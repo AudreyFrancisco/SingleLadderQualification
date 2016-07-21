@@ -1,0 +1,387 @@
+\documentclass{article}
+\usepackage{fancyvrb}
+
+\let\oldsection\section
+\renewcommand\section{\clearpage\oldsection}
+
+\begin{document}
+\title{ALPIDE software - Architecture description}
+\date{rev. 1, \today}
+
+%\author{Markus Keil}
+\maketitle
+
+
+\section{Introduction}
+
+The software described in the following is intended to offer a lean
+software environment, which facilitates the development of test
+routines for the ALPIDE chip and ALPIDE modules. 
+
+The basic guidelines are the following: 
+
+\begin{itemize}
+\item Simplicity of application development: the software should offer
+  a package of building blocks that allow the user to easily implement
+  applications for tests. 
+\item Independence from the readout system: as far as the generic
+  functions of the readout boards are concerned, the implementation
+  should be transparent to the application, i.e. the high level
+  implementation should not depend on which readout board is used. 
+\item As a consequence the same Alpide implementation and (within
+  limits) the same test routines can be used with all readout cards /
+  test systems.
+\end{itemize}
+
+
+These requirements are addressed by the following class structure:
+\begin{itemize}
+\item An abstract base class TReadoutBoard, which all readout boards
+  are derived from. Common functionality is declared in TReadoutBoard,
+  special functionality of the different cards in the derived
+  classes. 
+\item A class TAlpide containing the basic chip interface and the
+  register map. 
+\item Two helper classes TAlpideDecoder and TAlpideConfig for event
+  decoding and standard configuration commands, resp.
+\item A class TConfig containing configuration information.
+\end{itemize}
+
+
+\section{Readout Board}
+
+Each board used for the readout of ALPIDE chips or modules has to be
+derived from the class TReadoutBoard and implement the functions
+described in the following: 
+
+
+\subsection{Board Communication}
+
+\begin{itemize}
+\item \texttt{int ReadRegister(uint16\_t Address, uint32\_t \&Value)}:
+  \newline read value of readout board register at address \texttt{Address}.
+\item \texttt{int WriteRegister(uint16\_t Address, uint32\_t Value)}:
+  \newline write value \texttt{Value} into readout board register at address
+\texttt{Address}.
+\end{itemize}
+
+
+
+\subsection{Chip Control Communication}
+
+\begin{itemize}
+\item \texttt{int ReadChipRegister(uint16\_t Address, uint16\_t \&Value, uint8\_t ChipID = 0)}: \newline read value of chip register at address \texttt{Address}.
+\item \texttt{int WriteChipRegister(uint16\_t Address, uint16\_t Value, uint8\_t ChipID = 0)}: \newline write value \texttt{Value} into chip register at address
+\texttt{Address}.
+\item \texttt{int SendOpCode(uint8\_t OpCode)}: \newline Send an Opcode to all connected chips
+\end{itemize}
+
+These methods should be called only by a TAlpide object, not by the
+user directly. They are therefore to be declared \texttt{protected} and
+the classes TReadoutBoard and TAlpide friend classes
+(exception:\texttt{ReadChipRegister} may be declared public). 
+
+\subsection{Triggering, Pulsing and Readout}
+
+Triggering and pulsing work differently in the MOSAIC readout board
+and in the Cagliari DAQ board. However, a common subset of the
+functionality can be found by dropping the ``pulse-after-trigger''
+mode of the Cagliari DAQ board. In that case the parameters of pulse
+and trigger would be: 
+\begin{itemize}
+\item Trigger enabled (yes / no)
+\item Pulse enabled (yes / no)
+\item Delay pulse - trigger 
+\item Number of triggers
+\item Internal / external trigger
+\item (Delay trigger - following pulse: only for MOSAIC)
+\end{itemize}
+
+The ReadoutBoard class therefore has to implement the following
+configuration / setter methods: 
+
+\begin{itemize}
+\item \texttt{void SetTriggerConfig (bool enablePulse, bool
+  enableTrigger, int triggerDelay, int pulseDelay)}
+\item \texttt{void SetTriggerSource (TTriggerSource triggerSource)}
+\end{itemize}
+
+
+For data taking the readout board provides the following two methods: 
+
+\begin{itemize}
+\item \texttt{int Trigger (int NTriggers)}: Sends \texttt{NTriggers}
+  triggers to the chip(s). Here trigger means the strobe opcodes,
+  pulse opcodes or a combination of pulse then strobe with the
+  programmed distance inbetween. (The latter kept for redundance,
+  aim would be to send only pulses and generate the strobe on-chip.)
+\item \texttt{int ReadEventData(int \&NBytes, char *Buffer)}: Returns
+  the event data received by the readout card. Event data is in raw
+  (undecoded) format, including readout card headers and
+  trailers. Decoding is done in a separate decoder class \textbf{To be
+    decided:} Single events, vectors of events, blocks of data.. 
+\end{itemize}
+
+\textbf{Note:} This could be combined in one method. Keeping two leaves more
+flexibility, e.g. to have pulsing and reading in separate threads,
+however might require (in particular for the Cagliari DAQ board) to
+read the data already in the trigger function and buffer it in the
+software object until retrieved by ReadEventData.
+
+
+\subsection{General}
+
+
+\paragraph {Construction:}
+
+TReadoutBoard is the abstract base class for all readout boards. A
+readout board is therefore typically constructed the following way: 
+
+\begin{verbatim}
+TReadoutBoard *myReadoutBoard  = new TDAQBoard (config);
+TReadoutBoard *mySecondBoard   = new TMosaic   (config);
+\end{verbatim}
+
+\paragraph {Setup:}
+In order for the control communication and the data readout to work in
+all cases (single chips, IB staves and OB modules) the readout card
+needs to have information on which chip, defined by its ID, is
+connected to which control port and to which data receiver. This
+information has to be added once from a configuration and then stored
+internally, such that the chip ID is the only parameter for all
+methods interacting with the chip for control or readout. The
+necessary information is added by the method 
+
+\begin{verbatim}
+int AddChip (uint8_t ChipID, int ControlInterface, int Receiver)
+\end{verbatim}
+
+\paragraph {Accessing readout board methods:} 
+Generic methods for chip interactions should not be accessed directly
+but only through the chip object (i.e. call \texttt{TAlpide::WriteRegister()}
+instead of \texttt{TReadoutBoard::WriteChipRegister()}).
+
+Generic methods for readout board interaction can be accessed
+directly. Special methods for certain types of readout boards can be
+accessed e.g. after casting the readout board on the corresponding
+board type: 
+
+\begin{verbatim}
+TReadoutBoard *myReadoutBoard = new TDAQBoard (config);
+
+...
+...
+
+TDAQBoard *myDAQBoard = dynamic_cast<TDAQBoard*> myReadoutBoard;
+if (myDAQBoard) {
+  myDAQBoard->GetADCValue();
+  ...
+}
+\end{verbatim}
+
+
+
+
+
+
+\section {Alpide Chip}
+This class implements the interface of the alpide chip (control
+interface and data readout) as well as the list of accessible register
+addresses and will be used for all test setups. All further
+information on the internal functionality of the chip are contained in
+the helper classes TAlpideConfig (for configuration information) and
+TAlpideDecoder (for decoding of event data). The class TAlpide
+contains the following functions: 
+
+
+\subsection {Constructing etc.}
+
+\begin{itemize}
+\item \texttt{TAlpide (TConfig *config, int ichip)}: \newline
+  Constructs TAlpide chip according to chip \#\texttt{ichip} in the
+  configuration.
+\item \texttt{TAlpide (TConfig *config, int ichip, TReadoutBoard *myROB)}: \newline Constructor
+  including pointer to readout board
+\item \texttt{void SetReadoutBoard(TReadoutBoard *myROB)}: \newline
+  Setter function for readout board
+\item \texttt{TReadoutBoard *GetReadoutBoard ())}: \newline (Private)
+  Getter function for readout board
+\end{itemize}
+
+
+\subsection {Low Level Functions}
+
+\begin{itemize}
+\item \texttt{int ReadRegister(TAlpideRegister Address, uint16\_t \&Value}: \newline read value of chip register at address \texttt{Address}.
+\item \texttt{int WriteRegister(TAlpideRegister Address, uint16\_t Value}: \newline write value \texttt{Value} into chip register at address
+\texttt{Address}.
+\item \texttt{int ModifyRegisterBits(TAlpideRegister Address, int
+    lowBit, int nBits, int Value)}: write bits [\texttt{lowBit, lowBit + nBits
+  - 1}] of register \texttt{Address}. This can be implemented either
+by reading from the chip, then writing a new value and / or caching
+the values in the software.
+\item \texttt{int SendOpCode(uint8\_t OpCode)}: \newline Send an Opcode
+  (Q: define opcodes?)
+\end{itemize}
+
+
+
+
+\subsection {Register Definitions} 
+
+Chip registers are published in an enum type \texttt{TAlpideRegister}
+
+\subsection{High Level Functions}
+
+Higher level functionality of the alpide chip is implemented in two
+helper classes: TAlpideDecoder for the event decoding and
+TAlpideConfig for all configuration commands that go beyond mere
+communication with the chip and act upon the internal functionality of
+the chip.
+
+\section {Overall structure}
+
+
+\subsection{Config class}
+
+The class TConfig contains all configuration information on the setup
+(module, single chip, stave, type of readout board, number of chips)
+as well as for the chips and the readout boards. It is based on /
+similar to the TConfig class used by the software for the Cagliari
+readout board and MATE. In addition to those versions it will allow
+modification / creation on the fly by the software (Use case, e.g.:
+create a config object after an automated check, which chips of the
+module work; modify settings according to parameters entered in the
+GUI by the user). 
+
+The precise structure of the config class will be defined in the
+coming days. For the time being assume the following structure: 
+
+\begin{verbatim}
+
+class TConfig {
+ private: 
+  // List of general settings
+  int  Setting1;
+  int  Setting2;
+  bool Setting3;
+  ...
+
+  // Board and Chip configs
+  std::vector <TBoardConfig *> fBoardConfigs;
+  std::vector <TChipConfig *>  fChipConfigs;
+
+ public:
+  // Constructor from file
+  TConfig (const char *fName);
+  // Constructor for on-the-fly construction
+  TConfig (int numberOfBoards, int numberOfChips);
+
+  // List of getter functions for settings
+  int  GetSetting1 ();
+  int  GetSetting2 (); 
+  bool GetSetting3 ();
+  ... 
+  // List of setter functions for general settings
+  void SetSetting1 ();
+  void SetSetting2 ();
+  ...
+
+  // Getter functions for board and chip configs
+  TChipConfig  *GetChipConfig  (int chipId);
+  TBoardConfig *GetBoardConfig (int iBoard);
+
+  // Write to file for future reference / bookkeeping 
+  void WriteToFile (const char *fName);
+};
+
+\end{verbatim}
+
+
+
+\subsection{Application} 
+
+An example for the skeleton of an application is given below: 
+
+
+\begin{Verbatim}[fontsize=\tiny]
+
+main () {
+
+  // initialise setup
+  // 1) Create config object (here: from config file)
+  // 2) Create readout board and chips
+  // 3) Pass pointer to readout board to chip objects
+  // 4) Pass information on ChipId / ControlInterface / Receiver to readout board
+
+  TConfig       *myConfig       = new TConfig ("Config.cfg"); 
+  TReadoutBoard *myReadoutBoard = new TMOSAIC (myConfig);
+
+  std::vector<TAlpide*> Chips;
+
+
+  for (int ichip = 0; ichip < myConfig->GetNChips(); ichip ++) {
+    Chips          -> push_back       (new TAlpide (myConfig, ichip));         // create ichipth chip out of the config
+    Chips [ichip]  -> SetReadoutBoard (myReadoutBoard);                        // set pointer to readout board in the chip object
+    myReadoutBoard -> AddChip         (myConfig->GetChipId           (ichip),  // add ChipId / ControlInterface / Receiver settings 
+                                       myConfig->GetControlInterface (ichip),  // to readout board
+                                       myConfig->GetReceiver         (ichip));
+  }
+
+
+  // configure chips
+  // a) write registers directly
+  for (std::vector<TAlpide*>::iterator ichip = Chips.begin(); ichip != Chips.end(); ichip ++) {
+    ichip->WriteRegister (VCASN,   57);
+    ichip->WriteRegister (ITHR,    51);
+    ichip->WriteRegister (VPULSEH, 170);
+    //...
+  }
+
+  // b) use predefined methods in TAlpideConfig class
+  for (std::vector<TAlpide*>::iterator ichip = Chips.begin(); ichip != Chips.end(); ichip ++) {
+    TAlpideConfig::SettingsForBackBias (ichip, 3);        // apply DAC settings for 3 V back bias
+    //...
+  }
+
+		
+  // do the scan
+
+  int  NBytes;
+  char Buffer[];			 
+
+  myReadoutBoard->Trigger(myConfig->GetNTriggers(), OPCODE_PULSE);
+
+  // Format of data still to be defined (single events, full buffer ... 
+  myReadoutBoard->ReadEventData (NBytes, Buffer);
+  
+  TAlpideDecoder::DecodeEvent (Buffer, std::vector<TPixHit> Hits);
+  // ...
+     
+
+  // delete chips + readout board
+
+}
+
+
+\end{Verbatim}
+
+
+\section {Open Points:} 
+
+\begin {itemize}
+\item To be investigated: command sequencer implementation: this
+  is needed for the probe station, is existing in the MOSAIC and
+  planned for the DAQ board. Find best software implementation
+\item Common subclass for applications / scans? 
+\item possibility to read command sequences from file?
+\item ...
+\end{itemize}
+
+
+
+\end{document} 
+
+
+
+
