@@ -1,3 +1,11 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#include <vector>
+#include "TChipConfig.h"
+#include "TBoardConfig.h"
+
+
 class TConfig {
  private:
   std::vector <TBoardConfig *> fBoardConfigs;
@@ -12,3 +20,6 @@ class TConfig {
   void WriteToFile (const char *fName);
 
 };
+
+
+#endif   /* CONFIG_H */

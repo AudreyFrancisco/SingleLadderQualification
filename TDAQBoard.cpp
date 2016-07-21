@@ -85,7 +85,7 @@ int TDAQBoard::WriteChipRegister (uint16_t address, uint16_t value, uint8_t chip
   uint32_t command [4];
   uint32_t address32 = (uint32_t) address;
   uint32_t chipId32  = (uint32_t) chipId; 
-  uint32_t newAddress = (address32 << 16) | (chipId32 << 8) | TAlpide::OPCODE_WROP;
+  uint32_t newAddress = (address32 << 16) | (chipId32 << 8) | Alpide::OPCODE_WROP;
 
   command[0] = DAQBOARD_WRITE_DATA_REG + (MODULE_JTAG << DAQBOARD_ADDR_REG_SIZE);
   command[1] = (uint32_t) value;
@@ -115,7 +115,7 @@ int TDAQBoard::ReadChipRegister (uint16_t address, uint16_t &value, uint8_t chip
   uint32_t      headerword = 0;
   uint32_t      address32  = (uint32_t) address;
   uint32_t      chipId32   = (uint32_t) chipId;
-  uint32_t      newAddress = (address32 << 16) | (chipId32 << 8) | TAlpide::OPCODE_RDOP;
+  uint32_t      newAddress = (address32 << 16) | (chipId32 << 8) | Alpide::OPCODE_RDOP;
 
   command[0] = DAQBOARD_WRITE_INSTR_REG + (MODULE_JTAG << DAQBOARD_ADDR_REG_SIZE);
   command[1] = newAddress;

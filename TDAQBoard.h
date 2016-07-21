@@ -7,8 +7,7 @@
 
 #include "USB.h"
 #include "TReadoutBoard.h"
-
-class TConfig; 
+#include "TConfig.h"
 
 
 
