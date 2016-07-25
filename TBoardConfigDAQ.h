@@ -13,14 +13,13 @@ const int CLOCK_ENABLE_TIME  = 12;      // time until clock is enabled
 const int SIGNAL_ENABLE_TIME = 12;      // time until signals are enabled
 const int DRST_TIME          = 13;      // time until drst is deasserted
 
+
+//************************************************************
+// TBoardConfigDAQ: config for Cagliari DAQboard 
+//************************************************************
+
 class TBoardConfigDAQ : public TBoardConfig {
  private:
- protected:
-
- public:
-  TBoardConfigDAQ(const char *fName = 0, int boardIndex = 0);
-  int GetBoardType() {return 0;};
-  // should these be private with getters? 
   int fLimitDigital;
   int fLimitIo;
   int fLimitAnalogue;
@@ -30,7 +29,27 @@ class TBoardConfigDAQ : public TBoardConfig {
   int fSignalEnableTime;
   int fDrstTime;
 
+  bool fEnableDDR;
+  bool fInvertCMU;
+
+ protected:
+
+ public:
+  TBoardConfigDAQ(const char *fName = 0, int boardIndex = 0);
+  int GetBoardType() {return 0;};
+
+  int GetLimitDigital()   {return fLimitDigital;};
+  int GetLimitIo()        {return fLimitIo;};
+  int GetLimitAnalogue()  {return fLimitDigital;};
+
+  int GetAutoShutdownTime() {return fAutoShutdownTime;};
+  int GetClockEnableTime()  {return fClockEnableTime;};
+  int GetSignalEnableTime() {return fSignalEnableTime;};
+  int GetDrstTime()         {return fDrstTime;};
+
+
 };
 
+//************************************************************
 
 #endif   /* BOARDCONFIGDAQ_H */
