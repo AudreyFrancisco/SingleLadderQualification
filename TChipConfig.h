@@ -7,7 +7,7 @@ class TChipConfig {
   int fChipId;
  protected:
  public:
-  TChipConfig   (const char *fName, int chipId);
+  TChipConfig   (int chipId, const char *fName = 0);
   int GetChipId () {return fChipId;};
 };
 

@@ -13,7 +13,8 @@ class TConfig {
  protected:
  public:
   TConfig (const char *fName);
-  TConfig (int nBoards, int nChips);
+  TConfig (int nBoards, std::vector <int> chipId);
+  TConfig (int chipId);
 
   TChipConfig  *GetChipConfig  (int chipId);
   TBoardConfig *GetBoardConfig (int iBoard);

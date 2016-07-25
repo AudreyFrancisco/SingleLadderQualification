@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include "TBoardConfig.h"
 
 class TConfig; 
 
@@ -24,13 +25,13 @@ class TReadoutBoard {
   int         GetReceiver         (uint8_t chipId);
   friend class TAlpide;     // could be reduced to the relevant methods ReadRegister, WriteRegister
  public:
-  TReadoutBoard  (TConfig *config) {};
+  TReadoutBoard  (TBoardConfig *config) {};
   ~TReadoutBoard () {};
 
   int          AddChip           (uint8_t chipId, int controlInterface, int receiver);
   
-  virtual int  ReadRegister      (uint32_t Address, uint32_t &Value) = 0;
-  virtual int  WriteRegister     (uint32_t Address, uint32_t Value)  = 0;
+  virtual int  ReadRegister      (uint16_t Address, uint32_t &Value) = 0;
+  virtual int  WriteRegister     (uint16_t Address, uint32_t Value)  = 0;
 
   virtual int  ReadChipRegister  (uint16_t Address, uint16_t &Value, uint8_t chipID = 0) = 0;
 

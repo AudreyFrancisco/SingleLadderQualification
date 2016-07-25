@@ -15,7 +15,7 @@ bool IsDAQBoard(libusb_device *device) {
     libusb_device_descriptor desc;
     libusb_get_device_descriptor(device, &desc);
 
-//    std::cout << std::hex << "Vendor id " << (int)desc.idVendor << ", Product id " << (int)desc.idProduct << std::dec << std::endl;
+    // std::cout << std::hex << "Vendor id " << (int)desc.idVendor << ", Product id " << (int)desc.idProduct << std::dec << std::endl;
 
     if ((desc.idVendor == DAQ_BOARD_VENDOR_ID) && (desc.idProduct == DAQ_BOARD_PRODUCT_ID)) {
       //std::cout << "Serial number " << (int)desc.iSerialNumber << std::endl;
@@ -26,12 +26,14 @@ bool IsDAQBoard(libusb_device *device) {
 }
 
 
-int AddDAQBoard (libusb_device *device, TConfig *config, std::vector <TReadoutBoard *> boards) {
+int AddDAQBoard (libusb_device *device, TConfig *config, std::vector <TReadoutBoard *> &boards) {
     TReadoutBoard *readoutBoard;
-    readoutBoard = new TDAQBoard(device, config);
-
+    // note: this should change to use the correct board config according to index or geographical id
+    readoutBoard = new TReadoutBoardDAQ(device, config->GetBoardConfig(0));
+    
     if (readoutBoard) {
         boards.push_back(readoutBoard);
+    std::cout << "boards.size = " << boards.size() <<std::endl;
         return 0;
     }
     else {
@@ -40,7 +42,7 @@ int AddDAQBoard (libusb_device *device, TConfig *config, std::vector <TReadoutBo
 }
 
 
-int FindDAQBoards (TConfig *config, std::vector <TReadoutBoard *> boards) {
+int FindDAQBoards (TConfig *config, std::vector <TReadoutBoard *> &boards) {
     int err     = 0;
     libusb_device **list;
 
@@ -66,6 +68,7 @@ int FindDAQBoards (TConfig *config, std::vector <TReadoutBoard *> boards) {
             }
         }
     }
+    std::cout << "boards.size = " << boards.size() <<std::endl;
     libusb_free_device_list(list, 1);
     return err;
 }

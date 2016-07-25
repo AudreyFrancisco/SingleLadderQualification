@@ -10,7 +10,8 @@ namespace Alpide {
     REG_COMMAND         = 0x0,
     REG_MODECONTROL     = 0x1,
     REG_REGDISABLE_LOW  = 0x2,
-    REG_REGDISABLE_HIGH = 0x3
+    REG_REGDISABLE_HIGH = 0x3, 
+    REG_IBIAS           = 0x60d
   } TRegister;
 
   typedef enum {

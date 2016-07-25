@@ -5,8 +5,22 @@ TConfig::TConfig (const char *fName) {
 }
 
 
-// construct Config in the application using only number of boards and number of chips
-TConfig::TConfig (int nBoards, int nChips) {
+// construct Config in the application using only number of boards and number of chips / vector of chip Ids
+// for the time being use one common config for all board types (change this?)
+TConfig::TConfig (int nBoards, std::vector <int> chipIds) {
+  for (int iboard = 0; iboard < nBoards; iboard ++) {
+    fBoardConfigs.push_back (new TBoardConfig());
+  }
+  for (int ichip = 0; ichip < chipIds.size(); ichip ++) {
+    fChipConfigs.push_back (new TChipConfig(chipIds.at(ichip)));
+  } 
+}
+
+
+// construct a config for a single chip setup (one board and one chip only)
+TConfig::TConfig (int chipId) {
+  fBoardConfigs.push_back (new TBoardConfig());
+  fChipConfigs. push_back (new TChipConfig (chipId));
 }
 
 
