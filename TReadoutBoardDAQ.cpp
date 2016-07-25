@@ -2,21 +2,28 @@
 #include "TAlpide.h"
 
 
+// constructor
 TReadoutBoardDAQ::TReadoutBoardDAQ (libusb_device *ADevice, TBoardConfigDAQ *config) : TUSBBoard (ADevice), TReadoutBoard(config)
 {
-  fLimitDigital  = config->fLimitDigital;
-  fLimitIo       = config->fLimitIo;
-  fLimitAnalogue = config->fLimitAnalogue;
+  fBoardConfigDAQ = config;
 
-  fAutoShutdownTime = config->fAutoShutdownTime;
-  fClockEnableTime  = config->fClockEnableTime;
-  fSignalEnableTime = config->fSignalEnableTime;
-  fDrstTime         = config->fDrstTime;
+  //fLimitDigital  = config->fLimitDigital;
+  //fLimitIo       = config->fLimitIo;
+  //fLimitAnalogue = config->fLimitAnalogue;
 
-  SetDelays();
+  //fAutoShutdownTime = config->fAutoShutdownTime;
+  //fClockEnableTime  = config->fClockEnableTime;
+  //fSignalEnableTime = config->fSignalEnableTime;
+  //fDrstTime         = config->fDrstTime;
+
+  //WriteDelays();
+
 }
 
 
+
+// method to send 32 bit words to DAQ board
+// FPGA internal registers have 12-bit addres field and 32-bit data payload
 int TReadoutBoardDAQ::SendWord (uint32_t value) 
 {
   std::cout << "SendWord: value = " <<std::hex <<  value << std::dec << std::endl;
@@ -207,10 +214,13 @@ float TReadoutBoardDAQ::ADCToCurrent (int value)
 }
 
 
-void TReadoutBoardDAQ::SetLimits (bool LDOOn, bool Autoshutdown) {
-  int limitDigital = CurrentToADC (fLimitDigital);
-  int limitIo      = CurrentToADC (fLimitIo);
-  int limitAnalog  = CurrentToADC (fLimitAnalogue);
+void TReadoutBoardDAQ::WriteLimits (bool LDOOn, bool Autoshutdown) {
+  //int limitDigital = CurrentToADC (fLimitDigital);
+  //int limitIo      = CurrentToADC (fLimitIo);
+  //int limitAnalog  = CurrentToADC (fLimitAnalogue);
+  int limitDigital = CurrentToADC (fBoardConfigDAQ->GetLimitDigital());
+  int limitIo      = CurrentToADC (fBoardConfigDAQ->GetLimitIo());
+  int limitAnalog  = CurrentToADC (fBoardConfigDAQ->GetLimitAnalogue());
 
   uint32_t config0 = (((int) limitDigital) & 0xfff) | ((((int) limitIo) & 0xfff) << 12);
   config0 |= ((Autoshutdown?1:0) << 24);
@@ -221,26 +231,30 @@ void TReadoutBoardDAQ::SetLimits (bool LDOOn, bool Autoshutdown) {
 }
 
 
-void TReadoutBoardDAQ::SetDelays () 
+void TReadoutBoardDAQ::WriteDelays () 
 {
-  uint32_t delays = ((fDrstTime         & 0xff) << 24) 
-                  | ((fSignalEnableTime & 0xff) << 16) 
-                  | ((fClockEnableTime  & 0xff) << 8) 
-                  | (fAutoShutdownTime  & 0xff);
+  //uint32_t delays = ((fDrstTime         & 0xff) << 24) 
+  //                | ((fSignalEnableTime & 0xff) << 16) 
+  //                | ((fClockEnableTime  & 0xff) << 8) 
+  //                | (fAutoShutdownTime  & 0xff);
+  uint32_t delays = ((fBoardConfigDAQ->GetDrstTime()         & 0xff) << 24) 
+                  | ((fBoardConfigDAQ->GetSignalEnableTime() & 0xff) << 16) 
+                  | ((fBoardConfigDAQ->GetClockEnableTime()  & 0xff) << 8) 
+                  | ( fBoardConfigDAQ->GetAutoShutdownTime() & 0xff);
   WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_DELAYS, delays);  
 }
 
 
 bool TReadoutBoardDAQ::PowerOn (int &AOverflow) {
-  int   delayDrst    = 13;
-  int   delaySig     = 12;
-  int   delayClk     = 12;
-  int   delayShtdn   = 10;
+  //int   delayDrst    = 13;
+  //int   delaySig     = 12;
+  //int   delayClk     = 12;
+  //int   delayShtdn   = 10;
  
   // set current limits with voltages off
-  SetLimits(false, true); 
+  WriteLimits(false, true); 
   // switch on voltages
-  SetLimits(true, true);
+  WriteLimits(true, true);
   return GetLDOStatus(AOverflow);
 }
 
