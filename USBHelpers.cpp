@@ -29,7 +29,8 @@ bool IsDAQBoard(libusb_device *device) {
 int AddDAQBoard (libusb_device *device, TConfig *config, std::vector <TReadoutBoard *> &boards) {
     TReadoutBoard *readoutBoard;
     // note: this should change to use the correct board config according to index or geographical id
-    readoutBoard = new TReadoutBoardDAQ(device, config->GetBoardConfig(0));
+    TBoardConfigDAQ *boardConfig = dynamic_cast<TBoardConfigDAQ *>(config->GetBoardConfig(0));
+    readoutBoard = new TReadoutBoardDAQ(device, boardConfig);
     
     if (readoutBoard) {
         boards.push_back(readoutBoard);

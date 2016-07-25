@@ -2,7 +2,7 @@
 #include "TAlpide.h"
 
 
-TReadoutBoardDAQ::TReadoutBoardDAQ (libusb_device *ADevice, TBoardConfig *config) : TUSBBoard (ADevice), TReadoutBoard(config)
+TReadoutBoardDAQ::TReadoutBoardDAQ (libusb_device *ADevice, TBoardConfigDAQ *config) : TUSBBoard (ADevice), TReadoutBoard(config)
 {
   fLimitDigital  = config->fLimitDigital;
   fLimitIo       = config->fLimitIo;
@@ -60,7 +60,7 @@ int TReadoutBoardDAQ::ReadRegister (uint16_t address, uint32_t &value)
   uint32_t      headerword = 0;
   int           err; 
 
-  err = SendWord ((uint32_t)address +  (1 << (DAQBOARD_ADDR_REG_SIZE + DAQBOARD_ADDR_MODULE_SIZE))); // add 1 bit for read access
+  err = SendWord ((uint32_t)address +  (1 << (DAQBOARD_REG_ADDR_SIZE + DAQBOARD_MODULE_ADDR_SIZE))); // add 1 bit for read access
   if (err < 0) return -1;
   err = ReceiveData (ENDPOINT_READ_REG, data_buf, DAQBOARD_WORD_SIZE * 2); 
 
@@ -102,9 +102,9 @@ int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, uint8
   uint32_t chipId32  = (uint32_t) chipId; 
   uint32_t newAddress = (address32 << 16) | (chipId32 << 8) | Alpide::OPCODE_WROP;
 
-  command[0] = DAQBOARD_WRITE_DATA_REG + (MODULE_JTAG << DAQBOARD_ADDR_REG_SIZE);
+  command[0] = DAQBOARD_WRITE_DATA_REG + (MODULE_JTAG << DAQBOARD_REG_ADDR_SIZE);
   command[1] = (uint32_t) value;
-  command[2] = DAQBOARD_WRITE_INSTR_REG + (MODULE_JTAG << DAQBOARD_ADDR_REG_SIZE);
+  command[2] = DAQBOARD_WRITE_INSTR_REG + (MODULE_JTAG << DAQBOARD_REG_ADDR_SIZE);
   command[3] = (uint32_t) newAddress;
 
   SendWord (command[0]);
@@ -136,7 +136,7 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8
   uint32_t      chipId32   = (uint32_t) chipId;
   uint32_t      newAddress = (address32 << 16) | (chipId32 << 8) | Alpide::OPCODE_RDOP;
 
-  command[0] = DAQBOARD_WRITE_INSTR_REG + (MODULE_JTAG << DAQBOARD_ADDR_REG_SIZE);
+  command[0] = DAQBOARD_WRITE_INSTR_REG + (MODULE_JTAG << DAQBOARD_REG_ADDR_SIZE);
   command[1] = newAddress;
   SendWord (command[0]);
   SendWord (command[1]);
@@ -162,7 +162,7 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8
 
 int TReadoutBoardDAQ::SendOpCode (uint8_t  OpCode) 
 {
-  return WriteRegister (DAQBOARD_WRITE_INSTR_REG + (MODULE_JTAG << DAQBOARD_ADDR_REG_SIZE), (int) OpCode);
+  return WriteRegister (DAQBOARD_WRITE_INSTR_REG + (MODULE_JTAG << DAQBOARD_REG_ADDR_SIZE), (int) OpCode);
 }
 
 
@@ -215,9 +215,9 @@ void TReadoutBoardDAQ::SetLimits (bool LDOOn, bool Autoshutdown) {
   uint32_t config0 = (((int) limitDigital) & 0xfff) | ((((int) limitIo) & 0xfff) << 12);
   config0 |= ((Autoshutdown?1:0) << 24);
   config0 |= ((LDOOn       ?1:0) << 25);   
-  WriteRegister ((MODULE_ADC << DAQBOARD_ADDR_REG_SIZE) + ADC_CONFIG0, config0);
+  WriteRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_CONFIG0, config0);
   uint32_t config1 = ((int) limitAnalog) & 0xfff;
-  WriteRegister ((MODULE_ADC << DAQBOARD_ADDR_REG_SIZE) + ADC_CONFIG1, config1);
+  WriteRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_CONFIG1, config1);
 }
 
 
@@ -227,7 +227,7 @@ void TReadoutBoardDAQ::SetDelays ()
                   | ((fSignalEnableTime & 0xff) << 16) 
                   | ((fClockEnableTime  & 0xff) << 8) 
                   | (fAutoShutdownTime  & 0xff);
-  WriteRegister ((MODULE_RESET << DAQBOARD_ADDR_REG_SIZE) + RESET_DELAYS, delays);  
+  WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_DELAYS, delays);  
 }
 
 
@@ -249,14 +249,14 @@ bool TReadoutBoardDAQ::GetLDOStatus(int &AOverflow) {
   uint32_t ReadValue;
   bool     err, reg0, reg1, reg2;
 
-  err  = ReadRegister ((MODULE_ADC << DAQBOARD_ADDR_REG_SIZE) + ADC_READ0, ReadValue);
+  err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_READ0, ReadValue);
   reg0 = ((ReadValue & 0x1000000) != 0);
-  err  = ReadRegister ((MODULE_ADC << DAQBOARD_ADDR_REG_SIZE) + ADC_READ1, ReadValue);
+  err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_READ1, ReadValue);
   reg1 = ((ReadValue & 0x1000000) != 0);
-  err  = ReadRegister ((MODULE_ADC << DAQBOARD_ADDR_REG_SIZE) + ADC_READ2, ReadValue);
+  err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_READ2, ReadValue);
   reg2 = ((ReadValue & 0x1000000) != 0);
   
-  err = ReadRegister((MODULE_ADC << DAQBOARD_ADDR_REG_SIZE) + ADC_OVERFLOW, ReadValue);
+  err = ReadRegister((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_OVERFLOW, ReadValue);
 
   AOverflow = (int) ReadValue;
 
@@ -268,7 +268,7 @@ bool TReadoutBoardDAQ::GetLDOStatus(int &AOverflow) {
 
 float TReadoutBoardDAQ::ReadAnalogI() {
   uint32_t ReadValue;
-  ReadRegister ((MODULE_ADC << DAQBOARD_ADDR_REG_SIZE) + ADC_READ2, ReadValue);
+  ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_READ2, ReadValue);
   int Value = (ReadValue >> 12) & 0xfff;
 
   return ADCToCurrent(Value);
@@ -276,7 +276,7 @@ float TReadoutBoardDAQ::ReadAnalogI() {
 
 float TReadoutBoardDAQ::ReadDigitalI() {
   uint32_t ReadValue;
-  ReadRegister ((MODULE_ADC << DAQBOARD_ADDR_REG_SIZE) + ADC_READ1, ReadValue);
+  ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_READ1, ReadValue);
   int Value = (ReadValue >> 12) & 0xfff;
 
   return ADCToCurrent(Value);

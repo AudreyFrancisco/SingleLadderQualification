@@ -1,4 +1,5 @@
 #include "TConfig.h" 
+#include "TBoardConfigDAQ.h"
 
 //construct Config from config file
 TConfig::TConfig (const char *fName) {
@@ -9,7 +10,7 @@ TConfig::TConfig (const char *fName) {
 // for the time being use one common config for all board types (change this?)
 TConfig::TConfig (int nBoards, std::vector <int> chipIds) {
   for (int iboard = 0; iboard < nBoards; iboard ++) {
-    fBoardConfigs.push_back (new TBoardConfig());
+    fBoardConfigs.push_back (new TBoardConfigDAQ());
   }
   for (int ichip = 0; ichip < chipIds.size(); ichip ++) {
     fChipConfigs.push_back (new TChipConfig(chipIds.at(ichip)));
@@ -19,7 +20,7 @@ TConfig::TConfig (int nBoards, std::vector <int> chipIds) {
 
 // construct a config for a single chip setup (one board and one chip only)
 TConfig::TConfig (int chipId) {
-  fBoardConfigs.push_back (new TBoardConfig());
+  fBoardConfigs.push_back (new TBoardConfigDAQ());
   fChipConfigs. push_back (new TChipConfig (chipId));
 }
 

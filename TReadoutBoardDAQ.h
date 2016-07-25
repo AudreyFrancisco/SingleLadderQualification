@@ -8,6 +8,7 @@
 #include "USB.h"
 #include "TReadoutBoard.h"
 #include "TConfig.h"
+#include "TBoardConfigDAQ.h"
 
 
 
@@ -20,8 +21,8 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   static const int ENDPOINT_READ_DATA =3;
 
   static const int DAQBOARD_WORD_SIZE        = 4;
-  static const int DAQBOARD_ADDR_REG_SIZE    = 8;
-  static const int DAQBOARD_ADDR_MODULE_SIZE = 4;
+  static const int DAQBOARD_REG_ADDR_SIZE    = 8;
+  static const int DAQBOARD_MODULE_ADDR_SIZE = 4;
 
   static const int DAQBOARD_WRITE_INSTR_REG  = 0x0;
   static const int DAQBOARD_WRITE_DATA_REG   = 0x1;
@@ -67,7 +68,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId = 0);
  protected: 
  public: 
-  TReadoutBoardDAQ(libusb_device *ADevice, TBoardConfig *config);
+  TReadoutBoardDAQ(libusb_device *ADevice, TBoardConfigDAQ *config);
 
 
   int  ReadRegister      (uint16_t Address, uint32_t &Value);
