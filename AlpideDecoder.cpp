@@ -1,5 +1,6 @@
 #include "AlpideDecoder.h"
 #include <stdint.h>
+#include <iostream>
 
 //using namespace AlpideDecoder;
 
@@ -18,7 +19,7 @@ TDataType AlpideDecoder::GetDataType(unsigned char dataWord) {
 }
 
 
-void AlpideDecoder::DecodeChipHeader (unsigned char *data, int &chipId, int &bunchCounter) {
+void AlpideDecoder::DecodeChipHeader (unsigned char *data, int &chipId, unsigned int &bunchCounter) {
   int16_t data_field = (((int16_t) data[0]) << 8) + data[1];
 
   bunchCounter = data_field & 0xff;
@@ -36,7 +37,7 @@ void AlpideDecoder::DecodeRegionHeader (unsigned char *data, int &region) {
 }
 
 
-void AlpideDecoder::DecodeEmptyFrame (unsigned char *data, int &chipId, int &bunchCounter) {
+void AlpideDecoder::DecodeEmptyFrame (unsigned char *data, int &chipId, unsigned int &bunchCounter) {
   int16_t data_field = (((int16_t) data[0]) << 8) + data[1];
 
   bunchCounter = data_field & 0xff;
@@ -66,4 +67,100 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int region, std::vector
     hit.address = address + (i + 1);
     hits->push_back (hit);
   }
+}
+
+
+bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <TPixHit> *hits) {
+  int       byte    = 0;
+  int       region  = -1;
+  int       chip    = 0;
+  int       flags   = 0;
+  bool      started = false; // event has started, i.e. chip header has been found
+  bool      finished = false; // event trailer found
+  TDataType type;
+
+  unsigned int BunchCounterTmp;
+
+  while (byte < nBytes) {
+    type = GetDataType (data[byte]);
+    switch (type) {
+    case DT_IDLE:
+      byte +=1;
+      break;
+    case DT_BUSYON:
+      byte += 1;
+      break;
+    case DT_BUSYOFF:
+      byte += 1;
+      break;
+    case DT_EMPTYFRAME:
+      started = true;
+      DecodeEmptyFrame (data + byte, chip, BunchCounterTmp);
+      byte += 2;
+      finished = true;
+      break;
+    case DT_CHIPHEADER:
+      started = true;
+      DecodeChipHeader (data + byte, chip, BunchCounterTmp);
+      byte += 2;
+      break;
+    case DT_CHIPTRAILER:
+      if (!started) {
+        std::cout << "Error, chip trailer found before chip header" << std::endl;
+        return false; 
+      }
+      if (finished) {
+        std::cout << "Error, chip trailer found after event was finished" << std::endl;
+        return false;  
+      }
+      DecodeChipTrailer (data + byte, flags);
+      finished = true;
+      byte += 1;
+      break;
+    case DT_REGIONHEADER:
+      if (!started) {
+        std::cout << "Error, region header found before chip header or after chip trailer" << std::endl;
+        return false;
+      }
+      DecodeRegionHeader (data + byte, region);
+      byte +=1;
+      break;
+    case DT_DATASHORT:
+      if (!started) {
+        std::cout << "Error, hit data found before chip header or after chip trailer" << std::endl;
+        return false;
+      }
+      if (hits) {
+        DecodeDataWord (data + byte, region, hits, false);
+      }
+      byte += 2;
+      break;
+    case DT_DATALONG:
+      if (!started) {
+        std::cout << "Error, hit data found before chip header or after chip trailer" << std::endl;
+        return false;
+      }
+      if (hits) {
+        DecodeDataWord (data + byte, region, hits, true);
+      }
+      byte += 3;
+      break;
+    case DT_UNKNOWN:
+      std::cout << "Error, data of unknown type 0x" << std::hex << data[byte] << std::dec << std::endl;
+      return false;
+    }
+  }
+  //std::cout << "Found " << Hits->size() - NOldHits << " hits" << std::endl;
+  if (started && finished) return true;
+  else {
+    if (started && !finished) {
+      std::cout << "Warning, event not finished at end of data" << std::endl;
+      return false;
+    }
+    if (!started) {
+      std::cout << "Warning, event not started at end of data" << std::endl;
+      return false;
+    }
+  }
+  return true;
 }

@@ -14,13 +14,14 @@ typedef struct {
 class AlpideDecoder {
  private:
    static TDataType GetDataType        (unsigned char dataWord);
-   static void      DecodeChipHeader   (unsigned char *data, int &chipId, int &bunchCounter);
+   static void      DecodeChipHeader   (unsigned char *data, int &chipId, unsigned int &bunchCounter);
    static void      DecodeChipTrailer  (unsigned char *data, int &flags);
    static void      DecodeRegionHeader (unsigned char *data, int &region);
-   static void      DecodeEmptyFrame   (unsigned char *data, int &chipId, int &bunchCounter);
+   static void      DecodeEmptyFrame   (unsigned char *data, int &chipId, unsigned int &bunchCounter);
    static void      DecodeDataWord     (unsigned char *data, int region, std::vector <TPixHit> *hits, bool datalong);
  protected:
  public:
+   static bool      DecodeEvent        (unsigned char *data, int nBytes, std::vector <TPixHit> *hits);
 };
 
 
