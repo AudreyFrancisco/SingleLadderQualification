@@ -5,27 +5,38 @@
 #include <vector>
 #include "TBoardConfig.h"
 
-class TConfig; 
+//class TConfig; 
 
 typedef enum {trigInt, trigExt} TTriggerSource;
+
 
 typedef struct {
   int chipId;
   int controlInterface;
   int receiver;
 } TChipPos;
+
+
  
+//************************************************************
+// abstract base class for all readout boards
+//************************************************************
+
 class TReadoutBoard {
  private:
   int  fNChips;                              // probably obsolete, use fChipPositions.size() instead
   std::vector <TChipPos> fChipPositions;
+  
+  TBoardConfig *fBoardConfig;
+
  protected:
   virtual int WriteChipRegister   (uint16_t Address, uint16_t Value, uint8_t chipId = 0)  = 0;
   int         GetControlInterface (uint8_t chipId);
   int         GetReceiver         (uint8_t chipId);
   friend class TAlpide;     // could be reduced to the relevant methods ReadRegister, WriteRegister
  public:
-  TReadoutBoard  (TBoardConfig *config) {};
+  //TReadoutBoard  (TBoardConfig *config) {};
+  TReadoutBoard  (TBoardConfig *config);
   ~TReadoutBoard () {};
 
   int          AddChip           (uint8_t chipId, int controlInterface, int receiver);

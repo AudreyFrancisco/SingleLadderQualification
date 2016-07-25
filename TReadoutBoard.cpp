@@ -1,6 +1,15 @@
 #include "TReadoutBoard.h"
 
 
+TReadoutBoard::TReadoutBoard (TBoardConfig *config) 
+{
+  fNChips = 0;
+  //fChipPositions (0);
+  fBoardConfig = config;
+}
+
+
+
 int TReadoutBoard::AddChip (uint8_t chipId, int controlInterface, int receiver) 
 {
   if (GetControlInterface (chipId) >= 0) {
