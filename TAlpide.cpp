@@ -1,4 +1,5 @@
 #include "TAlpide.h"
+#include <iostream>
 
 using namespace Alpide;
 
@@ -8,7 +9,15 @@ TAlpide::TAlpide (TConfig *config, int chipId) {
 
 
 int TAlpide::ReadRegister (TRegister address, uint16_t &value) {
-  return fReadoutBoard->ReadChipRegister((uint16_t) address, value, fChipId);
+  int err = fReadoutBoard->ReadChipRegister((uint16_t) address, value, fChipId);
+  if (err < 0) return err;  // readout board should have thrown an exception before
+
+  if (value & 0xff != fChipId) {
+    std::cout << "Warning, received chip id " << (value & 0xff) << " instead of " << fChipId << std::endl;
+  }  
+  value >>= 8;
+  return err;
+
 }
 
 
