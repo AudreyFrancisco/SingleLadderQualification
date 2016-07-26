@@ -34,7 +34,7 @@ int main() {
       else std::cout << "LDOs are off" << std::endl;
       myDAQBoard->ReadRegister (0x602, version); 
       std::cout << "Version = " << std::hex << version << std::dec << std::endl;
-      myDAQBoard->WriteRegister (0x402, 5);
+      myDAQBoard->WriteRegister (0x402, 3);
       myDAQBoard->WriteRegister (0x500, 0x0220);
       myDAQBoard -> SendOpCode (Alpide::OPCODE_GRST);
       std::cout << "Analog Current = " << myDAQBoard-> ReadAnalogI() << std::endl;
