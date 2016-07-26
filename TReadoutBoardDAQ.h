@@ -75,7 +75,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   static const int TRIG_STROBE_COUNT     = 0x6;  // not existing in manual..
 
   // CMU Module 0x4: Register sub-addresses
-  static const int CMU_INSTRUCTION  = 0x0; // previously called DAQBOARD_WRITE_INSTR_REG from JTAG?
+  static const int CMU_INSTR        = 0x0; // previously called DAQBOARD_WRITE_INSTR_REG from JTAG?
   static const int CMU_DATA         = 0x1; // previously called DAQBOARD_WRITE_DATA_REG from JTAG?
   static const int CMU_CONFIG       = 0x2; // previously called DAQ_CONFIG_REG
   //// JTAG Module 0x4: Register TODO -> ONLY FOR PALPIDE-1??
