@@ -1,7 +1,10 @@
 #ifndef BOARDCONFIGDAQ_H
 #define BOARDCONFIGDAQ_H
 
+#include "stdint.h"
+
 #include "TBoardConfig.h"
+
 
 const int LIMIT_DIGITAL = 300; //300;
 const int LIMIT_IO      =  50; // 10, depreciated but leave in to write the register to some defined value
