@@ -109,9 +109,9 @@ int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, uint8
   uint32_t chipId32  = (uint32_t) chipId; 
   uint32_t newAddress = (address32 << 16) | (chipId32 << 8) | Alpide::OPCODE_WROP;
 
-  command[0] = DAQBOARD_WRITE_DATA_REG + (MODULE_JTAG << DAQBOARD_REG_ADDR_SIZE);
+  command[0] = DAQBOARD_WRITE_DATA_REG + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
   command[1] = (uint32_t) value;
-  command[2] = DAQBOARD_WRITE_INSTR_REG + (MODULE_JTAG << DAQBOARD_REG_ADDR_SIZE);
+  command[2] = DAQBOARD_WRITE_INSTR_REG + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
   command[3] = (uint32_t) newAddress;
 
   SendWord (command[0]);
@@ -143,7 +143,7 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8
   uint32_t      chipId32   = (uint32_t) chipId;
   uint32_t      newAddress = (address32 << 16) | (chipId32 << 8) | Alpide::OPCODE_RDOP;
 
-  command[0] = DAQBOARD_WRITE_INSTR_REG + (MODULE_JTAG << DAQBOARD_REG_ADDR_SIZE);
+  command[0] = DAQBOARD_WRITE_INSTR_REG + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
   command[1] = newAddress;
   SendWord (command[0]);
   SendWord (command[1]);
@@ -169,7 +169,7 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8
 
 int TReadoutBoardDAQ::SendOpCode (uint8_t  OpCode) 
 {
-  return WriteRegister (DAQBOARD_WRITE_INSTR_REG + (MODULE_JTAG << DAQBOARD_REG_ADDR_SIZE), (int) OpCode);
+  return WriteRegister (DAQBOARD_WRITE_INSTR_REG + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), (int) OpCode);
 }
 
 
@@ -263,11 +263,11 @@ bool TReadoutBoardDAQ::GetLDOStatus(int &AOverflow) {
   uint32_t ReadValue;
   bool     err, reg0, reg1, reg2;
 
-  err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_READ0, ReadValue);
+  err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA0, ReadValue);
   reg0 = ((ReadValue & 0x1000000) != 0);
-  err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_READ1, ReadValue);
+  err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA1, ReadValue);
   reg1 = ((ReadValue & 0x1000000) != 0);
-  err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_READ2, ReadValue);
+  err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA2, ReadValue);
   reg2 = ((ReadValue & 0x1000000) != 0);
   
   err = ReadRegister((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_OVERFLOW, ReadValue);
@@ -282,7 +282,7 @@ bool TReadoutBoardDAQ::GetLDOStatus(int &AOverflow) {
 
 float TReadoutBoardDAQ::ReadAnalogI() {
   uint32_t ReadValue;
-  ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_READ2, ReadValue);
+  ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA2, ReadValue);
   int Value = (ReadValue >> 12) & 0xfff;
 
   return ADCToCurrent(Value);
@@ -290,7 +290,7 @@ float TReadoutBoardDAQ::ReadAnalogI() {
 
 float TReadoutBoardDAQ::ReadDigitalI() {
   uint32_t ReadValue;
-  ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_READ1, ReadValue);
+  ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA1, ReadValue);
   int Value = (ReadValue >> 12) & 0xfff;
 
   return ADCToCurrent(Value);
