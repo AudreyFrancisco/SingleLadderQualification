@@ -101,9 +101,9 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
 
   // SOFTRESET Module Register 0x7: Register sub-addresses
   static const int SOFTRESET_DURATION   = 0x0;
-  static const int SOFTRESET_COMMAND    = 0x1; // previously SOFTRESET_FPGA_RESET?
-  //static const int SOFTRESET_FPGA_RESET = 0x1; // not existing in manual..
-  //static const int SOFTRESET_FX3_RESET  = 0x2; // not existing in manual..
+  //static const int SOFTRESET_COMMAND    = 0x1; // previously SOFTRESET_FPGA_RESET?
+  static const int SOFTRESET_FPGA_RESET = 0x1; // not existing in manual..
+  static const int SOFTRESET_FX3_RESET  = 0x2; // not existing in manual..
   
   //---------------------------------------------------------
 
@@ -160,6 +160,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   //int  WriteADCConfig      ();
   void  WriteCurrentLimits  (bool LDOOn, bool Autoshutdown);
  
+   
 
 
   // READOUT Module:
@@ -167,8 +168,10 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
 
 
   // TRIGGER Module:
-
- 
+  bool StartTrigger ();
+  bool StopTrigger ();
+  
+  bool WriteBusyOverrideReg(bool busyOverride);
 
   // CMU Module:
 
@@ -179,13 +182,15 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
 
 
 
+
   // ID Module:
 
 
 
 
   // SOFTRESET Module:
-
+  bool ResetBoardFPGA (int duration);
+  bool ResetBoardFX3  (int duration);
 
 };
 

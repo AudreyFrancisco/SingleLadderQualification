@@ -338,7 +338,61 @@ float TReadoutBoardDAQ::ReadTemperature() {
 
 
 
+// TRIGGER Module
+//----------------------------------------------------------------------------
 
+
+bool TReadoutBoardDAQ::StartTrigger()
+{
+    return WriteRegister((MODULE_TRIGGER << DAQBOARD_REG_ADDR_SIZE) + TRIG_START, 13);
+}
+
+
+bool TReadoutBoardDAQ::StopTrigger ()
+{
+    return WriteRegister((MODULE_TRIGGER << DAQBOARD_REG_ADDR_SIZE) + TRIG_STOP, 13);
+}
+
+
+
+
+
+
+
+bool TReadoutBoardDAQ::WriteBusyOverrideReg(bool ABusyOverride)
+{
+    //fBoardConfigDAQ->SetBusyOverride(ABusyOverride);
+    bool err;
+    err = WriteRegister((MODULE_TRIGGER << DAQBOARD_REG_ADDR_SIZE) + TRIG_BUSY_OVERRIDE, ABusyOverride);
+    if (!err) return false;
+
+    return err;
+}
+
+
+
+// SOFTRESET Module
+//----------------------------------------------------------------------------
+
+
+bool TReadoutBoardDAQ::ResetBoardFPGA (int ADuration)
+{
+    //fBoardConfigDAQ->SetSoftResetDuration(ABusyOverride); // keep track of latest config in TBoardConfigDAQ
+    bool err;
+    err = WriteRegister((MODULE_SOFTRESET << DAQBOARD_REG_ADDR_SIZE) + SOFTRESET_DURATION, ADuration);
+    if (!err) return false;
+    return WriteRegister((MODULE_SOFTRESET << DAQBOARD_REG_ADDR_SIZE) + SOFTRESET_FPGA_RESET, 13);
+}
+
+
+bool TReadoutBoardDAQ::ResetBoardFX3 (int ADuration)
+{
+    //fBoardConfigDAQ->SetSoftResetDuration(ABusyOverride); // keep track of latest config in TBoardConfigDAQ
+    bool err;
+    err = WriteRegister((MODULE_SOFTRESET << DAQBOARD_REG_ADDR_SIZE) + SOFTRESET_DURATION, ADuration);
+    if (!err) return false;
+    return WriteRegister((MODULE_SOFTRESET << DAQBOARD_REG_ADDR_SIZE) + SOFTRESET_FX3_RESET, 13);
+}
 
 
 
