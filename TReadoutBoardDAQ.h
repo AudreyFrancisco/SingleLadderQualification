@@ -33,6 +33,9 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   static const int DAQBOARD_REG_ADDR_SIZE    = 8;  // sub(reg)-address size = 12-bit
   static const int DAQBOARD_MODULE_ADDR_SIZE = 4;  // module-address size   =  4-bit
 
+  // register description
+  //---------------------------------------------------------
+  //
   // module addresses
   static const int MODULE_CONTROL   = 0x0; 
   static const int MODULE_ADC       = 0x1;
@@ -83,7 +86,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   //static const int DAQBOARD_WRITE_DATA_REG   = 0x1;
 
   // RESET Module 0x5: Register sub-addresses
-  static const int RESET_DURATION    = 0x0;
+  static const int RESET_DURATION    = 0x0; // PULSE and PRST duration only used in pA1, became OPCODEs in later verstions; (D)RST using CMU interface for later versions? DRST == GRST!
   static const int RESET_DELAYS      = 0x1;
   static const int RESET_DRST        = 0x2;
   static const int RESET_PRST        = 0x3; 
@@ -94,30 +97,25 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   // IDENTIFICATION Module 0x6: Register sub-addresses
   static const int ID_ADDRESS     = 0x0;
   static const int ID_CHIP        = 0x1;
-  static const int ID_FIRMWARE    = 0x2;
+  static const int ID_FIRMWARE    = 0x2; // not existing in manual..
 
   // SOFTRESET Module Register 0x7: Register sub-addresses
   static const int SOFTRESET_DURATION   = 0x0;
   static const int SOFTRESET_COMMAND    = 0x1; // previously SOFTRESET_FPGA_RESET?
   //static const int SOFTRESET_FPGA_RESET = 0x1; // not existing in manual..
   //static const int SOFTRESET_FX3_RESET  = 0x2; // not existing in manual..
+  
+  //---------------------------------------------------------
 
 
-  //int fLimitDigital;
-  //int fLimitIo;
-  //int fLimitAnalogue;
 
-  //int fAutoShutdownTime;
-  //int fClockEnableTime;
-  //int fSignalEnableTime;
-  //int fDrstTime;
 
 
   int SendWord          (uint32_t value);
   int ReadAcknowledge   ();
 
   int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId = 0);
-  int  ReadChipRegister  (uint16_t Address, uint16_t &Value, uint8_t chipID = 0);
+  int ReadChipRegister  (uint16_t Address, uint16_t &Value, uint8_t chipID = 0);
 
  protected: 
  public: 
@@ -135,16 +133,64 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   int  ReadEventData     (int &NBytes, char *Buffer);
   bool PowerOn           (int &AOverflow);
 
-  // this should probably be moved elsewhere and get the config structure as parameter
-  int  SetADCConfig      ();
-  bool GetLDOStatus(int &AOverflow);
-  float ReadAnalogI  ();
-  float ReadDigitalI ();
-  int   CurrentToADC (int current);
-  float ADCToCurrent (int value);
+
+  TBoardConfigDAQ *GetBoardConfig() {return fBoardConfigDAQ;};
+
+
+  int   CurrentToADC      (int current);
+  float ADCToCurrent      (int value);
+  float ADCToTemperature  (int value);
+
+
+  // methods related to modules
+  //---------------------------------------------------------
+
+  // ADC Module:
+
+  float ReadAnalogI     (); // read analogue supply current
+  float ReadDigitalI    (); // read digital supply current
+  float ReadIoI         (); // read digital I/O supply current
+  float ReadTemperature (); // read temperature
+
+  float ReadMonI  (); // 
+  float ReadMonV  (); // 
+
+  bool ReadLDOStatus(int &AOverflow);
+
+  //int  WriteADCConfig      ();
+  void  WriteCurrentLimits  (bool LDOOn, bool Autoshutdown);
+ 
+
+
+  // READOUT Module:
+
+
+
+  // TRIGGER Module:
+
+ 
+
+  // CMU Module:
+
+
+
+  // RESET Module:
   void  WriteDelays    ();
-  void  WriteLimits    (bool LDOOn, bool Autoshutdown);
+
+
+
+  // ID Module:
+
+
+
+
+  // SOFTRESET Module:
+
+
 };
+
+
+
 
 //************************************************************
 

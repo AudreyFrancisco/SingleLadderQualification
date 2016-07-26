@@ -1,6 +1,7 @@
+#include <math.h> 
+
 #include "TReadoutBoardDAQ.h"
 #include "TAlpide.h"
-
 
 // constructor
 TReadoutBoardDAQ::TReadoutBoardDAQ (libusb_device *ADevice, TBoardConfigDAQ *config) : TUSBBoard (ADevice), TReadoutBoard(config)
@@ -205,14 +206,63 @@ float TReadoutBoardDAQ::ADCToCurrent (int value)
     return Result;
 }
 
+void TReadoutBoardDAQ::WriteDelays () 
+{
+  uint32_t delays = ((fBoardConfigDAQ->GetDrstTime()         & 0xff) << 24) 
+                  | ((fBoardConfigDAQ->GetSignalEnableTime() & 0xff) << 16) 
+                  | ((fBoardConfigDAQ->GetClockEnableTime()  & 0xff) << 8) 
+                  | ( fBoardConfigDAQ->GetAutoShutdownTime() & 0xff);
+  WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_DELAYS, delays);  
+}
 
-void TReadoutBoardDAQ::WriteLimits (bool LDOOn, bool Autoshutdown) {
-  //int limitDigital = CurrentToADC (fLimitDigital);
-  //int limitIo      = CurrentToADC (fLimitIo);
-  //int limitAnalog  = CurrentToADC (fLimitAnalogue);
-  int limitDigital = CurrentToADC (fBoardConfigDAQ->GetLimitDigital());
-  int limitIo      = CurrentToADC (fBoardConfigDAQ->GetLimitIo());
-  int limitAnalog  = CurrentToADC (fBoardConfigDAQ->GetLimitAnalogue());
+
+float TReadoutBoardDAQ::ADCToTemperature (int AValue) {
+    float    Temperature, R;
+    float    AVDD = 1.8;
+    float    R2   = 5100;
+    float    B    = 3900;
+    float    T0   = 273.15 + 25;
+    float    R0   = 10000;
+
+    float Voltage = (float) AValue;
+    Voltage       *= 3.3;
+    Voltage       /= (1.8 * 4096);
+
+    R           = (AVDD/Voltage) * R2 - R2;   // Voltage divider between NTC and R2
+    Temperature = B / (log (R/R0) + B/T0);
+
+    return Temperature;
+}
+
+bool TReadoutBoardDAQ::PowerOn (int &AOverflow) {
+  //int   delayDrst    = 13;
+  //int   delaySig     = 12;
+  //int   delayClk     = 12;
+  //int   delayShtdn   = 10;
+ 
+  // set current limits with voltages off
+  WriteCurrentLimits(false, true); 
+  // switch on voltages
+  WriteCurrentLimits(true, true);
+
+  return ReadLDOStatus(AOverflow);
+}
+
+
+
+//****************************************************************************
+// methods module by module
+//****************************************************************************
+
+// ADC Module
+//----------------------------------------------------------------------------
+
+void TReadoutBoardDAQ::WriteCurrentLimits (bool LDOOn, bool Autoshutdown) {
+  int limitDigital = CurrentToADC (fBoardConfigDAQ->GetCurrentLimitDigital());
+  int limitIo      = CurrentToADC (fBoardConfigDAQ->GetCurrentLimitIo());
+  int limitAnalog  = CurrentToADC (fBoardConfigDAQ->GetCurrentLimitAnalogue());
+
+  
 
   uint32_t config0 = (((int) limitDigital) & 0xfff) | ((((int) limitIo) & 0xfff) << 12);
   config0 |= ((Autoshutdown?1:0) << 24);
@@ -223,52 +273,24 @@ void TReadoutBoardDAQ::WriteLimits (bool LDOOn, bool Autoshutdown) {
 }
 
 
-void TReadoutBoardDAQ::WriteDelays () 
-{
-  //uint32_t delays = ((fDrstTime         & 0xff) << 24) 
-  //                | ((fSignalEnableTime & 0xff) << 16) 
-  //                | ((fClockEnableTime  & 0xff) << 8) 
-  //                | (fAutoShutdownTime  & 0xff);
-  uint32_t delays = ((fBoardConfigDAQ->GetDrstTime()         & 0xff) << 24) 
-                  | ((fBoardConfigDAQ->GetSignalEnableTime() & 0xff) << 16) 
-                  | ((fBoardConfigDAQ->GetClockEnableTime()  & 0xff) << 8) 
-                  | ( fBoardConfigDAQ->GetAutoShutdownTime() & 0xff);
-  WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_DELAYS, delays);  
-}
-
-
-bool TReadoutBoardDAQ::PowerOn (int &AOverflow) {
-  //int   delayDrst    = 13;
-  //int   delaySig     = 12;
-  //int   delayClk     = 12;
-  //int   delayShtdn   = 10;
- 
-  // set current limits with voltages off
-  WriteLimits(false, true); 
-  // switch on voltages
-  WriteLimits(true, true);
-  return GetLDOStatus(AOverflow);
-}
-
-
-bool TReadoutBoardDAQ::GetLDOStatus(int &AOverflow) {
+bool TReadoutBoardDAQ::ReadLDOStatus(int &AOverflow) {
   uint32_t ReadValue;
   bool     err, reg0, reg1, reg2;
 
   err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA0, ReadValue);
-  reg0 = ((ReadValue & 0x1000000) != 0);
+  reg0 = ((ReadValue & 0x1000000) != 0); // LDO off if bit==0, on if bit==1
   err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA1, ReadValue);
   reg1 = ((ReadValue & 0x1000000) != 0);
   err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA2, ReadValue);
   reg2 = ((ReadValue & 0x1000000) != 0);
   
   err = ReadRegister((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_OVERFLOW, ReadValue);
-
   AOverflow = (int) ReadValue;
 
   if (! (reg0 & reg1 & reg2)) 
-  std::cout << "GetLDOStatus, LDO status = " << reg0 << ", " << reg1 << ", " << reg2 << std::endl;
-  return ( reg0& reg1 & reg2);
+    std::cout << "GetLDOStatus, LDO status = " << reg0 << ", " << reg1 << ", " << reg2 << std::endl;
+
+  return ( reg0 & reg1 & reg2);
 }
 
 
@@ -287,4 +309,41 @@ float TReadoutBoardDAQ::ReadDigitalI() {
 
   return ADCToCurrent(Value);
 }
+
+float TReadoutBoardDAQ::ReadIoI() {
+  uint32_t ReadValue;
+  ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA2, ReadValue);
+  int Value = (ReadValue) & 0xfff;
+
+  return ADCToCurrent(Value);
+}
+
+float TReadoutBoardDAQ::ReadMonV() {
+  uint32_t ReadValue;
+  ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA0, ReadValue);
+  int Value = (ReadValue >> 12) & 0xfff;
+
+  return ADCToCurrent(Value);
+}
+
+float TReadoutBoardDAQ::ReadTemperature() {
+  uint32_t ReadValue;
+  ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA0, ReadValue);
+    //printf("NTC ADC: 0x%08X\n",Reading);
+  int Value = (ReadValue) & 0xfff;
+
+  return ADCToTemperature (Value);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
