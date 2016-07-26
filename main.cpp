@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include "TAlpide.h"
+#include "AlpideConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "USBHelpers.h"
@@ -48,7 +49,8 @@ int main() {
       sleep(1);
       std::cout << "Analog Current = " << myDAQBoard-> ReadAnalogI() << std::endl;
 
-      chip -> ReadRegister (Alpide::REG_MODECONTROL, status);
+      AlpideConfig::ApplyStandardDACSettings (chip, 0);
+      chip -> ReadRegister (Alpide::REG_VRESETD, status);
 
       std::cout << "Control register value: 0x" << std::hex << status << std::dec << std::endl;
 

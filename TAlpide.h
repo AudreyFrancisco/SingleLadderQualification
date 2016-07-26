@@ -10,8 +10,21 @@ namespace Alpide {
     REG_COMMAND         = 0x0,
     REG_MODECONTROL     = 0x1,
     REG_REGDISABLE_LOW  = 0x2,
-    REG_REGDISABLE_HIGH = 0x3, 
-    REG_IBIAS           = 0x60d
+    REG_REGDISABLE_HIGH = 0x3,
+    REG_VRESETP         = 0x601, 
+    REG_VRESETD         = 0x602, 
+    REG_VCASP           = 0x603,
+    REG_VCASN           = 0x604,
+    REG_VPULSEH         = 0x605,
+    REG_VPULSEL         = 0x606,
+    REG_VCASN2          = 0x607,
+    REG_VCLIP           = 0x608,
+    REG_VTEMP           = 0x609,
+    REG_IAUX2           = 0x60a,
+    REG_IRESET          = 0x60b,
+    REG_IDB             = 0x60c,
+    REG_IBIAS           = 0x60d,
+    REG_ITHR            = 0x60e
   } TRegister;
 
   typedef enum {
