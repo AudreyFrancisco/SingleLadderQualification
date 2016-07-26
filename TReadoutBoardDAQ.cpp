@@ -16,7 +16,7 @@ TReadoutBoardDAQ::TReadoutBoardDAQ (libusb_device *ADevice, TBoardConfigDAQ *con
   //fSignalEnableTime = config->fSignalEnableTime;
   //fDrstTime         = config->fDrstTime;
 
-  //WriteDelays();
+  WriteDelays();
 
 }
 
@@ -26,7 +26,6 @@ TReadoutBoardDAQ::TReadoutBoardDAQ (libusb_device *ADevice, TBoardConfigDAQ *con
 // FPGA internal registers have 12-bit addres field and 32-bit data payload
 int TReadoutBoardDAQ::SendWord (uint32_t value) 
 {
-  std::cout << "SendWord: value = " <<std::hex <<  value << std::dec << std::endl;
     unsigned char data_buf[DAQBOARD_WORD_SIZE];
 
     for (int i=0; i<DAQBOARD_WORD_SIZE; i++) {
@@ -34,7 +33,6 @@ int TReadoutBoardDAQ::SendWord (uint32_t value)
         value >>= 8;
     }
 
-    std::cout << "data buf = " << std::hex << (int) data_buf[0] << " " << (int) data_buf[1] << " "<< (int) data_buf[2] << " "<< (int) data_buf[3] << std::dec << std::endl;
     if (SendData (ENDPOINT_WRITE_REG,data_buf,DAQBOARD_WORD_SIZE) != DAQBOARD_WORD_SIZE)
       return -1;
     return 0;
@@ -85,13 +83,12 @@ int TReadoutBoardDAQ::ReadRegister (uint16_t address, uint32_t &value)
 
 int TReadoutBoardDAQ::WriteRegister (uint16_t address, uint32_t value)
 {
-  std::cout << "Write register: address = 0x" << std::hex << address << ", value = 0x" << value << std::dec << std::endl;
   int err;
-  std::cout << "Calling send word with value 0x" << std::hex << address << std::dec << std::endl;
+
   err = SendWord((uint32_t)address);
-  std::cout << "err = " << err << std::endl;
+
   if (err < 0) return -1;       // add exceptions
-  std::cout << "Calling send word with value 0x" << std::hex << (int)value << std::dec << std::endl;
+
   err = SendWord(value);
   if (err < 0) return -1;
   err = ReadAcknowledge();
@@ -109,26 +106,21 @@ int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, uint8
   uint32_t chipId32  = (uint32_t) chipId; 
   uint32_t newAddress = (address32 << 16) | (chipId32 << 8) | Alpide::OPCODE_WROP;
 
-  command[0] = DAQBOARD_WRITE_DATA_REG + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
+  command[0] = CMU_DATA   + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
   command[1] = (uint32_t) value;
-  command[2] = DAQBOARD_WRITE_INSTR_REG + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
+  command[2] = CMU_INSTR + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
   command[3] = (uint32_t) newAddress;
 
   SendWord (command[0]);
   SendWord (command[1]);
-  std::cout << "Before read ack 1" << std::endl;
   err = ReadAcknowledge ();
-  std::cout << "After read ack 1, err = " << err << std::endl;
   if(err < 0) return -1;
 
-  std::cout << "Before send word 2, word = " << std::hex << command[2] << std::dec << std::endl;
   SendWord (command[2]);
-  std::cout << "Before send word 3,word = " << std::hex << command[3] << std::dec << std::endl;
   SendWord (command[3]);
-  std::cout << "Before read ack 2" << std::endl;
   err = ReadAcknowledge();
-  std::cout << "After read ack 2" << std::endl;
   if(err < 0) return -1;
+
   return 0;
 }
 
@@ -143,7 +135,7 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8
   uint32_t      chipId32   = (uint32_t) chipId;
   uint32_t      newAddress = (address32 << 16) | (chipId32 << 8) | Alpide::OPCODE_RDOP;
 
-  command[0] = DAQBOARD_WRITE_INSTR_REG + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
+  command[0] = CMU_INSTR + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
   command[1] = newAddress;
   SendWord (command[0]);
   SendWord (command[1]);
@@ -169,7 +161,7 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8
 
 int TReadoutBoardDAQ::SendOpCode (uint8_t  OpCode) 
 {
-  return WriteRegister (DAQBOARD_WRITE_INSTR_REG + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), (int) OpCode);
+  return WriteRegister (CMU_INSTR + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), (int) OpCode);
 }
 
 
