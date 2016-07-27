@@ -20,8 +20,6 @@
 
 class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
  private: 
-  TBoardConfigDAQ *fBoardConfigDAQ;
-
   static const int NEndpoints = 4;
   static const int ENDPOINT_WRITE_REG =0;
   static const int ENDPOINT_READ_REG  =1;
@@ -33,10 +31,10 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   static const int DAQBOARD_REG_ADDR_SIZE    = 8;  // sub(reg)-address size = 12-bit
   static const int DAQBOARD_MODULE_ADDR_SIZE = 4;  // module-address size   =  4-bit
 
-  // register description
+  //// Cagliari DAQ board register description
   //---------------------------------------------------------
-  //
-  // module addresses
+  
+  /// module addresses
   static const int MODULE_CONTROL   = 0x0; 
   static const int MODULE_ADC       = 0x1;
   static const int MODULE_READOUT   = 0x2;
@@ -106,10 +104,9 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   static const int SOFTRESET_FPGA_RESET = 0x1; // not existing in manual..
   static const int SOFTRESET_FX3_RESET  = 0x2; // not existing in manual..
   
-  //---------------------------------------------------------
+  //--------------------------------------
 
-
-
+  TBoardConfigDAQ *fBoardConfigDAQ;
 
   int SendWord          (uint32_t value);
   int ReadAcknowledge   ();
@@ -121,6 +118,8 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
  public: 
   TReadoutBoardDAQ(libusb_device *ADevice, TBoardConfigDAQ *config);
 
+  //// general methods of TReadoutBoard
+  //---------------------------------------------------------
 
   int  ReadRegister      (uint16_t address, uint32_t &value);
   int  WriteRegister     (uint16_t address, uint32_t value);
@@ -131,11 +130,14 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   void SetTriggerSource  (TTriggerSource triggerSource);
   int  Trigger           (int nTriggers);
   int  ReadEventData     (int &nBytes, char *buffer);
+
+
+  //// methods only for Cagliari DAQ board
+  //---------------------------------------------------------
+  TBoardConfigDAQ *GetBoardConfig() {return fBoardConfigDAQ;};
+
   bool PowerOn           (int &overflow);
   void PowerOff          ();
-
-
-  TBoardConfigDAQ *GetBoardConfig() {return fBoardConfigDAQ;};
 
 
   int   CurrentToADC      (int current);
@@ -143,8 +145,8 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   float ADCToTemperature  (int value);
 
 
-  // methods related to modules
-  //---------------------------------------------------------
+  // methods related to modules of Cagliari DAQ board
+  //--------------------------------------
 
   // ADC Module:
   float ReadAnalogI     (); // read analogue supply current

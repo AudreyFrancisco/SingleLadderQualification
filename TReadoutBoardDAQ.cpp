@@ -23,41 +23,10 @@ TReadoutBoardDAQ::TReadoutBoardDAQ (libusb_device *ADevice, TBoardConfigDAQ *con
 
 
 
-// method to send 32 bit words to DAQ board
-// FPGA internal registers have 12-bit addres field and 32-bit data payload
-int TReadoutBoardDAQ::SendWord (uint32_t value) 
-{
-    unsigned char data_buf[DAQBOARD_WORD_SIZE];
 
-    for (int i=0; i<DAQBOARD_WORD_SIZE; i++) {
-        data_buf[i] = value & 0xff;
-        value >>= 8;
-    }
-
-    if (SendData (ENDPOINT_WRITE_REG,data_buf,DAQBOARD_WORD_SIZE) != DAQBOARD_WORD_SIZE)
-      return -1;
-    return 0;
-}
-
-
-int TReadoutBoardDAQ::ReadAcknowledge() 
-{ 
-  unsigned char data_buf[2 * DAQBOARD_WORD_SIZE];
-  uint32_t      headerword = 0, 
-                dataword = 0;
-  int           err;
-
-  err=ReceiveData(ENDPOINT_READ_REG, data_buf, 2 * DAQBOARD_WORD_SIZE);
-
-  if (err < 0) return -1;
-
-  for (int i = 0; i < DAQBOARD_WORD_SIZE; i ++) {
-    headerword += (data_buf[i                     ] << (8 * i));   // bytes 0 ... 3 are header
-    dataword   += (data_buf[i + DAQBOARD_WORD_SIZE] << (8 * i));   // bytes 4 ... 7 are data
-  }
-
-  return 0;  
-}
+//---------------------------------------------------------
+// general methods of TReadoutBoard
+//---------------------------------------------------------
 
 
 int TReadoutBoardDAQ::ReadRegister (uint16_t address, uint32_t &value)
@@ -165,6 +134,55 @@ int TReadoutBoardDAQ::ReadEventData     (int &NBytes, char *Buffer)
 }
 
 
+
+
+
+
+
+//---------------------------------------------------------
+// methods only for Cagliari DAQ board
+//---------------------------------------------------------
+
+
+
+// method to send 32 bit words to DAQ board
+// FPGA internal registers have 12-bit addres field and 32-bit data payload
+int TReadoutBoardDAQ::SendWord (uint32_t value) 
+{
+    unsigned char data_buf[DAQBOARD_WORD_SIZE];
+
+    for (int i=0; i<DAQBOARD_WORD_SIZE; i++) {
+        data_buf[i] = value & 0xff;
+        value >>= 8;
+    }
+
+    if (SendData (ENDPOINT_WRITE_REG,data_buf,DAQBOARD_WORD_SIZE) != DAQBOARD_WORD_SIZE)
+      return -1;
+    return 0;
+}
+
+
+int TReadoutBoardDAQ::ReadAcknowledge() 
+{ 
+  unsigned char data_buf[2 * DAQBOARD_WORD_SIZE];
+  uint32_t      headerword = 0, 
+                dataword = 0;
+  int           err;
+
+  err=ReceiveData(ENDPOINT_READ_REG, data_buf, 2 * DAQBOARD_WORD_SIZE);
+
+  if (err < 0) return -1;
+
+  for (int i = 0; i < DAQBOARD_WORD_SIZE; i ++) {
+    headerword += (data_buf[i                     ] << (8 * i));   // bytes 0 ... 3 are header
+    dataword   += (data_buf[i + DAQBOARD_WORD_SIZE] << (8 * i));   // bytes 4 ... 7 are data
+  }
+
+  return 0;  
+}
+
+
+
 int TReadoutBoardDAQ::CurrentToADC (int current)
 {
   float Result = (float) current / 100. * 4096. / 3.3;
@@ -235,9 +253,9 @@ void TReadoutBoardDAQ::PowerOff ()
 
 
 
-//****************************************************************************
+//---------------------------------------------------------
 // methods module by module
-//****************************************************************************
+//---------------------------------------------------------
 
 // ADC Module
 //----------------------------------------------------------------------------
