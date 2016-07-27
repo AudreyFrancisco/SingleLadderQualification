@@ -99,27 +99,17 @@ int TReadoutBoardDAQ::WriteRegister (uint16_t address, uint32_t value)
 }
 
 
+
 int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId)
 {
   int err;
-  uint32_t command [4];
   uint32_t address32 = (uint32_t) address;
   uint32_t chipId32  = (uint32_t) chipId; 
   uint32_t newAddress = (address32 << 16) | (chipId32 << 8) | Alpide::OPCODE_WROP;
 
-  command[0] = CMU_DATA   + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
-  command[1] = (uint32_t) value;
-  command[2] = CMU_INSTR + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
-  command[3] = (uint32_t) newAddress;
-
-  SendWord (command[0]);
-  SendWord (command[1]);
-  err = ReadAcknowledge ();
+  err = WriteRegister (CMU_DATA + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), (uint32_t) value);
   if(err < 0) return -1;
-
-  SendWord (command[2]);
-  SendWord (command[3]);
-  err = ReadAcknowledge();
+  err = WriteRegister (CMU_INSTR + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), newAddress);
   if(err < 0) return -1;
 
   return 0;
@@ -129,33 +119,20 @@ int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, uint8
 int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8_t chipId) 
 {
   int           err; 
-  unsigned char data_buf[DAQBOARD_WORD_SIZE * 2];
-  uint32_t      command [2];
-  uint32_t      headerword = 0;
+  uint32_t      value32; 
   uint32_t      address32  = (uint32_t) address;
   uint32_t      chipId32   = (uint32_t) chipId;
   uint32_t      newAddress = (address32 << 16) | (chipId32 << 8) | Alpide::OPCODE_RDOP;
 
-  command[0] = CMU_INSTR + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
-  command[1] = newAddress;
-  SendWord (command[0]);
-  SendWord (command[1]);
-  err = ReadAcknowledge ();
+
+  err = WriteRegister(CMU_INSTR + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), newAddress);
 
   if (err < 0) return -1;
 
-  SendWord (0x00001401);       // read data word back from FPGA
-
-  err = ReceiveData (ENDPOINT_READ_REG, data_buf,DAQBOARD_WORD_SIZE * 2);
+  err = ReadRegister (CMU_DATA + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), value32);
   if (err < 0) return -1;
 
-  value = 0;
-
-  for (int i = 0; i < DAQBOARD_WORD_SIZE; i ++) {
-    headerword += (data_buf[i                     ] << (8 * i));   // bytes 0 ... 3 are header
-    if (i < 2) 
-      value += (data_buf[i + DAQBOARD_WORD_SIZE] << (8 * i));   // bytes 4 ... 7 are data, but value is 16 bit only
-  }
+  value = value32 & 0xffff;
   return 0;
 }
 
