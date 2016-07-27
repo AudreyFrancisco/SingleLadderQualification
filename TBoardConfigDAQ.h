@@ -6,14 +6,33 @@
 #include "TBoardConfig.h"
 
 
-const int LIMIT_DIGITAL = 300; //300;
-const int LIMIT_IO      =  50; // 10, depreciated but leave in to write the register to some defined value
-const int LIMIT_ANALOG  = 300; //100;
+// default values for conig parameters; less important ones are set in the TBoardConfig constructor
 
+
+//---- ADC module
+const int LIMIT_DIGITAL   = 300;
+const int LIMIT_IO        =  50; // depreciated but leave in to write the register to some defined value
+const int LIMIT_ANALOGUE  = 300; 
+
+//---- READOUT module
+const bool DATA_SAMPLING_EDGE = 1;
+const bool DATA_PKTBASED_EN   = 0;
+const bool DATA_DDR_EN        = 0;
+const int DATA_PORT           = 2;
+
+//---- TRIGGER module
+const int TRIGGER_MODE        = 1;
+const uint32_t STROBE_DELAY   = 0;
+const bool BUSY_OVERRIDE      = 1;
+
+//---- RESET module
 const int AUTOSHTDWN_TIME    = 10;      // time until enabling of auto shutdown
 const int CLOCK_ENABLE_TIME  = 12;      // time until clock is enabled
 const int SIGNAL_ENABLE_TIME = 12;      // time until signals are enabled
 const int DRST_TIME          = 13;      // time until drst is deasserted
+
+const int PULSE_STROBE_DELAY  = 10;
+const int STROBE_PULSE_SEQ    =  2;
 
 
 
@@ -45,7 +64,7 @@ class TBoardConfigDAQ : public TBoardConfig {
 
   // ADC config reg 2
   uint32_t fAutoShutOffDelay; // 19: 0; delay with a granularity of 12.5ns
-  int fADCDownSamplingFact;   // 31:20; factor for downscaling ADC sampling rate
+  int fADCDownSamplingFact;   // 31:20; factor for downscaling ADC sampling rate: 1.194MHz/(fADCDownSamplingFact+1)
 
 
   ////---- READOUT module
