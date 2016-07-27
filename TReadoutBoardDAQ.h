@@ -97,7 +97,8 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   // IDENTIFICATION Module 0x6: Register sub-addresses
   static const int ID_ADDRESS     = 0x0;
   static const int ID_CHIP        = 0x1;
-  static const int ID_FIRMWARE    = 0x2; // not existing in manual..
+  static const int ID_FIRMWARE    = 0x2;
+  static const int ID_ACK_COUNTER = 0x3;
 
   // SOFTRESET Module Register 0x7: Register sub-addresses
   static const int SOFTRESET_DURATION   = 0x0;
@@ -110,28 +111,28 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
 
 
 
-
   int SendWord          (uint32_t value);
   int ReadAcknowledge   ();
 
   int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId = 0);
-  int ReadChipRegister  (uint16_t Address, uint16_t &Value, uint8_t chipID = 0);
+  int ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId = 0);
 
  protected: 
  public: 
   TReadoutBoardDAQ(libusb_device *ADevice, TBoardConfigDAQ *config);
 
 
-  int  ReadRegister      (uint16_t Address, uint32_t &Value);
-  int  WriteRegister     (uint16_t Address, uint32_t Value);
+  int  ReadRegister      (uint16_t address, uint32_t &value);
+  int  WriteRegister     (uint16_t address, uint32_t value);
 
   int  SendOpCode        (uint8_t  OpCode) ;
 
   int  SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
   void SetTriggerSource  (TTriggerSource triggerSource);
   int  Trigger           (int nTriggers);
-  int  ReadEventData     (int &NBytes, char *Buffer);
-  bool PowerOn           (int &AOverflow);
+  int  ReadEventData     (int &nBytes, char *buffer);
+  bool PowerOn           (int &overflow);
+  void PowerOff          ();
 
 
   TBoardConfigDAQ *GetBoardConfig() {return fBoardConfigDAQ;};
@@ -146,7 +147,6 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   //---------------------------------------------------------
 
   // ADC Module:
-
   float ReadAnalogI     (); // read analogue supply current
   float ReadDigitalI    (); // read digital supply current
   float ReadIoI         (); // read digital I/O supply current
@@ -155,37 +155,43 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   float ReadMonI  (); // 
   float ReadMonV  (); // 
 
-  bool ReadLDOStatus(int &AOverflow);
+  bool ReadLDOStatus(int &overflow);
+  void DecodeOverflow(int overflow);
 
+  void WriteADCModuleConfigRegisters (); // write current ADC module config (fBoardConfigDAQ) to registers
   //int  WriteADCConfig      ();
-  void  WriteCurrentLimits  (bool LDOOn, bool Autoshutdown);
+  void  WriteCurrentLimits  (bool LDOOn, bool autoshutdown); // just write current limits
  
    
 
-
   // READOUT Module:
-
+  void WriteReadoutModuleConfigRegisters (); // write current Readout module config (fBoardConfigDAQ) to registers
+  bool ResyncSerialPort ();
+  bool WriteSlaveDataEmulatorReg (uint32_t data);
 
 
   // TRIGGER Module:
   bool StartTrigger ();
   bool StopTrigger ();
   
+  void WriteTriggerModuleConfigRegisters (); // write current trigger module config (fBoardConfigDAQ) to registers
   bool WriteBusyOverrideReg(bool busyOverride);
 
-  // CMU Module:
 
+  // CMU Module:
+  void WriteCMUModuleConfigRegisters (); // write current CMU module config (fBoardConfigDAQ) to registers
 
 
   // RESET Module:
-  void  WriteDelays    ();
-
-
+  void WriteResetModuleConfigRegisters (); // write current reset module config (fBoardConfigDAQ) to registers
+  void WriteDelays    ();
 
 
   // ID Module:
-
-
+  int ReadBoardAddress (); 
+  uint32_t ReadFirmwareVersion (); 
+  uint32_t ReadFirmwareDate (); 
+  int ReadFirmwareChipVersion (); 
 
 
   // SOFTRESET Module:
