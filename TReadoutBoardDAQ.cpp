@@ -126,9 +126,7 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8
 
 
   err = WriteRegister(CMU_INSTR + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), newAddress);
-
   if (err < 0) return -1;
-
   err = ReadRegister (CMU_DATA + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), value32);
   if (err < 0) return -1;
 
