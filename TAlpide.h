@@ -11,6 +11,7 @@ namespace Alpide {
     REG_MODECONTROL     = 0x1,
     REG_REGDISABLE_LOW  = 0x2,
     REG_REGDISABLE_HIGH = 0x3,
+    REG_PIXELCONFIG     = 0x500,
     REG_VRESETP         = 0x601, 
     REG_VRESETD         = 0x602, 
     REG_VCASP           = 0x603,
@@ -42,6 +43,10 @@ namespace Alpide {
     OPCODE_RDOP     = 0x4e
   } TOpCode;
 
+  typedef enum {
+    PIXREG_MASK   = 0x0,
+    PIXREG_SELECT = 0x1
+  } TPixReg;
 };
 
 class TAlpide {
@@ -56,6 +61,8 @@ class TAlpide {
   
   int ReadRegister       (Alpide::TRegister address, uint16_t &value);
   int WriteRegister      (Alpide::TRegister address, uint16_t value, bool verify = false);
+  int ReadRegister       (uint16_t address, uint16_t &value);
+  int WriteRegister      (uint16_t address, uint16_t value, bool verify = false);
   int ModifyRegisterBits (Alpide::TRegister address, uint8_t lowBit, uint8_t nBits, uint16_t value, bool verify = false);
 
   //int SendOpCode         (Alpide::TOpCode opcode);

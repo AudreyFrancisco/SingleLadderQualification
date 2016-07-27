@@ -9,7 +9,12 @@ TAlpide::TAlpide (TConfig *config, int chipId) {
 
 
 int TAlpide::ReadRegister (TRegister address, uint16_t &value) {
-  int err = fReadoutBoard->ReadChipRegister((uint16_t) address, value, fChipId);
+  return ReadRegister ((uint16_t) address, value);
+}
+
+
+int TAlpide::ReadRegister (uint16_t address, uint16_t &value) {
+  int err = fReadoutBoard->ReadChipRegister(address, value, fChipId);
   if (err < 0) return err;  // readout board should have thrown an exception before
 
   if (value & 0xff != fChipId) {
@@ -22,7 +27,12 @@ int TAlpide::ReadRegister (TRegister address, uint16_t &value) {
 
 
 int TAlpide::WriteRegister (TRegister address, uint16_t value, bool verify) {
-  int result = fReadoutBoard->WriteChipRegister((uint16_t) address, value, fChipId);
+  return WriteRegister ((uint16_t) address, value, verify);
+}
+
+
+int TAlpide::WriteRegister (uint16_t address, uint16_t value, bool verify) {
+  int result = fReadoutBoard->WriteChipRegister(address, value, fChipId);
   if ((!verify) || (result < 0)) return result;
 
   uint16_t check;
