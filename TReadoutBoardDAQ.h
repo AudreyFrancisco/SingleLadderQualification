@@ -126,7 +126,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
 
   int  SendOpCode        (uint8_t  OpCode) ;
 
-  int  SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
+  int  SetTriggerConfig  (bool enablePulse, bool enableTrigger, uint32_t triggerDelay, int pulseDelay);
   void SetTriggerSource  (TTriggerSource triggerSource);
   int  Trigger           (int nTriggers);
   int  ReadEventData     (int &nBytes, char *buffer);
@@ -199,6 +199,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   // SOFTRESET Module:
   bool ResetBoardFPGA (int duration);
   bool ResetBoardFX3  (int duration);
+  //void WriteResetModuleConfigRegisters (); // write current softreset module config (fBoardConfigDAQ) to registers
 
 };
 

@@ -17,7 +17,15 @@ TReadoutBoardDAQ::TReadoutBoardDAQ (libusb_device *ADevice, TBoardConfigDAQ *con
   //fSignalEnableTime = config->fSignalEnableTime;
   //fDrstTime         = config->fDrstTime;
 
-  WriteDelays();
+  //WriteDelays();
+
+  // write default config to all registers
+  WriteADCModuleConfigRegisters();
+  WriteReadoutModuleConfigRegisters();
+  WriteTriggerModuleConfigRegisters();
+  WriteCMUModuleConfigRegisters();
+  WriteResetModuleConfigRegisters();
+  //WriteSoftResetModuleRegisters();
 
 }
 
@@ -111,27 +119,63 @@ int TReadoutBoardDAQ::SendOpCode (uint8_t  OpCode)
 
 
 
-int TReadoutBoardDAQ::SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay)
+int TReadoutBoardDAQ::SetTriggerConfig  (bool enablePulse, bool enableTrigger, uint32_t triggerDelay, int pulseDelay)
+{
+  fBoardConfigDAQ->SetTriggerEnable(enableTrigger); // enableTrigger? DAQboard trigger disabled only if fBoardConfigDAQ.TriggerMode==0..
+  fBoardConfigDAQ->SetPulseEnable(enablePulse); // enablePulse on DAQboard??  
+ 
+  fBoardConfigDAQ->SetTriggerDelay(triggerDelay);
+  fBoardConfigDAQ->SetStrobeDelay(triggerDelay); // equivalent to trigger delay on DAQboard..
+  WriteTriggerModuleConfigRegisters();
+
+  fBoardConfigDAQ->SetPulseDelay(pulseDelay);
+  WriteResetModuleConfigRegisters();
+
+  return 0;
+}
+
+
+void TReadoutBoardDAQ::SetTriggerSource (TTriggerSource triggerSource)
+{
+  if (triggerSource == trigInt) {
+    fBoardConfigDAQ->SetTriggerMode(1);
+    WriteTriggerModuleConfigRegisters();
+  }
+  else if (triggerSource == trigExt) {
+    fBoardConfigDAQ->SetTriggerMode(2);
+    WriteTriggerModuleConfigRegisters();
+  }
+  else {
+    std::cerr << "!!! trigger source not known, doing nothing !!!" << std::endl;
+  }
+  
+}
+
+
+int TReadoutBoardDAQ::Trigger (int nTriggers)
+{
+  fBoardConfigDAQ->SetNTriggers(nTriggers); // TODO: test whether this feature is working at all; think it does no harm at least
+  WriteTriggerModuleConfigRegisters();
+
+
+
+
+
+
+
+
+
+
+  return 0;
+}
+
+
+int TReadoutBoardDAQ::ReadEventData (int &NBytes, char *Buffer)
 {
   return 0;
 }
 
 
-void TReadoutBoardDAQ::SetTriggerSource  (TTriggerSource triggerSource)
-{
-}
-
-
-int TReadoutBoardDAQ::Trigger           (int nTriggers)
-{
-  return 0;
-}
-
-
-int TReadoutBoardDAQ::ReadEventData     (int &NBytes, char *Buffer)
-{
-  return 0;
-}
 
 
 
