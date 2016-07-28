@@ -33,15 +33,18 @@ int main() {
     if (myDAQBoard) {
       if (myDAQBoard -> PowerOn (overflow)) std::cout << "LDOs are on" << std::endl;
       else std::cout << "LDOs are off" << std::endl;
-      myDAQBoard->ReadRegister (0x602, version); 
+      myDAQBoard->ReadRegister (0x602, version); // read firmware version
       std::cout << "Version = " << std::hex << version << std::dec << std::endl;
-      myDAQBoard->WriteRegister (0x402, 3);
-      myDAQBoard->WriteRegister (0x500, 0x0220);
+      myDAQBoard->WriteRegister (0x402, 3); // disable manchester encoding
+      //myDAQBoard->WriteRegister (0x500, 0x0220);
       myDAQBoard -> SendOpCode (Alpide::OPCODE_GRST);
+      sleep(1);
       std::cout << "Analog Current = " << myDAQBoard-> ReadAnalogI() << std::endl;
       std::cout << "Digital Current = " << myDAQBoard-> ReadDigitalI() << std::endl;
       
-      //chip -> WriteRegister (Alpide::REG_MODECONTROL, 0x20);
+      chip -> WriteRegister (Alpide::REG_MODECONTROL, 0x20);
+      chip -> WriteRegister (0xc, 0x40); // disable manchester encoding 
+     
       //std::cout << "After Write register " << std::endl;
       chip -> ReadRegister (Alpide::REG_IBIAS, status);
       std::cout << "IBias register value: 0x" << std::hex << status << std::dec << std::endl;
