@@ -17,7 +17,7 @@ int TAlpide::ReadRegister (uint16_t address, uint16_t &value) {
   int err = fReadoutBoard->ReadChipRegister(address, value, fChipId);
   if (err < 0) return err;  // readout board should have thrown an exception before
 
-  if (value & 0xff != fChipId) {
+  if ((value & 0xff) != fChipId) {
     std::cout << "Warning, received chip id " << (value & 0xff) << " instead of " << fChipId << std::endl;
   }  
   value >>= 8;
