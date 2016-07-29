@@ -10,7 +10,10 @@ CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp USB.cpp 
 #CLASS=  USB.cpp TDaqboard.cpp TPalpidefs.cpp TDut.cpp TTestsetup.cpp chiptests.cpp TConfig.cpp TModuleSetup.cpp
 OBJS = $(CLASS:.cpp=.o)
 
-all:    test
+all:    test ThresholdScan
+
+ThresholdScan:  $(OBJS) ThresholdScan.cpp
+	$(CC) -o ThresholdScan $(OBJS) $(CFLAGS) main.cpp $(LINKFLAGS)
 
 test:   $(OBJS) main.cpp
 	$(CC) -o $(OBJECT) $(OBJS) $(CFLAGS) main.cpp $(LINKFLAGS)
