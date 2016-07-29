@@ -53,18 +53,24 @@ namespace Alpide {
   } TRegister;
 
   typedef enum {
-    OPCODE_TRIGGER1 = 0xb1,
-    OPCODE_TRIGGER2 = 0x55,
-    OPCODE_TRIGGER3 = 0xc9,
-    OPCODE_TRIGGER4 = 0x2d,
-    OPCODE_GRST     = 0xd2,
-    OPCODE_PRST     = 0xe4,
-    OPCODE_PULSE    = 0x78,
-    OPCODE_BCRST    = 0x36,
-    OPCODE_DEBUG    = 0xaa,
-    OPCODE_RORST    = 0x63,
-    OPCODE_WROP     = 0x9c,
-    OPCODE_RDOP     = 0x4e
+    OPCODE_TRIGGER1     = 0xb1,
+    OPCODE_TRIGGER2     = 0x55,
+    OPCODE_TRIGGER3     = 0xc9,
+    OPCODE_TRIGGER4     = 0x2d,
+    OPCODE_GRST         = 0xd2,
+    OPCODE_PRST         = 0xe4,
+    OPCODE_PULSE        = 0x78,
+    OPCODE_BCRST        = 0x36,
+    OPCODE_DEBUG        = 0xaa,
+    OPCODE_RORST        = 0x63,
+    OPCODE_WROP         = 0x9c,
+    OPCODE_RDOP         = 0x4e,
+    OPCODE_CMU_CLEARERR = 0xff00,
+    OPCODE_FIFOTEST     = 0xff01,
+    OPCODE_LOADOBDEFCG  = 0xff02,
+    OPCODE_XOFF         = 0xff10,
+    OPCODE_XON          = 0xff11,
+    OPCODE_ADCMEASURE   = 0xff20
   } TOpCode;
 
   typedef enum {

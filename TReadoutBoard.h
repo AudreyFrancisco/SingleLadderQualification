@@ -47,9 +47,9 @@ class TReadoutBoard {
   virtual int  ReadChipRegister  (uint16_t Address, uint16_t &Value, uint8_t chipID = 0) = 0;
 
   // sends op code to all control interfaces
-  virtual int  SendOpCode        (uint8_t  OpCode) = 0;
+  virtual int  SendOpCode        (uint16_t  OpCode) = 0;
   // sends op code to control interface belonging to chip chipId
-  virtual int  SendOpCode        (uint8_t  OpCode, uint8_t chipId) = 0;
+  virtual int  SendOpCode        (uint16_t  OpCode, uint8_t chipId) = 0;
 
   virtual int  SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay) = 0;
   virtual void SetTriggerSource  (TTriggerSource triggerSource) = 0;

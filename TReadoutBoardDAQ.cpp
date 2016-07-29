@@ -112,7 +112,7 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8
 }
 
 
-int TReadoutBoardDAQ::SendOpCode (uint8_t  OpCode) 
+int TReadoutBoardDAQ::SendOpCode (uint16_t  OpCode)
 {
   return WriteRegister (CMU_INSTR + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), (int) OpCode);
 }
