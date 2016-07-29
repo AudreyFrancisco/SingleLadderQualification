@@ -3,8 +3,9 @@
 
 
 void AlpideConfig::Init (TAlpide *chip) {
-  ClearPixSelectBits (chip, true);
   
+  ClearPixSelectBits (chip, true);
+    
 }
 
 
@@ -110,4 +111,84 @@ void AlpideConfig::ApplyStandardDACSettings (TAlpide *chip, float backBias) {
     std::cout << "Settings not defined for back bias " << backBias << " V. Please set manually." << std::endl;
   }
 
+}
+
+
+// should it be allowed to pass a config or should always the chip config be used?
+void AlpideConfig::ConfigureFromu (TAlpide *chip, Alpide::TPulseType pulseType, bool testStrobe, TChipConfig *config ) {
+  // for the time being use these hard coded values; if needed move to configuration
+  int  mebmask          = 0;
+  bool rotatePulseLines = false;
+  bool internalStrobe   = false;    // strobe sequencer for continuous mode
+  bool busyMonitoring   = true;
+
+
+  if (!config) config = chip->GetConfig();
+
+  uint16_t fromuconfig = 0;
+  
+  fromuconfig |= mebmask;
+  fromuconfig |= (internalStrobe   ? 1:0)          << 3;
+  fromuconfig |= (busyMonitoring   ? 1:0)          << 4;
+  fromuconfig |= ((int) pulseType)                 << 5;
+  fromuconfig |= (testStrobe       ? 1:0)          << 6;
+  fromuconfig |= (rotatePulseLines ? 1:0)          << 7;
+  fromuconfig |= (config->GetTriggerDelay() & 0x7) << 8;
+  
+  chip->WriteRegister (Alpide::REG_FROMU_CONFIG1,  fromuconfig);
+  chip->WriteRegister (Alpide::REG_FROMU_CONFIG2,  config->GetStrobeDuration());
+  chip->WriteRegister (Alpide::REG_FROMU_PULSING1, config->GetStrobeDelay());
+  chip->WriteRegister (Alpide::REG_FROMU_PULSING2, config->GetPulseDuration());
+  
+}
+
+
+void AlpideConfig::ConfigureBuffers (TAlpide *chip, TChipConfig *config) {
+  if (!config) config = chip->GetConfig();
+  
+  uint16_t clocks = 0, ctrl = 0;
+
+  clocks |= (config->GetDclkReceiver () & 0xf);
+  clocks |= (config->GetDclkDriver   () & 0xf) << 4;
+  clocks |= (config->GetMclkReceiver () & 0xf) << 8;
+  
+  ctrl   |= (config->GetDctrlReceiver() & 0xf);
+  ctrl   |= (config->GetDctrlDriver  () & 0xf) << 4;
+
+  chip->WriteRegister (Alpide::REG_CLKIO_DACS, clocks);
+  chip->WriteRegister (Alpide::REG_CMUIO_DACS, ctrl);
+}
+
+
+void AlpideConfig::ConfigureCMU (TAlpide *chip, TChipConfig *config) {
+  if (!config) config = chip->GetConfig();
+  
+  uint16_t cmuconfig = 0;
+  
+  cmuconfig |= (config->GetPreviousId() & 0xf);
+  cmuconfig |= (config->GetInitialToken     () ? 1:0) << 4;
+  cmuconfig |= (config->GetDisableManchester() ? 1:0) << 5;
+  cmuconfig |= (config->GetEnableDdr        () ? 1:0) << 6;
+  
+  chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, cmuconfig);
+}
+
+
+void AlpideConfig::WriteControlReg (TAlpide *chip, Alpide::TChipMode chipMode, TChipConfig *config) {
+  if (!config) config = chip->GetConfig();
+
+  uint16_t controlreg = 0;
+  
+  controlreg |= (uint16_t) chipMode;
+  
+  controlreg |= (config->GetEnableClustering    () ? 1:0) << 2;
+  controlreg |= (config->GetMatrixReadoutSpeed  () & 0x1) << 3;
+  controlreg |= (config->GetSerialLinkSpeed     () & 0x3) << 4;
+  controlreg |= (config->GetEnableSkewingGlobal () ? 1:0) << 6;
+  controlreg |= (config->GetEnableSkewingStartRO() ? 1:0) << 7;
+  controlreg |= (config->GetEnableClockGating   () ? 1:0) << 8;
+  controlreg |= (config->GetEnableCMUReadout    () ? 1:0) << 9;
+  
+  chip->WriteRegister (Alpide::REG_MODECONTROL, controlreg);
+  
 }

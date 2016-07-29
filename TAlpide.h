@@ -77,16 +77,30 @@ namespace Alpide {
     PIXREG_MASK   = 0x0,
     PIXREG_SELECT = 0x1
   } TPixReg;
+  
+  typedef enum {
+    PT_DIGITAL  = 0,
+    PT_ANALOGUE = 1
+  } TPulseType;
+  
+  typedef enum {
+    MODE_CONFIG = 0,
+    MODE_TRIGGERED = 1,
+    MODE_CONTINUOUS = 2
+  } TChipMode;
+  
 };
 
 class TAlpide {
  private:
+  TChipConfig   *fConfig;
   int            fChipId;
   TReadoutBoard *fReadoutBoard;
  protected: 
  public:
-  TAlpide (TConfig *config, int chipId);
-  TAlpide (TConfig *config, int chipId, TReadoutBoard *readoutBoard);
+  TAlpide (TChipConfig *config);
+  TAlpide (TChipConfig *config, TReadoutBoard *readoutBoard);
+  TChipConfig *GetConfig () {return fConfig;};
   void SetReadoutBoard (TReadoutBoard *readoutBoard) {fReadoutBoard = readoutBoard;};
   
   int ReadRegister       (Alpide::TRegister address, uint16_t &value);

@@ -3,8 +3,9 @@
 
 using namespace Alpide;
 
-TAlpide::TAlpide (TConfig *config, int chipId) {
-  fChipId = chipId;
+TAlpide::TAlpide (TChipConfig *config) {
+  fConfig = config;
+  fChipId = config->GetChipId();
 }
 
 
