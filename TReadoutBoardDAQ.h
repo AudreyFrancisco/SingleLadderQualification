@@ -124,9 +124,11 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   int  ReadRegister      (uint16_t address, uint32_t &value);
   int  WriteRegister     (uint16_t address, uint32_t value);
 
+  // DAQ board has only one control interface -> both methods are identical
   int  SendOpCode        (uint8_t  OpCode) ;
+  int  SendOpCode        (uint8_t  OpCode, uint8_t chipId) {SendOpCode (OpCode);};
 
-  int  SetTriggerConfig  (bool enablePulse, bool enableTrigger, uint32_t triggerDelay, int pulseDelay);
+  int  SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
   void SetTriggerSource  (TTriggerSource triggerSource);
   int  Trigger           (int nTriggers);
   int  ReadEventData     (int &nBytes, char *buffer);

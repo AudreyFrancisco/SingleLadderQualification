@@ -119,7 +119,7 @@ int TReadoutBoardDAQ::SendOpCode (uint8_t  OpCode)
 
 
 
-int TReadoutBoardDAQ::SetTriggerConfig  (bool enablePulse, bool enableTrigger, uint32_t triggerDelay, int pulseDelay)
+int TReadoutBoardDAQ::SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay)
 {
   fBoardConfigDAQ->SetTriggerEnable(enableTrigger); // enableTrigger? DAQboard trigger disabled only if fBoardConfigDAQ.TriggerMode==0..
   fBoardConfigDAQ->SetPulseEnable(enablePulse); // enablePulse on DAQboard??  

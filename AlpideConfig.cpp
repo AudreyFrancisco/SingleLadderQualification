@@ -4,6 +4,7 @@
 
 void AlpideConfig::Init (TAlpide *chip) {
   ClearPixSelectBits (chip, true);
+  
 }
 
 
