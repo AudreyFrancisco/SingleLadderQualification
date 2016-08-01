@@ -24,8 +24,8 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
   const int  DCTRL_RECEIVER  = 10;
   const int  DCTRL_DRIVER    = 10;
 
-  const int  PREVIOUS_ID        = 0xf;
-  const bool INITIAL_TOKEN      = false;
+  const int  PREVIOUS_ID        = 0x10;
+  const bool INITIAL_TOKEN      = true;
   const bool DISABLE_MANCHESTER = true;
   const bool ENABLE_DDR         = false;
 };
