@@ -5,14 +5,25 @@
 #ifndef READOUTBOARDDAQ_H
 #define READOUTBOARDDAQ_H
 
+#include <iostream>
+#include <deque>
+#include <mutex>
+#include <thread>
+#include <vector>
+#include <iostream>
+
 #include "USB.h"
 #include "TReadoutBoard.h"
+#include "TAlpide.h"
 #include "TConfig.h"
 #include "TBoardConfigDAQ.h"
 
 
 //enum TTriggerSource {TRIG_INT, TRIG_EXT};
 
+const int MAX_DIFF_TRIG_EVT_CNT   =  10;    // maximum allowed difference between number triggers and events read; MAX_DIFF_TRIG_EVT_CNT is default
+const uint32_t MAX_EVT_BUFFSIZE   = 1e3;    // max number of events in fEventBuffer  TODO: maximum queue size ~1 Gb?
+const int MAX_NTRIG_TRAIN         = 100;    // fNTriggers will be subdivided into trigger trains with fMaxNTriggersAtOnce, MAX_NTRIG_ATONCE is default
 
 //************************************************************
 // TReadOutBoardDAQ: implementationn for Cagliari DAQboard 
@@ -105,6 +116,30 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   static const int SOFTRESET_FX3_RESET  = 0x2; // not existing in manual..
   
   //--------------------------------------
+  void  DAQTrigger       ();      // function for triggering fNTrigger events, to be ran in thread
+  int   fStatusTrigger;            // status variable for trigger
+    //  1: no error
+    //  -1: fMaxEventBufferSize reached
+  void  DAQReadData      ();      // function to read raw data, split into DAQboard events, and writing events to fEventBuffer
+  int   fStatusReadData;           // status variable for readdata
+    //  1: no error
+    // -1: general errror, not specifically treated
+    // -2: USB timeout
+    // -3: stop trigger marker
+  std::thread fThreadTrigger;     // thread for DAQTrigger
+  std::thread fThreadReadData;    // thread for DAQReadData
+  int fTrigCnt;                   // overall trigger counter
+  int fEvtCnt;                    // counter of events read/in queue
+  int fDiffTrigEvtCnt;            // difference between number triggers and events read
+  int fMaxDiffTrigEvtCnt;         // maximum allowed difference between number triggers and events read
+  uint32_t fMaxEventBufferSize;   // maximum number of events in fEventBuffer; TODO: maximum queue size ~1 Gb?
+  int fNTriggersTotal;            // total number of triggers to be launched
+  int fMaxNTriggersTrain;         // fNTriggersTotal will be subdivided into trigger trains with fMaxNTriggersAtOnce
+  std::mutex fMtx;                //  mutex for read/write acces to fEventBuffer
+
+  std::deque< std::vector<unsigned char> > fEventBuffer;  // double ended queue for DAQboard event data; vector<unsigned char> for saving events
+  std::deque<unsigned char> fRawBuffer;  // double ended queue for raw data;
+
 
   TBoardConfigDAQ *fBoardConfigDAQ;
 
@@ -114,9 +149,14 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId = 0);
   int ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId = 0);
 
+
  protected: 
+
  public: 
   TReadoutBoardDAQ(libusb_device *ADevice, TBoardConfigDAQ *config);
+  
+  virtual ~TReadoutBoardDAQ ();
+
 
   //// general methods of TReadoutBoard
   //---------------------------------------------------------
@@ -167,11 +207,11 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   void  WriteCurrentLimits  (bool LDOOn, bool autoshutdown); // just write current limits
  
    
-
   // READOUT Module:
   void WriteReadoutModuleConfigRegisters (); // write current Readout module config (fBoardConfigDAQ) to registers
   bool ResyncSerialPort ();
   bool WriteSlaveDataEmulatorReg (uint32_t data);
+  bool EndOfRun ()    {return WriteRegister((MODULE_READOUT << DAQBOARD_REG_ADDR_SIZE) + READOUT_EOR_COMMAND, 5);};
 
 
   // TRIGGER Module:
@@ -199,9 +239,9 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
 
 
   // SOFTRESET Module:
+  void WriteSoftResetModuleConfigRegisters (); // write current soft reset module config (fBoardConfigDAQ) to registers
   bool ResetBoardFPGA (int duration);
   bool ResetBoardFX3  (int duration);
-  //void WriteResetModuleConfigRegisters (); // write current softreset module config (fBoardConfigDAQ) to registers
 
 };
 
