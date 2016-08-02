@@ -26,7 +26,7 @@ bool InitSetup() {
   InitLibUsb();
   FindDAQBoards (fConfig, fBoards);
   
-  if (boards.size() != 1) {
+  if (boards.size() != 1) { 
     std::cout << "Problem in finding DAQ board" << std::endl;
     return false;
   }

@@ -16,7 +16,7 @@ const int LIMIT_ANALOGUE  = 300;
 
 //---- READOUT module
 const bool DATA_SAMPLING_EDGE = 1;
-const bool DATA_PKTBASED_EN   = 0;
+const bool DATA_PKTBASED_EN   = 1; // packet based readout default now!
 const bool DATA_DDR_EN        = 0;
 const int DATA_PORT           = 2;
 
@@ -204,7 +204,9 @@ class TBoardConfigDAQ : public TBoardConfig {
   int GetDrstTime()         {return fDrstTime;};
 
   
-
+  // SOFTRESET Module
+  int GetSoftResetDuration()     {return fSoftResetDuration;};
+   
 
 
   //// setters for module config parameters
