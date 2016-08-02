@@ -146,7 +146,7 @@ public:
 	int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId = 0);
 	int ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId = 0);
 	int SendOpCode        (uint16_t  OpCode, uint8_t ControlInterface);
-	int SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
+	int SetTriggerConfig  (bool enablePulse, bool enableTrigger, uint32_t triggerDelay, int pulseDelay);
 	void SetTriggerSource  (TTriggerSource triggerSource);
 	int Trigger           (int nTriggers);
 	int ReadEventData     (int &nBytes, char *buffer);

@@ -74,7 +74,7 @@ int TReadoutBoardMOSAIC::SendOpCode        (uint16_t  OpCode, uint8_t Cii)
 }
 
 
-int TReadoutBoardMOSAIC::SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay)
+int TReadoutBoardMOSAIC::SetTriggerConfig  (bool enablePulse, bool enableTrigger, uint32_t triggerDelay, int pulseDelay)
 {
 	uint16_t pulseMode;
 	if(enablePulse && enableTrigger) pulseMode = 3; // FIXME:
