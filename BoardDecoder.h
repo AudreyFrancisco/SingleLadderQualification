@@ -37,6 +37,10 @@ class BoardDecoder{
   static bool DecodeEventDAQ   (unsigned char *data, int &nBytes, TBoardHeader &boardInfo) {return false;};
  public:
   static bool DecodeEvent(TBoardType boardType, unsigned char *data, int &nBytes, TBoardHeader &boardInfo);
+
+ private:
+  static uint32_t BoardDecoder::endianAdjust(unsigned char *buf);
+
 };
 
 

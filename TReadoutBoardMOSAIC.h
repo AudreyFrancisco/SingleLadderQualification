@@ -128,6 +128,7 @@ private:
 	std::vector<MDataReceiver *> receivers;
 
 	uint32_t closedEventsPerSource[MAX_MOSAICTRANRECV];
+	TBoardHeader theHeaderOfReadData;  // This will host the info catch from Packet header/trailer
 
 	enum dataBlockFlag_e {
 		flagClosedEvent			= (1 << 0),
@@ -165,6 +166,8 @@ private:
 	void closeTCP();
 	ssize_t recvTCP(void *rxBuffer, size_t count, int timeout);
 	ssize_t readTCPData(void *buffer, size_t count, int timeout);
+	void cleanHeader(TBoardHeader *AHeader);
+	void copyHeader(const TBoardHeader *SourceHeader, TBoardHeader *DestinHeader);
 
 	void addDataReceiver(int id, MDataReceiver *dr);
 	void flushDataReceivers();
