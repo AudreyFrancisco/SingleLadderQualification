@@ -149,7 +149,7 @@ class TBoardConfigDAQ : public TBoardConfig {
 
  public:
   TBoardConfigDAQ(const char *fName = 0, int boardIndex = 0);
-  int GetBoardType() {return 0;};
+  TBoardType GetBoardType() {return boardDAQ;};
 
   //// getters for module config parameters 
 
@@ -216,7 +216,7 @@ class TBoardConfigDAQ : public TBoardConfig {
   void SetLDOEnable(bool enable)           {fLDOEnable          = enable;};
 
   // READOUT Module 
-  int SetDataPortSelect(int dataPort)      {fDataPortSelect     = dataPort;};
+  void SetDataPortSelect(int dataPort)      {fDataPortSelect     = dataPort;};
 
   // TRIGGER Module
   // void SetNTriggers   (int nTriggers)      {fNTriggers          = nTriggers;}; // defined in base class TBoardConfig

@@ -3,12 +3,11 @@
 
 #include <stdint.h>
 #include <vector>
+
+typedef enum {trigInt, trigExt} TTriggerSource;   // move these to TBoardConfig?
+typedef enum {boardDAQ, boardMOSAIC} TBoardType;
+
 #include "TBoardConfig.h"
-
-//class TConfig; 
-
-typedef enum {trigInt, trigExt} TTriggerSource;
-
 
 typedef struct {
   int chipId;
@@ -16,7 +15,7 @@ typedef struct {
   int receiver;
 } TChipPos;
 
-
+class TBoardConfig;
  
 //************************************************************
 // abstract base class for all readout boards
@@ -51,7 +50,7 @@ class TReadoutBoard {
   // sends op code to control interface belonging to chip chipId
   virtual int  SendOpCode        (uint16_t  OpCode, uint8_t chipId) = 0;
 
-  virtual int  SetTriggerConfig  (bool enablePulse, bool enableTrigger, uint32_t triggerDelay, int pulseDelay) = 0;
+  virtual int  SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay) = 0;
   virtual void SetTriggerSource  (TTriggerSource triggerSource) = 0;
   virtual int  Trigger           (int nTriggers) = 0;
   virtual int  ReadEventData     (int &NBytes, char *Buffer) = 0; // TODO: max buffer size not needed??

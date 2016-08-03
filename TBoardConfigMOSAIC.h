@@ -37,7 +37,7 @@ public:
 	virtual ~TBoardConfigMOSAIC();
 
 	// Info methods
-	int GetBoardType() {return(2);}; // Assume that the MOSAIC id is 2
+	TBoardType GetBoardType() {return boardMOSAIC;}; 
 
 	// Getters
 	char * GetIPaddress() {return(IPAddress);}
