@@ -1,12 +1,12 @@
 /* -------------------------------------------------
  *   Derived TReadOutBoard Class for MOSAIC board
  *
- *   ver.0.1		3/8/2016
+ *   ver.0.1		2/8/2016
  *
  *  Auth.: A.Franco	-  INFN BARI
  *
  *  		HISTORY
- *
+ *  3/8/16	-	Add the Board decoder class ...
  *
  */
 #include <math.h> 
@@ -18,6 +18,7 @@
 #include <sys/socket.h>
 #include <poll.h>
 #include "TReadoutBoardMOSAIC.h"
+#include "BoardDecoder.h"
 #include "TAlpide.h"
 
 // ---- Constructor
@@ -145,16 +146,27 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, char *buffer)
 	}
 
 	// The Data Counters are all empty then we read some thing ...
-
 	n = readTCPData(header, headerSize, fBoardConfigDAQ->GetPollingDataTimeout() ); 		// Read the TCP/IP socket
+	cleanHeader(&theHeaderOfReadData);
 	if (n == 0)	{		// timeout
+		theHeaderOfReadData.timeout = true;
 		return 0;
 	}
 	blockSize = buf2ui(header);	// Decodes the received block ...
+	theHeaderOfReadData.size = blockSize;
 
 	flags = buf2ui(header+4);
+	theHeaderOfReadData.overflow = flags & flagOverflow;
+	theHeaderOfReadData.endOfRun = flags & flagCloseRun;
+	theHeaderOfReadData.timeout = flags & flagTimeout;
+	theHeaderOfReadData.closedEvent = flags & flagClosedEvent;
+
 	closedDataCounter = buf2ui(header+8);
+	theHeaderOfReadData.eoeCount = closedDataCounter;
+
 	dataSrc = buf2ui(header+12);
+	theHeaderOfReadData.channel = dataSrc;
+
 	//	printf("Received TCP Header (%d) : Block Size = %d  Flags = %04x(Ovr %d, Tim %d Run %d Eve %d) DataCounters = %d DataSource = %04x",headerSize, blockSize,flags,flags & flagOverflow, flags & flagTimeout, flags & flagCloseRun, flags & flagClosedEvent, closedDataCounter,dataSrc);
 
 	readBlockSize = (blockSize & 0x3f) ? (blockSize & ~0x3f)+64: blockSize; // round the block size to the higher 64 multiple
@@ -274,6 +286,28 @@ int TReadoutBoardMOSAIC::returnDataOut(MDataReceiver *AReceiver, int &nBytes, ch
 	return(0);
 }
 
+// clean all fields of the structure
+void TReadoutBoardMOSAIC::cleanHeader(TBoardHeader *AHeader)
+{
+	if(AHeader == NULL) return;
+	AHeader->channel = 0;
+	AHeader->eoeCount = 0;
+	AHeader->timeout = false;
+	AHeader->endOfRun = false;
+	AHeader->overflow = false;
+	return;
+}
+
+void TReadoutBoardMOSAIC::copyHeader(const TBoardHeader *SourceHeader, TBoardHeader *DestinHeader)
+{
+	if(SourceHeader == NULL || DestinHeader == NULL) return;
+	DestinHeader->channel = SourceHeader->channel;
+	DestinHeader->eoeCount = SourceHeader->eoeCount;
+	DestinHeader->timeout = SourceHeader->timeout;
+	DestinHeader->endOfRun = SourceHeader->endOfRun;
+	DestinHeader->overflow = SourceHeader->overflow;
+	return;
+}
 
 /* -------------------------
  * 		Private Methods
