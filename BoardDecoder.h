@@ -33,13 +33,13 @@ typedef struct {
 // data and nBytes are modified such that after the board decoding they correspond to the chip event only  
 class BoardDecoder{
  private:
-  static bool DecodeEventMOSAIC(unsigned char *data, int &nBytes, TBoardHeader &boardInfo) {return false;};
+  static bool DecodeEventMOSAIC(unsigned char *data, int &nBytes, TBoardHeader &boardInfo);
   static bool DecodeEventDAQ   (unsigned char *data, int &nBytes, TBoardHeader &boardInfo) {return false;};
  public:
   static bool DecodeEvent(TBoardType boardType, unsigned char *data, int &nBytes, TBoardHeader &boardInfo);
 
  private:
-  static uint32_t BoardDecoder::endianAdjust(unsigned char *buf);
+  static uint32_t endianAdjust(unsigned char *buf);
 
 };
 

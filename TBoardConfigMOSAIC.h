@@ -34,7 +34,6 @@ protected:
 
 public:
 	TBoardConfigMOSAIC(const char *fName = 0, int boardIndex = 0);
-	virtual ~TBoardConfigMOSAIC();
 
 	// Info methods
 	TBoardType GetBoardType() {return boardMOSAIC;}; 

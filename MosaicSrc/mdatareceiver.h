@@ -38,10 +38,7 @@ typedef std::vector<char> dataBuffer_t;
 
 class MDataReceiver
 {
-friend class DAQBoard;
-friend class MOSAICBoard;
-friend class DUMMYBoard;
-friend class USBBoard;
+friend class TReadoutBoardMOSAIC;
 
 public:
 	MDataReceiver();

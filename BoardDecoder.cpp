@@ -28,7 +28,7 @@ bool BoardDecoder::DecodeEventMOSAIC(unsigned char *header, int &nBytes, TBoardH
 	boardInfo.closedEvent = flags & (1 << 0);
 	boardInfo.eoeCount = endianAdjust(header+8);
 	boardInfo.channel = endianAdjust(header+12);
-	*nBytes = 16;  // FIXME :: to discuss
+	nBytes = 16;  // FIXME :: to discuss
 	return false;
 };
 

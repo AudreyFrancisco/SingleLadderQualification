@@ -14,12 +14,52 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <poll.h>
 #include "TReadoutBoardMOSAIC.h"
 #include "BoardDecoder.h"
 #include "TAlpide.h"
+
+using namespace std;
+ForwardReceiver::ForwardReceiver() : MDataReceiver()
+{
+}
+ForwardReceiver::~ForwardReceiver()
+{
+}
+
+MosaicException::MosaicException()
+{
+}
+MosaicException::MosaicException(const string& arg)
+{
+	msg = arg;
+}
+MosaicException::~MosaicException() throw()
+{
+}
+const char* MosaicException::what() const throw()
+{
+	return msg.c_str();
+}
+
+
+MosaicSetupError::MosaicSetupError(const string& __arg)
+{
+		 msg = "MOSAIC Board Setup error: " + __arg;
+}
+
+MosaicRuntimeError::MosaicRuntimeError(const string& __arg)
+{
+	 msg = "MOSAIC Board Run error: " + __arg;
+}
+
+
+
+
+
 
 // ---- Constructor
 TReadoutBoardMOSAIC::TReadoutBoardMOSAIC (char *AIPaddress, TBoardConfigMOSAIC *AConfig) : TReadoutBoard(AConfig)
@@ -219,20 +259,20 @@ int TReadoutBoardMOSAIC::returnDataOut(MDataReceiver *AReceiver, int &nBytes, ch
 	if(AReceiver->dataBufferUsed == 0){ // nothing to do return null !
 		std::cerr << "WARNING Open Events, but buffer empty !!!" << std::endl;
 		buffer[0] = '\0';
-		*nBytes = 0;
+		nBytes = 0;
 		return(0); // zero events removed
 	}
 	char *ptrScan, *ptrStartEvent, *ptrEndEvent, *ptrEnd, *ptrBegin;
 	size_t bytesToMove;
 
-	ptrBegin = AReceiver->dataBuffer[0];
-	ptrEnd = AReceiver->dataBuffer[AReceiver->dataBufferUsed-1];
+	ptrBegin = &AReceiver->dataBuffer[0];
+	ptrEnd = &AReceiver->dataBuffer[AReceiver->dataBufferUsed-1];
 	ptrScan = ptrBegin;
 	ptrStartEvent = NULL;
 	ptrEndEvent = NULL;
 
 	while(ptrScan <= ptrEnd) { // start the light Parser
-		if(*ptrScan == 0xff || *ptrScan == 0xbc || *ptrScan == 0xf1  || *ptrScan == 0xf0) {//return DT_IDLE,DT_COMMA,DT_BUSYON,DT_BUSYOFF;
+		if(*ptrScan == (char)0xff || *ptrScan == (char)0xbc || *ptrScan == (char)0xf1  || *ptrScan == (char)0xf0) {//return DT_IDLE,DT_COMMA,DT_BUSYON,DT_BUSYOFF;
 			ptrScan++;
   	    } else if ((*ptrScan & 0xf0) == 0xa0) { // The Chip Id CHIPHEADER START of EVENT
   	    	ptrStartEvent = ptrScan;
@@ -249,7 +289,7 @@ int TReadoutBoardMOSAIC::returnDataOut(MDataReceiver *AReceiver, int &nBytes, ch
   	    		ptrEndEvent = ptrScan+1; // we remove the MOSAIC Flag byte
   	    		bytesToMove = (ptrEndEvent - ptrStartEvent +1);
   	    		if (bytesToMove>0) memcpy(buffer, ptrStartEvent, bytesToMove); // sets the output
-  	    		*nBytes = bytesToMove;
+  	    		nBytes = bytesToMove;
 
   	    		bytesToMove = AReceiver->dataBufferUsed - (ptrScan+3 - ptrBegin);
   	    		if (bytesToMove>0) memmove(ptrBegin, ptrScan+3, bytesToMove);	// move unused bytes to the begin of buffer
@@ -274,7 +314,7 @@ int TReadoutBoardMOSAIC::returnDataOut(MDataReceiver *AReceiver, int &nBytes, ch
 	}
 	if(ptrStartEvent != NULL) { // we found a StartEvent without an End of Event
 		buffer[0] = '\0';
-		*nBytes = 0;
+		nBytes = 0;
 
   		bytesToMove = AReceiver->dataBufferUsed - (ptrStartEvent - ptrBegin); // we clean the buffer up to the start of event
   		if (bytesToMove>0) memmove(ptrBegin, ptrStartEvent, bytesToMove);	// move unused bytes to the begin of buffer
@@ -345,7 +385,7 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 	addDataReceiver(0, (MDataReceiver *)dr);
 
 	for(int i=1; i<MAX_MOSAICTRANRECV;i++) {
-		dr = new ForwardReceiver();
+		dr =(MDataSave *) new ForwardReceiver();
 		addDataReceiver(i, (MDataReceiver *)dr);
 		a3rcv[i-1]->addDisable(false);  // FIXME: here we will decide to disable or enable receivers
 	}
@@ -358,8 +398,7 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 	if(!waitResetTransreceiver()) {
 		exit(-1);
 	}
-	for(int i=0;i<MAX_MOSAICCTRLINT;i++) setPhase(config->ControlInterfacePhase,i);  // set the Phase shift on the line
-
+	for(int i=0;i<MAX_MOSAICCTRLINT;i++) setPhase(config->GetCtrlInterfacePhase(),i);  // set the Phase shift on the line
 
 	setSpeedMode(config->IsLowSpeedMode(), -1);// set 400 MHz mode
 
@@ -481,7 +520,7 @@ ssize_t TReadoutBoardMOSAIC::recvTCP(void *rxBuffer, size_t count, int timeout)
 			rxSize = recv(tcp_sockfd, rxBuffer, count, 0);
 			if (rxSize==0 || rxSize == -1) throw MosaicRuntimeError("Board connection closed. Buffer overflow or fatal error!");
 		} else if (ufds.revents & POLLNVAL){
-			throw throw MosaicRuntimeError("Invalid file descriptor in poll system call");
+			throw MosaicRuntimeError("Invalid file descriptor in poll system call");
 		}
 	}
 	return(rxSize);

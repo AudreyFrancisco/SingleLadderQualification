@@ -16,9 +16,8 @@
 using namespace std;
 
 
-TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIndex) : TBoardConfig(AConfigFileName, ABoardIndex)
+TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIndex)
 {
-
 	// Default values set
 	NumberOfControlInterfaces = 2;
 	strcpy(IPAddress, "192.168.168.250");
@@ -35,12 +34,10 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
 	// Read Configuration file
 	try {
 		if(AConfigFileName == NULL || strlen(AConfigFileName) == 0) throw std::invalid_argument("MOSAIC Config : invalid filename");
-		FILE *fhConfigFile = fopen(AConfigFileName,"r"); // opens the file
+		fhConfigFile = fopen(AConfigFileName,"r"); // opens the file
 	} catch (...) {
 		throw std::invalid_argument("MOSAIC Config : file not exists !");
 	}
-
-
 }
 
 

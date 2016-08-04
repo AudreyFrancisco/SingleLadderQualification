@@ -18,6 +18,7 @@
 #include "TConfig.h"
 #include "TBoardConfig.h"
 #include "TBoardConfigMOSAIC.h"
+#include "BoardDecoder.h"
 
 #include "MosaicSrc/wbb.h"
 #include "MosaicSrc/ipbusudp.h"
@@ -62,7 +63,7 @@ public:
 	ForwardReceiver();
 	virtual ~ForwardReceiver();
 
-	void parse(int numClosed) { return;};
+	long parse(int numClosed) { return(0);};
 
 };
 
@@ -86,17 +87,13 @@ protected:
 class MosaicSetupError : public MosaicException
 {
 public:
-	explicit MosaicSetupError(const string& __arg)	{
-		 msg = "MOSAIC Board Setup error: " + __arg;
-	}
+	explicit MosaicSetupError(const string& __arg);
 };
 
 class MosaicRuntimeError : public MosaicException
 {
 public:
-	explicit MosaicRuntimeError(const string& __arg)	{
-		 msg = "MOSAIC Board Run error: " + __arg;
-	}
+	explicit MosaicRuntimeError(const string& __arg);
 };
 
 // -----------------------------------------------------
@@ -177,7 +174,7 @@ private:
 	void setPhase(int APhase, int ACii = 0) { controlInterface[ACii]->setPhase(APhase); controlInterface[ACii]->addSendCmd(ControlInterface::OPCODE_GRST); controlInterface[ACii]->execute();return;};
 	void setSpeedMode(bool AHSpeed, int Aindex = -1);
 	void enableExternalTrigger(bool isEnabled, bool levelSensitive = 0) { mTriggerControl->addEnableExtTrigger(isEnabled, levelSensitive);return;};
-	uint32_t TReadoutBoardMOSAIC::buf2ui(unsigned char *buf);
+	uint32_t buf2ui(unsigned char *buf);
 
 	int returnDataOut(MDataReceiver *AReceiver, int &nBytes, char *buffer);
 
