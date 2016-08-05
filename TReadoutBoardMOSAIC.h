@@ -53,6 +53,7 @@
 
 #define MAX_MOSAICCTRLINT 2
 #define MAX_MOSAICTRANRECV 10
+#define MOSAIC_HEADER_LENGTH 64
 
 //class string;
 using namespace std;
@@ -126,6 +127,7 @@ private:
 
 	uint32_t closedEventsPerSource[MAX_MOSAICTRANRECV];
 	TBoardHeader theHeaderOfReadData;  // This will host the info catch from Packet header/trailer
+	char *theHeaderBuffer[120]; // This will host the info of the header in the original format
 
 	enum dataBlockFlag_e {
 		flagClosedEvent			= (1 << 0),
@@ -141,9 +143,10 @@ public:
 	TReadoutBoardMOSAIC(char *AIPaddress, TBoardConfigMOSAIC *config);
 	virtual ~TReadoutBoardMOSAIC();
   
-	int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId = 0);
-	int ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId = 0);
-	int SendOpCode        (uint16_t  OpCode, uint8_t ControlInterface);
+	int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId =0);
+	int ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId =0);
+	int SendOpCode        (uint16_t  OpCode, uint8_t chipId=0);
+	int SendOpCode        (uint16_t  OpCode);
 	int SetTriggerConfig  (bool enablePulse, bool enableTrigger, uint32_t triggerDelay, int pulseDelay);
 	void SetTriggerSource  (TTriggerSource triggerSource);
 	int Trigger           (int nTriggers);
@@ -154,7 +157,6 @@ public:
 
 	int ReadRegister      (uint16_t Address, uint32_t &Value) { return(0);};
 	int WriteRegister     (uint16_t Address, uint32_t Value)  { return(0);};
-	int SendOpCode         (uint16_t  OpCode) { return(SendOpCode(OpCode, 0));};
 
 private:
 	void init(TBoardConfigMOSAIC *config);
@@ -163,12 +165,13 @@ private:
 	void closeTCP();
 	ssize_t recvTCP(void *rxBuffer, size_t count, int timeout);
 	ssize_t readTCPData(void *buffer, size_t count, int timeout);
-	void cleanHeader(TBoardHeader *AHeader);
-	void copyHeader(const TBoardHeader *SourceHeader, TBoardHeader *DestinHeader);
+//	void cleanHeader(TBoardHeader *AHeader);
+//	void copyHeader(const TBoardHeader *SourceHeader, TBoardHeader *DestinHeader);
 
 	void addDataReceiver(int id, MDataReceiver *dr);
 	void flushDataReceivers();
 	bool waitResetTransreceiver();
+	void enableDefinedReceivers();
 
 	void setupPLL() { mSysPLL->setup(); return;};
 	void setPhase(int APhase, int ACii = 0) { controlInterface[ACii]->setPhase(APhase); controlInterface[ACii]->addSendCmd(ControlInterface::OPCODE_GRST); controlInterface[ACii]->execute();return;};
@@ -176,7 +179,7 @@ private:
 	void enableExternalTrigger(bool isEnabled, bool levelSensitive = 0) { mTriggerControl->addEnableExtTrigger(isEnabled, levelSensitive);return;};
 	uint32_t buf2ui(unsigned char *buf);
 
-	int returnDataOut(MDataReceiver *AReceiver, int &nBytes, char *buffer);
+//	int returnDataOut(MDataReceiver *AReceiver, int &nBytes, char *buffer);
 
 protected:
   

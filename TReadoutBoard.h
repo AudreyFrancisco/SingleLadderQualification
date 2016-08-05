@@ -24,8 +24,9 @@ class TBoardConfig;
 class TReadoutBoard {
  private:
   int  fNChips;                              // probably obsolete, use fChipPositions.size() instead
-  std::vector <TChipPos> fChipPositions;
   
+ protected:
+  std::vector <TChipPos> fChipPositions;  // Antonio : change in protected to access from derived class
   TBoardConfig *fBoardConfig;
 
  protected:
@@ -54,7 +55,6 @@ class TReadoutBoard {
   virtual void SetTriggerSource  (TTriggerSource triggerSource) = 0;
   virtual int  Trigger           (int nTriggers) = 0;
   virtual int  ReadEventData     (int &NBytes, char *Buffer) = 0; // TODO: max buffer size not needed??
-
 
 };
 

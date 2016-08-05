@@ -7,6 +7,7 @@
  *
  *  		HISTORY
  *  3/8/16	-	Add the Board decoder class ...
+ *  5/8/16  - adapt the read event to new definition
  *
  */
 #include <math.h> 
@@ -92,7 +93,8 @@ TReadoutBoardMOSAIC::~TReadoutBoardMOSAIC()
 // Read/Write registers
 int TReadoutBoardMOSAIC::WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId)
 {
-	uint_fast16_t Cii = 0; // FIXME: How to specify the control interface
+
+	uint_fast16_t Cii = GetControlInterface(chipId);
 	controlInterface[Cii]->addWriteReg(chipId, address, value);
 	controlInterface[Cii]->execute();
 	return(0);
@@ -100,17 +102,26 @@ int TReadoutBoardMOSAIC::WriteChipRegister (uint16_t address, uint16_t value, ui
 
 int TReadoutBoardMOSAIC::ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId)
 {
-	uint_fast16_t Cii = 0; // FIXME: How to specify the control interface
+	uint_fast16_t Cii = GetControlInterface(chipId);
 	controlInterface[Cii]->addReadReg( chipId,  address,  &value);
 	controlInterface[Cii]->execute();
 	return(0);
 }
 
-int TReadoutBoardMOSAIC::SendOpCode        (uint16_t  OpCode, uint8_t Cii)
+int TReadoutBoardMOSAIC::SendOpCode        (uint16_t  OpCode, uint8_t chipId)
 {
-	//uint_fast16_t Cii = 0; // FIXME: How to specify the control interface
+	uint_fast16_t Cii = GetControlInterface(chipId);
 	controlInterface[Cii]->addSendCmd(OpCode);
 	controlInterface[Cii]->execute();
+	return(0);
+}
+
+int TReadoutBoardMOSAIC::SendOpCode        (uint16_t  OpCode)
+{
+	for(int Cii=0;Cii<MAX_MOSAICCTRLINT;Cii++){
+		controlInterface[Cii]->addSendCmd(OpCode);
+		controlInterface[Cii]->execute();
+	}
 	return(0);
 }
 
@@ -159,8 +170,9 @@ void TReadoutBoardMOSAIC::StopRun()
 	 return;
 }
 
+/*
 //
-//	Read data from the TCP socket
+//	Read data from the TCP socket version to unpack the stream one event for call
 //
 int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, char *buffer)
 {
@@ -192,6 +204,8 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, char *buffer)
 		theHeaderOfReadData.timeout = true;
 		return 0;
 	}
+	memcpy(theHeaderBuffer, header, MOSAIC_HEADER_LENGTH);// save the 16 bytes of the header
+
 	blockSize = buf2ui(header);	// Decodes the received block ...
 	theHeaderOfReadData.size = blockSize;
 
@@ -250,10 +264,100 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, char *buffer)
 	}
 	return(0);
 }
+*/
+
+//	Read data from the TCP socket second version
+//
+int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, char *buffer)
+{
+	const unsigned int bufferSize = DATA_INPUT_BUFFER_SIZE;
+	unsigned char rcvbuffer[bufferSize];
+	const unsigned int headerSize = MOSAIC_HEADER_LENGTH;
+	unsigned char header[headerSize];
+	unsigned int flags;
+	long blockSize, readBlockSize;
+	long closedDataCounter;
+	long movedEvents;
+	long readDataSize = headerSize;
+	int dataSrc;
+	ssize_t n;
+
+	n = readTCPData(header, headerSize, fBoardConfigDAQ->GetPollingDataTimeout() ); 		// Read the TCP/IP socket
+	if (n == 0)	{		// timeout
+		theHeaderOfReadData.timeout = true;
+		return(false);
+	}
+	memcpy(theHeaderBuffer, header, headerSize);// save the 16 bytes of the header
+
+	blockSize = buf2ui(header);	// Decodes the received block ...
+	theHeaderOfReadData.size = blockSize;
+
+	flags = buf2ui(header+4);
+	theHeaderOfReadData.overflow = flags & flagOverflow;
+	theHeaderOfReadData.endOfRun = flags & flagCloseRun;
+	theHeaderOfReadData.timeout = flags & flagTimeout;
+	theHeaderOfReadData.closedEvent = flags & flagClosedEvent;
+
+	closedDataCounter = buf2ui(header+8);
+	theHeaderOfReadData.eoeCount = closedDataCounter;
+
+	dataSrc = buf2ui(header+12);
+	theHeaderOfReadData.channel = dataSrc;
+
+	//	printf("Received TCP Header (%d) : Block Size = %d  Flags = %04x(Ovr %d, Tim %d Run %d Eve %d) DataCounters = %d DataSource = %04x",headerSize, blockSize,flags,flags & flagOverflow, flags & flagTimeout, flags & flagCloseRun, flags & flagClosedEvent, closedDataCounter,dataSrc);
+
+	readBlockSize = (blockSize & 0x3f) ? (blockSize & ~0x3f)+64: blockSize; // round the block size to the higher 64 multiple
+	readDataSize+=readBlockSize;
+
+	if (blockSize==0 && (flags & flagCloseRun)==0) { // Abort operation on error
+		throw MosaicRuntimeError("Block size set to zero and not CLOSE_RUN");
+	}
+	if (dataSrc>numOfSetReceivers || receivers[dataSrc] == NULL) {  	// skip data from unregistered source
+		// printf("Skipping data block from unregistered source = %d ",dataSrc);
+		while (readBlockSize) {
+			n = readTCPData(rcvbuffer, (readBlockSize>bufferSize) ? bufferSize : readBlockSize, -1);
+			readBlockSize -= n;
+		}
+		return(false);
+	}
+	if((flags & flagOverflow) != 0) { // track the event
+		std::cerr << " ERROR  ATTENTION !! We receive an Overflow Flag error. Pay attention! "<< std::endl;
+	}
+
+	MDataReceiver *dr = receivers[dataSrc];  // finally ...we can read data into the consumer buffer
+	if (readBlockSize != 0) { // Added By G.DeRobertis
+		n = readTCPData(dr->getWritePtr(readBlockSize), readBlockSize, -1); // read from TCP one Block of data and stores at the tail of buffer
+		if (n == 0) {		// timeout
+			// printf("Data block not received. Exit for Timeout !");
+			return(false);
+		}
+		dr->dataBufferUsed += (n<blockSize) ? n : blockSize;		// update the size of data in the buffer
+		// printf("We read the TCP block. Data read=%d Block size in the header=%d Block size to read=%d ",n,blockSize,readBlockSize);
+	}
+
+	if (closedDataCounter>0) { // We have closed transfers
+		memcpy(buffer, theHeaderBuffer, headerSize); // first copy the header
+		buffer = buffer + headerSize; // move the pointer
+		nBytes = headerSize;
+		memcpy(buffer, &dr->dataBuffer[0], dr->dataBufferUsed); // sets the output
+		nBytes += dr->dataBufferUsed;
+		dr->dataBufferUsed = 0; // flush the buffer
+		return(true);
+	}
+	if ((flags & flagCloseRun) && dr->dataBufferUsed!=0) {  // Here we have some mismatch between the buffer and the status  ?
+		std::cout << "WARNING Received data with flagCloseRun but after parsing the databuffer is not empty (" << dr->dataBufferUsed<<" bytes)" << std::endl;
+		//	dump((unsigned char*) &dr->dataBuffer[0], dr->dataBufferUsed);
+	}
+	return(false);
+}
+
+
+
+
 
 /* -----------------------------------------
  * This acts as a pre parser move the event into the out buffer
------------------------------------------ */
+-----------------------------------------
 int TReadoutBoardMOSAIC::returnDataOut(MDataReceiver *AReceiver, int &nBytes, char *buffer)
 {
 	if(AReceiver->dataBufferUsed == 0){ // nothing to do return null !
@@ -288,9 +392,12 @@ int TReadoutBoardMOSAIC::returnDataOut(MDataReceiver *AReceiver, int &nBytes, ch
   	    		}
   	    		ptrEndEvent = ptrScan+1; // we remove the MOSAIC Flag byte
   	    		bytesToMove = (ptrEndEvent - ptrStartEvent +1);
-  	    		if (bytesToMove>0) memcpy(buffer, ptrStartEvent, bytesToMove); // sets the output
-  	    		nBytes = bytesToMove;
-
+  	    		if (bytesToMove>0) {
+  	    			memcpy(buffer, theHeaderBuffer, MOSAIC_HEADER_LENGTH); // first mount the header
+  	    			buffer = buffer + MOSAIC_HEADER_LENGTH; // move the pointer
+  	    			memcpy(buffer, ptrStartEvent, bytesToMove); // sets the output
+  	  	    		nBytes = bytesToMove + MOSAIC_HEADER_LENGTH;
+  	    		}
   	    		bytesToMove = AReceiver->dataBufferUsed - (ptrScan+3 - ptrBegin);
   	    		if (bytesToMove>0) memmove(ptrBegin, ptrScan+3, bytesToMove);	// move unused bytes to the begin of buffer
   	    		AReceiver->dataBufferUsed -= bytesToMove;
@@ -348,6 +455,7 @@ void TReadoutBoardMOSAIC::copyHeader(const TBoardHeader *SourceHeader, TBoardHea
 	DestinHeader->overflow = SourceHeader->overflow;
 	return;
 }
+*/
 
 /* -------------------------
  * 		Private Methods
@@ -387,7 +495,7 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 	for(int i=1; i<MAX_MOSAICTRANRECV;i++) {
 		dr =(MDataSave *) new ForwardReceiver();
 		addDataReceiver(i, (MDataReceiver *)dr);
-		a3rcv[i-1]->addDisable(false);  // FIXME: here we will decide to disable or enable receivers
+		a3rcv[i-1]->addDisable(true);
 	}
 
 	// Trigger control
@@ -408,6 +516,8 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 	mRunControl->setAFThreshold(config->GetCtrlAFThreshold());
 	mRunControl->setLatency(config->GetCtrlLatMode(), config->GetCtrlLatMode());
 	mRunControl->setConfigReg(0);
+
+	enableDefinedReceivers(); // enable all the defined data link
 
 	return;
 }
@@ -451,6 +561,18 @@ bool TReadoutBoardMOSAIC::waitResetTransreceiver()
 	    return(false);
 	}
 	return(true);
+}
+
+void TReadoutBoardMOSAIC::enableDefinedReceivers()
+{
+	int dataLink;
+	for(int i=0;i< fChipPositions.size(); i++) { //for each defined chip
+		dataLink = fChipPositions.at(i).receiver;
+		if(dataLink >0) { // Enable the data receiver
+			a3rcv[dataLink-1]->addDisable(false);
+		}
+	}
+	return;
 }
 
 // ==============================TCP/IP private methods =======================================
@@ -548,7 +670,7 @@ ssize_t TReadoutBoardMOSAIC::readTCPData(void *buffer, size_t count, int timeout
 void TReadoutBoardMOSAIC::setSpeedMode(bool ALSpeed, int Aindex)
 {
 	int st,en;
-	Aindex = -1; // FIXME : disabled the single set
+	Aindex = -1;
 	st = (Aindex != -1) ? Aindex : 0;
 	en = (Aindex != -1) ? Aindex+1 : MAX_MOSAICTRANRECV-1;
 	for(int i=st;i<en;i++) {
