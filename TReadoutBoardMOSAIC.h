@@ -127,7 +127,7 @@ private:
 
 	uint32_t closedEventsPerSource[MAX_MOSAICTRANRECV];
 	TBoardHeader theHeaderOfReadData;  // This will host the info catch from Packet header/trailer
-	char *theHeaderBuffer[120]; // This will host the info of the header in the original format
+	char *theHeaderBuffer[MOSAIC_HEADER_LENGTH+10]; // This will host the info of the header in the original format
 
 	enum dataBlockFlag_e {
 		flagClosedEvent			= (1 << 0),

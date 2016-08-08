@@ -15,6 +15,10 @@ typedef struct {
   bool endOfRun;
   bool overflow;
   bool closedEvent;
+  unsigned char  MOSAICtransmissionFlag;
+  bool headerError;  // the received Frame contains error in the transmission
+  bool decoder10b8bError; // the MOSAIC board reports a 10b8b conversion error
+
   // DAQ board
   bool     almostFull;
   uint64_t eventId;
@@ -33,10 +37,10 @@ typedef struct {
 // data and nBytes are modified such that after the board decoding they correspond to the chip event only  
 class BoardDecoder{
  private:
-  static bool DecodeEventMOSAIC(unsigned char *data, int &nBytes, TBoardHeader &boardInfo);
+  static bool DecodeEventMOSAIC(unsigned char *data, int &nBytesHeader, int &nBytesTraileir, TBoardHeader &boardInfo);
   static bool DecodeEventDAQ   (unsigned char *data, int &nBytes, TBoardHeader &boardInfo) {return false;};
  public:
-  static bool DecodeEvent(TBoardType boardType, unsigned char *data, int &nBytes, TBoardHeader &boardInfo);
+  static bool DecodeEvent(TBoardType boardType, unsigned char *data, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo);
 
  private:
   static uint32_t endianAdjust(unsigned char *buf);

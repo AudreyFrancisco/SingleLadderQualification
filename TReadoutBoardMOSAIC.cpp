@@ -287,7 +287,7 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, char *buffer)
 		theHeaderOfReadData.timeout = true;
 		return(false);
 	}
-	memcpy(theHeaderBuffer, header, headerSize);// save the 16 bytes of the header
+	memcpy(theHeaderBuffer, header, headerSize);// save the 64 bytes of the header
 
 	blockSize = buf2ui(header);	// Decodes the received block ...
 	theHeaderOfReadData.size = blockSize;
@@ -339,6 +339,8 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, char *buffer)
 		memcpy(buffer, theHeaderBuffer, headerSize); // first copy the header
 		buffer = buffer + headerSize; // move the pointer
 		nBytes = headerSize;
+		*(buffer+20) = dr->dataBuffer[dr->dataBufferUsed-1]; // copy the last trailer byte (MOSAIC status) into the header in order to decode it later
+
 		memcpy(buffer, &dr->dataBuffer[0], dr->dataBufferUsed); // sets the output
 		nBytes += dr->dataBufferUsed;
 		dr->dataBufferUsed = 0; // flush the buffer

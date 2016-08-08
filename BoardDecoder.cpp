@@ -2,12 +2,12 @@
 
 #include "BoardDecoder.h"
 
-bool BoardDecoder::DecodeEvent(TBoardType boardType, unsigned char *data, int &nBytes, TBoardHeader &boardInfo) {
+bool BoardDecoder::DecodeEvent(TBoardType boardType, unsigned char *data, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo) {
   if (boardType == boardDAQ) {
-    return DecodeEventDAQ(data, nBytes, boardInfo);
+    return DecodeEventDAQ(data, nBytesHeader, boardInfo);
   }
   else if (boardType == boardMOSAIC) {
-    return DecodeEventMOSAIC(data, nBytes, boardInfo);
+    return DecodeEventMOSAIC(data, nBytesHeader, nBytesTrailer, boardInfo);
   }
   else {
     std::cout << "TBoardDecoder: Unknown board type" << std::endl;
@@ -18,7 +18,7 @@ bool BoardDecoder::DecodeEvent(TBoardType boardType, unsigned char *data, int &n
 
 // Decodes the Event Header and fill the structure.
 // The value of nBytes is filled with the length of read header
-bool BoardDecoder::DecodeEventMOSAIC(unsigned char *header, int &nBytes, TBoardHeader &boardInfo)
+bool BoardDecoder::DecodeEventMOSAIC(unsigned char *header, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo)
 {
 	boardInfo.size = endianAdjust(header);
 	uint32_t flags = endianAdjust(header+4);
@@ -28,7 +28,12 @@ bool BoardDecoder::DecodeEventMOSAIC(unsigned char *header, int &nBytes, TBoardH
 	boardInfo.closedEvent = flags & (1 << 0);
 	boardInfo.eoeCount = endianAdjust(header+8);
 	boardInfo.channel = endianAdjust(header+12);
-	nBytes = 64; // #define MOSAIC_HEADER_LENGTH 64
+	nBytesHeader = 64; // #define MOSAIC_HEADER_LENGTH 64
+	nBytesTrailer = 1; // #define The MOSAIC trailer length
+
+	boardInfo.MOSAICtransmissionFlag = header[20];
+	boardInfo.headerError = boardInfo.MOSAICtransmissionFlag & 0x01;
+	boardInfo.decoder10b8bError = boardInfo.MOSAICtransmissionFlag & 0x02;
 	return false;
 };
 
