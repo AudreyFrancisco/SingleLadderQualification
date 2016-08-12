@@ -16,13 +16,16 @@ const int LIMIT_ANALOGUE  = 300;
 
 //---- READOUT module
 const bool DATA_SAMPLING_EDGE = 1;
-const bool DATA_PKTBASED_EN   = 1; // packet based readout default now!
+const bool DATA_PKTBASED_EN   = 0; // packet based readout default now!
 const bool DATA_DDR_EN        = 0;
 const int DATA_PORT           = 2;
+const bool HEADER_TYPE        = 1; // as of firmware version 247e0611 the header type can be defined; 0 -> full header (default); 1 -> short header 
+const bool BOARD_VERSION      = 1; // as of firmware version 247e0611 the DAQboard version (v2 or v3) must be defined; 0 -> v2; 1 -> v3;  
 
 //---- TRIGGER module
 const int TRIGGER_MODE        = 1;
-const uint32_t STROBE_DELAY   = 0;
+const uint32_t STROBE_DELAY   = 10;// delay between external trigger and trigger sent to chip; when cofiguring the feature with a train of N triggers, this will be the delay between subsequent triggers
+const bool BUSY_CONFIG        = 0; // as of firmware version 247e0611
 const bool BUSY_OVERRIDE      = 1;
 
 //---- RESET module
@@ -79,7 +82,8 @@ class TBoardConfigDAQ : public TBoardConfig {
   int fFPGAEmulationMode;     // 10: 9; 00: FPGA is bus master, chip is in IB or OB master mode (default)
                               //        01: the FPGA emulates an OB master, chip is slave;    !! not working with pA3 and later versions
                               //        10: the FPGA emulates an OB slave, chip is OB master; !! not working with pA3 and later versions
-
+  bool fHeaderType;           //    11; as of firmware version 247e0611 the header type can be defined; 0 -> full header; 1 -> short header 
+  bool fBoardVersion;         //    12; as of firmware version 247e0611 the DAQboard version (v2 or v3) must be defined; 0 -> v2; 1 -> v3;  
   
   ////---- TRIGGER module
   
@@ -92,12 +96,20 @@ class TBoardConfigDAQ : public TBoardConfig {
                               //        1: auto trigger mode: system triggers the chip automatically after a start trigger command
                               //        2: external trigger mode: system triggers the chip on external trigger after a start trigger command
   int fStrobeDuration;        // 26:19; strobe duration with 25 ns granularity; depreciated
+  int fBusyConfig;            // 29:27; as of fw version 247e0611; 
+                              //  BUSY_OUT = BUSY_IN or DAQ_BUSY or CHIP_BUSY_SIGNAL or CHIP_BUSY_WORD
+                              //    3'b0 - All the components are enabled (default) 
+                              //    Bit [29] - Setting this bit excludes CHIP_BUSY_WORD from the busy logic
+                              //    Bit [28] - Setting this bit excludes CHIP_BUSY_SIGNAL from the busy logic 
+                              //    Bit [27] - Setting this bit excludes BUSY_IN from the busy logic 
+
 
   // Strobe delay register
   uint32_t fStrobeDelay;      // 31: 0; delay between the external trigger and the strobe sent to chip; with 25 ns granularity
 
   // Busy override register
   bool fBusyOverride;         //     0; 0: TLU busy is overridden, busy to TLU is kept high; 1: TLU busy is not overridden
+
 
 
   ////---- CMU module
@@ -173,6 +185,8 @@ class TBoardConfigDAQ : public TBoardConfig {
   bool GetDDREnable()           {return fDDREnable;};
   int GetDataPortSelect()       {return fDataPortSelect;};
   int GetFPGAEmulationMode()    {return fFPGAEmulationMode;};  
+  bool GetHeaderType()          {return fHeaderType;};  
+  bool GetBoardVersion()        {return fBoardVersion;};  
 
   // TRIGGER Module
   uint32_t GetBusyDuration()    {return fBusyDuration;};
@@ -180,6 +194,7 @@ class TBoardConfigDAQ : public TBoardConfig {
   int GetTriggerMode()          {return fTriggerMode;};
   int GetStrobeDuration()       {return fStrobeDuration;};
   uint32_t GetStrobeDelay()     {return fStrobeDelay;};
+  int GetBusyConfig()           {return fBusyConfig;}; 
   bool GetBusyOverride()        {return fBusyOverride;};
 
   // CMU Module

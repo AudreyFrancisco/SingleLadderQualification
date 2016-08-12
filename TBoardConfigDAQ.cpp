@@ -28,6 +28,8 @@ TBoardConfigDAQ::TBoardConfigDAQ(const char *fName, int boardIndex) {
   fDDREnable            = DATA_DDR_EN;         // 0: disable, 1: enable 
   fDataPortSelect       = DATA_PORT;           // 01: serial port, 10: parallel port
   fFPGAEmulationMode    = 0;        // 00: FPGA is bus master  
+  fHeaderType           = HEADER_TYPE;
+  fBoardVersion         = BOARD_VERSION;
   
   ////---- TRIGGER module
   
@@ -36,7 +38,8 @@ TBoardConfigDAQ::TBoardConfigDAQ(const char *fName, int boardIndex) {
   // Trigger configuration register
   fNTriggers      = 1; // TODO: feature ever used? 
   fTriggerMode    = TRIGGER_MODE; 
-  fStrobeDuration = 2; // depreciated
+  fStrobeDuration = 10; // depreciated
+  fBusyConfig     = BUSY_CONFIG;
   // Strobe delay register
   fStrobeDelay = STROBE_DELAY;
   // Busy override register
@@ -55,9 +58,9 @@ TBoardConfigDAQ::TBoardConfigDAQ(const char *fName, int boardIndex) {
   ////---- RESET module
 
   // PULSE DRST PRST duration reg
-  fPRSTDuration     = 2;                    // depreciated
-  fDRSTDuration     = 2;                    // TODO: should rather be done via opcode?
-  fPULSEDuration    = 2;                    // depreciated
+  fPRSTDuration     = 10;                    // depreciated
+  fDRSTDuration     = 10;                    // TODO: should rather be done via opcode?
+  fPULSEDuration    = 10;                    // depreciated
   // Power up sequencer delay reg
   fAutoShutdownTime = AUTOSHTDWN_TIME;
   fClockEnableTime  = CLOCK_ENABLE_TIME;
