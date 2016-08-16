@@ -23,7 +23,7 @@
 
 const int MAX_DIFF_TRIG_EVT_CNT   =  10;    // maximum allowed difference between number triggers and events read; MAX_DIFF_TRIG_EVT_CNT is default
 const uint32_t MAX_EVT_BUFFSIZE   = 1e3;    // max number of events in fEventBuffer  TODO: maximum queue size ~1 Gb?
-const int MAX_NTRIG_TRAIN         = 100;    // fNTriggers will be subdivided into trigger trains with fMaxNTriggersAtOnce, MAX_NTRIG_ATONCE is default
+const int MAX_NTRIG_TRAIN         = 20;    // fNTriggers will be subdivided into trigger trains with fMaxNTriggersAtOnce, MAX_NTRIG_ATONCE is default
 
 //************************************************************
 // TReadOutBoardDAQ: implementationn for Cagliari DAQboard 
@@ -76,6 +76,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   static const int READOUT_SLAVE_DATA_EMULATOR    = 0x5; //
   static const int READOUT_TIMESTAMP1             = 0x6; // not existing in manual..
   static const int READOUT_TIMESTAMP2             = 0x7; // not existing in manual..
+  static const int READOUT_MONITOR1               = 0x8; // not existing in manual..
    
   // TRIGGER Module 0x3: Register sub-addresses
   static const int TRIG_BUSY_DURATION    = 0x0; 
@@ -85,6 +86,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   static const int TRIG_DELAY            = 0x4;
   static const int TRIG_BUSY_OVERRIDE    = 0x5;
   static const int TRIG_STROBE_COUNT     = 0x6;  // not existing in manual..
+  static const int TRIG_MONITOR1         = 0x7;  // not existing in manual..
 
   // CMU Module 0x4: Register sub-addresses
   static const int CMU_INSTR        = 0x0; // previously called DAQBOARD_WRITE_INSTR_REG from JTAG?
@@ -116,6 +118,18 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   static const int SOFTRESET_FX3_RESET  = 0x2; // not existing in manual..
   
   //--------------------------------------
+
+  uint32_t fFirmwareVersion;    
+
+  TBoardConfigDAQ *fBoardConfigDAQ;
+
+  int SendWord          (uint32_t value);
+  int ReadAcknowledge   ();
+
+  int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId = 0);
+  int ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId = 0);
+
+  // members and methods related to data readout
   void  DAQTrigger       ();      // function for triggering fNTrigger events, to be ran in thread
   int   fStatusTrigger;            // status variable for trigger
     //  1: no error
@@ -127,8 +141,10 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
     // -2: USB timeout
     // -3: stop trigger marker
   std::thread fThreadTrigger;     // thread for DAQTrigger
-  std::thread fThreadReadData;    // thread for DAQReadData
+  bool fIsTriggerThreadRunning;       // boolan to check if thread is still running
   int fTrigCnt;                   // overall trigger counter
+  std::thread fThreadReadData;    // thread for DAQReadData
+  bool fIsReadDataThreadRunning;       // boolan to check if thread is still running
   int fEvtCnt;                    // counter of events read/in queue
   int fDiffTrigEvtCnt;            // difference between number triggers and events read
   int fMaxDiffTrigEvtCnt;         // maximum allowed difference between number triggers and events read
@@ -139,15 +155,6 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
 
   std::deque< std::vector<unsigned char> > fEventBuffer;  // double ended queue for DAQboard event data; vector<unsigned char> for saving events
   std::deque<unsigned char> fRawBuffer;  // double ended queue for raw data;
-
-
-  TBoardConfigDAQ *fBoardConfigDAQ;
-
-  int SendWord          (uint32_t value);
-  int ReadAcknowledge   ();
-
-  int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId = 0);
-  int ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId = 0);
 
 
  protected: 
@@ -174,6 +181,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   int  ReadEventData     (int &nBytes, char *buffer);
 
 
+
   //// methods only for Cagliari DAQ board
   //---------------------------------------------------------
   TBoardConfigDAQ *GetBoardConfig() {return fBoardConfigDAQ;};
@@ -181,11 +189,22 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   bool PowerOn           (int &overflow);
   void PowerOff          ();
 
+  void ReadAllRegisters ();
 
   int   CurrentToADC      (int current);
   float ADCToCurrent      (int value);
   float ADCToTemperature  (int value);
 
+  bool ReadMonitorRegisters();
+  bool ReadMonitorReadoutRegister();
+  bool ReadMonitorTriggerRegister();
+
+  int GetEventHeaderLength();
+  int GetEventTrailerLength() { return 8; }  
+ 
+  //// methods related to data readout
+  //---------------------------------------------------------
+  int GetEventBufferLength();
 
   // methods related to modules of Cagliari DAQ board
   //--------------------------------------
