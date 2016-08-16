@@ -16,7 +16,7 @@ const int LIMIT_ANALOGUE  = 300;
 
 //---- READOUT module
 const bool DATA_SAMPLING_EDGE = 1;
-const bool DATA_PKTBASED_EN   = 0; // packet based readout default now!
+const bool DATA_PKTBASED_EN   = 1; // packet based readout default now!
 const bool DATA_DDR_EN        = 0;
 const int DATA_PORT           = 2;
 const bool HEADER_TYPE        = 1; // as of firmware version 247e0611 the header type can be defined; 0 -> full header (default); 1 -> short header 
