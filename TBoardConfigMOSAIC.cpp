@@ -11,6 +11,8 @@
  */
 #include <iostream>
 #include <exception>
+#include <stdexcept>
+#include <cstring>
 #include "TBoardConfigMOSAIC.h"
 
 using namespace std;
