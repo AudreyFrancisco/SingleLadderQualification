@@ -3,6 +3,9 @@
 
 #include "TReadoutBoard.h"
 
+
+const uint32_t DAQ_TRAILER_WORD = 0xbfbfbfbf; // 
+
 // put all header and trailer information here 
 // (both for mosaic and DAQ board)
 typedef struct {
@@ -21,8 +24,11 @@ typedef struct {
 
   // DAQ board
   bool     almostFull;
+  int      trigType;
+  int      bufferDepth;
   uint64_t eventId;
   uint64_t timestamp;
+  int      eventSize;
   bool     truncated;
   int      strobeCount;
   int      trigCountChipBusy;
@@ -37,13 +43,19 @@ typedef struct {
 // data and nBytes are modified such that after the board decoding they correspond to the chip event only  
 class BoardDecoder{
  private:
-  static bool DecodeEventMOSAIC(unsigned char *data, int &nBytesHeader, int &nBytesTraileir, TBoardHeader &boardInfo);
-  static bool DecodeEventDAQ   (unsigned char *data, int &nBytes, TBoardHeader &boardInfo) {return false;};
- public:
-  static bool DecodeEvent(TBoardType boardType, unsigned char *data, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo);
-
- private:
+  static bool DecodeEventMOSAIC(unsigned char *data, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo);
   static uint32_t endianAdjust(unsigned char *buf);
+
+  static bool DecodeEventDAQ   (unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo, uint32_t firmwareVersion=0x247E0611, int headerType=0x1);
+  static uint32_t GetIntFromBinaryString(int numByte, unsigned char *str);
+  static uint32_t GetIntFromBinaryStringReversed(int numByte, unsigned char *str);
+
+ public:
+  static bool DecodeEvent(TBoardType boardType, unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo, uint32_t firmwareVersion=0x247E0611, int headerType=0x1);
+  static int GetDAQEventHeaderLength (uint32_t firmwareVersion=0x247E0611, int headerType=1);
+  static int GetDAQEventTrailerLength() {return 8;};
+
+
 
 };
 
