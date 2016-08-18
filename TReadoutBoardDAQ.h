@@ -17,13 +17,14 @@
 #include "TAlpide.h"
 #include "TConfig.h"
 #include "TBoardConfigDAQ.h"
+#include "BoardDecoder.h"
 
 
 //enum TTriggerSource {TRIG_INT, TRIG_EXT};
 
 const int MAX_DIFF_TRIG_EVT_CNT   =  10;    // maximum allowed difference between number triggers and events read; MAX_DIFF_TRIG_EVT_CNT is default
 const uint32_t MAX_EVT_BUFFSIZE   = 1e3;    // max number of events in fEventBuffer  TODO: maximum queue size ~1 Gb?
-const int MAX_NTRIG_TRAIN         = 20;    // fNTriggers will be subdivided into trigger trains with fMaxNTriggersAtOnce, MAX_NTRIG_ATONCE is default
+const int MAX_NTRIG_TRAIN         = 50;    // fNTriggers will be subdivided into trigger trains with fMaxNTriggersAtOnce, MAX_NTRIG_ATONCE is default
 
 //************************************************************
 // TReadOutBoardDAQ: implementationn for Cagliari DAQboard 
@@ -178,7 +179,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   int  SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
   void SetTriggerSource  (TTriggerSource triggerSource);
   int  Trigger           (int nTriggers);
-  int  ReadEventData     (int &nBytes, char *buffer);
+  int  ReadEventData     (int &nBytes, unsigned char *buffer);
 
 
 
@@ -199,9 +200,6 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   bool ReadMonitorReadoutRegister();
   bool ReadMonitorTriggerRegister();
 
-  int GetEventHeaderLength();
-  int GetEventTrailerLength() { return 8; }  
- 
   //// methods related to data readout
   //---------------------------------------------------------
   int GetEventBufferLength();

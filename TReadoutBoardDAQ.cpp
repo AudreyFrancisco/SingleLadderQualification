@@ -155,8 +155,19 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8
   err = ReadRegister (CMU_DATA + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), value32);
   if (err < 0) return -1;
 
-  value = value32 & 0xffff;
-  return 0;
+  value = (value32>>8) & 0xffff;
+
+  std::cout << std::hex << value32 << std::dec << std::endl;
+
+  uint8_t received_chipid = value32 & 0xff;
+  if (received_chipid!=chipId) {
+    std::cout << "WARNING: received chipID (" << (int)received_chipid << ") does not match with configuration in DAQboard (" << (int)chipId << ")" << std::endl;
+    return -1;
+  }
+  else {
+    return 0;
+  }
+  //return 0;
 }
 
 
@@ -316,10 +327,12 @@ void TReadoutBoardDAQ::DAQReadData() {
         fStatusReadData = -1;
         return;
       }
-      else if (evt_length < (GetEventHeaderLength()+GetEventTrailerLength()+4)) {
+      else if (evt_length < (BoardDecoder::GetDAQEventHeaderLength(fFirmwareVersion, fBoardConfigDAQ->GetHeaderType())+BoardDecoder::GetDAQEventTrailerLength()+4)) {
         std::cout << std::endl;
         std::cout << "WARNING, received too small event: " << evt_length 
-                  << " instead of expected >= " << (GetEventHeaderLength()+GetEventTrailerLength()+4) << std::endl;
+                  << " instead of expected >= " 
+                  << (BoardDecoder::GetDAQEventHeaderLength(fFirmwareVersion, fBoardConfigDAQ->GetHeaderType())+BoardDecoder::GetDAQEventTrailerLength()+4) 
+                  << std::endl;
         std::cout << std::endl;
       }
       else {
@@ -332,15 +345,15 @@ void TReadoutBoardDAQ::DAQReadData() {
         fMtx.unlock();
 
         // DEBUG output
-        fMtx.lock();
-        std::cout << "read evt " << fEvtCnt << std::endl;
-        std::cout << "\t data_evt size: " << data_evt.size() << std::endl;
-        std::cout << "\t EventBuffer length: " << fEventBuffer.size() << std::endl;
-        for (int iByte=0; iByte<data_evt.size(); ++iByte) {
-          std::cout << std::hex << (int)data_evt[iByte] << std::dec;
-        }
-        std::cout << std::endl;
-        fMtx.unlock();
+        //fMtx.lock();
+        //std::cout << "read evt " << fEvtCnt << std::endl;
+        //std::cout << "\t data_evt size: " << data_evt.size() << std::endl;
+        //std::cout << "\t EventBuffer length: " << fEventBuffer.size() << std::endl;
+        //for (int iByte=0; iByte<data_evt.size(); ++iByte) {
+        //  std::cout << std::hex << (int)data_evt[iByte] << std::dec;
+        //}
+        //std::cout << std::endl;
+        //fMtx.unlock();
       }
 
     }
@@ -373,9 +386,9 @@ void TReadoutBoardDAQ::DAQReadData() {
         while (length_tmp+4<=fRawBuffer.size() && !foundMagicWord) {// this is executed if fRawBuffer contains data, otherwise it jumps to next if and reads data..
 
           // DEBUG OUTPUT
-          std::cout << "length_tmp: " << length_tmp << std::endl;
-          std::cout << std::hex << (int)fRawBuffer[length_tmp+0] << (int)fRawBuffer[length_tmp+1] << (int)fRawBuffer[length_tmp+2] << (int)fRawBuffer[length_tmp+3] << std::dec;
-          std::cout << "\t";
+          //std::cout << "length_tmp: " << length_tmp << std::endl;
+          //std::cout << std::hex << (int)fRawBuffer[length_tmp+0] << (int)fRawBuffer[length_tmp+1] << (int)fRawBuffer[length_tmp+2] << (int)fRawBuffer[length_tmp+3] << std::dec;
+          //std::cout << "\t";
 
           for (int iMagicWord=0; iMagicWord<nMagicWords; ++iMagicWord) {
             if (magicWords[iMagicWord][0] == fRawBuffer[length_tmp+0] &&
@@ -411,7 +424,7 @@ void TReadoutBoardDAQ::DAQReadData() {
 
         if (!timeout && !foundMagicWord) { // read new data packet here if not a magic word found or timeout; this is performed until timeout or full event (magicword) achieved.. or error occurs
           packet_length = ReceiveData(ENDPOINT_READ_DATA, data_buf, length_buf, &tmp_error);
-          std::cout << "packet: " << packet_length << std::endl;
+          //std::cout << "packet: " << packet_length << std::endl;
 
 //          if (debug && debug_length) {
 //            *debug = new unsigned char[length];
@@ -481,17 +494,17 @@ void TReadoutBoardDAQ::DAQReadData() {
         fStatusReadData = -1;
         return;
       }
-      else if (evt_length < (GetEventHeaderLength()+GetEventTrailerLength()+4)) {
+      else if (evt_length < (BoardDecoder::GetDAQEventHeaderLength(fFirmwareVersion, fBoardConfigDAQ->GetHeaderType())+BoardDecoder::GetDAQEventTrailerLength()+4)) {
         std::cout << std::endl;
         std::cout << "WARNING, received too small event: " << evt_length << std::endl;
         std::cout << std::endl;
       }
 
       fEvtCnt++;
-      std::cout << "------------------------------------------------------" << std::endl;
-      std::cout << "\t evt: " << fEvtCnt << std::endl;
-      std::cout << "\t evt length: " << evt_length << std::endl;
-      std::cout << "\t RawBuffer length: " << fRawBuffer.size() << std::endl;
+      ///std::cout << "------------------------------------------------------" << std::endl;
+      ///std::cout << "\t evt: " << fEvtCnt << std::endl;
+      ///std::cout << "\t evt length: " << evt_length << std::endl;
+      ///std::cout << "\t RawBuffer length: " << fRawBuffer.size() << std::endl;
       for (int i=0; i<evt_length; ++i) {
           data_evt.push_back(fRawBuffer.front());
           fRawBuffer.pop_front();
@@ -499,9 +512,9 @@ void TReadoutBoardDAQ::DAQReadData() {
       fMtx.lock();
       fEventBuffer.push_back(data_evt);
       fMtx.unlock();
-      std::cout << "\t data_evt size: " << data_evt.size() << std::endl;
-      std::cout << "\t EventBuffer length: " << fEventBuffer.size() << std::endl;
-      std::cout << "------------------------------------------------------" << std::endl;
+      //std::cout << "\t data_evt size: " << data_evt.size() << std::endl;
+      //std::cout << "\t EventBuffer length: " << fEventBuffer.size() << std::endl;
+      //std::cout << "------------------------------------------------------" << std::endl;
 
 
       // DEBUG OUTPUT
@@ -570,7 +583,7 @@ int TReadoutBoardDAQ::Trigger (int nTriggers) // open threads for triggering and
 
 
 
-int TReadoutBoardDAQ::ReadEventData (int &NBytes, char *Buffer) // provide oldest event in queue and remove it from there
+int TReadoutBoardDAQ::ReadEventData (int &NBytes, unsigned char *Buffer) // provide oldest event in queue and remove it from there
 {
   //vector <unsigned char> evt_data = fEventBuffer.front(); 
   fMtx.lock();
@@ -588,7 +601,7 @@ int TReadoutBoardDAQ::ReadEventData (int &NBytes, char *Buffer) // provide oldes
     Buffer[i] = fEventBuffer.front()[i];
     //std::cout << std::hex << (int)fEventBuffer.front()[i] << std::dec;
   }
-  std::cout << std::endl; 
+  //std::cout << std::endl; 
   fEventBuffer.pop_front(); // delete oldest event from deque
   fMtx.unlock();
 
@@ -730,34 +743,6 @@ void TReadoutBoardDAQ::PowerOff ()
 
 }
 
-
-int TReadoutBoardDAQ::GetEventHeaderLength() {
-    switch(fFirmwareVersion) {
-    case 0x257E030A:
-    case 0x247E030A:
-    case 0x257E031D:
-    case 0x247E031D:
-        return 36;
-        break;
-    case 0:
-        return -1;
-        break;
-    case 0x257E0602:
-    case 0x247E0602:
-    case 0x257E0610:
-    case 0x247E0610:
-        return 12;
-        break;
-    case 0x247E0611:
-    case 0x347E0803:
-        return (fBoardConfigDAQ->GetHeaderType()==0) ? 36 : 12 ;
-        break;
-    default:
-        return 20;
-        break;
-    }
-    return 20;
-}
 
 
 void TReadoutBoardDAQ::ReadAllRegisters() {
