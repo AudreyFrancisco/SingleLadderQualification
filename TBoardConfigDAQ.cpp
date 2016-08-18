@@ -50,7 +50,7 @@ TBoardConfigDAQ::TBoardConfigDAQ(const char *fName, int boardIndex) {
  
   // CMU config register 
   fManchesterDisable      = true;           // 0: enable manchester encoding; 1: disable
-  fSamplingEdgeSelectCMU  = false;          // 0: positive edge; 1: negative edge
+  fSamplingEdgeSelectCMU  = true;           // 0: positive edge; 1: negative edge
   fInvertCMUBus           = false;          // 0: bus not inverted; 1: bus inverted
   fChipMaster             = false;          // 0: chip is master; 1: chip is slave
 
