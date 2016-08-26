@@ -13,6 +13,7 @@
 #define BOARDCONFIGMOSAIC_H
 
 #include "TBoardConfig.h"
+#include <stdio.h>
 
 class TBoardConfigMOSAIC : public TBoardConfig {
 

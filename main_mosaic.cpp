@@ -3,7 +3,14 @@
  *
  ----------------- */
 
-void main()
+#include <iostream>
+#include <unistd.h>
+#include "TReadoutBoard.h"
+#include "TReadoutBoardMOSAIC.h"
+#include "TBoardConfig.h"
+#include "TBoardConfigMOSAIC.h"
+
+int main()
 {
 	TBoardConfigMOSAIC *theBoardConfiguration;
 	TReadoutBoard      *theBoard;
@@ -20,11 +27,11 @@ void main()
 
 	/* Data Tacking */
 	int numberOfReadByte; // the bytes of row event
-	char *theBuffer; // the buffer containing the event
+	unsigned char *theBuffer; // the buffer containing the event
 
 	int enablePulse, enableTrigger, triggerDelay, pulseDelay, nTriggers; // variables that define the trigger/pulse
 
-	theBuffer = malloc(200 * 1024); // allocates 200 kilobytes ...
+	theBuffer = (unsigned char*) malloc(200 * 1024); // allocates 200 kilobytes ...
 
 	bool isDataTackingEnd = false; // break the execution of read polling
 	int returnCode = 0;
@@ -52,4 +59,5 @@ void main()
 	((TReadoutBoardMOSAIC *)theBoard)->StopRun(); // Stop run
 
 	exit(0);
+        return 0;
 }

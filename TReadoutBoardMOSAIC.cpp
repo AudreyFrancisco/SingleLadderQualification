@@ -63,7 +63,7 @@ MosaicRuntimeError::MosaicRuntimeError(const string& __arg)
 
 
 // ---- Constructor
-TReadoutBoardMOSAIC::TReadoutBoardMOSAIC (char *AIPaddress, TBoardConfigMOSAIC *AConfig) : TReadoutBoard(AConfig)
+TReadoutBoardMOSAIC::TReadoutBoardMOSAIC (const char *AIPaddress, TBoardConfigMOSAIC *AConfig) : TReadoutBoard(AConfig)
 {
 	init(AConfig);
 	setIPaddress(AIPaddress, TCPport);
@@ -126,7 +126,7 @@ int TReadoutBoardMOSAIC::SendOpCode        (uint16_t  OpCode)
 }
 
 
-int TReadoutBoardMOSAIC::SetTriggerConfig  (bool enablePulse, bool enableTrigger, uint32_t triggerDelay, int pulseDelay)
+int TReadoutBoardMOSAIC::SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay)
 {
 	uint16_t pulseMode;
 	if(enablePulse && enableTrigger) pulseMode = 3; // FIXME:
@@ -268,7 +268,7 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, char *buffer)
 
 //	Read data from the TCP socket second version
 //
-int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, char *buffer)
+int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 {
 	const unsigned int bufferSize = DATA_INPUT_BUFFER_SIZE;
 	unsigned char rcvbuffer[bufferSize];

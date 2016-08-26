@@ -13,6 +13,7 @@
 #define READOUTBOARDMOSAIC_H
 
 #include <exception>
+#include <string>
 
 #include "TReadoutBoard.h"
 #include "TConfig.h"
@@ -140,17 +141,20 @@ protected:
   
 // Methods
 public:
-	TReadoutBoardMOSAIC(char *AIPaddress, TBoardConfigMOSAIC *config);
+	TReadoutBoardMOSAIC(const char *AIPaddress, TBoardConfigMOSAIC *config);
 	virtual ~TReadoutBoardMOSAIC();
   
 	int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId =0);
 	int ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId =0);
 	int SendOpCode        (uint16_t  OpCode, uint8_t chipId=0);
 	int SendOpCode        (uint16_t  OpCode);
-	int SetTriggerConfig  (bool enablePulse, bool enableTrigger, uint32_t triggerDelay, int pulseDelay);
+        // Markus: changed trigger delay type from uint32_t to int, since changed upstream
+	int SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
 	void SetTriggerSource  (TTriggerSource triggerSource);
 	int Trigger           (int nTriggers);
-	int ReadEventData     (int &nBytes, char *buffer);
+        // Markus: changed data type from char to unsigned char; check that no problem
+        // (should be OK at least for memcpy)
+	int ReadEventData     (int &nBytes, unsigned char *buffer);
 
 	void StartRun();
 	void StopRun();
