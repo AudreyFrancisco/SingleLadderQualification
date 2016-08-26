@@ -6,7 +6,7 @@
 void main()
 {
 	TBoardConfigMOSAIC *theBoardConfiguration;
-	TReadoutBoard *theBoard;
+	TReadoutBoard      *theBoard;
 
 	// First create an instance of the Configuration
 	theBoardConfiguration = new TBoardConfigMOSAIC("Config.cfg", 0); // The file must exists... but could be useful a constructor without param
