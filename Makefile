@@ -19,7 +19,7 @@ $(info OBJS="$(OBJS)")
 all:    test ThresholdScan
 
 ThresholdScan:  $(OBJS) ThresholdScan.cpp
-	$(CC) -o ThresholdScan $(OBJS) $(CFLAGS) main.cpp $(LINKFLAGS)
+	$(CC) -o ThresholdScan $(OBJS) $(CFLAGS) ThresholdScan.cpp $(LINKFLAGS)
 
 test:   $(OBJS) main.cpp
 	$(CC) -o $(OBJECT) $(OBJS) $(CFLAGS) main.cpp $(LINKFLAGS)
