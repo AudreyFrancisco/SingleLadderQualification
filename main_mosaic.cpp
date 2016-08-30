@@ -22,14 +22,14 @@ int main()
 	// Then create an instance of the board
 	theBoard = (TReadoutBoard *) new TReadoutBoardMOSAIC("192.168.1.77", theBoardConfiguration);
 
-        TConfig *config = new TConfig (0);
-        TAlpide *chip   = new TAlpide (config->GetChipConfig(0));
+        TConfig *config = new TConfig (5);
+        TAlpide *chip   = new TAlpide (config->GetChipConfig(5));
 
         chip->SetReadoutBoard (theBoard);
-        theBoard->AddChip(0,0,0);
+        theBoard->AddChip(5,0,0);
 
         uint16_t Value;
-        chip->WriteRegister (0x60d, 63);
+        chip->WriteRegister (0x60d, 10);
         chip->ReadRegister (0x60d, Value);
 	std::cout << "Value = 0x" << std::hex << (int) Value << std::endl;
         return 0;
