@@ -66,7 +66,6 @@ MosaicRuntimeError::MosaicRuntimeError(const string& __arg)
 TReadoutBoardMOSAIC::TReadoutBoardMOSAIC (const char *AIPaddress, TBoardConfigMOSAIC *AConfig) : TReadoutBoard(AConfig)
 {
 	init(AConfig);
-	setIPaddress(AIPaddress, TCPport);
 }
 
 // Distructor
@@ -475,6 +474,8 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 	// System PLL on I2C bus
 	mSysPLL = new I2CSysPll(mIPbus, WbbBaseAddress::i2cSysPLL);
 
+	mIPbus->setIPaddress(config->GetIPaddress(), config->GetTCPport());
+
 	// CMU Control interface
 	controlInterface[0] = new ControlInterface(mIPbus, WbbBaseAddress::controlInterface);
 	controlInterface[1] = new ControlInterface(mIPbus, WbbBaseAddress::controlInterfaceB);
@@ -505,10 +506,10 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 
 	// ----- Now do the initilization -------
 	setupPLL(); // set the PLL ! in order to start the communication
-	if(!waitResetTransreceiver()) {
-		exit(-1);
-	}
-	for(int i=0;i<MAX_MOSAICCTRLINT;i++) setPhase(config->GetCtrlInterfacePhase(),i);  // set the Phase shift on the line
+        if(!waitResetTransreceiver()) {
+  		exit(-1);
+  	}
+        for(int i=0;i<MAX_MOSAICCTRLINT;i++) setPhase(config->GetCtrlInterfacePhase(),i);  // set the Phase shift on the line
 
 	setSpeedMode(config->IsLowSpeedMode(), -1);// set 400 MHz mode
 

@@ -22,10 +22,12 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
 {
 	// Default values set
 	NumberOfControlInterfaces = 2;
-	strcpy(IPAddress, "192.168.168.250");
+	//	strcpy(IPAddress, "192.168.168.250");
+
+	strcpy(IPAddress, "192.168.1.77");
 	TCPPort = 2000;
 
-	ControlInterfacePhase = 6;
+	ControlInterfacePhase = 0;
 	RunCtrlAFThreshold = 1250000;
 	RunCtrlLatMode =1; // 1 := latencyModeEoe, 2 := latencyModeMemory, 3 := latencyModeTimeout
 	RunCtrlTimeout = 0;
