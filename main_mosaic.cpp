@@ -20,7 +20,7 @@ int main()
 	// First create an instance of the Configuration
 	theBoardConfiguration = new TBoardConfigMOSAIC("Config.cfg", 0); // The file must exists... but could be useful a constructor without param
 	// Then create an instance of the board
-	theBoard = (TReadoutBoard *) new TReadoutBoardMOSAIC("192.168.1.77", theBoardConfiguration);
+	theBoard = (TReadoutBoard *) new TReadoutBoardMOSAIC(theBoardConfiguration);
 
         TConfig *config = new TConfig (5);
         TAlpide *chip   = new TAlpide (config->GetChipConfig(5));

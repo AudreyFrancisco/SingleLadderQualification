@@ -141,7 +141,7 @@ protected:
   
 // Methods
 public:
-	TReadoutBoardMOSAIC(const char *AIPaddress, TBoardConfigMOSAIC *config);
+	TReadoutBoardMOSAIC(TBoardConfigMOSAIC *config);
 	virtual ~TReadoutBoardMOSAIC();
   
 	int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId =0);

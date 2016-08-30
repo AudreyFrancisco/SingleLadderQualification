@@ -4,6 +4,7 @@
 #include <vector>
 #include "TChipConfig.h"
 #include "TBoardConfig.h"
+#include "TReadoutBoard.h"
 
 
 class TConfig {
@@ -13,8 +14,8 @@ class TConfig {
  protected:
  public:
   TConfig (const char *fName);
-  TConfig (int nBoards, std::vector <int> chipId);
-  TConfig (int chipId);
+  TConfig (int nBoards, std::vector <int> chipId, TBoardType boardType = boardMOSAIC); 
+  TConfig (int chipId, TBoardType boardType = boardDAQ);
 
   TChipConfig  *GetChipConfig  (int chipId);
   TBoardConfig *GetBoardConfig (int iBoard);

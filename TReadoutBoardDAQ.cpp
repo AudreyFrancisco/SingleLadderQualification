@@ -167,7 +167,6 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8
   else {
     return 0;
   }
-  //return 0;
 }
 
 
