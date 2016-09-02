@@ -17,6 +17,7 @@ class TConfig {
   TConfig (int nBoards, std::vector <int> chipId, TBoardType boardType = boardMOSAIC); 
   TConfig (int chipId, TBoardType boardType = boardDAQ);
 
+  int GetNChips () {return fChipConfigs.size();};
   TChipConfig  *GetChipConfig  (int chipId);
   TBoardConfig *GetBoardConfig (int iBoard);
   void WriteToFile (const char *fName);

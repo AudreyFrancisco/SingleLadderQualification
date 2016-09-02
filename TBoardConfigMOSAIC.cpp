@@ -35,12 +35,14 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
 
 	pollDataTimeout = 500; // milliseconds
 
-	// Read Configuration file
-	try {
-		if(AConfigFileName == NULL || strlen(AConfigFileName) == 0) throw std::invalid_argument("MOSAIC Config : invalid filename");
+        if (AConfigFileName) {
+  	// Read Configuration file
+  	  try {
+	  	if(AConfigFileName == NULL || strlen(AConfigFileName) == 0) throw std::invalid_argument("MOSAIC Config : invalid filename");
 		fhConfigFile = fopen(AConfigFileName,"r"); // opens the file
-	} catch (...) {
+	  } catch (...) {
 		throw std::invalid_argument("MOSAIC Config : file not exists !");
+	  }
 	}
 }
 

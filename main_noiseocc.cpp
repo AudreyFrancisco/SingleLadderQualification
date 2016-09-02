@@ -3,120 +3,146 @@
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
+#include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
 #include "TConfig.h"
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
 
 
+// definition of standard setup types: 
+//   - single chip with DAQ board
+//   - IB stave with MOSAIC
+//   - OB module with MOSAIC
+
+typedef enum {setupSingle, setupIB, setupOB} TSetupType;
+
+const int singleChipId = 16;
+
+
 TBoardType fBoardType = boardDAQ; 
-std::vector <TReadoutBoard *> boards;
-TConfig *config = new TConfig (16);
+TSetupType fSetupType = setupSingle;
+
+std::vector <TReadoutBoard *> fBoards;
+std::vector <TAlpide *>       fChips;
+
+TConfig *fConfig;
 
 
-int powerOn () {
+int powerOn (TReadoutBoardDAQ *aDAQBoard) {
+  int overflow;
+
+  if (aDAQBoard -> PowerOn (overflow)) std::cout << "LDOs are on" << std::endl;
+  else std::cout << "LDOs are off" << std::endl;
+  std::cout << "Version = " << std::hex << aDAQBoard->ReadFirmwareVersion() << std::dec << std::endl;
+  aDAQBoard -> SendOpCode (Alpide::OPCODE_GRST);
+  //sleep(1); // sleep necessary after GRST? or PowerOn?
+
+  std::cout << "Analog Current  = " << aDAQBoard-> ReadAnalogI() << std::endl;
+  std::cout << "Digital Current = " << aDAQBoard-> ReadDigitalI() << std::endl; 
+}
+
+
+int initSetupOB() {
+  std::vector <int> chipIDs;
+  for (int i = 16; i < 23; i++) chipIDs.push_back(i);
+  for (int i = 24; i < 31; i++) chipIDs.push_back(i);
+
+  fConfig       = new TConfig (1, chipIDs);
+  fBoardType    = boardMOSAIC;
+
+  fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
+
+  for (int i = 0; i < fConfig->GetNChips(); i++) {
+    fChips.push_back(new TAlpide(fConfig->GetChipConfig(chipIDs.at(i))));
+    fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
+    if (chipIDs.at(i) < 23) { // first master
+      fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, 0);
+    }
+    else {                    // second master
+      fBoards.at(0)-> AddChip        (chipIDs.at(i), 1, 1);
+    }
+  }
+}
+
+
+int initSetupIB() {
+  std::vector <int> chipIDs;
+  for (int i = 0; i < 9; i++) chipIDs.push_back(i);
+
+  int RCVMAP [] = { 3, 5, 7, 8, 6, 4, 2, 1, 0 };
+  fConfig       = new TConfig (1, chipIDs);
+  fBoardType    = boardMOSAIC;
+
+
+  fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
+
+  for (int i = 0; i < fConfig->GetNChips(); i++) {
+    fChips.push_back(new TAlpide(fConfig->GetChipConfig(chipIDs.at(i))));
+    fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
+    fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, RCVMAP[i]);
+  }
+}
+
+
+int initSetupSingle() {
+  TReadoutBoardDAQ  *myDAQBoard = 0;
+
+  fConfig    = new TConfig (singleChipId);
+  fBoardType = boardDAQ;
+  
+  InitLibUsb(); 
+  //  The following code searches the USB bus for DAQ boards, creates them and adds them to the readout board vector: 
+  //  TReadoutBoard *readoutBoard = new TReadoutBoardDAQ(device, config);
+  //  board.push_back (readoutBoard);
+  FindDAQBoards (fConfig, fBoards);
+  std::cout << "Found " << fBoards.size() << " DAQ boards" << std::endl;
+  myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+
+  if (fBoards.size() != 1) {
+    std::cout << "Error in creating readout board object" << std::endl;
+    return -1;
+  }
+
+  // create chip object and connections with readout board
+  fChips. push_back(new TAlpide (fConfig->GetChipConfig(singleChipId)));
+  fChips. at(0) -> SetReadoutBoard (fBoards.at(0));
+  fBoards.at(0) -> AddChip         (singleChipId, 0, 0);
+
+  powerOn(myDAQBoard);
+
 }
 
 
 int initSetup() {
-  TConfig *config = new TConfig (16, fBoardType);
-  
-  if (fBoardType == boardDAQ) {
-    InitLibUsb(); 
-    FindDAQBoards (config, boards);
-
-    std::cout << "found " << boards.size() << " DAQ boards" << std::endl;
-  }
-  else if (fBoardType == boardMOSAIC) {
-  }
-
-
+  switch (fSetupType) 
+    {
+    case setupSingle: 
+      initSetupSingle();
+      break;
+    case setupIB:
+      initSetupIB();
+      break;
+    case setupOB:
+      initSetupOB();
+      break;
+    default: 
+      std::cout << "Unknown setup type, doing nothing" << std::endl;
+      return -1;
+    }
+  return 0;
 }
 
 
-int main() {
+int configureChip(TAlpide *chip) {
   uint16_t          status;
-  uint32_t          version;
-  int               overflow;
-  TReadoutBoardDAQ  *myDAQBoard;
-
-
-  // if (config->BoardType == DAQBoard)
-  // 
-  //  The following code searches the USB bus for DAQ boards, creates them and adds them to the readout board vector: 
-  //  TReadoutBoard *readoutBoard = new TReadoutBoardDAQ(device, config);
-  //  board.push_back (readoutBoard);
-
-  
-  if (boards.size() == 1) {
-    TAlpide *chip   = new TAlpide (config->GetChipConfig(16));
-    chip         -> SetReadoutBoard (boards.at(0));
-    boards.at(0) -> AddChip (0, 0, 0);
-    
-    myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (boards.at(0));
-    if (myDAQBoard) {
-      if (myDAQBoard -> PowerOn (overflow)) std::cout << "LDOs are on" << std::endl;
-      else std::cout << "LDOs are off" << std::endl;
-      //myDAQBoard->ReadRegister (0x602, version); // read firmware version
-      //std::cout << "Version = " << std::hex << version << std::dec << std::endl;
-      std::cout << "Version = " << std::hex << myDAQBoard->ReadFirmwareVersion() << std::dec << std::endl;
-      //myDAQBoard->WriteRegister (0x402, 3); // disable manchester encoding in DAQboard
-      //myDAQBoard->WriteRegister (0x500, 0x0220);
-      myDAQBoard -> SendOpCode (Alpide::OPCODE_GRST);
-      //sleep(1); // sleep necessary after GRST? or PowerOn?
-
-      std::cout << "Analog Current = " << myDAQBoard-> ReadAnalogI() << std::endl;
-      std::cout << "Digital Current = " << myDAQBoard-> ReadDigitalI() << std::endl;
-
-      /* test markus
-      //std::cout << "After Write register " << std::endl;
-      //chip -> ReadRegister (Alpide::REG_IBIAS, status);
-      //std::cout << "IBias register value: 0x" << std::hex << status << std::dec << std::endl;
-      //chip->WriteRegister (Alpide::REG_IBIAS, 0);
-      //sleep(1);
-      //std::cout << "Analog Current = " << myDAQBoard-> ReadAnalogI() << std::endl;
-
-      //AlpideConfig::ApplyStandardDACSettings (chip, 0);
-      //chip -> ReadRegister (Alpide::REG_VRESETD, status);
-
-      //std::cout << "Control register value: 0x" << std::hex << status << std::dec << std::endl;
-
-      //chip -> ReadRegister (Alpide::REG_IBIAS, status);
-      //std::cout << "IBias register value: 0x" << std::hex << status << std::dec << std::endl;
-
-      */ 
-      
-    
-   
-/*
-      //myDAQBoard -> ReadAllRegisters();
-      //chip -> ReadAllRegisters();
-      usleep(10000);
-
-      int n_bytes;
-      char buffer[1024*4000];
-
-      int n_triggers = 5;
-      myDAQBoard->Trigger(n_triggers);
-      //for (int itrg=0; itrg<n_triggers; itrg++) {
-      //  myDAQBoard->ReadEventData(n_bytes, buffer);
-      //} 
-
-      //sleep(5); 
-
-      //libusb_exit(fContext);
-*/
-      
-   
 
       chip -> WriteRegister (0x1, 0x20); // config mode
       
-      // PRST
-      myDAQBoard -> WriteRegister (0x400, 0xe4);
       // CMUDMU config
       chip -> WriteRegister (0xc, 0x60); // turn manchester encoding off etc..
       // RORST: to be always performed after write to CMUDMU?
-      myDAQBoard -> WriteRegister (0x400, 0x63);
+ 
       // FROMU config 1
       chip -> WriteRegister (0x4, 0x0); 
       sleep(1);
@@ -159,8 +185,26 @@ int main() {
       std::cout << "VPULSEH register value: 0x" << std::hex << status << std::dec << std::endl;
       chip -> ReadRegister (0x60d, status);
       std::cout << "IBIAS register value: 0x" << std::hex << status << std::dec << std::endl;
+}
+
+
+int main() {
+  uint32_t          version;
+
+  initSetup();
+
+  TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+  
+  if (fBoards.size() == 1) {
      
-      
+    fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
+    fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
+
+    for (int i = 0; i < fChips.size(); i ++) {
+      configureChip (fChips.at(i));
+    }
+
+    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
       //usleep(10000);
       //// start tigger
       //myDAQBoard -> WriteRegister (0x302, 0xd); 
@@ -175,11 +219,11 @@ int main() {
       //myDAQBoard->GetBoardConfig()->SetStrobeDelay(40); // 40*25ns + 175 ns (offset by fw) => ~1MHz
       //myDAQBoard->GetBoardConfig()->SetStrobeDelay(100); // 100*25ns + 175 ns (offset by fw) => ~400kHz
       //myDAQBoard->GetBoardConfig()->SetStrobeDelay(400); //  => ~100kHz
-      myDAQBoard->GetBoardConfig()->SetStrobeDelay(1000); // ) => ~40kHz during bunch train
+      //myDAQBoard->GetBoardConfig()->SetStrobeDelay(1000); // ) => ~40kHz during bunch train
       //myDAQBoard->GetBoardConfig()->SetStrobeDelay(4000); // 4000*25ns + 175 ns (offset by fw) => ~10kHz
       //myDAQBoard->GetBoardConfig()->SetStrobeDelay(40000); // 40000*25ns + 175 ns (offset by fw) => ~1kHz
       //myDAQBoard->ReadAllRegisters();
-      myDAQBoard->WriteTriggerModuleConfigRegisters(); 
+      //myDAQBoard->WriteTriggerModuleConfigRegisters(); 
 
       //std::cout << "start trigger in 3s" << std::endl;
       //sleep(3);
@@ -198,10 +242,10 @@ int main() {
 
 
       // trigger n events
-      myDAQboard->SetTriggerConfig(true, true, 1000, 75); // enablePulse, enableTrigger, trigger(strobe)Delay, pulseDelay
+      fBoards.at(0)->SetTriggerConfig(true, true, 1000, 75); // enablePulse, enableTrigger, trigger(strobe)Delay, pulseDelay
 
       int n_triggers = 10;
-      myDAQBoard->Trigger(n_triggers);
+      fBoards.at(0)->Trigger(n_triggers);
 
 
 
@@ -215,7 +259,7 @@ int main() {
       int itrg = 0;
       //for (int itrg=0; itrg<n_triggers; itrg++) {
       while(itrg<n_triggers) {
-        if (myDAQBoard->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
+        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
           usleep(100);
           continue;
         }
@@ -237,11 +281,14 @@ int main() {
 
         }
       } 
-      if (myDAQBoard->GetEventBufferLength()!=0) { 
-        std::cout << "WARNING: still events in buffer, not expected at this point!" << std::endl; 
-      }
-      else {
-        std::cout << n_triggers << " triggers read" << std::endl;
+     
+      if (myDAQBoard) {
+        if (myDAQBoard->GetEventBufferLength()!=0) { 
+          std::cout << "WARNING: still events in buffer, not expected at this point!" << std::endl; 
+        }
+        else {
+          std::cout << n_triggers << " triggers read" << std::endl;
+        }
       }
       std::cout << "Hit pixels: " << std::endl;
       //for (int i=0; i<Hits->size(); i++) {
@@ -252,11 +299,8 @@ int main() {
       //myDAQBoard -> PowerOff();
 
     }
-    else {
-      std::cout << "Type cast failed" << std::endl;
-    }
 
-  }
+
 
   //myDAQBoard->ResetBoardFPGA(10);  
   delete myDAQBoard;

@@ -11,6 +11,7 @@
 #include "TBoardConfigMOSAIC.h"
 #include "TConfig.h"
 #include "TAlpide.h"
+#include <exception>
 
 int main()
 {
@@ -18,20 +19,39 @@ int main()
 	TReadoutBoard      *theBoard;
 
 	// First create an instance of the Configuration
-	theBoardConfiguration = new TBoardConfigMOSAIC("Config.cfg", 0); // The file must exists... but could be useful a constructor without param
+	//theBoardConfiguration = new TBoardConfigMOSAIC("Config.cfg", 0); // The file must exists... but could be useful a constructor without param
 	// Then create an instance of the board
-	theBoard = (TReadoutBoard *) new TReadoutBoardMOSAIC(theBoardConfiguration);
 
-        TConfig *config = new TConfig (5);
-        TAlpide *chip   = new TAlpide (config->GetChipConfig(5));
 
-        chip->SetReadoutBoard (theBoard);
-        theBoard->AddChip(5,0,0);
+	std::vector <int>      chipIDs;
+	std::vector <TAlpide*> fChips;
+ 
+        for (int i = 0; i < 10; i++) chipIDs.push_back(i);
+        //TConfig *config = new TConfig (5);
+        TConfig *config = new TConfig (1, chipIDs);
+
+	theBoard = (TReadoutBoard *) new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)config->GetBoardConfig(0));
+
+        for (int i = 0; i < config->GetNChips(); i++) {
+          fChips.push_back(new TAlpide(config->GetChipConfig(chipIDs.at(i))));
+          fChips.at(i) -> SetReadoutBoard(theBoard);
+          theBoard     -> AddChip        (chipIDs.at(i), 0, 0);
+	}
 
         uint16_t Value;
-        chip->WriteRegister (0x60d, 10);
-        chip->ReadRegister (0x60d, Value);
-	std::cout << "Value = 0x" << std::hex << (int) Value << std::endl;
+
+        for (int i = 0; i < fChips.size(); i++) {
+          fChips.at(i)->WriteRegister (0x60d, 10);
+          try {
+            fChips.at(i)->ReadRegister (0x60d, Value);
+    	    std::cout << "Chip ID " << chipIDs.at(i) << ", Value = 0x" << std::hex << (int) Value << std::dec << std::endl;
+	  }
+          catch (exception &e) {
+    	    std::cout << "Chip ID " << chipIDs.at(i) << ", not answering, exception: " << e.what() << std::endl;
+	  }
+	}
+
+
         return 0;
 
 
