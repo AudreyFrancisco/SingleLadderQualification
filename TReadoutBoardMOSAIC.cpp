@@ -474,7 +474,7 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 	// System PLL on I2C bus
 	mSysPLL = new I2CSysPll(mIPbus, WbbBaseAddress::i2cSysPLL);
 
-	mIPbus->setIPaddress(config->GetIPaddress(), config->GetTCPport());
+	setIPaddress(config->GetIPaddress(), config->GetTCPport());
 
 	// CMU Control interface
 	controlInterface[0] = new ControlInterface(mIPbus, WbbBaseAddress::controlInterface);
@@ -603,6 +603,8 @@ void TReadoutBoardMOSAIC::connectTCP(int Aport, int rcvBufferSize)
 			throw MosaicSetupError("Error in the TCP/IP socket set. setsockopt() ");
 		}
 	}
+
+	std::cout << "ipAddress = " << ipAddress.c_str() << ", port = " << TCPport << std::endl;
 	bzero(&servaddr,sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr=inet_addr(ipAddress.c_str());
