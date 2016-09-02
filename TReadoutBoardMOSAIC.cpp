@@ -65,7 +65,8 @@ MosaicRuntimeError::MosaicRuntimeError(const string& __arg)
 // ---- Constructor
 TReadoutBoardMOSAIC::TReadoutBoardMOSAIC (TBoardConfigMOSAIC *AConfig) : TReadoutBoard(AConfig)
 {
-	init(AConfig);
+  fBoardConfig = AConfig;
+  init(AConfig);
 }
 
 // Distructor
@@ -281,7 +282,7 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 	int dataSrc;
 	ssize_t n;
 
-	n = readTCPData(header, headerSize, fBoardConfigDAQ->GetPollingDataTimeout() ); 		// Read the TCP/IP socket
+	n = readTCPData(header, headerSize, fBoardConfig->GetPollingDataTimeout() ); 		// Read the TCP/IP socket
 	if (n == 0)	{		// timeout
 		theHeaderOfReadData.timeout = true;
 		return(false);
@@ -319,6 +320,7 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 		}
 		return(false);
 	}
+
 	if((flags & flagOverflow) != 0) { // track the event
 		std::cerr << " ERROR  ATTENTION !! We receive an Overflow Flag error. Pay attention! "<< std::endl;
 	}
@@ -333,7 +335,6 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 		dr->dataBufferUsed += (n<blockSize) ? n : blockSize;		// update the size of data in the buffer
 		// printf("We read the TCP block. Data read=%d Block size in the header=%d Block size to read=%d ",n,blockSize,readBlockSize);
 	}
-
 	if (closedDataCounter>0) { // We have closed transfers
 		memcpy(buffer, theHeaderBuffer, headerSize); // first copy the header
 		buffer = buffer + headerSize; // move the pointer
@@ -604,11 +605,11 @@ void TReadoutBoardMOSAIC::connectTCP(int Aport, int rcvBufferSize)
 		}
 	}
 
-	std::cout << "ipAddress = " << ipAddress.c_str() << ", port = " << TCPport << std::endl;
 	bzero(&servaddr,sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr=inet_addr(ipAddress.c_str());
-	servaddr.sin_port=htons(TCPport);
+	//servaddr.sin_port=htons(TCPport);
+	servaddr.sin_port=htons(Aport);
 
 	if (::connect(tcp_sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == -1){
 		closeTCP ();
@@ -638,8 +639,9 @@ ssize_t TReadoutBoardMOSAIC::recvTCP(void *rxBuffer, size_t count, int timeout)
 
 	ufds.fd = tcp_sockfd;
 	ufds.events = POLLIN|POLLNVAL; // check for normal read or error
-
+     
 	rv = poll(&ufds, 1, timeout);
+
 	if (rv == -1) throw MosaicRuntimeError("TCP/IP Poll system call fails");
 
 	if (rv > 0) { // There are Data !
@@ -660,6 +662,7 @@ ssize_t TReadoutBoardMOSAIC::readTCPData(void *buffer, size_t count, int timeout
 	ssize_t res;
 	while (count){
 		res = recvTCP(buffer, count, timeout);
+
 		if (res == 0) {
 			return p;
 		}

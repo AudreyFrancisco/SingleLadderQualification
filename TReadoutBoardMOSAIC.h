@@ -107,7 +107,7 @@ public:
 
 private:
 
-	TBoardConfigMOSAIC *fBoardConfigDAQ;
+	TBoardConfigMOSAIC *fBoardConfig;
 
 	IPbusUDP 			*mIPbus;
 	MRunControl 		*mRunControl;
