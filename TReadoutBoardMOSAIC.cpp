@@ -129,10 +129,10 @@ int TReadoutBoardMOSAIC::SendOpCode        (uint16_t  OpCode)
 int TReadoutBoardMOSAIC::SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay)
 {
 	uint16_t pulseMode;
-	if(enablePulse && enableTrigger) pulseMode = 3; // FIXME:
-	if(enablePulse && !enableTrigger) pulseMode = 2; // FIXME:
-	if(!enablePulse && enableTrigger) pulseMode = 1; // FIXME:
-	if(!enablePulse && !enableTrigger) pulseMode = 0; // FIXME:
+	if(enablePulse  && enableTrigger)  pulseMode = 3; 
+	if(enablePulse  && !enableTrigger) pulseMode = 1;
+	if(!enablePulse && enableTrigger)  pulseMode = 2;
+	if(!enablePulse && !enableTrigger) pulseMode = 0;
 	pulser->setConfig(triggerDelay, pulseDelay, pulseMode);
 	return(pulseMode);
 }
@@ -156,6 +156,7 @@ int  TReadoutBoardMOSAIC::Trigger           (int nTriggers)
 
 void TReadoutBoardMOSAIC::StartRun()
 {
+        enableDefinedReceivers();
 	connectTCP(); // open TCP connection
 	mRunControl->startRun(); // start run
 	usleep(5000); 	//
