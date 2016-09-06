@@ -123,7 +123,7 @@ private:
 	int	tcp_sockfd;
 	std::string ipAddress;
 	uint16_t TCPport;
-	uint16_t numOfSetReceivers = 0;
+	uint16_t numOfSetReceivers;
 	std::vector<MDataReceiver *> receivers;
 
 	uint32_t closedEventsPerSource[MAX_MOSAICTRANRECV];
