@@ -148,12 +148,13 @@ class TAlpide {
   TChipConfig *GetConfig () {return fConfig;};
   void SetReadoutBoard (TReadoutBoard *readoutBoard) {fReadoutBoard = readoutBoard;};
   
-  int ReadRegister       (Alpide::TRegister address, uint16_t &value);
-  int WriteRegister      (Alpide::TRegister address, uint16_t value, bool verify = false);
-  int ReadRegister       (uint16_t address, uint16_t &value);
-  int WriteRegister      (uint16_t address, uint16_t value, bool verify = false);
-  int ModifyRegisterBits (Alpide::TRegister address, uint8_t lowBit, uint8_t nBits, uint16_t value, bool verify = false);
+  int  ReadRegister       (Alpide::TRegister address, uint16_t &value);
+  int  WriteRegister      (Alpide::TRegister address, uint16_t value, bool verify = false);
+  int  ReadRegister       (uint16_t address, uint16_t &value);
+  int  WriteRegister      (uint16_t address, uint16_t value, bool verify = false);
+  int  ModifyRegisterBits (Alpide::TRegister address, uint8_t lowBit, uint8_t nBits, uint16_t value, bool verify = false);
 
+  void SetEnable          (bool Enable);
   //int SendOpCode         (Alpide::TOpCode opcode);
 
   //int SendCommandSequence (vector <> sequence);

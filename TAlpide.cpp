@@ -9,6 +9,12 @@ TAlpide::TAlpide (TChipConfig *config) {
 }
 
 
+void TAlpide::SetEnable (bool Enable) {
+  fReadoutBoard->SetChipEnable (fChipId, Enable);
+  fConfig      ->SetEnable     (Enable);
+}
+
+
 int TAlpide::ReadRegister (TRegister address, uint16_t &value) {
   return ReadRegister ((uint16_t) address, value);
 }

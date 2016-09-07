@@ -3,8 +3,9 @@
 using namespace ChipConfig;
 
 TChipConfig::TChipConfig (int chipId, const char *fName) {
-  fChipId = chipId;
-
+  fChipId  = chipId;
+  fEnabled = true;
+ 
   // fill default values from header file
   fEnableClustering    = ENABLE_CLUSTERING;
   fMatrixReadoutSpeed  = MATRIX_READOUT_SPEED;

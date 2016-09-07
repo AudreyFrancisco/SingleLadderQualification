@@ -10,9 +10,10 @@ typedef enum {boardDAQ, boardMOSAIC} TBoardType;
 #include "TBoardConfig.h"
 
 typedef struct {
-  int chipId;
-  int controlInterface;
-  int receiver;
+  int  chipId;
+  int  controlInterface;
+  int  receiver;
+  bool enabled; 
 } TChipPos;
 
 class TBoardConfig;
@@ -40,7 +41,8 @@ class TReadoutBoard {
   ~TReadoutBoard () {};
 
   int          AddChip           (uint8_t chipId, int controlInterface, int receiver);
-  
+  void         SetChipEnable     (uint8_t chipId, bool Enable);
+
   virtual int  ReadRegister      (uint16_t Address, uint32_t &Value) = 0;
   virtual int  WriteRegister     (uint16_t Address, uint32_t Value)  = 0;
 

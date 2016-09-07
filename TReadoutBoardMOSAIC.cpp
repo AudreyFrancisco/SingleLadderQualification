@@ -574,7 +574,12 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
 	for(int i=0;i< fChipPositions.size(); i++) { //for each defined chip
 		dataLink = fChipPositions.at(i).receiver;
 		if(dataLink >0) { // Enable the data receiver
+		  if (fChipPositions.at(i).enabled) {
 			a3rcv[dataLink-1]->addDisable(false);
+		  }
+                  else {
+			a3rcv[dataLink-1]->addDisable(true);
+		  }
 		}
 	}
 	return;
