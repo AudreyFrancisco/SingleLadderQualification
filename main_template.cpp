@@ -39,8 +39,12 @@
 
 typedef enum {setupSingle, setupIB, setupOB} TSetupType;
 
+// chip ID that is used in case of single chip setup
 const int singleChipId = 16;
 
+// module ID that is used for outer barrel modules 
+// (1 will result in master chip IDs 0x10 and 0x18, 2 in 0x20 and 0x28 ...)
+const int moduleId = 1;
 
 TBoardType fBoardType;
 TSetupType fSetupType = setupSingle;
@@ -67,8 +71,9 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 
 int initSetupOB() {
   std::vector <int> chipIDs;
-  for (int i = 16; i < 23; i++) chipIDs.push_back(i);
-  for (int i = 24; i < 31; i++) chipIDs.push_back(i);
+  int offset = moduleId << 4;
+  for (int i = 0 + offset; i < 7  + offset; i++) chipIDs.push_back(i);
+  for (int i = 8 + offset; i < 15 + offset; i++) chipIDs.push_back(i);
 
   fConfig       = new TConfig (1, chipIDs);
   fBoardType    = boardMOSAIC;
