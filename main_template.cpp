@@ -69,9 +69,16 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 }
 
 
+// Setup definition for outer barrel module with MOSAIC
+//    - module ID (3 most significant bits of chip ID) defined by moduleId 
+//      (usually 1) 
+//    - chips connected to two different control interfaces
+//    - masters send data to two different receivers (0 and 1)
+//    - receiver number for slaves set to -1 (not connected directly to receiver)
+//      (this ensures that a receiver is disabled only if the connected master is disabled)
 int initSetupOB() {
   std::vector <int> chipIDs;
-  int offset = moduleId << 4;
+  int offset = (moduleId & 0x7) << 4;
   for (int i = 0 + offset; i < 7  + offset; i++) chipIDs.push_back(i);
   for (int i = 8 + offset; i < 15 + offset; i++) chipIDs.push_back(i);
 
@@ -83,16 +90,29 @@ int initSetupOB() {
   for (int i = 0; i < fConfig->GetNChips(); i++) {
     fChips.push_back(new TAlpide(fConfig->GetChipConfig(chipIDs.at(i))));
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
-    if (chipIDs.at(i) < 23) { // first master
-      fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, 0);
+    if (chipIDs.at(i) < 7 + offset) { // first master-slave row
+      if (chipIDs.at(i) & 0x7) {        // slave
+        fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, -1);
+      }
+      else {                            // master
+        fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, 0);
+      }
     }
-    else {                    // second master
-      fBoards.at(0)-> AddChip        (chipIDs.at(i), 1, 1);
+    else {                    // second master-slave row
+      if (chipIDs.at(i) & 0x7) {        // slave
+        fBoards.at(0)-> AddChip        (chipIDs.at(i), 1, -1);
+      }                                
+      else {                            // master
+        fBoards.at(0)-> AddChip        (chipIDs.at(i), 1, 1);
+      }
     }
   }
 }
 
 
+// Setup definition for inner barrel stave with MOSAIC
+//    - all chips connected to same control interface
+//    - each chip has its own receiver, mapping defined in RCVMAP
 int initSetupIB() {
   std::vector <int> chipIDs;
   for (int i = 0; i < 9; i++) chipIDs.push_back(i);

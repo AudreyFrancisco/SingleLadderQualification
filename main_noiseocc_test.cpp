@@ -84,10 +84,20 @@ int initSetupOB() {
     fChips.push_back(new TAlpide(fConfig->GetChipConfig(chipIDs.at(i))));
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
     if (chipIDs.at(i) < 23) { // first master
-      fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, 0);
+      if (chipIDs.at(i) & 0x7) {  // slave
+        fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, -1);
+      }
+      else {                      // master
+        fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, 0);
+      }
     }
     else {                    // second master
-      fBoards.at(0)-> AddChip        (chipIDs.at(i), 1, 1);
+      if (chipIDs.at(i) & 0x7) {  // slave
+        fBoards.at(0)-> AddChip        (chipIDs.at(i), 1, -1);
+      }
+      else {
+        fBoards.at(0)-> AddChip        (chipIDs.at(i), 1, 1);
+      }
     }
   }
 }
@@ -211,7 +221,7 @@ int configureChip(TAlpide *chip) {
       chip->WriteRegister (0xe, 0x041); 
 
       usleep(1000);		// wait 1ms
-      chip->WriteRegister (0xf, 0xaaf);     // DTU_DAC: PLL:0 Driver:0x0a Pre-emphasis:0	bits 0-3 charge pump current, 4-7 hs line driver current, 8-11 preemph
+      chip->WriteRegister (0xf, 0x0af);     // DTU_DAC: PLL:0 Driver:0x0a Pre-emphasis:0	bits 0-3 charge pump current, 4-7 hs line driver current, 8-11 preemph
 
       chip->WriteRegister (0x12, 0x00); 	// DTU_TEST1: Normal mode	
       chip->WriteRegister (0x11, 0x0101);     // DTU_PLL_LOCK2, 0x0101); 
@@ -249,6 +259,11 @@ int main() {
       configureChip (fChips.at(i));
     }
 
+    // try one chip only 
+    for (int i = 2; i < fChips.size(); i++) {
+      fChips.at(i)->SetEnable(false);
+    }
+
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
 
     fBoards.at(0)->SetTriggerConfig(false, true, 100, 1000);
@@ -261,23 +276,48 @@ int main() {
 
 	theBuffer = (unsigned char*) malloc(200 * 1024); // allocates 200 kilobytes ...
 
-	bool isDataTackingEnd = false; // break the execution of read polling
-	int returnCode = 0;
-	int timeoutLimit = 10; // ten seconds
+	bool isDataTakingEnd = false; // break the execution of read polling
+	int  returnCode = 0;
+	int  timeoutLimit = 10; // ten seconds
 
 
 
     ((TReadoutBoardMOSAIC *)fBoards.at(0))->StartRun(); // Activate the data taking ...
 
+    
+    for (int i = 1; i < fChips.size(); i++) {  // XOFF
+      fChips.at(i)->WriteRegister(0xc, 0x30);
+    }
+
     fBoards.at(0)->Trigger(1); // Preset end start the trigger
 
-	while(!isDataTackingEnd) { // while we don't receive a timeout
+    for (int i = 1; i < fChips.size(); i++) {  // no XOFF
+      fChips.at(i)->WriteRegister(0xc, 0x20);
+    }
+
+    int nBytesHeader, nBytesTrailer;
+    TBoardHeader boardInfo;
+
+
+
+	while(!isDataTakingEnd) { // while we don't receive a timeout
 	  returnCode = fBoards.at(0)->ReadEventData(numberOfReadByte, theBuffer);
 		if(returnCode != 0) { // we have some thing
 			std::cout << "Read an event !  Dimension :" << numberOfReadByte << std::endl;   // Consume the buffer ...
+			std::cout << std::hex << "  ";
+		        for (int i = 0; i < numberOfReadByte; i++) {
+			  std::cout << std::hex << (int) theBuffer[i] << " ";
+			}
+			std::cout << std::dec << std::endl;
+                        if (BoardDecoder::DecodeEvent(boardMOSAIC, theBuffer, numberOfReadByte, nBytesHeader, nBytesTrailer, boardInfo)) {
+			  std::cout << "  Header info: channel = " << boardInfo.channel << std::endl;
+			} 
+                        else {
+			  std::cout << "  Decoding failed: channel = " << boardInfo.channel << std::endl;
+			}
 			usleep(20000); // wait
 		} else { // read nothing is finished ?
-			if(timeoutLimit-- == 0) isDataTackingEnd = true;
+			if(timeoutLimit-- == 0) isDataTakingEnd = true;
 			sleep(1);
 		}
 	}
