@@ -23,7 +23,7 @@ const bool HEADER_TYPE        = 1; // as of firmware version 247e0611 the header
 const bool BOARD_VERSION      = 1; // as of firmware version 247e0611 the DAQboard version (v2 or v3) must be defined; 0 -> v2; 1 -> v3;  
 
 //---- TRIGGER module
-const int TRIGGER_MODE        = 1;
+const int TRIGGER_MODE        = 2; // 2: external, 1:internal
 const uint32_t STROBE_DELAY   = 10;// delay between external trigger and trigger sent to chip; when cofiguring the feature with a train of N triggers, this will be the delay between subsequent triggers
 const bool BUSY_CONFIG        = 0; // as of firmware version 247e0611
 const bool BUSY_OVERRIDE      = 1;
@@ -35,7 +35,7 @@ const int SIGNAL_ENABLE_TIME = 12;      // time until signals are enabled
 const int DRST_TIME          = 13;      // time until drst is deasserted
 
 const int PULSE_STROBE_DELAY  = 10;
-const int STROBE_PULSE_SEQ    =  2;
+const int STROBE_PULSE_SEQ    =  2;     // 3: just send pulse after external trigger..
 
 
 
@@ -140,6 +140,7 @@ class TBoardConfigDAQ : public TBoardConfig {
                                 //        1: strobe - delay - pulse; pulse is generated after a delay with respect to the strobe
                                 //        2: pulse - delay - strobe; pulse is generated after a write access to pulse command register and a delay is enabled for a generated strobe; 
                                 //                                   this strobe goes to the trigger sequencer module in external trigger mode
+                                //        3: just pulse
 
   // PowerOnReset disable reg
   bool fPORDisable;              //     0; 0: enable POR; 1: disable
