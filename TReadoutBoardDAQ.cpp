@@ -42,8 +42,8 @@ TReadoutBoardDAQ::~TReadoutBoardDAQ ()
 {
   // join threads
   
-  fThreadTrigger.join();
-  fThreadReadData.join();
+  //fThreadTrigger.join();
+  //fThreadReadData.join();
   std::cout << "joined threads.." << std::endl;
 
   std::cout << "Powering off chip" << std::endl;
@@ -217,71 +217,104 @@ void TReadoutBoardDAQ::DAQTrigger() {
   fMtx.unlock();
 
   fStatusTrigger = 0;
-  
-  std::cout << "Number of triggers: " << fNTriggersTotal << std::endl;
-  int nTriggerTrains = fNTriggersTotal/fMaxNTriggersTrain;
-  std::cout << " --> " << nTriggerTrains << " trigger trains with " << fMaxNTriggersTrain << " triggers going to be launched" << std::endl;
-  int nTriggersLeft  = fNTriggersTotal%fMaxNTriggersTrain; // TODO: nicer solution?
-  std::cout << " --> then " << nTriggersLeft << " triggers left to be launched" << std::endl;
-
-  fBoardConfigDAQ->SetNTriggers(fMaxNTriggersTrain);
-  WriteTriggerModuleConfigRegisters();
   int evtbuffer_size = 0;
+  
+  if (fBoardConfig->GetTriggerEnable() && !fBoardConfigDAQ->GetPulseEnable()) { // TRIGGERING
+    std::cout << "Number of triggers: " << fNTriggersTotal << std::endl;
+    int nTriggerTrains = fNTriggersTotal/fMaxNTriggersTrain;
+    std::cout << " --> " << nTriggerTrains << " trigger trains with " << fMaxNTriggersTrain << " triggers going to be launched" << std::endl;
+    int nTriggersLeft  = fNTriggersTotal%fMaxNTriggersTrain; // TODO: nicer solution?
+    std::cout << " --> then " << nTriggersLeft << " triggers left to be launched" << std::endl;
 
-  for (int itrain=0; itrain<nTriggerTrains; itrain++) {
-    fMtx.lock();
-    evtbuffer_size = fEventBuffer.size();
-    fMtx.unlock();
-    if (evtbuffer_size < fMaxEventBufferSize) {
-      std::cout << "train " << itrain << std::endl;
-      
-      StartTrigger(); // start trigger train; 
-      // sleep for enough time so that stoptrigger sent after last trigger..
-      //int sleep_time = fBoardConfigDAQ->GetStrobeDelay()*0.25+375; // TODO: check why this is not working.. but longer a wait time is needed..
-      int sleep_time = fBoardConfigDAQ->GetStrobeDelay(); 
-      usleep(sleep_time);
-      StopTrigger();
+    fBoardConfigDAQ->SetNTriggers(fMaxNTriggersTrain);
+    WriteTriggerModuleConfigRegisters();
 
-      fTrigCnt += fMaxNTriggersTrain;
+    for (int itrain=0; itrain<nTriggerTrains; itrain++) {
+      fMtx.lock();
+      evtbuffer_size = fEventBuffer.size();
+      fMtx.unlock();
+      if (evtbuffer_size < fMaxEventBufferSize) {
+        std::cout << "train " << itrain << std::endl;
+        
+        StartTrigger(); // start trigger train; 
+        // sleep for enough time so that stoptrigger sent after last trigger..
+        //int sleep_time = fBoardConfigDAQ->GetStrobeDelay()*0.25+375; // TODO: check why this is not working.. but longer a wait time is needed..
+        int sleep_time = fBoardConfigDAQ->GetStrobeDelay(); 
+        usleep(sleep_time);
+        StopTrigger();
+
+        fTrigCnt += fMaxNTriggersTrain;
+      }
+      else {
+        std::cout << "Maximum event buffer size reached before reaching nTriggers; stop here!" << std::endl;
+        std::cout << "    -> Number of triggers performed: " << fTrigCnt << std::endl;
+        fStatusTrigger = -1;
+        return;
+      }
     }
-    else {
-      std::cout << "Maximum event buffer size reached before reaching nTriggers; stop here!" << std::endl;
-      std::cout << "    -> Number of triggers performed: " << fTrigCnt << std::endl;
-      fStatusTrigger = -1;
-      return;
+    
+    if (nTriggersLeft!=0) { // TODO: nicer solution?
+      fMtx.lock();
+      evtbuffer_size = fEventBuffer.size();
+      fMtx.unlock();
+      if (evtbuffer_size < fMaxEventBufferSize) {
+        fBoardConfigDAQ->SetNTriggers(nTriggersLeft); 
+        WriteTriggerModuleConfigRegisters();
+
+        StartTrigger(); // start trigger train; 
+        // sleep for enough time so that stoptrigger sent after last trigger..
+        //int sleep_time = fBoardConfigDAQ->GetStrobeDelay()*0.025+375; // TODO: check why this is not working.. but longer a wait time is needed..
+        int sleep_time = fBoardConfigDAQ->GetStrobeDelay();
+        usleep(sleep_time);
+        StopTrigger();
+        
+        fTrigCnt += nTriggersLeft;
+      }
+      else {
+        std::cout << "Maximum event buffer size reached before reaching nTriggers; stop here!" << std::endl;
+        std::cout << "    -> Number of triggers performed: " << fTrigCnt << std::endl;
+        fStatusTrigger = -1;
+        return;
+      }
     }
   }
-  
-  if (nTriggersLeft!=0) { // TODO: nicer solution?
-    fMtx.lock();
-    evtbuffer_size = fEventBuffer.size();
-    fMtx.unlock();
-    if (evtbuffer_size < fMaxEventBufferSize) {
-      fBoardConfigDAQ->SetNTriggers(nTriggersLeft); 
-      WriteTriggerModuleConfigRegisters();
+  else if (!fBoardConfig->GetTriggerEnable() && fBoardConfigDAQ->GetPulseEnable()) { // just PULSING
+    //fBoardConfigDAQ->SetNTriggers(100); // TODO: number of triggers to be launched with StartTrigger command? if set trigger src to external not trigger sent at all? 
+    //WriteTriggerModuleConfigRegisters();
 
-      StartTrigger(); // start trigger train; 
-      // sleep for enough time so that stoptrigger sent after last trigger..
-      //int sleep_time = fBoardConfigDAQ->GetStrobeDelay()*0.025+375; // TODO: check why this is not working.. but longer a wait time is needed..
-      int sleep_time = fBoardConfigDAQ->GetStrobeDelay();
-      usleep(sleep_time);
-      StopTrigger();
-      
-      fTrigCnt += nTriggersLeft;
+    //StartTrigger(); // TODO: needed so that DAQboard reads events? but does it also send trigger?
+    for (fTrigCnt=0; fTrigCnt<fNTriggersTotal; fTrigCnt++) {
+      fMtx.lock();
+      evtbuffer_size = fEventBuffer.size();
+      fMtx.unlock();
+      if (evtbuffer_size < fMaxEventBufferSize) {
+        //SendOpCode (0x78); // send PULSE to chip
+        StartTrigger();
+        WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_PULSE, 13); // write anything to pulse register to trigger pulse
+        StopTrigger();
+        std::cout << "Pulse " << fTrigCnt << " sent" << std::endl;
+      }
+      else {
+        std::cout << "Maximum event buffer size reached before reaching nTriggers (Pulses); stop here!" << std::endl;
+        std::cout << "    -> Number of pulses performed: " << fTrigCnt << std::endl;
+        fStatusTrigger = -1;
+        return;
+      }
     }
-    else {
-      std::cout << "Maximum event buffer size reached before reaching nTriggers; stop here!" << std::endl;
-      std::cout << "    -> Number of triggers performed: " << fTrigCnt << std::endl;
-      fStatusTrigger = -1;
-      return;
-    }
+    //StopTrigger();
+    
   }
-  
+  else {
+    std::cout << "Pulse and Trigger either both disabled or enabled, please select one of the two!" << std::endl;
+    return;
+  }
+
+ 
   // DEBUG read monitoring registers
   //ReadMonitorRegisters();
 
   // send EndOfRun command; resets counters in header
-  WriteRegister(0x201, 0x1);
+  //WriteRegister(0x201, 0x1);
 
   fMtx.lock();
   fIsTriggerThreadRunning = false;
@@ -550,12 +583,12 @@ int TReadoutBoardDAQ::Trigger (int nTriggers) // open threads for triggering and
 {
   std::cout << "in Trigger function now" << std::endl;
 
-  int wait_counter = 0;
-  while ((fIsTriggerThreadRunning || fIsReadDataThreadRunning) && wait_counter<10) { // check if some other threads still running
-    std::cout << "Trigger or ReadData thread still active, please wait" << std::endl;
-    usleep(100000);
-    wait_counter++;
-  }
+  //int wait_counter = 0;
+  //while ((fIsTriggerThreadRunning || fIsReadDataThreadRunning) && wait_counter<10) { // check if some other threads still running
+  //  std::cout << "Trigger or ReadData thread still active, please wait" << std::endl;
+  //  usleep(100000);
+  //  wait_counter++;
+  //}
   
   fNTriggersTotal = nTriggers;
 
@@ -573,8 +606,8 @@ int TReadoutBoardDAQ::Trigger (int nTriggers) // open threads for triggering and
   //fThreadTrigger  = std::thread ([this] { DAQTrigger(); });
   //fThreadReadData = std::thread ([this] { DAQReadData(); });
 
-  //fThreadTrigger.join();  
-  //fThreadReadData.join();
+  fThreadTrigger.join();  
+  fThreadReadData.join();
 
   return 0;
 }
@@ -1100,6 +1133,7 @@ void TReadoutBoardDAQ::WriteResetModuleConfigRegisters ()
 
   // PULSE STROBE delay sequence reg
   uint32_t config2 = 0;
+  std::cout << "PulseDelay: " << fBoardConfigDAQ->GetPulseDelay() << std::endl;
   config2 |= ( fBoardConfigDAQ->GetPulseDelay()          & 0xffff );
   config2 |= ((fBoardConfigDAQ->GetStrobePulseSeq()      & 0x3)     << 16);
   WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_PULSE_DELAY, config2);
