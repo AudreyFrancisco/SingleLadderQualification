@@ -242,7 +242,7 @@ int main() {
 
 
       // trigger n events
-      fBoards.at(0)->SetTriggerConfig(true, true, 1000, 75); // enablePulse, enableTrigger, trigger(strobe)Delay, pulseDelay
+      myDAQBoard->SetTriggerConfig(true, false, 1000, 75); // enablePulse, enableTrigger, trigger(strobe)Delay, pulseDelay
 
       int n_triggers = 10;
       fBoards.at(0)->Trigger(n_triggers);
