@@ -8,130 +8,10 @@
 #include "TConfig.h"
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
+#include "SetupHelpers.h"
 
 
-// definition of standard setup types: 
-//   - single chip with DAQ board
-//   - IB stave with MOSAIC
-//   - OB module with MOSAIC
 
-typedef enum {setupSingle, setupIB, setupOB} TSetupType;
-
-const int singleChipId = 16;
-
-
-TBoardType fBoardType = boardDAQ; 
-TSetupType fSetupType = setupSingle;
-
-std::vector <TReadoutBoard *> fBoards;
-std::vector <TAlpide *>       fChips;
-
-TConfig *fConfig;
-
-
-int powerOn (TReadoutBoardDAQ *aDAQBoard) {
-  int overflow;
-
-  if (aDAQBoard -> PowerOn (overflow)) std::cout << "LDOs are on" << std::endl;
-  else std::cout << "LDOs are off" << std::endl;
-  std::cout << "Version = " << std::hex << aDAQBoard->ReadFirmwareVersion() << std::dec << std::endl;
-  aDAQBoard -> SendOpCode (Alpide::OPCODE_GRST);
-  //sleep(1); // sleep necessary after GRST? or PowerOn?
-
-  std::cout << "Analog Current  = " << aDAQBoard-> ReadAnalogI() << std::endl;
-  std::cout << "Digital Current = " << aDAQBoard-> ReadDigitalI() << std::endl; 
-}
-
-
-int initSetupOB() {
-  std::vector <int> chipIDs;
-  for (int i = 16; i < 23; i++) chipIDs.push_back(i);
-  for (int i = 24; i < 31; i++) chipIDs.push_back(i);
-
-  fConfig       = new TConfig (1, chipIDs);
-  fBoardType    = boardMOSAIC;
-
-  fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
-
-  for (int i = 0; i < fConfig->GetNChips(); i++) {
-    fChips.push_back(new TAlpide(fConfig->GetChipConfig(chipIDs.at(i))));
-    fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
-    if (chipIDs.at(i) < 23) { // first master
-      fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, 0);
-    }
-    else {                    // second master
-      fBoards.at(0)-> AddChip        (chipIDs.at(i), 1, 1);
-    }
-  }
-}
-
-
-int initSetupIB() {
-  std::vector <int> chipIDs;
-  for (int i = 0; i < 9; i++) chipIDs.push_back(i);
-
-  int RCVMAP [] = { 3, 5, 7, 8, 6, 4, 2, 1, 0 };
-  fConfig       = new TConfig (1, chipIDs);
-  fBoardType    = boardMOSAIC;
-
-
-  fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
-
-  for (int i = 0; i < fConfig->GetNChips(); i++) {
-    fChips.push_back(new TAlpide(fConfig->GetChipConfig(chipIDs.at(i))));
-    fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
-    fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, RCVMAP[i]);
-  }
-}
-
-
-int initSetupSingle() {
-  TReadoutBoardDAQ  *myDAQBoard = 0;
-
-  fConfig    = new TConfig (singleChipId);
-  fBoardType = boardDAQ;
-  
-  InitLibUsb(); 
-  //  The following code searches the USB bus for DAQ boards, creates them and adds them to the readout board vector: 
-  //  TReadoutBoard *readoutBoard = new TReadoutBoardDAQ(device, config);
-  //  board.push_back (readoutBoard);
-  FindDAQBoards (fConfig, fBoards);
-  std::cout << "Found " << fBoards.size() << " DAQ boards" << std::endl;
-  myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
-
-  if (fBoards.size() != 1) {
-    std::cout << "Error in creating readout board object" << std::endl;
-    return -1;
-  }
-
-  // create chip object and connections with readout board
-  fChips. push_back(new TAlpide (fConfig->GetChipConfig(singleChipId)));
-  fChips. at(0) -> SetReadoutBoard (fBoards.at(0));
-  fBoards.at(0) -> AddChip         (singleChipId, 0, 0);
-
-  powerOn(myDAQBoard);
-
-}
-
-
-int initSetup() {
-  switch (fSetupType) 
-    {
-    case setupSingle: 
-      initSetupSingle();
-      break;
-    case setupIB:
-      initSetupIB();
-      break;
-    case setupOB:
-      initSetupOB();
-      break;
-    default: 
-      std::cout << "Unknown setup type, doing nothing" << std::endl;
-      return -1;
-    }
-  return 0;
-}
 
 
 int configureChip(TAlpide *chip) {
@@ -159,8 +39,6 @@ int configureChip(TAlpide *chip) {
       //myDAQBoard -> WriteRegister (0x304, 0x1a); 
       // strobeB duration
       chip -> WriteRegister (0x5, 0xa); // 10*25ns
-      // triggered readout mode
-      chip -> WriteRegister (0x1, 0x21); 
       
       
       // configure dacs
@@ -185,10 +63,25 @@ int configureChip(TAlpide *chip) {
       std::cout << "VPULSEH register value: 0x" << std::hex << status << std::dec << std::endl;
       chip -> ReadRegister (0x60d, status);
       std::cout << "IBIAS register value: 0x" << std::hex << status << std::dec << std::endl;
+
+      // triggered readout mode
+      chip -> WriteRegister (0x1, 0x21); 
+
+
 }
 
 
 int main() {
+  // chip ID that is used in case of single chip setup
+  fSingleChipId = 16;
+
+  // module ID that is used for outer barrel modules 
+  // (1 will result in master chip IDs 0x10 and 0x18, 2 in 0x20 and 0x28 ...)
+  fModuleId   = 1;
+
+  fSetupType = setupSingle;
+
+
   uint32_t          version;
 
   initSetup();
@@ -291,9 +184,9 @@ int main() {
         }
       }
       std::cout << "Hit pixels: " << std::endl;
-      //for (int i=0; i<Hits->size(); i++) {
-      //  std::cout << i << ":\t region: " << Hits->at(i).region << "\tdcol: " << Hits->at(i).dcol << "\taddres: " << Hits->at(i).address << std::endl; 
-      //}
+      for (int i=0; i<Hits->size(); i++) {
+        std::cout << i << ":\t region: " << Hits->at(i).region << "\tdcol: " << Hits->at(i).dcol << "\taddres: " << Hits->at(i).address << std::endl; 
+      }
 
       //std::cout << "Powering off board" << std::endl;
       //myDAQBoard -> PowerOff();
