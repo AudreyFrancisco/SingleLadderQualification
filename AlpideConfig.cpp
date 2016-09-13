@@ -72,6 +72,8 @@ void AlpideConfig::WritePixRegSingle (TAlpide *chip, Alpide::TPixReg reg, bool d
   int address = 0x400 | (region << 11) | (1 << highlow);
   int value   = 1 << bit;
 
+  chip->WriteRegister (address, value);
+
   // set correct rowsel bit 
   region = row / 16;
   bit    = row % 16;
