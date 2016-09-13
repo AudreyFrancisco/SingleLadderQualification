@@ -40,8 +40,8 @@ int  fErrCountf;
 
 int configureChip(TAlpide *chip) {
   // put all chip configurations before the start of the test here
-  chip->WriteRegister (0x1, 0x20);
-  chip->WriteRegister (0xc, 0x60);
+  chip->WriteRegister (Alpide::REG_MODECONTROL,   0x20);
+  chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x60);
 }
 
 
