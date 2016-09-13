@@ -16,9 +16,9 @@ const int LIMIT_ANALOGUE  = 300;
 
 //---- READOUT module
 const bool DATA_SAMPLING_EDGE = 1;
-const bool DATA_PKTBASED_EN   = 1; // packet based readout default now!
+const bool DATA_PKTBASED_EN   = 0; // packet based readout default now!
 const bool DATA_DDR_EN        = 0;
-const int DATA_PORT           = 2;
+const int  DATA_PORT          = 2;
 const bool HEADER_TYPE        = 1; // as of firmware version 247e0611 the header type can be defined; 0 -> full header (default); 1 -> short header 
 const bool BOARD_VERSION      = 1; // as of firmware version 247e0611 the DAQboard version (v2 or v3) must be defined; 0 -> v2; 1 -> v3;  
 
@@ -247,12 +247,14 @@ class TBoardConfigDAQ : public TBoardConfig {
   void SetClockEnableTime(int duration)    {fClockEnableTime    = duration;};
   void SetSignalEnableTime(int duration)   {fSignalEnableTime   = duration;};
   void SetAutoShutdownTime(int duration)   {fAutoShutdownTime   = duration;};
+  void SetPORDisable(bool disable)         {fPORDisable         = disable;};
 
   // ID Module
 
   // SOFTRESET Module
   void SetSoftResetDuration(int duration)  {fSoftResetDuration  = duration;};
 
+ 
 };
 
 //************************************************************

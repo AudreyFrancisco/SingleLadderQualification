@@ -70,7 +70,7 @@ TBoardConfigDAQ::TBoardConfigDAQ(const char *fName, int boardIndex) {
   fPulseDelay       = PULSE_STROBE_DELAY;
   fStrobePulseSeq   = STROBE_PULSE_SEQ;
   // PowerOnReset disable reg
-  fPORDisable       = 0;                    //     0; 0: enable POR; 1: disable
+  fPORDisable       = false;                 //     0; 0: enable POR; 1: disable
 
   ////---- ID module
 
