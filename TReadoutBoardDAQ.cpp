@@ -82,7 +82,7 @@ int TReadoutBoardDAQ::ReadRegister (uint16_t address, uint32_t &value)
 
 int TReadoutBoardDAQ::WriteRegister (uint16_t address, uint32_t value)
 {
-  std::cout << "[FPGA] ADDRESS: " << std::hex <<  address << " VALUE " << value << std::dec << std::endl; 
+  //std::cout << "[FPGA] ADDRESS: " << std::hex <<  address << " VALUE " << value << std::dec << std::endl; 
 
   int err;
   err = SendWord((uint32_t)address);
@@ -116,7 +116,7 @@ int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, uint8
     uint32_t command[4];
     bool err;
 
-    std::cout << "[ CHIP ] ADDRESS: " << std::hex << address << " (" << newAddress << ") " << " VALUE " << value << std::dec << std::endl;
+    //std::cout << "[ CHIP ] ADDRESS: " << std::hex << address << " (" << newAddress << ") " << " VALUE " << value << std::dec << std::endl;
     command[0] = CMU_DATA + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
     command[1] = value;
     command[2] = CMU_INSTR + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);
@@ -157,7 +157,7 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8
 
   value = (value32>>8) & 0xffff;
 
-  std::cout << std::hex << value32 << std::dec << std::endl;
+  //std::cout << std::hex << value32 << std::dec << std::endl;
 
   uint8_t received_chipid = value32 & 0xff;
   if (received_chipid!=chipId) {
@@ -931,8 +931,23 @@ float TReadoutBoardDAQ::ReadMonV()
   ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA0, ReadValue);
   int Value = (ReadValue >> 12) & 0xfff;
 
+  float Voltage = (float) Value;
+  Voltage *= 3.3;
+  Voltage /= (1.8 * 4096);
+  return Voltage;
+  //  return ADCToCurrent(Value);
+}
+
+
+float TReadoutBoardDAQ::ReadMonI() 
+{
+  uint32_t ReadValue;
+  ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA1, ReadValue);
+  int Value = (ReadValue) & 0xfff;
+
   return ADCToCurrent(Value);
 }
+
 
 float TReadoutBoardDAQ::ReadTemperature() 
 {
