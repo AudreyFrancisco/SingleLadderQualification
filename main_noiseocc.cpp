@@ -1,3 +1,25 @@
+// Template to prepare standard test routines
+// ==========================================
+//
+// The template is intended to prepare scans that work in the same way for the three setup types
+//   - single chip with DAQ board
+//   - IB stave with MOSAIC
+//   - OB module with MOSAIC
+// The setup type has to be set with the global variable fSetupType
+//
+// After successful call to initSetup() the elements of the setup are accessible in the two vectors
+//   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
+//   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
+//
+// In order to have a generic scan, which works for single chips as well as for staves and modules, 
+// all chip accesses should be done with a loop over all elements of the chip vector. 
+// (see e.g. the configureChip loop in main)
+// Board accesses are to be done via fBoards.at(0);  
+// For an example how to access board-specific functions see the power off at the end of main. 
+//
+// The functions that should be modified for the specific test are configureChip() and main()
+
+
 #include <unistd.h>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
@@ -11,63 +33,135 @@
 #include "SetupHelpers.h"
 
 
+int myStrobeLength = 60;      // strobe length in units of 25 ns
+int myStrobeDelay  = 0;
+int myPulseLength  = 500;
 
+int myPulseDelay   = 50;
+int myNTriggers    = 100000;
+
+
+int HitData     [512][1024];
+
+
+void ClearHitData() {
+  for (int icol = 0; icol < 512; icol ++) {
+    for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+      HitData[icol][iaddr] = 0;
+    }
+  }
+}
+
+
+void CopyHitData(std::vector <TPixHit> *Hits) {
+  for (int ihit = 0; ihit < Hits->size(); ihit ++) {
+    HitData[Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address] ++;
+  }
+  Hits->clear();
+}
+
+
+void WriteDataToFile (const char *fName, bool Recreate) {
+  FILE *fp;
+  bool  HasData;
+  if (Recreate) fp = fopen(fName, "w");
+  else          fp = fopen(fName, "a");
+
+  for (int icol = 0; icol < 512; icol ++) {
+    for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+      if (HitData[icol][iaddr] > 0) {
+        fprintf(fp, "%d %d %d\n", icol, iaddr, HitData[icol][iaddr]);
+      }
+    }
+  }
+  fclose (fp);
+}
+
+
+// initialisation of Fromu
+int configureFromu(TAlpide *chip) {
+  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x0);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
+  chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
+  //  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
+}
+
+
+// initialisation of chip DACs
+int configureDACs(TAlpide *chip) {
+  chip->WriteRegister (Alpide::REG_VRESETD, 147);
+  //  chip->WriteRegister (Alpide::REG_ITHR, 51);
+}
+
+
+// initialisation of fixed mask
+int configureMask(TAlpide *chip) {
+  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   false);
+  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
+}
 
 
 int configureChip(TAlpide *chip) {
-  uint16_t          status;
+  // put all chip configurations before the start of the test here
+  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x20); // set chip to config mode
+  if (fSetupType == setupSingle) {
+    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x30); // CMU/DMU config: turn manchester encoding off etc, initial token=1, disable DDR
+  }
+  else {
+    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x10); // CMU/DMU config: same as above, but manchester on
+  }
 
-      chip -> WriteRegister (0x1, 0x20); // config mode
-      
-      // CMUDMU config
-      chip -> WriteRegister (0xc, 0x60); // turn manchester encoding off etc..
-      // RORST: to be always performed after write to CMUDMU?
- 
-      // FROMU config 1
-      chip -> WriteRegister (0x4, 0x0); 
-      sleep(1);
-      // unmask all pixels 
-      chip -> WriteRegister (0x500, 0x600); 
-      chip -> WriteRegister (0x501, 0x400); 
-      chip -> WriteRegister (0x502, 0x1); 
-      chip -> WriteRegister (0x502, 0x0); 
-      //// configure readout
-      //myDAQBoard -> WriteRegister (0x200, 0x1911); 
-      //// configure trigger
-      //myDAQBoard -> WriteRegister (0x300, 0x4); 
-      //myDAQBoard -> WriteRegister (0x301, 0x510001); 
-      //myDAQBoard -> WriteRegister (0x304, 0x1a); 
-      // strobeB duration
-      chip -> WriteRegister (0x5, 0xa); // 10*25ns
-      
-      
-      // configure dacs
-      chip -> WriteRegister (0x601, 0x75); 
-      chip -> WriteRegister (0x602, 0x93); 
-      chip -> WriteRegister (0x603, 0x56); 
-      chip -> WriteRegister (0x604, 0x3c); // VCASN 0x32=50
-      chip -> WriteRegister (0x605, 0xff); 
-      chip -> WriteRegister (0x606, 0x00); 
-      chip -> WriteRegister (0x607, 0x48); // VCASN2 0x39=57
-      chip -> WriteRegister (0x608, 0x00); 
-      chip -> WriteRegister (0x609, 0x00); 
-      chip -> WriteRegister (0x60a, 0x00); 
-      chip -> WriteRegister (0x60b, 0x32); 
-      chip -> WriteRegister (0x60c, 0x40); 
-      chip -> WriteRegister (0x60d, 0x40); 
-      chip -> WriteRegister (0x60e, 0x33); 
-
-      //chip -> WriteRegister (0xc, 0x60); 
-
-      chip -> ReadRegister (0x605, status);
-      std::cout << "VPULSEH register value: 0x" << std::hex << status << std::dec << std::endl;
-      chip -> ReadRegister (0x60d, status);
-      std::cout << "IBIAS register value: 0x" << std::hex << status << std::dec << std::endl;
-
-      // triggered readout mode
-      chip -> WriteRegister (0x1, 0x21); 
+  configureFromu(chip);
+  configureDACs (chip);
+  configureMask (chip);
 
 
+  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
+
+
+}
+
+
+void scan() {   
+  unsigned char         buffer[1024*4000]; 
+  int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
+  TBoardHeader          boardInfo;
+  std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
+
+  int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 100;
+
+  nTrains = myNTriggers / nTrigsPerTrain;
+  nRest   = myNTriggers % nTrigsPerTrain;
+
+  for (int itrain = 0; itrain <= nTrains; itrain ++) {
+    if (itrain == nTrains) {
+      nTrigsThisTrain = nRest;
+    }
+    else {
+      nTrigsThisTrain = nTrigsPerTrain;
+    }
+
+      fBoards.at(0)->Trigger(nTrigsThisTrain);
+
+      int itrg = 0;
+      while(itrg < nTrigsThisTrain) {
+        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
+          usleep(100);
+          continue;
+        }
+        else {
+          // decode DAQboard event
+          BoardDecoder::DecodeEvent(boardDAQ, buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+          // decode Chip event
+          int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
+          AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
+
+          itrg++;
+        }
+      } 
+      //std::cout << "Number of hits: " << Hits->size() << std::endl;
+      CopyHitData(Hits);
+  }
 }
 
 
@@ -77,14 +171,18 @@ int main() {
 
   // module ID that is used for outer barrel modules 
   // (1 will result in master chip IDs 0x10 and 0x18, 2 in 0x20 and 0x28 ...)
-  fModuleId   = 1;
+  fModuleId = 1;
 
   fSetupType = setupSingle;
 
-
-  uint32_t          version;
-
   initSetup();
+
+  char Suffix[20], fName[100];
+
+  ClearHitData();
+  time_t       t = time(0);   // get time now
+  struct tm *now = localtime( & t );
+  sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
   
@@ -98,105 +196,20 @@ int main() {
     }
 
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
-      //usleep(10000);
-      //// start tigger
-      //myDAQBoard -> WriteRegister (0x302, 0xd); 
-      //// stop tigger
-      //myDAQBoard -> WriteRegister (0x303, 0xd); 
-      //// start tigger
-      //myDAQBoard -> WriteRegister (0x302, 0xd); 
-      //// stop tigger
-      //myDAQBoard -> WriteRegister (0x303, 0xd); 
 
-      /**/ //test trigger train
-      //myDAQBoard->GetBoardConfig()->SetStrobeDelay(40); // 40*25ns + 175 ns (offset by fw) => ~1MHz
-      //myDAQBoard->GetBoardConfig()->SetStrobeDelay(100); // 100*25ns + 175 ns (offset by fw) => ~400kHz
-      //myDAQBoard->GetBoardConfig()->SetStrobeDelay(400); //  => ~100kHz
-      //myDAQBoard->GetBoardConfig()->SetStrobeDelay(1000); // ) => ~40kHz during bunch train
-      //myDAQBoard->GetBoardConfig()->SetStrobeDelay(4000); // 4000*25ns + 175 ns (offset by fw) => ~10kHz
-      //myDAQBoard->GetBoardConfig()->SetStrobeDelay(40000); // 40000*25ns + 175 ns (offset by fw) => ~1kHz
-      //myDAQBoard->ReadAllRegisters();
-      //myDAQBoard->WriteTriggerModuleConfigRegisters(); 
+    // put your test here... 
+    fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
+    fBoards.at(0)->SetTriggerSource (trigExt);
 
-      //std::cout << "start trigger in 3s" << std::endl;
-      //sleep(3);
-      //myDAQBoard -> WriteRegister (0x302, 0xd); // StartTrigger
-      //sleep(1);
-      //myDAQBoard -> WriteRegister (0x303, 0xd); // StopTrigger
+    scan();
 
-      std::cout << "start trigger in 2s" << std::endl;
-      sleep(2);
-  
-      //myDAQBoard->StartTrigger();
-      //std::cout << "triggers sent" << std::endl;
-
-      //sleep(2);
-      /**/
-
-
-      // trigger n events
-      myDAQBoard->SetTriggerConfig(true, false, 1000, 75); // enablePulse, enableTrigger, trigger(strobe)Delay, pulseDelay
-
-      int n_triggers = 10;
-      fBoards.at(0)->Trigger(n_triggers);
-
-
-
-      // read events
-      int n_bytes_data;
-      unsigned char buffer[1024*4000]; // TODO is char better than unsigned char here?
-      int n_bytes_header;
-      int n_bytes_trailer;
-      TBoardHeader boardInfo;
-      std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
-      int itrg = 0;
-      //for (int itrg=0; itrg<n_triggers; itrg++) {
-      while(itrg<n_triggers) {
-        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
-          usleep(100);
-          continue;
-        }
-        else {
-          std::cout << "received Event" << itrg << " with length " << n_bytes_data << std::endl; 
-          for (int iByte=0; iByte<n_bytes_data; ++iByte) {
-            std::cout << std::hex << (int)(uint8_t)buffer[iByte] << std::dec;
-          }
-          std::cout << std::endl;
-          
-          // decode DAQboard event
-          BoardDecoder::DecodeEvent(boardDAQ, buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-          // decode Chip event
-          int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
-          AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
-          std::cout << "total number of hits found: " << Hits->size() << std::endl;
-
-          itrg++;
-
-        }
-      } 
-     
-      if (myDAQBoard) {
-        if (myDAQBoard->GetEventBufferLength()!=0) { 
-          std::cout << "WARNING: still events in buffer, not expected at this point!" << std::endl; 
-        }
-        else {
-          std::cout << n_triggers << " triggers read" << std::endl;
-        }
-      }
-      std::cout << "Hit pixels: " << std::endl;
-      for (int i=0; i<Hits->size(); i++) {
-        std::cout << i << ":\t region: " << Hits->at(i).region << "\tdcol: " << Hits->at(i).dcol << "\taddres: " << Hits->at(i).address << std::endl; 
-      }
-
-      //std::cout << "Powering off board" << std::endl;
-      //myDAQBoard -> PowerOff();
-
+    if (myDAQBoard) {
+      myDAQBoard->PowerOff();
+      delete myDAQBoard;
     }
+  }
 
-
-
-  //myDAQBoard->ResetBoardFPGA(10);  
-  delete myDAQBoard;
-  
+  sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
+  WriteDataToFile (fName, true);
   return 0;
 }

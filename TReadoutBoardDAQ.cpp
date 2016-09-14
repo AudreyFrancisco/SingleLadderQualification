@@ -1075,7 +1075,7 @@ void TReadoutBoardDAQ::WriteTriggerModuleConfigRegisters()
   config2 |= fBoardConfigDAQ->GetStrobeDelay();
   //std::cout << "config2: " << std::hex << config2 << std::dec << std::endl;
   err = WriteRegister ((MODULE_TRIGGER << DAQBOARD_REG_ADDR_SIZE) + TRIG_DELAY, config2);
-  std::cout << err << std::endl;
+  //std::cout << err << std::endl;
   //  busy override config reg
   uint32_t config3 = 0;
   config3 |= (fBoardConfigDAQ->GetBusyOverride()?1:0);
@@ -1148,7 +1148,7 @@ void TReadoutBoardDAQ::WriteResetModuleConfigRegisters ()
 
   // PULSE STROBE delay sequence reg
   uint32_t config2 = 0;
-  std::cout << "PulseDelay: " << fBoardConfigDAQ->GetPulseDelay() << std::endl;
+  //std::cout << "PulseDelay: " << fBoardConfigDAQ->GetPulseDelay() << std::endl;
   config2 |= ( fBoardConfigDAQ->GetPulseDelay()          & 0xffff );
   config2 |= ((fBoardConfigDAQ->GetStrobePulseSeq()      & 0x3)     << 16);
   WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_PULSE_DELAY, config2);

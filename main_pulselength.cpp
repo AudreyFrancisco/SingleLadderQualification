@@ -33,54 +33,73 @@
 #include "SetupHelpers.h"
 
 
-int myStrobeLength = 40;      // strobe length in units of 25 ns
-int myStrobeDelay  = 10;
-int myPulseLength  = 1000;
+int myStrobeLength = 10;      // strobe length in units of 25 ns
+int myStrobeDelay  = 0;       // not needed right now as strobe generated on DAQ board
+int myPulseLength  = 2000;    // 2000 = 50 us
 
-int myPulseDelay   = 50;
-int myNTriggers    = 100;
-int myMaskStages   = 2048;
+int myNTriggers    = 10;
 
-int HitData[512][1024];
+// Pixel to test
+int myRow = 5;
+int myCol = 13;
+
+// charge range
+int myChargeStart  = 0;
+int myChargeStop   = 170;   
+
+// delay between pulse and strobe seems to be 50 ns + 12.5 ns * PulseDelay + 25 ns * StrobeDelay
+int myPulseDelayStart   = 36;    // 36 = 500 ns 
+int myPulseDelayStop    = 1000;  // 1000 = 12550 ns 
 
 
-void ClearHitData() {
-  for (int icol = 0; icol < 512; icol ++) {
-    for (int iaddr = 0; iaddr < 1024; iaddr ++) {
-      HitData[icol][iaddr] = 0;
-    }
-  }
+
+int AddressToColumn      (int ARegion, int ADoubleCol, int AAddress)
+{
+  int Column    = ARegion * 32 + ADoubleCol * 2;    // Double columns before ADoubleCol
+  int LeftRight = ((((AAddress % 4) == 1) || ((AAddress % 4) == 2))? 1:0);       // Left or right column within the double column
+
+  Column += LeftRight;
+
+  return Column;
 }
 
 
-void CopyHitData(std::vector <TPixHit> *Hits) {
-  for (int ihit = 0; ihit < Hits->size(); ihit ++) {
-    HitData[Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address] ++;
-  }
-  Hits->clear();
+int AddressToRow         (int ARegion, int ADoubleCol, int AAddress)
+{
+  int Row = AAddress / 2;
+  return Row;
 }
 
 
-void WriteDataToFile (const char *fName, bool Recreate) {
+
+
+void WriteDataToFile (const char *fName, std::vector<TPixHit> *Hits, int charge, int delay, bool Recreate) {
   FILE *fp;
-  bool  HasData;
+  int   nHits = 0;
+  int   col, row;
   if (Recreate) fp = fopen(fName, "w");
   else          fp = fopen(fName, "a");
 
-  for (int icol = 0; icol < 512; icol ++) {
-    for (int iaddr = 0; iaddr < 1024; iaddr ++) {
-      if (HitData[icol][iaddr] > 0) {
-        fprintf(fp, "%d %d %d\n", icol, iaddr, HitData[icol][iaddr]);
-      }
+  for (int i = 0; i < Hits->size(); i ++) {
+    col = AddressToColumn(Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
+    row = AddressToRow   (Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
+
+    if ((col == myCol) && (row == myRow)) {
+      nHits ++;
     }
   }
+  Hits->clear();
+  if (nHits) 
+    fprintf(fp, "%d %d %d %d %d\n", col, row, charge, delay, nHits);
+
   fclose (fp);
+
 }
 
 
 // initialisation of Fromu
 int configureFromu(TAlpide *chip) {
-  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x0);             // fromu config 1: digital pulsing (put to 0x20 for analogue)
+  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x20);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
   chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
@@ -89,39 +108,19 @@ int configureFromu(TAlpide *chip) {
 
 // initialisation of chip DACs
 int configureDACs(TAlpide *chip) {
-  //  chip->WriteRegister (Alpide::REG_ITHR, );
+  chip->WriteRegister (Alpide::REG_VPULSEH, 170);
+  chip->WriteRegister (Alpide::REG_VPULSEL, 169);
+  chip->WriteRegister (Alpide::REG_VRESETD, 147);
 }
 
 
 // initialisation of fixed mask
 int configureMask(TAlpide *chip) {
-  // unmask all pixels 
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK, true);
-}
-
-
-// setting of mask stage during scan
-int configureMaskStage(TAlpide *chip, int istage) {
-  int row    = istage / 4;
-  int region = istage % 4;
-
-  uint32_t regionmod = 0x77777777 >> region;
-
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
 
-  AlpideConfig::WritePixRegRow (chip, Alpide::PIXREG_MASK,   false, row);
-  AlpideConfig::WritePixRegRow (chip, Alpide::PIXREG_SELECT, true,  row);
-
-  chip->WriteRegister (Alpide::REG_REGDISABLE_LOW,  (uint16_t) regionmod);
-  chip->WriteRegister (Alpide::REG_REGDISABLE_HIGH, (uint16_t) regionmod);
-
-  //for (int icol = 0; icol < 1024; icol += 4) {
-  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 1024, icol + istage / 1024);
-  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 1024, icol + istage / 1024);
-  // 
-  //}
-
+  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, myRow, myCol);
+  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  myRow, myCol);
 }
 
 
@@ -146,54 +145,44 @@ int configureChip(TAlpide *chip) {
 }
 
 
-void scan() {   
+void scan(const char *fName) {   
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
 
-  for (int istage = 0; istage < myMaskStages; istage ++) {
-    std::cout << "Mask stage " << istage << std::endl;
-    for (int i = 0; i < fChips.size(); i ++) {
-      configureMaskStage (fChips.at(i), istage);
+    for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+      std::cout << "Charge = " << icharge << std::endl;
+      fChips.at(0)->WriteRegister (Alpide::REG_VPULSEL, 170 - icharge);
+
+      for (int idelay = myPulseDelayStart; idelay < myPulseDelayStop; idelay ++) {
+        fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, idelay);  
+        fBoards.at(0)->Trigger(myNTriggers);
+
+        int itrg = 0;
+        while(itrg < myNTriggers) {
+          if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
+            usleep(100);
+            continue;
+          }
+          else {
+            // decode DAQboard event
+            BoardDecoder::DecodeEvent(boardDAQ, buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+            // decode Chip event
+            int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
+            AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
+
+            itrg++;
+          }
+ 	}
+        if ((idelay == myPulseDelayStart) && (icharge == myChargeStart))
+          WriteDataToFile (fName, Hits, icharge, idelay, true);
+        else 
+          WriteDataToFile (fName, Hits, icharge, idelay, false);
+      }
+
     }
-
-    fBoards.at(0)->Trigger(myNTriggers);
-
-    int itrg = 0;
-    while(itrg < myNTriggers) {
-      if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
-        usleep(100);
-        continue;
-      }
-      else {
-        //std::cout << "received Event" << itrg << " with length " << n_bytes_data << std::endl; 
-        //for (int iByte=0; iByte<n_bytes_data; ++iByte) {
-        //  std::cout << std::hex << (int)(uint8_t)buffer[iByte] << std::dec;
-	// }
-        //std::cout << std::endl;
-            
-        // decode DAQboard event
-        BoardDecoder::DecodeEvent(boardDAQ, buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-        // decode Chip event
-        int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
-        AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
-        //std::cout << "total number of hits found: " << Hits->size() << std::endl;
-
-        itrg++;
-
-      }
-    } 
-    
-    //std::cout << "Hit pixels: " << std::endl;
-    //for (int i=0; i<Hits->size(); i++) {
-    //  std::cout << i << ":\t region: " << Hits->at(i).region << "\tdcol: " << Hits->at(i).dcol << "\taddres: " << Hits->at(i).address << std::endl; 
-    //}
-    CopyHitData(Hits);
-  }
-
-
 }
 
 
@@ -211,10 +200,11 @@ int main() {
 
   char Suffix[20], fName[100];
 
-  ClearHitData();
   time_t       t = time(0);   // get time now
   struct tm *now = localtime( & t );
   sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+  sprintf(fName, "Data/PulselengthScan_%s.dat", Suffix);
+
 
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
   
@@ -230,10 +220,9 @@ int main() {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
 
     // put your test here... 
-    fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
     fBoards.at(0)->SetTriggerSource (trigExt);
 
-    scan();
+    scan(fName);
 
     if (myDAQBoard) {
       myDAQBoard->PowerOff();
@@ -242,7 +231,6 @@ int main() {
   }
 
 
-  sprintf(fName, "Data/DigitalScan_%s.dat", Suffix);
-  WriteDataToFile (fName, true);
+
   return 0;
 }
