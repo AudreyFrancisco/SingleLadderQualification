@@ -64,7 +64,7 @@ int main() {
       // FROMU pulsing 1: delay between PULSE and STROBE
       //chip -> WriteRegister (0x6, 80); // 80=>2us
       // FROMU pulsing 2: PULSE duration
-      chip -> WriteRegister (0x6, 1600); // 800=>40us
+      chip -> WriteRegister (0x7, 1600); // 800=>40us
 
       sleep(1);
       // unmask all pixels 
@@ -83,7 +83,7 @@ int main() {
       //chip -> WriteRegister (0x601, 0x75); 
       chip -> WriteRegister (0x602, 0x93); 
       //chip -> WriteRegister (0x603, 0x56); 
-      chip -> WriteRegister (0x604, 65); // VCASN 0x32=50
+      chip -> WriteRegister (0x604, 57); // VCASN 0x32=50
       //chip -> WriteRegister (0x605, 0xff); // VPULSEH
       chip -> WriteRegister (0x605, 170); 
       //chip -> WriteRegister (0x606, 0x00);   // VPULSEL
@@ -101,7 +101,7 @@ int main() {
       chip -> WriteRegister (0x1, 0x21); 
        
       // configure readout/pulse/trigger
-      myDAQBoard->SetTriggerConfig(true, false, 0, 200); // enablePulse, enableTrigger, trigger(strobe)Delay (x25ns), pulseDelay (x12.5ns)
+      myDAQBoard->SetTriggerConfig(true, false, 50, 50); // enablePulse, enableTrigger, trigger(strobe)Delay (x25ns), pulseDelay (x12.5ns)
       // delay between pulse and trigger is the triggerDelay(x25ns) + puslseDelay(x12.5ns) + 50ns offset
       // pusleDelay has to be set to larger than 25 to not cause problems..
       myDAQBoard->SetTriggerSource(trigExt);
@@ -151,7 +151,7 @@ int main() {
         chip -> WriteRegister (0x502, 0x0);   // Pixel CFG reg 3: strobe off
        
         // triggered mode
-        chip -> WriteRegister (0x1, 0x20); 
+        chip -> WriteRegister (0x1, 0x21); 
       
         // pulse!
         myDAQBoard->Trigger(n_triggers);

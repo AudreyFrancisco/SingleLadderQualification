@@ -292,7 +292,7 @@ void TReadoutBoardDAQ::DAQTrigger() {
         StartTrigger();
         WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_PULSE, 13); // write anything to pulse register to trigger pulse
         StopTrigger();
-        std::cout << "Pulse " << fTrigCnt << " sent" << std::endl;
+        //std::cout << "Pulse " << fTrigCnt << " sent" << std::endl;
       }
       else {
         std::cout << "Maximum event buffer size reached before reaching nTriggers (Pulses); stop here!" << std::endl;
@@ -326,7 +326,7 @@ void TReadoutBoardDAQ::DAQTrigger() {
 // readdata function to be executed in thread fThreadReadData
 void TReadoutBoardDAQ::DAQReadData() {
   fMtx.lock();
-  std::cout << " -> in DAQReadData now" << std::endl;
+  //std::cout << " -> in DAQReadData now" << std::endl;
   fIsReadDataThreadRunning = true;
   fMtx.unlock();
 
@@ -340,7 +340,7 @@ void TReadoutBoardDAQ::DAQReadData() {
   //std::copy(my_deque.begin(), my_deque.end(), std::back_inserter(my_vector));
 
   if (fBoardConfigDAQ->GetPktBasedROEnable() == false) { // event based
-    std::cout << " --> event based readout" << std::endl;
+    //std::cout << " --> event based readout" << std::endl;
     while (fEvtCnt<fNTriggersTotal) { // no stop-trigger marker with event-based readout
       data_evt.clear();
       evt_length = ReceiveData(ENDPOINT_READ_DATA, data_buf, length_buf, &tmp_error);
@@ -581,7 +581,7 @@ void TReadoutBoardDAQ::DAQReadData() {
 
 int TReadoutBoardDAQ::Trigger (int nTriggers) // open threads for triggering and reading/writing data to queue..
 {
-  std::cout << "in Trigger function now" << std::endl;
+  //std::cout << "in Trigger function now" << std::endl;
 
   //int wait_counter = 0;
   //while ((fIsTriggerThreadRunning || fIsReadDataThreadRunning) && wait_counter<10) { // check if some other threads still running
@@ -598,7 +598,7 @@ int TReadoutBoardDAQ::Trigger (int nTriggers) // open threads for triggering and
   fEvtCnt  = 0;
 
   // launch trigger and readdata in threads:
-  std::cout << "starting threads.." << std::endl;
+  //std::cout << "starting threads.." << std::endl;
   fThreadTrigger  = std::thread (&TReadoutBoardDAQ::DAQTrigger,   this);
   //usleep(10000);
   //sleep(1);

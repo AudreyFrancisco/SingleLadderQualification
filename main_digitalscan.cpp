@@ -39,7 +39,7 @@ int myPulseLength  = 1000;
 
 int myPulseDelay   = 50;
 int myNTriggers    = 10;
-
+int myMaskStages   = 2048;
 
 int HitData[512][1024];
 
@@ -102,15 +102,25 @@ int configureMask(TAlpide *chip) {
 
 // setting of mask stage during scan
 int configureMaskStage(TAlpide *chip, int istage) {
+  int row    = istage / 4;
+  int region = istage % 4;
 
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   false);
+  uint32_t regionmod = 0x77777777 >> region;
+
+  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
 
-  for (int icol = 0; icol < 1024; icol += 32) {
-    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage, icol);
-    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage, icol);
-   
-  }
+  AlpideConfig::WritePixRegRow (chip, Alpide::PIXREG_MASK,   false, row);
+  AlpideConfig::WritePixRegRow (chip, Alpide::PIXREG_SELECT, true,  row);
+
+  chip->WriteRegister (Alpide::REG_REGDISABLE_LOW,  (uint16_t) regionmod);
+  chip->WriteRegister (Alpide::REG_REGDISABLE_HIGH, (uint16_t) regionmod);
+
+  //for (int icol = 0; icol < 1024; icol += 4) {
+  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 1024, icol + istage / 1024);
+  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 1024, icol + istage / 1024);
+  // 
+  //}
 
 }
 
@@ -143,7 +153,8 @@ void scan() {
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
 
-  for (int istage = 0; istage < 1; istage ++) {
+  for (int istage = 0; istage < myMaskStages; istage ++) {
+    std::cout << "Mask stage " << istage << std::endl;
     for (int i = 0; i < fChips.size(); i ++) {
       configureMaskStage (fChips.at(i), istage);
     }
@@ -157,30 +168,29 @@ void scan() {
         continue;
       }
       else {
-        std::cout << "received Event" << itrg << " with length " << n_bytes_data << std::endl; 
-        for (int iByte=0; iByte<n_bytes_data; ++iByte) {
-          std::cout << std::hex << (int)(uint8_t)buffer[iByte] << std::dec;
-        }
-        std::cout << std::endl;
+        //std::cout << "received Event" << itrg << " with length " << n_bytes_data << std::endl; 
+        //for (int iByte=0; iByte<n_bytes_data; ++iByte) {
+        //  std::cout << std::hex << (int)(uint8_t)buffer[iByte] << std::dec;
+	// }
+        //std::cout << std::endl;
             
         // decode DAQboard event
         BoardDecoder::DecodeEvent(boardDAQ, buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
         // decode Chip event
         int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
         AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
-        std::cout << "total number of hits found: " << Hits->size() << std::endl;
+        //std::cout << "total number of hits found: " << Hits->size() << std::endl;
 
         itrg++;
 
       }
     } 
     
-    std::cout << "Hit pixels: " << std::endl;
-    for (int i=0; i<Hits->size(); i++) {
-      std::cout << i << ":\t region: " << Hits->at(i).region << "\tdcol: " << Hits->at(i).dcol << "\taddres: " << Hits->at(i).address << std::endl; 
-    }
+    //std::cout << "Hit pixels: " << std::endl;
+    //for (int i=0; i<Hits->size(); i++) {
+    //  std::cout << i << ":\t region: " << Hits->at(i).region << "\tdcol: " << Hits->at(i).dcol << "\taddres: " << Hits->at(i).address << std::endl; 
+    //}
     CopyHitData(Hits);
-    std::cout << "------------------- Mask stage " << istage << " finished -------------------" << std::endl;
   }
 
 
@@ -232,7 +242,7 @@ int main() {
   }
 
 
-  sprintf(fName, "DigitalScan_%s.dat", Suffix);
+  sprintf(fName, "Data/DigitalScan_%s.dat", Suffix);
   WriteDataToFile (fName, true);
   return 0;
 }
