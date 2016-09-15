@@ -232,7 +232,8 @@ class TBoardConfigDAQ : public TBoardConfig {
   void SetLDOEnable(bool enable)           {fLDOEnable          = enable;};
 
   // READOUT Module 
-  void SetDataPortSelect(int dataPort)      {fDataPortSelect     = dataPort;};
+  void SetDataPortSelect(int dataPort)     {fDataPortSelect      = dataPort;};
+  void SetPktBasedROEnable(bool enable)    {fPktBasedROEnable    = enable;};
 
   // TRIGGER Module
   // void SetNTriggers   (int nTriggers)      {fNTriggers          = nTriggers;}; // defined in base class TBoardConfig
