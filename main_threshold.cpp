@@ -33,13 +33,13 @@
 #include "SetupHelpers.h"
 
 
-int myStrobeLength = 60;      // strobe length in units of 25 ns
-int myStrobeDelay  = 10;
+int myStrobeLength = 80;      // strobe length in units of 25 ns
+int myStrobeDelay  = 0;
 int myPulseLength  = 500;
 
-int myPulseDelay   = 60;
+int myPulseDelay   = 40;
 int myNTriggers    = 50;
-int myMaskStages   = 4096;    // full: 4096
+int myMaskStages   = 164;    // full: 8192
 
 int myChargeStart  = 0;
 int myChargeStop   = 50;   // if > 100 points, increase array sizes
