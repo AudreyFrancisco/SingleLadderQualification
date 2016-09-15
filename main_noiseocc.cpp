@@ -38,7 +38,7 @@ int myVCASN2  = 64;
 int myVCLIP   = 0;
 int myVRESETD = 147;
 
-int myStrobeLength = 10;      // strobe length in units of 25 ns
+int myStrobeLength = 20;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;
 int myPulseLength  = 500;
 
