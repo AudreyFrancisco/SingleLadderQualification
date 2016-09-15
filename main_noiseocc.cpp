@@ -32,6 +32,11 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
+int myVCASN   = 57;
+int myITHR    = 51;
+int myVCASN2  = 64;
+int myVCLIP   = 0;
+int myVRESETD = 147;
 
 int myStrobeLength = 10;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;
@@ -89,8 +94,11 @@ int configureFromu(TAlpide *chip) {
 
 // initialisation of chip DACs
 int configureDACs(TAlpide *chip) {
-  chip->WriteRegister (Alpide::REG_VRESETD, 147);
-  //  chip->WriteRegister (Alpide::REG_ITHR, 51);
+  chip->WriteRegister (Alpide::REG_VRESETD, myVRESETD);
+  chip->WriteRegister (Alpide::REG_VCASN,   myVCASN);
+  chip->WriteRegister (Alpide::REG_VCASN2,  myVCASN2);
+  chip->WriteRegister (Alpide::REG_VCLIP,   myVCLIP);
+  chip->WriteRegister (Alpide::REG_ITHR,    myITHR);
 }
 
 

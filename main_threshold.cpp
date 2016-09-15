@@ -33,6 +33,12 @@
 #include "SetupHelpers.h"
 
 
+int myVCASN   = 57;
+int myITHR    = 51;
+int myVCASN2  = 64;
+int myVCLIP   = 0;
+int myVRESETD = 147;
+
 int myStrobeLength = 80;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;
 int myPulseLength  = 500;
@@ -105,7 +111,11 @@ int configureFromu(TAlpide *chip) {
 int configureDACs(TAlpide *chip) {
   chip->WriteRegister (Alpide::REG_VPULSEH, 170);
   chip->WriteRegister (Alpide::REG_VPULSEL, 169);
-  chip->WriteRegister (Alpide::REG_VRESETD, 147);
+  chip->WriteRegister (Alpide::REG_VRESETD, myVRESETD);
+  chip->WriteRegister (Alpide::REG_VCASN,   myVCASN);
+  chip->WriteRegister (Alpide::REG_VCASN2,  myVCASN2);
+  chip->WriteRegister (Alpide::REG_VCLIP,   myVCLIP);
+  chip->WriteRegister (Alpide::REG_ITHR,    myITHR);
 }
 
 
