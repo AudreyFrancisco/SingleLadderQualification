@@ -33,12 +33,12 @@
 #include "SetupHelpers.h"
 
 
-int myStrobeLength = 60;      // strobe length in units of 25 ns
+int myStrobeLength = 10;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;
 int myPulseLength  = 500;
 
 int myPulseDelay   = 50;
-int myNTriggers    = 100000;
+int myNTriggers    = 1000000;
 
 
 int HitData     [512][1024];
