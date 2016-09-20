@@ -2,7 +2,7 @@ CC=g++
 INCLUDE=/usr/local/include
 LIBPATH=/usr/local/lib
 CFLAGS= -pipe -fPIC -g -std=c++0x -I $(INCLUDE)
-LINKFLAGS=-lusb-1.0 -L $(LIBPATH)
+LINKFLAGS=-lusb-1.0 -ltinyxml -L $(LIBPATH)
 #LINKFLAGS=
 OBJECT= runTest
 #LIBRARY=libpalpidefs.so
@@ -47,6 +47,10 @@ test_dacscan:   $(OBJS) main_dacscan.cpp
 
 test_pulselength:   $(OBJS) main_pulselength.cpp
 	$(CC) -o test_pulselength $(OBJS) $(CFLAGS) main_pulselength.cpp $(LINKFLAGS)
+
+test_tid: $(OBJS) main_tid.cpp
+	$(CC) -o test_tid $(OBJS) $(CFLAGS) main_tid.cpp $(LINKFLAGS)
+  
 
 %.o: 	%.cpp %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
