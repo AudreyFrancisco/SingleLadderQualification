@@ -49,13 +49,6 @@
 int SEU_CHECKER = 1;
 int BB=0; // 0: 0V, 1: -3V
 
-// DAC Setup - (0: BB = 0V, 1: BB=-3V)
-int myVCASN   = 57;
-int myVCASN2  = 64;
-int myITHR    = 51;
-int myVCLIP   = 0;
-int myVRESETD = 147;
-
 // DAQ Setup
 int myStrobeLength = 80;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;
@@ -71,6 +64,9 @@ int myChargeStop   = 50;   // if > 100 points, increase array sizes
 
 int HitData     [100][512][1024];
 int ChargePoints[100];
+
+// Log data
+float logData [16];
 
 TReadoutBoardDAQ *myDAQBoard; // Compile error: Can not find the myDAQBoard in the read function
 
@@ -275,8 +271,39 @@ void readAllDac (TAlpide *chip){
   readCurrentDac (chip, Alpide::REG_ITHR,    "ITHR");
 }
 
-void monHameg(){
-  system("./tid/hameg2030.py /dev/ttyHAMEG0 6 0 >> Data/hameg.log");
+void WriteDataToLogFile (const char *fName, bool Recreate) {
+  FILE *fp;
+  bool  HasData;
+  if (Recreate) fp = fopen(fName, "w");
+  else          fp = fopen(fName, "a");
+
+  for (int icol = 0; icol < 512; icol ++) {
+    for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+      HasData = false;
+      for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+        if (HitData[icharge - myChargeStart][icol][iaddr] > 0) HasData = true;
+      }
+      
+      if (HasData) {
+        for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+          fprintf(fp, "%d %d %d %d\n", icol, iaddr, icharge, HitData[icharge - myChargeStart][icol][iaddr]);
+  }
+      }
+    }
+  }
+  fclose (fp);
+}
+
+float monHameg1(){
+  float DAQHamegCurrent;
+  DAQHamegCurrent = system("./tid/hameg2030.py /dev/ttyHAMEG0 6 0 >> Data/hameg.log");
+  return DAQHamegCurrent;
+}
+
+float monHameg1(){
+  float DAQHamegCurrent;
+  DAQHamegCurrent = system("./tid/hameg2030.py /dev/ttyHAMEG0 6 0 >> Data/hameg.log");
+  return DAQHamegCurrent;
 }
 
 // Threshold scan part start
@@ -323,7 +350,6 @@ void WriteDataToFile (const char *fName, bool Recreate) {
   fclose (fp);
 }
 
-
 // initialisation of Fromu
 int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x20);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
@@ -334,26 +360,44 @@ int configureFromu(TAlpide *chip) {
 
 
 // initialisation of chip DACs
-int configureDACs(TAlpide *chip) {
+int configureDACs_threshold(TAlpide *chip) {
   chip->WriteRegister (Alpide::REG_VPULSEH, 170);
   chip->WriteRegister (Alpide::REG_VPULSEL, 169);
 }
 
-int configureDACs(TAlpide *chip, int aBB) {
-  int VDAC[2][3] = {};
-  int IDAC[2][2] = {};
-  if (aBB==0)
-  {
-    chip->WriteRegister (Alpide::REG_VCASN,   myVCASN);
-    chip->WriteRegister (Alpide::REG_VCASN2,  myVCASN2);
-    chip->WriteRegister (Alpide::REG_VCLIP,   myVCLIP);
-    chip->WriteRegister (Alpide::REG_IDB,     myIDB);
-    chip->WriteRegister (Alpide::REG_ITHR,    myITHR);
-  }
-  chip->WriteRegister (Alpide::REG_VRESETD, myVRESETD);
-  if (aBB==3)
-  {
-    /* code */
+int configureDACs(TAlpide *chip, int backBias) {
+  // Order: VCASN, VCASN2, VRESETP, VRESETD, VCLIP
+  int VDAC[2][5] = {
+    {50, 62, 117, 147, 0},
+    {105, 117, 117, 147, 60}
+  };
+  // Order: ITHR, IDB, IRESET
+  int IDAC[2][3] = {
+    {51, 64, 100},
+    {51, 64, 100}
+  };
+  switch (backBias) {
+    case 0:
+    chip->WriteRegister (Alpide::REG_VCASN,     VDAC[0][0]);
+    chip->WriteRegister (Alpide::REG_VCASN2,    VDAC[0][1]);
+    chip->WriteRegister (Alpide::REG_VRESETP,   VDAC[0][2]);
+    chip->WriteRegister (Alpide::REG_VRESETD,   VDAC[0][3]);
+    chip->WriteRegister (Alpide::REG_VCLIP,     VDAC[0][4]);
+
+    chip->WriteRegister (Alpide::REG_ITHR,      IDAC[0][0]);
+    chip->WriteRegister (Alpide::REG_IDB,       IDAC[0][1]);
+    chip->WriteRegister (Alpide::REG_IRESET,    IDAC[0][2]);
+
+    case 3:
+    chip->WriteRegister (Alpide::REG_VCASN,     VDAC[1][0]);
+    chip->WriteRegister (Alpide::REG_VCASN2,    VDAC[1][1]);
+    chip->WriteRegister (Alpide::REG_VRESETP,   VDAC[1][2]);
+    chip->WriteRegister (Alpide::REG_VRESETD,   VDAC[1][3]);
+    chip->WriteRegister (Alpide::REG_VCLIP,     VDAC[1][4]);
+
+    chip->WriteRegister (Alpide::REG_ITHR,      IDAC[1][0]);
+    chip->WriteRegister (Alpide::REG_IDB,       IDAC[1][1]);
+    chip->WriteRegister (Alpide::REG_IRESET,    IDAC[1][2]);
   }
 }
 
@@ -445,7 +489,8 @@ int configureChip_threshold(TAlpide *chip) {
   }
 
   configureFromu(chip);
-  configureDACs (chip);  
+  configureDACs_threshold (chip);  
+  configureDACs (chip, 0);  
   configureMask (chip);
 
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
