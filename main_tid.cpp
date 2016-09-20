@@ -40,6 +40,8 @@
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
+#include <cstdio>
+#include <tinyxml.h>
 #include <iomanip> // For using std::setprecision
 #include <ctime> // For measuring the time elapsed
 #include <iostream> // For writing output file
@@ -48,6 +50,14 @@
 // Flag
 int SEU_CHECKER = 1;
 int BB=0; // 0: 0V, 1: -3V
+
+// DAC Setup - (0: BB = 0V, 1: BB=-3V)
+int myVCASN   = 57;
+int myVCASN2  = 64;
+int myITHR    = 51;
+int myVCLIP   = 0;
+int myVRESETD = 147;
+int myIDB = 29;
 
 // DAQ Setup
 int myStrobeLength = 80;      // strobe length in units of 25 ns
@@ -69,6 +79,129 @@ int ChargePoints[100];
 float logData [16];
 
 TReadoutBoardDAQ *myDAQBoard; // Compile error: Can not find the myDAQBoard in the read function
+
+unsigned int Bitmask(int width)
+{
+  unsigned int tmp = 0;
+  for (int i=0; i<width; i++)
+    tmp |= 1 << i;
+  return tmp;
+}
+
+void ParseXML(TAlpide* dut, TiXmlNode* node, int base, int rgn,
+              bool readwrite)
+{
+  // readwrite (from Chip): true = read; false = write
+  for (TiXmlNode* pChild = node->FirstChild("address"); pChild != 0;
+       pChild = pChild->NextSibling("address")) {
+    if (pChild->Type() != TiXmlNode::TINYXML_ELEMENT)
+      continue;
+//         printf( "Element %d [%s] %d %d\n", pChild->Type(), pChild->Value(),
+//         base, rgn);
+    TiXmlElement* elem = pChild->ToElement();
+    if (base == -1) {
+      if (!elem->Attribute("base")) {
+        std::cout << "Base attribute not found!" << std::endl;
+        break;
+      }
+      ParseXML(dut, pChild, atoi(elem->Attribute("base")), -1, readwrite);
+    } else if (rgn == -1) {
+      if (!elem->Attribute("rgn")) {
+        std::cout << "Rgn attribute not found!" << std::endl;
+        break;
+      }
+      ParseXML(dut, pChild, base, atoi(elem->Attribute("rgn")), readwrite);
+    } else {
+      if (!elem->Attribute("sub")) {
+        std::cout << "Sub attribute not found!" << std::endl;
+        break;
+      }
+      int sub = atoi(elem->Attribute("sub"));
+      uint16_t address = ((rgn << 11) + (base << 8) + sub);
+      uint16_t value = 0;
+      //std::cout << "region" << rgn << " " << base << " " << sub << std::endl;
+
+      if (readwrite) {
+        if (dut->ReadRegister(address, value) != 1) {
+          std::cout << "Failure to read chip address " << address << std::endl;
+          continue;
+        }
+      }
+
+      for (TiXmlNode* valueChild = pChild->FirstChild("value"); valueChild != 0;
+           valueChild = valueChild->NextSibling("value")) {
+        if (!valueChild->ToElement()->Attribute("begin")) {
+          std::cout << "begin attribute not found!" << std::endl;
+          break;
+        }
+        int begin = atoi(valueChild->ToElement()->Attribute("begin"));
+
+        int width = 1;
+        if (valueChild->ToElement()->Attribute("width")) // width attribute is
+                                                         // optional
+          width = atoi(valueChild->ToElement()->Attribute("width"));
+
+        if (!valueChild->FirstChild("content") &&
+            !valueChild->FirstChild("content")->FirstChild()) {
+          std::cout << "content tag not found!" << std::endl;
+          break;
+        }
+        if (readwrite) {
+          int subvalue = (value >> begin) & Bitmask(width);
+          char tmp[5];
+          sprintf(tmp, "%X", subvalue);
+          valueChild->FirstChild("content")->FirstChild()->SetValue(tmp);
+        } else {
+          int content = (int)strtol(
+            valueChild->FirstChild("content")->FirstChild()->Value(), 0, 16);
+
+
+
+          if (content >= (1 << width)) {
+            std::cout << "value too large: " << begin << " " << width << " "
+                      << content << " "
+                      << valueChild->FirstChild("content")->Value()
+                      << std::endl;
+            break;
+          }
+          value += content << begin;
+        }
+      }
+      if (!readwrite) {
+        //printf("%d %d %d: %d %d\n", base, rgn, sub, address, value);
+	      if (dut->WriteRegister(address, value) != 1)
+		      std::cout << "Failure to write chip address " << address << std::endl;
+        uint16_t valuecompare = 0;
+        if (dut->ReadRegister(address, valuecompare) != 1)
+          std::cout << "Failure to read chip address after writing chip address " << address << std::endl;
+        if (address != 14 && value != valuecompare)
+          std::cout << "Register read back error : write value is : " << value << " and read value is : "<< valuecompare << std::endl;
+
+      }
+    }
+  }
+}
+
+void DumpConfiguration(TAlpide *myAlpide, long int timef) {
+  TiXmlDocument doc("full.xml");
+  if (!doc.LoadFile()) {
+    std::string msg = "Failed to load config file!";
+    std::cerr << msg.data() << std::endl;
+    return;
+  }
+  
+  ParseXML(myAlpide, doc.FirstChild("root")->ToElement(), -1, -1, true);
+  
+  std::string configStr;
+  configStr << doc;
+
+  char buffer[100];
+  sprintf(buffer, "Data/Configuration_%ld.xml", timef );
+  FILE *fp = fopen (buffer, "w");
+  fprintf(fp, "%s", configStr.c_str());
+  fclose(fp);
+}
+
 
 void timestamp(int lineChange=0){
   time_t       t = time(0);   // get time now
@@ -153,11 +286,11 @@ void SetDACMon (TAlpide *chip, Alpide::TRegister ADac, int IRef = 2) { // copy f
   
 }
 
-void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int sampleDist = 1) { // copy from DAC scan
+void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int sampleDist = 1, long int time = 0) { // copy from DAC scan
   char     fName[50];
   float    Current;
   uint16_t old;
-  sprintf (fName, "Data/IDAC_%s.dat", Name);
+  sprintf (fName, "Data/ScanDACS/%ld/IDAC_%s.dat",time, Name);
   FILE *fp = fopen (fName, "w");
   
   std::cout << "Scanning DAC " << Name << std::endl;
@@ -177,11 +310,11 @@ void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
   fclose (fp);
 }
 
-void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int sampleDist = 1) { // copy from DAC scan
+void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int sampleDist = 1, long int time = 0) { // copy from DAC scan
   char     fName[50];
   float    Voltage;
   uint16_t old;
-  sprintf (fName, "Data/VDAC_%s.dat", Name);
+  sprintf (fName, "Data/ScanDACS/%ld/VDAC_%s.dat", time, Name );
   FILE *fp = fopen (fName, "w");
   
   std::cout << "Scanning DAC " << Name << std::endl;
@@ -201,23 +334,23 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
   fclose (fp);
 }
 
-void scanAllDac(TAlpide *chip, int sampleDist = 1){
+void scanAllDac(TAlpide *chip, int sampleDist = 1, long int time = 0){
     // Volatge DAC scan
-    scanVoltageDac (fChips.at(0), Alpide::REG_VRESETP, "VRESETP", sampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VRESETD, "VRESETD", sampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VCASP,   "VCASP",   sampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VCASN,   "VCASN",   sampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEH, "VPULSEH", sampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEL, "VPULSEL", sampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VCASN2,  "VCASN2",  sampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VCLIP,   "VCLIP",   sampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VTEMP,   "VTEMP",   sampleDist);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VRESETP, "VRESETP", sampleDist, time);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VRESETD, "VRESETD", sampleDist, time);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VCASP,   "VCASP",   sampleDist, time);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VCASN,   "VCASN",   sampleDist, time);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEH, "VPULSEH", sampleDist, time);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEL, "VPULSEL", sampleDist, time);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VCASN2,  "VCASN2",  sampleDist, time);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VCLIP,   "VCLIP",   sampleDist, time);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VTEMP,   "VTEMP",   sampleDist, time);
     // Current DAC scan
-    scanCurrentDac (fChips.at(0), Alpide::REG_IAUX2,   "IAUX2",   sampleDist);
-    scanCurrentDac (fChips.at(0), Alpide::REG_IRESET,  "IRESET",  sampleDist);
-    scanCurrentDac (fChips.at(0), Alpide::REG_IDB,     "IDB",     sampleDist);
-    scanCurrentDac (fChips.at(0), Alpide::REG_IBIAS,   "IBIAS",   sampleDist);
-    scanCurrentDac (fChips.at(0), Alpide::REG_ITHR,    "ITHR",    sampleDist);
+    scanCurrentDac (fChips.at(0), Alpide::REG_IAUX2,   "IAUX2",   sampleDist, time);
+    scanCurrentDac (fChips.at(0), Alpide::REG_IRESET,  "IRESET",  sampleDist, time);
+    scanCurrentDac (fChips.at(0), Alpide::REG_IDB,     "IDB",     sampleDist, time);
+    scanCurrentDac (fChips.at(0), Alpide::REG_IBIAS,   "IBIAS",   sampleDist, time);
+    scanCurrentDac (fChips.at(0), Alpide::REG_ITHR,    "ITHR",    sampleDist, time);
 }
 
 // Copy from dacscan. Change it to read single value.
@@ -356,6 +489,7 @@ int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
   chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
+  return 0;
 }
 
 
@@ -363,6 +497,8 @@ int configureFromu(TAlpide *chip) {
 int configureDACs_threshold(TAlpide *chip) {
   chip->WriteRegister (Alpide::REG_VPULSEH, 170);
   chip->WriteRegister (Alpide::REG_VPULSEL, 169);
+
+  return 0;
 }
 
 int configureDACs(TAlpide *chip, int backBias) {
@@ -399,12 +535,14 @@ int configureDACs(TAlpide *chip, int backBias) {
     chip->WriteRegister (Alpide::REG_IDB,       IDAC[1][1]);
     chip->WriteRegister (Alpide::REG_IRESET,    IDAC[1][2]);
   }
+    return 0;
 }
 
 // initialisation of fixed mask
 int configureMask(TAlpide *chip) {
   // unmask all pixels 
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK, true);
+  return 0;
 }
 
 
@@ -497,14 +635,14 @@ int configureChip_threshold(TAlpide *chip) {
 
 }
 
-void readDAQBoardAnalogueCurrent(TReadoutBoardDAQ *aDAQBoard){
+float readDAQBoardAnalogueCurrent(TReadoutBoardDAQ *aDAQBoard){
   float analogueI;
   std::cout << "Analog Current  = " << aDAQBoard-> ReadAnalogI() << std::endl;
   analogueI = aDAQBoard->ReadAnalogI();
   return analogueI;
 }
 
-void readDAQBoardDigitalCurrent(TReadoutBoardDAQ *aDAQBoard){
+float readDAQBoardDigitalCurrent(TReadoutBoardDAQ *aDAQBoard){
   float digitalI;
   std::cout << "Digital Current = " << aDAQBoard-> ReadDigitalI() << std::endl; 
   digitalI = aDAQBoard->ReadDigitalI();
@@ -543,17 +681,28 @@ int main() {
     // put your test here...
     int n = 0;
     std::cout << "Measurement Start" << std::endl;
+    char OutputPath[100];
+
     while(1) {
+      time_t       t = time(0);   // get time now
+      time_t  temp_time = time(0); // temporary time space for reading dacs
+
+      snprintf(OutputPath, 100, "./DataScanDACS/%ld", t);
+      char command[120];
+      snprintf(command, 120, "mkdir -p %s", OutputPath);
+      system(command);
+
       timestamp(0);
       std::cout << "DACread start" << std::endl;
       monHameg();
       readDAQBoardCurrent(myDAQBoard);
-      fBoard.at(0)->ReadTemperature();
+      myDAQBoard->ReadTemperature();
       readAllDac(fChips.at(0));
       timestamp(0);
       std::cout << "DACread end" << std::endl;
 
       if(n==3) {
+        
         timestamp(1);
         std::cout << "Before DAC scan, DACread start" << std::endl;
         readAllDac(fChips.at(0));
@@ -564,7 +713,7 @@ int main() {
 
         timestamp(1);
         std::cout << "Start DAC scan" << std::endl;
-        scanAllDac(fChips.at(0), 1);
+        scanAllDac(fChips.at(0), 1, t);
         timestamp(1);        
         std::cout << "Complete DAC scan" << std::endl;
 
@@ -578,7 +727,6 @@ int main() {
 
         timestamp(1);
         std::cout << "Start threshold scan" << std::endl;
-        time_t       t = time(0);   // get time now
         struct tm *now = localtime( & t );
         sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
         configureChip_threshold (fChips.at(0));
@@ -607,6 +755,7 @@ int main() {
         std::cout << "After Threshold scan, DACread end" << std::endl;
         break;
       }
+      DumpConfiguration(fChips.at(0), t);
       sleep(4);
       n++;
     }
