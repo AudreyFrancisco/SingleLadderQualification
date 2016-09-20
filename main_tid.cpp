@@ -1,0 +1,577 @@
+// Template to prepare standard test routines
+// ==========================================
+//
+// The template is intended to prepare scans that work in the same way for the three setup types
+//   - single chip with DAQ board
+//   - IB stave with MOSAIC
+//   - OB module with MOSAIC
+// The setup type has to be set with the global variable fSetupType
+//
+// After successful call to initSetup() the elements of the setup are accessible in the two vectors
+//   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
+//   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
+//
+// In order to have a generic scan, which works for single chips as well as for staves and modules, 
+// all chip accesses should be done with a loop over all elements of the chip vector. 
+// (see e.g. the configureChip loop in main)
+// Board accesses are to be done via fBoards.at(0);  
+// For an example how to access board-specific functions see the power off at the end of main. 
+//
+// The functions that should be modified for the specific test are configureChip() and main()
+
+// Todo
+// 1. SEU 때문에 register 값이 바뀔 수 있음. -> Check하는 코드
+// 2. threhold (2~3번 loop) check analogue, digital current, DAC value check 
+// 3. Current (D/A) 읽기 ~ 완료
+// 4. Output file sutructure 만들기 (예전 자료 참고)
+// 5. Temperature 읽기 ~ 완료
+// 6. Vbb setup(-3V)에 대비하기
+// 7. Configure xml file import (also change makefile)
+
+
+#include <unistd.h>
+#include "TAlpide.h"
+#include "AlpideConfig.h"
+#include "TReadoutBoard.h"
+#include "TReadoutBoardDAQ.h"
+#include "TReadoutBoardMOSAIC.h"
+#include "USBHelpers.h"
+#include "TConfig.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include <iomanip> // For using std::setprecision
+#include <ctime> // For measuring the time elapsed
+#include <iostream> // For writing output file
+//#include "tinyxml.h" // For ParseXML
+
+// Flag
+int SEU_CHECKER = 1;
+int BB=0; // 0: 0V, 1: -3V
+
+// DAC Setup - (0: BB = 0V, 1: BB=-3V)
+int myVCASN   = 57;
+int myVCASN2  = 64;
+int myITHR    = 51;
+int myVCLIP   = 0;
+int myVRESETD = 147;
+
+// DAQ Setup
+int myStrobeLength = 80;      // strobe length in units of 25 ns
+int myStrobeDelay  = 0;
+int myPulseLength  = 500;
+
+// Threshold scan setup
+int myPulseDelay   = 40;
+int myNTriggers    = 50;
+int myMaskStages   = 164;    // full: 8192, previous 164
+
+int myChargeStart  = 0;
+int myChargeStop   = 50;   // if > 100 points, increase array sizes
+
+int HitData     [100][512][1024];
+int ChargePoints[100];
+
+TReadoutBoardDAQ *myDAQBoard; // Compile error: Can not find the myDAQBoard in the read function
+
+void timestamp(int lineChange=0){
+  time_t       t = time(0);   // get time now
+  struct tm *now = localtime( & t );
+  if(lineChange>0) printf("%02d-%02d-%02d %02d:%02d:%02d>> ", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+  else printf("%02d-%02d-%02d %02d:%02d:%02d\n", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+}
+
+// DAC scan & read start
+void SetDACMon (TAlpide *chip, Alpide::TRegister ADac, int IRef = 2) { // copy from DAC scan
+  int VDAC, IDAC;
+  uint16_t Value;
+  switch (ADac) {
+    case Alpide::REG_VRESETP:
+      VDAC = 4;
+      IDAC = 0;
+      break;
+    case Alpide::REG_VRESETD:
+      VDAC = 5;
+      IDAC = 0;
+      break;
+    case Alpide::REG_VCASP:
+      VDAC = 1;
+      IDAC = 0;
+      break;
+    case Alpide::REG_VCASN:
+      VDAC = 0;
+      IDAC = 0;
+      break;
+    case Alpide::REG_VPULSEH:
+      VDAC = 2;
+      IDAC = 0;
+      break;
+    case Alpide::REG_VPULSEL:
+      VDAC = 3;
+      IDAC = 0;
+      break;
+    case Alpide::REG_VCASN2:
+      VDAC = 6;
+      IDAC = 0;
+      break;
+    case Alpide::REG_VCLIP:
+      VDAC = 7;
+      IDAC = 0;
+      break;
+    case Alpide::REG_VTEMP:
+      VDAC = 8;
+      IDAC = 0;
+      break;
+    case Alpide::REG_IAUX2:
+      IDAC = 1;
+      VDAC = 0;
+      break;
+    case Alpide::REG_IRESET:
+      IDAC = 0;
+      VDAC = 0;
+      break;
+    case Alpide::REG_IDB:
+      IDAC = 3;
+      VDAC = 0;
+      break;
+    case Alpide::REG_IBIAS:
+      IDAC = 2;
+      VDAC = 0;
+      break;
+    case Alpide::REG_ITHR:
+      IDAC = 5;
+      VDAC = 0;
+      break;
+    default:
+      VDAC = 0;
+      IDAC = 0;
+      break;
+  }
+  
+  
+  Value = VDAC & 0xf; // bitwise AND
+  Value |= (IDAC & 0x7) << 4;
+  Value |= (IRef & 0x3) << 9;
+  
+  chip->WriteRegister (Alpide::REG_ANALOGMON, Value);
+  
+}
+
+void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int sampleDist = 1) { // copy from DAC scan
+  char     fName[50];
+  float    Current;
+  uint16_t old;
+  sprintf (fName, "Data/IDAC_%s.dat", Name);
+  FILE *fp = fopen (fName, "w");
+  
+  std::cout << "Scanning DAC " << Name << std::endl;
+  
+  SetDACMon (chip, ADac);
+  usleep(100000);
+  
+  chip->ReadRegister (ADac, old);
+  
+  for (int i = 0; i < 256; i += sampleDist) {
+    chip->WriteRegister (ADac, i);
+    Current = myDAQBoard->ReadMonI();
+    fprintf (fp, "%d %.3f\n", i, Current);
+  }
+  
+  chip->WriteRegister (ADac, old);
+  fclose (fp);
+}
+
+void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int sampleDist = 1) { // copy from DAC scan
+  char     fName[50];
+  float    Voltage;
+  uint16_t old;
+  sprintf (fName, "Data/VDAC_%s.dat", Name);
+  FILE *fp = fopen (fName, "w");
+  
+  std::cout << "Scanning DAC " << Name << std::endl;
+  
+  SetDACMon (chip, ADac);
+  usleep(100000);
+  
+  chip->ReadRegister (ADac, old);
+  
+  for (int i = 0; i < 256; i += sampleDist) {
+    chip->WriteRegister (ADac, i);
+    Voltage = myDAQBoard->ReadMonV();
+    fprintf (fp, "%d %.3f\n", i, Voltage);
+  }
+  
+  chip->WriteRegister (ADac, old);
+  fclose (fp);
+}
+
+void scanAllDac(TAlpide *chip, int sampleDist = 1){
+    // Volatge DAC scan
+    scanVoltageDac (fChips.at(0), Alpide::REG_VRESETP, "VRESETP", sampleDist);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VRESETD, "VRESETD", sampleDist);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VCASP,   "VCASP",   sampleDist);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VCASN,   "VCASN",   sampleDist);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEH, "VPULSEH", sampleDist);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEL, "VPULSEL", sampleDist);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VCASN2,  "VCASN2",  sampleDist);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VCLIP,   "VCLIP",   sampleDist);
+    scanVoltageDac (fChips.at(0), Alpide::REG_VTEMP,   "VTEMP",   sampleDist);
+    // Current DAC scan
+    scanCurrentDac (fChips.at(0), Alpide::REG_IAUX2,   "IAUX2",   sampleDist);
+    scanCurrentDac (fChips.at(0), Alpide::REG_IRESET,  "IRESET",  sampleDist);
+    scanCurrentDac (fChips.at(0), Alpide::REG_IDB,     "IDB",     sampleDist);
+    scanCurrentDac (fChips.at(0), Alpide::REG_IBIAS,   "IBIAS",   sampleDist);
+    scanCurrentDac (fChips.at(0), Alpide::REG_ITHR,    "ITHR",    sampleDist);
+}
+
+// Copy from dacscan. Change it to read single value.
+float readCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name) {
+  float    Current;
+  uint16_t value;
+  
+  SetDACMon (chip, ADac);
+  usleep(100000);
+
+  
+  chip->ReadRegister (ADac, value); // Current value reading
+  std::cout << "Reading DAC(" << Name  << " ," << value << "): ";
+  Current = myDAQBoard->ReadMonI();
+  //std::cout << std::setprecision(3) << Current << " " << std::endl;
+  return Current;
+}
+
+// Copy from dacscan. Change it to read single value.
+float readVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name) {
+  float    Voltage;
+  uint16_t value;
+  
+  SetDACMon (chip, ADac);
+  usleep(100000);
+  
+  chip->ReadRegister (ADac, value); // Current value reading
+  std::cout << "Reading DAC(" << Name  << " ," << value << "): ";
+  Voltage = myDAQBoard->ReadMonV();
+  //std::cout << std::setprecision(3) << Voltage << std::endl;
+  return Voltage;
+}
+
+
+void readAllDac (TAlpide *chip){
+  // Read Voltage DAC
+  readVoltageDac (chip, Alpide::REG_VRESETP, "VRESETP");
+  readVoltageDac (chip, Alpide::REG_VRESETD, "VRESETD");
+  readVoltageDac (chip, Alpide::REG_VCASP,   "VCASP");
+  readVoltageDac (chip, Alpide::REG_VCASN,   "VCASN");
+  readVoltageDac (chip, Alpide::REG_VPULSEH, "VPULSEH");
+  readVoltageDac (chip, Alpide::REG_VPULSEL, "VPULSEL");
+  readVoltageDac (chip, Alpide::REG_VCASN2,  "VCASN2");
+  readVoltageDac (chip, Alpide::REG_VCLIP,   "VCLIP");
+  readVoltageDac (chip, Alpide::REG_VTEMP,   "VTEMP");
+  // Read Current DAC
+  readCurrentDac (chip, Alpide::REG_IAUX2,   "IAUX2");
+  readCurrentDac (chip, Alpide::REG_IRESET,  "IRESET");
+  readCurrentDac (chip, Alpide::REG_IDB,     "IDB");
+  readCurrentDac (chip, Alpide::REG_IBIAS,   "IBIAS");
+  readCurrentDac (chip, Alpide::REG_ITHR,    "ITHR");
+}
+
+void monHameg(){
+  system("./tid/hameg2030.py /dev/ttyHAMEG0 6 0 >> Data/hameg.log");
+}
+
+// Threshold scan part start
+void ClearHitData() {
+  for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+    ChargePoints[icharge-myChargeStart] = icharge;
+    for (int icol = 0; icol < 512; icol ++) {
+      for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+        HitData[icharge-myChargeStart][icol][iaddr] = 0;
+      }
+    }
+  }
+}
+
+
+void CopyHitData(std::vector <TPixHit> *Hits, int charge) {
+  for (int ihit = 0; ihit < Hits->size(); ihit ++) {
+    HitData[charge-myChargeStart][Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address] ++;
+  }
+  Hits->clear();
+}
+
+
+void WriteDataToFile (const char *fName, bool Recreate) {
+  FILE *fp;
+  bool  HasData;
+  if (Recreate) fp = fopen(fName, "w");
+  else          fp = fopen(fName, "a");
+
+  for (int icol = 0; icol < 512; icol ++) {
+    for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+      HasData = false;
+      for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+        if (HitData[icharge - myChargeStart][icol][iaddr] > 0) HasData = true;
+      }
+      
+      if (HasData) {
+        for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+          fprintf(fp, "%d %d %d %d\n", icol, iaddr, icharge, HitData[icharge - myChargeStart][icol][iaddr]);
+  }
+      }
+    }
+  }
+  fclose (fp);
+}
+
+
+// initialisation of Fromu
+int configureFromu(TAlpide *chip) {
+  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x20);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
+  chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
+}
+
+
+// initialisation of chip DACs
+int configureDACs(TAlpide *chip) {
+  chip->WriteRegister (Alpide::REG_VPULSEH, 170);
+  chip->WriteRegister (Alpide::REG_VPULSEL, 169);
+}
+
+int configureDACs(TAlpide *chip, int aBB) {
+  int VDAC[2][3] = {};
+  int IDAC[2][2] = {};
+  if (aBB==0)
+  {
+    chip->WriteRegister (Alpide::REG_VCASN,   myVCASN);
+    chip->WriteRegister (Alpide::REG_VCASN2,  myVCASN2);
+    chip->WriteRegister (Alpide::REG_VCLIP,   myVCLIP);
+    chip->WriteRegister (Alpide::REG_IDB,     myIDB);
+    chip->WriteRegister (Alpide::REG_ITHR,    myITHR);
+  }
+  chip->WriteRegister (Alpide::REG_VRESETD, myVRESETD);
+  if (aBB==3)
+  {
+    /* code */
+  }
+}
+
+// initialisation of fixed mask
+int configureMask(TAlpide *chip) {
+  // unmask all pixels 
+  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK, true);
+}
+
+
+// setting of mask stage during scan
+int configureMaskStage(TAlpide *chip, int istage) {
+  int row    = istage / 4;
+  int region = istage % 4;
+
+  //uint32_t regionmod = 0x08080808 >> region;
+
+  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
+  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
+
+  //AlpideConfig::WritePixRegRow (chip, Alpide::PIXREG_MASK,   false, row);
+  //AlpideConfig::WritePixRegRow (chip, Alpide::PIXREG_SELECT, true,  row);
+
+  //chip->WriteRegister (Alpide::REG_REGDISABLE_LOW,  (uint16_t) regionmod);
+  //chip->WriteRegister (Alpide::REG_REGDISABLE_HIGH, (uint16_t) regionmod);
+
+  for (int icol = 0; icol < 1024; icol += 8) {
+    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 1024, icol + istage / 1024);
+    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 1024, icol + istage / 1024);   
+  }
+
+}
+
+void scan() {   
+  unsigned char         buffer[1024*4000]; 
+  int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
+  TBoardHeader          boardInfo;
+  std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
+
+
+  for (int istage = 0; istage < myMaskStages; istage ++) {
+    std::cout << "Mask stage " << istage << std::endl;
+    for (int i = 0; i < fChips.size(); i ++) {
+      configureMaskStage (fChips.at(i), istage);
+    }
+    configureMaskStage (fChips.at(0), istage);
+
+    for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+      //std::cout << "Charge = " << icharge << std::endl;
+      fChips.at(0)->WriteRegister (Alpide::REG_VPULSEL, 170 - icharge);
+      fBoards.at(0)->Trigger(myNTriggers);
+
+      int itrg = 0;
+      while(itrg < myNTriggers) {
+        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
+          usleep(100);
+          continue;
+        }
+        else {
+          // decode DAQboard event
+          BoardDecoder::DecodeEvent(boardDAQ, buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+          // decode Chip event
+          int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
+          AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
+
+          itrg++;
+        }
+      } 
+      //std::cout << "Number of hits: " << Hits->size() << std::endl;
+      CopyHitData(Hits, icharge);
+    }
+  }
+}
+
+int configureChip_dac(TAlpide *chip) {
+  // put all chip configurations before the start of the test here
+  chip->WriteRegister (Alpide::REG_MODECONTROL,   0x20);
+  chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x60);
+}
+
+int configureChip_threshold(TAlpide *chip) {
+  // put all chip configurations before the start of the test here
+  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x20); // set chip to config mode
+  if (fSetupType == setupSingle) {
+    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x30); // CMU/DMU config: turn manchester encoding off etc, initial token=1, disable DDR
+  }
+  else {
+    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x10); // CMU/DMU config: same as above, but manchester on
+  }
+
+  configureFromu(chip);
+  configureDACs (chip);  
+  configureMask (chip);
+
+  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
+
+}
+
+void readDAQBoardAnalogueCurrent(TReadoutBoardDAQ *aDAQBoard){
+  float analogueI;
+  std::cout << "Analog Current  = " << aDAQBoard-> ReadAnalogI() << std::endl;
+  analogueI = aDAQBoard->ReadAnalogI();
+  return analogueI;
+}
+
+void readDAQBoardDigitalCurrent(TReadoutBoardDAQ *aDAQBoard){
+  float digitalI;
+  std::cout << "Digital Current = " << aDAQBoard-> ReadDigitalI() << std::endl; 
+  digitalI = aDAQBoard->ReadDigitalI();
+  return digitalI;
+}
+
+int main() {
+  // chip ID that is used in case of single chip setup
+  fSingleChipId = 16;
+
+  // module ID that is used for outer barrel modules 
+  // (1 will result in master chip IDs 0x10 and 0x18, 2 in 0x20 and 0x28 ...)
+  fModuleId = 1;
+
+  fSetupType = setupSingle;
+
+  initSetup();
+
+  char Suffix[20], fName[100];
+  ClearHitData();
+
+  myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+  
+  if (fBoards.size() == 1) {
+     
+    fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
+    fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
+
+    for (int i = 0; i < fChips.size(); i ++) {
+      configureChip_dac (fChips.at(i));
+    }
+
+    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+
+
+    // put your test here...
+    int n = 0;
+    std::cout << "Measurement Start" << std::endl;
+    while(1) {
+      timestamp(0);
+      std::cout << "DACread start" << std::endl;
+      monHameg();
+      readDAQBoardCurrent(myDAQBoard);
+      fBoard.at(0)->ReadTemperature();
+      readAllDac(fChips.at(0));
+      timestamp(0);
+      std::cout << "DACread end" << std::endl;
+
+      if(n==3) {
+        timestamp(1);
+        std::cout << "Before DAC scan, DACread start" << std::endl;
+        readAllDac(fChips.at(0));
+        monHameg();
+        readDAQBoardCurrent(myDAQBoard);
+        timestamp(1);
+        std::cout << "Before DAC scan, DACread end" << std::endl;
+
+        timestamp(1);
+        std::cout << "Start DAC scan" << std::endl;
+        scanAllDac(fChips.at(0), 1);
+        timestamp(1);        
+        std::cout << "Complete DAC scan" << std::endl;
+
+        timestamp(1);
+        std::cout << "After DAC scan, DACread start" << std::endl;
+        readAllDac(fChips.at(0));
+        monHameg();
+        readDAQBoardCurrent(myDAQBoard);
+        timestamp(1);
+        std::cout << "After DAC scan, DACread end" << std::endl;
+
+        timestamp(1);
+        std::cout << "Start threshold scan" << std::endl;
+        time_t       t = time(0);   // get time now
+        struct tm *now = localtime( & t );
+        sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+        configureChip_threshold (fChips.at(0));
+
+        timestamp(1);
+        std::cout << "Before Threshold scan, DACread start" << std::endl;
+        readAllDac(fChips.at(0));
+        monHameg();
+        readDAQBoardCurrent(myDAQBoard);
+        timestamp(1);
+        std::cout << "Before Threshold scan, DACread end" << std::endl;
+
+        fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+        fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
+        fBoards.at(0)->SetTriggerSource (trigExt);
+        scan();
+        timestamp(1);
+        std::cout << "Complete threshold scan" << std::endl;
+
+        timestamp(1);
+        std::cout << "After Threshold scan, DACread start" << std::endl;
+        readAllDac(fChips.at(0));
+        monHameg();
+        readDAQBoardCurrent(myDAQBoard);
+        timestamp(1);
+        std::cout << "After Threshold scan, DACread end" << std::endl;
+        break;
+      }
+      sleep(4);
+      n++;
+    }
+
+    if (myDAQBoard) {
+      myDAQBoard->PowerOff();
+      delete myDAQBoard;
+    }
+  }
+  sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
+  WriteDataToFile (fName, true);
+  return 0;
+}
