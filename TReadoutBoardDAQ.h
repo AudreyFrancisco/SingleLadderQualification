@@ -130,6 +130,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId = 0);
   int ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId = 0);
 
+
   // members and methods related to data readout
   void  DAQTrigger       ();      // function for triggering fNTrigger events, to be ran in thread
   int   fStatusTrigger;            // status variable for trigger
@@ -164,6 +165,8 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   TReadoutBoardDAQ(libusb_device *ADevice, TBoardConfigDAQ *config);
   
   virtual ~TReadoutBoardDAQ ();
+
+  void DumpConfig(const char *fName, bool writeFile=true, char *config=0);
 
 
   //// general methods of TReadoutBoard

@@ -37,20 +37,22 @@ int myStrobeLength = 10;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;       // not needed right now as strobe generated on DAQ board
 int myPulseLength  = 2000;    // 2000 = 50 us
 
-int myNTriggers    = 10;
+int myNTriggers    = 20;
 
 // Pixel to test
 int myRow = 5;
-int myCol = 13;
+//int myCol = 13; 
+int myCol = 8; // Col within region, 0:15
 
 // charge range
-int myChargeStart  = 0;
-int myChargeStop   = 170;   
+int myChargeStart  = 10; // 1
+int myChargeStop   = 20; // 160 
+int myChargeStep   = 2;
 
 // delay between pulse and strobe seems to be 50 ns + 12.5 ns * PulseDelay + 25 ns * StrobeDelay
 int myPulseDelayStart   = 36;    // 36 = 500 ns 
-int myPulseDelayStop    = 1000;  // 1000 = 12550 ns 
-
+int myPulseDelayStop    = 1600;  // 1000 = 12550 ns 
+int myPulseDelayStep    = 8;     // 100 ns
 
 
 int AddressToColumn      (int ARegion, int ADoubleCol, int AAddress)
@@ -80,20 +82,40 @@ void WriteDataToFile (const char *fName, std::vector<TPixHit> *Hits, int charge,
   if (Recreate) fp = fopen(fName, "w");
   else          fp = fopen(fName, "a");
 
-  for (int i = 0; i < Hits->size(); i ++) {
-    col = AddressToColumn(Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
-    row = AddressToRow   (Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
+  for (int ireg = 0; ireg < 32; ireg ++) {
+    nHits = 0;
+    //std::cout << ireg << std::endl;
+    for (int i = 0; i < Hits->size(); i ++) {
+      col = AddressToColumn(Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
+      row = AddressToRow   (Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
 
-    if ((col == myCol) && (row == myRow)) {
-      nHits ++;
+      if ((col == ireg*32+myCol) && (row == myRow)) {
+        nHits ++;
+      }
+    }
+    if (nHits) {
+      //printf("       %d %d %d %d %d\n", ireg*32+myCol, row, charge, delay, nHits);
+      fprintf(fp, "%d %d %d %d %d\n", ireg*32+myCol, row, charge, delay, nHits);
     }
   }
   Hits->clear();
-  if (nHits) 
-    fprintf(fp, "%d %d %d %d %d\n", col, row, charge, delay, nHits);
 
   fclose (fp);
 
+}
+
+void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {
+  char Config[1000];
+  FILE *fp = fopen(fName, "w");
+
+  chip     -> DumpConfig("", false, Config);
+  //std::cout << Config << std::endl;
+  fprintf(fp, "%s\n", Config);
+  daqBoard -> DumpConfig("", false, Config);
+  fprintf(fp, "%s\n", Config);
+  //std::cout << Config << std::endl;
+    
+  fclose(fp);
 }
 
 
@@ -119,8 +141,10 @@ int configureMask(TAlpide *chip) {
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
 
-  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, myRow, myCol);
-  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  myRow, myCol);
+  for (int ireg=0; ireg<32; ireg++) {
+    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, myRow, ireg*32+myCol);
+    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  myRow, ireg*32+myCol);
+  }
 }
 
 
@@ -152,11 +176,14 @@ void scan(const char *fName) {
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
 
-    for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+    //for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+    for (int icharge = myChargeStart; icharge < myChargeStop; icharge += myChargeStep) {
       std::cout << "Charge = " << icharge << std::endl;
       fChips.at(0)->WriteRegister (Alpide::REG_VPULSEL, 170 - icharge);
 
-      for (int idelay = myPulseDelayStart; idelay < myPulseDelayStop; idelay ++) {
+      //for (int idelay = myPulseDelayStart; idelay < myPulseDelayStop; idelay ++) {
+      for (int idelay = myPulseDelayStart; idelay < myPulseDelayStop; idelay += myPulseDelayStep) {
+        //std::cout << "    Delay = " << idelay << std::endl;
         fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, idelay);  
         fBoards.at(0)->Trigger(myNTriggers);
 
@@ -175,11 +202,15 @@ void scan(const char *fName) {
 
             itrg++;
           }
- 	}
-        if ((idelay == myPulseDelayStart) && (icharge == myChargeStart))
+ 	      }
+        if ((idelay == myPulseDelayStart) && (icharge == myChargeStart)) {
           WriteDataToFile (fName, Hits, icharge, idelay, true);
-        else 
+          //std::cout << "Wrote data to new file" << std::endl;
+        }
+        else {
           WriteDataToFile (fName, Hits, icharge, idelay, false);
+          //std::cout << "Wrote data to file" << std::endl;
+        } 
       }
 
     }
@@ -223,6 +254,9 @@ int main() {
     fBoards.at(0)->SetTriggerSource (trigExt);
 
     scan(fName);
+
+    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    WriteScanConfig (fName, fChips.at(0), myDAQBoard);
 
     if (myDAQBoard) {
       myDAQBoard->PowerOff();
