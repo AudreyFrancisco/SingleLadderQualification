@@ -2,6 +2,7 @@
 #include "TBoardConfigDAQ.h"
 #include "TBoardConfigMOSAIC.h"
 #include <iostream>
+#include <string.h>
 
 //construct Config from config file
 TConfig::TConfig (const char *fName) {
@@ -54,6 +55,7 @@ void TConfig::Init (int chipId, TBoardType boardType) {
   fChipConfigs. push_back (new TChipConfig (chipId));
 }
 
+
 // getter functions for chip and board config
 TChipConfig *TConfig::GetChipConfig  (int chipId) {
   for (int i = 0; i < fChipConfigs.size(); i++) {
@@ -75,19 +77,112 @@ TBoardConfig *TConfig::GetBoardConfig (int iBoard){
 }
 
 
+TDeviceType TConfig::ReadDeviceType (const char *deviceName) {
+  TDeviceType type = TYPE_UNKNOWN;
+  if (!strcmp (deviceName, "CHIP")) {
+    type = TYPE_CHIP;
+  }
+  else if (!strcmp(deviceName, "TELESCOPE")) {
+    type = TYPE_TELESCOPE;
+  }
+  else if (!strcmp(deviceName, "MODULE")) {
+    type = TYPE_MODULE;
+  }
+  else if (!strcmp(deviceName, "STAVE")) {
+    type = TYPE_STAVE;
+  }
+  else {
+    std::cout << "Error, unknown setup type found: " << deviceName << std::endl;
+    exit (EXIT_FAILURE);
+  }
+  return type;
+}
+
+
+void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
+  std::vector <int> chipIds;
+  if (AType == TYPE_CHIP) {
+    Init(16, boardDAQ);
+  }
+  else if (AType == TYPE_TELESCOPE) {
+    for (int i = 0; i < NChips; i++) {
+      chipIds.push_back(16);
+    }
+    Init(NChips, chipIds, boardDAQ);
+  }
+  else if (AType == TYPE_MODULE) {
+    if (NChips != 16) {
+      std::cout << "Warning, Module with " << NChips << " chips requested. Default chip IDs probably wrong." << std::endl;
+    }
+    for (int i = 0; i < NChips; i++) {
+      if (i == 7) continue;
+      chipIds.push_back(i + ((DEFAULT_MODULE_ID & 0x7) << 4));
+    }
+    Init (NChips, chipIds, boardMOSAIC);
+  }
+  else if (AType == TYPE_STAVE) {
+    if (NChips != 9) {
+      std::cout << "Warning, Stave with " << NChips << " chips requested. Default chip IDs probably wrong." << std::endl;
+    }
+    for (int i = 0; i < NChips; i++) {
+      chipIds.push_back(i + ((DEFAULT_MODULE_ID & 0x7) << 4));
+    }
+    Init (NChips, chipIds, boardMOSAIC);    
+  }
+  //std::cout << "TConfig: Initialised setup of type " << fType << " with " << fNChips << " chips and " << fNBoards << " DAQ boards." <<std::endl;
+}
+
+
 void TConfig::ReadConfigFile (const char *fName) 
 {
-  FILE *fp = fopen (fName, "r");
+  char  Line[1024], Param[50], Rest[50];
+  bool  Initialised = false;
+  int         NChips = 0;
+  int         Chip;
+  TDeviceType type   = TYPE_UNKNOWN;
+  FILE *fp          = fopen (fName, "r");
 
   if (!fp) {
     std::cout << "WARNING: Config file " << fName << " not found, using default configuration." << std::endl;
     return;
   }
 
+  // first look for the type of setup in order to initialise config structure
+  while ((!Initialised) && (fgets(Line, 20123, fp) != NULL)) {
+    if ((Line[0] == '\n') || (Line[0] == '#')) continue; 
+      ParseLine (Line, Param, Rest, &Chip);
+      if (!strcmp(Param,"NCHIPS")){
+        sscanf(Rest, "%d", &NChips);
+      }
+      if (!strcmp(Param, "DEVICE")) {
+        type = ReadDeviceType (Rest);
+      }
+      if ((((NChips > 0) || type == TYPE_CHIP)) && (type != TYPE_UNKNOWN)) {   // type and nchips has been found (nchips not needed for type chip)
+      SetDeviceType(type, NChips);
+    }
+  }
+
+
 }
 
+
+void TConfig::ParseLine(const char *Line, char *Param, char *Rest, int *Chip) {
+  char MyParam[132];
+  char *MyParam2;
+  if (!strchr(Line, '_')) {
+    *Chip = -1;
+    sscanf (Line,"%s\t%s",Param, Rest);
+  }
+  else {
+    sscanf (Line,"%s\t%s", MyParam, Rest);
+    MyParam2 = strtok(MyParam, "_");
+    sprintf(Param, "%s", MyParam2);
+    sscanf (strpbrk(Line, "_")+1, "%d", Chip);
+  }
+}
 
 
 // write config to file, has to call same function for all sub-configs (chips and boards)
 void TConfig::WriteToFile (const char *fName) {
+
 }
