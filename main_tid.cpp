@@ -728,6 +728,13 @@ int main() {
             std::cout << "DACread end" << std::endl;
 
             if(n%10 == 0) {
+
+                platereturn =  exec("./moveplate.py 0");                
+                if (!(std::stoi(platereturn)) ) {
+                  cout << "ERROR : PLATE NOT MOVING" << endl;
+                  break;
+                }
+                
                 myDAQBoard->PowerOff();
                 delete fChips.at(0);
                 delete fBoards.at(0);
@@ -852,6 +859,13 @@ int main() {
                 }
 
                 fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+                sleep(1);
+
+                platereturn =  exec("./moveplate.py 1");                
+                if (!(std::stoi(platereturn)) ) {
+                  cout << "ERROR : PLATE NOT MOVING" << endl;
+                  break;
+                }
             }
             DumpConfiguration(fChips.at(0), scan_time);
             sleep(4);
