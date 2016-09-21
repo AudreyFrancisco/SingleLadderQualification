@@ -733,7 +733,7 @@ float TReadoutBoardDAQ::ADCToTemperature (int AValue)
 
 bool TReadoutBoardDAQ::PowerOn (int &AOverflow) 
 {
-
+    std::cout << "Power ON!" << std::endl;
   // set current limits with voltages off
   WriteCurrentLimits(false, true); 
   // switch on voltages
@@ -848,7 +848,6 @@ void TReadoutBoardDAQ::WriteCurrentLimits (bool ALDOEnable, bool AAutoshutdown)
   //int limitDigital = CurrentToADC (fBoardConfigDAQ->GetCurrentLimitDigital());
   //int limitIo      = CurrentToADC (fBoardConfigDAQ->GetCurrentLimitIo());
   //int limitAnalog  = CurrentToADC (fBoardConfigDAQ->GetCurrentLimitAnalogue());
-
   fBoardConfigDAQ->SetAutoShutdownEnable(AAutoshutdown);  // keep track of settings in BoardConfig..
   fBoardConfigDAQ->SetLDOEnable(ALDOEnable);              // keep track of settings in BoardConfig..
 
@@ -1243,11 +1242,3 @@ bool TReadoutBoardDAQ::ResetBoardFX3 (int ADuration)
   if (!err) return false;
   return WriteRegister((MODULE_SOFTRESET << DAQBOARD_REG_ADDR_SIZE) + SOFTRESET_FX3_RESET, 13);
 }
-
-
-
-
-
-
-
-

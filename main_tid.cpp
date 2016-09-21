@@ -623,199 +623,245 @@ int configureChip_threshold(TAlpide *chip) {
 }
 
 float readDAQBoardAnalogueCurrent(TReadoutBoardDAQ *aDAQBoard){
-  float analogueI;
-  //std::cout << "Analog Current  = " << aDAQBoard-> ReadAnalogI() << std::endl;
-  analogueI = aDAQBoard->ReadAnalogI();
-  return analogueI;
+    float analogueI;
+    //std::cout << "Analog Current  = " << aDAQBoard-> ReadAnalogI() << std::endl;
+    analogueI = aDAQBoard->ReadAnalogI();
+    return analogueI;
 }
 
 float readDAQBoardDigitalCurrent(TReadoutBoardDAQ *aDAQBoard){
-  float digitalI;
-  //std::cout << "Digital Current = " << aDAQBoard-> ReadDigitalI() << std::endl; 
-  digitalI = aDAQBoard->ReadDigitalI();
-  return digitalI;
+    float digitalI;
+    //std::cout << "Digital Current = " << aDAQBoard-> ReadDigitalI() << std::endl; 
+    digitalI = aDAQBoard->ReadDigitalI();
+    return digitalI;
 }
 
 int main() {
-  // chip ID that is used in case of single chip setup
-  fSingleChipId = 16;
+    // chip ID that is used in case of single chip setup
+    fSingleChipId = 16;
 
-  // module ID that is used for outer barrel modules 
-  // (1 will result in master chip IDs 0x10 and 0x18, 2 in 0x20 and 0x28 ...)
-  fModuleId = 1;
+    // module ID that is used for outer barrel modules 
+    // (1 will result in master chip IDs 0x10 and 0x18, 2 in 0x20 and 0x28 ...)
+    fModuleId = 1;
 
-  fSetupType = setupSingle;
+    fSetupType = setupSingle;
 
-  initSetup();
+    initSetup();
 
-  char Suffix[20], fName[100];
-  ClearHitData();
+    char Suffix[20], fName[100];
 
-  myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
-  
-  if (fBoards.size() == 1) {
-     
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
+    myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
 
-    for (int i = 0; i < fChips.size(); i ++) {
-      configureChip_threshold (fChips.at(i));
-    }
+    if (fBoards.size() == 1) {
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+        fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
+        fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
-
-    // put your test here...
-    int n = 0;
-    long int scan_time;
-    std::cout << "Measurement Start" << std::endl;
-    std::cout << "Make the Output folder sutructure" << std::endl;
-    char ChipNum[10] = "W1-1";
-    char OutputPath[100], OutputPath_DAC[100], OutputPath_Threshold[100];
-    // Make defualt folder for chip
-    snprintf(OutputPath, 100, "Data/%s", ChipNum);
-    char command[120];
-    snprintf(command, 120, "mkdir -p %s", OutputPath);
-    system(command);
-    // Make defualt DAC scan folder for chip
-    command[0] = '\0';
-    snprintf(OutputPath_DAC, 100, "Data/%s/DataScanDACS", ChipNum);
-    snprintf(command, 120, "mkdir -p %s", OutputPath);
-    system(command);
-    // Make defualt DAC scan folder for chip
-    command[0] = '\0';
-    snprintf(OutputPath_Threshold, 100, "Data/%s/ThresholdScan", ChipNum);
-    snprintf(command, 120, "mkdir -p %s", OutputPath);
-    system(command);
-
-    std::ofstream logfile;
-    char LogPath[100];
-    snprintf(LogPath, 120, "%s/%s.log", OutputPath, ChipNum);
-    logfile.open(LogPath);
-    logfile << "chipID;Time;Hameg Output Current5V;Hameg Output Current VBB;Analog Current;Digital Current;Output Current;Temperature;VCASN;VCASN2;VCASP;VPULSEH;VPULSEL;VRESETP;VRESETD;VCLIP;VTEMP;IRESET;IAUX2;IBIAS;IDB;ITHR" << std::endl;
-
-    string hameg5V, hamegVBB;
-
-    while(1) {
-      scan_time = timestamp2();
-      hameg5V =  exec("./tid/hameg2030.py /dev/ttyHAMEG0 6 0");
-      hamegVBB = exec("./tid/hameg2030.py /dev/ttyHAMEG0 6 2");
-      hameg5V.erase(std::remove(hameg5V.begin(), hameg5V.end(), '\n'), hameg5V.end());
-      hamegVBB.erase(std::remove(hamegVBB.begin(), hamegVBB.end(), '\n'), hamegVBB.end());
-      timestamp(1);
-      std::cout << "DACread start" << std::endl;
-      logfile << setprecision(6) << ChipNum << ";" << scan_time << ";"
-        << hameg5V << ";" 
-        << hamegVBB << ";" 
-        << readDAQBoardAnalogueCurrent(myDAQBoard) << ";" 
-        << readDAQBoardDigitalCurrent(myDAQBoard) << ";" 
-        << myDAQBoard->ReadTemperature() << ":"
-        << readVoltageDac (fChips.at(0), Alpide::REG_VCASN,   "VCASN")    << ";"
-        << readVoltageDac (fChips.at(0), Alpide::REG_VCASN2,  "VCASN2")   << ";"
-        << readVoltageDac (fChips.at(0), Alpide::REG_VCASP,   "VCASP")    << ";"
-        << readVoltageDac (fChips.at(0), Alpide::REG_VPULSEH, "VPULSEH")  << ";"
-        << readVoltageDac (fChips.at(0), Alpide::REG_VPULSEL, "VPULSEL")  << ";"
-        << readVoltageDac (fChips.at(0), Alpide::REG_VRESETP, "VRESETP")  << ";"
-        << readVoltageDac (fChips.at(0), Alpide::REG_VRESETD, "VRESETD")  << ";"
-        << readVoltageDac (fChips.at(0), Alpide::REG_VCLIP,   "VCLIP")    << ";"
-        << readVoltageDac (fChips.at(0), Alpide::REG_VTEMP,   "VTEMP")    << ";"
-        << readCurrentDac (fChips.at(0), Alpide::REG_IRESET,  "IRESET")   << ";"
-        << readCurrentDac (fChips.at(0), Alpide::REG_IAUX2,   "IAUX2")    << ";"
-        << readCurrentDac (fChips.at(0), Alpide::REG_IBIAS,   "IBIAS")    << ";"
-        << readCurrentDac (fChips.at(0), Alpide::REG_IDB,     "IDB")      << ";"
-        << readCurrentDac (fChips.at(0), Alpide::REG_ITHR,    "ITHR")    
-        << std::endl;
-      timestamp(1);
-      std::cout << "DACread end" << std::endl;
-      
-      if(n==10) {
-          powerOn(myDAQBoard);
-
-    for (int i = 0; i < fChips.size(); i ++) {
-      configureChip_threshold (fChips.at(i));
-    }
-
-
-        /*timestamp(1);
-        std::cout << "Before DAC scan, DACread start" << std::endl;
-        timestamp(1);
-        std::cout << "Before DAC scan, DACread end" << std::endl;*/
-        char ScanPath0[100], ScanPath1[100];
-        command[0] = '\0';
-        snprintf(ScanPath0, 100, "%s/%ld", OutputPath_DAC, scan_time);
-        snprintf(command, 120, "mkdir -p %s", ScanPath0);
-        system(command);
-        command[0] = '\0';
-        snprintf(ScanPath1, 100, "%s/%ld", OutputPath_Threshold, scan_time);
-        snprintf(command, 120, "mkdir -p %s", ScanPath1);
-        system(command);
-
-        timestamp(1);
-        std::cout << "Start DAC scan" << std::endl;
-        scanVoltageDac (fChips.at(0), Alpide::REG_VRESETP, "VRESETP", ChipNum, mySampleDist, scan_time);
-        scanVoltageDac (fChips.at(0), Alpide::REG_VRESETD, "VRESETD", ChipNum, mySampleDist, scan_time);
-        scanVoltageDac (fChips.at(0), Alpide::REG_VCASP,   "VCASP",   ChipNum, mySampleDist, scan_time);
-        scanVoltageDac (fChips.at(0), Alpide::REG_VCASN,   "VCASN",   ChipNum, mySampleDist, scan_time);
-        scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEH, "VPULSEH", ChipNum, mySampleDist, scan_time);
-        scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEL, "VPULSEL", ChipNum, mySampleDist, scan_time);
-        scanVoltageDac (fChips.at(0), Alpide::REG_VCASN2,  "VCASN2",  ChipNum, mySampleDist, scan_time);
-        scanVoltageDac (fChips.at(0), Alpide::REG_VCLIP,   "VCLIP",   ChipNum, mySampleDist, scan_time);
-        scanVoltageDac (fChips.at(0), Alpide::REG_VTEMP,   "VTEMP",   ChipNum, mySampleDist, scan_time);
-
-        scanCurrentDac (fChips.at(0), Alpide::REG_IAUX2,   "IAUX2",   ChipNum, mySampleDist, scan_time);
-        scanCurrentDac (fChips.at(0), Alpide::REG_IRESET,  "IRESET",  ChipNum, mySampleDist, scan_time);
-        scanCurrentDac (fChips.at(0), Alpide::REG_IDB,     "IDB",     ChipNum, mySampleDist, scan_time);
-        scanCurrentDac (fChips.at(0), Alpide::REG_IBIAS,   "IBIAS",   ChipNum, mySampleDist, scan_time);
-        scanCurrentDac (fChips.at(0), Alpide::REG_ITHR,    "ITHR",    ChipNum, mySampleDist, scan_time);
-
-        timestamp(1);        
-        std::cout << "Complete DAC scan" << std::endl;
-
-        /*timestamp(1);
-        std::cout << "After DAC scan, DACread start" << std::endl;
-        timestamp(1);
-        std::cout << "After DAC scan, DACread end" << std::endl;*/
-
-        timestamp(1);
-        std::cout << "Start threshold scan" << std::endl;
-        sprintf(Suffix, "%ld", scan_time);
-
-        /*timestamp(1);
-        std::cout << "Before Threshold scan, DACread start" << std::endl;
-        timestamp(1);
-        std::cout << "Before Threshold scan, DACread end" << std::endl;*/
+        for (int i = 0; i < fChips.size(); i ++) {
+            configureChip_threshold (fChips.at(i));
+        }
 
         fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
-        fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
-        fBoards.at(0)->SetTriggerSource (trigExt);
-        scan();
-        sprintf(fName, "%s/ThresholdScan_%s.dat", ScanPath1, Suffix);
-        WriteDataToFile (fName, true);
- 
-        timestamp(1);
-        std::cout << "Complete threshold scan" << std::endl;
 
-        /*timestamp(1);
-        std::cout << "After Threshold scan, DACread start" << std::endl;
-        readAllDac(fChips.at(0));
-        timestamp(1);
-        std::cout << "After Threshold scan, DACread end" << std::endl;*/
-      }
-      DumpConfiguration(fChips.at(0), scan_time);
-      powerOn(myDAQBoard);
-for (int i = 0; i < fChips.size(); i ++) {
-	    configureChip_threshold (fChips.at(i));
-	  }
-	  
 
-      sleep(4);
-      n++;
+        // put your test here...
+        int n = 0;
+        long int scan_time;
+        std::cout << "Measurement Start" << std::endl;
+        std::cout << "Make the Output folder sutructure" << std::endl;
+        char ChipNum[10] = "W1-1";
+        char OutputPath[100], OutputPath_DAC[100], OutputPath_Threshold[100];
+        // Make defualt folder for chip
+        snprintf(OutputPath, 100, "Data/%s", ChipNum);
+        char command[120];
+        snprintf(command, 120, "mkdir -p %s", OutputPath);
+        system(command);
+        // Make defualt DAC scan folder for chip
+        command[0] = '\0';
+        snprintf(OutputPath_DAC, 100, "Data/%s/DataScanDACS", ChipNum);
+        snprintf(command, 120, "mkdir -p %s", OutputPath);
+        system(command);
+        // Make defualt DAC scan folder for chip
+        command[0] = '\0';
+        snprintf(OutputPath_Threshold, 100, "Data/%s/ThresholdScan", ChipNum);
+        snprintf(command, 120, "mkdir -p %s", OutputPath);
+        system(command);
+
+        std::ofstream logfile;
+        char LogPath[100];
+        snprintf(LogPath, 120, "%s/%s.log", OutputPath, ChipNum);
+        logfile.open(LogPath);
+        logfile << "chipID;Time;Hameg Output Current5V;Hameg Output Current VBB;Analog Current;Digital Current;Output Current;Temperature;VCASN;VCASN2;VCASP;VPULSEH;VPULSEL;VRESETP;VRESETD;VCLIP;VTEMP;IRESET;IAUX2;IBIAS;IDB;ITHR" << std::endl;
+
+        string hameg5V, hamegVBB;
+
+        while(1) {
+            scan_time = timestamp2();
+            hameg5V =  exec("./tid/hameg2030.py /dev/ttyHAMEG0 6 0");
+            hamegVBB = exec("./tid/hameg2030.py /dev/ttyHAMEG0 6 2");
+            hameg5V.erase(std::remove(hameg5V.begin(), hameg5V.end(), '\n'), hameg5V.end());
+            hamegVBB.erase(std::remove(hamegVBB.begin(), hamegVBB.end(), '\n'), hamegVBB.end());
+            timestamp(1);
+            std::cout << "DACread start" << std::endl;
+            logfile << setprecision(6) << ChipNum << ";" << scan_time << ";"
+                << hameg5V << ";" 
+                << hamegVBB << ";" 
+                << readDAQBoardAnalogueCurrent(myDAQBoard) << ";" 
+                << readDAQBoardDigitalCurrent(myDAQBoard) << ";" 
+                << myDAQBoard->ReadTemperature() << ":"
+                << readVoltageDac (fChips.at(0), Alpide::REG_VCASN,   "VCASN")    << ";"
+                << readVoltageDac (fChips.at(0), Alpide::REG_VCASN2,  "VCASN2")   << ";"
+                << readVoltageDac (fChips.at(0), Alpide::REG_VCASP,   "VCASP")    << ";"
+                << readVoltageDac (fChips.at(0), Alpide::REG_VPULSEH, "VPULSEH")  << ";"
+                << readVoltageDac (fChips.at(0), Alpide::REG_VPULSEL, "VPULSEL")  << ";"
+                << readVoltageDac (fChips.at(0), Alpide::REG_VRESETP, "VRESETP")  << ";"
+                << readVoltageDac (fChips.at(0), Alpide::REG_VRESETD, "VRESETD")  << ";"
+                << readVoltageDac (fChips.at(0), Alpide::REG_VCLIP,   "VCLIP")    << ";"
+                << readVoltageDac (fChips.at(0), Alpide::REG_VTEMP,   "VTEMP")    << ";"
+                << readCurrentDac (fChips.at(0), Alpide::REG_IRESET,  "IRESET")   << ";"
+                << readCurrentDac (fChips.at(0), Alpide::REG_IAUX2,   "IAUX2")    << ";"
+                << readCurrentDac (fChips.at(0), Alpide::REG_IBIAS,   "IBIAS")    << ";"
+                << readCurrentDac (fChips.at(0), Alpide::REG_IDB,     "IDB")      << ";"
+                << readCurrentDac (fChips.at(0), Alpide::REG_ITHR,    "ITHR")    
+                << std::endl;
+            timestamp(1);
+            std::cout << "DACread end" << std::endl;
+
+            if(n%10 == 0) {
+                myDAQBoard->PowerOff();
+                delete fChips.at(0);
+                delete fBoards.at(0);
+                fChips.erase(fChips.begin(), fChips.end());
+                fBoards.erase(fBoards.begin(), fBoards.end());
+                sleep(1);
+                system("./tid/hameg2030.py /dev/ttyHAMEG0 9");
+                sleep(4);
+                system("./tid/hameg2030.py /dev/ttyHAMEG0 7");
+                sleep(4);
+                system("./program.sh");
+                sleep(1);
+
+                initSetup();
+                ClearHitData();
+
+                myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+
+
+                fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
+                fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
+
+                for (int i = 0; i < fChips.size(); i ++) {
+                    configureChip_threshold (fChips.at(i));
+                }
+
+                fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+
+//                for (int i = 0; i < fChips.size(); i ++) {
+ //                   configureChip_threshold (fChips.at(i));
+  //              }
+
+
+                /*timestamp(1);
+                  std::cout << "Before DAC scan, DACread start" << std::endl;
+                  timestamp(1);
+                  std::cout << "Before DAC scan, DACread end" << std::endl;*/
+                char ScanPath0[100], ScanPath1[100];
+                command[0] = '\0';
+                snprintf(ScanPath0, 100, "%s/%ld", OutputPath_DAC, scan_time);
+                snprintf(command, 120, "mkdir -p %s", ScanPath0);
+                system(command);
+                command[0] = '\0';
+                snprintf(ScanPath1, 100, "%s/%ld", OutputPath_Threshold, scan_time);
+                snprintf(command, 120, "mkdir -p %s", ScanPath1);
+                system(command);
+
+                timestamp(1);
+                std::cout << "Start DAC scan" << std::endl;
+                scanVoltageDac (fChips.at(0), Alpide::REG_VRESETP, "VRESETP", ChipNum, mySampleDist, scan_time);
+                scanVoltageDac (fChips.at(0), Alpide::REG_VRESETD, "VRESETD", ChipNum, mySampleDist, scan_time);
+                scanVoltageDac (fChips.at(0), Alpide::REG_VCASP,   "VCASP",   ChipNum, mySampleDist, scan_time);
+                scanVoltageDac (fChips.at(0), Alpide::REG_VCASN,   "VCASN",   ChipNum, mySampleDist, scan_time);
+                scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEH, "VPULSEH", ChipNum, mySampleDist, scan_time);
+                scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEL, "VPULSEL", ChipNum, mySampleDist, scan_time);
+                scanVoltageDac (fChips.at(0), Alpide::REG_VCASN2,  "VCASN2",  ChipNum, mySampleDist, scan_time);
+                scanVoltageDac (fChips.at(0), Alpide::REG_VCLIP,   "VCLIP",   ChipNum, mySampleDist, scan_time);
+                scanVoltageDac (fChips.at(0), Alpide::REG_VTEMP,   "VTEMP",   ChipNum, mySampleDist, scan_time);
+
+                scanCurrentDac (fChips.at(0), Alpide::REG_IAUX2,   "IAUX2",   ChipNum, mySampleDist, scan_time);
+                scanCurrentDac (fChips.at(0), Alpide::REG_IRESET,  "IRESET",  ChipNum, mySampleDist, scan_time);
+                scanCurrentDac (fChips.at(0), Alpide::REG_IDB,     "IDB",     ChipNum, mySampleDist, scan_time);
+                scanCurrentDac (fChips.at(0), Alpide::REG_IBIAS,   "IBIAS",   ChipNum, mySampleDist, scan_time);
+                scanCurrentDac (fChips.at(0), Alpide::REG_ITHR,    "ITHR",    ChipNum, mySampleDist, scan_time);
+
+                timestamp(1);        
+                std::cout << "Complete DAC scan" << std::endl;
+
+                /*timestamp(1);
+                  std::cout << "After DAC scan, DACread start" << std::endl;
+                  timestamp(1);
+                  std::cout << "After DAC scan, DACread end" << std::endl;*/
+
+                timestamp(1);
+                std::cout << "Start threshold scan" << std::endl;
+                sprintf(Suffix, "%ld", scan_time);
+
+                /*timestamp(1);
+                  std::cout << "Before Threshold scan, DACread start" << std::endl;
+                  timestamp(1);
+                  std::cout << "Before Threshold scan, DACread end" << std::endl;*/
+
+//                fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+                fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
+                fBoards.at(0)->SetTriggerSource (trigExt);
+                scan();
+                sprintf(fName, "%s/ThresholdScan_%s.dat", ScanPath1, Suffix);
+                WriteDataToFile (fName, true);
+
+                timestamp(1);
+                std::cout << "Complete threshold scan" << std::endl;
+
+                /*timestamp(1);
+                  std::cout << "After Threshold scan, DACread start" << std::endl;
+                  readAllDac(fChips.at(0));
+                  timestamp(1);
+                  std::cout << "After Threshold scan, DACread end" << std::endl;*/
+            
+                myDAQBoard->PowerOff();
+                delete fChips.at(0);
+                delete fBoards.at(0);
+                fChips.erase(fChips.begin(), fChips.end());
+                fBoards.erase(fBoards.begin(), fBoards.end());
+                sleep(1);
+                system("./tid/hameg2030.py /dev/ttyHAMEG0 9");
+                sleep(4);
+                system("./tid/hameg2030.py /dev/ttyHAMEG0 7");
+                sleep(4);
+                system("./program.sh");
+                sleep(1);
+
+                initSetup();
+
+                myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+
+
+                fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
+                fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
+
+                for (int i = 0; i < fChips.size(); i ++) {
+                    configureChip_threshold (fChips.at(i));
+                }
+
+                fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+            }
+            DumpConfiguration(fChips.at(0), scan_time);
+            sleep(4);
+            n++;
+        }
+
+        if (myDAQBoard) {
+            myDAQBoard->PowerOff();
+            delete myDAQBoard;
+        }
     }
-
-    if (myDAQBoard) {
-      myDAQBoard->PowerOff();
-      delete myDAQBoard;
-    }
-  }
-  return 0;
+    return 0;
 }
