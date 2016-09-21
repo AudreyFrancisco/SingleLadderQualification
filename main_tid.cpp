@@ -87,9 +87,8 @@ unsigned int Bitmask(int width)
 void ParseXML(TAlpide* dut, TiXmlNode* node, int base, int rgn,
               bool readwrite)
 {
+  uint16_t value = 0;
 
-    uint16_t tempval = -1;
-    cout << dut->ReadRegister(0x1, tempval) << "and " << tempval << endl;
   // readwrite (from Chip): true = read; false = write
   for (TiXmlNode* pChild = node->FirstChild("address"); pChild != 0;
        pChild = pChild->NextSibling("address")) {
@@ -118,11 +117,9 @@ void ParseXML(TAlpide* dut, TiXmlNode* node, int base, int rgn,
       int sub = atoi(elem->Attribute("sub"));
       uint16_t address = ((rgn << 11) + (base << 8) + sub);
 //      cout << address << endl;
-      uint16_t value = 0;
       //std::cout << "region" << rgn << " " << base << " " << sub << std::endl;
 
       if (readwrite) {
-          cout << dut->ReadRegister(address, value) << "ho " << value << endl;
         if (dut->ReadRegister(address, value)) {
           std::cout << "Failure to read chip address " << address << std::endl;
           continue;
@@ -489,8 +486,8 @@ int configureDACs(TAlpide *chip, int backBias) {
     chip->WriteRegister (Alpide::REG_ITHR,      IDAC[0][0]);
     chip->WriteRegister (Alpide::REG_IDB,       IDAC[0][1]);
     chip->WriteRegister (Alpide::REG_IRESET,    IDAC[0][2]);
-
-    case 3:
+    break;
+    case 1:
     chip->WriteRegister (Alpide::REG_VCASN,     VDAC[1][0]);
     chip->WriteRegister (Alpide::REG_VCASN2,    VDAC[1][1]);
     chip->WriteRegister (Alpide::REG_VRESETP,   VDAC[1][2]);
@@ -500,6 +497,7 @@ int configureDACs(TAlpide *chip, int backBias) {
     chip->WriteRegister (Alpide::REG_ITHR,      IDAC[1][0]);
     chip->WriteRegister (Alpide::REG_IDB,       IDAC[1][1]);
     chip->WriteRegister (Alpide::REG_IRESET,    IDAC[1][2]);
+    break;
   }
     return 0;
 }
@@ -638,7 +636,7 @@ int main() {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
     for (int i = 0; i < fChips.size(); i ++) {
-      configureChip_dac (fChips.at(i));
+      configureChip_threshold (fChips.at(i));
     }
 
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
@@ -752,7 +750,6 @@ int main() {
         timestamp(1);
         std::cout << "Start threshold scan" << std::endl;
         sprintf(Suffix, "%ld", scan_time);
-        configureChip_threshold (fChips.at(0));
 
         /*timestamp(1);
         std::cout << "Before Threshold scan, DACread start" << std::endl;
