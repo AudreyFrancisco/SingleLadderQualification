@@ -48,7 +48,7 @@ test_dacscan:   $(OBJS) main_dacscan.cpp
 test_pulselength:   $(OBJS) main_pulselength.cpp
 	$(CC) -o test_pulselength $(OBJS) $(CFLAGS) main_pulselength.cpp $(LINKFLAGS)
 
-test_tid: $(OBJS) main_tid.cpp
+tt: $(OBJS) main_tid.cpp
 	$(CC) -o test_tid $(OBJS) $(CFLAGS) main_tid.cpp $(LINKFLAGS)
   
 
