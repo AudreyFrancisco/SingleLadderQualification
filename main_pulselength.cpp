@@ -32,12 +32,13 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
+// test setttings ----------------------------------------------------------------------
 
 int myStrobeLength = 10;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;       // not needed right now as strobe generated on DAQ board
 int myPulseLength  = 2000;    // 2000 = 50 us
 
-int myNTriggers    = 20;
+int myNTriggers    = 50;
 
 // Pixel to test
 int myRow = 5;
@@ -45,14 +46,16 @@ int myRow = 5;
 int myCol = 8; // Col within region, 0:15
 
 // charge range
-int myChargeStart  = 10; // 1
-int myChargeStop   = 20; // 160 
+int myChargeStart  = 1; // 1 default
+int myChargeStop   = 160; // 160 default
 int myChargeStep   = 2;
 
 // delay between pulse and strobe seems to be 50 ns + 12.5 ns * PulseDelay + 25 ns * StrobeDelay
 int myPulseDelayStart   = 36;    // 36 = 500 ns 
 int myPulseDelayStop    = 1600;  // 1000 = 12550 ns 
 int myPulseDelayStep    = 8;     // 100 ns
+
+// -------------------------------------------------------------------------------------
 
 
 int AddressToColumn      (int ARegion, int ADoubleCol, int AAddress)
@@ -114,6 +117,20 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   daqBoard -> DumpConfig("", false, Config);
   fprintf(fp, "%s\n", Config);
   //std::cout << Config << std::endl;
+
+  fprintf(fp, "%s\n", Config);
+
+  fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
+  fprintf(fp, "ROW %i\n", myRow);
+  fprintf(fp, "COL %i\n", myCol);
+
+  fprintf(fp, "CHARGESTART %i\n", myChargeStart);
+  fprintf(fp, "CHARGESTOP %i\n", myChargeStop);
+  fprintf(fp, "CHARGESTEP %i\n", myChargeStep);
+
+  fprintf(fp, "PULSEDELAYSTART %i\n", myPulseDelayStart);
+  fprintf(fp, "PULSEDELAYSTOP %i\n", myPulseDelayStop);
+  fprintf(fp, "PULSEDELAYSTEP %i\n", myPulseDelayStep);
     
   fclose(fp);
 }
