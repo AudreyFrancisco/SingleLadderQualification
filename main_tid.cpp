@@ -52,7 +52,7 @@
 
 // Flag
 int SEU_CHECKER = 1;
-int BB=0; // 0: 0V, 3: -3V
+int BB=0; // 0: 0V, 1: -3V
 int mySampleDist = 1;
 
 // DAQ Setup
@@ -71,10 +71,8 @@ int myChargeStop   = 50;   // if > 100 points, increase array sizes
 int HitData     [100][512][1024];
 int ChargePoints[100];
 
-// Log data
-float logData [16];
 
-TReadoutBoardDAQ *myDAQBoard; // Compile error: Can not find the myDAQBoard in the read function
+TReadoutBoardDAQ *myDAQBoard;
 
 unsigned int Bitmask(int width)
 {
@@ -370,8 +368,33 @@ float readVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name) {
   return Voltage;
 }
 
+/*bool checkDAC(TAlpide *chip, int backBias){
+  const char VName[7][10] = {"VCASN", "VCASN2", "VRESETP", "VRESETD", "VCLIP", "VPULSEH", "VPULSEL"};
+  const char IName[3][10] = {"ITHR", "IDB", "IRESET"};
 
-void readAllDac (TAlpide *chip){
+  int VDAC_compare[2][7]={0}; // Order: VCASN, VCASN2, VRESETP, VRESETD, VCLIP, VPULSEH, VPULSEL
+  int IDAC_compare[2][3]={0}; // Order: ITHR, IDB, IRESET
+
+  chip->ReadRegister (Alpide::REG_VCASN,   VDAC_compare[backBias][0]);
+  chip->ReadRegister (Alpide::REG_VCASN2,  VDAC_compare[backBias][1]);
+  chip->ReadRegister (Alpide::REG_VRESETP, VDAC_compare[backBias][2]);
+  chip->ReadRegister (Alpide::REG_VRESETD, VDAC_compare[backBias][3]);
+  chip->ReadRegister (Alpide::REG_VCLIP,   VDAC_compare[backBias][4]);
+  for (int i=0; i<5; i++){
+    if(VDAC_default[backBias][i]==VDAC_compare[backBias][i]){
+      std::cout << "Different DAC setting(" << VName[i] <<  "):" <<  
+    }
+  }
+
+  chip->ReadRegister (Alpide::REG_VPULSEH, VDAC_compare[backBias][5]);
+  chip->ReadRegister (Alpide::REG_VPULSEL, VDAC_compare[backBias][6]);
+  // Read Current DAC
+  chip->ReadRegister (Alpide::REG_ITHR,    IDAC_compare[backBias][0]);
+  chip->ReadRegister (Alpide::REG_IDB,     IDAC_compare[backBias][1]);
+  chip->ReadRegister (Alpide::REG_IRESET,  IDAC_compare[backBias][2]);
+  }*/
+
+void readAllDac (TAlpide *chip){ // Not used
   // Read Voltage DAC
   readVoltageDac (chip, Alpide::REG_VRESETP, "VRESETP");
   readVoltageDac (chip, Alpide::REG_VRESETD, "VRESETD");
@@ -706,7 +729,13 @@ int main() {
       std::cout << "DACread end" << std::endl;
       
       if(n==10) {
-        
+          powerOn(myDAQBoard);
+
+    for (int i = 0; i < fChips.size(); i ++) {
+      configureChip_threshold (fChips.at(i));
+    }
+
+
         /*timestamp(1);
         std::cout << "Before DAC scan, DACread start" << std::endl;
         timestamp(1);
@@ -773,6 +802,12 @@ int main() {
         std::cout << "After Threshold scan, DACread end" << std::endl;*/
       }
       DumpConfiguration(fChips.at(0), scan_time);
+      powerOn(myDAQBoard);
+for (int i = 0; i < fChips.size(); i ++) {
+	    configureChip_threshold (fChips.at(i));
+	  }
+	  
+
       sleep(4);
       n++;
     }
