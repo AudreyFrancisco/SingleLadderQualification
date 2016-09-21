@@ -1,8 +1,16 @@
 #ifndef CHIPCONFIG_H
 #define CHIPCONFIG_H
 
+#include <map>
+
 
 namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STROBE_DELAY)
+  const int  VCASN   = 50;
+  const int  VCASN2  = 64;
+  const int  VCLIP   = 0;
+  const int  VRESETD = 147;
+  const int  ITHR    = 51;
+
   const bool ENABLE_CLUSTERING      = true;
   const int  MATRIX_READOUT_SPEED   = 1;
   const int  SERIAL_LINK_SPEED      = 3;
@@ -33,9 +41,14 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
 
 class TChipConfig {
  private: 
+  std::map <std::string, int*> fSettings;
   int  fChipId;
   bool fEnabled;                 // variable to exclude (non-working) chip from tests, default true
   int  fITHR;
+  int  fVCASN;
+  int  fVCASN2; 
+  int  fVCLIP;
+  int  fVRESETD;
   // Control register settings
   bool fEnableClustering;
   int  fMatrixReadoutSpeed;
@@ -65,12 +78,15 @@ class TChipConfig {
  protected:
  public:
   TChipConfig   (int chipId, const char *fName = 0);
+  void InitParamMap         (); 
   bool SetParamValue        (const char *Name, const char *Value);
+  int  GetParamValue        (const char *Name) ;
   int  GetChipId            () {return fChipId;};
   bool IsEnabled            () {return fEnabled;};
   void SetEnable            (bool Enabled) {fEnabled = Enabled;};
 
   int  GetITHR                 () {return fITHR;};  
+  int  GetVCASN                () {return fVCASN;};
   bool GetEnableClustering     () {return fEnableClustering;};
   int  GetMatrixReadoutSpeed   () {return fMatrixReadoutSpeed;};
   int  GetSerialLinkSpeed      () {return fSerialLinkSpeed;};

@@ -10,6 +10,12 @@ TChipConfig::TChipConfig (int chipId, const char *fName) {
   fEnabled = true;
  
   // fill default values from header file
+  fVCASN   = VCASN;
+  fVCASN2  = VCASN2;
+  fVCLIP   = VCLIP;
+  fVRESETD = VRESETD;
+  fITHR    = ITHR;
+
   fEnableClustering    = ENABLE_CLUSTERING;
   fMatrixReadoutSpeed  = MATRIX_READOUT_SPEED;
   fSerialLinkSpeed     = SERIAL_LINK_SPEED;
@@ -37,17 +43,39 @@ TChipConfig::TChipConfig (int chipId, const char *fName) {
   if (fName) {
     // read information from file
   }
+
+  InitParamMap();
+}
+
+
+void TChipConfig::InitParamMap () 
+{
+  fSettings["ITHR"]    = &fITHR;
+  fSettings["VCASN"]   = &fVCASN;
+  fSettings["VCASN2"]  = &fVCASN2;
+  fSettings["VCLIP"]   = &fVCLIP;
+  fSettings["VRESETD"] = &fVRESETD;
 }
 
 
 bool TChipConfig::SetParamValue (const char *Name, const char *Value) 
 {
-
-  std::cout << "SetParamValue called with " << Name << " and " << Value << std::endl;
-  if (!strcmp(Name, "ITHR")) {
-    std::cout << "Setting ITHR to " << Value << std::endl;
-    sscanf (Value,"%d", &fITHR);
+  if (fSettings.find (Name) != fSettings.end()) {
+    sscanf (Value, "%d", fSettings.find(Name)->second);
     return true;
   }
+
   return false;
 }
+
+
+int TChipConfig::GetParamValue (const char *Name) 
+{
+  if (fSettings.find (Name) != fSettings.end()) {
+    return *(fSettings.find(Name)->second);
+  }
+  return -1;
+
+}
+
+

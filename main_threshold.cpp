@@ -112,11 +112,11 @@ int configureFromu(TAlpide *chip) {
 int configureDACs(TAlpide *chip) {
   chip->WriteRegister (Alpide::REG_VPULSEH, 170);
   chip->WriteRegister (Alpide::REG_VPULSEL, 169);
-  chip->WriteRegister (Alpide::REG_VRESETD, myVRESETD);
-  chip->WriteRegister (Alpide::REG_VCASN,   myVCASN);
-  chip->WriteRegister (Alpide::REG_VCASN2,  myVCASN2);
-  chip->WriteRegister (Alpide::REG_VCLIP,   myVCLIP);
-  chip->WriteRegister (Alpide::REG_ITHR,    myITHR);
+  chip->WriteRegister (Alpide::REG_VRESETD, fChips.at(0)->GetConfig()->GetParamValue("VRESETD"));
+  chip->WriteRegister (Alpide::REG_VCASN,   fChips.at(0)->GetConfig()->GetParamValue("VCASN"));
+  chip->WriteRegister (Alpide::REG_VCASN2,  fChips.at(0)->GetConfig()->GetParamValue("VCASN2"));
+  chip->WriteRegister (Alpide::REG_VCLIP,   fChips.at(0)->GetConfig()->GetParamValue("VCLIP"));
+  chip->WriteRegister (Alpide::REG_ITHR,    fChips.at(0)->GetConfig()->GetParamValue("ITHR"));
 }
 
 
