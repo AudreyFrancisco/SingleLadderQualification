@@ -45,7 +45,8 @@ int myPulseLength  = 500;
 
 int myPulseDelay   = 40;
 int myNTriggers    = 50;
-int myMaskStages   = 164;    // full: 8192
+//int myMaskStages   = 164;    // full: 8192
+int myMaskStages   = 1; 
 
 int myChargeStart  = 0;
 int myChargeStop   = 50;   // if > 100 points, increase array sizes
@@ -170,6 +171,21 @@ int configureChip(TAlpide *chip) {
 
 }
 
+void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {
+  char Config[1000];
+  FILE *fp = fopen(fName, "w");
+
+  chip     -> DumpConfig("", false, Config);
+  std::cout << Config << std::endl;
+  fprintf(fp, "%s\n", Config);
+  daqBoard -> DumpConfig("", false, Config);
+  fprintf(fp, "%s\n", Config);
+  std::cout << Config << std::endl;
+    
+  fclose(fp);
+}
+
+
 
 void scan() {   
   unsigned char         buffer[1024*4000]; 
@@ -227,7 +243,7 @@ int main() {
 
   initSetup();
 
-  char Suffix[20], fName[100];
+  char Suffix[20], fName[100], Config[1000];
 
   ClearHitData();
   time_t       t = time(0);   // get time now
@@ -253,14 +269,16 @@ int main() {
 
     scan();
 
+    sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
+    WriteDataToFile (fName, true);
+    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    WriteScanConfig (fName, fChips.at(0), myDAQBoard);
+
     if (myDAQBoard) {
       myDAQBoard->PowerOff();
       delete myDAQBoard;
     }
   }
 
-
-  sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
-  WriteDataToFile (fName, true);
   return 0;
 }

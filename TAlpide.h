@@ -158,6 +158,9 @@ class TAlpide {
   //int SendOpCode         (Alpide::TOpCode opcode);
 
   //int SendCommandSequence (vector <> sequence);
+
+  void DumpConfig(const char *fName, bool writeFile=true, char *Config=0);
+
 };
 
 
