@@ -1,7 +1,7 @@
 CC=g++
 INCLUDE=/usr/local/include
 LIBPATH=/usr/local/lib
-CFLAGS= -pipe -fPIC -g -std=c++0x -I $(INCLUDE)
+CFLAGS= -pipe -fPIC -DDEBUG -g -std=c++0x -I $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -L $(LIBPATH)
 #LINKFLAGS=
 OBJECT= runTest
@@ -23,6 +23,9 @@ all:    test test_mosaic test_noiseocc test_threshold test_digital test_fifo tes
 
 test:   $(OBJS) main.cpp
 	$(CC) -o $(OBJECT) $(OBJS) $(CFLAGS) main.cpp $(LINKFLAGS)
+
+adcmon:   $(OBJS) adcmon.o main_adcmon.cpp
+	$(CC) -o adcmon $(OBJS) adcmon.o $(CFLAGS) main_adcmon.cpp $(LINKFLAGS)
 
 test_mosaic:   $(OBJS) main_mosaic.cpp
 	$(CC) -o test_mosaic $(OBJS) $(CFLAGS) main_mosaic.cpp $(LINKFLAGS)
