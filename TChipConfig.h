@@ -85,8 +85,6 @@ class TChipConfig {
   bool IsEnabled            () {return fEnabled;};
   void SetEnable            (bool Enabled) {fEnabled = Enabled;};
 
-  int  GetITHR                 () {return fITHR;};  
-  int  GetVCASN                () {return fVCASN;};
   bool GetEnableClustering     () {return fEnableClustering;};
   int  GetMatrixReadoutSpeed   () {return fMatrixReadoutSpeed;};
   int  GetSerialLinkSpeed      () {return fSerialLinkSpeed;};
