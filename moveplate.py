@@ -1,4 +1,3 @@
-
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -54,7 +53,7 @@ def movehigh():
         break
     return 0
 
-def movelow()
+def movelow():
     plateok = 1
     while 1:
       print("Setting Plane 1 to low position")
@@ -94,3 +93,14 @@ def movelow()
           break
 
     return 0
+
+def main():
+  initplate();
+  mode=int(sys.argv[1])
+  if mode==0:
+    movelow()
+  elif mode==1:
+    movehigh()
+
+if __name__ == "__main__":
+  sys.exit(main())
