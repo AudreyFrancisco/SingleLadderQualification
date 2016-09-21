@@ -44,6 +44,13 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
 		throw std::invalid_argument("MOSAIC Config : file not exists !");
 	  }
 	}
+        InitParamMap();
+}
+
+
+
+void TBoardConfigMOSAIC::InitParamMap() 
+{
 }
 
 

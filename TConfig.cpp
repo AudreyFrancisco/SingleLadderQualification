@@ -207,13 +207,21 @@ void TConfig::DecodeLine(const char *Line)
     ChipStop  = Chip+1;
   }
 
-
+  // Todo: correctly handle the number of readout boards
+  // currently only one is written
+  // Note: having a config file with parameters for the mosaic board, but a setup with a DAQ board
+  // (or vice versa) will issue unknown-parameter warnings... 
   if (fChipConfigs.at(0)->IsParameter(Param)) {
     for (int i = ChipStart; i < ChipStop; i++) {
-      bool ChipParam = fChipConfigs.at(i)->SetParamValue (Param, Rest);
+      fChipConfigs.at(i)->SetParamValue (Param, Rest);
     }
   }
-
+  else if (fBoardConfigs.at(0)->IsParameter(Param)) {
+      fBoardConfigs.at(0)->SetParamValue (Param, Rest);
+  }
+  else {
+    std::cout << "Warning: Unknown parameter " << Param << std::endl;
+  }
 
 
 }

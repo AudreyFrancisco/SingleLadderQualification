@@ -80,9 +80,10 @@ TBoardConfigDAQ::TBoardConfigDAQ(const char *fName, int boardIndex) {
   // Software reset duration register
   fSoftResetDuration = 10;  
 
+  InitParamMap();
+}
 
-  // read configuration from file
-  if (fName) {
 
-  }
+void TBoardConfigDAQ::InitParamMap()
+{
 }

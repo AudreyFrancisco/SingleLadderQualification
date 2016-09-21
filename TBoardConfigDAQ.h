@@ -159,7 +159,7 @@ class TBoardConfigDAQ : public TBoardConfig {
 
 
  protected:
-
+  void InitParamMap ();
  public:
   TBoardConfigDAQ(const char *fName = 0, int boardIndex = 0);
   TBoardType GetBoardType() {return boardDAQ;};
