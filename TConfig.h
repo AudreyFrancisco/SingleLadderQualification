@@ -18,6 +18,7 @@ class TConfig {
   void        Init           (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC); 
   void        Init           (int chipId, TBoardType boardType = boardDAQ);
   void        ParseLine      (const char *Line, char *Param, char *Rest, int *Chip);
+  void        DecodeLine     (const char *Line);
   void        SetDeviceType  (TDeviceType AType, int NChips);
   TDeviceType ReadDeviceType (const char *deviceName);
  protected:

@@ -35,6 +35,7 @@ class TChipConfig {
  private: 
   int  fChipId;
   bool fEnabled;                 // variable to exclude (non-working) chip from tests, default true
+  int  fITHR;
   // Control register settings
   bool fEnableClustering;
   int  fMatrixReadoutSpeed;
@@ -64,10 +65,12 @@ class TChipConfig {
  protected:
  public:
   TChipConfig   (int chipId, const char *fName = 0);
+  bool SetParamValue        (const char *Name, const char *Value);
   int  GetChipId            () {return fChipId;};
   bool IsEnabled            () {return fEnabled;};
   void SetEnable            (bool Enabled) {fEnabled = Enabled;};
-  
+
+  int  GetITHR                 () {return fITHR;};  
   bool GetEnableClustering     () {return fEnableClustering;};
   int  GetMatrixReadoutSpeed   () {return fMatrixReadoutSpeed;};
   int  GetSerialLinkSpeed      () {return fSerialLinkSpeed;};

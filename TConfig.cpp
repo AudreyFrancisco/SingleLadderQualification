@@ -150,19 +150,25 @@ void TConfig::ReadConfigFile (const char *fName)
   // first look for the type of setup in order to initialise config structure
   while ((!Initialised) && (fgets(Line, 20123, fp) != NULL)) {
     if ((Line[0] == '\n') || (Line[0] == '#')) continue; 
-      ParseLine (Line, Param, Rest, &Chip);
-      if (!strcmp(Param,"NCHIPS")){
-        sscanf(Rest, "%d", &NChips);
-      }
-      if (!strcmp(Param, "DEVICE")) {
-        type = ReadDeviceType (Rest);
-      }
-      if ((((NChips > 0) || type == TYPE_CHIP)) && (type != TYPE_UNKNOWN)) {   // type and nchips has been found (nchips not needed for type chip)
+    ParseLine (Line, Param, Rest, &Chip);
+    if (!strcmp(Param,"NCHIPS")){
+      sscanf(Rest, "%d", &NChips);
+    }
+    if (!strcmp(Param, "DEVICE")) {
+      type = ReadDeviceType (Rest);
+    }
+    if ((((NChips > 0) || type == TYPE_CHIP)) && (type != TYPE_UNKNOWN)) {   // type and nchips has been found (nchips not needed for type chip)
+      // SetDeviceType calls the appropriate init method, which in turn calls
+      // the constructors for board and chip configs
       SetDeviceType(type, NChips);
+      Initialised = true;
     }
   }
 
-
+  // now read the rest
+  while (fgets(Line, 1023, fp) != NULL) {
+    DecodeLine(Line);
+  }
 }
 
 
@@ -181,6 +187,34 @@ void TConfig::ParseLine(const char *Line, char *Param, char *Rest, int *Chip) {
   }
 }
 
+
+void TConfig::DecodeLine(const char *Line)
+{
+  int Chip, ChipStart, ChipStop;
+  char Param[128], Rest[896];
+  if ((Line[0] == '\n') || (Line[0] == '#')) {   // empty Line or comment
+      return;
+  }
+
+  ParseLine(Line, Param, Rest, &Chip);
+
+  if (Chip == -1) {
+    ChipStart = 0;
+    ChipStop  = fChipConfigs.size();
+  }
+  else {
+    ChipStart = Chip;
+    ChipStop  = Chip+1;
+  }
+
+
+  for (int i = ChipStart; i < ChipStop; i++) {
+    bool ChipParam = fChipConfigs.at(i)->SetParamValue (Param, Rest);
+  }
+
+
+
+}
 
 // write config to file, has to call same function for all sub-configs (chips and boards)
 void TConfig::WriteToFile (const char *fName) {

@@ -82,7 +82,7 @@ int initSetupIB() {
 int initSetupSingle() {
   TReadoutBoardDAQ  *myDAQBoard = 0;
 
-  fConfig    = new TConfig (fSingleChipId);
+  fConfig    = new TConfig ("Config.cfg");// new TConfig (fSingleChipId);
   fBoardType = boardDAQ;
   
   InitLibUsb(); 

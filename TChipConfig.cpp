@@ -1,4 +1,7 @@
 #include "TChipConfig.h"
+#include <string.h>
+#include <stdio.h>
+#include <iostream>
 
 using namespace ChipConfig;
 
@@ -34,4 +37,17 @@ TChipConfig::TChipConfig (int chipId, const char *fName) {
   if (fName) {
     // read information from file
   }
+}
+
+
+bool TChipConfig::SetParamValue (const char *Name, const char *Value) 
+{
+
+  std::cout << "SetParamValue called with " << Name << " and " << Value << std::endl;
+  if (!strcmp(Name, "ITHR")) {
+    std::cout << "Setting ITHR to " << Value << std::endl;
+    sscanf (Value,"%d", &fITHR);
+    return true;
+  }
+  return false;
 }
