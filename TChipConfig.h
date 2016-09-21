@@ -81,6 +81,7 @@ class TChipConfig {
   void InitParamMap         (); 
   bool SetParamValue        (const char *Name, const char *Value);
   int  GetParamValue        (const char *Name) ;
+  bool IsParameter          (const char *Name) {return (fSettings.count(Name) > 0);};
   int  GetChipId            () {return fChipId;};
   bool IsEnabled            () {return fEnabled;};
   void SetEnable            (bool Enabled) {fEnabled = Enabled;};

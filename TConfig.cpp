@@ -208,8 +208,10 @@ void TConfig::DecodeLine(const char *Line)
   }
 
 
-  for (int i = ChipStart; i < ChipStop; i++) {
-    bool ChipParam = fChipConfigs.at(i)->SetParamValue (Param, Rest);
+  if (fChipConfigs.at(0)->IsParameter(Param)) {
+    for (int i = ChipStart; i < ChipStop; i++) {
+      bool ChipParam = fChipConfigs.at(i)->SetParamValue (Param, Rest);
+    }
   }
 
 

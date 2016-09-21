@@ -75,7 +75,6 @@ int TChipConfig::GetParamValue (const char *Name)
     return *(fSettings.find(Name)->second);
   }
   return -1;
-
 }
 
 
