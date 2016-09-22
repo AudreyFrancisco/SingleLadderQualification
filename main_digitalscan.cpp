@@ -116,6 +116,12 @@ int configureMaskStage(TAlpide *chip, int istage) {
   chip->WriteRegister (Alpide::REG_REGDISABLE_LOW,  (uint16_t) regionmod);
   chip->WriteRegister (Alpide::REG_REGDISABLE_HIGH, (uint16_t) regionmod);
 
+  for (uint16_t ireg = 0; ireg < 32; ireg ++) {
+    uint16_t Address = Alpide::REG_DCOL_DISABLE_BASE | (ireg << 11);
+    chip->WriteRegister (Address, 0);
+  }
+
+
   //for (int icol = 0; icol < 1024; icol += 4) {
   //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 1024, icol + istage / 1024);
   //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 1024, icol + istage / 1024);
