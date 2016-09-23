@@ -193,7 +193,7 @@ void DumpConfiguration(TAlpide *myAlpide, long int timef) {
 
   char buffer[100];
   sprintf(buffer, "Data/Configuration_%ld.xml", timef );
-  FILE *fp = fopen (buffer, "w");
+  FILE *fp = fopen (buffer, "a");
   fprintf(fp, "%s", configStr.c_str());
   fclose(fp);
 }
