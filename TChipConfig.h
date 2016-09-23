@@ -2,7 +2,7 @@
 #define CHIPCONFIG_H
 
 #include <map>
-
+#include <string>
 
 namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STROBE_DELAY)
   const int  VCASN   = 50;
