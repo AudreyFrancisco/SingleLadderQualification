@@ -55,6 +55,15 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int region, std::vector
   hit.dcol   = (data_field & 0x3c00) >> 10;
   address    = (data_field & 0x03ff);
 
+  if (hits->size() > 0) {
+    if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address == hits->back().address)) {
+      std::cout << "Warning, received pixel " << hit.region << "/" << hit.dcol << "/" << hit.address <<  " twice." << std::endl;
+    }
+    else if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address < hits->back().address)) {
+      std::cout << "Warning, address of pixel " << hit.region << "/" << hit.dcol << "/" << hit.address <<  " is lower than previous one ("<< hits->back().address << ") in same double column." << std::endl;
+    }
+  }
+
   if (datalong) {
     hitmap_length = 7;
   }
