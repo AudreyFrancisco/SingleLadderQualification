@@ -24,7 +24,7 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
 	NumberOfControlInterfaces = 2;
 	//	strcpy(IPAddress, "192.168.168.250");
 
-	strcpy(IPAddress, "192.168.1.77");
+	strcpy(IPAddress, "192.168.1.66");
 	TCPPort = 2000;
 
 	ControlInterfacePhase = 0;
