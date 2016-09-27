@@ -91,6 +91,9 @@ TDeviceType TConfig::ReadDeviceType (const char *deviceName) {
   else if (!strcmp(deviceName, "STAVE")) {
     type = TYPE_STAVE;
   }
+  else if (!strcmp(deviceName, "CHIPMOSAIC")) {
+    type = TYPE_CHIP_MOSAIC;
+  }
   else {
     std::cout << "Error, unknown setup type found: " << deviceName << std::endl;
     exit (EXIT_FAILURE);
@@ -103,6 +106,9 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
   std::vector <int> chipIds;
   if (AType == TYPE_CHIP) {
     Init(16, boardDAQ);
+  }
+  else if (AType == TYPE_CHIP_MOSAIC) {
+    Init(16, boardMOSAIC);
   }
   else if (AType == TYPE_TELESCOPE) {
     for (int i = 0; i < NChips; i++) {

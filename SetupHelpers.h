@@ -10,7 +10,7 @@
 //   - IB stave with MOSAIC
 //   - OB module with MOSAIC
 
-typedef enum {setupSingle, setupIB, setupOB} TSetupType;
+typedef enum {setupSingle, setupIB, setupOB, setupSingleM} TSetupType;
 
 // chip ID that is used in case of single chip setup
 extern int fSingleChipId;
@@ -27,9 +27,10 @@ extern std::vector <TAlpide *>       fChips;
 
 extern TConfig *fConfig;
 
-int initSetupOB    ();
-int initSetupIB    ();
-int initSetupSingle();
-int initSetup      ();
-int powerOn        (TReadoutBoardDAQ *aDAQBoard);
+int initSetupOB          ();
+int initSetupIB          ();
+int initSetupSingle      ();
+int initSetupSingleMosaic();
+int initSetup            ();
+int powerOn              (TReadoutBoardDAQ *aDAQBoard);
 #endif

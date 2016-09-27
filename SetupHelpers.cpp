@@ -79,6 +79,21 @@ int initSetupIB() {
 }
 
 
+int initSetupSingleMosaic() {
+  int ReceiverId = 1;
+
+  fConfig       = new TConfig ("Config.cfg");
+  fBoardType    = boardMOSAIC;
+
+  fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
+
+  fChips. push_back(new TAlpide(fConfig->GetChipConfig(fSingleChipId)));
+  fChips. at(0) -> SetReadoutBoard(fBoards.at(0));
+  fBoards.at(0) -> AddChip        (fSingleChipId, 0, ReceiverId);
+
+}
+
+
 int initSetupSingle() {
   TReadoutBoardDAQ  *myDAQBoard = 0;
 
@@ -134,6 +149,9 @@ int initSetup() {
       break;
     case setupOB:
       initSetupOB();
+      break;
+    case setupSingleM: 
+      initSetupSingleMosaic();
       break;
     default: 
       std::cout << "Unknown setup type, doing nothing" << std::endl;
