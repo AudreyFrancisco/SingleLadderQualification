@@ -33,11 +33,11 @@
 #include "SetupHelpers.h"
 
 
-int myVCASN   = 57;
-int myITHR    = 51;
-int myVCASN2  = 64;
-int myVCLIP   = 0;
-int myVRESETD = 147;
+//int myVCASN   = 57;
+//int myITHR    = 51;
+//int myVCASN2  = 64;
+//int myVCLIP   = 0;
+//int myVRESETD = 147;
 
 int myStrobeLength = 80;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;
@@ -45,8 +45,9 @@ int myPulseLength  = 500;
 
 int myPulseDelay   = 40;
 int myNTriggers    = 50;
-//int myMaskStages   = 164;    // full: 8192
-int myMaskStages   = 1; 
+int myMaskStages   = 164;    // full: 8192
+//int myMaskStages   = 1; 
+//int myMaskStages   = 82; 
 
 int myChargeStart  = 0;
 int myChargeStop   = 50;   // if > 100 points, increase array sizes
@@ -117,6 +118,7 @@ int configureDACs(TAlpide *chip) {
   chip->WriteRegister (Alpide::REG_VCASN2,  fChips.at(0)->GetConfig()->GetParamValue("VCASN2"));
   chip->WriteRegister (Alpide::REG_VCLIP,   fChips.at(0)->GetConfig()->GetParamValue("VCLIP"));
   chip->WriteRegister (Alpide::REG_ITHR,    fChips.at(0)->GetConfig()->GetParamValue("ITHR"));
+  chip->WriteRegister (Alpide::REG_IDB,     fChips.at(0)->GetConfig()->GetParamValue("IDB"));
 }
 
 
@@ -181,6 +183,15 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   daqBoard -> DumpConfig("", false, Config);
   fprintf(fp, "%s\n", Config);
   std::cout << Config << std::endl;
+
+  fprintf(fp, "\n", Config);
+
+  fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
+  fprintf(fp, "MASKSTAGES %i\n", myMaskStages);
+
+  fprintf(fp, "CHARGESTART %i\n", myChargeStart);
+  fprintf(fp, "CHARGESTOP %i\n", myChargeStop);
+
     
   fclose(fp);
 }
