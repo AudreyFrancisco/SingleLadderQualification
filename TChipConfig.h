@@ -45,6 +45,7 @@ class TChipConfig {
   int  fChipId;
   bool fEnabled;                 // variable to exclude (non-working) chip from tests, default true
   int  fITHR;
+  int  fIDB;
   int  fVCASN;
   int  fVCASN2; 
   int  fVCLIP;

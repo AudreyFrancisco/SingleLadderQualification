@@ -51,6 +51,7 @@ TChipConfig::TChipConfig (int chipId, const char *fName) {
 void TChipConfig::InitParamMap () 
 {
   fSettings["ITHR"]    = &fITHR;
+  fSettings["IDB"]     = &fIDB;
   fSettings["VCASN"]   = &fVCASN;
   fSettings["VCASN2"]  = &fVCASN2;
   fSettings["VCLIP"]   = &fVCLIP;
