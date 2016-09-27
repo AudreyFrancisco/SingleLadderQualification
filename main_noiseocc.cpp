@@ -44,6 +44,7 @@ int myPulseLength  = 500;
 
 int myPulseDelay   = 50;
 int myNTriggers    = 1000000;
+//int myNTriggers    = 1000;
 
 
 int HitData     [512][1024];
@@ -93,12 +94,22 @@ int configureFromu(TAlpide *chip) {
 
 
 // initialisation of chip DACs
+//int configureDACs(TAlpide *chip) {
+//  chip->WriteRegister (Alpide::REG_VRESETD, myVRESETD);
+//  chip->WriteRegister (Alpide::REG_VCASN,   myVCASN);
+//  chip->WriteRegister (Alpide::REG_VCASN2,  myVCASN2);
+//  chip->WriteRegister (Alpide::REG_VCLIP,   myVCLIP);
+//  chip->WriteRegister (Alpide::REG_ITHR,    myITHR);
+//}
 int configureDACs(TAlpide *chip) {
-  chip->WriteRegister (Alpide::REG_VRESETD, myVRESETD);
-  chip->WriteRegister (Alpide::REG_VCASN,   myVCASN);
-  chip->WriteRegister (Alpide::REG_VCASN2,  myVCASN2);
-  chip->WriteRegister (Alpide::REG_VCLIP,   myVCLIP);
-  chip->WriteRegister (Alpide::REG_ITHR,    myITHR);
+  //chip->WriteRegister (Alpide::REG_VPULSEH, 170);
+  //chip->WriteRegister (Alpide::REG_VPULSEL, 169);
+  chip->WriteRegister (Alpide::REG_VRESETD, fChips.at(0)->GetConfig()->GetParamValue("VRESETD"));
+  chip->WriteRegister (Alpide::REG_VCASN,   fChips.at(0)->GetConfig()->GetParamValue("VCASN"));
+  chip->WriteRegister (Alpide::REG_VCASN2,  fChips.at(0)->GetConfig()->GetParamValue("VCASN2"));
+  chip->WriteRegister (Alpide::REG_VCLIP,   fChips.at(0)->GetConfig()->GetParamValue("VCLIP"));
+  chip->WriteRegister (Alpide::REG_ITHR,    fChips.at(0)->GetConfig()->GetParamValue("ITHR"));
+  chip->WriteRegister (Alpide::REG_IDB,     fChips.at(0)->GetConfig()->GetParamValue("IDB"));
 }
 
 
@@ -129,6 +140,24 @@ int configureChip(TAlpide *chip) {
 
 }
 
+void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {
+  char Config[1000];
+  FILE *fp = fopen(fName, "w");
+
+  chip     -> DumpConfig("", false, Config);
+  //std::cout << Config << std::endl;
+  fprintf(fp, "%s\n", Config);
+  daqBoard -> DumpConfig("", false, Config);
+  fprintf(fp, "%s\n", Config);
+  //std::cout << Config << std::endl;
+
+  fprintf(fp, "\n", Config);
+
+  fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
+    
+  fclose(fp);
+}
+
 
 void scan() {   
   unsigned char         buffer[1024*4000]; 
@@ -141,7 +170,13 @@ void scan() {
   nTrains = myNTriggers / nTrigsPerTrain;
   nRest   = myNTriggers % nTrigsPerTrain;
 
+  std::cout << "NTriggers: " << myNTriggers << std::endl;
+  std::cout << "NTriggersPerTrain: " << nTrigsPerTrain << std::endl;
+  std::cout << "NTrains: " << nTrains << std::endl;
+  std::cout << "NRest: " << nRest << std::endl;
+
   for (int itrain = 0; itrain <= nTrains; itrain ++) {
+    std::cout << "Train: " << itrain << std::endl;
     if (itrain == nTrains) {
       nTrigsThisTrain = nRest;
     }
@@ -211,13 +246,19 @@ int main() {
 
     scan();
 
+    sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
+    WriteDataToFile (fName, true);
+
+    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    WriteScanConfig (fName, fChips.at(0), myDAQBoard);
+
     if (myDAQBoard) {
       myDAQBoard->PowerOff();
       delete myDAQBoard;
     }
   }
 
-  sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
-  WriteDataToFile (fName, true);
+  //sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
+  //WriteDataToFile (fName, true);
   return 0;
 }
