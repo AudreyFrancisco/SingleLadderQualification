@@ -119,6 +119,7 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 
   std::cout << "Analog Current  = " << aDAQBoard-> ReadAnalogI() << std::endl;
   std::cout << "Digital Current = " << aDAQBoard-> ReadDigitalI() << std::endl; 
+  std::cout << "Temperature     = " << aDAQBoard-> ReadTemperature() << std::endl; 
 }
 
 
