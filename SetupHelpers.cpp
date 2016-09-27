@@ -80,7 +80,7 @@ int initSetupIB() {
 
 
 int initSetupSingleMosaic() {
-  int ReceiverId = 1;
+  int ReceiverId = 3;  // HSData is connected to pins for first chip on a stave
 
   fConfig       = new TConfig ("Config.cfg");
   fBoardType    = boardMOSAIC;
