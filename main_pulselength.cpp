@@ -48,11 +48,13 @@ int myCol = 8; // Col within region, 0:15
 // charge range
 int myChargeStart  = 1; // 1 default
 int myChargeStop   = 160; // 160 default
+//int myChargeStop   = 4; // 160 default
 int myChargeStep   = 2;
 
 // delay between pulse and strobe seems to be 50 ns + 12.5 ns * PulseDelay + 25 ns * StrobeDelay
 int myPulseDelayStart   = 36;    // 36 = 500 ns 
-int myPulseDelayStop    = 1600;  // 1000 = 12550 ns 
+//int myPulseDelayStop    = 1600;  // 1000 = 12550 ns 
+int myPulseDelayStop    = 1200;  // 1200 = 15050 ns 
 int myPulseDelayStep    = 8;     // 100 ns
 
 // -------------------------------------------------------------------------------------
@@ -118,7 +120,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "%s\n", Config);
   //std::cout << Config << std::endl;
 
-  fprintf(fp, "%s\n", Config);
+  fprintf(fp, "\n", Config);
 
   fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
   fprintf(fp, "ROW %i\n", myRow);
@@ -149,7 +151,12 @@ int configureFromu(TAlpide *chip) {
 int configureDACs(TAlpide *chip) {
   chip->WriteRegister (Alpide::REG_VPULSEH, 170);
   chip->WriteRegister (Alpide::REG_VPULSEL, 169);
-  chip->WriteRegister (Alpide::REG_VRESETD, 147);
+  chip->WriteRegister (Alpide::REG_VRESETD, fChips.at(0)->GetConfig()->GetParamValue("VRESETD"));
+  chip->WriteRegister (Alpide::REG_VCASN,   fChips.at(0)->GetConfig()->GetParamValue("VCASN"));
+  chip->WriteRegister (Alpide::REG_VCASN2,  fChips.at(0)->GetConfig()->GetParamValue("VCASN2"));
+  chip->WriteRegister (Alpide::REG_VCLIP,   fChips.at(0)->GetConfig()->GetParamValue("VCLIP"));
+  chip->WriteRegister (Alpide::REG_ITHR,    fChips.at(0)->GetConfig()->GetParamValue("ITHR"));
+  chip->WriteRegister (Alpide::REG_IDB,     fChips.at(0)->GetConfig()->GetParamValue("IDB"));
 }
 
 
