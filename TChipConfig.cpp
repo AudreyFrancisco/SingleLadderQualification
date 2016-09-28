@@ -15,6 +15,7 @@ TChipConfig::TChipConfig (int chipId, const char *fName) {
   fVCLIP   = VCLIP;
   fVRESETD = VRESETD;
   fITHR    = ITHR;
+  fIBIAS   = IBIAS;
 
   fEnableClustering    = ENABLE_CLUSTERING;
   fMatrixReadoutSpeed  = MATRIX_READOUT_SPEED;
@@ -56,6 +57,14 @@ void TChipConfig::InitParamMap ()
   fSettings["VCASN2"]  = &fVCASN2;
   fSettings["VCLIP"]   = &fVCLIP;
   fSettings["VRESETD"] = &fVRESETD;
+  fSettings["IBIAS"]   = &fIBIAS;
+  fSettings["VCASP"]   = &fVCASP;
+  fSettings["VPULSEL"] = &fVPULSEL;
+  fSettings["VPULSEH"] = &fVPULSEH;
+  fSettings["VRESETP"] = &fVRESETP;
+  fSettings["VTEMP"]   = &fVTEMP;
+  fSettings["IAUX2"]   = &fIAUX2;
+  fSettings["IRESET"]  = &fIRESET;
 }
 
 
