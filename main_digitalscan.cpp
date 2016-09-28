@@ -38,7 +38,7 @@ int myStrobeDelay  = 10;
 int myPulseLength  = 1000;
 
 int myPulseDelay   = 50;
-int myNTriggers    = 100;
+int myNTriggers    = 50;
 int myMaskStages   = 2048;
 
 int HitData[512][1024];
@@ -131,6 +131,34 @@ int configureMaskStage(TAlpide *chip, int istage) {
 }
 
 
+int configurePLL(TAlpide *chip) {
+  uint16_t Phase      = 8;  // 4bit Value, default 8
+  uint16_t Stages     = 1; // 0 = 3 stages, 1 = 4,  3 = 5 (typical 4)
+  uint16_t ChargePump = 8;
+  uint16_t Driver     = 8;
+  uint16_t Preemp     = 8;
+  uint16_t Value;
+
+  Value = (Stages & 0x3) | 0x4 | 0x8 | ((Phase & 0xf) << 4);   // 0x4: narrow bandwidth, 0x8: PLL off
+
+  chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+
+  Value = (ChargePump & 0xf) | ((Driver & 0xf) << 4) | ((Preemp & 0xf) << 8);
+
+  chip->WriteRegister (Alpide::REG_DTU_DACS, Value);
+
+  // Clear PLL off signal
+  Value = (Stages & 0x3) | 0x4 | ((Phase & 0xf) << 4);   // 0x4: narrow bandwidth, 0x8: PLL off
+  chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+  // Force PLL reset
+  Value = (Stages & 0x3) | 0x4 | 0x100 |((Phase & 0xf) << 4);   // 0x4: narrow bandwidth, 0x100: Reset
+  chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+  Value = (Stages & 0x3) | 0x4 |((Phase & 0xf) << 4);           // Reset off
+  chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+
+}
+
+
 int configureChip(TAlpide *chip) {
   // put all chip configurations before the start of the test here
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x20); // set chip to config mode
@@ -144,7 +172,7 @@ int configureChip(TAlpide *chip) {
   configureFromu(chip);
   configureDACs (chip);
   configureMask (chip);
-
+  configurePLL  (chip);
 
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
 
@@ -159,14 +187,18 @@ void scan() {
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
 
+  TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (fBoards.at(0));
+
+  if (myMOSAIC) {
+    myMOSAIC->StartRun();
+  }
+
   for (int istage = 0; istage < myMaskStages; istage ++) {
     std::cout << "Mask stage " << istage << std::endl;
     for (int i = 0; i < fChips.size(); i ++) {
       configureMaskStage (fChips.at(i), istage);
     }
-
     fBoards.at(0)->Trigger(myNTriggers);
-
     int itrg = 0;
     while(itrg < myNTriggers) {
       if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
@@ -174,6 +206,7 @@ void scan() {
         continue;
       }
       else {
+
         //std::cout << "received Event" << itrg << " with length " << n_bytes_data << std::endl; 
         //for (int iByte=0; iByte<n_bytes_data; ++iByte) {
         //  std::cout << std::hex << (int)(uint8_t)buffer[iByte] << std::dec;
@@ -181,7 +214,7 @@ void scan() {
         //std::cout << std::endl;
             
         // decode DAQboard event
-        BoardDecoder::DecodeEvent(boardDAQ, buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+        BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
         // decode Chip event
         int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
         AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
@@ -198,6 +231,9 @@ void scan() {
     //}
     CopyHitData(Hits);
   }
+  if (myMOSAIC) {
+    myMOSAIC->StopRun();
+  }
 
 
 }
@@ -211,6 +247,7 @@ int main() {
   // (1 will result in master chip IDs 0x10 and 0x18, 2 in 0x20 and 0x28 ...)
   fModuleId = 1;
 
+  // setup type; use setupSingle for DAQ board, setupSingleM for single chip with MOSAIC
   fSetupType = setupSingle;
 
   initSetup();
@@ -236,9 +273,14 @@ int main() {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
 
     // put your test here... 
-    fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
-    fBoards.at(0)->SetTriggerSource (trigExt);
-
+    if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
+      fBoards.at(0)->SetTriggerConfig (true, true, 100, 1000);//myStrobeDelay, myPulseDelay);
+      fBoards.at(0)->SetTriggerSource (trigInt);
+    }
+    else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
+      fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
+      fBoards.at(0)->SetTriggerSource (trigExt);
+    }
     scan();
 
     if (myDAQBoard) {
