@@ -128,6 +128,34 @@ int configureMask(TAlpide *chip) {
 }
 
 
+int configurePLL(TAlpide *chip) {
+  uint16_t Phase      = 8;  // 4bit Value, default 8
+  uint16_t Stages     = 1; // 0 = 3 stages, 1 = 4,  3 = 5 (typical 4)
+  uint16_t ChargePump = 8;
+  uint16_t Driver     = 8;
+  uint16_t Preemp     = 8;
+  uint16_t Value;
+
+  Value = (Stages & 0x3) | 0x4 | 0x8 | ((Phase & 0xf) << 4);   // 0x4: narrow bandwidth, 0x8: PLL off
+
+  chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+
+  Value = (ChargePump & 0xf) | ((Driver & 0xf) << 4) | ((Preemp & 0xf) << 8);
+
+  chip->WriteRegister (Alpide::REG_DTU_DACS, Value);
+
+  // Clear PLL off signal
+  Value = (Stages & 0x3) | 0x4 | ((Phase & 0xf) << 4);   // 0x4: narrow bandwidth, 0x8: PLL off
+  chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+  // Force PLL reset
+  Value = (Stages & 0x3) | 0x4 | 0x100 |((Phase & 0xf) << 4);   // 0x4: narrow bandwidth, 0x100: Reset
+  chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+  Value = (Stages & 0x3) | 0x4 |((Phase & 0xf) << 4);           // Reset off
+  chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+
+}
+
+
 int configureChip(TAlpide *chip) {
   // put all chip configurations before the start of the test here
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x20); // set chip to config mode
@@ -141,7 +169,7 @@ int configureChip(TAlpide *chip) {
   configureFromu(chip);
   configureDACs (chip);
   configureMask (chip);
-
+  configurePLL  (chip);
 
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
 
@@ -155,7 +183,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   chip     -> DumpConfig("", false, Config);
   //std::cout << Config << std::endl;
   fprintf(fp, "%s\n", Config);
-  daqBoard -> DumpConfig("", false, Config);
+  if (daqBoard) daqBoard -> DumpConfig("", false, Config);
   fprintf(fp, "%s\n", Config);
   //std::cout << Config << std::endl;
 
@@ -183,6 +211,12 @@ void scan() {
   std::cout << "NTrains: " << nTrains << std::endl;
   std::cout << "NRest: " << nRest << std::endl;
 
+  TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (fBoards.at(0));
+
+  if (myMOSAIC) {
+    myMOSAIC->StartRun();
+  }
+
   for (int itrain = 0; itrain <= nTrains; itrain ++) {
     std::cout << "Train: " << itrain << std::endl;
     if (itrain == nTrains) {
@@ -202,7 +236,7 @@ void scan() {
         }
         else {
           // decode DAQboard event
-          BoardDecoder::DecodeEvent(boardDAQ, buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+          BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
           // decode Chip event
           int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
           AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
@@ -212,6 +246,9 @@ void scan() {
       } 
       //std::cout << "Number of hits: " << Hits->size() << std::endl;
       CopyHitData(Hits);
+  }
+  if (myMOSAIC) {
+    myMOSAIC->StopRun();
   }
 }
 
@@ -249,8 +286,14 @@ int main() {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
 
     // put your test here... 
-    fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
-    fBoards.at(0)->SetTriggerSource (trigExt);
+    if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
+      fBoards.at(0)->SetTriggerConfig (true, true, myPulseDelay, myPulseLength * 2);
+      fBoards.at(0)->SetTriggerSource (trigInt);
+    }
+    else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
+      fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
+      fBoards.at(0)->SetTriggerSource (trigExt);
+    }
 
     scan();
 
