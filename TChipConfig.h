@@ -10,6 +10,8 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
   const int  VCLIP   = 0;
   const int  VRESETD = 147;
   const int  ITHR    = 51;
+  const int  IBIAS   = 64;
+  const int  VCASP   = 86;
 
   const bool ENABLE_CLUSTERING      = true;
   const int  MATRIX_READOUT_SPEED   = 1;
@@ -44,12 +46,22 @@ class TChipConfig {
   std::map <std::string, int*> fSettings;
   int  fChipId;
   bool fEnabled;                 // variable to exclude (non-working) chip from tests, default true
+  // DACs used
   int  fITHR;
   int  fIDB;
   int  fVCASN;
   int  fVCASN2; 
   int  fVCLIP;
   int  fVRESETD;
+  int  fVCASP;
+  int  fVPULSEL;
+  int  fVPULSEH;
+  int  fIBIAS;
+  // DACs unused
+  int  fVRESETP;
+  int  fVTEMP;
+  int  fIAUX2;
+  int  fIRESET;
   // Control register settings
   bool fEnableClustering;
   int  fMatrixReadoutSpeed;
