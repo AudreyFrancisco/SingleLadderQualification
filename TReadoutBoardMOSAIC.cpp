@@ -168,7 +168,7 @@ void TReadoutBoardMOSAIC::StopRun()
 {
 	 pulser->run(0);
 	 mRunControl->stopRun();
-	 //closeTCP();  // FIXME: this could cause the lost of the tail of the buffer ...
+	 closeTCP();  // FIXME: this could cause the lost of the tail of the buffer ...
 	 return;
 }
 
@@ -578,7 +578,6 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
 		if(dataLink >= 0) { // Enable the data receiver
 		  if (fChipPositions.at(i).enabled) {
 			a3rcv[dataLink-1]->addDisable(false);
-			std::cout << "Enabling receiver " << dataLink << std::endl;
 		  }
                   else {
 			a3rcv[dataLink-1]->addDisable(true);
