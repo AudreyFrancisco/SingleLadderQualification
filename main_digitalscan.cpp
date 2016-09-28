@@ -182,7 +182,7 @@ int configureChip(TAlpide *chip) {
 
 void scan() {   
   unsigned char         buffer[1024*4000]; 
-  int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
+  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -192,6 +192,7 @@ void scan() {
   if (myMOSAIC) {
     myMOSAIC->StartRun();
   }
+
 
   for (int istage = 0; istage < myMaskStages; istage ++) {
     std::cout << "Mask stage " << istage << std::endl;
@@ -215,6 +216,7 @@ void scan() {
             
         // decode DAQboard event
         BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+        if (boardInfo.decoder10b8bError) errors8b10b++;
         // decode Chip event
         int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
         AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
@@ -233,6 +235,7 @@ void scan() {
   }
   if (myMOSAIC) {
     myMOSAIC->StopRun();
+    std::cout << "Total number of 8b10b decoder errors: " << errors8b10b << std::endl;
   }
 
 
