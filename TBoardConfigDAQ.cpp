@@ -4,6 +4,7 @@ TBoardConfigDAQ::TBoardConfigDAQ(const char *fName, int boardIndex) {
   // fill default value from header file
   ////---- ADC module
 
+  fBoardType = boardDAQ;
   // ADC config reg 0 !! values as found in old TDaqBoard::PowerOn()
   fCurrentLimitDigital = LIMIT_DIGITAL; 
   fCurrentLimitIo      = LIMIT_IO;      

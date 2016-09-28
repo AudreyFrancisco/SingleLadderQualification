@@ -20,6 +20,7 @@ using namespace std;
 
 TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIndex)
 {
+  fBoardType = boardMOSAIC;
 	// Default values set
 	NumberOfControlInterfaces = 2;
 	//	strcpy(IPAddress, "192.168.168.250");

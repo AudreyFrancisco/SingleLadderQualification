@@ -26,7 +26,7 @@ class TBoardConfig {
   int  GetParamValue        (const char *Name) ;
   bool IsParameter          (const char *Name) {return (fSettings.count(Name) > 0);};
 
-  virtual TBoardType GetBoardType() = 0;
+  virtual TBoardType GetBoardType() {return fBoardType;};
 
   bool           GetTriggerEnable() {return fTriggerEnable;};
   bool           GetPulseEnable  () {return fPulseEnable;};

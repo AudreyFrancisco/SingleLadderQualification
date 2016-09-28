@@ -162,7 +162,6 @@ class TBoardConfigDAQ : public TBoardConfig {
   void InitParamMap ();
  public:
   TBoardConfigDAQ(const char *fName = 0, int boardIndex = 0);
-  TBoardType GetBoardType() {return boardDAQ;};
 
   //// getters for module config parameters 
 
