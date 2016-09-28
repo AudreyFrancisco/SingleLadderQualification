@@ -157,6 +157,13 @@ int configureDACs(TAlpide *chip) {
   chip->WriteRegister (Alpide::REG_VCLIP,   fChips.at(0)->GetConfig()->GetParamValue("VCLIP"));
   chip->WriteRegister (Alpide::REG_ITHR,    fChips.at(0)->GetConfig()->GetParamValue("ITHR"));
   chip->WriteRegister (Alpide::REG_IDB,     fChips.at(0)->GetConfig()->GetParamValue("IDB"));
+  chip->WriteRegister (Alpide::REG_IBIAS,   fChips.at(0)->GetConfig()->GetParamValue("IBIAS"));
+  chip->WriteRegister (Alpide::REG_VCASP,   fChips.at(0)->GetConfig()->GetParamValue("VCASP"));
+  // not used DACs..
+  chip->WriteRegister (Alpide::REG_VTEMP,   fChips.at(0)->GetConfig()->GetParamValue("VTEMP"));
+  chip->WriteRegister (Alpide::REG_VRESETP, fChips.at(0)->GetConfig()->GetParamValue("VRESETP"));
+  chip->WriteRegister (Alpide::REG_IRESET,  fChips.at(0)->GetConfig()->GetParamValue("IRESET"));
+  chip->WriteRegister (Alpide::REG_IAUX2,   fChips.at(0)->GetConfig()->GetParamValue("IAUX2"));
 }
 
 
