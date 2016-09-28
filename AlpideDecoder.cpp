@@ -5,6 +5,8 @@
 //using namespace AlpideDecoder;
 
 
+bool newEvent;
+
 TDataType AlpideDecoder::GetDataType(unsigned char dataWord) {
   if      (dataWord == 0xff)          return DT_IDLE;
   else if (dataWord == 0xf1)          return DT_BUSYON;
@@ -24,6 +26,7 @@ void AlpideDecoder::DecodeChipHeader (unsigned char *data, int &chipId, unsigned
 
   bunchCounter = data_field & 0xff;
   chipId       = (data_field >> 8) & 0xf;
+  newEvent     = true;
 }
 
 
@@ -55,12 +58,12 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int region, std::vector
   hit.dcol   = (data_field & 0x3c00) >> 10;
   address    = (data_field & 0x03ff);
 
-  if (hits->size() > 0) {
+  if ((hits->size() > 0) && (!newEvent)) {
     if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address == hits->back().address)) {
-      std::cout << "Warning, received pixel " << hit.region << "/" << hit.dcol << "/" << hit.address <<  " twice." << std::endl;
+      std::cout << "Warning, received pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " twice." << std::endl;
     }
     else if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address < hits->back().address)) {
-      std::cout << "Warning, address of pixel " << hit.region << "/" << hit.dcol << "/" << hit.address <<  " is lower than previous one ("<< hits->back().address << ") in same double column." << std::endl;
+      std::cout << "Warning, address of pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " is lower than previous one ("<< hits->back().address << ") in same double column." << std::endl;
     }
   }
 
@@ -76,6 +79,7 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int region, std::vector
     hit.address = address + (i + 1);
     hits->push_back (hit);
   }
+  newEvent = false;
 }
 
 
