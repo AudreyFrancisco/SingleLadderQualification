@@ -27,7 +27,7 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
 	strcpy(IPAddress, "192.168.1.66");
 	TCPPort = 2000;
 
-	ControlInterfacePhase = 0;
+	ControlInterfacePhase = 2;
 	RunCtrlAFThreshold = 1250000;
 	RunCtrlLatMode =1; // 1 := latencyModeEoe, 2 := latencyModeMemory, 3 := latencyModeTimeout
 	RunCtrlTimeout = 0;
