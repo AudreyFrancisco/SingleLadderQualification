@@ -6,13 +6,18 @@
 
 //construct Config from config file
 TConfig::TConfig (const char *fName) {
+  fDeviceType = TYPE_UNKNOWN;   // will be overwritten in read config file
   ReadConfigFile (fName);
 }
 
 
 // construct Config in the application using only number of boards and number of chips / vector of chip Ids
 // for the time being use one common config for all board types (change this?)
+// this constructor does not set the device type correctly 
+// (not clear right now, which setup this constructor will be used for)
 TConfig::TConfig (int nBoards, std::vector <int> chipIds, TBoardType boardType) {
+  std::cout << "Warning: using deprecated constructur that does not set setup type correctly" << std::endl;
+  fDeviceType = TYPE_UNKNOWN;
   Init(nBoards, chipIds, boardType);
 }
 
@@ -43,12 +48,15 @@ void TConfig::Init (int nBoards, std::vector <int> chipIds, TBoardType boardType
 
 void TConfig::Init (int chipId, TBoardType boardType) {
   if (boardType == boardDAQ) {
+    fDeviceType = TYPE_CHIP;
     fBoardConfigs.push_back (new TBoardConfigDAQ());
   } 
   else if (boardType == boardMOSAIC) {
+    fDeviceType = TYPE_CHIP_MOSAIC;
     fBoardConfigs.push_back (new TBoardConfigMOSAIC());
   }
   else {
+    fDeviceType = TYPE_UNKNOWN;
     std::cout << "TConfig: Unknown board type" << std::endl;
   }
 
@@ -104,6 +112,8 @@ TDeviceType TConfig::ReadDeviceType (const char *deviceName) {
 
 void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
   std::vector <int> chipIds;
+
+  fDeviceType = AType;
   if (AType == TYPE_CHIP) {
     Init(16, boardDAQ);
   }

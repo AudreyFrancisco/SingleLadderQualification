@@ -43,6 +43,8 @@ class TReadoutBoard {
   int          AddChip           (uint8_t chipId, int controlInterface, int receiver);
   void         SetChipEnable     (uint8_t chipId, bool Enable);
 
+  TBoardConfig *GetConfig        () {return fBoardConfig;};
+
   virtual int  ReadRegister      (uint16_t Address, uint32_t &Value) = 0;
   virtual int  WriteRegister     (uint16_t Address, uint32_t Value)  = 0;
 

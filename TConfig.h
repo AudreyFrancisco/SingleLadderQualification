@@ -14,6 +14,8 @@ class TConfig {
  private:
   std::vector <TBoardConfig *> fBoardConfigs;
   std::vector <TChipConfig *>  fChipConfigs;
+  TDeviceType                  fDeviceType;
+
   void        ReadConfigFile (const char *fName);
   void        Init           (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC); 
   void        Init           (int chipId, TBoardType boardType = boardDAQ);
@@ -26,11 +28,12 @@ class TConfig {
   TConfig (const char *fName);
   TConfig (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC); 
   TConfig (int chipId, TBoardType boardType = boardDAQ);
-
-  int GetNChips () {return fChipConfigs.size();};
+  
+  TDeviceType   GetDeviceType  () {return fDeviceType;};
+  int           GetNChips      () {return fChipConfigs.size();};
   TChipConfig  *GetChipConfig  (int chipId);
   TBoardConfig *GetBoardConfig (int iBoard);
-  void WriteToFile (const char *fName);
+  void          WriteToFile    (const char *fName);
 
 };
 
