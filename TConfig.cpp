@@ -118,7 +118,7 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
     Init(16, boardDAQ);
   }
   else if (AType == TYPE_CHIP_MOSAIC) {
-    Init(0, boardMOSAIC);
+    Init(16, boardMOSAIC);
   }
   else if (AType == TYPE_TELESCOPE) {
     for (int i = 0; i < NChips; i++) {
@@ -139,7 +139,6 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
     }
     Init (9, chipIds, boardMOSAIC);    
   }
-  //std::cout << "TConfig: Initialised setup of type " << fType << " with " << fNChips << " chips and " << fNBoards << " DAQ boards." <<std::endl;
 }
 
 
