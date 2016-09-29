@@ -81,7 +81,7 @@ int initSetupOB() {
   fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
 
   for (int i = 0; i < fConfig->GetNChips(); i++) {
-    fChips.push_back(new TAlpide(fConfig->GetChipConfig(chipIDs.at(i))));
+    fChips.push_back(new TAlpide(fConfig->GetChipConfigById(chipIDs.at(i))));
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
     if (chipIDs.at(i) < 23) { // first master
       if (chipIDs.at(i) & 0x7) {  // slave
@@ -115,7 +115,7 @@ int initSetupIB() {
   fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
 
   for (int i = 0; i < fConfig->GetNChips(); i++) {
-    fChips.push_back(new TAlpide(fConfig->GetChipConfig(chipIDs.at(i))));
+    fChips.push_back(new TAlpide(fConfig->GetChipConfigById(chipIDs.at(i))));
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
     fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, RCVMAP[i]);
   }
@@ -140,7 +140,7 @@ int initSetupSingle() {
   }
 
   // create chip object and connections with readout board
-  fChips. push_back(new TAlpide (fConfig->GetChipConfig(singleChipId)));
+  fChips. push_back(new TAlpide (fConfig->GetChipConfigById(singleChipId)));
   fChips. at(0) -> SetReadoutBoard (fBoards.at(0));
   fBoards.at(0) -> AddChip         (singleChipId, 0, 0);
 

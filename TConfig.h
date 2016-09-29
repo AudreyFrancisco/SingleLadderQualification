@@ -29,11 +29,12 @@ class TConfig {
   TConfig (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC); 
   TConfig (int chipId, TBoardType boardType = boardDAQ);
   
-  TDeviceType   GetDeviceType  () {return fDeviceType;};
-  int           GetNChips      () {return fChipConfigs.size();};
-  TChipConfig  *GetChipConfig  (int chipId);
-  TBoardConfig *GetBoardConfig (int iBoard);
-  void          WriteToFile    (const char *fName);
+  TDeviceType   GetDeviceType      () {return fDeviceType;};
+  int           GetNChips          () {return fChipConfigs.size();};
+  TChipConfig  *GetChipConfig      (int iChip);
+  TChipConfig  *GetChipConfigById  (int chipId);
+  TBoardConfig *GetBoardConfig     (int iBoard);
+  void          WriteToFile        (const char *fName);
 
 };
 

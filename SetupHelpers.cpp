@@ -24,33 +24,30 @@ TConfig *fConfig;
 //    - receiver number for slaves set to -1 (not connected directly to receiver)
 //      (this ensures that a receiver is disabled only if the connected master is disabled)
 int initSetupOB() {
-  std::vector <int> chipIDs;
-  int offset = (fModuleId & 0x7) << 4;
-  for (int i = 0 + offset; i < 7  + offset; i++) chipIDs.push_back(i);
-  for (int i = 8 + offset; i < 15 + offset; i++) chipIDs.push_back(i);
-
-  fConfig       = new TConfig (1, chipIDs);
   fBoardType    = boardMOSAIC;
 
   fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
 
   for (int i = 0; i < fConfig->GetNChips(); i++) {
-    fChips.push_back(new TAlpide(fConfig->GetChipConfig(chipIDs.at(i))));
+    TChipConfig *chipConfig = fConfig   ->GetChipConfig(i);
+    int          chipId     = chipConfig->GetChipId    ();
+
+    fChips.push_back(new TAlpide(chipConfig));
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
-    if (chipIDs.at(i) < 7 + offset) { // first master-slave row
-      if (chipIDs.at(i) & 0x7) {        // slave
-        fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, -1);
+    if (i < 7) { // first master-slave row
+      if (chipId & 0x7) {        // slave
+        fBoards.at(0)-> AddChip        (chipId, 0, -1);
       }
       else {                            // master
-        fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, 0);
+        fBoards.at(0)-> AddChip        (chipId, 0, 0);
       }
     }
     else {                    // second master-slave row
-      if (chipIDs.at(i) & 0x7) {        // slave
-        fBoards.at(0)-> AddChip        (chipIDs.at(i), 1, -1);
+      if (chipId & 0x7) {        // slave
+        fBoards.at(0)-> AddChip        (chipId, 1, -1);
       }                                
       else {                            // master
-        fBoards.at(0)-> AddChip        (chipIDs.at(i), 1, 1);
+        fBoards.at(0)-> AddChip        (chipId, 1, 1);
       }
     }
   }
@@ -61,44 +58,37 @@ int initSetupOB() {
 //    - all chips connected to same control interface
 //    - each chip has its own receiver, mapping defined in RCVMAP
 int initSetupIB() {
-  std::vector <int> chipIDs;
-  for (int i = 0; i < 9; i++) chipIDs.push_back(i);
-
   int RCVMAP [] = { 3, 5, 7, 8, 6, 4, 2, 1, 0 };
-  fConfig       = new TConfig (1, chipIDs);
   fBoardType    = boardMOSAIC;
-
 
   fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
 
   for (int i = 0; i < fConfig->GetNChips(); i++) {
-    fChips.push_back(new TAlpide(fConfig->GetChipConfig(chipIDs.at(i))));
+    TChipConfig *chipConfig = fConfig->GetChipConfig(i);
+    fChips.push_back(new TAlpide(chipConfig));
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
-    fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, RCVMAP[i]);
+    fBoards.at(0)-> AddChip        (chipConfig->GetChipId(), 0, RCVMAP[i]);
   }
 }
 
 
 int initSetupSingleMosaic() {
-  int ReceiverId = 4;  // HSData is connected to pins for first chip on a stave
-
-  fConfig       = new TConfig ("Config.cfg");
-  fBoardType    = boardMOSAIC;
+  int          ReceiverId = 4;  // HSData is connected to pins for first chip on a stave
+  TChipConfig *chipConfig = fConfig->GetChipConfig(0);
+  fBoardType              = boardMOSAIC;
 
   fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
 
-  fChips. push_back(new TAlpide(fConfig->GetChipConfig(fSingleChipId)));
+  fChips. push_back(new TAlpide(chipConfig));
   fChips. at(0) -> SetReadoutBoard(fBoards.at(0));
-  fBoards.at(0) -> AddChip        (fSingleChipId, 0, ReceiverId);
-
+  fBoards.at(0) -> AddChip        (chipConfig->GetChipId(), 0, ReceiverId);
 }
 
 
 int initSetupSingle() {
   TReadoutBoardDAQ  *myDAQBoard = 0;
-
-  fConfig    = new TConfig ("Config.cfg");// new TConfig (fSingleChipId);
-  fBoardType = boardDAQ;
+  TChipConfig       *chipConfig = fConfig->GetChipConfig(0);
+  fBoardType                    = boardDAQ;
   
   InitLibUsb(); 
   //  The following code searches the USB bus for DAQ boards, creates them and adds them to the readout board vector: 
@@ -114,9 +104,9 @@ int initSetupSingle() {
   }
 
   // create chip object and connections with readout board
-  fChips. push_back(new TAlpide (fConfig->GetChipConfig(fSingleChipId)));
+  fChips. push_back(new TAlpide (chipConfig));
   fChips. at(0) -> SetReadoutBoard (fBoards.at(0));
-  fBoards.at(0) -> AddChip         (fSingleChipId, 0, 0);
+  fBoards.at(0) -> AddChip         (chipConfig->GetChipId(), 0, 0);
 
   powerOn(myDAQBoard);
 
@@ -138,19 +128,20 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 }
 
 
-int initSetup() {
-  switch (fSetupType) 
+int initSetup(const char *configFileName) {
+  fConfig = new TConfig ("Config.cfg");  
+  switch (fConfig->GetDeviceType())
     {
-    case setupSingle: 
+    case TYPE_CHIP: 
       initSetupSingle();
       break;
-    case setupIB:
+    case TYPE_STAVE:
       initSetupIB();
       break;
-    case setupOB:
+    case TYPE_MODULE:
       initSetupOB();
       break;
-    case setupSingleM: 
+    case TYPE_CHIP_MOSAIC: 
       initSetupSingleMosaic();
       break;
     default: 

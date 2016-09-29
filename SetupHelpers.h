@@ -31,6 +31,6 @@ int initSetupOB          ();
 int initSetupIB          ();
 int initSetupSingle      ();
 int initSetupSingleMosaic();
-int initSetup            ();
+int initSetup            (const char *configFileName = "Config.cfg");
 int powerOn              (TReadoutBoardDAQ *aDAQBoard);
 #endif

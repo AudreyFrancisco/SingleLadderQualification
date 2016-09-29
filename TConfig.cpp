@@ -65,13 +65,23 @@ void TConfig::Init (int chipId, TBoardType boardType) {
 
 
 // getter functions for chip and board config
-TChipConfig *TConfig::GetChipConfig  (int chipId) {
+TChipConfig *TConfig::GetChipConfigById  (int chipId) {
   for (int i = 0; i < fChipConfigs.size(); i++) {
     if (fChipConfigs.at(i)->GetChipId() == chipId) 
       return fChipConfigs.at(i);
   }
   // throw exception here.
   return 0;
+}
+
+
+TChipConfig *TConfig::GetChipConfig (int iChip) {
+  if (iChip < fChipConfigs.size()) {
+    return fChipConfigs.at(iChip);
+  }
+  else {
+    return 0;
+  }
 }
 
 
