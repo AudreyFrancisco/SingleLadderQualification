@@ -118,7 +118,7 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
     Init(16, boardDAQ);
   }
   else if (AType == TYPE_CHIP_MOSAIC) {
-    Init(16, boardMOSAIC);
+    Init(0, boardMOSAIC);
   }
   else if (AType == TYPE_TELESCOPE) {
     for (int i = 0; i < NChips; i++) {
@@ -127,23 +127,17 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
     Init(NChips, chipIds, boardDAQ);
   }
   else if (AType == TYPE_MODULE) {
-    if (NChips != 16) {
-      std::cout << "Warning, Module with " << NChips << " chips requested. Default chip IDs probably wrong." << std::endl;
-    }
-    for (int i = 0; i < NChips; i++) {
+    for (int i = 0; i < 15; i++) {
       if (i == 7) continue;
       chipIds.push_back(i + ((DEFAULT_MODULE_ID & 0x7) << 4));
     }
-    Init (NChips, chipIds, boardMOSAIC);
+    Init (14, chipIds, boardMOSAIC);
   }
   else if (AType == TYPE_STAVE) {
-    if (NChips != 9) {
-      std::cout << "Warning, Stave with " << NChips << " chips requested. Default chip IDs probably wrong." << std::endl;
-    }
-    for (int i = 0; i < NChips; i++) {
+    for (int i = 0; i < 9; i++) {
       chipIds.push_back(i + ((DEFAULT_MODULE_ID & 0x7) << 4));
     }
-    Init (NChips, chipIds, boardMOSAIC);    
+    Init (9, chipIds, boardMOSAIC);    
   }
   //std::cout << "TConfig: Initialised setup of type " << fType << " with " << fNChips << " chips and " << fNBoards << " DAQ boards." <<std::endl;
 }
