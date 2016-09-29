@@ -166,7 +166,7 @@ void TConfig::ReadConfigFile (const char *fName)
     if (!strcmp(Param, "DEVICE")) {
       type = ReadDeviceType (Rest);
     }
-    if ((((NChips > 0) || (type == TYPE_CHIP) || (type == TYPE_CHIP_MOSAIC))) && (type != TYPE_UNKNOWN)) {   // type and nchips has been found (nchips not needed for type chip)
+    if ((type != TYPE_UNKNOWN) && ((type != TYPE_TELESCOPE) || (NChips > 0)) ) {   // type and nchips has been found (nchips not needed for type chip)
       // SetDeviceType calls the appropriate init method, which in turn calls
       // the constructors for board and chip configs
       SetDeviceType(type, NChips);
