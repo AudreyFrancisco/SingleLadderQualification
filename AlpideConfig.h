@@ -15,6 +15,11 @@ namespace AlpideConfig {
   void ConfigureBuffers   (TAlpide *chip, TChipConfig *config);
   void ConfigureCMU       (TAlpide *chip, TChipConfig *config);
   void WriteControlReg    (TAlpide *chip, Alpide::TChipMode chipMode, TChipConfig *config);
+  void BaseConfigPLL      (TAlpide *chip);
+  void BaseConfigMask     (TAlpide *chip);
+  void BaseConfigFromu    (TAlpide *chip);
+  void BaseConfigDACs     (TAlpide *chip);
+  void BaseConfig         (TAlpide *chip);
 }
 
 

@@ -32,7 +32,7 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
 	RunCtrlAFThreshold = 1250000;
 	RunCtrlLatMode = 0; // 0 := latencyModeEoe, 1 := latencyModeMemory, 2 := latencyModeTimeout
 	RunCtrlTimeout = 0;
-	LowSpeedMode = true;
+	LowSpeedMode = false;
 
 	pollDataTimeout = 500; // milliseconds
 

@@ -2,11 +2,8 @@
 #include "SetupHelpers.h"
 #include "USBHelpers.h"
 
-int fSingleChipId;
-int fModuleId;
 
 TBoardType fBoardType;
-TSetupType fSetupType;
 
 
 std::vector <TReadoutBoard *> fBoards;

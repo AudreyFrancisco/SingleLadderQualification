@@ -1,4 +1,5 @@
 #include "AlpideConfig.h"
+#include "SetupHelpers.h"
 #include <iostream>
 
 
@@ -193,4 +194,85 @@ void AlpideConfig::WriteControlReg (TAlpide *chip, Alpide::TChipMode chipMode, T
   
   chip->WriteRegister (Alpide::REG_MODECONTROL, controlreg);
   
+}
+
+
+void AlpideConfig::BaseConfigPLL (TAlpide *chip) 
+{
+  uint16_t Phase      = 8;  // 4bit Value, default 8
+  uint16_t Stages     = 1; // 0 = 3 stages, 1 = 4,  3 = 5 (typical 4)
+  uint16_t ChargePump = 8;
+  uint16_t Driver     = 8;
+  uint16_t Preemp     = 8;
+  uint16_t Value;
+
+  Value = (Stages & 0x3) | 0x4 | 0x8 | ((Phase & 0xf) << 4);   // 0x4: narrow bandwidth, 0x8: PLL off
+
+  chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+
+  Value = (ChargePump & 0xf) | ((Driver & 0xf) << 4) | ((Preemp & 0xf) << 8);
+
+  chip->WriteRegister (Alpide::REG_DTU_DACS, Value);
+
+  // Clear PLL off signal
+  Value = (Stages & 0x3) | 0x4 | ((Phase & 0xf) << 4);   // 0x4: narrow bandwidth, 0x8: PLL off
+  chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+  // Force PLL reset
+  Value = (Stages & 0x3) | 0x4 | 0x100 |((Phase & 0xf) << 4);   // 0x4: narrow bandwidth, 0x100: Reset
+  chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+  Value = (Stages & 0x3) | 0x4 |((Phase & 0xf) << 4);           // Reset off
+  chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+}
+
+
+void AlpideConfig::BaseConfigMask (TAlpide *chip)
+{
+  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
+  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
+}
+
+
+void AlpideConfig::BaseConfigFromu (TAlpide *chip)
+{
+}
+
+
+void AlpideConfig::BaseConfigDACs (TAlpide *chip)
+{
+  chip->WriteRegister (Alpide::REG_VPULSEH, 170);
+  chip->WriteRegister (Alpide::REG_VPULSEL, 169);
+  chip->WriteRegister (Alpide::REG_VRESETD, chip->GetConfig()->GetParamValue("VRESETD"));
+  chip->WriteRegister (Alpide::REG_VCASN,   chip->GetConfig()->GetParamValue("VCASN"));
+  chip->WriteRegister (Alpide::REG_VCASN2,  chip->GetConfig()->GetParamValue("VCASN2"));
+  chip->WriteRegister (Alpide::REG_VCLIP,   chip->GetConfig()->GetParamValue("VCLIP"));
+  chip->WriteRegister (Alpide::REG_ITHR,    chip->GetConfig()->GetParamValue("ITHR"));
+  chip->WriteRegister (Alpide::REG_IDB,     chip->GetConfig()->GetParamValue("IDB"));
+  chip->WriteRegister (Alpide::REG_IBIAS,   chip->GetConfig()->GetParamValue("IBIAS"));
+  chip->WriteRegister (Alpide::REG_VCASP,   chip->GetConfig()->GetParamValue("VCASP"));
+  // not used DACs..
+  chip->WriteRegister (Alpide::REG_VTEMP,   chip->GetConfig()->GetParamValue("VTEMP"));
+  chip->WriteRegister (Alpide::REG_VRESETP, chip->GetConfig()->GetParamValue("VRESETP"));
+  chip->WriteRegister (Alpide::REG_IRESET,  chip->GetConfig()->GetParamValue("IRESET"));
+  chip->WriteRegister (Alpide::REG_IAUX2,   chip->GetConfig()->GetParamValue("IAUX2"));
+}
+
+
+void AlpideConfig::BaseConfig (TAlpide *chip)
+{
+  // put all chip configurations before the start of the test here
+  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x20); // set chip to config mode
+  if (fConfig->GetDeviceType() == TYPE_CHIP) {
+    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x30); // CMU/DMU config: turn manchester encoding off etc, initial token=1, disable DDR
+  }
+  else {
+    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x10); // CMU/DMU config: same as above, but manchester on
+  }
+
+  BaseConfigFromu(chip);
+  BaseConfigDACs (chip);
+  BaseConfigMask (chip);
+  if ((fConfig->GetDeviceType() != TYPE_CHIP) && (fConfig->GetDeviceType() != TYPE_TELESCOPE))
+    BaseConfigPLL  (chip);
+
+  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
 }

@@ -1,12 +1,6 @@
 // Template to prepare standard test routines
 // ==========================================
 //
-// The template is intended to prepare scans that work in the same way for the three setup types
-//   - single chip with DAQ board
-//   - IB stave with MOSAIC
-//   - OB module with MOSAIC
-// The setup type has to be set with the global variable fSetupType
-//
 // After successful call to initSetup() the elements of the setup are accessible in the two vectors
 //   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
@@ -147,26 +141,6 @@ int configureFromu(TAlpide *chip) {
 }
 
 
-// initialisation of chip DACs
-int configureDACs(TAlpide *chip) {
-  chip->WriteRegister (Alpide::REG_VPULSEH, 170);
-  chip->WriteRegister (Alpide::REG_VPULSEL, 169);
-  chip->WriteRegister (Alpide::REG_VRESETD, fChips.at(0)->GetConfig()->GetParamValue("VRESETD"));
-  chip->WriteRegister (Alpide::REG_VCASN,   fChips.at(0)->GetConfig()->GetParamValue("VCASN"));
-  chip->WriteRegister (Alpide::REG_VCASN2,  fChips.at(0)->GetConfig()->GetParamValue("VCASN2"));
-  chip->WriteRegister (Alpide::REG_VCLIP,   fChips.at(0)->GetConfig()->GetParamValue("VCLIP"));
-  chip->WriteRegister (Alpide::REG_ITHR,    fChips.at(0)->GetConfig()->GetParamValue("ITHR"));
-  chip->WriteRegister (Alpide::REG_IDB,     fChips.at(0)->GetConfig()->GetParamValue("IDB"));
-  chip->WriteRegister (Alpide::REG_IBIAS,   fChips.at(0)->GetConfig()->GetParamValue("IBIAS"));
-  chip->WriteRegister (Alpide::REG_VCASP,   fChips.at(0)->GetConfig()->GetParamValue("VCASP"));
-  // not used DACs..
-  chip->WriteRegister (Alpide::REG_VTEMP,   fChips.at(0)->GetConfig()->GetParamValue("VTEMP"));
-  chip->WriteRegister (Alpide::REG_VRESETP, fChips.at(0)->GetConfig()->GetParamValue("VRESETP"));
-  chip->WriteRegister (Alpide::REG_IRESET,  fChips.at(0)->GetConfig()->GetParamValue("IRESET"));
-  chip->WriteRegister (Alpide::REG_IAUX2,   fChips.at(0)->GetConfig()->GetParamValue("IAUX2"));
-}
-
-
 // initialisation of fixed mask
 int configureMask(TAlpide *chip) {
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
@@ -180,19 +154,10 @@ int configureMask(TAlpide *chip) {
 
 
 int configureChip(TAlpide *chip) {
-  // put all chip configurations before the start of the test here
-  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x20); // set chip to config mode
-  if (fSetupType == setupSingle) {
-    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x30); // CMU/DMU config: turn manchester encoding off etc, initial token=1, disable DDR
-  }
-  else {
-    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x10); // CMU/DMU config: same as above, but manchester on
-  }
+  AlpideConfig::BaseConfig(chip);
 
   configureFromu(chip);
-  configureDACs (chip);
   configureMask (chip);
-
 
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
 
@@ -249,14 +214,6 @@ void scan(const char *fName) {
 
 
 int main() {
-  // chip ID that is used in case of single chip setup
-  fSingleChipId = 16;
-
-  // module ID that is used for outer barrel modules 
-  // (1 will result in master chip IDs 0x10 and 0x18, 2 in 0x20 and 0x28 ...)
-  fModuleId = 1;
-
-  fSetupType = setupSingle;
 
   initSetup();
 

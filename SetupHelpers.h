@@ -12,15 +12,7 @@
 
 typedef enum {setupSingle, setupIB, setupOB, setupSingleM} TSetupType;
 
-// chip ID that is used in case of single chip setup
-extern int fSingleChipId;
-
-// module ID that is used for outer barrel modules 
-// (1 will result in master chip IDs 0x10 and 0x18, 2 in 0x20 and 0x28 ...)
-extern int fModuleId;
-
 extern TBoardType fBoardType;
-extern TSetupType fSetupType;
 
 extern std::vector <TReadoutBoard *> fBoards;
 extern std::vector <TAlpide *>       fChips;

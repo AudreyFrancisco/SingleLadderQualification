@@ -1,12 +1,6 @@
 // Template to prepare standard test routines
 // ==========================================
 //
-// The template is intended to prepare scans that work in the same way for the three setup types
-//   - single chip with DAQ board
-//   - IB stave with MOSAIC
-//   - OB module with MOSAIC
-// The setup type has to be set with the global variable fSetupType
-//
 // After successful call to initSetup() the elements of the setup are accessible in the two vectors
 //   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
@@ -41,7 +35,7 @@ int  fErrCountf;
 int configureChip(TAlpide *chip) {
   // put all chip configurations before the start of the test here
   chip->WriteRegister (Alpide::REG_MODECONTROL,   0x20);
-  if (fSetupType == setupSingle)
+  if (fConfig->GetDeviceType() == TYPE_CHIP)
     chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x60);
 }
 
@@ -119,14 +113,6 @@ void MemTest (TAlpide *chip, int ARegion, int AOffset) {
 
 
 int main() {
-  // chip ID that is used in case of single chip setup
-  fSingleChipId = 16;
-
-  // module ID that is used for outer barrel modules 
-  // (1 will result in master chip IDs 0x10 and 0x18, 2 in 0x20 and 0x28 ...)
-  fModuleId = 1;
-
-  fSetupType = setupSingle;
 
   initSetup();
 
