@@ -87,4 +87,5 @@ TBoardConfigDAQ::TBoardConfigDAQ(const char *fName, int boardIndex) {
 
 void TBoardConfigDAQ::InitParamMap()
 {
+  fSettings["BOARDVERSION"] = &fBoardVersion;
 }
