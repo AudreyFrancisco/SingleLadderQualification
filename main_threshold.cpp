@@ -186,7 +186,7 @@ void scan() {
     configureMaskStage (fChips.at(0), istage);
 
     for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
-      //std::cout << "Charge = " << icharge << std::endl;
+      std::cout << "Charge = " << icharge << std::endl;
       fChips.at(0)->WriteRegister (Alpide::REG_VPULSEL, 170 - icharge);
       fBoards.at(0)->Trigger(myNTriggers);
 
