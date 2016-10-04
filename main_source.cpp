@@ -226,7 +226,7 @@ int main() {
 
     // put your test here... 
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
-      fBoards.at(0)->SetTriggerConfig (true, true, myPulseDelay, myPulseLength * 2);
+      fBoards.at(0)->SetTriggerConfig (false, true, myPulseDelay, myStrobeLength * 2);
       fBoards.at(0)->SetTriggerSource (trigInt);
     }
     else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
@@ -236,7 +236,7 @@ int main() {
 
     scan();
 
-    sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
+    sprintf(fName, "Data/Source_%s.dat", Suffix);
     WriteDataToFile (fName, true);
 
     sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
