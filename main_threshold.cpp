@@ -39,9 +39,7 @@ int myPulseLength  = 500;
 
 int myPulseDelay   = 40;
 int myNTriggers    = 50;
-int myMaskStages   = 164;    // full: 8192
-//int myMaskStages   = 1; 
-//int myMaskStages   = 82; 
+int myMaskStages   = 82;    // full: 4096
 
 int myChargeStart  = 0;
 int myChargeStop   = 50;   // if > 100 points, increase array sizes
@@ -104,23 +102,12 @@ int configureFromu(TAlpide *chip) {
 
 // setting of mask stage during scan
 int configureMaskStage(TAlpide *chip, int istage) {
-  int row    = istage / 4;
-  int region = istage % 4;
-
-  //uint32_t regionmod = 0x08080808 >> region;
-
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
 
-  //AlpideConfig::WritePixRegRow (chip, Alpide::PIXREG_MASK,   false, row);
-  //AlpideConfig::WritePixRegRow (chip, Alpide::PIXREG_SELECT, true,  row);
-
-  //chip->WriteRegister (Alpide::REG_REGDISABLE_LOW,  (uint16_t) regionmod);
-  //chip->WriteRegister (Alpide::REG_REGDISABLE_HIGH, (uint16_t) regionmod);
-
   for (int icol = 0; icol < 1024; icol += 8) {
-    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 1024, icol + istage / 1024);
-    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 1024, icol + istage / 1024);   
+    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 512, icol + istage / 512);
+    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 512, icol + istage / 512);   
   }
 
 }
@@ -179,7 +166,7 @@ void scan() {
     for (int i = 0; i < fChips.size(); i ++) {
       configureMaskStage (fChips.at(i), istage);
     }
-    configureMaskStage (fChips.at(0), istage);
+    //configureMaskStage (fChips.at(0), istage);
 
     for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
       //std::cout << "Charge = " << icharge << std::endl;
