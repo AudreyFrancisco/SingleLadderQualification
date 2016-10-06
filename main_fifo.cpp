@@ -129,28 +129,33 @@ int main() {
 
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
 
-    // Reset error counters
-    fErrCount0 = 0;
-    fErrCount5 = 0;
-    fErrCountf = 0;
+    for (int ichip = 0; ichip < fChips.size(); ichip++) {
+      if (! fChips.at(ichip)->GetConfig()->IsEnabled()) continue;
+     
+      std::cout << std::endl << "Doing FIFO test on chip ID " << fChips.at(ichip)->GetConfig()->GetChipId() << std::endl;
+      // Reset error counters
+      fErrCount0 = 0;
+      fErrCount5 = 0;
+      fErrCountf = 0;
 
-    // Do the loop over all memories
-    for (int ireg = 0; ireg < 32; ireg++) {
-      std::cout << "FIFO scan: region " << ireg << std::endl;
-      for (int iadd = 0; iadd < 128; iadd ++) {
-        MemTest (fChips.at(0), ireg, iadd);
+      // Do the loop over all memories
+      for (int ireg = 0; ireg < 32; ireg++) {
+        std::cout << "FIFO scan: region " << ireg << std::endl;
+        for (int iadd = 0; iadd < 128; iadd ++) {
+          MemTest (fChips.at(ichip), ireg, iadd);
+        }
       }
+
+      // Output result
+      std::cout << "Test finished: error counters: " << std::endl; 
+      std::cout << "  pattern 0x0:      " << fErrCount0 << std::endl;
+      std::cout << "  pattern 0x555555: " << fErrCount5 << std::endl;
+      std::cout << "  pattern 0xffffff: " << fErrCountf << std::endl;
+      std::cout << "(total number of tested memories: 32 * 128 = 4096)" << std::endl;
+
+      if (fErrCount0 + fErrCount5 + fErrCountf > 0) 
+        std::cout << "Set <Verbose> in source code to get single errors" << std::endl;
     }
-
-    // Output result
-    std::cout << "Test finished: error counters: " << std::endl; 
-    std::cout << "  pattern 0x0:      " << fErrCount0 << std::endl;
-    std::cout << "  pattern 0x555555: " << fErrCount5 << std::endl;
-    std::cout << "  pattern 0xffffff: " << fErrCountf << std::endl;
-    std::cout << "(total number of tested memories: 32 * 128 = 4096)" << std::endl;
-
-    if (fErrCount0 + fErrCount5 + fErrCountf > 0) 
-      std::cout << "Set <Verbose> in source code to get single errors" << std::endl;
 
     if (myDAQBoard) {
       myDAQBoard->PowerOff();

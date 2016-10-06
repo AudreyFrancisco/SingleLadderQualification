@@ -25,4 +25,5 @@ int initSetupSingle      ();
 int initSetupSingleMosaic();
 int initSetup            (const char *configFileName = "Config.cfg");
 int powerOn              (TReadoutBoardDAQ *aDAQBoard);
+int CheckControlInterface();
 #endif

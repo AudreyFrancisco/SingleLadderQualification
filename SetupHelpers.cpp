@@ -48,6 +48,30 @@ int initSetupOB() {
       }
     }
   }
+  std::cout << "Checking control interfaces." << std::endl;
+  int nWorking = CheckControlInterface();
+  std::cout << "Found " << nWorking << " working chips" << std::endl;
+}
+
+
+// Try to communicate with all 
+int CheckControlInterface() {
+  uint16_t Value;
+  int      nWorking = 0;
+
+  for (int i = 0; i < fChips.size(); i++) {
+    fChips.at(i)->WriteRegister (0x60d, 10);
+    try {
+      fChips.at(i)->ReadRegister (0x60d, Value);
+      std::cout << "Chip ID " << fChips.at(i)->GetConfig()->GetChipId() << ", Value = 0x" << std::hex << (int) Value << std::dec << std::endl;
+      nWorking ++;
+    }
+    catch (exception &e) {
+      std::cout << "Chip ID " << fChips.at(i)->GetConfig()->GetChipId() << ", not answering, disabling." << std::endl;
+      fChips.at(i)->GetConfig()->SetEnable(false);
+    }
+  }
+  return nWorking;
 }
 
 
@@ -66,6 +90,10 @@ int initSetupIB() {
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
     fBoards.at(0)-> AddChip        (chipConfig->GetChipId(), 0, RCVMAP[i]);
   }
+
+  std::cout << "Checking control interfaces." << std::endl;
+  int nWorking = CheckControlInterface();
+  std::cout << "Found " << nWorking << " working chips" << std::endl;
 }
 
 
