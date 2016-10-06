@@ -6,6 +6,7 @@
 enum TDataType {DT_IDLE, DT_CHIPHEADER, DT_CHIPTRAILER, DT_EMPTYFRAME, DT_REGIONHEADER, DT_DATASHORT, DT_DATALONG, DT_BUSYON, DT_BUSYOFF, DT_UNKNOWN};
 
 typedef struct {
+  int chipId;
   int region; 
   int dcol;
   int address;
