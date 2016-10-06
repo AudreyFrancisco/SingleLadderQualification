@@ -36,15 +36,15 @@ int initSetupOB() {
         fBoards.at(0)-> AddChip        (chipId, 0, -1);
       }
       else {                            // master
-        fBoards.at(0)-> AddChip        (chipId, 0, 0);
+        fBoards.at(0)-> AddChip        (chipId, 0, 7);
       }
     }
     else {                    // second master-slave row
       if (chipId & 0x7) {        // slave
-        fBoards.at(0)-> AddChip        (chipId, 1, -1);
+        fBoards.at(0)-> AddChip        (chipId, 0, -1);
       }                                
       else {                            // master
-        fBoards.at(0)-> AddChip        (chipId, 1, 1);
+        fBoards.at(0)-> AddChip        (chipId, 0, 0);
       }
     }
   }
@@ -98,7 +98,7 @@ int initSetupIB() {
 
 
 int initSetupSingleMosaic() {
-  int          ReceiverId = 4;  // HSData is connected to pins for first chip on a stave
+  int          ReceiverId = 3;  // HSData is connected to pins for first chip on a stave
   TChipConfig *chipConfig = fConfig->GetChipConfig(0);
   fBoardType              = boardMOSAIC;
 
@@ -155,6 +155,7 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 
 int initSetup(const char *configFileName) {
   fConfig = new TConfig ("Config.cfg");  
+
   switch (fConfig->GetDeviceType())
     {
     case TYPE_CHIP: 
