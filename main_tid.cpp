@@ -606,14 +606,14 @@ int configureMaskStage(TAlpide *chip, int istage) {
 
 }
 
-void scan() {   
+int scan() {   
   unsigned char         buffer[1024*8000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
-
-
+  int count;
   for (int istage = 0; istage < myMaskStages; istage ++) {
+  count = 0;
 //    if ( !(istage%int(myMaskStages * 0.1)) )
         std::cout << "Mask stage " << istage << std::endl;
     for (int i = 0; i < fChips.size(); i ++) {
@@ -631,6 +631,8 @@ void scan() {
         if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
           usleep(100);
           cout << n_bytes_data << endl;
+          count++;
+          if (count > 5000000) return -1;
           continue;
         }
         else {
@@ -649,6 +651,7 @@ void scan() {
   }
   delete Hits;
   Hits = 0x0;
+  return 0;
 }
 
 int configureChip_dac(TAlpide *chip) {
@@ -911,7 +914,51 @@ int main() {
 
                 fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
                 fBoards.at(0)->SetTriggerSource (trigExt);
-                scan();
+
+                int checktimeout = scan();
+                if (checktimeout == -1) {
+                  myDAQBoard->PowerOff();
+                  delete fChips.at(0);
+                  delete fBoards.at(0);
+                  fChips.erase(fChips.begin(), fChips.end());
+                  fBoards.erase(fBoards.begin(), fBoards.end());
+                  sleep(1);
+                  system("./tid/hameg2030.py /dev/ttyHAMEG0 9");
+                  sleep(4);
+                  system("./tid/hameg2030.py /dev/ttyHAMEG0 7");
+                  sleep(4);
+                  system("./program.sh");
+                  sleep(3);
+
+                  initSetup();
+                  ClearHitData();
+
+                  myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+
+
+                  fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
+                  fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
+
+                  for (int i = 0; i < fChips.size(); i ++) {
+                    configureChip_threshold (fChips.at(i));
+                  }
+
+                  fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+
+                  /*timestamp(1);
+                    std::cout << "Before Threshold scan, DACread start" << std::endl;
+                    timestamp(1);
+                    std::cout << "Before Threshold scan, DACread end" << std::endl;*/
+
+                  //                fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
+                  //
+
+                  fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
+                  fBoards.at(0)->SetTriggerSource (trigExt);
+
+                }
+
+
                 sprintf(fName, "%s/ThresholdScan_%s.dat", ScanPath1, Suffix);
                 WriteDataToFile (fName, true);
 
