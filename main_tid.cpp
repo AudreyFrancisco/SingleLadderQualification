@@ -875,7 +875,7 @@ int main() {
                 timestamp(1);
                 std::cout << "Start threshold scan" << std::endl;
                 sprintf(Suffix, "%ld", scan_time);
-                
+                /*
                 myDAQBoard->PowerOff();
                 delete fChips.at(0);
                 delete fBoards.at(0);
@@ -904,19 +904,20 @@ int main() {
 
                 fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
 
-                /*timestamp(1);
-                  std::cout << "Before Threshold scan, DACread start" << std::endl;
-                  timestamp(1);
-                  std::cout << "Before Threshold scan, DACread end" << std::endl;*/
+               // timestamp(1);
+//                  std::cout << "Before Threshold scan, DACread start" << std::endl;
+ //                 timestamp(1);
+  //                std::cout << "Before Threshold scan, DACread end" << std::endl;
 
 //                fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
 //
 
                 fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
                 fBoards.at(0)->SetTriggerSource (trigExt);
+                */
 
-                int checktimeout = scan();
-                if (checktimeout == -1) {
+                int checktimeout = -1;
+                while(checktimeout == -1) {
                   myDAQBoard->PowerOff();
                   delete fChips.at(0);
                   delete fBoards.at(0);
@@ -955,7 +956,7 @@ int main() {
 
                   fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
                   fBoards.at(0)->SetTriggerSource (trigExt);
-                  scan();
+                  checktimeout = scan();
 
                 }
 
