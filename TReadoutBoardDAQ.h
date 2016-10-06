@@ -165,6 +165,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   
   virtual ~TReadoutBoardDAQ ();
 
+  void DumpConfig(const char *fName, bool writeFile=true, char *config=0);
 
   //// general methods of TReadoutBoard
   //---------------------------------------------------------

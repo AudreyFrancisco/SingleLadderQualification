@@ -789,6 +789,25 @@ void TReadoutBoardDAQ::ReadAllRegisters() {
 
 }
 
+
+void TReadoutBoardDAQ::DumpConfig(const char *fName, bool writeFile, char *config) {
+  sprintf(config,"");
+  if (writeFile) {
+    FILE *fp = fopen(fName, "w");
+    fprintf(fp, "FIRMWARE  %i\n", ReadFirmwareVersion());
+    fprintf(fp, "TRIGGERDELAY  %i\n", GetBoardConfig()->GetTriggerDelay()); // same as StrobeDelay on DAQboard
+    fprintf(fp, "PULSEDELAY  %i\n", GetBoardConfig()->GetPulseDelay());
+    fclose(fp);
+  }
+  
+  sprintf(config, "FIRMWARE  0x%x\n", ReadFirmwareVersion());
+  sprintf(config, "%sTRIGGERDELAY  %i\n", config, GetBoardConfig()->GetTriggerDelay());
+  sprintf(config, "%sPULSEDELAY  %i\n", config, GetBoardConfig()->GetPulseDelay());
+}
+
+
+
+
 //---------------------------------------------------------
 // methods related to data readout
 //---------------------------------------------------------

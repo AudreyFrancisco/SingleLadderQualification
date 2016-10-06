@@ -238,8 +238,8 @@ void TUSBEndpoint::Init() {
 	fDirection       = (libusb_endpoint_direction) -1;
 	fEndpointAddress = 0;
 	fMaxPacketSize   = 0;
-	fTimeout         = 35000; // 5000 milliseconds
-    //fTimeout         = 0; // milliseconds
+    fTimeout         = 1000; // milliseconds
+	//fTimeout         = 35000; // 5000 milliseconds
 }
 
 
