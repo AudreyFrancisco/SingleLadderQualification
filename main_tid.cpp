@@ -955,6 +955,7 @@ int main() {
 
                   fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
                   fBoards.at(0)->SetTriggerSource (trigExt);
+                  scan();
 
                 }
 
