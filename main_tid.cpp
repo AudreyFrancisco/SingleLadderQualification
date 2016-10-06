@@ -600,8 +600,8 @@ int configureMaskStage(TAlpide *chip, int istage) {
   //chip->WriteRegister (Alpide::REG_REGDISABLE_HIGH, (uint16_t) regionmod);
 
   for (int icol = 0; icol < 1024; icol += 8) {
-    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 1024, icol + istage / 1024);
-    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 1024, icol + istage / 1024);   
+    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 512, icol + istage / 512);
+    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 512, icol + istage / 512);   
   }
 
 }
@@ -619,7 +619,7 @@ void scan() {
     for (int i = 0; i < fChips.size(); i ++) {
       configureMaskStage (fChips.at(i), istage);
     }
-    configureMaskStage (fChips.at(0), istage);
+//    configureMaskStage (fChips.at(0), istage);
 
     for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
 //      std::cout << "Charge = " << icharge << std::endl;
@@ -787,8 +787,8 @@ int main() {
             std::cout << "DACread end" << std::endl;
 
             if(n%56 == 0) {
-                platereturn = exec("./moveplate.py 1");
-                cout << platereturn << endl;
+ //               platereturn = exec("./moveplate.py 1");
+ //               cout << platereturn << endl;
 /*                if (!(std::stoi(platereturn))) {
                     cout << "ERROR : PLATE NOT MOVING" << endl;
                     break;
@@ -951,8 +951,8 @@ int main() {
 
                 fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
                 
-                platereturn = exec("./moveplate.py 0");
-                cout << platereturn << endl;
+ //               platereturn = exec("./moveplate.py 0");
+//                cout << platereturn << endl;
 /*                if (!(std::stoi(platereturn))) {
                     cout << "ERROR : PLATE NOT MOVING" << endl;
                     break;
