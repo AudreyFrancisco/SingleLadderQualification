@@ -1,12 +1,6 @@
 // Template to prepare standard test routines
 // ==========================================
 //
-// The template is intended to prepare scans that work in the same way for the three setup types
-//   - single chip with DAQ board
-//   - IB stave with MOSAIC
-//   - OB module with MOSAIC
-// The setup type has to be set with the global variable fSetupType
-//
 // After successful call to initSetup() the elements of the setup are accessible in the two vectors
 //   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
@@ -43,7 +37,9 @@ int myStrobeDelay  = 0;
 int myPulseLength  = 500;
 
 int myPulseDelay   = 50;
-int myNTriggers    = 1000000;
+//int myNTriggers    = 1000000;
+int myNTriggers    = 100000;
+//int myNTriggers    = 100;
 
 
 int HitData     [512][1024];
@@ -92,16 +88,6 @@ int configureFromu(TAlpide *chip) {
 }
 
 
-// initialisation of chip DACs
-int configureDACs(TAlpide *chip) {
-  chip->WriteRegister (Alpide::REG_VRESETD, myVRESETD);
-  chip->WriteRegister (Alpide::REG_VCASN,   myVCASN);
-  chip->WriteRegister (Alpide::REG_VCASN2,  myVCASN2);
-  chip->WriteRegister (Alpide::REG_VCLIP,   myVCLIP);
-  chip->WriteRegister (Alpide::REG_ITHR,    myITHR);
-}
-
-
 // initialisation of fixed mask
 int configureMask(TAlpide *chip) {
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   false);
@@ -110,23 +96,30 @@ int configureMask(TAlpide *chip) {
 
 
 int configureChip(TAlpide *chip) {
-  // put all chip configurations before the start of the test here
-  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x20); // set chip to config mode
-  if (fSetupType == setupSingle) {
-    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x30); // CMU/DMU config: turn manchester encoding off etc, initial token=1, disable DDR
-  }
-  else {
-    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x10); // CMU/DMU config: same as above, but manchester on
-  }
+  AlpideConfig::BaseConfig(chip);
 
   configureFromu(chip);
-  configureDACs (chip);
   configureMask (chip);
 
-
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
+}
 
+void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {
+  char Config[1000];
+  FILE *fp = fopen(fName, "w");
 
+  chip     -> DumpConfig("", false, Config);
+  //std::cout << Config << std::endl;
+  fprintf(fp, "%s\n", Config);
+  if (daqBoard) daqBoard -> DumpConfig("", false, Config);
+  fprintf(fp, "%s\n", Config);
+  //std::cout << Config << std::endl;
+
+  fprintf(fp, "\n", Config);
+
+  fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
+    
+  fclose(fp);
 }
 
 
@@ -141,7 +134,19 @@ void scan() {
   nTrains = myNTriggers / nTrigsPerTrain;
   nRest   = myNTriggers % nTrigsPerTrain;
 
+  std::cout << "NTriggers: " << myNTriggers << std::endl;
+  std::cout << "NTriggersPerTrain: " << nTrigsPerTrain << std::endl;
+  std::cout << "NTrains: " << nTrains << std::endl;
+  std::cout << "NRest: " << nRest << std::endl;
+
+  TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (fBoards.at(0));
+
+  if (myMOSAIC) {
+    myMOSAIC->StartRun();
+  }
+
   for (int itrain = 0; itrain <= nTrains; itrain ++) {
+    std::cout << "Train: " << itrain << std::endl;
     if (itrain == nTrains) {
       nTrigsThisTrain = nRest;
     }
@@ -159,7 +164,7 @@ void scan() {
         }
         else {
           // decode DAQboard event
-          BoardDecoder::DecodeEvent(boardDAQ, buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+          BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
           // decode Chip event
           int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
           AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
@@ -170,19 +175,13 @@ void scan() {
       //std::cout << "Number of hits: " << Hits->size() << std::endl;
       CopyHitData(Hits);
   }
+  if (myMOSAIC) {
+    myMOSAIC->StopRun();
+  }
 }
 
 
 int main() {
-  // chip ID that is used in case of single chip setup
-  fSingleChipId = 16;
-
-  // module ID that is used for outer barrel modules 
-  // (1 will result in master chip IDs 0x10 and 0x18, 2 in 0x20 and 0x28 ...)
-  fModuleId = 1;
-
-  fSetupType = setupSingle;
-
   initSetup();
 
   char Suffix[20], fName[100];
@@ -206,10 +205,22 @@ int main() {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
 
     // put your test here... 
-    fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
-    fBoards.at(0)->SetTriggerSource (trigExt);
+    if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
+      fBoards.at(0)->SetTriggerConfig (true, true, myPulseDelay, myPulseLength * 2);
+      fBoards.at(0)->SetTriggerSource (trigInt);
+    }
+    else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
+      fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
+      fBoards.at(0)->SetTriggerSource (trigExt);
+    }
 
     scan();
+
+    sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
+    WriteDataToFile (fName, true);
+
+    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    WriteScanConfig (fName, fChips.at(0), myDAQBoard);
 
     if (myDAQBoard) {
       myDAQBoard->PowerOff();
@@ -217,7 +228,7 @@ int main() {
     }
   }
 
-  sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
-  WriteDataToFile (fName, true);
+  //sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
+  //WriteDataToFile (fName, true);
   return 0;
 }

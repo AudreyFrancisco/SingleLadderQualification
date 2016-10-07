@@ -25,7 +25,7 @@ int main() {
   std::cout << "found " << boards.size() << " DAQ boards" << std::endl;
   
   if (boards.size() == 1) {
-    TAlpide *chip   = new TAlpide (config->GetChipConfig(16));
+    TAlpide *chip   = new TAlpide (config->GetChipConfigById(16));
     chip         -> SetReadoutBoard (boards.at(0));
     boards.at(0) -> AddChip (0, 0, 0);
     

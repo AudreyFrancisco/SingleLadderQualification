@@ -5,6 +5,8 @@
 //using namespace AlpideDecoder;
 
 
+bool newEvent;
+
 TDataType AlpideDecoder::GetDataType(unsigned char dataWord) {
   if      (dataWord == 0xff)          return DT_IDLE;
   else if (dataWord == 0xf1)          return DT_BUSYON;
@@ -24,6 +26,7 @@ void AlpideDecoder::DecodeChipHeader (unsigned char *data, int &chipId, unsigned
 
   bunchCounter = data_field & 0xff;
   chipId       = (data_field >> 8) & 0xf;
+  newEvent     = true;
 }
 
 
@@ -45,15 +48,25 @@ void AlpideDecoder::DecodeEmptyFrame (unsigned char *data, int &chipId, unsigned
 }
 
 
-void AlpideDecoder::DecodeDataWord (unsigned char *data, int region, std::vector <TPixHit> *hits, bool datalong) {
+void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong) {
   TPixHit hit;
   int     address, hitmap_length;
 
   int16_t data_field = (((int16_t) data[0]) << 8) + data[1];
 
+  hit.chipId = chip;
   hit.region = region;
   hit.dcol   = (data_field & 0x3c00) >> 10;
   address    = (data_field & 0x03ff);
+
+  if ((hits->size() > 0) && (!newEvent)) {
+    if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address == hits->back().address)) {
+      std::cout << "Warning, received pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " twice." << std::endl;
+    }
+    else if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address < hits->back().address)) {
+      std::cout << "Warning, address of pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " is lower than previous one ("<< hits->back().address << ") in same double column." << std::endl;
+    }
+  }
 
   if (datalong) {
     hitmap_length = 7;
@@ -67,13 +80,14 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int region, std::vector
     hit.address = address + (i + 1);
     hits->push_back (hit);
   }
+  newEvent = false;
 }
 
 
 bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <TPixHit> *hits) {
   int       byte    = 0;
   int       region  = -1;
-  int       chip    = 0;
+  int       chip    = -1;
   int       flags   = 0;
   bool      started = false; // event has started, i.e. chip header has been found
   bool      finished = false; // event trailer found
@@ -115,6 +129,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
       }
       DecodeChipTrailer (data + byte, flags);
       finished = true;
+      chip = -1;
       byte += 1;
       break;
     case DT_REGIONHEADER:
@@ -131,7 +146,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
         return false;
       }
       if (hits) {
-        DecodeDataWord (data + byte, region, hits, false);
+        DecodeDataWord (data + byte, chip, region, hits, false);
       }
       byte += 2;
       break;
@@ -141,7 +156,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
         return false;
       }
       if (hits) {
-        DecodeDataWord (data + byte, region, hits, true);
+        DecodeDataWord (data + byte, chip, region, hits, true);
       }
       byte += 3;
       break;

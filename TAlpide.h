@@ -112,7 +112,7 @@ namespace Alpide {
     OPCODE_RDOP         = 0x4e,
     OPCODE_CMU_CLEARERR = 0xff00,
     OPCODE_FIFOTEST     = 0xff01,
-    OPCODE_LOADOBDEFCG  = 0xff02,
+    OPCODE_LOADOBDEFCFG = 0xff02,
     OPCODE_XOFF         = 0xff10,
     OPCODE_XON          = 0xff11,
     OPCODE_ADCMEASURE   = 0xff20

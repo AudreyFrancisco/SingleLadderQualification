@@ -1041,13 +1041,13 @@ void TReadoutBoardDAQ::WriteReadoutModuleConfigRegisters()
   // Event builder config reg 0
   uint32_t config = 0;
   config |= ( fBoardConfigDAQ->GetMaxDiffTriggers()       & 0xf);
-  config |= ((fBoardConfigDAQ->GetSamplingEdgeSelect()?1:0)       <<  4);
-  config |= ((fBoardConfigDAQ->GetPktBasedROEnable()?  1:0)       <<  5);
-  config |= ((fBoardConfigDAQ->GetDDREnable()?         1:0)       <<  6);
-  config |= ((fBoardConfigDAQ->GetDataPortSelect()        & 0x3)  <<  7);
-  config |= ((fBoardConfigDAQ->GetFPGAEmulationMode()     & 0x3)  <<  9);
-  config |= ((fBoardConfigDAQ->GetHeaderType()?        1:0)       << 11);
-  config |= ((fBoardConfigDAQ->GetBoardVersion()?      1:0)       << 12);
+  config |= ((fBoardConfigDAQ->GetSamplingEdgeSelect()?1:0)         <<  4);
+  config |= ((fBoardConfigDAQ->GetPktBasedROEnable()?  1:0)         <<  5);
+  config |= ((fBoardConfigDAQ->GetDDREnable()?         1:0)         <<  6);
+  config |= ((fBoardConfigDAQ->GetDataPortSelect()           & 0x3) <<  7);
+  config |= ((fBoardConfigDAQ->GetFPGAEmulationMode()        & 0x3) <<  9);
+  config |= ((fBoardConfigDAQ->GetHeaderType()?        1:0)         << 11);
+  config |= ((fBoardConfigDAQ->GetParamValue("BOARDVERSION") & 0x1) << 12);
 
   //std::cout << "FPGAEmulationMode: " << fBoardConfigDAQ->GetFPGAEmulationMode() << std::endl;
 

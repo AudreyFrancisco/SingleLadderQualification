@@ -1,12 +1,6 @@
 // Template to prepare standard test routines
 // ==========================================
 //
-// The template is intended to prepare scans that work in the same way for the three setup types
-//   - single chip with DAQ board
-//   - IB stave with MOSAIC
-//   - OB module with MOSAIC
-// The setup type has to be set with the global variable fSetupType
-//
 // After successful call to initSetup() the elements of the setup are accessible in the two vectors
 //   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
@@ -32,12 +26,13 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
+// test setttings ----------------------------------------------------------------------
 
 int myStrobeLength = 10;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;       // not needed right now as strobe generated on DAQ board
 int myPulseLength  = 2000;    // 2000 = 50 us
 
-int myNTriggers    = 20;
+int myNTriggers    = 50;
 
 // Pixel to test
 int myRow = 5;
@@ -45,14 +40,18 @@ int myRow = 5;
 int myCol = 8; // Col within region, 0:15
 
 // charge range
-int myChargeStart  = 10; // 1
-int myChargeStop   = 20; // 160 
+int myChargeStart  = 1; // 1 default
+int myChargeStop   = 160; // 160 default
+//int myChargeStop   = 4; // 160 default
 int myChargeStep   = 2;
 
 // delay between pulse and strobe seems to be 50 ns + 12.5 ns * PulseDelay + 25 ns * StrobeDelay
 int myPulseDelayStart   = 36;    // 36 = 500 ns 
-int myPulseDelayStop    = 1600;  // 1000 = 12550 ns 
+//int myPulseDelayStop    = 1600;  // 1000 = 12550 ns 
+int myPulseDelayStop    = 1200;  // 1200 = 15050 ns 
 int myPulseDelayStep    = 8;     // 100 ns
+
+// -------------------------------------------------------------------------------------
 
 
 int AddressToColumn      (int ARegion, int ADoubleCol, int AAddress)
@@ -114,6 +113,20 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   daqBoard -> DumpConfig("", false, Config);
   fprintf(fp, "%s\n", Config);
   //std::cout << Config << std::endl;
+
+  fprintf(fp, "\n", Config);
+
+  fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
+  fprintf(fp, "ROW %i\n", myRow);
+  fprintf(fp, "COL %i\n", myCol);
+
+  fprintf(fp, "CHARGESTART %i\n", myChargeStart);
+  fprintf(fp, "CHARGESTOP %i\n", myChargeStop);
+  fprintf(fp, "CHARGESTEP %i\n", myChargeStep);
+
+  fprintf(fp, "PULSEDELAYSTART %i\n", myPulseDelayStart);
+  fprintf(fp, "PULSEDELAYSTOP %i\n", myPulseDelayStop);
+  fprintf(fp, "PULSEDELAYSTEP %i\n", myPulseDelayStep);
     
   fclose(fp);
 }
@@ -125,14 +138,6 @@ int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
   chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
-}
-
-
-// initialisation of chip DACs
-int configureDACs(TAlpide *chip) {
-  chip->WriteRegister (Alpide::REG_VPULSEH, 170);
-  chip->WriteRegister (Alpide::REG_VPULSEL, 169);
-  chip->WriteRegister (Alpide::REG_VRESETD, 147);
 }
 
 
@@ -149,19 +154,10 @@ int configureMask(TAlpide *chip) {
 
 
 int configureChip(TAlpide *chip) {
-  // put all chip configurations before the start of the test here
-  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x20); // set chip to config mode
-  if (fSetupType == setupSingle) {
-    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x30); // CMU/DMU config: turn manchester encoding off etc, initial token=1, disable DDR
-  }
-  else {
-    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x10); // CMU/DMU config: same as above, but manchester on
-  }
+  AlpideConfig::BaseConfig(chip);
 
   configureFromu(chip);
-  configureDACs (chip);
   configureMask (chip);
-
 
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
 
@@ -218,14 +214,6 @@ void scan(const char *fName) {
 
 
 int main() {
-  // chip ID that is used in case of single chip setup
-  fSingleChipId = 16;
-
-  // module ID that is used for outer barrel modules 
-  // (1 will result in master chip IDs 0x10 and 0x18, 2 in 0x20 and 0x28 ...)
-  fModuleId = 1;
-
-  fSetupType = setupSingle;
 
   initSetup();
 

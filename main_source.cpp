@@ -26,16 +26,22 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
+int myVCASN   = 57;
+int myITHR    = 51;
+int myVCASN2  = 64;
+int myVCLIP   = 0;
+int myVRESETD = 147;
 
-int myStrobeLength = 40;      // strobe length in units of 25 ns
-int myStrobeDelay  = 10;
-int myPulseLength  = 1000;
+int myStrobeLength = 2000;      // strobe length in units of 25 ns
+int myStrobeDelay  = 0;
+int myPulseLength  = 500;
 
 int myPulseDelay   = 50;
-int myNTriggers    = 50;
-int myMaskStages   = 2048;
+int myNTriggers    = 1000;
+//int myNTriggers    = 1000;
 
-int HitData[512][1024];
+
+int HitData     [512][1024];
 
 
 void ClearHitData() {
@@ -52,6 +58,22 @@ void CopyHitData(std::vector <TPixHit> *Hits) {
     HitData[Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address] ++;
   }
   Hits->clear();
+}
+
+
+void WriteRawData (FILE *fp, std::vector <TPixHit> *Hits, int oldHits, TBoardHeader boardInfo) {
+  int dcol, address, event;
+  for (int ihit = oldHits; ihit < Hits->size(); ihit ++) {
+    dcol     = Hits->at(ihit).dcol + Hits->at(ihit).region * 16;
+    address  = Hits->at(ihit).address;
+    if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
+      event = boardInfo.eventId;
+    } 
+    else {
+      event = boardInfo.eoeCount;
+    }
+    fprintf(fp, "%d %d %d\n", event, dcol, address);
+  }
 }
 
 
@@ -74,41 +96,17 @@ void WriteDataToFile (const char *fName, bool Recreate) {
 
 // initialisation of Fromu
 int configureFromu(TAlpide *chip) {
-  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x0);             // fromu config 1: digital pulsing (put to 0x20 for analogue)
+  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x0);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
+  //  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
 }
 
 
-// setting of mask stage during scan
-int configureMaskStage(TAlpide *chip, int istage) {
-  int row    = istage / 4;
-  int region = istage % 4;
-
-  uint32_t regionmod = 0x77777777 >> region;
-
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
+// initialisation of fixed mask
+int configureMask(TAlpide *chip) {
+  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   false);
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
-
-  AlpideConfig::WritePixRegRow (chip, Alpide::PIXREG_MASK,   false, row);
-  AlpideConfig::WritePixRegRow (chip, Alpide::PIXREG_SELECT, true,  row);
-
-  chip->WriteRegister (Alpide::REG_REGDISABLE_LOW,  (uint16_t) regionmod);
-  chip->WriteRegister (Alpide::REG_REGDISABLE_HIGH, (uint16_t) regionmod);
-
-  for (uint16_t ireg = 0; ireg < 32; ireg ++) {
-    uint16_t Address = Alpide::REG_DCOL_DISABLE_BASE | (ireg << 11);
-    chip->WriteRegister (Address, 0);
-  }
-
-
-  //for (int icol = 0; icol < 1024; icol += 4) {
-  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 1024, icol + istage / 1024);
-  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 1024, icol + istage / 1024);
-  // 
-  //}
-
 }
 
 
@@ -116,18 +114,48 @@ int configureChip(TAlpide *chip) {
   AlpideConfig::BaseConfig(chip);
 
   configureFromu(chip);
+  configureMask (chip);
+
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
+}
 
 
+void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {
+  char Config[1000];
+  FILE *fp = fopen(fName, "w");
+
+  chip     -> DumpConfig("", false, Config);
+  //std::cout << Config << std::endl;
+  fprintf(fp, "%s\n", Config);
+  if (daqBoard) daqBoard -> DumpConfig("", false, Config);
+  fprintf(fp, "%s\n", Config);
+  //std::cout << Config << std::endl;
+
+  fprintf(fp, "\n", Config);
+
+  fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
+    
+  fclose(fp);
 }
 
 
 void scan() {   
   unsigned char         buffer[1024*4000]; 
-  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b = 0;
+  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, oldHits;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
+  FILE                 *rawFile = fopen ("RawData.dat", "w");
+
+  int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 100;
+
+  nTrains = myNTriggers / nTrigsPerTrain;
+  nRest   = myNTriggers % nTrigsPerTrain;
+
+  std::cout << "NTriggers: " << myNTriggers << std::endl;
+  std::cout << "NTriggersPerTrain: " << nTrigsPerTrain << std::endl;
+  std::cout << "NTrains: " << nTrains << std::endl;
+  std::cout << "NRest: " << nRest << std::endl;
 
   TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (fBoards.at(0));
 
@@ -135,52 +163,41 @@ void scan() {
     myMOSAIC->StartRun();
   }
 
-
-  for (int istage = 0; istage < myMaskStages; istage ++) {
-    std::cout << "Mask stage " << istage << std::endl;
-    for (int i = 0; i < fChips.size(); i ++) {
-      configureMaskStage (fChips.at(i), istage);
+  for (int itrain = 0; itrain <= nTrains; itrain ++) {
+    std::cout << "Train: " << itrain << std::endl;
+    if (itrain == nTrains) {
+      nTrigsThisTrain = nRest;
     }
-    fBoards.at(0)->Trigger(myNTriggers);
-    int itrg = 0;
-    while(itrg < myNTriggers) {
-      if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
-        usleep(100);
-        continue;
-      }
-      else {
+    else {
+      nTrigsThisTrain = nTrigsPerTrain;
+    }
 
-        //std::cout << "received Event" << itrg << " with length " << n_bytes_data << std::endl; 
-        //for (int iByte=0; iByte<n_bytes_data; ++iByte) {
-        //  std::cout << std::hex << (int)(uint8_t)buffer[iByte] << std::dec;
-	// }
-        //std::cout << std::endl;
-            
-        // decode DAQboard event
-        BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-        if (boardInfo.decoder10b8bError) errors8b10b++;
-        // decode Chip event
-        int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
-        AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
-        //std::cout << "total number of hits found: " << Hits->size() << std::endl;
+      fBoards.at(0)->Trigger(nTrigsThisTrain);
 
-        itrg++;
-
-      }
-    } 
-    
-    //std::cout << "Hit pixels: " << std::endl;
-    //for (int i=0; i<Hits->size(); i++) {
-    //  std::cout << i << ":\t region: " << Hits->at(i).region << "\tdcol: " << Hits->at(i).dcol << "\taddres: " << Hits->at(i).address << std::endl; 
-    //}
-    CopyHitData(Hits);
+      int itrg = 0;
+      while(itrg < nTrigsThisTrain) {
+        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
+          usleep(100);
+          continue;
+        }
+        else {
+          // decode DAQboard event
+          BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+          // decode Chip event
+          int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
+          oldHits = Hits->size();
+          AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
+          WriteRawData              (rawFile, Hits, oldHits, boardInfo);
+          itrg++;
+        }
+      } 
+      //std::cout << "Number of hits: " << Hits->size() << std::endl;
+      CopyHitData(Hits);
   }
   if (myMOSAIC) {
     myMOSAIC->StopRun();
-    std::cout << "Total number of 8b10b decoder errors: " << errors8b10b << std::endl;
   }
-
-
+  fclose (rawFile);
 }
 
 
@@ -209,14 +226,21 @@ int main() {
 
     // put your test here... 
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
-      fBoards.at(0)->SetTriggerConfig (true, true, 100, 1000);//myStrobeDelay, myPulseDelay);
+      fBoards.at(0)->SetTriggerConfig (false, true, myPulseDelay, myStrobeLength * 2);
       fBoards.at(0)->SetTriggerSource (trigInt);
     }
     else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
       fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
       fBoards.at(0)->SetTriggerSource (trigExt);
     }
+
     scan();
+
+    sprintf(fName, "Data/Source_%s.dat", Suffix);
+    WriteDataToFile (fName, true);
+
+    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    WriteScanConfig (fName, fChips.at(0), myDAQBoard);
 
     if (myDAQBoard) {
       myDAQBoard->PowerOff();
@@ -224,8 +248,7 @@ int main() {
     }
   }
 
-
-  sprintf(fName, "Data/DigitalScan_%s.dat", Suffix);
-  WriteDataToFile (fName, true);
+  //sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
+  //WriteDataToFile (fName, true);
   return 0;
 }

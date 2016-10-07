@@ -21,6 +21,7 @@ private:
 	FILE *fhConfigFile; // the file handle of the Configuration File
 
 protected:
+        void     InitParamMap ();
 	uint16_t NumberOfControlInterfaces;
 	char IPAddress[30];
 	uint16_t TCPPort;
@@ -37,7 +38,6 @@ public:
 	TBoardConfigMOSAIC(const char *fName = 0, int boardIndex = 0);
 
 	// Info methods
-	TBoardType GetBoardType() {return boardMOSAIC;}; 
 
 	// Getters
 	char * GetIPaddress() {return(IPAddress);}

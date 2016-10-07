@@ -1,4 +1,7 @@
 #include "TChipConfig.h"
+#include <string.h>
+#include <stdio.h>
+#include <iostream>
 
 using namespace ChipConfig;
 
@@ -7,6 +10,13 @@ TChipConfig::TChipConfig (int chipId, const char *fName) {
   fEnabled = true;
  
   // fill default values from header file
+  fVCASN   = VCASN;
+  fVCASN2  = VCASN2;
+  fVCLIP   = VCLIP;
+  fVRESETD = VRESETD;
+  fITHR    = ITHR;
+  fIBIAS   = IBIAS;
+
   fEnableClustering    = ENABLE_CLUSTERING;
   fMatrixReadoutSpeed  = MATRIX_READOUT_SPEED;
   fSerialLinkSpeed     = SERIAL_LINK_SPEED;
@@ -34,4 +44,48 @@ TChipConfig::TChipConfig (int chipId, const char *fName) {
   if (fName) {
     // read information from file
   }
+
+  InitParamMap();
 }
+
+
+void TChipConfig::InitParamMap () 
+{
+  fSettings["CHIPID"]  = &fChipId;
+  fSettings["ITHR"]    = &fITHR;
+  fSettings["IDB"]     = &fIDB;
+  fSettings["VCASN"]   = &fVCASN;
+  fSettings["VCASN2"]  = &fVCASN2;
+  fSettings["VCLIP"]   = &fVCLIP;
+  fSettings["VRESETD"] = &fVRESETD;
+  fSettings["IBIAS"]   = &fIBIAS;
+  fSettings["VCASP"]   = &fVCASP;
+  fSettings["VPULSEL"] = &fVPULSEL;
+  fSettings["VPULSEH"] = &fVPULSEH;
+  fSettings["VRESETP"] = &fVRESETP;
+  fSettings["VTEMP"]   = &fVTEMP;
+  fSettings["IAUX2"]   = &fIAUX2;
+  fSettings["IRESET"]  = &fIRESET;
+}
+
+
+bool TChipConfig::SetParamValue (const char *Name, const char *Value) 
+{
+  if (fSettings.find (Name) != fSettings.end()) {
+    sscanf (Value, "%d", fSettings.find(Name)->second);
+    return true;
+  }
+
+  return false;
+}
+
+
+int TChipConfig::GetParamValue (const char *Name) 
+{
+  if (fSettings.find (Name) != fSettings.end()) {
+    return *(fSettings.find(Name)->second);
+  }
+  return -1;
+}
+
+

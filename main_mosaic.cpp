@@ -33,7 +33,7 @@ int main()
 	theBoard = (TReadoutBoard *) new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)config->GetBoardConfig(0));
 
         for (int i = 0; i < config->GetNChips(); i++) {
-          fChips.push_back(new TAlpide(config->GetChipConfig(chipIDs.at(i))));
+          fChips.push_back(new TAlpide(config->GetChipConfigById(chipIDs.at(i))));
           fChips.at(i) -> SetReadoutBoard(theBoard);
           theBoard     -> AddChip        (chipIDs.at(i), 0, 0);
 	}

@@ -20,7 +20,7 @@ const bool DATA_PKTBASED_EN   = 0; // packet based readout default now!
 const bool DATA_DDR_EN        = 0;
 const int  DATA_PORT          = 2;
 const bool HEADER_TYPE        = 1; // as of firmware version 247e0611 the header type can be defined; 0 -> full header (default); 1 -> short header 
-const bool BOARD_VERSION      = 1; // as of firmware version 247e0611 the DAQboard version (v2 or v3) must be defined; 0 -> v2; 1 -> v3;  
+const int  BOARD_VERSION      = 1; // as of firmware version 247e0611 the DAQboard version (v2 or v3) must be defined; 0 -> v2; 1 -> v3;  
 
 //---- TRIGGER module
 const int TRIGGER_MODE        = 2; // 2: external, 1:internal
@@ -45,8 +45,6 @@ const int STROBE_PULSE_SEQ    =  2;     // 3: just send pulse after external tri
 
 class TBoardConfigDAQ : public TBoardConfig {
  private:
-
-
   // config related to firmware modules
   //----------------------------------------------------------
   //
@@ -83,7 +81,7 @@ class TBoardConfigDAQ : public TBoardConfig {
                               //        01: the FPGA emulates an OB master, chip is slave;    !! not working with pA3 and later versions
                               //        10: the FPGA emulates an OB slave, chip is OB master; !! not working with pA3 and later versions
   bool fHeaderType;           //    11; as of firmware version 247e0611 the header type can be defined; 0 -> full header; 1 -> short header 
-  bool fBoardVersion;         //    12; as of firmware version 247e0611 the DAQboard version (v2 or v3) must be defined; 0 -> v2; 1 -> v3;  
+  int  fBoardVersion;         //    12; as of firmware version 247e0611 the DAQboard version (v2 or v3) must be defined; 0 -> v2; 1 -> v3;  
   
   ////---- TRIGGER module
   
@@ -159,10 +157,9 @@ class TBoardConfigDAQ : public TBoardConfig {
 
 
  protected:
-
+  void InitParamMap ();
  public:
   TBoardConfigDAQ(const char *fName = 0, int boardIndex = 0);
-  TBoardType GetBoardType() {return boardDAQ;};
 
   //// getters for module config parameters 
 
@@ -187,7 +184,6 @@ class TBoardConfigDAQ : public TBoardConfig {
   int GetDataPortSelect()       {return fDataPortSelect;};
   int GetFPGAEmulationMode()    {return fFPGAEmulationMode;};  
   bool GetHeaderType()          {return fHeaderType;};  
-  bool GetBoardVersion()        {return fBoardVersion;};  
 
   // TRIGGER Module
   uint32_t GetBusyDuration()    {return fBusyDuration;};

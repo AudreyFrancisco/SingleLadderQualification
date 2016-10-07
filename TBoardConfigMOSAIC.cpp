@@ -20,18 +20,19 @@ using namespace std;
 
 TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIndex)
 {
+  fBoardType = boardMOSAIC;
 	// Default values set
 	NumberOfControlInterfaces = 2;
 	//	strcpy(IPAddress, "192.168.168.250");
 
-	strcpy(IPAddress, "192.168.1.77");
+	strcpy(IPAddress, "192.168.1.66");
 	TCPPort = 2000;
 
-	ControlInterfacePhase = 0;
+	ControlInterfacePhase = 2;
 	RunCtrlAFThreshold = 1250000;
-	RunCtrlLatMode =1; // 1 := latencyModeEoe, 2 := latencyModeMemory, 3 := latencyModeTimeout
+	RunCtrlLatMode = 0; // 0 := latencyModeEoe, 1 := latencyModeMemory, 2 := latencyModeTimeout
 	RunCtrlTimeout = 0;
-	LowSpeedMode = true;
+	LowSpeedMode = false;
 
 	pollDataTimeout = 500; // milliseconds
 
@@ -44,6 +45,13 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
 		throw std::invalid_argument("MOSAIC Config : file not exists !");
 	  }
 	}
+        InitParamMap();
+}
+
+
+
+void TBoardConfigMOSAIC::InitParamMap() 
+{
 }
 
 

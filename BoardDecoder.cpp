@@ -211,20 +211,20 @@ uint32_t BoardDecoder::GetIntFromBinaryStringReversed(int numByte, unsigned char
 // The value of nBytes is filled with the length of read header
 bool BoardDecoder::DecodeEventMOSAIC(unsigned char *header, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo)
 {
-  boardInfo.size = endianAdjust(header);
-  uint32_t flags = endianAdjust(header+4);
-  boardInfo.overflow = flags & (1 << 1);
-  boardInfo.endOfRun = flags & (1 << 3);
-  boardInfo.timeout = flags & (1 << 2);
+  boardInfo.size        = endianAdjust(header);
+  uint32_t flags        = endianAdjust(header+4);
+  boardInfo.overflow    = flags & (1 << 1);
+  boardInfo.endOfRun    = flags & (1 << 3);
+  boardInfo.timeout     = flags & (1 << 2);
   boardInfo.closedEvent = flags & (1 << 0);
-  boardInfo.eoeCount = endianAdjust(header+8);
-  boardInfo.channel = endianAdjust(header+12);
-  nBytesHeader = 64; // #define MOSAIC_HEADER_LENGTH 64
-  nBytesTrailer = 1; // #define The MOSAIC trailer length
+  boardInfo.eoeCount    = endianAdjust(header+8);
+  boardInfo.channel     = endianAdjust(header+12);
+  nBytesHeader          = 64; // #define MOSAIC_HEADER_LENGTH 64
+  nBytesTrailer         = 1; // #define The MOSAIC trailer length
 
   boardInfo.MOSAICtransmissionFlag = header[20];
-  boardInfo.headerError = boardInfo.MOSAICtransmissionFlag & 0x01;
-  boardInfo.decoder10b8bError = boardInfo.MOSAICtransmissionFlag & 0x02;
+  boardInfo.headerError            = boardInfo.MOSAICtransmissionFlag & 0x01;
+  boardInfo.decoder10b8bError      = boardInfo.MOSAICtransmissionFlag & 0x02;
   return false;
 };
 

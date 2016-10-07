@@ -128,6 +128,7 @@ int TReadoutBoardMOSAIC::SendOpCode        (uint16_t  OpCode)
 
 int TReadoutBoardMOSAIC::SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay)
 {
+
 	uint16_t pulseMode;
 	if(enablePulse  && enableTrigger)  pulseMode = 3; 
 	if(enablePulse  && !enableTrigger) pulseMode = 1;
@@ -286,7 +287,8 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 	n = readTCPData(header, headerSize, fBoardConfig->GetPollingDataTimeout() ); 		// Read the TCP/IP socket
 	if (n == 0)	{		// timeout
 		theHeaderOfReadData.timeout = true;
-		return(false);
+		std::cout << "Header timeout " << std::endl;
+		return(-1);
 	}
 	memcpy(theHeaderBuffer, header, headerSize);// save the 64 bytes of the header
 
@@ -305,7 +307,7 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 	dataSrc = buf2ui(header+12);
 	theHeaderOfReadData.channel = dataSrc;
 
-	//	printf("Received TCP Header (%d) : Block Size = %d  Flags = %04x(Ovr %d, Tim %d Run %d Eve %d) DataCounters = %d DataSource = %04x",headerSize, blockSize,flags,flags & flagOverflow, flags & flagTimeout, flags & flagCloseRun, flags & flagClosedEvent, closedDataCounter,dataSrc);
+      	//printf("Received TCP Header (%d) : Block Size = %d  Flags = %04x(Ovr %d, Tim %d Run %d Eve %d) DataCounters = %d DataSource = %04x",headerSize, blockSize,flags,flags & flagOverflow, flags & flagTimeout, flags & flagCloseRun, flags & flagClosedEvent, closedDataCounter,dataSrc);
 
 	readBlockSize = (blockSize & 0x3f) ? (blockSize & ~0x3f)+64: blockSize; // round the block size to the higher 64 multiple
 	readDataSize+=readBlockSize;
@@ -319,7 +321,7 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 			n = readTCPData(rcvbuffer, (readBlockSize>bufferSize) ? bufferSize : readBlockSize, -1);
 			readBlockSize -= n;
 		}
-		return(false);
+		return(-1);
 	}
 
 	if((flags & flagOverflow) != 0) { // track the event
@@ -331,7 +333,7 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 		n = readTCPData(dr->getWritePtr(readBlockSize), readBlockSize, -1); // read from TCP one Block of data and stores at the tail of buffer
 		if (n == 0) {		// timeout
 			// printf("Data block not received. Exit for Timeout !");
-			return(false);
+			return(-1);
 		}
 		dr->dataBufferUsed += (n<blockSize) ? n : blockSize;		// update the size of data in the buffer
 		// printf("We read the TCP block. Data read=%d Block size in the header=%d Block size to read=%d ",n,blockSize,readBlockSize);
@@ -351,7 +353,7 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 		std::cout << "WARNING Received data with flagCloseRun but after parsing the databuffer is not empty (" << dr->dataBufferUsed<<" bytes)" << std::endl;
 		//	dump((unsigned char*) &dr->dataBuffer[0], dr->dataBufferUsed);
 	}
-	return(false);
+	return(-1);
 }
 
 
@@ -575,10 +577,10 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
 		dataLink = fChipPositions.at(i).receiver;
 		if(dataLink >= 0) { // Enable the data receiver
 		  if (fChipPositions.at(i).enabled) {
-			a3rcv[dataLink-1]->addDisable(false);
+			a3rcv[dataLink]->addDisable(false);
 		  }
                   else {
-			a3rcv[dataLink-1]->addDisable(true);
+			a3rcv[dataLink]->addDisable(true);
 		  }
 		}
 	}

@@ -2,11 +2,8 @@
 #include "SetupHelpers.h"
 #include "USBHelpers.h"
 
-int fSingleChipId;
-int fModuleId;
 
 TBoardType fBoardType;
-TSetupType fSetupType;
 
 
 std::vector <TReadoutBoard *> fBoards;
@@ -24,36 +21,57 @@ TConfig *fConfig;
 //    - receiver number for slaves set to -1 (not connected directly to receiver)
 //      (this ensures that a receiver is disabled only if the connected master is disabled)
 int initSetupOB() {
-  std::vector <int> chipIDs;
-  int offset = (fModuleId & 0x7) << 4;
-  for (int i = 0 + offset; i < 7  + offset; i++) chipIDs.push_back(i);
-  for (int i = 8 + offset; i < 15 + offset; i++) chipIDs.push_back(i);
-
-  fConfig       = new TConfig (1, chipIDs);
   fBoardType    = boardMOSAIC;
 
   fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
 
   for (int i = 0; i < fConfig->GetNChips(); i++) {
-    fChips.push_back(new TAlpide(fConfig->GetChipConfig(chipIDs.at(i))));
+    TChipConfig *chipConfig = fConfig   ->GetChipConfig(i);
+    int          chipId     = chipConfig->GetChipId    ();
+
+    fChips.push_back(new TAlpide(chipConfig));
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
-    if (chipIDs.at(i) < 7 + offset) { // first master-slave row
-      if (chipIDs.at(i) & 0x7) {        // slave
-        fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, -1);
+    if (i < 7) { // first master-slave row
+      if (chipId & 0x7) {        // slave
+        fBoards.at(0)-> AddChip        (chipId, 0, -1);
       }
       else {                            // master
-        fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, 0);
+        fBoards.at(0)-> AddChip        (chipId, 0, 7);
       }
     }
     else {                    // second master-slave row
-      if (chipIDs.at(i) & 0x7) {        // slave
-        fBoards.at(0)-> AddChip        (chipIDs.at(i), 1, -1);
+      if (chipId & 0x7) {        // slave
+        fBoards.at(0)-> AddChip        (chipId, 0, -1);
       }                                
       else {                            // master
-        fBoards.at(0)-> AddChip        (chipIDs.at(i), 1, 1);
+        fBoards.at(0)-> AddChip        (chipId, 0, 0);
       }
     }
   }
+  std::cout << "Checking control interfaces." << std::endl;
+  int nWorking = CheckControlInterface();
+  std::cout << "Found " << nWorking << " working chips" << std::endl;
+}
+
+
+// Try to communicate with all 
+int CheckControlInterface() {
+  uint16_t Value;
+  int      nWorking = 0;
+
+  for (int i = 0; i < fChips.size(); i++) {
+    fChips.at(i)->WriteRegister (0x60d, 10);
+    try {
+      fChips.at(i)->ReadRegister (0x60d, Value);
+      std::cout << "Chip ID " << fChips.at(i)->GetConfig()->GetChipId() << ", Value = 0x" << std::hex << (int) Value << std::dec << std::endl;
+      nWorking ++;
+    }
+    catch (exception &e) {
+      std::cout << "Chip ID " << fChips.at(i)->GetConfig()->GetChipId() << ", not answering, disabling." << std::endl;
+      fChips.at(i)->GetConfig()->SetEnable(false);
+    }
+  }
+  return nWorking;
 }
 
 
@@ -61,29 +79,41 @@ int initSetupOB() {
 //    - all chips connected to same control interface
 //    - each chip has its own receiver, mapping defined in RCVMAP
 int initSetupIB() {
-  std::vector <int> chipIDs;
-  for (int i = 0; i < 9; i++) chipIDs.push_back(i);
-
   int RCVMAP [] = { 3, 5, 7, 8, 6, 4, 2, 1, 0 };
-  fConfig       = new TConfig (1, chipIDs);
   fBoardType    = boardMOSAIC;
-
 
   fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
 
   for (int i = 0; i < fConfig->GetNChips(); i++) {
-    fChips.push_back(new TAlpide(fConfig->GetChipConfig(chipIDs.at(i))));
+    TChipConfig *chipConfig = fConfig->GetChipConfig(i);
+    fChips.push_back(new TAlpide(chipConfig));
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
-    fBoards.at(0)-> AddChip        (chipIDs.at(i), 0, RCVMAP[i]);
+    fBoards.at(0)-> AddChip        (chipConfig->GetChipId(), 0, RCVMAP[i]);
   }
+
+  std::cout << "Checking control interfaces." << std::endl;
+  int nWorking = CheckControlInterface();
+  std::cout << "Found " << nWorking << " working chips" << std::endl;
+}
+
+
+int initSetupSingleMosaic() {
+  int          ReceiverId = 3;  // HSData is connected to pins for first chip on a stave
+  TChipConfig *chipConfig = fConfig->GetChipConfig(0);
+  fBoardType              = boardMOSAIC;
+
+  fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
+
+  fChips. push_back(new TAlpide(chipConfig));
+  fChips. at(0) -> SetReadoutBoard(fBoards.at(0));
+  fBoards.at(0) -> AddChip        (chipConfig->GetChipId(), 0, ReceiverId);
 }
 
 
 int initSetupSingle() {
   TReadoutBoardDAQ  *myDAQBoard = 0;
-
-  fConfig    = new TConfig (fSingleChipId);
-  fBoardType = boardDAQ;
+  TChipConfig       *chipConfig = fConfig->GetChipConfig(0);
+  fBoardType                    = boardDAQ;
   
   InitLibUsb(); 
   //  The following code searches the USB bus for DAQ boards, creates them and adds them to the readout board vector: 
@@ -99,9 +129,9 @@ int initSetupSingle() {
   }
 
   // create chip object and connections with readout board
-  fChips. push_back(new TAlpide (fConfig->GetChipConfig(fSingleChipId)));
+  fChips. push_back(new TAlpide (chipConfig));
   fChips. at(0) -> SetReadoutBoard (fBoards.at(0));
-  fBoards.at(0) -> AddChip         (fSingleChipId, 0, 0);
+  fBoards.at(0) -> AddChip         (chipConfig->GetChipId(), 0, 0);
 
   powerOn(myDAQBoard);
 
@@ -119,20 +149,26 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 
   std::cout << "Analog Current  = " << aDAQBoard-> ReadAnalogI() << std::endl;
   std::cout << "Digital Current = " << aDAQBoard-> ReadDigitalI() << std::endl; 
+  std::cout << "Temperature     = " << aDAQBoard-> ReadTemperature() << std::endl; 
 }
 
 
-int initSetup() {
-  switch (fSetupType) 
+int initSetup(const char *configFileName) {
+  fConfig = new TConfig ("Config.cfg");  
+
+  switch (fConfig->GetDeviceType())
     {
-    case setupSingle: 
+    case TYPE_CHIP: 
       initSetupSingle();
       break;
-    case setupIB:
+    case TYPE_STAVE:
       initSetupIB();
       break;
-    case setupOB:
+    case TYPE_MODULE:
       initSetupOB();
+      break;
+    case TYPE_CHIP_MOSAIC: 
+      initSetupSingleMosaic();
       break;
     default: 
       std::cout << "Unknown setup type, doing nothing" << std::endl;

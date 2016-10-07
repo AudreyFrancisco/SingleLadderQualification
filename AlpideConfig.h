@@ -12,9 +12,14 @@ namespace AlpideConfig {
   void WritePixRegSingle  (TAlpide *chip, Alpide::TPixReg reg, bool data, int row, int col);
   void ApplyStandardDACSettings (TAlpide *chip, float backBias);
   void ConfigureFromu     (TAlpide *chip, Alpide::TPulseType pulseType, bool testStrobe, TChipConfig *config = 0);
-  void ConfigureBuffers   (TAlpide *chip, TChipConfig *config);
-  void ConfigureCMU       (TAlpide *chip, TChipConfig *config);
-  void WriteControlReg    (TAlpide *chip, Alpide::TChipMode chipMode, TChipConfig *config);
+  void ConfigureBuffers   (TAlpide *chip, TChipConfig *config = 0);
+  void ConfigureCMU       (TAlpide *chip, TChipConfig *config = 0);
+  void WriteControlReg    (TAlpide *chip, Alpide::TChipMode chipMode, TChipConfig *config = 0);
+  void BaseConfigPLL      (TAlpide *chip);
+  void BaseConfigMask     (TAlpide *chip);
+  void BaseConfigFromu    (TAlpide *chip);
+  void BaseConfigDACs     (TAlpide *chip);
+  void BaseConfig         (TAlpide *chip);
 }
 
 
