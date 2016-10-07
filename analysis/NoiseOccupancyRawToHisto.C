@@ -7,9 +7,9 @@
 #include <TH2F.h>
 #include <TFile.h>
 
-#include "classes/helpers.h"
+#include "helpers.h"
 
-#define NSEC 8
+#define NSEC 1
 
 char fNameCfg [1024];
 char fNameOut [1024];
@@ -17,6 +17,12 @@ char fPathOut [1024];
 char fSuffix  [1024]; // date_time suffix
 
 //----------------------------------------------------------
+void dblcol_adr_to_col_row(UShort_t doublecol, UShort_t address, UShort_t &col, UShort_t &row) {
+    col = doublecol*2 + (address%4 < 2 ? 1 : 0);
+    row = 2*(address/4) + 1-(address%2);
+}
+
+
 void PrepareOutputFile (TString fName) {
     string buff1=fName.Data();
     unsigned pos=buff1.find_last_of("_");
@@ -42,10 +48,7 @@ void PrepareOutputFile (TString fName) {
 
 // main
 //-------------------------------------------------------------------------------------------
-Bool_t NoiseOccupancyRawToHisto(TString file_path, Float_t n_trg=120000, Int_t palpide_version=3) {
-    if (palpide_version!=3 && NSEC==8) {
-        cout << "WARNING: number of sectors not correct for the selected palpide version" << endl;
-    }
+Bool_t NoiseOccupancyRawToHisto(TString file_path) {
 
     ifstream raw_file(file_path.Data());
     if(!raw_file.good()) {
@@ -72,24 +75,21 @@ Bool_t NoiseOccupancyRawToHisto(TString file_path, Float_t n_trg=120000, Int_t p
     MeasConfig_t conf = read_config_file(Form("%s%s", fPathOut, fNameCfg));
     print_meas_config(conf);
 
+
+    Float_t n_trg=conf.NTRIGGERS;
+
+
     // read in noise file and fill hit map
     TH2F *h2_hitmap;
-    if (palpide_version==3) {
-        h2_hitmap = new TH2F(Form("h2_hitmap_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i", 
-            conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
-            conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
-            conf.IDB, conf.IBIAS, conf.VCASP),
-          Form("Noise Hit Map, VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i; Column; Row", 
-            conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
-            conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
-            conf.IDB, conf.IBIAS, conf.VCASP),
-          1024, -0.5, 1024.-0.5, 512, -0.5, 512.-0.5);
-    }
-    else { 
-        h2_hitmap = new TH2F(Form("h2_hitmap_TEMP%i.0_VBB%2.1f_VCASN%i_ITHR%i_RATE%i_BUSY%i", conf.TEMP_SET, conf.VBB, conf.VCASN, conf.ITHR, conf.RATE, conf.BUSY), 
-          Form("Noise Hit Map, TEMP%i.0_VBB%2.1f_VCASN%i_ITHR%i_RATE%i_BUSY%i; Column; Row", conf.TEMP_SET, conf.VBB, conf.VCASN, conf.ITHR, conf.RATE, conf.BUSY),
-          1024, -0.5, 1024.-0.5, 512, -0.5, 512.-0.5);
-    }
+    h2_hitmap = new TH2F(Form("h2_hitmap_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i", 
+        conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
+        conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
+        conf.IDB, conf.IBIAS, conf.VCASP),
+      Form("Noise Hit Map, VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i; Column; Row", 
+        conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
+        conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
+        conf.IDB, conf.IBIAS, conf.VCASP),
+      1024, -0.5, 1024.-0.5, 512, -0.5, 512.-0.5);
     h2_hitmap->SetStats(0);
   
     UShort_t dblcol, adr, col, row;
@@ -112,24 +112,16 @@ Bool_t NoiseOccupancyRawToHisto(TString file_path, Float_t n_trg=120000, Int_t p
     Float_t int_hits = 0;
     Float_t noise_occ = 0;
     for (Int_t i_sec=0; i_sec<NSEC; i_sec++) {
-        if (palpide_version==3) {
-            h_noise_occ[i_sec] = new TH1F(Form("h_noiseocc_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i_sec%i", 
-                conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
-                conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
-                conf.IDB, conf.IBIAS, conf.VCASP, i_sec),
-              Form("Noise Occupancy, Sector %i, VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i; # excluded pixels; noise occupancy [/event/pixel]", 
-                i_sec, 
-                conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
-                conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
-                conf.IDB, conf.IBIAS, conf.VCASP),
-              100, 0, 100);
-        }
-        else {
-            h_noise_occ[i_sec] = new TH1F(Form("h_noiseocc_TEMP%i.0_VBB%2.1f_VCASN%i_ITHR%i_RATE%i_BUSY%i_sec%i", conf.TEMP_SET, conf.VBB, conf.VCASN, conf.ITHR, conf.RATE, conf.BUSY, i_sec),
-              Form("Noise Occupancy, Sector %i, TEMP%i.0_VBB%2.1f_VCASN%i_ITHR%i_RATE%i_BUSY%i; # excluded pixels; noise occupancy [/event/pixel]", 
-                i_sec, conf.TEMP_SET, conf.VBB, conf.VCASN, conf.ITHR, conf.RATE, conf.BUSY),
-              100, 0, 100);
-        }
+        h_noise_occ[i_sec] = new TH1F(Form("h_noiseocc_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i_sec%i", 
+            conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
+            conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
+            conf.IDB, conf.IBIAS, conf.VCASP, i_sec),
+          Form("Noise Occupancy, Sector %i, VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i; # excluded pixels; noise occupancy [/event/pixel]", 
+            i_sec, 
+            conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
+            conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
+            conf.IDB, conf.IBIAS, conf.VCASP),
+          100, 0, 100);
 
         h_noise_occ[i_sec]->SetLineColor(i_sec+1);
         h_noise_occ[i_sec]->SetStats(0);
