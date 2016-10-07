@@ -60,6 +60,7 @@ int CheckControlInterface() {
   int      nWorking = 0;
 
   for (int i = 0; i < fChips.size(); i++) {
+    if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
     fChips.at(i)->WriteRegister (0x60d, 10);
     try {
       fChips.at(i)->ReadRegister (0x60d, Value);
