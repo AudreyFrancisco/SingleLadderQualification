@@ -45,7 +45,7 @@ class TChipConfig {
  private: 
   std::map <std::string, int*> fSettings;
   int  fChipId;
-  bool fEnabled;                 // variable to exclude (non-working) chip from tests, default true
+  int  fEnabled;                 // variable to exclude (non-working) chip from tests, default true
   // DACs used
   int  fITHR;
   int  fIDB;
@@ -96,8 +96,8 @@ class TChipConfig {
   int  GetParamValue        (const char *Name) ;
   bool IsParameter          (const char *Name) {return (fSettings.count(Name) > 0);};
   int  GetChipId            () {return fChipId;};
-  bool IsEnabled            () {return fEnabled;};
-  void SetEnable            (bool Enabled) {fEnabled = Enabled;};
+  bool IsEnabled            () {return (fEnabled != 0);};
+  void SetEnable            (bool Enabled) {fEnabled = Enabled?1:0;};
 
   bool GetEnableClustering     () {return fEnableClustering;};
   int  GetMatrixReadoutSpeed   () {return fMatrixReadoutSpeed;};

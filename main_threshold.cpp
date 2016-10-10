@@ -42,7 +42,8 @@ int myNTriggers    = 50;
 int myMaskStages   = 82;    // full: 4096
 
 int myChargeStart  = 0;
-int myChargeStop   = 50;   // if > 100 points, increase array sizes
+//int myChargeStop   = 50;   // if > 100 points, increase array sizes
+int myChargeStop   = 90;   // if > 100 points, increase array sizes
 
 int HitData     [100][512][1024];
 int ChargePoints[100];
