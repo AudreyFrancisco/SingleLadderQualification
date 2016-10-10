@@ -77,6 +77,12 @@ void Alpide3rcv::addSetLowSpeed(bool sp)
 	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_LOWSPEED, sp ? OPMODE_LOWSPEED : 0);
 }
 
+
+void Alpide3rcv::addSetInvert (bool inv)
+{
+	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_INVERT, inv ? OPMODE_INVERT : 0);
+}
+
 //
 // Disable (or enable) the receiver 
 //
