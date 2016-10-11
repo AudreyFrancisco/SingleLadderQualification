@@ -36,8 +36,8 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
 
   const int  PREVIOUS_ID        = 0x10;
   const bool INITIAL_TOKEN      = true;
-  const bool DISABLE_MANCHESTER = true;
-  const bool ENABLE_DDR         = false;
+  const bool DISABLE_MANCHESTER = false;
+  const bool ENABLE_DDR         = true;
 };
 
 
@@ -98,7 +98,7 @@ class TChipConfig {
   int  GetChipId            () {return fChipId;};
   bool IsEnabled            () {return (fEnabled != 0);};
   void SetEnable            (bool Enabled) {fEnabled = Enabled?1:0;};
-
+  
   bool GetEnableClustering     () {return fEnableClustering;};
   int  GetMatrixReadoutSpeed   () {return fMatrixReadoutSpeed;};
   int  GetSerialLinkSpeed      () {return fSerialLinkSpeed;};
@@ -122,6 +122,11 @@ class TChipConfig {
   bool GetInitialToken         () {return fInitialToken;};
   bool GetDisableManchester    () {return fDisableManchester;};
   bool GetEnableDdr            () {return fEnableDdr;};
+
+  void SetPreviousId           (int APreviousId)         {fPreviousId   = APreviousId;};
+  void SetInitialToken         (bool AInitialToken)      {fInitialToken = AInitialToken;};
+  void SetEnableDdr            (bool AEnableDdr)         {fEnableDdr    = AEnableDdr;};
+  void SetDisableManchester    (bool ADisableManchester) {fDisableManchester = ADisableManchester;};
 };
 
 
