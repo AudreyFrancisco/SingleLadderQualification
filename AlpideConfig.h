@@ -20,6 +20,7 @@ namespace AlpideConfig {
   void BaseConfigFromu    (TAlpide *chip);
   void BaseConfigDACs     (TAlpide *chip);
   void BaseConfig         (TAlpide *chip);
+  void PrintDebugStream   (TAlpide *chip);
 }
 
 

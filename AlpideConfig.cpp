@@ -276,3 +276,26 @@ void AlpideConfig::BaseConfig (TAlpide *chip)
 
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
 }
+
+
+void AlpideConfig::PrintDebugStream (TAlpide *chip) 
+{
+  uint16_t Value;
+
+  std::cout << "Debug Stream chip id " << chip->GetConfig()->GetChipId() << ": " << std::endl;
+
+  for (int i = 0; i < 2; i++) {
+    chip->ReadRegister(Alpide::REG_BMU_DEBUG, Value);
+    std::cout << "  BMU Debug reg word " << i << ": " << std::hex << Value << std::dec << std::endl;  
+  }
+  for (int i = 0; i < 4; i++) {
+    chip->ReadRegister(Alpide::REG_DMU_DEBUG, Value);
+    std::cout << "  DMU Debug reg word " << i << ": " << std::hex << Value << std::dec << std::endl;  
+  }
+  for (int i = 0; i < 9; i++) {
+    chip->ReadRegister(Alpide::REG_FROMU_DEBUG, Value);
+    std::cout << "  FROMU Debug reg word " << i << ": " << std::hex << Value << std::dec << std::endl;  
+  }
+
+
+}
