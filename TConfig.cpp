@@ -71,6 +71,7 @@ TChipConfig *TConfig::GetChipConfigById  (int chipId) {
       return fChipConfigs.at(i);
   }
   // throw exception here.
+  std::cout << "Chip id " << chipId << " not found" << std::endl;
   return 0;
 }
 
