@@ -339,7 +339,7 @@ void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, con
   char     fName[200];
   float    Current;
   uint16_t old; 
-  sprintf (fName, "/home/2016OctXray/Data/%s/DataScanDACS/%ld/IDAC_%s.dat", ChipNum, time, Name);
+  sprintf (fName, "Data/%s/DataScanDACS/%ld/IDAC_%s.dat", ChipNum, time, Name);
   FILE *fp = fopen (fName, "w");
 
   std::cout << "Scanning DAC " << Name << std::endl;
@@ -364,7 +364,7 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, con
   char     fName[200];
   float    Voltage;
   uint16_t old; 
-  sprintf (fName, "/home/2016OctXray/Data/%s/DataScanDACS/%ld/VDAC_%s.dat", ChipNum, time, Name);
+  sprintf (fName, "Data/%s/DataScanDACS/%ld/VDAC_%s.dat", ChipNum, time, Name);
   FILE *fp = fopen (fName, "w");
 
   std::cout << "Scanning DAC " << Name << std::endl;
@@ -750,35 +750,35 @@ int main() {
 
         // put your test here...
         int n = 0;
-        long int scan_time;
+        long int scan_time = timestamp2();
         std::cout << "Measurement Start" << std::endl;
         std::cout << "Make the Output folder sutructure" << std::endl;
         char ChipNum[10] = "A4W7G7R22";
         char OutputPath[100], OutputPath_DAC[100], OutputPath_Threshold[100];
         // Make defualt folder for chip
-        snprintf(OutputPath, 100, "/home/2016OctXray/Data/%s", ChipNum);
+        snprintf(OutputPath, 100, "Data/%s/%l", ChipNum);
         char command[120];
         snprintf(command, 120, "mkdir -p %s", OutputPath);
         system(command);
         // Make defualt DAC scan folder for chip
         command[0] = '\0';
-        snprintf(OutputPath_DAC, 100, "/home/2016OctXray/Data/%s/DataScanDACS", ChipNum);
+        snprintf(OutputPath_DAC, 100, "Data/%s/%ld/DataScanDACS", ChipNum, scan_time);
         snprintf(command, 120, "mkdir -p %s", OutputPath);
         system(command);
         // Make defualt DAC scan folder for chip
         command[0] = '\0';
-        snprintf(OutputPath_Threshold, 100, "/home/2016OctXray/Data/%s/ThresholdScan", ChipNum);
+        snprintf(OutputPath_Threshold, 100, "Data/%s/%ld/ThresholdScan", ChipNum, scan_time);
         snprintf(command, 120, "mkdir -p %s", OutputPath);
         system(command);
 
         char countLog[100];
-        sprintf(countLog, "/home/2016OctXray/Data/%s_countLog.log", ChipNum);
+        sprintf(countLog, "Data/%s_%ld_countLog.log", ChipNum, scan_time);
         std::ofstream countLogfile;
         countLogfile.open(countLog, std::ofstream::app);
 
         std::ofstream logfile;
         char LogPath[100];
-        snprintf(LogPath, 120, "%s/%s.log", OutputPath, ChipNum);
+        snprintf(LogPath, 120, "%s/%s_%ld.log", OutputPath, ChipNum, scan_time);
         logfile.open(LogPath, std::ofstream::app);
         logfile << "chipID;Time;Hameg Output Current5V;Hameg Output Current VBB;Analog Current;Digital Current;Temperature;VCASN;VCASN2;VCASP;VPULSEH;VPULSEL;VRESETP;VRESETD;VCLIP;VTEMP;IRESET;IAUX2;IBIAS;IDB;ITHR;ADCDAC;IREF;IREFBuffer" << std::endl;
 
@@ -821,8 +821,8 @@ int main() {
 
             if(n%56 == 0) {
 //            if(n%2 == 0) {
- //               platereturn = exec("./moveplate.py 1");
- //               cout << platereturn << endl;
+                platereturn = exec("./moveplate.py 1");
+                cout << "Plate status : " <<  platereturn << endl;
 /*                if (!(std::stoi(platereturn))) {
                     cout << "ERROR : PLATE NOT MOVING" << endl;
                     break;
@@ -1039,8 +1039,8 @@ int main() {
 
                 fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
                 
- //               platereturn = exec("./moveplate.py 0");
-//                cout << platereturn << endl;
+                platereturn = exec("./moveplate.py 0");
+                cout << "Plate status : " << platereturn << endl;
 /*                if (!(std::stoi(platereturn))) {
                     cout << "ERROR : PLATE NOT MOVING" << endl;
                     break;
