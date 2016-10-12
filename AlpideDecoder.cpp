@@ -115,6 +115,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
       break;
     case DT_CHIPHEADER:
       started = true;
+      finished = false;
       DecodeChipHeader (data + byte, chip, BunchCounterTmp);
       byte += 2;
       break;

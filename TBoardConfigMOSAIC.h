@@ -31,6 +31,7 @@ protected:
 	uint16_t RunCtrlLatMode;
 	uint32_t RunCtrlTimeout;
 	bool LowSpeedMode;
+        bool Inverted;
 
 	uint32_t pollDataTimeout;
 
@@ -48,6 +49,7 @@ public:
 	uint16_t GetCtrlLatMode() {return(RunCtrlLatMode);}
 	uint32_t GetCtrlTimeout() {return(RunCtrlTimeout);}
 	bool IsLowSpeedMode() { return(LowSpeedMode);}
+	bool IsInverted    () { return(Inverted);}
 	uint32_t GetPollingDataTimeout() {return(pollDataTimeout);}
 
 	// Setters

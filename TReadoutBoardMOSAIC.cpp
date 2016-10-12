@@ -515,7 +515,8 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
   	}
         for(int i=0;i<MAX_MOSAICCTRLINT;i++) setPhase(config->GetCtrlInterfacePhase(),i);  // set the Phase shift on the line
 
-	setSpeedMode(config->IsLowSpeedMode(), -1);// set 400 MHz mode
+	setSpeedMode (config->IsLowSpeedMode(), -1);// set 400 MHz mode
+	setInverted  (config->IsInverted(),     -1);// set 400 MHz mode
 
 	pulser->run(0);
 	mRunControl->stopRun();
@@ -691,6 +692,20 @@ void TReadoutBoardMOSAIC::setSpeedMode(bool ALSpeed, int Aindex)
 	en = (Aindex != -1) ? Aindex+1 : MAX_MOSAICTRANRECV-1;
 	for(int i=st;i<en;i++) {
 		a3rcv[i]->addSetLowSpeed(ALSpeed);
+		a3rcv[i]->execute();
+	}
+	return;
+}
+
+
+void TReadoutBoardMOSAIC::setInverted(bool AInverted, int Aindex)
+{
+	int st,en;
+	Aindex = -1;
+	st = (Aindex != -1) ? Aindex : 0;
+	en = (Aindex != -1) ? Aindex+1 : MAX_MOSAICTRANRECV-1;
+	for(int i=st;i<en;i++) {
+		a3rcv[i]->addSetInvert(AInverted);
 		a3rcv[i]->execute();
 	}
 	return;

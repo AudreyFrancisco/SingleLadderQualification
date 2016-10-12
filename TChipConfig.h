@@ -36,8 +36,8 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
 
   const int  PREVIOUS_ID        = 0x10;
   const bool INITIAL_TOKEN      = true;
-  const bool DISABLE_MANCHESTER = true;
-  const bool ENABLE_DDR         = false;
+  const bool DISABLE_MANCHESTER = false;
+  const bool ENABLE_DDR         = true;
 };
 
 
@@ -45,7 +45,7 @@ class TChipConfig {
  private: 
   std::map <std::string, int*> fSettings;
   int  fChipId;
-  bool fEnabled;                 // variable to exclude (non-working) chip from tests, default true
+  int  fEnabled;                 // variable to exclude (non-working) chip from tests, default true
   // DACs used
   int  fITHR;
   int  fIDB;
@@ -96,9 +96,9 @@ class TChipConfig {
   int  GetParamValue        (const char *Name) ;
   bool IsParameter          (const char *Name) {return (fSettings.count(Name) > 0);};
   int  GetChipId            () {return fChipId;};
-  bool IsEnabled            () {return fEnabled;};
-  void SetEnable            (bool Enabled) {fEnabled = Enabled;};
-
+  bool IsEnabled            () {return (fEnabled != 0);};
+  void SetEnable            (bool Enabled) {fEnabled = Enabled?1:0;};
+  
   bool GetEnableClustering     () {return fEnableClustering;};
   int  GetMatrixReadoutSpeed   () {return fMatrixReadoutSpeed;};
   int  GetSerialLinkSpeed      () {return fSerialLinkSpeed;};
@@ -122,6 +122,11 @@ class TChipConfig {
   bool GetInitialToken         () {return fInitialToken;};
   bool GetDisableManchester    () {return fDisableManchester;};
   bool GetEnableDdr            () {return fEnableDdr;};
+
+  void SetPreviousId           (int APreviousId)         {fPreviousId   = APreviousId;};
+  void SetInitialToken         (bool AInitialToken)      {fInitialToken = AInitialToken;};
+  void SetEnableDdr            (bool AEnableDdr)         {fEnableDdr    = AEnableDdr;};
+  void SetDisableManchester    (bool ADisableManchester) {fDisableManchester = ADisableManchester;};
 };
 
 

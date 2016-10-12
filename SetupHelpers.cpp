@@ -33,7 +33,7 @@ int initSetupOB() {
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
     if (i < 7) { // first master-slave row
       if (chipId & 0x7) {        // slave
-        fBoards.at(0)-> AddChip        (chipId, 0, -1);
+        fBoards.at(0)-> AddChip        (chipId, 0, 7);
       }
       else {                            // master
         fBoards.at(0)-> AddChip        (chipId, 0, 7);
@@ -41,7 +41,7 @@ int initSetupOB() {
     }
     else {                    // second master-slave row
       if (chipId & 0x7) {        // slave
-        fBoards.at(0)-> AddChip        (chipId, 0, -1);
+        fBoards.at(0)-> AddChip        (chipId, 0, 0);
       }                                
       else {                            // master
         fBoards.at(0)-> AddChip        (chipId, 0, 0);
@@ -51,15 +51,57 @@ int initSetupOB() {
   std::cout << "Checking control interfaces." << std::endl;
   int nWorking = CheckControlInterface();
   std::cout << "Found " << nWorking << " working chips" << std::endl;
+  MakeDaisyChain();
 }
 
 
-// Try to communicate with all 
+// Make the daisy chain for OB readout, based on enabled chips
+// i.e. to be called after CheckControlInterface
+void MakeDaisyChain() {
+  for (int i = 0; i < fChips.size(); i++) {
+    if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
+    int chipId   = fChips.at(i)->GetConfig()->GetChipId();
+    int previous = -1;
+    if (!(chipId & 0x7)) {   // Master, has initial token, previous chip is last enabled chip in row
+      fChips.at(i)->GetConfig()->SetInitialToken(true);
+      for (int iprev = chipId + 6; (iprev > chipId) && (previous == -1); iprev--) { 
+        if (fConfig->GetChipConfigById(iprev)->IsEnabled()) {
+          previous = iprev; 
+	}
+      }
+      if (previous == -1) {
+        fChips.at(i)->GetConfig()->SetPreviousId(chipId);
+      }
+      else {
+         fChips.at(i)->GetConfig()->SetPreviousId(previous);
+      }
+    }
+    else {    // Slave, does not have token, previous chip is last enabled chip before
+      fChips.at(i)->GetConfig()->SetInitialToken(false);
+      for (int iprev = chipId - 1; (iprev >= (chipId & 0x78)) && (previous == -1); iprev--) {
+        if (fConfig->GetChipConfigById(iprev)->IsEnabled()) {
+          previous = iprev; 
+	}
+      }
+      if (previous == -1) {
+        fChips.at(i)->GetConfig()->SetPreviousId(chipId);
+      }
+      else {
+         fChips.at(i)->GetConfig()->SetPreviousId(previous);
+      }
+    }
+    std::cout << "Chip Id " << chipId << ", token = " << (bool) fChips.at(i)->GetConfig()->GetInitialToken() << ", previous = " << previous << std::endl;
+  }
+}
+
+
+// Try to communicate with all chips, disable chips that are not answering
 int CheckControlInterface() {
   uint16_t Value;
   int      nWorking = 0;
 
   for (int i = 0; i < fChips.size(); i++) {
+    if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
     fChips.at(i)->WriteRegister (0x60d, 10);
     try {
       fChips.at(i)->ReadRegister (0x60d, Value);
@@ -127,6 +169,10 @@ int initSetupSingle() {
     std::cout << "Error in creating readout board object" << std::endl;
     return -1;
   }
+
+  // for Cagliari DAQ board disable DDR and Manchester encoding
+  chipConfig->SetEnableDdr         (false);
+  chipConfig->SetDisableManchester (true);
 
   // create chip object and connections with readout board
   fChips. push_back(new TAlpide (chipConfig));

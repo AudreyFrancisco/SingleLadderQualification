@@ -180,6 +180,7 @@ private:
 	void setupPLL() { mSysPLL->setup(); return;};
 	void setPhase(int APhase, int ACii = 0) { controlInterface[ACii]->setPhase(APhase); controlInterface[ACii]->addSendCmd(ControlInterface::OPCODE_GRST); controlInterface[ACii]->execute();return;};
 	void setSpeedMode(bool AHSpeed, int Aindex = -1);
+        void setInverted (bool AInverted, int Aindex = -1);
 	void enableExternalTrigger(bool isEnabled, bool levelSensitive = 0) { mTriggerControl->addEnableExtTrigger(isEnabled, levelSensitive);return;};
 	uint32_t buf2ui(unsigned char *buf);
 
