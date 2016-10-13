@@ -18,8 +18,13 @@ char fSuffix  [1024]; // date_time suffix
 
 //----------------------------------------------------------
 void dblcol_adr_to_col_row(UShort_t doublecol, UShort_t address, UShort_t &col, UShort_t &row) {
-    col = doublecol*2 + (address%4 < 2 ? 1 : 0);
-    row = 2*(address/4) + 1-(address%2);
+    // palpide 1/2
+    //col = doublecol*2 + (address%4 < 2 ? 1 : 0);
+    //row = 2*(address/4) + 1-(address%2);
+    // palpide 3/ alpide
+    col = doublecol*2;
+    col += ((((address%4)==1) || ((address%4)==2)) ? 1:0);
+    row = address/2;
 }
 
 
