@@ -38,6 +38,8 @@ void reset_meas_config(MeasConfig_t *conf) {
     conf->PULSEDELAYSTART = -1;
     conf->PULSEDELAYSTOP  = -1;
     conf->PULSEDELAYSTEP  = -1;
+    // threshold scan
+    conf->MASKSTAGES   = -1;
     // chiller temperature
     conf->TEMP_SET  = -1;
     // VBB
@@ -153,6 +155,9 @@ void decode_line(const char *line, MeasConfig_t *conf) {
         read_int_parameter(line, &(conf->PULSEDELAYSTEP), true);
     }
 
+    if (!strcmp(param,"MASKSTAGES")) {
+        read_int_parameter(line, &(conf->MASKSTAGES), true);
+    }
 
     if (!strcmp(param,"TEMP")) {
         read_int_parameter(line, &(conf->TEMP_SET));
@@ -196,6 +201,8 @@ void print_meas_config(MeasConfig_t conf) {
     std::cout << "PULSEDELAYSTART:  " << conf.PULSEDELAYSTART << std::endl; 
     std::cout << "PULSEDELAYSTOP:   " << conf.PULSEDELAYSTOP << std::endl; 
     std::cout << "PULSEDELAYSTEP:   " << conf.PULSEDELAYSTEP << std::endl; 
+    std::cout << std::endl;
+    std::cout << "MASKSTAGES:   " << conf.MASKSTAGES << std::endl; 
     std::cout << std::endl;
     std::cout << "TEMP SET: " << conf.TEMP_SET  << std::endl; 
     std::cout << "VBB:      " << conf.VBB       << std::endl; 

@@ -27,6 +27,8 @@ struct MeasConfig_t {
     Int_t PULSEDELAYSTART;
     Int_t PULSEDELAYSTOP;
     Int_t PULSEDELAYSTEP;
+
+    Int_t MASKSTAGES;
     // chiller temperature
     Int_t TEMP_SET;
     // vbb
