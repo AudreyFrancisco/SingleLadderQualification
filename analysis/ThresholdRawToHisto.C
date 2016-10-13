@@ -137,15 +137,17 @@ void ProcessPixel (int dcol, int address) {
 
 
 
-void PrepareOutputFile (const char *fName) {
+void PrepareOutputFile (const char *fName, bool suffixIsTstmp) {
     string buff1=fName;
     unsigned pos1=buff1.find_last_of("_");
     string buff2=buff1.substr(0,pos1);
     unsigned pos2=buff2.find_last_of("_");
-    sprintf(fSuffix, "%s", buff1.substr(pos2, 14).c_str()); // for std measurements
-
-    //sprintf(fSuffix, "%s", buff1.substr(pos1, 10).c_str()); // with unix tstmp
-
+    if (!suffixIsTstmp) {
+        sprintf(fSuffix, "%s", buff1.substr(pos2, 14).c_str()); // for std measurements
+    } 
+    else {
+        sprintf(fSuffix, "%s", buff1.substr(pos1, 11).c_str()); // with unix tstmp
+    }
     // fNameOut
     sprintf(fNameOut, "FitValues%s.dat", fSuffix);
 
@@ -163,12 +165,17 @@ void PrepareOutputFile (const char *fName) {
 
     // fNameCfg
     sprintf(fNameCfg, "ScanConfig%s.cfg", fSuffix);
+    printf("Cfg file: %s\n", fNameCfg);
 
 }
 
 
-void ProcessFile (const char *fName) {
+int ProcessFile (const char *fName) {
     FILE *fp = fopen (fName, "r");
+    if (fp==0) {
+      std::cout << "threshold data file could not be opened, please check!" << std::endl;
+      return -1;
+    }
     int dcol, address, ampl, hits;
     int lastdcol = -1, lastaddress = -1;
     NPoints  = 0;
@@ -201,13 +208,29 @@ void ProcessFile (const char *fName) {
     }
     fclose(fp);
     if (fpOut) fclose(fpOut);
+    return 0;
 }
 
 
-int ThresholdRawToHisto(const char *fName, bool WriteToFile=false, bool saveCanvas=false) {
+int ThresholdRawToHisto(const char *fName, bool WriteToFile=false, bool saveCanvas=false, bool suffixIsTstmp=false) {
     PrepareHistos();
-    PrepareOutputFile(fName);
-    ProcessFile(fName);
+    PrepareOutputFile(fName, suffixIsTstmp);
+
+    // read run config file for settings information
+    MeasConfig_t conf; reset_meas_config(&conf);
+    ifstream cfg_file(Form("%s%s", fPathOut, fNameCfg));
+    if(!cfg_file.good()) {
+        std::cout << "Config file not found!" << std::endl;
+        return -1;
+    } 
+    conf = read_config_file(Form("%s%s", fPathOut, fNameCfg));
+    print_meas_config(conf);
+
+    nInj=conf.NTRIGGERS;
+    // process threshold data
+    if (ProcessFile(fName)==-1) {
+        return -1;
+    }
 
     std::cout << "Found " << NPixels << " pixel." << std::endl;
     std::cout << "No start point found: " << NNostart << std::endl;
@@ -234,74 +257,60 @@ int ThresholdRawToHisto(const char *fName, bool WriteToFile=false, bool saveCanv
         hNoise [isec]->Draw("SAME");
     }
 
-
     if (saveCanvas) {
         c_thresh->SaveAs(Form("%sthresholds%s.png", fPathOut, fSuffix));
         c_noise ->SaveAs(Form("%snoise%s.png"     , fPathOut, fSuffix));
     }
 
-
     if (WriteToFile) {
         // file with result summary
-        FILE *fp = fopen(Form("%sThresholdSummary%s.dat", fPathOut, fSuffix), "a");
+        FILE *fp = fopen(Form("%sThresholdSummary%s.dat", fPathOut, fSuffix), "w");
 
         for (int isec=0;isec<NSEC;++isec) {
-            fprintf(fp, "%i %.1f %.1f %.1f %.1f\n", isec,
+            fprintf(fp, "%i %.1f %.1f %.1f %.1f %.0f %i\n", isec,
                     hThresh[isec]->GetMean(), hThresh[isec]->GetRMS(), 
-                    hNoise[isec]->GetMean(), hNoise[isec]->GetRMS());
+                    hNoise[isec]->GetMean(), hNoise[isec]->GetRMS(),
+                    hThresh[isec]->GetEntries(), conf.MASKSTAGES*32*4); // number of pixels with successful fit, number of pixels scanned
         }
         fclose(fp);
 
         // root file with histograms
         TFile *f_out = new TFile(Form("%sThresholds%s.root", fPathOut, fSuffix), "RECREATE");
         f_out->cd();
-        // read run config file for settings information
-        MeasConfig_t conf; reset_meas_config(&conf);
-        ifstream cfg_file(Form("%s%s", fPathOut, fNameCfg));
-        if(!cfg_file.good()) {
-            std::cout << "Config file not found! Histogram naming not unique!" << std::endl;
-            for (int isec=0;isec<NSEC;++isec) {
-                hThresh[isec]->Write();
-                hNoise[isec]->Write();
-            }
-        } 
-        else {
-            conf = read_config_file(Form("%s%s", fPathOut, fNameCfg));
-            print_meas_config(conf);
 
-            for (int isec=0;isec<NSEC;++isec) {
-                hThresh[isec]->SetName(Form("h_thresholds_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i_sec%i", 
-                            conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
-                            conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
-                            conf.IDB, conf.IBIAS, conf.VCASP, isec));
-                hThresh[isec]->Write();
-                hNoise[isec]->SetName(Form("h_noise_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i_sec%i", 
-                            conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
-                            conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
-                            conf.IDB, conf.IBIAS, conf.VCASP, isec));
-                hNoise[isec]->Write();
-            }
-
-            // additional file with result summary, with file name containing settings info
-            fp = fopen(Form("%sThresholdSummary_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i.dat", 
-                        fPathOut,
+        for (int isec=0;isec<NSEC;++isec) {
+            hThresh[isec]->SetName(Form("h_thresholds_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i_sec%i", 
                         conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
                         conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
-                        conf.IDB, conf.IBIAS, conf.VCASP), "a");
-
-            for (int isec=0;isec<NSEC;++isec) {
-                fprintf(fp, "%i %.1f %.1f %.1f %.1f\n", isec,
-                        hThresh[isec]->GetMean(), hThresh[isec]->GetRMS(), 
-                        hNoise[isec]->GetMean(), hNoise[isec]->GetRMS());
-            }
-            fclose(fp);
-
+                        conf.IDB, conf.IBIAS, conf.VCASP, isec));
+            hThresh[isec]->Write();
+            hNoise[isec]->SetName(Form("h_noise_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i_sec%i", 
+                        conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
+                        conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
+                        conf.IDB, conf.IBIAS, conf.VCASP, isec));
+            hNoise[isec]->Write();
         }
+
+        // additional file with result summary, with file name containing settings info
+        fp = fopen(Form("%sThresholdSummary_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i.dat", 
+                    fPathOut,
+                    conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
+                    conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
+                    conf.IDB, conf.IBIAS, conf.VCASP), "w");
+
+        for (int isec=0;isec<NSEC;++isec) {
+            fprintf(fp, "%i %.1f %.1f %.1f %.1f %.0f %i\n", isec,
+                    hThresh[isec]->GetMean(), hThresh[isec]->GetRMS(), 
+                    hNoise[isec]->GetMean(), hNoise[isec]->GetRMS(),
+                    hThresh[isec]->GetEntries(), conf.MASKSTAGES*32*4); // number of pixels with successful fit, number of pixels scanned
+        }
+        fclose(fp);
+
         f_out->Close();
     }
 
     for (int isec=0;isec<NSEC;++isec)
-        std::cout << "Threshold sector "<<isec<<": " << hThresh[isec]->GetMean() << " +- " << hThresh[isec]->GetRMS() << " ( " << hThresh[isec]->GetEntries() << " entries)" << std::endl;
+        std::cout << "Threshold sector "<<isec<<": " << hThresh[isec]->GetMean() << " +- " << hThresh[isec]->GetRMS() << " ( " << hThresh[isec]->GetEntries() << " entries / " << conf.MASKSTAGES*32*4 << " )" << std::endl;
 
     for (int isec=0;isec<NSEC;++isec)
         std::cout << "Noise sector "<<isec<<":     " << hNoise [isec]->GetMean() << " +- " << hNoise [isec]->GetRMS() << std::endl;
