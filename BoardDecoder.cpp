@@ -220,7 +220,7 @@ bool BoardDecoder::DecodeEventMOSAIC(unsigned char *header, int &nBytesHeader, i
   boardInfo.eoeCount    = endianAdjust(header+8);
   boardInfo.channel     = endianAdjust(header+12);
   nBytesHeader          = 64; // #define MOSAIC_HEADER_LENGTH 64
-  nBytesTrailer         = 2; // #define The MOSAIC trailer length
+  nBytesTrailer         = 1; // #define The MOSAIC trailer length
 
   boardInfo.MOSAICtransmissionFlag = header[20];
   boardInfo.headerError            = boardInfo.MOSAICtransmissionFlag & 0x01;
