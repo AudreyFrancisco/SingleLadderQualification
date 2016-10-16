@@ -1,4 +1,6 @@
 *.o
+*.so
+*.d
 *.swp
 runTest
 test_*
