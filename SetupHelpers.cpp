@@ -90,7 +90,7 @@ void MakeDaisyChain() {
          fChips.at(i)->GetConfig()->SetPreviousId(previous);
       }
     }
-    std::cout << "Chip Id " << chipId << ", token = " << (bool) fChips.at(i)->GetConfig()->GetInitialToken() << ", previous = " << previous << std::endl;
+    std::cout << "Chip Id " << chipId << ", token = " << (bool) fChips.at(i)->GetConfig()->GetInitialToken() << ", previous = " << fChips.at(i)->GetConfig()->GetPreviousId() << std::endl;
   }
 }
 
