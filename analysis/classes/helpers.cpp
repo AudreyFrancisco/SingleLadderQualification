@@ -47,6 +47,7 @@ void zoom_th1(TH1* h, Int_t offset) {
     Int_t x2 = h->FindLastBinAbove(0, 1);
     if( x1 != -1 && x2 != -1 ) {
         h->GetXaxis()->SetRange(x1-offset, x2+offset);
+        //h->GetXaxis()->SetRange(-0.5, x2+offset);
     }
 
 }
