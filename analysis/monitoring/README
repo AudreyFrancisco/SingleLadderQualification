@@ -1,0 +1,3 @@
+Code for simple monitoring of raw data taken with ./test_source (defined in main_source.cpp, flag for writing raw data has to be enabled) 
+
+For starting the monitoring, simply execute ./run_monitoring.sh <path>/SourceRaw_<date>_<time>.dat

@@ -32,13 +32,15 @@ int myVCASN2  = 64;
 int myVCLIP   = 0;
 int myVRESETD = 147;
 
-int myStrobeLength = 2000;      // strobe length in units of 25 ns
+int myStrobeLength = 10;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;
-int myPulseLength  = 500;
+int myPulseLength  = 0;
 
 int myPulseDelay   = 50;
 int myNTriggers    = 1000;
 //int myNTriggers    = 1000;
+
+char fNameRaw[1024];
 
 
 int HitData     [512][1024];
@@ -145,9 +147,9 @@ void scan() {
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
-  FILE                 *rawFile = fopen ("RawData.dat", "w");
+  FILE                 *rawFile = fopen (fNameRaw, "w");
 
-  int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 100;
+  int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 1;
 
   nTrains = myNTriggers / nTrigsPerTrain;
   nRest   = myNTriggers % nTrigsPerTrain;
@@ -163,6 +165,7 @@ void scan() {
     myMOSAIC->StartRun();
   }
 
+  int count;
   for (int itrain = 0; itrain <= nTrains; itrain ++) {
     std::cout << "Train: " << itrain << std::endl;
     if (itrain == nTrains) {
@@ -175,9 +178,12 @@ void scan() {
       fBoards.at(0)->Trigger(nTrigsThisTrain);
 
       int itrg = 0;
+      count = 0;
       while(itrg < nTrigsThisTrain) {
         if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
           usleep(100);
+          if (count>50) break;
+          count++;
           continue;
         }
         else {
@@ -234,6 +240,7 @@ int main() {
       fBoards.at(0)->SetTriggerSource (trigExt);
     }
 
+    sprintf(fNameRaw, "Data/SourceRaw_%s.dat", Suffix);
     scan();
 
     sprintf(fName, "Data/Source_%s.dat", Suffix);

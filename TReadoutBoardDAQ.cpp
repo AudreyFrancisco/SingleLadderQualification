@@ -330,9 +330,9 @@ void TReadoutBoardDAQ::DAQReadData() {
   fIsReadDataThreadRunning = true;
   fMtx.unlock();
 
-  const int max_length_buf = 1024*4000;   // length needed at ITHR=10 ~5000!!!  
+  const int max_length_buf = 1024*1000;   // length needed at ITHR=10 ~5000!!!  
   const int length_buf = 1024;   // length needed at ITHR=10 ~5000!!!  
-  unsigned char data_buf[length_buf]; // TODO large enough?   
+  unsigned char data_buf[max_length_buf]; // TODO large enough?   
   int evt_length = 0;       
   int tmp_error = 0;
   
@@ -343,13 +343,13 @@ void TReadoutBoardDAQ::DAQReadData() {
     //std::cout << " --> event based readout" << std::endl;
     while (fEvtCnt<fNTriggersTotal) { // no stop-trigger marker with event-based readout
       data_evt.clear();
-      evt_length = ReceiveData(ENDPOINT_READ_DATA, data_buf, length_buf, &tmp_error);
+      evt_length = ReceiveData(ENDPOINT_READ_DATA, data_buf, max_length_buf, &tmp_error);
       //std::cout << "Received " << *length << " bytes" << std::endl;
 
       if (tmp_error == -7) { // USB timeout
         std::cout << "timeout" << std::endl;
         fStatusReadData = -2;
-        return;
+        return; // TODO: this has to be handled better with
         //return -2;
       }
       else if (evt_length < 1) {
