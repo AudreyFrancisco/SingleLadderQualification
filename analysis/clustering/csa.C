@@ -3,6 +3,7 @@
 #include <TTree.h>
 #include <TFile.h>
 #include <TH2F.h>
+#include <TH1F.h>
 #include <TMath.h>
 
 #include "../classes/AliPALPIDEFSRawStreamMS.h"
@@ -39,7 +40,7 @@ Bool_t IsBorderPixel(BinaryPixel pix, Short_t scols, Short_t srows) {
 
 //_______________________________________________________________________________________________
 Bool_t csa(
-    const TString filepath_raw,                      // path to RawHits_*_*.dat file
+    const TString filepath_raw,                      // path to SourceRaw_*_*.dat file
     const TString filepath_tree,                     // output tree path
     const TString filepath_mask="",                  // path to mask file
     const Short_t crown = 3,                         // consider neighbours all pixels in <crown> crown
@@ -75,6 +76,19 @@ Bool_t csa(
     BinaryPixel*  pix_arr = new BinaryPixel[MAX_CS];
     BinaryPixel   pix_tmp;
 
+    // statistics histograms
+    TH1F *hNPixAll = new TH1F("hNPixAll", "Number of hit pixels per event;Number of hit pixels per event;Frequency",
+                            1000, 0, 10000);
+    Int_t n_hitpix[n_secs];
+    TH1F *hNPix[n_secs];
+    TH1F *hNClu[n_secs];
+    for(Short_t i=0; i<n_secs; ++i) {
+        hNPix[i] = new TH1F(Form("hNPix_%i", i), Form("Number of hit pixels per event, sector %i;Number of hit pixels per event;Frequency", i),
+                            1000, 0, 10000);
+        hNClu[i] = new TH1F(Form("hNClu_%i", i), Form("Number of clusters per event, sector %i;Number of clusters per event;Frequency", i),
+                            1000, 0, 10000);
+    }
+
     // TODO: make the code nicer
     // hot pixels variables
     Bool_t flagHot = filepath_mask.EqualTo("") ? kFALSE : kTRUE;
@@ -105,8 +119,8 @@ Bool_t csa(
     //-------------------------------------------
     cout << "csa() : Started reading RawHits file." << endl;
     Long_t evts = 0;
-    while(palpidefsRaw->ReadEvent()) {
-        if( (evts+1)%10000 == 0 )
+    while(palpidefsRaw->ReadEvent() && evts<1000) {
+        if( (evts+1)%10 == 0 )
             cout << "csa() : Processed events: " << evts+1 << endl;
         event->Reset();
         event->SetEventID(evts);
@@ -114,15 +128,18 @@ Bool_t csa(
         for(Short_t i=0; i<n_secs; ++i) {
             plane[i]->Reset();
             plane[i]->SetPlaneID(i);
+            n_hitpix[i] = 0;
         }
 
         Int_t   nhits = palpidefsRaw->GetNumHits();
         Int_t   j=0;
         Short_t col, row;
         Bool_t  flagPixAdded = kTRUE;
+        hNPixAll->Fill(nhits);
 
         // read which pixels are hit and re-construct first cluster
         while(palpidefsRaw->GetNextHit(&col, &row)) {
+            n_hitpix[col/scols]++;
             pix_tmp.Reset();
             pix_tmp.Set(col, row);
             // check if there are conditions that require setting a flag for this pixel
@@ -211,6 +228,11 @@ Bool_t csa(
         // fill the tree (if at least one plane is hit)
         Bool_t flagFill = kFALSE;
         for(Short_t i=0; i<n_secs; ++i) {
+            // stats hists
+            hNClu[i]->Fill(plane[i]->GetNClustersSaved());
+            hNPix[i]->Fill(n_hitpix[i]);
+            // tree
+            plane[i]->SetNHitPix(n_hitpix[i]);
             event->AddPlane(plane[i]);
             if(plane[i]->GetNClustersSaved()) flagFill = kTRUE;
         }
