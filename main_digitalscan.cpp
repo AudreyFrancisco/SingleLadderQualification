@@ -60,7 +60,6 @@ void CopyHitData(std::vector <TPixHit> *Hits) {
 }
 
 
-
 bool HasData(int chipId) {
   for (int icol = 0; icol < 512; icol ++) {
     for (int iaddr = 0; iaddr < 1024; iaddr ++) {
@@ -80,6 +79,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
   strtok (fNameTemp, "."); 
 
   for (int ichip = 0; ichip < fChips.size(); ichip ++) {
+    std::cout << "ichip = "<<ichip << std::endl;
     int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
     if (!HasData(chipId)) continue;  // write files only for chips with data
     if (fChips.size() > 1) {
@@ -88,6 +88,8 @@ void WriteDataToFile (const char *fName, bool Recreate) {
     else {
       sprintf(fNameChip, "%s.dat", fNameTemp);
     }
+    std::cout << "Writing data to file "<< fNameChip <<std::endl;
+
     if (Recreate) fp = fopen(fNameChip, "w");
     else          fp = fopen(fNameChip, "a");
     for (int icol = 0; icol < 512; icol ++) {
@@ -97,8 +99,9 @@ void WriteDataToFile (const char *fName, bool Recreate) {
         }
       }
     }
+    if (fp) fclose (fp);
   }
-  fclose (fp);
+
 }
 
 
@@ -136,7 +139,6 @@ int configureMaskStage(TAlpide *chip, int istage) {
   //for (int icol = 0; icol < 1024; icol += 8) {
   //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 512, icol + istage / 512);
   //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 512, icol + istage / 512);
-  //
   //}
 
 }
@@ -153,7 +155,7 @@ int configureChip(TAlpide *chip) {
 
 void scan() {   
   unsigned char         buffer[1024*4000]; 
-  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b = 0;
+  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b, nClosedEvents = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -178,16 +180,22 @@ void scan() {
         continue;
       }
       else {
-
         //std::cout << "received Event" << itrg << " with length " << n_bytes_data << std::endl; 
         //for (int iByte=0; iByte<n_bytes_data; ++iByte) {
         //  printf ("%02x ", (int) buffer[iByte]);
-          //std::cout << std::hex << (int)(uint8_t)buffer[iByte] << std::dec;
         //}
         //std::cout << std::endl;
             
         // decode DAQboard event
         BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+	//std::cout << "Closed data counter: " <<  boardInfo.eoeCount << std::endl;
+
+        if (boardInfo.eoeCount) {
+          nClosedEvents = boardInfo.eoeCount;
+	}
+        else {
+ 	  nClosedEvents = 1;
+	}
         if (boardInfo.decoder10b8bError) errors8b10b++;
         // decode Chip event
         int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
@@ -195,9 +203,7 @@ void scan() {
         AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
         //std::cout << "total number of hits found: " << Hits->size() << std::endl;
 
-
-        itrg++;
-
+        itrg+= nClosedEvents;
       }
     }
 
@@ -212,8 +218,6 @@ void scan() {
     myMOSAIC->StopRun();
     std::cout << "Total number of 8b10b decoder errors: " << errors8b10b << std::endl;
   }
-
-
 }
 
 
