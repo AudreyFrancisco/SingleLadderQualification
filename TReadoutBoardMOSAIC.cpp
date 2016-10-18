@@ -24,6 +24,7 @@
 #include "BoardDecoder.h"
 #include "AlpideDecoder.h"
 #include "TAlpide.h"
+#include "SetupHelpers.h"
 
 using namespace std;
 ForwardReceiver::ForwardReceiver() : MDataReceiver()
@@ -658,7 +659,7 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
 	for(int i=0;i< fChipPositions.size(); i++) { //for each defined chip
 		dataLink = fChipPositions.at(i).receiver;
 		if(dataLink >= 0) { // Enable the data receiver
-		  if (fChipPositions.at(i).enabled) {
+		  if (fConfig->GetChipConfigById(fChipPositions.at(i).chipId)->IsEnabled()) {
 		    std::cout << "!!!!!! ENabling receiver " << dataLink << std::endl;
 			a3rcv[dataLink]->addDisable(false);
 		  }
