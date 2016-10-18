@@ -239,8 +239,8 @@ void AlpideConfig::BaseConfigFromu (TAlpide *chip)
 
 void AlpideConfig::BaseConfigDACs (TAlpide *chip)
 {
-  chip->WriteRegister (Alpide::REG_VPULSEH, 170);
-  chip->WriteRegister (Alpide::REG_VPULSEL, 169);
+  chip->WriteRegister (Alpide::REG_VPULSEH, chip->GetConfig()->GetParamValue("VPULSEH"));
+  chip->WriteRegister (Alpide::REG_VPULSEL, chip->GetConfig()->GetParamValue("VPULSEL"));
   chip->WriteRegister (Alpide::REG_VRESETD, chip->GetConfig()->GetParamValue("VRESETD"));
   chip->WriteRegister (Alpide::REG_VCASN,   chip->GetConfig()->GetParamValue("VCASN"));
   chip->WriteRegister (Alpide::REG_VCASN2,  chip->GetConfig()->GetParamValue("VCASN2"));
