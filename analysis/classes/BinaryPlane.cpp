@@ -16,6 +16,7 @@ BinaryPlane::BinaryPlane()
     fPosX(-1.),
     fPosY(-1.),
     fPosZ(-1.),
+    fNHitPix(-1),
     fClusters(0)
 {
     fClusters=new TClonesArray(BinaryCluster::Class());
@@ -33,6 +34,7 @@ BinaryPlane::BinaryPlane(const BinaryPlane& orig)
      fPosX(-1.),
      fPosY(-1.),
      fPosZ(-1.),
+     fNHitPix(-1),
      fClusters(0)
 {
     fClusters=new TClonesArray(BinaryCluster::Class());
@@ -52,6 +54,7 @@ BinaryPlane& BinaryPlane::operator=(const BinaryPlane& orig) {
         fPosX=orig.fPosX;
         fPosY=orig.fPosY;
         fPosZ=orig.fPosZ;    
+        fNHitPix=orig.fNHitPix;
         *fClusters=*orig.fClusters;
     }
     return *this;
@@ -81,6 +84,7 @@ void BinaryPlane::Reset() {
     fPosX=-1.;
     fPosY=-1.;
     fPosZ=-1.;
+    fNHitPix=-1;
     fClusters->Clear();
 }
 
