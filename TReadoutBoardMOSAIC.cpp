@@ -655,21 +655,27 @@ bool TReadoutBoardMOSAIC::waitResetTransreceiver()
 
 void TReadoutBoardMOSAIC::enableDefinedReceivers()
 {
-	int dataLink;
-	for(int i=0;i< fChipPositions.size(); i++) { //for each defined chip
-		dataLink = fChipPositions.at(i).receiver;
-		if(dataLink >= 0) { // Enable the data receiver
-		  if (fConfig->GetChipConfigById(fChipPositions.at(i).chipId)->IsEnabled()) {
-		    std::cout << "!!!!!! ENabling receiver " << dataLink << std::endl;
-			a3rcv[dataLink]->addDisable(false);
-		  }
-                  else {
-		    std::cout << "!!!!!! DISabling receiver " << dataLink << std::endl;
-			a3rcv[dataLink]->addDisable(true);
-		  }
-		}
-	}
-	return;
+  bool Used[MAX_MOSAICTRANRECV];
+  for (int i = 0; i < MAX_MOSAICTRANRECV; i++) {
+    Used[i] = false;
+  }
+
+  int dataLink;
+  for(int i=0;i< fChipPositions.size(); i++) { //for each defined chip
+    dataLink = fChipPositions.at(i).receiver;
+    if(dataLink >= 0) { // Enable the data receiver
+      if (fConfig->GetChipConfigById(fChipPositions.at(i).chipId)->IsEnabled()) {
+        std::cout << "!!!!!! ENabling receiver " << dataLink << std::endl;
+        a3rcv[dataLink]->addDisable(false);
+        Used[dataLink] = true;
+      }
+      else if (!Used[dataLink]){
+        std::cout << "!!!!!! DISabling receiver " << dataLink << std::endl;
+        a3rcv[dataLink]->addDisable(true);
+      }
+    }
+  }
+  return;
 }
 
 // ==============================TCP/IP private methods =======================================
