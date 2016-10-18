@@ -16,11 +16,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <iostream>
+#include <algorithm>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <poll.h>
 #include "TReadoutBoardMOSAIC.h"
 #include "BoardDecoder.h"
+#include "AlpideDecoder.h"
 #include "TAlpide.h"
 
 using namespace std;
@@ -157,6 +159,7 @@ int  TReadoutBoardMOSAIC::Trigger           (int nTriggers)
 
 void TReadoutBoardMOSAIC::StartRun()
 {
+  fEventBuffer.clear();
         enableDefinedReceivers();
 	connectTCP(); // open TCP connection
 	mRunControl->startRun(); // start run
@@ -169,6 +172,9 @@ void TReadoutBoardMOSAIC::StopRun()
 	 pulser->run(0);
 	 mRunControl->stopRun();
 	 closeTCP();  // FIXME: this could cause the lost of the tail of the buffer ...
+         if (fEventBuffer.size() > 0) {
+	   std::cout << "Warning: " << fEventBuffer.size() << " event(s) left in buffer at end of run" << std::endl;
+	 }
 	 return;
 }
 
@@ -268,90 +274,165 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, char *buffer)
 }
 */
 
+
+void TReadoutBoardMOSAIC::DecodeHeader (unsigned char *header, 
+                                        long           &blockSize, 
+                                        long           &closedDataCounter, 
+                                        int            &dataSrc, 
+                                        unsigned int   &flags) 
+{
+  blockSize                       = buf2ui(header);	// Decodes the received block ...
+  theHeaderOfReadData.size        = blockSize;
+
+  flags                           = buf2ui(header+4);
+  theHeaderOfReadData.overflow    = flags & flagOverflow;
+  theHeaderOfReadData.endOfRun    = flags & flagCloseRun;
+  theHeaderOfReadData.timeout     = flags & flagTimeout;
+  theHeaderOfReadData.closedEvent = flags & flagClosedEvent;
+
+  closedDataCounter               = buf2ui(header+8);
+  theHeaderOfReadData.eoeCount    = closedDataCounter;
+
+  dataSrc                         = buf2ui(header+12);
+  theHeaderOfReadData.channel     = dataSrc;
+
+  //printf("Received TCP Header (%d) : Block Size = %d  Flags = %04x(Ovr %d, Tim %d Run %d Eve %d) DataCounters = %d DataSource = %04x",headerSize, blockSize,flags,flags & flagOverflow, flags & flagTimeout, flags & flagCloseRun, flags & flagClosedEvent, closedDataCounter,dataSrc);
+}
+
+
+void TReadoutBoardMOSAIC::SplitBuffer(long closedDataCounter, unsigned char *header, MDataReceiver *dr) 
+{
+  int                dataByte   = 0;
+  const unsigned int headerSize = MOSAIC_HEADER_LENGTH;
+
+  std::vector<unsigned char> tempBuffer; 
+  for (int iev = 0; iev < closedDataCounter; iev++) {
+    tempBuffer.clear();
+    // copy header
+    for (int ibyte = 0; ibyte < headerSize; ibyte ++) {
+      tempBuffer.push_back(theHeaderBuffer[ibyte]);
+    }
+
+    bool chipEnd = false;
+    while ((dataByte < dr->dataBufferUsed) && (!chipEnd)) {
+      tempBuffer.push_back(dr->dataBuffer[dataByte]);
+      if ((dataByte > 0) && (AlpideDecoder::GetDataType(dr->dataBuffer[dataByte-1]) == DT_EMPTYFRAME)) chipEnd = true;
+      if (AlpideDecoder::GetDataType(dr->dataBuffer[dataByte]) == DT_CHIPTRAILER)                    chipEnd = true;
+      dataByte ++;
+    }            
+    // copy data until end of event or empty frame
+    fEventBuffer.push_back(tempBuffer);
+  }
+  dr->dataBufferUsed = 0; // flush the buffer
+}
+
+
+void TReadoutBoardMOSAIC::CopyAndPop(int &nBytes, unsigned char *buffer) 
+{
+  if (fEventBuffer.size() == 0) {
+    std::cout << "Error, trying to access empty event queue" << std::endl;
+    return;
+  }
+  std::vector <unsigned char> thisEvent = fEventBuffer.front();
+  
+  std::copy (thisEvent.begin(), thisEvent.end(), buffer);
+  nBytes = thisEvent.size();
+
+  fEventBuffer.pop_front();
+}
+
+
+void TReadoutBoardMOSAIC::CheckEvent (ssize_t n, long blockSize, long readBlockSize, int flags, int dataSrc) 
+{
+  const unsigned int bufferSize = DATA_INPUT_BUFFER_SIZE;
+  unsigned char      rcvbuffer[bufferSize];
+  if (blockSize==0 && (flags & flagCloseRun)==0) { // Abort operation on error
+    throw MosaicRuntimeError("Block size set to zero and not CLOSE_RUN");
+  }
+  if (dataSrc>numOfSetReceivers || receivers[dataSrc] == NULL) {  	// skip data from unregistered source
+    printf("Skipping data block from unregistered source = %d ",dataSrc);
+    while (readBlockSize) {
+      n              = readTCPData(rcvbuffer, (readBlockSize>bufferSize) ? bufferSize : readBlockSize, -1);
+      readBlockSize -= n;
+    }
+  }
+  if((flags & flagOverflow) != 0) { // track the event
+    std::cerr << " ERROR  ATTENTION !! We receive an Overflow Flag error. Pay attention! "<< std::endl;
+  }
+}
+
+
 //	Read data from the TCP socket second version
 //
 int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 {
 	const unsigned int bufferSize = DATA_INPUT_BUFFER_SIZE;
-	unsigned char rcvbuffer[bufferSize];
 	const unsigned int headerSize = MOSAIC_HEADER_LENGTH;
-	unsigned char header[headerSize];
-	unsigned int flags;
-	long blockSize, readBlockSize;
-	long closedDataCounter;
-	long movedEvents;
-	long readDataSize = headerSize;
-	int dataSrc;
-	ssize_t n;
+	unsigned char      header[headerSize];
+	unsigned int       flags;
+	long               blockSize, readBlockSize;
+	long               closedDataCounter;
+	long               movedEvents;
+	long               readDataSize = headerSize;
+	int                dataSrc;
+	ssize_t            n;
 
-	n = readTCPData(header, headerSize, fBoardConfig->GetPollingDataTimeout() ); 		// Read the TCP/IP socket
+        // MK: Check if deque empty. If not, take event from deque and return
+        if (fEventBuffer.size() > 0) {
+          CopyAndPop (nBytes, buffer);
+          return(1);
+	}
+
+        // Read header from the TCP/IP socket
+	n = readTCPData(header, headerSize, fBoardConfig->GetPollingDataTimeout() ); 		
 	if (n == 0)	{		// timeout
-		theHeaderOfReadData.timeout = true;
-		std::cout << "Header timeout " << std::endl;
-		return(-1);
+	  theHeaderOfReadData.timeout = true;
+	  std::cout << "Header timeout " << std::endl;
+	  return(-1);
 	}
 	memcpy(theHeaderBuffer, header, headerSize);// save the 64 bytes of the header
 
-	blockSize = buf2ui(header);	// Decodes the received block ...
-	theHeaderOfReadData.size = blockSize;
+        // decode header, use header data to calculate block size and check event integrity
+        DecodeHeader(header, blockSize, closedDataCounter, dataSrc, flags);
+        // round the block size to the higher 64 multiple
+	readBlockSize = (blockSize & 0x3f) ? (blockSize & ~0x3f)+64: blockSize; 
+	readDataSize +=readBlockSize;
 
-	flags = buf2ui(header+4);
-	theHeaderOfReadData.overflow = flags & flagOverflow;
-	theHeaderOfReadData.endOfRun = flags & flagCloseRun;
-	theHeaderOfReadData.timeout = flags & flagTimeout;
-	theHeaderOfReadData.closedEvent = flags & flagClosedEvent;
+        CheckEvent(n, blockSize, readBlockSize, flags, dataSrc);
 
-	closedDataCounter = buf2ui(header+8);
-	theHeaderOfReadData.eoeCount = closedDataCounter;
-
-	dataSrc = buf2ui(header+12);
-	theHeaderOfReadData.channel = dataSrc;
-
-      	//printf("Received TCP Header (%d) : Block Size = %d  Flags = %04x(Ovr %d, Tim %d Run %d Eve %d) DataCounters = %d DataSource = %04x",headerSize, blockSize,flags,flags & flagOverflow, flags & flagTimeout, flags & flagCloseRun, flags & flagClosedEvent, closedDataCounter,dataSrc);
-
-	readBlockSize = (blockSize & 0x3f) ? (blockSize & ~0x3f)+64: blockSize; // round the block size to the higher 64 multiple
-	readDataSize+=readBlockSize;
-
-	if (blockSize==0 && (flags & flagCloseRun)==0) { // Abort operation on error
-		throw MosaicRuntimeError("Block size set to zero and not CLOSE_RUN");
-	}
-	if (dataSrc>numOfSetReceivers || receivers[dataSrc] == NULL) {  	// skip data from unregistered source
-		// printf("Skipping data block from unregistered source = %d ",dataSrc);
-		while (readBlockSize) {
-			n = readTCPData(rcvbuffer, (readBlockSize>bufferSize) ? bufferSize : readBlockSize, -1);
-			readBlockSize -= n;
-		}
-		return(-1);
-	}
-
-	if((flags & flagOverflow) != 0) { // track the event
-		std::cerr << " ERROR  ATTENTION !! We receive an Overflow Flag error. Pay attention! "<< std::endl;
-	}
-
-	MDataReceiver *dr = receivers[dataSrc];  // finally ...we can read data into the consumer buffer
+        // finally ...we can read data into the consumer buffer
+	MDataReceiver *dr = receivers[dataSrc];  
 	if (readBlockSize != 0) { // Added By G.DeRobertis
-		n = readTCPData(dr->getWritePtr(readBlockSize), readBlockSize, -1); // read from TCP one Block of data and stores at the tail of buffer
-		if (n == 0) {		// timeout
-			// printf("Data block not received. Exit for Timeout !");
-			return(-1);
-		}
-		dr->dataBufferUsed += (n<blockSize) ? n : blockSize;		// update the size of data in the buffer
-		// printf("We read the TCP block. Data read=%d Block size in the header=%d Block size to read=%d ",n,blockSize,readBlockSize);
+          // read from TCP one Block of data and stores at the tail of buffer
+	  n = readTCPData(dr->getWritePtr(readBlockSize), readBlockSize, -1); 
+	  if (n == 0) {		// timeout
+	    printf("Data block not received. Exit for Timeout !");
+	    return(-1);
+	  }
+	  dr->dataBufferUsed += (n<blockSize) ? n : blockSize;		// update the size of data in the buffer
+	  //printf("We read the TCP block. Data read=%d Block size in the header=%d Block size to read=%d\n ",n,blockSize,readBlockSize);
 	}
-	if (closedDataCounter>0) { // We have closed transfers
-		memcpy(buffer, theHeaderBuffer, headerSize); // first copy the header
-		buffer = buffer + headerSize; // move the pointer
-		nBytes = headerSize;
-		*(buffer+20) = dr->dataBuffer[dr->dataBufferUsed-1]; // copy the last trailer byte (MOSAIC status) into the header in order to decode it later
 
-		memcpy(buffer, &dr->dataBuffer[0], dr->dataBufferUsed); // sets the output
-		nBytes += dr->dataBufferUsed;
-		dr->dataBufferUsed = 0; // flush the buffer
-		return(true);
+        // more than one event: split events in eventBuffer, copy first event into buffer
+        if (closedDataCounter>1) {  
+          SplitBuffer (closedDataCounter, header, dr);
+          CopyAndPop  (nBytes, buffer);
+          return(1);
+	}
+	else if (closedDataCounter>0) { // We have closed transfers
+	  memcpy(buffer, theHeaderBuffer, headerSize); // first copy the header
+	  buffer = buffer + headerSize; // move the pointer
+	  nBytes = headerSize;
+	  *(buffer+20) = dr->dataBuffer[dr->dataBufferUsed-1]; // copy the last trailer byte (MOSAIC status) into the header in order to decode it later
+
+	  memcpy(buffer, &dr->dataBuffer[0], dr->dataBufferUsed); // sets the output
+	  nBytes += dr->dataBufferUsed;
+	  dr->dataBufferUsed = 0; // flush the buffer
+	  return(true);  
 	}
 	if ((flags & flagCloseRun) && dr->dataBufferUsed!=0) {  // Here we have some mismatch between the buffer and the status  ?
-		std::cout << "WARNING Received data with flagCloseRun but after parsing the databuffer is not empty (" << dr->dataBufferUsed<<" bytes)" << std::endl;
-		//	dump((unsigned char*) &dr->dataBuffer[0], dr->dataBufferUsed);
+	  std::cout << "WARNING Received data with flagCloseRun but after parsing the databuffer is not empty (" << dr->dataBufferUsed<<" bytes)" << std::endl;
+	  //	dump((unsigned char*) &dr->dataBuffer[0], dr->dataBufferUsed);
 	}
 	return(-1);
 }
@@ -578,9 +659,11 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
 		dataLink = fChipPositions.at(i).receiver;
 		if(dataLink >= 0) { // Enable the data receiver
 		  if (fChipPositions.at(i).enabled) {
+		    std::cout << "!!!!!! ENabling receiver " << dataLink << std::endl;
 			a3rcv[dataLink]->addDisable(false);
 		  }
                   else {
+		    std::cout << "!!!!!! DISabling receiver " << dataLink << std::endl;
 			a3rcv[dataLink]->addDisable(true);
 		  }
 		}

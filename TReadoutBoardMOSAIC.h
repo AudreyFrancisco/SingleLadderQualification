@@ -14,6 +14,7 @@
 
 #include <exception>
 #include <string>
+#include <deque>
 
 #include "TReadoutBoard.h"
 #include "TConfig.h"
@@ -128,8 +129,9 @@ private:
 
 	uint32_t closedEventsPerSource[MAX_MOSAICTRANRECV];
 	TBoardHeader theHeaderOfReadData;  // This will host the info catch from Packet header/trailer
-	char *theHeaderBuffer[MOSAIC_HEADER_LENGTH+10]; // This will host the info of the header in the original format
+	char theHeaderBuffer[MOSAIC_HEADER_LENGTH+10]; // This will host the info of the header in the original format
 
+        std::deque< std::vector<unsigned char> > fEventBuffer;  // double ended queue for DAQboard event data; vector<unsigned char> for saving events
 	enum dataBlockFlag_e {
 		flagClosedEvent			= (1 << 0),
 		flagOverflow			= (1 << 1),
@@ -155,7 +157,11 @@ public:
         // Markus: changed data type from char to unsigned char; check that no problem
         // (should be OK at least for memcpy)
 	int ReadEventData     (int &nBytes, unsigned char *buffer);
-
+        void DecodeHeader     (unsigned char *header, long &blockSize, long &closedDataCounter, 
+                               int &dataSrc, unsigned int &flags);
+        void SplitBuffer      (long closedDataCounter, unsigned char *header, MDataReceiver *dr);
+        void CopyAndPop       (int &nBytes, unsigned char *buffer);
+        void CheckEvent       (ssize_t n, long blockSize, long readBlockSize, int flags, int dataSrc);
 	void StartRun();
 	void StopRun();
 

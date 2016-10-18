@@ -14,7 +14,6 @@ typedef struct {
 
 class AlpideDecoder {
  private:
-   static TDataType GetDataType        (unsigned char dataWord);
    static void      DecodeChipHeader   (unsigned char *data, int &chipId, unsigned int &bunchCounter);
    static void      DecodeChipTrailer  (unsigned char *data, int &flags);
    static void      DecodeRegionHeader (unsigned char *data, int &region);
@@ -22,6 +21,7 @@ class AlpideDecoder {
    static void      DecodeDataWord     (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong);
  protected:
  public:
+   static TDataType GetDataType        (unsigned char dataWord);
    static bool      DecodeEvent        (unsigned char *data, int nBytes, std::vector <TPixHit> *hits);
 };
 
