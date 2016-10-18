@@ -146,7 +146,7 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
   }
   else if (AType == TYPE_STAVE) {
     for (int i = 0; i < 9; i++) {
-      chipIds.push_back(i + ((DEFAULT_MODULE_ID & 0x7) << 4));
+      chipIds.push_back(i);
     }
     Init (9, chipIds, boardMOSAIC);    
   }
