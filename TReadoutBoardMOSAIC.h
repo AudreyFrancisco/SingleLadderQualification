@@ -60,6 +60,9 @@
 //class string;
 using namespace std;
 
+
+extern std::vector<unsigned char> fDebugBuffer; 
+
 class ForwardReceiver : public MDataReceiver
 {
 public:

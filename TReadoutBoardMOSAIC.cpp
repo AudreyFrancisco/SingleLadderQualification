@@ -27,6 +27,10 @@
 #include "SetupHelpers.h"
 
 using namespace std;
+
+
+std::vector<unsigned char> fDebugBuffer; 
+
 ForwardReceiver::ForwardReceiver() : MDataReceiver()
 {
 }
@@ -305,8 +309,16 @@ void TReadoutBoardMOSAIC::SplitBuffer(long closedDataCounter, unsigned char *hea
 {
   int                dataByte   = 0;
   const unsigned int headerSize = MOSAIC_HEADER_LENGTH;
+  int                size = 0;
 
   std::vector<unsigned char> tempBuffer; 
+
+    for (int ibyte = 0; ibyte < dr->dataBufferUsed; ibyte ++) {
+      fDebugBuffer.push_back(dr->dataBuffer[ibyte]);
+    }
+
+
+
   for (int iev = 0; iev < closedDataCounter; iev++) {
     tempBuffer.clear();
     // copy header
@@ -314,14 +326,28 @@ void TReadoutBoardMOSAIC::SplitBuffer(long closedDataCounter, unsigned char *hea
       tempBuffer.push_back(theHeaderBuffer[ibyte]);
     }
 
-    bool chipEnd = false;
+    bool      chipEnd   = false;
+    bool      chipStart = true; 
+    TDataType dataType;
+    int       wordLength;
     while ((dataByte < dr->dataBufferUsed) && (!chipEnd)) {
-      tempBuffer.push_back(dr->dataBuffer[dataByte]);
-      if ((dataByte > 0) && (AlpideDecoder::GetDataType(dr->dataBuffer[dataByte-1]) == DT_EMPTYFRAME)) chipEnd = true;
-      if (AlpideDecoder::GetDataType(dr->dataBuffer[dataByte]) == DT_CHIPTRAILER)                    chipEnd = true;
-      dataByte ++;
+      dataType   = AlpideDecoder::GetDataType (dr->dataBuffer[dataByte]);
+      wordLength = AlpideDecoder::GetWordLength (dataType);      
+      if (chipStart && (dr->dataBuffer [dataByte] == 0x0)) {  // get rid of 0x00's between chip events 
+        dataByte ++;
+        continue;
+      }
+      // copy as many bytes as belong to the given data type without further checks
+      // (to avoid that data, flags, bunch counters are falsely identified as trailers or empty frames)
+      for (int ibyte = 0; ibyte < wordLength; ibyte ++) {     
+        tempBuffer.push_back(dr->dataBuffer[dataByte]);
+        dataByte ++;
+      }
+      chipStart = false;
+      // now check whether the chip event is finished
+      if ((dataType == DT_EMPTYFRAME) || (dataType == DT_CHIPTRAILER)) chipEnd = true;
     }            
-    // copy data until end of event or empty frame
+    size += tempBuffer.size();
     fEventBuffer.push_back(tempBuffer);
   }
   dr->dataBufferUsed = 0; // flush the buffer
@@ -338,7 +364,6 @@ void TReadoutBoardMOSAIC::CopyAndPop(int &nBytes, unsigned char *buffer)
   
   std::copy (thisEvent.begin(), thisEvent.end(), buffer);
   nBytes = thisEvent.size();
-
   fEventBuffer.pop_front();
 }
 
@@ -384,6 +409,8 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
           return(1);
 	}
 
+        fDebugBuffer.clear();
+
         // Read header from the TCP/IP socket
 	n = readTCPData(header, headerSize, fBoardConfig->GetPollingDataTimeout() ); 		
 	if (n == 0)	{		// timeout
@@ -391,7 +418,12 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 	  std::cout << "Header timeout " << std::endl;
 	  return(-1);
 	}
+
 	memcpy(theHeaderBuffer, header, headerSize);// save the 64 bytes of the header
+
+        for (int ibyte = 0; ibyte < headerSize; ibyte ++) {
+          fDebugBuffer.push_back(theHeaderBuffer[ibyte]);
+        }
 
         // decode header, use header data to calculate block size and check event integrity
         DecodeHeader(header, blockSize, closedDataCounter, dataSrc, flags);
@@ -428,6 +460,11 @@ int  TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 
 	  memcpy(buffer, &dr->dataBuffer[0], dr->dataBufferUsed); // sets the output
 	  nBytes += dr->dataBufferUsed;
+
+          for (int ibyte = 0; ibyte < dr->dataBufferUsed; ibyte ++) {
+            fDebugBuffer.push_back(dr->dataBuffer[ibyte]);
+          }
+
 	  dr->dataBufferUsed = 0; // flush the buffer
 	  return(true);  
 	}
