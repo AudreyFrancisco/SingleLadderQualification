@@ -22,6 +22,7 @@ class AlpideDecoder {
  protected:
  public:
    static TDataType GetDataType        (unsigned char dataWord);
+   static int       GetWordLength      (TDataType dataType);
    static bool      DecodeEvent        (unsigned char *data, int nBytes, std::vector <TPixHit> *hits);
 };
 

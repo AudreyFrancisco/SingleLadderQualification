@@ -21,6 +21,17 @@ TDataType AlpideDecoder::GetDataType(unsigned char dataWord) {
 }
 
 
+int AlpideDecoder::GetWordLength(TDataType dataType) {
+  if (dataType == DT_DATALONG) {
+    return 3;
+  }
+  else if ((dataType == DT_DATASHORT) || (dataType == DT_CHIPHEADER) || (dataType == DT_EMPTYFRAME)) {
+    return 2;
+  }
+  else return 1;
+}
+
+
 void AlpideDecoder::DecodeChipHeader (unsigned char *data, int &chipId, unsigned int &bunchCounter) {
   int16_t data_field = (((int16_t) data[0]) << 8) + data[1];
 
@@ -54,6 +65,7 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, s
 
   int16_t data_field = (((int16_t) data[0]) << 8) + data[1];
 
+  if (chip == -1) {std::cout << "Warning, found chip id -1, dataword = 0x" <<std::hex << (int) data_field << std::dec << std::endl;}
   hit.chipId = chip;
   hit.region = region;
   hit.dcol   = (data_field & 0x3c00) >> 10;
@@ -78,6 +90,7 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, s
   for (int i = -1; i < hitmap_length; i ++) {
     if ((i >= 0) && (! (data[2] >> i) & 0x1)) continue;     
     hit.address = address + (i + 1);
+  if (hit.chipId == -1) {std::cout << "Warning, found chip id -1" << std::endl;}
     hits->push_back (hit);
   }
   newEvent = false;
@@ -93,9 +106,12 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
   bool      finished = false; // event trailer found
   TDataType type;
 
+  unsigned char last;
+
   unsigned int BunchCounterTmp;
 
   while (byte < nBytes) {
+    last = data[byte];
     type = GetDataType (data[byte]);
     switch (type) {
     case DT_IDLE:
@@ -146,7 +162,16 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
         std::cout << "Error, hit data found before chip header or after chip trailer" << std::endl;
         return false;
       }
-      if (hits) {
+      if (region == -1) {
+	std::cout << "Warning: data word without region, skipping (Chip " << chip << ")" << std::endl;
+      }
+      else if (hits) {
+        if (chip == -1) {
+          for (int i = 0; i < nBytes; i++) {
+            printf("%02x ", data[i]);
+	  }
+          printf("\n");
+	}
         DecodeDataWord (data + byte, chip, region, hits, false);
       }
       byte += 2;
@@ -156,7 +181,16 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
         std::cout << "Error, hit data found before chip header or after chip trailer" << std::endl;
         return false;
       }
-      if (hits) {
+      if (region == -1) {
+	std::cout << "Warning: data word without region, skipping (Chip " << chip << ")" << std::endl;
+      }
+      else if (hits) {
+        if (chip == -1) {
+          for (int i = 0; i < nBytes; i++) {
+            printf("%02x ", data[i]);
+	  }
+          printf("\n");
+	}
         DecodeDataWord (data + byte, chip, region, hits, true);
       }
       byte += 3;
@@ -170,7 +204,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
   if (started && finished) return true;
   else {
     if (started && !finished) {
-      std::cout << "Warning, event not finished at end of data" << std::endl;
+      std::cout << "Warning, event not finished at end of data, last byte was 0x" << std::hex << (int) last << std::dec <<std::endl;
       return false;
     }
     if (!started) {
