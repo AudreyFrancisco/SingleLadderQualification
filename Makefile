@@ -16,7 +16,7 @@ CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp USB.cpp 
 OBJS = $(CLASS:.cpp=.o)
 $(info OBJS="$(OBJS)")
 
-all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source
+all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron
 
 #ThresholdScan:  $(OBJS) ThresholdScan.cpp
 #	$(CC) -o ThresholdScan $(OBJS) $(CFLAGS) ThresholdScan.cpp $(LINKFLAGS)
@@ -50,6 +50,9 @@ test_dacscan:   $(OBJS) main_dacscan.cpp
 
 test_pulselength:   $(OBJS) main_pulselength.cpp
 	$(CC) -o test_pulselength $(OBJS) $(CFLAGS) main_pulselength.cpp $(LINKFLAGS)
+
+test_poweron:   $(OBJS) main_poweron.cpp
+	$(CC) -o test_poweron $(OBJS) $(CFLAGS) main_poweron.cpp $(LINKFLAGS)
 
 %.o: 	%.cpp %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
