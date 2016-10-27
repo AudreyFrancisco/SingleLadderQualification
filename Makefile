@@ -1,7 +1,7 @@
 CC=g++
 INCLUDE=/usr/local/include
 LIBPATH=/usr/local/lib
-CFLAGS= -pipe -fPIC -g -pthread -std=c++0x -I $(INCLUDE)
+CFLAGS= -pipe -fPIC -g -std=c++0x -mcmodel=medium -I $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -L $(LIBPATH)
 #LINKFLAGS=
 OBJECT= runTest

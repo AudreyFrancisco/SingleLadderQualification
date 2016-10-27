@@ -607,7 +607,7 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 	pulser = new Pulser(mIPbus, WbbBaseAddress::pulser);
 
 	// ALPIDE3 Hi Speed data receiver
-	for(int i=0; i<MAX_MOSAICTRANRECV-1;i++)
+	for(int i=0; i<MAX_MOSAICTRANRECV;i++)
 		a3rcv[i] = new Alpide3rcv(mIPbus, WbbBaseAddress::alpide3rcv+(i<<24) );
 
 	// Data Generator
@@ -618,7 +618,7 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 	dr = new MDataSave;
 	addDataReceiver(0, (MDataReceiver *)dr);
 
-	for(int i=1; i<MAX_MOSAICTRANRECV;i++) {
+	for(int i=1; i<=MAX_MOSAICTRANRECV;i++) {
 		dr =(MDataSave *) new ForwardReceiver();
 		addDataReceiver(i, (MDataReceiver *)dr);
 		a3rcv[i-1]->addDisable(true);
@@ -816,7 +816,7 @@ void TReadoutBoardMOSAIC::setSpeedMode(bool ALSpeed, int Aindex)
 	int st,en;
 	Aindex = -1;
 	st = (Aindex != -1) ? Aindex : 0;
-	en = (Aindex != -1) ? Aindex+1 : MAX_MOSAICTRANRECV-1;
+	en = (Aindex != -1) ? Aindex+1 : MAX_MOSAICTRANRECV;
 	for(int i=st;i<en;i++) {
 		a3rcv[i]->addSetLowSpeed(ALSpeed);
 		a3rcv[i]->execute();
@@ -830,7 +830,7 @@ void TReadoutBoardMOSAIC::setInverted(bool AInverted, int Aindex)
 	int st,en;
 	Aindex = -1;
 	st = (Aindex != -1) ? Aindex : 0;
-	en = (Aindex != -1) ? Aindex+1 : MAX_MOSAICTRANRECV-1;
+	en = (Aindex != -1) ? Aindex+1 : MAX_MOSAICTRANRECV;
 	for(int i=st;i<en;i++) {
 		a3rcv[i]->addSetInvert(AInverted);
 		a3rcv[i]->execute();

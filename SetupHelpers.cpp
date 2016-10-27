@@ -33,10 +33,10 @@ int initSetupOB() {
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
     if (i < 7) { // first master-slave row
       if (chipId & 0x7) {        // slave
-        fBoards.at(0)-> AddChip        (chipId, 0, 7);
+        fBoards.at(0)-> AddChip        (chipId, 1, 9);
       }
       else {                            // master
-        fBoards.at(0)-> AddChip        (chipId, 0, 7);
+        fBoards.at(0)-> AddChip        (chipId, 1, 9);
       }
     }
     else {                    // second master-slave row
