@@ -15,6 +15,7 @@
 
 
 #include <unistd.h>
+#include <string.h>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -34,27 +35,31 @@
 //int myVRESETD = 147;
 
 int myStrobeLength = 80;      // strobe length in units of 25 ns
-int myStrobeDelay  = 0;
+int myStrobeDelay  = 10;
 int myPulseLength  = 500;
 
 int myPulseDelay   = 40;
 int myNTriggers    = 50;
-int myMaskStages   = 82;    // full: 4096
+int myMaskStages   = 4096;    // full: 4096
 
 int myChargeStart  = 0;
 //int myChargeStop   = 50;   // if > 100 points, increase array sizes
 int myChargeStop   = 90;   // if > 100 points, increase array sizes
 
-int HitData     [100][512][1024];
-int ChargePoints[100];
+int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
+int HitData     [16][100][512][1024];
+int ChargePoints[100];
+int ievt = 0;
 
 void ClearHitData() {
   for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
     ChargePoints[icharge-myChargeStart] = icharge;
-    for (int icol = 0; icol < 512; icol ++) {
-      for (int iaddr = 0; iaddr < 1024; iaddr ++) {
-        HitData[icharge-myChargeStart][icol][iaddr] = 0;
+    for (int ichip = 0; ichip < 16; ichip ++) {
+      for (int icol = 0; icol < 512; icol ++) {
+        for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+          HitData[ichip][icharge-myChargeStart][icol][iaddr] = 0;
+        }
       }
     }
   }
@@ -63,33 +68,49 @@ void ClearHitData() {
 
 void CopyHitData(std::vector <TPixHit> *Hits, int charge) {
   for (int ihit = 0; ihit < Hits->size(); ihit ++) {
-    HitData[charge-myChargeStart][Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address] ++;
+    HitData[Hits->at(ihit).chipId][charge-myChargeStart][Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address] ++;
   }
   Hits->clear();
 }
 
 
 void WriteDataToFile (const char *fName, bool Recreate) {
+  char  fNameChip[100];
   FILE *fp;
-  bool  HasData;
-  if (Recreate) fp = fopen(fName, "w");
-  else          fp = fopen(fName, "a");
 
-  for (int icol = 0; icol < 512; icol ++) {
-    for (int iaddr = 0; iaddr < 1024; iaddr ++) {
-      HasData = false;
-      for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
-        if (HitData[icharge - myChargeStart][icol][iaddr] > 0) HasData = true;
-      }
-      
-      if (HasData) {
+  char fNameTemp[100];
+  sprintf(fNameTemp,"%s", fName);
+  strtok (fNameTemp, "."); 
+  bool  HasData;
+
+  for (int ichip = 0; ichip < fChips.size(); ichip ++) {
+    int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
+    if (!fChips.at(ichip)->GetConfig()->IsEnabled()) continue;  // write files only for enabled chips
+    if (fChips.size() > 1) {
+      sprintf(fNameChip, "%s_Chip%d.dat", fNameTemp, chipId);
+    }
+    else {
+      sprintf(fNameChip, "%s.dat", fNameTemp);
+    }
+    if (Recreate) fp = fopen(fNameChip, "w");
+    else          fp = fopen(fNameChip, "a");
+
+    for (int icol = 0; icol < 512; icol ++) {
+      for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+        HasData = false;
         for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
-          fprintf(fp, "%d %d %d %d\n", icol, iaddr, icharge, HitData[icharge - myChargeStart][icol][iaddr]);
-	}
+          if (HitData[chipId][icharge - myChargeStart][icol][iaddr] > 0) HasData = true;
+        }
+      
+        if (HasData) {
+          for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+            fprintf(fp, "%d %d %d %d\n", icol, iaddr, icharge, HitData[chipId][icharge - myChargeStart][icol][iaddr]);
+	  }
+        }
       }
     }
+    fclose (fp);
   }
-  fclose (fp);
 }
 
 
@@ -118,7 +139,8 @@ int configureChip(TAlpide *chip) {
   AlpideConfig::BaseConfig(chip);
 
   configureFromu(chip);
-  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
+
+  AlpideConfig::ConfigureCMU (chip);
 
 
 }
@@ -152,12 +174,13 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 void scan() {   
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
+  int                   nBad = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
-
   TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (fBoards.at(0));
 
+  Hits->clear();
   if (myMOSAIC) {
     myMOSAIC->StartRun();
   }
@@ -165,28 +188,61 @@ void scan() {
   for (int istage = 0; istage < myMaskStages; istage ++) {
     std::cout << "Mask stage " << istage << std::endl;
     for (int i = 0; i < fChips.size(); i ++) {
+      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
       configureMaskStage (fChips.at(i), istage);
     }
-    //configureMaskStage (fChips.at(0), istage);
 
     for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
       //std::cout << "Charge = " << icharge << std::endl;
-      fChips.at(0)->WriteRegister (Alpide::REG_VPULSEL, 170 - icharge);
+      for (int i = 0; i < fChips.size(); i ++) {
+        if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+        fChips.at(i)->WriteRegister (Alpide::REG_VPULSEL, 170 - icharge);
+      }
+      
       fBoards.at(0)->Trigger(myNTriggers);
 
       int itrg = 0;
-      while(itrg < myNTriggers) {
+      while(itrg < myNTriggers * fEnabled) {
         if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
           usleep(100);
           continue;
         }
         else {
           // decode DAQboard event
+          //if (ievt < 20) {
+	  //   FILE *fDebug = fopen ("DebugData.dat", "a");
+          //  fprintf(fDebug, "Normal event:\n");
+          //  for (int iByte=0; iByte<n_bytes_data; ++iByte) {
+          //    fprintf (fDebug, "%02x ", (int) buffer[iByte]);
+          //  }
+          //  fprintf(fDebug, "\nFull Event:\n"); 
+          //  for (int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
+          //    fprintf (fDebug, "%02x ", (int) fDebugBuffer.at(ibyte));
+          //  }
+          //  fprintf(fDebug, "\n\n");
+          //  fclose (fDebug);
+          //  ievt ++;
+	  // }
           BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
           // decode Chip event
-          int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
-          AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
-
+          int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
+          if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
+          if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits)) {
+   	    std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
+	    nBad ++;
+            if (nBad > 10) continue;
+	    FILE *fDebug = fopen ("DebugData.dat", "a");
+            fprintf(fDebug, "Bad event:\n");
+            for (int iByte=0; iByte<n_bytes_data + 1; ++iByte) {
+              fprintf (fDebug, "%02x ", (int) buffer[iByte]);
+            }
+            fprintf(fDebug, "\nFull Event:\n"); 
+            for (int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
+              fprintf (fDebug, "%02x ", (int) fDebugBuffer.at(ibyte));
+            }
+            fprintf(fDebug, "\n\n");
+            fclose (fDebug);
+	  }
           itrg++;
         }
       } 
@@ -219,14 +275,17 @@ int main() {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
     for (int i = 0; i < fChips.size(); i ++) {
+      if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
+      fEnabled ++;        
       configureChip (fChips.at(i));
     }
 
+    std::cout << "Found " << fEnabled << " enabled chips." << std::endl;
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
 
     // put your test here... 
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
-      fBoards.at(0)->SetTriggerConfig (true, true, myPulseDelay, myPulseLength * 2);
+      fBoards.at(0)->SetTriggerConfig (true, true, myPulseDelay, 10 * myPulseLength);
       fBoards.at(0)->SetTriggerSource (trigInt);
     }
     else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
@@ -239,9 +298,9 @@ int main() {
     sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
     WriteDataToFile (fName, true);
     sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
-    WriteScanConfig (fName, fChips.at(0), myDAQBoard);
 
     if (myDAQBoard) {
+      WriteScanConfig (fName, fChips.at(0), myDAQBoard);
       myDAQBoard->PowerOff();
       delete myDAQBoard;
     }
