@@ -41,27 +41,28 @@ public:
 	// Info methods
 
 	// Getters
-	char * GetIPaddress() {return(IPAddress);}
-	uint16_t GetTCPport() {return(TCPPort);}
-	uint16_t GetCtrlInterfaceNum() {return(NumberOfControlInterfaces);}
-	uint16_t GetCtrlInterfacePhase() {return(ControlInterfacePhase);}
-	uint32_t GetCtrlAFThreshold() {return(RunCtrlAFThreshold);}
-	uint16_t GetCtrlLatMode() {return(RunCtrlLatMode);}
-	uint32_t GetCtrlTimeout() {return(RunCtrlTimeout);}
-	bool IsLowSpeedMode() { return(LowSpeedMode);}
-	bool IsInverted    () { return(Inverted);}
-	uint32_t GetPollingDataTimeout() {return(pollDataTimeout);}
+	char *   GetIPaddress          () {return(IPAddress);}
+	uint16_t GetTCPport            () {return(TCPPort);}
+	uint16_t GetCtrlInterfaceNum   () {return(NumberOfControlInterfaces);}
+	uint16_t GetCtrlInterfacePhase () {return(ControlInterfacePhase);}
+	uint32_t GetCtrlAFThreshold    () {return(RunCtrlAFThreshold);}
+	uint16_t GetCtrlLatMode        () {return(RunCtrlLatMode);}
+	uint32_t GetCtrlTimeout        () {return(RunCtrlTimeout);}
+	bool     IsLowSpeedMode        () { return(LowSpeedMode);}
+	bool     IsInverted            () { return(Inverted);}
+	uint32_t GetPollingDataTimeout () {return(pollDataTimeout);}
 
 	// Setters
-	void SetIPaddress(const char *AIPaddress);
-	void SetTCPport(uint16_t APort) { TCPPort = APort;}
-	void SetCtrlInterfaceNum(uint16_t ACtrlInterfaceNumber) { NumberOfControlInterfaces = ACtrlInterfaceNumber;}
-	void SetCtrlInterfacePhase(uint16_t ACtrlInterfacePhase) { ControlInterfacePhase = ACtrlInterfacePhase;}
-	void SetCtrlAFThreshold(uint32_t ACtrlAFThreshold) { RunCtrlAFThreshold = ACtrlAFThreshold;}
-	void SetCtrlLatMode(uint16_t ARunCtrlLatencyMode) { RunCtrlLatMode = ARunCtrlLatencyMode;}
-	void SetCtrlTimeout(uint32_t ARunCtrlTimeout) { RunCtrlTimeout = ARunCtrlTimeout;}
-	void SetLowSpeedMode(bool IsLowSpeedMode) { LowSpeedMode = IsLowSpeedMode;}
-	void SetPollingDataTimeout(uint32_t APollDataTimeout) { pollDataTimeout = APollDataTimeout;}
+	void SetIPaddress          (const char *AIPaddress);
+	void SetTCPport            (uint16_t APort)                { TCPPort = APort;}
+	void SetCtrlInterfaceNum   (uint16_t ACtrlInterfaceNumber) { NumberOfControlInterfaces = ACtrlInterfaceNumber;}
+	void SetCtrlInterfacePhase (uint16_t ACtrlInterfacePhase)  { ControlInterfacePhase = ACtrlInterfacePhase;}
+	void SetCtrlAFThreshold    (uint32_t ACtrlAFThreshold)     { RunCtrlAFThreshold = ACtrlAFThreshold;}
+	void SetCtrlLatMode        (uint16_t ARunCtrlLatencyMode)  { RunCtrlLatMode = ARunCtrlLatencyMode;}
+	void SetCtrlTimeout        (uint32_t ARunCtrlTimeout)      { RunCtrlTimeout = ARunCtrlTimeout;}
+	void SetLowSpeedMode       (bool     IsLowSpeedMode)       { LowSpeedMode = IsLowSpeedMode;}
+        void SetInvertedData       (bool     IsInverted)           { Inverted = IsInverted;};
+	void SetPollingDataTimeout (uint32_t APollDataTimeout)     { pollDataTimeout = APollDataTimeout;} 
 
 };
 

@@ -165,9 +165,9 @@ void AlpideConfig::ConfigureBuffers (TAlpide *chip, TChipConfig *config) {
 
 void AlpideConfig::ConfigureCMU (TAlpide *chip, TChipConfig *config) {
   if (!config) config = chip->GetConfig();
-  
+
   uint16_t cmuconfig = 0;
-  
+
   cmuconfig |= (config->GetPreviousId() & 0xf);
   cmuconfig |= (config->GetInitialToken     () ? 1:0) << 4;
   cmuconfig |= (config->GetDisableManchester() ? 1:0) << 5;

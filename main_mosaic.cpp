@@ -26,7 +26,8 @@ int main()
 	std::vector <int>      chipIDs;
 	std::vector <TAlpide*> fChips;
  
-        for (int i = 0; i < 10; i++) chipIDs.push_back(i);
+        for (int i = 0; i < 30; i++) chipIDs.push_back(i);
+
         //TConfig *config = new TConfig (5);
         TConfig *config = new TConfig (1, chipIDs);
 
@@ -41,6 +42,11 @@ int main()
         uint16_t Value;
 
         for (int i = 0; i < fChips.size(); i++) {
+	  // std::cout << "About to write chip " << chipIDs.at(i) << std::endl;
+          //for (int ii = 5; ii >0; ii --) {
+	  //  std::cout << "  in " << ii << " s." << std::endl;
+          //  sleep(1);
+	  //}
           fChips.at(i)->WriteRegister (0x60d, 10);
           try {
             fChips.at(i)->ReadRegister (0x60d, Value);

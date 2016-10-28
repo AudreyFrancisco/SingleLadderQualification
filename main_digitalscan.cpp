@@ -54,7 +54,16 @@ void ClearHitData() {
 
 void CopyHitData(std::vector <TPixHit> *Hits) {
   for (int ihit = 0; ihit < Hits->size(); ihit ++) {
-    HitData[Hits->at(ihit).chipId][Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address] ++;
+    int chipId  = Hits->at(ihit).chipId;
+    int dcol    = Hits->at(ihit).dcol;
+    int region  = Hits->at(ihit).region;
+    int address = Hits->at(ihit).address;
+    if ((chipId < 0) || (dcol < 0) || (region < 0) || (address < 0)) {
+      std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
+    }
+    else {
+      HitData[Hits->at(ihit).chipId][Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address] ++;
+    }
   }
   Hits->clear();
 }
@@ -156,6 +165,7 @@ int configureChip(TAlpide *chip) {
 void scan() {   
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b, nClosedEvents = 0;
+  int                   nBad = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -171,7 +181,18 @@ void scan() {
       if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
       configureMaskStage (fChips.at(i), istage);
     }
+
+    //uint16_t Value;
+    //fChips.at(0)->ReadRegister(Alpide::REG_CMUDMU_CONFIG, Value);
+    //std::cout << "CMU DMU Config: 0x" << std::hex << Value << std::dec << std::endl;
+    //fChips.at(0)->ReadRegister(Alpide::REG_FROMU_STATUS1, Value);
+    //std::cout << "Trigger counter before: " << Value << std::endl;
     fBoards.at(0)->Trigger(myNTriggers);
+    //fChips.at(0)->ReadRegister(Alpide::REG_FROMU_STATUS1, Value);
+    //std::cout << "Trigger counter after: " << Value << std::endl;
+
+    //fBoards.at(0)->SendOpCode(Alpide::OPCODE_DEBUG);
+    //AlpideConfig::PrintDebugStream(fChips.at(0));
 
     int itrg = 0;
     while(itrg < myNTriggers * fEnabled) {
@@ -189,7 +210,6 @@ void scan() {
         // decode DAQboard event
         BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
 	//std::cout << "Closed data counter: " <<  boardInfo.eoeCount << std::endl;
-
         if (boardInfo.eoeCount) {
           nClosedEvents = boardInfo.eoeCount;
 	}
@@ -199,8 +219,16 @@ void scan() {
         if (boardInfo.decoder10b8bError) errors8b10b++;
         // decode Chip event
         int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
-
-        AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
+        if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits)) {
+	  std::cout << "Found bad event " << std::endl;
+	  nBad ++;
+          if (nBad > 10) continue;
+	  FILE *fDebug = fopen ("DebugData.dat", "a");
+          for (int iByte=0; iByte<n_bytes_data; ++iByte) {
+            fprintf (fDebug, "%02x ", (int) buffer[iByte]);
+          }
+          fclose (fDebug);
+	}
         //std::cout << "total number of hits found: " << Hits->size() << std::endl;
 
         itrg+= nClosedEvents;

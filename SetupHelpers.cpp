@@ -21,9 +21,13 @@ TConfig *fConfig;
 //    - receiver number for slaves set to -1 (not connected directly to receiver)
 //      (this ensures that a receiver is disabled only if the connected master is disabled)
 int initSetupOB() {
-  fBoardType    = boardMOSAIC;
+  fBoardType                      = boardMOSAIC;
+  TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) fConfig->GetBoardConfig(0);
 
-  fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
+  boardConfig->SetInvertedData (true);
+  boardConfig->SetLowSpeedMode (true);
+
+  fBoards.push_back (new TReadoutBoardMOSAIC(boardConfig));
 
   for (int i = 0; i < fConfig->GetNChips(); i++) {
     TChipConfig *chipConfig = fConfig   ->GetChipConfig(i);
@@ -121,10 +125,14 @@ int CheckControlInterface() {
 //    - all chips connected to same control interface
 //    - each chip has its own receiver, mapping defined in RCVMAP
 int initSetupIB() {
-  int RCVMAP [] = { 3, 5, 7, 8, 6, 4, 2, 1, 0 };
-  fBoardType    = boardMOSAIC;
+  int RCVMAP []                   = { 3, 5, 7, 8, 6, 4, 2, 1, 0 };
+  fBoardType                      = boardMOSAIC;
+  TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) fConfig->GetBoardConfig(0);
 
-  fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
+  boardConfig->SetInvertedData (false);
+  boardConfig->SetLowSpeedMode (false);
+
+  fBoards.push_back (new TReadoutBoardMOSAIC(boardConfig));
 
   for (int i = 0; i < fConfig->GetNChips(); i++) {
     TChipConfig *chipConfig = fConfig->GetChipConfig(i);
@@ -140,15 +148,19 @@ int initSetupIB() {
 
 
 int initSetupSingleMosaic() {
-  int          ReceiverId = 3;  // HSData is connected to pins for first chip on a stave
-  TChipConfig *chipConfig = fConfig->GetChipConfig(0);
-  fBoardType              = boardMOSAIC;
+  int                 ReceiverId  = 7;  // HSData is connected to pins for first chip on a stave
+  TChipConfig        *chipConfig  = fConfig->GetChipConfig(0);
+  fBoardType                      = boardMOSAIC;
+  TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) fConfig->GetBoardConfig(0);
 
-  fBoards.push_back (new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)fConfig->GetBoardConfig(0)));
+  boardConfig->SetInvertedData (false);
+  boardConfig->SetLowSpeedMode (true);
+
+  fBoards.push_back (new TReadoutBoardMOSAIC(boardConfig));
 
   fChips. push_back(new TAlpide(chipConfig));
   fChips. at(0) -> SetReadoutBoard(fBoards.at(0));
-  fBoards.at(0) -> AddChip        (chipConfig->GetChipId(), 0, ReceiverId);
+  fBoards.at(0) -> AddChip        (chipConfig->GetChipId(), 1, ReceiverId);
 }
 
 

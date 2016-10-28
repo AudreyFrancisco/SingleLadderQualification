@@ -66,9 +66,6 @@ MosaicRuntimeError::MosaicRuntimeError(const string& __arg)
 
 
 
-
-
-
 // ---- Constructor
 TReadoutBoardMOSAIC::TReadoutBoardMOSAIC (TBoardConfigMOSAIC *AConfig) : TReadoutBoard(AConfig)
 {
