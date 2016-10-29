@@ -17,7 +17,7 @@ using namespace std;
 
 #define NSEC 1
 
-int nInj       = 50;
+int nInj       = 100;
 
 double maxchi2 = 5;
 
@@ -41,6 +41,19 @@ int NChisq;
 TH1F *hThresh[NSEC]={0};
 TH1F *hNoise [NSEC]={0};
 TH1F *hChi2=0;
+TH2F *hThreshMap=0;
+TH2F *hNoiseMap=0;
+
+//----------------------------------------------------------
+void dblcol_adr_to_col_row(int doublecol, int address, int &col, int &row) {
+    // palpide 1/2
+    //col = doublecol*2 + (address%4 < 2 ? 1 : 0);
+    //row = 2*(address/4) + 1-(address%2);
+    // palpide 3/ alpide
+    col = doublecol*2;
+    col += ((((address%4)==1) || ((address%4)==2)) ? 1:0);
+    row = address/2;
+}
 
 void PrepareHistos() {
     for (int isec=0;isec<NSEC;++isec) {
@@ -51,6 +64,8 @@ void PrepareHistos() {
     }
     delete hChi2;hChi2=0;
     hChi2=new TH1F("hChi2","Chi square distribution",1000,0.,100.);
+    hThreshMap=new TH2F("hThreshMap","threshold map", 1024, -0.5, 1024.-0.5, 512, -0.5, 512.-0.5);
+    hNoiseMap=new TH2F("hNoiseMap","noise map", 1024, -0.5, 1024.-0.5, 512, -0.5, 512.-0.5);
 }
 
 void ResetData() {
@@ -123,6 +138,7 @@ bool GetThreshold(double *thresh,double *noise,double *chi2) {
 void ProcessPixel (int dcol, int address) {
     double thresh, noise, chi2;
     int isec = dcol/(1024/(NSEC*2));
+    int row, col;
 
     if (!GetThreshold(&thresh, &noise, &chi2)) return;
 
@@ -132,7 +148,15 @@ void ProcessPixel (int dcol, int address) {
     if(chi2<maxchi2){
         hThresh[isec]->Fill(thresh);
         hNoise [isec]->Fill(noise );
+
+        dblcol_adr_to_col_row(dcol, address, col, row);
+        //cout << dblcol << " " << adr << " " << col << " " << row << " " << nhits << endl;
+        hThreshMap->Fill(col, row, thresh);
+        hNoiseMap ->Fill(col, row, noise );
     }
+
+
+
 }
 
 
@@ -211,6 +235,8 @@ int ProcessFile (const char *fName) {
     return 0;
 }
 
+//----------------------------------------------------------
+//----------------------------------------------------------
 
 int ThresholdRawToHisto(const char *fName, bool WriteToFile=false, bool saveCanvas=false, bool suffixIsTstmp=false) {
     PrepareHistos();
@@ -226,7 +252,8 @@ int ThresholdRawToHisto(const char *fName, bool WriteToFile=false, bool saveCanv
     conf = read_config_file(Form("%s%s", fPathOut, fNameCfg));
     print_meas_config(conf);
 
-    nInj=conf.NTRIGGERS;
+    //nInj=conf.NTRIGGERS;
+
     // process threshold data
     if (ProcessFile(fName)==-1) {
         return -1;
@@ -246,20 +273,35 @@ int ThresholdRawToHisto(const char *fName, bool WriteToFile=false, bool saveCanv
     //  hNoise[0]->SetMaximum(500);
 
     TCanvas* c_thresh = new TCanvas;
-    hThresh[0]->Draw();
+    c_thresh->cd();
+    hThresh[0]->DrawCopy();
     for (int isec=1;isec<NSEC;++isec) {
-        hThresh[isec]->Draw("SAME");
+        hThresh[isec]->DrawCopy("SAME");
     }
 
     TCanvas* c_noise = new TCanvas;
-    hNoise [0]->Draw();
+    c_noise->cd();
+    hNoise [0]->DrawCopy();
     for (int isec=1;isec<NSEC;++isec) {
-        hNoise [isec]->Draw("SAME");
+        hNoise [isec]->DrawCopy("SAME");
     }
 
+    TCanvas* c_threshmap = new TCanvas;
+    c_threshmap->cd();
+    hThreshMap->DrawCopy("COLZ");
+    TCanvas* c_noisemap = new TCanvas;
+    c_noisemap->cd();
+    hNoiseMap->DrawCopy("COLZ");
+
     if (saveCanvas) {
-        c_thresh->SaveAs(Form("%sthresholds%s.png", fPathOut, fSuffix));
-        c_noise ->SaveAs(Form("%snoise%s.png"     , fPathOut, fSuffix));
+        c_thresh->cd();
+        c_thresh->Print(Form("%sthresholds%s.png", fPathOut, fSuffix));
+        c_noise->cd();
+        c_noise ->Print(Form("%snoise%s.png"     , fPathOut, fSuffix));
+        c_threshmap->cd();
+        c_threshmap->Print(Form("%sthresholdmap%s.png", fPathOut, fSuffix));
+        c_noisemap->cd();
+        c_noisemap ->Print(Form("%snoisemap%s.png"     , fPathOut, fSuffix));
     }
 
     if (WriteToFile) {
