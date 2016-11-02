@@ -218,7 +218,7 @@ void TReadoutBoardDAQ::DAQTrigger() {
 
   fStatusTrigger = 0;
   int evtbuffer_size = 0;
-  
+
   if (fBoardConfig->GetTriggerEnable() && !fBoardConfigDAQ->GetPulseEnable()) { // TRIGGERING
     std::cout << "Number of triggers: " << fNTriggersTotal << std::endl;
     int nTriggerTrains = fNTriggersTotal/fMaxNTriggersTrain;
@@ -392,7 +392,7 @@ void TReadoutBoardDAQ::DAQReadData() {
     
   }
   else if (fBoardConfigDAQ->GetPktBasedROEnable() == true) { // packet based
-    std::cout << " --> packet based readout" << std::endl;
+    //std::cout << " --> packet based readout" << std::endl;
     // each packet may contain more or less than one event. the following code split raw data into events and writes it into fEventBuffer
     evt_length = 0; // no data read so far
     bool foundMagicWord = false;
@@ -442,7 +442,7 @@ void TReadoutBoardDAQ::DAQReadData() {
                   //  std::cout << std::hex << (int)fRawBuffer[iByte] << std::dec;
                   //}
                   //std::cout << std::endl;
-                  std::cout << "Stop-trigger marker received after " << fEvtCnt << " events" << std::endl;
+                  std::cout << "Stop-trigger marker received." << std::endl;
                   data_evt.clear();
                   //return -3;
                   fStatusReadData = -3;
@@ -533,13 +533,13 @@ void TReadoutBoardDAQ::DAQReadData() {
       }
 
       fEvtCnt++;
-      ///std::cout << "------------------------------------------------------" << std::endl;
-      ///std::cout << "\t evt: " << fEvtCnt << std::endl;
-      ///std::cout << "\t evt length: " << evt_length << std::endl;
-      ///std::cout << "\t RawBuffer length: " << fRawBuffer.size() << std::endl;
+      //std::cout << "------------------------------------------------------" << std::endl;
+      //std::cout << "\t evt: " << fEvtCnt << std::endl;
+      //std::cout << "\t evt length: " << evt_length << std::endl;
+      //std::cout << "\t RawBuffer length: " << fRawBuffer.size() << std::endl;
       for (int i=0; i<evt_length; ++i) {
-          data_evt.push_back(fRawBuffer.front());
-          fRawBuffer.pop_front();
+        data_evt.push_back(fRawBuffer.front());
+        fRawBuffer.pop_front();
       }
       fMtx.lock();
       fEventBuffer.push_back(data_evt);
@@ -599,14 +599,20 @@ int TReadoutBoardDAQ::Trigger (int nTriggers) // open threads for triggering and
 
   // launch trigger and readdata in threads:
   //std::cout << "starting threads.." << std::endl;
-  fThreadTrigger  = std::thread (&TReadoutBoardDAQ::DAQTrigger,   this);
+  if (nTriggers>=0) {
+    fThreadTrigger  = std::thread (&TReadoutBoardDAQ::DAQTrigger,   this);
+  }
+  else {
+	fTrigCnt        = -nTriggers;
+	fNTriggersTotal = -nTriggers;
+  }
   //usleep(10000);
   //sleep(1);
   fThreadReadData = std::thread (&TReadoutBoardDAQ::DAQReadData,  this);
   //fThreadTrigger  = std::thread ([this] { DAQTrigger(); });
   //fThreadReadData = std::thread ([this] { DAQReadData(); });
 
-  fThreadTrigger.join();  
+  if (nTriggers>=0) fThreadTrigger.join();
   fThreadReadData.join();
   //std::cout << "joined threads.." << std::endl;
 

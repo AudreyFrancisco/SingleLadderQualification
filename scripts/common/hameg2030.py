@@ -57,7 +57,7 @@ def measureCurr(sour):
 def init2030(hameg, i_max):
     hameg.write("*IDN?\n")
     idn = hameg.readline()
-    if not ("HAMEG" and "HMP2030") in idn:
+    if not ("HAMEG") in idn:
         sys.stderr.write("WRONG DEVICE: %s" % idn)
         return
     #print idn

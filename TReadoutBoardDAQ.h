@@ -207,6 +207,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   //// methods related to data readout
   //---------------------------------------------------------
   int GetEventBufferLength();
+  int GetStatusReadData() { return fStatusReadData; }
 
   // methods related to modules of Cagliari DAQ board
   //--------------------------------------

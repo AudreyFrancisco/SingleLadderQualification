@@ -246,6 +246,8 @@ class TBoardConfigDAQ : public TBoardConfig {
   void SetAutoShutdownTime(int duration)   {fAutoShutdownTime   = duration;};
   void SetPORDisable(bool disable)         {fPORDisable         = disable;};
 
+  void SetStrobePulseSeq(int strobePulseSeq) {fStrobePulseSeq   = strobePulseSeq;};
+
   // ID Module
 
   // SOFTRESET Module
