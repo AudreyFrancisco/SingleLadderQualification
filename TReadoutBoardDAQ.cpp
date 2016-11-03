@@ -704,11 +704,20 @@ int TReadoutBoardDAQ::CurrentToADC (int current)
 }
 
 
-float TReadoutBoardDAQ::ADCToCurrent (int value)
+float TReadoutBoardDAQ::ADCToSupplyCurrent (int value)
 {
   float Result = (float) value * 3.3 / 4096.;   // reference voltage 3.3 V, full range 4096
   Result /= 0.1;    // 0.1 Ohm resistor
   Result *= 10;     // / 100 (gain) * 1000 (conversion to mA);
+  return Result;
+}
+
+
+float TReadoutBoardDAQ::ADCToDacmonCurrent (int value)
+{
+  float Result = (float) value * (1e9 * 3.3);   // reference voltage 3.3 V, conversion to nA
+  Result /= (5100 * 4096 * 6);                  // 5.1 kOhm res., ADC-range 4096, amplifier gain 6
+  Result /= 10;                                 // gain of monitoring buffer
   return Result;
 }
 
@@ -922,7 +931,7 @@ float TReadoutBoardDAQ::ReadAnalogI()
   ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA2, ReadValue);
   int Value = (ReadValue >> 12) & 0xfff;
 
-  return ADCToCurrent(Value);
+  return ADCToSupplyCurrent(Value);
 }
 
 float TReadoutBoardDAQ::ReadDigitalI() 
@@ -931,7 +940,7 @@ float TReadoutBoardDAQ::ReadDigitalI()
   ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA1, ReadValue);
   int Value = (ReadValue >> 12) & 0xfff;
 
-  return ADCToCurrent(Value);
+  return ADCToSupplyCurrent(Value);
 }
 
 float TReadoutBoardDAQ::ReadIoI() 
@@ -940,7 +949,7 @@ float TReadoutBoardDAQ::ReadIoI()
   ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA2, ReadValue);
   int Value = (ReadValue) & 0xfff;
 
-  return ADCToCurrent(Value);
+  return ADCToSupplyCurrent(Value);
 }
 
 float TReadoutBoardDAQ::ReadMonV() 
@@ -953,7 +962,6 @@ float TReadoutBoardDAQ::ReadMonV()
   Voltage *= 3.3;
   Voltage /= (1.8 * 4096);
   return Voltage;
-  //  return ADCToCurrent(Value);
 }
 
 
@@ -963,7 +971,7 @@ float TReadoutBoardDAQ::ReadMonI()
   ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA1, ReadValue);
   int Value = (ReadValue) & 0xfff;
 
-  return ADCToCurrent(Value);
+  return ADCToDacmonCurrent(Value);
 }
 
 

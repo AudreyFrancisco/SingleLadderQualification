@@ -195,9 +195,10 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
 
   void ReadAllRegisters ();
 
-  int   CurrentToADC      (int current);
-  float ADCToCurrent      (int value);
-  float ADCToTemperature  (int value);
+  int   CurrentToADC       (int current);
+  float ADCToSupplyCurrent (int value);
+  float ADCToDacmonCurrent (int value);
+  float ADCToTemperature   (int value);
 
   bool ReadMonitorRegisters();
   bool ReadMonitorReadoutRegister();
