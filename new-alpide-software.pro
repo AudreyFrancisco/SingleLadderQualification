@@ -79,13 +79,13 @@ INCLUDEPATH = \
     $$PWD/MosaicSrc
 
 macx: {
-    message("Compiling for OSX")
+    message("Compiling new-alpide-software for OSX")
     INCLUDEPATH += /usr/local/Cellar/libusb/1.0.20/include/
     LIBS += -L/usr/local/lib -lusb-1.0
 }
 
 unix {
-    message("Compiling for unix")
+    message("Compiling new-alpide-software for unix")
     target.path = /User/kuijer/local/lib
     INSTALLS += target
 }

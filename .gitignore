@@ -5,3 +5,7 @@
 runTest
 test_*
 *~
+# Qt5 local project files
+*.pro.user
+.qmake.stash
+
