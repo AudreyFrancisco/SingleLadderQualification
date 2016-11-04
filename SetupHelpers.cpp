@@ -25,7 +25,7 @@ int initSetupOB() {
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) fConfig->GetBoardConfig(0);
 
   boardConfig->SetInvertedData (true);
-  boardConfig->SetLowSpeedMode (true);
+  boardConfig->SetSpeedMode    (Mosaic::RCV_RATE_400);
 
   fBoards.push_back (new TReadoutBoardMOSAIC(boardConfig));
 
@@ -130,7 +130,7 @@ int initSetupIB() {
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) fConfig->GetBoardConfig(0);
 
   boardConfig->SetInvertedData (false);
-  boardConfig->SetLowSpeedMode (false);
+  boardConfig->SetSpeedMode    (Mosaic::RCV_RATE_1200);
 
   fBoards.push_back (new TReadoutBoardMOSAIC(boardConfig));
 
@@ -154,7 +154,7 @@ int initSetupSingleMosaic() {
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) fConfig->GetBoardConfig(0);
 
   boardConfig->SetInvertedData (false);
-  boardConfig->SetLowSpeedMode (true);
+  boardConfig->SetSpeedMode    (Mosaic::RCV_RATE_400);
 
   fBoards.push_back (new TReadoutBoardMOSAIC(boardConfig));
 

@@ -69,26 +69,39 @@ void Alpide3rcv::addGetReg(uint16_t address, uint32_t *val)
 	wbb->addRead(baseAddress+address, val);
 }
 
-//
-//	Set mlow speed mode
-//
-void Alpide3rcv::addSetLowSpeed(bool sp)
+
+void Alpide3rcv::addSetRcvSpeed(Mosaic::TReceiverSpeed sp)
 {
-	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_LOWSPEED, sp ? OPMODE_LOWSPEED : 0);
+	int regSet;
+
+	switch (sp){
+		case Mosaic::RCV_RATE_400:
+			regSet = OPMODE_RATE_400;
+			break;
+
+		case Mosaic::RCV_RATE_600:
+			regSet = OPMODE_RATE_600;
+			break;
+
+		case Mosaic::RCV_RATE_1200:
+			regSet = OPMODE_RATE_1200;
+			break;
+	}
+	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_RATE_MASK, regSet);
 }
 
 
 void Alpide3rcv::addSetInvert (bool inv)
 {
-	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_INVERT, inv ? OPMODE_INVERT : 0);
+	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_INVERT_POLARITY, inv ? OPMODE_INVERT_POLARITY : 0);
 }
 
 //
 // Disable (or enable) the receiver 
 //
-void Alpide3rcv::addDisable(bool d)
+void Alpide3rcv::addEnable(bool d)
 {
-	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_RCVDISABLE, d ? OPMODE_RCVDISABLE : 0);
+	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_RCVENABLE, d ? OPMODE_RCVENABLE : 0);
 }
 
 //

@@ -34,6 +34,7 @@
 #include "MosaicSrc/alpide3rcv.h"
 #include "MosaicSrc/i2csyspll.h"
 
+
 // Constant Definitions
 #define DEFAULT_PACKET_SIZE 		1400
 #define DEFAULT_UDP_PORT			2000
@@ -188,7 +189,7 @@ private:
 
 	void setupPLL() { mSysPLL->setup(); return;};
 	void setPhase(int APhase, int ACii = 0) { controlInterface[ACii]->setPhase(APhase); controlInterface[ACii]->addSendCmd(ControlInterface::OPCODE_GRST); controlInterface[ACii]->execute();return;};
-	void setSpeedMode(bool AHSpeed, int Aindex = -1);
+	void setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex = -1);
         void setInverted (bool AInverted, int Aindex = -1);
 	void enableExternalTrigger(bool isEnabled, bool levelSensitive = 0) { mTriggerControl->addEnableExtTrigger(isEnabled, levelSensitive);return;};
 	uint32_t buf2ui(unsigned char *buf);

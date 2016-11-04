@@ -330,7 +330,7 @@ void TReadoutBoardMOSAIC::SplitBuffer(long closedDataCounter, unsigned char *hea
     while ((dataByte < dr->dataBufferUsed) && (!chipEnd)) {
       dataType   = AlpideDecoder::GetDataType (dr->dataBuffer[dataByte]);
       wordLength = AlpideDecoder::GetWordLength (dataType);      
-      if (chipStart && (dr->dataBuffer [dataByte] == 0x0)) {  // get rid of 0x00's between chip events 
+      if (chipStart && ((dr->dataBuffer [dataByte] == 0x0) || (dr->dataBuffer[dataByte] == 0xff))) {  // get rid of 0x00's between chip events 
         dataByte ++;
         continue;
       }
@@ -618,7 +618,7 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 	for(int i=1; i<=MAX_MOSAICTRANRECV;i++) {
 		dr =(MDataSave *) new ForwardReceiver();
 		addDataReceiver(i, (MDataReceiver *)dr);
-		a3rcv[i-1]->addDisable(true);
+		a3rcv[i-1]->addEnable(false);
 	}
 
 	// Trigger control
@@ -631,7 +631,7 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
   	}
         for(int i=0;i<MAX_MOSAICCTRLINT;i++) setPhase(config->GetCtrlInterfacePhase(),i);  // set the Phase shift on the line
 
-	setSpeedMode (config->IsLowSpeedMode(), -1);// set 400 MHz mode
+	setSpeedMode (config->GetSpeedMode());// set 400 MHz mode
 	setInverted  (config->IsInverted(),     -1);// set 400 MHz mode
 
 	pulser->run(0);
@@ -700,12 +700,12 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
     if(dataLink >= 0) { // Enable the data receiver
       if (fConfig->GetChipConfigById(fChipPositions.at(i).chipId)->IsEnabled()) {
         std::cout << "!!!!!! ENabling receiver " << dataLink << std::endl;
-        a3rcv[dataLink]->addDisable(false);
+        a3rcv[dataLink]->addEnable(true);
         Used[dataLink] = true;
       }
       else if (!Used[dataLink]){
         std::cout << "!!!!!! DISabling receiver " << dataLink << std::endl;
-        a3rcv[dataLink]->addDisable(true);
+        a3rcv[dataLink]->addEnable(false);
       }
     }
   }
@@ -808,14 +808,14 @@ ssize_t TReadoutBoardMOSAIC::readTCPData(void *buffer, size_t count, int timeout
 }
 // =========================================================================================
 
-void TReadoutBoardMOSAIC::setSpeedMode(bool ALSpeed, int Aindex)
+void TReadoutBoardMOSAIC::setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex)
 {
 	int st,en;
 	Aindex = -1;
 	st = (Aindex != -1) ? Aindex : 0;
 	en = (Aindex != -1) ? Aindex+1 : MAX_MOSAICTRANRECV;
 	for(int i=st;i<en;i++) {
-		a3rcv[i]->addSetLowSpeed(ALSpeed);
+		a3rcv[i]->addSetRcvSpeed(ASpeed);
 		a3rcv[i]->execute();
 	}
 	return;

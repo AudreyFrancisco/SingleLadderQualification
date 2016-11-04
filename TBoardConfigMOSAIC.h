@@ -13,6 +13,7 @@
 #define BOARDCONFIGMOSAIC_H
 
 #include "TBoardConfig.h"
+#include "MosaicSrc/alpide3rcv.h"
 #include <stdio.h>
 
 class TBoardConfigMOSAIC : public TBoardConfig {
@@ -26,12 +27,12 @@ protected:
 	char IPAddress[30];
 	uint16_t TCPPort;
 
-	uint16_t ControlInterfacePhase;
-	uint32_t RunCtrlAFThreshold;
-	uint16_t RunCtrlLatMode;
-	uint32_t RunCtrlTimeout;
-	bool LowSpeedMode;
-        bool Inverted;
+	uint16_t                ControlInterfacePhase;
+	uint32_t                RunCtrlAFThreshold;
+	uint16_t                RunCtrlLatMode;
+	uint32_t                RunCtrlTimeout;
+	Mosaic::TReceiverSpeed  SpeedMode;
+    bool                    Inverted;
 
 	uint32_t pollDataTimeout;
 
@@ -48,7 +49,7 @@ public:
 	uint32_t GetCtrlAFThreshold    () {return(RunCtrlAFThreshold);}
 	uint16_t GetCtrlLatMode        () {return(RunCtrlLatMode);}
 	uint32_t GetCtrlTimeout        () {return(RunCtrlTimeout);}
-	bool     IsLowSpeedMode        () { return(LowSpeedMode);}
+    Mosaic::TReceiverSpeed     GetSpeedMode        () { return(SpeedMode);}
 	bool     IsInverted            () { return(Inverted);}
 	uint32_t GetPollingDataTimeout () {return(pollDataTimeout);}
 
@@ -60,9 +61,9 @@ public:
 	void SetCtrlAFThreshold    (uint32_t ACtrlAFThreshold)     { RunCtrlAFThreshold = ACtrlAFThreshold;}
 	void SetCtrlLatMode        (uint16_t ARunCtrlLatencyMode)  { RunCtrlLatMode = ARunCtrlLatencyMode;}
 	void SetCtrlTimeout        (uint32_t ARunCtrlTimeout)      { RunCtrlTimeout = ARunCtrlTimeout;}
-	void SetLowSpeedMode       (bool     IsLowSpeedMode)       { LowSpeedMode = IsLowSpeedMode;}
-        void SetInvertedData       (bool     IsInverted)           { Inverted = IsInverted;};
-	void SetPollingDataTimeout (uint32_t APollDataTimeout)     { pollDataTimeout = APollDataTimeout;} 
+	void SetSpeedMode          (Mosaic::TReceiverSpeed ASpeedMode) { SpeedMode = ASpeedMode; }
+    void SetInvertedData       (bool     IsInverted)               { Inverted = IsInverted;};
+	void SetPollingDataTimeout (uint32_t APollDataTimeout)         { pollDataTimeout = APollDataTimeout;}
 
 };
 

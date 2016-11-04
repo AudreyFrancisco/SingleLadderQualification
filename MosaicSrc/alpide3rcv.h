@@ -35,6 +35,14 @@
 #include "mwbbslave.h"
 
 
+namespace Mosaic {
+  typedef enum rcvRate_e {			// Receiver data rate (in Mbps)
+    RCV_RATE_400,
+    RCV_RATE_600,
+    RCV_RATE_1200
+  }  TReceiverSpeed;
+}
+
 
 class Alpide3rcv: public MWbbSlave
 {
@@ -45,8 +53,8 @@ public:
 	void setBusAddress(WishboneBus *wbbPtr, uint32_t baseAddress);
 	void addSetReg(uint16_t address, uint16_t val);
 	void addGetReg(uint16_t address, uint32_t *val);
-	void addSetLowSpeed(bool sp);
-	void addDisable(bool d);
+	void addSetRcvSpeed(Mosaic::TReceiverSpeed sp);
+	void addEnable(bool d);
         void addSetInvert(bool inv);
 	void addSetRDPReg(uint16_t address, uint16_t val);
 	void addGetRDPReg(uint16_t address, uint32_t *val);
@@ -61,12 +69,12 @@ private:					// WBB Slave registers map
 
 public:
 	enum opModeBits_e {
-		OPMODE_LOWSPEED		= (1<<0),
-		OPMODE_RCVDISABLE	= (1<<1),
-		OPMODE_INVERT   	= (1<<2)
-	};
-
-
+		OPMODE_RCVENABLE			= (1<<0),
+		OPMODE_RATE_MASK			= (0x03<<1),
+		OPMODE_RATE_1200			= (0<<1),
+		OPMODE_RATE_600				= (0x01<<1),
+		OPMODE_RATE_400				= (0x02<<1),
+		OPMODE_INVERT_POLARITY		= (1<<3)	};
 
 };
 
