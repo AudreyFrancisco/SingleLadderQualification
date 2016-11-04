@@ -15,6 +15,7 @@
 
 
 #include <unistd.h>
+#include <string.h>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -41,14 +42,17 @@ int myPulseDelay   = 50;
 int myNTriggers    = 100000;
 //int myNTriggers    = 100;
 
+int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
-int HitData     [512][1024];
+int HitData     [16][512][1024];
 
 
 void ClearHitData() {
-  for (int icol = 0; icol < 512; icol ++) {
-    for (int iaddr = 0; iaddr < 1024; iaddr ++) {
-      HitData[icol][iaddr] = 0;
+  for (int ichip = 0; ichip < 16; ichip ++) {
+    for (int icol = 0; icol < 512; icol ++) {
+      for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+        HitData[ichip][icol][iaddr] = 0;
+      }
     }
   }
 }
@@ -56,26 +60,63 @@ void ClearHitData() {
 
 void CopyHitData(std::vector <TPixHit> *Hits) {
   for (int ihit = 0; ihit < Hits->size(); ihit ++) {
-    HitData[Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address] ++;
+	int chipId  = Hits->at(ihit).chipId;
+	int dcol    = Hits->at(ihit).dcol;
+	int region  = Hits->at(ihit).region;
+	int address = Hits->at(ihit).address;
+	if ((chipId < 0) || (dcol < 0) || (region < 0) || (address < 0)) {
+	  std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
+	}
+	else {
+	  HitData[chipId][dcol + region * 16][address] ++;
+	}
   }
   Hits->clear();
 }
 
 
-void WriteDataToFile (const char *fName, bool Recreate) {
-  FILE *fp;
-  bool  HasData;
-  if (Recreate) fp = fopen(fName, "w");
-  else          fp = fopen(fName, "a");
-
+bool HasData(int chipId) {
   for (int icol = 0; icol < 512; icol ++) {
     for (int iaddr = 0; iaddr < 1024; iaddr ++) {
-      if (HitData[icol][iaddr] > 0) {
-        fprintf(fp, "%d %d %d\n", icol, iaddr, HitData[icol][iaddr]);
-      }
+      if (HitData[chipId][icol][iaddr] > 0) return true;
     }
   }
-  fclose (fp);
+  return false;
+}
+
+
+void WriteDataToFile (const char *fName, bool Recreate) {
+  char  fNameChip[100];
+  FILE *fp;
+
+  char  fNameTemp[100];
+  sprintf(fNameTemp,"%s", fName);
+  strtok (fNameTemp, ".");
+
+  for (int ichip = 0; ichip < fChips.size(); ichip ++) {
+    int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
+    if (!HasData(chipId)) continue;  // write files only for chips with data
+    if (fChips.size() > 1) {
+      sprintf(fNameChip, "%s_Chip%d.dat", fNameTemp, chipId);
+    }
+    else {
+      sprintf(fNameChip, "%s.dat", fNameTemp);
+    }
+    std::cout << "Writing data to file "<< fNameChip <<std::endl;
+
+
+    if (Recreate) fp = fopen(fNameChip, "w");
+    else          fp = fopen(fNameChip, "a");
+
+    for (int icol = 0; icol < 512; icol ++) {
+      for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+        if (HitData[ichip][icol][iaddr] > 0) {
+          fprintf(fp, "%d %d %d\n", icol, iaddr, HitData[ichip][icol][iaddr]);
+        }
+      }
+    }
+    if (fp) fclose (fp);
+  }
 }
 
 
@@ -125,7 +166,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 
 void scan() {   
   unsigned char         buffer[1024*4000]; 
-  int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
+  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -157,7 +198,7 @@ void scan() {
       fBoards.at(0)->Trigger(nTrigsThisTrain);
 
       int itrg = 0;
-      while(itrg < nTrigsThisTrain) {
+      while(itrg < nTrigsThisTrain * fEnabled) {
         if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
           usleep(100);
           continue;
@@ -165,11 +206,17 @@ void scan() {
         else {
           // decode DAQboard event
           BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+          if (boardInfo.eoeCount) {
+            nClosedEvents = boardInfo.eoeCount;
+          }
+          else {
+   	        nClosedEvents = 1;
+          }
           // decode Chip event
           int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
           AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
 
-          itrg++;
+          itrg+=nClosedEvents;
         }
       } 
       //std::cout << "Number of hits: " << Hits->size() << std::endl;
@@ -199,6 +246,8 @@ int main() {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
     for (int i = 0; i < fChips.size(); i ++) {
+      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+      fEnabled ++;
       configureChip (fChips.at(i));
     }
 
@@ -219,16 +268,13 @@ int main() {
     sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
     WriteDataToFile (fName, true);
 
-    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
-    WriteScanConfig (fName, fChips.at(0), myDAQBoard);
-
     if (myDAQBoard) {
+      sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+      WriteScanConfig (fName, fChips.at(0), myDAQBoard);
       myDAQBoard->PowerOff();
       delete myDAQBoard;
     }
   }
 
-  //sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
-  //WriteDataToFile (fName, true);
   return 0;
 }
