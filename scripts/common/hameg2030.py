@@ -72,6 +72,7 @@ def init2030(hameg, i_max):
     hameg.write("FUSE on\n")
     hameg.write("SOUR:VOLT 5.0\n")
     hameg.write("SOUR:CURR %f\n" % i_max[0])
+    time.sleep(0.1);
     hameg.write("OUTP ON\n")
     # CH2
     hameg.write("INST OUT2\n");
@@ -81,6 +82,7 @@ def init2030(hameg, i_max):
     hameg.write("FUSE on\n")
     hameg.write("SOUR:VOLT 0.0\n")
     hameg.write("SOUR:CURR %f\n" % i_max[1])
+    time.sleep(0.1);
     hameg.write("OUTP OFF\n")
     # CH3
     hameg.write("INST OUT3\n");
@@ -90,6 +92,7 @@ def init2030(hameg, i_max):
     hameg.write("FUSE on\n")
     hameg.write("SOUR:VOLT 0.0\n")
     hameg.write("SOUR:CURR %f\n" % i_max[2])
+    time.sleep(0.1);
     hameg.write("OUTP ON\n")
 
 def main():

@@ -51,22 +51,23 @@ TChipConfig::TChipConfig (int chipId, const char *fName) {
 
 void TChipConfig::InitParamMap () 
 {
-  fSettings["CHIPID"]  = &fChipId;
-  fSettings["ENABLED"] = &fEnabled;
-  fSettings["ITHR"]    = &fITHR;
-  fSettings["IDB"]     = &fIDB;
-  fSettings["VCASN"]   = &fVCASN;
-  fSettings["VCASN2"]  = &fVCASN2;
-  fSettings["VCLIP"]   = &fVCLIP;
-  fSettings["VRESETD"] = &fVRESETD;
-  fSettings["IBIAS"]   = &fIBIAS;
-  fSettings["VCASP"]   = &fVCASP;
-  fSettings["VPULSEL"] = &fVPULSEL;
-  fSettings["VPULSEH"] = &fVPULSEH;
-  fSettings["VRESETP"] = &fVRESETP;
-  fSettings["VTEMP"]   = &fVTEMP;
-  fSettings["IAUX2"]   = &fIAUX2;
-  fSettings["IRESET"]  = &fIRESET;
+  fSettings["CHIPID"]         = &fChipId;
+  fSettings["ENABLED"]        = &fEnabled;
+  fSettings["ITHR"]           = &fITHR;
+  fSettings["IDB"]            = &fIDB;
+  fSettings["VCASN"]          = &fVCASN;
+  fSettings["VCASN2"]         = &fVCASN2;
+  fSettings["VCLIP"]          = &fVCLIP;
+  fSettings["VRESETD"]        = &fVRESETD;
+  fSettings["IBIAS"]          = &fIBIAS;
+  fSettings["VCASP"]          = &fVCASP;
+  fSettings["VPULSEL"]        = &fVPULSEL;
+  fSettings["VPULSEH"]        = &fVPULSEH;
+  fSettings["VRESETP"]        = &fVRESETP;
+  fSettings["VTEMP"]          = &fVTEMP;
+  fSettings["IAUX2"]          = &fIAUX2;
+  fSettings["IRESET"]         = &fIRESET;
+  fSettings["STROBEDURATION"] = &fStrobeDuration;
 }
 
 

@@ -26,19 +26,12 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
-int myVCASN   = 57;
-int myITHR    = 51;
-int myVCASN2  = 64;
-int myVCLIP   = 0;
-int myVRESETD = 147;
-
-int myStrobeLength = 20;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;
 int myPulseLength  = 500;
 
 int myPulseDelay   = 50;
-int myNTriggers    = 1000000;
-//int myNTriggers    = 100000;
+//int myNTriggers    = 1000000;
+int myNTriggers    = 100000;
 //int myNTriggers    = 100;
 
 
@@ -82,7 +75,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
 // initialisation of Fromu
 int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x0);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
-  chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
+  chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetStrobeDuration());  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
   //  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length
 }
@@ -129,7 +122,7 @@ void scan() {
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
-  int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 100;
+  int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 1000;
 
   nTrains = myNTriggers / nTrigsPerTrain;
   nRest   = myNTriggers % nTrigsPerTrain;
@@ -236,7 +229,7 @@ int main() {
 
     scan();
 
-    sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
+    sprintf(fName, "Data/NoiseOccupancyExt_%s.dat", Suffix);
     WriteDataToFile (fName, true);
 
     sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
