@@ -13,6 +13,7 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
   const int  IBIAS   = 64;
   const int  VCASP   = 86;
 
+  const bool READOUT_MODE           = false;// triggered
   const bool ENABLE_CLUSTERING      = true;
   const int  MATRIX_READOUT_SPEED   = 1;
   const int  SERIAL_LINK_SPEED      = 3;
@@ -63,6 +64,7 @@ class TChipConfig {
   int  fIAUX2;
   int  fIRESET;
   // Control register settings
+  bool fReadoutMode;        // false = triggered, true = continuous (influences busy handling)
   bool fEnableClustering;
   int  fMatrixReadoutSpeed;
   int  fSerialLinkSpeed;
@@ -98,7 +100,8 @@ class TChipConfig {
   int  GetChipId            () {return fChipId;};
   bool IsEnabled            () {return (fEnabled != 0);};
   void SetEnable            (bool Enabled) {fEnabled = Enabled?1:0;};
-  
+
+  bool GetReadoutMode          () {return fReadoutMode;};
   bool GetEnableClustering     () {return fEnableClustering;};
   int  GetMatrixReadoutSpeed   () {return fMatrixReadoutSpeed;};
   int  GetSerialLinkSpeed      () {return fSerialLinkSpeed;};

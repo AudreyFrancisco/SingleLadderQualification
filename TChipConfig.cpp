@@ -17,6 +17,7 @@ TChipConfig::TChipConfig (int chipId, const char *fName) {
   fITHR    = ITHR;
   fIBIAS   = IBIAS;
 
+  fReadoutMode         = READOUT_MODE;
   fEnableClustering    = ENABLE_CLUSTERING;
   fMatrixReadoutSpeed  = MATRIX_READOUT_SPEED;
   fSerialLinkSpeed     = SERIAL_LINK_SPEED;
@@ -68,6 +69,7 @@ void TChipConfig::InitParamMap ()
   fSettings["IAUX2"]          = &fIAUX2;
   fSettings["IRESET"]         = &fIRESET;
   fSettings["STROBEDURATION"] = &fStrobeDuration;
+  fSettings["READOUTMODE"]    = (int*)&fReadoutMode;
 }
 
 

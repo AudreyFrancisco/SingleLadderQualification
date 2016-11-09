@@ -94,7 +94,8 @@ int configureChip(TAlpide *chip) {
   configureFromu(chip);
   configureMask (chip);
 
-  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
+  int readout_mode = (chip->GetConfig()->GetReadoutMode()) ? 0x2 : 0x1;
+  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x20 | (readout_mode & 0x3)); // strobed readout mode
 }
 
 void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {

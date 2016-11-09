@@ -12,8 +12,8 @@ V_RESETD_LIST=( 147 170 170 ) # in DAC
 # how many V_CASN values to process per back-bias voltage
 V_CASN_PER_VBB=$(echo "${#V_CASN_LIST[@]} / ${#VBB_LIST[@]}" | bc)
 
-MODE_LIST=( A B ) # chip readout mode
-STROBEB_LIST=( 4 0 ) # continuous integration: 0,
+MODE_LIST=( 0 1 ) # chip readout mode (0=triggered, 1=continuous)
+STROBEB_LIST=( 4 20 0 ) # continuous integration: 0,
                      # different from 0: multiple of 25ns clock cycles
 
 TRG_FREQ_LIST=( 20000 50000 100000 200000 500000 1000000 ) # in Hz
@@ -148,9 +148,9 @@ VCASP   86
 IBIAS 64
 
 STROBEDURATION ${STROBEB}
+READOUTMODE ${MODE}
 
 EOF
-                        # READOUTMODE
 
                         mv Config.cfg ../
 
