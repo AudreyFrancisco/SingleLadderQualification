@@ -136,7 +136,7 @@ Bool_t NoiseOccupancyRawToHisto(TString file_path) {
         cout << "sector " << i_sec << endl; 
         h2_hitmap->GetXaxis()->SetRange(i_sec*(1024/NSEC)+1, (i_sec+1)*(1024/NSEC)+1);
         int_hits = h2_hitmap->Integral();
-        for (Int_t i_pix=0; i_pix<100; i_pix++) {
+        for (Int_t i_pix=0; i_pix<1000; i_pix++) {
             noise_occ = int_hits/n_trg/(1024./NSEC*512.);
             h_noise_occ[i_sec]->SetBinContent(i_pix+1, noise_occ);
     
@@ -162,8 +162,16 @@ Bool_t NoiseOccupancyRawToHisto(TString file_path) {
 
     cout << "Done!" << endl;
 
-    c1->Print(Form("%s/hitmap%s.png", fPathOut, fSuffix)); 
-    c2->Print(Form("%s/noise_occ%s.pdf", fPathOut, fSuffix)); 
+    c1->Print(Form("%s/hitmap%s.png", fPathOut, fSuffix));
+    c1->Print(Form("%s/hitmap%s.pdf", fPathOut, fSuffix));
+    c2->Print(Form("%s/noise_occ%s.png", fPathOut, fSuffix));
+    c2->Print(Form("%s/noise_occ%s.pdf", fPathOut, fSuffix));
+
+    ofstream fhr_file(Form("%s/fhr.txt",fPathOut));
+    for (int iExcl=0; iExcl<1000; ++iExcl) {
+        fhr_file << iExcl << "\t" << h_noise_occ[0]->GetBinContent(iExcl+1) << endl;
+    }
+    fhr_file.close();
 
     //delete h2_hitmap;
     f_out->Close();

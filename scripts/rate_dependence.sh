@@ -167,8 +167,9 @@ EOF
                         cd ${ROOT_DIR}/../
                         ./test_noiseocc_ext  | tee -a $LOGFILE
 
-                        cp -v Data/$(ls -1tr Data | grep NoiseOccupancyExt | tail -n 1) ${SUBFOLDER}
-                        cp -v Data/$(ls -1tr Data | grep ScanConfig | tail -n 1) ${SUBFOLDER}
+                        # moving the data
+                        mv -v Data/$(ls -1tr Data | grep NoiseOccupancyExt | tail -n 1) ${SUBFOLDER}
+                        mv -v Data/$(ls -1tr Data | grep ScanConfig | tail -n 1) ${SUBFOLDER}
                     done
                 done
             done
