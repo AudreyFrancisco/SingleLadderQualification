@@ -200,10 +200,10 @@ void AlpideConfig::WriteControlReg (TAlpide *chip, Alpide::TChipMode chipMode, T
 void AlpideConfig::BaseConfigPLL (TAlpide *chip) 
 {
   uint16_t Phase      = 8;  // 4bit Value, default 8
-  uint16_t Stages     = 1; // 0 = 3 stages, 1 = 4,  3 = 5 (typical 4)
+  uint16_t Stages     = 0; // 0 = 3 stages, 1 = 4,  3 = 5 (typical 4)
   uint16_t ChargePump = 8;
   uint16_t Driver     = 8;
-  uint16_t Preemp     = 8;
+  uint16_t Preemp     = 15;
   uint16_t Value;
 
   Value = (Stages & 0x3) | 0x4 | 0x8 | ((Phase & 0xf) << 4);   // 0x4: narrow bandwidth, 0x8: PLL off
