@@ -34,6 +34,15 @@
 #include <stdint.h>
 #include "mwbbslave.h"
 
+namespace Mosaic {
+  typedef enum rcvRate_e {			// Receiver data rate (in Mbps)
+    RCV_RATE_400,
+    RCV_RATE_600,
+    RCV_RATE_1200
+  }  TReceiverSpeed;
+}
+
+
 class MRunControl : public MWbbSlave
 {
 public:
@@ -47,6 +56,7 @@ public:
 	void setLatency(uint8_t mode, uint32_t d);
 	void getLatency(uint8_t *mode, uint32_t *d);
 	void getStatus(uint32_t *st);
+        void setSpeed (Mosaic::TReceiverSpeed ASpeed);
 	void startRun();
 	void stopRun();
 
@@ -72,7 +82,11 @@ private:					// WBB Slave registers map
 public:
 	enum configBits_e {
 		CFG_EXTCLOCK_SEL_BIT	= (1<<0),		// 0: internal clock - 1: external clock
-		CFG_CLOCK_20MHZ_BIT		= (1<<1)		// 0: 40 MHz clock	- 1: 20 MHz clock	
+		CFG_CLOCK_20MHZ_BIT		= (1<<1),		// 0: 40 MHz clock	- 1: 20 MHz clock	
+		CFG_RATE_MASK			= (0x03<<2),
+		CFG_RATE_1200			= (0<<2),
+		CFG_RATE_600			= (0x01<<2),
+		CFG_RATE_400			= (0x02<<2)
 	};
 
 	enum latencyMode_e {

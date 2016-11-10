@@ -29,6 +29,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 #include "mruncontrol.h"
 
 
@@ -99,6 +100,30 @@ void MRunControl::getStatus(uint32_t *st)
 {
 	wbb->addRead(baseAddress+regStatus, st);
 	wbb->execute();
+}
+
+
+void MRunControl::setSpeed(Mosaic::TReceiverSpeed ASpeed) 
+{
+	int regSet = 0;
+
+	switch (ASpeed){
+	case Mosaic::RCV_RATE_400:
+			regSet = CFG_RATE_400;
+			break;
+
+	case Mosaic::RCV_RATE_600:
+			regSet = CFG_RATE_600;
+			break;
+
+	case Mosaic::RCV_RATE_1200:
+			regSet = CFG_RATE_1200;
+			break;
+	}
+	std::cout << "Writing " << std::hex << regSet << std::dec << " to config register" << std::endl;
+	wbb->addRMWbits(baseAddress+regConfig, ~CFG_RATE_MASK, regSet);
+	wbb->execute();
+
 }
 
 

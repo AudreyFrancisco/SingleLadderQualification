@@ -70,27 +70,6 @@ void Alpide3rcv::addGetReg(uint16_t address, uint32_t *val)
 }
 
 
-void Alpide3rcv::addSetRcvSpeed(Mosaic::TReceiverSpeed sp)
-{
-	int regSet;
-
-	switch (sp){
-		case Mosaic::RCV_RATE_400:
-			regSet = OPMODE_RATE_400;
-			break;
-
-		case Mosaic::RCV_RATE_600:
-			regSet = OPMODE_RATE_600;
-			break;
-
-		case Mosaic::RCV_RATE_1200:
-			regSet = OPMODE_RATE_1200;
-			break;
-	}
-	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_RATE_MASK, regSet);
-}
-
-
 void Alpide3rcv::addSetInvert (bool inv)
 {
 	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_INVERT_POLARITY, inv ? OPMODE_INVERT_POLARITY : 0);
