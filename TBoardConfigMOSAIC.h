@@ -13,7 +13,7 @@
 #define BOARDCONFIGMOSAIC_H
 
 #include "TBoardConfig.h"
-#include "MosaicSrc/alpide3rcv.h"
+#include "MosaicSrc/mruncontrol.h"
 #include <stdio.h>
 
 class TBoardConfigMOSAIC : public TBoardConfig {
