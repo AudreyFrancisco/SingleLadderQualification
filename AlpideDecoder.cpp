@@ -204,7 +204,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
   if (started && finished) return true;
   else {
     if (started && !finished) {
-      std::cout << "Warning, event not finished at end of data, last byte was 0x" << std::hex << (int) last << std::dec <<std::endl;
+      std::cout << "Warning (chip "<< chip << "), event not finished at end of data, last byte was 0x" << std::hex << (int) last << std::dec << ", event length = " << nBytes <<std::endl;
       return false;
     }
     if (!started) {
