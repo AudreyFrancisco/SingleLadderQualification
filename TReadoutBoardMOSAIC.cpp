@@ -637,6 +637,7 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 	pulser->run(0);
 	mRunControl->stopRun();
 	mRunControl->clearErrors();
+	setSpeedMode (config->GetSpeedMode());// set 400 MHz mode
 	mRunControl->setAFThreshold(config->GetCtrlAFThreshold());
 	mRunControl->setLatency(config->GetCtrlLatMode(), config->GetCtrlLatMode());
 	mRunControl->setConfigReg(0);
@@ -810,15 +811,7 @@ ssize_t TReadoutBoardMOSAIC::readTCPData(void *buffer, size_t count, int timeout
 
 void TReadoutBoardMOSAIC::setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex)
 {
-	int st,en;
-	Aindex = -1;
-	st = (Aindex != -1) ? Aindex : 0;
-	en = (Aindex != -1) ? Aindex+1 : MAX_MOSAICTRANRECV;
-	for(int i=st;i<en;i++) {
-		a3rcv[i]->addSetRcvSpeed(ASpeed);
-		a3rcv[i]->execute();
-	}
-	return;
+  mRunControl->setSpeed (ASpeed);
 }
 
 
