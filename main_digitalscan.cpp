@@ -212,23 +212,23 @@ void scan() {
 	//std::cout << "Closed data counter: " <<  boardInfo.eoeCount << std::endl;
         if (boardInfo.eoeCount) {
           nClosedEvents = boardInfo.eoeCount;
-	}
+        }
         else {
- 	  nClosedEvents = 1;
-	}
+ 	      nClosedEvents = 1;
+        }
         if (boardInfo.decoder10b8bError) errors8b10b++;
         // decode Chip event
         int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
         if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits)) {
-	  std::cout << "Found bad event " << std::endl;
-	  nBad ++;
+	      std::cout << "Found bad event " << std::endl;
+	      nBad ++;
           if (nBad > 10) continue;
-	  FILE *fDebug = fopen ("DebugData.dat", "a");
+	      FILE *fDebug = fopen ("DebugData.dat", "a");
           for (int iByte=0; iByte<n_bytes_data; ++iByte) {
             fprintf (fDebug, "%02x ", (int) buffer[iByte]);
           }
           fclose (fDebug);
-	}
+        }
         //std::cout << "total number of hits found: " << Hits->size() << std::endl;
 
         itrg+= nClosedEvents;
@@ -252,6 +252,7 @@ void scan() {
 int main() {
   initSetup();
 
+  sleep(1);
   char Suffix[20], fName[100];
 
   ClearHitData();

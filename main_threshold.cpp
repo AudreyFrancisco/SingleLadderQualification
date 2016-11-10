@@ -44,7 +44,7 @@ int myMaskStages   = 4096;    // full: 4096
 
 int myChargeStart  = 0;
 //int myChargeStop   = 50;   // if > 100 points, increase array sizes
-int myChargeStop   = 90;   // if > 100 points, increase array sizes
+int myChargeStop   = 50;   // if > 100 points, increase array sizes
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
@@ -127,6 +127,8 @@ int configureMaskStage(TAlpide *chip, int istage) {
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
 
+  //AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_MASK,   false, istage);
+  //AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_SELECT, true, istage);
   for (int icol = 0; icol < 1024; icol += 8) {
     AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 512, icol + istage / 512);
     AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 512, icol + istage / 512);   
@@ -174,7 +176,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 void scan() {   
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int                   nBad = 0;
+  int                   nBad = 0, skipped = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -198,13 +200,20 @@ void scan() {
         if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
         fChips.at(i)->WriteRegister (Alpide::REG_VPULSEL, 170 - icharge);
       }
-      
       fBoards.at(0)->Trigger(myNTriggers);
 
       int itrg = 0;
+      int trials = 0;
       while(itrg < myNTriggers * fEnabled) {
         if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
           usleep(100);
+          trials ++;
+          if (trials == 10) {
+        	std::cout << "Reached 10 timeouts, giving up on this event" << std::endl;
+            itrg = myNTriggers * fEnabled;
+            skipped ++;
+            trials = 0;
+          }
           continue;
         }
         else {
@@ -254,6 +263,7 @@ void scan() {
   if (myMOSAIC) {
     myMOSAIC->StopRun();
   }
+  std::cout << "Scan finished, skipped " << skipped << " points." << std::endl;
 }
 
 

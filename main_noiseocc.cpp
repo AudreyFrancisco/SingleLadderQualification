@@ -34,10 +34,10 @@ int myVCLIP   = 0;
 int myVRESETD = 147;
 
 int myStrobeLength = 20;      // strobe length in units of 25 ns
-int myStrobeDelay  = 0;
+int myStrobeDelay  = 10;
 int myPulseLength  = 500;
 
-int myPulseDelay   = 50;
+int myPulseDelay   = 40;
 //int myNTriggers    = 1000000;
 int myNTriggers    = 100000;
 //int myNTriggers    = 100;
@@ -125,7 +125,7 @@ int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x0);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
-  //  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
+  // chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
 }
 
 
@@ -141,8 +141,8 @@ int configureChip(TAlpide *chip) {
 
   configureFromu(chip);
   configureMask (chip);
-
-  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
+  AlpideConfig::ConfigureCMU (chip);
+  //chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
 }
 
 void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {
@@ -166,7 +166,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 
 void scan() {   
   unsigned char         buffer[1024*4000]; 
-  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0;
+  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0, skipped = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -198,9 +198,17 @@ void scan() {
       fBoards.at(0)->Trigger(nTrigsThisTrain);
 
       int itrg = 0;
+      int trials = 0;
       while(itrg < nTrigsThisTrain * fEnabled) {
         if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
           usleep(100);
+          trials ++;
+          if (trials == 3) {
+        	std::cout << "Reached 3 timeouts, giving up on this event" << std::endl;
+            itrg = nTrigsThisTrain * fEnabled;
+            skipped ++;
+            trials = 0;
+          }
           continue;
         }
         else {
@@ -214,8 +222,14 @@ void scan() {
           }
           // decode Chip event
           int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
-          AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
-
+          bool Decode = AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
+          //if (!Decode) {
+          //  printf("Bad Event: ");
+          //  for (int i = 0; i < n_bytes_chipevent; i++) {
+          //    printf ("%02x ", buffer[n_bytes_header + i]);
+	  //  }
+          //  printf ("\n");
+	  //}
           itrg+=nClosedEvents;
         }
       } 
@@ -255,7 +269,7 @@ int main() {
 
     // put your test here... 
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
-      fBoards.at(0)->SetTriggerConfig (true, true, myPulseDelay, myPulseLength * 2);
+      fBoards.at(0)->SetTriggerConfig (true, true, myPulseDelay, myPulseLength * 10);
       fBoards.at(0)->SetTriggerSource (trigInt);
     }
     else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
