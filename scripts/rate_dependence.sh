@@ -5,7 +5,7 @@
 
 VBB_LIST=( 0.0 3.0 6.0 ) # in V
 I_THR_LIST=( 51 100 ) # in DAC
-V_CASN_LIST=( 57 105 135 ) # in DAC
+V_CASN_LIST=( 50 105 135 ) # in DAC
 V_CLIP_LIST=( 0 60 100 ) # in DAC
 V_RESETD_LIST=( 147 170 170 ) # in DAC
 
