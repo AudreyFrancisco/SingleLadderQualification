@@ -181,6 +181,7 @@ done
 ###################################################################################################
 ### power down everything
 ###################################################################################################
+${ROOT_DIR}/common/pulser.py -1.0 # deactivate pulser which could lead to an input signal above VDDA and VDDD
 ${ROOT_DIR}/common/hameg2030.py ${HAMEG} 6 # turn off the PSU
 
 git checkout ${ROOT_DIR}/../Config.cfg
