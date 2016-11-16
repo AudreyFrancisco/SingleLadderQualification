@@ -84,10 +84,10 @@ macx: {
     LIBS += -L/usr/local/lib -lusb-1.0
 }
 
-unix {
-    message("Compiling new-alpide-software for unix")
+unix:!macx {
     message("Compiling for unix")
     INCLUDEPATH += $$PWD/../libusb-1.0.9/local/include/
+    LIBS += -L$$PWD/../libusb-1.0.9/local/lib -lusb-1.0
 }
 
 
