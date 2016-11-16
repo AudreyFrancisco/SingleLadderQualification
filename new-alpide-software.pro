@@ -86,8 +86,8 @@ macx: {
 
 unix {
     message("Compiling new-alpide-software for unix")
-    target.path = /User/kuijer/local/lib
-    INSTALLS += target
+    message("Compiling for unix")
+    INCLUDEPATH += $$PWD/../libusb-1.0.9/local/include/
 }
 
 
