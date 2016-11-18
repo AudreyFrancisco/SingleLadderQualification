@@ -179,12 +179,19 @@ void scan() {
   int                   nBad = 0, skipped = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
+  std::vector<int> myVPULSEH;
 
   TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (fBoards.at(0));
 
   Hits->clear();
   if (myMOSAIC) {
     myMOSAIC->StartRun();
+  }
+
+  for (int i = 0; i < fChips.size(); i++) { //Read VPULSEH from Config and save it at vector temporarily
+      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+      myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
+//      std::cout << "Read VPULSEH : " << myVPULSEH[i] << std::endl;
   }
 
   for (int istage = 0; istage < myMaskStages; istage ++) {
@@ -198,7 +205,7 @@ void scan() {
       //std::cout << "Charge = " << icharge << std::endl;
       for (int i = 0; i < fChips.size(); i ++) {
         if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-        fChips.at(i)->WriteRegister (Alpide::REG_VPULSEL, 170 - icharge);
+        fChips.at(i)->WriteRegister (Alpide::REG_VPULSEL, myVPULSEH[i] - icharge);  //Automatically matches max pulse = VPULSEH in config
       }
       fBoards.at(0)->Trigger(myNTriggers);
 

@@ -26,7 +26,7 @@ PSU_CURR3=0.020  # vbb
 
 PSU_VOLT1=5.0
 PSU_VOLT2=0.0
-PSU_VOLT3=0.0
+PSU_VOLT3=3.0
 
 # initialise all power supplies
 ./hameg2030.py $PSU_DEV 0 $PSU_CURR1 $PSU_CURR2 $PSU_CURR3 2>&1
@@ -47,7 +47,7 @@ fi
 
 sleep 5
 
-#./hameg2030.py $PSU_DEV 3 3.0 4.0 5 
+#./hameg2030.py $PSU_DEV 3 0 3.0 20
 
 #./hameg2030.py $PSU_DEV 6 3 2>&1
 #wait
