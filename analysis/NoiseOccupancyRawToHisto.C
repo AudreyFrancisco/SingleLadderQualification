@@ -102,7 +102,7 @@ Bool_t NoiseOccupancyRawToHisto(TString file_path) {
 
     while(raw_file >> dblcol >> adr >> nhits && raw_file.good()) {
         dblcol_adr_to_col_row(dblcol, adr, col, row);
-        //cout << dblcol << " " << adr << " " << col << " " << row << " " << nhits << endl;
+        cout << dblcol << " " << adr << " " << col << " " << row << " " << nhits << endl;
         h2_hitmap->Fill(col, row, nhits);
     }
     h2_hitmap->Write();
@@ -126,7 +126,7 @@ Bool_t NoiseOccupancyRawToHisto(TString file_path) {
             conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
             conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
             conf.IDB, conf.IBIAS, conf.VCASP),
-          100, 0, 100);
+          1000, 0, 1000);
 
         h_noise_occ[i_sec]->SetLineColor(i_sec+1);
         h_noise_occ[i_sec]->SetStats(0);
