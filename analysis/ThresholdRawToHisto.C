@@ -17,7 +17,7 @@ using namespace std;
 
 #define NSEC 1
 
-int nInj       = 100;
+int nInj       = 50;
 
 double maxchi2 = 5;
 
@@ -252,7 +252,7 @@ int ThresholdRawToHisto(const char *fName, bool WriteToFile=false, bool saveCanv
     conf = read_config_file(Form("%s%s", fPathOut, fNameCfg));
     print_meas_config(conf);
 
-    //nInj=conf.NTRIGGERS;
+    nInj=conf.NTRIGGERS;
 
     // process threshold data
     if (ProcessFile(fName)==-1) {
