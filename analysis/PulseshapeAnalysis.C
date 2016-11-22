@@ -123,14 +123,14 @@ FitRange_t getFitRange(TH2F *h2) {
     Int_t row_minth = getMinThresholdFast(h2).BinY;
     // row in center of row_minth and row_maxpl
     Int_t row_center = row_minth + (row_maxpl - row_minth)/2+1;
-    cout << row_maxpl << "\t" << row_minth << "\t" << row_center << endl; 
+    //cout << row_maxpl << "\t" << row_minth << "\t" << row_center << endl; 
     //cout << row_center << "\t" << h2->GetYaxis()->GetBinCenter(row_center) << endl;
 
     // low edge
     for (Int_t i_col=0; i_col<n_bins_x; i_col++) {
         if (h2->GetBinContent(i_col+1, row_center)>0.999) {
             fr.BinLow = i_col+1;
-            cout << i_col+1 << "\t" << h2->GetXaxis()->GetBinCenter(i_col+1) << endl;
+            //cout << i_col+1 << "\t" << h2->GetXaxis()->GetBinCenter(i_col+1) << endl;
             break;
         }
     }
@@ -138,7 +138,7 @@ FitRange_t getFitRange(TH2F *h2) {
     for (Int_t i_col=n_bins_x-1; i_col>=0; i_col--) {
         if (h2->GetBinContent(i_col+1, row_center)>0.999) {
             fr.BinHigh = i_col+1;
-            cout << i_col+1 << "\t" << h2->GetXaxis()->GetBinCenter(i_col+1) << endl;
+            //cout << i_col+1 << "\t" << h2->GetXaxis()->GetBinCenter(i_col+1) << endl;
             break;
         }
     }
@@ -231,19 +231,19 @@ MinThreshold_t getMinThreshold(TH2F *h2) {
     //c33->cd(4);
     //h_th_chi2->Draw();
 
-    h2->SetStats(0);
-    TCanvas *c44 = new TCanvas("c44", "c44", 1200, 1200);
-    c44->Divide(2, 2);
-    c44->cd(1);
-    h2->Draw("colz");
-    c44->cd(2);
-    h2->Draw("colz");
-    c44->cd(3);
-    //h1_threshold->Draw("hist");
-    h1_threshold->DrawCopy("");
-    c44->cd(4);
-    h1_noise->DrawCopy("");
-    //h1_noise->Draw("hist");
+    //h2->SetStats(0);
+    //TCanvas *c44 = new TCanvas("c44", "c44", 1200, 1200);
+    //c44->Divide(2, 2);
+    //c44->cd(1);
+    //h2->Draw("colz");
+    //c44->cd(2);
+    //h2->Draw("colz");
+    //c44->cd(3);
+    ////h1_threshold->Draw("hist");
+    //h1_threshold->DrawCopy("");
+    //c44->cd(4);
+    //h1_noise->DrawCopy("");
+    ////h1_noise->Draw("hist");
 
     return minth; 
 }
@@ -589,6 +589,7 @@ Bool_t PulseshapeAnalysis(TString file_path) {
     hMinThrNoise->Write();
     hMaxPulseLen->Write();
     hMaxPulseLenCharge->Write(); 
+    Float_t x_err[n_bins_y];
     for (Int_t i_sec=0; i_sec<NSEC; i_sec++) { 
         for (Int_t i_point=0; i_point<n_bins_y; i_point++) { 
             av_tot[i_sec][i_point] /= (32/NSEC);
@@ -604,6 +605,7 @@ Bool_t PulseshapeAnalysis(TString file_path) {
             av_tw_err[i_reg/(32/NSEC)][i_point] += (y-av_tw[i_reg/(32/NSEC)][i_point])*(y-av_tw[i_reg/(32/NSEC)][i_point]);
             gTimeWalkAboveThr[i_reg]->GetPoint(i_point, x, y);
             av_tw_abovethr_err[i_reg/(32/NSEC)][i_point] += (y-av_tw_abovethr[i_reg/(32/NSEC)][i_point])*(y-av_tw_abovethr[i_reg/(32/NSEC)][i_point]);
+            x_err[i_point]=(charge[1]-charge[0])/2;
         }
     }
     for (Int_t i_sec=0; i_sec<NSEC; i_sec++) { 
@@ -636,7 +638,7 @@ Bool_t PulseshapeAnalysis(TString file_path) {
         gAvTimeWalk[i_sec]->Write();
         mgAvTimeWalk->Add(gAvTimeWalk[i_sec], "p");
 
-        gAvTimeWalkAboveThr[i_sec] = new TGraphErrors(n_bins_y, charge, av_tw_abovethr[i_sec], 0, av_tw_abovethr_err[i_sec]); 
+        gAvTimeWalkAboveThr[i_sec] = new TGraphErrors(n_bins_y, charge, av_tw_abovethr[i_sec], x_err, av_tw_abovethr_err[i_sec]); 
         gAvTimeWalkAboveThr[i_sec]->SetLineColor(1+i_sec);
         gAvTimeWalkAboveThr[i_sec]->SetMarkerColor(1+i_sec);
         gAvTimeWalkAboveThr[i_sec]->SetMarkerStyle(20+i_sec);
@@ -648,38 +650,56 @@ Bool_t PulseshapeAnalysis(TString file_path) {
         mgAvTimeWalkAboveThr->Add(gAvTimeWalkAboveThr[i_sec], "p");
 
     }
+    mgToT->SetName("mgToT");
+    mgToT->Write();
+    mgAvToT->SetName("mgAvToT");
+    mgAvToT->Write();
+    mgTimeWalk->SetName("mgTimeWalk");
+    mgTimeWalk->Write();
+    mgAvTimeWalk->SetName("mgAvTimeWalk");
+    mgAvTimeWalk->Write();
+    mgAvTimeWalkAboveThr->SetName("mgAvTimeWalkAboveThr");
+    mgAvTimeWalkAboveThr->Write();
+
+
     f_out_root->Close();
 
-    // drawing 
-    TCanvas *c = new TCanvas("c", "c", 1200, 800);
-    c->cd();
-    mgTimeWalk->SetTitle("");
-    mgTimeWalk->Draw("ap");
-    mgTimeWalk->SetTitle(Form("PulseShape%s", run_id.Data()));
-    mgTimeWalk->GetXaxis()->SetTitle("Charge [DAC]");
-    mgTimeWalk->GetYaxis()->SetTitle("Time Walk [#mus]");
-    leg->SetTextSize(mgTimeWalk->GetXaxis()->GetTitleSize());
-    leg->Draw("same");
+    cout << "root file written" << endl;
 
-    TCanvas *c1 = new TCanvas("c1", "c1", 1200, 800);
-    c1->cd();
-    mgAvTimeWalkAboveThr->SetTitle("");
-    mgAvTimeWalkAboveThr->Draw("alp");
-    mgAvTimeWalkAboveThr->SetTitle(Form("PulseShape%s", run_id.Data()));
-    mgAvTimeWalkAboveThr->SetMinimum(0);
-    mgAvTimeWalkAboveThr->GetXaxis()->SetTitle("Injected Charge [DAC]");
-    mgAvTimeWalkAboveThr->GetYaxis()->SetTitle("Time Walk above Thrsehold [#mus]");
-    leg->Draw("same");
+    //// drawing 
+    //TCanvas *c = new TCanvas("c", "c", 1200, 800);
+    //c->cd();
+    //mgTimeWalk->SetTitle("");
+    //mgTimeWalk->Draw("ap");
+    //mgTimeWalk->SetTitle(Form("PulseShape%s", run_id.Data()));
+    //mgTimeWalk->GetXaxis()->SetTitle("Charge [DAC]");
+    //mgTimeWalk->GetYaxis()->SetTitle("Time Walk [#mus]");
+    //leg->SetTextSize(mgTimeWalk->GetXaxis()->GetTitleSize());
+    //leg->Draw("same");
 
-    TCanvas *c2 = new TCanvas("c2", "c2", 1200, 800);
-    c2->cd();
-    mgAvTimeWalk->SetTitle("");
-    mgAvTimeWalk->Draw("ap");
-    mgAvTimeWalk->SetTitle(Form("PulseShape%s", run_id.Data()));
-    mgAvTimeWalk->SetMinimum(0);
-    mgAvTimeWalk->GetXaxis()->SetTitle("Injected Charge [DAC]");
-    mgAvTimeWalk->GetYaxis()->SetTitle("Time Walk [#mus]");
-    leg->Draw("same");
+    //TCanvas *c1 = new TCanvas("c1", "c1", 1200, 800);
+    //c1->cd();
+    //mgAvTimeWalkAboveThr->SetTitle("");
+    //mgAvTimeWalkAboveThr->Draw("alp");
+    //mgAvTimeWalkAboveThr->SetTitle(Form("PulseShape%s", run_id.Data()));
+    //mgAvTimeWalkAboveThr->SetMinimum(0);
+    //mgAvTimeWalkAboveThr->GetXaxis()->SetTitle("Injected Charge [DAC]");
+    //mgAvTimeWalkAboveThr->GetYaxis()->SetTitle("Time Walk above Thrsehold [#mus]");
+    //leg->Draw("same");
+
+    //TCanvas *c2 = new TCanvas("c2", "c2", 1200, 800);
+    //c2->cd();
+    //mgAvTimeWalk->SetTitle("");
+    //mgAvTimeWalk->Draw("ap");
+    ////mgTimeWalk->Draw("p same");
+    ////mgAvTimeWalk->Draw("ap same");
+    //mgAvTimeWalk->SetTitle(Form("PulseShape%s", run_id.Data()));
+    //mgAvTimeWalk->SetMinimum(0);
+    //mgAvTimeWalk->GetXaxis()->SetTitle("Injected Charge [DAC]");
+    //mgAvTimeWalk->GetYaxis()->SetTitle("Time Walk [#mus]");
+    //leg->Draw("same");
+
+
 
     //c->Print(Form("results/pulseShape/PulseShape_%s_ToT__pix_%i_%i_ITH%i_VCASN%i_VBIAS-%i.0V_StrBLen%ins.png", 
     //            fFileID.Data(), DCol_sel, Addr_sel, Ithr, VCasn, Vbias, Strobe_B_length));
