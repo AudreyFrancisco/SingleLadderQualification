@@ -49,7 +49,7 @@ int myChargeStep   = 2;
 int myPulseDelayStart   = 36;    // 36 = 500 ns 
 //int myPulseDelayStop    = 1600;  // 1000 = 12550 ns 
 int myPulseDelayStop    = 1200;  // 1200 = 15050 ns 
-int myPulseDelayStep    = 8;     // 100 ns
+int myPulseDelayStep    = 16;     // 200 ns
 
 // -------------------------------------------------------------------------------------
 
