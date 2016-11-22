@@ -51,4 +51,6 @@ cd $DIR_MACROS
 
 root -l -b -q "$DIR_CLASSES/load_classes.C" "csa.C+(\"$FILE_RAW\", \"$FILE_TREE\", \"$FILE_MASK\")"
 #root -l -b -q "$DIR_CLASSES/load_classes.C" "interesting_events.C+(\"$FILE_TREE\", \"$FILE_IE\")"
-root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$FILE_TREE\", \"$2\")"
+root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$FILE_TREE\", \"$2\", \"$FILENAME\")"
+
+
