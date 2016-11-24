@@ -29,8 +29,8 @@ const bool BUSY_CONFIG        = 0; // as of firmware version 247e0611
 const bool BUSY_OVERRIDE      = 1;
 
 //---- RESET module
-const int AUTOSHTDWN_TIME    = 10;      // time until enabling of auto shutdown
-const int CLOCK_ENABLE_TIME  = 12;      // time until clock is enabled
+const int AUTOSHTDWN_TIME    = 100;      // time until enabling of auto shutdown
+const int CLOCK_ENABLE_TIME  = 102;      // time until clock is enabled
 const int SIGNAL_ENABLE_TIME = 12;      // time until signals are enabled
 const int DRST_TIME          = 13;      // time until drst is deasserted
 
