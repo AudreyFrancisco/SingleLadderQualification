@@ -34,6 +34,7 @@ class TReadoutBoard {
   virtual int WriteChipRegister   (uint16_t Address, uint16_t Value, uint8_t chipId = 0)  = 0;
   int         GetControlInterface (uint8_t chipId);
   int         GetReceiver         (uint8_t chipId);
+  int         GetChipById         (uint8_t chipId);
   friend class TAlpide;     // could be reduced to the relevant methods ReadRegister, WriteRegister
  public:
   //TReadoutBoard  (TBoardConfig *config) {};
@@ -42,6 +43,9 @@ class TReadoutBoard {
 
   int          AddChip           (uint8_t chipId, int controlInterface, int receiver);
   void         SetChipEnable     (uint8_t chipId, bool Enable);
+
+  void         SetControlInterface (uint8_t chipId, int controlInterface);
+  void         SetReceiver         (uint8_t chipId, int receiver);
 
   TBoardConfig *GetConfig        () {return fBoardConfig;};
 

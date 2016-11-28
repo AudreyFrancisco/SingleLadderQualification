@@ -29,21 +29,44 @@ int TReadoutBoard::AddChip (uint8_t chipId, int controlInterface, int receiver)
 }
 
 
-int TReadoutBoard::GetControlInterface (uint8_t chipId) 
+int TReadoutBoard::GetChipById (uint8_t chipId)
 {
   for (int i = 0; i < fChipPositions.size(); i ++) {
-    if (fChipPositions.at(i).chipId == chipId) return fChipPositions.at(i).controlInterface;
+    if (fChipPositions.at(i).chipId == chipId) return i;
   }
-  return -1;  // throw exception -> non-existing chip
+  return -1;   // throw exception, non existing chip
+}
+
+
+int TReadoutBoard::GetControlInterface (uint8_t chipId) 
+{
+  int chip = GetChipById (chipId);
+  if (chip > -1) return fChipPositions.at(chip).controlInterface;
+
+  return -1; 
 }
 
 
 int TReadoutBoard::GetReceiver(uint8_t chipId)
 {
-  for (int i = 0; i < fChipPositions.size(); i ++) {
-    if (fChipPositions.at(i).chipId == chipId) return fChipPositions.at(i).receiver;
-  }
-  return -1;  // throw exception -> non-existing chip
+  int chip = GetChipById (chipId);
+  if (chip > -1) return fChipPositions.at(chip).receiver;
+
+  return -1; 
+}
+
+
+void TReadoutBoard::SetControlInterface (uint8_t chipId, int controlInterface) 
+{
+  int chip = GetChipById (chipId);
+  if (chip > -1) fChipPositions.at(chip).controlInterface = controlInterface;
+}
+
+
+void TReadoutBoard::SetReceiver (uint8_t chipId, int receiver) 
+{
+  int chip = GetChipById (chipId);
+  if (chip > -1) fChipPositions.at(chip).receiver = receiver;
 }
 
 
