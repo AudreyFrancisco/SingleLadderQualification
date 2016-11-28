@@ -37,10 +37,11 @@
 int Rate = 10000;// rate in Hz
 
 int myStrobeLength = 80;      // strobe length in units of 25 ns
-int myStrobeDelay  = 40;
+int myStrobeDelay  = 10;
 int myPulseLength  = 500;
 
-int myPulseDelay   = (40000000 / Rate) - myStrobeDelay;
+//int myPulseDelay   = (40000000 / Rate) - myStrobeDelay;
+int myPulseDelay   = 40;
 int myNTriggers    = 50;
 int myMaskStages   = 4096;    // full: 4096
 
@@ -133,7 +134,7 @@ int configureMaskStage(TAlpide *chip, int istage) {
   //AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_SELECT, true, istage);
   for (int icol = 0; icol < 1024; icol += 8) {
     AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 512, icol + istage / 512);
-   AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 512, icol + istage / 512);   
+    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 512, icol + istage / 512);   
   }
 
 }
@@ -304,7 +305,7 @@ int main() {
 
     // put your test here... 
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
-      fBoards.at(0)->SetTriggerConfig (true, true, myStrobeDelay, myPulseDelay);
+      fBoards.at(0)->SetTriggerConfig (true, true, myStrobeDelay, 10 * myPulseLength);
       fBoards.at(0)->SetTriggerSource (trigInt);
     }
     else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {

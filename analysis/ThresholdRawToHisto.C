@@ -245,12 +245,12 @@ int ThresholdRawToHisto(const char *fName, bool WriteToFile=false, bool saveCanv
     // read run config file for settings information
     MeasConfig_t conf; reset_meas_config(&conf);
     ifstream cfg_file(Form("%s%s", fPathOut, fNameCfg));
-    //if(!cfg_file.good()) {
-    //    std::cout << "Config file not found!" << std::endl;
-    //    return -1;
-    //} 
-    //conf = read_config_file(Form("%s%s", fPathOut, fNameCfg));
-    //print_meas_config(conf);
+    if(!cfg_file.good()) {
+        std::cout << "Config file not found!" << std::endl;
+        return -1;
+    } 
+    conf = read_config_file(Form("%s%s", fPathOut, fNameCfg));
+    print_meas_config(conf);
 
     nInj=conf.NTRIGGERS;
 

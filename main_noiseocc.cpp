@@ -39,7 +39,7 @@ int myPulseLength  = 500;
 
 int myPulseDelay   = 40;
 //int myNTriggers    = 1000000;
-int myNTriggers    = 1000000;
+int myNTriggers    = 100000;
 //int myNTriggers    = 100;
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
