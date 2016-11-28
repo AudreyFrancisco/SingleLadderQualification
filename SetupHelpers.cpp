@@ -32,25 +32,20 @@ int initSetupOB() {
   for (int i = 0; i < fConfig->GetNChips(); i++) {
     TChipConfig *chipConfig = fConfig   ->GetChipConfig(i);
     int          chipId     = chipConfig->GetChipId    ();
+    int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
+    int          receiver   = chipConfig->GetParamValue("RECEIVER");
 
     fChips.push_back(new TAlpide(chipConfig));
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
-    if (i < 7) { // first master-slave row
-      if (chipId & 0x7) {        // slave
-        fBoards.at(0)-> AddChip        (chipId, 1, 9);
-      }
-      else {                            // master
-        fBoards.at(0)-> AddChip        (chipId, 1, 9);
-      }
+    if (i < 7) {              // first master-slave row
+      if (receiver < 0) receiver = 9;
+      if (control  < 0) control  = 1;
     }
     else {                    // second master-slave row
-      if (chipId & 0x7) {        // slave
-        fBoards.at(0)-> AddChip        (chipId, 0, 0);
-      }                                
-      else {                            // master
-        fBoards.at(0)-> AddChip        (chipId, 0, 0);
-      }
+      if (receiver < 0) receiver = 0;
+      if (control  < 0) control  = 0;
     }
+    fBoards.at(0)-> AddChip        (chipId, control, receiver);
   }
   std::cout << "Checking control interfaces." << std::endl;
   int nWorking = CheckControlInterface();
@@ -136,9 +131,15 @@ int initSetupIB() {
 
   for (int i = 0; i < fConfig->GetNChips(); i++) {
     TChipConfig *chipConfig = fConfig->GetChipConfig(i);
+    int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
+    int          receiver   = chipConfig->GetParamValue("RECEIVER");
     fChips.push_back(new TAlpide(chipConfig));
     fChips.at(i) -> SetReadoutBoard(fBoards.at(0));
-    fBoards.at(0)-> AddChip        (chipConfig->GetChipId(), 0, RCVMAP[i]);
+
+    if (control  < 0) control  = 0;
+    if (receiver < 0) receiver = RCVMAP[i];
+
+    fBoards.at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver);
   }
 
   std::cout << "Checking control interfaces." << std::endl;
@@ -148,10 +149,14 @@ int initSetupIB() {
 
 
 int initSetupSingleMosaic() {
-  int                 ReceiverId  = 3;  // HSData is connected to pins for first chip on a stave
   TChipConfig        *chipConfig  = fConfig->GetChipConfig(0);
   fBoardType                      = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) fConfig->GetBoardConfig(0);
+  int                 control     = chipConfig->GetParamValue("CONTROLINTERFACE");
+  int                 receiver    = chipConfig->GetParamValue("RECEIVER");
+
+  if (receiver < 0) receiver = 3;   // HSData is connected to pins for first chip on a stave
+  if (control  < 0) control  = 0; 
 
   boardConfig->SetInvertedData (false);
   boardConfig->SetSpeedMode    (Mosaic::RCV_RATE_400);
@@ -160,7 +165,7 @@ int initSetupSingleMosaic() {
 
   fChips. push_back(new TAlpide(chipConfig));
   fChips. at(0) -> SetReadoutBoard(fBoards.at(0));
-  fBoards.at(0) -> AddChip        (chipConfig->GetChipId(), 0, ReceiverId);
+  fBoards.at(0) -> AddChip        (chipConfig->GetChipId(), control, receiver);
 }
 
 
@@ -168,6 +173,9 @@ int initSetupSingle() {
   TReadoutBoardDAQ  *myDAQBoard = 0;
   TChipConfig       *chipConfig = fConfig->GetChipConfig(0);
   fBoardType                    = boardDAQ;
+  // values for control interface and receiver currently ignored for DAQ board
+  int               control     = chipConfig->GetParamValue("CONTROLINTERFACE");
+  int               receiver    = chipConfig->GetParamValue("RECEIVER");
   
   InitLibUsb(); 
   //  The following code searches the USB bus for DAQ boards, creates them and adds them to the readout board vector: 
@@ -189,6 +197,7 @@ int initSetupSingle() {
   // create chip object and connections with readout board
   fChips. push_back(new TAlpide (chipConfig));
   fChips. at(0) -> SetReadoutBoard (fBoards.at(0));
+
   fBoards.at(0) -> AddChip         (chipConfig->GetChipId(), 0, 0);
 
   powerOn(myDAQBoard);

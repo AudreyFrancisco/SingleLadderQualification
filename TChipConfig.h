@@ -47,6 +47,8 @@ class TChipConfig {
   std::map <std::string, int*> fSettings;
   int  fChipId;
   int  fEnabled;                 // variable to exclude (non-working) chip from tests, default true
+  int  fReceiver;
+  int  fControlInterface;
   // DACs used
   int  fITHR;
   int  fIDB;
