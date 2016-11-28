@@ -148,7 +148,7 @@ int initSetupIB() {
 
 
 int initSetupSingleMosaic() {
-  int                 ReceiverId  = 7;  // HSData is connected to pins for first chip on a stave
+  int                 ReceiverId  = 3;  // HSData is connected to pins for first chip on a stave
   TChipConfig        *chipConfig  = fConfig->GetChipConfig(0);
   fBoardType                      = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) fConfig->GetBoardConfig(0);
@@ -160,7 +160,7 @@ int initSetupSingleMosaic() {
 
   fChips. push_back(new TAlpide(chipConfig));
   fChips. at(0) -> SetReadoutBoard(fBoards.at(0));
-  fBoards.at(0) -> AddChip        (chipConfig->GetChipId(), 1, ReceiverId);
+  fBoards.at(0) -> AddChip        (chipConfig->GetChipId(), 0, ReceiverId);
 }
 
 

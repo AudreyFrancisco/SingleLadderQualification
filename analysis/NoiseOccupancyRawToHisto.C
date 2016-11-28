@@ -11,6 +11,8 @@
 
 #define NSEC 1
 
+Float_t n_trg=1e6;
+
 char fNameCfg [1024];
 char fNameOut [1024];
 char fPathOut [1024];
@@ -70,18 +72,18 @@ Bool_t NoiseOccupancyRawToHisto(TString file_path) {
     // read config from file
     //pos = file_path.Last('.');
     //TString f_cfg_name = TString(file_path(0, pos) + ".cfg");
-    ifstream cfg_file(Form("%s%s", fPathOut, fNameCfg));
-    if(!cfg_file.good()) {
-        cout << "Config file not found!" << endl;
-        return kFALSE;
-    }
+    //ifstream cfg_file(Form("%s%s", fPathOut, fNameCfg));
+    //if(!cfg_file.good()) {
+    //    cout << "Config file not found!" << endl;
+    //    return kFALSE;
+    //}
  
     // get info
-    MeasConfig_t conf = read_config_file(Form("%s%s", fPathOut, fNameCfg));
+    MeasConfig_t conf; //= read_config_file(Form("%s%s", fPathOut, fNameCfg));
     print_meas_config(conf);
 
 
-    Float_t n_trg=conf.NTRIGGERS;
+    //Float_t n_trg=conf.NTRIGGERS;
 
 
     // read in noise file and fill hit map
@@ -153,7 +155,7 @@ Bool_t NoiseOccupancyRawToHisto(TString file_path) {
     TCanvas *c2 = new TCanvas("c2", "Canvas 2", 0, 0, 1024, 512);
     c2->cd();
     c2->SetLogy();
-    h_noise_occ[0]->SetMinimum(1e-10);
+    h_noise_occ[0]->SetMinimum(1e-12);
     h_noise_occ[0]->SetMaximum(1e-3);
     h_noise_occ[0]->DrawCopy("");
     for (Int_t i_sec=1; i_sec<NSEC; i_sec++) {

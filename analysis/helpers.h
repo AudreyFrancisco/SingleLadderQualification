@@ -1,3 +1,6 @@
+#ifndef HELPERS_H
+#define HELPERS_H
+
 struct MeasConfig_t {
     // bias config
     Int_t VCASN;
@@ -43,4 +46,4 @@ void print_meas_config(MeasConfig_t conf);
 void reset_meas_config(MeasConfig_t *conf);
 MeasConfig_t read_config_file (const char *fName);
 
-
+#endif
