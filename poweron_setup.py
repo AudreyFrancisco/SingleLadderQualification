@@ -21,7 +21,8 @@ def main():
         return
 
     sour.write("INST OUT2\n");
-    sour.write("OUTP OFF\n");
+    sour.write("SOUR:VOLT 0.0\n")
+    sour.write("OUTP ON\n");
 
     # CH1
     sour.write("INST OUT1\n");
@@ -40,7 +41,7 @@ def main():
     sour.write("FUSE:LINK 2\n")
     sour.write("FUSE:DEL 200\n")
     sour.write("FUSE on\n")
-    sour.write("SOUR:VOLT 0.0\n")
+    sour.write("SOUR:VOLT 3.0\n")
     sour.write("SOUR:CURR 0.05\n")
     time.sleep(0.5);
     sour.write("OUTP ON\n")
@@ -73,4 +74,3 @@ def main():
 ## execute the main
 if __name__ == "__main__":
     sys.exit(main())
-    

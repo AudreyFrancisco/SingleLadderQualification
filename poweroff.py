@@ -31,7 +31,7 @@ def main():
     time.sleep(0.5);
     sour.write("OUTP ON\n")
     time.sleep(2.0);
-    sour.write("OUTP OFF\n")
+    #sour.write("OUTP OFF\n")
 
     ## CH1
     #sour.write("INST OUT1\n");
