@@ -46,7 +46,6 @@ int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
 int HitData     [16][512][1024];
 
-vector<int> myChipId(32,0);
 
 void ClearHitData() {
   for (int ichip = 0; ichip < 16; ichip ++) {
@@ -120,50 +119,6 @@ void WriteDataToFile (const char *fName, bool Recreate) {
   }
 }
 
-vector<FILE*> InitDataFile(const char *fName, bool Recreate) {
-  char  fNameChip[100];
-  vector<FILE*> fp(fChips.size());
-  cout << fChips.size() << endl;
-
-  char  fNameTemp[100];
-  sprintf(fNameTemp,"%s", fName);
-  strtok (fNameTemp, ".");
-
-  for (int ichip = 0; ichip < fChips.size(); ichip ++) {
-    int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
-    myChipId[chipId] = ichip;
-    if (fChips.size() > 1) {
-      sprintf(fNameChip, "%s_Chip%d.dat", fNameTemp, chipId);
-    }
-    else {
-      sprintf(fNameChip, "%s.dat", fNameTemp);
-    }
-    std::cout << "Writing data to file "<< fNameChip <<std::endl;
-
-    if (Recreate) fp[ichip] = fopen(fNameChip, "w");
-    else          fp[ichip] = fopen(fNameChip, "a");
-  }
-  return fp;
-}
-
-void WriteDataToFile(vector<FILE*> fp,vector<TPixHit>* Hits, int nevent) {
-  for (int ihit = 0; ihit < Hits->size(); ihit ++) {
-    int chipId  = Hits->at(ihit).chipId;
-    int dcol    = Hits->at(ihit).dcol;
-    int region  = Hits->at(ihit).region;
-    int address = Hits->at(ihit).address;
-    if ((chipId < 0) || (dcol < 0) || (region < 0) || (address < 0)) {
-      std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
-    }
-    else {
-//        cout << myChipId[chipId] << endl;
-      fprintf(fp[myChipId[chipId]], "%d %d %d %d\n", nevent,dcol + region*16, address, 1);
-    }
-  }
-  Hits->clear();
-}
-
-
 
 // initialisation of Fromu
 int configureFromu(TAlpide *chip) {
@@ -209,7 +164,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 }
 
 
-void scan(vector<FILE*> fp) {   
+void scan() {   
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0, skipped = 0;
   TBoardHeader          boardInfo;
@@ -277,10 +232,9 @@ void scan(vector<FILE*> fp) {
 	  //}
           itrg+=nClosedEvents;
         }
-//        CopyHitData(Hits);
-        WriteDataToFile(fp, Hits, itrg/fEnabled + itrain*nTrigsThisTrain);
       } 
       //std::cout << "Number of hits: " << Hits->size() << std::endl;
+      CopyHitData(Hits);
   }
   if (myMOSAIC) {
     myMOSAIC->StopRun();
@@ -322,14 +276,11 @@ int main() {
       fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
       fBoards.at(0)->SetTriggerSource (trigExt);
     }
+
+    scan();
+
     sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
-    vector<FILE*> fp = InitDataFile(fName, true);
-
-    scan(fp);
-
-    for (int i = 0; i < fChips.size(); i++) {
-      fclose(fp[i]);
-    }
+    WriteDataToFile (fName, true);
 
     if (myDAQBoard) {
       sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
