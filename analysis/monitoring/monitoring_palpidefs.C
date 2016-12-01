@@ -3,6 +3,7 @@
 //  Modified for ALPIDE by Jacobus van Hoorne, jvanhoor@cern.ch
 
 #include <iostream>
+#include <string>
 using namespace std;
 #include <sstream>
 #include <TH2.h>
@@ -26,7 +27,8 @@ using namespace std;
 #include <TGTextEntry.h>
 #include <TGComboBox.h>
 #include <TRootCanvas.h>
-
+#include <TPad.h>
+#include <TRootEmbeddedCanvas.h>
 #include <../classes/AliPALPIDEFSRawStreamMS.h>
 //#include <AliPALPIDEFSRawStreamMS.h>
 
@@ -41,12 +43,16 @@ private:
     Int_t totevt;
     Bool_t fStop;
     char *fFile;
+    vector<string> fsFiles;
     Bool_t flagInitHistos;	
 
     TCanvas *c1; //single event
     TCanvas *c2; //summary canvas
+    TCanvas *c3; //summary canvas consisting full dev
+    TPad *pad;   //same as above
 
     AliPALPIDEFSRawStreamMS *palpidefs;
+    vector<AliPALPIDEFSRawStreamMS*> palpidefsdev;
 
     TGMainFrame *fMain;
     //TGMainFrame *PedM;
@@ -60,6 +66,7 @@ private:
     // Histo to fill
     TH2F *map;
     TH2F *maptot;
+    vector<TH2F*> mapdev;
 
     // Functions
   
@@ -78,6 +85,8 @@ public:
     Bool_t NextEvt();
     Bool_t End();
     Bool_t EndSilent();
+    Bool_t ResetAll();
+    Bool_t AutoUpdate();
     void   Stop();
     void   DisplayInt();
     void   DisplayFloat();
@@ -102,8 +111,13 @@ Monitoring::~Monitoring() {
     delete tentry;
     delete c1;
     delete c2;
+    delete c3;
+    delete pad;
     delete map;
     delete maptot;
+    for (int i = 0; i < 9; i++) {
+      delete mapdev[i];
+    }
 
 }
 //_______________________________________________________________
@@ -121,8 +135,22 @@ Bool_t Monitoring::Init(){
     fStop = kFALSE;
     flagInitHistos=kFALSE;
 
+    string sFile = fFile;
+    string tempFileBase = sFile.substr(0, sFile.find(".dat")-1);
+
+    for (int i = 0; i < 9; i++) {
+      string tempFileName = Form("%s%d.dat",tempFileBase.c_str(), i);
+      fsFiles.push_back(tempFileName);
+    }
+
     palpidefs = new AliPALPIDEFSRawStreamMS();
-    palpidefs->SetInputFile(fFile);
+    palpidefs->SetInputFile(fsFiles[0].c_str());
+
+    for (int i = 0; i < 9; i++) {
+      palpidefsdev.push_back(new AliPALPIDEFSRawStreamMS());
+      palpidefsdev[i]->SetInputFile(fsFiles[i].c_str());
+      cout << fsFiles[i] << endl;
+    }
 
     MyMainFrame(gClient->GetRoot(),200,200);
  
@@ -145,6 +173,8 @@ Bool_t Monitoring::InitHistos(){
 
     TRootCanvas *c1i;
     TRootCanvas *c2i;
+    TRootCanvas *c3i;
+    TRootCanvas *p3i;
 
     c1 = new TCanvas("pALPIDEfsSnglEvt","pALPIDEfs Single Event",1200,600);
     c1i=(TRootCanvas*)c1->GetCanvasImp();
@@ -154,16 +184,29 @@ Bool_t Monitoring::InitHistos(){
     c2i=(TRootCanvas*)c2->GetCanvasImp();
     c2i->DontCallClose();
     
+    c3 = new TCanvas("pALPIDEfsAllEvt_AllDev","pALPIDEfs Cumulative Events2",1200,600);
+//    c3->Divide(9,1,0,0);
+    pad = new TPad("pALPIDEfsAlldevPad", "pALPIDEfsAlldevPad", 0, 0, 1, 1);
+    pad->Draw();
+    pad->Divide(9,1, 0, 0);
+    pad->Draw();
+    p3i=(TRootCanvas*)pad->GetCanvasImp();
+    p3i->DontCallClose();
+    c3i=(TRootCanvas*)c3->GetCanvasImp();
+    c3i->DontCallClose();
+    
     map = new TH2F("snglevt", "pALPIDEfs Event;Column;Row", 1024, -0.5, 1023.5, 512, -0.5, 512);
     maptot = new TH2F("allevt", "pALPIDEfs Multiple Events;Column;Row", 1024, -0.5, 1023.5, 512, -0.5, 512);
+    for (int i = 0; i < 9; i++) {
+      mapdev.push_back(new TH2F(Form("allevt%d",i), Form( "AllEvent %d;Column;Row",i), 1024, -0.5, 1023.5, 512, -0.5, 511.5)); 
+      mapdev[i]->SetStats(0);
+    }
    
     map->SetStats(0);
     maptot->SetStats(0);
 
 // End histo part
-
     return kTRUE;
-
 }
 
 //_______________________________________________________________
@@ -183,6 +226,15 @@ Bool_t Monitoring::ProcessSingleEvent(){
              << palpidefs->GetEventCounter() << endl;
         return kFALSE;
     }
+    bool ireadfalse = kFALSE;
+    for (int ichips = 0; ichips < 9; ichips++) {
+      if (!palpidefsdev[ichips]->ReadEvent()) {
+        cout << "Monitoring::problem Reading Event:" << palpidefsdev[ichips]->GetEventCounter() << endl;
+        ireadfalse = kTRUE;
+        continue;
+      }
+    }
+    if (ireadfalse) return kFALSE;
 
     if(!flagInitHistos){
         cout << "evt :" << evt << endl;
@@ -207,6 +259,13 @@ Bool_t Monitoring::ProcessSingleEvent(){
         maptot->Fill(col, row);
     }
 
+    for (int ichips = 0; ichips < 9; ichips++) {
+      for (int ihit = 0; palpidefsdev[ichips]->GetNextHit(&col, &row); ++ihit) {
+//        cout << ichips << " " << col << " "  << row << endl;
+        mapdev[ichips]->Fill(col, row);
+      }
+    }
+
     return kTRUE; 
 
 }
@@ -218,6 +277,16 @@ Bool_t Monitoring::FinishEventFast(){
     return kTRUE;
 
 }
+//--------------------------------------------------------------
+Bool_t Monitoring::ResetAll(){
+  map->Reset();
+  maptot->Reset();
+  for (int ichips = 0; ichips < 9; ichips++) {
+    mapdev[ichips]->Reset();
+  }
+  return kTRUE;
+}
+
 //_______________________________________________________________
 Bool_t Monitoring::ProcessSingleEventFast(){
 
@@ -232,6 +301,16 @@ Bool_t Monitoring::ProcessSingleEventFast(){
              << palpidefs->GetEventCounter() << endl;
         return kFALSE;
     }
+    
+    bool ireadfalse = kFALSE;
+    for (int ichips = 0; ichips < 9; ichips++) {
+      if (!palpidefsdev[ichips]->ReadEvent()) {
+        cout << "Monitoring::problem Reading Event:" << palpidefsdev[ichips]->GetEventCounter() << endl;
+        ireadfalse = kTRUE;
+        continue;
+      }
+    }
+    if (ireadfalse) return kFALSE;
 
     if(!flagInitHistos){
         cout << "evt :" << evt << endl;
@@ -246,6 +325,15 @@ Bool_t Monitoring::ProcessSingleEventFast(){
     for(Int_t ihit=0; palpidefs->GetNextHit(&col, &row); ++ihit) {
         maptot->Fill(col, row);
     }
+
+    for (int ichips = 0; ichips < 9; ichips++) {
+//      cout << ichips << endl;
+      for (int ihit = 0; palpidefsdev[ichips]->GetNextHit(&col, &row); ++ihit) {
+//        cout << ichips << " " << col << " "  << row << endl;
+        mapdev[ichips]->Fill(col, row);
+      }
+    }
+    
 
     return kTRUE;
 
@@ -268,6 +356,14 @@ Bool_t Monitoring::DrawSE(){
     maptot->DrawCopy("COLZ");
     c2->Update();
   
+    c3->cd();
+    for (int ichips = 0; ichips < 9; ichips++) {
+      pad->cd(ichips+1);
+      mapdev[ichips]->DrawCopy("COLZ");
+//      cout << "ho " << endl;
+      pad->Update();
+    }
+//    c3->Update();
     return kTRUE;
   
 }
@@ -317,6 +413,35 @@ Bool_t Monitoring::EndSilent(){
     return kTRUE;
 
 }
+Bool_t Monitoring::AutoUpdate() {
+
+    while (1 && fStop == kFALSE) {
+      while(ProcessSingleEventFast());
+      cout << "Processed Fast event reading" << endl;
+      ResetAll();
+      cout << "Processed Fast Histogram Reset" << endl;
+      DrawSE();
+      Terminate();
+      
+//      delete palpidefs;
+//      palpidefs = 0x0;
+
+//      palpidefs = new AliPALPIDEFSRawStreamMS();
+      palpidefs->SetInputFile(fsFiles[0].c_str());
+/*
+      for (int i = 0; i < 9; i++) {
+        delete palpidefsdev[i];
+      }*/
+//      palpidefsdev.clear();
+      for (int i = 0; i < 9; i++) {
+//        palpidefsdev.push_back(new AliPALPIDEFSRawStreamMS());
+        palpidefsdev[i]->SetInputFile(fsFiles[i].c_str());
+      }
+      sleep(10);
+      cout << "slept 10" << endl;
+    }
+    return kTRUE;
+}
 //_______________________________________________________________
 void Monitoring::Stop(){
 
@@ -356,6 +481,9 @@ void Monitoring::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
     TGTextButton *draw3 = new TGTextButton(hframe,"To the &End");
     draw3->Connect("Clicked()","Monitoring",this,"EndSilent()");
     hframe->AddFrame(draw3, new TGLayoutHints(kLHintsCenterX,15,15,15,15));
+//    TGTextButton *draw6 = new TGTextButton(hframe,"AutoUpdate");
+//    draw6->Connect("Clicked()","Monitoring",this,"AutoUpdate()");
+//    hframe->AddFrame(draw6, new TGLayoutHints(kLHintsCenterX,15,15,15,15));
 // TGTextButton *draw4 = new TGTextButton(hframe,"&Use Pedestal");
 // draw4->Connect("Clicked()","Monitoring",this,"MenuPedestal()");
 //hframe->AddFrame(draw4, new TGLayoutHints(kLHintsCenterX,15,15,15,15));
