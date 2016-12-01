@@ -123,6 +123,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
 vector<FILE*> InitDataFile(const char *fName, bool Recreate) {
   char  fNameChip[100];
   vector<FILE*> fp(fChips.size());
+  cout << fChips.size() << endl;
 
   char  fNameTemp[100];
   sprintf(fNameTemp,"%s", fName);
@@ -142,6 +143,7 @@ vector<FILE*> InitDataFile(const char *fName, bool Recreate) {
     if (Recreate) fp[ichip] = fopen(fNameChip, "w");
     else          fp[ichip] = fopen(fNameChip, "a");
   }
+  return fp;
 }
 
 void WriteDataToFile(vector<FILE*> fp,vector<TPixHit>* Hits, int nevent) {
@@ -154,7 +156,8 @@ void WriteDataToFile(vector<FILE*> fp,vector<TPixHit>* Hits, int nevent) {
       std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
     }
     else {
-      fprintf(fp[myChipId[chipId]], "%d %d %d %d %d\n", myChipId[chipId], nevent,dcol + region*16, address, 1);
+//        cout << myChipId[chipId] << endl;
+      fprintf(fp[myChipId[chipId]], "%d %d %d %d\n", nevent,dcol + region*16, address, 1);
     }
   }
   Hits->clear();
