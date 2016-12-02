@@ -16,6 +16,7 @@
 
 #include <unistd.h>
 #include <string.h>
+#include <climits>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -216,6 +217,8 @@ void scan(vector<FILE*> fp) {
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
   int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 100;
+
+  if (myNTriggers == -1) myNTriggers = INT_MAX;
 
   nTrains = myNTriggers / nTrigsPerTrain;
   nRest   = myNTriggers % nTrigsPerTrain;
