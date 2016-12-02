@@ -274,6 +274,7 @@ void AlpideConfig::BaseConfig (TAlpide *chip)
   if ((fConfig->GetDeviceType() != TYPE_CHIP) && (fConfig->GetDeviceType() != TYPE_TELESCOPE))
     BaseConfigPLL  (chip);
 
+  //chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
 }
 

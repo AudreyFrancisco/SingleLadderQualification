@@ -30,6 +30,9 @@ test_mosaic:   $(OBJS) main_mosaic.cpp
 test_noiseocc:   $(OBJS) main_noiseocc.cpp
 	$(CC) -o test_noiseocc $(OBJS) $(CFLAGS) main_noiseocc.cpp $(LINKFLAGS)
 
+hoho:   $(OBJS) main_noiseocc_orig.cpp
+	$(CC) -o hoho_test $(OBJS) $(CFLAGS) main_noiseocc_orig.cpp $(LINKFLAGS)
+
 test_source:   $(OBJS) main_source.cpp
 	$(CC) -o test_source $(OBJS) $(CFLAGS) main_source.cpp $(LINKFLAGS)
 
