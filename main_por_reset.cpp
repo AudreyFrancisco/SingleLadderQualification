@@ -69,6 +69,8 @@ int main() {
 
     sleep(1.);
 
+    fChips.at(0)->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x60);
+
     fChips.at(0)->ReadRegister (address1, value1);
     fChips.at(0)->ReadRegister (address2, value2);
 

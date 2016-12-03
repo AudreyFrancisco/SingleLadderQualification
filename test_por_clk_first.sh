@@ -38,6 +38,9 @@ do
     then
         let BAD=BAD+1
         echo ${iTrial} 1 ${GOOD} ${BAD} "TIMED OUT!" | tee -a ${RESULT_FILE}
+
+        # power off
+        ./poweroff_all.py 2>&1 | tee -a ${LOG_FILE}
     else
           let BAD=BAD+1
           echo ${iTrial} 1 ${GOOD} ${BAD} | tee -a ${RESULT_FILE}
