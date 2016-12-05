@@ -274,7 +274,26 @@ void AlpideConfig::BaseConfig (TAlpide *chip)
   if ((fConfig->GetDeviceType() != TYPE_CHIP) && (fConfig->GetDeviceType() != TYPE_TELESCOPE))
     BaseConfigPLL  (chip);
 
-  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
+
+  uint16_t value;
+
+  switch (chip->GetConfig()->GetParamValue("LINKSPEED")) {
+  case 400: 
+    value = 0x01;
+    break;
+  case 600: 
+    value = 0x11;
+    break;
+  case 1200: 
+    value = 0x21;
+    break;
+  default: 
+    std::cout << "Warning: invalid link speed, using 1200" << std::endl;
+    value = 0x21;
+    break;
+  }
+
+  chip->WriteRegister (Alpide::REG_MODECONTROL, value); // strobed readout mode
 }
 
 
