@@ -50,6 +50,7 @@ int initSetupOB() {
   std::cout << "Checking control interfaces." << std::endl;
   int nWorking = CheckControlInterface();
   std::cout << "Found " << nWorking << " working chips" << std::endl;
+  sleep(5);
   MakeDaisyChain();
 }
 

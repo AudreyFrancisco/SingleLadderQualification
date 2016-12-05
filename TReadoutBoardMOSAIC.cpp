@@ -161,7 +161,9 @@ int  TReadoutBoardMOSAIC::Trigger           (int nTriggers)
 
 void TReadoutBoardMOSAIC::StartRun()
 {
-  fEventBuffer.clear();
+  uint16_t val;
+  uint32_t val32;
+        fEventBuffer.clear();
         enableDefinedReceivers();
 	connectTCP(); // open TCP connection
 	mRunControl->startRun(); // start run
@@ -640,7 +642,6 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 	setSpeedMode (config->GetSpeedMode());// set 400 MHz mode
 	mRunControl->setAFThreshold(config->GetCtrlAFThreshold());
 	mRunControl->setLatency(config->GetCtrlLatMode(), config->GetCtrlLatMode());
-	mRunControl->setConfigReg(0);
 
 	enableDefinedReceivers(); // enable all the defined data link
 
@@ -703,6 +704,7 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
         std::cout << "!!!!!! ENabling receiver " << dataLink << std::endl;
         a3rcv[dataLink]->addEnable(true);
         Used[dataLink] = true;
+        //a3rcv[dataLink]->execute();
       }
       else if (!Used[dataLink]){
         std::cout << "!!!!!! DISabling receiver " << dataLink << std::endl;
