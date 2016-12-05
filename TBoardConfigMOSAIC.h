@@ -49,7 +49,7 @@ public:
 	uint32_t GetCtrlAFThreshold    () {return(RunCtrlAFThreshold);}
 	uint16_t GetCtrlLatMode        () {return(RunCtrlLatMode);}
 	uint32_t GetCtrlTimeout        () {return(RunCtrlTimeout);}
-    Mosaic::TReceiverSpeed     GetSpeedMode        () { return(SpeedMode);}
+        Mosaic::TReceiverSpeed    GetSpeedMode        () { return(SpeedMode);}
 	bool     IsInverted            () { return(Inverted);}
 	uint32_t GetPollingDataTimeout () {return(pollDataTimeout);}
 

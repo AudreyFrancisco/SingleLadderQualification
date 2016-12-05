@@ -29,6 +29,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 #include "pexception.h"
 #include "alpide3rcv.h"
 
@@ -73,6 +74,7 @@ void Alpide3rcv::addGetReg(uint16_t address, uint32_t *val)
 void Alpide3rcv::addSetInvert (bool inv)
 {
 	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_INVERT_POLARITY, inv ? OPMODE_INVERT_POLARITY : 0);
+        wbb->execute();
 }
 
 //
@@ -80,7 +82,8 @@ void Alpide3rcv::addSetInvert (bool inv)
 //
 void Alpide3rcv::addEnable(bool d)
 {
-	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_RCVENABLE, d ? OPMODE_RCVENABLE : 0);
+  wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_RCVENABLE, d ? OPMODE_RCVENABLE : 0);
+  wbb->execute();
 }
 
 //

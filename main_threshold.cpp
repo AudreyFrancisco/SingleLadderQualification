@@ -43,7 +43,7 @@ int myPulseLength  = 500;
 //int myPulseDelay   = (40000000 / Rate) - myStrobeDelay;
 int myPulseDelay   = 40;
 int myNTriggers    = 50;
-int myMaskStages   = 4096;    // full: 4096
+int myMaskStages   = 512;    // full: 4096
 
 int myChargeStart  = 0;
 //int myChargeStop   = 50;   // if > 100 points, increase array sizes
@@ -130,12 +130,12 @@ int configureMaskStage(TAlpide *chip, int istage) {
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
 
-  //AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_MASK,   false, istage);
-  //AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_SELECT, true, istage);
-  for (int icol = 0; icol < 1024; icol += 8) {
-    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 512, icol + istage / 512);
-    AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 512, icol + istage / 512);   
-  }
+  AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_MASK,   false, istage);
+  AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_SELECT, true, istage);
+  //for (int icol = 0; icol < 1024; icol += 8) {
+  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 512, icol + istage / 512);
+  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 512, icol + istage / 512);   
+  //}
 
 }
 
