@@ -16,7 +16,7 @@ CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp USB.cpp 
 OBJS = $(CLASS:.cpp=.o)
 $(info OBJS="$(OBJS)")
 
-all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_por test_por_clk_first test_por_reset test_por_clk_first_reset
+all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_por test_por_clk_first test_por_reset test_por_clk_first_reset test_por_analogue_delayed
 
 #ThresholdScan:  $(OBJS) ThresholdScan.cpp
 #	$(CC) -o ThresholdScan $(OBJS) $(CFLAGS) ThresholdScan.cpp $(LINKFLAGS)
@@ -68,6 +68,10 @@ test_por_clk_first: $(OBJS) main_por_clk_first.cpp
 
 test_por_clk_first_reset: $(OBJS) main_por_clk_first_reset.cpp
 	$(CC) -o test_por_clk_first_reset $(OBJS) $(CFLAGS) main_por_clk_first_reset.cpp $(LINKFLAGS)
+
+test_por_analogue_delayed: $(OBJS) main_por_analogue_delayed.cpp
+	$(CC) -o test_por_analogue_delayed $(OBJS) $(CFLAGS) main_por_analogue_delayed.cpp $(LINKFLAGS)
+
 
 %.o: 	%.cpp %.h
 	$(CC) $(CFLAGS) -c -o $@ $<

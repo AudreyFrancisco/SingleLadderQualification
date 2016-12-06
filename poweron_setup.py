@@ -24,10 +24,15 @@ def main():
     sour.write("SOUR:VOLT 0.0\n")
     sour.write("OUTP ON\n");
 
+    sour.write("INST OUT4\n");
+    sour.write("SOUR:VOLT 0.0\n")
+    sour.write("OUTP ON\n");
+
     # CH1
     sour.write("INST OUT1\n");
     sour.write("FUSE:LINK 2\n")
     sour.write("FUSE:LINK 3\n")
+    sour.write("FUSE:LINK 4\n")
     sour.write("FUSE:DEL 100\n")
     sour.write("FUSE on\n")
     sour.write("SOUR:VOLT 5.0\n")
@@ -39,36 +44,13 @@ def main():
     sour.write("INST OUT3\n");
     sour.write("FUSE:LINK 1\n")
     sour.write("FUSE:LINK 2\n")
+    sour.write("FUSE:LINK 4\n")
     sour.write("FUSE:DEL 200\n")
     sour.write("FUSE on\n")
     sour.write("SOUR:VOLT 3.0\n")
     sour.write("SOUR:CURR 0.05\n")
     time.sleep(0.5);
     sour.write("OUTP ON\n")
-
-    #time.sleep(1.0);
-    #
-    #val=([0.0, 0.0, 0.0])
-    #for c in range(3):
-    #    sour.write("INST OUT%d\n" % (c+1))
-    #    sour.write("MEAS:VOLT?\n")
-    #    val[c] = float(sour.readline())
-    #print "%0.4fV\t%0.4fV\t%0.4fV" % ( val[0], val[1], val[2])
-    #
-    #
-    #for c in range(3):
-    #    sour.write("INST OUT%d\n" % (c+1))
-    #    sour.write("MEAS:CURR?\n")
-    #    val[c] = float(sour.readline())
-    #print "%0.4fA\t%0.4fA\t%0.4fA" % ( val[0], val[1], val[2])
-    #
-    #tripped = False
-    #for c in range(3):
-    #    sour.write("INST OUT%d\n" % (c+1))
-    #    sour.write("FUSE:TRIP?\n")
-    #    if (int(sour.readline())!=0):
-    #        sys.stderr.write("Channel %d tripped\n" % (c+1))
-    #        tripped = True
 
 
 ## execute the main

@@ -20,9 +20,10 @@ def main():
         sys.stderr.write("WRONG DEVICE: %s" % idn)
         return
 
-    # CH2
-    sour.write("INST OUT2\n");
+    # CH4
+    sour.write("INST OUT4\n");
     sour.write("FUSE:LINK 1\n")
+    sour.write("FUSE:LINK 2\n")
     sour.write("FUSE:LINK 3\n")
     sour.write("FUSE:DEL 100\n")
     sour.write("FUSE OFF\n")
@@ -33,30 +34,6 @@ def main():
     time.sleep(1.5);
     sour.write("SOUR:CURR 0.15\n")
     sour.write("FUSE ON\n")
-
-
-    #val=([0.0, 0.0, 0.0])
-    #for c in range(3):
-    #    sour.write("INST OUT%d\n" % (c+1))
-    #    sour.write("MEAS:VOLT?\n")
-    #    val[c] = float(sour.readline())
-    #print "%0.4fV\t%0.4fV\t%0.4fV" % ( val[0], val[1], val[2])
-    #
-    #
-    #for c in range(3):
-    #    sour.write("INST OUT%d\n" % (c+1))
-    #    sour.write("MEAS:CURR?\n")
-    #    val[c] = float(sour.readline())
-    #print "%0.4fA\t%0.4fA\t%0.4fA" % ( val[0], val[1], val[2])
-    #
-    #tripped = False
-    #for c in range(3):
-    #    sour.write("INST OUT%d\n" % (c+1))
-    #    sour.write("FUSE:TRIP?\n")
-    #    if (int(sour.readline())!=0):
-    #        sys.stderr.write("Channel %d tripped\n" % (c+1))
-    #        tripped = True
-    #return tripped
 
 
 ## execute the main

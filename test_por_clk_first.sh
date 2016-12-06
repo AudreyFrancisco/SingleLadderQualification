@@ -34,16 +34,21 @@ do
     then
           let GOOD=GOOD+1
           echo ${iTrial} 1 ${GOOD} ${BAD} | tee -a ${RESULT_FILE}
-    elif [[ "$ret_value" -ge 124 ]]
-    then
-        let BAD=BAD+1
-        echo ${iTrial} 1 ${GOOD} ${BAD} "TIMED OUT!" | tee -a ${RESULT_FILE}
+    else
+        if [[ "$ret_value" -ge 124 ]]
+        then
+            let BAD=BAD+1
+            echo ${iTrial} 1 ${GOOD} ${BAD} "TIMED OUT!" | tee -a ${RESULT_FILE}
+
+
+        else
+            let BAD=BAD+1
+            echo ${iTrial} 1 ${GOOD} ${BAD} | tee -a ${RESULT_FILE}
+
+        fi
 
         # power off
         ./poweroff_all.py 2>&1 | tee -a ${LOG_FILE}
-    else
-          let BAD=BAD+1
-          echo ${iTrial} 1 ${GOOD} ${BAD} | tee -a ${RESULT_FILE}
     fi
 
     # power off

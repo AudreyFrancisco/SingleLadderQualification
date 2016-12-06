@@ -24,22 +24,25 @@ def main():
     sour.write("INST OUT2\n");
     sour.write("FUSE:LINK 1\n")
     sour.write("FUSE:LINK 3\n")
+    sour.write("FUSE:LINK 4\n")
     sour.write("FUSE:DEL 100\n")
     sour.write("FUSE on\n")
     sour.write("SOUR:VOLT 0.0\n")
-    sour.write("SOUR:CURR 1.0\n")
-    time.sleep(0.5);
+    sour.write("SOUR:CURR 0.150\n")
+    sour.write("OUTP ON\n")
+
+
+    # CH2
+    sour.write("INST OUT2\n");
+    sour.write("FUSE:LINK 1\n")
+    sour.write("FUSE:LINK 2\n")
+    sour.write("FUSE:LINK 3\n")
+    sour.write("FUSE:DEL 100\n")
+    sour.write("FUSE on\n")
+    sour.write("SOUR:VOLT 0.0\n")
+    sour.write("SOUR:CURR 0.150\n")
     sour.write("OUTP ON\n")
     time.sleep(2.0);
-    #sour.write("OUTP OFF\n")
-
-    ## CH1
-    #sour.write("INST OUT1\n");
-    #sour.write("OUTP OFF\n");
-    #
-    ## CH3
-    #sour.write("INST OUT3\n");
-    #sour.write("OUTP OFF\n");
 
 
 ## execute the main
