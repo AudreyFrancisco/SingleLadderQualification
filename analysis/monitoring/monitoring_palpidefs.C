@@ -144,7 +144,7 @@ Bool_t Monitoring::Init(){
     }
 
     palpidefs = new AliPALPIDEFSRawStreamMS();
-    palpidefs->SetInputFile(fsFiles[0].c_str());
+    palpidefs->SetInputFile(sFile.c_str());
 
     for (int i = 0; i < 9; i++) {
       palpidefsdev.push_back(new AliPALPIDEFSRawStreamMS());
@@ -222,19 +222,20 @@ Bool_t Monitoring::ProcessSingleEvent(){
 
     //*****************************************************
     if(!palpidefs->ReadEvent()) {
-        cout << "Monitoring::problem Reading event:" 
+        cout << "Monitoring::problem Reading event (single chip):" 
              << palpidefs->GetEventCounter() << endl;
         return kFALSE;
     }
     bool ireadfalse = kFALSE;
     for (int ichips = 0; ichips < 9; ichips++) {
       if (!palpidefsdev[ichips]->ReadEvent()) {
-        cout << "Monitoring::problem Reading Event:" << palpidefsdev[ichips]->GetEventCounter() << endl;
-        ireadfalse = kTRUE;
+        cout << "Monitoring::problem Reading Event (chip " << ichips << ") " << palpidefsdev[ichips]->GetEventCounter() << endl;
+        ireadfalse = ireadfalse || kTRUE;
+	cout << ireadfalse << endl;
         continue;
       }
     }
-    if (ireadfalse) return kFALSE;
+    if (!ireadfalse && flagInitHistos) return kFALSE;
 
     if(!flagInitHistos){
         cout << "evt :" << evt << endl;
@@ -297,7 +298,7 @@ Bool_t Monitoring::ProcessSingleEventFast(){
 
     //*****************************************************
     if(!palpidefs->ReadEvent()) {
-        cout << "Monitoring::problem Reading event:" 
+        cout << "Monitoring::problem Reading event (single chip):" 
              << palpidefs->GetEventCounter() << endl;
         return kFALSE;
     }
@@ -305,12 +306,12 @@ Bool_t Monitoring::ProcessSingleEventFast(){
     bool ireadfalse = kFALSE;
     for (int ichips = 0; ichips < 9; ichips++) {
       if (!palpidefsdev[ichips]->ReadEvent()) {
-        cout << "Monitoring::problem Reading Event:" << palpidefsdev[ichips]->GetEventCounter() << endl;
-        ireadfalse = kTRUE;
+	cout << "Monitoring::problem Reading Event (chip " << ichips << ") " << palpidefsdev[ichips]->GetEventCounter() << endl;
+        ireadfalse = ireadfalse || kTRUE;
         continue;
       }
     }
-    if (ireadfalse) return kFALSE;
+    if (!ireadfalse && flagInitHistos) return kFALSE;
 
     if(!flagInitHistos){
         cout << "evt :" << evt << endl;
