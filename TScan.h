@@ -5,11 +5,12 @@
 #include "TReadoutBoard.h"
 #include "TScanConfig.h"
 
-const int MAXLOOPLEVEL = 3;
-bool      fScanAbort;
+const  int  MAXLOOPLEVEL = 3;
+extern bool fScanAbort;
 
 class TScan {
  private:
+ protected: 
   TScanConfig                  *m_config;
   std::vector <TAlpide *>       m_chips;
   std::vector <TReadoutBoard *> m_boards;
@@ -17,7 +18,6 @@ class TScan {
   int m_stop  [MAXLOOPLEVEL];
   int m_step  [MAXLOOPLEVEL];
   int m_value [MAXLOOPLEVEL];
- protected: 
  public:
   TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards);
   ~TScan() {};

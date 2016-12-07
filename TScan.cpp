@@ -1,5 +1,6 @@
 #include "TScan.h"
 
+bool fScanAbort;
 
 TScan::TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards) 
 {
@@ -8,7 +9,6 @@ TScan::TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <T
   m_boards = boards;
 
   fScanAbort = false;
-
 }
 
 
@@ -34,4 +34,5 @@ TMaskScan::TMaskScan (TScanConfig *config, std::vector <TAlpide *> chips, std::v
 : TScan(config, chips, boards)
 {
 }
+
 
