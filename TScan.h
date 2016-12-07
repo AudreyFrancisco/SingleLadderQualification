@@ -12,11 +12,20 @@ class TScan {
   TScanConfig                  *m_config;
   std::vector <TAlpide *>       m_chips;
   std::vector <TReadoutBoard *> m_boards;
+  //  int m_steps[MAXLOOPLEVEL];
  protected: 
  public:
-  TScan () {};
   TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards);
   ~TScan() {};
+
+  virtual void Init        ()              = 0;
+  virtual void Terminate   ()              = 0;
+  virtual void LoopStart   (int loopIndex) = 0;
+  virtual void LoopEnd     (int loopIndex) = 0;
+  virtual void PrepareStep (int loopIndex) = 0;
+  virtual void Execute     ()              = 0;
+  virtual bool Loop        (int loopIndex) = 0;
+  virtual void Next        (int loopIndex) = 0; 
 };
 
 
