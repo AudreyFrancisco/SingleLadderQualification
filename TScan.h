@@ -6,13 +6,17 @@
 #include "TScanConfig.h"
 
 const int MAXLOOPLEVEL = 3;
+bool      fScanAbort;
 
 class TScan {
  private:
   TScanConfig                  *m_config;
   std::vector <TAlpide *>       m_chips;
   std::vector <TReadoutBoard *> m_boards;
-  //  int m_steps[MAXLOOPLEVEL];
+  int m_start [MAXLOOPLEVEL];
+  int m_stop  [MAXLOOPLEVEL];
+  int m_step  [MAXLOOPLEVEL];
+  int m_value [MAXLOOPLEVEL];
  protected: 
  public:
   TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards);
@@ -24,8 +28,8 @@ class TScan {
   virtual void LoopEnd     (int loopIndex) = 0;
   virtual void PrepareStep (int loopIndex) = 0;
   virtual void Execute     ()              = 0;
-  virtual bool Loop        (int loopIndex) = 0;
-  virtual void Next        (int loopIndex) = 0; 
+  bool         Loop        (int loopIndex);
+  void         Next        (int loopIndex); 
 };
 
 
