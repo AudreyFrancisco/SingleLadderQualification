@@ -153,6 +153,12 @@ void TReadoutBoardMOSAIC::SetTriggerSource  (TTriggerSource triggerSource)
 
 }
 
+uint32_t TReadoutBoardMOSAIC::GetTriggerCount() {
+    uint32_t counter;
+    mTriggerControl->getTriggerCounter(&counter);
+    return counter;
+}
+
 int  TReadoutBoardMOSAIC::Trigger           (int nTriggers)
 {
 	pulser->run(nTriggers);
@@ -700,7 +706,7 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
     dataLink = fChipPositions.at(i).receiver;
     if(dataLink >= 0) { // Enable the data receiver
       if (fConfig->GetChipConfigById(fChipPositions.at(i).chipId)->IsEnabled()) {
-        std::cout << "!!!!!! ENabling receiver " << dataLink << std::endl;
+        std::cout << "!!!!!! ENabling receiver " << dataLink << " ChipID: " << fChipPositions.at(i).chipId << std::endl;
         a3rcv[dataLink]->addEnable(true);
         Used[dataLink] = true;
       }

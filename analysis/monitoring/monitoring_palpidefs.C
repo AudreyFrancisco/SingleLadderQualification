@@ -184,7 +184,7 @@ Bool_t Monitoring::InitHistos(){
     c2i=(TRootCanvas*)c2->GetCanvasImp();
     c2i->DontCallClose();
     
-    c3 = new TCanvas("pALPIDEfsAllEvt_AllDev","pALPIDEfs Cumulative Events2",1200,600);
+    c3 = new TCanvas("pALPIDEfsAllEvt_AllDev","pALPIDEfs Cumulative Events2",1900,300);
 //    c3->Divide(9,1,0,0);
     pad = new TPad("pALPIDEfsAlldevPad", "pALPIDEfsAlldevPad", 0, 0, 1, 1);
     pad->Draw();
@@ -221,19 +221,20 @@ Bool_t Monitoring::ProcessSingleEvent(){
     UInt_t evt = palpidefs->GetEventCounter();
 
     //*****************************************************
+    bool singlereadtrue = kTRUE;
     if(!palpidefs->ReadEvent()) {
         cout << "Monitoring::problem Reading event (single chip):" 
              << palpidefs->GetEventCounter() << endl;
-        return kFALSE;
+        singlereadtrue = kFALSE;
     }
     bool ireadfalse = kFALSE;
     for (int ichips = 0; ichips < 9; ichips++) {
       if (!palpidefsdev[ichips]->ReadEvent()) {
         cout << "Monitoring::problem Reading Event (chip " << ichips << ") " << palpidefsdev[ichips]->GetEventCounter() << endl;
-        ireadfalse = ireadfalse || kTRUE;
-	cout << ireadfalse << endl;
         continue;
       }
+      else
+        ireadfalse = ireadfalse || kTRUE;
     }
     if (!ireadfalse && flagInitHistos) return kFALSE;
 
@@ -255,9 +256,11 @@ Bool_t Monitoring::ProcessSingleEvent(){
     Short_t col;
     Short_t row;
 
-    for(Int_t ihit=0; palpidefs->GetNextHit(&col, &row); ++ihit) {
-        map->Fill(col, row);
-        maptot->Fill(col, row);
+    if(singlereadtrue) {
+        for(Int_t ihit=0; palpidefs->GetNextHit(&col, &row); ++ihit) {
+            map->Fill(col, row);
+            maptot->Fill(col, row);
+        }
     }
 
     for (int ichips = 0; ichips < 9; ichips++) {
@@ -297,19 +300,21 @@ Bool_t Monitoring::ProcessSingleEventFast(){
     UInt_t evt = palpidefs->GetEventCounter();
 
     //*****************************************************
+    bool singlereadtrue = kTRUE;
     if(!palpidefs->ReadEvent()) {
         cout << "Monitoring::problem Reading event (single chip):" 
              << palpidefs->GetEventCounter() << endl;
-        return kFALSE;
+        singlereadtrue = kFALSE;
     }
     
     bool ireadfalse = kFALSE;
     for (int ichips = 0; ichips < 9; ichips++) {
       if (!palpidefsdev[ichips]->ReadEvent()) {
 	cout << "Monitoring::problem Reading Event (chip " << ichips << ") " << palpidefsdev[ichips]->GetEventCounter() << endl;
-        ireadfalse = ireadfalse || kTRUE;
         continue;
       }
+      else
+	ireadfalse = ireadfalse || kTRUE;
     }
     if (!ireadfalse && flagInitHistos) return kFALSE;
 
@@ -323,8 +328,12 @@ Bool_t Monitoring::ProcessSingleEventFast(){
     }
 
     Short_t col, row;
-    for(Int_t ihit=0; palpidefs->GetNextHit(&col, &row); ++ihit) {
-        maptot->Fill(col, row);
+
+    if(singlereadtrue) {
+        for(Int_t ihit=0; palpidefs->GetNextHit(&col, &row); ++ihit) {
+            //if(ihit==0 && col%32!=0 && row!=0) break;
+            maptot->Fill(col, row);
+        }
     }
 
     for (int ichips = 0; ichips < 9; ichips++) {

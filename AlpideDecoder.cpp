@@ -73,7 +73,7 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, s
 
   if ((hits->size() > 0) && (!newEvent)) {
     if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address == hits->back().address)) {
-      std::cout << "Warning, received pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " twice." << std::endl;
+        std::cout << "Warning, chip " << chip << " received pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " twice." << std::endl;
     }
     else if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address < hits->back().address)) {
       std::cout << "Warning, address of pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " is lower than previous one ("<< hits->back().address << ") in same double column." << std::endl;
@@ -202,6 +202,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
   }
   //std::cout << "Found " << Hits->size() - NOldHits << " hits" << std::endl;
   if (started && finished) return true;
+
   else {
     if (started && !finished) {
       std::cout << "Warning (chip "<< chip << "), event not finished at end of data, last byte was 0x" << std::hex << (int) last << std::dec << ", event length = " << nBytes <<std::endl;

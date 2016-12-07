@@ -157,6 +157,7 @@ public:
         // Markus: changed trigger delay type from uint32_t to int, since changed upstream
 	int SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
 	void SetTriggerSource  (TTriggerSource triggerSource);
+    uint32_t GetTriggerCount();
 	int Trigger           (int nTriggers);
         // Markus: changed data type from char to unsigned char; check that no problem
         // (should be OK at least for memcpy)
