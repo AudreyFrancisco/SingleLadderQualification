@@ -32,6 +32,9 @@ using namespace std;
 #include <../classes/AliPALPIDEFSRawStreamMS.h>
 //#include <AliPALPIDEFSRawStreamMS.h>
 
+#define BINRED 1
+//#define ZOOM
+
 class Monitoring {
 
 protected:
@@ -195,10 +198,10 @@ Bool_t Monitoring::InitHistos(){
     c3i=(TRootCanvas*)c3->GetCanvasImp();
     c3i->DontCallClose();
     
-    map = new TH2F("snglevt", "pALPIDEfs Event;Column;Row", 1024, -0.5, 1023.5, 512, -0.5, 512);
-    maptot = new TH2F("allevt", "pALPIDEfs Multiple Events;Column;Row", 1024, -0.5, 1023.5, 512, -0.5, 512);
+    map = new TH2F("snglevt", "pALPIDEfs Event;Column;Row", 1024/BINRED, -0.5, 1023.5, 512/BINRED, -0.5, 512);
+    maptot = new TH2F("allevt", "pALPIDEfs Multiple Events;Column;Row", 1024/BINRED, -0.5, 1023.5, 512/BINRED, -0.5, 512);
     for (int i = 0; i < 9; i++) {
-      mapdev.push_back(new TH2F(Form("allevt%d",i), Form( "AllEvent %d;Column;Row",i), 1024, -0.5, 1023.5, 512, -0.5, 511.5)); 
+      mapdev.push_back(new TH2F(Form("allevt%d",i), Form( "AllEvent %d;Column;Row",i), 1024/BINRED, -0.5, 1023.5, 512/BINRED, -0.5, 511.5)); 
       mapdev[i]->SetStats(0);
     }
    
@@ -362,14 +365,24 @@ Bool_t Monitoring::DrawSE(){
     map->DrawCopy("COLZ");
     c1->Update();
 
+#ifdef ZOOM
+    Float_t avgz = maptot->Integral()/maptot->GetNbinsX()/maptot->GetNbinsY();
+#endif
+
     c2->cd();
     maptot->DrawCopy("COLZ");
+#ifdef ZOOM
+    maptot->GetZaxis()->SetRangeUser(0, 30);
+#endif
     c2->Update();
   
     c3->cd();
     for (int ichips = 0; ichips < 9; ichips++) {
       pad->cd(ichips+1);
       mapdev[ichips]->DrawCopy("COLZ");
+#ifdef ZOOM
+    mapdev[ichips]->GetZaxis()->SetRangeUser(0, 30);
+#endif
 //      cout << "ho " << endl;
       pad->Update();
     }

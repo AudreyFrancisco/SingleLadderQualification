@@ -177,8 +177,7 @@ void WriteDataToFile(vector<FILE*> fp,vector<TPixHit>* Hits, int nevent) {
         else {
 //        cout << myChipId[chipId] << endl;
             fprintf(fp[myChipId[chipId]], "%d %d %d %d\n", nevent,dcol + region*16, address, 1);
-        }
-    }
+        }    }
     Hits->clear();
 }
 
@@ -248,9 +247,14 @@ void scan(vector<FILE*> fp) {
         std::cout << fBoards.at(0)->ReadEventData(n_bytes_data, buffer) << std::endl;
     }
 
+    int recTriggers = 0; // number of read out triggers
+    // data consistency counters
     int received_cnt[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
     bool flagMissingData = false;
-    int recTriggers = 0; // number of read out triggers
+    int  valMissingData = 0;
+    int skippedEvts = 0;
+    int doubleEvts[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
     while(recTriggers < myNTriggers) {
         // polling for triggers
         int readyTriggers = myMOSAIC->GetTriggerCount();
@@ -265,10 +269,14 @@ void scan(vector<FILE*> fp) {
 
         for(int itrig=0; itrig < trigsToRead; ++itrig) {
             int triggerRcvd[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // flag for each receiever. checking if corresponding reciever has been processed
+            if(flagMissingData) triggerRcvd[valMissingData]++;
+            int prevRcv = -1; // previous receiver
+            int rcvdHits = 0;
+
             for(int ichip=flagMissingData; ichip < fEnabled; ++ichip) {
                 if(flagMissingData) {
-                    std::cout << "INFO, main_na61, " << recTriggers << " " << itrig << " " << ichip 
-                              << ", missing / advanced data situation solved" << std::endl;
+                    std::cout << "INFO, main_na61, " << recTriggers << " " << itrig << " " << 
+                        ichip << ", missing / advanced data situation solved" << std::endl;
                     flagMissingData = false;
                 }
                 // wait for data if needed
@@ -281,22 +289,38 @@ void scan(vector<FILE*> fp) {
                 BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
 
                 int rcv = boardInfo.channel-1; // MOSAIC is counting receivers from 1
-                if(triggerRcvd[rcv]) {
-                    std::cout << "ERROR, main_na61, " << recTriggers << " " << itrig << " " << ichip 
-                              << ", already processed reciever " << rcv << " - chip " << rcvToChipId(rcv) << std::endl;
-                    flagMissingData = true;
-                    //std::cout << "Processed receivers: ";
-                    //for(int i=0; i<9; ++i) 
-                    //    std::cout << triggerRcvd[i] << "  ";
-                    //std::cout << std::endl;
-                }
-
                 int expChipId = rcvToChipId(rcv); // expected chip id
                 if (expChipId == -1) {
                     std::cout << "FATAL, main_na61, " << recTriggers << " " << itrig << " " << ichip 
                               << ", ChipID - RCV problem. Manual code check needed! Exiting!" << std::endl;
                     return;
                 }
+
+                if(triggerRcvd[rcv]) {
+                    if(prevRcv != rcv) {
+                        std::cout << "ERROR, main_na61, " << recTriggers << " " << itrig << " " << ichip
+                                  << ", already processed reciever " << rcv << " - chip " << expChipId << std::endl;
+                        flagMissingData = true;
+                        valMissingData = rcv;
+                        //std::cout << "Processed receivers: ";
+                        //for(int i=0; i<9; ++i) 
+                        //    std::cout << triggerRcvd[i] << "  ";
+                        //std::cout << std::endl;
+                        Hits->erase(Hits->begin(), Hits->begin()+rcvdHits);
+                        rcvdHits = 0;
+                        for(int i=0; i<9; ++i) received_cnt[rcvToChipId(i)] -= triggerRcvd[i];
+                        skippedEvts++;
+                    }
+                    else {
+                        std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip
+                                  << ", already processed reciever " << rcv << " - chip " << expChipId
+                                  << " once. Processing again." << std::endl;
+                        ichip--;
+                        doubleEvts[expChipId]++;
+                    }
+                }
+                prevRcv = rcv;
+                
                 received_cnt[expChipId]++;
                 triggerRcvd[rcv]++;
 
@@ -309,10 +333,10 @@ void scan(vector<FILE*> fp) {
                               << ", Decode failed! (receiver " << rcv << " - chipID" << rcvToChipId(rcv) << ")!" << std::endl; 
                 }
 
-                if(Hits->size()) {
+                if(Hits->size() > rcvdHits) {
                     // check hits consistency
                     int prevChipId = -999;
-                    for (int ihit = 0; ihit < Hits->size(); ihit ++) {
+                    for (int ihit = rcvdHits; ihit < Hits->size(); ihit ++) {
                         int iChipId  = Hits->at(ihit).chipId;
                         if(iChipId < 0 || iChipId > 8)
                             std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip 
@@ -323,12 +347,13 @@ void scan(vector<FILE*> fp) {
                         prevChipId = iChipId;
                     }
                     if(prevChipId != rcvToChipId(rcv))
-                        std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip
+                        std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip 
                                   << ", ChipId " << prevChipId << " not expected on reciever " << rcv << std::endl;                    
+                    rcvdHits = Hits->size();
                 }
-                WriteDataToFile(fp, Hits, recTriggers + flagMissingData);
                 if(flagMissingData) break;
             } // FOR chips
+            WriteDataToFile(fp, Hits, recTriggers + flagMissingData);
             recTriggers++;
         } // FOR triggers
         std::cout << "\r"
@@ -350,9 +375,17 @@ void scan(vector<FILE*> fp) {
         myMOSAIC->StopRun();
     }
 
+    // counters 
+    if(flagMissingData) received_cnt[rcvToChipId(valMissingData)]--;
 
+    std::cout << "Num. of recorded triggers per chip: ";
     for(int i=0; i<9; ++i) 
         std::cout << received_cnt[i] << "  ";
+    std::cout << std::endl;
+    std::cout << "Skipped events: " << skippedEvts << std::endl;
+    std::cout << "Num. of double reads: ";
+    for(int i=0; i<9; ++i) 
+        std::cout << doubleEvts[i] << "  ";
     std::cout << std::endl;
 }
 
