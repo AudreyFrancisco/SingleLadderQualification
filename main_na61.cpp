@@ -68,337 +68,339 @@ int rcvToChipId(int rcv) {
 }
 
 void ClearHitData() {
-  for (int ichip = 0; ichip < 16; ichip ++) {
-    for (int icol = 0; icol < 512; icol ++) {
-      for (int iaddr = 0; iaddr < 1024; iaddr ++) {
-        HitData[ichip][icol][iaddr] = 0;
-      }
+    for (int ichip = 0; ichip < 16; ichip ++) {
+        for (int icol = 0; icol < 512; icol ++) {
+            for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+                HitData[ichip][icol][iaddr] = 0;
+            }
+        }
     }
-  }
 }
 
 
 void CopyHitData(std::vector <TPixHit> *Hits) {
-  for (int ihit = 0; ihit < Hits->size(); ihit ++) {
-	int chipId  = Hits->at(ihit).chipId;
-	int dcol    = Hits->at(ihit).dcol;
-	int region  = Hits->at(ihit).region;
-	int address = Hits->at(ihit).address;
-	if ((chipId < 0) || (dcol < 0) || (region < 0) || (address < 0)) {
-	  std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
-	}
-	else {
-	  HitData[chipId][dcol + region * 16][address] ++;
-	}
-  }
-  Hits->clear();
+    for (int ihit = 0; ihit < Hits->size(); ihit ++) {
+        int chipId  = Hits->at(ihit).chipId;
+        int dcol    = Hits->at(ihit).dcol;
+        int region  = Hits->at(ihit).region;
+        int address = Hits->at(ihit).address;
+        if ((chipId < 0) || (dcol < 0) || (region < 0) || (address < 0)) {
+            std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
+        }
+        else {
+            HitData[chipId][dcol + region * 16][address] ++;
+        }
+    }
+    Hits->clear();
 }
 
 
 bool HasData(int chipId) {
-  for (int icol = 0; icol < 512; icol ++) {
-    for (int iaddr = 0; iaddr < 1024; iaddr ++) {
-      if (HitData[chipId][icol][iaddr] > 0) return true;
+    for (int icol = 0; icol < 512; icol ++) {
+        for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+            if (HitData[chipId][icol][iaddr] > 0) return true;
+        }
     }
-  }
-  return false;
+    return false;
 }
 
 
 void WriteDataToFile (const char *fName, bool Recreate) {
-  char  fNameChip[100];
-  FILE *fp;
+    char  fNameChip[100];
+    FILE *fp;
 
-  char  fNameTemp[100];
-  sprintf(fNameTemp,"%s", fName);
-  strtok (fNameTemp, ".");
+    char  fNameTemp[100];
+    sprintf(fNameTemp,"%s", fName);
+    strtok (fNameTemp, ".");
 
-  for (int ichip = 0; ichip < fChips.size(); ichip ++) {
-    int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
-    if (!HasData(chipId)) continue;  // write files only for chips with data
-    if (fChips.size() > 1) {
-      sprintf(fNameChip, "%s_Chip%d.dat", fNameTemp, chipId);
-    }
-    else {
-      sprintf(fNameChip, "%s.dat", fNameTemp);
-    }
-    std::cout << "Writing data to file "<< fNameChip <<std::endl;
-
-
-    if (Recreate) fp = fopen(fNameChip, "w");
-    else          fp = fopen(fNameChip, "a");
-
-    for (int icol = 0; icol < 512; icol ++) {
-      for (int iaddr = 0; iaddr < 1024; iaddr ++) {
-        if (HitData[ichip][icol][iaddr] > 0) {
-          fprintf(fp, "%d %d %d\n", icol, iaddr, HitData[ichip][icol][iaddr]);
+    for (int ichip = 0; ichip < fChips.size(); ichip ++) {
+        int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
+        if (!HasData(chipId)) continue;  // write files only for chips with data
+        if (fChips.size() > 1) {
+            sprintf(fNameChip, "%s_Chip%d.dat", fNameTemp, chipId);
         }
-      }
+        else {
+            sprintf(fNameChip, "%s.dat", fNameTemp);
+        }
+        std::cout << "Writing data to file "<< fNameChip <<std::endl;
+
+
+        if (Recreate) fp = fopen(fNameChip, "w");
+        else          fp = fopen(fNameChip, "a");
+
+        for (int icol = 0; icol < 512; icol ++) {
+            for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+                if (HitData[ichip][icol][iaddr] > 0) {
+                    fprintf(fp, "%d %d %d\n", icol, iaddr, HitData[ichip][icol][iaddr]);
+                }
+            }
+        }
+        if (fp) fclose (fp);
     }
-    if (fp) fclose (fp);
-  }
 }
 
 vector<FILE*> InitDataFile(const char *fName, bool Recreate) {
-  char  fNameChip[100];
-  vector<FILE*> fp(fChips.size());
-  cout << fChips.size() << endl;
+    char  fNameChip[100];
+    vector<FILE*> fp(fChips.size());
+    cout << fChips.size() << endl;
 
-  char  fNameTemp[100];
-  sprintf(fNameTemp,"%s", fName);
-  strtok (fNameTemp, ".");
+    char  fNameTemp[100];
+    sprintf(fNameTemp,"%s", fName);
+    strtok (fNameTemp, ".");
 
-  for (int ichip = 0; ichip < fChips.size(); ichip ++) {
-    int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
-    myChipId[chipId] = ichip;
-    if (fChips.size() > 1) {
-      sprintf(fNameChip, "%s_Chip%d.dat", fNameTemp, chipId);
+    for (int ichip = 0; ichip < fChips.size(); ichip ++) {
+        int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
+        myChipId[chipId] = ichip;
+        if (fChips.size() > 1) {
+            sprintf(fNameChip, "%s_Chip%d.dat", fNameTemp, chipId);
+        }
+        else {
+            sprintf(fNameChip, "%s.dat", fNameTemp);
+        }
+        std::cout << "Writing data to file "<< fNameChip <<std::endl;
+
+        if (Recreate) fp[ichip] = fopen(fNameChip, "w");
+        else          fp[ichip] = fopen(fNameChip, "a");
     }
-    else {
-      sprintf(fNameChip, "%s.dat", fNameTemp);
-    }
-    std::cout << "Writing data to file "<< fNameChip <<std::endl;
-
-    if (Recreate) fp[ichip] = fopen(fNameChip, "w");
-    else          fp[ichip] = fopen(fNameChip, "a");
-  }
-  return fp;
+    return fp;
 }
 
 void WriteDataToFile(vector<FILE*> fp,vector<TPixHit>* Hits, int nevent) {
-  for (int ihit = 0; ihit < Hits->size(); ihit ++) {
-    int chipId  = Hits->at(ihit).chipId;
-    int dcol    = Hits->at(ihit).dcol;
-    int region  = Hits->at(ihit).region;
-    int address = Hits->at(ihit).address;
-    if ((chipId < 0) || (dcol < 0) || (region < 0) || (address < 0)) {
-      std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
-    }
-    else {
+    for (int ihit = 0; ihit < Hits->size(); ihit ++) {
+        int chipId  = Hits->at(ihit).chipId;
+        int dcol    = Hits->at(ihit).dcol;
+        int region  = Hits->at(ihit).region;
+        int address = Hits->at(ihit).address;
+        if ((chipId < 0) || (dcol < 0) || (region < 0) || (address < 0)) {
+            std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
+        }
+        else {
 //        cout << myChipId[chipId] << endl;
-      fprintf(fp[myChipId[chipId]], "%d %d %d %d\n", nevent,dcol + region*16, address, 1);
+            fprintf(fp[myChipId[chipId]], "%d %d %d %d\n", nevent,dcol + region*16, address, 1);
+        }
     }
-  }
-  Hits->clear();
+    Hits->clear();
 }
 
 
 
 // initialisation of Fromu
 int configureFromu(TAlpide *chip) {
-  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x0);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
-  chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
-  // chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
+    chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x0);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
+    chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
+    chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
+    // chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
 }
 
 
 // initialisation of fixed mask
 int configureMask(TAlpide *chip) {
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   false);
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
+    AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   false);
+    AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
 }
 
 
 int configureChip(TAlpide *chip) {
-  AlpideConfig::BaseConfig(chip);
+    AlpideConfig::BaseConfig(chip);
 
-  configureFromu(chip);
-  configureMask (chip);
-  AlpideConfig::ConfigureCMU (chip);
-  //  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
+    configureFromu(chip);
+    configureMask (chip);
+    AlpideConfig::ConfigureCMU (chip);
+    //  chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
 }
 
 void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {
-  char Config[1000];
-  FILE *fp = fopen(fName, "w");
+    char Config[1000];
+    FILE *fp = fopen(fName, "w");
 
-  chip     -> DumpConfig("", false, Config);
-  //std::cout << Config << std::endl;
-  fprintf(fp, "%s\n", Config);
-  if (daqBoard) daqBoard -> DumpConfig("", false, Config);
-  fprintf(fp, "%s\n", Config);
-  //std::cout << Config << std::endl;
+    chip     -> DumpConfig("", false, Config);
+    //std::cout << Config << std::endl;
+    fprintf(fp, "%s\n", Config);
+    if (daqBoard) daqBoard -> DumpConfig("", false, Config);
+    fprintf(fp, "%s\n", Config);
+    //std::cout << Config << std::endl;
 
-  fprintf(fp, "\n", Config);
+    fprintf(fp, "\n", Config);
 
-  fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
+    fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
     
-  fclose(fp);
+    fclose(fp);
 }
 
 
 void scan(vector<FILE*> fp) {   
-  unsigned char         buffer[1024*4000]; 
-  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0, skipped = 0;
-  TBoardHeader          boardInfo;
-  std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
+    unsigned char         buffer[1024*4000]; 
+    int                   n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0, skipped = 0;
+    TBoardHeader          boardInfo;
+    std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
-  int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 100;
 
-  nTrains = myNTriggers / nTrigsPerTrain;
-  nRest   = myNTriggers % nTrigsPerTrain;
+    std::cout << "NTriggers: " << myNTriggers << std::endl;
 
-  std::cout << "NTriggers: " << myNTriggers << std::endl;
-  std::cout << "NTriggersPerTrain: " << nTrigsPerTrain << std::endl;
-  std::cout << "NTrains: " << nTrains << std::endl;
-  std::cout << "NRest: " << nRest << std::endl;
+    TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (fBoards.at(0));
 
-  TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (fBoards.at(0));
-
-  if (myMOSAIC) {
-    myMOSAIC->StartRun();
-  }
-
-  int received_cnt[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-  for (int itrain = 0; itrain <= nTrains; itrain ++) {
-      //std::cout << "\r" << "Train: " << itrain << "                     " << std::endl;
-    if (itrain == nTrains) {
-      nTrigsThisTrain = nRest;
+    if (myMOSAIC) {
+        myMOSAIC->StartRun();
     }
-    else {
-      nTrigsThisTrain = nTrigsPerTrain;
+    
+    // This is needed to crash the run immediately if there is something wrong. Otherwise it is just stuck  FIX ME!!!
+    for(int ichip=0; ichip < fEnabled; ++ichip) {
+        std::cout << fBoards.at(0)->ReadEventData(n_bytes_data, buffer) << std::endl;
     }
 
-//      fBoards.at(0)->Trigger(nTrigsThisTrain);
-
-      int itrg = 0;
-      int trials = 0;
-      while(itrg < nTrigsThisTrain * fEnabled) {
-        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
-          usleep(1e6);
-          trials ++;
-          /*
-          if (trials == 101) {
-        	std::cout << "Reached 101 timeouts (10.1 ms), giving up on this event" << std::endl;
-            itrg = nTrigsThisTrain * fEnabled;
-            skipped ++;
-            trials = 0;
-          }
-          */
-          //continue;
+    int received_cnt[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    bool flagMissingData = false;
+    int recTriggers = 0; // number of read out triggers
+    while(recTriggers < myNTriggers) {
+        // polling for triggers
+        int readyTriggers = myMOSAIC->GetTriggerCount();
+        //std::cout << "Waiting for triggers" << std::flush;
+        while(readyTriggers == recTriggers) {
+            usleep(1e5);
+            readyTriggers = myMOSAIC->GetTriggerCount();
+            std::cout << "." << std::flush;
         }
-        else {
-          // decode DAQboard event
-          BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-          if (boardInfo.eoeCount) {
-            nClosedEvents = boardInfo.eoeCount;
-          }
-          else {
-   	        nClosedEvents = 1;
-          }
+        //std::cout << std::endl;
+        int trigsToRead = readyTriggers > myNTriggers ? myNTriggers - recTriggers : readyTriggers - recTriggers;
 
-          int rcv = boardInfo.channel-1; // MOSAIC is counting receivers from 1
-          received_cnt[rcvToChipId(rcv)]++;
-          // decode Chip event
-          int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
-          bool Decode = AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
+        for(int itrig=0; itrig < trigsToRead; ++itrig) {
+            int triggerRcvd[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // flag for each receiever. checking if corresponding reciever has been processed
+            for(int ichip=flagMissingData; ichip < fEnabled; ++ichip) {
+                if(flagMissingData) {
+                    std::cerr << "INFO, main_na61, missing / advanced data situation solved" << std::endl;
+                    flagMissingData = false;
+                }
+                // wait for data if needed
+                while (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) {
+                    std::cout << "Waiting for data..." << std::endl;
+                    usleep(1e2);
+                }
+                
+                // decode DAQboard event
+                BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+
+                int rcv = boardInfo.channel-1; // MOSAIC is counting receivers from 1
+                if(triggerRcvd[rcv]) {
+                    std::cerr << "ERROR, main_na61, already processed reciever " << rcv << " - chip " << rcvToChipId(rcv) << std::endl;
+                    flagMissingData = true;
+                    //std::cerr << "Processed receivers: ";
+                    //for(int i=0; i<9; ++i) 
+                    //    std::cerr << triggerRcvd[i] << "  ";
+                    //std::cerr << std::endl;
+                }
+
+                int expChipId = rcvToChipId(rcv); // expected chip id
+                if (expChipId == -1) {
+                    std::cerr << "FATAL, main_na61, ChipID - RCV problem. Manual code check needed! Exiting!" << std::endl;
+                    return;
+                }
+                received_cnt[expChipId]++;
+                triggerRcvd[rcv]++;
+
+                // decode Chip event
+                int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
+                bool Decode = AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
           
-          if(!Decode) {
-              std::cerr << "WARNING, main_noiseocc, Decode failed! (receiver " << rcv << " - chipID" << rcvToChipId(rcv) << ")!" << std::endl; 
-          }
+                if(!Decode) {
+                    std::cerr << "WARNING, main_na61, Decode failed! (receiver " << rcv << " - chipID" << rcvToChipId(rcv) << ")!" << std::endl; 
+                }
 
-          if(Hits->size()) {
-              // check hits consistency
-              int prevChipId = -999;
-              for (int ihit = 0; ihit < Hits->size(); ihit ++) {
-                  int iChipId  = Hits->at(ihit).chipId;
-                  if(iChipId < 0 || iChipId > 8)
-                      std::cerr << "WARNING, main_noiseocc, ChipId out of range fo IB HIC = " << iChipId << std::endl;
-                  if(prevChipId != -999 && prevChipId != iChipId)
-                      std::cerr << "WARNING, main_noiseocc, ChipId within same Hits changes! Previous " << prevChipId << " is now " << iChipId << std::endl;
-                  prevChipId = iChipId;
-              }
-              if(prevChipId != rcvToChipId(rcv))
-                  std::cerr << "WARNING, main_noiseocc, ChipId " << prevChipId << " not expected on reciever " << rcv << std::endl;  
-          }
-
-	  //if (!Decode) {
-          //  printf("Bad Event: ");
-          //  for (int i = 0; i < n_bytes_chipevent; i++) {
-          //    printf ("%02x ", buffer[n_bytes_header + i]);
-	  //  }
-          //  printf ("\n");
-	  //}
-          itrg+=nClosedEvents;
-        }
-//        CopyHitData(Hits);
-        WriteDataToFile(fp, Hits, myMOSAIC->GetTriggerCount());
-
+                if(Hits->size()) {
+                    // check hits consistency
+                    int prevChipId = -999;
+                    for (int ihit = 0; ihit < Hits->size(); ihit ++) {
+                        int iChipId  = Hits->at(ihit).chipId;
+                        if(iChipId < 0 || iChipId > 8)
+                            std::cerr << "WARNING, main_na61, ChipId out of range fo IB HIC = " << iChipId << std::endl;
+                        if(prevChipId != -999 && prevChipId != iChipId)
+                            std::cerr << "WARNING, main_na61, ChipId within same Hits changes! Previous " << prevChipId << " is now " << iChipId << std::endl;
+                        prevChipId = iChipId;
+                    }
+                    if(prevChipId != rcvToChipId(rcv))
+                        std::cerr << "WARNING, main_na61, ChipId " << prevChipId << " not expected on reciever " << rcv << std::endl;                    
+                }
+                WriteDataToFile(fp, Hits, recTriggers + flagMissingData);
+                if(flagMissingData) break;
+            } // FOR chips
+            recTriggers++;
+        } // FOR triggers
         std::cout << "\r"
-                  << "Received triggers: " << itrg/fEnabled + itrain*nTrigsThisTrain << "   " 
+            //<< "Received triggers: " << itrg/fEnabled + itrain*nTrigsThisTrain << "   " 
+                  << "Recorded Trigger Counter: " << recTriggers << "   "
                   << "MOSAIC Trigger Counter: " << myMOSAIC->GetTriggerCount() << "   "
             //<< "boardInfo.channel = " << boardInfo.channel << "   "
                   << std::flush;
-      }
-      for (int ichips = 0; ichips < 9; ichips++) {
-          fflush(fp[ichips]);
-      }
-      //std::cout << "Number of hits: " << Hits->size() << std::endl;
-  }
-  std::cout << std::endl;
-  if (myMOSAIC) {
-    myMOSAIC->StopRun();
-  }
 
-  for(int i=0; i<9; ++i) 
-      std::cout << received_cnt[i] << "  ";
-  std::cout << std::endl;
+        for (int ichips = 0; ichips < 9; ichips++) {
+            fflush(fp[ichips]);
+        }
+        //std::cout << "Number of hits: " << Hits->size() << std::endl;
+    } // WHILE Triggers
+    std::cout << std::endl;
+
+ 
+    if (myMOSAIC) {
+        myMOSAIC->StopRun();
+    }
+
+
+    for(int i=0; i<9; ++i) 
+        std::cout << received_cnt[i] << "  ";
+    std::cout << std::endl;
 }
 
 
 int main(int argc, char *argv[]) {
-  initSetup();
+    initSetup();
 
-  char Suffix[20], fName[100];
+    char Suffix[20], fName[100];
 
-  ClearHitData();
-  time_t       t = time(0);   // get time now
-  struct tm *now = localtime( & t );
-  sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+    ClearHitData();
+    time_t       t = time(0);   // get time now
+    struct tm *now = localtime( & t );
+    sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
-  TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+    TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
   
-  if (fBoards.size() == 1) {
+    if (fBoards.size() == 1) {
      
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
+        fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
+        fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
-    for (int i = 0; i < fChips.size(); i ++) {
-      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-      fEnabled ++;
-      configureChip (fChips.at(i));
+        for (int i = 0; i < fChips.size(); i ++) {
+            if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+            fEnabled ++;
+            configureChip (fChips.at(i));
+        }
+
+        fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+
+        // put your test here... 
+        if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
+            fBoards.at(0)->SetTriggerConfig (true, true, myPulseDelay, myPulseLength * 10);
+            fBoards.at(0)->SetTriggerSource (trigExt);
+        }
+        else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
+            fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
+            fBoards.at(0)->SetTriggerSource (trigExt);
+        }
+        sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
+        vector<FILE*> fp = InitDataFile(fName, true);
+        if (argc == 2) myNTriggers = atoi(argv[1]);
+
+        scan(fp);
+
+        for (int i = 0; i < fChips.size(); i++) {
+            fclose(fp[i]);
+        }
+
+        if (myDAQBoard) {
+            sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+            WriteScanConfig (fName, fChips.at(0), myDAQBoard);
+            myDAQBoard->PowerOff();
+            delete myDAQBoard;
+        }
     }
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
-
-    // put your test here... 
-    if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
-      fBoards.at(0)->SetTriggerConfig (true, true, myPulseDelay, myPulseLength * 10);
-      fBoards.at(0)->SetTriggerSource (trigExt);
-    }
-    else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
-      fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
-      fBoards.at(0)->SetTriggerSource (trigExt);
-    }
-    sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
-    vector<FILE*> fp = InitDataFile(fName, true);
-    if (argc == 2) myNTriggers = atoi(argv[1]);
-
-    scan(fp);
-
-    for (int i = 0; i < fChips.size(); i++) {
-      fclose(fp[i]);
-    }
-
-    if (myDAQBoard) {
-      sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
-      WriteScanConfig (fName, fChips.at(0), myDAQBoard);
-      myDAQBoard->PowerOff();
-      delete myDAQBoard;
-    }
-  }
-
-  return 0;
+    return 0;
 }
