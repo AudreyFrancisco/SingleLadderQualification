@@ -6,6 +6,8 @@
 #include "TScanConfig.h"
 
 const  int  MAXLOOPLEVEL = 3;
+const  int  MAXBOARDS    = 2;
+
 extern bool fScanAbort;
 
 class TScan {
@@ -14,10 +16,14 @@ class TScan {
   TScanConfig                  *m_config;
   std::vector <TAlpide *>       m_chips;
   std::vector <TReadoutBoard *> m_boards;
-  int m_start [MAXLOOPLEVEL];
-  int m_stop  [MAXLOOPLEVEL];
-  int m_step  [MAXLOOPLEVEL];
-  int m_value [MAXLOOPLEVEL];
+  int m_start   [MAXLOOPLEVEL];
+  int m_stop    [MAXLOOPLEVEL];
+  int m_step    [MAXLOOPLEVEL];
+  int m_value   [MAXLOOPLEVEL];
+  int m_enabled [MAXBOARDS];  // number of enabled chips per readout board
+
+  void CountEnabledChips();
+
  public:
   TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards);
   ~TScan() {};
@@ -37,6 +43,7 @@ class TScan {
 class TMaskScan : public TScan {
  private: 
  protected: 
+  void ConfigureMaskStage(TAlpide *chip, int istage);
  public: 
   TMaskScan  (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards);
   ~TMaskScan () {};

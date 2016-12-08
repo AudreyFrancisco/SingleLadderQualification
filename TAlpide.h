@@ -147,7 +147,7 @@ class TAlpide {
   TAlpide (TChipConfig *config, TReadoutBoard *readoutBoard);
   TChipConfig *GetConfig () {return fConfig;};
   void SetReadoutBoard (TReadoutBoard *readoutBoard) {fReadoutBoard = readoutBoard;};
-  
+  TReadoutBoard *GetReadoutBoard() {return fReadoutBoard;};  
   int  ReadRegister       (Alpide::TRegister address, uint16_t &value);
   int  WriteRegister      (Alpide::TRegister address, uint16_t value, bool verify = false);
   int  ReadRegister       (uint16_t address, uint16_t &value);
