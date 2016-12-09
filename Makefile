@@ -11,12 +11,12 @@ CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp USB.cpp 
  MosaicSrc/alpide3rcv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/i2cbus.cpp MosaicSrc/i2cslave.cpp MosaicSrc/i2csyspll.cpp \
  MosaicSrc/ipbus.cpp MosaicSrc/ipbusudp.cpp MosaicSrc/mdatagenerator.cpp MosaicSrc/mdatareceiver.cpp MosaicSrc/mdatasave.cpp \
  MosaicSrc/mexception.cpp MosaicSrc/mruncontrol.cpp MosaicSrc/mtriggercontrol.cpp MosaicSrc/mwbbslave.cpp \
- MosaicSrc/pexception.cpp MosaicSrc/pulser.cpp TScan.cpp TThresholdScan.cpp
+ MosaicSrc/pexception.cpp MosaicSrc/pulser.cpp TScan.cpp TThresholdScan.cpp TScanConfig.cpp
 #CLASS=  USB.cpp TDaqboard.cpp TPalpidefs.cpp TDut.cpp TTestsetup.cpp chiptests.cpp TConfig.cpp TModuleSetup.cpp
 OBJS = $(CLASS:.cpp=.o)
 $(info OBJS="$(OBJS)")
 
-all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext
+all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest
 
 #ThresholdScan:  $(OBJS) ThresholdScan.cpp
 #	$(CC) -o ThresholdScan $(OBJS) $(CFLAGS) ThresholdScan.cpp $(LINKFLAGS)
@@ -56,6 +56,9 @@ test_poweron:   $(OBJS) main_poweron.cpp
 
 test_noiseocc_ext:   $(OBJS) main_noiseocc_ext.cpp
 	$(CC) -o test_noiseocc_ext $(OBJS) $(CFLAGS) main_noiseocc_ext.cpp $(LINKFLAGS)
+
+test_scantest:   $(OBJS) main_scantest.cpp
+	$(CC) -o test_scantest $(OBJS) $(CFLAGS) main_scantest.cpp $(LINKFLAGS)
 
 %.o: 	%.cpp %.h
 	$(CC) $(CFLAGS) -c -o $@ $<

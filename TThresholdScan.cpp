@@ -10,8 +10,25 @@ TThresholdScan::TThresholdScan (TScanConfig *config, std::vector <TAlpide *> chi
   m_start[0]  = m_config->GetChargeStart();
   m_stop [0]  = m_config->GetChargeStop ();
   m_step [0]  = m_config->GetChargeStep ();
+
+  m_start[1]  = 0;
+  m_step [1]  = 1;
+  m_stop [1]  = m_config->GetNMaskStages();
+
+  m_start[2]  = 0;
+  m_step [2]  = 1;
+  m_stop [2]  = 1;
+
   m_VPULSEH   = 170;
   m_nTriggers = 50;
+}
+
+
+void TThresholdScan::Init() {
+  CountEnabledChips();
+  for (int i = 0; i < m_boards.size(); i++) {
+    std::cout << "Board " << i << ", found " << m_enabled[i] << " enabled chips" << std::endl;
+  }
 }
 
 
