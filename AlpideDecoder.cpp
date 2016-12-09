@@ -215,3 +215,120 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
   }
   return true;
 }
+
+bool AlpideDecoder::DecodeEventAndBunch (unsigned char *data, int nBytes, std::vector <TPixHit> *hits, unsigned int &BunchCounterTmp) {
+  int       byte    = 0;
+  int       region  = -1;
+  int       chip    = -1;
+  int       flags   = 0;
+  bool      started = false; // event has started, i.e. chip header has been found
+  bool      finished = false; // event trailer found
+  TDataType type;
+
+  unsigned char last;
+
+  while (byte < nBytes) {
+    last = data[byte];
+    type = GetDataType (data[byte]);
+    switch (type) {
+    case DT_IDLE:
+      byte +=1;
+      break;
+    case DT_BUSYON:
+      byte += 1;
+      break;
+    case DT_BUSYOFF:
+      byte += 1;
+      break;
+    case DT_EMPTYFRAME:
+      started = true;
+      DecodeEmptyFrame (data + byte, chip, BunchCounterTmp);
+      byte += 2;
+      finished = true;
+      break;
+    case DT_CHIPHEADER:
+      started = true;
+      finished = false;
+      DecodeChipHeader (data + byte, chip, BunchCounterTmp);
+      byte += 2;
+      break;
+    case DT_CHIPTRAILER:
+      if (!started) {
+        std::cout << "Error, chip trailer found before chip header" << std::endl;
+        return false; 
+      }
+      if (finished) {
+        std::cout << "Error, chip trailer found after event was finished" << std::endl;
+        return false;  
+      }
+      DecodeChipTrailer (data + byte, flags);
+      finished = true;
+      chip = -1;
+      byte += 1;
+      break;
+    case DT_REGIONHEADER:
+      if (!started) {
+        std::cout << "Error, region header found before chip header or after chip trailer" << std::endl;
+        return false;
+      }
+      DecodeRegionHeader (data + byte, region);
+      byte +=1;
+      break;
+    case DT_DATASHORT:
+      if (!started) {
+        std::cout << "Error, hit data found before chip header or after chip trailer" << std::endl;
+        return false;
+      }
+      if (region == -1) {
+	std::cout << "Warning: data word without region, skipping (Chip " << chip << ")" << std::endl;
+      }
+      else if (hits) {
+        if (chip == -1) {
+          for (int i = 0; i < nBytes; i++) {
+            printf("%02x ", data[i]);
+	  }
+          printf("\n");
+	}
+        DecodeDataWord (data + byte, chip, region, hits, false);
+      }
+      byte += 2;
+      break;
+    case DT_DATALONG:
+      if (!started) {
+        std::cout << "Error, hit data found before chip header or after chip trailer" << std::endl;
+        return false;
+      }
+      if (region == -1) {
+	std::cout << "Warning: data word without region, skipping (Chip " << chip << ")" << std::endl;
+      }
+      else if (hits) {
+        if (chip == -1) {
+          for (int i = 0; i < nBytes; i++) {
+            printf("%02x ", data[i]);
+	  }
+          printf("\n");
+	}
+        DecodeDataWord (data + byte, chip, region, hits, true);
+      }
+      byte += 3;
+      break;
+    case DT_UNKNOWN:
+      std::cout << "Error, data of unknown type 0x" << std::hex << data[byte] << std::dec << std::endl;
+      return false;
+    }
+  }
+  //std::cout << "Found " << Hits->size() - NOldHits << " hits" << std::endl;
+  if (started && finished) return true;
+
+  else {
+    if (started && !finished) {
+      std::cout << "Warning (chip "<< chip << "), event not finished at end of data, last byte was 0x" << std::hex << (int) last << std::dec << ", event length = " << nBytes <<std::endl;
+      return false;
+    }
+    if (!started) {
+      std::cout << "Warning, event not started at end of data" << std::endl;
+      return false;
+    }
+  }
+  return true;
+}
