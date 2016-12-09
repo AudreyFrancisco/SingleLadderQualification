@@ -9,8 +9,8 @@ void x_csa() {
     gROOT->LoadMacro("csa.C+");
     gROOT->LoadMacro("basic_analysis.C+");
 
-//    csa("../pALPIDEfs-software/pALPIDEfs-software/Data/alfa_2015-02-20/RawHits_150220_1626.dat",
-//        "~/work/tmp/palpidefs.root",
+    csa("/home/palpidefs/MOSAIC/new-alpide-software/Data/na61_161208_night//NoiseOccupancy_161208_231852_Chip2.dat",
+        "/home/palpidefs/MOSAIC/new-alpide-software/Data/na61_161208_night//NoiseOccupancy_161208_231852_Chip2_tree.root");
 //        "");
 //
 ////    basic_analysis();
