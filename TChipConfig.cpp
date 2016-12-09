@@ -74,6 +74,7 @@ void TChipConfig::InitParamMap ()
   fSettings["IRESET"]           = &fIRESET;
   fSettings["STROBEDURATION"]   = &fStrobeDuration;
   fSettings["READOUTMODE"]      = (int*)&fReadoutMode;
+  fSettings["LINKSPEED"]        = &fSerialLinkSpeed; 
 }
 
 

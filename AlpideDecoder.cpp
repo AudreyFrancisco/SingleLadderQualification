@@ -73,10 +73,10 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, s
 
   if ((hits->size() > 0) && (!newEvent)) {
     if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address == hits->back().address)) {
-      std::cout << "Warning, received pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " twice." << std::endl;
+      std::cout << "Warning (chip "<< chip << "), received pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " twice." << std::endl;
     }
     else if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address < hits->back().address)) {
-      std::cout << "Warning, address of pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " is lower than previous one ("<< hits->back().address << ") in same double column." << std::endl;
+      std::cout << "Warning (chip "<< chip << "), address of pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " is lower than previous one ("<< hits->back().address << ") in same double column." << std::endl;
     }
   }
 

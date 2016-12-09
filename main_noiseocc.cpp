@@ -16,6 +16,7 @@
 
 #include <unistd.h>
 #include <string.h>
+#include <climits>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -28,18 +29,18 @@
 #include "SetupHelpers.h"
 
 int myVCASN   = 57;
-int myITHR    = 51;
+int myITHR    = 50;
 int myVCASN2  = 64;
 int myVCLIP   = 0;
 int myVRESETD = 147;
 
 int myStrobeLength = 20;      // strobe length in units of 25 ns
 int myStrobeDelay  = 10;
-int myPulseLength  = 500;
+int myPulseLength  = 4000;
 
 int myPulseDelay   = 40;
 //int myNTriggers    = 1000000;
-int myNTriggers    = 100000;
+int myNTriggers    = 1000000;
 //int myNTriggers    = 100;
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
@@ -216,6 +217,8 @@ void scan(vector<FILE*> fp) {
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
   int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 100;
+
+  if (myNTriggers == -1) myNTriggers = INT_MAX;
 
   nTrains = myNTriggers / nTrigsPerTrain;
   nRest   = myNTriggers % nTrigsPerTrain;

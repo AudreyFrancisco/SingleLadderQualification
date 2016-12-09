@@ -50,6 +50,7 @@ int initSetupOB() {
   std::cout << "Checking control interfaces." << std::endl;
   int nWorking = CheckControlInterface();
   std::cout << "Found " << nWorking << " working chips" << std::endl;
+  sleep(5);
   MakeDaisyChain();
 }
 
@@ -125,7 +126,26 @@ int initSetupIB() {
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) fConfig->GetBoardConfig(0);
 
   boardConfig->SetInvertedData (false);
-  boardConfig->SetSpeedMode    (Mosaic::RCV_RATE_1200);
+
+  Mosaic::TReceiverSpeed speed; 
+
+  switch (fConfig->GetChipConfig(0)->GetParamValue("LINKSPEED")) {
+  case 400: 
+    speed = Mosaic::RCV_RATE_400;
+    break;
+  case 600: 
+    speed = Mosaic::RCV_RATE_600;
+    break;
+  case 1200: 
+    speed = Mosaic::RCV_RATE_1200;
+    break;
+  default: 
+    std::cout << "Warning: invalid link speed, using 1200" << std::endl;
+    speed = Mosaic::RCV_RATE_1200;
+    break;
+  }
+  std::cout << "Speed mode = " << speed << std::endl;
+  boardConfig->SetSpeedMode    (speed);
 
   fBoards.push_back (new TReadoutBoardMOSAIC(boardConfig));
 

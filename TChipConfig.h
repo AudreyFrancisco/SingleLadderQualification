@@ -16,7 +16,7 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
   const bool READOUT_MODE           = false;// triggered
   const bool ENABLE_CLUSTERING      = true;
   const int  MATRIX_READOUT_SPEED   = 1;
-  const int  SERIAL_LINK_SPEED      = 3;
+  const int  SERIAL_LINK_SPEED      = 1200;
   const bool ENABLE_SKEWING_GLOBAL  = false;
   const bool ENABLE_SKEWING_STARTRO = false;
   const bool ENABLE_CLOCK_GATING    = false;

@@ -56,14 +56,17 @@ public:
 private:					// WBB Slave registers map 
 	enum regAddress_e {
 		regOpMode		= 0,
-                regConfig               = 8,
+		//                regConfig               = 8,
 		rdpBase			= 0x00800000
-		};
+	};
 
 public:
 	enum opModeBits_e {
-		OPMODE_RCVENABLE			= (1<<0),
-		OPMODE_INVERT_POLARITY		= (1<<3)	};
+	        OPMODE_RCVENABLE       = (1<<0),
+		//		OPMODE_INVERT_POLARITY = (3<<2)	
+		OPMODE_INVERT_POLARITY = (1 << 1)	
+		
+        };
 
 };
 
