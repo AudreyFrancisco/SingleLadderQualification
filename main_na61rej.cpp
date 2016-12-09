@@ -27,6 +27,8 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
+int VERBOSE = 2;
+
 int myVCASN   = 57;
 int myITHR    = 51;
 int myVCASN2  = 64;
@@ -171,8 +173,14 @@ void WriteDataToFile(vector<FILE*> fp,vector<TPixHit>* Hits, int nevent) {
         int dcol    = Hits->at(ihit).dcol;
         int region  = Hits->at(ihit).region;
         int address = Hits->at(ihit).address;
-        if ((chipId < 0) || (dcol < 0) || (region < 0) || (address < 0)) {
-            std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
+        if(chipId < 0) {
+            std::cout << "ERROR, WriteDataToFile(), chipId < 0" << std::endl;
+        }
+        else if ( (dcol < 0) && (region < 0) && (address < 0) ) {
+            fprintf(fp[myChipId[chipId]], "%d %d %d %d\n", nevent, dcol, region, address);
+        }
+        else if ((dcol < 0) || (region < 0) || (address < 0)) {
+            std::cout << "ERROR, WriteDataToFile(), Bad pixel coordinates ( <0), skipping hit" << std::endl;
         }
         else {
 //        cout << myChipId[chipId] << endl;
@@ -250,10 +258,15 @@ void scan(vector<FILE*> fp) {
     int recTriggers = 0; // number of read out triggers
     // data consistency counters
     int received_cnt[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int doubleEvts[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int skippedEvtsMissing = 0;
+    int skippedEvtsBad = 0;
+    int skippedEvtsMissingAndBad = 0;
+
+    // error catching flags
+    bool flagBadHits = false;
     bool flagMissingData = false;
     int  valMissingData = 0;
-    int skippedEvts = 0;
-    int doubleEvts[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     while(recTriggers < myNTriggers) {
         // polling for triggers
@@ -273,12 +286,15 @@ void scan(vector<FILE*> fp) {
             int prevRcv = -1; // previous receiver
             int rcvdHits = 0;
 
+            if(!flagMissingData) flagBadHits = false;
+
             for(int ichip=flagMissingData; ichip < fEnabled; ++ichip) {
                 if(flagMissingData) {
-                    std::cout << "INFO, main_na61, " << recTriggers << " " << itrig << " " << 
-                        ichip << ", missing / advanced data situation solved" << std::endl;
+                    if(VERBOSE > 1) std::cout << "INFO, main_na61, " << recTriggers << " " << itrig << " " << 
+                                    ichip << ", missing / advanced data situation solved" << std::endl;
                     flagMissingData = false;
                 }
+                
                 // wait for data if needed
                 while (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) {
                     std::cout << "Waiting for data..." << std::endl;
@@ -292,29 +308,40 @@ void scan(vector<FILE*> fp) {
                 int expChipId = rcvToChipId(rcv); // expected chip id
                 if (expChipId == -1) {
                     std::cout << "FATAL, main_na61, " << recTriggers << " " << itrig << " " << ichip 
-                              << ", ChipID - RCV problem. Manual code check needed! Exiting!" << std::endl;
+                                          << ", ChipID - RCV problem. Manual code check needed! Exiting!" << std::endl;
                     return;
                 }
+                
 
                 if(triggerRcvd[rcv]) {
                     if(prevRcv != rcv) {
-                        std::cout << "ERROR, main_na61, " << recTriggers << " " << itrig << " " << ichip
-                                  << ", already processed reciever " << rcv << " - chip " << expChipId << std::endl;
+                        if(VERBOSE > 1) std::cout << "ERROR, main_na61, " << recTriggers << " " << itrig << " " << ichip
+                                                  << ", already processed reciever " << rcv << " - chip " << expChipId << std::endl;
                         flagMissingData = true;
                         valMissingData = rcv;
-                        //std::cout << "Processed receivers: ";
-                        //for(int i=0; i<9; ++i) 
-                        //    std::cout << triggerRcvd[i] << "  ";
-                        //std::cout << std::endl;
-                        Hits->erase(Hits->begin(), Hits->begin()+rcvdHits);
+                        // dump hits
+                        //Hits->erase(Hits->begin(), Hits->begin()+rcvdHits);
+                        Hits->clear();
                         rcvdHits = 0;
-                        for(int i=0; i<9; ++i) received_cnt[rcvToChipId(i)] -= triggerRcvd[i];
-                        skippedEvts++;
+                        std::vector <TPixHit> *ErrorHits = new std::vector<TPixHit>;
+                        for(int i=0; i<9; ++i) {
+                            received_cnt[rcvToChipId(i)] -= triggerRcvd[i];
+                            //triggerRcvd[i]=0;
+                            TPixHit errhit; errhit.chipId = rcvToChipId(i); errhit.dcol = -1; errhit.region = -1; errhit.address = -1;
+                            ErrorHits->push_back(errhit);
+                        }
+                        //triggerRcvd[valMissingData]++;
+                        WriteDataToFile(fp, ErrorHits, recTriggers);
+                        ErrorHits->clear();
+                        delete ErrorHits;
+                        skippedEvtsMissing++;
+                        if(flagBadHits) skippedEvtsMissingAndBad++;
+                        flagBadHits = false;
                     }
                     else {
-                        std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip
-                                  << ", already processed reciever " << rcv << " - chip " << expChipId
-                                  << " once. Processing again." << std::endl;
+                        if(VERBOSE > 1) std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip
+                                                  << ", already processed reciever " << rcv << " - chip " << expChipId
+                                                  << " once. Processing again." << std::endl;
                         ichip--;
                         doubleEvts[expChipId]++;
                     }
@@ -327,10 +354,11 @@ void scan(vector<FILE*> fp) {
                 // decode Chip event
                 int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
                 bool Decode = AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
-          
+
                 if(!Decode) {
-                    std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip
-                              << ", Decode failed! (receiver " << rcv << " - chipID" << rcvToChipId(rcv) << ")!" << std::endl; 
+                    if(VERBOSE) std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip
+                                          << ", Decode failed! (receiver " << rcv << " - chipID " << rcvToChipId(rcv) << ")!" << std::endl; 
+                    flagBadHits = true;
                 }
 
                 if(Hits->size() > rcvdHits) {
@@ -338,22 +366,45 @@ void scan(vector<FILE*> fp) {
                     int prevChipId = -999;
                     for (int ihit = rcvdHits; ihit < Hits->size(); ihit ++) {
                         int iChipId  = Hits->at(ihit).chipId;
-                        if(iChipId < 0 || iChipId > 8)
-                            std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip 
-                                      << ", ChipId out of range fo IB HIC = " << iChipId << std::endl;
-                        if(prevChipId != -999 && prevChipId != iChipId)
-                            std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip 
-                                      << ", ChipId within same Hits changes! Previous " << prevChipId << " is now " << iChipId << std::endl;
+                        if(iChipId < 0 || iChipId > 8) {
+                            if(VERBOSE) std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip 
+                                                  << ", ChipId out of range fo IB HIC = " << iChipId << std::endl;
+                            flagBadHits = true;
+                        }
+                        if(prevChipId != -999 && prevChipId != iChipId) {
+                            if(VERBOSE) std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip 
+                                                  << ", ChipId within same Hits changes! Previous " << prevChipId << " is now " << iChipId << std::endl;
+                            flagBadHits = true;
+                        }
                         prevChipId = iChipId;
                     }
-                    if(prevChipId != rcvToChipId(rcv))
-                        std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip 
-                                  << ", ChipId " << prevChipId << " not expected on reciever " << rcv << std::endl;                    
+                    if(prevChipId != rcvToChipId(rcv)) {
+                        if(VERBOSE) std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip 
+                                              << ", ChipId " << prevChipId << " not expected on reciever " << rcv << std::endl;
+                        flagBadHits = true;
+                    }
                     rcvdHits = Hits->size();
                 }
                 if(flagMissingData) break;
             } // FOR chips
-            WriteDataToFile(fp, Hits, recTriggers + flagMissingData);
+            if(flagBadHits) {
+                // dump hits
+                Hits->clear();
+                rcvdHits = 0;
+                std::vector <TPixHit> *ErrorHits = new std::vector<TPixHit>;
+                for(int i=0; i<9; ++i) {
+                    //received_cnt[rcvToChipId(i)] -= triggerRcvd[i];
+                    TPixHit errhit; errhit.chipId = rcvToChipId(i); errhit.dcol = -2; errhit.region = -2; errhit.address = -2;
+                    ErrorHits->push_back(errhit);
+                }
+                WriteDataToFile(fp, ErrorHits, recTriggers + flagMissingData);
+                ErrorHits->clear();
+                delete ErrorHits;
+                skippedEvtsBad++;
+            }
+            else {
+                WriteDataToFile(fp, Hits, recTriggers + flagMissingData);
+            }
             recTriggers++;
         } // FOR triggers
         std::cout << "\r"
@@ -382,8 +433,8 @@ void scan(vector<FILE*> fp) {
     for(int i=0; i<9; ++i) 
         std::cout << received_cnt[i] << "  ";
     std::cout << std::endl;
-    std::cout << "Skipped events: " << skippedEvts << std::endl;
-    std::cout << "Num. of double reads: ";
+    std::cout << "Skipped events (missing): " << skippedEvtsMissing << " / Skipped events (bad): " << skippedEvtsBad << " / Both: " << skippedEvtsMissingAndBad << std::endl;
+    std::cout << "Number of double reads per chip:    ";
     for(int i=0; i<9; ++i) 
         std::cout << doubleEvts[i] << "  ";
     std::cout << std::endl;
