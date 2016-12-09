@@ -59,7 +59,7 @@ void AlpideDecoder::DecodeEmptyFrame (unsigned char *data, int &chipId, unsigned
 }
 
 
-void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong) {
+void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong, unsigned int bunchCounter) {
   TPixHit hit;
   int     address, hitmap_length;
 
@@ -67,6 +67,7 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, s
 
   if (chip == -1) {std::cout << "Warning, found chip id -1, dataword = 0x" <<std::hex << (int) data_field << std::dec << std::endl;}
   hit.chipId = chip;
+  hit.bunch  = (int)bunchCounter;
   hit.region = region;
   hit.dcol   = (data_field & 0x3c00) >> 10;
   address    = (data_field & 0x03ff);
@@ -172,7 +173,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
 	  }
           printf("\n");
 	}
-        DecodeDataWord (data + byte, chip, region, hits, false);
+        DecodeDataWord (data + byte, chip, region, hits, false, BunchCounterTmp);
       }
       byte += 2;
       break;
@@ -191,7 +192,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
 	  }
           printf("\n");
 	}
-        DecodeDataWord (data + byte, chip, region, hits, true);
+        DecodeDataWord (data + byte, chip, region, hits, true, BunchCounterTmp);
       }
       byte += 3;
       break;
@@ -289,7 +290,7 @@ bool AlpideDecoder::DecodeEventAndBunch (unsigned char *data, int nBytes, std::v
 	  }
           printf("\n");
 	}
-        DecodeDataWord (data + byte, chip, region, hits, false);
+        DecodeDataWord (data + byte, chip, region, hits, false, BunchCounterTmp);
       }
       byte += 2;
       break;
@@ -308,7 +309,7 @@ bool AlpideDecoder::DecodeEventAndBunch (unsigned char *data, int nBytes, std::v
 	  }
           printf("\n");
 	}
-        DecodeDataWord (data + byte, chip, region, hits, true);
+        DecodeDataWord (data + byte, chip, region, hits, true, BunchCounterTmp);
       }
       byte += 3;
       break;

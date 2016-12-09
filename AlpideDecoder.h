@@ -10,6 +10,7 @@ typedef struct {
   int region; 
   int dcol;
   int address;
+  int bunch;
 } TPixHit;
 
 class AlpideDecoder {
@@ -18,7 +19,7 @@ class AlpideDecoder {
    static void      DecodeChipTrailer  (unsigned char *data, int &flags);
    static void      DecodeRegionHeader (unsigned char *data, int &region);
    static void      DecodeEmptyFrame   (unsigned char *data, int &chipId, unsigned int &bunchCounter);
-   static void      DecodeDataWord     (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong);
+   static void      DecodeDataWord     (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong, unsigned int bunchCounter=1);
  protected:
  public:
    static TDataType GetDataType        (unsigned char dataWord);

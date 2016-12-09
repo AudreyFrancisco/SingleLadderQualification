@@ -27,7 +27,7 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
-int VERBOSE = 0;
+int VERBOSE = 2;
 
 int myVCASN   = 57;
 int myITHR    = 51;
@@ -173,6 +173,7 @@ void WriteDataToFile(vector<FILE*> fp,vector<TPixHit>* Hits, int nevent) {
         int dcol    = Hits->at(ihit).dcol;
         int region  = Hits->at(ihit).region;
         int address = Hits->at(ihit).address;
+        int bunch   = Hits->at(ihit).bunch;
         if(chipId < 0) {
             std::cout << "ERROR, WriteDataToFile(), chipId < 0" << std::endl;
         }
@@ -184,7 +185,7 @@ void WriteDataToFile(vector<FILE*> fp,vector<TPixHit>* Hits, int nevent) {
         }
         else {
 //        cout << myChipId[chipId] << endl;
-            fprintf(fp[myChipId[chipId]], "%d %d %d %d\n", nevent,dcol + region*16, address, 1);
+            fprintf(fp[myChipId[chipId]], "%d %d %d %d\n", nevent,dcol + region*16, address, bunch);
         }    }
     Hits->clear();
 }
@@ -356,7 +357,7 @@ void scan(vector<FILE*> fp) {
                 unsigned int bunchCounter;
                 bool Decode = AlpideDecoder::DecodeEventAndBunch(buffer + n_bytes_header, n_bytes_chipevent, Hits, bunchCounter);
 
-                std::cout << "Rcv " << rcv  << " bunchCounter " << bunchCounter << std::endl;
+                ///                std::cout << "Rcv " << rcv  << " bunchCounter " << bunchCounter << std::endl;
 
 
                 if(!Decode) {
