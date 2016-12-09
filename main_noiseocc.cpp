@@ -40,7 +40,7 @@ int myPulseLength  = 4000;
 
 int myPulseDelay   = 40;
 //int myNTriggers    = 1000000;
-int myNTriggers    = 1000000;
+int myNTriggers    = 1000000000;
 //int myNTriggers    = 100;
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
@@ -48,6 +48,25 @@ int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 int HitData     [16][512][1024];
 
 vector<int> myChipId(32,0);
+
+int CHIPRCVMAP [] = { 3, 5, 7, 8, 6, 4, 2, 1, 0 };
+int RCVCHIPMAP [] = { 8, 7, 6, 0, 5, 1, 4, 2, 3 };
+
+int chipIdToRcv(int chipId) {
+    if(chipId < 0 || chipId > 8) {
+        std::cerr << "WARNING, chipIdToRcv, chipId out of range!" << std::endl;
+        return -1;
+    }
+    else return CHIPRCVMAP[chipId];
+}
+
+int rcvToChipId(int rcv) {
+    if(rcv < 0 || rcv > 8) {
+        std::cerr << "WARNING, rcvToChipId, reciever out of range!" << std::endl;
+        return -1;
+    }
+    else return RCVCHIPMAP[rcv];
+}
 
 void ClearHitData() {
   for (int ichip = 0; ichip < 16; ichip ++) {
@@ -234,8 +253,10 @@ void scan(vector<FILE*> fp) {
     myMOSAIC->StartRun();
   }
 
+  int received_cnt[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
   for (int itrain = 0; itrain <= nTrains; itrain ++) {
-    std::cout << "Train: " << itrain << std::endl;
+      //std::cout << "\r" << "Train: " << itrain << "                     " << std::endl;
     if (itrain == nTrains) {
       nTrigsThisTrain = nRest;
     }
@@ -249,15 +270,17 @@ void scan(vector<FILE*> fp) {
       int trials = 0;
       while(itrg < nTrigsThisTrain * fEnabled) {
         if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
-          usleep(100);
+          usleep(1e6);
           trials ++;
+          /*
           if (trials == 101) {
         	std::cout << "Reached 101 timeouts (10.1 ms), giving up on this event" << std::endl;
             itrg = nTrigsThisTrain * fEnabled;
             skipped ++;
             trials = 0;
           }
-          continue;
+          */
+          //continue;
         }
         else {
           // decode DAQboard event
@@ -268,10 +291,33 @@ void scan(vector<FILE*> fp) {
           else {
    	        nClosedEvents = 1;
           }
+
+          int rcv = boardInfo.channel-1; // MOSAIC is counting receivers from 1
+          received_cnt[rcvToChipId(rcv)]++;
           // decode Chip event
           int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
           bool Decode = AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
-          //if (!Decode) {
+          
+          if(!Decode) {
+              std::cerr << "WARNING, main_noiseocc, Decode failed! (receiver " << rcv << " - chipID" << rcvToChipId(rcv) << ")!" << std::endl; 
+          }
+
+          if(Hits->size()) {
+              // check hits consistency
+              int prevChipId = -999;
+              for (int ihit = 0; ihit < Hits->size(); ihit ++) {
+                  int iChipId  = Hits->at(ihit).chipId;
+                  if(iChipId < 0 || iChipId > 8)
+                      std::cerr << "WARNING, main_noiseocc, ChipId out of range fo IB HIC = " << iChipId << std::endl;
+                  if(prevChipId != -999 && prevChipId != iChipId)
+                      std::cerr << "WARNING, main_noiseocc, ChipId within same Hits changes! Previous " << prevChipId << " is now " << iChipId << std::endl;
+                  prevChipId = iChipId;
+              }
+              if(prevChipId != rcvToChipId(rcv))
+                  std::cerr << "WARNING, main_noiseocc, ChipId " << prevChipId << " not expected on reciever " << rcv << std::endl;  
+          }
+
+	  //if (!Decode) {
           //  printf("Bad Event: ");
           //  for (int i = 0; i < n_bytes_chipevent; i++) {
           //    printf ("%02x ", buffer[n_bytes_header + i]);
@@ -281,17 +327,31 @@ void scan(vector<FILE*> fp) {
           itrg+=nClosedEvents;
         }
 //        CopyHitData(Hits);
-        WriteDataToFile(fp, Hits, itrg/fEnabled + itrain*nTrigsThisTrain);
-      } 
+        WriteDataToFile(fp, Hits, myMOSAIC->GetTriggerCount());
+
+        std::cout << "\r"
+                  << "Received triggers: " << itrg/fEnabled + itrain*nTrigsThisTrain << "   " 
+                  << "MOSAIC Trigger Counter: " << myMOSAIC->GetTriggerCount() << "   "
+            //<< "boardInfo.channel = " << boardInfo.channel << "   "
+                  << std::flush;
+      }
+      for (int ichips = 0; ichips < 9; ichips++) {
+          fflush(fp[ichips]);
+      }
       //std::cout << "Number of hits: " << Hits->size() << std::endl;
   }
+  std::cout << std::endl;
   if (myMOSAIC) {
     myMOSAIC->StopRun();
   }
+
+  for(int i=0; i<9; ++i) 
+      std::cout << received_cnt[i] << "  ";
+  std::cout << std::endl;
 }
 
 
-int main() {
+int main(int argc, char *argv[]) {
   initSetup();
 
   char Suffix[20], fName[100];
@@ -327,6 +387,7 @@ int main() {
     }
     sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
     vector<FILE*> fp = InitDataFile(fName, true);
+    if (argc == 2) myNTriggers = atoi(argv[1]);
 
     scan(fp);
 

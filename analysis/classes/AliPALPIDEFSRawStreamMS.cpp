@@ -56,9 +56,14 @@ Bool_t AliPALPIDEFSRawStreamMS::ReadEvent()
   while(fFileInput.good() && evt == fEventCounter) {
     //fFileInput >> col >> row;
     fFileInput >> dcol >> addr >> hits;
-    dblcol_adr_to_col_row(dcol, addr, &col, &row);
-    fHitCols.push_back(col);
-    fHitRows.push_back(row);
+    if(dcol < 0 || addr < 0 || row < 0) {
+        //skip event
+    }
+    else {
+        dblcol_adr_to_col_row(dcol, addr, &col, &row);
+        fHitCols.push_back(col);
+        fHitRows.push_back(row);
+    }
     if(!fFileInput.good()) {
       cerr << "AliPALPIDEFSRawStreamMS::ReadEvent() : Error Input File : 2" << endl;
       return kFALSE;

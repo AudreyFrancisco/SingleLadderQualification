@@ -1,6 +1,7 @@
 /// Developer: Valerio Altini  Contact: valerio.altini@cern.ch  ///
 //  Modified for palpide by Miljenko Suljic, m.suljic@cern.ch
 //  Modified for ALPIDE by Jacobus van Hoorne, jvanhoor@cern.ch
+//  Modified Paolo Martinengo
 
 #include <iostream>
 #include <string>
@@ -51,6 +52,7 @@ private:
 
     TCanvas *c1; //single event
     TCanvas *c2; //summary canvas
+    TCanvas *c4;
     TCanvas *c3; //summary canvas consisting full dev
     TPad *pad;   //same as above
 
@@ -69,6 +71,7 @@ private:
     // Histo to fill
     TH2F *map;
     TH2F *maptot;
+    TH2F *mapall;
     vector<TH2F*> mapdev;
 
     // Functions
@@ -114,10 +117,12 @@ Monitoring::~Monitoring() {
     delete tentry;
     delete c1;
     delete c2;
+    delete c4;
     delete c3;
     delete pad;
     delete map;
     delete maptot;
+    delete mapall;
     for (int i = 0; i < 9; i++) {
       delete mapdev[i];
     }
@@ -176,8 +181,10 @@ Bool_t Monitoring::InitHistos(){
 
     TRootCanvas *c1i;
     TRootCanvas *c2i;
+    TRootCanvas *c4i;
     TRootCanvas *c3i;
     TRootCanvas *p3i;
+    //TRootCanvas *p4i;
 
     c1 = new TCanvas("pALPIDEfsSnglEvt","pALPIDEfs Single Event",1200,600);
     c1i=(TRootCanvas*)c1->GetCanvasImp();
@@ -186,6 +193,7 @@ Bool_t Monitoring::InitHistos(){
     c2 = new TCanvas("pALPIDEfsAllEvt","pALPIDEfs Cumulative Events",1200,600);
     c2i=(TRootCanvas*)c2->GetCanvasImp();
     c2i->DontCallClose();
+    c4 = new TCanvas("pALPIDEfsAllEvt_IBHIC","ALPIDE IB HIC",1900,300);
     
     c3 = new TCanvas("pALPIDEfsAllEvt_AllDev","pALPIDEfs Cumulative Events2",1900,300);
 //    c3->Divide(9,1,0,0);
@@ -197,16 +205,25 @@ Bool_t Monitoring::InitHistos(){
     p3i->DontCallClose();
     c3i=(TRootCanvas*)c3->GetCanvasImp();
     c3i->DontCallClose();
-    
+
+    //padAll = new TPad("ALPIDE IB HIC", "ALPIDE IB HIC", 0, 0, 1, 1);
+    //padAll->Draw()
+    //p4i=(TRootCanvas*)padAll->GetCanvasImp();
+    //p4i->DontCallClose();
+    c4i=(TRootCanvas*)c4->GetCanvasImp();
+    c4i->DontCallClose();
+
     map = new TH2F("snglevt", "pALPIDEfs Event;Column;Row", 1024/BINRED, -0.5, 1023.5, 512/BINRED, -0.5, 512);
     maptot = new TH2F("allevt", "pALPIDEfs Multiple Events;Column;Row", 1024/BINRED, -0.5, 1023.5, 512/BINRED, -0.5, 512);
     for (int i = 0; i < 9; i++) {
       mapdev.push_back(new TH2F(Form("allevt%d",i), Form( "AllEvent %d;Column;Row",i), 1024/BINRED, -0.5, 1023.5, 512/BINRED, -0.5, 511.5)); 
       mapdev[i]->SetStats(0);
     }
+    mapall = new TH2F("allevtsingle", "IB HIC Multiple Events;Column;Row", 9*1024/BINRED, -0.5, 9*1024-0.5, 512/BINRED, -0.5, 511.5);
    
     map->SetStats(0);
     maptot->SetStats(0);
+    mapall->SetStats(0);
 
 // End histo part
     return kTRUE;
@@ -269,7 +286,10 @@ Bool_t Monitoring::ProcessSingleEvent(){
     for (int ichips = 0; ichips < 9; ichips++) {
       for (int ihit = 0; palpidefsdev[ichips]->GetNextHit(&col, &row); ++ihit) {
 //        cout << ichips << " " << col << " "  << row << endl;
-        mapdev[ichips]->Fill(col, row);
+          if(col >= 0 && row >= 0 && col < 1024 && row < 512) {
+              mapdev[ichips]->Fill(col, row);
+              mapall->Fill(ichips*1024+col, row);
+          }
       }
     }
 
@@ -288,6 +308,7 @@ Bool_t Monitoring::FinishEventFast(){
 Bool_t Monitoring::ResetAll(){
   map->Reset();
   maptot->Reset();
+  mapall->Reset();
   for (int ichips = 0; ichips < 9; ichips++) {
     mapdev[ichips]->Reset();
   }
@@ -343,7 +364,10 @@ Bool_t Monitoring::ProcessSingleEventFast(){
 //      cout << ichips << endl;
       for (int ihit = 0; palpidefsdev[ichips]->GetNextHit(&col, &row); ++ihit) {
 //        cout << ichips << " " << col << " "  << row << endl;
-        mapdev[ichips]->Fill(col, row);
+          if(col >= 0 && row >= 0 && col < 1024 && row < 512) {
+              mapdev[ichips]->Fill(col, row);
+              mapall->Fill(ichips*1024+col, row);
+          }
       }
     }
     
@@ -365,28 +389,34 @@ Bool_t Monitoring::DrawSE(){
     map->DrawCopy("COLZ");
     c1->Update();
 
-#ifdef ZOOM
-    Float_t avgz = maptot->Integral()/maptot->GetNbinsX()/maptot->GetNbinsY();
-#endif
 
     c2->cd();
     maptot->DrawCopy("COLZ");
 #ifdef ZOOM
-    maptot->GetZaxis()->SetRangeUser(0, 30);
+    maptot->GetZaxis()->SetRangeUser(0, 50);
 #endif
     c2->Update();
+
+    c4->cd();
+    mapall->DrawCopy("COLZ");
+#ifdef ZOOM
+    //mapall->GetZaxis()->SetRangeUser(0, 50);
+#endif
+    c4->Update();
+
   
     c3->cd();
     for (int ichips = 0; ichips < 9; ichips++) {
       pad->cd(ichips+1);
       mapdev[ichips]->DrawCopy("COLZ");
 #ifdef ZOOM
-    mapdev[ichips]->GetZaxis()->SetRangeUser(0, 30);
+    mapdev[ichips]->GetZaxis()->SetRangeUser(0, 50);
 #endif
 //      cout << "ho " << endl;
       pad->Update();
     }
-//    c3->Update();
+
+
     return kTRUE;
   
 }

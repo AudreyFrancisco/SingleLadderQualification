@@ -43,7 +43,7 @@ Bool_t csa(
     const TString filepath_raw,                      // path to SourceRaw_*_*.dat file
     const TString filepath_tree,                     // output tree path
     const TString filepath_mask="",                  // path to mask file
-    const Short_t crown = 3,                         // consider neighbours all pixels in <crown> crown
+    const Short_t crown = 1,                         // consider neighbours all pixels in <crown> crown
     const Bool_t  flagRmSingleHotPixClusters = kTRUE // do not save clusters with just one pixels which is hot
     ) {
 
@@ -72,7 +72,7 @@ Bool_t csa(
     BinaryPlane* plane[n_secs];
     for(Short_t i=0; i<n_secs; ++i) plane[i] = new BinaryPlane(); 
     BinaryCluster* cluster = new BinaryCluster();
-    vector<BinaryPixel> pix_vec;
+    vector<BinaryPixel> pix_vec; pix_vec.resize(MAX_CS);
     BinaryPixel*  pix_arr = new BinaryPixel[MAX_CS];
     BinaryPixel   pix_tmp;
 
@@ -119,8 +119,8 @@ Bool_t csa(
     //-------------------------------------------
     cout << "csa() : Started reading RawHits file." << endl;
     Long_t evts = 0;
-    while(palpidefsRaw->ReadEvent() && evts<1000) {
-        if( (evts+1)%10 == 0 )
+    while(palpidefsRaw->ReadEvent()) {
+        if( (evts+1)%1000 == 0 )
             cout << "csa() : Processed events: " << evts+1 << endl;
         event->Reset();
         event->SetEventID(evts);
@@ -137,8 +137,10 @@ Bool_t csa(
         Bool_t  flagPixAdded = kTRUE;
         hNPixAll->Fill(nhits);
 
+
         // read which pixels are hit and re-construct first cluster
         while(palpidefsRaw->GetNextHit(&col, &row)) {
+            //if(nhits > 100) cout << nhits << " " << j << endl;
             n_hitpix[col/scols]++;
             pix_tmp.Reset();
             pix_tmp.Set(col, row);
@@ -187,6 +189,7 @@ Bool_t csa(
             plane[TMath::FloorNint(cluster->GetX() / scols)]->AddCluster(cluster);
         
         // reconstruct other clusters
+
         while(nhits) {
             pix_arr[0] = pix_vec[0];
             pix_vec.erase(pix_vec.begin());
@@ -197,6 +200,7 @@ Bool_t csa(
                         pix_arr[j] = pix_vec[i];
                         pix_vec.erase(pix_vec.begin()+i);
                         ++j; --nhits; --i;
+                        if(i < 0) break; //FIX ME - this should not be needed
                     }
                 }
             }
@@ -224,6 +228,7 @@ Bool_t csa(
             else
                 plane[TMath::FloorNint(cluster->GetX() / scols)]->AddCluster(cluster);
         }
+
 
         // fill the tree (if at least one plane is hit)
         Bool_t flagFill = kFALSE;
