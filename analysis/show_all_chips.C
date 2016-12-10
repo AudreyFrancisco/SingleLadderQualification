@@ -8,7 +8,7 @@
 
 void show_all_chips() {
 
-    TString prefix = "/home/palpidefs/MOSAIC/new-alpide-software/Data/na61_161209_203716/results/analysis_basic_";
+    TString prefix = "/home/palpidefs/MOSAIC/new-alpide-software/Data/na61_161210_025127/results/analysis_basic_";
 
 
     TH2F *mapall = new TH2F("mapall", "IB HIC", 1024*9, -0.5, 1024*9-0.5, 512, -0.5, 512);

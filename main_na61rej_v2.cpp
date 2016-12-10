@@ -28,6 +28,7 @@
 #include "SetupHelpers.h"
 
 int VERBOSE = 2;
+bool WRITE_DEBUG_FILE = true;
 
 int myVCASN   = 57;
 int myITHR    = 51;
@@ -236,7 +237,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 }
 
 
-void scan(vector<FILE*> fp) {   
+void scan(vector<FILE*> fp, FILE *fd) {   
     unsigned char         buffer[1024*4000]; 
     int                   n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0, skipped = 0;
     TBoardHeader          boardInfo;
@@ -302,6 +303,14 @@ void scan(vector<FILE*> fp) {
                     usleep(1e2);
                 }
                 
+                if(WRITE_DEBUG_FILE) {
+                    for (int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
+                        fprintf(fd, "%02x", (int) fDebugBuffer.at(ibyte));
+                    }
+                    fprintf(fd, "\n\n");
+                }
+
+
                 // decode DAQboard event
                 BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
 
@@ -449,7 +458,7 @@ void scan(vector<FILE*> fp) {
 int main(int argc, char *argv[]) {
     initSetup();
 
-    char Suffix[20], fName[100];
+    char Suffix[20], fName[100], fNameDebug[100];
 
     ClearHitData();
     time_t       t = time(0);   // get time now
@@ -481,17 +490,23 @@ int main(int argc, char *argv[]) {
             fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
             fBoards.at(0)->SetTriggerSource (trigExt);
         }
+
         sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
         vector<FILE*> fp = InitDataFile(fName, true);
+
+        sprintf(fNameDebug, "Data/RawDebugData_%s.dat", Suffix);
+        FILE * fdebug = fopen(fNameDebug, "w");
+
         if (argc == 2) myNTriggers = atoi(argv[1]);
 
         fBoards.at(0)->SendOpCode (Alpide::OPCODE_BCRST);
 
-        scan(fp);
+        scan(fp, fdebug);
 
         for (int i = 0; i < fChips.size(); i++) {
             fclose(fp[i]);
         }
+        fclose(fdebug);
 
         if (myDAQBoard) {
             sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
