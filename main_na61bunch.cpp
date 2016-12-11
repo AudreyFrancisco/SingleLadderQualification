@@ -28,7 +28,7 @@
 #include "SetupHelpers.h"
 
 int VERBOSE = 2;
-bool WRITE_DEBUG_FILE = true;
+bool WRITE_DEBUG_FILE = false;
 
 int myVCASN   = 57;
 int myITHR    = 51;
@@ -48,11 +48,19 @@ int myNTriggers    = 1000000000;
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
 int HitData     [16][512][1024];
+vector<int> enabledChips(32,0);
 
 vector<int> myChipId(32,0);
 
 int CHIPRCVMAP [] = { 3, 5, 7, 8, 6, 4, 2, 1, 0 };
 int RCVCHIPMAP [] = { 8, 7, 6, 0, 5, 1, 4, 2, 3 };
+
+struct OpenBunch {
+    int bunch;
+    int count;
+    int trigger;
+};
+
 
 int chipIdToRcv(int chipId) {
     if(chipId < 0 || chipId > 8) {
@@ -154,6 +162,7 @@ vector<FILE*> InitDataFile(const char *fName, bool Recreate) {
     for (int ichip = 0; ichip < fChips.size(); ichip ++) {
         int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
         myChipId[chipId] = ichip;
+        enabledChips[ichip] = chipId; // FIX - move somewhere more appropriate
         if (fChips.size() > 1) {
             sprintf(fNameChip, "%s_Chip%d.dat", fNameTemp, chipId);
         }
@@ -179,7 +188,7 @@ void WriteDataToFile(vector<FILE*> fp,vector<TPixHit>* Hits, int nevent) {
             std::cout << "ERROR, WriteDataToFile(), chipId < 0" << std::endl;
         }
         else if ( (dcol < 0) && (region < 0) && (address < 0) ) {
-            fprintf(fp[myChipId[chipId]], "%d %d %d %d\n", nevent, dcol, region, address);
+            fprintf(fp[myChipId[chipId]], "%d %d %d %d\n", nevent, dcol, region, bunch);
         }
         else if ((dcol < 0) || (region < 0) || (address < 0)) {
             std::cout << "ERROR, WriteDataToFile(), Bad pixel coordinates ( <0), skipping hit" << std::endl;
@@ -253,203 +262,172 @@ void scan(vector<FILE*> fp, FILE *fd) {
     }
     
     // This is needed to crash the run immediately if there is something wrong. Otherwise it is just stuck  FIX ME!!!
-    for(int ichip=0; ichip < fEnabled; ++ichip) {
-        std::cout << fBoards.at(0)->ReadEventData(n_bytes_data, buffer) << std::endl;
-    }
+    //for(int ichip=0; ichip < fEnabled; ++ichip) {
+    //    std::cout << fBoards.at(0)->ReadEventData(n_bytes_data, buffer) << std::endl;
+    //}
+
 
     int recTriggers = 0; // number of read out triggers
-    // data consistency counters
-    int received_cnt[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-    int doubleEvts[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-    int skippedEvtsMissing = 0;
-    int skippedEvtsBad = 0;
-    int skippedEvtsMissingAndBad = 0;
-
+    int openTriggers = 0;
+    int closedTriggers = 0;
+    
+    int sameBunchCounter = 0;
+    
     // error catching flags
     bool flagBadHits = false;
-    bool flagMissingData = false;
-    int  valMissingData = 0;
+    
+    std::vector <OpenBunch> openBunches;
+    int          rcvdBunches[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    unsigned int lastBunch[9] = {999, 999, 999, 999, 999, 999, 999, 999, 999}; // max bunch counter value = 255 (8 bits) - 999 starting value, 1111 decode failed
+    bool eventsToRead = true;
 
-    while(recTriggers < myNTriggers) {
-        // polling for triggers
-        int readyTriggers = myMOSAIC->GetTriggerCount();
-        //std::cout << "Waiting for triggers" << std::flush;
-        while(readyTriggers == recTriggers) {
-            usleep(1e5);
-            readyTriggers = myMOSAIC->GetTriggerCount();
-            std::cout << "." << std::flush;
+    int loopCounter = 0;
+
+    while(closedTriggers < myNTriggers) {
+        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) {
+            //std::cout << "Waiting for data..." << std::endl;
+            usleep(1e6);
+            continue;
         }
-        //std::cout << std::endl;
-        int trigsToRead = readyTriggers > myNTriggers ? myNTriggers - recTriggers : readyTriggers - recTriggers;
+        loopCounter++;
+        int readyTriggers = myMOSAIC->GetTriggerCount();
 
-        for(int itrig=0; itrig < trigsToRead; ++itrig) {
-            int triggerRcvd[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // flag for each receiever. checking if corresponding reciever has been processed
-            if(flagMissingData) triggerRcvd[valMissingData]++;
-            int prevRcv = -1; // previous receiver
-            int rcvdHits = 0;
+        if(WRITE_DEBUG_FILE) {
+            for (int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
+                fprintf(fd, "%02x", (int) fDebugBuffer.at(ibyte));
+            }
+            fprintf(fd, "\n\n");
+        }
+        
+        bool boardDecode = BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+        if(!boardDecode) {
+            //std::cout << "FATAL, main_na61, BoardDecoder failed!" << std::endl;
+            //return;
+        }
 
-            if(!flagMissingData) flagBadHits = false;
+        int rcv = boardInfo.channel-1; // MOSAIC is counting receivers from 1
+        int expChipId = rcvToChipId(rcv); // expected chip id
+        if (expChipId == -1) {
+            std::cout << "FATAL, main_na61, " << recTriggers << " " << loopCounter
+                      << ", ChipID - RCV problem. Manual code check needed! Exiting!" << std::endl;
+            return;
+        }
 
-            for(int ichip=flagMissingData; ichip < fEnabled; ++ichip) {
-                if(flagMissingData) {
-                    if(VERBOSE > 1) std::cout << "INFO, main_na61, " << recTriggers << " " << itrig << " " << 
-                                    ichip << ", missing / advanced data situation solved" << std::endl;
-                    flagMissingData = false;
-                }
-                
-                // wait for data if needed
-                while (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) {
-                    std::cout << "Waiting for data..." << std::endl;
-                    usleep(1e2);
-                }
-                
-                if(WRITE_DEBUG_FILE) {
-                    for (int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
-                        fprintf(fd, "%02x", (int) fDebugBuffer.at(ibyte));
-                    }
-                    fprintf(fd, "\n\n");
-                }
+        // decode Chip event
+        int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
 
+        unsigned int bunchCounter;
+        bool Decode = AlpideDecoder::DecodeEventAndBunch(buffer + n_bytes_header, n_bytes_chipevent, Hits, bunchCounter);
 
-                // decode DAQboard event
-                BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+        if(!Decode) {
+            if(VERBOSE) std::cout << "WARNING, main_na61, " << recTriggers << " " << loopCounter
+                                       << ", Decode failed! (receiver " << rcv << " - chipID " << rcvToChipId(rcv) << ")!" << std::endl;
+            flagBadHits = true;
+            bunchCounter = 1111;
+        }
+        
+        OpenBunch cb; // current bunch
+        if(lastBunch[expChipId] == bunchCounter) {
+            if(VERBOSE > 1) std::cout << "INFO, na61, previous bunch counter == new bunch counter, chipID " << expChipId << " , ob size = " << openBunches.size() << std::endl;
+            //for(int iob=0; iob < openBunches.size(); iob++) {
+            //    if(openBunches.at(iob).bunch == bunchCounter) cb = openBunches.at(iob);
+            //    else { std::cout << "FATAL, na61, previous bunch not found in open bunches" << std::endl; return; }
+            //}
+            sameBunchCounter++;
+            
+        }
+        {
+            rcvdBunches[expChipId]++;
 
-                int rcv = boardInfo.channel-1; // MOSAIC is counting receivers from 1
-                int expChipId = rcvToChipId(rcv); // expected chip id
-                if (expChipId == -1) {
-                    std::cout << "FATAL, main_na61, " << recTriggers << " " << itrig << " " << ichip 
-                                          << ", ChipID - RCV problem. Manual code check needed! Exiting!" << std::endl;
-                    return;
-                }
-
-                if(triggerRcvd[rcv]) {
-                    if(prevRcv != rcv) {
-                        if(VERBOSE > 1) std::cout << "ERROR, main_na61, " << recTriggers << " " << itrig << " " << ichip
-                                                  << ", already processed reciever " << rcv << " - chip " << expChipId << std::endl;
-                        flagMissingData = true;
-                        valMissingData = rcv;
-                        // dump hits
-                        //Hits->erase(Hits->begin(), Hits->begin()+rcvdHits);
-                        Hits->clear();
-                        rcvdHits = 0;
-                        std::vector <TPixHit> *ErrorHits = new std::vector<TPixHit>;
-                        for(int i=0; i<9; ++i) {
-                            received_cnt[rcvToChipId(i)] -= triggerRcvd[i];
-                            //triggerRcvd[i]=0;
-                            TPixHit errhit; errhit.chipId = rcvToChipId(i); errhit.dcol = -1; errhit.region = -1; errhit.address = -1; errhit.bunch = -1;
-                            ErrorHits->push_back(errhit);
-                        }
-                        //triggerRcvd[valMissingData]++;
-                        WriteDataToFile(fp, ErrorHits, recTriggers);
-                        ErrorHits->clear();
-                        delete ErrorHits;
-                        skippedEvtsMissing++;
-                        if(flagBadHits) skippedEvtsMissingAndBad++;
-                        flagBadHits = false;
-                    }
-                    else {
-                        if(VERBOSE > 1) std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip
-                                                  << ", already processed reciever " << rcv << " - chip " << expChipId
-                                                  << " once. Processing again." << std::endl;
-                        ichip--;
-                        doubleEvts[expChipId]++;
-                    }
-                }
-                prevRcv = rcv;
-                
-                received_cnt[expChipId]++;
-                triggerRcvd[rcv]++;
-
-                // decode Chip event
-                int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
-
-                unsigned int bunchCounter;
-                bool Decode = AlpideDecoder::DecodeEventAndBunch(buffer + n_bytes_header, n_bytes_chipevent, Hits, bunchCounter);
-
-                ///                std::cout << "Rcv " << rcv  << " bunchCounter " << bunchCounter << std::endl;
-
-
-                if(!Decode) {
-                    if(VERBOSE) std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip
-                                          << ", Decode failed! (receiver " << rcv << " - chipID " << rcvToChipId(rcv) << ")!" << std::endl; 
-                    flagBadHits = true;
-                }
-
-                if(Hits->size() > rcvdHits) {
-                    // check hits consistency
-                    int prevChipId = -999;
-                    for (int ihit = rcvdHits; ihit < Hits->size(); ihit ++) {
-                        int iChipId  = Hits->at(ihit).chipId;
-                        if(iChipId < 0 || iChipId > 8) {
-                            if(VERBOSE) std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip 
-                                                  << ", ChipId out of range fo IB HIC = " << iChipId << std::endl;
-                            flagBadHits = true;
-                        }
-                        if(prevChipId != -999 && prevChipId != iChipId) {
-                            if(VERBOSE) std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip 
-                                                  << ", ChipId within same Hits changes! Previous " << prevChipId << " is now " << iChipId << std::endl;
-                            flagBadHits = true;
-                        }
-                        prevChipId = iChipId;
-                    }
-                    if(prevChipId != rcvToChipId(rcv)) {
-                        if(VERBOSE) std::cout << "WARNING, main_na61, " << recTriggers << " " << itrig << " " << ichip 
-                                              << ", ChipId " << prevChipId << " not expected on reciever " << rcv << std::endl;
-                        flagBadHits = true;
-                    }
-                    rcvdHits = Hits->size();
-                }
-                else {
-                    TPixHit emptyhit; emptyhit.chipId = expChipId; emptyhit.dcol = -3; emptyhit.region = -3; emptyhit.address = -3; emptyhit.bunch = bunchCounter;
-                    Hits->push_back(emptyhit);
-                    rcvdHits = Hits->size();
-                }
-                
-
-                if(flagMissingData) break;
-            } // FOR chips
-            if(flagBadHits) {
-                // dump hits
-                Hits->clear();
-                rcvdHits = 0;
-                std::vector <TPixHit> *ErrorHits = new std::vector<TPixHit>;
-                for(int i=0; i<9; ++i) {
-                    //received_cnt[rcvToChipId(i)] -= triggerRcvd[i];
-                    TPixHit errhit; errhit.chipId = rcvToChipId(i); errhit.dcol = -2; errhit.region = -2; errhit.address = -2; errhit.bunch = -2;
-                    ErrorHits->push_back(errhit);
-                }
-                WriteDataToFile(fp, ErrorHits, recTriggers + flagMissingData);
-                ErrorHits->clear();
-                delete ErrorHits;
-                skippedEvtsBad++;
+            bool flagBunchOpened = false;
+            int iob=0;
+            while( iob < openBunches.size() && !flagBunchOpened) {
+                if(openBunches.at(iob).bunch == bunchCounter) flagBunchOpened = true;
+                else iob++;
+            }
+            if(!flagBunchOpened) {
+                OpenBunch ob; ob.bunch = bunchCounter; ob.count = 1; ob.trigger = openTriggers;
+                openBunches.push_back(ob);
+                iob = 0;
+                cb = openBunches.at(iob);
+                openTriggers++;
             }
             else {
-                WriteDataToFile(fp, Hits, recTriggers + flagMissingData);
+                openBunches.at(iob).count++;
+                cb = openBunches.at(iob);
+                if(openBunches.at(iob).count == fEnabled) {
+                    openBunches.erase(openBunches.begin()+iob);
+                    closedTriggers++;
+                }
             }
-            recTriggers++;
-        } // FOR triggers
-        std::cout << "\r"
-            //<< "Received triggers: " << itrg/fEnabled + itrain*nTrigsThisTrain << "   " 
-                  << "Recorded Trigger Counter: " << recTriggers << "   "
-                  << "MOSAIC Trigger Counter: " << myMOSAIC->GetTriggerCount() << "   "
-            //<< "boardInfo.channel = " << boardInfo.channel << "   "
-                  << std::flush;
+        }
+        lastBunch[expChipId] = bunchCounter;
+        
+        // check bunch consistency
+        if(openBunches.size() > 1 && VERBOSE) { std::cout << "WARNING, na61, number of open bunches: " << openBunches.size() << std::endl; }
+        if(closedTriggers > readyTriggers)      { std::cout << "FATAL, na61, number of closed triggers > MOSAIC triggers" << std::endl; return; }
 
+        // check hits consistency
+        if(Hits->size()) {
+            int prevChipId = -999;
+            for (int ihit = 0; ihit < Hits->size(); ihit ++) {
+                int iChipId  = Hits->at(ihit).chipId;
+                if(iChipId < 0 || iChipId > 8) {
+                    if(VERBOSE) std::cout << "WARNING, main_na61, " << recTriggers << " " << loopCounter
+                                          << ", ChipId out of range fo IB HIC = " << iChipId << std::endl;
+                    flagBadHits = true;
+                }
+                if(prevChipId != -999 && prevChipId != iChipId) {
+                    if(VERBOSE) std::cout << "WARNING, main_na61, " << recTriggers << " " << loopCounter
+                                          << ", ChipId within same Hits changes! Previous " << prevChipId << " is now " << iChipId << std::endl;
+                    flagBadHits = true;
+                }
+                prevChipId = iChipId;
+            }
+            if(prevChipId != expChipId) {
+                if(VERBOSE) std::cout << "WARNING, main_na61, " << recTriggers << " " << loopCounter
+                                      << ", ChipId " << prevChipId << " not expected on reciever " << rcv << std::endl;
+                flagBadHits = true;
+            }
+        }
+        else {
+            TPixHit emptyhit; emptyhit.chipId = expChipId; emptyhit.dcol = -1; emptyhit.region = -1; emptyhit.address = -1; emptyhit.bunch = bunchCounter;
+            Hits->push_back(emptyhit);
+        }
+
+        if(flagBadHits) { // dump hits
+            Hits->clear();
+            std::vector <TPixHit> *ErrorHits = new std::vector<TPixHit>;
+            TPixHit errhit; errhit.chipId = expChipId; errhit.dcol = -2; errhit.region = -2; errhit.address = -2; errhit.bunch = bunchCounter;
+            ErrorHits->push_back(errhit);
+            WriteDataToFile(fp, ErrorHits, cb.trigger);
+            ErrorHits->clear();
+            delete ErrorHits;
+        }
+        else {
+            WriteDataToFile(fp, Hits, cb.trigger);
+        }
+        //recTriggers++;
+        
+        std::cout << "\r"
+                  << "Open triggers: " << openTriggers << "   " 
+                  << "Closed triggers: " << closedTriggers << "   "
+                  << "MOSAIC Trigger Counter: " << myMOSAIC->GetTriggerCount() << "   "
+                  << "Same bunch = " << sameBunchCounter << "   "
+                  << std::flush;
+        
+        // FIX !!
         for (int ichips = 0; ichips < 9; ichips++) {
             fflush(fp[ichips]);
         }
-        //std::cout << "Number of hits: " << Hits->size() << std::endl;
-    } // WHILE Triggers
+    } // END while
     std::cout << std::endl;
-
  
     if (myMOSAIC) {
         myMOSAIC->StopRun();
     }
 
-    // counters 
-    if(flagMissingData) received_cnt[rcvToChipId(valMissingData)]--;
-
+/*
     std::cout << "Num. of recorded triggers per chip: ";
     for(int i=0; i<9; ++i) 
         std::cout << received_cnt[i] << "  ";
@@ -459,6 +437,7 @@ void scan(vector<FILE*> fp, FILE *fd) {
     for(int i=0; i<9; ++i) 
         std::cout << doubleEvts[i] << "  ";
     std::cout << std::endl;
+*/
 }
 
 
