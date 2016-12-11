@@ -65,7 +65,7 @@ fi
 mkdir -p $DIR_RESULTS
 
 # parallel processing
-MAXJOBS=2
+MAXJOBS=4
 
 echo "---------------------------------"
 echo "Target directory:  $DIR_RAW"
@@ -115,7 +115,10 @@ done
 wait
 
 if [ "$FLAG_INTERESTING" -eq 1 ]; then
-    root -l -b -q "$DIR_CLASSES/load_classes.C" "interesting_events.C+(\"$DIR_RAW/NoiseOccupancy_*_tree.root\", \"$DIR_RESULTS/interesting_events.root\")" | tee $DIR_RESULTS/interesting_events.log 2>&1
+    for i in `seq 0 8`
+    do
+        root -l -b -q "$DIR_CLASSES/load_classes.C" "interesting_events.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip${i}_tree.root\", \"$DIR_RESULTS/interesting_events_Chip${i}.root\")" | tee $DIR_RESULTS/interesting_events_chip${i}.log 2>&1
+    done
 else
     echo "Not searching for interesting events!"
 fi

@@ -32,7 +32,7 @@ Bool_t AliPALPIDEFSRawStreamMS::ReadEvent()
   Int_t   evt;
   Short_t col, row;
   Short_t dcol, addr;
-  short hits;
+  Short_t hits;
 
   fHitIter = 0;
   fHitCols.clear();
@@ -56,7 +56,7 @@ Bool_t AliPALPIDEFSRawStreamMS::ReadEvent()
   while(fFileInput.good() && evt == fEventCounter) {
     //fFileInput >> col >> row;
     fFileInput >> dcol >> addr >> hits;
-    if(dcol < 0 || addr < 0 || row < 0) {
+    if(dcol < 0 || addr < 0 || hits < 0) {
         //skip event
     }
     else {
