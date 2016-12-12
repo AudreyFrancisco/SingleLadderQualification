@@ -72,7 +72,7 @@ Bool_t csa(
     BinaryPlane* plane[n_secs];
     for(Short_t i=0; i<n_secs; ++i) plane[i] = new BinaryPlane(); 
     BinaryCluster* cluster = new BinaryCluster();
-    vector<BinaryPixel> pix_vec; pix_vec.resize(MAX_CS);
+    vector<BinaryPixel> pix_vec;
     BinaryPixel*  pix_arr = new BinaryPixel[MAX_CS];
     BinaryPixel   pix_tmp;
 
@@ -200,7 +200,6 @@ Bool_t csa(
                         pix_arr[j] = pix_vec[i];
                         pix_vec.erase(pix_vec.begin()+i);
                         ++j; --nhits; --i;
-                        if(i < 0) break; //FIX ME - this should not be needed
                     }
                 }
             }

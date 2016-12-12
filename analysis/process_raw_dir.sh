@@ -65,7 +65,7 @@ fi
 mkdir -p $DIR_RESULTS
 
 # parallel processing
-MAXJOBS=2
+MAXJOBS=4
 
 echo "---------------------------------"
 echo "Target directory:  $DIR_RAW"
@@ -115,20 +115,20 @@ done
 wait
 
 if [ "$FLAG_INTERESTING" -eq 1 ]; then
-    root -l -b -q "$DIR_CLASSES/load_classes.C" "interesting_events.C+(\"$DIR_RAW/NoiseOccupancy_*_tree.root\", \"$DIR_RESULTS/interesting_events.root\")" | tee $DIR_RESULTS/interesting_events.log 2>&1
+    for i in `seq 0 8`
+    do
+        root -l -b -q "$DIR_CLASSES/load_classes.C" "interesting_events.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip${i}_tree.root\", \"$DIR_RESULTS/interesting_events_Chip${i}.root\")" | tee $DIR_RESULTS/interesting_events_chip${i}.log 2>&1
+    done
 else
     echo "Not searching for interesting events!"
 fi
 
-root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip0_tree.root\", \"$DIR_RESULTS\", \"0\")" | tee $DIR_RESULTS/analysis_basic.log
-root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip1_tree.root\", \"$DIR_RESULTS\", \"1\")" | tee $DIR_RESULTS/analysis_basic.log
-root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip2_tree.root\", \"$DIR_RESULTS\", \"2\")" | tee $DIR_RESULTS/analysis_basic.log
-root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip3_tree.root\", \"$DIR_RESULTS\", \"3\")" | tee $DIR_RESULTS/analysis_basic.log
-root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip4_tree.root\", \"$DIR_RESULTS\", \"4\")" | tee $DIR_RESULTS/analysis_basic.log
-root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip5_tree.root\", \"$DIR_RESULTS\", \"5\")" | tee $DIR_RESULTS/analysis_basic.log
-root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip6_tree.root\", \"$DIR_RESULTS\", \"6\")" | tee $DIR_RESULTS/analysis_basic.log
-root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip7_tree.root\", \"$DIR_RESULTS\", \"7\")" | tee $DIR_RESULTS/analysis_basic.log
-root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip8_tree.root\", \"$DIR_RESULTS\", \"8\")" | tee $DIR_RESULTS/analysis_basic.log
+for i in `seq 0 8`
+do
+    root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip${i}_tree.root\", \"$DIR_RESULTS\", \"Chip${i}\")" | tee $DIR_RESULTS/analysis_basic_chip${i}.log
+done
+    
+#root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip0_tree.root\", \"$DIR_RESULTS\", \"0\")" | tee $DIR_RESULTS/analysis_basic.log
 
 
 echo "Finished processing directory!"
