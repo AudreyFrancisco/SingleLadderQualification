@@ -14,7 +14,7 @@ Bool_t analysis_basic(
     const TString filepath_tree,  // input tree path
     const TString dirpath_plots,  // output plots path
     const TString file_id,        // identifier (suffix) for output files
-    const Short_t binred   = 5,   // bin reduction - useful in case of low statistics
+    const Short_t binred   = 1,   // bin reduction - useful in case of low statistics
     const Short_t max_mult = 500, // max drawn cluster size
     const Short_t max_spread = 50 // max drawn cluster spread
     ) {
@@ -65,9 +65,9 @@ Bool_t analysis_basic(
     TH1F *hMaxSpread[n_secs];
     for(Short_t i=0; i<n_secs; ++i) {
         hNPix[i] = new TH1F(Form("hNPix_%i", i), Form("Number of hit pixels per event, sector %i;Number of hit pixels per event;Frequency", i),
-                            1000, 0, 3000);
+                            3000, -0.5, 3000-0.5);
         hNClu[i] = new TH1F(Form("hNClu_%i", i), Form("Number of clusters per event, sector %i;Number of clusters per event;Frequency", i),
-                            1000, 0, 1500);
+                            1500, -0.5, 1500-0.5);
         hMult[i] = new TH1F(Form("hMult_%i", i), Form("Cluster size, Sector %i;Number of pixels in cluster;Frequency", i),
                             max_mult+1, -1.5, max_mult-0.5);
         //hMult[i]->SetStats(0);
@@ -86,7 +86,7 @@ Bool_t analysis_basic(
 
     for(Long_t ientry=0; ientry < nentries; ++ientry) {
         chain->GetEntry(ientry);
-        if( (ientry+1)%10 == 0 )
+        if( (ientry+1)%1000 == 0 )
             cout << "Processed events: " << ientry+1 << " / " << nentries << endl;
         for(Short_t isec=0; isec < n_secs; ++isec) {
             hNPix[isec]->Fill(event->GetPlane(isec)->GetNHitPix());

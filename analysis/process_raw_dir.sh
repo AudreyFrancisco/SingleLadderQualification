@@ -89,7 +89,7 @@ root -l -b <<EOF
 .L csa.C+
 .L interesting_events.C+
 .L analysis_basic.C+
-.L analysis_empty_core.C+
+.L analysis_ibhic.C+
 .q
 EOF
 
@@ -127,7 +127,9 @@ for i in `seq 0 8`
 do
     root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip${i}_tree.root\", \"$DIR_RESULTS\", \"Chip${i}\")" | tee $DIR_RESULTS/analysis_basic_chip${i}.log
 done
-    
+
+
+root -l "$DIR_CLASSES/load_classes.C" "analysis_ibhic.C+(\"$DIR_RESULTS/\")" | tee $DIR_RESULTS/analysis_ibhic.log
 #root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip0_tree.root\", \"$DIR_RESULTS\", \"0\")" | tee $DIR_RESULTS/analysis_basic.log
 
 
