@@ -10,7 +10,8 @@
 #include "../classes/BinaryEvent.hpp"
 #include "../classes/helpers.h"
 
-#define MAX_CS 1000 // maximum pixels in an event
+#define MAX_CS 5000 // maximum pixels in an event
+//#define DEBUG
 
 using namespace std;
 
@@ -72,7 +73,7 @@ Bool_t csa(
     BinaryPlane* plane[n_secs];
     for(Short_t i=0; i<n_secs; ++i) plane[i] = new BinaryPlane(); 
     BinaryCluster* cluster = new BinaryCluster();
-    vector<BinaryPixel> pix_vec;
+    vector<BinaryPixel> pix_vec; pix_vec.reserve(MAX_CS);
     BinaryPixel*  pix_arr = new BinaryPixel[MAX_CS];
     BinaryPixel   pix_tmp;
 
@@ -137,9 +138,18 @@ Bool_t csa(
         Bool_t  flagPixAdded = kTRUE;
         hNPixAll->Fill(nhits);
 
+#ifdef DEBUG
+        int d_n_clu = 0;
+        int d_get_hit_cnt = 0;
+#endif
 
         // read which pixels are hit and re-construct first cluster
         while(palpidefsRaw->GetNextHit(&col, &row)) {
+#ifdef DEBUG
+            cout << "csa() : DEBUG: Reading hit " << d_get_hit_cnt << " of expected " << nhits << ", col: " << col << " row: " << row
+                 << " NClu = " << d_n_clu << " nhits = " << nhits << " j = " << j << endl;
+            d_get_hit_cnt++;
+#endif
             //if(nhits > 100) cout << nhits << " " << j << endl;
             n_hitpix[col/scols]++;
             pix_tmp.Reset();
@@ -158,6 +168,7 @@ Bool_t csa(
                     if(IsNeighbour(crown, pix_tmp, pix_arr[k])) {
                         pix_arr[j] = pix_tmp;
                         ++j; --nhits;
+                        if(j >= MAX_CS) cerr << "csa() : FATAL: cluster size > MAX cluster size" << endl;
                         flagNeigh = kTRUE;
                     }
                 }
@@ -175,12 +186,17 @@ Bool_t csa(
                         pix_arr[j] = pix_vec[i];
                         pix_vec.erase(pix_vec.begin()+i);
                         ++j; --nhits; --i;
+                        if(j >= MAX_CS) cerr << "csa() : FATAL: cluster size > MAX cluster size" << endl;
                         flagPixAdded = kTRUE;
                         break;
                     }
                 }
             }
         }
+#ifdef DEBUG
+        d_n_clu++;
+        cout << "csa() : DEBUG: NClu = " << d_n_clu << " nhits = " << nhits << " j = " << j << endl;
+#endif
         cluster->SetPixelArray(j, pix_arr);
         if(flagHot && flagRmSingleHotPixClusters
            && cluster->GetNPixels()==1 && cluster->HasHotPixels() )
@@ -190,7 +206,7 @@ Bool_t csa(
         
         // reconstruct other clusters
 
-        while(nhits) {
+        while(nhits) {            
             pix_arr[0] = pix_vec[0];
             pix_vec.erase(pix_vec.begin());
             j=1; --nhits;
@@ -199,6 +215,7 @@ Bool_t csa(
                     if(IsNeighbour(crown, pix_vec[i], pix_arr[k])) {
                         pix_arr[j] = pix_vec[i];
                         pix_vec.erase(pix_vec.begin()+i);
+                        if(j >= MAX_CS) cerr << "csa() : FATAL: cluster size > MAX cluster size" << endl;
                         ++j; --nhits; --i;
                     }
                 }
@@ -214,12 +231,17 @@ Bool_t csa(
                             pix_arr[j] = pix_vec[i];
                             pix_vec.erase(pix_vec.begin()+i);
                             ++j; --nhits; --i;
+                            if(j >= MAX_CS) cerr << "csa() : FATAL: cluster size > MAX cluster size" << endl;
                             flagPixAdded = kTRUE;
                             break;
                         }
                     }
                 }
             }
+#ifdef DEBUG
+            d_n_clu++;
+            cout << "csa() : DEBUG: NClu = " << d_n_clu << " nhits = " << nhits << " j = " << j << endl;
+#endif
             cluster->SetPixelArray(j, pix_arr);
             if(flagHot && flagRmSingleHotPixClusters
                && cluster->GetNPixels()==1 && cluster->HasHotPixels() )

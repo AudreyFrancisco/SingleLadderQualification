@@ -40,7 +40,7 @@ Bool_t interesting_events(
     const TString filepath_tree,    // path to event tree file
     const TString filepath_ie,      // output path
     const Bool_t  find_ecc = kFALSE, // find empty core clusters // something not right FIX ME!!!
-    const Short_t find_mult = 200,    // clusters with multiplicity > <int_mult> are considered interesting (0 = disabled)
+    const Short_t find_mult = 300,    // clusters with multiplicity > <int_mult> are considered interesting (0 = disabled)
     const Short_t find_prox = 0,    // minimum distance to consider cluster fully separate (0 = disabled)
     const Short_t max_mult = 500    // max drawn cluster multiplicity
     ) {
@@ -80,7 +80,7 @@ Bool_t interesting_events(
     for(Long_t ientry=0; ientry < nentries; ++ientry) {
         chain->GetEntry(ientry);
         if( (ientry+1)%10000 == 0 )
-            cout << "Processed events: " << ientry+1 << " / " << nentries << endl;
+            cout << "interesting_events() : Processed events: " << ientry+1 << " / " << nentries << endl;
         for(Short_t isec=0; isec < n_secs; ++isec) {
             Int_t nclusters = event->GetPlane(isec)->GetNClustersSaved();
             
