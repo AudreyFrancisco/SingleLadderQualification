@@ -37,7 +37,7 @@
 int Rate = 10000;// rate in Hz
 
 int myStrobeLength = 80;      // strobe length in units of 25 ns
-int myStrobeDelay  = 10;
+int myStrobeDelay  = 20;      // 12 is minimum for the MOSAIC
 int myPulseLength  = 500;
 
 //int myPulseDelay   = (40000000 / Rate) - myStrobeDelay;
@@ -264,7 +264,7 @@ void scan() {
 	  }
           itrg++;
         }
-      } 
+      }
       //std::cout << "Number of hits: " << Hits->size() << std::endl;
       CopyHitData(Hits, icharge);
     }
