@@ -4,6 +4,14 @@
 #include <map>
 #include <string>
 
+namespace ScanConfig {
+  const int CHARGE_START  = 0;
+  const int CHARGE_STOP   = 50;
+  const int CHARGE_STEP   = 1;
+  const int N_MASK_STAGES = 3;
+}
+
+
 class TScanConfig {
  private: 
   std::map <std::string, int*> fSettings;
