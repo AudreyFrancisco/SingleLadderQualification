@@ -185,6 +185,8 @@ void TConfig::ReadConfigFile (const char *fName)
     }
   }
 
+  fScanConfig = new TScanConfig();
+
   // now read the rest
   while (fgets(Line, 1023, fp) != NULL) {
     DecodeLine(Line);
@@ -238,6 +240,9 @@ void TConfig::DecodeLine(const char *Line)
   }
   else if (fBoardConfigs.at(0)->IsParameter(Param)) {
       fBoardConfigs.at(0)->SetParamValue (Param, Rest);
+  }
+  else if (fScanConfig->IsParameter(Param)) {
+    fScanConfig->SetParamValue (Param, Rest);
   }
   else {
     std::cout << "Warning: Unknown parameter " << Param << std::endl;

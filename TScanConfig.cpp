@@ -10,3 +10,31 @@ TScanConfig::TScanConfig()
 
 }
 
+
+void TScanConfig::InitParamMap () 
+{
+  //fSettings["CHIPID"]           = &fChipId;
+
+}
+
+
+bool TScanConfig::SetParamValue (const char *Name, const char *Value) 
+{
+  if (fSettings.find (Name) != fSettings.end()) {
+    sscanf (Value, "%d", fSettings.find(Name)->second);
+    return true;
+  }
+
+  return false;
+}
+
+
+int TScanConfig::GetParamValue (const char *Name) 
+{
+  if (fSettings.find (Name) != fSettings.end()) {
+    return *(fSettings.find(Name)->second);
+  }
+  return -1;
+}
+
+

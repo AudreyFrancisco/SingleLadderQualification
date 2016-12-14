@@ -5,6 +5,7 @@
 #include "TChipConfig.h"
 #include "TBoardConfig.h"
 #include "TReadoutBoard.h"
+#include "TScanConfig.h"
 
 const int DEFAULT_MODULE_ID = 1;
 
@@ -14,6 +15,7 @@ class TConfig {
  private:
   std::vector <TBoardConfig *> fBoardConfigs;
   std::vector <TChipConfig *>  fChipConfigs;
+  TScanConfig                 *fScanConfig;
   TDeviceType                  fDeviceType;
 
   void        ReadConfigFile (const char *fName);
