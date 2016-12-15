@@ -5,20 +5,24 @@
 #include <string>
 
 namespace ScanConfig {
-  const int CHARGE_START  = 0;
-  const int CHARGE_STOP   = 50;
-  const int CHARGE_STEP   = 1;
-  const int N_MASK_STAGES = 3;
+  const int NINJ           = 50;
+  const int CHARGE_START   = 0;
+  const int CHARGE_STOP    = 50;
+  const int CHARGE_STEP    = 1;
+  const int N_MASK_STAGES  = 3;
+  const int PIX_PER_REGION = 32;
 }
 
 
 class TScanConfig {
  private: 
   std::map <std::string, int*> fSettings;
+  int m_nInj;
   int m_chargeStart;
   int m_chargeStop;
   int m_chargeStep;
   int m_nMaskStages;
+  int m_pixPerRegion;
  protected: 
  public:
   TScanConfig ();

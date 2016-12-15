@@ -53,6 +53,7 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
 
 void TBoardConfigMOSAIC::InitParamMap() 
 {
+  TBoardConfig::InitParamMap();
 }
 
 

@@ -73,6 +73,8 @@ void TChipConfig::InitParamMap ()
   fSettings["IAUX2"]            = &fIAUX2;
   fSettings["IRESET"]           = &fIRESET;
   fSettings["STROBEDURATION"]   = &fStrobeDuration;
+  fSettings["PULSEDURATION"]    = &fPulseDuration;
+  fSettings["STROBEDELAYCHIP"]  = &fStrobeDelay;
   fSettings["READOUTMODE"]      = (int*)&fReadoutMode;
   fSettings["LINKSPEED"]        = &fSerialLinkSpeed; 
 }

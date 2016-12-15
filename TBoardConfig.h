@@ -15,13 +15,13 @@ class TBoardConfig {
   bool           fTriggerEnable;
   bool           fPulseEnable;
   int            fNTriggers;
-  uint32_t       fTriggerDelay;
+  int            fTriggerDelay;
   int            fPulseDelay;
   TTriggerSource fTriggerSource;
   TBoardType     fBoardType;
  public:
   TBoardConfig(const char *fName = 0, int boardIndex = 0) {};
-  virtual void InitParamMap () = 0;
+  virtual void InitParamMap ();
   bool SetParamValue        (const char *Name, const char *Value);
   int  GetParamValue        (const char *Name) ;
   bool IsParameter          (const char *Name) {return (fSettings.count(Name) > 0);};
@@ -38,8 +38,8 @@ class TBoardConfig {
   void SetTriggerEnable(bool           trigEnable)  {fTriggerEnable = trigEnable;};
   void SetPulseEnable  (bool           pulseEnable) {fPulseEnable   = pulseEnable;};
   void SetNTriggers    (int            nTriggers)   {fNTriggers     = nTriggers;};
-  void SetTriggerDelay (int            trigDelay)   {fTriggerDelay  = trigDelay;};
-  void SetPulseDelay   (int            pulseDelay)  {fPulseDelay    = pulseDelay;};
+  void SetTriggerDelay (int            trigDelay)   {fTriggerDelay  = trigDelay;};   // obsolete
+  void SetPulseDelay   (int            pulseDelay)  {fPulseDelay    = pulseDelay;};  // obsolete
   void SetTriggerSource(TTriggerSource trigSource)  {fTriggerSource = trigSource;};
 
 
