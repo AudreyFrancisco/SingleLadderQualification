@@ -11,6 +11,7 @@ TScanConfig::TScanConfig()
   m_chargeStep   = CHARGE_STEP;
   m_nMaskStages  = N_MASK_STAGES;
   m_pixPerRegion = PIX_PER_REGION;
+  InitParamMap();
 }
 
 
@@ -22,7 +23,6 @@ void TScanConfig::InitParamMap ()
   fSettings["CHARGESTEP"]   = &m_chargeStep;
   fSettings["NMASKSTAGES"]  = &m_nMaskStages;
   fSettings["PIXPERREGION"] = &m_pixPerRegion;
-
 }
 
 
@@ -39,6 +39,7 @@ bool TScanConfig::SetParamValue (const char *Name, const char *Value)
 
 int TScanConfig::GetParamValue (const char *Name) 
 {
+
   if (fSettings.find (Name) != fSettings.end()) {
     return *(fSettings.find(Name)->second);
   }

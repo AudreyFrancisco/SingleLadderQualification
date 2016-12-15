@@ -28,32 +28,30 @@
 #include "SetupHelpers.h"
 
 
-//int myVCASN   = 57;
-//int myITHR    = 51;
-//int myVCASN2  = 64;
-//int myVCLIP   = 0;
-//int myVRESETD = 147;
+// !!! NOTE: Scan parameters are now set via Config file
 
-int Rate = 10000;// rate in Hz
+int myNTriggers;
+int myMaskStages;
 
-int myStrobeLength = 80;      // strobe length in units of 25 ns
-int myStrobeDelay  = 20;      // 12 is minimum for the MOSAIC
-int myPulseLength  = 500;
-
-//int myPulseDelay   = (40000000 / Rate) - myStrobeDelay;
-int myPulseDelay   = 40;
-int myNTriggers    = 50;
-int myMaskStages   = 512;    // full: 4096
-
-int myChargeStart  = 0;
-//int myChargeStop   = 50;   // if > 100 points, increase array sizes
-int myChargeStop   = 50;   // if > 100 points, increase array sizes
+int myChargeStart;
+int myChargeStop;
+int myChargeStep;  // currently unused
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
 int HitData     [16][100][512][1024];
 int ChargePoints[100];
 int ievt = 0;
+
+
+void InitScanParameters() {
+  myMaskStages  = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
+  myNTriggers   = fConfig->GetScanConfig()->GetParamValue("NINJ");
+  myChargeStart = fConfig->GetScanConfig()->GetParamValue("CHARGESTART");
+  myChargeStop  = fConfig->GetScanConfig()->GetParamValue("CHARGESTOP");
+  myChargeStep  = fConfig->GetScanConfig()->GetParamValue("CHARGESTEP");
+}
+
 
 void ClearHitData() {
   for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
@@ -119,9 +117,9 @@ void WriteDataToFile (const char *fName, bool Recreate) {
 
 int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x20);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
-  chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
+  chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING1, chip->GetConfig()->GetParamValue("STROBEDELAYCHIP"));   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length 
 }
 
 
@@ -196,7 +194,7 @@ void scan() {
       myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
 //      std::cout << "Read VPULSEH : " << myVPULSEH[i] << std::endl;
   }
-
+ 
   for (int istage = 0; istage < myMaskStages; istage ++) {
     std::cout << "Mask stage " << istage << std::endl;
     for (int i = 0; i < fChips.size(); i ++) {
@@ -279,7 +277,7 @@ void scan() {
 
 int main() {
   initSetup();
-
+  InitScanParameters();
   char Suffix[20], fName[100], Config[1000];
 
   ClearHitData();
@@ -305,11 +303,15 @@ int main() {
 
     // put your test here... 
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
-      fBoards.at(0)->SetTriggerConfig (true, true, myStrobeDelay, 10 * myPulseLength);
+      fBoards.at(0)->SetTriggerConfig (true, true, 
+                                       fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
+                                       fBoards.at(0)->GetConfig()->GetParamValue("PULSEDELAY"));
       fBoards.at(0)->SetTriggerSource (trigInt);
     }
     else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
-      fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
+      fBoards.at(0)->SetTriggerConfig (true, false, 
+                                       fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
+                                       fBoards.at(0)->GetConfig()->GetParamValue("PULSEDELAY"));            
       fBoards.at(0)->SetTriggerSource (trigExt);
     }
 

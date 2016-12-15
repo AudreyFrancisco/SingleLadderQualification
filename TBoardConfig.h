@@ -6,6 +6,11 @@
 #include <string>
 #include <map>
 
+namespace BoardConfig {
+  const int PULSEDELAY  = 1000;
+  const int STROBEDELAY = 20;
+};
+
 
 class TBoardConfig {
  private:
@@ -20,7 +25,7 @@ class TBoardConfig {
   TTriggerSource fTriggerSource;
   TBoardType     fBoardType;
  public:
-  TBoardConfig(const char *fName = 0, int boardIndex = 0) {};
+  TBoardConfig(const char *fName = 0, int boardIndex = 0);
   virtual void InitParamMap ();
   bool SetParamValue        (const char *Name, const char *Value);
   int  GetParamValue        (const char *Name) ;

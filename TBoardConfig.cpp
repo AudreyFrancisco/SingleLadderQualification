@@ -1,6 +1,14 @@
 #include "TBoardConfig.h"
 #include <stdio.h>
 
+using namespace BoardConfig;
+
+TBoardConfig::TBoardConfig(const char *fName, int boardIndex)
+{
+  fTriggerDelay = STROBEDELAY;
+  fPulseDelay   = PULSEDELAY;
+}
+
 
 void TBoardConfig::InitParamMap() 
 {

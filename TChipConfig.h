@@ -27,7 +27,7 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
   const int  STROBE_GAP      = 4000;     // .1 ms
   const int  STROBE_DELAY    = 20;       // 500 ns
   const int  TRIGGER_DELAY   = 0;
-  const int  PULSE_DURATION  = 2000;     // 50 us
+  const int  PULSE_DURATION  = 500;      // 12.5 us
 
   const int  DCLK_RECEIVER   = 10;
   const int  DCLK_DRIVER     = 10;

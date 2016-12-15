@@ -36,6 +36,7 @@ class TConfig {
   TChipConfig  *GetChipConfig      (int iChip);
   TChipConfig  *GetChipConfigById  (int chipId);
   TBoardConfig *GetBoardConfig     (int iBoard);
+  TScanConfig  *GetScanConfig      () {return fScanConfig;};
   void          WriteToFile        (const char *fName);
 
 };

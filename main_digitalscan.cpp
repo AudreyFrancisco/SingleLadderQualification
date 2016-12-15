@@ -28,17 +28,21 @@
 #include "SetupHelpers.h"
 
 
-int myStrobeLength = 40;      // strobe length in units of 25 ns
-int myStrobeDelay  = 10;
-int myPulseLength  = 1000;
 
-int myPulseDelay   = 50;
-int myNTriggers    = 50;
-int myMaskStages   = 2048;
+// !!! NOTE: Scan parameters are now set via Config file
+
+int myNTriggers;
+int myMaskStages;
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
 int HitData[16][512][1024];
+
+
+void InitScanParameters() {
+  myMaskStages  = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
+  myNTriggers   = fConfig->GetScanConfig()->GetParamValue("NINJ");
+}
 
 
 void ClearHitData() {
@@ -117,9 +121,9 @@ void WriteDataToFile (const char *fName, bool Recreate) {
 // initialisation of Fromu
 int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x0);             // fromu config 1: digital pulsing (put to 0x20 for analogue)
-  chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
+  chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING1, chip->GetConfig()->GetParamValue("STROBEDELAYCHIP"));   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length 
 }
 
 
@@ -255,6 +259,7 @@ int main() {
   sleep(1);
   char Suffix[20], fName[100];
 
+  InitScanParameters();
   ClearHitData();
   time_t       t = time(0);   // get time now
   struct tm *now = localtime( & t );
@@ -279,11 +284,15 @@ int main() {
 
     // put your test here... 
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
-      fBoards.at(0)->SetTriggerConfig (true, true, 100, 20000);//myStrobeDelay, myPulseDelay);
+      fBoards.at(0)->SetTriggerConfig (true, true,
+                                       fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
+                                       fBoards.at(0)->GetConfig()->GetParamValue("PULSEDELAY")); 
       fBoards.at(0)->SetTriggerSource (trigInt);
     }
     else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
-      fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, myPulseDelay);
+      fBoards.at(0)->SetTriggerConfig (true, false, 
+                                       fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
+                                       fBoards.at(0)->GetConfig()->GetParamValue("PULSEDELAY"));
       fBoards.at(0)->SetTriggerSource (trigExt);
     }
 
