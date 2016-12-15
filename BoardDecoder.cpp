@@ -225,7 +225,10 @@ bool BoardDecoder::DecodeEventMOSAIC(unsigned char *header, int &nBytesHeader, i
   boardInfo.MOSAICtransmissionFlag = header[20];
   boardInfo.headerError            = boardInfo.MOSAICtransmissionFlag & 0x01;
   boardInfo.decoder10b8bError      = boardInfo.MOSAICtransmissionFlag & 0x02;
-  return false;
+  if (boardInfo.MOSAICtransmissionFlag) {
+    return false;
+  }
+  else return true;
 };
 
 
