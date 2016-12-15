@@ -11,8 +11,8 @@ void x_csa() {
     //csa("/home/msuljic/work/na61/data/NoiseOccupancy_161211_001735/NoiseOccupancy_161211_001735_Chip4.dat",
     //  "/home/msuljic/work/na61/data/NoiseOccupancy_161211_001735/NoiseOccupancy_161211_001735_Chip4_tree.root");
 
-    csa("/home/msuljic/work/na61/data/NoiseOccupancy_161211_001735/NoiseOccupancy_161211_001735_Chip5.dat",
-        "/home/msuljic/work/na61/data/NoiseOccupancy_161211_001735/NoiseOccupancy_161211_001735_Chip5.dat");
+    csa("/home/msuljic/work/na61/data/NoiseOccupancy_161214_172840/NoiseOccupancy_161214_172840_Chip7.dat",
+        "/home/msuljic/work/na61/data/NoiseOccupancy_161214_172840/NoiseOccupancy_161214_172840_Chip7_tree.root", "", 3);
 
 
 //        "");

@@ -121,8 +121,12 @@ Bool_t csa(
     cout << "csa() : Started reading RawHits file." << endl;
     Long_t evts = 0;
     while(palpidefsRaw->ReadEvent()) {
+#ifdef DEBUG
+        cout << "csa() : Processed events: " << evts+1 << " / Trigger: " << palpidefsRaw->GetEventCounter() << endl;
+#else
         if( (evts+1)%1000 == 0 )
             cout << "csa() : Processed events: " << evts+1 << endl;
+#endif
         event->Reset();
         event->SetEventID(evts);
         event->SetIntTrigCnt(palpidefsRaw->GetEventCounter());
@@ -180,8 +184,8 @@ Bool_t csa(
         flagPixAdded = kTRUE;
         while(flagPixAdded && nhits) {
             flagPixAdded = kFALSE;
-            for(Int_t i=0; i < nhits; ++i) {
-                for(Int_t k=0; k<j; ++k) {
+            for(Int_t k=0; k<j; ++k) {
+                for(Int_t i=0; i < nhits; ++i) {
                     if(IsNeighbour(crown, pix_vec[i], pix_arr[k])) {
                         pix_arr[j] = pix_vec[i];
                         pix_vec.erase(pix_vec.begin()+i);
@@ -198,35 +202,57 @@ Bool_t csa(
         cout << "csa() : DEBUG: NClu = " << d_n_clu << " nhits = " << nhits << " j = " << j << endl;
 #endif
         cluster->SetPixelArray(j, pix_arr);
+
         if(flagHot && flagRmSingleHotPixClusters
            && cluster->GetNPixels()==1 && cluster->HasHotPixels() )
             cluster->Reset();
         else
             plane[TMath::FloorNint(cluster->GetX() / scols)]->AddCluster(cluster);
+
+#ifdef DEBUG
+        cout << "Dump 1" << endl;
+        for(Int_t i=0; i < pix_vec.size(); ++i)
+            cout << i << " col: " << pix_vec[i].GetCol() << " row: " << pix_vec[i].GetRow() << endl;
+#endif
         
         // reconstruct other clusters
 
-        while(nhits) {            
+        while(nhits) {
             pix_arr[0] = pix_vec[0];
             pix_vec.erase(pix_vec.begin());
+#ifdef DEBUG
+            cout << "Dump 2" << endl;
+            for(Int_t i=0; i < pix_vec.size(); ++i)
+                cout << i << " col: " << pix_vec[i].GetCol() << " row: " << pix_vec[i].GetRow() << endl;
+#endif
             j=1; --nhits;
-            for(Int_t i=0; i < nhits; ++i) {
-                for(Int_t k=0; k<j; ++k) {
+            for(Int_t k=0; k<j; ++k) {
+                for(Int_t i=0; i < nhits; ++i) {
                     if(IsNeighbour(crown, pix_vec[i], pix_arr[k])) {
                         pix_arr[j] = pix_vec[i];
+#ifdef DEBUG
+                        cout << "csa() : DEBUG: in loop: NClu = " << d_n_clu << " nhits = " << nhits << " j = " << j << " i = " << i
+                             << ", col: " << pix_vec[i].GetCol() << " row: " << pix_vec[i].GetRow() << endl;
+#endif
+#ifdef DEBUG
+                        cout << "Dump 3" << endl;
+                        for(Int_t ii=0; ii < pix_vec.size(); ++ii)
+                            cout << ii << " col: " << pix_vec[ii].GetCol() << " row: " << pix_vec[ii].GetRow() << endl;
+#endif
                         pix_vec.erase(pix_vec.begin()+i);
                         if(j >= MAX_CS) cerr << "csa() : FATAL: cluster size > MAX cluster size" << endl;
                         ++j; --nhits; --i;
                     }
                 }
             }
+
             // some pixels excluded from cluster at the beginning of previous loop
             // might be neighbours with pixels included at the end
             flagPixAdded = kTRUE;
             while(flagPixAdded && nhits) {
                 flagPixAdded = kFALSE;
-                for(Int_t i=0; i < nhits; ++i) {
-                    for(Int_t k=0; k<j; ++k) {
+                for(Int_t k=0; k<j; ++k) {
+                    for(Int_t i=0; i < nhits; ++i) {
                         if(IsNeighbour(crown, pix_vec[i], pix_arr[k])) {
                             pix_arr[j] = pix_vec[i];
                             pix_vec.erase(pix_vec.begin()+i);
