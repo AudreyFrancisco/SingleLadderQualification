@@ -244,6 +244,9 @@ void TConfig::DecodeLine(const char *Line)
   else if (fScanConfig->IsParameter(Param)) {
     fScanConfig->SetParamValue (Param, Rest);
   }
+  else if ((!strcmp(Param, "ADDRESS")) && (fBoardConfigs.at(0)->GetBoardType() == boardMOSAIC)) {
+      ((TBoardConfigMOSAIC *)fBoardConfigs.at(0))->SetIPaddress(Rest);
+  }
   else {
     std::cout << "Warning: Unknown parameter " << Param << std::endl;
   }

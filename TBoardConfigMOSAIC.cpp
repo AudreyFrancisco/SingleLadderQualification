@@ -23,9 +23,7 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
   fBoardType = boardMOSAIC;
 	// Default values set
 	NumberOfControlInterfaces = 2;
-	//	strcpy(IPAddress, "192.168.168.250");
 
-	strcpy(IPAddress, "192.168.1.77");
 	TCPPort = 2000;
 
 	ControlInterfacePhase = 2;
