@@ -32,6 +32,8 @@ int  fErrCount0;
 int  fErrCount5;
 int  fErrCountf;
 
+int fTotalErr;
+
 int configureChip(TAlpide *chip) {
   // put all chip configurations before the start of the test here
   chip->WriteRegister (Alpide::REG_MODECONTROL,   0x20);
@@ -129,6 +131,8 @@ int main() {
 
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
 
+    fTotalErr  = 0;
+
     for (int ichip = 0; ichip < fChips.size(); ichip++) {
       if (! fChips.at(ichip)->GetConfig()->IsEnabled()) continue;
      
@@ -155,7 +159,10 @@ int main() {
 
       if (fErrCount0 + fErrCount5 + fErrCountf > 0) 
         std::cout << "Set <Verbose> in source code to get single errors" << std::endl;
+      fTotalErr += fErrCount0 + fErrCount5 + fErrCountf;
     }
+
+    std::cout << std::endl << "Total error count (all chips): " << fTotalErr << std::endl << std::endl;
 
     if (myDAQBoard) {
       myDAQBoard->PowerOff();
