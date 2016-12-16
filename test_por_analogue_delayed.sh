@@ -3,14 +3,14 @@
 
 ROOT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # determine where this script is located
 
-LOG_FILE=${ROOT_DIR}/Data/por_clk_first_log_$(date +%Y-%m-%d_%H-%M-%S).txt
-RESULT_FILE=${ROOT_DIR}/Data/por_clk_first_result_$(date +%Y-%m-%d_%H-%M-%S).txt
+LOG_FILE=${ROOT_DIR}/Data/por_analogue_delayed_log_$(date +%Y-%m-%d_%H-%M-%S).txt
+RESULT_FILE=${ROOT_DIR}/Data/por_analogue_delayed_result_$(date +%Y-%m-%d_%H-%M-%S).txt
 
 GOOD=0
 BAD=0
 
-VBB=3.0
 VDD=1.8
+VBB=3.0
 
 ./poweron_setup.py ${VBB} 2>&1 | tee -a ${LOG_FILE}
 
@@ -27,10 +27,10 @@ do
     cd ${ROOT_DIR}
 
     sleep 0.1
-
+    ./poweron_chip.py ${VBB} ${VDD} 2>&1 | tee -a ${LOG_FILE}
 
     # do the test
-    timeout 20 ./test_por_clk_first_reset ${VBB} ${VDD} 2>&1 | tee -a ${LOG_FILE}
+    timeout 20 ./test_por_analogue_delayed ${VBB} ${VDD} 2>&1 | tee -a ${LOG_FILE}
     ret_value=$?
 
     if [[ "$ret_value" -eq 0 ]]

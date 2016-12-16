@@ -10,7 +10,7 @@ GOOD=0
 BAD=0
 
 VBB=3.0
-VDD=1.6
+VDD=1.8
 
 
 ./poweron.py ${VBB} ${VDD} 2>&1 | tee -a ${LOG_FILE}
