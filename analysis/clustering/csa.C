@@ -10,7 +10,8 @@
 #include "../classes/BinaryEvent.hpp"
 #include "../classes/helpers.h"
 
-#define MAX_CS 1000 // maximum pixels in an event
+#define MAX_CS 5000 // maximum pixels in an event
+//#define DEBUG
 
 using namespace std;
 
@@ -43,7 +44,7 @@ Bool_t csa(
     const TString filepath_raw,                      // path to SourceRaw_*_*.dat file
     const TString filepath_tree,                     // output tree path
     const TString filepath_mask="",                  // path to mask file
-    const Short_t crown = 3,                         // consider neighbours all pixels in <crown> crown
+    const Short_t crown = 1,                         // consider neighbours all pixels in <crown> crown
     const Bool_t  flagRmSingleHotPixClusters = kTRUE // do not save clusters with just one pixels which is hot
     ) {
 
@@ -72,7 +73,7 @@ Bool_t csa(
     BinaryPlane* plane[n_secs];
     for(Short_t i=0; i<n_secs; ++i) plane[i] = new BinaryPlane(); 
     BinaryCluster* cluster = new BinaryCluster();
-    vector<BinaryPixel> pix_vec;
+    vector<BinaryPixel> pix_vec; pix_vec.reserve(MAX_CS);
     BinaryPixel*  pix_arr = new BinaryPixel[MAX_CS];
     BinaryPixel   pix_tmp;
 
@@ -119,9 +120,13 @@ Bool_t csa(
     //-------------------------------------------
     cout << "csa() : Started reading RawHits file." << endl;
     Long_t evts = 0;
-    while(palpidefsRaw->ReadEvent() && evts<1000) {
-        if( (evts+1)%10 == 0 )
+    while(palpidefsRaw->ReadEvent()) {
+#ifdef DEBUG
+        cout << "csa() : Processed events: " << evts+1 << " / Trigger: " << palpidefsRaw->GetEventCounter() << endl;
+#else
+        if( (evts+1)%1000 == 0 )
             cout << "csa() : Processed events: " << evts+1 << endl;
+#endif
         event->Reset();
         event->SetEventID(evts);
         event->SetIntTrigCnt(palpidefsRaw->GetEventCounter());
@@ -137,8 +142,19 @@ Bool_t csa(
         Bool_t  flagPixAdded = kTRUE;
         hNPixAll->Fill(nhits);
 
+#ifdef DEBUG
+        int d_n_clu = 0;
+        int d_get_hit_cnt = 0;
+#endif
+
         // read which pixels are hit and re-construct first cluster
         while(palpidefsRaw->GetNextHit(&col, &row)) {
+#ifdef DEBUG
+            cout << "csa() : DEBUG: Reading hit " << d_get_hit_cnt << " of expected " << nhits << ", col: " << col << " row: " << row
+                 << " NClu = " << d_n_clu << " nhits = " << nhits << " j = " << j << endl;
+            d_get_hit_cnt++;
+#endif
+            //if(nhits > 100) cout << nhits << " " << j << endl;
             n_hitpix[col/scols]++;
             pix_tmp.Reset();
             pix_tmp.Set(col, row);
@@ -156,6 +172,7 @@ Bool_t csa(
                     if(IsNeighbour(crown, pix_tmp, pix_arr[k])) {
                         pix_arr[j] = pix_tmp;
                         ++j; --nhits;
+                        if(j >= MAX_CS) cerr << "csa() : FATAL: cluster size > MAX cluster size" << endl;
                         flagNeigh = kTRUE;
                     }
                 }
@@ -167,56 +184,76 @@ Bool_t csa(
         flagPixAdded = kTRUE;
         while(flagPixAdded && nhits) {
             flagPixAdded = kFALSE;
-            for(Int_t i=0; i < nhits; ++i) {
-                for(Int_t k=0; k<j; ++k) {
+            for(Int_t k=0; k<j; ++k) {
+                for(Int_t i=0; i < nhits; ++i) {
                     if(IsNeighbour(crown, pix_vec[i], pix_arr[k])) {
                         pix_arr[j] = pix_vec[i];
                         pix_vec.erase(pix_vec.begin()+i);
                         ++j; --nhits; --i;
+                        if(j >= MAX_CS) cerr << "csa() : FATAL: cluster size > MAX cluster size" << endl;
                         flagPixAdded = kTRUE;
                         break;
                     }
                 }
             }
         }
+#ifdef DEBUG
+        d_n_clu++;
+        cout << "csa() : DEBUG: NClu = " << d_n_clu << " nhits = " << nhits << " j = " << j << endl;
+#endif
         cluster->SetPixelArray(j, pix_arr);
+
         if(flagHot && flagRmSingleHotPixClusters
            && cluster->GetNPixels()==1 && cluster->HasHotPixels() )
             cluster->Reset();
         else
             plane[TMath::FloorNint(cluster->GetX() / scols)]->AddCluster(cluster);
+
+//#ifdef DEBUG
+//        cout << "Dump 1" << endl;
+//        for(Int_t i=0; i < pix_vec.size(); ++i)
+//            cout << i << " col: " << pix_vec[i].GetCol() << " row: " << pix_vec[i].GetRow() << endl;
+//#endif
         
         // reconstruct other clusters
+
         while(nhits) {
             pix_arr[0] = pix_vec[0];
             pix_vec.erase(pix_vec.begin());
             j=1; --nhits;
-            for(Int_t i=0; i < nhits; ++i) {
-                for(Int_t k=0; k<j; ++k) {
+            for(Int_t k=0; k<j; ++k) {
+                for(Int_t i=0; i < nhits; ++i) {
                     if(IsNeighbour(crown, pix_vec[i], pix_arr[k])) {
                         pix_arr[j] = pix_vec[i];
                         pix_vec.erase(pix_vec.begin()+i);
+                        if(j >= MAX_CS) cerr << "csa() : FATAL: cluster size > MAX cluster size" << endl;
                         ++j; --nhits; --i;
                     }
                 }
             }
+
             // some pixels excluded from cluster at the beginning of previous loop
             // might be neighbours with pixels included at the end
             flagPixAdded = kTRUE;
             while(flagPixAdded && nhits) {
                 flagPixAdded = kFALSE;
-                for(Int_t i=0; i < nhits; ++i) {
-                    for(Int_t k=0; k<j; ++k) {
+                for(Int_t k=0; k<j; ++k) {
+                    for(Int_t i=0; i < nhits; ++i) {
                         if(IsNeighbour(crown, pix_vec[i], pix_arr[k])) {
                             pix_arr[j] = pix_vec[i];
                             pix_vec.erase(pix_vec.begin()+i);
                             ++j; --nhits; --i;
+                            if(j >= MAX_CS) cerr << "csa() : FATAL: cluster size > MAX cluster size" << endl;
                             flagPixAdded = kTRUE;
                             break;
                         }
                     }
                 }
             }
+#ifdef DEBUG
+            d_n_clu++;
+            cout << "csa() : DEBUG: NClu = " << d_n_clu << " nhits = " << nhits << " j = " << j << endl;
+#endif
             cluster->SetPixelArray(j, pix_arr);
             if(flagHot && flagRmSingleHotPixClusters
                && cluster->GetNPixels()==1 && cluster->HasHotPixels() )
@@ -224,6 +261,7 @@ Bool_t csa(
             else
                 plane[TMath::FloorNint(cluster->GetX() / scols)]->AddCluster(cluster);
         }
+
 
         // fill the tree (if at least one plane is hit)
         Bool_t flagFill = kFALSE;
