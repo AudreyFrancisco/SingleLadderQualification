@@ -32,8 +32,8 @@ def main():
     sour.write("OUTP ON\n")
 
 
-    # CH2
-    sour.write("INST OUT2\n");
+    # CH4
+    sour.write("INST OUT4\n");
     sour.write("FUSE:LINK 1\n")
     sour.write("FUSE:LINK 2\n")
     sour.write("FUSE:LINK 3\n")

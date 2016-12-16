@@ -3,8 +3,8 @@
 ROOT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # determine where this script is located
 
 cd ${ROOT_DIR}/Data
-for f in $(find . -name "*log*.txt" | sort) ; 
-do 
+for f in $(find . -name "*log*.txt" | grep -v result | sort) ;
+do
     GOOD=$(cat $f | grep -E 'Readback.*0xaaa.*0xaa' | wc -l )
     TOTAL=$(cat $f | grep Readback | wc -l )
     LDO_OFF=$(cat $f | grep "LDOs are off" | wc -l)
@@ -16,7 +16,7 @@ do
 	echo "Suspicious: "
 	#cat $f | egrep -C3 -E 'Readback.*0x' ;
 	cat $f | egrep -A1 "received chipID" ;
-    else 
+    else
 	echo -e "$f\tStatus: ${GOOD}/${TOTAL}/${LDO_OFF}/${BAD} - OK"
     fi
     echo " "

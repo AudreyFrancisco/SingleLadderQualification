@@ -15,6 +15,7 @@
 
 
 #include <unistd.h>
+#include <stdio.h>
 #include <cstdlib>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
@@ -28,7 +29,7 @@
 #include "SetupHelpers.h"
 
 
-int main() {
+int main(int argc, char* argv[]) {
 
   uint16_t address1 = 0x000E;
   uint16_t value1 = 0xFFFF;
@@ -41,7 +42,9 @@ int main() {
 
   if (fBoards.size() == 1) {
 
-    std::system("./poweron_analogue.py");
+    char tmp[50] = { 0 };
+    snprintf(tmp, 50, "./poweron_analogue.py %s", argv[2]);
+    std::system(tmp);
 
     fChips.at(0)->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x60);
 

@@ -47,11 +47,19 @@ def main():
     sour.write("FUSE:LINK 4\n")
     sour.write("FUSE:DEL 200\n")
     sour.write("FUSE on\n")
-    sour.write("SOUR:VOLT 3.0\n")
+    sour.write("SOUR:VOLT %f\n" % float(sys.argv[1]))
     sour.write("SOUR:CURR 0.05\n")
     time.sleep(0.5);
     sour.write("OUTP ON\n")
 
+#    val=([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+#    for c in range(4):
+#        sour.write("INST OUT%d\n" % (c+1))
+#        sour.write("MEAS:VOLT?\n")
+#        val[2*c]   = float(sour.readline())
+#        sour.write("MEAS:CURR?\n")
+#        val[2*c+1] = float(sour.readline())
+#    print "%0.4fV\t%0.4fA\t%0.4fV\t%0.4fA\t%0.4fV\t%0.4fA\t%0.4fV\t%0.4fA\t" % ( val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7])
 
 ## execute the main
 if __name__ == "__main__":

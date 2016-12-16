@@ -28,7 +28,7 @@
 #include "SetupHelpers.h"
 
 
-int main() {
+int main(int argc, char* argv[]) {
 
   uint16_t address1 = 0x000E;
   uint16_t value1 = 0xFFFF;
@@ -41,7 +41,9 @@ int main() {
 
   if (fBoards.size() == 1) {
 
-    std::system("./poweron_chip.py");
+    char tmp[50] = { 0 };
+    snprintf(tmp, 50, "./poweron_chip.py %s %s", argv[1], argv[2]);
+    std::system(tmp);
 
     fChips.at(0)->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x60);
 

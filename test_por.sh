@@ -9,12 +9,16 @@ RESULT_FILE=${ROOT_DIR}/Data/por_result_$(date +%Y-%m-%d_%H-%M-%S).txt
 GOOD=0
 BAD=0
 
-./poweron.py 2>&1 | tee -a ${LOG_FILE}
+VBB=3.0
+VDD=1.6
+
+
+./poweron.py ${VBB} ${VDD} 2>&1 | tee -a ${LOG_FILE}
 
 for iTrial in $(seq 1 10000)
 do
     # power on
-    ./poweron.py 2>&1 | tee -a ${LOG_FILE}
+    ./poweron.py ${VBB} ${VDD} 2>&1 | tee -a ${LOG_FILE}
 
     sleep 1
 
@@ -27,7 +31,7 @@ do
 
 
     # do the test
-    timeout 20 ./test_por_reset 2>&1 | tee -a ${LOG_FILE}
+    timeout 20 ./test_por_reset ${VBB} ${VDD} 2>&1 | tee -a ${LOG_FILE}
     ret_value=$?
 
     if [[ "$ret_value" -eq 0 ]]

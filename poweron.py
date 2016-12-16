@@ -47,36 +47,10 @@ def main():
     sour.write("FUSE:LINK 4\n")
     sour.write("FUSE:DEL 200\n")
     sour.write("FUSE on\n")
-    sour.write("SOUR:VOLT 3.0\n")
-    sour.write("SOUR:VOLT 0.0\n")
+    sour.write("SOUR:VOLT %f\n" % float(sys.argv[1]))
     sour.write("SOUR:CURR 0.05\n")
     time.sleep(0.5);
     sour.write("OUTP ON\n")
-
-    #time.sleep(1.0);
-    #
-    #val=([0.0, 0.0, 0.0])
-    #for c in range(3):
-    #    sour.write("INST OUT%d\n" % (c+1))
-    #    sour.write("MEAS:VOLT?\n")
-    #    val[c] = float(sour.readline())
-    #print "%0.4fV\t%0.4fV\t%0.4fV" % ( val[0], val[1], val[2])
-    #
-    #
-    #for c in range(3):
-    #    sour.write("INST OUT%d\n" % (c+1))
-    #    sour.write("MEAS:CURR?\n")
-    #    val[c] = float(sour.readline())
-    #print "%0.4fA\t%0.4fA\t%0.4fA" % ( val[0], val[1], val[2])
-    #
-    #tripped = False
-    #for c in range(3):
-    #    sour.write("INST OUT%d\n" % (c+1))
-    #    sour.write("FUSE:TRIP?\n")
-    #    if (int(sour.readline())!=0):
-    #        sys.stderr.write("Channel %d tripped\n" % (c+1))
-    #        tripped = True
-
 
     # CH2 (DIGITAL)
     sour.write("INST OUT2\n");
@@ -85,7 +59,7 @@ def main():
     sour.write("FUSE:LINK 4\n")
     sour.write("FUSE:DEL 100\n")
     sour.write("FUSE OFF\n")
-    sour.write("SOUR:VOLT 1.65\n")
+    sour.write("SOUR:VOLT %f\n" % (float(sys.argv[2]) + 0.095))
     sour.write("SOUR:CURR 2.0\n")
     time.sleep(0.5);
     sour.write("OUTP ON\n")
@@ -102,6 +76,15 @@ def main():
     sour.write("FUSE OFF\n")
     sour.write("SOUR:VOLT 0.0\n")
     sour.write("OUTP ON\n")
+
+    val=([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    for c in range(4):
+        sour.write("INST OUT%d\n" % (c+1))
+        sour.write("MEAS:VOLT?\n")
+        val[2*c]   = float(sour.readline())
+        sour.write("MEAS:CURR?\n")
+        val[2*c+1] = float(sour.readline())
+    print "%0.4fV\t%0.4fA\t%0.4fV\t%0.4fA\t%0.4fV\t%0.4fA\t%0.4fV\t%0.4fA\t" % ( val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7])
 
 
 ## execute the main
