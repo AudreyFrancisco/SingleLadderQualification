@@ -262,9 +262,11 @@ int main() {
       fBoards.at(0)->SetTriggerSource (trigInt);
     }
     else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
+      // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns * strobe delay
+      // pulse delay cannot be 0, therefore set strobe delay to 0 and use only pulse delay
       fBoards.at(0)->SetTriggerConfig (true, false, 
-                                       fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
-                                       fBoards.at(0)->GetConfig()->GetParamValue("PULSEDELAY"));
+                                       0,
+                                       2 * fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
       fBoards.at(0)->SetTriggerSource (trigExt);
     }
 
