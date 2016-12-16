@@ -52,20 +52,12 @@ void TScan::CountEnabledChips()
 TMaskScan::TMaskScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards) 
 : TScan(config, chips, boards)
 {
+  m_pixPerStage = m_config->GetParamValue("PIXPERREGION");
 }
 
 
 void TMaskScan::ConfigureMaskStage(TAlpide *chip, int istage) {
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
-
-  AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_MASK,   false, istage);
-  AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_SELECT, true, istage);
-  //for (int icol = 0; icol < 1024; icol += 8) {
-  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 512, icol + istage / 512);
-  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 512, icol + istage / 512);   
-  //}
-
+  AlpideConfig::ConfigureMaskStage (chip, m_pixPerStage, istage);
 }
 
 

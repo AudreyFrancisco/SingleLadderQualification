@@ -23,61 +23,44 @@
 #include "USBHelpers.h"
 #include "TConfig.h"
 #include "AlpideDecoder.h"
+#include "AlpideConfig.h"
+
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 #include "TThresholdScan.h"
 #include "TScanConfig.h"
-
-int configureChip(TAlpide *chip) {
-  // put all chip configurations before the start of the test here
-  chip->WriteRegister (Alpide::REG_MODECONTROL,   0x20);
-  if (fConfig->GetDeviceType() == TYPE_CHIP)
-    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x60);
-}
 
 
 
 int main() {
 
   initSetup();
+    
+  TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards);
 
-  if (fBoards.size() == 1) {
-     
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
+  myScan->Init();
 
-    for (int i = 0; i < fChips.size(); i ++) {
-      configureChip (fChips.at(i));
-    }
-
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
-
-    TScanConfig    *myScanConfig = new TScanConfig();
-    TThresholdScan *myScan       = new TThresholdScan(myScanConfig, fChips, fBoards);
-
-    myScan->Init();
-
-    myScan->LoopStart(2);
-    while (myScan->Loop(2)) {
-      myScan->PrepareStep(2);
-      myScan->LoopStart  (1);
-      while (myScan->Loop(1)) {
-        myScan->PrepareStep(1);
-        myScan->LoopStart  (0);
-        while (myScan->Loop(0)) {
-          myScan->PrepareStep(0);
-          myScan->Execute    ();
-          myScan->Next       (0);  
-	}
-	myScan->LoopEnd(0);
-        myScan->Next   (1);
+  myScan->LoopStart(2);
+  while (myScan->Loop(2)) {
+    myScan->PrepareStep(2);
+    myScan->LoopStart  (1);
+    while (myScan->Loop(1)) {
+      myScan->PrepareStep(1);
+      myScan->LoopStart  (0);
+      while (myScan->Loop(0)) {
+        myScan->PrepareStep(0);
+        myScan->Execute    ();
+        myScan->Next       (0);  
       }
-      myScan->LoopEnd(1);
-      myScan->Next   (2);
+      myScan->LoopEnd(0);
+      myScan->Next   (1);
     }
-    myScan->LoopEnd  (2);
-    myScan->Terminate();
+    myScan->LoopEnd(1);
+    myScan->Next   (2);
   }
+  myScan->LoopEnd  (2);
+  myScan->Terminate();
+  
 
   return 0;
 }

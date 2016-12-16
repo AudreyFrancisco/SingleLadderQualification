@@ -43,6 +43,7 @@ class TScan {
 class TMaskScan : public TScan {
  private: 
  protected: 
+  int  m_pixPerStage;
   void ConfigureMaskStage(TAlpide *chip, int istage);
  public: 
   TMaskScan  (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards);
