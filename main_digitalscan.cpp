@@ -33,6 +33,7 @@
 
 int myNTriggers;
 int myMaskStages;
+int myPixPerRegion;
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
@@ -40,8 +41,9 @@ int HitData[16][512][1024];
 
 
 void InitScanParameters() {
-  myMaskStages  = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
-  myNTriggers   = fConfig->GetScanConfig()->GetParamValue("NINJ");
+  myMaskStages    = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
+  myPixPerRegion  = fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
+  myNTriggers     = fConfig->GetScanConfig()->GetParamValue("NINJ");
 }
 
 
@@ -127,36 +129,6 @@ int configureFromu(TAlpide *chip) {
 }
 
 
-// setting of mask stage during scan
-int configureMaskStage(TAlpide *chip, int istage) {
-  int row    = istage / 4;
-  int region = istage % 4;
-
-  uint32_t regionmod = 0x77777777 >> region;
-
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
-
-  AlpideConfig::WritePixRegRow (chip, Alpide::PIXREG_MASK,   false, row);
-  AlpideConfig::WritePixRegRow (chip, Alpide::PIXREG_SELECT, true,  row);
-
-  chip->WriteRegister (Alpide::REG_REGDISABLE_LOW,  (uint16_t) regionmod);
-  chip->WriteRegister (Alpide::REG_REGDISABLE_HIGH, (uint16_t) regionmod);
-
-  for (uint16_t ireg = 0; ireg < 32; ireg ++) {
-    uint16_t Address = Alpide::REG_DCOL_DISABLE_BASE | (ireg << 11);
-    chip->WriteRegister (Address, 0);
-  }
-
-
-  //for (int icol = 0; icol < 1024; icol += 8) {
-  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 512, icol + istage / 512);
-  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 512, icol + istage / 512);
-  //}
-
-}
-
-
 int configureChip(TAlpide *chip) {
   AlpideConfig::BaseConfig(chip);
 
@@ -183,7 +155,7 @@ void scan() {
     std::cout << "Mask stage " << istage << std::endl;
     for (int i = 0; i < fChips.size(); i ++) {
       if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-      configureMaskStage (fChips.at(i), istage);
+      AlpideConfig::ConfigureMaskStage (fChips.at(i), myPixPerRegion, istage);
     }
 
     //uint16_t Value;

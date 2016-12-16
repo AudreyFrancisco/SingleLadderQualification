@@ -32,6 +32,7 @@
 
 int myNTriggers;
 int myMaskStages;
+int myPixPerRegion;
 
 int myChargeStart;
 int myChargeStop;
@@ -45,11 +46,12 @@ int ievt = 0;
 
 
 void InitScanParameters() {
-  myMaskStages  = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
-  myNTriggers   = fConfig->GetScanConfig()->GetParamValue("NINJ");
-  myChargeStart = fConfig->GetScanConfig()->GetParamValue("CHARGESTART");
-  myChargeStop  = fConfig->GetScanConfig()->GetParamValue("CHARGESTOP");
-  myChargeStep  = fConfig->GetScanConfig()->GetParamValue("CHARGESTEP");
+  myMaskStages   = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
+  myPixPerRegion = fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
+  myNTriggers    = fConfig->GetScanConfig()->GetParamValue("NINJ");
+  myChargeStart  = fConfig->GetScanConfig()->GetParamValue("CHARGESTART");
+  myChargeStop   = fConfig->GetScanConfig()->GetParamValue("CHARGESTOP");
+  myChargeStep   = fConfig->GetScanConfig()->GetParamValue("CHARGESTEP");
 }
 
 
@@ -123,21 +125,6 @@ int configureFromu(TAlpide *chip) {
 }
 
 
-// setting of mask stage during scan
-int configureMaskStage(TAlpide *chip, int istage) {
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
-
-  AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_MASK,   false, istage);
-  AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_SELECT, true, istage);
-  //for (int icol = 0; icol < 1024; icol += 8) {
-  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, istage % 512, icol + istage / 512);
-  //  AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  istage % 512, icol + istage / 512);   
-  //}
-
-}
-
-
 int configureChip(TAlpide *chip) {
   AlpideConfig::BaseConfig(chip);
 
@@ -199,7 +186,7 @@ void scan() {
     std::cout << "Mask stage " << istage << std::endl;
     for (int i = 0; i < fChips.size(); i ++) {
       if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-      configureMaskStage (fChips.at(i), istage);
+      AlpideConfig::ConfigureMaskStage(fChips.at(i), myPixPerRegion, istage);
     }
 
     for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {

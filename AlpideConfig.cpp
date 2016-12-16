@@ -177,6 +177,30 @@ void AlpideConfig::ConfigureCMU (TAlpide *chip, TChipConfig *config) {
 }
 
 
+void AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage) {
+  // check that nPix is one of (1, 2, 4, 8, 16, 32)
+  if ((nPix <= 0) || (nPix & (nPix - 1)) || (nPix > 32)) {      
+    std::cout << "Warning: bad number of pixels for mask stage (" << nPix << ", using 1 instead" << std::endl;
+    nPix = 1;
+  }
+  WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
+  WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
+
+  // complete row
+  if (nPix == 32) {
+    WritePixRegRow(chip, Alpide::PIXREG_MASK,   false, iStage);
+    WritePixRegRow(chip, Alpide::PIXREG_SELECT, true, iStage);
+  }
+  else {
+    int colStep = 32 / nPix;
+    for (int icol = 0; icol < 1024; icol += colStep) {
+      WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, iStage % 512, icol + iStage / 512);
+      WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  iStage % 512, icol + iStage / 512);   
+    }
+  }
+}
+
+
 void AlpideConfig::WriteControlReg (TAlpide *chip, Alpide::TChipMode chipMode, TChipConfig *config) {
   if (!config) config = chip->GetConfig();
 
