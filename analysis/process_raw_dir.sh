@@ -28,14 +28,19 @@ then
 fi
 
 # variables
-CROWN=1
+CROWN=7
 
 # paths
 DIR_ANALYSIS=${BASH_SOURCE%/*}
 DIR_MACROS=$(readlink -f $DIR_ANALYSIS/clustering)/
 DIR_CLASSES=$(readlink -f $DIR_ANALYSIS/classes)/
 DIR_RAW=$(readlink -f $1)/
-DIR_RESULTS=$(readlink -f $DIR_RAW/results)/
+DIR_RESULTS=$(readlink -f $DIR_RAW/results)_cr${CROWN}/
+DIR_LOGS=$(readlink -f $DIR_RAW/logs)/
+
+# parallel processing
+MAXJOBS=3
+
 if [ "$#" -ge 2 ] 
 then
     if [ "$2" == "NULL" ] || [ "$2" == "0" ]
@@ -63,9 +68,7 @@ else
 fi
 
 mkdir -p $DIR_RESULTS
-
-# parallel processing
-MAXJOBS=4
+mkdir -p $DIR_LOGS
 
 echo "---------------------------------"
 echo "Target directory:  $DIR_RAW"
@@ -90,6 +93,7 @@ root -l -b <<EOF
 .L interesting_events.C+
 .L analysis_basic.C+
 .L analysis_ibhic.C+
+.L analysis_chip7.C+
 .q
 EOF
 
@@ -99,10 +103,11 @@ do
     echo $FILE_RAW
     FILE_ROOT=${FILE_RAW%.dat}_tree.root
     FILE_LOG=${FILE_RAW%.dat}_csa.log
-	if [ ! -f "$DIR_RAW/$FILE_ROOT" ] || [ "$FLAG_RECREATE" -eq 1 ]
+    [ -f "$DIR_RAW/crown" ] && LAST_CSA_CROWN=`cat $DIR_RAW/crown` || LAST_CSA_CROWN=0
+	if [ ! -f "$DIR_RAW/$FILE_ROOT" ] || [ "$FLAG_RECREATE" -eq 1 ] || [ "$LAST_CSA_CROWN" != "$CROWN" ]
 	then
         echo "Processing $FILE_RAW"
-        time root -l -b -q "$DIR_CLASSES/load_classes.C" "csa.C+(\"$DIR_RAW/$FILE_RAW\", \"$DIR_RAW/$FILE_ROOT\", \"$FILE_MASK\", $CROWN)" > $DIR_RAW/$FILE_LOG 2>&1 &
+        time root -l -b -q "$DIR_CLASSES/load_classes.C" "csa.C+(\"$DIR_RAW/$FILE_RAW\", \"$DIR_RAW/$FILE_ROOT\", \"$FILE_MASK\", $CROWN)" > $DIR_LOGS/$FILE_LOG 2>&1 &
         let njobs=njobs+1
         if [ $njobs -ge $MAXJOBS ]
         then
@@ -114,10 +119,12 @@ do
 done
 wait
 
+echo $CROWN > $DIR_RAW/crown
+
 if [ "$FLAG_INTERESTING" -eq 1 ]; then
     for i in `seq 0 8`
     do
-        root -l -b -q "$DIR_CLASSES/load_classes.C" "interesting_events.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip${i}_tree.root\", \"$DIR_RESULTS/interesting_events_Chip${i}.root\")" | tee $DIR_RESULTS/interesting_events_chip${i}.log 2>&1
+        root -l -b -q "$DIR_CLASSES/load_classes.C" "interesting_events.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip${i}_tree.root\", \"$DIR_RESULTS/interesting_events_Chip${i}.root\")" | tee $DIR_LOGS/interesting_events_chip${i}.log 2>&1
     done
 else
     echo "Not searching for interesting events!"
@@ -125,12 +132,12 @@ fi
 
 for i in `seq 0 8`
 do
-    root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip${i}_tree.root\", \"$DIR_RESULTS\", \"Chip${i}\")" | tee $DIR_RESULTS/analysis_basic_chip${i}.log
+    #root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip${i}_tree.root\", \"$DIR_RESULTS\", \"Chip${i}\")" | tee $DIR_LOGS/analysis_basic_chip${i}.log
+    root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_chip7.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip${i}_tree.root\", \"$DIR_RESULTS\", \"Chip${i}\")" | tee $DIR_LOGS/analysis_basic_chip${i}.log
 done
 
 
-root -l "$DIR_CLASSES/load_classes.C" "analysis_ibhic.C+(\"$DIR_RESULTS/\")" | tee $DIR_RESULTS/analysis_ibhic.log
-#root -l -b -q "$DIR_CLASSES/load_classes.C" "analysis_basic.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip0_tree.root\", \"$DIR_RESULTS\", \"0\")" | tee $DIR_RESULTS/analysis_basic.log
+root -l "$DIR_CLASSES/load_classes.C" "analysis_ibhic.C+(\"$DIR_RESULTS/\")" | tee $DIR_LOGS/analysis_ibhic.log
 
 
 echo "Finished processing directory!"

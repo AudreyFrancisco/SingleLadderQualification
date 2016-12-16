@@ -10,7 +10,7 @@
 #include "../classes/helpers.cpp"
 #include "../classes/BinaryEvent.hpp"
 
-Bool_t analysis_basic(
+Bool_t analysis_chip7(
     const TString filepath_tree,  // input tree path
     const TString dirpath_plots,  // output plots path
     const TString file_id,        // identifier (suffix) for output files
@@ -57,12 +57,22 @@ Bool_t analysis_basic(
                            srows-0.5, -0.5, srows-0.5);
     hCluY->SetStats(0);
 
+    // correlations
+    TH2F *hTwoCluX = new TH2F("hTwoCluX", "Correlation between X position of 2 consecutive clusters in an event;Cluster 1 X (column);Cluster 2 X (column);a.u.",
+                              n_secs*scols, -0.5, n_secs*scols-0.5, scols, -0.5, scols-0.5);
+    hTwoCluX->SetStats(0);
+    TH2F *hTwoCluY = new TH2F("hTwoCluY", "Correlation between Y position of 2 consecutive clusters in an event;Cluster 1 Y (row);Cluster 2 Y (row);a.u.",
+                              n_secs*srows, -0.5, n_secs*srows-0.5, srows, -0.5, srows-0.5);
+    hTwoCluX->SetStats(0);
+
+    
     TH1F *hNPix[n_secs];
     TH1F *hNClu[n_secs];
     TH1F *hMult[n_secs];
     TH1F *hXSpread[n_secs];
     TH1F *hYSpread[n_secs];
     TH1F *hMaxSpread[n_secs];
+    
     for(Short_t i=0; i<n_secs; ++i) {
         hNPix[i] = new TH1F(Form("hNPix_%i", i), Form("Number of hit pixels per event, sector %i;Number of hit pixels per event;Frequency", i),
                             3000, -0.5, 3000-0.5);
@@ -84,17 +94,24 @@ Bool_t analysis_basic(
 
     cout << "Number of events found in tree: " << nentries << endl;
 
+    BinaryCluster *prev_clu = new BinaryCluster();
+    Float_t prevx[1000], prevy[1000];
+    Int_t nprev=0;
+    
     for(Long_t ientry=0; ientry < nentries; ++ientry) {
         chain->GetEntry(ientry);
-        if( (ientry+1)%10000 == 0 )
+        if( (ientry+1)%1000 == 0 )
             cout << "Processed events: " << ientry+1 << " / " << nentries << endl;
+
         for(Short_t isec=0; isec < n_secs; ++isec) {
+            //if ( event->GetPlane(isec)->GetNClustersSaved() < 10 ) continue;
             hNPix[isec]->Fill(event->GetPlane(isec)->GetNHitPix());
             hNClu[isec]->Fill(event->GetPlane(isec)->GetNClustersSaved());
             for(Int_t iclu=0; iclu < event->GetPlane(isec)->GetNClustersSaved(); ++iclu) {
                 Int_t mult = event->GetPlane(isec)->GetCluster(iclu)->GetMultiplicity();
                 BinaryCluster* cluster = event->GetPlane(isec)->GetCluster(iclu);
                 BinaryPixel* pixels = cluster->GetPixelArray();
+
                 //if(mult < 2) continue;
                 //if(!cluster->HasBorderPixels())
                 //{
@@ -109,9 +126,25 @@ Bool_t analysis_basic(
                     hYSpread[isec]->Fill(cluster->GetYSpread());
                     hMaxSpread[isec]->Fill(cluster->GetMaxSpread());
                 //}
-                    //if(iclu > 0)
-                    //  hPixHits->Fill(event->GetPlane(isec)->GetCluster(iclu)->GetY(), event->GetPlane(isec)->GetCluster(iclu-1)->GetY());
+                    //if(iclu > 0) {
+                    //    hTwoCluX->Fill(event->GetPlane(isec)->GetCluster(iclu)->GetX(), event->GetPlane(isec)->GetCluster(iclu-1)->GetX());
+                    //    hTwoCluY->Fill(event->GetPlane(isec)->GetCluster(iclu)->GetY(), event->GetPlane(isec)->GetCluster(iclu-1)->GetY());
+                    //}
+                    if(ientry > 0 && ientry % 1 == 0) {
+                        for(Int_t jclu=0; jclu < nprev; jclu++) {
+                            hTwoCluX->Fill(prevx[jclu], cluster->GetX());
+                            hTwoCluY->Fill(prevy[jclu], cluster->GetY());
+                        }
+                    }
                     
+            }
+            if(ientry % 1 == 0) {
+                prev_clu = event->GetPlane(isec)->GetCluster(0);
+                nprev = event->GetPlane(isec)->GetNClustersSaved();
+                for(Int_t iclu=0; iclu < nprev; ++iclu) {
+                    prevx[iclu] = event->GetPlane(isec)->GetCluster(iclu)->GetX();
+                    prevy[iclu] = event->GetPlane(isec)->GetCluster(iclu)->GetY();
+                }
             }
         } // END FOR sectors
     } // END FOR entries
@@ -182,6 +215,7 @@ Bool_t analysis_basic(
     file_plots->Write();
 
     delete chain;
+    delete event;
     delete hPixHits;
     delete hCluHits;
     delete hCluX;

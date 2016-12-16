@@ -209,36 +209,22 @@ Bool_t csa(
         else
             plane[TMath::FloorNint(cluster->GetX() / scols)]->AddCluster(cluster);
 
-#ifdef DEBUG
-        cout << "Dump 1" << endl;
-        for(Int_t i=0; i < pix_vec.size(); ++i)
-            cout << i << " col: " << pix_vec[i].GetCol() << " row: " << pix_vec[i].GetRow() << endl;
-#endif
+//#ifdef DEBUG
+//        cout << "Dump 1" << endl;
+//        for(Int_t i=0; i < pix_vec.size(); ++i)
+//            cout << i << " col: " << pix_vec[i].GetCol() << " row: " << pix_vec[i].GetRow() << endl;
+//#endif
         
         // reconstruct other clusters
 
         while(nhits) {
             pix_arr[0] = pix_vec[0];
             pix_vec.erase(pix_vec.begin());
-#ifdef DEBUG
-            cout << "Dump 2" << endl;
-            for(Int_t i=0; i < pix_vec.size(); ++i)
-                cout << i << " col: " << pix_vec[i].GetCol() << " row: " << pix_vec[i].GetRow() << endl;
-#endif
             j=1; --nhits;
             for(Int_t k=0; k<j; ++k) {
                 for(Int_t i=0; i < nhits; ++i) {
                     if(IsNeighbour(crown, pix_vec[i], pix_arr[k])) {
                         pix_arr[j] = pix_vec[i];
-#ifdef DEBUG
-                        cout << "csa() : DEBUG: in loop: NClu = " << d_n_clu << " nhits = " << nhits << " j = " << j << " i = " << i
-                             << ", col: " << pix_vec[i].GetCol() << " row: " << pix_vec[i].GetRow() << endl;
-#endif
-#ifdef DEBUG
-                        cout << "Dump 3" << endl;
-                        for(Int_t ii=0; ii < pix_vec.size(); ++ii)
-                            cout << ii << " col: " << pix_vec[ii].GetCol() << " row: " << pix_vec[ii].GetRow() << endl;
-#endif
                         pix_vec.erase(pix_vec.begin()+i);
                         if(j >= MAX_CS) cerr << "csa() : FATAL: cluster size > MAX cluster size" << endl;
                         ++j; --nhits; --i;
