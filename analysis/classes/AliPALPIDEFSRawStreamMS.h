@@ -16,7 +16,7 @@ public:
     Bool_t ReadEvent();
     
     Bool_t IsLastEvent()     { return fLastEvent; }
-    Int_t  GetEventCounter() { return fEventCounter; }
+    Int_t  GetEventCounter() { return fCurrentEvent; }
     Int_t  GetNumHits()      { return fHitCols.size(); }
     Int_t  GetHitPixels(Short_t *col, Short_t* row);
     Bool_t GetNextHit(Short_t *col, Short_t* row);
@@ -28,6 +28,7 @@ private:
     ifstream fFileInput;
     Bool_t   fFirstEvent;
     Int_t    fEventCounter;
+    Int_t    fCurrentEvent;
     Bool_t   fLastEvent;
     Int_t    fHitIter;
     
