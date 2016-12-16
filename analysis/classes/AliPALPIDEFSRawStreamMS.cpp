@@ -55,10 +55,9 @@ Bool_t AliPALPIDEFSRawStreamMS::ReadEvent()
     fCurrentEvent = fEventCounter;
     
     while(fFileInput.good() && evt == fEventCounter) {
-        //fFileInput >> col >> row;
         fFileInput >> dcol >> addr >> hits;
         if(dcol < 0 || addr < 0 || hits < 0) {
-            //skip event
+            //skip event // FIX ME - make nicer
         }
         else {
             dblcol_adr_to_col_row(dcol, addr, &col, &row);
