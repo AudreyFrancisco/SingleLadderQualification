@@ -79,17 +79,17 @@ Bool_t analysis_ibhic(
         if(hCluHitsChip == NULL) { cerr << "analysis_ibhic() : ERROR: missing histogram in " << fname << endl; return kFALSE; }
 
         hMult[ichip] = (TH1F*)file->Get("hMult_0");
-        if(hMult == NULL) { cerr << "analysis_ibhic() : ERROR: missing histogram in " << fname << endl; return kFALSE; }
+        if(hMult[ichip] == NULL) { cerr << "analysis_ibhic() : ERROR: missing histogram in " << fname << endl; return kFALSE; }
         hMult[ichip]->SetDirectory(0);
         hMult[ichip]->SetNameTitle(Form("hMult_%i", ichip), Form("Cluster multiplicity, Chip %i", ichip));
 
         hNClu[ichip] = (TH1F*)file->Get("hNClu_0");
-        if(hNClu == NULL) { cerr << "analysis_ibhic() : ERROR: missing histogram in " << fname << endl; return kFALSE; }
+        if(hNClu[ichip] == NULL) { cerr << "analysis_ibhic() : ERROR: missing histogram in " << fname << endl; return kFALSE; }
         hNClu[ichip]->SetDirectory(0);
         hNClu[ichip]->SetNameTitle(Form("hNClu_%i", ichip), Form("Number of clusters per event, Chip %i", ichip));
         
         hNPix[ichip] = (TH1F*)file->Get("hNPix_0");
-        if(hNPix == NULL) { cerr << "analysis_ibhic() : ERROR: missing histogram in " << fname << endl; return kFALSE; }
+        if(hNPix[ichip] == NULL) { cerr << "analysis_ibhic() : ERROR: missing histogram in " << fname << endl; return kFALSE; }
         hNPix[ichip]->SetDirectory(0);
         hNPix[ichip]->SetNameTitle(Form("hNPix_%i", ichip), Form("Number of hit pixels per event, Chip %i", ichip));
         

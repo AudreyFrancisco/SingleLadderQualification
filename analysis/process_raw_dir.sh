@@ -28,7 +28,7 @@ then
 fi
 
 # variables
-CROWN=7
+CROWN=3
 
 # paths
 DIR_ANALYSIS=${BASH_SOURCE%/*}

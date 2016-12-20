@@ -5,11 +5,13 @@ AliPALPIDEFSRawStreamMS::AliPALPIDEFSRawStreamMS() :
     fEventCounter(0),
     fFirstEvent(1),
     fLastEvent(0),
-    fHitIter(0)
+    fHitIter(0),
+    fChipType(4),       // default ALPIDE
+    fSkipErrorEvents(1) // default skip error events (row or col < 0)
 {
     // Construct
-    fHitCols.reserve(50);
-    fHitRows.reserve(50);
+    fHitCols.reserve(100);
+    fHitRows.reserve(100);
 }
 
 //__________________________________________________________
@@ -29,6 +31,9 @@ Bool_t AliPALPIDEFSRawStreamMS::SetInputFile(const char *filename)
 //__________________________________________________________
 Bool_t AliPALPIDEFSRawStreamMS::ReadEvent()
 {
+    // if fSkipErrorEvents = true, events with pixels with dcol/addr/hits < 0 will be ignored
+    // if fSkipErrorEvents = false, pixel hit with col = dcol (<0) / row = addr (<0) will be propagated
+    
     Int_t   evt;
     Short_t col, row;
     Short_t dcol, addr;
@@ -56,11 +61,13 @@ Bool_t AliPALPIDEFSRawStreamMS::ReadEvent()
     
     while(fFileInput.good() && evt == fEventCounter) {
         fFileInput >> dcol >> addr >> hits;
-        if(dcol < 0 || addr < 0 || hits < 0) {
-            //skip event // FIX ME - make nicer
+        if( (dcol < 0 || addr < 0 || hits < 0) && fSkipErrorEvents ) {
+            fFileInput >> evt;
+            fEventCounter = evt;
+            continue;
         }
         else {
-            dblcol_adr_to_col_row(dcol, addr, &col, &row);
+            dblcol_adr_to_col_row(dcol, addr, &col, &row, fChipType);
             fHitCols.push_back(col);
             fHitRows.push_back(row);
         }
@@ -80,14 +87,6 @@ Bool_t AliPALPIDEFSRawStreamMS::ReadEvent()
 }
 
 //__________________________________________________________
-Int_t AliPALPIDEFSRawStreamMS::GetHitPixels(Short_t *col, Short_t* row) {
-    // not working
-    col = &fHitCols[0];
-    row = &fHitRows[0];
-    return fHitCols.size();
-}
-
-//__________________________________________________________
 Bool_t AliPALPIDEFSRawStreamMS::GetNextHit(Short_t *col, Short_t* row) {
     if( fHitIter < GetNumHits() ) {
         *col = fHitCols.at(fHitIter);
@@ -102,9 +101,20 @@ Bool_t AliPALPIDEFSRawStreamMS::GetNextHit(Short_t *col, Short_t* row) {
     }
 }
 
+//__________________________________________________________
+//Int_t AliPALPIDEFSRawStreamMS::GetHitPixels(Short_t *col, Short_t* row) {
+//    // not working
+//    col = &fHitCols[0];
+//    row = &fHitRows[0];
+//    return fHitCols.size();
+//}
 
-
-void AliPALPIDEFSRawStreamMS::dblcol_adr_to_col_row(Short_t doublecol, Short_t address, Short_t *col, Short_t *row, int chiptype) {
+Bool_t AliPALPIDEFSRawStreamMS::dblcol_adr_to_col_row(Short_t doublecol, Short_t address, Short_t *col, Short_t *row, Short_t chiptype) {
+    if( doublecol < 0 || address < 0 ) {
+        *col = doublecol;
+        *row = address;
+        return kFALSE;
+    }
     if (chiptype<3) { // pALPIDE-1/2
         *col = doublecol*2 + (address%4 < 2 ? 1 : 0);
         *row = 2*(address/4) + 1-(address%2);
@@ -114,5 +124,6 @@ void AliPALPIDEFSRawStreamMS::dblcol_adr_to_col_row(Short_t doublecol, Short_t a
         *col += ((((address%4)==1) || ((address%4)==2)) ? 1:0);
         *row = address/2;
     }
+    return kTRUE;
 }
 
