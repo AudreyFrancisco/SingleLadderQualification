@@ -241,7 +241,7 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 
 
 int initSetup(const char *configFileName) {
-  fConfig = new TConfig ("Config.cfg");  
+  fConfig = new TConfig (configFileName);  
 
   switch (fConfig->GetDeviceType())
     {
