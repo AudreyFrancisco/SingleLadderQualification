@@ -113,6 +113,9 @@ TDeviceType TConfig::ReadDeviceType (const char *deviceName) {
   else if (!strcmp(deviceName, "CHIPMOSAIC")) {
     type = TYPE_CHIP_MOSAIC;
   }
+  else if (!strcmp(deviceName, "HALFSTAVE")) {
+    type = TYPE_HALFSTAVE;
+  }
   else {
     std::cout << "Error, unknown setup type found: " << deviceName << std::endl;
     exit (EXIT_FAILURE);
@@ -142,25 +145,36 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
       if (i == 7) continue;
       chipIds.push_back(i + ((DEFAULT_MODULE_ID & 0x7) << 4));
     }
-    Init (14, chipIds, boardMOSAIC);
+    Init (1, chipIds, boardMOSAIC);
   }
   else if (AType == TYPE_IBHIC) {
     for (int i = 0; i < 9; i++) {
       chipIds.push_back(i);
     }
-    Init (9, chipIds, boardMOSAIC);    
+    Init (1, chipIds, boardMOSAIC);    
+  }
+  else if (AType == TYPE_HALFSTAVE) {
+    for (int imod = 0; imod < NChips; imod++) {
+      int moduleId = imod + 1;
+      for (int i = 0; i < 15; i++) {
+        if (i == 7) continue;
+        chipIds.push_back(i + ((moduleId & 0x7) << 4));
+      }
+    }
+    Init (2, chipIds, boardMOSAIC);
   }
 }
 
 
 void TConfig::ReadConfigFile (const char *fName) 
 {
-  char  Line[1024], Param[50], Rest[50];
-  bool  Initialised = false;
-  int         NChips = 0;
+  char        Line[1024], Param[50], Rest[50];
+  bool        Initialised = false;
+  int         NChips      = 0;
+  int         NModules    = 0;
   int         Chip;
-  TDeviceType type   = TYPE_UNKNOWN;
-  FILE *fp          = fopen (fName, "r");
+  TDeviceType type        = TYPE_UNKNOWN;
+  FILE       *fp          = fopen (fName, "r");
 
   if (!fp) {
     std::cout << "WARNING: Config file " << fName << " not found, using default configuration." << std::endl;
@@ -174,13 +188,17 @@ void TConfig::ReadConfigFile (const char *fName)
     if (!strcmp(Param,"NCHIPS")){
       sscanf(Rest, "%d", &NChips);
     }
+    if (!strcmp(Param,"NMODULES")){
+      sscanf(Rest, "%d", &NModules);
+    }
     if (!strcmp(Param, "DEVICE")) {
       type = ReadDeviceType (Rest);
     }
-    if ((type != TYPE_UNKNOWN) && ((type != TYPE_TELESCOPE) || (NChips > 0)) ) {   // type and nchips has been found (nchips not needed for type chip)
+    if ((type != TYPE_UNKNOWN) && ((type != TYPE_TELESCOPE) || (NChips > 0)) && ((type != TYPE_HALFSTAVE) || (NModules = 0))) {   // type and nchips has been found (nchips not needed for type chip)
       // SetDeviceType calls the appropriate init method, which in turn calls
       // the constructors for board and chip configs
-      SetDeviceType(type, NChips);
+      if (type == TYPE_HALFSTAVE) SetDeviceType(type, NModules);
+      else SetDeviceType(type, NChips);
       Initialised = true;
     }
   }
