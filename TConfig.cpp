@@ -104,11 +104,11 @@ TDeviceType TConfig::ReadDeviceType (const char *deviceName) {
   else if (!strcmp(deviceName, "TELESCOPE")) {
     type = TYPE_TELESCOPE;
   }
-  else if (!strcmp(deviceName, "MODULE")) {
-    type = TYPE_MODULE;
+  else if (!strcmp(deviceName, "OBHIC")) {
+    type = TYPE_OBHIC;
   }
-  else if (!strcmp(deviceName, "STAVE")) {
-    type = TYPE_STAVE;
+  else if (!strcmp(deviceName, "IBHIC")) {
+    type = TYPE_IBHIC;
   }
   else if (!strcmp(deviceName, "CHIPMOSAIC")) {
     type = TYPE_CHIP_MOSAIC;
@@ -137,14 +137,14 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
     }
     Init(NChips, chipIds, boardDAQ);
   }
-  else if (AType == TYPE_MODULE) {
+  else if (AType == TYPE_OBHIC) {
     for (int i = 0; i < 15; i++) {
       if (i == 7) continue;
       chipIds.push_back(i + ((DEFAULT_MODULE_ID & 0x7) << 4));
     }
     Init (14, chipIds, boardMOSAIC);
   }
-  else if (AType == TYPE_STAVE) {
+  else if (AType == TYPE_IBHIC) {
     for (int i = 0; i < 9; i++) {
       chipIds.push_back(i);
     }

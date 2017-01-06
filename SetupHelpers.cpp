@@ -248,10 +248,10 @@ int initSetup(const char *configFileName) {
     case TYPE_CHIP: 
       initSetupSingle();
       break;
-    case TYPE_STAVE:
+    case TYPE_IBHIC:
       initSetupIB();
       break;
-    case TYPE_MODULE:
+    case TYPE_OBHIC:
       initSetupOB();
       break;
     case TYPE_CHIP_MOSAIC: 
