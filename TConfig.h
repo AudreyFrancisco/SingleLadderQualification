@@ -33,6 +33,7 @@ class TConfig {
   
   TDeviceType   GetDeviceType      () {return fDeviceType;};
   int           GetNChips          () {return fChipConfigs.size();};
+  int           GetNBoards         () {return fBoardConfigs.size();};
   TChipConfig  *GetChipConfig      (int iChip);
   TChipConfig  *GetChipConfigById  (int chipId);
   TBoardConfig *GetBoardConfig     (int iBoard);

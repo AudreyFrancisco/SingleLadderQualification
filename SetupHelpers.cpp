@@ -55,9 +55,39 @@ int initSetupOB() {
 }
 
 
+// implicit assumptions on the setup in this method
+// - chips of master 0 of all modules are connected to 1st mosaic, chips of master 8 to 2nd MOSAIC
 int initSetupHalfStave() {
   fBoardType = boardMOSAIC;
-  
+  for (int i = 0; i < fConfig->GetNBoards(); i++) {
+    TBoardConfigMOSAIC* boardConfig = (TBoardConfigMOSAIC*) fConfig->GetBoardConfig(i);
+
+    boardConfig->SetInvertedData (false);  //already inverted in the adapter plug ?
+    boardConfig->SetSpeedMode    (Mosaic::RCV_RATE_400);
+
+    fBoards.push_back (new TReadoutBoardMOSAIC(boardConfig));
+  }
+
+  for (int i = 0; i < fConfig->GetNChips(); i++) {
+    TChipConfig* chipConfig = fConfig   ->GetChipConfig(i);
+    int          chipId     = chipConfig->GetChipId    ();
+    int          mosaic     = (chipId & 0x1000) ? 1:0;
+
+    fChips.push_back(new TAlpide(chipConfig));
+    fChips.at(i) -> SetReadoutBoard(fBoards.at(mosaic));
+    
+    // to be checked when final layout of adapter fixed
+    int ci  = 0; 
+    int rcv = (chipId & 0x7) ? -1 : 9*ci; //FIXME 
+    fBoards.at(mosaic)-> AddChip(chipId, ci, rcv);
+  }
+
+  std::cout << "Checking control interfaces." << std::endl;
+  int nWorking = CheckControlInterface();
+  std::cout << "Found " << nWorking << " working chips" << std::endl;
+  sleep(5);
+  MakeDaisyChain();
+  return 0;
 }
 
 
