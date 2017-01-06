@@ -5,7 +5,7 @@ CFLAGS= -pipe -fPIC -g -std=c++0x -mcmodel=medium -I $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -L $(LIBPATH)
 #LINKFLAGS=
 OBJECT= runTest
-#LIBRARY=libpalpidefs.so
+LIBRARY=libalpide.so
 CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
  TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp BoardDecoder.cpp SetupHelpers.cpp \
  MosaicSrc/alpide3rcv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/i2cbus.cpp MosaicSrc/i2cslave.cpp MosaicSrc/i2csyspll.cpp \
@@ -23,6 +23,9 @@ all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dac
 
 $(OBJECT):   $(OBJS) main.cpp
 	$(CC) -o $(OBJECT) $(OBJS) $(CFLAGS) main.cpp $(LINKFLAGS)
+
+lib: $(OBJS)
+	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
 
 test_mosaic:   $(OBJS) main_mosaic.cpp
 	$(CC) -o test_mosaic $(OBJS) $(CFLAGS) main_mosaic.cpp $(LINKFLAGS)
@@ -66,4 +69,3 @@ test_scantest:   $(OBJS) main_scantest.cpp
 clean:
 	rm -rf *.o $(OBJECT)
 	rm -rf MosaicSrc/*.o
-
