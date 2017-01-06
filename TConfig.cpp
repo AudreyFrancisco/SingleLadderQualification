@@ -182,7 +182,7 @@ void TConfig::ReadConfigFile (const char *fName)
   }
 
   // first look for the type of setup in order to initialise config structure
-  while ((!Initialised) && (fgets(Line, 20123, fp) != NULL)) {
+  while ((!Initialised) && (fgets(Line, 1023, fp) != NULL)) {
     if ((Line[0] == '\n') || (Line[0] == '#')) continue; 
     ParseLine (Line, Param, Rest, &Chip);
     if (!strcmp(Param,"NCHIPS")){
