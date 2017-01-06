@@ -55,6 +55,12 @@ int initSetupOB() {
 }
 
 
+int initSetupHalfStave() {
+  fBoardType = boardMOSAIC;
+  
+}
+
+
 // Make the daisy chain for OB readout, based on enabled chips
 // i.e. to be called after CheckControlInterface
 void MakeDaisyChain() {

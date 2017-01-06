@@ -230,7 +230,7 @@ void TConfig::ParseLine(const char *Line, char *Param, char *Rest, int *Chip) {
 
 void TConfig::DecodeLine(const char *Line)
 {
-  int Chip, ChipStart, ChipStop;
+  int Chip, Start, ChipStop, BoardStop;
   char Param[128], Rest[896];
   if ((Line[0] == '\n') || (Line[0] == '#')) {   // empty Line or comment
       return;
@@ -239,12 +239,14 @@ void TConfig::DecodeLine(const char *Line)
   ParseLine(Line, Param, Rest, &Chip);
 
   if (Chip == -1) {
-    ChipStart = 0;
+    Start     = 0;
     ChipStop  = fChipConfigs.size();
+    BoardStop = fBoardConfigs.size();
   }
   else {
-    ChipStart = Chip;
+    Start     = Chip;
     ChipStop  = Chip+1;
+    BoardStop = Chip+1;
   }
 
   // Todo: correctly handle the number of readout boards
@@ -252,18 +254,22 @@ void TConfig::DecodeLine(const char *Line)
   // Note: having a config file with parameters for the mosaic board, but a setup with a DAQ board
   // (or vice versa) will issue unknown-parameter warnings... 
   if (fChipConfigs.at(0)->IsParameter(Param)) {
-    for (int i = ChipStart; i < ChipStop; i++) {
+    for (int i = Start; i < ChipStop; i++) {
       fChipConfigs.at(i)->SetParamValue (Param, Rest);
     }
   }
   else if (fBoardConfigs.at(0)->IsParameter(Param)) {
-      fBoardConfigs.at(0)->SetParamValue (Param, Rest);
+    for (int i = Start; i < BoardStop; i++) {
+      fBoardConfigs.at(i)->SetParamValue (Param, Rest);
+    }
   }
   else if (fScanConfig->IsParameter(Param)) {
     fScanConfig->SetParamValue (Param, Rest);
   }
   else if ((!strcmp(Param, "ADDRESS")) && (fBoardConfigs.at(0)->GetBoardType() == boardMOSAIC)) {
-      ((TBoardConfigMOSAIC *)fBoardConfigs.at(0))->SetIPaddress(Rest);
+    for (int i = Start; i < BoardStop; i++) {
+      ((TBoardConfigMOSAIC *)fBoardConfigs.at(i))->SetIPaddress(Rest);
+    }
   }
   else {
     std::cout << "Warning: Unknown parameter " << Param << std::endl;

@@ -23,6 +23,7 @@ int  initSetupOB          ();
 int  initSetupIB          ();
 int  initSetupSingle      ();
 int  initSetupSingleMosaic();
+int  initSetupHalfStave   ();
 int  initSetup            (const char *configFileName = "Config.cfg");
 int  powerOn              (TReadoutBoardDAQ *aDAQBoard);
 int  CheckControlInterface();
