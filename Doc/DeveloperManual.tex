@@ -1,14 +1,18 @@
 \documentclass{article}
 \usepackage{fancyvrb}
-
+\usepackage{listings}
+\lstset{
+basicstyle=\small\ttfamily,
+columns=flexible,
+breaklines=true
+}
 \let\oldsection\section
-\renewcommand\section{\clearpage\oldsection}
+%\renewcommand\section{\clearpage\oldsection}
 
 \begin{document}
 \title{ALPIDE Characterisation Software Framework - Manual}
 \date{rev. 1, \today}
 
-%\author{Markus Keil}
 \maketitle
 
 
@@ -49,13 +53,11 @@ These requirements were addressed by the following class structure:
 \end{itemize}
 
 This document describes how the framework can be used to implement
-test applications. Even if the framework is compatible with the test
-of both single chips and modules, this version of the document focuses
-on the test of single chips with the DAQ board. The first part of the
+test applications. The first part of the
 document gives a step-to-step guide to the application development,
 the last part serves as a reference for the implemented methods. 
 
-\section {User Manual}
+\section {Manual}
 
 \subsection{Initialisation of the Setup}
 
@@ -80,7 +82,7 @@ A standard initialisation for a setup with one DAQ board and a single
 chip with ID 16 is given in the following example (detailed
 explanations of the used methods in the reference part): 
 
-\begin{verbatim}
+\begin{lstlisting}
 
 // vectors containing all chips and boards 
 // (in this example only one)
@@ -115,8 +117,10 @@ if (myDAQBoard) {     // otherwise board was not of type TReadoutBoardDAQ
     // throw exception
   }
 }
-\end{verbatim}
+\end{lstlisting}
 
+
+Please also have a look at the  file \texttt{SetupHelpers.cpp} in the repository / software package where several initialisations for standard setup types (single chip, IB HIC, OB HIC, half-stave) are already implemented.
 
 \subsection{Interaction with the Readout Board}
 
@@ -130,31 +134,30 @@ reference section). To access the methods of the derived classes the
 readout board has to be cast on the appropriate class. Checks of the
 object type can be done using a dynamic cast, e.g. 
 
-\begin{verbatim}
+\begin{lstlisting}
 TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*>(myReadoutBoard);
 if (myDAQBoard) ... 
-\end{verbatim}
+\end{lstlisting}
 
 or alternatively with the method \texttt{GetBoardType()}.
 
 
 \subsection{Chip Configuration}
 
-Also the configuration of the chip can be done directly using the
-methods \texttt{WriteChipRegister}, \texttt{SendOpCode} and
-\texttt{ReadChipRegister}. The register addresses can be given either
+The configuration of the chip can be done directly using the
+methods \texttt{TAlpide::} \texttt{WriteRegister}, \texttt{TReadoutBoard::SendOpCode} and
+\texttt{TAlpide::ReadRegister}. The register addresses can be given either
 directly as integers or using the names defined in \texttt{TAlpide.h},
 e.g. \texttt{Alpide::REG\_VCASN}. Additionally several methods for
 standard configuration procedures (masking, CMU configuration...) have
 been defined in AlpideConfig. All methods in AlpideConfig are used
 with the chip object as parameter, e.g.
-\begin{verbatim}
+\begin{lstlisting}
 // unmask all pixels
 AlpideConfig::WritePixRegAll (myChip, Alpide::PIXREG_MASK, false);
 // select row 5 for injection 
 AlpideConfig::WritePixRegRow (myChip, Alpide::PIXREG_SELECT, true, 5);
-\end{verbatim}
-
+\end{lstlisting}
 
 A command sequencer that can be used to send a predefined series of
 commands to the chip is also foreseen. 
@@ -185,14 +188,53 @@ buffer returned by \texttt{ReadEventData()} is first passed to
 
 
 
-\paragraph{Pending:} For integration of the MOSAIC probably two
-methods will be added that need to be called before and after data
-taking (\texttt {Start/StopDataTaking()}). 
+\paragraph{MOSAIC only:} In case of the MOSAIC board the \texttt{StartRun()} method has to be called before the data taking and \texttt{StopRun()} after.
+
+Examples for the implementation of data taking can be seen in the files \texttt{main\_threshold.cpp, main\_digital.cpp, main\_noiseocc.cpp}
 
 
 
+\subsection {Scan Class} 
+For better portability of the scans to other softwares, in particular a GUI, a generic scan class \texttt{TScan} has been implemented. The class implements a generic scan consisting of three nested loops. The specific functionality performed in these loops can then be implemented in derived classes. Up to now this has been done and tested for the threshold scan. A sample application, which performs the threshold scan using the \texttt{TThresholdScan} class looks like this: 
 
-\section {Reference Manual}
+\begin {lstlisting}
+int main() {
+
+  initSetup();
+
+  TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards);
+
+  myScan->Init();
+
+  myScan->LoopStart(2);
+  while (myScan->Loop(2)) {
+    myScan->PrepareStep(2);
+    myScan->LoopStart  (1);
+    while (myScan->Loop(1)) {
+      myScan->PrepareStep(1);
+      myScan->LoopStart  (0);
+      while (myScan->Loop(0)) {
+        myScan->PrepareStep(0);
+        myScan->Execute    ();
+        myScan->Next       (0);  
+      }
+      myScan->LoopEnd(0);
+      myScan->Next   (1);
+    }
+    myScan->LoopEnd(1);
+    myScan->Next   (2);
+  }
+  myScan->LoopEnd  (2);
+  myScan->Terminate();
+  
+  return 0;
+}
+\end{lstlisting}
+
+Note that the implementation would be identical for other types of scans, with the exception of the call to the appropriate constructor. 
+
+\clearpage
+\section {Reference}
 
 \subsection{Readout Board}
 
@@ -270,10 +312,10 @@ For data taking itself the readout board provides the following two methods:
 TReadoutBoard is the abstract base class for all readout boards. A
 readout board is therefore typically constructed the following way: 
 
-\begin{verbatim}
+\begin{lstlisting}
 TReadoutBoard *myReadoutBoard = new TReadoutBoardDAQ   (config);
 TReadoutBoard *mySecondBoard  = new TReadoutBoardMosaic(config);
-\end{verbatim}
+\end{lstlisting}
 
 \paragraph {Setup:}
 In order for the control communication and the data readout to work in
@@ -285,9 +327,9 @@ internally, such that the chip ID is the only parameter for all
 methods interacting with the chip for control or readout. The
 necessary information is added by the method 
 
-\begin{verbatim}
+\begin{lstlisting}
 int AddChip (uint8_t ChipID, int ControlInterface, int Receiver)
-\end{verbatim}
+\end{lstlisting}
 
 
 
@@ -392,13 +434,13 @@ setup can be constructed in three different ways:
 \begin{itemize}
 \item \texttt{TConfig(const char *fName)}: reads the config from the
     given file.
-\item \texttt{TConfig(int nBoards, std::vector <int> chipIds)}:
-  creates a config for a given number of (DAQ) boards, and chips with the
+\item \texttt{TConfig(int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC)}:
+  creates a config for a given number of readout boards of type \texttt{boardType}, and chips with the
   given chip IDs. In this case standard settings are used as defined
   in the header files \texttt{TBoardConfig.h} and
   \texttt{TChipConfig.h}.
-\item \texttt{TConfig(int chipId)}: creates a standard config for one
-  DAQ board and one chip with the given chip Id. This is currently the
+\item \texttt{TConfig(int chipId), TBoardType boardType = boardDAQ}: creates a standard config for one
+  readout board of type \texttt{boardType} and one chip with the given chip Id. This is currently the
   only implemented constructor and can be used for initial testing of
   Alpide single chips.
 \end{itemize}
