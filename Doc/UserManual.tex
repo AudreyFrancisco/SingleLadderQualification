@@ -101,7 +101,17 @@ Chip ID & 16 & 17 & 18 & ... & 22 & 24 & 25 & ... & 30\\ \hline
 \end{tabular}
 \end{center}
 This numbering scheme corresponds to a module ID of 1. In a future implementation it will be possible to change this via config file, currently this can already be done by changing the individual chip IDs.
+
+\item Outer Barrel Half-Stave: The structure for an outer barrel half-stave is prepared with the device \texttt{HALFSTAVE}, however this device type requires in addition the number of modules, e.g. for a fully mounter outer layer half-stave:
+\begin{verbatim}
+DEVICE HALFSTAVE
+NMODULES 7
+\end{verbatim}
+The prepared setup then contains \texttt{NMODULES} modules with 14 chips each and ascending module IDs 0 ... \texttt{NMODULES + 1}. If the module IDs are to be changed, this currently has to be done chipwise, however modulewise switches are under preparation.
+
 \end{enumerate}
+
+
 
 \paragraph {Chip Enabling / Disabling} \hfill \\
 By default all defined chips are enabled for configuration and scans. For all multi-chip devices single chips can be disabled in the config file by adding a line \texttt{ENABLED\_n 0} to disable chip \texttt{n}. In addition the software checks before execution of the actual test whether an enabled chip responds to the command interface. If this is not the case the chip is auto-disabled. In case of the OB module the daisy chain is established after this procedure, skipping all disabled chips \footnote{Note that it is currently not possible to read out a daisy chain with the corresponding master disabled}.
