@@ -26,7 +26,7 @@ Bool_t correlation_psd(
     const Short_t srows        = 512;
     const Short_t n_secs       = 1;   // number of sectors
     const Short_t n_chips      = 9;
-    const TString dirpath_results = dirpath_data + "/results";
+    const TString dirpath_results = dirpath_data + "/results_cr3";
 
     Float_t totpixmult[100000] = {0.};
     Float_t totclumult[100000] = {0.};
@@ -51,9 +51,9 @@ Bool_t correlation_psd(
     Int_t fpsdbeg = file_psd.tellg();
 
     TH1F *hEPSD = new TH1F("hEPSD", "PSD energy distribution;ePSD;a.u.", 5e2, 0., 5e4);
-    TH2F *hNPixPSDAll = new TH2F("hNPixPSDAll", "Pixel hit multiplicity vs PSD energy - IB HIC;ePSD;# of pixels hit;a.u.", 3e2, 0, 3e4, 200, -0.5, 800-0.5);
+    TH2F *hNPixPSDAll = new TH2F("hNPixPSDAll", "Pixel hit multiplicity vs PSD energy - IB HIC;ePSD;# of hit pixels;a.u.", 3e2, 0, 3e4, 200, -0.5, 800-0.5);
     TH2F *hNPixPSD[n_chips];
-    TH2F *hNCluPSDAll = new TH2F("hNCluPSDAll", "Cluster hit multiplicity vs PSD energy - IB HIC;ePSD;# of clusters hit;a.u.", 3e2, 0, 3e4, 300, -0.5, 300-0.5);
+    TH2F *hNCluPSDAll = new TH2F("hNCluPSDAll", "Cluster hit multiplicity vs PSD energy - IB HIC;ePSD;# of clusters;a.u.", 3e2, 0, 3e4, 300, -0.5, 300-0.5);
     TH2F *hNCluPSD[n_chips];
     
     Long_t trg_to_read = 0;
@@ -78,7 +78,7 @@ Bool_t correlation_psd(
         Long_t nentries = chain->GetEntries();
 
         if(nentries != expTriggers) {
-            cerr << "correlation_psd() : ERROR: Number of expected triggers (" << expTriggers << ") and entries in tree (" << nentries << ") does not match!" << endl;
+            cerr << "correlation_psd() : ERROR: Number of expected triggers (" << expTriggers << ") and entries in tree (" << nentries << ") do not match!" << endl;
             //return kFALSE;
         }
 

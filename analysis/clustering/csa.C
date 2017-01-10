@@ -62,6 +62,7 @@ Bool_t csa(
              << "\tFile path: " << filepath_raw.Data() << endl;
         return kFALSE;
     }
+    palpidefsRaw->SetSkipErrorEvents(kFALSE);
 
     // Event tree variables
     TFile* file_tree = new TFile(filepath_tree.Data(), "RECREATE");

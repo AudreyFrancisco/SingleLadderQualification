@@ -18,7 +18,8 @@ public:
     Bool_t IsLastEvent()     { return fLastEvent; }
     Int_t  GetEventCounter() { return fCurrentEvent; }
     Int_t  GetNumHits()      { return fHitCols.size(); }
-    Bool_t GetNextHit(Short_t *col, Short_t* row);  
+    Bool_t GetNextHit(Short_t *col, Short_t* row);
+    Bool_t GetNextHit(Short_t *col, Short_t* row, Short_t* bunch);
     //Int_t  GetHitPixels(Short_t *col, Short_t* row);      // not working
     //void   GetHitAt(Int_t i, Short_t *col, Short_t* row); // not implemented
 
@@ -39,9 +40,10 @@ private:
     Bool_t   fSkipErrorEvents; // see ReadEvent() comment
     
     std::vector<Short_t> fHitCols;
-    std::vector<Short_t> fHitRows;    
+    std::vector<Short_t> fHitRows;
+    std::vector<Short_t> fHitBunch;
     
-    ClassDef(AliPALPIDEFSRawStreamMS,1)
+    ClassDef(AliPALPIDEFSRawStreamMS,2)
 };
 
 #endif
