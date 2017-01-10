@@ -52,9 +52,15 @@ Bool_t correlation_psd(
 
     TH1F *hEPSD = new TH1F("hEPSD", "PSD energy distribution;ePSD;a.u.", 5e2, 0., 5e4);
     TH2F *hNPixPSDAll = new TH2F("hNPixPSDAll", "Pixel hit multiplicity vs PSD energy - IB HIC;ePSD;# of hit pixels;a.u.", 3e2, 0, 3e4, 200, -0.5, 800-0.5);
+    hNPixPSDAll->SetStats(0);
     TH2F *hNPixPSD[n_chips];
     TH2F *hNCluPSDAll = new TH2F("hNCluPSDAll", "Cluster hit multiplicity vs PSD energy - IB HIC;ePSD;# of clusters;a.u.", 3e2, 0, 3e4, 300, -0.5, 300-0.5);
+    hNCluPSDAll->SetStats(0);
     TH2F *hNCluPSD[n_chips];
+
+    TH1F *hCluT[4];
+    for(Int_t i=0; i < 4; ++i)
+        hCluT[i] = new TH1F(Form("hClu_T%i", i+1), Form("Cluster Multiplicity Trigger class %i; #of clusters;a.u.", i+1), 300, -0.5, 300-0.5);
     
     Long_t trg_to_read = 0;
     
@@ -130,6 +136,8 @@ Bool_t correlation_psd(
         //if(ePSD < 22222.)
         hNPixPSDAll->Fill(ePSD, totpixmult[ientry]);
         hNCluPSDAll->Fill(ePSD, totclumult[ientry]);
+        for(Int_t i=0; i < 4; ++i)
+            if(sT[i]) hCluT[i]->Fill(totclumult[ientry]);
     }
  
     file_psd.close();
