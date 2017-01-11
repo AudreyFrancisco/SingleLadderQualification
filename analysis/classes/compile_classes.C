@@ -9,5 +9,7 @@ void compile_classes() {
     gROOT->LoadMacro("BinaryEvent.cpp+");
     gROOT->LoadMacro("helpers.cpp+");
 
+    gROOT->LoadMacro("AliALPIDEModuleStreamMS.cpp+");
+    
     cout << "compile_classes() : Classes compiled." << endl;
 }
