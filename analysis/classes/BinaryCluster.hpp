@@ -47,7 +47,7 @@ public:
     void SetPixelArray(Int_t npixels, BinaryPixel* pixels);
 //    void SetPixelArray(Int_t npixels, Short_t* cols, Short_t* rows);
 
-    ClassDef(BinaryCluster,1);
+    ClassDef(BinaryCluster,2);
 };
 
 #endif

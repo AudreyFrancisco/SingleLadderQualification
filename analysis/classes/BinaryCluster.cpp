@@ -89,8 +89,11 @@ Float_t BinaryCluster::GetY() {
 void BinaryCluster::Reset() {
     fClusterID=-1;
     fSectorID=-1;
-    for (Int_t i=0; i<fNPixels; ++i)
-        fPixels[i].Reset();
+    if(fPixels) {
+        delete[] fPixels;
+        fPixels = NULL;
+    }
+    fNPixels = 0;
 }
 
 // set ClusterID

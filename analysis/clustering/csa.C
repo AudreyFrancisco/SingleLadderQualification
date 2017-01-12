@@ -149,6 +149,7 @@ Bool_t csa(
 #endif
 
         // read which pixels are hit and re-construct first cluster
+        cluster->Reset();
         while(palpidefsRaw->GetNextHit(&col, &row)) {
 #ifdef DEBUG
             cout << "csa() : DEBUG: Reading hit " << d_get_hit_cnt << " of expected " << nhits << ", col: " << col << " row: " << row
@@ -202,12 +203,12 @@ Bool_t csa(
         d_n_clu++;
         cout << "csa() : DEBUG: NClu = " << d_n_clu << " nhits = " << nhits << " j = " << j << endl;
 #endif
-        cluster->SetPixelArray(j, pix_arr);
+        if(j > 0) cluster->SetPixelArray(j, pix_arr);
 
         if(flagHot && flagRmSingleHotPixClusters
            && cluster->GetNPixels()==1 && cluster->HasHotPixels() )
             cluster->Reset();
-        else
+        else if(cluster->GetMultiplicity() > 0)
             plane[TMath::FloorNint(cluster->GetX() / scols)]->AddCluster(cluster);
 
 //#ifdef DEBUG
@@ -219,6 +220,7 @@ Bool_t csa(
         // reconstruct other clusters
 
         while(nhits) {
+            cluster->Reset();
             pix_arr[0] = pix_vec[0];
             pix_vec.erase(pix_vec.begin());
             j=1; --nhits;
@@ -255,11 +257,12 @@ Bool_t csa(
             d_n_clu++;
             cout << "csa() : DEBUG: NClu = " << d_n_clu << " nhits = " << nhits << " j = " << j << endl;
 #endif
-            cluster->SetPixelArray(j, pix_arr);
+            if(j > 0) cluster->SetPixelArray(j, pix_arr);
+            
             if(flagHot && flagRmSingleHotPixClusters
                && cluster->GetNPixels()==1 && cluster->HasHotPixels() )
                 cluster->Reset();
-            else
+            else if(cluster->GetMultiplicity() > 0)
                 plane[TMath::FloorNint(cluster->GetX() / scols)]->AddCluster(cluster);
         }
 
