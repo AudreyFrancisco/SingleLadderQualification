@@ -47,9 +47,7 @@ int initSetupOB() {
     }
     fBoards.at(0)-> AddChip        (chipId, control, receiver);
   }
-  std::cout << "Checking control interfaces." << std::endl;
   int nWorking = CheckControlInterface();
-  std::cout << "Found " << nWorking << " working chips" << std::endl;
   sleep(5);
   MakeDaisyChain();
 }
@@ -82,9 +80,7 @@ int initSetupHalfStave() {
     fBoards.at(mosaic)-> AddChip(chipId, ci, rcv);
   }
 
-  std::cout << "Checking control interfaces." << std::endl;
   int nWorking = CheckControlInterface();
-  std::cout << "Found " << nWorking << " working chips" << std::endl;
   sleep(5);
   MakeDaisyChain();
   return 0;
@@ -133,22 +129,33 @@ void MakeDaisyChain() {
 
 // Try to communicate with all chips, disable chips that are not answering
 int CheckControlInterface() {
+  uint16_t WriteValue = 10;
   uint16_t Value;
   int      nWorking = 0;
 
+  std::cout << std::endl << "Before starting actual test:" << std::endl << "Checking the control interfaces of all chips by doing a single register readback test" << std::endl;
+
   for (int i = 0; i < fChips.size(); i++) {
     if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
-    fChips.at(i)->WriteRegister (0x60d, 10);
+    fChips.at(i)->WriteRegister (0x60d, WriteValue);
     try {
       fChips.at(i)->ReadRegister (0x60d, Value);
-      std::cout << "Chip ID " << fChips.at(i)->GetConfig()->GetChipId() << ", Value = 0x" << std::hex << (int) Value << std::dec << std::endl;
-      nWorking ++;
+      if (WriteValue == Value) {
+        std::cout << "  Chip ID " << fChips.at(i)->GetConfig()->GetChipId() << ", readback correct." << std::endl;
+        nWorking ++;   
+      }
+      else {
+	std::cout << "  Chip ID " << fChips.at(i)->GetConfig()->GetChipId() << ", wrong readback value (" << Value << " instead of " << WriteValue << "), disabling." << std::endl;
+        fChips.at(i)->GetConfig()->SetEnable(false);
+      }
     }
     catch (exception &e) {
-      std::cout << "Chip ID " << fChips.at(i)->GetConfig()->GetChipId() << ", not answering, disabling." << std::endl;
+      std::cout << "  Chip ID " << fChips.at(i)->GetConfig()->GetChipId() << ", not answering, disabling." << std::endl;
       fChips.at(i)->GetConfig()->SetEnable(false);
     }
+    
   }
+  std::cout << "Found " << nWorking << " working chips." << std::endl << std::endl;
   return nWorking;
 }
 
@@ -198,9 +205,7 @@ int initSetupIB() {
     fBoards.at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver);
   }
 
-  std::cout << "Checking control interfaces." << std::endl;
   int nWorking = CheckControlInterface();
-  std::cout << "Found " << nWorking << " working chips" << std::endl;
 }
 
 
