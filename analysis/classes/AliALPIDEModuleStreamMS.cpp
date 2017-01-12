@@ -184,3 +184,10 @@ Bool_t AliALPIDEModuleStreamMS::GetNextHit(Short_t chip, Short_t *col, Short_t* 
     }
     else                 return kFALSE;
 }
+
+//__________________________________________________________
+Int_t AliALPIDEModuleStreamMS::GetNumHitsTotal() {
+    Int_t retval = 0;
+    for(Int_t i=0; i<fNChips;++i) retval += fNHits[i];
+    return retval;
+}

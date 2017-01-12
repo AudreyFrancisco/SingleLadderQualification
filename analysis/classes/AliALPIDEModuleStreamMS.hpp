@@ -25,6 +25,7 @@ public:
     
     Int_t  GetNumHits(Short_t chip) { return fNHits[chip]; }
     Bool_t GetNextHit(Short_t chip, Short_t *col, Short_t* row);
+    Int_t  GetNumHitsTotal();
 
 private:
     Short_t   fVerboseLevel;

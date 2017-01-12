@@ -1,5 +1,6 @@
 void load_classes() {
     gSystem->Load("AliPALPIDEFSRawStreamMS_cpp.so");
+    gSystem->Load("AliALPIDEModuleStreamMS_cpp.so");
     gSystem->Load("BinaryPixel_cpp.so");
     gSystem->Load("BinaryCluster_cpp.so");
     gSystem->Load("BinaryPlane_cpp.so");
