@@ -53,10 +53,17 @@ Bool_t analysis_basic_hic(
     hCluHitsHIC->SetStats(0);
     TH1F *hCluXHIC = new TH1F("hCluXHIC", "Clusters X-position, HIC;Column;a.u.",
                               n_chips*scols, -0.5, n_chips*scols-0.5);
-    hCluXHIC->SetStats(0);
+    //hCluXHIC->SetStats(0);
     TH1F *hCluYHIC = new TH1F("hCluYHIC", "Clusters Y-Position, HIC;Row;a.u.",
                               srows-0.5, -0.5, srows-0.5);
-    hCluYHIC->SetStats(0);
+    //hCluYHIC->SetStats(0);
+
+    TH1F *hNPixHIC = new TH1F("hNPixHIC", "Number of hit pixels per event, HIC;Number of hit pixels per event;a.u.",
+                              1500, -0.5, 1500-0.5);
+    TH1F *hNCluHIC = new TH1F("hNCluHIC", "Number of clusters per event, HIC;Number of clusters per event;a.u.",
+                              750, -0.5, 750-0.5);
+    TH1F *hMultHIC = new TH1F("hMultHIC", "Cluster size, HIC;Number of pixels in cluster;a.u.",
+                              max_mult+1, -1.5, max_mult-0.5);
     
     TH2F *hPixHits[n_chips];
     TH2F *hCluHits[n_chips];
@@ -81,10 +88,10 @@ Bool_t analysis_basic_hic(
         hCluHits[i]->SetStats(0);
         hCluX[i] = new TH1F(Form("hCluX_%i", i), Form("Clusters X-position, chip %i;Column;a.u.", i),
                             scols, -0.5, scols-0.5);
-        hCluX[i]->SetStats(0);
+        //hCluX[i]->SetStats(0);
         hCluY[i] = new TH1F(Form("hCluY_%i", i), Form("Clusters Y-Position, chip %i;Row;a.u.", i),
                             srows-0.5, -0.5, srows-0.5);
-        hCluY[i]->SetStats(0);
+        //hCluY[i]->SetStats(0);
         
         hNPix[i] = new TH1F(Form("hNPix_%i", i), Form("Number of hit pixels per event, chip %i;Number of hit pixels per event;a.u.", i),
                             1500, -0.5, 1500-0.5);
@@ -95,13 +102,13 @@ Bool_t analysis_basic_hic(
         //hMult[i]->SetStats(0);
         hXSpread[i] = new TH1F(Form("hXSpread_%i", i), Form("Cluster X Spread, Chip %i;Cluster X Spread (pixels);a.u.", i),
                             max_spread+1, -1.5, max_spread-0.5);
-        hXSpread[i]->SetStats(0);
+        //hXSpread[i]->SetStats(0);
         hYSpread[i] = new TH1F(Form("hYSpread_%i", i), Form("Cluster Y Spread, Chip %i;Cluster Y Spread (pixels);a.u.", i),
                             max_spread+1, -1.5, max_spread-0.5);
-        hYSpread[i]->SetStats(0);
+        //hYSpread[i]->SetStats(0);
         hMaxSpread[i] = new TH1F(Form("hMaxSpread_%i", i), Form("Cluster Max Spread, Chip %i;Cluster Max Spread (pixels);a.u.", i),
                             max_spread+1, -1.5, max_spread-0.5);
-        hMaxSpread[i]->SetStats(0);
+        //hMaxSpread[i]->SetStats(0);
     }
     file_plots->cd();
     
@@ -111,9 +118,12 @@ Bool_t analysis_basic_hic(
         chain->GetEntry(ientry);
         if( (ientry+1)%10000 == 0 )
             cout << "Processed events: " << ientry+1 << " / " << nentries << endl;
+        Int_t totnpix = 0, totnclu = 0;
         for(Short_t ichip=0; ichip < n_chips; ++ichip) {
             hNPix[ichip]->Fill(event->GetPlane(ichip)->GetNHitPix());
             hNClu[ichip]->Fill(event->GetPlane(ichip)->GetNClustersSaved());
+            totnpix += event->GetPlane(ichip)->GetNHitPix();
+            totnclu += event->GetPlane(ichip)->GetNClustersSaved();
             for(Int_t iclu=0; iclu < event->GetPlane(ichip)->GetNClustersSaved(); ++iclu) {
                 Int_t mult = event->GetPlane(ichip)->GetCluster(iclu)->GetMultiplicity();
                 BinaryCluster* cluster = event->GetPlane(ichip)->GetCluster(iclu);
@@ -122,6 +132,7 @@ Bool_t analysis_basic_hic(
                 //if(!cluster->HasBorderPixels())
                 //{
                     hMult[ichip]->Fill(mult);
+                    hMultHIC->Fill(mult);
                     hCluHits[ichip]->Fill(cluster->GetX(),cluster->GetY());
                     hCluHitsHIC->Fill(ichip*scols+cluster->GetX(),cluster->GetY());
                     for(Int_t ipix=0; ipix < mult; ++ipix) {
@@ -141,6 +152,8 @@ Bool_t analysis_basic_hic(
                     
             }
         } // END FOR chips
+        hNPixHIC->Fill(totnpix);
+        hNCluHIC->Fill(totnclu);
     } // END FOR entries
 
     TCanvas *c1 = new TCanvas("c1", "Canvas 1", 0, 0, 1800, 1000);

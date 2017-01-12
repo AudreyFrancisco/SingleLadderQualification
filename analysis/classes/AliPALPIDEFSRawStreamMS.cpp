@@ -123,6 +123,25 @@ Bool_t AliPALPIDEFSRawStreamMS::GetNextHit(Short_t *col, Short_t* row, Short_t* 
 }
 
 //__________________________________________________________
+Bool_t AliPALPIDEFSRawStreamMS::CheckDoubleHits(Bool_t remove) {
+    // check if there are pixels that show up multiple times
+    Bool_t doublehits = kFALSE;
+    for(Int_t i=0; i < GetNumHits(); ++i)
+        for(Int_t j=i+1; j < GetNumHits(); ++j)
+            if(fHitCols.at(i) == fHitCols.at(j))
+                if(fHitRows.at(i) == fHitRows.at(j)) {
+                    doublehits = kTRUE;
+                    if(remove) {
+                        fHitCols.erase(fHitCols.begin()+j);
+                        fHitRows.erase(fHitRows.begin()+j);
+                        fHitBunch.erase(fHitBunch.begin()+j);
+                        --j;
+                    }
+                }
+    return doublehits;
+}
+
+//__________________________________________________________
 //Int_t AliPALPIDEFSRawStreamMS::GetHitPixels(Short_t *col, Short_t* row) {
 //    // not working
 //    col = &fHitCols[0];

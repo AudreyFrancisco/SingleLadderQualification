@@ -156,12 +156,15 @@ Bool_t AliALPIDEModuleStreamMS::ProcessEvent() {
     Short_t col, row, bunch, refbunch = -999;
     for(Int_t i=0; i < fNChips; ++i) {
         if(fChip[i].GetEventCounter() != fCurrentEvent) continue; // check only this event
+
+        if(fChip[i].CheckDoubleHits(kTRUE))
+            Report(2, Form("Found twice hit pixel(s) and removed multiple(s), event %i, chipID %i", fCurrentEvent, fChipID[i]));
         
         while(fChip[i].GetNextHit(&col, &row, &bunch)) {
             if(bunch >=0) {
                 if(refbunch == -999) refbunch = bunch;
                 if(bunch != refbunch) {
-                    Report(2, "Bunch counter changed within an event!");
+                    Report(2, Form("Bunch counter changed within an event (%i), chipID %i", fCurrentEvent, fChipID[i]));
                     return kFALSE;
                 }
                 fNHits[i]++;
