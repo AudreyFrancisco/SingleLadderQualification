@@ -130,7 +130,7 @@ Bool_t csa_hic(
             return kFALSE;
         }
         if(!hic->ProcessEvent()) {
-            cerr << "csa_hic() : FATAL: Error processing event" << endl;
+            cerr << "csa_hic() : ERROR: Error processing event" << endl;
             return kFALSE;
         }
         
@@ -281,14 +281,21 @@ Bool_t csa_hic(
 
         } // end for planes
         
-        // fill the tree (if at least one plane is hit)
-        Bool_t flagFill = kFALSE;
+        // fill the tree (if at least one plane is hit) // do not check. fill everything
+        //Bool_t flagFill = kFALSE;
+        Bool_t flagFill = kTRUE;
         for(Short_t i=0; i<n_chips; ++i) {
             // stats hists
             hNClu[i]->Fill(plane[i]->GetNClustersSaved());
             hNPix[i]->Fill(n_hitpix[i]);
             // tree
-            plane[i]->SetNHitPix(n_hitpix[i]);
+            if(flagRmSingleHotPixClusters) // if this flag is set n_hitpix counter is different than number of saved pixels
+                n_hitpix[i] = plane[i]->GetNHitPix(kTRUE);
+            else {  // check that n_hitpix information is correct
+                plane[i]->SetNHitPix(n_hitpix[i]);
+                if(n_hitpix[i] != plane[i]->GetNHitPix(kTRUE))
+                    cout << "csa_hic() : WARNING: n_hitpix information incorrect. Corrected!" << endl;
+            }
             event->AddPlane(plane[i]);
             if(plane[i]->GetNClustersSaved()) flagFill = kTRUE;
         }
@@ -297,7 +304,7 @@ Bool_t csa_hic(
     } // End while ReadEvent()
     cout << "csa_hic() : Finished reading RAW file." << endl;
 
-//    tree->Print();
+    //tree->Print();
 
     file_tree->Write();
     tree->ResetBranchAddresses();

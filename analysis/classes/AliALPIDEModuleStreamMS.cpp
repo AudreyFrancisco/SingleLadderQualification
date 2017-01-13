@@ -151,9 +151,10 @@ Bool_t AliALPIDEModuleStreamMS::ReadEvent()
 }
 
 //__________________________________________________________
-Bool_t AliALPIDEModuleStreamMS::ProcessEvent() {
+Bool_t AliALPIDEModuleStreamMS::ProcessEvent(Bool_t silent) {
     // check hit consistency and count number of hits
     Short_t col, row, bunch, refbunch = -999;
+    Bool_t  flagSkipEvent = kFALSE;
     for(Int_t i=0; i < fNChips; ++i) {
         if(fChip[i].GetEventCounter() != fCurrentEvent) continue; // check only this event
 
@@ -164,8 +165,9 @@ Bool_t AliALPIDEModuleStreamMS::ProcessEvent() {
             if(bunch >=0) {
                 if(refbunch == -999) refbunch = bunch;
                 if(bunch != refbunch) {
-                    Report(2, Form("Bunch counter changed within an event (%i), chipID %i", fCurrentEvent, fChipID[i]));
-                    return kFALSE;
+                    Report(1, Form("Bunch counter changed within an event (%i), chipID %i", fCurrentEvent, fChipID[i]));
+                    if(!silent) return kFALSE;
+                    else flagSkipEvent = kTRUE;
                 }
                 fNHits[i]++;
             }
@@ -173,9 +175,14 @@ Bool_t AliALPIDEModuleStreamMS::ProcessEvent() {
                 Report(2, Form("Found missing event (%i), chipID %i", fCurrentEvent, fChipID[i]));
             else if(bunch == -2)
                 Report(2, Form("Found decoding problem (%i), chipID %i", fCurrentEvent, fChipID[i]));
+            if(flagSkipEvent) break;
         }
         fChip[i].ResetHitIter();
+        if(flagSkipEvent) break;
     }
+    if(flagSkipEvent)
+        for(Int_t i=0; i < fNChips; ++i)
+            fNHits[i] = 0;
     return kTRUE;
 }
 

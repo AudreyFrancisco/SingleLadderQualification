@@ -21,7 +21,7 @@ public:
     Bool_t IsLastEvent();
     Int_t  GetEventCounter() { return fCurrentEvent; }
     Bool_t ReadEvent();
-    Bool_t ProcessEvent();
+    Bool_t ProcessEvent(Bool_t silent=kTRUE);
     
     Int_t  GetNumHits(Short_t chip) { return fNHits[chip]; }
     Bool_t GetNextHit(Short_t chip, Short_t *col, Short_t* row);
