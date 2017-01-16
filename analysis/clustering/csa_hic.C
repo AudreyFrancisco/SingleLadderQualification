@@ -43,7 +43,7 @@ Bool_t IsBorderPixel(BinaryPixel pix, Short_t scols, Short_t srows) {
 Bool_t csa_hic(
     const TString filepath_raw,                      // path to NoiseOccupancy_*_*_Chip%i.dat files
     const TString filepath_tree,                     // output tree path
-    const TString dirpath_mask="",                   // path to mask file
+    const TString dirpath_mask="",                   // path to mask files
     const Short_t crown = 1,                         // consider neighbours all pixels in <crown> crown
     const Bool_t  flagRmSingleHotPixClusters = kTRUE // do not save clusters with just one pixels which is hot
     ) {
@@ -94,7 +94,9 @@ Bool_t csa_hic(
     // TODO: make the code nicer
     // hot pixels variables
     Bool_t flagHot = dirpath_mask.EqualTo("") ? kFALSE : kTRUE;
-    Bool_t hot_map[n_chips][scols][srows]; 
+    Bool_t hot_map[n_chips][scols][srows];
+    // excluded double columns variables
+    Bool_t excl_cols[n_chips][scols];
     if(flagHot) {
         for(Int_t ichip=0; ichip < n_chips; ++ichip) {
             for(Int_t i=0; i<scols; ++i) // initialise hotmap
@@ -118,6 +120,27 @@ Bool_t csa_hic(
             file_mask.close();
             cout << "csa_hic() : Successfully loaded " << cnt << " hot pixels from mask file! " << filename_mask << endl;
         }
+        for(Int_t ichip=0; ichip < n_chips; ++ichip) {
+            for(Int_t i=0; i<scols; ++i) // initialise hotmap
+                excl_cols[ichip][i] = kFALSE;
+            
+            TString filename_mask = dirpath_mask; filename_mask += "excl_cols_chip"; filename_mask += ichip; filename_mask += ".dat";
+            ifstream file_mask(filename_mask.Data()); // read hot pixels from mask file
+            if(!file_mask.is_open()) {
+                cout << "csa_hic() : Unable to open column mask file: "
+                     << filename_mask.Data() << endl;
+                continue;
+            }
+            Short_t col, cnt=0;
+            file_mask >> col;
+            while(file_mask.good()) {
+                excl_cols[ichip][col] = kTRUE;
+                ++cnt;
+                file_mask >> col;
+            }
+            file_mask.close();
+            cout << "csa_hic() : Successfully loaded " << cnt << " excluded columns from column mask file! " << filename_mask << endl;
+        }
     }
         
     //-------------------------------------------
@@ -129,6 +152,7 @@ Bool_t csa_hic(
             cerr << "csa_hic() : FATAL: Error reading event" << endl;
             return kFALSE;
         }
+        
         if(!hic->ProcessEvent()) {
             cerr << "csa_hic() : ERROR: Error processing event" << endl;
             return kFALSE;
@@ -164,6 +188,12 @@ Bool_t csa_hic(
             // read which pixels are hit and re-construct first cluster
             cluster->Reset();
             while(hic->GetNextHit(ichip, &col, &row)) {
+                if(col < 0) {
+                    cout << "csa_hic() : ERROR: col < 0" << endl;
+                    return kFALSE;
+                    //nhits = 0; continue;
+                }
+                
 #ifdef DEBUG
                 cout << "csa_hic() : DEBUG: Reading hit " << d_get_hit_cnt << " of expected " << nhits << ", col: " << col << " row: " << row
                      << " NClu = " << d_n_clu << " nhits = " << nhits << " j = " << j << endl;
@@ -174,7 +204,12 @@ Bool_t csa_hic(
                 pix_tmp.Reset();
                 pix_tmp.Set(col, row);
                 // check if there are conditions that require setting a flag for this pixel
-                if(flagHot) if(hot_map[ichip][col][row])        pix_tmp.SetFlag(0, kTRUE);
+                if(flagHot) {
+                    if(hot_map[ichip][col][row])                pix_tmp.SetFlag(0, kTRUE);
+                    if(excl_cols[ichip][col])                   pix_tmp.SetFlag(2, kTRUE);
+                    if(col>0)       if(excl_cols[ichip][col-1]) pix_tmp.SetFlag(2, kTRUE);
+                    if(scols-1>col) if(excl_cols[ichip][col+1]) pix_tmp.SetFlag(2, kTRUE);
+                }
                 if(IsBorderPixel(pix_tmp, scols, srows)) pix_tmp.SetFlag(1, kTRUE);
                 // 1st cluster reconstruction
                 if(j==0) {

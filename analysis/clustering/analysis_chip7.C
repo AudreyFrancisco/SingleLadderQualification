@@ -126,16 +126,18 @@ Bool_t analysis_chip7(
                     hYSpread[isec]->Fill(cluster->GetYSpread());
                     hMaxSpread[isec]->Fill(cluster->GetMaxSpread());
                 //}
-                    //if(iclu > 0) {
-                    //    hTwoCluX->Fill(event->GetPlane(isec)->GetCluster(iclu)->GetX(), event->GetPlane(isec)->GetCluster(iclu-1)->GetX());
-                    //    hTwoCluY->Fill(event->GetPlane(isec)->GetCluster(iclu)->GetY(), event->GetPlane(isec)->GetCluster(iclu-1)->GetY());
-                    //}
+                    if(iclu > 0) {
+                        hTwoCluX->Fill(event->GetPlane(isec)->GetCluster(iclu)->GetX(), event->GetPlane(isec)->GetCluster(iclu-1)->GetX());
+                        hTwoCluY->Fill(event->GetPlane(isec)->GetCluster(iclu)->GetY(), event->GetPlane(isec)->GetCluster(iclu-1)->GetY());
+                    }
+                    /*
                     if(ientry > 0 && ientry % 1 == 0) {
                         for(Int_t jclu=0; jclu < nprev; jclu++) {
                             hTwoCluX->Fill(prevx[jclu], cluster->GetX());
                             hTwoCluY->Fill(prevy[jclu], cluster->GetY());
                         }
                     }
+                    */
                     
             }
             if(ientry % 1 == 0) {

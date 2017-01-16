@@ -288,14 +288,14 @@ Bool_t csa(
     file_tree->Write();
     tree->ResetBranchAddresses();
     file_tree->Close();
-
+/*
     delete file_tree;
     delete palpidefsRaw;
     delete event;
     for(Short_t i=0; i<n_secs; ++i) delete plane[i];
     delete cluster;
     delete[] pix_arr;
-
+*/
     cout << "csa() : Done!" << endl;
     return kTRUE;
 }

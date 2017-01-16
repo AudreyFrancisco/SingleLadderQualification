@@ -89,9 +89,9 @@ cd $DIR_MACROS
 #rm *.so *.d
 root -l -b <<EOF
 .x $DIR_CLASSES/load_classes.C
-.L csa_hic.C+
-.L interesting_events.C+
-.L analysis_basic_hic.C+
+.L csa_hic.C+g
+.L interesting_events_hic.C+g
+.L analysis_basic_hic.C+g
 .q
 EOF
 
@@ -109,19 +109,19 @@ cd $DIR_MACROS
 if [ ! -f "$DIR_RAW/$FILE_ROOT" ] || [ "$FLAG_RECREATE" -eq 1 ] || [ "$LAST_CSA_CROWN" != "$CROWN" ]
 then
     echo "Processing $FILE_RAW"
-    root -l -b -q "$DIR_CLASSES/load_classes.C" "csa_hic.C+(\"$DIR_RAW/$FILE_RAW\", \"$DIR_RAW/$FILE_ROOT\", \"$DIR_MASK\", $CROWN)" 2>&1 | tee $DIR_LOGS/$FILE_LOG
+    root -l -b -q "$DIR_CLASSES/load_classes.C" "csa_hic.C+g(\"$DIR_RAW/$FILE_RAW\", \"$DIR_RAW/$FILE_ROOT\", \"$DIR_MASK\", $CROWN)" 2>&1 | tee $DIR_LOGS/$FILE_LOG
 fi
+
+#valgrind --leak-check=full --show-leak-kinds=all --suppressions=/opt/root/v5-34-36/etc/valgrind-root.supp  root -l -b -q
+#exit 0
 
 echo $CROWN > $DIR_RAW/crown
 
-#if [ "$FLAG_INTERESTING" -eq 1 ]; then
-#    for i in `seq 0 8`
-#    do
-#        root -l -b -q "$DIR_CLASSES/load_classes.C" "interesting_events.C+(\"$DIR_RAW/NoiseOccupancy_*_Chip${i}_tree.root\", \"$DIR_RESULTS/interesting_events_Chip${i}.root\")" | tee $DIR_LOGS/interesting_events_chip${i}.log 2>&1
-#    done
-#else
-#    echo "Not searching for interesting events!"
-#fi
+if [ "$FLAG_INTERESTING" -eq 1 ]; then
+    root -l -b -q "$DIR_CLASSES/load_classes.C" "interesting_events_hic.C+(\"$DIR_RAW/$FILE_ROOT\", \"$DIR_RESULTS/interesting_events_hic.root\")" | tee $DIR_LOGS/interesting_events_hic.log 2>&1
+else
+    echo "Not searching for interesting events!"
+fi
 
 root -l "$DIR_CLASSES/load_classes.C" "analysis_basic_hic.C+(\"$DIR_RAW/$FILE_ROOT\", \"$DIR_RESULTS\", \"cr$CROWN\")" | tee $DIR_LOGS/analysis_basic_chip${i}.log
 

@@ -106,10 +106,12 @@ Bool_t AliALPIDEModuleStreamMS::ReadEvent()
 
     if(fFirstEvent) { // first time read all chips
         for(Int_t i=0; i<fNChips; ++i) {
+            fNHits[i] = 0;
             if(!fChip[i].ReadEvent()) {
                 Report(0, Form("Problem reading event for chip %i", fChipID[i]));
                 return kFALSE;
             }
+            fNHits[i] = fChip[i].GetNumHits();
         }
         Report(4, "First event read successfully.");
         fFirstEvent = kFALSE;
@@ -128,6 +130,7 @@ Bool_t AliALPIDEModuleStreamMS::ReadEvent()
                     Report(0, Form("Problem reading event for chip %i", fChipID[i]));
                     return kFALSE;
                 }
+                fNHits[i] = fChip[i].GetNumHits();
                 Report(4, Form("Read event for chip %i", fChipID[i]));
             }
         }
@@ -153,15 +156,17 @@ Bool_t AliALPIDEModuleStreamMS::ReadEvent()
 //__________________________________________________________
 Bool_t AliALPIDEModuleStreamMS::ProcessEvent(Bool_t silent) {
     // check hit consistency and count number of hits
-    Short_t col, row, bunch, refbunch = -999;
+    Short_t col, row, bunch, refbunch = -999, tmp = -1;
     Bool_t  flagSkipEvent = kFALSE;
     for(Int_t i=0; i < fNChips; ++i) {
+        fNHits[i] = 0;
         if(fChip[i].GetEventCounter() != fCurrentEvent) continue; // check only this event
-
+        
         if(fChip[i].CheckDoubleHits(kTRUE))
             Report(2, Form("Found twice hit pixel(s) and removed multiple(s), event %i, chipID %i", fCurrentEvent, fChipID[i]));
         
         while(fChip[i].GetNextHit(&col, &row, &bunch)) {
+            tmp = col;
             if(bunch >=0) {
                 if(refbunch == -999) refbunch = bunch;
                 if(bunch != refbunch) {
@@ -171,12 +176,28 @@ Bool_t AliALPIDEModuleStreamMS::ProcessEvent(Bool_t silent) {
                 }
                 fNHits[i]++;
             }
-            else if(bunch == -1)
+            else if(bunch == -1) {
                 Report(2, Form("Found missing event (%i), chipID %i", fCurrentEvent, fChipID[i]));
-            else if(bunch == -2)
+                flagSkipEvent = kTRUE;
+            }
+            else if(bunch == -2) {
                 Report(2, Form("Found decoding problem (%i), chipID %i", fCurrentEvent, fChipID[i]));
-            if(flagSkipEvent) break;
+                flagSkipEvent = kTRUE;
+            }
+            else if(bunch == -3 && fNHits[i] > 1) {
+                Report(2, Form("Inconsistent hits information. Skipping chip event (%i), chipID %i", fCurrentEvent, fChipID[i]));
+                fNHits[i] = 0;
+            }
+            //if(flagSkipEvent) break;
         }
+        /*
+        if(tmp >=0 && fNHits[i] != fChip[i].GetNumHits())
+            Report(2, Form("A %i %i (%i), chipID %i", fNHits[i], fChip[i].GetNumHits(), fCurrentEvent, fChipID[i]));
+        if(refbunch < 0 && fChip[i].GetNumHits() > 1)
+            Report(2, Form("B %i %i (%i), chipID %i", fNHits[i], fChip[i].GetNumHits(), fCurrentEvent, fChipID[i]));
+        if(refbunch < 0 && fNHits[i] != 0)
+            Report(2, Form("C %i %i (%i), chipID %i", fNHits[i], fChip[i].GetNumHits(), fCurrentEvent, fChipID[i]));
+        */
         fChip[i].ResetHitIter();
         if(flagSkipEvent) break;
     }
@@ -189,10 +210,20 @@ Bool_t AliALPIDEModuleStreamMS::ProcessEvent(Bool_t silent) {
 //__________________________________________________________
 Bool_t AliALPIDEModuleStreamMS::GetNextHit(Short_t chip, Short_t *col, Short_t* row) {
     if(chip >= 0 && chip < fNChips) {
+        //if(fChip[chip].GetEventCounter() != fCurrentEvent) return kFALSE;
+        /*
+        if(fNHits[chip] != fChip[chip].GetNumHits() && fChip[chip].GetNumHits() > 1) {
+            Report(2, Form("G %i %i (%i), chipID %i", fNHits[chip], fChip[chip].GetNumHits(), fCurrentEvent, fChipID[chip]));
+            Report(2, Form("DUMP %i %i %i", fCurrentEvent, *col, *row));
+        }
+        */
         if(fNHits[chip]) return fChip[chip].GetNextHit(col, row);
         else             return kFALSE;
     }
-    else                 return kFALSE;
+    else {
+        Report(1, "ChipID out of range!");
+        return kFALSE;
+    }
 }
 
 //__________________________________________________________

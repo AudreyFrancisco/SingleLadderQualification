@@ -182,6 +182,15 @@ Bool_t BinaryCluster::HasBorderPixels() {
     return kFALSE;
 }
 
+// contains pixels near excluded doublecolum?
+//______________________________________________________________________
+Bool_t BinaryCluster::HasExclDblcolPixels() {
+    for(Int_t i=0; i<fNPixels; ++i)
+        if(fPixels[i].GetFlag(2))
+            return kTRUE;
+    return kFALSE;
+}
+
 //______________________________________________________________________
 void BinaryCluster::Print(Option_t *) const {
     cout << "********************BinaryCluster********************" << endl;

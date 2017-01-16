@@ -2,14 +2,14 @@
 #include "TROOT.h"
 
 void compile_classes() {
-    gROOT->LoadMacro("AliPALPIDEFSRawStreamMS.cpp+");
-    gROOT->LoadMacro("BinaryPixel.cpp+");
-    gROOT->LoadMacro("BinaryCluster.cpp+");
-    gROOT->LoadMacro("BinaryPlane.cpp+");
-    gROOT->LoadMacro("BinaryEvent.cpp+");
-    gROOT->LoadMacro("helpers.cpp+");
+    gROOT->LoadMacro("AliPALPIDEFSRawStreamMS.cpp+g");
+    gROOT->LoadMacro("BinaryPixel.cpp+g");
+    gROOT->LoadMacro("BinaryCluster.cpp+g");
+    gROOT->LoadMacro("BinaryPlane.cpp+g");
+    gROOT->LoadMacro("BinaryEvent.cpp+g");
+    gROOT->LoadMacro("helpers.cpp+g");
 
-    gROOT->LoadMacro("AliALPIDEModuleStreamMS.cpp+");
+    gROOT->LoadMacro("AliALPIDEModuleStreamMS.cpp+g");
     
     cout << "compile_classes() : Classes compiled." << endl;
 }

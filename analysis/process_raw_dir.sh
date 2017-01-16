@@ -35,7 +35,7 @@ DIR_ANALYSIS=${BASH_SOURCE%/*}
 DIR_MACROS=$(readlink -f $DIR_ANALYSIS/clustering)/
 DIR_CLASSES=$(readlink -f $DIR_ANALYSIS/classes)/
 DIR_RAW=$(readlink -f $1)/
-DIR_RESULTS=$(readlink -f $DIR_RAW/results)_cr${CROWN}/
+DIR_RESULTS=$(readlink -f $DIR_RAW/results)/
 DIR_LOGS=$(readlink -f $DIR_RAW/logs)/
 
 # parallel processing

@@ -114,6 +114,8 @@ Bool_t analysis_basic_hic(
     
     cout << "Number of events found in tree: " << nentries << endl;
 
+    //nentries = 22994;
+    
     for(Long_t ientry=0; ientry < nentries; ++ientry) {
         chain->GetEntry(ientry);
         if( (ientry+1)%10000 == 0 )
@@ -128,8 +130,9 @@ Bool_t analysis_basic_hic(
                 Int_t mult = event->GetPlane(ichip)->GetCluster(iclu)->GetMultiplicity();
                 BinaryCluster* cluster = event->GetPlane(ichip)->GetCluster(iclu);
                 BinaryPixel* pixels = cluster->GetPixelArray();
-                //if(mult < 2) continue;
-                //if(!cluster->HasBorderPixels())
+                //if(mult <= 1) continue;
+                if(cluster->HasBorderPixels()) continue;
+                if(cluster->HasExclDblcolPixels()) continue;
                 //{
                     hMult[ichip]->Fill(mult);
                     hMultHIC->Fill(mult);
@@ -142,7 +145,7 @@ Bool_t analysis_basic_hic(
                     hCluX[ichip]->Fill(cluster->GetX());
                     hCluXHIC->Fill(ichip*scols+cluster->GetX());
                     hCluY[ichip]->Fill(cluster->GetY());
-                    hCluYHIC->Fill(ichip*scols+cluster->GetY());
+                    hCluYHIC->Fill(cluster->GetY());
                     hXSpread[ichip]->Fill(cluster->GetXSpread());
                     hYSpread[ichip]->Fill(cluster->GetYSpread());
                     hMaxSpread[ichip]->Fill(cluster->GetMaxSpread());
