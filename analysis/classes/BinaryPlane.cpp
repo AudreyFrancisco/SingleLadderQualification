@@ -73,6 +73,21 @@ BinaryCluster* BinaryPlane::GetCluster(Int_t idx) {
     return static_cast<BinaryCluster*>(fClusters->UncheckedAt(idx));
 }
 
+// get number of hit pixels
+// if recalc = false, use the saved info
+// else recalculate humber of hit pixels
+//______________________________________________________________________
+Int_t BinaryPlane::GetNHitPix(Bool_t recalc) {
+    if(recalc) {
+        Int_t npix = 0;
+        for(Int_t i=0; i < GetNClustersSaved(); ++i)
+            npix += GetCluster(i)->GetNPixels();
+        fNHitPix = npix;
+    }
+    return fNHitPix;
+}
+
+
 // reset plane
 //______________________________________________________________________
 void BinaryPlane::Reset() {

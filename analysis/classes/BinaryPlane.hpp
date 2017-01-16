@@ -42,7 +42,7 @@ private:
     Float_t	fPosX; 		// x position of left lower corner of sensor seen in beam direction
     Float_t	fPosY;		// y position of left lower corner of sensor seen in beam direction
     Float_t	fPosZ; 		// z position of plane (z-axis pointing in beam direction)
-    Int_t fNHitPix;     // number of hit pixels found in plane
+    Int_t   fNHitPix;     // number of hit pixels found in plane
     //Float_t	fTemperature;
     TClonesArray *fClusters; //-> array containg all clusters in one plane
    
@@ -59,7 +59,7 @@ public:
     Int_t 	GetNPixelsX   		() const {return fNPixelsX;}
     Int_t 	GetNPixelsY   		() const {return fNPixelsY;}
     Int_t 	GetPlaneID    		() const {return fPlaneID;}
-    Float_t 	GetNHitPix		() const {return fNHitPix;}
+    Int_t 	GetNHitPix   		(Bool_t recalc=kFALSE); // const {return fNHitPix;}
     Float_t 	GetPosX    		() const {return fPosX;}
     Float_t 	GetPosY    		() const {return fPosY;}
     Float_t 	GetPosZ	 		() const {return fPosZ;}
@@ -71,7 +71,7 @@ public:
     void SetNPixelsX   	 (Int_t npixelsx)	 {fNPixelsX=npixelsx;}
     void SetNPixelsY   	 (Int_t npixelsy)	 {fNPixelsY=npixelsy;}
     void SetPlaneID    	 (Int_t planeID)     {fPlaneID=planeID;}
-    void SetNHitPix		 (Int_t nhitpix )    {fNHitPix=nhitpix;}
+    void SetNHitPix		 (Int_t nhitpix)     {fNHitPix=nhitpix;}
     void SetPosX    	 (Float_t posx)		 {fPosX=posx;}
     void SetPosY    	 (Float_t posy)   	 {fPosY=posy;}
     void SetPosZ    	 (Float_t posz)	 	 {fPosZ=posz;}

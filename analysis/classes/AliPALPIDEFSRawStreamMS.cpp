@@ -12,6 +12,7 @@ AliPALPIDEFSRawStreamMS::AliPALPIDEFSRawStreamMS() :
     // Construct
     fHitCols.reserve(100);
     fHitRows.reserve(100);
+    fHitBunch.reserve(100);
 }
 
 //__________________________________________________________
@@ -20,6 +21,7 @@ AliPALPIDEFSRawStreamMS::~AliPALPIDEFSRawStreamMS()
     fFileInput.close();
     fHitCols.clear();
     fHitRows.clear();
+    fHitBunch.clear();
 }
 //__________________________________________________________
 Bool_t AliPALPIDEFSRawStreamMS::SetInputFile(const char *filename)
@@ -37,11 +39,12 @@ Bool_t AliPALPIDEFSRawStreamMS::ReadEvent()
     Int_t   evt;
     Short_t col, row;
     Short_t dcol, addr;
-    Short_t hits;
+    Short_t bunch;
 
     fHitIter = 0;
     fHitCols.clear();
     fHitRows.clear();
+    fHitBunch.clear();
 
     if(!fFileInput.good()) {
         if(!IsLastEvent())
@@ -60,8 +63,8 @@ Bool_t AliPALPIDEFSRawStreamMS::ReadEvent()
     fCurrentEvent = fEventCounter;
     
     while(fFileInput.good() && evt == fEventCounter) {
-        fFileInput >> dcol >> addr >> hits;
-        if( (dcol < 0 || addr < 0 || hits < 0) && fSkipErrorEvents ) {
+        fFileInput >> dcol >> addr >> bunch;
+        if( (dcol < 0 || addr < 0 || bunch < 0) && fSkipErrorEvents ) {
             fFileInput >> evt;
             fEventCounter = evt;
             continue;
@@ -70,6 +73,7 @@ Bool_t AliPALPIDEFSRawStreamMS::ReadEvent()
             dblcol_adr_to_col_row(dcol, addr, &col, &row, fChipType);
             fHitCols.push_back(col);
             fHitRows.push_back(row);
+            fHitBunch.push_back(bunch);
         }
         if(!fFileInput.good()) {
             cerr << "AliPALPIDEFSRawStreamMS::ReadEvent() : Error Input File : 2" << endl;
@@ -99,6 +103,42 @@ Bool_t AliPALPIDEFSRawStreamMS::GetNextHit(Short_t *col, Short_t* row) {
         *row = -1;
         return kFALSE;
     }
+}
+
+//__________________________________________________________
+Bool_t AliPALPIDEFSRawStreamMS::GetNextHit(Short_t *col, Short_t* row, Short_t* bunch) {
+    if( fHitIter < GetNumHits() ) {
+        *col = fHitCols.at(fHitIter);
+        *row = fHitRows.at(fHitIter);
+        *bunch = fHitBunch.at(fHitIter);
+        ++fHitIter;
+        return kTRUE;
+    }
+    else {
+        *col = -99;
+        *row = -99;
+        *bunch = -99;
+        return kFALSE;
+    }
+}
+
+//__________________________________________________________
+Bool_t AliPALPIDEFSRawStreamMS::CheckDoubleHits(Bool_t remove) {
+    // check if there are pixels that show up multiple times
+    Bool_t doublehits = kFALSE;
+    for(Int_t i=0; i < GetNumHits(); ++i)
+        for(Int_t j=i+1; j < GetNumHits(); ++j)
+            if(fHitCols.at(i) == fHitCols.at(j))
+                if(fHitRows.at(i) == fHitRows.at(j)) {
+                    doublehits = kTRUE;
+                    if(remove) {
+                        fHitCols.erase(fHitCols.begin()+j);
+                        fHitRows.erase(fHitRows.begin()+j);
+                        fHitBunch.erase(fHitBunch.begin()+j);
+                        --j;
+                    }
+                }
+    return doublehits;
 }
 
 //__________________________________________________________
