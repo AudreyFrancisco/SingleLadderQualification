@@ -172,6 +172,9 @@ public:
 	int ReadRegister      (uint16_t Address, uint32_t &Value) { return(0);};
 	int WriteRegister     (uint16_t Address, uint32_t Value)  { return(0);};
 
+	void dumpChipRegisters(TAlpide *chipPtr);
+
+
 private:
 	void init(TBoardConfigMOSAIC *config);
 	void setIPaddress(const char *IPaddr, int UDPport=DEFAULT_UDP_PORT);
@@ -193,6 +196,8 @@ private:
         void setInverted (bool AInverted, int Aindex = -1);
 	void enableExternalTrigger(bool isEnabled, bool levelSensitive = 0) { mTriggerControl->addEnableExtTrigger(isEnabled, levelSensitive);return;};
 	uint32_t buf2ui(unsigned char *buf);
+
+	uint32_t decodeMOSAICError();
 
 //	int returnDataOut(MDataReceiver *AReceiver, int &nBytes, char *buffer);
 

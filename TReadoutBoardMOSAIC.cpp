@@ -846,6 +846,72 @@ uint32_t TReadoutBoardMOSAIC::buf2ui(unsigned char *buf)
 #endif
 }
 
+// Decode the Mosaic Error register
+uint32_t TReadoutBoardMOSAIC::decodeMOSAICError()
+{
+	uint32_t runErrors;
+	mRunControl->getErrors(&runErrors);
+	if (runErrors){
+		std::cout << "MOSAIC Error register: 0x" << std::hex << runErrors << std::dec << " ";
+		if (runErrors & (1<<0)) std::cout << "Board memory overflow, ";
+		if (runErrors & (1<<1)) std::cout << "Board detected TCP/IP connection closed while running, ";
+		for (int i=0; i<10; i++) {
+			if (runErrors & (1<<(8+i))) {
+				std::cout << "- Alpide data receiver " << i << " detected electrical idle condition  ";
+			}
+		}
+		std::cout << std::endl;
+	}
+	return(runErrors);
+}
+
+void TReadoutBoardMOSAIC::dumpChipRegisters(TAlpide * chipPtr)
+{
+
+	char *regName[] = {
+       (char *) "Command Register",
+       (char *) "Mode Control register",
+       (char *) "Disable of regions 0-15",
+       (char *) "Disable of regions 16-31",
+       (char *) "FROMU Configuration Register 1",
+       (char *) "FROMU Configuration Register 2",
+       (char *) "FROMU Configuration Register 3",
+       (char *) "FROMU Pulsing Register 1",
+       (char *) "FROMU Pulsing Register 2",
+       (char *) "FROMU Status Register 1",
+       (char *) "FROMU Status Register 2",
+       (char *) "FROMU Status Register 3",
+       (char *) "FROMU Status Register 4",
+       (char *) "FROMU Status Register 5",
+       (char *) "DAC settings for DCLK and MCLK I/O buffers",
+       (char *) "DAC settings for CMU I/O buffers",
+       (char *) "CMU and DMU Configuration Register",
+       (char *) "CMU and DMU Status Register",
+       (char *) "DMU Data FIFO [15:0]",
+       (char *) "DMU Data FIFO [23:16]",
+       (char *) "DTU Configuration Register",
+       (char *) "DTU DACs Register",
+       (char *) "DTU PLL Lock Register 1",
+       (char *) "DTU PLL Lock Register 2",
+       (char *) "DTU Test Register 1",
+       (char *) "DTU Test Register 2",
+       (char *) "DTU Test Register 3",
+       (char *) "BUSY min width"
+};
+
+	uint16_t regs[0x1c];
+	uint16_t testControlRegister;
+
+	for (int i=0; i<0x1c; i++){
+		chipPtr->ReadRegister(i, regs[i] );
+	}
+
+	printf("\nALPIDE ChipID = 0x%02x registers dump:\n",chipPtr->GetConfig()->GetChipId());
+	for (int i=0; i<0x1c; i++){
+		printf("%s \t=\t0x%04x (%d)\n", regName[i], (int) regs[i], (int) regs[i]);
+	}
+	printf("----------- \n");
+}
 // ================================== EOF ========================================
 
 
