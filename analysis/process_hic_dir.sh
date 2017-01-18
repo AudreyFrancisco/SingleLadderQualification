@@ -38,9 +38,6 @@ DIR_RAW=$(readlink -f $1)/
 DIR_RESULTS=$(readlink -f $DIR_RAW/results)_cr${CROWN}/
 DIR_LOGS=$(readlink -f $DIR_RAW/logs)/
 
-# parallel processing
-MAXJOBS=3
-
 if [ "$#" -ge 2 ] 
 then
     if [ "$2" == "NULL" ] || [ "$2" == "0" ]
@@ -95,8 +92,6 @@ root -l -b <<EOF
 .q
 EOF
 
-njobs=0
-
 cd $DIR_RAW
 FILE_RAW=${PWD##*/}"_Chip%i.dat"
 FILE_ROOT=${PWD##*/}"_tree.root"
@@ -110,6 +105,7 @@ if [ ! -f "$DIR_RAW/$FILE_ROOT" ] || [ "$FLAG_RECREATE" -eq 1 ] || [ "$LAST_CSA_
 then
     echo "Processing $FILE_RAW"
     root -l -b -q "$DIR_CLASSES/load_classes.C" "csa_hic.C+g(\"$DIR_RAW/$FILE_RAW\", \"$DIR_RAW/$FILE_ROOT\", \"$DIR_MASK\", $CROWN)" 2>&1 | tee $DIR_LOGS/$FILE_LOG
+    ln -s $FILE_ROOT $DIR_RAW/event_tree.root
 fi
 
 #valgrind --leak-check=full --show-leak-kinds=all --suppressions=/opt/root/v5-34-36/etc/valgrind-root.supp  root -l -b -q
@@ -123,6 +119,7 @@ else
     echo "Not searching for interesting events!"
 fi
 
-root -l "$DIR_CLASSES/load_classes.C" "analysis_basic_hic.C+(\"$DIR_RAW/$FILE_ROOT\", \"$DIR_RESULTS\", \"cr$CROWN\")" | tee $DIR_LOGS/analysis_basic_chip${i}.log
+
+root -l "$DIR_CLASSES/load_classes.C" "analysis_basic_hic.C+(\"$DIR_RAW/$FILE_ROOT\", \"$DIR_RESULTS\", \"cr$CROWN\")" | tee $DIR_LOGS/analysis_basic_hic.log
 
 echo "Finished processing directory!"
