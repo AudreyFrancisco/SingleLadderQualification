@@ -783,7 +783,13 @@ ssize_t TReadoutBoardMOSAIC::recvTCP(void *rxBuffer, size_t count, int timeout)
 	if (rv > 0) { // There are Data !
 		if (ufds.revents & POLLIN) { // check for events on sockfd:
 			rxSize = recv(tcp_sockfd, rxBuffer, count, 0);
-			if (rxSize==0 || rxSize == -1) throw MosaicRuntimeError("Board connection closed. Buffer overflow or fatal error!");
+			if (rxSize==0 || rxSize == -1) {
+				std::cerr << "RecvTCP MOSAIC Error : " << errno << std::endl;
+				perror("   Error description :");
+				decodeMOSAICError();
+				std::cerr << "Buffer state : return from recv() = " << rxSize << " poll() = " << rv << " allocated buffer dim = " << count << std::endl;
+				throw MosaicRuntimeError("MOSAIC Board connection closed. Buffer overflow or fatal error!");
+			}
 		} else if (ufds.revents & POLLNVAL){
 			throw MosaicRuntimeError("Invalid file descriptor in poll system call");
 		}
@@ -865,53 +871,6 @@ uint32_t TReadoutBoardMOSAIC::decodeMOSAICError()
 	return(runErrors);
 }
 
-void TReadoutBoardMOSAIC::dumpChipRegisters(TAlpide * chipPtr)
-{
-
-	char *regName[] = {
-       (char *) "Command Register",
-       (char *) "Mode Control register",
-       (char *) "Disable of regions 0-15",
-       (char *) "Disable of regions 16-31",
-       (char *) "FROMU Configuration Register 1",
-       (char *) "FROMU Configuration Register 2",
-       (char *) "FROMU Configuration Register 3",
-       (char *) "FROMU Pulsing Register 1",
-       (char *) "FROMU Pulsing Register 2",
-       (char *) "FROMU Status Register 1",
-       (char *) "FROMU Status Register 2",
-       (char *) "FROMU Status Register 3",
-       (char *) "FROMU Status Register 4",
-       (char *) "FROMU Status Register 5",
-       (char *) "DAC settings for DCLK and MCLK I/O buffers",
-       (char *) "DAC settings for CMU I/O buffers",
-       (char *) "CMU and DMU Configuration Register",
-       (char *) "CMU and DMU Status Register",
-       (char *) "DMU Data FIFO [15:0]",
-       (char *) "DMU Data FIFO [23:16]",
-       (char *) "DTU Configuration Register",
-       (char *) "DTU DACs Register",
-       (char *) "DTU PLL Lock Register 1",
-       (char *) "DTU PLL Lock Register 2",
-       (char *) "DTU Test Register 1",
-       (char *) "DTU Test Register 2",
-       (char *) "DTU Test Register 3",
-       (char *) "BUSY min width"
-};
-
-	uint16_t regs[0x1c];
-	uint16_t testControlRegister;
-
-	for (int i=0; i<0x1c; i++){
-		chipPtr->ReadRegister(i, regs[i] );
-	}
-
-	printf("\nALPIDE ChipID = 0x%02x registers dump:\n",chipPtr->GetConfig()->GetChipId());
-	for (int i=0; i<0x1c; i++){
-		printf("%s \t=\t0x%04x (%d)\n", regName[i], (int) regs[i], (int) regs[i]);
-	}
-	printf("----------- \n");
-}
 // ================================== EOF ========================================
 
 
