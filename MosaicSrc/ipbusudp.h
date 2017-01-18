@@ -35,6 +35,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <mutex>
 #include "ipbus.h"
 
 #define DEFAULT_PACKET_SIZE 		1400
