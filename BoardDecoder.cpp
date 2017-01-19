@@ -1,13 +1,15 @@
 #include <iostream>
 
 #include "BoardDecoder.h"
+#include "MosaicSrc/mboard.h"
+#include "MosaicSrc/TAlpideDataParser.h"
 
 bool BoardDecoder::DecodeEvent(TBoardType boardType, unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo, uint32_t firmwareVersion, int headerType) {
   if (boardType == boardDAQ) {
     return DecodeEventDAQ(data, nBytes, nBytesHeader, nBytesTrailer, boardInfo);
   }
   else if (boardType == boardMOSAIC) {
-    return DecodeEventMOSAIC(data, nBytesHeader, nBytesTrailer, boardInfo);
+    return DecodeEventMOSAIC(data, nBytes, nBytesHeader, nBytesTrailer, boardInfo);
   }
   else {
     std::cout << "TBoardDecoder: Unknown board type" << std::endl;
@@ -209,26 +211,27 @@ uint32_t BoardDecoder::GetIntFromBinaryStringReversed(int numByte, unsigned char
 
 // Decodes the Event Header and fill the structure.
 // The value of nBytes is filled with the length of read header
-bool BoardDecoder::DecodeEventMOSAIC(unsigned char *header, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo)
+bool BoardDecoder::DecodeEventMOSAIC(unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, 
+						TBoardHeader &boardInfo)
 {
-  boardInfo.size        = endianAdjust(header);
-  uint32_t flags        = endianAdjust(header+4);
-  boardInfo.overflow    = flags & (1 << 1);
-  boardInfo.endOfRun    = flags & (1 << 3);
-  boardInfo.timeout     = flags & (1 << 2);
-  boardInfo.closedEvent = flags & (1 << 0);
-  boardInfo.eoeCount    = endianAdjust(header+8);
-  boardInfo.channel     = endianAdjust(header+12);
-  nBytesHeader          = 64; // #define MOSAIC_HEADER_LENGTH 64
-  nBytesTrailer         = 1; // #define The MOSAIC trailer length
+//  boardInfo.size        = endianAdjust(data); // NOT correct
+	uint32_t blockFlags        = endianAdjust(data+4);
 
-  boardInfo.MOSAICtransmissionFlag = header[20];
-  boardInfo.headerError            = boardInfo.MOSAICtransmissionFlag & 0x01;
-  boardInfo.decoder10b8bError      = boardInfo.MOSAICtransmissionFlag & 0x02;
-  if (boardInfo.MOSAICtransmissionFlag) {
-    return false;
-  }
-  else return true;
+	boardInfo.overflow    		= blockFlags & MBoard::flagOverflow;
+	boardInfo.endOfRun			= blockFlags & MBoard::flagCloseRun;
+	boardInfo.timeout			= blockFlags & MBoard::flagTimeout;
+	boardInfo.eoeCount    		= 1;
+	boardInfo.channel     		= endianAdjust(data+12);
+	nBytesHeader          		= 64; // #define MOSAIC_HEADER_LENGTH 64
+	nBytesTrailer         		= 1; // #define The MOSAIC trailer length
+
+	uint8_t MOSAICtransmissionFlag = data[nBytes-1];	// last byte is the trailer
+	boardInfo.headerError            = MOSAICtransmissionFlag & TAlpideDataParser::flagHeaderError;
+	boardInfo.decoder10b8bError      = MOSAICtransmissionFlag & TAlpideDataParser::flagDecoder10b8bError;
+	if (MOSAICtransmissionFlag)
+		return false;
+
+	return true;
 };
 
 

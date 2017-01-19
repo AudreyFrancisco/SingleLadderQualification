@@ -28,7 +28,7 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
 
 	ControlInterfacePhase = 2;
 	RunCtrlAFThreshold = 1250000;
-	RunCtrlLatMode = 0; // 0 := latencyModeEoe, 1 := latencyModeMemory, 2 := latencyModeTimeout
+	RunCtrlLatMode = 0; // 0 := latencyModeEoe, 1 := latencyModeTimeout, 2 := latencyModeMemory
 	RunCtrlTimeout = 0;
 	//	LowSpeedMode = false;
         //Inverted     = false;

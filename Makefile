@@ -1,17 +1,19 @@
 CC=g++
 INCLUDE=/usr/local/include
 LIBPATH=/usr/local/lib
-CFLAGS= -pipe -fPIC -g -std=c++0x -mcmodel=large -I $(INCLUDE)
+CFLAGS= -O2 -pipe -fPIC -g -std=c++0x -mcmodel=large -I $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -L $(LIBPATH)
 #LINKFLAGS=
 OBJECT= runTest
 LIBRARY=libalpide.so
 CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
- TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp BoardDecoder.cpp SetupHelpers.cpp \
- MosaicSrc/alpide3rcv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/i2cbus.cpp MosaicSrc/i2cslave.cpp MosaicSrc/i2csyspll.cpp \
+ TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
+ BoardDecoder.cpp SetupHelpers.cpp \
+ MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/i2cbus.cpp MosaicSrc/i2cslave.cpp MosaicSrc/i2csyspll.cpp \
  MosaicSrc/ipbus.cpp MosaicSrc/ipbusudp.cpp MosaicSrc/mdatagenerator.cpp MosaicSrc/mdatareceiver.cpp MosaicSrc/mdatasave.cpp \
  MosaicSrc/mexception.cpp MosaicSrc/mruncontrol.cpp MosaicSrc/mtriggercontrol.cpp MosaicSrc/mwbbslave.cpp \
- MosaicSrc/pexception.cpp MosaicSrc/pulser.cpp TScan.cpp TThresholdScan.cpp TScanConfig.cpp
+ MosaicSrc/pexception.cpp MosaicSrc/pulser.cpp MosaicSrc/mboard.cpp MosaicSrc/TAlpideDataParser.cpp \
+ TScan.cpp TThresholdScan.cpp TScanConfig.cpp
 #CLASS=  USB.cpp TDaqboard.cpp TPalpidefs.cpp TDut.cpp TTestsetup.cpp chiptests.cpp TConfig.cpp TModuleSetup.cpp
 OBJS = $(CLASS:.cpp=.o)
 $(info OBJS="$(OBJS)")

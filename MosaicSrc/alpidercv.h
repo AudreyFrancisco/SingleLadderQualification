@@ -28,48 +28,42 @@
  *
  */
 
-#ifndef MDATARECEIVER_H
-#define MDATARECEIVER_H
+#ifndef ALPIDERCV_H
+#define ALPIDERCV_H
 
-#include <vector>
-#include <stdlib.h>
-#include "mboard.h"
+#include <stdint.h>
+#include "mwbbslave.h"
 
-typedef std::vector<char> dataBuffer_t;
 
-class MDataReceiver
+
+class ALPIDErcv: public MWbbSlave
 {
-friend class MBoard;
-
 public:
-	MDataReceiver();
-	virtual ~MDataReceiver();
+    ALPIDErcv();
+    ALPIDErcv(WishboneBus *wbbPtr, uint32_t baseAddress);
+	~ALPIDErcv();
+	void setBusAddress(WishboneBus *wbbPtr, uint32_t baseAddress);
+	void addSetReg(uint16_t address, uint16_t val);
+	void addGetReg(uint16_t address, uint32_t *val);
+	void addEnable(bool d);
+	void addInvertInput(bool d);
+	void addSetRDPReg(uint16_t address, uint16_t val);
+	void addGetRDPReg(uint16_t address, uint32_t *val);
+	void addSetRDPRegField(uint16_t address, uint16_t size, uint16_t offset, uint16_t val);
 
-protected:
-	virtual long parse(int numClosed) = 0;		// Pure virtual
-	virtual void flush();
-
-protected:
-	long dataBufferUsed;
-	long numClosedData;
-	long blockFlags;
-	long blockSrc;
-	dataBuffer_t dataBuffer;
-	unsigned char blockHeader[MOSAIC_HEADER_SIZE];
-
-protected:
-	void *getWritePtr(size_t size) 
-		{
-			// resize the buffer if needed
-			if (dataBufferUsed+size > dataBuffer.size()){
-				dataBuffer.resize(dataBufferUsed+size);
-			}  
-			// return a pointer to the free area
-			return (void*) &dataBuffer[dataBufferUsed];
+private:					// WBB Slave registers map 
+	enum regAddress_e {
+		regOpMode		= 0,
+		rdpBase			= 0x00800000
 		};
+
+private:
+	enum opModeBits_e {
+		OPMODE_RCVENABLE			= (1<<0),
+		OPMODE_INVERT_POLARITY		= (1<<1)
+	};
 };
 
 
 
-
-#endif // MDATARECEIVER_H
+#endif // ALPIDERCV_H

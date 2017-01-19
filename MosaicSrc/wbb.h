@@ -45,7 +45,7 @@ public:
 		i2cMaster				= (0x05 << 24),
 		controlInterface		= (0x06 << 24),
 		controlInterfaceB		= (0x07 << 24),
-		alpide3rcv				= (0x08 << 24),
+		alpideRcv				= (0x08 << 24),
 		};
 };
 

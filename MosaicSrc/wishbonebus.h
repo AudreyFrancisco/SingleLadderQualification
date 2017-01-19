@@ -36,6 +36,7 @@
 class WishboneBus
 {
 public:
+	virtual ~WishboneBus() {}
 	virtual void addWrite(uint32_t address, uint32_t data) = 0;
 	virtual void addWrite(int size, uint32_t address, uint32_t *data) = 0;
 	virtual void addRead(int size, uint32_t address, uint32_t *data) = 0;

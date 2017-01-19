@@ -10,15 +10,13 @@ const uint32_t DAQ_TRAILER_WORD = 0xbfbfbfbf; //
 // (both for mosaic and DAQ board)
 typedef struct {
   // common 
-  int  size;
+//  int  size;
   // MOSAIC
   int  channel; 
   int  eoeCount;
   bool timeout;
   bool endOfRun;
   bool overflow;
-  bool closedEvent;
-  unsigned char  MOSAICtransmissionFlag;
   bool headerError;  // the received Frame contains error in the transmission
   bool decoder10b8bError; // the MOSAIC board reports a 10b8b conversion error
 
@@ -43,7 +41,7 @@ typedef struct {
 // data and nBytes are modified such that after the board decoding they correspond to the chip event only  
 class BoardDecoder{
  private:
-  static bool DecodeEventMOSAIC(unsigned char *data, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo);
+  static bool DecodeEventMOSAIC(unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo);
   static uint32_t endianAdjust(unsigned char *buf);
 
   static bool DecodeEventDAQ   (unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo, uint32_t firmwareVersion=0x247E0611, int headerType=0x1);

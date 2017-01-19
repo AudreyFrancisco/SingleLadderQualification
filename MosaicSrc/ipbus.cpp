@@ -221,7 +221,7 @@ void IPbus::processAnswer()
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex);
 	IPbusTransaction tr;
-	int pktId;
+	int pktId=0;
 
 	try {
 		rxPtr = 0;

@@ -177,8 +177,11 @@ void scan() {
   }
 
   for (int i = 0; i < fChips.size(); i++) { //Read VPULSEH from Config and save it at vector temporarily
+    if (! fChips.at(i)->GetConfig()->IsEnabled()) {
+	  myVPULSEH.push_back(0);
+	} else {
       myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
-//      std::cout << "Read VPULSEH : " << myVPULSEH[i] << std::endl;
+	}
   }
  
   for (int istage = 0; istage < myMaskStages; istage ++) {
@@ -196,11 +199,13 @@ void scan() {
       }
       fBoards.at(0)->Trigger(myNTriggers);
 
+//std::cout << " >>>>" << myMOSAIC->GetConfig()->GetPollingDataTimeout() << endl; 
+
       int itrg = 0;
       int trials = 0;
       while(itrg < myNTriggers * fEnabled) {
         if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
-          usleep(100);
+          usleep(1000); // Increment from 100us
           trials ++;
           if (trials == 10) {
         	std::cout << "Reached 10 timeouts, giving up on this event" << std::endl;
@@ -231,10 +236,10 @@ void scan() {
           int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
           if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
           if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits)) {
-   	    std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
-	    nBad ++;
+   	    	std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
+	    	nBad ++;
             if (nBad > 10) continue;
-	    FILE *fDebug = fopen ("DebugData.dat", "a");
+	    	FILE *fDebug = fopen ("DebugData.dat", "a");
             fprintf(fDebug, "Bad event:\n");
             for (int iByte=0; iByte<n_bytes_data + 1; ++iByte) {
               fprintf (fDebug, "%02x ", (int) buffer[iByte]);
@@ -245,10 +250,12 @@ void scan() {
             }
             fprintf(fDebug, "\n\n");
             fclose (fDebug);
-	  }
+	  	  }
           itrg++;
         }
       }
+	  //usleep(100);
+
       //std::cout << "Number of hits: " << Hits->size() << std::endl;
       CopyHitData(Hits, icharge);
     }
