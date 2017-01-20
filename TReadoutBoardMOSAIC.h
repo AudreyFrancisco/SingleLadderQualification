@@ -44,10 +44,6 @@
 
 #define DATA_INPUT_BUFFER_SIZE	64*1024
 
-#define MAX_MOSAICCTRLINT 2
-#define MAX_MOSAICTRANRECV 10
-#define MOSAIC_HEADER_LENGTH 64
-
 //class string;
 using namespace std;
 

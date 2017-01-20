@@ -261,7 +261,7 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 		setPhase(config->GetCtrlInterfacePhase(),i);  // set the Phase shift on the line
 
 	setSpeedMode (config->GetSpeedMode());// set 400 MHz mode
-	setInverted  (config->IsInverted(),     -1);// set 400 MHz mode
+	setInverted  (config->IsInverted(),-1);
 
 	pulser->run(0);
 	mRunControl->stopRun();
