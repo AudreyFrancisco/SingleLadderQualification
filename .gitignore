@@ -9,3 +9,7 @@ test_*
 *.pro.user
 .qmake.stash
 
+# ECLIPSE local projects
+.project
+.cproject
+

@@ -38,6 +38,7 @@ public:
 
     Bool_t HasHotPixels();          // contains hot pixels?
     Bool_t HasBorderPixels();       // contains border pixels?
+    Bool_t HasExclDblcolPixels();   // contains pixels near excluded doublecolum?
 
     virtual void Print(Option_t *option="") const;
     void Reset();
@@ -47,7 +48,7 @@ public:
     void SetPixelArray(Int_t npixels, BinaryPixel* pixels);
 //    void SetPixelArray(Int_t npixels, Short_t* cols, Short_t* rows);
 
-    ClassDef(BinaryCluster,1);
+    ClassDef(BinaryCluster,2);
 };
 
 #endif

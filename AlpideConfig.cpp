@@ -295,9 +295,14 @@ void AlpideConfig::BaseConfig (TAlpide *chip)
   BaseConfigFromu(chip);
   BaseConfigDACs (chip);
   BaseConfigMask (chip);
-  if ((fConfig->GetDeviceType() != TYPE_CHIP) && (fConfig->GetDeviceType() != TYPE_TELESCOPE))
-    BaseConfigPLL  (chip);
 
+  int chipID = chip->GetConfig()->GetChipId(); // get the chipID
+
+  // Set the DTU only for the Masters in the OB
+  if ((fConfig->GetDeviceType() != TYPE_CHIP) && (fConfig->GetDeviceType() != TYPE_TELESCOPE) &&
+		  ( chipID<=15 || // IB mode
+		  ((chipID >0x0f) && ((chipID&0x07)==0) ) ) )             // OB Master
+    BaseConfigPLL  (chip);
 
   uint16_t value;
 

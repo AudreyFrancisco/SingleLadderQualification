@@ -89,8 +89,11 @@ Float_t BinaryCluster::GetY() {
 void BinaryCluster::Reset() {
     fClusterID=-1;
     fSectorID=-1;
-    for (Int_t i=0; i<fNPixels; ++i)
-        fPixels[i].Reset();
+    if(fPixels) {
+        delete[] fPixels;
+        fPixels = NULL;
+    }
+    fNPixels = 0;
 }
 
 // set ClusterID
@@ -175,6 +178,15 @@ Bool_t BinaryCluster::HasHotPixels() {
 Bool_t BinaryCluster::HasBorderPixels() {
     for(Int_t i=0; i<fNPixels; ++i)
         if(fPixels[i].IsBorder())
+            return kTRUE;
+    return kFALSE;
+}
+
+// contains pixels near excluded doublecolum?
+//______________________________________________________________________
+Bool_t BinaryCluster::HasExclDblcolPixels() {
+    for(Int_t i=0; i<fNPixels; ++i)
+        if(fPixels[i].GetFlag(2))
             return kTRUE;
     return kFALSE;
 }

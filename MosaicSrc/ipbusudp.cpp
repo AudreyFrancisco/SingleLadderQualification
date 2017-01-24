@@ -26,6 +26,7 @@
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
+ * 21/12/2015	Added mutex for multithread operation
  */
 #include <string>
 #include <stdio.h>
@@ -78,10 +79,15 @@ IPbusUDP::~IPbusUDP()
 
 void IPbusUDP::testConnection()
 {
-	rcvTimoutTime = RCV_LONG_TIMEOUT;
-	addIdle();
-	execute();
-	rcvTimoutTime = RCV_SHORT_TIMEOUT;
+	try {
+		rcvTimoutTime = RCV_LONG_TIMEOUT;
+		addIdle();
+		execute();
+		rcvTimoutTime = RCV_SHORT_TIMEOUT;
+	} catch (MIPBusUDPError) {
+		throw MIPBusUDPError("Board connection error in IPbusUDP::testConnection");
+	}
+	
 }
 
 void IPbusUDP::sockRead()
@@ -118,17 +124,22 @@ void IPbusUDP::sockWrite()
 		throw MIPBusUDPError("Datagram send system call");
 }
 
-//#include <iostream>
-
 void IPbusUDP::execute()
 {
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+
+	if (txSize==0)
+		return;
+
 	for (int i=0; i<3; i++){
 		try {
 			// Send the UDP datagram
 			sockWrite();	
 
 			// Wait for the answer
-			sockRead();
+			do {
+				sockRead();
+			} while (duplicatedRxPkt());
 
 			// check the answer packet content
 			processAnswer();
@@ -139,7 +150,7 @@ void IPbusUDP::execute()
 			// cout << "Timeout from sockRead" << endl;			
 		}
 	}
-	throw MIPBusUDPError("Can not connect the board");	
+	throw MIPBusUDPError("Board comunication error in IPbusUDP::execute");	
 }
 
 

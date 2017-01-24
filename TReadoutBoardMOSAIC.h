@@ -194,6 +194,8 @@ private:
 	void enableExternalTrigger(bool isEnabled, bool levelSensitive = 0) { mTriggerControl->addEnableExtTrigger(isEnabled, levelSensitive);return;};
 	uint32_t buf2ui(unsigned char *buf);
 
+	uint32_t decodeMOSAICError();
+
 //	int returnDataOut(MDataReceiver *AReceiver, int &nBytes, char *buffer);
 
 protected:

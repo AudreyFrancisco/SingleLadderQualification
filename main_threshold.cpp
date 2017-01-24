@@ -177,7 +177,6 @@ void scan() {
   }
 
   for (int i = 0; i < fChips.size(); i++) { //Read VPULSEH from Config and save it at vector temporarily
-      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
       myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
 //      std::cout << "Read VPULSEH : " << myVPULSEH[i] << std::endl;
   }

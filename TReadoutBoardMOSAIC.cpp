@@ -783,7 +783,13 @@ ssize_t TReadoutBoardMOSAIC::recvTCP(void *rxBuffer, size_t count, int timeout)
 	if (rv > 0) { // There are Data !
 		if (ufds.revents & POLLIN) { // check for events on sockfd:
 			rxSize = recv(tcp_sockfd, rxBuffer, count, 0);
-			if (rxSize==0 || rxSize == -1) throw MosaicRuntimeError("Board connection closed. Buffer overflow or fatal error!");
+			if (rxSize==0 || rxSize == -1) {
+				std::cerr << "RecvTCP MOSAIC Error : " << errno << std::endl;
+				perror("   Error description :");
+				decodeMOSAICError();
+				std::cerr << "Buffer state : return from recv() = " << rxSize << " poll() = " << rv << " allocated buffer dim = " << count << std::endl;
+				throw MosaicRuntimeError("MOSAIC Board connection closed. Buffer overflow or fatal error!");
+			}
 		} else if (ufds.revents & POLLNVAL){
 			throw MosaicRuntimeError("Invalid file descriptor in poll system call");
 		}
@@ -844,6 +850,25 @@ uint32_t TReadoutBoardMOSAIC::buf2ui(unsigned char *buf)
 	d |= (*buf++) << 24;
 	return d;
 #endif
+}
+
+// Decode the Mosaic Error register
+uint32_t TReadoutBoardMOSAIC::decodeMOSAICError()
+{
+	uint32_t runErrors;
+	mRunControl->getErrors(&runErrors);
+	if (runErrors){
+		std::cout << "MOSAIC Error register: 0x" << std::hex << runErrors << std::dec << " ";
+		if (runErrors & (1<<0)) std::cout << "Board memory overflow, ";
+		if (runErrors & (1<<1)) std::cout << "Board detected TCP/IP connection closed while running, ";
+		for (int i=0; i<10; i++) {
+			if (runErrors & (1<<(8+i))) {
+				std::cout << "- Alpide data receiver " << i << " detected electrical idle condition  ";
+			}
+		}
+		std::cout << std::endl;
+	}
+	return(runErrors);
 }
 
 // ================================== EOF ========================================

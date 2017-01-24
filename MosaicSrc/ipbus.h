@@ -33,6 +33,7 @@
 
 #include <stdint.h>
 #include "wishbonebus.h"
+#include <mutex>
 
 #define IPBUS_PROTOCOL_VERSION		2
 #define DEFAULT_PACKET_SIZE 		1400
@@ -64,6 +65,7 @@ public:
 	int  getBufferSize() { return bufferSize; }
 
 protected:
+	bool duplicatedRxPkt();
 	void processAnswer();
 	
 private:
@@ -105,6 +107,7 @@ protected:
 	int txSize;
 	int rxSize;
 	int errorCode;
+	std::recursive_mutex mutex;
 	
 private:
 	int bufferSize;
@@ -113,6 +116,7 @@ private:
 	uint8_t transactionId;
 	int expectedRxSize;
 	int rxPtr;
+	int lastRxPktId;
 };
 
 #endif // IPBUS_H
