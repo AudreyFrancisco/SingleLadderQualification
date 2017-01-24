@@ -111,19 +111,9 @@ int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode, uint8_t chipId)
 
 int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode)
 {
-	uint8_t theShortCommand;
-
-	if((OpCode & 0x00F0) == 0) {
-		theShortCommand = OpCode;
-		for(int Cii=0;Cii<MAX_MOSAICCTRLINT;Cii++){
-			controlInterface[Cii]->addSendCmd(theShortCommand);
-			controlInterface[Cii]->execute();
-		}
-	} else {
-		for(int Cii=0;Cii<MAX_MOSAICCTRLINT;Cii++){
-			controlInterface[Cii]->addSendCmd(OpCode);
-			controlInterface[Cii]->execute();
-		}
+	for(int Cii=0;Cii<MAX_MOSAICCTRLINT;Cii++){
+		controlInterface[Cii]->addSendCmd(OpCode);
+		controlInterface[Cii]->execute();
 	}
 	return(0);
 }

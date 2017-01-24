@@ -79,18 +79,6 @@ void ControlInterface::setPhase(uint8_t phase)
 //
 // schedule a broadcast command
 //
-void ControlInterface::addSendCmd(uint8_t cmd)
-{
-	if (!wbb)
-		throw PControlInterfaceError("No IPBus configured");
-
-	wbb->addWrite(baseAddress+regWriteCtrl, cmd << 24);
-// printf("Sd_com-> 0x%04x : 0x%04x\n", regWriteCtrl, cmd);
-}
-
-//
-// schedule a broadcast command
-//
 void ControlInterface::addSendCmd(uint16_t cmd)
 {
 	if (!wbb)
