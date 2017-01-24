@@ -52,7 +52,7 @@ public:
 	~ControlInterface();
 	void setBusAddress(WishboneBus *wbbPtr, uint32_t baseAddress);
 	void setPhase(uint8_t phase);
-	void addSendCmd(uint16_t cmd);
+	void addSendCmd(uint8_t cmd);
 	void addWriteReg(uint8_t chipID, uint16_t address, uint16_t data);
 	void addReadReg(uint8_t chipID, uint16_t address, uint16_t *dataPtr);
 	void execute();

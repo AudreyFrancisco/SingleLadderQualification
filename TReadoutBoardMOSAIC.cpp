@@ -104,15 +104,16 @@ int TReadoutBoardMOSAIC::ReadChipRegister (uint16_t address, uint16_t &value, ui
 int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode, uint8_t chipId)
 {
 	uint_fast16_t Cii = GetControlInterface(chipId);
-	controlInterface[Cii]->addSendCmd(OpCode);
+	controlInterface[Cii]->addWriteReg(chipId, Alpide::REG_COMMAND, OpCode);
 	controlInterface[Cii]->execute();
 	return(0);
 }
 
 int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode)
 {
+	uint8_t ShortOpCode = (uint8_t)OpCode;
 	for(int Cii=0;Cii<MAX_MOSAICCTRLINT;Cii++){
-		controlInterface[Cii]->addSendCmd(OpCode);
+		controlInterface[Cii]->addSendCmd(ShortOpCode);
 		controlInterface[Cii]->execute();
 	}
 	return(0);

@@ -58,12 +58,12 @@ void readTemp() {
 	  if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
 	  fChips.at(i)->WriteRegister( Alpide::REG_ANALOGMON, MonitoringDAC);
 	  fChips.at(i)->WriteRegister( Alpide::REG_ADC_CONTROL, TemperatureSelect);
+	  fBoards.at(0)->SendOpCode ( fChips.at(i)->GetConfig()->GetChipId(), Alpide::OPCODE_ADCMEASURE);
   }
 
   // Send the ADC Measurement command to all chips
-  fBoards.at(0)->SendOpCode (Alpide::OPCODE_ADCMEASURE);
 
-  usleep(6000); // Wait for the measurement > of 5 milli sec
+  usleep(5000); // Wait for the measurement > of 5 milli sec
 
   // Read all ADC registers
   for (int i = 0; i < fChips.size(); i ++) {
@@ -76,7 +76,7 @@ void readTemp() {
   uint16_t theChipId;
   for (int i = 0; i < fChips.size(); i ++) {
   	  if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-  	  theChipId = fChips.at(i)->GetConfig()->GetChipId() & 0xf;
+  	  theChipId = fChips.at(i)->GetConfig()->GetChipId();
   	  theValue =  ( ((float)theResult[i]) * 0.1281) + 6.8; // first approximation
   	  std::cout << i << ")\t" << theChipId << "\t" << theValue << " " << std::endl;
   }
