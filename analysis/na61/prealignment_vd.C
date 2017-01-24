@@ -18,7 +18,8 @@ Bool_t prealignment_vd(
     const TString filepath_tree,  // input tree path
     const TString filepath_vd,    // file with vd tracks
     const TString dirpath_plots,  // output plots path
-    const TString file_id         // identifier (suffix) for output files
+    const TString file_id,        // identifier (suffix) for output files
+    const Bool_t  extract_tracks = kTRUE
     ) {
     
     cout << "prealignment_vd() : Starting..." << endl;
@@ -30,6 +31,27 @@ Bool_t prealignment_vd(
     const Short_t srows        = 512;
     const Short_t n_chips      = 9;   // number of chips
 
+    // Alignment
+    /*
+    const Float_t xpos = 11.1;
+    const Float_t ypos = 120.4;
+    const Float_t zpos = 92.3;
+    */
+    
+    const Float_t xpos = 11.05;
+    const Float_t ypos = 120.485;
+    const Float_t zpos = 92.23;
+    
+    Alignment align_chip[n_chips];
+    for(Short_t i=0; i<n_chips; ++i) {
+        align_chip[i].SetPos(TVector3(xpos, ypos-30.15*i, zpos));
+        TRotation rot;
+        rot.RotateY(0.106);
+        //rot.RotateY(6.*TMath::DegToRad());
+        //rot.RotateX(1.*TMath::DegToRad());
+        align_chip[i].SetRotation(rot);
+    }
+    
     // ALPIDE event tree
     TChain* chain = new TChain("event_tree", "event_tree");
     if(!chain->Add(filepath_tree.Data())) {
@@ -71,20 +93,6 @@ Bool_t prealignment_vd(
         return kFALSE;
     }
 
-    // Alignment
-    const Float_t xpos = 11.1;
-    const Float_t ypos = 120.4;
-    const Float_t zpos = 92.3;
-    Alignment align_chip[n_chips];
-    for(Short_t i=0; i<n_chips; ++i) {
-        align_chip[i].SetPos(TVector3(xpos, ypos-30.15*i, zpos));
-        TRotation rot;
-        //rot.RotateY(-0.07*TMath::Pi());
-        rot.RotateY(6.*TMath::DegToRad());
-        //rot.RotateX(1.*TMath::DegToRad());
-        align_chip[i].SetRotation(rot);
-    }
-
     // histograms
     TH2F *hTrackHitsHIC = new TH2F("hTrackHitsHIC", "Track hit map, HIC;X [mm];Y [mm];a.u.",
                                  400, -10., 30., 4000, -200., 200.);
@@ -123,6 +131,18 @@ Bool_t prealignment_vd(
                                  400, xpos-20., xpos+20., 400, zpos-20., zpos+20.);
     }
     file_plots->cd();
+
+    TTree *tree_ex = NULL;
+    Float_t ex_clux, ex_cluy;
+    Float_t ex_to[3], ex_td[3];
+    if(extract_tracks) {
+        tree_ex = new TTree("extracted_tracks", "extracted_tracks");
+        tree_ex->Branch("clu_x", &ex_clux, "clu_x/F");
+        tree_ex->Branch("clu_y", &ex_cluy, "clu_y/F");
+        tree_ex->Branch("track_origin", ex_to, "track_origin[3]/F");
+        tree_ex->Branch("track_direction", ex_td, "track_direction[3]/F");
+    }
+    Float_t exx1 = 0., exx2=0., exy1=0., exy2=0.; // extract intervals    
     
     cout << "prealignment_vd() : Number of events found in tree: " << nentries << endl;
 
@@ -136,77 +156,116 @@ Bool_t prealignment_vd(
             }
         }
     }
-    
-    for(Long_t ivd=0; ivd < tree_vd->GetEntriesFast(); ++ivd) {
-        tree_vd->GetEntry(ivd);
-        //if( ivd < 100) cout << vd_event_n << endl;
-        vd_event_n -= 1;
-        if(vd_event_n < nentries)
-            chain->GetEntry(vd_event_n);
-        else {
-            cout << "prealignment_vd() : WARNING more tracks than saved triggers" << endl;
-            continue;
-        }
-        if(event->GetIntTrigCnt() != vd_event_n) cout << "prealignment_vd() : ERROR sync" << endl;
-        if( (ivd+1)%1000 == 0 )
-            cout << "Processed events: " << ivd+1 << " / " << tree_vd->GetEntriesFast() << endl;
+
+    for(Int_t loop=0; loop < 1+extract_tracks; ++loop) {
+        // loop 0 drawing, loop 1 extracting;
+        if(loop==0) cout << "prealignment_vd() : Starting prealignment..." << endl;
+        if(loop==1) cout << "prealignment_vd() : Extracting tracks..." << endl;
         
-        for(Int_t itrack=0; itrack < vd_n_tracks; ++itrack) {
-            TVector3 to(*(TVector3*)vd_to->At(itrack));
-            TVector3 td(*(TVector3*)vd_td->At(itrack));
+        for(Long_t ivd=0; ivd < tree_vd->GetEntriesFast(); ++ivd) {
+            tree_vd->GetEntry(ivd);
+            //if( ivd < 100) cout << vd_event_n << endl;
+            vd_event_n -= 1;
+            if(vd_event_n < nentries)
+                chain->GetEntry(vd_event_n);
+            else {
+                cout << "prealignment_vd() : WARNING more tracks than saved triggers" << endl;
+                continue;
+            }
+            if(event->GetIntTrigCnt() != vd_event_n)
+                cout << "prealignment_vd() : ERROR sync" << endl;
+            if( (ivd+1)%1000 == 0 )
+                cout << "Processed events: " << ivd+1 << " / " << tree_vd->GetEntriesFast() << " in loop " << loop << endl;
+        
+            for(Int_t itrack=0; itrack < vd_n_tracks; ++itrack) {
+                TVector3 to(*(TVector3*)vd_to->At(itrack));
+                TVector3 td(*(TVector3*)vd_td->At(itrack));
 
-            //if(dataset[itrack] >= 3) continue;
-            //if(td.X() / td.Z() > 1) continue;
-            
-            TVector3 p = align_chip[4].IntersectionPointWithLine(to, td);
-            hTrackHitsHIC->Fill(p.X(), p.Y());
-            
-            for(Int_t ichip=0; ichip < n_chips; ++ichip) {
-                p = align_chip[ichip].IntersectionPointWithLine(to, td);
-                hTrackHits[ichip]->Fill(p.X(), p.Y());
+                //_cuts____
+                //if(dataset[itrack] >= 3) continue;
+                //if(td.X() / td.Z() > 1) continue;
+                //_cuts____
                 
-                //if( event->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
+                for(Int_t ichip=0; ichip < n_chips; ++ichip) {
+                    if(loop==1 && ichip != 4) continue;
+                    TVector3 p = align_chip[ichip].IntersectionPointWithLine(to, td);
+                    if(loop==0) hTrackHits[ichip]->Fill(p.X(), p.Y());
+                    if(loop==0) if(ichip == 4) hTrackHitsHIC->Fill(p.X(), p.Y());
                 
-                for(Int_t iclu=0; iclu < event->GetPlane(ichip)->GetNClustersSaved(); ++iclu) {
-                    Int_t mult = event->GetPlane(ichip)->GetCluster(iclu)->GetMultiplicity();
-                    BinaryCluster* cluster = event->GetPlane(ichip)->GetCluster(iclu);
-                    
-                    if(mult > 4) continue;
-                    if(cluster->HasHotPixels()) continue;
-                    if(cluster->HasBorderPixels()) continue;
-                    if(cluster->HasExclDblcolPixels()) continue;
-                    
-                    TVector3 clupos = align_chip[ichip].PixToGlobal(cluster->GetX(), cluster->GetY());
-                    if( TMath::Abs(clupos.Y() - p.Y()) < 0.5 ) {
-                        hDX[ichip]->Fill( clupos.X() - p.X() );
-                        hDXzoom[ichip]->Fill( clupos.X() - p.X() );
-                    }
-                    if( TMath::Abs(clupos.X() - p.X()) < 0.5 ) {
-                        hDY[ichip]->Fill( clupos.Y() - p.Y() );
-                        hDYzoom[ichip]->Fill( clupos.Y() - p.Y() );
-                    }
-                } // END FOR clusters
-            } // END FOR chips
-        } // END FOR tracks
-    } // END FOR events
+                    //if( event->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
+                
+                    for(Int_t iclu=0; iclu < event->GetPlane(ichip)->GetNClustersSaved(); ++iclu) {
+                        Int_t mult = event->GetPlane(ichip)->GetCluster(iclu)->GetMultiplicity();
+                        BinaryCluster* cluster = event->GetPlane(ichip)->GetCluster(iclu);
 
-    TF1 *fres = new TF1("fres", "[0]*TMath::Gaus(x, [1], [2])+[3]", -0.2, 0.2);
-    fres->SetParLimits(2, 10., 10000.);
-    fres->SetParLimits(2, 0.001, 1);
+                        //_cuts____
+                        if(mult > 10) continue;
+                        if(cluster->HasHotPixels()) continue;
+                        if(cluster->HasBorderPixels()) continue;
+                        if(cluster->HasExclDblcolPixels()) continue;
+                        //_cuts____
+                        
+                        TVector3 clupos = align_chip[ichip].PixToGlobal(cluster->GetX(), cluster->GetY());
+                        Float_t dx = clupos.X() - p.X();
+                        Float_t dy = clupos.Y() - p.Y();
+                        if(loop==0) {
+                            if( TMath::Abs(dy) < 0.5 ) {
+                                hDX[ichip]->Fill( dx );
+                                hDXzoom[ichip]->Fill( dx );
+                            }
+                            if( TMath::Abs(dx) < 0.5 ) {
+                                hDY[ichip]->Fill( dy );
+                                hDYzoom[ichip]->Fill( dy );
+                            }
+                        }
+                        else if(loop==1) {
+                            if( exx1 < dx && dx < exx2 ) {
+                                if( exy1 < dy && dy < exy2 ) {
+                                    ex_clux = cluster->GetX();
+                                    ex_cluy = cluster->GetY();
+                                    to.GetXYZ(ex_to);
+                                    td.GetXYZ(ex_td);
+                                    tree_ex->Fill();
+                                }
+                            }       
+                        }
+                        
+                    } // END FOR clusters
+                } // END FOR chips
+            } // END FOR tracks
+        } // END FOR events
+
+        if(loop > 0) {
+            cout << "prealignment_vd() : Extracted " << tree_ex->GetEntriesFast() << " tracks." << endl;
+            continue; // no need to redo fitting
+        }
+        TF1 *fres = new TF1("fres", "[0]*TMath::Gaus(x, [1], [2])+[3]", -0.2, 0.2);
+        fres->SetParNames("Norm", "#mu", "#sigma", "Const (backg)");
+        fres->SetParLimits(2, 10., 10000.);
+        fres->SetParLimits(2, 0.001, 1);
     
-    for(Short_t i=0; i<n_chips; ++i) {
-        fres->SetParameter(0, 200.);
-        fres->SetParameter(2, 0.01);
-        fres->SetParameter(3, 1);
+        for(Short_t i=0; i<n_chips; ++i) {
+            fres->SetParameter(0, 200.);
+            fres->SetParameter(2, 0.01);
+            fres->SetParameter(3, 1);
+            
+            fres->SetParameter(1, hDXzoom[i]->GetMean());
+            hDXzoom[i]->Fit(fres, "QRL");
+            if(i == 4) {
+                exx1 = fres->GetParameter(1) - 5.*fres->GetParameter(2);
+                exx2 = fres->GetParameter(1) + 5.*fres->GetParameter(2);
+            }
+            
+            fres->SetParameter(1, hDYzoom[i]->GetMean());
+            hDYzoom[i]->Fit(fres, "QRL");
+            if(i == 4) {
+                exy1 = fres->GetParameter(1) - 5.*fres->GetParameter(2);
+                exy2 = fres->GetParameter(1) + 5.*fres->GetParameter(2);
+            }
+        }
+    } // END FOR LOOP
 
-        fres->SetParameter(1, hDXzoom[i]->GetMean());
-        hDXzoom[i]->Fit(fres, "RL");
-        fres->SetParameter(1, hDYzoom[i]->GetMean());
-        hDYzoom[i]->Fit(fres, "RL");
-    }
-
-    
-    Int_t ctd = 4;
+    Int_t ctd = 4; // chip to draw
     
     TCanvas *c1 = new TCanvas("c1", "Canvas 1", 0, 0, 1800, 1000);
     c1->Divide(3,1);
@@ -233,36 +292,7 @@ Bool_t prealignment_vd(
     hDXzoom[ctd]->DrawCopy();
     c2->cd(4);
     hDYzoom[ctd]->DrawCopy();
-/*    
-    TCanvas *c2 = new TCanvas("c2", "Cluster size", 50, 50, 1800, 1000);
-    c2->Divide(np,np);
-    for(Short_t i=0; i<n_chips; ++i) {
-        c2->GetPad(i+1)->SetLogy();
-        c2->cd(i+1);
-        zoom_th1(hMult[i]->DrawCopy());
-    }
-    c2->Print(Form("%s/%s_c2.png", dirpath_plots.Data(), filename_out.Data()));
-    
-    TCanvas *c3 = new TCanvas("c3", "Number of clusters per event", 100, 100, 1800, 1000);
-    c3->Divide(np,np);
-    for(Short_t i=0; i<n_chips; ++i) {
-        c3->GetPad(i+1)->SetLogy();
-        c3->cd(i+1);
-        if(binred > 1) hNClu[i]->Rebin(binred);
-        zoom_th1(hNClu[i]->DrawCopy());
-    }
-    c3->Print(Form("%s/%s_c3.png", dirpath_plots.Data(), filename_out.Data()));
-    
-    TCanvas *c4 = new TCanvas("c4", "Number of pixels per event", 150, 150, 1800, 1000);
-    c4->Divide(np,np);
-    for(Short_t i=0; i<n_chips; ++i) {
-        c4->GetPad(i+1)->SetLogy();
-        c4->cd(i+1);
-        if(binred > 1) hNPix[i]->Rebin(binred);
-        zoom_th1(hNPix[i]->DrawCopy());
-    }
-    c4->Print(Form("%s/%s_c4.png", dirpath_plots.Data(), filename_out.Data()));
-*/
+
     file_plots->cd();
     file_plots->Write();
 
@@ -283,6 +313,7 @@ Bool_t prealignment_vd(
         delete hChipPosXZ[i];
         
     }
+    if(tree_ex) delete tree_ex;
     file_plots->Close();
 
     cout << "prealignment_vd() : Done!" << endl;
