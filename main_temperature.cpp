@@ -41,6 +41,9 @@ void readTemp() {
 	  return;
   }
 
+  uint16_t MonitoringDAC = 0x00 | (0x00 << 4) | (0x0 << 7) | (0x0 << 8);
+
+
   uint16_t Mode = 0x0; // 0:Manual 1:Calibrate 2:Auto 3:SupoerManual
   uint16_t SelectInput = 0x08 << 2; // 0:AVSS 1:DVSS 2:AVDD 3:DVDD 4:VBGthVolScal 5:DACMONV 6:DACMONI 7:Bandgap 8:Temperature
   uint16_t ComparatorCurrent = 0x02 << 6; // 0:180uA 1:190uA 2:296uA 3:410uA
@@ -48,12 +51,13 @@ void readTemp() {
   uint16_t RampSpeed = 0x01 << 9; // 0:500ms 1:1us 2:2us 3:4us
   uint16_t HalfSLBTrim = 0x00 << 11;
 
-  uint16_t data = Mode | SelectInput | ComparatorCurrent | DiscriminatorSign | RampSpeed | HalfSLBTrim | DiscriminatorSign;
+  uint16_t TemperatureSelect = Mode | SelectInput | ComparatorCurrent | DiscriminatorSign | RampSpeed | HalfSLBTrim | DiscriminatorSign;
 
   // Set all chips for Temperature Measurement
   for (int i = 0; i < fChips.size(); i ++) {
 	  if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-	  fChips.at(i)->WriteRegister( Alpide::REG_ADC_CONTROL, data);
+	  fChips.at(i)->WriteRegister( Alpide::REG_ANALOGMON, MonitoringDAC);
+	  fChips.at(i)->WriteRegister( Alpide::REG_ADC_CONTROL, TemperatureSelect);
   }
 
   // Send the ADC Measurement command to all chips
