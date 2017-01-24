@@ -104,6 +104,7 @@ void TBoardConfigMOSAIC::SetSpeedMode(Mosaic::TReceiverSpeed ASpeedMode)
 // sets the IP address
 void TBoardConfigMOSAIC::SetIPaddress(const char *AIPaddress)
 {
+	std::cout << "IP Address " << AIPaddress << std::endl ;
 	try {
 		if(AIPaddress == NULL) throw std::invalid_argument("MOSAIC Config : invalid IP number");
 		strcpy(IPAddress, AIPaddress);
