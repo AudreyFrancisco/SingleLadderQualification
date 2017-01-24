@@ -106,32 +106,27 @@ void readTemp() {
   }
   uint16_t Bias;
   bool Sign, Half;
+  float theValue;
+  uint16_t theChipId;
 
+  std::cout <<  "\tChipId\tBias\tRaw\tTemp."  << std::endl;
   // Set all chips for Temperature Measurement
   for (int i = 0; i < fChips.size(); i ++) {
 	  if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
 
-	  Bias CalibrateADC(i, Sign, Half);
+	  Bias = CalibrateADC(i, Sign, Half);
+	  theChipId = fChips.at(i)->GetConfig()->GetChipId();
 
 	  setTheDacMonitor(i, 0, 0, false, false, 1);
 	  setTheADCCtrlRegister(i, 0, 8, 2, Sign, 1, Half);
 
-	  fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(i)->GetConfig()->GetChipId());
+	  fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE,  theChipId);
 	  usleep(5000); // Wait for the measurement > of 5 milli sec
 	  fChips.at(i)->ReadRegister( Alpide::REG_ADC_AVSS, theResult[i]);
-  }
+	  theResult[i] -= Bias;
+	  theValue =  ( ((float)theResult[i]) * 0.1281) + 6.8; // first approximation
+ 	  std::cout << i << ")\t" << theChipId << "\t" << Bias << "\t" << theResult[i] << "\t" << theValue << " " << std::endl; 
 
-  // Send the ADC Measurement command to all chips
-
- 
-  // Calculate and dump the temperature values
-  float theValue;
-  uint16_t theChipId;
-  for (int i = 0; i < fChips.size(); i ++) {
-  	  if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-  	  theChipId = fChips.at(i)->GetConfig()->GetChipId();
-  	  theValue =  ( ((float)theResult[i]) * 0.1281) + 6.8; // first approximation
-  	  std::cout << i << ")\t" << theChipId << "\t" << theValue << " " << std::endl;
   }
 
   // Deallocate memory
