@@ -64,8 +64,8 @@ private:
     // constants
     static const Float_t fPixX;  // pixel dimension x
     static const Float_t fPixY;  // pixel dimension y
-    static const Float_t fPixDX; // distance x of pixel (0, 0) carmost corner and chip centre i.e. half sensor size
-    static const Float_t fPixDY; // distance x of pixel (0, 0) carmost corner and chip centre i.e. half sensor size
+    static const Float_t fPixDX; // distance x of pixel (0, 0) farmost corner and chip centre i.e. half sensor size
+    static const Float_t fPixDY; // distance x of pixel (0, 0) farmost corner and chip centre i.e. half sensor size
     // calculation variables
     TVector3 fN;  // normal vector (in global coo)
     TVector3 fP;  // point in plane (in global coo)

@@ -18,8 +18,7 @@ then
     echo " or you have requested help... "
     echo "Required arugments:"
     echo "  1) path to dir with event tree"
-    echo "Optional:"
-    echo "  2) masks dir name (0 for none - default)"
+    echo "  2) path to file with VD tracks"
     echo "-------------------------------------------------------"
     exit 1
 fi
@@ -29,6 +28,9 @@ DIR_ANALYSIS=${BASH_SOURCE%/*}
 DIR_MACROS=$(readlink -f $DIR_ANALYSIS/na61)/
 DIR_CLASSES=$(readlink -f $DIR_ANALYSIS/classes)/
 DIR_RAW=$(readlink -f $1)/
+
+FILE_VD=$(readlink -f $2)
+
 if [ -f "$DIR_RAW/crown" ]
 then
     CROWN=`cat $DIR_RAW/crown`
@@ -70,7 +72,7 @@ cd $DIR_MACROS
 #rm *.so *.d
 root -l -b <<EOF
 .x $DIR_CLASSES/load_classes.C
-.L alignment_vd.C+g
+.L prealignment_vd.C+g
 .q
 EOF
 
@@ -78,6 +80,8 @@ FILE_ROOT="event_tree.root"
 
 cd $DIR_MACROS
 
-root -l "$DIR_CLASSES/load_classes.C" "alignment_vd.C+(\"$DIR_RAW/$FILE_ROOT\", \"$DIR_RESULTS\", \"cr$CROWN\")" | tee $DIR_LOGS/alignment_vd.log
+root -l "$DIR_CLASSES/load_classes.C" "prealignment_vd.C+(\"$DIR_RAW/$FILE_ROOT\", \"$FILE_VD\", \"$DIR_RESULTS\", \"cr$CROWN\")" | tee $DIR_LOGS/prealignment_vd.log
+
+#root -l ~/.tbr.C $DIR_RESULTS
 
 echo "Finished processing directory!"

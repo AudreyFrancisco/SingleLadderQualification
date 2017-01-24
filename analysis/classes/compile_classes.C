@@ -10,6 +10,8 @@ void compile_classes() {
     gROOT->LoadMacro("helpers.cpp+g");
 
     gROOT->LoadMacro("AliALPIDEModuleStreamMS.cpp+g");
+
+    gROOT->LoadMacro("Alignment.cpp+g");
     
     cout << "compile_classes() : Classes compiled." << endl;
 }

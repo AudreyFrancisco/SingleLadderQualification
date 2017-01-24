@@ -6,6 +6,8 @@ void load_classes() {
     gSystem->Load("BinaryPlane_cpp.so");
     gSystem->Load("BinaryEvent_cpp.so");
     gSystem->Load("helpers_cpp.so");
-
+    
+    gSystem->Load("Alignment_cpp.so");
+    
     cout << "load_classes() : Classes loadad." << endl;
 }
