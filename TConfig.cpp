@@ -194,7 +194,7 @@ void TConfig::ReadConfigFile (const char *fName)
     if (!strcmp(Param, "DEVICE")) {
       type = ReadDeviceType (Rest);
     }
-    if ((type != TYPE_UNKNOWN) && ((type != TYPE_TELESCOPE) || (NChips > 0)) && ((type != TYPE_HALFSTAVE) || (NModules = 0))) {   // type and nchips has been found (nchips not needed for type chip)
+    if ((type != TYPE_UNKNOWN) && ((type != TYPE_TELESCOPE) || (NChips > 0)) && ((type != TYPE_HALFSTAVE) || (NModules == 0))) {   // type and nchips has been found (nchips not needed for type chip)
       // SetDeviceType calls the appropriate init method, which in turn calls
       // the constructors for board and chip configs
       if (type == TYPE_HALFSTAVE) SetDeviceType(type, NModules);
