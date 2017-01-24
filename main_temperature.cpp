@@ -29,6 +29,70 @@
 
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
+// Mode =  0:Manual 1:Calibrate 2:Auto 3:SupoerManual
+// SelectInput =   0:AVSS 1:DVSS 2:AVDD 3:DVDD 4:VBGthVolScal 5:DACMONV 6:DACMONI 7:Bandgap 8:Temperature
+// ComparatorCurrent =  0:180uA 1:190uA 2:296uA 3:410uA
+// DiscriminatorSign = 0 / 1;
+// RampSpeed = 0:500ms 1:1us 2:2us 3:4us
+// HalfSLBTrim = 0 / 1;
+uint16_t setTheADCCtrlRegister(int ChipIndex, uint16_t Mode, uint16_t SelectInput, uint16_t ComparatorCurrent,
+		uint16_t DiscriminatorSign, uint16_t RampSpeed, uint16_t HalfSLBTrim)
+{
+	uint16_t Data;
+	Data = Mode | (SelectInput<<2) | (ComparatorCurrent<<6) | (DiscriminatorSign<<8) | (RampSpeed<<9) | (HalfSLBTrim<<11);
+	fChips.at(ChipIndex)->WriteRegister( Alpide::REG_ADC_CONTROL, Data);
+	return(Data);
+}
+
+// Iref =  0:0.25ua 1:0.75uA 2:1.00uA 3:1.25uA
+uint16_t setTheDacMonitor(int ChipIndex, uint16_t VoltageDAC, uint16_t CurrentDAC, bool CurrentOverwrite, bool VoltageOverwrite, uint16_t Iref)
+{
+	uint16_t Data;
+	Data = VoltageDAC | (CurrentDAC<<4) | (CurrentOverwrite ? 1<<7 : 0) | (VoltageOverwrite ? 1<<8 : 0) | (Iref<<9);
+	fChips.at(ChipIndex)->WriteRegister( Alpide::REG_ANALOGMON, Data);
+	return(Data);
+}
+
+
+
+int CalibrateADC(int ChipIndex, bool &bDiscrSign, bool &bHalfBit)
+{
+	uint16_t theVal2,theVal1;
+	bool isAVoltDAC, isACurrDAC, isATemperature, isAVoltageBuffered;
+	int theSelInput;
+	uint16_t Bias;
+
+	// Calibration Phase 1
+	setTheADCCtrlRegister(ChipIndex, 1, 0, 2, false, 1, false);
+	fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(ChipIndex)->GetConfig()->GetChipId());
+	usleep(4000); // > of 5 milli sec
+	fChips.at(ChipIndex)->ReadRegister( Alpide::REG_ADC_CALIB, theVal1);
+	setTheADCCtrlRegister(ChipIndex, 1, 0, 2, true, 1, false);
+	fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(ChipIndex)->GetConfig()->GetChipId());
+	usleep(4000); // > of 5 milli sec
+	fChips.at(ChipIndex)->ReadRegister( Alpide::REG_ADC_CALIB, theVal2);
+	bDiscrSign =  (theVal1 > theVal2) ? false : true;
+
+	// Calibration Phase 2
+	setTheADCCtrlRegister(ChipIndex, 1, 7, 2, bDiscrSign, 1, false);
+	fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(ChipIndex)->GetConfig()->GetChipId());
+	usleep(4000); // > of 5 milli sec
+	fChips.at(ChipIndex)->ReadRegister( Alpide::REG_ADC_CALIB, theVal1);
+	setTheADCCtrlRegister(ChipIndex, 1, 7, 2, bDiscrSign, 1, true);
+	fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(ChipIndex)->GetConfig()->GetChipId());
+	usleep(4000); // > of 5 milli sec
+	fChips.at(ChipIndex)->ReadRegister( Alpide::REG_ADC_CALIB, theVal2);
+	bHalfBit =  (theVal1 > theVal2) ? false : true;
+
+	// Detect the Bias
+	setTheADCCtrlRegister(ChipIndex, 1, 0, 2, bDiscrSign, 1, bHalfBit);
+	fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(ChipIndex)->GetConfig()->GetChipId());
+	usleep(4000); // > of 5 milli sec
+	fChips.at(ChipIndex)->ReadRegister( Alpide::REG_ADC_CALIB, Bias);
+
+	return(Bias);
+}
+
 
 void readTemp() {
 
@@ -40,36 +104,25 @@ void readTemp() {
 	  std::cerr << "Test_temperature : Error to allocate memory" << std::endl;
 	  return;
   }
-
-  uint16_t MonitoringDAC = 0x00 | (0x00 << 4) | (0x0 << 7) | (0x0 << 8);
-
-
-  uint16_t Mode = 0x0; // 0:Manual 1:Calibrate 2:Auto 3:SupoerManual
-  uint16_t SelectInput = 0x08 << 2; // 0:AVSS 1:DVSS 2:AVDD 3:DVDD 4:VBGthVolScal 5:DACMONV 6:DACMONI 7:Bandgap 8:Temperature
-  uint16_t ComparatorCurrent = 0x02 << 6; // 0:180uA 1:190uA 2:296uA 3:410uA
-  uint16_t DiscriminatorSign = 0x00 << 8;
-  uint16_t RampSpeed = 0x01 << 9; // 0:500ms 1:1us 2:2us 3:4us
-  uint16_t HalfSLBTrim = 0x00 << 11;
-
-  uint16_t TemperatureSelect = Mode | SelectInput | ComparatorCurrent | DiscriminatorSign | RampSpeed | HalfSLBTrim | DiscriminatorSign;
+  uint16_t Bias;
+  bool Sign, Half;
 
   // Set all chips for Temperature Measurement
   for (int i = 0; i < fChips.size(); i ++) {
 	  if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-	  fChips.at(i)->WriteRegister( Alpide::REG_ANALOGMON, MonitoringDAC);
-	  fChips.at(i)->WriteRegister( Alpide::REG_ADC_CONTROL, TemperatureSelect);
-	  fBoards.at(0)->SendOpCode ( fChips.at(i)->GetConfig()->GetChipId(), Alpide::OPCODE_ADCMEASURE);
+
+	  Bias CalibrateADC(i, Sign, Half);
+
+	  setTheDacMonitor(i, 0, 0, false, false, 1);
+	  setTheADCCtrlRegister(i, 0, 8, 2, Sign, 1, Half);
+
+	  fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(i)->GetConfig()->GetChipId());
+	  usleep(5000); // Wait for the measurement > of 5 milli sec
+	  fChips.at(i)->ReadRegister( Alpide::REG_ADC_AVSS, theResult[i]);
   }
 
   // Send the ADC Measurement command to all chips
 
-  usleep(5000); // Wait for the measurement > of 5 milli sec
-
-  // Read all ADC registers
-  for (int i = 0; i < fChips.size(); i ++) {
-	  if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-	  fChips.at(i)->ReadRegister( Alpide::REG_ADC_AVSS, theResult[i]);
-  }
  
   // Calculate and dump the temperature values
   float theValue;
