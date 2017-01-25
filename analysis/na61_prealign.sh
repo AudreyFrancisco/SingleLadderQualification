@@ -11,7 +11,7 @@
 ##  Following srs-software concept.
 ###---------------------------------------------------
 
-if [ "$#" -lt 1 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
+if [ "$#" -lt 2 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]
 then
     echo "-------------------------------------------------------"
     echo "Either number of arguments is not correct"
@@ -19,6 +19,8 @@ then
     echo "Required arugments:"
     echo "  1) path to dir with event tree"
     echo "  2) path to file with VD tracks"
+    echo "Optional:"
+    echo "  ROOT flags "
     echo "-------------------------------------------------------"
     exit 1
 fi
@@ -41,21 +43,9 @@ fi
 DIR_RESULTS=$(readlink -f $DIR_RAW/results)_cr${CROWN}/
 DIR_LOGS=$(readlink -f $DIR_RAW/logs)/
 
-if [ "$#" -ge 2 ] 
-then
-    if [ "$2" == "NULL" ] || [ "$2" == "0" ]
-    then
-        DIR_MASK=""
-    else
-        DIR_MASK=$(readlink -f $2)/
-    fi
-else
-    DIR_MASK=""
-fi
-
 echo "---------------------------------"
 echo "Target directory:  $DIR_RAW"
-echo "Mask filename:     $DIR_MASK"
+echo "VD tracks file:    $FILE_VD"
 echo "Results directory: $DIR_RESULTS"
 echo "Dir with macros:   $DIR_MACROS"
 echo "Dir with classes:  $DIR_CLASSES"
@@ -80,7 +70,7 @@ FILE_ROOT="event_tree.root"
 
 cd $DIR_MACROS
 
-root -l "$DIR_CLASSES/load_classes.C" "prealignment_vd.C+(\"$DIR_RAW/$FILE_ROOT\", \"$FILE_VD\", \"$DIR_RESULTS\", \"cr$CROWN\")" | tee $DIR_LOGS/prealignment_vd.log
+root -l $3 $4 "$DIR_CLASSES/load_classes.C" "prealignment_vd.C+(\"$DIR_RAW/$FILE_ROOT\", \"$FILE_VD\", \"$DIR_RESULTS\", \"cr$CROWN\")" | tee $DIR_LOGS/prealignment_vd.log
 
 #root -l ~/.tbr.C $DIR_RESULTS
 

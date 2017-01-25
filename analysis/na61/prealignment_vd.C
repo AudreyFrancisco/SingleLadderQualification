@@ -26,11 +26,15 @@ Bool_t prealignment_vd(
 
     set_my_style();
 
+    // general constants
     const TString filename_out = "prealignment_vd_" + file_id;
     const Short_t scols        = 1024;
     const Short_t srows        = 512;
     const Short_t n_chips      = 9;   // number of chips
 
+    // extraction variables
+    const Float_t ex_sigma = 4.; // extratact tracaks in alignment peak inside mean +- ex_sigma*stdev
+    
     // Alignment
     /*
     const Float_t xpos = 11.1;
@@ -38,17 +42,20 @@ Bool_t prealignment_vd(
     const Float_t zpos = 92.3;
     */
     
-    const Float_t xpos = 11.05;
-    const Float_t ypos = 120.485;
-    const Float_t zpos = 92.23;
-    
+    const Float_t xpos = 11.044;
+    const Float_t ypos = 120.6-0.117;
+    const Float_t zpos = 92.243;
+    const Float_t angY = 6.935*TMath::DegToRad();
+    const Float_t angX = 0.;
+    const Float_t angZ = 0.;
+
     Alignment align_chip[n_chips];
     for(Short_t i=0; i<n_chips; ++i) {
         align_chip[i].SetPos(TVector3(xpos, ypos-30.15*i, zpos));
         TRotation rot;
-        rot.RotateY(0.106);
-        //rot.RotateY(6.*TMath::DegToRad());
-        //rot.RotateX(1.*TMath::DegToRad());
+        rot.RotateY(angY);
+        rot.RotateX(angX);
+        rot.RotateZ(angZ);
         align_chip[i].SetRotation(rot);
     }
     
@@ -99,6 +106,9 @@ Bool_t prealignment_vd(
     hTrackHitsHIC->SetStats(0);
     
     TH2F *hTrackHits[n_chips];
+    TH2F *hHits[n_chips];
+    TH2F *hHitsAligned[n_chips];
+    
     TH1F *hDX[n_chips];
     TH1F *hDY[n_chips];
     TH1F *hDXzoom[n_chips];
@@ -107,13 +117,22 @@ Bool_t prealignment_vd(
     TH2F *hChipPosXY[n_chips];
     TH2F *hChipPosZY[n_chips];
     TH2F *hChipPosXZ[n_chips];
+
+    TH1F *hMult[n_chips];
     
+    const Int_t binred = 2;
     for(Short_t i=0; i<n_chips; ++i) {
         file_plots->mkdir(Form("Chip_%i", i));
         file_plots->cd(Form("Chip_%i", i));
+        
         hTrackHits[i] = new TH2F(Form("hTrackHits_%i", i), Form("Track hit map, chip %i;X [mm]; Y[mm];a.u.", i),
                                400, xpos-20., xpos+20., 400, ypos-30.15*i-20., ypos-30.15*i+20.);
-        hTrackHits[i]->SetStats(0);
+        hTrackHits[i]->SetStats(0);    
+        hHits[i] = new TH2F(Form("hHits_%i", i), Form("Hit map, chip %i;Column;Row;a.u.", i),
+                            scols/binred, -0.5, scols-0.5, srows/binred, -0.5, srows-0.5);
+        hHitsAligned[i] = new TH2F(Form("hHitsAlign_%i", i), Form("Aligned hit map, chip %i;Column;Row;a.u.", i),
+                                   scols/binred, -0.5, scols-0.5, srows/binred, -0.5, srows-0.5);
+        
         hDX[i] = new TH1F(Form("hDX_%i", i), Form("Difference track hit - cluster pos X, chip %i;DeltaX [mm];a.u.", i),
                           400, xpos-20., xpos+20.);
         hDY[i] = new TH1F(Form("hDY_%i", i), Form("Difference track hit - cluster pos Y, chip %i;DeltaY [mm];a.u.", i),
@@ -129,9 +148,13 @@ Bool_t prealignment_vd(
                                  400, zpos-20., zpos+20., 400, ypos-30.15*i-20., ypos-30.15*i+20.);
         hChipPosXZ[i] = new TH2F(Form("hChipPosXZ_%i", i), Form("Chip %i position in X-Z plane;X [mm]; Z[mm];a.u.", i),
                                  400, xpos-20., xpos+20., 400, zpos-20., zpos+20.);
+
+        hMult[i] = new TH1F(Form("hMult_%i", i), Form("Cluster size aligned, Chip %i;Number of pixels in cluster;a.u.", i),
+                            101, -1.5, 100-0.5);
     }
     file_plots->cd();
 
+    // extracted tracks tree
     TTree *tree_ex = NULL;
     Float_t ex_clux, ex_cluy;
     Float_t ex_to[3], ex_td[3];
@@ -146,6 +169,7 @@ Bool_t prealignment_vd(
     
     cout << "prealignment_vd() : Number of events found in tree: " << nentries << endl;
 
+    // draw chip position
     for(Int_t ichip=0; ichip < n_chips; ++ichip) {
         for(Int_t icol=0; icol < scols; ++icol) {
             for(Int_t irow=0; irow < srows; ++irow) {
@@ -157,14 +181,15 @@ Bool_t prealignment_vd(
         }
     }
 
+    
     for(Int_t loop=0; loop < 1+extract_tracks; ++loop) {
         // loop 0 drawing, loop 1 extracting;
         if(loop==0) cout << "prealignment_vd() : Starting prealignment..." << endl;
         if(loop==1) cout << "prealignment_vd() : Extracting tracks..." << endl;
         
         for(Long_t ivd=0; ivd < tree_vd->GetEntriesFast(); ++ivd) {
+            // read events from vd tree and find equivalent in event tree
             tree_vd->GetEntry(ivd);
-            //if( ivd < 100) cout << vd_event_n << endl;
             vd_event_n -= 1;
             if(vd_event_n < nentries)
                 chain->GetEntry(vd_event_n);
@@ -182,15 +207,20 @@ Bool_t prealignment_vd(
                 TVector3 td(*(TVector3*)vd_td->At(itrack));
 
                 //_cuts____
-                //if(dataset[itrack] >= 3) continue;
+                if(dataset[itrack] != 1) continue;
                 //if(td.X() / td.Z() > 1) continue;
                 //_cuts____
                 
                 for(Int_t ichip=0; ichip < n_chips; ++ichip) {
                     if(loop==1 && ichip != 4) continue;
                     TVector3 p = align_chip[ichip].IntersectionPointWithLine(to, td);
-                    if(loop==0) hTrackHits[ichip]->Fill(p.X(), p.Y());
-                    if(loop==0) if(ichip == 4) hTrackHitsHIC->Fill(p.X(), p.Y());
+                    if(loop==0) {
+                        hTrackHits[ichip]->Fill(p.X(), p.Y());
+                        if(ichip == 4) hTrackHitsHIC->Fill(p.X(), p.Y());
+                        Float_t col, row;
+                        align_chip[ichip].GlobalToPix(p, col, row);
+                        hHits[ichip]->Fill(col, row);
+                    }
                 
                     //if( event->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
                 
@@ -199,33 +229,36 @@ Bool_t prealignment_vd(
                         BinaryCluster* cluster = event->GetPlane(ichip)->GetCluster(iclu);
 
                         //_cuts____
-                        if(mult > 10) continue;
-                        if(cluster->HasHotPixels()) continue;
-                        if(cluster->HasBorderPixels()) continue;
-                        if(cluster->HasExclDblcolPixels()) continue;
+                        //if(mult > 10) continue;
+                        //if(cluster->HasHotPixels()) continue;
+                        //if(cluster->HasBorderPixels()) continue;
+                        //if(cluster->HasExclDblcolPixels()) continue;
                         //_cuts____
-                        
-                        TVector3 clupos = align_chip[ichip].PixToGlobal(cluster->GetX(), cluster->GetY());
-                        Float_t dx = clupos.X() - p.X();
-                        Float_t dy = clupos.Y() - p.Y();
+
+                        TVector3 d = align_chip[ichip].DistPixLine(cluster->GetX(), cluster->GetY(), to, td, kFALSE);
                         if(loop==0) {
-                            if( TMath::Abs(dy) < 0.5 ) {
-                                hDX[ichip]->Fill( dx );
-                                hDXzoom[ichip]->Fill( dx );
+                            if( TMath::Abs(d.Y()) < 0.5 ) { //_cuts____
+                                hDX[ichip]->Fill( d.X() );
+                                hDXzoom[ichip]->Fill( d.X() );
                             }
-                            if( TMath::Abs(dx) < 0.5 ) {
-                                hDY[ichip]->Fill( dy );
-                                hDYzoom[ichip]->Fill( dy );
+                            if( TMath::Abs(d.X()) < 0.5 ) { //_cuts____
+                                hDY[ichip]->Fill( d.Y() );
+                                hDYzoom[ichip]->Fill( d.Y() );
                             }
                         }
                         else if(loop==1) {
-                            if( exx1 < dx && dx < exx2 ) {
-                                if( exy1 < dy && dy < exy2 ) {
+                            if( exx1 < d.X() && d.X() < exx2 ) {
+                                if( exy1 < d.Y() && d.Y() < exy2 ) {
                                     ex_clux = cluster->GetX();
                                     ex_cluy = cluster->GetY();
                                     to.GetXYZ(ex_to);
                                     td.GetXYZ(ex_td);
                                     tree_ex->Fill();
+                                    Float_t col, row;
+                                    align_chip[ichip].GlobalToPix(p, col, row);
+                                    hHitsAligned[ichip]->Fill(col, row);
+                                    hMult[ichip]->Fill(mult);
+                                    //hHitsAligned[ichip]->Fill(ex_clux, ex_cluy);
                                 }
                             }       
                         }
@@ -250,17 +283,17 @@ Bool_t prealignment_vd(
             fres->SetParameter(3, 1);
             
             fres->SetParameter(1, hDXzoom[i]->GetMean());
-            hDXzoom[i]->Fit(fres, "QRL");
+            hDXzoom[i]->Fit(fres, "QR");
             if(i == 4) {
-                exx1 = fres->GetParameter(1) - 5.*fres->GetParameter(2);
-                exx2 = fres->GetParameter(1) + 5.*fres->GetParameter(2);
+                exx1 = fres->GetParameter(1) - ex_sigma*fres->GetParameter(2);
+                exx2 = fres->GetParameter(1) + ex_sigma*fres->GetParameter(2);
             }
             
             fres->SetParameter(1, hDYzoom[i]->GetMean());
-            hDYzoom[i]->Fit(fres, "QRL");
+            hDYzoom[i]->Fit(fres, "QR");
             if(i == 4) {
-                exy1 = fres->GetParameter(1) - 5.*fres->GetParameter(2);
-                exy2 = fres->GetParameter(1) + 5.*fres->GetParameter(2);
+                exy1 = fres->GetParameter(1) - ex_sigma*fres->GetParameter(2);
+                exy2 = fres->GetParameter(1) + ex_sigma*fres->GetParameter(2);
             }
         }
     } // END FOR LOOP
@@ -304,6 +337,8 @@ Bool_t prealignment_vd(
     delete hTrackHitsHIC;
     for(Short_t i=0; i<n_chips; ++i) {
         delete hTrackHits[i];
+        delete hHits[i];
+        delete hHitsAligned[i];
         delete hDX[i];
         delete hDY[i];
         delete hDXzoom[i];
@@ -311,12 +346,13 @@ Bool_t prealignment_vd(
         delete hChipPosXY[i];
         delete hChipPosZY[i];
         delete hChipPosXZ[i];
-        
+        delete hMult[i];
     }
     if(tree_ex) delete tree_ex;
     file_plots->Close();
 
     cout << "prealignment_vd() : Done!" << endl;
+    
     return kTRUE;
 }
 
