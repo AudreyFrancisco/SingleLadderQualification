@@ -56,7 +56,7 @@ void TThresholdScan::ConfigureFromu(TAlpide *chip)
 }
 
 
-void TThresholdScan::ConfigureChip(TAlpide *chip) 
+void TThresholdScan::ConfigureChip(TAlpide *chip)
 {
   AlpideConfig::BaseConfig(chip);
 

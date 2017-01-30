@@ -26,6 +26,11 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
+TBoardType fBoardType;
+std::vector <TReadoutBoard *> fBoards;
+std::vector <TAlpide *>       fChips;
+TConfig *fConfig;
+
 // test setttings ----------------------------------------------------------------------
 
 int myStrobeLength = 10;      // strobe length in units of 25 ns
@@ -114,7 +119,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "%s\n", Config);
   //std::cout << Config << std::endl;
 
-  fprintf(fp, "\n", Config);
+  fprintf(fp, "\n");
 
   fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
   fprintf(fp, "ROW %i\n", myRow);
@@ -215,7 +220,7 @@ void scan(const char *fName) {
 
 int main() {
 
-  initSetup();
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   char Suffix[20], fName[100];
 

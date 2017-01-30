@@ -27,6 +27,12 @@
 #include "SetupHelpers.h"
 
 
+
+TBoardType fBoardType;
+std::vector <TReadoutBoard *> fBoards;
+std::vector <TAlpide *>       fChips;
+TConfig *fConfig;
+
 bool Verbose = false;
 int  fErrCount0;
 int  fErrCount5;
@@ -116,7 +122,7 @@ void MemTest (TAlpide *chip, int ARegion, int AOffset) {
 
 int main() {
 
-  initSetup();
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
   

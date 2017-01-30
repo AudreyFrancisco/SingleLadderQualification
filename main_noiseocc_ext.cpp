@@ -26,6 +26,9 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
+
+//== GLOBAL VARIABLES == TO BE REMOVED ===
+
 int myStrobeDelay  = 0;
 int myPulseLength  = 500;
 
@@ -35,8 +38,12 @@ int myNTriggers    = 100000;
 //int myNTriggers    = 100;
 
 
-int HitData     [512][1024];
+TConfig* fConfig;
+std::vector <TReadoutBoard *> fBoards;
+TBoardType fBoardType;
+std::vector <TAlpide *> fChips;
 
+int HitData     [512][1024];
 
 void ClearHitData() {
   for (int icol = 0; icol < 512; icol ++) {
@@ -196,7 +203,7 @@ void scan() {
 
 
 int main() {
-  initSetup();
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   char Suffix[20], fName[100];
 

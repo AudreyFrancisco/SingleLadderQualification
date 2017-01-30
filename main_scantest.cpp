@@ -33,8 +33,12 @@
 
 
 int main() {
+  TBoardType fBoardType;
+  std::vector <TReadoutBoard *> fBoards;
+  std::vector <TAlpide *>       fChips;
+  TConfig *fConfig;
 
-  initSetup();
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
     
   TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards);
 

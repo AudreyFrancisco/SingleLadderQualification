@@ -30,6 +30,11 @@
 
 // !!! NOTE: Scan parameters are now set via Config file
 
+TBoardType fBoardType;
+std::vector <TReadoutBoard *> fBoards;
+std::vector <TAlpide *>       fChips;
+TConfig *fConfig;
+
 int myNTriggers;
 int myMaskStages;
 int myPixPerRegion;
@@ -147,7 +152,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "%s\n", Config);
   std::cout << Config << std::endl;
 
-  fprintf(fp, "\n", Config);
+  fprintf(fp, "\n");
 
   fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
   fprintf(fp, "MASKSTAGES %i\n", myMaskStages);
@@ -269,7 +274,7 @@ void scan() {
 
 
 int main() {
-  initSetup();
+  initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
   InitScanParameters();
   char Suffix[20], fName[100], Config[1000];
 

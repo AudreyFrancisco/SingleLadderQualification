@@ -30,7 +30,6 @@ class TReadoutBoard {
   std::vector <TChipPos> fChipPositions;  // Antonio : change in protected to access from derived class
   TBoardConfig *fBoardConfig;
 
- protected:
   virtual int WriteChipRegister   (uint16_t Address, uint16_t Value, uint8_t chipId = 0)  = 0;
   int         GetControlInterface (uint8_t chipId);
   int         GetReceiver         (uint8_t chipId);

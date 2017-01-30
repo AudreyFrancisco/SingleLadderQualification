@@ -26,15 +26,15 @@ bool IsDAQBoard(libusb_device *device) {
 }
 
 
-int AddDAQBoard (libusb_device *device, TConfig *config, std::vector <TReadoutBoard *> &boards) {
+int AddDAQBoard (libusb_device *device, TConfig *config, std::vector <TReadoutBoard *> * boards) {
     TReadoutBoard *readoutBoard;
     // note: this should change to use the correct board config according to index or geographical id
     TBoardConfigDAQ *boardConfig = dynamic_cast<TBoardConfigDAQ *>(config->GetBoardConfig(0));
     readoutBoard = new TReadoutBoardDAQ(device, boardConfig);
     
     if (readoutBoard) {
-        boards.push_back(readoutBoard);
-    std::cout << "boards.size = " << boards.size() <<std::endl;
+        boards->push_back(readoutBoard);
+        std::cout << "boards.size = " << boards->size() <<std::endl;
         return 0;
     }
     else {
@@ -43,7 +43,7 @@ int AddDAQBoard (libusb_device *device, TConfig *config, std::vector <TReadoutBo
 }
 
 
-int FindDAQBoards (TConfig *config, std::vector <TReadoutBoard *> &boards) {
+int FindDAQBoards (TConfig *config, std::vector <TReadoutBoard *> * boards) {
     int err     = 0;
     libusb_device **list;
 
@@ -61,7 +61,7 @@ int FindDAQBoards (TConfig *config, std::vector <TReadoutBoard *> &boards) {
     for (ssize_t i = 0; i < cnt; i++) {
         libusb_device *device = list[i];
         if (IsDAQBoard(device)) {
-	  err = AddDAQBoard(device, config, boards);
+            err = AddDAQBoard(device, config, boards);
             if (err) {
                 std::cout << "Problem adding DAQ board" << std::endl;
                 libusb_free_device_list(list, 1);
@@ -69,7 +69,7 @@ int FindDAQBoards (TConfig *config, std::vector <TReadoutBoard *> &boards) {
             }
         }
     }
-    std::cout << "boards.size = " << boards.size() <<std::endl;
+    std::cout << "boards.size = " << boards->size() <<std::endl;
     libusb_free_device_list(list, 1);
     return err;
 }

@@ -33,7 +33,13 @@ int configureChip(TAlpide *chip) {
 
 
 int main() {
-  initSetup();
+  TBoardType fBoardType;
+  std::vector <TReadoutBoard *> fBoards;
+  std::vector <TAlpide *>       fChips;
+  TConfig *fConfig;
+
+
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
   

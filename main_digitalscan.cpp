@@ -31,6 +31,12 @@
 
 // !!! NOTE: Scan parameters are now set via Config file
 
+
+TBoardType fBoardType;
+std::vector <TReadoutBoard *> fBoards;
+std::vector <TAlpide *>       fChips;
+TConfig *fConfig;
+
 int myNTriggers;
 int myMaskStages;
 int myPixPerRegion;
@@ -226,7 +232,7 @@ void scan() {
 
 
 int main() {
-  initSetup();
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   sleep(1);
   char Suffix[20], fName[100];

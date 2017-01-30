@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Antonio Franco  <Anotnio.Franco@ba.infn.it>
@@ -34,7 +34,7 @@
  *  5/8/16  - adapt the read event to new definition
  *  18/01/17 - Review of ReadEventData. Added inheritance from class MBoard
  */
-#include <math.h> 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,10 +55,11 @@ using namespace std;
 std::vector<unsigned char> fDebugBuffer;
 
 // ---- Constructor
-TReadoutBoardMOSAIC::TReadoutBoardMOSAIC (TBoardConfigMOSAIC *AConfig) : TReadoutBoard(AConfig)
+TReadoutBoardMOSAIC::TReadoutBoardMOSAIC (TConfig* config, TBoardConfigMOSAIC *boardConfig)
+  : TReadoutBoard(boardConfig)
+  , fConfig(config)
 {
-  fBoardConfig = AConfig;
-  init(AConfig);
+  init();
 }
 
 
@@ -71,7 +72,7 @@ TReadoutBoardMOSAIC::~TReadoutBoardMOSAIC()
 	for (int i=0; i<MAX_MOSAICTRANRECV; i++)
 		delete alpideDataParser[i];
 
-	for(int i=0; i<MAX_MOSAICCTRLINT; i++) 
+	for(int i=0; i<MAX_MOSAICCTRLINT; i++)
 		delete controlInterface[i];
 
 	delete i2cBus;
@@ -124,8 +125,8 @@ int TReadoutBoardMOSAIC::SetTriggerConfig (bool enablePulse, bool enableTrigger,
 	uint16_t pulseMode = 0;
 
 	if(enablePulse)
-		pulseMode |= Pulser::OPMODE_ENPLS_BIT; 
-	if(enableTrigger) 
+		pulseMode |= Pulser::OPMODE_ENPLS_BIT;
+	if(enableTrigger)
 		pulseMode |= Pulser::OPMODE_ENTRG_BIT;
 	pulser->setConfig(triggerDelay, pulseDelay, pulseMode);
 	return(pulseMode);
@@ -133,10 +134,10 @@ int TReadoutBoardMOSAIC::SetTriggerConfig (bool enablePulse, bool enableTrigger,
 
 void TReadoutBoardMOSAIC::SetTriggerSource (TTriggerSource triggerSource)
 {
-	if(triggerSource == trigInt) { 
+	if(triggerSource == trigInt) {
 		// Internal Trigger
 		mTriggerControl->addEnableExtTrigger(false, 0);
-	} else { 
+	} else {
 		// external trigger
 		mTriggerControl->addEnableExtTrigger(true, 0);
 	}
@@ -178,7 +179,7 @@ int  TReadoutBoardMOSAIC::ReadEventData (int &nBytes, unsigned char *buffer)
 	// try to read from TCP connection
 	for (;;){
 		try {
-			readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), (MDataReceiver **) &dr);	
+			readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), (MDataReceiver **) &dr);
 			if (readDataSize == 0)
 				return -1;
 		} catch (exception& e) {
@@ -189,8 +190,8 @@ int  TReadoutBoardMOSAIC::ReadEventData (int &nBytes, unsigned char *buffer)
 		}
 
 		// get event data from the selected data receiver
-		if (dr->hasData()) 	
-			return (dr->ReadEventData(nBytes, buffer));	
+		if (dr->hasData())
+			return (dr->ReadEventData(nBytes, buffer));
 	}
 	return -1;
 }
@@ -200,9 +201,9 @@ int  TReadoutBoardMOSAIC::ReadEventData (int &nBytes, unsigned char *buffer)
  * 		Private Methods
    ------------------------- */
 // Private : Init the board
-void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
+void TReadoutBoardMOSAIC::init()
 {
-	setIPaddress(config->GetIPaddress(), config->GetTCPport());
+	setIPaddress(fBoardConfig->GetIPaddress(), fBoardConfig->GetTCPport());
 
 	// Data Generator
 	dataGenerator = new MDataGenerator(mIPbus, WbbBaseAddress::dataGenerator);
@@ -258,17 +259,17 @@ void TReadoutBoardMOSAIC::init(TBoardConfigMOSAIC *config)
 	if (init_try==0)
 		throw MBoardInitError("Timeout setting MOSAIC system PLL");
 
-    for(int i=0;i<MAX_MOSAICCTRLINT;i++) 
-		setPhase(config->GetCtrlInterfacePhase(),i);  // set the Phase shift on the line
+    for(int i=0;i<MAX_MOSAICCTRLINT;i++)
+		setPhase(fBoardConfig->GetCtrlInterfacePhase(),i);  // set the Phase shift on the line
 
-	setSpeedMode (config->GetSpeedMode());// set 400 MHz mode
-	setInverted  (config->IsInverted(),-1);
+	setSpeedMode (fBoardConfig->GetSpeedMode());// set 400 MHz mode
+	setInverted  (fBoardConfig->IsInverted(),-1);
 
 	pulser->run(0);
 	mRunControl->stopRun();
 	mRunControl->clearErrors();
-	mRunControl->setAFThreshold(config->GetCtrlAFThreshold());
-	mRunControl->setLatency(config->GetCtrlLatMode(), config->GetCtrlLatMode());
+	mRunControl->setAFThreshold(fBoardConfig->GetCtrlAFThreshold());
+	mRunControl->setLatency(fBoardConfig->GetCtrlLatMode(), fBoardConfig->GetCtrlLatMode());
 
 	return;
 }
@@ -330,8 +331,8 @@ uint32_t TReadoutBoardMOSAIC::decodeError()
 		std::cout << "MOSAIC Error register: 0x" << std::hex << runErrors << std::dec << " ";
 		if (runErrors & (1<<0)) std::cout << "Board memory overflow, ";
 		if (runErrors & (1<<1)) std::cout << "Board detected TCP/IP connection closed while running, ";
-		for (int i=0; i<10; i++) 
-			if (runErrors & (1<<(8+i))) 
+		for (int i=0; i<10; i++)
+			if (runErrors & (1<<(8+i)))
 				std::cout << " Alpide data receiver " << i << " detected electric idle condition, ";
 		std::cout << std::endl;
 	}
@@ -340,8 +341,3 @@ uint32_t TReadoutBoardMOSAIC::decodeError()
 
 
 // ================================== EOF ========================================
-
-
-
-
-

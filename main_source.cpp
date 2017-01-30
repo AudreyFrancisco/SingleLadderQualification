@@ -26,6 +26,11 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
+TBoardType fBoardType;
+std::vector <TReadoutBoard *> fBoards;
+std::vector <TAlpide *>       fChips;
+TConfig *fConfig;
+
 int myVCASN   = 57;
 int myITHR    = 51;
 int myVCASN2  = 64;
@@ -133,7 +138,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "%s\n", Config);
   //std::cout << Config << std::endl;
 
-  fprintf(fp, "\n", Config);
+  fprintf(fp, "\n");
 
   fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
     
@@ -208,7 +213,7 @@ void scan() {
 
 
 int main() {
-  initSetup();
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   char Suffix[20], fName[100];
 

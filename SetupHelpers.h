@@ -12,20 +12,13 @@
 
 typedef enum {setupSingle, setupIB, setupOB, setupSingleM} TSetupType;
 
-extern TBoardType fBoardType;
-
-extern std::vector <TReadoutBoard *> fBoards;
-extern std::vector <TAlpide *>       fChips;
-
-extern TConfig *fConfig;
-
-int  initSetupOB          ();
-int  initSetupIB          ();
-int  initSetupSingle      ();
-int  initSetupSingleMosaic();
-int  initSetupHalfStave   ();
-int  initSetup            (const char *configFileName = "Config.cfg");
+int  initSetupOB          (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
+int  initSetupIB          (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
+int  initSetupSingle      (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
+int  initSetupSingleMosaic(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
+int  initSetupHalfStave   (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
+int  initSetup            (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, const char *configFileName = "Config.cfg");
 int  powerOn              (TReadoutBoardDAQ *aDAQBoard);
-int  CheckControlInterface();
-void MakeDaisyChain      ();
+int  CheckControlInterface(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
+void MakeDaisyChain       (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
 #endif

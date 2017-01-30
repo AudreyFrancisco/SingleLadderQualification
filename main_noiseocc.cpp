@@ -8,7 +8,7 @@
 // In order to have a generic scan, which works for single chips as well as for staves and modules, 
 // all chip accesses should be done with a loop over all elements of the chip vector. 
 // (see e.g. the configureChip loop in main)
-// Board accesses are to be done via fBoards.at(0);  
+// Board accesses are to be done via fBoards.at(0);
 // For an example how to access board-specific functions see the power off at the end of main. 
 //
 // The functions that should be modified for the specific test are configureChip() and main()
@@ -26,6 +26,12 @@
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
+
+
+TBoardType fBoardType;
+std::vector <TReadoutBoard *> fBoards;
+std::vector <TAlpide *>       fChips;
+TConfig *fConfig;
 
 int myVCASN   = 57;
 int myITHR    = 50;
@@ -249,7 +255,7 @@ void scan() {
 
 
 int main() {
-  initSetup();
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   char Suffix[20], fName[100];
 
@@ -271,7 +277,7 @@ int main() {
       configureChip (fChips.at(i));
     }
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
 
     // put your test here... 
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {

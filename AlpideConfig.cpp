@@ -223,6 +223,9 @@ void AlpideConfig::WriteControlReg (TAlpide *chip, Alpide::TChipMode chipMode, T
 
 void AlpideConfig::BaseConfigPLL (TAlpide *chip) 
 {
+  if (chip->GetConfig()->GetParamValue("LINKSPEED") == -1) return; // high-speed link deactivated
+
+
   uint16_t Phase      = 8;  // 4bit Value, default 8
   uint16_t Stages     = 1; // 0 = 3 stages, 1 = 4,  3 = 5 (typical 4)
   uint16_t ChargePump = 8;
@@ -284,29 +287,25 @@ void AlpideConfig::BaseConfigDACs (TAlpide *chip)
 void AlpideConfig::BaseConfig (TAlpide *chip)
 {
   // put all chip configurations before the start of the test here
+
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x20); // set chip to config mode
-  if (fConfig->GetDeviceType() == TYPE_CHIP) {
-    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x30); // CMU/DMU config: turn manchester encoding off etc, initial token=1, disable DDR
-  }
-  else {
-    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x10); // CMU/DMU config: same as above, but manchester on
-  }
+  //TODO: use chip config here, the config should be written accordingly at this point!
+
+
+  // CMU/DMU config: turn manchester encoding off or on etc, initial token=1, disable DDR
+  int cmudmu_config = 0x10 | ((chip->GetConfig()->GetDisableManchester()) ? 0x20 : 0x00);
 
   BaseConfigFromu(chip);
   BaseConfigDACs (chip);
   BaseConfigMask (chip);
-
-  int chipID = chip->GetConfig()->GetChipId(); // get the chipID
-
-  // Set the DTU only for the Masters in the OB
-  if ((fConfig->GetDeviceType() != TYPE_CHIP) && (fConfig->GetDeviceType() != TYPE_TELESCOPE) &&
-		  ( chipID<=15 || // IB mode
-		  ((chipID >0x0f) && ((chipID&0x07)==0) ) ) )             // OB Master
-    BaseConfigPLL  (chip);
+  BaseConfigPLL  (chip);
 
   uint16_t value;
 
   switch (chip->GetConfig()->GetParamValue("LINKSPEED")) {
+  case -1: // DTU not activated
+	value = 0x21;
+	break;
   case 400: 
     value = 0x01;
     break;

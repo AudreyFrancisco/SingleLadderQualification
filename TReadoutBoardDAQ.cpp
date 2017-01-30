@@ -1,6 +1,7 @@
 #include <math.h> 
 #include <string.h>
 #include <unistd.h>
+#include <thread>
 
 #include "USB.h"
 #include "TAlpide.h"
@@ -436,6 +437,7 @@ void TReadoutBoardDAQ::DAQReadData() {
                   break;
                 case 3: 
                   std::cout << "Inconsistent timestamp and data FIFO detected!" << std::endl;
+                  break;
                 case 2:
                   // DEBUG OUTPUT
                   //for (int iByte=0; iByte<fRawBuffer.size(); ++iByte) {
@@ -807,7 +809,7 @@ void TReadoutBoardDAQ::ReadAllRegisters() {
 
 
 void TReadoutBoardDAQ::DumpConfig(const char *fName, bool writeFile, char *config) {
-  sprintf(config,"");
+  config[0] = '\0';
   if (writeFile) {
     FILE *fp = fopen(fName, "w");
     fprintf(fp, "FIRMWARE  %i\n", ReadFirmwareVersion());

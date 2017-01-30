@@ -129,7 +129,7 @@ void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
     fclose (fp);
   }
 
-  sprintf(config, "");
+  config[0] = '\0';
   // DACs
   ReadRegister(0x601, value);
   sprintf(config, "VRESETP %i\n", value);

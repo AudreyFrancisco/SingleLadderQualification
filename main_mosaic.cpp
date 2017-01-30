@@ -31,7 +31,7 @@ int main()
         //TConfig *config = new TConfig (5);
         TConfig *config = new TConfig (1, chipIDs);
 
-	theBoard = (TReadoutBoard *) new TReadoutBoardMOSAIC((TBoardConfigMOSAIC*)config->GetBoardConfig(0));
+	theBoard = (TReadoutBoard *) new TReadoutBoardMOSAIC(config, (TBoardConfigMOSAIC*)config->GetBoardConfig(0));
 
         for (int i = 0; i < config->GetNChips(); i++) {
           fChips.push_back(new TAlpide(config->GetChipConfigById(chipIDs.at(i))));
