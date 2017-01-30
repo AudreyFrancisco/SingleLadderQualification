@@ -42,6 +42,7 @@ int initSetupOB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
   int nWorking = CheckControlInterface(config, boards, boardType, chips);
   sleep(5);
   MakeDaisyChain(config, boards, boardType, chips);
+  return 0;
 }
 
 
@@ -198,6 +199,8 @@ int initSetupIB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
   }
 
   int nWorking = CheckControlInterface(config, boards, boardType, chips);
+
+  return 0;
 }
 
 
@@ -219,6 +222,7 @@ int initSetupSingleMosaic(TConfig* config, std::vector <TReadoutBoard *> * board
   chips-> push_back(new TAlpide(chipConfig));
   chips-> at(0) -> SetReadoutBoard(boards->at(0));
   boards->at(0) -> AddChip        (chipConfig->GetChipId(), control, receiver);
+  return 0;
 }
 
 
@@ -256,6 +260,7 @@ int initSetupSingle(TConfig* config, std::vector <TReadoutBoard *> * boards, TBo
 
   powerOn(myDAQBoard);
 
+  return 0;
 }
 
 
@@ -270,7 +275,9 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 
   std::cout << "Analog Current  = " << aDAQBoard-> ReadAnalogI()     << std::endl;
   std::cout << "Digital Current = " << aDAQBoard-> ReadDigitalI()    << std::endl;
-  std::cout << "Temperature     = " << aDAQBoard-> ReadTemperature() << std::endl; 
+  std::cout << "Temperature     = " << aDAQBoard-> ReadTemperature() << std::endl;
+
+  return 0;
 }
 
 

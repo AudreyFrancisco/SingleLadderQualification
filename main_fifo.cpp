@@ -45,6 +45,8 @@ int configureChip(TAlpide *chip) {
   chip->WriteRegister (Alpide::REG_MODECONTROL,   0x20);
   if (fConfig->GetDeviceType() == TYPE_CHIP)
     chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x60);
+
+  return 0;
 }
 
 

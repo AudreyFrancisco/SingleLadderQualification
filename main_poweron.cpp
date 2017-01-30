@@ -29,6 +29,7 @@
 
 int configureChip(TAlpide *chip) {
   // put all chip configurations before the start of the test here
+  return 0;
 }
 
 

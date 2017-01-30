@@ -3,9 +3,12 @@
 
 using namespace Alpide;
 
-TAlpide::TAlpide (TChipConfig *config) {
-  fConfig = config;
-  fChipId = config->GetChipId();
+TAlpide::TAlpide (TChipConfig *config)
+  : fConfig(config)
+  , fChipId(config->GetChipId())
+  , fReadoutBoard(0x0)
+{
+
 }
 
 
