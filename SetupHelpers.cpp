@@ -24,7 +24,7 @@ int initSetupOB() {
   fBoardType                      = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) fConfig->GetBoardConfig(0);
 
-  boardConfig->SetInvertedData (true);
+  boardConfig->SetInvertedData (boardConfig->IsInverted());
   boardConfig->SetSpeedMode    (Mosaic::RCV_RATE_400);
 
   fBoards.push_back (new TReadoutBoardMOSAIC(boardConfig));
