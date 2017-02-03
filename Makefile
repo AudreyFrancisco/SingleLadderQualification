@@ -20,9 +20,6 @@ $(info OBJS="$(OBJS)")
 
 all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest test_temperature
 
-#ThresholdScan:  $(OBJS) ThresholdScan.cpp
-#	$(CC) -o ThresholdScan $(OBJS) $(CFLAGS) ThresholdScan.cpp $(LINKFLAGS)
-
 $(OBJECT):   $(OBJS) main.cpp
 	$(CC) -o $(OBJECT) $(OBJS) $(CFLAGS) main.cpp $(LINKFLAGS)
 

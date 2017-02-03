@@ -31,6 +31,12 @@
 
 // !!! NOTE: Scan parameters are now set via Config file
 
+
+TBoardType fBoardType;
+std::vector <TReadoutBoard *> fBoards;
+std::vector <TAlpide *>       fChips;
+TConfig *fConfig;
+
 int myNTriggers;
 int myMaskStages;
 int myPixPerRegion;
@@ -126,6 +132,7 @@ int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, chip->GetConfig()->GetParamValue("STROBEDELAYCHIP"));   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
   chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length 
+  return 0;
 }
 
 
@@ -135,6 +142,8 @@ int configureChip(TAlpide *chip) {
   configureFromu(chip);
 
   AlpideConfig::ConfigureCMU (chip);
+
+  return 0;
 }
 
 
@@ -226,7 +235,7 @@ void scan() {
 
 
 int main() {
-  initSetup();
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   sleep(1);
   char Suffix[20], fName[100];

@@ -5,11 +5,11 @@
 //   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
 //
-// In order to have a generic scan, which works for single chips as well as for staves and modules, 
-// all chip accesses should be done with a loop over all elements of the chip vector. 
+// In order to have a generic scan, which works for single chips as well as for staves and modules,
+// all chip accesses should be done with a loop over all elements of the chip vector.
 // (see e.g. the configureChip loop in main)
-// Board accesses are to be done via fBoards.at(0);  
-// For an example how to access board-specific functions see the power off at the end of main. 
+// Board accesses are to be done via fBoards.at(0);
+// For an example how to access board-specific functions see the power off at the end of main.
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
@@ -27,6 +27,10 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
+TConfig* fConfig;
+std::vector <TReadoutBoard *> fBoards;
+TBoardType fBoardType;
+std::vector <TAlpide *> fChips;
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 // Mode =  0:Manual 1:Calibrate 2:Auto 3:SupoerManual
@@ -125,7 +129,7 @@ void readTemp() {
 	  fChips.at(i)->ReadRegister( Alpide::REG_ADC_AVSS, theResult[i]);
 	  theResult[i] -= Bias;
 	  theValue =  ( ((float)theResult[i]) * 0.1281) + 6.8; // first approximation
- 	  std::cout << i << ")\t" << theChipId << "\t" << Bias << "\t" << theResult[i] << "\t" << theValue << " " << std::endl; 
+ 	  std::cout << i << ")\t" << theChipId << "\t" << Bias << "\t" << theResult[i] << "\t" << theValue << " " << std::endl;
 
   }
 
@@ -145,12 +149,12 @@ char *makeTimeStamp(char *ABuffer)
 }
 
 int main() {
+    initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
 
-	initSetup();
 	char TimeStamp[20];
 
 	TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
-  
+
 	if (fBoards.size() == 1) {
 		fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
 		fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);

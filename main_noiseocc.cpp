@@ -8,7 +8,7 @@
 // In order to have a generic scan, which works for single chips as well as for staves and modules, 
 // all chip accesses should be done with a loop over all elements of the chip vector. 
 // (see e.g. the configureChip loop in main)
-// Board accesses are to be done via fBoards.at(0);  
+// Board accesses are to be done via fBoards.at(0);
 // For an example how to access board-specific functions see the power off at the end of main. 
 //
 // The functions that should be modified for the specific test are configureChip() and main()
@@ -26,6 +26,12 @@
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
+
+
+TBoardType fBoardType;
+std::vector <TReadoutBoard *> fBoards;
+std::vector <TAlpide *>       fChips;
+TConfig *fConfig;
 
 int myVCASN   = 57;
 int myITHR    = 50;
@@ -125,7 +131,9 @@ int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x0);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
-  // chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
+  // chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length
+
+  return 0;
 }
 
 
@@ -133,6 +141,8 @@ int configureFromu(TAlpide *chip) {
 int configureMask(TAlpide *chip) {
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   false);
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
+
+  return 0;
 }
 
 
@@ -143,6 +153,8 @@ int configureChip(TAlpide *chip) {
   configureMask (chip);
   AlpideConfig::ConfigureCMU (chip);
   //chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
+
+  return 0;
 }
 
 void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {
@@ -156,7 +168,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "%s\n", Config);
   //std::cout << Config << std::endl;
 
-  fprintf(fp, "\n", Config);
+  fprintf(fp, "\n");
 
   fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
     
@@ -243,7 +255,7 @@ void scan() {
 
 
 int main() {
-  initSetup();
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   char Suffix[20], fName[100];
 
@@ -265,7 +277,7 @@ int main() {
       configureChip (fChips.at(i));
     }
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
 
     // put your test here... 
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {

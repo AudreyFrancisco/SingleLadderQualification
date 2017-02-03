@@ -26,6 +26,11 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
+TBoardType fBoardType;
+std::vector <TReadoutBoard *> fBoards;
+std::vector <TAlpide *>       fChips;
+TConfig *fConfig;
+
 // test setttings ----------------------------------------------------------------------
 
 int myStrobeLength = 10;      // strobe length in units of 25 ns
@@ -114,7 +119,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "%s\n", Config);
   //std::cout << Config << std::endl;
 
-  fprintf(fp, "\n", Config);
+  fprintf(fp, "\n");
 
   fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
   fprintf(fp, "ROW %i\n", myRow);
@@ -138,6 +143,7 @@ int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
   chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
+  return 0;
 }
 
 
@@ -161,7 +167,7 @@ int configureChip(TAlpide *chip) {
 
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
 
-
+  return 0;
 }
 
 
@@ -215,7 +221,7 @@ void scan(const char *fName) {
 
 int main() {
 
-  initSetup();
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   char Suffix[20], fName[100];
 

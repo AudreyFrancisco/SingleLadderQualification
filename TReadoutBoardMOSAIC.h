@@ -48,7 +48,7 @@
 using namespace std;
 
 
-extern std::vector<unsigned char> fDebugBuffer; 
+extern std::vector<unsigned char> fDebugBuffer;
 
 class DummyReceiver : public MDataReceiver
 {
@@ -61,14 +61,14 @@ public:
 
 // -----------------------------------------------------
 
-class TReadoutBoardMOSAIC : public TReadoutBoard, private MBoard 
+class TReadoutBoardMOSAIC : public TReadoutBoard, private MBoard
 {
 
 // Methods
 public:
-	TReadoutBoardMOSAIC(TBoardConfigMOSAIC *config);
+	TReadoutBoardMOSAIC(TConfig* config, TBoardConfigMOSAIC *boardConfig);
 	virtual ~TReadoutBoardMOSAIC();
-  
+
 	int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId =0);
 	int ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId =0);
 	int SendOpCode        (uint16_t  OpCode, uint8_t chipId);
@@ -87,11 +87,11 @@ public:
 	int WriteRegister     (uint16_t Address, uint32_t Value)  { return(0);};
 
 private:
-	void init(TBoardConfigMOSAIC *config);
+	void init();
 	void enableDefinedReceivers();
-	void setPhase(int APhase, int ACii = 0) { 
-			controlInterface[ACii]->setPhase(APhase); 
-			controlInterface[ACii]->addSendCmd(ControlInterface::OPCODE_GRST); 
+	void setPhase(int APhase, int ACii = 0) {
+			controlInterface[ACii]->setPhase(APhase);
+			controlInterface[ACii]->addSendCmd(ControlInterface::OPCODE_GRST);
 			controlInterface[ACii]->execute();
 			return;
 		};
@@ -105,6 +105,7 @@ private:
 // Properties
 private:
 	TBoardConfigMOSAIC *fBoardConfig;
+  TConfig            *fConfig;
 	MDataGenerator 		*dataGenerator;
 	I2Cbus 	 			*i2cBus;
 	ControlInterface 	*controlInterface[MAX_MOSAICCTRLINT];
@@ -113,7 +114,7 @@ private:
 	TAlpideDataParser	*alpideDataParser[MAX_MOSAICTRANRECV];
 	DummyReceiver 		*dr;
 	TBoardHeader 		theHeaderOfReadData;  // This will host the info catch from Packet header/trailer
- 
+
 private:
 	// status register bits
 	enum BOARD_STATUS_BITS {

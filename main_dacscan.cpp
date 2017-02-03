@@ -2,13 +2,13 @@
 // ==========================================
 //
 // After successful call to initSetup() the elements of the setup are accessible in the two vectors
-//   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
-//   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
+//   - boards: vector of readout boards (setups implemented here have only 1 readout board, i.e. boards.at(0)
+//   - chips:  vector of chips, depending on setup type 1, 9 or 14 elements
 //
 // In order to have a generic scan, which works for single chips as well as for staves and modules, 
 // all chip accesses should be done with a loop over all elements of the chip vector. 
 // (see e.g. the configureChip loop in main)
-// Board accesses are to be done via fBoards.at(0);  
+// Board accesses are to be done via boards.at(0);
 // For an example how to access board-specific functions see the power off at the end of main. 
 //
 // The functions that should be modified for the specific test are configureChip() and main()
@@ -169,42 +169,46 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
 
 
 int main() {
-  initSetup();
+  TConfig* config;
+  std::vector <TReadoutBoard *> boards;
+  TBoardType boardType;
+  std::vector <TAlpide *> chips;
+  initSetup(config, &boards, &boardType, &chips);
 
-  myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+  myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (boards.at(0));
   
   if (!myDAQBoard) {
     std::cout << "This test works only with DAQ board" << std::endl;
     exit(1);
   }
 
-  if (fBoards.size() == 1) {
+  if (boards.size() == 1) {
      
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
+    boards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
+    boards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
-    for (int i = 0; i < fChips.size(); i ++) {
-      configureChip (fChips.at(i));
+    for (int i = 0; i < chips.size(); i ++) {
+      configureChip (chips.at(i));
     }
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+    boards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
 
 
-    scanVoltageDac (fChips.at(0), Alpide::REG_VRESETP, "VRESETP", mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VRESETD, "VRESETD", mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VCASP,   "VCASP",   mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VCASN,   "VCASN",   mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEH, "VPULSEH", mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEL, "VPULSEL", mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VCASN2,  "VCASN2",  mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VCLIP,   "VCLIP",   mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VTEMP,   "VTEMP",   mySampleDist);
+    scanVoltageDac (chips.at(0), Alpide::REG_VRESETP, "VRESETP", mySampleDist);
+    scanVoltageDac (chips.at(0), Alpide::REG_VRESETD, "VRESETD", mySampleDist);
+    scanVoltageDac (chips.at(0), Alpide::REG_VCASP,   "VCASP",   mySampleDist);
+    scanVoltageDac (chips.at(0), Alpide::REG_VCASN,   "VCASN",   mySampleDist);
+    scanVoltageDac (chips.at(0), Alpide::REG_VPULSEH, "VPULSEH", mySampleDist);
+    scanVoltageDac (chips.at(0), Alpide::REG_VPULSEL, "VPULSEL", mySampleDist);
+    scanVoltageDac (chips.at(0), Alpide::REG_VCASN2,  "VCASN2",  mySampleDist);
+    scanVoltageDac (chips.at(0), Alpide::REG_VCLIP,   "VCLIP",   mySampleDist);
+    scanVoltageDac (chips.at(0), Alpide::REG_VTEMP,   "VTEMP",   mySampleDist);
 
-    scanCurrentDac (fChips.at(0), Alpide::REG_IAUX2,   "IAUX2",   mySampleDist);
-    scanCurrentDac (fChips.at(0), Alpide::REG_IRESET,  "IRESET",  mySampleDist);
-    scanCurrentDac (fChips.at(0), Alpide::REG_IDB,     "IDB",     mySampleDist);
-    scanCurrentDac (fChips.at(0), Alpide::REG_IBIAS,   "IBIAS",   mySampleDist);
-    scanCurrentDac (fChips.at(0), Alpide::REG_ITHR,    "ITHR",    mySampleDist);
+    scanCurrentDac (chips.at(0), Alpide::REG_IAUX2,   "IAUX2",   mySampleDist);
+    scanCurrentDac (chips.at(0), Alpide::REG_IRESET,  "IRESET",  mySampleDist);
+    scanCurrentDac (chips.at(0), Alpide::REG_IDB,     "IDB",     mySampleDist);
+    scanCurrentDac (chips.at(0), Alpide::REG_IBIAS,   "IBIAS",   mySampleDist);
+    scanCurrentDac (chips.at(0), Alpide::REG_ITHR,    "ITHR",    mySampleDist);
 
 
     if (myDAQBoard) {
