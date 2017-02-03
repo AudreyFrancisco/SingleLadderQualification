@@ -281,7 +281,7 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 }
 
 
-int initSetup(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, const char *configFileName) {
+int initSetup(TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, const char *configFileName) {
   config = new TConfig (configFileName);
 
   switch (config->GetDeviceType())

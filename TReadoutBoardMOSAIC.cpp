@@ -57,6 +57,7 @@ std::vector<unsigned char> fDebugBuffer;
 // ---- Constructor
 TReadoutBoardMOSAIC::TReadoutBoardMOSAIC (TConfig* config, TBoardConfigMOSAIC *boardConfig)
   : TReadoutBoard(boardConfig)
+  , fBoardConfig(boardConfig)
   , fConfig(config)
 {
   init();
