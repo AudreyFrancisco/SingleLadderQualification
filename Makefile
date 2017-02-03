@@ -2,7 +2,7 @@ CC=g++
 INCLUDE=/usr/local/include
 LIBPATH=/usr/local/lib
 CFLAGS= -O2 -pipe -fPIC -g -std=c++0x -mcmodel=large -I $(INCLUDE)
-LINKFLAGS=-lusb-1.0 -L $(LIBPATH)
+LINKFLAGS=-lusb-1.0 -lpthread -L $(LIBPATH)
 #LINKFLAGS=
 OBJECT= runTest
 LIBRARY=libalpide.so
