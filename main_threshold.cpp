@@ -183,11 +183,7 @@ void scan() {
   }
 
   for (int i = 0; i < fChips.size(); i++) { //Read VPULSEH from Config and save it at vector temporarily
-    if (! fChips.at(i)->GetConfig()->IsEnabled()) {
-	  myVPULSEH.push_back(0);
-	} else {
-      myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
-	}
+    myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
   }
  
   for (int istage = 0; istage < myMaskStages; istage ++) {
