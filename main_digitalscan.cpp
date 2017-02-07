@@ -150,7 +150,8 @@ int configureChip(TAlpide *chip) {
 void scan() {   
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b, nClosedEvents = 0;
-  int                   nBad = 0;
+  int                   nBad     = 0;
+  int                   nSkipped = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -180,9 +181,19 @@ void scan() {
     //AlpideConfig::PrintDebugStream(fChips.at(0));
 
     int itrg = 0;
+    int nTrials = 0;
+    int MAXTRIALS = 3;
+
     while(itrg < myNTriggers * fEnabled) {
       if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
         usleep(100);
+        nTrials ++;
+        if (nTrials == MAXTRIALS) {
+	  std::cout << "Reached " << nTrials << " timeouts, giving up on this point." << std::endl;
+          itrg = myNTriggers * fEnabled;
+          nSkipped ++;
+          nTrials = 0;
+	}
         continue;
       }
       else {
@@ -231,6 +242,7 @@ void scan() {
     myMOSAIC->StopRun();
     std::cout << "Total number of 8b10b decoder errors: " << errors8b10b << std::endl;
   }
+  std::cout << "Number of skipped points: " << nSkipped << std::endl;
 }
 
 
