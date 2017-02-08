@@ -1,7 +1,7 @@
 #ifndef ALPIDE_H
 #define ALPIDE_H
 
-
+#include <unistd.h>
 #include "TReadoutBoard.h"
 #include "TConfig.h"
 
@@ -141,6 +141,13 @@ class TAlpide {
   TChipConfig   *fConfig;
   int            fChipId;
   TReadoutBoard *fReadoutBoard;
+
+  // ADC calibration parameters
+  int		fADCBias;
+  bool		fADCHalfLSB;
+  bool		fADCSign;
+
+
  protected: 
  public:
   TAlpide (TChipConfig *config);
@@ -160,6 +167,17 @@ class TAlpide {
   //int SendCommandSequence (vector <> sequence);
 
   void DumpConfig(const char *fName, bool writeFile=true, char *Config=0);
+
+
+
+public:
+  int CalibrateADC();
+  void setTheDacMonitor(Alpide::TRegister ADac, int IRef = 2);
+  uint16_t setTheADCCtrlRegister(uint16_t Mode, uint16_t SelectInput, uint16_t ComparatorCurrent, uint16_t RampSpeed);
+  float readTemp();
+  float readDACVoltage(Alpide::TRegister ADac);
+  float readDACCurrent(Alpide::TRegister ADac);
+
 
 };
 

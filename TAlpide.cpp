@@ -7,6 +7,9 @@ TAlpide::TAlpide (TChipConfig *config)
   : fConfig(config)
   , fChipId(config->GetChipId())
   , fReadoutBoard(0x0)
+  , fADCBias(-1)
+  , fADCHalfLSB(false)
+  , fADCSign(false)
 {
 
 }
@@ -132,7 +135,7 @@ void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
     fclose (fp);
   }
 
-  config[0] = '\0';
+  sprintf(config, "");
   // DACs
   ReadRegister(0x601, value);
   sprintf(config, "VRESETP %i\n", value);
