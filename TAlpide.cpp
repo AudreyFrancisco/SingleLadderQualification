@@ -192,3 +192,201 @@ void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
   sprintf(config, "%sCMUDMU_CONFIG  %i\n", config, value);
 
 }
+
+// ---------- DAC / ADC section -----------------------
+
+
+
+// Mode =  0:Manual 1:Calibrate 2:Auto 3:SupoerManual
+// SelectInput =   0:AVSS 1:DVSS 2:AVDD 3:DVDD 4:VBGthVolScal 5:DACMONV 6:DACMONI 7:Bandgap 8:Temperature
+// ComparatorCurrent =  0:180uA 1:190uA 2:296uA 3:410uA
+// RampSpeed = 0:500ms 1:1us 2:2us 3:4us
+uint16_t TAlpide::setTheADCCtrlRegister(uint16_t Mode, uint16_t SelectInput, uint16_t ComparatorCurrent, uint16_t RampSpeed)
+{
+	uint16_t Data;
+	Data = Mode | (SelectInput<<2) | (ComparatorCurrent<<6) | (fADCSign<<8) | (RampSpeed<<9) | (fADCHalfLSB<<11);
+	WriteRegister( Alpide::REG_ADC_CONTROL, Data);
+	return(Data);
+}
+
+// Iref =  0:0.25ua 1:0.75uA 2:1.00uA 3:1.25uA
+void TAlpide::setTheDacMonitor(Alpide::TRegister ADac, int IRef)
+{
+	int VDAC, IDAC;
+	uint16_t Value;
+	switch (ADac) {
+	case Alpide::REG_VRESETP:
+		VDAC = 4;
+	    IDAC = 0;
+	    break;
+	case Alpide::REG_VRESETD:
+	    VDAC = 5;
+	    IDAC = 0;
+	    break;
+	case Alpide::REG_VCASP:
+	    VDAC = 1;
+	    IDAC = 0;
+	    break;
+	case Alpide::REG_VCASN:
+	    VDAC = 0;
+	    IDAC = 0;
+	    break;
+	case Alpide::REG_VPULSEH:
+	    VDAC = 2;
+	    IDAC = 0;
+	    break;
+	case Alpide::REG_VPULSEL:
+	    VDAC = 3;
+	    IDAC = 0;
+	    break;
+	case Alpide::REG_VCASN2:
+	    VDAC = 6;
+	    IDAC = 0;
+	    break;
+	case Alpide::REG_VCLIP:
+	    VDAC = 7;
+	    IDAC = 0;
+	    break;
+	case Alpide::REG_VTEMP:
+	    VDAC = 8;
+	    IDAC = 0;
+	    break;
+	case Alpide::REG_IAUX2:
+	    IDAC = 1;
+	    VDAC = 0;
+	    break;
+	case Alpide::REG_IRESET:
+	    IDAC = 0;
+	    VDAC = 0;
+	    break;
+	case Alpide::REG_IDB:
+	    IDAC = 3;
+	    VDAC = 0;
+	    break;
+	case Alpide::REG_IBIAS:
+	    IDAC = 2;
+	    VDAC = 0;
+	    break;
+	case Alpide::REG_ITHR:
+	    IDAC = 5;
+	    VDAC = 0;
+	    break;
+	default:
+	    VDAC = 0;
+	    IDAC = 0;
+	    break;
+	}
+
+	Value = VDAC & 0xf;
+	Value |= (IDAC & 0x7) << 4;
+	Value |= (IRef & 0x3) << 9;
+
+	WriteRegister (Alpide::REG_ANALOGMON, Value);
+	return;
+}
+
+
+
+int TAlpide::CalibrateADC()
+{
+	uint16_t theVal2,theVal1;
+	bool isAVoltDAC, isACurrDAC, isATemperature, isAVoltageBuffered;
+	int theSelInput;
+
+
+	// Calibration Phase 1
+	fADCHalfLSB = false;
+	fADCSign = false;
+	setTheADCCtrlRegister(1, 0, 2, 1);
+	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fConfig->GetChipId());
+	usleep(4000); // > of 5 milli sec
+	ReadRegister( Alpide::REG_ADC_CALIB, theVal1);
+	fADCSign = true;
+	setTheADCCtrlRegister(1, 0, 2, 1);
+	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fConfig->GetChipId());
+	usleep(4000); // > of 5 milli sec
+	ReadRegister( Alpide::REG_ADC_CALIB, theVal2);
+	fADCSign =  (theVal1 > theVal2) ? false : true;
+
+	// Calibration Phase 2
+	fADCHalfLSB = false;
+	setTheADCCtrlRegister(1, 7, 2, 1);
+	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fConfig->GetChipId());
+	usleep(4000); // > of 5 milli sec
+	ReadRegister( Alpide::REG_ADC_CALIB, theVal1);
+	fADCHalfLSB = true;
+	setTheADCCtrlRegister( 1, 7, 2, 1);
+	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fConfig->GetChipId());
+	usleep(4000); // > of 5 milli sec
+	ReadRegister( Alpide::REG_ADC_CALIB, theVal2);
+	fADCHalfLSB =  (theVal1 > theVal2) ? false : true;
+
+	// Detect the Bias
+	setTheADCCtrlRegister(1, 0, 2, 1);
+	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fConfig->GetChipId());
+	usleep(4000); // > of 5 milli sec
+	ReadRegister( Alpide::REG_ADC_CALIB,theVal1);
+	fADCBias = theVal1;
+	return(fADCBias);
+}
+
+
+float TAlpide::readTemp() {
+
+	uint16_t theResult = 0;
+	float theValue;
+	if(fADCBias == -1) { // needs calibration
+		CalibrateADC();
+	}
+
+	setTheDacMonitor(Alpide::REG_ANALOGMON); // uses the RE_ANALOGMON, in order to disable the monitoring !
+	usleep(5000);
+	setTheADCCtrlRegister(0, 8, 2, 1);
+
+	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE);
+	usleep(5000); // Wait for the measurement > of 5 milli sec
+	ReadRegister( Alpide::REG_ADC_AVSS, theResult);
+	theResult -=  (uint16_t)fADCBias;
+	theValue =  ( ((float)theResult) * 0.1281) + 6.8; // first approximation
+	return(theValue);
+}
+
+float TAlpide::readDACVoltage(Alpide::TRegister ADac) {
+
+	uint16_t theResult = 0;
+	float theValue;
+	if(fADCBias == -1) { // needs calibration
+		CalibrateADC();
+	}
+
+	setTheDacMonitor(ADac);
+	usleep(5000);
+	setTheADCCtrlRegister(0, 5, 2, 1);
+
+	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE);
+	usleep(5000); // Wait for the measurement > of 5 milli sec
+	ReadRegister( Alpide::REG_ADC_AVSS, theResult);
+	theResult -=  (uint16_t)fADCBias;
+	theValue =  ( ((float)theResult) * 0.001644); // V scale first approximation
+	return(theValue);
+}
+
+float TAlpide::readDACCurrent(Alpide::TRegister ADac) {
+
+	uint16_t theResult = 0;
+	float theValue;
+	if(fADCBias == -1) { // needs calibration
+		CalibrateADC();
+	}
+
+	setTheDacMonitor(ADac);
+	usleep(5000);
+	setTheADCCtrlRegister(0, 6, 2, 1);
+
+	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE);
+	usleep(5000); // Wait for the measurement > of 5 milli sec
+	ReadRegister( Alpide::REG_ADC_AVSS, theResult);
+	theResult -= (uint16_t)fADCBias;
+	theValue =  ( ((float)theResult) * 0.164); // uA scale   first approximation
+	return(theValue);
+}
