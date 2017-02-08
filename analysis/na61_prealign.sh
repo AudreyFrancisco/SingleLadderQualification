@@ -1,11 +1,7 @@
 #!/bin/bash
 
 ###---------------------------------------------------
-##  Macro for processing directory containing
-##  NoiseOccupancy_*_*_Chip*.dat files.
-##  Runs CSA on all files and saves clusters in
-##  NoiseOccupancy_*_*_tree.root file. Afterwards performs
-##  an anlysis on the combined data.
+##  Macro for prealignment and plotting of NA61 data
 ##  
 ##  Written by Miljenko Suljic, m.suljic@cern.ch
 ##  Following srs-software concept.

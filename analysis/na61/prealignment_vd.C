@@ -116,7 +116,8 @@ Bool_t prealignment_vd(
     TH1F *hDY[n_chips];
     TH1F *hDXzoom[n_chips];
     TH1F *hDYzoom[n_chips];
-
+    TH2F *hDXY[n_chips];
+    
     TH2F *hChipPosXY[n_chips];
     TH2F *hChipPosZY[n_chips];
     TH2F *hChipPosXZ[n_chips];
@@ -136,14 +137,17 @@ Bool_t prealignment_vd(
         hHitsAligned[i] = new TH2F(Form("hHitsAlign_%i", i), Form("Hit map only aligned tracks, chip %i;Column;Row;a.u.", i),
                                    scols/binred, -0.5, scols-0.5, srows/binred, -0.5, srows-0.5);
         
-        hDX[i] = new TH1F(Form("hDX_%i", i), Form("Difference track hit - cluster pos X, chip %i;DeltaX [mm];a.u.", i),
+        hDX[i] = new TH1F(Form("hDX_%i", i), Form("Difference track hit - cluster pos X, chip %i;#DeltaX [mm];a.u.", i),
                           400, xpos-20., xpos+20.);
-        hDY[i] = new TH1F(Form("hDY_%i", i), Form("Difference track hit - cluster pos Y, chip %i;DeltaY [mm];a.u.", i),
+        hDY[i] = new TH1F(Form("hDY_%i", i), Form("Difference track hit - cluster pos Y, chip %i;#DeltaY [mm];a.u.", i),
                           400, ypos-30.15*i-40., ypos-30.15*i+40.);
-        hDXzoom[i] = new TH1F(Form("hDXzoom_%i", i), Form("Difference track hit - cluster pos X, chip %i;DeltaX [mm];a.u.", i),
+        hDXzoom[i] = new TH1F(Form("hDXzoom_%i", i), Form("Difference track hit - cluster pos X, chip %i;#DeltaX [mm];a.u.", i),
                               200, -0.25, 0.25);
-        hDYzoom[i] = new TH1F(Form("hDYzoom_%i", i), Form("Difference track hit - cluster pos Y, chip %i;DeltaY [mm];a.u.", i),
+        hDYzoom[i] = new TH1F(Form("hDYzoom_%i", i), Form("Difference track hit - cluster pos Y, chip %i;#DeltaY [mm];a.u.", i),
                               200, -0.25, 0.25);
+        hDXY[i] = new TH2F(Form("hDXY_%i", i), Form("#DeltaX vs #DeltaY, chip %i;#DeltaX [mm];#DeltaY [mm];a.u.", i),
+                           200, -0.25, 0.25, 200, -0.25, 0.25);
+        //400, xpos-20., xpos+20., 400, ypos-30.15*i-40., ypos-30.15*i+40.);
         
         hChipPosXY[i] = new TH2F(Form("hChipPosXY_%i", i), Form("Chip %i position in X-Y plane;X [mm]; Y[mm];a.u.", i),
                                  400, xpos-20., xpos+20., 400, ypos-30.15*i-20., ypos-30.15*i+20.);
@@ -257,6 +261,7 @@ Bool_t prealignment_vd(
                                 hDY[ichip]->Fill( d.Y() );
                                 hDYzoom[ichip]->Fill( d.Y() );
                             }
+                            hDXY[ichip]->Fill( d.X(), d.Y() );
                         }
                         else if(loop==1) {
                             if( exx1 < d.X() && d.X() < exx2 ) {
@@ -372,6 +377,7 @@ Bool_t prealignment_vd(
         delete hDY[i];
         delete hDXzoom[i];
         delete hDYzoom[i];
+        delete hDXY[i];
         delete hChipPosXY[i];
         delete hChipPosZY[i];
         delete hChipPosXZ[i];
