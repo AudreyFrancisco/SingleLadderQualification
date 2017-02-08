@@ -159,7 +159,7 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
 
   myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
 
-  std::cout << "Scanning DAC " << Name << std::endl;
+  std::cout << "ChipID = " << chip->GetConfig()->GetChipId() << "    Scanning DAC " << Name << std::endl;
 
   chip->ReadRegister (ADac, old);
   if (!myDAQBoard) { // MOSAIC board internal ADC read
@@ -197,28 +197,29 @@ int main() {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
     for (int i = 0; i < fChips.size(); i ++) {
-      configureChip (fChips.at(i));
+ //     configureChip (fChips.at(i));
     }
 
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
 
+    for (int i = 0; i < fChips.size(); i ++) {
 
-    scanVoltageDac (fChips.at(0), Alpide::REG_VRESETP, "VRESETP", mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VRESETD, "VRESETD", mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VCASP,   "VCASP",   mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VCASN,   "VCASN",   mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEH, "VPULSEH", mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VPULSEL, "VPULSEL", mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VCASN2,  "VCASN2",  mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VCLIP,   "VCLIP",   mySampleDist);
-    scanVoltageDac (fChips.at(0), Alpide::REG_VTEMP,   "VTEMP",   mySampleDist);
+    	scanVoltageDac (fChips.at(i), Alpide::REG_VRESETP, "VRESETP", mySampleDist);
+    	scanVoltageDac (fChips.at(i), Alpide::REG_VRESETD, "VRESETD", mySampleDist);
+    	scanVoltageDac (fChips.at(i), Alpide::REG_VCASP,   "VCASP",   mySampleDist);
+    	scanVoltageDac (fChips.at(i), Alpide::REG_VCASN,   "VCASN",   mySampleDist);
+    	scanVoltageDac (fChips.at(i), Alpide::REG_VPULSEH, "VPULSEH", mySampleDist);
+    	scanVoltageDac (fChips.at(i), Alpide::REG_VPULSEL, "VPULSEL", mySampleDist);
+    	scanVoltageDac (fChips.at(i), Alpide::REG_VCASN2,  "VCASN2",  mySampleDist);
+    	scanVoltageDac (fChips.at(i), Alpide::REG_VCLIP,   "VCLIP",   mySampleDist);
+    	scanVoltageDac (fChips.at(i), Alpide::REG_VTEMP,   "VTEMP",   mySampleDist);
 
-    scanCurrentDac (fChips.at(0), Alpide::REG_IAUX2,   "IAUX2",   mySampleDist);
-    scanCurrentDac (fChips.at(0), Alpide::REG_IRESET,  "IRESET",  mySampleDist);
-    scanCurrentDac (fChips.at(0), Alpide::REG_IDB,     "IDB",     mySampleDist);
-    scanCurrentDac (fChips.at(0), Alpide::REG_IBIAS,   "IBIAS",   mySampleDist);
-    scanCurrentDac (fChips.at(0), Alpide::REG_ITHR,    "ITHR",    mySampleDist);
-
+    	scanCurrentDac (fChips.at(i), Alpide::REG_IAUX2,   "IAUX2",   mySampleDist);
+    	scanCurrentDac (fChips.at(i), Alpide::REG_IRESET,  "IRESET",  mySampleDist);
+    	scanCurrentDac (fChips.at(i), Alpide::REG_IDB,     "IDB",     mySampleDist);
+    	scanCurrentDac (fChips.at(i), Alpide::REG_IBIAS,   "IBIAS",   mySampleDist);
+    	scanCurrentDac (fChips.at(i), Alpide::REG_ITHR,    "ITHR",    mySampleDist);
+    }
 
     if (myDAQBoard) {
       myDAQBoard->PowerOff();
