@@ -64,6 +64,9 @@ public:
     Float_t   GetPosZ     () const { return fPos.Z(); }
     TRotation GetRotation () const { return fRot;     }
 
+    Bool_t WriteFile(TString fname);
+    Bool_t ReadFile(TString fname);
+
 private:
     // alignment variables
     TVector3  fPos; // position of the centre of the plane wrt ref system

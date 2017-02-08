@@ -1,4 +1,5 @@
 #include "Riostream.h"
+#include <TString.h>
 #include "Alignment.hpp"
 
 using namespace std;
@@ -99,4 +100,42 @@ TVector3 Alignment::DistPixLine(Float_t col, Float_t row, TVector3 o, TVector3 d
     else
         c = PixToGlobal(col, row);
     return (c - p);
+}
+
+//______________________________________________________________________
+Bool_t Alignment::WriteFile(TString fname) {
+    ofstream out;
+    out.open(fname.Data());
+    if(!out.is_open()) return kFALSE;
+    out << "Alignment_parameters" << endl
+        << "X\t" << fPos.X() << endl
+        << "Y\t" << fPos.Y() << endl
+        << "Z\t" << fPos.Z() << endl
+        << "XPhi\t" << fRot.GetXPhi() << endl
+        << "XTheta\t" << fRot.GetXTheta() << endl
+        << "XPsi\t" << fRot.GetXPsi() << endl;
+        out.close();
+    return kTRUE;
+}
+
+//______________________________________________________________________
+Bool_t Alignment::ReadFile(TString fname) {
+    TString s;
+    Float_t x, y, z, xphi, xpsi, xtheta;
+    ifstream in;
+    in.open(fname.Data());
+    if(!in.is_open()) return kFALSE;
+    in >> s; if(!s.Contains("Alignment_parameters")) {in.close(); return kFALSE;}
+    in >> s >> x; if(!s.EqualTo("X")) {in.close(); return kFALSE;}
+    in >> s >> y; if(!s.EqualTo("Y")) {in.close(); return kFALSE;}
+    in >> s >> z; if(!s.EqualTo("Z")) {in.close(); return kFALSE;}
+    in >> s >> xphi; if(!s.EqualTo("XPhi")) {in.close(); return kFALSE;}
+    in >> s >> xtheta; if(!s.EqualTo("XTheta")) {in.close(); return kFALSE;}
+    in >> s >> xpsi; if(!s.EqualTo("XPsi")) {in.close(); return kFALSE;}
+    if(!in.good()) {in.close(); return kFALSE;}
+    in.close();
+    fPos.SetXYZ(x, y, z);
+    fRot.SetToIdentity();
+    fRot.SetXEulerAngles(xphi, xtheta, xpsi);
+    return kTRUE;
 }

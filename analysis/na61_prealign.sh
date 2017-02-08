@@ -49,6 +49,7 @@ echo "VD tracks file:    $FILE_VD"
 echo "Results directory: $DIR_RESULTS"
 echo "Dir with macros:   $DIR_MACROS"
 echo "Dir with classes:  $DIR_CLASSES"
+echo "CROWN:             $CROWN"
 echo "---------------------------------"
 
 # compile classes

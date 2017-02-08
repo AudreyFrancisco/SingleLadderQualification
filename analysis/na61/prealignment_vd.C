@@ -128,9 +128,9 @@ Bool_t prealignment_vd(
         hTrackHits[i] = new TH2F(Form("hTrackHits_%i", i), Form("Track hit map, chip %i;X [mm]; Y[mm];a.u.", i),
                                400, xpos-20., xpos+20., 400, ypos-30.15*i-20., ypos-30.15*i+20.);
         hTrackHits[i]->SetStats(0);    
-        hHits[i] = new TH2F(Form("hHits_%i", i), Form("Hit map, chip %i;Column;Row;a.u.", i),
+        hHits[i] = new TH2F(Form("hHits_%i", i), Form("Hit map all, chip %i;Column;Row;a.u.", i),
                             scols/binred, -0.5, scols-0.5, srows/binred, -0.5, srows-0.5);
-        hHitsAligned[i] = new TH2F(Form("hHitsAlign_%i", i), Form("Aligned hit map, chip %i;Column;Row;a.u.", i),
+        hHitsAligned[i] = new TH2F(Form("hHitsAlign_%i", i), Form("Hit map only aligned tracks, chip %i;Column;Row;a.u.", i),
                                    scols/binred, -0.5, scols-0.5, srows/binred, -0.5, srows-0.5);
         
         hDX[i] = new TH1F(Form("hDX_%i", i), Form("Difference track hit - cluster pos X, chip %i;DeltaX [mm];a.u.", i),
@@ -207,7 +207,7 @@ Bool_t prealignment_vd(
                 TVector3 td(*(TVector3*)vd_td->At(itrack));
 
                 //_cuts____
-                if(dataset[itrack] != 1) continue;
+                //if(dataset[itrack] != 4) continue; // {down1, down2, up1, up2, up1x}
                 //if(td.X() / td.Z() > 1) continue;
                 //_cuts____
                 
@@ -219,7 +219,7 @@ Bool_t prealignment_vd(
                         if(ichip == 4) hTrackHitsHIC->Fill(p.X(), p.Y());
                         Float_t col, row;
                         align_chip[ichip].GlobalToPix(p, col, row);
-                        hHits[ichip]->Fill(col, row);
+                        if(col>=0 && row>=0 && col<scols && row<srows) hHits[ichip]->Fill(col, row);
                     }
                 
                     //if( event->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
@@ -274,12 +274,13 @@ Bool_t prealignment_vd(
         }
         TF1 *fres = new TF1("fres", "[0]*TMath::Gaus(x, [1], [2])+[3]", -0.2, 0.2);
         fres->SetParNames("Norm", "#mu", "#sigma", "Const (backg)");
-        fres->SetParLimits(2, 10., 10000.);
+        fres->SetNpx(1000);
+        fres->SetParLimits(0, 10., 10000.);
         fres->SetParLimits(2, 0.001, 1);
     
         for(Short_t i=0; i<n_chips; ++i) {
-            fres->SetParameter(0, 200.);
-            fres->SetParameter(2, 0.01);
+            fres->SetParameter(0, 300.);
+            fres->SetParameter(2, 0.008);
             fres->SetParameter(3, 1);
             
             fres->SetParameter(1, hDXzoom[i]->GetMean());
@@ -301,16 +302,25 @@ Bool_t prealignment_vd(
     Int_t ctd = 4; // chip to draw
     
     TCanvas *c1 = new TCanvas("c1", "Canvas 1", 0, 0, 1800, 1000);
-    c1->Divide(3,1);
-    c1->cd(1);
-    //hTrackHitsHIC->DrawCopy("COLZ");
-    hChipPosXY[ctd]->DrawCopy("COLZ");
-    c1->cd(2);
-    //((TH1F*)hTrackHitsHIC->ProjectionX())->DrawCopy();
-    hChipPosZY[ctd]->DrawCopy("COLZ");
-    c1->cd(3);
-    //((TH1F*)hTrackHitsHIC->ProjectionY())->DrawCopy();
-    hChipPosXZ[ctd]->DrawCopy("COLZ");
+    if(0) {
+        c1->Divide(3,1);
+        c1->cd(1);
+        //hTrackHitsHIC->DrawCopy("COLZ");
+        hChipPosXY[ctd]->DrawCopy("COLZ");
+        c1->cd(2);
+        //((TH1F*)hTrackHitsHIC->ProjectionX())->DrawCopy();
+        hChipPosZY[ctd]->DrawCopy("COLZ");
+        c1->cd(3);
+        //((TH1F*)hTrackHitsHIC->ProjectionY())->DrawCopy();
+        hChipPosXZ[ctd]->DrawCopy("COLZ");
+    }
+    else {
+        c1->Divide(1,2);
+        c1->cd(1);
+        hHits[4]->DrawCopy("COLZ");
+        c1->cd(2);
+        hHitsAligned[4]->DrawCopy("COLZ");
+    }
     c1->Print(Form("%s/%s_c1.png", dirpath_plots.Data(), filename_out.Data()));
 
     Int_t np = TMath::CeilNint(TMath::Sqrt(n_chips));

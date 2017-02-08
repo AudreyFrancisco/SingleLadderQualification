@@ -77,7 +77,7 @@ Bool_t alignment_vd(
         fname += ".root";
         cout << "alignment_vd() : Loading file " << fname << endl;
         if(!chain->Add(fname.Data())) {
-            cerr << "prealignment_vd() : ERROR: Cannot find extracted tracks tree in file! " << fname << endl;
+            cerr << "alignment_vd() : ERROR: Cannot find extracted tracks tree in file! " << fname << endl;
             return kFALSE;
         }
     }
@@ -98,7 +98,19 @@ Bool_t alignment_vd(
     TRotation rot;
     rot.RotateY(6.*TMath::DegToRad());
     align_before.SetRotation(rot);
-
+    if(!align_before.WriteFile(Form("%s/%s_before.aln", dirpath_out.Data(), filename_out.Data()))) {
+        cerr << "alignment_vd() : ERROR: Cannot write alignment parameters to file! " << endl;
+        return kFALSE;
+    }
+                
+    
+    TString fname_out = dirpath_out + "/alignment_vd_combined.root";
+    TFile* file_plots = new TFile(fname_out, "RECREATE");
+    if(!file_plots->IsOpen()) {
+        cerr << "alignment_vd() : ERROR: Cannot open output plots file! " << fname_out << endl;
+        return kFALSE;
+    }
+    
     TH1F *hDXbefore = new TH1F("hDXbefore", "Difference track hit - cluster pos X, BEFORE alignment;#DeltaX [mm];a.u.",
                                200, -0.25, 0.25);
     TH1F *hDYbefore = new TH1F("hDYbefore", "Difference track hit - cluster pos Y, BEFORE alignment;#DeltaY [mm];a.u.",
@@ -129,10 +141,10 @@ Bool_t alignment_vd(
 
     Bool_t   fix_par[]          = { 0, 0, 0, 0, 1, 1};
     Char_t   PARM_NAMES[6][255] = {"x0","y0","z0", "ang1", "ang2", "ang3"};
-    Double_t PARM_START[6]      = {900, 900, 900,  0.1,  0.00,  0.0};
-    Double_t PARM_STEP[6]       = {1e-3, 1e-3, 1e-3, 1e-3,  1e-2, 1e-2};
-    Double_t PARM_LOWER[6]      = {-1e3, -1e3, -1e3, -0.5,  -0.3, -0.2};
-    Double_t PARM_UPPER[6]      = { 1e3,  1e3,  1e3,  0.5,   0.3,  0.2}; 
+    Double_t PARM_START[6]      = {10., 0., 100, 0.1,  0.0,  0.0};
+    Double_t PARM_STEP[6]       = {1e-2, 1e-2, 1e-2, 1e-2,  1e-2, 1e-2};
+    Double_t PARM_LOWER[6]      = {-1e3, -1e3, -1e3, -1.,  -0.3, -0.2};
+    Double_t PARM_UPPER[6]      = { 1e3,  1e3,  1e3,  1.,   0.3,  0.2}; 
     Double_t PARM_END[6];
     
     TMinuit *minuit = new TMinuit(npars);
@@ -190,6 +202,10 @@ Bool_t alignment_vd(
     rota.RotateX(PARM_END[4]);
     rota.RotateZ(PARM_END[5]);
     align_after.SetRotation(rota);
+    if(!align_after.WriteFile(Form("%s/%s_after.aln", dirpath_out.Data(), filename_out.Data()))) {
+        cerr << "alignment_vd() : ERROR: Cannot write alignment parameters to file! " << endl;
+        return kFALSE;
+    }
     
     for(Int_t i=0; i < ntracks; ++i) {
         TVector3 d = align_after.DistPixLine(clux[i], cluy[i], TVector3(to_arr[i]), TVector3(td_arr[i]));
@@ -212,11 +228,18 @@ Bool_t alignment_vd(
     c1->cd(4);
     hDYafter->Fit("gaus", "Q");
     hDYafter->DrawCopy();
+    c1->Print(Form("%s/alignment_vd_c1.pdf", dirpath_out.Data()));
 
+    file_plots->Write();
+    
     delete hDXbefore;
     delete hDYbefore;
     delete hDXafter;
     delete hDYafter;
+    
+    file_plots->Close();
+
+    cout << "alignment_vd() : Done!" << endl;
     
     return kTRUE;
 }

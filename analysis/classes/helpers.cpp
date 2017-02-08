@@ -246,6 +246,7 @@ void set_my_style() {
     TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
     gStyle->SetNumberContours(NCont);
     gStyle->SetOptFit(1111);
+    //gStyle->SetOptStat(11111111);
 }
 
 
