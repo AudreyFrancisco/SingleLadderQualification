@@ -122,12 +122,12 @@ void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
   char     fName[50];
   float    Current;
   uint16_t old; 
-  sprintf (fName, "Data/IDAC_%s.dat", Name);
+  sprintf (fName, "Data/IDAC_%s_Chip%d.dat", Name, chip->GetConfig()->GetChipId());
   FILE *fp = fopen (fName, "w");
 
   myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
 
-  std::cout << "Scanning DAC " << Name << std::endl;
+  std::cout << "ChipID = " << chip->GetConfig()->GetChipId() << "    Scanning DAC " << Name << std::endl;
 
   chip->ReadRegister (ADac, old);
   if (!myDAQBoard) { // MOSAIC board internal ADC read
@@ -154,7 +154,7 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
   char     fName[50];
   float    Voltage;
   uint16_t old; 
-  sprintf (fName, "Data/VDAC_%s.dat", Name);
+  sprintf (fName, "Data/IDAC_%s_Chip%d.dat", Name, chip->GetConfig()->GetChipId());
   FILE *fp = fopen (fName, "w");
 
   myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
