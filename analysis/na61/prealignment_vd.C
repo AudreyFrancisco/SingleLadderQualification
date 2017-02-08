@@ -103,7 +103,10 @@ Bool_t prealignment_vd(
     // histograms
     TH2F *hTrackHitsHIC = new TH2F("hTrackHitsHIC", "Track hit map, HIC;X [mm];Y [mm];a.u.",
                                  400, -10., 30., 4000, -200., 200.);
-    hTrackHitsHIC->SetStats(0);
+    //hTrackHitsHIC->SetStats(0);
+    TH2F *hTrackHitsMiss = new TH2F("hTrackHitsMiss", "Track hit map, tracks not intersecting HIC;X [mm];Y [mm];a.u.",
+                                    400, -10., 30., 4000, -200., 200.);
+    //hTrackHitsMiss->SetStats(0);
     
     TH2F *hTrackHits[n_chips];
     TH2F *hHits[n_chips];
@@ -127,7 +130,7 @@ Bool_t prealignment_vd(
         
         hTrackHits[i] = new TH2F(Form("hTrackHits_%i", i), Form("Track hit map, chip %i;X [mm]; Y[mm];a.u.", i),
                                400, xpos-20., xpos+20., 400, ypos-30.15*i-20., ypos-30.15*i+20.);
-        hTrackHits[i]->SetStats(0);    
+        //hTrackHits[i]->SetStats(0);    
         hHits[i] = new TH2F(Form("hHits_%i", i), Form("Hit map all, chip %i;Column;Row;a.u.", i),
                             scols/binred, -0.5, scols-0.5, srows/binred, -0.5, srows-0.5);
         hHitsAligned[i] = new TH2F(Form("hHitsAlign_%i", i), Form("Hit map only aligned tracks, chip %i;Column;Row;a.u.", i),
@@ -180,10 +183,9 @@ Bool_t prealignment_vd(
             }
         }
     }
-
     
     for(Int_t loop=0; loop < 1+extract_tracks; ++loop) {
-        // loop 0 drawing, loop 1 extracting;
+        // loop 0 drawing, loop 1 extracting and drawing extracted
         if(loop==0) cout << "prealignment_vd() : Starting prealignment..." << endl;
         if(loop==1) cout << "prealignment_vd() : Extracting tracks..." << endl;
         
@@ -191,17 +193,20 @@ Bool_t prealignment_vd(
             // read events from vd tree and find equivalent in event tree
             tree_vd->GetEntry(ivd);
             vd_event_n -= 1;
+            
             if(vd_event_n < nentries)
                 chain->GetEntry(vd_event_n);
             else {
                 cout << "prealignment_vd() : WARNING more tracks than saved triggers" << endl;
                 continue;
             }
+            
             if(event->GetIntTrigCnt() != vd_event_n)
                 cout << "prealignment_vd() : ERROR sync" << endl;
             if( (ivd+1)%1000 == 0 )
                 cout << "Processed events: " << ivd+1 << " / " << tree_vd->GetEntriesFast() << " in loop " << loop << endl;
-        
+
+            // loop over all tracks in event
             for(Int_t itrack=0; itrack < vd_n_tracks; ++itrack) {
                 TVector3 to(*(TVector3*)vd_to->At(itrack));
                 TVector3 td(*(TVector3*)vd_td->At(itrack));
@@ -210,16 +215,21 @@ Bool_t prealignment_vd(
                 //if(dataset[itrack] != 4) continue; // {down1, down2, up1, up2, up1x}
                 //if(td.X() / td.Z() > 1) continue;
                 //_cuts____
+
+                Bool_t flagHICHit = kFALSE;
                 
                 for(Int_t ichip=0; ichip < n_chips; ++ichip) {
                     if(loop==1 && ichip != 4) continue;
                     TVector3 p = align_chip[ichip].IntersectionPointWithLine(to, td);
                     if(loop==0) {
-                        hTrackHits[ichip]->Fill(p.X(), p.Y());
-                        if(ichip == 4) hTrackHitsHIC->Fill(p.X(), p.Y());
                         Float_t col, row;
                         align_chip[ichip].GlobalToPix(p, col, row);
-                        if(col>=0 && row>=0 && col<scols && row<srows) hHits[ichip]->Fill(col, row);
+                        if(col>=0 && row>=0 && col<scols && row<srows) {
+                            hTrackHits[ichip]->Fill(p.X(), p.Y());
+                            hTrackHitsHIC->Fill(p.X(), p.Y());
+                            hHits[ichip]->Fill(col, row);
+                            flagHICHit = kTRUE;
+                        }
                     }
                 
                     //if( event->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
@@ -237,11 +247,13 @@ Bool_t prealignment_vd(
 
                         TVector3 d = align_chip[ichip].DistPixLine(cluster->GetX(), cluster->GetY(), to, td, kFALSE);
                         if(loop==0) {
-                            if( TMath::Abs(d.Y()) < 0.5 ) { //_cuts____
+                            if( TMath::Abs(d.Y()) < 0.5 ) //_cuts____
+                            {
                                 hDX[ichip]->Fill( d.X() );
                                 hDXzoom[ichip]->Fill( d.X() );
                             }
-                            if( TMath::Abs(d.X()) < 0.5 ) { //_cuts____
+                            if( TMath::Abs(d.X()) < 0.5 ) //_cuts____
+                            {
                                 hDY[ichip]->Fill( d.Y() );
                                 hDYzoom[ichip]->Fill( d.Y() );
                             }
@@ -265,6 +277,13 @@ Bool_t prealignment_vd(
                         
                     } // END FOR clusters
                 } // END FOR chips
+                
+                if(!flagHICHit && loop==0) {
+                    TVector3 p = align_chip[4].IntersectionPointWithLine(to, td);
+                    Float_t col, row;
+                    align_chip[4].GlobalToPix(p, col, row);
+                    hTrackHitsMiss->Fill(p.X(), p.Y());
+                }
             } // END FOR tracks
         } // END FOR events
 
