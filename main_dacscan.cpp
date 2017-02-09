@@ -133,7 +133,7 @@ void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
   if (!myDAQBoard) { // MOSAIC board internal ADC read
 	  for (int i = 0; i < 256; i += sampleDist) {
 		  chip->WriteRegister (ADac, i);
-		  Current = chip->readDACCurrent(ADac);
+		  Current = chip->ReadDACCurrent(ADac);
 		  fprintf (fp, "%d %.3f\n", i, Current);
 	  }
   } else { // DAQ board : external ADC read
@@ -165,7 +165,7 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
   if (!myDAQBoard) { // MOSAIC board internal ADC read
 	  for (int i = 0; i < 256; i += sampleDist) {
 		  chip->WriteRegister (ADac, i);
-		  Voltage = chip->readDACVoltage(ADac);
+		  Voltage = chip->ReadDACVoltage(ADac);
 		  fprintf (fp, "%d %.3f\n", i, Voltage);
 	  }
   } else { // DAQ board : external ADC read

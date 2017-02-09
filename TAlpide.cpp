@@ -195,13 +195,21 @@ void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
 
 // ---------- DAC / ADC section -----------------------
 
-
-
-// Mode =  0:Manual 1:Calibrate 2:Auto 3:SupoerManual
-// SelectInput =   0:AVSS 1:DVSS 2:AVDD 3:DVDD 4:VBGthVolScal 5:DACMONV 6:DACMONI 7:Bandgap 8:Temperature
-// ComparatorCurrent =  0:180uA 1:190uA 2:296uA 3:410uA
-// RampSpeed = 0:500ms 1:1us 2:2us 3:4us
-uint16_t TAlpide::setTheADCCtrlRegister(uint16_t Mode, uint16_t SelectInput, uint16_t ComparatorCurrent, uint16_t RampSpeed)
+/* ------------------------------------------------------
+ * Set the ADC Control Register
+ *
+ * Parameter  : Mode of ADC measurement [0:Manual 1:Calibrate 2:Auto 3:SupoerManual]
+ *              SelectInput the source specification [0:AVSS 1:DVSS 2:AVDD 3:DVDD
+ *              									4:VBGthVolScal 5:DACMONV 6:DACMONI
+ *              									7:Bandgap 8:Temperature]
+ *              ComparatorCurrent  [0:180uA 1:190uA 2:296uA 3:410uA]
+ * 				RampSpeed 	[0:500ms 1:1us 2:2us 3:4us]
+ *
+ */
+uint16_t TAlpide::SetTheADCCtrlRegister(Alpide::TADCMode Mode,
+										Alpide::TADCInput SelectInput,
+										Alpide::TADCComparator ComparatorCurrent,
+										Alpide::TADCRampSpeed RampSpeed)
 {
 	uint16_t Data;
 	Data = Mode | (SelectInput<<2) | (ComparatorCurrent<<6) | (fADCSign<<8) | (RampSpeed<<9) | (fADCHalfLSB<<11);
@@ -209,8 +217,16 @@ uint16_t TAlpide::setTheADCCtrlRegister(uint16_t Mode, uint16_t SelectInput, uin
 	return(Data);
 }
 
-// Iref =  0:0.25ua 1:0.75uA 2:1.00uA 3:1.25uA
-void TAlpide::setTheDacMonitor(Alpide::TRegister ADac, int IRef)
+/* ------------------------------------------------------
+ * Sets the DAC Monitor multiplexer
+ *
+ * Parameter  : the Index of the DAC register.
+ *              the IRef value
+ *
+ * Note  : Iref =  0:0.25ua 1:0.75uA 2:1.00uA 3:1.25uA
+ *
+ */
+void TAlpide::SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef)
 {
 	int VDAC, IDAC;
 	uint16_t Value;
@@ -286,23 +302,30 @@ void TAlpide::setTheDacMonitor(Alpide::TRegister ADac, int IRef)
 }
 
 
-
+/* ------------------------------------------------------
+ * Calibrate the internal ADC
+ *
+ * Returns  : the value of the calculated Bias.
+ *
+ * Note  : the calibration parameter are stored into the
+ *         devoted class members.
+ *
+ */
 int TAlpide::CalibrateADC()
 {
 	uint16_t theVal2,theVal1;
 	bool isAVoltDAC, isACurrDAC, isATemperature, isAVoltageBuffered;
 	int theSelInput;
 
-
 	// Calibration Phase 1
 	fADCHalfLSB = false;
 	fADCSign = false;
-	setTheADCCtrlRegister(1, 0, 2, 1);
+	SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
 	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fConfig->GetChipId());
 	usleep(4000); // > of 5 milli sec
 	ReadRegister( Alpide::REG_ADC_CALIB, theVal1);
 	fADCSign = true;
-	setTheADCCtrlRegister(1, 0, 2, 1);
+	SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
 	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fConfig->GetChipId());
 	usleep(4000); // > of 5 milli sec
 	ReadRegister( Alpide::REG_ADC_CALIB, theVal2);
@@ -310,19 +333,19 @@ int TAlpide::CalibrateADC()
 
 	// Calibration Phase 2
 	fADCHalfLSB = false;
-	setTheADCCtrlRegister(1, 7, 2, 1);
+	SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
 	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fConfig->GetChipId());
 	usleep(4000); // > of 5 milli sec
 	ReadRegister( Alpide::REG_ADC_CALIB, theVal1);
 	fADCHalfLSB = true;
-	setTheADCCtrlRegister( 1, 7, 2, 1);
+	SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
 	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fConfig->GetChipId());
 	usleep(4000); // > of 5 milli sec
 	ReadRegister( Alpide::REG_ADC_CALIB, theVal2);
 	fADCHalfLSB =  (theVal1 > theVal2) ? false : true;
 
 	// Detect the Bias
-	setTheADCCtrlRegister(1, 0, 2, 1);
+	SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
 	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fConfig->GetChipId());
 	usleep(4000); // > of 5 milli sec
 	ReadRegister( Alpide::REG_ADC_CALIB,theVal1);
@@ -330,8 +353,17 @@ int TAlpide::CalibrateADC()
 	return(fADCBias);
 }
 
-
-float TAlpide::readTemp() {
+/* ------------------------------------------------------
+ * Reads the temperature sensor by means of internal ADC
+ *
+ * Returns  : the value in Celsius degree.
+ *
+ * Note  : if this was the first measure after the chip
+ *         configuration phase, a calibration will be
+ *         automatically executed.
+ *
+ */
+float TAlpide::ReadTemperature() {
 
 	uint16_t theResult = 0;
 	float theValue;
@@ -339,11 +371,10 @@ float TAlpide::readTemp() {
 		CalibrateADC();
 	}
 
-	setTheDacMonitor(Alpide::REG_ANALOGMON); // uses the RE_ANALOGMON, in order to disable the monitoring !
+	SetTheDacMonitor(Alpide::REG_ANALOGMON); // uses the RE_ANALOGMON, in order to disable the monitoring !
 	usleep(5000);
-	setTheADCCtrlRegister(0, 8, 2, 1);
-
-	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE);
+	SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature, Alpide::COMP_296uA, Alpide::RAMP_1us);
+	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE,  fConfig->GetChipId());
 	usleep(5000); // Wait for the measurement > of 5 milli sec
 	ReadRegister( Alpide::REG_ADC_AVSS, theResult);
 	theResult -=  (uint16_t)fADCBias;
@@ -351,7 +382,19 @@ float TAlpide::readTemp() {
 	return(theValue);
 }
 
-float TAlpide::readDACVoltage(Alpide::TRegister ADac) {
+/* ------------------------------------------------------
+ * Reads the output voltage of one DAC by means of internal ADC
+ *
+ * Parameter : the Index that define the DAC register
+ *
+ * Returns  : the value in Volts.
+ *
+ * Note  : if this was the first measure after the chip
+ *         configuration phase, a calibration will be
+ *         automatically executed.
+ *
+ */
+float TAlpide::ReadDACVoltage(Alpide::TRegister ADac) {
 
 	uint16_t theResult = 0;
 	float theValue;
@@ -359,11 +402,10 @@ float TAlpide::readDACVoltage(Alpide::TRegister ADac) {
 		CalibrateADC();
 	}
 
-	setTheDacMonitor(ADac);
+	SetTheDacMonitor(ADac);
 	usleep(5000);
-	setTheADCCtrlRegister(0, 5, 2, 1);
-
-	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE);
+	SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_DACMONV, Alpide::COMP_296uA, Alpide::RAMP_1us);
+	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE,  fConfig->GetChipId());
 	usleep(5000); // Wait for the measurement > of 5 milli sec
 	ReadRegister( Alpide::REG_ADC_AVSS, theResult);
 	theResult -=  (uint16_t)fADCBias;
@@ -371,7 +413,19 @@ float TAlpide::readDACVoltage(Alpide::TRegister ADac) {
 	return(theValue);
 }
 
-float TAlpide::readDACCurrent(Alpide::TRegister ADac) {
+/* ------------------------------------------------------
+ * Reads the output current of one DAC by means of internal ADC
+ *
+ * Parameter : the Index that define the DAC register
+ *
+ * Returns  : the value in Micro Ampere.
+ *
+ * Note  : if this was the first measure after the chip
+ *         configuration phase, a calibration will be
+ *         automatically executed.
+ *
+ */
+float TAlpide::ReadDACCurrent(Alpide::TRegister ADac) {
 
 	uint16_t theResult = 0;
 	float theValue;
@@ -379,11 +433,11 @@ float TAlpide::readDACCurrent(Alpide::TRegister ADac) {
 		CalibrateADC();
 	}
 
-	setTheDacMonitor(ADac);
+	SetTheDacMonitor(ADac);
 	usleep(5000);
-	setTheADCCtrlRegister(0, 6, 2, 1);
+	SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_DACMONI, Alpide::COMP_296uA, Alpide::RAMP_1us);
 
-	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE);
+	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE,  fConfig->GetChipId());
 	usleep(5000); // Wait for the measurement > of 5 milli sec
 	ReadRegister( Alpide::REG_ADC_AVSS, theResult);
 	theResult -= (uint16_t)fADCBias;

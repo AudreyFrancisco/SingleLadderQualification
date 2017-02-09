@@ -134,6 +134,47 @@ namespace Alpide {
     MODE_CONTINUOUS = 2
   } TChipMode;
   
+  typedef enum {
+	IREF_025uA = 0,
+	IREF_075uA = 1,
+	IREF_100uA = 2,
+	IREF_125uA = 3
+  } TDACMonIref;
+
+  typedef enum {
+	MODE_MANUAL = 0,
+	MODE_CALIBRATE = 1,
+	MODO_AUTO = 2,
+	MODE_SUPERMANUAL = 3
+  } TADCMode;
+
+  typedef enum {
+	INP_AVSS = 0,
+	INP_DVSS = 1,
+	INP_AVDD = 2,
+	INP_DVDD = 3,
+	INP_VBGthVolScal = 4,
+	INP_DACMONV = 5,
+	INP_DACMONI = 6,
+	INP_Bandgap = 7,
+	INP_Temperature = 8
+  } TADCInput;
+
+  typedef enum {
+  	COMP_180uA = 0,
+ 	COMP_190uA = 1,
+ 	COMP_296uA = 2,
+ 	COMP_410uA = 3
+  } TADCComparator;
+
+  typedef enum {
+  	RAMP_500ms = 0,
+  	RAMP_1us = 1,
+  	RAMP_2us = 2,
+  	RAMP_4us = 3
+  } TADCRampSpeed;
+
+
 };
 
 class TAlpide {
@@ -171,12 +212,13 @@ class TAlpide {
 
 
 public:
+  int GetADCBias() { return(fADCBias); };
   int CalibrateADC();
-  void setTheDacMonitor(Alpide::TRegister ADac, int IRef = 2);
-  uint16_t setTheADCCtrlRegister(uint16_t Mode, uint16_t SelectInput, uint16_t ComparatorCurrent, uint16_t RampSpeed);
-  float readTemp();
-  float readDACVoltage(Alpide::TRegister ADac);
-  float readDACCurrent(Alpide::TRegister ADac);
+  void SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef = Alpide::IREF_100uA);
+  uint16_t SetTheADCCtrlRegister(Alpide::TADCMode Mode, Alpide::TADCInput SelectInput, Alpide::TADCComparator ComparatorCurrent, Alpide::TADCRampSpeed RampSpeed);
+  float ReadTemperature();
+  float ReadDACVoltage(Alpide::TRegister ADac);
+  float ReadDACCurrent(Alpide::TRegister ADac);
 
 
 };
