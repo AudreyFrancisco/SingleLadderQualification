@@ -53,6 +53,7 @@ void readTemp() {
   // Set all chips for Temperature Measurement
   for (int i = 0; i < fChips.size(); i ++) {
 	  if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+	  theChipId = fChips.at(i)->GetConfig()->GetChipId();
 	  theValue = fChips.at(i)->ReadTemperature();
  	  std::cout << i << ")\t" << theChipId << "\t" << fChips.at(i)->GetADCBias() << "\t" << theValue << " " << std::endl;
 
