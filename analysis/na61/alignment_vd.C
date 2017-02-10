@@ -44,7 +44,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag ) {
 
     for (Int_t i=0; i<ntracks; ++i) {
         TVector3 d = align.DistPixLine(clux[i], cluy[i], TVector3(to_arr[i]), TVector3(td_arr[i]), 0);
-        sum += d.X()*d.X() + d.Y()*d.Y();
+        sum += (d.X()*d.X() + d.Y()*d.Y());
     }
     
     f=sum;
@@ -141,10 +141,11 @@ Bool_t alignment_vd(
 
     Bool_t   fix_par[]          = { 0, 0, 0, 0, 1, 1};
     Char_t   PARM_NAMES[6][255] = {"x0","y0","z0", "ang1", "ang2", "ang3"};
-    Double_t PARM_START[6]      = {10., 0., 100, 0.1,  0.0,  0.0};
+    //Double_t PARM_START[6]      = {11.04, -0.12, 92.28, 0.105,  0.00,  0.0};
+    Double_t PARM_START[6]      = {900., 900., 100, 0.10,  0.0,  0.0};
     Double_t PARM_STEP[6]       = {1e-2, 1e-2, 1e-2, 1e-2,  1e-2, 1e-2};
-    Double_t PARM_LOWER[6]      = {-1e3, -1e3, -1e3, -1.,  -0.3, -0.2};
-    Double_t PARM_UPPER[6]      = { 1e3,  1e3,  1e3,  1.,   0.3,  0.2}; 
+    Double_t PARM_LOWER[6]      = {-1e3, -1e3, -1e3, -1.,  -1., -1.};
+    Double_t PARM_UPPER[6]      = { 1e3,  1e3,  1e3,  1.,   1.,  1.}; 
     Double_t PARM_END[6];
     
     TMinuit *minuit = new TMinuit(npars);
@@ -152,7 +153,7 @@ Bool_t alignment_vd(
     
     /* set starting values and steps */
     for (Int_t i=0; i < npars; i++) {
-        if(fix_par[i]) PARM_START[i] = 0.;
+        //if(fix_par[i]) PARM_START[i] = 0.;
         if( minuit->DefineParameter(i, PARM_NAMES[i], PARM_START[i], PARM_STEP[i], PARM_LOWER[i], PARM_UPPER[i]) ) {
             cout << "alignment_vd() : MINUIT ERROR : Unable to define parameter " << i << endl;
             return kFALSE;
@@ -166,7 +167,7 @@ Bool_t alignment_vd(
     arglist[0] = 1.0;
     if (arglist[0]) minuit->mnexcm("SET ERR", arglist, 1, ierflg);
     arglist[0] = 10000;   // do at least 1000 function calls
-    arglist[1] = 0.05;     // tolerance = 0.1
+    arglist[1] = 0.1;     // tolerance = 0.1
     minuit->mnexcm("MIGRAD", arglist, 2, ierflg );
     cout << endl << "alignment_vd() : MIGRAD exited with status " << ierflg << endl;
     if(ierflg) return kFALSE;

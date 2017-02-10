@@ -47,6 +47,11 @@ Na61Analysis::Na61Analysis():
         hMult[i] = NULL;
     }
     
+    fResMean[0] = -1.;
+    fResMean[1] = -1.;
+    fResSigma[0] = -1.;
+    fResSigma[1] = -1.;
+    
     set_my_style();    
 } 
 
@@ -140,6 +145,10 @@ void Na61Analysis::InitHistograms()
 
 //__________________________________________________________
 void Na61Analysis::InitExtractedTracksTree() {
+    if(fExTracksTree) {
+        Report(2, "Tracks tree already initialised.");
+        return;
+    }
     fExTracksTree = new TTree("extracted_tracks", "extracted_tracks");
     fExTracksTree->Branch("clu_x", &fEx_clux, "clu_x/F");
     fExTracksTree->Branch("clu_y", &fEx_cluy, "clu_y/F");
@@ -150,10 +159,10 @@ void Na61Analysis::InitExtractedTracksTree() {
 //__________________________________________________________
 Bool_t Na61Analysis::SetInputFileALPIDE(TString filepath_tree)
 {
+    Report(3, "Setting new ALPIDE file: " + filepath_tree);
     fEventTree->Reset();
     if(!fEventTree->Add(filepath_tree.Data())) {
-        TString err = "Cannot find event tree in file! "; err += filepath_tree;
-        Report(1, err);
+        Report(1, "Cannot find event tree in file! " + filepath_tree);
         return kFALSE;
     }
     fEventTree->SetBranchAddress("event", &fEvent);
@@ -163,10 +172,10 @@ Bool_t Na61Analysis::SetInputFileALPIDE(TString filepath_tree)
 //__________________________________________________________
 Bool_t Na61Analysis::SetInputFileVDTracks(TString filepath_tree)
 {
+    Report(3, "Setting new VD tracks file: " + filepath_tree);
     fVDTracksTree->Reset();
     if(!fVDTracksTree->Add(filepath_tree.Data())) {
-        TString err = "Cannot find event tree in file! "; err += filepath_tree;
-        Report(1, err);
+        Report(1, "Cannot find tracks tree in file! " + filepath_tree);
         return kFALSE;
     }
     fVDTracksTree->SetBranchAddress("event_n", &fVD_EventN);
@@ -209,9 +218,9 @@ Bool_t Na61Analysis::SetAlignment(Int_t chip, Alignment a) {
 }
 
 //__________________________________________________________
-Bool_t Na61Analysis::WriteHistograms(TString fname) {
+Bool_t Na61Analysis::WriteHistograms(TString fname, TString opt) {
     fname = fDirPathPlots + "/" + fname;
-    TFile* file_plots = new TFile(fname.Data(), "RECREATE");
+    TFile* file_plots = new TFile(fname.Data(), opt.Data());
     if(!file_plots->IsOpen()) {
         Report(1, Form("ERROR: Cannot open output plots file! %s", fname.Data()));
         return kFALSE;
@@ -244,6 +253,28 @@ Bool_t Na61Analysis::WriteHistograms(TString fname) {
     }
     file_plots->Close();
     delete file_plots;
+    Report(3, "Histograms written to file successfully.");
+    return kTRUE;
+}
+
+//__________________________________________________________
+Bool_t Na61Analysis::WriteTracksTree(TString fname, TString opt) {
+    if(!fExTracksTree) {
+        Report(1, "Extracted tracks tree does NOT exist!");
+        return kFALSE;
+    }
+    fname = fDirPathPlots + "/" + fname;
+    TFile* file_plots = new TFile(fname.Data(), opt.Data());
+    if(!file_plots->IsOpen()) {
+        Report(1, Form("ERROR: Cannot open output plots file! %s", fname.Data()));
+        return kFALSE;
+    } 
+    file_plots->cd();
+    fExTracksTree->Write();
+    file_plots->Close();
+    delete file_plots;
+    Report(3, "Tracks tree written to file successfully.");
+    return kTRUE;
 }
 
 // private
@@ -286,143 +317,143 @@ void Na61Analysis::FillChipPosHistos()
 }
 
 //__________________________________________________________
-void Na61Analysis::PreAlignmentVD() {
-
-    Report(3, "PreAlignmentVD() : Starting");
-
-    const Float_t ex_sigma = 4.; // extratact tracks in alignment peak inside mean +- ex_sigma*stdev
-
-    Bool_t extract_tracks = kFALSE+1;
-
-    InitExtractedTracksTree();
+void Na61Analysis::PrealignmentVD(Float_t ex_sigma) {
     
-    Float_t exx1 = 0., exx2=0., exy1=0., exy2=0.; // extract intervals
-
+    Float_t extract_tracks = kFALSE;
+    if(ex_sigma > 0) extract_tracks = kTRUE;
+    TString mname = extract_tracks ? "ExtractTracksVD() : " : "PrealignmentVD() : ";
+    if(extract_tracks && fResSigma[0] < 0.)
+        Report(2, mname + "Extracting tracks but stdev < 1");
+    Float_t exx1=0., exx2=0., exy1=0., exy2=0.; // extract intervals
+    
+    if(extract_tracks) {
+        InitExtractedTracksTree();
+        // extratact tracks in alignment peak inside mean +- ex_sigma*stdev
+        exx1 = fResMean[0] - ex_sigma*fResSigma[0];
+        exx2 = fResMean[0] + ex_sigma*fResSigma[0];
+        exy1 = fResMean[1] - ex_sigma*fResSigma[1];
+        exy2 = fResMean[1] + ex_sigma*fResSigma[1];
+    }
+    
     Int_t nentries_al = fEventTree->GetEntries();
     Int_t nentries_vd = fVDTracksTree->GetEntries();
-    for(Int_t loop=0; loop < 1+extract_tracks; ++loop) {
-        // loop 0 drawing, loop 1 extracting and drawing extracted
-        if(loop==0) Report(3, "PreAlignmentVD() : Starting prealignment");
-        if(loop==1) Report(3, "PreAlignmentVD() : Extracting tracks");
+    
+    if(extract_tracks) Report(3, mname + "Starting extraction");
+    else               Report(3, mname + "Starting prealignment");
+    for(Int_t ivd=0; ivd < nentries_vd; ++ivd) {
+        // read events from vd tree and find equivalent in event tree
+        fVDTracksTree->GetEntry(ivd);
         
-        for(Int_t ivd=0; ivd < nentries_vd; ++ivd) {
-            // read events from vd tree and find equivalent in event tree
-            fVDTracksTree->GetEntry(ivd);
-            
-            fVD_EventN -= 1; // correct for different trigger numbering between VD and ALPIDE
-            
-            if(fVD_EventN > nentries_al) {
-                Report(2, "PreAlignmentVD() : WARNING more tracks than saved triggers");
-                continue;
-            }
-            
-            fEventTree->GetEntry(fVD_EventN);
-            
-            if(fEvent->GetIntTrigCnt() != fVD_EventN)
-                Report(2, "PreAlignmentVD() : sync error");
-            
-            if( (ivd+1)%1000 == 0 )
-                Report(3, Form("PreAlignmentVD() : Processed events %i / %i", ivd+1, nentries_vd));
-            
-            // loop over all tracks in event
-            for(Int_t itrack=0; itrack < fVD_NTracks; ++itrack) {
-                TVector3 to(*(TVector3*)fVD_to->At(itrack));
-                TVector3 td(*(TVector3*)fVD_td->At(itrack));
-
-                //_cuts____
-                //if(dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
-                //if(td.X() / td.Z() > 1) continue;
-                Float_t c4, r4;
-                TVector3 p4 = fAlignChip[4].IntersectionPointWithLine(to, td);
-                fAlignChip[4].GlobalToPix(p4, c4, r4);
-                if(r4<0) continue;
-                //if(c4<0 || c4>fNCols) continue; // only chip4 is interesting
-                //_cuts____
-                
-                Bool_t flagHICHit = kFALSE;
-                
-                for(Int_t ichip=0; ichip < fNChips; ++ichip) {
-                    if(loop==1 && ichip != 4) continue;
-                    TVector3 p = fAlignChip[ichip].IntersectionPointWithLine(to, td);
-                    if(loop==0) {
-                        Float_t col, row;
-                        fAlignChip[ichip].GlobalToPix(p, col, row);
-                        if(col>=0 && row>=0 && col<fNCols && row<fNRows) {
-                            hTrackHits[ichip]->Fill(p.X(), p.Y());
-                            hTrackHitsHIC->Fill(p.X(), p.Y());
-                            hHits[ichip]->Fill(col, row);
-                            flagHICHit = kTRUE;
-                        }
-                    }
-                
-                    //if( fEvent->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
-                
-                    for(Int_t iclu=0; iclu < fEvent->GetPlane(ichip)->GetNClustersSaved(); ++iclu) {
-                        Int_t mult = fEvent->GetPlane(ichip)->GetCluster(iclu)->GetMultiplicity();
-                        BinaryCluster* cluster = fEvent->GetPlane(ichip)->GetCluster(iclu);
-
-                        //_cuts____
-                        //if(mult > 10) continue;
-                        //if(cluster->HasHotPixels()) continue;
-                        //if(cluster->HasBorderPixels()) continue;
-                        //if(cluster->HasExclDblcolPixels()) continue;
-                        //_cuts____
-
-                        TVector3 d = fAlignChip[ichip].DistPixLine(cluster->GetX(), cluster->GetY(), to, td, kFALSE);
-                        if(loop==0) {
-                            if( TMath::Abs(d.Y()) < 0.5 ) //_cuts____
-                            {
-                                hDX[ichip]->Fill( d.X() );
-                                hDXzoom[ichip]->Fill( d.X() );
-                            }
-                            if( TMath::Abs(d.X()) < 0.5 ) //_cuts____
-                            {
-                                hDY[ichip]->Fill( d.Y() );
-                                hDYzoom[ichip]->Fill( d.Y() );
-                            }
-                            hDXY[ichip]->Fill( d.X(), d.Y() );
-                        }
-                        else if(loop==1) {
-                            if( exx1 < d.X() && d.X() < exx2 ) {
-                                if( exy1 < d.Y() && d.Y() < exy2 ) {
-                                    fEx_clux = cluster->GetX();
-                                    fEx_cluy = cluster->GetY();
-                                    to.GetXYZ(fEx_to);
-                                    td.GetXYZ(fEx_td);
-                                    fExTracksTree->Fill();
-                                    Float_t col, row;
-                                    fAlignChip[ichip].GlobalToPix(p, col, row);
-                                    hHitsAligned[ichip]->Fill(col, row);
-                                    hMult[ichip]->Fill(mult);
-                                    //hHitsAligned[ichip]->Fill(fEx_clux, fEx_cluy);
-                                }
-                            }       
-                        }
-                        
-                    } // END FOR clusters
-                } // END FOR chips
-                
-                if(!flagHICHit && loop==0) {
-                    TVector3 p = fAlignChip[4].IntersectionPointWithLine(to, td);
-                    Float_t col, row;
-                    fAlignChip[4].GlobalToPix(p, col, row);
-                    hTrackHitsMiss->Fill(p.X(), p.Y());
-                }
-            } // END FOR tracks
-        } // END FOR events
-
-        if(loop > 0) {
-            cout << "prealignment_vd() : Extracted " << fExTracksTree->GetEntriesFast() << " tracks." << endl;
-            continue; // no need to redo fitting
+        fVD_EventN -= 1; // correct for different trigger numbering between VD and ALPIDE
+        
+        if(fVD_EventN > nentries_al) {
+            Report(2, mname + "WARNING more tracks than saved triggers");
+            continue;
         }
         
+        fEventTree->GetEntry(fVD_EventN);
+            
+        if(fEvent->GetIntTrigCnt() != fVD_EventN)
+            Report(2, mname + "sync error");
+        
+        if( (ivd+1)%5000 == 0 )
+            Report(3, Form(mname + "Processed events %i / %i", ivd+1, nentries_vd));
+            
+        // loop over all tracks in event
+        for(Int_t itrack=0; itrack < fVD_NTracks; ++itrack) {
+            TVector3 to(*(TVector3*)fVD_to->At(itrack));
+            TVector3 td(*(TVector3*)fVD_td->At(itrack));
+
+            //_cuts____
+            //if(dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
+            //if(td.X() / td.Z() > 1) continue;
+            Float_t c4, r4;
+            TVector3 p4 = fAlignChip[4].IntersectionPointWithLine(to, td);
+            fAlignChip[4].GlobalToPix(p4, c4, r4);
+            if(r4<0) continue;
+            //if(c4<0 || c4>fNCols) continue; // only chip4 is interesting
+            //_cuts____
+                
+            Bool_t flagHICHit = kFALSE;
+            
+            for(Int_t ichip=0; ichip < fNChips; ++ichip) {
+                //if( fEvent->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
+                if(extract_tracks && ichip != 4) continue; // only interested in extracting tracks for chip for
+
+                TVector3 p = fAlignChip[ichip].IntersectionPointWithLine(to, td);
+                Float_t col, row; 
+                if(!extract_tracks) {                    
+                    fAlignChip[ichip].GlobalToPix(p, col, row);
+                    if(col>=0 && row>=0 && col<fNCols && row<fNRows) {
+                        hTrackHits[ichip]->Fill(p.X(), p.Y());
+                        hTrackHitsHIC->Fill(p.X(), p.Y());
+                        hHits[ichip]->Fill(col, row);
+                        flagHICHit = kTRUE;
+                    }
+                }
+                
+                for(Int_t iclu=0; iclu < fEvent->GetPlane(ichip)->GetNClustersSaved(); ++iclu) {
+                    Int_t mult = fEvent->GetPlane(ichip)->GetCluster(iclu)->GetMultiplicity();
+                    BinaryCluster* cluster = fEvent->GetPlane(ichip)->GetCluster(iclu);
+
+                    //_cuts____
+                    //if(mult > 10) continue;
+                    //if(cluster->HasHotPixels()) continue;
+                    //if(cluster->HasBorderPixels()) continue;
+                    //if(cluster->HasExclDblcolPixels()) continue;
+                    //_cuts____
+
+                    TVector3 d = fAlignChip[ichip].DistPixLine(cluster->GetX(), cluster->GetY(), to, td, kFALSE);
+                    if(extract_tracks) {
+                        if( exx1 < d.X() && d.X() < exx2
+                            && exy1 < d.Y() && d.Y() < exy2 ) {
+                            // fill extracted tree
+                            fEx_clux = cluster->GetX();
+                            fEx_cluy = cluster->GetY();
+                            to.GetXYZ(fEx_to);
+                            td.GetXYZ(fEx_td);
+                            fExTracksTree->Fill();
+                            // fill histograms
+                            fAlignChip[ichip].GlobalToPix(p, col, row);
+                            hHitsAligned[ichip]->Fill(col, row);
+                            hMult[ichip]->Fill(mult);
+                        }       
+                    }
+                    else {
+                        if( TMath::Abs(d.Y()) < 0.5 ) { //_cuts____
+                            hDX[ichip]->Fill( d.X() );
+                            hDXzoom[ichip]->Fill( d.X() );
+                        }
+                        if( TMath::Abs(d.X()) < 0.5 ) { //_cuts____
+                            hDY[ichip]->Fill( d.Y() );
+                            hDYzoom[ichip]->Fill( d.Y() );
+                        }
+                        hDXY[ichip]->Fill( d.X(), d.Y() );
+                    }
+                } // END FOR clusters
+            } // END FOR chips
+                
+            if(!extract_tracks && !flagHICHit) {
+                TVector3 p = fAlignChip[4].IntersectionPointWithLine(to, td);
+                Float_t col, row;
+                fAlignChip[4].GlobalToPix(p, col, row); // chip 4 is just used as reference. any chip can be used
+                hTrackHitsMiss->Fill(p.X(), p.Y());
+            }
+        } // END FOR tracks
+    } // END FOR events
+
+    if(extract_tracks) {
+        Report(3, Form(mname + "Extracted %i tracks.", (Int_t)fExTracksTree->GetEntriesFast() ));
+    }
+    else {
         TF1 *fres = new TF1("fres", "[0]*TMath::Gaus(x, [1], [2])+[3]", -0.2, 0.2);
         fres->SetParNames("Norm", "#mu", "#sigma", "Const (backg)");
         fres->SetNpx(1000);
         fres->SetParLimits(0, 10., 10000.);
         fres->SetParLimits(2, 0.001, 1);
-    
+        
         for(Short_t i=0; i<fNChips; ++i) {
+            if(i != 4) continue; // no hits in other chips
             fres->SetParameter(0, 300.);
             fres->SetParameter(2, 0.008);
             fres->SetParameter(3, 1);
@@ -430,17 +461,28 @@ void Na61Analysis::PreAlignmentVD() {
             fres->SetParameter(1, hDXzoom[i]->GetMean());
             hDXzoom[i]->Fit(fres, "QR");
             if(i == 4) {
-                exx1 = fres->GetParameter(1) - ex_sigma*fres->GetParameter(2);
-                exx2 = fres->GetParameter(1) + ex_sigma*fres->GetParameter(2);
+                fResMean[0] = fres->GetParameter(1);
+                fResSigma[0] = fres->GetParameter(2);
+                Report(4, Form(mname + "Residual mean = %f, sigma = %f", fResMean[0]*1e3, fResSigma[0]*1e3));
             }
             
             fres->SetParameter(1, hDYzoom[i]->GetMean());
             hDYzoom[i]->Fit(fres, "QR");
             if(i == 4) {
-                exy1 = fres->GetParameter(1) - ex_sigma*fres->GetParameter(2);
-                exy2 = fres->GetParameter(1) + ex_sigma*fres->GetParameter(2);
+                fResMean[1] = fres->GetParameter(1);
+                fResSigma[1] = fres->GetParameter(2);
+                Report(4, Form(mname + "Residual mean = %f, sigma = %f", fResMean[1]*1e3, fResSigma[1]*1e3));
             }
         }
-    } // END FOR LOOP
+        delete fres;
+    }
     
+    Report(3, mname + "Finished.");
+}
+
+//__________________________________________________________
+void Na61Analysis::EfficiencyVD() {
+    TString mname = "EfficiencyVD() : ";
+    Report(3, Form("Preliminary efficiency = %f", 100.*hHitsAligned[4]->GetEntries()/hHits[4]->GetEntries() ));
+    Report(3, mname + "Finished.");
 }

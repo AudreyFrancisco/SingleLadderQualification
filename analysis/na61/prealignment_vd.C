@@ -174,7 +174,8 @@ Bool_t prealignment_vd(
     }
     Float_t exx1 = 0., exx2=0., exy1=0., exy2=0.; // extract intervals    
     
-    cout << "prealignment_vd() : Number of events found in tree: " << nentries << endl;
+    cout << "prealignment_vd() : Number of events found in event tree: " << nentries << endl;
+    cout << "prealignment_vd() : Number of events found in track tree: " << tree_vd->GetEntries() << endl;
 
     // draw chip position
     for(Int_t ichip=0; ichip < n_chips; ++ichip) {
@@ -216,10 +217,15 @@ Bool_t prealignment_vd(
                 TVector3 td(*(TVector3*)vd_td->At(itrack));
 
                 //_cuts____
-                //if(dataset[itrack] != 4) continue; // {down1, down2, up1, up2, up1x}
+                //if(dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
                 //if(td.X() / td.Z() > 1) continue;
+                Float_t c4, r4;
+                TVector3 p4 = align_chip[4].IntersectionPointWithLine(to, td);
+                align_chip[4].GlobalToPix(p4, c4, r4);
+                if(r4<0) continue;
+                //if(c4<0 || c4>scols) continue; // only chip4 is interesting
                 //_cuts____
-
+                
                 Bool_t flagHICHit = kFALSE;
                 
                 for(Int_t ichip=0; ichip < n_chips; ++ichip) {
@@ -360,6 +366,9 @@ Bool_t prealignment_vd(
     c2->cd(4);
     hDYzoom[ctd]->DrawCopy();
 
+    cout << "Preliminary efficiency: " << hHitsAligned[4]->GetEntries()/hHits[4]->GetEntries() << endl;
+
+    
     file_plots->cd();
     file_plots->Write();
 

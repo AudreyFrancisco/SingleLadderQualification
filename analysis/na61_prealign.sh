@@ -60,6 +60,7 @@ cd $DIR_MACROS
 root -l -b <<EOF
 .x $DIR_CLASSES/load_classes.C
 .L prealignment_vd.C+g
+.L efficiency_vd.C+g
 .q
 EOF
 
@@ -67,7 +68,8 @@ FILE_ROOT="event_tree.root"
 
 cd $DIR_MACROS
 
-root -l $3 $4 "$DIR_CLASSES/load_classes.C" "prealignment_vd.C+(\"$DIR_RAW/$FILE_ROOT\", \"$FILE_VD\", \"$DIR_RESULTS\", \"cr$CROWN\")" | tee $DIR_LOGS/prealignment_vd.log
+#root -l $3 $4 "$DIR_CLASSES/load_classes.C" "prealignment_vd.C+(\"$DIR_RAW/$FILE_ROOT\", \"$FILE_VD\", \"$DIR_RESULTS\", \"cr$CROWN\")" | tee $DIR_LOGS/prealignment_vd.log
+root -l $3 $4 "$DIR_CLASSES/load_classes.C" "efficiency_vd.C+(\"$DIR_RAW/$FILE_ROOT\", \"$FILE_VD\", \"$DIR_RESULTS\", \"cr$CROWN\")" | tee $DIR_LOGS/efficiency_vd.log
 
 #root -l ~/.tbr.C $DIR_RESULTS
 

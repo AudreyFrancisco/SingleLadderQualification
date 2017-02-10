@@ -31,13 +31,16 @@ public:
     void   SetDefaultAlignment();
     Bool_t SetAlignment(Int_t chip, Alignment a);
 
-    Bool_t WriteHistograms(TString fname);
+    Bool_t WriteHistograms(TString fname, TString opt="RECREATE");
+    Bool_t WriteTracksTree(TString fname, TString opt="UPDATE");
 
     // misc
     void   FillChipPosHistos();
     
     // analyses
-    void   PreAlignmentVD();
+    void   PrealignmentVD(Float_t ex_sigma=-1.);
+    void   ExtractTracksVD(Float_t extract_sigma) { PrealignmentVD(extract_sigma); }
+    void   EfficiencyVD();
     
 private:
     // Na61Analysis constants
@@ -53,6 +56,9 @@ private:
     TString   fDirPathPlots;
     TString   fSuffix;
 
+    Float_t   fResMean[2];  // x/y residual mean
+    Float_t   fResSigma[2]; // x/y residual rms or std dev
+    
     // event tree variables
     BinaryEvent *fEvent;
     // VD tracks tree variables
