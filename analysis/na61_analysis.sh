@@ -31,8 +31,8 @@ cd $DIR_MACROS
 #rm *.so *.d
 root -l -b <<EOF
 .x $DIR_CLASSES/load_classes.C
-.L alignment_vd.C+g
-.q
+.L Na61Analysis.cpp+g
+.L main_Na61Analysis.C+g
 EOF
 
-root -l $1 $2 "$DIR_CLASSES/load_classes.C" "alignment_vd.C+"
+root -l $1 $2 "$DIR_CLASSES/load_classes.C" "Na61Analysis.cpp+" "main_Na61Analysis.C+"

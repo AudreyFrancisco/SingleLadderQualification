@@ -90,7 +90,7 @@ Bool_t Alignment::CheckPointIsInMatrix(TVector3 p) {
 //______________________________________________________________________
 TVector3 Alignment::DistPixLine(Float_t col, Float_t row, TVector3 o, TVector3 d, Bool_t local) {
     // return distance between pixel and line
-    // local toggles global or local coordinates
+    // local toggles global or local (default) coordinates
     TVector3 p = IntersectionPointWithLine(o, d);
     TVector3 c;
     if(local) {
