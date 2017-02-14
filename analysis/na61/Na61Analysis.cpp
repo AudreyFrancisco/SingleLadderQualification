@@ -26,12 +26,15 @@ Na61Analysis::Na61Analysis():
     fVDTracksTree = new TChain("tracks_tree", "tracks_tree");
     fVD_to = new TClonesArray("TVector3");
     fVD_td = new TClonesArray("TVector3");
-
+    fVD_hits1 = new TClonesArray("TVector3");
+    fVD_hits2 = new TClonesArray("TVector3");
+    fVD_hits4 = new TClonesArray("TVector3");
+    
     fExTracksTree = NULL;
+    fExHitsTree = NULL;
     
     hTrackHitsHIC = NULL;
     hTrackHitsMiss = NULL;
-
     for(Int_t i=0; i<fNChips; ++i) {
         hTrackHits[i] = NULL;
         hHits[i] = NULL;
@@ -51,7 +54,8 @@ Na61Analysis::Na61Analysis():
         hEffIneff[i] = NULL;
         hEffEff[i] = NULL;
         hEffEffD[i] = NULL;
-
+        hEffCluMult[i] = NULL;
+        
         fEffNTracks[i] = 0;
         fEffNRej   [i] = 0;
         fEffNGood  [i] = 0;
@@ -79,9 +83,14 @@ Na61Analysis::~Na61Analysis()
     delete fVDTracksTree;
     delete fVD_to;
     delete fVD_td;
+    delete fVD_hits1;
+    delete fVD_hits2;
+    delete fVD_hits4;
 
     if(fExTracksTree) fExTracksTree->ResetBranchAddresses();
     delete fExTracksTree;
+    if(fExHitsTree) fExHitsTree->ResetBranchAddresses();
+    delete fExHitsTree;
     
     // histograms
     delete hTrackHitsHIC;
@@ -106,6 +115,7 @@ Na61Analysis::~Na61Analysis()
         delete hEffIneff[i];
         delete hEffEff[i]; 
         delete hEffEffD[i];
+        delete hEffCluMult[i];
     }
 }
 
@@ -164,47 +174,53 @@ void Na61Analysis::InitHistograms(const Int_t binred)
                               (fNCols+512)/binred, -256-0.5, 256+fNCols-0.5, (fNRows+512)/binred, -384-0.5, 128+fNRows-0.5);
         hEffEffD[i] = new TH2F(Form("hEffD_%i", i), Form("Efficient tracks relative to hit position, chip %i;X [mm];Y [mm];a.u.", i),
                                800, -0.4, 0.4, 800, -0.4, 0.4);
-        
+        hEffCluMult[i] = new TH1F(Form("hEffCluMult_%i", i), Form("Cluter multiplicity of efficient events, chip %i;# of clusters in event; a.u.", i),
+                                  200, -0.5, 199.5);
     }
     
 }
 
 //__________________________________________________________
-void Na61Analysis::DrawHistograms(TString set) {
-    Int_t ctd = 4; // chip to draw
+void Na61Analysis::DrawHistograms(TString set, Int_t ichip) {
+    if(ichip < 0 || ichip >= fNChips) {
+        Report(2, Form("Chip %i out of range 0-%i. Drawing chip 4.", ichip, fNChips));
+        ichip = 4;
+    }
     set.ToLower();
     if(set.BeginsWith("prealign")) {
         TCanvas *c = new TCanvas("c_"+set, set, 50, 50, 1700, 1000);
         c->Divide(2,2);
         c->cd(1);
-        hDX[ctd]->DrawCopy();
+        hDX[ichip]->DrawCopy();
         c->cd(2);
-        hDY[ctd]->DrawCopy();
+        hDY[ichip]->DrawCopy();
         c->cd(3);
-        hDXzoom[ctd]->DrawCopy();
+        hDXzoom[ichip]->DrawCopy();
         c->cd(4);
-        hDYzoom[ctd]->DrawCopy();
+        hDYzoom[ichip]->DrawCopy();
     }
     else if(set.BeginsWith("eff")) {
         TCanvas *c = new TCanvas("c_"+set, set, 50, 50, 1700, 1000);
         c->Divide(2,2);
         c->cd(1);
-        hEffRej[ctd]->DrawCopy("COLZ");
+        hEffRej[ichip]->DrawCopy("COLZ");
         c->cd(2);
-        hEffGood[ctd]->DrawCopy("COLZ");
+        hEffGood[ichip]->DrawCopy("COLZ");
         c->cd(3);
-        hEffIneff[ctd]->SetMaximum(1);
-        hEffIneff[ctd]->DrawCopy("COLZ");
+        hEffIneff[ichip]->SetMaximum(1);
+        hEffIneff[ichip]->DrawCopy("COLZ");
         c->cd(4);
-        hEffEff[ctd]->DrawCopy("COLZ");
+        hEffEff[ichip]->DrawCopy("COLZ");
         TCanvas *cc = new TCanvas("cc_"+set, set, 700, 300, 800, 800);
         cc->Divide(2,2);
         cc->cd(1);
-        hEffEffD[ctd]->DrawCopy("COLZ");
+        hEffEffD[ichip]->DrawCopy("COLZ");
+        cc->cd(2);
+        hEffCluMult[ichip]->DrawCopy();
         cc->cd(3);
-        hEffEffD[ctd]->ProjectionX()->DrawCopy();
+        hEffEffD[ichip]->ProjectionX()->DrawCopy();
         cc->cd(4);
-        hEffEffD[ctd]->ProjectionY()->DrawCopy();        
+        hEffEffD[ichip]->ProjectionY()->DrawCopy();        
     }
     
 }
@@ -227,15 +243,15 @@ Bool_t Na61Analysis::WriteHistograms(TString fname, TString opt) {
         file_plots->mkdir(Form("Chip_%i", i));
         file_plots->cd(Form("Chip_%i", i));
         
-        hTrackHits[i]->Write();
-        hHits[i]->Write();
+        hTrackHits  [i]->Write();
+        hHits       [i]->Write();
         hHitsAligned[i]->Write();
 
-        hDX[i]->Write();
-        hDY[i]->Write();
+        hDX    [i]->Write();
+        hDY    [i]->Write();
         hDXzoom[i]->Write();
         hDYzoom[i]->Write();
-        hDXY[i]->Write();
+        hDXY   [i]->Write();
 
         if(hChipPosXY[i]->GetEntries()) hChipPosXY[i]->Write();
         if(hChipPosZY[i]->GetEntries()) hChipPosZY[i]->Write();
@@ -243,11 +259,12 @@ Bool_t Na61Analysis::WriteHistograms(TString fname, TString opt) {
 
         hMult[i]->Write();
         
-        if(hEffGood[i]->GetEntries()) hEffGood [i]->Write();
-        if(hEffGood[i]->GetEntries()) hEffRej  [i]->Write();
-        if(hEffGood[i]->GetEntries()) hEffIneff[i]->Write();
-        if(hEffGood[i]->GetEntries()) hEffEff  [i]->Write();
-        if(hEffGood[i]->GetEntries()) hEffEffD [i]->Write();
+        if(hEffGood[i]->GetEntries()) hEffGood   [i]->Write();
+        if(hEffGood[i]->GetEntries()) hEffRej    [i]->Write();
+        if(hEffGood[i]->GetEntries()) hEffIneff  [i]->Write();
+        if(hEffGood[i]->GetEntries()) hEffEff    [i]->Write();
+        if(hEffGood[i]->GetEntries()) hEffEffD   [i]->Write();
+        if(hEffGood[i]->GetEntries()) hEffCluMult[i]->Write();
     }
     file_plots->Close();
     delete file_plots;
@@ -273,19 +290,6 @@ Bool_t Na61Analysis::WriteTracksTree(TString fname, TString opt) {
     delete file_plots;
     Report(3, "Tracks tree written to file successfully.");
     return kTRUE;
-}
-
-//__________________________________________________________
-void Na61Analysis::InitExtractedTracksTree() {
-    if(fExTracksTree) {
-        Report(2, "Tracks tree already initialised.");
-        return;
-    }
-    fExTracksTree = new TTree("extracted_tracks", "extracted_tracks");
-    fExTracksTree->Branch("clu_x", &fEx_clux, "clu_x/F");
-    fExTracksTree->Branch("clu_y", &fEx_cluy, "clu_y/F");
-    fExTracksTree->Branch("track_origin", fEx_to, "track_origin[3]/F");
-    fExTracksTree->Branch("track_direction", fEx_td, "track_direction[3]/F");
 }
 
 //__________________________________________________________
@@ -323,6 +327,7 @@ Bool_t Na61Analysis::SetInputFileVDTracks(TString filepath_tree)
     fVDTracksTree->SetBranchAddress("dataset", fVD_Dataset);
     fVDTracksTree->SetBranchAddress("track_origin", &fVD_to);
     fVDTracksTree->SetBranchAddress("track_direction", &fVD_td);
+        
     return kTRUE;
 }
 
@@ -336,14 +341,14 @@ void Na61Analysis::SetDefaultAlignment() {
     const Float_t angZ = 0.;
 
     for(Short_t i=0; i<fNChips; ++i) {
-        Alignment a;
-        a.SetPos(TVector3(xpos, ypos-30.15*i, zpos));
+        Alignment aln;
+        aln.SetPos(TVector3(xpos, ypos-30.15*i, zpos));
         TRotation rot;
         rot.RotateY(angY);
         rot.RotateX(angX);
         rot.RotateZ(angZ);
-        a.SetRotation(rot);
-        SetAlignment(i, a);
+        aln.SetRotation(rot);
+        SetAlignment(i, aln);
     }
 }
 
@@ -439,15 +444,31 @@ void Na61Analysis::FillChipPosHistos()
 //__________________________________________________________
 void Na61Analysis::PrealignmentVD(Float_t ex_sigma) {
 
-    Float_t extract_tracks = kFALSE;
-    if(ex_sigma > 0) extract_tracks = kTRUE;
+    Float_t extract_tracks = ex_sigma > 0 ? kTRUE : kFALSE;
     TString mname = extract_tracks ? "ExtractTracksVD() : " : "PrealignmentVD() : ";
+    
     if(extract_tracks && fResSigma[0] < 0.)
         Report(2, mname + "Extracting tracks but stdev < 1");
+    
     Float_t exx1=0., exx2=0., exy1=0., exy2=0.; // extract intervals
+    Float_t ex_clux, ex_cluy, ex_to[3], ex_td[3];
     
     if(extract_tracks) {
-        InitExtractedTracksTree();
+        if(fExTracksTree) {
+            Report(2, "Extracted tracks tree already initialised.");
+            fExTracksTree->SetBranchAddress("clu_x", &ex_clux, "clu_x/F");
+            fExTracksTree->SetBranchAddress("clu_y", &ex_cluy, "clu_y/F");
+            fExTracksTree->SetBranchAddress("track_origin", ex_to, "track_origin[3]/F");
+            fExTracksTree->SetBranchAddress("track_direction", ex_td, "track_direction[3]/F");
+        }
+        else {
+            fExTracksTree = new TTree("extracted_tracks", "extracted_tracks");
+            fExTracksTree->Branch("clu_x", &ex_clux, "clu_x/F");
+            fExTracksTree->Branch("clu_y", &ex_cluy, "clu_y/F");
+            fExTracksTree->Branch("track_origin", ex_to, "track_origin[3]/F");
+            fExTracksTree->Branch("track_direction", ex_td, "track_direction[3]/F");
+            Report(3, "Extracted tracks tree intialised.");
+        }
         // extratact tracks in alignment peak inside mean +- ex_sigma*stdev
         exx1 = fResMean[0] - ex_sigma*fResSigma[0];
         exx2 = fResMean[0] + ex_sigma*fResSigma[0];
@@ -485,7 +506,7 @@ void Na61Analysis::PrealignmentVD(Float_t ex_sigma) {
             TVector3 td(*(TVector3*)fVD_td->At(itrack));
 
             //_cuts____
-            //if(dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
+            //if(fVD_Dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
             //if(td.X() / td.Z() > 1) continue;
             Float_t c4, r4;
             TVector3 p4 = fAlignChip[4].IntersectionPointWithLine(to, td);
@@ -528,10 +549,10 @@ void Na61Analysis::PrealignmentVD(Float_t ex_sigma) {
                         if( exx1 < d.X() && d.X() < exx2
                             && exy1 < d.Y() && d.Y() < exy2 ) {
                             // fill extracted tree
-                            fEx_clux = cluster->GetX();
-                            fEx_cluy = cluster->GetY();
-                            to.GetXYZ(fEx_to);
-                            td.GetXYZ(fEx_td);
+                            ex_clux = cluster->GetX();
+                            ex_cluy = cluster->GetY();
+                            to.GetXYZ(ex_to);
+                            td.GetXYZ(ex_td);
                             fExTracksTree->Fill();
                             // fill histograms
                             fAlignChip[ichip].GlobalToPix(p, col, row);
@@ -602,7 +623,8 @@ void Na61Analysis::PrealignmentVD(Float_t ex_sigma) {
         }
         delete fres;
     }
-    
+
+    if(extract_tracks && fExTracksTree) fExTracksTree->ResetBranchAddresses();
     Report(3, mname + "Finished.");
 }
 
@@ -613,9 +635,8 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
 
     Float_t wx = 0.1; // search radius in x [mm]
     Float_t wy = 0.1; // search rafius in y [mm]
-    Int_t   wc = TMath::Ceil(wy/29.24*1000.); // search radius in columns
-    Int_t   wr = TMath::Ceil(wx/26.88*1000.); // search radius in rows
-    
+    Int_t   wc = TMath::Ceil(wy/29.24e-3); // search radius in columns
+    Int_t   wr = TMath::Ceil(wx/26.88e-3); // search radius in rows
 
     Int_t nentries_al = fEventTree->GetEntries();
     Int_t nentries_vd = fVDTracksTree->GetEntries();
@@ -626,6 +647,7 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
     Int_t nn_rej    = 0;
     Int_t nn_ineff  = 0;
     Int_t nn_mult   = 0;
+    Int_t nn_discev = 0;
     
     for(Int_t ivd=0; ivd < nentries_vd; ++ivd) {
         // read events from vd tree and find equivalent in event tree
@@ -645,7 +667,10 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
         
         if( (ivd+1)%5000 == 0 )
             Report(3, Form(mname + "Processed events %i / %i", ivd+1, nentries_vd));
-            
+
+        Int_t nnt_good = 0;
+        Int_t nnt_eff  = 0;
+        
         // loop over all tracks in event
         for(Int_t itrack=0; itrack < fVD_NTracks; ++itrack) {
             TVector3 to(*(TVector3*)fVD_to->At(itrack));
@@ -653,9 +678,7 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
             nn_tracks++;
             
             //_cuts____
-            //if(dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
-            //if(td.X() / td.Z() > 1) continue;
-            //if(c4<0 || c4>fNCols) continue; // only chip4 is interesting
+            //if(fVD_Dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
             //_cuts____
                 
             //if( fEvent->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
@@ -682,6 +705,7 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
             
             nn_good++;
             hEffGood[ichip]->Fill(col, row);
+            nnt_good++;
 
             Int_t nhits = 0;
             for(Int_t iclu=0; iclu < fEvent->GetPlane(ichip)->GetNClustersSaved(); ++iclu) {
@@ -707,10 +731,11 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
             if( nhits >= 1 ) {
                 nn_eff++;
                 hEffEff[ichip]->Fill(col, row);
+                nnt_eff++;
             }
             else {
-                hEffIneff[ichip]->Fill(col, row);
                 nn_ineff++;
+                hEffIneff[ichip]->Fill(col, row);
             }
             
             if( nhits >  1 ) {
@@ -720,19 +745,29 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
             //if( nhits >  1 ) Report(3, mname + "Double hit");
             
         } // END FOR tracks
-        //if(100.*nn_eff/nn_good < 99.9)
-        //    Report(3, mname + Form("Event = %i, Efficiency = %.2f    %i %i %i", ivd, 100.*nn_eff/nn_good, nn_eff, nn_good, fVD_NTracks));
-        //nn_eff = 0;
-        //nn_good = 0;
+        
+        //if(100.*nnt_eff/nnt_good < 99.9)
+        //    Report(3, mname + Form("Event = %i, Efficiency = %.2f    %i %i %i", fVD_EventN+1, 100.*nnt_eff/nnt_good, nnt_eff, nnt_good, fVD_NTracks));
+        if(nnt_eff > 1) {
+            hEffCluMult[ichip]->Fill( fEvent->GetPlane(ichip)->GetNClustersSaved() );
+        }
+        else if(nnt_good > 1 && nnt_eff == 0) {
+            //hEffCluMult[ichip]->Fill( fEvent->GetPlane(ichip)->GetNClustersSaved() );
+            nn_discev++;
+            nn_good  -= nnt_good;
+            nn_ineff -= nnt_good;
+            nn_rej   += nnt_good;
+        }
     } // END FOR events
 
-    Report(3, mname + Form("Total tracks = %i", nn_tracks));
-    Report(3, mname + Form("Rej.  tracks = %i", nn_rej));
-    Report(3, mname + Form("Mult. tracks = %i", nn_mult));
-    Report(3, mname + Form("Good  tracks = %i", nn_good));
-    Report(3, mname + Form("Eff.  tracks = %i", nn_eff));
-    Report(3, mname + Form("Ineff tracks = %i", nn_ineff));
-    Report(3, mname + Form("Efficiency = %f", 100.*nn_eff/nn_good));
+    Report(3, mname + Form("Total tracks:  %i", nn_tracks));
+    Report(3, mname + Form("Rej.  tracks:  %i", nn_rej));
+    Report(3, mname + Form("Mult. tracks:  %i", nn_mult));
+    Report(3, mname + Form("Good  tracks:  %i", nn_good));
+    Report(3, mname + Form("Eff.  tracks:  %i", nn_eff));
+    Report(3, mname + Form("Ineff tracks:  %i", nn_ineff));
+    Report(3, mname + Form("Efficiency:    %f %%", 100.*nn_eff/nn_good));
+    Report(3, mname + Form("Discarded events:  %i", nn_discev));
 
     fEffNTracks[ichip] += nn_tracks;
     fEffNEff   [ichip] += nn_eff;
@@ -754,11 +789,151 @@ void Na61Analysis::PrintEfficiencyVD(Int_t ichip) {
     Float_t errdo = eff - mean + err;
     
     cout << endl << "Cumulative efficiency results: " << endl
-         << "\t Total tracks = " << fEffNTracks[ichip] << endl
-         << "\t Rej.  tracks = " << fEffNRej   [ichip] << endl
-         << "\t Good  tracks = " << fEffNGood  [ichip] << endl  
-         << "\t Eff.  tracks = " << fEffNEff   [ichip] << endl
-         << "\t Ineff tracks = " << fEffNIneff [ichip] << endl
-         << "\t Efficiency   = " << 100.*eff  << " + " << 100.*errup << " - " << 100.*errdo << endl
+         << "\t Total tracks:  " << fEffNTracks[ichip] << endl
+         << "\t Rej.  tracks:  " << fEffNRej   [ichip] << endl
+         << "\t Good  tracks:  " << fEffNGood  [ichip] << endl  
+         << "\t Eff.  tracks:  " << fEffNEff   [ichip] << endl
+         << "\t Ineff tracks:  " << fEffNIneff [ichip] << endl
+         << "\t Efficiency:    " << 100.*eff  << " + " << 100.*errup << " - " << 100.*errdo << endl
          << endl;
 }
+
+
+//__________________________________________________________
+void Na61Analysis::ExtractHitsVD(Int_t ichip) {
+    TString mname = "ExtractHitsVD() : ";
+    Report(3, mname + "Starting hits extraction" );
+
+    Float_t wx = 0.1; // search radius in x [mm]
+    Float_t wy = 0.1; // search rafius in y [mm]
+    Int_t   wc = TMath::Ceil(wy/29.24e-3); // search radius in columns
+    Int_t   wr = TMath::Ceil(wx/26.88e-3); // search radius in rows
+
+    Int_t sba = 0;
+    sba += fVDTracksTree->SetBranchAddress("track_hits_s1", &fVD_hits1);
+    sba += fVDTracksTree->SetBranchAddress("track_hits_s2", &fVD_hits2);
+    sba += fVDTracksTree->SetBranchAddress("track_hits_s4", &fVD_hits4);
+    if(sba) {
+        Report(0, mname + "Problem with setting branch address of hits in VD tree!");
+        return;
+    }
+
+    TClonesArray *hits[4];
+    for(Int_t i=0; i<4; ++i) hits[i] = new TClonesArray("TVector3");
+    Int_t nhits = 0;
+    Int_t nhitstot = 0;
+    
+    if(fExHitsTree) {
+        Report(2, "Extracted hits tree already initialised.");
+        fExHitsTree->SetBranchAddress("event_n", &fVD_EventN);
+        fExHitsTree->SetBranchAddress("n_tracks", &nhits);
+        for(Int_t i=0; i<4; ++i)
+            fExHitsTree->SetBranchAddress(Form("hits_s%i", i+1), &hits[i]);
+    }
+    else {
+        fExHitsTree = new TTree("extracted_hits", "extracted_hits");
+        fExHitsTree->Branch("event_n", &fVD_EventN);
+        fExHitsTree->Branch("n_tracks", &nhits);
+        for(Int_t i=0; i<4; ++i)
+            fExHitsTree->Branch(Form("hits_s%i", i+1), &hits[i]);
+        Report(3, "Extracted tracks tree intialised.");
+    }
+    
+    Int_t nentries_al = fEventTree->GetEntries();
+    Int_t nentries_vd = fVDTracksTree->GetEntries();
+    
+    for(Int_t ivd=0; ivd < nentries_vd; ++ivd) {
+        // read events from vd tree and find equivalent in event tree
+        fVDTracksTree->GetEntry(ivd);
+        
+        fVD_EventN -= 1; // correct for different trigger numbering between VD and ALPIDE
+        
+        if(fVD_EventN > nentries_al) {
+            Report(2, mname + "WARNING more tracks than saved triggers");
+            continue;
+        }
+        
+        fEventTree->GetEntry(fVD_EventN);
+            
+        if(fEvent->GetIntTrigCnt() != fVD_EventN)
+            Report(2, mname + "sync error");
+        
+        if( (ivd+1)%5000 == 0 )
+            Report(3, Form(mname + "Processed events %i / %i", ivd+1, nentries_vd));
+
+        fVD_EventN += 1; // resync with vd event numbering for backward compatibility
+        nhits = 0;
+        for(Int_t i=0; i<4; ++i)
+            hits[i]->Clear();
+            
+        // loop over all tracks in event
+        for(Int_t itrack=0; itrack < fVD_NTracks; ++itrack) {
+            TVector3 to(*(TVector3*)fVD_to->At(itrack));
+            TVector3 td(*(TVector3*)fVD_td->At(itrack));
+
+            //_cuts____
+            //if(fVD_Dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
+            //if(td.X() / td.Z() > 1) continue;
+            //if(c4<0 || c4>fNCols) continue; // only chip4 is interesting
+            //_cuts____
+                
+            //if( fEvent->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
+
+            TVector3 p = fAlignChip[ichip].IntersectionPointWithLine(to, td);
+            Float_t col, row;
+            fAlignChip[ichip].GlobalToPix(p, col, row);
+            
+            if(col<=wc || row<=wr || col>fNCols-wc || row>fNRows-wr)
+                continue;
+            
+            hTrackHits[ichip]->Fill(p.X(), p.Y());
+            hHits[ichip]->Fill(col, row);
+            
+            for(Int_t iclu=0; iclu < fEvent->GetPlane(ichip)->GetNClustersSaved(); ++iclu) {
+                Int_t mult = fEvent->GetPlane(ichip)->GetCluster(iclu)->GetMultiplicity();
+                BinaryCluster* cluster = fEvent->GetPlane(ichip)->GetCluster(iclu);
+                 
+                //_cuts____
+                //if(mult > 10) continue;
+                //if(cluster->HasHotPixels()) continue;
+                //if(cluster->HasBorderPixels()) continue;
+                //if(cluster->HasExclDblcolPixels()) continue;
+                //_cuts____
+                 
+                TVector3 d = fAlignChip[ichip].DistPixLine(cluster->GetX(), cluster->GetY(), to, td, kTRUE);
+                if( d.X()*d.X()/wx/wx + d.Y()*d.Y()/wy/wy < 1. ) {
+                    // add hit to clones array
+                    TVector3 *hit[4]; for(Int_t i=0; i<4; ++i) hit[i] = (TVector3*)hits[i]->ConstructedAt(nhits);
+                    TVector3 vdhit1(*(TVector3*)fVD_hits1->At(itrack));
+                    TVector3 vdhit2(*(TVector3*)fVD_hits2->At(itrack));
+                    TVector3 alphit = fAlignChip[ichip].PixToGlobal(cluster->GetX(), cluster->GetY());
+                    TVector3 vdhit4(*(TVector3*)fVD_hits4->At(itrack));
+                    hit[0]->SetXYZ( vdhit1.X(), vdhit1.Y(), vdhit1.Z() );
+                    hit[1]->SetXYZ( vdhit2.X(), vdhit2.Y(), vdhit2.Z() );
+                    hit[2]->SetXYZ( alphit.X(), alphit.Y(), alphit.Z() );
+                    hit[3]->SetXYZ( vdhit4.X(), vdhit4.Y(), vdhit4.Z() );
+                    nhits++;
+                    nhitstot++;
+                    // fill histograms
+                    hHitsAligned[ichip]->Fill(col, row);
+                    hMult[ichip]->Fill(mult);
+                }       
+             } // END FOR clusters
+        } // END FOR tracks
+        if(nhits) fExHitsTree->Fill();
+    } // END FOR events
+    
+    Report(3, mname + Form("Extracted %i hits from %i events", nhitstot, (Int_t)fExHitsTree->GetEntriesFast() ));
+
+    fVDTracksTree->ResetBranchAddress(fVDTracksTree->FindBranch("track_hits_s1"));
+    fVDTracksTree->ResetBranchAddress(fVDTracksTree->FindBranch("track_hits_s2"));
+    fVDTracksTree->ResetBranchAddress(fVDTracksTree->FindBranch("track_hits_s4"));
+    if(fExHitsTree) {
+        fExHitsTree->ResetBranchAddresses();
+        for(Int_t i=0; i<4; ++i) {
+            delete hits[i];
+        }
+    }
+    Report(3, mname + "Finished.");
+}
+

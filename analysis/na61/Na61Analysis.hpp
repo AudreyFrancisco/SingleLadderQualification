@@ -23,7 +23,7 @@ public:
     virtual ~Na61Analysis();
 
     void   InitHistograms(const Int_t binred = 2);
-    void   DrawHistograms(TString set);
+    void   DrawHistograms(TString set, Int_t ichip = 4);
     Bool_t WriteHistograms(TString fname, TString opt="RECREATE");
     Bool_t WriteTracksTree(TString fname, TString opt="UPDATE");
     
@@ -46,8 +46,9 @@ public:
     void   ExtractTracksVD(Float_t extract_sigma) { PrealignmentVD(extract_sigma); }
     void   EfficiencyVD(Int_t ichip=4);
     void   PrintEfficiencyVD(Int_t ichip=4);
-    
+    void   ExtractHitsVD(Int_t ichip=4);
 private:
+    
     // Na61Analysis constants
     static const Short_t fNChips = 9;   // number of chips in HIC
     static const Short_t fNCols = 1024; // number of columns 
@@ -57,6 +58,7 @@ private:
     TChain   *fEventTree;
     TChain   *fVDTracksTree;
     TTree    *fExTracksTree;
+    TTree    *fExHitsTree;
     Alignment fAlignChip[fNChips];
     TString   fDirPathPlots;
     TString   fSuffix;
@@ -76,11 +78,10 @@ private:
     Int_t fVD_Dataset[10000];
     TClonesArray *fVD_to;
     TClonesArray *fVD_td;
-    // extracted tacks tree variables
-    Float_t fEx_clux;
-    Float_t fEx_cluy;
-    Float_t fEx_to[3];
-    Float_t fEx_td[3];
+    TClonesArray *fVD_hits1;
+    TClonesArray *fVD_hits2;
+    TClonesArray *fVD_hits4;
+    
     // efficiency variables
     Int_t fEffNTracks[fNChips];
     Int_t fEffNGood[fNChips];  
@@ -111,11 +112,10 @@ private:
     TH2F *hEffIneff[fNChips];
     TH2F *hEffEff[fNChips];
     TH2F *hEffEffD[fNChips];
-    
+    TH1F *hEffCluMult[fNChips];
 
     // error reporting method
     Int_t fVerboseLevel;
-    void  InitExtractedTracksTree();
     void  Report(Short_t level, const char * message);
     
     ClassDef(Na61Analysis,1);
