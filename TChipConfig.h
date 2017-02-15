@@ -1,8 +1,11 @@
 #ifndef CHIPCONFIG_H
 #define CHIPCONFIG_H
 
+#include "TConfig.h"
 #include <map>
 #include <string>
+
+class TConfig;
 
 namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STROBE_DELAY)
   const int  VCASN   = 50;
@@ -45,10 +48,11 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
 class TChipConfig {
  private: 
   std::map <std::string, int*> fSettings;
-  int  fChipId;
-  int  fEnabled;                 // variable to exclude (non-working) chip from tests, default true
-  int  fReceiver;
-  int  fControlInterface;
+  TConfig *fConfig;
+  int      fChipId;
+  int      fEnabled;                 // variable to exclude (non-working) chip from tests, default true
+  int      fReceiver;
+  int      fControlInterface;
   // DACs used
   int  fITHR;
   int  fIDB;
@@ -94,7 +98,7 @@ class TChipConfig {
   
  protected:
  public:
-  TChipConfig   (int chipId, const char *fName = 0);
+  TChipConfig               (TConfig *config, int chipId, const char *fName = 0);
   void InitParamMap         (); 
   bool SetParamValue        (const char *Name, const char *Value);
   int  GetParamValue        (const char *Name) ;
@@ -102,6 +106,9 @@ class TChipConfig {
   int  GetChipId            () {return fChipId;};
   bool IsEnabled            () {return (fEnabled != 0);};
   void SetEnable            (bool Enabled) {fEnabled = Enabled?1:0;};
+  int  GetModuleId          () {return (fChipId & 0x70) >> 4;};
+  bool IsOBMaster           () {return ((fChipId % 8 == 0) && (GetModuleId() > 0));};
+  bool HasEnabledSlave      (); 
 
   bool GetReadoutMode          () {return fReadoutMode;};
   bool GetEnableClustering     () {return fEnableClustering;};

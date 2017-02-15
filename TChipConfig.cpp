@@ -5,7 +5,8 @@
 
 using namespace ChipConfig;
 
-TChipConfig::TChipConfig (int chipId, const char *fName) {
+TChipConfig::TChipConfig (TConfig *config, int chipId, const char *fName) {
+  fConfig           = config;
   fChipId           = chipId;
   fEnabled          = true;
   fReceiver         = -1;
@@ -100,3 +101,10 @@ int TChipConfig::GetParamValue (const char *Name)
 }
 
 
+bool TChipConfig::HasEnabledSlave() {
+  if (!IsOBMaster()) return false;
+  for (int i = fChipId + 1; i <= fChipId + 6; i++) {
+    if (fConfig->GetChipConfigById(i)->IsEnabled()) return true;
+  }
+  return false;
+}
