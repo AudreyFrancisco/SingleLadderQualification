@@ -27,6 +27,11 @@
 #include "SetupHelpers.h"
 
 
+
+TConfig* config;
+std::vector <TReadoutBoard *> fBoards;
+TBoardType boardType;
+std::vector <TAlpide *> fChips;
 TReadoutBoardDAQ *myDAQBoard;
 
 int mySampleDist = 1;
