@@ -53,11 +53,11 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag ) {
 Bool_t alignment_vd(
     const TString dirpath_data = "/home/msuljic/cernbox/na61/data/by_run/",
     const TString dirpath_out  = "/home/msuljic/cernbox/na61/data/alignment_vd/",
-    const TString suffix      = "cr2"    // identifier (suffix)
+    const TString suffix      = "_cr2"    // identifier (suffix)
     ) {
 
-    const Int_t n_runs = 2;
-    const TString run[] = {"27487", "27489"};
+    const Int_t n_runs = 3;
+    const TString run[] = {"27487", "27489", "27490"};
     
     cout << "alignment_vd() : Starting..." << endl;
 
@@ -72,8 +72,8 @@ Bool_t alignment_vd(
     TChain* chain = new TChain("extracted_tracks", "extracted_tracks");
     for(Int_t i=0; i<n_runs; ++i) {
         TString fname = dirpath_data + run[i];
-        fname += "/results_" + suffix;
-        fname += "/prealignment_vd_" + suffix;
+        fname += "/results" + suffix;
+        fname += "/prealignment_vd"; + suffix;
         fname += ".root";
         cout << "alignment_vd() : Loading file " << fname << endl;
         if(!chain->Add(fname.Data())) {
@@ -139,10 +139,10 @@ Bool_t alignment_vd(
     const Float_t ypos = 120.4;//-30.15*4;
     const Float_t zpos = 92.3;
 
-    Bool_t   fix_par[]          = { 0, 0, 0, 0, 1, 1};
+    Bool_t   fix_par[]          = { 0, 0, 0, 0, 0, 0};
     Char_t   PARM_NAMES[6][255] = {"x0","y0","z0", "ang1", "ang2", "ang3"};
-    //Double_t PARM_START[6]      = {11.04, -0.12, 92.28, 0.105,  0.00,  0.0};
-    Double_t PARM_START[6]      = {900., 900., 100, 0.10,  0.0,  0.0};
+    Double_t PARM_START[6]      = {11.05, -0.115, 92.24, 0.115,  0.00,  4.3e-4};
+    //Double_t PARM_START[6]      = {900., 900., 100, 0.10,  0.0,  0.0};
     Double_t PARM_STEP[6]       = {1e-2, 1e-2, 1e-2, 1e-2,  1e-2, 1e-2};
     Double_t PARM_LOWER[6]      = {-1e3, -1e3, -1e3, -1.,  -1., -1.};
     Double_t PARM_UPPER[6]      = { 1e3,  1e3,  1e3,  1.,   1.,  1.}; 

@@ -12,9 +12,13 @@
 #include <TH2F.h>
 #include <TString.h>
 #include <TClonesArray.h>
+#include <TF1.h>
 
 #include "../classes/BinaryEvent.hpp"
 #include "../classes/Alignment.hpp"
+
+//#include "/home/msuljic/work/na61/vdal/utils/UVdEvent.h"
+//#include "/home/msuljic/work/na61/vdal/utils/UVdTrack.h"
 
 class Na61Analysis: public TObject {
 
@@ -26,6 +30,11 @@ public:
     void   DrawHistograms(TString set, Int_t ichip = 4);
     Bool_t WriteHistograms(TString fname, TString opt="RECREATE");
     Bool_t WriteTracksTree(TString fname, TString opt="UPDATE");
+    Bool_t WriteHitsTree(TString fname, TString opt="UPDATE");
+
+    void   ResetHistograms();
+    void   ResetTracksTree();
+    void   ResetHitsTree();
     
     void   SetVerboseLevel(Int_t level)             { fVerboseLevel = level; }
     Bool_t SetInputFileALPIDE(TString filepath_tree);
@@ -48,6 +57,37 @@ public:
     void   PrintEfficiencyVD(Int_t ichip=4);
     void   ExtractHitsVD(Int_t ichip=4);
 private:
+    /*
+    // methods
+    void FitLine_w2(TVector3* hit1,TVector3* hit2,TVector3* hit3,TVector3* hit4,
+                    Float_t& ax,Float_t& ay,Float_t& bx,Float_t& by,
+                    Float_t& chi2x,Float_t& chi2y,Float_t& N, Float_t& zmin);
+    bool FindPrimaryVertex(TObjArray* tracktab, Vector3D* fPrimaryVertex);
+    TH1F *fhVx;
+    TH1F *fhVy;
+    TH1F *fhVz;
+    
+    TF1 *fFGauss;
+
+    TH1F *fhVx3;
+    TH1F *fhVy3;
+    TH1F *fhVz3;
+    
+    TH1F *fhVx4;
+    TH1F *fhVy4;
+    TH1F *fhVz4;
+
+    TH1F *fhVxD;
+    TH1F *fhVyD;
+    TH1F *fhVzD;
+
+    TH2F *fhVx34;
+    TH2F *fhVy34;
+    TH2F *fhVz34;
+
+    TH1F *fhchi2x;
+    TH1F *fhchi2y;
+    */
     
     // Na61Analysis constants
     static const Short_t fNChips = 9;   // number of chips in HIC
