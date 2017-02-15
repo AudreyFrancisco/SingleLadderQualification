@@ -20,12 +20,12 @@ int initSetupOB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
   boards->push_back (new TReadoutBoardMOSAIC(config, boardConfig));
 
   for (int i = 0; i < config->GetNChips(); i++) {
-    TChipConfig *chipConfig = config   ->GetChipConfig(i);
+    TChipConfig *chipConfig = config    ->GetChipConfig(i);
     int          chipId     = chipConfig->GetChipId    ();
     int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
     int          receiver   = chipConfig->GetParamValue("RECEIVER");
 
-    if (chipId%16!=0) chipConfig->SetParamValue("LINKSPEED", "-1"); // deactivate the DTU/PLL for none master chips
+    if (chipId%8!=0) chipConfig->SetParamValue("LINKSPEED", "-1"); // deactivate the DTU/PLL for none master chips
 
     chips->push_back(new TAlpide(chipConfig));
     chips->at(i) -> SetReadoutBoard(boards->at(0));
