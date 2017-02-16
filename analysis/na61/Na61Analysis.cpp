@@ -200,7 +200,7 @@ void Na61Analysis::InitHistograms(const Int_t binred)
                               (fNCols+512)/binred, -256-0.5, 256+fNCols-0.5, (fNRows+512)/binred, -384-0.5, 128+fNRows-0.5);
         hEffEffD[i] = new TH2F(Form("hEffD_%i", i), Form("Efficient tracks relative to hit position, chip %i;X [mm];Y [mm];a.u.", i),
                                800, -0.4, 0.4, 800, -0.4, 0.4);
-        hEffCluMult[i] = new TH1F(Form("hEffCluMult_%i", i), Form("Cluter multiplicity of efficient events, chip %i;# of clusters in event; a.u.", i),
+        hEffCluMult[i] = new TH1F(Form("hEffCluMult_%i", i), Form("Hit multiplicity of 100% efficient events, chip %i;# of clusters in event; a.u.", i),
                                   200, -0.5, 199.5);
     }
     
@@ -346,7 +346,7 @@ Bool_t Na61Analysis::WriteHitsTree(TString fname, TString opt) {
     fname = fDirPathPlots + "/" + fname;
     TFile* file_plots = new TFile(fname.Data(), opt.Data());
     if(!file_plots->IsOpen()) {
-        Report(1, "ERROR: Cannot open output tracks tree file! ", fname);
+        Report(1, "ERROR: Cannot open output tracks tree file! " + fname);
         return kFALSE;
     }
     file_plots->cd();
@@ -444,12 +444,12 @@ Bool_t Na61Analysis::SetInputFileVDTracks(TString filepath_tree)
 
 //__________________________________________________________
 void Na61Analysis::SetDefaultAlignment() {
-    const Float_t xpos = 11.046;
+    const Float_t xpos = 11.049;
     const Float_t ypos = 120.6-0.115;
-    const Float_t zpos = 92.241;
-    const Float_t angY = 6.810*TMath::DegToRad();
+    const Float_t zpos = 92.265;
+    const Float_t angY = 6.589*TMath::DegToRad();
     const Float_t angX = 0.;
-    const Float_t angZ = 0.025*TMath::DegToRad();
+    const Float_t angZ = 0.024*TMath::DegToRad();
 
     for(Short_t i=0; i<fNChips; ++i) {
         Alignment aln;
@@ -779,97 +779,106 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
         if( (ivd+1)%5000 == 0 )
             Report(3, Form(mname + "Processed events %i / %i", ivd+1, nentries_vd));
 
-        Int_t nnt_good = 0;
-        Int_t nnt_eff  = 0;
-        
-        // loop over all tracks in event
-        for(Int_t itrack=0; itrack < fVD_NTracks; ++itrack) {
-            TVector3 to(*(TVector3*)fVD_to->At(itrack));
-            TVector3 td(*(TVector3*)fVD_td->At(itrack));
-            nn_tracks++;
+        // do two loops, first to check if efficiency of the event is 0, and second to fill the histograms
+        Bool_t flagDiscard = kFALSE;
+        for(Int_t loop=0; loop < 2; loop++) {
             
-            //_cuts____
-            //if(fVD_Dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
-            //_cuts____
+            Int_t nnt_good = 0;
+            Int_t nnt_eff  = 0;
+            
+            // loop over all tracks in event
+            for(Int_t itrack=0; itrack < fVD_NTracks; ++itrack) {
+                TVector3 to(*(TVector3*)fVD_to->At(itrack));
+                TVector3 td(*(TVector3*)fVD_td->At(itrack));
+                if(loop) nn_tracks++;
+            
+                //_cuts____
+                //if(fVD_Dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
+                //_cuts____
                 
-            //if( fEvent->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
+                //if( fEvent->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
 
-            TVector3 p = fAlignChip[ichip].IntersectionPointWithLine(to, td);
-            Float_t col, row;
-            fAlignChip[ichip].GlobalToPix(p, col, row);
+                TVector3 p = fAlignChip[ichip].IntersectionPointWithLine(to, td);
+                Float_t col, row;
+                fAlignChip[ichip].GlobalToPix(p, col, row);
 
-            Bool_t flagRej = kFALSE;
-            if(col<=wc || row<=wr || col>fNCols-wc || row>fNRows-wr)
-                flagRej = kTRUE;
-            for(UInt_t i=0; i<fHotPixCols[ichip].size(); i++)
-                if( TMath::Abs(col-fHotPixCols[ichip].at(i)) < wc && TMath::Abs(row-fHotPixRows[ichip].at(i)) < wr)
+                Bool_t flagRej = kFALSE;
+                if(col<=wc || row<=wr || col>fNCols-wc || row>fNRows-wr)
                     flagRej = kTRUE;
-            for(UInt_t i=0; i<fExclCols[ichip].size(); i++)
-                if( TMath::Abs(col-fExclCols[ichip].at(i)) < wc )
-                    flagRej = kTRUE;
+                for(UInt_t i=0; i<fHotPixCols[ichip].size(); i++)
+                    if( TMath::Abs(col-fHotPixCols[ichip].at(i)) < wc && TMath::Abs(row-fHotPixRows[ichip].at(i)) < wr)
+                        flagRej = kTRUE;
+                for(UInt_t i=0; i<fExclCols[ichip].size(); i++)
+                    if( TMath::Abs(col-fExclCols[ichip].at(i)) < wc )
+                        flagRej = kTRUE;
             
-            if(flagRej) {
-                nn_rej++;
-                hEffRej[ichip]->Fill(col, row);
-                continue;
-            }
+                if(flagRej || flagDiscard) {
+                    nn_rej++;
+                    hEffRej[ichip]->Fill(col, row);
+                    continue;
+                }
             
-            nn_good++;
-            hEffGood[ichip]->Fill(col, row);
-            nnt_good++;
+                if(loop) nn_good++;
+                if(loop) hEffGood[ichip]->Fill(col, row);
+                nnt_good++;
 
-            Int_t nhits = 0;
-            for(Int_t iclu=0; iclu < fEvent->GetPlane(ichip)->GetNClustersSaved(); ++iclu) {
-                Int_t mult = fEvent->GetPlane(ichip)->GetCluster(iclu)->GetMultiplicity();
-                BinaryCluster* cluster = fEvent->GetPlane(ichip)->GetCluster(iclu);
+                Int_t nhits = 0;
+                for(Int_t iclu=0; iclu < fEvent->GetPlane(ichip)->GetNClustersSaved(); ++iclu) {
+                    Int_t mult = fEvent->GetPlane(ichip)->GetCluster(iclu)->GetMultiplicity();
+                    BinaryCluster* cluster = fEvent->GetPlane(ichip)->GetCluster(iclu);
 
-                //_cuts____
-                //if(mult > 10) continue;
-                //if(cluster->HasHotPixels()) continue;
-                //if(cluster->HasBorderPixels()) continue;
-                //if(cluster->HasExclDblcolPixels()) continue;
-                //_cuts____
+                    //_cuts____
+                    //if(mult > 10) continue;
+                    //if(cluster->HasHotPixels()) continue;
+                    //if(cluster->HasBorderPixels()) continue;
+                    //if(cluster->HasExclDblcolPixels()) continue;
+                    //_cuts____
+                    
+                    TVector3 d = fAlignChip[ichip].DistPixLine(cluster->GetX(), cluster->GetY(), to, td, kTRUE); // search in localc coordinates
 
-                TVector3 d = fAlignChip[ichip].DistPixLine(cluster->GetX(), cluster->GetY(), to, td, kTRUE); // search in localc coordinates
+                    //if( d.X()*d.X()/wx/wx + d.Y()*d.Y()/wy/wy < 1. ) {
+                    if( TMath::Abs(d.X()) < wx && TMath::Abs(d.Y()) < wy ) {
+                        nhits++;
+                        if(loop) hEffEffD[ichip]->Fill(d.X(), d.Y());
+                    }
+                
+                } // END FOR clusters
 
-                //if( d.X()*d.X()/wx/wx + d.Y()*d.Y()/wy/wy < 1. ) {
-                if( TMath::Abs(d.X()) < wx && TMath::Abs(d.Y()) < wy ) {
-                    nhits++;
-                    hEffEffD[ichip]->Fill(d.X(), d.Y());
+                if(loop) {
+                    if( nhits >= 1 ) {
+                        nn_eff++;
+                        hEffEff[ichip]->Fill(col, row);
+                    }
+                    else {
+                        nn_ineff++;
+                        hEffIneff[ichip]->Fill(col, row);
+                    }
+                    
+                    if( nhits >  1 ) {
+                        nn_mult++;
+                    }
                 }
                 
-            } // END FOR clusters
-            
-            if( nhits >= 1 ) {
-                nn_eff++;
-                hEffEff[ichip]->Fill(col, row);
-                nnt_eff++;
+                if( nhits >= 1 )
+                    nnt_eff++;
+                
+                //if( nhits >  1 ) Report(3, mname + "Double hit");
+            } // END FOR tracks
+
+            if(loop == 0) {
+                //if(100.*nnt_eff/nnt_good < 99.9)
+                //    Report(3, mname + Form("Event = %i, Efficiency = %.2f    %i %i %i", fVD_EventN+1, 100.*nnt_eff/nnt_good, nnt_eff, nnt_good, fVD_NTracks));
+                if(nnt_good > 0 && nnt_eff == 0) {
+                    nn_discev++;
+                    flagDiscard = kTRUE;
+                }
             }
             else {
-                nn_ineff++;
-                hEffIneff[ichip]->Fill(col, row);
+                //if(!nnt_good)// || nnt_eff < nnt_good)
+                if(nnt_eff && nnt_eff == nnt_good)
+                    hEffCluMult[ichip]->Fill( fEvent->GetPlane(ichip)->GetNClustersSaved() );
             }
-            
-            if( nhits >  1 ) {
-                nn_mult++;
-            }
-
-            //if( nhits >  1 ) Report(3, mname + "Double hit");
-            
-        } // END FOR tracks
-        
-        //if(100.*nnt_eff/nnt_good < 99.9)
-        //    Report(3, mname + Form("Event = %i, Efficiency = %.2f    %i %i %i", fVD_EventN+1, 100.*nnt_eff/nnt_good, nnt_eff, nnt_good, fVD_NTracks));
-        if(nnt_eff > 1) {
-            hEffCluMult[ichip]->Fill( fEvent->GetPlane(ichip)->GetNClustersSaved() );
-        }
-        else if(nnt_good > 1 && nnt_eff == 0) {
-            //hEffCluMult[ichip]->Fill( fEvent->GetPlane(ichip)->GetNClustersSaved() );
-            nn_discev++;
-            nn_good  -= nnt_good;
-            nn_ineff -= nnt_good;
-            nn_rej   += nnt_good;
-        }
+        } // END FOR loop
     } // END FOR events
 
     Report(3, mname + Form("Total tracks:  %i", nn_tracks));

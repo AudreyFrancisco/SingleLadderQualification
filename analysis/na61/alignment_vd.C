@@ -10,6 +10,7 @@
 #include "TF1.h"
 #include "TMinuit.h"
 #include "TGraph.h"
+#include "TSystem.h"
 
 #include "../classes/helpers.cpp"
 #include "../classes/Alignment.hpp"
@@ -141,9 +142,9 @@ Bool_t alignment_vd(
 
     Bool_t   fix_par[]          = { 0, 0, 0, 0, 0, 0};
     Char_t   PARM_NAMES[6][255] = {"x0","y0","z0", "ang1", "ang2", "ang3"};
-    Double_t PARM_START[6]      = {11.05, -0.115, 92.24, 0.115,  0.00,  4.3e-4};
+    Double_t PARM_START[6]      = {11.05, -0.115, 92.24, 0.115,  0.0,  0.};
     //Double_t PARM_START[6]      = {900., 900., 100, 0.10,  0.0,  0.0};
-    Double_t PARM_STEP[6]       = {1e-2, 1e-2, 1e-2, 1e-2,  1e-2, 1e-2};
+    Double_t PARM_STEP[6]       = { 0.1, 0.1, 0.2, 0.01,  0.1, 0.1};
     Double_t PARM_LOWER[6]      = {-1e3, -1e3, -1e3, -1.,  -1., -1.};
     Double_t PARM_UPPER[6]      = { 1e3,  1e3,  1e3,  1.,   1.,  1.}; 
     Double_t PARM_END[6];
@@ -169,8 +170,10 @@ Bool_t alignment_vd(
     arglist[0] = 10000;   // do at least 1000 function calls
     arglist[1] = 0.1;     // tolerance = 0.1
     minuit->mnexcm("MIGRAD", arglist, 2, ierflg );
+    //minuit->mnexcm("HESSE", arglist, 2, ierflg );
+    //minuit->mnexcm("MINOS", arglist, 2, ierflg );
     cout << endl << "alignment_vd() : MIGRAD exited with status " << ierflg << endl;
-    if(ierflg) return kFALSE;
+    if(ierflg) gSystem->Exit(1);//return kFALSE;
     //minuit->mnexcm("IMPROVE", arglist, 1, ierflg );
     
     cout << endl;
