@@ -200,7 +200,7 @@ void Na61Analysis::InitHistograms(const Int_t binred)
                               (fNCols+512)/binred, -256-0.5, 256+fNCols-0.5, (fNRows+512)/binred, -384-0.5, 128+fNRows-0.5);
         hEffEffD[i] = new TH2F(Form("hEffD_%i", i), Form("Efficient tracks relative to hit position, chip %i;X [mm];Y [mm];a.u.", i),
                                800, -0.4, 0.4, 800, -0.4, 0.4);
-        hEffCluMult[i] = new TH1F(Form("hEffCluMult_%i", i), Form("Hit multiplicity of 100% efficient events, chip %i;# of clusters in event; a.u.", i),
+        hEffCluMult[i] = new TH1F(Form("hEffCluMult_%i", i), Form("Hit multiplicity of 100%% efficient events, chip %i ;# of clusters in event; a.u.", i),
                                   200, -0.5, 199.5);
     }
     
@@ -617,7 +617,7 @@ void Na61Analysis::PrealignmentVD(Float_t ex_sigma) {
             TVector3 td(*(TVector3*)fVD_td->At(itrack));
 
             //_cuts____
-            //if(fVD_Dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
+            //if(fVD_Dataset[itrack] > 6) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
             //if(td.X() / td.Z() > 1) continue;
             Float_t c4, r4;
             TVector3 p4 = fAlignChip[4].IntersectionPointWithLine(to, td);

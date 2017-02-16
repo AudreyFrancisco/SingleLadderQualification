@@ -74,7 +74,7 @@ Bool_t alignment_vd(
     for(Int_t i=0; i<n_runs; ++i) {
         TString fname = dirpath_data + run[i];
         fname += "/results" + suffix;
-        fname += "/prealignment_vd"; + suffix;
+        fname += "/prealignment_vd";// + suffix;
         fname += ".root";
         cout << "alignment_vd() : Loading file " << fname << endl;
         if(!chain->Add(fname.Data())) {

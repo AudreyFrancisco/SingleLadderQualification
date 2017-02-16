@@ -18,8 +18,8 @@ void main_Na61Analysis() {
     enum  AnaType { kPrealign, kEfficiency };
     const TString suffix   = "_cr2";
     const Int_t   n_runs   = 3;
-    //const AnaType ana_type = kPrealign;
-    const AnaType ana_type = kEfficiency;
+    const AnaType ana_type = kPrealign;
+    //const AnaType ana_type = kEfficiency;
     
     const TString *runs_vd;
     if(ana_type == kPrealign)        runs_vd = runs_vd_aln;
@@ -49,6 +49,11 @@ void main_Na61Analysis() {
         if(ana_type == kPrealign) {
             ana->PrealignmentVD();
             ana->ExtractTracksVD(4);
+
+            //run_vd = dir_vd + runs_vd_eff[i];
+            //if( !ana->SetInputFileVDTracks(run_vd) ) gSystem->Exit(1);
+            //ana->PrealignmentVD();
+            //ana->ExtractTracksVD(4);
             
             ana->SetOutputDirPlots(dplots);
             ana->WriteHistograms("prealignment_vd.root");
@@ -56,7 +61,6 @@ void main_Na61Analysis() {
             
             ana->ResetHistograms();
             ana->ResetTracksTree();
-            
         }
         
         ana->EfficiencyVD();
@@ -67,9 +71,9 @@ void main_Na61Analysis() {
     
     ana->SetOutputDirPlots("~/work/na61/data/alignment_vd/");
     if(ana_type == kPrealign) {
-        ana->WriteHistograms("prealignment_vd.root");
-        ana->WriteTracksTree("prealignment_vd.root");
-        ana->DrawHistograms("prealignment");
+        //ana->WriteHistograms("prealignment_vd.root");
+        //ana->WriteTracksTree("prealignment_vd.root");
+        //ana->DrawHistograms("prealignment");
     }
     else if(ana_type == kEfficiency) {
         ana->WriteHistograms("efficiency_vd.root");
