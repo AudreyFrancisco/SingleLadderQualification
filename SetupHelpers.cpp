@@ -83,6 +83,73 @@ int initSetupHalfStave(TConfig* config, std::vector <TReadoutBoard *> * boards, 
 // Make the daisy chain for OB readout, based on enabled chips
 // i.e. to be called after CheckControlInterface
 void MakeDaisyChain(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
+  int firstLow[8], firstHigh[8], lastLow[8], lastHigh[8];
+  
+  for (int imod = 0; imod < 8; imod ++) {
+    firstLow  [imod] = 0x77;
+    firstHigh [imod] = 0x7f; 
+    lastLow   [imod] = 0x0;
+    lastHigh  [imod] = 0x8;
+  }
+
+  // find the first and last enabled chip in each row
+  for (int i = 0; i < chips->size(); i++) {
+    if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
+    int chipId   = chips->at(i)->GetConfig()->GetChipId();
+    int modId    = (chipId & 0x70) >> 4;
+
+    if ( (chipId & 0x8) && (chipId < firstHigh [modId])) firstHigh [modId] = chipId;
+    if (!(chipId & 0x8) && (chipId < firstLow  [modId])) firstLow  [modId] = chipId;
+
+    if ( (chipId & 0x8) && (chipId > lastHigh [modId])) lastHigh [modId] = chipId;
+    if (!(chipId & 0x8) && (chipId > lastLow  [modId])) lastLow  [modId] = chipId;
+  }
+
+  for (int i = 0; i < chips->size(); i++) {
+    if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
+    int chipId   = chips->at(i)->GetConfig()->GetChipId();
+    int modId    = (chipId & 0x70) >> 4;
+    int previous = -1;
+    
+    // first chip in row gets token and previous chip is last chip in row (for each module)
+    // (first and last can be same chip)
+    if (chipId == firstLow [modId]) {
+      chips->at(i)->GetConfig()->SetInitialToken(true);
+      chips->at(i)->GetConfig()->SetPreviousId  (lastLow [modId]);
+    }
+    else if (chipId == firstHigh [modId]) {
+      chips->at(i)->GetConfig()->SetInitialToken(true);
+      chips->at(i)->GetConfig()->SetPreviousId  (lastHigh [modId]);
+    }
+    // chip is enabled, but not first in row; no token, search previous chip
+    // search range: first chip in row on same module .. chip -1
+    else if (chipId & 0x8) {
+      chips->at(i)->GetConfig()->SetInitialToken(false);
+      for (int iprev = chipId - 1; (iprev >= firstHigh [modId]) && (previous == -1); iprev--) {
+        if (config->GetChipConfigById(iprev)->IsEnabled()) {
+          previous = iprev; 
+	}
+      }
+      chips->at(i)->GetConfig()->SetPreviousId (previous);
+    }
+    else if (!(chipId & 0x8)) {
+      chips->at(i)->GetConfig()->SetInitialToken(false);
+      for (int iprev = chipId - 1; (iprev >= firstLow [modId]) && (previous == -1); iprev--) {
+        if (config->GetChipConfigById(iprev)->IsEnabled()) {
+          previous = iprev; 
+	}
+      }
+      chips->at(i)->GetConfig()->SetPreviousId (previous);
+    }
+
+    std::cout << "Chip Id " << chipId << ", token = " << (bool) chips->at(i)->GetConfig()->GetInitialToken() << ", previous = " << chips->at(i)->GetConfig()->GetPreviousId() << std::endl;
+  }
+}
+
+
+
+
+void MakeDaisyChainOld(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
   for (int i = 0; i < chips->size(); i++) {
     if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
     int chipId   = chips->at(i)->GetConfig()->GetChipId();

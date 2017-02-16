@@ -266,10 +266,15 @@ int main() {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
     for (int i = 0; i < fChips.size(); i ++) {
-      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-      fEnabled ++;
-      std::cout << "Configuring chip " << i << ", chip ID = "<< fChips.at(i)->GetConfig()->GetChipId()<< std::endl;
-      configureChip (fChips.at(i));
+      if (fChips.at(i)->GetConfig()->IsEnabled()) {
+        fEnabled ++;
+        std::cout << "Configuring chip " << i << ", chip ID = "<< fChips.at(i)->GetConfig()->GetChipId()<< std::endl;
+        configureChip (fChips.at(i));
+      }
+      else if (fChips.at(i)->GetConfig()->HasEnabledSlave()) {
+        std::cout << "Configuring PLL of chip " << i << ", chip ID = "<< fChips.at(i)->GetConfig()->GetChipId()<< std::endl;
+	AlpideConfig::BaseConfigPLL(fChips.at(i));
+      }
     }
     std::cout << "Found " << fEnabled << " enabled chips" << std::endl;
 

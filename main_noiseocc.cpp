@@ -272,9 +272,13 @@ int main() {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
     for (int i = 0; i < fChips.size(); i ++) {
-      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-      fEnabled ++;
-      configureChip (fChips.at(i));
+      if (fChips.at(i)->GetConfig()->IsEnabled()) {
+        fEnabled ++;
+        configureChip (fChips.at(i));
+      }
+      else if (fChips.at(i)->GetConfig()->HasEnabledSlave()) {
+	AlpideConfig::BaseConfigPLL(fChips.at(i));
+      }      
     }
 
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
