@@ -72,6 +72,7 @@ ControlInterface::~ControlInterface()
 //
 void ControlInterface::addEnableClock(bool en)
 {
+printf("ControlInterface::addEnableClock %d %lx\n", en, (long) this);
 	wbb->addRMWbits(baseAddress+regConfig, ~CFG_CLK_EN, en ? CFG_CLK_EN : 0);
 }
 
