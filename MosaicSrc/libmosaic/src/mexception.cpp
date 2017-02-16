@@ -28,22 +28,71 @@
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
-
-#include <string>
 #include "mexception.h"
 
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+MException::MException()
 {
-public:
-	explicit PControlInterfaceError(const string& __arg);
-};
+}
+
+MException::MException(const string& arg)
+{
+	msg = arg;
+}
+
+MException::~MException() throw()
+{
+}
+
+MIPBusUDPError::MIPBusUDPError(const string& arg)
+{
+	 msg = "IPBusUDP Error: " + arg;
+}
+
+// IPBus over UDP Timeout
+MIPBusUDPTimeout::MIPBusUDPTimeout()
+{
+}
+
+// IPBus error
+MIPBusError::MIPBusError(const string& arg)
+{
+	 msg = "IPBus Error: " + arg;
+}
+
+// IPBus error - Remote Bus Write error
+MIPBusErrorWrite::MIPBusErrorWrite(const string& arg)
+{
+	 msg = "IPBus Error: " + arg;
+}
+
+// Data connection over TCP error
+MDataConnectError::MDataConnectError(const string& arg)
+{
+	 msg = "TCP Data connection Error: " + arg;
+}
+
+// Data receive over TCP
+MDataReceiveError::MDataReceiveError(const string& arg)
+{
+	 msg = "TCP Data receive Error: " + arg;
+}
+
+// Data parser
+MDataParserError::MDataParserError(const string& arg)
+{
+	 msg = "TCP Data parser Error: " + arg;
+}
+
+// Board initialization
+MBoardInitError::MBoardInitError(const string& arg)
+{
+	 msg = "Board initialization Error: " + arg;
+}
 
 
+const char* MException::what() const throw()
+{
+	return msg.c_str();
+}
 
-#endif // PEXCEPTION
+

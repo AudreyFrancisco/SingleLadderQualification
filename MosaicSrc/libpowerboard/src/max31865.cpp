@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014
+ * Copyright (C) 2017
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,26 +24,54 @@
  * /_/ /_/ |__/ /_/    /_/ |__/  	 
  *
  * ====================================================
- * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
+ * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "max31865.h"
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
-
-#include <string>
-#include "mexception.h"
-
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+MAX31865::MAX31865(SC18IS602 *spi, uint8_t slave)
 {
-public:
-	explicit PControlInterfaceError(const string& __arg);
-};
+	spiBus = spi;
+	spiSlave = slave;
+}
 
 
+void MAX31865::writeRegister(uint8_t reg, uint8_t data)
+{
+	uint8_t buffer[2];
 
-#endif // PEXCEPTION
+	buffer[0] = reg | REG_WRITE;
+	buffer[1] = data;
+
+	spiBus->spiWrite(spiSlave, 2, buffer);
+}
+
+uint8_t MAX31865::readRegister(uint8_t reg)
+{
+	uint8_t buffer[2];
+
+	buffer[0] = reg;
+	buffer[1] = 0x00;		// dummy value.
+
+	spiBus->spiWrite(spiSlave, 2, buffer);
+	spiBus->spiReadBuffer(2, buffer);
+
+	return buffer[1];	
+}
+
+void MAX31865::configure(uint8_t cfg)
+{
+	writeRegister(REG_Configuration, cfg);
+}
+
+uint16_t MAX31865::getRTD()
+{
+	uint16_t resH = readRegister(REG_RTD_MSB);
+	uint16_t resL = readRegister(REG_RTD_LSB);
+	
+	return ((resH&0xff)<<8) | (resL&0xff);
+}
+

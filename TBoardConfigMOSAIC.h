@@ -13,7 +13,7 @@
 #define BOARDCONFIGMOSAIC_H
 
 #include "TBoardConfig.h"
-#include "MosaicSrc/mruncontrol.h"
+#include "Mosaic.h"
 #include <stdio.h>
 
 #define MAX_MOSAICCTRLINT 2

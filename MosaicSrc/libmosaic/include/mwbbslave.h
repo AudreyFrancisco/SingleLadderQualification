@@ -28,22 +28,25 @@
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
+#ifndef MWBBSLAVE_H
+#define MWBBSLAVE_H
 
-#include <string>
-#include "mexception.h"
+#include <stdint.h>
+#include "wishbonebus.h"
 
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+class MWbbSlave
 {
 public:
-	explicit PControlInterfaceError(const string& __arg);
+    MWbbSlave();
+    MWbbSlave(WishboneBus *wbbPtr, uint32_t baseAddress);
+	void setBusAddress(WishboneBus *wbbPtr, uint32_t baseAdd);
+	void execute();
+
+protected:
+	WishboneBus *wbb;
+	uint32_t baseAddress;
 };
 
 
 
-#endif // PEXCEPTION
+#endif // MWBBSLAVE_H

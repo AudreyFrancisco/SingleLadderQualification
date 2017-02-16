@@ -27,23 +27,37 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
+#include <stdio.h>
+#include <stdlib.h>
+#include "mtriggercontrol.h"
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
 
-#include <string>
-#include "mexception.h"
-
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+MTriggerControl::MTriggerControl(WishboneBus *wbbPtr, uint32_t baseAdd): 
+			MWbbSlave(wbbPtr, baseAdd)
 {
-public:
-	explicit PControlInterfaceError(const string& __arg);
-};
+}
+
+
+void MTriggerControl::addEnableExtTrigger(bool en, bool levelSensitive)
+{
+	uint32_t tmp;
+
+	tmp = en ? EN_EXT_TRIGGER : 0;
+	tmp |= levelSensitive ? EXT_TRG_LEVEL : 0;
+
+	wbb->addWrite(baseAddress+regCfg, tmp);
+}
+
+void MTriggerControl::getTriggerCounter(uint32_t *counter)
+{
+	wbb->addRead(baseAddress+regTriggerCounter, counter);
+	wbb->execute();
+}
 
 
 
-#endif // PEXCEPTION
+
+
+
+
+

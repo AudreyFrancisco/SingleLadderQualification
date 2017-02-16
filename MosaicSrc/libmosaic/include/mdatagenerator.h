@@ -28,22 +28,37 @@
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
+#ifndef MDATAGENERATOR_H
+#define MDATAGENERATOR_H
 
-#include <string>
-#include "mexception.h"
+#include <stdint.h>
+#include "mwbbslave.h"
 
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+class MDataGenerator: public MWbbSlave
 {
 public:
-	explicit PControlInterfaceError(const string& __arg);
+    MDataGenerator();
+    MDataGenerator(WishboneBus *wbbPtr, uint32_t baseAddress);
+	void setup(uint32_t evSize, uint32_t evDelay, bool on=true);
+	void getSetup(uint32_t *evSize, uint32_t *evDelay, bool *on);
+	void setOnOff(bool on);
+	void start() { return setOnOff(true); }
+	void stop() { return setOnOff(false); }
+
+private:					// WBB Slave registers map 
+	enum regAddress_e {
+		regModeOn					= 0,		// Run control register
+		regEventSize 				= 1,		// Event size
+		regEventDelay				= 2			// delay between events
+	};
+
+	enum modeOn_e {
+		MODEON_ON				= (1<<0),
+		MODEON_MODE				= (1<<1)	 // NOT implemented
+	};
+
 };
 
 
 
-#endif // PEXCEPTION
+#endif // MDATAGENERATOR_H

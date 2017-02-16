@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014
+ * Copyright (C) 2015
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,26 +24,25 @@
  * /_/ /_/ |__/ /_/    /_/ |__/  	 
  *
  * ====================================================
- * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
+ * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2015.
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
+#ifndef PCF8574_H
+#define PCF8574_H
 
-#include <string>
-#include "mexception.h"
+#include <stdint.h>
+#include "i2cslave.h"
 
-//class string;
-using namespace std;
 
-// Control interface errors
-class PControlInterfaceError : public MException 
+class PCF8574 : public I2Cslave
 {
 public:
-	explicit PControlInterfaceError(const string& __arg);
+	PCF8574(I2Cbus *bus, uint8_t address);
+	void write(uint8_t b);
+	uint8_t read();
 };
 
 
 
-#endif // PEXCEPTION
+#endif // PCF8574_H

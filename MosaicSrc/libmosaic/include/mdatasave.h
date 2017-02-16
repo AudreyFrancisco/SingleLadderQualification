@@ -28,22 +28,38 @@
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
+#ifndef MDATASAVE_H
+#define MDATASAVE_H
 
-#include <string>
-#include "mexception.h"
+#include <stdint.h>
+#include "mdatareceiver.h"
 
-//class string;
-using namespace std;
+// function pointer
+typedef void (*saveFunction_t)(char* hdr, int hdrLen, char* data, int dataLen);
 
-// Control interface errors
-class PControlInterfaceError : public MException 
+class MDataSave : public MDataReceiver
 {
 public:
-	explicit PControlInterfaceError(const string& __arg);
+	MDataSave();
+	void setEventSize(long evSize) { eventSize = evSize; }
+	void flush();
+	void setSaveFunction(saveFunction_t s) { saveFunction = s; }
+	
+protected:
+	long parse(int numClosed);
+
+private:
+	long eventSize;
+	saveFunction_t saveFunction;
+
+public:
+	uint32_t expectedData;
+
 };
 
 
 
-#endif // PEXCEPTION
+
+
+
+#endif // MDATASAVE_H

@@ -26,6 +26,7 @@
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
+ * 21/12/2015	Added mutex for multithread operation
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,14 +68,30 @@ ControlInterface::~ControlInterface()
 }
 
 //
+//	Control the output of FE clock to ALPIDE chip
+//
+void ControlInterface::addEnableClock(bool en)
+{
+	wbb->addRMWbits(baseAddress+regConfig, ~CFG_CLK_EN, en ? CFG_CLK_EN : 0);
+}
+
+//
 //	set the output phase
 //
 void ControlInterface::setPhase(uint8_t phase)
 {
-	wbb->addWrite(baseAddress+regDataPhase, phase);
+	wbb->addRMWbits(baseAddress+regConfig, ~CFG_PHASE_MASK, phase);
 	wbb->execute();
 }
 
+
+//
+//	Read error counter (Works only on dedicated firmware) 
+//
+void ControlInterface::addGetErrorCounter(uint32_t *ctr)
+{
+	wbb->addRead(baseAddress+regConfig, ctr);
+}
 
 //
 // schedule a broadcast command
@@ -85,7 +102,6 @@ void ControlInterface::addSendCmd(uint8_t cmd)
 		throw PControlInterfaceError("No IPBus configured");
 
 	wbb->addWrite(baseAddress+regWriteCtrl, cmd << 24);
-// printf("Sd_com-> 0x%04x : 0x%04x\n", regWriteCtrl, cmd);
 }
 
 //
@@ -93,6 +109,8 @@ void ControlInterface::addSendCmd(uint8_t cmd)
 //
 void ControlInterface::addWriteReg(uint8_t chipID, uint16_t address, uint16_t data)
 {
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+
 	if (!wbb)
 		throw PControlInterfaceError("No IPBus configured");
 
@@ -102,7 +120,6 @@ void ControlInterface::addWriteReg(uint8_t chipID, uint16_t address, uint16_t da
 					((chipID & 0xff) << 16) |
 					(address & 0xffff)
 					);
-// printf("wr_reg-> 0x%04x : 0x%04x : 0x%04x\n", chipID, address, data);
 }
 
 
@@ -112,6 +129,8 @@ void ControlInterface::addWriteReg(uint8_t chipID, uint16_t address, uint16_t da
 //
 void ControlInterface::addReadReg(uint8_t chipID, uint16_t address, uint16_t *dataPtr)
 {
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+
 	if (!wbb)
 		throw PControlInterfaceError("No IPBus configured");
 
@@ -137,6 +156,8 @@ void ControlInterface::addReadReg(uint8_t chipID, uint16_t address, uint16_t *da
 
 void ControlInterface::execute()
 {
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+
 	try {
 		MWbbSlave::execute();
 

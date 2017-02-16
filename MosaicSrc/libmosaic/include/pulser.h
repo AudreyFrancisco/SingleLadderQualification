@@ -28,22 +28,45 @@
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
+#ifndef PULSER_H
+#define PULSER_H
 
-#include <string>
-#include "mexception.h"
+#include <stdint.h>
+#include "mwbbslave.h"
 
-//class string;
-using namespace std;
 
-// Control interface errors
-class PControlInterfaceError : public MException 
+
+class Pulser: public MWbbSlave
 {
 public:
-	explicit PControlInterfaceError(const string& __arg);
+    Pulser();
+    Pulser(WishboneBus *wbbPtr, uint32_t baseAddress);
+	~Pulser();
+	void setBusAddress(WishboneBus *wbbPtr, uint32_t baseAddress);
+	void setConfig(uint32_t triggerDelay, uint32_t pulseDelay, uint32_t opMode=OPMODE_ENPLS_BIT|OPMODE_ENTRG_BIT);
+	void getConfig(uint32_t *triggerDelay, uint32_t *pulseDelay, uint32_t *opMode);
+	void run(uint32_t numPulses);
+	void getStatus(uint32_t *numPulses);
+
+
+private:					// WBB Slave registers map 
+	enum regAddress_e {
+		regOpMode				= 0,
+		regTriggerDelay			= 1,
+		regPulseDelay			= 2,
+		regNumPulses			= 3,
+		regStatus				= 7
+		};
+
+public:
+	enum readFlagsBits_e {
+		OPMODE_ENPLS_BIT	= (1<<0),
+		OPMODE_ENTRG_BIT	= (1<<1),
+		OPMODE_ENEXTTRG_BIT	= (1<<2)
+	};
+
 };
 
 
 
-#endif // PEXCEPTION
+#endif // PULSER_H
