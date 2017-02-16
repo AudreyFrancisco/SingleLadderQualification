@@ -4,6 +4,7 @@
 
 void main_Na61Analysis() {
 
+    enum  AnaType { kPrealign, kEfficiency };
     const TString dir_al = "/home/msuljic/work/na61/data/by_run/";
     const TString dir_vd = "/home/msuljic/work/na61/data/vdal/";
     const TString runs_al[] = {"27487",
@@ -12,12 +13,12 @@ void main_Na61Analysis() {
     const TString runs_vd_aln[] = {"vd_183_new.root",
                                    "vd_185_new.root",
                                    "vd_186_new.root"};
-    const TString runs_vd_eff[] = {"vd_3pt_183_eff.root",
-                                   "vd_3pt_185_eff.root",
-                                   "vd_3pt_186_eff.root"};
-    enum  AnaType { kPrealign, kEfficiency };
+    const TString runs_vd_eff[] = {"vd_all_183.root",
+                                   "vd_all_185.root",
+                                   "vd_all_186.root"};
     const TString suffix   = "_cr2";
     const Int_t   n_runs   = 3;
+    const Bool_t  write_separate = kFALSE;
     const AnaType ana_type = kPrealign;
     //const AnaType ana_type = kEfficiency;
     
@@ -54,13 +55,14 @@ void main_Na61Analysis() {
             //if( !ana->SetInputFileVDTracks(run_vd) ) gSystem->Exit(1);
             //ana->PrealignmentVD();
             //ana->ExtractTracksVD(4);
-            
-            ana->SetOutputDirPlots(dplots);
-            ana->WriteHistograms("prealignment_vd.root");
-            ana->WriteTracksTree("prealignment_vd.root");
-            
-            ana->ResetHistograms();
-            ana->ResetTracksTree();
+
+            if(write_separate) {
+                ana->SetOutputDirPlots(dplots);
+                ana->WriteHistograms("prealignment_vd.root");
+                ana->WriteTracksTree("prealignment_vd.root");
+                ana->ResetHistograms();
+                ana->ResetTracksTree();
+            }
         }
         
         ana->EfficiencyVD();
@@ -70,10 +72,10 @@ void main_Na61Analysis() {
     cout << endl;
     
     ana->SetOutputDirPlots("~/work/na61/data/alignment_vd/");
-    if(ana_type == kPrealign) {
-        //ana->WriteHistograms("prealignment_vd.root");
+    if(ana_type == kPrealign && !write_separate) {
+        ana->WriteHistograms("prealignment_vd.root");
         //ana->WriteTracksTree("prealignment_vd.root");
-        //ana->DrawHistograms("prealignment");
+        ana->DrawHistograms("prealignment");
     }
     else if(ana_type == kEfficiency) {
         ana->WriteHistograms("efficiency_vd.root");

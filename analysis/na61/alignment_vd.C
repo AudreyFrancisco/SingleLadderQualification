@@ -11,6 +11,8 @@
 #include "TMinuit.h"
 #include "TGraph.h"
 #include "TSystem.h"
+#include "TAxis.h"
+#include "TStyle.h"
 
 #include "../classes/helpers.cpp"
 #include "../classes/Alignment.hpp"
@@ -62,8 +64,10 @@ Bool_t alignment_vd(
     
     cout << "alignment_vd() : Starting..." << endl;
 
-    set_my_style();
-
+    //set_my_style();
+    gStyle->SetOptStat(1110);
+    gStyle->SetOptFit(111);
+    
     const TString filename_out = "alignment_vd_" + suffix;
     const Short_t scols        = 1024;
     const Short_t srows        = 512;
@@ -95,7 +99,7 @@ Bool_t alignment_vd(
 
     // alignment before
     Alignment align_before;
-    align_before.SetPos(TVector3(11.1, 120.4-30.15*4, 92.3));
+    align_before.SetPos(TVector3(11.1, 120.5-30.15*4, 92.3));
     TRotation rot;
     rot.RotateY(6.*TMath::DegToRad());
     align_before.SetRotation(rot);
@@ -217,20 +221,24 @@ Bool_t alignment_vd(
         hDYafter->Fill(d.Y());
     }
 
-    
+    Float_t rang = 0.1;
     TCanvas *c1 = new TCanvas("c1", "Alignment Canvas 1", 50, 50, 1600, 1000);
-    c1->Divide(2,2);
+    c1->Divide(2,1);
     c1->cd(1);
     hDXbefore->Fit("gaus", "Q");
+    hDXbefore->GetXaxis()->SetRangeUser(-rang,rang);
     hDXbefore->DrawCopy();
     c1->cd(2);
     hDYbefore->Fit("gaus", "Q");
+    hDYbefore->GetXaxis()->SetRangeUser(-rang,rang);
     hDYbefore->DrawCopy();
     c1->cd(3);
     hDXafter->Fit("gaus", "Q");
+    hDXafter->GetXaxis()->SetRangeUser(-rang,rang);
     hDXafter->DrawCopy();
     c1->cd(4);
     hDYafter->Fit("gaus", "Q");
+    hDYafter->GetXaxis()->SetRangeUser(-rang,rang);
     hDYafter->DrawCopy();
     c1->Print(Form("%s/alignment_vd_c1.pdf", dirpath_out.Data()));
 

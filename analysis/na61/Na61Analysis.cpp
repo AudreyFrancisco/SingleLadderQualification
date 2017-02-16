@@ -4,6 +4,7 @@
 #include <TFile.h>
 #include <TCanvas.h>
 #include <TAxis.h>
+#include <TStyle.h>
 
 #include "Na61Analysis.hpp"
 #include "../classes/helpers.h"
@@ -70,6 +71,7 @@ Na61Analysis::Na61Analysis():
     fResSigma[1] = -1.;
     
     set_my_style();
+    gStyle->SetOptStat(1110);
 /*
     fhVx = new TH1F("hVx","event 2 part vertexes",2000,-20,20);
     fhVy = new TH1F("hVy","event 2 part vertexes",2000,-20,20);
@@ -453,6 +455,7 @@ void Na61Analysis::SetDefaultAlignment() {
 
     for(Short_t i=0; i<fNChips; ++i) {
         Alignment aln;
+        //aln.SetPos(TVector3(11.1, 120.5-30.15*4, 92.3));
         aln.SetPos(TVector3(xpos, ypos-30.15*i, zpos));
         TRotation rot;
         rot.RotateY(angY);
@@ -617,13 +620,13 @@ void Na61Analysis::PrealignmentVD(Float_t ex_sigma) {
             TVector3 td(*(TVector3*)fVD_td->At(itrack));
 
             //_cuts____
-            //if(fVD_Dataset[itrack] > 6) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
+            //if(fVD_Dataset[itrack] < 5) continue; // {down1, down2, up1, up2, up1x, up2x, 3pt0, 3pt1, 3pt3}
             //if(td.X() / td.Z() > 1) continue;
             Float_t c4, r4;
             TVector3 p4 = fAlignChip[4].IntersectionPointWithLine(to, td);
             fAlignChip[4].GlobalToPix(p4, c4, r4);
-            if(r4<0) continue;
-            //if(c4<0 || c4>fNCols) continue; // only chip4 is interesting
+            //if(r4<-100) continue;
+            //if(c4<-100 || c4>fNCols+100) continue; // only chip4 is interesting
             //_cuts____
                 
             Bool_t flagHICHit = kFALSE;
@@ -672,11 +675,13 @@ void Na61Analysis::PrealignmentVD(Float_t ex_sigma) {
                         }       
                     }
                     else {
-                        if( TMath::Abs(d.Y()) < 0.5 ) { //_cuts____
+                        if( TMath::Abs(d.Y()) < 0.25 ) //_cuts____
+                        {
                             hDX[ichip]->Fill( d.X() );
                             hDXzoom[ichip]->Fill( d.X() );
                         }
-                        if( TMath::Abs(d.X()) < 0.5 ) { //_cuts____
+                        if( TMath::Abs(d.X()) < 0.25 ) //_cuts____
+                        {
                             hDY[ichip]->Fill( d.Y() );
                             hDYzoom[ichip]->Fill( d.Y() );
                         }
@@ -698,22 +703,25 @@ void Na61Analysis::PrealignmentVD(Float_t ex_sigma) {
         Report(3, mname + Form("Extracted %i tracks.", (Int_t)fExTracksTree->GetEntriesFast() ));
     }
     else {
-        TF1 *fres = new TF1("fres", "[0]*TMath::Gaus(x, [1], [2])+[3]", -0.2, 0.2);
+        Float_t range = 0.05, mean = 0.;
+        TF1 *fres = new TF1("fres", "[0]*TMath::Gaus(x, [1], [2])+[3]", -range, range);
         fres->SetParNames("Norm", "#mu", "#sigma", "Const (backg)");
         fres->SetNpx(1000);
         fres->SetParLimits(0, 10., 10000.);
         fres->SetParLimits(2, 0.001, 1);
         
         for(Short_t i=0; i<fNChips; ++i) {
-            if(hDXzoom[i]->GetEntries() < 10 || hDYzoom[i]->GetEntries() < 10) {
+            if(hDXzoom[i]->Integral() < 10 || hDYzoom[i]->Integral() < 10) {
                 Report( (i==4 ? 3 : 4), mname + Form("Skipping fit - insufficent tracks in residual plots, chip %i", i));
                 continue;
             }
             fres->SetParameter(0, 300.);
             fres->SetParameter(2, 0.008);
             fres->SetParameter(3, 1);
-            
-            fres->SetParameter(1, hDXzoom[i]->GetMean());
+
+            mean = hDXzoom[i]->GetMean();
+            fres->SetRange(mean-range, mean+range);
+            fres->SetParameter(1, mean);
             hDXzoom[i]->Fit(fres, "QR0");
             if(i == 4) {
                 fResMean[0] = fres->GetParameter(1);
@@ -721,7 +729,9 @@ void Na61Analysis::PrealignmentVD(Float_t ex_sigma) {
                 Report(4, Form(mname + "Residual mean = %f, sigma = %f", fResMean[0]*1e3, fResSigma[0]*1e3));
             }
             
-            fres->SetParameter(1, hDYzoom[i]->GetMean());
+            mean = hDYzoom[i]->GetMean();
+            fres->SetRange(mean-range, mean+range);
+            fres->SetParameter(1, mean);
             hDYzoom[i]->Fit(fres, "QR0");
             if(i == 4) {
                 fResMean[1] = fres->GetParameter(1);
@@ -793,7 +803,7 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
                 if(loop) nn_tracks++;
             
                 //_cuts____
-                //if(fVD_Dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
+                //if(fVD_Dataset[itrack] < 4) continue; // {down1, down2, up1, up2, up1x, up2x, 3pt0, 3pt1, 3pt3}
                 //_cuts____
                 
                 //if( fEvent->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
@@ -866,11 +876,11 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
             } // END FOR tracks
 
             if(loop == 0) {
-                //if(100.*nnt_eff/nnt_good < 99.9)
-                //    Report(3, mname + Form("Event = %i, Efficiency = %.2f    %i %i %i", fVD_EventN+1, 100.*nnt_eff/nnt_good, nnt_eff, nnt_good, fVD_NTracks));
                 if(nnt_good > 0 && nnt_eff == 0) {
                     nn_discev++;
                     flagDiscard = kTRUE;
+                    Report(4, mname + Form("Discarding event = %i, Efficiency = %.2f = %i/%i, ntracks = %i",
+                                           fVD_EventN+1, 100.*nnt_eff/nnt_good, nnt_eff, nnt_good, fVD_NTracks));
                 }
             }
             else {
