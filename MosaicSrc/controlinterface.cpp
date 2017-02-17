@@ -70,10 +70,9 @@ ControlInterface::~ControlInterface()
 //
 //	Control the output of FE clock to ALPIDE chip
 //
-void ControlInterface::addEnableClock(bool en)
+void ControlInterface::addEnable(bool en)
 {
-printf("ControlInterface::addEnableClock %d %lx\n", en, (long) this);
-	wbb->addRMWbits(baseAddress+regConfig, ~CFG_CLK_EN, en ? CFG_CLK_EN : 0);
+	wbb->addRMWbits(baseAddress+regConfig, ~CFG_EN, en ? CFG_EN : 0);
 }
 
 //

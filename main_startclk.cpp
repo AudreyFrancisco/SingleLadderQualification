@@ -21,7 +21,7 @@ int main()
 	TConfig *config = new TConfig ("Config.cfg");
 	theBoard = new TReadoutBoardMOSAIC(config, (TBoardConfigMOSAIC*)config->GetBoardConfig(0));
 
-	theBoard->enableControlInterfaces(false);
+	theBoard->enableControlInterfaces(true);
 
     return 0;
 }

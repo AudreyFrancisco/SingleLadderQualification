@@ -297,7 +297,7 @@ void TReadoutBoardMOSAIC::init()
 	mRunControl->clearErrors();
 	mRunControl->setAFThreshold(fBoardConfig->GetCtrlAFThreshold());
 	mRunControl->setLatency(fBoardConfig->GetCtrlLatMode(), fBoardConfig->GetCtrlLatMode());
-	enableClockOutput(true);
+	enableControlInterfaces(true);
 
 	return;
 }
@@ -350,10 +350,10 @@ void TReadoutBoardMOSAIC::setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex
 	mRunControl->rmwConfigReg(~CFG_RATE_MASK, regSet);
 }
 
-void TReadoutBoardMOSAIC::enableClockOutput(bool en)
+void TReadoutBoardMOSAIC::enableControlInterfaces(bool en)
 {
 	for(int Cii=0;Cii<MAX_MOSAICCTRLINT;Cii++){
-		controlInterface[Cii]->addEnableClock(en);
+		controlInterface[Cii]->addEnable(en);
 		controlInterface[Cii]->execute();
 	}
 }

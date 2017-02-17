@@ -18,7 +18,7 @@ CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp USB.cpp 
 OBJS = $(CLASS:.cpp=.o)
 $(info OBJS="$(OBJS)")
 
-all: $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest test_temperature stopclk
+all: $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest test_temperature stopclk startclk
 
 $(OBJECT):   $(OBJS) main.cpp
 	$(CC) -o $(OBJECT) $(OBJS) $(CFLAGS) main.cpp $(LINKFLAGS)
@@ -73,6 +73,9 @@ test_temperature:   $(OBJS) main_temperature.cpp
 
 stopclk:   $(OBJS) main_stopclk.cpp
 	$(CC) -o stopclk $(OBJS) $(CFLAGS) main_stopclk.cpp $(LINKFLAGS)
+
+startclk:   $(OBJS) main_startclk.cpp
+	$(CC) -o startclk $(OBJS) $(CFLAGS) main_startclk.cpp $(LINKFLAGS)
 
 
 %.o: 	%.cpp %.h

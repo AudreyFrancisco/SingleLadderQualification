@@ -74,7 +74,7 @@ public:
 
 	int ReadRegister      (uint16_t Address, uint32_t &Value) { return(0);};
 	int WriteRegister     (uint16_t Address, uint32_t Value)  { return(0);};
-	void enableClockOutput(bool en);
+	void enableControlInterfaces(bool en);
 
 private:
 	void init();
