@@ -18,7 +18,7 @@ protected:
     void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
 
 private:
-    unsigned short matrix[1024][512];
+    uint16_t matrix[16][1024][512];
 };
 
 #endif // RENDERAREA_H

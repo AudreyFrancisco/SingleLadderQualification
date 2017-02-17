@@ -15,10 +15,11 @@ void RenderArea::fillMatrix(char *buf, long readBytes)
 {
     uint32_t *ptr = (uint32_t *)buf;
     while(((char *)ptr) <= ( buf+readBytes-1 )){
+    	int chipId =  (*ptr >> 19) & 0xF;
         if((*ptr & 0x80000000) != 0) { // this is an event
-            for(int x=0; x<1024; x++) for(int y=0;y<512;y++) if(matrix[x][y] >16)  matrix[x][y] -= 16;
+            for(int x=0; x<1024; x++) for(int y=0;y<512;y++) if(matrix[chipId][x][y] >0)  matrix[chipId][x][y] -= 1;
         } else {
-            matrix[((*ptr & 0x0007FE00) >> 9)][(*ptr & 0x000001FF)] = 254;
+            matrix[chipId][((*ptr & 0x0007FE00) >> 9)][(*ptr & 0x000001FF)] = 254 * 256;
         }
         ptr++;
     }
@@ -30,13 +31,14 @@ void RenderArea::fillMatrix(char *buf, long readBytes)
 
 void RenderArea::paintEvent(QPaintEvent * /* event */)
 {
+	int chipId = 0;
     QPen thePen(Qt::red);
     QPainter painter(this);
     thePen.setWidth(1);
     painter.setPen(thePen);
      for(int x=0;x<1024;x++) {
         for(int y=0;y<512;y++) {
-            thePen.setColor(QColor(matrix[x][y],0,0,255));
+            thePen.setColor(QColor(matrix[chipId][x][y] / 256 ,matrix[chipId][x][y] % 256 ,0,255));
             painter.setPen(thePen);
             painter.drawPoint(x,y);
         }
