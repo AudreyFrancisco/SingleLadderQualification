@@ -358,7 +358,10 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 
 int initSetup(TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, const char *configFileName) {
 
-  config = new TConfig (ConfigurationFileName);
+  if(strlen(configFileName) == 0) // if length is 0 => use the default name or the Command Parameter
+	  config = new TConfig (ConfigurationFileName);
+  else // Assume that the config name if defined in the code !
+	  config = new TConfig (configFileName);
 
   switch (config->GetDeviceType())
     {
