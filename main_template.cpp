@@ -32,8 +32,11 @@ int configureChip(TAlpide *chip) {
 }
 
 
-int main() {
-  initSetup();
+int main(int argc, char** argv) {
+
+  decodeCommandParameters(argc, argv);
+
+  initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
 
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
   

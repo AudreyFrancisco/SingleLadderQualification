@@ -12,9 +12,11 @@
 #include "TConfig.h"
 #include "TAlpide.h"
 #include <exception>
+#include "SetupHelpers.h"
 
-int main()
-{
+int main(int argc, char** argv) {
+
+    decodeCommandParameters(argc, argv);
 	TBoardConfigMOSAIC *theBoardConfiguration;
 	TReadoutBoard      *theBoard;
 
