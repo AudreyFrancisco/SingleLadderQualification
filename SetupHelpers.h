@@ -5,6 +5,7 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 
+
 // definition of standard setup types: 
 //   - single chip with DAQ board
 //   - IB stave with MOSAIC
@@ -21,4 +22,6 @@ int  initSetup            (TConfig*& config, std::vector <TReadoutBoard *> * boa
 int  powerOn              (TReadoutBoardDAQ *aDAQBoard);
 int  CheckControlInterface(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
 void MakeDaisyChain       (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
+int  decodeCommandParameters(int argc, char **argv);
+
 #endif

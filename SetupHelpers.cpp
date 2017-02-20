@@ -3,6 +3,13 @@
 #include "USBHelpers.h"
 
 
+#define NEWALPIDEVERSION "1.0"
+
+// ----- Global variables (deprecated but ) -
+int VerboseLevel = 0;
+char ConfigurationFileName[1024] = "Config.cfg";
+// --------------------------------------
+
 // Setup definition for outer barrel module with MOSAIC
 //    - module ID (3 most significant bits of chip ID) defined by moduleId 
 //      (usually 1) 
@@ -349,7 +356,7 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 
 
 int initSetup(TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, const char *configFileName) {
-  config = new TConfig (configFileName);
+  config = new TConfig (ConfigurationFileName);
 
   switch (config->GetDeviceType())
     {
@@ -371,4 +378,45 @@ int initSetup(TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardTy
     }
   return 0;
 }
+
+
+// ---------- Decode line command parameters ----------
+
+int decodeCommandParameters(int argc, char **argv)
+{
+	int c;
+
+	while ((c = getopt (argc, argv, "hv:c:")) != -1)
+		switch (c) {
+		case 'h':  // prints the Help of usage
+			std::cout << "**  ALICE new-alpide-software   v." << NEWALPIDEVERSION << " **" << std::endl<< std::endl;
+			std::cout << "Usage : test_name -h -v <level> -c <configuration_file> "<< std::endl;
+			std::cout << "-h  :  Display this message" << std::endl;
+			std::cout << "-v <level> : Sets the verbosity level (not yet implemented)" << std::endl;
+			std::cout << "-c <configuration_file> : Sets the configuration file used" << std::endl;
+			break;
+		case 'v':  // sets the verbose level
+			VerboseLevel = atoi(optarg);
+	        break;
+	    case 'c':  // the name of Configuration file
+	        strncpy(ConfigurationFileName, optarg, 1023);
+	        break;
+	    case '?':
+	        if (optopt == 'c') {
+	        	std::cerr << "Option -" << optopt << " requires an argument." << std::endl;
+	        } else {
+	        	if (isprint (optopt)) {
+	        		std::cerr << "Unknown option `-" << optopt << "`" << std::endl;
+	        	} else {
+	        		std::cerr << "Unknown option character `" << std::hex << optopt << std::dec << "`" << std::endl;
+	        	}
+	        }
+	        return 0;
+	      default:
+	        return 0;
+		}
+
+	return 1;
+}
+
 

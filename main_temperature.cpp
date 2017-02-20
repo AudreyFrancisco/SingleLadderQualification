@@ -73,7 +73,10 @@ char *makeTimeStamp(char *ABuffer)
 	return(ABuffer);
 }
 
-int main() {
+int main(int argc, char** argv) {
+
+    decodeCommandParameters(argc, argv);
+
     initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
 
 	char TimeStamp[20];
