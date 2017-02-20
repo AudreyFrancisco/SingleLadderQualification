@@ -2,10 +2,19 @@
 #define THISTO_H 
 
 #include <string> 
+#include <map>
+
+typedef struct 
+{
+  unsigned int boardIndex; 
+  unsigned int controlInterface;
+  unsigned int chipId;
+} TChipIndex;
+
 
 class THisto { 
 
-private: 
+ private: 
   int           m_ndim;      // Number of dimensions (1 or 2)
   std::string   m_name;      // Histogram name 
   std::string   m_title;     // Histogram title 
@@ -15,7 +24,7 @@ private:
   unsigned int  m_size;      // Word size 
   double        m_trash;     // Trash bin
 
-public:   
+ public:   
   THisto ();                                                                                     // Default constructor ("0-Dim histogram")   
   THisto (std::string name, std::string title, unsigned int nbin, double xmin, double xmax);     // Constructor 1D   
   THisto (std::string name, std::string title, unsigned int nbin1, double xmin1, double xmax1,
@@ -42,5 +51,15 @@ public:
   double      GetMax  (int d) const { if (d >=0 && d <= 1) return m_lim[d][1]; else return 0; };
  };
 
+
+class TScanHisto {
+ private:
+  std::map<int, THisto> m_histos;
+ public:
+  TScanHisto () {};                       // Default constructor;
+  TScanHisto (const TScanHisto &sh);      // Copy constructor;
+ 
+  void AddHisto (TChipIndex index, THisto histo);
+};
 
  #endif

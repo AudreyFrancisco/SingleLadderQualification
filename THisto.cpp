@@ -185,7 +185,7 @@ THisto &THisto::operator=(const THisto &h) {
   }
 }
 
-double THisto::operator()(unsigned int i) const{
+double THisto::operator()(unsigned int i) const {
   if (i<m_dim[0]) {
     if (m_size == 1) return (double)(((unsigned char **)m_histo)[0][i]);
     if (m_size == 2) return (double)(((unsigned short int **)m_histo)[0][i]);
@@ -255,3 +255,27 @@ void THisto::Clear() {
   }
   m_trash = 0;
 }
+
+
+//================================================================================
+//
+//                         TScanHisto 
+//
+//================================================================================
+
+
+TScanHisto::TScanHisto (const TScanHisto &sh)
+{
+  std::map<int, THisto>::const_iterator it;
+  for (it = sh.m_histos.begin(); it != sh.m_histos.end(); ++it) {
+    m_histos.insert(*it);
+  }
+}
+
+
+void TScanHisto::AddHisto  (TChipIndex index, THisto histo) 
+{
+  int int_index = (index.boardIndex << 8) | (index.controlInterface << 4) | (index.chipId);
+  m_histos.insert (std::pair<int, THisto>(int_index, histo));
+}
+
