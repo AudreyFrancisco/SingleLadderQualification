@@ -60,6 +60,7 @@ class TScanHisto {
   TScanHisto (const TScanHisto &sh);      // Copy constructor;
  
   void AddHisto (TChipIndex index, THisto histo);
+  void Clear    ();
 };
 
  #endif

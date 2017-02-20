@@ -263,7 +263,7 @@ void THisto::Clear() {
 //
 //================================================================================
 
-
+ 
 TScanHisto::TScanHisto (const TScanHisto &sh)
 {
   std::map<int, THisto>::const_iterator it;
@@ -279,3 +279,11 @@ void TScanHisto::AddHisto  (TChipIndex index, THisto histo)
   m_histos.insert (std::pair<int, THisto>(int_index, histo));
 }
 
+
+void TScanHisto::Clear() 
+{
+  std::map<int, THisto>::iterator it;
+  for (it = m_histos.begin(); it != m_histos.end(); ++it) {
+    (*it).second.Clear();
+  }
+}
