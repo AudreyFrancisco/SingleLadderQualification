@@ -1,6 +1,7 @@
 #include <iostream>
 #include "SetupHelpers.h"
 #include "USBHelpers.h"
+#include <string.h>
 
 
 #define NEWALPIDEVERSION "1.0"
@@ -356,6 +357,7 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 
 
 int initSetup(TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, const char *configFileName) {
+
   config = new TConfig (ConfigurationFileName);
 
   switch (config->GetDeviceType())
@@ -390,10 +392,11 @@ int decodeCommandParameters(int argc, char **argv)
 		switch (c) {
 		case 'h':  // prints the Help of usage
 			std::cout << "**  ALICE new-alpide-software   v." << NEWALPIDEVERSION << " **" << std::endl<< std::endl;
-			std::cout << "Usage : test_name -h -v <level> -c <configuration_file> "<< std::endl;
+			std::cout << "Usage : " << argv[0] << " -h -v <level> -c <configuration_file> "<< std::endl;
 			std::cout << "-h  :  Display this message" << std::endl;
 			std::cout << "-v <level> : Sets the verbosity level (not yet implemented)" << std::endl;
-			std::cout << "-c <configuration_file> : Sets the configuration file used" << std::endl;
+			std::cout << "-c <configuration_file> : Sets the configuration file used" << std::endl << std::endl;
+			exit(0);
 			break;
 		case 'v':  // sets the verbose level
 			VerboseLevel = atoi(optarg);
@@ -411,7 +414,7 @@ int decodeCommandParameters(int argc, char **argv)
 	        		std::cerr << "Unknown option character `" << std::hex << optopt << std::dec << "`" << std::endl;
 	        	}
 	        }
-	        return 0;
+	        exit(0);
 	      default:
 	        return 0;
 		}
