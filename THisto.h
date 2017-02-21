@@ -7,7 +7,7 @@
 typedef struct 
 {
   unsigned int boardIndex; 
-  unsigned int controlInterface;
+  unsigned int dataReceiver;
   unsigned int chipId;
 } TChipIndex;
 
@@ -58,9 +58,12 @@ class TScanHisto {
  public:
   TScanHisto () {};                       // Default constructor;
   TScanHisto (const TScanHisto &sh);      // Copy constructor;
- 
+  double operator()  (TChipIndex index, unsigned int i, unsigned int j) const;       // Bin read access 2d   
+
   void AddHisto (TChipIndex index, THisto histo);
+  int  GetSize  () {return m_histos.size();};
   void Clear    ();
+  void Incr     (TChipIndex index, unsigned int i, unsigned int j);
 };
 
  #endif

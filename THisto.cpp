@@ -1,4 +1,5 @@
 #include "THisto.h"
+#include <iostream>
 
 THisto::THisto(){
   m_ndim = 0;
@@ -275,7 +276,7 @@ TScanHisto::TScanHisto (const TScanHisto &sh)
 
 void TScanHisto::AddHisto  (TChipIndex index, THisto histo) 
 {
-  int int_index = (index.boardIndex << 8) | (index.controlInterface << 4) | (index.chipId);
+  int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId);
   m_histos.insert (std::pair<int, THisto>(int_index, histo));
 }
 
@@ -286,4 +287,19 @@ void TScanHisto::Clear()
   for (it = m_histos.begin(); it != m_histos.end(); ++it) {
     (*it).second.Clear();
   }
+}
+
+
+//TODO (for all) check index for validity
+void TScanHisto::Incr (TChipIndex index, unsigned int i, unsigned int j) {
+  int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId);
+  m_histos.at(int_index).Incr(i,j);
+}
+
+
+//TODO clean up, write missing operator (1-d)
+double TScanHisto::operator() (TChipIndex index, unsigned int i, unsigned int j) const
+{
+  int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId);
+  (m_histos.at(int_index))(i,j);
 }
