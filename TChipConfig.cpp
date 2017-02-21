@@ -92,6 +92,16 @@ bool TChipConfig::SetParamValue (const char *Name, const char *Value)
 }
 
 
+bool TChipConfig::SetParamValue (const char *Name, int Value) 
+{
+  if (fSettings.find (Name) != fSettings.end()) {
+    *(fSettings.find(Name)->second) = Value;
+    return true;
+  }
+
+  return false;
+}
+
 int TChipConfig::GetParamValue (const char *Name) 
 {
   if (fSettings.find (Name) != fSettings.end()) {

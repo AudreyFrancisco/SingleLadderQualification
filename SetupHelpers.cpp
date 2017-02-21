@@ -38,12 +38,24 @@ int initSetupOB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
     chips->push_back(new TAlpide(chipConfig));
     chips->at(i) -> SetReadoutBoard(boards->at(0));
     if (i < 7) {              // first master-slave row
-      if (receiver < 0) receiver = 9;
-      if (control  < 0) control  = 1;
+      if (control < 0) {
+        control = 1;
+        chipConfig->SetParamValue("CONTROLINTERFACE", 1);
+      }
+      if (receiver < 0) {
+        receiver = 9;
+        chipConfig->SetParamValue("RECEIVER", 9);
+      }
     }
     else {                    // second master-slave row
-      if (receiver < 0) receiver = 0;
-      if (control  < 0) control  = 0;
+      if (control < 0) {
+        control = 0;
+        chipConfig->SetParamValue("CONTROLINTERFACE", 0);
+      }
+      if (receiver < 0) {
+        receiver = 0;
+        chipConfig->SetParamValue("RECEIVER", 0);
+      }
     }
     boards->at(0)-> AddChip        (chipId, control, receiver);
   }
@@ -267,8 +279,14 @@ int initSetupIB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
     chips->push_back(new TAlpide(chipConfig));
     chips->at(i) -> SetReadoutBoard(boards->at(0));
 
-    if (control  < 0) control  = 0;
-    if (receiver < 0) receiver = RCVMAP[i];
+    if (control  < 0) {
+      chipConfig->SetParamValue("CONTROLINTERFACE", "0");
+      control = 0;
+    }
+    if (receiver < 0) {
+      chipConfig->SetParamValue("RECEIVER", RCVMAP[i]);
+      receiver = RCVMAP[i];
+    }
 
     boards->at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver);
   }
@@ -286,8 +304,15 @@ int initSetupSingleMosaic(TConfig* config, std::vector <TReadoutBoard *> * board
   int                 control     = chipConfig->GetParamValue("CONTROLINTERFACE");
   int                 receiver    = chipConfig->GetParamValue("RECEIVER");
 
-  if (receiver < 0) receiver = 3;   // HSData is connected to pins for first chip on a stave
-  if (control  < 0) control  = 0; 
+
+  if (receiver < 0) {
+    chipConfig->SetParamValue("RECEIVER", 3);
+    receiver = 3;   // HSData is connected to pins for first chip on a stave
+  }
+  if (control  < 0) {
+    chipConfig->SetParamValue("CONTROLINTERFACE", 0);
+    control  = 0; 
+  }
 
   boardConfig->SetInvertedData (false);
   boardConfig->SetSpeedMode    (Mosaic::RCV_RATE_400);

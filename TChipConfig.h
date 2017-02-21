@@ -101,6 +101,7 @@ class TChipConfig {
   TChipConfig               (TConfig *config, int chipId, const char *fName = 0);
   void InitParamMap         (); 
   bool SetParamValue        (const char *Name, const char *Value);
+  bool SetParamValue        (const char *Name, int Value);
   int  GetParamValue        (const char *Name) ;
   bool IsParameter          (const char *Name) {return (fSettings.count(Name) > 0);};
   int  GetChipId            () {return fChipId;};
