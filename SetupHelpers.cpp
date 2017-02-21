@@ -167,46 +167,6 @@ void MakeDaisyChain(TConfig* config, std::vector <TReadoutBoard *> * boards, TBo
 }
 
 
-
-
-void MakeDaisyChainOld(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
-  for (int i = 0; i < chips->size(); i++) {
-    if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
-    int chipId   = chips->at(i)->GetConfig()->GetChipId();
-    int previous = -1;
-    if (!(chipId & 0x7)) {   // Master, has initial token, previous chip is last enabled chip in row
-      chips->at(i)->GetConfig()->SetInitialToken(true);
-      for (int iprev = chipId + 6; (iprev > chipId) && (previous == -1); iprev--) { 
-        if (config->GetChipConfigById(iprev)->IsEnabled()) {
-          previous = iprev; 
-	}
-      }
-      if (previous == -1) {
-        chips->at(i)->GetConfig()->SetPreviousId(chipId);
-      }
-      else {
-         chips->at(i)->GetConfig()->SetPreviousId(previous);
-      }
-    }
-    else {    // Slave, does not have token, previous chip is last enabled chip before
-      chips->at(i)->GetConfig()->SetInitialToken(false);
-      for (int iprev = chipId - 1; (iprev >= (chipId & 0x78)) && (previous == -1); iprev--) {
-        if (config->GetChipConfigById(iprev)->IsEnabled()) {
-          previous = iprev; 
-	}
-      }
-      if (previous == -1) {
-        chips->at(i)->GetConfig()->SetPreviousId(chipId);
-      }
-      else {
-         chips->at(i)->GetConfig()->SetPreviousId(previous);
-      }
-    }
-    std::cout << "Chip Id " << chipId << ", token = " << (bool) chips->at(i)->GetConfig()->GetInitialToken() << ", previous = " << chips->at(i)->GetConfig()->GetPreviousId() << std::endl;
-  }
-}
-
-
 // Try to communicate with all chips, disable chips that are not answering
 int CheckControlInterface(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
   uint16_t WriteValue = 10;
