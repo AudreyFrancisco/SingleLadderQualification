@@ -1,7 +1,15 @@
 #include <iostream>
 #include "SetupHelpers.h"
 #include "USBHelpers.h"
+#include <string.h>
 
+
+#define NEWALPIDEVERSION "1.0"
+
+// ----- Global variables (deprecated but ) -
+int VerboseLevel = 0;
+char ConfigurationFileName[1024] = "Config.cfg";
+// --------------------------------------
 
 // Setup definition for outer barrel module with MOSAIC
 //    - module ID (3 most significant bits of chip ID) defined by moduleId 
@@ -349,7 +357,11 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
 
 
 int initSetup(TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, const char *configFileName) {
-  config = new TConfig (configFileName);
+
+  if(strlen(configFileName) == 0) // if length is 0 => use the default name or the Command Parameter
+	  config = new TConfig (ConfigurationFileName);
+  else // Assume that the config name if defined in the code !
+	  config = new TConfig (configFileName);
 
   switch (config->GetDeviceType())
     {
@@ -371,4 +383,46 @@ int initSetup(TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardTy
     }
   return 0;
 }
+
+
+// ---------- Decode line command parameters ----------
+
+int decodeCommandParameters(int argc, char **argv)
+{
+	int c;
+
+	while ((c = getopt (argc, argv, "hv:c:")) != -1)
+		switch (c) {
+		case 'h':  // prints the Help of usage
+			std::cout << "**  ALICE new-alpide-software   v." << NEWALPIDEVERSION << " **" << std::endl<< std::endl;
+			std::cout << "Usage : " << argv[0] << " -h -v <level> -c <configuration_file> "<< std::endl;
+			std::cout << "-h  :  Display this message" << std::endl;
+			std::cout << "-v <level> : Sets the verbosity level (not yet implemented)" << std::endl;
+			std::cout << "-c <configuration_file> : Sets the configuration file used" << std::endl << std::endl;
+			exit(0);
+			break;
+		case 'v':  // sets the verbose level
+			VerboseLevel = atoi(optarg);
+	        break;
+	    case 'c':  // the name of Configuration file
+	        strncpy(ConfigurationFileName, optarg, 1023);
+	        break;
+	    case '?':
+	        if (optopt == 'c') {
+	        	std::cerr << "Option -" << optopt << " requires an argument." << std::endl;
+	        } else {
+	        	if (isprint (optopt)) {
+	        		std::cerr << "Unknown option `-" << optopt << "`" << std::endl;
+	        	} else {
+	        		std::cerr << "Unknown option character `" << std::hex << optopt << std::dec << "`" << std::endl;
+	        	}
+	        }
+	        exit(0);
+	      default:
+	        return 0;
+		}
+
+	return 1;
+}
+
 

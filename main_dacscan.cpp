@@ -187,7 +187,9 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
 }
 
 
-int main() {
+int main(int argc, char** argv) {
+
+  decodeCommandParameters(argc, argv);
   initSetup(config, &fBoards, &boardType, &fChips);
 
   myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));

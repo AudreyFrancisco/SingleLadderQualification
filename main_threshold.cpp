@@ -270,7 +270,9 @@ void scan() {
 }
 
 
-int main() {
+int main(int argc, char** argv) {
+
+  decodeCommandParameters(argc, argv);
   initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
   InitScanParameters();
   char Suffix[20], fName[100], Config[1000];
