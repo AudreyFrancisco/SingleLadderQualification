@@ -50,6 +50,7 @@
 #include "TAlpide.h"
 #include "SetupHelpers.h"
 #include "mexception.h"
+#include "mservice.h"
 
 using namespace std;
 std::vector<unsigned char> fDebugBuffer;
@@ -400,9 +401,9 @@ char *TReadoutBoardMOSAIC::getFirmwareVersion()
 	theIPAddr = fBoardConfig->GetIPaddress();
 
 	MService::fw_info_t *MOSAICinfo;
-	MService serviceEndPoint = new MService();
-	serviceEndPoint.setIPaddress(theIPAddr);
-	serviceEndPoint.readFWinfo(MOSAICinfo);
+	MService *endPoint = new MService();
+	endPoint->setIPaddress(theIPAddr);
+	endPoint->readFWinfo(MOSAICinfo);
 
 	theVersionMaj = MOSAICinfo->ver_maj;
 	theVersionMin = MOSAICinfo->ver_min;
