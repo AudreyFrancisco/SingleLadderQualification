@@ -177,7 +177,8 @@ void AlpideConfig::ConfigureCMU (TAlpide *chip, TChipConfig *config) {
 }
 
 
-void AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage) {
+// return value: active row (needed for threshold scan histogramming)
+int AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage) {
   // check that nPix is one of (1, 2, 4, 8, 16, 32)
   if ((nPix <= 0) || (nPix & (nPix - 1)) || (nPix > 32)) {      
     std::cout << "Warning: bad number of pixels for mask stage (" << nPix << ", using 1 instead" << std::endl;
@@ -190,6 +191,7 @@ void AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage) {
   if (nPix == 32) {
     WritePixRegRow(chip, Alpide::PIXREG_MASK,   false, iStage);
     WritePixRegRow(chip, Alpide::PIXREG_SELECT, true, iStage);
+    return iStage;
   }
   else {
     int colStep = 32 / nPix;
@@ -197,6 +199,7 @@ void AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage) {
       WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, iStage % 512, icol + iStage / 512);
       WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  iStage % 512, icol + iStage / 512);   
     }
+    return (iStage % 512);
   }
 }
 
