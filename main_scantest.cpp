@@ -15,6 +15,7 @@
 
 
 #include <unistd.h>
+#include <deque>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -29,7 +30,8 @@
 #include "SetupHelpers.h"
 #include "TThresholdScan.h"
 #include "TScanConfig.h"
-
+#include "THisto.h"
+#include "TScanAnalysis.h"
 
 
 int main(int argc, char** argv) {
@@ -41,9 +43,17 @@ int main(int argc, char** argv) {
   std::vector <TAlpide *>       fChips;
   TConfig *fConfig;
 
+  std::deque<TScanHisto>  fHistoQue;
+
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
     
-  TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards);
+  TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue);
+
+  //THisto *histo = new THisto("Test", "Test", 1024, 0, 1023, 50, 0, 50);
+
+  // histo->Set(40, 40, 2);
+  // histo->Incr(40, 40);
+  // std::cout << "histo readback: " << (*histo)(40, 40) << std::endl;
 
   myScan->Init();
 
@@ -68,6 +78,8 @@ int main(int argc, char** argv) {
   myScan->LoopEnd  (2);
   myScan->Terminate();
   
+  TScanAnalysis *analysis = new TScanAnalysis (&fHistoQue);
+  analysis->Run();
 
   return 0;
 }

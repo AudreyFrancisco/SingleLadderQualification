@@ -2,12 +2,11 @@
 #include "TThresholdScan.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardDAQ.h"
-#include "AlpideDecoder.h"
 #include "AlpideConfig.h"
 
 
-TThresholdScan::TThresholdScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards) 
-  : TMaskScan (config, chips, boards) 
+TThresholdScan::TThresholdScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue) 
+  : TMaskScan (config, chips, boards, histoQue) 
 {
   m_start[0]  = m_config->GetChargeStart();
   m_stop [0]  = m_config->GetChargeStop ();
@@ -23,6 +22,7 @@ TThresholdScan::TThresholdScan (TScanConfig *config, std::vector <TAlpide *> chi
 
   m_VPULSEH   = 170;
   m_nTriggers = m_config->GetParamValue("NINJ");
+  CreateScanHisto();
 }
 
 
@@ -63,6 +63,12 @@ void TThresholdScan::ConfigureChip(TAlpide *chip)
   ConfigureFromu(chip);
 
   AlpideConfig::ConfigureCMU (chip);
+}
+
+
+THisto TThresholdScan::CreateHisto() {
+  THisto *histo = new THisto ("ThresholdHisto", "ThresholdHisto", 1024, 0, 1023, (m_stop[0] - m_start[0]) / m_step[0], m_start[0], m_stop[0]);
+  return *histo;
 }
 
 
@@ -163,9 +169,43 @@ void TThresholdScan::Execute()
 	}
         itrg++;
         }
-      }
+    }
     std::cout << "Found " << Hits->size() << " hits" << std::endl;
-    //CopyHitData(Hits, m_value[0]);
+    FillHistos (Hits, iboard);
+  }
+}
+
+
+void TThresholdScan::FillHistos (std::vector<TPixHit> *Hits, int board)
+{
+  TChipIndex idx; 
+  idx.boardIndex = board;
+
+  int chipId;
+  int region; 
+  int dcol;
+  int address;
+
+  for (int i = 0; i < Hits->size(); i++) {
+    if (Hits->at(i).address / 2 != m_row) continue;  // todo: keep track of spurious hits, i.e. hits in non-injected rows
+    // !! This will not work when allowing several chips with the same Id
+    idx.dataReceiver = m_boards.at(board)->GetReceiver(Hits->at(i).chipId);
+    idx.chipId       = Hits->at(i).chipId;
+    int col = Hits->at(i).region * 32 + Hits->at(i).dcol * 2;
+    int leftRight = ((((Hits->at(i).address % 4) == 1) || ((Hits->at(i).address % 4) == 2))? 1:0); 
+    col += leftRight;
+
+    m_histo->Incr(idx, col, m_value[0]);
+  }
+  
+}
+
+
+void TThresholdScan::LoopEnd(int loopIndex) 
+{
+  if (loopIndex == 0) {
+    m_histoQue->push_back(*m_histo);
+    m_histo   ->Clear();
   }
 }
 
