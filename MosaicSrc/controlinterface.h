@@ -32,6 +32,7 @@
 #define CONTROLINTERFACE_H
 
 #include <stdint.h>
+#include <mutex>
 #include "mwbbslave.h"
 
 
@@ -52,6 +53,8 @@ public:
 	~ControlInterface();
 	void setBusAddress(WishboneBus *wbbPtr, uint32_t baseAddress);
 	void setPhase(uint8_t phase);
+	void addEnable(bool en);
+	void addGetErrorCounter(uint32_t *ctr);
 	void addSendCmd(uint8_t cmd);
 	void addWriteReg(uint8_t chipID, uint16_t address, uint16_t data);
 	void addReadReg(uint8_t chipID, uint16_t address, uint16_t *dataPtr);
@@ -79,7 +82,7 @@ private:					// WBB Slave registers map
 		regWriteCtrl				= 0,
 		regWriteData 				= 1,
 		regReadData 				= 2,
-		regDataPhase 				= 3
+		regConfig	 				= 3
 		};
 
 
@@ -90,10 +93,16 @@ private:					// WBB Slave registers map
 		FLAG_DATAH_BIT	= (1<<0)
 	};
 
+	enum configBits_e {
+		CFG_PHASE_MASK	= 0x03,
+		CFG_EN			= (1<<3)	
+	};
+
 private:
 	CiReadRequest *readReqest;
 	int readRequestSize;
 	int numReadRequest;
+	std::recursive_mutex mutex;
 };
 
 

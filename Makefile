@@ -1,27 +1,33 @@
 CC=g++
-INCLUDE=/usr/local/include
-LIBPATH=/usr/local/lib
-CFLAGS= -O2 -pipe -fPIC -g -std=c++0x -mcmodel=large -I $(INCLUDE)
-LINKFLAGS=-lusb-1.0 -lpthread -L $(LIBPATH)
+LIBMOSAIC_DIR=./MosaicSrc/libmosaic
+LIBPOWERBOARD_DIR=./MosaicSrc/libpowerboard
+INCLUDE=-I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include
+LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic
+CFLAGS= -O2 -pipe -fPIC -g -std=c++0x -mcmodel=large $(INCLUDE)
+LINKFLAGS=-lusb-1.0 -lpthread $(LIB)
 #LINKFLAGS=
 OBJECT= runTest
 LIBRARY=libalpide.so
+
 CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
  TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
- BoardDecoder.cpp SetupHelpers.cpp THisto.cpp \
- MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/i2cbus.cpp MosaicSrc/i2cslave.cpp MosaicSrc/i2csyspll.cpp \
- MosaicSrc/ipbus.cpp MosaicSrc/ipbusudp.cpp MosaicSrc/mdatagenerator.cpp MosaicSrc/mdatareceiver.cpp MosaicSrc/mdatasave.cpp \
- MosaicSrc/mexception.cpp MosaicSrc/mruncontrol.cpp MosaicSrc/mtriggercontrol.cpp MosaicSrc/mwbbslave.cpp \
- MosaicSrc/pexception.cpp MosaicSrc/pulser.cpp MosaicSrc/mboard.cpp MosaicSrc/TAlpideDataParser.cpp \
+ BoardDecoder.cpp SetupHelpers.cpp THisto.cpp\
+ MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/pexception.cpp MosaicSrc/TAlpideDataParser.cpp \
  TScan.cpp TThresholdScan.cpp TScanConfig.cpp
 #CLASS=  USB.cpp TDaqboard.cpp TPalpidefs.cpp TDut.cpp TTestsetup.cpp chiptests.cpp TConfig.cpp TModuleSetup.cpp
 OBJS = $(CLASS:.cpp=.o)
 $(info OBJS="$(OBJS)")
 
-all:    test_stream test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest test_temperature
+all: $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) test_stream test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest test_temperature stopclk startclk
 
 $(OBJECT):   $(OBJS) main.cpp
 	$(CC) -o $(OBJECT) $(OBJS) $(CFLAGS) main.cpp $(LINKFLAGS)
+
+$(LIBMOSAIC_DIR):
+	$(MAKE) -C $@
+
+$(LIBPOWERBOARD_DIR):
+	$(MAKE) -C $@
 
 lib: $(OBJS)
 	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
@@ -65,8 +71,16 @@ test_scantest:   $(OBJS) main_scantest.cpp
 test_temperature:   $(OBJS) main_temperature.cpp
 	$(CC) -o test_temperature $(OBJS) $(CFLAGS) main_temperature.cpp $(LINKFLAGS)
 
+
 test_stream:   $(OBJS) main_pipestream.cpp
 	$(CC) -o test_stream $(OBJS) $(CFLAGS) main_pipestream.cpp $(LINKFLAGS)
+
+stopclk:   $(OBJS) main_stopclk.cpp
+	$(CC) -o stopclk $(OBJS) $(CFLAGS) main_stopclk.cpp $(LINKFLAGS)
+
+startclk:   $(OBJS) main_startclk.cpp
+	$(CC) -o startclk $(OBJS) $(CFLAGS) main_startclk.cpp $(LINKFLAGS)
+
 
 %.o: 	%.cpp %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -74,3 +88,9 @@ test_stream:   $(OBJS) main_pipestream.cpp
 clean:
 	rm -rf *.o $(OBJECT)
 	rm -rf MosaicSrc/*.o
+	$(MAKE) -C $(LIBMOSAIC_DIR) clean
+	$(MAKE) -C $(LIBPOWERBOARD_DIR) clean
+
+
+.PHONY: all $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR)
+

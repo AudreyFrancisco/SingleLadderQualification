@@ -28,22 +28,26 @@
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
+#ifndef I2CSYSPLL_H
+#define I2CSYSPLL_H
 
-#include <string>
-#include "mexception.h"
+#include <stdint.h>
+#include "i2cbus.h"
 
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+class I2CSysPll: public I2Cbus
 {
 public:
-	explicit PControlInterfaceError(const string& __arg);
+	typedef struct pllRegisters_s {
+			uint16_t reg[22];
+		} pllRegisters_t;
+
+    I2CSysPll(WishboneBus *wbbPtr, uint32_t baseAddress);
+	void writeReg(uint8_t add, uint16_t d);
+	void readReg (uint8_t add, uint16_t *d);
+	void setup(pllRegisters_t regs);
+
 };
 
 
 
-#endif // PEXCEPTION
+#endif // I2CBUS_H

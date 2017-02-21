@@ -27,23 +27,35 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
-
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
-
-#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+#include "mwbbslave.h"
 #include "mexception.h"
 
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+MWbbSlave::MWbbSlave()
 {
-public:
-	explicit PControlInterfaceError(const string& __arg);
-};
+	wbb = NULL;
+	baseAddress = 0;
+}
+
+MWbbSlave::MWbbSlave(WishboneBus *wbbPtr, uint32_t baseAdd)
+{
+	wbb = wbbPtr;
+	baseAddress = baseAdd;
+}
+
+void MWbbSlave::setBusAddress(WishboneBus *wbbPtr, uint32_t baseAdd)
+{
+	wbb = wbbPtr;
+	baseAddress = baseAdd;
+}
+
+void MWbbSlave::execute()
+{
+	if (!wbb)
+		throw MException("IPBus is not configured");
+	wbb->execute();
+}
 
 
 
-#endif // PEXCEPTION

@@ -28,22 +28,32 @@
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
+#ifndef GENCONSUMER_H
+#define GENCONSUMER_H
 
-#include <string>
-#include "mexception.h"
+#include <stdint.h>
+#include "mdatareceiver.h"
 
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+class GenConsumer : public MDataReceiver
 {
 public:
-	explicit PControlInterfaceError(const string& __arg);
+	GenConsumer();
+	void setEventSize(long evSize) { eventSize = evSize; }
+	void flush();
+	
+protected:
+	long parse(int numClosed);
+
+private:
+	long eventSize;
+public:
+	uint32_t expectedData;
+
 };
 
 
 
-#endif // PEXCEPTION
+
+
+
+#endif // GENCONSUMER_H
