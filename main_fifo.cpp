@@ -122,7 +122,9 @@ void MemTest (TAlpide *chip, int ARegion, int AOffset) {
 }
 
 
-int main() {
+int main(int argc, char** argv) {
+
+  decodeCommandParameters(argc, argv);
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 

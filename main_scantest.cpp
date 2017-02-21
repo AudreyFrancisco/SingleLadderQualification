@@ -32,7 +32,10 @@
 
 
 
-int main() {
+int main(int argc, char** argv) {
+
+  decodeCommandParameters(argc, argv);
+
   TBoardType fBoardType;
   std::vector <TReadoutBoard *> fBoards;
   std::vector <TAlpide *>       fChips;
