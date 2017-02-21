@@ -391,4 +391,71 @@ uint32_t TReadoutBoardMOSAIC::decodeError()
 }
 
 
+/* ------------------  Firmware Version --------------------
+
+ */
+char *TReadoutBoardMOSAIC::getFirmwareVersion()
+{
+	char *theIPAddr;
+	theIPAddr = fBoardConfig->GetIPaddress();
+
+	MService::fw_info_t *MOSAICinfo;
+	MService serviceEndPoint = new MService();
+	serviceEndPoint.setIPaddress(theIPAddr);
+	serviceEndPoint.readFWinfo(MOSAICinfo);
+
+	theVersionMaj = MOSAICinfo->ver_maj;
+	theVersionMin = MOSAICinfo->ver_min;
+	strncpy(theVersionId, MOSAICinfo->fw_identity, 33);
+	theVersionId[33] = 0; // just for sure
+	return(theVersionId);
+}
+
+
+/* -------------------------
+ 	 Power Board control methods
+ ------------------------- */
+bool TReadoutBoardMOSAIC::PowerOn()
+{
+
+	/* --- needs to integrate with the Set of pwB parameters ...
+
+	powerboard *thePower = pb;  // gets the handler to the power board
+	if( !thePower->isReady())  { // there is not a PwB connected !
+		std::cout << "No power board detected !" << std::endl;
+		return(false);
+	}
+
+	thePower->onAllVout();
+	sleep(1);
+	*/
+
+	// Switch On the CtrInterface
+	enableControlInterfaces(true);
+
+	return(true);
+
+}
+
+void TReadoutBoardMOSAIC::PowerOff()
+{
+	// Switch Off the CtrInterface
+	enableControlInterfaces(false);
+
+	/* --- needs to integrate with the Set of pwB parameters ...
+
+	powerboard *thePower = pb;  // gets the handler to the power board
+	if( !thePower->isReady())  { // there is not a PwB connected !
+		std::cout << "No power board detected !" << std::endl;
+		return(false);
+	}
+
+	// --> to switch off : put Iset = 0, then restore  Iset values
+
+	*/
+
+	return;
+}
+
+
 // ================================== EOF ========================================

@@ -219,7 +219,9 @@ void scan(const char *fName) {
 }
 
 
-int main() {
+int main(int argc, char** argv) {
+
+  decodeCommandParameters(argc, argv);
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 

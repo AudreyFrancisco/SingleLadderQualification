@@ -76,6 +76,15 @@ public:
 	int WriteRegister     (uint16_t Address, uint32_t Value)  { return(0);};
 	void enableControlInterfaces(bool en);
 
+	bool PowerOn           ();
+	void PowerOff          ();
+
+	int  GetFwMajVersion() { return(theVersionMaj); };
+	int  GetFwMinVersion() { return(theVersionMin); };
+	char *GetFwIdString() { return(theVersionId); };
+
+
+
 private:
 	void init();
 	void enableDefinedReceivers();
@@ -90,7 +99,7 @@ private:
 	void setInverted (bool AInverted, int Aindex = -1);
 
 	uint32_t decodeError();
-
+	char *getFirmwareVersion();
 
 // Properties
 private:
@@ -104,6 +113,12 @@ private:
 	TAlpideDataParser	*alpideDataParser[MAX_MOSAICTRANRECV];
 	DummyReceiver 		*dr;
 	TBoardHeader 		theHeaderOfReadData;  // This will host the info catch from Packet header/trailer
+
+	char 				theVersionId[50];  // Version properties
+	int					theVersionMaj;
+	int					theVersionMin;
+
+
 
 private:
 	// extend WBB address definitions in mwbb.h
