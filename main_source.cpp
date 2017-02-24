@@ -200,7 +200,7 @@ void scan() {
           // decode Chip event
           int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
           oldHits = Hits->size();
-          AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits);
+          AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel);
           WriteRawData              (rawFile, Hits, oldHits, boardInfo);
           itrg++;
         }

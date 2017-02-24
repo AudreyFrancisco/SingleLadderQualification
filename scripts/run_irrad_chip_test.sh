@@ -37,6 +37,22 @@ elif [ $CHIP_ID == "W7R42" ]
 then 
     echo $CHIP_ID
     VBB=3.0
+elif [ $CHIP_ID == "608519W10R22" ]
+then 
+    echo $CHIP_ID
+    VBB=0.0
+elif [ $CHIP_ID == "608519W10R23" ]
+then 
+    echo $CHIP_ID
+    VBB=0.0
+elif [ $CHIP_ID == "608519W12R10" ]
+then 
+    echo $CHIP_ID
+    VBB=0.0
+elif [ $CHIP_ID == "608519W13R25" ]
+then 
+    echo $CHIP_ID
+    VBB=0.0
 elif [ $CHIP_ID == "test" ]
 then 
     echo $CHIP_ID
