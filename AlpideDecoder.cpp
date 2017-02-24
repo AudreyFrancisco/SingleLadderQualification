@@ -59,13 +59,14 @@ void AlpideDecoder::DecodeEmptyFrame (unsigned char *data, int &chipId, unsigned
 }
 
 
-void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong) {
+void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong, int channel) {
   TPixHit hit;
   int     address, hitmap_length;
 
   int16_t data_field = (((int16_t) data[0]) << 8) + data[1];
 
   if (chip == -1) {std::cout << "Warning, found chip id -1, dataword = 0x" <<std::hex << (int) data_field << std::dec << std::endl;}
+  hit.channel = channel;
   hit.chipId = chip;
   hit.region = region;
   hit.dcol   = (data_field & 0x3c00) >> 10;
@@ -73,10 +74,10 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, s
 
   if ((hits->size() > 0) && (!newEvent)) {
     if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address == hits->back().address)) {
-      std::cout << "Warning (chip "<< chip << "), received pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " twice." << std::endl;
+      std::cout << "Warning (chip "<< chip << "/ channel "<< channel << "), received pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " twice." << std::endl;
     }
     else if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address < hits->back().address)) {
-      std::cout << "Warning (chip "<< chip << "), address of pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " is lower than previous one ("<< hits->back().address << ") in same double column." << std::endl;
+      std::cout << "Warning (chip "<< chip << "/ channel "<< channel << "), address of pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " is lower than previous one ("<< hits->back().address << ") in same double column." << std::endl;
     }
   }
 
@@ -96,8 +97,7 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, s
   newEvent = false;
 }
 
-
-bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <TPixHit> *hits) {
+bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <TPixHit> *hits, int channel) {
   int       byte    = 0;
   int       region  = -1;
   int       chip    = -1;
@@ -172,7 +172,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
 	  }
           printf("\n");
 	}
-        DecodeDataWord (data + byte, chip, region, hits, false);
+        DecodeDataWord (data + byte, chip, region, hits, false, channel);
       }
       byte += 2;
       break;
@@ -191,7 +191,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
 	  }
           printf("\n");
 	}
-        DecodeDataWord (data + byte, chip, region, hits, true);
+        DecodeDataWord (data + byte, chip, region, hits, true, channel);
       }
       byte += 3;
       break;

@@ -151,7 +151,7 @@ void TThresholdScan::Execute()
         // decode Chip event
         int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
         if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
-        if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits)) {
+        if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel)) {
           std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
           nBad ++;
           if (nBad > 10) continue;
