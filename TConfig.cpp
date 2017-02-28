@@ -27,7 +27,6 @@ TConfig::TConfig (int chipId, TBoardType boardType) {
   Init(chipId, boardType);
 }
 
-
 void TConfig::Init (int nBoards, std::vector <int> chipIds, TBoardType boardType) {
   for (int iboard = 0; iboard < nBoards; iboard ++) {
     if (boardType == boardDAQ) {
@@ -143,7 +142,8 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
   else if (AType == TYPE_OBHIC) {
     for (int i = 0; i < 15; i++) {
       if (i == 7) continue;
-      chipIds.push_back(i + ((DEFAULT_MODULE_ID & 0x7) << 4));
+      int ModuleId = (NChips <= 0 ? DEFAULT_MODULE_ID : NChips) & 0x07;
+      chipIds.push_back(i + (ModuleId << 4));
     }
     Init (1, chipIds, boardMOSAIC);
   }
@@ -172,6 +172,7 @@ void TConfig::ReadConfigFile (const char *fName)
   bool        Initialised = false;
   int         NChips      = 0;
   int         NModules    = 0;
+  int         ModuleId    = DEFAULT_MODULE_ID;
   int         Chip;
   TDeviceType type        = TYPE_UNKNOWN;
   FILE       *fp          = fopen (fName, "r");
@@ -191,14 +192,22 @@ void TConfig::ReadConfigFile (const char *fName)
     if (!strcmp(Param,"NMODULES")){
       sscanf(Rest, "%d", &NModules);
     }
+    if (!strcmp(Param,"MODULE")){
+      sscanf(Rest, "%d", &ModuleId);
+    }
     if (!strcmp(Param, "DEVICE")) {
       type = ReadDeviceType (Rest);
     }
     if ((type != TYPE_UNKNOWN) && ((type != TYPE_TELESCOPE) || (NChips > 0)) && ((type != TYPE_HALFSTAVE) || (NModules == 0))) {   // type and nchips has been found (nchips not needed for type chip)
       // SetDeviceType calls the appropriate init method, which in turn calls
       // the constructors for board and chip configs
-      if (type == TYPE_HALFSTAVE) SetDeviceType(type, NModules);
-      else SetDeviceType(type, NChips);
+      if (type == TYPE_OBHIC) {
+    	  SetDeviceType(type, ModuleId);
+      } else if (type == TYPE_HALFSTAVE) {
+    	  SetDeviceType(type, NModules);
+      } else {
+    	  SetDeviceType(type, NChips);
+      }
       Initialised = true;
     }
   }
