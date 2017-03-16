@@ -7,7 +7,7 @@
 #include <map>
 
 namespace BoardConfig {
-  const int PULSEDELAY  = 1000;
+  const int PULSEDELAY  = 10000;
   const int STROBEDELAY = 20;
 };
 
