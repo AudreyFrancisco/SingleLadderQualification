@@ -6,6 +6,10 @@
 #include "TBoardConfigRU.h"
 #include "USB.h"
 
+#include <memory>
+
+#include "ReadoutUnitSrc/UsbDev.hpp"
+
 class TReadoutBoardRU : public TReadoutBoard {
 private:
   static const int VID = 0x04B4;
@@ -15,6 +19,32 @@ private:
   static const uint8_t EP_CTL_IN = 3;
   static const uint8_t EP_DATA0_IN = 4;
   static const uint8_t EP_DATA1_IN = 5;
+
+    static const size_t USB_TIMEOUT = 1000;
+    static const int MAX_RETRIES_READ = 5;
+
+    // Module Addresses
+    static const uint16_t MODULE_DCTRL = 4;
+
+  std::shared_ptr<UsbDev> m_usb;
+
+
+    struct ReadResult {
+        uint16_t address;
+        uint16_t data;
+        bool error;
+    };
+
+    void registeredWrite(uint16_t module, uint16_t address, uint16_t data);
+    void registeredRead(uint16_t module, uint16_t address);
+    bool flush();
+    void readFromPort(uint8_t port, size_t size, UsbDev::DataBuffer &buffer);
+    std::vector<ReadResult> readResults();
+
+    UsbDev::DataBuffer m_buffer;
+    uint32_t m_readBytes;
+
+    bool m_logging;
 
 public:
   TReadoutBoardRU(libusb_device *ADevice, TBoardConfigRU *config);
