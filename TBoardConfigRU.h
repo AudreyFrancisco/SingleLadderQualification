@@ -2,6 +2,8 @@
 #define BOARDCONFIGRU_H
 
 #include <cstdint>
+#include <vector>
+#include <pair>
 
 #include "TBoardConfig.h"
 
@@ -10,7 +12,20 @@ public:
     TBoardConfigRU(const char *fName = 0, int boardIndex = 0);
 
     // Returns the connected Chip (as chipid) for a given Dataport index on a Dataport
-    uint8_t getTransceiverChip(const uint8_t DP, const uint8_t index);
+    uint8_t getTransceiverChip(const uint8_t DP, const uint8_t index) const;
+
+
+    struct TransceiverMapping {
+        uint8_t chipId;
+        uint8_t moduleId;
+    };
+    std::vector<TransceiverMapping> getTransceiverMappings();
+
+    uint8_t getConnector() const;
+
+    enum class ReaudoutSpeed {RO_400, RO_600, RO_1200};
+    ReadoutSpeed getReadoutSpeed() const;
+    bool getInvertPolarity() const;
 };
 
 #endif //BOARDCONFIGRU_H

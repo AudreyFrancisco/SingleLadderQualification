@@ -3,8 +3,6 @@
 #include "TReadoutBoardRU.h"
 #include "TAlpide.h"
 
-namespace AddrDctrl = RUBoardAddresses::Dctrl;
-
 int roundUpToMultiple(int numToRound, int multiple) {
   if (multiple == 0)
     return numToRound;
@@ -18,7 +16,14 @@ int roundUpToMultiple(int numToRound, int multiple) {
 
 TReadoutBoardRU::TReadoutBoardRU(libusb_device *ADevice, TBoardConfigRU *config)
     : m_buffer(), m_readBytes(0), m_logging(false), m_enablePulse(false),
-      m_enableTrigger(true), m_triggerDelay(0), m_pulseDelay(0) {}
+      m_enableTrigger(true), m_triggerDelay(0), m_pulseDelay(0) {
+  dctrl =
+      std::make_shared<TRuDctrlModule>(*this, TReadoutBoardRU::MODULE_DCTRL);
+
+  for(auto mapping : m_config->getTransceiverMappings()) {
+    transceiler_array[mapping.chipId] = std::make_shared<TRuTransceiverModule
+  }
+}
 
 void TReadoutBoardRU::registeredWrite(uint16_t module, uint16_t address,
                                       uint32_t data) {
@@ -127,62 +132,18 @@ int TReadoutBoardRU::WriteRegister(uint16_t Address, uint32_t Value) {
 
 int TReadoutBoardRU::WriteChipRegister(uint16_t Address, uint16_t Value,
                                        uint8_t chipId = 0) {
-
-  uint16_t writeCmd = (Alpide::OPCODE_WROP << 8) | chipId;
-
-  registeredWrite(AddrDctrl::MODULE_ADDR, AddrDctrl::WRITE_ADDRESS, Address);
-  registeredWrite(AddrDctrl::MODULE_ADDR, AddrDctrl::WRITE_DATA, Value);
-  registeredWrite(AddrDctrl::MODULE_ADDR, AddrDctrl::WRITE_CTRL, writeCmd);
-  flush();
-
+  dctrl->WriteChipRegister(Address, Value, chipId);
   return 0;
 }
 
 int TReadoutBoardRU::ReadChipRegister(uint16_t Address, uint16_t &Value,
-                                      uint8_t chipID = 0) {
-
-  uint16_t readCmd = (Alpide::OPCODE_RDOP << 8) | chipId;
-
-  registeredWrite(AddrDctrl::MODULE_ADDR, AddrDctrl::WRITE_ADDRESS, Address);
-  registeredWrite(AddrDctrl::MODULE_ADDR, AddrDctrl::WRITE_CTRL, writeCmd);
-  registeredRead(AddrDctrl::MODULE_ADDR, AddrDctrl::READ_STATUS);
-  registeredRead(AddrDctrl::MODULE_ADDR, AddrDctrl::READ_DATA);
-
-  flush();
-
-  auto results = readResults();
-  if (results.size() != 2) {
-    if (m_logging)
-      std::cout << "TReadoutBoardRU: ChipRead: expected 2 results, got "
-                << results.size() << "\n";
-    return -1;
-  }
-  Value = results[1].data;
-
-  // Check return status and chip id
-  uint16_t status_reg = results[0].data; // State + chipid
-  uint8_t chipid_read = status_reg & 0x7F;
-  uint8_t status = (status_reg >> 7) & 0x3F;
-  if (status != TReadoutBoardRU::CHIP_READ_STATUS_OK) {
-    if (m_logging)
-      std::cout << "TReadoutBoardRU: ChipRead: Return status NOK, got 0x"
-                << std::hex << status << "\n";
-    return -1;
-  }
-  if (chipid_read != chipID) {
-    if (m_logging)
-      std::cout << "TReadoutBoardRU: ChipRead: ChipID read NOK, expected "
-                << chipID << ", got " << chipid_read << "\n";
-    return -2;
-  }
-
-  return 0;
+                                      uint8_t chipId = 0) {
+  return dctrl->ReadChipRegister(Address, Value, chipId);
 }
 
 int TReadoutBoardRU::SendOpCode(uint16_t OpCode) {
-  registeredWrite(AddrDctrl::MODULE_ADDR, AddrDctrl::WRITE_CTRL,
-                  opcode << 8 | 0);
-  flush();
+  dctrl->SendOpCode(OpCode);
+  return 0;
 }
 
 int TReadoutBoardRU::SendOpCode(uint16_t OpCode, uint8_t chipId) {
@@ -202,17 +163,13 @@ void TReadoutBoardRU::SetTriggerSource(TTriggerSource triggerSource) {}
 int TReadoutBoardRU::Trigger(int nTriggers) {
   for (int i = 0; i < nTriggers; ++i) {
     if (enablePulse)
-      registeredWrite(AddrDctrl::MODULE_ADDR, AddrDctrl::WRITE_CTRL,
-                      Alpide::OPCODE_PULSE);
+      dctrl->SendOpCode(Alpide::OPCODE_PULSE, false);
     if (m_pulseDelay > 0)
-      registeredWrite(AddrDctrl::MODULE_ADDR, ADdrDctrl::WAIT_VALUE,
-                      m_pulseDelay);
+      dctrl->Wait(m_pulseDelay, false);
     if (enableTrigger)
-      registeredWrite(AddrDctrl::MODULE_ADDR, AddrDctrl::WRITE_CTRL,
-                      Alpide::OPCODE_TRIGGER1);
+      dctrl->SendOpCode(Alpide::OPCODE_TRIGGER1, false);
     if (m_triggerDelay > 0)
-      registeredWrite(AddrDctrl::MODULE_ADDR, AddrDctrl::WAIT_VALUE,
-                      m_triggerDelay);
+      dctrl->Wait(m_triggerDelay, false);
   }
   flush();
 }
@@ -244,7 +201,10 @@ int TReadoutBoardRU::ReadEventData(int &NBytes, unsigned char *Buffer) {
   return -1;
 }
 
-
 int TReadoutBoardRU::Initialize() {
+  dctrl->SetConnector(m_config->getConnector());
 
+  for(auto &transceiver : transceiver_array) {
+    transceiver->Initialize(m_config->getReadoutSpeed(), m_config->getPolarity());
+  }
 }
