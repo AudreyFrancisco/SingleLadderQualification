@@ -45,7 +45,7 @@ public:
       : m_VID(VID), m_PID(PID), m_interface(interface),
         m_serialNumber(serialNumber), m_deviceConnected(false),
         m_ctx(0, libusb_exit),
-        m_device(0, std::bind(&UsbDev::closeDevice, this, _1)) {
+        m_device(0, std::bind(&UsbDev::closeDevice, this, std::placeholders::_1)) {
 
     initLibUsb();
     initDevice();
@@ -98,39 +98,12 @@ public:
     return actualWritten;
   }
 
-  /*! Checks and updates the status of the USB device.
-    Checks if the device is still connected properly. If not, attempts to
-    reconnect the device.
-    \param active Actively check device status (dedicated function call). If
-    false, relies on previous error codes
-    \throw Exeception if device can't be reconnected.
-   */
-  void checkDeviceStatus(bool activeCheck = false) {
-    std::lock_guard<std::recursive_mutex> lock(m_reconnectMutex);
-
-    if (activeCheck) {
-      int retCode = libusb_kernel_driver_active(m_device.get(), m_interface);
-      if (retCode == LIBUSB_ERROR_NO_DEVICE) {
-        m_deviceConnected = false;
-      }
-    }
-
-    if (!m_deviceConnected) {
-      // Try to reconnect device
-      libusb_device_handle *p = m_device.release();
-      libusb_close(p); // close
-
-      initDevice();
-    }
-  }
-
 private:
   size_t m_VID;
   size_t m_PID;
   int m_interface;
   std::string m_serialNumber;
   bool m_deviceConnected;
-  std::recursive_mutex m_reconnectMutex;
 
   /*! Pointer Handle for usb context. Calls libusb_exit on destruction*/
   std::unique_ptr<libusb_context, decltype(&libusb_exit)> m_ctx;
@@ -148,7 +121,7 @@ private:
       int ret = libusb_release_interface(dev_handle, m_interface);
       if (ret != 0) {
         // could not release
-          std::cout << ("Could not release Usb Interface (Errorcode: " << ret << ")\n";
+          std::cout << "Could not release Usb Interface (Errorcode: " << ret << ")\n";
       }
       libusb_close(dev_handle); // close
     }
@@ -252,7 +225,7 @@ private:
       if (retCode == LIBUSB_ERROR_NO_DEVICE) {
         m_deviceConnected = false;
       }
-      std::ostrstream err_msg;
+      std::ostringstream err_msg;
       err_msg << "Libusb returned with error code " << retCode;
       throw std::runtime_error(err_msg.str());
     }

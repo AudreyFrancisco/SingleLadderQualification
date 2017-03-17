@@ -16,11 +16,12 @@
 
 
 class TReadoutBoardRU : public TReadoutBoard {
-private:
+public:
   struct ReadResult {
     uint16_t address;
     uint16_t data;
     bool error;
+    ReadResult(uint16_t address, uint16_t data, bool error) : address(address),data(data),error(error){}
   };
 
   static const int VID = 0x04B4;
@@ -36,7 +37,7 @@ private:
   static const int MAX_RETRIES_READ = 5;
 
   static const uint8_t MODULE_DCTRL = 4;
-
+private:
   std::shared_ptr<UsbDev> m_usb;
   TBoardConfigRU *m_config;
   UsbDev::DataBuffer m_buffer;
@@ -58,9 +59,9 @@ private:
 public:
   // Modules
   std::shared_ptr<TRuDctrlModule> dctrl;
-  std::map<uint8_t, std::shared_ptr<TRuTransceiverModule> transceiver_array;
+  std::map<uint8_t, std::shared_ptr<TRuTransceiverModule> > transceiver_array;
 public:
-  TReadoutBoardRU(libusb_device *ADevice, TBoardConfigRU *config);
+  TReadoutBoardRU(TBoardConfigRU *config);
 
   virtual int WriteChipRegister(uint16_t Address, uint16_t Value,
                                 uint8_t chipId = 0);

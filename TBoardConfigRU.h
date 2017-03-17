@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <vector>
-#include <pair>
 
 #include "TBoardConfig.h"
 
@@ -18,12 +17,13 @@ public:
     struct TransceiverMapping {
         uint8_t chipId;
         uint8_t moduleId;
+        TransceiverMapping(uint8_t chipId, uint8_t moduleId) : chipId(chipId), moduleId(moduleId) {}
     };
     std::vector<TransceiverMapping> getTransceiverMappings();
 
     uint8_t getConnector() const;
 
-    enum class ReaudoutSpeed {RO_400, RO_600, RO_1200};
+    enum class ReadoutSpeed {RO_400, RO_600, RO_1200};
     ReadoutSpeed getReadoutSpeed() const;
     bool getInvertPolarity() const;
 };

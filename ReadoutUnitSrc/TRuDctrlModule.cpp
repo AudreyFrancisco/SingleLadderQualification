@@ -1,6 +1,14 @@
 #include "TRuDctrlModule.h"
 
-void TRuDctrlModule::WriteChipRegister(int Address, int Value, int chipId, bool commit) {
+#include "../TReadoutBoardRU.h"
+#include "../TAlpide.h"
+
+TRuDctrlModule::TRuDctrlModule(TReadoutBoardRU &board, uint8_t moduleId,
+                               bool logging)
+    : TRuWishboneModule(board, moduleId, logging) {}
+
+void TRuDctrlModule::WriteChipRegister(uint16_t Address, uint16_t Value,
+                                       uint8_t chipId, bool commit) {
   uint16_t writeCmd = (Alpide::OPCODE_WROP << 8) | chipId;
 
   Write(TRuDctrlModule::WRITE_ADDRESS, Address);
@@ -8,15 +16,16 @@ void TRuDctrlModule::WriteChipRegister(int Address, int Value, int chipId, bool 
   Write(TRuDctrlModule::WRITE_CTRL, writeCmd, commit); // flush
 }
 
-int TRuDctrlModule::ReadChipRegister(int Address, int &Value, int chipId) {
+int TRuDctrlModule::ReadChipRegister(uint16_t Address, uint16_t &Value,
+                                     uint8_t chipId) {
   uint16_t readCmd = (Alpide::OPCODE_RDOP << 8) | chipId;
 
   Write(TRuDctrlModule::WRITE_ADDRESS, Address);
-  Write(TRuDctrlModule::WRITE_CTRL, writeCmd);
+  Write(TRuDctrlModule::WRITE_CTRL, readCmd);
   Read(TRuDctrlModule::READ_STATUS);
   Read(TRuDctrlModule::READ_DATA);
 
-  flush();
+  m_board.flush();
 
   auto results = m_board.readResults();
   if (results.size() != 2) {
@@ -37,27 +46,27 @@ int TRuDctrlModule::ReadChipRegister(int Address, int &Value, int chipId) {
                 << std::hex << status << "\n";
     return -1;
   }
-  if (chipid_read != chipID) {
+  if (chipid_read != chipId) {
     if (m_logging)
       std::cout << "TReadoutBoardRU: ChipRead: ChipID read NOK, expected "
-                << chipID << ", got " << chipid_read << "\n";
+                << chipId << ", got " << chipid_read << "\n";
     return -2;
   }
 
   return 0;
 }
 
-void TRuDctrlModule::SendOpCode(int OpCode, bool commit) {
-    Write(AddrDctrl::WRITE_CTRL,opCode << 8 | 0, commit);
+void TRuDctrlModule::SendOpCode(uint16_t OpCode, bool commit) {
+  Write(TRuDctrlModule::WRITE_CTRL, OpCode << 8 | 0, commit);
 }
 
 int TRuDctrlModule::SetConnector(uint8_t connector, bool commit) {
-    if (connector >=5)
-        return -1;
-    Write(TRuDctrlModule::SET_DCTRL_INPUT,connector,commit);
-    return 0;
+  if (connector >= 5)
+    return -1;
+  Write(TRuDctrlModule::SET_DCTRL_INPUT, connector, commit);
+  return 0;
 }
 
 void TRuDctrlModule::Wait(uint16_t waittime, bool commit) {
-    Write(TRuDctrlModule::WAIT_VALUE, waittime, commit);
+  Write(TRuDctrlModule::WAIT_VALUE, waittime, commit);
 }

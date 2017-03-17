@@ -5,7 +5,6 @@
 
 #include "TRuWishboneModule.h"
 
-
 class TRuDctrlModule : public TRuWishboneModule {
 public:
   static const uint16_t WRITE_CTRL = 0;
@@ -39,12 +38,17 @@ public:
   static const uint16_t GET_IDELAY_VALUE23 = 28;
 
   static const uint16_t CHIP_READ_STATUS_OK = 0x3F;
-  void WriteChipRegister(uint16_t Address, uint16_t Value, uint8_t chipId, bool commit=true);
-  int ReadChipRegister(uint16_t Address, uint16_t &Value, uint8_t chipId);
-  void SendOpCode(uint16_t OpCode, bool commit=true);
 
-  int SetConnector(uint8_t connector, bool commit=true);
-  void Wait(uint16_t waittime, bool commit=true)
+  TRuDctrlModule(TReadoutBoardRU &board, uint8_t moduleId, bool logging = false);
+
+
+  void WriteChipRegister(uint16_t Address, uint16_t Value, uint8_t chipId,
+                         bool commit = true);
+  int ReadChipRegister(uint16_t Address, uint16_t &Value, uint8_t chipId);
+  void SendOpCode(uint16_t OpCode, bool commit = true);
+
+  int SetConnector(uint8_t connector, bool commit = true);
+  void Wait(uint16_t waittime, bool commit = true);
 };
 
 #endif // TRUDCTRLMODULE_H

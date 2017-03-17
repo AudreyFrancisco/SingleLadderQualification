@@ -6,6 +6,10 @@ LINKFLAGS=-lusb-1.0 -lpthread -L $(LIBPATH)
 #LINKFLAGS=
 OBJECT= runTest
 LIBRARY=libalpide.so
+
+RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp ReadoutUnitSrc/TRuDctrlModule.cpp \
+ TReadoutBoardRU.cpp TBoardConfigRU.cpp
+
 CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
  TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
  BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp\
@@ -13,12 +17,12 @@ CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp USB.cpp 
  MosaicSrc/ipbus.cpp MosaicSrc/ipbusudp.cpp MosaicSrc/mdatagenerator.cpp MosaicSrc/mdatareceiver.cpp MosaicSrc/mdatasave.cpp \
  MosaicSrc/mexception.cpp MosaicSrc/mruncontrol.cpp MosaicSrc/mtriggercontrol.cpp MosaicSrc/mwbbslave.cpp \
  MosaicSrc/pexception.cpp MosaicSrc/pulser.cpp MosaicSrc/mboard.cpp MosaicSrc/TAlpideDataParser.cpp \
- TScan.cpp TThresholdScan.cpp TScanConfig.cpp
+ TScan.cpp TThresholdScan.cpp TScanConfig.cpp $(RU_SOURCES)
 #CLASS=  USB.cpp TDaqboard.cpp TPalpidefs.cpp TDut.cpp TTestsetup.cpp chiptests.cpp TConfig.cpp TModuleSetup.cpp
 OBJS = $(CLASS:.cpp=.o)
 $(info OBJS="$(OBJS)")
 
-all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest test_temperature
+all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest test_temperature test_readoutunit
 
 $(OBJECT):   $(OBJS) main.cpp
 	$(CC) -o $(OBJECT) $(OBJS) $(CFLAGS) main.cpp $(LINKFLAGS)
@@ -65,7 +69,11 @@ test_scantest:   $(OBJS) main_scantest.cpp
 test_temperature:   $(OBJS) main_temperature.cpp
 	$(CC) -o test_temperature $(OBJS) $(CFLAGS) main_temperature.cpp $(LINKFLAGS)
 
-%.o: 	%.cpp %.h
+test_readoutunit: $(OBJS) main_readoutunit.cpp
+	$(CC) -o test_readoutunit $(OBJS) $(CFLAGS) main_readoutunit.cpp $(LINKFLAGS)
+
+
+%.o:    %.cpp %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
