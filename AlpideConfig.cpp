@@ -226,14 +226,15 @@ void AlpideConfig::WriteControlReg (TAlpide *chip, Alpide::TChipMode chipMode, T
 
 void AlpideConfig::BaseConfigPLL (TAlpide *chip) 
 {
-  if (chip->GetConfig()->GetParamValue("LINKSPEED") == -1) return; // high-speed link deactivated
+  TChipConfig *config = chip->GetConfig();
+  if (config->GetParamValue("LINKSPEED") == -1) return; // high-speed link deactivated
 
 
-  uint16_t Phase      = 8;  // 4bit Value, default 8
-  uint16_t Stages     = 1; // 0 = 3 stages, 1 = 4,  3 = 5 (typical 4)
-  uint16_t ChargePump = 8;
-  uint16_t Driver     = 15;
-  uint16_t Preemp     = 15;
+  uint16_t Phase      = config->GetParamValue("PLLPHASE");  // 4bit Value, default 8
+  uint16_t Stages     = config->GetParamValue("PLLSTAGES"); // 0 = 3 stages, 1 = 4,  3 = 5 (typical 4)
+  uint16_t ChargePump = config->GetParamValue("CHARGEPUMP");
+  uint16_t Driver     = config->GetParamValue("DTUDRIVER");
+  uint16_t Preemp     = config->GetParamValue("DTUPREEMP");
   uint16_t Value;
 
   Value = (Stages & 0x3) | 0x4 | 0x8 | ((Phase & 0xf) << 4);   // 0x4: narrow bandwidth, 0x8: PLL off
@@ -252,6 +253,8 @@ void AlpideConfig::BaseConfigPLL (TAlpide *chip)
   chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
   Value = (Stages & 0x3) | 0x4 |((Phase & 0xf) << 4);           // Reset off
   chip->WriteRegister (Alpide::REG_DTU_CONFIG, Value);
+
+
 }
 
 
