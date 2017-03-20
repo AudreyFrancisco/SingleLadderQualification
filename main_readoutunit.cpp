@@ -67,29 +67,30 @@ int main(int argc, char **argv) {
                 << ", not answering, exception: " << e.what() << std::endl;
     }
   }
-  /*
+
   // Setup chips and transceivers for readout
   for (int i = 0; i < fChips.size(); i++) {
       auto ch = fChips.at(i);
       auto chipId = chipIDs.at(i);
       AlpideConfig::Init(ch);
-      AlpideConfig::ConfigureCMU(ch, config->GetChipConfigById(chipId));
-      AlpideConfig::BaseConfigPLL(ch);
+      AlpideConfig::BaseConfig(ch);
   }
 
   for(int i = 0; i < chipIDs.size(); ++i) {
       auto tr = theBoard->transceiver_array[i]; // TODO: Mapping between transceiver and chipid
     tr->Initialize(TBoardConfigRU::ReadoutSpeed::RO_1200,0);
+    bool alignedBefore = tr->IsAligned();
     tr->ActivateReadout();
     if(tr->IsAligned()) {
-        std::cout << "Transceiver " << i << "is aligned \n";
+        std::cout << "Transceiver " << i << " is aligned (before: " << alignedBefore << " )\n";
     } else {
-        std::cout << "Transceiver " << i << "is NOT aligned \n";
+        std::cout << "Transceiver " << i << " is NOT aligned \n";
     }
     tr->ResetCounters();
   }
 
   // Start triggering
+  theBoard->SetTriggerConfig(false, true, 10000, 0);
   theBoard->Trigger(10);
 
   // check counters
@@ -97,7 +98,11 @@ int main(int argc, char **argv) {
       auto tr = theBoard->transceiver_array[i]; // TODO: Mapping between transceiver and chipid
       auto counters = tr->ReadCounters();
       std::cout << "Transceiver " << i << ", Events: " << counters["Events NrEvents"] << "\n";
+
+      //for(auto cnt : counters) {
+      //    std::cout << cnt.first << ": " << cnt.second << "\n";
+      //}
   }
-  */
+
   return 0;
 }
