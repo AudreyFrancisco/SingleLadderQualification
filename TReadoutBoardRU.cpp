@@ -15,20 +15,28 @@ int roundUpToMultiple(int numToRound, int multiple) {
 }
 
 TReadoutBoardRU::TReadoutBoardRU(TBoardConfigRU *config)
-  : TReadoutBoard(config), m_buffer(), m_readBytes(0), m_logging(false), m_enablePulse(false),
+    : TReadoutBoard(config), m_buffer(), m_readBytes(0), m_logging(config->enableLogging()), m_enablePulse(false),
       m_enableTrigger(true), m_triggerDelay(0), m_pulseDelay(0) {
+
+    m_usb = std::make_shared<UsbDev>(TReadoutBoardRU::VID,
+                                     TReadoutBoardRU::PID,
+                                     TReadoutBoardRU::INTERFACE_NUMBER);
+
   dctrl =
-      std::make_shared<TRuDctrlModule>(*this, TReadoutBoardRU::MODULE_DCTRL);
+      std::make_shared<TRuDctrlModule>(*this, TReadoutBoardRU::MODULE_DCTRL, m_logging);
 
   for(auto mapping : m_config->getTransceiverMappings()) {
-    transceiver_array[mapping.chipId] = std::make_shared<TRuTransceiverModule>(*this,mapping.moduleId,m_logging);
+      uint8_t moduleId = TReadoutBoardRU::MODULE_DATA0 + mapping.transceiverId;
+      transceiver_array[mapping.chipId] = std::make_shared<TRuTransceiverModule>(*this,
+                                                                                 moduleId,
+                                                                                 m_logging);
   }
 }
 
 void TReadoutBoardRU::registeredWrite(uint16_t module, uint16_t address,
                                       uint16_t data) {
   uint8_t module_byte = module & 0x7F;
-  uint8_t address_byte = address = 0xFF;
+  uint8_t address_byte = address & 0xFF;
   uint8_t data_low = data >> 0 & 0xFF;
   uint8_t data_high = data >> 8 & 0xFF;
 
@@ -42,7 +50,7 @@ void TReadoutBoardRU::registeredWrite(uint16_t module, uint16_t address,
 
 void TReadoutBoardRU::registeredRead(uint16_t module, uint16_t address) {
   uint8_t module_byte = module & 0x7F;
-  uint8_t address_byte = address = 0xFF;
+  uint8_t address_byte = address & 0xFF;
 
   m_buffer.push_back(0);
   m_buffer.push_back(0);
@@ -55,6 +63,11 @@ void TReadoutBoardRU::registeredRead(uint16_t module, uint16_t address) {
 bool TReadoutBoardRU::flush() {
   size_t toWrite = m_buffer.size();
   size_t written = m_usb->writeData(EP_CTL_OUT, m_buffer, USB_TIMEOUT);
+  //std::cout << "Bytes written: " << written << "( ";
+  //for (auto b : m_buffer)
+  //    std::cout << "0x" <<std::hex << (int)b << ",";
+  //std::cout << ")\n";
+  m_buffer.clear();
 
   return toWrite == written;
 }
@@ -62,7 +75,12 @@ bool TReadoutBoardRU::flush() {
 void TReadoutBoardRU::readFromPort(uint8_t port, size_t size,
                                    UsbDev::DataBuffer &buffer) {
   buffer.resize(roundUpToMultiple(size, 1024));
-  m_usb->readData(EP_CTL_IN, buffer, USB_TIMEOUT);
+  size_t bytesRead = m_usb->readData(port, buffer, USB_TIMEOUT);
+
+  //std::cout << "Port " << (int) port << ": Bytes Read: " << bytesRead << "( ";
+  //for (auto b : buffer)
+  //    std::cout << "0x" <<std::hex << (int)b << ",";
+  //std::cout << ")\n";
 }
 
 std::vector<TReadoutBoardRU::ReadResult> TReadoutBoardRU::readResults() {
@@ -92,13 +110,15 @@ std::vector<TReadoutBoardRU::ReadResult> TReadoutBoardRU::readResults() {
   std::vector<TReadoutBoardRU::ReadResult> results;
   for (size_t i = 0; i < buffer_all.size(); i += 4) {
     uint16_t data = buffer_all[i] | (buffer_all[i + 1] << 8);
-    uint8_t address = buffer_all[i + 2] | (buffer_all[i + 3] << 8);
-    bool read_error = ((address >> 15) & 1) > 0;
+    uint16_t address = buffer_all[i + 2] | (buffer_all[i + 3] << 8);
+    bool read_error = (address & 0x8000) > 0;
     address &= 0x7FFF;
     if (read_error && m_logging) {
       std::cout << "TReadoutBoardRU: Wishbone error while reading: Address "
                 << address << "\n";
     }
+    //std::cout << "Result received: Address: " << std::hex << (int)address << ", data: " << std::hex
+    //          << data << "read error: " << read_error << "\n";
     results.emplace_back(address, data, read_error);
   }
   return results;
@@ -209,4 +229,21 @@ int TReadoutBoardRU::Initialize() {
     transceiver.second->Initialize(m_config->getReadoutSpeed(), m_config->getInvertPolarity());
   }
   return 0;
+}
+
+void TReadoutBoardRU::checkGitHash() {
+    registeredRead(TReadoutBoardRU::MODULE_STATUS, 0);
+    registeredRead(TReadoutBoardRU::MODULE_STATUS, 1);
+
+    flush();
+    auto results = readResults();
+    if (results.size() != 2) {
+        if (m_logging)
+            std::cout << "TReadoutBoardRU: Expected 2 results, got " << results.size()
+                      << "\n";
+    } else {
+        uint16_t lsb = results[0].data;
+        uint16_t msb = results[1].data;
+        std::cout << "Git hash: " << std::hex << msb << lsb << "\n";
+    }
 }

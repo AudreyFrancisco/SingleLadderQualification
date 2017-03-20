@@ -31,6 +31,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <memory>
 
 // libusb
 #include <libusb-1.0/libusb.h>
@@ -41,7 +42,7 @@
 */
 class UsbDev {
 public:
-  UsbDev(size_t VID, size_t PID, int interface, std::string serialNumber)
+    UsbDev(size_t VID=0x04b4, size_t PID=0x0008, int interface = 2, std::string serialNumber=std::string())
       : m_VID(VID), m_PID(PID), m_interface(interface),
         m_serialNumber(serialNumber), m_deviceConnected(false),
         m_ctx(0, libusb_exit),
@@ -53,6 +54,7 @@ public:
   }
 
   typedef std::vector<unsigned char> DataBuffer;
+    typedef std::shared_ptr<UsbDev> Ptr;
 
   /*! Read Data from Usb Endpoint and write it to DataBuffer
 
@@ -73,6 +75,7 @@ public:
     if (!(ret == 0 || ret == LIBUSB_ERROR_TIMEOUT)) {
       checkError(ret);
     }
+    data.resize(actualRead);
     return actualRead;
   }
 

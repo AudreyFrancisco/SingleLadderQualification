@@ -37,3 +37,7 @@ TBoardConfigRU::ReadoutSpeed TBoardConfigRU::getReadoutSpeed() const {
 bool TBoardConfigRU::getInvertPolarity() const {
     return false;
 }
+
+bool TBoardConfigRU::enableLogging() const {
+    return true;
+}

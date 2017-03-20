@@ -36,7 +36,11 @@ public:
   static const size_t USB_TIMEOUT = 1000;
   static const int MAX_RETRIES_READ = 5;
 
-  static const uint8_t MODULE_DCTRL = 4;
+  static const uint8_t MODULE_MASTER = 0;
+  static const uint8_t MODULE_STATUS = 1;
+  static const uint8_t MODULE_VOLTAGE = 2;
+  static const uint8_t MODULE_DCTRL = 3;
+  static const uint8_t MODULE_DATA0 = 4;
 private:
   std::shared_ptr<UsbDev> m_usb;
   TBoardConfigRU *m_config;
@@ -88,6 +92,8 @@ public:
   bool flush();
   void readFromPort(uint8_t port, size_t size, UsbDev::DataBuffer &buffer);
   std::vector<ReadResult> readResults();
+
+  void checkGitHash();
 };
 
 #endif // TREADOUTBOARDRU_H

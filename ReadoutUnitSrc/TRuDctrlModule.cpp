@@ -11,8 +11,8 @@ void TRuDctrlModule::WriteChipRegister(uint16_t Address, uint16_t Value,
                                        uint8_t chipId, bool commit) {
   uint16_t writeCmd = (Alpide::OPCODE_WROP << 8) | chipId;
 
-  Write(TRuDctrlModule::WRITE_ADDRESS, Address);
-  Write(TRuDctrlModule::WRITE_DATA, Value);
+  Write(TRuDctrlModule::WRITE_ADDRESS, Address,false);
+  Write(TRuDctrlModule::WRITE_DATA, Value,false);
   Write(TRuDctrlModule::WRITE_CTRL, writeCmd, commit); // flush
 }
 
@@ -20,10 +20,10 @@ int TRuDctrlModule::ReadChipRegister(uint16_t Address, uint16_t &Value,
                                      uint8_t chipId) {
   uint16_t readCmd = (Alpide::OPCODE_RDOP << 8) | chipId;
 
-  Write(TRuDctrlModule::WRITE_ADDRESS, Address);
-  Write(TRuDctrlModule::WRITE_CTRL, readCmd);
-  Read(TRuDctrlModule::READ_STATUS);
-  Read(TRuDctrlModule::READ_DATA);
+  Write(TRuDctrlModule::WRITE_ADDRESS, Address,false);
+  Write(TRuDctrlModule::WRITE_CTRL, readCmd,false);
+  Read(TRuDctrlModule::READ_STATUS,false);
+  Read(TRuDctrlModule::READ_DATA,false);
 
   m_board.flush();
 
@@ -43,13 +43,13 @@ int TRuDctrlModule::ReadChipRegister(uint16_t Address, uint16_t &Value,
   if (status != TRuDctrlModule::CHIP_READ_STATUS_OK) {
     if (m_logging)
       std::cout << "TReadoutBoardRU: ChipRead: Return status NOK, got 0x"
-                << std::hex << status << "\n";
+                << std::hex << (int)status << ", expected: " << (int)TRuDctrlModule::CHIP_READ_STATUS_OK  << "\n";
     return -1;
   }
   if (chipid_read != chipId) {
     if (m_logging)
       std::cout << "TReadoutBoardRU: ChipRead: ChipID read NOK, expected "
-                << chipId << ", got " << chipid_read << "\n";
+                << chipId << ", got " << (int)chipid_read << "\n";
     return -2;
   }
 
