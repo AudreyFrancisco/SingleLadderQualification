@@ -2,6 +2,7 @@
 
 #include "TReadoutBoardRU.h"
 #include "TAlpide.h"
+#include "AlpideDecoder.h"
 
 int roundUpToMultiple(int numToRound, int multiple) {
   if (multiple == 0)
@@ -24,6 +25,8 @@ TReadoutBoardRU::TReadoutBoardRU(TBoardConfigRU *config)
 
   dctrl =
       std::make_shared<TRuDctrlModule>(*this, TReadoutBoardRU::MODULE_DCTRL, m_logging);
+
+  master = std::make_shared<TRuWishboneModule>(*this,TReadoutBoardRU::MODULE_MASTER,m_logging);
 
   for(auto mapping : m_config->getTransceiverMappings()) {
       uint8_t moduleId = TReadoutBoardRU::MODULE_DATA0 + mapping.transceiverId;
@@ -217,9 +220,53 @@ void TReadoutBoardRU::fetchEventData() {
   }
 }
 
+std::vector<uint8_t> TReadoutBoardRU::ReadEventData(int &NBytes, unsigned char *Buffer, std::vector<uint8_t> const& chipIds) {
+    std::vector<uint8_t> buffersToUpdate{};
+    auto BufferIt = Buffer;
+    for(uint8_t chipId : chipIds) {
+        auto it = m_readoutBuffers.find(chipId);
+        if(it == m_readoutBuffers.end()) {
+            // not found, fetch
+            buffersToUpdate.push_back(chipId);
+        } else {
+            auto &buf = it->second;
+            int eventEnd = 0;
+            bool isError;
+            bool hasEvent = AlpideDecoder::ExtractNextEvent(buf.data(), buf.size(), eventEnd,isError,m_logging);
+            if(isError and m_logging) {
+                std::cout << "Event decoding error on chip 0x" << std::hex << chipId
+                          << ". Event size: " << std::dec << eventEnd << "\n";
+            }
+            if(hasEvent) {
+                std::copy(buf.begin(), buf.begin() + eventEnd, BufferIt);
+                NBytes += eventEnd;
+            } else {
+                buffersToUpdate.push_back(chipId);
+            }
+
+        }
+    }
+    return buffersToUpdate;
+}
+
+
 int TReadoutBoardRU::ReadEventData(int &NBytes, unsigned char *Buffer) {
-  // Todo
-  return -1;
+
+    std::vector<uint8_t> chipIds {};
+
+    for(auto const& mapping: m_config->getTransceiverMappings()) {
+        chipIds.push_back(mapping.chipId);
+    }
+
+
+    auto secondFetch = ReadEventData(NBytes,Buffer,chipIds);
+    // IF there are Events missing, fetch event data and try again
+    if(!secondFetch.empty()) {
+        fetchEventData();
+        ReadEventData(NBytes,Buffer+NBytes,secondFetch);
+    }
+
+    return 0;
 }
 
 int TReadoutBoardRU::Initialize() {
@@ -246,4 +293,18 @@ void TReadoutBoardRU::checkGitHash() {
         uint16_t msb = results[1].data;
         std::cout << "Git hash: " << std::hex << msb << lsb << "\n";
     }
+}
+
+void TReadoutBoardRU::setDataportSource(uint8_t DP2Source,uint8_t DP3Source) {
+    uint16_t setting = master->Read(MASTER_DP23_SOURCE,true);
+
+    if(DP3Source != 255) {
+        setting &= 0x00FF;
+        setting |= (DP3Source&0xF) << 8;
+    }
+    if(DP2Source != 255) {
+        setting &= 0xFF00;
+        setting |= DP2Source&0xF;
+    }
+    master->Write(MASTER_DP23_SOURCE,true);
 }

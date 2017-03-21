@@ -89,13 +89,98 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, s
   }
 
   for (int i = -1; i < hitmap_length; i ++) {
-    if ((i >= 0) && (! (data[2] >> i) & 0x1)) continue;     
+    if ((i >= 0) && (! (data[2] >> i) & 0x1)) continue;
     hit.address = address + (i + 1);
   if (hit.chipId == -1) {std::cout << "Warning, found chip id -1" << std::endl;}
     hits->push_back (hit);
   }
   newEvent = false;
 }
+
+bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &eventEnd, bool &isError, bool logging) {
+  int       byte    = 0;
+  bool      started = false; // event has started, i.e. chip header has been found
+  bool      finished = false; // event trailer found
+  TDataType type;
+
+  unsigned char last;
+
+  while (byte < nBytes) {
+    last = data[byte];
+    type = GetDataType (data[byte]);
+    switch (type) {
+    case DT_IDLE:
+      byte +=1;
+      break;
+    case DT_BUSYON:
+      byte += 1;
+      break;
+    case DT_BUSYOFF:
+      byte += 1;
+      break;
+    case DT_EMPTYFRAME:
+      started = true;
+      byte += 2;
+      finished = true;
+      break;
+    case DT_CHIPHEADER:
+      started = true;
+      finished = false;
+      byte += 2;
+      break;
+    case DT_CHIPTRAILER:
+      if (!started) {
+          if(logging)
+              std::cout << "Error, chip trailer found before chip header" << std::endl;
+        isError = true;
+      }
+      if (finished) {
+          if(logging)
+        std::cout << "Error, chip trailer found after event was finished" << std::endl;
+        isError = true;
+      }
+      finished = true;
+      byte += 1;
+      break;
+    case DT_REGIONHEADER:
+      if (!started) {
+          if(logging)
+              std::cout << "Error, region header found before chip header or after chip trailer" << std::endl;
+        isError = true;
+      }
+      byte +=1;
+      break;
+    case DT_DATASHORT:
+      if (!started) {
+          if(logging)
+              std::cout << "Error, hit data found before chip header or after chip trailer" << std::endl;
+        isError = true;
+      }
+      byte += 2;
+      break;
+    case DT_DATALONG:
+      if (!started) {
+          if(logging)
+        std::cout << "Error, hit data found before chip header or after chip trailer" << std::endl;
+          isError = true;
+      }
+      byte += 3;
+      break;
+    case DT_UNKNOWN:
+        if(logging)
+            std::cout << "Error, data of unknown type 0x" << std::hex << data[byte] << std::dec << std::endl;
+        isError=true;
+    }
+    if(finished or isError)
+        break;
+  }
+
+  eventEnd = byte;
+
+  // return true if Event end is found, false otherwise
+  return finished or isError;
+}
+
 
 bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <TPixHit> *hits, int channel) {
   int       byte    = 0;
@@ -138,11 +223,11 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
     case DT_CHIPTRAILER:
       if (!started) {
         std::cout << "Error, chip trailer found before chip header" << std::endl;
-        return false; 
+        return false;
       }
       if (finished) {
         std::cout << "Error, chip trailer found after event was finished" << std::endl;
-        return false;  
+        return false;
       }
       DecodeChipTrailer (data + byte, flags);
       finished = true;

@@ -41,6 +41,8 @@ public:
   static const uint8_t MODULE_VOLTAGE = 2;
   static const uint8_t MODULE_DCTRL = 3;
   static const uint8_t MODULE_DATA0 = 4;
+
+  static const uint8_t MASTER_DP23_SOURCE = 10;
 private:
   std::shared_ptr<UsbDev> m_usb;
   TBoardConfigRU *m_config;
@@ -55,7 +57,7 @@ private:
   int m_triggerDelay;
   int m_pulseDelay;
 
-  std::map<uint8_t, std::deque<uint8_t> > m_readoutBuffers;
+  std::map<uint8_t, std::vector<uint8_t> > m_readoutBuffers;
 
   // Readout streams
   void fetchEventData();
@@ -63,6 +65,7 @@ private:
 public:
   // Modules
   std::shared_ptr<TRuDctrlModule> dctrl;
+  std::shared_ptr<TRuWishboneModule> master;
   std::map<uint8_t, std::shared_ptr<TRuTransceiverModule> > transceiver_array;
 public:
   TReadoutBoardRU(TBoardConfigRU *config);
@@ -83,6 +86,10 @@ public:
   virtual int ReadEventData(int &NBytes, unsigned char *Buffer);
 
   // RU specific functions
+  std::vector<uint8_t> ReadEventData(int &NBytes, unsigned char *Buffer, std::vector<uint8_t> const& chipIds);
+
+
+  void setDataportSource(uint8_t DP2Source=255, uint8_t DP3Source=255);
 
   // Initialize Readout Unit to start readout with given configuration
   int Initialize();
@@ -94,6 +101,7 @@ public:
   std::vector<ReadResult> readResults();
 
   void checkGitHash();
+
 };
 
 #endif // TREADOUTBOARDRU_H

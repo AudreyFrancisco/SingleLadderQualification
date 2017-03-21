@@ -11,6 +11,8 @@
 #include "SetupHelpers.h"
 #include "AlpideConfig.h"
 
+#include <fstream>
+
 int main(int argc, char **argv) {
 
     using namespace std;
@@ -74,6 +76,8 @@ int main(int argc, char **argv) {
       auto chipId = chipIDs.at(i);
       AlpideConfig::Init(ch);
       AlpideConfig::BaseConfig(ch);
+
+      AlpideConfig::WritePixRegAll(ch, Alpide::PIXREG_MASK, true);
   }
 
   for(int i = 0; i < chipIDs.size(); ++i) {
@@ -102,6 +106,26 @@ int main(int argc, char **argv) {
       //for(auto cnt : counters) {
       //    std::cout << cnt.first << ": " << cnt.second << "\n";
       //}
+  }
+
+  ///////////
+  // READOUT
+  //////////
+
+  // Cycle through readout 8 Chips -> 0-3 on DP2/DP3
+  for(int i = 0; i < 4; ++i) {
+      theBoard->setDataportSource(i, i);
+      theBoard->dctrl->Wait(1000); // wait 1000 cycles approx.
+  }
+
+  std::vector<uint8_t> buffer(1*1024*1024);
+  for(int i = 0; i < 10;++i) {
+      int bytesRead = 0;
+      theBoard->ReadEventData(bytesRead, buffer.data());
+      std::cout << "Pass " << i << ", Bytes Read: " << bytesRead;
+      std::string filename = std::string("event_") + std::to_string(i) + ".dat";
+      std::ofstream of(filename, ios::binary);
+      of.write((char*) buffer.data(),bytesRead);
   }
 
   return 0;

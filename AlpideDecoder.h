@@ -2,13 +2,14 @@
 #define ALPIDEDECODER_H
 
 #include <vector>
+#include <cstdint>
 
 enum TDataType {DT_IDLE, DT_CHIPHEADER, DT_CHIPTRAILER, DT_EMPTYFRAME, DT_REGIONHEADER, DT_DATASHORT, DT_DATALONG, DT_BUSYON, DT_BUSYOFF, DT_UNKNOWN};
 
 typedef struct {
   int channel;
   int chipId;
-  int region; 
+  int region;
   int dcol;
   int address;
 } TPixHit;
@@ -25,6 +26,7 @@ class AlpideDecoder {
    static TDataType GetDataType        (unsigned char dataWord);
    static int       GetWordLength      (TDataType dataType);
    static bool      DecodeEvent        (unsigned char *data, int nBytes, std::vector <TPixHit> *hits, int channel = 0);
+   static bool      ExtractNextEvent    (unsigned char *data, int nBytes, int &eventEnd, bool& isError, bool logging=false);
 };
 
 
