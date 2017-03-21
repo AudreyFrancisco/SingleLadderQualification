@@ -105,6 +105,7 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
 
   unsigned char last;
 
+  isError = false;
   while (byte < nBytes) {
     last = data[byte];
     type = GetDataType (data[byte]);
@@ -168,11 +169,14 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
       break;
     case DT_UNKNOWN:
         if(logging)
-            std::cout << "Error, data of unknown type 0x" << std::hex << data[byte] << std::dec << std::endl;
+            std::cout << "Error, data of unknown type 0x" << std::hex << (int)data[byte] << std::dec << std::endl;
         isError=true;
+        byte += 1;
     }
-    if(finished or isError)
+    if(finished || (started && isError))
         break;
+    if(!started && isError)
+        isError=false;
   }
 
   eventEnd = byte;

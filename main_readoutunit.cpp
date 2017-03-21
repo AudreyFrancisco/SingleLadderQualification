@@ -10,8 +10,11 @@
 #include <exception>
 #include "SetupHelpers.h"
 #include "AlpideConfig.h"
+#include <thread>
+#include <chrono>
 
 #include <fstream>
+
 
 int main(int argc, char **argv) {
 
@@ -29,7 +32,7 @@ int main(int argc, char **argv) {
   std::vector<int> chipIDs;
   std::vector<TAlpide *> fChips;
 
-  for (int i = 0; i < 8; i++)
+  for (int i = 0; i < 9; i++)
     chipIDs.push_back(i);
 
     std::cout << "Create config\n";
@@ -74,9 +77,13 @@ int main(int argc, char **argv) {
   for (int i = 0; i < fChips.size(); i++) {
       auto ch = fChips.at(i);
       auto chipId = chipIDs.at(i);
+
+      std::cout << "Configure chip " << (int) chipId << "\n";
+
       AlpideConfig::Init(ch);
       AlpideConfig::BaseConfig(ch);
 
+      AlpideConfig::BaseConfigMask(ch);
       AlpideConfig::WritePixRegAll(ch, Alpide::PIXREG_MASK, true);
   }
 
@@ -92,37 +99,55 @@ int main(int argc, char **argv) {
     }
     tr->ResetCounters();
   }
+  // "clean" ports
+  std::cout <<"Clean ports\n";
+  UsbDev::DataBuffer buf;
+  theBoard->setDataportSource(0, 0);
+  theBoard->readFromPort(TReadoutBoardRU::EP_DATA0_IN ,1024*10000, buf);
+  theBoard->readFromPort(TReadoutBoardRU::EP_DATA1_IN ,1024*10000, buf);
+  std::cout <<"Clean ports done\n";
 
+  int const NR_TRIGGERS = 2;
   // Start triggering
   theBoard->SetTriggerConfig(false, true, 10000, 0);
-  theBoard->Trigger(10);
+  theBoard->Trigger(NR_TRIGGERS);
 
   // check counters
+  std::cout << "Transceiver; Events; Overflow bytes; 8b10b Errors\n";
   for(int i = 0; i < chipIDs.size(); ++i) {
       auto tr = theBoard->transceiver_array[i]; // TODO: Mapping between transceiver and chipid
       auto counters = tr->ReadCounters();
-      std::cout << "Transceiver " << i << ", Events: " << counters["Events NrEvents"] << "\n";
+      std::cout << i << ";"
+                << counters["Events NrEvents"] << ";"
+                << counters["Idlesuppress overflow"] << ";"
+                << counters["8b10b Code Error"] << "\n";
 
-      //for(auto cnt : counters) {
-      //    std::cout << cnt.first << ": " << cnt.second << "\n";
-      //}
+      // for(auto cnt : counters) {
+      //     std::cout << cnt.first << ": " << cnt.second << "\n";
+      // }
   }
+
+  // Deactivate Readout
+  for(auto &tr : theBoard->transceiver_array)
+      tr.second->DeactivateReadout();
+
 
   ///////////
   // READOUT
   //////////
-
   // Cycle through readout 8 Chips -> 0-3 on DP2/DP3
-  for(int i = 0; i < 4; ++i) {
-      theBoard->setDataportSource(i, i);
-      theBoard->dctrl->Wait(1000); // wait 1000 cycles approx.
-  }
+  // for(int i = 0; i < 6; ++i) {
+  //     theBoard->setDataportSource(i, i);
+  //     theBoard->dctrl->Wait(10000); // wait 1000 cycles approx.
+  // }
+  // std::this_thread::sleep_for(std::chrono::seconds(1));
+
 
   std::vector<uint8_t> buffer(1*1024*1024);
-  for(int i = 0; i < 10;++i) {
+  for(int i = 0; i < NR_TRIGGERS; ++i) {
       int bytesRead = 0;
       theBoard->ReadEventData(bytesRead, buffer.data());
-      std::cout << "Pass " << i << ", Bytes Read: " << bytesRead;
+      std::cout << "Pass " << i << ", Bytes Read: " << bytesRead << "\n";
       std::string filename = std::string("event_") + std::to_string(i) + ".dat";
       std::ofstream of(filename, ios::binary);
       of.write((char*) buffer.data(),bytesRead);

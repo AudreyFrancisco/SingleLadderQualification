@@ -33,7 +33,7 @@ public:
   static const uint8_t EP_DATA1_IN = 5;
 
   static const size_t EVENT_DATA_READ_CHUNK = 50 * 1024;
-  static const size_t USB_TIMEOUT = 1000;
+  static const size_t USB_TIMEOUT = 100;
   static const int MAX_RETRIES_READ = 5;
 
   static const uint8_t MODULE_MASTER = 0;
