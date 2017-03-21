@@ -131,7 +131,7 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
     Init(16, boardDAQ);
   }
   else if (AType == TYPE_CHIP_MOSAIC) {
-    Init(16, boardMOSAIC);
+    Init(0, boardMOSAIC);
   }
   else if (AType == TYPE_TELESCOPE) {
     for (int i = 0; i < NChips; i++) {
