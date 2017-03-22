@@ -1,0 +1,337 @@
+#include <algorithm>
+#include <iomanip>
+
+#include "AlpideDecoder.h"
+#include "TAlpide.h"
+#include "TReadoutBoardRU.h"
+
+int roundUpToMultiple(int numToRound, int multiple) {
+  if (multiple == 0)
+    return numToRound;
+
+  int remainder = numToRound % multiple;
+  if (remainder == 0)
+    return numToRound;
+
+  return numToRound + multiple - remainder;
+}
+
+TReadoutBoardRU::TReadoutBoardRU(TBoardConfigRU *config)
+    : TReadoutBoard(config), m_buffer(), m_readBytes(0),
+      m_logging(config->enableLogging()), m_enablePulse(false),
+      m_enableTrigger(true), m_triggerDelay(0), m_pulseDelay(0) {
+
+  m_usb = std::make_shared<UsbDev>(TReadoutBoardRU::VID, TReadoutBoardRU::PID,
+                                   TReadoutBoardRU::INTERFACE_NUMBER);
+
+  dctrl = std::make_shared<TRuDctrlModule>(*this, TReadoutBoardRU::MODULE_DCTRL,
+                                           m_logging);
+
+  master = std::make_shared<TRuWishboneModule>(
+      *this, TReadoutBoardRU::MODULE_MASTER, m_logging);
+
+  for (auto mapping : m_config->getTransceiverMappings()) {
+    uint8_t moduleId = TReadoutBoardRU::MODULE_DATA0 + mapping.transceiverId;
+    transceiver_array[mapping.chipId] =
+        std::make_shared<TRuTransceiverModule>(*this, moduleId, m_logging);
+  }
+}
+
+void TReadoutBoardRU::registeredWrite(uint16_t module, uint16_t address,
+                                      uint16_t data) {
+  uint8_t module_byte = module & 0x7F;
+  uint8_t address_byte = address & 0xFF;
+  uint8_t data_low = data >> 0 & 0xFF;
+  uint8_t data_high = data >> 8 & 0xFF;
+
+  module_byte |= 0x80; // Write operation
+
+  m_buffer.push_back(data_low);
+  m_buffer.push_back(data_high);
+  m_buffer.push_back(address_byte);
+  m_buffer.push_back(module_byte);
+}
+
+void TReadoutBoardRU::registeredRead(uint16_t module, uint16_t address) {
+  uint8_t module_byte = module & 0x7F;
+  uint8_t address_byte = address & 0xFF;
+
+  m_buffer.push_back(0);
+  m_buffer.push_back(0);
+  m_buffer.push_back(address_byte);
+  m_buffer.push_back(module_byte);
+
+  m_readBytes += 4;
+}
+
+bool TReadoutBoardRU::flush() {
+  size_t toWrite = m_buffer.size();
+  size_t written = m_usb->writeData(EP_CTL_OUT, m_buffer, USB_TIMEOUT);
+  // std::cout << "Bytes written: " << written << "( ";
+  // for (auto b : m_buffer)
+  //    std::cout << "0x" <<std::hex << (int)b << ",";
+  // std::cout << ")\n";
+  m_buffer.clear();
+
+  return toWrite == written;
+}
+
+void TReadoutBoardRU::readFromPort(uint8_t port, size_t size,
+                                   UsbDev::DataBuffer &buffer) {
+  buffer.resize(roundUpToMultiple(size, 1024));
+  size_t bytesRead = m_usb->readData(port, buffer, USB_TIMEOUT);
+
+  // std::cout << "Port " << (int) port << ": Bytes Read: " << bytesRead << "(
+  // ";
+  // for (auto b : buffer)
+  //    std::cout << "0x" <<std::hex << (int)b << ",";
+  // std::cout << ")\n";
+}
+
+std::vector<TReadoutBoardRU::ReadResult> TReadoutBoardRU::readResults() {
+  // Read from Control Port
+  UsbDev::DataBuffer buffer_all, buffer_single;
+  int retries = 0;
+  size_t data_left = m_readBytes;
+  while (buffer_all.size() < m_readBytes && retries < MAX_RETRIES_READ) {
+
+    readFromPort(EP_CTL_IN, data_left, buffer_single);
+    buffer_all.insert(buffer_all.end(), buffer_single.begin(),
+                      buffer_single.end());
+
+    if (buffer_all.size() < m_readBytes) {
+      data_left = m_readBytes - buffer_all.size();
+      ++retries;
+    }
+  }
+  if (buffer_all.size() < m_readBytes) {
+    if (m_logging)
+      std::cout
+          << "TReadoutBoardRU: could not read all data from Control Port. "
+             "Packet dropped";
+  }
+  m_readBytes = 0;
+
+  // Process read data
+  std::vector<TReadoutBoardRU::ReadResult> results;
+  for (size_t i = 0; i < buffer_all.size(); i += 4) {
+    uint16_t data = buffer_all[i] | (buffer_all[i + 1] << 8);
+    uint16_t address = buffer_all[i + 2] | (buffer_all[i + 3] << 8);
+    bool read_error = (address & 0x8000) > 0;
+    address &= 0x7FFF;
+    if (read_error && m_logging) {
+      std::cout << "TReadoutBoardRU: Wishbone error while reading: Address "
+                << address << "\n";
+    }
+    // std::cout << "Result received: Address: " << std::hex << (int)address <<
+    // ", data: " << std::hex
+    //          << data << "read error: " << read_error << "\n";
+    results.emplace_back(address, data, read_error);
+  }
+  return results;
+}
+
+int TReadoutBoardRU::ReadRegister(uint16_t Address, uint32_t &Value) {
+  uint16_t module = Address >> 8 & 0xFF;
+  uint16_t sub_address = Address & 0xFF;
+  registeredRead(module, sub_address);
+  flush();
+  auto results = readResults();
+  if (results.size() != 1) {
+    if (m_logging)
+      std::cout << "TReadoutBoardRU: Expected 1 result, got " << results.size()
+                << "\n";
+    return -1;
+  } else {
+    Value = results[0].data;
+  }
+  return 0;
+}
+int TReadoutBoardRU::WriteRegister(uint16_t Address, uint32_t Value) {
+  uint16_t module = Address >> 8 & 0xFF;
+  uint16_t sub_address = Address & 0xFF;
+  uint16_t data = Value & 0xFFFF;
+  registeredWrite(module, sub_address, data);
+  flush();
+
+  return 0;
+}
+
+int TReadoutBoardRU::WriteChipRegister(uint16_t Address, uint16_t Value,
+                                       uint8_t chipId) {
+  dctrl->WriteChipRegister(Address, Value, chipId);
+  return 0;
+}
+
+int TReadoutBoardRU::ReadChipRegister(uint16_t Address, uint16_t &Value,
+                                      uint8_t chipId) {
+  return dctrl->ReadChipRegister(Address, Value, chipId);
+}
+
+int TReadoutBoardRU::SendOpCode(uint16_t OpCode) {
+  dctrl->SendOpCode(OpCode);
+  return 0;
+}
+
+int TReadoutBoardRU::SendOpCode(uint16_t OpCode, uint8_t chipId) {
+  return SendOpCode(OpCode);
+}
+
+int TReadoutBoardRU::SetTriggerConfig(bool enablePulse, bool enableTrigger,
+                                      int triggerDelay, int pulseDelay) {
+  m_enablePulse = enablePulse;
+  m_enableTrigger = enableTrigger;
+  m_triggerDelay = triggerDelay;
+  m_pulseDelay = pulseDelay;
+}
+
+void TReadoutBoardRU::SetTriggerSource(TTriggerSource triggerSource) {}
+
+int TReadoutBoardRU::Trigger(int nTriggers) {
+  for (int i = 0; i < nTriggers; ++i) {
+    if (m_enablePulse)
+      dctrl->SendOpCode(Alpide::OPCODE_PULSE, false);
+    if (m_pulseDelay > 0)
+      dctrl->Wait(m_pulseDelay, false);
+    if (m_enableTrigger)
+      dctrl->SendOpCode(Alpide::OPCODE_TRIGGER1, false);
+    if (m_triggerDelay > 0)
+      dctrl->Wait(m_triggerDelay, false);
+  }
+  flush();
+  return 0;
+}
+
+void TReadoutBoardRU::fetchEventData() {
+  static UsbDev::DataBuffer buffer;
+  std::map<uint8_t,size_t> chipByteCounters;
+  for (int i = 0; i < 6; ++i) {
+    this->setDataportSource(i, i);
+    for (auto port : {EP_DATA0_IN, EP_DATA1_IN}) {
+      // read chunk from USB
+      readFromPort(port, TReadoutBoardRU::EVENT_DATA_READ_CHUNK, buffer);
+
+      // Debug: Print output
+      // std::cout << "========== HS data read ==========\n";
+      // std::cout << std::hex;
+      // for (int i = 0; i < buffer.size(); ++i) {
+      //   std::cout << std::setfill('0') << std::setw(2)
+      //             << (int)buffer[i] << " ";
+      //   if (i % 20 == 19)
+      //     std::cout << "\n";
+      // }
+      // std::cout << std::dec;
+      // std::cout << "\n========== HS data read ==========\n";
+
+      // Filter, remove status, remove padded bytes, split to dataport
+      for (size_t i = 0; i < buffer.size(); i += 4) {
+        uint8_t status = buffer[i + 3];
+        uint8_t index = status >> 5;
+        uint8_t chip = m_config->getTransceiverChip(port, index);
+
+        for (int j = 0; j < 3; j++) {
+          bool isPadded = ((status >> (2 + j)) & 1) == 1;
+          if (!isPadded) {
+            m_readoutBuffers[chip].push_back(buffer[i + j]);
+            chipByteCounters[chip]++;
+          }
+        }
+      }
+    }
+  }
+  // std::cout << "Chip;Bytes read\n";
+  // for(auto entry : chipByteCounters)
+  //    std::cout << (int)entry.first << ";" << entry.second << "\n";
+}
+
+std::vector<uint8_t>
+TReadoutBoardRU::ReadEventData(int &NBytes, unsigned char *Buffer,
+                               std::vector<uint8_t> const &chipIds) {
+  std::vector<uint8_t> buffersToUpdate{};
+  auto BufferIt = Buffer;
+  for (uint8_t chipId : chipIds) {
+    auto it = m_readoutBuffers.find(chipId);
+    if (it == m_readoutBuffers.end()) {
+      // not found, fetch
+      buffersToUpdate.push_back(chipId);
+    } else {
+      auto &buf = it->second;
+      int eventEnd = 0;
+      bool isError;
+      bool hasEvent = AlpideDecoder::ExtractNextEvent(
+          buf.data(), buf.size(), eventEnd, isError, false);
+      if (isError and m_logging) {
+        std::cout << "Event decoding error on chip 0x" << std::hex
+                  << (int)chipId << ". Event size: " << std::dec << eventEnd
+                  << "\n";
+        std::cout << "===== Event Data ======\n";
+        std::cout << std::hex;
+        for (int i = 0; i < eventEnd; ++i) {
+          std::cout << std::setfill('0') << std::setw(2)
+                    << (int)buf[i] << " ";
+          if (i % 20 == 19)
+            std::cout << "\n";
+        }
+        std::cout << std::dec;
+        std::cout << "\n========== /Event Data ==========\n";
+      }
+      if (hasEvent) {
+        std::copy(buf.begin(), buf.begin() + eventEnd, BufferIt);
+        NBytes += eventEnd;
+      } else {
+        buffersToUpdate.push_back(chipId);
+      }
+    }
+  }
+  return buffersToUpdate;
+}
+
+int TReadoutBoardRU::ReadEventData(int &NBytes, unsigned char *Buffer) {
+
+  std::vector<uint8_t> chipIds{};
+
+  for (auto const &mapping : m_config->getTransceiverMappings()) {
+    chipIds.push_back(mapping.chipId);
+  }
+
+  auto secondFetch = ReadEventData(NBytes, Buffer, chipIds);
+  // IF there are Events missing, fetch event data and try again
+  if (!secondFetch.empty()) {
+    fetchEventData();
+    ReadEventData(NBytes, Buffer + NBytes, secondFetch);
+  }
+
+  return 0;
+}
+
+int TReadoutBoardRU::Initialize() {
+  dctrl->SetConnector(m_config->getConnector());
+
+  for (auto &transceiver : transceiver_array) {
+    transceiver.second->Initialize(m_config->getReadoutSpeed(),
+                                   m_config->getInvertPolarity());
+  }
+  return 0;
+}
+
+void TReadoutBoardRU::checkGitHash() {
+  registeredRead(TReadoutBoardRU::MODULE_STATUS, 0);
+  registeredRead(TReadoutBoardRU::MODULE_STATUS, 1);
+
+  flush();
+  auto results = readResults();
+  if (results.size() != 2) {
+    if (m_logging)
+      std::cout << "TReadoutBoardRU: Expected 2 results, got " << results.size()
+                << "\n";
+  } else {
+    uint16_t lsb = results[0].data;
+    uint16_t msb = results[1].data;
+    std::cout << "Git hash: " << std::hex << msb << lsb << "\n";
+  }
+}
+
+void TReadoutBoardRU::setDataportSource(uint8_t DP2Source, uint8_t DP3Source) {
+  uint16_t setting = ((DP3Source & 0xF) << 8) | (DP2Source & 0xF);
+  master->Write(MASTER_DP23_SOURCE, setting, true);
+}
