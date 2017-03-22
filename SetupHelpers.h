@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
+#include "TReadoutBoardRU.h"
 
 
 // definition of standard setup types: 
@@ -15,6 +16,7 @@ typedef enum {setupSingle, setupIB, setupOB, setupSingleM} TSetupType;
 
 int  initSetupOB          (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
 int  initSetupIB          (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
+int  initSetupIBRU        (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
 int  initSetupSingle      (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
 int  initSetupSingleMosaic(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
 int  initSetupHalfStave   (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);

@@ -174,9 +174,9 @@ int CheckControlInterface(TConfig* config, std::vector <TReadoutBoard *> * board
   int      nWorking = 0;
 
   std::cout << std::endl << "Before starting actual test:" << std::endl << "Checking the control interfaces of all chips by doing a single register readback test" << std::endl;
-
   for (int i = 0; i < chips->size(); i++) {
     if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
+    //std::cout << "Writing chip " << i << std::endl;
     chips->at(i)->WriteRegister (0x60d, WriteValue);
     try {
       chips->at(i)->ReadRegister (0x60d, Value);
@@ -205,6 +205,7 @@ int CheckControlInterface(TConfig* config, std::vector <TReadoutBoard *> * board
 //    - each chip has its own receiver, mapping defined in RCVMAP
 int initSetupIB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
   int RCVMAP []                   = { 3, 5, 7, 8, 6, 4, 2, 1, 0 };
+
   (*boardType)                      = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) config->GetBoardConfig(0);
 
@@ -251,6 +252,53 @@ int initSetupIB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
     boards->at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver);
   }
 
+  int nWorking = CheckControlInterface(config, boards, boardType, chips);
+
+  return 0;
+}
+
+
+// Setup definition for inner barrel stave with readout unit
+//    - all chips connected to same control interface
+//    - each chip has its own receiver, assume connector 0 -> transceiver number = chip id
+int initSetupIBRU(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
+  (*boardType)                = boardRU;
+  TBoardConfigRU *boardConfig = (TBoardConfigRU*) config->GetBoardConfig(0);
+
+  switch (config->GetChipConfig(0)->GetParamValue("LINKSPEED")) {
+  case 1200: 
+    break;
+  default: 
+    std::cout << "Warning: invalid link speed, using 1200" << std::endl;
+    break;
+  }
+
+  // TODO: Set speed mode correctly 
+
+  boards->push_back (new TReadoutBoardRU(boardConfig));
+
+  for (int i = 0; i < config->GetNChips(); i++) {
+    TChipConfig *chipConfig = config->GetChipConfig(i);
+    int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
+    int          receiver   = chipConfig->GetParamValue("RECEIVER");
+
+    if (control  < 0) {
+      chipConfig->SetParamValue("CONTROLINTERFACE", "0");
+      control = 0;
+    }
+    if (receiver < 0) {
+      // connected to port 0 -> receiver number = chip Id
+      chipConfig->SetParamValue("RECEIVER", chipConfig->GetChipId());
+      receiver = chipConfig->GetChipId();
+    }
+
+    chips->push_back(new TAlpide(chipConfig));
+    chips->at(i) -> SetReadoutBoard(boards->at(0));
+
+    boards->at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver);
+  }
+
+  // TODO: check whether CheckControlInterface works for readout unit
   int nWorking = CheckControlInterface(config, boards, boardType, chips);
 
   return 0;

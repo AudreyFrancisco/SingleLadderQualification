@@ -1,6 +1,7 @@
 #include "TConfig.h" 
 #include "TBoardConfigDAQ.h"
 #include "TBoardConfigMOSAIC.h"
+#include "TBoardConfigRU.h"
 #include <iostream>
 #include <string.h>
 
@@ -36,8 +37,7 @@ void TConfig::Init (int nBoards, std::vector <int> chipIds, TBoardType boardType
       fBoardConfigs.push_back (new TBoardConfigMOSAIC());
     }
     else if (boardType == boardRU) {
-      // TODO: correct this
-      //   fBoardConfigs.push_back (new TBoardConfigRU());
+      fBoardConfigs.push_back (new TBoardConfigRU());
     }
     else {
       std::cout << "TConfig: Unknown board type" << std::endl;
