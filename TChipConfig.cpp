@@ -44,6 +44,12 @@ TChipConfig::TChipConfig (TConfig *config, int chipId, const char *fName) {
   fInitialToken        = INITIAL_TOKEN;
   fDisableManchester   = DISABLE_MANCHESTER;
   fEnableDdr           = ENABLE_DDR;
+  
+  fPllPhase            = PLL_PHASE;
+  fPllStages           = PLL_STAGES;
+  fChargePump          = CHARGE_PUMP;
+  fDtuDriver           = DTU_DRIVER;
+  fDtuPreemp           = DTU_PREEMP;
  
   if (fName) {
     // read information from file
@@ -78,6 +84,11 @@ void TChipConfig::InitParamMap ()
   fSettings["STROBEDELAYCHIP"]  = &fStrobeDelay;
   fSettings["READOUTMODE"]      = (int*)&fReadoutMode;
   fSettings["LINKSPEED"]        = &fSerialLinkSpeed; 
+  fSettings["PLLPHASE"]         = &fPllPhase;
+  fSettings["PLLSTAGES"]        = &fPllStages;
+  fSettings["CHARGEPUMP"]       = &fChargePump;
+  fSettings["DTUDRIVER"]        = &fDtuDriver;
+  fSettings["DTUPREEMP"]        = &fDtuPreemp;
 }
 
 

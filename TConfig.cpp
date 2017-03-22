@@ -35,6 +35,10 @@ void TConfig::Init (int nBoards, std::vector <int> chipIds, TBoardType boardType
     else if (boardType == boardMOSAIC) {
       fBoardConfigs.push_back (new TBoardConfigMOSAIC());
     }
+    else if (boardType == boardRU) {
+      // TODO: correct this
+      //   fBoardConfigs.push_back (new TBoardConfigRU());
+    }
     else {
       std::cout << "TConfig: Unknown board type" << std::endl;
     }
@@ -115,6 +119,9 @@ TDeviceType TConfig::ReadDeviceType (const char *deviceName) {
   else if (!strcmp(deviceName, "HALFSTAVE")) {
     type = TYPE_HALFSTAVE;
   }
+  else if (!strcmp(deviceName, "IBHICRU")) {
+    type = TYPE_IBHICRU;
+  }
   else {
     std::cout << "Error, unknown setup type found: " << deviceName << std::endl;
     exit (EXIT_FAILURE);
@@ -131,7 +138,7 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
     Init(16, boardDAQ);
   }
   else if (AType == TYPE_CHIP_MOSAIC) {
-    Init(16, boardMOSAIC);
+    Init(0, boardMOSAIC);
   }
   else if (AType == TYPE_TELESCOPE) {
     for (int i = 0; i < NChips; i++) {
@@ -152,6 +159,12 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
       chipIds.push_back(i);
     }
     Init (1, chipIds, boardMOSAIC);    
+  }
+  else if (AType == TYPE_IBHICRU) {
+    for (int i = 0; i < 9; i++) {
+      chipIds.push_back(i);
+    }
+    Init (1, chipIds, boardRU);    
   }
   else if (AType == TYPE_HALFSTAVE) {
     for (int imod = 0; imod < NChips; imod++) {

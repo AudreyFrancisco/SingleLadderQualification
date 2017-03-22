@@ -38,10 +38,17 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
   const int  DCTRL_RECEIVER  = 10;
   const int  DCTRL_DRIVER    = 10;
 
+  const int  PLL_PHASE       = 8;
+  const int  PLL_STAGES      = 1;
+  const int  CHARGE_PUMP     = 8;
+  const int  DTU_DRIVER      = 15;
+  const int  DTU_PREEMP      = 15;
+
   const int  PREVIOUS_ID        = 0x10;
   const bool INITIAL_TOKEN      = true;
   const bool DISABLE_MANCHESTER = false;
   const bool ENABLE_DDR         = true;
+
 };
 
 
@@ -95,7 +102,12 @@ class TChipConfig {
   bool fInitialToken;
   bool fDisableManchester;
   bool fEnableDdr;
-  
+  // DTU settings
+  int  fPllPhase;
+  int  fPllStages;
+  int  fChargePump;
+  int  fDtuDriver;
+  int  fDtuPreemp;
  protected:
  public:
   TChipConfig               (TConfig *config, int chipId, const char *fName = 0);
