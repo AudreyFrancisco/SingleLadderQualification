@@ -13,11 +13,11 @@ typedef struct {
   int  chipId;
   int  controlInterface;
   int  receiver;
-  bool enabled;
+  bool enabled; 
 } TChipPos;
 
 class TBoardConfig;
-
+ 
 //************************************************************
 // abstract base class for all readout boards
 //************************************************************
@@ -25,7 +25,7 @@ class TBoardConfig;
 class TReadoutBoard {
  private:
   int  fNChips;                              // probably obsolete, use fChipPositions.size() instead
-
+  
  protected:
   std::vector <TChipPos> fChipPositions;  // Antonio : change in protected to access from derived class
   TBoardConfig *fBoardConfig;
