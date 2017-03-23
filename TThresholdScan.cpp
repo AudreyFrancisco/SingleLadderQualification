@@ -189,12 +189,12 @@ void TThresholdScan::FillHistos (std::vector<TPixHit> *Hits, int board)
   for (int i = 0; i < Hits->size(); i++) {
     if (Hits->at(i).address / 2 != m_row) continue;  // todo: keep track of spurious hits, i.e. hits in non-injected rows
     // !! This will not work when allowing several chips with the same Id
-    idx.dataReceiver = m_boards.at(board)->GetReceiver(Hits->at(i).chipId);
+    idx.dataReceiver = Hits->at(i).channel;
     idx.chipId       = Hits->at(i).chipId;
+
     int col = Hits->at(i).region * 32 + Hits->at(i).dcol * 2;
     int leftRight = ((((Hits->at(i).address % 4) == 1) || ((Hits->at(i).address % 4) == 2))? 1:0); 
     col += leftRight;
-
     m_histo->Incr(idx, col, m_value[0]);
   }
   

@@ -221,7 +221,7 @@ bool BoardDecoder::DecodeEventMOSAIC(unsigned char *data, int nBytes, int &nByte
 	boardInfo.endOfRun			= blockFlags & MBoard::flagCloseRun;
 	boardInfo.timeout			= blockFlags & MBoard::flagTimeout;
 	boardInfo.eoeCount    		= 1;
-	boardInfo.channel     		= endianAdjust(data+12);
+	boardInfo.channel     		= endianAdjust(data+12) - 1;
 	nBytesHeader          		= 64; // #define MOSAIC_HEADER_LENGTH 64
 	nBytesTrailer         		= 1; // #define The MOSAIC trailer length
 
