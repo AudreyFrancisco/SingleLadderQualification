@@ -59,7 +59,7 @@ void AlpideDecoder::DecodeEmptyFrame (unsigned char *data, int &chipId, unsigned
 }
 
 
-void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong, int channel) {
+void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong, int channel, int &prioErrors) {
   TPixHit hit;
   int     address, hitmap_length;
 
@@ -75,9 +75,11 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, s
   if ((hits->size() > 0) && (!newEvent)) {
     if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address == hits->back().address)) {
       std::cout << "Warning (chip "<< chip << "/ channel "<< channel << "), received pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " twice." << std::endl;
+      prioErrors ++;
     }
     else if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address < hits->back().address)) {
       std::cout << "Warning (chip "<< chip << "/ channel "<< channel << "), address of pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " is lower than previous one ("<< hits->back().address << ") in same double column." << std::endl;
+      prioErrors ++;
     }
   }
 
@@ -186,13 +188,14 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
 }
 
 
-bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <TPixHit> *hits, int channel) {
+bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <TPixHit> *hits, int channel, int &prioErrors) {
   int       byte    = 0;
   int       region  = -1;
   int       chip    = -1;
   int       flags   = 0;
   bool      started = false; // event has started, i.e. chip header has been found
   bool      finished = false; // event trailer found
+  bool      corrupt  = false; // corrupt data found (i.e. data without region or chip)
   TDataType type;
 
   unsigned char last;
@@ -253,6 +256,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
       }
       if (region == -1) {
 	std::cout << "Warning: data word without region, skipping (Chip " << chip << ")" << std::endl;
+        corrupt = true;
       }
       else if (hits) {
         if (chip == -1) {
@@ -261,7 +265,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
 	  }
           printf("\n");
 	}
-        DecodeDataWord (data + byte, chip, region, hits, false, channel);
+        DecodeDataWord (data + byte, chip, region, hits, false, channel, prioErrors);
       }
       byte += 2;
       break;
@@ -272,6 +276,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
       }
       if (region == -1) {
 	std::cout << "Warning: data word without region, skipping (Chip " << chip << ")" << std::endl;
+        corrupt = true;
       }
       else if (hits) {
         if (chip == -1) {
@@ -280,7 +285,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
 	  }
           printf("\n");
 	}
-        DecodeDataWord (data + byte, chip, region, hits, true, channel);
+        DecodeDataWord (data + byte, chip, region, hits, true, channel, prioErrors);
       }
       byte += 3;
       break;
@@ -290,7 +295,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
     }
   }
   //std::cout << "Found " << Hits->size() - NOldHits << " hits" << std::endl;
-  if (started && finished) return true;
+  if (started && finished) return (!corrupt);
   else {
     if (started && !finished) {
       std::cout << "Warning (chip "<< chip << "), event not finished at end of data, last byte was 0x" << std::hex << (int) last << std::dec << ", event length = " << nBytes <<std::endl;
@@ -301,5 +306,6 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
       return false;
     }
   }
-  return true;
+
+  return (!corrupt);
 }

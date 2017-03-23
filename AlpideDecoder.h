@@ -20,12 +20,12 @@ class AlpideDecoder {
    static void      DecodeChipTrailer  (unsigned char *data, int &flags);
    static void      DecodeRegionHeader (unsigned char *data, int &region);
    static void      DecodeEmptyFrame   (unsigned char *data, int &chipId, unsigned int &bunchCounter);
-   static void      DecodeDataWord     (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong, int channel = 0);
+   static void      DecodeDataWord     (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong, int channel, int &prioErrors);
  protected:
  public:
    static TDataType GetDataType        (unsigned char dataWord);
    static int       GetWordLength      (TDataType dataType);
-   static bool      DecodeEvent        (unsigned char *data, int nBytes, std::vector <TPixHit> *hits, int channel = 0);
+   static bool      DecodeEvent        (unsigned char *data, int nBytes, std::vector <TPixHit> *hits, int channel, int &prioErrors);
    static bool      ExtractNextEvent    (unsigned char *data, int nBytes, int &eventEnd, bool& isError, bool logging=false);
 };
 

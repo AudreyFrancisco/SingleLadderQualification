@@ -170,7 +170,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 void scan() {   
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int                   nBad = 0, skipped = 0;
+  int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
   std::vector<int> myVPULSEH;
@@ -212,32 +212,18 @@ void scan() {
           if (trials == 10) {
         	std::cout << "Reached 10 timeouts, giving up on this event" << std::endl;
             itrg = myNTriggers * fEnabled;
-            skipped ++;
+            nSkipped ++;
             trials = 0;
           }
           continue;
         }
         else {
-          // decode DAQboard event
-          //if (ievt < 20) {
-	  //   FILE *fDebug = fopen ("DebugData.dat", "a");
-          //  fprintf(fDebug, "Normal event:\n");
-          //  for (int iByte=0; iByte<n_bytes_data; ++iByte) {
-          //    fprintf (fDebug, "%02x ", (int) buffer[iByte]);
-          //  }
-          //  fprintf(fDebug, "\nFull Event:\n"); 
-          //  for (int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
-          //    fprintf (fDebug, "%02x ", (int) fDebugBuffer.at(ibyte));
-          //  }
-          //  fprintf(fDebug, "\n\n");
-          //  fclose (fDebug);
-          //  ievt ++;
-	  // }
           BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+          if (boardInfo.decoder10b8bError) errors8b10b++;
           // decode Chip event
           int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
           if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
-          if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel)) {
+          if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel, prioErrors)) {
    	    	std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
 	    	nBad ++;
             if (nBad > 10) continue;
@@ -266,7 +252,18 @@ void scan() {
   if (myMOSAIC) {
     myMOSAIC->StopRun();
   }
-  std::cout << "Scan finished, skipped " << skipped << " points." << std::endl;
+
+
+  std::cout << std::endl;
+  if (myMOSAIC) {
+    myMOSAIC->StopRun();
+    std::cout << "Total number of 8b10b decoder errors: " << errors8b10b << std::endl;
+  }
+  std::cout << "Number of corrupt events:             " << nBad       << std::endl;
+  std::cout << "Number of skipped points:             " << nSkipped   << std::endl;
+  std::cout << "Priority encoder errors:              " << prioErrors << std::endl;
+  std::cout << std::endl;
+
 }
 
 

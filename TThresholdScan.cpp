@@ -123,7 +123,8 @@ void TThresholdScan::Execute()
 {
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int                   nBad = 0, skipped = 0;
+  // TODO: move counters out (should be for the full scan, not for one point
+  int                   nBad = 0, skipped = 0, prioErrors = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -151,7 +152,7 @@ void TThresholdScan::Execute()
         // decode Chip event
         int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
         if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
-        if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel)) {
+        if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel, prioErrors)) {
           std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
           nBad ++;
           if (nBad > 10) continue;

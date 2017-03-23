@@ -174,6 +174,7 @@ int configureChip(TAlpide *chip) {
 void scan(const char *fName) {   
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
+  int                   prioErrors;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -200,7 +201,7 @@ void scan(const char *fName) {
             BoardDecoder::DecodeEvent(boardDAQ, buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
             // decode Chip event
             int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
-            AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel);
+            AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel, prioErrors);
 
             itrg++;
           }

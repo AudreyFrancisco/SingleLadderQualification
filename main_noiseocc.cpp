@@ -178,7 +178,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 
 void scan() {   
   unsigned char         buffer[1024*4000]; 
-  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0, skipped = 0;
+  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0, skipped = 0, prioErrors = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -234,7 +234,7 @@ void scan() {
           }
           // decode Chip event
           int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
-          bool Decode = AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel);
+          bool Decode = AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel, prioErrors);
           //if (!Decode) {
           //  printf("Bad Event: ");
           //  for (int i = 0; i < n_bytes_chipevent; i++) {
