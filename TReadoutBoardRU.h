@@ -33,7 +33,7 @@ public:
   static const uint8_t EP_DATA1_IN = 5;
 
   static const size_t EVENT_DATA_READ_CHUNK = 50 * 1024;
-  static const size_t USB_TIMEOUT = 100;
+  static const size_t USB_TIMEOUT = 1;
   static const int MAX_RETRIES_READ = 5;
 
   static const uint8_t MODULE_MASTER = 0;
@@ -57,7 +57,9 @@ private:
   int m_triggerDelay;
   int m_pulseDelay;
 
+
   std::map<uint8_t, std::vector<uint8_t> > m_readoutBuffers;
+  std::deque<std::vector<uint8_t> > m_events;
 
   // Readout streams
   void fetchEventData();
@@ -87,8 +89,6 @@ public:
   virtual int ReadEventData(int &NBytes, unsigned char *Buffer);
 
   // RU specific functions
-  std::vector<uint8_t> ReadEventData(int &NBytes, unsigned char *Buffer, std::vector<uint8_t> const& chipIds);
-
 
   void setDataportSource(uint8_t DP2Source=255, uint8_t DP3Source=255);
 

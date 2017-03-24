@@ -99,13 +99,15 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, s
   newEvent = false;
 }
 
-bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &eventEnd, bool &isError, bool logging) {
+bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &eventStart, int &eventEnd, bool &isError, bool logging) {
   int       byte    = 0;
   bool      started = false; // event has started, i.e. chip header has been found
   bool      finished = false; // event trailer found
   TDataType type;
 
   unsigned char last;
+
+  eventStart = 0;
 
   isError = false;
   while (byte < nBytes) {
@@ -123,11 +125,13 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
       break;
     case DT_EMPTYFRAME:
       started = true;
+      eventStart = byte;
       byte += 2;
       finished = true;
       break;
     case DT_CHIPHEADER:
       started = true;
+      eventStart = byte;
       finished = false;
       byte += 2;
       break;

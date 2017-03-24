@@ -5,11 +5,11 @@
 //   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
 //
-// In order to have a generic scan, which works for single chips as well as for staves and modules, 
-// all chip accesses should be done with a loop over all elements of the chip vector. 
+// In order to have a generic scan, which works for single chips as well as for staves and modules,
+// all chip accesses should be done with a loop over all elements of the chip vector.
 // (see e.g. the configureChip loop in main)
-// Board accesses are to be done via fBoards.at(0);  
-// For an example how to access board-specific functions see the power off at the end of main. 
+// Board accesses are to be done via fBoards.at(0);
+// For an example how to access board-specific functions see the power off at the end of main.
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
@@ -97,7 +97,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
 
   char fNameTemp[100];
   sprintf(fNameTemp,"%s", fName);
-  strtok (fNameTemp, "."); 
+  strtok (fNameTemp, ".");
 
   for (int ichip = 0; ichip < fChips.size(); ichip ++) {
     std::cout << "ichip = "<<ichip << std::endl;
@@ -131,7 +131,7 @@ int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x0);             // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, chip->GetConfig()->GetParamValue("STROBEDELAYCHIP"));   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length 
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length
   return 0;
 }
 
@@ -147,8 +147,8 @@ int configureChip(TAlpide *chip) {
 }
 
 
-void scan() {   
-  unsigned char         buffer[1024*4000]; 
+void scan() {
+  unsigned char         buffer[1024*4000];
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b, nClosedEvents = 0;
   int                   nBad       = 0;
   int                   nSkipped   = 0;
@@ -158,9 +158,9 @@ void scan() {
 
   TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (fBoards.at(0));
 
-  
+
   fBoards.at(0)->StartRun();
-  
+
 
   for (int istage = 0; istage < myMaskStages; istage ++) {
     std::cout << "Mask stage " << istage << std::endl;
@@ -198,12 +198,12 @@ void scan() {
         continue;
       }
       else {
-        std::cout << "received Event" << itrg << " with length " << n_bytes_data << std::endl; 
+        std::cout << "received Event" << itrg << " with length " << n_bytes_data << std::endl;
         for (int iByte=0; iByte<n_bytes_data; ++iByte) {
           printf ("%02x ", (int) buffer[iByte]);
         }
         std::cout << std::endl;
-            
+
         // decode DAQboard event
         BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
 	//std::cout << "Closed data counter: " <<  boardInfo.eoeCount << std::endl;
@@ -232,10 +232,10 @@ void scan() {
       }
     }
 
-    
+
     //std::cout << "Hit pixels: " << std::endl;
     //for (int i=0; i<Hits->size(); i++) {
-    //  std::cout << i << ":\t region: " << Hits->at(i).region << "\tdcol: " << Hits->at(i).dcol << "\taddres: " << Hits->at(i).address << std::endl; 
+    //  std::cout << i << ":\t region: " << Hits->at(i).region << "\tdcol: " << Hits->at(i).dcol << "\taddres: " << Hits->at(i).address << std::endl;
     //}
     CopyHitData(Hits);
   }
@@ -268,9 +268,9 @@ int main(int argc, char** argv) {
   sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
-  
+
   if (fBoards.size() == 1) {
-     
+
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
@@ -287,19 +287,19 @@ int main(int argc, char** argv) {
     }
     std::cout << "Found " << fEnabled << " enabled chips" << std::endl;
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
 
-    // put your test here... 
+    // put your test here...
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
       fBoards.at(0)->SetTriggerConfig (true, true,
                                        fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
-                                       fBoards.at(0)->GetConfig()->GetParamValue("PULSEDELAY")); 
+                                       fBoards.at(0)->GetConfig()->GetParamValue("PULSEDELAY"));
       fBoards.at(0)->SetTriggerSource (trigInt);
     }
     else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
       // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns * strobe delay
       // pulse delay cannot be 0, therefore set strobe delay to 0 and use only pulse delay
-      fBoards.at(0)->SetTriggerConfig (true, false, 
+      fBoards.at(0)->SetTriggerConfig (true, false,
                                        0,
                                        2 * fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
       fBoards.at(0)->SetTriggerSource (trigExt);

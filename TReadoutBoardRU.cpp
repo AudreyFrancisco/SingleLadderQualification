@@ -212,19 +212,19 @@ void TReadoutBoardRU::fetchEventData() {
     for (auto port : {EP_DATA0_IN, EP_DATA1_IN}) {
       // read chunk from USB
       readFromPort(port, TReadoutBoardRU::EVENT_DATA_READ_CHUNK, buffer);
+      if(!buffer.empty()) {
+          // std::cout << "===== HS Data ======\n";
+          // std::cout << std::hex;
+          // for (int i = 0; i < buffer.size(); ++i) {
+          //     std::cout << std::setfill('0') << std::setw(2)
+          //               << (int)buffer[i] << " ";
+          //     if (i % 40 == 39)
+          //         std::cout << "\n";
+          // }
+          // std::cout << std::dec;
+          // std::cout << "\n========== /HS Data ==========\n";
+      }
 
-      // Debug: Print output
-       std::cout << "========== HS data read ==========\n";
-       std::cout << "Dataport: " << i << "=\n";
-       std::cout << std::hex;
-       for (int i = 0; i < buffer.size(); ++i) {
-         std::cout << std::setfill('0') << std::setw(2)
-                   << (int)buffer[i] << " ";
-         if (i % 20 == 19)
-           std::cout << "\n";
-       }
-       std::cout << std::dec;
-       std::cout << "\n========== HS data read ==========\n";
 
       // Filter, remove status, remove padded bytes, split to dataport
       for (size_t i = 0; i < buffer.size(); i += 4) {
@@ -242,68 +242,58 @@ void TReadoutBoardRU::fetchEventData() {
       }
     }
   }
-  // std::cout << "Chip;Bytes read\n";
-  // for(auto entry : chipByteCounters)
-  //    std::cout << (int)entry.first << ";" << entry.second << "\n";
-}
 
-std::vector<uint8_t>
-TReadoutBoardRU::ReadEventData(int &NBytes, unsigned char *Buffer,
-                               std::vector<uint8_t> const &chipIds) {
-  std::vector<uint8_t> buffersToUpdate{};
-  auto BufferIt = Buffer;
-  NBytes = 0;
-  for (uint8_t chipId : chipIds) {
-    auto it = m_readoutBuffers.find(chipId);
-    if (it == m_readoutBuffers.end()) {
-      // not found, fetch
-      buffersToUpdate.push_back(chipId);
-    } else {
-      auto &buf = it->second;
+  // Read out events
+  for(auto& buffer : m_readoutBuffers) {
+      auto chipId = buffer.first;
+      auto& data = buffer.second;
+
+      int eventStart = 0;
       int eventEnd = 0;
       bool isError;
       bool hasEvent = AlpideDecoder::ExtractNextEvent(
-          buf.data(), buf.size(), eventEnd, isError, false);
+          data.data(), data.size(), eventStart, eventEnd, isError, false);
       if (isError and m_logging) {
-        std::cout << "Event decoding error on chip 0x" << std::hex
-                  << (int)chipId << ". Event size: " << std::dec << eventEnd
-                  << "\n";
-        std::cout << "===== Event Data ======\n";
-        std::cout << std::hex;
-        for (int i = 0; i < eventEnd; ++i) {
-          std::cout << std::setfill('0') << std::setw(2)
-                    << (int)buf[i] << " ";
-          if (i % 20 == 19)
-            std::cout << "\n";
-        }
-        std::cout << std::dec;
-        std::cout << "\n========== /Event Data ==========\n";
+          std::cout << "Event decoding error on chip 0x" << std::hex
+                    << (int)chipId << ". Event size: " << std::dec << eventEnd
+                    << "\n";
       }
       if (hasEvent) {
-        std::copy(buf.begin(), buf.begin() + eventEnd, BufferIt);
-        NBytes += eventEnd;
-      } else {
-        buffersToUpdate.push_back(chipId);
+          // std::cout << "===== Event Data ======\n";
+          // std::cout << std::hex;
+          // for (int i = eventStart; i < eventEnd; ++i) {
+          //     std::cout << std::setfill('0') << std::setw(2)
+          //               << (int)data[i] << " ";
+          //     if (i % 20 == 19)
+          //         std::cout << "\n";
+          // }
+          // std::cout << std::dec;
+          // std::cout << "\n========== /Event Data ==========\n";
+
+          // Extract event bytes and store in event list
+          std::vector<uint8_t> eventData(begin(data) + eventStart, begin(data) + eventEnd);
+          m_events.emplace_back(eventData);
+
+          // event is extracted, remove data from buffer
+          data.erase(begin(data) + eventEnd, end(data));
       }
-    }
   }
-  return buffersToUpdate;
 }
 
 int TReadoutBoardRU::ReadEventData(int &NBytes, unsigned char *Buffer) {
 
-  std::vector<uint8_t> chipIds{};
+    if(m_events.empty())
+        fetchEventData();
 
-  for (auto const &mapping : m_config->getTransceiverMappings()) {
-    chipIds.push_back(mapping.chipId);
-  }
+    if(!m_events.empty()) {
+        auto event = m_events.front();
+        m_events.pop_front();
 
-  auto secondFetch = ReadEventData(NBytes, Buffer, chipIds);
-  // IF there are Events missing, fetch event data and try again
-  if (!secondFetch.empty()) {
-    fetchEventData();
-    ReadEventData(NBytes, Buffer + NBytes, secondFetch);
-  }
+        std::copy(begin(event),end(event),Buffer);
+        NBytes = event.size();
+    } else {
+        return -1;
+    }
 
   return 0;
 }
