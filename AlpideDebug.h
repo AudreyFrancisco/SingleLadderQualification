@@ -1,6 +1,8 @@
 #ifndef ALPIDEDEBUG_H
 #define ALPIDEDEBUG_H
 
+#include "TAlpide.h"
+
 namespace Alpide {
 
   typedef struct {
@@ -85,8 +87,16 @@ namespace Alpide {
   } TADCDebugStream;
 };
 
+using namespace Alpide;
 
 namespace AlpideDebug {
+  bool ReadStream          (TAlpide *chip, TRegister reg, uint16_t *stream, int len, uint16_t Header);
+  bool GetBMUDebugStream   (TAlpide *chip, TBMUDebugStream &stream);
+  bool GetDMUDebugStream   (TAlpide *chip, TDMUDebugStream &stream);
+  bool GetTRUDebugStream   (TAlpide *chip, TTRUDebugStream &stream);
+  bool GetRRUDebugSteam    (TAlpide *chip, TRRUDebugStream &stream);
+  bool GetFromuDebugStream (TAlpide *chip, TFromuDebugStream &stream);
+  bool GetADCDebugStream   (TAlpide *chip, TADCDebugStream &stream);
 };
 
 #endif
