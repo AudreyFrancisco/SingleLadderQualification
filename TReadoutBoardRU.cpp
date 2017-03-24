@@ -193,12 +193,12 @@ int TReadoutBoardRU::Trigger(int nTriggers) {
   for (int i = 0; i < nTriggers; ++i) {
     if (m_enablePulse)
       dctrl->SendOpCode(Alpide::OPCODE_PULSE, false);
-    if (m_pulseDelay > 0)
-      dctrl->Wait(m_pulseDelay, false);
+    if (m_triggerDelay > 0)
+      dctrl->Wait(4* m_triggerDelay, false);
     if (m_enableTrigger)
       dctrl->SendOpCode(Alpide::OPCODE_TRIGGER1, false);
-    if (m_triggerDelay > 0)
-      dctrl->Wait(m_triggerDelay, false);
+    if (m_pulseDelay > 0)
+      dctrl->Wait(4* m_pulseDelay, false);
   }
   flush();
   return 0;
@@ -275,7 +275,7 @@ void TReadoutBoardRU::fetchEventData() {
           m_events.emplace_back(eventData);
 
           // event is extracted, remove data from buffer
-          data.erase(begin(data) + eventEnd, end(data));
+          data.erase(begin(data), begin(data) + eventEnd);
       }
   }
 }

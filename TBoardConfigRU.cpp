@@ -4,6 +4,7 @@
 
 TBoardConfigRU::TBoardConfigRU(const char *fName, int boardIndex) : TBoardConfig(fName,boardIndex) {
     this->fBoardType = TBoardType::boardRU;
+    InitParamMap();
 }
 
 uint8_t TBoardConfigRU::getTransceiverChip(const uint8_t DP, const uint8_t index) const {
