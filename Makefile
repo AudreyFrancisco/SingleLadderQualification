@@ -10,7 +10,7 @@ LIBRARY=libalpide.so
 RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp ReadoutUnitSrc/TRuDctrlModule.cpp \
  TReadoutBoardRU.cpp TBoardConfigRU.cpp
 
-CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
+CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
  TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
  BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp\
  MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/i2cbus.cpp MosaicSrc/i2cslave.cpp MosaicSrc/i2csyspll.cpp \
