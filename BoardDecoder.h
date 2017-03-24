@@ -42,6 +42,7 @@ typedef struct {
 class BoardDecoder{
  private:
   static bool DecodeEventMOSAIC(unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo);
+  static bool DecodeEventRU    (unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo);
   static uint32_t endianAdjust(unsigned char *buf);
 
   static bool DecodeEventDAQ   (unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo, uint32_t firmwareVersion=0x247E0611, int headerType=0x1);

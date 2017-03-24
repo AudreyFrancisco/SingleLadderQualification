@@ -410,6 +410,9 @@ int initSetup(TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardTy
     case TYPE_CHIP_MOSAIC: 
       initSetupSingleMosaic(config, boards, boardType, chips);
       break;
+    case TYPE_IBHICRU:
+      initSetupIBRU(config, boards, boardType, chips);
+      break;
     default: 
       std::cout << "Unknown setup type, doing nothing" << std::endl;
       return -1;

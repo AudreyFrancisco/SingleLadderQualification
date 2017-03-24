@@ -122,36 +122,17 @@ int main(int argc, char **argv) {
                 << counters["Idlesuppress overflow"] << ";"
                 << counters["8b10b Code Error"] << "\n";
 
-      // for(auto cnt : counters) {
-      //     std::cout << cnt.first << ": " << cnt.second << "\n";
-      // }
   }
-
-  // Deactivate Readout
-  for(auto &tr : theBoard->transceiver_array)
-      tr.second->DeactivateReadout();
-
-
-  ///////////
-  // READOUT
-  //////////
-  // Cycle through readout 8 Chips -> 0-3 on DP2/DP3
-  // for(int i = 0; i < 6; ++i) {
-  //     theBoard->setDataportSource(i, i);
-  //     theBoard->dctrl->Wait(10000); // wait 1000 cycles approx.
-  // }
-  // std::this_thread::sleep_for(std::chrono::seconds(1));
-
-
-  std::vector<uint8_t> buffer(1*1024*1024);
-  for(int i = 0; i < NR_TRIGGERS; ++i) {
+       std::vector<uint8_t> buffer(1*1024*1024);
+ for(int i = 0; i < NR_TRIGGERS; ++i) {
       int bytesRead = 0;
+
       theBoard->ReadEventData(bytesRead, buffer.data());
       std::cout << "Pass " << i << ", Bytes Read: " << bytesRead << "\n";
       std::string filename = std::string("event_") + std::to_string(i) + ".dat";
       std::ofstream of(filename, ios::binary);
       of.write((char*) buffer.data(),bytesRead);
-  }
+ }
 
   return 0;
 }

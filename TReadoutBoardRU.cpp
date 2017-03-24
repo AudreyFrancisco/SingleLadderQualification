@@ -34,6 +34,8 @@ TReadoutBoardRU::TReadoutBoardRU(TBoardConfigRU *config)
     uint8_t moduleId = TReadoutBoardRU::MODULE_DATA0 + mapping.transceiverId;
     transceiver_array[mapping.chipId] =
         std::make_shared<TRuTransceiverModule>(*this, moduleId, m_logging);
+
+    transceiver_array[mapping.chipId]->DeactivateReadout();
   }
 }
 
@@ -212,16 +214,17 @@ void TReadoutBoardRU::fetchEventData() {
       readFromPort(port, TReadoutBoardRU::EVENT_DATA_READ_CHUNK, buffer);
 
       // Debug: Print output
-      // std::cout << "========== HS data read ==========\n";
-      // std::cout << std::hex;
-      // for (int i = 0; i < buffer.size(); ++i) {
-      //   std::cout << std::setfill('0') << std::setw(2)
-      //             << (int)buffer[i] << " ";
-      //   if (i % 20 == 19)
-      //     std::cout << "\n";
-      // }
-      // std::cout << std::dec;
-      // std::cout << "\n========== HS data read ==========\n";
+       std::cout << "========== HS data read ==========\n";
+       std::cout << "Dataport: " << i << "=\n";
+       std::cout << std::hex;
+       for (int i = 0; i < buffer.size(); ++i) {
+         std::cout << std::setfill('0') << std::setw(2)
+                   << (int)buffer[i] << " ";
+         if (i % 20 == 19)
+           std::cout << "\n";
+       }
+       std::cout << std::dec;
+       std::cout << "\n========== HS data read ==========\n";
 
       // Filter, remove status, remove padded bytes, split to dataport
       for (size_t i = 0; i < buffer.size(); i += 4) {
@@ -249,6 +252,7 @@ TReadoutBoardRU::ReadEventData(int &NBytes, unsigned char *Buffer,
                                std::vector<uint8_t> const &chipIds) {
   std::vector<uint8_t> buffersToUpdate{};
   auto BufferIt = Buffer;
+  NBytes = 0;
   for (uint8_t chipId : chipIds) {
     auto it = m_readoutBuffers.find(chipId);
     if (it == m_readoutBuffers.end()) {
@@ -313,6 +317,31 @@ int TReadoutBoardRU::Initialize() {
   }
   return 0;
 }
+
+
+void TReadoutBoardRU::StartRun() {
+  for(int i = 0; i < fChipPositions.size(); ++i) {
+    auto tr = transceiver_array[fChipPositions.at(i).chipId]; // TODO: Mapping between transceiver and chipid
+    tr->Initialize(TBoardConfigRU::ReadoutSpeed::RO_1200,0);
+    bool alignedBefore = tr->IsAligned();
+    tr->ActivateReadout();
+    if(tr->IsAligned()) {
+        std::cout << "Transceiver " << i << " is aligned (before: " << alignedBefore << " )\n";
+    } else {
+        std::cout << "Transceiver " << i << " is NOT aligned \n";
+    }
+    tr->ResetCounters();
+  }
+
+  std::cout <<"Clean ports\n";
+  UsbDev::DataBuffer buf;
+  setDataportSource(0, 0);
+  readFromPort(TReadoutBoardRU::EP_DATA0_IN ,1024*10000, buf);
+  readFromPort(TReadoutBoardRU::EP_DATA1_IN ,1024*10000, buf);
+  std::cout <<"Clean ports done\n";
+
+}
+
 
 void TReadoutBoardRU::checkGitHash() {
   registeredRead(TReadoutBoardRU::MODULE_STATUS, 0);

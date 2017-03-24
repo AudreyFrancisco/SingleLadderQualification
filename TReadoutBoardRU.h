@@ -82,6 +82,7 @@ public:
   virtual int SetTriggerConfig(bool enablePulse, bool enableTrigger,
                                int triggerDelay, int pulseDelay);
   virtual void SetTriggerSource(TTriggerSource triggerSource);
+  virtual void StartRun();
   virtual int Trigger(int nTriggers);
   virtual int ReadEventData(int &NBytes, unsigned char *Buffer);
 

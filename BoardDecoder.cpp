@@ -11,6 +11,9 @@ bool BoardDecoder::DecodeEvent(TBoardType boardType, unsigned char *data, int nB
   else if (boardType == boardMOSAIC) {
     return DecodeEventMOSAIC(data, nBytes, nBytesHeader, nBytesTrailer, boardInfo);
   }
+  else if (boardType == boardRU) {
+    return DecodeEventRU(data, nBytes, nBytesHeader, nBytesTrailer, boardInfo);
+  }
   else {
     std::cout << "TBoardDecoder: Unknown board type" << std::endl;
     return false;
@@ -207,6 +210,13 @@ uint32_t BoardDecoder::GetIntFromBinaryStringReversed(int numByte, unsigned char
   return number;
 }
 
+
+bool BoardDecoder::DecodeEventRU(unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, 
+						TBoardHeader &boardInfo)
+{
+  nBytesHeader = 0;
+  nBytesTrailer = 0;
+}
 
 
 // Decodes the Event Header and fill the structure.

@@ -235,7 +235,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   bool WriteSlaveDataEmulatorReg (uint32_t data);
   bool EndOfRun ()    {return WriteRegister((MODULE_READOUT << DAQBOARD_REG_ADDR_SIZE) + READOUT_EOR_COMMAND, 5);};
 
-
+  void StartRun() {};
   // TRIGGER Module:
   bool StartTrigger ();
   bool StopTrigger ();
