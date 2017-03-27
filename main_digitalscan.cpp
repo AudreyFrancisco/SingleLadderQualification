@@ -249,6 +249,7 @@ void scan() {
   std::cout << "Number of skipped points:             " << nSkipped   << std::endl;
   std::cout << "Priority encoder errors:              " << prioErrors << std::endl;
   std::cout << std::endl;
+  std::cout << fEnabled << " chips were enabled for scan." << std::endl << std::endl;
 
 }
 

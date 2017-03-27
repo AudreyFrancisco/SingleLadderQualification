@@ -38,6 +38,8 @@ int  fErrCount0;
 int  fErrCount5;
 int  fErrCountf;
 
+int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
+
 int fTotalErr;
 
 int configureChip(TAlpide *chip) {
@@ -145,7 +147,9 @@ int main(int argc, char** argv) {
 
     for (int ichip = 0; ichip < fChips.size(); ichip++) {
       if (! fChips.at(ichip)->GetConfig()->IsEnabled()) continue;
-     
+      
+      fEnabled ++;
+
       std::cout << std::endl << "Doing FIFO test on chip ID " << fChips.at(ichip)->GetConfig()->GetChipId() << std::endl;
       // Reset error counters
       fErrCount0 = 0;
@@ -173,6 +177,8 @@ int main(int argc, char** argv) {
     }
 
     std::cout << std::endl << "Total error count (all chips): " << fTotalErr << std::endl << std::endl;
+
+    std::cout << fEnabled << " chips were enabled for scan." << std::endl << std::endl << std::endl;
 
     if (myDAQBoard) {
       myDAQBoard->PowerOff();
