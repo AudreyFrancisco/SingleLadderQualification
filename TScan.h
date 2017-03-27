@@ -40,7 +40,7 @@ class TScan {
   virtual void PrepareStep     (int loopIndex) = 0;
   virtual void Execute         ()              = 0;
   bool         Loop            (int loopIndex);
-  void         Next            (int loopIndex); 
+  virtual void Next            (int loopIndex); 
   void         CreateScanHisto ();
 };
 
