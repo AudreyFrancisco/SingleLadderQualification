@@ -167,6 +167,7 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
     Init (1, chipIds, boardRU);    
   }
   else if (AType == TYPE_HALFSTAVE) {
+    // in case of half stave NChips contains number of modules
     for (int imod = 0; imod < NChips; imod++) {
       int moduleId = imod + 1;
       for (int i = 0; i < 15; i++) {
