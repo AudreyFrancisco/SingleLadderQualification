@@ -10,7 +10,6 @@ LINKFLAGS=-lusb-1.0 -lpthread -L $(LIB)
 OBJECT= runTest
 LIBRARY=libalpide.so
 
-<<<<<<< HEAD
 RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp ReadoutUnitSrc/TRuDctrlModule.cpp \
  TReadoutBoardRU.cpp TBoardConfigRU.cpp
 
