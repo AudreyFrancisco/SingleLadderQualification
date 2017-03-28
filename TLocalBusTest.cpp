@@ -103,6 +103,7 @@ void TLocalBusTest::PrepareStep(int loopIndex)
     // give token to write chip, take away in loop end
 
     m_writeChip->ModifyRegisterBits (Alpide::REG_CMUDMU_CONFIG, 4, 1, 1);
+    m_boards[0]->SendOpCode(Alpide::OPCODE_RORST);
     break;
   case 2:    // outermost loop: change daisy chain
     m_stop[0] = m_daisyChains.at(m_value[2]).size();
@@ -128,34 +129,57 @@ void TLocalBusTest::Next (int loopIndex) {
 }
 
 
-void TLocalBusTest::Execute() 
-{
+bool TLocalBusTest::TestPattern (int pattern) {
   TDMUDebugStream debugStream;
-  TBMUDebugStream bmuDebugStream;
-  m_writeChip->WriteRegister(REG_TEST_CONTROL, 0x201);
+  int             readId  = m_readChip->GetConfig()->GetChipId();
+  int             writeId = m_writeChip->GetConfig()->GetChipId();
+  uint16_t             Value   = 1 | ((pattern & 0xf) << 1);
 
-  uint16_t Value;
-  m_writeChip->ReadRegister (Alpide::REG_CMUDMU_CONFIG, Value);
-  //std::cout << "writeChip CMUDMU config reg = 0x" << std::hex << Value << std::dec << std::endl; 
-  for (int iboard = 0; iboard < m_boards.size(); iboard++) {
-    m_boards.at(iboard)->SendOpCode(Alpide::OPCODE_DEBUG);
-  }
+  m_writeChip->WriteRegister (REG_TEST_CONTROL, Value);
+  m_writeChip->GetReadoutBoard()->SendOpCode(Alpide::OPCODE_DEBUG);
+
   if (!AlpideDebug::GetDMUDebugStream(m_readChip, debugStream)) {
     std::cout << "Problem reading debug stream" << std::endl;
   }
-  if (!AlpideDebug::GetBMUDebugStream(m_readChip, bmuDebugStream)) {
-    std::cout << "Problem reading debug stream" << std::endl;
+
+  if((debugStream.LocalBusValue & 0xf) != (pattern & 0xf)) {
+    std::cout << "ERROR (BUS VALUE): written 0x" << std::hex << pattern << std::dec << " to chip " << writeId << ", read " << std::hex << debugStream.LocalBusValue << std::dec << " from chip " << readId << std::endl;
+    return false;
   }
-  int busy = (int) bmuDebugStream.BusyInState;
+  return true;
+}
+
+
+bool TLocalBusTest::TestBusy(bool busy) 
+{
+  TBMUDebugStream bmuDebugStream;
   int readId  = m_readChip->GetConfig()->GetChipId();
   int writeId = m_writeChip->GetConfig()->GetChipId();
-   
-  m_writeChip->WriteRegister(REG_TEST_CONTROL, 0x0);
-  for (int iboard = 0; iboard < m_boards.size(); iboard++) {
-    m_boards.at(iboard)->SendOpCode(Alpide::OPCODE_DEBUG);
-  }
+
+  m_writeChip->WriteRegister (REG_TEST_CONTROL, busy ? 0x200 : 0x000);
+  m_writeChip->GetReadoutBoard()->SendOpCode(Alpide::OPCODE_DEBUG);
+  
   if (!AlpideDebug::GetBMUDebugStream(m_readChip, bmuDebugStream)) {
     std::cout << "Problem reading debug stream" << std::endl;
   }
-  std::cout << "Write " << writeId << ", read " << readId << ", Value 0x" << std::hex << debugStream.LocalBusValue << ", busy " << busy << ", no busy " << (int) bmuDebugStream.BusyInState << std::dec << std::endl;
+  int busyRead = (int) bmuDebugStream.BusyInState;
+
+  if (((bool) busyRead) == busy) { // busy logic is active low!
+    std::cout << "ERROR (BUSY): written " << std::hex << (int) busy << std::dec << " to chip " << writeId << ", read " << std::hex << (int)(! busyRead) << std::dec << " from chip " << readId << std::endl;
+  }
+}
+
+
+void TLocalBusTest::Execute() 
+{
+  TBMUDebugStream bmuDebugStream;
+  //  m_writeChip->WriteRegister(REG_TEST_CONTROL, 0x215);
+
+  TestPattern (0xf);
+  TestPattern (0x0);
+  TestPattern (0xa);
+  TestPattern (0x5);
+
+  TestBusy(true);
+  TestBusy(false);
 }

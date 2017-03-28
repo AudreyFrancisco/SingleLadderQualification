@@ -11,6 +11,8 @@ class TLocalBusTest : public TScan {
   std::vector<std::vector <TAlpide*>> m_daisyChains;
   int      FindDaisyChains(std::vector <TAlpide *> chips);
   int      GetChipById    (std::vector <TAlpide *> chips, int previousId);
+  bool     TestPattern    (int pattern);
+  bool     TestBusy       (bool busy);
  protected: 
   THisto CreateHisto() {THisto histo; return histo;};
  public:
