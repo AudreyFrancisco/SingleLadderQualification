@@ -7,7 +7,7 @@
 #include "TReadoutBoard.h"
 #include "TScanConfig.h"
 
-const int DEFAULT_MODULE_ID = 7;
+const int DEFAULT_MODULE_ID = 1;
 
 enum TDeviceType {TYPE_CHIP, TYPE_TELESCOPE, TYPE_OBHIC, TYPE_IBHIC, TYPE_CHIP_MOSAIC, TYPE_HALFSTAVE, TYPE_UNKNOWN};
 
