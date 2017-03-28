@@ -28,22 +28,52 @@
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
+#ifndef I2CBUS_H
+#define I2CBUS_H
 
-#include <string>
-#include "mexception.h"
+#include <stdint.h>
+#include "mwbbslave.h"
 
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+class I2Cbus: public MWbbSlave
 {
 public:
-	explicit PControlInterfaceError(const string& __arg);
+	enum readWriteN_e {
+		I2C_Write 				= 0,
+		I2C_Read 				= 1
+		};
+	typedef readWriteN_e readWriteN_t;
+
+	enum readWriteFlags_e {
+		RWF_start			= 0x01,
+		RWF_stop			= 0x02,
+		RWF_dontAck			= 0x04
+	};
+	typedef readWriteFlags_e readWriteFlags_t;
+
+public:
+    I2Cbus(WishboneBus *wbbPtr, uint32_t baseAddress);
+	void addAddress(uint8_t address, readWriteN_t rw);
+	void addWriteData(uint8_t d, uint32_t flags=0);
+	void addRead(uint32_t *d, uint32_t flags=0);
+	void addReadParIn(uint32_t *d);
+	void execute();
+
+private:					// WBB Slave registers map 
+	enum regAddress_e {
+		regWriteAdd				= 0,
+		regReadAdd 				= 1,
+		regParInAdd				= 2
+		};
+
+	enum writeRegBits_e {
+		I2C_STOP_BIT		= (1<<31),
+		I2C_START_BIT		= (1<<30),
+		I2C_MASTER_ACK_BIT	= (1<<29),
+		I2C_IGNORE_ACK_BIT	= (1<<28)
+	};
+
 };
 
 
 
-#endif // PEXCEPTION
+#endif // I2CBUS_H

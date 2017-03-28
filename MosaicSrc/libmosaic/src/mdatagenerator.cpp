@@ -27,23 +27,52 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
+#include <stdio.h>
+#include <stdlib.h>
+#include "mdatagenerator.h"
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
 
-#include <string>
-#include "mexception.h"
-
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+MDataGenerator::MDataGenerator()
 {
-public:
-	explicit PControlInterfaceError(const string& __arg);
-};
+}
+
+MDataGenerator::MDataGenerator(WishboneBus *wbbPtr, uint32_t baseAdd) : 
+			MWbbSlave(wbbPtr, baseAdd)
+{
+}
+
+void MDataGenerator::setup(uint32_t evSize, uint32_t evDelay, bool on)
+{
+	wbb->addWrite(baseAddress+regModeOn, on ? MODEON_ON : 0);
+	wbb->addWrite(baseAddress+regEventSize, evSize);
+	wbb->addWrite(baseAddress+regEventDelay, evDelay);
+	wbb->execute();
+}
+
+void MDataGenerator::getSetup(uint32_t *evSize, uint32_t *evDelay, bool *on)
+{
+	uint32_t onOff;
+
+	wbb->addRead(baseAddress+regModeOn, &onOff);
+	wbb->addRead(baseAddress+regEventSize, evSize);
+	wbb->addRead(baseAddress+regEventDelay, evDelay);
+	wbb->execute();
+	*on = onOff & MODEON_ON;
+}
+
+
+void MDataGenerator::setOnOff(bool on)
+{
+	wbb->addWrite(baseAddress+regModeOn, on ? MODEON_ON : 0);
+	wbb->execute();
+}
 
 
 
-#endif // PEXCEPTION
+
+
+
+
+
+
+

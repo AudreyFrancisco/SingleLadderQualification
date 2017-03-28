@@ -28,22 +28,33 @@
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
+#ifndef MTRIGGERCONTROL_H
+#define MTRIGGERCONTROL_H
 
-#include <string>
-#include "mexception.h"
+#include <stdint.h>
+#include "mwbbslave.h"
 
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+class MTriggerControl : public MWbbSlave
 {
 public:
-	explicit PControlInterfaceError(const string& __arg);
+    MTriggerControl(WishboneBus *wbbPtr, uint32_t baseAddress);
+	void addEnableExtTrigger(bool en, bool levelSensitive=0);
+	void getTriggerCounter(uint32_t *counter);
+
+private:					// WBB Slave registers map 
+	enum regAddress_e {
+		regCfg						= 0,			// enable external trigger
+		regTriggerCounter			= 1,			// Trigger counter - Read only. Reset by RUN signal
+		regTimeL					= 2,			// TIMER from first trigger bits 31:0 - Read only. Reset by RUN signal
+		regTimeH					= 3,			// TIMER from first trigger bits 63:32 - Read only. Reset by RUN signal
+	};
+
+	enum cfgBits_e {
+		EN_EXT_TRIGGER			= (1<<0),
+		EXT_TRG_LEVEL			= (1<<1)
+	};
 };
 
 
 
-#endif // PEXCEPTION
+#endif // MTRIGGERCONTROL_H

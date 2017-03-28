@@ -28,22 +28,40 @@
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
+#ifndef IPBUSUDP_H
+#define IPBUSUDP_H
 
-#include <string>
-#include "mexception.h"
+#include <stdint.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <mutex>
+#include "ipbus.h"
 
-//class string;
-using namespace std;
+#define DEFAULT_PACKET_SIZE 		1400
+#define DEFAULT_PORT				2000
+#define RCV_LONG_TIMEOUT			2000	// timeout in ms for the first rx datagrams
+#define RCV_SHORT_TIMEOUT			100		// timeout in ms for rx datagrams
 
-// Control interface errors
-class PControlInterfaceError : public MException 
+class IPbusUDP : public IPbus
 {
 public:
-	explicit PControlInterfaceError(const string& __arg);
+	IPbusUDP(int pktSize=DEFAULT_PACKET_SIZE);
+    IPbusUDP(const char *brdName, int port=DEFAULT_PORT, int pktsize=DEFAULT_PACKET_SIZE);
+    ~IPbusUDP();
+	void setIPaddress(const char *brdName, int port=DEFAULT_PORT);
+	void execute();
+
+private:
+	void testConnection();
+	void sockRead();
+	void sockWrite();
+
+private:
+	int port;
+	int sockfd;
+	struct sockaddr_in sockAddress;
+	int rcvTimoutTime;
 };
 
-
-
-#endif // PEXCEPTION
+#endif // IPBUSUDP_H

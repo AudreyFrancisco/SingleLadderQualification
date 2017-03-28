@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014
+ * Copyright (C) 2017
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,26 +24,53 @@
  * /_/ /_/ |__/ /_/    /_/ |__/  	 
  *
  * ====================================================
- * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
+ * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
+#ifndef MAX31865_H
+#define MAX31865_H
 
-#include <string>
-#include "mexception.h"
+#include <stdint.h>
+#include "sc18is602.h"
 
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+class MAX31865
 {
+private:
+	// Register list
+	enum {
+		REG_Configuration	= 0x00,
+		REG_RTD_MSB			= 0x01,
+		REG_RTD_LSB			= 0x02,
+
+		REG_WRITE			= 0x80
+	};
+
+
+	// Configuration register bits
+	enum {
+		CFG_FREQ_50Hz		= 0x01,
+		CFG_FAULT_CLEAR		= 0x02,
+		CFG_3WIRE			= 0x10,
+		CFG_1SHORT			= 0x20,
+		CFG_CONV_AUTO		= 0x40,
+		CFG_Vbias_ON		= 0x80
+	};	
+
 public:
-	explicit PControlInterfaceError(const string& __arg);
+	MAX31865(SC18IS602 *spi, uint8_t slave);
+	void writeRegister(uint8_t reg, uint8_t data);
+	uint8_t readRegister(uint8_t reg);
+	void configure(uint8_t cfg = CFG_Vbias_ON | CFG_CONV_AUTO | CFG_FAULT_CLEAR | CFG_FREQ_50Hz);
+	uint16_t getRTD();
+
+private:
+	SC18IS602 *spiBus;
+	uint8_t spiSlave;
+
+
 };
 
 
 
-#endif // PEXCEPTION
+#endif // MAX31865_H

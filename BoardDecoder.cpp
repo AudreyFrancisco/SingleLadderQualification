@@ -1,8 +1,7 @@
 #include <iostream>
 
 #include "BoardDecoder.h"
-#include "MosaicSrc/mboard.h"
-#include "MosaicSrc/TAlpideDataParser.h"
+#include "TAlpideDataParser.h"
 
 bool BoardDecoder::DecodeEvent(TBoardType boardType, unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, TBoardHeader &boardInfo, uint32_t firmwareVersion, int headerType) {
   if (boardType == boardDAQ) {

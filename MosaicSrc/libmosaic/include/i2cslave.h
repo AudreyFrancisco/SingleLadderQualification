@@ -28,22 +28,23 @@
  *
  */
 
-#ifndef PEXCEPTION_H
-#define PEXCEPTION_H
+#ifndef I2CSLAVE_H
+#define I2CSLAVE_H
 
-#include <string>
-#include "mexception.h"
+#include <stdint.h>
+#include "i2cbus.h"
 
-//class string;
-using namespace std;
-
-// Control interface errors
-class PControlInterfaceError : public MException 
+class I2Cslave
 {
 public:
-	explicit PControlInterfaceError(const string& __arg);
+	I2Cslave(I2Cbus *bus, uint8_t address=0);
+	void execute();
+
+protected:
+	I2Cbus *i2cBus;	
+	uint8_t i2c_deviceAddress;
 };
 
 
 
-#endif // PEXCEPTION
+#endif // SPD_H
