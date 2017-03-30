@@ -19,9 +19,9 @@ void main_Na61Analysis() {
     const TString suffix_dir = "_cr2";
     const Int_t   n_runs     = 3;
     const Bool_t  write_separate = kFALSE;
-    //const AnaType ana_type = kPrealign;
-    const AnaType ana_type = kEfficiency;
-    const TString cut_ds   = "pawelall";
+    const AnaType ana_type = kPrealign;
+    //const AnaType ana_type = kEfficiency;
+    const TString cut_ds   = "";
 
     TString suffix_out;
     const TString *runs_vd;
@@ -83,7 +83,8 @@ void main_Na61Analysis() {
     if(ana_type == kPrealign && !write_separate) {
         ana->WriteHistograms(Form("prealignment_vd%s.root", suffix_out.Data()));
         ana->WriteTracksTree(Form("prealignment_vd%s.root", suffix_out.Data()));
-        ana->DrawHistograms("prealignment");
+        //ana->DrawHistograms("prealignment");
+        ana->DrawHistograms("multpos");
     }
     else if(ana_type == kEfficiency) {
         ana->WriteHistograms(Form("efficiency_vd%s.root", suffix_out.Data()));

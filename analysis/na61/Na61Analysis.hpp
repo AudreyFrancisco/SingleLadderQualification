@@ -97,7 +97,9 @@ private:
     static const Short_t fNChips = 9;   // number of chips in HIC
     static const Short_t fNCols = 1024; // number of columns 
     static const Short_t fNRows = 512;  // number of rows
-
+    static const Float_t fPixX  = 0.02924e3;
+    static const Float_t fPixY  = 0.02688e3;
+    
     // Na61Analysis variables
     TChain   *fEventTree;
     TChain   *fVDTracksTree;
@@ -157,6 +159,10 @@ private:
     TH2F *hChipPosZY[fNChips];
     TH2F *hChipPosXZ[fNChips];
     TH1F *hMult[fNChips];
+
+    static const Int_t fNMultPos = 5;
+    TH2F *hMultPos[fNChips][fNMultPos];
+
     // efficiency
     TH2F *hEffGood[fNChips];
     TH2F *hEffRej[fNChips];

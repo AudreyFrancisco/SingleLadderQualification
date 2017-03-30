@@ -53,6 +53,8 @@ Na61Analysis::Na61Analysis():
         hChipPosZY[i] = NULL;
         hChipPosXZ[i] = NULL;
         hMult[i] = NULL;
+        for(Int_t j=0; j<fNMultPos; j++) 
+            hMultPos[i][j] = NULL;
 
         hEffGood[i] = NULL;
         hEffRej[i] = NULL; 
@@ -147,6 +149,8 @@ Na61Analysis::~Na61Analysis()
         delete hChipPosZY[i];
         delete hChipPosXZ[i];
         delete hMult[i];
+        for(Int_t j=0; j<fNMultPos; j++) 
+            delete hMultPos[i][j];
 
         delete hEffGood[i];
         delete hEffRej[i]; 
@@ -202,6 +206,20 @@ void Na61Analysis::InitHistograms(const Int_t binred)
 
         hMult[i] = new TH1F(Form("hMult_%i", i), Form("Cluster size aligned, Chip %i;Number of pixels in cluster;a.u.", i),
                             101, -1.5, 100-0.5);
+
+        Int_t   nbins = 50;
+        Float_t dpx = fPixX/nbins;
+        Float_t dpy = fPixY/nbins;
+        for(Int_t j=1; j<fNMultPos; j++) {
+            hMultPos[i][j] = new TH2F(Form("hMultPos_%i_%i", j, i), Form("Track position of clusters with multiplicity = %i, chip %i;pixel x/column [#mum];pixel y/row [#mum];a.u.", j, i),
+                                      nbins, -fPixX-dpx, fPixX-dpx, nbins, -fPixY-dpy, fPixY-dpy);
+            hMultPos[i][j]->SetStats(0);
+        }
+        hMultPos[i][0] = new TH2F(Form("hMultPos_%i_%i", 0, i), Form("Track position of clusters with multiplicity >= %i, chip %i;pixel x/column [#mum];pixel y/row [#mum];a.u.", fNMultPos, i),
+                                  nbins, -fPixX-dpx, fPixX-dpx, nbins, -fPixY-dpy, fPixY-dpy);
+        hMultPos[i][0]->SetStats(0);
+
+            
         // efficiency
         hEffGood[i] = new TH2F(Form("hEffGood_%i", i), Form("Accepted tracks for efficiency calc, chip %i;Column;Row;a.u.", i),
                                fNCols/binred, -0.5, fNCols-0.5, fNRows/binred, -0.5, fNRows-0.5);
@@ -265,6 +283,21 @@ void Na61Analysis::DrawHistograms(TString set, Int_t ichip) {
         cc->cd(4);
         hEffEffD[ichip]->ProjectionY()->DrawCopy();        
     }
+    else if(set.BeginsWith("multpos")) {
+        TCanvas *c = new TCanvas("c_"+set, set, 50, 50, 1700, 1000);
+        c->Divide(2,2);
+        c->cd(1);
+        zoom_th2((TH2F*)hMultPos[ichip][1]->DrawCopy("COLZ"));
+        c->cd(2);
+        zoom_th2((TH2F*)hMultPos[ichip][2]->DrawCopy("COLZ"));
+        c->cd(3);
+        zoom_th2((TH2F*)hMultPos[ichip][3]->DrawCopy("COLZ"));
+        c->cd(4);
+        zoom_th2((TH2F*)hMultPos[ichip][4]->DrawCopy("COLZ"));
+        TCanvas *cc = new TCanvas("cc_"+set, set, 100, 100, 500, 500);
+        cc->cd();
+        zoom_th2((TH2F*)hMultPos[ichip][0]->DrawCopy("COLZ"));
+    }
     /*
     else if(set.BeginsWith("vertex")) {
         TCanvas *c = new TCanvas("c_"+set, set, 50, 50, 1700, 1000);
@@ -320,6 +353,8 @@ Bool_t Na61Analysis::WriteHistograms(TString fname, TString opt) {
         if(hChipPosXZ[i]->GetEntries()) hChipPosXZ[i]->Write();
 
         hMult[i]->Write();
+        for(Int_t j=0; j<fNMultPos; j++) 
+            if(hMultPos[i][j]->GetEntries()) hMultPos[i][j]->Write();
         
         if(hEffGood[i]->GetEntries()) hEffGood   [i]->Write();
         if(hEffGood[i]->GetEntries()) hEffRej    [i]->Write();
@@ -396,6 +431,9 @@ void Na61Analysis::ResetHistograms() {
         hChipPosXZ[i]->Reset();
 
         hMult[i]->Reset();
+
+        for(Int_t j=0; j<fNMultPos; j++) 
+            hMultPos[i][j]->Reset();
         
         hEffGood   [i]->Reset();
         hEffRej    [i]->Reset();
@@ -759,6 +797,15 @@ void Na61Analysis::PrealignmentVD(Float_t ex_sigma) {
                             fAlignChip[ichip].GlobalToPix(p, col, row);
                             hHitsAligned[ichip]->Fill(col, row);
                             hMult[ichip]->Fill(mult);
+                            // multiplcity vs position
+                            if(TMath::Abs(d.X()) < 0.03 && TMath::Abs(d.Y()) < 0.03) {
+                                Float_t dc = col - TMath::Floor(col)-0.5;
+                                Float_t dr = row - TMath::Floor(row)-0.5;
+                                if(mult < fNMultPos)
+                                    hMultPos[ichip][mult]->Fill(dc*fPixX, dr*fPixY);
+                                else
+                                    hMultPos[ichip][0]->Fill(dc*fPixX, dr*fPixY);
+                            }
                         }       
                     }
                     else {
@@ -1085,6 +1132,7 @@ void Na61Analysis::ExtractChipHits(TString fpath_out, Int_t ichip) {
 }
 
 //__________________________________________________________
+// not used / not working
 void Na61Analysis::ExtractHitsVD(Int_t ichip) {
     TString mname = "ExtractHitsVD() : ";
     Report(3, mname + "Starting hits extraction" );
