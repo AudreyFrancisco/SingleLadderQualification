@@ -158,6 +158,16 @@ Bool_t correlation_psd_hic(
     c1->GetPad(2)->SetRightMargin(0.15);
     hNPixPSDAll->DrawCopy("COLZ");
     c1->Print(Form("%s/%s_c1.png", dirpath_results.Data(), filename_out.Data()));
+
+    TCanvas *c2 = new TCanvas("c2", "Canvas 2", 0, 0, 1800, 1000);
+    c2->Divide(2,2);
+    for(Int_t i=0; i<4; ++i) {
+        c2->cd(i+1);
+        hCluT[i]->SetLineWidth(2);
+        hCluT[i]->DrawCopy();
+    }
+            
+
     
     file_plots->cd();
     file_plots->Write();

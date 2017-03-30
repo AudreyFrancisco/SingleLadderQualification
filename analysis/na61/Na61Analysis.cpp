@@ -16,8 +16,12 @@ ClassImp(Na61Analysis)
 //______________________________________________________________________
 Na61Analysis::Na61Analysis():
     TObject(),
+    fCutDataset(kFALSE),
+    fCutDatasetString(""),
+    fCutDatasetValue(),
+    fFileLog(),
     fVerboseLevel(5)
-{   
+{
     fDirPathPlots = "./";
     fSuffix = "";
     
@@ -56,12 +60,16 @@ Na61Analysis::Na61Analysis():
         hEffEff[i] = NULL;
         hEffEffD[i] = NULL;
         hEffCluMult[i] = NULL;
+        hEffCluMultDisc[i] = NULL;
         
         fEffNTracks[i] = 0;
         fEffNRej   [i] = 0;
         fEffNGood  [i] = 0;
         fEffNEff   [i] = 0;
         fEffNIneff [i] = 0;
+        fEffNEvTot [i] = 0;
+        fEffNEvGood[i] = 0;
+        fEffNEvDisc[i] = 0;
 
     }
     
@@ -119,6 +127,8 @@ Na61Analysis::~Na61Analysis()
     delete fExTracksTree;
     if(fExHitsTree) fExHitsTree->ResetBranchAddresses();
     delete fExHitsTree;
+
+    if(fFileLog.is_open()) fFileLog.close();
     
     // histograms
     delete hTrackHitsHIC;
@@ -144,6 +154,7 @@ Na61Analysis::~Na61Analysis()
         delete hEffEff[i]; 
         delete hEffEffD[i];
         delete hEffCluMult[i];
+        delete hEffCluMultDisc[i];
     }
 }
 
@@ -202,8 +213,10 @@ void Na61Analysis::InitHistograms(const Int_t binred)
                               (fNCols+512)/binred, -256-0.5, 256+fNCols-0.5, (fNRows+512)/binred, -384-0.5, 128+fNRows-0.5);
         hEffEffD[i] = new TH2F(Form("hEffD_%i", i), Form("Efficient tracks relative to hit position, chip %i;X [mm];Y [mm];a.u.", i),
                                800, -0.4, 0.4, 800, -0.4, 0.4);
-        hEffCluMult[i] = new TH1F(Form("hEffCluMult_%i", i), Form("Hit multiplicity of 100%% efficient events, chip %i ;# of clusters in event; a.u.", i),
-                                  200, -0.5, 199.5);
+        hEffCluMult[i] = new TH1F(Form("hEffCluMult_%i", i), Form("Hit multiplicity of efficient events, chip %i ;# of clusters in event; a.u.", i),
+                                  100, -0.5, 199.5);
+        hEffCluMultDisc[i] = new TH1F(Form("hEffCluMultDisc_%i", i), Form("Hit multiplicity of discarded events, chip %i ;# of clusters in event; a.u.", i),
+                                      100, -0.5, 199.5);
     }
     
 }
@@ -245,6 +258,8 @@ void Na61Analysis::DrawHistograms(TString set, Int_t ichip) {
         hEffEffD[ichip]->DrawCopy("COLZ");
         cc->cd(2);
         hEffCluMult[ichip]->DrawCopy();
+        hEffCluMultDisc[ichip]->SetLineColor(kRed);
+        hEffCluMultDisc[ichip]->DrawCopy("SAME");
         cc->cd(3);
         hEffEffD[ichip]->ProjectionX()->DrawCopy();
         cc->cd(4);
@@ -312,6 +327,7 @@ Bool_t Na61Analysis::WriteHistograms(TString fname, TString opt) {
         if(hEffGood[i]->GetEntries()) hEffEff    [i]->Write();
         if(hEffGood[i]->GetEntries()) hEffEffD   [i]->Write();
         if(hEffGood[i]->GetEntries()) hEffCluMult[i]->Write();
+        if(hEffGood[i]->GetEntries()) hEffCluMultDisc[i]->Write();
     }
     file_plots->Close();
     delete file_plots;
@@ -387,6 +403,7 @@ void Na61Analysis::ResetHistograms() {
         hEffEff    [i]->Reset();
         hEffEffD   [i]->Reset();
         hEffCluMult[i]->Reset();
+        hEffCluMultDisc[i]->Reset();
     }
     Report(3, "All histograms reset.");
 }
@@ -443,6 +460,18 @@ Bool_t Na61Analysis::SetInputFileVDTracks(TString filepath_tree)
         
     return kTRUE;
 }
+//__________________________________________________________
+Bool_t Na61Analysis::SetLogFile(TString filepath) {
+    fFileLog.open(filepath.Data());
+    if(!fFileLog.is_open()) {
+        Report(1, "Unable to open log file " + filepath);
+        return kFALSE;
+    }
+    else {
+        Report(3, "Set log output to file " + filepath);
+        return kTRUE;
+    }
+}
 
 //__________________________________________________________
 void Na61Analysis::SetDefaultAlignment() {
@@ -474,6 +503,61 @@ Bool_t Na61Analysis::SetAlignment(Int_t chip, Alignment a) {
     }
     fAlignChip[chip] = a;
     return kTRUE;
+}
+
+//__________________________________________________________
+Bool_t Na61Analysis::SetCutDataset(TString cut, Int_t set) {
+    // {down1, down2, up1, up2, up1x, up2x, 3pt0, 3pt1, 3pt3}
+    //    0      1     2    3    4     5     6     7     8
+    TString mname = "SetCutDataset() : ";
+    cut.ToLower();
+    fCutDataset = kTRUE;
+    if( cut == "" || cut.Contains("off") || cut.Contains("nocut") || cut.Contains("disable") ) {
+        fCutDataset       = kFALSE;
+        Report(3, mname + "Cut disabled");
+    } else if( cut.Contains("4pt") || cut.Contains("full") ) {
+        fCutDatasetString    = "<";
+        fCutDatasetValue[0]  = 4;
+        Report(3, mname + "Analysing only full (4pt) tracks");
+    } else if( cut == "pawel3pt" ) {
+        fCutDatasetString    = "><";
+        fCutDatasetValue[0]  = 3;
+        fCutDatasetValue[1]  = 6;
+        Report(3, mname + "Analysing only Pawel's 3pt tracks");
+    } else if( cut == "pawelall" ) {
+        fCutDatasetString    = "<";
+        fCutDatasetValue[0]  = 6;
+        Report(3, mname + "Analysing all Pawel's tracks");
+    } else if( cut == "miko3pt" ) {
+        fCutDatasetString    = ">";
+        fCutDatasetValue[0]  = 5;
+        Report(3, mname + "Analysing only Miko's 3pt tracks");
+    } else if( cut == "set" ) {
+        fCutDatasetString    = "==";
+        fCutDatasetValue[0]  = set;
+        Report(3, mname + Form("Analysing only set %i tracks", set));
+    } else {
+        fCutDataset       = kFALSE;
+        Report(2, mname + "Uknown cut " + cut);
+        return kFALSE;
+    }   
+    return kTRUE;
+}
+
+//__________________________________________________________
+Bool_t Na61Analysis::ApplyCutDataset(Int_t val) {
+    if(fCutDatasetString == "<")
+        return (val < fCutDatasetValue[0]);
+    if(fCutDatasetString == ">")
+        return (val > fCutDatasetValue[0]);
+    if(fCutDatasetString == "==")
+        return (val == fCutDatasetValue[0]);
+    if(fCutDatasetString == "><")
+        return (val > fCutDatasetValue[0] && val < fCutDatasetValue[1]);
+    else {
+        Report(2, "ApplyCutDataset() : Uknown cut string");
+        return kFALSE;
+    }
 }
 
 //__________________________________________________________
@@ -527,16 +611,19 @@ void Na61Analysis::Report(Short_t level, const char * message)
     // INFO    = level 3
     // DEBUG   = level 4
     if(level > fVerboseLevel) return;
-    cout << "Na61Analysis : ";
+    TString msg = "Na61Analysis : ";
     switch(level) {
-    case 0 : cout << " FATAL  : "; break;
-    case 1 : cout << " ERROR  : "; break;
-    case 2 : cout << "WARNING : "; break;
-    case 3 : cout << " INFO   : "; break;
-    case 4 : cout << " DEBUG  : "; break;
-    default: cout << " CUSTOM : ";
+    case 0 : msg += " FATAL  : "; break;
+    case 1 : msg += " ERROR  : "; break;
+    case 2 : msg += "WARNING : "; break;
+    case 3 : msg += " INFO   : "; break;
+    case 4 : msg += " DEBUG  : "; break;
+    default: msg += " CUSTOM : ";
     }
-    cout << message << endl;
+    msg += message;
+    cout << msg.Data() << endl;
+    if(fFileLog.is_open())
+        fFileLog << msg.Data() << endl;
 }
 
 //__________________________________________________________
@@ -620,7 +707,7 @@ void Na61Analysis::PrealignmentVD(Float_t ex_sigma) {
             TVector3 td(*(TVector3*)fVD_td->At(itrack));
 
             //_cuts____
-            //if(fVD_Dataset[itrack] < 5) continue; // {down1, down2, up1, up2, up1x, up2x, 3pt0, 3pt1, 3pt3}
+            if(fCutDataset) if(!ApplyCutDataset(fVD_Dataset[itrack])) continue;
             //if(td.X() / td.Z() > 1) continue;
             Float_t c4, r4;
             TVector3 p4 = fAlignChip[4].IntersectionPointWithLine(to, td);
@@ -769,6 +856,7 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
     Int_t nn_ineff  = 0;
     Int_t nn_mult   = 0;
     Int_t nn_discev = 0;
+    Int_t nn_goodev = 0;
     
     for(Int_t ivd=0; ivd < nentries_vd; ++ivd) {
         // read events from vd tree and find equivalent in event tree
@@ -803,7 +891,7 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
                 if(loop) nn_tracks++;
             
                 //_cuts____
-                //if(fVD_Dataset[itrack] < 4) continue; // {down1, down2, up1, up2, up1x, up2x, 3pt0, 3pt1, 3pt3}
+                if(fCutDataset) if(!ApplyCutDataset(fVD_Dataset[itrack])) continue;
                 //_cuts____
                 
                 //if( fEvent->GetPlane(ichip)->GetNClustersSaved() > 20 ) continue;
@@ -877,16 +965,19 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
 
             if(loop == 0) {
                 if(nnt_good > 0 && nnt_eff == 0) {
+                    hEffCluMultDisc[ichip]->Fill( fEvent->GetPlane(ichip)->GetNClustersSaved() );
                     nn_discev++;
                     flagDiscard = kTRUE;
                     Report(4, mname + Form("Discarding event = %i, Efficiency = %.2f = %i/%i, ntracks = %i",
                                            fVD_EventN+1, 100.*nnt_eff/nnt_good, nnt_eff, nnt_good, fVD_NTracks));
                 }
+                else if(nnt_good > 0) nn_goodev++;
             }
             else {
                 //if(!nnt_good)// || nnt_eff < nnt_good)
-                if(nnt_eff && nnt_eff == nnt_good)
+                if(nnt_eff && nnt_eff == nnt_good) {
                     hEffCluMult[ichip]->Fill( fEvent->GetPlane(ichip)->GetNClustersSaved() );
+                }
             }
         } // END FOR loop
     } // END FOR events
@@ -898,6 +989,8 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
     Report(3, mname + Form("Eff.  tracks:  %i", nn_eff));
     Report(3, mname + Form("Ineff tracks:  %i", nn_ineff));
     Report(3, mname + Form("Efficiency:    %f %%", 100.*nn_eff/nn_good));
+    Report(3, mname + Form("Total     events:  %i", nentries_vd));
+    Report(3, mname + Form("Accepted  events:  %i", nn_goodev));
     Report(3, mname + Form("Discarded events:  %i", nn_discev));
 
     fEffNTracks[ichip] += nn_tracks;
@@ -905,6 +998,9 @@ void Na61Analysis::EfficiencyVD(Int_t ichip) {
     fEffNGood  [ichip] += nn_good;
     fEffNRej   [ichip] += nn_rej;
     fEffNIneff [ichip] += nn_ineff;
+    fEffNEvTot [ichip] += nentries_vd;
+    fEffNEvGood[ichip] += nn_goodev;
+    fEffNEvDisc[ichip] += nn_discev;
 
     Report(3, mname + "Finished.");
 }
@@ -918,8 +1014,11 @@ void Na61Analysis::PrintEfficiencyVD(Int_t ichip) {
     Float_t err = TMath::Sqrt( (k+1)*(k+2)/(n+2)/(n+3) - (k+1)*(k+1)/(n+2)/(n+2) );
     Float_t errup = mean + err - eff;
     Float_t errdo = eff - mean + err;
-    
+
     cout << endl << "Cumulative efficiency results: " << endl
+         << "\t Total     events:  " << fEffNEvTot [ichip] << endl
+         << "\t Accepted  events:  " << fEffNEvGood[ichip] << endl
+         << "\t Discarded events:  " << fEffNEvDisc[ichip] << endl
          << "\t Total tracks:  " << fEffNTracks[ichip] << endl
          << "\t Rej.  tracks:  " << fEffNRej   [ichip] << endl
          << "\t Good  tracks:  " << fEffNGood  [ichip] << endl  
@@ -927,8 +1026,63 @@ void Na61Analysis::PrintEfficiencyVD(Int_t ichip) {
          << "\t Ineff tracks:  " << fEffNIneff [ichip] << endl
          << "\t Efficiency:    " << 100.*eff  << " + " << 100.*errup << " - " << 100.*errdo << endl
          << endl;
+    if(fFileLog.is_open())
+        fFileLog << endl << "Cumulative efficiency results: " << endl
+                 << "\t Total     events:  " << fEffNEvTot [ichip] << endl
+                 << "\t Accepted  events:  " << fEffNEvGood[ichip] << endl
+                 << "\t Discarded events:  " << fEffNEvDisc[ichip] << endl
+                 << "\t Total tracks:  " << fEffNTracks[ichip] << endl
+                 << "\t Rej.  tracks:  " << fEffNRej   [ichip] << endl
+                 << "\t Good  tracks:  " << fEffNGood  [ichip] << endl  
+                 << "\t Eff.  tracks:  " << fEffNEff   [ichip] << endl
+                 << "\t Ineff tracks:  " << fEffNIneff [ichip] << endl
+                 << "\t Efficiency:    " << 100.*eff  << " + " << 100.*errup << " - " << 100.*errdo << endl
+                 << endl;
 }
 
+
+//__________________________________________________________
+void Na61Analysis::ExtractChipHits(TString fpath_out, Int_t ichip) {
+    TString mname = "ExtractChipHits() : ";
+    
+    TFile *file_out = new TFile(fpath_out.Data(), "recreate");
+    if(!file_out->IsOpen()) {
+        Report(1, mname + "ERROR: Cannot open output file! " + fpath_out);
+        return;
+    }
+
+    TClonesArray *hits = new TClonesArray("TVector3");
+    TTree *tree = new TTree("alpide_hits", "alpide_hits");
+    tree->Branch("hits", &hits);
+
+    Int_t nentries = fEventTree->GetEntries();
+    for(Int_t ientry=0; ientry < nentries; ++ientry) {
+        fEventTree->GetEntry(ientry);
+        
+        hits->Clear();
+        Int_t ihit = 0;
+        
+        for(Int_t iclu=0; iclu < fEvent->GetPlane(ichip)->GetNClustersSaved(); ++iclu) {
+            Int_t mult = fEvent->GetPlane(ichip)->GetCluster(iclu)->GetMultiplicity();
+            BinaryCluster* cluster = fEvent->GetPlane(ichip)->GetCluster(iclu);
+            TVector3 hh = fAlignChip[ichip].PixToGlobal(cluster->GetX(), cluster->GetY());
+
+            if(mult > 6) continue;
+
+            TVector3 *hit = (TVector3*)hits->ConstructedAt(ihit++);
+            hit->SetXYZ( hh.X(), hh.Y(), hh.Z() );
+        }
+        tree->Fill();
+    }
+
+    file_out->Write();
+    file_out->Close();
+    
+    //delete tree;
+    delete hits;
+    delete file_out;
+    Report(3, mname + "Hits extracted to file " + fpath_out);
+}
 
 //__________________________________________________________
 void Na61Analysis::ExtractHitsVD(Int_t ichip) {
@@ -1003,7 +1157,7 @@ void Na61Analysis::ExtractHitsVD(Int_t ichip) {
             TVector3 td(*(TVector3*)fVD_td->At(itrack));
 
             //_cuts____
-            //if(fVD_Dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
+            if(fCutDataset) if(!ApplyCutDataset(fVD_Dataset[itrack])) continue;
             //if(td.X() / td.Z() > 1) continue;
             //if(c4<0 || c4>fNCols) continue; // only chip4 is interesting
             //_cuts____
@@ -1148,8 +1302,8 @@ void Na61Analysis::ExtractHitsVD(Int_t ichip) {
             TVector3 td(*(TVector3*)fVD_td->At(itrack));
 
             //_cuts____
-            //if(fVD_Dataset[itrack] < 7) continue; // {down1, down2, up1, up2, up1x, 3pt0, 3pt1, 3pt3}
-            //if(td.X() / td.Z() > 1) continue;
+            if(fCutDataset) if(!ApplyCutDataset(fVD_Dataset[itrack])) continue; 
+           //if(td.X() / td.Z() > 1) continue;
             //if(c4<0 || c4>fNCols) continue; // only chip4 is interesting
             //_cuts____
                 

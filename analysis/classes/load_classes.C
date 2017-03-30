@@ -8,6 +8,8 @@ void load_classes() {
     gSystem->Load("helpers_cpp.so");
     
     gSystem->Load("Alignment_cpp.so");
+
+    //gSystem->Load("/home/msuljic/work/na61/vdal/utils/libLUtils.so");
     
     cout << "load_classes() : Classes loadad." << endl;
 }

@@ -37,13 +37,16 @@ public:
     void   ResetHitsTree();
     
     void   SetVerboseLevel(Int_t level)             { fVerboseLevel = level; }
+    Bool_t SetLogFile(TString filepath);
     Bool_t SetInputFileALPIDE(TString filepath_tree);
     Bool_t SetInputFileVDTracks(TString filepath_tree);
     void   SetOutputDirPlots(TString dirpath_plots) { fDirPathPlots = dirpath_plots; }
     void   SetIOSuffix(TString suffix)              { fSuffix = suffix; }
     void   SetDefaultAlignment();
     Bool_t SetAlignment(Int_t chip, Alignment a);
-
+    // cuts
+    Bool_t SetCutDataset(TString cut, Int_t set=-1);
+    
     Bool_t LoadHotPixMask(Int_t ichip, TString fname);
     Bool_t LoadExclColMask(Int_t ichip, TString fname);
     
@@ -55,6 +58,7 @@ public:
     void   ExtractTracksVD(Float_t extract_sigma) { PrealignmentVD(extract_sigma); }
     void   EfficiencyVD(Int_t ichip=4);
     void   PrintEfficiencyVD(Int_t ichip=4);
+    void   ExtractChipHits(TString fpath_out, Int_t ichip=4);
     void   ExtractHitsVD(Int_t ichip=4);
 private:
     /*
@@ -109,7 +113,7 @@ private:
     vector<Short_t> fHotPixRows[fNChips];
     vector<Short_t> fHotPixCols[fNChips];
     vector<Short_t> fExclCols[fNChips];
-    
+
     // event tree variables
     BinaryEvent *fEvent;
     // VD tracks tree variables
@@ -127,8 +131,15 @@ private:
     Int_t fEffNGood[fNChips];  
     Int_t fEffNEff[fNChips];   
     Int_t fEffNRej[fNChips];   
-    Int_t fEffNIneff[fNChips];   
-    
+    Int_t fEffNIneff[fNChips];
+    Int_t fEffNEvTot [fNChips];
+    Int_t fEffNEvGood[fNChips];
+    Int_t fEffNEvDisc[fNChips];
+
+    // cut variables
+    Bool_t  fCutDataset;
+    TString fCutDatasetString;
+    Int_t   fCutDatasetValue[4];
     
     // histograms
     // prealignment and extraction
@@ -153,10 +164,14 @@ private:
     TH2F *hEffEff[fNChips];
     TH2F *hEffEffD[fNChips];
     TH1F *hEffCluMult[fNChips];
+    TH1F *hEffCluMultDisc[fNChips];
 
-    // error reporting method
-    Int_t fVerboseLevel;
-    void  Report(Short_t level, const char * message);
+    // cut methods
+    Bool_t ApplyCutDataset(Int_t val);
+    // error reporting method and log
+    ofstream fFileLog;
+    Int_t    fVerboseLevel;
+    void     Report(Short_t level, const char * message);
     
     ClassDef(Na61Analysis,1);
 };
