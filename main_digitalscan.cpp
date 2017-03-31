@@ -198,11 +198,11 @@ void scan() {
         continue;
       }
       else {
-        std::cout << "received Event" << itrg << " with length " << n_bytes_data << std::endl;
-        for (int iByte=0; iByte<n_bytes_data; ++iByte) {
-          printf ("%02x ", (int) buffer[iByte]);
-        }
-        std::cout << std::endl;
+//        std::cout << "received Event" << itrg << " with length " << n_bytes_data << std::endl;
+//        for (int iByte=0; iByte<n_bytes_data; ++iByte) {
+//          printf ("%02x ", (int) buffer[iByte]);
+//        }
+//        std::cout << std::endl;
 
         // decode DAQboard event
         BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);

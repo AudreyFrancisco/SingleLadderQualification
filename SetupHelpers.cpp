@@ -34,6 +34,7 @@ int initSetupOB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
     int          receiver   = chipConfig->GetParamValue("RECEIVER");
 
     if (chipId%8!=0) chipConfig->SetParamValue("LINKSPEED", "-1"); // deactivate the DTU/PLL for none master chips
+    else chipConfig->SetParamValue("LINKSPEED", "1200");
 
     chips->push_back(new TAlpide(chipConfig));
     chips->at(i) -> SetReadoutBoard(boards->at(0));
