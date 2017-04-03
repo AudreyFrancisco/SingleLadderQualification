@@ -1,0 +1,10 @@
+before_script:
+    - yum install -y libusb1-devel
+
+slc6:
+    image: cern/slc6
+    script: make clean && make
+
+cc7:
+    image: cern/cc7
+    script: make clean && make
