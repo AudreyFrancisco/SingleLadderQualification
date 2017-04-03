@@ -6,5 +6,5 @@ slc6:
     script: make clean && make
 
 cc7:
-    image: cern/cc7-base
+    image: ci-tools/ci-worker:cc7
     script: make clean && make
