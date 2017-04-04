@@ -10,5 +10,5 @@ cc7:
     script: make clean && make lib
 
 ubuntu1604:
-    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:ubuntu.1604
+    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:ubuntu16.04
     script: make clean && make lib
