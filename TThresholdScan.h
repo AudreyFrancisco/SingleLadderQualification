@@ -2,6 +2,7 @@
 #define TTHRESHOLDSCAN_H
 
 #include <deque>
+#include <mutex>
 #include "TScan.h"
 #include "THisto.h"
 #include "AlpideDecoder.h"
@@ -19,7 +20,7 @@ class TThresholdScan : public TMaskScan {
  protected:
   THisto CreateHisto    ();
  public: 
-  TThresholdScan   (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoque);
+  TThresholdScan   (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoque, std::mutex *aMutex);
   ~TThresholdScan  () {};
 
   void Init        ();

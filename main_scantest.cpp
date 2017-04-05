@@ -16,6 +16,8 @@
 
 #include <unistd.h>
 #include <deque>
+#include <thread>
+#include <mutex> 
 #include "TAlpide.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -28,33 +30,17 @@
 
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
+#include "TScan.h"
 #include "TThresholdScan.h"
 #include "TScanConfig.h"
 #include "THisto.h"
 #include "TScanAnalysis.h"
 
 
-int main(int argc, char** argv) {
 
-  decodeCommandParameters(argc, argv);
-
-  TBoardType fBoardType;
-  std::vector <TReadoutBoard *> fBoards;
-  std::vector <TAlpide *>       fChips;
-  TConfig *fConfig;
-
-  std::deque<TScanHisto>  fHistoQue;
-
-  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
-    
-  TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue);
-
-  //THisto *histo = new THisto("Test", "Test", 1024, 0, 1023, 50, 0, 50);
-
-  // histo->Set(40, 40, 2);
-  // histo->Incr(40, 40);
-  // std::cout << "histo readback: " << (*histo)(40, 40) << std::endl;
-
+void scanLoop (TScan *myScan)
+{
+  std::cout << "In scan loop functiokn" << std::endl;
   myScan->Init();
 
   myScan->LoopStart(2);
@@ -77,10 +63,36 @@ int main(int argc, char** argv) {
   }
   myScan->LoopEnd  (2);
   myScan->Terminate();
-  
-  TScanAnalysis *analysis = new TScanAnalysis (&fHistoQue);
-  analysis->Run();
+}
 
+
+
+
+int main(int argc, char** argv) {
+
+  decodeCommandParameters(argc, argv);
+
+  TBoardType fBoardType;
+  std::vector <TReadoutBoard *> fBoards;
+  std::vector <TAlpide *>       fChips;
+  TConfig *fConfig;
+
+  std::deque<TScanHisto>  fHistoQue;
+  std::mutex              fMutex;
+
+
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
+    
+  TThresholdScan *myScan   = new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue, &fMutex);
+  TScanAnalysis  *analysis = new TScanAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), &fMutex);
+
+  //scanLoop(myScan);
+  std::cout << "starting thread" << std::endl;
+  std::thread scanThread(scanLoop, myScan);
+  std::thread analysisThread(&TScanAnalysis::Run, std::ref(analysis));
+
+  scanThread.join();
+  analysisThread.join();
   return 0;
 }
 

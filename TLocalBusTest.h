@@ -1,6 +1,7 @@
 #ifndef TLOCALBUSTEST_H
 #define TLOCALBUSTEST_H
 
+#include <mutex>
 #include "TScan.h"
 #include "THisto.h"
 
@@ -16,7 +17,7 @@ class TLocalBusTest : public TScan {
  protected: 
   THisto CreateHisto() {THisto histo; return histo;};
  public:
-  TLocalBusTest   (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoque);
+  TLocalBusTest   (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoque, std::mutex *aMutex);
   ~TLocalBusTest  () {};
   void Init ();
   void Execute ();

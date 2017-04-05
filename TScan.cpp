@@ -4,13 +4,14 @@
 
 bool fScanAbort;
 
-TScan::TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue) 
+TScan::TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
 {
   m_config = config;
   m_chips  = chips; 
   m_boards = boards;
 
   m_histoQue = histoQue;
+  m_mutex    = aMutex;
 
   fScanAbort = false;
 }
@@ -75,8 +76,8 @@ void TScan::CreateScanHisto ()
 
 
 
-TMaskScan::TMaskScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue) 
-  : TScan(config, chips, boards, histoQue)
+TMaskScan::TMaskScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
+  : TScan(config, chips, boards, histoQue, aMutex)
 {
   m_pixPerStage = m_config->GetParamValue("PIXPERREGION");
 }

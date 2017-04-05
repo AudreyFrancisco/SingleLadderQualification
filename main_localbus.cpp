@@ -16,6 +16,7 @@
 
 #include <unistd.h>
 #include <deque>
+#include <mutex>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -44,10 +45,11 @@ int main(int argc, char** argv) {
   TConfig *fConfig;
 
   std::deque<TScanHisto>  fHistoQue;
+  std::mutex              fMutex;
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
     
-  TLocalBusTest *myScan = new TLocalBusTest(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue);
+  TLocalBusTest *myScan = new TLocalBusTest(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue, &fMutex);
 
   //THisto *histo = new THisto("Test", "Test", 1024, 0, 1023, 50, 0, 50);
 
@@ -78,7 +80,7 @@ int main(int argc, char** argv) {
   myScan->LoopEnd  (2);
   myScan->Terminate();
   
-  TScanAnalysis *analysis = new TScanAnalysis (&fHistoQue);
+  TScanAnalysis *analysis = new TScanAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), &fMutex);
   analysis->Run();
 
   return 0;

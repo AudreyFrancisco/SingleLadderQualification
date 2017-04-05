@@ -5,8 +5,8 @@
 #include "AlpideConfig.h"
 
 
-TThresholdScan::TThresholdScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue) 
-  : TMaskScan (config, chips, boards, histoQue) 
+TThresholdScan::TThresholdScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
+  : TMaskScan (config, chips, boards, histoQue, aMutex) 
 {
   m_start[0]  = m_config->GetChargeStart();
   m_stop [0]  = m_config->GetChargeStop ();
@@ -73,6 +73,7 @@ THisto TThresholdScan::CreateHisto() {
 
 
 void TThresholdScan::Init() {
+  m_running = true;
   CountEnabledChips();
   for (int i = 0; i < m_boards.size(); i++) {
     std::cout << "Board " << i << ", found " << m_enabled[i] << " enabled chips" << std::endl;
@@ -171,7 +172,7 @@ void TThresholdScan::Execute()
         itrg++;
         }
     }
-    std::cout << "Found " << Hits->size() << " hits" << std::endl;
+        std::cout << "Found " << Hits->size() << " hits" << std::endl;
     FillHistos (Hits, iboard);
   }
 }
@@ -205,7 +206,9 @@ void TThresholdScan::FillHistos (std::vector<TPixHit> *Hits, int board)
 void TThresholdScan::LoopEnd(int loopIndex) 
 {
   if (loopIndex == 0) {
+    while (!(m_mutex->try_lock()));
     m_histoQue->push_back(*m_histo);
+    m_mutex   ->unlock();
     m_histo   ->Clear();
   }
 }
@@ -226,6 +229,6 @@ void TThresholdScan::Terminate()
       //delete myDAQBoard;
     }
   }
-
+  m_running = false;
 }
 

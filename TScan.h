@@ -2,6 +2,7 @@
 #define TSCAN_H
 
 #include <deque>
+#include <mutex>
 #include "TAlpide.h"
 #include "TReadoutBoard.h"
 #include "TScanConfig.h"
@@ -20,6 +21,8 @@ class TScan {
   std::vector <TReadoutBoard *> m_boards;
   TScanHisto                   *m_histo;
   std::deque <TScanHisto>      *m_histoQue;
+  std::mutex                   *m_mutex;
+  bool                          m_running;
   int m_start   [MAXLOOPLEVEL];
   int m_stop    [MAXLOOPLEVEL];
   int m_step    [MAXLOOPLEVEL];
@@ -30,7 +33,7 @@ class TScan {
   virtual THisto CreateHisto        () = 0;
 
  public:
-  TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue);
+  TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex);
   ~TScan() {};
 
   virtual void Init            ()              = 0;
@@ -42,6 +45,7 @@ class TScan {
   bool         Loop            (int loopIndex);
   virtual void Next            (int loopIndex); 
   void         CreateScanHisto ();
+  bool         IsRunning       () {return m_running;}
 };
 
 
@@ -53,7 +57,7 @@ class TMaskScan : public TScan {
   int  m_row;
   void ConfigureMaskStage(TAlpide *chip, int istage);
  public: 
-  TMaskScan  (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue);
+  TMaskScan  (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex);
   ~TMaskScan () {};
 };
 
