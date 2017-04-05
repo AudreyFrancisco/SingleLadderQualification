@@ -58,14 +58,14 @@ int TAlpide::ModifyRegisterBits (TRegister address, uint8_t lowBit, uint8_t nBit
   }
   uint16_t registerValue, mask = 0xffff; 
   ReadRegister(address, registerValue); 
-  
+  //std::cout << "Value before modify:0x " << std::hex << registerValue << std::dec << std::endl;
   for (int i = lowBit; i < lowBit + nBits; i++) {
-    mask -= 1 << i;
+    mask -= (1 << i);
   }
 
   registerValue &= mask;                  // set all bits that are to be overwritten to 0
   value         &= (1 << nBits) -1;       // make sure value fits into nBits
-  registerValue |= value << nBits;        // or value into the foreseen spot
+  registerValue |= value << lowBit;        // or value into the foreseen spot
 
   return WriteRegister (address, registerValue, verify);
 

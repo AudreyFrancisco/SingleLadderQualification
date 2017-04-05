@@ -1,6 +1,6 @@
 #include "AlpideDebug.h"
 #include "TAlpide.h"
-
+#include <iostream>
 
 // TODO: decode remaining debug streams
 
@@ -8,7 +8,10 @@ bool AlpideDebug::ReadStream (TAlpide *chip, TRegister reg, uint16_t *stream, in
   for (int i = 0; i < len; i++) {
     chip->ReadRegister(reg, stream[i]);
   }
-  if (stream[0] != Header) return false;
+  if (stream[0] != Header) {
+    std::cout << "Wrong header value 0x" << std::hex << stream[0] << std::dec << std::endl;
+    return false;
+  }
   return true;  
 }
 

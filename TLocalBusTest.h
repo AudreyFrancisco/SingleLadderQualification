@@ -11,17 +11,21 @@ class TLocalBusTest : public TScan {
   std::vector<std::vector <TAlpide*>> m_daisyChains;
   int      FindDaisyChains(std::vector <TAlpide *> chips);
   int      GetChipById    (std::vector <TAlpide *> chips, int previousId);
+  bool     TestPattern    (int pattern);
+  bool     TestBusy       (bool busy);
  protected: 
   THisto CreateHisto() {THisto histo; return histo;};
  public:
   TLocalBusTest   (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoque);
   ~TLocalBusTest  () {};
-  void Init () {};
+  void Init ();
   void Execute ();
   void Terminate () {};
-  void LoopStart (int loopIndex) {};
-  void LoopEnd   (int loopIndex) {};
-  void PrepareStep(int loopIndex) {};
+
+  void Next (int loopIndex);
+  void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
+  void LoopEnd   (int loopIndex);
+  void PrepareStep(int loopIndex);
 
 };
 

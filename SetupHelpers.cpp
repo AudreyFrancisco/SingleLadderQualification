@@ -33,7 +33,14 @@ int initSetupOB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
     int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
     int          receiver   = chipConfig->GetParamValue("RECEIVER");
 
-    if (chipId%8!=0) chipConfig->SetParamValue("LINKSPEED", "-1"); // deactivate the DTU/PLL for none master chips
+    // --- Force the Link Speed values to 1.2 GHz in the Chip-Master
+    //   in order to prevent wrong settings that stuck the DataLink
+    //   Antonio : 30/3/17
+    if (chipId%8!=0)  { // deactivate the DTU/PLL for none master chips
+    	chipConfig->SetParamValue("LINKSPEED", "-1");
+    } else { // sets the Master to 1.2GHz
+    	chipConfig->SetParamValue("LINKSPEED", "1200");
+    }
 
     chips->push_back(new TAlpide(chipConfig));
     chips->at(i) -> SetReadoutBoard(boards->at(0));
