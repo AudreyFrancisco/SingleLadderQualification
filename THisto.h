@@ -56,6 +56,7 @@ class THisto {
 class TScanHisto {
  private:
   std::map<int, THisto> m_histos;
+  int                   m_index;
  public:
   TScanHisto () {};                       // Default constructor;
   TScanHisto (const TScanHisto &sh);      // Copy constructor;
@@ -65,6 +66,8 @@ class TScanHisto {
   int  GetSize     () {return m_histos.size();};
   int  GetChipList (std::vector <TChipIndex> &chipList);
   void Clear       ();
+  void SetIndex    (int aIndex) {m_index = aIndex;};
+  int  GetIndex    ()           {return m_index;};
   void Incr        (TChipIndex index, unsigned int i, unsigned int j);
 };
 

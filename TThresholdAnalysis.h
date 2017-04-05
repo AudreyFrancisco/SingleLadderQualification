@@ -10,6 +10,7 @@
 
 class TThresholdAnalysis : public TScanAnalysis {
  private:
+  bool HasData(TScanHisto histo, TChipIndex idx, int col);
  protected:
  public:
   TThresholdAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);

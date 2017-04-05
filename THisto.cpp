@@ -287,6 +287,7 @@ void TScanHisto::Clear()
   for (it = m_histos.begin(); it != m_histos.end(); ++it) {
     (*it).second.Clear();
   }
+  m_index = -1;
 }
 
 

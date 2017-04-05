@@ -207,6 +207,7 @@ void TThresholdScan::LoopEnd(int loopIndex)
 {
   if (loopIndex == 0) {
     while (!(m_mutex->try_lock()));
+    m_histo   ->SetIndex (m_row);
     m_histoQue->push_back(*m_histo);
     m_mutex   ->unlock();
     m_histo   ->Clear();

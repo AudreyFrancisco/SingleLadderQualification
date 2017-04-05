@@ -7,9 +7,16 @@ TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *histoQue, TScan *
 }
 
 
+//TODO: Implement HasData
+bool TThresholdAnalysis::HasData(TScanHisto histo, TChipIndex idx, int col) 
+{
+  return true;
+}
+
+//TODO: clean up
 void TThresholdAnalysis::Run() 
 {
-
+  int chargeSteps = ((float)m_config->GetChargeStop() - (float) m_config->GetChargeStart()) / m_config->GetChargeStep();
   std::vector <TChipIndex> chipList;
 
   while (m_histoQue->size() == 0) {
@@ -26,15 +33,24 @@ void TThresholdAnalysis::Run()
       m_histoQue->pop_front();
       m_mutex   ->unlock();
 
+      int row = histo.GetIndex();
       for (int ichip = 0; ichip < chipList.size(); ichip++) {
-        for (int i = 0; i < 50; i ++) {
-          std::cout << histo(chipList.at(ichip), 0, i) << " ";
+        char fName[100];
+        //TODO: Write file name correctly, including time stamp
+        sprintf(fName, "TestData_%d.dat", chipList.at(ichip).chipId);
+        FILE *fp = fopen (fName, "a");
+        for (int icol = 0; icol < 1024; icol ++) {
+          if (HasData(histo, chipList.at(ichip), icol)) {
+            for (int icharge = 0; icharge < chargeSteps; icharge ++) {
+              fprintf(fp, "%d %d %d %d\n", icol, row, icharge, (int)histo(chipList.at(ichip), icol, icharge));
+              //std::cout << histo(chipList.at(ichip), icol , icharge) << " ";
+  	    }
+	    std::cout << std::endl;
+	  }
         }
-	std::cout << std::endl;
+        fclose(fp);
       }
      
-      std::cout << "In Scan analysis <<=========================================" << std::endl;
-      std::cout << std::endl;
     }
   }
 
