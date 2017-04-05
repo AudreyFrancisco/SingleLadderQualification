@@ -303,3 +303,19 @@ double TScanHisto::operator() (TChipIndex index, unsigned int i, unsigned int j)
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
   (m_histos.at(int_index))(i,j);
 }
+
+
+int TScanHisto::GetChipList (std::vector <TChipIndex> &chipList) 
+{
+  chipList.clear();
+  for (std::map<int, THisto>::iterator it = m_histos.begin(); it != m_histos.end(); ++it) {
+    int        intIndex = it->first;
+    TChipIndex index;
+    index.boardIndex   = (intIndex >> 8);
+    index.dataReceiver = (intIndex >> 4) & 0xf;
+    index.chipId       =  intIndex       & 0xf;
+    chipList.push_back(index);
+  }
+  return chipList.size();
+}
+

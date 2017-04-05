@@ -3,6 +3,7 @@
 
 #include <string> 
 #include <map>
+#include <vector>
 
 typedef struct 
 {
@@ -60,10 +61,11 @@ class TScanHisto {
   TScanHisto (const TScanHisto &sh);      // Copy constructor;
   double operator()  (TChipIndex index, unsigned int i, unsigned int j) const;       // Bin read access 2d   
 
-  void AddHisto (TChipIndex index, THisto histo);
-  int  GetSize  () {return m_histos.size();};
-  void Clear    ();
-  void Incr     (TChipIndex index, unsigned int i, unsigned int j);
+  void AddHisto    (TChipIndex index, THisto histo);
+  int  GetSize     () {return m_histos.size();};
+  int  GetChipList (std::vector <TChipIndex> &chipList);
+  void Clear       ();
+  void Incr        (TChipIndex index, unsigned int i, unsigned int j);
 };
 
  #endif
