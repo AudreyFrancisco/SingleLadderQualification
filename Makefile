@@ -1,7 +1,7 @@
 CC=g++
 INCLUDE=/usr/local/include
 LIBPATH=/usr/local/lib
-CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=large -I $(INCLUDE)
+CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium -I $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -lpthread -L $(LIBPATH)
 #LINKFLAGS=
 OBJECT= runTest
@@ -12,7 +12,7 @@ RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverM
 
 CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
  TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
- BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp\
+ BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TThresholdAnalysis.cpp\
  MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/i2cbus.cpp MosaicSrc/i2cslave.cpp MosaicSrc/i2csyspll.cpp \
  MosaicSrc/ipbus.cpp MosaicSrc/ipbusudp.cpp MosaicSrc/mdatagenerator.cpp MosaicSrc/mdatareceiver.cpp MosaicSrc/mdatasave.cpp \
  MosaicSrc/mexception.cpp MosaicSrc/mruncontrol.cpp MosaicSrc/mtriggercontrol.cpp MosaicSrc/mwbbslave.cpp \

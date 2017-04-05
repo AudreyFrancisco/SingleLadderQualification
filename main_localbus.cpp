@@ -80,8 +80,6 @@ int main(int argc, char** argv) {
   myScan->LoopEnd  (2);
   myScan->Terminate();
   
-  TScanAnalysis *analysis = new TScanAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), &fMutex);
-  analysis->Run();
 
   return 0;
 }

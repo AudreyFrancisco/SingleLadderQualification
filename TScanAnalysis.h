@@ -15,7 +15,7 @@ class TScanAnalysis {
   TScanConfig            *m_config;
  public:
   TScanAnalysis (std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
-  void Run();
+  virtual void Run() = 0;
 };
 
 
