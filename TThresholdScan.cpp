@@ -67,8 +67,8 @@ void TThresholdScan::ConfigureChip(TAlpide *chip)
 
 
 THisto TThresholdScan::CreateHisto() {
-  THisto *histo = new THisto ("ThresholdHisto", "ThresholdHisto", 1024, 0, 1023, (m_stop[0] - m_start[0]) / m_step[0], m_start[0], m_stop[0]);
-  return *histo;
+  THisto histo ("ThresholdHisto", "ThresholdHisto", 1024, 0, 1023, (m_stop[0] - m_start[0]) / m_step[0], m_start[0], m_stop[0]);
+  return histo;
 }
 
 
@@ -172,9 +172,10 @@ void TThresholdScan::Execute()
         itrg++;
         }
     }
-        std::cout << "Found " << Hits->size() << " hits" << std::endl;
+    //    std::cout << "Found " << Hits->size() << " hits" << std::endl;
     FillHistos (Hits, iboard);
   }
+  delete Hits;
 }
 
 
@@ -207,7 +208,8 @@ void TThresholdScan::LoopEnd(int loopIndex)
 {
   if (loopIndex == 0) {
     while (!(m_mutex->try_lock()));
-    m_histo   ->SetIndex (m_row);
+    m_histo   ->SetIndex(m_row);
+    std::cout << "SCAN: Writing histo with row " << m_histo->GetIndex() << std::endl;
     m_histoQue->push_back(*m_histo);
     m_mutex   ->unlock();
     m_histo   ->Clear();

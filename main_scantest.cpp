@@ -93,6 +93,9 @@ int main(int argc, char** argv) {
 
   scanThread.join();
   analysisThread.join();
+
+  delete myScan;
+  delete analysis;
   return 0;
 }
 

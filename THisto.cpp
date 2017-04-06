@@ -271,6 +271,13 @@ TScanHisto::TScanHisto (const TScanHisto &sh)
   for (it = sh.m_histos.begin(); it != sh.m_histos.end(); ++it) {
     m_histos.insert(*it);
   }
+  SetIndex(sh.GetIndex());
+}
+
+
+TScanHisto::~TScanHisto() 
+{
+  m_histos.clear();
 }
 
 
@@ -319,4 +326,3 @@ int TScanHisto::GetChipList (std::vector <TChipIndex> &chipList)
   }
   return chipList.size();
 }
-
