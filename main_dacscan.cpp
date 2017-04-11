@@ -199,8 +199,10 @@ int main(int argc, char** argv) {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
-    for (int i = 0; i < fChips.size(); i ++) {
- //     configureChip (fChips.at(i));
+    if ( myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0))) {
+      for (int i = 0; i < fChips.size(); i ++) {
+        configureChip (fChips.at(i));
+      }
     }
 
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
