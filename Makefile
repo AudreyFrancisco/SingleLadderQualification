@@ -3,6 +3,15 @@ INCLUDE=/usr/local/include
 LIBPATH=/usr/local/lib
 CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium -I $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -lpthread -L $(LIBPATH)
+
+ROOTCONFIG   := $(shell which root-config)
+ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
+ROOTLDFLAGS  := $(shell $(ROOTCONFIG) --ldflags)
+ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs)
+
+CFLAGS += $(ROOTCFLAGS)
+LINKFLAGS += $(ROOTLDFLAGS) $(ROOTLIBS)
+
 #LINKFLAGS=
 OBJECT= runTest
 LIBRARY=libalpide.so
