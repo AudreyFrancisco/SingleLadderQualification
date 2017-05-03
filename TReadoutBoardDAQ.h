@@ -54,7 +54,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   //static const int MODULE_JTAG      = 0x4;
   static const int MODULE_CMU       = 0x4;
   static const int MODULE_RESET     = 0x5;
-  //static const int MODULE_IDENT     = 0x6;
+  static const int MODULE_IDENT     = 0x6;
   static const int MODULE_ID        = 0x6;
   static const int MODULE_SOFTRESET = 0x7;
 
@@ -203,6 +203,8 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   bool ReadMonitorRegisters();
   bool ReadMonitorReadoutRegister();
   bool ReadMonitorTriggerRegister();
+
+  int GetBoardAddress();
 
   //// methods related to data readout
   //---------------------------------------------------------
