@@ -11,15 +11,44 @@ breaklines=true
 \author{Markus Keil}
 \maketitle
 
-This manual describes the software used to perform standard tests of the ALPIDE chip with different readout boards and in different setups (single chip with DAQ board, HICs or staves with MOSAIC board...). 
+This manual describes the software used to perform standard tests of the ALPIDE chip with different readout boards and in different setups (single chip with DAQ board, HICs or staves with MOSAIC board...).
 The manual is intended as a quick start guide to get the ALPIDE
 software installed and perform the most important tests via the
-command line interface. For a description on the software structure and how to implement your own test applications, please refer to the developer's manual . 
+command line interface. For a description on the software structure and how to implement your own test applications, please refer to the developer's manual .
 
 
 \section {Installation and First Steps}
+\subsection{Prerequisites}
+The software is currently supported to run only on the three following operating systems installing the listed packages. This reference installations are used to test software after every commit to the repository.
+\begin{itemize}
+\item \textbf{Ubuntu 16.04 LTS:}
+  \begin{lstlisting}
+    yum install -y gcc gcc-c++ make cmake tar zlib wget subversion \
+      git libusb1-devel tinyxml-devel
+  \end{lstlisting}
+\item \textbf{Scientific Linux CERN 6:}
+  \begin{lstlisting}
+    yum install -y libX11-devel libXft-devel libXpm-devel \
+      libXext-devel libusb1-devel wget tinyxml-devel
+    wget -O /etc/yum.repos.d/slc6-devtoolset.repo \
+      http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
+    yum install -y devtoolset-2
+  \end{lstlisting}
+  The \texttt{devtoolset-2} is necessary on SLC6. It has to be activated by invoking
+  \begin{lstlisting}
+    source /opt/rh/devtoolset-2/enable .
+  \end{lstlisting}
+  This command can either be executed before compiling or running the software or added to the \texttt{.bashrc}.
+  \newpage
+\item \textbf{CentOS CERN 7:}
+  \begin{lstlisting}
+    yum install -y gcc gcc-c++ make cmake tar zlib wget subversion \
+      git libusb1-devel tinyxml-devel
+  \end{lstlisting}
+\end{itemize}
 
-The software is available in a gitlab repository: 
+\subsection{Installation}
+The software is available in a gitlab repository:
 
 \begin{lstlisting}
 https://gitlab.cern.ch/alice-its-alpide-software/new-alpide-software
@@ -32,20 +61,9 @@ git clone https://username@gitlab.cern.ch/alice-its-alpide-software/new-alpide-s
 \end{lstlisting}
 
 with your user name. Note that your account needs to be added to a
-list of users in order to being able to access the repository..
+list of users in order to being able to access the repository.
 Versions are updated regularly, make sure you have checked out the
-latest version. After the clone you will find the software in a directory \texttt{new-alpide-software}, an additional subdirectory \texttt{analysis} contains standard macros to analyse the data. 
-
-
-
-
-In order to compile the software you need to have libusb installed. If
-not yet installed, download and install version 1.0
-from \texttt{http://www.libusb.org}.
-If compilation fails this is most likely due to the installation path
-of the libusb package. In that case you need to locate the path of the
-header and library file on your system and modify the makefile / scripts
-accordingly. 
+latest version. After the clone you will find the software in a directory \texttt{new-alpide-software}, an additional subdirectory \texttt{analysis} contains standard macros to analyse the data.
 
 \paragraph{Executing Tests}\hfill \\
 After compiling the software package you will find a certain number of standard tests, described below, in the form of individual executables. Each executable performs a specific test once and, if applicable, writes the output data in a text file in the subdirectory \texttt{Data}. The settings of the chip(s), readout board(s) and the scan itself can be modified in the config file \texttt{Config.cfg}. Some of the available parameters are described below, for a more detailed description of the syntax and the available parameters please refer to the comments in the config file itself.
@@ -53,44 +71,44 @@ After compiling the software package you will find a certain number of standard 
 
 
 \paragraph{Executing Tests with the DAQ Board}\hfill \\
-To execute tests with the DAQ board setup the FX3 chip has to be configured. The procedure and the necessary files are identical to the old pALPIDEfs-software: 
+To execute tests with the DAQ board setup the FX3 chip has to be configured. The procedure and the necessary files are identical to the old pALPIDEfs-software:
 \begin{verbatim}
 ./download_fx3 -t RAM -i SlaveFifoSync.img
 \end{verbatim}
 
-In case you have not performed tests with the DAQ board before you can download the necessary files from the directory \texttt{fx3} in the repository https:// gitlab.cern.ch/alice-its-alpide-software/pALPIDEfs-software. You can then compile the tool to configure the FX3 chip (execute \texttt{build\_mac.sh} or \texttt{build\_linux.sh}, resp., in the directory \texttt{fx3}). 
+In case you have not performed tests with the DAQ board before you can download the necessary files from the directory \texttt{fx3} in the repository https:// gitlab.cern.ch/alice-its-alpide-software/pALPIDEfs-software. You can then compile the tool to configure the FX3 chip (execute \texttt{build\_mac.sh} or \texttt{build\_linux.sh}, resp., in the directory \texttt{fx3}).
 
 
 \section{Setup Definition}
 
-The standard tests of the ALPIDE software, provided in command line applications, work in the same way for different types of setups. There are several predefined setups that can be selected via the config file. Each of these predefined setup types implements a readout board (DAQ or MOSAIC), a certain number of chips with predefined chip IDs and mapping of chips to the data lines and command interfaces of the MOSAIC board. 
+The standard tests of the ALPIDE software, provided in command line applications, work in the same way for different types of setups. There are several predefined setups that can be selected via the config file. Each of these predefined setup types implements a readout board (DAQ or MOSAIC), a certain number of chips with predefined chip IDs and mapping of chips to the data lines and command interfaces of the MOSAIC board.
 
 Several config-file switches exist to modify these pre-defined setups, e.g. to assign different chip IDs, command interfaces or data receivers to individual chips.
 
-The currently available setups are the following: 
+The currently available setups are the following:
 
 \begin {enumerate}
-\item Single chip: a setup with a single chip connected to the DAQ board is selected by the config-file switch: 
-\begin{verbatim} 
+\item Single chip: a setup with a single chip connected to the DAQ board is selected by the config-file switch:
+\begin{verbatim}
 DEVICE CHIP
 \end{verbatim}
 
 In this case the chip has the chip-ID 16 (OB Master), which is the standard configuration for single chip tests. If needed this can be changed by adding a switch \texttt{CHIPID\_0 x} (Since there is only one chip in the setup the index \texttt{\_0} can also be omitted.)
 
-\item Single chip with MOSAIC: to test a single chip with the MOSAIC board the switch 
+\item Single chip with MOSAIC: to test a single chip with the MOSAIC board the switch
 \begin{verbatim}
 DEVICE CHIPMOSAIC
 \end{verbatim}
-has to be used. In this case the software assumes a chip mounted on a carrier with SAMTEC connector, which is connected through an IB Firefly-Eyespeed adapter to the MOSAIC. The default chip ID is 16. In case a different setup is used, mappings of control and data lines need to be changed using the switches \texttt{CONTROLINTERFACE\_0 x} and \texttt{RECEIVER\_0 y}, substituting the appropriate values for x and y. 
+has to be used. In this case the software assumes a chip mounted on a carrier with SAMTEC connector, which is connected through an IB Firefly-Eyespeed adapter to the MOSAIC. The default chip ID is 16. In case a different setup is used, mappings of control and data lines need to be changed using the switches \texttt{CONTROLINTERFACE\_0 x} and \texttt{RECEIVER\_0 y}, substituting the appropriate values for x and y.
 
 \item Inner Barrel HIC: test of an inner barrel HIC is done using the switch
-\begin{verbatim} 
+\begin{verbatim}
 DEVICE IBHIC
 \end{verbatim}
 This assumes an inner barrel HIC with 9 chips with chip IDs ranging from 0 to 8. The HIC is supposed to be connected to the MOSAIC via a standard IB Firefly-Eyespeed adapter. Again all basic settings (mapping and chip IDs) can be changed.
 
 \item Outer Barrel HIC: test of an outer barrel HIC is done using the switch
-\begin{verbatim} 
+\begin{verbatim}
 DEVICE OBHIC
 \end{verbatim}
 This assumes an outer barrel HIC with 14 chips with chip IDs ranging from 16 to 22 and from 24 to 30. The The HIC is supposed to be connected to the MOSAIC via a standard OB Firefly-Eyespeed adapter. Again all basic settings (mapping and chip IDs) can be changed. When changing individual chip settings, note that the index of the config-file switch refers to the running index and not to the chip ID. These are identical for the IB, but not for the OB HIC. The correspondence between chip index and (default) chip ID is shown in the following table:
@@ -130,12 +148,12 @@ readback value. The test is executed by running
 ./test_fifo
 \end{verbatim}
 
-The test will print on screen the numbers of errors for each chip (seperately for each pattern) and at the end the sum of errors for all tested chips. 
+The test will print on screen the numbers of errors for each chip (seperately for each pattern) and at the end the sum of errors for all tested chips.
 (If for debugging purposes output of the individual errors is needed the program has to be recompiled setting the variable \texttt{bool Verbose} in \texttt{main\_fifo.cpp} to \texttt{true}).
 
 \subsection {On-chip DAC Scan (DAQ board only)}
 The output of the on-chip DACs can be connected to monitoring pins of
-the ALPIDE chip and measured by ADCs on the DAQ board. The DAC Scan measures the characteristics of all on-chip DACs. The test is started by running 
+the ALPIDE chip and measured by ADCs on the DAQ board. The DAC Scan measures the characteristics of all on-chip DACs. The test is started by running
 \begin{verbatim}
 ./test_dacscan
 \end{verbatim}
@@ -143,7 +161,7 @@ For each DAC it loops over the values from 0 to 255 and measures the
 output values. The measured values are written into one file for each
 DAC.
 
-\subsection{Digital Scan} 
+\subsection{Digital Scan}
 The digital scan generates a digital pulse in a number of pixels and
 reads the hits out. It is started with the command
 \begin{verbatim}
@@ -153,7 +171,7 @@ reads the hits out. It is started with the command
 The number of injections and the number of injected pixels is configurable with the parameters \texttt{NINJ, PIXPERREGION, NMASKSTAGES} in the config file (see also the comments in the box below).
 
 The output data is written into a file \texttt{DigitalScan.dat}, each
-line has the format 
+line has the format
 \begin{verbatim}
 Doublecol Address NHits
 \end{verbatim}
@@ -163,14 +181,14 @@ to 1023 (Address is the address as described in the ALPIDE manual,
 not the row number).
 
 \paragraph {Analysis Macro} \hfill \\
-In the subdirectory \texttt{analysis} you can find the macro \texttt{Hitmap.C}, which can be used to visualize the output data of the digital scan. If the macro is invoked in the form 
+In the subdirectory \texttt{analysis} you can find the macro \texttt{Hitmap.C}, which can be used to visualize the output data of the digital scan. If the macro is invoked in the form
 \begin{verbatim}
 .x Hitmap.C (<filename>, <number of injections>)
 \end{verbatim}
 it draws a hitmap of the given chip and returns the numbers of pixels that have registered 0 hits or more / less hits than injections. If the second parameter is omitted, only the hitmap is drawn.
 
 \vspace{0.5 cm}
-\fbox{\parbox{\textwidth}{General remarks on scans: 
+\fbox{\parbox{\textwidth}{General remarks on scans:
 
 \begin{itemize}
 \item{Mask stages: All injection-based scans (digital, analogue and
@@ -184,7 +202,7 @@ it draws a hitmap of the given chip and returns the numbers of pixels that have 
 \subsection{Threshold Scan}
 The threshold scan performs analogue injections, looping over the
 charge. For each charge point 50 injections are performed. The command
-is 
+is
 \begin{verbatim}
 ./test_threshold
 \end{verbatim}
@@ -196,27 +214,27 @@ Doublecol Address Charge NHits
 In addition to the parameters present for the digital scan, for the threshold scan also the charge range can be configured in the config file; the default setting ranges from 0 to 50 DAC units.
 
 \paragraph {Analysis Macro} \hfill \\
-In the subdirectory \texttt{analysis} you can find the macro \texttt{FitThresholds.C}, which is used to fit the s-curves for the scanned pixels. For speed reasons it should be used in the compiled form 
+In the subdirectory \texttt{analysis} you can find the macro \texttt{FitThresholds.C}, which is used to fit the s-curves for the scanned pixels. For speed reasons it should be used in the compiled form
 \begin{verbatim}
 .x FitThresholds.C+ (<filename>)
 \end{verbatim}
 
-The fitted values are written in an output file \texttt{FitValues... .dat} in the format \texttt{doublecol address thresh noise chisq}, which can be visualized in form of a threshold map with the macro \texttt{ThresholdMap.C} in the same directory. 
+The fitted values are written in an output file \texttt{FitValues... .dat} in the format \texttt{doublecol address thresh noise chisq}, which can be visualized in form of a threshold map with the macro \texttt{ThresholdMap.C} in the same directory.
 
 
 \subsection{Noise Occupancy}
 The scan gives a selectable number of random triggers and returns the
-number of hits. The command is 
+number of hits. The command is
 \begin{verbatim}
 ./test_noiseocc
 \end{verbatim}
-The output file format is identical to the digital scan. 
+The output file format is identical to the digital scan.
 
 \paragraph {Analysis Macro} \hfill \\
 The macro \texttt{NoiseOccupancyRawToHisto} in the subdirectory \texttt{analysis} can be used to prepare a histogram with the noise occupancy as a function of the number of masked pixels. The path to the file, which is to be analysed, has to be given as a parameter. Note that the macro assumes a certain number of triggers, which is read from a config file in case of the DAQ board. If the MOSAIC is used this config file does not exist and the macro has to be adjusted accordingly (i.e. remove the reading of the config file and set the variable \texttt{n\_trg} manually to the correct number of triggers). This will be adjusted in a future version.
 
 \subsection{Source Scan}
-A dedicated source scan is currently not implemented, however by adjusting the strobe length the noise occupancy scan can be used to perform a simple source scan (without single event information). The hitmap macro can then be used to show the hit data. 
+A dedicated source scan is currently not implemented, however by adjusting the strobe length the noise occupancy scan can be used to perform a simple source scan (without single event information). The hitmap macro can then be used to show the hit data.
 
 
 
