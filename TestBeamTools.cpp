@@ -1,5 +1,17 @@
-void ParseXML(TpAlpidefs* dut, TiXmlNode* node, int base, int rgn,
-              bool readwrite)
+#include "TestBeamTools.h"
+
+#include <iostream>
+#include <tinyxml.h>
+#include "TAlpide.h"
+
+unsigned int Bitmask(int width) {
+  unsigned int tmp = 0;
+  for (int i = 0; i < width; i++)
+    tmp |= 1 << i;
+  return tmp;
+}
+
+void ParseXML(TAlpide* dut, TiXmlNode* node, int base, int rgn, bool readwrite)
 {
   // readwrite (from Chip): true = read; false = write
   for (TiXmlNode* pChild = node->FirstChild("address"); pChild != 0;
@@ -27,12 +39,12 @@ void ParseXML(TpAlpidefs* dut, TiXmlNode* node, int base, int rgn,
         break;
       }
       int sub = atoi(elem->Attribute("sub"));
-      int address = ((rgn << 11) + (base << 8) + sub);
-      int value = 0;
+      uint16_t address = ((rgn << 11) + (base << 8) + sub);
+      uint16_t value = 0;
       //std::cout << "region" << rgn << " " << base << " " << sub << std::endl;
 
       if (readwrite) {
-        if (dut->ReadRegister(address, &value) != 1) {
+        if (dut->ReadRegister(address, value) != 1) {
           std::cout << "Failure to read chip address " << address << std::endl;
           continue;
         }
@@ -84,8 +96,8 @@ void ParseXML(TpAlpidefs* dut, TiXmlNode* node, int base, int rgn,
         //printf("%d %d %d: %d %d\n", base, rgn, sub, address, value);
         if (dut->WriteRegister(address, value) != 1)
           std::cout << "Failure to write chip address " << address << std::endl;
-        int valuecompare = -1;
-        if (dut->ReadRegister(address, &valuecompare) != 1)
+        uint16_t valuecompare = -1;
+        if (dut->ReadRegister(address, valuecompare) != 1)
           std::cout << "Failure to read chip address after writing chip address " << address << std::endl;
         if (address != 14 && value != valuecompare)
           std::cout << "Register 0x" << std::hex << address << std::dec << "read back error : write value is : " << value << " and read value is : "<< valuecompare << std::endl;
