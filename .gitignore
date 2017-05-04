@@ -2,7 +2,7 @@
 *.so
 *.d
 *.swp
-runTest
+*.pcm
 test_*
 *~
 # Qt5 local project files
@@ -12,4 +12,3 @@ test_*
 # ECLIPSE local projects
 .project
 .cproject
-
