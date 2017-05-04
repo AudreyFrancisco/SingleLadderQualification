@@ -2,39 +2,31 @@ CC=g++
 INCLUDE=/usr/local/include
 LIBPATH=/usr/local/lib
 CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium -I $(INCLUDE)
-LINKFLAGS=-lusb-1.0 -lpthread -L $(LIBPATH)
+LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread -L $(LIBPATH)
+LIBRARY=libalpide.so
 
 ROOTCONFIG   := $(shell which root-config)
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
 ROOTLDFLAGS  := $(shell $(ROOTCONFIG) --ldflags)
 ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs)
 
-CFLAGS += $(ROOTCFLAGS)
-LINKFLAGS += $(ROOTLDFLAGS) $(ROOTLIBS)
-
-#LINKFLAGS=
-OBJECT= runTest
-LIBRARY=libalpide.so
-
 RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp ReadoutUnitSrc/TRuDctrlModule.cpp \
  TReadoutBoardRU.cpp TBoardConfigRU.cpp
 
-CLASS= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
+MOSAIC_SOURCES =  MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/i2cbus.cpp MosaicSrc/i2cslave.cpp \
+ MosaicSrc/i2csyspll.cpp MosaicSrc/ipbus.cpp MosaicSrc/ipbusudp.cpp MosaicSrc/mdatagenerator.cpp MosaicSrc/mdatareceiver.cpp \
+ MosaicSrc/mdatasave.cpp MosaicSrc/mexception.cpp MosaicSrc/mruncontrol.cpp MosaicSrc/mtriggercontrol.cpp MosaicSrc/mwbbslave.cpp \
+ MosaicSrc/pexception.cpp MosaicSrc/pulser.cpp MosaicSrc/mboard.cpp MosaicSrc/TAlpideDataParser.cpp
+
+CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
  TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
- BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TThresholdAnalysis.cpp\
- MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/i2cbus.cpp MosaicSrc/i2cslave.cpp MosaicSrc/i2csyspll.cpp \
- MosaicSrc/ipbus.cpp MosaicSrc/ipbusudp.cpp MosaicSrc/mdatagenerator.cpp MosaicSrc/mdatareceiver.cpp MosaicSrc/mdatasave.cpp \
- MosaicSrc/mexception.cpp MosaicSrc/mruncontrol.cpp MosaicSrc/mtriggercontrol.cpp MosaicSrc/mwbbslave.cpp \
- MosaicSrc/pexception.cpp MosaicSrc/pulser.cpp MosaicSrc/mboard.cpp MosaicSrc/TAlpideDataParser.cpp \
- TScan.cpp TThresholdScan.cpp TLocalBusTest.cpp TScanConfig.cpp $(RU_SOURCES)
-#CLASS=  USB.cpp TDaqboard.cpp TPalpidefs.cpp TDut.cpp TTestsetup.cpp chiptests.cpp TConfig.cpp TModuleSetup.cpp
-OBJS = $(CLASS:.cpp=.o)
+ BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TThresholdAnalysis.cpp \
+ TScan.cpp TThresholdScan.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp $(RU_SOURCES) $(MOSAIC_SOURCES)
+
+OBJS = $(CLASSES:.cpp=.o)
 $(info OBJS="$(OBJS)")
 
-all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest test_temperature test_readoutunit test_localbus
-
-$(OBJECT):   $(OBJS) main.cpp
-	$(CC) -o $(OBJECT) $(OBJS) $(CFLAGS) main.cpp $(LINKFLAGS)
+all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest test_temperature test_readoutunit test_localbus test_roottest
 
 lib: $(OBJS)
 	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
@@ -84,10 +76,20 @@ test_readoutunit: $(OBJS) main_readoutunit.cpp
 test_localbus: $(OBJS) main_localbus.cpp
 	$(CC) -o test_localbus $(OBJS) $(CFLAGS) main_localbus.cpp $(LINKFLAGS)
 
+# Example ROOT executable: add $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+test_roottest: $(OBJS) main_roottest.cpp
+	$(CC) -o test_roottest $(OBJS) $(CFLAGS) $(ROOTCFLAGS) main_roottest.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 %.o:    %.cpp %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -rf *.o $(OBJECT)
+	rm -rf *.o
 	rm -rf MosaicSrc/*.o
+	rm -rf ReadoutUnitSrc/*.o
+
+clean-all:	clean
+	rm -rf test_*
+	rm -rf libalpide.so
+
+.PHONY:	all clean clean-all

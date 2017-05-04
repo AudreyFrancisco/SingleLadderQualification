@@ -1,8 +1,15 @@
+#include <iostream>
+
+#include "TH2F.h"
+#include "TStyle.h"
+#include "TColor.h"
+#include "TLine.h"
+#include "TLatex.h"
+
 //#include <string.h>
 //#include <stdio.h>
 
-void
-set_plot_style()
+void set_plot_style()
 {
     const Int_t NRGBs = 5;
     const Int_t NCont = 255;

@@ -1041,11 +1041,13 @@ bool TReadoutBoardDAQ::ReadMonitorTriggerRegister(){
     return true;
 }
 
-
-
-
-
-
+int TReadoutBoardDAQ::GetBoardAddress(){
+    uint32_t value;
+    int addr = ID_ADDRESS+ (MODULE_IDENT << DAQBOARD_REG_ADDR_SIZE);
+    bool err = ReadRegister(addr, value);
+    if (err) return (~value) & 0x0f;
+    return -1;
+}
 
 
 // READOUT Module

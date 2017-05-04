@@ -1,5 +1,11 @@
-void
-set_plot_style()
+#include <iostream>
+
+#include "TH2F.h"
+#include "TProfile.h"
+#include "TStyle.h"
+#include "TColor.h"
+
+void set_plot_style()
 {
     const Int_t NRGBs = 5;
     const Int_t NCont = 255;
