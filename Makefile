@@ -5,6 +5,11 @@ CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium -I $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread -L $(LIBPATH)
 LIBRARY=libalpide.so
 
+ROOTCONFIG   := $(shell which root-config)
+ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
+ROOTLDFLAGS  := $(shell $(ROOTCONFIG) --ldflags)
+ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs)
+
 RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp ReadoutUnitSrc/TRuDctrlModule.cpp \
  TReadoutBoardRU.cpp TBoardConfigRU.cpp
 
@@ -21,7 +26,7 @@ CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp Alpide
 OBJS = $(CLASSES:.cpp=.o)
 $(info OBJS="$(OBJS)")
 
-all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest test_temperature test_readoutunit test_localbus
+all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest test_temperature test_readoutunit test_localbus test_roottest
 
 lib: $(OBJS)
 	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
@@ -70,6 +75,10 @@ test_readoutunit: $(OBJS) main_readoutunit.cpp
 
 test_localbus: $(OBJS) main_localbus.cpp
 	$(CC) -o test_localbus $(OBJS) $(CFLAGS) main_localbus.cpp $(LINKFLAGS)
+
+# Example ROOT executable: add $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+test_roottest: $(OBJS) main_roottest.cpp
+	$(CC) -o test_roottest $(OBJS) $(CFLAGS) $(ROOTCFLAGS) main_roottest.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 %.o:    %.cpp %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
