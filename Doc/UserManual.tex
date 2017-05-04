@@ -7,8 +7,8 @@ breaklines=true
 }
 \begin{document}
 \title{ALPIDE Software - User manual}
-\date{rev. 1, \today}
-\author{Markus Keil}
+\date{rev. 2, \today}
+\author{Markus Keil, Felix Reidt}
 \maketitle
 
 This manual describes the software used to perform standard tests of the ALPIDE chip with different readout boards and in different setups (single chip with DAQ board, HICs or staves with MOSAIC board...).
@@ -25,26 +25,69 @@ The software is currently supported to run only on the three following operating
   \begin{lstlisting}
     yum install -y gcc gcc-c++ make cmake tar zlib wget subversion \
       git libusb1-devel tinyxml-devel
+      wget -O /opt/root.tar.gz \
+        https://root.cern.ch/download/root_v6.08.06.Linux-ubuntu16-x86_64-gcc5.4.tar.gz
+      cd /opt/ ; tar xzfv root.tar.gz
   \end{lstlisting}
-\item \textbf{Scientific Linux CERN 6:}
+  ROOT has to be loaded using
+  \begin{lstlisting}
+    source /opt/root/bin/thisroot.sh .
+  \end{lstlisting}
+  \newpage
+\item \textbf{CentOS CERN 7:}
+  \begin{lstlisting}
+    yum install -y gcc gcc-c++ make cmake tar zlib wget subversion \
+      git libusb1-devel tinyxml-devel
+      wget -O /opt/root.tar.gz \
+        https://root.cern.ch/download/root_v6.08.06.Linux-centos7-x86_64-gcc4.8.tar.gz
+      cd /opt/ ; tar xzfv root.tar.bz
+  \end{lstlisting}
+  ROOT has to be loaded using
+  \begin{lstlisting}
+    source /opt/root/bin/thisroot.sh .
+  \end{lstlisting}
+\item \textbf{Scientific Linux CERN 6 *DEPRECATED*:}
   \begin{lstlisting}
     yum install -y libX11-devel libXft-devel libXpm-devel \
       libXext-devel libusb1-devel wget tinyxml-devel
     wget -O /etc/yum.repos.d/slc6-devtoolset.repo \
       http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
     yum install -y devtoolset-2
+    export PATH=/opt/rh/devtoolset-2/root/usr/bin:$PATH
+    # Python
+    wget https://www.python.org/ftp/python/2.7.13/Python-2.7.13.tar.xz
+    tar xfv Python-2.7.13.tar.xz
+    cd Python*
+    ./configure --prefix=/usr/local/
+    make install
+    cd ../
+    rm -rf Python-*
+    # CMake
+    wget https://cmake.org/files/v3.8/cmake-3.8.1.tar.gz
+    tar xfv cmake-3.8.1.tar.gz
+    cd cmake-*
+    ./configure --prefix=/usr/local
+    make install
+    cd ../
+    rm -rf cmake-*
+    export PATH=/usr/local/bin:$PATH
+    wget -O /opt/root.tar.gz \
+      https://root.cern.ch/download/root_v6.08.06.source.tar.gz
+    cd /opt
+    tar xzfv root.tar.gz
+    mv /opt/root-* /opt/root
+    cd /opt/root
+    ./configure
+    make
   \end{lstlisting}
-  The \texttt{devtoolset-2} is necessary on SLC6. It has to be activated by invoking
+  \newpage
+  The \texttt{devtoolset-2} is necessary on SLC6 and the \texttt{\$PATH} has to be modified using the following commands:
   \begin{lstlisting}
     source /opt/rh/devtoolset-2/enable .
+    export PATH=/opt/rh/devtoolset-2/root/usr/bin:/usr/local/bin:$PATH
+    source /opt/root/bin/thisroot.sh
   \end{lstlisting}
   This command can either be executed before compiling or running the software or added to the \texttt{.bashrc}.
-  \newpage
-\item \textbf{CentOS CERN 7:}
-  \begin{lstlisting}
-    yum install -y gcc gcc-c++ make cmake tar zlib wget subversion \
-      git libusb1-devel tinyxml-devel
-  \end{lstlisting}
 \end{itemize}
 
 \subsection{Installation}
