@@ -16,6 +16,7 @@ namespace AlpideConfig {
   void ConfigureCMU       (TAlpide *chip, TChipConfig *config = 0);
   int  ConfigureMaskStage (TAlpide *chip, int nPix, int iStage);
   void WriteControlReg    (TAlpide *chip, Alpide::TChipMode chipMode, TChipConfig *config = 0);
+  void EnableDoubleColumns(TAlpide *chip);
   void BaseConfigPLL      (TAlpide *chip);
   void BaseConfigMask     (TAlpide *chip);
   void BaseConfigFromu    (TAlpide *chip);

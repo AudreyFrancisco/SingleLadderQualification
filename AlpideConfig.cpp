@@ -177,8 +177,17 @@ void AlpideConfig::ConfigureCMU (TAlpide *chip, TChipConfig *config) {
 }
 
 
+void AlpideConfig::EnableDoubleColumns(TAlpide *chip) {
+  for (int ireg = 0; ireg < 32; ireg ++) {
+    uint16_t Register = Alpide::REG_DCOL_DISABLE_BASE | (ireg < 11); 
+    chip->WriteRegister (Register, 0x0);        
+  }
+}
+
+
 // return value: active row (needed for threshold scan histogramming)
 int AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage) {
+  EnableDoubleColumns(chip);
   // check that nPix is one of (1, 2, 4, 8, 16, 32)
   if ((nPix <= 0) || (nPix & (nPix - 1)) || (nPix > 32)) {      
     std::cout << "Warning: bad number of pixels for mask stage (" << nPix << ", using 1 instead" << std::endl;
