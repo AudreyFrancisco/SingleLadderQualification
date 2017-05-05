@@ -21,7 +21,7 @@ MOSAIC_SOURCES =  MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicS
 CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
  TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
  BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TThresholdAnalysis.cpp \
- TScan.cpp TThresholdScan.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp $(RU_SOURCES) $(MOSAIC_SOURCES)
+ TScan.cpp TThresholdScan.cpp TDigitalScan.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp $(RU_SOURCES) $(MOSAIC_SOURCES)
 
 OBJS = $(CLASSES:.cpp=.o)
 $(info OBJS="$(OBJS)")

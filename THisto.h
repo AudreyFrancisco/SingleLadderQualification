@@ -69,6 +69,7 @@ class TScanHisto {
   void SetIndex    (int aIndex) {m_index = aIndex;};
   int  GetIndex    () const     {return m_index;};
   void Incr        (TChipIndex index, unsigned int i, unsigned int j);
+  void Incr        (TChipIndex index, unsigned int i);
 };
 
  #endif
