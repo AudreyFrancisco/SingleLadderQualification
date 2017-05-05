@@ -7,7 +7,7 @@ breaklines=true
 }
 \begin{document}
 \title{ALPIDE Software - User manual}
-\date{rev. 2, \today}
+\date{rev. 3, \today}
 \author{Markus Keil, Felix Reidt}
 \maketitle
 
@@ -48,46 +48,30 @@ The software is currently supported to run only on the three following operating
   \end{lstlisting}
 \item \textbf{Scientific Linux CERN 6 *DEPRECATED*:}
   \begin{lstlisting}
-    yum install -y libX11-devel libXft-devel libXpm-devel \
-      libXext-devel libusb1-devel wget tinyxml-devel
-    wget -O /etc/yum.repos.d/slc6-devtoolset.repo \
-      http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
-    yum install -y devtoolset-2
-    export PATH=/opt/rh/devtoolset-2/root/usr/bin:$PATH
-    # Python
-    wget https://www.python.org/ftp/python/2.7.13/Python-2.7.13.tar.xz
-    tar xfv Python-2.7.13.tar.xz
-    cd Python*
-    ./configure --prefix=/usr/local/
-    make install
-    cd ../
-    rm -rf Python-*
-    # CMake
-    wget https://cmake.org/files/v3.8/cmake-3.8.1.tar.gz
-    tar xfv cmake-3.8.1.tar.gz
-    cd cmake-*
-    ./configure --prefix=/usr/local
-    make install
-    cd ../
-    rm -rf cmake-*
-    export PATH=/usr/local/bin:$PATH
-    wget -O /opt/root.tar.gz \
-      https://root.cern.ch/download/root_v6.08.06.source.tar.gz
-    cd /opt
-    tar xzfv root.tar.gz
-    mv /opt/root-* /opt/root
-    cd /opt/root
-    ./configure
+    yum install -y sl-release-scl
+    yum install -y git cmake binutils which \
+      libX11-devel libXpm-devel libXft-devel libXext-devel \
+      gsl-static curl tar devtoolset-4-gcc-c++  \
+      python27 libusb1-devel tinyxml-devel \
+    yum clean all
+
+    source scl_source enable python27 devtoolset-4
+    curl https://root.cern.ch/download/root_v6.06.08.source.tar.gz \
+      | tar -xzC /tmp/
+    cd /tmp/root-* / && mkdir _build && cd _build
+    cmake .. -Dmathmore=on -Dhttp=on \
+      -DCMAKE_INSTALL_PREFIX=/opt/root
+    mkdir -p /opt/root
     make
+    make install
+    rm -rf /root-*'
   \end{lstlisting}
-  \newpage
-  The \texttt{devtoolset-2} is necessary on SLC6 and the \texttt{\$PATH} has to be modified using the following commands:
+  The \texttt{devtoolset-4} and \texttt{python27} is necessary on SLC6 and ROOT has to be activated using the following commands:
   \begin{lstlisting}
-    source /opt/rh/devtoolset-2/enable .
-    export PATH=/opt/rh/devtoolset-2/root/usr/bin:/usr/local/bin:$PATH
+    source scl_source enable python27 devtoolset-4
     source /opt/root/bin/thisroot.sh
   \end{lstlisting}
-  This command can either be executed before compiling or running the software or added to the \texttt{.bashrc}.
+  These commands can either be executed before compiling or running the software or added to the \texttt{.bashrc}.
 \end{itemize}
 
 \subsection{Installation}
@@ -110,8 +94,6 @@ latest version. After the clone you will find the software in a directory \textt
 
 \paragraph{Executing Tests}\hfill \\
 After compiling the software package you will find a certain number of standard tests, described below, in the form of individual executables. Each executable performs a specific test once and, if applicable, writes the output data in a text file in the subdirectory \texttt{Data}. The settings of the chip(s), readout board(s) and the scan itself can be modified in the config file \texttt{Config.cfg}. Some of the available parameters are described below, for a more detailed description of the syntax and the available parameters please refer to the comments in the config file itself.
-
-
 
 \paragraph{Executing Tests with the DAQ Board}\hfill \\
 To execute tests with the DAQ board setup the FX3 chip has to be configured. The procedure and the necessary files are identical to the old pALPIDEfs-software:
