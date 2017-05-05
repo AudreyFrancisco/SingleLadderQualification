@@ -311,11 +311,18 @@ void TScanHisto::Incr (TChipIndex index, unsigned int i) {
 }
 
 
-//TODO clean up, write missing operator (1-d)
+//TODO clean up
 double TScanHisto::operator() (TChipIndex index, unsigned int i, unsigned int j) const
 {
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
   (m_histos.at(int_index))(i,j);
+}
+
+
+double TScanHisto::operator() (TChipIndex index, unsigned int i) const
+{
+  int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
+  (m_histos.at(int_index))(i);
 }
 
 

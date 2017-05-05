@@ -62,6 +62,7 @@ class TScanHisto {
   TScanHisto (const TScanHisto &sh);      // Copy constructor;
   ~TScanHisto();
   double operator()  (TChipIndex index, unsigned int i, unsigned int j) const;       // Bin read access 2d   
+  double operator()  (TChipIndex index, unsigned int i) const;
   void AddHisto    (TChipIndex index, THisto histo);
   int  GetSize     () {return m_histos.size();};
   int  GetChipList (std::vector <TChipIndex> &chipList);
