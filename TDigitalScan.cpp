@@ -120,9 +120,10 @@ void TDigitalScan::PrepareStep (int loopIndex)
 {
   switch(loopIndex) {
   case 0:    // innermost loop: mask staging
+    std::cout << "mask stage " << m_value[0] << std::endl;
     for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
-      ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
+      ConfigureMaskStage(m_chips.at(ichip), m_value[0]);
     }
     break;
   default:
@@ -133,6 +134,12 @@ void TDigitalScan::PrepareStep (int loopIndex)
 
 void TDigitalScan::LoopEnd     (int loopIndex)
 {
+
+}
+
+
+void TDigitalScan::Next (int loopIndex) 
+{
   if (loopIndex == 0) {
     while (!(m_mutex->try_lock()));
     m_histo   ->SetIndex(m_row);
@@ -141,6 +148,7 @@ void TDigitalScan::LoopEnd     (int loopIndex)
     m_mutex   ->unlock();
     m_histo   ->Clear();
   }
+  TScan::Next (loopIndex);
 }
 
 

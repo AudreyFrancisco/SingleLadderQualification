@@ -32,10 +32,12 @@
 #include "SetupHelpers.h"
 #include "TScan.h"
 #include "TThresholdScan.h"
+#include "TDigitalScan.h"
 #include "TScanConfig.h"
 #include "THisto.h"
 #include "TScanAnalysis.h"
 #include "TThresholdAnalysis.h"
+#include "TDigitalAnalysis.h"
 
 
 void scanLoop (TScan *myScan)
@@ -83,8 +85,8 @@ int main(int argc, char** argv) {
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
     
-  TThresholdScan *myScan   = new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue, &fMutex);
-  TScanAnalysis  *analysis = new TThresholdAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), &fMutex);
+  TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue, &fMutex);
+  TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), &fMutex);
 
   //scanLoop(myScan);
   std::cout << "starting thread" << std::endl;
@@ -93,6 +95,13 @@ int main(int argc, char** argv) {
 
   scanThread.join();
   analysisThread.join();
+
+  std::vector <TCounter> counters = ((TDigitalAnalysis*)analysis)->GetCounters();
+
+  std::cout << std::endl << "Counter values: " << std::endl;
+  for (int i = 0; i < counters.size(); i ++) {
+    std::cout << "Chip " << counters.at(i).chipId <<": nCorrect = " << counters.at(i).nCorrect << std::endl;
+  }
 
   delete myScan;
   delete analysis;

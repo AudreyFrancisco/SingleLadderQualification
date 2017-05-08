@@ -29,6 +29,7 @@ void TDigitalAnalysis::InitCounters (std::vector <TChipIndex> chipList)
     counter.nCorrect   = 0;
     counter.nIneff     = 0;
     counter.nNoisy     = 0;
+    m_counters.push_back(counter);
   }
 }
 

@@ -25,6 +25,7 @@ class TDigitalScan : public TMaskScan {
   void Init        ();
   void PrepareStep (int loopIndex);
   void LoopEnd     (int loopIndex);
+  void Next        (int loopIndex);
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void Execute     ();
   void Terminate   ();
