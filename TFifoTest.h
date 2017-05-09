@@ -10,6 +10,8 @@ class TFifoTest : public TScan {
   TAlpide *m_testChip;
 
   int      GetChipById    (std::vector <TAlpide *> chips, int previousId);
+  void     ReadMem        (TAlpide *chip, int ARegion, int AOffset, int &AValue);
+  void     WriteMem       (TAlpide *chip, int ARegion, int AOffset, int AValue);
   bool     TestPattern    (int pattern);
 
  protected: 
