@@ -59,7 +59,7 @@ void AlpideDecoder::DecodeEmptyFrame (unsigned char *data, int &chipId, unsigned
 }
 
 
-void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong, int channel, int &prioErrors) {
+void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, std::vector <TPixHit> *hits, bool datalong, int channel, int &prioErrors, std::vector <TPixHit> *stuck) {
   TPixHit hit;
   int     address, hitmap_length;
 
@@ -76,10 +76,12 @@ void AlpideDecoder::DecodeDataWord (unsigned char *data, int chip, int region, s
     if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address == hits->back().address)) {
       std::cout << "Warning (chip "<< chip << "/ channel "<< channel << "), received pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " twice." << std::endl;
       prioErrors ++;
+      if (stuck) stuck->push_back(hit);
     }
     else if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address < hits->back().address)) {
       std::cout << "Warning (chip "<< chip << "/ channel "<< channel << "), address of pixel " << hit.region << "/" << hit.dcol << "/" << address <<  " is lower than previous one ("<< hits->back().address << ") in same double column." << std::endl;
       prioErrors ++;
+      if (stuck) stuck->push_back(hit);
     }
   }
 
@@ -192,7 +194,7 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
 }
 
 
-bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <TPixHit> *hits, int channel, int &prioErrors) {
+bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <TPixHit> *hits, int channel, int &prioErrors, std::vector <TPixHit> *stuck) {
   int       byte    = 0;
   int       region  = -1;
   int       chip    = -1;
@@ -269,7 +271,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
 	  }
           printf("\n");
 	}
-        DecodeDataWord (data + byte, chip, region, hits, false, channel, prioErrors);
+        DecodeDataWord (data + byte, chip, region, hits, false, channel, prioErrors, stuck);
       }
       byte += 2;
       break;
@@ -289,7 +291,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char *data, int nBytes, std::vector <T
 	  }
           printf("\n");
 	}
-        DecodeDataWord (data + byte, chip, region, hits, true, channel, prioErrors);
+        DecodeDataWord (data + byte, chip, region, hits, true, channel, prioErrors, stuck);
       }
       byte += 3;
       break;

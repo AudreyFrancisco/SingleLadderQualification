@@ -3,10 +3,12 @@
 
 #include <deque>
 #include <mutex>
+#include <vector>
 #include "TAlpide.h"
 #include "TReadoutBoard.h"
 #include "TScanConfig.h"
 #include "THisto.h"
+#include "AlpideDecoder.h"
 
 const  int  MAXLOOPLEVEL = 3;
 const  int  MAXBOARDS    = 2;
@@ -53,12 +55,14 @@ class TScan {
 class TMaskScan : public TScan {
  private: 
  protected: 
-  int  m_pixPerStage;
-  int  m_row;
+  int                   m_pixPerStage;
+  int                   m_row;
+  std::vector <TPixHit> m_stuck;
   void ConfigureMaskStage(TAlpide *chip, int istage);
  public: 
   TMaskScan  (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex);
   ~TMaskScan () {};
+  std::vector <TPixHit> GetStuckPixels () {return m_stuck;};
 };
 
 #endif

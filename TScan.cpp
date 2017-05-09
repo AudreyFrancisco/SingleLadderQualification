@@ -1,6 +1,6 @@
+#include <iostream>
 #include "TScan.h"
 #include "AlpideConfig.h"
-#include <iostream>
 
 bool fScanAbort;
 
@@ -80,6 +80,7 @@ TMaskScan::TMaskScan (TScanConfig *config, std::vector <TAlpide *> chips, std::v
   : TScan(config, chips, boards, histoQue, aMutex)
 {
   m_pixPerStage = m_config->GetParamValue("PIXPERREGION");
+  m_stuck.clear  ();
 }
 
 

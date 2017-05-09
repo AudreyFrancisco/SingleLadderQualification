@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <mutex>
+#include <vector>
 #include "TScan.h"
 #include "THisto.h"
 #include "AlpideDecoder.h"
@@ -10,8 +11,7 @@
 
 class TDigitalScan : public TMaskScan {
  private:
-  int         m_nTriggers;
-
+  int                   m_nTriggers;
   void ConfigureFromu (TAlpide *chip);
   void ConfigureChip  (TAlpide *chip);
   void ConfigureBoard (TReadoutBoard *board);
