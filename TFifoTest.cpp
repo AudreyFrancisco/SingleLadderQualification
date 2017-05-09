@@ -19,6 +19,13 @@ TFifoTest::TFifoTest (TScanConfig *config, std::vector <TAlpide *> chips, std::v
 }
 
 
+THisto TFifoTest::CreateHisto () 
+{
+  // count errors in bins corresponding to pattern, 
+  // e.g. error in pattern 0xaaaa in region 16 -> Incr(16, 10)
+  THisto histo ("ErrorHisto", "ErrorHisto", 32, 0 , 31, 16, 0, 15);
+}
+
 
 void TFifoTest::Init() 
 {
@@ -41,6 +48,17 @@ int TFifoTest::GetChipById (std::vector <TAlpide*> chips, int id)
 }
 
 
+// seems the board index is not accessible anywhere.
+// for the time being do like this...
+int  TFifoTest::FindBoardIndex (TAlpide *chip) 
+{
+  for (int i = 0; i < m_boards.size(); i++) {
+    if (m_boards.at(i) == chip->GetReadoutBoard()) return i;
+  }
+  return -1;
+}
+
+
 void TFifoTest::PrepareStep(int loopIndex) 
 {
 
@@ -50,7 +68,8 @@ void TFifoTest::PrepareStep(int loopIndex)
   case 1:    // 2nd loop
     break;
   case 2:    // outermost loop: change chip
-    m_testChip = m_chips.at(m_value[2]);
+    m_testChip   = m_chips.at     (m_value[2]);
+    m_boardIndex = FindBoardIndex (m_testChip);
     break;
   default: 
     break;
@@ -118,10 +137,15 @@ bool TFifoTest::TestPattern (int pattern) {
 
 void TFifoTest::Execute() 
 {
+  TChipIndex idx;
+  idx.boardIndex   = m_boardIndex;
+  idx.chipId       = m_testChip->GetConfig()->GetChipId    ();
+  idx.dataReceiver = m_testChip->GetConfig()->GetParamValue("RECEIVER");
+
   if (m_testChip->GetConfig()->IsEnabled()) {
-    TestPattern (0xffff);
-    TestPattern (0x0);
-    TestPattern (0xaaaa);
-    TestPattern (0x5555);
+    if (!TestPattern (0xffff)) m_histo->Incr(idx, m_value[1], 0xf);
+    if (!TestPattern (0x0))    m_histo->Incr(idx, m_value[1], 0x0);;
+    if (!TestPattern (0xaaaa)) m_histo->Incr(idx, m_value[1], 0xa);;
+    if (!TestPattern (0x5555)) m_histo->Incr(idx, m_value[1], 0x5);;
   }
 }
