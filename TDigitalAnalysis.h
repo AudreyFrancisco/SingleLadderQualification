@@ -24,10 +24,11 @@ class TDigitalAnalysis : public TScanAnalysis {
  private:
   std::vector <TCounter> m_counters;
   int                    m_ninj;
-  bool HasData      (TScanHisto &histo, TChipIndex idx, int col);
-  void InitCounters ();
-  void WriteHitData (TScanHisto histo, int row); 
-  void WriteResult  ();
+  bool HasData          (TScanHisto &histo, TChipIndex idx, int col);
+  void InitCounters     ();
+  void WriteHitData     (TScanHisto histo, int row); 
+  void WriteResult      ();
+  void WriteStuckPixels ();
  protected:
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);

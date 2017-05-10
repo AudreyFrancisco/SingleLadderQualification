@@ -80,6 +80,21 @@ void TDigitalAnalysis::WriteResult()
 }
 
 
+void TDigitalAnalysis::WriteStuckPixels() 
+{
+  char fName[100];
+  sprintf (fName, "StuckPixels_%s.dat", m_config->GetfNameSuffix());
+  
+  FILE                 *fp     = fopen (fName, "w");
+  std::vector<TPixHit>  pixels = ((TMaskScan*)m_scan)->GetStuckPixels();
+
+  for (int i = 0; i < pixels.size(); i++) {
+    fprintf (fp, "%d %d %d %d %d\n", pixels.at(i).channel, pixels.at(i).chipId, pixels.at(i).region, pixels.at(i).dcol,pixels.at(i).address);
+  }
+  fclose(fp);
+}
+
+
 void TDigitalAnalysis::Run() 
 {
   while (m_histoQue->size() == 0) {
