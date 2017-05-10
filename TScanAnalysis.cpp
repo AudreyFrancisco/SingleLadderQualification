@@ -10,6 +10,7 @@ TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TSc
   m_scan     = aScan;
   m_config   = aConfig;
   m_first    = true;
+  m_chipList.clear ();
 }
 
 

@@ -25,8 +25,9 @@ class TDigitalAnalysis : public TScanAnalysis {
   std::vector <TCounter> m_counters;
   int                    m_ninj;
   bool HasData      (TScanHisto &histo, TChipIndex idx, int col);
-  void InitCounters (std::vector <TChipIndex> chipList);
-  void WriteHitData (std::vector <TChipIndex> chipList, TScanHisto histo, int row); 
+  void InitCounters ();
+  void WriteHitData (TScanHisto histo, int row); 
+  void WriteResult  ();
  protected:
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);

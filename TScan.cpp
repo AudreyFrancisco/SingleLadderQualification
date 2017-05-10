@@ -85,9 +85,9 @@ void TScan::CreateScanHisto ()
 TMaskScan::TMaskScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
   : TScan(config, chips, boards, histoQue, aMutex)
 {
-  m_pixPerStage = m_config->GetParamValue("PIXPERREGION");
-  m_stuck.clear  ();
-  m_errorCount = {};
+  m_pixPerStage  = m_config->GetParamValue("PIXPERREGION");
+  m_stuck.clear    ();
+  m_errorCount   = {};
   FILE *fp = fopen ("DebugData.dat", "w");
   fclose(fp);
 }

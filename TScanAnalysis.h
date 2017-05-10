@@ -9,11 +9,12 @@
 
 class TScanAnalysis {
  protected:
-  std::deque<TScanHisto> *m_histoQue;
-  std::mutex             *m_mutex;
-  TScan                  *m_scan;
-  TScanConfig            *m_config;
-  bool                    m_first;
+  std::deque <TScanHisto> *m_histoQue;
+  std::vector<TChipIndex>  m_chipList;
+  std::mutex              *m_mutex;
+  TScan                   *m_scan;
+  TScanConfig             *m_config;
+  bool                     m_first;
  public:
   TScanAnalysis (std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
   virtual void Run() = 0;
