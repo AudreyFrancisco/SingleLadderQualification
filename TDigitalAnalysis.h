@@ -8,6 +8,7 @@
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
 #include "TScan.h"
+#include "THisto.h"
 
 typedef struct {
   int boardIndex;
@@ -25,6 +26,7 @@ class TDigitalAnalysis : public TScanAnalysis {
   int                    m_ninj;
   bool HasData      (TScanHisto &histo, TChipIndex idx, int col);
   void InitCounters (std::vector <TChipIndex> chipList);
+  void WriteHitData (std::vector <TChipIndex> chipList, TScanHisto histo, int row); 
  protected:
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);

@@ -31,6 +31,25 @@ void TDigitalAnalysis::InitCounters (std::vector <TChipIndex> chipList)
 }
 
 
+void TDigitalAnalysis::WriteHitData(std::vector <TChipIndex> chipList, TScanHisto histo, int row) 
+{
+  char fName[100];
+  for (int ichip = 0; ichip < chipList.size(); ichip++) {
+    sprintf(fName, "Digital_%s_B%d_Rcv%d_Ch%d.dat", m_config->GetfNameSuffix(), 
+	                                            chipList.at(ichip).boardIndex, 
+                                                    chipList.at(ichip).dataReceiver, 
+                                                    chipList.at(ichip).chipId);
+    FILE *fp = fopen (fName, "a");
+    for (int icol = 0; icol < 1024; icol ++) {
+      if (histo(chipList.at(ichip), icol) > 0) {  // write only non-zero values
+        fprintf(fp, "%d %d %d\n", icol, row, (int) histo(chipList.at(ichip), icol));
+      }
+    }
+    fclose(fp);
+  }
+}
+
+
 void TDigitalAnalysis::Run() 
 {
   std::vector <TChipIndex> chipList;
@@ -55,6 +74,7 @@ void TDigitalAnalysis::Run()
 
       int row = histo.GetIndex();
       std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size() << std::endl;
+      WriteHitData(chipList, histo, row);
       for (int ichip = 0; ichip < chipList.size(); ichip++) {
         for (int icol = 0; icol < 1024; icol ++) {
           int hits = (int) histo (chipList.at(ichip), icol);
