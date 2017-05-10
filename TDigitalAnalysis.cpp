@@ -130,3 +130,9 @@ void TDigitalAnalysis::Run()
     else usleep (300);
   }
 }
+
+
+void TDigitalAnalysis::Finalize() {
+  WriteResult      ();
+  WriteStuckPixels ();
+}
