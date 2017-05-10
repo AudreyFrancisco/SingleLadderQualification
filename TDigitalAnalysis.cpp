@@ -2,11 +2,8 @@
 #include <vector>
 #include "TDigitalAnalysis.h"
 
-bool first;
-
 TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex) : TScanAnalysis(histoQue, aScan, aScanConfig, aMutex) 
 {
-  first  = true;
   m_ninj = m_config->GetParamValue("NINJ");
 }
 
@@ -47,10 +44,10 @@ void TDigitalAnalysis::Run()
       while (!(m_mutex->try_lock()));
     
       TScanHisto histo = m_histoQue->front();
-      if (first) {
+      if (m_first) {
         histo.GetChipList(chipList);
         InitCounters     (chipList);
-        first = false;
+        m_first = false;
       }
 
       m_histoQue->pop_front();

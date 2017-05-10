@@ -19,13 +19,13 @@ class TFifoTest : public TScan {
   THisto   CreateHisto();
  public:
   TFifoTest   (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoque, std::mutex *aMutex);
-  ~TFifoTest  () {};
-  void Init ();
-  void Execute ();
-  void Terminate () {};
-
-  void LoopStart  (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
-  void PrepareStep(int loopIndex);
+  ~TFifoTest       () {};
+  void Init        ();
+  void Execute     ();
+  void Terminate   () {};
+  void LoopEnd     (int loopIndex);
+  void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
+  void PrepareStep (int loopIndex);
 
 };
 

@@ -135,6 +135,17 @@ bool TFifoTest::TestPattern (int pattern) {
 }
 
 
+void TFifoTest::LoopEnd(int loopIndex) 
+{
+  if (loopIndex == 2) {
+    while (!(m_mutex->try_lock()));
+    m_histoQue->push_back(*m_histo);
+    m_mutex   ->unlock();
+    m_histo   ->Clear();
+  }
+}
+
+
 void TFifoTest::Execute() 
 {
   TChipIndex idx;

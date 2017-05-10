@@ -13,6 +13,7 @@ class TScanAnalysis {
   std::mutex             *m_mutex;
   TScan                  *m_scan;
   TScanConfig            *m_config;
+  bool                    m_first;
  public:
   TScanAnalysis (std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
   virtual void Run() = 0;
