@@ -155,11 +155,6 @@ void TDigitalScan::Next (int loopIndex)
 
 void TDigitalScan::Execute     ()
 {
-  unsigned char         buffer[1024*4000]; 
-  int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
-  // TODO: move counters out (should be for the full scan, not for one point
-  int                   nBad = 0, skipped = 0, prioErrors = 0;
-  TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
   for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
@@ -167,46 +162,8 @@ void TDigitalScan::Execute     ()
   }
 
   for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
-    int itrg   = 0;
-    int trials = 0;
-    while(itrg < m_nTriggers * m_enabled[iboard]) {
-      if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
-        usleep(100);
-        trials ++;
-        if (trials == 3) {
-      	  std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event" << std::endl;
-          itrg = m_nTriggers * m_enabled[iboard];
-          skipped ++;
-          trials = 0;
-        }
-        continue;
-      }
-      else {
-        BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-        // decode Chip event
-        int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
-        if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
-        if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel, prioErrors, &m_stuck)) {
-          std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
-          nBad ++;
-          if (nBad > 10) continue;
-	  FILE *fDebug = fopen ("DebugData.dat", "a");
-          fprintf(fDebug, "Bad event:\n");
-          for (int iByte=0; iByte<n_bytes_data + 1; ++iByte) {
-            fprintf (fDebug, "%02x ", (int) buffer[iByte]);
-          }
-          fprintf(fDebug, "\nFull Event:\n"); 
-          for (int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
-            fprintf (fDebug, "%02x ", (int) fDebugBuffer.at(ibyte));
-          }
-          fprintf(fDebug, "\n\n");
-          fclose (fDebug);
-	}
-        itrg++;
-        }
-    }
-    //    std::cout << "Found " << Hits->size() << " hits" << std::endl;
-    FillHistos (Hits, iboard);
+    ReadEventData(Hits, iboard);
+    FillHistos   (Hits, iboard);
   }
   delete Hits;
 }

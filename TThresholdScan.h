@@ -11,8 +11,6 @@
 class TThresholdScan : public TMaskScan {
  private:
   int         m_VPULSEH; 
-  int         m_nTriggers;
-
   void ConfigureFromu (TAlpide *chip);
   void ConfigureChip  (TAlpide *chip);
   void ConfigureBoard (TReadoutBoard *board);

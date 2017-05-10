@@ -1,7 +1,9 @@
 #include <iostream>
 #include "TScan.h"
 #include "AlpideConfig.h"
-
+#include "TReadoutBoardMOSAIC.h"
+#include "TReadoutBoardRU.h"
+#include "TReadoutBoardDAQ.h"
 bool fScanAbort;
 
 TScan::TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
@@ -85,11 +87,62 @@ TMaskScan::TMaskScan (TScanConfig *config, std::vector <TAlpide *> chips, std::v
 {
   m_pixPerStage = m_config->GetParamValue("PIXPERREGION");
   m_stuck.clear  ();
+  m_errorCount = {};
+  FILE *fp = fopen ("DebugData.dat", "w");
+  fclose(fp);
 }
 
 
 void TMaskScan::ConfigureMaskStage(TAlpide *chip, int istage) {
   m_row = AlpideConfig::ConfigureMaskStage (chip, m_pixPerStage, istage);
+}
+
+
+void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
+{
+  unsigned char buffer[1024*4000]; 
+  int           n_bytes_data, n_bytes_header, n_bytes_trailer;
+  int           itrg = 0, trials = 0;
+  int           nBad = 0, prioErrors = 0;
+  TBoardHeader  boardInfo;
+
+  while (itrg < m_nTriggers * m_enabled[iboard]) {
+    if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
+      usleep(100);
+      trials ++;
+      if (trials == 3) {
+  	  std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event" << std::endl;
+        itrg = m_nTriggers * m_enabled[iboard];
+        m_errorCount.nTimeout ++;
+        trials = 0;
+      }
+      continue;
+    }
+    else {
+      BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+      // decode Chip event
+      if (boardInfo.decoder10b8bError) m_errorCount.n8b10b++;
+      int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
+      if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
+      if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel, m_errorCount.nPrioEncoder, &m_stuck)) {
+        std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
+        m_errorCount.nCorruptEvent ++;
+        if (nBad > 10) continue;
+        FILE *fDebug = fopen ("DebugData.dat", "a");
+        fprintf(fDebug, "Bad event:\n");
+        for (int iByte=0; iByte<n_bytes_data + 1; ++iByte) {
+          fprintf (fDebug, "%02x ", (int) buffer[iByte]);
+        }
+        fprintf(fDebug, "\nFull Event:\n"); 
+        for (int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
+          fprintf (fDebug, "%02x ", (int) fDebugBuffer.at(ibyte));
+        }
+        fprintf(fDebug, "\n\n");
+        fclose (fDebug);
+      }
+      itrg++;
+    }
+  }
 }
 
 

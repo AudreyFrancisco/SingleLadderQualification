@@ -15,6 +15,13 @@ const  int  MAXBOARDS    = 2;
 
 extern bool fScanAbort;
 
+typedef struct {
+  int n8b10b;
+  int nCorruptEvent;
+  int nPrioEncoder;
+  int nTimeout;
+} TErrorCounter;
+
 class TScan {
  private:
  protected: 
@@ -56,13 +63,17 @@ class TMaskScan : public TScan {
  private: 
  protected: 
   int                   m_pixPerStage;
+  int                   m_nTriggers;
   int                   m_row;
   std::vector <TPixHit> m_stuck;
+  TErrorCounter         m_errorCount;
   void ConfigureMaskStage(TAlpide *chip, int istage);
+  void ReadEventData     (std::vector <TPixHit> *Hits, int iboard);
  public: 
   TMaskScan  (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex);
   ~TMaskScan () {};
   std::vector <TPixHit> GetStuckPixels () {return m_stuck;};
+  TErrorCounter         GetErrorCount  () {return m_errorCount;};
 };
 
 #endif
