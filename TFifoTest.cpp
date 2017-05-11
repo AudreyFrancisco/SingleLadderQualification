@@ -16,6 +16,8 @@ TFifoTest::TFifoTest (TScanConfig *config, std::vector <TAlpide *> chips, std::v
   m_start[0] = 0; 
   m_step [0] = 1;
   m_stop [0] = 128;
+
+  CreateScanHisto ();
 }
 
 
@@ -24,6 +26,7 @@ THisto TFifoTest::CreateHisto ()
   // count errors in bins corresponding to pattern, 
   // e.g. error in pattern 0xaaaa in region 16 -> Incr(16, 10)
   THisto histo ("ErrorHisto", "ErrorHisto", 32, 0 , 31, 16, 0, 15);
+  return histo;
 }
 
 

@@ -22,7 +22,7 @@ class TFifoTest : public TScan {
   ~TFifoTest       () {};
   void Init        ();
   void Execute     ();
-  void Terminate   () {};
+  void Terminate   () {m_running = false;};
   void LoopEnd     (int loopIndex);
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void PrepareStep (int loopIndex);
