@@ -19,7 +19,7 @@ void TDigitalAnalysis::InitCounters ()
 {
   m_counters.clear();
   for (int i = 0; i < m_chipList.size(); i++) {
-    TCounter counter;
+    TDigitalCounter counter;
     counter.boardIndex = m_chipList.at(i).boardIndex;
     counter.receiver   = m_chipList.at(i).dataReceiver;
     counter.chipId     = m_chipList.at(i).chipId;
@@ -53,7 +53,7 @@ void TDigitalAnalysis::WriteHitData(TScanHisto histo, int row)
 void TDigitalAnalysis::WriteResult() 
 {
   char fName[100];
-  sprintf (fName, "ScanResult_%s.dat", m_config->GetfNameSuffix());
+  sprintf (fName, "DigitalScanResult_%s.dat", m_config->GetfNameSuffix());
   
   FILE         *fp       = fopen (fName, "w");
   TErrorCounter errCount = ((TMaskScan*)m_scan)->GetErrorCount();

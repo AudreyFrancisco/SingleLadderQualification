@@ -10,6 +10,7 @@
 #include "TScan.h"
 #include "THisto.h"
 
+
 typedef struct {
   int boardIndex;
   int receiver;
@@ -17,13 +18,13 @@ typedef struct {
   int nCorrect;
   int nIneff;
   int nNoisy;
-} TCounter;
+} TDigitalCounter;
 
 
 class TDigitalAnalysis : public TScanAnalysis {
  private:
-  std::vector <TCounter> m_counters;
-  int                    m_ninj;
+  std::vector <TDigitalCounter> m_counters;
+  int                           m_ninj;
   bool HasData          (TScanHisto &histo, TChipIndex idx, int col);
   void InitCounters     ();
   void WriteHitData     (TScanHisto histo, int row); 
@@ -32,9 +33,9 @@ class TDigitalAnalysis : public TScanAnalysis {
  protected:
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
-  void Run();
+  void Run     ();
   void Finalize();
-  std::vector <TCounter> GetCounters() {return m_counters;};
+  std::vector <TDigitalCounter> GetCounters() {return m_counters;};
  };
 
 #endif

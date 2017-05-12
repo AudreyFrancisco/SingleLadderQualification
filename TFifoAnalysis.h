@@ -10,12 +10,27 @@
 #include "TScan.h"
 
 
+typedef struct {
+  int boardIndex;
+  int receiver;
+  int chipId;
+  int err0;
+  int err5;
+  int erra;
+  int errf;
+} TFifoCounter;
+
+
 class TFifoAnalysis : public TScanAnalysis {
  private:
+  std::vector <TFifoCounter> m_counters; 
+  void InitCounters ();
+  void WriteResult  ();
  protected:
  public:
   TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
-  void Run();
+  void Run      ();
+  void Finalize ();
  };
 
 #endif
