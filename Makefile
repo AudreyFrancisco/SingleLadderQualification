@@ -20,13 +20,19 @@ MOSAIC_SOURCES =  MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicS
 
 CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
  TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
- BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TThresholdAnalysis.cpp TDigitalAnalysis.cpp TFifoAnalysis.cpp\
+ BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TDigitalAnalysis.cpp TFifoAnalysis.cpp\
  TScan.cpp TFifoTest.cpp TThresholdScan.cpp TDigitalScan.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp $(RU_SOURCES) $(MOSAIC_SOURCES)
 
 OBJS = $(CLASSES:.cpp=.o)
 $(info OBJS="$(OBJS)")
 
-all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_scantest test_temperature test_readoutunit test_localbus test_roottest
+CLASSES_ROOT= TThresholdAnalysis.cpp
+
+OBJS_ROOT  = $(CLASSES_ROOT:.cpp=.o)
+OBJS_ROOT += $(OBJS)
+$(info OBJS_ROOT="$(OBJS_ROOT)")
+
+all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit test_localbus test_roottest test_scantest test_threshold_v1
 
 lib: $(OBJS)
 	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
@@ -64,9 +70,6 @@ test_poweron:   $(OBJS) main_poweron.cpp
 test_noiseocc_ext:   $(OBJS) main_noiseocc_ext.cpp
 	$(CC) -o test_noiseocc_ext $(OBJS) $(CFLAGS) main_noiseocc_ext.cpp $(LINKFLAGS)
 
-test_scantest:   $(OBJS) main_scantest.cpp
-	$(CC) -o test_scantest $(OBJS) $(CFLAGS) main_scantest.cpp $(LINKFLAGS)
-
 test_temperature:   $(OBJS) main_temperature.cpp
 	$(CC) -o test_temperature $(OBJS) $(CFLAGS) main_temperature.cpp $(LINKFLAGS)
 
@@ -79,6 +82,17 @@ test_localbus: $(OBJS) main_localbus.cpp
 # Example ROOT executable: add $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 test_roottest: $(OBJS) main_roottest.cpp
 	$(CC) -o test_roottest $(OBJS) $(CFLAGS) $(ROOTCFLAGS) main_roottest.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
+# Executables with classes using ROOT. 
+test_scantest:   $(OBJS_ROOT) main_scantest.cpp
+	$(CC) -o test_scantest $(OBJS_ROOT) $(CFLAGS)$(CFLAGS) $(ROOTCFLAGS) main_scantest.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
+test_threshold_v1:   $(OBJS_ROOT) main_threshold_v1.cpp
+	$(CC) -o test_threshold_v1 $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_threshold_v1.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
+# Classes using ROOT.
+TThresholdAnalysis.o: TThresholdAnalysis.cpp TThresholdAnalysis.h 
+	$(CC) $(CFLAGS) $(ROOTCFLAGS) -c -o $@ $<
 
 %.o:    %.cpp %.h
 	$(CC) $(CFLAGS) -c -o $@ $<

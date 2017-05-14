@@ -32,6 +32,8 @@ class TScanConfig {
   bool  SetParamValue   (const char *Name, const char *Value);
   int   GetParamValue   (const char *Name) ;
   bool  IsParameter     (const char *Name) {return (fSettings.count(Name) > 0);};
+  
+  int   GetNInj         () {return m_chargeStart;};
   int   GetChargeStart  () {return m_chargeStart;};
   int   GetChargeStep   () {return m_chargeStep;};
   int   GetChargeStop   () {return m_chargeStop;};

@@ -33,9 +33,12 @@ class TDigitalAnalysis : public TScanAnalysis {
  protected:
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
-  void Run     ();
-  void Finalize();
+  
+  void Initialize(){;}
+  void Run       ();
+  void Finalize  ();
+  
   std::vector <TDigitalCounter> GetCounters() {return m_counters;};
- };
+};
 
 #endif
