@@ -65,6 +65,7 @@ bool TThresholdAnalysis::CheckPixelNoHits(TGraph* aGraph)
 
 bool TThresholdAnalysis::CheckPixelStuck(TGraph* aGraph)
 {
+  double y_dummy =0;
   for (int itrPoint=0; itrPoint<aGraph->GetN(); itrPoint++){
     double x =0;
     double y =0;
@@ -81,13 +82,13 @@ double ErrorFunc(double* x, double* par)
   return y;
 }
 
-void TThresholdAnalysis::DoFit(TGraph* aGraph)
+std::pair<double,double> TThresholdAnalysis::DoFit(TGraph* aGraph)
 {
   TF1* fitfcn = new TF1("fitfcn", 
-		   ErrorFunc,
-		   m_startPulseAmplitude*m_electronPerDac,
-		   m_stopPulseAmplitude*m_electronPerDac,
-		   4);
+			ErrorFunc,
+			m_startPulseAmplitude*m_electronPerDac,
+			m_stopPulseAmplitude*m_electronPerDac,
+			4);
   // y@50%.
   fitfcn->SetParameter(0,0.5*m_nPulseInj); 
   // 0.5 of max. amplitude.
@@ -98,26 +99,27 @@ void TThresholdAnalysis::DoFit(TGraph* aGraph)
   fitfcn->SetParameter(3,0.5);
   
   aGraph->Fit("fitfcn","RQ");
-
-  double noise =fitfcn->GetParameter(1);
+  
   double thresh=fitfcn->GetParameter(0);
+  double noise =fitfcn->GetParameter(1);
   //double chi2  =fitfcn->GetChisquare()/fitfcn->GetNDF();
-  //std::cout << thresh 
-  //	    << "\t"
-  //	    << noise 
-  //	    << std::endl;
+  
+  // Make a struct for fit result!
+  std::pair<double,double> fitResult_dummy;
+  fitResult_dummy.first =thresh;
+  fitResult_dummy.second=noise;
   
   delete fitfcn; 
+  
+  return fitResult_dummy;
 }
 
 void TThresholdAnalysis::Initialize()
 {
   
-  while (!m_scan->IsRunning()){sleep(1);}
+  std::cout << "Initializing " << m_analisysName << std::endl;
   
-  std::cout << "Initializing " 
-	    << m_analisysName  
-	    << std::endl;
+  while (!m_scan->IsRunning()){sleep(1);}
   
   // Initialize counters.
   m_counterPixelsNoHits     =0;
@@ -127,23 +129,8 @@ void TThresholdAnalysis::Initialize()
   m_sumGoodThresholds    =0;
   m_counterGoodThresholds=0;
   
-  
-  //for (int itr=0; itr<m_scan->; itr++){
-  // ;
-  //}
-  
+  // TODO
   // open files.
-  //std::string fileNameDummy = GetFileName(chipList.at(iChip), "PixelsNoHits");
-  //m_filePixelNoHits         = fopen (fileNameDummy.c_str(), "a");
-  //fileNameDummy             = GetFileName(chipList.at(iChip), "PixelsStuck");
-  //m_filePixelStuck          = fopen (fileNameDummy.c_str(), "a");
-  //fileNameDummy             = GetFileName(chipList.at(iChip), "PixelsNoThreshold");
-  //m_filePixelNoThreshold    = fopen (fileNameDummy.c_str(), "a");
-
-  //if(m_fDoDumpRawData){
-  //	fileNameDummy = GetFileName(chipList.at(iChip), "RawData");
-  //	m_fileRawData = fopen (fileNameDummy.c_str(), "a");
-  //  }
   
 }
 
@@ -185,6 +172,10 @@ void TThresholdAnalysis::Run()
   	fileNameDummy = GetFileName(m_chipList.at(iChip), "RawData");
   	m_fileRawData = fopen (fileNameDummy.c_str(), "a");
       }
+      if(m_fDoFit){
+  	fileNameDummy = GetFileName(m_chipList.at(iChip), "FitResult");
+	m_fileFitResults = fopen (fileNameDummy.c_str(), "a");
+      }
       
       //= MB: 1024 should be replaced with const int n_cols.
       for (int iCol = 0; iCol < 1024; iCol ++) {
@@ -200,8 +191,8 @@ void TThresholdAnalysis::Run()
   				      iPulse);
 	  
   	  gDummy->SetPoint(gDummy->GetN(),
-  			    iPulse*m_electronPerDac,
-  			    entries);
+			   iPulse*m_electronPerDac,
+			   entries);
 	  
   	  if(m_fDoDumpRawData){
   	    fprintf(m_fileRawData, 
@@ -216,7 +207,7 @@ void TThresholdAnalysis::Run()
   	bool fPixelNoHits= CheckPixelNoHits(gDummy);
   	bool fPixelStuck = CheckPixelStuck (gDummy);
 	
-        if (fPixelNoHits){
+	if (fPixelNoHits){
   	  fprintf(m_filePixelNoHits, 
   		  "%d %d\n", 
   		  iCol,row);
@@ -225,15 +216,25 @@ void TThresholdAnalysis::Run()
   	  if (m_chipList.size()==1){ 
 	    m_counterPixelsNoHits++;
   	  }
-  	} else if (fPixelStuck && (m_chipList.size()==1) ){
-  	  fprintf(m_filePixelStuck, 
-  		  "%d %d\n", 
-  		  iCol,row);
-  	  // TODO: extend to all sizes.
+  	} else if (fPixelStuck){
+	  fprintf(m_filePixelStuck, 
+		  "%d %d\n", 
+		  iCol,row);
+	  
+	  // TODO: extend to all sizes.
   	  if (m_chipList.size()==1){
   	    m_counterPixelsStuck++;
   	  }
-  	} else if (m_fDoFit){DoFit(gDummy);}
+  	} else if (m_fDoFit){
+	  std::pair<double,double> fitResult;
+	  fitResult=DoFit(gDummy);
+	  
+	  fprintf(m_fileFitResults, 
+  		  "%d %d %f %f\n", 
+  		  iCol,row,
+		  fitResult.first,  //Threshold
+		  fitResult.second); //Noise
+	}
 	
   	delete gDummy;
       } // end loop over iCol.
@@ -254,9 +255,7 @@ void TThresholdAnalysis::Finalize()
 	    << m_analisysName 
 	    << std::endl;
   
+  // TODO
   //Close files.
-  //fclose(m_filePixelNoHits);
-  //fclose(m_filePixelStuck);
-  //fclose(m_filePixelNoThreshold);
-  //if(m_fDoDumpRawData){fclose(m_fileRawData);}
+  
 }

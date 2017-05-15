@@ -18,8 +18,7 @@ class TThresholdAnalysis : public TScanAnalysis {
   
  private:
   
-  //= MB Adds:start.
-  const float m_electronPerDac = 7.0*226.0/160.0;
+  const float m_electronPerDac = 10;
   const std::string m_analisysName = "TThresholdAnalysis";
   
   int m_startPulseAmplitude;
@@ -46,6 +45,7 @@ class TThresholdAnalysis : public TScanAnalysis {
   FILE* m_filePixelStuck;
   FILE* m_filePixelNoThreshold;
   FILE* m_fileRawData;
+  FILE* m_fileFitResults;
   
   // TODO
   //std::vector<FILE*> m_filePixelNoHits;
@@ -54,10 +54,9 @@ class TThresholdAnalysis : public TScanAnalysis {
   //std::vector<FILE*> m_fileRawData;
   
   std::string GetFileName(TChipIndex aChipIndex,std::string fileType);
-  bool CheckPixelNoHits(TGraph* aGraph);
-  bool CheckPixelStuck(TGraph* aGraph);
-  void DoFit(TGraph* aGraph);
-  //= MB Adds:end.
+  bool   CheckPixelNoHits(TGraph* aGraph);
+  bool   CheckPixelStuck (TGraph* aGraph);
+  std::pair<double,double>   DoFit           (TGraph* aGraph);
   
   bool HasData(TScanHisto &scanHisto, 
 	       TChipIndex idx, 
@@ -71,8 +70,8 @@ class TThresholdAnalysis : public TScanAnalysis {
 		     std::mutex *aMutex);
   
   void Initialize();
-  void Run();
-  void Finalize();
+  void Run       ();
+  void Finalize  ();
   
 };
 

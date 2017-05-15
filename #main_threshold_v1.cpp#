@@ -42,7 +42,7 @@ void scanLoop (TScan *myScan)
 {
   std::cout << "In scan loop functiokn" << std::endl;
   myScan->Init();
-
+  
   myScan->LoopStart(2);
   while (myScan->Loop(2)) {
     myScan->PrepareStep(2);
@@ -56,7 +56,7 @@ void scanLoop (TScan *myScan)
         myScan->Next       (0);  
       }
       myScan->LoopEnd(0);
-      // To avoid race hazard w.r.t. analysis (fit takes time). 
+      // To avoid race hazard when Analysis does fit. 
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
       myScan->Next   (1);
     }
@@ -68,7 +68,7 @@ void scanLoop (TScan *myScan)
 }
 
 void scanAnalysis (TScanAnalysis *myAnalysis){
- 
+  
   myAnalysis->Initialize();
   myAnalysis->Run();
   myAnalysis->Finalize();

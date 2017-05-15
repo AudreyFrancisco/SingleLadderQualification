@@ -33,12 +33,13 @@ class TScanConfig {
   int   GetParamValue   (const char *Name) ;
   bool  IsParameter     (const char *Name) {return (fSettings.count(Name) > 0);};
   
-  int   GetNInj         () {return m_chargeStart;};
+  int   GetNInj         () {return m_nInj;};
   int   GetChargeStart  () {return m_chargeStart;};
   int   GetChargeStep   () {return m_chargeStep;};
   int   GetChargeStop   () {return m_chargeStop;};
   int   GetNMaskStages  () {return m_nMaskStages;};
   char *GetfNameSuffix  () {return m_fNameSuffix;};
+  
 };
 
 
