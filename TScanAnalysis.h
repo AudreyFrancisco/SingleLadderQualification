@@ -17,7 +17,11 @@ class TScanAnalysis {
   bool                     m_first;
  public:
   TScanAnalysis (std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
+  
+  virtual void Initialize() =0; 
   virtual void Run() = 0;
+  virtual void Finalize() =0; 
+  
 };
 
 
