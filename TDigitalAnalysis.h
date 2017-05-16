@@ -34,7 +34,7 @@ class TDigitalAnalysis : public TScanAnalysis {
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
   
-  void Initialize(){;}
+  void Initialize() {};
   void Run       ();
   void Finalize  ();
   

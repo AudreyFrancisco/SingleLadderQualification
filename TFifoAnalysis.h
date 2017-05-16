@@ -29,8 +29,9 @@ class TFifoAnalysis : public TScanAnalysis {
  protected:
  public:
   TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
-  void Run      ();
-  void Finalize ();
+  void Initialize () {};
+  void Run        ();
+  void Finalize   ();
  };
 
 #endif
