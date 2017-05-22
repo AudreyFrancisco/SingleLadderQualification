@@ -36,6 +36,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <mutex>
+#include <string>
 #include "ipbus.h"
 
 #define DEFAULT_PACKET_SIZE 		1400
@@ -51,6 +52,7 @@ public:
     ~IPbusUDP();
 	void setIPaddress(const char *brdName, int port=DEFAULT_PORT);
 	void execute();
+	const std::string name() {return "IPbusUDP";}
 
 private:
 	void testConnection();

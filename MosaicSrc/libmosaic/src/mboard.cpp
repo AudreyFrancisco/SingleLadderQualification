@@ -243,6 +243,7 @@ long MBoard::pollTCP(int timeout, MDataReceiver **drPtr)
 	int dataSrc;
 	ssize_t n;
 
+	*drPtr = NULL;
 	n = readTCPData(header, headerSize, timeout);
 
 	if (n == 0)			// timeout
@@ -316,24 +317,25 @@ long MBoard::pollData(int timeout)
 	MDataReceiver *dr;
 
 	readDataSize = pollTCP(timeout, &dr);
-	closedDataCounter = dr->numClosedData;
-	if (closedDataCounter>0){
-		long parsedBytes = dr->parse(closedDataCounter);
+	if (dr != NULL){
+		closedDataCounter = dr->numClosedData;
+		if (closedDataCounter>0){
+			long parsedBytes = dr->parse(closedDataCounter);
 
-		// move unused bytes to the begin of buffer
-		size_t bytesToMove = dr->dataBufferUsed - parsedBytes;
-		if (bytesToMove>0)
-			memmove(&dr->dataBuffer[0], &dr->dataBuffer[parsedBytes], bytesToMove);
-		dr->dataBufferUsed -= parsedBytes;
-		dr->numClosedData = 0;
+			// move unused bytes to the begin of buffer
+			size_t bytesToMove = dr->dataBufferUsed - parsedBytes;
+			if (bytesToMove>0)
+				memmove(&dr->dataBuffer[0], &dr->dataBuffer[parsedBytes], bytesToMove);
+			dr->dataBufferUsed -= parsedBytes;
+			dr->numClosedData = 0;
+		}
+
+		if ((dr->blockFlags & flagCloseRun) && dr->dataBufferUsed!=0){
+			printf("WARNING: MBoard::pollData received data with flagCloseRun but after parsing the databuffer is not empty (%ld bytes)\n",
+							dr->dataBufferUsed);		
+		//	dump((unsigned char*) &dr->dataBuffer[0], dr->dataBufferUsed);
+		}
 	}
-
-	if ((dr->blockFlags & flagCloseRun) && dr->dataBufferUsed!=0){
-		printf("WARNING: MBoard::pollData received data with flagCloseRun but after parsing the databuffer is not empty (%ld bytes)\n",
-						dr->dataBufferUsed);		
-	//	dump((unsigned char*) &dr->dataBuffer[0], dr->dataBufferUsed);
-	}
-
 	return readDataSize;
 }
 

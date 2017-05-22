@@ -37,6 +37,7 @@
 #include <netdb.h>
 #include <string.h>
 #include <poll.h>
+#include <iostream>
 #include "ipbusudp.h"
 #include "mexception.h"
 
@@ -106,7 +107,7 @@ void IPbusUDP::sockRead()
 
 	if (rv == 0)
 		throw MIPBusUDPTimeout();
-	
+
 	// check for events on sockfd:
 	if (ufds.revents & POLLIN) {
 		peer_addr_len=sizeof(struct sockaddr);
@@ -123,8 +124,6 @@ void IPbusUDP::sockWrite()
 	if (sendto(sockfd, txBuffer, txSize, 0, (struct sockaddr *)&sockAddress, sizeof (struct sockaddr)) == -1)
 		throw MIPBusUDPError("Datagram send system call");
 }
-
-int dupCounter=0;
 
 void IPbusUDP::execute()
 {

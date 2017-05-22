@@ -34,8 +34,10 @@
 #include <stdint.h>
 #include "wishbonebus.h"
 #include <mutex>
+#include <string>
 
 #define IPBUS_PROTOCOL_VERSION		2
+#define WRONG_PROTOCOL_VERSION		3
 #define DEFAULT_PACKET_SIZE 		1400
 
 
@@ -58,15 +60,21 @@ public:
 	void addIdle();
 	void addWrite(uint32_t address, uint32_t data);
 	void addWrite(int size, uint32_t address, uint32_t *data);
+	void addNIWrite(int size, uint32_t address, uint32_t *data);
 	void addRead(int size, uint32_t address, uint32_t *data);
 	void addRead(uint32_t address, uint32_t *data) { addRead(1, address, data); }
-	void addRMWbits(uint32_t address, uint32_t mask, uint32_t data);
-	void execute();
+	void addNIRead(int size, uint32_t address, uint32_t *data);
+	void addRMWbits(uint32_t address, uint32_t mask, uint32_t data, uint32_t *rData=NULL);
+	void addRMWsum(uint32_t address, uint32_t data, uint32_t *rData=NULL);
+	virtual void execute() = 0;
 	int  getBufferSize() { return bufferSize; }
+	virtual const std::string name() = 0;
 
-protected:
-	bool duplicatedRxPkt();
-	void processAnswer();
+	// test functions
+	void addBadIdle(bool sendWrongVersion=false, bool sendWrongInfoCode=false);
+	void setBufferSize(int s) { bufferSize = s; }
+	void cutTX(int size) { txSize -= size; }
+
 	
 private:
 	void chkBuffers(int txTransactionSize, int rxTransactionSize);
@@ -117,6 +125,11 @@ private:
 	int expectedRxSize;
 	int rxPtr;
 	int lastRxPktId;
+
+protected:
+	bool duplicatedRxPkt();
+	void processAnswer();
+	int getExpectedRxSize() {return expectedRxSize;}
 };
 
 #endif // IPBUS_H

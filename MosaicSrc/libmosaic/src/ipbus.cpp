@@ -39,15 +39,13 @@
 
 #ifdef TRACE_IPBUS
 	#define TRACE(format, args...) { \
+		fprintf(stderr, "%s ", name().c_str()); \
 		fprintf(stderr, format, ##args); \
 		fflush(stderr); \
 		}
 #else
 	#define TRACE(format, args...)
 #endif
-
-
-
 
 IPbus::IPbus(int pktSize)
 {
@@ -62,12 +60,9 @@ IPbus::IPbus(int pktSize)
 
 IPbus::~IPbus()
 {
+	delete transactionList;
 	delete txBuffer;
 	delete rxBuffer;
-}
-
-void IPbus::execute()
-{
 }
 
 void IPbus::clearList()
@@ -101,8 +96,10 @@ uint32_t IPbus::getWord()
 void IPbus::addHeader(uint16_t words, uint8_t typeId, uint32_t *readDataPtr)
 {
 	// Avoid consecutive packets with the same transactionId in first IPBUS request
-	if ((numTransactions==0) && (transactionId == lastRxPktId))
+	if ((numTransactions==0) && (transactionId == lastRxPktId)){
 		transactionId++;
+		TRACE("IPbus::addHeader increased transactionId to %d\n", transactionId);
+	}
 
 	// Put the request into the list
 	transactionList[numTransactions].words = words;
@@ -127,6 +124,10 @@ void IPbus::getHeader(IPbusTransaction *tr)
 	tr->transactionId = (header>>8) & 0xff;
 	tr->typeId = (header>>4) & 0xf;
 	tr->infoCode = header & 0xf;;
+
+#ifdef TRACE_IPBUS
+//	printf("header: %08x\n", header);
+#endif
 }
 
 void IPbus::chkBuffers(int txTransactionSize, int rxTransactionSize)
@@ -145,7 +146,6 @@ void IPbus::chkBuffers(int txTransactionSize, int rxTransactionSize)
 	if (rxTransactionSize > bufferSize)
 		throw MIPBusError("Rx buffer overflaw");
 }
-
 
 void IPbus::addIdle()
 {
@@ -166,7 +166,20 @@ void IPbus::addWrite(int size, uint32_t address, uint32_t *data)
 	addHeader(size, typeIdWrite, NULL);
 	addWord(address);
 	for (int i=0; i<size; i++)
-		addWord(*data);
+		addWord(*data++);
+	expectedRxSize+=4;
+}
+
+void IPbus::addNIWrite(int size, uint32_t address, uint32_t *data)
+{
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+
+	TRACE("IPbus::addNIWrite (size:%d, address:0x%08x, *data:0x%08lx)\n", size, address, (unsigned long) data);
+	chkBuffers(4*(size+2), 4);
+	addHeader(size, typeIdNIWrite, NULL);
+	addWord(address);
+	for (int i=0; i<size; i++)
+		addWord(*data++);
 	expectedRxSize+=4;
 }
 
@@ -191,17 +204,40 @@ void IPbus::addRead(int size, uint32_t address, uint32_t *data)
 	expectedRxSize+= 4+size*4;
 }
 
-void IPbus::addRMWbits(uint32_t address, uint32_t mask, uint32_t data)
+void IPbus::addNIRead(int size, uint32_t address, uint32_t *data)
+{
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+	TRACE("IPbus::addMIRead (size:%d, address:0x%08x, *data:0x%08lx)\n", size, address, (unsigned long) data);
+	chkBuffers(4*2, 4*(size+1));
+	addHeader(size, typeIdNIRead, data);
+	addWord(address);
+	expectedRxSize+= 4+size*4;
+}
+
+
+void IPbus::addRMWbits(uint32_t address, uint32_t mask, uint32_t data, uint32_t *rData)
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex);
 	TRACE("IPbus::addRMWbits (address:0x%08x, mask:0x%08lx, data:0x%08lx)\n", address, (unsigned long) mask, (unsigned long) data);
 	chkBuffers(4*(1+3), 4*2);
-	addHeader(1, typeIdRMWbits, NULL);
+	addHeader(1, typeIdRMWbits, rData);
 	addWord(address);
 	addWord(mask);
 	addWord(data);
 	expectedRxSize+=8;
 }
+
+void IPbus::addRMWsum(uint32_t address, uint32_t data, uint32_t *rData)
+{
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+	TRACE("IPbus::addRMWsum (address:0x%08x, data:0x%08lx)\n", address, (unsigned long) data);
+	chkBuffers(4*(1+2), 4*2);
+	addHeader(1, typeIdRMWsum, rData);
+	addWord(address);
+	addWord(data);
+	expectedRxSize+=8;
+}
+
 
 
 bool IPbus::duplicatedRxPkt()
@@ -211,6 +247,9 @@ bool IPbus::duplicatedRxPkt()
 
 	rxPtr = 0;
 	getHeader(&tr);
+
+//	TRACE("IPbus::duplicatedRxPkt transactionId:%d lastRxPktId:%d\n", tr.transactionId, lastRxPktId);
+
 	if (tr.transactionId == lastRxPktId)
 		return true;
 
@@ -227,7 +266,7 @@ void IPbus::processAnswer()
 		rxPtr = 0;
 		for (int i=0; i<numTransactions; i++){
 			if ((rxSize-rxPtr)<4){
-				printf("\n\n numTransactions:%d size:%d\n\n", numTransactions, rxSize-rxPtr);
+				// printf("\n\n Wrong answer size at transaction %d. size:%d\n\n", i, rxSize-rxPtr);
 				throw MIPBusError("Wrong answer size");
 			}
 
@@ -254,7 +293,7 @@ void IPbus::processAnswer()
 					case infoCodeBusErrWrite:
 						throw MIPBusErrorWrite("Remote bus error in write");
 					case infoCodeBusTimeoutRead:
-						throw MIPBusError("Remote bus timeout in read");
+						throw MIPBusErrorReadTimeout("Remote bus timeout in read");
 					case infoCodeBusTimeoutWrite:
 						throw MIPBusError("Remote bus timeout in write");
 					case infoCodeBufferOverflaw:
@@ -291,5 +330,45 @@ void IPbus::processAnswer()
 		clearList();
 		throw;
 	}
+}
+
+
+/*
+ *		Test functions
+ */
+void IPbus::addBadIdle(bool sendWrongVersion, bool sendWrongInfoCode)
+{
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+
+	TRACE("IPbus::addBadIdle\n");
+	chkBuffers(4, 4);
+	
+	// modified copy of addHeader function
+	// void IPbus::addHeader(uint16_t words, uint8_t typeId, uint32_t *readDataPtr)
+	//	addHeader(0, typeIdIdle, NULL);
+	uint16_t words = 0;
+	uint8_t typeId = typeIdIdle;
+	uint32_t *readDataPtr = NULL;
+
+	// Avoid consecutive packets with the same transactionId in first IPBUS request
+	if ((numTransactions==0) && (transactionId == lastRxPktId))
+		transactionId++;
+
+	// Put the request into the list
+	transactionList[numTransactions].words = words;
+	transactionList[numTransactions].transactionId = transactionId;
+	transactionList[numTransactions].typeId = typeId;
+	transactionList[numTransactions].readDataPtr = readDataPtr;
+	
+	// Add the header to the tx buffer
+	unsigned ipProtocol = sendWrongVersion ? WRONG_PROTOCOL_VERSION : IPBUS_PROTOCOL_VERSION;
+	unsigned infoCode   = sendWrongInfoCode ? infoCodeBusErrRead : infoCodeRequest;
+	addWord((ipProtocol<<28) | (words<<16) | (transactionId<<8) | (typeId<<4) | infoCode);
+
+	transactionId++;
+	transactionId &= 0xff;
+	numTransactions++;
+ 
+	expectedRxSize+=4;
 }
 

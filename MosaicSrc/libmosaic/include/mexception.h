@@ -67,6 +67,13 @@ public:
 	explicit MIPBusErrorWrite(const string& __arg);
 };
 
+// IPBus error - Remote Bus Read error
+class MIPBusErrorReadTimeout : public MException 
+{
+public:
+	explicit MIPBusErrorReadTimeout(const string& __arg);
+};
+
 // IPBus over UDP error
 class MIPBusUDPError : public MException 
 {
