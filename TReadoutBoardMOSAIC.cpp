@@ -33,6 +33,8 @@
  *  3/8/16	- Add the Board decoder class ...
  *  5/8/16  - adapt the read event to new definition
  *  18/01/17 - Review of ReadEventData. Added inheritance from class MBoard
+ *  22/05/17 - Review for Auxiliary COntrol Interfaces facility
+ *
  */
 #include <math.h>
 #include <stdio.h>
@@ -244,6 +246,9 @@ void TReadoutBoardMOSAIC::init()
 	// CMU Control interface
 	controlInterface[0] = new ControlInterface(mIPbus, add_controlInterface);
 	controlInterface[1] = new ControlInterface(mIPbus, add_controlInterfaceB);
+	for(int i=2; i<MAX_MOSAICCTRLINT; i++) {
+		controlInterface[i] = new ControlInterface(mIPbus, add_controlInterface_0+(i<<24) );
+	}
 
 	// Pulser
 	pulser = new Pulser(mIPbus, WbbBaseAddress::pulser);

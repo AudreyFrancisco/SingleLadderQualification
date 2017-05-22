@@ -7,6 +7,7 @@
  *
  *  		HISTORY
  *
+ *  22/05/2017    -  Modify the maximum number of Control Interfaces
  *
  */
 #ifndef BOARDCONFIGMOSAIC_H
@@ -16,7 +17,7 @@
 #include "Mosaic.h"
 #include <stdio.h>
 
-#define MAX_MOSAICCTRLINT 2
+#define MAX_MOSAICCTRLINT 12
 #define MAX_MOSAICTRANRECV 10
 #define MOSAIC_HEADER_LENGTH 64
 
