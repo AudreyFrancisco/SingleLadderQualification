@@ -21,12 +21,19 @@ typedef struct {
 } TFifoCounter;
 
 
+class TFifoScanResult : public TScanResult {
+ public: 
+  TFifoScanResult () : TScanResult() {};
+};
+
+
 class TFifoAnalysis : public TScanAnalysis {
  private:
   std::vector <TFifoCounter> m_counters; 
   void InitCounters ();
   void WriteResult  ();
  protected:
+  TScanResult GetResultObject () {TFifoScanResult Result; return Result;};
  public:
   TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
   void Initialize () {};

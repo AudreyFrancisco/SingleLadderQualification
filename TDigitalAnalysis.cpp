@@ -94,6 +94,7 @@ void TDigitalAnalysis::WriteStuckPixels()
   fclose(fp);
 }
 
+
 void TDigitalAnalysis::Run() 
 {
   while (m_histoQue->size() == 0) {

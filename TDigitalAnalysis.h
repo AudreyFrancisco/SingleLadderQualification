@@ -21,6 +21,12 @@ typedef struct {
 } TDigitalCounter;
 
 
+class TDigitalScanResult : public TScanResult {
+ public: 
+  TDigitalScanResult () : TScanResult() {};
+};
+
+
 class TDigitalAnalysis : public TScanAnalysis {
  private:
   std::vector <TDigitalCounter> m_counters;
@@ -31,6 +37,7 @@ class TDigitalAnalysis : public TScanAnalysis {
   void WriteResult      ();
   void WriteStuckPixels ();
  protected:
+  TScanResult GetResultObject () {TDigitalScanResult Result; return Result;};
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
   

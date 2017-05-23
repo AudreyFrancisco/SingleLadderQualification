@@ -14,6 +14,11 @@
 class TF1;
 class TGraph;
 
+class TThresholdScanResult : public TScanResult {
+ public: 
+  TThresholdScanResult () : TScanResult() {};
+};
+
 class TThresholdAnalysis : public TScanAnalysis {
   
  private:
@@ -63,6 +68,7 @@ class TThresholdAnalysis : public TScanAnalysis {
 	       int col);
   
  protected:
+  TScanResult GetResultObject () {TThresholdScanResult Result; return Result;};
  public:
   TThresholdAnalysis(std::deque<TScanHisto> *scanHistoQue, 
 		     TScan *aScan, 
