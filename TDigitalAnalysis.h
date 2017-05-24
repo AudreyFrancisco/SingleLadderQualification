@@ -21,9 +21,9 @@ typedef struct {
 } TDigitalCounter;
 
 
-class TDigitalScanResult : public TScanResult {
+class TDigitalResultChip : public TScanResultChip {
  public: 
-  TDigitalScanResult () : TScanResult() {};
+  TDigitalResultChip () : TScanResultChip () {};
 };
 
 
@@ -37,7 +37,7 @@ class TDigitalAnalysis : public TScanAnalysis {
   void WriteResult      ();
   void WriteStuckPixels ();
  protected:
-  TScanResult GetResultObject () {TDigitalScanResult Result; return Result;};
+  TScanResultChip GetChipResult () {TDigitalResultChip Result; return Result;};
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
   

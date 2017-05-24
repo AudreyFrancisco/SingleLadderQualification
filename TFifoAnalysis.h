@@ -21,9 +21,9 @@ typedef struct {
 } TFifoCounter;
 
 
-class TFifoScanResult : public TScanResult {
+class TFifoResultChip : public TScanResultChip {
  public: 
-  TFifoScanResult () : TScanResult() {};
+  TFifoResultChip () : TScanResultChip () {};
 };
 
 
@@ -33,7 +33,7 @@ class TFifoAnalysis : public TScanAnalysis {
   void InitCounters ();
   void WriteResult  ();
  protected:
-  TScanResult GetResultObject () {TFifoScanResult Result; return Result;};
+  TScanResultChip GetChipResult () {TFifoResultChip Result; return Result;};
  public:
   TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
   void Initialize () {};

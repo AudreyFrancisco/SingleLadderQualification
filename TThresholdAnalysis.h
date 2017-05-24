@@ -14,9 +14,9 @@
 class TF1;
 class TGraph;
 
-class TThresholdScanResult : public TScanResult {
+class TThresholdResultChip : public TScanResultChip {
  public: 
-  TThresholdScanResult () : TScanResult() {};
+  TThresholdResultChip () : TScanResultChip () {};
 };
 
 class TThresholdAnalysis : public TScanAnalysis {
@@ -68,7 +68,7 @@ class TThresholdAnalysis : public TScanAnalysis {
 	       int col);
   
  protected:
-  TScanResult GetResultObject () {TThresholdScanResult Result; return Result;};
+  TScanResultChip GetChipResult () {TThresholdResultChip Result; return Result;};
  public:
   TThresholdAnalysis(std::deque<TScanHisto> *scanHistoQue, 
 		     TScan *aScan, 
