@@ -27,6 +27,12 @@ class TDigitalResultChip : public TScanResultChip {
 };
 
 
+class TDigitalResult : public TScanResult {
+ public: 
+  TDigitalResult () : TScanResult () {};
+};
+
+
 class TDigitalAnalysis : public TScanAnalysis {
  private:
   std::vector <TDigitalCounter> m_counters;
@@ -38,6 +44,7 @@ class TDigitalAnalysis : public TScanAnalysis {
   void WriteStuckPixels ();
  protected:
   TScanResultChip GetChipResult () {TDigitalResultChip Result; return Result;};
+  void            CreateResult  () {};
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
   

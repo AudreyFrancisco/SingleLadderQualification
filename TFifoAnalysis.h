@@ -27,6 +27,12 @@ class TFifoResultChip : public TScanResultChip {
 };
 
 
+class TFifoResult : public TScanResult {
+ public: 
+  TFifoResult () : TScanResult () {};
+};
+
+
 class TFifoAnalysis : public TScanAnalysis {
  private:
   std::vector <TFifoCounter> m_counters; 
@@ -34,6 +40,7 @@ class TFifoAnalysis : public TScanAnalysis {
   void WriteResult  ();
  protected:
   TScanResultChip GetChipResult () {TFifoResultChip Result; return Result;};
+  void            CreateResult  () {};
  public:
   TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
   void Initialize () {};

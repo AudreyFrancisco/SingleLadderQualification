@@ -14,7 +14,7 @@ TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TSc
 }
 
 
-void TScanAnalysis::CreateResult () 
+void TScanAnalysis::CreateChipResults () 
 {
   if (m_chipList.size() == 0) {
     std::cout  << "Warning (TScanAnalysis::CreateResult): chip list is empty, doing nothing" << std::endl;
@@ -25,7 +25,7 @@ void TScanAnalysis::CreateResult ()
     TScanResultChip result = GetChipResult();
     TChipIndex      idx    = m_chipList.at(i);
     int             id     = (idx.boardIndex << 8) | (idx.dataReceiver << 4) | (idx.chipId & 0xf);
-    m_result.insert(std::pair<int, TScanResultChip> (id, result));
+    m_chipResults.insert(std::pair<int, TScanResultChip> (id, result));
   }
   
 }

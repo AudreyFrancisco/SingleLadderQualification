@@ -19,6 +19,13 @@ class TThresholdResultChip : public TScanResultChip {
   TThresholdResultChip () : TScanResultChip () {};
 };
 
+
+class TThresholdResult : public TScanResult {
+ public: 
+  TThresholdResult () : TScanResult () {};
+};
+
+
 class TThresholdAnalysis : public TScanAnalysis {
   
  private:
@@ -69,6 +76,7 @@ class TThresholdAnalysis : public TScanAnalysis {
   
  protected:
   TScanResultChip GetChipResult () {TThresholdResultChip Result; return Result;};
+  void            CreateResult  () {};
  public:
   TThresholdAnalysis(std::deque<TScanHisto> *scanHistoQue, 
 		     TScan *aScan, 
