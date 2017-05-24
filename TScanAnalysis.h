@@ -20,8 +20,12 @@ class TScanResultChip {
 // base class for classes containing complete results
 // derive class for each analysis
 class TScanResult {
+ private:
+ protected: 
+  std::map <int, TScanResultChip> m_chipResults;
  public: 
-  TScanResult () {};
+  TScanResult   () {};
+  int AddChipResult (TScanResultChip chipResult, TChipIndex idx);
 };
 
 
@@ -30,7 +34,6 @@ class TScanAnalysis {
   std::deque <TScanHisto>         *m_histoQue;
   std::vector<TChipIndex>          m_chipList;
   std::mutex                      *m_mutex;
-  std::map <int, TScanResultChip>  m_chipResults;
   TScanResult                     *m_result;
 
   TScan                       *m_scan;
@@ -44,10 +47,8 @@ class TScanAnalysis {
   virtual void Initialize() = 0; 
   virtual void Run       () = 0;
   virtual void Finalize  () = 0; 
-  TScanResult GetResult () {return *m_result;};  
+  TScanResult  GetResult () {return *m_result;};  
 };
-
-
 
 
 #endif
