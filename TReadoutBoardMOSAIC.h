@@ -59,9 +59,10 @@ public:
 	TReadoutBoardMOSAIC(TConfig* config, TBoardConfigMOSAIC *boardConfig);
 	virtual ~TReadoutBoardMOSAIC();
 
-	int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId =0);
-	int ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId =0);
-	int SendOpCode        (uint16_t  OpCode, uint8_t chipId);
+	int WriteChipRegister (uint16_t address, uint16_t value, TAlpide *chipPtr);
+	int ReadChipRegister  (uint16_t address, uint16_t &value, TAlpide *chipPtr);
+	int SendOpCode        (uint16_t  OpCode, TAlpide *chipPtr);
+
 	int SendOpCode        (uint16_t  OpCode);
         // Markus: changed trigger delay type from uint32_t to int, since changed upstream
 	int SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);

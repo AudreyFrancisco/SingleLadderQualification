@@ -14,6 +14,7 @@
 
 typedef enum {setupSingle, setupIB, setupOB, setupSingleM} TSetupType;
 
+int  initSetupEndurance   (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType,std::vector <TAlpide *> *chips)
 int  initSetupOB          (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
 int  initSetupIB          (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
 int  initSetupIBRU        (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
@@ -23,7 +24,7 @@ int  initSetupHalfStave   (TConfig* config, std::vector <TReadoutBoard *> * boar
 int  initSetup            (TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, const char *configFileName = "");
 int  powerOn              (TReadoutBoardDAQ *aDAQBoard);
 int  CheckControlInterface(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
-void MakeDaisyChain       (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
+void MakeDaisyChain       (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, int startPtr=-1);
 int  decodeCommandParameters(int argc, char **argv);
 
 #endif

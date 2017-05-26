@@ -27,7 +27,7 @@ int TAlpide::ReadRegister (TRegister address, uint16_t &value) {
 
 
 int TAlpide::ReadRegister (uint16_t address, uint16_t &value) {
-  int err = fReadoutBoard->ReadChipRegister(address, value, fChipId);
+  int err = fReadoutBoard->ReadChipRegister(address, value, this);
   if (err < 0) return err;  // readout board should have thrown an exception before
 
   return err;
@@ -41,7 +41,7 @@ int TAlpide::WriteRegister (TRegister address, uint16_t value, bool verify) {
 
 
 int TAlpide::WriteRegister (uint16_t address, uint16_t value, bool verify) {
-  int result = fReadoutBoard->WriteChipRegister(address, value, fChipId);
+  int result = fReadoutBoard->WriteChipRegister(address, value, this);
   if ((!verify) || (result < 0)) return result;
 
   uint16_t check;

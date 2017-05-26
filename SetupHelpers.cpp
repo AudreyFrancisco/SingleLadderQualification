@@ -4,7 +4,7 @@
 #include <string.h>
 
 
-#define NEWALPIDEVERSION "1.0"
+#define NEWALPIDEVERSION "1.1"
 
 // ----- Global variables (deprecated but ) -
 int VerboseLevel = 0;
@@ -64,7 +64,7 @@ int initSetupOB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
         chipConfig->SetParamValue("RECEIVER", 0);
       }
     }
-    boards->at(0)-> AddChip        (chipId, control, receiver);
+    boards->at(0)-> AddChip        (chipId, control, receiver, chips->at(i));
   }
   int nWorking = CheckControlInterface(config, boards, boardType, chips);
   sleep(5);
@@ -97,7 +97,7 @@ int initSetupHalfStave(TConfig* config, std::vector <TReadoutBoard *> * boards, 
     // to be checked when final layout of adapter fixed
     int ci  = 0; 
     int rcv = (chipId & 0x7) ? -1 : 9*ci; //FIXME 
-    boards->at(mosaic)-> AddChip(chipId, ci, rcv);
+    boards->at(mosaic)-> AddChip(chipId, ci, rcv, chips->at(i));
   }
 
   int nWorking = CheckControlInterface(config, boards, boardType, chips);
@@ -109,8 +109,16 @@ int initSetupHalfStave(TConfig* config, std::vector <TReadoutBoard *> * boards, 
 
 // Make the daisy chain for OB readout, based on enabled chips
 // i.e. to be called after CheckControlInterface
-void MakeDaisyChain(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
+//
+// Modify the function in order to scan a sub set of chips. The dimension is fixed to 14 !!
+//
+void MakeDaisyChain(TConfig* config, std::vector <TReadoutBoard *> * boards,
+		TBoardType* boardType, std::vector <TAlpide *> * chips, int startPtr)
+{
+
   int firstLow[8], firstHigh[8], lastLow[8], lastHigh[8];
+  int startChipIndex = (startPtr == -1) ? 0 : startPtr;
+  int endChipIndex = (startPtr == -1) ? chips->size() : startPtr+14;
   
   for (int imod = 0; imod < 8; imod ++) {
     firstLow  [imod] = 0x77;
@@ -120,7 +128,7 @@ void MakeDaisyChain(TConfig* config, std::vector <TReadoutBoard *> * boards, TBo
   }
 
   // find the first and last enabled chip in each row
-  for (int i = 0; i < chips->size(); i++) {
+  for (int i = startChipIndex; i < endChipIndex; i++) {
     if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
     int chipId   = chips->at(i)->GetConfig()->GetChipId();
     int modId    = (chipId & 0x70) >> 4;
@@ -132,7 +140,7 @@ void MakeDaisyChain(TConfig* config, std::vector <TReadoutBoard *> * boards, TBo
     if (!(chipId & 0x8) && (chipId > lastLow  [modId])) lastLow  [modId] = chipId;
   }
 
-  for (int i = 0; i < chips->size(); i++) {
+  for (int i = startChipIndex; i < endChipIndex; i++) {
     if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
     int chipId   = chips->at(i)->GetConfig()->GetChipId();
     int modId    = (chipId & 0x70) >> 4;
@@ -256,7 +264,7 @@ int initSetupIB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
       receiver = RCVMAP[i];
     }
 
-    boards->at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver);
+    boards->at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver, chips->at(i));
   }
 
   int nWorking = CheckControlInterface(config, boards, boardType, chips);
@@ -302,7 +310,7 @@ int initSetupIBRU(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoar
     chips->push_back(new TAlpide(chipConfig));
     chips->at(i) -> SetReadoutBoard(boards->at(0));
 
-    boards->at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver);
+    boards->at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver, chips->at(i));
   }
 
   // TODO: check whether CheckControlInterface works for readout unit
@@ -336,7 +344,7 @@ int initSetupSingleMosaic(TConfig* config, std::vector <TReadoutBoard *> * board
 
   chips-> push_back(new TAlpide(chipConfig));
   chips-> at(0) -> SetReadoutBoard(boards->at(0));
-  boards->at(0) -> AddChip        (chipConfig->GetChipId(), control, receiver);
+  boards->at(0) -> AddChip        (chipConfig->GetChipId(), control, receiver, chips->at(0));
   return 0;
 }
 
@@ -371,7 +379,7 @@ int initSetupSingle(TConfig* config, std::vector <TReadoutBoard *> * boards, TBo
   chips-> push_back(new TAlpide (chipConfig));
   chips-> at(0) -> SetReadoutBoard (boards->at(0));
 
-  boards->at(0) -> AddChip         (chipConfig->GetChipId(), 0, 0);
+  boards->at(0) -> AddChip         (chipConfig->GetChipId(), 0, 0, chips->at(0));
 
   powerOn(myDAQBoard);
 
@@ -395,7 +403,10 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
   return 0;
 }
 
-
+/*
+ * Add the InitSetUpEndurance call  - 25/5/17
+ *
+*/
 int initSetup(TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, const char *configFileName) {
 
   if(strlen(configFileName) == 0) // if length is 0 => use the default name or the Command Parameter
@@ -414,6 +425,9 @@ int initSetup(TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardTy
     case TYPE_OBHIC:
       initSetupOB(config, boards, boardType, chips);
       break;
+    case TYPE_ENDURANCE:
+       initSetupEndurance(config, boards, boardType, chips);
+       break;
     case TYPE_CHIP_MOSAIC: 
       initSetupSingleMosaic(config, boards, boardType, chips);
       break;
@@ -468,4 +482,72 @@ int decodeCommandParameters(int argc, char **argv)
 	return 1;
 }
 
+// -------------- Endurance Test Extension ----------------------------
+/*  --- Ver. 0.1   23/05/2017   A.Franco
+ *
+ *
+ *
+ */
+int initSetupEndurance(TConfig* config,
+						std::vector <TReadoutBoard *> *boards,
+						TBoardType* boardType,
+						std::vector <TAlpide *> *chips)
+{
+	std::cout << "Entry SetUp Endurance Test" << std::endl;
+
+	// Create the MOSAIC board istance
+	(*boardType) = boardMOSAIC;
+	TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) config->GetBoardConfig(0);
+	boardConfig->SetSpeedMode(Mosaic::RCV_RATE_400);
+	boards->push_back (new TReadoutBoardMOSAIC(config, boardConfig));
+
+	// Create all the Constant values ...
+	int NumberOfModules = 5;
+	int NumberOfChipsForModule = 14;
+	int TotalNumOfChips = NumberOfModules * NumberOfChipsForModule;
+
+	int CtrIntMap[5][2] = { {3,2},{5,4},{7,6},{9,8},{11,10} };
+	int DataRcvMap[5][2] = { {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0} };
+	bool InverRcvMap[5][2] = { {false, true},{false, true},{false, true},{false, true},{false, true} };
+
+	// Loops for create all the Chip instances
+	for(int mod=0; mod < NumberOfModules; mod++) {
+		for (int i = 0; i < NumberOfChipsForModule; i++) {
+			int arrayIndex =  mod * NumberOfChipsForModule + i;
+			int LowHigh = (i < 7) ? 0 : 1;
+
+			std::cout << "    SetUp Chip "<<arrayIndex<<"/"<< TotalNumOfChips << "  m:" << mod<< " c:" << i  ;
+
+			// Update the Config info for the Aplpide Object
+		    TChipConfig *chipConfig = config->GetChipConfig(arrayIndex); // Get the Pointer to the Chip Configuration
+		    int chipId = chipConfig->GetChipId(); // Get the real OBmod chipid
+		    int control = CtrIntMap[mod][LowHigh];  // set the ctrlInt association
+		    int receiver = DataRcvMap[mod][LowHigh];  // set the receiver association
+			std::cout << "     ChipId=" << chipId<< " ctrlInt:" << control << " recV:" << receiver << std::endl;
+		    // --- Force the Link Speed values to 1.2 GHz in the Chip-Master
+		    if (chipId%8!=0)  { // deactivate the DTU/PLL for none master chips
+		    	chipConfig->SetParamValue("LINKSPEED", "-1");
+		    } else { // sets the Master to 1.2GHz
+		    	chipConfig->SetParamValue("LINKSPEED", "1200");
+		    }
+		    chipConfig->SetParamValue("CONTROLINTERFACE", control);
+		    chipConfig->SetParamValue("RECEIVER", receiver);
+
+		    // --- Finally create the ALPIDE object
+		    chips->push_back(new TAlpide(chipConfig));
+		    chips->at(chips->size()-1)->SetReadoutBoard(boards->at(0)); // Set the Board Handler
+
+		    // -- and Add the chip object to the MOSAIC directory
+		    boards->at(0)->AddChip(chipId, control, receiver, chips->at(chips->size()-1));
+		}
+		((TReadoutBoardMOSAIC *)(boards->at(0)))->setInverted(InverRcvMap[mod][0], DataRcvMap[mod][0]);
+		((TReadoutBoardMOSAIC *)(boards->at(0)))->setInverted(InverRcvMap[mod][1], DataRcvMap[mod][1]);
+	}
+	int nWorking = CheckControlInterface(config, boards, boardType, chips);
+	sleep(5);
+	for(int mod=0; mod < NumberOfModules; mod++) {
+		MakeDaisyChain(config, boards, boardType, chips, mod * 14);
+	}
+	return 0;
+}
 
