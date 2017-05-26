@@ -7,8 +7,10 @@
 typedef enum {trigInt, trigExt} TTriggerSource;   // move these to TBoardConfig?
 typedef enum {boardDAQ, boardMOSAIC, boardRU} TBoardType;
 
-#include "TBoardConfig.h"
-#include "TAlpide.h"
+//#include "TBoardConfig.h"
+//#include "TAlpide.h"
+class TAlpide;
+class TBoardConfig;
 
 typedef struct {
   int  chipId;
