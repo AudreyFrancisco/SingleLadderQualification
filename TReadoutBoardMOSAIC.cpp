@@ -145,34 +145,6 @@ int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode, TAlpide *chipPtr)
 	return(0);
 }
 
-// Read/Write registers
-int TReadoutBoardMOSAIC::WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId)
-{
-	int chipIndex = GetChipById(chipId);
-	uint_fast16_t Cii = fChipPositions.at(chipIndex).controlInterface;
-	controlInterface[Cii]->addWriteReg(chipId, address, value);
-	controlInterface[Cii]->execute();
-	return(0);
-}
-
-int TReadoutBoardMOSAIC::ReadChipRegister (uint16_t address, uint16_t &value, uint8_t chipId)
-{
-	int chipIndex = GetChipById(chipId);
-	uint_fast16_t Cii = fChipPositions.at(chipIndex).controlInterface;	controlInterface[Cii]->addReadReg( chipId,  address,  &value);
-	controlInterface[Cii]->execute();
-	return(0);
-}
-
-int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode, uint8_t chipId)
-{
-	int chipIndex = GetChipById(chipId);
-	uint_fast16_t Cii = fChipPositions.at(chipIndex).controlInterface;	controlInterface[Cii]->addWriteReg(chipId, Alpide::REG_COMMAND, OpCode);
-	controlInterface[Cii]->execute();
-	return(0);
-}
-
-
-
 
 int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode)
 {

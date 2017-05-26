@@ -100,8 +100,9 @@ int TReadoutBoardDAQ::WriteRegister (uint16_t address, uint32_t value)
 
 
 
-int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId)
+int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, TAlpide *chipPtr)
 {
+  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   //int err;
   uint32_t address32 = (uint32_t) address;
   uint32_t chipId32  = (uint32_t) chipId; 
@@ -142,8 +143,9 @@ int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, uint8
 }
 
 
-int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, uint8_t chipId) 
+int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, TAlpide *chipPtr)
 {
+  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   int           err; 
   uint32_t      value32; 
   uint32_t      address32  = (uint32_t) address;
