@@ -8,6 +8,7 @@ typedef enum {trigInt, trigExt} TTriggerSource;   // move these to TBoardConfig?
 typedef enum {boardDAQ, boardMOSAIC, boardRU} TBoardType;
 
 #include "TBoardConfig.h"
+#include "TAlpide.h"
 
 typedef struct {
   int  chipId;
@@ -48,7 +49,7 @@ class TReadoutBoard {
   TReadoutBoard  (TBoardConfig *config);
   ~TReadoutBoard () {};
 
-  int          AddChip           (uint8_t chipId, int controlInterface, int receiver, TAlpide *chipPtr=NULL);
+  int          AddChip           (uint8_t chipId, int controlInterface, int receiver, TAlpide *chipPtr=0);
 
   int          GetReceiver       (uint8_t chipId);
   int          GetReceiver       (TAlpide *chipPtr);
