@@ -176,6 +176,7 @@ namespace Alpide {
 
 };
 
+class TReadoutBoard;
 
 class TAlpide {
  private:
