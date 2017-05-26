@@ -18,7 +18,6 @@ typedef struct {
   TAlpide *alpidePtr;
 } TChipPos;
 
-class TBoardConfig;
  
 //************************************************************
 // abstract base class for all readout boards
