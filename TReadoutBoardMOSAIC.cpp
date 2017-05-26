@@ -246,8 +246,10 @@ void TReadoutBoardMOSAIC::init()
 	// CMU Control interface
 	controlInterface[0] = new ControlInterface(mIPbus, add_controlInterface);
 	controlInterface[1] = new ControlInterface(mIPbus, add_controlInterfaceB);
+	int addDisp = 0;
 	for(int i=2; i<MAX_MOSAICCTRLINT; i++) {
-		controlInterface[i] = new ControlInterface(mIPbus, add_controlInterface_0+(i<<24) );
+		controlInterface[i] = new ControlInterface(mIPbus, add_controlInterface_0+(addDisp<<24) );
+		addDisp++;
 	}
 
 	// Pulser

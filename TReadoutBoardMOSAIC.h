@@ -7,6 +7,7 @@
  *
  *  		HISTORY
  *
+ *  23/05/17 - 	Add the support for the endurance Test Board
  *
  */
 #ifndef READOUTBOARDMOSAIC_H
@@ -75,6 +76,8 @@ public:
 	int ReadRegister      (uint16_t Address, uint32_t &Value) { return(0);};
 	int WriteRegister     (uint16_t Address, uint32_t Value)  { return(0);};
 	void enableControlInterfaces(bool en);
+	void enableClockOutput(bool en) { enableControlInterfaces(en); return; } // just a wrapper
+	void setInverted (bool AInverted, int Aindex = -1);
 
 	bool PowerOn           ();
 	void PowerOff          ();
@@ -96,7 +99,6 @@ private:
 		};
 
 	void setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex = -1);
-	void setInverted (bool AInverted, int Aindex = -1);
 
 	uint32_t decodeError();
 	char *getFirmwareVersion();
@@ -128,8 +130,10 @@ private:
 		add_controlInterfaceB		= (7 << 24),
 		add_alpideRcv				= (8 << 24),
 		// total of 10 alpideRcv 
-		add_trgRecorder				= (18 << 24)
-		};
+		add_trgRecorder				= (18 << 24),
+		add_controlInterface_0		= (19 << 24),
+		add_controlInterface_9		= (29 << 24)
+	};
 
 	// status register bits
 	enum BOARD_STATUS_BITS {
