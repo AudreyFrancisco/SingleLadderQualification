@@ -129,8 +129,8 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
 
   int WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId = 0);
   int ReadChipRegister  (uint16_t address, uint16_t &value, uint8_t chipId = 0);
-  int WriteChipRegister (uint16_t address, uint16_t value, TAlpide * chipPtr = 0);
-  int ReadChipRegister  (uint16_t address, uint16_t &value, TAlpide * chipPtr = 0);
+  int WriteChipRegister (uint16_t address, uint16_t value, TAlpide * chipPtr = 0) { return(WriteChipRegister(address, value, chipPtr->GetConfig()->GetChipId())); };
+  int ReadChipRegister  (uint16_t address, uint16_t &value, TAlpide * chipPtr = 0) { return(ReadChipRegister(address, value, chipPtr->GetConfig()->GetChipId())); };
 
 
   // members and methods related to data readout
