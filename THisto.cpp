@@ -281,7 +281,7 @@ TScanHisto::~TScanHisto()
 }
 
 
-void TScanHisto::AddHisto  (TChipIndex index, THisto histo) 
+void TScanHisto::AddHisto  (common::TChipIndex index, THisto histo) 
 {
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
   m_histos.insert (std::pair<int, THisto>(int_index, histo));
@@ -299,39 +299,39 @@ void TScanHisto::Clear()
 
 
 //TODO (for all) check index for validity
-void TScanHisto::Incr (TChipIndex index, unsigned int i, unsigned int j) {
+void TScanHisto::Incr (common::TChipIndex index, unsigned int i, unsigned int j) {
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
   m_histos.at(int_index).Incr(i,j);
 }
 
 
-void TScanHisto::Incr (TChipIndex index, unsigned int i) {
+void TScanHisto::Incr (common::TChipIndex index, unsigned int i) {
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
   m_histos.at(int_index).Incr(i);
 }
 
 
 //TODO clean up
-double TScanHisto::operator() (TChipIndex index, unsigned int i, unsigned int j) const
+double TScanHisto::operator() (common::TChipIndex index, unsigned int i, unsigned int j) const
 {
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
   (m_histos.at(int_index))(i,j);
 }
 
 
-double TScanHisto::operator() (TChipIndex index, unsigned int i) const
+double TScanHisto::operator() (common::TChipIndex index, unsigned int i) const
 {
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
   (m_histos.at(int_index))(i);
 }
 
 
-int TScanHisto::GetChipList (std::vector <TChipIndex> &chipList) 
+int TScanHisto::GetChipList (std::vector <common::TChipIndex> &chipList) 
 {
   chipList.clear();
   for (std::map<int, THisto>::iterator it = m_histos.begin(); it != m_histos.end(); ++it) {
     int        intIndex = it->first;
-    TChipIndex index;
+    common::TChipIndex index;
     index.boardIndex   = (intIndex >> 8);
     index.dataReceiver = (intIndex >> 4) & 0xf;
     index.chipId       =  intIndex       & 0xf;
