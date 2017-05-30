@@ -2,6 +2,8 @@
 #define TFIFOTEST_H
 
 #include <mutex>
+
+#include "Common.h"
 #include "TScan.h"
 #include "THisto.h"
 

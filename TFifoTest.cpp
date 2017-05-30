@@ -151,7 +151,7 @@ void TFifoTest::LoopEnd(int loopIndex)
 
 void TFifoTest::Execute() 
 {
-  TChipIndex idx;
+  common::TChipIndex idx;
   idx.boardIndex   = m_boardIndex;
   idx.chipId       = m_testChip->GetConfig()->GetChipId    ();
   idx.dataReceiver = m_testChip->GetConfig()->GetParamValue("RECEIVER");
