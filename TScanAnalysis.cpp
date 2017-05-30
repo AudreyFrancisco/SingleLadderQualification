@@ -1,7 +1,11 @@
 #include <iostream>
 #include <unistd.h>
+
 #include "TScanAnalysis.h"
+
 #include "THisto.h"
+#include "TScan.h"
+#include "TScanConfig.h"
 
 TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aConfig, std::mutex *aMutex) 
 {
@@ -23,16 +27,26 @@ void TScanAnalysis::CreateChipResults ()
 
   for (int i = 0; i < m_chipList.size(); i ++) {
     TScanResultChip result = GetChipResult();
-    TChipIndex      idx    = m_chipList.at(i);
-    m_result->AddChipResult (result, idx);
+    common::TChipIndex      idx    = m_chipList.at(i);
+    m_result->AddChipResult (idx,result);
   }
   
 }
 
 
-int TScanResult::AddChipResult (TScanResultChip chipResult, TChipIndex idx) 
+int TScanResult::AddChipResult (common::TChipIndex idx,
+				TScanResultChip aChipResult) 
 {
   int id = (idx.boardIndex << 8) | (idx.dataReceiver << 4) | (idx.chipId & 0xf);
-  m_chipResults.insert(std::pair<int, TScanResultChip> (id, chipResult));
+  m_chipResults.insert(std::pair<int, TScanResultChip> (id, aChipResult));
+  return m_chipResults.size();
+}
+
+
+int TScanResult::AddChipResult (int aIntIndex, 
+				TScanResultChip aChipResult) 
+{
+  m_chipResults.insert(std::pair<int, TScanResultChip> (aIntIndex,aChipResult));
+  
   return m_chipResults.size();
 }
