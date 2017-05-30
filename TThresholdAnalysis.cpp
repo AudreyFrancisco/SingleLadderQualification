@@ -369,13 +369,6 @@ void TThresholdAnalysis::Run()
     
     TScanHisto scanHisto = m_histoQue->front();      
     
-    // Sanity check.
-    if (m_chipList.size()!=scanHisto.GetChipList(m_chipList) ){
-      std::cout<< "ERROR in " 
-    	       << m_analisysName  
-    	       << "!!!"
-    	       <<std::endl; exit(EXIT_FAILURE);}
-    
     m_histoQue->pop_front();
     m_mutex->unlock();
     
@@ -455,7 +448,7 @@ void TThresholdAnalysis::Run()
 	  m_threshold.at(intIndexDummy).entries+=1;
 	  
 	  m_noise.at(intIndexDummy).sum+=row;//;itResult.noise;
-	  m_noise.at(intIndexDummy).sum2+=row*row;pow(fitResult.noise,2);
+	  m_noise.at(intIndexDummy).sum2+=row*row;//pow(fitResult.noise,2);
 	  m_noise.at(intIndexDummy).entries+=1;
 	  
 	}
