@@ -5,11 +5,11 @@
 #include <mutex>
 #include <vector>
 
+#include "Common.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
 #include "TScan.h"
 #include "THisto.h"
-
 
 typedef struct {
   int boardIndex;
@@ -37,7 +37,7 @@ class TDigitalAnalysis : public TScanAnalysis {
  private:
   std::vector <TDigitalCounter> m_counters;
   int                           m_ninj;
-  bool HasData          (TScanHisto &histo, TChipIndex idx, int col);
+  bool HasData          (TScanHisto &histo,  common::TChipIndex idx, int col);
   void InitCounters     ();
   void WriteHitData     (TScanHisto histo, int row); 
   void WriteResult      ();
