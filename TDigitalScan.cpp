@@ -1,10 +1,10 @@
 #include <unistd.h>
+
+#include "AlpideConfig.h"
 #include "TDigitalScan.h"
+#include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
-#include "TReadoutBoardDAQ.h"
-#include "AlpideConfig.h"
-
 
 TDigitalScan::TDigitalScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
   : TMaskScan (config, chips, boards, histoQue, aMutex) 
@@ -65,7 +65,7 @@ void TDigitalScan::ConfigureBoard (TReadoutBoard *board)
 
 void TDigitalScan::FillHistos     (std::vector<TPixHit> *Hits, int board)
 {
-  TChipIndex idx; 
+  common::TChipIndex idx; 
   idx.boardIndex = board;
 
   int chipId;
