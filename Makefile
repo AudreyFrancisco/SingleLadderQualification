@@ -91,7 +91,7 @@ test_threshold_v1:   $(OBJS_ROOT) main_threshold_v1.cpp
 	$(CC) -o test_threshold_v1 $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_threshold_v1.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 # Classes using ROOT.
-TThresholdAnalysis.o: TThresholdAnalysis.cpp TThresholdAnalysis.h# 
+TThresholdAnalysis.o: TThresholdAnalysis.cpp TThresholdAnalysis.h 
 	$(CC) $(CFLAGS) $(ROOTCFLAGS) -c -o $@ $<
 
 %.o:    %.cpp %.h
