@@ -21,7 +21,7 @@ MOSAIC_SOURCES =  MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicS
 CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
  TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
  BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TDigitalAnalysis.cpp TFifoAnalysis.cpp\
- TScan.cpp TFifoTest.cpp TThresholdScan.cpp TDigitalScan.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp $(RU_SOURCES) $(MOSAIC_SOURCES)
+ TScan.cpp TFifoTest.cpp TThresholdScan.cpp TDigitalScan.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp Common.cpp $(RU_SOURCES) $(MOSAIC_SOURCES)
 
 OBJS = $(CLASSES:.cpp=.o)
 $(info OBJS="$(OBJS)")
@@ -84,14 +84,14 @@ test_roottest: $(OBJS) main_roottest.cpp
 	$(CC) -o test_roottest $(OBJS) $(CFLAGS) $(ROOTCFLAGS) main_roottest.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 # Executables with classes using ROOT. 
-test_scantest:   $(OBJS_ROOT) main_scantest.cpp
+test_scantest: $(OBJS_ROOT) main_scantest.cpp
 	$(CC) -o test_scantest $(OBJS_ROOT) $(CFLAGS)$(CFLAGS) $(ROOTCFLAGS) main_scantest.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 test_threshold_v1:   $(OBJS_ROOT) main_threshold_v1.cpp
 	$(CC) -o test_threshold_v1 $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_threshold_v1.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 # Classes using ROOT.
-TThresholdAnalysis.o: TThresholdAnalysis.cpp TThresholdAnalysis.h 
+TThresholdAnalysis.o: TThresholdAnalysis.cpp TThresholdAnalysis.h# 
 	$(CC) $(CFLAGS) $(ROOTCFLAGS) -c -o $@ $<
 
 %.o:    %.cpp %.h
