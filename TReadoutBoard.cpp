@@ -12,10 +12,6 @@ TReadoutBoard::TReadoutBoard (TBoardConfig *config)
 
 int TReadoutBoard::AddChip (uint8_t chipId, int controlInterface, int receiver, TAlpide *chipPtr)
 {
-  if (GetControlInterface (chipId) >= 0) {
-    // throw exception -> duplicate chip id
-    return -1; 
-  }
 
   TChipPos newChip;
   newChip.chipId           = chipId; 

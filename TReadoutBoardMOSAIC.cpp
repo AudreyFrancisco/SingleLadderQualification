@@ -328,14 +328,14 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
   for(int i=0;i< fChipPositions.size(); i++) { //for each defined chip
     dataLink = fChipPositions.at(i).receiver;
     if(dataLink >= 0) { // Enable the data receiver
-      if (fConfig->GetChipConfigById(fChipPositions.at(i).chipId)->IsEnabled()) {
-        std::cout << "!!!!!! ENabling receiver " << dataLink << std::endl;
+      if (fChipPositions.at(i).enabled && !Used[dataLink]) {
+        std::cout << "ENabling receiver " << dataLink << std::endl;
         alpideRcv[dataLink]->addEnable(true);
         Used[dataLink] = true;
         //alpideRcv[dataLink]->execute();
       }
       else if (!Used[dataLink]){
-        std::cout << "!!!!!! DISabling receiver " << dataLink << std::endl;
+//        std::cout << "DISabling receiver " << dataLink << std::endl;
         alpideRcv[dataLink]->addEnable(false);
       }
     }

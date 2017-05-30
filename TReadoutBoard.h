@@ -1,6 +1,9 @@
 #ifndef READOUTBOARD_H
 #define READOUTBOARD_H
 
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <vector>
 

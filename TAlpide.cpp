@@ -16,7 +16,7 @@ TAlpide::TAlpide (TChipConfig *config)
 
 
 void TAlpide::SetEnable (bool Enable) {
-  fReadoutBoard->SetChipEnable (fChipId, Enable);
+  fReadoutBoard->SetChipEnable (this, Enable);
   fConfig      ->SetEnable     (Enable);
 }
 

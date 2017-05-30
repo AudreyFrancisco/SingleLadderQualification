@@ -160,23 +160,32 @@ void MakeDaisyChain(TConfig* config, std::vector <TReadoutBoard *> * boards,
     // search range: first chip in row on same module .. chip -1
     else if (chipId & 0x8) {
       chips->at(i)->GetConfig()->SetInitialToken(false);
-      for (int iprev = chipId - 1; (iprev >= firstHigh [modId]) && (previous == -1); iprev--) {
-        if (config->GetChipConfigById(iprev)->IsEnabled()) {
-          previous = iprev; 
-	}
+      int iprev = chipId - 1;
+      while((iprev >= firstHigh [modId]) && (previous == -1)) {
+    	  for (int j = startChipIndex; j < endChipIndex; j++) {
+    		  if (!chips->at(j)->GetConfig()->IsEnabled()) continue;
+    		  if(chips->at(j)->GetConfig()->GetChipId() == iprev) {
+    			  previous = iprev;
+    		  }
+    	  }
+    	  iprev--;
       }
       chips->at(i)->GetConfig()->SetPreviousId (previous);
     }
     else if (!(chipId & 0x8)) {
       chips->at(i)->GetConfig()->SetInitialToken(false);
-      for (int iprev = chipId - 1; (iprev >= firstLow [modId]) && (previous == -1); iprev--) {
-        if (config->GetChipConfigById(iprev)->IsEnabled()) {
-          previous = iprev; 
-	}
+      int iprev = chipId - 1;
+      while((iprev >= firstLow [modId]) && (previous == -1)) {
+    	  for (int j = startChipIndex; j < endChipIndex; j++) {
+    		  if (!chips->at(j)->GetConfig()->IsEnabled()) continue;
+      		  if(chips->at(j)->GetConfig()->GetChipId() == iprev) {
+      			  previous = iprev;
+      		  }
+      	  }
+      	  iprev--;
       }
       chips->at(i)->GetConfig()->SetPreviousId (previous);
     }
-
     std::cout << "Chip Id " << chipId << ", token = " << (bool) chips->at(i)->GetConfig()->GetInitialToken() << ", previous = " << chips->at(i)->GetConfig()->GetPreviousId() << std::endl;
   }
 }
@@ -196,17 +205,17 @@ int CheckControlInterface(TConfig* config, std::vector <TReadoutBoard *> * board
     try {
       chips->at(i)->ReadRegister (0x60d, Value);
       if (WriteValue == Value) {
-        std::cout << "  Chip ID " << chips->at(i)->GetConfig()->GetChipId() << ", readback correct." << std::endl;
+        std::cout << "Pos:" << i << "  Chip ID " << chips->at(i)->GetConfig()->GetChipId() << ", readback correct." << std::endl;
         nWorking ++;   
       }
       else {
-	std::cout << "  Chip ID " << chips->at(i)->GetConfig()->GetChipId() << ", wrong readback value (" << Value << " instead of " << WriteValue << "), disabling." << std::endl;
-        chips->at(i)->GetConfig()->SetEnable(false);
+	std::cout << "Pos:" << i << "  Chip ID " << chips->at(i)->GetConfig()->GetChipId() << ", wrong readback value (" << Value << " instead of " << WriteValue << "), disabling." << std::endl;
+        chips->at(i)->SetEnable(false); // GetConfig()->SetEnable(false);
       }
     }
     catch (exception &e) {
-      std::cout << "  Chip ID " << chips->at(i)->GetConfig()->GetChipId() << ", not answering, disabling." << std::endl;
-      chips->at(i)->GetConfig()->SetEnable(false);
+      std::cout << "Pos:" << i << "  Chip ID " << chips->at(i)->GetConfig()->GetChipId() << ", not answering, disabling." << std::endl;
+      chips->at(i)->SetEnable(false); // GetConfig()->SetEnable(false);
     }
     
   }
