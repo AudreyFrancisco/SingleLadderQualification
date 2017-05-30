@@ -1,9 +1,12 @@
 #include <iostream>
-#include "TScan.h"
+
+#include "Common.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
 #include "TReadoutBoardDAQ.h"
+#include "TScan.h"
+
 bool fScanAbort;
 
 TScan::TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
@@ -58,10 +61,9 @@ void TScan::CountEnabledChips()
 
 }
 
-
 void TScan::CreateScanHisto () 
 {
-  TChipIndex id; 
+  common::TChipIndex id; 
   m_histo = new TScanHisto();
 
   THisto histo = CreateHisto ();
@@ -78,9 +80,8 @@ void TScan::CreateScanHisto ()
     }
   }  
   std::cout << "CreateHisto: generated map with " << m_histo->GetSize() << " elements" << std::endl;
+  
 }
-
-
 
 TMaskScan::TMaskScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
   : TScan(config, chips, boards, histoQue, aMutex)

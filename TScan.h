@@ -4,11 +4,12 @@
 #include <deque>
 #include <mutex>
 #include <vector>
+
 #include "TAlpide.h"
+#include "AlpideDecoder.h"
+#include "THisto.h"
 #include "TReadoutBoard.h"
 #include "TScanConfig.h"
-#include "THisto.h"
-#include "AlpideDecoder.h"
 
 const  int  MAXLOOPLEVEL = 3;
 const  int  MAXBOARDS    = 2;
@@ -55,9 +56,9 @@ class TScan {
   virtual void Next            (int loopIndex); 
   void         CreateScanHisto ();
   bool         IsRunning       () {return m_running;}
+  TScanHisto  GetTScanHisto    () {return *m_histo;}
+  
 };
-
-
 
 class TMaskScan : public TScan {
  private: 
