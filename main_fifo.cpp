@@ -150,7 +150,7 @@ int main(int argc, char** argv) {
       
       fEnabled ++;
 
-      std::cout << std::endl << "Doing FIFO test on chip ID " << fChips.at(ichip)->GetConfig()->GetChipId() << std::endl;
+      std::cout << std::endl << "Doing FIFO test on ControlInterface " << fChips.at(ichip)->GetConfig()->GetCtrInt( )<< "  chip ID " << fChips.at(ichip)->GetConfig()->GetChipId() << std::endl;
       // Reset error counters
       fErrCount0 = 0;
       fErrCount5 = 0;

@@ -93,9 +93,10 @@ void WriteDataToFile (const char *fName, bool Recreate) {
 
   for (int ichip = 0; ichip < fChips.size(); ichip ++) {
     int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
+    int ctrInt = fChips.at(ichip)->GetConfig()->GetCtrInt();
     if (!fChips.at(ichip)->GetConfig()->IsEnabled()) continue;  // write files only for enabled chips
     if (fChips.size() > 1) {
-      sprintf(fNameChip, "%s_Chip%d.dat", fNameTemp, chipId);
+      sprintf(fNameChip, "%s_Chip%d_%d.dat", fNameTemp, chipId, ctrInt);
     }
     else {
       sprintf(fNameChip, "%s.dat", fNameTemp);
