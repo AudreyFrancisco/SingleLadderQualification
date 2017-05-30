@@ -508,7 +508,7 @@ int initSetupEndurance(TConfig* config,
 
 	int CtrIntMap[5][2] = { {3,2},{5,4},{7,6},{9,8},{11,10} };
 	int DataRcvMap[5][2] = { {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0} };
-	bool InverRcvMap[5][2] = { {false, true},{false, true},{false, true},{false, true},{false, true} };
+	bool InverRcvMap[5][2] = { {true, false},{true, false},{true, false},{true, false},{true, false} };
 
 	// Loops for create all the Chip instances
 	for(int mod=0; mod < NumberOfModules; mod++) {

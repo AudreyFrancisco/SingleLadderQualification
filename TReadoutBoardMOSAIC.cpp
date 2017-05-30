@@ -265,6 +265,7 @@ void TReadoutBoardMOSAIC::init()
 		alpideRcv[i] = new ALPIDErcv(mIPbus, add_alpideRcv+(i<<24));
 		alpideRcv[i]->addEnable(false);
 		alpideRcv[i]->addInvertInput(false);
+        alpideRcv[i]->execute();
 	}
 
 	// The data consumer for hardware generators
@@ -374,12 +375,14 @@ void TReadoutBoardMOSAIC::enableControlInterfaces(bool en)
 void TReadoutBoardMOSAIC::setInverted(bool AInverted, int Aindex)
 {
 	int st,en;
-	Aindex = -1;
+//	Aindex = -1;
 	st = (Aindex != -1) ? Aindex : 0;
 	en = (Aindex != -1) ? Aindex+1 : MAX_MOSAICTRANRECV;
+
 	for(int i=st;i<en;i++) {
 		alpideRcv[i]->addInvertInput(AInverted);
 		alpideRcv[i]->execute();
+		std::cout << "Invert polarity to receiver : "<< i << " set to :" << AInverted << std::endl;
 	}
 	return;
 }
