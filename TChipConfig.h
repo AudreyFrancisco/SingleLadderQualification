@@ -117,6 +117,8 @@ class TChipConfig {
   int  GetParamValue        (const char *Name) ;
   bool IsParameter          (const char *Name) {return (fSettings.count(Name) > 0);};
   int  GetChipId            () {return fChipId;};
+  int  GetCtrInt            () {return fControlInterface;};
+  int  GetDataLink          () {return fReceiver;};
   bool IsEnabled            () {return (fEnabled != 0);};
   void SetEnable            (bool Enabled) {fEnabled = Enabled?1:0;};
   int  GetModuleId          () {return (fChipId & 0x70) >> 4;};

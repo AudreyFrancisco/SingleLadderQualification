@@ -127,7 +127,8 @@ void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
   char     fName[50];
   float    Current;
   uint16_t old; 
-  sprintf (fName, "Data/IDAC_%s_Chip%d.dat", Name, chip->GetConfig()->GetChipId());
+
+  sprintf (fName, "Data/IDAC_%s_Chip%d_%d.dat", Name, chip->GetConfig()->GetChipId(), chip->GetConfig()->GetCtrInt() );
   FILE *fp = fopen (fName, "w");
 
   myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));

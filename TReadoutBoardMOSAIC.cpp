@@ -33,6 +33,8 @@
  *  3/8/16	- Add the Board decoder class ...
  *  5/8/16  - adapt the read event to new definition
  *  18/01/17 - Review of ReadEventData. Added inheritance from class MBoard
+ *  22/05/17 - Review for Auxiliary COntrol Interfaces facility
+ *
  */
 #include <math.h>
 #include <stdio.h>
@@ -49,10 +51,40 @@
 #include "AlpideDecoder.h"
 #include "TAlpide.h"
 #include "SetupHelpers.h"
-#include "MosaicSrc/mexception.h"
+#include "mexception.h"
+#include "mservice.h"
 
 using namespace std;
 std::vector<unsigned char> fDebugBuffer;
+
+I2CSysPll::pllRegisters_t TReadoutBoardMOSAIC::sysPLLregContent = {
+	.reg = {
+		/* Register 0: */ 0x02A9,
+		/* Register 1: */ 0x0000,
+		/* Register 2: */ 0x000E,
+		/* Register 3: */ 0x08F5,
+		/* Register 4: */ 0x346F,	// set to 0x346f to set reference clock from secondary input (0x246f for primary)
+		/* Register 5: */ 0x0023,
+		/* Register 6: */ 0x0002,
+		/* Register 7: */ 0x0023,
+		/* Register 8: */ 0x0002,
+		/* Register 9: */ 0x0003,
+		/* Register 10: */ 0x0020,
+		/* Register 11: */ 0x0000,
+		/* Register 12: */ 0x0003,  // 0x0003, 0x2003 bypass Y5 from primary input
+		/* Register 13: */ 0x0020,
+		/* Register 14: */ 0x0000,
+		/* Register 15: */ 0x0003,
+		/* Register 16: */ 0x0020,
+		/* Register 17: */ 0x0000,
+		/* Register 18: */ 0x0003,
+		/* Register 19: */ 0x0020,
+		/* Register 20: */ 0x0000,
+		/* Register 21: */ 0x0006			// RO register
+		}
+	};
+
+
 
 // ---- Constructor
 TReadoutBoardMOSAIC::TReadoutBoardMOSAIC (TConfig* config, TBoardConfigMOSAIC *boardConfig)
@@ -77,7 +109,6 @@ TReadoutBoardMOSAIC::~TReadoutBoardMOSAIC()
 		delete controlInterface[i];
 
 	delete i2cBus;
-	delete dataGenerator;
 }
 
 
@@ -87,29 +118,33 @@ TReadoutBoardMOSAIC::~TReadoutBoardMOSAIC()
   -------------------------- */
 
 // Read/Write registers
-int TReadoutBoardMOSAIC::WriteChipRegister (uint16_t address, uint16_t value, uint8_t chipId)
+int TReadoutBoardMOSAIC::WriteChipRegister (uint16_t address, uint16_t value, TAlpide *chipPtr)
 {
-	uint_fast16_t Cii = GetControlInterface(chipId);
+	uint_fast16_t Cii = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
+	uint8_t chipId = chipPtr->GetConfig()->GetChipId();
 	controlInterface[Cii]->addWriteReg(chipId, address, value);
 	controlInterface[Cii]->execute();
 	return(0);
 }
 
-int TReadoutBoardMOSAIC::ReadChipRegister (uint16_t address, uint16_t &value, uint8_t chipId)
+int TReadoutBoardMOSAIC::ReadChipRegister (uint16_t address, uint16_t &value, TAlpide *chipPtr)
 {
-	uint_fast16_t Cii = GetControlInterface(chipId);
+	uint_fast16_t Cii = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
+	uint8_t chipId = chipPtr->GetConfig()->GetChipId();
 	controlInterface[Cii]->addReadReg( chipId,  address,  &value);
 	controlInterface[Cii]->execute();
 	return(0);
 }
 
-int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode, uint8_t chipId)
+int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode, TAlpide *chipPtr)
 {
-	uint_fast16_t Cii = GetControlInterface(chipId);
+	uint_fast16_t Cii = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
+	uint8_t chipId = chipPtr->GetConfig()->GetChipId();
 	controlInterface[Cii]->addWriteReg(chipId, Alpide::REG_COMMAND, OpCode);
 	controlInterface[Cii]->execute();
 	return(0);
 }
+
 
 int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode)
 {
@@ -206,27 +241,31 @@ void TReadoutBoardMOSAIC::init()
 {
 	setIPaddress(fBoardConfig->GetIPaddress(), fBoardConfig->GetTCPport());
 
-	// Data Generator
-	dataGenerator = new MDataGenerator(mIPbus, WbbBaseAddress::dataGenerator);
-
 	// I2C master (WBB slave) and connected peripherals
-	i2cBus = new I2Cbus(mIPbus, WbbBaseAddress::i2cMaster);
+	i2cBus = new I2Cbus(mIPbus, add_i2cMaster);
 
-	// System PLL on I2C bus
-	mSysPLL = new I2CSysPll(mIPbus, WbbBaseAddress::i2cSysPLL);
+	// Master Powerboard	
+	pb = new powerboard(i2cBus, true);
 
 	// CMU Control interface
-	controlInterface[0] = new ControlInterface(mIPbus, WbbBaseAddress::controlInterface);
-	controlInterface[1] = new ControlInterface(mIPbus, WbbBaseAddress::controlInterfaceB);
+	controlInterface[0] = new ControlInterface(mIPbus, add_controlInterface);
+	controlInterface[1] = new ControlInterface(mIPbus, add_controlInterfaceB);
+	int addDisp = 0;
+	for(int i=2; i<MAX_MOSAICCTRLINT; i++) {
+		controlInterface[i] = new ControlInterface(mIPbus, add_controlInterface_0+(addDisp<<24) );
+		addDisp++;
+	}
 
 	// Pulser
 	pulser = new Pulser(mIPbus, WbbBaseAddress::pulser);
 
+
 	// ALPIDE Hi Speed data receiver
 	for (int i=0; i<MAX_MOSAICTRANRECV; i++){
-		alpideRcv[i] = new ALPIDErcv(mIPbus, WbbBaseAddress::alpideRcv+(i<<24));
+		alpideRcv[i] = new ALPIDErcv(mIPbus, add_alpideRcv+(i<<24));
 		alpideRcv[i]->addEnable(false);
 		alpideRcv[i]->addInvertInput(false);
+        alpideRcv[i]->execute();
 	}
 
 	// The data consumer for hardware generators
@@ -240,7 +279,7 @@ void TReadoutBoardMOSAIC::init()
 
 	// ----- Now do the initilization -------
 	// Initialize the System PLL
-	mSysPLL->setup();
+	mSysPLL->setup(sysPLLregContent);
 
 	// wait for board to be ready
 	uint32_t boardStatusReady = (BOARD_STATUS_GTP_RESET_DONE | \
@@ -271,6 +310,7 @@ void TReadoutBoardMOSAIC::init()
 	mRunControl->clearErrors();
 	mRunControl->setAFThreshold(fBoardConfig->GetCtrlAFThreshold());
 	mRunControl->setLatency(fBoardConfig->GetCtrlLatMode(), fBoardConfig->GetCtrlLatMode());
+	enableControlInterfaces(true);
 
 	return;
 }
@@ -288,14 +328,14 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
   for(int i=0;i< fChipPositions.size(); i++) { //for each defined chip
     dataLink = fChipPositions.at(i).receiver;
     if(dataLink >= 0) { // Enable the data receiver
-      if (fConfig->GetChipConfigById(fChipPositions.at(i).chipId)->IsEnabled()) {
-        std::cout << "!!!!!! ENabling receiver " << dataLink << std::endl;
+      if (fChipPositions.at(i).enabled && !Used[dataLink]) {
+        std::cout << "ENabling receiver " << dataLink << std::endl;
         alpideRcv[dataLink]->addEnable(true);
         Used[dataLink] = true;
         //alpideRcv[dataLink]->execute();
       }
       else if (!Used[dataLink]){
-        std::cout << "!!!!!! DISabling receiver " << dataLink << std::endl;
+//        std::cout << "DISabling receiver " << dataLink << std::endl;
         alpideRcv[dataLink]->addEnable(false);
       }
     }
@@ -305,19 +345,44 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
 
 void TReadoutBoardMOSAIC::setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex)
 {
-  mRunControl->setSpeed (ASpeed);
+	int regSet = 0;
+
+	switch (ASpeed){
+		case Mosaic::RCV_RATE_400:
+			regSet = CFG_RATE_400;
+			break;
+
+		case Mosaic::RCV_RATE_600:
+			regSet = CFG_RATE_600;
+			break;
+
+		case Mosaic::RCV_RATE_1200:
+			regSet = CFG_RATE_1200;
+			break;
+	}
+	mRunControl->rmwConfigReg(~CFG_RATE_MASK, regSet);
+}
+
+void TReadoutBoardMOSAIC::enableControlInterfaces(bool en)
+{
+	for(int Cii=0;Cii<MAX_MOSAICCTRLINT;Cii++){
+		controlInterface[Cii]->addEnable(en);
+		controlInterface[Cii]->execute();
+	}
 }
 
 
 void TReadoutBoardMOSAIC::setInverted(bool AInverted, int Aindex)
 {
 	int st,en;
-	Aindex = -1;
+//	Aindex = -1;
 	st = (Aindex != -1) ? Aindex : 0;
 	en = (Aindex != -1) ? Aindex+1 : MAX_MOSAICTRANRECV;
+
 	for(int i=st;i<en;i++) {
 		alpideRcv[i]->addInvertInput(AInverted);
 		alpideRcv[i]->execute();
+		std::cout << "Invert polarity to receiver : "<< i << " set to :" << AInverted << std::endl;
 	}
 	return;
 }
@@ -338,6 +403,73 @@ uint32_t TReadoutBoardMOSAIC::decodeError()
 		std::cout << std::endl;
 	}
 	return(runErrors);
+}
+
+
+/* ------------------  Firmware Version --------------------
+
+ */
+char *TReadoutBoardMOSAIC::getFirmwareVersion()
+{
+	char *theIPAddr;
+	theIPAddr = fBoardConfig->GetIPaddress();
+
+	MService::fw_info_t *MOSAICinfo;
+	MService *endPoint = new MService();
+	endPoint->setIPaddress(theIPAddr);
+	endPoint->readFWinfo(MOSAICinfo);
+
+	theVersionMaj = MOSAICinfo->ver_maj;
+	theVersionMin = MOSAICinfo->ver_min;
+	strncpy(theVersionId, MOSAICinfo->fw_identity, 33);
+	theVersionId[33] = 0; // just for sure
+	return(theVersionId);
+}
+
+
+/* -------------------------
+ 	 Power Board control methods
+ ------------------------- */
+bool TReadoutBoardMOSAIC::PowerOn()
+{
+
+	/* --- needs to integrate with the Set of pwB parameters ...
+
+	powerboard *thePower = pb;  // gets the handler to the power board
+	if( !thePower->isReady())  { // there is not a PwB connected !
+		std::cout << "No power board detected !" << std::endl;
+		return(false);
+	}
+
+	thePower->onAllVout();
+	sleep(1);
+	*/
+
+	// Switch On the CtrInterface
+	enableControlInterfaces(true);
+
+	return(true);
+
+}
+
+void TReadoutBoardMOSAIC::PowerOff()
+{
+	// Switch Off the CtrInterface
+	enableControlInterfaces(false);
+
+	/* --- needs to integrate with the Set of pwB parameters ...
+
+	powerboard *thePower = pb;  // gets the handler to the power board
+	if( !thePower->isReady())  { // there is not a PwB connected !
+		std::cout << "No power board detected !" << std::endl;
+		return(false);
+	}
+
+	// --> to switch off : put Iset = 0, then restore  Iset values
+
+	*/
+
+	return;
 }
 
 

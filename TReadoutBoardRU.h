@@ -73,13 +73,17 @@ public:
   TReadoutBoardRU(TBoardConfigRU *config);
 
   virtual int WriteChipRegister(uint16_t Address, uint16_t Value,
-                                uint8_t chipId = 0);
+                                TAlpide *chipPtr = 0);
+
+
   virtual int ReadRegister(uint16_t Address, uint32_t &Value);
   virtual int WriteRegister(uint16_t Address, uint32_t Value);
   virtual int ReadChipRegister(uint16_t Address, uint16_t &Value,
-                               uint8_t chipID = 0);
+                               TAlpide *chipPtr = 0);
+  
+
   virtual int SendOpCode(uint16_t OpCode);
-  virtual int SendOpCode(uint16_t OpCode, uint8_t chipId);
+  virtual int SendOpCode(uint16_t OpCode, TAlpide *chipPtr);
 
   virtual int SetTriggerConfig(bool enablePulse, bool enableTrigger,
                                int triggerDelay, int pulseDelay);

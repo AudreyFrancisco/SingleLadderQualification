@@ -10,18 +10,15 @@ TReadoutBoard::TReadoutBoard (TBoardConfig *config)
 
 
 
-int TReadoutBoard::AddChip (uint8_t chipId, int controlInterface, int receiver) 
+int TReadoutBoard::AddChip (uint8_t chipId, int controlInterface, int receiver, TAlpide *chipPtr)
 {
-  if (GetControlInterface (chipId) >= 0) {
-    // throw exception -> duplicate chip id
-    return -1; 
-  }
 
   TChipPos newChip;
   newChip.chipId           = chipId; 
   newChip.controlInterface = controlInterface;
   newChip.receiver         = receiver;
   newChip.enabled          = true;                 // create chip positions by default enabled? 
+  newChip.alpidePtr        = chipPtr;
 
   fChipPositions.push_back(newChip);
   fNChips ++;
@@ -36,16 +33,26 @@ int TReadoutBoard::GetChipById (uint8_t chipId)
   }
   return -1;   // throw exception, non existing chip
 }
-
+int TReadoutBoard::GetChipById (TAlpide *chipPtr)
+{
+  for (int i = 0; i < fChipPositions.size(); i ++) {
+    if (fChipPositions.at(i).alpidePtr == chipPtr) return i;
+  }
+  return -1;   // throw exception, non existing chip
+}
 
 int TReadoutBoard::GetControlInterface (uint8_t chipId) 
 {
   int chip = GetChipById (chipId);
   if (chip > -1) return fChipPositions.at(chip).controlInterface;
-
   return -1; 
 }
-
+int TReadoutBoard::GetControlInterface (TAlpide *chipPtr)
+{
+  int chip = GetChipById (chipPtr);
+  if (chip > -1) return fChipPositions.at(chip).controlInterface;
+  return -1;
+}
 
 int TReadoutBoard::GetReceiver(uint8_t chipId)
 {
@@ -54,11 +61,22 @@ int TReadoutBoard::GetReceiver(uint8_t chipId)
 
   return -1; 
 }
+int TReadoutBoard::GetReceiver(TAlpide *chipPtr)
+{
+  int chip = GetChipById (chipPtr);
+  if (chip > -1) return fChipPositions.at(chip).receiver;
 
+  return -1;
+}
 
 void TReadoutBoard::SetControlInterface (uint8_t chipId, int controlInterface) 
 {
   int chip = GetChipById (chipId);
+  if (chip > -1) fChipPositions.at(chip).controlInterface = controlInterface;
+}
+void TReadoutBoard::SetControlInterface (TAlpide *chipPtr, int controlInterface)
+{
+  int chip = GetChipById (chipPtr);
   if (chip > -1) fChipPositions.at(chip).controlInterface = controlInterface;
 }
 
@@ -68,16 +86,22 @@ void TReadoutBoard::SetReceiver (uint8_t chipId, int receiver)
   int chip = GetChipById (chipId);
   if (chip > -1) fChipPositions.at(chip).receiver = receiver;
 }
+void TReadoutBoard::SetReceiver (TAlpide *chipPtr, int receiver)
+{
+  int chip = GetChipById (chipPtr);
+  if (chip > -1) fChipPositions.at(chip).receiver = receiver;
+}
 
 
 void TReadoutBoard::SetChipEnable(uint8_t chipId, bool Enable) 
 {
-  for (int i = 0; i < fChipPositions.size(); i ++) {
-    if (fChipPositions.at(i).chipId == chipId) {
-      fChipPositions.at(i).enabled = Enable;
-    }
-  }
-  // throw exception -> non-existing chip  
+  int chip = GetChipById (chipId);
+  if (chip > -1) fChipPositions.at(chip).enabled = Enable;
+}
+void TReadoutBoard::SetChipEnable(TAlpide *chipPtr, bool Enable)
+{
+  int chip = GetChipById (chipPtr);
+  if (chip > -1) fChipPositions.at(chip).enabled = Enable;
 }
 
 

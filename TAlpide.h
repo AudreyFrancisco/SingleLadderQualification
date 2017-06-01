@@ -2,7 +2,7 @@
 #define ALPIDE_H
 
 #include <unistd.h>
-#include "TReadoutBoard.h"
+ // #include "TReadoutBoard.h"
 #include "TConfig.h"
 
 namespace Alpide {
@@ -176,6 +176,7 @@ namespace Alpide {
 
 };
 
+class TReadoutBoard;
 
 class TAlpide {
  private:

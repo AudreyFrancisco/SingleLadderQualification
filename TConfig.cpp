@@ -119,6 +119,9 @@ TDeviceType TConfig::ReadDeviceType (const char *deviceName) {
   else if (!strcmp(deviceName, "HALFSTAVE")) {
     type = TYPE_HALFSTAVE;
   }
+  else if (!strcmp(deviceName, "ENDURANCETEST")) {
+    type = TYPE_ENDURANCE;
+  }
   else if (!strcmp(deviceName, "IBHICRU")) {
     type = TYPE_IBHICRU;
   }
@@ -153,6 +156,16 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
       chipIds.push_back(i + (ModuleId << 4));
     }
     Init (1, chipIds, boardMOSAIC);
+  }
+  else if (AType == TYPE_ENDURANCE) {
+  	for(int mod=0; mod < 5; mod++) {
+  	  for (int i = 0; i < 15; i++) {
+        if (i == 7) continue;
+        int ModuleId = (NChips <= 0 ? DEFAULT_MODULE_ID : NChips) & 0x07;
+        chipIds.push_back(i + (ModuleId << 4));
+  	  }
+  	}
+  	Init (1, chipIds, boardMOSAIC);
   }
   else if (AType == TYPE_IBHIC) {
     for (int i = 0; i < 9; i++) {
@@ -217,6 +230,8 @@ void TConfig::ReadConfigFile (const char *fName)
       // the constructors for board and chip configs
       if (type == TYPE_OBHIC) {
     	  SetDeviceType(type, ModuleId);
+      } else if (type == TYPE_ENDURANCE) {
+  	      SetDeviceType(type, ModuleId);
       } else if (type == TYPE_HALFSTAVE) {
     	  SetDeviceType(type, NModules);
       } else {

@@ -160,13 +160,15 @@ int TReadoutBoardRU::WriteRegister(uint16_t Address, uint32_t Value) {
 }
 
 int TReadoutBoardRU::WriteChipRegister(uint16_t Address, uint16_t Value,
-                                       uint8_t chipId) {
+                                       TAlpide *chipPtr) {
+  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   dctrl->WriteChipRegister(Address, Value, chipId);
   return 0;
 }
 
 int TReadoutBoardRU::ReadChipRegister(uint16_t Address, uint16_t &Value,
-                                      uint8_t chipId) {
+                                      TAlpide *chipPtr) {
+  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   return dctrl->ReadChipRegister(Address, Value, chipId);
 }
 
@@ -175,7 +177,8 @@ int TReadoutBoardRU::SendOpCode(uint16_t OpCode) {
   return 0;
 }
 
-int TReadoutBoardRU::SendOpCode(uint16_t OpCode, uint8_t chipId) {
+int TReadoutBoardRU::SendOpCode(uint16_t OpCode, TAlpide *chipPtr) {
+  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   return SendOpCode(OpCode);
 }
 

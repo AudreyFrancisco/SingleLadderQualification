@@ -102,9 +102,11 @@ void WriteDataToFile (const char *fName, bool Recreate) {
   for (int ichip = 0; ichip < fChips.size(); ichip ++) {
     std::cout << "ichip = "<<ichip << std::endl;
     int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
+    int ctrInt = fChips.at(ichip)->GetConfig()->GetCtrInt();
+
     if (!HasData(chipId)) continue;  // write files only for chips with data
     if (fChips.size() > 1) {
-      sprintf(fNameChip, "%s_Chip%d.dat", fNameTemp, chipId);
+      sprintf(fNameChip, "%s_Chip%d_%d.dat", fNameTemp, chipId, ctrInt);
     }
     else {
       sprintf(fNameChip, "%s.dat", fNameTemp);
@@ -203,10 +205,9 @@ void scan() {
         //  printf ("%02x ", (int) buffer[iByte]);
         //}
         //std::cout << std::endl;
-
         // decode DAQboard event
         BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-	//std::cout << "Closed data counter: " <<  boardInfo.eoeCount << std::endl;
+     	//std::cout << "Closed data counter: " <<  boardInfo.eoeCount << std::endl;
         if (boardInfo.eoeCount) {
           nClosedEvents = boardInfo.eoeCount;
         }

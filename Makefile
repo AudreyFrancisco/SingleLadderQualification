@@ -1,8 +1,12 @@
 CC=g++
-INCLUDE=/usr/local/include
+LIBMOSAIC_DIR=./MosaicSrc/libmosaic
+LIBPOWERBOARD_DIR=./MosaicSrc/libpowerboard
+INCLUDE=-I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include
+LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic
 LIBPATH=/usr/local/lib
 CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium -I $(INCLUDE)
-LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread -L $(LIBPATH)
+LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread -L $(LIBPATH) -L $(LIB)
+#OBJECT= runTest
 LIBRARY=libalpide.so
 
 ROOTCONFIG   := $(shell which root-config)
@@ -13,10 +17,7 @@ ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs)
 RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp ReadoutUnitSrc/TRuDctrlModule.cpp \
  TReadoutBoardRU.cpp TBoardConfigRU.cpp
 
-MOSAIC_SOURCES =  MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/i2cbus.cpp MosaicSrc/i2cslave.cpp \
- MosaicSrc/i2csyspll.cpp MosaicSrc/ipbus.cpp MosaicSrc/ipbusudp.cpp MosaicSrc/mdatagenerator.cpp MosaicSrc/mdatareceiver.cpp \
- MosaicSrc/mdatasave.cpp MosaicSrc/mexception.cpp MosaicSrc/mruncontrol.cpp MosaicSrc/mtriggercontrol.cpp MosaicSrc/mwbbslave.cpp \
- MosaicSrc/pexception.cpp MosaicSrc/pulser.cpp MosaicSrc/mboard.cpp MosaicSrc/TAlpideDataParser.cpp
+MOSAIC_SOURCES = MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/pexception.cpp MosaicSrc/TAlpideDataParser.cpp
 
 CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
  TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
@@ -32,7 +33,13 @@ OBJS_ROOT  = $(CLASSES_ROOT:.cpp=.o)
 OBJS_ROOT += $(OBJS)
 $(info OBJS_ROOT="$(OBJS_ROOT)")
 
-all:    test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit test_localbus test_roottest test_scantest test_threshold_v1
+all:   $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) stopclk startclk test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit test_localbus test_roottest test_scantest test_threshold_v1
+
+$(LIBMOSAIC_DIR):
+	$(MAKE) -C $@
+
+$(LIBPOWERBOARD_DIR):
+	$(MAKE) -C $@
 
 lib: $(OBJS)
 	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
@@ -94,6 +101,13 @@ test_threshold_v1:   $(OBJS_ROOT) main_threshold_v1.cpp
 TThresholdAnalysis.o: TThresholdAnalysis.cpp TThresholdAnalysis.h 
 	$(CC) $(CFLAGS) $(ROOTCFLAGS) -c -o $@ $<
 
+stopclk:   $(OBJS) main_stopclk.cpp
+	$(CC) -o stopclk $(OBJS) $(CFLAGS) main_stopclk.cpp $(LINKFLAGS)
+
+startclk:   $(OBJS) main_startclk.cpp
+	$(CC) -o startclk $(OBJS) $(CFLAGS) main_startclk.cpp $(LINKFLAGS)
+
+
 %.o:    %.cpp %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
@@ -106,4 +120,8 @@ clean-all:	clean
 	rm -rf test_*
 	rm -rf libalpide.so
 
-.PHONY:	all clean clean-all
+	$(MAKE) -C $(LIBMOSAIC_DIR) clean
+	$(MAKE) -C $(LIBPOWERBOARD_DIR) clean
+
+.PHONY:	all clean clean-all $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR)
+

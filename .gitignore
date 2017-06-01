@@ -4,6 +4,9 @@
 *.swp
 *.pcm
 test_*
+startclk
+stopclk
+Config.cfg
 *~
 # Qt5 local project files
 *.pro.user
