@@ -4,10 +4,11 @@
 #include <deque>
 #include <mutex>
 #include <vector>
-#include "TScan.h"
-#include "THisto.h"
-#include "AlpideDecoder.h"
 
+#include "AlpideDecoder.h"
+#include "Common.h"
+#include "THisto.h"
+#include "TScan.h"
 
 class TDigitalScan : public TMaskScan {
  private:

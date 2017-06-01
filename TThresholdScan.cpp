@@ -72,6 +72,7 @@ THisto TThresholdScan::CreateHisto() {
 
 void TThresholdScan::Init() {
   m_running = true;
+  
   CountEnabledChips();
   for (int i = 0; i < m_boards.size(); i++) {
     std::cout << "Board " << i << ", found " << m_enabled[i] << " enabled chips" << std::endl;
@@ -94,6 +95,7 @@ void TThresholdScan::Init() {
      myMOSAIC->StartRun();
     } 
   }
+  
 }
 
 
@@ -136,9 +138,9 @@ void TThresholdScan::Execute()
 
 void TThresholdScan::FillHistos (std::vector<TPixHit> *Hits, int board)
 {
-  TChipIndex idx; 
+  common::TChipIndex idx; 
   idx.boardIndex = board;
-
+  
   int chipId;
   int region; 
   int dcol;

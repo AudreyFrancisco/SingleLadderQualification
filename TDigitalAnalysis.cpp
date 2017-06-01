@@ -9,7 +9,7 @@ TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aSca
 
 
 //TODO: Implement HasData
-bool TDigitalAnalysis::HasData(TScanHisto &histo, TChipIndex idx, int col) 
+bool TDigitalAnalysis::HasData(TScanHisto &histo,  common::TChipIndex idx, int col) 
 {
   return true;
 }

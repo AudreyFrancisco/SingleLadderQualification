@@ -5,13 +5,15 @@
 #include <map>
 #include <vector>
 
-typedef struct 
-{
-  unsigned int boardIndex; 
-  unsigned int dataReceiver;
-  unsigned int chipId;
-} TChipIndex;
+#include "Common.h"
 
+
+/* typedef struct  */
+/* { */
+/*   unsigned int boardIndex; */
+/*   unsigned int dataReceiver; */
+/*   unsigned int chipId; */
+/* } TChipIndex; */
 
 class THisto { 
 
@@ -61,16 +63,17 @@ class TScanHisto {
   TScanHisto () {};                       // Default constructor;
   TScanHisto (const TScanHisto &sh);      // Copy constructor;
   ~TScanHisto();
-  double operator()  (TChipIndex index, unsigned int i, unsigned int j) const;       // Bin read access 2d   
-  double operator()  (TChipIndex index, unsigned int i) const;
-  void AddHisto    (TChipIndex index, THisto histo);
+  double operator()  (common::TChipIndex index, unsigned int i, unsigned int j) const;       // Bin read access 2d   
+  double operator()  (common::TChipIndex index, unsigned int i) const;
+  void AddHisto    (common::TChipIndex index, THisto histo);
   int  GetSize     () {return m_histos.size();};
-  int  GetChipList (std::vector <TChipIndex> &chipList);
+  int  GetChipList (std::vector <common::TChipIndex> &chipList);
   void Clear       ();
   void SetIndex    (int aIndex) {m_index = aIndex;};
   int  GetIndex    () const     {return m_index;};
-  void Incr        (TChipIndex index, unsigned int i, unsigned int j);
-  void Incr        (TChipIndex index, unsigned int i);
+  void Incr        (common::TChipIndex index, unsigned int i, unsigned int j);
+  void Incr        (common::TChipIndex index, unsigned int i);
+  std::map<int,THisto> GetHistoMap() {return m_histos;}  
 };
 
- #endif
+#endif

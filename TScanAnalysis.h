@@ -4,10 +4,13 @@
 #include <deque>
 #include <mutex>
 #include <map>
-#include "THisto.h"
-#include "TScan.h"
-#include "TScanConfig.h"
 
+#include "Common.h"
+
+class THisto;
+class TScan;
+class TScanConfig;
+class TScanHisto;
 
 // base class for classes that contain chip results
 // derive class for each analysis
@@ -25,17 +28,19 @@ class TScanResult {
   std::map <int, TScanResultChip> m_chipResults;
  public: 
   TScanResult   () {};
-  int AddChipResult (TScanResultChip chipResult, TChipIndex idx);
+  int AddChipResult (common::TChipIndex idx, 
+		     TScanResultChip aChipResult);
+  int AddChipResult (int aIntIndex, TScanResultChip aChipResult);
+  
 };
-
 
 class TScanAnalysis {
  protected:
   std::deque <TScanHisto>         *m_histoQue;
-  std::vector<TChipIndex>          m_chipList;
+  std::vector<common::TChipIndex>  m_chipList;
   std::mutex                      *m_mutex;
   TScanResult                     *m_result;
-
+  
   TScan                       *m_scan;
   TScanConfig                 *m_config;
   bool                         m_first;
@@ -47,7 +52,7 @@ class TScanAnalysis {
   virtual void Initialize() = 0; 
   virtual void Run       () = 0;
   virtual void Finalize  () = 0; 
-  TScanResult  GetResult () {return *m_result;};  
+  TScanResult  GetScanResult () {return *m_result;};  
 };
 
 

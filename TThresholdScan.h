@@ -3,10 +3,11 @@
 
 #include <deque>
 #include <mutex>
-#include "TScan.h"
-#include "THisto.h"
-#include "AlpideDecoder.h"
 
+#include "AlpideDecoder.h"
+#include "Common.h"
+#include "THisto.h"
+#include "TScan.h"
 
 class TThresholdScan : public TMaskScan {
  private:
