@@ -8,6 +8,7 @@ CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium -I $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread -L $(LIBPATH) $(LIB)
 #OBJECT= runTest
 LIBRARY=libalpide.so
+ANALYSIS_LIBRARY=libalpide.so
 
 ROOTCONFIG   := $(shell which root-config)
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
@@ -45,6 +46,9 @@ $(LIBPOWERBOARD_DIR):
 
 lib: $(DEPS)
 	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
+
+lib_analysis: $(DEPS)
+	$(CC) -shared $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -o $(ANALYSIS_LIBRARY)
 
 test_mosaic: $(DEPS) main_mosaic.cpp
 	$(CC) -o test_mosaic $(OBJS) $(CFLAGS) main_mosaic.cpp $(LINKFLAGS)
@@ -124,4 +128,4 @@ clean-all:	clean
 	$(MAKE) -C $(LIBMOSAIC_DIR) clean
 	$(MAKE) -C $(LIBPOWERBOARD_DIR) clean
 
-.PHONY:	all clean clean-all $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR)
+.PHONY:	all clean clean-all $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) lib lib_analysis
