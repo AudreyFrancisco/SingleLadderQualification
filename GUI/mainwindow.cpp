@@ -71,7 +71,7 @@ MainWindow::MainWindow(QWidget *parent) :
      connect(ui->obm7,SIGNAL(clicked()),this,SLOT(button_obm7_clicked()));
      connect (ui->testselection,SIGNAL(currentIndexChanged(int)),this, SLOT(combochanged(int)));
 
-     QPixmap alice("/home/palpidefs/Alpide/GUI_Dimitra/GUI/alice.jpg");
+     QPixmap alice("alice.jpg");
      int w = ui->alicepic->width();
      int h = ui->alicepic->height();
      ui->alicepic->setPixmap(alice.scaled(w,h,Qt::KeepAspectRatio));
@@ -630,4 +630,3 @@ void MainWindow::connectcombo(int value){
 
     }
 }
-
