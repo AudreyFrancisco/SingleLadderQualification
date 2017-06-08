@@ -183,7 +183,7 @@ VRESETD_LIST[1,0]=147
 # measurement home dir
 HOME_DIR=`pwd`
 # dir with pALPIDEfs software
-SOFTWARE_DIR=$HOME_DIR/../
+SOFTWARE_DIR=$(readlink -f $HOME_DIR/../)
 ANA_DIR=$SOFTWARE_DIR/analysis/
 COMMON_DIR=$HOME_DIR/common/
 
@@ -246,6 +246,33 @@ do
 done
 wait
 sleep 2
+
+###### prepare the config template
+cat ${SOFTWARE_DIR}/Config_template.cfg <<EOF
+DEVICE CHIP
+
+#ITHR	ithrTmp
+#IDB idbTmp
+#VCASN2	vcasn2Tmp
+#VCASN   vcasnTmp
+#VCLIP	vclipTmp
+#VRESETD	vresetdTmp
+
+IBIAS 64
+VCASP 86
+VPULSEH 170
+VPULSEL 169
+
+IAUX2 0
+#IRESET iresetTmp
+VTEMP 0
+#VRESETP vresetpTmp
+
+NMASKSTAGES 164
+NINJ 50
+PIXPERREGION 1
+
+EOF
 
 
 ###### set temperature of chiller
@@ -568,6 +595,9 @@ $HOME_DIR/common/hameg2030.py $PSU_DEV 7
 # put chiller on stand-by mode
 #cd $COMMON_DIR
 #./huber.py 4
+
+
+rm ${SOFTWARE_DIR}/Config_template.cfg
 
 echo
 echo
