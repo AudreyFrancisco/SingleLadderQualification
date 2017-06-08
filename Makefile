@@ -5,7 +5,7 @@ INCLUDE=-I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOW
 LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic
 LIBPATH=/usr/local/lib
 CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium -I $(INCLUDE)
-LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread -L $(LIBPATH) -L $(LIB)
+LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread -L $(LIBPATH) $(LIB)
 #OBJECT= runTest
 LIBRARY=libalpide.so
 
