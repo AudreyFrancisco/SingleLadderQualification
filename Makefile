@@ -33,6 +33,8 @@ OBJS_ROOT  = $(CLASSES_ROOT:.cpp=.o)
 OBJS_ROOT += $(OBJS)
 $(info OBJS_ROOT="$(OBJS_ROOT)")
 
+DEPS = $(OBJS) $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR)
+
 all:   $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) stopclk startclk test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit test_localbus test_roottest test_scantest test_threshold_v1
 
 $(LIBMOSAIC_DIR):
@@ -41,70 +43,70 @@ $(LIBMOSAIC_DIR):
 $(LIBPOWERBOARD_DIR):
 	$(MAKE) -C $@
 
-lib: $(OBJS)
+lib: $(DEPS)
 	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
 
-test_mosaic:   $(OBJS) main_mosaic.cpp
+test_mosaic: $(DEPS) main_mosaic.cpp
 	$(CC) -o test_mosaic $(OBJS) $(CFLAGS) main_mosaic.cpp $(LINKFLAGS)
 
-test_noiseocc:   $(OBJS) main_noiseocc.cpp
+test_noiseocc:   $(DEPS) main_noiseocc.cpp
 	$(CC) -o test_noiseocc $(OBJS) $(CFLAGS) main_noiseocc.cpp $(LINKFLAGS)
 
-test_source:   $(OBJS) main_source.cpp
+test_source:   $(DEPS) main_source.cpp
 	$(CC) -o test_source $(OBJS) $(CFLAGS) main_source.cpp $(LINKFLAGS)
 
-test_threshold:   $(OBJS) main_threshold.cpp
+test_threshold:   $(DEPS) main_threshold.cpp
 	$(CC) -o test_threshold $(OBJS) $(CFLAGS) main_threshold.cpp $(LINKFLAGS)
 
-test_threshold_pb:   $(OBJS) main_threshold_pb.cpp
+test_threshold_pb:   $(DEPS) main_threshold_pb.cpp
 	$(CC) -o test_threshold_pb $(OBJS) $(CFLAGS) main_threshold_pb.cpp $(LINKFLAGS)
 
-test_digital:   $(OBJS) main_digitalscan.cpp
+test_digital:   $(DEPS) main_digitalscan.cpp
 	$(CC) -o test_digital $(OBJS) $(CFLAGS) main_digitalscan.cpp $(LINKFLAGS)
 
-test_fifo:   $(OBJS) main_fifo.cpp
+test_fifo:   $(DEPS) main_fifo.cpp
 	$(CC) -o test_fifo $(OBJS) $(CFLAGS) main_fifo.cpp $(LINKFLAGS)
 
-test_dacscan:   $(OBJS) main_dacscan.cpp
+test_dacscan:   $(DEPS) main_dacscan.cpp
 	$(CC) -o test_dacscan $(OBJS) $(CFLAGS) main_dacscan.cpp $(LINKFLAGS)
 
-test_pulselength:   $(OBJS) main_pulselength.cpp
+test_pulselength:   $(DEPS) main_pulselength.cpp
 	$(CC) -o test_pulselength $(OBJS) $(CFLAGS) main_pulselength.cpp $(LINKFLAGS)
 
-test_poweron:   $(OBJS) main_poweron.cpp
+test_poweron:   $(DEPS) main_poweron.cpp
 	$(CC) -o test_poweron $(OBJS) $(CFLAGS) main_poweron.cpp $(LINKFLAGS)
 
-test_noiseocc_ext:   $(OBJS) main_noiseocc_ext.cpp
+test_noiseocc_ext:   $(DEPS) main_noiseocc_ext.cpp
 	$(CC) -o test_noiseocc_ext $(OBJS) $(CFLAGS) main_noiseocc_ext.cpp $(LINKFLAGS)
 
-test_temperature:   $(OBJS) main_temperature.cpp
+test_temperature:   $(DEPS) main_temperature.cpp
 	$(CC) -o test_temperature $(OBJS) $(CFLAGS) main_temperature.cpp $(LINKFLAGS)
 
-test_readoutunit: $(OBJS) main_readoutunit.cpp
+test_readoutunit: $(DEPS) main_readoutunit.cpp
 	$(CC) -o test_readoutunit $(OBJS) $(CFLAGS) main_readoutunit.cpp $(LINKFLAGS)
 
-test_localbus: $(OBJS) main_localbus.cpp
+test_localbus: $(DEPS) main_localbus.cpp
 	$(CC) -o test_localbus $(OBJS) $(CFLAGS) main_localbus.cpp $(LINKFLAGS)
 
 # Example ROOT executable: add $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
-test_roottest: $(OBJS) main_roottest.cpp
+test_roottest: $(DEPS) main_roottest.cpp
 	$(CC) -o test_roottest $(OBJS) $(CFLAGS) $(ROOTCFLAGS) main_roottest.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
-# Executables with classes using ROOT. 
-test_scantest: $(OBJS_ROOT) main_scantest.cpp
+# Executables with classes using ROOT.
+test_scantest: $(DEPS) $(OBJS_ROOT) main_scantest.cpp
 	$(CC) -o test_scantest $(OBJS_ROOT) $(CFLAGS)$(CFLAGS) $(ROOTCFLAGS) main_scantest.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
-test_threshold_v1:   $(OBJS_ROOT) main_threshold_v1.cpp
+test_threshold_v1: $(DEPS)  $(OBJS_ROOT) main_threshold_v1.cpp
 	$(CC) -o test_threshold_v1 $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_threshold_v1.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 # Classes using ROOT.
-TThresholdAnalysis.o: TThresholdAnalysis.cpp TThresholdAnalysis.h 
+TThresholdAnalysis.o: TThresholdAnalysis.cpp TThresholdAnalysis.h
 	$(CC) $(CFLAGS) $(ROOTCFLAGS) -c -o $@ $<
 
-stopclk:   $(OBJS) main_stopclk.cpp
+stopclk: $(DEPS) main_stopclk.cpp
 	$(CC) -o stopclk $(OBJS) $(CFLAGS) main_stopclk.cpp $(LINKFLAGS)
 
-startclk:   $(OBJS) main_startclk.cpp
+startclk: $(DEPS) main_startclk.cpp
 	$(CC) -o startclk $(OBJS) $(CFLAGS) main_startclk.cpp $(LINKFLAGS)
 
 
@@ -119,9 +121,7 @@ clean:
 clean-all:	clean
 	rm -rf test_*
 	rm -rf libalpide.so
-
 	$(MAKE) -C $(LIBMOSAIC_DIR) clean
 	$(MAKE) -C $(LIBPOWERBOARD_DIR) clean
 
 .PHONY:	all clean clean-all $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR)
-
