@@ -8,7 +8,7 @@ CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium -I $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread -L $(LIBPATH) $(LIB)
 #OBJECT= runTest
 LIBRARY=libalpide.so
-ANALYSIS_LIBRARY=libalpide.so
+ANALYSIS_LIBRARY=libalpide_analysis.so
 
 ROOTCONFIG   := $(shell which root-config)
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
@@ -124,7 +124,8 @@ clean:
 
 clean-all:	clean
 	rm -rf test_*
-	rm -rf libalpide.so
+	rm -rf $(LIBRARY)
+	rm -rf $(ANALYSIS_LIBRARY)
 	$(MAKE) -C $(LIBMOSAIC_DIR) clean
 	$(MAKE) -C $(LIBPOWERBOARD_DIR) clean
 
