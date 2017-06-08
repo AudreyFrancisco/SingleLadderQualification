@@ -30,6 +30,12 @@ def ramp(sour, v, nsteps):
         sour.write("SOUR:VOLT %f\n" % (float(v[2])*step/nsteps))
         time.sleep(0.1);
 
+def set_voltage(sour, ch, v):
+    sour.write("INST OUT%d\n" % int(ch))
+    sour.write("SOUR:VOLT %0.3f\n" % float(v))
+    sour.write("OUTP ON")
+    time.sleep(0.1);
+
 def rampFromTo(sour, v, nsteps):
     for step in range(0, nsteps+1):
         sour.write("INST OUT3\n")
@@ -47,12 +53,18 @@ def powerDown(sour):
     sour.write("OUTP OFF\n")
 
 def measureCurr(sour):
-    val=([0.0, 0.0, 0.0])
-    for c in range(3):
+    val=([0.0, 0.0, 0.0, 0.0])
+    for c in range(4):
         sour.write("INST OUT%d\n" % (c+1))
         sour.write("MEAS:CURR?\n")
         val[c] = float(sour.readline())
-    print "%0.4fA\t%0.4fA\t%0.4fA" % ( val[0], val[1], val[2])
+    print "%0.4fA\t%0.4fA\t%0.4fA\t%0.4fA" % ( val[0], val[1], val[2], val[3])
+    for c in range(4):
+        sour.write("INST OUT%d\n" % (c+1))
+        sour.write("MEAS:VOLT?\n")
+        val[c] = float(sour.readline())
+    print "%0.4fV\t%0.4fV\t%0.4fV\t%0.4fV" % ( val[0], val[1], val[2], val[3])
+
 
 def init2030(hameg, i_max):
     hameg.write("*IDN?\n")
@@ -83,7 +95,7 @@ def init2030(hameg, i_max):
     hameg.write("SOUR:VOLT 0.0\n")
     hameg.write("SOUR:CURR %f\n" % i_max[1])
     time.sleep(0.1);
-    hameg.write("OUTP OFF\n")
+    hameg.write("OUTP ON\n")
     # CH3
     hameg.write("INST OUT3\n");
     hameg.write("FUSE:LINK 1\n")
@@ -118,6 +130,8 @@ def main():
         return trip(sour)
     elif mode==5:
         measureCurr(sour)
+    elif mode==10:
+        set_voltage(sour, int(sys.argv[3]), float(sys.argv[4]))
     else:
         powerDown(sour)
 
