@@ -12,6 +12,7 @@ Config.cfg
 # Qt5 local project files
 *.pro.user
 .qmake.stash
+DebugData.dat
 
 # ECLIPSE local projects
 .project
