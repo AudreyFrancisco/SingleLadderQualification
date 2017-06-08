@@ -2,7 +2,7 @@ CC = gcc
 CXX = g++
 AR = ar rcs
 RM = rm -f
-CPPFLAGS = -O2 -g -Wall -std=gnu++11 -I./include
+CPPFLAGS = -O2 -g -Wall -std=gnu++11 -fPIC -I./include
 LDFLAGS = ""
 LDLIBS = ""
 
