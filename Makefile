@@ -47,7 +47,7 @@ $(LIBPOWERBOARD_DIR):
 lib: $(DEPS)
 	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
 
-lib_analysis: $(DEPS)
+lib_analysis: $(DEPS) $(OBJS_ROOT)
 	$(CC) -shared $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -o $(ANALYSIS_LIBRARY)
 
 test_mosaic: $(DEPS) main_mosaic.cpp
