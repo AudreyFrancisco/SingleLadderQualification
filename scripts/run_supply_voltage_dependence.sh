@@ -36,7 +36,7 @@ CHIP_ID=$1
 TEMP=room
 
 # Supply voltages
-V_LIST=( $(seq 1.780 0.005 1.820) )
+V_LIST=( $(seq 1.780 0.002 1.820) )
 N_V=${#V_LIST[@]}
 
 # Subset of testbeam settings
@@ -248,7 +248,7 @@ wait
 sleep 2
 
 ###### prepare the config template
-cat ${SOFTWARE_DIR}/Config_template.cfg <<EOF
+cat > ${SOFTWARE_DIR}/Config_template.cfg <<EOF
 DEVICE CHIP
 
 #ITHR	ithrTmp
