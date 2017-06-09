@@ -596,7 +596,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
     std::thread scanThread(&MainWindow::scanLoop,this,s[i]);
     qDebug()<<s.at(i)<<"g"<<endl;
     std::thread analysisThread(&TScanAnalysis::Run, std::ref(a[i]));
-
+    a.at(i)->Initialize();
     scanThread.join();
     analysisThread.join();
     a.at(i)->Finalize();
