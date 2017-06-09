@@ -27,6 +27,7 @@ class TScan {
  private:
  protected: 
   TScanConfig                  *m_config;
+  char                          m_name[40];
   std::vector <TAlpide *>       m_chips;
   std::vector <TReadoutBoard *> m_boards;
   TScanHisto                   *m_histo;
@@ -55,9 +56,9 @@ class TScan {
   bool         Loop            (int loopIndex);
   virtual void Next            (int loopIndex); 
   void         CreateScanHisto ();
-  bool         IsRunning       () {return m_running;}
-  TScanHisto  GetTScanHisto    () {return *m_histo;}
-  
+  bool         IsRunning       () {return m_running;};
+  TScanHisto   GetTScanHisto   () {return *m_histo;};
+  const char  *GetName         () {return m_name;};  
 };
 
 class TMaskScan : public TScan {

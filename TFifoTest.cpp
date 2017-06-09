@@ -1,10 +1,12 @@
 #include <iostream>
+#include <string.h>
 #include "TFifoTest.h"
 #include "AlpideConfig.h"
 
 TFifoTest::TFifoTest (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
   : TScan (config, chips, boards, histoQue, aMutex) 
 {
+  strcpy(m_name, "Fifo Scan");
   m_start[2] = 0;
   m_step [2] = 1;
   m_stop [2] = m_chips.size();

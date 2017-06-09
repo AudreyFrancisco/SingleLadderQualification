@@ -1,5 +1,5 @@
 #include <unistd.h>
-
+#include <string.h>
 #include "AlpideConfig.h"
 #include "TDigitalScan.h"
 #include "TReadoutBoardDAQ.h"
@@ -9,6 +9,7 @@
 TDigitalScan::TDigitalScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
   : TMaskScan (config, chips, boards, histoQue, aMutex) 
 {
+  strcpy(m_name, "Digital Scan");
   m_start[0] = 0;
   m_step [0] = 1;
   m_stop [0] = m_config->GetNMaskStages();
