@@ -23,12 +23,15 @@ class TNoiseOccupancy : public TScan {
   void ConfigureBoard (TReadoutBoard *board);
   void ConfigureMask  (TAlpide *chip, std::vector <TPixHit> *MaskedPixels);
   void FillHistos     (std::vector<TPixHit> *Hits, int board);
-void ReadEventData (std::vector <TPixHit> *Hits, int iboard, int nTriggers);
+  void ReadEventData (std::vector <TPixHit> *Hits, int iboard, int nTriggers);
+ protected:
+  THisto CreateHisto();
  public:
   TNoiseOccupancy   (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoque, std::mutex *aMutex);
   ~TNoiseOccupancy  () {};
   void Init         ();
-  void PrepareStep  ();
+  void PrepareStep  (int loopIndex) {};
+  void LoopEnd      (int loopIndex);
   void Execute      ();
   void Terminate    ();
 };

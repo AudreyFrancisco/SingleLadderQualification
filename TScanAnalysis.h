@@ -34,6 +34,7 @@ class TScanResult {
   
 };
 
+
 class TScanAnalysis {
  protected:
   std::deque <TScanHisto>         *m_histoQue;

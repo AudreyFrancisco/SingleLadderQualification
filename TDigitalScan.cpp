@@ -76,7 +76,6 @@ void TDigitalScan::FillHistos     (std::vector<TPixHit> *Hits, int board)
 
   for (int i = 0; i < Hits->size(); i++) {
     if (Hits->at(i).address / 2 != m_row) continue;  // todo: keep track of spurious hits, i.e. hits in non-injected rows
-    // !! This will not work when allowing several chips with the same Id
     idx.dataReceiver = Hits->at(i).channel;
     idx.chipId       = Hits->at(i).chipId;
 
@@ -187,3 +186,5 @@ void TDigitalScan::Terminate   ()
   }
   m_running = false;
 }
+
+

@@ -4,6 +4,9 @@
 #include "AlpideConfig.h"
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
+#include "TReadoutBoardDAQ.h"
+#include "TReadoutBoardMOSAIC.h"
+#include "TReadoutBoardRU.h"
 
 TNoiseOccupancy::TNoiseOccupancy (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
   : TScan (config, chips, boards, histoQue, aMutex) 
@@ -53,6 +56,7 @@ void TNoiseOccupancy::ConfigureChip  (TAlpide *chip)
 }
 
 
+// TODO: add masking of MaskedPixels
 void TNoiseOccupancy::ConfigureMask (TAlpide *chip, std::vector <TPixHit> *MaskedPixels)
 {
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   false);
@@ -71,11 +75,18 @@ void TNoiseOccupancy::ConfigureBoard (TReadoutBoard *board)
     board->SetTriggerSource (trigExt);
   }
   else {
-    board->SetTriggerConfig (true, false, 
+    board->SetTriggerConfig (false, true, 
                              board->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
                              board->GetConfig()->GetParamValue("PULSEDELAY"));
     board->SetTriggerSource (trigInt);
   }
+}
+
+
+THisto TNoiseOccupancy::CreateHisto () 
+{
+  THisto histo ("HitmapHisto", "HitmapHisto", 1024, 0, 1023, 512, 0, 511);
+  return histo;
 }
 
 
@@ -140,7 +151,33 @@ void TNoiseOccupancy::ReadEventData (std::vector <TPixHit> *Hits, int iboard, in
 
 void TNoiseOccupancy::FillHistos     (std::vector<TPixHit> *Hits, int board) 
 {
+  common::TChipIndex idx;
+  idx.boardIndex = board;
+   
+  int chipId, region, dcol, address;
+
+  for (int i = 0; i < Hits->size(); i++) {
+    idx.dataReceiver = Hits->at(i).channel;
+    idx.chipId       = Hits->at(i).chipId;
+
+    int col       = Hits->at(i).region * 32 + Hits->at(i).dcol * 2;
+    int leftRight = ((((Hits->at(i).address % 4) == 1) || ((Hits->at(i).address % 4) == 2))? 1:0); 
+    col          += leftRight;
+    m_histo->Incr(idx, col, Hits->at(i).address / 2);
+  }					  
 }
+
+
+void TNoiseOccupancy::LoopEnd (int loopIndex)
+{
+  if (loopIndex == 0) {
+    while (!(m_mutex->try_lock()));
+    m_histoQue->push_back(*m_histo);
+    m_mutex   ->unlock   ();
+    m_histo   ->Clear    ();
+  }
+}
+
 
 void TNoiseOccupancy::Execute     ()
 {
@@ -162,4 +199,17 @@ void TNoiseOccupancy::Execute     ()
 
 void TNoiseOccupancy::Terminate ()
 {
+  for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
+    TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(iboard));
+    if (myMOSAIC) {
+      myMOSAIC->StopRun();
+      //delete myMOSAIC;
+    }
+    TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (m_boards.at(iboard));
+    if (myDAQBoard) {
+      myDAQBoard->PowerOff();
+      //delete myDAQBoard;
+    }
+  }
+  m_running = false;
 }
