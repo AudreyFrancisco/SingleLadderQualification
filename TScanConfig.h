@@ -5,7 +5,8 @@
 #include <string>
 
 namespace ScanConfig {
-  const int NINJ           = 50;
+  const int NINJ           = 50;        // number of injections in digital/threshold scans
+  const int NTRIG          = 1000000;   // number of triggers for noise occupancy scans
   const int CHARGE_START   = 0;
   const int CHARGE_STOP    = 50;
   const int CHARGE_STEP    = 1;
@@ -18,6 +19,7 @@ class TScanConfig {
  private: 
   std::map <std::string, int*> fSettings;
   int  m_nInj;
+  int  m_nTrig;
   int  m_chargeStart;
   int  m_chargeStop;
   int  m_chargeStep;

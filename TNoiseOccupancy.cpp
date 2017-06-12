@@ -10,7 +10,7 @@ TNoiseOccupancy::TNoiseOccupancy (TScanConfig *config, std::vector <TAlpide *> c
 {
   strcpy(m_name, "Noise Occupancy");
 
-  int nTriggers = m_config->GetParamValue("NINJ");
+  int nTriggers = m_config->GetParamValue("NTRIG");
 
   if (nTriggers % kTrigPerTrain == 0) {
     m_nLast   = kTrigPerTrain;
