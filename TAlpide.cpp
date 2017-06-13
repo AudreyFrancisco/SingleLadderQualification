@@ -393,11 +393,14 @@ float TAlpide::ReadTemperature() {
  *         configuration phase, a calibration will be
  *         automatically executed.
  *
+ *   13/6/17 - Returns negative values (A.Franco)
+ *
  */
 float TAlpide::ReadDACVoltage(Alpide::TRegister ADac) {
 
-	uint16_t theResult = 0;
-	float theValue;
+	uint16_t theRowValue = 0;
+	int theResult = 0;
+	float theValue = 0.0;
 	if(fADCBias == -1) { // needs calibration
 		CalibrateADC();
 	}
@@ -407,8 +410,8 @@ float TAlpide::ReadDACVoltage(Alpide::TRegister ADac) {
 	SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_DACMONV, Alpide::COMP_296uA, Alpide::RAMP_1us);
 	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE,  this);
 	usleep(5000); // Wait for the measurement > of 5 milli sec
-	ReadRegister( Alpide::REG_ADC_AVSS, theResult);
-	theResult -=  (uint16_t)fADCBias;
+	ReadRegister( Alpide::REG_ADC_AVSS, theRowValue);
+	theResult = ((int)theRowValue) - fADCBias;
 	theValue =  ( ((float)theResult) * 0.001644); // V scale first approximation
 	return(theValue);
 }
@@ -424,11 +427,14 @@ float TAlpide::ReadDACVoltage(Alpide::TRegister ADac) {
  *         configuration phase, a calibration will be
  *         automatically executed.
  *
+ *   13/6/17 - Returns negative values (A.Franco)
+ *
  */
 float TAlpide::ReadDACCurrent(Alpide::TRegister ADac) {
 
-	uint16_t theResult = 0;
-	float theValue;
+	uint16_t theRowValue = 0;
+	int theResult = 0;
+	float theValue = 0.0;
 	if(fADCBias == -1) { // needs calibration
 		CalibrateADC();
 	}
@@ -439,8 +445,8 @@ float TAlpide::ReadDACCurrent(Alpide::TRegister ADac) {
 
 	fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE,  this);
 	usleep(5000); // Wait for the measurement > of 5 milli sec
-	ReadRegister( Alpide::REG_ADC_AVSS, theResult);
-	theResult -= (uint16_t)fADCBias;
-	theValue =  ( ((float)theResult) * 0.164); // uA scale   first approximation
+	ReadRegister( Alpide::REG_ADC_AVSS, theRowValue);
+	theResult = ((int)theRowValue) - fADCBias;
+	theValue = ( ((float)theResult) * 0.164); // uA scale   first approximation
 	return(theValue);
 }
