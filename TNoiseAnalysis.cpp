@@ -17,7 +17,7 @@ void TNoiseAnalysis::WriteResult()
 void TNoiseAnalysis::Initialize()
 {
   ReadChipList      ();
-  CreateChipResults ();
+  CreateChipResults (&m_result);
 }
 
 

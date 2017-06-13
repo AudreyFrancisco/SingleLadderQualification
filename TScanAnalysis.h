@@ -40,13 +40,12 @@ class TScanAnalysis {
   std::deque <TScanHisto>         *m_histoQue;
   std::vector<common::TChipIndex>  m_chipList;
   std::mutex                      *m_mutex;
-  TScanResult                     *m_result;
   
   TScan                       *m_scan;
   TScanConfig                 *m_config;
   bool                         m_first;
   virtual TScanResultChip      GetChipResult     () = 0;
-  void                         CreateChipResults ();
+  void                         CreateChipResults (TScanResult *result);
   virtual void                 CreateResult      () = 0;
   int                          ReadChipList      ();
  public:
@@ -54,7 +53,6 @@ class TScanAnalysis {
   virtual void Initialize() = 0; 
   virtual void Run       () = 0;
   virtual void Finalize  () = 0; 
-  TScanResult  GetScanResult () {return *m_result;};  
 };
 
 

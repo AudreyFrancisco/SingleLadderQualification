@@ -25,7 +25,7 @@ int TScanAnalysis::ReadChipList()
 }
 
 
-void TScanAnalysis::CreateChipResults () 
+void TScanAnalysis::CreateChipResults (TScanResult *result) 
 {
   if (m_chipList.size() == 0) {
     std::cout  << "Warning (TScanAnalysis::CreateResult): chip list is empty, doing nothing" << std::endl;
@@ -33,9 +33,9 @@ void TScanAnalysis::CreateChipResults ()
   }
 
   for (int i = 0; i < m_chipList.size(); i ++) {
-    TScanResultChip result = GetChipResult();
+    TScanResultChip chipResult = GetChipResult();
     common::TChipIndex      idx    = m_chipList.at(i);
-    m_result->AddChipResult (idx,result);
+    result->AddChipResult (idx, chipResult);
   }
   
 }
