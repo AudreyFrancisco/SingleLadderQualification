@@ -4,7 +4,8 @@
 
 TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex) : TScanAnalysis(histoQue, aScan, aScanConfig, aMutex) 
 {
-  m_ninj = m_config->GetParamValue("NINJ");
+  m_ninj   = m_config->GetParamValue("NINJ");
+  m_result = new TDigitalResult(); 
 }
 
 
