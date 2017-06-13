@@ -12,6 +12,7 @@ namespace ScanConfig {
   const int CHARGE_STEP    = 1;
   const int N_MASK_STAGES  = 3;
   const int PIX_PER_REGION = 32;
+  const int NOISECUT_INV   = 100000;   // inverse of pixel noise cut (e.g. 100000 = 1e-5)
 }
 
 
@@ -25,6 +26,7 @@ class TScanConfig {
   int  m_chargeStep;
   int  m_nMaskStages;
   int  m_pixPerRegion;
+  int  m_noiseCutInv;
   char m_fNameSuffix[20];
  protected: 
  public:

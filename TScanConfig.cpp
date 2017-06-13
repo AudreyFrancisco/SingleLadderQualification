@@ -12,6 +12,7 @@ TScanConfig::TScanConfig()
   m_chargeStep   = CHARGE_STEP;
   m_nMaskStages  = N_MASK_STAGES;
   m_pixPerRegion = PIX_PER_REGION;
+  m_noiseCutInv  = NOISECUT_INV;
   InitParamMap();
 }
 
@@ -25,6 +26,7 @@ void TScanConfig::InitParamMap ()
   fSettings["CHARGESTEP"]   = &m_chargeStep;
   fSettings["NMASKSTAGES"]  = &m_nMaskStages;
   fSettings["PIXPERREGION"] = &m_pixPerRegion;
+  fSettings["NOISECUT_INV"] = &m_noiseCutInv;
 }
 
 
