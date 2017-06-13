@@ -18,6 +18,13 @@ TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TSc
 }
 
 
+int TScanAnalysis::ReadChipList() 
+{
+  TScanHisto histo = m_scan->GetTScanHisto();
+  return histo.GetChipList (m_chipList);
+}
+
+
 void TScanAnalysis::CreateChipResults () 
 {
   if (m_chipList.size() == 0) {

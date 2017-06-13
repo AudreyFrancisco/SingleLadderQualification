@@ -38,9 +38,12 @@ class TNoiseAnalysis : public TScanAnalysis {
   float        m_noiseCut;
   TNoiseResult m_result;
   void         WriteResult();
+ protected: 
+  TScanResultChip GetChipResult () {TNoiseResultChip Result; return Result;};  
+  void            CreateResult  () {};
  public: 
   TNoiseAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
-  void Initialize () {};
+  void Initialize ();
   void Run        ();
   void Finalize   () { WriteResult(); };  
 };

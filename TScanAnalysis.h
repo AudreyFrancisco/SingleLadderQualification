@@ -48,6 +48,7 @@ class TScanAnalysis {
   virtual TScanResultChip      GetChipResult     () = 0;
   void                         CreateChipResults ();
   virtual void                 CreateResult      () = 0;
+  int                          ReadChipList      ();
  public:
   TScanAnalysis (std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
   virtual void Initialize() = 0; 

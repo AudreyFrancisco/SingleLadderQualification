@@ -14,6 +14,13 @@ void TNoiseAnalysis::WriteResult()
 }
 
 
+void TNoiseAnalysis::Initialize()
+{
+  ReadChipList      ();
+  CreateChipResults ();
+}
+
+
 void TNoiseAnalysis::Run() 
 {
   while (m_histoQue->size() == 0) {

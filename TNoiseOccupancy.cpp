@@ -35,6 +35,8 @@ TNoiseOccupancy::TNoiseOccupancy (TScanConfig *config, std::vector <TAlpide *> c
   m_start[2] = 0;
   m_step [2] = 1;
   m_stop [2] = 1;
+
+  CreateScanHisto();
 }
 
 
