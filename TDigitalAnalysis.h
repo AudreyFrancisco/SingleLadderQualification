@@ -22,12 +22,23 @@ typedef struct {
 
 
 class TDigitalResultChip : public TScanResultChip {
+ private: 
+  int m_nDead;
+  int m_nNoisy;
+  int m_nIneff;
+  int m_nStuck;
+  int m_nBadDcols;
  public: 
   TDigitalResultChip () : TScanResultChip () {};
 };
 
 
 class TDigitalResult : public TScanResult {
+ private: 
+  int m_nTimeout;
+  int m_n8b10b;
+  int m_nCorrupt;
+  std::map <common::TChipIndex, TDigitalResultChip> m_chipResult;
  public: 
   TDigitalResult () : TScanResult () {};
 };
@@ -48,7 +59,7 @@ class TDigitalAnalysis : public TScanAnalysis {
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
   
-  void Initialize() {};
+  void Initialize();
   void Run       ();
   void Finalize  ();
   

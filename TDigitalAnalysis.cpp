@@ -15,6 +15,13 @@ bool TDigitalAnalysis::HasData(TScanHisto &histo,  common::TChipIndex idx, int c
 }
 
 
+void TDigitalAnalysis::Initialize() 
+{
+  ReadChipList      ();
+  CreateChipResults ();
+}
+
+
 void TDigitalAnalysis::InitCounters () 
 {
   m_counters.clear();
@@ -133,6 +140,9 @@ void TDigitalAnalysis::Run()
 
 
 void TDigitalAnalysis::Finalize() {
+  TErrorCounter errCount = ((TMaskScan*)m_scan)->GetErrorCount();
+
+  // TODO: write results to result object
   WriteResult      ();
   WriteStuckPixels ();
 }
