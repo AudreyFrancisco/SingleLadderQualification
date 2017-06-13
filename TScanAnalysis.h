@@ -31,7 +31,7 @@ class TScanResult {
   int AddChipResult (common::TChipIndex idx, 
 		     TScanResultChip aChipResult);
   int AddChipResult (int aIntIndex, TScanResultChip aChipResult);
-  
+  TScanResultChip *GetChipResult (common::TChipIndex idx);
 };
 
 

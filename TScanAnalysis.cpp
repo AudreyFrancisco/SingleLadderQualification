@@ -33,8 +33,8 @@ void TScanAnalysis::CreateChipResults ()
   }
 
   for (int i = 0; i < m_chipList.size(); i ++) {
-    TScanResultChip chipResult = GetChipResult();
-    common::TChipIndex      idx    = m_chipList.at(i);
+    TScanResultChip    chipResult = GetChipResult();
+    common::TChipIndex idx        = m_chipList.at(i);
     m_result->AddChipResult (idx, chipResult);
   }
   
@@ -56,4 +56,14 @@ int TScanResult::AddChipResult (int aIntIndex,
   m_chipResults.insert(std::pair<int, TScanResultChip> (aIntIndex,aChipResult));
   
   return m_chipResults.size();
+}
+
+
+TScanResultChip *TScanResult::GetChipResult (common::TChipIndex idx) 
+{
+  for (std::map<int, TScanResultChip>::iterator it = m_chipResults.begin(); it != m_chipResults.end(); ++it)  {
+    int id = (idx.boardIndex << 8) | (idx.dataReceiver << 4) | (idx.chipId & 0xf);
+    if (it->first == id) return &(it->second);
+  }  
+  return 0;
 }

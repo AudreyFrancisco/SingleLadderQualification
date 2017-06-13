@@ -40,10 +40,14 @@ void TNoiseAnalysis::Run()
       m_mutex   ->unlock   ();
 
       for (int ichip = 0; ichip < m_chipList.size(); ichip ++) {
-        TNoiseResultChip *chipResult = ((TNoiseResult*)m_result)->GetChipResult(m_chipList.at(ichip));
+        TNoiseResultChip *chipResult = (TNoiseResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
         int               channel    = m_chipList.at(ichip).dataReceiver;
         int               chipId     = m_chipList.at(ichip).chipId;
         float             occ        = 0;
+        if (!chipResult) {
+	  std::cout << "Warning (TNoiseAnalysis): Missing chip result" << std::endl;
+          continue;
+	}
         for (int icol = 0; icol < 1024; icol ++) {
           for (int irow = 0; irow < 512; irow ++) {
             // if entry > noise cut: add pixel to chipResult->AddNoisyPixel

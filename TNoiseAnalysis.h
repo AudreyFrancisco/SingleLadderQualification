@@ -28,7 +28,6 @@ class TNoiseResult : public TScanResult {
   std::map <common::TChipIndex, TNoiseResultChip> m_chipResult;
  public: 
   TNoiseResult () : TScanResult () {};
-  TNoiseResultChip *GetChipResult (common::TChipIndex chip) {};
 };
 
 
