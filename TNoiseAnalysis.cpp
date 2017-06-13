@@ -6,6 +6,8 @@ TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, T
 {
   m_nTrig    = m_config->GetParamValue("NTRIG");
   m_noiseCut = m_nTrig / m_config->GetParamValue("NOISECUT_INV");
+
+  m_result = new TNoiseResult();
 }
 
 
@@ -17,7 +19,7 @@ void TNoiseAnalysis::WriteResult()
 void TNoiseAnalysis::Initialize()
 {
   ReadChipList      ();
-  CreateChipResults (&m_result);
+  CreateChipResults ();
 }
 
 
@@ -38,7 +40,7 @@ void TNoiseAnalysis::Run()
       m_mutex   ->unlock   ();
 
       for (int ichip = 0; ichip < m_chipList.size(); ichip ++) {
-        TNoiseResultChip *chipResult = m_result.GetChipResult(m_chipList.at(ichip));
+        TNoiseResultChip *chipResult = ((TNoiseResult*)m_result)->GetChipResult(m_chipList.at(ichip));
         int               channel    = m_chipList.at(ichip).dataReceiver;
         int               chipId     = m_chipList.at(ichip).chipId;
         float             occ        = 0;

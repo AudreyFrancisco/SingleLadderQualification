@@ -36,7 +36,6 @@ class TNoiseAnalysis : public TScanAnalysis {
  private: 
   int          m_nTrig;
   float        m_noiseCut;
-  TNoiseResult m_result;
   void         WriteResult();
  protected: 
   TScanResultChip GetChipResult () {TNoiseResultChip Result; return Result;};  

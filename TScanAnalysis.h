@@ -43,9 +43,10 @@ class TScanAnalysis {
   
   TScan                       *m_scan;
   TScanConfig                 *m_config;
+  TScanResult                 *m_result;
   bool                         m_first;
   virtual TScanResultChip      GetChipResult     () = 0;
-  void                         CreateChipResults (TScanResult *result);
+  void                         CreateChipResults ();
   virtual void                 CreateResult      () = 0;
   int                          ReadChipList      ();
  public:
