@@ -31,6 +31,7 @@ class TNoiseOccupancy : public TScan {
   ~TNoiseOccupancy  () {};
   void Init         ();
   void PrepareStep  (int loopIndex) {};
+  void LoopStart    (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void LoopEnd      (int loopIndex);
   void Execute      ();
   void Terminate    ();
