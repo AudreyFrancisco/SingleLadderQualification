@@ -39,6 +39,23 @@ common::TChipIndex common::GetChipIndex(int aIntIndex){
 }
 
 
+//preliminary function; for multi-board setups need to include boardId in TPixHit
+bool common::HitBelongsToChip(TChipIndex aChipIndex, TPixHit aHit) 
+{
+  if ((aChipIndex.dataReceiver == aHit.channel) && (aChipIndex.chipId == aHit.chipId)) return true;
+  return false;
+}
+
+
+int common::FindIndexForHit (std::vector <TChipIndex> aChipList, TPixHit aHit) 
+{
+  for (int ichip = 0; ichip < aChipList.size(); ichip++) {
+    if (HitBelongsToChip(aChipList.at(ichip), aHit)) return ichip;
+  }
+  return -1;
+}
+
+
 std::vector <common::TChipIndex> common::GetChipList (TScanHisto* aScanHisto){
   
   std::vector <TChipIndex> chipList;

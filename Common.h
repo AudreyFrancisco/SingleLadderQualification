@@ -8,6 +8,8 @@
 #include <vector>
 #include <string>
 
+#include "AlpideDecoder.h"
+
 class TScanHisto;
 
 namespace common{
@@ -71,6 +73,8 @@ namespace common{
   extern TChipIndex GetChipIndex(int aIntIndex);
   extern std::vector<TChipIndex> GetChipList(TScanHisto* aScanHisto);
   
+  bool HitBelongsToChip(TChipIndex aChipIndex, TPixHit aHit);  
+  int  FindIndexForHit (std::vector <TChipIndex> aChipList, TPixHit aHit);
 }
 
 #endif

@@ -22,18 +22,21 @@ typedef struct {
 
 
 class TDigitalResultChip : public TScanResultChip {
+  friend class TDigitalAnalysis;
  private: 
   int m_nDead;
   int m_nNoisy;
   int m_nIneff;
   int m_nStuck;
   int m_nBadDcols;
- public: 
+  std::vector <TPixHit> m_stuck;
+ public:
   TDigitalResultChip () : TScanResultChip () {};
 };
 
 
 class TDigitalResult : public TScanResult {
+  friend class TDigitalAnalysis;
  private: 
   int m_nTimeout;
   int m_n8b10b;
