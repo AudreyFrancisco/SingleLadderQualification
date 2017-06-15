@@ -1,0 +1,5 @@
+GUI
+*.pro.user
+Makefile
+moc_*
+ui_*

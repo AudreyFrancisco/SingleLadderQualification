@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <string.h>
 #include "TThresholdScan.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardDAQ.h"
@@ -8,6 +9,7 @@
 TThresholdScan::TThresholdScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
   : TMaskScan (config, chips, boards, histoQue, aMutex) 
 {
+  strcpy(m_name, "Threshold Scan");
   m_start[0]  = m_config->GetChargeStart();
   m_stop [0]  = m_config->GetChargeStop ();
   m_step [0]  = m_config->GetChargeStep ();

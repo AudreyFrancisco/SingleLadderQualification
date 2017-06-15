@@ -23,11 +23,15 @@ The software is currently supported to run only on the three following operating
 \begin{itemize}
 \item \textbf{Ubuntu 16.04 LTS:}
   \begin{lstlisting}
-    yum install -y gcc gcc-c++ make cmake tar zlib wget subversion \
-      git libusb1-devel tinyxml-devel
-      wget -O /opt/root.tar.gz \
-        https://root.cern.ch/download/root_v6.08.06.Linux-ubuntu16-x86_64-gcc5.4.tar.gz
-      cd /opt/ ; tar xzfv root.tar.gz
+    apt-get update -y && \
+    apt-get install -qq -y man git subversion dpkg-dev make cmake \
+                           wget binutils python python-dev libxml2-dev \
+                           software-properties-common gcc g++ \
+                           libusb-1.0-0-dev libtinyxml-dev qt5-default qt5-qmake && \
+    apt-get update -y
+    wget -O /opt/root.tar.gz \
+      https://root.cern.ch/download/root_v6.08.06.Linux-ubuntu16-x86_64-gcc5.4.tar.gz
+    cd /opt/ ; tar xzfv root.tar.gz
   \end{lstlisting}
   ROOT has to be loaded using
   \begin{lstlisting}
@@ -37,7 +41,7 @@ The software is currently supported to run only on the three following operating
 \item \textbf{CentOS CERN 7:}
   \begin{lstlisting}
     yum install -y gcc gcc-c++ make cmake tar zlib wget subversion \
-      git libusb1-devel tinyxml-devel
+      git libusb1-devel tinyxml-devel qt5-qtbase-devel
       wget -O /opt/root.tar.gz \
         https://root.cern.ch/download/root_v6.08.06.Linux-centos7-x86_64-gcc4.8.tar.gz
       cd /opt/ ; tar xzfv root.tar.bz
@@ -52,7 +56,7 @@ The software is currently supported to run only on the three following operating
     yum install -y git cmake binutils which \
       libX11-devel libXpm-devel libXft-devel libXext-devel \
       gsl-static curl tar devtoolset-4-gcc-c++  \
-      python27 libusb1-devel tinyxml-devel \
+      python27 libusb1-devel tinyxml-devel qt5-qtbase-devel \
     yum clean all
 
     source scl_source enable python27 devtoolset-4
@@ -64,7 +68,7 @@ The software is currently supported to run only on the three following operating
     mkdir -p /opt/root
     make
     make install
-    rm -rf /root-*'
+    rm -rf /tmp/root-*'
   \end{lstlisting}
   The \texttt{devtoolset-4} and \texttt{python27} is necessary on SLC6 and ROOT has to be activated using the following commands:
   \begin{lstlisting}
@@ -91,6 +95,26 @@ with your user name. Note that your account needs to be added to a
 list of users in order to being able to access the repository.
 Versions are updated regularly, make sure you have checked out the
 latest version. After the clone you will find the software in a directory \texttt{new-alpide-software}, an additional subdirectory \texttt{analysis} contains standard macros to analyse the data.
+
+The standard software is compiled using
+\begin{lstlisting}
+make
+\end{lstlisting}
+The libraries which are necessary for the GUI or EUDAQ are compiled using
+\begin{lstlisting}
+make lib && make lib_analysis
+\end{lstlisting}
+The GUI can be compiled using
+\begin{lstlisting}
+cd GUI
+qmake -makefile
+make
+\end{lstlisting}
+and can be run by invoking
+\begin{lstlisting}
+source ./env.sh
+./GUI
+\end{lstlisting}
 
 \paragraph{Executing Tests}\hfill \\
 After compiling the software package you will find a certain number of standard tests, described below, in the form of individual executables. Each executable performs a specific test once and, if applicable, writes the output data in a text file in the subdirectory \texttt{Data}. The settings of the chip(s), readout board(s) and the scan itself can be modified in the config file \texttt{Config.cfg}. Some of the available parameters are described below, for a more detailed description of the syntax and the available parameters please refer to the comments in the config file itself.

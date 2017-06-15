@@ -171,6 +171,7 @@ bool TThresholdAnalysis::HasData(TScanHisto &histo, common::TChipIndex idx, int 
   return true;
 }
 
+
 bool TThresholdAnalysis::CheckPixelNoHits(TGraph* aGraph)
 {
   

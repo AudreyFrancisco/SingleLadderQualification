@@ -31,28 +31,29 @@ class TScanResult {
   int AddChipResult (common::TChipIndex idx, 
 		     TScanResultChip aChipResult);
   int AddChipResult (int aIntIndex, TScanResultChip aChipResult);
-  
+  TScanResultChip *GetChipResult (common::TChipIndex idx);
 };
+
 
 class TScanAnalysis {
  protected:
   std::deque <TScanHisto>         *m_histoQue;
   std::vector<common::TChipIndex>  m_chipList;
   std::mutex                      *m_mutex;
-  TScanResult                     *m_result;
   
   TScan                       *m_scan;
   TScanConfig                 *m_config;
+  TScanResult                 *m_result;
   bool                         m_first;
   virtual TScanResultChip      GetChipResult     () = 0;
   void                         CreateChipResults ();
   virtual void                 CreateResult      () = 0;
+  int                          ReadChipList      ();
  public:
   TScanAnalysis (std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
   virtual void Initialize() = 0; 
   virtual void Run       () = 0;
   virtual void Finalize  () = 0; 
-  TScanResult  GetScanResult () {return *m_result;};  
 };
 
 

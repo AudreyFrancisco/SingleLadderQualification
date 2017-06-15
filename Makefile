@@ -5,9 +5,10 @@ INCLUDE=-I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOW
 LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic
 LIBPATH=/usr/local/lib
 CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium -I $(INCLUDE)
-LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread -L $(LIBPATH) -L $(LIB)
+LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread -L $(LIBPATH) $(LIB)
 #OBJECT= runTest
 LIBRARY=libalpide.so
+ANALYSIS_LIBRARY=libalpide_analysis.so
 
 ROOTCONFIG   := $(shell which root-config)
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
@@ -21,8 +22,8 @@ MOSAIC_SOURCES = MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSr
 
 CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
  TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
- BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TDigitalAnalysis.cpp TFifoAnalysis.cpp\
- TScan.cpp TFifoTest.cpp TThresholdScan.cpp TDigitalScan.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp Common.cpp $(RU_SOURCES) $(MOSAIC_SOURCES)
+ BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TDigitalAnalysis.cpp TFifoAnalysis.cpp TNoiseAnalysis.cpp\
+ TScan.cpp TFifoTest.cpp TThresholdScan.cpp TDigitalScan.cpp TNoiseOccupancy.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp Common.cpp $(RU_SOURCES) $(MOSAIC_SOURCES)
 
 OBJS = $(CLASSES:.cpp=.o)
 $(info OBJS="$(OBJS)")
@@ -45,6 +46,9 @@ $(LIBPOWERBOARD_DIR):
 
 lib: $(DEPS)
 	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
+
+lib_analysis: $(DEPS) $(OBJS_ROOT)
+	$(CC) -shared $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -o $(ANALYSIS_LIBRARY)
 
 test_mosaic: $(DEPS) main_mosaic.cpp
 	$(CC) -o test_mosaic $(OBJS) $(CFLAGS) main_mosaic.cpp $(LINKFLAGS)
@@ -120,8 +124,9 @@ clean:
 
 clean-all:	clean
 	rm -rf test_*
-	rm -rf libalpide.so
+	rm -rf $(LIBRARY)
+	rm -rf $(ANALYSIS_LIBRARY)
 	$(MAKE) -C $(LIBMOSAIC_DIR) clean
 	$(MAKE) -C $(LIBPOWERBOARD_DIR) clean
 
-.PHONY:	all clean clean-all $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR)
+.PHONY:	all clean clean-all $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) lib lib_analysis
