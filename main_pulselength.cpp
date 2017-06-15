@@ -167,6 +167,8 @@ int configureChip(TAlpide *chip) {
 
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
 
+  AlpideConfig::ConfigureCMU (chip);
+
   return 0;
 }
 
@@ -174,7 +176,7 @@ int configureChip(TAlpide *chip) {
 void scan(const char *fName) {   
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int                   prioErrors;
+  int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -191,9 +193,17 @@ void scan(const char *fName) {
         fBoards.at(0)->Trigger(myNTriggers);
 
         int itrg = 0;
+        int trials = 0;
         while(itrg < myNTriggers) {
           if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
-            usleep(100);
+            usleep(1000); // Increment from 100us
+            trials ++;
+            if (trials == 10) {
+              std::cout << "Reached 10 timeouts, giving up on this event" << std::endl;
+              itrg = myNTriggers;
+              nSkipped ++;
+              trials = 0;
+            }
             continue;
           }
           else {
