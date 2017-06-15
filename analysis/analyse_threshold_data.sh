@@ -88,7 +88,7 @@ EOF
 
 mkdir ${INPUT_PATH}/analysis
 cd ${INPUT_PATH}/analysis
-root  -l -b -q cd ${INPUT_PATH}/analyse_supply_voltage.C+g'("${INPUT_PATH}/threshold_summary.root")'
+root  -l -b -q cd ${ROOT_DIR}/analyse_supply_voltage.C+g'("${INPUT_PATH}/threshold_summary.root")'
 
 
 echo "done"
