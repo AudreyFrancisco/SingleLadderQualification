@@ -67,7 +67,7 @@ do
             VBB=${p:3}
         fi
     done
-    while read line 
+    while read line
     do
 	printf "%f %f %s %s %s %s %s %s %s\n" $V $VBB $line >> ${SUMMARY_FILE}
     done < "$f"
@@ -85,5 +85,10 @@ f->Close();
 delete f;
 f = 0x0;
 EOF
+
+mkdir ${INPUT_PATH}/analysis
+cd ${INPUT_PATH}/analysis
+root  -l -b -q cd ${INPUT_PATH}/analyse_supply_voltage.C+g'("${INPUT_PATH}/threshold_summary.root")'
+
 
 echo "done"
