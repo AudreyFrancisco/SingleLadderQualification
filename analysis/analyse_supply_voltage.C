@@ -121,8 +121,8 @@ void analyse_supply_voltage(TString filename = "../threshold_summary.root") {
   std::vector<TMultiGraph*> mg_vcasn;
   std::vector<TMultiGraph*> mg_ithr;
 
-  Int_t colours[] = { kBlack, kRed, kAzure, kOrange, kViolet, kGreen+3 };
-  Int_t markers[] = { 20,     21,   24,     25,      47,      46       };
+  Int_t colours[] = { kBlack, kRed, kAzure, kOrange, kViolet, kGreen+3, kBlack, kRed, kAzure, kOrange, kViolet, kGreen+3 };
+  Int_t markers[] = { 20,     21,   24,     25,      47,      46      , 24,     25,   46,     47,      20,      21};
 
   for (float vbb : vbb_list) {
     TMultiGraph* mg = new TMultiGraph();
