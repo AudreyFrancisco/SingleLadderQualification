@@ -11,8 +11,8 @@
 #include "TMultiGraph.h"
 #include "TLegend.h"
 
-//void analyse_supply_voltage(TString filename = "threshold_summary_608520W07R07_supplyVoltage_20170608_112250.root") {
-void analyse_supply_voltage(TString filename = "threshold_summary_608520W07R07_supplyVoltage_20170609_190610.root") {
+
+void analyse_supply_voltage(TString filename = "../threshold_summary.root") {
   TFile* f = new TFile(filename.Data());
   TTree* t = 0x0;
   gDirectory->GetObject("voltageDependence", t);

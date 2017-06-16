@@ -74,7 +74,7 @@ do
 done
 cat $SUMMARY_FILE
 
-### generate ROOT
+### generate ROOT TTree
 cd ${INPUT_PATH}
 root -l <<EOF
 TFile* f = new TFile("${INPUT_PATH}/threshold_summary.root", "RECREATE")
@@ -86,9 +86,10 @@ delete f;
 f = 0x0;
 EOF
 
-mkdir ${INPUT_PATH}/analysis
+### analyse the data
+mkdir -p  ${INPUT_PATH}/analysis
 cd ${INPUT_PATH}/analysis
-root  -l -b -q cd ${ROOT_DIR}/analyse_supply_voltage.C+g'("${INPUT_PATH}/threshold_summary.root")'
+root  -l -b -q ${ROOT_DIR}/analyse_supply_voltage.C+g'("'${INPUT_PATH}/threshold_summary.root'")'
 
 
 echo "done"
