@@ -41,7 +41,6 @@ class TDigitalResult : public TScanResult {
   int m_nTimeout;
   int m_n8b10b;
   int m_nCorrupt;
-  //  std::map <common::TChipIndex, TDigitalResultChip> m_chipResult;
  public: 
   TDigitalResult () : TScanResult () {};
 };

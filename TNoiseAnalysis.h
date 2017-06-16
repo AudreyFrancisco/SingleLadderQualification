@@ -25,7 +25,6 @@ class TNoiseResultChip : public TScanResultChip {
 
 class TNoiseResult : public TScanResult {
  private: 
-  std::map <common::TChipIndex, TNoiseResultChip> m_chipResult;
  public: 
   TNoiseResult () : TScanResult () {};
 };
