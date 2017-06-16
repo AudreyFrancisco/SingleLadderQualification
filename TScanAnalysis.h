@@ -25,12 +25,12 @@ class TScanResultChip {
 class TScanResult {
  private:
  protected: 
-  std::map <int, TScanResultChip> m_chipResults;
+  std::map <int, TScanResultChip*> m_chipResults;
  public: 
   TScanResult   () {};
   int AddChipResult (common::TChipIndex idx, 
-		     TScanResultChip aChipResult);
-  int AddChipResult (int aIntIndex, TScanResultChip aChipResult);
+		     TScanResultChip *aChipResult);
+  int AddChipResult (int aIntIndex, TScanResultChip *aChipResult);
   TScanResultChip *GetChipResult (common::TChipIndex idx);
 };
 
@@ -45,7 +45,7 @@ class TScanAnalysis {
   TScanConfig                 *m_config;
   TScanResult                 *m_result;
   bool                         m_first;
-  virtual TScanResultChip      GetChipResult     () = 0;
+  virtual TScanResultChip     *GetChipResult     () = 0;
   void                         CreateChipResults ();
   virtual void                 CreateResult      () = 0;
   int                          ReadChipList      ();

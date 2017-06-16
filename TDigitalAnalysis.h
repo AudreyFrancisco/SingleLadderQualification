@@ -41,7 +41,7 @@ class TDigitalResult : public TScanResult {
   int m_nTimeout;
   int m_n8b10b;
   int m_nCorrupt;
-  std::map <common::TChipIndex, TDigitalResultChip> m_chipResult;
+  //  std::map <common::TChipIndex, TDigitalResultChip> m_chipResult;
  public: 
   TDigitalResult () : TScanResult () {};
 };
@@ -57,7 +57,7 @@ class TDigitalAnalysis : public TScanAnalysis {
   void WriteResult      ();
   void WriteStuckPixels ();
  protected:
-  TScanResultChip GetChipResult () {TDigitalResultChip Result; return Result;};
+  TScanResultChip *GetChipResult () {TDigitalResultChip *Result = new TDigitalResultChip; return Result;};
   void            CreateResult  () {};
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);

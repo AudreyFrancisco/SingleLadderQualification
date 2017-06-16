@@ -553,7 +553,7 @@ void TThresholdAnalysis::Finalize()
     fclose(itr->second.GetFileRawData()); 
     
     m_result->AddChipResult(itr->first,
-			    itr->second);
+			    &(itr->second));
     
   }
 }

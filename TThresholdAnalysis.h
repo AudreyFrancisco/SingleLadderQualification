@@ -152,7 +152,7 @@ class TThresholdAnalysis : public TScanAnalysis {
 	       int col);
   
  protected:
-  TScanResultChip GetChipResult () {TThresholdResultChip Result; return Result;};
+  TScanResultChip *GetChipResult () {TThresholdResultChip *Result = new TThresholdResultChip(); return Result;};
   void            CreateResult  () {};
  public:
   TThresholdAnalysis(std::deque<TScanHisto> *scanHistoQue, 

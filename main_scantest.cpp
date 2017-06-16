@@ -91,11 +91,12 @@ int main(int argc, char** argv) {
   //scanLoop(myScan);
   std::cout << "starting thread" << std::endl;
   std::thread scanThread(scanLoop, myScan);
+  analysis->Initialize();
   std::thread analysisThread(&TScanAnalysis::Run, std::ref(analysis));
 
   scanThread.join();
   analysisThread.join();
-
+  analysis->Finalize();
   // std::vector <TCounter> counters = ((TDigitalAnalysis*)analysis)->GetCounters();
   
   // std::cout << std::endl << "Counter values: " << std::endl;

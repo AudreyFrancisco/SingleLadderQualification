@@ -148,26 +148,27 @@ void TDigitalAnalysis::Finalize() {
   result->m_nTimeout       = errCount.nTimeout;
   result->m_n8b10b         = errCount.n8b10b;
   result->m_nCorrupt       = errCount.nCorruptEvent;
-
+     
   for (int ichip = 0; ichip < m_chipList.size();ichip ++ ) {
     TDigitalResultChip* chipResult = (TDigitalResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
-
+      
+    if (!chipResult) std::cout << "WARNING: chipResult = 0" << std::endl;
     chipResult->m_nDead  = 512 * 1024 - (m_counters.at(ichip).nCorrect + m_counters.at(ichip).nNoisy + m_counters.at(ichip).nIneff);
     chipResult->m_nNoisy = m_counters.at(ichip).nNoisy;
     chipResult->m_nIneff = m_counters.at(ichip).nIneff;
   }
-
+   
   // for the time being divide stuck pixels on different chips here
   // later: change AlpideDecoder?
+
   for (int istuck = 0; istuck < stuck.size(); istuck++) {
     int entry = common::FindIndexForHit(m_chipList, stuck.at(istuck));
     if (entry >= 0) {
-      TDigitalResultChip* chipResult = (TDigitalResultChip*) m_result->GetChipResult(m_chipList.at(entry));
-      chipResult->m_stuck.push_back(stuck.at(istuck));
-      chipResult->m_nStuck++;
+        TDigitalResultChip* chipResult = (TDigitalResultChip*) m_result->GetChipResult(m_chipList.at(entry));
+        chipResult->m_stuck.push_back(stuck.at(istuck));
+        chipResult->m_nStuck++;
     }
   }
-
   WriteResult      ();
   WriteStuckPixels ();
 }
