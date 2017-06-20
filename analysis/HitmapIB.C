@@ -9,6 +9,8 @@
 //#include <string.h>
 //#include <stdio.h>
 
+/*Hitmap plotting for outer barrel*/
+
 void set_plot_style()
 {
     const Int_t NRGBs = 5;
@@ -62,11 +64,15 @@ void ReadFile (const char *fName, TH2F *hHitmap, int Chip, int nInj) {
       if (nhits < nInj) nIneff ++;
       if (nhits > nInj) nHot   ++;
     }
-    hHitmap->Fill(1024 * Chip + Column, Row, nhits);
+    if(Chip<7) {
+      hHitmap->Fill(1024 * Chip + Column, Row, nhits);
+    } else {
+      hHitmap->Fill(1024 * (14-Chip) + Column, Row+512, nhits);
+    }
   }
 
   if (nInj > 0) {
-    int nNoHit = 524288 - nLines;
+    int nNoHit = 1024*14 - nLines; //May be incorrect //524288 - nLines;
     std::cout << std::endl;
     std::cout << std::endl << "Chip " << Chip << ":" << std::endl;
     std::cout << "  Pixels without hits: " << nNoHit << std::endl;
@@ -80,16 +86,23 @@ void ReadFile (const char *fName, TH2F *hHitmap, int Chip, int nInj) {
 
 
 void AddLabels(){
-  for (int i = 1; i < 9; i++) {
-    TLine *line = new TLine (-.5 + i*1024,-.5,-.5 + i*1024, 511.5);
+  for (int i = 1; i < 7; i++) {
+    TLine *line = new TLine (-.5 + i*1024,-.5,-.5 + i*1024, 2*512-.5);
     line->Draw();
   }
   
-  for (int i = 0; i < 9; i++) {
+  TLine *horiz = new TLine(-.5,512-.5,7*1024-.5,512-.5);
+  horiz->Draw();
+  
+  for (int i = 0; i < 7; i++) {
     char text[10];
     sprintf(text, "Chip %d", i);
     TLatex *label = new TLatex (200 + i*1024, 250, text);
     label->Draw();
+    //upper row
+    sprintf(text, "Chip %d", 14-(i)); //order reversed for top
+    TLatex *label2 = new TLatex(200+i*1024, 250+512, text);
+    label2->Draw();
   }
 }
 
@@ -102,11 +115,13 @@ int HitmapIB(const char *fName, int nInj = -1) {
 
   std::cout << "Prefix = " << Prefix << std::endl;
   set_plot_style();
-  TH2F *hHitmap = new TH2F("hHitmap", "Hit map", 9216, -.5, 9215.5, 512, -.5, 511.5);
+  TH2F *hHitmap = new TH2F("hHitmap", "Hit map", 7*1024, -.5, 7*1024-.5, 512*2, -.5, 512*2-.5);
 
-  for (int ichip = 0; ichip < 9; ichip ++) {    
+  for (int ichip = 0; ichip < 7; ichip ++) {    
     sprintf(fNameChip, "%sChip%d.dat", Prefix, ichip);
     ReadFile(fNameChip, hHitmap, ichip, nInj);
+    sprintf(fNameChip, "%s_Chip%d_%d.dat", Prefix, ichip+8, 0); //second row
+    ReadFile(fNameChip, hHitmap, ichip+8, noise);
   }
 
   gStyle->SetPalette (1);
