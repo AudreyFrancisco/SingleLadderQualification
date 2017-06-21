@@ -36,7 +36,7 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
   const int  DCLK_DRIVER     = 10;
   const int  MCLK_RECEIVER   = 10;
   const int  DCTRL_RECEIVER  = 10;
-  const int  DCTRL_DRIVER    = 10;
+  const int  DCTRL_DRIVER    = 0;
 
   const int  PLL_PHASE       = 8;
   const int  PLL_STAGES      = 1;

@@ -138,7 +138,10 @@ int main(int argc, char** argv) {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
     for (int i = 0; i < fChips.size(); i ++) {
+      uint16_t value;
       configureChip (fChips.at(i));
+      fChips.at(i)->ReadRegister (0xf, value);
+      std::cout << "CMUDMU Config: " <<std::hex << value << std::dec << std::endl;
     }
 
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     

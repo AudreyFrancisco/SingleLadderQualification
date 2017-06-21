@@ -4,14 +4,15 @@
 #include <iostream>
 #include <QtCore/QCoreApplication>
 #include <iomanip>
-
+#include "TFifoTest.h"
 TestSelection::TestSelection(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::TestSelection)
 {
     ui->setupUi(this);
 
-    connect(ui->settings, SIGNAL(clicked()), this->parent(), SLOT(open()));
+    //connect(ui->settings, SIGNAL(clicked()), this->parent(), SLOT(open()));
+
     connect(ui->typeoftest,SIGNAL(currentIndexChanged(int)),this->parent(),SLOT(connectcombo(int)));
 
 

@@ -33,6 +33,8 @@
 #include "../TThresholdAnalysis.h"
 #include  "../TFifoTest.h"
 #include  "../TFifoAnalysis.h"
+#include "../TNoiseAnalysis.h"
+#include "../TNoiseOccupancy.h"
 #include <QFile>
 #include <typeinfo>
 #include <qpushbutton.h>
@@ -43,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {   chkBtnObm1=chkBtnObm2=chkBtnObm3=chkBtnObm4=chkBtnObm5=chkBtnObm6=chkBtnObm7=false;
+
      ui->setupUi(this);
      ui->tab_2->setEnabled(false);
      ui->tab_3->setEnabled(false);
@@ -572,31 +575,53 @@ void MainWindow::start_test(){
 
 void MainWindow::fillingvectors(){
     TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
-    TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), &fMutex);
+   TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), &fMutex);
     TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
+    TNoiseOccupancy *noisescan=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
     TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), &fMutex);
     TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
     TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), &fMutex);
+    TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(),&fMutex);
     fScanVector.push_back(fifoscan);
-    fScanVector.push_back(digitalscan);
+   fScanVector.push_back(digitalscan);
     fScanVector.push_back(thresholdscan);
+   fScanVector.push_back(noisescan);
+    //for (int i;i<3;i++)
+   //{
+     //   std::cout<<fScanVector[i]->GetName()<<endl;
+       // QString testnames=fScanVector[i]->GetName()+"\n";
+        // std::cout<<testnames;
+       // ui->scanstobeperformed->cursorForPosition(QPoint(0,0));
+     //   QString name =ui->scanstobeperformed->text();
+       // name =fScanVector[i]->GetName();
+        //  connect(ui->scanstobeperformed , SIGNAL(textChanged(QString)),label, SLOT(setText(QString )));
+       // ui->setupUi(this);
+      // ui->scanstobeperformed->setText(fScanVector[i]->GetName());
+       // ui->scanstobeperformed->setText("d");
+              //  append("dimitra");
+       // std::cout<<name;
+        //ui->scanstobeperformed->setText(name);
+        // ui->scanstobeperformed->setPlainText(fScanVector[i]->GetName());
+
+    //}
     fAnalysisVector.push_back(fifoanalysis);
     fAnalysisVector.push_back(digitalanalysis);
-    fAnalysisVector.push_back(thresholdanalysis);
-   // qDebug()<<fAnalysisVector.size()<<endl;
-    performtests(fScanVector,fAnalysisVector);
+   fAnalysisVector.push_back(thresholdanalysis);
+  fAnalysisVector.push_back(noiseanalysis);
+  // performtests(fScanVector,fAnalysisVector);
     qDebug()<<"dimitra"<<endl;
 
 }
 
 void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysis *> a){
     qDebug()<<s.size()<<endl;
-    for (int i=0;i<s.size();i++){
+    for (int i=1;i<2;i++){
 
     std::thread scanThread(&MainWindow::scanLoop,this,s[i]);
+     a.at(i)->Initialize();
     qDebug()<<s.at(i)<<"g"<<endl;
     std::thread analysisThread(&TScanAnalysis::Run, std::ref(a[i]));
-    a.at(i)->Initialize();
+
     scanThread.join();
     analysisThread.join();
     a.at(i)->Finalize();
@@ -611,22 +636,43 @@ void MainWindow::connectcombo(int value){
         qDebug()<<"No Test selected";
         ui->start_test->hide();
         break;
-    case 1:
+    case 1:{
         ui->start_test->show();
         qDebug()<<"OB Qualification test selected";
-       // disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(test()));
-      //  disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(scantest()));
-      //  disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(digital()));
-        connect (ui->start_test,SIGNAL(clicked()),this,SLOT(fillingvectors()));
-        break;
+        open();
+        fillingvectors();
+      //  connect (ui->start_test,SIGNAL(clicked()),this,SLOT(fillingvectors()));
+     connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
+     //TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
+       // fillingvectors();
+      //  performtests(fScanVector,fAnalysisVector);
+        break;}
     case 2:
         ui->start_test->show();
         qDebug()<<"IB Qualification test selected";
-        disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(fillingvectors()));
-        //disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(digital()));
+       // disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(performtests(fScanVector,fAnalysisVector)));
+        disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(digital()));
         //disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(fifotest()));
         //connect (ui->start_test,SIGNAL(clicked()),this,SLOT(scantest()));
         break;
+
+    }
+}
+
+void MainWindow::applytests(){
+    performtests(fScanVector,fAnalysisVector);
+}
+void MainWindow::WriteTests(){
+
+    for (int i;i<3;i++)
+       {
+         //   std::cout<<fScanVector[i]->GetName()<<endl;
+           // QString testnames=fScanVector[i]->GetName()+"\n";
+            // std::cout<<testnames;
+           // ui->scanstobeperformed->cursorForPosition(QPoint(0,0));
+         //   QString name =ui->scanstobeperformed->text();
+           // name =fScanVector[i]->GetName();
+            //  connect(ui->scanstobeperformed , SIGNAL(textChanged(QString)),label, SLOT(setText(QString )));
 
     }
 }

@@ -1101,6 +1101,19 @@
      <string>Start new test</string>
     </property>
    </widget>
+   <widget class="QLabel" name="scanstobeperformed">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>40</y>
+      <width>241</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">

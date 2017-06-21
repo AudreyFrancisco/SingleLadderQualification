@@ -76,15 +76,15 @@ void ReadFile (const char *fName, TH2F *hHitmap, int Chip, bool aNoise) {
     threshSq  += thresh * thresh;
 
     if (aNoise) { //correct for second row now
-      if(Chip<7) {
-        hHitmap->Fill(1024 * Chip + Column, Row, noise);
+      if(Chip<7) {  //Need to rotate bottom pixels by 180*!
+        hHitmap->Fill(1024 * Chip + (1024-Column), 512-Row, noise);
       } else { //shift up and reverse order of rows
         hHitmap->Fill(1024 * (14-Chip) + Column, Row+512, noise);
       }
     }
     else {
       if(Chip<7) {
-        hHitmap->Fill(1024 * Chip + Column, Row, thresh);
+        hHitmap->Fill(1024 * Chip + (1024-Column), 512-Row, thresh);
       } else {
         hHitmap->Fill(1024 * (14-Chip) + Column, Row+512, thresh);
       }
@@ -117,6 +117,7 @@ void AddLabels(){
   }
   
   TLine *horiz = new TLine(-.5,512-.5,7*1024-.5,512-.5);
+  horiz->Draw();
 
   for (int i = 0; i < 7; i++) {
     char text[10];

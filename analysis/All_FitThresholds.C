@@ -9,7 +9,7 @@
 void runFit(int chipNum, std::string prefix, int suff) {
   //This might not be the cleanest way to do this, but it works.  Streamline later?
   std::string commandStr = ".x ../../../analysis/FitThresholds.C+(\"" + prefix
-                 + "_Chip" + std::to_string(chipNum) + "_" + std::to_string(suff) + ".dat\")";
+                 + "Chip" + std::to_string(chipNum) + "_" + std::to_string(suff) + ".dat\")";
   
   
   const char * input = commandStr.c_str();
