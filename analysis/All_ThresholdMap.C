@@ -7,7 +7,7 @@
 #include "TStyle.h"
 #include "TColor.h"
 
-/*ThresholdMap for mid-layer chips*/
+/*Plot ThresholdMap for outer barrel*/
 
 void set_plot_style()
 {
@@ -47,13 +47,6 @@ int AddressToRow(int ARegion, int ADoubleCol, int AAddress)
 void ReadFile (const char *fName, TH2F *hHitmap, int Chip, bool aNoise) {
   int   event, col, row;  //position=new=upper or lower row
   float thresh, noise, chisq;
-
-  /*if(Chip<7) {
-    position=1;
-  } else {
-    position=0;
-  } */
-
   FILE *fp = fopen(fName, "r");
 
   if (!fp) {
@@ -103,10 +96,7 @@ void ReadFile (const char *fName, TH2F *hHitmap, int Chip, bool aNoise) {
     std::cout << "  Noise:     (" << avNoise << " +- " << rmsNoise << ") e." <<std::endl;
   }
 
-
-
   fclose(fp);
-
 }
 
 
