@@ -40,13 +40,13 @@
 #define ALPIDEDBMANAGER_H_
 
 #include <locale>
-#include <codecvt>
-#include <curl/curl.h>
+//#include <curl/curl.h>
 
 #include "utilities.h"
 #include "CernSsoCookiesJar.h"
 
 #define USERCERT "/home/fap/.globus/usercert.pem"
+#define USERKEYPEM "/home/fap/.globus/userkey.pem"
 #define USERKEY "/home/fap/.globus/userkey.key"
 #define SSOURL "https://test-alucmsapi.web.cern.ch"
 #define CAPATH "/home/fap/.globus/CA/"
@@ -67,13 +67,14 @@ struct ReceiveBuffer {
 // Members
 private:
 
-	CURL * myHandle;
-	CURLcode result; // We’ll store the result of CURL’s webpage retrieval, for simple error checking.
+//	CURL * myHandle;
+//	CURLcode result; // We’ll store the result of CURL’s webpage retrieval, for simple error checking.
 
 	CernSsoCookieJar	*theCookieJar;
 
 	string	theCliCer;
 	string	theCliKey;
+	string	theCliKeyPem;
 	string	theJarUrl;
 	string theCertificationAuthorityPath;
 
@@ -88,32 +89,32 @@ public:
     ~AlpideDBManager();
 
     bool Init(string aCliCer, string aCliKey, string aSslUrl, string aCAPath);
+    bool Init(string aCliCer, string aCliKey, string aCliKeyPem, string aSslUrl, string aCAPath);
     bool Init();
 
     // getters & setters
     string getClientCertFile() { return(theCliCer);};
     string getClientKeyFile() { return(theCliKey);};
+    string getClientKeyPemFile() { return(theCliKeyPem);};
     string getSSOCookieUrl() { return(theJarUrl);};
     string getCAPath() { return(theCertificationAuthorityPath);};
 
     void setClientCertFile(string aCliCer) { theCliCer = aCliCer;};
     void setClientKeyFile(string aCliKey) { theCliKey = aCliKey;};
+    void setClientKeyPemFile(string aCliKey) { theCliKeyPem = aCliKey;};
     void setSSOCookieUrl(string aJarUrl) { theJarUrl = aJarUrl;};
     void setCAPath(string aCAPath) { theCertificationAuthorityPath = aCAPath;};
 
 public:
 	int makeDBQuery(const string Url, const char *Payload, char **Result);
-	// int syncDBQuery(string Url, char *Payload, char **Result);
-
-	static size_t readResponseCB(void *contents, size_t size, size_t nmemb, void *userp);
-
-//	void receiveResults(QNetworkRequest *request,QByteArray *result);
-
+//	static size_t readResponseCB(void *contents, size_t size, size_t nmemb, void *userp);
 
 private:
 	bool makeDBQuery(string Url);
+//	void print_cookies(CURL *curl);
 
 private:
+	//	void receiveResults(QNetworkRequest *request,QByteArray *result);
 //	void endTheDBQuery(QNetworkReply *reply);
 //	void requestAuthenication(QNetworkReply *reply, QAuthenticator *ator);
 //	void recieveSslErrors(QNetworkReply*,const QList<QSslError> &errors);

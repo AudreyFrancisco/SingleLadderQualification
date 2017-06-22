@@ -15,7 +15,7 @@ INCLUDES = -I/usr/include/libxml2
 LIBS = -lxml2 -lcurl
 
 # define any compile-time flags
-CFLAGS = -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium $(INCLUDES)
+CFLAGS = -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium $(INCLUDES) -v
 
 # define the C source files
 SRCS = AlpideDB.cpp AlpideDBEndPoints.cpp AlpideDBManager.cpp CernSsoCookiesJar.cpp utilities.cpp main.cpp

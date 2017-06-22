@@ -40,9 +40,12 @@
 #include "CernSsoCookiesJar.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #include <iostream>
 #include <fstream>
-#include <string>
+// / #include <string>
+
 
 CernSsoCookieJar::CernSsoCookieJar() //: QNetworkCookieJar(parent)
 {
@@ -114,10 +117,6 @@ bool CernSsoCookieJar::fillTheJar()
     Command += " -o ";
     Command += CookieFileName;
 
-    //    QString par1 = " --cert /home/fap/.globus/usercert.pem";
-    //    QString par2 = " --key /home/fap/.globus/userkey.key";
-    //    QString par3 = " -r -u https://test-alucmsapi.web.cern.ch";
-
     system(Command.c_str());
     cout << "Execute the bash :" << Command;
     if(!fileExists(CookieFileName)) { //the file doesn't exists. ACH !
@@ -172,28 +171,28 @@ bool CernSsoCookieJar::fillTheJar()
 bool CernSsoCookieJar::testTheCERNSSO()
 {
 
-	remove("/tmp/exitus.txtn");
+    remove("/tmp/exitus.txt");
 
-	string Command = "type cern-get-sso-cookie > /tmp/exitus.txt";
+    string Command = "type cern-get-sso-cookie > /tmp/exitus.txt";
     system(Command.c_str());
-    cout << "Execute : " << Command;
+    cout << "Execute : " << Command << endl;
 
-    ifstream result;
-    result.open ("/tmp/exitus.txtn", ios::in );
-    if (!result.is_open()) {
-        cerr << "Error to access /tmp folder ! Abort";
+    FILE *result;
+    result = fopen("/tmp/exitus.txt", "r");
+    if (result == NULL) {
+        cerr << "Error to access /tmp folder ! Abort" << endl;
         return(false);
     }
 
-    string line;
-    if( getline( result, line)) {
-    	if( line.find( "cern-get-sso-cookie is") != string::npos ) {
-    		cout << "The CERN-SSO package is installed !";
-    		return(true);
-    	} else {
-    		cerr << "CERN-SSO package not Found ! Abort";
-    		return(false);
-    	}
+    char buffer[512];
+    if( fgets(buffer,511,result) != NULL && strstr(buffer,"cern-get-sso-cookie is") !=  NULL) {
+    	cout << "The CERN-SSO package is installed !" << endl;
+	fclose(result);    	
+	return(true);
+    } else {
+    	cerr << "CERN-SSO package not Found ! Abort" << endl;
+	fclose(result);    	
+	return(false);
     }
     return(false);
 }

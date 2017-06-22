@@ -37,19 +37,19 @@
 #include "AlpideDB.h"
 #include "utilities.h"
 
-#include <curl/curl.h>
+//#include <curl/curl.h>
 
 AlpideDB::AlpideDB()
 {
-	curl_global_init( CURL_GLOBAL_ALL );
+	//curl_global_init( CURL_GLOBAL_ALL );
 
 	theQueryDomain = "https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx/";
 
     theDBmanager = new AlpideDBManager();
     theDBmanager->Init("/home/fap/.globus/usercert.pem",
-    					"/home/fap/.globus/userkey.key",
-						"https://test-alucmsapi.web.cern.ch",
-						"/etc/ssl/certs/");
+    		"/home/fap/.globus/userkey.pem",
+			"https://test-alucmsapi.web.cern.ch",
+			"/etc/ssl/certs");
 
 }
 

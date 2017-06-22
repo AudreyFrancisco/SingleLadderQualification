@@ -40,8 +40,6 @@
 
 #include <iostream>
 #include <string>
-#include <locale>
-#include <codecvt>
 
 using namespace std;
 
@@ -51,11 +49,11 @@ bool pathExists(string path);
 class Uri {
 private:
 public:
-	std::wstring QueryString, Path, wProtocol, wHost, wPort;
-	std::string Protocol, Host, Port;
-	static Uri Parse(const std::wstring &uri);
+	std::string QueryString, Path;
+	std::string Protocol, Host, Port, User;
 	static Uri Parse(const std::string &uri);
 };
+
 #endif // UTILITIES_H
 
 

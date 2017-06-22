@@ -34,6 +34,10 @@
  *
  *
  */
+#include <stdio.h>
+#include <string.h>
+
+
 #include "AlpideDBEndPoints.h"
 #include "AlpideDB.h"
 #include "utilities.h"
@@ -54,10 +58,7 @@ AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString)
 	doc = xmlReadMemory(ReturnedString, strlen(ReturnedString), "noname.xml", NULL, 0); // parse the XML
 	if (doc == NULL) {
 	    cerr << "Failed to parse document" << endl;
-		theResponse.ErrorCode = -1;
-		theResponse.ErrorMessage = "Invalid XML format";
-		theResponse.ID = 0;
-		theResponse.Session = 0;
+	    SetResponse(AlpideTable::BadXML, 0,0);
 		return(&theResponse);
 	}
 
@@ -114,10 +115,7 @@ int ProjectDB::GetList(vector<project> *Result)
 	doc = xmlReadMemory(result, strlen(result), "noname.xml", NULL, 0); // parse the XML
 	if (doc == NULL) {
 	    cerr << "Failed to parse document" << endl;
-		theResponse.ErrorCode = -1;
-		theResponse.ErrorMessage = "Invalid XML format";
-		theResponse.ID = 0;
-		theResponse.Session = 0;
+	    SetResponse(AlpideTable::BadXML, 0,0);
 		return(0);
 	}
 
@@ -125,10 +123,7 @@ int ProjectDB::GetList(vector<project> *Result)
 	xmlNode *root_element = NULL;
 	root_element = xmlDocGetRootElement(doc);
 	if(root_element == NULL) {
-		theResponse.ErrorCode = -1;
-		theResponse.ErrorMessage = "Invalid XML format";
-		theResponse.ID = 0;
-		theResponse.Session = 0;
+	    SetResponse(AlpideTable::BadXML, 0,0);
 		return(0);
 	}
 	xmlNode *nod = root_element->children;
@@ -175,10 +170,7 @@ int MemberDB::GetList(int projectID, vector<member> *Result)
 	doc = xmlReadMemory(result, strlen(result), "noname.xml", NULL, 0); // parse the XML
 	if (doc == NULL) {
 	    cerr << "Failed to parse document" << endl;
-		theResponse.ErrorCode = -1;
-		theResponse.ErrorMessage = "Invalid XML format";
-		theResponse.ID = 0;
-		theResponse.Session = 0;
+	    SetResponse(AlpideTable::BadXML, 0,0);
 		return(0);
 	}
 
@@ -186,10 +178,7 @@ int MemberDB::GetList(int projectID, vector<member> *Result)
 	xmlNode *root_element = NULL;
 	root_element = xmlDocGetRootElement(doc);
 	if(root_element == NULL) {
-		theResponse.ErrorCode = -1;
-		theResponse.ErrorMessage = "Invalid XML format";
-		theResponse.ID = 0;
-		theResponse.Session = 0;
+	    SetResponse(AlpideTable::BadXML, 0,0);
 		return(0);
 	}
 	xmlNode *nod = root_element->children;
@@ -238,10 +227,7 @@ int ComponentDB::GetList(int ProjectID, vector<component> *Result)
 	doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
 	if (doc == NULL) {
 	    cerr << "Failed to parse document" << endl;
-		theResponse.ErrorCode = -1;
-		theResponse.ErrorMessage = "Invalid XML format";
-		theResponse.ID = 0;
-		theResponse.Session = 0;
+	    SetResponse(AlpideTable::BadXML, 0,0);
 		return(0);
 	}
 
@@ -249,10 +235,7 @@ int ComponentDB::GetList(int ProjectID, vector<component> *Result)
 	xmlNode *root_element = NULL;
 	root_element = xmlDocGetRootElement(doc);
 	if(root_element == NULL) {
-		theResponse.ErrorCode = -1;
-		theResponse.ErrorMessage = "Invalid XML format";
-		theResponse.ID = 0;
-		theResponse.Session = 0;
+	    SetResponse(AlpideTable::BadXML, 0,0);
 		return(0);
 	}
 
@@ -349,10 +332,7 @@ int ComponentDB::Get(int ComponentTypeID, component *Result)
 	doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
 	if (doc == NULL) {
 	    cerr << "Failed to parse document" << endl;
-		theResponse.ErrorCode = -1;
-		theResponse.ErrorMessage = "Invalid XML format";
-		theResponse.ID = 0;
-		theResponse.Session = 0;
+	    SetResponse(AlpideTable::BadXML, 0,0);
 		return(0);
 	}
 
@@ -360,10 +340,7 @@ int ComponentDB::Get(int ComponentTypeID, component *Result)
 	xmlNode *root_element = NULL;
 	root_element = xmlDocGetRootElement(doc);
 	if(root_element == NULL) {
-		theResponse.ErrorCode = -1;
-		theResponse.ErrorMessage = "Invalid XML format";
-		theResponse.ID = 0;
-		theResponse.Session = 0;
+	    SetResponse(AlpideTable::BadXML, 0,0);
 		return(0);
 	}
 
