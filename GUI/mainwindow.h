@@ -142,7 +142,7 @@ private slots:
  void applytests();
  void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
 // void connectcombo(int value);
- void fillingvectors();
+ void fillingOBvectors();
  void WriteTests();
 
 };
