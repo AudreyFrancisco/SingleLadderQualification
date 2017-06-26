@@ -174,7 +174,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 }
 
 
-void fillIthr(int (&ithr)[14]) { //WIP
+void fillIthr(int *ithr) { //WIP
   int old_vcas; //only current used for now; the rest are probably unecessary
   int old_ith;
   int goodPixels;
@@ -198,8 +198,8 @@ void fillIthr(int (&ithr)[14]) { //WIP
       std::cout << "Unable to open file." << std::endl;
       ithr[i]=-1;
     }
+    fclose(fp);
   }
-  fclose(fp);
 }
 
 
@@ -208,7 +208,7 @@ void scan() {
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0;
-  int ithr[14]; //shouldn't have >14 chips
+  int *ithr = new int[14]; //shouldn't have >14 chips
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
   std::vector<int> myVPULSEH;
@@ -220,7 +220,7 @@ void scan() {
     myMOSAIC->StartRun();
   }
 
-  fillIthr(&ithr); //NEW--fill ithr with calibrated values for each chip
+  fillIthr(ithr); //NEW--fill ithr with calibrated values for each chip
 
   for (int i = 0; i < fChips.size(); i++) { //Read VPULSEH from Config and save it at vector temporarily
     myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
@@ -363,9 +363,9 @@ int main(int argc, char** argv) {
 
     scan();
 
-    sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
+    sprintf(fName, "Data/ThresholdScan_%s_0.dat", Suffix);
     WriteDataToFile (fName, true);
-    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    sprintf(fName, "Data/ScanConfig_%s_0.cfg", Suffix);
 
     if (myDAQBoard) {
       WriteScanConfig (fName, fChips.at(0), myDAQBoard);

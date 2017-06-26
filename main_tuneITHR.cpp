@@ -319,9 +319,9 @@ int main() {
 
     scan();
 
-    sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
+    sprintf(fName, "Data/ThresholdScan_%s_0.dat", Suffix);
     WriteDataToFile (fName, true);
-    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    sprintf(fName, "Data/ScanConfig_%s_0.cfg", Suffix);
 
     if (myDAQBoard) {
       WriteScanConfig (fName, fChips.at(0), myDAQBoard);
