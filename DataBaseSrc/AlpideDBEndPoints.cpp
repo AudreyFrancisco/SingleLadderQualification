@@ -214,12 +214,12 @@ ComponentDB::~ComponentDB()
 {
 }
 
-int ComponentDB::GetList(int ProjectID, vector<component> *Result)
+int ComponentDB::GetTypeList(int ProjectID, vector<componentType> *Result)
 {
 	string theUrl = theParentDB->GetQueryDomain() + "ComponentTypeRead";
 	string theQuery = "projectID=" + std::to_string(ProjectID) ;
 	char *stringresult;
-	component pro;
+	componentType pro;
 
 	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) return(-1);
 
@@ -244,7 +244,7 @@ int ComponentDB::GetList(int ProjectID, vector<component> *Result)
 	while (nod != NULL) {
 		if(strcmp((const char*)nod->name, "ComponentType") == 0) {
 			n1 = nod->children;
-			extractTheComponent(n1, &pro);
+			extractTheComponentType(n1, &pro);
 			Result->push_back(pro);
 		}
 		nod = nod->next;
@@ -257,9 +257,9 @@ int ComponentDB::GetList(int ProjectID, vector<component> *Result)
 	return(Result->size());
 }
 
-void ComponentDB::extractTheComponent(xmlNode *ns, component *pro)
+void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro)
 {
-	xmlNode *n1,*n2,*n3;
+	xmlNode *n1,*n2,*n3, *n4;
 	n1 = ns;
 
 	while(n1 != NULL) {
@@ -274,9 +274,16 @@ void ComponentDB::extractTheComponent(xmlNode *ns, component *pro)
 					n3 = n2->children;
 					composition ap1;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ComponentType") == 0)  ap1.ComponentType.assign( (const char *)n3->content);
-						else if(strcmp((const char*)n3->name, "Quantity") == 0)  ap1.Quantity = atoi( (const char*)n3->content);
-						n3 = n3->next;
+						if(strcmp((const char*)n3->name, "ComponentType") == 0)  {
+							n4 = n3->children;
+							while(n4 != NULL) {
+								if(strcmp((const char*)n4->name, "ID") == 0) ap1.ID = atoi( (const char*)n4->children->content);
+								else if(strcmp((const char*)n4->name, "Name") == 0)  ap1.ComponentType.assign( (const char *)n4->children->content);
+								n4 = n4->next;
+							}
+						}
+						else if(strcmp((const char*)n3->name, "Quantity") == 0)  ap1.Quantity = atoi( (const char*)n3->children->content);
+						n3 =n3->next;
 					}
 					pro->Composition.push_back(ap1);
 				}
@@ -290,8 +297,8 @@ void ComponentDB::extractTheComponent(xmlNode *ns, component *pro)
 					n3 = n2->children;
 					statusphysical ap1;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0)  ap1.ID = atoi((const char *)n3->content);
-						else if(strcmp((const char*)n3->name, "NAME") == 0)  ap1.Name.assign( (const char *)n3->content);
+						if(strcmp((const char*)n3->name, "ID") == 0) ap1.ID = atoi((const char *)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Name") == 0)  ap1.Name.assign( (const char *)n3->children->content);
 						n3 = n3->next;
 					}
 					pro->PhysicalStatus.push_back(ap1);
@@ -306,8 +313,8 @@ void ComponentDB::extractTheComponent(xmlNode *ns, component *pro)
 					n3 = n2->children;
 					statusfunctional ap1;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0)  ap1.ID = atoi((const char *)n3->content);
-						else if(strcmp((const char*)n3->name, "NAME") == 0)  ap1.Name.assign( (const char *)n3->content );
+						if(strcmp((const char*)n3->name, "ID") == 0)  ap1.ID = atoi((const char *)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Name") == 0)  ap1.Name.assign( (const char *)n3->children->content );
 						n3 = n3->next;
 					}
 					pro->FunctionalStatus.push_back(ap1);
@@ -319,15 +326,14 @@ void ComponentDB::extractTheComponent(xmlNode *ns, component *pro)
 	}
 }
 
-int ComponentDB::Get(int ComponentTypeID, component *Result)
+int ComponentDB::GetType(int ComponentTypeID, componentType *Result)
 {
 	string theUrl = theParentDB->GetQueryDomain() + "ComponentTypeReadAll";
 	string theQuery = "componentTypeID=" + std::to_string(ComponentTypeID) ;
 	char *stringresult;
-	component pro;
+	componentType pro;
 
 	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) return(-1);
-
 	xmlDocPtr doc;
 	doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
 	if (doc == NULL) {
@@ -345,7 +351,7 @@ int ComponentDB::Get(int ComponentTypeID, component *Result)
 	}
 
 	xmlNode *n1 = root_element->children;
-	extractTheComponent(n1, Result);
+	extractTheComponentType(n1, Result);
 
 	return(1);
 }
@@ -358,7 +364,6 @@ AlpideTable::response * ComponentDB::Create(string ComponentTypeID, string Compo
 	string theQuery = "componentTypeID="+ComponentTypeID+"&componentID="+ComponentID+"&supplierComponentID="+SupplyCompID+
 			"&description="+Description+"&lotID="+LotID+"&packageID="+PackageID+"&userID="+UserID;
 	char *stringresult;
-	component pro;
 
 	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 		SetResponse(AlpideTable::SyncQuery);
@@ -367,4 +372,26 @@ AlpideTable::response * ComponentDB::Create(string ComponentTypeID, string Compo
 	return(&theResponse);
 }
 
+const char *ComponentDB::print(componentType *co)
+{
+			ap = "Component : ID=" + std::to_string(co->ID) +
+				" Name="+ co->Name + " Code=" + co->Code + " Description=" + co->Description + "\n";
+			ap += "   Composition : {";
+			for(int i=0;i<co->Composition.size();i++)
+				ap+= "( ID="+std::to_string(co->Composition.at(i).ID)+
+						",Type="+co->Composition.at(i).ComponentType+
+						  ",Q.ty="+std::to_string(co->Composition.at(i).Quantity)+")";
+			ap += "}\n";
+			ap += "   Physical Status  : {";
+			for(int i=0;i<co->PhysicalStatus.size();i++)
+				ap+= "( ID="+ std::to_string(co->PhysicalStatus.at(i).ID) +
+						  ",Name="+co->PhysicalStatus.at(i).Name+")";
+			ap += "}\n";
+			ap += "   Functional Status  : {";
+			for(int i=0;i<co->FunctionalStatus.size();i++)
+				ap+= "( ID="+ std::to_string(co->FunctionalStatus.at(i).ID) +
+						  ",Name="+co->FunctionalStatus.at(i).Name+")";
+			ap += "}\n";
+			return(ap.c_str());
+}
 

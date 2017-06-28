@@ -47,7 +47,7 @@
 // / #include <string>
 
 
-CernSsoCookieJar::CernSsoCookieJar() //: QNetworkCookieJar(parent)
+CernSsoCookieJar::CernSsoCookieJar(string aCookiePackFileName)
 {
     if( !testTheCERNSSO()) {
         exit(1);
@@ -55,6 +55,7 @@ CernSsoCookieJar::CernSsoCookieJar() //: QNetworkCookieJar(parent)
     theCliCert = "";
     theCliKey = "";
     theSslUrl = "";
+    theCookiePackFile = aCookiePackFileName;
 }
 
 CernSsoCookieJar::~CernSsoCookieJar()
@@ -67,22 +68,20 @@ CernSsoCookieJar::~CernSsoCookieJar()
  * ----------------------------------- */
 bool CernSsoCookieJar::isJarValid()
 {
-	/*
-    QList<QNetworkCookie> ActualJar;
-    ActualJar = allCookies();
-    if(ActualJar.size() == 0) { // it is empty
-        return(false);
-    }
-    for(int i=0;i<ActualJar.size();i++) { // test the expiration datetime
-        QDateTime expire;
-        expire = ActualJar.at(i).expirationDate();
-        if(expire < QDateTime::currentDateTime()) {
-            qDebug() << "A cookie is expired !";
-            return(false);
-        }
-    }
-    */
-    return(true);
+	int i;
+	int n = theJar.size();
+	unsigned long int theActualTime = time(NULL);
+	unsigned long int theExpiration ;
+
+	if(n==0) return(false); // the Jar is empty
+	for(i=0;i<n;i++) {
+		theExpiration = theJar.at(i).expires;
+		if(theExpiration <= theActualTime) {
+			cerr << "The cookie " << theJar.at(i).name << " is expired !" << endl;
+			return(false);
+		}
+	}
+	return(true);
 }
 
 
@@ -103,9 +102,8 @@ bool CernSsoCookieJar::fillTheJar(string aCliCert, string aCliKey, string aSslUr
 bool CernSsoCookieJar::fillTheJar()
 {
     // run the CERN SSO in order to obtain the cookies file
-    string CookieFileName =  "/tmp/cerncookie.txt";
-    if(remove(CookieFileName.c_str())) {//the file exists... delete!
-        cout << "The " << CookieFileName << " file deleted.";
+    if(remove(theCookiePackFile.c_str())) {//the file exists... delete!
+        cout << "The " << theCookiePackFile << " file deleted." << endl;
     }
     string Command = "cern-get-sso-cookie ";
     Command += " --cert ";
@@ -115,55 +113,68 @@ bool CernSsoCookieJar::fillTheJar()
     Command += " -r -u ";
     Command += theSslUrl;
     Command += " -o ";
-    Command += CookieFileName;
+    Command += theCookiePackFile;
 
     system(Command.c_str());
-    cout << "Execute the bash :" << Command;
-    if(!fileExists(CookieFileName)) { //the file doesn't exists. ACH !
+    if(VERBOSITYLEVEL == 1) {cout << "Execute the bash :" << Command << endl;}
+    if(!fileExists(theCookiePackFile)) { //the file doesn't exists. ACH !
         cerr << "Error to obtain the CERN SSO Cookies pack file. Abort !";
         return(false);
     }
-/*
-    // Parse the CERN SSO file
-    QList<QNetworkCookie> *CernCookiePack = new QList<QNetworkCookie>;
-    QNetworkCookie *Cookie = new QNetworkCookie();
 
-    QFile file(CookieFileName);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qWarning() << "Error to open the CERN SSO Cookies pack file. Abort !";
-        return(false);
-    }
-    QTextStream in(&file);
-    QString line;
-    QDateTime exp;
-    QStringList fields;
+    int numOfCookies = parseTheJar(theCookiePackFile);
+    if(numOfCookies < 1) return(false);
+    if(VERBOSITYLEVEL == 1) {cout << "The CERN cookie jar contains " << numOfCookies << " valid cookies !" << endl;}
 
-    in.setCodec("UTF-8"); // change the file codec to UTF-8.
-    while(!in.atEnd()) {
-        line = in.readLine();
-        if(line.size() == 0) continue;
-        if(line.mid(0,1) == "#") continue;
-        fields = line.split('\t');
-        Cookie->setDomain(fields.at(0).toAscii());
-        exp.setTime_t(fields.at(4).toUInt());
-        Cookie->setExpirationDate(exp);
-        Cookie->setHttpOnly(true);
-        Cookie->setName(fields.at(5).toAscii());
-        Cookie->setPath(fields.at(2).toAscii());
-        Cookie->setSecure(fields.at(3) == "TRUE" ? true : false);
-        Cookie->setValue(fields.at(6).toAscii());
-        qDebug() << "Cookie : " << Cookie->toRawForm();
-        CernCookiePack->push_back(*Cookie);
-    }
-    file.close();
-
-    this->setAllCookies(*CernCookiePack);
-
- */
     return(true);
 }
 
+int CernSsoCookieJar::parseTheJar(string aCookieJarFile)
+{
+	FILE *fh = fopen(aCookieJarFile.c_str(),"r");
+	if(fh == NULL) {
+		cerr << "Error to read the CookieJar file ! Abort" << endl;
+		return(-1);
+	}
 
+	int NumberOfCookies = 0;
+	Cookie rigolo;
+	char Buffer[THECOOKIELENGTH];
+
+	fgets(Buffer, THECOOKIELENGTH, fh);
+	while(!feof(fh)) {
+		if(Buffer[0] != '#' && Buffer[0] != 0 && Buffer[0] != '\n' && Buffer[0] != '\r'){
+
+			char *ptr;
+			if(ptr = strtok(Buffer, "\t")) {
+				rigolo.domain = ptr;
+				if(ptr = strtok(NULL, "\t")) {
+					rigolo.tailmatch = (strcmp(ptr, "FALSE") == 0) ? false : true;
+					if(ptr = strtok(NULL, "\t")) {
+						rigolo.path = ptr;
+						if(ptr = strtok(NULL, "\t")) {
+							rigolo.secure = (strcmp(ptr, "FALSE") == 0) ? false : true;
+							if(ptr = strtok(NULL, "\t")) {
+								rigolo.expires = atol(ptr);
+								if(ptr = strtok(NULL, "\t")) {
+									rigolo.name = ptr;
+									if(ptr = strtok(NULL, "\t")) {
+										rigolo.value = ptr;
+										theJar.push_back( rigolo );
+										NumberOfCookies++;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		fgets(Buffer, THECOOKIELENGTH, fh);
+	}
+	fclose(fh);
+	return(NumberOfCookies);
+}
 
 /* ------------------------------------
  * tests the presence of CERNSSO
@@ -175,7 +186,7 @@ bool CernSsoCookieJar::testTheCERNSSO()
 
     string Command = "type cern-get-sso-cookie > /tmp/exitus.txt";
     system(Command.c_str());
-    cout << "Execute : " << Command << endl;
+    if(VERBOSITYLEVEL == 1) {cout << "Execute : " << Command << endl;}
 
     FILE *result;
     result = fopen("/tmp/exitus.txt", "r");
@@ -186,17 +197,19 @@ bool CernSsoCookieJar::testTheCERNSSO()
 
     char buffer[512];
     if( fgets(buffer,511,result) != NULL && strstr(buffer,"cern-get-sso-cookie is") !=  NULL) {
-    	cout << "The CERN-SSO package is installed !" << endl;
-	fclose(result);    	
-	return(true);
+    	if(VERBOSITYLEVEL == 1) {cout << "The CERN-SSO package is installed !" << endl;}
+    	fclose(result);
+    	return(true);
     } else {
     	cerr << "CERN-SSO package not Found ! Abort" << endl;
-	fclose(result);    	
-	return(false);
+    	fclose(result);
+    	return(false);
     }
     return(false);
 }
 
+
+// ---------------- eof ------------------------
 
 
 

@@ -45,15 +45,22 @@
 AlpideDBManager::AlpideDBManager()
 {
 
+	theJarUrl = SSOURL;
+	theCookieJar = new CernSsoCookieJar(COOKIEPACK);
 	theCliCer = USERCERT;
 	theCliKey = USERKEY;
-	theCliKeyPem = USERKEYPEM;
-	theJarUrl = SSOURL;
+
+#ifdef COMPILE_LIBCURL
+	curl_global_init( CURL_GLOBAL_ALL );
+
+	myHandle = curl_easy_init ( ) ;
 	theCertificationAuthorityPath = CAPATH;
-
-
-//	myHandle = curl_easy_init ( ) ;
-	theCookieJar = new CernSsoCookieJar();
+	theNSSNickName = NSSCERTNICKNAME;
+	theNSSDBPath = NSSDATABASEPATH;
+	theNSSDBPassword = NSSDBPASSWD;
+#else
+	theCertificationAuthorityPath = CAPATH;
+#endif
 
 }
 
@@ -62,54 +69,80 @@ AlpideDBManager::~AlpideDBManager()
 {
 }
 
-bool AlpideDBManager::Init(string aCliCer, string aCliKey, string aSslUrl, string aCAPath)
+#ifdef COMPILE_LIBCURL
+bool AlpideDBManager::Init(string aSslUrl, string aNickName, string aNSSDBPath,  string aNSSDBPass)
 {
-	Init(aCliCer, "", aCliKey, aSslUrl, aCAPath);
+	theJarUrl = aSslUrl;
+	theNSSNickName = aNickName;
+	theNSSDBPath = aNSSDBPath;
+	theNSSDBPassword = aNSSDBPass;
+
+	string command;
+	// now export cert
+	command = "certutil -L -d ";
+	command += aNSSDBPath;
+	command += " -n ";
+	command += aNickName;
+	command += " -a >";
+	command += theCliCer;
+	system(command.c_str());
+	if(VERBOSITYLEVEL == 1) {cout << "Com:" << command << endl;}
+
+	// now export  key
+	command = "pk12util -o /tmp/theKey.p12 -d . -K ";
+	command += theNSSDBPassword;
+	command += " -W \"\" -n ";
+	command += theNSSNickName;
+	system(command.c_str());
+	if(VERBOSITYLEVEL == 1) {cout << "Com:" << command << endl;}
+
+	command = "openssl pkcs12 -in /tmp/theKey.p12 -out ";
+	command += theCliKey;
+	command += " -nodes -passin pass:";
+	system(command.c_str());
+	if(VERBOSITYLEVEL == 1) {cout << "Com:" << command << endl;}
+
+	command = "rm /tmp/theKey.p12";
+	system(command.c_str());
+	if(VERBOSITYLEVEL == 1) {cout << "Com:" << command << endl;}
+
 	return(Init());
 }
-
-bool AlpideDBManager::Init(string aCliCer, string aCliKey, string aCliKeyPem, string aSslUrl, string aCAPath)
+#else
+bool AlpideDBManager::Init(string aSslUrl, string aCliCer, string aCliKey, string aCAPath)
 {
+	theJarUrl = aSslUrl;
 	theCliCer = aCliCer;
 	theCliKey = aCliKey;
-	theCliKeyPem = aCliKeyPem;
-	theJarUrl = aSslUrl;
 	theCertificationAuthorityPath = aCAPath;
 	return(Init());
 }
+#endif
+
 
 bool AlpideDBManager::Init()
 {
 
-	if(!theCookieJar->fillTheJar(theCliCer,theCliKeyPem,theJarUrl)) {
+	if(!theCookieJar->fillTheJar(theCliCer,theCliKey,theJarUrl)) {
 		cerr << "Error to Init the DB manager. Exit !";
 		return(false);
 	}
 
-	/*
+
+#ifdef COMPILE_LIBCURL
+
 	myHandle = curl_easy_init ( ) ;
-	curl_easy_setopt( myHandle, CURLOPT_VERBOSE, 1L);
+	curl_easy_setopt( myHandle, CURLOPT_VERBOSE, VERBOSITYLEVEL );
 
+	curl_easy_setopt( myHandle, CURLOPT_CAINFO, CAFILE);
+	curl_easy_setopt( myHandle, CURLOPT_CAPATH , CAPATH);
 
-	curl_easy_setopt( myHandle,CURLOPT_CAPATH , theCertificationAuthorityPath.c_str());
-	curl_easy_setopt( myHandle, CURLOPT_SSH_PRIVATE_KEYFILE, theCliKeyPem.c_str());
-	curl_easy_setopt( myHandle, CURLOPT_SSLCERT, theCliCer.c_str());
+	curl_easy_setopt( myHandle, CURLOPT_KEYPASSWD, theNSSDBPassword.c_str());
+	curl_easy_setopt( myHandle, CURLOPT_SSLKEY,  theNSSNickName.c_str());
+	curl_easy_setopt( myHandle, CURLOPT_SSLCERT, theNSSNickName.c_str());
 
-	cout <<endl<< "the Key file:"<<  theCliKeyPem <<endl;
+#endif
 	thePendingRequests = 0;
-    */
-
-
-
-	/*
-	QList<QSslCertificate> certCA;
-	QString s = theCertificationAuthorityPath; s += CA1FILE;
-	certCA.append(QSslCertificate::fromPath(QLatin1String(s.toAscii())));
-	s = theCertificationAuthorityPath; s += CA2FILE;
-	certCA.append(QSslCertificate::fromPath(QLatin1String(s.toAscii())));
-	theSslConfig->setCaCertificates(certCA);
-    qDebug() << "* CA certificates loaded :"; for(int i=0; i<theSslConfig->caCertificates().size(); i++) qDebug() << i << ")" << theSslConfig->caCertificates().at(i); qDebug() << "-------------------------- ";
-*/
 
 	return(true);
 }
@@ -120,17 +153,71 @@ int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **R
 	 // in order to maintain the connection over the 24hours
 	 if(!theCookieJar->isJarValid()) theCookieJar->fillTheJar();
 
-	 cout << endl << "DBQuery :" << Url << " Payload:" << Payload << endl;;
+	 if(VERBOSITYLEVEL == 1) {cout << endl << "DBQuery :" << Url << " Payload:" << Payload << endl;}
+
+#ifdef COMPILE_LIBCURL
+
+	CURLcode res;
+	curl_easy_setopt( myHandle, CURLOPT_VERBOSE, VERBOSITYLEVEL);
+
+	// parse  the Url ....
+	Uri theUrl = Uri::Parse(Url);
+
+	// Compose the request
+	string appo;
+
+	curl_easy_setopt( myHandle, CURLOPT_URL, theUrl.URI.c_str() );
+	curl_easy_setopt( myHandle, CURLOPT_USERAGENT, "curl/7.19.7 (x86_64-redhat-linux-gnu) libcurl/7.19.7 NSS/3.21 Basic ECC zlib/1.2.3 libidn/1.18 libssh2/1.4.2" );
+
+	struct curl_slist *headers=NULL;
+	headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
+	appo = "Host: "; appo += theUrl.Host;
+	headers = curl_slist_append(headers, appo.c_str());
+	curl_easy_setopt(myHandle, CURLOPT_HTTPHEADER, headers);
+
+
+	// send all data to this function
+	curl_easy_setopt(myHandle, CURLOPT_WRITEFUNCTION, readResponseCB);
+
+	// we pass our 'chunk' struct to the callback function
+	struct ReceiveBuffer theBuffer;
+	theBuffer.memory = (char *) malloc(1);  //will be grown as needed by the realloc above
+	theBuffer.size = 0;    // no data at this point
+	curl_easy_setopt(myHandle, CURLOPT_WRITEDATA, (void *)&theBuffer);
+
+	// Put the Post data ...
+	curl_easy_setopt(myHandle, CURLOPT_POSTFIELDS, Payload);
+	curl_easy_setopt(myHandle, CURLOPT_POSTFIELDSIZE, strlen(Payload) );
+
+	// https settings ...
+	curl_easy_setopt( myHandle, CURLOPT_SSL_VERIFYPEER, true);
+	curl_easy_setopt( myHandle, CURLOPT_SSL_VERIFYHOST, true);
+
+	curl_easy_setopt( myHandle, CURLOPT_FOLLOWLOCATION, true);
+	curl_easy_setopt( myHandle, CURLOPT_COOKIEFILE, COOKIEPACK);
+
+	// Perform the request, res will get the return code
+	res = curl_easy_perform(myHandle);
+	if(res != CURLE_OK) { // Check for errors
+		cerr << "Curl_easy_perform() failed: " << curl_easy_strerror(res) << endl;
+		return(0);
+	} else {
+		*Result = theBuffer.memory;
+	}
+//	curl_easy_cleanup(myHandle);
+	return(1);
+
+#else
 
 	 string Command = "curl ";
 	    Command += " --cert ";
 	    Command += theCliCer;
 	    Command += " --key ";
-	    Command += theCliKeyPem;
+	    Command += theCliKey;
 	    Command += " -b";
-	    Command += "/tmp/cerncookie.txt";
+	    Command += COOKIEPACK;
 	    Command += " -c ";
-	    Command += "/tmp/cerncookie.txt";
+	    Command += COOKIEPACK;
 	    Command += " ";
 	    Command += Url;
 	    Command += Payload;
@@ -138,7 +225,7 @@ int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **R
 
 	    system(Command.c_str());
 
-cout << "Execute the bash :" << Command;
+	    if(VERBOSITYLEVEL == 1) {cout << "Execute the bash :" << Command << endl;}
 
 	    if(!fileExists("/tmp/Queryresult.xml")) { //the file doesn't exists. ACH !
 	        cerr << "Error to Execute the query. Abort !";
@@ -174,72 +261,12 @@ cout << "Execute the bash :" << Command;
 	    *Result = ptrBuf;
 	    return(true);
 
-	/*
-	CURLcode res;
-	curl_easy_setopt( myHandle, CURLOPT_VERBOSE, 1L);
 
-    // in order to maintain the connection over the 24hours
-    if(!theCookieJar->isJarValid()) theCookieJar->fillTheJar();
-
-    cout << endl << "DBQuery :" << Url << " Payload:" << Payload << endl;;
-
-    // parse  the Url ....
-    Uri theUrl = Uri::Parse(Url);
-
-
-    // encode the url ...
-    char *encodedUrl = curl_easy_escape( myHandle, Url.c_str(), Url.size() );
-
-    char encodedUrl[200] = "https://www.cern.ch";
-    // Compose the request
-    string appo;
-    curl_easy_setopt( myHandle, CURLOPT_URL, encodedUrl );
-    curl_easy_setopt( myHandle, CURLOPT_USERAGENT, "curl/7.19.7 (x86_64-redhat-linux-gnu) libcurl/7.19.7 NSS/3.21 Basic ECC zlib/1.2.3 libidn/1.18 libssh2/1.4.2" );
-*/
- //   curl_easy_setopt( myHandle, CURLOPT_ENCODING, "*/*" );
-
-/*    struct curl_slist *headers=NULL;
-    headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
-    appo = "Host: "; appo += theUrl.Host;
-    headers = curl_slist_append(headers, appo.c_str());
-//	request.setRawHeader("Content-Length", postDataSize);
-    curl_easy_setopt(myHandle, CURLOPT_HTTPHEADER, headers);
-
-    // send all data to this function
-    curl_easy_setopt(myHandle, CURLOPT_WRITEFUNCTION, readResponseCB);
-
-    // we pass our 'chunk' struct to the callback function
-    struct ReceiveBuffer theBuffer;
-    theBuffer.memory = (char *) malloc(1);  //will be grown as needed by the realloc above
-    theBuffer.size = 0;    // no data at this point
-    curl_easy_setopt(myHandle, CURLOPT_WRITEDATA, (void *)&theBuffer);
-
-    // Put the Post data ...
-    curl_easy_setopt(myHandle, CURLOPT_POSTFIELDS, Payload);
-    curl_easy_setopt(myHandle, CURLOPT_POSTFIELDSIZE, strlen(Payload) );
-
-    //
-    curl_easy_setopt( myHandle, CURLOPT_FOLLOWLOCATION, true);
-    curl_easy_setopt( myHandle, CURLOPT_SSL_VERIFYPEER, false);
-    curl_easy_setopt( myHandle, CURLOPT_COOKIEFILE, "/tmp/cerncookie.txt");
-
-print_cookies(myHandle);
-    // Perform the request, res will get the return code
-    res = curl_easy_perform(myHandle);
-    if(res != CURLE_OK) { // Check for errors
-        cerr << "Curl_easy_perform() failed: " << curl_easy_strerror(res) << endl;
-        return(0);
-    } else {
-    	*Result = theBuffer.memory;
-    }
-    curl_easy_cleanup(myHandle);
-
-    curl_free(encodedUrl);
-*/
-	return(1);
+#endif
 }
 
-/*
+#ifdef COMPILE_LIBCURL
+
 size_t AlpideDBManager::readResponseCB(void *contents, size_t size, size_t nmemb, void *userp)
 {
 	size_t realsize = size * nmemb;
@@ -284,4 +311,8 @@ void  AlpideDBManager::print_cookies(CURL *curl)
   }
   curl_slist_free_all(cookies);
 }
-*/
+
+#endif
+
+// ---------------- eof ------------------------
+

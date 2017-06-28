@@ -37,6 +37,7 @@ Uri Uri::Parse(const std::string &uri)
 	if (uri.length() == 0) return result;
 
 
+   result.URI = uri;
    string appo = uri;
 
    // get query start

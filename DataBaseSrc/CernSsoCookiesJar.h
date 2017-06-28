@@ -41,21 +41,38 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
+
+#define VERBOSITYLEVEL 0L
+#define THECOOKIELENGTH 8196
 
 using namespace std;
 
 class CernSsoCookieJar
 {
+struct Cookie {
+	string domain;
+	bool tailmatch;
+	string path;
+	bool secure;
+	unsigned long int expires;
+	string name;
+	string value;
+};
+
+
 // Members
 private:
 	string theCliCert;
 	string theCliKey;
 	string theSslUrl;
-    //QString theSSOFileName;
+	string theCookiePackFile;
+
+	vector<Cookie> theJar;
 
 // Methods
 public:
-	CernSsoCookieJar();
+	CernSsoCookieJar(string aCookiePackFileName);
     ~CernSsoCookieJar();
 
     bool isJarValid();
@@ -66,6 +83,7 @@ public:
 
 private:
     bool testTheCERNSSO();
+    int parseTheJar(string aCookieJarFile);
 
 };
 

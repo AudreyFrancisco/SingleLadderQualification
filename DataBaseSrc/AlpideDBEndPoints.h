@@ -128,8 +128,12 @@ class ComponentDB : public AlpideTable
 {
 
 	// Members
+private:
+	string ap;
+
 public:
 	struct composition {
+		int ID;
 		string ComponentType;
 		int Quantity;
 	};
@@ -141,7 +145,7 @@ public:
 		int ID;
 		string Name;
 	};
-	struct component {
+	struct componentType {
 		int ID;
 		string Name;
 		string Code;
@@ -156,35 +160,17 @@ public:
 	ComponentDB(AlpideDB * DBhandle);
     ~ComponentDB();
 
-	int Get(int ComponentTypeID , component *Result);
-	int GetList(int ProjectID , vector<component> *Result);
+	int GetType(int ComponentTypeID , componentType *Result);
+	int GetTypeList(int ProjectID , vector<componentType> *Result);
+
+
 	response *Create(string ComponentTypeID, string ComponentID, string SupplyCompID,
 			string Description, string lotID, string PackaageID, string userID );
 
-	string print(component *co) {
-		string ap;
-		ap = "Component : ID=" + std::to_string(co->ID) +
-			" Name="+ co->Name + " Code=" + co->Code + " Description=" + co->Description + "\n";
-		ap += "   Composition : {";
-		for(int i=0;i<co->Composition.size();i++)
-			ap+= "( Type="+co->Composition.at(i).ComponentType+
-					  ",Q.ty="+std::to_string(co->Composition.at(i).Quantity)+")";
-		ap += "}\n";
-		ap += "   Physical Status  : {";
-		for(int i=0;i<co->PhysicalStatus.size();i++)
-			ap+= "( ID="+ std::to_string(co->PhysicalStatus.at(i).ID) +
-					  ",Name="+co->PhysicalStatus.at(i).Name+")";
-		ap += "}\n";
-		ap += "   Functional Status  : {";
-		for(int i=0;i<co->FunctionalStatus.size();i++)
-			ap+= "( ID="+ std::to_string(co->FunctionalStatus.at(i).ID) +
-					  ",Name="+co->FunctionalStatus.at(i).Name+")";
-		ap += "}\n";
-		return(ap);
-	}
+	const char *print(componentType *co);
 
 private:
-	void extractTheComponent(xmlNode *n1, component *pro);
+	void extractTheComponentType(xmlNode *n1, componentType *pro);
 
 };
 

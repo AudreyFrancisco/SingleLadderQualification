@@ -40,19 +40,40 @@
 #define ALPIDEDBMANAGER_H_
 
 #include <locale>
-//#include <curl/curl.h>
+
+// if lib curl is used
+#define COMPILE_LIBCURL
+
+#define VERBOSITYLEVEL 0L
+
+// --- Definition of constants for auth methods
+	#define COOKIEPACK "/tmp/cerncookie.txt"
+
+	#define SSOURL "https://test-alucmsapi.web.cern.ch"
+	#define CAPATH "/etc/pki/tls/certs"
+	#define CAFILE "/etc/pki/tls/certs/ca-bundle.crt"
+	#define CA1FILE "CERN_Grid_Certification_Authority.pem"
+	#define CA2FILE	"AddTrustExternalCARoot.pem"
+
+
+#ifdef COMPILE_LIBCURL
+	#define NSSDATABASEPATH "."
+	#define NSSCERTNICKNAME "FrancoAntonio"
+	#define NSSDBPASSWD "alpide4me"
+	#define USERCERT "/tmp/usercert.pem"
+	#define USERKEY "/tmp/userkey.pem"
+#else
+    #define USERCERT "/home/fap/.globus/usercert.pem"
+    #define USERKEY "/home/fap/.globus/userkey.pem"
+#endif
+
+
+#ifdef COMPILE_LIBCURL
+#include <curl/curl.h>
+#endif
 
 #include "utilities.h"
 #include "CernSsoCookiesJar.h"
-
-#define USERCERT "/home/fap/.globus/usercert.pem"
-#define USERKEYPEM "/home/fap/.globus/userkey.pem"
-#define USERKEY "/home/fap/.globus/userkey.key"
-#define SSOURL "https://test-alucmsapi.web.cern.ch"
-#define CAPATH "/home/fap/.globus/CA/"
-#define CA1FILE "CERN_Grid_Certification_Authority.pem"
-#define CA2FILE	"AddTrustExternalCARoot.pem"
-
 
 class AlpideDBManager
 {
@@ -67,20 +88,22 @@ struct ReceiveBuffer {
 // Members
 private:
 
-//	CURL * myHandle;
-//	CURLcode result; // We’ll store the result of CURL’s webpage retrieval, for simple error checking.
+#ifdef COMPILE_LIBCURL
+	CURL * myHandle;
+	CURLcode result; // We’ll store the result of CURL’s webpage retrieval, for simple error checking.
 
-	CernSsoCookieJar	*theCookieJar;
+	string theNSSNickName;
+	string theNSSDBPath;
+	string theNSSDBPassword;
+#endif
 
 	string	theCliCer;
 	string	theCliKey;
-	string	theCliKeyPem;
+	string  theCertificationAuthorityPath;
+
+	CernSsoCookieJar	*theCookieJar;
 	string	theJarUrl;
-	string theCertificationAuthorityPath;
 
-
-//	QNetworkAccessManager  *theDBMan;
-//	QSslConfiguration	*theSslConfig;
 	int		thePendingRequests;
 
 // Methods
@@ -88,37 +111,46 @@ public:
 	AlpideDBManager();
     ~AlpideDBManager();
 
-    bool Init(string aCliCer, string aCliKey, string aSslUrl, string aCAPath);
-    bool Init(string aCliCer, string aCliKey, string aCliKeyPem, string aSslUrl, string aCAPath);
+#ifdef COMPILE_LIBCURL
+    bool Init(string aSslUrl, string aNickName, string aNSSDBPath, string aNSSDBPassFile);
+    string getNSSDBNickName() { return(theNSSNickName);};
+    string getNSSDBPath() { return(theNSSDBPath);};
+    string getNSSDBPass() { return(theNSSDBPassword);};
+    void setNSSDBNickName(string aNickName) { theNSSNickName = aNickName;};
+    void setNSSDBPath(string aNSSDBPath) { theNSSDBPath = aNSSDBPath;};
+    void setNSSDBPass(string aNSSDBPass) { theNSSDBPassword = aNSSDBPass;};
+    bool isLibCurlCompiled(void) { return(true); };
+#else
+    bool Init(string aSslUrl, string aCliCer, string aCliKey,  string aCAPath);
+    bool isLibCurlCompiled(void) { return(false); };
+#endif
+
+
     bool Init();
 
-    // getters & setters
     string getClientCertFile() { return(theCliCer);};
     string getClientKeyFile() { return(theCliKey);};
-    string getClientKeyPemFile() { return(theCliKeyPem);};
-    string getSSOCookieUrl() { return(theJarUrl);};
-    string getCAPath() { return(theCertificationAuthorityPath);};
-
     void setClientCertFile(string aCliCer) { theCliCer = aCliCer;};
     void setClientKeyFile(string aCliKey) { theCliKey = aCliKey;};
-    void setClientKeyPemFile(string aCliKey) { theCliKeyPem = aCliKey;};
-    void setSSOCookieUrl(string aJarUrl) { theJarUrl = aJarUrl;};
+
+    string getCAPath() { return(theCertificationAuthorityPath);};
     void setCAPath(string aCAPath) { theCertificationAuthorityPath = aCAPath;};
+
+    string getSSOCookieUrl() { return(theJarUrl);};
+    void setSSOCookieUrl(string aJarUrl) { theJarUrl = aJarUrl;};
 
 public:
 	int makeDBQuery(const string Url, const char *Payload, char **Result);
-//	static size_t readResponseCB(void *contents, size_t size, size_t nmemb, void *userp);
+
+#ifdef COMPILE_LIBCURL
+	static size_t readResponseCB(void *contents, size_t size, size_t nmemb, void *userp);
+#endif
 
 private:
-	bool makeDBQuery(string Url);
-//	void print_cookies(CURL *curl);
 
-private:
-	//	void receiveResults(QNetworkRequest *request,QByteArray *result);
-//	void endTheDBQuery(QNetworkReply *reply);
-//	void requestAuthenication(QNetworkReply *reply, QAuthenticator *ator);
-//	void recieveSslErrors(QNetworkReply*,const QList<QSslError> &errors);
-
+#ifdef COMPILE_LIBCURL
+	void print_cookies(CURL *curl);
+#endif
 
 };
 

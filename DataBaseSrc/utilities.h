@@ -49,6 +49,7 @@ bool pathExists(string path);
 class Uri {
 private:
 public:
+	std::string URI;
 	std::string QueryString, Path;
 	std::string Protocol, Host, Port, User;
 	static Uri Parse(const std::string &uri);

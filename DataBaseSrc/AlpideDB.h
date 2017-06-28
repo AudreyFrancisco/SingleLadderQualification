@@ -39,9 +39,10 @@
 #ifndef ALPIDEDB_H_
 #define ALPIDEDB_H_
 
+
+
 #include <iostream>
 #include <string>
-
 
 #include "AlpideDBManager.h"
 
@@ -75,13 +76,11 @@ public:
     ~AlpideDB();
 
     string GetQueryDomain() { return(theQueryDomain); };
+    void SetQueryDomain(string aQueryDomain) { theQueryDomain = aQueryDomain; };
+
 	AlpideDBManager  * GetManageHandle() { return(theDBmanager); };
 
-//public slots:
-//	int ComponentTypeReadAll(QString ComponentTypetID, QList<QList<QString> > *queryResult);
-
 private:
-//	int XMLResultsDecode(char* RecordTag, char *SourceString,  vector<vector<string> > *queryResult);
 
 };
 
