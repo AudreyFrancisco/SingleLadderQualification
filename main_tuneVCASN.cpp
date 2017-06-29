@@ -322,7 +322,7 @@ int main() {
 
     scan();
 
-    sprintf(fName, "Data/VCASNScan_%s.dat", Suffix); //used to be ThresholdScan
+    sprintf(fName, "Data/VcASNScan_%s.dat", Suffix); //note the lowercase; necessary for All_FitThresholds
     WriteDataToFile (fName, true);
     sprintf(fName, "Data/ScanConfig_%s_0.cfg", Suffix);
 
