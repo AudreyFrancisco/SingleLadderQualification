@@ -65,7 +65,7 @@ void PlotCalibrationResults(char * fileName, int Chips=0) {
   }
 
   TGraphErrors cal(Chips, chipNums, ithr, NULL, RMS);
-  cal.SetTitle("Mean ITHR/VCASN threshold value per chip");
+  cal.SetTitle("Mean VCASN threshold value per chip, with errors");
   cal.SetMarkerStyle(21);
   cal.SetMarkerColor(4);
   cal.SetLineColor(4);

@@ -175,14 +175,14 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 }
 
 
-void fillVcasn(int *vcasn) { //WIP
-  double old_vcas; //only current is used for now; the rest may be used later
-  double old_ith;
-  double goodPixels;
-  int voltage;
-  int voltageRMS;
-  int noise;
-  int noiseRMS;
+void fillVcasn(float *vcasn) { //WIP
+  int old_vcas; //only current is used for now; the rest may be used later
+  int old_ith;
+  int goodPixels;
+  float voltage;
+  float voltageRMS;
+  float noise;
+  float noiseRMS;
   char name[100];
   
   std::cout << "Filling Vcasn" << std::endl;
@@ -194,7 +194,7 @@ void fillVcasn(int *vcasn) { //WIP
     FILE *fp = fopen(name, "r");
     //load file into array
     if(fp) {
-      fscanf(fp, "%d %d %d %i %i %i %i", &old_vcas, &old_ith, &goodPixels, &voltage,
+      fscanf(fp, "%i %i %i %f %f %f %f", &old_vcas, &old_ith, &goodPixels, &voltage,
           &voltageRMS, &noise, &noiseRMS);
       vcasn[i]=voltage;
       fclose(fp);
@@ -211,7 +211,7 @@ void scan() {
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0;
-  int *vcasn = new int[14]; //shouldn't have >14 chips
+  float *vcasn = new float[14]; //shouldn't have >14 chips
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
   std::vector<int> myVPULSEH;
