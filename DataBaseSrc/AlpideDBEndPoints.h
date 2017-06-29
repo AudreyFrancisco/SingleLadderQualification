@@ -66,13 +66,14 @@ struct response {
 protected:
 	AlpideDB * theParentDB;
 	response theResponse;
+	string   theGeneralBuffer;
 
 public:
 	explicit AlpideTable(AlpideDB *DBhandle);
     virtual ~AlpideTable();
-    response *DecodeResponse(char *returnedString);
+    response *DecodeResponse(char *returnedString, int Session = 0);
     void SetResponse(AlpideTable::ErrorCode, int ID=0, int Session=0);
-
+    const char *DumpResponse();
 };
 
 
@@ -94,8 +95,8 @@ public:
     ~ProjectDB();
 
 public:
-	int GetList(vector<ProjectDB::project> *Result);
-	string print(ProjectDB::project *pr) { return( "Project : ID=" + std::to_string(pr->ID) +  " Name=" + pr->Name);};
+    AlpideTable::response *GetList(vector<ProjectDB::project> *Result);
+	string Print(ProjectDB::project *pr) { return( "Project : ID=" + std::to_string(pr->ID) +  " Name=" + pr->Name);};
 
 };
 
@@ -118,8 +119,8 @@ public:
 	MemberDB(AlpideDB * DBhandle);
     ~MemberDB();
 
-	int GetList(int projectID, vector<member> *Result);
-	string print(member *me) { return( "Member : ID=" + std::to_string(me->ID) +
+    AlpideTable::response *GetList(int projectID, vector<member> *Result);
+	string Print(member *me) { return( "Member : ID=" + std::to_string(me->ID) +
 			" Personal ID="+ std::to_string(me->PersonalID) + " Name=" + me->FullName);};
 
 };
@@ -160,18 +161,59 @@ public:
 	ComponentDB(AlpideDB * DBhandle);
     ~ComponentDB();
 
-	int GetType(int ComponentTypeID , componentType *Result);
-	int GetTypeList(int ProjectID , vector<componentType> *Result);
+    AlpideTable::response *GetType(int ComponentTypeID , componentType *Result);
+    AlpideTable::response *GetTypeList(int ProjectID , vector<componentType> *Result);
 
-
-	response *Create(string ComponentTypeID, string ComponentID, string SupplyCompID,
+    AlpideTable::response *Create(string ComponentTypeID, string ComponentID, string SupplyCompID,
 			string Description, string lotID, string PackaageID, string userID );
 
-	const char *print(componentType *co);
+	string Print(componentType *co);
 
 private:
 	void extractTheComponentType(xmlNode *n1, componentType *pro);
 
 };
+
+// --------------------
+class ActivityDB : public AlpideTable
+{
+
+	// Members
+private:
+
+public:
+	struct activity {
+		int Type;
+		int Location;
+		string Lot;
+		string Name;
+		time_t StartDate;
+		time_t EndDate;
+		string Position;
+		int Result;
+		int Status;
+		int User;
+	} ;
+
+
+
+// Methods
+public:
+	ActivityDB(AlpideDB * DBhandle);
+    ~ActivityDB();
+
+    AlpideTable::response *Create(activity *aActivity);
+
+
+private:
+
+};
+
+
+
+
+
+
+
 
 #endif /* ALPIDEDBENDPOINTS_H_ */

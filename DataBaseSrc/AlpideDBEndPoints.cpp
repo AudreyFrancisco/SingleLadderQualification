@@ -36,39 +36,86 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include <ctime>
 
 
 #include "AlpideDBEndPoints.h"
 #include "AlpideDB.h"
 #include "utilities.h"
 
+/* --------------------------------------------------------
+ *    AlpideDB Table Base class
+ *
+ *    set the pointer to the linked DB and expose
+ *    basic methods for Encode/Decode responses
+ *
+ *-------------------------------------------------------- */
 
+/* -----------------
+ *    Constructor
+ *    set the pointer to the linked DB
+ *---------------- */
 AlpideTable::AlpideTable(AlpideDB *DBhandle)
 {
 	theParentDB = DBhandle;
 }
 
+/* -----------------
+ *    Destructor
+ *---------------- */
 AlpideTable::~AlpideTable()
 {
 }
 
-AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString)
+/* -----------------
+ *    DecodeResponse := analyze the returned XML and fills the
+ *                      response structure with the returned errors info
+ *		Params :  ReturnedString := the XML sgtring received from the WebDB server
+ *				  Session := a Session Index Value (reserved for future use)
+ *		returns : a response struct that contains the error code
+ *
+ *---------------- */
+AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Session)
 {
 	xmlDocPtr doc;
 	doc = xmlReadMemory(ReturnedString, strlen(ReturnedString), "noname.xml", NULL, 0); // parse the XML
 	if (doc == NULL) {
 	    cerr << "Failed to parse document" << endl;
-	    SetResponse(AlpideTable::BadXML, 0,0);
+	    SetResponse(AlpideTable::BadXML, 0, Session);
 		return(&theResponse);
 	}
-
-// to do !!!!!!
-
-	theResponse.Session = 0;
+	xmlNode *root_element = NULL;
+	root_element = xmlDocGetRootElement(doc);
+	if(root_element == NULL) {
+	    cerr << "Failed to parse document: No root element" << endl;
+	    SetResponse(AlpideTable::BadXML, 0, Session);
+		return(&theResponse);
+	}
+	xmlNode *n1 = root_element->children;
+	while (n1 != NULL) {
+		if(strcmp((const char*)n1->name, "ErrorCode") == 0) {
+			theResponse.ErrorCode = atoi( (const char*)n1->children->content);
+		} else if(strcmp((const char*)n1->name, "ErrorMessage") == 0) {
+			theResponse.ErrorMessage = (const char*)n1->children->content;
+		} else if(strcmp((const char*)n1->name, "ID") == 0) {
+			theResponse.ID = atoi( (const char*)n1->children->content);
+		}
+		n1 = n1->next;
+	}
+	theResponse.Session = Session;
 	return(&theResponse);
 }
 
 
+/* -----------------
+ *    SetResponse := preset the response struct with a certain number
+ *    				 of standard errors
+ *
+ *		Params :  ErrorCode := the standard error code
+ *				  ID := the ID ...
+ *				  Session := a Session Index Value (reserved for future use)
+ *
+ *---------------- */
 void AlpideTable::SetResponse(AlpideTable::ErrorCode ErrNum, int ID, int Session)
 {
 	theResponse.ErrorCode = (int)ErrNum;
@@ -83,7 +130,7 @@ void AlpideTable::SetResponse(AlpideTable::ErrorCode ErrNum, int ID, int Session
 		theResponse.ErrorMessage = "The Sync DB Query returns error";
 		break;
 	case AlpideTable::NoError:
-		theResponse.ErrorMessage = "";
+		theResponse.ErrorMessage = "No error !";
 		break;
 	default:
 		theResponse.ErrorMessage = "Unknown Error";
@@ -91,8 +138,25 @@ void AlpideTable::SetResponse(AlpideTable::ErrorCode ErrNum, int ID, int Session
 	return;
 }
 
+/* -----------------
 
-// ------------------------------------------
+ *---------------- */
+const char *AlpideTable::DumpResponse()
+{
+	theGeneralBuffer = "Return : Message =" + theResponse.ErrorMessage + "(" + std::to_string(theResponse.ErrorCode) + ") " ;
+	theGeneralBuffer += "ID=" + std::to_string(theResponse.ID) + " Session=" +std::to_string(theResponse.Session);
+	return(theGeneralBuffer.c_str());
+}
+
+/* --------------------------------------------------------
+ *    ProjectDB   Class to manage the Projects Table
+ *
+ *
+ *-------------------------------------------------------- */
+
+/* -----------------
+ *    Constructor
+ *---------------- */
 ProjectDB::ProjectDB(AlpideDB * DBhandle) : AlpideTable(DBhandle)
 {
 }
@@ -101,7 +165,13 @@ ProjectDB::~ProjectDB()
 {
 }
 
-int ProjectDB::GetList(vector<project> *Result)
+/* -----------------
+ *    GetList := get the complete list of projects
+ *
+ *		Out Param : a Reference to a vector of Project struct that will contain all the projects
+ *		returns : a response struct that contains the error code
+ *---------------- */
+AlpideTable::response *ProjectDB::GetList(vector<project> *Result)
 {
 	string theUrl = theParentDB->GetQueryDomain() + "ProjectRead";
 	string theQuery = "";
@@ -109,14 +179,17 @@ int ProjectDB::GetList(vector<project> *Result)
 	project pro;
 
 
-	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &result) == 0) return(-1);
-
+	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &result) == 0) {
+	    cerr << "Failed to execut the Query" << endl;
+	    SetResponse(AlpideTable::SyncQuery, 0,0);
+		return(&theResponse);
+	}
 	xmlDocPtr doc;
 	doc = xmlReadMemory(result, strlen(result), "noname.xml", NULL, 0); // parse the XML
 	if (doc == NULL) {
 	    cerr << "Failed to parse document" << endl;
 	    SetResponse(AlpideTable::BadXML, 0,0);
-		return(0);
+		return(&theResponse);
 	}
 
 	// Get the root element node
@@ -124,8 +197,10 @@ int ProjectDB::GetList(vector<project> *Result)
 	root_element = xmlDocGetRootElement(doc);
 	if(root_element == NULL) {
 	    SetResponse(AlpideTable::BadXML, 0,0);
-		return(0);
+		return(&theResponse);
 	}
+
+	Result->clear();
 	xmlNode *nod = root_element->children;
 	while (nod != NULL) {
 		if(strcmp((const char*)nod->name, "Project") == 0) {
@@ -144,11 +219,21 @@ int ProjectDB::GetList(vector<project> *Result)
 	xmlFreeDoc(doc);       // free document
 	xmlCleanupParser();
 
-	return(Result->size());
+	SetResponse(AlpideTable::NoError, 0,0);
+	return(&theResponse);
 }
 
 
-// ------------------------------------------
+
+/* --------------------------------------------------------
+ *    MemberDB   Class to manage the Members Table
+ *
+ *
+ *-------------------------------------------------------- */
+
+/* -----------------
+ *    Constructor
+ *---------------- */
 MemberDB::MemberDB(AlpideDB * DBhandle) : AlpideTable(DBhandle)
 {
 }
@@ -157,29 +242,39 @@ MemberDB::~MemberDB()
 {
 }
 
-int MemberDB::GetList(int projectID, vector<member> *Result)
+/* -----------------
+ *    GetList := get the complete list of members
+ *
+ *		Out Param : a Reference to a vector of Member struct that will contain all the member
+ *		returns : a response struct that contains the error code
+ *---------------- */
+AlpideTable::response *MemberDB::GetList(int projectID, vector<member> *Result)
 {
 	string theUrl = theParentDB->GetQueryDomain() + "ProjectMemberRead";
 	string theQuery = "projectID=" + std::to_string(projectID) ;
 	char *result;
 	member pro;
 
-	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &result) == 0) return(-1);
-
+	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &result) == 0) {
+	    cerr << "Failed to execute the Query" << endl;
+	    SetResponse(AlpideTable::SyncQuery, 0,0);
+		return(&theResponse);
+	}
 	xmlDocPtr doc;
 	doc = xmlReadMemory(result, strlen(result), "noname.xml", NULL, 0); // parse the XML
 	if (doc == NULL) {
 	    cerr << "Failed to parse document" << endl;
 	    SetResponse(AlpideTable::BadXML, 0,0);
-		return(0);
+		return(&theResponse);
 	}
 
 	// Get the root element node
 	xmlNode *root_element = NULL;
 	root_element = xmlDocGetRootElement(doc);
 	if(root_element == NULL) {
+	    cerr << "Failed Bad XML format no root element" << endl;
 	    SetResponse(AlpideTable::BadXML, 0,0);
-		return(0);
+		return(&theResponse);
 	}
 	xmlNode *nod = root_element->children;
 	while (nod != NULL) {
@@ -200,12 +295,21 @@ int MemberDB::GetList(int projectID, vector<member> *Result)
 	xmlFreeDoc(doc);       // free document
 	xmlCleanupParser();
 
+	SetResponse(AlpideTable::NoError, 0,0);
+	return(&theResponse);
 
-	return(Result->size());
 }
 
 
-// ------------------------------------------
+/* --------------------------------------------------------
+ *    ComponentDB   Class to manage the Components Table
+ *
+ *
+ *-------------------------------------------------------- */
+
+/* -----------------
+ *    Constructor
+ *---------------- */
 ComponentDB::ComponentDB(AlpideDB * DBhandle) : AlpideTable(DBhandle)
 {
 }
@@ -214,21 +318,32 @@ ComponentDB::~ComponentDB()
 {
 }
 
-int ComponentDB::GetTypeList(int ProjectID, vector<componentType> *Result)
+/* -----------------
+*    GetTypeList := get the complete list of all the component types defined
+*
+*		In Param : the ID of the Project
+*		Out Param : a Reference to a vector of ComponentType struct that will contain all the component types
+*		returns : a response struct that contains the error code
+*---------------- */
+AlpideTable::response * ComponentDB::GetTypeList(int ProjectID, vector<componentType> *Result)
 {
 	string theUrl = theParentDB->GetQueryDomain() + "ComponentTypeRead";
 	string theQuery = "projectID=" + std::to_string(ProjectID) ;
 	char *stringresult;
 	componentType pro;
 
-	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) return(-1);
+	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+	    cerr << "Failed to execute the Query" << endl;
+	    SetResponse(AlpideTable::SyncQuery, 0,0);
+		return(&theResponse);
+	}
 
 	xmlDocPtr doc;
 	doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
 	if (doc == NULL) {
 	    cerr << "Failed to parse document" << endl;
 	    SetResponse(AlpideTable::BadXML, 0,0);
-		return(0);
+		return(&theResponse);
 	}
 
 	// Get the root element node
@@ -236,7 +351,7 @@ int ComponentDB::GetTypeList(int ProjectID, vector<componentType> *Result)
 	root_element = xmlDocGetRootElement(doc);
 	if(root_element == NULL) {
 	    SetResponse(AlpideTable::BadXML, 0,0);
-		return(0);
+		return(&theResponse);
 	}
 
 	xmlNode *n1;
@@ -254,9 +369,19 @@ int ComponentDB::GetTypeList(int ProjectID, vector<componentType> *Result)
 	xmlFreeDoc(doc);       // free document
 	xmlCleanupParser();
 
-	return(Result->size());
+    SetResponse(AlpideTable::NoError, 0,0);
+	return(&theResponse);
 }
 
+
+/* -----------------
+ * 	PRIVATE
+ *    extractTheComponentType := get the component types definition
+ *
+ *		In Param : the XML node that contains the Type definition
+ *		Out Param : a Reference to a ComponentType struct that will contains the values parsed
+ *
+ * ---------------- */
 void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro)
 {
 	xmlNode *n1,*n2,*n3, *n4;
@@ -326,37 +451,53 @@ void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro)
 	}
 }
 
-int ComponentDB::GetType(int ComponentTypeID, componentType *Result)
+/* -----------------
+*    GetType := get the complete definition of the requested component
+*
+*		In Param : the ID of the Component Type
+*		Out Param : a Reference to a ComponentType struct that will contain the component type definition
+*		returns : a response struct that contains the error code
+*---------------- */
+AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *Result)
 {
 	string theUrl = theParentDB->GetQueryDomain() + "ComponentTypeReadAll";
 	string theQuery = "componentTypeID=" + std::to_string(ComponentTypeID) ;
 	char *stringresult;
 	componentType pro;
 
-	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) return(-1);
+	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0)  {
+	    cerr << "Failed to execute the Query" << endl;
+	    SetResponse(AlpideTable::SyncQuery, 0,0);
+		return(&theResponse);
+	}
 	xmlDocPtr doc;
 	doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
 	if (doc == NULL) {
 	    cerr << "Failed to parse document" << endl;
 	    SetResponse(AlpideTable::BadXML, 0,0);
-		return(0);
+		return(&theResponse);
 	}
-
 	// Get the root element node
 	xmlNode *root_element = NULL;
 	root_element = xmlDocGetRootElement(doc);
 	if(root_element == NULL) {
 	    SetResponse(AlpideTable::BadXML, 0,0);
-		return(0);
+		return(&theResponse);
 	}
 
 	xmlNode *n1 = root_element->children;
 	extractTheComponentType(n1, Result);
 
-	return(1);
+    SetResponse(AlpideTable::NoError, 0,0);
+	return(&theResponse);
 }
 
-
+/* -----------------
+*    Create := A component type ... TODO: need a better interface (with the struct parameter)
+*
+*		In Param : ... all the items describing ...
+*		returns : a response struct that contains the error code
+*---------------- */
 AlpideTable::response * ComponentDB::Create(string ComponentTypeID, string ComponentID, string SupplyCompID,
 		string Description, string LotID, string PackageID, string UserID )
 {
@@ -367,12 +508,19 @@ AlpideTable::response * ComponentDB::Create(string ComponentTypeID, string Compo
 
 	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 		SetResponse(AlpideTable::SyncQuery);
+	} else {
+		DecodeResponse(stringresult);
 	}
-	DecodeResponse(stringresult);
 	return(&theResponse);
 }
 
-const char *ComponentDB::print(componentType *co)
+/* -----------------
+*    Print := Dumps a human readable form of the Component Type definition
+*
+*		In Param : the component type struct
+*		returns : a char pointer to a string buffer
+*---------------- */
+string ComponentDB::Print(componentType *co)
 {
 			ap = "Component : ID=" + std::to_string(co->ID) +
 				" Name="+ co->Name + " Code=" + co->Code + " Description=" + co->Description + "\n";
@@ -392,6 +540,58 @@ const char *ComponentDB::print(componentType *co)
 				ap+= "( ID="+ std::to_string(co->FunctionalStatus.at(i).ID) +
 						  ",Name="+co->FunctionalStatus.at(i).Name+")";
 			ap += "}\n";
-			return(ap.c_str());
+			return(ap);
+}
+
+
+/* --------------------------------------------------------
+ *    ActivityDB   Class to manage the Activity Table
+ *
+ *
+ *-------------------------------------------------------- */
+
+/* -----------------
+ *    Constructor
+ *---------------- */
+ActivityDB::ActivityDB(AlpideDB * DBhandle) : AlpideTable(DBhandle)
+{
+}
+
+ActivityDB::~ActivityDB()
+{
+}
+
+/* -----------------
+*    Create := Create a new activity record  TODO: complete the activity with all the info
+*
+*		In Param : the activity struct
+*		returns : a char pointer to a string buffer
+*---------------- */
+ActivityDB::response * ActivityDB::Create(activity *aActivity)
+{
+	char DateBuffer[40];
+	char DateMask[40] = "%Y.%m.%d %H.%M.%S";
+	char *stringresult;
+
+	string theUrl = theParentDB->GetQueryDomain() + "ActivityCreate";
+	string theQuery = "activityTypeID="+std::to_string(aActivity->Type);
+	theQuery += "&locationID=" + std::to_string(aActivity->Location);
+	theQuery += "&lotID=" + aActivity->Lot;
+	theQuery += "&activityName=" + aActivity->Name;
+	strftime(DateBuffer, 40, DateMask,(const tm *)(localtime(&(aActivity->StartDate))));
+	theQuery += "&startDate=" + DateBuffer;
+	strftime(DateBuffer, 40, DateMask,(const tm *)(localtime(&(aActivity->EndDate))));
+	theQuery += "&endDate=" + DateBuffer;
+	theQuery += "&position=" + aActivity->Position;
+	theQuery += "&resultID=" + std::to_string(aActivity->Result);
+	theQuery += "&statusID=" + std::to_string(aActivity->Status);
+	theQuery += "&userID=" +  std::to_string(aActivity->User);
+
+	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+	} else {
+		DecodeResponse(stringresult);
+	}
+	return(&theResponse);
 }
 
