@@ -182,7 +182,31 @@ class ActivityDB : public AlpideTable
 private:
 
 public:
+	struct member {
+		int ID;
+		int ProjectMember;
+		int Leader;
+		int User;
+	};
+
+	struct parameter {
+		int ID;
+		int ActivityParameter;
+		float Value;
+		int User;
+	};
+
+	struct attach {
+		int ID;
+		int Category;
+		string RemoteFileName;
+		string LocalFileName;
+		int User;
+	};
+
+
 	struct activity {
+		int ID;
 		int Type;
 		int Location;
 		string Lot;
@@ -193,8 +217,10 @@ public:
 		int Result;
 		int Status;
 		int User;
+		vector<member> Members;
+		vector<parameter> Parameters;
+		vector<attach> Attachments;
 	} ;
-
 
 
 // Methods
@@ -206,6 +232,8 @@ public:
 
 
 private:
+    string buildBase64Binary(string aLocalFileName);
+
 
 };
 

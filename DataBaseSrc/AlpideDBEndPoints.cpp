@@ -525,18 +525,18 @@ string ComponentDB::Print(componentType *co)
 			ap = "Component : ID=" + std::to_string(co->ID) +
 				" Name="+ co->Name + " Code=" + co->Code + " Description=" + co->Description + "\n";
 			ap += "   Composition : {";
-			for(int i=0;i<co->Composition.size();i++)
+			for(unsigned int i=0;i<co->Composition.size();i++)
 				ap+= "( ID="+std::to_string(co->Composition.at(i).ID)+
 						",Type="+co->Composition.at(i).ComponentType+
 						  ",Q.ty="+std::to_string(co->Composition.at(i).Quantity)+")";
 			ap += "}\n";
 			ap += "   Physical Status  : {";
-			for(int i=0;i<co->PhysicalStatus.size();i++)
+			for(unsigned int i=0;i<co->PhysicalStatus.size();i++)
 				ap+= "( ID="+ std::to_string(co->PhysicalStatus.at(i).ID) +
 						  ",Name="+co->PhysicalStatus.at(i).Name+")";
 			ap += "}\n";
 			ap += "   Functional Status  : {";
-			for(int i=0;i<co->FunctionalStatus.size();i++)
+			for(unsigned int i=0;i<co->FunctionalStatus.size();i++)
 				ap+= "( ID="+ std::to_string(co->FunctionalStatus.at(i).ID) +
 						  ",Name="+co->FunctionalStatus.at(i).Name+")";
 			ap += "}\n";
@@ -572,16 +572,20 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 	char DateBuffer[40];
 	char DateMask[40] = "%Y.%m.%d %H.%M.%S";
 	char *stringresult;
+	string theUrl;
+	string theQuery;
 
-	string theUrl = theParentDB->GetQueryDomain() + "ActivityCreate";
-	string theQuery = "activityTypeID="+std::to_string(aActivity->Type);
+	theUrl = theParentDB->GetQueryDomain() + "ActivityCreate";
+	theQuery = "activityTypeID="+std::to_string(aActivity->Type);
 	theQuery += "&locationID=" + std::to_string(aActivity->Location);
 	theQuery += "&lotID=" + aActivity->Lot;
 	theQuery += "&activityName=" + aActivity->Name;
 	strftime(DateBuffer, 40, DateMask,(const tm *)(localtime(&(aActivity->StartDate))));
-	theQuery += "&startDate=" + DateBuffer;
+	theQuery += "&startDate=";
+	theQuery.append( DateBuffer );
 	strftime(DateBuffer, 40, DateMask,(const tm *)(localtime(&(aActivity->EndDate))));
-	theQuery += "&endDate=" + DateBuffer;
+	theQuery += "&endDate=";
+	theQuery.append( DateBuffer );
 	theQuery += "&position=" + aActivity->Position;
 	theQuery += "&resultID=" + std::to_string(aActivity->Result);
 	theQuery += "&statusID=" + std::to_string(aActivity->Status);
@@ -589,9 +593,106 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 
 	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 		SetResponse(AlpideTable::SyncQuery);
+		return(&theResponse);
 	} else {
 		DecodeResponse(stringresult);
+		aActivity->ID = theResponse.ID;
 	}
+
+	theUrl = theParentDB->GetQueryDomain() + "ActivityMemberAssign";
+	for(int i=0;aActivity->Members.size();i++) {
+		theQuery = "projectMemberID="+std::to_string(aActivity->Members.at(i).ProjectMember);
+		theQuery += "&activityID=" + std::to_string(aActivity->ID);
+		theQuery += "&leader=" + std::to_string(aActivity->Members.at(i).Leader);
+		theQuery += "&userID=" + std::to_string(aActivity->Members.at(i).User);
+
+		if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+			SetResponse(AlpideTable::SyncQuery);
+			return(&theResponse);
+		} else {
+			DecodeResponse(stringresult);
+			aActivity->Members.at(i).ID = theResponse.ID;
+		}
+	}
+
+	theUrl = theParentDB->GetQueryDomain() + "ActivityParameterCreate";
+	for(int i=0;aActivity->Parameters.size();i++) {
+		theQuery = "activityID=" + std::to_string(aActivity->ID);
+		theQuery += "&activityParameterID=" + std::to_string(aActivity->Parameters.at(i).ActivityParameter);
+		theQuery += "&value=" + std::to_string(aActivity->Parameters.at(i).Value);
+		theQuery += "&userID=" + std::to_string(aActivity->Parameters.at(i).User);
+
+		if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+			SetResponse(AlpideTable::SyncQuery);
+			return(&theResponse);
+		} else {
+			DecodeResponse(stringresult);
+			aActivity->Parameters.at(i).ID = theResponse.ID;
+		}
+	}
+
+	theUrl = theParentDB->GetQueryDomain() + "ActivityAttachmentCreate";
+	for(int i=0;aActivity->Parameters.size();i++) {
+		theQuery = "activityID=" + std::to_string(aActivity->ID);
+		theQuery += "&attachmentCategoryID=" + std::to_string(aActivity->Attachments.at(i).Category);
+		theQuery += "&userID=" + std::to_string(aActivity->Attachments.at(i).User);
+		theQuery += "&fileName=" + aActivity->Attachments.at(i).RemoteFileName;
+		theQuery += "&file=" + buildBase64Binary(aActivity->Attachments.at(i).LocalFileName);
+
+		if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+			SetResponse(AlpideTable::SyncQuery);
+			return(&theResponse);
+		} else {
+			DecodeResponse(stringresult);
+			aActivity->Attachments.at(i).ID = theResponse.ID;
+		}
+	}
+
 	return(&theResponse);
 }
+
+string ActivityDB::buildBase64Binary(string aLocalFileName)
+{
+
+	static const std::string base64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+	string Buffer = "";
+	FILE *fh = fopen(aLocalFileName.c_str(), "rb");
+	if(fh == NULL) {
+		cerr << "Failed to open the file :" << aLocalFileName << "Abort !" << endl;
+		return(Buffer);
+	}
+
+	unsigned char cBufferIn[3];
+	unsigned char cBufferOut[4];
+
+	int i = 0;
+	int j = 0;
+	unsigned char ch;
+
+	ch =  (unsigned char)fgetc(fh);
+    while(!feof(fh)) {
+    	cBufferIn[i++] = ch;// *(bytes_to_encode++);
+    	if (i == 3) {
+    		cBufferOut[0] = (cBufferIn[0] & 0xfc) >> 2;
+    		cBufferOut[1] = ((cBufferIn[0] & 0x03) << 4) + ((cBufferIn[1] & 0xf0) >> 4);
+    		cBufferOut[2] = ((cBufferIn[1] & 0x0f) << 2) + ((cBufferIn[2] & 0xc0) >> 6);
+    		cBufferOut[3] = cBufferIn[2] & 0x3f;
+			for(i = 0; (i<4) ; i++) Buffer += base64chars[cBufferOut[i]];
+			i = 0;
+		}
+		ch = (unsigned char)fgetc(fh);
+	}
+    if (i) {
+    	for(j = i; j < 3; j++) cBufferIn[j] = '\0';
+    	cBufferOut[0] = ( cBufferIn[0] & 0xfc) >> 2;
+    	cBufferOut[1] = ((cBufferIn[0] & 0x03) << 4) + ((cBufferIn[1] & 0xf0) >> 4);
+    	cBufferOut[2] = ((cBufferIn[1] & 0x0f) << 2) + ((cBufferIn[2] & 0xc0) >> 6);
+    	cBufferOut[3] =   cBufferIn[2] & 0x3f;
+	    for (j = 0; (j < i + 1); j++) Buffer += base64chars[cBufferOut[j]];
+	    while((i++ < 3)) Buffer += '=';
+    }
+	return(Buffer);
+}
+
 

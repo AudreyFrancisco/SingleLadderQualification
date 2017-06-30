@@ -146,19 +146,19 @@ int CernSsoCookieJar::parseTheJar(string aCookieJarFile)
 		if(Buffer[0] != '#' && Buffer[0] != 0 && Buffer[0] != '\n' && Buffer[0] != '\r'){
 
 			char *ptr;
-			if(ptr = strtok(Buffer, "\t")) {
+			if((ptr = strtok(Buffer, "\t"))) {
 				rigolo.domain = ptr;
-				if(ptr = strtok(NULL, "\t")) {
+				if((ptr = strtok(NULL, "\t"))) {
 					rigolo.tailmatch = (strcmp(ptr, "FALSE") == 0) ? false : true;
-					if(ptr = strtok(NULL, "\t")) {
+					if((ptr = strtok(NULL, "\t"))) {
 						rigolo.path = ptr;
-						if(ptr = strtok(NULL, "\t")) {
+						if((ptr = strtok(NULL, "\t"))) {
 							rigolo.secure = (strcmp(ptr, "FALSE") == 0) ? false : true;
-							if(ptr = strtok(NULL, "\t")) {
+							if((ptr = strtok(NULL, "\t"))) {
 								rigolo.expires = atol(ptr);
-								if(ptr = strtok(NULL, "\t")) {
+								if((ptr = strtok(NULL, "\t"))) {
 									rigolo.name = ptr;
-									if(ptr = strtok(NULL, "\t")) {
+									if((ptr = strtok(NULL, "\t"))) {
 										rigolo.value = ptr;
 										theJar.push_back( rigolo );
 										NumberOfCookies++;
