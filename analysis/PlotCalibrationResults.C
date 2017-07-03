@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "TGraphErrors.h"
+#include "TMultiGraph.h"
 #include "TROOT.h"
 #include "TCanvas.h"
 #include "TF1.h"
@@ -39,14 +40,7 @@ void fillData(float *ithr, float *RMS, int Chips, char * filePrefix) { //Blatant
   }
 }
 
-//Must give PlotCal one of the summary file names AND the total number of chips
-//  (including inactive ones)
-//Missing chips are mapped to 0.
-void PlotCalibrationResults(char * fileName, int Chips=0) {
-  if(Chips==0) {
-    std::cout << "Missing number of chips parameter" << std::endl;
-    return;
-  }
+void MakeGraphErrors(int Chips, TGraphErrors * cal, char * fileName) {
   float *ithr = new float[Chips];
   float *RMS = new float[Chips];
   float *chipNums = new float[Chips];
@@ -57,7 +51,36 @@ void PlotCalibrationResults(char * fileName, int Chips=0) {
     filePrefix[i]=fileName[i];
   }
   char nul = '\0';
-  filePrefix[length+1]=nul;
+  filePrefix[length]=nul;
+
+  fillData(ithr,RMS, Chips, filePrefix);
+  for(int i=0; i<Chips; i++) { //xvals
+    chipNums[i]=i;
+  }
+  cal = new TGraphErrors(Chips, chipNums, ithr, NULL, RMS);
+  if(cal) { std::cout << "Done" << std::endl; }
+  cal->SetLineColor(4);
+  std::cout << "set"<< std::endl;
+}
+
+//Must give PlotCal one of the summary file names AND the total number of chips
+//  (including inactive ones)
+//Missing chips are mapped to 0.
+//Give 2 file names to plot ITHR and VCASN cal results.
+void PlotCalibrationResults(int Chips, char * fileName1, char * fileName2=NULL) {
+  //NOTE:  first filename plotted in red, second in blue
+  
+  /*float *ithr = new float[Chips];
+  float *RMS = new float[Chips];
+  float *chipNums = new float[Chips];
+  char * filePrefix; //must be null-terminated...
+  int length = strcspn(fileName1, "C")+4; //add 4 to include "Chip"
+  filePrefix = new char[length+1];
+  for(int i=0; i<length; i++) {
+    filePrefix[i]=fileName1[i];
+  }
+  char nul = '\0';
+  filePrefix[length]=nul;
 
   fillData(ithr,RMS, Chips, filePrefix);
   for(int i=0; i<Chips; i++) { //xvals
@@ -65,17 +88,62 @@ void PlotCalibrationResults(char * fileName, int Chips=0) {
   }
 
   TGraphErrors cal(Chips, chipNums, ithr, NULL, RMS);
-  cal.SetTitle("Mean VCASN threshold value per chip, with errors");
+  cal.SetTitle("Mean threshold value per chip (VCASN)");
   cal.SetMarkerStyle(21);
   cal.SetMarkerColor(4);
   cal.SetLineColor(4);
   auto axis = cal.GetXaxis();
-  axis->SetLimits(-.5,9);
-  auto can = new TCanvas();
-  cal.DrawClone("APE");
+  axis->SetLimits(-.5,8.5);*/
+  
+  if(!fileName2) { //VCASN or ITHR
+    TGraphErrors * cal1=NULL;
+    MakeGraphErrors(Chips, cal1, fileName1);
+    if(cal1) {
+      std::cout << "Constructed" << std::endl;
+    }
+    cal1->SetTitle("Mean threshold value per chip");
+    std::cout << "Title" << std::endl;
+    cal1->SetMarkerStyle(21);
+    cal1->SetMarkerColor(4);
+    cal1->SetLineColor(4);
+    auto axis = cal1->GetXaxis();
+    axis->SetLimits(-.5,8.5);
+    std::cout << "GraphErrors set" << std::endl;
+    
+    auto can = new TCanvas();
+    cal1->DrawClone("APE");
+    cal1->Print("ITHRorVCASN.pdf");
 
-  cal.Print("ITHRorVCASN.pdf");
+  } else {  //first filename in red, second in blue
+    TGraphErrors * cal1=NULL;
+    TGraphErrors * cal2=NULL;
+    MakeGraphErrors(Chips, cal1, fileName1);
+    MakeGraphErrors(Chips, cal2, fileName2);
+    cal1->SetTitle("Mean threshold value per chip");
+    cal2->SetTitle("Mean threshold value per chip");
+    cal1->SetMarkerStyle(21);
+    cal2->SetMarkerStyle(21);
+    cal1->SetMarkerColor(2);
+    cal2->SetMarkerColor(4);
+    cal1->SetLineColor(2);
+    cal2->SetLineColor(4);
+    auto axis1 = cal1->GetXaxis();
+    axis1->SetLimits(-.5,8.5);
+    auto axis2 = cal2->GetXaxis();
+    axis2->SetLimits(-.5,8.5);
 
+    TMultiGraph *mg = new TMultiGraph();
+    mg->Add(cal1);
+    mg->Add(cal2);
+
+    TCanvas *c1 = new TCanvas("c1","multigraph",400,300);
+    c1->SetGrid();
+
+    mg->Draw("apl");
+    mg->GetXaxis()->SetTitle("Chip number");
+    mg->GetYaxis()->SetTitle("Threshold");
+
+    gPad->Update();
+    gPad->Modified();
+  }
 }
-
-
