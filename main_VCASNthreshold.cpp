@@ -16,6 +16,7 @@
 
 #include <unistd.h>
 #include <string.h>
+#include <iostream>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -29,6 +30,11 @@
 
 
 // !!! NOTE: Scan parameters are now set via Config file
+
+// This routine reads ThresholdSummary files for a chip (produced by tuning scan +
+// routines), sets VCASN appropriately, and then begins a threshold scan.
+// This program MUST be given a ThresholdSummary...dat filename as a command line argument.
+// The name must have the format ThresholdSummary_XXXXXX_XXXXXX_Chip#..., where # is the chip number; stuff past the chip name doesn't matter.
 
 TBoardType fBoardType;
 std::vector <TReadoutBoard *> fBoards;
@@ -45,10 +51,11 @@ int myChargeStep;  // currently unused
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
-int HitData     [15][100][512][1024];
+int HitData     [16][100][512][1024];
 int ChargePoints[100];
 int ievt = 0;
 
+std::string summaryName; //for reading ThresholdSummary files in fillVcasn
 
 void InitScanParameters() {
   myMaskStages   = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
@@ -63,7 +70,7 @@ void InitScanParameters() {
 void ClearHitData() {
   for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
     ChargePoints[icharge-myChargeStart] = icharge;
-    for (int ichip = 0; ichip < 15; ichip ++) {
+    for (int ichip = 0; ichip < 16; ichip ++) {
       for (int icol = 0; icol < 512; icol ++) {
         for (int iaddr = 0; iaddr < 1024; iaddr ++) {
           HitData[ichip][icharge-myChargeStart][icol][iaddr] = 0;
@@ -88,6 +95,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
 
   char fNameTemp[100];
   sprintf(fNameTemp,"%s", fName);
+  std::cout << "WriteData:  fNameTemp = " << fNameTemp << std::endl;
   strtok (fNameTemp, "."); 
   bool  HasData;
 
@@ -167,11 +175,43 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 }
 
 
+void fillVcasn(float *vcasn) { //WIP
+  int old_vcas; //only current is used for now; the rest may be used later
+  int old_ith;
+  int goodPixels;
+  float voltage;
+  float voltageRMS;
+  float noise;
+  float noiseRMS;
+  char name[100];
+  
+  std::cout << "Filling Vcasn" << std::endl;
+  for(int i = 0; i < fChips.size(); i++) {
+    //get file; name of one of them is in summaryName.
+    //Only use first 34 chars of summaryName; insert chip # right after.
+
+    sprintf(name, "%s%i_0.dat", summaryName.c_str(), i);
+    FILE *fp = fopen(name, "r");
+    //load file into array
+    if(fp) {
+      fscanf(fp, "%i %i %i %f %f %f %f", &old_vcas, &old_ith, &goodPixels, &voltage,
+          &voltageRMS, &noise, &noiseRMS);
+      vcasn[i]=voltage;
+      fclose(fp);
+    } else {
+      std::cout << "Unable to open file." << std::endl;
+      vcasn[i]=-1;
+    }
+  }
+}
+
+
 
 void scan() {   
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0;
+  float *vcasn = new float[14]; //shouldn't have >14 chips
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
   std::vector<int> myVPULSEH;
@@ -183,8 +223,17 @@ void scan() {
     myMOSAIC->StartRun();
   }
 
+  fillVcasn(vcasn); //NEW--fill vcasn with calibrated values for each chip
+
   for (int i = 0; i < fChips.size(); i++) { //Read VPULSEH from Config and save it at vector temporarily
     myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
+  }
+
+  std::cout << "Initializing Vcasn array" << std::endl;
+  //set VCASN for each chip here!
+  for (int i = fChips.size()-1; i>-1; i--) {
+    if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+    fChips.at(i)->WriteRegister(Alpide::REG_VCASN, vcasn[i]);
   }
  
   for (int istage = 0; istage < myMaskStages; istage ++) {
@@ -198,6 +247,8 @@ void scan() {
       //std::cout << "Charge = " << icharge << std::endl;
       for (int i = 0; i < fChips.size(); i ++) {
         if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+        if (vcasn[i] == -1) continue;  //Summary file does not exist
+
         fChips.at(i)->WriteRegister (Alpide::REG_VPULSEL, myVPULSEH[i] - icharge);  //Automatically matches max pulse = VPULSEH in config
       }
       fBoards.at(0)->Trigger(myNTriggers);
@@ -270,6 +321,14 @@ void scan() {
 
 int main(int argc, char** argv) {
 
+  if(!argv[1]) {
+    std::cout << "ERROR:  No Summary file provided by the command line!" << std::endl;
+    return 1;
+  }
+  summaryName = argv[1]; //use the first 35 characters ONLY--see above
+  summaryName = summaryName.substr(0,35);
+  std::cout << "Summary " << summaryName << std::endl;
+
   decodeCommandParameters(argc, argv);
   initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
   InitScanParameters();
@@ -317,10 +376,10 @@ int main(int argc, char** argv) {
     }
 
     scan();
-
+    std::cout << "SUFFIX: " << Suffix << std::endl;
     sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
     WriteDataToFile (fName, true);
-    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    sprintf(fName, "Data/ScanConfig_%s_0.cfg", Suffix);
 
     if (myDAQBoard) {
       WriteScanConfig (fName, fChips.at(0), myDAQBoard);

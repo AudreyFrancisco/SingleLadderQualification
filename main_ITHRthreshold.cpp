@@ -16,6 +16,7 @@
 
 #include <unistd.h>
 #include <string.h>
+#include <iostream>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -29,6 +30,11 @@
 
 
 // !!! NOTE: Scan parameters are now set via Config file
+
+// This routine reads ThresholdSummary files for a chip (produced by tuning scan +
+// routines), sets the ITHR appropriates, and then begins a threshold scan.
+// This program MUST be given a ThresholdSummary...dat filename as a command line argument.
+// The name must have the format ThresholdSummary_XXXXXX_XXXXXX_Chip#..., where # is the chip number; stuff past the chip name doesn't matter.
 
 TBoardType fBoardType;
 std::vector <TReadoutBoard *> fBoards;
@@ -45,10 +51,11 @@ int myChargeStep;  // currently unused
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
-int HitData     [15][100][512][1024];
+int HitData     [16][100][512][1024];
 int ChargePoints[100];
 int ievt = 0;
 
+char *summaryName; //for reading ThresholdSummary files in fillIthr
 
 void InitScanParameters() {
   myMaskStages   = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
@@ -63,7 +70,7 @@ void InitScanParameters() {
 void ClearHitData() {
   for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
     ChargePoints[icharge-myChargeStart] = icharge;
-    for (int ichip = 0; ichip < 15; ichip ++) {
+    for (int ichip = 0; ichip < 16; ichip ++) {
       for (int icol = 0; icol < 512; icol ++) {
         for (int iaddr = 0; iaddr < 1024; iaddr ++) {
           HitData[ichip][icharge-myChargeStart][icol][iaddr] = 0;
@@ -167,11 +174,41 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 }
 
 
+void fillIthr(int *ithr) { //WIP
+  int old_vcas; //only current used for now; the rest are probably unecessary
+  int old_ith;
+  int goodPixels;
+  int current;
+  int currentRMS;
+  int noise;
+  int noiseRMS;
+  char name[100];
+  for(int i = 0; i < fChips.size(); i++) {
+    //get file; name of one of them is in summaryName.
+    //Only use first 34 chars of summaryName; insert chip # right after.
+    sprintf(name, "%s%i_0.dat", summaryName, i);
+    std::cout << "Opening " << name << std::endl;
+    FILE *fp = fopen(name, "r");
+    //load file into array
+    if(fp) {
+      fscanf(fp, "%d %d %d %f %f %f %f", &old_vcas, &old_ith, &goodPixels, &current,
+          &currentRMS, &noise, &noiseRMS);
+      ithr[i]=current;
+    } else {
+      std::cout << "Unable to open file." << std::endl;
+      ithr[i]=-1;
+    }
+    fclose(fp);
+  }
+}
+
+
 
 void scan() {   
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0;
+  int *ithr = new int[14]; //shouldn't have >14 chips
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
   std::vector<int> myVPULSEH;
@@ -183,8 +220,12 @@ void scan() {
     myMOSAIC->StartRun();
   }
 
+  fillIthr(ithr); //NEW--fill ithr with calibrated values for each chip
+
   for (int i = 0; i < fChips.size(); i++) { //Read VPULSEH from Config and save it at vector temporarily
     myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
+    //NEW:  set ITHR for each chip here!
+    fChips.at(i)->WriteRegister(Alpide::REG_ITHR, ithr[i]);
   }
  
   for (int istage = 0; istage < myMaskStages; istage ++) {
@@ -198,6 +239,8 @@ void scan() {
       //std::cout << "Charge = " << icharge << std::endl;
       for (int i = 0; i < fChips.size(); i ++) {
         if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+        if (ithr[i] == -1) continue;  //Summary file does not exist
+
         fChips.at(i)->WriteRegister (Alpide::REG_VPULSEL, myVPULSEH[i] - icharge);  //Automatically matches max pulse = VPULSEH in config
       }
       fBoards.at(0)->Trigger(myNTriggers);
@@ -270,6 +313,8 @@ void scan() {
 
 int main(int argc, char** argv) {
 
+  char *summaryName = argv[0]; //use the first 34 characters ONLY--see above
+
   decodeCommandParameters(argc, argv);
   initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
   InitScanParameters();
@@ -318,9 +363,9 @@ int main(int argc, char** argv) {
 
     scan();
 
-    sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
+    sprintf(fName, "Data/ThresholdScan_%s_0.dat", Suffix);
     WriteDataToFile (fName, true);
-    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    sprintf(fName, "Data/ScanConfig_%s_0.cfg", Suffix);
 
     if (myDAQBoard) {
       WriteScanConfig (fName, fChips.at(0), myDAQBoard);

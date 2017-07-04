@@ -29,7 +29,9 @@
 
 
 // !!! NOTE: Scan parameters are now set via Config file
+// ...EXCEPT for myChargeStop/Start, which are set in InitScanParameters below.
 
+//ADDED to match test_threshold--not declared anywhere else!! (WIP?)
 TBoardType fBoardType;
 std::vector <TReadoutBoard *> fBoards;
 std::vector <TAlpide *>       fChips;
@@ -45,7 +47,7 @@ int myChargeStep;  // currently unused
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
-int HitData     [15][100][512][1024];
+int HitData     [16][100][512][1024];
 int ChargePoints[100];
 int ievt = 0;
 
@@ -54,8 +56,10 @@ void InitScanParameters() {
   myMaskStages   = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
   myPixPerRegion = fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
   myNTriggers    = fConfig->GetScanConfig()->GetParamValue("NINJ");
-  myChargeStart  = fConfig->GetScanConfig()->GetParamValue("CHARGESTART");
-  myChargeStop   = fConfig->GetScanConfig()->GetParamValue("CHARGESTOP");
+  //myChargeStart  = fConfig->GetScanConfig()->GetParamValue("CHARGESTART");
+  myChargeStart  = 40;
+  //myChargeStop   = fConfig->GetScanConfig()->GetParamValue("CHARGESTOP");
+  myChargeStop   = 60;
   myChargeStep   = fConfig->GetScanConfig()->GetParamValue("CHARGESTEP");
 }
 
@@ -63,7 +67,7 @@ void InitScanParameters() {
 void ClearHitData() {
   for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
     ChargePoints[icharge-myChargeStart] = icharge;
-    for (int ichip = 0; ichip < 15; ichip ++) {
+    for (int ichip = 0; ichip < 16; ichip ++) {
       for (int icol = 0; icol < 512; icol ++) {
         for (int iaddr = 0; iaddr < 1024; iaddr ++) {
           HitData[ichip][icharge-myChargeStart][icol][iaddr] = 0;
@@ -93,10 +97,9 @@ void WriteDataToFile (const char *fName, bool Recreate) {
 
   for (int ichip = 0; ichip < fChips.size(); ichip ++) {
     int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
-    int ctrInt = fChips.at(ichip)->GetConfig()->GetCtrInt();
     if (!fChips.at(ichip)->GetConfig()->IsEnabled()) continue;  // write files only for enabled chips
     if (fChips.size() > 1) {
-      sprintf(fNameChip, "%s_Chip%d_%d.dat", fNameTemp, chipId, ctrInt);
+      sprintf(fNameChip, "%s_Chip%d_0.dat", fNameTemp, chipId);
     }
     else {
       sprintf(fNameChip, "%s.dat", fNameTemp);
@@ -128,7 +131,6 @@ int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, chip->GetConfig()->GetParamValue("STROBEDELAYCHIP"));   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
   chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length 
-  return 0;
 }
 
 
@@ -139,7 +141,12 @@ int configureChip(TAlpide *chip) {
 
   AlpideConfig::ConfigureCMU (chip);
 
-  return 0;
+
+  //int Target = fConfig->GetScanConfig()->GetParamValue("TARGET");
+  //Target    /= 10;
+  //std::cout << "Target = " << Target << std::endl;  Just produces 0...
+  chip->WriteRegister (Alpide::REG_VPULSEH, 170);
+  chip->WriteRegister (Alpide::REG_VPULSEL, 155); //was 155
 }
 
 
@@ -154,7 +161,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "%s\n", Config);
   std::cout << Config << std::endl;
 
-  fprintf(fp, "\n");
+  fprintf(fp, "\n", Config);
 
   fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
   fprintf(fp, "MASKSTAGES %i\n", myMaskStages);
@@ -171,7 +178,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 void scan() {   
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0;
+  int                   nBad = 0, skipped = 0, prioErrors = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
   std::vector<int> myVPULSEH;
@@ -184,7 +191,8 @@ void scan() {
   }
 
   for (int i = 0; i < fChips.size(); i++) { //Read VPULSEH from Config and save it at vector temporarily
-    myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
+      myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
+//      std::cout << "Read VPULSEH : " << myVPULSEH[i] << std::endl;
   }
  
   for (int istage = 0; istage < myMaskStages; istage ++) {
@@ -198,37 +206,51 @@ void scan() {
       //std::cout << "Charge = " << icharge << std::endl;
       for (int i = 0; i < fChips.size(); i ++) {
         if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-        fChips.at(i)->WriteRegister (Alpide::REG_VPULSEL, myVPULSEH[i] - icharge);  //Automatically matches max pulse = VPULSEH in config
+        fChips.at(i)->WriteRegister (Alpide::REG_VCASN, icharge); 
+	//        fChips.at(i)->WriteRegister (Alpide::REG_VPULSEL, myVPULSEH[i] - icharge);  //Automatically matches max pulse = VPULSEH in config
       }
+      usleep (5000);
       fBoards.at(0)->Trigger(myNTriggers);
-
-//std::cout << " >>>>" << myMOSAIC->GetConfig()->GetPollingDataTimeout() << endl; 
 
       int itrg = 0;
       int trials = 0;
       while(itrg < myNTriggers * fEnabled) {
         if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
-          usleep(1000); // Increment from 100us
+          usleep(100);
           trials ++;
           if (trials == 10) {
         	std::cout << "Reached 10 timeouts, giving up on this event" << std::endl;
             itrg = myNTriggers * fEnabled;
-            nSkipped ++;
+            skipped ++;
             trials = 0;
           }
           continue;
         }
         else {
+          // decode DAQboard event
+          //if (ievt < 20) {
+	  //   FILE *fDebug = fopen ("DebugData.dat", "a");
+          //  fprintf(fDebug, "Normal event:\n");
+          //  for (int iByte=0; iByte<n_bytes_data; ++iByte) {
+          //    fprintf (fDebug, "%02x ", (int) buffer[iByte]);
+          //  }
+          //  fprintf(fDebug, "\nFull Event:\n"); 
+          //  for (int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
+          //    fprintf (fDebug, "%02x ", (int) fDebugBuffer.at(ibyte));
+          //  }
+          //  fprintf(fDebug, "\n\n");
+          //  fclose (fDebug);
+          //  ievt ++;
+	  // }
           BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-          if (boardInfo.decoder10b8bError) errors8b10b++;
           // decode Chip event
           int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
           if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
           if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel, prioErrors)) {
-   	    	std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
-	    	nBad ++;
+   	    std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
+	    nBad ++;
             if (nBad > 10) continue;
-	    	FILE *fDebug = fopen ("DebugData.dat", "a");
+	    FILE *fDebug = fopen ("DebugData.dat", "a");
             fprintf(fDebug, "Bad event:\n");
             for (int iByte=0; iByte<n_bytes_data + 1; ++iByte) {
               fprintf (fDebug, "%02x ", (int) buffer[iByte]);
@@ -239,12 +261,10 @@ void scan() {
             }
             fprintf(fDebug, "\n\n");
             fclose (fDebug);
-	  	  }
+	  }
           itrg++;
         }
       }
-	  //usleep(100);
-
       //std::cout << "Number of hits: " << Hits->size() << std::endl;
       CopyHitData(Hits, icharge);
     }
@@ -253,25 +273,13 @@ void scan() {
   if (myMOSAIC) {
     myMOSAIC->StopRun();
   }
-
-
-  std::cout << std::endl;
-  if (myMOSAIC) {
-    myMOSAIC->StopRun();
-    std::cout << "Total number of 8b10b decoder errors: " << errors8b10b << std::endl;
-  }
-  std::cout << "Number of corrupt events:             " << nBad       << std::endl;
-  std::cout << "Number of skipped points:             " << nSkipped   << std::endl;
-  std::cout << "Priority encoder errors:              " << prioErrors << std::endl;
-  std::cout << std::endl;
-  std::cout << fEnabled << " chips were enabled for scan." << std::endl << std::endl;
+  std::cout << "Scan finished, skipped " << skipped << " points." << std::endl;
 }
 
 
-int main(int argc, char** argv) {
-
-  decodeCommandParameters(argc, argv);
-  initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
+int main() {
+  //initSetup();
+  initSetup(fConfig,  &fBoards,  &fBoardType, &fChips); //ADDED:  now given full set of params to match test_threshold
   InitScanParameters();
   char Suffix[20], fName[100], Config[1000];
 
@@ -288,20 +296,22 @@ int main(int argc, char** argv) {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
     for (int i = 0; i < fChips.size(); i ++) {
-      if (fChips.at(i)->GetConfig()->IsEnabled()) {
-        fEnabled ++;        
-        configureChip (fChips.at(i));
-      }
-      else if (fChips.at(i)->GetConfig()->HasEnabledSlave()) {
-	AlpideConfig::BaseConfigPLL(fChips.at(i));
-      }
+      if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
+      fEnabled ++;        
+      configureChip (fChips.at(i));
     }
 
-    std::cout << "Found " << fEnabled << " enabled chips." << std::endl;
+    std::cout << "Found " << fEnabled << " enabled chips out of " << fChips.size() << "." << std::endl;
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
 
     // put your test here... 
-    if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
+    if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
+      fBoards.at(0)->SetTriggerConfig (true, true, 
+                                       fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
+                                       fBoards.at(0)->GetConfig()->GetParamValue("PULSEDELAY"));
+      fBoards.at(0)->SetTriggerSource (trigInt);
+    }
+    else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
       // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns * strobe delay
       // pulse delay cannot be 0, therefore set strobe delay to 0 and use only pulse delay
       fBoards.at(0)->SetTriggerConfig (true, false, 
@@ -309,18 +319,12 @@ int main(int argc, char** argv) {
                                        2 * fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
       fBoards.at(0)->SetTriggerSource (trigExt);
     }
-    else {
-      fBoards.at(0)->SetTriggerConfig (true, true, 
-                                       fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
-                                       fBoards.at(0)->GetConfig()->GetParamValue("PULSEDELAY"));
-      fBoards.at(0)->SetTriggerSource (trigInt);
-    }
 
     scan();
 
-    sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
+    sprintf(fName, "Data/VcASNScan_%s.dat", Suffix); //note the lowercase; necessary for All_FitThresholds
     WriteDataToFile (fName, true);
-    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    sprintf(fName, "Data/ScanConfig_%s_0.cfg", Suffix);
 
     if (myDAQBoard) {
       WriteScanConfig (fName, fChips.at(0), myDAQBoard);

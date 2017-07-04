@@ -29,6 +29,7 @@
 
 
 // !!! NOTE: Scan parameters are now set via Config file
+// ...EXCEPT for myChargeStop/Start, which are set in InitScanParameters below.
 
 //ADDED to match test_threshold--not declared anywhere else!! (WIP?)
 TBoardType fBoardType;
@@ -55,8 +56,10 @@ void InitScanParameters() {
   myMaskStages   = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
   myPixPerRegion = fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
   myNTriggers    = fConfig->GetScanConfig()->GetParamValue("NINJ");
-  myChargeStart  = fConfig->GetScanConfig()->GetParamValue("CHARGESTART");
-  myChargeStop   = fConfig->GetScanConfig()->GetParamValue("CHARGESTOP");
+  //myChargeStart  = fConfig->GetScanConfig()->GetParamValue("CHARGESTART");
+  myChargeStart  = 30;
+  //myChargeStop   = fConfig->GetScanConfig()->GetParamValue("CHARGESTOP");
+  myChargeStop   = 100;
   myChargeStep   = fConfig->GetScanConfig()->GetParamValue("CHARGESTEP");
 }
 
@@ -96,7 +99,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
     int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
     if (!fChips.at(ichip)->GetConfig()->IsEnabled()) continue;  // write files only for enabled chips
     if (fChips.size() > 1) {
-      sprintf(fNameChip, "%s_Chip%d.dat", fNameTemp, chipId);
+      sprintf(fNameChip, "%s_Chip%d_0.dat", fNameTemp, chipId);
     }
     else {
       sprintf(fNameChip, "%s.dat", fNameTemp);
@@ -319,9 +322,9 @@ int main() {
 
     scan();
 
-    sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
+    sprintf(fName, "Data/ITHRScan_%s.dat", Suffix); //used to be ThresholdScan
     WriteDataToFile (fName, true);
-    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    sprintf(fName, "Data/ScanConfig_%s_0.cfg", Suffix);
 
     if (myDAQBoard) {
       WriteScanConfig (fName, fChips.at(0), myDAQBoard);
