@@ -44,6 +44,8 @@
 #include <iostream>
 #include <string>
 
+#include "utilities.h"
+
 #include "AlpideDBManager.h"
 
 using namespace std;

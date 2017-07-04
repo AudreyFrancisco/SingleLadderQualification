@@ -43,6 +43,12 @@
 
 using namespace std;
 
+// if lib curl is used
+#define COMPILE_LIBCURL
+
+#define VERBOSITYLEVEL 0L
+
+
 bool fileExists(string path);
 bool pathExists(string path);
 

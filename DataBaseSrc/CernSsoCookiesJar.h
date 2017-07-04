@@ -43,7 +43,6 @@
 #include <string>
 #include <vector>
 
-#define VERBOSITYLEVEL 0L
 #define THECOOKIELENGTH 8196
 
 using namespace std;

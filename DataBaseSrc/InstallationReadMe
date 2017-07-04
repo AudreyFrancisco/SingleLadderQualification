@@ -4,7 +4,7 @@
     
     ReadMe for the installation
 
-	ver 0.1		29/06/2017
+	ver 0.2		04/07/2017
 	Auth.  A.Franco
 
  
@@ -62,7 +62,7 @@
   	AlpideDB *theDB = new AlpideDB();
   	
   	// Setup the AlpideDBWebURI
-	theDB->SetQueryDomain("https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx/");
+	theDB->SetQueryDomain("https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx");
 
     AlpideDBManager *theDBManager = theDB->GetManageHandle();
     
@@ -81,7 +81,7 @@
    
  **  Compilation Flags  **
  
- in the "AlpideDBManager.h" file
+ in the "utilities.h" file
 
 	#define COMPILE_LIBCURL   	 <-	Undefine it if you don't want to use libcurl
 

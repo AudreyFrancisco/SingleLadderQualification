@@ -45,6 +45,8 @@
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 
+#include "utilities.h"
+
 using namespace std;
 
 
@@ -232,8 +234,8 @@ public:
 
 
 private:
-    string buildBase64Binary(string aLocalFileName);
-
+    int buildBase64Binary(string aLocalFileName, string * aBuffer);
+    int buildUrlEncoded(string aLocalFileName, string *Buffer);
 
 };
 

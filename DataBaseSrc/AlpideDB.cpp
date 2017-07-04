@@ -35,14 +35,12 @@
  *
  */
 #include "AlpideDB.h"
-#include "utilities.h"
-
 
 AlpideDB::AlpideDB()
 {
 
 
-	theQueryDomain = "https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx/";
+	theQueryDomain = "https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx";
 
     theDBmanager = new AlpideDBManager();
 

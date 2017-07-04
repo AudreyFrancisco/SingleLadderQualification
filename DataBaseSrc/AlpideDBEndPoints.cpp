@@ -41,7 +41,7 @@
 
 #include "AlpideDBEndPoints.h"
 #include "AlpideDB.h"
-#include "utilities.h"
+
 
 /* --------------------------------------------------------
  *    AlpideDB Table Base class
@@ -74,9 +74,15 @@ AlpideTable::~AlpideTable()
  *				  Session := a Session Index Value (reserved for future use)
  *		returns : a response struct that contains the error code
  *
+ *
  *---------------- */
+
+// TODO: Need to make two routines to decode the response in order to be compliant with SOAP/POST versions.
+
 AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Session)
 {
+	bool bGoChildren = false;
+//	cout << ">>--Returned string--->>" <<  ReturnedString << endl;
 	xmlDocPtr doc;
 	doc = xmlReadMemory(ReturnedString, strlen(ReturnedString), "noname.xml", NULL, 0); // parse the XML
 	if (doc == NULL) {
@@ -94,13 +100,25 @@ AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Ses
 	xmlNode *n1 = root_element->children;
 	while (n1 != NULL) {
 		if(strcmp((const char*)n1->name, "ErrorCode") == 0) {
-			theResponse.ErrorCode = atoi( (const char*)n1->children->content);
+			if(n1->children != NULL)
+				theResponse.ErrorCode = atoi( (const char*)n1->children->content);
 		} else if(strcmp((const char*)n1->name, "ErrorMessage") == 0) {
-			theResponse.ErrorMessage = (const char*)n1->children->content;
+			if(n1->children != NULL)
+				theResponse.ErrorMessage = (const char*)n1->children->content;
 		} else if(strcmp((const char*)n1->name, "ID") == 0) {
-			theResponse.ID = atoi( (const char*)n1->children->content);
+			if(n1->children != NULL)
+				theResponse.ID = atoi( (const char*)n1->children->content);
+		} else if(strcmp((const char*)n1->name, "text") == 0) { // we need to skip this
+			// do nothing
+		} else  { // we reach the parent of results
+			bGoChildren = true;
 		}
-		n1 = n1->next;
+		if(bGoChildren) {
+			n1 = n1->children;
+			bGoChildren = false;
+		} else {
+			n1 = n1->next;
+		}
 	}
 	theResponse.Session = Session;
 	return(&theResponse);
@@ -173,7 +191,7 @@ ProjectDB::~ProjectDB()
  *---------------- */
 AlpideTable::response *ProjectDB::GetList(vector<project> *Result)
 {
-	string theUrl = theParentDB->GetQueryDomain() + "ProjectRead";
+	string theUrl = theParentDB->GetQueryDomain() + "/ProjectRead";
 	string theQuery = "";
 	char *result;
 	project pro;
@@ -250,7 +268,7 @@ MemberDB::~MemberDB()
  *---------------- */
 AlpideTable::response *MemberDB::GetList(int projectID, vector<member> *Result)
 {
-	string theUrl = theParentDB->GetQueryDomain() + "ProjectMemberRead";
+	string theUrl = theParentDB->GetQueryDomain() + "/ProjectMemberRead";
 	string theQuery = "projectID=" + std::to_string(projectID) ;
 	char *result;
 	member pro;
@@ -327,7 +345,7 @@ ComponentDB::~ComponentDB()
 *---------------- */
 AlpideTable::response * ComponentDB::GetTypeList(int ProjectID, vector<componentType> *Result)
 {
-	string theUrl = theParentDB->GetQueryDomain() + "ComponentTypeRead";
+	string theUrl = theParentDB->GetQueryDomain() + "/ComponentTypeRead";
 	string theQuery = "projectID=" + std::to_string(ProjectID) ;
 	char *stringresult;
 	componentType pro;
@@ -460,7 +478,7 @@ void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro)
 *---------------- */
 AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *Result)
 {
-	string theUrl = theParentDB->GetQueryDomain() + "ComponentTypeReadAll";
+	string theUrl = theParentDB->GetQueryDomain() + "/ComponentTypeReadAll";
 	string theQuery = "componentTypeID=" + std::to_string(ComponentTypeID) ;
 	char *stringresult;
 	componentType pro;
@@ -501,7 +519,7 @@ AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *
 AlpideTable::response * ComponentDB::Create(string ComponentTypeID, string ComponentID, string SupplyCompID,
 		string Description, string LotID, string PackageID, string UserID )
 {
-	string theUrl = theParentDB->GetQueryDomain() + "ComponentCreate";
+	string theUrl = theParentDB->GetQueryDomain() + "/ComponentCreate";
 	string theQuery = "componentTypeID="+ComponentTypeID+"&componentID="+ComponentID+"&supplierComponentID="+SupplyCompID+
 			"&description="+Description+"&lotID="+LotID+"&packageID="+PackageID+"&userID="+UserID;
 	char *stringresult;
@@ -567,15 +585,17 @@ ActivityDB::~ActivityDB()
 *		In Param : the activity struct
 *		returns : a char pointer to a string buffer
 *---------------- */
+// TODO: evaluate the error conditions return policy ??
+
 ActivityDB::response * ActivityDB::Create(activity *aActivity)
 {
 	char DateBuffer[40];
-	char DateMask[40] = "%Y.%m.%d %H.%M.%S";
+	char DateMask[40] = "%m.%d.%Y";
 	char *stringresult;
 	string theUrl;
 	string theQuery;
 
-	theUrl = theParentDB->GetQueryDomain() + "ActivityCreate";
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityCreate";
 	theQuery = "activityTypeID="+std::to_string(aActivity->Type);
 	theQuery += "&locationID=" + std::to_string(aActivity->Location);
 	theQuery += "&lotID=" + aActivity->Lot;
@@ -596,11 +616,12 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 		return(&theResponse);
 	} else {
 		DecodeResponse(stringresult);
+		if(VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
 		aActivity->ID = theResponse.ID;
 	}
 
-	theUrl = theParentDB->GetQueryDomain() + "ActivityMemberAssign";
-	for(int i=0;aActivity->Members.size();i++) {
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityMemberAssign";
+	for(int i=0; i< aActivity->Members.size();i++) {
 		theQuery = "projectMemberID="+std::to_string(aActivity->Members.at(i).ProjectMember);
 		theQuery += "&activityID=" + std::to_string(aActivity->ID);
 		theQuery += "&leader=" + std::to_string(aActivity->Members.at(i).Leader);
@@ -611,12 +632,13 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 			return(&theResponse);
 		} else {
 			DecodeResponse(stringresult);
+			if(VERBOSITYLEVEL == 1) cout << "Activity Member creation :" << DumpResponse() << endl;
 			aActivity->Members.at(i).ID = theResponse.ID;
 		}
 	}
 
-	theUrl = theParentDB->GetQueryDomain() + "ActivityParameterCreate";
-	for(int i=0;aActivity->Parameters.size();i++) {
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityParameterCreate";
+	for(int i=0; i< aActivity->Parameters.size();i++) {
 		theQuery = "activityID=" + std::to_string(aActivity->ID);
 		theQuery += "&activityParameterID=" + std::to_string(aActivity->Parameters.at(i).ActivityParameter);
 		theQuery += "&value=" + std::to_string(aActivity->Parameters.at(i).Value);
@@ -627,23 +649,39 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 			return(&theResponse);
 		} else {
 			DecodeResponse(stringresult);
+			if(VERBOSITYLEVEL == 1) cout << "Activity Parameter creation :" << DumpResponse() << endl;
 			aActivity->Parameters.at(i).ID = theResponse.ID;
 		}
 	}
 
-	theUrl = theParentDB->GetQueryDomain() + "ActivityAttachmentCreate";
-	for(int i=0;aActivity->Parameters.size();i++) {
-		theQuery = "activityID=" + std::to_string(aActivity->ID);
-		theQuery += "&attachmentCategoryID=" + std::to_string(aActivity->Attachments.at(i).Category);
-		theQuery += "&userID=" + std::to_string(aActivity->Attachments.at(i).User);
-		theQuery += "&fileName=" + aActivity->Attachments.at(i).RemoteFileName;
-		theQuery += "&file=" + buildBase64Binary(aActivity->Attachments.at(i).LocalFileName);
+	theUrl = theParentDB->GetQueryDomain() ;//+ "/ActivityAttachmentCreate";
+	string theBuf;
+	int theBase64Result;
+	for(int i=0; i< aActivity->Attachments.size();i++) {
+		theBuf = "";
 
-		if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		theQuery = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+		theQuery += "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">";
+		theQuery += "<soap12:Body><ActivityAttachmentCreate xmlns=\"http://tempuri.org/\"><activityID>";
+		theQuery += std::to_string(aActivity->ID);
+		theQuery += "</activityID><attachmentCategoryID>";
+		theQuery += std::to_string(aActivity->Attachments.at(i).Category);
+		theQuery += "</attachmentCategoryID><file>";
+		theBase64Result = buildBase64Binary(aActivity->Attachments.at(i).LocalFileName, &theBuf);
+		if(VERBOSITYLEVEL == 1) cout << "Base64 encoding of Attachment return :" <<  theBase64Result << endl;
+		theQuery += theBuf;
+		theQuery += "</file><fileName>";
+		theQuery += aActivity->Attachments.at(i).RemoteFileName;
+		theQuery += "</fileName><userID>";
+		theQuery += std::to_string(aActivity->Attachments.at(i).User);
+		theQuery += "</userID></ActivityAttachmentCreate></soap12:Body></soap12:Envelope>";
+
+		if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult, true) == 0) {
 			SetResponse(AlpideTable::SyncQuery);
 			return(&theResponse);
 		} else {
 			DecodeResponse(stringresult);
+			if(VERBOSITYLEVEL == 1) cout << "Activity Attachment creation :" << DumpResponse() << endl;
 			aActivity->Attachments.at(i).ID = theResponse.ID;
 		}
 	}
@@ -651,16 +689,53 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 	return(&theResponse);
 }
 
-string ActivityDB::buildBase64Binary(string aLocalFileName)
+/* ----------------------
+ * Converts the string into the URI encoding
+ *
+ *  not used !
+----------------------- */
+int ActivityDB::buildUrlEncoded(string aLocalFileName, string *Buffer)
 {
-
-	static const std::string base64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-	string Buffer = "";
 	FILE *fh = fopen(aLocalFileName.c_str(), "rb");
 	if(fh == NULL) {
 		cerr << "Failed to open the file :" << aLocalFileName << "Abort !" << endl;
-		return(Buffer);
+		return(0);
+	}
+
+	char exa[16] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+	int i = 0;
+	int j = 0;
+	unsigned char ch;
+
+	ch =  (unsigned char)fgetc(fh);
+	while(!feof(fh)) {
+		if(isalnum(ch) || ch == '~' || ch == '-' || ch == '.' || ch == '_') {  //rfc3986
+			*Buffer += ch;
+		} else {
+			*Buffer += '%';
+			*Buffer += exa[ch >> 4];
+			*Buffer += exa[ch && 4];
+		}
+		ch = (unsigned char)fgetc(fh);
+	}
+	return(Buffer->size());
+}
+
+/* ----------------------
+ * Converts the string into the Base64 coding
+ *
+ * must be improved !
+----------------------- */
+int ActivityDB::buildBase64Binary(string aLocalFileName, string *Buffer)
+{
+
+	static const string base64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+
+	FILE *fh = fopen(aLocalFileName.c_str(), "rb");
+	if(fh == NULL) {
+		cerr << "Failed to open the file :" << aLocalFileName << "Abort !" << endl;
+		return(0);
 	}
 
 	unsigned char cBufferIn[3];
@@ -678,7 +753,7 @@ string ActivityDB::buildBase64Binary(string aLocalFileName)
     		cBufferOut[1] = ((cBufferIn[0] & 0x03) << 4) + ((cBufferIn[1] & 0xf0) >> 4);
     		cBufferOut[2] = ((cBufferIn[1] & 0x0f) << 2) + ((cBufferIn[2] & 0xc0) >> 6);
     		cBufferOut[3] = cBufferIn[2] & 0x3f;
-			for(i = 0; (i<4) ; i++) Buffer += base64chars[cBufferOut[i]];
+			for(i = 0; (i<4) ; i++) *Buffer += base64chars[cBufferOut[i]];
 			i = 0;
 		}
 		ch = (unsigned char)fgetc(fh);
@@ -689,10 +764,10 @@ string ActivityDB::buildBase64Binary(string aLocalFileName)
     	cBufferOut[1] = ((cBufferIn[0] & 0x03) << 4) + ((cBufferIn[1] & 0xf0) >> 4);
     	cBufferOut[2] = ((cBufferIn[1] & 0x0f) << 2) + ((cBufferIn[2] & 0xc0) >> 6);
     	cBufferOut[3] =   cBufferIn[2] & 0x3f;
-	    for (j = 0; (j < i + 1); j++) Buffer += base64chars[cBufferOut[j]];
-	    while((i++ < 3)) Buffer += '=';
+	    for (j = 0; (j < i + 1); j++) *Buffer += base64chars[cBufferOut[j]];
+	    while((i++ < 3)) *Buffer += '=';
     }
-	return(Buffer);
+	return(Buffer->size());
 }
 
 

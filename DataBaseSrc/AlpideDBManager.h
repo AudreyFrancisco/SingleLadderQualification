@@ -40,11 +40,7 @@
 #define ALPIDEDBMANAGER_H_
 
 #include <locale>
-
-// if lib curl is used
-#define COMPILE_LIBCURL
-
-#define VERBOSITYLEVEL 0L
+#include "utilities.h"
 
 // --- Definition of constants for auth methods
 	#define COOKIEPACK "/tmp/cerncookie.txt"
@@ -140,7 +136,7 @@ public:
     void setSSOCookieUrl(string aJarUrl) { theJarUrl = aJarUrl;};
 
 public:
-	int makeDBQuery(const string Url, const char *Payload, char **Result);
+	int makeDBQuery(const string Url, const char *Payload, char **Result, bool isSOAPrequest = false);
 
 #ifdef COMPILE_LIBCURL
 	static size_t readResponseCB(void *contents, size_t size, size_t nmemb, void *userp);
