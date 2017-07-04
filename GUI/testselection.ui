@@ -89,8 +89,8 @@
   <widget class="QPushButton" name="settings">
    <property name="geometry">
     <rect>
-     <x>430</x>
-     <y>330</y>
+     <x>260</x>
+     <y>370</y>
      <width>111</width>
      <height>31</height>
     </rect>
@@ -143,6 +143,19 @@
      <string>IB Qualification test</string>
     </property>
    </item>
+  </widget>
+  <widget class="QPushButton" name="close">
+   <property name="geometry">
+    <rect>
+     <x>444</x>
+     <y>360</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Close</string>
+   </property>
   </widget>
  </widget>
  <resources/>

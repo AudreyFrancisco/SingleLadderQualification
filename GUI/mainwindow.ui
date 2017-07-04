@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1437</width>
-    <height>635</height>
+    <height>722</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,24 +18,29 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
-      <width>261</width>
-      <height>271</height>
+      <y>50</y>
+      <width>361</width>
+      <height>291</height>
      </rect>
     </property>
     <column>
      <property name="text">
       <string>Testing object</string>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
     </column>
    </widget>
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>0</y>
-      <width>1061</width>
-      <height>531</height>
+      <x>370</x>
+      <y>20</y>
+      <width>961</width>
+      <height>551</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -48,8 +53,8 @@
      <widget class="QGroupBox" name="IBModule">
       <property name="geometry">
        <rect>
-        <x>80</x>
-        <y>330</y>
+        <x>110</x>
+        <y>350</y>
         <width>781</width>
         <height>141</height>
        </rect>
@@ -191,8 +196,8 @@
      <widget class="QGroupBox" name="OBHALFSTAVE">
       <property name="geometry">
        <rect>
-        <x>60</x>
-        <y>50</y>
+        <x>70</x>
+        <y>20</y>
         <width>811</width>
         <height>121</height>
        </rect>
@@ -311,8 +316,8 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>110</x>
-        <y>180</y>
+        <x>120</x>
+        <y>170</y>
         <width>791</width>
         <height>141</height>
        </rect>
@@ -920,7 +925,7 @@
       <widget class="QLabel" name="label">
        <property name="geometry">
         <rect>
-         <x>270</x>
+         <x>280</x>
          <y>20</y>
          <width>191</width>
          <height>21</height>
@@ -952,8 +957,8 @@
      <widget class="QComboBox" name="testselection">
       <property name="geometry">
        <rect>
-        <x>110</x>
-        <y>70</y>
+        <x>740</x>
+        <y>380</y>
         <width>131</width>
         <height>31</height>
        </rect>
@@ -982,8 +987,8 @@
      <widget class="QLabel" name="label_3">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>50</y>
+        <x>560</x>
+        <y>370</y>
         <width>91</width>
         <height>71</height>
        </rect>
@@ -992,48 +997,11 @@
        <string>Select Test</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="start_test">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>170</y>
-        <width>101</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Start Test</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="statuslabel">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>470</x>
-        <y>120</y>
-        <width>173</width>
-        <height>35</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>16</pointsize>
-        <weight>75</weight>
-        <italic>true</italic>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Testing progress</string>
-      </property>
-     </widget>
      <widget class="QProgressBar" name="statusbar">
       <property name="geometry">
        <rect>
-        <x>440</x>
-        <y>190</y>
+        <x>710</x>
+        <y>430</y>
         <width>224</width>
         <height>30</height>
        </rect>
@@ -1042,6 +1010,97 @@
        <number>0</number>
       </property>
      </widget>
+     <widget class="QPushButton" name="writetodatabase">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>410</y>
+        <width>141</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Write to Database</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="cfg">
+      <property name="geometry">
+       <rect>
+        <x>320</x>
+        <y>430</y>
+        <width>41</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>LDC</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="newtest">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>360</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start new test</string>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="thresholdbox">
+      <property name="geometry">
+       <rect>
+        <x>490</x>
+        <y>100</y>
+        <width>251</width>
+        <height>151</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string/>
+      </property>
+      <widget class="QLabel" name="Thresholdresulttitle1">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>20</y>
+         <width>66</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Details1</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="ThresholdResulttitle2">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>50</y>
+         <width>66</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Details2</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>20</y>
+         <width>66</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -1049,37 +1108,11 @@
      </attribute>
     </widget>
    </widget>
-   <widget class="QPushButton" name="cfg">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>220</y>
-      <width>131</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Load Configuration</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="quit">
-    <property name="geometry">
-     <rect>
-      <x>1210</x>
-      <y>540</y>
-      <width>111</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Quit</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="alicepic">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>280</y>
+      <x>20</x>
+      <y>370</y>
       <width>241</width>
       <height>311</height>
      </rect>
@@ -1088,27 +1121,236 @@
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="newtest">
+   <widget class="QLabel" name="testtypeselected">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>220</y>
-      <width>111</width>
-      <height>41</height>
+      <x>0</x>
+      <y>20</y>
+      <width>211</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Start new test</string>
+     <string/>
     </property>
    </widget>
-   <widget class="QPlainTextEdit" name="scanstobeperformed">
+   <widget class="QLabel" name="tob">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>60</y>
+      <width>201</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test1">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>40</y>
-      <width>231</width>
-      <height>161</height>
+      <y>100</y>
+      <width>151</width>
+      <height>31</height>
      </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>140</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>180</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test4">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>220</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test5">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>260</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="fstatus">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>100</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="dstatus">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>140</y>
+      <width>171</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tstatus">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>180</y>
+      <width>191</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="nstatus">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>230</y>
+      <width>181</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ustatus">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>260</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="statuslabel">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>80</y>
+      <width>161</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+      <weight>75</weight>
+      <italic>true</italic>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Testing progress</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="start_test">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>300</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start Test</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="abort">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>300</y>
+      <width>95</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Abort</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="abortall">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>300</y>
+      <width>95</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Abort All</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="quit">
+    <property name="geometry">
+     <rect>
+      <x>1230</x>
+      <y>600</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Quit</string>
     </property>
    </widget>
   </widget>
