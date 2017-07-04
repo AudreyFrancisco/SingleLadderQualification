@@ -43,6 +43,10 @@ class TDigitalResult : public TScanResult {
   int m_nCorrupt;
  public: 
   TDigitalResult () : TScanResult () {};
+  //virtual TDigitalResult* clone() const;
+//  TDigitalResult(const TDigitalResult &other):TScanResult(other){/*Body of copy constructor of the TDigitalResult copy constructor*/ }
+ // TDigitalResult& operator=(const TDigitalResult& other);
+//TDigitalResult& operator=(const TDigitalResult& other){/*handle self assignmet*/ if (&other!=this) return *this;/*handle base class assignemnt*/ TScanResult::operator=(other); return *this;}
 };
 
 
@@ -52,6 +56,7 @@ class TDigitalAnalysis : public TScanAnalysis {
   int                           m_ninj;
   bool HasData          (TScanHisto &histo,  common::TChipIndex idx, int col);
   void InitCounters     ();
+  void FillVariableList ();
   void WriteHitData     (TScanHisto histo, int row); 
   void WriteResult      ();
   void WriteStuckPixels ();
@@ -67,5 +72,6 @@ class TDigitalAnalysis : public TScanAnalysis {
   
   std::vector <TDigitalCounter> GetCounters() {return m_counters;};
 };
+
 
 #endif

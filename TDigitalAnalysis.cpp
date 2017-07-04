@@ -6,13 +6,39 @@ TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aSca
 {
   m_ninj   = m_config->GetParamValue("NINJ");
   m_result = new TDigitalResult(); 
+  FillVariableList ();
 }
 
+/*
+TDigitalResult* TDigitalResult::clone()const{
+
+return new TDigitalResult(*this);
+}
+*/
+/*
+//Calling the base class assignment operator in my derived class assignment operator
+ TDigitalResult* TDigitalResult::operator=(const TDigitalResult& other){
+//handle self assignment 
+if (&other!=this) return *this;
+//handle base class assignemnt
+TScanResult::operator=(other);
+return *this;
+}
+*/
 
 //TODO: Implement HasData
 bool TDigitalAnalysis::HasData(TScanHisto &histo,  common::TChipIndex idx, int col) 
 {
   return true;
+}
+
+
+void TDigitalAnalysis::FillVariableList () 
+{
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("Chip Status", status));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# of dead Pixels", deadPix));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# of noisy Pixels", noisyPix));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# of ineff Pixels", ineffPix));
 }
 
 

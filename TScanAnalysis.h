@@ -28,11 +28,18 @@ class TScanResult {
   std::map <int, TScanResultChip*> m_chipResults;
  public: 
   TScanResult   () {};
-  int AddChipResult (common::TChipIndex idx, 
+  //virtual TScanResult *clone() const=0;
+ //TScanResult(const TScanResult &other){m_chipResults=other.m_chipResults;}
+ //assignment operation from my base class 
+//TScanResult &operator=(const TScanResult &other){if (&other!=this) return *this; m_chipResults=other.m_chipResults; return *this;} 
+ int AddChipResult (common::TChipIndex idx, 
 		     TScanResultChip *aChipResult);
   int AddChipResult (int aIntIndex, TScanResultChip *aChipResult);
   TScanResultChip *GetChipResult (common::TChipIndex idx);
 };
+
+
+typedef enum resultType {status, deadPix, noisyPix, ineffPix, thresh, noise, threshRms, noiseRms} TResultVariable;
 
 
 class TScanAnalysis {
@@ -40,7 +47,7 @@ class TScanAnalysis {
   std::deque <TScanHisto>         *m_histoQue;
   std::vector<common::TChipIndex>  m_chipList;
   std::mutex                      *m_mutex;
-  
+  std::map <const char *, TResultVariable> m_variableList;
   TScan                       *m_scan;
   TScanConfig                 *m_config;
   TScanResult                 *m_result;
@@ -51,9 +58,10 @@ class TScanAnalysis {
   int                          ReadChipList      ();
  public:
   TScanAnalysis (std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
-  virtual void Initialize() = 0; 
-  virtual void Run       () = 0;
-  virtual void Finalize  () = 0; 
+  virtual void Initialize      () = 0; 
+  virtual void Run             () = 0;
+  virtual void Finalize        () = 0; 
+  std::map <const char *, TResultVariable> GetVariableList () {return m_variableList;}
 };
 
 
