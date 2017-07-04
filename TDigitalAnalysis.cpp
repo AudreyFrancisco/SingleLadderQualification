@@ -39,6 +39,7 @@ void TDigitalAnalysis::FillVariableList ()
   m_variableList.insert (std::pair <const char *, TResultVariable> ("# of dead Pixels", deadPix));
   m_variableList.insert (std::pair <const char *, TResultVariable> ("# of noisy Pixels", noisyPix));
   m_variableList.insert (std::pair <const char *, TResultVariable> ("# of ineff Pixels", ineffPix));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# of bad double columns", badDcol));
 }
 
 

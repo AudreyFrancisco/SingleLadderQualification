@@ -7,6 +7,7 @@ TFifoAnalysis::TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TSc
 }
 
 
+
 void TFifoAnalysis::InitCounters() 
 {
   m_counters.clear();

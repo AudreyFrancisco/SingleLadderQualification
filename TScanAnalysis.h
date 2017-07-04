@@ -39,7 +39,7 @@ class TScanResult {
 };
 
 
-typedef enum resultType {status, deadPix, noisyPix, ineffPix, thresh, noise, threshRms, noiseRms} TResultVariable;
+typedef enum resultType {status, deadPix, noisyPix, ineffPix, badDcol, thresh, noise, threshRms, noiseRms, noiseOcc} TResultVariable;
 
 
 class TScanAnalysis {
