@@ -37,6 +37,8 @@ class TFifoResult : public TScanResult {
   friend class TFifoAnalysis;
  public: 
   TFifoResult () : TScanResult () {};
+  void WriteToFile   (const char *fName) {};
+  void WriteToDB     (const char *hicID) {};
 };
 
 
