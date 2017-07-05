@@ -10,6 +10,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <qapplication.h>
 //#include "TQtWidgets.h"
 #include "../TAlpide.h"
 #include "../TDigitalAnalysis.h"
@@ -40,13 +41,16 @@
 #include <qpushbutton.h>
 #include <QPixmap>
 #include "testselection.h"
+#include <QMenuBar>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {   chkBtnObm1=chkBtnObm2=chkBtnObm3=chkBtnObm4=chkBtnObm5=chkBtnObm6=chkBtnObm7=false;
 
-     ui->setupUi(this);
+
+      ui->setupUi(this);
+     this->setWindowTitle(QString::fromUtf8("GUI Test"));
      ui->tab_2->setEnabled(false);
      ui->tab_3->setEnabled(false);
      qDebug()<<"Starting testing";
@@ -60,8 +64,25 @@ MainWindow::MainWindow(QWidget *parent) :
       ui->OBModule->hide();
       ui->IBModule->hide();
       ui->OBHALFSTAVE->hide();
+      ui->test1->setStyleSheet("border:none;");
+      ui->test2->setStyleSheet("border:none;");
+      ui->test3->setStyleSheet("border:none;");
+      ui->test4->setStyleSheet("border:none;");
+      ui->test5->setStyleSheet("border:none;");
       ui->statusbar->hide();
       ui->statuslabel->setVisible(false);
+      ui->testtypeselected->setText("Type of test");
+      ui->cfg->hide();
+      ui->label_3->hide();
+      ui->testselection->hide();
+      QMenuBar *menu=new QMenuBar(this);
+      QMenu *menu1;
+      menu1=menu->addMenu("&Options");
+      QAction *newtestaction = new QAction("&New test", menu);
+      QAction *writedb = new QAction("&Write to database", menu);
+      menu1->addAction(newtestaction);
+      menu1->addAction(writedb);
+     connect(newtestaction, SIGNAL(triggered()),this, SLOT(start_test()));
      connect(ui->newtest,SIGNAL(clicked()),SLOT(start_test()));
      connect( ui->cfg, SIGNAL( clicked()), this, SLOT(open()) );
      connect(ui->quit,SIGNAL(clicked()),this,SLOT(close()));
@@ -117,6 +138,7 @@ if (properconfig==1){
     int device=0;
     device=fConfig->GetDeviceType();
     if (device==2){
+        ui->tob->setText("Outer Barrel module");
         ui->OBModule->show();
         for (int i=0;i< fChips.size();i++){
             int chipid;
@@ -567,6 +589,21 @@ void MainWindow::start_test(){
     fScanVector.clear();
     fChips.clear();
     fBoards.clear();
+
+    ui->fstatus->clear();
+    ui->dstatus->clear();
+    ui->tstatus->clear();
+    ui->nstatus->clear();
+    ui->ustatus->clear();
+     ui->tob->clear();
+
+    ui->test1->setText(" ");
+    ui->test2->setText(" ");
+    ui->test3->setText(" ");
+    ui->test4->setText(" ");
+    ui->test5->setText(" ");
+    ui->testtypeselected->clear();
+
     // settingswindow->setAttribute(Qt::WA_DeleteOnClose);
     settingswindow= new TestSelection(this);
     settingswindow->show();
@@ -597,16 +634,87 @@ void MainWindow::fillingOBvectors(){
 
 void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysis *> a){
     qDebug()<<s.size()<<endl;
-    for (int i=0;i<4;i++){
+    ui->statuslabel->setVisible(true);
+     ui->statuslabel->update();
+    for (int i=0;i<s.size();i++){
 
-    std::thread scanThread(&MainWindow::scanLoop,this,s[i]);
-     a.at(i)->Initialize();
-    qDebug()<<s.at(i)<<"g"<<endl;
-    std::thread analysisThread(&TScanAnalysis::Run, std::ref(a[i]));
+        std::thread scanThread(&MainWindow::scanLoop,this,s[i]);
+        a.at(i)->Initialize();
+        qDebug()<<s.at(i)<<"g"<<endl;
 
-    scanThread.join();
-    analysisThread.join();
-    a.at(i)->Finalize();
+        while (i<1){
+              ui->fstatus->setText("50% Completed");
+              ui->dstatus->setText("Waiting . . .");
+              ui->tstatus->setText("Waiting . . .");
+              ui->nstatus->setText("Waiting . . .");
+              qApp->processEvents();
+            break;
+         }
+         while (i<2 && i>0){
+              ui->fstatus->setText("100% Completed");
+              ui->dstatus->setText("50% Completed");
+              ui->tstatus->setText("Waiting . . .");
+              ui->nstatus->setText("Waiting . . .");
+              qApp->processEvents();
+             break;
+          }
+         while (i<3 && i>1){
+              ui->fstatus->setText("100% Completed");
+              ui->dstatus->setText("100% Completed");
+              ui->tstatus->setText("50% Completed");
+              ui->nstatus->setText("Waiting . . .");
+              qApp->processEvents();
+              break;
+         }
+
+         while (i<4 && i>2){
+              ui->fstatus->setText("100% Completed");
+              ui->dstatus->setText("100% Completed");
+              ui->tstatus->setText("100% Completed");
+              ui->nstatus->setText("50% Completed");
+              qApp->processEvents();
+         break;
+         }
+        std::thread analysisThread(&TScanAnalysis::Run, std::ref(a[i]));
+        scanThread.join();
+
+
+
+        analysisThread.join();
+        a.at(i)->Finalize();
+
+        while (i<1){
+            ui->fstatus->setText("100% Completed");
+            ui->dstatus->setText("Starting . . .");
+            ui->tstatus->setText("Waiting . . .");
+            ui->nstatus->setText("Waiting . . .");
+            qApp->processEvents();
+        break;
+        }
+       while (i<2 && i>0){
+            ui->fstatus->setText("100% Completed");
+            ui->dstatus->setText("100% Completed");
+            ui->tstatus->setText("Starting . . .");
+            ui->nstatus->setText("Waiting . . .");
+            qApp->processEvents();
+          break;
+       }
+        while (i<3 && i>1){
+            ui->fstatus->setText("100% Completed");
+            ui->dstatus->setText("100% Completed");
+            ui->tstatus->setText("100% Completed");
+            ui->nstatus->setText("Starting . . . ");
+            qApp->processEvents();
+         break;
+        }
+        while(i<4 && i>2){
+            ui->fstatus->setText("100% Completed");
+            ui->dstatus->setText("100% Completed");
+            ui->tstatus->setText("100% Completed");
+            ui->nstatus->setText("100% Completed");
+            qApp->processEvents();
+        break;
+        }
 
     }
 }
@@ -615,20 +723,24 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
 void MainWindow::connectcombo(int value){
     switch(value){
     case 0:
-        ui->scanstobeperformed->clear();
+        ui->testtypeselected->clear();
         qDebug()<<"No Test selected";
         ui->start_test->hide();
         break;
     case 1:{
-        ui->scanstobeperformed->clear();
+        ui->testtypeselected->clear();
         ui->start_test->show();
         qDebug()<<"OB Qualification test selected";
+        ui->testtypeselected->setText("OB Qualification Test");
         open();
         fillingOBvectors();
         break;}
     case 2:
+
+        ui->testtypeselected->clear();
         ui->start_test->show();
         qDebug()<<"IB Qualification test selected";
+        //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
         break;
     }
 
@@ -640,8 +752,19 @@ void MainWindow::applytests(){
 }
 
 void MainWindow::WriteTests(){
+
     for (int i=0;i<fScanVector.size();i++)
     {
-        ui->scanstobeperformed->appendPlainText(fScanVector[i]->GetName());
+
+    while (i<1){
+        if (fScanVector.size()<5){
+           ui->test1->setText(fScanVector[i]->GetName());
+           ui->test2->setText(fScanVector[i+1]->GetName());
+           ui->test3->setText(fScanVector[i+2]->GetName());
+           ui->test4->setText(fScanVector[i+3]->GetName());
+}//           ui->test5->setText(fScanVector[i+4]->GetName());
+
+        break;
+}
     }
 }

@@ -8,6 +8,7 @@ TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, T
   m_noiseCut = m_nTrig / m_config->GetParamValue("NOISECUT_INV");
 
   m_result = new TNoiseResult();
+  FillVariableList();
 }
 
 
@@ -20,6 +21,13 @@ void TNoiseAnalysis::Initialize()
 {
   ReadChipList      ();
   CreateChipResults ();
+}
+
+
+void TNoiseAnalysis::FillVariableList() 
+{
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# of noisy Pixels",noisyPix));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("Noise occupancy",noiseOcc));
 }
 
 

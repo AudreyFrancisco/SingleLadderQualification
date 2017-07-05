@@ -34,6 +34,7 @@
 #include  "../TFifoAnalysis.h"
 #include  "../TNoiseOccupancy.h"
 #include  "../TNoiseAnalysis.h"
+//#include "multipagewidget.h"
 
 namespace Ui {
 class MainWindow;
@@ -80,6 +81,7 @@ public:
 
 public slots:
    void connectcombo(int value);
+
    // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     /*
     void open();

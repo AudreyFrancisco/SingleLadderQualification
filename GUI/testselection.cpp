@@ -10,11 +10,11 @@ TestSelection::TestSelection(QWidget *parent) :
     ui(new Ui::TestSelection)
 {
     ui->setupUi(this);
-
+    ui->settings->hide();
     //connect(ui->settings, SIGNAL(clicked()), this->parent(), SLOT(open()));
 
     connect(ui->typeoftest,SIGNAL(currentIndexChanged(int)),this->parent(),SLOT(connectcombo(int)));
-
+     connect(ui->close,SIGNAL(clicked()),this,SLOT(close()));
 
 
 }
