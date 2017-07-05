@@ -31,19 +31,17 @@ int All_FitThresholdsIB(const char *fName, bool generateMap=true) {  //Give it a
   strncpy(Prefix, fName, PrefixLength);
   Prefix[PrefixLength]='\0';
   std::string Pre(Prefix);
-  std::cout << Pre << std::endl;
+  std::cout << "Prefix: " << Pre << std::endl;
   
   for(int i=0; i<9; i++) {
+    std::cout << "Next:" << std::endl;
     runFit(i,Pre);
   }
   
-  /*for(int i=8; i<15; i++) {
-    suffix = 0;
-    runFit(i,Pre,suffix);
-  }*/
   if(generateMap) {
-    std::string slice="FitValues" + Pre.substr(13,15); //length-sensitive...
-    std::cout << slice << std::endl;
+    int IDstart = strcspn(Prefix, "_");
+    std::string slice="FitValues" + Pre.substr(IDstart,15); //length-sensitive
+    std::cout << "Map file prefix = " << slice << std::endl;
     const char * line = (".x ../../../analysis/ThresholdMapIB.C+(\"" + slice + "Chip0_0.dat\")").c_str();  //I /think/ this is right...add , false parameter to plot noise instead
     gROOT->ProcessLine(line); //arbitrary file
   }

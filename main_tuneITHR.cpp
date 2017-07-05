@@ -146,7 +146,7 @@ int configureChip(TAlpide *chip) {
   //Target    /= 10;
   //std::cout << "Target = " << Target << std::endl;  Just produces 0...
   chip->WriteRegister (Alpide::REG_VPULSEH, 170);
-  chip->WriteRegister (Alpide::REG_VPULSEL, 155); //was 155
+  chip->WriteRegister (Alpide::REG_VPULSEL, 155);
 }
 
 

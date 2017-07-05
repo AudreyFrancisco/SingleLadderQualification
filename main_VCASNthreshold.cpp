@@ -233,7 +233,9 @@ void scan() {
   //set VCASN for each chip here!
   for (int i = fChips.size()-1; i>-1; i--) {
     if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-    fChips.at(i)->WriteRegister(Alpide::REG_VCASN, vcasn[i]);
+    fChips.at(i)->WriteRegister(Alpide::REG_VCASN, (int)(vcasn[i]+.5));
+    //casts to int, with rounding
+    fChips.at(i)->WriteRegister(Alpide::REG_VCASN2, (int)(vcasn[i]+.5)+12); //added recently
   }
  
   for (int istage = 0; istage < myMaskStages; istage ++) {

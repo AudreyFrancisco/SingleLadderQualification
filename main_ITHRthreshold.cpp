@@ -55,7 +55,7 @@ int HitData     [16][100][512][1024];
 int ChargePoints[100];
 int ievt = 0;
 
-char *summaryName; //for reading ThresholdSummary files in fillIthr
+std::string summaryName; //for reading ThresholdSummary files in fillIthr
 
 void InitScanParameters() {
   myMaskStages   = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
@@ -95,6 +95,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
 
   char fNameTemp[100];
   sprintf(fNameTemp,"%s", fName);
+  std::cout << "WriteData:  fNameTemp = " << fNameTemp << std::endl;
   strtok (fNameTemp, "."); 
   bool  HasData;
 
@@ -174,31 +175,33 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 }
 
 
-void fillIthr(int *ithr) { //WIP
-  int old_vcas; //only current used for now; the rest are probably unecessary
+void fillIthr(float *ithr) { //WIP
+  int old_vcas; //only current is used for now; the rest may be used later
   int old_ith;
   int goodPixels;
-  int current;
-  int currentRMS;
-  int noise;
-  int noiseRMS;
+  float current;
+  float currentRMS;
+  float noise;
+  float noiseRMS;
   char name[100];
+  
+  std::cout << "Filling Ithr" << std::endl;
   for(int i = 0; i < fChips.size(); i++) {
     //get file; name of one of them is in summaryName.
     //Only use first 34 chars of summaryName; insert chip # right after.
-    sprintf(name, "%s%i_0.dat", summaryName, i);
-    std::cout << "Opening " << name << std::endl;
+
+    sprintf(name, "%s%i_0.dat", summaryName.c_str(), i);
     FILE *fp = fopen(name, "r");
     //load file into array
     if(fp) {
-      fscanf(fp, "%d %d %d %f %f %f %f", &old_vcas, &old_ith, &goodPixels, &current,
+      fscanf(fp, "%i %i %i %f %f %f %f", &old_vcas, &old_ith, &goodPixels, &current,
           &currentRMS, &noise, &noiseRMS);
       ithr[i]=current;
+      fclose(fp);
     } else {
       std::cout << "Unable to open file." << std::endl;
       ithr[i]=-1;
     }
-    fclose(fp);
   }
 }
 
@@ -208,7 +211,7 @@ void scan() {
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0;
-  int *ithr = new int[14]; //shouldn't have >14 chips
+  float *ithr = new float[14]; //shouldn't have >14 chips //[fChips.size()]??
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
   std::vector<int> myVPULSEH;
@@ -225,8 +228,21 @@ void scan() {
   for (int i = 0; i < fChips.size(); i++) { //Read VPULSEH from Config and save it at vector temporarily
     myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
     //NEW:  set ITHR for each chip here!
-    fChips.at(i)->WriteRegister(Alpide::REG_ITHR, ithr[i]);
   }
+
+  std::cout << "Initializing Ithr array" << std::endl;
+  
+  for (int i = fChips.size()-1; i>-1; i--) {
+    if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+    fChips.at(i)->WriteRegister(Alpide::REG_ITHR, (int)(ithr[i]+.5));
+  }
+  /*std::cout << "Confirm successful register write:" << std::endl;
+  for (int i = 0; i < fChips.size(); i++) {
+    uint16_t readVal;
+    if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+    fChips.at(i)->ReadRegister(Alpide::REG_ITHR, readVal);
+    std::cout << "Chip " << i << ": " << (int)readVal << std::endl;
+  }*/
  
   for (int istage = 0; istage < myMaskStages; istage ++) {
     std::cout << "Mask stage " << istage << std::endl;
@@ -313,7 +329,13 @@ void scan() {
 
 int main(int argc, char** argv) {
 
-  char *summaryName = argv[0]; //use the first 34 characters ONLY--see above
+  if(!argv[1]) {
+    std::cout << "ERROR:  No Summary file provided by the command line!" << std::endl;
+    return 1;
+  }
+  summaryName = argv[1]; //use the first 35 characters ONLY--see above
+  summaryName = summaryName.substr(0,35);
+  std::cout << "Summary " << summaryName << std::endl;
 
   decodeCommandParameters(argc, argv);
   initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
@@ -362,8 +384,8 @@ int main(int argc, char** argv) {
     }
 
     scan();
-
-    sprintf(fName, "Data/ThresholdScan_%s_0.dat", Suffix);
+    std::cout << "SUFFIX: " << Suffix << std::endl;
+    sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
     WriteDataToFile (fName, true);
     sprintf(fName, "Data/ScanConfig_%s_0.cfg", Suffix);
 

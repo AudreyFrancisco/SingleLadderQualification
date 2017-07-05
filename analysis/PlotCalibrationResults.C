@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <math.h>
 #include "TGraphErrors.h"
 #include "TMultiGraph.h"
 #include "TROOT.h"
@@ -8,7 +9,9 @@
 #include "TArrow.h"
 #include "TAxis.h"
 
-void fillData(float *ithr, float *RMS, int Chips, char * filePrefix) { //Blatantly copied from test_ITHR
+//WARNING:  CURRENTLY INCOMPLETE!!  Potential issue with scope+MakeGraphErrors result...
+
+void fillData(float *ithr, float *RMS, float *actualRMS, int target, int Chips, char * filePrefix) { //Blatantly copied from test_ITHR
   int old_vcas; //only voltage+noise are used for now; the rest may be used later
   int old_ith;
   int goodPixels;
@@ -17,6 +20,8 @@ void fillData(float *ithr, float *RMS, int Chips, char * filePrefix) { //Blatant
   float noise;
   float noiseRMS;
   char name[100];
+  float rmsSum=0;
+  int deadChips=0;
 
   std::cout << "Filling Ithr" << std::endl;
   for(int i = 0; i < Chips; i++) {
@@ -30,17 +35,22 @@ void fillData(float *ithr, float *RMS, int Chips, char * filePrefix) { //Blatant
               &currentRMS, &noise, &noiseRMS);
       ithr[i]=current;
       RMS[i]=currentRMS;
+      rmsSum += (current-target)*(current-target);
       fclose(fp);
       std::cout << "Read " << name << std::endl;
     } else {
       std::cout << "Unable to open file " << name << std::endl;
       ithr[i]=0;
       RMS[i]=0;
+      deadChips++;
     }
   }
+  rmsSum /= (Chips-deadChips);
+  *actualRMS = sqrt(rmsSum);
 }
 
-void MakeGraphErrors(int Chips, TGraphErrors * cal, char * fileName) {
+/*void MakeGraphErrors(int Chips, TGraphErrors * cal_, char * fileName) {
+  TGraphErrors * cal;
   float *ithr = new float[Chips];
   float *RMS = new float[Chips];
   float *chipNums = new float[Chips];
@@ -58,21 +68,22 @@ void MakeGraphErrors(int Chips, TGraphErrors * cal, char * fileName) {
     chipNums[i]=i;
   }
   cal = new TGraphErrors(Chips, chipNums, ithr, NULL, RMS);
-  if(cal) { std::cout << "Done" << std::endl; }
-  cal->SetLineColor(4);
-  std::cout << "set"<< std::endl;
-}
+  cal_ = (TGraphErrors*)cal->Clone();
+  if(cal_) { std::cout << "Cloned" << std::endl; }
+}*/
 
 //Must give PlotCal one of the summary file names AND the total number of chips
 //  (including inactive ones)
 //Missing chips are mapped to 0.
 //Give 2 file names to plot ITHR and VCASN cal results.
-void PlotCalibrationResults(int Chips, char * fileName1, char * fileName2=NULL) {
+//Chips=number of chips, target=ideal threshold value (in electrons)
+void PlotCalibrationResults(int Chips, int target, char * fileName1, char * fileName2=NULL) {
   //NOTE:  first filename plotted in red, second in blue
   
-  /*float *ithr = new float[Chips];
+  float *ithr = new float[Chips];
   float *RMS = new float[Chips];
   float *chipNums = new float[Chips];
+  float * actualRMS = new float;
   char * filePrefix; //must be null-terminated...
   int length = strcspn(fileName1, "C")+4; //add 4 to include "Chip"
   filePrefix = new char[length+1];
@@ -81,21 +92,29 @@ void PlotCalibrationResults(int Chips, char * fileName1, char * fileName2=NULL) 
   }
   char nul = '\0';
   filePrefix[length]=nul;
-
-  fillData(ithr,RMS, Chips, filePrefix);
+  *actualRMS=1000;
+  fillData(ithr, RMS, actualRMS, target, Chips, filePrefix);
+  std::cout << "Data filled" << std::endl;
   for(int i=0; i<Chips; i++) { //xvals
     chipNums[i]=i;
   }
-
+  std::cout << "Making graph" << std::endl;
   TGraphErrors cal(Chips, chipNums, ithr, NULL, RMS);
-  cal.SetTitle("Mean threshold value per chip (VCASN)");
+  char graphName[100];
+  std::cout << "Printing title, " << target << ", " << *actualRMS << std::endl;
+  sprintf(graphName, "Mean threshold per chip, target=%i, RMS error=%f", target, *actualRMS);
+  std::cout << "Title printed" << std::endl;
+  cal.SetTitle(graphName);
   cal.SetMarkerStyle(21);
   cal.SetMarkerColor(4);
   cal.SetLineColor(4);
   auto axis = cal.GetXaxis();
-  axis->SetLimits(-.5,8.5);*/
+  axis->SetLimits(-.5,8.5);
+  auto can = new TCanvas();
+  cal.DrawClone("APE");
+  cal.Print("ITHRorVCASN.pdf");
   
-  if(!fileName2) { //VCASN or ITHR
+  /*if(!fileName2) { //VCASN or ITHR
     TGraphErrors * cal1=NULL;
     MakeGraphErrors(Chips, cal1, fileName1);
     if(cal1) {
@@ -145,5 +164,5 @@ void PlotCalibrationResults(int Chips, char * fileName1, char * fileName2=NULL) 
 
     gPad->Update();
     gPad->Modified();
-  }
+  }*/
 }
