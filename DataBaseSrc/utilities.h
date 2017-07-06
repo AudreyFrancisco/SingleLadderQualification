@@ -46,6 +46,9 @@ using namespace std;
 // if lib curl is used
 #define COMPILE_LIBCURL
 
+// The SOAP version 11 or 12
+#define SOAPVERSION 11
+
 #define VERBOSITYLEVEL 0L
 
 

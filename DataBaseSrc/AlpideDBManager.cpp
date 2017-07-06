@@ -146,13 +146,21 @@ bool AlpideDBManager::Init()
 	return(true);
 }
 
-int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **Result, bool isSOAPrequest)
+int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **Result, bool isSOAPrequest, const char *SOAPAction)
 {
 
 	 // in order to maintain the connection over the 24hours
 	 if(!theCookieJar->isJarValid()) theCookieJar->fillTheJar();
 
-	 if(VERBOSITYLEVEL == 1) {cout << endl << "DBQuery :" << Url << " Payload:" << Payload << endl;}
+	 if(VERBOSITYLEVEL == 1) {
+		 cout << endl << "DBQuery :" << Url << endl;
+		 if(strlen(Payload) > 512) {
+			 printf(" Payload : %.*s ...\n", 500, Payload) ;
+		 } else {
+			 cout << " Payload:" <<  Payload  << endl;
+		 }
+
+	 }
 
 #ifdef COMPILE_LIBCURL
 
@@ -168,16 +176,23 @@ int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **R
 	curl_easy_setopt( myHandle, CURLOPT_URL, theUrl.URI.c_str() );
 	curl_easy_setopt( myHandle, CURLOPT_USERAGENT, "curl/7.19.7 (x86_64-redhat-linux-gnu) libcurl/7.19.7 NSS/3.21 Basic ECC zlib/1.2.3 libidn/1.18 libssh2/1.4.2" );
 
+	// Compose the heasder
 	struct curl_slist *headers=NULL;
+	appo = "Host: "; appo += theUrl.Host;
+	headers = curl_slist_append(headers, appo.c_str());
+
 	if(isSOAPrequest) {
-		headers = curl_slist_append(headers, "Content-Type: application/soap+xml; charset=utf-8");
+		if(SOAPVERSION == 11) {
+			headers = curl_slist_append(headers, "Content-Type: text/xml; charset=utf-8");
+			appo = "SOAPAction:\""; appo += SOAPAction ; appo += "\"";
+			headers = curl_slist_append(headers, appo.c_str());
+		} else {
+			headers = curl_slist_append(headers, "Content-Type: application/soap+xml; charset=utf-8");
+		}
 	} else {
 		headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
 	}
-	appo = "Host: "; appo += theUrl.Host;
-	headers = curl_slist_append(headers, appo.c_str());
 	curl_easy_setopt(myHandle, CURLOPT_HTTPHEADER, headers);
-
 
 	// send all data to this function
 	curl_easy_setopt(myHandle, CURLOPT_WRITEFUNCTION, readResponseCB);
@@ -191,7 +206,9 @@ int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **R
 	// Put the Post data ...
 	curl_easy_setopt(myHandle, CURLOPT_POSTFIELDS, Payload);
 	curl_easy_setopt(myHandle, CURLOPT_POSTFIELDSIZE, strlen(Payload) );
-	if(VERBOSITYLEVEL == 1) { cout << " Payload >" << Payload << endl; }
+	if(VERBOSITYLEVEL == 1) {
+		 if(strlen(Payload) > 512) printf(" Payload : %.*s ...\n", 500, Payload) ; else cout << " Payload:" <<  Payload  << endl;
+	}
 	// https settings ...
 	curl_easy_setopt( myHandle, CURLOPT_SSL_VERIFYPEER, true);
 	curl_easy_setopt( myHandle, CURLOPT_SSL_VERIFYHOST, true);
@@ -207,6 +224,7 @@ int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **R
 	} else {
 		*Result = theBuffer.memory;
 	}
+	curl_slist_free_all(headers);
 //	curl_easy_cleanup(myHandle);
 	return(1);
 

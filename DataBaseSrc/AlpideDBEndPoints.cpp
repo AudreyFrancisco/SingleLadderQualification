@@ -661,22 +661,39 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 		theBuf = "";
 
 		theQuery = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-		theQuery += "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">";
-		theQuery += "<soap12:Body><ActivityAttachmentCreate xmlns=\"http://tempuri.org/\"><activityID>";
-		theQuery += std::to_string(aActivity->ID);
-		theQuery += "</activityID><attachmentCategoryID>";
-		theQuery += std::to_string(aActivity->Attachments.at(i).Category);
-		theQuery += "</attachmentCategoryID><file>";
-		theBase64Result = buildBase64Binary(aActivity->Attachments.at(i).LocalFileName, &theBuf);
-		if(VERBOSITYLEVEL == 1) cout << "Base64 encoding of Attachment return :" <<  theBase64Result << endl;
-		theQuery += theBuf;
-		theQuery += "</file><fileName>";
-		theQuery += aActivity->Attachments.at(i).RemoteFileName;
-		theQuery += "</fileName><userID>";
-		theQuery += std::to_string(aActivity->Attachments.at(i).User);
-		theQuery += "</userID></ActivityAttachmentCreate></soap12:Body></soap12:Envelope>";
+		if(SOAPVERSION == 11) {
+			theQuery += "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">";
+			theQuery += "<soap:Body><ActivityAttachmentCreate xmlns=\"http://tempuri.org/\"><activityID>";
+			theQuery += std::to_string(aActivity->ID);
+			theQuery += "</activityID><attachmentCategoryID>";
+			theQuery += std::to_string(aActivity->Attachments.at(i).Category);
+			theQuery += "</attachmentCategoryID><file>";
+			theBase64Result = buildBase64Binary(aActivity->Attachments.at(i).LocalFileName, &theBuf);
+			if(VERBOSITYLEVEL == 1) cout << "Base64 encoding of Attachment return :" <<  theBase64Result << endl;
+			theQuery += theBuf;
+			theQuery += "</file><fileName>";
+			theQuery += aActivity->Attachments.at(i).RemoteFileName;
+			theQuery += "</fileName><userID>";
+			theQuery += std::to_string(aActivity->Attachments.at(i).User);
+			theQuery += "</userID></ActivityAttachmentCreate></soap:Body></soap:Envelope>";
+		} else {
+			theQuery += "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">";
+			theQuery += "<soap12:Body><ActivityAttachmentCreate xmlns=\"http://tempuri.org/\"><activityID>";
+			theQuery += std::to_string(aActivity->ID);
+			theQuery += "</activityID><attachmentCategoryID>";
+			theQuery += std::to_string(aActivity->Attachments.at(i).Category);
+			theQuery += "</attachmentCategoryID><file>";
+			theBase64Result = buildBase64Binary(aActivity->Attachments.at(i).LocalFileName, &theBuf);
+			if(VERBOSITYLEVEL == 1) cout << "Base64 encoding of Attachment return :" <<  theBase64Result << endl;
+			theQuery += theBuf;
+			theQuery += "</file><fileName>";
+			theQuery += aActivity->Attachments.at(i).RemoteFileName;
+			theQuery += "</fileName><userID>";
+			theQuery += std::to_string(aActivity->Attachments.at(i).User);
+			theQuery += "</userID></ActivityAttachmentCreate></soap12:Body></soap12:Envelope>";
+		}
 
-		if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult, true) == 0) {
+		if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult, true, "http://tempuri.org/ActivityAttachmentCreate") == 0) {
 			SetResponse(AlpideTable::SyncQuery);
 			return(&theResponse);
 		} else {
