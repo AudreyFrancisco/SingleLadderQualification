@@ -234,7 +234,7 @@ public:
 
 
 private:
-    int buildBase64Binary(string aLocalFileName, string * aBuffer);
+    unsigned long buildBase64Binary(string aLocalFileName, string * aBuffer);
     int buildUrlEncoded(string aLocalFileName, string *Buffer);
 
 };
