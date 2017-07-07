@@ -121,7 +121,7 @@ private:
     void color_green(int side, int pos);
     void color_green_IB(int position);
     void color_red_IB(int position);
-
+    int counter;
     Dialog *windowex;
     bool properconfig=false;
 

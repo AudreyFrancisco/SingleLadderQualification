@@ -86,8 +86,8 @@ MainWindow::MainWindow(QWidget *parent) :
       QAction *writedb = new QAction("&Write to database", menu);
       menu1->addAction(newtestaction);
       menu1->addAction(writedb);
-      ui->abort->hide();
-      ui->abortall->hide();
+     // ui->abort->hide();
+     // ui->abortall->hide();
       ui->tabWidget->removeTab(2);
       ui->tabWidget->removeTab(1);
       connect(ui->test1,SIGNAL(clicked()),this,SLOT(fifolist()));
@@ -124,10 +124,10 @@ MainWindow::~MainWindow()
 void MainWindow::open(){
     QString operatorname;
     int hicidnumber;
-    int counter;
     settingswindow->hide();
     settingswindow->SaveSettings(operatorname,hicidnumber,counter);
     if (counter==0) {return;}
+
    QString fileName="Config.cfg";
 
    // QString fileName = QFileDialog::getOpenFileName(this,
@@ -749,6 +749,7 @@ qApp->processEvents();
 
 
 void MainWindow::connectcombo(int value){
+    counter=0;
     switch(value){
     case 0:
         ui->testtypeselected->clear();
@@ -761,6 +762,7 @@ void MainWindow::connectcombo(int value){
         qDebug()<<"OB Qualification test selected";
         ui->testtypeselected->setText("OB Qualification Test");
         open();
+        if (counter==0) {break;}
         fillingOBvectors();
         break;}
     case 2:
@@ -769,6 +771,7 @@ void MainWindow::connectcombo(int value){
         ui->start_test->show();
         qDebug()<<"IB Qualification test selected";
         openib();
+        if (counter==0){break;}
         //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
         break;}
 
@@ -1028,7 +1031,6 @@ ui->displaydetails->show();
 void MainWindow::openib(){
     QString operatorname;
     int hicidnumber;
-    int counter;
     settingswindow->hide();
     settingswindow->SaveSettings(operatorname,hicidnumber,counter);
     if (counter==0) {return;}
