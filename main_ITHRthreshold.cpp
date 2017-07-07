@@ -17,6 +17,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <iostream>
+#include <cstdlib>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -196,10 +197,12 @@ void fillIthr(float *ithr) { //WIP
     if(fp) {
       fscanf(fp, "%i %i %i %f %f %f %f", &old_vcas, &old_ith, &goodPixels, &current,
           &currentRMS, &noise, &noiseRMS);
+      //current=60;  //TESTING
       ithr[i]=current;
+      //std::cout << "Found ITHR = " << current << " in " << name << std::endl;
       fclose(fp);
     } else {
-      std::cout << "Unable to open file." << std::endl;
+      std::cout << "Unable to open file " << name << std::endl;
       ithr[i]=-1;
     }
   }
@@ -207,7 +210,7 @@ void fillIthr(float *ithr) { //WIP
 
 
 
-void scan() {   
+void scan(int VCASN_mean, bool automated) {
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0;
@@ -230,19 +233,28 @@ void scan() {
     //NEW:  set ITHR for each chip here!
   }
 
+  if(automated) {
+    for (int i = fChips.size()-1; i>-1; i--) { //write VCASN_mean to all chips
+      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+      fChips.at(i)->WriteRegister(Alpide::REG_VCASN, VCASN_mean);
+      fChips.at(i)->WriteRegister(Alpide::REG_VCASN2, VCASN_mean+12); //added recently
+    }
+  }
+
   std::cout << "Initializing Ithr array" << std::endl;
   
   for (int i = fChips.size()-1; i>-1; i--) {
     if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+    std::cout << "Setting REG_ITHR to " << (int)(ithr[i]+.5) << std::endl;
     fChips.at(i)->WriteRegister(Alpide::REG_ITHR, (int)(ithr[i]+.5));
   }
-  /*std::cout << "Confirm successful register write:" << std::endl;
+  std::cout << "Confirm successful register write:" << std::endl;
   for (int i = 0; i < fChips.size(); i++) {
     uint16_t readVal;
     if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
     fChips.at(i)->ReadRegister(Alpide::REG_ITHR, readVal);
     std::cout << "Chip " << i << ": " << (int)readVal << std::endl;
-  }*/
+  }
  
   for (int istage = 0; istage < myMaskStages; istage ++) {
     std::cout << "Mask stage " << istage << std::endl;
@@ -328,7 +340,7 @@ void scan() {
 
 
 int main(int argc, char** argv) {
-
+  //first arg MUST be the summary file name.  second arg (optional) is VCASN_mean.
   if(!argv[1]) {
     std::cout << "ERROR:  No Summary file provided by the command line!" << std::endl;
     return 1;
@@ -336,6 +348,16 @@ int main(int argc, char** argv) {
   summaryName = argv[1]; //use the first 35 characters ONLY--see above
   summaryName = summaryName.substr(0,35);
   std::cout << "Summary " << summaryName << std::endl;
+  //extract VCASN_mean
+  int VCASN_mean = 0;
+  bool automated;
+  if(argc==3) {
+    automated = true;
+    VCASN_mean = (int)(strtol(argv[2], NULL, 10)+.5);
+    //std::cout << "VCANS_mean=" << VCASN_mean << std::endl;
+  } else if(argc!=2) {
+    std::cout << "ERROR: wrong number of arguments!  argc=" << argc << std::endl;
+  }
 
   decodeCommandParameters(argc, argv);
   initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
@@ -383,7 +405,8 @@ int main(int argc, char** argv) {
       fBoards.at(0)->SetTriggerSource (trigInt);
     }
 
-    scan();
+    scan(VCASN_mean, automated);
+
     std::cout << "SUFFIX: " << Suffix << std::endl;
     sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
     WriteDataToFile (fName, true);
@@ -394,6 +417,14 @@ int main(int argc, char** argv) {
       myDAQBoard->PowerOff();
       delete myDAQBoard;
     }
+  }
+
+  if(true) {
+    std::cout << "Passing file prefix " << Suffix << std::endl;
+    FILE *id;
+    id=fopen("filename.txt", "w");
+    fprintf(id, Suffix);
+    fclose(id);
   }
 
   return 0;

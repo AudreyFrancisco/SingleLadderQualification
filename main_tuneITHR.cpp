@@ -16,6 +16,7 @@
 
 #include <unistd.h>
 #include <string.h>
+#include <cstdlib>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -89,7 +90,6 @@ void CopyHitData(std::vector <TPixHit> *Hits, int charge) {
 void WriteDataToFile (const char *fName, bool Recreate) {
   char  fNameChip[100];
   FILE *fp;
-
   char fNameTemp[100];
   sprintf(fNameTemp,"%s", fName);
   strtok (fNameTemp, "."); 
@@ -146,7 +146,7 @@ int configureChip(TAlpide *chip) {
   //Target    /= 10;
   //std::cout << "Target = " << Target << std::endl;  Just produces 0...
   chip->WriteRegister (Alpide::REG_VPULSEH, 170);
-  chip->WriteRegister (Alpide::REG_VPULSEL, 155);
+  chip->WriteRegister (Alpide::REG_VPULSEL, 160);
 }
 
 
@@ -175,7 +175,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 
 
 
-void scan() {   
+void scan(int maskStepSize, int VCASN_mean, bool automated) {
   unsigned char         buffer[1024*4000]; 
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nBad = 0, skipped = 0, prioErrors = 0;
@@ -194,8 +194,17 @@ void scan() {
       myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
 //      std::cout << "Read VPULSEH : " << myVPULSEH[i] << std::endl;
   }
+
+  if(automated) {
+    std::cout << "IN TUNE_ITHR:  VCASN_mean = " << VCASN_mean << std::endl;
+    for (int i = fChips.size()-1; i>-1; i--) { //write VCASN_mean to all chips
+      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+      fChips.at(i)->WriteRegister(Alpide::REG_VCASN, VCASN_mean);
+      fChips.at(i)->WriteRegister(Alpide::REG_VCASN2, VCASN_mean+12); //added recently
+    }
+  }
  
-  for (int istage = 0; istage < myMaskStages; istage ++) {
+  for (int istage = 0; istage < myMaskStages; istage+=maskStepSize) {
     std::cout << "Mask stage " << istage << std::endl;
     for (int i = 0; i < fChips.size(); i ++) {
       if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
@@ -277,7 +286,22 @@ void scan() {
 }
 
 
-int main() {
+int main(int argc, char** argv) {  //args have been added for convenience...remove later?
+  //Accepts step size (default 1, should be a power of 2) and VCASN_mean (default leave unchanged).  NOT REQUIRED.
+
+  int maskStepSize = 1;
+  int VCASN_mean = 0;
+  bool automated = false;
+  if(argc==3) {
+    automated = true; //get mask step size and VCASN_mean, in that order
+    maskStepSize = (int)strtol(argv[1], NULL, 10);
+    VCASN_mean = (int)(strtol(argv[2], NULL, 10)+.5);
+    std::cout << "VCASN in ITHR: " << VCASN_mean << std::endl;
+  } else if(argc!=1) {
+    std::cout << "ERROR: wrong number of arguments!  argc=" << argc << std::endl;
+    return 1;
+  } //else run normally
+
   //initSetup();
   initSetup(fConfig,  &fBoards,  &fBoardType, &fChips); //ADDED:  now given full set of params to match test_threshold
   InitScanParameters();
@@ -320,7 +344,7 @@ int main() {
       fBoards.at(0)->SetTriggerSource (trigExt);
     }
 
-    scan();
+    scan(maskStepSize, VCASN_mean, automated);
 
     sprintf(fName, "Data/ITHRScan_%s.dat", Suffix); //used to be ThresholdScan
     WriteDataToFile (fName, true);
@@ -333,5 +357,16 @@ int main() {
     }
   }
 
+  //ADDED for run_ITHR script!  Writes the prefix/ID ONLY to a file.
+  if(true) {
+    std::cout << "Passing file prefix " << Suffix << std::endl;
+    FILE *id;
+    id=fopen("filename.txt", "w");
+    fprintf(id, Suffix);
+    fclose(id);
+  }
+
   return 0;
 }
+
+
