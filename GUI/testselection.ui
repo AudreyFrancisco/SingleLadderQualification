@@ -143,6 +143,46 @@
      <string>IB Qualification test</string>
     </property>
    </item>
+   <item>
+    <property name="text">
+     <string>OB Endurance Test</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>IB Endurance Test</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>OB Reception Test</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>OB Powering Test (cut)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>OB Powering Test (glue)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>OB Half-Stave Test</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>OB Stave Test</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>IB Stave Test</string>
+    </property>
+   </item>
   </widget>
   <widget class="QPushButton" name="close">
    <property name="geometry">

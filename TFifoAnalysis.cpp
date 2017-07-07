@@ -2,10 +2,31 @@
 #include <vector>
 #include "TFifoAnalysis.h"
 
+
+// TODO: Add number of exceptions to result
+// TODO: Add errors per region to chip result
+
 TFifoAnalysis::TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex) : TScanAnalysis(histoQue, aScan, aScanConfig, aMutex) 
 {
+  m_result = new TFifoResult();
+  FillVariableList ();
 }
 
+
+void TFifoAnalysis::Initialize() 
+{
+  ReadChipList      ();
+  CreateChipResults ();
+}
+
+
+void TFifoAnalysis::FillVariableList ()
+{
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0x0000", fifoErr0));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0xffff", fifoErrf));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0x5555", fifoErr5));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0xaaaa", fifoErra));
+}
 
 
 void TFifoAnalysis::InitCounters() 
@@ -85,5 +106,17 @@ void TFifoAnalysis::Run()
 
 void TFifoAnalysis::Finalize()
 {
+  TFifoResult *result = (TFifoResult*) m_result;
+
+  for (int ichip = 0; ichip < m_chipList.size(); ichip ++) {
+    TFifoResultChip* chipResult = (TFifoResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
+    if (!chipResult) std::cout << "WARNING: chipResult = 0" << std::endl;
+
+    chipResult->m_err0 = m_counters.at(ichip).err0;
+    chipResult->m_err5 = m_counters.at(ichip).err5;
+    chipResult->m_erra = m_counters.at(ichip).erra;
+    chipResult->m_errf = m_counters.at(ichip).errf;
+  }
+
   WriteResult ();
 }

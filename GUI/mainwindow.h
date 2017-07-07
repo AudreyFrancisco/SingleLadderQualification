@@ -35,6 +35,7 @@
 #include  "../TNoiseOccupancy.h"
 #include  "../TNoiseAnalysis.h"
 //#include "multipagewidget.h"
+//#include "scanthread.h"
 
 namespace Ui {
 class MainWindow;
@@ -53,7 +54,7 @@ public:
     std::vector <TScan *> fScanVector;
     std::vector <TScanAnalysis *> fAnalysisVector;
   //  void fillingvectors();
-
+ std::vector <std::string> mapdetails;
 
 
 
@@ -81,8 +82,8 @@ public:
 
 public slots:
    void connectcombo(int value);
-
-   // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
+   void createbtn();
+      // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     /*
     void open();
     void combochanged(int index);
@@ -100,6 +101,9 @@ public slots:
     void popup(QString message);
     void start_test();
 */
+
+signals:
+   void stopTimer();
 
 private:
     Ui::MainWindow *ui;
@@ -144,8 +148,15 @@ private slots:
  void applytests();
  void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
 // void connectcombo(int value);
+ void  runscans();
  void fillingOBvectors();
  void WriteTests();
+ void StopScan();
+ void fifolist();
+ void digitallist();
+ void thresholdlist();
+ void noiselist();
+ void openib();
 
 };
 #endif // MAINWINDOW_H

@@ -949,6 +949,34 @@
        </property>
       </widget>
      </widget>
+     <widget class="QLabel" name="displaydetails">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>150</y>
+        <width>131</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Details:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="details">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>150</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -1124,7 +1152,7 @@
    <widget class="QLabel" name="testtypeselected">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>10</x>
       <y>20</y>
       <width>211</width>
       <height>21</height>
@@ -1138,7 +1166,7 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>60</y>
+      <y>55</y>
       <width>201</width>
       <height>20</height>
      </rect>
@@ -1150,8 +1178,8 @@
    <widget class="QPushButton" name="test1">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>100</y>
+      <x>-40</x>
+      <y>110</y>
       <width>151</width>
       <height>31</height>
      </rect>
@@ -1163,7 +1191,7 @@
    <widget class="QPushButton" name="test2">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>-30</x>
       <y>140</y>
       <width>151</width>
       <height>31</height>
@@ -1176,8 +1204,8 @@
    <widget class="QPushButton" name="test3">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>180</y>
+      <x>-19</x>
+      <y>170</y>
       <width>151</width>
       <height>31</height>
      </rect>
@@ -1189,8 +1217,8 @@
    <widget class="QPushButton" name="test4">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>220</y>
+      <x>-10</x>
+      <y>200</y>
       <width>151</width>
       <height>31</height>
      </rect>
@@ -1203,9 +1231,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>260</y>
-      <width>151</width>
-      <height>31</height>
+      <y>270</y>
+      <width>81</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -1215,8 +1243,8 @@
    <widget class="QLabel" name="fstatus">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>100</y>
+      <x>120</x>
+      <y>110</y>
       <width>181</width>
       <height>31</height>
      </rect>
@@ -1228,8 +1256,8 @@
    <widget class="QLabel" name="dstatus">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>140</y>
+      <x>120</x>
+      <y>145</y>
       <width>171</width>
       <height>21</height>
      </rect>
@@ -1241,8 +1269,8 @@
    <widget class="QLabel" name="tstatus">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>180</y>
+      <x>130</x>
+      <y>170</y>
       <width>191</width>
       <height>31</height>
      </rect>
@@ -1254,8 +1282,8 @@
    <widget class="QLabel" name="nstatus">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>230</y>
+      <x>150</x>
+      <y>205</y>
       <width>181</width>
       <height>21</height>
      </rect>
@@ -1267,7 +1295,7 @@
    <widget class="QLabel" name="ustatus">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>100</x>
       <y>260</y>
       <width>181</width>
       <height>31</height>
@@ -1283,7 +1311,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>127</x>
       <y>80</y>
       <width>161</width>
       <height>31</height>
@@ -1291,7 +1319,7 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>9</pointsize>
+      <pointsize>11</pointsize>
       <weight>75</weight>
       <italic>true</italic>
       <bold>true</bold>

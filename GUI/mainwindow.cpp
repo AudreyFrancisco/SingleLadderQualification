@@ -42,7 +42,8 @@
 #include <QPixmap>
 #include "testselection.h"
 #include <QMenuBar>
-
+//#include "scanthread.h"
+//#include <QtCore>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -50,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
       ui->setupUi(this);
-     this->setWindowTitle(QString::fromUtf8("GUI Test"));
+     this->setWindowTitle(QString::fromUtf8("GUI"));
      ui->tab_2->setEnabled(false);
      ui->tab_3->setEnabled(false);
      qDebug()<<"Starting testing";
@@ -64,12 +65,15 @@ MainWindow::MainWindow(QWidget *parent) :
       ui->OBModule->hide();
       ui->IBModule->hide();
       ui->OBHALFSTAVE->hide();
+      ui->details->hide();
+      ui->displaydetails->hide();
       ui->test1->setStyleSheet("border:none;");
       ui->test2->setStyleSheet("border:none;");
       ui->test3->setStyleSheet("border:none;");
       ui->test4->setStyleSheet("border:none;");
       ui->test5->setStyleSheet("border:none;");
       ui->statusbar->hide();
+      ui->tab_2->setVisible(false);
       ui->statuslabel->setVisible(false);
       ui->testtypeselected->setText("Type of test");
       ui->cfg->hide();
@@ -82,6 +86,15 @@ MainWindow::MainWindow(QWidget *parent) :
       QAction *writedb = new QAction("&Write to database", menu);
       menu1->addAction(newtestaction);
       menu1->addAction(writedb);
+      ui->abort->hide();
+      ui->abortall->hide();
+      ui->tabWidget->removeTab(2);
+      ui->tabWidget->removeTab(1);
+      connect(ui->test1,SIGNAL(clicked()),this,SLOT(fifolist()));
+      connect(ui->test2,SIGNAL(clicked()),this,SLOT(digitallist()));
+      connect(ui->test3,SIGNAL(clicked()),this,SLOT(thresholdlist()));
+      connect(ui->test4,SIGNAL(clicked()),this,SLOT(noiselist()));
+      connect(ui->abortall,SIGNAL(clicked()),this,SLOT(StopScan()),Qt::DirectConnection);
      connect(newtestaction, SIGNAL(triggered()),this, SLOT(start_test()));
      connect(ui->newtest,SIGNAL(clicked()),SLOT(start_test()));
      connect( ui->cfg, SIGNAL( clicked()), this, SLOT(open()) );
@@ -115,12 +128,16 @@ void MainWindow::open(){
     settingswindow->hide();
     settingswindow->SaveSettings(operatorname,hicidnumber,counter);
     if (counter==0) {return;}
-    QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open Configuration. . ."), "/home/palpidefs/Alpide/GUI_Dimitra/build-GUI-Desktop-Debug", tr("Configuration Files (*.cfg)"));
+   QString fileName="Config.cfg";
+
+   // QString fileName = QFileDialog::getOpenFileName(this,
+      //  tr("Open Configuration. . ."), "/home/palpidefs/Alpide/GUI_Dimitra/build-GUI-Desktop-Debug", tr("Configuration Files (*.cfg)"));
     try{
     std::cout<<properconfig<<"d1"<<endl;
-    initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str());
+   // initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str());
+    initSetup(fConfig, &fBoards, &fBoardType, &fChips,fileName.toStdString().c_str());
     properconfig=true;
+
     std::cout<<properconfig<<"d2"<<endl;
    // fillingvectors();
 
@@ -551,12 +568,15 @@ void MainWindow::fifotest(){
 void MainWindow::scanLoop (TScan *myScan)
 { myScan->Init();
   myScan->LoopStart(2);
+ // QApplication::processEvents() ;
   while (myScan->Loop(2)) {
     myScan->PrepareStep(2);
     myScan->LoopStart  (1);
+  //  QApplication::processEvents() ;
     while (myScan->Loop(1)) {
       myScan->PrepareStep(1);
       myScan->LoopStart  (0);
+  //    QApplication::processEvents() ;
       while (myScan->Loop(0)) {
         myScan->PrepareStep(0);
         myScan->Execute    ();
@@ -637,11 +657,18 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
     ui->statuslabel->setVisible(true);
      ui->statuslabel->update();
     for (int i=0;i<s.size();i++){
+      //   QApplication::processEvents() ;
+
 
         std::thread scanThread(&MainWindow::scanLoop,this,s[i]);
         a.at(i)->Initialize();
         qDebug()<<s.at(i)<<"g"<<endl;
 
+      // ui->details->addItem("d");
+
+
+       // std::thread koumpi(&MainWindow::runscans,this);
+      //  koumpi.join();
         while (i<1){
               ui->fstatus->setText("50% Completed");
               ui->dstatus->setText("Waiting . . .");
@@ -715,8 +742,9 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
             qApp->processEvents();
         break;
         }
-
+qApp->processEvents();
     }
+    qApp->processEvents();
 }
 
 
@@ -736,19 +764,96 @@ void MainWindow::connectcombo(int value){
         fillingOBvectors();
         break;}
     case 2:
-
+       {
         ui->testtypeselected->clear();
         ui->start_test->show();
         qDebug()<<"IB Qualification test selected";
+        openib();
         //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
-        break;
+        break;}
+
+    case 3:
+       {
+        ui->testtypeselected->clear();
+        ui->start_test->show();
+        qDebug()<<"IB Qualification test selected";
+       // openib();
+        //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
+        break;}
+
+    case 4:
+       {
+        ui->testtypeselected->clear();
+        ui->start_test->show();
+        qDebug()<<"IB Qualification test selected";
+       // openib();
+        //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
+        break;}
+
+    case 5:
+       {
+        ui->testtypeselected->clear();
+        ui->start_test->show();
+        qDebug()<<"IB Qualification test selected";
+       // openib();
+        //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
+        break;}
+
+    case 6:
+       {
+        ui->testtypeselected->clear();
+        ui->start_test->show();
+        qDebug()<<"IB Qualification test selected";
+       // openib();
+        //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
+        break;}
+
+    case 7:
+       {
+        ui->testtypeselected->clear();
+        ui->start_test->show();
+        qDebug()<<"IB Qualification test selected";
+       // openib();
+        //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
+        break;}
+
+    case 8:
+       {
+        ui->testtypeselected->clear();
+        ui->start_test->show();
+        qDebug()<<"IB Qualification test selected";
+       // openib();
+        //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
+        break;}
+
+    case 9:
+       {
+        ui->testtypeselected->clear();
+        ui->start_test->show();
+        qDebug()<<"IB Qualification test selected";
+       // openib();
+        //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
+        break;}
+    case 10:
+       {
+        ui->testtypeselected->clear();
+        ui->start_test->show();
+        qDebug()<<"IB Qualification test selected";
+       // openib();
+        //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
+        break;}
+
     }
 
-    connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
+  connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
+   //connect(ui->start_test,SIGNAL(clicked()),this,SLOT(runscans()));
 }
 
 void MainWindow::applytests(){
+
     performtests(fScanVector,fAnalysisVector);
+
+  // emit stopTimer();
 }
 
 void MainWindow::WriteTests(){
@@ -767,4 +872,232 @@ void MainWindow::WriteTests(){
         break;
 }
     }
+}
+
+void MainWindow::runscans(){
+/*QTimer* timer;
+timer=new QTimer(this);
+connect(timer,SIGNAL(timeout()),this,SLOT(applytests()));
+connect(ui->abortall,SIGNAL(clicked()),timer,SLOT(stop()));
+connect(ui->abortall,SIGNAL(clicked()),timer,SLOT(deleteLater()));
+connect(this, SIGNAL(stopTimer()),timer,SLOT(deleteLater()));
+connect(this, SIGNAL(stopTimer()),timer,SLOT(stop()));
+timer->setInterval(0);
+timer->setSingleShot(false);
+timer->start();
+*/
+//QPushButton *dimitra=new QPushButton("dsxfvgdvg", parent->thread());
+//connect(dimitra,SIGNAL(clicked()),this,SLOT(StopScan());
+//QThread *thread=new QThread;
+//ScanThread *dim= new ScanThread();
+//dim->moveToThread(thread);
+//std::cout<<"RTg"<<std::endl;
+//connect(thread,SIGNAL(started()),dim, SLOT(run()));
+//std::cout<<"RTg"<<std::endl;
+//connect(thread, SIGNAL(started()),dim,SLOT(process()));
+
+//connect(dim,SIGNAL(ScanThread::resultReady()),thread, SLOT(quit()));
+//thread->start();
+//dim->start();
+//std::cout<<"RTg"<<std::endl;
+    //QThread *thread=new QThread(this);
+//dimitra->moveToThread(thread);
+//connect(timer, SIGNAL(timeout()),this,SLOT(applytests()));
+/*connect(thread,SIGNAL(started()),this,SLOT(applytests()));
+connect(dimitra,SIGNAL(finished()),thread,SLOT(quit()));
+connect(dimitra,SIGNAL(finished()),dimitra,SLOT(deleteLater()));
+connect(thread,SIGNAL(finished()),thread,SLOT(deleteLater()));
+thread->start();
+*/
+//while (!thread->isFinished()) QCoreApplication::processEvents();
+//if (ui->abortall->isChecked()){
+    //thread->isFinished();
+//}
+//timer->start();
+    //std::thread t1(&MainWindow::performtests,this, fScanVector,fAnalysisVector);
+
+   // std::thread t2(&MainWindow::createbtn,this);
+    //t2.join();
+}
+
+void MainWindow::StopScan(){
+
+    fScanAbort=true;
+
+}
+
+void MainWindow::createbtn(){
+
+    QPushButton *dimitra=new QPushButton("dsxfvgdvg", this);
+    connect(dimitra,SIGNAL(clicked()),this,SLOT(StopScan()));
+
+}
+
+void MainWindow::fifolist(){
+    mapdetails.clear();
+    ui->details->clear();
+    for (std::map<const char*,resultType>::const_iterator it=fAnalysisVector.at(0)->GetVariableList().begin(); it!=fAnalysisVector.at(0)->GetVariableList().end(); ++it){
+
+          std::cout << it->first << " => " << it->second << '\n';
+          std::string d;
+         d=(std::string(it->first));
+         // d.append(++it->first);
+        //  QVector <std::string> dimitra;
+         mapdetails.push_back(d);
+
+     }
+    for (int i=0; i<mapdetails.size();i++){
+        std::cout<<mapdetails[i]<<std::endl;
+        ui->details->addItem(mapdetails[i].c_str());
+    }
+ui->details->show();
+qApp->processEvents();
+ui->displaydetails->show();
+}
+
+
+void MainWindow::digitallist(){
+    mapdetails.clear();
+    ui->details->clear();
+    for (std::map<const char*,resultType>::const_iterator it=fAnalysisVector.at(1)->GetVariableList().begin(); it!=fAnalysisVector.at(1)->GetVariableList().end(); ++it){
+
+          std::cout << it->first << " => " << it->second << '\n';
+          std::string d;
+         d=(std::string(it->first));
+         // d.append(++it->first);
+        //  QVector <std::string> dimitra;
+         mapdetails.push_back(d);
+
+     }
+    for (int i=0; i<mapdetails.size();i++){
+        std::cout<<mapdetails[i]<<std::endl;
+        ui->details->addItem(mapdetails[i].c_str());
+    }
+ui->details->show();
+qApp->processEvents();
+ui->displaydetails->show();
+}
+
+void MainWindow::thresholdlist(){
+    mapdetails.clear();
+    ui->details->clear();
+    for (std::map<const char*,resultType>::const_iterator it=fAnalysisVector.at(2)->GetVariableList().begin(); it!=fAnalysisVector.at(2)->GetVariableList().end(); ++it){
+
+          std::cout << it->first << " => " << it->second << '\n';
+          std::string d;
+         d=(std::string(it->first));
+         // d.append(++it->first);
+        //  QVector <std::string> dimitra;
+         mapdetails.push_back(d);
+
+     }
+    for (int i=0; i<mapdetails.size();i++){
+        std::cout<<mapdetails[i]<<std::endl;
+        ui->details->addItem(mapdetails[i].c_str());
+    }
+ui->details->show();
+qApp->processEvents();
+ui->displaydetails->show();
+}
+
+
+void MainWindow::noiselist(){
+    mapdetails.clear();
+    ui->details->clear();
+    for (std::map<const char*,resultType>::const_iterator it=fAnalysisVector.at(3)->GetVariableList().begin(); it!=fAnalysisVector.at(3)->GetVariableList().end(); ++it){
+
+          std::cout << it->first << " => " << it->second << '\n';
+          std::string d;
+         d=(std::string(it->first));
+         // d.append(++it->first);
+        //  QVector <std::string> dimitra;
+         mapdetails.push_back(d);
+
+     }
+    for (int i=0; i<mapdetails.size();i++){
+        std::cout<<mapdetails[i]<<std::endl;
+        ui->details->addItem(mapdetails[i].c_str());
+    }
+ui->details->show();
+qApp->processEvents();
+ui->displaydetails->show();
+}
+
+
+
+void MainWindow::openib(){
+    QString operatorname;
+    int hicidnumber;
+    int counter;
+    settingswindow->hide();
+    settingswindow->SaveSettings(operatorname,hicidnumber,counter);
+    if (counter==0) {return;}
+    QString fileName="Configib.cfg";
+
+   // QString fileName = QFileDialog::getOpenFileName(this,
+     //   tr("Open Configuration. . ."), "/home/palpidefs/Alpide/GUI_Dimitra/build-GUI-Desktop-Debug", tr("Configuration Files (*.cfg)"));
+    try{
+    std::cout<<properconfig<<"d1"<<endl;
+   // initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str());
+    initSetup(fConfig, &fBoards, &fBoardType, &fChips,fileName.toStdString().c_str());
+
+    properconfig=true;
+    std::cout<<properconfig<<"d2"<<endl;
+   // fillingvectors();
+
+    }
+    catch(exception &e){
+       std::cout<<e.what()<<endl;
+      popup("Check Connection :(");
+       //popup(e.what());
+       properconfig=false;
+       std::cout<<properconfig<<"d3"<<endl;
+}
+std::cout<<properconfig<<"d4"<<endl;
+if (properconfig==1){
+    ui->tab_2->setEnabled(true);
+    ui->tab_3->setEnabled(true);
+    int device=0;
+    device=fConfig->GetDeviceType();
+    if (device==2){
+        ui->tob->setText("Outer Barrel module");
+        ui->OBModule->show();
+        for (int i=0;i< fChips.size();i++){
+            int chipid;
+            uint8_t module,side,pos;
+            chipid=fChips.at(i)->GetConfig()->GetChipId();
+            if(fChips.at(i)->GetConfig()->IsEnabled()){
+            DecodeId(chipid,module,side,pos);
+            color_green(side,pos);
+                        } else {DecodeId(chipid,module,side,pos);
+                color_red(side,pos);}
+        }
+    }
+    if (device==3){
+         ui->IBModule->show();
+         for (int i=0;i< fChips.size();i++){
+             int chipid;
+             uint8_t module,side,pos;
+             chipid=fChips.at(i)->GetConfig()->GetChipId();
+             if(fChips.at(i)->GetConfig()->IsEnabled()){
+             DecodeId(chipid,module,side,pos);
+             color_green_IB(pos);
+                         } else {DecodeId(chipid,module,side,pos);
+                 color_red_IB(pos);}
+         }
+    }
+   if (device==5){
+      ui->OBHALFSTAVE->show();
+      for (int i=0;i< fChips.size();i++){
+          int chipid;
+          chipid=fChips.at(i)->GetConfig()->GetChipId();
+          if(fChips.at(i)->GetConfig()->IsEnabled()){
+                    explore_halfstave(chipid);
+                    }
+      }
+    }
+}
+//TestSelection *saveinput;
+//saveinput->SaveSettings(operatorname,hicidnumber);
+
 }

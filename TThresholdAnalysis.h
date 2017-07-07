@@ -105,12 +105,19 @@ class TThresholdResultChip : public TScanResultChip {
   
 };
 
-class TThresholdResult : public TScanResult {
-  
+class TThresholdResult : public TScanResult { 
+protected:
+ // std::map <int, TScanResultChip*> abs_chipResults;
  public: 
   TThresholdResult  ();
   ~TThresholdResult ();
-  
+ // virtual TThresholdResult *clone() const;
+  //TThresholdResult (const TThresholdResult &_tresult):TScanResult(_tresult){}; 
+//  TThresholdResult  &operator=(const TThresholdResult &_tresult){m_chipResults=_tresult.m_chipResults; return *this;} 
+   //TThresholdResult(const TScanResult &_result):TScanResult(_result){}
+ // TThresholdResult *TThresholdResult:: clone() const {return new TThresholdResult(*this);} 
+  void WriteToFile   (const char *fName) {};
+  void WriteToDB     (const char *hicID) {};
 };
 
 class TThresholdAnalysis : public TScanAnalysis {
