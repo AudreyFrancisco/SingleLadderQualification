@@ -28,7 +28,7 @@ class TNoiseResult : public TScanResult {
  private: 
  public: 
   TNoiseResult () : TScanResult () {};
-  void WriteToFileGlobal (const char *fName) {};
+  void WriteToFileGlobal (FILE *fp)          {};
   void WriteToDB         (const char *hicID) {};
 };
 

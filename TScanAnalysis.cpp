@@ -67,3 +67,21 @@ TScanResultChip *TScanResult::GetChipResult (common::TChipIndex idx)
   }  
   return 0;
 }
+
+
+void TScanResult::WriteToFile(const char *fName) 
+{
+  FILE *fp = fopen (fName, "a");
+
+  fprintf (fp, "Number of chips: %d\n", m_chipResults.size());
+
+  WriteToFileGlobal (fp);
+
+  for (std::map<int, TScanResultChip*>::iterator it = m_chipResults.begin(); it != m_chipResults.end(); ++it)  {
+    int idx = it->first;
+    fprintf(fp, "\nBoard %d, Receiver %d, Chip %d:\n", (idx >> 8) & 0xf, (idx >> 4) & 0xf, idx & 0xf);
+    it->second->WriteToFile(fp);
+  }      
+
+  fclose (fp);
+}

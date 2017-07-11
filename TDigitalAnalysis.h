@@ -48,7 +48,7 @@ class TDigitalResult : public TScanResult {
 //  TDigitalResult(const TDigitalResult &other):TScanResult(other){/*Body of copy constructor of the TDigitalResult copy constructor*/ }
  // TDigitalResult& operator=(const TDigitalResult& other);
 //TDigitalResult& operator=(const TDigitalResult& other){/*handle self assignmet*/ if (&other!=this) return *this;/*handle base class assignemnt*/ TScanResult::operator=(other); return *this;}
-  void WriteToFileGlobal (const char *fName) {};
+  void WriteToFileGlobal (FILE *fp)          {};
   void WriteToDB         (const char *hicID) {};
 };
 
