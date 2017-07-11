@@ -90,28 +90,7 @@ void TDigitalAnalysis::WriteResult()
   char fName[100];
   sprintf (fName, "DigitalScanResult_%s.dat", m_config->GetfNameSuffix());
   
-  FILE         *fp       = fopen (fName, "w");
-  TErrorCounter errCount = ((TMaskScan*)m_scan)->GetErrorCount();
-
-  fprintf(fp, "NChips\t%d\n\n", m_chipList.size());
-
-  
-  fprintf(fp, "8b10b errors:\t%d\n",    errCount.n8b10b);
-  fprintf(fp, "Corrupt events:\t%d\n",  errCount.nCorruptEvent);
-  fprintf(fp, "Timeouts:\t%d\n",        errCount.nTimeout);
-  fprintf(fp, "Priority errors:\t%d\n", errCount.nPrioEncoder);
-
-  for (int ichip = 0; ichip < m_chipList.size();ichip ++ ) {
-    fprintf(fp, "\nBoard %d, Receiver %d, Chip %d\n", m_chipList.at(ichip).boardIndex,
-	    m_chipList.at(ichip).dataReceiver, 
-            m_chipList.at(ichip).chipId);
-    int dead = 512 * 1024 - (m_counters.at(ichip).nCorrect + m_counters.at(ichip).nNoisy + m_counters.at(ichip).nIneff);
-    fprintf(fp, "Dead pixels: %d\n", dead);
-    fprintf(fp, "Pixels with < %d hits: %d\n", m_ninj, m_counters.at(ichip).nIneff);
-    fprintf(fp, "Pixels with > %d hits: %d\n", m_ninj, m_counters.at(ichip).nNoisy);
-  }
-  
-  fclose (fp);  
+  m_result->WriteToFile(fName);
 }
 
 
@@ -198,4 +177,22 @@ void TDigitalAnalysis::Finalize() {
   }
   WriteResult      ();
   WriteStuckPixels ();
+}
+
+
+void TDigitalResult::WriteToFileGlobal (FILE *fp) 
+{
+  fprintf(fp, "8b10b errors:\t%d\n",    m_n8b10b);
+  fprintf(fp, "Corrupt events:\t%d\n",  m_nCorrupt);
+  fprintf(fp, "Timeouts:\t%d\n",        m_nTimeout);
+}
+
+
+void TDigitalResultChip::WriteToFile (FILE *fp) 
+{
+  fprintf(fp, "Dead pixels: %d\n", m_nDead);
+  fprintf(fp, "Inefficient pixels: %d\n", m_nIneff);
+  fprintf(fp, "Noisy pixels: %d\n", m_nNoisy);
+  fprintf(fp, "Bad double cols: %d\n", m_nBadDcols);
+  fprintf(fp, "Stuck pixels: %d\n", m_nStuck);
 }

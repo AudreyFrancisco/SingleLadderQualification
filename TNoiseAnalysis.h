@@ -20,7 +20,7 @@ class TNoiseResultChip : public TScanResultChip {
   TNoiseResultChip () : TScanResultChip () {};
   void AddNoisyPixel (TPixHit pixel) {m_noisyPixels.push_back(pixel);};
   void SetOccupancy  (float occ)     {m_occ = occ;};
-  void WriteToFile   (FILE *fp)      {};
+  void WriteToFile   (FILE *fp);
 };
 
 

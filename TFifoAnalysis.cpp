@@ -51,22 +51,7 @@ void TFifoAnalysis::WriteResult () {
   char fName[100];
   sprintf (fName, "FifoScanResult_%s.dat", m_config->GetfNameSuffix());
   
-  FILE         *fp       = fopen (fName, "w");
-
-  fprintf(fp, "NChips\t%d\n\n", m_chipList.size());
-
-  for (int ichip = 0; ichip < m_chipList.size();ichip ++ ) {
-    fprintf(fp, "\nBoard %d, Receiver %d, Chip %d\n", m_chipList.at(ichip).boardIndex,
-	    m_chipList.at(ichip).dataReceiver, 
-            m_chipList.at(ichip).chipId);
- 
-    fprintf(fp, "Errors in pattern 0x0000: %d\n", m_counters.at(ichip).err0);
-    fprintf(fp, "Errors in pattern 0x5555: %d\n", m_counters.at(ichip).err5);
-    fprintf(fp, "Errors in pattern 0xaaaa: %d\n", m_counters.at(ichip).erra);
-    fprintf(fp, "Errors in pattern 0xffff: %d\n", m_counters.at(ichip).errf);
-  }
-  
-  fclose (fp);  
+  m_result->WriteToFile(fName);
 }
 
 
@@ -119,4 +104,13 @@ void TFifoAnalysis::Finalize()
   }
 
   WriteResult ();
+}
+
+
+void TFifoResultChip::WriteToFile (FILE *fp) 
+{
+  fprintf(fp, "Errors in pattern 0x0000: %d\n", m_err0);
+  fprintf(fp, "Errors in pattern 0x5555: %d\n", m_err5);
+  fprintf(fp, "Errors in pattern 0xaaaa: %d\n", m_erra);
+  fprintf(fp, "Errors in pattern 0xffff: %d\n", m_errf);
 }

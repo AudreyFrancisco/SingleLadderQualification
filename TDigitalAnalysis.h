@@ -32,7 +32,7 @@ class TDigitalResultChip : public TScanResultChip {
   std::vector <TPixHit> m_stuck;
  public:
   TDigitalResultChip () : TScanResultChip () {};
-  void WriteToFile (FILE *fp) {};
+  void WriteToFile (FILE *fp);
 };
 
 
@@ -48,7 +48,7 @@ class TDigitalResult : public TScanResult {
 //  TDigitalResult(const TDigitalResult &other):TScanResult(other){/*Body of copy constructor of the TDigitalResult copy constructor*/ }
  // TDigitalResult& operator=(const TDigitalResult& other);
 //TDigitalResult& operator=(const TDigitalResult& other){/*handle self assignmet*/ if (&other!=this) return *this;/*handle base class assignemnt*/ TScanResult::operator=(other); return *this;}
-  void WriteToFileGlobal (FILE *fp)          {};
+  void WriteToFileGlobal (FILE *fp);
   void WriteToDB         (const char *hicID) {};
 };
 

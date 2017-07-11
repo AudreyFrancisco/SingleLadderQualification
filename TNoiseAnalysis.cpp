@@ -14,6 +14,10 @@ TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, T
 
 void TNoiseAnalysis::WriteResult() 
 {
+  char fName[100];
+  sprintf (fName, "NoiseOccResult_%s.dat", m_config->GetfNameSuffix());
+
+  m_result->WriteToFile(fName);
 }
 
 
@@ -74,4 +78,11 @@ void TNoiseAnalysis::Run()
    
     else usleep(300);
   }
+}
+
+
+void TNoiseResultChip::WriteToFile(FILE *fp) 
+{
+  fprintf(fp, "Noisy pixels: %d\n", m_noisyPixels.size());
+  fprintf(fp, "Noise occupancy: %e\n", m_occ);
 }
