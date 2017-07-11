@@ -116,8 +116,8 @@ protected:
 //  TThresholdResult  &operator=(const TThresholdResult &_tresult){m_chipResults=_tresult.m_chipResults; return *this;} 
    //TThresholdResult(const TScanResult &_result):TScanResult(_result){}
  // TThresholdResult *TThresholdResult:: clone() const {return new TThresholdResult(*this);} 
-  void WriteToFile   (const char *fName) {};
-  void WriteToDB     (const char *hicID) {};
+  void WriteToFileGlobal (const char *fName) {};
+  void WriteToDB         (const char *hicID) {};
 };
 
 class TThresholdAnalysis : public TScanAnalysis {

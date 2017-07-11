@@ -32,13 +32,14 @@ class TScanResult {
  //TScanResult(const TScanResult &other){m_chipResults=other.m_chipResults;}
  //assignment operation from my base class 
 //TScanResult &operator=(const TScanResult &other){if (&other!=this) return *this; m_chipResults=other.m_chipResults; return *this;} 
-  int              AddChipResult (common::TChipIndex idx, 
-		                  TScanResultChip *aChipResult);
-  int              AddChipResult (int aIntIndex, TScanResultChip *aChipResult);
-  int              GetNChips     ()     {return m_chipResults.size();};
-  virtual void     WriteToFile   (const char *fName) = 0;
-  virtual void     WriteToDB     (const char *hicID) = 0;
-  TScanResultChip *GetChipResult (common::TChipIndex idx);
+  int              AddChipResult     (common::TChipIndex idx, 
+		                      TScanResultChip *aChipResult);
+  int              AddChipResult     (int aIntIndex, TScanResultChip *aChipResult);
+  int              GetNChips         ()     {return m_chipResults.size();};
+  void             WriteToFile       () {};
+  virtual void     WriteToFileGlobal (const char *fName) = 0;
+  virtual void     WriteToDB         (const char *hicID) = 0;
+  TScanResultChip *GetChipResult     (common::TChipIndex idx);
 };
 
 
