@@ -50,8 +50,8 @@ void TFifoAnalysis::InitCounters()
 void TFifoAnalysis::WriteResult () {
   char fName[100];
   sprintf (fName, "FifoScanResult_%s.dat", m_config->GetfNameSuffix());
-  
-  m_result->WriteToFile(fName);
+  m_scan  ->WriteConditions (fName);
+  m_result->WriteToFile     (fName);
 }
 
 

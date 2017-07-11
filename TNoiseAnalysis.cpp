@@ -16,8 +16,8 @@ void TNoiseAnalysis::WriteResult()
 {
   char fName[100];
   sprintf (fName, "NoiseOccResult_%s.dat", m_config->GetfNameSuffix());
-
-  m_result->WriteToFile(fName);
+  m_scan  ->WriteConditions (fName);
+  m_result->WriteToFile     (fName);
 }
 
 

@@ -23,6 +23,18 @@ typedef struct {
   int nTimeout;
 } TErrorCounter;
 
+typedef struct {
+  float TempStart;
+  float TempEnd;
+  float IDDAStart;
+  float IDDAEnd;
+  float IDDDStart;
+  float IDDDEnd;
+  char  FirmwareVersion[50];
+  //TODO: Add Software version, date, time 
+} TScanConditions;
+
+
 class TScan {
  private:
  protected: 
@@ -34,6 +46,7 @@ class TScan {
   std::deque <TScanHisto>      *m_histoQue;
   std::mutex                   *m_mutex;
   bool                          m_running;
+  TScanConditions               m_conditions;
   int m_start   [MAXLOOPLEVEL];
   int m_stop    [MAXLOOPLEVEL];
   int m_step    [MAXLOOPLEVEL];
@@ -47,18 +60,20 @@ class TScan {
   TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex);
   ~TScan() {};
 
-  virtual void Init            ()              = 0;
-  virtual void Terminate       ()              = 0;
-  virtual void LoopStart       (int loopIndex) = 0;
-  virtual void LoopEnd         (int loopIndex) = 0;
-  virtual void PrepareStep     (int loopIndex) = 0;
-  virtual void Execute         ()              = 0;
-  bool         Loop            (int loopIndex);
-  virtual void Next            (int loopIndex); 
-  void         CreateScanHisto ();
-  bool         IsRunning       () {return m_running;};
-  TScanHisto   GetTScanHisto   () {return *m_histo;};
-  const char  *GetName         () {return m_name;};  
+  virtual void Init              ()              = 0;
+  virtual void Terminate         ()              = 0;
+  virtual void LoopStart         (int loopIndex) = 0;
+  virtual void LoopEnd           (int loopIndex) = 0;
+  virtual void PrepareStep       (int loopIndex) = 0;
+  virtual void Execute           ()              = 0;
+  bool         Loop              (int loopIndex);
+  virtual void Next              (int loopIndex); 
+  void         CreateScanHisto   ();
+  bool         IsRunning         () {return m_running;};
+  TScanHisto   GetTScanHisto     () {return *m_histo;};
+  const char  *GetName           () {return m_name;};  
+  TScanConditions *GetConditions () {return &m_conditions;};
+  void         WriteConditions   (const char *fName);
 };
 
 class TMaskScan : public TScan {
