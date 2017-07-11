@@ -30,6 +30,7 @@ class TFifoResultChip : public TScanResultChip {
   int m_errf;
  public: 
   TFifoResultChip () : TScanResultChip () {};
+  void WriteToFile (FILE *fp) {};
 };
 
 

@@ -103,6 +103,7 @@ class TThresholdResultChip : public TScanResultChip {
   FILE* GetFilePixelFitResult   ();
   FILE* GetFileRawData          (); 
   
+  void WriteToFile (FILE *fp) {};
 };
 
 class TThresholdResult : public TScanResult { 

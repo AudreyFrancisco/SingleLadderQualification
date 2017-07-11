@@ -17,6 +17,7 @@ class TScanHisto;
 class TScanResultChip {
  public:
   TScanResultChip () {};
+  virtual void WriteToFile (FILE *fp) = 0;
 };
 
 
@@ -36,7 +37,7 @@ class TScanResult {
 		                      TScanResultChip *aChipResult);
   int              AddChipResult     (int aIntIndex, TScanResultChip *aChipResult);
   int              GetNChips         ()     {return m_chipResults.size();};
-  void             WriteToFile       () {};
+  void             WriteToFile       (const char *fName);
   virtual void     WriteToFileGlobal (const char *fName) = 0;
   virtual void     WriteToDB         (const char *hicID) = 0;
   TScanResultChip *GetChipResult     (common::TChipIndex idx);
