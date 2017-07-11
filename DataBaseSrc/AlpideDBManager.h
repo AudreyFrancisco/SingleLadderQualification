@@ -136,7 +136,7 @@ public:
     void setSSOCookieUrl(string aJarUrl) { theJarUrl = aJarUrl;};
 
 public:
-	int makeDBQuery(const string Url, const char *Payload, char **Result, bool isSOAPrequest = false, const char *SOAPAction);
+	int makeDBQuery(const string Url, const char *Payload, char **Result, bool isSOAPrequest = false, const char *SOAPAction = NULL);
 
 #ifdef COMPILE_LIBCURL
 	static size_t readResponseCB(void *contents, size_t size, size_t nmemb, void *userp);

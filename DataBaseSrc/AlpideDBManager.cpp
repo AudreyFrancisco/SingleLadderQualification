@@ -37,6 +37,8 @@
 
 #include "AlpideDBManager.h"
 
+#include <fstream>
+
 #include <stdio.h>
 #include <string.h>
 //#include <curl/curl.h>
@@ -239,9 +241,23 @@ int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **R
 	    Command += COOKIEPACK;
 	    Command += " -c ";
 	    Command += COOKIEPACK;
-	    Command += " ";
-	    Command += Url;
-	    Command += Payload;
+		if(isSOAPrequest) {
+			remove("/tmp/tempappo.xml");
+			std::ofstream out("/tmp/tempappo.xml");
+			out << Payload;
+			out.close();
+			Command += " -H 'SOAPACTION: \"";
+			Command += SOAPAction;
+			Command += "\"' -X POST -H 'Content-type: text/xml' -d @/tmp/tempappo.xml \"";
+			Command += Url;
+			Command += "\"";
+		} else {
+			Command += " \"";
+			Command += Url;
+			Command += "?";
+			Command += Payload;
+			Command += "\"";
+		}
 	    Command += " > /tmp/Queryresult.xml";
 
 	    system(Command.c_str());
