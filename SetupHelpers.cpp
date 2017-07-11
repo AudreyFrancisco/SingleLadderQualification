@@ -198,6 +198,10 @@ int CheckControlInterface(TConfig* config, std::vector <TReadoutBoard *> * board
   int      nWorking = 0;
 
   std::cout << std::endl << "Before starting actual test:" << std::endl << "Checking the control interfaces of all chips by doing a single register readback test" << std::endl;
+  for (int i = 0; i < boards->size(); i++) {
+    boards->at(i)->SendOpCode(Alpide::OPCODE_GRST);
+  }
+
   for (int i = 0; i < chips->size(); i++) {
     if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
     //std::cout << "Writing chip " << i << std::endl;

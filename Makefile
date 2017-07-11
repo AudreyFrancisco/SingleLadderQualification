@@ -103,6 +103,19 @@ test_scantest: $(DEPS) $(OBJS_ROOT) main_scantest.cpp
 test_threshold_v1: $(DEPS)  $(OBJS_ROOT) main_threshold_v1.cpp
 	$(CC) -o test_threshold_v1 $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_threshold_v1.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
+#added for calibration
+test_tuneITHR: $(DEPS)  $(OBJS_ROOT) main_tuneITHR.cpp
+	$(CC) -o test_tuneITHR $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_tuneITHR.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
+test_ITHRthreshold: $(DEPS)  $(OBJS_ROOT) main_ITHRthreshold.cpp
+	$(CC) -o test_ITHRthreshold $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_ITHRthreshold.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
+test_tuneVCASN: $(DEPS)  $(OBJS_ROOT) main_tuneVCASN.cpp
+	$(CC) -o test_tuneVCASN $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_tuneVCASN.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
+test_VCASNthreshold: $(DEPS)  $(OBJS_ROOT) main_VCASNthreshold.cpp
+	$(CC) -o test_VCASNthreshold $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_VCASNthreshold.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
 # Classes using ROOT.
 TThresholdAnalysis.o: TThresholdAnalysis.cpp TThresholdAnalysis.h
 	$(CC) $(CFLAGS) $(ROOTCFLAGS) -c -o $@ $<

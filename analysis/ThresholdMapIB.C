@@ -119,7 +119,7 @@ int ThresholdMapIB(const char *fName, bool noise = false) {
   TH2F *hHitmap = new TH2F("hHitmap", "Threshold map", 9216, -.5, 9215.5, 512, -.5, 511.5);
 
   for (int ichip = 0; ichip < 9; ichip ++) {    
-    sprintf(fNameChip, "%s_Chip%d.dat", Prefix, ichip);
+    sprintf(fNameChip, "%s_Chip%d_0.dat", Prefix, ichip);
     ReadFile(fNameChip, hHitmap, ichip, noise);
   }
 

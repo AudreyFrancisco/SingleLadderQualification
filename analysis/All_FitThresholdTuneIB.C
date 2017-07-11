@@ -11,7 +11,7 @@
 
 void runFit(int chipNum, std::string prefix) {
   //This might not be the cleanest way to do this, but it works.  Streamline later?
-  std::string name = prefix + "Chip" + std::to_string(chipNum) + ".dat";
+  std::string name = prefix + "Chip" + std::to_string(chipNum) + "_0.dat";
   //Write to file.  Need to manually give it ITH and VCASN??
   //   - BUT ITH varies constantly...?
   std::string commandStr = ".x ../../../analysis/FitThresholdTune.C+(\"" + name + "\", true)";
@@ -45,9 +45,9 @@ int All_FitThresholdTuneIB(const char *fName, bool generateMap=true) {  //Give i
     runFit(i,Pre,suffix);
   }*/
   if(generateMap) {
-    std::string slice="FitValues" + Pre.substr(13,15); //length-sensitive...
+    std::string slice="Plotting FitValues" + Pre.substr(13,15); //length-sensitive...
     std::cout << slice << std::endl;
-    const char * line = (".x ../../../analysis/ThresholdMapIB.C+(\"" + slice + "Chip0.dat\", true)").c_str();  //I /think/ this is right...
+    const char * line = (".x ../../../analysis/ThresholdMapIB.C+(\"" + slice + "Chip0_0.dat\", false)").c_str();  //I /think/ this is right...
     gROOT->ProcessLine(line); //arbitrary file
   }
   return 0;
