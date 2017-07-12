@@ -4,6 +4,8 @@
 #include <vector>
 #include "TAlpide.h"
 
+class TAlpide;
+
 class THic {
  private:
   std::vector <TAlpide> m_chips;
@@ -15,12 +17,15 @@ class THic {
  protected:
  public:
   THic (const char *id, /*TPowerBoard pb, */ int chanVddd, int chanVdda, int chanBias);
+  bool  IsPowered ();
+  void  PowerOn   ();
+  void  PowerOff  ();
   float GetIddd   () {return 0;};
   float GetIdda   () {return 0;};
   float GetIBias  () {return 0;};
   char *GetDbId   () {return m_dbId;};
   int   GetNChips () {return m_chips.size();};
-  int  AddChip  (TAlpide chip) {m_chips.push_back(chip); return GetNChips();};
+  int   AddChip   (TAlpide chip);
 };
 
 
