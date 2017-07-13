@@ -13,7 +13,7 @@ THic::THic (const char *id, /*TPowerBoard *pb, */ int chanVddd, int chanVdda, in
 }
 
 
-int THic::AddChip (TAlpide chip) 
+int THic::AddChip (TAlpide *chip) 
 {
   m_chips.push_back(chip); 
   return GetNChips();
@@ -40,4 +40,5 @@ void THic::PowerOff()
   if (!IsPowered()) return;
   
   //otherwise: power off 
+  // Q: do we need to consider case where part of the channels is on?
 }

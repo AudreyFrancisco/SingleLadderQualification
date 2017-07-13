@@ -36,8 +36,7 @@ void TScanAnalysis::CreateChipResults ()
     TScanResultChip    *chipResult = GetChipResult();
     common::TChipIndex idx         = m_chipList.at(i);
     m_result->AddChipResult (idx, chipResult);
-  }
-  
+  }  
 }
 
 
