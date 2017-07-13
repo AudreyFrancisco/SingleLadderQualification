@@ -53,6 +53,8 @@ MainWindow::MainWindow(QWidget *parent) :
       ui->setupUi(this);
      this->setWindowTitle(QString::fromUtf8("GUI"));
      ui->tab_2->setEnabled(false);
+     ui->example1->hide();
+
      ui->tab_3->setEnabled(false);
      qDebug()<<"Starting testing";
       ui->obm1->setStyleSheet("background-color:red;");
@@ -127,7 +129,6 @@ void MainWindow::open(){
     settingswindow->hide();
     settingswindow->SaveSettings(operatorname,hicidnumber,counter);
     if (counter==0) {return;}
-
    QString fileName="Config.cfg";
 
    // QString fileName = QFileDialog::getOpenFileName(this,
@@ -155,7 +156,7 @@ if (properconfig==1){
     int device=0;
     device=fConfig->GetDeviceType();
     if (device==2){
-        ui->tob->setText("Outer Barrel module");
+       ui->tob->setText("Outer Barrel module");
         ui->OBModule->show();
         for (int i=0;i< fChips.size();i++){
             int chipid;
@@ -657,6 +658,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
     ui->statuslabel->setVisible(true);
      ui->statuslabel->update();
     for (int i=0;i<s.size();i++){
+   // for (int i=0;i<2;i++){
       //   QApplication::processEvents() ;
 
 
@@ -685,6 +687,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
               qApp->processEvents();
              break;
           }
+
          while (i<3 && i>1){
               ui->fstatus->setText("100% Completed");
               ui->dstatus->setText("100% Completed");
@@ -726,6 +729,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
             qApp->processEvents();
           break;
        }
+
         while (i<3 && i>1){
             ui->fstatus->setText("100% Completed");
             ui->dstatus->setText("100% Completed");
@@ -760,10 +764,15 @@ void MainWindow::connectcombo(int value){
         ui->testtypeselected->clear();
         ui->start_test->show();
         qDebug()<<"OB Qualification test selected";
+        // ui->testtypeselected->setText("OB Reception Test");
         ui->testtypeselected->setText("OB Qualification Test");
+      //  ui->example1->show();
         open();
-        if (counter==0) {break;}
-        fillingOBvectors();
+
+
+       if (counter==0) {break;}
+       fillingOBvectors();
+
         break;}
     case 2:
        {
@@ -789,6 +798,7 @@ void MainWindow::connectcombo(int value){
         ui->testtypeselected->clear();
         ui->start_test->show();
         qDebug()<<"IB Qualification test selected";
+         ui->testtypeselected->setText("OB Reception Test");
        // openib();
         //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
         break;}
