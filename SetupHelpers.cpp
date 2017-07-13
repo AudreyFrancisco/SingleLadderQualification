@@ -64,9 +64,12 @@ int initSetupOB(TConfig                        *config,
     }
 
     TAlpide *chip = new TAlpide(chipConfig);
-    chip        ->SetHic   (hics->at(0));
+    if (hics) {
+      chip        ->SetHic   (hics->at(0));
+      hics->at(0) ->AddChip  (chip);
+    }
     chips       ->push_back(chip);
-    hics->at(0) ->AddChip  (chip);
+
 
     chips->at(i) -> SetReadoutBoard(boards->at(0));
     if (i < 7) {              // first master-slave row
