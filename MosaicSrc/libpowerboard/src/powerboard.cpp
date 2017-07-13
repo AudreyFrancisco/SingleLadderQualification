@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014
+ * Copyright (C) 2017
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@
  * /_/ /_/ |__/ /_/    /_/ |__/  	 
  *
  * ====================================================
- * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
+ * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
 #include <stdio.h>
@@ -32,84 +32,66 @@
 #include <unistd.h>
 #include "powerboard.h"
 
-powerboard::i2c_baseAddress_t powerboard::i2c_baseAddress[2] = 
-	{
-		{	// Master board					
-			.dacBias 			= 0x32,		// LTC2635		U3  0110010	0x32
-			.dacThreshold_14	= 0x31,		// LTC2635		U20 0110001 0x31
-			.dacThreshold_58	= 0x33,		// LTC2635		U21 0110011 0x33
-			.rdacVadj_14		= 0x2c,		// AD5254		U2	0101100	0x2c
-			.rdacVadj_58		= 0x2d,		// AD5254		U8	0101101	0x2d
-			.regLuVbuf_18		= 0x20,		// PCF8574		U32	0100000 0x20
-			.regCtrl			= 0x26,		// PCF8574		U39	0100110 0x26
-			.adcMon_14			= 0x21,		// AD7997		U4	0100001	0x21
-			.adcMon_58			= 0x23,		// AD7997		U15	0100011	0x23
-			.spiBridge			= 0x2a		// SC18IS602B 	U51	0101010	0x2a
-		},
-		{	// Slave board					
-			.dacBias 			= 0x50,		// LTC2635		U3  1010000	0x50
-			.dacThreshold_14	= 0x43,		// LTC2635		U20 1000011 0x43
-			.dacThreshold_58	= 0x51,		// LTC2635		U21 1010001 0x51
-			.rdacVadj_14		= 0x2e,		// AD5254		U2	0101110	0x2e
-			.rdacVadj_58		= 0x2f,		// AD5254		U8	0101111	0x2f
-			.regLuVbuf_18		= 0x27,		// PCF8574		U32	0100000 0x27
-			.regCtrl			= 0x25,		// PCF8574		U39	0100101 0x25
-			.adcMon_14			= 0x22,		// AD7997		U4	0100010	0x22
-			.adcMon_58			= 0x24,		// AD7997		U15	0100100	0x24
-			.spiBridge			= 0x2b		// SC18IS602B 	U51	0101011	0x2b
-		}
-	};
-
-
-
-powerboard::powerboard(I2Cbus *bus, bool master)
+powerboard::powerboard(I2Cbus *busMaster, I2Cbus *busAux)
 {
-	i2cBus = bus;
-	i2c_baseAddress_t *baseAddrPtr = master ? i2c_baseAddress : i2c_baseAddress+1;
+	i2cBus    = busMaster;
+	i2cBusAux = busAux;
+	
+	dacThreshold[0] = new LTC2635(i2cBus, I2Caddress_dacThreshold_1_4);
+	dacThreshold[1] = new LTC2635(i2cBus, I2Caddress_dacThreshold_5_8);
+	dacThreshold[2] = new LTC2635(i2cBus, I2Caddress_dacThreshold_9_12);
+	dacThreshold[3] = new LTC2635(i2cBus, I2Caddress_dacThreshold_13_16);
 
-	regLuVbuf_18 = new PCF8574(i2cBus, baseAddrPtr->regLuVbuf_18);
-	regCtrl = new PCF8574(i2cBus, baseAddrPtr->regCtrl);
-	dacBias = new LTC2635(i2cBus, baseAddrPtr->dacBias);
-	dacThreshold14 = new LTC2635(i2cBus, baseAddrPtr->dacThreshold_14);
-	dacThreshold58 = new LTC2635(i2cBus, baseAddrPtr->dacThreshold_58);
-	rdacVadj14 = new AD5254(i2cBus, baseAddrPtr->rdacVadj_14);
-	rdacVadj58 = new AD5254(i2cBus, baseAddrPtr->rdacVadj_58);
-	adcMon14 = new AD7997(i2cBus, baseAddrPtr->adcMon_14);
-	adcMon58 = new AD7997(i2cBus, baseAddrPtr->adcMon_58);
-	spiBridge = new SC18IS602(i2cBus, baseAddrPtr->spiBridge);
-	for (int i=0; i<NUM_TSENSOR; i++)
-		temperatureDetector[i] = new MAX31865(spiBridge, i);
+	rdacVadj[0] = new AD5254(i2cBus, I2Caddress_rdacVadj_1_4);
+	rdacVadj[1] = new AD5254(i2cBus, I2Caddress_rdacVadj_5_8);
+	rdacVadj[2] = new AD5254(i2cBus, I2Caddress_rdacVadj_9_12);
+	rdacVadj[3] = new AD5254(i2cBus, I2Caddress_rdacVadj_13_16);
+
+	rdacVbias = new MAX5419(i2cBus, I2Caddress_rdacVbias);
+
+	regCtrl[0] = new PCF8574(i2cBusAux, AUX_I2Caddress_regCtrl_1_8);
+	regCtrl[1] = new PCF8574(i2cBusAux, AUX_I2Caddress_regCtrl_9_16);
+
+	regCtrlBias = new PCF8574(i2cBus, I2Caddress_regCtrl_Bias);
+
+	adcMon[0] = new ADC128D818(i2cBus, I2Caddress_adcMon_1_4);
+	adcMon[1] = new ADC128D818(i2cBus, I2Caddress_adcMon_5_8);
+	adcMon[2] = new ADC128D818(i2cBus, I2Caddress_adcMon_9_12);
+	adcMon[3] = new ADC128D818(i2cBus, I2Caddress_adcMon_13_16);
+	adcMon[4] = new ADC128D818(i2cBus, I2Caddress_adcMon_Bias);
+
+	spiBridge = new SC18IS602(i2cBus, I2Caddress_spiBridge);
+	temperatureDetector = new MAX31865(spiBridge, 0);
 }
 
 
 powerboard::~powerboard()
 {
 	// delete objects in creation reverse order
-	for (int i=0; i<NUM_TSENSOR; i++)
-		delete temperatureDetector[i];
-	delete adcMon14;
-	delete adcMon58;
-	delete rdacVadj14;
-	delete rdacVadj58;
-	delete dacBias;
-	delete dacThreshold14;
-	delete dacThreshold58;
-	delete regCtrl;
-	delete regLuVbuf_18;
+	delete temperatureDetector;
+	delete spiBridge;
+
+	for (int i=0; i<5; i++)
+		delete adcMon[i];	
+
+	delete regCtrlBias;	
+	delete regCtrl[0];	
+	delete regCtrl[1];	
+	delete rdacVbias;	
+
+	for (int i=0; i<4; i++)
+		delete rdacVadj[i];	
+
+	for (int i=0; i<4; i++)
+		delete dacThreshold[i];	
 }
 
 bool powerboard::isReady()
 {
-	uint16_t data;
+	uint8_t tmp;
+	adcMon[0]->getConfiguration(&tmp);
+	// if board is offline, an exception is generated
 
-	// Write 0x550 in the hysteresys register of channel 1
-	adcMon14->write(AD7997::REG_Hysteresis_CH1, (uint16_t) 0x0550);
-	adcMon14->read(AD7997::REG_Hysteresis_CH1, &data);
-	if (data != 0x0550)
-		return false;
-
-	// reset hysteresys register
-	adcMon14->write(AD7997::REG_Hysteresis_CH1, (uint16_t) 0x0000);
 	return true;
 }
 
@@ -123,16 +105,13 @@ void powerboard::setIth(uint8_t ch, float value)
 	uint16_t data;
 
 	// select the DAC
-	dac = (ch<4) ? dacThreshold14 : dacThreshold58;
+	dac = dacThreshold[ch/4];
 
 	// evaluate the dac value from current value
-	if ((ch&0x01) == 0)
-		data = (255.0 * value)/4.31;	// Digital power supply
-	else
-		data = (255.0 * value)/0.43;	// analog power supply
+	data = 410 + (3685.0/3.0) * value;
 
-	if (data > 255)
-		data = 255;
+	if (data > 0xfff)
+		data = 0xff;
 
 	dac->WriteUpdateReg(ch&0x03, data);
 }
@@ -147,20 +126,34 @@ void powerboard::setVbias(float value)
 	if (value>0)
 		return;
 	
-	data = value * (-6528.0/125.0);
+	data = value * (-125.0/5.0);
 	
 	if (data>255)
 		data = 255;
 	
-	dacBias->WriteUpdateReg(0, data);
+	rdacVbias->setRDAC(data);
 }
 
-void powerboard::enVbias(bool en)
+void powerboard::offVbias(uint8_t ch)
 {
-	if (en == false)
-		regCtrl->write(CTRL_BiasShdn | CTRL_AllInputs | CTRL_ResetBar);
-	else
-		regCtrl->write(CTRL_AllInputs | CTRL_ResetBar);
+	uint8_t tmp = regCtrlBias->read();
+	regCtrlBias->write( tmp | (1<<ch));
+}
+
+void powerboard::onVbias(uint8_t ch)
+{
+	uint8_t tmp = regCtrlBias->read();
+	regCtrlBias->write( tmp & ~(1<<ch));
+}
+
+void powerboard::offAllVbias()
+{
+	regCtrlBias->write( 0xff );
+}
+
+void powerboard::onAllVbias()
+{
+	regCtrlBias->write( 0x00 );
 }
 
 
@@ -170,9 +163,9 @@ void powerboard::setVout(uint8_t ch, float value)
 	AD5254 *rdac;
 
 	// select the RDAC
-	rdac = (ch<4) ? rdacVadj14 : rdacVadj58;
+	rdac = rdacVadj[ch/4];
 
-	data = 200.0 * (2.8-value); 
+	data = (value / 0.00486) - 306; 
 	if (data<0)
 		data = 0;
 	if (data>255)
@@ -186,7 +179,7 @@ void powerboard::storeVout(uint8_t ch)
 	AD5254 *rdac;
 
 	// select the RDAC
-	rdac = (ch<4) ? rdacVadj14 : rdacVadj58;
+	rdac = rdacVadj[ch/4];
 	rdac->storeRDAC(ch&0x03);
 }
 
@@ -194,32 +187,55 @@ void powerboard::storeVout(uint8_t ch)
 void powerboard::storeAllVout()
 {
 	for (int i=0; i<4; i++){
-		rdacVadj14->storeRDAC(i);
-		rdacVadj58->storeRDAC(i);
+		for (int j=0; j<4; j++){
+			rdacVadj[j]->storeRDAC(i);
+		}
 	}
+	rdacVbias->storeRDAC();
 }
 
 void powerboard::restoreAllVout()
 {
-	rdacVadj14->restoreAll();
-	rdacVadj58->restoreAll();
+	for (int j=0; j<4; j++)
+		rdacVadj[j]->restoreAll();
+	rdacVbias->restoreRDAC();
 }
 
-// turn on all selected channel
+// turn on selected channel
 void powerboard::onVout(uint8_t ch)
 {
-	regLuVbuf_18->write(~(1<<ch));
-	usleep(100000);
-	regLuVbuf_18->write(0xff);
+	PCF8574	*regCtrlPtr = regCtrl[ch/8];
+	ch %= 8;
+
+	uint8_t tmp = regCtrlPtr->read();
+	regCtrlPtr->write( tmp | (1<<ch));
+}
+
+// turn off selected channel
+void powerboard::offVout(uint8_t ch)
+{
+	PCF8574	*regCtrlPtr = regCtrl[ch/8];
+	ch %= 8;
+
+	uint8_t tmp = regCtrlPtr->read();
+	regCtrlPtr->write( tmp & ~(1<<ch));
 }
 
 // turn on all channels
 void powerboard::onAllVout()
 {
-	regLuVbuf_18->write(0x00);
-	usleep(100000);
-	regLuVbuf_18->write(0xff);
+	regCtrl[0]->write(0xff);
+	regCtrl[1]->write(0xff);
 }
+
+// turn off all channels
+void powerboard::offAllVout()
+{
+	regCtrl[0]->write(0x00);
+	regCtrl[1]->write(0x00);
+}
+
+
 
 // polinomial interpolation of RTD to Temperature function for PT100 sensor
 static float RTD2T(float r)
@@ -236,61 +252,64 @@ static float RTD2T(float r)
 }
 
 /*
+	Start ADC and temperature converter
+*/
+void powerboard::startADC()
+{
+	temperatureDetector->configure();
+
+	for (int i=0; i<5; i++)
+		adcMon[i]->setConfiguration();
+}
+
+/*
 	Read board state from all chips
 */
 void powerboard::getState(pbstate_t *state, getFlags flags)
 {
-	// configure the temperature sensors to start converting
-	for (int i=0; i<NUM_TSENSOR; i++)
-		temperatureDetector[i]->configure();
-
-	if (flags & WaitTconv)
-		usleep(50000);		// wait few conversion periods
-
 	// Latch register
-	state->chOn = regLuVbuf_18->read();
-	
+	state->chOn = regCtrl[0]->read();
+	state->chOn |= regCtrl[1]->read() << 8;
+	state->biasOn = ~regCtrlBias->read();
+
 	if (flags & GetSettings){
 		// Voltage adjust
-		for (int i=0; i<8; i++){
+		for (int i=0; i<16; i++){
 			int rdata;
-			AD5254 *rdac= (i<4) ? rdacVadj14 : rdacVadj58;
+			AD5254 *rdac= rdacVadj[i/4];
 
 			rdata = rdac->getRDAC(i&0x03);
-			state->Vout[i] = 2.8 - ((float)rdata / 200.0);
-		}		
+			state->Vout[i] = (float) (rdata+306) * 0.00486;
+		}
 	}
 
 	if (flags & GetMonitor){
-		// Volatage/Currents monitor 
-		adcMon14->setConfiguration(0xff);	// All channels
-		adcMon58->setConfiguration(0xff);	// All channels
-	
-		uint16_t adcData[16];
+		uint16_t adcData[40];
 		uint16_t *dataPtr = adcData;
+		float data;
+	
+		for (int i=0; i<5; i++)
+			adcMon[i]->convert(adcData + i*8);
 
-		adcMon14->convert(8, adcData);
-		adcMon58->convert(8, adcData+8);
-
-		for (int i=0; i<8; i++){
-			float data;
-			data = (*dataPtr++ >> 2) & 0x3ff;
-			state->Vmon[i] = data * (3.0 / 1024.0);
-
-			data = (*dataPtr++ >> 2) & 0x3ff;
-			if (i&0x01){
-				// analog
-				state->Imon[i] = data * ((3.0 / 1024.0) * (1.0/100.0) * (1.0/0.058));
-			} else {
-				// digital
-				state->Imon[i] = data * ((3.0 / 1024.0) * (1.0/10.0) * (1.0/0.058));
-			}
+		for (int i=0; i<16; i++){
+			// Voltage
+			data = ((*dataPtr++) >> 4) & 0xfff;
+			state->Vmon[i] = data * (2.56/4096.0);
+			// Current
+			data = ((*dataPtr++) >> 4) & 0xfff;
+			state->Imon[i] = ((data * (2.56/4096.0) - 0.25) * 1.337) + 0.013;
+			if (state->Imon[i] < 0)
+				state->Imon[i] = 0;
 		}
 
-		for (int i=0; i<NUM_TSENSOR; i++){
-			float rtd = (temperatureDetector[i]->getRTD() >> 1) * (400.0/32768.0);
-			state->T[i] = RTD2T(rtd);
-		}
+		data = ((*dataPtr++) >> 4) & 0xfff;
+		state->Ibias = data * (2.56/4096.0);
+		dataPtr++;
+		data = ((*dataPtr++) >> 4) & 0xfff;
+		state->Vbias = data * (-5.12/4096.0);
+
+		float rtd = (temperatureDetector->getRTD() >> 1) * (400.0/32768.0);
+		state->T = RTD2T(rtd);
 	}
 }
 

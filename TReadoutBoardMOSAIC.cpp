@@ -243,9 +243,12 @@ void TReadoutBoardMOSAIC::init()
 
 	// I2C master (WBB slave) and connected peripherals
 	i2cBus = new I2Cbus(mIPbus, add_i2cMaster);
+	i2cBusAux = new I2Cbus(mIPbus, add_i2cAux);
+	pb = new powerboard(i2cBus, i2cBusAux);
+
 
 	// Master Powerboard	
-	pb = new powerboard(i2cBus, true);
+	pb = new powerboard(i2cBus, i2cBusAux);
 
 	// CMU Control interface
 	controlInterface[0] = new ControlInterface(mIPbus, add_controlInterface);
@@ -432,24 +435,18 @@ char *TReadoutBoardMOSAIC::getFirmwareVersion()
  ------------------------- */
 bool TReadoutBoardMOSAIC::PowerOn()
 {
-
-	/* --- needs to integrate with the Set of pwB parameters ...
-
 	powerboard *thePower = pb;  // gets the handler to the power board
 	if( !thePower->isReady())  { // there is not a PwB connected !
 		std::cout << "No power board detected !" << std::endl;
 		return(false);
 	}
-
 	thePower->onAllVout();
 	sleep(1);
-	*/
 
 	// Switch On the CtrInterface
 	enableControlInterfaces(true);
 
 	return(true);
-
 }
 
 void TReadoutBoardMOSAIC::PowerOff()
@@ -457,17 +454,11 @@ void TReadoutBoardMOSAIC::PowerOff()
 	// Switch Off the CtrInterface
 	enableControlInterfaces(false);
 
-	/* --- needs to integrate with the Set of pwB parameters ...
-
 	powerboard *thePower = pb;  // gets the handler to the power board
 	if( !thePower->isReady())  { // there is not a PwB connected !
 		std::cout << "No power board detected !" << std::endl;
-		return(false);
+		return;
 	}
-
-	// --> to switch off : put Iset = 0, then restore  Iset values
-
-	*/
 
 	return;
 }
