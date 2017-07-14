@@ -17,15 +17,16 @@ class THic {
  protected:
  public:
   THic (const char *id, /*TPowerBoard pb, */ int chanVddd, int chanVdda, int chanBias);
-  bool  IsPowered ();
-  void  PowerOn   ();
-  void  PowerOff  ();
-  float GetIddd   () {return 0;};
-  float GetIdda   () {return 0;};
-  float GetIBias  () {return 0;};
-  char *GetDbId   () {return m_dbId;};
-  int   GetNChips () {return m_chips.size();};
-  int   AddChip   (TAlpide *chip);
+  bool  IsPowered      ();
+  void  PowerOn        ();
+  void  PowerOff       ();
+  float GetIddd        () {return 0;};
+  float GetIdda        () {return 0;};
+  float GetIBias       () {return 0;};
+  float GetTemperature ();
+  char *GetDbId        () {return m_dbId;};
+  int   GetNChips      () {return m_chips.size();};
+  int   AddChip        (TAlpide *chip);
 };
 
 

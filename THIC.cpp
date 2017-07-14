@@ -42,3 +42,20 @@ void THic::PowerOff()
   //otherwise: power off 
   // Q: do we need to consider case where part of the channels is on?
 }
+
+
+float THic::GetTemperature() 
+{
+  float result = 0; 
+  int   nChips = 0;
+
+  for (int i = 0; i < m_chips.size(); i++) {
+    if (! m_chips.at(i)->GetConfig()->IsEnabled()) continue;
+    result += m_chips.at(i)->ReadTemperature();
+    nChips ++;
+  }
+  
+  if (nChips > 0) return result / nChips;
+  else return 0;
+
+}
