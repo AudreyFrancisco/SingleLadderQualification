@@ -40,11 +40,14 @@ int initSetupOB(TConfig                        *config,
   boards->push_back (new TReadoutBoardMOSAIC(config, boardConfig));
   
   if (hics) {
+    TChipConfig *chipConfig = config->GetChipConfig (0);
+    int          chipId     = chipConfig->GetChipId ();
+    int          modId      = (chipId >> 4) & 0x7;
     if (hicIds) {
-      hics->push_back(new THic(hicIds[0], 0, 0, 0));
+      hics->push_back(new THic(hicIds[0], modId, 0, 0, 0));
     }
     else {
-      hics->push_back(new THic("Dummy ID", 0, 0, 0));
+      hics->push_back(new THic("Dummy ID", modId, 0, 0, 0));
     }
   }
 
@@ -95,7 +98,7 @@ int initSetupOB(TConfig                        *config,
     boards->at(0)-> AddChip        (chipId, control, receiver, chips->at(i));
   }
   int nWorking = CheckControlInterface(config, boards, boardType, chips);
-  sleep(5);
+  //sleep(5);
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
 }

@@ -1,7 +1,7 @@
 #include "THIC.h"
 #include <cstring>
 
-THic::THic (const char *id, /*TPowerBoard *pb, */ int chanVddd, int chanVdda, int chanBias)
+THic::THic (const char *id, int modId, /*TPowerBoard *pb, */ int chanVddd, int chanVdda, int chanBias)
 {
   strcpy(m_dbId, id);
   //m_powerBoard = pb;
@@ -9,6 +9,7 @@ THic::THic (const char *id, /*TPowerBoard *pb, */ int chanVddd, int chanVdda, in
   m_chanVdda = chanVdda;
   m_chanBias = chanBias;
 
+  m_moduleId = modId;
   m_chips.clear();
 }
 
