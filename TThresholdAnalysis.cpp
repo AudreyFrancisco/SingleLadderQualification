@@ -149,7 +149,12 @@ TThresholdResult::~TThresholdResult () {;}
 // ================================
 
 
-TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex) : TScanAnalysis(aScanHistoQue, aScan, aScanConfig, aMutex)  
+TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue, 
+                                       TScan                  *aScan, 
+                                       TScanConfig            *aScanConfig, 
+                                       std::vector <THic*>     hics, 
+                                       std::mutex             *aMutex) 
+: TScanAnalysis(aScanHistoQue, aScan, aScanConfig, hics, aMutex)  
 {
   
   // It is pulse amplitude, not charge, yet.

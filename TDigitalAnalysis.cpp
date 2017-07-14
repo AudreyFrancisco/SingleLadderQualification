@@ -2,7 +2,12 @@
 #include <vector>
 #include "TDigitalAnalysis.h"
 
-TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex) : TScanAnalysis(histoQue, aScan, aScanConfig, aMutex) 
+TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, 
+                                   TScan                  *aScan, 
+                                   TScanConfig            *aScanConfig, 
+                                   std::vector <THic*>     hics,
+                                   std::mutex             *aMutex) 
+: TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) 
 {
   m_ninj   = m_config->GetParamValue("NINJ");
   m_result = new TDigitalResult(); 

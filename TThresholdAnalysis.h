@@ -164,9 +164,10 @@ class TThresholdAnalysis : public TScanAnalysis {
   void            CreateResult  () {};
  public:
   TThresholdAnalysis(std::deque<TScanHisto> *scanHistoQue, 
-		     TScan *aScan, 
-		     TScanConfig *aScanConfig, 
-		     std::mutex *aMutex);
+		     TScan                  *aScan, 
+		     TScanConfig            *aScanConfig, 
+		     std::vector <THic*>     hics,
+                     std::mutex             *aMutex);
   
   void Initialize();
   void Run       ();

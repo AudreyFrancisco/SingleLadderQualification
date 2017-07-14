@@ -6,7 +6,12 @@
 // TODO: Add number of exceptions to result
 // TODO: Add errors per region to chip result
 
-TFifoAnalysis::TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex) : TScanAnalysis(histoQue, aScan, aScanConfig, aMutex) 
+TFifoAnalysis::TFifoAnalysis(std::deque<TScanHisto> *histoQue, 
+                             TScan                  *aScan, 
+                             TScanConfig            *aScanConfig,
+                             std::vector <THic*>     hics, 
+                             std::mutex             *aMutex) 
+: TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) 
 {
   m_result = new TFifoResult();
   FillVariableList ();

@@ -2,7 +2,12 @@
 #include <vector>
 #include "TNoiseAnalysis.h"
 
-TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex) : TScanAnalysis(histoQue, aScan, aScanConfig, aMutex) 
+TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue, 
+                               TScan                  *aScan, 
+                               TScanConfig            *aScanConfig,
+                               std::vector <THic*>     hics, 
+                               std::mutex             *aMutex) 
+: TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) 
 {
   m_nTrig    = m_config->GetParamValue("NTRIG");
   m_noiseCut = m_nTrig / m_config->GetParamValue("NOISECUT_INV");

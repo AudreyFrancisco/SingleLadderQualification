@@ -65,9 +65,13 @@ class TDigitalAnalysis : public TScanAnalysis {
   void WriteStuckPixels ();
  protected:
   TScanResultChip *GetChipResult () {TDigitalResultChip *Result = new TDigitalResultChip; return Result;};
-  void            CreateResult  () {};
+  void             CreateResult  () {};
  public:
-  TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
+  TDigitalAnalysis(std::deque<TScanHisto> *histoQue, 
+                   TScan                  *aScan, 
+                   TScanConfig            *aScanConfig, 
+                   std::vector <THic*>     hics,
+                   std::mutex             *aMutex);
   
   void Initialize();
   void Run       ();

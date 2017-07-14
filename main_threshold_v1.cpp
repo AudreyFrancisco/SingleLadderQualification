@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
   
   TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TScanAnalysis *myAnalysis = new TThresholdAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), &fMutex);
+  TScanAnalysis *myAnalysis = new TThresholdAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
   
   std::thread scanThread(scanLoop, myScan);
   std::thread analysisThread(scanAnalysis, myAnalysis);

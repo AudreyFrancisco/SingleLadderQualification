@@ -5,6 +5,7 @@
 #include <mutex>
 #include <map>
 
+#include "THIC.h"
 #include "Common.h"
 
 class THisto;
@@ -51,6 +52,7 @@ class TScanAnalysis {
  protected:
   std::deque <TScanHisto>         *m_histoQue;
   std::vector<common::TChipIndex>  m_chipList;
+  std::vector<THic *>              m_hics;
   std::mutex                      *m_mutex;
   std::map <const char *, TResultVariable> m_variableList;
   TScan                       *m_scan;
@@ -62,7 +64,11 @@ class TScanAnalysis {
   virtual void                 CreateResult      () = 0;
   int                          ReadChipList      ();
  public:
-  TScanAnalysis (std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
+  TScanAnalysis (std::deque<TScanHisto> *histoQue, 
+                 TScan                  *aScan, 
+                 TScanConfig            *aScanConfig, 
+                 std::vector <THic*>     hics,
+                 std::mutex             *aMutex);
   virtual void Initialize      () = 0; 
   virtual void Run             () = 0;
   virtual void Finalize        () = 0; 

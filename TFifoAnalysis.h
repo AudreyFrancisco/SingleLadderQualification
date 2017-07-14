@@ -53,7 +53,11 @@ class TFifoAnalysis : public TScanAnalysis {
   TScanResultChip *GetChipResult () {TFifoResultChip *Result = new TFifoResultChip(); return Result;};
   void            CreateResult  () {};
  public:
-  TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
+  TFifoAnalysis(std::deque<TScanHisto> *histoQue, 
+                TScan                  *aScan, 
+                TScanConfig            *aScanConfig, 
+                std::vector <THic*>     hics,
+                std::mutex             *aMutex);
   void Initialize ();
   void Run        ();
   void Finalize   ();

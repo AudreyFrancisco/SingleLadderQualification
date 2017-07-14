@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
   
   TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), &fMutex);
+  TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
   
   //scanLoop(myScan);
   std::cout << "starting thread" << std::endl;
