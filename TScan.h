@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "TAlpide.h"
+#include "THIC.h"
 #include "AlpideDecoder.h"
 #include "THisto.h"
 #include "TReadoutBoard.h"
@@ -41,6 +42,7 @@ class TScan {
   TScanConfig                  *m_config;
   char                          m_name[40];
   std::vector <TAlpide *>       m_chips;
+  std::vector <THic *>          m_hics;
   std::vector <TReadoutBoard *> m_boards;
   TScanHisto                   *m_histo;
   std::deque <TScanHisto>      *m_histoQue;
@@ -57,7 +59,12 @@ class TScan {
   virtual THisto CreateHisto        () = 0;
 
  public:
-  TScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex);
+  TScan (TScanConfig                   *config, 
+         std::vector <TAlpide *>        chips, 
+         std::vector <THic*>            hics,
+         std::vector <TReadoutBoard *>  boards, 
+         std::deque<TScanHisto>        *histoQue, 
+         std::mutex                    *aMutex);
   ~TScan() {};
 
   virtual void Init              ()              = 0;
@@ -87,7 +94,12 @@ class TMaskScan : public TScan {
   void ConfigureMaskStage(TAlpide *chip, int istage);
   void ReadEventData     (std::vector <TPixHit> *Hits, int iboard);
  public: 
-  TMaskScan  (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex);
+  TMaskScan  (TScanConfig                   *config, 
+              std::vector <TAlpide *>        chips, 
+              std::vector <THic *>           hics, 
+              std::vector <TReadoutBoard *>  boards, 
+              std::deque<TScanHisto>        *histoQue, 
+              std::mutex                    *aMutex);
   ~TMaskScan () {};
   std::vector <TPixHit> GetStuckPixels () {return m_stuck;};
   TErrorCounter         GetErrorCount  () {return m_errorCount;};

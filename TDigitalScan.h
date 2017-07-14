@@ -19,7 +19,12 @@ class TDigitalScan : public TMaskScan {
  protected:
   THisto CreateHisto    ();
  public: 
-  TDigitalScan   (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoque, std::mutex *aMutex);
+  TDigitalScan   (TScanConfig                   *config, 
+                  std::vector <TAlpide *>        chips, 
+                  std::vector <THic*>            hics, 
+                  std::vector <TReadoutBoard *>  boards, 
+                  std::deque<TScanHisto>        *histoque, 
+                  std::mutex                    *aMutex);
   ~TDigitalScan  () {};
 
   void Init        ();

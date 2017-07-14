@@ -136,7 +136,7 @@ void MainWindow::open(){
     try{
     std::cout<<properconfig<<"d1"<<endl;
    // initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str());
-    initSetup(fConfig, &fBoards, &fBoardType, &fChips,fileName.toStdString().c_str());
+    initSetup(fConfig, &fBoards, &fBoardType, &fChips,fileName.toStdString().c_str(), &fHics);
     properconfig=true;
 
     std::cout<<properconfig<<"d2"<<endl;
@@ -472,7 +472,7 @@ void MainWindow::scantest(){
          ui->statusbar->setValue(0);
         ui->statusbar->show();
 
-     TThresholdScan *myScan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
+	TThresholdScan *myScan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
      TScanAnalysis  *analysis = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), &fMutex);
     // analysis->Initialize();
 
@@ -508,7 +508,7 @@ void MainWindow::digital(){
          ui->statusbar->setValue(0);
         ui->statusbar->show();
 
-     TDigitalScan *mydigital= new TDigitalScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
+	TDigitalScan *mydigital= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
     TDigitalAnalysis  *analysis = new TDigitalAnalysis(&fHistoQue,mydigital, fConfig->GetScanConfig(), &fMutex);
 
    //scanLoop(mydigital);
@@ -537,7 +537,7 @@ void MainWindow::fifotest(){
          ui->statuslabel->update();
           ui->statusbar->setValue(0);
         ui->statusbar->show();
-    TFifoTest *myfifo= new TFifoTest(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
+	TFifoTest *myfifo= new TFifoTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
     TFifoAnalysis  *analysis = new TFifoAnalysis(&fHistoQue,myfifo,fConfig->GetScanConfig(), &fMutex);
 
    //scanLoop(myfifo);
@@ -632,12 +632,12 @@ void MainWindow::start_test(){
 
 
 void MainWindow::fillingOBvectors(){
-    TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
+  TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
     TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), &fMutex);
-    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
-    TNoiseOccupancy *noisescan=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
+    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+    TNoiseOccupancy *noisescan=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
     TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), &fMutex);
-    TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
+    TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
     TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), &fMutex);
     TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(),&fMutex);
     fScanVector.push_back(fifoscan);

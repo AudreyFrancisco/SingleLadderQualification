@@ -19,7 +19,12 @@ class TThresholdScan : public TMaskScan {
  protected:
   THisto CreateHisto    ();
  public: 
-  TThresholdScan   (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoque, std::mutex *aMutex);
+  TThresholdScan   (TScanConfig                   *config, 
+                    std::vector <TAlpide *>        chips, 
+                    std::vector <THic*>            hics, 
+                    std::vector <TReadoutBoard *>  boards, 
+                    std::deque<TScanHisto>        *histoque, 
+                    std::mutex                    *aMutex);
   ~TThresholdScan  () {};
 
   void Init        ();

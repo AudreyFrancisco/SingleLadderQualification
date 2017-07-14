@@ -19,6 +19,7 @@
 #include <thread>
 #include <mutex> 
 #include "TAlpide.h"
+#include "THIC.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
@@ -82,6 +83,7 @@ int main(int argc, char** argv) {
   
   TBoardType fBoardType;
   std::vector <TReadoutBoard *> fBoards;
+  std::vector <THic *>          fHics;
   std::vector <TAlpide *>       fChips;
   TConfig *fConfig;
   
@@ -90,7 +92,7 @@ int main(int argc, char** argv) {
   
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
   
-  TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue, &fMutex);
+  TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
   TScanAnalysis *myAnalysis = new TThresholdAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), &fMutex);
   
   std::thread scanThread(scanLoop, myScan);

@@ -6,8 +6,13 @@
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
 
-TDigitalScan::TDigitalScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
-  : TMaskScan (config, chips, boards, histoQue, aMutex) 
+TDigitalScan::TDigitalScan (TScanConfig                   *config, 
+                            std::vector <TAlpide *>        chips, 
+                            std::vector <THic*>            hics,
+                            std::vector <TReadoutBoard *>  boards, 
+                            std::deque<TScanHisto>        *histoQue, 
+                            std::mutex                    *aMutex) 
+  : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
 {
   strcpy(m_name, "Digital Scan");
   m_start[0] = 0;

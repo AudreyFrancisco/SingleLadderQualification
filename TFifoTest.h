@@ -20,7 +20,12 @@ class TFifoTest : public TScan {
  protected: 
   THisto   CreateHisto();
  public:
-  TFifoTest   (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoque, std::mutex *aMutex);
+  TFifoTest   (TScanConfig                   *config, 
+               std::vector <TAlpide *>        chips, 
+               std::vector <THic*>            hics,
+               std::vector <TReadoutBoard *>  boards, 
+               std::deque<TScanHisto>        *histoque, 
+               std::mutex                    *aMutex);
   ~TFifoTest       () {};
   void Init        ();
   void Execute     ();
