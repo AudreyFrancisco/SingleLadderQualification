@@ -80,6 +80,9 @@ test_pulselength:   $(DEPS) main_pulselength.cpp
 test_poweron:   $(DEPS) main_poweron.cpp
 	$(CC) -o test_poweron $(OBJS) $(CFLAGS) main_poweron.cpp $(LINKFLAGS)
 
+test_powerboard:   $(DEPS) main_testpowerboard.cpp
+	$(CC) -o main_testpowerboard $(OBJS) $(CFLAGS) main_testpowerboard.cpp $(LINKFLAGS)
+
 test_noiseocc_ext:   $(DEPS) main_noiseocc_ext.cpp
 	$(CC) -o test_noiseocc_ext $(OBJS) $(CFLAGS) main_noiseocc_ext.cpp $(LINKFLAGS)
 

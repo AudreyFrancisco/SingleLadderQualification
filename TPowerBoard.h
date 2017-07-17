@@ -106,6 +106,7 @@ public:
 	// Info and Mode
 	bool IsOK();
 	void SetRealTimeMode(bool realTime) { realTimeRead = realTime; return; };
+	TPowerBoardConfig *GetConfigurationHandler() {return(fPowerBoardConfig);};
 
 	// Getters
 	float GetTemperature() { readMonitor(); return(fPBoard.Temp);};
