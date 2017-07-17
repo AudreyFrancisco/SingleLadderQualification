@@ -14,6 +14,8 @@
 #include "TAlpide.h"
 #include <exception>
 
+#include <strings.h>
+
 using namespace std;
 
 
@@ -76,6 +78,7 @@ void DoJob(int choice, int numModules)
 	float AV,AI,DV,DI;
 	bool BiON,AChON,DChON;
 	char buf[255];
+	TPowerBoardConfig *theConfig;
 
 	switch(choice) {
 	case 1:
@@ -107,12 +110,12 @@ void DoJob(int choice, int numModules)
 		break;
 	case 6:
 		scanf("\n The Configuration File name to write :%s",buf);
-		TPowerBoardConfig *theConfig = thePowerBoard->GetConfigurationHandler();
+		theConfig = thePowerBoard->GetConfigurationHandler();
 		theConfig->WriteToFile(buf);
 		break;
 	case 7:
 		scanf("\n The Configuration File name to read:%s",buf);
-		TPowerBoardConfig *theConfig = thePowerBoard->GetConfigurationHandler();
+		theConfig = thePowerBoard->GetConfigurationHandler();
 		theConfig->ReadFromFile(buf);
 		break;
 	default:
@@ -125,13 +128,13 @@ void DoJob(int choice, int numModules)
 int main()
 {
 	TBoardConfigMOSAIC 	*theBoardConfiguration;
-	TReadoutBoardMOSAIC *theBoard;
+	TReadoutBoardMOSAIC 	*theBoard;
 
 	TConfig *config = new TConfig ("Config.cfg");
 	theBoard = new TReadoutBoardMOSAIC(config, (TBoardConfigMOSAIC*)config->GetBoardConfig(0));
 
 	// Create an Object : Power Board
-	thePowerBoard = TPowerBoard(theBoard);
+	thePowerBoard = new TPowerBoard(theBoard);
 
 	int numModules = 2; // just 2 of the 8 modules
 
