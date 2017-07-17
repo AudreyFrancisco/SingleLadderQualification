@@ -40,6 +40,7 @@
 
 
 #include <stdio.h>
+#include "TReadoutBoard.h"
 
 // The maximum number of modules of the power board
 // that the MOSAIC board can drive.
@@ -65,17 +66,19 @@ public:
 		float AIset;
 		float DVset;
 		float DIset;
-	};
+	} Mod_t;
 
 	typedef struct PowBoard {
-		Mod Modul[MAX_MOULESPERMOSAIC];
+		Mod_t Modul[MAX_MOULESPERMOSAIC];
 		float VBset;
-	};
+	} PowBoard_t;
 
 // members
 private:
 	FILE *fhConfigFile; // the file handle of the Configuration File
-	PowBoard fPBConfig;
+	PowBoard_t	fPBConfig;
+	TBoardType	fBoardType;
+
 
 // methods
 public:
@@ -93,11 +96,11 @@ public:
 	bool GetBiasOn(int mod) { return(fPBConfig.Modul[mod].BiasOn); };
 
 	void GetModuleSetUp(int mod, float*AVSet, float*AISet, float*DVSet, float*DISet, bool*isBiasOn);
-	void GetAnalogVoltages(float * AVSet[]);
-	void GetDigitalVoltages(float * DVSet[]);
-	void GetAnalogCurrents(float * AISet[]);
-	void GetDigitalCurrents(float * DISet[]);
-	void GetBiasOnSets(bool * BIASOn[]);
+	void GetAnalogVoltages(float * AVSet);
+	void GetDigitalVoltages(float * DVSet);
+	void GetAnalogCurrents(float * AISet);
+	void GetDigitalCurrents(float * DISet);
+	void GetBiasOnSets(bool * BIASOn);
 
 	// Setters
 	void SetBiasVoltage(float val) { fPBConfig.VBset = val; };

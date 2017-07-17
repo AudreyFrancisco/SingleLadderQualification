@@ -189,9 +189,9 @@ void TPowerBoardConfig::ModuleSetUp(int mod, float AVSet, float AISet, float DVS
 	Parameter Output : pointer to a float array of 8 elements
 
   -------------------------- */
-void TPowerBoardConfig::GetAnalogVoltages(float * AVSet[]) {
+void TPowerBoardConfig::GetAnalogVoltages(float * AVSet) {
 	for(int i=0;i<MAX_MOULESPERMOSAIC;i++) {
-		AVSet[i] = fPBConfig.Modul[i].AVset;
+		*(AVSet++) = fPBConfig.Modul[i].AVset;
 	}
 	return;
 }
@@ -203,9 +203,9 @@ void TPowerBoardConfig::GetAnalogVoltages(float * AVSet[]) {
 	Parameter Output : pointer to a float array of 8 elements
 
   -------------------------- */
-void TPowerBoardConfig::GetDigitalVoltages(float * DVSet[]) {
+void TPowerBoardConfig::GetDigitalVoltages(float * DVSet) {
 	for(int i=0;i<MAX_MOULESPERMOSAIC;i++) {
-		DVSet[i] = fPBConfig.Modul[i].DVset;
+		*(DVSet++) = fPBConfig.Modul[i].DVset;
 	}
 	return;
 }
@@ -217,9 +217,9 @@ void TPowerBoardConfig::GetDigitalVoltages(float * DVSet[]) {
 	Parameter Output : pointer to a float array of 8 elements
 
   -------------------------- */
-void TPowerBoardConfig::GetAnalogCurrents(float * AISet[]) {
+void TPowerBoardConfig::GetAnalogCurrents(float * AISet) {
 	for(int i=0;i<MAX_MOULESPERMOSAIC;i++) {
-		AISet[i] = fPBConfig.Modul[i].AIset;
+		*(AISet++) = fPBConfig.Modul[i].AIset;
 	}
 	return;
 }
@@ -231,9 +231,9 @@ void TPowerBoardConfig::GetAnalogCurrents(float * AISet[]) {
 	Parameter Output : pointer to a float array of 8 elements
 
   -------------------------- */
-void TPowerBoardConfig::GetDigitalCurrents(float * DISet[]) {
+void TPowerBoardConfig::GetDigitalCurrents(float * DISet) {
 	for(int i=0;i<MAX_MOULESPERMOSAIC;i++) {
-		DISet[i] = fPBConfig.Modul[i].AVset;
+		*(DISet++) = fPBConfig.Modul[i].AVset;
 	}
 	return;
 }
@@ -245,9 +245,9 @@ void TPowerBoardConfig::GetDigitalCurrents(float * DISet[]) {
 	Parameter Output : pointer to a bool array of 8 elements
 
   -------------------------- */
-void TPowerBoardConfig::GetBiasOnSets(bool * BIASOn[]) {
+void TPowerBoardConfig::GetBiasOnSets(bool * BIASOn) {
 	for(int i=0;i<MAX_MOULESPERMOSAIC;i++) {
-		BIASOn[i] = fPBConfig.Modul[i].BiasOn;
+		*(BIASOn++) = fPBConfig.Modul[i].BiasOn;
 	}
 	return;
 }
@@ -291,7 +291,7 @@ bool TPowerBoardConfig::WriteToFile(char *AFileName)
 		if(fhConfigFile != NULL) {
 			fprintf(fhConfigFile,"# ALPIDE POWER BOARD CONFIGURATION  - v0.1\n");
 			fprintf(fhConfigFile,"BIASVOLTAGE\t%f\n", fPBConfig.VBset);
-			fprintf(fhConfigFile,"# PARAM.\tM0\tM1\M2\tM3\tM4\tM5\tM6\tM7");
+			fprintf(fhConfigFile,"# PARAM.\tM0\tM1\tM2\tM3\tM4\tM5\tM6\tM7");
 			fprintf(fhConfigFile,"\nANALOGVOLTAGE"); for(i=0;i<MAX_MOULESPERMOSAIC;i++) fprintf(fhConfigFile,"\t%f",fPBConfig.Modul[i].AVset );
 			fprintf(fhConfigFile,"\nANALOGCURRENT"); for(i=0;i<MAX_MOULESPERMOSAIC;i++) fprintf(fhConfigFile,"\t%f",fPBConfig.Modul[i].AIset );
 			fprintf(fhConfigFile,"\nDIGITALVOLTAGE"); for(i=0;i<MAX_MOULESPERMOSAIC;i++) fprintf(fhConfigFile,"\t%f",fPBConfig.Modul[i].DVset );

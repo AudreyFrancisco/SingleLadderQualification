@@ -35,8 +35,8 @@
  *
  *
  */
-#ifndef POWERBOARD_H
-#define POWERBOARD_H
+#ifndef TPOWERBOARD_H
+#define TPOWERBOARD_H
 
 #include <iostream>
 #include <stdio.h>
@@ -44,7 +44,14 @@
 #include <stdint.h>
 #include <vector>
 
-class TPowerBoardConfig;
+#include <powerboard.h>
+#include "TReadoutBoardMOSAIC.h"
+#include "TPowerBoardConfig.h"
+
+//class TPowerBoardConfig;
+//class powerboard;
+
+//class TReadoutBoardMOSAIC;
 
 // The maximum number of modules of the power board
 // that the MOSAIC board can drive.
@@ -60,7 +67,7 @@ class TPowerBoard {
 
 // Structures and Data types
 public:
-	typedef struct pbModule {
+	struct pbModule {
 		bool  AchOn;
 		float AVmon;
 		float AImon;
@@ -72,9 +79,9 @@ public:
 		float AIset;
 		float DVset;
 		float DIset;
-	};
+	} ;
 
-	typedef struct pbBoard {
+	struct pbBoard {
 		pbModule Modules[MAX_MOULESPERMOSAIC];
 		float VBset;
 		float VBmon;
@@ -88,14 +95,12 @@ private:
 	powerboard *fMOSAICPowerBoard;  // The handle to the low level object of MOSAIC framework
 	pbBoard fPBoard; // The 'powerboard' data structure
 	bool realTimeRead; // forces the access to Power Board hardware
-
-protected:
 	TPowerBoardConfig *fPowerBoardConfig; // the configuration set
 
 // Methods
 public:
-	TPowerBoard  (TReadoutBoardMOSAIC *board);
-	TPowerBoard  (TReadoutBoardMOSAIC *board, TPowerBoardConfig *config);
+	TPowerBoard(TReadoutBoardMOSAIC *board);
+	TPowerBoard(TReadoutBoardMOSAIC *board, TPowerBoardConfig *config);
 	~TPowerBoard () {};
 
 	// Info and Mode
@@ -138,11 +143,11 @@ public:
 
 private:
 	void Init();
-	bool compareSettings(powerboard::pbstate *aState);
+	bool compareSettings(powerboard::pbstate_t *aState);
 	bool readMonitor();
 
 };
 
 
-#endif  /* POWERBOARD_H */
+#endif  /* TOWERBOARD_H */
 // ------------------- eof ---------------------

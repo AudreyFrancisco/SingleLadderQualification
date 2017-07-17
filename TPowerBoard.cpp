@@ -37,6 +37,8 @@
  */
 #include "TPowerBoard.h"
 
+
+
 /* -------------------------
 	Constructor
 
@@ -61,7 +63,7 @@ TPowerBoard::TPowerBoard(TReadoutBoardMOSAIC *board)
 {
 	TPowerBoardConfig *theConfig = new TPowerBoardConfig("");
 	fMOSAICPowerBoard = board->GetPowerBoardHandle();
-	fPowerBoardConfig = config;
+	fPowerBoardConfig = theConfig;
 	realTimeRead = false;
 }
 
@@ -135,7 +137,7 @@ void TPowerBoard::Init()
 	Return : false is there is a mismatch
 
   -------------------------- */
-bool TPowerBoard::compareSettings(powerboard::pbstate *aState)
+bool TPowerBoard::compareSettings(powerboard::pbstate_t *aState)
 {
 	bool match = true;
 	int i;
@@ -176,7 +178,7 @@ bool TPowerBoard::readMonitor()
 	}
 
 	// Read the board
-	powerboard::pbstate *thePowerBoardState;
+	powerboard::pbstate_t *thePowerBoardState;
 	fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::GetMonitor);
 
 	// Set the data members
@@ -293,7 +295,7 @@ bool TPowerBoard::IsOK()
 		return(false);
 	}
 	// Now read the state
-	powerboard::pbstate *thePowerBoardState;
+	powerboard::pbstate_t *thePowerBoardState;
 	try {
 		fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::GetMonitor);
 	} catch (...) {
