@@ -60,3 +60,15 @@ float THic::GetTemperature()
   else return 0;
 
 }
+
+
+THicIB::THicIB (const char *dbId, int modId,/*TPowerBoard pb, */ int chanVddd, int chanVdda, int chanBias)
+  : THic (dbId, modId, chanVddd, chanVdda, chanBias)
+{
+}
+
+
+THicOB::THicOB (const char *dbId, int modId,/*TPowerBoard pb, */ int chanVddd, int chanVdda, int chanBias)
+  : THic (dbId, modId, chanVddd, chanVdda, chanBias)
+{
+}

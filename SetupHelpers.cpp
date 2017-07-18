@@ -44,10 +44,10 @@ int initSetupOB(TConfig                        *config,
     int          chipId     = chipConfig->GetChipId ();
     int          modId      = (chipId >> 4) & 0x7;
     if (hicIds) {
-      hics->push_back(new THic(hicIds[0], modId, 0, 0, 0));
+      hics->push_back(new THicOB(hicIds[0], modId, 0, 0, 0));
     }
     else {
-      hics->push_back(new THic("Dummy ID", modId, 0, 0, 0));
+      hics->push_back(new THicOB("Dummy ID", modId, 0, 0, 0));
     }
   }
 
