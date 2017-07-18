@@ -248,8 +248,14 @@ void TPowerBoard::SwitchModule(int module, bool value)
 {
 	fPBoard.Modules[module].AchOn = value;
 	fPBoard.Modules[module].DchOn = value;
-	fMOSAICPowerBoard->onVout(module *2);
-	fMOSAICPowerBoard->onVout(module *2+1);
+	if(value) {
+		fMOSAICPowerBoard->onVout(module *2);
+		fMOSAICPowerBoard->onVout(module *2+1);
+	} else {
+		fMOSAICPowerBoard->offVout(module *2);
+		fMOSAICPowerBoard->offVout(module *2+1);
+	}
+
 	return;
 }
 

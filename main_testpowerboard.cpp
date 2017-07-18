@@ -38,7 +38,7 @@ void DisplayStatus(int numModules)
 		cout << " ------------ " << endl;
 		cout << " Module :" << i << "    Back Bias :" << (BiON ? "ON" : "off") << endl;
 		cout << "    Analogic channel :  Voltage: " << AV << "   Current:" << AI << "    State =:" << (AChON ? "ON" : "off") << endl;
-		cout << "    Digital channel :  Voltage: " << AV << "   Current:" << AI << "    State =:" << (AChON ? "ON" : "off") << endl;
+		cout << "    Digital channel :  Voltage: " << DV << "   Current:" << DI << "    State =:" << (DChON ? "ON" : "off") << endl;
 	}
 	cout << " ------------ " << endl;
 	return;
@@ -87,19 +87,22 @@ void DoJob(int choice, int numModules)
 	case 2:
 		cout << endl << "What module :" ;scanf("%d",&mod);
 		if(mod <0 && mod >= numModules) return;
-		cout << endl << "Analog voltage :" ;scanf("%d",&AV);
+		cout << endl << "Analog voltage :" ;scanf("%f",&AV);
 		cout << endl << "Analog max current :" ;scanf("%f",&AI);
 		cout << endl << "Digital voltage :" ;scanf("%f",&DV);
 		cout << endl << "Digital max current :" ;scanf("%f",&DI);
+
+cout << " >>" << 	AV << " "  <<  AI<< " " <<  DV<< " " << DI;
 		cout << endl << "Back Bias [ON,OFF] :" ;scanf("%s",buf);
 		BiON = (strcasecmp((const char *)buf, "ON") == 0) ?  true : false;
 		thePowerBoard->SetModule(mod,AV,AI,DV,DI,BiON);
 		break;
 	case 3:
-		cout << endl << "What module :" ;scanf("%d",&mod);
+		cout << endl << "What module to switch:" ;scanf("%d",&mod);
 		if(mod <0 && mod >= numModules) return;
 		cout << endl << "Module [ON,OFF] :" ;scanf("%s",buf);
 		AChON = (strcasecmp((const char *)buf, "ON") == 0) ?  true : false;
+		cout << " >>" << AChON << endl;
 		thePowerBoard->SwitchModule(mod, AChON);
 		break;
 	case 4:
