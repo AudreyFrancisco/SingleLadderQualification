@@ -244,8 +244,6 @@ void TReadoutBoardMOSAIC::init()
 	// I2C master (WBB slave) and connected peripherals
 	i2cBus = new I2Cbus(mIPbus, add_i2cMaster);
 	i2cBusAux = new I2Cbus(mIPbus, add_i2cAux);
-	pb = new powerboard(i2cBus, i2cBusAux);
-
 
 	// Master Powerboard	
 	pb = new powerboard(i2cBus, i2cBusAux);
