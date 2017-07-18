@@ -465,42 +465,112 @@ void MainWindow::combochanged(int index){
     }
 }
 
-void MainWindow::scantest(){
-    try{
-        ui->statuslabel->setVisible(true);
-        ui->statuslabel->update();
-         ui->statusbar->setValue(0);
-        ui->statusbar->show();
+void MainWindow::scantest() {
+/* Runs tuneVCASN, tuneITHR, and ITHRthreshold, each using the preceeding results. */
+  try {
+    ui->statuslabel->setVisible(true);
+    ui->statuslabel->update();
+    ui->statusbar->setValue(0);
+    ui->statusbar->show();
 
-	TThresholdScan *myScan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-	TScanAnalysis  *analysis = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex);
-    // analysis->Initialize();
+    /* FIRST: tuneVCASN */
 
-    // scanLoop(myScan);
-    std::cout << "starting thread" << std::endl;
-    std::thread scanThread(&MainWindow::scanLoop,this,myScan);
-  //  analysis->Initialize();
+    TtuneVCASNScan *myTuneVScan = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+    TAnalogAnalysis  *analysisTuneV = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex);
 
-    std::thread analysisThread(&TScanAnalysis::Run, std::ref(analysis));
-    analysis->Initialize();
-
+    std::cout << "starting thread (tuneVCASN)" << std::endl;
+    std::thread scanThread(&MainWindow::scanLoop,this,mytuneVScan);
+    std::thread analysisThread(&TAnalogAnalysis::Run, std::ref(analysisTuneV));
+    /*NOTE**:  will need to give analysisThread an AnalogAnalysis argument type, plus extend change to other classes... */
+    analysisTuneV->Initialize();
 
     ui->statusbar->setValue(50);
     scanThread.join();
-     analysisThread.join();
+    analysisThread.join();
 
-             analysis->Finalize();
-     delete myScan;
-     delete analysis;
+    analysisTuneV->Finalize();
+
+    float vcasn[fHics.size()]; //has one entry for each HIC
+    int finishedChips = 0; //chips set so far
+    float sum = 0;
+    for(int i=0; i<fHics.size(), i++) {
+      for(int j=0; i<fHics.at(i).GetNChips(); j++) {
+        sum += analysisTuneV->GetResultThreshold(finishedChips+j);
+      }
+      finishedChips += hHics.at(i).GetNChips();
+      vcasn[i] = sum/fHics.at(i).GetNChips();
+      sum=0;
+    }
+
+    fConfig->GetScanConfig()->SetVcasnArr(fHics.size(), vcasn);
+    
+    ui->statusbar->setValue(100);
+    delete myTuneVScan;
+    delete analysisTuneV;
+
+    /* NEXT: tuneITHR */
+
+    TtuneVCASNScan *myTuneIScan = new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+    TAnalogAnalysis  *analysisTuneI = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+
+    std::cout << "starting thread (tuneITHR)" << std::endl;
+    std::thread scanThread(&MainWindow::scanLoop,this,myTuneIScan);
+
+    std::thread analysisThread(&TAnalogAnalysis::Run, std::ref(analysisTuneI));
+    /*NOTE**:  will need to give analysisThread an AnalogAnalysis argument type */
+    analysisTuneI->Initialize();
+
+    ui->statusbar->setValue(50);
+    scanThread.join();
+    analysisThread.join();
+
+    analysisTuneI->Finalize();
+
+    float ithr[fChips.size()]; //has one entry for each chip
+    for(int i=0; i<fChips.size(), i++) {
+      //get the mean ithr value for each chip and assign them here
+      ithr[i]=analysisTuneI->GetResultThreshold(i);
+    }
+    fConfig->GetScanConfig()->SetIthrArr(fChips.size(), ithr); //vcasn has already been set
+
     ui->statusbar->setValue(100);
 
-    }
-     catch(exception &scanex){
-         std::cout<<scanex.what()<<endl;
-         popup(scanex.what());
-     }
+    delete myTuneIScan;
+    delete analysisTuneI;
 
+    /* LAST: ITHRthreshold */
+
+    TtuneVCASNScan *myIthrScan = new TITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+    TAnalogAnalysis  *analysisIthr = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+    //NOTE:  config is passed by reference.
+
+    std::cout << "starting thread (tuneITHR)" << std::endl;
+    std::thread scanThread(&MainWindow::scanLoop,this,myIthrScan);
+
+    std::thread analysisThread(&TAnalogAnalysis::Run, std::ref(analysisIthr));
+    /*NOTE**:  will need to give analysisThread an AnalogAnalysis argument type */
+    analysisIthr->Initialize();
+
+    ui->statusbar->setValue(50);
+    scanThread.join();
+    analysisThread.join();
+
+    analysisIthr->Finalize(); //produce final results; rms may be useful as usual...
+
+    ui->statusbar->setValue(100);
+
+    delete myIthrScan;
+    delete analysisIthr;
+
+    setVI(vcasn, ithr); //set config/save results for all future scans
+
+  } catch(exception &scanex) {
+    std::cout<<scanex.what()<<endl;
+    popup(scanex.what());
+  }
 }
+
+
 void MainWindow::digital(){
     try{
         ui->statuslabel->setVisible(true);
@@ -1113,3 +1183,12 @@ if (properconfig==1){
 //saveinput->SaveSettings(operatorname,hicidnumber);
 
 }
+
+
+void MainWindow::setVI(float * vcasn, float * ithr) {
+  for(int i=0; i<fChips.size(); i++) {
+    fChips.at(i)->GetConfig()->SetParamValue(ithr[i]);
+    //WIP...
+  }
+}
+
