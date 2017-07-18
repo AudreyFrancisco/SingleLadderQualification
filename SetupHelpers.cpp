@@ -311,11 +311,27 @@ int initSetupIB(TConfig                        *config,
 
   boards->push_back (new TReadoutBoardMOSAIC(config, boardConfig));
 
+  if (hics) {
+    if (hicIds) {
+      hics->push_back(new THicOB(hicIds[0], 0, 0, 0, 0));
+    }
+    else {
+      hics->push_back(new THicOB("Dummy ID", 0, 0, 0, 0));
+    }
+  }
+
   for (int i = 0; i < config->GetNChips(); i++) {
     TChipConfig *chipConfig = config->GetChipConfig(i);
     int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
     int          receiver   = chipConfig->GetParamValue("RECEIVER");
-    chips->push_back(new TAlpide(chipConfig));
+
+    TAlpide *chip = new TAlpide(chipConfig);
+    if (hics) {
+      chip        ->SetHic   (hics->at(0));
+      hics->at(0) ->AddChip  (chip);
+    }
+
+    chips->push_back(chip);
     chips->at(i) -> SetReadoutBoard(boards->at(0));
 
     if (control  < 0) {
