@@ -85,20 +85,20 @@ void DoJob(int choice, int numModules)
 		DisplayStatus(numModules);
 		break;
 	case 2:
-		scanf("\n What module :%d",&mod);
+		cout << endl << "What module :" ;scanf("%d",&mod);
 		if(mod <0 && mod >= numModules) return;
-		scanf("\n Analog voltage :%f",&AV);
-		scanf("\n Analog max current :%f",&AI);
-		scanf("\n Digital voltage :%f",&DV);
-		scanf("\n Digital max current :%f",&DI);
-		scanf("\n Back Bias [ON,OFF] :%s",buf);
+		cout << endl << "Analog voltage :" ;scanf("%d",&AV);
+		cout << endl << "Analog max current :" ;scanf("%f",&AI);
+		cout << endl << "Digital voltage :" ;scanf("%f",&DV);
+		cout << endl << "Digital max current :" ;scanf("%f",&DI);
+		cout << endl << "Back Bias [ON,OFF] :" ;scanf("%s",buf);
 		BiON = (strcasecmp((const char *)buf, "ON") == 0) ?  true : false;
 		thePowerBoard->SetModule(mod,AV,AI,DV,DI,BiON);
 		break;
 	case 3:
-		scanf("\n What module :%d",&mod);
+		cout << endl << "What module :" ;scanf("%d",&mod);
 		if(mod <0 && mod >= numModules) return;
-		scanf("\n Module [ON,OFF] :%s",buf);
+		cout << endl << "Module [ON,OFF] :" ;scanf("%s",buf);
 		AChON = (strcasecmp((const char *)buf, "ON") == 0) ?  true : false;
 		thePowerBoard->SwitchModule(mod, AChON);
 		break;
@@ -109,12 +109,12 @@ void DoJob(int choice, int numModules)
 		thePowerBoard->SwitchOFF();
 		break;
 	case 6:
-		scanf("\n The Configuration File name to write :%s",buf);
+		cout << endl << "The Configuration File name to write :" ;scanf("%s",buf);
 		theConfig = thePowerBoard->GetConfigurationHandler();
 		theConfig->WriteToFile(buf);
 		break;
 	case 7:
-		scanf("\n The Configuration File name to read:%s",buf);
+		cout << endl << "The Configuration File name to read:" ;scanf("%s",buf);
 		theConfig = thePowerBoard->GetConfigurationHandler();
 		theConfig->ReadFromFile(buf);
 		break;
@@ -135,6 +135,9 @@ int main()
 
 	// Create an Object : Power Board
 	thePowerBoard = new TPowerBoard(theBoard);
+	if(thePowerBoard == NULL) {
+		cerr << "Error to create Power Board Object ! Abort" << endl;
+	}
 
 	int numModules = 2; // just 2 of the 8 modules
 

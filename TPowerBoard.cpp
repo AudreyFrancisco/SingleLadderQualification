@@ -50,6 +50,7 @@ TPowerBoard::TPowerBoard(TReadoutBoardMOSAIC *board, TPowerBoardConfig *config)
 	fMOSAICPowerBoard = board->GetPowerBoardHandle();
 	fPowerBoardConfig = config;
 	realTimeRead = false;
+	Init();
 }
 
 /* -------------------------
@@ -61,10 +62,11 @@ TPowerBoard::TPowerBoard(TReadoutBoardMOSAIC *board, TPowerBoardConfig *config)
   -------------------------- */
 TPowerBoard::TPowerBoard(TReadoutBoardMOSAIC *board)
 {
-	TPowerBoardConfig *theConfig = new TPowerBoardConfig("");
+	TPowerBoardConfig *theConfig = new TPowerBoardConfig(NULL);
 	fMOSAICPowerBoard = board->GetPowerBoardHandle();
 	fPowerBoardConfig = theConfig;
 	realTimeRead = false;
+	Init();
 }
 
 /* -------------------------
@@ -77,6 +79,8 @@ TPowerBoard::TPowerBoard(TReadoutBoardMOSAIC *board)
   -------------------------- */
 void TPowerBoard::Init()
 {
+	thePowerBoardState = new powerboard::pbstate;
+
 	fPBoard.VBset = fPowerBoardConfig->GetBiasVoltage();
 	for(int i=0; i<MAX_MOULESPERMOSAIC; i++) {
 		fPBoard.Modules[i].AIset = fPowerBoardConfig->GetAnalogCurrent(i);
@@ -85,7 +89,6 @@ void TPowerBoard::Init()
 		fPBoard.Modules[i].DVset = fPowerBoardConfig->GetDigitalVoltage(i);
 		fPBoard.Modules[i].BiasOn = fPowerBoardConfig->GetBiasOn(i);
 	}
-
 	// first of all test the presence of the power board
 	try {
 		fMOSAICPowerBoard->isReady();
@@ -95,13 +98,13 @@ void TPowerBoard::Init()
 	}
 
 	// Get the State
-	powerboard::pbstate *thePowerBoardState;
 	try {
 		fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::getAll);
 	} catch (...) {
 		std::cerr << "Error accessing the Power board found ! Abort." << std::endl;
 		return;
 	}
+
 	compareSettings(thePowerBoardState);
 
 	// Switch off all channels before the setting
@@ -178,7 +181,7 @@ bool TPowerBoard::readMonitor()
 	}
 
 	// Read the board
-	powerboard::pbstate_t *thePowerBoardState;
+//	powerboard::pbstate_t *thePowerBoardState;
 	fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::GetMonitor);
 
 	// Set the data members
@@ -295,7 +298,7 @@ bool TPowerBoard::IsOK()
 		return(false);
 	}
 	// Now read the state
-	powerboard::pbstate_t *thePowerBoardState;
+//	powerboard::pbstate_t *thePowerBoardState;
 	try {
 		fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::GetMonitor);
 	} catch (...) {

@@ -263,13 +263,17 @@ void TPowerBoardConfig::GetBiasOnSets(bool * BIASOn) {
   -------------------------- */
 bool TPowerBoardConfig::ReadFromFile(char *AFileName)
 {
-	if(AFileName == NULL || strlen(AFileName) == 0) {
+	if(AFileName != NULL && strlen(AFileName) != 0) {
 		fhConfigFile = fopen(AFileName,"r"); // opens the file
 		if(fhConfigFile != NULL) {
 			readConfiguration();
 			fclose(fhConfigFile);
 			return(true);
+		} else {
+			cerr << "Error opening the Config file for read !" << endl;
 		}
+	} else {
+		cerr << "Bad Config file name for read !" << endl;
 	}
 	return(false);
 }
@@ -286,7 +290,7 @@ bool TPowerBoardConfig::ReadFromFile(char *AFileName)
 bool TPowerBoardConfig::WriteToFile(char *AFileName)
 {
 	int i;
-	if(AFileName == NULL || strlen(AFileName) == 0) {
+	if(AFileName != NULL && strlen(AFileName) != 0) {
 		fhConfigFile = fopen(AFileName,"w"); // opens the file
 		if(fhConfigFile != NULL) {
 			fprintf(fhConfigFile,"# ALPIDE POWER BOARD CONFIGURATION  - v0.1\n");
@@ -300,7 +304,11 @@ bool TPowerBoardConfig::WriteToFile(char *AFileName)
 			fprintf(fhConfigFile,"\n# --- eof ----\n");
 			fclose(fhConfigFile);
 			return(true);
+		} else {
+			cerr << "Error opening the Config file for write !" << endl;
 		}
+	} else {
+		cerr << "Bad Config file name for write !" << endl;
 	}
 	return(false);
 }

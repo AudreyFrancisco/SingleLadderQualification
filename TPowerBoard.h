@@ -96,6 +96,7 @@ private:
 	pbBoard fPBoard; // The 'powerboard' data structure
 	bool realTimeRead; // forces the access to Power Board hardware
 	TPowerBoardConfig *fPowerBoardConfig; // the configuration set
+	powerboard::pbstate *thePowerBoardState;
 
 // Methods
 public:
