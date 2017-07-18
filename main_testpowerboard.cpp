@@ -91,8 +91,6 @@ void DoJob(int choice, int numModules)
 		cout << endl << "Analog max current :" ;scanf("%f",&AI);
 		cout << endl << "Digital voltage :" ;scanf("%f",&DV);
 		cout << endl << "Digital max current :" ;scanf("%f",&DI);
-
-cout << " >>" << 	AV << " "  <<  AI<< " " <<  DV<< " " << DI;
 		cout << endl << "Back Bias [ON,OFF] :" ;scanf("%s",buf);
 		BiON = (strcasecmp((const char *)buf, "ON") == 0) ?  true : false;
 		thePowerBoard->SetModule(mod,AV,AI,DV,DI,BiON);
@@ -102,7 +100,6 @@ cout << " >>" << 	AV << " "  <<  AI<< " " <<  DV<< " " << DI;
 		if(mod <0 && mod >= numModules) return;
 		cout << endl << "Module [ON,OFF] :" ;scanf("%s",buf);
 		AChON = (strcasecmp((const char *)buf, "ON") == 0) ?  true : false;
-		cout << " >>" << AChON << endl;
 		thePowerBoard->SwitchModule(mod, AChON);
 		break;
 	case 4:
