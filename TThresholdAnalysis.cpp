@@ -149,11 +149,12 @@ TThresholdResult::~TThresholdResult () {;}
 // ================================
 
 
-TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue, 
-                                       TScan                  *aScan, 
-                                       TScanConfig            *aScanConfig, 
-                                       std::vector <THic*>     hics, 
-                                       std::mutex             *aMutex) 
+TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
+                                       TScan                  *aScan,
+                                       TScanConfig            *aScanConfig,
+                                       std::vector <THic*>     hics,
+                                       std::mutex             *aMutex,
+                                       int                     resultFactor)
 : TScanAnalysis(aScanHistoQue, aScan, aScanConfig, hics, aMutex)  
 {
   
@@ -165,7 +166,8 @@ TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
   
   m_fDoDumpRawData = true;
   m_fDoFit         = true;
-  
+  m_resultFactor   = resultFactor;
+
   m_result = new TThresholdResult();
   
 }
@@ -211,24 +213,39 @@ double ErrorFunc(double* x, double* par)
 
 common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph)
 {
-  TF1* fitfcn = new TF1("fitfcn", 
-			ErrorFunc,
-			m_startPulseAmplitude*m_electronPerDac,
-			m_stopPulseAmplitude*m_electronPerDac,
-			4);
+  if(m_resultFactor<1) {
+    TF1* fitfcn = new TF1("fitfcn",
+                          ErrorFunc,
+                          m_stopPulseAmplitude*m_resultFactor,
+                          m_startPulseAmplitude*m_resultFactor,
+                          4);
+  } else {
+    TF1* fitfcn = new TF1("fitfcn", 
+  			  ErrorFunc,
+  			  m_startPulseAmplitude*m_resultFactor,
+			  m_stopPulseAmplitude*m_resultFactor,
+			  4);
+  }
   // y@50%.
   fitfcn->SetParameter(0,0.5*m_nPulseInj); 
   // 0.5 of max. amplitude.
   fitfcn->SetParameter(1,0.5*m_nPulseInj); 
   // x@50%.
-  fitfcn->SetParameter(2,0.5*(m_stopPulseAmplitude - m_startPulseAmplitude)*m_electronPerDac);
-  // slope of s-curve.
+  fitfcn->SetParameter(2,0.5*(m_stopPulseAmplitude - m_startPulseAmplitude)*m_resultFactor);
+  // slope of s-curve.  m_resultFactor MAY BE -1--make sure this doesn't cause any problems!! (WIP)
   fitfcn->SetParameter(3,0.5);
   
   aGraph->Fit("fitfcn","RQ");
   
   common::TErrFuncFitResult fitResult_dummy;
-  fitResult_dummy.threshold = fitfcn->GetParameter(0);
+  if(fitfcn->GetParameter(0)>0 && m_resultFactor<0) {
+    std::cout << "ERROR in line 241 of TAnalogAnalysis:  Unexpected resultFactor/threshold sign!" << std::endl;
+    return 1;
+  if(fitfcn->GetParameter(0) < 0) {
+    fitResult_dummy.threshold = -1*fitfcn->GetParameter(0);  //for the ithr case
+  } else {
+    fitResult_dummy.threshold = fitfcn->GetParameter(0);
+  }
   fitResult_dummy.noise     = fitfcn->GetParameter(1);
   fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
   
@@ -385,19 +402,27 @@ void TThresholdAnalysis::Run()
     for (int iChip = 0; iChip < m_chipList.size(); iChip++) {
       
       for (int iCol = 0; iCol < common::nCols; iCol ++) {
-	
+	int iPulseStart;
+        int iPulseStop;
     	TGraph* gDummy = new TGraph();
-	
-   	int pulseRangeDummy = ((float)abs( m_startPulseAmplitude - m_stopPulseAmplitude))/ m_stepPulseAmplitude;
-	
-   	for (int iPulse = 0; iPulse < pulseRangeDummy; iPulse++) {
+	if(m_resultFactor > 1) { //regular scan
+   	  iPulseStop = ((float)abs( m_startPulseAmplitude - m_stopPulseAmplitude))/ m_stepPulseAmplitude;
+          iPulseStart = 0;
+	} else if(m_resultFactor==1) { //vcasn
+          iPulseStart = 40; //range of vcasn values scanned over.
+          iPulseStop  = 60; //not changing in the forseeable future...but might.
+        } else { //else ithr
+          iPulseStart = 30;
+          iPulseStop  = 100;
+        }
+   	for (int iPulse = iPulseStart; iPulse < iPulseStop; iPulse++) {
 	  
    	  int entries =(int)scanHisto(m_chipList.at(iChip), 
    				      iCol, 
    				      iPulse);
 	  
    	  gDummy->SetPoint(gDummy->GetN(),
-   			   iPulse*m_electronPerDac,
+   			   iPulse*m_resultFactor,
    			   entries);
 	  
    	  if(m_fDoDumpRawData){
@@ -562,3 +587,9 @@ void TThresholdAnalysis::Finalize()
     
   }
 }
+
+float TThresholdAnalysis::GetResultThreshold(int chip) {
+  return m_threshold.at(chip).mean;
+}
+
+

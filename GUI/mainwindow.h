@@ -161,5 +161,7 @@ private slots:
  void noiselist();
  void openib();
 
+ void setVI(float * vcasn, float * ithr);
+
 };
 #endif // MAINWINDOW_H
