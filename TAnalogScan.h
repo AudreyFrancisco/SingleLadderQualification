@@ -36,19 +36,19 @@ class TAnalogScan : public TMaskScan {
 };
 
 
-class TThresholdScan : public TAnalogScan {
+//class TThresholdScan : public TAnalogScan {
   //Conducts a regular threshold scan
- public:
-  TThresholdScan  (TScanConfig                   *config,
-                  std::vector <TAlpide *>        chips,
-                  std::vector <THic*>            hics,
-                  std::vector <TReadoutBoard *>  boards,
-                  std::deque<TScanHisto>        *histoque,
-                  std::mutex                    *aMutex) :
-    TAnalogScan  (config, chips, hics, boards, histoque, aMutex) {
-    m_step[1] = 1;
-  }
-};
+// public:
+//  TThresholdScan  (TScanConfig                   *config,
+//                  std::vector <TAlpide *>        chips,
+//                  std::vector <THic*>            hics,
+//                  std::vector <TReadoutBoard *>  boards,
+//                  std::deque<TScanHisto>        *histoque,
+//                  std::mutex                    *aMutex) :
+//    TAnalogScan  (config, chips, hics, boards, histoque, aMutex) {
+//    m_step[1] = 1;
+//  }
+//};
 
 class TtuneVCASNScan : public TAnalogScan {
   //NOTE:  may need new destructor?
