@@ -479,26 +479,26 @@ void MainWindow::scantest() {
     TAnalogAnalysis  *analysisTuneV = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex, 1);
 
     std::cout << "starting thread (tuneVCASN)" << std::endl;
-    std::thread scanThread(&MainWindow::scanLoop,this,mytuneVScan);
-    std::thread analysisThread(&TAnalogAnalysis::Run, std::ref(analysisTuneV));
-    /*NOTE**:  will need to give analysisThread an AnalogAnalysis argument type, plus extend change to other classes... */
+    std::thread scanThreadV(&MainWindow::scanLoop,this,mytuneVScan);
+    std::thread analysisThreadV(&TThresholdAnalysis::Run, std::ref(analysisTuneV));
+    
     analysisTuneV->Initialize();
 
     ui->statusbar->setValue(50);
-    scanThread.join();
-    analysisThread.join();
+    scanThreadV.join();
+    analysisThreadV.join();
 
     analysisTuneV->Finalize();
 
     float vcasn[fHics.size()]; //has one entry for each HIC
     int finishedChips = 0; //chips set so far
     float sum = 0;
-    for(int i=0; i<fHics.size(), i++) {
-      for(int j=0; i<fHics.at(i).GetNChips(); j++) {
+    for(unsigned int i=0; i<fHics.size(); i++) {
+      for(unsigned int j=0; j<fHics.at(i)->GetNChips(); j++) {
         sum += analysisTuneV->GetResultThreshold(finishedChips+j);
       }
-      finishedChips += hHics.at(i).GetNChips();
-      vcasn[i] = sum/fHics.at(i).GetNChips();
+      finishedChips += fHics.at(i)->GetNChips();
+      vcasn[i] = sum/fHics.at(i)->GetNChips();
       sum=0;
     }
 
@@ -510,24 +510,23 @@ void MainWindow::scantest() {
 
     /* NEXT: tuneITHR */
 
-    TtuneVCASNScan *myTuneIScan = new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+    TtuneITHRScan *myTuneIScan = new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
     TAnalogAnalysis  *analysisTuneI = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex, -1);
 
     std::cout << "starting thread (tuneITHR)" << std::endl;
-    std::thread scanThread(&MainWindow::scanLoop,this,myTuneIScan);
-
-    std::thread analysisThread(&TAnalogAnalysis::Run, std::ref(analysisTuneI));
-    /*NOTE**:  will need to give analysisThread an AnalogAnalysis argument type */
+    std::thread scanThreadI(&MainWindow::scanLoop,this,myTuneIScan);
+    std::thread analysisThreadI(&TThresholdAnalysis::Run, std::ref(analysisTuneI));
+    
     analysisTuneI->Initialize();
 
     ui->statusbar->setValue(50);
-    scanThread.join();
-    analysisThread.join();
+    scanThreadI.join();
+    analysisThreadI.join();
 
     analysisTuneI->Finalize();
 
     float ithr[fChips.size()]; //has one entry for each chip
-    for(int i=0; i<fChips.size(), i++) {
+    for(unsigned int i=0; i<fChips.size(); i++) {
       //get the mean ithr value for each chip and assign them here
       ithr[i]=analysisTuneI->GetResultThreshold(i);
     }
@@ -540,14 +539,14 @@ void MainWindow::scantest() {
 
     /* LAST: ITHRthreshold */
 
-    TtuneVCASNScan *myIthrScan = new TITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+    TITHRScan *myIthrScan = new TITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
     TAnalogAnalysis  *analysisIthr = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex);
     //NOTE:  config is passed by reference.
 
     std::cout << "starting thread (tuneITHR)" << std::endl;
     std::thread scanThread(&MainWindow::scanLoop,this,myIthrScan);
 
-    std::thread analysisThread(&TAnalogAnalysis::Run, std::ref(analysisIthr));
+    std::thread analysisThread(&TThresholdAnalysis::Run, std::ref(analysisIthr));
     /*NOTE**:  will need to give analysisThread an AnalogAnalysis argument type */
     analysisIthr->Initialize();
 
@@ -1187,7 +1186,7 @@ if (properconfig==1){
 
 void MainWindow::setVI(float * vcasn, float * ithr) {
   for(int i=0; i<fChips.size(); i++) {
-    fChips.at(i)->GetConfig()->SetParamValue(ithr[i]);
+    fChips.at(i)->GetConfig()->SetParamValue("ITHR", ithr[i]);
     //WIP...
   }
 }

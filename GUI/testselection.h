@@ -1,35 +1,8 @@
-#ifndef TESTSELECTION_H
-#define TESTSELECTION_H
-#include<TFifoTest.h>
-#include <QDialog>
-#include <QPushButton>
-#include "dialog.h"
+/****************************************************************************
+** Form interface generated from reading ui file 'testselection.ui'
+**
+** Created by User Interface Compiler
+**
+** WARNING! All changes made in this file will be lost!
+****************************************************************************/
 
-namespace Ui {
-class TestSelection;
-}
-
-class TestSelection : public QDialog
-{
-    Q_OBJECT
-
-public:
-
-    explicit TestSelection(QWidget *parent = 0);
-    ~TestSelection();
-    virtual void SaveSettings(QString &opname, int &hicid, int &counter);
-
-
-private:
-Ui::TestSelection *ui;
-Dialog *missingsettings;
-
-
-
-private slots:
-void popupmessage(QString m);
-
-
-};
-
-#endif // TESTSELECTION_H
