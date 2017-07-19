@@ -213,14 +213,15 @@ double ErrorFunc(double* x, double* par)
 
 common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph)
 {
+  TF1 *fitfcn;
   if(m_resultFactor<1) {
-    TF1* fitfcn = new TF1("fitfcn",
+    fitfcn = new TF1("fitfcn",
                           ErrorFunc,
                           m_stopPulseAmplitude*m_resultFactor,
                           m_startPulseAmplitude*m_resultFactor,
                           4);
   } else {
-    TF1* fitfcn = new TF1("fitfcn", 
+    fitfcn = new TF1("fitfcn", 
   			  ErrorFunc,
   			  m_startPulseAmplitude*m_resultFactor,
 			  m_stopPulseAmplitude*m_resultFactor,
@@ -240,15 +241,16 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph)
   common::TErrFuncFitResult fitResult_dummy;
   if(fitfcn->GetParameter(0)>0 && m_resultFactor<0) {
     std::cout << "ERROR in line 241 of TAnalogAnalysis:  Unexpected resultFactor/threshold sign!" << std::endl;
-    return 1;
-  if(fitfcn->GetParameter(0) < 0) {
-    fitResult_dummy.threshold = -1*fitfcn->GetParameter(0);  //for the ithr case
-  } else {
-    fitResult_dummy.threshold = fitfcn->GetParameter(0);
+    fitResult_dummy.threshold = 1;
+    return fitResult_dummy;
+    if(fitfcn->GetParameter(0) < 0) {
+      fitResult_dummy.threshold = -1*fitfcn->GetParameter(0);  //for the ithr case
+    } else {
+      fitResult_dummy.threshold = fitfcn->GetParameter(0);
+    }
+    fitResult_dummy.noise     = fitfcn->GetParameter(1);
+    fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
   }
-  fitResult_dummy.noise     = fitfcn->GetParameter(1);
-  fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
-  
   delete fitfcn; 
   
   return fitResult_dummy;

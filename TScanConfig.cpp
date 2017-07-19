@@ -63,14 +63,14 @@ int TScanConfig::GetParamValue (const char *Name)
 
 void TScanConfig::SetVcasnArr (int hics, float *vcasn) { //copy vcasn array to m_vcasn
   m_vcasn = new int[hics];
-  for(int i=0; i<hics, i++) {
+  for(int i=0; i<hics; i++) {
     m_vcasn[i] = (int)(vcasn[i]+.5); //rounding matters
   }
 }
 
-void TScanConfig::SetIthrArr (int chips, float *ithr) {
+void TScanConfig::SetIthrArr (int hics, float *ithr) {
   m_ithr = new int[hics];
-  for(int i=0; i<chips, i++) {
+  for(int i=0; i<hics; i++) {
     m_ithr[i] = (int)(ithr[i]+.5); //rounding matters
   }
 }
