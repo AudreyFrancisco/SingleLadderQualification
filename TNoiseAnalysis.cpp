@@ -60,13 +60,15 @@ void TNoiseAnalysis::Run()
         TNoiseResultChip *chipResult = (TNoiseResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
         int               channel    = m_chipList.at(ichip).dataReceiver;
         int               chipId     = m_chipList.at(ichip).chipId;
-        float             occ        = 0;
+        double            occ        = 0;
+        double            denom      = 512. * 1024. * m_nTrig;
+
         if (!chipResult) {
 	  std::cout << "Warning (TNoiseAnalysis): Missing chip result" << std::endl;
           continue;
 	}
         for (int icol = 0; icol < 1024; icol ++) {
-          for (int irow = 0; irow < 512; irow ++) {
+          for (int irow = 0; irow < 512; irow ++) {            
             // if entry > noise cut: add pixel to chipResult->AddNoisyPixel
             if (histo(m_chipList.at(ichip), icol, irow) > m_noiseCut) {
 	      TPixHit pixel = {channel, chipId, 0, icol, irow};
@@ -76,7 +78,7 @@ void TNoiseAnalysis::Run()
 	  }
 	}
         // divide chipResult->m_occ by m_nTrig * 512 * 1024 and write to chipResult
-        occ /= (m_nTrig * 512 * 1024);
+        occ /= denom;
         chipResult->SetOccupancy(occ);
       }
     }
