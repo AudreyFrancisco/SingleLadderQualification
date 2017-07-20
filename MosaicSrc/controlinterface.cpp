@@ -167,23 +167,40 @@ void ControlInterface::execute()
 			uint8_t rxChipID = (d >> 16) & 0xff;
 			uint8_t rxFlags  = (d >> 24) & 0x0f;
 
+			//BDR
+			//printf("$$$$$$$$$$$$$\n");
+			//printf("FLAG_SYNC_BIT= %d\n",FLAG_SYNC_BIT);//BDR
+			//printf("FLAG_CHIPID_BIT= %d\n",FLAG_CHIPID_BIT);//BDR
+			//printf("FLAG_DATAL_BIT= %d\n",FLAG_DATAL_BIT);//BDR
+			//printf("FLAG_DATAH_BIT= %d\n",FLAG_DATAH_BIT);//BDR
+			//printf("rxChipID= %d\n",rxChipID);//BDR
+			//printf("readReqest_chipID= %d\n",readReqest[i].chipID);//BDR
+			//printf("==============\n");
+			//BDR
+
 			// check the flags
-			if ((rxFlags & FLAG_SYNC_BIT) == 0)
+			if ((rxFlags & FLAG_SYNC_BIT) == 0){
+			        //printf("ERROR FLAG_SYNC_BIT= %d\n",FLAG_SYNC_BIT);//BDR
 				throw PControlInterfaceError("Sync error reading data");
-
-			if ((rxFlags & FLAG_CHIPID_BIT) == 0)
+			}
+			if ((rxFlags & FLAG_CHIPID_BIT) == 0){
+			        //printf("ERROR FLAG_CHIPID_BIT= %d\n",FLAG_CHIPID_BIT);//BDR
 				throw PControlInterfaceError("No ChipID reading data");
-
-			if ((rxFlags & FLAG_DATAL_BIT) == 0)
+			}
+			if ((rxFlags & FLAG_DATAL_BIT) == 0){
+			        //printf("ERROR FLAG_DATAL_BIT= %d\n",FLAG_DATAL_BIT);//BDR
 				throw PControlInterfaceError("No Data Low byte reading data");
-
-			if ((rxFlags & FLAG_DATAH_BIT) == 0)
+			}
+			if ((rxFlags & FLAG_DATAH_BIT) == 0){
+			        //printf("ERROR FLAG_DATAH_BIT= %d\n",FLAG_DATAH_BIT);//BDR
 				throw PControlInterfaceError("No Data High byte reading data");
-
+			}
 			// check the sender
-			if (rxChipID!=readReqest[i].chipID)
+			if (rxChipID!=readReqest[i].chipID){
+			        //printf("ERROR rxChipID= %d\n",rxChipID);//BDR
+				//printf("ERROR readReqest_chipID= %d\n",readReqest[i].chipID);//BDR
 				throw PControlInterfaceError("ChipID mismatch");
-
+			}
 			*readReqest[i].readDataPtr = (d & 0xffff);
 		}
 		numReadRequest = 0;

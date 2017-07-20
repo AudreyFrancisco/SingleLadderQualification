@@ -73,7 +73,7 @@ uint8_t AD5254::read(uint8_t cmd, uint8_t add)
 
 	// read 
 	i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Read);	
-	i2cBus->addRead(&r, I2Cbus::RWF_stop);
+	i2cBus->addRead(&r, I2Cbus::RWF_stop | I2Cbus::RWF_dontAck);
 
 	// send commands packet
 	i2cBus->execute();

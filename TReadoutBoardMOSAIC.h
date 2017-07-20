@@ -86,6 +86,7 @@ public:
 	int  GetFwMajVersion() { return(theVersionMaj); };
 	int  GetFwMinVersion() { return(theVersionMin); };
 	char *GetFwIdString() { return(theVersionId); };
+	powerboard *GetPowerBoardHandle() { return(pb); };
 
 
 
@@ -109,6 +110,7 @@ private:
 	TBoardConfigMOSAIC *fBoardConfig;
 	TConfig            *fConfig;
 	I2Cbus 	 			*i2cBus;
+	I2Cbus 	 			*i2cBusAux;
 	powerboard 			*pb;
 	ControlInterface 	*controlInterface[MAX_MOSAICCTRLINT];
 	Pulser			 	*pulser;
@@ -133,7 +135,8 @@ private:
 		// total of 10 alpideRcv 
 		add_trgRecorder				= (18 << 24),
 		add_controlInterface_0		= (19 << 24),
-		add_controlInterface_9		= (29 << 24)
+		add_controlInterface_9		= (28 << 24),
+		add_i2cAux					= (29 << 24)
 	};
 
 	// status register bits

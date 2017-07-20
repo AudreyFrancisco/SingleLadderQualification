@@ -42,6 +42,7 @@
 #include <QGroupBox>
 #include <QPushButton>
 #include <QTextStream>
+#include <QCheckBox>
 #include "mexception.h"
 #include "pbMainWindow.h"
 #include "optionsDialog.h"
@@ -58,8 +59,8 @@ pbMainWindow::pbMainWindow( QWidget* parent, Qt::WFlags fl )
     (void)statusBar();
 
 	// Voltage input string validator
-	VbiasValidator = new setValidator(-6.0, 0.0, 2);	// from -6.0 to 0.0 volts 2 decimals
-	VsetValidator = new setValidator(1.5, 2.0, 3);	// from 1.5 to 2.0 volts 3 decimals
+	VbiasValidator = new setValidator(-4.5, 0.0, 2);	// from -6.0 to 0.0 volts 2 decimals
+	VsetValidator = new setValidator(1.5, 2.5, 3);	// from 1.5 to 2.0 volts 3 decimals
 	IsetValidator = new setValidator(0.0, 2.0, 3);	// from 0 to 2.0 Amp 3 decimals
 
     // actions
@@ -112,13 +113,22 @@ pbMainWindow::pbMainWindow( QWidget* parent, Qt::WFlags fl )
 	ChannelSetOffMapper =  new QSignalMapper;
 	ChannelVsetMapper =  new QSignalMapper;
 	ChannelIsetMapper =  new QSignalMapper;
+	ChannelBiasMapper =  new QSignalMapper;
 
 	QGridLayout* channelLayout = new QGridLayout(w);
 	int ch=0;
-	for (int r=0; r<4; r++)
-		for (int c=0; c<2; c++)
-			channelLayout->addWidget(channel(ch++), r, c);
+	for (int r=0; r<NUM_MODULES; r++){
+		QGroupBox *chVbiasGroup = new QGroupBox("Vbias", this);
+		QGridLayout *gbox = new QGridLayout(chVbiasGroup);
+		chVbiasOn[r] = new QCheckBox("ON", this);
+		gbox->addWidget(chVbiasOn[r]);
+		ChannelBiasMapper->setMapping(chVbiasOn[r], r);
+		connect(chVbiasOn[r], SIGNAL(stateChanged(int)), ChannelBiasMapper, SLOT(map()));
 
+		channelLayout->addWidget(chVbiasGroup, r, 0);
+		channelLayout->addWidget(channel(ch++, "Module " + QString::number(r+1) + " analog"), r, 1);
+		channelLayout->addWidget(channel(ch++, "Module " + QString::number(r+1) + " digital"), r, 2);
+	}
 
     // signals and slots connections
 	connect( fileOpenAction, SIGNAL( activated() ), this, SLOT( fileOpen() ) );
@@ -131,6 +141,7 @@ pbMainWindow::pbMainWindow( QWidget* parent, Qt::WFlags fl )
 	connect( ChannelSetOffMapper, SIGNAL(mapped(int)), this, SLOT(channelSetOFF(int)));
 	connect( ChannelVsetMapper, SIGNAL(mapped(int)), this, SLOT(channelVset(int)));
 	connect( ChannelIsetMapper, SIGNAL(mapped(int)), this, SLOT(channelIset(int)));
+	connect( ChannelBiasMapper, SIGNAL(mapped(int)), this, SLOT(biasCheckBoxChanged(int)));
 
 	statusBar()->showMessage("Ready");
 
@@ -177,6 +188,7 @@ void pbMainWindow::setIPaddress(QString add)
 		if (!pb->isReady()){
 			throw MIPBusErrorWrite("Power board comunication error");			
 		}
+		pb->startADC();
 	} catch (std::exception& e) {
 		qDebug("Power Board is not connected or is off");
 		setOnline(false);
@@ -222,23 +234,18 @@ QWidget *pbMainWindow::topStatusBar()
 
 	QLabel *label;
 	for (int i=0; i<NUM_TSENSORS; i++){
-
-		label = new QLabel("<h2> T" + QString::number(i+1) + "</h2>", this);
+		label = new QLabel("<h1> T" + QString::number(i+1) + "</h1>", this);
 		label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 		statusFrameLayout->addWidget(label);
-
-		temperatureLCD[i] = new QLCDNumber( this );
-		temperatureLCD[i]->setNumDigits(4);
-		temperatureLCD[i]->setAutoFillBackground(true);
-		temperatureLCD[i]->setPalette(Pal);
-		temperatureLCD[i]->setSegmentStyle(QLCDNumber::Flat);
-		temperatureLCD[i]->setSmallDecimalPoint(true);
-		temperatureLCD[i]->setFixedSize(QSize(75,30));
+		temperatureLCD[i] = newSmallLCD();
 		statusFrameLayout->addWidget(temperatureLCD[i]);
 	}
 
 	// Vbias
-	label = new QLabel(" Vbias", this);
+	statusFrameLayout->addStretch(2);	
+	label = new QLabel(" <h1>Bias </h1>", this);
+	statusFrameLayout->addWidget(label);	
+	label = new QLabel("Vset", this);
 	statusFrameLayout->addWidget(label);	
 	VbiasText = new QLineEdit(this);
 	VbiasText->setInputMask("-9.99");
@@ -246,11 +253,18 @@ QWidget *pbMainWindow::topStatusBar()
 	VbiasText->setFixedWidth(metrics.width("-9.99") + 10);
 	VbiasText->setValidator(VbiasValidator);
 	statusFrameLayout->addWidget(VbiasText);	
-	VbiasON = false;
 	connect(VbiasText, SIGNAL(editingFinished()), this, SLOT(VbiasSet())); 
-	VbiasLED = new QLabel(NULL);
-	VbiasLED->setPixmap(ledGreyPixmap);
-	statusFrameLayout->addWidget(VbiasLED);
+
+	VbiasLCD = newSmallLCD();
+	statusFrameLayout->addWidget(VbiasLCD);
+	label = new QLabel("<h1>V </h1>", this);
+	statusFrameLayout->addWidget(label);
+
+	IbiasLCD = newSmallLCD();
+	statusFrameLayout->addWidget(IbiasLCD);
+	label = new QLabel("<h1>mA </h1>", this);
+	statusFrameLayout->addWidget(label);
+
 	statusFrameLayout->addStretch(10);	
 
 	// Global ON/OFF 
@@ -279,18 +293,36 @@ QLCDNumber *pbMainWindow::newLargeLCD()
 	lcd->setPalette(Pal);
 	lcd->setSegmentStyle(QLCDNumber::Flat);
 	lcd->setSmallDecimalPoint(true);
+	lcd->setFixedSize(QSize(150,60));
+	return lcd;
+}
+
+QLCDNumber *pbMainWindow::newSmallLCD()
+{
+	QPalette Pal(palette());
+	Pal.setColor(QPalette::Background, Qt::black);
+	Pal.setColor(QPalette::Foreground, Qt::red);
+
+	QLCDNumber *lcd;
+	lcd = new QLCDNumber( this );
+	lcd->setNumDigits(4);
+	lcd->setAutoFillBackground(true);
+	lcd->setPalette(Pal);
+	lcd->setSegmentStyle(QLCDNumber::Flat);
+	lcd->setSmallDecimalPoint(true);
 	lcd->setFixedSize(QSize(100,40));
 	return lcd;
 }
 
 
-QWidget *pbMainWindow::channel(int ch)
+
+QWidget *pbMainWindow::channel(int ch, QString chName)
 {
 	QLabel *label;
 	int col = 0;
 	QFontMetrics metrics(QApplication::font());
 
-	QGroupBox *channelGroup = new QGroupBox("Channel " + QString::number(ch+1), this);
+	QGroupBox *channelGroup = new QGroupBox(chName, this);
 	QGridLayout *gbox = new QGridLayout(channelGroup);
 	
 	// LED
@@ -302,13 +334,13 @@ QWidget *pbMainWindow::channel(int ch)
 	// Voltage monitor
 	VoltLCD[ch] = newLargeLCD();
 	gbox->addWidget(VoltLCD[ch], 0, col++, 2, 1);
-	label = new QLabel("<h2>V </h2>", this);
+	label = new QLabel("<h1>V </h1>", this);
 	gbox->addWidget(label, 0, col++, 2, 1);
 
 	// Current monitor
 	AmpLCD[ch] = newLargeLCD();
 	gbox->addWidget(AmpLCD[ch], 0, col++, 2, 1);
-	label = new QLabel("<h2>A </h2>", this);
+	label = new QLabel("<h1>A </h1>", this);
 	gbox->addWidget(label, 0, col++, 2, 1);
 
 	// Voltage & current set
@@ -360,6 +392,7 @@ void pbMainWindow::channelSetON(int ch)
 {
 	channelIset(ch);
 	try{
+		// pb->onVout(ch);
 		pb->onVout(ch);
 	} catch (std::exception& e) {	
 		comErrorExit(e);
@@ -369,7 +402,8 @@ void pbMainWindow::channelSetON(int ch)
 void pbMainWindow::channelSetOFF(int ch)
 {
 	try{
-		pb->setIth(ch, 0.0);
+		// pb->setIth(ch, 0.0);
+		pb->offVout(ch);
 	} catch (std::exception& e) {	
 		comErrorExit(e);
 	}
@@ -382,8 +416,8 @@ void pbMainWindow::channelVset(int ch)
 	
 	if (V<0)
 		V = 0;
-	if (V>2.0)
-		V = 2.0;
+	if (V>2.5)
+		V = 2.5;
 	s.setNum(V, 'F', 3);
  
 	try{
@@ -434,20 +468,43 @@ void pbMainWindow::VbiasSet()
 		comErrorExit(e);
 	}
 
-	enVbias(V!=0.0);
+//	enVbias(V!=0.0);
 }
 
-void pbMainWindow::enVbias(bool en)
+void pbMainWindow::biasCheckBoxChanged(int ch)
 {
-	VbiasON = en;
-	VbiasLED->setPixmap(en ? ledRedPixmap : ledGreyPixmap);
+	bool on = chVbiasOn[ch]->isChecked();
+	enVbias(on, ch);
+}
 
+
+/*
+void pbMainWindow::enAllVbias(bool en)
+{
 	try{
-		pb->enVbias(VbiasON);
+		if (en)
+			pb->onAllVbias();
+		else
+			pb->offAllVbias();
 	} catch (std::exception& e) {	
 		comErrorExit(e);
 	}
 }
+*/
+
+void pbMainWindow::enVbias(bool en, int ch)
+{
+	try{
+		if (en)
+			pb->onVbias(ch);
+		else
+			pb->offVbias(ch);
+	} catch (std::exception& e) {	
+		comErrorExit(e);
+	}
+}
+
+
 
 void pbMainWindow::refreshMonitor()
 {
@@ -461,23 +518,21 @@ void pbMainWindow::refreshMonitor()
 	}
 	
 	// Temperature sensors
-	for (int i=0; i<NUM_TSENSORS; i++){
-		float t = pbStat.T[i];
-		if (t<-9.99 || t>99.99)
-			s = "-----";
-		else
-			s.setNum(t, 'F', 2);
-		temperatureLCD[i]->display(s);
-	}
+	float t = pbStat.T;
+	if (t<-9.99 || t>99.99)
+		s = "-----";
+	else
+		s.setNum(t, 'F', 2);
+	temperatureLCD[0]->display(s);
 
 	// Channel ON
 	for (int i=0; i<NUM_CHANNELS; i++){
 		if (pbStat.chOn & 1<<i){
-			channelON[i] = false;
-			channelLED[i]->setPixmap(ledGreyPixmap);
-		} else {
 			channelON[i] = true;
 			channelLED[i]->setPixmap(ledRedPixmap);
+		} else {
+			channelON[i] = false;
+			channelLED[i]->setPixmap(ledGreyPixmap);
 		}
 	}
 
@@ -500,6 +555,26 @@ void pbMainWindow::refreshMonitor()
 			s.setNum(I, 'F', 3);
 		AmpLCD[i]->display(s);
 	}
+
+	// Bias voltage
+	float v = pbStat.Vbias;
+	if (v>0 || v<-9.99)
+		s = "-----";
+	else
+		s.setNum(v, 'F', 3);
+	VbiasLCD->display(s);
+
+	// Bias current
+	float i = pbStat.Ibias * 1000;		// convert in mA
+	if (i<0 || i>9999)
+		s = "-----";
+	else
+		s.setNum(i, 'F', 0);
+	IbiasLCD->display(s);
+
+	// Vbias ON/Off
+	for (int i=0; i<NUM_MODULES; i++)
+		chVbiasOn[i]->setCheckState(pbStat.biasOn & (1<<i) ? Qt::Checked : Qt::Unchecked);
 }
 
 /*
@@ -522,6 +597,7 @@ void pbMainWindow::refreshSettings()
 		s.setNum(v, 'f', 3);
 		VsetText[i]->setText(s);
 	}
+
 }
 
 /*
@@ -529,15 +605,12 @@ void pbMainWindow::refreshSettings()
 */
 void pbMainWindow::allON()
 {	
-	for (int i=0; i<NUM_CHANNELS; i++)
-		channelIset(i);
-
 	try{
 		pb->onAllVout();
+		pb->onAllVbias();	
 	} catch (std::exception& e) {	
 		comErrorExit(e);
 	}
-	VbiasSet();	
 }
 
 /*
@@ -545,9 +618,12 @@ void pbMainWindow::allON()
 */
 void pbMainWindow::allOFF()
 {	
-	enVbias(false);
-	for (int i=0; i<NUM_CHANNELS; i++)
-		channelSetOFF(i);
+	try{
+		pb->offAllVbias();	
+		pb->offAllVout();
+	} catch (std::exception& e) {	
+		comErrorExit(e);
+	}
 }
 
 /*
@@ -602,7 +678,11 @@ void pbMainWindow::saveConfiguration()
 
 	QDomElement bias = doc.createElement( "Bias" );;
 	bias.setAttribute ( "Vbias", VbiasText->text() );
-	bias.setAttribute ( "ON", VbiasON );
+	for (int m=0; m<NUM_MODULES; m++){
+		QString mN;
+		mN.setNum(m);
+		bias.setAttribute ( "M"+mN, chVbiasOn[m]->isChecked() );
+	}
 	root.appendChild( bias );
 
 	for (int ch=0; ch<NUM_CHANNELS; ch++){
@@ -736,8 +816,14 @@ bool pbMainWindow::XMLreadBias(QDomElement &root)
 	val = bias.attribute ( "Vbias", "-0.00" );
 	VbiasText->setText(val);
 	VbiasSet();
-	val = bias.attribute ( "ON", "0" ); 
-	enVbias(val=="1");
+
+	for (int m=0; m<NUM_MODULES; m++){
+		QString mN;
+		mN.setNum(m);
+		val = bias.attribute ( "M"+mN, "0" );
+		enVbias(val=="1", m);
+	}
+	
 	return true;
 }
 

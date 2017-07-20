@@ -83,6 +83,7 @@ private:
 	void addHeader(uint16_t words, uint8_t typeId, uint32_t *readDataPtr);
 	void getHeader(IPbusTransaction *tr);
 	void clearList();
+	void dumpRxData();
 
 public:
 	// IPBus info codes (errors)

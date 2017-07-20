@@ -20,8 +20,8 @@ RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverM
 
 MOSAIC_SOURCES = MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/pexception.cpp MosaicSrc/TAlpideDataParser.cpp
 
-CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp THIC.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
- TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
+CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
+ TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp TPowerBoard.cpp TPowerBoardConfig.cpp\
  BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TDigitalAnalysis.cpp TFifoAnalysis.cpp TNoiseAnalysis.cpp\
  TScan.cpp TFifoTest.cpp TThresholdScan.cpp TDigitalScan.cpp TNoiseOccupancy.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp Common.cpp $(RU_SOURCES) $(MOSAIC_SOURCES)
 
@@ -79,6 +79,9 @@ test_pulselength:   $(DEPS) main_pulselength.cpp
 
 test_poweron:   $(DEPS) main_poweron.cpp
 	$(CC) -o test_poweron $(OBJS) $(CFLAGS) main_poweron.cpp $(LINKFLAGS)
+
+test_powerboard:   $(DEPS) main_testpowerboard.cpp
+	$(CC) -o test_powerboard $(OBJS) $(CFLAGS) main_testpowerboard.cpp $(LINKFLAGS)
 
 test_noiseocc_ext:   $(DEPS) main_noiseocc_ext.cpp
 	$(CC) -o test_noiseocc_ext $(OBJS) $(CFLAGS) main_noiseocc_ext.cpp $(LINKFLAGS)
@@ -139,7 +142,7 @@ clean-all:	clean
 	rm -rf test_*
 	rm -rf $(LIBRARY)
 	rm -rf $(ANALYSIS_LIBRARY)
-	$(MAKE) -C $(LIBMOSAIC_DIR) clean
-	$(MAKE) -C $(LIBPOWERBOARD_DIR) clean
+	$(MAKE) -C $(LIBMOSAIC_DIR) cleanall
+	$(MAKE) -C $(LIBPOWERBOARD_DIR) cleanall
 
 .PHONY:	all clean clean-all $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) lib lib_analysis

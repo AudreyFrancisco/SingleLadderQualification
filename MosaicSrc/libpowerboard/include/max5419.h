@@ -28,43 +28,30 @@
  *
  */
 
-#ifndef PBIF_H
-#define PBIF_H
+#ifndef MAX5419_H
+#define MAX5419_H
 
 #include <stdint.h>
-#include "ipbusudp.h"
-#include "i2cbus.h"
-#include "mwbb.h"
-#include "powerboard.h"
+#include "i2cslave.h"
 
-#define DEFAULT_PACKET_SIZE 		1400
-#define DEFAULT_UDP_PORT			2000
 
-class PBif
+class MAX5419 : public I2Cslave
 {
 public:
-    PBif();
-    PBif(char *IPaddr, int UDPport=DEFAULT_UDP_PORT);
-	void setIPaddress(const char *IPaddr, int UDPport=DEFAULT_UDP_PORT);
-    ~PBif();
+	MAX5419(I2Cbus *bus, uint8_t address);
+	void setRDAC(uint8_t b);
+	void setNVREG(uint8_t b);
+	void restoreRDAC();
+	void storeRDAC();
 
 private:
-	void init();
+	enum {
+		CMD_VREG 		= 0x11,
+		CMD_NVREG 		= 0x21,
+		CMD_NVREGxVREG	= 0x61,
+		CMD_VREGxNVREG	= 0x51
+	};
 
-private:
-	// extend WBB address definitions in mwbb.h
-	enum baseAddress_e {		
-		add_i2cMaster				= (5 << 24),
-		add_i2cAux					= (29 << 24)
-		};
-
-	std::string 	IPaddress;
-	IPbusUDP 		*mIPbus;
-	I2Cbus 			*i2cBus;
-	I2Cbus 			*i2cBusAux;
-
-public:
-	powerboard 		*pb;
 };
 
-#endif // PBIF_H
+#endif // MAX5419_H

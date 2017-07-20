@@ -77,7 +77,8 @@ void I2Cbus::addRead(uint32_t *d, uint32_t flags)
 					(0xff) | 
 					((flags & RWF_start)  ? I2C_START_BIT : 0) |
 					((flags & RWF_stop)   ? I2C_STOP_BIT  : 0) |
-					((flags & RWF_dontAck)? I2C_IGNORE_ACK_BIT : I2C_MASTER_ACK_BIT)
+					( I2C_IGNORE_ACK_BIT ) |
+					((flags & RWF_dontAck)? 0 : I2C_MASTER_ACK_BIT)
 					);	
 
 	wbb->addRead(baseAddress+regReadAdd, d);	
