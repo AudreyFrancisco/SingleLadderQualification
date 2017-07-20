@@ -17,7 +17,12 @@ class TLocalBusTest : public TScan {
  protected: 
   THisto CreateHisto() {THisto histo; return histo;};
  public:
-  TLocalBusTest   (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoque, std::mutex *aMutex);
+  TLocalBusTest   (TScanConfig                   *config, 
+                   std::vector <TAlpide *>        chips, 
+                   std::vector <THic*>            hics, 
+                   std::vector <TReadoutBoard *>  boards, 
+                   std::deque<TScanHisto>        *histoque, 
+                   std::mutex                    *aMutex);
   ~TLocalBusTest  () {};
   void Init ();
   void Execute ();

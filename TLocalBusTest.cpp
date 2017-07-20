@@ -3,8 +3,13 @@
 #include "AlpideDebug.h"
 #include "AlpideConfig.h"
 
-TLocalBusTest::TLocalBusTest (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
-  : TScan (config, chips, boards, histoQue, aMutex) 
+TLocalBusTest::TLocalBusTest (TScanConfig                   *config, 
+                              std::vector <TAlpide *>        chips, 
+                              std::vector <THic*>            hics, 
+                              std::vector <TReadoutBoard *>  boards, 
+                              std::deque  <TScanHisto>      *histoQue, 
+                              std::mutex                    *aMutex) 
+  : TScan (config, chips, hics, boards, histoQue, aMutex) 
 {
   FindDaisyChains(chips);
   m_start[2] = 0;

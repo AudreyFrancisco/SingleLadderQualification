@@ -34,6 +34,8 @@
 #include  "../TFifoAnalysis.h"
 #include  "../TNoiseOccupancy.h"
 #include  "../TNoiseAnalysis.h"
+#include  "../THIC.h"
+
 //#include "multipagewidget.h"
 //#include "scanthread.h"
 
@@ -113,7 +115,8 @@ private:
 
     TBoardType fBoardType;
     std::vector <TReadoutBoard *> fBoards;
-  std::vector <TAlpide *>       fChips;
+    std::vector <TAlpide *>       fChips;
+    std::vector <THic *>          fHics;  
     std::mutex fMutex;
     TConfig *fConfig;
     std::deque<TScanHisto>  fHistoQue;
@@ -157,6 +160,8 @@ private slots:
  void thresholdlist();
  void noiselist();
  void openib();
+
+ void setVI(float * vcasn, float * ithr);
 
 };
 #endif // MAINWINDOW_H

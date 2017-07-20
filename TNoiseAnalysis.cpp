@@ -2,7 +2,12 @@
 #include <vector>
 #include "TNoiseAnalysis.h"
 
-TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex) : TScanAnalysis(histoQue, aScan, aScanConfig, aMutex) 
+TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue, 
+                               TScan                  *aScan, 
+                               TScanConfig            *aScanConfig,
+                               std::vector <THic*>     hics, 
+                               std::mutex             *aMutex) 
+: TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) 
 {
   m_nTrig    = m_config->GetParamValue("NTRIG");
   m_noiseCut = m_nTrig / m_config->GetParamValue("NOISECUT_INV");
@@ -14,6 +19,10 @@ TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, T
 
 void TNoiseAnalysis::WriteResult() 
 {
+  char fName[100];
+  sprintf (fName, "NoiseOccResult_%s.dat", m_config->GetfNameSuffix());
+  m_scan  ->WriteConditions (fName);
+  m_result->WriteToFile     (fName);
 }
 
 
@@ -74,4 +83,11 @@ void TNoiseAnalysis::Run()
    
     else usleep(300);
   }
+}
+
+
+void TNoiseResultChip::WriteToFile(FILE *fp) 
+{
+  fprintf(fp, "Noisy pixels: %d\n", m_noisyPixels.size());
+  fprintf(fp, "Noise occupancy: %e\n", m_occ);
 }

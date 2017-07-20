@@ -18,6 +18,7 @@
 #include <deque>
 #include <mutex>
 #include "TAlpide.h"
+#include "THIC.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
@@ -41,6 +42,7 @@ int main(int argc, char** argv) {
 
   TBoardType fBoardType;
   std::vector <TReadoutBoard *> fBoards;
+  std::vector <THic *>          fHics;
   std::vector <TAlpide *>       fChips;
   TConfig *fConfig;
 
@@ -49,7 +51,7 @@ int main(int argc, char** argv) {
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
     
-  TLocalBusTest *myScan = new TLocalBusTest(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue, &fMutex);
+  TLocalBusTest *myScan = new TLocalBusTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
 
   //THisto *histo = new THisto("Test", "Test", 1024, 0, 1023, 50, 0, 50);
 

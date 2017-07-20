@@ -7,12 +7,17 @@
 #include "TScan.h"
 #include "TScanConfig.h"
 
-TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aConfig, std::mutex *aMutex) 
+TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue, 
+                             TScan                  *aScan, 
+                             TScanConfig            *aConfig, 
+                             std::vector <THic*>     hics, 
+                             std::mutex             *aMutex) 
 {
   m_histoQue = histoQue;
   m_mutex    = aMutex;
   m_scan     = aScan;
   m_config   = aConfig;
+  m_hics     = hics;
   m_first    = true;
   m_chipList.clear ();
 }
@@ -36,8 +41,7 @@ void TScanAnalysis::CreateChipResults ()
     TScanResultChip    *chipResult = GetChipResult();
     common::TChipIndex idx         = m_chipList.at(i);
     m_result->AddChipResult (idx, chipResult);
-  }
-  
+  }  
 }
 
 

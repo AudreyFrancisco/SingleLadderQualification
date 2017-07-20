@@ -4,6 +4,7 @@
 #include <unistd.h>
  // #include "TReadoutBoard.h"
 #include "TConfig.h"
+#include "THIC.h"
 
 namespace Alpide {
   typedef enum {
@@ -177,12 +178,14 @@ namespace Alpide {
 };
 
 class TReadoutBoard;
+class THic;
 
 class TAlpide {
  private:
   TChipConfig   *fConfig;
   int            fChipId;
   TReadoutBoard *fReadoutBoard;
+  THic          *fHic;
 
   // ADC calibration parameters
   int		fADCBias;
@@ -194,9 +197,12 @@ class TAlpide {
  public:
   TAlpide (TChipConfig *config);
   TAlpide (TChipConfig *config, TReadoutBoard *readoutBoard);
-  TChipConfig *GetConfig () {return fConfig;};
-  void SetReadoutBoard (TReadoutBoard *readoutBoard) {fReadoutBoard = readoutBoard;};
-  TReadoutBoard *GetReadoutBoard() {return fReadoutBoard;};  
+  TChipConfig   *GetConfig ()                {return fConfig;};
+  void           SetReadoutBoard (TReadoutBoard *readoutBoard) {fReadoutBoard = readoutBoard;};
+  TReadoutBoard *GetReadoutBoard ()          {return fReadoutBoard;};  
+  THic          *GetHic          ()          {return fHic;};
+  void           SetHic          (THic *hic) {fHic = hic;};
+
   int  ReadRegister       (Alpide::TRegister address, uint16_t &value);
   int  WriteRegister      (Alpide::TRegister address, uint16_t value, bool verify = false);
   int  ReadRegister       (uint16_t address, uint16_t &value);

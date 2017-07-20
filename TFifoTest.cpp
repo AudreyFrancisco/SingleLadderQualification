@@ -3,8 +3,13 @@
 #include "TFifoTest.h"
 #include "AlpideConfig.h"
 
-TFifoTest::TFifoTest (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
-  : TScan (config, chips, boards, histoQue, aMutex) 
+TFifoTest::TFifoTest (TScanConfig                   *config, 
+                      std::vector <TAlpide *>        chips, 
+                      std::vector <THic*>            hics, 
+                      std::vector <TReadoutBoard *>  boards, 
+                      std::deque<TScanHisto>        *histoQue, 
+                      std::mutex                    *aMutex) 
+  : TScan (config, chips, hics, boards, histoQue, aMutex) 
 {
   strcpy(m_name, "Fifo Scan");
   m_start[2] = 0;

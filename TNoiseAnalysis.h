@@ -20,7 +20,7 @@ class TNoiseResultChip : public TScanResultChip {
   TNoiseResultChip () : TScanResultChip () {};
   void AddNoisyPixel (TPixHit pixel) {m_noisyPixels.push_back(pixel);};
   void SetOccupancy  (float occ)     {m_occ = occ;};
-  void WriteToFile   (FILE *fp)      {};
+  void WriteToFile   (FILE *fp);
 };
 
 
@@ -43,7 +43,11 @@ class TNoiseAnalysis : public TScanAnalysis {
   TScanResultChip *GetChipResult () {TNoiseResultChip *Result = new TNoiseResultChip(); return Result;};  
   void            CreateResult  () {};
  public: 
-  TNoiseAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
+  TNoiseAnalysis(std::deque<TScanHisto> *histoQue, 
+                 TScan                  *aScan, 
+                 TScanConfig            *aScanConfig, 
+                 std::vector <THic*>     hics,
+                 std::mutex             *aMutex);
   void Initialize ();
   void Run        ();
   void Finalize   () { WriteResult(); };  

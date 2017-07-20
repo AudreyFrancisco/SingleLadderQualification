@@ -32,7 +32,7 @@ class TDigitalResultChip : public TScanResultChip {
   std::vector <TPixHit> m_stuck;
  public:
   TDigitalResultChip () : TScanResultChip () {};
-  void WriteToFile (FILE *fp) {};
+  void WriteToFile (FILE *fp);
 };
 
 
@@ -48,7 +48,7 @@ class TDigitalResult : public TScanResult {
 //  TDigitalResult(const TDigitalResult &other):TScanResult(other){/*Body of copy constructor of the TDigitalResult copy constructor*/ }
  // TDigitalResult& operator=(const TDigitalResult& other);
 //TDigitalResult& operator=(const TDigitalResult& other){/*handle self assignmet*/ if (&other!=this) return *this;/*handle base class assignemnt*/ TScanResult::operator=(other); return *this;}
-  void WriteToFileGlobal (FILE *fp)          {};
+  void WriteToFileGlobal (FILE *fp);
   void WriteToDB         (const char *hicID) {};
 };
 
@@ -65,9 +65,13 @@ class TDigitalAnalysis : public TScanAnalysis {
   void WriteStuckPixels ();
  protected:
   TScanResultChip *GetChipResult () {TDigitalResultChip *Result = new TDigitalResultChip; return Result;};
-  void            CreateResult  () {};
+  void             CreateResult  () {};
  public:
-  TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
+  TDigitalAnalysis(std::deque<TScanHisto> *histoQue, 
+                   TScan                  *aScan, 
+                   TScanConfig            *aScanConfig, 
+                   std::vector <THic*>     hics,
+                   std::mutex             *aMutex);
   
   void Initialize();
   void Run       ();

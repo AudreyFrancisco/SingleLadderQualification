@@ -6,12 +6,12 @@
 #include "AlpideConfig.h"
 
 
-TThresholdScan::TThresholdScan (TScanConfig                   *config, 
+TAnalogScan::TAnalogScan       (TScanConfig                   *config,
                                 std::vector <TAlpide *>        chips,
-                                std::vector <THic*>            hics, 
-                                std::vector <TReadoutBoard *>  boards, 
-                                std::deque<TScanHisto>        *histoQue, 
-                                std::mutex                    *aMutex) 
+                                std::vector <THic*>            hics,
+                                std::vector <TReadoutBoard *>  boards,
+                                std::deque<TScanHisto>        *histoQue,
+                                std::mutex                    *aMutex)
   : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
 {
   strcpy(m_name, "Threshold Scan");
@@ -20,7 +20,7 @@ TThresholdScan::TThresholdScan (TScanConfig                   *config,
   m_step [0]  = m_config->GetChargeStep ();
 
   m_start[1]  = 0;
-  m_step [1]  = 1;
+  //m_step [1]  = maskStepSize;
   m_stop [1]  = m_config->GetNMaskStages();
 
   m_start[2]  = 0;
@@ -33,7 +33,7 @@ TThresholdScan::TThresholdScan (TScanConfig                   *config,
 }
 
 
-void TThresholdScan::ConfigureBoard(TReadoutBoard *board) 
+void TAnalogScan::ConfigureBoard(TReadoutBoard *board) 
 {
   if (board->GetConfig()->GetBoardType() == boardDAQ) {
     // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns * strobe delay
@@ -52,7 +52,7 @@ void TThresholdScan::ConfigureBoard(TReadoutBoard *board)
 }
 
  
-void TThresholdScan::ConfigureFromu(TAlpide *chip) 
+void TAnalogScan::ConfigureFromu(TAlpide *chip) 
 {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x20);      // analogue pulsing
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
@@ -61,7 +61,7 @@ void TThresholdScan::ConfigureFromu(TAlpide *chip)
 }
 
 
-void TThresholdScan::ConfigureChip(TAlpide *chip)
+void TAnalogScan::ConfigureChip(TAlpide *chip)
 {
   AlpideConfig::BaseConfig(chip);
 
@@ -71,13 +71,13 @@ void TThresholdScan::ConfigureChip(TAlpide *chip)
 }
 
 
-THisto TThresholdScan::CreateHisto() {
+THisto TAnalogScan::CreateHisto() {
   THisto histo ("ThresholdHisto", "ThresholdHisto", 1024, 0, 1023, (m_stop[0] - m_start[0]) / m_step[0], m_start[0], m_stop[0]);
   return histo;
 }
 
 
-void TThresholdScan::Init() {
+void TAnalogScan::Init() {
   m_running = true;
   
   CountEnabledChips();
@@ -106,13 +106,14 @@ void TThresholdScan::Init() {
 }
 
 
-void TThresholdScan::PrepareStep (int loopIndex) 
+
+void TAnalogScan::PrepareStep (int loopIndex) 
 {
   switch (loopIndex) {
   case 0:    // innermost loop: change VPULSEL
     for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
-      m_chips.at(ichip)->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEH - m_value[0]);
+      m_chips.at(ichip)->WriteRegister(scanReg, m_VPULSEH - m_value[0]);
     }
     break;
   case 1:    // 2nd loop: mask staging
@@ -126,8 +127,50 @@ void TThresholdScan::PrepareStep (int loopIndex)
   }
 }
 
+//Need different registers for different classes...
+void TtuneVCASNScan::PrepareStep (int loopIndex)
+{
+  switch (loopIndex) {
+  case 0:    // innermost loop: change VCASN
+    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      m_chips.at(ichip)->WriteRegister(Alpide::REG_VCASN, m_value[0]);
+    }
+    break;
+  case 1:    // 2nd loop: mask staging
+    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
+    }
+    break;
+  default:
+    break;
+  }
+}
 
-void TThresholdScan::Execute() 
+void TtuneITHRScan::PrepareStep (int loopIndex)
+{
+  switch (loopIndex) {
+  case 0:    // innermost loop: change ITHR
+    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      m_chips.at(ichip)->WriteRegister(Alpide::REG_ITHR, m_value[0]);
+    }
+    break;
+  case 1:    // 2nd loop: mask staging
+    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
+    }
+    break;
+  default:
+    break;
+  }
+}
+
+
+
+void TAnalogScan::Execute() 
 {
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -143,7 +186,7 @@ void TThresholdScan::Execute()
 }
 
 
-void TThresholdScan::FillHistos (std::vector<TPixHit> *Hits, int board)
+void TAnalogScan::FillHistos (std::vector<TPixHit> *Hits, int board)
 {
   common::TChipIndex idx; 
   idx.boardIndex = board;
@@ -168,7 +211,7 @@ void TThresholdScan::FillHistos (std::vector<TPixHit> *Hits, int board)
 }
 
 
-void TThresholdScan::LoopEnd(int loopIndex) 
+void TAnalogScan::LoopEnd(int loopIndex) 
 {
   if (loopIndex == 0) {
     while (!(m_mutex->try_lock()));
@@ -181,7 +224,7 @@ void TThresholdScan::LoopEnd(int loopIndex)
 }
 
 
-void TThresholdScan::Terminate() 
+void TAnalogScan::Terminate() 
 {
   // write Data;
   for (int iboard = 0; iboard < m_boards.size(); iboard ++) {

@@ -14,6 +14,8 @@
 //#include "TQtWidgets.h"
 #include "../TAlpide.h"
 #include "../TDigitalAnalysis.h"
+#include "../TAnalogScan.h"
+//#include "../TAnalogAnalysis.h"
 #include "../TDigitalScan.h"
 #include "../AlpideConfig.h"
 #include "../TReadoutBoard.h"
@@ -53,6 +55,8 @@ MainWindow::MainWindow(QWidget *parent) :
       ui->setupUi(this);
      this->setWindowTitle(QString::fromUtf8("GUI"));
      ui->tab_2->setEnabled(false);
+     ui->example1->hide();
+
      ui->tab_3->setEnabled(false);
      qDebug()<<"Starting testing";
       ui->obm1->setStyleSheet("background-color:red;");
@@ -127,7 +131,6 @@ void MainWindow::open(){
     settingswindow->hide();
     settingswindow->SaveSettings(operatorname,hicidnumber,counter);
     if (counter==0) {return;}
-
    QString fileName="Config.cfg";
 
    // QString fileName = QFileDialog::getOpenFileName(this,
@@ -135,7 +138,7 @@ void MainWindow::open(){
     try{
     std::cout<<properconfig<<"d1"<<endl;
    // initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str());
-    initSetup(fConfig, &fBoards, &fBoardType, &fChips,fileName.toStdString().c_str());
+    initSetup(fConfig, &fBoards, &fBoardType, &fChips,fileName.toStdString().c_str(), &fHics);
     properconfig=true;
 
     std::cout<<properconfig<<"d2"<<endl;
@@ -155,7 +158,7 @@ if (properconfig==1){
     int device=0;
     device=fConfig->GetDeviceType();
     if (device==2){
-        ui->tob->setText("Outer Barrel module");
+       ui->tob->setText("Outer Barrel module");
         ui->OBModule->show();
         for (int i=0;i< fChips.size();i++){
             int chipid;
@@ -464,42 +467,112 @@ void MainWindow::combochanged(int index){
     }
 }
 
-void MainWindow::scantest(){
-    try{
-        ui->statuslabel->setVisible(true);
-        ui->statuslabel->update();
-         ui->statusbar->setValue(0);
-        ui->statusbar->show();
+void MainWindow::scantest() {
+/* Runs tuneVCASN, tuneITHR, and ITHRthreshold, each using the preceeding results. */
+  try {
+    ui->statuslabel->setVisible(true);
+    ui->statuslabel->update();
+    ui->statusbar->setValue(0);
+    ui->statusbar->show();
 
-     TThresholdScan *myScan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
-     TScanAnalysis  *analysis = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), &fMutex);
-    // analysis->Initialize();
+    /* FIRST: tuneVCASN */
 
-    // scanLoop(myScan);
-    std::cout << "starting thread" << std::endl;
-    std::thread scanThread(&MainWindow::scanLoop,this,myScan);
-  //  analysis->Initialize();
+    //TtuneVCASNScan *myTuneVScan = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+    //TAnalogAnalysis  *analysisTuneV = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex, 1);
 
-    std::thread analysisThread(&TScanAnalysis::Run, std::ref(analysis));
-    analysis->Initialize();
+    //std::cout << "starting thread (tuneVCASN)" << std::endl;
+    //std::thread scanThread(&MainWindow::scanLoop,this,mytuneVScan);
+    //std::thread analysisThread(&TAnalogAnalysis::Run, std::ref(analysisTuneV));
+    /*NOTE**:  will need to give analysisThread an AnalogAnalysis argument type, plus extend change to other classes... */
+    //analysisTuneV->Initialize();
 
+    //ui->statusbar->setValue(50);
+    //scanThread.join();
+    //analysisThread.join();
 
-    ui->statusbar->setValue(50);
-    scanThread.join();
-     analysisThread.join();
+    //analysisTuneV->Finalize();
 
-             analysis->Finalize();
-     delete myScan;
-     delete analysis;
-    ui->statusbar->setValue(100);
+    //float vcasn[fHics.size()]; //has one entry for each HIC
+    //int finishedChips = 0; //chips set so far
+    //float sum = 0;
+    //for(int i=0; i<fHics.size(), i++) {
+    // for(int j=0; i<fHics.at(i).GetNChips(); j++) {
+    //   sum += analysisTuneV->GetResultThreshold(finishedChips+j);
+    //  }
+    //  finishedChips += hHics.at(i).GetNChips();
+    //  vcasn[i] = sum/fHics.at(i).GetNChips();
+    //  sum=0;
+    //}
 
-    }
-     catch(exception &scanex){
-         std::cout<<scanex.what()<<endl;
-         popup(scanex.what());
-     }
+    //fConfig->GetScanConfig()->SetVcasnArr(fHics.size(), vcasn);
+    
+    // ui->statusbar->setValue(100);
+    //delete myTuneVScan;
+    //delete analysisTuneV;
 
+    /* NEXT: tuneITHR */
+
+    //TtuneVCASNScan *myTuneIScan = new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+    //TAnalogAnalysis  *analysisTuneI = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex, -1);
+
+    //std::cout << "starting thread (tuneITHR)" << std::endl;
+    //std::thread scanThread(&MainWindow::scanLoop,this,myTuneIScan);
+
+    //std::thread analysisThread(&TAnalogAnalysis::Run, std::ref(analysisTuneI));
+    /*NOTE**:  will need to give analysisThread an AnalogAnalysis argument type */
+    //analysisTuneI->Initialize();
+
+    //ui->statusbar->setValue(50);
+    //scanThread.join();
+    //analysisThread.join();
+
+    //analysisTuneI->Finalize();
+
+    //float ithr[fChips.size()]; //has one entry for each chip
+    //for(int i=0; i<fChips.size(), i++) {
+      //get the mean ithr value for each chip and assign them here
+    // ithr[i]=analysisTuneI->GetResultThreshold(i);
+    // }
+    //fConfig->GetScanConfig()->SetIthrArr(fChips.size(), ithr); //vcasn has already been set
+
+    //ui->statusbar->setValue(100);
+
+    //delete myTuneIScan;
+    //delete analysisTuneI;
+
+    /* LAST: ITHRthreshold */
+
+    //TtuneVCASNScan *myIthrScan = new TITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+    //TAnalogAnalysis  *analysisIthr = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+    //NOTE:  config is passed by reference.
+
+    //std::cout << "starting thread (tuneITHR)" << std::endl;
+    //std::thread scanThread(&MainWindow::scanLoop,this,myIthrScan);
+
+    //std::thread analysisThread(&TAnalogAnalysis::Run, std::ref(analysisIthr));
+    /*NOTE**:  will need to give analysisThread an AnalogAnalysis argument type */
+    //analysisIthr->Initialize();
+
+    //ui->statusbar->setValue(50);
+    //scanThread.join();
+    //analysisThread.join();
+
+    //analysisIthr->Finalize(); //produce final results; rms may be useful as usual...
+
+    //ui->statusbar->setValue(100);
+
+    //delete myIthrScan;
+    //delete analysisIthr;
+
+    //setVI(vcasn, ithr); //set config/save results for all future scans
+
+  } catch(exception &scanex) {
+    std::cout<<scanex.what()<<endl;
+    popup(scanex.what());
+  }
 }
+
+
 void MainWindow::digital(){
     try{
         ui->statuslabel->setVisible(true);
@@ -507,8 +580,8 @@ void MainWindow::digital(){
          ui->statusbar->setValue(0);
         ui->statusbar->show();
 
-     TDigitalScan *mydigital= new TDigitalScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
-    TDigitalAnalysis  *analysis = new TDigitalAnalysis(&fHistoQue,mydigital, fConfig->GetScanConfig(), &fMutex);
+	TDigitalScan *mydigital= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+	TDigitalAnalysis  *analysis = new TDigitalAnalysis(&fHistoQue,mydigital, fConfig->GetScanConfig(), fHics, &fMutex);
 
    //scanLoop(mydigital);
     std::cout << "starting thread" << std::endl;
@@ -536,8 +609,8 @@ void MainWindow::fifotest(){
          ui->statuslabel->update();
           ui->statusbar->setValue(0);
         ui->statusbar->show();
-    TFifoTest *myfifo= new TFifoTest(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
-    TFifoAnalysis  *analysis = new TFifoAnalysis(&fHistoQue,myfifo,fConfig->GetScanConfig(), &fMutex);
+	TFifoTest *myfifo= new TFifoTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+	TFifoAnalysis  *analysis = new TFifoAnalysis(&fHistoQue,myfifo,fConfig->GetScanConfig(), fHics, &fMutex);
 
    //scanLoop(myfifo);
     std::cout << "starting thread" << std::endl;
@@ -631,14 +704,14 @@ void MainWindow::start_test(){
 
 
 void MainWindow::fillingOBvectors(){
-    TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
-    TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), &fMutex);
-    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
-    TNoiseOccupancy *noisescan=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
-    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), &fMutex);
-    TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue,&fMutex);
-    TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), &fMutex);
-    TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(),&fMutex);
+  TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+  TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHics, &fMutex);
+    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+    TNoiseOccupancy *noisescan=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHics, &fMutex);
+    TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+    TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHics, &fMutex);
+    TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(), fHics, &fMutex);
     fScanVector.push_back(fifoscan);
     fScanVector.push_back(digitalscan);
     fScanVector.push_back(thresholdscan);
@@ -657,6 +730,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
     ui->statuslabel->setVisible(true);
      ui->statuslabel->update();
     for (int i=0;i<s.size();i++){
+   // for (int i=0;i<2;i++){
       //   QApplication::processEvents() ;
 
 
@@ -685,6 +759,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
               qApp->processEvents();
              break;
           }
+
          while (i<3 && i>1){
               ui->fstatus->setText("100% Completed");
               ui->dstatus->setText("100% Completed");
@@ -726,6 +801,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
             qApp->processEvents();
           break;
        }
+
         while (i<3 && i>1){
             ui->fstatus->setText("100% Completed");
             ui->dstatus->setText("100% Completed");
@@ -760,10 +836,15 @@ void MainWindow::connectcombo(int value){
         ui->testtypeselected->clear();
         ui->start_test->show();
         qDebug()<<"OB Qualification test selected";
+        // ui->testtypeselected->setText("OB Reception Test");
         ui->testtypeselected->setText("OB Qualification Test");
+      //  ui->example1->show();
         open();
-        if (counter==0) {break;}
-        fillingOBvectors();
+
+
+       if (counter==0) {break;}
+       fillingOBvectors();
+
         break;}
     case 2:
        {
@@ -789,6 +870,7 @@ void MainWindow::connectcombo(int value){
         ui->testtypeselected->clear();
         ui->start_test->show();
         qDebug()<<"IB Qualification test selected";
+         ui->testtypeselected->setText("OB Reception Test");
        // openib();
         //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
         break;}
@@ -1103,3 +1185,12 @@ if (properconfig==1){
 //saveinput->SaveSettings(operatorname,hicidnumber);
 
 }
+
+
+void MainWindow::setVI(float * vcasn, float * ithr) {
+  for(int i=0; i<fChips.size(); i++) {
+    //fChips.at(i)->GetConfig()->SetParamValue(ithr[i]);
+    //WIP...
+  }
+}
+
