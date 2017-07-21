@@ -1,13 +1,11 @@
 #include "THIC.h"
 #include <cstring>
 
-THic::THic (const char *id, int modId, /*TPowerBoard *pb, */ int chanVddd, int chanVdda, int chanBias)
+THic::THic (const char *id, int modId, TPowerBoard *pb, int pbMod)
 {
   strcpy(m_dbId, id);
-  //m_powerBoard = pb;
-  m_chanVddd = chanVddd;
-  m_chanVdda = chanVdda;
-  m_chanBias = chanBias;
+  m_powerBoard = pb;
+  m_pbMod    = pbMod;
 
   m_moduleId = modId;
   m_chips.clear();
@@ -62,13 +60,13 @@ float THic::GetTemperature()
 }
 
 
-THicIB::THicIB (const char *dbId, int modId,/*TPowerBoard pb, */ int chanVddd, int chanVdda, int chanBias)
-  : THic (dbId, modId, chanVddd, chanVdda, chanBias)
+THicIB::THicIB (const char *dbId, int modId, TPowerBoard *pb, int pbMod)
+  : THic (dbId, modId, pb, pbMod)
 {
 }
 
 
-THicOB::THicOB (const char *dbId, int modId,/*TPowerBoard pb, */ int chanVddd, int chanVdda, int chanBias)
-  : THic (dbId, modId, chanVddd, chanVdda, chanBias)
+THicOB::THicOB (const char *dbId, int modId, TPowerBoard *pb, int pbMod)
+  : THic (dbId, modId, pb, pbMod)
 {
 }

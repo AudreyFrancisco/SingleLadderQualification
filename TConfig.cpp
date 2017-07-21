@@ -8,6 +8,7 @@
 //construct Config from config file
 TConfig::TConfig (const char *fName) {
   fDeviceType = TYPE_UNKNOWN;   // will be overwritten in read config file
+  fUsePowerBoard = false;
   ReadConfigFile (fName);
 }
 
@@ -25,6 +26,7 @@ TConfig::TConfig (int nBoards, std::vector <int> chipIds, TBoardType boardType) 
 
 // construct a config for a single chip setup (one board and one chip only)
 TConfig::TConfig (int chipId, TBoardType boardType) {
+  fUsePowerBoard = false;
   Init(chipId, boardType);
 }
 
@@ -108,6 +110,10 @@ TDeviceType TConfig::ReadDeviceType (const char *deviceName) {
     type = TYPE_TELESCOPE;
   }
   else if (!strcmp(deviceName, "OBHIC")) {
+    type = TYPE_OBHIC;
+  }
+  else if (!strcmp(deviceName, "OBHIC_PB")) {
+    SetUsePowerBoard(true);
     type = TYPE_OBHIC;
   }
   else if (!strcmp(deviceName, "IBHIC")) {

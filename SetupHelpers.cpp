@@ -1,6 +1,7 @@
 #include <iostream>
 #include "SetupHelpers.h"
 #include "USBHelpers.h"
+#include "TPowerBoard.h"
 #include <string.h>
 
 
@@ -34,20 +35,24 @@ int initSetupOB(TConfig                        *config,
   (*boardType)                      = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) config->GetBoardConfig(0);
 
-  boardConfig->SetInvertedData (boardConfig->IsInverted());
   boardConfig->SetSpeedMode    (Mosaic::RCV_RATE_400);
 
   boards->push_back (new TReadoutBoardMOSAIC(config, boardConfig));
-  
+
+  TPowerBoard *pb = 0;  
+  if (config->GetUsePowerBoard()) {
+    pb = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0));
+  }
+
   if (hics) {
     TChipConfig *chipConfig = config->GetChipConfig (0);
     int          chipId     = chipConfig->GetChipId ();
     int          modId      = (chipId >> 4) & 0x7;
     if (hicIds) {
-      hics->push_back(new THicOB(hicIds[0], modId, 0, 0, 0));
+      hics->push_back(new THicOB(hicIds[0], modId, pb, 0));
     }
     else {
-      hics->push_back(new THicOB("Dummy ID", modId, 0, 0, 0));
+      hics->push_back(new THicOB("Dummy ID", modId, pb, 0));
     }
   }
 
@@ -313,10 +318,10 @@ int initSetupIB(TConfig                        *config,
 
   if (hics) {
     if (hicIds) {
-      hics->push_back(new THicOB(hicIds[0], 0, 0, 0, 0));
+      hics->push_back(new THicIB(hicIds[0], 0, 0, 0));
     }
     else {
-      hics->push_back(new THicOB("Dummy ID", 0, 0, 0, 0));
+      hics->push_back(new THicIB("Dummy ID", 0, 0, 0));
     }
   }
 

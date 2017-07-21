@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "TAlpide.h"
+#include "TPowerBoard.h"
 
 class TAlpide;
 
@@ -10,14 +11,15 @@ class THic {
  private:
  protected:
   std::vector <TAlpide*> m_chips;
-  // TPowerBoard *m_powerBoard;
-  int                   m_moduleId;
+  TPowerBoard          *m_powerBoard;
+  int                   m_moduleId;  // module ID as used in chip IDs
+  int                   m_pbMod;     // module number inside power board
   int                   m_chanVdda;
   int                   m_chanVddd;
   int                   m_chanBias;
   char                  m_dbId[50];
  public:
-  THic (const char *dbId, int modId,/*TPowerBoard pb, */ int chanVddd, int chanVdda, int chanBias);
+  THic (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
   bool  IsPowered      ();
   void  PowerOn        ();
   void  PowerOff       ();
@@ -40,7 +42,7 @@ class THicOB : public THic {
   int                   m_rcv8;       // receiver for master 8
  protected: 
  public:
-  THicOB (const char *dbId, int modId,/*TPowerBoard pb, */ int chanVddd, int chanVdda, int chanBias);
+  THicOB (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
 };
 
 
@@ -50,7 +52,7 @@ class THicIB : public THic {
   int                  m_rcv[9];
  protected:
  public:
-  THicIB (const char *dbId, int modId,/*TPowerBoard pb, */ int chanVddd, int chanVdda, int chanBias);
+  THicIB (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
 };
 
 
