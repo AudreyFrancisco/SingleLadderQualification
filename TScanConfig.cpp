@@ -68,9 +68,9 @@ void TScanConfig::SetVcasnArr (int hics, float *vcasn) { //copy vcasn array to m
   }
 }
 
-void TScanConfig::SetIthrArr (int hics, float *ithr) {
-  m_ithr = new int[hics];
-  for(int i=0; i<hics; i++) {
+void TScanConfig::SetIthrArr (int chips, float *ithr) {
+  m_ithr = new int[chips];
+  for(int i=0; i<chips; i++) {
     m_ithr[i] = (int)(ithr[i]+.5); //rounding matters
   }
 }

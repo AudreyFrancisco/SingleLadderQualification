@@ -138,6 +138,10 @@ FILE* TThresholdResultChip::GetFilePixelFitResult()
 FILE* TThresholdResultChip::GetFileRawData()
 {return m_fileRawData;} 
 
+void TThresholdResultChip::WriteToFile(FILE *fp) {
+  fprintf(fp, "INCOMPLETE");
+}
+
 // ================================
 // ================================
 
@@ -243,11 +247,10 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph)
     std::cout << "ERROR in line 241 of TAnalogAnalysis:  Unexpected resultFactor/threshold sign!" << std::endl;
     fitResult_dummy.threshold = 1;
     return fitResult_dummy;
-    if(fitfcn->GetParameter(0) < 0) {
-      fitResult_dummy.threshold = -1*fitfcn->GetParameter(0);  //for the ithr case
-    } else {
-      fitResult_dummy.threshold = fitfcn->GetParameter(0);
-    }
+  } else if(fitfcn->GetParameter(0) < 0) {
+    fitResult_dummy.threshold = -1*fitfcn->GetParameter(0);  //for the ithr case
+  } else {
+    fitResult_dummy.threshold = fitfcn->GetParameter(0);
     fitResult_dummy.noise     = fitfcn->GetParameter(1);
     fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
   }
@@ -267,7 +270,7 @@ void TThresholdAnalysis::Initialize()
   while (!m_scan->IsRunning()){sleep(1);}
   
   std::cout << "Initializing " << m_analisysName << std::endl;
-  
+ 
   TScanHisto histoDummy = m_scan->GetTScanHisto();
   
   std::map<int, THisto> histoMap_dummy= histoDummy.GetHistoMap();
@@ -369,8 +372,10 @@ void TThresholdAnalysis::Initialize()
     thresholdDummy.sum2=0;
     thresholdDummy.entries=0;
     pairDummy = std::make_pair(itr->first,thresholdDummy);
+    //std::cout << "TEST TTh Anal line 375: insert" << std::endl;
     m_threshold.insert(pairDummy);
-    
+    //std::cout << itr->first << std::endl;
+
     common::TStatVar noiseDummy;
     noiseDummy.sum=0;
     noiseDummy.sum2=0;
@@ -593,5 +598,4 @@ void TThresholdAnalysis::Finalize()
 float TThresholdAnalysis::GetResultThreshold(int chip) {
   return m_threshold.at(chip).mean;
 }
-
 

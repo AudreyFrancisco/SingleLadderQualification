@@ -10,9 +10,9 @@
 #include "TScan.h"
 
 class TAnalogScan : public TMaskScan {
- private:
-  int         m_VPULSEH;
+ //private:
  protected:
+  int         m_VPULSEH;
   void ConfigureFromu (TAlpide *chip);
   void ConfigureChip  (TAlpide *chip);
   void ConfigureBoard (TReadoutBoard *board);
@@ -28,7 +28,7 @@ class TAnalogScan : public TMaskScan {
   ~TAnalogScan  () {};
 
   void Init        ();
-  void PrepareStep (int loopIndex);
+  //virtual void PrepareStep (int loopIndex);
   void LoopEnd     (int loopIndex);
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void Execute     ();
@@ -36,22 +36,22 @@ class TAnalogScan : public TMaskScan {
 };
 
 
-//class TThresholdScan : public TAnalogScan {
+class TThreshScan : public TAnalogScan { //note:  NOT the same as TThresholdScan!
   //Conducts a regular threshold scan
-// public:
-//  TThresholdScan  (TScanConfig                   *config,
-//                  std::vector <TAlpide *>        chips,
-//                  std::vector <THic*>            hics,
-//                  std::vector <TReadoutBoard *>  boards,
-//                  std::deque<TScanHisto>        *histoque,
-//                  std::mutex                    *aMutex) :
-//    TAnalogScan  (config, chips, hics, boards, histoque, aMutex) {
-//    m_step[1] = 1;
-//  }
-//};
+ public:
+  TThreshScan  (TScanConfig                   *config,
+                  std::vector <TAlpide *>        chips,
+                  std::vector <THic*>            hics,
+                  std::vector <TReadoutBoard *>  boards,
+                  std::deque<TScanHisto>        *histoque,
+                  std::mutex                    *aMutex) :
+    TAnalogScan  (config, chips, hics, boards, histoque, aMutex) {
+    m_step[1] = 1;
+  }
+  void PrepareStep (int loopIndex);
+};
 
 class TtuneVCASNScan : public TAnalogScan {
-  //NOTE:  may need new destructor?
   //Conducts a threshold scan changing VCASN
  public:
   TtuneVCASNScan (TScanConfig                   *config,
@@ -94,6 +94,7 @@ class TITHRScan : public TAnalogScan {
     TAnalogScan  (config, chips, hics, boards, histoque, aMutex) {
     m_step[1] = 1;
   }
+  void PrepareStep (int loopIndex);
 };
 
 

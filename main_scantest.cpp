@@ -32,14 +32,14 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 #include "TScan.h"
-#include "TThresholdScan.h"
+//#include "TThresholdScan.h"
 #include "TDigitalScan.h"
 #include "TScanConfig.h"
 #include "THisto.h"
 #include "TScanAnalysis.h"
 #include "TThresholdAnalysis.h"
 #include "TDigitalAnalysis.h"
-
+#include "TAnalogScan.h"
 
 void scanLoop (TScan *myScan)
 {
@@ -87,27 +87,39 @@ int main(int argc, char** argv) {
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
   
-  TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
-  
-  //scanLoop(myScan);
-  std::cout << "starting thread" << std::endl;
-  std::thread scanThread(scanLoop, myScan);
-  analysis->Initialize();
-  std::thread analysisThread(&TScanAnalysis::Run, std::ref(analysis));
+  //TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  //TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+  TtuneVCASNScan *myTuneVScan = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+  TThresholdAnalysis  *analysisTuneV = new TThresholdAnalysis (&fHistoQue,myTuneVScan, fConfig->GetScanConfig(), fHics, &fMutex, 1); 
 
-  scanThread.join();
-  analysisThread.join();
-  analysis->Finalize();
+  //testing other classes...
+  //TtuneITHRScan *myTuneIScan = new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+  //TThreshScan *myThreshScan = new TThreshScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+
+  //scanLoop(myScan)...
+  std::cout << "starting thread" << std::endl;
+  std::thread scanThreadV(scanLoop, myTuneVScan);
+  analysisTuneV->Initialize(); //should allocate for GetResultThreshold...
+  std::thread analysisThreadI(&TScanAnalysis::Run, std::ref(analysisTuneV));
+
+  scanThreadV.join();
+  analysisThreadI.join();
+  analysisTuneV->Finalize();
   // std::vector <TCounter> counters = ((TDigitalAnalysis*)analysis)->GetCounters();
   
+  std::cout << "Printing VCASN thresholds:" << std::endl; //need to know SPECIFIC chip number!!
+  std::cout << analysisTuneV->GetResultThreshold(0);
+  //for(std::map<int,TThresholdResultChip> it; i<fChips.size(); i++) {
+  //  std::cout << "Chip " << i << ":  " << analysisTuneV->GetResultThreshold(i) << std::endl;
+  //}
+
   // std::cout << std::endl << "Counter values: " << std::endl;
   // for (int i = 0; i < counters.size(); i ++) {
   //   std::cout << "Chip " << counters.at(i).chipId <<": nCorrect = " << counters.at(i).nCorrect << std::endl;
   // }
   
-  delete myScan;
-  delete analysis;
+  delete myTuneVScan;
+  delete analysisTuneV;
   return 0;
 }
 

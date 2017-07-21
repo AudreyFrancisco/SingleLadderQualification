@@ -1,6 +1,6 @@
 #include <unistd.h>
 #include <string.h>
-#include "TThresholdScan.h"
+#include "TAnalogScan.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardDAQ.h"
 #include "AlpideConfig.h"
@@ -107,13 +107,13 @@ void TAnalogScan::Init() {
 
 
 
-void TAnalogScan::PrepareStep (int loopIndex) 
+void TThreshScan::PrepareStep (int loopIndex) 
 {
   switch (loopIndex) {
   case 0:    // innermost loop: change VPULSEL
     for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
-      m_chips.at(ichip)->WriteRegister(scanReg, m_VPULSEH - m_value[0]);
+      m_chips.at(ichip)->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEH - m_value[0]);
     }
     break;
   case 1:    // 2nd loop: mask staging
@@ -123,6 +123,26 @@ void TAnalogScan::PrepareStep (int loopIndex)
     }
     break;
   default: 
+    break;
+  }
+}
+
+void TITHRScan::PrepareStep (int loopIndex) //same as above
+{
+  switch (loopIndex) {
+  case 0:    // innermost loop: change VPULSEL
+    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      m_chips.at(ichip)->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEH - m_value[0]);
+    }
+    break;
+  case 1:    // 2nd loop: mask staging
+    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
+    }
+    break;
+  default:
     break;
   }
 }
