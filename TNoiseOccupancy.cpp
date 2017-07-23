@@ -197,6 +197,7 @@ void TNoiseOccupancy::Execute     ()
     m_boards.at(iboard)->Trigger(nTriggers);
   }
   for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
+		Hits->clear();
     ReadEventData(Hits, iboard, nTriggers);
     FillHistos   (Hits, iboard);
   }

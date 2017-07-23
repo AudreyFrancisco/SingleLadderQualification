@@ -136,6 +136,7 @@ void TThresholdScan::Execute()
   }
 
   for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
+		Hits->clear();
     ReadEventData (Hits, iboard);
     FillHistos    (Hits, iboard);
   }
