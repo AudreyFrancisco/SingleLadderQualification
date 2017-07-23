@@ -13,6 +13,7 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
+
 #include <unistd.h>
 #include <deque>
 #include <thread>
@@ -57,7 +58,7 @@ void scanLoop (TScan *myScan)
       }
       myScan->LoopEnd(0);
       // To avoid race hazard w.r.t. analysis (fit takes time). 
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
       myScan->Next   (1);
     }
     myScan->LoopEnd(1);
@@ -74,6 +75,7 @@ void scanAnalysis (TScanAnalysis *myAnalysis){
   myAnalysis->Finalize();
   
 }
+
 
 int main(int argc, char** argv) {
   
