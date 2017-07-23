@@ -240,6 +240,88 @@ bool TThresholdAnalysis::CheckPixelStuck(TGraph* aGraph)
   return true;
 }
 
+double TThresholdAnalysis::FindStart(TGraph* aGraph)
+{
+  
+  double xA = 0;
+  double yA = 0;
+  aGraph->GetPoint(0, xA, yA);
+  
+  double xB = 0;
+  double yB = 0;
+  aGraph->GetPoint(aGraph->GetN()-1, xB, yB);
+  
+  int initPoint = 0;
+  int endPoint = 0;
+  int incr = 0;
+  
+  if (yA==yB){
+    return -1;
+  } else if(yA<yB){
+    initPoint=0;
+    endPoint=aGraph->GetN()-1;
+    incr = +1;
+  } else if(yA>yB){
+    initPoint=aGraph->GetN()-1;
+    endPoint=0;
+    incr = -1;
+  }
+  
+  double upperPointX =0;
+  double upperPointY =0;
+  for (int itrPoint=initPoint; itrPoint<=endPoint; itrPoint+=incr){
+    double xDummy =0;
+    double yDummy =0;
+    aGraph->GetPoint(itrPoint, xDummy, yDummy);
+    
+    if (yDummy == m_nPulseInj) {
+      upperPointX = xDummy;
+      upperPointY = yDummy;
+      break;
+    }
+    
+  }
+  
+  double lowerPointX =0;
+  double lowerPointY =0;
+  for (int itrPoint=endPoint; itrPoint>=initPoint; itrPoint-=incr){
+    double xDummy =0;
+    double yDummy =0;
+    aGraph->GetPoint(itrPoint, xDummy, yDummy);
+    
+    if (yDummy == 0) {
+      lowerPointX = xDummy;
+      lowerPointY = yDummy;
+      break;
+    }
+    
+  }
+  
+  return (upperPointX + lowerPointX)*0.5;
+  
+  // double yMin = TMath::MinElement(aGraph->GetN(),aGraph->GetY());
+  // double yMax = TMath::MaxElement(aGraph->GetN(),aGraph->GetY());
+  
+  // if (yMin!=0 || yMax<=yMin || yMax>m_nPulseInj){return -1;}
+  
+  // double yMiddle = 0.5*(yMax - yMin);
+  
+  // int minPoint = TMath::LocMin( aGraph->GetN(),aGraph->GetY() );
+  // int maxPoint = TMath::LocMax( aGraph->GetN(),aGraph->GetY() );
+  
+  // std::cout << "Y: " << yMin << ";" << yMax << std::endl;
+  // std::cout << "X: " << minPoint << ";" << maxPoint << std::endl;
+  
+  // for (int itrPoint=minPoint; itrPoint<maxPoint; itrPoint++){
+  //   double x =0;
+  //   double y =0;
+  //   aGraph->GetPoint(itrPoint, x, y);
+  //   //std::cout << itrPoint << ":" << x << ";" << y << std::endl;
+  //   if (y>=yMiddle){return x;}  
+  // }
+  
+}
+
 double ErrorFunc(double* x, double* par)
 {
   double y = par[0]+par[1]*TMath::Erf( (x[0]-par[2]) / par[3] );
@@ -248,6 +330,9 @@ double ErrorFunc(double* x, double* par)
 
 common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph)
 {
+  
+  // std::cout << FindStart(aGraph) << std::endl;
+  
   TF1* fitfcn = new TF1("fitfcn", 
 			ErrorFunc,
 			m_startPulseAmplitude*m_electronPerDac,
@@ -257,12 +342,10 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph)
   fitfcn->SetParameter(0,0.5*m_nPulseInj); 
   // 0.5 of max. amplitude.
   fitfcn->SetParameter(1,0.5*m_nPulseInj); 
-  // x@50%.
-  fitfcn->SetParameter(2,0.5*(m_stopPulseAmplitude - m_startPulseAmplitude)*m_electronPerDac);
+  // x@y=50%.
+  fitfcn->SetParameter(2,FindStart(aGraph));
   // slope of s-curve.
-  fitfcn->SetParameter(3,0.5);
-  
-  aGraph->Fit("fitfcn","RQ");
+  fitfcn->SetParameter(3,0.10);
   
   common::TErrFuncFitResult fitResult_dummy;
   fitResult_dummy.status    = aGraph->Fit("fitfcn","RQ");
@@ -562,7 +645,7 @@ void TThresholdAnalysis::Finalize()
     resultDummy->SetNoiseStdDev(m_noise.at(dummyIntIndex).stdDev);
     
     fprintf( m_resultThreshold->GetFileHicResult(), 
-	     "%d %d %d %f %f %f %f",
+	     "%d %d %d %d %d %d %f %f %f %f",
 	     dummyChipIndex.boardIndex,
 	     dummyChipIndex.dataReceiver,
 	     dummyChipIndex.chipId,
