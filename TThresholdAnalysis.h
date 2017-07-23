@@ -20,6 +20,8 @@ class TScanHisto;
 
 class TF1;
 class TGraph;
+class TH1D;/*H*/
+class TH2D;/*H*/
 
 class TThresholdResultChip : public TScanResultChip {
  private:
@@ -42,12 +44,6 @@ class TThresholdResultChip : public TScanResultChip {
   double m_noiseMean;
   double m_noiseStdDev;
   
-  FILE* m_fileSummary;
-  FILE* m_filePixelNoHits;
-  FILE* m_filePixelStuck;
-  FILE* m_filePixelNoThreshold; // To do, based on chi2 cut?
-  FILE* m_filePixelFitResult;
-  FILE* m_fileRawData; 
   
  public: 
   TThresholdResultChip ();
@@ -71,13 +67,6 @@ class TThresholdResultChip : public TScanResultChip {
   void SetNoiseMean       (double aNoiseMean);
   void SetNoiseStdDev     (double aNoiseStdDev);
   
-  void SetFileSummary          (FILE* aFileName); 
-  void SetFilePixelNoHits      (FILE* aFileName);
-  void SetFilePixelStuck       (FILE* aFileName);
-  void SetFilePixelNoThreshold (FILE* aFileName); 
-  void SetFilePixelFitResult   (FILE* aFileName);
-  void SetFileRawData          (FILE* aFileName); 
-  
   unsigned int GetBoardIndex   (); 
   unsigned int GetDataReceiver ();
   unsigned int GetChipId ();
@@ -86,7 +75,7 @@ class TThresholdResultChip : public TScanResultChip {
   int GetVPulseH ();
   int GetVPulseStep ();
   int GetNMask   ();
-  
+   
   int GetCounterPixelsNoHits      ();
   int GetCounterPixelsStuck       ();
   int GetCounterPixelsNoThreshold ();
@@ -147,23 +136,26 @@ class TThresholdAnalysis : public TScanAnalysis {
   
   double m_cutChi2; // Or float ?
   
-  std::map<int,TThresholdResultChip> m_resultChip;
   std::map<int,common::TStatVar> m_threshold;
   std::map<int,common::TStatVar> m_noise;
   
   std::string GetFileName(common::TChipIndex aChipIndex,
 			  std::string fileType);
-  bool                      CheckPixelNoHits(TGraph* aGraph);
-  bool                      CheckPixelStuck (TGraph* aGraph);
-  common::TErrFuncFitResult DoFit           (TGraph* aGraph);
+  bool CheckPixelNoHits(TGraph* aGraph);
+  bool CheckPixelStuck (TGraph* aGraph);
+  double FindStart(TGraph* aGraph);
+  common::TErrFuncFitResult DoFit (TGraph* aGraph);
   
   bool HasData(TScanHisto &scanHisto, 
 	       common::TChipIndex idx, 
 	       int col);
   
  protected:
-  TScanResultChip *GetChipResult () {TThresholdResultChip *Result = new TThresholdResultChip(); return Result;};
+  TScanResultChip *GetChipResult () {
+    TThresholdResultChip *Result= new TThresholdResultChip(); 
+    return Result;};
   void            CreateResult  () {};
+  
  public:
   TThresholdAnalysis(std::deque<TScanHisto> *scanHistoQue, 
 		     TScan *aScan, 
@@ -182,21 +174,7 @@ class TThresholdAnalysis : public TScanAnalysis {
 
 #endif
 
-// STUFF TO IMPLEMENT FROM MARKUS' TALK :
-// Raw data;
-// Fit data;
-// # pixels with no hits;
-// Addr. of pixels with no hits, dump to file;
-// # pixels with no threshold;
-// Addr. of pixels with no threshold, dump to file;
-// Threshold avg. + rms per chip;
-// Noise avg. + rms per chip;
-// # stuck pixels, dump to file; 
-// Addr. of stuck pixels, dump to file;
-
-// STUFF TO IMPLEMENT FROM MARKUS' EMAIL:
-// Retrieve charge min, max, nInj;
-// Flag to dump raw data in file;
-// Flat to fit;
-// Cut for scan success;
-// Return boolean;
+//TODO:
+//- why fit fails.
+//-implement errors.
+//-optimize output files.
