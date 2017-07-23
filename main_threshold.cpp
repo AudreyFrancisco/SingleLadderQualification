@@ -45,7 +45,7 @@ int myChargeStep;  // currently unused
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
-int HitData     [16][100][512][1024];
+int HitData     [15][100][512][1024];
 int ChargePoints[100];
 int ievt = 0;
 
@@ -63,7 +63,7 @@ void InitScanParameters() {
 void ClearHitData() {
   for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
     ChargePoints[icharge-myChargeStart] = icharge;
-    for (int ichip = 0; ichip < 16; ichip ++) {
+    for (int ichip = 0; ichip < 15; ichip ++) {
       for (int icol = 0; icol < 512; icol ++) {
         for (int iaddr = 0; iaddr < 1024; iaddr ++) {
           HitData[ichip][icharge-myChargeStart][icol][iaddr] = 0;

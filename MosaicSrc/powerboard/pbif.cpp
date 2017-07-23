@@ -64,13 +64,15 @@ void PBif::init()
 
 	// I2C master (WBB slave) and connected peripherals
 	i2cBus = new I2Cbus(mIPbus, add_i2cMaster);
-	pb = new powerboard(i2cBus, true);					// master power board
+	i2cBusAux = new I2Cbus(mIPbus, add_i2cAux);
+	pb = new powerboard(i2cBus, i2cBusAux);
 }
 
 
 PBif::~PBif() 
 {
 	// delete objects in creation reverse order
+	delete i2cBusAux;
 	delete i2cBus;
 	delete mIPbus;
 }

@@ -1,6 +1,6 @@
 #ifndef TESTSELECTION_H
 #define TESTSELECTION_H
-
+#include<TFifoTest.h>
 #include <QDialog>
 #include <QPushButton>
 #include "dialog.h"
@@ -33,3 +33,4 @@ void popupmessage(QString m);
 };
 
 #endif // TESTSELECTION_H
+

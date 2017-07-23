@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015
+ * Copyright (C) 2017
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@
  * /_/ /_/ |__/ /_/    /_/ |__/  	 
  *
  * ====================================================
- * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2015.
+ * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
 
@@ -39,18 +39,21 @@
 #include "ad7997.h"
 #include "sc18is602.h"
 #include "max31865.h"
-
-#define NUM_TSENSOR 3
+#include "max5419.h"
+#include "ADC128D818.h"
 
 class powerboard
 {
 public:
 	typedef struct pbstate {
-		float Vmon[8];
-		float Imon[8];
-		int	  chOn;
-		float Vout[8];
-		float T[NUM_TSENSOR];
+		float Vmon[16];
+		float Imon[16];
+		uint16_t  chOn;
+		float Vout[16];
+		float Vbias;
+		float Ibias;
+		uint8_t	  biasOn;
+		float T;
 	} pbstate_t; 
 
 	enum getFlags {
@@ -61,60 +64,63 @@ public:
 	};
 
 public:
-	powerboard(I2Cbus *bus, bool master);
+	powerboard(I2Cbus *busMaster, I2Cbus *busAux);
 	~powerboard();
 	bool isReady();
 	void setIth(uint8_t ch, float value);
 	void setVbias(float value);
-	void enVbias(bool en);
+	void onVbias(uint8_t ch);
+	void offVbias(uint8_t ch);
+	void onAllVbias();
+	void offAllVbias();
 	void setVout(uint8_t ch, float value);
 	void storeVout(uint8_t ch);
 	void storeAllVout();
 	void restoreAllVout();
 	void onVout(uint8_t ch);
+	void offVout(uint8_t ch);
 	void onAllVout();
-
+	void offAllVout();
+	void startADC();
 	void getState(pbstate_t *state, getFlags flags=getAll);
 
 
 protected:
 	I2Cbus *i2cBus;	
+	I2Cbus *i2cBusAux;	
 
 private:
-	PCF8574				*regLuVbuf_18;
-	PCF8574				*regCtrl;
-	LTC2635				*dacBias;
-	LTC2635				*dacThreshold14;
-	LTC2635				*dacThreshold58;
-	AD5254				*rdacVadj14;
-	AD5254				*rdacVadj58;
-	AD7997				*adcMon14;
-	AD7997				*adcMon58;
+	LTC2635				*dacThreshold[4];
+	AD5254				*rdacVadj[4];
+	PCF8574				*regCtrl[2];
+	PCF8574				*regCtrlBias;
+	ADC128D818			*adcMon[5];
+	MAX5419				*rdacVbias;
 	SC18IS602			*spiBridge;
-	MAX31865			*temperatureDetector[3];
+	MAX31865			*temperatureDetector;
 
 private:
-	typedef struct i2c_baseAddress_s {
-		uint8_t dacBias;
-		uint8_t dacThreshold_14;
-		uint8_t dacThreshold_58;
-		uint8_t rdacVadj_14;
-		uint8_t rdacVadj_58;
-		uint8_t regLuVbuf_18;
-		uint8_t regCtrl;
-		uint8_t adcMon_14;
-		uint8_t adcMon_58;
-		uint8_t spiBridge;
-	} i2c_baseAddress_t;
-	static i2c_baseAddress_t i2c_baseAddress[2];
-
-	enum regCtrlBits{
-		CTRL_ResetBar			= 0x01,		// output
-		CTRL_AllertBusy1		= 0x02,		// input
-		CTRL_AllertBusy2		= 0x04,		// input
-		CTRL_BiasShdn			= 0x08,		// output
-		CTRL_AllInputs			= 0x06
-	};
+	// I2C device addresses
+	enum {
+		I2Caddress_dacThreshold_1_4		= 0x52,		// LTC2635 U291	0x52
+		I2Caddress_dacThreshold_5_8		= 0x60,		// LTC2635 U287 0x60
+		I2Caddress_dacThreshold_9_12	= 0x70,		// LTC2635 U288 0x70
+		I2Caddress_dacThreshold_13_16	= 0x72,		// LTC2635 U289 0x72
+		I2Caddress_rdacVadj_1_4			= 0x2c,		// AD5254  U275 0x2c
+		I2Caddress_rdacVadj_5_8			= 0x2d,		// AD5254  U276 0x2d
+		I2Caddress_rdacVadj_9_12		= 0x2e,		// AD5254  U272 0x2e
+		I2Caddress_rdacVadj_13_16		= 0x2f,		// AD5254  U274 0x2f
+		I2Caddress_rdacVbias			= 0x29,		// MAX5419 U253 0x29
+		AUX_I2Caddress_regCtrl_1_8		= 0x38,		// PCF8574A U267 0x38 (AUX)
+		AUX_I2Caddress_regCtrl_9_16		= 0x39,		// PCF8574A U268 0x39 (AUX)
+		I2Caddress_regCtrl_Bias			= 0x38,		// PCF8574A U265 0x38
+		I2Caddress_adcMon_1_4			= 0x1d,		// ADC128D818 U279 0x1d
+		I2Caddress_adcMon_5_8			= 0x1f,		// ADC128D818 U281 0x1f
+		I2Caddress_adcMon_9_12			= 0x35,		// ADC128D818 U280 0x35
+		I2Caddress_adcMon_13_16			= 0x37,		// ADC128D818 U283 0x37
+		I2Caddress_adcMon_Bias			= 0x1e,		// ADC128D818 U282 0x1e
+		I2Caddress_spiBridge			= 0x28		// SC18IS602  U195 0x28
+	};	
 };
 
 

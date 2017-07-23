@@ -20,8 +20,8 @@ RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverM
 
 MOSAIC_SOURCES = MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/pexception.cpp MosaicSrc/TAlpideDataParser.cpp
 
-CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
- TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp \
+CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp THIC.cpp USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp \
+ TReadoutBoardMOSAIC.cpp TChipConfig.cpp TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp TPowerBoard.cpp TPowerBoardConfig.cpp\
  BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TDigitalAnalysis.cpp TFifoAnalysis.cpp TNoiseAnalysis.cpp\
  TScan.cpp TFifoTest.cpp TThresholdScan.cpp TDigitalScan.cpp TNoiseOccupancy.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp Common.cpp $(RU_SOURCES) $(MOSAIC_SOURCES)
 
@@ -80,6 +80,9 @@ test_pulselength:   $(DEPS) main_pulselength.cpp
 test_poweron:   $(DEPS) main_poweron.cpp
 	$(CC) -o test_poweron $(OBJS) $(CFLAGS) main_poweron.cpp $(LINKFLAGS)
 
+test_powerboard:   $(DEPS) main_testpowerboard.cpp
+	$(CC) -o test_powerboard $(OBJS) $(CFLAGS) main_testpowerboard.cpp $(LINKFLAGS)
+
 test_noiseocc_ext:   $(DEPS) main_noiseocc_ext.cpp
 	$(CC) -o test_noiseocc_ext $(OBJS) $(CFLAGS) main_noiseocc_ext.cpp $(LINKFLAGS)
 
@@ -102,6 +105,19 @@ test_scantest: $(DEPS) $(OBJS_ROOT) main_scantest.cpp
 
 test_threshold_v1: $(DEPS)  $(OBJS_ROOT) main_threshold_v1.cpp
 	$(CC) -o test_threshold_v1 $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_threshold_v1.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
+#added for calibration
+test_tuneITHR: $(DEPS)  $(OBJS_ROOT) main_tuneITHR.cpp
+	$(CC) -o test_tuneITHR $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_tuneITHR.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
+test_ITHRthreshold: $(DEPS)  $(OBJS_ROOT) main_ITHRthreshold.cpp
+	$(CC) -o test_ITHRthreshold $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_ITHRthreshold.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
+test_tuneVCASN: $(DEPS)  $(OBJS_ROOT) main_tuneVCASN.cpp
+	$(CC) -o test_tuneVCASN $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_tuneVCASN.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
+test_VCASNthreshold: $(DEPS)  $(OBJS_ROOT) main_VCASNthreshold.cpp
+	$(CC) -o test_VCASNthreshold $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_VCASNthreshold.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 # Classes using ROOT.
 TThresholdAnalysis.o: TThresholdAnalysis.cpp TThresholdAnalysis.h
@@ -126,7 +142,7 @@ clean-all:	clean
 	rm -rf test_*
 	rm -rf $(LIBRARY)
 	rm -rf $(ANALYSIS_LIBRARY)
-	$(MAKE) -C $(LIBMOSAIC_DIR) clean
-	$(MAKE) -C $(LIBPOWERBOARD_DIR) clean
+	$(MAKE) -C $(LIBMOSAIC_DIR) cleanall
+	$(MAKE) -C $(LIBPOWERBOARD_DIR) cleanall
 
 .PHONY:	all clean clean-all $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) lib lib_analysis

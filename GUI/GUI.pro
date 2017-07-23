@@ -21,11 +21,13 @@ QMAKE_LDFLAGS  *= $(shell root-config --ldflags)
 SOURCES += main.cpp\
            mainwindow.cpp\
            dialog.cpp \
-           testselection.cpp
+           testselection.cpp \
+    scanthread.cpp
 
 HEADERS  += mainwindow.h \
             dialog.h \
-            testselection.h
+            testselection.h \
+    scanthread.h
 
 FORMS    += mainwindow.ui \
             dialog.ui \

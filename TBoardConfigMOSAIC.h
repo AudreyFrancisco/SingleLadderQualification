@@ -78,7 +78,7 @@ public:
 	void SetCtrlAFThreshold    (uint32_t ACtrlAFThreshold)     { RunCtrlAFThreshold = (int)ACtrlAFThreshold;}
 	void SetCtrlLatMode        (uint16_t ARunCtrlLatencyMode)  { RunCtrlLatMode = (int)ARunCtrlLatencyMode;}
 	void SetCtrlTimeout        (uint32_t ARunCtrlTimeout)      { RunCtrlTimeout = (int)ARunCtrlTimeout;}
-    void SetInvertedData       (bool IsInverted)               { Inverted = (int)IsInverted;};
+        void SetInvertedData       (bool     AIsInverted)          { Inverted       = (int)AIsInverted;};
 	void SetPollingDataTimeout (uint32_t APollDataTimeout)     { pollDataTimeout = (int)APollDataTimeout;}
 	void SetSpeedMode          (Mosaic::TReceiverSpeed ASpeedMode);
 

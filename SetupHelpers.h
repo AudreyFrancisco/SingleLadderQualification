@@ -5,6 +5,8 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
+#include "TAlpide.h"
+#include "THIC.h"
 
 
 // definition of standard setup types: 
@@ -14,14 +16,14 @@
 
 typedef enum {setupSingle, setupIB, setupOB, setupSingleM} TSetupType;
 
-int  initSetupEndurance   (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType,std::vector <TAlpide *> *chips);
-int  initSetupOB          (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
-int  initSetupIB          (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
-int  initSetupIBRU        (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
+int  initSetupEndurance   (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType,std::vector <TAlpide *> *chips, std::vector <THic *> *hics, const char **hicIds);
+int  initSetupOB          (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, std::vector <THic *> *hics, const char **hicIds);
+int  initSetupIB          (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, std::vector <THic *> *hics, const char **hicIds);
+int  initSetupIBRU        (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, std::vector <THic *> *hics, const char **hicIds);
 int  initSetupSingle      (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
 int  initSetupSingleMosaic(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
-int  initSetupHalfStave   (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
-int  initSetup            (TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, const char *configFileName = "");
+int  initSetupHalfStave   (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, std::vector <THic *> *hics, const char **hicIds);
+int  initSetup            (TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, const char *configFileName = "", std::vector <THic *> *hics = 0, const char **hicIds = 0);
 int  powerOn              (TReadoutBoardDAQ *aDAQBoard);
 int  CheckControlInterface(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips);
 void MakeDaisyChain       (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, int startPtr=-1);

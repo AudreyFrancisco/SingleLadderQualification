@@ -34,8 +34,8 @@ all: $(TARGET_LIB)
 $(TARGET_LIB): $(LIB_OBJS)
 	$(RM) $@
 	$(AR) $@ $(LIB_OBJS)
-
-
+	
+	
 depend: .depend
 
 .depend: $(SRC)

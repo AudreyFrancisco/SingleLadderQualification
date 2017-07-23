@@ -38,12 +38,14 @@
 #include <QLineEdit>
 #include <QSignalMapper>
 #include <QTimer>
+#include <QCheckBox>
 #include "setValidator.h"
 #include "pbif.h"
 #include "powerboard.h"
 
-#define NUM_TSENSORS 3
-#define NUM_CHANNELS 8
+#define NUM_TSENSORS 1
+#define NUM_MODULES  8
+#define NUM_CHANNELS 16
 
 class pbMainWindow : public QMainWindow
 {
@@ -60,19 +62,22 @@ private:
 	QPixmap 		ledRedPixmap;
 	QPixmap 		ledGreyPixmap;
 	QLCDNumber 		*temperatureLCD[NUM_TSENSORS];
+	QCheckBox 		*chVbiasOn[NUM_MODULES];
 	QLabel 			*VbiasLED;
 	QLabel			*channelLED[NUM_CHANNELS];
 	bool			channelON[NUM_CHANNELS];
+	QLCDNumber		*VbiasLCD;
+	QLCDNumber		*IbiasLCD;
 	QLCDNumber 		*VoltLCD[NUM_CHANNELS];
 	QLCDNumber 		*AmpLCD[NUM_CHANNELS];
 	QLineEdit 		*VsetText[NUM_CHANNELS];
 	QLineEdit 		*IsetText[NUM_CHANNELS];
 	QLineEdit 		*VbiasText;
-	bool			VbiasON;
 	QSignalMapper 	*ChannelSetOnMapper;
 	QSignalMapper 	*ChannelSetOffMapper;
 	QSignalMapper 	*ChannelVsetMapper;
 	QSignalMapper 	*ChannelIsetMapper;
+	QSignalMapper 	*ChannelBiasMapper;
 	QTimer			*refreshTimer;
 	setValidator 	*VbiasValidator;
 	setValidator 	*VsetValidator;
@@ -91,9 +96,11 @@ private slots:
 	void channelSetOFF(int ch);
 	void channelVset(int ch);
 	void channelIset(int ch);
+	void biasCheckBoxChanged(int ch);
 	void storeVset();
 	void VbiasSet();
-	void enVbias(bool en);
+//	void enAllVbias(bool en);
+	void enVbias(bool en, int ch);
 	void refreshMonitor();
 	void refreshSettings();
 	void allON();
@@ -106,8 +113,9 @@ private slots:
 	
 private:
 	QWidget *topStatusBar();
-	QWidget *channel(int ch);
+	QWidget *channel(int ch, QString chName);
 	QLCDNumber *newLargeLCD();
+	QLCDNumber *newSmallLCD();
 	bool XMLreadChannel(QDomElement &root, int n);
 	bool XMLreadBias(QDomElement &root);
 	bool XMLreadMOSAIC(QDomElement &root);

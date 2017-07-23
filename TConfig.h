@@ -20,6 +20,7 @@ class TConfig {
   std::vector <TChipConfig *>  fChipConfigs;
   TScanConfig                 *fScanConfig;
   TDeviceType                  fDeviceType;
+  bool                         fUsePowerBoard;
 
   void        ReadConfigFile (const char *fName);
   void        Init           (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC); 
@@ -34,9 +35,11 @@ class TConfig {
   TConfig (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC); 
   TConfig (int chipId, TBoardType boardType = boardDAQ);
   
-  TDeviceType   GetDeviceType      () {return fDeviceType;};
-  int           GetNChips          () {return fChipConfigs.size();};
-  int           GetNBoards         () {return fBoardConfigs.size();};
+  TDeviceType   GetDeviceType      ()           {return fDeviceType;};
+  int           GetNChips          ()           {return fChipConfigs.size();};
+  int           GetNBoards         ()           {return fBoardConfigs.size();};
+  bool          GetUsePowerBoard   ()           {return fUsePowerBoard;};
+  void          SetUsePowerBoard   (bool UsePB) {fUsePowerBoard = UsePB;};
   TChipConfig  *GetChipConfig      (int iChip);
   TChipConfig  *GetChipConfigById  (int chipId);
   TBoardConfig *GetBoardConfig     (int iBoard);

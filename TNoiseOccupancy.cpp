@@ -8,8 +8,13 @@
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
 
-TNoiseOccupancy::TNoiseOccupancy (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
-  : TScan (config, chips, boards, histoQue, aMutex) 
+TNoiseOccupancy::TNoiseOccupancy (TScanConfig                   *config, 
+                                  std::vector <TAlpide *>        chips, 
+                                  std::vector <THic*>            hics, 
+                                  std::vector <TReadoutBoard *>  boards, 
+                                  std::deque<TScanHisto>        *histoQue, 
+                                  std::mutex                    *aMutex) 
+  : TScan (config, chips, hics, boards, histoQue, aMutex) 
 {
   strcpy(m_name, "Noise Occupancy");
 
@@ -192,6 +197,7 @@ void TNoiseOccupancy::Execute     ()
     m_boards.at(iboard)->Trigger(nTriggers);
   }
   for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
+		Hits->clear();
     ReadEventData(Hits, iboard, nTriggers);
     FillHistos   (Hits, iboard);
   }

@@ -262,8 +262,12 @@ void IPbus::processAnswer()
 	IPbusTransaction tr;
 	int pktId=0;
 
+
 	try {
 		rxPtr = 0;
+#ifdef TRACE_IPBUS
+		dumpRxData();
+#endif
 		for (int i=0; i<numTransactions; i++){
 			if ((rxSize-rxPtr)<4){
 				// printf("\n\n Wrong answer size at transaction %d. size:%d\n\n", i, rxSize-rxPtr);
@@ -332,6 +336,19 @@ void IPbus::processAnswer()
 	}
 }
 
+/*
+ *		Debug function tu dump received data
+ */
+void IPbus::dumpRxData()
+{
+	int rxPtrSave = rxPtr;
+
+	printf("Received IPBUS data:\n");
+	for (int i=0; i<rxSize; i+=4)
+		printf("%08x\n", getWord());
+
+	rxPtr = rxPtrSave;
+}
 
 /*
  *		Test functions

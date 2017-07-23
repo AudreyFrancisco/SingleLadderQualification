@@ -13,11 +13,13 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
+
 #include <unistd.h>
 #include <deque>
 #include <thread>
 #include <mutex> 
 #include "TAlpide.h"
+#include "THIC.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
@@ -56,7 +58,7 @@ void scanLoop (TScan *myScan)
       }
       myScan->LoopEnd(0);
       // To avoid race hazard w.r.t. analysis (fit takes time). 
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
       myScan->Next   (1);
     }
     myScan->LoopEnd(1);
@@ -74,12 +76,14 @@ void scanAnalysis (TScanAnalysis *myAnalysis){
   
 }
 
+
 int main(int argc, char** argv) {
   
   decodeCommandParameters(argc, argv);
   
   TBoardType fBoardType;
   std::vector <TReadoutBoard *> fBoards;
+  std::vector <THic *>          fHics;
   std::vector <TAlpide *>       fChips;
   TConfig *fConfig;
   
@@ -88,8 +92,8 @@ int main(int argc, char** argv) {
   
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
   
-  TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fBoards, &fHistoQue, &fMutex);
-  TScanAnalysis *myAnalysis = new TThresholdAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), &fMutex);
+  TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  TScanAnalysis *myAnalysis = new TThresholdAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
   
   std::thread scanThread(scanLoop, myScan);
   std::thread analysisThread(scanAnalysis, myAnalysis);

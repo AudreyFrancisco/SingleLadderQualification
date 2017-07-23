@@ -28,6 +28,7 @@ typedef struct options_s {
 	bool storeAllVout;
 	bool restoreAllVout;
 	bool on;
+	bool off;
 } options_t;
 options_t OPTIONS;
 
@@ -51,13 +52,14 @@ void print_help()
 		"\n"
 		"Options list:\n"
 		"\t -state\n"
-		"\t -Ith <channel> <value[V]>\n"
+		"\t -Ith <channel> <value[A]>\n"
 		"\t -Vbias <value[V]> - Note: MUST be negative\n"
 		"\t -Vout <channel> <value[V]>\n"
 		"\t -store <channel>\n"
 		"\t -storeall\n"
 		"\t -restoreall\n"
 		"\t -on\n"
+		"\t -off\n"
 		"\n"
 	);
 }
@@ -83,6 +85,7 @@ int readopt(int argc, char *argv[])
 	OPTIONS.storeAllVout = false;
 	OPTIONS.restoreAllVout = false;
 	OPTIONS.on = false;
+	OPTIONS.off = false;
 	
 	while (pc<argc){
 		if (strcmp(argv[pc], "-state")==0){
@@ -92,7 +95,7 @@ int readopt(int argc, char *argv[])
 				return -1;
 			OPTIONS.IthN = strtol(argv[++pc], NULL, 10);
 			OPTIONS.IthVal = strtof(argv[++pc], NULL);
-			if (OPTIONS.IthN<0 || OPTIONS.IthN>7 || OPTIONS.IthVal<0)
+			if (OPTIONS.IthN<0 || OPTIONS.IthN>15 || OPTIONS.IthVal<0)
 				return -1; 
 		} else if (strcmp(argv[pc], "-Vbias")==0){
 			if (pc>=(argc-1))
@@ -105,7 +108,7 @@ int readopt(int argc, char *argv[])
 				return -1;
 			OPTIONS.VoutN = strtol(argv[++pc], NULL, 10);
 			OPTIONS.VoutVal = strtof(argv[++pc], NULL);
-			if (OPTIONS.VoutN<0 || OPTIONS.VoutN>7 || OPTIONS.VoutVal<0)
+			if (OPTIONS.VoutN<0 || OPTIONS.VoutN>15 || OPTIONS.VoutVal<0)
 				return -1; 
 		} else if (strcmp(argv[pc], "-store")==0){
 			if (pc>=(argc-1))
@@ -119,6 +122,8 @@ int readopt(int argc, char *argv[])
 			OPTIONS.restoreAllVout = true;
 		} else if (strcmp(argv[pc], "-on")==0){
 			OPTIONS.on = true;
+		} else if (strcmp(argv[pc], "-off")==0){
+			OPTIONS.off = true;
 		} else {
 			break;
 		}
@@ -135,16 +140,19 @@ void printState(powerboard::pbstate_t *pbStat)
 {
 	printf("\nPower board state:\n");
 
-	for (int i=0; i<NUM_TSENSOR; i++)
-		printf("T[%d]:%5.1f ", i, pbStat->T[i]);
+	printf("T:%5.1f ", pbStat->T);
 	printf("\n");
 
-	for (int i=0; i<8; i++){
-		printf("CH%d:%s ", i, (pbStat->chOn & 1<<i) ? "Off":"ON ");
+	for (int i=0; i<16; i++){
+		printf("CH%02d:%s ", i, (pbStat->chOn & 1<<i) ? "ON ":"Off");
 		printf("Vset:%4.2f ", pbStat->Vout[i]); 
 		printf("Vmon:%4.2f ", pbStat->Vmon[i]); 
 		printf("Imon:%5.3f\n", pbStat->Imon[i]); 
-	}	
+	}
+	printf("VmonBias: %4.2f ImonBias: %4.2f\n", pbStat->Vbias, pbStat->Ibias);
+	printf("Bias status:");
+	for (int i=0; i<8; i++)
+		printf(" %d:%s", i, (pbStat->biasOn & 1<<i) ? "ON ":"Off"); 
 
 	printf("\n\n");
 }
@@ -171,13 +179,8 @@ int main(int argc, char**argv)
 
 		if (OPTIONS.IthN>=0)
 			pb->setIth(OPTIONS.IthN, OPTIONS.IthVal);
-		if (OPTIONS.Vbias<=0){
+		if (OPTIONS.Vbias<=0)
 			pb->setVbias(OPTIONS.Vbias);
-			if (OPTIONS.Vbias!=0.0)
-				pb->enVbias(true);
-			else
-				pb->enVbias(false);
-		}
 		if (OPTIONS.VoutN>=0)
 			pb->setVout(OPTIONS.VoutN, OPTIONS.VoutVal);
 		if (OPTIONS.storeVout>=0)
@@ -186,10 +189,19 @@ int main(int argc, char**argv)
 			pb->storeAllVout();
 		if (OPTIONS.restoreAllVout)
 			pb->restoreAllVout();
-		if (OPTIONS.on)
+		if (OPTIONS.on){
 			pb->onAllVout();
-	
+			pb->onAllVbias();
+		}
+		if (OPTIONS.off){
+			pb->offAllVout();
+			pb->offAllVbias();
+		}
 		if (OPTIONS.readState){
+			pb->startADC();
+			// wait 100 ms to get first convertion
+			usleep(100000);
+
 			pb->getState(&pbStat);
 			printState(&pbStat);
 		}

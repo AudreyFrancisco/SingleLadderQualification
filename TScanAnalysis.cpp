@@ -7,12 +7,17 @@
 #include "TScan.h"
 #include "TScanConfig.h"
 
-TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aConfig, std::mutex *aMutex) 
+TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue, 
+                             TScan                  *aScan, 
+                             TScanConfig            *aConfig, 
+                             std::vector <THic*>     hics, 
+                             std::mutex             *aMutex) 
 {
   m_histoQue = histoQue;
   m_mutex    = aMutex;
   m_scan     = aScan;
   m_config   = aConfig;
+  m_hics     = hics;
   m_first    = true;
   m_chipList.clear ();
 }
@@ -36,8 +41,7 @@ void TScanAnalysis::CreateChipResults ()
     TScanResultChip    *chipResult = GetChipResult();
     common::TChipIndex idx         = m_chipList.at(i);
     m_result->AddChipResult (idx, chipResult);
-  }
-  
+  }  
 }
 
 
@@ -66,4 +70,22 @@ TScanResultChip *TScanResult::GetChipResult (common::TChipIndex idx)
     if (it->first == id) return it->second;
   }  
   return 0;
+}
+
+
+void TScanResult::WriteToFile(const char *fName) 
+{
+  FILE *fp = fopen (fName, "a");
+
+  fprintf (fp, "Number of chips: %d\n", m_chipResults.size());
+
+  WriteToFileGlobal (fp);
+
+  for (std::map<int, TScanResultChip*>::iterator it = m_chipResults.begin(); it != m_chipResults.end(); ++it)  {
+    int idx = it->first;
+    fprintf(fp, "\nBoard %d, Receiver %d, Chip %d:\n", (idx >> 8) & 0xf, (idx >> 4) & 0xf, idx & 0xf);
+    it->second->WriteToFile(fp);
+  }      
+
+  fclose (fp);
 }

@@ -1,10 +1,17 @@
 #include <iostream>
 #include "SetupHelpers.h"
 #include "USBHelpers.h"
+#include "TPowerBoard.h"
 #include <string.h>
 
 
 #define NEWALPIDEVERSION "1.1"
+
+
+
+
+//TODO: Create Hic Lists for all setup types
+//Include power boards
 
 // ----- Global variables (deprecated but ) -
 int VerboseLevel = 0;
@@ -18,14 +25,36 @@ char ConfigurationFileName[1024] = "Config.cfg";
 //    - masters send data to two different receivers (0 and 1)
 //    - receiver number for slaves set to -1 (not connected directly to receiver)
 //      (this ensures that a receiver is disabled only if the connected master is disabled)
-int initSetupOB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
+int initSetupOB(TConfig                        *config, 
+                std::vector <TReadoutBoard *>  *boards, 
+                TBoardType                     *boardType, 
+                std::vector <TAlpide *>        *chips, 
+                std::vector <THic *>           *hics, 
+                const char                    **hicIds) 
+{
   (*boardType)                      = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) config->GetBoardConfig(0);
 
-  boardConfig->SetInvertedData (boardConfig->IsInverted());
   boardConfig->SetSpeedMode    (Mosaic::RCV_RATE_400);
 
   boards->push_back (new TReadoutBoardMOSAIC(config, boardConfig));
+
+  TPowerBoard *pb = 0;  
+  if (config->GetUsePowerBoard()) {
+    pb = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0));
+  }
+
+  if (hics) {
+    TChipConfig *chipConfig = config->GetChipConfig (0);
+    int          chipId     = chipConfig->GetChipId ();
+    int          modId      = (chipId >> 4) & 0x7;
+    if (hicIds) {
+      hics->push_back(new THicOB(hicIds[0], modId, pb, 0));
+    }
+    else {
+      hics->push_back(new THicOB("Dummy ID", modId, pb, 0));
+    }
+  }
 
   for (int i = 0; i < config->GetNChips(); i++) {
     TChipConfig *chipConfig = config    ->GetChipConfig(i);
@@ -42,7 +71,14 @@ int initSetupOB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
     	chipConfig->SetParamValue("LINKSPEED", "1200");
     }
 
-    chips->push_back(new TAlpide(chipConfig));
+    TAlpide *chip = new TAlpide(chipConfig);
+    if (hics) {
+      chip        ->SetHic   (hics->at(0));
+      hics->at(0) ->AddChip  (chip);
+    }
+    chips       ->push_back(chip);
+
+
     chips->at(i) -> SetReadoutBoard(boards->at(0));
     if (i < 7) {              // first master-slave row
       if (control < 0) {
@@ -67,7 +103,7 @@ int initSetupOB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
     boards->at(0)-> AddChip        (chipId, control, receiver, chips->at(i));
   }
   int nWorking = CheckControlInterface(config, boards, boardType, chips);
-  sleep(5);
+  //sleep(5);
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
 }
@@ -75,7 +111,13 @@ int initSetupOB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
 
 // implicit assumptions on the setup in this method
 // - chips of master 0 of all modules are connected to 1st mosaic, chips of master 8 to 2nd MOSAIC
-int initSetupHalfStave(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
+int initSetupHalfStave(TConfig                        *config, 
+                       std::vector <TReadoutBoard *>  *boards, 
+                       TBoardType                     *boardType, 
+                       std::vector <TAlpide *>        *chips,
+                       std::vector <THic *>           *hics, 
+                       const char                    **hicIds) 
+{
   (*boardType) = boardMOSAIC;
   for (int i = 0; i < config->GetNBoards(); i++) {
     TBoardConfigMOSAIC* boardConfig = (TBoardConfigMOSAIC*) config->GetBoardConfig(i);
@@ -112,8 +154,11 @@ int initSetupHalfStave(TConfig* config, std::vector <TReadoutBoard *> * boards, 
 //
 // Modify the function in order to scan a sub set of chips. The dimension is fixed to 14 !!
 //
-void MakeDaisyChain(TConfig* config, std::vector <TReadoutBoard *> * boards,
-		TBoardType* boardType, std::vector <TAlpide *> * chips, int startPtr)
+void MakeDaisyChain(TConfig                       *config, 
+                    std::vector <TReadoutBoard *> *boards,
+		    TBoardType                    *boardType,
+                    std::vector <TAlpide *>       *chips, 
+                    int                            startPtr)
 {
 
   int firstLow[8], firstHigh[8], lastLow[8], lastHigh[8];
@@ -192,12 +237,20 @@ void MakeDaisyChain(TConfig* config, std::vector <TReadoutBoard *> * boards,
 
 
 // Try to communicate with all chips, disable chips that are not answering
-int CheckControlInterface(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
+int CheckControlInterface(TConfig                       *config, 
+                          std::vector <TReadoutBoard *> *boards, 
+                          TBoardType                    *boardType, 
+                          std::vector <TAlpide *>       *chips) 
+{
   uint16_t WriteValue = 10;
   uint16_t Value;
   int      nWorking = 0;
 
   std::cout << std::endl << "Before starting actual test:" << std::endl << "Checking the control interfaces of all chips by doing a single register readback test" << std::endl;
+  for (int i = 0; i < boards->size(); i++) {
+    boards->at(i)->SendOpCode(Alpide::OPCODE_GRST);
+  }
+
   for (int i = 0; i < chips->size(); i++) {
     if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
     //std::cout << "Writing chip " << i << std::endl;
@@ -227,7 +280,13 @@ int CheckControlInterface(TConfig* config, std::vector <TReadoutBoard *> * board
 // Setup definition for inner barrel stave with MOSAIC
 //    - all chips connected to same control interface
 //    - each chip has its own receiver, mapping defined in RCVMAP
-int initSetupIB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
+int initSetupIB(TConfig                        *config, 
+                std::vector <TReadoutBoard *>  *boards, 
+                TBoardType                     *boardType, 
+                std::vector <TAlpide *>        *chips, 
+                std::vector <THic *>           *hics, 
+                const char                    **hicIds) 
+{
   int RCVMAP []                   = { 3, 5, 7, 8, 6, 4, 2, 1, 0 };
 
   (*boardType)                      = boardMOSAIC;
@@ -257,11 +316,27 @@ int initSetupIB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
 
   boards->push_back (new TReadoutBoardMOSAIC(config, boardConfig));
 
+  if (hics) {
+    if (hicIds) {
+      hics->push_back(new THicIB(hicIds[0], 0, 0, 0));
+    }
+    else {
+      hics->push_back(new THicIB("Dummy ID", 0, 0, 0));
+    }
+  }
+
   for (int i = 0; i < config->GetNChips(); i++) {
     TChipConfig *chipConfig = config->GetChipConfig(i);
     int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
     int          receiver   = chipConfig->GetParamValue("RECEIVER");
-    chips->push_back(new TAlpide(chipConfig));
+
+    TAlpide *chip = new TAlpide(chipConfig);
+    if (hics) {
+      chip        ->SetHic   (hics->at(0));
+      hics->at(0) ->AddChip  (chip);
+    }
+
+    chips->push_back(chip);
     chips->at(i) -> SetReadoutBoard(boards->at(0));
 
     if (control  < 0) {
@@ -285,7 +360,13 @@ int initSetupIB(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardT
 // Setup definition for inner barrel stave with readout unit
 //    - all chips connected to same control interface
 //    - each chip has its own receiver, assume connector 0 -> transceiver number = chip id
-int initSetupIBRU(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
+int initSetupIBRU(TConfig                       *config, 
+                  std::vector <TReadoutBoard *> *boards, 
+                  TBoardType                    *boardType, 
+                  std::vector <TAlpide *>       *chips, 
+                  std::vector <THic *>          *hics, 
+                  const char                   **hicIds) 
+{
   (*boardType)                = boardRU;
   TBoardConfigRU *boardConfig = (TBoardConfigRU*) config->GetBoardConfig(0);
 
@@ -329,7 +410,11 @@ int initSetupIBRU(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoar
 }
 
 
-int initSetupSingleMosaic(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
+int initSetupSingleMosaic(TConfig                       *config, 
+                          std::vector <TReadoutBoard *> *boards, 
+                          TBoardType                    *boardType, 
+                          std::vector <TAlpide *>       *chips) 
+{
   TChipConfig        *chipConfig  = config->GetChipConfig(0);
   (*boardType)                      = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) config->GetBoardConfig(0);
@@ -358,7 +443,11 @@ int initSetupSingleMosaic(TConfig* config, std::vector <TReadoutBoard *> * board
 }
 
 
-int initSetupSingle(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
+int initSetupSingle(TConfig                       *config, 
+                    std::vector <TReadoutBoard *> *boards, 
+                    TBoardType                    *boardType, 
+                    std::vector <TAlpide *>       *chips) 
+{
   TReadoutBoardDAQ  *myDAQBoard = 0;
   TChipConfig       *chipConfig = config->GetChipConfig(0);
   chipConfig->SetParamValue("LINKSPEED", "-1");
@@ -416,7 +505,14 @@ int powerOn (TReadoutBoardDAQ *aDAQBoard) {
  * Add the InitSetUpEndurance call  - 25/5/17
  *
 */
-int initSetup(TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, const char *configFileName) {
+int initSetup(TConfig                       *&config, 
+              std::vector <TReadoutBoard *> * boards, 
+              TBoardType                    * boardType, 
+              std::vector <TAlpide *>       * chips, 
+              const char                    * configFileName, 
+              std::vector <THic *>          * hics, 
+              const char                    **hicIds) 
+{
 
   if(strlen(configFileName) == 0) // if length is 0 => use the default name or the Command Parameter
 	  config = new TConfig (ConfigurationFileName);
@@ -429,19 +525,19 @@ int initSetup(TConfig*& config, std::vector <TReadoutBoard *> * boards, TBoardTy
       initSetupSingle(config, boards, boardType, chips);
       break;
     case TYPE_IBHIC:
-      initSetupIB(config, boards, boardType, chips);
+      initSetupIB(config, boards, boardType, chips, hics, hicIds);
       break;
     case TYPE_OBHIC:
-      initSetupOB(config, boards, boardType, chips);
+      initSetupOB(config, boards, boardType, chips, hics, hicIds);
       break;
     case TYPE_ENDURANCE:
-       initSetupEndurance(config, boards, boardType, chips);
-       break;
+      initSetupEndurance(config, boards, boardType, chips, hics, hicIds);
+      break;
     case TYPE_CHIP_MOSAIC: 
       initSetupSingleMosaic(config, boards, boardType, chips);
       break;
     case TYPE_IBHICRU:
-      initSetupIBRU(config, boards, boardType, chips);
+      initSetupIBRU(config, boards, boardType, chips, hics, hicIds);
       break;
     default: 
       std::cout << "Unknown setup type, doing nothing" << std::endl;
@@ -497,10 +593,12 @@ int decodeCommandParameters(int argc, char **argv)
  *
  *
  */
-int initSetupEndurance(TConfig* config,
-						std::vector <TReadoutBoard *> *boards,
-						TBoardType* boardType,
-						std::vector <TAlpide *> *chips)
+int initSetupEndurance(TConfig                        *config,
+		       std::vector <TReadoutBoard *>  *boards,
+		       TBoardType                     *boardType,
+		       std::vector <TAlpide *>        *chips, 
+                       std::vector <THic *>           *hics,
+                       const char                    **hicIds)
 {
 	std::cout << "Entry SetUp Endurance Test" << std::endl;
 

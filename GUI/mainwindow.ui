@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1437</width>
-    <height>635</height>
+    <height>722</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,25 +17,30 @@
    <widget class="QTreeWidget" name="treeWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>0</y>
-      <width>261</width>
-      <height>271</height>
+      <x>0</x>
+      <y>50</y>
+      <width>361</width>
+      <height>371</height>
      </rect>
     </property>
     <column>
      <property name="text">
       <string>Testing object</string>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
     </column>
    </widget>
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>0</y>
-      <width>1061</width>
-      <height>531</height>
+      <x>370</x>
+      <y>20</y>
+      <width>961</width>
+      <height>551</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -48,8 +53,8 @@
      <widget class="QGroupBox" name="IBModule">
       <property name="geometry">
        <rect>
-        <x>80</x>
-        <y>330</y>
+        <x>110</x>
+        <y>350</y>
         <width>781</width>
         <height>141</height>
        </rect>
@@ -191,8 +196,8 @@
      <widget class="QGroupBox" name="OBHALFSTAVE">
       <property name="geometry">
        <rect>
-        <x>60</x>
-        <y>50</y>
+        <x>70</x>
+        <y>20</y>
         <width>811</width>
         <height>121</height>
        </rect>
@@ -311,8 +316,8 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>110</x>
-        <y>180</y>
+        <x>120</x>
+        <y>170</y>
         <width>791</width>
         <height>141</height>
        </rect>
@@ -920,14 +925,14 @@
       <widget class="QLabel" name="label">
        <property name="geometry">
         <rect>
-         <x>270</x>
+         <x>280</x>
          <y>20</y>
          <width>191</width>
          <height>21</height>
         </rect>
        </property>
        <property name="text">
-        <string>OUTER BARRELMODULE</string>
+        <string>OUTER BARRELHIC</string>
        </property>
       </widget>
       <widget class="QLabel" name="modulenumber">
@@ -944,6 +949,34 @@
        </property>
       </widget>
      </widget>
+     <widget class="QLabel" name="displaydetails">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>144</y>
+        <width>131</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Details:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="details">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>140</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -952,8 +985,8 @@
      <widget class="QComboBox" name="testselection">
       <property name="geometry">
        <rect>
-        <x>110</x>
-        <y>70</y>
+        <x>740</x>
+        <y>380</y>
         <width>131</width>
         <height>31</height>
        </rect>
@@ -982,64 +1015,197 @@
      <widget class="QLabel" name="label_3">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>50</y>
+        <x>560</x>
+        <y>400</y>
         <width>91</width>
-        <height>71</height>
+        <height>41</height>
        </rect>
       </property>
       <property name="text">
        <string>Select Test</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="start_test">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>170</y>
-        <width>101</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Start Test</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="statuslabel">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>470</x>
-        <y>120</y>
-        <width>173</width>
-        <height>35</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>16</pointsize>
-        <weight>75</weight>
-        <italic>true</italic>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Testing progress</string>
-      </property>
-     </widget>
      <widget class="QProgressBar" name="statusbar">
       <property name="geometry">
        <rect>
-        <x>440</x>
-        <y>190</y>
+        <x>710</x>
+        <y>430</y>
         <width>224</width>
         <height>30</height>
        </rect>
       </property>
       <property name="value">
        <number>0</number>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="writetodatabase">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>410</y>
+        <width>141</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Write to Database</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="cfg">
+      <property name="geometry">
+       <rect>
+        <x>320</x>
+        <y>430</y>
+        <width>41</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>LDC</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="newtest">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>360</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start new test</string>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="thresholdbox">
+      <property name="geometry">
+       <rect>
+        <x>380</x>
+        <y>240</y>
+        <width>251</width>
+        <height>151</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string/>
+      </property>
+      <widget class="QLabel" name="Thresholdresulttitle1">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>20</y>
+         <width>66</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Details1</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="ThresholdResulttitle2">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>50</y>
+         <width>66</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Details2</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>20</y>
+         <width>66</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QPlainTextEdit" name="example3">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>20</y>
+        <width>281</width>
+        <height>201</height>
+       </rect>
+      </property>
+      <property name="plainText">
+       <string>Powering test                 
+Ctrl IF phase scan           
+FIFO test                       
+PLL parameter scan      
+Digital scan                     
+VCASN Tuning                  
+ITHR Tuning                    
+Threshold scan                
+Noise occupancy scan    </string>
+      </property>
+     </widget>
+     <widget class="QPlainTextEdit" name="example1">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>30</y>
+        <width>281</width>
+        <height>201</height>
+       </rect>
+      </property>
+      <property name="plainText">
+       <string>Powering test                 Starting . . .
+Ctrl IF phase scan           Waiting . . .
+FIFO test                         Waiting . . 
+PLL parameter scan       Waiting . . 
+Digital scan                     Waiting . . 
+VCASN Tuning                 Waiting . . 
+ITHR Tuning                     Waiting . . 
+Threshold scan                Waiting . . 
+Noise occupancy scan     Waiting . . </string>
+      </property>
+     </widget>
+     <widget class="QPlainTextEdit" name="example2">
+      <property name="geometry">
+       <rect>
+        <x>670</x>
+        <y>20</y>
+        <width>281</width>
+        <height>201</height>
+       </rect>
+      </property>
+      <property name="plainText">
+       <string>Powering test                 Completed
+Ctrl IF phase scan           Completed
+FIFO test                         Completed
+PLL parameter scan       Completed
+Digital scan                     Completed
+VCASN Tuning                 Completed
+ITHR Tuning                     Completed
+Threshold scan                Completed 
+Noise occupancy scan     Completed </string>
+      </property>
+     </widget>
+     <widget class="QPlainTextEdit" name="example4">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>240</y>
+        <width>281</width>
+        <height>91</height>
+       </rect>
+      </property>
+      <property name="plainText">
+       <string>Powering test                 Starting . . .
+FIFO test                         Waiting . . .
+Digital scan                     Waiting . . 
+</string>
       </property>
      </widget>
     </widget>
@@ -1049,56 +1215,249 @@
      </attribute>
     </widget>
    </widget>
-   <widget class="QPushButton" name="cfg">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>210</y>
-      <width>131</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Load Configuration</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="quit">
-    <property name="geometry">
-     <rect>
-      <x>1210</x>
-      <y>540</y>
-      <width>111</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Quit</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="alicepic">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>280</y>
-      <width>241</width>
-      <height>311</height>
+      <x>10</x>
+      <y>430</y>
+      <width>321</width>
+      <height>241</height>
      </rect>
     </property>
     <property name="text">
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="newtest">
+   <widget class="QLabel" name="testtypeselected">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>150</y>
-      <width>121</width>
-      <height>41</height>
+      <x>10</x>
+      <y>20</y>
+      <width>211</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Start new test</string>
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tob">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>55</y>
+      <width>201</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test1">
+    <property name="geometry">
+     <rect>
+      <x>-40</x>
+      <y>110</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test2">
+    <property name="geometry">
+     <rect>
+      <x>-30</x>
+      <y>140</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test3">
+    <property name="geometry">
+     <rect>
+      <x>-19</x>
+      <y>170</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test4">
+    <property name="geometry">
+     <rect>
+      <x>-10</x>
+      <y>200</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test5">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>270</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="fstatus">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>110</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="dstatus">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>145</y>
+      <width>171</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="tstatus">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>170</y>
+      <width>191</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="nstatus">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>205</y>
+      <width>181</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ustatus">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>270</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="statuslabel">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>127</x>
+      <y>80</y>
+      <width>161</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+      <weight>75</weight>
+      <italic>true</italic>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Testing progress</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="start_test">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>380</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start Test</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="abort">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>380</y>
+      <width>95</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Abort</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="abortall">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>380</y>
+      <width>95</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Abort All</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="quit">
+    <property name="geometry">
+     <rect>
+      <x>1230</x>
+      <y>600</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Quit</string>
     </property>
    </widget>
   </widget>

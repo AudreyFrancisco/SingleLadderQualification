@@ -22,28 +22,43 @@ typedef struct {
 
 
 class TFifoResultChip : public TScanResultChip {
+  friend class TFifoAnalysis;
+ private:
+  int m_err0;
+  int m_err5;
+  int m_erra;
+  int m_errf;
  public: 
   TFifoResultChip () : TScanResultChip () {};
+  void WriteToFile (FILE *fp);
 };
 
 
 class TFifoResult : public TScanResult {
+  friend class TFifoAnalysis;
  public: 
   TFifoResult () : TScanResult () {};
+  void WriteToFileGlobal (FILE *fp)          {};
+  void WriteToDB         (const char *hicID) {};
 };
 
 
 class TFifoAnalysis : public TScanAnalysis {
  private:
   std::vector <TFifoCounter> m_counters; 
-  void InitCounters ();
-  void WriteResult  ();
+  void InitCounters     ();
+  void WriteResult      ();
+  void FillVariableList ();
  protected:
   TScanResultChip *GetChipResult () {TFifoResultChip *Result = new TFifoResultChip(); return Result;};
   void            CreateResult  () {};
  public:
-  TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex);
-  void Initialize () {};
+  TFifoAnalysis(std::deque<TScanHisto> *histoQue, 
+                TScan                  *aScan, 
+                TScanConfig            *aScanConfig, 
+                std::vector <THic*>     hics,
+                std::mutex             *aMutex);
+  void Initialize ();
   void Run        ();
   void Finalize   ();
  };

@@ -40,8 +40,9 @@ void LTC2635::write(uint8_t cmd, uint8_t add, uint16_t data)
 {
 	add &= 0x0f;
 
+	uint16_t d = data<<4;				// data alignment for LTC2635-12
 //	uint16_t d = data<<6;				// data alignment for LTC2635-10
-	uint16_t d = data<<8;				// data alignment for LTC2635-8
+//	uint16_t d = data<<8;				// data alignment for LTC2635-8
 
 	// Write command and data
 	i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Write);

@@ -13,6 +13,10 @@ TScanConfig::TScanConfig()
   m_nMaskStages  = N_MASK_STAGES;
   m_pixPerRegion = PIX_PER_REGION;
   m_noiseCutInv  = NOISECUT_INV;
+  m_vcasnStart   = VCASN_START;  //there's probably no need to change these four
+  m_vcasnStop    = VCASN_STOP;
+  m_ithrStart    = ITHR_START;
+  m_ithrStop     = ITHR_STOP;
   InitParamMap();
 }
 
@@ -27,6 +31,13 @@ void TScanConfig::InitParamMap ()
   fSettings["NMASKSTAGES"]  = &m_nMaskStages;
   fSettings["PIXPERREGION"] = &m_pixPerRegion;
   fSettings["NOISECUT_INV"] = &m_noiseCutInv;
+
+  fSettings["VCASN_START"]  = &m_vcasnStart;
+  fSettings["VCASN_STOP"]   = &m_vcasnStop;
+  fSettings["ITHR_START"]   = &m_ithrStart;
+  fSettings["ITHR_STOP"]    = &m_ithrStop;
+  m_ithr = NULL;  //not always used
+  m_vcasn = NULL;
 }
 
 
@@ -48,6 +59,20 @@ int TScanConfig::GetParamValue (const char *Name)
     return *(fSettings.find(Name)->second);
   }
   return -1;
+}
+
+void TScanConfig::SetVcasnArr (int hics, float *vcasn) { //copy vcasn array to m_vcasn
+  m_vcasn = new int[hics];
+  for(int i=0; i<hics; i++) {
+    m_vcasn[i] = (int)(vcasn[i]+.5); //rounding matters
+  }
+}
+
+void TScanConfig::SetIthrArr (int hics, float *ithr) {
+  m_ithr = new int[hics];
+  for(int i=0; i<hics; i++) {
+    m_ithr[i] = (int)(ithr[i]+.5); //rounding matters
+  }
 }
 
 

@@ -2,7 +2,7 @@ CC = gcc
 CXX = g++
 AR = ar rcs
 RM = rm -f
-CPPFLAGS = -O2 -g -Wall -std=gnu++11 -fPIC -I../libmosaic/include -I./include
+CPPFLAGS = -O2 -g -Wall -std=gnu++11  -fPIC -I../libmosaic/include -I./include
 LDFLAGS = ""
 LDLIBS = ""
 
@@ -12,7 +12,9 @@ LIB_SRC = 		src/powerboard.cpp \
 				src/ad5254.cpp \
 				src/ad7997.cpp \
 				src/sc18is602.cpp \
-				src/max31865.cpp
+				src/max31865.cpp \
+				src/max5419.cpp \
+				src/ADC128D818.cpp
 
 
 LIB_OBJS = $(LIB_SRC:.cpp=.o)

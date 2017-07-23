@@ -2,17 +2,49 @@
 #include <vector>
 #include "TDigitalAnalysis.h"
 
-TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig, std::mutex *aMutex) : TScanAnalysis(histoQue, aScan, aScanConfig, aMutex) 
+TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, 
+                                   TScan                  *aScan, 
+                                   TScanConfig            *aScanConfig, 
+                                   std::vector <THic*>     hics,
+                                   std::mutex             *aMutex) 
+: TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) 
 {
   m_ninj   = m_config->GetParamValue("NINJ");
   m_result = new TDigitalResult(); 
+  FillVariableList ();
 }
 
+/*
+TDigitalResult* TDigitalResult::clone()const{
+
+return new TDigitalResult(*this);
+}
+*/
+/*
+//Calling the base class assignment operator in my derived class assignment operator
+ TDigitalResult* TDigitalResult::operator=(const TDigitalResult& other){
+//handle self assignment 
+if (&other!=this) return *this;
+//handle base class assignemnt
+TScanResult::operator=(other);
+return *this;
+}
+*/
 
 //TODO: Implement HasData
 bool TDigitalAnalysis::HasData(TScanHisto &histo,  common::TChipIndex idx, int col) 
 {
   return true;
+}
+
+
+void TDigitalAnalysis::FillVariableList () 
+{
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("Chip Status", status));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# of dead Pixels", deadPix));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# of noisy Pixels", noisyPix));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# of ineff Pixels", ineffPix));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# of bad double columns", badDcol));
 }
 
 
@@ -62,29 +94,8 @@ void TDigitalAnalysis::WriteResult()
 {
   char fName[100];
   sprintf (fName, "DigitalScanResult_%s.dat", m_config->GetfNameSuffix());
-  
-  FILE         *fp       = fopen (fName, "w");
-  TErrorCounter errCount = ((TMaskScan*)m_scan)->GetErrorCount();
-
-  fprintf(fp, "NChips\t%d\n\n", m_chipList.size());
-
-  
-  fprintf(fp, "8b10b errors:\t%d\n",    errCount.n8b10b);
-  fprintf(fp, "Corrupt events:\t%d\n",  errCount.nCorruptEvent);
-  fprintf(fp, "Timeouts:\t%d\n",        errCount.nTimeout);
-  fprintf(fp, "Priority errors:\t%d\n", errCount.nPrioEncoder);
-
-  for (int ichip = 0; ichip < m_chipList.size();ichip ++ ) {
-    fprintf(fp, "\nBoard %d, Receiver %d, Chip %d\n", m_chipList.at(ichip).boardIndex,
-	    m_chipList.at(ichip).dataReceiver, 
-            m_chipList.at(ichip).chipId);
-    int dead = 512 * 1024 - (m_counters.at(ichip).nCorrect + m_counters.at(ichip).nNoisy + m_counters.at(ichip).nIneff);
-    fprintf(fp, "Dead pixels: %d\n", dead);
-    fprintf(fp, "Pixels with < %d hits: %d\n", m_ninj, m_counters.at(ichip).nIneff);
-    fprintf(fp, "Pixels with > %d hits: %d\n", m_ninj, m_counters.at(ichip).nNoisy);
-  }
-  
-  fclose (fp);  
+  m_scan  ->WriteConditions (fName);
+  m_result->WriteToFile     (fName);
 }
 
 
@@ -171,4 +182,22 @@ void TDigitalAnalysis::Finalize() {
   }
   WriteResult      ();
   WriteStuckPixels ();
+}
+
+
+void TDigitalResult::WriteToFileGlobal (FILE *fp) 
+{
+  fprintf(fp, "8b10b errors:\t%d\n",    m_n8b10b);
+  fprintf(fp, "Corrupt events:\t%d\n",  m_nCorrupt);
+  fprintf(fp, "Timeouts:\t%d\n",        m_nTimeout);
+}
+
+
+void TDigitalResultChip::WriteToFile (FILE *fp) 
+{
+  fprintf(fp, "Dead pixels: %d\n", m_nDead);
+  fprintf(fp, "Inefficient pixels: %d\n", m_nIneff);
+  fprintf(fp, "Noisy pixels: %d\n", m_nNoisy);
+  fprintf(fp, "Bad double cols: %d\n", m_nBadDcols);
+  fprintf(fp, "Stuck pixels: %d\n", m_nStuck);
 }

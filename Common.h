@@ -24,7 +24,6 @@ namespace common{
   } TChipIndex;
   
   typedef struct {
-    int status;
     double threshold;
     double noise;
     double redChi2;
@@ -76,8 +75,6 @@ namespace common{
   
   bool HitBelongsToChip(TChipIndex aChipIndex, TPixHit aHit);  
   int  FindIndexForHit (std::vector <TChipIndex> aChipList, TPixHit aHit);
-  
-  
 }
 
 #endif

@@ -6,8 +6,13 @@
 #include "AlpideConfig.h"
 
 
-TThresholdScan::TThresholdScan (TScanConfig *config, std::vector <TAlpide *> chips, std::vector <TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex) 
-  : TMaskScan (config, chips, boards, histoQue, aMutex) 
+TThresholdScan::TThresholdScan (TScanConfig                   *config, 
+                                std::vector <TAlpide *>        chips,
+                                std::vector <THic*>            hics, 
+                                std::vector <TReadoutBoard *>  boards, 
+                                std::deque<TScanHisto>        *histoQue, 
+                                std::mutex                    *aMutex) 
+  : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
 {
   strcpy(m_name, "Threshold Scan");
   m_start[0]  = m_config->GetChargeStart();
@@ -131,6 +136,7 @@ void TThresholdScan::Execute()
   }
 
   for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
+		Hits->clear();
     ReadEventData (Hits, iboard);
     FillHistos    (Hits, iboard);
   }
