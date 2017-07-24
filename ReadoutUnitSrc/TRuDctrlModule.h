@@ -2,6 +2,7 @@
 #define TRUDCTRLMODULE_H
 
 #include <cstdint>
+#include <iostream>
 
 #include "TRuWishboneModule.h"
 
@@ -49,6 +50,17 @@ public:
 
   int SetConnector(uint8_t connector, bool commit = true);
   void Wait(uint16_t waittime, bool commit = true);
+
+	//YCM: some function from Python code
+	void SetManchesterEn(bool en = true);
+	void ForcePhase(uint16_t phase);
+	void ReleasePhaseForce();
+	bool PhaseIsForce();
+	uint16_t GetPhase();
+
+private:
+  uint8_t m_connector;
+  bool m_connectorSet;
 };
 
 #endif // TRUDCTRLMODULE_H
