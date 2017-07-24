@@ -661,3 +661,14 @@ int initSetupEndurance(TConfig                        *config,
 	}
 	return 0;
 }
+
+
+int initConfig(TConfig*& config, const char *configFileName )
+{
+  if (strlen(configFileName) == 0)//use default or command parameter name
+    config = new TConfig(ConfigurationFileName);
+  else
+    config = new TConfig(configFileName); //use passed name
+
+	return 0;
+}

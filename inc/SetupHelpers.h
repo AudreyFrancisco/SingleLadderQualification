@@ -29,4 +29,5 @@ int  CheckControlInterface(TConfig* config, std::vector <TReadoutBoard *> * boar
 void MakeDaisyChain       (TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips, int startPtr=-1);
 int  decodeCommandParameters(int argc, char **argv);
 
+int initConfig            (TConfig*& config, const char* configFileName = ""); //YCM: init config from command parameter
 #endif

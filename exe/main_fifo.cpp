@@ -130,18 +130,21 @@ int main(int argc, char** argv) {
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
-  TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+  if (fBoards.size()) { //Yasser (change to use more than one board)
 
-  if (fBoards.size() == 1) {
+    for (const auto& rBoard : fBoards) {
+      rBoard->SendOpCode (Alpide::OPCODE_GRST);
+      rBoard->SendOpCode (Alpide::OPCODE_PRST);
+    }
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
-
-    for (unsigned int i = 0; i < fChips.size(); i ++) {
+    for (int i = 0; i < fChips.size(); i ++) {
+      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
       configureChip (fChips.at(i));
     }
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
+    for (const auto& rBoard : fBoards) {
+      rBoard->SendOpCode (Alpide::OPCODE_RORST);
+    }
 
     fTotalErr  = 0;
 
@@ -180,9 +183,12 @@ int main(int argc, char** argv) {
 
     std::cout << fEnabled << " chips were enabled for scan." << std::endl << std::endl << std::endl;
 
-    if (myDAQBoard) {
-      myDAQBoard->PowerOff();
-      delete myDAQBoard;
+    for (const auto& rBoard : fBoards) {
+      TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (rBoard);
+      if (myDAQBoard) {
+        myDAQBoard->PowerOff();
+        delete myDAQBoard;
+      }
     }
   }
 
