@@ -5,20 +5,22 @@
 #include <string>
 #include "TChipConfig.h"
 #include "TBoardConfig.h"
+#include "THicConfig.h"
 #include "TReadoutBoard.h"
 #include "TScanConfig.h"
 
 const int DEFAULT_MODULE_ID = 1;
 
 enum TDeviceType {TYPE_CHIP, TYPE_TELESCOPE, TYPE_OBHIC, TYPE_IBHIC, TYPE_CHIP_MOSAIC,
-					TYPE_HALFSTAVE, TYPE_IBHICRU, TYPE_ENDURANCE, TYPE_UNKNOWN};
+                  TYPE_HALFSTAVE, TYPE_HALFSTAVERU, TYPE_IBHICRU, TYPE_ENDURANCE, TYPE_UNKNOWN};
 
 class TChipConfig;
 
 class TConfig {
- private:
+private:
   std::vector <TBoardConfig *> fBoardConfigs;
   std::vector <TChipConfig *>  fChipConfigs;
+	std::vector <THicConfig *>   fHicConfigs;
   TScanConfig                 *fScanConfig;
   TDeviceType                  fDeviceType;
   bool                         fUsePowerBoard;
@@ -30,8 +32,8 @@ class TConfig {
   void        DecodeLine     (const char *Line);
   void        SetDeviceType  (TDeviceType AType, int NChips);
   TDeviceType ReadDeviceType (const char *deviceName);
- protected:
- public:
+protected:
+public:
   TConfig (const char *fName);
   TConfig (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC);
   TConfig (int chipId, TBoardType boardType = boardDAQ);
@@ -39,11 +41,15 @@ class TConfig {
   TDeviceType   GetDeviceType      ()           {return fDeviceType;};
   unsigned int  GetNChips          ()           {return fChipConfigs.size();};
   unsigned int  GetNBoards         ()           {return fBoardConfigs.size();};
+  unsigned int  GetNHics           ()           {return fHicConfigs.size();};
   bool          GetUsePowerBoard   ()           {return fUsePowerBoard;};
   void          SetUsePowerBoard   (bool UsePB) {fUsePowerBoard = UsePB;};
   TChipConfig  *GetChipConfig      (unsigned int iChip);
   TChipConfig  *GetChipConfigById  (int chipId);
   TBoardConfig *GetBoardConfig     (unsigned int iBoard);
+  TBoardConfig *GetBoardConfig     (unsigned int iBoard);
+  THicConfig   *GetHicConfig       (unsigned int iHic);
+  THicConfig   *GetHicConfigById   (unsigned int modId);
   TScanConfig  *GetScanConfig      () {return fScanConfig;};
   void          WriteToFile        (const char *fName);
 

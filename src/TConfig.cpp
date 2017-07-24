@@ -69,7 +69,7 @@ void TConfig::Init (int chipId, TBoardType boardType) {
 }
 
 
-// getter functions for chip and board config
+// getter functions for chip, board and hic config
 TChipConfig *TConfig::GetChipConfigById  (int chipId) {
   for (unsigned int i = 0; i < fChipConfigs.size(); i++) {
     if (fChipConfigs.at(i)->GetChipId() == chipId)
@@ -100,6 +100,26 @@ TBoardConfig *TConfig::GetBoardConfig (unsigned int iBoard){
   }
 }
 
+THicConfig *TConfig::GetHicConfigById  (int modId) {
+  for (int i = 0; i < fHicConfigs.size(); i++) {
+    if (fHicConfigs.at(i)->GetModId() == modId) 
+      return fHicConfigs.at(i);
+  }
+  // throw exception here.
+  std::cout << "HIC id " << modId << " not found" << std::endl;
+  return 0;
+}
+
+
+THicConfig *TConfig::GetHicConfig (int iHic) {
+  if (iHic < fHicConfigs.size()) {
+    return fHicConfigs.at(iHic);
+  }
+  else {
+    return 0;
+  }
+}
+
 
 TDeviceType TConfig::ReadDeviceType (const char *deviceName) {
   TDeviceType type = TYPE_UNKNOWN;
@@ -125,6 +145,9 @@ TDeviceType TConfig::ReadDeviceType (const char *deviceName) {
   else if (!strcmp(deviceName, "HALFSTAVE")) {
     type = TYPE_HALFSTAVE;
   }
+  else if (!strcmp(deviceName, "HALFSTAVERU")) {
+		type = TYPE_HALFSTAVERU;
+ 	}
   else if (!strcmp(deviceName, "ENDURANCETEST")) {
     type = TYPE_ENDURANCE;
   }
@@ -185,16 +208,20 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
     }
     Init (1, chipIds, boardRU);
   }
-  else if (AType == TYPE_HALFSTAVE) {
+  else if (AType == TYPE_HALFSTAVE || AType == TYPE_HALFSTAVERU) {
     // in case of half stave NChips contains number of modules
-    for (int imod = 0; imod < NChips; imod++) {
-      int moduleId = imod + 1;
+    for (int imod = 1; imod <= NChips; imod++) {
+      int modId = (imod & 0x7);
+			fHicConfigs.push_back(new THicConfigOB(this,modId));
       for (int i = 0; i < 15; i++) {
         if (i == 7) continue;
-        chipIds.push_back(i + ((moduleId & 0x7) << 4));
+        chipIds.push_back(i + (modId << 4));
       }
     }
-    Init (2, chipIds, boardMOSAIC);
+    if (AType == TYPE_HALFSTAVE) 
+			Init (2, chipIds, boardMOSAIC);
+		else 
+			Init (1, chipIds, boardRU);
   }
 }
 
@@ -231,15 +258,21 @@ void TConfig::ReadConfigFile (const char *fName)
     if (!strcmp(Param, "DEVICE")) {
       type = ReadDeviceType (Rest);
     }
-    if ((type != TYPE_UNKNOWN) && ((type != TYPE_TELESCOPE) || (NChips > 0)) && ((type != TYPE_HALFSTAVE) || (NModules == 0))) {   // type and nchips has been found (nchips not needed for type chip)
-      // SetDeviceType calls the appropriate init method, which in turn calls
+    if ((type != TYPE_UNKNOWN) &&
+			  ((type != TYPE_TELESCOPE) || (NChips > 0)) &&
+			  ((type != TYPE_HALFSTAVE) || (NModules > 0)) &&
+			  ((type != TYPE_HALFSTAVERU) || (NModules > 0))
+      ) {   // type and nchips has been found (nchips not needed for type chip)      
+			// SetDeviceType calls the appropriate init method, which in turn calls
       // the constructors for board and chip configs
       if (type == TYPE_OBHIC) {
     	  SetDeviceType(type, ModuleId);
       } else if (type == TYPE_ENDURANCE) {
-  	      SetDeviceType(type, ModuleId);
+  	    SetDeviceType(type, ModuleId);
       } else if (type == TYPE_HALFSTAVE) {
     	  SetDeviceType(type, NModules);
+			} else if (type == TYPE_HALFSTAVERU) {
+				SetDeviceType(type, NModules);
       } else {
     	  SetDeviceType(type, NChips);
       }
@@ -274,10 +307,10 @@ void TConfig::ParseLine(const char *Line, char *Param, char *Rest, int *Chip) {
 
 void TConfig::DecodeLine(const char *Line)
 {
-  int Index, ChipStart, ChipStop, BoardStart, BoardStop;
+  int Index, ChipStart, ChipStop, BoardStart, BoardStop, HicStart, HicStop;
   char Param[128], Rest[896];
   if ((Line[0] == '\n') || (Line[0] == '#')) {   // empty Line or comment
-      return;
+    return;
   }
 
   ParseLine(Line, Param, Rest, &Index);
@@ -287,12 +320,16 @@ void TConfig::DecodeLine(const char *Line)
     ChipStop  = fChipConfigs.size();
     BoardStart = 0;
     BoardStop  = fBoardConfigs.size();
+		HicStart = 0;
+		HicStop  = 0;
   }
   else {
-    ChipStart  = (Index< (int)fChipConfigs.size())  ? Index   : -1;
-    ChipStop   = (Index< (int)fChipConfigs.size())  ? Index+1 : -1;
-    BoardStart = (Index< (int)fBoardConfigs.size()) ? Index   : -1;
-    BoardStop  = (Index< (int)fBoardConfigs.size()) ? Index+1 : -1;
+    ChipStart  = (Index<(int)fChipConfigs.size())  ? Index   : -1;
+    ChipStop   = (Index<(int)fChipConfigs.size())  ? Index+1 : -1;
+    BoardStart = (Index<(int)fBoardConfigs.size()) ? Index   : -1;
+    BoardStop  = (Index<(int)fBoardConfigs.size()) ? Index+1 : -1;
+		HicStart   = (Index<(int)fHicConfigs.size())   ? Index   : -1;
+		HicStop    = (Index<(int)fHicConfigs.size())   ? Index+1 : -1;
   }
 
   // Todo: correctly handle the number of readout boards
@@ -309,6 +346,11 @@ void TConfig::DecodeLine(const char *Line)
       fBoardConfigs.at(i)->SetParamValue (Param, Rest);
     }
   }
+	else if ((fHicConfigs.size() > 0) && (fHicConfigs.at(0)->IsParameter(Param))) {
+		for (int i = Start; i < HicStop; i++) {
+			fHicConfigs.at(i)->SetParamValue (Param, Rest);
+		}
+	}
   else if (fScanConfig->IsParameter(Param)) {
     fScanConfig->SetParamValue (Param, Rest);
   }
