@@ -5,22 +5,27 @@
 
 #include <iostream>
 #include <unistd.h>
-#include "TReadoutBoard.h"
+#include <vector>
 #include "TReadoutBoardMOSAIC.h"
-#include "TBoardConfig.h"
 #include "TBoardConfigMOSAIC.h"
 #include "TConfig.h"
-#include "TAlpide.h"
+#include "SetupHelpers.h"
 #include <exception>
 
-int main()
+int main(int argc, char** argv)
 {
-	TReadoutBoardMOSAIC *theBoard;
+	TConfig* fConfig;
 
-	TConfig *config = new TConfig ("Config.cfg");
-	theBoard = new TReadoutBoardMOSAIC(config, (TBoardConfigMOSAIC*)config->GetBoardConfig(0));
+	decodeCommandParameters(argc,argv);
+  initConfig(fConfig);
 
-	theBoard->enableControlInterfaces(false);
+  TReadoutBoardMOSAIC *theBoard;
+  TBoardConfigMOSAIC  *theBoardConfig;
+  for(int i=0; i < fConfig->GetNBoards(); i++){
+    theBoardConfig = (TBoardConfigMOSAIC*)fConfig->GetBoardConfig(i);
+    theBoard       =  new TReadoutBoardMOSAIC(fConfig, theBoardConfig);
+    theBoard->enableControlInterfaces(false);
+	}
 
-    return 0;
+  return 0;
 }
