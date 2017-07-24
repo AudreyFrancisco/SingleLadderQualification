@@ -5,6 +5,26 @@
 #include "TAlpide.h"
 #include "TReadoutBoardRU.h"
 
+const int TReadoutBoardRU::VID = 0x04B4;
+const int TReadoutBoardRU::PID = 0x0008;
+const int TReadoutBoardRU::INTERFACE_NUMBER = 2;
+const uint8_t TReadoutBoardRU::EP_CTL_OUT = 3;
+const uint8_t TReadoutBoardRU::EP_CTL_IN = 3;
+const uint8_t TReadoutBoardRU::EP_DATA0_IN = 4;
+const uint8_t TReadoutBoardRU::EP_DATA1_IN = 5;
+
+const size_t TReadoutBoardRU::EVENT_DATA_READ_CHUNK = 50 * 1024;
+const size_t TReadoutBoardRU::USB_TIMEOUT = 1;
+const int TReadoutBoardRU::MAX_RETRIES_READ = 5;
+
+const uint8_t TReadoutBoardRU::MODULE_MASTER = 0;
+const uint8_t TReadoutBoardRU::MODULE_STATUS = 1;
+const uint8_t TReadoutBoardRU::MODULE_VOLTAGE = 2;
+const uint8_t TReadoutBoardRU::MODULE_DCTRL = 3;
+const uint8_t TReadoutBoardRU::MODULE_DATA0 = 4;
+
+const uint8_t TReadoutBoardRU::MASTER_DP23_SOURCE = 10;
+
 int roundUpToMultiple(int numToRound, int multiple) {
   if (multiple == 0)
     return numToRound;
@@ -30,13 +50,22 @@ TReadoutBoardRU::TReadoutBoardRU(TBoardConfigRU *config)
   master = std::make_shared<TRuWishboneModule>(
       *this, TReadoutBoardRU::MODULE_MASTER, m_logging);
 
-  for (auto mapping : m_config->getTransceiverMappings()) {
-    uint8_t moduleId = TReadoutBoardRU::MODULE_DATA0 + mapping.transceiverId;
-    transceiver_array[mapping.chipId] =
-        std::make_shared<TRuTransceiverModule>(*this, moduleId, m_logging);
+}
 
-    transceiver_array[mapping.chipId]->DeactivateReadout();
-  }
+void TReadoutBoardRU::InitReceivers() {
+    std::cout << "....Setup Chip positions....\n";
+
+    for(auto& chippos : fChipPositions) {
+        bool hasTranceiver = (chippos.chipId%8 == 0) && (chippos.enabled);
+        std::cout << "chippos " << chippos.chipId << " " << hasTranceiver << std::endl;
+        if(chippos.receiver >= 0 && hasTranceiver) {
+            uint8_t moduleId = TReadoutBoardRU::MODULE_DATA0 + chippos.receiver;
+            std::cout << "Module " << (int) moduleId << " set to chip " << chippos.chipId << "\n";
+            transceiver_array[chippos.chipId] =
+                std::make_shared<TRuTransceiverModule>(*this, moduleId, m_logging);
+            transceiver_array[chippos.chipId]->DeactivateReadout();
+        }
+    }
 }
 
 void TReadoutBoardRU::registeredWrite(uint16_t module, uint16_t address,
@@ -161,7 +190,7 @@ int TReadoutBoardRU::WriteRegister(uint16_t Address, uint32_t Value) {
 
 int TReadoutBoardRU::WriteChipRegister(uint16_t Address, uint16_t Value,
                                        TAlpide *chipPtr) {
-  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
+	uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   dctrl->WriteChipRegister(Address, Value, chipId);
   return 0;
 }
@@ -169,9 +198,11 @@ int TReadoutBoardRU::WriteChipRegister(uint16_t Address, uint16_t Value,
 int TReadoutBoardRU::ReadChipRegister(uint16_t Address, uint16_t &Value,
                                       TAlpide *chipPtr) {
   uint8_t chipId = chipPtr->GetConfig()->GetChipId();
+  // set control
+  dctrl->SetConnector(GetControlInterface(chipId),false);
+
   return dctrl->ReadChipRegister(Address, Value, chipId);
 }
-
 int TReadoutBoardRU::SendOpCode(uint16_t OpCode) {
   dctrl->SendOpCode(OpCode);
   return 0;
@@ -251,7 +282,6 @@ void TReadoutBoardRU::fetchEventData() {
   for(auto& buffer : m_readoutBuffers) {
       auto chipId = buffer.first;
       auto& data = buffer.second;
-
       int eventStart = 0;
       int eventEnd = 0;
       bool isError;
@@ -276,6 +306,7 @@ void TReadoutBoardRU::fetchEventData() {
 
           // Extract event bytes and store in event list
           std::vector<uint8_t> eventData(begin(data) + eventStart, begin(data) + eventEnd);
+          eventData.push_back ((uint8_t) chipId);
           m_events.emplace_back(eventData);
 
           // event is extracted, remove data from buffer
@@ -314,15 +345,23 @@ int TReadoutBoardRU::Initialize() {
 
 
 void TReadoutBoardRU::StartRun() {
-  for(unsigned int i = 0; i < fChipPositions.size(); ++i) {
-    auto tr = transceiver_array[fChipPositions.at(i).chipId]; // TODO: Mapping between transceiver and chipid
-    tr->Initialize(TBoardConfigRU::ReadoutSpeed::RO_1200,0);
+  for(int i = 0; i < fChipPositions.size(); ++i) {
+
+      if (fChipPositions.at(i).chipId & 0x7) continue;
+      if (fChipPositions.at(i).receiver < 0) continue;
+      if (!fChipPositions.at(i).enabled) continue;
+      std::cout << "initialising transceiver for chip id " << std::dec << fChipPositions.at(i).chipId << std::endl;
+      TBoardConfigRU *config = (TBoardConfigRU*) GetConfig();
+      auto tr = transceiver_array[fChipPositions.at(i).chipId]; // TODO: Mapping between transceiver and chipid
+      tr->Initialize(config->getReadoutSpeed(), config->getInvertPolarity());
+    std::cout << "Done"<< std::endl;
     bool alignedBefore = tr->IsAligned();
     tr->ActivateReadout();
     if(tr->IsAligned()) {
-        std::cout << "Transceiver " << i << " is aligned (before: " << alignedBefore << " )\n";
+        std::cout << "Transceiver " << std::dec << fChipPositions.at(i).receiver << " is aligned (before: " << alignedBefore << " )\n";
     } else {
-        std::cout << "Transceiver " << i << " is NOT aligned \n";
+        std::cout << "Transceiver " << std::dec << fChipPositions.at(i).receiver << " is NOT aligned \n";
+        tr->DeactivateReadout();
     }
     tr->ResetCounters();
   }

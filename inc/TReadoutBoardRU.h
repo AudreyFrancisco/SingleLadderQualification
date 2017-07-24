@@ -24,25 +24,25 @@ public:
     ReadResult(uint16_t address, uint16_t data, bool error) : address(address),data(data),error(error){}
   };
 
-  static const int VID = 0x04B4;
-  static const int PID = 0x0008;
-  static const int INTERFACE_NUMBER = 2;
-  static const uint8_t EP_CTL_OUT = 3;
-  static const uint8_t EP_CTL_IN = 3;
-  static const uint8_t EP_DATA0_IN = 4;
-  static const uint8_t EP_DATA1_IN = 5;
+  static const int VID;
+  static const int PID;
+  static const int INTERFACE_NUMBER;
+  static const uint8_t EP_CTL_OUT;
+  static const uint8_t EP_CTL_IN;
+  static const uint8_t EP_DATA0_IN;
+  static const uint8_t EP_DATA1_IN;
 
-  static const size_t EVENT_DATA_READ_CHUNK = 50 * 1024;
-  static const size_t USB_TIMEOUT = 1;
-  static const int MAX_RETRIES_READ = 5;
+  static const size_t EVENT_DATA_READ_CHUNK;
+  static const size_t USB_TIMEOUT;
+  static const int MAX_RETRIES_READ;
 
-  static const uint8_t MODULE_MASTER = 0;
-  static const uint8_t MODULE_STATUS = 1;
-  static const uint8_t MODULE_VOLTAGE = 2;
-  static const uint8_t MODULE_DCTRL = 3;
-  static const uint8_t MODULE_DATA0 = 4;
+  static const uint8_t MODULE_MASTER;
+  static const uint8_t MODULE_STATUS;
+  static const uint8_t MODULE_VOLTAGE;
+  static const uint8_t MODULE_DCTRL;
+  static const uint8_t MODULE_DATA0;
 
-  static const uint8_t MASTER_DP23_SOURCE = 10;
+  static const uint8_t MASTER_DP23_SOURCE;
 private:
   std::shared_ptr<UsbDev> m_usb;
   TBoardConfigRU *m_config;
@@ -74,14 +74,10 @@ public:
 
   virtual int WriteChipRegister(uint16_t Address, uint16_t Value,
                                 TAlpide *chipPtr = 0);
-
-
   virtual int ReadRegister(uint16_t Address, uint32_t &Value);
   virtual int WriteRegister(uint16_t Address, uint32_t Value);
   virtual int ReadChipRegister(uint16_t Address, uint16_t &Value,
                                TAlpide *chipPtr = 0);
-  
-
   virtual int SendOpCode(uint16_t OpCode);
   virtual int SendOpCode(uint16_t OpCode, TAlpide *chipPtr);
 
@@ -106,6 +102,7 @@ public:
   std::vector<ReadResult> readResults();
 
   void checkGitHash();
+  void InitReceivers();
 
 };
 
