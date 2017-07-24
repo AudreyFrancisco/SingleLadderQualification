@@ -73,6 +73,10 @@ TEST_EXE = test_mosaic test_noiseocc test_threshold test_digitalscan test_fifo t
   test_localbus test_chip_count test_alucms
 EXE += $(TEST_EXE)
 
+#
+TEST_HS = test_GRST test_scantest_digital test_scantest_threshold
+EXE += $(TEST_HS)
+
 # test_* executables with ROOT
 TEST_EXE_ROOT =  test_roottest test_scantest test_threshold_v1 test_tuneITHR test_ITHRthreshold \
   test_tuneVCASN test_VCASNthreshold
