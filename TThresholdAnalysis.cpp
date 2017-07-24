@@ -12,164 +12,27 @@
 #include <TF1.h>
 #include <TGraph.h>
 #include <TMath.h>
-
-TThresholdResultChip::TThresholdResultChip (): TScanResultChip()
-{;}
-
-TThresholdResultChip::~TThresholdResultChip ()
-{;}
- 
-void TThresholdResultChip::SetBoardIndex (unsigned int aBoardIndex)
-{m_boardIndex = aBoardIndex;} 
-
-void TThresholdResultChip::SetDataReceiver(unsigned int aDataReceiver)
-{m_dataReceiver = aDataReceiver;}
-
-void TThresholdResultChip::SetChipId(unsigned int aChipId)
-{m_chipId = aChipId;}
-
-void TThresholdResultChip::SetVPulseL(int aVPulseL)
-{m_vPulseL = aVPulseL;}    
-
-void TThresholdResultChip::SetVPulseH(int aVPulseH)
-{m_vPulseH = aVPulseH;}    
-
-void TThresholdResultChip::SetVPulseStep(int aVPulseStep)
-{m_vPulseStep = aVPulseStep;} 
-
-void TThresholdResultChip::SetNMask(int aNMask)
-{m_nMask = aNMask;}
-  
-void TThresholdResultChip::SetCounterPixelsNoHits(int aCounterPixelsNoHits)
-{m_counterPixelsNoHits = aCounterPixelsNoHits;}
-
-void TThresholdResultChip::SetCounterPixelsStuck(int aCounterPixelsStuck)
-{m_counterPixelsStuck = aCounterPixelsStuck;}
-
-void TThresholdResultChip::SetCounterPixelsNoThreshold(int aCounterPixelsNoThreshold)
-{m_counterPixelsNoThreshold = aCounterPixelsNoThreshold;}
-  
-void TThresholdResultChip::SetThresholdMean(double aThresholdMean){m_thresholdMean =  aThresholdMean;}
-
-void TThresholdResultChip::SetThresholdStdDev(double aThresholdStdDev)
-{m_thresholdStdDev = aThresholdStdDev;}
-
-void TThresholdResultChip::SetNoiseMean(double aNoiseMean)
-{m_noiseMean =  aNoiseMean;}
-
-void TThresholdResultChip::SetNoiseStdDev(double aNoiseStdDev)
-{m_noiseStdDev  = aNoiseStdDev;}
-
-void TThresholdResultChip::SetFileSummary(FILE* aFileName)
-{m_fileSummary = aFileName;}  
-
-void TThresholdResultChip::SetFilePixelNoHits(FILE* aFileName)
-{m_filePixelNoHits = aFileName;}
-
-void TThresholdResultChip::SetFilePixelStuck(FILE* aFileName)
-{m_filePixelStuck = aFileName;}
-
-void TThresholdResultChip::SetFilePixelNoThreshold(FILE* aFileName)
-{m_filePixelNoThreshold = aFileName;} 
-
-void TThresholdResultChip::SetFilePixelFitResult(FILE* aFileName)
-{m_filePixelFitResult = aFileName;}
-
-void TThresholdResultChip::SetFileRawData(FILE* aFileName)
-{m_fileRawData = aFileName;} 
-
-unsigned int TThresholdResultChip::GetBoardIndex()
-{return m_boardIndex;} 
-
-unsigned int TThresholdResultChip::GetDataReceiver()
-{return m_dataReceiver;}
-
-unsigned int TThresholdResultChip::GetChipId()
-{return m_chipId;}
-
-int TThresholdResultChip::GetVPulseL()
-{return m_vPulseL;}
-
-int TThresholdResultChip::GetVPulseH()
-{return m_vPulseH;}
-
-int TThresholdResultChip::GetVPulseStep()
-{return m_vPulseStep;}
-
-int TThresholdResultChip::GetNMask()
-{return m_nMask;}
-
-int TThresholdResultChip::GetCounterPixelsNoHits()
-{return m_counterPixelsNoHits;}
-
-int TThresholdResultChip::GetCounterPixelsStuck()
-{return m_counterPixelsStuck;}
-
-int TThresholdResultChip::GetCounterPixelsNoThreshold()
-{return m_counterPixelsNoThreshold;}
-  
-double TThresholdResultChip::GetThresholdMean()
-{return m_thresholdMean;}
-
-double TThresholdResultChip::GetThresholdStdDev()
-{return m_thresholdStdDev;}
-
-double TThresholdResultChip::GetNoiseMean()
-{return m_noiseMean;}
-
-double TThresholdResultChip::GetNoiseStdDev()
-{return m_noiseStdDev;}
-
-FILE* TThresholdResultChip::GetFileSummary()
-{return  m_fileSummary;}
-
-FILE* TThresholdResultChip::GetFilePixelNoHits()
-{return  m_filePixelNoHits;}
-
-FILE* TThresholdResultChip::GetFilePixelStuck()
-{return m_filePixelStuck;}
-
-FILE* TThresholdResultChip::GetFilePixelNoThreshold()
-{return m_filePixelNoThreshold;}
- 
-FILE* TThresholdResultChip::GetFilePixelFitResult()
-{return m_filePixelFitResult;}
-
-FILE* TThresholdResultChip::GetFileRawData()
-{return m_fileRawData;} 
-
-// ================================
-// ================================
-
-TThresholdResult::TThresholdResult (): TScanResult () {;}
-
-TThresholdResult::~TThresholdResult () {;}
-
-// ================================
-// ================================
-
+#include <TPaveText.h>
 
 TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
-                                       TScan                  *aScan,
-                                       TScanConfig            *aScanConfig,
-                                       std::vector <THic*>     hics,
-                                       std::mutex             *aMutex,
-                                       int                     resultFactor)
-: TScanAnalysis(aScanHistoQue, aScan, aScanConfig, hics, aMutex)  
+                                       TScan *aScan,
+                                       TScanConfig *aScanConfig,
+                                       std::vector <THic*> hics,
+                                       std::mutex *aMutex,
+                                       int resultFactor)
+  : TScanAnalysis(aScanHistoQue, aScan, aScanConfig, hics, aMutex) 
 {
   
-  // It is pulse amplitude, not charge, yet.
+  // N.B.:It is pulse amplitude, not charge yet.
   m_startPulseAmplitude = m_config->GetChargeStart();
   m_stopPulseAmplitude  = m_config->GetChargeStop();
   m_stepPulseAmplitude  = m_config->GetChargeStep();
   m_nPulseInj           = m_config->GetNInj();
   
-  m_fDoDumpRawData = true;
   m_fDoFit         = true;
   m_resultFactor   = resultFactor;
-
-  m_result = new TThresholdResult();
   
+  m_result = new TThresholdResult();
 }
 
 //TODO: Implement HasData.
@@ -205,6 +68,68 @@ bool TThresholdAnalysis::CheckPixelStuck(TGraph* aGraph)
   return true;
 }
 
+double TThresholdAnalysis::FindStart(TGraph* aGraph)
+{
+  
+  double xA = 0;
+  double yA = 0;
+  aGraph->GetPoint(0, xA, yA);
+  
+  double xB = 0;
+  double yB = 0;
+  aGraph->GetPoint(aGraph->GetN()-1, xB, yB);
+  
+  int initPoint = 0;
+  int endPoint = 0;
+  int incr = 0;
+  
+  if (yA==yB){
+    return -1;
+  } else if(yA<yB){
+    initPoint=0;
+    endPoint=aGraph->GetN()-1;
+    incr = +1;
+  } else if(yA>yB){
+    initPoint=aGraph->GetN()-1;
+    endPoint=0;
+    incr = -1;
+  }
+  
+  double upperPointX =0;
+  double upperPointY =0;
+  for (int itrPoint=initPoint; itrPoint<=endPoint; itrPoint+=incr){
+    double xDummy =0;
+    double yDummy =0;
+    aGraph->GetPoint(itrPoint, xDummy, yDummy);
+    
+    if (yDummy == m_nPulseInj) {
+      upperPointX = xDummy;
+      upperPointY = yDummy;
+      break;
+    }
+    
+  }
+  
+  double lowerPointX =0;
+  double lowerPointY =0;
+  for (int itrPoint=endPoint; itrPoint>=initPoint; itrPoint-=incr){
+    double xDummy =0;
+    double yDummy =0;
+    aGraph->GetPoint(itrPoint, xDummy, yDummy);
+    
+    if (yDummy == 0) {
+      lowerPointX = xDummy;
+      lowerPointY = yDummy;
+      break;
+    }
+    
+  }
+  
+  return (upperPointX + lowerPointX)*0.5;
+  
+}
+
+
 double ErrorFunc(double* x, double* par)
 {
   double y = par[0]+par[1]*TMath::Erf( (x[0]-par[2]) / par[3] );
@@ -213,44 +138,33 @@ double ErrorFunc(double* x, double* par)
 
 common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph)
 {
-  TF1 *fitfcn;
-  if(m_resultFactor<1) {
-    fitfcn = new TF1("fitfcn",
-                          ErrorFunc,
-                          m_stopPulseAmplitude*m_resultFactor,
-                          m_startPulseAmplitude*m_resultFactor,
-                          4);
-  } else {
-    fitfcn = new TF1("fitfcn", 
-  			  ErrorFunc,
-  			  m_startPulseAmplitude*m_resultFactor,
-			  m_stopPulseAmplitude*m_resultFactor,
-			  4);
-  }
+  TF1 *fitfcn = new TF1("fitfcn",
+			ErrorFunc,
+			m_stopPulseAmplitude*m_electronPerDac,
+			m_startPulseAmplitude*m_electronPerDac,
+			4);
+  
   // y@50%.
   fitfcn->SetParameter(0,0.5*m_nPulseInj); 
   // 0.5 of max. amplitude.
   fitfcn->SetParameter(1,0.5*m_nPulseInj); 
   // x@50%.
-  fitfcn->SetParameter(2,0.5*(m_stopPulseAmplitude - m_startPulseAmplitude)*m_resultFactor);
-  // slope of s-curve.  m_resultFactor MAY BE -1--make sure this doesn't cause any problems!! (WIP)
-  fitfcn->SetParameter(3,0.5);
-  
-  aGraph->Fit("fitfcn","RQ");
+  fitfcn->SetParameter(2,FindStart(aGraph));
+  // slope of s-curve. 
+  fitfcn->SetParameter(3,10);
   
   common::TErrFuncFitResult fitResult_dummy;
-  if(fitfcn->GetParameter(0)>0 && m_resultFactor<0) {
-    std::cout << "ERROR in line 241 of TAnalogAnalysis:  Unexpected resultFactor/threshold sign!" << std::endl;
-    fitResult_dummy.threshold = 1;
-    return fitResult_dummy;
-    if(fitfcn->GetParameter(0) < 0) {
-      fitResult_dummy.threshold = -1*fitfcn->GetParameter(0);  //for the ithr case
-    } else {
-      fitResult_dummy.threshold = fitfcn->GetParameter(0);
-    }
-    fitResult_dummy.noise     = fitfcn->GetParameter(1);
-    fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
-  }
+  fitResult_dummy.status = aGraph->Fit("fitfcn","RQ");
+  fitResult_dummy.threshold = fitfcn->GetParameter(2);
+  fitResult_dummy.noise     = fitfcn->GetParameter(3);
+  fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
+  
+  // std::cout << fitResult_dummy.threshold << "\t"
+  //  	    << fitResult_dummy.noise << "\t"
+  //  	    << fitResult_dummy.redChi2 << "\t"
+  //  	    << fitResult_dummy.status << "\t"
+  //  	    << std::endl;
+  
   delete fitfcn; 
   
   return fitResult_dummy;
@@ -259,125 +173,57 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph)
 void TThresholdAnalysis::Initialize()
 {
   
-  // Retrieving HistoMap from TThresholdScan, after it is initialized.
-  // Creating map of TThresholdResults: 1 result for each chip.
-  // Initializing TThresholdResult variables.
-  // Initializing counters.
-  
+  // TBC: Necessary ???
   while (!m_scan->IsRunning()){sleep(1);}
   
   std::cout << "Initializing " << m_analisysName << std::endl;
   
-  TScanHisto histoDummy = m_scan->GetTScanHisto();
+  ReadChipList      ();
+  CreateChipResults ();
   
-  std::map<int, THisto> histoMap_dummy= histoDummy.GetHistoMap();
-  
-  for (std::map<int, THisto>::iterator itr=histoMap_dummy.begin();
-       itr!=histoMap_dummy.end(); 
-       ++itr) {
+  for (int iChip = 0; iChip < m_chipList.size();iChip ++ ) {
     
-    common::TChipIndex chipIndexDummy = common::GetChipIndex(itr->first);
+    TThresholdResultChip* chipResult = (TThresholdResultChip*) m_result->GetChipResult(m_chipList.at(iChip));
     
-    m_chipList.push_back(chipIndexDummy);
+    chipResult->m_boardIndex=m_chipList.at(iChip).boardIndex; 
+    chipResult->m_dataReceiver=m_chipList.at(iChip).dataReceiver;
+    chipResult->m_chipId=m_chipList.at(iChip).chipId;
     
-    TThresholdResultChip resultDummy;
+    chipResult->m_counterPixelsNoHits=0;
+    chipResult->m_counterPixelsStuck=0;
+    chipResult->m_counterPixelsNoThreshold=0;
+    chipResult->m_counterPixelsYesThreshold=0;
     
-    resultDummy.SetBoardIndex(chipIndexDummy.boardIndex);
-    resultDummy.SetDataReceiver(chipIndexDummy.dataReceiver);
-    resultDummy.SetChipId(chipIndexDummy.chipId);
+    chipResult->m_threshold.sum=0;
+    chipResult->m_threshold.sum2=0;
+    chipResult->m_threshold.entries=0;
     
-    resultDummy.SetCounterPixelsNoHits      (0);
-    resultDummy.SetCounterPixelsStuck       (0);
-    resultDummy.SetCounterPixelsNoThreshold (0);
-    
-    resultDummy.SetThresholdMean   (0);
-    resultDummy.SetThresholdStdDev (0);
-    resultDummy.SetNoiseMean       (0);
-    resultDummy.SetNoiseStdDev     (0);
-    
-    std::string fileNameDummy;
-    fileNameDummy  = m_analisysName;
-    fileNameDummy += "-";
-    fileNameDummy += m_config->GetfNameSuffix();
-    fileNameDummy += "-Summary";
-    fileNameDummy  = common::GetFileName(chipIndexDummy,
-  					 fileNameDummy);
-    
-    resultDummy.SetFileSummary(fopen(fileNameDummy.c_str(),"w"));
-    
-    fileNameDummy  = m_analisysName;
-    fileNameDummy += "-";
-    fileNameDummy += m_config->GetfNameSuffix();
-    fileNameDummy += "-PixelNoHits";
-    fileNameDummy  = common::GetFileName(chipIndexDummy,
-  					  fileNameDummy);
-    
-    resultDummy.SetFilePixelNoHits(fopen(fileNameDummy.c_str(),"w"));
-    
-    
-    fileNameDummy  = m_analisysName;
-    fileNameDummy += "-";
-    fileNameDummy += m_config->GetfNameSuffix();
-    fileNameDummy += "-PixelStuck";
-    fileNameDummy  = common::GetFileName(chipIndexDummy,
-  					  fileNameDummy);
-    
-    resultDummy.SetFilePixelStuck(fopen(fileNameDummy.c_str(),"w"));
-    
-    
-    fileNameDummy  = m_analisysName;
-    fileNameDummy += "-";
-    fileNameDummy += m_config->GetfNameSuffix();
-    fileNameDummy += "-PixelNoThreshold";
-    fileNameDummy  = common::GetFileName(chipIndexDummy,
-  					  fileNameDummy);
-    
-    resultDummy.SetFilePixelNoThreshold(fopen(fileNameDummy.c_str(),"w"));
-    
-    
-    fileNameDummy  = m_analisysName;
-    fileNameDummy += "-";
-    fileNameDummy += m_config->GetfNameSuffix();
-    fileNameDummy += "-PixelFitResult";
-    fileNameDummy  = common::GetFileName(chipIndexDummy,
-  					  fileNameDummy);
-    
-    resultDummy.SetFilePixelFitResult(fopen(fileNameDummy.c_str(),"w"));
-    
-    fileNameDummy  = m_analisysName;
-    fileNameDummy += "-";
-    fileNameDummy += m_config->GetfNameSuffix();
-    fileNameDummy += "-PixelRawData";
-    fileNameDummy  = common::GetFileName(chipIndexDummy,
-  					 fileNameDummy);
-    
-    resultDummy.SetFileRawData(fopen(fileNameDummy.c_str(),"w"));
-    
-    std::pair<int,TThresholdResultChip> pairDummy;
-    pairDummy = std::make_pair(itr->first,resultDummy);
-    m_resultChip.insert(pairDummy);
+    chipResult->m_noise.sum=0;
+    chipResult->m_noise.sum2=0;
+    chipResult->m_noise.entries=0;
     
   }
   
-  std::pair<int,common::TStatVar> pairDummy;
-  for (std::map<int, THisto>::iterator itr=histoMap_dummy.begin();
-       itr!=histoMap_dummy.end(); 
-       ++itr) {
-    
-    common::TStatVar thresholdDummy;
-    thresholdDummy.sum=0;
-    thresholdDummy.sum2=0;
-    thresholdDummy.entries=0;
-    pairDummy = std::make_pair(itr->first,thresholdDummy);
-    m_threshold.insert(pairDummy);
-    
-    common::TStatVar noiseDummy;
-    noiseDummy.sum=0;
-    noiseDummy.sum2=0;
-    noiseDummy.entries=0;
-    pairDummy = std::make_pair(itr->first,noiseDummy);
-    m_noise.insert(pairDummy);
-  } 
+  TThresholdResult* thresholdResult = (TThresholdResult*)m_result;
+  char fName[100];
+  
+  sprintf (fName, "%s_%s_Summary.dat", 
+	   m_analisysName,m_config->GetfNameSuffix());
+  thresholdResult->SetFileSummary(fopen(fName,"w"));
+  
+  sprintf (fName, "%s_%s_PixelByPixel.dat", 
+	   m_analisysName,m_config->GetfNameSuffix());
+  thresholdResult->SetFilePixelByPixel(fopen(fName,"w"));
+  
+  fprintf(thresholdResult->GetFilePixelByPixel(),
+	  "#%s %s %s %s %s %s %s %s\n", 
+	  "BrdId",
+	  "RxId",
+	  "ChipId",
+	  "Col","Row",
+	  "Thresh[e]",
+	  "Noise[e]",
+	  "redChi2");
   
 }
 
@@ -404,85 +250,64 @@ void TThresholdAnalysis::Run()
     for (int iChip = 0; iChip < m_chipList.size(); iChip++) {
       
       for (int iCol = 0; iCol < common::nCols; iCol ++) {
-	int iPulseStart;
-        int iPulseStop;
-    	TGraph* gDummy = new TGraph();
-	if(m_resultFactor > 1) { //regular scan
-   	  iPulseStop = ((float)abs( m_startPulseAmplitude - m_stopPulseAmplitude))/ m_stepPulseAmplitude;
-          iPulseStart = 0;
-	} else if(m_resultFactor==1) { //vcasn
-          iPulseStart = 40; //range of vcasn values scanned over.
-          iPulseStop  = 60; //not changing in the forseeable future...but might.
-        } else { //else ithr
-          iPulseStart = 30;
-          iPulseStop  = 100;
-        }
-   	for (int iPulse = iPulseStart; iPulse < iPulseStop; iPulse++) {
-	  
-   	  int entries =(int)scanHisto(m_chipList.at(iChip), 
-   				      iCol, 
-   				      iPulse);
-	  
-   	  gDummy->SetPoint(gDummy->GetN(),
-   			   iPulse*m_resultFactor,
-   			   entries);
-	  
-   	  if(m_fDoDumpRawData){
-   	    int intIndexDummy = common::GetChipIntIndex(m_chipList.at(iChip)); 
-	    
-	    TThresholdResultChip resultDummy = m_resultChip.at(intIndexDummy);
-	    
-   	    fprintf(m_resultChip.at(intIndexDummy).GetFileRawData(),
-	    	    "%d %d %d %d\n", 
-   	    	    iCol,row,iPulse,entries);
-   	  }
-	  
-   	} // end loop over iPulse.
+      
+	TGraph* gDummy = new TGraph();
 	
-   	if (gDummy->GetN()==0){delete gDummy;continue;}
+	int pulseRangeDummy = ((float)abs( m_startPulseAmplitude - m_stopPulseAmplitude))/ m_stepPulseAmplitude;
+      
+	for (int iPulse = 0; iPulse < pulseRangeDummy; iPulse++) {
+      
+	  int entries =(int)scanHisto(m_chipList.at(iChip), 
+				      iCol, 
+				      iPulse);
+	  
+	  gDummy->SetPoint(gDummy->GetN(),
+			   iPulse*m_electronPerDac,
+			   entries);
+	  
+	} // end loop over iPulse.
 	
-	int intIndexDummy = common::GetChipIntIndex(m_chipList.at(iChip));
+	if (gDummy->GetN()==0){ delete gDummy;continue;}
 	
-	TThresholdResultChip resultDummy = m_resultChip.at(intIndexDummy);
+	TThresholdResultChip* chipResult = (TThresholdResultChip*) m_result->GetChipResult(m_chipList.at(iChip));
 	
 	bool fPixelNoHits= CheckPixelNoHits(gDummy);
-	bool fPixelStuck = CheckPixelStuck (gDummy);
+       	bool fPixelStuck = CheckPixelStuck (gDummy);
 	
 	if (fPixelNoHits){
-	  fprintf(m_resultChip.at(intIndexDummy).GetFilePixelNoHits(), 
-   	  	  "%d %d\n", 
-		  iCol,row);
-	  
-	  m_resultChip.at(intIndexDummy).SetCounterPixelsNoHits(m_resultChip.at(intIndexDummy).GetCounterPixelsNoHits()+1);
-	  
+	  chipResult->m_counterPixelsNoHits++;
 	} else if (fPixelStuck){
-	  fprintf(m_resultChip.at(intIndexDummy).GetFilePixelStuck(), 
-		  "%d %d\n", 
-		  iCol,row);
-	  
-	  m_resultChip.at(intIndexDummy).SetCounterPixelsStuck(m_resultChip.at(intIndexDummy).GetCounterPixelsStuck()+1);
-	  
+	  chipResult->m_counterPixelsStuck++;
 	} else if (m_fDoFit){
-	  
-	  // MB - NEED TO SELECT GOOD FIT.
 	  
 	  common::TErrFuncFitResult fitResult;
 	  fitResult=DoFit(gDummy);
 	  
-	  fprintf(m_resultChip.at(intIndexDummy).GetFilePixelFitResult(), 
-   	    	  "%d %d %f %f %f\n", 
-   	    	  iCol,row,
-   	    	  fitResult.threshold,
-   	    	  fitResult.noise,
-   	 	  fitResult.redChi2);
+	  TThresholdResult* thresholdResult = (TThresholdResult*)m_result;
+	  fprintf(thresholdResult->GetFilePixelByPixel(),
+	    	  "%d %d %d %d %d %f %f %f\n", 
+	   	  chipResult->m_boardIndex,
+	    	  chipResult->m_dataReceiver,
+	    	  chipResult->m_chipId,
+	    	  iCol,row,
+	    	  fitResult.threshold,
+	   	  fitResult.noise,
+		  fitResult.redChi2); 
 	  
-	  m_threshold.at(intIndexDummy).sum+=row;//fitResult.threshold;
-	  m_threshold.at(intIndexDummy).sum2+=row*row;//pow(fitResult.threshold,2);
-	  m_threshold.at(intIndexDummy).entries+=1;
+	  // MB - NEED TO SELECT GOOD FIT.
+	  m_cutChi2 = 5;// To implement from MK -> MB TBC.
+	  if (fitResult.status!=0)
+	    {chipResult->m_counterPixelsNoThreshold++;continue;}
 	  
-	  m_noise.at(intIndexDummy).sum+=row;//;itResult.noise;
-	  m_noise.at(intIndexDummy).sum2+=row*row;//pow(fitResult.noise,2);
-	  m_noise.at(intIndexDummy).entries+=1;
+	  chipResult->m_counterPixelsYesThreshold++;
+	  
+	  chipResult->m_threshold.sum+=fitResult.threshold;
+	  chipResult->m_threshold.sum2+=pow(fitResult.threshold,2);
+	  chipResult->m_threshold.entries+=1;
+	  
+	  chipResult->m_noise.sum+=fitResult.noise;
+	  chipResult->m_noise.sum2+=pow(fitResult.noise,2);
+	  chipResult->m_noise.entries+=1;
 	  
 	}
 	
@@ -501,97 +326,63 @@ void TThresholdAnalysis::Finalize()
 	    << m_analisysName 
 	    << std::endl;
   
-  // Sanity check.
-  if ( m_resultChip.size()!=m_threshold.size() || 
-       m_resultChip.size()!=m_noise.size()){ 
-    std::cout<< "ERROR in " 
-   	     << m_analisysName  
-   	     << "!!!"
-   	     <<std::endl; exit(EXIT_FAILURE);;
+  TThresholdResult* thresholdResult = (TThresholdResult*)m_result;
+  
+  for (int iChip=0; iChip < m_chipList.size(); iChip++) {
+    
+    TThresholdResultChip* chipResult = (TThresholdResultChip*) m_result->GetChipResult(m_chipList.at(iChip));
+    
+    fprintf(thresholdResult->GetFileSummary(),
+	    "\nBoard %d, Receiver %d, Chip %d\n",
+	    chipResult->m_boardIndex,
+       	    chipResult->m_dataReceiver, 
+	    chipResult->m_chipId);
+    fprintf(thresholdResult->GetFileSummary(),
+	    "Pixels without hits[CAREFUL]: %d\n", 
+     	    chipResult->m_counterPixelsNoHits);
+    fprintf(thresholdResult->GetFileSummary(),
+	    "Stuck pixels: %d\n", 
+     	    chipResult->m_counterPixelsStuck);
+    fprintf(thresholdResult->GetFileSummary(),
+	    "Pixels without threshold: %d\n", 
+     	    chipResult->m_counterPixelsNoThreshold);
+    fprintf(thresholdResult->GetFileSummary(),
+	     "Pixels with threshold: %d\n", 
+	     chipResult->m_counterPixelsYesThreshold);
+    
+    if (chipResult->m_threshold.entries!=0){
+      chipResult->m_thresholdMean = chipResult->m_threshold.sum/chipResult->m_threshold.entries;
+      
+      chipResult->m_thresholdStdDev= sqrt((chipResult->m_threshold.sum2/chipResult->m_threshold.entries) - pow(chipResult->m_thresholdMean,2) );
+    }
+    
+    fprintf(thresholdResult->GetFileSummary(), 
+	    "Threshold[e] %f +/- %f\n",
+     	    chipResult->m_thresholdMean,
+      	    chipResult->m_thresholdStdDev);
+    
+    if (chipResult->m_noise.entries!=0){
+      chipResult->m_noiseMean = chipResult->m_noise.sum/chipResult->m_noise.entries;
+      chipResult->m_noiseStdDev=sqrt((chipResult->m_noise.sum2/
+				      chipResult->m_noise.entries)
+				     - pow(chipResult->m_noiseMean,2) );
+    }
+    
+    fprintf(thresholdResult->GetFileSummary(), 
+	    "Noise[e] %f +/- %f\n",
+     	    chipResult->m_noiseMean,
+     	    chipResult->m_noiseStdDev);
+    
   }
   
-  for (std::map<int,common::TStatVar>::iterator itr=m_threshold.begin();
-       itr!=m_threshold.end(); 
-       ++itr) {
-    
-    if (itr->second.entries==0){continue;}
-    
-    double mean   = itr->second.sum/itr->second.entries;
-    double stdDev = sqrt((itr->second.sum2/itr->second.entries) 
-   			 - pow(mean,2) );
-    
-    itr->second.mean   = mean;
-    itr->second.stdDev = stdDev;
-    
-  }
+  fclose(thresholdResult->GetFileSummary());
+  fclose(thresholdResult->GetFilePixelByPixel());
   
-  for (std::map<int,common::TStatVar>::iterator itr=m_noise.begin();
-       itr!=m_noise.end(); 
-       ++itr) {
-    
-    if (itr->second.entries==0){continue;}
-    
-    double mean   = itr->second.sum/itr->second.entries;
-    double stdDev = sqrt((itr->second.sum2/itr->second.entries) 
-   			 - pow(mean,2) );
-    
-    itr->second.mean   = mean;
-    itr->second.stdDev = stdDev;
-    
-  }
-  
-  for (std::map<int,TThresholdResultChip>::iterator itr=m_resultChip.begin();
-       itr!=m_resultChip.end(); 
-       ++itr) {
-    
-    itr->second.SetThresholdMean(m_threshold.at(itr->first).mean);
-    itr->second.SetThresholdStdDev(m_threshold.at(itr->first).stdDev);
-    itr->second.SetNoiseMean(m_noise.at(itr->first).mean);
-    itr->second.SetNoiseStdDev(m_noise.at(itr->first).stdDev);
-    
-    fprintf(itr->second.GetFileSummary(), 
-       	    "Threshold mean: %f \n", 
-       	    itr->second.GetThresholdMean() );
-    
-    fprintf(itr->second.GetFileSummary(), 
-     	    "Threshold stdDev: %f \n", 
-     	    itr->second.GetThresholdStdDev());
-    
-    fprintf(itr->second.GetFileSummary(), 
-     	    "Noise mean: %f \n", 
-     	    itr->second.GetNoiseMean());
-    
-    fprintf(itr->second.GetFileSummary(), 
-     	    "Noise stdDev: %f \n", 
-     	    itr->second.GetNoiseStdDev());
-    
-    fprintf(itr->second.GetFileSummary(), 
-	    "counterPixelsNoHits: %d \n", 
-	    itr->second.GetCounterPixelsNoHits());
-    
-    fprintf(itr->second.GetFileSummary(), 
-	    "counterPixelsNoThreshold: %d \n", 
-	    itr->second.GetCounterPixelsNoThreshold());
-    
-    fprintf(itr->second.GetFileSummary(), 
-	    "counterPixelsStuck: %d \n", 
-	    itr->second.GetCounterPixelsStuck()); 
-    
-    fclose(itr->second.GetFileSummary());
-    fclose(itr->second.GetFilePixelNoHits());
-    fclose(itr->second.GetFilePixelStuck());
-    fclose(itr->second.GetFilePixelNoThreshold());
-    fclose(itr->second.GetFilePixelFitResult());
-    fclose(itr->second.GetFileRawData()); 
-    
-    m_result->AddChipResult(itr->first,
-			    &(itr->second));
-    
-  }
 }
 
 float TThresholdAnalysis::GetResultThreshold(int chip) {
-  return m_threshold.at(chip).mean;
+  
+  TThresholdResultChip* chipResult = (TThresholdResultChip*) m_result->GetChipResult(m_chipList.at(chip));
+  return chipResult->m_thresholdMean;
+  
 }
-
-
