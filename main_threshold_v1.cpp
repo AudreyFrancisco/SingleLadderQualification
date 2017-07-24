@@ -58,7 +58,7 @@ void scanLoop (TScan *myScan)
       }
       myScan->LoopEnd(0);
       // To avoid race hazard w.r.t. analysis (fit takes time). 
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
       myScan->Next   (1);
     }
     myScan->LoopEnd(1);
