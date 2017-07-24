@@ -64,17 +64,17 @@ bool BoardDecoder::DecodeEventDAQ(unsigned char *data, int nBytes, int &nBytesHe
   int ExtTrigCounter    = -1;
   if (header_length==3) {
     switch(firmwareVersion) {
-      case 0x257E0602:
-      case 0x247E0602:
-        Event_ID         = (uint64_t)Header[0] & 0x7fffffff;
-        TimeStamp        = (uint64_t)Header[1] & 0x7fffffff;
-        break;
-      case 0x257E0610:
-      case 0x247E0610:
-      default:
-        Event_ID         = (uint64_t)Header[0] & 0x00ffffff;
-        //TimeStamp        = (uint64_t)Header[1] & 0x7fffffff | ((uint64_t)Header[0] & 0x7f000000) << 7; // Original
-        TimeStamp        = ((uint64_t)Header[1] & 0x7fffffff) | ((uint64_t)Header[0] & 0x7f000000) << 7; // Caterina: added ()
+    case 0x257E0602:
+    case 0x247E0602:
+      Event_ID         = (uint64_t)Header[0] & 0x7fffffff;
+      TimeStamp        = (uint64_t)Header[1] & 0x7fffffff;
+      break;
+    case 0x257E0610:
+    case 0x247E0610:
+    default:
+      Event_ID         = (uint64_t)Header[0] & 0x00ffffff;
+      //TimeStamp        = (uint64_t)Header[1] & 0x7fffffff | ((uint64_t)Header[0] & 0x7f000000) << 7; // Original
+      TimeStamp        = ((uint64_t)Header[1] & 0x7fffffff) | ((uint64_t)Header[0] & 0x7f000000) << 7; // Caterina: added ()
     }
     TrigCountDAQbusy = (Header[2] & 0x7fff0000)>>8;
     StrobeCountTotal = (Header[2] & 0x00007fff);
@@ -158,28 +158,28 @@ bool BoardDecoder::DecodeEventDAQ(unsigned char *data, int nBytes, int &nBytesHe
 
 int BoardDecoder::GetDAQEventHeaderLength(uint32_t firmwareVersion, int headerType) {
   switch(firmwareVersion) {
-    case 0x257E030A:
-    case 0x247E030A:
-    case 0x257E031D:
-    case 0x247E031D:
-      return 36;
-      break;
-    case 0:
-      return -1;
-      break;
-    case 0x257E0602:
-    case 0x247E0602:
-    case 0x257E0610:
-    case 0x247E0610:
-      return 12;
-      break;
-    case 0x247E0611:
-    case 0x347E0803:
-      return (headerType==0) ? 36 : 12 ;
-      break;
-    default:
-      return 20;
-      break;
+  case 0x257E030A:
+  case 0x247E030A:
+  case 0x257E031D:
+  case 0x247E031D:
+    return 36;
+    break;
+  case 0:
+    return -1;
+    break;
+  case 0x257E0602:
+  case 0x247E0602:
+  case 0x257E0610:
+  case 0x247E0610:
+    return 12;
+    break;
+  case 0x247E0611:
+  case 0x347E0803:
+    return (headerType==0) ? 36 : 12 ;
+    break;
+  default:
+    return 20;
+    break;
   }
   return 20;
 }
@@ -211,10 +211,13 @@ uint32_t BoardDecoder::GetIntFromBinaryStringReversed(int numByte, unsigned char
 
 
 bool BoardDecoder::DecodeEventRU(unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer,
-						TBoardHeader &boardInfo)
+                                 TBoardHeader &boardInfo)
 {
   nBytesHeader = 0;
-  nBytesTrailer = 0;
+  nBytesTrailer = 1;
+
+  unsigned char chipId = data[nBytes-1]; // last byte is the transiver number
+  boardInfo.channel = (int) chipId;
   return true;
 }
 
@@ -222,7 +225,7 @@ bool BoardDecoder::DecodeEventRU(unsigned char *data, int nBytes, int &nBytesHea
 // Decodes the Event Header and fill the structure.
 // The value of nBytes is filled with the length of read header
 bool BoardDecoder::DecodeEventMOSAIC(unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer,
-						TBoardHeader &boardInfo)
+                                     TBoardHeader &boardInfo)
 {
 //  boardInfo.size        = endianAdjust(data); // NOT correct
 	uint32_t blockFlags        = endianAdjust(data+4);
