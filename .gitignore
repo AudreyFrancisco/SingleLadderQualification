@@ -6,8 +6,8 @@
 *.pcm
 *.dat
 test_*
-startclk
-stopclk
+startclk*
+stopclk*
 Config.cfg
 *~
 git_status.txt
