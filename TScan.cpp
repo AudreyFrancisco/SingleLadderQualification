@@ -73,19 +73,18 @@ void TScan::CreateScanHisto ()
   m_histo = new TScanHisto();
 
   THisto histo = CreateHisto ();
-
   for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
     for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      //if(m_chips.at(ichip)->GetConfig()->IsEnabled()) { std::cout << "CHECK" << std::endl; }
       if ((m_chips.at(ichip)->GetConfig()->IsEnabled()) && (m_chips.at(ichip)->GetReadoutBoard() == m_boards.at(iboard))) {
         id.boardIndex       = iboard;
         id.dataReceiver     = m_chips.at(ichip)->GetConfig()->GetParamValue("RECEIVER"); 
         id.chipId           = m_chips.at(ichip)->GetConfig()->GetChipId();
-
         m_histo->AddHisto (id, histo);        
       }
     }
   }  
-  std::cout << "CreateHisto: generated map with " << m_histo->GetSize() << " elements" << std::endl;
+  std::cout << "CreateScanHisto: " << m_chips.size() << " chips, generated map with " << m_histo->GetSize() << " elements" << std::endl;
   
 }
 

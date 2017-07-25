@@ -215,7 +215,8 @@ class TAlpide {
   //int SendCommandSequence (vector <> sequence);
 
   void DumpConfig(const char *fName, bool writeFile=true, char *Config=0);
-
+  //NEW
+  int GetChipId() {return fChipId;};
 
 
 public:

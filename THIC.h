@@ -29,6 +29,7 @@ class THic {
   int   GetModId       () {return m_moduleId;};
   int   GetNChips      () {return m_chips.size();};
   int   AddChip        (TAlpide *chip);
+  std::vector<TAlpide*> GetChipVector() {return m_chips;};
 };
 
 

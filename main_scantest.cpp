@@ -32,7 +32,7 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 #include "TScan.h"
-//#include "TThresholdScan.h"
+#include "TThresholdScan.h"
 #include "TDigitalScan.h"
 #include "TScanConfig.h"
 #include "THisto.h"
@@ -43,7 +43,7 @@
 
 void scanLoop (TScan *myScan)
 {
-  std::cout << "In scan loop functiokn" << std::endl;
+  std::cout << "In scan loop function" << std::endl;
   myScan->Init();
 
   myScan->LoopStart(2);
@@ -65,6 +65,7 @@ void scanLoop (TScan *myScan)
     myScan->Next   (2);
   }
   myScan->LoopEnd  (2);
+  std::cout << "DONE" << std::endl;
   myScan->Terminate();
 }
 
@@ -83,20 +84,18 @@ int main(int argc, char** argv) {
 
   std::deque<TScanHisto>  fHistoQue;
   std::mutex              fMutex;
+  const char ** hicIds;  //this needs to come from *SOMEWHERE*, OK for now...
 
-
-  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
-  
-  //TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  //TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips, "", &fHics, hicIds);
   TtuneVCASNScan *myTuneVScan = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
   TThresholdAnalysis  *analysisTuneV = new TThresholdAnalysis (&fHistoQue,myTuneVScan, fConfig->GetScanConfig(), fHics, &fMutex, 1); 
 
   //testing other classes...
-  //TtuneITHRScan *myTuneIScan = new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-  //TThreshScan *myThreshScan = new TThreshScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+  //TThresholdScan *myTuneVScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+  //TThresholdAnalysis *analysisTuneV = new TThresholdAnalysis(&fHistoQue, myTuneVScan, fConfig->GetScanConfig(), fHics, &fMutex, 1);
+  //TDigitalScan *myTuneVScan = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  //TScanAnalysis * analysisTuneV = new TDigitalAnalysis(&fHistoQue, myTuneVScan, fConfig->GetScanConfig(), fHics, &fMutex);
 
-  //scanLoop(myScan)...
   std::cout << "starting thread" << std::endl;
   std::thread scanThreadV(scanLoop, myTuneVScan);
   analysisTuneV->Initialize(); //should allocate for GetResultThreshold...
@@ -107,11 +106,22 @@ int main(int argc, char** argv) {
   analysisTuneV->Finalize();
   // std::vector <TCounter> counters = ((TDigitalAnalysis*)analysis)->GetCounters();
   
+  float * vcasn = new float[fHics.size()];
   std::cout << "Printing VCASN thresholds:" << std::endl; //need to know SPECIFIC chip number!!
-  std::cout << analysisTuneV->GetResultThreshold(0);
-  //for(std::map<int,TThresholdResultChip> it; i<fChips.size(); i++) {
-  //  std::cout << "Chip " << i << ":  " << analysisTuneV->GetResultThreshold(i) << std::endl;
-  //}
+  int hicnum = 0;
+  for(std::vector<THic*>::iterator it = fHics.begin(); it<fHics.end(); it++) {  //For each HIC, visit each chip:
+    std::cout << "HIC " << hicnum << std::endl;
+    std::vector<TAlpide*> chips = (*it)->GetChipVector();
+    float sum = 0;
+    for(std::vector<TAlpide*>::iterator chp = chips.begin(); chp < chips.end(); chp++) {
+      unsigned int id = (*chp)->GetChipId();
+      std::cout << "ChipId got" << std::endl;
+      sum += analysisTuneV->GetResultThreshold(id);
+      std::cout << "Chip " << id << ":  " << analysisTuneV->GetResultThreshold(id) << std::endl;
+    }
+    vcasn[hicnum] = sum / (float)(chips.size());
+    hicnum++; ///NOTE THE ORDER
+  }
 
   // std::cout << std::endl << "Counter values: " << std::endl;
   // for (int i = 0; i < counters.size(); i ++) {

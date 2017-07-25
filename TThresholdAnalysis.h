@@ -148,6 +148,7 @@ class TThresholdAnalysis : public TScanAnalysis {
 			  std::string fileType);
   bool                      CheckPixelNoHits(TGraph* aGraph);
   bool                      CheckPixelStuck (TGraph* aGraph);
+  double FindStart(TGraph* aGraph);
   common::TErrFuncFitResult DoFit           (TGraph* aGraph);
   
   bool HasData(TScanHisto &scanHisto, 

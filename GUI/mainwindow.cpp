@@ -478,7 +478,7 @@ void MainWindow::scantest() {
     /* FIRST: tuneVCASN */
 
     TtuneVCASNScan *myTuneVScan = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-    TThresholdAnalysis  *analysisTuneV = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex, 1);
+    TThresholdAnalysis  *analysisTuneV = new TThresholdAnalysis (&fHistoQue,myTuneVScan, fConfig->GetScanConfig(), fHics, &fMutex, 1);
 
     std::cout << "starting thread (tuneVCASN)" << std::endl;
     std::thread scanThreadV(&MainWindow::scanLoop,this,mytuneVScan);
@@ -512,7 +512,7 @@ void MainWindow::scantest() {
     /* NEXT: tuneITHR */
 
     TtuneITHRScan *myTuneIScan = new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-    TThresholdAnalysis  *analysisTuneI = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex, -1);
+    TThresholdAnalysis  *analysisTuneI = new TThresholdAnalysis (&fHistoQue,myTuneIScan, fConfig->GetScanConfig(), fHics, &fMutex, -1);
 
     std::cout << "starting thread (tuneITHR)" << std::endl;
     std::thread scanThreadI(&MainWindow::scanLoop,this,myTuneIScan);
@@ -542,7 +542,7 @@ void MainWindow::scantest() {
     /* LAST: ITHRthreshold */
 
     TtuneITHRScan *myIthrScan = new TITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-    TThresholdAnalysis  *analysisIthr = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+    TThresholdAnalysis  *analysisIthr = new TThresholdAnalysis (&fHistoQue,myIthrScan, fConfig->GetScanConfig(), fHics, &fMutex);
     //NOTE:  config is passed by reference.
 
     std::cout << "starting thread (tuneITHR)" << std::endl;

@@ -121,7 +121,7 @@ int HitmapIB(const char *fName, int nInj = -1) {
     sprintf(fNameChip, "%sChip%d.dat", Prefix, ichip);
     ReadFile(fNameChip, hHitmap, ichip, nInj);
     sprintf(fNameChip, "%s_Chip%d_%d.dat", Prefix, ichip+8, 0); //second row
-    ReadFile(fNameChip, hHitmap, ichip+8, noise);
+    ReadFile(fNameChip, hHitmap, ichip+8, nInj);
   }
 
   gStyle->SetPalette (1);
