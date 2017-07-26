@@ -148,7 +148,7 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph)
   fitfcn->SetParameter(0,0.5*m_nPulseInj); 
   // 0.5 of max. amplitude.
   fitfcn->SetParameter(1,0.5*m_nPulseInj); 
-  // x@50%.
+  // x@y=50%.
   fitfcn->SetParameter(2,FindStart(aGraph));
   // slope of s-curve. 
   fitfcn->SetParameter(3,10);
@@ -207,11 +207,11 @@ void TThresholdAnalysis::Initialize()
   TThresholdResult* thresholdResult = (TThresholdResult*)m_result;
   char fName[100];
   
-  sprintf (fName, "%s_%s_Summary.dat", 
+  sprintf (fName, "Data/%s_%s_Summary.dat", 
 	   m_analisysName,m_config->GetfNameSuffix());
   thresholdResult->SetFileSummary(fopen(fName,"w"));
   
-  sprintf (fName, "%s_%s_PixelByPixel.dat", 
+  sprintf (fName, "Data/%s_%s_PixelByPixel.dat", 
 	   m_analisysName,m_config->GetfNameSuffix());
   thresholdResult->SetFilePixelByPixel(fopen(fName,"w"));
   
@@ -271,7 +271,7 @@ void TThresholdAnalysis::Run()
 	
 	TThresholdResultChip* chipResult = (TThresholdResultChip*) m_result->GetChipResult(m_chipList.at(iChip));
 	
-	bool fPixelNoHits= CheckPixelNoHits(gDummy);
+	bool fPixelNoHits= CheckPixelNoHits(gDummy); // IMPROVE!?!
        	bool fPixelStuck = CheckPixelStuck (gDummy);
 	
 	if (fPixelNoHits){
@@ -326,6 +326,8 @@ void TThresholdAnalysis::Finalize()
 	    << m_analisysName 
 	    << std::endl;
   
+  int totalScannedPixels = 32*m_config->GetNMaskStages()*m_config->GetPixPerRegion();
+  
   TThresholdResult* thresholdResult = (TThresholdResult*)m_result;
   
   for (int iChip=0; iChip < m_chipList.size(); iChip++) {
@@ -338,8 +340,12 @@ void TThresholdAnalysis::Finalize()
        	    chipResult->m_dataReceiver, 
 	    chipResult->m_chipId);
     fprintf(thresholdResult->GetFileSummary(),
-	    "Pixels without hits[CAREFUL]: %d\n", 
-     	    chipResult->m_counterPixelsNoHits);
+	    "Pixels without hits: %d\n", 
+     	    totalScannedPixels
+	    -chipResult->m_counterPixelsStuck
+	    -chipResult->m_counterPixelsNoThreshold
+	    -chipResult->m_counterPixelsYesThreshold
+	    );
     fprintf(thresholdResult->GetFileSummary(),
 	    "Stuck pixels: %d\n", 
      	    chipResult->m_counterPixelsStuck);
@@ -347,8 +353,8 @@ void TThresholdAnalysis::Finalize()
 	    "Pixels without threshold: %d\n", 
      	    chipResult->m_counterPixelsNoThreshold);
     fprintf(thresholdResult->GetFileSummary(),
-	     "Pixels with threshold: %d\n", 
-	     chipResult->m_counterPixelsYesThreshold);
+	    "Pixels with threshold: %d\n", 
+	    chipResult->m_counterPixelsYesThreshold);
     
     if (chipResult->m_threshold.entries!=0){
       chipResult->m_thresholdMean = chipResult->m_threshold.sum/chipResult->m_threshold.entries;
