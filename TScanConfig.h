@@ -54,14 +54,15 @@ class TScanConfig {
   void  SetVcasnArr     (int hics, float *vcasn);
     //Will set a different value of vcasn for each HIC.
   void  SetIthrArr      (int chips, float *ithr);
-    //Will set a different value of ithr for each chip.
-
-  int   GetNInj         () {return m_nInj;};
-  int   GetChargeStart  () {return m_chargeStart;};
-  int   GetChargeStep   () {return m_chargeStep;};
-  int   GetChargeStop   () {return m_chargeStop;};
-  int   GetNMaskStages  () {return m_nMaskStages;};
-  char *GetfNameSuffix  () {return m_fNameSuffix;};  
+  //Will set a different value of ithr for each chip.
+  
+  int   GetNInj           () {return m_nInj;};
+  int   GetChargeStart    () {return m_chargeStart;};
+  int   GetChargeStep     () {return m_chargeStep;};
+  int   GetChargeStop     () {return m_chargeStop;};
+  int   GetPixPerRegion   () {return m_pixPerRegion;};
+  int   GetNMaskStages    () {return m_nMaskStages;};
+  char *GetfNameSuffix    () {return m_fNameSuffix;};  
 };
 
 
