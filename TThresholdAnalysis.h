@@ -124,7 +124,7 @@ protected:
 class TThresholdAnalysis : public TScanAnalysis {
   
  private:  
-  static constexpr float m_electronPerDac = 10; //[e/DAC]
+  static constexpr float m_electronPerDac = 7. *226/160; //[e/DAC]
   const std::string m_analisysName = "TThresholdAnalysis";
   
   int m_startPulseAmplitude;
@@ -170,7 +170,7 @@ class TThresholdAnalysis : public TScanAnalysis {
 		     TScanConfig *aScanConfig,
                      std::vector <THic*> hics,
 		     std::mutex *aMutex,
-                     int resultFactor = m_electronPerDac); //MUST BE 1 for a vcasn scan, and *-1* for an ithr scan!!!  Else use default.
+                     float resultFactor = m_electronPerDac); //MUST BE 1 for a vcasn scan, and *-1* for an ithr scan!!!  Else use default.
   
   void Initialize();
   void Run       ();

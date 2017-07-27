@@ -87,9 +87,11 @@ int main(int argc, char** argv) {
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
   
-  TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
-  
+  //TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  //TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+  TThresholdScan *myScan   = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  TThresholdAnalysis  *analysis = new TThresholdAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+
   //scanLoop(myScan);
   std::cout << "starting thread" << std::endl;
   std::thread scanThread(scanLoop, myScan);
