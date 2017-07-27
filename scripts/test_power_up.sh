@@ -8,15 +8,15 @@
 
 ### Settings
 
-N_TRIALS=100
-
+N_TRIALS=10
+INTER_TEST_SLEEP=10
 
 ## hameg and back bias
 PSU_DEV=${PSU_DEV-'/dev/ttyHAMEG0'} # PSU file descriptor
 
 # maximum supply current to the boards
-PSU_CURR1=1.5    # digital
-PSU_CURR2=0.5    # analogue
+PSU_CURR1=1.3    # digital
+PSU_CURR2=0.3    # analogue
 PSU_CURR3=0.020  # Vbb
 
 PSU_VOLT1=1.8    # digital (goes directly to the chip!)
@@ -33,72 +33,68 @@ ANA_DIR=$(readlink -f $SOFTWARE_DIR/../analysis/)
 COMMON_DIR=$HOME_DIR/common/
 
 DATE_TIME=`date +%Y%m%d_%H%M%S`
-OUTFILE=$SOFTWARE_DIR/Data/powerup_test_${DATE_TIME}.log
-
-
-start_clk () {
-}
-
-stop_clk () {
-
-
-}
-
-module_power_on () {
-    ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 1
-
-}
-
-moudle_power_off() {
-
-
-if [ -z "$1" ]
-then
-  echo "Usage: run_irrad_chip_test.sh <CHIPID>"
-  exit 0
-fi
-CHIP_ID=$1
-
-
-
-# basic command
-#CMD=$SOFTWARE_DIR/runTest
+OUTFILE_CLK=$SOFTWARE_DIR/Data/powerup_test_${DATE_TIME}_cont_clk.log
+OUTFILE_NOCLK=$SOFTWARE_DIR/Data/powerup_test_${DATE_TIME}_clk_off.log
 
 
 # initialise all power supplies
 $COMMON_DIR/hameg_module_test.py $PSU_DEV 0 $PSU_CURR1 $PSU_CURR2 $PSU_CURR3 2>&1
 sleep 1
 
-# measure the current
-$COMMON_DIR/hameg_module_test.py $PSU_DEV 2 2>&1
-if [ ${PIPESTATUS[0]} -eq 1 ]
-then
-    echo "back-bias current too high, stopping measurement"  2>&1
-    $COMMON_DIR/hameg_module_test.py $PSU_DEV 3 2>&1
-    exit 1
-fi
-
-cd $HOME_DIR
+cd $SOFTWARE_DIR
 
 
 #################################################################
 
 #### with clock on
-${HOME_DIR}/startclk
+${SOFTWARE_DIR}/startclk > /dev/null 2>&1
+
+echo -e "#Iteration\tActiveChips\tDIDD (A)\tAIDD (A)\tIBB (A)" | tee -a $OUTFILE_CLK
+for i in $(seq 1 ${N_TRIALS})
+do
+    ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 1 $PSU_VOLT1 $PSU_VOLT3 # power on the module
+    sleep 1
+
+    CURRENTS=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 )
+    CHIPS=$(eval ${SOFTWARE_DIR}/test_chip_count | grep enabled | cut -f1 -d' ' )
+
+    echo -e "$i\t$CHIPS\t$CURRENTS" | tee -a $OUTFILE_CLK
+
+    $COMMON_DIR/hameg_module_test.py $PSU_DEV 3 2>&1 # power off the module
+
+    sleep $INTER_TEST_SLEEP # wait between power off and power on
+done
+${SOFTWARE_DIR}/stopclk > /dev/null 2>&1
+
+
+
+#### with clock disabled
+
+
+echo -e "#Iteration\tActiveChips\tDIDD w/o clk (A)\tAIDD w/o clk (A)\tIBB w/o clk (A)\tDIDD (A)\tAIDD (A)\tIBB (A)" | tee -a $OUTFILE_NOCLK
+
+${SOFTWARE_DIR}/stopclk > /dev/null 2>&1
 
 for i in $(seq 1 ${N_TRIALS})
 do
     ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 1 $PSU_VOLT1 $PSU_VOLT3 # power on the module
+    sleep 1
 
-    CURRENTS=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 )
-    CHIPS=$(eval ${HOME_DIR}/test_chip_count | cut -f1)
+    CURRENTS_NOCLK=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 )
 
-    echo -e "$i\t$CHIPS\t$CURRENTS" | tail -a $OUTFILE
+    ${SOFTWARE_DIR}/startclk > /dev/null 2>&1
+    sleep 1
+
+    CURRENTS_CLK=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 )
+    CHIPS=$(eval ${SOFTWARE_DIR}/test_chip_count | grep enabled | cut -f1 -d' ' )
+
+    echo -e "$i\t$CHIPS\t$CURRENTS_NOCLK\t$CURRENTS_CLK" | tee -a $OUTFILE_NOCLK
+
+    ${SOFTWARE_DIR}/stopclk > /dev/null 2>&1
 
     $COMMON_DIR/hameg_module_test.py $PSU_DEV 3 2>&1 # power off the module
+
+    sleep $INTER_TEST_SLEEP # wait between power off and power on
 done
-${HOME_DIR}/stopclk
 
-#### with clock disabled
-
-$HOME_DIR/common/hameg2030.py $PSU_DEV 3
+$HOME_DIR/common/hameg_module_test.py $PSU_DEV 3

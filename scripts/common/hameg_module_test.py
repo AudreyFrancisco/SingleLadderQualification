@@ -78,19 +78,22 @@ def init2030(hameg, i_max):
     time.sleep(0.1);
 
 def activate_module(sour, v, vbb):
-    sour.write("OUT:GEN OFF")
-    sour.write("INST OUT1\n" % int(ch))
+    sour.write("OUTP:GEN OFF\n")
+    time.sleep(0.1)
+    sour.write("INST OUT1\n")
     sour.write("SOUR:VOLT %0.3f\n" % float(v))
-    sour.write("OUTP:SEL ON")
-    sour.write("INST OUT2\n" % int(ch))
+    sour.write("OUTP:SEL ON\n")
+    time.sleep(0.1)
+    sour.write("INST OUT2\n")
     sour.write("SOUR:VOLT %0.3f\n" % float(v))
-    sour.write("OUTP:SEL ON")
-    sour.write("INST OUT3\n" % int(ch))
+    sour.write("OUTP:SEL ON\n")
+    time.sleep(0.1)
+    sour.write("INST OUT3\n")
     sour.write("SOUR:VOLT %0.3f\n" % float(vbb))
-    sour.write("OUTP:SEL ON")
+    sour.write("OUTP:SEL ON\n")
     time.sleep(0.1)
 
-    sour.write("OUT:GEN ON")
+    sour.write("OUTP:GEN ON\n")
 
 
 def main():
@@ -102,6 +105,7 @@ def main():
     # switch mode
     if mode==0:
         # prepare the voltage source
+        powerDown(sour)
         init2030(sour, (float(sys.argv[3]), float(sys.argv[4]), float(sys.argv[5])))
     elif mode==1:
         # set a voltage value

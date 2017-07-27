@@ -72,7 +72,7 @@ test_fifo:   $(DEPS) main_fifo.cpp
 	$(CC) -o test_fifo $(OBJS) $(CFLAGS) main_fifo.cpp $(LINKFLAGS)
 
 test_chip_count:   $(DEPS) main_fifo.cpp
-	$(CC) -o test_chip_cout $(OBJS) $(CFLAGS) main_chip_count.cpp $(LINKFLAGS)
+	$(CC) -o test_chip_count $(OBJS) $(CFLAGS) main_chip_count.cpp $(LINKFLAGS)
 
 test_dacscan:   $(DEPS) main_dacscan.cpp
 	$(CC) -o test_dacscan $(OBJS) $(CFLAGS) main_dacscan.cpp $(LINKFLAGS)
