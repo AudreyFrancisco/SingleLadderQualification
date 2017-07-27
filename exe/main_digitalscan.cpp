@@ -211,7 +211,7 @@ void scan() {
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
-  int nTrigsPerTrain =  maxTrigsPerTrain;
+  int nTrigsPerTrain =  (maxTrigsPerTrain > 0) ? maxTrigsPerTrain : myNTriggers;
   while((myNTriggers % nTrigsPerTrain) != 0) nTrigsPerTrain --;
   int nTrains = myNTriggers / nTrigsPerTrain;
 
