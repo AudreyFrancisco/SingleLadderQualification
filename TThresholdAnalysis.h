@@ -118,7 +118,7 @@ class TThresholdResult : public TScanResult {
 class TThresholdAnalysis : public TScanAnalysis {
   
  private:  
-  const float m_electronPerDac = 10; //[e/DAC]
+  //int m_electronPerDac = 10; //[e/DAC]
   const std::string m_analisysName = "TThresholdAnalysis";
   
   int m_startPulseAmplitude;
@@ -138,7 +138,7 @@ class TThresholdAnalysis : public TScanAnalysis {
   int m_counterGoodThresholds;
   
   double m_cutChi2; // Or float ?
-  int m_resultFactor;
+  float m_resultFactor;
   
   std::map<int,TThresholdResultChip> m_resultChip;
   std::map<int,common::TStatVar> m_threshold;
@@ -164,13 +164,14 @@ class TThresholdAnalysis : public TScanAnalysis {
 		     TScanConfig *aScanConfig, 
                      std::vector <THic*> hics,
 		     std::mutex *aMutex,
-                     int resultFactor);
+                     float resultFactor = 7. *226/160); // = electrons per DAC
   
   void Initialize();
   void Run       ();
   void Finalize  ();
   float GetResultThreshold(int chip);
 
+  std::map<int,common::TStatVar> DeleteThis() { return m_threshold; }
 };
 
 #endif

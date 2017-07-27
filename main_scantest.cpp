@@ -87,33 +87,35 @@ int main(int argc, char** argv) {
   const char ** hicIds;  //this needs to come from *SOMEWHERE*, OK for now...
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips, "", &fHics, hicIds);
-  TtuneVCASNScan *myTuneVScan = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-  TThresholdAnalysis  *analysisTuneV = new TThresholdAnalysis (&fHistoQue,myTuneVScan, fConfig->GetScanConfig(), fHics, &fMutex, 1); 
+  //TtuneVCASNScan *myTuneVScan = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+  //TThresholdAnalysis  *analysisTuneV = new TThresholdAnalysis (&fHistoQue,myTuneVScan, fConfig->GetScanConfig(), fHics, &fMutex, 1);
 
   //testing other classes...
-  //TThresholdScan *myTuneVScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-  //TThresholdAnalysis *analysisTuneV = new TThresholdAnalysis(&fHistoQue, myTuneVScan, fConfig->GetScanConfig(), fHics, &fMutex, 1);
+  TThreshScan *myTuneVScan = new TThreshScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
+  //TThresholdAnalysis *analysisTuneV = new TThresholdAnalysis(&fHistoQue, myTuneVScan, fConfig->GetScanConfig(), fHics, &fMutex);
   //TDigitalScan *myTuneVScan = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
   //TScanAnalysis * analysisTuneV = new TDigitalAnalysis(&fHistoQue, myTuneVScan, fConfig->GetScanConfig(), fHics, &fMutex);
 
   std::cout << "starting thread" << std::endl;
   std::thread scanThreadV(scanLoop, myTuneVScan);
-  analysisTuneV->Initialize(); //should allocate for GetResultThreshold...
-  std::thread analysisThreadI(&TScanAnalysis::Run, std::ref(analysisTuneV));
+  //analysisTuneV->Initialize(); //should allocate for GetResultThreshold...
+  std::cout << "Initialized" << std::endl;
+  //std::thread analysisThreadI(&TScanAnalysis::Run, std::ref(analysisTuneV));
 
+  std::cout << "joining threads" << std::endl;
   scanThreadV.join();
-  analysisThreadI.join();
-  analysisTuneV->Finalize();
+  //analysisThreadI.join();
+  //analysisTuneV->Finalize();
   // std::vector <TCounter> counters = ((TDigitalAnalysis*)analysis)->GetCounters();
   
   float * vcasn = new float[fHics.size()];
   std::cout << "Printing VCASN thresholds:" << std::endl; //need to know SPECIFIC chip number!!
-  int hicnum = 0;
-  for(std::vector<THic*>::iterator it = fHics.begin(); it<fHics.end(); it++) {  //For each HIC, visit each chip:
+  /*int hicnum = 0;
+  for(std::vector<THic*>::iterator it = fHics.begin(); it != fHics.end(); it++) {  //For each HIC, visit each chip:
     std::cout << "HIC " << hicnum << std::endl;
     std::vector<TAlpide*> chips = (*it)->GetChipVector();
     float sum = 0;
-    for(std::vector<TAlpide*>::iterator chp = chips.begin(); chp < chips.end(); chp++) {
+    for(std::vector<TAlpide*>::iterator chp = chips.begin(); chp != chips.end(); chp++) {
       unsigned int id = (*chp)->GetChipId();
       std::cout << "ChipId got" << std::endl;
       sum += analysisTuneV->GetResultThreshold(id);
@@ -121,7 +123,12 @@ int main(int argc, char** argv) {
     }
     vcasn[hicnum] = sum / (float)(chips.size());
     hicnum++; ///NOTE THE ORDER
-  }
+  }*/
+
+  //std::map<int,common::TStatVar> m_thr = analysisTuneV->DeleteThis();
+  //for (std::map<int,common::TStatVar>::iterator it = m_thr.begin(); it != m_thr.end(); it++) {
+  //  std::cout << "ChipID " << it->first << ", mean threshold = " << it->second.mean << std::endl;
+  //}
 
   // std::cout << std::endl << "Counter values: " << std::endl;
   // for (int i = 0; i < counters.size(); i ++) {
@@ -129,7 +136,7 @@ int main(int argc, char** argv) {
   // }
   
   delete myTuneVScan;
-  delete analysisTuneV;
+  //delete analysisTuneV;
   return 0;
 }
 

@@ -158,7 +158,7 @@ TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
                                        TScanConfig            *aScanConfig,
                                        std::vector <THic*>     hics,
                                        std::mutex             *aMutex,
-                                       int                     resultFactor)
+                                       float                   resultFactor)
 : TScanAnalysis(aScanHistoQue, aScan, aScanConfig, hics, aMutex)  
 {
   
@@ -321,20 +321,29 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph)
   // 0.5 of max. amplitude.
   fitfcn->SetParameter(1,0.5*m_nPulseInj); 
   // x@y50%.
-  //fitfcn->SetParameter(2,0.5*(m_stopPulseAmplitude - m_startPulseAmplitude)*m_resultFactor);
-  fitfcn->SetParameter(2,FindStart(aGraph)*m_resultFactor);
+  fitfcn->SetParameter(2,0.5*(m_stopPulseAmplitude - m_startPulseAmplitude)*m_resultFactor); //old
+  //fitfcn->SetParameter(2,FindStart(aGraph)*m_resultFactor);
   // slope of s-curve.  RESULTFACTOR COULD BE WRONG--WIP.
-  fitfcn->SetParameter(3,0.10);
+  fitfcn->SetParameter(3,0.5); //old
+  aGraph->Fit("fitfcn","RQ");
+  //fitfcn->SetParameter(3,0.10);
   
   common::TErrFuncFitResult fitResult_dummy;
   if(fitfcn->GetParameter(0)>0 && m_resultFactor<0) {
     std::cout << "ERROR in line 241 of TAnalogAnalysis:  Unexpected resultFactor/threshold sign!" << std::endl;
-    fitResult_dummy.threshold = 1;
+    std::cout << "  A different resultFactor should be used?" << std::endl;
+    fitResult_dummy.threshold = 0;
+    fitResult_dummy.noise     = 0;
+    fitResult_dummy.redChi2   = 0;
     return fitResult_dummy;
   } else if(fitfcn->GetParameter(0) < 0) {
     fitResult_dummy.threshold = -1*fitfcn->GetParameter(0);  //for the ithr case
+    //std::cout << "pix thresh = " << fitResult_dummy.threshold << std::endl;
+    fitResult_dummy.noise     = fitfcn->GetParameter(1);
+    fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
   } else {
     fitResult_dummy.threshold = fitfcn->GetParameter(0);
+    //std::cout << "pix thresh = " << fitResult_dummy.threshold << std::endl;
     fitResult_dummy.noise     = fitfcn->GetParameter(1);
     fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
   }
@@ -496,7 +505,7 @@ void TThresholdAnalysis::Run()
 	int iPulseStart;
         int iPulseStop;
     	TGraph* gDummy = new TGraph();
-	if(m_resultFactor > 1) { //regular scan
+	if(m_resultFactor > 1) { //regular scan/final tune
    	  iPulseStop = ((float)abs( m_startPulseAmplitude - m_stopPulseAmplitude))/ m_stepPulseAmplitude;
           iPulseStart = 0;
 	} else if(m_resultFactor==1) { //vcasn
@@ -565,12 +574,12 @@ void TThresholdAnalysis::Run()
    	    	  fitResult.noise,
    	 	  fitResult.redChi2);
 	  
-	  m_threshold.at(intIndexDummy).sum+=row;//fitResult.threshold;
-	  m_threshold.at(intIndexDummy).sum2+=row*row;//pow(fitResult.threshold,2);
+	  m_threshold.at(intIndexDummy).sum+=fitResult.threshold;  //row
+	  m_threshold.at(intIndexDummy).sum2+=pow(fitResult.threshold,2);  //row*row;
 	  m_threshold.at(intIndexDummy).entries+=1;
 	  
-	  m_noise.at(intIndexDummy).sum+=row;//;itResult.noise;
-	  m_noise.at(intIndexDummy).sum2+=row*row;//pow(fitResult.noise,2);
+	  m_noise.at(intIndexDummy).sum+=fitResult.noise; //row
+	  m_noise.at(intIndexDummy).sum2+=pow(fitResult.noise,2); //row*row
 	  m_noise.at(intIndexDummy).entries+=1;
 	  
 	}
