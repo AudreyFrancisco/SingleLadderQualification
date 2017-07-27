@@ -36,7 +36,7 @@ $(info OBJS_ROOT="$(OBJS_ROOT)")
 
 DEPS = $(OBJS) $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR)
 
-all:   $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) stopclk startclk test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit test_localbus test_roottest test_scantest test_threshold_v1
+all:   $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) stopclk startclk test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit test_localbus test_roottest test_scantest test_threshold_v1 test_chip_count
 
 $(LIBMOSAIC_DIR):
 	$(MAKE) -C $@
@@ -70,6 +70,9 @@ test_digital:   $(DEPS) main_digitalscan.cpp
 
 test_fifo:   $(DEPS) main_fifo.cpp
 	$(CC) -o test_fifo $(OBJS) $(CFLAGS) main_fifo.cpp $(LINKFLAGS)
+
+test_chip_count:   $(DEPS) main_fifo.cpp
+	$(CC) -o test_chip_cout $(OBJS) $(CFLAGS) main_chip_count.cpp $(LINKFLAGS)
 
 test_dacscan:   $(DEPS) main_dacscan.cpp
 	$(CC) -o test_dacscan $(OBJS) $(CFLAGS) main_dacscan.cpp $(LINKFLAGS)
@@ -140,6 +143,7 @@ clean:
 
 clean-all:	clean
 	rm -rf test_*
+	rm -rf startclk stopclk
 	rm -rf $(LIBRARY)
 	rm -rf $(ANALYSIS_LIBRARY)
 	$(MAKE) -C $(LIBMOSAIC_DIR) cleanall
