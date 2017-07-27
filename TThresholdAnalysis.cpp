@@ -211,38 +211,112 @@ double ErrorFunc(double* x, double* par)
   return y;
 }
 
-common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph)
+
+
+//Methods for a speedier fit:  find the mean of the derivative (erf->gaussian)
+//  Differentiates manually; may be less accurate.
+//  Returns 0 if |mean|>500, which happens when a pixel is received twice.  Ignore these when calculating the chip mean.
+double meanGraph(TGraph* resultGraph) { //returns the weighted mean x value
+  double sum=0.0;
+  double norm=0.0;
+  double * xs = resultGraph->GetX();
+  double * ys = resultGraph->GetY();
+  for (int i = 0; i < resultGraph->GetN(); i++) {
+    sum += xs[i]*ys[i];  //xs=value, ys=weight
+    norm += ys[i];
+  }
+
+  if(abs(sum/norm) > 500) {  //outliers occur when a pixel is received twice; return 0.
+    /*std::cout << "WARNING: ignoring high mean of " << sum/norm << "!  (Probably received a pixel twice.)" << std::endl;
+    std::cout << "  sum=" << sum << ", norm=" << norm << std::endl;
+    std::cout << "  xs=[";
+    for(int i=0; i<resultGraph->GetN(); i++) {
+      std::cout << xs[i] << ",";
+    }
+    std::cout << "]" << std::endl << "  ys=[";
+    for(int i=0; i<resultGraph->GetN(); i++) {
+      std::cout << ys[i] << ",";
+    }
+    std::cout << "]" << std::endl;*/
+    return 0;
+  }
+
+  return sum/norm;
+}
+
+double rmsGraph(TGraph* resultGraph) {
+  double sum=0.0;
+  double norm=0.0;
+  double mean = meanGraph(resultGraph);
+  if(mean==0) return 0;
+  double * xs = resultGraph->GetX();
+  double * ys = resultGraph->GetY();
+  for (int i = 0; i < resultGraph->GetN(); i++) {
+    sum += ys[i]*(xs[i]-mean)*(xs[i]-mean);
+    norm += ys[i];
+  }
+  return sqrt(sum/norm);
+}
+
+void ddxGraph(TGraph* aGraph, TGraph* resultGraph) {
+  //TGraph* resultGraph = new TGraph();
+  double * xs = aGraph->GetX();  //all x-coords
+  double * ys = aGraph->GetY();
+  for (int i = 0; i < aGraph->GetN()-1; i++) {
+    resultGraph->SetPoint(resultGraph->GetN(), xs[i], (ys[i+1]-ys[i])/(xs[i+1]-xs[i]));
+  }
+}
+
+
+common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
+//speedy=true will run the fast analysis in place of the slower fit.  Much faster,
+//  but potentially less accurate.  (Shouldn't be a huge difference, though.)
+//Note:  The slower version isn't working right now!
 {
-  TF1 *fitfcn;
-  if(m_resultFactor<1) {
-    fitfcn = new TF1("fitfcn",
-                          ErrorFunc,
-                          m_stopPulseAmplitude*m_resultFactor,
-                          m_startPulseAmplitude*m_resultFactor,
-                          4);
-  } else {
-    fitfcn = new TF1("fitfcn", 
-  			  ErrorFunc,
-  			  m_startPulseAmplitude*m_resultFactor,
+  common::TErrFuncFitResult fitResult_dummy;
+
+  if(speedy) { //Looks good!
+    //This should return a TGraph @ the derivative of aGraph ("d" option in copy constructor).  CHECK.
+    TGraph* diffGraph = new TGraph();
+    ddxGraph(aGraph, diffGraph); // = ddxGraph(aGraph);
+
+    fitResult_dummy.threshold = abs(meanGraph(diffGraph));
+    fitResult_dummy.noise     = rmsGraph(diffGraph);
+    fitResult_dummy.redChi2   = 0; //not supported with this version; no fit ran
+    delete diffGraph;
+  }
+  else {  //WARNING:  This version is still buggy!
+    TF1 *fitfcn;
+    if(m_resultFactor<1) {
+      fitfcn = new TF1("fitfcn",
+                            ErrorFunc,
+                            m_stopPulseAmplitude*m_resultFactor,
+                            m_startPulseAmplitude*m_resultFactor,
+                            4);
+    } else {
+      fitfcn = new TF1("fitfcn", 
+			  ErrorFunc,
+			  m_startPulseAmplitude*m_resultFactor,
 			  m_stopPulseAmplitude*m_resultFactor,
 			  4);
-  }
-  // y@50%.
-  fitfcn->SetParameter(0,0.5*m_nPulseInj); 
-  // 0.5 of max. amplitude.
-  fitfcn->SetParameter(1,0.5*m_nPulseInj); 
-  // x@50%.
-  fitfcn->SetParameter(2,0.5*(m_stopPulseAmplitude - m_startPulseAmplitude)*m_resultFactor);
-  // slope of s-curve.  m_resultFactor MAY BE -1--make sure this doesn't cause any problems!! (WIP)
-  fitfcn->SetParameter(3,0.5);
-  
-  aGraph->Fit("fitfcn","RQ");
-  
-  common::TErrFuncFitResult fitResult_dummy;
-  if(fitfcn->GetParameter(0)>0 && m_resultFactor<0) {
-    std::cout << "ERROR in line 241 of TAnalogAnalysis:  Unexpected resultFactor/threshold sign!" << std::endl;
-    fitResult_dummy.threshold = 1;
-    return fitResult_dummy;
+    }
+    // y@50%.
+    fitfcn->SetParameter(0,0.5*m_nPulseInj); 
+    // 0.5 of max. amplitude.
+    fitfcn->SetParameter(1,0.5*m_nPulseInj); 
+    // x@50%.
+    fitfcn->SetParameter(2,0.5*(m_stopPulseAmplitude - m_startPulseAmplitude)*m_resultFactor);
+    // slope of s-curve.  m_resultFactor MAY BE -1--make sure this doesn't cause any problems!! (WIP)
+    fitfcn->SetParameter(3,0.5);
+    
+    aGraph->Fit("fitfcn","RQ");
+    
+    //common::TErrFuncFitResult fitResult_dummy;
+    if(fitfcn->GetParameter(0)>0 && m_resultFactor<0) {
+      std::cout << "ERROR in line 241 of TAnalogAnalysis:  Unexpected resultFactor/threshold sign!" << std::endl;
+      fitResult_dummy.threshold = 1;
+      return fitResult_dummy;
+    }
     if(fitfcn->GetParameter(0) < 0) {
       fitResult_dummy.threshold = -1*fitfcn->GetParameter(0);  //for the ithr case
     } else {
@@ -250,9 +324,11 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph)
     }
     fitResult_dummy.noise     = fitfcn->GetParameter(1);
     fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
+    
+    delete fitfcn; 
+    
   }
-  delete fitfcn; 
-  
+
   return fitResult_dummy;
 }
 
@@ -467,7 +543,7 @@ void TThresholdAnalysis::Run()
 	  // MB - NEED TO SELECT GOOD FIT.
 	  
 	  common::TErrFuncFitResult fitResult;
-	  fitResult=DoFit(gDummy);
+	  fitResult=DoFit(gDummy, true); //testing speedy version for now!
 	  
 	  fprintf(m_resultChip.at(intIndexDummy).GetFilePixelFitResult(), 
    	    	  "%d %d %f %f %f\n", 
@@ -475,14 +551,15 @@ void TThresholdAnalysis::Run()
    	    	  fitResult.threshold,
    	    	  fitResult.noise,
    	 	  fitResult.redChi2);
-	  
-	  m_threshold.at(intIndexDummy).sum+=row;//fitResult.threshold;
-	  m_threshold.at(intIndexDummy).sum2+=row*row;//pow(fitResult.threshold,2);
-	  m_threshold.at(intIndexDummy).entries+=1;
-	  
-	  m_noise.at(intIndexDummy).sum+=row;//;itResult.noise;
-	  m_noise.at(intIndexDummy).sum2+=row*row;//pow(fitResult.noise,2);
-	  m_noise.at(intIndexDummy).entries+=1;
+	  if (fitResult.threshold!=0) { //if no error/dead pixel
+	    m_threshold.at(intIndexDummy).sum+=fitResult.threshold; //row;
+	    m_threshold.at(intIndexDummy).sum2+=pow(fitResult.threshold,2); //row*row
+	    m_threshold.at(intIndexDummy).entries+=1;
+	    
+	    m_noise.at(intIndexDummy).sum+=fitResult.noise; //row
+	    m_noise.at(intIndexDummy).sum2+=pow(fitResult.noise,2); //row*row
+	    m_noise.at(intIndexDummy).entries+=1;
+          }
 	  
 	}
 	

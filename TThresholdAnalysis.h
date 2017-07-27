@@ -124,7 +124,7 @@ protected:
 class TThresholdAnalysis : public TScanAnalysis {
   
  private:  
-  static constexpr float m_electronPerDac = 7. *226/160; //[e/DAC]
+  static constexpr float m_electronPerDac = 7. *226/160; //[e/DAC], around 10
   const std::string m_analisysName = "TThresholdAnalysis";
   
   int m_startPulseAmplitude;
@@ -155,7 +155,7 @@ class TThresholdAnalysis : public TScanAnalysis {
 			  std::string fileType);
   bool                      CheckPixelNoHits(TGraph* aGraph);
   bool                      CheckPixelStuck (TGraph* aGraph);
-  common::TErrFuncFitResult DoFit           (TGraph* aGraph);
+  common::TErrFuncFitResult DoFit           (TGraph* aGraph, bool speedy = false);
   
   bool HasData(TScanHisto &scanHisto, 
 	       common::TChipIndex idx, 
@@ -178,6 +178,7 @@ class TThresholdAnalysis : public TScanAnalysis {
 
   float GetResultThreshold(int chip); //new; returns mean threshold of ith chip
   
+  std::map<int,common::TStatVar> DeleteThis() { return m_threshold; }
 };
 
 #endif

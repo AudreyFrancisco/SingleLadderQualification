@@ -132,6 +132,7 @@ void ProcessPixel (int col, int row) {
 
 
 void ProcessFile (const char *fName) {
+  std::cout << fName << std::endl;
   FILE *fp = fopen (fName, "r");
   int col, address, ampl, hits;
   int lastcol = -1, lastaddress = -1;
@@ -170,6 +171,7 @@ void ProcessFile (const char *fName) {
 
 int FitThresholds(const char *fName, bool WriteToFile, int ITH, int VCASN, bool saveCanvas) {
   PrepareHistos();
+  std::cout << "Histos prepared" << std::endl;
   ProcessFile(fName);
 
   std::cout << "Found " << NPixels << " pixels, i.e." << 524288 - NPixels << " pixels have no hits." << std::endl;

@@ -50,21 +50,29 @@ void scanLoop (TScan *myScan)
   while (myScan->Loop(2)) {
     myScan->PrepareStep(2);
     myScan->LoopStart  (1);
+    std::cout << "Loop 1 start" << std::endl;
     while (myScan->Loop(1)) {
       myScan->PrepareStep(1);
       myScan->LoopStart  (0);
+      std::cout << "Loop 0 start" << std::endl;
       while (myScan->Loop(0)) {
         myScan->PrepareStep(0);
         myScan->Execute    ();
         myScan->Next       (0);  
+        std::cout << "0";
       }
+      std::cout << std::endl << "Loop 0 end";
       myScan->LoopEnd(0);
+      std::cout << "...and...";
       myScan->Next   (1);
+      std::cout << "next." << std::endl;
     }
     myScan->LoopEnd(1);
     myScan->Next   (2);
+    std::cout << "Loop 1 end" << std::endl;
   }
   myScan->LoopEnd  (2);
+  std::cout << "Loop 2 end, terminating" << std::endl;
   myScan->Terminate();
 }
 
@@ -101,6 +109,14 @@ int main(int argc, char** argv) {
   scanThread.join();
   analysisThread.join();
   analysis->Finalize();
+
+  std::cout << "Printing mean thresholds:" << std::endl; //need to know SPECIFIC chip number!!
+  //want to go through each list in m_threshold.at(...) and print .mean.
+  std::map<int,common::TStatVar> thresh = analysis->DeleteThis();
+  for (std::map<int,common::TStatVar>::iterator it = thresh.begin(); it != thresh.end(); it++) {
+    std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
+  }
+  
   // std::vector <TCounter> counters = ((TDigitalAnalysis*)analysis)->GetCounters();
   
   // std::cout << std::endl << "Counter values: " << std::endl;
