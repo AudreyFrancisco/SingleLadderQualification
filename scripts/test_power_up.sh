@@ -67,7 +67,7 @@ do
 	CHIPS_RETRY=-1
     fi
 
-    echo -e "$i\t$CHIPS\t$CURRENTS\n$CHIPS_RETRY" | tee -a $OUTFILE_CLK
+    printf "%d\t%d\t%0.3f\t%0.3f\t%0.3f\t%d\n" $i $CHIPS $CURRENTS $CHIPS_RETRY | tee -a $OUTFILE_CLK
 
     $COMMON_DIR/hameg_module_test.py $PSU_DEV 3 2>&1 # power off the module
 
