@@ -138,8 +138,12 @@ class TThresholdAnalysis : public TScanAnalysis {
   int m_counterPixelsStuck;
   
   bool m_fDoFit;
-  bool m_fDoDumpRawData;
-  
+  bool m_writeRawData;
+  bool m_writeNoHitPixels;
+  bool m_writeNoThreshPixels;
+  bool m_writeStuckPixels;
+  bool m_writeFitResults;
+
   int m_sumGoodThresholds;
   int m_counterGoodThresholds;
 

@@ -164,9 +164,13 @@ TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
   m_stepPulseAmplitude  = m_config->GetChargeStep();
   m_nPulseInj           = m_config->GetNInj();
   
-  m_fDoDumpRawData = true;
-  m_fDoFit         = true;
-  m_resultFactor   = resultFactor;
+  m_writeRawData        = false;
+  m_writeNoHitPixels    = false;
+  m_writeNoThreshPixels = false;
+  m_writeStuckPixels    = false;
+  m_writeFitResults     = true;
+  m_fDoFit              = true;
+  m_resultFactor        = resultFactor;
 
   m_result = new TThresholdResult();
   
@@ -380,55 +384,61 @@ void TThresholdAnalysis::Initialize()
   					 fileNameDummy);
     
     resultDummy.SetFileSummary(fopen(fileNameDummy.c_str(),"w"));
-    
-    fileNameDummy  = m_analisysName;
-    fileNameDummy += "-";
-    fileNameDummy += m_config->GetfNameSuffix();
-    fileNameDummy += "-PixelNoHits";
-    fileNameDummy  = common::GetFileName(chipIndexDummy,
+    if (m_writeNoHitPixels) {
+      fileNameDummy  = m_analisysName;
+      fileNameDummy += "-";
+      fileNameDummy += m_config->GetfNameSuffix();
+      fileNameDummy += "-PixelNoHits";
+      fileNameDummy  = common::GetFileName(chipIndexDummy,
   					  fileNameDummy);
     
-    resultDummy.SetFilePixelNoHits(fopen(fileNameDummy.c_str(),"w"));
+      resultDummy.SetFilePixelNoHits(fopen(fileNameDummy.c_str(),"w"));
+    }
     
-    
-    fileNameDummy  = m_analisysName;
-    fileNameDummy += "-";
-    fileNameDummy += m_config->GetfNameSuffix();
-    fileNameDummy += "-PixelStuck";
-    fileNameDummy  = common::GetFileName(chipIndexDummy,
+    if (m_writeStuckPixels) {
+      fileNameDummy  = m_analisysName;
+      fileNameDummy += "-";
+      fileNameDummy += m_config->GetfNameSuffix();
+      fileNameDummy += "-PixelStuck";
+      fileNameDummy  = common::GetFileName(chipIndexDummy,
   					  fileNameDummy);
     
-    resultDummy.SetFilePixelStuck(fopen(fileNameDummy.c_str(),"w"));
+      resultDummy.SetFilePixelStuck(fopen(fileNameDummy.c_str(),"w"));
+    }
     
-    
-    fileNameDummy  = m_analisysName;
-    fileNameDummy += "-";
-    fileNameDummy += m_config->GetfNameSuffix();
-    fileNameDummy += "-PixelNoThreshold";
-    fileNameDummy  = common::GetFileName(chipIndexDummy,
+    if (m_writeNoThreshPixels) {
+      fileNameDummy  = m_analisysName;
+      fileNameDummy += "-";
+      fileNameDummy += m_config->GetfNameSuffix();
+      fileNameDummy += "-PixelNoThreshold";
+      fileNameDummy  = common::GetFileName(chipIndexDummy,
   					  fileNameDummy);
     
-    resultDummy.SetFilePixelNoThreshold(fopen(fileNameDummy.c_str(),"w"));
+      resultDummy.SetFilePixelNoThreshold(fopen(fileNameDummy.c_str(),"w"));
+    }
     
-    
-    fileNameDummy  = m_analisysName;
-    fileNameDummy += "-";
-    fileNameDummy += m_config->GetfNameSuffix();
-    fileNameDummy += "-PixelFitResult";
-    fileNameDummy  = common::GetFileName(chipIndexDummy,
+    if (m_writeFitResults) {
+      fileNameDummy  = m_analisysName;
+      fileNameDummy += "-";
+      fileNameDummy += m_config->GetfNameSuffix();
+      fileNameDummy += "-PixelFitResult";
+      fileNameDummy  = common::GetFileName(chipIndexDummy,
   					  fileNameDummy);
     
-    resultDummy.SetFilePixelFitResult(fopen(fileNameDummy.c_str(),"w"));
+      resultDummy.SetFilePixelFitResult(fopen(fileNameDummy.c_str(),"w"));
+    }
     
-    fileNameDummy  = m_analisysName;
-    fileNameDummy += "-";
-    fileNameDummy += m_config->GetfNameSuffix();
-    fileNameDummy += "-PixelRawData";
-    fileNameDummy  = common::GetFileName(chipIndexDummy,
+    if (m_writeRawData) {
+      fileNameDummy  = m_analisysName;
+      fileNameDummy += "-";
+      fileNameDummy += m_config->GetfNameSuffix();
+      fileNameDummy += "-PixelRawData";
+      fileNameDummy  = common::GetFileName(chipIndexDummy,
   					 fileNameDummy);
     
-    resultDummy.SetFileRawData(fopen(fileNameDummy.c_str(),"w"));
-    
+      resultDummy.SetFileRawData(fopen(fileNameDummy.c_str(),"w"));
+    }
+
     std::pair<int,TThresholdResultChip> pairDummy;
     pairDummy = std::make_pair(itr->first,resultDummy);
     m_resultChip.insert(pairDummy);
@@ -503,11 +513,11 @@ void TThresholdAnalysis::Run()
    			   iPulse*m_resultFactor,
    			   entries);
 	  
-   	  if(m_fDoDumpRawData){
+   	  if(m_writeRawData){
    	    int intIndexDummy = common::GetChipIntIndex(m_chipList.at(iChip)); 
 	    
 	    TThresholdResultChip resultDummy = m_resultChip.at(intIndexDummy);
-	    
+
    	    fprintf(m_resultChip.at(intIndexDummy).GetFileRawData(),
 	    	    "%d %d %d %d\n", 
    	    	    iCol,row,iPulse,entries);
@@ -525,16 +535,20 @@ void TThresholdAnalysis::Run()
 	bool fPixelStuck = CheckPixelStuck (gDummy);
 	
 	if (fPixelNoHits){
-	  fprintf(m_resultChip.at(intIndexDummy).GetFilePixelNoHits(), 
-   	  	  "%d %d\n", 
-		  iCol,row);
+	  if (m_writeNoHitPixels) {
+            fprintf(m_resultChip.at(intIndexDummy).GetFilePixelNoHits(), 
+   	    	    "%d %d\n", 
+		    iCol,row);
+	  }
 	  
 	  m_resultChip.at(intIndexDummy).SetCounterPixelsNoHits(m_resultChip.at(intIndexDummy).GetCounterPixelsNoHits()+1);
 	  
 	} else if (fPixelStuck){
-	  fprintf(m_resultChip.at(intIndexDummy).GetFilePixelStuck(), 
-		  "%d %d\n", 
-		  iCol,row);
+	  if (m_writeStuckPixels) {
+            fprintf(m_resultChip.at(intIndexDummy).GetFilePixelStuck(), 
+	 	    "%d %d\n", 
+		    iCol,row);
+	  }
 	  
 	  m_resultChip.at(intIndexDummy).SetCounterPixelsStuck(m_resultChip.at(intIndexDummy).GetCounterPixelsStuck()+1);
 	  
@@ -544,13 +558,15 @@ void TThresholdAnalysis::Run()
 	  
 	  common::TErrFuncFitResult fitResult;
 	  fitResult=DoFit(gDummy, true); //testing speedy version for now!
-	  
-	  fprintf(m_resultChip.at(intIndexDummy).GetFilePixelFitResult(), 
-   	    	  "%d %d %f %f %f\n", 
-   	    	  iCol,row,
-   	    	  fitResult.threshold,
-   	    	  fitResult.noise,
-   	 	  fitResult.redChi2);
+
+	  if (m_writeFitResults) {
+  	    fprintf(m_resultChip.at(intIndexDummy).GetFilePixelFitResult(), 
+   	    	    "%d %d %f %f %f\n", 
+   	    	    iCol,row,
+   	    	    fitResult.threshold,
+   	    	    fitResult.noise,
+   	 	    fitResult.redChi2);
+	  }
 	  if (fitResult.threshold!=0) { //if no error/dead pixel
 	    m_threshold.at(intIndexDummy).sum+=fitResult.threshold; //row;
 	    m_threshold.at(intIndexDummy).sum2+=pow(fitResult.threshold,2); //row*row
@@ -655,11 +671,11 @@ void TThresholdAnalysis::Finalize()
 	    itr->second.GetCounterPixelsStuck()); 
     
     fclose(itr->second.GetFileSummary());
-    fclose(itr->second.GetFilePixelNoHits());
-    fclose(itr->second.GetFilePixelStuck());
-    fclose(itr->second.GetFilePixelNoThreshold());
-    fclose(itr->second.GetFilePixelFitResult());
-    fclose(itr->second.GetFileRawData()); 
+    if (m_writeNoHitPixels)    fclose(itr->second.GetFilePixelNoHits());
+    if (m_writeStuckPixels)    fclose(itr->second.GetFilePixelStuck());
+    if (m_writeNoThreshPixels) fclose(itr->second.GetFilePixelNoThreshold());
+    if (m_writeFitResults)     fclose(itr->second.GetFilePixelFitResult());
+    if (m_writeRawData)        fclose(itr->second.GetFileRawData()); 
     
     m_result->AddChipResult(itr->first,
 			    &(itr->second));
