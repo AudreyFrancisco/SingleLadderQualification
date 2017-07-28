@@ -50,7 +50,7 @@ cd $SOFTWARE_DIR
 #### with clock on
 ${SOFTWARE_DIR}/startclk > /dev/null 2>&1
 
-echo -e "#Iteration\tActiveChips\tDIDD (A)\tAIDD (A)\tIBB (A)" | tee -a $OUTFILE_CLK
+echo -e "#Iteration\tActiveChips\tDIDD (A)\tAIDD (A)\tIBB (A)\tActiveChipsRetry\tDIDD configured (A)\tAIDD configured (A)\tIBB configured (A)" | tee -a $OUTFILE_CLK
 for i in $(seq 1 ${N_TRIALS})
 do
     ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 1 $PSU_VOLT1 $PSU_VOLT3 # power on the module
@@ -66,12 +66,15 @@ do
     else
 	CHIPS_RETRY=-1
     fi
+    sleep 1
+    CURRENTS_CONFIGURED=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 )
 
-    printf "%d\t%d\t%0.3f\t%0.3f\t%0.3f\t%d\n" $i $CHIPS $CURRENTS $CHIPS_RETRY | tee -a $OUTFILE_CLK
+    printf "%d\t%d\t%0.3f\t%0.3f\t%0.3f\t%d\t%0.3f\t%0.3f\t%0.3f\n" $i $CHIPS $CURRENTS $CHIPS_RETRY $CURRENTS_CONFIGURED | tee -a $OUTFILE_CLK
 
     $COMMON_DIR/hameg_module_test.py $PSU_DEV 3 2>&1 # power off the module
-
+    ${SOFTWARE_DIR}/stopclk > /dev/null 2>&1
     sleep $INTER_TEST_SLEEP # wait between power off and power on
+    ${SOFTWARE_DIR}/startclk > /dev/null 2>&1
 done
 ${SOFTWARE_DIR}/stopclk > /dev/null 2>&1
 
@@ -80,7 +83,7 @@ ${SOFTWARE_DIR}/stopclk > /dev/null 2>&1
 #### with clock disabled
 
 
-echo -e "#Iteration\tActiveChips\tDIDD w/o clk (A)\tAIDD w/o clk (A)\tIBB w/o clk (A)\tDIDD (A)\tAIDD (A)\tIBB (A)" | tee -a $OUTFILE_NOCLK
+echo -e "#Iteration\tActiveChips\tDIDD w/o clk (A)\tAIDD w/o clk (A)\tIBB w/o clk (A)\tDIDD (A)\tAIDD (A)\tIBB (A)\tDIDD configured (A)\tAIDD configured (A)\tIBB configured (A)" | tee -a $OUTFILE_NOCLK
 
 ${SOFTWARE_DIR}/stopclk > /dev/null 2>&1
 
@@ -95,9 +98,11 @@ do
     sleep 1
 
     CURRENTS_CLK=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 )
-    CHIPS=$(eval ${SOFTWARE_DIR}/test_chip_count | grep enabled | cut -f1 -d' ' )
+    CHIPS=$(eval ${SOFTWARE_DIR}/test_chip_count | grep enabled | cut -f1 -d' ' 
+    sleep 1
+    CURRENTS_CONFIGURED=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 ))
 
-    echo -e "$i\t$CHIPS\t$CURRENTS_NOCLK\t$CURRENTS_CLK" | tee -a $OUTFILE_NOCLK
+    printf "%d\t%d\t%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f\n" $i $CHIPS $CURRENTS_NOCLK $CURRENTS_CLK $CURRENTS_CONFIGURED | tee -a $OUTFILE_NOCLK
 
     ${SOFTWARE_DIR}/stopclk > /dev/null 2>&1
 
