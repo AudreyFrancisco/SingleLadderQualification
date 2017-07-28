@@ -3,9 +3,8 @@ LIBMOSAIC_DIR=./MosaicSrc/libmosaic
 LIBPOWERBOARD_DIR=./MosaicSrc/libpowerboard
 INCLUDE=-I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include
 LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic
-LIBPATH=/usr/local/lib
-CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium -I $(INCLUDE)
-LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread -L $(LIBPATH) $(LIB)
+CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium $(INCLUDE)
+LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread $(LIB)
 #OBJECT= runTest
 LIBRARY=libalpide.so
 ANALYSIS_LIBRARY=libalpide_analysis.so
