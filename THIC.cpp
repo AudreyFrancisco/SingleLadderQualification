@@ -3,7 +3,7 @@
 
 THic::THic (const char *id, int modId, TPowerBoard *pb, int pbMod)
 {
-  strcpy(m_dbId, id);
+  m_dbId.assign(id);
 
   m_powerBoard = pb;
   m_pbMod      = pbMod;

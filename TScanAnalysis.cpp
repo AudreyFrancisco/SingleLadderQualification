@@ -72,7 +72,7 @@ void TScanAnalysis::CreateHicResults ()
       }
     }
 
-    m_result->AddHicResult (m_hics.at(i)->GetNumber(), hicResult);
+    m_result->AddHicResult (m_hics.at(i)->GetDbId(), hicResult);
   }  
 
 }
@@ -97,9 +97,9 @@ int TScanResult::AddChipResult (int aIntIndex,
 }
 
 
-int TScanResult::AddHicResult (int aNumber, TScanResultHic *aHicResult) 
+int TScanResult::AddHicResult (std::string hicId, TScanResultHic *aHicResult) 
 {
-  m_hicResults.insert(std::pair<int, TScanResultHic*> (aNumber, aHicResult));
+  m_hicResults.insert(std::pair<std::string, TScanResultHic*> (hicId, aHicResult));
 
   return m_hicResults.size();
 }

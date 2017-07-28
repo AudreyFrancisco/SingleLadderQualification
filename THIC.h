@@ -2,6 +2,7 @@
 #define HIC_H
 
 #include <vector>
+#include <string>
 #include "TAlpide.h"
 #include "TPowerBoard.h"
 #include "Common.h"
@@ -18,7 +19,7 @@ class THic {
   int                   m_pbMod;     // module number inside power board
   // unique identifiers
   int                   m_hicNumber; // TODO: find out name and format ...
-  char                  m_dbId[50];  // ... in db: int? string?
+  std::string           m_dbId;      // ... in db: int? string?
  public:
   THic (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
   int                  GetNumber      () {return m_hicNumber;};
@@ -29,7 +30,7 @@ class THic {
   float                GetIdda        () {return 0;};
   float                GetIBias       () {return 0;};
   float                GetTemperature ();
-  char                *GetDbId        () {return m_dbId;};
+  std::string          GetDbId        () {return m_dbId;};
   int                  GetModId       () {return m_moduleId;};
   int                  GetNChips      () {return m_chips.size();};
   int                  AddChip        (TAlpide *chip);
