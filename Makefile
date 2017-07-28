@@ -1,10 +1,14 @@
 CC=g++
+
+### SStatic libraries which are located in subfolders
 LIBMOSAIC_DIR=./MosaicSrc/libmosaic
 LIBPOWERBOARD_DIR=./MosaicSrc/libpowerboard
 LIBALUCMS_DIR=./DataBaseSrc
+STATIC_LIBS=$(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR)
+
 INCLUDE=-I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I/usr/include/libxml2
 LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic -L$(LIBALUCMS_DIR) -lalucms -lxml2 -lcurl
-CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium $(INCLUDE)
+CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -Wall -mcmodel=medium $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread $(LIB)
 
 
@@ -40,7 +44,7 @@ CLASSES_ROOT= TThresholdAnalysis.cpp
 OBJS_ROOT  = $(CLASSES_ROOT:.cpp=.o)
 
 ### Dependencies
-DEPS = $(OBJS) $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR)
+DEPS = $(OBJS) $(STATIC_LIBS)
 
 ### Executables
 # Definition of the executables
@@ -59,7 +63,7 @@ EXE+= $(TEST_EXE_ROOT)
 
 
 #### TARGETS ####
-all:   $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR) $(EXE)
+all: $(EXE)
 
 ### EXECUTABLES
 # test_* executables without ROOT using Pattern Rules
@@ -84,16 +88,9 @@ lib: $(DEPS)
 lib_analysis: $(DEPS) $(OBJS_ROOT)
 	$(CC) -shared $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -o $(ANALYSIS_LIBRARY)
 
-
 ### STATIC LIBRARIES (in subfolders used by the executables and dynamic libraries)
-$(LIBMOSAIC_DIR):
-	$(MAKE) -C $@
-
-$(LIBPOWERBOARD_DIR):
-	$(MAKE) -C $@
-
-$(LIBALUCMS_DIR):
-	$(MAKE) -C $@
+$(STATIC_LIBS):
+	$(MAKE) -C $@ # execute the corresponding Makefile
 
 ### OBJECTS
 # Classes
@@ -120,4 +117,4 @@ clean-all:	clean
 	$(MAKE) -C $(LIBPOWERBOARD_DIR) cleanall
 	$(MAKE) -C $(LIBALUCMS_DIR) clean-all
 
-.PHONY:	all clean clean-all $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR) lib lib_analysis
+.PHONY:	all clean clean-all $(STATIC_LIBS) lib lib_analysis
