@@ -329,9 +329,15 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
       fitResult_dummy.threshold = fitfcn->GetParameter(0);
     }*/
     if(fitfcn->GetParameter(0)==0.5*m_nPulseInj) std::cout << "TTA328: fit parameter unchanged!" << std::endl;
-    fitResult_dummy.threshold = fitfcn->GetParameter(0);
-    fitResult_dummy.noise     = fitfcn->GetParameter(1);
-    fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
+    if(abs(fitfcn->GetParameter(0))<500 && abs(fitfcn->GetParameter(1))<500) {
+      fitResult_dummy.threshold = fitfcn->GetParameter(0);
+      fitResult_dummy.noise     = fitfcn->GetParameter(1);
+      fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
+    } else {
+      fitResult_dummy.threshold=0;
+      fitResult_dummy.noise=0;
+      fitResult_dummy.redChi2=0;
+    }
     
     delete fitfcn; 
     
