@@ -164,7 +164,7 @@ TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
   m_stepPulseAmplitude  = m_config->GetChargeStep();
   m_nPulseInj           = m_config->GetNInj();
   
-  m_writeRawData        = false;
+  m_writeRawData        = true; //false;
   m_writeNoHitPixels    = false;
   m_writeNoThreshPixels = false;
   m_writeStuckPixels    = false;
@@ -209,13 +209,6 @@ bool TThresholdAnalysis::CheckPixelStuck(TGraph* aGraph)
   return true;
 }
 
-double ErrorFunc(double* x, double* par)
-{
-  double y = par[0]+par[1]*TMath::Erf( (x[0]-par[2]) / par[3] );
-  return y;
-}
-
-
 
 //Methods for a speedier fit:  find the mean of the derivative (erf->gaussian)
 //  Differentiates manually; may be less accurate.
@@ -244,7 +237,7 @@ double meanGraph(TGraph* resultGraph) { //returns the weighted mean x value
     std::cout << "]" << std::endl;*/
     return 0;
   }
-
+  std::cout << sum/norm << std::endl;
   return sum/norm;
 }
 
@@ -271,6 +264,13 @@ void ddxGraph(TGraph* aGraph, TGraph* resultGraph) {
   }
 }
 
+
+double ErrorFunc(double* x, double* par)
+{
+  //double y = par[0]+par[1]*TMath::Erf( (x[0]-par[2]) / par[3] );
+  double y = (50/2)*(1+TMath::Erf( (x[0]-par[0]) / par[1] ) );
+  return y;
+}
 
 common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
 //speedy=true will run the fast analysis in place of the slower fit.  Much faster,
@@ -305,18 +305,20 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
 			  4);
     }
     // y@50%.
-    fitfcn->SetParameter(0,0.5*m_nPulseInj); 
+    //fitfcn->SetParameter(0,0.5*m_nPulseInj); 
     // 0.5 of max. amplitude.
-    fitfcn->SetParameter(1,0.5*m_nPulseInj); 
+    //fitfcn->SetParameter(1,0.5*m_nPulseInj); 
     // x@50%.
-    fitfcn->SetParameter(2,0.5*(m_stopPulseAmplitude - m_startPulseAmplitude)*m_resultFactor);
+    //fitfcn->SetParameter(2,0.5*(m_stopPulseAmplitude - m_startPulseAmplitude)*m_resultFactor);
     // slope of s-curve.  m_resultFactor MAY BE -1--make sure this doesn't cause any problems!! (WIP)
-    fitfcn->SetParameter(3,0.5);
+    //fitfcn->SetParameter(3,0.5);
     
+    fitfcn->SetParameter(0, .5*(m_stopPulseAmplitude-m_startPulseAmplitude)*m_resultFactor);
+    fitfcn->SetParameter(1, 8);
     aGraph->Fit("fitfcn","RQ");
     
     //common::TErrFuncFitResult fitResult_dummy;
-    if(fitfcn->GetParameter(0)>0 && m_resultFactor<0) {
+    /*if(fitfcn->GetParameter(0)>0 && m_resultFactor<0) {
       std::cout << "ERROR in line 241 of TAnalogAnalysis:  Unexpected resultFactor/threshold sign!" << std::endl;
       fitResult_dummy.threshold = 1;
       return fitResult_dummy;
@@ -325,7 +327,9 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
       fitResult_dummy.threshold = -1*fitfcn->GetParameter(0);  //for the ithr case
     } else {
       fitResult_dummy.threshold = fitfcn->GetParameter(0);
-    }
+    }*/
+    if(fitfcn->GetParameter(0)==0.5*m_nPulseInj) std::cout << "TTA328: fit parameter unchanged!" << std::endl;
+    fitResult_dummy.threshold = fitfcn->GetParameter(0);
     fitResult_dummy.noise     = fitfcn->GetParameter(1);
     fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
     
@@ -557,7 +561,7 @@ void TThresholdAnalysis::Run()
 	  // MB - NEED TO SELECT GOOD FIT.
 	  
 	  common::TErrFuncFitResult fitResult;
-	  fitResult=DoFit(gDummy, true); //testing speedy version for now!
+	  fitResult=DoFit(gDummy, false); //run with true for speedy version
 
 	  if (m_writeFitResults) {
   	    fprintf(m_resultChip.at(intIndexDummy).GetFilePixelFitResult(), 
@@ -568,6 +572,7 @@ void TThresholdAnalysis::Run()
    	 	    fitResult.redChi2);
 	  }
 	  if (fitResult.threshold!=0) { //if no error/dead pixel
+//            if(fitResult.threshold<50) std::cout << "TTA571: Thresh " << fitResult.threshold << " <50" << std::endl;
 	    m_threshold.at(intIndexDummy).sum+=fitResult.threshold; //row;
 	    m_threshold.at(intIndexDummy).sum2+=pow(fitResult.threshold,2); //row*row
 	    m_threshold.at(intIndexDummy).entries+=1;
@@ -648,7 +653,7 @@ void TThresholdAnalysis::Finalize()
     itr->second.SetNoiseMean(m_noise.at(itr->first).mean);
     itr->second.SetNoiseStdDev(m_noise.at(itr->first).stdDev);
     
-    fprintf(itr->second.GetFileSummary(), 
+    /*fprintf(itr->second.GetFileSummary(), 
        	    "Threshold mean: %f \n", 
        	    itr->second.GetThresholdMean() );
     
@@ -674,7 +679,9 @@ void TThresholdAnalysis::Finalize()
     
     fprintf(itr->second.GetFileSummary(), 
 	    "counterPixelsStuck: %d \n", 
-	    itr->second.GetCounterPixelsStuck()); 
+	    itr->second.GetCounterPixelsStuck()); */
+    fprintf(itr->second.GetFileSummary(), "%d %d %d %.1f %.1f %.1f %.1f\n", 0, 0, 0, itr->second.GetThresholdMean(), itr->second.GetThresholdStdDev(),
+          itr->second.GetNoiseMean(), itr->second.GetNoiseStdDev());
     
     fclose(itr->second.GetFileSummary());
     if (m_writeNoHitPixels)    fclose(itr->second.GetFilePixelNoHits());
