@@ -9,7 +9,8 @@
 ### Settings
 
 N_TRIALS=10
-INTER_TEST_SLEEP=10
+INTER_TEST_SLEEP=10 # seconds given to discharge the capacitors between power-off and power-on
+CHIPS_PER_MODULE=9 # how many chips are expected to respond on this module
 
 ## hameg and back bias
 PSU_DEV=${PSU_DEV-'/dev/ttyHAMEG0'} # PSU file descriptor
@@ -58,7 +59,15 @@ do
     CURRENTS=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 )
     CHIPS=$(eval ${SOFTWARE_DIR}/test_chip_count | grep enabled | cut -f1 -d' ' )
 
-    echo -e "$i\t$CHIPS\t$CURRENTS" | tee -a $OUTFILE_CLK
+    if [[ "$CHIPS" -ne "$CHIPS_PER_MODULE" ]]
+    then
+	sleep 2
+	CHIPS_RETRY=$(eval ${SOFTWARE_DIR}/test_chip_count | grep enabled | cut -f1 -d' ' )
+    else
+	CHIPS_RETRY=-1
+    fi
+
+    echo -e "$i\t$CHIPS\t$CURRENTS\n$CHIPS_RETRY" | tee -a $OUTFILE_CLK
 
     $COMMON_DIR/hameg_module_test.py $PSU_DEV 3 2>&1 # power off the module
 
