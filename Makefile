@@ -1,8 +1,9 @@
 CC=g++
 LIBMOSAIC_DIR=./MosaicSrc/libmosaic
 LIBPOWERBOARD_DIR=./MosaicSrc/libpowerboard
-INCLUDE=-I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include
-LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic
+LIBALUCMS_DIR=./DataBaseSrc
+INCLUDE=-I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I/usr/include/libxml2
+LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic -L$(LIBALUCMS_DIR) -lalucms -lxml2 -lcurl
 CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -mcmodel=medium $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread $(LIB)
 #OBJECT= runTest
@@ -33,14 +34,17 @@ OBJS_ROOT  = $(CLASSES_ROOT:.cpp=.o)
 OBJS_ROOT += $(OBJS)
 $(info OBJS_ROOT="$(OBJS_ROOT)")
 
-DEPS = $(OBJS) $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR)
+DEPS = $(OBJS) $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR)
 
-all:   $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) stopclk startclk test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit test_localbus test_roottest test_scantest test_threshold_v1 test_chip_count
+all:   $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR) stopclk startclk test_mosaic test_noiseocc test_threshold test_digital test_fifo test_dacscan test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit test_localbus test_roottest test_scantest test_threshold_v1 test_chip_count test_alucms
 
 $(LIBMOSAIC_DIR):
 	$(MAKE) -C $@
 
 $(LIBPOWERBOARD_DIR):
+	$(MAKE) -C $@
+
+$(LIBALUCMS_DIR):
 	$(MAKE) -C $@
 
 lib: $(DEPS)
@@ -121,6 +125,10 @@ test_tuneVCASN: $(DEPS)  $(OBJS_ROOT) main_tuneVCASN.cpp
 test_VCASNthreshold: $(DEPS)  $(OBJS_ROOT) main_VCASNthreshold.cpp
 	$(CC) -o test_VCASNthreshold $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) main_VCASNthreshold.cpp $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
+# Test execulable for the ALUCMS DB
+test_alucms: $(DEPS)
+	$(CC) -o test_alucms $(OBJS) $(CFLAGS) main_alucms.cpp $(LINKFLAGS)
+
 # Classes using ROOT.
 TThresholdAnalysis.o: TThresholdAnalysis.cpp TThresholdAnalysis.h
 	$(CC) $(CFLAGS) $(ROOTCFLAGS) -c -o $@ $<
@@ -139,6 +147,7 @@ clean:
 	rm -rf *.o
 	rm -rf MosaicSrc/*.o
 	rm -rf ReadoutUnitSrc/*.o
+	$(MAKE) -C $(LIBALUCMS_DIR) clean
 
 clean-all:	clean
 	rm -rf test_*
@@ -147,5 +156,6 @@ clean-all:	clean
 	rm -rf $(ANALYSIS_LIBRARY)
 	$(MAKE) -C $(LIBMOSAIC_DIR) cleanall
 	$(MAKE) -C $(LIBPOWERBOARD_DIR) cleanall
+	$(MAKE) -C $(LIBALUCMS_DIR) clean-all
 
-.PHONY:	all clean clean-all $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) lib lib_analysis
+.PHONY:	all clean clean-all $(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR) lib lib_analysis
