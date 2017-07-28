@@ -221,14 +221,14 @@ void scan() {
     rBoard->StartRun();
 
   for (int istage = 0; istage < myMaskStages; istage ++) {
-    std::cout << "Mask stage " << istage << std::endl;
-    for (unsigned int i = 0; i < fChips.size(); i ++) {
+    std::cout << std::endl << "Mask stage " << istage << std::endl;
+    for (int i = 0; i < fChips.size(); i ++) {
       if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
       AlpideConfig::ConfigureMaskStage (fChips.at(i), myPixPerRegion, istage);
     }
 
     for (int itrain = 0; itrain < nTrains; itrain ++) {
-			std::cout << std::endl << "Trigger train " << itrain << std::endl;
+			std::cout << "Trigger train " << itrain << std::endl;
 
 			//Send triggers for all boards
       for (const auto& rBoard : fBoards) {
