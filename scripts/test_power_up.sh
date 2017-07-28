@@ -98,7 +98,7 @@ do
     sleep 1
 
     CURRENTS_CLK=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 )
-    CHIPS=$(eval ${SOFTWARE_DIR}/test_chip_count | grep enabled | cut -f1 -d' ' 
+    CHIPS=$(eval ${SOFTWARE_DIR}/test_chip_count | grep enabled | cut -f1 -d' ' )
     sleep 1
     CURRENTS_CONFIGURED=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 ))
 
