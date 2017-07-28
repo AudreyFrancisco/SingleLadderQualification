@@ -45,6 +45,40 @@ void TScanAnalysis::CreateChipResults ()
 }
 
 
+void TScanAnalysis::CreateHicResults ()
+{
+  if (m_hics.size() == 0) {
+    std::cout  << "Warning (TScanAnalysis::CreateResult): hic list is empty, doing nothing" << std::endl;
+    return;
+  }  
+  if (m_chipList.size() == 0) {
+    std::cout  << "Warning (TScanAnalysis::CreateResult): chip list is empty, doing nothing" << std::endl;
+    return;
+  }
+
+  for (int i = 0; i < m_chipList.size(); i ++) {
+    TScanResultChip    *chipResult = GetChipResult();
+    common::TChipIndex idx         = m_chipList.at(i);
+    m_result->AddChipResult (idx, chipResult);
+  }  
+
+
+  for (int i = 0; i < m_hics.size(); i ++) {
+    TScanResultHic *hicResult = GetHicResult();
+    for (int iChip = 0; iChip < m_chipList.size(); iChip ++) {
+      if (m_hics.at(i)->ContainsChip(m_chipList.at(i))) {
+        hicResult->AddChipResult(m_chipList.at(i).chipId & 0xf, 
+                                 m_result->GetChipResult(m_chipList.at(i)));
+      }
+    }
+
+    m_result->AddHicResult (m_hics.at(i)->GetNumber(), hicResult);
+  }  
+
+}
+
+
+
 int TScanResult::AddChipResult (common::TChipIndex idx,
 				TScanResultChip *aChipResult) 
 {
@@ -59,6 +93,22 @@ int TScanResult::AddChipResult (int aIntIndex,
 {
   m_chipResults.insert(std::pair<int, TScanResultChip*> (aIntIndex,aChipResult));
   
+  return m_chipResults.size();
+}
+
+
+int TScanResult::AddHicResult (int aNumber, TScanResultHic *aHicResult) 
+{
+  m_hicResults.insert(std::pair<int, TScanResultHic*> (aNumber, aHicResult));
+
+  return m_hicResults.size();
+}
+
+
+int TScanResultHic::AddChipResult (int aChipId, TScanResultChip *aChipResult) 
+{
+  m_chipResults.insert(std::pair<int, TScanResultChip*> (aChipId, aChipResult));
+ 
   return m_chipResults.size();
 }
 

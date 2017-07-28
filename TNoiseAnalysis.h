@@ -24,6 +24,15 @@ class TNoiseResultChip : public TScanResultChip {
 };
 
 
+class TNoiseResultHic : public TScanResultHic {
+  friend class TNoiseAnalysis;
+ private:
+ public: 
+  TNoiseResultHic () : TScanResultHic () {};
+  void WriteToFile (FILE *fp) {};
+};
+
+
 class TNoiseResult : public TScanResult {
  private: 
  public: 
@@ -41,6 +50,7 @@ class TNoiseAnalysis : public TScanAnalysis {
   void         FillVariableList ();
  protected: 
   TScanResultChip *GetChipResult () {TNoiseResultChip *Result = new TNoiseResultChip(); return Result;};  
+  TScanResultHic  *GetHicResult  () {TNoiseResultHic  *Result = new TNoiseResultHic (); return Result;};
   void            CreateResult  () {};
  public: 
   TNoiseAnalysis(std::deque<TScanHisto> *histoQue, 

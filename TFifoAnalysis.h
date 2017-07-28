@@ -34,6 +34,15 @@ class TFifoResultChip : public TScanResultChip {
 };
 
 
+class TFifoResultHic : public TScanResultHic {
+  friend class TFifoAnalysis;
+ private:
+ public: 
+  TFifoResultHic () : TScanResultHic () {};
+  void WriteToFile (FILE *fp) {};
+};
+
+
 class TFifoResult : public TScanResult {
   friend class TFifoAnalysis;
  public: 
@@ -51,6 +60,7 @@ class TFifoAnalysis : public TScanAnalysis {
   void FillVariableList ();
  protected:
   TScanResultChip *GetChipResult () {TFifoResultChip *Result = new TFifoResultChip(); return Result;};
+  TScanResultHic  *GetHicResult  () {TFifoResultHic  *Result = new TFifoResultHic (); return Result;};
   void            CreateResult  () {};
  public:
   TFifoAnalysis(std::deque<TScanHisto> *histoQue, 

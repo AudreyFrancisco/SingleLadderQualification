@@ -36,6 +36,15 @@ class TDigitalResultChip : public TScanResultChip {
 };
 
 
+class TDigitalResultHic : public TScanResultHic {
+  friend class TDigitalAnalysis;
+ private:
+ public: 
+  TDigitalResultHic () : TScanResultHic () {};
+  void WriteToFile (FILE *fp) {};
+};
+
+
 class TDigitalResult : public TScanResult {
   friend class TDigitalAnalysis;
  private: 
@@ -64,7 +73,8 @@ class TDigitalAnalysis : public TScanAnalysis {
   void WriteResult      ();
   void WriteStuckPixels ();
  protected:
-  TScanResultChip *GetChipResult () {TDigitalResultChip *Result = new TDigitalResultChip; return Result;};
+  TScanResultChip *GetChipResult () {TDigitalResultChip *Result = new TDigitalResultChip(); return Result;};
+  TScanResultHic  *GetHicResult  () {TDigitalResultHic  *Result = new TDigitalResultHic ();  return Result;};
   void             CreateResult  () {};
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, 

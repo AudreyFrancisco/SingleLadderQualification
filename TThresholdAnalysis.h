@@ -106,6 +106,16 @@ class TThresholdResultChip : public TScanResultChip {
   void WriteToFile (FILE *fp) {}; 
 };
 
+
+class TThresholdResultHic : public TScanResultHic {
+  friend class TThresholdAnalysis;
+ private:
+ public: 
+  TThresholdResultHic () : TScanResultHic () {};
+  void WriteToFile (FILE *fp) {};
+};
+
+
 class TThresholdResult : public TScanResult { 
 protected:
  // std::map <int, TScanResultChip*> abs_chipResults;
@@ -167,6 +177,7 @@ class TThresholdAnalysis : public TScanAnalysis {
   
  protected:
   TScanResultChip *GetChipResult () {TThresholdResultChip *Result = new TThresholdResultChip(); return Result;};
+  TScanResultHic  *GetHicResult ()  {TThresholdResultHic  *Result = new TThresholdResultHic (); return Result;};
   void            CreateResult  () {};
  public:
   TThresholdAnalysis(std::deque<TScanHisto> *scanHistoQue, 

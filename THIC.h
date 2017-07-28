@@ -4,8 +4,10 @@
 #include <vector>
 #include "TAlpide.h"
 #include "TPowerBoard.h"
+#include "Common.h"
 
 class TAlpide;
+
 
 class THic {
  private:
@@ -14,23 +16,25 @@ class THic {
   TPowerBoard          *m_powerBoard;
   int                   m_moduleId;  // module ID as used in chip IDs
   int                   m_pbMod;     // module number inside power board
-  int                   m_chanVdda;
-  int                   m_chanVddd;
-  int                   m_chanBias;
-  char                  m_dbId[50];
+  // unique identifiers
+  int                   m_hicNumber; // TODO: find out name and format ...
+  char                  m_dbId[50];  // ... in db: int? string?
  public:
   THic (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
-  bool  IsPowered      ();
-  void  PowerOn        ();
-  void  PowerOff       ();
-  float GetIddd        () {return 0;};
-  float GetIdda        () {return 0;};
-  float GetIBias       () {return 0;};
-  float GetTemperature ();
-  char *GetDbId        () {return m_dbId;};
-  int   GetModId       () {return m_moduleId;};
-  int   GetNChips      () {return m_chips.size();};
-  int   AddChip        (TAlpide *chip);
+  int                  GetNumber      () {return m_hicNumber;};
+  bool                 IsPowered      ();
+  void                 PowerOn        ();
+  void                 PowerOff       ();
+  float                GetIddd        () {return 0;};
+  float                GetIdda        () {return 0;};
+  float                GetIBias       () {return 0;};
+  float                GetTemperature ();
+  char                *GetDbId        () {return m_dbId;};
+  int                  GetModId       () {return m_moduleId;};
+  int                  GetNChips      () {return m_chips.size();};
+  int                  AddChip        (TAlpide *chip);
+  virtual bool         ContainsChip   (common::TChipIndex idx) = 0;
+  virtual common::TChipIndex GetChipIndex   (int i) = 0;
 };
 
 
@@ -40,9 +44,13 @@ class THicOB : public THic {
   int                   m_boardidx8;  // readout board index for master 0
   int                   m_rcv0;       // receiver for master 0
   int                   m_rcv8;       // receiver for master 8
+  int                   m_ctrl0;      // control interface for master 0
+  int                   m_ctrl8;      // control interface for master 8
  protected: 
  public:
   THicOB (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
+  common::TChipIndex GetChipIndex (int i);
+  bool               ContainsChip (common::TChipIndex idx);
 };
 
 
@@ -50,9 +58,12 @@ class THicIB : public THic {
  private: 
   int                  m_boardidx;
   int                  m_rcv[9];
+  int                  m_ctrl;       // control interface
  protected:
  public:
   THicIB (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
+  common::TChipIndex GetChipIndex (int i);
+  bool               ContainsChip (common::TChipIndex idx);
 };
 
 

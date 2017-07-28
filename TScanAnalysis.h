@@ -22,12 +22,23 @@ class TScanResultChip {
 };
 
 
+class TScanResultHic {
+ protected: 
+  std::map <int, TScanResultChip*> m_chipResults;
+ public:
+  TScanResultHic () {};
+  virtual void WriteToFile   (FILE *fp) = 0;
+  int          AddChipResult (int aChipId, TScanResultChip *aChipResult);
+};
+
+
 // base class for classes containing complete results
 // derive class for each analysis
 class TScanResult {
  private:
  protected: 
   std::map <int, TScanResultChip*> m_chipResults;
+  std::map <int, TScanResultHic*>  m_hicResults;
  public: 
   TScanResult   () {};
   //virtual TScanResult *clone() const=0;
@@ -37,6 +48,7 @@ class TScanResult {
   int              AddChipResult     (common::TChipIndex idx, 
 		                      TScanResultChip *aChipResult);
   int              AddChipResult     (int aIntIndex, TScanResultChip *aChipResult);
+  int              AddHicResult      (int aNumber,   TScanResultHic  *aHicResult);
   int              GetNChips         ()     {return m_chipResults.size();};
   void             WriteToFile       (const char *fName);
   virtual void     WriteToFileGlobal (FILE *fp)          = 0;
@@ -60,7 +72,9 @@ class TScanAnalysis {
   TScanResult                 *m_result;
   bool                         m_first;
   virtual TScanResultChip     *GetChipResult     () = 0;
+  virtual TScanResultHic      *GetHicResult      () = 0;
   void                         CreateChipResults ();
+  void                         CreateHicResults  ();
   virtual void                 CreateResult      () = 0;
   int                          ReadChipList      ();
  public:
