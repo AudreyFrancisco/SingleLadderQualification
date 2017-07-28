@@ -100,7 +100,7 @@ do
     CURRENTS_CLK=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 )
     CHIPS=$(eval ${SOFTWARE_DIR}/test_chip_count | grep enabled | cut -f1 -d' ' )
     sleep 1
-    CURRENTS_CONFIGURED=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 ))
+    CURRENTS_CONFIGURED=$(eval ${COMMON_DIR}/hameg_module_test.py ${PSU_DEV} 2 )
 
     printf "%d\t%d\t%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f\t%0.3f\n" $i $CHIPS $CURRENTS_NOCLK $CURRENTS_CLK $CURRENTS_CONFIGURED | tee -a $OUTFILE_NOCLK
 
