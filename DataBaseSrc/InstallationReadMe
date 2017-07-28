@@ -1,0 +1,95 @@
+==================================================
+
+    **** AlpideDB  ****
+    
+    ReadMe for the installation
+
+	ver 0.2		04/07/2017
+	Auth.  A.Franco
+
+ 
+ 		- History -
+ 
+==================================================
+ 
+    
+  1.Dependency
+  
+  	The DB extension needs this packages:
+  		- libxml2
+  		- libcurl
+  		- cern-sso
+  		- cern-CA
+  		- certutil
+  		
+  2.Certificates
+  
+  	A valid pair of UserCert.pem and UserKey.pem
+  	for a CERN user account enabled on the Alpide DB
+  	
+  3. Create a NSS database
+   
+    choose a safe path location (could be also the new-alpide-software)
+    then 
+    		user$ certutil -N -d <pathOfNSSdb>
+    		
+    and setup an access password for the NSS db (remember it !)
+  
+  4. Convert the PEM certificate/key couple into the p12 format
+     in order to do this take in account the path of the certificate (PEM) and key (PEM) files
+     and in addition choose a NickName that will be identify the certificate/key into the NSS db
+     then
+     
+  		user$ openssl pkcs12 -export -in <usercert.pem> -inkey <userkey.pem> -out ~/UserPair.p12 -name <NickName>
+  		
+  5. Import the p12 file into the NSS db
+  
+  		user$ pk12util -i ~/UserPair.p12 -d <pathOfNSSdb>
+  		
+  6. Import into the NSS db the CA certificates for the SSL/TLS protocol
+  
+  		user$ certutil -A -n "CernGridCA" -t "C,," -i /etc/ssl/certs/CERN_Grid_Certification_Authority.crt -d <pathOfNSSdb>
+		user$ certutil -A -n "AddTrustCA" -t "C,," -i /etc/ssl/certs/AddTrustExternalCARoot.crt -d <pathOfNSSdb>
+ 
+ - Now the setup of Certificates/Keys is done, remove the file "~/UserPair.p12" and the .pem files
+ 
+ NOTE : you can skip the step 3 if you use directly the p12 format file
+ 
+  ** SETUP into the Software ** 
+  In order to setup a correct connection to the DB
+  
+  	// create an instance of AlpideDb
+  	AlpideDB *theDB = new AlpideDB();
+  	
+  	// Setup the AlpideDBWebURI
+	theDB->SetQueryDomain("https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx");
+
+    AlpideDBManager *theDBManager = theDB->GetManageHandle();
+    
+    // Set the Nick Name of the Certificates/Key in the NSS DB
+	theDBManager->setNSSDBNickName("FrancoAntonio");  // the name associated to the CErt/Key in the DB
+	
+	// Set the NSS db path
+	theDBManager->setNSSDBPath(".");  // the path where the: cert8.db,key3.db,secmod.db are stored
+	
+	// Set the NSS db access password
+	theDBManager->setNSSDBPass("alpide4me");  // the password used to access the NSS DB
+
+	// Init the Connection
+	theDBManager->Init();
+   
+   
+ **  Compilation Flags  **
+ 
+ in the "utilities.h" file
+
+	#define COMPILE_LIBCURL   	 <-	Undefine it if you don't want to use libcurl
+
+	#define VERBOSITYLEVEL 0L	<- Define 1L if you want some debug messages
+ 
+  
+** in the make file **
+
+	-library  curl xml2
+	
+	   		
