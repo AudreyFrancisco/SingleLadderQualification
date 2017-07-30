@@ -123,6 +123,15 @@ TScanResultChip *TScanResult::GetChipResult (common::TChipIndex idx)
 }
 
 
+TScanResultHic *TScanResult::GetHicResult (std::string hic)
+{
+  std::map<std::string, TScanResultHic*>::iterator it;
+  it = m_hicResults.find(hic);
+  if (it != m_hicResults.end()) return it->second;
+  return 0;
+}
+
+
 void TScanResult::WriteToFile(const char *fName) 
 {
   FILE *fp = fopen (fName, "a");

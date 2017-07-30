@@ -38,8 +38,8 @@ class TScanResultHic {
 class TScanResult {
  private:
  protected: 
-  std::map <int, TScanResultChip*> m_chipResults;
-  std::map <std::string, TScanResultHic*>  m_hicResults;
+  std::map <int, TScanResultChip*>        m_chipResults;
+  std::map <std::string, TScanResultHic*> m_hicResults;
  public: 
   TScanResult   () {};
   //virtual TScanResult *clone() const=0;
@@ -51,10 +51,13 @@ class TScanResult {
   int              AddChipResult     (int aIntIndex, TScanResultChip *aChipResult);
   int              AddHicResult      (std::string hicId,   TScanResultHic  *aHicResult);
   int              GetNChips         ()     {return m_chipResults.size();};
+  int              GetNHics          ()     {return m_hicResults.size();};
   void             WriteToFile       (const char *fName);
   virtual void     WriteToFileGlobal (FILE *fp)          = 0;
   virtual void     WriteToDB         (const char *hicID) = 0;
   TScanResultChip *GetChipResult     (common::TChipIndex idx);
+  TScanResultHic  *GetHicResult      (std::string hic);
+  std::map <std::string, TScanResultHic*> GetHicResults () {return m_hicResults;};  
 };
 
 

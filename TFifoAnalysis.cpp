@@ -49,6 +49,18 @@ void TFifoAnalysis::InitCounters()
     counter.errf       = 0;
     m_counters.push_back(counter);
   }
+
+  std::map<std::string, TScanResultHic*>::iterator it;
+ 
+  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+    TFifoResultHic *result = (TFifoResultHic*) it->second;
+    result->m_nExceptions = 0;
+    result->m_err0        = 0;
+    result->m_err5        = 0;
+    result->m_erra        = 0;
+    result->m_errf        = 0;
+  }
+
 }
 
 
@@ -96,8 +108,6 @@ void TFifoAnalysis::Run()
 
 void TFifoAnalysis::Finalize()
 {
-  TFifoResult *result = (TFifoResult*) m_result;
-
   for (int ichip = 0; ichip < m_chipList.size(); ichip ++) {
     TFifoResultChip* chipResult = (TFifoResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
     if (!chipResult) std::cout << "WARNING: chipResult = 0" << std::endl;
@@ -106,6 +116,17 @@ void TFifoAnalysis::Finalize()
     chipResult->m_err5 = m_counters.at(ichip).err5;
     chipResult->m_erra = m_counters.at(ichip).erra;
     chipResult->m_errf = m_counters.at(ichip).errf;
+
+    std::map<std::string, TScanResultHic*>::iterator it;
+ 
+    for (int ihic = 0; ihic < m_hics.size(); ihic++) {
+      if (! (m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
+      TFifoResultHic *hicResult = (TFifoResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+      hicResult->m_err0 += chipResult->m_err0;
+      hicResult->m_err5 += chipResult->m_err5;
+      hicResult->m_erra += chipResult->m_erra;
+      hicResult->m_errf += chipResult->m_errf;
+    }
   }
 
   WriteResult ();
