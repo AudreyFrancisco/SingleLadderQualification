@@ -35,6 +35,8 @@ class TNoiseResultHic : public TScanResultHic {
 
 class TNoiseResult : public TScanResult {
  private: 
+  float m_occ;
+  int   m_nNoisy;
  public: 
   TNoiseResult () : TScanResult () {};
   void WriteToFileGlobal (FILE *fp)          {};

@@ -39,6 +39,9 @@ class TDigitalResultChip : public TScanResultChip {
 class TDigitalResultHic : public TScanResultHic {
   friend class TDigitalAnalysis;
  private:
+  int m_nBad;
+  int m_nStuck;
+  int m_nBadDcols;
  public: 
   TDigitalResultHic () : TScanResultHic () {};
   void WriteToFile (FILE *fp) {};

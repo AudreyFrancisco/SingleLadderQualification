@@ -37,6 +37,11 @@ class TFifoResultChip : public TScanResultChip {
 class TFifoResultHic : public TScanResultHic {
   friend class TFifoAnalysis;
  private:
+  int m_err0;
+  int m_err5;
+  int m_erra;
+  int m_errf;
+  int m_nExceptions;
  public: 
   TFifoResultHic () : TScanResultHic () {};
   void WriteToFile (FILE *fp) {};
