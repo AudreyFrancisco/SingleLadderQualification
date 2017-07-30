@@ -6,7 +6,7 @@
 
 #include "TRuWishboneModule.h"
 
-#include "../TBoardConfigRU.h"
+#include "TBoardConfigRU.h"
 
 // Wishbone mapping:
 //

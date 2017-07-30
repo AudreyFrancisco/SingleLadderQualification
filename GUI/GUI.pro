@@ -47,6 +47,10 @@ else:unix: LIBS += -L$$PWD/../ -lalpide -lalpide_analysis
 INCLUDEPATH += $$PWD/../
 DEPENDPATH += $$PWD/../
 
+INCLUDEPATH += $$PWD/../inc
+DEPENDPATH += $$PWD/../src
+DEPENDPATH += $$PWD/../inc
+
 INCLUDEPATH += $$PWD/../MosaicSrc/
 DEPENDPATH += $$PWD/../MosaicSrc/
 

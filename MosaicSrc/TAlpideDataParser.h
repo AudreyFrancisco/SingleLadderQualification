@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
@@ -33,7 +33,7 @@
 
 #include <stdint.h>
 #include "mdatareceiver.h"
-#include "../BoardDecoder.h"
+#include "BoardDecoder.h"
 
 class TAlpideDataParser : public MDataReceiver
 {
@@ -42,7 +42,7 @@ public:
 	void flush() {};
 	int  ReadEventData(int &nBytes, unsigned char *buffer);
 	bool hasData() { return (numClosedData!=0); }
-	
+
 protected:
 	long parse(int numClosed);
 
@@ -65,7 +65,7 @@ private:
 
 private:
 	long checkEvent(unsigned char *dBuffer, unsigned char *evFlagsPtr);
-	
+
 public:
 	enum eventFlag_e {
 		flagHeaderError			= (1 << 0),

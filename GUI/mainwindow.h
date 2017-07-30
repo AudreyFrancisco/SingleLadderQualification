@@ -10,31 +10,31 @@
 #include <QtGui>
 #include <QtCore>
 #include "testselection.h"
-#include "../TAlpide.h"
-#include "../TDigitalAnalysis.h"
-#include "../TDigitalScan.h"
-#include "../AlpideConfig.h"
-#include "../TReadoutBoard.h"
-#include "../TReadoutBoardDAQ.h"
-#include "../TReadoutBoardMOSAIC.h"
-//#include "../USBHelpers.h"
-#include "../TConfig.h"
-#include "../AlpideDecoder.h"
-#include "../AlpideConfig.h"
+#include "inc/TAlpide.h"
+#include "inc/TDigitalAnalysis.h"
+#include "inc/TDigitalScan.h"
+#include "inc/AlpideConfig.h"
+#include "inc/TReadoutBoard.h"
+#include "inc/TReadoutBoardDAQ.h"
+#include "inc/TReadoutBoardMOSAIC.h"
+//#include "inc/USBHelpers.h"
+#include "inc/TConfig.h"
+#include "inc/AlpideDecoder.h"
+#include "inc/AlpideConfig.h"
 #include "qfiledialog.h"
-#include "../BoardDecoder.h"
-#include "../SetupHelpers.h"
-#include "../TThresholdScan.h"
-#include "../TScanConfig.h"
-#include "../THisto.h"
-#include "../TScanAnalysis.h"
-#include "../TScan.h"
-#include "../TThresholdAnalysis.h"
-#include  "../TFifoTest.h"
-#include  "../TFifoAnalysis.h"
-#include  "../TNoiseOccupancy.h"
-#include  "../TNoiseAnalysis.h"
-#include  "../THIC.h"
+#include "inc/BoardDecoder.h"
+#include "inc/SetupHelpers.h"
+#include "inc/TThresholdScan.h"
+#include "inc/TScanConfig.h"
+#include "inc/THisto.h"
+#include "inc/TScanAnalysis.h"
+#include "inc/TScan.h"
+#include "inc/TThresholdAnalysis.h"
+#include  "TFifoTest.h"
+#include  "TFifoAnalysis.h"
+#include  "TNoiseOccupancy.h"
+#include  "TNoiseAnalysis.h"
+#include  "THIC.h"
 
 //#include "multipagewidget.h"
 //#include "scanthread.h"
@@ -116,7 +116,7 @@ private:
     TBoardType fBoardType;
     std::vector <TReadoutBoard *> fBoards;
     std::vector <TAlpide *>       fChips;
-    std::vector <THic *>          fHics;  
+    std::vector <THic *>          fHics;
     std::mutex fMutex;
     TConfig *fConfig;
     std::deque<TScanHisto>  fHistoQue;

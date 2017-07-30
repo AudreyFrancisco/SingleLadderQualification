@@ -12,32 +12,32 @@
 #include <iostream>
 #include <qapplication.h>
 //#include "TQtWidgets.h"
-#include "../TAlpide.h"
-#include "../TDigitalAnalysis.h"
-#include "../TAnalogScan.h"
-//#include "../TAnalogAnalysis.h"
-#include "../TDigitalScan.h"
-#include "../AlpideConfig.h"
-#include "../TReadoutBoard.h"
-#include "../TReadoutBoardDAQ.h"
-#include "../TReadoutBoardMOSAIC.h"
-//#include "../USBHelpers.h"
-#include "../TConfig.h"
-#include "../AlpideDecoder.h"
-#include "../AlpideConfig.h"
+#include "TAlpide.h"
+#include "TDigitalAnalysis.h"
+#include "TAnalogScan.h"
+//#include "TAnalogAnalysis.h"
+#include "TDigitalScan.h"
+#include "AlpideConfig.h"
+#include "TReadoutBoard.h"
+#include "TReadoutBoardDAQ.h"
+#include "TReadoutBoardMOSAIC.h"
+//#include "USBHelpers.h"
+#include "TConfig.h"
+#include "AlpideDecoder.h"
+#include "AlpideConfig.h"
 #include <QFileDialog>
-#include "../BoardDecoder.h"
-#include "../SetupHelpers.h"
-#include "../TThresholdScan.h"
-#include "../TScanConfig.h"
-#include "../THisto.h"
-#include "../TScanAnalysis.h"
-#include "../TScan.h"
-#include "../TThresholdAnalysis.h"
-#include  "../TFifoTest.h"
-#include  "../TFifoAnalysis.h"
-#include "../TNoiseAnalysis.h"
-#include "../TNoiseOccupancy.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TThresholdScan.h"
+#include "TScanConfig.h"
+#include "THisto.h"
+#include "TScanAnalysis.h"
+#include "TScan.h"
+#include "TThresholdAnalysis.h"
+#include  "TFifoTest.h"
+#include  "TFifoAnalysis.h"
+#include "TNoiseAnalysis.h"
+#include "TNoiseOccupancy.h"
 #include <QFile>
 #include <typeinfo>
 #include <qpushbutton.h>
@@ -505,7 +505,7 @@ void MainWindow::scantest() {
     //}
 
     //fConfig->GetScanConfig()->SetVcasnArr(fHics.size(), vcasn);
-    
+
     // ui->statusbar->setValue(100);
     //delete myTuneVScan;
     //delete analysisTuneV;
@@ -1193,4 +1193,3 @@ void MainWindow::setVI(float * vcasn, float * ithr) {
     //WIP...
   }
 }
-

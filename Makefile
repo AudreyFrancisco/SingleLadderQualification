@@ -6,7 +6,7 @@ LIBPOWERBOARD_DIR=./MosaicSrc/libpowerboard
 LIBALUCMS_DIR=./DataBaseSrc
 STATIC_LIBS=$(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR)
 
-INCLUDE=-Iinc -I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I/usr/include/libxml2
+INCLUDE=-I. -Iinc -I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I/usr/include/libxml2
 LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic -L$(LIBALUCMS_DIR) -lalucms -lxml2 -lcurl
 CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -Wall -mcmodel=medium $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread $(LIB)
@@ -24,24 +24,28 @@ ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs)
 
 
 ### Source files
-RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp \
-  ReadoutUnitSrc/TRuDctrlModule.cpp TReadoutBoardRU.cpp TBoardConfigRU.cpp
-
-MOSAIC_SOURCES = MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/pexception.cpp \
-  MosaicSrc/TAlpideDataParser.cpp
-
-CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp THIC.cpp \
+BASE_CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp THIC.cpp \
   USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp TReadoutBoardMOSAIC.cpp TChipConfig.cpp \
   TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp TPowerBoard.cpp \
   TPowerBoardConfig.cpp BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp \
   TDigitalAnalysis.cpp TFifoAnalysis.cpp TNoiseAnalysis.cpp TScan.cpp TFifoTest.cpp \
   TThresholdScan.cpp TDigitalScan.cpp TNoiseOccupancy.cpp TLocalBusTest.cpp TScanConfig.cpp \
-  TestBeamTools.cpp Common.cpp $(RU_SOURCES) $(MOSAIC_SOURCES)
-OBJS = $(CLASSES:.cpp=.o)
+  TestBeamTools.cpp Common.cpp TReadoutBoardRU.cpp TBoardConfigRU.cpp
+BASE_OBJS = $(BASE_CLASSES:.cpp=.o)
+
+RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp \
+  ReadoutUnitSrc/TRuDctrlModule.cpp
+RU_OBJS = $(RU_SOURCES:.cpp=.o)
+
+MOSAIC_SOURCES = MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/pexception.cpp \
+  MosaicSrc/TAlpideDataParser.cpp
+MOSAIC_OBJS = $(MOSAIC_SOURCES:.cpp=.o)
+
+OBJS=$(BASE_OBJS) $(RU_OBJS) $(MOSAIC_OBJS)
 
 ### Source files using ROOT classes
-CLASSES_ROOT= TThresholdAnalysis.cpp
-OBJS_ROOT  = $(CLASSES_ROOT:.cpp=.o)
+ROOT_CLASSES= TThresholdAnalysis.cpp
+ROOT_OBJS  = $(ROOT_CLASSES:.cpp=.o)
 
 ### Dependencies
 DEPS = $(OBJS) $(STATIC_LIBS)
@@ -67,26 +71,26 @@ all: $(EXE)
 
 ### EXECUTABLES
 # test_* executables without ROOT using Pattern Rules
-$(TEST_EXE) : test_% : main_%.cpp $(DEPS)
+$(TEST_EXE) : test_% : exe/main_%.cpp $(DEPS)
 	$(CC) -o $@ $(OBJS) $(CFLAGS) $< $(LINKFLAGS)
 
 # test_* executables with ROOT using Pattern Rules
-$(TEST_EXE_ROOT): test_% : main_%.cpp $(DEPS) $(OBJS_ROOT)
-	$(CC) -o $@ $(OBJS) $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) $< $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+$(TEST_EXE_ROOT): test_% : exe/main_%.cpp $(DEPS) $(ROOT_OBJS)
+	$(CC) -o $@ $(OBJS) $(ROOT_OBJS) $(CFLAGS) $(ROOTCFLAGS) $< $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 # executables with special rules
-stopclk: $(DEPS) main_stopclk.cpp
-	$(CC) -o stopclk $(OBJS) $(CFLAGS) main_stopclk.cpp $(LINKFLAGS)
+stopclk: exe/main_stopclk.cpp $(DEPS)
+	$(CC) -o stopclk $(OBJS) $(CFLAGS) $< $(LINKFLAGS)
 
-startclk: $(DEPS) main_startclk.cpp
-	$(CC) -o startclk $(OBJS) $(CFLAGS) main_startclk.cpp $(LINKFLAGS)
+startclk: exe/main_startclk.cpp $(DEPS)
+	$(CC) -o startclk $(OBJS) $(CFLAGS) $< $(LINKFLAGS)
 
 ### DYNAMIC LIBRARIES
 lib: $(DEPS)
 	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
 
-lib_analysis: $(DEPS) $(OBJS_ROOT)
-	$(CC) -shared $(OBJS_ROOT) $(CFLAGS) $(ROOTCFLAGS) $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -o $(ANALYSIS_LIBRARY)
+lib_analysis: $(DEPS) $(ROOT_OBJS)
+	$(CC) -shared $(ROOT_OBJS) $(CFLAGS) $(ROOTCFLAGS) $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -o $(ANALYSIS_LIBRARY)
 
 ### STATIC LIBRARIES (in subfolders used by the executables and dynamic libraries)
 $(STATIC_LIBS):
@@ -94,11 +98,14 @@ $(STATIC_LIBS):
 
 ### OBJECTS
 # Classes
-$(OBJS): %.o: src/%.cpp inc/%.h
+$(BASE_OBJS): %.o: src/%.cpp inc/%.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(RU_OBJS) $(MOSAIC_OBJS): %.o: %.cpp %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Classes using ROOT.
-$(OBJS_ROOT): %.o: src/%.cpp inc/%.h
+$(ROOT_OBJS): %.o: src/%.cpp inc/%.h
 	$(CC) $(CFLAGS) $(ROOTCFLAGS) -c -o $@ $<
 
 ### CLEANING

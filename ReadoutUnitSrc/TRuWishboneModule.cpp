@@ -1,5 +1,5 @@
 #include "TRuWishboneModule.h"
-#include "../TReadoutBoardRU.h"
+#include "TReadoutBoardRU.h"
 #include <iostream>
 
 void TRuWishboneModule::Write(uint8_t address, uint16_t data, bool commit){

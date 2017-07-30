@@ -5,7 +5,7 @@
 #include <initializer_list>
 #include <algorithm>
 
-#include "../TReadoutBoardRU.h"
+#include "TReadoutBoardRU.h"
 
 int  TRuTransceiverModule::Initialize(TBoardConfigRU::ReadoutSpeed RoSpeed, bool InvertPolarity){
     uint8_t transceiver_settings = 0;
