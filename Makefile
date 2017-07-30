@@ -6,7 +6,7 @@ LIBPOWERBOARD_DIR=./MosaicSrc/libpowerboard
 LIBALUCMS_DIR=./DataBaseSrc
 STATIC_LIBS=$(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR)
 
-INCLUDE=-I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I/usr/include/libxml2
+INCLUDE=-Iinc -I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I/usr/include/libxml2
 LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic -L$(LIBALUCMS_DIR) -lalucms -lxml2 -lcurl
 CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -Wall -mcmodel=medium $(INCLUDE)
 LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread $(LIB)
@@ -94,11 +94,11 @@ $(STATIC_LIBS):
 
 ### OBJECTS
 # Classes
-$(OBJS): %.o:    %.cpp %.h
+$(OBJS): %.o: src/%.cpp inc/%.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Classes using ROOT.
-$(OBJS_ROOT): %.o: %.cpp %.h
+$(OBJS_ROOT): %.o: src/%.cpp inc/%.h
 	$(CC) $(CFLAGS) $(ROOTCFLAGS) -c -o $@ $<
 
 ### CLEANING
