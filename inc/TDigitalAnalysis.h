@@ -39,12 +39,14 @@ class TDigitalResultChip : public TScanResultChip {
 class TDigitalResultHic : public TScanResultHic {
   friend class TDigitalAnalysis;
  private:
-  int m_nBad;
-  int m_nStuck;
-  int m_nBadDcols;
+  int  m_nBad;
+  int  m_nStuck;
+  int  m_nBadDcols;
+  char m_stuckFile[200];
  public: 
   TDigitalResultHic () : TScanResultHic () {};
-  void WriteToFile (FILE *fp) {};
+  void SetStuckFile (const char *fName) {strcpy(m_stuckFile, fName);};
+  void WriteToFile  (FILE *fp);
 };
 
 
@@ -74,7 +76,7 @@ class TDigitalAnalysis : public TScanAnalysis {
   void FillVariableList ();
   void WriteHitData     (TScanHisto histo, int row); 
   void WriteResult      ();
-  void WriteStuckPixels ();
+  void WriteStuckPixels (THic *hic);
  protected:
   TScanResultChip *GetChipResult () {TDigitalResultChip *Result = new TDigitalResultChip(); return Result;};
   TScanResultHic  *GetHicResult  () {TDigitalResultHic  *Result = new TDigitalResultHic (); return Result;};

@@ -116,22 +116,36 @@ void TDigitalAnalysis::WriteResult()
   // separate files: stuck pixels (how to separate by HIC?)
   // hitmap file? 
   // write both paths to result structure
-  char fName[100];
-  sprintf (fName, "DigitalScanResult_%s.dat", m_config->GetfNameSuffix());
-  m_scan  ->WriteConditions (fName);
-  m_result->WriteToFile     (fName);
+  char fName[200];
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    WriteStuckPixels (m_hics.at(ihic));
+    sprintf (fName, "DigitalScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+                                                   m_config->GetfNameSuffix());
+    m_scan  ->WriteConditions (fName);
+
+    FILE *fp = fopen (fName, "a");
+    m_result->WriteToFileGlobal(fp);
+    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
+    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile  (fp);
+    fclose (fp);
+    //    m_result->WriteToFile     (fName);
+  }
 }
 
 
-void TDigitalAnalysis::WriteStuckPixels() 
+void TDigitalAnalysis::WriteStuckPixels(THic *hic) 
 {
   char fName[100];
-  sprintf (fName, "StuckPixels_%s.dat", m_config->GetfNameSuffix());
+  sprintf (fName, "StuckPixels_%s_%s.dat", hic->GetDbId().c_str(), 
+                                           m_config->GetfNameSuffix());
   
+  ((TDigitalResultHic*)m_result->GetHicResult(hic->GetDbId()))->SetStuckFile(fName);
+
   FILE                 *fp     = fopen (fName, "w");
   std::vector<TPixHit>  pixels = ((TMaskScan*)m_scan)->GetStuckPixels();
 
   for (unsigned int i = 0; i < pixels.size(); i++) {
+    if (!common::HitBelongsToHic(hic, pixels.at(i))) continue;
     fprintf (fp, "%d %d %d %d %d\n", pixels.at(i).channel, pixels.at(i).chipId, pixels.at(i).region, pixels.at(i).dcol,pixels.at(i).address);
   }
   fclose(fp);
@@ -217,7 +231,6 @@ void TDigitalAnalysis::Finalize() {
   }
 
   WriteResult      ();
-  WriteStuckPixels ();
 }
 
 
@@ -229,11 +242,33 @@ void TDigitalResult::WriteToFileGlobal (FILE *fp)
 }
 
 
+void TDigitalResultHic::WriteToFile (FILE *fp)
+{
+  fprintf(fp, "HIC Result:\n\n");
+
+  fprintf(fp, "Bad pixels:      %d\n", m_nBad);
+  fprintf(fp, "Bad double cols: %d\n", m_nBadDcols);
+  fprintf(fp, "Stuck pixels:    %d\n", m_nStuck);
+
+  fprintf(fp, "\nStuck pixel file: %s\n", m_stuckFile);
+
+  fprintf(fp, "\nNumber of chips: %d\n\n", (int) m_chipResults.size());
+
+  std::map<int, TScanResultChip*>::iterator it;
+  
+  for (it = m_chipResults.begin(); it != m_chipResults.end(); it++) {
+    fprintf(fp, "\nResult chip %d:\n\n", it->first);
+    it->second->WriteToFile(fp);
+  }
+
+}
+
+
 void TDigitalResultChip::WriteToFile (FILE *fp) 
 {
-  fprintf(fp, "Dead pixels: %d\n", m_nDead);
+  fprintf(fp, "Dead pixels:        %d\n", m_nDead);
   fprintf(fp, "Inefficient pixels: %d\n", m_nIneff);
-  fprintf(fp, "Noisy pixels: %d\n", m_nNoisy);
-  fprintf(fp, "Bad double cols: %d\n", m_nBadDcols);
-  fprintf(fp, "Stuck pixels: %d\n", m_nStuck);
+  fprintf(fp, "Noisy pixels:       %d\n", m_nNoisy);
+  fprintf(fp, "Bad double cols:    %d\n", m_nBadDcols);
+  fprintf(fp, "Stuck pixels:       %d\n", m_nStuck);
 }
