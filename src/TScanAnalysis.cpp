@@ -47,6 +47,7 @@ void TScanAnalysis::CreateChipResults ()
 
 void TScanAnalysis::CreateHicResults ()
 {
+
   if (m_hics.size() == 0) {
     std::cout  << "Warning (TScanAnalysis::CreateResult): hic list is empty, doing nothing" << std::endl;
     return;
@@ -66,9 +67,9 @@ void TScanAnalysis::CreateHicResults ()
   for (unsigned int i = 0; i < m_hics.size(); i ++) {
     TScanResultHic *hicResult = GetHicResult();
     for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip ++) {
-      if (m_hics.at(i)->ContainsChip(m_chipList.at(i))) {
-        hicResult->AddChipResult(m_chipList.at(i).chipId & 0xf, 
-                                 m_result->GetChipResult(m_chipList.at(i)));
+      if (m_hics.at(i)->ContainsChip(m_chipList.at(iChip))) {
+        hicResult->AddChipResult(m_chipList.at(iChip).chipId & 0xf, 
+                                 m_result->GetChipResult(m_chipList.at(iChip)));
       }
     }
 

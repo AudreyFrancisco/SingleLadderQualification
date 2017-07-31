@@ -184,7 +184,7 @@ class TThresholdAnalysis : public TScanAnalysis {
  protected:
   TScanResultChip *GetChipResult () {TThresholdResultChip *Result = new TThresholdResultChip(); return Result;};
   TScanResultHic  *GetHicResult ()  {TThresholdResultHic  *Result = new TThresholdResultHic (); return Result;};
-  void            CreateResult  () {};
+  void             CreateResult  () {};
  public:
   TThresholdAnalysis(std::deque<TScanHisto> *scanHistoQue, 
 		     TScan *aScan, 

@@ -51,8 +51,9 @@ class THicOB : public THic {
  protected: 
  public:
   THicOB (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
-  common::TChipIndex GetChipIndex (int i);
-  bool               ContainsChip (common::TChipIndex idx);
+  common::TChipIndex GetChipIndex    (int i);
+  bool               ContainsChip    (common::TChipIndex idx);
+  void               ConfigureMaster (int Master, int board, int rcv, int ctrl);
 };
 
 

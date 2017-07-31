@@ -51,7 +51,7 @@ void TDigitalAnalysis::FillVariableList ()
 void TDigitalAnalysis::Initialize() 
 {
   ReadChipList      ();
-  CreateChipResults ();
+  CreateHicResults  ();
 }
 
 
@@ -156,7 +156,7 @@ void TDigitalAnalysis::Run()
       int row = histo.GetIndex();
       std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size() << std::endl;
       WriteHitData(histo, row);
-      for (int ichip = 0; ichip < m_chipList.size(); ichip++) {
+      for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
         for (int icol = 0; icol < 1024; icol ++) {
           int hits = (int) histo (m_chipList.at(ichip), icol);
           if      (hits == m_ninj) m_counters.at(ichip).nCorrect ++;         

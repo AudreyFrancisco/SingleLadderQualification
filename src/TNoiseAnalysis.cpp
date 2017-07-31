@@ -29,7 +29,7 @@ void TNoiseAnalysis::WriteResult()
 void TNoiseAnalysis::Initialize()
 {
   ReadChipList      ();
-  CreateChipResults ();
+  CreateHicResults  ();
 }
 
 
@@ -111,6 +111,6 @@ void TNoiseAnalysis::Finalize()
 
 void TNoiseResultChip::WriteToFile(FILE *fp) 
 {
-  fprintf(fp, "Noisy pixels: %d\n", m_noisyPixels.size());
+  fprintf(fp, "Noisy pixels: %d\n", (int) m_noisyPixels.size());
   fprintf(fp, "Noise occupancy: %e\n", m_occ);
 }

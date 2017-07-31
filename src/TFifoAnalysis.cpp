@@ -20,8 +20,8 @@ TFifoAnalysis::TFifoAnalysis(std::deque<TScanHisto> *histoQue,
 
 void TFifoAnalysis::Initialize() 
 {
-  ReadChipList      ();
-  CreateChipResults ();
+  ReadChipList     ();
+  CreateHicResults ();
 }
 
 

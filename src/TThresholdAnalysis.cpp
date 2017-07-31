@@ -343,7 +343,7 @@ void TThresholdAnalysis::Initialize()
   // Creating map of TThresholdResults: 1 result for each chip.
   // Initializing TThresholdResult variables.
   // Initializing counters.
-  
+
   while (!m_scan->IsRunning()){sleep(1);}
   
   std::cout << "Initializing " << m_analisysName << std::endl;
@@ -464,7 +464,8 @@ void TThresholdAnalysis::Initialize()
     pairDummy = std::make_pair(itr->first,noiseDummy);
     m_noise.insert(pairDummy);
   } 
-  
+
+  CreateHicResults();  
 }
 
 void TThresholdAnalysis::Run() 

@@ -136,6 +136,24 @@ common::TChipIndex THicOB::GetChipIndex (int i)
 }
 
 
+void THicOB::ConfigureMaster (int Master, int board, int rcv, int ctrl) 
+{
+  if (Master == 0) {
+    m_boardidx0 = board;
+    m_rcv0      = rcv;
+    m_ctrl0     = ctrl;
+  }
+  else if (Master == 8) {
+    m_boardidx8 = board;
+    m_rcv8      = rcv;
+    m_ctrl8     = ctrl;
+  }
+  else {
+    std::cout << "Warning: bad master id, doing nothing" << std::endl;
+  }
+}
+
+
 bool THicOB::ContainsChip (common::TChipIndex idx) 
 {
   if (idx.chipId < 7) {

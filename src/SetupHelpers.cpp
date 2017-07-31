@@ -75,6 +75,9 @@ int initSetupOB(TConfig                        *config,
     if (hics) {
       chip        ->SetHic   (hics->at(0));
       hics->at(0) ->AddChip  (chip);
+      // TODO: Move this into the correct place
+      ((THicOB*)(hics->at(0)))->ConfigureMaster (0, 0, 9, 1);
+      ((THicOB*)(hics->at(0)))->ConfigureMaster (8, 0, 0, 0);
     }
     chips       ->push_back(chip);
 

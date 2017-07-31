@@ -39,7 +39,8 @@
 #include "TScanAnalysis.h"
 #include "TThresholdAnalysis.h"
 #include "TDigitalAnalysis.h"
-
+#include "TFifoTest.h"
+#include "TFifoAnalysis.h"
 
 void scanLoop (TScan *myScan)
 {
@@ -78,7 +79,6 @@ void scanLoop (TScan *myScan)
 
 
 
-
 int main(int argc, char** argv) {
 
   decodeCommandParameters(argc, argv);
@@ -93,12 +93,12 @@ int main(int argc, char** argv) {
   std::mutex              fMutex;
 
 
-  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips, "Config.cfg", &fHics);
   
   //TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
   //TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
-  TThresholdScan *myScan   = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TThresholdAnalysis  *analysis = new TThresholdAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+  TScan *myScan   = new TFifoTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  TScanAnalysis  *analysis = new TFifoAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
 
   //scanLoop(myScan);
   std::cout << "starting thread" << std::endl;
@@ -110,12 +110,12 @@ int main(int argc, char** argv) {
   analysisThread.join();
   analysis->Finalize();
 
-  std::cout << "Printing mean thresholds:" << std::endl; //need to know SPECIFIC chip number!!
+  //std::cout << "Printing mean thresholds:" << std::endl; //need to know SPECIFIC chip number!!
   //want to go through each list in m_threshold.at(...) and print .mean.
-  std::map<int,common::TStatVar> thresh = analysis->DeleteThis();
-  for (std::map<int,common::TStatVar>::iterator it = thresh.begin(); it != thresh.end(); it++) {
-    std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
-  }
+  //std::map<int,common::TStatVar> thresh = analysis->DeleteThis();
+  //for (std::map<int,common::TStatVar>::iterator it = thresh.begin(); it != thresh.end(); it++) {
+  //  std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
+  // }
   
   // std::vector <TCounter> counters = ((TDigitalAnalysis*)analysis)->GetCounters();
   
