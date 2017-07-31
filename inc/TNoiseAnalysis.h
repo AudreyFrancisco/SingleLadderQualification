@@ -39,7 +39,9 @@ class TNoiseResultHic : public TScanResultHic {
 
 
 class TNoiseResult : public TScanResult {
+  friend class TNoiseAnalysis;
  private: 
+  std::vector <TPixHit> m_noisyPixels;
  public: 
   TNoiseResult () : TScanResult () {};
   void WriteToFileGlobal (FILE *fp)          {};

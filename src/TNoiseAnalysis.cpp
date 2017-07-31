@@ -38,14 +38,22 @@ void TNoiseAnalysis::WriteResult()
 void TNoiseAnalysis::WriteNoisyPixels(THic *hic)
 {
   char fName[200];
+  TNoiseResult *result = (TNoiseResult*) m_result;
+ 
   sprintf (fName, "NoisyPixels_%s_%s.dat", hic->GetDbId().c_str(), 
                                            m_config->GetfNameSuffix());
   
-  ((TNoiseResultHic*)m_result->GetHicResult(hic->GetDbId()))->SetNoisyFile(fName);
+  ((TNoiseResultHic*)result->GetHicResult(hic->GetDbId()))->SetNoisyFile(fName);
 
-  FILE                 *fp     = fopen (fName, "w");
-  
-  // TODO: write noisy pixels correctly
+  FILE *fp     = fopen (fName, "w");
+
+  for (unsigned int i = 0; i < result->m_noisyPixels.size(); i++) {
+    if (!common::HitBelongsToHic(hic, result->m_noisyPixels.at(i))) continue;
+    fprintf (fp, "%d %d %d %d\n", result->m_noisyPixels.at(i).chipId, 
+                                  result->m_noisyPixels.at(i).region, 
+                                  result->m_noisyPixels.at(i).dcol, 
+                                  result->m_noisyPixels.at(i).address);
+  }  
   fclose(fp);
 }
 
@@ -84,6 +92,7 @@ void TNoiseAnalysis::Run()
         TNoiseResultChip *chipResult = (TNoiseResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
         int               channel    = m_chipList.at(ichip).dataReceiver;
         int               chipId     = m_chipList.at(ichip).chipId;
+        int               boardIndex = m_chipList.at(ichip).boardIndex;
         double            occ        = 0;
         double            denom      = 512. * 1024. * m_nTrig;
 
@@ -95,8 +104,9 @@ void TNoiseAnalysis::Run()
           for (int irow = 0; irow < 512; irow ++) {            
             // if entry > noise cut: add pixel to chipResult->AddNoisyPixel
             if (histo(m_chipList.at(ichip), icol, irow) > m_noiseCut) {
-	      TPixHit pixel = {channel, chipId, 0, icol, irow};
-              chipResult->AddNoisyPixel(pixel);
+	      TPixHit pixel = {boardIndex, channel, chipId, 0, icol, irow};
+              chipResult->AddNoisyPixel(pixel);   // is this still needed?
+              ((TNoiseResult*)m_result)->m_noisyPixels.push_back(pixel);
 	    }
             occ += histo(m_chipList.at(ichip), icol, irow);
 	  }

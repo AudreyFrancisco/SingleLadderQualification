@@ -146,7 +146,7 @@ void TDigitalAnalysis::WriteStuckPixels(THic *hic)
 
   for (unsigned int i = 0; i < pixels.size(); i++) {
     if (!common::HitBelongsToHic(hic, pixels.at(i))) continue;
-    fprintf (fp, "%d %d %d %d %d\n", pixels.at(i).channel, pixels.at(i).chipId, pixels.at(i).region, pixels.at(i).dcol,pixels.at(i).address);
+    fprintf (fp, "%d %d %d %d\n", pixels.at(i).chipId, pixels.at(i).region, pixels.at(i).dcol,pixels.at(i).address);
   }
   fclose(fp);
 }
