@@ -30,9 +30,11 @@ class TNoiseResultHic : public TScanResultHic {
  private:
   double m_occ;
   int    m_nNoisy;
+  char   m_noisyFile[200];
  public: 
   TNoiseResultHic () : TScanResultHic () {};
-  void WriteToFile (FILE *fp) {};
+  void SetNoisyFile (const char *fName) {strcpy(m_noisyFile, fName);};
+  void WriteToFile  (FILE *fp);
 };
 
 
@@ -51,6 +53,7 @@ class TNoiseAnalysis : public TScanAnalysis {
   float        m_noiseCut;
   void         WriteResult      ();
   void         FillVariableList ();
+  void         WriteNoisyPixels (THic *hic);
  protected: 
   TScanResultChip *GetChipResult () {TNoiseResultChip *Result = new TNoiseResultChip(); return Result;};  
   TScanResultHic  *GetHicResult  () {TNoiseResultHic  *Result = new TNoiseResultHic (); return Result;};

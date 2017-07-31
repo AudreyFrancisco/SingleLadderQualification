@@ -19,10 +19,34 @@ TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue,
 
 void TNoiseAnalysis::WriteResult() 
 {
-  char fName[100];
-  sprintf (fName, "NoiseOccResult_%s.dat", m_config->GetfNameSuffix());
-  m_scan  ->WriteConditions (fName);
-  m_result->WriteToFile     (fName);
+  char fName[200];
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    sprintf (fName, "NoiseOccResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+                                                m_config->GetfNameSuffix());
+    m_scan  ->WriteConditions (fName);
+
+    FILE *fp = fopen (fName, "a");
+    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
+    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile  (fp);
+    
+    fclose(fp);
+    //    m_result->WriteToFile     (fName);
+  }
+}
+
+
+void TNoiseAnalysis::WriteNoisyPixels(THic *hic)
+{
+  char fName[200];
+  sprintf (fName, "NoisyPixels_%s_%s.dat", hic->GetDbId().c_str(), 
+                                           m_config->GetfNameSuffix());
+  
+  ((TNoiseResultHic*)m_result->GetHicResult(hic->GetDbId()))->SetNoisyFile(fName);
+
+  FILE                 *fp     = fopen (fName, "w");
+  
+  // TODO: write noisy pixels correctly
+  fclose(fp);
 }
 
 
@@ -55,7 +79,7 @@ void TNoiseAnalysis::Run()
 
       m_histoQue->pop_front();
       m_mutex   ->unlock   ();
-
+      // TODO: check that hits from different hics / boards are considered correctly
       for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip ++) {
         TNoiseResultChip *chipResult = (TNoiseResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
         int               channel    = m_chipList.at(ichip).dataReceiver;
@@ -111,6 +135,27 @@ void TNoiseAnalysis::Finalize()
 
 void TNoiseResultChip::WriteToFile(FILE *fp) 
 {
-  fprintf(fp, "Noisy pixels: %d\n", (int) m_noisyPixels.size());
+  fprintf(fp, "Noisy pixels:    %d\n", (int) m_noisyPixels.size());
   fprintf(fp, "Noise occupancy: %e\n", m_occ);
+}
+
+
+void TNoiseResultHic::WriteToFile(FILE *fp)
+{
+  fprintf(fp, "HIC Result:\n\n");
+
+  fprintf(fp, "Noisy pixels:    %d\n", m_nNoisy);
+  fprintf(fp, "Noise occupancy: %e\n", m_occ);  
+
+  fprintf(fp, "\nNoisy pixel file: %s\n", m_noisyFile);
+
+  fprintf(fp, "\nNumber of chips: %d\n\n", (int)m_chipResults.size());
+
+  std::map<int, TScanResultChip*>::iterator it;
+
+  for (it = m_chipResults.begin(); it != m_chipResults.end(); it++) {
+    fprintf(fp, "\nResults chip %d:\n\n", it->first);
+    it->second->WriteToFile(fp);
+  }
+  
 }
