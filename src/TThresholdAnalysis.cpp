@@ -589,7 +589,13 @@ void TThresholdAnalysis::Run()
 
 void TThresholdAnalysis::Finalize()
 {
-  
+  TErrorCounter     errCount = ((TMaskScan*)m_scan)->GetErrorCount();
+  TThresholdResult *result   = (TThresholdResult *) m_result;  
+
+  result->m_nTimeout = errCount.nTimeout;
+  result->m_n8b10b   = errCount.n8b10b;
+  result->m_nCorrupt = errCount.nCorruptEvent;
+
   std::cout << "Finalizing " 
 	    << m_analisysName 
 	    << std::endl;
@@ -680,6 +686,13 @@ void TThresholdAnalysis::Finalize()
     m_result->AddChipResult(itr->first,
 			    &(itr->second));
     
+
+    for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+      if (! (m_hics.at(ihic)->ContainsChip(itr->first))) continue;
+      TThresholdResultHic *hicResult = (TThresholdResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+      hicResult->m_nPixelsNoThreshold += itr->second.GetCounterPixelsNoHits();
+      hicResult->m_nPixelsNoThreshold += itr->second.GetCounterPixelsNoThreshold();
+    }
   }
 }
 

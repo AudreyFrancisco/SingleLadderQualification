@@ -35,6 +35,7 @@ class THic {
   int                  GetNChips      () {return m_chips.size();};
   int                  AddChip        (TAlpide *chip);
   virtual bool         ContainsChip   (common::TChipIndex idx) = 0;
+  bool                 ContainsChip   (int index);
   virtual common::TChipIndex GetChipIndex   (int i) = 0;
 };
 

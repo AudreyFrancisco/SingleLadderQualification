@@ -110,6 +110,7 @@ class TThresholdResultChip : public TScanResultChip {
 class TThresholdResultHic : public TScanResultHic {
   friend class TThresholdAnalysis;
  private:
+  int m_nPixelsNoThreshold;
  public: 
   TThresholdResultHic () : TScanResultHic () {};
   void WriteToFile (FILE *fp) {};
@@ -117,7 +118,12 @@ class TThresholdResultHic : public TScanResultHic {
 
 
 class TThresholdResult : public TScanResult { 
-protected:
+  friend class TThresholdAnalysis;
+ private: 
+  int m_nTimeout;
+  int m_n8b10b;
+  int m_nCorrupt;  
+ protected:
  // std::map <int, TScanResultChip*> abs_chipResults;
  public: 
   TThresholdResult  ();
@@ -134,7 +140,7 @@ protected:
 class TThresholdAnalysis : public TScanAnalysis {
   
  private:  
-  static constexpr float m_electronPerDac = 7. *226/160; //[e/DAC], around 10
+  static constexpr float m_electronPerDac = 10; //[e/DAC], around 10
   const std::string m_analisysName = "TThresholdAnalysis";
   
   int m_startPulseAmplitude;

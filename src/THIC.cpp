@@ -20,6 +20,17 @@ int THic::AddChip (TAlpide *chip)
 }
 
 
+bool THic::ContainsChip (int index)
+{
+  common::TChipIndex idx;
+  idx.boardIndex   = (index >> 8) & 0xf;
+  idx.dataReceiver = (index >> 4) & 0xf;
+  idx.chipId       = index & 0xf;
+  
+  return ContainsChip (idx);
+}
+
+
 bool THic::IsPowered() 
 {
   // TODO: what if partially powered? What about bias?
