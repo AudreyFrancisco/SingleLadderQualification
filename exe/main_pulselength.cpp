@@ -5,11 +5,11 @@
 //   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
 //
-// In order to have a generic scan, which works for single chips as well as for staves and modules, 
-// all chip accesses should be done with a loop over all elements of the chip vector. 
+// In order to have a generic scan, which works for single chips as well as for staves and modules,
+// all chip accesses should be done with a loop over all elements of the chip vector.
 // (see e.g. the configureChip loop in main)
-// Board accesses are to be done via fBoards.at(0);  
-// For an example how to access board-specific functions see the power off at the end of main. 
+// Board accesses are to be done via fBoards.at(0);
+// For an example how to access board-specific functions see the power off at the end of main.
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
@@ -41,7 +41,7 @@ int myNTriggers    = 50;
 
 // Pixel to test
 int myRow = 5;
-//int myCol = 13; 
+//int myCol = 13;
 int myCol = 8; // Col within region, 0:15
 
 // charge range
@@ -51,9 +51,9 @@ int myChargeStop   = 160; // 160 default
 int myChargeStep   = 2;
 
 // delay between pulse and strobe seems to be 50 ns + 12.5 ns * PulseDelay + 25 ns * StrobeDelay
-int myPulseDelayStart   = 36;    // 36 = 500 ns 
-//int myPulseDelayStop    = 1600;  // 1000 = 12550 ns 
-int myPulseDelayStop    = 1200;  // 1200 = 15050 ns 
+int myPulseDelayStart   = 36;    // 36 = 500 ns
+//int myPulseDelayStop    = 1600;  // 1000 = 12550 ns
+int myPulseDelayStop    = 1200;  // 1200 = 15050 ns
 int myPulseDelayStep    = 16;     // 200 ns
 
 // -------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ void WriteDataToFile (const char *fName, std::vector<TPixHit> *Hits, int charge,
   for (int ireg = 0; ireg < 32; ireg ++) {
     nHits = 0;
     //std::cout << ireg << std::endl;
-    for (int i = 0; i < Hits->size(); i ++) {
+    for (unsigned int i = 0; i < Hits->size(); i ++) {
       col = AddressToColumn(Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
       row = AddressToRow   (Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
 
@@ -132,7 +132,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "PULSEDELAYSTART %i\n", myPulseDelayStart);
   fprintf(fp, "PULSEDELAYSTOP %i\n", myPulseDelayStop);
   fprintf(fp, "PULSEDELAYSTEP %i\n", myPulseDelayStep);
-    
+
   fclose(fp);
 }
 
@@ -142,7 +142,7 @@ int configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x20);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  myStrobeLength);  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, myStrobeDelay);   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length 
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, myPulseLength);   // fromu pulsing 2: pulse length
   return 0;
 }
 
@@ -156,6 +156,7 @@ int configureMask(TAlpide *chip) {
     AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, myRow, ireg*32+myCol);
     AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  myRow, ireg*32+myCol);
   }
+  return 0;
 }
 
 
@@ -173,10 +174,10 @@ int configureChip(TAlpide *chip) {
 }
 
 
-void scan(const char *fName) {   
-  unsigned char         buffer[1024*4000]; 
+void scan(const char *fName) {
+  unsigned char         buffer[1024*4000];
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0;
+  int                   nSkipped = 0, prioErrors =0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -189,7 +190,7 @@ void scan(const char *fName) {
       //for (int idelay = myPulseDelayStart; idelay < myPulseDelayStop; idelay ++) {
       for (int idelay = myPulseDelayStart; idelay < myPulseDelayStop; idelay += myPulseDelayStep) {
         //std::cout << "    Delay = " << idelay << std::endl;
-        fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, idelay);  
+        fBoards.at(0)->SetTriggerConfig (true, false, myStrobeDelay, idelay);
         fBoards.at(0)->Trigger(myNTriggers);
 
         int itrg = 0;
@@ -223,7 +224,7 @@ void scan(const char *fName) {
         else {
           WriteDataToFile (fName, Hits, icharge, idelay, false);
           //std::cout << "Wrote data to file" << std::endl;
-        } 
+        }
       }
 
     }
@@ -245,19 +246,19 @@ int main(int argc, char** argv) {
 
 
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
-  
+
   if (fBoards.size() == 1) {
-     
+
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
-    for (int i = 0; i < fChips.size(); i ++) {
+    for (unsigned int i = 0; i < fChips.size(); i ++) {
       configureChip (fChips.at(i));
     }
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
 
-    // put your test here... 
+    // put your test here...
     fBoards.at(0)->SetTriggerSource (trigExt);
 
     scan(fName);

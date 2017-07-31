@@ -24,22 +24,22 @@ namespace Alpide {
     REG_FROMU_STATUS5   = 0xd,
     REG_CLKIO_DACS      = 0xe,
     REG_CMUIO_DACS      = 0xf,
-    REG_CMUDMU_CONFIG   = 0x10,       
+    REG_CMUDMU_CONFIG   = 0x10,
     REG_CMUDMU_STATUS   = 0x11,
     REG_CMUFIFO_LOW     = 0x12,
     REG_CMUFIFO_HIGH    = 0x13,
     REG_DTU_CONFIG      = 0x14,
     REG_DTU_DACS        = 0x15,
-    REG_PLL_LOCK1       = 0x16,    
-    REG_PLL_LOCK2       = 0x17,    
+    REG_PLL_LOCK1       = 0x16,
+    REG_PLL_LOCK2       = 0x17,
     REG_DTU_TEST1       = 0x18,
     REG_DTU_TEST2       = 0x19,
     REG_DTU_TEST3       = 0x1a,
     REG_BUSY_MINWIDTH   = 0x1b,
     REG_PIXELCONFIG     = 0x500,
     REG_ANALOGMON       = 0x600,
-    REG_VRESETP         = 0x601, 
-    REG_VRESETD         = 0x602, 
+    REG_VRESETP         = 0x601,
+    REG_VRESETD         = 0x602,
     REG_VCASP           = 0x603,
     REG_VCASN           = 0x604,
     REG_VPULSEH         = 0x605,
@@ -79,16 +79,16 @@ namespace Alpide {
     REG_ADC_T2V         = 0x627,
     REG_SEU_ERROR_COUNT = 0x700,
     REG_TEST_CONTROL    = 0x701,
-    REG_BMU_DEBUG       = 0x702, 
-    REG_DMU_DEBUG       = 0x703, 
+    REG_BMU_DEBUG       = 0x702,
+    REG_DMU_DEBUG       = 0x703,
     REG_TRU_DEBUG       = 0x704,
     REG_RRU_DEBUG       = 0x705,
     REG_FROMU_DEBUG     = 0x706,
     REG_ADC_DEBUG       = 0x707,
-    // region register base addresses (addres for region 0), 
-    // to be ORed with 0x0800 - 0xf800 for regions 1 - 31 or 
+    // region register base addresses (addres for region 0),
+    // to be ORed with 0x0800 - 0xf800 for regions 1 - 31 or
     // with 0x80 for region broadcast
-    REG_RRU_MEB_LSB_BASE   = 0x100,    // to be ORed with 0x00 - 0x7f for the different RAM words  
+    REG_RRU_MEB_LSB_BASE   = 0x100,    // to be ORed with 0x00 - 0x7f for the different RAM words
     REG_RRU_MEB_MSB_BASE   = 0x200,    // same here
     REG_DCOL_DISABLE_BASE  = 0x300,
     REG_REGION_STATUS_BASE = 0x301,
@@ -123,18 +123,18 @@ namespace Alpide {
     PIXREG_MASK   = 0x0,
     PIXREG_SELECT = 0x1
   } TPixReg;
-  
+
   typedef enum {
     PT_DIGITAL  = 0,
     PT_ANALOGUE = 1
   } TPulseType;
-  
+
   typedef enum {
     MODE_CONFIG = 0,
     MODE_TRIGGERED = 1,
     MODE_CONTINUOUS = 2
   } TChipMode;
-  
+
   typedef enum {
 	IREF_025uA = 0,
 	IREF_075uA = 1,
@@ -175,7 +175,7 @@ namespace Alpide {
   	RAMP_4us = 3
   } TADCRampSpeed;
 
-};
+}
 
 class TReadoutBoard;
 class THic;
@@ -193,13 +193,13 @@ class TAlpide {
   bool		fADCSign;
 
 
- protected: 
+ protected:
  public:
   TAlpide (TChipConfig *config);
   TAlpide (TChipConfig *config, TReadoutBoard *readoutBoard);
   TChipConfig   *GetConfig ()                {return fConfig;};
   void           SetReadoutBoard (TReadoutBoard *readoutBoard) {fReadoutBoard = readoutBoard;};
-  TReadoutBoard *GetReadoutBoard ()          {return fReadoutBoard;};  
+  TReadoutBoard *GetReadoutBoard ()          {return fReadoutBoard;};
   THic          *GetHic          ()          {return fHic;};
   void           SetHic          (THic *hic) {fHic = hic;};
 

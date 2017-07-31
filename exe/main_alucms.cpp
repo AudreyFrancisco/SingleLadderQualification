@@ -31,7 +31,7 @@ int main()
 	cout << theProjTable->DumpResponse() << endl;
 
 	cout << "The list of Projects is " << ProjList.size() << "  long " << endl;
-	for(int i=0;i<ProjList.size();i++) {
+	for(unsigned int i=0;i<ProjList.size();i++) {
 		cout << i << " " << ProjList.at(i).ID << "  " << ProjList.at(i).Name << endl;
 	}
 
@@ -48,7 +48,7 @@ int main()
 	cout << theMembTable->DumpResponse() << endl;
 
 	cout << "The list of Members of Project=" << ProjectID << " is " << MemberList.size() << "  long " << endl;
-	for(int i=0;i<MemberList.size();i++) {
+	for(unsigned int i=0;i<MemberList.size();i++) {
 		cout << i << " " << MemberList.at(i).ID << "  " << MemberList.at(i).PersonalID << "  " << MemberList.at(i).FullName << endl;
 	}
 
@@ -65,7 +65,7 @@ int main()
 	cout << theCompTable->DumpResponse() << endl;
 
 	cout << "The list of Type Components of Project=" << ProjectID << " is " << ComponentList.size() << "  long " << endl;
-	for(int i=0;i<ComponentList.size();i++) {
+	for(unsigned int i=0;i<ComponentList.size();i++) {
 		cout << i << " " << ComponentList.at(i).ID << "  " << ComponentList.at(i).Code << "  " << ComponentList.at(i).Name << endl;
 	}
 
@@ -132,8 +132,3 @@ int main()
 	cout << theActivityTable->DumpResponse() << endl;
 
 }
-
-
-
-
-

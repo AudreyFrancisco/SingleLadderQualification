@@ -49,11 +49,11 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
   const bool DISABLE_MANCHESTER = false;
   const bool ENABLE_DDR         = true;
 
-};
+}
 
 
 class TChipConfig {
- private: 
+ private:
   std::map <std::string, int*> fSettings;
   TConfig *fConfig;
   int      fChipId;
@@ -64,7 +64,7 @@ class TChipConfig {
   int  fITHR;
   int  fIDB;
   int  fVCASN;
-  int  fVCASN2; 
+  int  fVCASN2;
   int  fVCLIP;
   int  fVRESETD;
   int  fVCASP;
@@ -111,7 +111,7 @@ class TChipConfig {
  protected:
  public:
   TChipConfig               (TConfig *config, int chipId, const char *fName = 0);
-  void InitParamMap         (); 
+  void InitParamMap         ();
   bool SetParamValue        (const char *Name, const char *Value);
   bool SetParamValue        (const char *Name, int Value);
   int  GetParamValue        (const char *Name) ;
@@ -123,7 +123,7 @@ class TChipConfig {
   void SetEnable            (bool Enabled) {fEnabled = Enabled?1:0;};
   int  GetModuleId          () {return (fChipId & 0x70) >> 4;};
   bool IsOBMaster           () {return ((fChipId % 8 == 0) && (GetModuleId() > 0));};
-  bool HasEnabledSlave      (); 
+  bool HasEnabledSlave      ();
 
   bool GetReadoutMode          () {return fReadoutMode;};
   bool GetEnableClustering     () {return fEnableClustering;};
@@ -133,7 +133,7 @@ class TChipConfig {
   bool GetEnableSkewingStartRO () {return fEnableSkewingStartRO;};
   bool GetEnableClockGating    () {return fEnableClockGating;};
   bool GetEnableCMUReadout     () {return fEnableCMUReadout;};
-  
+
   int  GetTriggerDelay         () {return fTriggerDelay;};
   int  GetStrobeDuration       () {return fStrobeDuration;};
   int  GetStrobeDelay          () {return fStrobeDelay;};

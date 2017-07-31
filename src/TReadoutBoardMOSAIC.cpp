@@ -245,7 +245,7 @@ void TReadoutBoardMOSAIC::init()
 	i2cBus = new I2Cbus(mIPbus, add_i2cMaster);
 	i2cBusAux = new I2Cbus(mIPbus, add_i2cAux);
 
-	// Master Powerboard	
+	// Master Powerboard
 	pb = new powerboard(i2cBus, i2cBusAux);
 
 	// CMU Control interface
@@ -326,7 +326,7 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
   }
 
   int dataLink;
-  for(int i=0;i< fChipPositions.size(); i++) { //for each defined chip
+  for(unsigned int i=0;i< fChipPositions.size(); i++) { //for each defined chip
     dataLink = fChipPositions.at(i).receiver;
     if(dataLink >= 0) { // Enable the data receiver
       if (fChipPositions.at(i).enabled && !Used[dataLink]) {

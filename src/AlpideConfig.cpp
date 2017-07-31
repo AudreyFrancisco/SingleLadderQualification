@@ -4,19 +4,19 @@
 
 
 void AlpideConfig::Init (TAlpide *chip) {
-  
+
   ClearPixSelectBits (chip, true);
-  
+
 }
 
 
 // clear all column and row select bits
-// if clearPulseGating is set also the pulse gating registers will be reset 
+// if clearPulseGating is set also the pulse gating registers will be reset
 // (possibly useful at startup, but not in-between setting of mask patterns)
 void AlpideConfig::ClearPixSelectBits (TAlpide *chip, bool clearPulseGating) {
-  if (clearPulseGating) 
+  if (clearPulseGating)
     chip->WriteRegister(0x48f, 0);
-  else 
+  else
     chip->WriteRegister(0x487, 0);
 }
 
@@ -75,7 +75,7 @@ void AlpideConfig::WritePixRegSingle (TAlpide *chip, Alpide::TPixReg reg, bool d
 
   chip->WriteRegister (address, value);
 
-  // set correct rowsel bit 
+  // set correct rowsel bit
   region = row / 16;
   bit    = row % 16;
 
@@ -129,7 +129,7 @@ void AlpideConfig::ConfigureFromu (TAlpide *chip, Alpide::TPulseType pulseType, 
   if (!config) config = chip->GetConfig();
 
   uint16_t fromuconfig = 0;
-  
+
   fromuconfig |= mebmask;
   fromuconfig |= (internalStrobe   ? 1:0)          << 3;
   fromuconfig |= (busyMonitoring   ? 1:0)          << 4;
@@ -137,24 +137,24 @@ void AlpideConfig::ConfigureFromu (TAlpide *chip, Alpide::TPulseType pulseType, 
   fromuconfig |= (testStrobe       ? 1:0)          << 6;
   fromuconfig |= (rotatePulseLines ? 1:0)          << 7;
   fromuconfig |= (config->GetTriggerDelay() & 0x7) << 8;
-  
+
   chip->WriteRegister (Alpide::REG_FROMU_CONFIG1,  fromuconfig);
   chip->WriteRegister (Alpide::REG_FROMU_CONFIG2,  config->GetStrobeDuration());
   chip->WriteRegister (Alpide::REG_FROMU_PULSING1, config->GetStrobeDelay());
   chip->WriteRegister (Alpide::REG_FROMU_PULSING2, config->GetPulseDuration());
-  
+
 }
 
 
 void AlpideConfig::ConfigureBuffers (TAlpide *chip, TChipConfig *config) {
   if (!config) config = chip->GetConfig();
-  
+
   uint16_t clocks = 0, ctrl = 0;
 
   clocks |= (config->GetDclkReceiver () & 0xf);
   clocks |= (config->GetDclkDriver   () & 0xf) << 4;
   clocks |= (config->GetMclkReceiver () & 0xf) << 8;
-  
+
   ctrl   |= (config->GetDctrlReceiver() & 0xf);
   ctrl   |= (config->GetDctrlDriver  () & 0xf) << 4;
 
@@ -172,15 +172,15 @@ void AlpideConfig::ConfigureCMU (TAlpide *chip, TChipConfig *config) {
   cmuconfig |= (config->GetInitialToken     () ? 1:0) << 4;
   cmuconfig |= (config->GetDisableManchester() ? 1:0) << 5;
   cmuconfig |= (config->GetEnableDdr        () ? 1:0) << 6;
-  
+
   chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, cmuconfig);
 }
 
 
 void AlpideConfig::EnableDoubleColumns(TAlpide *chip) {
   for (int ireg = 0; ireg < 32; ireg ++) {
-    uint16_t Register = Alpide::REG_DCOL_DISABLE_BASE | (ireg < 11); 
-    chip->WriteRegister (Register, 0x0);        
+    uint16_t Register = Alpide::REG_DCOL_DISABLE_BASE | (ireg < 11);
+    chip->WriteRegister (Register, 0x0);
   }
 }
 
@@ -189,7 +189,7 @@ void AlpideConfig::EnableDoubleColumns(TAlpide *chip) {
 int AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage) {
   EnableDoubleColumns(chip);
   // check that nPix is one of (1, 2, 4, 8, 16, 32)
-  if ((nPix <= 0) || (nPix & (nPix - 1)) || (nPix > 32)) {      
+  if ((nPix <= 0) || (nPix & (nPix - 1)) || (nPix > 32)) {
     std::cout << "Warning: bad number of pixels for mask stage (" << nPix << ", using 1 instead" << std::endl;
     nPix = 1;
   }
@@ -206,7 +206,7 @@ int AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage) {
     int colStep = 32 / nPix;
     for (int icol = 0; icol < 1024; icol += colStep) {
       WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, iStage % 512, icol + iStage / 512);
-      WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  iStage % 512, icol + iStage / 512);   
+      WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  iStage % 512, icol + iStage / 512);
     }
     return (iStage % 512);
   }
@@ -217,9 +217,9 @@ void AlpideConfig::WriteControlReg (TAlpide *chip, Alpide::TChipMode chipMode, T
   if (!config) config = chip->GetConfig();
 
   uint16_t controlreg = 0;
-  
+
   controlreg |= (uint16_t) chipMode;
-  
+
   controlreg |= (config->GetEnableClustering    () ? 1:0) << 2;
   controlreg |= (config->GetMatrixReadoutSpeed  () & 0x1) << 3;
   controlreg |= (config->GetSerialLinkSpeed     () & 0x3) << 4;
@@ -227,13 +227,13 @@ void AlpideConfig::WriteControlReg (TAlpide *chip, Alpide::TChipMode chipMode, T
   controlreg |= (config->GetEnableSkewingStartRO() ? 1:0) << 7;
   controlreg |= (config->GetEnableClockGating   () ? 1:0) << 8;
   controlreg |= (config->GetEnableCMUReadout    () ? 1:0) << 9;
-  
+
   chip->WriteRegister (Alpide::REG_MODECONTROL, controlreg);
-  
+
 }
 
 
-void AlpideConfig::BaseConfigPLL (TAlpide *chip) 
+void AlpideConfig::BaseConfigPLL (TAlpide *chip)
 {
   TChipConfig *config = chip->GetConfig();
   if (config->GetParamValue("LINKSPEED") == -1) return; // high-speed link deactivated
@@ -321,16 +321,16 @@ void AlpideConfig::BaseConfig (TAlpide *chip)
   case -1: // DTU not activated
 	value = 0x21;
 	break;
-  case 400: 
+  case 400:
     value = 0x01;
     break;
-  case 600: 
+  case 600:
     value = 0x11;
     break;
-  case 1200: 
+  case 1200:
     value = 0x21;
     break;
-  default: 
+  default:
     std::cout << "Warning: invalid link speed, using 1200" << std::endl;
     value = 0x21;
     break;
@@ -340,7 +340,7 @@ void AlpideConfig::BaseConfig (TAlpide *chip)
 }
 
 
-void AlpideConfig::PrintDebugStream (TAlpide *chip) 
+void AlpideConfig::PrintDebugStream (TAlpide *chip)
 {
   uint16_t Value;
 
@@ -348,15 +348,15 @@ void AlpideConfig::PrintDebugStream (TAlpide *chip)
 
   for (int i = 0; i < 2; i++) {
     chip->ReadRegister(Alpide::REG_BMU_DEBUG, Value);
-    std::cout << "  BMU Debug reg word " << i << ": " << std::hex << Value << std::dec << std::endl;  
+    std::cout << "  BMU Debug reg word " << i << ": " << std::hex << Value << std::dec << std::endl;
   }
   for (int i = 0; i < 4; i++) {
     chip->ReadRegister(Alpide::REG_DMU_DEBUG, Value);
-    std::cout << "  DMU Debug reg word " << i << ": " << std::hex << Value << std::dec << std::endl;  
+    std::cout << "  DMU Debug reg word " << i << ": " << std::hex << Value << std::dec << std::endl;
   }
   for (int i = 0; i < 9; i++) {
     chip->ReadRegister(Alpide::REG_FROMU_DEBUG, Value);
-    std::cout << "  FROMU Debug reg word " << i << ": " << std::hex << Value << std::dec << std::endl;  
+    std::cout << "  FROMU Debug reg word " << i << ": " << std::hex << Value << std::dec << std::endl;
   }
 
 

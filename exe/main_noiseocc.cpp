@@ -5,11 +5,11 @@
 //   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
 //
-// In order to have a generic scan, which works for single chips as well as for staves and modules, 
-// all chip accesses should be done with a loop over all elements of the chip vector. 
+// In order to have a generic scan, which works for single chips as well as for staves and modules,
+// all chip accesses should be done with a loop over all elements of the chip vector.
 // (see e.g. the configureChip loop in main)
 // Board accesses are to be done via fBoards.at(0);
-// For an example how to access board-specific functions see the power off at the end of main. 
+// For an example how to access board-specific functions see the power off at the end of main.
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
@@ -65,7 +65,7 @@ void ClearHitData() {
 
 
 void CopyHitData(std::vector <TPixHit> *Hits) {
-  for (int ihit = 0; ihit < Hits->size(); ihit ++) {
+  for (unsigned int ihit = 0; ihit < Hits->size(); ihit ++) {
 	int chipId  = Hits->at(ihit).chipId;
 	int dcol    = Hits->at(ihit).dcol;
 	int region  = Hits->at(ihit).region;
@@ -99,7 +99,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
   sprintf(fNameTemp,"%s", fName);
   strtok (fNameTemp, ".");
 
-  for (int ichip = 0; ichip < fChips.size(); ichip ++) {
+  for (unsigned int ichip = 0; ichip < fChips.size(); ichip ++) {
     int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
     if (!HasData(chipId)) continue;  // write files only for chips with data
     if (fChips.size() > 1) {
@@ -171,13 +171,13 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "\n");
 
   fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
-    
+
   fclose(fp);
 }
 
 
-void scan() {   
-  unsigned char         buffer[1024*4000]; 
+void scan() {
+  unsigned char         buffer[1024*4000];
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0, skipped = 0, prioErrors = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
@@ -244,7 +244,7 @@ void scan() {
 	  //}
           itrg+=nClosedEvents;
         }
-      } 
+      }
       //std::cout << "Number of hits: " << Hits->size() << std::endl;
       CopyHitData(Hits);
   }
@@ -267,25 +267,25 @@ int main(int argc, char** argv) {
   sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
-  
+
   if (fBoards.size() == 1) {
-     
+
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
-    for (int i = 0; i < fChips.size(); i ++) {
+    for (unsigned int i = 0; i < fChips.size(); i ++) {
       if (fChips.at(i)->GetConfig()->IsEnabled()) {
         fEnabled ++;
         configureChip (fChips.at(i));
       }
       else if (fChips.at(i)->GetConfig()->HasEnabledSlave()) {
 	AlpideConfig::BaseConfigPLL(fChips.at(i));
-      }      
+      }
     }
 
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
 
-    // put your test here... 
+    // put your test here...
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
       fBoards.at(0)->SetTriggerConfig (true, true, myPulseDelay, myPulseLength * 10);
       fBoards.at(0)->SetTriggerSource (trigInt);

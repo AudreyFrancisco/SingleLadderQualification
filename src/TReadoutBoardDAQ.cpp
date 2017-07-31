@@ -1,4 +1,4 @@
-#include <math.h> 
+#include <math.h>
 #include <string.h>
 #include <unistd.h>
 #include <thread>
@@ -10,14 +10,14 @@
 // constructor
 TReadoutBoardDAQ::TReadoutBoardDAQ (libusb_device *ADevice, TBoardConfigDAQ *config) : TUSBBoard (ADevice), TReadoutBoard(config)
 {
-  fTrigCnt            = 0; 
-  fEvtCnt             = 0; 
+  fTrigCnt            = 0;
+  fEvtCnt             = 0;
   fNTriggersTotal     = 0;
-  fMaxDiffTrigEvtCnt  = MAX_DIFF_TRIG_EVT_CNT; 
-  fMaxEventBufferSize = MAX_EVT_BUFFSIZE;      
-  fMaxNTriggersTrain  = MAX_NTRIG_TRAIN;      
+  fMaxDiffTrigEvtCnt  = MAX_DIFF_TRIG_EVT_CNT;
+  fMaxEventBufferSize = MAX_EVT_BUFFSIZE;
+  fMaxNTriggersTrain  = MAX_NTRIG_TRAIN;
 
-  fIsTriggerThreadRunning   = false; 
+  fIsTriggerThreadRunning   = false;
   fIsReadDataThreadRunning  = false;
 
   fBoardConfigDAQ = config;
@@ -30,9 +30,9 @@ TReadoutBoardDAQ::TReadoutBoardDAQ (libusb_device *ADevice, TBoardConfigDAQ *con
   WriteADCModuleConfigRegisters();
   WriteTriggerModuleConfigRegisters();
   WriteResetModuleConfigRegisters();
-  WriteSoftResetModuleConfigRegisters(); 
-  
-  //WriteRegister (0x200, 0x1801); 
+  WriteSoftResetModuleConfigRegisters();
+
+  //WriteRegister (0x200, 0x1801);
 
 }
 
@@ -42,7 +42,7 @@ TReadoutBoardDAQ::TReadoutBoardDAQ (libusb_device *ADevice, TBoardConfigDAQ *con
 TReadoutBoardDAQ::~TReadoutBoardDAQ ()
 {
   // join threads
-  
+
   //fThreadTrigger.join();
   //fThreadReadData.join();
   //std::cout << "joined threads.." << std::endl;
@@ -63,11 +63,11 @@ int TReadoutBoardDAQ::ReadRegister (uint16_t address, uint32_t &value)
 {
   unsigned char data_buf[DAQBOARD_WORD_SIZE * 2];
   uint32_t      headerword = 0;
-  int           err; 
+  int           err;
 
   err = SendWord ((uint32_t)address +  (1 << (DAQBOARD_REG_ADDR_SIZE + DAQBOARD_MODULE_ADDR_SIZE))); // add 1 bit for read access
   if (err < 0) return -1;
-  err = ReceiveData (ENDPOINT_READ_REG, data_buf, DAQBOARD_WORD_SIZE * 2); 
+  err = ReceiveData (ENDPOINT_READ_REG, data_buf, DAQBOARD_WORD_SIZE * 2);
 
   if (err < 0) return -1;
 
@@ -83,7 +83,7 @@ int TReadoutBoardDAQ::ReadRegister (uint16_t address, uint32_t &value)
 
 int TReadoutBoardDAQ::WriteRegister (uint16_t address, uint32_t value)
 {
-  //std::cout << "[FPGA] ADDRESS: " << std::hex <<  address << " VALUE " << value << std::dec << std::endl; 
+  //std::cout << "[FPGA] ADDRESS: " << std::hex <<  address << " VALUE " << value << std::dec << std::endl;
 
   int err;
   err = SendWord((uint32_t)address);
@@ -105,10 +105,10 @@ int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, TAlpi
   uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   //int err;
   uint32_t address32 = (uint32_t) address;
-  uint32_t chipId32  = (uint32_t) chipId; 
+  uint32_t chipId32  = (uint32_t) chipId;
   uint32_t newAddress = (address32 << 16) | (chipId32 << 8) | Alpide::OPCODE_WROP;
 
-  //std::cout << "[CHIP] ADDRESS: " << std::hex <<  newAddress << " VALUE " << value << std::dec << std::endl; 
+  //std::cout << "[CHIP] ADDRESS: " << std::hex <<  newAddress << " VALUE " << value << std::dec << std::endl;
 
   //err = WriteRegister (CMU_DATA + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), (uint32_t) value);
   //if(err < 0) return -1;
@@ -137,7 +137,7 @@ int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, TAlpi
     if (err < 0) return -1;
 
     return 1;
-  
+
 
   //return 0;
 }
@@ -146,8 +146,8 @@ int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, TAlpi
 int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, TAlpide *chipPtr)
 {
   uint8_t chipId = chipPtr->GetConfig()->GetChipId();
-  int           err; 
-  uint32_t      value32; 
+  int           err;
+  uint32_t      value32;
   uint32_t      address32  = (uint32_t) address;
   uint32_t      chipId32   = (uint32_t) chipId;
   uint32_t      newAddress = (address32 << 16) | (chipId32 << 8) | Alpide::OPCODE_RDOP;
@@ -183,7 +183,7 @@ int TReadoutBoardDAQ::SendOpCode (uint16_t  OpCode)
 int TReadoutBoardDAQ::SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay)
 {
   fBoardConfigDAQ->SetTriggerEnable(enableTrigger); // enableTrigger? DAQboard trigger disabled only if fBoardConfigDAQ.TriggerMode==0..
-  fBoardConfigDAQ->SetPulseEnable(enablePulse); // enablePulse on DAQboard??  
+  fBoardConfigDAQ->SetPulseEnable(enablePulse); // enablePulse on DAQboard??
 
   fBoardConfigDAQ->SetTriggerDelay((int32_t)triggerDelay);
   fBoardConfigDAQ->SetStrobeDelay((int32_t)triggerDelay); // equivalent to trigger delay on DAQboard..
@@ -220,7 +220,7 @@ void TReadoutBoardDAQ::DAQTrigger() {
   fMtx.unlock();
 
   fStatusTrigger = 0;
-  int evtbuffer_size = 0;
+  unsigned int evtbuffer_size = 0;
 
   if (fBoardConfig->GetTriggerEnable() && !fBoardConfigDAQ->GetPulseEnable()) { // TRIGGERING
     std::cout << "Number of triggers: " << fNTriggersTotal << std::endl;
@@ -238,11 +238,11 @@ void TReadoutBoardDAQ::DAQTrigger() {
       fMtx.unlock();
       if (evtbuffer_size < fMaxEventBufferSize) {
         std::cout << "train " << itrain << std::endl;
-        
-        StartTrigger(); // start trigger train; 
+
+        StartTrigger(); // start trigger train;
         // sleep for enough time so that stoptrigger sent after last trigger..
         //int sleep_time = fBoardConfigDAQ->GetStrobeDelay()*0.25+375; // TODO: check why this is not working.. but longer a wait time is needed..
-        int sleep_time = fBoardConfigDAQ->GetStrobeDelay(); 
+        int sleep_time = fBoardConfigDAQ->GetStrobeDelay();
         usleep(sleep_time);
         StopTrigger();
 
@@ -255,22 +255,22 @@ void TReadoutBoardDAQ::DAQTrigger() {
         return;
       }
     }
-    
+
     if (nTriggersLeft!=0) { // TODO: nicer solution?
       fMtx.lock();
       evtbuffer_size = fEventBuffer.size();
       fMtx.unlock();
       if (evtbuffer_size < fMaxEventBufferSize) {
-        fBoardConfigDAQ->SetNTriggers(nTriggersLeft); 
+        fBoardConfigDAQ->SetNTriggers(nTriggersLeft);
         WriteTriggerModuleConfigRegisters();
 
-        StartTrigger(); // start trigger train; 
+        StartTrigger(); // start trigger train;
         // sleep for enough time so that stoptrigger sent after last trigger..
         //int sleep_time = fBoardConfigDAQ->GetStrobeDelay()*0.025+375; // TODO: check why this is not working.. but longer a wait time is needed..
         int sleep_time = fBoardConfigDAQ->GetStrobeDelay();
         usleep(sleep_time);
         StopTrigger();
-        
+
         fTrigCnt += nTriggersLeft;
       }
       else {
@@ -282,7 +282,7 @@ void TReadoutBoardDAQ::DAQTrigger() {
     }
   }
   else if (!fBoardConfig->GetTriggerEnable() && fBoardConfigDAQ->GetPulseEnable()) { // just PULSING
-    //fBoardConfigDAQ->SetNTriggers(100); // TODO: number of triggers to be launched with StartTrigger command? if set trigger src to external not trigger sent at all? 
+    //fBoardConfigDAQ->SetNTriggers(100); // TODO: number of triggers to be launched with StartTrigger command? if set trigger src to external not trigger sent at all?
     //WriteTriggerModuleConfigRegisters();
 
     //StartTrigger(); // TODO: needed so that DAQboard reads events? but does it also send trigger?
@@ -305,14 +305,14 @@ void TReadoutBoardDAQ::DAQTrigger() {
       }
     }
     //StopTrigger();
-    
+
   }
   else {
     std::cout << "Pulse and Trigger either both disabled or enabled, please select one of the two!" << std::endl;
     return;
   }
 
- 
+
   // DEBUG read monitoring registers
   //ReadMonitorRegisters();
 
@@ -333,12 +333,12 @@ void TReadoutBoardDAQ::DAQReadData() {
   fIsReadDataThreadRunning = true;
   fMtx.unlock();
 
-  const int max_length_buf = 1024*1000;   // length needed at ITHR=10 ~5000!!!  
-  const int length_buf = 1024;   // length needed at ITHR=10 ~5000!!!  
-  unsigned char data_buf[max_length_buf]; // TODO large enough?   
-  int evt_length = 0;       
+  const int max_length_buf = 1024*1000;   // length needed at ITHR=10 ~5000!!!
+  const int length_buf = 1024;   // length needed at ITHR=10 ~5000!!!
+  unsigned char data_buf[max_length_buf]; // TODO large enough?
+  int evt_length = 0;
   int tmp_error = 0;
-  
+
   std::vector <unsigned char> data_evt (max_length_buf);
   //std::copy(my_deque.begin(), my_deque.end(), std::back_inserter(my_vector));
 
@@ -364,9 +364,9 @@ void TReadoutBoardDAQ::DAQReadData() {
       }
       else if (evt_length < (BoardDecoder::GetDAQEventHeaderLength(fFirmwareVersion, fBoardConfigDAQ->GetHeaderType())+BoardDecoder::GetDAQEventTrailerLength()+4)) {
         std::cout << std::endl;
-        std::cout << "WARNING, received too small event: " << evt_length 
-                  << " instead of expected >= " 
-                  << (BoardDecoder::GetDAQEventHeaderLength(fFirmwareVersion, fBoardConfigDAQ->GetHeaderType())+BoardDecoder::GetDAQEventTrailerLength()+4) 
+        std::cout << "WARNING, received too small event: " << evt_length
+                  << " instead of expected >= "
+                  << (BoardDecoder::GetDAQEventHeaderLength(fFirmwareVersion, fBoardConfigDAQ->GetHeaderType())+BoardDecoder::GetDAQEventTrailerLength()+4)
                   << std::endl;
         std::cout << std::endl;
       }
@@ -392,7 +392,7 @@ void TReadoutBoardDAQ::DAQReadData() {
       }
 
     }
-    
+
   }
   else if (fBoardConfigDAQ->GetPktBasedROEnable() == true) { // packet based
     //std::cout << " --> packet based readout" << std::endl;
@@ -407,11 +407,11 @@ void TReadoutBoardDAQ::DAQReadData() {
                                                  { 0xfe, 0xab, 0xfe, 0xab } }; // pALPIDE-1 event trailer
     bool timeout = false;
     int packet_length = 0;
-    int length_tmp    = 0;
+    unsigned int length_tmp = 0;
 
 
     while (fEvtCnt<=fNTriggersTotal || fRawBuffer.size()!=0) { // at fEvtCnt==fNTriggersTotal it should find stop-trigger marker
-     
+
       foundMagicWord = false;
       data_evt.clear();
       timeout = false;
@@ -437,7 +437,7 @@ void TReadoutBoardDAQ::DAQReadData() {
                 case 1:
                   std::cerr << "Truncated pALPIDE-2/3 event found!" << std::endl;
                   break;
-                case 3: 
+                case 3:
                   std::cout << "Inconsistent timestamp and data FIFO detected!" << std::endl;
                   break;
                 case 2:
@@ -480,13 +480,13 @@ void TReadoutBoardDAQ::DAQReadData() {
 //          }
 //          std::cout << std::endl;
 //#endif
-  
+
             std::cout << "timeout" << std::endl;
             fStatusReadData = -2;
             return;
             //return -2;
           }
-  
+
           if (packet_length < 1) {
             std::cout << "Error, receive data returned with " << packet_length << std::endl;
             fStatusReadData = -1;
@@ -499,11 +499,11 @@ void TReadoutBoardDAQ::DAQReadData() {
             return;
             //return -1;
           }
-  
+
           for (int i=0; i<packet_length; i++) {
             fRawBuffer.push_back(data_buf[i]);
           }
-  
+
 //#if 0
 //        std::cout << "USB RAW (length " << length << "): ";
 //        for (int j=0; j<length; j++)
@@ -513,16 +513,16 @@ void TReadoutBoardDAQ::DAQReadData() {
 
         }
       } while (length_tmp<fRawBuffer.size() && !foundMagicWord);
-  
-      // arrive here only if 
+
+      // arrive here only if
       if (!foundMagicWord) {
         //return -1; // did not achieve to read a full event
         fStatusReadData = -1;
         return;
       }
-  
+
       evt_length = length_tmp;
-  
+
       if (evt_length > max_length_buf) {
         evt_length = 0;
         std::cerr << "Event to large (" << evt_length << "Byte) to be read with a buffer of " << max_length_buf << "Byte!" << std::endl;
@@ -566,7 +566,7 @@ void TReadoutBoardDAQ::DAQReadData() {
   // check if buffer is empty
   if (fRawBuffer.size() != 0) {
     std::cout << "WARNING: fRawBuffer not empty, but should be at this point!" << std::endl;
-    for (int iByte=0; iByte<fRawBuffer.size(); ++iByte) {
+    for (unsigned int iByte=0; iByte<fRawBuffer.size(); ++iByte) {
       std::cout << std::hex << (int)fRawBuffer[iByte] << std::dec;
     }
   }
@@ -593,7 +593,7 @@ int TReadoutBoardDAQ::Trigger (int nTriggers) // open threads for triggering and
   //  usleep(100000);
   //  wait_counter++;
   //}
-  
+
   fNTriggersTotal = nTriggers;
 
   fEventBuffer.clear();
@@ -628,11 +628,11 @@ int TReadoutBoardDAQ::Trigger (int nTriggers) // open threads for triggering and
 
 int TReadoutBoardDAQ::ReadEventData (int &NBytes, unsigned char *Buffer) // provide oldest event in queue and remove it from there
 {
-  //vector <unsigned char> evt_data = fEventBuffer.front(); 
+  //vector <unsigned char> evt_data = fEventBuffer.front();
   fMtx.lock();
   int n_evts_buf = fEventBuffer.size();
   fMtx.unlock();
-  
+
   if (n_evts_buf==0) {
     //std::cout << "No events left in fEventBuffer. Exit." << std::endl;
     return -1;
@@ -644,14 +644,14 @@ int TReadoutBoardDAQ::ReadEventData (int &NBytes, unsigned char *Buffer) // prov
     Buffer[i] = fEventBuffer.front()[i];
     //std::cout << std::hex << (int)fEventBuffer.front()[i] << std::dec;
   }
-  //std::cout << std::endl; 
+  //std::cout << std::endl;
   fEventBuffer.pop_front(); // delete oldest event from deque
   fMtx.unlock();
 
   //for (int i=0; i<NBytes; ++i) {
   //  std::cout << std::hex << (int)(uint8_t)Buffer[i] << std::dec;
   //}
-  //std::cout << std::endl; 
+  //std::cout << std::endl;
 
   return 1;
 }
@@ -670,7 +670,7 @@ int TReadoutBoardDAQ::ReadEventData (int &NBytes, unsigned char *Buffer) // prov
 
 // method to send 32 bit words to DAQ board
 // FPGA internal registers have 12-bit addres field and 32-bit data payload
-int TReadoutBoardDAQ::SendWord (uint32_t value) 
+int TReadoutBoardDAQ::SendWord (uint32_t value)
 {
   unsigned char data_buf[DAQBOARD_WORD_SIZE];
 
@@ -685,10 +685,10 @@ int TReadoutBoardDAQ::SendWord (uint32_t value)
 }
 
 
-int TReadoutBoardDAQ::ReadAcknowledge() 
-{ 
+int TReadoutBoardDAQ::ReadAcknowledge()
+{
   unsigned char data_buf[2 * DAQBOARD_WORD_SIZE];
-  uint32_t      headerword = 0, 
+  uint32_t      headerword = 0,
                 dataword = 0;
   int           err;
 
@@ -701,7 +701,7 @@ int TReadoutBoardDAQ::ReadAcknowledge()
     dataword   += (data_buf[i + DAQBOARD_WORD_SIZE] << (8 * i));   // bytes 4 ... 7 are data
   }
 
-  return 0;  
+  return 0;
 }
 
 
@@ -732,7 +732,7 @@ float TReadoutBoardDAQ::ADCToDacmonCurrent (int value)
 }
 
 
-float TReadoutBoardDAQ::ADCToTemperature (int AValue) 
+float TReadoutBoardDAQ::ADCToTemperature (int AValue)
 {
   float    Temperature, R;
   float    AVDD = 1.8;
@@ -751,11 +751,11 @@ float TReadoutBoardDAQ::ADCToTemperature (int AValue)
   return Temperature;
 }
 
-bool TReadoutBoardDAQ::PowerOn (int &AOverflow) 
+bool TReadoutBoardDAQ::PowerOn (int &AOverflow)
 {
 
   // set current limits with voltages off
-  WriteCurrentLimits(false, true); 
+  WriteCurrentLimits(false, true);
   // switch on voltages
   WriteCurrentLimits(true, true);
 
@@ -775,17 +775,17 @@ bool TReadoutBoardDAQ::PowerOn (int &AOverflow)
 }
 
 
-void TReadoutBoardDAQ::PowerOff () 
+void TReadoutBoardDAQ::PowerOff ()
 {
-  // registers set in sequence similar to old software.. 
+  // registers set in sequence similar to old software..
 
   fBoardConfigDAQ->SetDataPortSelect(0); // select no dataport
   WriteReadoutModuleConfigRegisters();
 
-  fBoardConfigDAQ->SetDrstTime(0);          // TODO necessary? 
-  fBoardConfigDAQ->SetClockEnableTime(0);   // TODO necessary? 
-  fBoardConfigDAQ->SetSignalEnableTime(0);  // TODO necessary? 
-  fBoardConfigDAQ->SetAutoShutdownTime(1);  // TODO necessary? 
+  fBoardConfigDAQ->SetDrstTime(0);          // TODO necessary?
+  fBoardConfigDAQ->SetClockEnableTime(0);   // TODO necessary?
+  fBoardConfigDAQ->SetSignalEnableTime(0);  // TODO necessary?
+  fBoardConfigDAQ->SetAutoShutdownTime(1);  // TODO necessary?
   //WriteDelays();
   WriteResetModuleConfigRegisters();
 
@@ -819,7 +819,7 @@ void TReadoutBoardDAQ::DumpConfig(const char *fName, bool writeFile, char *confi
     fprintf(fp, "PULSEDELAY  %i\n", GetBoardConfig()->GetPulseDelay());
     fclose(fp);
   }
-  
+
   sprintf(config, "FIRMWARE  0x%x\n", ReadFirmwareVersion());
   sprintf(config, "%sTRIGGERDELAY  %i\n", config, GetBoardConfig()->GetTriggerDelay());
   sprintf(config, "%sPULSEDELAY  %i\n", config, GetBoardConfig()->GetPulseDelay());
@@ -834,7 +834,7 @@ int TReadoutBoardDAQ::GetEventBufferLength() {
   fMtx.lock();
   buffer_length = fEventBuffer.size();
   fMtx.unlock();
-  
+
   return buffer_length;
 }
 
@@ -848,7 +848,7 @@ int TReadoutBoardDAQ::GetEventBufferLength() {
 //----------------------------------------------------------------------------
 
 
-void TReadoutBoardDAQ::WriteADCModuleConfigRegisters() 
+void TReadoutBoardDAQ::WriteADCModuleConfigRegisters()
 {
   int limitDigital = CurrentToADC (fBoardConfigDAQ->GetCurrentLimitDigital());
   int limitIo      = CurrentToADC (fBoardConfigDAQ->GetCurrentLimitIo());
@@ -859,11 +859,11 @@ void TReadoutBoardDAQ::WriteADCModuleConfigRegisters()
   config0 |= ( limitDigital                              & 0xfff);
   config0 |= ((limitIo                                   & 0xfff) << 12);
   config0 |= ((fBoardConfigDAQ->GetAutoShutdownEnable() ?1:0)     << 24);
-  config0 |= ((fBoardConfigDAQ->GetLDOEnable()          ?1:0)     << 25);   
-  config0 |= ((fBoardConfigDAQ->GetADCEnable()          ?1:0)     << 26);   
-  config0 |= ((fBoardConfigDAQ->GetADCSelfStop()        ?1:0)     << 27);   
-  config0 |= ((fBoardConfigDAQ->GetDisableTstmpReset()  ?1:0)     << 28);   
-  config0 |= ((fBoardConfigDAQ->GetPktBasedROEnableADC()?1:0)     << 29);   
+  config0 |= ((fBoardConfigDAQ->GetLDOEnable()          ?1:0)     << 25);
+  config0 |= ((fBoardConfigDAQ->GetADCEnable()          ?1:0)     << 26);
+  config0 |= ((fBoardConfigDAQ->GetADCSelfStop()        ?1:0)     << 27);
+  config0 |= ((fBoardConfigDAQ->GetDisableTstmpReset()  ?1:0)     << 28);
+  config0 |= ((fBoardConfigDAQ->GetPktBasedROEnableADC()?1:0)     << 29);
   WriteRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_CONFIG0, config0);
 
   // ADC config reg 1
@@ -880,7 +880,7 @@ void TReadoutBoardDAQ::WriteADCModuleConfigRegisters()
 }
 
 
-void TReadoutBoardDAQ::WriteCurrentLimits (bool ALDOEnable, bool AAutoshutdown) 
+void TReadoutBoardDAQ::WriteCurrentLimits (bool ALDOEnable, bool AAutoshutdown)
 {
   //int limitDigital = CurrentToADC (fBoardConfigDAQ->GetCurrentLimitDigital());
   //int limitIo      = CurrentToADC (fBoardConfigDAQ->GetCurrentLimitIo());
@@ -891,7 +891,7 @@ void TReadoutBoardDAQ::WriteCurrentLimits (bool ALDOEnable, bool AAutoshutdown)
 
   //uint32_t config0 = (((int) limitDigital) & 0xfff) | ((((int) limitIo) & 0xfff) << 12);
   //config0 |= ((AAutoshutdown?1:0) << 24);
-  //config0 |= ((ALDOEnable       ?1:0) << 25);   
+  //config0 |= ((ALDOEnable       ?1:0) << 25);
   //WriteRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_CONFIG0, config0);
   //uint32_t config1 = ((int) limitAnalog) & 0xfff;
   //WriteRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_CONFIG1, config1);
@@ -900,7 +900,7 @@ void TReadoutBoardDAQ::WriteCurrentLimits (bool ALDOEnable, bool AAutoshutdown)
 }
 
 
-bool TReadoutBoardDAQ::ReadLDOStatus(int &AOverflow) 
+bool TReadoutBoardDAQ::ReadLDOStatus(int &AOverflow)
 {
   uint32_t ReadValue;
   bool     err, reg0, reg1, reg2;
@@ -915,7 +915,7 @@ bool TReadoutBoardDAQ::ReadLDOStatus(int &AOverflow)
   err = ReadRegister((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_OVERFLOW, ReadValue);
   AOverflow = (int) ReadValue;
 
-  if (! (reg0 & reg1 & reg2)) 
+  if (! (reg0 & reg1 & reg2))
     std::cout << "GetLDOStatus, LDO status = " << reg0 << ", " << reg1 << ", " << reg2 << std::endl;
 
   return ( reg0 & reg1 & reg2);
@@ -935,7 +935,7 @@ void TReadoutBoardDAQ::DecodeOverflow  (int AOverflow) {
 }
 
 
-float TReadoutBoardDAQ::ReadAnalogI() 
+float TReadoutBoardDAQ::ReadAnalogI()
 {
   uint32_t ReadValue;
   ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA2, ReadValue);
@@ -944,7 +944,7 @@ float TReadoutBoardDAQ::ReadAnalogI()
   return ADCToSupplyCurrent(Value);
 }
 
-float TReadoutBoardDAQ::ReadDigitalI() 
+float TReadoutBoardDAQ::ReadDigitalI()
 {
   uint32_t ReadValue;
   ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA1, ReadValue);
@@ -953,7 +953,7 @@ float TReadoutBoardDAQ::ReadDigitalI()
   return ADCToSupplyCurrent(Value);
 }
 
-float TReadoutBoardDAQ::ReadIoI() 
+float TReadoutBoardDAQ::ReadIoI()
 {
   uint32_t ReadValue;
   ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA2, ReadValue);
@@ -962,7 +962,7 @@ float TReadoutBoardDAQ::ReadIoI()
   return ADCToSupplyCurrent(Value);
 }
 
-float TReadoutBoardDAQ::ReadMonV() 
+float TReadoutBoardDAQ::ReadMonV()
 {
   uint32_t ReadValue;
   ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA0, ReadValue);
@@ -975,7 +975,7 @@ float TReadoutBoardDAQ::ReadMonV()
 }
 
 
-float TReadoutBoardDAQ::ReadMonI() 
+float TReadoutBoardDAQ::ReadMonI()
 {
   uint32_t ReadValue;
   ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA1, ReadValue);
@@ -985,7 +985,7 @@ float TReadoutBoardDAQ::ReadMonI()
 }
 
 
-float TReadoutBoardDAQ::ReadTemperature() 
+float TReadoutBoardDAQ::ReadTemperature()
 {
   uint32_t ReadValue;
   ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA0, ReadValue);
@@ -1055,7 +1055,7 @@ int TReadoutBoardDAQ::GetBoardAddress(){
 // READOUT Module
 //----------------------------------------------------------------------------
 
-void TReadoutBoardDAQ::WriteReadoutModuleConfigRegisters() 
+void TReadoutBoardDAQ::WriteReadoutModuleConfigRegisters()
 {
 
   // Event builder config reg 0
@@ -1089,7 +1089,7 @@ bool TReadoutBoardDAQ::WriteSlaveDataEmulatorReg(uint32_t AWord) {
 // TRIGGER Module
 //----------------------------------------------------------------------------
 
-void TReadoutBoardDAQ::WriteTriggerModuleConfigRegisters() 
+void TReadoutBoardDAQ::WriteTriggerModuleConfigRegisters()
 {
   bool err;
 
@@ -1151,7 +1151,7 @@ bool TReadoutBoardDAQ::WriteBusyOverrideReg(bool ABusyOverride)
 // CMU Module
 //----------------------------------------------------------------------------
 
-void TReadoutBoardDAQ::WriteCMUModuleConfigRegisters () 
+void TReadoutBoardDAQ::WriteCMUModuleConfigRegisters ()
 {
 
   //  CMU config reg
@@ -1168,7 +1168,7 @@ void TReadoutBoardDAQ::WriteCMUModuleConfigRegisters ()
 // RESET Module
 //----------------------------------------------------------------------------
 
-void TReadoutBoardDAQ::WriteResetModuleConfigRegisters () 
+void TReadoutBoardDAQ::WriteResetModuleConfigRegisters ()
 {
   //  PULSE DRST PRST duration reg
   uint32_t config0 = 0;
@@ -1178,11 +1178,11 @@ void TReadoutBoardDAQ::WriteResetModuleConfigRegisters ()
   WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_DURATION, config0);
 
   // power up sequencer delay register
-  uint32_t config1 = ((fBoardConfigDAQ->GetDrstTime()        & 0xff) << 24) 
-    | ((fBoardConfigDAQ->GetSignalEnableTime() & 0xff) << 16) 
-    | ((fBoardConfigDAQ->GetClockEnableTime()  & 0xff) << 8) 
+  uint32_t config1 = ((fBoardConfigDAQ->GetDrstTime()        & 0xff) << 24)
+    | ((fBoardConfigDAQ->GetSignalEnableTime() & 0xff) << 16)
+    | ((fBoardConfigDAQ->GetClockEnableTime()  & 0xff) << 8)
     | ( fBoardConfigDAQ->GetAutoShutdownTime() & 0xff);
-  WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_DELAYS, config1);  
+  WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_DELAYS, config1);
 
   // PULSE STROBE delay sequence reg
   uint32_t config2 = 0;
@@ -1198,13 +1198,13 @@ void TReadoutBoardDAQ::WriteResetModuleConfigRegisters ()
 }
 
 
-void TReadoutBoardDAQ::WriteDelays () 
+void TReadoutBoardDAQ::WriteDelays ()
 {
-  uint32_t delays = ((fBoardConfigDAQ->GetDrstTime()         & 0xff) << 24) 
-    | ((fBoardConfigDAQ->GetSignalEnableTime() & 0xff) << 16) 
-    | ((fBoardConfigDAQ->GetClockEnableTime()  & 0xff) << 8) 
+  uint32_t delays = ((fBoardConfigDAQ->GetDrstTime()         & 0xff) << 24)
+    | ((fBoardConfigDAQ->GetSignalEnableTime() & 0xff) << 16)
+    | ((fBoardConfigDAQ->GetClockEnableTime()  & 0xff) << 8)
     | ( fBoardConfigDAQ->GetAutoShutdownTime() & 0xff);
-  WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_DELAYS, delays);  
+  WriteRegister ((MODULE_RESET << DAQBOARD_REG_ADDR_SIZE) + RESET_DELAYS, delays);
 }
 
 
@@ -1212,7 +1212,7 @@ void TReadoutBoardDAQ::WriteDelays ()
 // ID Module
 //----------------------------------------------------------------------------
 
-int TReadoutBoardDAQ::ReadBoardAddress() 
+int TReadoutBoardDAQ::ReadBoardAddress()
 {
   uint32_t ReadValue;
   ReadRegister ((MODULE_ID << DAQBOARD_REG_ADDR_SIZE) + ID_ADDRESS, ReadValue);
@@ -1223,7 +1223,7 @@ int TReadoutBoardDAQ::ReadBoardAddress()
 }
 
 
-uint32_t TReadoutBoardDAQ::ReadFirmwareVersion() 
+uint32_t TReadoutBoardDAQ::ReadFirmwareVersion()
 {
   ReadRegister ((MODULE_ID << DAQBOARD_REG_ADDR_SIZE) + ID_FIRMWARE, fFirmwareVersion);
 
@@ -1231,9 +1231,9 @@ uint32_t TReadoutBoardDAQ::ReadFirmwareVersion()
 }
 
 
-uint32_t TReadoutBoardDAQ::ReadFirmwareDate() 
+uint32_t TReadoutBoardDAQ::ReadFirmwareDate()
 {
-  if (fFirmwareVersion==0) { 
+  if (fFirmwareVersion==0) {
     ReadRegister ((MODULE_ID << DAQBOARD_REG_ADDR_SIZE) + ID_FIRMWARE, fFirmwareVersion);
   }
 
@@ -1241,9 +1241,9 @@ uint32_t TReadoutBoardDAQ::ReadFirmwareDate()
 }
 
 
-int TReadoutBoardDAQ::ReadFirmwareChipVersion() 
+int TReadoutBoardDAQ::ReadFirmwareChipVersion()
 {
-  if (fFirmwareVersion==0) { 
+  if (fFirmwareVersion==0) {
     ReadRegister ((MODULE_ID << DAQBOARD_REG_ADDR_SIZE) + ID_FIRMWARE, fFirmwareVersion);
   }
   return ((fFirmwareVersion & 0xf0000000) >> 28);
@@ -1253,7 +1253,7 @@ int TReadoutBoardDAQ::ReadFirmwareChipVersion()
 
 // SOFTRESET Module
 //----------------------------------------------------------------------------
-void TReadoutBoardDAQ::WriteSoftResetModuleConfigRegisters () 
+void TReadoutBoardDAQ::WriteSoftResetModuleConfigRegisters ()
 {
   //  PULSE DRST PRST duration reg
   uint32_t config = 0;
@@ -1281,11 +1281,3 @@ bool TReadoutBoardDAQ::ResetBoardFX3 (int ADuration)
   if (!err) return false;
   return WriteRegister((MODULE_SOFTRESET << DAQBOARD_REG_ADDR_SIZE) + SOFTRESET_FX3_RESET, 13);
 }
-
-
-
-
-
-
-
-

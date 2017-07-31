@@ -35,23 +35,18 @@ std::vector <TAlpide *> fChips;
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
 void readTemp() {
-
-  TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (fBoards.at(0));
-
   // Allocate the memory for host the results
   uint16_t *theResult = (uint16_t *)malloc(sizeof(uint16_t) * (fChips.size()+1) ); //
   if( theResult == NULL ) {
 	  std::cerr << "Test_temperature : Error to allocate memory" << std::endl;
 	  return;
   }
-  uint16_t Bias;
-  bool Sign, Half;
   float theValue;
   uint16_t theChipId;
 
   std::cout <<  "\tChipId\tBias\tTemp."  << std::endl;
   // Set all chips for Temperature Measurement
-  for (int i = 0; i < fChips.size(); i ++) {
+  for (unsigned int i = 0; i < fChips.size(); i ++) {
 	  if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
 	  theChipId = fChips.at(i)->GetConfig()->GetChipId();
 	  theValue = fChips.at(i)->ReadTemperature();
@@ -80,11 +75,10 @@ int main(int argc, char** argv) {
     initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
 
 	char TimeStamp[20];
-	TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
 	if (fBoards.size() == 1) {
 		fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
 		fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
-		for (int i = 0; i < fChips.size(); i ++) {
+		for (unsigned int i = 0; i < fChips.size(); i ++) {
 			if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
 			fEnabled ++;
 //			configureChip (fChips.at(i));

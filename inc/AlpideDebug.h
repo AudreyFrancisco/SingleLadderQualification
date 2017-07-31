@@ -11,7 +11,7 @@ namespace Alpide {
     bool BusyInState;
     bool SEUErrorOR;
   } TBMUDebugStream;
-  
+
   typedef struct {
     int  DataFIFOReadPointer [3];
     int  DataFIFOWritePointer[3];
@@ -85,7 +85,7 @@ namespace Alpide {
     int  ADCSequencerState;
     bool SEUErrorOR;
   } TADCDebugStream;
-};
+}
 
 using namespace Alpide;
 
@@ -97,6 +97,6 @@ namespace AlpideDebug {
   bool GetRRUDebugSteam    (TAlpide *chip, TRRUDebugStream &stream);
   bool GetFromuDebugStream (TAlpide *chip, TFromuDebugStream &stream);
   bool GetADCDebugStream   (TAlpide *chip, TADCDebugStream &stream);
-};
+}
 
 #endif

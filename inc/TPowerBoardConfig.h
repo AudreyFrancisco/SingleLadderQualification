@@ -115,7 +115,7 @@ public:
 	// Utilities
 	bool ReadFromFile(char * AFileName);
 	bool WriteToFile(char *AFileName);
-	bool DumpConfig() {}; // TODO: not yet implemented
+	bool DumpConfig() { return false; }; // TODO: not yet implemented
 
 private:
     void readConfiguration();

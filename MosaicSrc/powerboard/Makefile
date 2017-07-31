@@ -2,11 +2,11 @@
 CC = gcc
 CXX = g++
 RM = rm -f
-CPPFLAGS = -O2 -g -Wall -std=gnu++11 $(INC_DIR)
+CPPFLAGS = -O2 -g -Wall -pedantic -std=gnu++11 $(INC_DIR)
 LDFLAGS = -O2 -g -Wall -std=gnu++11
 OBJS = $(SRC:.cpp=.o)
 
-LDLIBS = -L../libpowerboard -lpowerboard -L../libmosaic -lmosaic 
+LDLIBS = -L../libpowerboard -lpowerboard -L../libmosaic -lmosaic
 INC_DIR = -I../libmosaic/include -I../libpowerboard/include
 LIBS = ../libmosaic ../libpowerboard
 
@@ -18,13 +18,13 @@ SRC = 	pbif.cpp \
 # Targets
 ALL_EXE = pbctrl
 
-all: $(LIBS) $(ALL_EXE) 
+all: $(LIBS) $(ALL_EXE)
 
 $(LIBS):
 	$(MAKE) -C $@
 
 pbctrl: $(OBJS) $(LIBS)
-	$(CXX) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@   
+	$(CXX) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
 depend: .depend
 
@@ -43,6 +43,6 @@ cleanall:
 dist-clean: clean
 	$(RM) *~ .depend
 
-.PHONY: all $(LIBS) 
+.PHONY: all $(LIBS)
 
 include .depend

@@ -103,7 +103,7 @@ std::map<std::string, uint16_t> TRuTransceiverModule::ReadCounters(){
     }
     std::map<std::string,uint16_t> counterValues;
 
-    for(int i = 0; i < resultSize; ++i) {
+    for(unsigned int i = 0; i < resultSize; ++i) {
         auto result = results[i];
         auto name = counterNames[i];
         counterValues.emplace(name, result.data);

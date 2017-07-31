@@ -9,7 +9,7 @@
 namespace BoardConfig {
   const int PULSEDELAY  = 10000;
   const int STROBEDELAY = 20;
-};
+}
 
 
 class TBoardConfig {

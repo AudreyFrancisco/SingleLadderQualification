@@ -313,7 +313,7 @@ int TReadoutBoardRU::Initialize() {
 
 
 void TReadoutBoardRU::StartRun() {
-  for(int i = 0; i < fChipPositions.size(); ++i) {
+  for(unsigned int i = 0; i < fChipPositions.size(); ++i) {
     auto tr = transceiver_array[fChipPositions.at(i).chipId]; // TODO: Mapping between transceiver and chipid
     tr->Initialize(TBoardConfigRU::ReadoutSpeed::RO_1200,0);
     bool alignedBefore = tr->IsAligned();
