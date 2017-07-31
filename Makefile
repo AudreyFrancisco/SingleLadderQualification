@@ -67,7 +67,11 @@ EXE+= $(TEST_EXE_ROOT)
 
 
 #### TARGETS ####
-all: $(EXE)
+all: $(EXE) Config.cfg
+
+### Config.cfg
+Config.cfg: ConfigTemplate.cfg
+	bash -c 'if [[ ! -f Config.cfg ]]; then cp -v ConfigTemplate.cfg Config.cfg ; else echo "Cannot update the Config.cfg, local changes are present"; fi'
 
 ### EXECUTABLES
 # test_* executables without ROOT using Pattern Rules
