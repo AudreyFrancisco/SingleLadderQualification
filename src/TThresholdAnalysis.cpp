@@ -267,7 +267,7 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
 {
   common::TErrFuncFitResult fitResult_dummy;
 
-  if(speedy) { //Looks good!
+  if(speedy==1) { //Looks good!
     //This should return a TGraph @ the derivative of aGraph ("d" option in copy constructor).  CHECK.
     TGraph* diffGraph = new TGraph();
     ddxGraph(aGraph, diffGraph); // = ddxGraph(aGraph);
@@ -556,7 +556,7 @@ void TThresholdAnalysis::Run()
 	  // MB - NEED TO SELECT GOOD FIT.
 	  
 	  common::TErrFuncFitResult fitResult;
-	  fitResult=DoFit(gDummy, true); //run with true for speedy version
+	  fitResult=DoFit(gDummy, m_config->GetParamValue("SPEEDY")); //run with true for speedy version
 
 	  if (m_writeFitResults) {
   	    fprintf(m_resultChip.at(intIndexDummy).GetFilePixelFitResult(), 
