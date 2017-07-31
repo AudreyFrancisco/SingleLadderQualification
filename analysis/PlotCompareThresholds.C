@@ -50,7 +50,7 @@ void fillData(int nPix, float * thr1, float * thr2, char * fileName1, char * fil
       for(int i = 0; i < nPix-1; i++) {
         fscanf(fp1, "%i %i %f %f %f", &col1, &row1, &current1, &noise1, &dump1);
         fscanf(fp2, "%i %i %f %f %f", &dc, &adr, &current2, &noise2, &dump2);
-        std::cout << i << std::endl;
+        std::cout << current1 << ", " << noise2 << std::endl;
         thr1[i]=current1; //i=col1+1024*row1
         thr2[i]=current2;
       }
@@ -115,7 +115,7 @@ void PlotCompareThresholds(char * fileName1, char * fileName2) {
   float *thr1 = new float[nPix]; //10 mask stages, 1024 pixels each
   float *thr2 = new float[nPix];
 
-  fillData(nPix, thr1, thr2, fileName1, fileName2, false);
+  fillData(nPix, thr1, thr2, fileName1, fileName2, true);
   //fillData(nPix, thr2, fileName2);
 
   if(!thr1 || !thr2) std::cout << "thr MISSING" << std::endl;
@@ -138,13 +138,13 @@ void PlotCompareThresholds(char * fileName1, char * fileName2) {
   cal1->GetXaxis()->SetTitle("Threshold 1");
   cal1->GetYaxis()->SetTitle("Threshold 2");
   auto axis1 = cal1->GetYaxis();
-  axis1->SetLimits(-20,300);
-  cal1->SetMinimum(-20);
+  axis1->SetLimits(-10,300); //was -10 to 300
+  cal1->SetMinimum(-10);
   cal1->SetMaximum(300);
   gPad->Update();
   gPad->Modified();
   auto axis2 = cal1->GetXaxis();
-  axis2->SetLimits(-20,300);
+  axis2->SetLimits(-10,300);
   cal1->Draw("apl");
   gPad->Update();
   gPad->Modified();

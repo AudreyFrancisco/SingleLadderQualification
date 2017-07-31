@@ -198,7 +198,6 @@ bool TThresholdAnalysis::CheckPixelNoHits(TGraph* aGraph)
 
 bool TThresholdAnalysis::CheckPixelStuck(TGraph* aGraph)
 {
-  double y_dummy =0;
   for (int itrPoint=0; itrPoint<aGraph->GetN(); itrPoint++){
     double x =0;
     double y =0;
@@ -244,11 +243,12 @@ double rmsGraph(TGraph* resultGraph) {
 }
 
 void ddxGraph(TGraph* aGraph, TGraph* resultGraph) { //resultGraph contains the derivative of aGraph wrt x (1st order)
-  //TGraph* resultGraph = new TGraph();
+  //Results are at MIDPOINTS of the old graph!
   double * xs = aGraph->GetX();  //all x-coords
   double * ys = aGraph->GetY();
   for (int i = 0; i < aGraph->GetN()-1; i++) {
-    resultGraph->SetPoint(resultGraph->GetN(), xs[i], (ys[i+1]-ys[i])/(xs[i+1]-xs[i]));
+    //xval=avg of x1 and x2
+    resultGraph->SetPoint(resultGraph->GetN(), 0.5*(xs[i+1]+xs[i]), (ys[i+1]-ys[i])/(xs[i+1]-xs[i]));
   }
 }
 
@@ -486,7 +486,7 @@ void TThresholdAnalysis::Run()
     
     std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size() << std::endl;
     
-    for (int iChip = 0; iChip < m_chipList.size(); iChip++) {
+    for (int iChip = 0; iChip < (int)m_chipList.size(); iChip++) {
       
       for (int iCol = 0; iCol < common::nCols; iCol ++) {
 	int iPulseStart;
@@ -556,7 +556,7 @@ void TThresholdAnalysis::Run()
 	  // MB - NEED TO SELECT GOOD FIT.
 	  
 	  common::TErrFuncFitResult fitResult;
-	  fitResult=DoFit(gDummy, false); //run with true for speedy version
+	  fitResult=DoFit(gDummy, true); //run with true for speedy version
 
 	  if (m_writeFitResults) {
   	    fprintf(m_resultChip.at(intIndexDummy).GetFilePixelFitResult(), 
@@ -566,17 +566,16 @@ void TThresholdAnalysis::Run()
    	    	    fitResult.noise,
    	 	    fitResult.redChi2);
 	  }
-	  //if (fitResult.threshold!=0) { //if no error/dead pixel ///**READ THIS**:  Ignored points are STILL printed to the data file!
-//            if(fitResult.threshold<50) std::cout << "TTA571: Thresh " << fitResult.threshold << " <50" << std::endl;
-	  m_threshold.at(intIndexDummy).sum+=fitResult.threshold; //row;
-	  m_threshold.at(intIndexDummy).sum2+=pow(fitResult.threshold,2); //row*row
-	  m_threshold.at(intIndexDummy).entries+=1;
-	  
-	  m_noise.at(intIndexDummy).sum+=fitResult.noise; //row
-	  m_noise.at(intIndexDummy).sum2+=pow(fitResult.noise,2); //row*row
-	  m_noise.at(intIndexDummy).entries+=1;
-          //}
-	  
+	  if (fitResult.threshold!=0) { //if no error/dead pixel ///**READ THIS**:  Ignored points are STILL printed to the data file!
+            if(fitResult.threshold<50) std::cout << "TTA571: Thresh " << fitResult.threshold << " <50" << std::endl;
+	    m_threshold.at(intIndexDummy).sum+=fitResult.threshold; //row;
+	    m_threshold.at(intIndexDummy).sum2+=pow(fitResult.threshold,2); //row*row
+	    m_threshold.at(intIndexDummy).entries+=1;
+	    
+	    m_noise.at(intIndexDummy).sum+=fitResult.noise; //row
+	    m_noise.at(intIndexDummy).sum2+=pow(fitResult.noise,2); //row*row
+	    m_noise.at(intIndexDummy).entries+=1;
+          }
 	}
 	
 	delete gDummy;
