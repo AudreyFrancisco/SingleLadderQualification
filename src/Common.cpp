@@ -3,7 +3,7 @@
 #include "Common.h"
 
 #include "THisto.h"
-
+#include "THIC.h"
 
 std::string common::GetFileName(TChipIndex aChipIndex, 
 				std::string suffix){
@@ -48,9 +48,18 @@ bool common::HitBelongsToChip(TChipIndex aChipIndex, TPixHit aHit)
 }
 
 
+bool common::HitBelongsToHic(THic *aHic, TPixHit aHit)
+{
+  for (unsigned int ichip = 0; ichip < aHic->GetNChips(); ichip ++) {
+    if (HitBelongsToChip(aHic->GetChipIndex(ichip), aHit)) return true;
+  }
+  return false;
+}
+
+
 int common::FindIndexForHit (std::vector <TChipIndex> aChipList, TPixHit aHit) 
 {
-  for (int ichip = 0; ichip < aChipList.size(); ichip++) {
+  for (unsigned int ichip = 0; ichip < aChipList.size(); ichip++) {
     if (HitBelongsToChip(aChipList.at(ichip), aHit)) return ichip;
   }
   return -1;

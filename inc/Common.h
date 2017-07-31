@@ -9,8 +9,10 @@
 #include <string>
 
 #include "AlpideDecoder.h"
+//#include "THIC.h"
 
 class TScanHisto;
+class THic;
 
 namespace common{
   
@@ -74,6 +76,7 @@ namespace common{
   extern std::vector<TChipIndex> GetChipList(TScanHisto* aScanHisto);
   
   bool HitBelongsToChip(TChipIndex aChipIndex, TPixHit aHit);  
+  bool HitBelongsToHic (THic       *aHic,      TPixHit aHit);  
   int  FindIndexForHit (std::vector <TChipIndex> aChipList, TPixHit aHit);
 }
 
