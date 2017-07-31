@@ -48,7 +48,7 @@ int TAlpide::WriteRegister (uint16_t address, uint16_t value, bool verify) {
   result = ReadRegister (address, check);
   if (result < 0) return result;
   if (check != value) return -1;      // raise exception (warning) readback != write value;
-  return 0;  
+  return 0;
 }
 
 
@@ -56,8 +56,8 @@ int TAlpide::ModifyRegisterBits (TRegister address, uint8_t lowBit, uint8_t nBit
   if ((lowBit < 0) || (lowBit > 15) || (lowBit + nBits > 15)) {
     return -1;    // raise exception illegal limits
   }
-  uint16_t registerValue, mask = 0xffff; 
-  ReadRegister(address, registerValue); 
+  uint16_t registerValue, mask = 0xffff;
+  ReadRegister(address, registerValue);
   //std::cout << "Value before modify:0x " << std::hex << registerValue << std::dec << std::endl;
   for (int i = lowBit; i < lowBit + nBits; i++) {
     mask -= (1 << i);
@@ -74,7 +74,7 @@ int TAlpide::ModifyRegisterBits (TRegister address, uint8_t lowBit, uint8_t nBit
 
 void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
   uint16_t value;
-   
+
   if (writeFile) {
     FILE *fp = fopen(fName, "w");
     // DACs
@@ -111,11 +111,11 @@ void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
     // Mode control register
     ReadRegister(0x1, value);
     fprintf(fp, "MODECONTROL  %i\n", value);
-    
+
     // FROMU config reg 1: [5]: test pulse mode; [6]: enable test strobe, etc.
     ReadRegister(0x4, value);
     fprintf(fp, "FROMU_CONFIG1  %i\n", value);
-    
+
     // FROMU config reg 2: strobe duration
     ReadRegister(0x5, value);
     fprintf(fp, "FROMU_CONFIG2  %i\n", value);
@@ -170,11 +170,11 @@ void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
   // Mode control register
   ReadRegister(0x1, value);
   sprintf(config, "%sMODECONTROL  %i\n", config, value);
-  
+
   // FROMU config reg 1: [5]: test pulse mode; [6]: enable test strobe, etc.
   ReadRegister(0x4, value);
   sprintf(config, "%sFROMU_CONFIG1  %i\n", config, value);
-  
+
   // FROMU config reg 2: strobe duration
   ReadRegister(0x5, value);
   sprintf(config, "%sFROMU_CONFIG2  %i\n", config, value);
@@ -314,8 +314,6 @@ void TAlpide::SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef)
 int TAlpide::CalibrateADC()
 {
 	uint16_t theVal2,theVal1;
-	bool isAVoltDAC, isACurrDAC, isATemperature, isAVoltageBuffered;
-	int theSelInput;
 
 	// Calibration Phase 1
 	fADCHalfLSB = false;

@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
   std::cout << "Reset Chips (GRST)\n";
   theBoard->SendOpCode(Alpide::OPCODE_GRST);
   std::cout << "Register Tests" << "\n";
-  for (int i = 0; i < fChips.size(); i++) {
+  for (unsigned int i = 0; i < fChips.size(); i++) {
     fChips.at(i)->WriteRegister(0x60d, 10);
     try {
       fChips.at(i)->ReadRegister(0x60d, Value);
@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
   }
 
   // Setup chips and transceivers for readout
-  for (int i = 0; i < fChips.size(); i++) {
+  for (unsigned int i = 0; i < fChips.size(); i++) {
       auto ch = fChips.at(i);
       auto chipId = chipIDs.at(i);
 
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
       AlpideConfig::WritePixRegAll(ch, Alpide::PIXREG_MASK, true);
   }
 
-  for(int i = 0; i < chipIDs.size(); ++i) {
+  for(unsigned int i = 0; i < chipIDs.size(); ++i) {
       auto tr = theBoard->transceiver_array[i]; // TODO: Mapping between transceiver and chipid
     tr->Initialize(TBoardConfigRU::ReadoutSpeed::RO_1200,0);
     bool alignedBefore = tr->IsAligned();
@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
 
   // check counters
   std::cout << "Transceiver; Events; Overflow bytes; 8b10b Errors\n";
-  for(int i = 0; i < chipIDs.size(); ++i) {
+  for(unsigned int i = 0; i < chipIDs.size(); ++i) {
       auto tr = theBoard->transceiver_array[i]; // TODO: Mapping between transceiver and chipid
       auto counters = tr->ReadCounters();
       std::cout << i << ";"

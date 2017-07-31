@@ -103,7 +103,7 @@ bool BoardDecoder::DecodeEventDAQ(unsigned char *data, int nBytes, int &nBytesHe
       std::cout << "Bad Trigger Type " << TrigType << std::endl;
       return false;
     }
-  }  
+  }
   //#ifdef MYDEBUG
   //    std::cout << "Header: Trigger type = " << TrigType << std::endl;
   //    std::cout << "Header: Almost full  = " << (int) AFull << std::endl;
@@ -129,7 +129,7 @@ bool BoardDecoder::DecodeEventDAQ(unsigned char *data, int nBytes, int &nBytesHe
   // TRAILER
 
   //bool TDAQBoard::DecodeEventTrailer (unsigned char *data_buf, TEventHeader *AHeader) {
-  int Trailer[2];
+  unsigned int Trailer[2];
   for (int i = 0; i < 2; i++) {
     Trailer[i] = GetIntFromBinaryStringReversed(4, (data + nBytes - nBytesTrailer) + i*4);
     //#ifdef MYDEBUG
@@ -210,7 +210,7 @@ uint32_t BoardDecoder::GetIntFromBinaryStringReversed(int numByte, unsigned char
 }
 
 
-bool BoardDecoder::DecodeEventRU(unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, 
+bool BoardDecoder::DecodeEventRU(unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer,
 						TBoardHeader &boardInfo)
 {
   nBytesHeader = 0;
@@ -220,7 +220,7 @@ bool BoardDecoder::DecodeEventRU(unsigned char *data, int nBytes, int &nBytesHea
 
 // Decodes the Event Header and fill the structure.
 // The value of nBytes is filled with the length of read header
-bool BoardDecoder::DecodeEventMOSAIC(unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer, 
+bool BoardDecoder::DecodeEventMOSAIC(unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer,
 						TBoardHeader &boardInfo)
 {
 //  boardInfo.size        = endianAdjust(data); // NOT correct
@@ -258,9 +258,3 @@ uint32_t BoardDecoder::endianAdjust(unsigned char *buf)
   return d;
 #endif
 }
-
-
-
-
-
-

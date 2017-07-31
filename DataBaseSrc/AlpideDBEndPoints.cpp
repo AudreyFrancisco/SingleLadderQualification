@@ -621,7 +621,7 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 	}
 
 	theUrl = theParentDB->GetQueryDomain() + "/ActivityMemberAssign";
-	for(int i=0; i< aActivity->Members.size();i++) {
+	for(unsigned int i=0; i< aActivity->Members.size();i++) {
 		theQuery = "projectMemberID="+std::to_string(aActivity->Members.at(i).ProjectMember);
 		theQuery += "&activityID=" + std::to_string(aActivity->ID);
 		theQuery += "&leader=" + std::to_string(aActivity->Members.at(i).Leader);
@@ -638,7 +638,7 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 	}
 
 	theUrl = theParentDB->GetQueryDomain() + "/ActivityParameterCreate";
-	for(int i=0; i< aActivity->Parameters.size();i++) {
+	for(unsigned int i=0; i< aActivity->Parameters.size();i++) {
 		theQuery = "activityID=" + std::to_string(aActivity->ID);
 		theQuery += "&activityParameterID=" + std::to_string(aActivity->Parameters.at(i).ActivityParameter);
 		theQuery += "&value=" + std::to_string(aActivity->Parameters.at(i).Value);
@@ -656,7 +656,7 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 
 	theUrl = theParentDB->GetQueryDomain() ;//+ "/ActivityAttachmentCreate";
 	unsigned long theBase64Result;
-	for(int i=0; i< aActivity->Attachments.size();i++) {
+	for(unsigned int i=0; i< aActivity->Attachments.size();i++) {
 		theQuery = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
 		if(SOAPVERSION == 11) {
 			theQuery += "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">";
@@ -714,8 +714,6 @@ int ActivityDB::buildUrlEncoded(string aLocalFileName, string *Buffer)
 	}
 
 	char exa[16] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
-	int i = 0;
-	int j = 0;
 	unsigned char ch;
 
 	ch =  (unsigned char)fgetc(fh);
@@ -781,5 +779,3 @@ unsigned long ActivityDB::buildBase64Binary(string aLocalFileName, string *Buffe
     theBufferLength = Buffer->size() - theBufferLength;
 	return(theBufferLength);
 }
-
-

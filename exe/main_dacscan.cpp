@@ -5,11 +5,11 @@
 //   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
 //
-// In order to have a generic scan, which works for single chips as well as for staves and modules, 
-// all chip accesses should be done with a loop over all elements of the chip vector. 
+// In order to have a generic scan, which works for single chips as well as for staves and modules,
+// all chip accesses should be done with a loop over all elements of the chip vector.
 // (see e.g. the configureChip loop in main)
-// Board accesses are to be done via fBoards.at(0);  
-// For an example how to access board-specific functions see the power off at the end of main. 
+// Board accesses are to be done via fBoards.at(0);
+// For an example how to access board-specific functions see the power off at the end of main.
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
@@ -45,11 +45,11 @@ int configureChip(TAlpide *chip) {
 }
 
 
-// this is ugly, but there is no simple relation between the DAC addresses and the 
+// this is ugly, but there is no simple relation between the DAC addresses and the
 // corresponding value in the monitoring register -> TODO: define map
 void SetDACMon (TAlpide *chip, Alpide::TRegister ADac, int IRef = 2) {
   int VDAC, IDAC;
-  uint16_t Value; 
+  uint16_t Value;
   switch (ADac) {
   case Alpide::REG_VRESETP:
     VDAC = 4;
@@ -108,16 +108,16 @@ void SetDACMon (TAlpide *chip, Alpide::TRegister ADac, int IRef = 2) {
     VDAC = 0;
     break;
   default:
-    VDAC = 0; 
+    VDAC = 0;
     IDAC = 0;
     break;
   }
-  
-  
+
+
   Value = VDAC & 0xf;
   Value |= (IDAC & 0x7) << 4;
   Value |= (IRef & 0x3) << 9;
-   
+
   chip->WriteRegister (Alpide::REG_ANALOGMON, Value);
 
 }
@@ -126,7 +126,7 @@ void SetDACMon (TAlpide *chip, Alpide::TRegister ADac, int IRef = 2) {
 void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int sampleDist = 1) {
   char     fName[50];
   float    Current;
-  uint16_t old; 
+  uint16_t old;
 
   sprintf (fName, "Data/IDAC_%s_Chip%d_%d.dat", Name, chip->GetConfig()->GetChipId(), chip->GetConfig()->GetCtrInt() );
   FILE *fp = fopen (fName, "w");
@@ -196,19 +196,19 @@ int main(int argc, char** argv) {
   myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
 
   if (fBoards.size() == 1) {
-     
+
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
-    if ( myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0))) {
-      for (int i = 0; i < fChips.size(); i ++) {
+    if ((myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0)))) {
+      for (unsigned int i = 0; i < fChips.size(); i ++) {
         configureChip (fChips.at(i));
       }
     }
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
 
-    for (int i = 0; i < fChips.size(); i ++) {
+    for (unsigned int i = 0; i < fChips.size(); i ++) {
 
     	scanVoltageDac (fChips.at(i), Alpide::REG_VRESETP, "VRESETP", mySampleDist);
     	scanVoltageDac (fChips.at(i), Alpide::REG_VRESETD, "VRESETD", mySampleDist);

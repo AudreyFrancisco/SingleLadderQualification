@@ -1,6 +1,8 @@
 #include "USBHelpers.h"
 #include "USB.h"
 
+static struct libusb_context *fContext = 0;
+
 int InitLibUsb() {
     int err = libusb_init(&fContext);
     if (err) {
@@ -31,7 +33,7 @@ int AddDAQBoard (libusb_device *device, TConfig *config, std::vector <TReadoutBo
     // note: this should change to use the correct board config according to index or geographical id
     TBoardConfigDAQ *boardConfig = dynamic_cast<TBoardConfigDAQ *>(config->GetBoardConfig(0));
     readoutBoard = new TReadoutBoardDAQ(device, boardConfig);
-    
+
     if (readoutBoard) {
         boards->push_back(readoutBoard);
         std::cout << "boards.size = " << boards->size() <<std::endl;
@@ -73,4 +75,3 @@ int FindDAQBoards (TConfig *config, std::vector <TReadoutBoard *> * boards) {
     libusb_free_device_list(list, 1);
     return err;
 }
-

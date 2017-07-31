@@ -23,7 +23,7 @@ class TConfig {
   bool                         fUsePowerBoard;
 
   void        ReadConfigFile (const char *fName);
-  void        Init           (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC); 
+  void        Init           (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC);
   void        Init           (int chipId, TBoardType boardType = boardDAQ);
   void        ParseLine      (const char *Line, char *Param, char *Rest, int *Chip);
   void        DecodeLine     (const char *Line);
@@ -32,15 +32,15 @@ class TConfig {
  protected:
  public:
   TConfig (const char *fName);
-  TConfig (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC); 
+  TConfig (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC);
   TConfig (int chipId, TBoardType boardType = boardDAQ);
-  
+
   TDeviceType   GetDeviceType      ()           {return fDeviceType;};
   int           GetNChips          ()           {return fChipConfigs.size();};
   int           GetNBoards         ()           {return fBoardConfigs.size();};
   bool          GetUsePowerBoard   ()           {return fUsePowerBoard;};
   void          SetUsePowerBoard   (bool UsePB) {fUsePowerBoard = UsePB;};
-  TChipConfig  *GetChipConfig      (int iChip);
+  TChipConfig  *GetChipConfig      (unsigned int iChip);
   TChipConfig  *GetChipConfigById  (int chipId);
   TBoardConfig *GetBoardConfig     (int iBoard);
   TScanConfig  *GetScanConfig      () {return fScanConfig;};

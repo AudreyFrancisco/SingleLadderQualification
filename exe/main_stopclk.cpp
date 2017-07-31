@@ -15,7 +15,6 @@
 
 int main()
 {
-	TBoardConfigMOSAIC 	*theBoardConfiguration;
 	TReadoutBoardMOSAIC *theBoard;
 
 	TConfig *config = new TConfig ("Config.cfg");

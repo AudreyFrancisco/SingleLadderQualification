@@ -65,7 +65,7 @@ void ClearHitData() {
 
 
 void CopyHitData(std::vector <TPixHit> *Hits) {
-  for (int ihit = 0; ihit < Hits->size(); ihit ++) {
+  for (unsigned int ihit = 0; ihit < Hits->size(); ihit ++) {
     int chipId  = Hits->at(ihit).chipId;
     int dcol    = Hits->at(ihit).dcol;
     int region  = Hits->at(ihit).region;
@@ -99,7 +99,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
   sprintf(fNameTemp,"%s", fName);
   strtok (fNameTemp, ".");
 
-  for (int ichip = 0; ichip < fChips.size(); ichip ++) {
+  for (unsigned int ichip = 0; ichip < fChips.size(); ichip ++) {
     std::cout << "ichip = "<<ichip << std::endl;
     int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
     int ctrInt = fChips.at(ichip)->GetConfig()->GetCtrInt();
@@ -151,7 +151,7 @@ int configureChip(TAlpide *chip) {
 
 void scan() {
   unsigned char         buffer[1024*4000];
-  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b, nClosedEvents = 0;
+  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b = 0, nClosedEvents = 0;
   int                   nBad       = 0;
   int                   nSkipped   = 0;
   int                   prioErrors = 0;
@@ -166,7 +166,7 @@ void scan() {
 
   for (int istage = 0; istage < myMaskStages; istage ++) {
     std::cout << "Mask stage " << istage << std::endl;
-    for (int i = 0; i < fChips.size(); i ++) {
+    for (unsigned int i = 0; i < fChips.size(); i ++) {
       if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
       AlpideConfig::ConfigureMaskStage (fChips.at(i), myPixPerRegion, istage);
     }
@@ -276,7 +276,7 @@ int main(int argc, char** argv) {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
-    for (int i = 0; i < fChips.size(); i ++) {
+    for (unsigned int i = 0; i < fChips.size(); i ++) {
       if (fChips.at(i)->GetConfig()->IsEnabled()) {
         fEnabled ++;
         std::cout << "Configuring chip " << i << ", chip ID = "<< fChips.at(i)->GetConfig()->GetChipId()<< std::endl;
