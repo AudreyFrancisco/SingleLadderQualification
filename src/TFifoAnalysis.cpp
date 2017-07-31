@@ -65,13 +65,14 @@ void TFifoAnalysis::InitCounters()
 
 
 void TFifoAnalysis::WriteResult () {
-  char fName[100];
+  char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
     sprintf (fName, "FifoScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
                                                 m_config->GetfNameSuffix());
     m_scan  ->WriteConditions (fName);
     
     FILE *fp = fopen (fName, "a");
+    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
     m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile(fp);
     fclose(fp);
     //    m_result->WriteToFile     (fName);
@@ -147,7 +148,7 @@ void TFifoResultHic::WriteToFile (FILE *fp)
   fprintf(fp, "Errors in pattern 0xaaaa: %d\n", m_erra);
   fprintf(fp, "Errors in pattern 0xffff: %d\n", m_errf);
   
-  fprintf(fp, "\nNumber of chips: %d\n\n", m_chipResults.size());
+  fprintf(fp, "\nNumber of chips: %d\n\n", (int) m_chipResults.size());
 
   std::map<int, TScanResultChip*>::iterator it;
 

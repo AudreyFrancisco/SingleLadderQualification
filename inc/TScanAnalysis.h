@@ -5,6 +5,7 @@
 #include <mutex>
 #include <map>
 #include <string>
+#include <string.h>
 
 #include "THIC.h"
 #include "Common.h"
@@ -26,10 +27,12 @@ class TScanResultChip {
 class TScanResultHic {
  protected: 
   std::map <int, TScanResultChip*> m_chipResults;
+  char m_resultFile[200];
  public:
   TScanResultHic () {};
   virtual void WriteToFile   (FILE *fp) = 0;
   int          AddChipResult (int aChipId, TScanResultChip *aChipResult);
+  void         SetResultFile (const char *fName) {strcpy(m_resultFile, fName);};
 };
 
 

@@ -37,7 +37,7 @@ void TScanAnalysis::CreateChipResults ()
     return;
   }
 
-  for (int i = 0; i < m_chipList.size(); i ++) {
+  for (unsigned int i = 0; i < m_chipList.size(); i ++) {
     TScanResultChip    *chipResult = GetChipResult();
     common::TChipIndex idx         = m_chipList.at(i);
     m_result->AddChipResult (idx, chipResult);
@@ -56,16 +56,16 @@ void TScanAnalysis::CreateHicResults ()
     return;
   }
 
-  for (int i = 0; i < m_chipList.size(); i ++) {
+  for (unsigned int i = 0; i < m_chipList.size(); i ++) {
     TScanResultChip    *chipResult = GetChipResult();
     common::TChipIndex idx         = m_chipList.at(i);
     m_result->AddChipResult (idx, chipResult);
   }  
 
 
-  for (int i = 0; i < m_hics.size(); i ++) {
+  for (unsigned int i = 0; i < m_hics.size(); i ++) {
     TScanResultHic *hicResult = GetHicResult();
-    for (int iChip = 0; iChip < m_chipList.size(); iChip ++) {
+    for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip ++) {
       if (m_hics.at(i)->ContainsChip(m_chipList.at(i))) {
         hicResult->AddChipResult(m_chipList.at(i).chipId & 0xf, 
                                  m_result->GetChipResult(m_chipList.at(i)));
@@ -136,7 +136,7 @@ void TScanResult::WriteToFile(const char *fName)
 {
   FILE *fp = fopen (fName, "a");
 
-  fprintf (fp, "Number of chips: %d\n", m_chipResults.size());
+  fprintf (fp, "Number of chips: %d\n", (int) m_chipResults.size());
 
   WriteToFileGlobal (fp);
 
