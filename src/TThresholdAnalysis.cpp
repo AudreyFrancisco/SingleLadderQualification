@@ -224,20 +224,8 @@ double meanGraph(TGraph* resultGraph) { //returns the weighted mean x value
   }
 
   if(abs(sum/norm) > 500) {  //outliers occur when a pixel is received twice; return 0.
-    /*std::cout << "WARNING: ignoring high mean of " << sum/norm << "!  (Probably received a pixel twice.)" << std::endl;
-    std::cout << "  sum=" << sum << ", norm=" << norm << std::endl;
-    std::cout << "  xs=[";
-    for(int i=0; i<resultGraph->GetN(); i++) {
-      std::cout << xs[i] << ",";
-    }
-    std::cout << "]" << std::endl << "  ys=[";
-    for(int i=0; i<resultGraph->GetN(); i++) {
-      std::cout << ys[i] << ",";
-    }
-    std::cout << "]" << std::endl;*/
     return 0;
   }
-  std::cout << sum/norm << std::endl;
   return sum/norm;
 }
 
@@ -255,7 +243,7 @@ double rmsGraph(TGraph* resultGraph) {
   return sqrt(sum/norm);
 }
 
-void ddxGraph(TGraph* aGraph, TGraph* resultGraph) {
+void ddxGraph(TGraph* aGraph, TGraph* resultGraph) { //resultGraph contains the derivative of aGraph wrt x (1st order)
   //TGraph* resultGraph = new TGraph();
   double * xs = aGraph->GetX();  //all x-coords
   double * ys = aGraph->GetY();
@@ -268,7 +256,7 @@ void ddxGraph(TGraph* aGraph, TGraph* resultGraph) {
 double ErrorFunc(double* x, double* par)
 {
   //double y = par[0]+par[1]*TMath::Erf( (x[0]-par[2]) / par[3] );
-  double y = (50/2)*(1+TMath::Erf( (x[0]-par[0]) / par[1] ) );
+  double y = par[2]*(1+TMath::Erf( (x[0]-par[0]) / par[1] ) );
   return y;
 }
 
@@ -315,6 +303,7 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
     
     fitfcn->SetParameter(0, .5*(m_stopPulseAmplitude-m_startPulseAmplitude)*m_resultFactor);
     fitfcn->SetParameter(1, 8);
+    fitfcn->SetParameter(2, .5*m_nPulseInj);
     aGraph->Fit("fitfcn","RQ");
     
     //common::TErrFuncFitResult fitResult_dummy;
@@ -329,7 +318,7 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
       fitResult_dummy.threshold = fitfcn->GetParameter(0);
     }*/
     if(fitfcn->GetParameter(0)==0.5*m_nPulseInj) std::cout << "TTA328: fit parameter unchanged!" << std::endl;
-    if(abs(fitfcn->GetParameter(0))<500 && abs(fitfcn->GetParameter(1))<500) {
+    if(abs(fitfcn->GetParameter(0))<500 && abs(fitfcn->GetParameter(1))<100) {
       fitResult_dummy.threshold = fitfcn->GetParameter(0);
       fitResult_dummy.noise     = fitfcn->GetParameter(1);
       fitResult_dummy.redChi2   = fitfcn->GetChisquare()/fitfcn->GetNDF();
@@ -577,16 +566,16 @@ void TThresholdAnalysis::Run()
    	    	    fitResult.noise,
    	 	    fitResult.redChi2);
 	  }
-	  if (fitResult.threshold!=0) { //if no error/dead pixel
+	  //if (fitResult.threshold!=0) { //if no error/dead pixel ///**READ THIS**:  Ignored points are STILL printed to the data file!
 //            if(fitResult.threshold<50) std::cout << "TTA571: Thresh " << fitResult.threshold << " <50" << std::endl;
-	    m_threshold.at(intIndexDummy).sum+=fitResult.threshold; //row;
-	    m_threshold.at(intIndexDummy).sum2+=pow(fitResult.threshold,2); //row*row
-	    m_threshold.at(intIndexDummy).entries+=1;
-	    
-	    m_noise.at(intIndexDummy).sum+=fitResult.noise; //row
-	    m_noise.at(intIndexDummy).sum2+=pow(fitResult.noise,2); //row*row
-	    m_noise.at(intIndexDummy).entries+=1;
-          }
+	  m_threshold.at(intIndexDummy).sum+=fitResult.threshold; //row;
+	  m_threshold.at(intIndexDummy).sum2+=pow(fitResult.threshold,2); //row*row
+	  m_threshold.at(intIndexDummy).entries+=1;
+	  
+	  m_noise.at(intIndexDummy).sum+=fitResult.noise; //row
+	  m_noise.at(intIndexDummy).sum2+=pow(fitResult.noise,2); //row*row
+	  m_noise.at(intIndexDummy).entries+=1;
+          //}
 	  
 	}
 	

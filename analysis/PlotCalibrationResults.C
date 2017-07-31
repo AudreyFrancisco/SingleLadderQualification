@@ -202,7 +202,7 @@ void PlotCalibrationResults(int Chips, int target, char * fileName1, char * file
     mg->Add(cal1);
     mg->Add(cal2);
 
-    TCanvas *c1 = new TCanvas("c1","multigraph",400,300);
+    TCanvas *c1 = new TCanvas("c1","multigraph",700,700);
     c1->SetGrid();
 
     mg->Draw("apl");
