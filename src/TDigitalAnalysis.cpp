@@ -111,6 +111,11 @@ void TDigitalAnalysis::WriteHitData(TScanHisto histo, int row)
 
 void TDigitalAnalysis::WriteResult() 
 {
+
+  // should write to file: Conditions, global, results
+  // separate files: stuck pixels (how to separate by HIC?)
+  // hitmap file? 
+  // write both paths to result structure
   char fName[100];
   sprintf (fName, "DigitalScanResult_%s.dat", m_config->GetfNameSuffix());
   m_scan  ->WriteConditions (fName);

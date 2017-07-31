@@ -136,7 +136,7 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
       if (boardInfo.decoder10b8bError) m_errorCount.n8b10b++;
       int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
       if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
-      if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel, m_errorCount.nPrioEncoder, &m_stuck)) {
+      if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel, m_errorCount.nPrioEncoder, &m_stuck)) {
         std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
         m_errorCount.nCorruptEvent ++;
         if (nBad > 10) continue;
