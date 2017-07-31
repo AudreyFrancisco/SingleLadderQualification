@@ -44,7 +44,7 @@ class TFifoResultHic : public TScanResultHic {
   int m_nExceptions;
  public: 
   TFifoResultHic () : TScanResultHic () {};
-  void WriteToFile (FILE *fp) {};
+  void WriteToFile (FILE *fp);
 };
 
 

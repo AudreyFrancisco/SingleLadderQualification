@@ -66,9 +66,16 @@ void TFifoAnalysis::InitCounters()
 
 void TFifoAnalysis::WriteResult () {
   char fName[100];
-  sprintf (fName, "FifoScanResult_%s.dat", m_config->GetfNameSuffix());
-  m_scan  ->WriteConditions (fName);
-  m_result->WriteToFile     (fName);
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    sprintf (fName, "FifoScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+                                                m_config->GetfNameSuffix());
+    m_scan  ->WriteConditions (fName);
+    
+    FILE *fp = fopen (fName, "a");
+    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile(fp);
+    fclose(fp);
+    //    m_result->WriteToFile     (fName);
+  }
 }
 
 
@@ -128,6 +135,26 @@ void TFifoAnalysis::Finalize()
   }
 
   WriteResult ();
+}
+
+
+void TFifoResultHic::WriteToFile (FILE *fp) 
+{
+  fprintf (fp, "HIC Result:\n\n");
+
+  fprintf(fp, "Errors in pattern 0x0000: %d\n", m_err0);
+  fprintf(fp, "Errors in pattern 0x5555: %d\n", m_err5);
+  fprintf(fp, "Errors in pattern 0xaaaa: %d\n", m_erra);
+  fprintf(fp, "Errors in pattern 0xffff: %d\n", m_errf);
+  
+  fprintf(fp, "\nNumber of chips: %d\n\n", m_chipResults.size());
+
+  std::map<int, TScanResultChip*>::iterator it;
+
+  for (it = m_chipResults.begin(); it != m_chipResults.end(); it++) {
+    fprintf(fp, "\nResult chip %d:\n\n", it->first);
+    it->second->WriteToFile(fp);
+  }
 }
 
 
