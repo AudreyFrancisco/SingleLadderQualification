@@ -56,7 +56,7 @@ void TNoiseAnalysis::Run()
       m_histoQue->pop_front();
       m_mutex   ->unlock   ();
 
-      for (int ichip = 0; ichip < m_chipList.size(); ichip ++) {
+      for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip ++) {
         TNoiseResultChip *chipResult = (TNoiseResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
         int               channel    = m_chipList.at(ichip).dataReceiver;
         int               chipId     = m_chipList.at(ichip).chipId;
@@ -85,6 +85,27 @@ void TNoiseAnalysis::Run()
    
     else usleep(300);
   }
+}
+
+
+void TNoiseAnalysis::Finalize() 
+{
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    TNoiseResultHic *hicResult = (TNoiseResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+    hicResult->m_occ    = 0; 
+    hicResult->m_nNoisy = 0;
+    if (m_hics.at(ihic)->GetNChips() == 0) continue;
+
+    for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
+      if (! (m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
+      TNoiseResultChip *chipResult = (TNoiseResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
+      hicResult->m_occ    += chipResult->m_occ;
+      hicResult->m_nNoisy += chipResult->m_noisyPixels.size();
+    }
+    hicResult->m_occ /= m_hics.at(ihic)->GetNChips();
+  }
+
+  WriteResult();
 }
 
 

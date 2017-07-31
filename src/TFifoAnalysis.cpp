@@ -117,8 +117,6 @@ void TFifoAnalysis::Finalize()
     chipResult->m_erra = m_counters.at(ichip).erra;
     chipResult->m_errf = m_counters.at(ichip).errf;
 
-    std::map<std::string, TScanResultHic*>::iterator it;
- 
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
       if (! (m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TFifoResultHic *hicResult = (TFifoResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());

@@ -13,13 +13,14 @@
 #include "AlpideDecoder.h"
 
 class TNoiseResultChip : public TScanResultChip {
+  friend class TNoiseAnalysis;
  private: 
   std::vector <TPixHit> m_noisyPixels;
-  float                 m_occ;
+  double                m_occ;
  public: 
   TNoiseResultChip () : TScanResultChip () {};
   void AddNoisyPixel (TPixHit pixel) {m_noisyPixels.push_back(pixel);};
-  void SetOccupancy  (float occ)     {m_occ = occ;};
+  void SetOccupancy  (double occ)    {m_occ = occ;};
   void WriteToFile   (FILE *fp);
 };
 
@@ -27,6 +28,8 @@ class TNoiseResultChip : public TScanResultChip {
 class TNoiseResultHic : public TScanResultHic {
   friend class TNoiseAnalysis;
  private:
+  double m_occ;
+  int    m_nNoisy;
  public: 
   TNoiseResultHic () : TScanResultHic () {};
   void WriteToFile (FILE *fp) {};
@@ -35,8 +38,6 @@ class TNoiseResultHic : public TScanResultHic {
 
 class TNoiseResult : public TScanResult {
  private: 
-  float m_occ;
-  int   m_nNoisy;
  public: 
   TNoiseResult () : TScanResult () {};
   void WriteToFileGlobal (FILE *fp)          {};
@@ -62,7 +63,7 @@ class TNoiseAnalysis : public TScanAnalysis {
                  std::mutex             *aMutex);
   void Initialize ();
   void Run        ();
-  void Finalize   () { WriteResult(); };  
+  void Finalize   ();
 };
 
 
