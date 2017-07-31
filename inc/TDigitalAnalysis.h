@@ -77,7 +77,7 @@ class TDigitalAnalysis : public TScanAnalysis {
   void WriteStuckPixels ();
  protected:
   TScanResultChip *GetChipResult () {TDigitalResultChip *Result = new TDigitalResultChip(); return Result;};
-  TScanResultHic  *GetHicResult  () {TDigitalResultHic  *Result = new TDigitalResultHic ();  return Result;};
+  TScanResultHic  *GetHicResult  () {TDigitalResultHic  *Result = new TDigitalResultHic (); return Result;};
   void             CreateResult  () {};
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, 

@@ -58,7 +58,7 @@ void TDigitalAnalysis::Initialize()
 void TDigitalAnalysis::InitCounters () 
 {
   m_counters.clear();
-  for (int i = 0; i < m_chipList.size(); i++) {
+  for (unsigned int i = 0; i < m_chipList.size(); i++) {
     TDigitalCounter counter;
     counter.boardIndex = m_chipList.at(i).boardIndex;
     counter.receiver   = m_chipList.at(i).dataReceiver;
@@ -67,14 +67,33 @@ void TDigitalAnalysis::InitCounters ()
     counter.nIneff     = 0;
     counter.nNoisy     = 0;
     m_counters.push_back(counter);
+
+    TDigitalResultChip *result = (TDigitalResultChip*) m_result->GetChipResult(m_chipList.at(i));
+
+    result->m_nStuck    = 0;
+    result->m_nDead     = 0;
+    result->m_nNoisy    = 0;
+    result->m_nIneff    = 0;
+    result->m_nBadDcols = 0;
+
   }
+
+  std::map<std::string, TScanResultHic*>::iterator it;
+
+  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+    TDigitalResultHic *result = (TDigitalResultHic *) it->second;
+    result->m_nBad      = 0;
+    result->m_nStuck    = 0;
+    result->m_nBadDcols = 0;
+  }
+
 }
 
 
 void TDigitalAnalysis::WriteHitData(TScanHisto histo, int row) 
 {
   char fName[100];
-  for (int ichip = 0; ichip < m_chipList.size(); ichip++) {
+  for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     sprintf(fName, "Digital_%s_B%d_Rcv%d_Ch%d.dat", m_config->GetfNameSuffix(), 
 	                                            m_chipList.at(ichip).boardIndex, 
                                                     m_chipList.at(ichip).dataReceiver, 
@@ -107,7 +126,7 @@ void TDigitalAnalysis::WriteStuckPixels()
   FILE                 *fp     = fopen (fName, "w");
   std::vector<TPixHit>  pixels = ((TMaskScan*)m_scan)->GetStuckPixels();
 
-  for (int i = 0; i < pixels.size(); i++) {
+  for (unsigned int i = 0; i < pixels.size(); i++) {
     fprintf (fp, "%d %d %d %d %d\n", pixels.at(i).channel, pixels.at(i).chipId, pixels.at(i).region, pixels.at(i).dcol,pixels.at(i).address);
   }
   fclose(fp);
@@ -160,7 +179,7 @@ void TDigitalAnalysis::Finalize() {
   result->m_n8b10b         = errCount.n8b10b;
   result->m_nCorrupt       = errCount.nCorruptEvent;
      
-  for (int ichip = 0; ichip < m_chipList.size();ichip ++ ) {
+  for (unsigned int ichip = 0; ichip < m_chipList.size();ichip ++ ) {
     TDigitalResultChip* chipResult = (TDigitalResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
       
     if (!chipResult) std::cout << "WARNING: chipResult = 0" << std::endl;
@@ -172,7 +191,7 @@ void TDigitalAnalysis::Finalize() {
   // for the time being divide stuck pixels on different chips here
   // later: change AlpideDecoder?
 
-  for (int istuck = 0; istuck < stuck.size(); istuck++) {
+  for (unsigned int istuck = 0; istuck < stuck.size(); istuck++) {
     int entry = common::FindIndexForHit(m_chipList, stuck.at(istuck));
     if (entry >= 0) {
         TDigitalResultChip* chipResult = (TDigitalResultChip*) m_result->GetChipResult(m_chipList.at(entry));
@@ -180,6 +199,18 @@ void TDigitalAnalysis::Finalize() {
         chipResult->m_nStuck++;
     }
   }
+
+  for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip ++) {
+    for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+      if (! (m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
+      TDigitalResultChip *chipResult = (TDigitalResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
+      TDigitalResultHic  *hicResult  = (TDigitalResultHic*)  m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+      hicResult->m_nBad      += chipResult->m_nDead + chipResult->m_nIneff + chipResult->m_nNoisy;
+      hicResult->m_nBadDcols += chipResult->m_nBadDcols;
+      hicResult->m_nStuck    += chipResult->m_nStuck;
+    }
+  }
+
   WriteResult      ();
   WriteStuckPixels ();
 }

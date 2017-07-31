@@ -50,8 +50,8 @@ class TScanResult {
 		                      TScanResultChip *aChipResult);
   int              AddChipResult     (int aIntIndex, TScanResultChip *aChipResult);
   int              AddHicResult      (std::string hicId,   TScanResultHic  *aHicResult);
-  int              GetNChips         ()     {return m_chipResults.size();};
-  int              GetNHics          ()     {return m_hicResults.size();};
+  int              GetNChips         ()     {return (int) m_chipResults.size();};
+  int              GetNHics          ()     {return (int) m_hicResults.size();};
   void             WriteToFile       (const char *fName);
   virtual void     WriteToFileGlobal (FILE *fp)          = 0;
   virtual void     WriteToDB         (const char *hicID) = 0;

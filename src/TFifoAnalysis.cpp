@@ -38,7 +38,7 @@ void TFifoAnalysis::InitCounters()
 {
   m_counters.clear();
 
-  for (int i = 0; i < m_chipList.size(); i++) {
+  for (unsigned int i = 0; i < m_chipList.size(); i++) {
     TFifoCounter counter;
     counter.boardIndex = m_chipList.at(i).boardIndex;
     counter.receiver   = m_chipList.at(i).dataReceiver;
@@ -92,7 +92,7 @@ void TFifoAnalysis::Run()
       m_histoQue->pop_front();
       m_mutex   ->unlock();
 
-      for (int ichip = 0; ichip < m_chipList.size(); ichip++) {
+      for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
         for (int ireg = 0; ireg < 32; ireg ++) {
           m_counters.at(ichip).err0 += (int) histo (m_chipList.at(ichip), ireg, 0x0);
           m_counters.at(ichip).err5 += (int) histo (m_chipList.at(ichip), ireg, 0x5);
@@ -108,7 +108,7 @@ void TFifoAnalysis::Run()
 
 void TFifoAnalysis::Finalize()
 {
-  for (int ichip = 0; ichip < m_chipList.size(); ichip ++) {
+  for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip ++) {
     TFifoResultChip* chipResult = (TFifoResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
     if (!chipResult) std::cout << "WARNING: chipResult = 0" << std::endl;
 
@@ -119,7 +119,7 @@ void TFifoAnalysis::Finalize()
 
     std::map<std::string, TScanResultHic*>::iterator it;
  
-    for (int ihic = 0; ihic < m_hics.size(); ihic++) {
+    for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
       if (! (m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TFifoResultHic *hicResult = (TFifoResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
       hicResult->m_err0 += chipResult->m_err0;
