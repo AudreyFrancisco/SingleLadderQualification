@@ -81,7 +81,7 @@ void TThresholdScan::Init() {
   m_running = true;
   
   CountEnabledChips();
-  for (int i = 0; i < m_boards.size(); i++) {
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
     std::cout << "Board " << i << ", found " << m_enabled[i] << " enabled chips" << std::endl;
     ConfigureBoard(m_boards.at(i));
 
@@ -89,12 +89,12 @@ void TThresholdScan::Init() {
     m_boards.at(i)->SendOpCode (Alpide::OPCODE_PRST);
   }
 
-  for (int i = 0; i < m_chips.size(); i ++) {
+  for (unsigned int i = 0; i < m_chips.size(); i ++) {
     if (! (m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     ConfigureChip (m_chips.at(i));
   }
 
-  for (int i = 0; i < m_boards.size(); i++) {
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode (Alpide::OPCODE_RORST);     
     TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(i));
 
@@ -110,13 +110,13 @@ void TThresholdScan::PrepareStep (int loopIndex)
 {
   switch (loopIndex) {
   case 0:    // innermost loop: change VPULSEL
-    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEH - m_value[0]);
     }
     break;
   case 1:    // 2nd loop: mask staging
-    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
     }
@@ -131,11 +131,11 @@ void TThresholdScan::Execute()
 {
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
-  for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
     m_boards.at(iboard)->Trigger(m_nTriggers);
   }
 
-  for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
 		Hits->clear();
     ReadEventData (Hits, iboard);
     FillHistos    (Hits, iboard);
@@ -149,12 +149,12 @@ void TThresholdScan::FillHistos (std::vector<TPixHit> *Hits, int board)
   common::TChipIndex idx; 
   idx.boardIndex = board;
   
-  int chipId;
+  /*int chipId;
   int region; 
   int dcol;
-  int address;
+  int address;*/
 
-  for (int i = 0; i < Hits->size(); i++) {
+  for (unsigned int i = 0; i < Hits->size(); i++) {
     if (Hits->at(i).address / 2 != m_row) continue;  // todo: keep track of spurious hits, i.e. hits in non-injected rows
     // !! This will not work when allowing several chips with the same Id
     idx.dataReceiver = Hits->at(i).channel;
@@ -185,7 +185,7 @@ void TThresholdScan::LoopEnd(int loopIndex)
 void TThresholdScan::Terminate() 
 {
   // write Data;
-  for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
     TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(iboard));
     if (myMOSAIC) {
       myMOSAIC->StopRun();

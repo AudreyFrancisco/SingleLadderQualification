@@ -61,7 +61,7 @@ float THic::GetTemperature()
   float result = 0; 
   int   nChips = 0;
 
-  for (int i = 0; i < m_chips.size(); i++) {
+  for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (! m_chips.at(i)->GetConfig()->IsEnabled()) continue;
     result += m_chips.at(i)->ReadTemperature();
     nChips ++;

@@ -82,7 +82,7 @@ void ClearHitData() {
 
 
 void CopyHitData(std::vector <TPixHit> *Hits, int charge) {
-  for (int ihit = 0; ihit < Hits->size(); ihit ++) {
+  for (unsigned int ihit = 0; ihit < Hits->size(); ihit ++) {
     HitData[Hits->at(ihit).chipId][charge-myChargeStart][Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address] ++;
   }
   Hits->clear();
@@ -99,7 +99,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
   strtok (fNameTemp, "."); 
   bool  HasData;
 
-  for (int ichip = 0; ichip < fChips.size(); ichip ++) {
+  for (unsigned int ichip = 0; ichip < fChips.size(); ichip ++) {
     int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
     int ctrInt = fChips.at(ichip)->GetConfig()->GetCtrInt();
     if (!fChips.at(ichip)->GetConfig()->IsEnabled()) continue;  // write files only for enabled chips
@@ -112,8 +112,8 @@ void WriteDataToFile (const char *fName, bool Recreate) {
     if (Recreate) fp = fopen(fNameChip, "w");
     else          fp = fopen(fNameChip, "a");
 
-    for (int icol = 0; icol < 512; icol ++) {
-      for (int iaddr = 0; iaddr < 1024; iaddr ++) {
+    for (unsigned int icol = 0; icol < 512; icol ++) {
+      for (unsigned int iaddr = 0; iaddr < 1024; iaddr ++) {
         HasData = false;
         for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
           if (HitData[chipId][icharge - myChargeStart][icol][iaddr] > 0) HasData = true;
@@ -131,23 +131,23 @@ void WriteDataToFile (const char *fName, bool Recreate) {
 }
 
 
-int configureFromu(TAlpide *chip) {
+void configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x20);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, chip->GetConfig()->GetParamValue("STROBEDELAYCHIP"));   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
   chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length 
-  return 0;
+  //return 0;
 }
 
 
-int configureChip(TAlpide *chip) {
+void configureChip(TAlpide *chip) {
   AlpideConfig::BaseConfig(chip);
 
   configureFromu(chip);
 
   AlpideConfig::ConfigureCMU (chip);
 
-  return 0;
+  //return 0;
 }
 
 
@@ -186,7 +186,7 @@ void fillVcasn(float *vcasn) { //WIP
   char name[100];
   
   std::cout << "Filling Vcasn" << std::endl;
-  for(int i = 0; i < fChips.size(); i++) {
+  for(unsigned int i = 0; i < fChips.size(); i++) {
     //get file; name of one of them is in summaryName.
     //Only use first 34 chars of summaryName; insert chip # right after.
 
@@ -225,13 +225,13 @@ void scan() {
 
   fillVcasn(vcasn); //NEW--fill vcasn with calibrated values for each chip
 
-  for (int i = 0; i < fChips.size(); i++) { //Read VPULSEH from Config and save it at vector temporarily
+  for (unsigned int i = 0; i < fChips.size(); i++) { //Read VPULSEH from Config and save it at vector temporarily
     myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
   }
 
   std::cout << "Initializing Vcasn array" << std::endl;
   //set VCASN for each chip here!
-  for (int i = fChips.size()-1; i>-1; i--) {
+  for (int i = (int)fChips.size()-1; i>-1; i--) {
     if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
     fChips.at(i)->WriteRegister(Alpide::REG_VCASN, (int)(vcasn[i]+.5));
     //casts to int, with rounding
@@ -240,14 +240,14 @@ void scan() {
  
   for (int istage = 0; istage < myMaskStages; istage ++) {
     std::cout << "Mask stage " << istage << std::endl;
-    for (int i = 0; i < fChips.size(); i ++) {
+    for (unsigned int i = 0; i < fChips.size(); i ++) {
       if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
       AlpideConfig::ConfigureMaskStage(fChips.at(i), myPixPerRegion, istage);
     }
 
     for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
       //std::cout << "Charge = " << icharge << std::endl;
-      for (int i = 0; i < fChips.size(); i ++) {
+      for (unsigned int i = 0; i < fChips.size(); i ++) {
         if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
         if (vcasn[i] == -1) continue;  //Summary file does not exist
 
@@ -287,7 +287,7 @@ void scan() {
               fprintf (fDebug, "%02x ", (int) buffer[iByte]);
             }
             fprintf(fDebug, "\nFull Event:\n"); 
-            for (int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
+            for (unsigned int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
               fprintf (fDebug, "%02x ", (int) fDebugBuffer.at(ibyte));
             }
             fprintf(fDebug, "\n\n");
@@ -334,7 +334,7 @@ int main(int argc, char** argv) {
   decodeCommandParameters(argc, argv);
   initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
   InitScanParameters();
-  char Suffix[20], fName[100], Config[1000];
+  char Suffix[20], fName[100]; //, Config[1000];
 
   ClearHitData();
   time_t       t = time(0);   // get time now
@@ -348,7 +348,7 @@ int main(int argc, char** argv) {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
-    for (int i = 0; i < fChips.size(); i ++) {
+    for (unsigned int i = 0; i < fChips.size(); i ++) {
       if (fChips.at(i)->GetConfig()->IsEnabled()) {
         fEnabled ++;        
         configureChip (fChips.at(i));
