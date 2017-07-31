@@ -39,10 +39,11 @@ common::TChipIndex common::GetChipIndex(int aIntIndex){
 }
 
 
-//preliminary function; for multi-board setups need to include boardId in TPixHit
 bool common::HitBelongsToChip(TChipIndex aChipIndex, TPixHit aHit) 
 {
-  if ((aChipIndex.dataReceiver == aHit.channel) && (aChipIndex.chipId == aHit.chipId)) return true;
+  if ((aChipIndex.boardIndex   == aHit.boardIndex) &&
+      (aChipIndex.dataReceiver == aHit.channel) && 
+      (aChipIndex.chipId       == aHit.chipId)) return true;
   return false;
 }
 
