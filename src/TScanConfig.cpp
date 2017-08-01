@@ -17,6 +17,7 @@ TScanConfig::TScanConfig()
   m_vcasnStop    = VCASN_STOP;
   m_ithrStart    = ITHR_START;
   m_ithrStop     = ITHR_STOP;
+  m_speedy       = SPEEDY;
   InitParamMap();
 }
 
@@ -36,6 +37,7 @@ void TScanConfig::InitParamMap ()
   fSettings["VCASN_STOP"]   = &m_vcasnStop;
   fSettings["ITHR_START"]   = &m_ithrStart;
   fSettings["ITHR_STOP"]    = &m_ithrStop;
+  fSettings["SPEEDY"]       = &m_speedy;
   m_ithr = NULL;  //not always used
   m_vcasn = NULL;
 }

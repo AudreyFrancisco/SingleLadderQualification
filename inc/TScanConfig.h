@@ -20,6 +20,7 @@ namespace ScanConfig {
   const int ITHR_STOP      = 100;
   const int VCASN_START    = 40;
   const int VCASN_STOP     = 60;
+  const int SPEEDY         = 1;
 }
 
 
@@ -42,6 +43,7 @@ class TScanConfig {
   int  m_ithrStop;   //usually 100
   int  m_vcasnStart; //usually 40
   int  m_vcasnStop;  //usually 60
+  int  m_speedy;
 
  protected: 
  public:
