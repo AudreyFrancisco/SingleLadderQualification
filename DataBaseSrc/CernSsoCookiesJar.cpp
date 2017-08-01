@@ -52,8 +52,6 @@ CernSsoCookieJar::CernSsoCookieJar(string aCookiePackFileName)
     if( !testTheCERNSSO()) {
         exit(1);
     }
-    theCliCert = "";
-    theCliKey = "";
     theSslUrl = "";
     theCookiePackFile = aCookiePackFileName;
 }
@@ -91,10 +89,8 @@ bool CernSsoCookieJar::isJarValid()
  * gets the CERN SSO Cookies and fills
  * the cookie jar
  * ----------------------------------- */
-bool CernSsoCookieJar::fillTheJar(string aCliCert, string aCliKey, string aSslUrl)
+bool CernSsoCookieJar::fillTheJar(string aSslUrl)
 {
-    theCliCert = aCliCert;
-    theCliKey = aCliKey;
     theSslUrl = aSslUrl;
     return(fillTheJar());
 }
@@ -106,10 +102,7 @@ bool CernSsoCookieJar::fillTheJar()
         cout << "The " << theCookiePackFile << " file deleted." << endl;
     }
     string Command = "cern-get-sso-cookie ";
-    Command += " --cert ";
-    Command += theCliCert;
-    Command += " --key ";
-    Command += theCliKey;
+    Command += " --krb";
     Command += " -r -u ";
     Command += theSslUrl;
     Command += " -o ";

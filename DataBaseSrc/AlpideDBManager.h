@@ -46,18 +46,9 @@
 	#define COOKIEPACK "/tmp/cerncookie.txt"
 
 	#define SSOURL "https://test-alucmsapi.web.cern.ch"
-	#define CAPATH "/etc/pki/tls/certs"
-	#define CAFILE "/etc/pki/tls/certs/ca-bundle.crt"
-	#define CA1FILE "CERN_Grid_Certification_Authority.pem"
-	#define CA2FILE	"AddTrustExternalCARoot.pem"
-
 
 #ifdef COMPILE_LIBCURL
-	#define NSSDATABASEPATH "."
-	#define NSSCERTNICKNAME "FrancoAntonio"
-	#define NSSDBPASSWD "alpide4me"
-	#define USERCERT "/tmp/usercert.pem"
-	#define USERKEY "/tmp/userkey.pem"
+	#define PASSWD ":"
 #else
     #define USERCERT "/home/fap/.globus/usercert.pem"
     #define USERKEY "/home/fap/.globus/userkey.pem"
@@ -88,14 +79,7 @@ private:
 	CURL * myHandle;
 	CURLcode result; // We’ll store the result of CURL’s webpage retrieval, for simple error checking.
 
-	string theNSSNickName;
-	string theNSSDBPath;
-	string theNSSDBPassword;
 #endif
-
-	string	theCliCer;
-	string	theCliKey;
-	string  theCertificationAuthorityPath;
 
 	CernSsoCookieJar	*theCookieJar;
 	string	theJarUrl;
@@ -108,13 +92,7 @@ public:
     ~AlpideDBManager();
 
 #ifdef COMPILE_LIBCURL
-    bool Init(string aSslUrl, string aNickName, string aNSSDBPath, string aNSSDBPassFile);
-    string getNSSDBNickName() { return(theNSSNickName);};
-    string getNSSDBPath() { return(theNSSDBPath);};
-    string getNSSDBPass() { return(theNSSDBPassword);};
-    void setNSSDBNickName(string aNickName) { theNSSNickName = aNickName;};
-    void setNSSDBPath(string aNSSDBPath) { theNSSDBPath = aNSSDBPath;};
-    void setNSSDBPass(string aNSSDBPass) { theNSSDBPassword = aNSSDBPass;};
+    bool Init(string aSslUrl);
     bool isLibCurlCompiled(void) { return(true); };
 #else
     bool Init(string aSslUrl, string aCliCer, string aCliKey,  string aCAPath);
@@ -123,14 +101,6 @@ public:
 
 
     bool Init();
-
-    string getClientCertFile() { return(theCliCer);};
-    string getClientKeyFile() { return(theCliKey);};
-    void setClientCertFile(string aCliCer) { theCliCer = aCliCer;};
-    void setClientKeyFile(string aCliKey) { theCliKey = aCliKey;};
-
-    string getCAPath() { return(theCertificationAuthorityPath);};
-    void setCAPath(string aCAPath) { theCertificationAuthorityPath = aCAPath;};
 
     string getSSOCookieUrl() { return(theJarUrl);};
     void setSSOCookieUrl(string aJarUrl) { theJarUrl = aJarUrl;};

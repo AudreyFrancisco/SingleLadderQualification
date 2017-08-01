@@ -48,17 +48,10 @@ AlpideDBManager::AlpideDBManager()
 
 	theJarUrl = SSOURL;
 	theCookieJar = new CernSsoCookieJar(COOKIEPACK);
-	theCliCer = USERCERT;
-	theCliKey = USERKEY;
 
 #ifdef COMPILE_LIBCURL
 	curl_global_init( CURL_GLOBAL_ALL );
-
 	myHandle = curl_easy_init ( ) ;
-	theCertificationAuthorityPath = CAPATH;
-	theNSSNickName = NSSCERTNICKNAME;
-	theNSSDBPath = NSSDATABASEPATH;
-	theNSSDBPassword = NSSDBPASSWD;
 #else
 	theCertificationAuthorityPath = CAPATH;
 #endif
@@ -71,51 +64,15 @@ AlpideDBManager::~AlpideDBManager()
 }
 
 #ifdef COMPILE_LIBCURL
-bool AlpideDBManager::Init(string aSslUrl, string aNickName, string aNSSDBPath,  string aNSSDBPass)
+bool AlpideDBManager::Init(string aSslUrl)
 {
 	theJarUrl = aSslUrl;
-	theNSSNickName = aNickName;
-	theNSSDBPath = aNSSDBPath;
-	theNSSDBPassword = aNSSDBPass;
-
-	string command;
-	// now export cert
-	command = "certutil -L -d ";
-	command += aNSSDBPath;
-	command += " -n ";
-	command += aNickName;
-	command += " -a >";
-	command += theCliCer;
-	system(command.c_str());
-	if(VERBOSITYLEVEL == 1) {cout << "Com:" << command << endl;}
-
-	// now export  key
-	command = "pk12util -o /tmp/theKey.p12 -d . -K ";
-	command += theNSSDBPassword;
-	command += " -W \"\" -n ";
-	command += theNSSNickName;
-	system(command.c_str());
-	if(VERBOSITYLEVEL == 1) {cout << "Com:" << command << endl;}
-
-	command = "openssl pkcs12 -in /tmp/theKey.p12 -out ";
-	command += theCliKey;
-	command += " -nodes -passin pass:";
-	system(command.c_str());
-	if(VERBOSITYLEVEL == 1) {cout << "Com:" << command << endl;}
-
-	command = "rm /tmp/theKey.p12";
-	system(command.c_str());
-	if(VERBOSITYLEVEL == 1) {cout << "Com:" << command << endl;}
-
 	return(Init());
 }
 #else
 bool AlpideDBManager::Init(string aSslUrl, string aCliCer, string aCliKey, string aCAPath)
 {
 	theJarUrl = aSslUrl;
-	theCliCer = aCliCer;
-	theCliKey = aCliKey;
-	theCertificationAuthorityPath = aCAPath;
 	return(Init());
 }
 #endif
@@ -124,7 +81,7 @@ bool AlpideDBManager::Init(string aSslUrl, string aCliCer, string aCliKey, strin
 bool AlpideDBManager::Init()
 {
 
-	if(!theCookieJar->fillTheJar(theCliCer,theCliKey,theJarUrl)) {
+	if(!theCookieJar->fillTheJar(theJarUrl)) {
 		cerr << "Error to Init the DB manager. Exit !";
 		return(false);
 	}
@@ -135,12 +92,8 @@ bool AlpideDBManager::Init()
 	myHandle = curl_easy_init ( ) ;
 	curl_easy_setopt( myHandle, CURLOPT_VERBOSE, VERBOSITYLEVEL );
 
-	curl_easy_setopt( myHandle, CURLOPT_CAINFO, CAFILE);
-	curl_easy_setopt( myHandle, CURLOPT_CAPATH , CAPATH);
-
-	curl_easy_setopt( myHandle, CURLOPT_KEYPASSWD, theNSSDBPassword.c_str());
-	curl_easy_setopt( myHandle, CURLOPT_SSLKEY,  theNSSNickName.c_str());
-	curl_easy_setopt( myHandle, CURLOPT_SSLCERT, theNSSNickName.c_str());
+	curl_easy_setopt( myHandle, CURLOPT_HTTPAUTH, CURLAUTH_NEGOTIATE);
+	curl_easy_setopt( myHandle, CURLOPT_USERPWD, ':');
 
 #endif
 	thePendingRequests = 0;

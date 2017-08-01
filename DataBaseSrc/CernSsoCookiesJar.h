@@ -62,8 +62,6 @@ struct Cookie {
 
 // Members
 private:
-	string theCliCert;
-	string theCliKey;
 	string theSslUrl;
 	string theCookiePackFile;
 
@@ -77,7 +75,7 @@ public:
     bool isJarValid();
 
 public:
-    bool fillTheJar(string aCliCert, string aCliKey, string aSslUrl);
+    bool fillTheJar(string aSslUrl);
     bool fillTheJar();
 
 private:
