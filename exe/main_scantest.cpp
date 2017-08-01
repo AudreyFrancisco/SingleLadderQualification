@@ -50,29 +50,29 @@ void scanLoop (TScan *myScan)
   while (myScan->Loop(2)) {
     myScan->PrepareStep(2);
     myScan->LoopStart  (1);
-    //std::cout << "Loop 1 start" << std::endl;
+    std::cout << "Loop 1 start" << std::endl;
     while (myScan->Loop(1)) {
       myScan->PrepareStep(1);
       myScan->LoopStart  (0);
-      //std::cout << "Loop 0 start" << std::endl;
+      std::cout << "Loop 0 start" << std::endl;
       while (myScan->Loop(0)) {
         myScan->PrepareStep(0);
         myScan->Execute    ();
         myScan->Next       (0);  
-        //std::cout << "0";
+        std::cout << "0";
       }
-      //std::cout << std::endl << "Loop 0 end";
+      std::cout << std::endl << "Loop 0 end";
       myScan->LoopEnd(0);
-      //std::cout << "...and...";
+      std::cout << "...and...";
       myScan->Next   (1);
-      //std::cout << "next." << std::endl;
+      std::cout << "next." << std::endl;
     }
     myScan->LoopEnd(1);
     myScan->Next   (2);
-    //std::cout << "Loop 1 end" << std::endl;
+    std::cout << "Loop 1 end" << std::endl;
   }
   myScan->LoopEnd  (2);
-  //std::cout << "Loop 2 end, terminating" << std::endl;
+  std::cout << "Loop 2 end, terminating" << std::endl;
   myScan->Terminate();
 }
 
@@ -105,12 +105,9 @@ int main(int argc, char** argv) {
   std::thread scanThread(scanLoop, myScan);
   analysis->Initialize();
   std::thread analysisThread(&TScanAnalysis::Run, std::ref(analysis));
-  
-  std::cout << "Join scanThread" << std::endl;
+
   scanThread.join();
-  std::cout << "Join analysisThread" << std::endl;
   analysisThread.join();
-  std::cout << "Finalizing analysis" << std::endl;
   analysis->Finalize();
 
   std::cout << "Printing mean thresholds:" << std::endl; //need to know SPECIFIC chip number!!

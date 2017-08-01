@@ -24,9 +24,9 @@ public:
     ReadResult(uint16_t address, uint16_t data, bool error) : address(address),data(data),error(error){}
   };
 
-   int VID = 0x04B4;
- int PID = 0x0008;
-   int INTERFACE_NUMBER = 2;
+  static const int VID = 0x04B4;
+  static const int PID = 0x0008;
+  static const int INTERFACE_NUMBER = 2;
   static const uint8_t EP_CTL_OUT = 3;
   static const uint8_t EP_CTL_IN = 3;
   static const uint8_t EP_DATA0_IN = 4;
@@ -36,11 +36,11 @@ public:
   static const size_t USB_TIMEOUT = 1;
   static const int MAX_RETRIES_READ = 5;
 
-   uint8_t MODULE_MASTER = 0;
+  static const uint8_t MODULE_MASTER = 0;
   static const uint8_t MODULE_STATUS = 1;
   static const uint8_t MODULE_VOLTAGE = 2;
-   uint8_t MODULE_DCTRL = 3;
-   uint8_t MODULE_DATA0 = 4;
+  static const uint8_t MODULE_DCTRL = 3;
+  static const uint8_t MODULE_DATA0 = 4;
 
   static const uint8_t MASTER_DP23_SOURCE = 10;
 private:
