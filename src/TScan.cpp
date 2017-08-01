@@ -29,6 +29,8 @@ TScan::TScan (TScanConfig                   *config,
   time_t       t = time(0);   // get time now
   struct tm *now = localtime( & t );
   sprintf(config->GetfNameSuffix(), "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+
+  CreateHicConditions();
 }
 
 
@@ -57,8 +59,8 @@ void TScan::CountEnabledChips()
   for (int i = 0; i < MAXBOARDS; i++) {
     m_enabled[i] = 0;
   }
-  for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
-    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if ((m_chips.at(ichip)->GetConfig()->IsEnabled()) && (m_chips.at(ichip)->GetReadoutBoard() == m_boards.at(iboard))) {
         m_enabled[iboard] ++;
       }
@@ -74,8 +76,8 @@ void TScan::CreateScanHisto ()
 
   THisto histo = CreateHisto ();
 
-  for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
-    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if ((m_chips.at(ichip)->GetConfig()->IsEnabled()) && (m_chips.at(ichip)->GetReadoutBoard() == m_boards.at(iboard))) {
         id.boardIndex       = iboard;
         id.dataReceiver     = m_chips.at(ichip)->GetConfig()->GetParamValue("RECEIVER"); 
@@ -115,7 +117,7 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
   unsigned char buffer[1024*4000]; 
   int           n_bytes_data, n_bytes_header, n_bytes_trailer;
   int           itrg = 0, trials = 0;
-  int           nBad = 0, prioErrors = 0;
+  int           nBad = 0;
   TBoardHeader  boardInfo;
 
   while (itrg < m_nTriggers * m_enabled[iboard]) {
@@ -146,7 +148,7 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
           fprintf (fDebug, "%02x ", (int) buffer[iByte]);
         }
         fprintf(fDebug, "\nFull Event:\n"); 
-        for (int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
+        for (unsigned int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
           fprintf (fDebug, "%02x ", (int) fDebugBuffer.at(ibyte));
         }
         fprintf(fDebug, "\n\n");
@@ -158,15 +160,31 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
 }
 
 
+void TScan::CreateHicConditions() 
+{
+  for (unsigned int i = 0; i < m_hics.size(); i++) {
+    m_conditions.AddHicConditions(m_hics.at(i)->GetDbId(), new TScanConditionsHic());
+  }
+}
+
+
 void TScan::WriteConditions (const char *fName)
 {
-  FILE *fp = fopen (fName, "a");
-  fprintf (fp, "Firmware version: %s\n", m_conditions.FirmwareVersion);
-  fprintf (fp, "Temp (start): %.1f\n", m_conditions.TempStart);
-  fprintf (fp, "Temp (end): %.1f\n", m_conditions.TempEnd);
-  fprintf (fp, "IDDD (start): %.3f A\n", m_conditions.IDDDStart);
-  fprintf (fp, "IDDD (end):   %.3f A\n", m_conditions.IDDDEnd);
-  fprintf (fp, "IDDA (start): %.3f A\n", m_conditions.IDDAStart);
-  fprintf (fp, "IDDA (end):   %.3f A\n", m_conditions.IDDAEnd);
-  fclose (fp);
+  //FILE *fp = fopen (fName, "a");
+  //fprintf (fp, "Firmware version: %s\n", m_conditions.FirmwareVersion);
+  //  fprintf (fp, "Temp (start): %.1f\n", m_conditions.TempStart);
+  //fprintf (fp, "Temp (end): %.1f\n", m_conditions.TempEnd);
+  //fprintf (fp, "IDDD (start): %.3f A\n", m_conditions.IDDDStart);
+  //fprintf (fp, "IDDD (end):   %.3f A\n", m_conditions.IDDDEnd);
+  //fprintf (fp, "IDDA (start): %.3f A\n", m_conditions.IDDAStart);
+  //fprintf (fp, "IDDA (end):   %.3f A\n", m_conditions.IDDAEnd);
+  //fclose (fp);
+}
+
+
+int TScanConditions::AddHicConditions (std::string hicId, TScanConditionsHic *hicCond)
+{
+  m_hicConditions.insert(std::pair<std::string, TScanConditionsHic*> (hicId, hicCond));
+
+  return m_hicConditions.size();
 }

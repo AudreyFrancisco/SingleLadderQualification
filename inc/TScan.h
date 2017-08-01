@@ -24,16 +24,29 @@ typedef struct {
   int nTimeout;
 } TErrorCounter;
 
-typedef struct {
-  float TempStart;
-  float TempEnd;
-  float IDDAStart;
-  float IDDAEnd;
-  float IDDDStart;
-  float IDDDEnd;
-  char  FirmwareVersion[50];
-  //TODO: Add Software version, date, time 
-} TScanConditions;
+
+class TScanConditionsHic {
+ private: 
+  float m_tempStart;
+  float m_tempEnd;
+  float m_iddaStart;
+  float m_iddaEnd;
+  float m_idddStart;
+  float m_idddEnd;
+ public: 
+  TScanConditionsHic() {};
+};
+
+
+class TScanConditions {
+ private: 
+  char m_fwVersion[50];
+  char m_swVersion[50];
+  std::map <std::string, TScanConditionsHic*> m_hicConditions;
+ public: 
+  TScanConditions() {};
+  int AddHicConditions (std::string hicId, TScanConditionsHic *hicCond);
+};
 
 
 class TScan {
@@ -80,6 +93,7 @@ class TScan {
   TScanHisto   GetTScanHisto     () {return *m_histo;};
   const char  *GetName           () {return m_name;};  
   TScanConditions *GetConditions () {return &m_conditions;};
+  void         CreateHicConditions();
   void         WriteConditions   (const char *fName);
 };
 
