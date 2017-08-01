@@ -93,7 +93,7 @@ bool AlpideDBManager::Init()
 	curl_easy_setopt( myHandle, CURLOPT_VERBOSE, VERBOSITYLEVEL );
 
 	curl_easy_setopt( myHandle, CURLOPT_HTTPAUTH, CURLAUTH_GSSNEGOTIATE);
-	curl_easy_setopt( myHandle, CURLOPT_USERPWD, ':');
+	curl_easy_setopt( myHandle, CURLOPT_USERPWD, ":");
 
 #endif
 	thePendingRequests = 0;
