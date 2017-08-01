@@ -39,6 +39,7 @@ THisto TFifoTest::CreateHisto ()
 
 void TFifoTest::Init() 
 {
+  TScan::Init();
   for (int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
   }

@@ -101,6 +101,7 @@ THisto TDigitalScan::CreateHisto    ()
 
 void TDigitalScan::Init        ()
 {
+  TScan::Init();
   m_running = true;
   CountEnabledChips();
   for (int i = 0; i < m_boards.size(); i++) {

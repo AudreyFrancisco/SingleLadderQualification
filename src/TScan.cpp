@@ -34,6 +34,14 @@ TScan::TScan (TScanConfig                   *config,
 }
 
 
+void TScan::Init() 
+{
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart = m_hics.at(ihic)->GetTemperature();
+  }
+}
+
+
 bool TScan::Loop (int loopIndex) 
 {
   if (fScanAbort) return false;     // check for abort flag first
@@ -168,17 +176,20 @@ void TScan::CreateHicConditions()
 }
 
 
-void TScan::WriteConditions (const char *fName)
+void TScan::WriteConditions (const char *fName, THic *aHic)
 {
-  //FILE *fp = fopen (fName, "a");
+  FILE *fp = fopen (fName, "a");
+
+
+
   //fprintf (fp, "Firmware version: %s\n", m_conditions.FirmwareVersion);
-  //  fprintf (fp, "Temp (start): %.1f\n", m_conditions.TempStart);
+  fprintf (fp, "Temp (start): %.1f\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempStart);
   //fprintf (fp, "Temp (end): %.1f\n", m_conditions.TempEnd);
   //fprintf (fp, "IDDD (start): %.3f A\n", m_conditions.IDDDStart);
   //fprintf (fp, "IDDD (end):   %.3f A\n", m_conditions.IDDDEnd);
   //fprintf (fp, "IDDA (start): %.3f A\n", m_conditions.IDDAStart);
   //fprintf (fp, "IDDA (end):   %.3f A\n", m_conditions.IDDAEnd);
-  //fclose (fp);
+  fclose (fp);
 }
 
 

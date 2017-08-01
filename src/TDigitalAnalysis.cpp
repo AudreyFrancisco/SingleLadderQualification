@@ -121,7 +121,7 @@ void TDigitalAnalysis::WriteResult()
     WriteStuckPixels (m_hics.at(ihic));
     sprintf (fName, "DigitalScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
                                                    m_config->GetfNameSuffix());
-    m_scan  ->WriteConditions (fName);
+    m_scan  ->WriteConditions (fName, m_hics.at(ihic));
 
     FILE *fp = fopen (fName, "a");
     m_result->WriteToFileGlobal(fp);

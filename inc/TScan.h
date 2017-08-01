@@ -26,6 +26,7 @@ typedef struct {
 
 
 class TScanConditionsHic {
+  friend class TScan;
  private: 
   float m_tempStart;
   float m_tempEnd;
@@ -39,6 +40,7 @@ class TScanConditionsHic {
 
 
 class TScanConditions {
+  friend class TScan;
  private: 
   char m_fwVersion[50];
   char m_swVersion[50];
@@ -80,7 +82,7 @@ class TScan {
          std::mutex                    *aMutex);
   ~TScan() {};
 
-  virtual void Init              ()              = 0;
+  virtual void Init              ();
   virtual void Terminate         ()              = 0;
   virtual void LoopStart         (int loopIndex) = 0;
   virtual void LoopEnd           (int loopIndex) = 0;
@@ -94,7 +96,7 @@ class TScan {
   const char  *GetName           () {return m_name;};  
   TScanConditions *GetConditions () {return &m_conditions;};
   void         CreateHicConditions();
-  void         WriteConditions   (const char *fName);
+  void         WriteConditions   (const char *fName, THic *aHic);
 };
 
 class TMaskScan : public TScan {
