@@ -21,6 +21,7 @@ void TNoiseAnalysis::WriteResult()
 {
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    WriteNoisyPixels (m_hics.at(ihic));
     sprintf (fName, "NoiseOccResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
                                                 m_config->GetfNameSuffix());
     m_scan  ->WriteConditions (fName);
