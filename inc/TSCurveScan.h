@@ -24,7 +24,7 @@ class TSCurveScan : public TMaskScan {
                 std::vector <TReadoutBoard *>  boards,
                 std::deque<TScanHisto>        *histoque,
                 std::mutex                    *aMutex);
-  virtual ~TSCurveScan () = 0;
+  virtual ~TSCurveScan () {};
 
   THisto CreateHisto(); //public in TScan, so...
   void Init        ();
