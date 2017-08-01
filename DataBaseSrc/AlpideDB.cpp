@@ -44,14 +44,14 @@ AlpideDB::AlpideDB()
 
     theDBmanager = new AlpideDBManager();
 
-    if(theDBmanager->isLibCurlCompiled()){
-    	theDBmanager->Init("https://test-alucmsapi.web.cern.ch","FrancoAntonio",".","alpide4me");
-    } else {
-    	theDBmanager->Init("https://test-alucmsapi.web.cern.ch",
+#ifdef COMPILE_LIBCURL
+    theDBmanager->Init("https://test-alucmsapi.web.cern.ch");
+#else
+    theDBmanager->Init("https://test-alucmsapi.web.cern.ch",
     	    		"/home/fap/.globus/usercert.pem",
     	    		"/home/fap/.globus/userkey.pem",
     				"/etc/ssl/certs");
-    }
+#endif
 
 }
 
