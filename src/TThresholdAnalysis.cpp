@@ -272,12 +272,12 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
     TGraph* diffGraph = new TGraph();
     ddxGraph(aGraph, diffGraph); // = ddxGraph(aGraph);
 
-    fitResult_dummy.threshold = abs(meanGraph(diffGraph));
+    fitResult_dummy.threshold = abs(meanGraph(diffGraph)); //abs for tuneITHR
     fitResult_dummy.noise     = rmsGraph(diffGraph);
     fitResult_dummy.redChi2   = 0; //not supported with this version; no fit ran
     delete diffGraph;
   }
-  else {  //WARNING:  This version is still buggy!
+  else {  //WARNING:  This version has NOT been tested for tuneITHR!
     TF1 *fitfcn;
     if(m_resultFactor<1) {
       fitfcn = new TF1("fitfcn",
@@ -497,11 +497,11 @@ void TThresholdAnalysis::Run()
    	  iPulseStop = ((float)abs( m_startPulseAmplitude - m_stopPulseAmplitude))/ m_stepPulseAmplitude;
           iPulseStart = 0;
 	} else if(m_resultFactor==1) { //vcasn
-          iPulseStart = 40; //range of vcasn values scanned over.
-          iPulseStop  = 60; //not changing in the forseeable future...but might.
+          iPulseStart = m_config->GetParamValue("VCASN_START"); //range of vcasn values scanned over.
+          iPulseStop  = m_config->GetParamValue("VCASN_STOP"); //not changing in the forseeable future...but might.
         } else { //else ithr
-          iPulseStart = 30;
-          iPulseStop  = 100;
+          iPulseStart = m_config->GetParamValue("ITHR_START");
+          iPulseStop  = m_config->GetParamValue("ITHR_STOP");
         }
    	for (int iPulse = iPulseStart; iPulse < iPulseStop; iPulse++) {
 	  

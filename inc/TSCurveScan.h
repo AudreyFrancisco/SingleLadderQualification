@@ -1,5 +1,5 @@
-#ifndef TANALOGSCAN_H
-#define TANALOGSCAN_H
+#ifndef TSCURVESCAN_H
+#define TSCURVESCAN_H
 
 #include <deque>
 #include <mutex>
@@ -9,7 +9,7 @@
 #include "THisto.h"
 #include "TScan.h"
 
-class TAnalogScan : public TMaskScan {
+class TSCurveScan : public TMaskScan {
  private:
   int         m_VPULSEH;
  protected:
@@ -19,13 +19,13 @@ class TAnalogScan : public TMaskScan {
   void FillHistos     (std::vector<TPixHit> *Hits, int board);
   THisto CreateHisto    ();
  public: 
-  TAnalogScan  (TScanConfig                   *config,
+  TSCurveScan  (TScanConfig                   *config,
                 std::vector <TAlpide *>        chips,
                 std::vector <THic*>            hics,
                 std::vector <TReadoutBoard *>  boards,
                 std::deque<TScanHisto>        *histoque,
                 std::mutex                    *aMutex);
-  ~TAnalogScan  () {};
+  ~TSCurveScan  () {};
 
   void Init        ();
   void PrepareStep (int loopIndex);
@@ -36,21 +36,21 @@ class TAnalogScan : public TMaskScan {
 };
 
 
-//class TThresholdScan : public TAnalogScan {
+class TThresholdScan : public TSCurveScan {
   //Conducts a regular threshold scan
-// public:
-//  TThresholdScan  (TScanConfig                   *config,
-//                  std::vector <TAlpide *>        chips,
-//                  std::vector <THic*>            hics,
-//                  std::vector <TReadoutBoard *>  boards,
-//                  std::deque<TScanHisto>        *histoque,
-//                  std::mutex                    *aMutex) :
-//    TAnalogScan  (config, chips, hics, boards, histoque, aMutex) {
-//    m_step[1] = 1;
-//  }
-//};
+ public:
+  TThresholdScan  (TScanConfig                   *config,
+                  std::vector <TAlpide *>        chips,
+                  std::vector <THic*>            hics,
+                  std::vector <TReadoutBoard *>  boards,
+                  std::deque<TScanHisto>        *histoque,
+                  std::mutex                    *aMutex) :
+    TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
+    m_step[1] = 1;
+  }
+};
 
-class TtuneVCASNScan : public TAnalogScan {
+class TtuneVCASNScan : public TSCurveScan {
   //NOTE:  may need new destructor?
   //Conducts a threshold scan changing VCASN
  public:
@@ -60,13 +60,13 @@ class TtuneVCASNScan : public TAnalogScan {
                   std::vector <TReadoutBoard *>  boards,
                   std::deque<TScanHisto>        *histoque,
                   std::mutex                    *aMutex) :
-    TAnalogScan  (config, chips, hics, boards, histoque, aMutex) {
-    m_step[1] = 16;
+    TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
+    m_step[1] = 16; //this will probably never change
   }
   void PrepareStep (int loopIndex);
 };
 
-class TtuneITHRScan : public TAnalogScan {
+class TtuneITHRScan : public TSCurveScan {
   //Conducts a threshold scan changing ITHR (note:  needs data from VCASNscan first)
  public:
   TtuneITHRScan  (TScanConfig                   *config,
@@ -75,26 +75,10 @@ class TtuneITHRScan : public TAnalogScan {
                   std::vector <TReadoutBoard *>  boards,
                   std::deque<TScanHisto>        *histoque,
                   std::mutex                    *aMutex) :
-    TAnalogScan  (config, chips, hics, boards, histoque, aMutex) {
+    TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
     m_step[1] = 16;
   }
   void PrepareStep (int loopIndex);
 };
-
-class TITHRScan : public TAnalogScan {
-  //Conducts a regular threshold scan, after first setting ITHR and VCASN per chip based on
-  //the results from TtuneVCASN and TtuneITHR
- public:
-  TITHRScan      (TScanConfig                   *config,
-                  std::vector <TAlpide *>        chips,
-                  std::vector <THic*>            hics,
-                  std::vector <TReadoutBoard *>  boards,
-                  std::deque<TScanHisto>        *histoque,
-                  std::mutex                    *aMutex) :
-    TAnalogScan  (config, chips, hics, boards, histoque, aMutex) {
-    m_step[1] = 1;
-  }
-};
-
 
 #endif

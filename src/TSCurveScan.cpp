@@ -1,12 +1,12 @@
 #include <unistd.h>
 #include <string.h>
-#include "TThresholdScan.h"
+#include "TSCurveScan.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardDAQ.h"
 #include "AlpideConfig.h"
 
 
-TAnalogScan::TAnalogScan       (TScanConfig                   *config,
+TSCurveScan::TSCurveScan       (TScanConfig                   *config,
                                 std::vector <TAlpide *>        chips,
                                 std::vector <THic*>            hics,
                                 std::vector <TReadoutBoard *>  boards,
@@ -33,7 +33,7 @@ TAnalogScan::TAnalogScan       (TScanConfig                   *config,
 }
 
 
-void TAnalogScan::ConfigureBoard(TReadoutBoard *board) 
+void TSCurveScan::ConfigureBoard(TReadoutBoard *board) 
 {
   if (board->GetConfig()->GetBoardType() == boardDAQ) {
     // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns * strobe delay
@@ -52,7 +52,7 @@ void TAnalogScan::ConfigureBoard(TReadoutBoard *board)
 }
 
  
-void TAnalogScan::ConfigureFromu(TAlpide *chip) 
+void TSCurveScan::ConfigureFromu(TAlpide *chip) 
 {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x20);      // analogue pulsing
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
@@ -61,7 +61,7 @@ void TAnalogScan::ConfigureFromu(TAlpide *chip)
 }
 
 
-void TAnalogScan::ConfigureChip(TAlpide *chip)
+void TSCurveScan::ConfigureChip(TAlpide *chip)
 {
   AlpideConfig::BaseConfig(chip);
 
@@ -71,13 +71,13 @@ void TAnalogScan::ConfigureChip(TAlpide *chip)
 }
 
 
-THisto TAnalogScan::CreateHisto() {
+THisto TSCurveScan::CreateHisto() {
   THisto histo ("ThresholdHisto", "ThresholdHisto", 1024, 0, 1023, (m_stop[0] - m_start[0]) / m_step[0], m_start[0], m_stop[0]);
   return histo;
 }
 
 
-void TAnalogScan::Init() {
+void TSCurveScan::Init() {
   m_running = true;
   
   CountEnabledChips();
@@ -107,7 +107,7 @@ void TAnalogScan::Init() {
 
 
 
-void TAnalogScan::PrepareStep (int loopIndex) 
+void TSCurveScan::PrepareStep (int loopIndex) 
 {
   switch (loopIndex) {
   case 0:    // innermost loop: change VPULSEL
@@ -170,7 +170,7 @@ void TtuneITHRScan::PrepareStep (int loopIndex)
 
 
 
-void TAnalogScan::Execute() 
+void TSCurveScan::Execute() 
 {
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -187,7 +187,7 @@ void TAnalogScan::Execute()
 }
 
 
-void TAnalogScan::FillHistos (std::vector<TPixHit> *Hits, int board)
+void TSCurveScan::FillHistos (std::vector<TPixHit> *Hits, int board)
 {
   common::TChipIndex idx; 
   idx.boardIndex = board;
@@ -212,7 +212,7 @@ void TAnalogScan::FillHistos (std::vector<TPixHit> *Hits, int board)
 }
 
 
-void TAnalogScan::LoopEnd(int loopIndex) 
+void TSCurveScan::LoopEnd(int loopIndex) 
 {
   if (loopIndex == 0) {
     while (!(m_mutex->try_lock()));
@@ -225,7 +225,7 @@ void TAnalogScan::LoopEnd(int loopIndex)
 }
 
 
-void TAnalogScan::Terminate() 
+void TSCurveScan::Terminate() 
 {
   // write Data;
   for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
