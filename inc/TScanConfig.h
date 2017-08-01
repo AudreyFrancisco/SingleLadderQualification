@@ -37,8 +37,6 @@ class TScanConfig {
   int  m_noiseCutInv;
   char m_fNameSuffix[20];
   //NEW--added for additional scans
-  int *m_ithr; //needed by ITHRthreshold; stores values for each chip
-  int *m_vcasn; //needed by tuneITHR+ITHRthreshold; stores values for each HIC
   int  m_ithrStart;  //usually 30
   int  m_ithrStop;   //usually 100
   int  m_vcasnStart; //usually 40
@@ -53,10 +51,6 @@ class TScanConfig {
   bool  SetParamValue   (const char *Name, const char *Value);
   int   GetParamValue   (const char *Name) ;
   bool  IsParameter     (const char *Name) {return (fSettings.count(Name) > 0);};
-  void  SetVcasnArr     (int hics, float *vcasn);
-    //Will set a different value of vcasn for each HIC.
-  void  SetIthrArr      (int chips, float *ithr);
-    //Will set a different value of ithr for each chip.
 
   int   GetNInj         () {return m_nInj;};
   int   GetChargeStart  () {return m_chargeStart;};

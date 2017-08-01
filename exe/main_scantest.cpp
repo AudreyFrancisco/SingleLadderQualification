@@ -32,7 +32,8 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 #include "TScan.h"
-#include "TThresholdScan.h"
+//#include "TThresholdScan.h"
+#include "TSCurveScan.h" //testing
 #include "TDigitalScan.h"
 #include "TScanConfig.h"
 #include "THisto.h"
@@ -44,33 +45,33 @@
 
 void scanLoop (TScan *myScan)
 {
-  std::cout << "In scan loop functiokn" << std::endl;
+  std::cout << "In scan loop function" << std::endl;
   myScan->Init();
 
   myScan->LoopStart(2);
   while (myScan->Loop(2)) {
     myScan->PrepareStep(2);
     myScan->LoopStart  (1);
-    std::cout << "Loop 1 start" << std::endl;
+   // std::cout << "Loop 1 start" << std::endl;
     while (myScan->Loop(1)) {
       myScan->PrepareStep(1);
       myScan->LoopStart  (0);
-      std::cout << "Loop 0 start" << std::endl;
+      //std::cout << "Loop 0 start" << std::endl;
       while (myScan->Loop(0)) {
         myScan->PrepareStep(0);
         myScan->Execute    ();
         myScan->Next       (0);  
-        std::cout << "0";
+        //std::cout << "0";
       }
-      std::cout << std::endl << "Loop 0 end";
+      //std::cout << std::endl << "Loop 0 end";
       myScan->LoopEnd(0);
-      std::cout << "...and...";
+      //std::cout << "...and...";
       myScan->Next   (1);
-      std::cout << "next." << std::endl;
+      //std::cout << "next." << std::endl;
     }
     myScan->LoopEnd(1);
     myScan->Next   (2);
-    std::cout << "Loop 1 end" << std::endl;
+    //std::cout << "Loop 1 end" << std::endl;
   }
   myScan->LoopEnd  (2);
   std::cout << "Loop 2 end, terminating" << std::endl;
@@ -97,8 +98,11 @@ int main(int argc, char** argv) {
   
   //TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
   //TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
-  TScan *myScan   = new TFifoTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TScanAnalysis  *analysis = new TFifoAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+  //TScan *myScan   = new TFifoTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  //TScanAnalysis  *analysis = new TFifoAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+
+  TtuneVCASNScan *myScan = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  TThresholdAnalysis *analysis = new TThresholdAnalysis(&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
 
   //scanLoop(myScan);
   std::cout << "starting thread" << std::endl;
@@ -112,10 +116,10 @@ int main(int argc, char** argv) {
 
   //std::cout << "Printing mean thresholds:" << std::endl; //need to know SPECIFIC chip number!!
   //want to go through each list in m_threshold.at(...) and print .mean.
-  //std::map<int,common::TStatVar> thresh = analysis->DeleteThis();
-  //for (std::map<int,common::TStatVar>::iterator it = thresh.begin(); it != thresh.end(); it++) {
-  //  std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
-  // }
+  std::map<int,common::TStatVar> thresh = analysis->DeleteThis();
+  for (std::map<int,common::TStatVar>::iterator it = thresh.begin(); it != thresh.end(); it++) {
+    std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
+  }
   
   // std::vector <TCounter> counters = ((TDigitalAnalysis*)analysis)->GetCounters();
   

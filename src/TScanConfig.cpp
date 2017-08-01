@@ -38,8 +38,8 @@ void TScanConfig::InitParamMap ()
   fSettings["ITHR_START"]   = &m_ithrStart;
   fSettings["ITHR_STOP"]    = &m_ithrStop;
   fSettings["SPEEDY"]       = &m_speedy;
-  m_ithr = NULL;  //not always used
-  m_vcasn = NULL;
+  //m_ithr = NULL;  //not always used
+  //m_vcasn = NULL;
 }
 
 
@@ -63,18 +63,18 @@ int TScanConfig::GetParamValue (const char *Name)
   return -1;
 }
 
-void TScanConfig::SetVcasnArr (int hics, float *vcasn) { //copy vcasn array to m_vcasn
+
+/*void TScanConfig::SetVcasnArr (int hics, float *vcasn) { //copy vcasn array to m_vcasn
   m_vcasn = new int[hics];
   for(int i=0; i<hics; i++) {
     m_vcasn[i] = (int)(vcasn[i]+.5); //rounding matters
   }
 }
-
 void TScanConfig::SetIthrArr (int hics, float *ithr) {
   m_ithr = new int[hics];
   for(int i=0; i<hics; i++) {
     m_ithr[i] = (int)(ithr[i]+.5); //rounding matters
   }
-}
+}*/
 
 

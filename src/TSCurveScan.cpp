@@ -107,13 +107,13 @@ void TSCurveScan::Init() {
 
 
 
-void TSCurveScan::PrepareStep (int loopIndex) 
+void TThresholdScan::PrepareStep (int loopIndex) 
 {
   switch (loopIndex) {
   case 0:    // innermost loop: change VPULSEL
     for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
-      m_chips.at(ichip)->WriteRegister(scanReg, m_VPULSEH - m_value[0]);
+      m_chips.at(ichip)->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEH - m_value[0]);
     }
     break;
   case 1:    // 2nd loop: mask staging

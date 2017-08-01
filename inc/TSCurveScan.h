@@ -25,10 +25,10 @@ class TSCurveScan : public TMaskScan {
                 std::vector <TReadoutBoard *>  boards,
                 std::deque<TScanHisto>        *histoque,
                 std::mutex                    *aMutex);
-  ~TSCurveScan  () {};
+  //~TSCurveScan  () {};
 
   void Init        ();
-  void PrepareStep (int loopIndex);
+  virtual void PrepareStep (int loopIndex);
   void LoopEnd     (int loopIndex);
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void Execute     ();
@@ -48,6 +48,8 @@ class TThresholdScan : public TSCurveScan {
     TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
     m_step[1] = 1;
   }
+  void PrepareStep (int loopIndex);
+  //~TThresholdScan() {};
 };
 
 class TtuneVCASNScan : public TSCurveScan {
@@ -64,6 +66,7 @@ class TtuneVCASNScan : public TSCurveScan {
     m_step[1] = 16; //this will probably never change
   }
   void PrepareStep (int loopIndex);
+  //~TtuneVCASNScan() {};
 };
 
 class TtuneITHRScan : public TSCurveScan {
@@ -79,6 +82,7 @@ class TtuneITHRScan : public TSCurveScan {
     m_step[1] = 16;
   }
   void PrepareStep (int loopIndex);
+  //~TtuneITHRScan() {};
 };
 
 #endif
