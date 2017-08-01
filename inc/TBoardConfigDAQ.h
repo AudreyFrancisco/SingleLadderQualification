@@ -145,6 +145,7 @@ class TBoardConfigDAQ : public TBoardConfig {
 
 
   ////---- ID module
+  int fBoardAddress; // 0: address set using the jumpers
 
 
   ////---- SOFTRESET module
@@ -215,6 +216,7 @@ class TBoardConfigDAQ : public TBoardConfig {
   int GetSignalEnableTime() {return fSignalEnableTime;};
   int GetDrstTime()         {return fDrstTime;};
 
+  int GetBoardAddress()     {return fBoardAddress;};
   
   // SOFTRESET Module
   int GetSoftResetDuration()     {return fSoftResetDuration;};
@@ -249,6 +251,7 @@ class TBoardConfigDAQ : public TBoardConfig {
   void SetStrobePulseSeq(int strobePulseSeq) {fStrobePulseSeq   = strobePulseSeq;};
 
   // ID Module
+  void SetBoardAddress(int addr)             {fBoardAddress = (addr>=0 && addr<=15) ? addr : -1;};
 
   // SOFTRESET Module
   void SetSoftResetDuration(int duration)  {fSoftResetDuration  = duration;};

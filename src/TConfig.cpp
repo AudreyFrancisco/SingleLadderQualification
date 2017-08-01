@@ -274,45 +274,56 @@ void TConfig::ParseLine(const char *Line, char *Param, char *Rest, int *Chip) {
 
 void TConfig::DecodeLine(const char *Line)
 {
-  int Chip, Start, ChipStop, BoardStop;
+  int Index, ChipStart, ChipStop, BoardStart, BoardStop;
   char Param[128], Rest[896];
   if ((Line[0] == '\n') || (Line[0] == '#')) {   // empty Line or comment
       return;
   }
 
-  ParseLine(Line, Param, Rest, &Chip);
+  ParseLine(Line, Param, Rest, &Index);
 
-  if (Chip == -1) {
-    Start     = 0;
+  if (Index == -1) {
+    ChipStart = 0;
     ChipStop  = fChipConfigs.size();
-    BoardStop = fBoardConfigs.size();
+    BoardStart = 0;
+    BoardStop  = fBoardConfigs.size();
   }
   else {
-    Start     = Chip;
-    ChipStop  = Chip+1;
-    BoardStop = Chip+1;
+    ChipStart  = (Index<fChipConfigs.size())  ? Index   : -1;
+    ChipStop   = (Index<fChipConfigs.size())  ? Index+1 : -1;
+    BoardStart = (Index<fBoardConfigs.size()) ? Index   : -1;
+    BoardStop  = (Index<fBoardConfigs.size()) ? Index+1 : -1;
   }
 
   // Todo: correctly handle the number of readout boards
   // currently only one is written
   // Note: having a config file with parameters for the mosaic board, but a setup with a DAQ board
   // (or vice versa) will issue unknown-parameter warnings...
-  if (fChipConfigs.at(0)->IsParameter(Param)) {
-    for (int i = Start; i < ChipStop; i++) {
+  if (ChipStart>=0 && fChipConfigs.at(ChipStart)->IsParameter(Param)) {
+    for (int i = ChipStart; i < ChipStop; i++) {
       fChipConfigs.at(i)->SetParamValue (Param, Rest);
     }
   }
-  else if (fBoardConfigs.at(0)->IsParameter(Param)) {
-    for (int i = Start; i < BoardStop; i++) {
+  else if (BoardStart>=0 && fBoardConfigs.at(BoardStart)->IsParameter(Param)) {
+    for (int i = BoardStart; i < BoardStop; i++) {
       fBoardConfigs.at(i)->SetParamValue (Param, Rest);
     }
   }
   else if (fScanConfig->IsParameter(Param)) {
     fScanConfig->SetParamValue (Param, Rest);
   }
-  else if ((!strcmp(Param, "ADDRESS")) && (fBoardConfigs.at(0)->GetBoardType() == boardMOSAIC)) {
-    for (int i = Start; i < BoardStop; i++) {
-      ((TBoardConfigMOSAIC *)fBoardConfigs.at(i))->SetIPaddress(Rest);
+  else if (BoardStart>=0 && !strcmp(Param, "ADDRESS")) {
+    for (int i = BoardStart; i < BoardStop; i++) {
+      if (fBoardConfigs.at(BoardStart)->GetBoardType() == boardMOSAIC) {
+        ((TBoardConfigMOSAIC *)fBoardConfigs.at(i))->SetIPaddress(Rest);
+      }
+      else if (fBoardConfigs.at(BoardStart)->GetBoardType() == boardDAQ) {
+        if (!strchr(Rest, '.')) {
+          int address = -1;
+          sscanf (Rest, "%d", &address);
+          ((TBoardConfigDAQ *)fBoardConfigs.at(i))->SetBoardAddress(address);
+        }
+      }
     }
   }
   else {

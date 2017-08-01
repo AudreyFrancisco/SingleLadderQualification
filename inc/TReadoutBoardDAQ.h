@@ -204,8 +204,6 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   bool ReadMonitorReadoutRegister();
   bool ReadMonitorTriggerRegister();
 
-  int GetBoardAddress();
-
   //// methods related to data readout
   //---------------------------------------------------------
   int GetEventBufferLength();
@@ -256,10 +254,11 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
 
 
   // ID Module:
-  int ReadBoardAddress (); 
-  uint32_t ReadFirmwareVersion (); 
-  uint32_t ReadFirmwareDate (); 
-  int ReadFirmwareChipVersion (); 
+  int ReadBoardAddress ();
+  bool CheckBoardAddress ();
+  uint32_t ReadFirmwareVersion ();
+  uint32_t ReadFirmwareDate ();
+  int ReadFirmwareChipVersion ();
 
 
   // SOFTRESET Module:

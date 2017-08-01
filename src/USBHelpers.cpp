@@ -28,16 +28,19 @@ bool IsDAQBoard(libusb_device *device) {
 }
 
 
-int AddDAQBoard (libusb_device *device, TConfig *config, std::vector <TReadoutBoard *> * boards) {
+int AddDAQBoard (libusb_device *device, TBoardConfigDAQ *boardConfig, std::vector <TReadoutBoard *> * boards) {
     TReadoutBoard *readoutBoard;
-    // note: this should change to use the correct board config according to index or geographical id
-    TBoardConfigDAQ *boardConfig = dynamic_cast<TBoardConfigDAQ *>(config->GetBoardConfig(0));
     readoutBoard = new TReadoutBoardDAQ(device, boardConfig);
 
     if (readoutBoard) {
-        boards->push_back(readoutBoard);
-        std::cout << "boards.size = " << boards->size() <<std::endl;
-        return 0;
+        if (((TReadoutBoardDAQ*)readoutBoard)->CheckBoardAddress()) {
+            boards->push_back(readoutBoard);
+            std::cout << "boards.size = " << boards->size() <<std::endl;
+            return 0;
+        }
+        else {
+            return -2;
+        }
     }
     else {
         return -1;
@@ -60,18 +63,24 @@ int FindDAQBoards (TConfig *config, std::vector <TReadoutBoard *> * boards) {
         return -1;
     }
 
-    for (ssize_t i = 0; i < cnt; i++) {
-        libusb_device *device = list[i];
-        if (IsDAQBoard(device)) {
-            err = AddDAQBoard(device, config, boards);
-            if (err) {
-                std::cout << "Problem adding DAQ board" << std::endl;
-                libusb_free_device_list(list, 1);
-                return err;
+    for (int iBoard = 0; iBoard < config->GetNBoards(); ++iBoard) {
+        TBoardConfigDAQ *boardConfig = dynamic_cast<TBoardConfigDAQ *>(config->GetBoardConfig(iBoard));
+        for (ssize_t i = 0; i < cnt; i++) {
+            libusb_device *device = list[i];
+            if (IsDAQBoard(device)) {
+                err = AddDAQBoard(device, boardConfig, boards);
+                if (err==-1) {
+                    std::cout << "Problem adding DAQ board" << std::endl;
+                    libusb_free_device_list(list, 1);
+                    return err;
+                }
+                else if (err==0) continue;
             }
         }
     }
-    std::cout << "boards.size = " << boards->size() <<std::endl;
     libusb_free_device_list(list, 1);
-    return err;
+
+    std::cout << "boards.size = " << boards->size()
+              << ",\t expected: " << config->GetNBoards() <<std::endl;
+    return (boards->size() == config->GetNBoards()) ? 0 : -3;
 }

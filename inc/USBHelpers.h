@@ -8,7 +8,7 @@
 
 int  InitLibUsb    ();
 bool IsDAQBoard    (libusb_device *device);
-int  AddDAQBoard   (libusb_device *device, TConfig *config, std::vector <TReadoutBoard *> * boards);
+int  AddDAQBoard   (libusb_device *device, TBoardConfigDAQ *boardConfig, std::vector <TReadoutBoard *> * boards);
 int  FindDAQBoards (TConfig *config, std::vector <TReadoutBoard *> * boards);
 
 #endif    /* _USBHELPERS_H_ */
