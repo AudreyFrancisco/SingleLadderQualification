@@ -10,9 +10,8 @@
 #include "TScan.h"
 
 class TSCurveScan : public TMaskScan {
- private:
-  int         m_VPULSEH;
  protected:
+  int         m_VPULSEH;
   void ConfigureFromu (TAlpide *chip);
   void ConfigureChip  (TAlpide *chip);
   void ConfigureBoard (TReadoutBoard *board);
@@ -47,7 +46,7 @@ class TThresholdScan : public TSCurveScan {
                   std::vector <TReadoutBoard *>  boards,
                   std::deque<TScanHisto>        *histoque,
                   std::mutex                    *aMutex) :
-    TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
+  TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
     m_step[1] = 1;
   }
   void PrepareStep (int loopIndex);
@@ -64,7 +63,7 @@ class TtuneVCASNScan : public TSCurveScan {
                   std::vector <TReadoutBoard *>  boards,
                   std::deque<TScanHisto>        *histoque,
                   std::mutex                    *aMutex) :
-    TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
+  TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
     m_step[1] = 16; //this will probably never change
   }
   void PrepareStep (int loopIndex);
@@ -80,7 +79,7 @@ class TtuneITHRScan : public TSCurveScan {
                   std::vector <TReadoutBoard *>  boards,
                   std::deque<TScanHisto>        *histoque,
                   std::mutex                    *aMutex) :
-    TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
+  TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
     m_step[1] = 16;
   }
   void PrepareStep (int loopIndex);

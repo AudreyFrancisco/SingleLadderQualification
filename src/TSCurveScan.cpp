@@ -107,7 +107,7 @@ void TSCurveScan::Init() {
 
 
 
-void TSCurveScan::PrepareStep (int loopIndex) 
+void TThresholdScan::PrepareStep (int loopIndex) 
 {
   switch (loopIndex) {
   case 0:    // innermost loop: change VPULSEL
