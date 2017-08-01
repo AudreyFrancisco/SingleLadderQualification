@@ -107,7 +107,7 @@ void TSCurveScan::Init() {
 
 
 
-void TThresholdScan::PrepareStep (int loopIndex) 
+void TSCurveScan::PrepareStep (int loopIndex) 
 {
   switch (loopIndex) {
   case 0:    // innermost loop: change VPULSEL
@@ -126,6 +126,7 @@ void TThresholdScan::PrepareStep (int loopIndex)
     break;
   }
 }
+
 
 //Need different registers for different classes...
 void TtuneVCASNScan::PrepareStep (int loopIndex)
