@@ -1043,14 +1043,6 @@ bool TReadoutBoardDAQ::ReadMonitorTriggerRegister(){
     return true;
 }
 
-int TReadoutBoardDAQ::GetBoardAddress(){
-    uint32_t value;
-    int addr = ID_ADDRESS+ (MODULE_IDENT << DAQBOARD_REG_ADDR_SIZE);
-    bool err = ReadRegister(addr, value);
-    if (err) return (~value) & 0x0f;
-    return -1;
-}
-
 
 // READOUT Module
 //----------------------------------------------------------------------------
@@ -1216,12 +1208,25 @@ int TReadoutBoardDAQ::ReadBoardAddress()
 {
   uint32_t ReadValue;
   ReadRegister ((MODULE_ID << DAQBOARD_REG_ADDR_SIZE) + ID_ADDRESS, ReadValue);
-  int BoardAddress = ReadValue & 0xff;
+  int BoardAddress = (~ReadValue) & 0xf;
 
   return BoardAddress;
 
 }
 
+bool TReadoutBoardDAQ::CheckBoardAddress() {
+    int addr = ReadBoardAddress();
+    int conf_addr = fBoardConfigDAQ->GetBoardAddress();
+    if (addr<0)            return false; // read failure
+    if (addr == conf_addr) return true;  // matching address
+    if (conf_addr == -1)   return true;  // accept any board address
+    //std::cout << "Address mismatch in configuration (0x"
+    //          << std::hex << conf_addr << std::dec
+    //          << ") and on the board (0x"
+    //          << std::hex << addr << std::dec
+    //          << ")" << std::endl;
+    return false;
+}
 
 uint32_t TReadoutBoardDAQ::ReadFirmwareVersion()
 {

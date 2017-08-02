@@ -29,7 +29,7 @@ BASE_CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp A
   TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp TPowerBoard.cpp \
   TPowerBoardConfig.cpp BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp \
   TDigitalAnalysis.cpp TFifoAnalysis.cpp TNoiseAnalysis.cpp TScan.cpp TFifoTest.cpp \
-  TThresholdScan.cpp TDigitalScan.cpp TNoiseOccupancy.cpp TLocalBusTest.cpp TScanConfig.cpp \
+  TSCurveScan.cpp TDigitalScan.cpp TNoiseOccupancy.cpp TLocalBusTest.cpp TScanConfig.cpp \
   TestBeamTools.cpp Common.cpp TReadoutBoardRU.cpp TBoardConfigRU.cpp
 BASE_OBJS = $(BASE_CLASSES:.cpp=.o)
 
@@ -63,7 +63,7 @@ EXE += $(TEST_EXE)
 # test_* executables with ROOT
 TEST_EXE_ROOT =  test_roottest test_scantest test_threshold_v1 test_tuneITHR test_ITHRthreshold \
   test_tuneVCASN test_VCASNthreshold
-EXE+= $(TEST_EXE_ROOT)
+EXE += $(TEST_EXE_ROOT)
 
 
 #### TARGETS ####

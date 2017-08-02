@@ -32,6 +32,7 @@
  *  Description : Alpide DB Manager Class *
  *  HISTORY
  *
+ * 	2/8/2017   -   Add the X509/Kerberos authentication switch
  *
  */
 
@@ -41,19 +42,26 @@
 
 #include <stdio.h>
 #include <string.h>
-//#include <curl/curl.h>
+
 
 AlpideDBManager::AlpideDBManager()
 {
-
 	theJarUrl = SSOURL;
 	theCookieJar = new CernSsoCookieJar(COOKIEPACK);
+#ifdef AUTH_X509
+	#ifdef COMPILE_LIBCURL
+		theNSSNickName = NSSCERTNICKNAME;
+		theNSSDBPath = NSSDATABASEPATH;
+		theNSSDBPassword = NSSDBPASSWD;
+		theCliCer = USERCERT;
+		theCliKey = USERKEY;
+		theCertificationAuthorityPath = CAPATH;
+	#endif
+#endif
 
 #ifdef COMPILE_LIBCURL
 	curl_global_init( CURL_GLOBAL_ALL );
-	myHandle = curl_easy_init ( ) ;
-#else
-	theCertificationAuthorityPath = CAPATH;
+	myHandle = curl_easy_init ( );
 #endif
 
 }
@@ -63,41 +71,96 @@ AlpideDBManager::~AlpideDBManager()
 {
 }
 
-#ifdef COMPILE_LIBCURL
+#ifdef AUTH_KERBEROS
 bool AlpideDBManager::Init(string aSslUrl)
 {
 	theJarUrl = aSslUrl;
 	return(Init());
 }
-#else
+#endif
+
+#ifdef AUTH_X509
+	#ifdef COMPILE_LIBCURL
+bool AlpideDBManager::Init(string aSslUrl, string aNickName, string aNSSDBPath,  string aNSSDBPass)
+{
+	theJarUrl = aSslUrl;
+	theNSSNickName = aNickName;
+	theNSSDBPath = aNSSDBPath;
+	theNSSDBPassword = aNSSDBPass;
+
+	string command;
+	// now export cert
+	command = "certutil -L -d ";
+	command += aNSSDBPath;
+	command += " -n ";
+	command += aNickName;
+	command += " -a >";
+	command += theCliCer;
+	system(command.c_str());
+	if(VERBOSITYLEVEL == 1) {cout << "Com:" << command << endl;}
+
+	// now export  key
+	command = "pk12util -o /tmp/theKey.p12 -d . -K ";
+	command += theNSSDBPassword;
+	command += " -W \"\" -n ";
+	command += theNSSNickName;
+	system(command.c_str());
+	if(VERBOSITYLEVEL == 1) {cout << "Com:" << command << endl;}
+
+	command = "openssl pkcs12 -in /tmp/theKey.p12 -out ";
+	command += theCliKey;
+	command += " -nodes -passin pass:";
+	system(command.c_str());
+	if(VERBOSITYLEVEL == 1) {cout << "Com:" << command << endl;}
+
+	command = "rm /tmp/theKey.p12";
+	system(command.c_str());
+	if(VERBOSITYLEVEL == 1) {cout << "Com:" << command << endl;}
+	return(Init());
+}
+	#else
 bool AlpideDBManager::Init(string aSslUrl, string aCliCer, string aCliKey, string aCAPath)
 {
 	theJarUrl = aSslUrl;
+	theCliCer = aCliCer;
+	theCliKey = aCliKey;
+	theCertificationAuthorityPath = aCAPath;
 	return(Init());
 }
+	#endif
 #endif
-
 
 bool AlpideDBManager::Init()
 {
-
+#ifdef AUTH_KERBEROS
 	if(!theCookieJar->fillTheJar(theJarUrl)) {
-		cerr << "Error to Init the DB manager. Exit !";
+		cerr << "Error to Init the DB manager with Kerberos authentication. Exit !\n" << endl;
 		return(false);
 	}
-
+#endif
+#ifdef AUTH_X509
+	if(!theCookieJar->fillTheJar(theCliCer,theCliKey,theJarUrl)) {
+		cerr << "Error to Init the DB manager with X509 authentication. Exit !" << endl;
+		return(false);
+	}
+#endif
 
 #ifdef COMPILE_LIBCURL
-
 	myHandle = curl_easy_init ( ) ;
 	curl_easy_setopt( myHandle, CURLOPT_VERBOSE, VERBOSITYLEVEL );
+	#ifdef AUTH_X509
+	curl_easy_setopt( myHandle, CURLOPT_CAINFO, CAFILE);
+	curl_easy_setopt( myHandle, CURLOPT_CAPATH , CAPATH);
 
+	curl_easy_setopt( myHandle, CURLOPT_KEYPASSWD, theNSSDBPassword.c_str());
+	curl_easy_setopt( myHandle, CURLOPT_SSLKEY,  theNSSNickName.c_str());
+	curl_easy_setopt( myHandle, CURLOPT_SSLCERT, theNSSNickName.c_str());
+	#else
 	curl_easy_setopt( myHandle, CURLOPT_HTTPAUTH, CURLAUTH_GSSNEGOTIATE);
 	curl_easy_setopt( myHandle, CURLOPT_USERPWD, ":");
-
+	#endif
 #endif
 	thePendingRequests = 0;
-
 	return(true);
 }
 
@@ -105,7 +168,11 @@ int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **R
 {
 
 	 // in order to maintain the connection over the 24hours
-	 if(!theCookieJar->isJarValid()) theCookieJar->fillTheJar();
+	 if(!theCookieJar->isJarValid()) {
+		 if(!theCookieJar->fillTheJar()) {
+			 return(0);
+		 }
+	 }
 
 	 if(VERBOSITYLEVEL == 1) {
 		 cout << endl << "DBQuery :" << Url << endl;
@@ -118,7 +185,6 @@ int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **R
 	 }
 
 #ifdef COMPILE_LIBCURL
-
 	CURLcode res;
 	curl_easy_setopt( myHandle, CURLOPT_VERBOSE, VERBOSITYLEVEL);
 
@@ -180,16 +246,20 @@ int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **R
 		*Result = theBuffer.memory;
 	}
 	curl_slist_free_all(headers);
-//	curl_easy_cleanup(myHandle);
 	return(1);
 
 #else
 
 	 string Command = "curl ";
+#ifdef AUTH_X509
 	    Command += " --cert ";
 	    Command += theCliCer;
 	    Command += " --key ";
 	    Command += theCliKey;
+#endif
+#ifdef AUTH_KERBEROS
+	    Command += " --negotiate -u :";
+#endif
 	    Command += " -b";
 	    Command += COOKIEPACK;
 	    Command += " -c ";
@@ -225,7 +295,7 @@ int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **R
 	    // get the response file size
 	    FILE *res = fopen("/tmp/Queryresult.xml","r");
 	    if(res == NULL) {
-	        cerr << "Error to Access the File buffer of Query. Abort !";
+	        cerr << "Error to Access the File buffer of Query. Abort !"<< endl;
 	        return(false);
 	    }
 	    fseek(res, 0L, SEEK_END);
@@ -235,14 +305,14 @@ int  AlpideDBManager::makeDBQuery(const string Url,const char *Payload, char **R
 	    // allocate memory
 	    char *ptrBuf = (char *)malloc(sz +10);
 	    if(ptrBuf == NULL){
-	        cerr << "Error to Allocate buffer in memory. Abort !";
+	        cerr << "Error to Allocate buffer in memory. Abort !"<< endl;
 	        fclose(res);
 	        return(false);
 	    }
 	    // read the response
 	    long nre = fread(ptrBuf, 1, sz, res);
 	    if(nre != sz) {
-	    	cerr << "Error reading the file buffer. Abort !";
+	    	cerr << "Error reading the file buffer. Abort !"<< endl;
 	    	fclose(res);
 	    	return(false);
 	    }

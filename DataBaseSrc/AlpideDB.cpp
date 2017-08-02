@@ -39,18 +39,25 @@
 AlpideDB::AlpideDB()
 {
 
-
 	theQueryDomain = "https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx";
-
     theDBmanager = new AlpideDBManager();
 
-#ifdef COMPILE_LIBCURL
-    theDBmanager->Init("https://test-alucmsapi.web.cern.ch");
-#else
-    theDBmanager->Init("https://test-alucmsapi.web.cern.ch",
-    	    		"/home/fap/.globus/usercert.pem",
-    	    		"/home/fap/.globus/userkey.pem",
-    				"/etc/ssl/certs");
+#ifdef AUTH_KERBEROS
+    isConnected = theDBmanager->Init("https://test-alucmsapi.web.cern.ch");
+#endif
+
+#ifdef AUTH_X509
+    if(theDBmanager->isLibCurlCompiled()){
+    	isConnected = theDBmanager->Init("https://test-alucmsapi.web.cern.ch",
+    			"FrancoAntonio",
+				".",
+				"alpide4me");
+    } else {
+    	isConnected = theDBmanager->Init("https://test-alucmsapi.web.cern.ch",
+        	    		"/home/fap/.globus/usercert.pem",
+        	    		"/home/fap/.globus/userkey.pem",
+        				"/etc/ssl/certs");
+    }
 #endif
 
 }

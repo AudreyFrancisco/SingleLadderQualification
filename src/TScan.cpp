@@ -10,15 +10,15 @@
 
 bool fScanAbort;
 
-TScan::TScan (TScanConfig                   *config, 
-              std::vector <TAlpide *>        chips, 
-              std::vector <THic *>           hics, 
-              std::vector <TReadoutBoard *>  boards, 
-              std::deque<TScanHisto>        *histoQue, 
-              std::mutex                    *aMutex) 
+TScan::TScan (TScanConfig                   *config,
+              std::vector <TAlpide *>        chips,
+              std::vector <THic *>           hics,
+              std::vector <TReadoutBoard *>  boards,
+              std::deque<TScanHisto>        *histoQue,
+              std::mutex                    *aMutex)
 {
   m_config = config;
-  m_chips  = chips; 
+  m_chips  = chips;
   m_hics   = hics;
   m_boards = boards;
 
@@ -35,7 +35,7 @@ TScan::TScan (TScanConfig                   *config,
 }
 
 
-void TScan::Init() 
+void TScan::Init()
 {
   TReadoutBoardMOSAIC *mosaic = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(0));
   if (mosaic) {
@@ -49,7 +49,7 @@ void TScan::Init()
 }
 
 
-void TScan::Terminate() 
+void TScan::Terminate()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd = m_hics.at(ihic)->GetTemperature();
@@ -59,11 +59,11 @@ void TScan::Terminate()
 }
 
 
-bool TScan::Loop (int loopIndex) 
+bool TScan::Loop (int loopIndex)
 {
   if (fScanAbort) return false;     // check for abort flag first
 
-  if ((m_step[loopIndex] > 0) && (m_value[loopIndex] < m_stop[loopIndex])) return true;  // limit check for positive steps 
+  if ((m_step[loopIndex] > 0) && (m_value[loopIndex] < m_stop[loopIndex])) return true;  // limit check for positive steps
   if ((m_step[loopIndex] < 0) && (m_value[loopIndex] > m_stop[loopIndex])) return true;  // same for negative steps
 
   return false;
@@ -71,13 +71,13 @@ bool TScan::Loop (int loopIndex)
 }
 
 
-void TScan::Next (int loopIndex) 
+void TScan::Next (int loopIndex)
 {
   m_value[loopIndex] += m_step[loopIndex];
 }
 
 
-void TScan::CountEnabledChips() 
+void TScan::CountEnabledChips()
 {
 
   //std::cout << "in count enabled chips, boards_size = " << m_boards.size() << ", chips_size = " << m_chips.size() << std::endl;
@@ -94,9 +94,9 @@ void TScan::CountEnabledChips()
 
 }
 
-void TScan::CreateScanHisto () 
+void TScan::CreateScanHisto ()
 {
-  common::TChipIndex id; 
+  common::TChipIndex id;
   m_histo = new TScanHisto();
 
   THisto histo = CreateHisto ();
@@ -105,23 +105,23 @@ void TScan::CreateScanHisto ()
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if ((m_chips.at(ichip)->GetConfig()->IsEnabled()) && (m_chips.at(ichip)->GetReadoutBoard() == m_boards.at(iboard))) {
         id.boardIndex       = iboard;
-        id.dataReceiver     = m_chips.at(ichip)->GetConfig()->GetParamValue("RECEIVER"); 
+        id.dataReceiver     = m_chips.at(ichip)->GetConfig()->GetParamValue("RECEIVER");
         id.chipId           = m_chips.at(ichip)->GetConfig()->GetChipId();
 
-        m_histo->AddHisto (id, histo);        
+        m_histo->AddHisto (id, histo);
       }
     }
-  }  
+  }
   std::cout << "CreateHisto: generated map with " << m_histo->GetSize() << " elements" << std::endl;
-  
+
 }
 
-TMaskScan::TMaskScan (TScanConfig                   *config, 
-                      std::vector <TAlpide *>        chips, 
-                      std::vector <THic *>           hics, 
-                      std::vector <TReadoutBoard *>  boards, 
-                      std::deque<TScanHisto>        *histoQue, 
-                      std::mutex                    *aMutex) 
+TMaskScan::TMaskScan (TScanConfig                   *config,
+                      std::vector <TAlpide *>        chips,
+                      std::vector <THic *>           hics,
+                      std::vector <TReadoutBoard *>  boards,
+                      std::deque<TScanHisto>        *histoQue,
+                      std::mutex                    *aMutex)
   : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
   m_pixPerStage  = m_config->GetParamValue("PIXPERREGION");
@@ -139,7 +139,7 @@ void TMaskScan::ConfigureMaskStage(TAlpide *chip, int istage) {
 
 void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
 {
-  unsigned char buffer[1024*4000]; 
+  unsigned char buffer[1024*4000];
   int           n_bytes_data, n_bytes_header, n_bytes_trailer;
   int           itrg = 0, trials = 0;
   int           nBad = 0;
@@ -172,7 +172,7 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
         for (int iByte=0; iByte<n_bytes_data + 1; ++iByte) {
           fprintf (fDebug, "%02x ", (int) buffer[iByte]);
         }
-        fprintf(fDebug, "\nFull Event:\n"); 
+        fprintf(fDebug, "\nFull Event:\n");
         for (unsigned int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
           fprintf (fDebug, "%02x ", (int) fDebugBuffer.at(ibyte));
         }
@@ -185,7 +185,7 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
 }
 
 
-void TScan::CreateHicConditions() 
+void TScan::CreateHicConditions()
 {
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     m_conditions.AddHicConditions(m_hics.at(i)->GetDbId(), new TScanConditionsHic());
@@ -205,7 +205,7 @@ void TScan::WriteConditions (const char *fName, THic *aHic)
   fprintf (fp, "IDDD (end):   %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_idddEnd);
   fprintf (fp, "IDDA (start): %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaStart);
   fprintf (fp, "IDDA (end):   %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaEnd);
- 
+
   fprintf (fp, "\n");
   fclose (fp);
 }

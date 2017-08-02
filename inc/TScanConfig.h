@@ -18,9 +18,13 @@ namespace ScanConfig {
 
   const int ITHR_START     = 30;
   const int ITHR_STOP      = 100;
+  const int ITHR_STEP      = 1;
   const int VCASN_START    = 40;
   const int VCASN_STOP     = 60;
-  const int SPEEDY         = 1;
+  const int VCASN_STEP     = 1;
+  const int SCAN_STEP      = 16; //Grab every Xth row (for tuneITHR/VCASN scan only).
+                                 //Speeds up scan; changing this has little effect on result accuracy.
+  const int SPEEDY         = 1;  //Use slow fit if 0, differentiate->mean if 1.
 }
 
 
@@ -37,12 +41,13 @@ class TScanConfig {
   int  m_noiseCutInv;
   char m_fNameSuffix[20];
   //NEW--added for additional scans
-  int *m_ithr; //needed by ITHRthreshold; stores values for each chip
-  int *m_vcasn; //needed by tuneITHR+ITHRthreshold; stores values for each HIC
   int  m_ithrStart;  //usually 30
   int  m_ithrStop;   //usually 100
+  int  m_ithrStep;
   int  m_vcasnStart; //usually 40
   int  m_vcasnStop;  //usually 60
+  int  m_vcasnStep;
+  int  m_scanStep;   //16
   int  m_speedy;
 
  protected: 
@@ -53,10 +58,6 @@ class TScanConfig {
   bool  SetParamValue   (const char *Name, const char *Value);
   int   GetParamValue   (const char *Name) ;
   bool  IsParameter     (const char *Name) {return (fSettings.count(Name) > 0);};
-  void  SetVcasnArr     (int hics, float *vcasn);
-    //Will set a different value of vcasn for each HIC.
-  void  SetIthrArr      (int chips, float *ithr);
-    //Will set a different value of ithr for each chip.
 
   int   GetNInj         () {return m_nInj;};
   int   GetChargeStart  () {return m_chargeStart;};
@@ -64,6 +65,15 @@ class TScanConfig {
   int   GetChargeStop   () {return m_chargeStop;};
   int   GetNMaskStages  () {return m_nMaskStages;};
   char *GetfNameSuffix  () {return m_fNameSuffix;};  
+  int   GetIthrStart    () {return m_ithrStart;};
+  int   GetIthrStop     () {return m_ithrStop;};
+  int   GetIthrStep     () {return m_ithrStep;};
+  int   GetVcasnStart   () {return m_vcasnStart;};
+  int   GetVcasnStop    () {return m_vcasnStop;};
+  int   GetVcasnStep    () {return m_vcasnStep;};
+  int   GetScanStep     () {return m_scanStep;};
+  int   GetSpeedy       () {return m_speedy;};
+
 };
 
 

@@ -61,7 +61,7 @@ float THic::GetTemperature()
   float result = 0; 
   int   nChips = 0;
 
-  for (int i = 0; i < m_chips.size(); i++) {
+  for (int i = 0; i < (int)m_chips.size(); i++) {
     if (! m_chips.at(i)->GetConfig()->IsEnabled()) continue;
     result += m_chips.at(i)->ReadTemperature();
     nChips ++;
@@ -81,7 +81,7 @@ THicIB::THicIB (const char *dbId, int modId, TPowerBoard *pb, int pbMod)
 common::TChipIndex THicIB::GetChipIndex (int i) 
 {
   common::TChipIndex idx;
-  if (i > m_chips.size()) {
+  if (i > (int)m_chips.size()) {
     std::cout << "Error (THicIB::GetChipIndex): trying to access bad chip" << std::endl;
     return idx;
   }
@@ -98,7 +98,7 @@ common::TChipIndex THicIB::GetChipIndex (int i)
 bool THicIB::ContainsChip (common::TChipIndex idx)
 {
   // probably the check on board id is enough...
-  if ((idx.boardIndex == m_boardidx) &&
+  if (((int)idx.boardIndex == m_boardidx) &&
       (idx.chipId >= 0) &&
       (idx.chipId < 10)) return true;
   return false;
@@ -114,7 +114,7 @@ THicOB::THicOB (const char *dbId, int modId, TPowerBoard *pb, int pbMod)
 common::TChipIndex THicOB::GetChipIndex (int i) 
 {
   common::TChipIndex idx;
-  if (i > m_chips.size()) {
+  if (i > (int)m_chips.size()) {
     std::cout << "Error (THicOB::GetChipIndex): trying to access bad chip" << std::endl;
     return idx;
   }
@@ -156,13 +156,13 @@ void THicOB::ConfigureMaster (int Master, int board, int rcv, int ctrl)
 bool THicOB::ContainsChip (common::TChipIndex idx) 
 {
   if (idx.chipId < 7) {
-    if ((idx.boardIndex   == m_boardidx0) &&
-        (idx.dataReceiver == m_rcv0)) 
+    if (((int)idx.boardIndex   == m_boardidx0) &&
+        ((int)idx.dataReceiver == m_rcv0)) 
       return true;
   }
   else {
-    if ((idx.boardIndex   == m_boardidx8) &&
-        (idx.dataReceiver == m_rcv8)) 
+    if (((int)idx.boardIndex   == m_boardidx8) &&
+        ((int)idx.dataReceiver == m_rcv8)) 
       return true;    
   }
 

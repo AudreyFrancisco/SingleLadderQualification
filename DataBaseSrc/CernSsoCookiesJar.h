@@ -34,6 +34,7 @@
  *
  *  HISTORY
  *
+ *	2/8/2017   -   Add the X509/Kerberos authentication switch
  *
  */
 #ifndef CERNSSOCOOKIEJAR_H
@@ -64,8 +65,12 @@ struct Cookie {
 private:
 	string theSslUrl;
 	string theCookiePackFile;
-
 	vector<Cookie> theJar;
+
+#ifdef AUTH_X509
+	string theCliCert;
+	string theCliKey;
+#endif
 
 // Methods
 public:
@@ -75,7 +80,14 @@ public:
     bool isJarValid();
 
 public:
+
+#ifdef AUTH_X509
+    bool fillTheJar(string aCliCert, string aCliKey, string aSslUrl);
+#endif
+#ifdef AUTH_KERBEROS
     bool fillTheJar(string aSslUrl);
+#endif
+
     bool fillTheJar();
 
 private:

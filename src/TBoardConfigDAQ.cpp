@@ -74,7 +74,7 @@ TBoardConfigDAQ::TBoardConfigDAQ(const char *fName, int boardIndex) {
   fPORDisable       = true;                 //     0; 0: enable POR; 1: disable
 
   ////---- ID module
-
+  fBoardAddress     = -1; // accept any address
 
   ////---- SOFTRESET module
   

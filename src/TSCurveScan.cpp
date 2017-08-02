@@ -1,18 +1,44 @@
 #include <unistd.h>
 #include <string.h>
-#include "TThresholdScan.h"
+#include "TSCurveScan.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardDAQ.h"
 #include "AlpideConfig.h"
 
 
-TThresholdScan::TThresholdScan (TScanConfig                   *config, 
+TSCurveScan::TSCurveScan       (TScanConfig                   *config,
                                 std::vector <TAlpide *>        chips,
-                                std::vector <THic*>            hics, 
-                                std::vector <TReadoutBoard *>  boards, 
-                                std::deque<TScanHisto>        *histoQue, 
-                                std::mutex                    *aMutex) 
+                                std::vector <THic*>            hics,
+                                std::vector <TReadoutBoard *>  boards,
+                                std::deque<TScanHisto>        *histoQue,
+                                std::mutex                    *aMutex)
   : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
+{
+  /*strcpy(m_name, "Threshold Scan");
+  m_start[0]  = m_config->GetChargeStart();
+  m_stop [0]  = m_config->GetChargeStop ();
+  m_step [0]  = m_config->GetChargeStep ();
+
+  m_start[1]  = 0;
+  //m_step [1]  = maskStepSize;
+  m_stop [1]  = m_config->GetNMaskStages();
+
+  m_start[2]  = 0;
+  m_step [2]  = 1;
+  m_stop [2]  = 1;
+
+  m_VPULSEH   = 170;
+  m_nTriggers = m_config->GetParamValue("NINJ");
+  CreateScanHisto();*/
+}
+
+TThresholdScan::TThresholdScan (TScanConfig                   *config,
+                                std::vector <TAlpide *>        chips,
+                                std::vector <THic*>            hics,
+                                std::vector <TReadoutBoard *>  boards,
+                                std::deque<TScanHisto>        *histoQue,
+                                std::mutex                    *aMutex)
+  : TSCurveScan (config, chips, hics, boards, histoQue, aMutex)
 {
   strcpy(m_name, "Threshold Scan");
   m_start[0]  = m_config->GetChargeStart();
@@ -32,8 +58,61 @@ TThresholdScan::TThresholdScan (TScanConfig                   *config,
   CreateScanHisto();
 }
 
+TtuneVCASNScan::TtuneVCASNScan (TScanConfig                   *config,
+                                std::vector <TAlpide *>        chips,
+                                std::vector <THic*>            hics,
+                                std::vector <TReadoutBoard *>  boards,
+                                std::deque<TScanHisto>        *histoQue,
+                                std::mutex                    *aMutex)
+  : TSCurveScan (config, chips, hics, boards, histoQue, aMutex)
+{
+  strcpy(m_name, "Tune VCASN Scan");
+  m_start[0]  = m_config->GetVcasnStart();
+  m_stop [0]  = m_config->GetVcasnStop ();
+  m_step [0]  = m_config->GetVcasnStep ();
 
-void TThresholdScan::ConfigureBoard(TReadoutBoard *board) 
+  m_start[1]  = 0;
+  m_step [1]  = m_config->GetScanStep   ();
+  m_stop [1]  = m_config->GetNMaskStages();
+
+  m_start[2]  = 0;
+  m_step [2]  = 1;
+  m_stop [2]  = 1;
+
+  m_VPULSEH   = 170;
+  m_nTriggers = m_config->GetParamValue("NINJ");
+  CreateScanHisto();
+}
+
+TtuneITHRScan::TtuneITHRScan   (TScanConfig                   *config,
+                                std::vector <TAlpide *>        chips,
+                                std::vector <THic*>            hics,
+                                std::vector <TReadoutBoard *>  boards,
+                                std::deque<TScanHisto>        *histoQue,
+                                std::mutex                    *aMutex)
+  : TSCurveScan (config, chips, hics, boards, histoQue, aMutex)
+{
+  strcpy(m_name, "Tune ITHR Scan");
+  m_start[0]  = m_config->GetIthrStart();
+  m_stop [0]  = m_config->GetIthrStop ();
+  m_step [0]  = m_config->GetIthrStep ();
+
+  m_start[1]  = 0;
+  m_step [1]  = m_config->GetScanStep   ();
+  m_stop [1]  = m_config->GetNMaskStages();
+
+  m_start[2]  = 0;
+  m_step [2]  = 1;
+  m_stop [2]  = 1;
+
+  m_VPULSEH   = 170;
+  m_nTriggers = m_config->GetParamValue("NINJ");
+  CreateScanHisto();
+}
+
+
+
+void TSCurveScan::ConfigureBoard(TReadoutBoard *board) 
 {
   if (board->GetConfig()->GetBoardType() == boardDAQ) {
     // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns * strobe delay
@@ -52,7 +131,7 @@ void TThresholdScan::ConfigureBoard(TReadoutBoard *board)
 }
 
  
-void TThresholdScan::ConfigureFromu(TAlpide *chip) 
+void TSCurveScan::ConfigureFromu(TAlpide *chip) 
 {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x20);      // analogue pulsing
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
@@ -61,7 +140,7 @@ void TThresholdScan::ConfigureFromu(TAlpide *chip)
 }
 
 
-void TThresholdScan::ConfigureChip(TAlpide *chip)
+void TSCurveScan::ConfigureChip(TAlpide *chip)
 {
   AlpideConfig::BaseConfig(chip);
 
@@ -71,14 +150,13 @@ void TThresholdScan::ConfigureChip(TAlpide *chip)
 }
 
 
-THisto TThresholdScan::CreateHisto() {
+THisto TSCurveScan::CreateHisto() {
   THisto histo ("ThresholdHisto", "ThresholdHisto", 1024, 0, 1023, (m_stop[0] - m_start[0]) / m_step[0], m_start[0], m_stop[0]);
   return histo;
 }
 
 
-void TThresholdScan::Init() {
-  TScan::Init();
+void TSCurveScan::Init() {
   m_running = true;
   
   CountEnabledChips();
@@ -107,6 +185,7 @@ void TThresholdScan::Init() {
 }
 
 
+
 void TThresholdScan::PrepareStep (int loopIndex) 
 {
   switch (loopIndex) {
@@ -128,7 +207,50 @@ void TThresholdScan::PrepareStep (int loopIndex)
 }
 
 
-void TThresholdScan::Execute() 
+//Need different registers for different classes...
+void TtuneVCASNScan::PrepareStep (int loopIndex)
+{
+  switch (loopIndex) {
+  case 0:    // innermost loop: change VCASN
+    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      m_chips.at(ichip)->WriteRegister(Alpide::REG_VCASN, m_value[0]);
+    }
+    break;
+  case 1:    // 2nd loop: mask staging
+    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
+    }
+    break;
+  default:
+    break;
+  }
+}
+
+void TtuneITHRScan::PrepareStep (int loopIndex)
+{
+  switch (loopIndex) {
+  case 0:    // innermost loop: change ITHR
+    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      m_chips.at(ichip)->WriteRegister(Alpide::REG_ITHR, m_value[0]);
+    }
+    break;
+  case 1:    // 2nd loop: mask staging
+    for (int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
+    }
+    break;
+  default:
+    break;
+  }
+}
+
+
+
+void TSCurveScan::Execute() 
 {
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -145,7 +267,7 @@ void TThresholdScan::Execute()
 }
 
 
-void TThresholdScan::FillHistos (std::vector<TPixHit> *Hits, int board)
+void TSCurveScan::FillHistos (std::vector<TPixHit> *Hits, int board)
 {
   common::TChipIndex idx; 
   idx.boardIndex = board;
@@ -170,7 +292,7 @@ void TThresholdScan::FillHistos (std::vector<TPixHit> *Hits, int board)
 }
 
 
-void TThresholdScan::LoopEnd(int loopIndex) 
+void TSCurveScan::LoopEnd(int loopIndex) 
 {
   if (loopIndex == 0) {
     while (!(m_mutex->try_lock()));
@@ -183,9 +305,8 @@ void TThresholdScan::LoopEnd(int loopIndex)
 }
 
 
-void TThresholdScan::Terminate() 
+void TSCurveScan::Terminate() 
 {
-  TScan::Terminate();
   // write Data;
   for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
     TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(iboard));
