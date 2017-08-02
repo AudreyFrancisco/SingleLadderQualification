@@ -66,7 +66,7 @@ class TNoiseAnalysis : public TScanAnalysis {
                  TScanConfig            *aScanConfig, 
                  std::vector <THic*>     hics,
                  std::mutex             *aMutex, 
-                 TNoiseResult           *aResult);
+                 TNoiseResult           *aResult = 0);
   void Initialize ();
   void Run        ();
   void Finalize   ();
