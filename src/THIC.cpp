@@ -69,7 +69,6 @@ float THic::GetTemperature()
   
   if (nChips > 0) return result / nChips;
   else return 0;
-
 }
 
 

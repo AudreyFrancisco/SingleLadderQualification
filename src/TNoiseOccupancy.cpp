@@ -208,6 +208,7 @@ void TNoiseOccupancy::Execute     ()
 
 void TNoiseOccupancy::Terminate ()
 {
+  TScan::Terminate();
   for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
     TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(iboard));
     if (myMOSAIC) {

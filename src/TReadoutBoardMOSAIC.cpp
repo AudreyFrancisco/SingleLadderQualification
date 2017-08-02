@@ -241,6 +241,7 @@ void TReadoutBoardMOSAIC::init()
 {
 	setIPaddress(fBoardConfig->GetIPaddress(), fBoardConfig->GetTCPport());
 
+        getFirmwareVersion();
 	// I2C master (WBB slave) and connected peripherals
 	i2cBus = new I2Cbus(mIPbus, add_i2cMaster);
 	i2cBusAux = new I2Cbus(mIPbus, add_i2cAux);
@@ -415,14 +416,14 @@ char *TReadoutBoardMOSAIC::getFirmwareVersion()
 	char *theIPAddr;
 	theIPAddr = fBoardConfig->GetIPaddress();
 
-	MService::fw_info_t *MOSAICinfo;
+	MService::fw_info_t MOSAICinfo;
 	MService *endPoint = new MService();
 	endPoint->setIPaddress(theIPAddr);
-	endPoint->readFWinfo(MOSAICinfo);
+	endPoint->readFWinfo(&MOSAICinfo);
 
-	theVersionMaj = MOSAICinfo->ver_maj;
-	theVersionMin = MOSAICinfo->ver_min;
-	strncpy(theVersionId, MOSAICinfo->fw_identity, 33);
+	theVersionMaj = MOSAICinfo.ver_maj;
+	theVersionMin = MOSAICinfo.ver_min;
+	strncpy(theVersionId, MOSAICinfo.fw_identity, 33);
 	theVersionId[33] = 0; // just for sure
 	return(theVersionId);
 }

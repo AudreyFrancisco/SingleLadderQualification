@@ -78,6 +78,7 @@ THisto TThresholdScan::CreateHisto() {
 
 
 void TThresholdScan::Init() {
+  TScan::Init();
   m_running = true;
   
   CountEnabledChips();
@@ -184,6 +185,7 @@ void TThresholdScan::LoopEnd(int loopIndex)
 
 void TThresholdScan::Terminate() 
 {
+  TScan::Terminate();
   // write Data;
   for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
     TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(iboard));

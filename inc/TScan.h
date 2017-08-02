@@ -83,7 +83,7 @@ class TScan {
   ~TScan() {};
 
   virtual void Init              ();
-  virtual void Terminate         ()              = 0;
+  virtual void Terminate         ();
   virtual void LoopStart         (int loopIndex) = 0;
   virtual void LoopEnd           (int loopIndex) = 0;
   virtual void PrepareStep       (int loopIndex) = 0;

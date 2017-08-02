@@ -315,14 +315,14 @@ void TScanHisto::Incr (common::TChipIndex index, unsigned int i) {
 double TScanHisto::operator() (common::TChipIndex index, unsigned int i, unsigned int j) const
 {
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
-  (m_histos.at(int_index))(i,j);
+  return (m_histos.at(int_index))(i,j);
 }
 
 
 double TScanHisto::operator() (common::TChipIndex index, unsigned int i) const
 {
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
-  (m_histos.at(int_index))(i);
+  return (m_histos.at(int_index))(i);
 }
 
 

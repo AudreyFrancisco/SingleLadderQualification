@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string.h>
 
 #include "Common.h"
 #include "AlpideConfig.h"
@@ -36,8 +37,24 @@ TScan::TScan (TScanConfig                   *config,
 
 void TScan::Init() 
 {
+  TReadoutBoardMOSAIC *mosaic = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(0));
+  if (mosaic) {
+    strcpy(m_conditions.m_fwVersion, mosaic->GetFwIdString());
+  }
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart = m_hics.at(ihic)->GetTemperature();
+    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaStart = m_hics.at(ihic)->GetIdda();
+    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddStart = m_hics.at(ihic)->GetIddd();
+  }
+}
+
+
+void TScan::Terminate() 
+{
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd = m_hics.at(ihic)->GetTemperature();
+    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaEnd = m_hics.at(ihic)->GetIdda();
+    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddEnd = m_hics.at(ihic)->GetIddd();
   }
 }
 
@@ -180,15 +197,16 @@ void TScan::WriteConditions (const char *fName, THic *aHic)
 {
   FILE *fp = fopen (fName, "a");
 
-
-
-  //fprintf (fp, "Firmware version: %s\n", m_conditions.FirmwareVersion);
+  fprintf (fp, "Firmware version: %s\n\n", m_conditions.m_fwVersion);
   fprintf (fp, "Temp (start): %.1f\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempStart);
-  //fprintf (fp, "Temp (end): %.1f\n", m_conditions.TempEnd);
-  //fprintf (fp, "IDDD (start): %.3f A\n", m_conditions.IDDDStart);
-  //fprintf (fp, "IDDD (end):   %.3f A\n", m_conditions.IDDDEnd);
-  //fprintf (fp, "IDDA (start): %.3f A\n", m_conditions.IDDAStart);
-  //fprintf (fp, "IDDA (end):   %.3f A\n", m_conditions.IDDAEnd);
+  fprintf (fp, "Temp (end):   %.1f\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempEnd);
+
+  fprintf (fp, "IDDD (start): %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_idddStart);
+  fprintf (fp, "IDDD (end):   %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_idddEnd);
+  fprintf (fp, "IDDA (start): %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaStart);
+  fprintf (fp, "IDDA (end):   %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaEnd);
+ 
+  fprintf (fp, "\n");
   fclose (fp);
 }
 

@@ -171,3 +171,10 @@ void TFifoTest::Execute()
     if (!TestPattern (0x5555)) m_histo->Incr(idx, m_value[1], 0x5);;
   }
 }
+
+
+void TFifoTest::Terminate() 
+{
+  TScan::Terminate();
+  m_running = false;
+}
