@@ -9,6 +9,8 @@ startclk
 stopclk
 Config.cfg
 *~
+git_status.txt
+
 # Qt5 local project files
 *.pro.user
 .qmake.stash
