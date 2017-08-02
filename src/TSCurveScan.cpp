@@ -14,7 +14,7 @@ TSCurveScan::TSCurveScan       (TScanConfig                   *config,
                                 std::mutex                    *aMutex)
   : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
 {
-  strcpy(m_name, "Threshold Scan");
+  /*strcpy(m_name, "Threshold Scan");
   m_start[0]  = m_config->GetChargeStart();
   m_stop [0]  = m_config->GetChargeStop ();
   m_step [0]  = m_config->GetChargeStep ();
@@ -29,8 +29,87 @@ TSCurveScan::TSCurveScan       (TScanConfig                   *config,
 
   m_VPULSEH   = 170;
   m_nTriggers = m_config->GetParamValue("NINJ");
+  CreateScanHisto();*/
+}
+
+TThresholdScan::TThresholdScan (TScanConfig                   *config,
+                                std::vector <TAlpide *>        chips,
+                                std::vector <THic*>            hics,
+                                std::vector <TReadoutBoard *>  boards,
+                                std::deque<TScanHisto>        *histoQue,
+                                std::mutex                    *aMutex)
+  : TSCurveScan (config, chips, hics, boards, histoQue, aMutex)
+{
+  strcpy(m_name, "Threshold Scan");
+  m_start[0]  = m_config->GetChargeStart();
+  m_stop [0]  = m_config->GetChargeStop ();
+  m_step [0]  = m_config->GetChargeStep ();
+
+  m_start[1]  = 0;
+  m_step [1]  = 1;
+  m_stop [1]  = m_config->GetNMaskStages();
+
+  m_start[2]  = 0;
+  m_step [2]  = 1;
+  m_stop [2]  = 1;
+
+  m_VPULSEH   = 170;
+  m_nTriggers = m_config->GetParamValue("NINJ");
   CreateScanHisto();
 }
+
+TtuneVCASNScan::TtuneVCASNScan (TScanConfig                   *config,
+                                std::vector <TAlpide *>        chips,
+                                std::vector <THic*>            hics,
+                                std::vector <TReadoutBoard *>  boards,
+                                std::deque<TScanHisto>        *histoQue,
+                                std::mutex                    *aMutex)
+  : TSCurveScan (config, chips, hics, boards, histoQue, aMutex)
+{
+  strcpy(m_name, "Tune VCASN Scan");
+  m_start[0]  = m_config->GetVcasnStart();
+  m_stop [0]  = m_config->GetVcasnStop ();
+  m_step [0]  = m_config->GetVcasnStep ();
+
+  m_start[1]  = 0;
+  m_step [1]  = m_config->GetScanStep   ();
+  m_stop [1]  = m_config->GetNMaskStages();
+
+  m_start[2]  = 0;
+  m_step [2]  = 1;
+  m_stop [2]  = 1;
+
+  m_VPULSEH   = 170;
+  m_nTriggers = m_config->GetParamValue("NINJ");
+  CreateScanHisto();
+}
+
+TtuneITHRScan::TtuneITHRScan   (TScanConfig                   *config,
+                                std::vector <TAlpide *>        chips,
+                                std::vector <THic*>            hics,
+                                std::vector <TReadoutBoard *>  boards,
+                                std::deque<TScanHisto>        *histoQue,
+                                std::mutex                    *aMutex)
+  : TSCurveScan (config, chips, hics, boards, histoQue, aMutex)
+{
+  strcpy(m_name, "Tune ITHR Scan");
+  m_start[0]  = m_config->GetIthrStart();
+  m_stop [0]  = m_config->GetIthrStop ();
+  m_step [0]  = m_config->GetIthrStep ();
+
+  m_start[1]  = 0;
+  m_step [1]  = m_config->GetScanStep   ();
+  m_stop [1]  = m_config->GetNMaskStages();
+
+  m_start[2]  = 0;
+  m_step [2]  = 1;
+  m_stop [2]  = 1;
+
+  m_VPULSEH   = 170;
+  m_nTriggers = m_config->GetParamValue("NINJ");
+  CreateScanHisto();
+}
+
 
 
 void TSCurveScan::ConfigureBoard(TReadoutBoard *board) 

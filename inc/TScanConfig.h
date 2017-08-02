@@ -18,9 +18,13 @@ namespace ScanConfig {
 
   const int ITHR_START     = 30;
   const int ITHR_STOP      = 100;
+  const int ITHR_STEP      = 1;
   const int VCASN_START    = 40;
   const int VCASN_STOP     = 60;
-  const int SPEEDY         = 1;
+  const int VCASN_STEP     = 1;
+  const int SCAN_STEP      = 16; //Grab every Xth row (for tuneITHR/VCASN scan only).
+                                 //Speeds up scan; changing this has little effect on result accuracy.
+  const int SPEEDY         = 1;  //Use slow fit if 0, differentiate->mean if 1.
 }
 
 
@@ -39,8 +43,11 @@ class TScanConfig {
   //NEW--added for additional scans
   int  m_ithrStart;  //usually 30
   int  m_ithrStop;   //usually 100
+  int  m_ithrStep;
   int  m_vcasnStart; //usually 40
   int  m_vcasnStop;  //usually 60
+  int  m_vcasnStep;
+  int  m_scanStep;   //16
   int  m_speedy;
 
  protected: 
@@ -58,6 +65,15 @@ class TScanConfig {
   int   GetChargeStop   () {return m_chargeStop;};
   int   GetNMaskStages  () {return m_nMaskStages;};
   char *GetfNameSuffix  () {return m_fNameSuffix;};  
+  int   GetIthrStart    () {return m_ithrStart;};
+  int   GetIthrStop     () {return m_ithrStop;};
+  int   GetIthrStep     () {return m_ithrStep;};
+  int   GetVcasnStart   () {return m_vcasnStart;};
+  int   GetVcasnStop    () {return m_vcasnStop;};
+  int   GetVcasnStep    () {return m_vcasnStep;};
+  int   GetScanStep     () {return m_scanStep;};
+  int   GetSpeedy       () {return m_speedy;};
+
 };
 
 

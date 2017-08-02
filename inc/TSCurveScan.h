@@ -45,10 +45,10 @@ class TThresholdScan : public TSCurveScan {
                   std::vector <THic*>            hics,
                   std::vector <TReadoutBoard *>  boards,
                   std::deque<TScanHisto>        *histoque,
-                  std::mutex                    *aMutex) :
-  TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
-    m_step[1] = 1;
-  }
+                  std::mutex                    *aMutex);  //:
+  //TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
+  //  m_step[1] = 1;
+  //}
   void PrepareStep (int loopIndex);
   ~TThresholdScan() {};
 };
@@ -62,10 +62,10 @@ class TtuneVCASNScan : public TSCurveScan {
                   std::vector <THic*>            hics,
                   std::vector <TReadoutBoard *>  boards,
                   std::deque<TScanHisto>        *histoque,
-                  std::mutex                    *aMutex) :
-  TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
-    m_step[1] = 16; //this will probably never change
-  }
+                  std::mutex                    *aMutex);  //:
+  //TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
+  //  m_step[1] = 16; //this will probably never change
+  //}
   void PrepareStep (int loopIndex);
   ~TtuneVCASNScan() {};
 };
@@ -78,10 +78,10 @@ class TtuneITHRScan : public TSCurveScan {
                   std::vector <THic*>            hics,
                   std::vector <TReadoutBoard *>  boards,
                   std::deque<TScanHisto>        *histoque,
-                  std::mutex                    *aMutex) :
-  TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
-    m_step[1] = 16;
-  }
+                  std::mutex                    *aMutex);  //:
+  //TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
+  //  m_step[1] = 16;
+  // }
   void PrepareStep (int loopIndex);
   ~TtuneITHRScan() {};
 };
