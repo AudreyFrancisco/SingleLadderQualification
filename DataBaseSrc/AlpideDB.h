@@ -70,7 +70,7 @@ public:
 protected:
 	AlpideDBManager  *theDBmanager;
 	string theQueryDomain;
-
+	bool isConnected;
 
 // Methods
 public:
@@ -80,7 +80,8 @@ public:
     string GetQueryDomain() { return(theQueryDomain); };
     void SetQueryDomain(string aQueryDomain) { theQueryDomain = aQueryDomain; };
 
-	AlpideDBManager  * GetManageHandle() { return(theDBmanager); };
+	AlpideDBManager  * GetManagerHandle() { return(theDBmanager); };
+	bool isDBConnected() { return(isConnected); };
 
 private:
 

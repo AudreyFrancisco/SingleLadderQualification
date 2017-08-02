@@ -6,25 +6,38 @@
 
 int main()
 {
-	// the default setting mode ...
+	// the default setting mode, it depends from compilation flags
 	AlpideDB *theDB = new AlpideDB();
 
-	/*
-	// --- alternative setting : NSSDB in the executable directory
-	theDB->SetQueryDomain("https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx");
+	// Verify if the connection is established
+	if(! theDB->isDBConnected()) {
+		exit(1); // here we can decide to abort or try to recover ...
+	}
 
-    AlpideDBManager *theDBManager = theDB->GetManageHandle();
-	theDBManager->setNSSDBNickName("FrancoAntonio");  // the name associated to the CErt/Key in the DB
-	theDBManager->setNSSDBPath(".");  // the path where the: cert8.db,key3.db,secmod.db are stored
-	theDBManager->setNSSDBPass("alpide4me");  // the password used to access the NSS DB
-	theDBManager->Init();
-	// -----
+	/* If the query domain is not the standard
+	theDB->SetQueryDomain("https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx");
+	*/
+
+	/* -- X509 / libcurl setup
+	AlpideDBManager *theDBManager = theDB->GetManagerHandle();
+	theDBManager->Init("https://test-alucmsapi.web.cern.ch", // the root URL of the web server
+					"FrancoAntonio",  // the name associated to the CErt/Key in the DB
+					".",  // the path where the: cert8.db,key3.db,secmod.db are stored
+					"alpide4me");  // the password used to access the NSS DB
+	*/
+
+	/* -- X509 / curl shell setup
+	AlpideDBManager *theDBManager = theDB->GetManagerHandle();
+	theDBManager->Init(""https://test-alucmsapi.web.cern.ch",
+						"/home/fap/.globus/usercert.pem",  // the path of the Certificate file
+						"/home/fap/.globus/userkey.pem",  // the path of the Key file
+						"/etc/ssl/certs");  // the path of the CA certificates database
 	*/
 
 	AlpideTable::response *theResult;
 
+	// Access the projects Data Base
 	ProjectDB *theProjTable = new ProjectDB(theDB);
-
 	vector<ProjectDB::project> ProjList;
 	cout << "------  PROJECTS DATABASE -----------" << endl;
 	theProjTable->GetList(&ProjList);
@@ -35,7 +48,7 @@ int main()
 		cout << i << " " << ProjList.at(i).ID << "  " << ProjList.at(i).Name << endl;
 	}
 
-
+	// Access the members Data Base
 	MemberDB *theMembTable = new MemberDB(theDB);
 	vector<MemberDB::member> MemberList;
 	MemberDB::member oneMember;
@@ -53,6 +66,7 @@ int main()
 	}
 
 
+	// Access the components Data Base
 	ComponentDB *theCompTable = new ComponentDB(theDB);
 	vector<ComponentDB::componentType> ComponentList;
 	ComponentDB::componentType oneComponent;

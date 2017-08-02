@@ -34,6 +34,7 @@
  *
  *  HISTORY
  *
+ *	2/8/2017   -   Add the X509/Kerberos authentication switch
  *
  */
 #include "utilities.h"
@@ -54,6 +55,11 @@ CernSsoCookieJar::CernSsoCookieJar(string aCookiePackFileName)
     }
     theSslUrl = "";
     theCookiePackFile = aCookiePackFileName;
+
+#ifdef AUTH_X509
+    theCliCert = "";
+    theCliKey = "";
+#endif
 }
 
 CernSsoCookieJar::~CernSsoCookieJar()
@@ -62,7 +68,7 @@ CernSsoCookieJar::~CernSsoCookieJar()
 }
 
 /* -----------------------------------
- * examin if the Jar is valid
+ * Examine if the Jar is valid
  * ----------------------------------- */
 bool CernSsoCookieJar::isJarValid()
 {
@@ -89,20 +95,40 @@ bool CernSsoCookieJar::isJarValid()
  * gets the CERN SSO Cookies and fills
  * the cookie jar
  * ----------------------------------- */
+#ifdef AUTH_X509
+bool CernSsoCookieJar::fillTheJar(string aCliCert, string aCliKey, string aSslUrl)
+{
+    theCliCert = aCliCert;
+    theCliKey = aCliKey;
+    theSslUrl = aSslUrl;
+    return(fillTheJar());
+}
+#endif
+#ifdef AUTH_KERBEROS
 bool CernSsoCookieJar::fillTheJar(string aSslUrl)
 {
     theSslUrl = aSslUrl;
     return(fillTheJar());
 }
+#endif
+
 
 bool CernSsoCookieJar::fillTheJar()
 {
     // run the CERN SSO in order to obtain the cookies file
     if(remove(theCookiePackFile.c_str())) {//the file exists... delete!
-        cout << "The " << theCookiePackFile << " file deleted." << endl;
+    	if(VERBOSITYLEVEL == 1) {cout << "The " << theCookiePackFile << " file deleted." << endl;}
     }
     string Command = "cern-get-sso-cookie ";
+#ifdef AUTH_X509
+    Command += " --cert ";
+    Command += theCliCert;
+    Command += " --key ";
+    Command += theCliKey;
+#endif
+#ifdef AUTH_KERBEROS
     Command += " --krb";
+#endif
     Command += " -r -u ";
     Command += theSslUrl;
     Command += " -o ";
@@ -111,7 +137,7 @@ bool CernSsoCookieJar::fillTheJar()
     system(Command.c_str());
     if(VERBOSITYLEVEL == 1) {cout << "Execute the bash :" << Command << endl;}
     if(!fileExists(theCookiePackFile)) { //the file doesn't exists. ACH !
-        cerr << "Error to obtain the CERN SSO Cookies pack file. Abort !";
+        cerr << "Error to obtain the CERN SSO Cookies pack file. Abort !" << endl;
         return(false);
     }
 

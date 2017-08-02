@@ -197,7 +197,7 @@ AlpideTable::response *ProjectDB::GetList(vector<project> *Result)
 	project pro;
 
 
-	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &result) == 0) {
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &result) == 0) {
 	    cerr << "Failed to execut the Query" << endl;
 	    SetResponse(AlpideTable::SyncQuery, 0,0);
 		return(&theResponse);
@@ -273,7 +273,7 @@ AlpideTable::response *MemberDB::GetList(int projectID, vector<member> *Result)
 	char *result;
 	member pro;
 
-	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &result) == 0) {
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &result) == 0) {
 	    cerr << "Failed to execute the Query" << endl;
 	    SetResponse(AlpideTable::SyncQuery, 0,0);
 		return(&theResponse);
@@ -350,7 +350,7 @@ AlpideTable::response * ComponentDB::GetTypeList(int ProjectID, vector<component
 	char *stringresult;
 	componentType pro;
 
-	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 	    cerr << "Failed to execute the Query" << endl;
 	    SetResponse(AlpideTable::SyncQuery, 0,0);
 		return(&theResponse);
@@ -483,7 +483,7 @@ AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *
 	char *stringresult;
 	componentType pro;
 
-	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0)  {
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0)  {
 	    cerr << "Failed to execute the Query" << endl;
 	    SetResponse(AlpideTable::SyncQuery, 0,0);
 		return(&theResponse);
@@ -524,7 +524,7 @@ AlpideTable::response * ComponentDB::Create(string ComponentTypeID, string Compo
 			"&description="+Description+"&lotID="+LotID+"&packageID="+PackageID+"&userID="+UserID;
 	char *stringresult;
 
-	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 		SetResponse(AlpideTable::SyncQuery);
 	} else {
 		DecodeResponse(stringresult);
@@ -611,7 +611,7 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 	theQuery += "&statusID=" + std::to_string(aActivity->Status);
 	theQuery += "&userID=" +  std::to_string(aActivity->User);
 
-	if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 		SetResponse(AlpideTable::SyncQuery);
 		return(&theResponse);
 	} else {
@@ -627,7 +627,7 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 		theQuery += "&leader=" + std::to_string(aActivity->Members.at(i).Leader);
 		theQuery += "&userID=" + std::to_string(aActivity->Members.at(i).User);
 
-		if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 			SetResponse(AlpideTable::SyncQuery);
 			return(&theResponse);
 		} else {
@@ -644,7 +644,7 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 		theQuery += "&value=" + std::to_string(aActivity->Parameters.at(i).Value);
 		theQuery += "&userID=" + std::to_string(aActivity->Parameters.at(i).User);
 
-		if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 			SetResponse(AlpideTable::SyncQuery);
 			return(&theResponse);
 		} else {
@@ -687,7 +687,7 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 		}
 		if(VERBOSITYLEVEL == 1) cout << "Base64 encoding of Attachment return a len of bytes = " <<  theBase64Result << endl;
 
-		if( theParentDB->GetManageHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult, true, "http://tempuri.org/ActivityAttachmentCreate") == 0) {
+		if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult, true, "http://tempuri.org/ActivityAttachmentCreate") == 0) {
 			SetResponse(AlpideTable::SyncQuery);
 			return(&theResponse);
 		} else {
