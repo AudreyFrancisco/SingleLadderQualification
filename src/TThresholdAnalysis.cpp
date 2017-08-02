@@ -215,14 +215,18 @@ bool TThresholdAnalysis::CheckPixelStuck(TGraph* aGraph)
 //  Differentiates manually; may be less accurate.
 //  Returns 0 if |mean|>500, which happens when a pixel is received twice.  Ignore these when calculating the chip mean.
 double meanGraph(TGraph* resultGraph) { //returns the weighted mean x value
+  std::cout << "Mean" << std::endl;
   double sum=0.0;
   double norm=0.0;
   double * xs = resultGraph->GetX();
   double * ys = resultGraph->GetY();
+  std::cout << "yarr [";
   for (int i = 0; i < resultGraph->GetN(); i++) {
     sum += xs[i]*ys[i];  //xs=value, ys=weight
     norm += ys[i];
+    std::cout << ys[i] << ",";
   }
+  std::cout << "], sum=" << sum << std::endl;
 
   if(abs(sum/norm) > 500) {  //outliers occur when a pixel is received twice; return 0.
     return 0;
@@ -270,6 +274,7 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
   common::TErrFuncFitResult fitResult_dummy;
 
   if(speedy==1) { //Looks good!
+    std::cout << "Speedy..." << std::endl;
     //This should return a TGraph @ the derivative of aGraph ("d" option in copy constructor).  CHECK.
     TGraph* diffGraph = new TGraph();
     ddxGraph(aGraph, diffGraph); // = ddxGraph(aGraph);
@@ -279,7 +284,8 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
     fitResult_dummy.redChi2   = 0; //not supported with this version; no fit ran
     delete diffGraph;
   }
-  else {  //WARNING:  This version has NOT been tested for tuneITHR!
+  else if(speedy==0){  //WARNING:  This version has NOT been tested for tuneITHR!
+    std::cout << "Not speedy" << std::endl;
     TF1 *fitfcn;
     if(m_resultFactor<1) {
       fitfcn = new TF1("fitfcn",
@@ -332,7 +338,7 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
     
     delete fitfcn; 
     
-  }
+  }  //Probable segfault if speedy!=1 or 0.
 
   return fitResult_dummy;
 }
@@ -541,7 +547,6 @@ void TThresholdAnalysis::AnalyseHisto (TScanHisto *histo) {
 	} else if (m_fDoFit){
 	  
 	  // MB - NEED TO SELECT GOOD FIT.
-	  
 	  common::TErrFuncFitResult fitResult;
 	  fitResult=DoFit(gDummy, m_config->GetParamValue("SPEEDY")); //run with true for speedy version
 
