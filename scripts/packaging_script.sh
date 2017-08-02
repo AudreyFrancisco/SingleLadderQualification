@@ -10,5 +10,5 @@ git diff   > git_status.txt 2>&1
 
 zip ../new-alpide-software.zip -r . \
     -x \*.o -x \*.so -x test_\* -x startclk -x stopclk \
-    -x analysis/\* -x GUI/\* -x .git\/* -x .gitignore \
-    -x DataBaseSrc/\* -x exe/\*
+    -x analysis\* -x GUI\* -x .git\* -x .gitignore \
+    -x DataBaseSrc\* -x exe\* -x scripts\* -x build_test.sh
