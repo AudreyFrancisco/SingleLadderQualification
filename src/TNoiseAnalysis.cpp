@@ -6,13 +6,15 @@ TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue,
                                TScan                  *aScan, 
                                TScanConfig            *aScanConfig,
                                std::vector <THic*>     hics, 
-                               std::mutex             *aMutex) 
+                               std::mutex             *aMutex, 
+                               TNoiseResult           *aResult) 
 : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) 
 {
   m_nTrig    = m_config->GetParamValue("NTRIG");
   m_noiseCut = m_nTrig / m_config->GetParamValue("NOISECUT_INV");
 
-  m_result = new TNoiseResult();
+  if (aResult) m_result = aResult;
+  else         m_result = new TNoiseResult();
   FillVariableList();
 }
 

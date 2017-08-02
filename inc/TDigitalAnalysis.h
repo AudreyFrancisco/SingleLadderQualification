@@ -86,7 +86,8 @@ class TDigitalAnalysis : public TScanAnalysis {
                    TScan                  *aScan, 
                    TScanConfig            *aScanConfig, 
                    std::vector <THic*>     hics,
-                   std::mutex             *aMutex);
+                   std::mutex             *aMutex, 
+                   TDigitalResult         *aResult);
   
   void Initialize();
   void Run       ();

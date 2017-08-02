@@ -10,10 +10,16 @@ TFifoAnalysis::TFifoAnalysis(std::deque<TScanHisto> *histoQue,
                              TScan                  *aScan, 
                              TScanConfig            *aScanConfig,
                              std::vector <THic*>     hics, 
-                             std::mutex             *aMutex) 
+                             std::mutex             *aMutex, 
+                             TFifoResult            *aResult)
 : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) 
 {
-  m_result = new TFifoResult();
+  if (aResult) 
+    m_result = aResult;
+  else
+    m_result = new TFifoResult();
+
+  
   FillVariableList ();
 }
 
@@ -66,16 +72,23 @@ void TFifoAnalysis::InitCounters()
 
 void TFifoAnalysis::WriteResult () {
   char fName[200];
+ 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
     sprintf (fName, "FifoScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
                                                 m_config->GetfNameSuffix());
+    cout<<"DDDDDDD";
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
+    cout<<"EEEEEE";
+   
     
     FILE *fp = fopen (fName, "a");
+  
     m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
+    cout<<"GGGG";
     m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile(fp);
     fclose(fp);
     //    m_result->WriteToFile     (fName);
+ 
   }
 }
 
@@ -134,7 +147,7 @@ void TFifoAnalysis::Finalize()
       hicResult->m_errf += chipResult->m_errf;
     }
   }
-
+ 
   WriteResult ();
 }
 

@@ -6,11 +6,13 @@ TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue,
                                    TScan                  *aScan, 
                                    TScanConfig            *aScanConfig, 
                                    std::vector <THic*>     hics,
-                                   std::mutex             *aMutex) 
+                                   std::mutex             *aMutex, 
+                                   TDigitalResult         *aResult) 
 : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) 
 {
   m_ninj   = m_config->GetParamValue("NINJ");
-  m_result = new TDigitalResult(); 
+  if (aResult) m_result = aResult;
+  else         m_result = new TDigitalResult(); 
   FillVariableList ();
 }
 

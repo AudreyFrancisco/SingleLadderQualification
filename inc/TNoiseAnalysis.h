@@ -59,13 +59,14 @@ class TNoiseAnalysis : public TScanAnalysis {
  protected: 
   TScanResultChip *GetChipResult () {TNoiseResultChip *Result = new TNoiseResultChip(); return Result;};  
   TScanResultHic  *GetHicResult  () {TNoiseResultHic  *Result = new TNoiseResultHic (); return Result;};
-  void            CreateResult  () {};
+  void             CreateResult  () {};
  public: 
   TNoiseAnalysis(std::deque<TScanHisto> *histoQue, 
                  TScan                  *aScan, 
                  TScanConfig            *aScanConfig, 
                  std::vector <THic*>     hics,
-                 std::mutex             *aMutex);
+                 std::mutex             *aMutex, 
+                 TNoiseResult           *aResult);
   void Initialize ();
   void Run        ();
   void Finalize   ();

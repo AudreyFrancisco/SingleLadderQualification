@@ -187,11 +187,12 @@ class TThresholdAnalysis : public TScanAnalysis {
   void             CreateResult  () {};
  public:
   TThresholdAnalysis(std::deque<TScanHisto> *scanHistoQue, 
-		     TScan *aScan, 
-		     TScanConfig *aScanConfig,
-                     std::vector <THic*> hics,
-		     std::mutex *aMutex,
-                     float resultFactor = m_electronPerDac); //MUST BE 1 for a vcasn scan, and *-1* for an ithr scan!!!  Else use default.
+		     TScan                  *aScan, 
+		     TScanConfig            *aScanConfig,
+                     std::vector <THic*>     hics,
+		     std::mutex             *aMutex,
+                     TThresholdResult       *aResult = 0,
+                     float                   resultFactor = m_electronPerDac); //MUST BE 1 for a vcasn scan, and *-1* for an ithr scan!!!  Else use default.
   
   void Initialize();
   void Run       ();

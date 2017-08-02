@@ -154,6 +154,7 @@ TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
                                        TScanConfig            *aScanConfig,
                                        std::vector <THic*>     hics,
                                        std::mutex             *aMutex,
+                                       TThresholdResult       *aResult,
                                        float                   resultFactor)
 : TScanAnalysis(aScanHistoQue, aScan, aScanConfig, hics, aMutex)  
 {
@@ -172,7 +173,8 @@ TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
   m_fDoFit              = true;
   m_resultFactor        = resultFactor;
 
-  m_result = new TThresholdResult();
+  if (aResult) m_result = aResult;
+  else         m_result = new TThresholdResult();
   
 }
 
