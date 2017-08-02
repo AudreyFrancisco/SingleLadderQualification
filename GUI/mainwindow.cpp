@@ -42,6 +42,7 @@
 #include <QPixmap>
 #include "testselection.h"
 #include <QMenuBar>
+#include  "inc/THIC.h"
 //#include "scanthread.h"
 //#include <QtCore>
 MainWindow::MainWindow(QWidget *parent) :
@@ -136,7 +137,9 @@ void MainWindow::open(){
     try{
     std::cout<<properconfig<<"d1"<<endl;
    // initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str());
-    initSetup(fConfig, &fBoards, &fBoardType, &fChips,fileName.toStdString().c_str(), &fHics);
+   const char *ar[1]={"maroudiw"};
+    initSetup(fConfig, &fBoards, &fBoardType, &fChips,fileName.toStdString().c_str(), &fHICs,ar);
+    std::cout<<fHICs.size()<<"the hics vector size";
     properconfig=true;
 
     std::cout<<properconfig<<"d2"<<endl;
@@ -702,14 +705,14 @@ void MainWindow::start_test(){
 
 
 void MainWindow::fillingOBvectors(){
-  TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-  TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHics, &fMutex);
-    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-    TNoiseOccupancy *noisescan=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHics, &fMutex);
-    TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-    TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHics, &fMutex);
-    TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(), fHics, &fMutex);
+  TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+  TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex);
+    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TNoiseOccupancy *noisescan=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex);
+    TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex);
+    TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(), fHICs,&fMutex);
     fScanVector.push_back(fifoscan);
     fScanVector.push_back(digitalscan);
     fScanVector.push_back(thresholdscan);
@@ -730,9 +733,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
     for (int i=0;i<s.size();i++){
    // for (int i=0;i<2;i++){
       //   QApplication::processEvents() ;
-
-
-        std::thread scanThread(&MainWindow::scanLoop,this,s[i]);
+       std::thread scanThread(&MainWindow::scanLoop,this,s[i]);
         a.at(i)->Initialize();
         qDebug()<<s.at(i)<<"g"<<endl;
 
@@ -747,9 +748,12 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
               ui->tstatus->setText("Waiting . . .");
               ui->nstatus->setText("Waiting . . .");
               qApp->processEvents();
+
             break;
          }
+
          while (i<2 && i>0){
+
               ui->fstatus->setText("100% Completed");
               ui->dstatus->setText("50% Completed");
               ui->tstatus->setText("Waiting . . .");
@@ -775,14 +779,16 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
               qApp->processEvents();
          break;
          }
+
         std::thread analysisThread(&TScanAnalysis::Run, std::ref(a[i]));
         scanThread.join();
 
 
 
         analysisThread.join();
+qDebug()<<"where is the problem :(";
         a.at(i)->Finalize();
-
+qDebug()<<"where is the problem";
         while (i<1){
             ui->fstatus->setText("100% Completed");
             ui->dstatus->setText("Starting . . .");
@@ -940,7 +946,7 @@ void MainWindow::applytests(){
 }
 
 void MainWindow::WriteTests(){
-
+std::cout<<fScanVector.size()<<"the scan vector size";
     for (int i=0;i<fScanVector.size();i++)
     {
 

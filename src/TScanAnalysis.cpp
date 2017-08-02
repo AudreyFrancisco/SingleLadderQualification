@@ -11,7 +11,7 @@ TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue,
                              TScan                  *aScan, 
                              TScanConfig            *aConfig, 
                              std::vector <THic*>     hics, 
-                             std::mutex             *aMutex) 
+                             std::mutex             *aMutex)
 {
   m_histoQue = histoQue;
   m_mutex    = aMutex;

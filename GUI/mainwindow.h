@@ -34,7 +34,7 @@
 #include  "TFifoAnalysis.h"
 #include  "TNoiseOccupancy.h"
 #include  "TNoiseAnalysis.h"
-#include  "THIC.h"
+#include  "inc/THIC.h"
 
 //#include "multipagewidget.h"
 //#include "scanthread.h"
@@ -55,6 +55,7 @@ public:
  //   void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     std::vector <TScan *> fScanVector;
     std::vector <TScanAnalysis *> fAnalysisVector;
+    std::vector <THic *> fHICs;
   //  void fillingvectors();
  std::vector <std::string> mapdetails;
 
