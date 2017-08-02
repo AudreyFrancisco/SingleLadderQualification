@@ -24,7 +24,7 @@
 #include "qfiledialog.h"
 #include "inc/BoardDecoder.h"
 #include "inc/SetupHelpers.h"
-#include "inc/TThresholdScan.h"
+#include "inc/TSCurveScan.h"
 #include "inc/TScanConfig.h"
 #include "inc/THisto.h"
 #include "inc/TScanAnalysis.h"

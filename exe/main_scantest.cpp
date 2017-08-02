@@ -5,11 +5,11 @@
 //   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
 //
-// In order to have a generic scan, which works for single chips as well as for staves and modules, 
-// all chip accesses should be done with a loop over all elements of the chip vector. 
+// In order to have a generic scan, which works for single chips as well as for staves and modules,
+// all chip accesses should be done with a loop over all elements of the chip vector.
 // (see e.g. the configureChip loop in main)
-// Board accesses are to be done via fBoards.at(0);  
-// For an example how to access board-specific functions see the power off at the end of main. 
+// Board accesses are to be done via fBoards.at(0);
+// For an example how to access board-specific functions see the power off at the end of main.
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include <deque>
 #include <thread>
-#include <mutex> 
+#include <mutex>
 #include "TAlpide.h"
 #include "THIC.h"
 #include "AlpideConfig.h"
@@ -32,8 +32,7 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 #include "TScan.h"
-#include "TThresholdScan.h"
-//#include "TSCurveScan.h" //testing
+#include "TSCurveScan.h"
 #include "TDigitalScan.h"
 #include "TScanConfig.h"
 #include "THisto.h"
@@ -60,7 +59,7 @@ void scanLoop (TScan *myScan)
       while (myScan->Loop(0)) {
         myScan->PrepareStep(0);
         myScan->Execute    ();
-        myScan->Next       (0);  
+        myScan->Next       (0);
         //std::cout << "0";
       }
       //std::cout << std::endl << "Loop 0 end";
@@ -95,7 +94,7 @@ int main(int argc, char** argv) {
 
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips, "Config.cfg", &fHics);
-  
+
   //TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
   //TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
   //TScan *myScan   = new TFifoTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
@@ -120,16 +119,15 @@ int main(int argc, char** argv) {
   for (std::map<int,common::TStatVar>::iterator it = thresh.begin(); it != thresh.end(); it++) {
     std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
   }
-  
+
   // std::vector <TCounter> counters = ((TDigitalAnalysis*)analysis)->GetCounters();
-  
+
   // std::cout << std::endl << "Counter values: " << std::endl;
   // for (int i = 0; i < counters.size(); i ++) {
   //   std::cout << "Chip " << counters.at(i).chipId <<": nCorrect = " << counters.at(i).nCorrect << std::endl;
   // }
-  
+
   delete myScan;
   delete analysis;
   return 0;
 }
-

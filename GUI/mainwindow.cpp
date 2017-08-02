@@ -14,8 +14,6 @@
 //#include "TQtWidgets.h"
 #include "TAlpide.h"
 #include "TDigitalAnalysis.h"
-#include "TAnalogScan.h"
-//#include "TAnalogAnalysis.h"
 #include "TDigitalScan.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -28,7 +26,7 @@
 #include <QFileDialog>
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
-#include "TThresholdScan.h"
+#include "TSCurveScan.h"
 #include "TScanConfig.h"
 #include "THisto.h"
 #include "TScanAnalysis.h"
