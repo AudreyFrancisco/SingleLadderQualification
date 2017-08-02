@@ -63,7 +63,7 @@ EXE += $(TEST_EXE)
 # test_* executables with ROOT
 TEST_EXE_ROOT =  test_roottest test_scantest test_threshold_v1 test_tuneITHR test_ITHRthreshold \
   test_tuneVCASN test_VCASNthreshold
-EXE+= $(TEST_EXE_ROOT)
+EXE += $(TEST_EXE_ROOT)
 
 
 #### TARGETS ####
