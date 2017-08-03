@@ -60,6 +60,8 @@ class TNoiseAnalysis : public TScanAnalysis {
   TScanResultChip *GetChipResult () {TNoiseResultChip *Result = new TNoiseResultChip(); return Result;};  
   TScanResultHic  *GetHicResult  () {TNoiseResultHic  *Result = new TNoiseResultHic (); return Result;};
   void             CreateResult  () {};
+  void             AnalyseHisto  (TScanHisto *histo);
+  void             InitCounters  (){};
  public: 
   TNoiseAnalysis(std::deque<TScanHisto> *histoQue, 
                  TScan                  *aScan, 
@@ -68,7 +70,6 @@ class TNoiseAnalysis : public TScanAnalysis {
                  std::mutex             *aMutex, 
                  TNoiseResult           *aResult = 0);
   void Initialize ();
-  void Run        ();
   void Finalize   ();
 };
 

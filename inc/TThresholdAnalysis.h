@@ -183,8 +183,10 @@ class TThresholdAnalysis : public TScanAnalysis {
   
  protected:
   TScanResultChip *GetChipResult () {TThresholdResultChip *Result = new TThresholdResultChip(); return Result;};
-  TScanResultHic  *GetHicResult ()  {TThresholdResultHic  *Result = new TThresholdResultHic (); return Result;};
+  TScanResultHic  *GetHicResult  ()  {TThresholdResultHic  *Result = new TThresholdResultHic (); return Result;};
   void             CreateResult  () {};
+  void             InitCounters  () {};
+  void             AnalyseHisto  (TScanHisto *histo);
  public:
   TThresholdAnalysis(std::deque<TScanHisto> *scanHistoQue, 
 		     TScan                  *aScan, 
@@ -195,7 +197,6 @@ class TThresholdAnalysis : public TScanAnalysis {
                      float                   resultFactor = m_electronPerDac); //MUST BE 1 for a vcasn scan, and *-1* for an ithr scan!!!  Else use default.
   
   void Initialize();
-  void Run       ();
   void Finalize  ();
 
   float GetResultThreshold(int chip); //new; returns mean threshold of ith chip

@@ -92,7 +92,7 @@ void TDigitalAnalysis::InitCounters ()
 }
 
 
-void TDigitalAnalysis::WriteHitData(TScanHisto histo, int row) 
+void TDigitalAnalysis::WriteHitData(TScanHisto *histo, int row) 
 {
   char fName[100];
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
@@ -102,8 +102,8 @@ void TDigitalAnalysis::WriteHitData(TScanHisto histo, int row)
                                                     m_chipList.at(ichip).chipId);
     FILE *fp = fopen (fName, "a");
     for (int icol = 0; icol < 1024; icol ++) {
-      if (histo(m_chipList.at(ichip), icol) > 0) {  // write only non-zero values
-        fprintf(fp, "%d %d %d\n", icol, row, (int) histo(m_chipList.at(ichip), icol));
+      if ((*histo)(m_chipList.at(ichip), icol) > 0) {  // write only non-zero values
+        fprintf(fp, "%d %d %d\n", icol, row, (int) (*histo)(m_chipList.at(ichip), icol));
       }
     }
     fclose(fp);
@@ -154,39 +154,18 @@ void TDigitalAnalysis::WriteStuckPixels(THic *hic)
 }
 
 
-void TDigitalAnalysis::Run() 
+void TDigitalAnalysis::AnalyseHisto (TScanHisto *histo) 
 {
-  while (m_histoQue->size() == 0) {
-    sleep(1);
-  }
-
-  while ((m_scan->IsRunning() || (m_histoQue->size() > 0))) {
-    if (m_histoQue->size() > 0) {
-      while (!(m_mutex->try_lock()));
-    
-      TScanHisto histo = m_histoQue->front();
-      if (m_first) {
-        histo.GetChipList(m_chipList);
-        InitCounters     ();
-        m_first = false;
-      }
-
-      m_histoQue->pop_front();
-      m_mutex   ->unlock();
-
-      int row = histo.GetIndex();
-      std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size() << std::endl;
-      WriteHitData(histo, row);
-      for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
-        for (int icol = 0; icol < 1024; icol ++) {
-          int hits = (int) histo (m_chipList.at(ichip), icol);
-          if      (hits == m_ninj) m_counters.at(ichip).nCorrect ++;         
-          else if (hits >  m_ninj) m_counters.at(ichip).nNoisy ++;
-          else if (hits >  0)      m_counters.at(ichip).nIneff ++;
-        }
-      }
+  int row = histo->GetIndex();
+  std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size() << std::endl;
+  WriteHitData(histo, row);
+  for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
+    for (int icol = 0; icol < 1024; icol ++) {
+      int hits = (int) (*histo) (m_chipList.at(ichip), icol);
+      if      (hits == m_ninj) m_counters.at(ichip).nCorrect ++;         
+      else if (hits >  m_ninj) m_counters.at(ichip).nNoisy ++;
+      else if (hits >  0)      m_counters.at(ichip).nIneff ++;
     }
-    else usleep (300);
   }
 }
 

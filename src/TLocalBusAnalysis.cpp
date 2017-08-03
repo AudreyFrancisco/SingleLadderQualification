@@ -67,33 +67,6 @@ void TLocalBusAnalysis::AnalyseHisto(TScanHisto *histo)
 }
 
 
-void TLocalBusAnalysis::Run() 
-{
-  while (m_histoQue->size() == 0) {
-    sleep(1);
-  }
-
-  while ((m_scan->IsRunning() || (m_histoQue->size() > 0))) {
-    if (m_histoQue->size() > 0) {
-      while (!(m_mutex->try_lock()));
-    
-      TScanHisto histo = m_histoQue->front();
-      if (m_first) {
-        histo.GetChipList(m_chipList);
-        InitCounters     ();
-        m_first = false;
-      }
-
-      m_histoQue->pop_front();
-      m_mutex   ->unlock();
-
-
-    }
-    else usleep (300);
-  }
-}
-
-
 void TLocalBusAnalysis::WriteResult () {
   char fName[200];
  

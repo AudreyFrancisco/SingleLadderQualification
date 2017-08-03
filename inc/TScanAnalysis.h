@@ -89,6 +89,8 @@ class TScanAnalysis {
   void                         CreateHicResults  ();
   virtual void                 CreateResult      () = 0;
   int                          ReadChipList      ();
+  virtual void                 AnalyseHisto      (TScanHisto *histo) = 0;
+  virtual void                 InitCounters      () = 0;
  public:
   TScanAnalysis (std::deque<TScanHisto> *histoQue, 
                  TScan                  *aScan, 
@@ -96,7 +98,7 @@ class TScanAnalysis {
                  std::vector <THic*>     hics,
                  std::mutex             *aMutex);
   virtual void Initialize      () = 0; 
-  virtual void Run             () = 0;
+  virtual void Run             ();
   virtual void Finalize        () = 0; 
   std::map <const char *, TResultVariable> GetVariableList () {return m_variableList;}
 };

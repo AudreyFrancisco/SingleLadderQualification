@@ -74,13 +74,14 @@ class TDigitalAnalysis : public TScanAnalysis {
   bool HasData          (TScanHisto &histo,  common::TChipIndex idx, int col);
   void InitCounters     ();
   void FillVariableList ();
-  void WriteHitData     (TScanHisto histo, int row); 
+  void WriteHitData     (TScanHisto *histo, int row); 
   void WriteResult      ();
   void WriteStuckPixels (THic *hic);
  protected:
   TScanResultChip *GetChipResult () {TDigitalResultChip *Result = new TDigitalResultChip(); return Result;};
   TScanResultHic  *GetHicResult  () {TDigitalResultHic  *Result = new TDigitalResultHic (); return Result;};
   void             CreateResult  () {};
+  void             AnalyseHisto  (TScanHisto *histo);
  public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, 
                    TScan                  *aScan, 
@@ -90,7 +91,6 @@ class TDigitalAnalysis : public TScanAnalysis {
                    TDigitalResult         *aResult = 0);
   
   void Initialize();
-  void Run       ();
   void Finalize  ();
   
   std::vector <TDigitalCounter> GetCounters() {return m_counters;};

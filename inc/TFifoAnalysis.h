@@ -76,7 +76,6 @@ class TFifoAnalysis : public TScanAnalysis {
                 std::mutex             *aMutex, 
                 TFifoResult            *aResult = 0);
   void Initialize ();
-  void Run        ();
   void Finalize   ();
  };
 

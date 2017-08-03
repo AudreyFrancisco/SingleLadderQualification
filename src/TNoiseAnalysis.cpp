@@ -75,21 +75,8 @@ void TNoiseAnalysis::FillVariableList()
 }
 
 
-void TNoiseAnalysis::Run() 
+void TNoiseAnalysis::AnalyseHisto (TScanHisto *histo)
 {
-  while (m_histoQue->size() == 0) {
-    sleep(1);
-  }
-
-  while ((m_scan->IsRunning() || (m_histoQue->size() > 0))) {
-    if (m_histoQue->size() > 0) {
-      while (!(m_mutex->try_lock()));
-    
-      TScanHisto histo = m_histoQue->front();
-      histo.GetChipList (m_chipList);
-
-      m_histoQue->pop_front();
-      m_mutex   ->unlock   ();
       // TODO: check that hits from different hics / boards are considered correctly
       for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip ++) {
         TNoiseResultChip *chipResult = (TNoiseResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
@@ -106,22 +93,18 @@ void TNoiseAnalysis::Run()
         for (int icol = 0; icol < 1024; icol ++) {
           for (int irow = 0; irow < 512; irow ++) {            
             // if entry > noise cut: add pixel to chipResult->AddNoisyPixel
-            if (histo(m_chipList.at(ichip), icol, irow) > m_noiseCut) {
+            if ((*histo)(m_chipList.at(ichip), icol, irow) > m_noiseCut) {
 	      TPixHit pixel = {boardIndex, channel, chipId, 0, icol, irow};
               chipResult->AddNoisyPixel(pixel);   // is this still needed?
               ((TNoiseResult*)m_result)->m_noisyPixels.push_back(pixel);
 	    }
-            occ += histo(m_chipList.at(ichip), icol, irow);
+            occ += (*histo)(m_chipList.at(ichip), icol, irow);
 	  }
 	}
         // divide chipResult->m_occ by m_nTrig * 512 * 1024 and write to chipResult
         occ /= denom;
         chipResult->SetOccupancy(occ);
       }
-    }
-   
-    else usleep(300);
-  }
 }
 
 

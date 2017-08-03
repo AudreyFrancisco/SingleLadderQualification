@@ -65,7 +65,6 @@ class TLocalBusAnalysis : public TScanAnalysis {
                      std::mutex             *aMutex, 
                      TLocalBusResult        *aResult = 0);
   void Initialize();
-  void Run       ();
   void Finalize  ();
  
 };

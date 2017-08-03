@@ -359,8 +359,6 @@ void TThresholdAnalysis::Initialize()
     
     common::TChipIndex chipIndexDummy = common::GetChipIndex(itr->first);
     
-    m_chipList.push_back(chipIndexDummy);
-    
     TThresholdResultChip resultDummy;
     
     resultDummy.SetBoardIndex(chipIndexDummy.boardIndex);
@@ -469,23 +467,9 @@ void TThresholdAnalysis::Initialize()
   CreateHicResults();  
 }
 
-void TThresholdAnalysis::Run() 
-{
-  
-  while (m_histoQue->size() == 0){sleep(1);}
-  
-  while ((m_scan->IsRunning() || (m_histoQue->size() > 0))) {
-    
-    if (m_histoQue->size()<= 0){usleep(300);continue;}
-    
-    while (!(m_mutex->try_lock()));
-    
-    TScanHisto scanHisto = m_histoQue->front();      
-    
-    m_histoQue->pop_front();
-    m_mutex->unlock();
-    
-    int row = scanHisto.GetIndex();
+
+void TThresholdAnalysis::AnalyseHisto (TScanHisto *histo) {
+    int row = histo->GetIndex();
     
     std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size() << std::endl;
     
@@ -507,7 +491,7 @@ void TThresholdAnalysis::Run()
         }
    	for (int iPulse = iPulseStart; iPulse < iPulseStop; iPulse++) {
 	  
-   	  int entries =(int)scanHisto(m_chipList.at(iChip), 
+   	  int entries =(int)(*histo)(m_chipList.at(iChip), 
    				      iCol, 
    				      iPulse);
 	  
@@ -585,9 +569,8 @@ void TThresholdAnalysis::Run()
       } // end loop over iCol.
       
     } // end loop over iChip.
-  } // end of "while" on m_scan and m_scanHistoQue.
-  
 }
+
 
 void TThresholdAnalysis::Finalize()
 {
