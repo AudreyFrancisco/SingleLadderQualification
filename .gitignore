@@ -9,6 +9,7 @@ test_*
 startclk*
 stopclk*
 Config.cfg
+Config_To_HS.cfg
 *~
 git_status.txt
 
