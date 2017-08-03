@@ -4,6 +4,7 @@
 *.d
 *.swp
 *.pcm
+*.dat
 test_*
 startclk
 stopclk
