@@ -40,10 +40,11 @@ ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs)
 BASE_CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp THIC.cpp \
   USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp TReadoutBoardMOSAIC.cpp TChipConfig.cpp \
   TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp TPowerBoard.cpp \
-  TPowerBoardConfig.cpp BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TPowerAnalysis.cpp \
-  TDigitalAnalysis.cpp TFifoAnalysis.cpp TLocalBusAnalysis.cpp TNoiseAnalysis.cpp TScan.cpp \
-  TPowerTest.cpp TFifoTest.cpp TSCurveScan.cpp TDigitalScan.cpp TNoiseOccupancy.cpp TLocalBusTest.cpp \
-  TScanConfig.cpp TestBeamTools.cpp Common.cpp TReadoutBoardRU.cpp TBoardConfigRU.cpp TApplyMask.cpp
+  TPowerBoardConfig.cpp BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp \
+  TPowerAnalysis.cpp TDigitalAnalysis.cpp TFifoAnalysis.cpp TLocalBusAnalysis.cpp \
+  TNoiseAnalysis.cpp TScan.cpp TFifoTest.cpp TPowerTest.cpp TSCurveScan.cpp TDigitalScan.cpp \
+  TNoiseOccupancy.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp Common.cpp \
+  TReadoutBoardRU.cpp TBoardConfigRU.cpp TApplyMask.cpp THicConfig.cpp
 BASE_OBJS = $(BASE_CLASSES:.cpp=.o)
 
 RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp \
@@ -74,7 +75,7 @@ TEST_EXE = test_mosaic test_noiseocc test_threshold test_digitalscan test_fifo t
 EXE += $(TEST_EXE)
 
 #
-TEST_HS = test_GRST test_scantest_digital test_scantest_threshold
+TEST_HS = test_GRST test_scantest_digital
 EXE += $(TEST_HS)
 
 # test_* executables with ROOT
@@ -105,6 +106,10 @@ stopclk: exe/main_stopclk.cpp $(DEPS)
 
 startclk: exe/main_startclk.cpp $(DEPS)
 	$(CC) -o startclk $(OBJS) $(CFLAGS) $< $(LINKFLAGS)
+
+#
+$(TEST_HS): test_% : exe/main_%.cpp $(DEPS)
+	$(CC) -o $@ $(OBJS) $(CFLAGS) $< $(LINKFLAGS)
 
 ### DYNAMIC LIBRARIES
 lib: $(DEPS)

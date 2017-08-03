@@ -144,11 +144,11 @@ int initSetupHalfStave(TConfig                        *config,
     pb = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0));
   }
 
-	std::vector <THic *> m_Hics;
+	std::vector <THic *>  m_Hics;
 	std::vector <THic *>* pHics = (hics) ? hics : &m_Hics;
 
 	for (int ihic = 0; ihic < config->GetNHics(); ihic++) {
-		pHics->push_back(new THic("Dummy ID", config->GetHicConfig(ihic)->GetModId(), pb, 0));
+		pHics->push_back(new THicOB("Dummy ID", config->GetHicConfig(ihic)->GetModId(), pb, 0));
 	}
 
   for (unsigned int i = 0; i < config->GetNChips(); i++) {

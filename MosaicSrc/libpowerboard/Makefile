@@ -25,7 +25,7 @@ all: $(TARGET_LIB)
 
 $(TARGET_LIB): $(LIB_OBJS)
 	$(RM) $@
-	$(AR) -o $@ $(LIB_OBJS)
+	$(AR) $@ $(LIB_OBJS)
 
 clean:
 	$(RM) $(LIB_OBJS)

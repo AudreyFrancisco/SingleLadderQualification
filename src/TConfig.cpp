@@ -347,7 +347,7 @@ void TConfig::DecodeLine(const char *Line)
     }
   }
 	else if ((fHicConfigs.size() > 0) && (fHicConfigs.at(0)->IsParameter(Param))) {
-		for (int i = Start; i < HicStop; i++) {
+		for (int i = HicStart; i < HicStop; i++) {
 			fHicConfigs.at(i)->SetParamValue (Param, Rest);
 		}
 	}

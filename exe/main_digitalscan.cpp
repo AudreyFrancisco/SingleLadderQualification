@@ -282,7 +282,7 @@ void scan() {
             if (boardInfo.decoder10b8bError) errors8b10b++;
             // decode Chip event
             int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
-            if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, boardInfo.channel, prioErrors)) {
+            if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0, boardInfo.channel, prioErrors)) {
 	            std::cout << "Found bad event " << std::endl;
 	            nBad ++;
               if (nBad > 10) continue;
