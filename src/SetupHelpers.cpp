@@ -199,7 +199,7 @@ int initSetupHalfStave(TConfig                        *config,
       }
 
       if (receiver < 0) {
-        receiver = modPos;
+        receiver = modPos-1;
         if (mosaic) {
           if (!receiver) receiver = 1;
           else if (receiver == 1) receiver = 0;
