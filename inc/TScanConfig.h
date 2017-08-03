@@ -25,6 +25,9 @@ namespace ScanConfig {
   const int SCAN_STEP      = 16; //Grab every Xth row (for tuneITHR/VCASN scan only).
                                  //Speeds up scan; changing this has little effect on result accuracy.
   const int SPEEDY         = 1;  //Use slow fit if 0, differentiate->mean if 1.
+
+  const int LOCALBUSCUTRED = 1;
+
 }
 
 
@@ -49,7 +52,7 @@ class TScanConfig {
   int  m_vcasnStep;
   int  m_scanStep;   //16
   int  m_speedy;
-
+  int  m_localBusCutRed;
  protected: 
  public:
   TScanConfig ();
@@ -73,7 +76,7 @@ class TScanConfig {
   int   GetVcasnStep    () {return m_vcasnStep;};
   int   GetScanStep     () {return m_scanStep;};
   int   GetSpeedy       () {return m_speedy;};
-
+  int   GetLocalBusCutRed() {return m_localBusCutRed;};
 };
 
 

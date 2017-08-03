@@ -67,6 +67,7 @@ class TFifoAnalysis : public TScanAnalysis {
   TScanResultChip *GetChipResult () {TFifoResultChip *Result = new TFifoResultChip(); return Result;};
   TScanResultHic  *GetHicResult  () {TFifoResultHic  *Result = new TFifoResultHic (); return Result;};
   void             CreateResult  () {};
+  void             AnalyseHisto  (TScanHisto *histo);
  public:
   TFifoAnalysis(std::deque<TScanHisto> *histoQue, 
                 TScan                  *aScan, 

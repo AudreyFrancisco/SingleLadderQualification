@@ -32,6 +32,7 @@ class TScanResultHic {
   std::map <int, TScanResultChip*> m_chipResults;
   char                             m_resultFile[200];
   THicClassification               m_class;
+  const char*                      WriteHicClassification();
  public:
   TScanResultHic () {};
   virtual void       WriteToFile       (FILE *fp) = 0;

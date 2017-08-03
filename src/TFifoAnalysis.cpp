@@ -56,8 +56,9 @@ void TFifoAnalysis::InitCounters()
     m_counters.push_back(counter);
   }
 
-  std::map<std::string, TScanResultHic*>::iterator it;
- 
+  std::map<std::string, TScanResultHic* >::iterator it;
+  std::map<int,         TScanResultChip*>::iterator itChip;
+
   for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
     TFifoResultHic *result = (TFifoResultHic*) it->second;
     result->m_nExceptions = 0;
@@ -65,6 +66,13 @@ void TFifoAnalysis::InitCounters()
     result->m_err5        = 0;
     result->m_erra        = 0;
     result->m_errf        = 0;
+    for (itChip = result->m_chipResults.begin(); itChip != result->m_chipResults.end(); ++itChip) {
+      TFifoResultChip *resultChip = (TFifoResultChip*) itChip->second;
+      resultChip->m_err0       = 0;
+      resultChip->m_err5       = 0;
+      resultChip->m_erra       = 0;
+      resultChip->m_errf       = 0;
+    }
   }
 
 }
@@ -76,19 +84,28 @@ void TFifoAnalysis::WriteResult () {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
     sprintf (fName, "FifoScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
                                                 m_config->GetfNameSuffix());
-    cout<<"DDDDDDD";
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
-    cout<<"EEEEEE";
-   
     
     FILE *fp = fopen (fName, "a");
   
     m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
-    cout<<"GGGG";
     m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile(fp);
     fclose(fp);
     //    m_result->WriteToFile     (fName);
  
+  }
+}
+
+
+void TFifoAnalysis::AnalyseHisto (TScanHisto *histo)
+{
+  for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
+    for (int ireg = 0; ireg < 32; ireg ++) {
+      m_counters.at(ichip).err0 += (int) ((*histo) (m_chipList.at(ichip), ireg, 0x0));
+      m_counters.at(ichip).err5 += (int) ((*histo) (m_chipList.at(ichip), ireg, 0x5));
+      m_counters.at(ichip).erra += (int) ((*histo) (m_chipList.at(ichip), ireg, 0xa));
+      m_counters.at(ichip).errf += (int) ((*histo) (m_chipList.at(ichip), ireg, 0xf));
+    }
   }
 }
 
@@ -113,14 +130,7 @@ void TFifoAnalysis::Run()
       m_histoQue->pop_front();
       m_mutex   ->unlock();
 
-      for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
-        for (int ireg = 0; ireg < 32; ireg ++) {
-          m_counters.at(ichip).err0 += (int) histo (m_chipList.at(ichip), ireg, 0x0);
-          m_counters.at(ichip).err5 += (int) histo (m_chipList.at(ichip), ireg, 0x5);
-          m_counters.at(ichip).erra += (int) histo (m_chipList.at(ichip), ireg, 0xa);
-          m_counters.at(ichip).errf += (int) histo (m_chipList.at(ichip), ireg, 0xf);
-        }
-      }
+      AnalyseHisto (&histo);
     }
     else usleep (300);
   }

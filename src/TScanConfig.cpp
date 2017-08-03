@@ -5,22 +5,23 @@ using namespace ScanConfig;
 TScanConfig::TScanConfig() 
 {
   // dummy values for first tests
-  m_nInj         = NINJ;
-  m_nTrig        = NTRIG;
-  m_chargeStart  = CHARGE_START;
-  m_chargeStop   = CHARGE_STOP;
-  m_chargeStep   = CHARGE_STEP;
-  m_nMaskStages  = N_MASK_STAGES;
-  m_pixPerRegion = PIX_PER_REGION;
-  m_noiseCutInv  = NOISECUT_INV;
-  m_vcasnStart   = VCASN_START;
-  m_vcasnStop    = VCASN_STOP;
-  m_vcasnStep    = VCASN_STEP;
-  m_ithrStart    = ITHR_START;
-  m_ithrStop     = ITHR_STOP;
-  m_ithrStep     = ITHR_STEP;
-  m_scanStep     = SCAN_STEP;
-  m_speedy       = SPEEDY;
+  m_nInj           = NINJ;
+  m_nTrig          = NTRIG;
+  m_chargeStart    = CHARGE_START;
+  m_chargeStop     = CHARGE_STOP;
+  m_chargeStep     = CHARGE_STEP;
+  m_nMaskStages    = N_MASK_STAGES;
+  m_pixPerRegion   = PIX_PER_REGION;
+  m_noiseCutInv    = NOISECUT_INV;
+  m_vcasnStart     = VCASN_START;
+  m_vcasnStop      = VCASN_STOP;
+  m_vcasnStep      = VCASN_STEP;
+  m_ithrStart      = ITHR_START;
+  m_ithrStop       = ITHR_STOP;
+  m_ithrStep       = ITHR_STEP;
+  m_scanStep       = SCAN_STEP;
+  m_speedy         = SPEEDY;
+  m_localBusCutRed = LOCALBUSCUTRED;
   InitParamMap();
 }
 

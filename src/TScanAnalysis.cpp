@@ -100,6 +100,16 @@ int TScanResultHic::AddChipResult (int aChipId, TScanResultChip *aChipResult)
 }
 
 
+const char* TScanResultHic::WriteHicClassification()
+{
+  if      (m_class == CLASS_UNTESTED) return "Untested";
+  else if (m_class == CLASS_GREEN)    return "Green";
+  else if (m_class == CLASS_RED)      return "Red";
+  else if (m_class == CLASS_ORANGE)   return "Orange";
+  else return "Unknown";
+}
+
+
 TScanResultChip *TScanResult::GetChipResult (common::TChipIndex idx) 
 {
   for (std::map<int, TScanResultChip*>::iterator it = m_chipResults.begin(); it != m_chipResults.end(); ++it)  {
