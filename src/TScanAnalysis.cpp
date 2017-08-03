@@ -30,19 +30,19 @@ int TScanAnalysis::ReadChipList()
 }
 
 
-void TScanAnalysis::CreateChipResults () 
-{
-  if (m_chipList.size() == 0) {
-    std::cout  << "Warning (TScanAnalysis::CreateResult): chip list is empty, doing nothing" << std::endl;
-    return;
-  }
+//void TScanAnalysis::CreateChipResults () 
+//{
+//  if (m_chipList.size() == 0) {
+//    std::cout  << "Warning (TScanAnalysis::CreateResult): chip list is empty, doing nothing" << std::endl;
+//    return;
+//  }
 
-  for (unsigned int i = 0; i < m_chipList.size(); i ++) {
-    TScanResultChip    *chipResult = GetChipResult();
-    common::TChipIndex idx         = m_chipList.at(i);
-    m_result->AddChipResult (idx, chipResult);
-  }  
-}
+//  for (unsigned int i = 0; i < m_chipList.size(); i ++) {
+//    TScanResultChip    *chipResult = GetChipResult();
+//    common::TChipIndex idx         = m_chipList.at(i);
+//    m_result->AddChipResult (idx, chipResult);
+//  }  
+//}
 
 
 void TScanAnalysis::CreateHicResults ()
@@ -66,6 +66,7 @@ void TScanAnalysis::CreateHicResults ()
 
   for (unsigned int i = 0; i < m_hics.size(); i ++) {
     TScanResultHic *hicResult = GetHicResult();
+    hicResult->m_class = CLASS_UNTESTED;
     for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip ++) {
       if (m_hics.at(i)->ContainsChip(m_chipList.at(iChip))) {
         hicResult->AddChipResult(m_chipList.at(iChip).chipId & 0xf, 

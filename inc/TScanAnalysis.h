@@ -15,6 +15,8 @@ class TScan;
 class TScanConfig;
 class TScanHisto;
 
+enum THicClassification {CLASS_UNTESTED, CLASS_GREEN, CLASS_RED, CLASS_ORANGE};
+
 // base class for classes that contain chip results
 // derive class for each analysis
 class TScanResultChip {
@@ -25,14 +27,17 @@ class TScanResultChip {
 
 
 class TScanResultHic {
+  friend class TScanAnalysis;
  protected: 
   std::map <int, TScanResultChip*> m_chipResults;
-  char m_resultFile[200];
+  char                             m_resultFile[200];
+  THicClassification               m_class;
  public:
   TScanResultHic () {};
-  virtual void WriteToFile   (FILE *fp) = 0;
-  int          AddChipResult (int aChipId, TScanResultChip *aChipResult);
-  void         SetResultFile (const char *fName) {strcpy(m_resultFile, fName);};
+  virtual void       WriteToFile       (FILE *fp) = 0;
+  int                AddChipResult     (int aChipId, TScanResultChip *aChipResult);
+  void               SetResultFile     (const char *fName) {strcpy(m_resultFile, fName);};
+  THicClassification GetClassification ()                  {return m_class;};
 };
 
 
@@ -80,7 +85,7 @@ class TScanAnalysis {
   bool                         m_first;
   virtual TScanResultChip     *GetChipResult     () = 0;
   virtual TScanResultHic      *GetHicResult      () = 0;
-  void                         CreateChipResults ();
+  //void                         CreateChipResults ();
   void                         CreateHicResults  ();
   virtual void                 CreateResult      () = 0;
   int                          ReadChipList      ();
