@@ -31,7 +31,7 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 #include "TScan.h"
-#include "TThresholdScan.h"
+#include "TSCurveScan.h"
 #include "TDigitalScan.h"
 #include "TScanConfig.h"
 #include "THisto.h"
