@@ -22,6 +22,8 @@ TLocalBusTest::TLocalBusTest (TScanConfig                   *config,
 
   m_start[0] = 0; 
   m_step [0] = 1;
+
+  CreateScanHisto();
 }
 
 
@@ -40,6 +42,7 @@ THisto TLocalBusTest::CreateHisto()
 
 void TLocalBusTest::Init() 
 {
+  TScan::Init();
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
   }
@@ -134,7 +137,12 @@ void TLocalBusTest::PrepareStep(int loopIndex)
 
 
 void TLocalBusTest::LoopEnd (int loopIndex) {
-
+  if (loopIndex == 2) {
+    while(!(m_mutex->try_lock()));
+    m_histoQue->push_back(*m_histo);
+    m_mutex   ->unlock();
+    m_histo   ->Clear();
+  }
 
 }
 
@@ -224,4 +232,11 @@ void TLocalBusTest::Execute()
 
   TestBusy(true);
   TestBusy(false);
+}
+
+
+void TLocalBusTest::Terminate()
+{
+  TScan::Terminate();
+  m_running = false;
 }

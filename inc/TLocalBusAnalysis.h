@@ -8,7 +8,7 @@
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
 #include "TScan.h"
-
+#include "Common.h"
 
 class TLocalBusResultChip : public TScanResultChip {
   friend class TLocalBusAnalysis;
@@ -56,7 +56,9 @@ class TLocalBusAnalysis : public TScanAnalysis {
  protected:
   TScanResultChip *GetChipResult () {TLocalBusResultChip *Result = new TLocalBusResultChip(); return Result;};
   TScanResultHic  *GetHicResult  () {TLocalBusResultHic  *Result = new TLocalBusResultHic (); return Result;}; 
+  void             CreateResult(){};
   void             AnalyseHisto  (TScanHisto *histo);
+ 
  public:
   TLocalBusAnalysis (std::deque<TScanHisto> *histoQue, 
                      TScan                  *aScan, 

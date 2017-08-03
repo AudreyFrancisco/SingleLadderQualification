@@ -43,6 +43,7 @@ void TLocalBusAnalysis::InitCounters()
 
 void TLocalBusAnalysis::Initialize()
 {
+  std::cout << "m_scan = " <<  m_scan << std::endl;
   ReadChipList     ();
   CreateHicResults ();
 }
@@ -116,7 +117,7 @@ void TLocalBusAnalysis::Finalize()
     else                                        hicResult->m_class = CLASS_GREEN;
   }
  
-  //  WriteResult();
+  WriteResult();
 }
 
 

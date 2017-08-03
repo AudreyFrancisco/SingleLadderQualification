@@ -25,9 +25,9 @@ class TLocalBusTest : public TScan {
                    std::deque<TScanHisto>        *histoque, 
                    std::mutex                    *aMutex);
   ~TLocalBusTest  () {};
-  void Init ();
-  void Execute ();
-  void Terminate () {};
+  void Init      ();
+  void Execute   ();
+  void Terminate () ;
 
   void Next        (int loopIndex);
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
