@@ -30,21 +30,6 @@ int TScanAnalysis::ReadChipList()
 }
 
 
-//void TScanAnalysis::CreateChipResults () 
-//{
-//  if (m_chipList.size() == 0) {
-//    std::cout  << "Warning (TScanAnalysis::CreateResult): chip list is empty, doing nothing" << std::endl;
-//    return;
-//  }
-
-//  for (unsigned int i = 0; i < m_chipList.size(); i ++) {
-//    TScanResultChip    *chipResult = GetChipResult();
-//    common::TChipIndex idx         = m_chipList.at(i);
-//    m_result->AddChipResult (idx, chipResult);
-//  }  
-//}
-
-
 void TScanAnalysis::CreateHicResults ()
 {
 

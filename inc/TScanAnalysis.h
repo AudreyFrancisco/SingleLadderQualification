@@ -85,7 +85,6 @@ class TScanAnalysis {
   bool                         m_first;
   virtual TScanResultChip     *GetChipResult     () = 0;
   virtual TScanResultHic      *GetHicResult      () = 0;
-  //void                         CreateChipResults ();
   void                         CreateHicResults  ();
   virtual void                 CreateResult      () = 0;
   int                          ReadChipList      ();
