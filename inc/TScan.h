@@ -71,6 +71,7 @@ class TScan {
   int m_enabled [MAXBOARDS];  // number of enabled chips per readout board
 
   void           CountEnabledChips  ();
+  int            FindBoardIndex     (TAlpide *chip);
   virtual THisto CreateHisto        () = 0;
 
  public:

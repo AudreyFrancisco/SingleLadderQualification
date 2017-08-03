@@ -25,13 +25,25 @@ TLocalBusTest::TLocalBusTest (TScanConfig                   *config,
 }
 
 
+THisto TLocalBusTest::CreateHisto()
+{
+  // count errors in bins corresponding to pattern, 
+  // e.g. error in pattern 0xa in communication with chip 3 -> Incr(3, 10)
+  // for the time being: count errors both for read and write chip in the 
+  // same way
+  // 17th and 18th bin are used for busy checks 
+  // (busy false error-> Incr(3,16), busy true error->Incr(3,17))
+  THisto histo ("ErrorHisto", "ErrorHisto", 15, 0 , 14, 18, 0, 17);
+  return histo;
+}
+
 
 void TLocalBusTest::Init() 
 {
-  for (int i = 0; i < m_boards.size(); i++) {
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
   }
-  for (int i = 0; i < m_chips.size(); i++) {
+  for (unsigned int i = 0; i < m_chips.size(); i++) {
     m_chips.at(i)->GetConfig()->SetInitialToken(false);
     m_chips.at(i)->GetConfig()->SetEnableDdr   (false);
     AlpideConfig::ConfigureCMU(m_chips.at(i));
@@ -41,7 +53,7 @@ void TLocalBusTest::Init()
 
 int TLocalBusTest::GetChipById (std::vector <TAlpide*> chips, int id) 
 {
-  for (int i = 0; i < chips.size(); i++) {
+  for (unsigned int i = 0; i < chips.size(); i++) {
     if (chips.at(i)->GetConfig()->GetChipId() == id) return i;
   }
 
@@ -49,17 +61,17 @@ int TLocalBusTest::GetChipById (std::vector <TAlpide*> chips, int id)
 }
 
 
-int TLocalBusTest::FindDaisyChains(std::vector <TAlpide *> chips) 
+void TLocalBusTest::FindDaisyChains(std::vector <TAlpide *> chips) 
 {
   int totalChips = 0;
   int iChip      = 0;
   int maxChip    = -1;
   std::vector <TAlpide *> daisyChain;
 
-  while ((totalChips < chips.size()) && (maxChip < (int)chips.size()-1))
+  while ((totalChips < (int)chips.size()) && (maxChip < (int)chips.size()-1))
   {
     // find next enabled chip and put into new daisy chain vector
-    for (iChip = maxChip + 1; (iChip < chips.size()) && (!(chips.at(iChip)->GetConfig()->IsEnabled())); iChip++) {
+    for (iChip = maxChip + 1; (iChip < (int)chips.size()) && (!(chips.at(iChip)->GetConfig()->IsEnabled())); iChip++) {
       totalChips ++;
     }
 
@@ -87,9 +99,9 @@ int TLocalBusTest::FindDaisyChains(std::vector <TAlpide *> chips)
     daisyChain.clear();    
   }
 
-  for (int i = 0; i < m_daisyChains.size(); i++) {
+  for (unsigned int i = 0; i < m_daisyChains.size(); i++) {
     std::cout << "Daisy chain no " << i << ": " << std::endl;
-    for (int ii = 0; ii < m_daisyChains.at(i).size(); ii ++) {
+    for (unsigned int ii = 0; ii < m_daisyChains.at(i).size(); ii ++) {
       std::cout << "  chip id " << m_daisyChains.at(i).at(ii)->GetConfig()->GetChipId() << std::endl;
     }
   }
@@ -101,14 +113,15 @@ void TLocalBusTest::PrepareStep(int loopIndex)
 
   switch (loopIndex) {
   case 0:    // innermost loop: change read chip
-    m_readChip = m_daisyChains.at(m_value[2]).at(m_value[0]);
+    m_readChip       = m_daisyChains.at(m_value[2]).at(m_value[0]);
     break;
   case 1:    // 2nd loop: change write chip
-    m_writeChip = m_daisyChains.at(m_value[2]).at(m_value[1]);
+    m_writeChip  = m_daisyChains.at(m_value[2]).at(m_value[1]);
+    m_boardIndex = FindBoardIndex (m_writeChip);
     // give token to write chip, take away in loop end
 
     m_writeChip->ModifyRegisterBits (Alpide::REG_CMUDMU_CONFIG, 4, 1, 1);
-    m_boards[0]->SendOpCode(Alpide::OPCODE_RORST);
+    m_boards[0]->SendOpCode         (Alpide::OPCODE_RORST);
     break;
   case 2:    // outermost loop: change daisy chain
     m_stop[0] = m_daisyChains.at(m_value[2]).size();
@@ -136,9 +149,20 @@ void TLocalBusTest::Next (int loopIndex) {
 
 bool TLocalBusTest::TestPattern (int pattern) {
   TDMUDebugStream debugStream;
-  int             readId  = m_readChip->GetConfig()->GetChipId();
+  int             readId  = m_readChip ->GetConfig()->GetChipId();
   int             writeId = m_writeChip->GetConfig()->GetChipId();
-  uint16_t             Value   = 1 | ((pattern & 0xf) << 1);
+  uint16_t        Value   = 1 | ((pattern & 0xf) << 1);
+
+  common::TChipIndex read_idx, write_idx;
+
+  read_idx.boardIndex   = m_boardIndex;
+  read_idx.chipId       = readId;
+  read_idx.dataReceiver = m_readChip->GetConfig()->GetParamValue("RECEIVER");
+
+  write_idx.boardIndex   = m_boardIndex;
+  write_idx.chipId       = writeId;
+  write_idx.dataReceiver = m_writeChip->GetConfig()->GetParamValue("RECEIVER");
+
 
   m_writeChip->WriteRegister (REG_TEST_CONTROL, Value);
   m_writeChip->GetReadoutBoard()->SendOpCode(Alpide::OPCODE_DEBUG);
@@ -149,6 +173,8 @@ bool TLocalBusTest::TestPattern (int pattern) {
 
   if((debugStream.LocalBusValue & 0xf) != (pattern & 0xf)) {
     std::cout << "ERROR (BUS VALUE): written 0x" << std::hex << pattern << std::dec << " to chip " << writeId << ", read " << std::hex << debugStream.LocalBusValue << std::dec << " from chip " << readId << std::endl;
+    m_histo->Incr(read_idx,  writeId & 0xf, pattern);
+    m_histo->Incr(write_idx, readId  & 0xf, pattern);
     return false;
   }
   return true;
@@ -158,8 +184,18 @@ bool TLocalBusTest::TestPattern (int pattern) {
 bool TLocalBusTest::TestBusy(bool busy) 
 {
   TBMUDebugStream bmuDebugStream;
-  int readId  = m_readChip->GetConfig()->GetChipId();
+  int readId  = m_readChip ->GetConfig()->GetChipId();
   int writeId = m_writeChip->GetConfig()->GetChipId();
+
+  common::TChipIndex read_idx, write_idx;
+
+  read_idx.boardIndex   = m_boardIndex;
+  read_idx.chipId       = readId;
+  read_idx.dataReceiver = m_readChip->GetConfig()->GetParamValue("RECEIVER");
+
+  write_idx.boardIndex   = m_boardIndex;
+  write_idx.chipId       = writeId;
+  write_idx.dataReceiver = m_writeChip->GetConfig()->GetParamValue("RECEIVER");
 
   m_writeChip->WriteRegister (REG_TEST_CONTROL, busy ? 0x200 : 0x000);
   m_writeChip->GetReadoutBoard()->SendOpCode(Alpide::OPCODE_DEBUG);
@@ -171,15 +207,16 @@ bool TLocalBusTest::TestBusy(bool busy)
 
   if (((bool) busyRead) == busy) { // busy logic is active low!
     std::cout << "ERROR (BUSY): written " << std::hex << (int) busy << std::dec << " to chip " << writeId << ", read " << std::hex << (int)(! busyRead) << std::dec << " from chip " << readId << std::endl;
+    m_histo->Incr(read_idx,  writeId & 0xf, 16 + (busy?1:0));
+    m_histo->Incr(write_idx, readId  & 0xf, 16 + (busy?1:0));
+    return false;
   }
+  return true;
 }
 
 
 void TLocalBusTest::Execute() 
 {
-  TBMUDebugStream bmuDebugStream;
-  //  m_writeChip->WriteRegister(REG_TEST_CONTROL, 0x215);
-
   TestPattern (0xf);
   TestPattern (0x0);
   TestPattern (0xa);

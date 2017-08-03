@@ -9,13 +9,14 @@ class TLocalBusTest : public TScan {
  private:
   TAlpide *m_readChip;
   TAlpide *m_writeChip;
+  int      m_boardIndex;
   std::vector<std::vector <TAlpide*>> m_daisyChains;
-  int      FindDaisyChains(std::vector <TAlpide *> chips);
+  void     FindDaisyChains(std::vector <TAlpide *> chips);
   int      GetChipById    (std::vector <TAlpide *> chips, int previousId);
   bool     TestPattern    (int pattern);
   bool     TestBusy       (bool busy);
  protected: 
-  THisto CreateHisto() {THisto histo; return histo;};
+  THisto   CreateHisto();
  public:
   TLocalBusTest   (TScanConfig                   *config, 
                    std::vector <TAlpide *>        chips, 
@@ -28,10 +29,10 @@ class TLocalBusTest : public TScan {
   void Execute ();
   void Terminate () {};
 
-  void Next (int loopIndex);
+  void Next        (int loopIndex);
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
-  void LoopEnd   (int loopIndex);
-  void PrepareStep(int loopIndex);
+  void LoopEnd     (int loopIndex);
+  void PrepareStep (int loopIndex);
 
 };
 

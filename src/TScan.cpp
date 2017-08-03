@@ -49,6 +49,17 @@ void TScan::Init()
 }
 
 
+// seems the board index is not accessible anywhere.
+// for the time being do like this...
+int  TScan::FindBoardIndex (TAlpide *chip) 
+{
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    if (m_boards.at(i) == chip->GetReadoutBoard()) return i;
+  }
+  return -1;
+}
+
+
 void TScan::Terminate()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {

@@ -16,7 +16,6 @@ class TFifoTest : public TScan {
   void     ReadMem        (TAlpide *chip, int ARegion, int AOffset, int &AValue);
   void     WriteMem       (TAlpide *chip, int ARegion, int AOffset, int AValue);
   bool     TestPattern    (int pattern);
-  int      FindBoardIndex (TAlpide *chip);
  protected: 
   THisto   CreateHisto();
  public:
