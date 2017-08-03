@@ -20,8 +20,8 @@ namespace ScanConfig {
   const int ITHR_START     = 30;
   const int ITHR_STOP      = 100;
   const int ITHR_STEP      = 1;
-  const int VCASN_START    = 40;
-  const int VCASN_STOP     = 60;
+  const int VCASN_START    = 20; //30; //40;
+  const int VCASN_STOP     = 80; //60; //<=100
   const int VCASN_STEP     = 1;
   const int SCAN_STEP      = 16; //Grab every Xth row (for tuneITHR/VCASN scan only).
                                  //Speeds up scan; changing this has little effect on result accuracy.

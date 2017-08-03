@@ -215,7 +215,7 @@ bool TThresholdAnalysis::CheckPixelStuck(TGraph* aGraph)
 //  Differentiates manually; may be less accurate.
 //  Returns 0 if |mean|>500, which happens when a pixel is received twice.  Ignore these when calculating the chip mean.
 double meanGraph(TGraph* resultGraph) { //returns the weighted mean x value
-  std::cout << "Mean" << std::endl;
+  //std::cout << "Mean" << std::endl;
   double sum=0.0;
   double norm=0.0;
   double * xs = resultGraph->GetX();
@@ -226,7 +226,7 @@ double meanGraph(TGraph* resultGraph) { //returns the weighted mean x value
     norm += ys[i];
     std::cout << ys[i] << ",";
   }
-  std::cout << "], sum=" << sum << std::endl;
+  std::cout << "], sum=" << sum << ", norm=" << norm << std::endl;
 
   if(abs(sum/norm) > 500) {  //outliers occur when a pixel is received twice; return 0.
     return 0;
@@ -250,12 +250,16 @@ double rmsGraph(TGraph* resultGraph) {
 
 void ddxGraph(TGraph* aGraph, TGraph* resultGraph) { //resultGraph contains the derivative of aGraph wrt x (1st order)
   //Results are at MIDPOINTS of the old graph!
+  std::cout << "ddxGraph" << std::endl;
   double * xs = aGraph->GetX();  //all x-coords
   double * ys = aGraph->GetY();
+  std::cout << "ys=[";
   for (int i = 0; i < aGraph->GetN()-1; i++) {
     //xval=avg of x1 and x2
+    std::cout << ys[i] << ",";
     resultGraph->SetPoint(resultGraph->GetN(), 0.5*(xs[i+1]+xs[i]), (ys[i+1]-ys[i])/(xs[i+1]-xs[i]));
   }
+  std::cout << "]" << std::endl;
 }
 
 
@@ -274,7 +278,7 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
   common::TErrFuncFitResult fitResult_dummy;
 
   if(speedy==1) { //Looks good!
-    std::cout << "Speedy..." << std::endl;
+    //std::cout << "Speedy..." << std::endl;
     //This should return a TGraph @ the derivative of aGraph ("d" option in copy constructor).  CHECK.
     TGraph* diffGraph = new TGraph();
     ddxGraph(aGraph, diffGraph); // = ddxGraph(aGraph);
@@ -480,7 +484,7 @@ void TThresholdAnalysis::AnalyseHisto (TScanHisto *histo) {
     std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size() << std::endl;
     
     for (int iChip = 0; iChip < (int)m_chipList.size(); iChip++) {
-      
+
       for (int iCol = 0; iCol < common::nCols; iCol ++) {
 	int iPulseStart;
         int iPulseStop;
@@ -500,8 +504,11 @@ void TThresholdAnalysis::AnalyseHisto (TScanHisto *histo) {
    	  int entries =(int)(*histo)(m_chipList.at(iChip), 
    				      iCol, 
    				      iPulse);
-	  
-   	  gDummy->SetPoint(gDummy->GetN(),
+   	  /*if(entries==3) {
+            std::cout << "**GOT ONE:**   ";
+            std::cout << "(" << gDummy->GetN() << "," << iPulse*m_resultFactor << "," << entries << ")" << std::endl;
+          }*/
+          gDummy->SetPoint(gDummy->GetN(),
    			   iPulse*m_resultFactor,
    			   entries);
 	  
@@ -559,7 +566,7 @@ void TThresholdAnalysis::AnalyseHisto (TScanHisto *histo) {
    	 	    fitResult.redChi2);
 	  }
 	  if (fitResult.threshold!=0) { //if no error/dead pixel ///**READ THIS**:  Ignored points are STILL printed to the data file!
-            if(fitResult.threshold<50) std::cout << "TTA571: Thresh " << fitResult.threshold << " <50" << std::endl;
+            //if(fitResult.threshold<50) std::cout << "TTA571: Thresh " << fitResult.threshold << " <50" << std::endl;
 	    m_threshold.at(intIndexDummy).sum+=fitResult.threshold; //row;
 	    m_threshold.at(intIndexDummy).sum2+=pow(fitResult.threshold,2); //row*row
 	    m_threshold.at(intIndexDummy).entries+=1;

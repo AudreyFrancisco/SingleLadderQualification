@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
   TScanAnalysis  *analysis = new TLocalBusAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
 
   TtuneVCASNScan *myScan = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TThresholdAnalysis *analysis = new TThresholdAnalysis(&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex, 1); //DON'T FORGET RESULTFACTOR!!
+  TThresholdAnalysis *analysis = new TThresholdAnalysis(&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex, 1); //remember resultFactor...
 
   //scanLoop(myScan);
   std::cout << "starting thread" << std::endl;
@@ -124,10 +124,6 @@ int main(int argc, char** argv) {
   //  std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
   //}
 
-  std::map<int,common::TStatVar> thr_list = analysis->DeleteThis();
-  for(std::map<int,common::TStatVar>::iterator it = thr_list.begin(); it != thr_list.end(); it++) {
-    std::cout << "Chip " << it->first << ", threshold = " << it->second.mean << std::endl;
-  }
 
   // std::vector <TCounter> counters = ((TDigitalAnalysis*)analysis)->GetCounters();
 

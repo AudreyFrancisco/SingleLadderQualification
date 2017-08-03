@@ -12,25 +12,8 @@ TSCurveScan::TSCurveScan       (TScanConfig                   *config,
                                 std::vector <TReadoutBoard *>  boards,
                                 std::deque<TScanHisto>        *histoQue,
                                 std::mutex                    *aMutex)
-  : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
-{
-  /*strcpy(m_name, "Threshold Scan");
-  m_start[0]  = m_config->GetChargeStart();
-  m_stop [0]  = m_config->GetChargeStop ();
-  m_step [0]  = m_config->GetChargeStep ();
+  : TMaskScan (config, chips, hics, boards, histoQue, aMutex) {}
 
-  m_start[1]  = 0;
-  //m_step [1]  = maskStepSize;
-  m_stop [1]  = m_config->GetNMaskStages();
-
-  m_start[2]  = 0;
-  m_step [2]  = 1;
-  m_stop [2]  = 1;
-
-  m_VPULSEH   = 170;
-  m_nTriggers = m_config->GetParamValue("NINJ");
-  CreateScanHisto();*/
-}
 
 TThresholdScan::TThresholdScan (TScanConfig                   *config,
                                 std::vector <TAlpide *>        chips,
@@ -250,6 +233,9 @@ void TtuneVCASNScan::PrepareStep (int loopIndex)
     for (int ichip = 0; ichip < (int)m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_VCASN, m_value[0]);
+      //uint16_t tmp;
+      //m_chips.at(ichip)->ReadRegister(Alpide::REG_ITHR, tmp);
+      //std::cout << "v=" << m_value[0] << ", i=" << tmp << std::endl;
     }
     break;
   case 1:    // 2nd loop: mask staging
@@ -270,6 +256,9 @@ void TtuneITHRScan::PrepareStep (int loopIndex)
     for (int ichip = 0; ichip < (int)m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_ITHR, m_value[0]);
+      //uint16_t tmp;
+      //m_chips.at(ichip)->ReadRegister(Alpide::REG_VCASN, tmp);
+      //std::cout << m_value[0] << ", v=" << tmp << std::endl;
     }
     break;
   case 1:    // 2nd loop: mask staging
@@ -295,6 +284,7 @@ void TSCurveScan::Execute()
 
   for (int iboard = 0; iboard < (int)m_boards.size(); iboard ++) {
 		Hits->clear();
+    usleep(1000);
     ReadEventData (Hits, iboard);
     FillHistos    (Hits, iboard);
   }
