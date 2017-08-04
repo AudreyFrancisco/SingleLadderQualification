@@ -102,7 +102,7 @@ void TNoiseOccupancy::Init        ()
   TScan::Init();
   m_running = true;
   CountEnabledChips();
-  for (int i = 0; i < m_boards.size(); i++) {
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
     std::cout << "Board " << i << ", found " << m_enabled[i] << " enabled chips" << std::endl;
     ConfigureBoard(m_boards.at(i));
 
@@ -110,11 +110,11 @@ void TNoiseOccupancy::Init        ()
     m_boards.at(i)->SendOpCode (Alpide::OPCODE_PRST);
   }
 
-  for (int i = 0; i < m_chips.size(); i ++) {
+  for (unsigned int i = 0; i < m_chips.size(); i ++) {
     if (! (m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     ConfigureChip (m_chips.at(i));
   }
-  for (int i = 0; i < m_boards.size(); i++) {
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode (Alpide::OPCODE_RORST);     
     m_boards.at(i)->StartRun   ();
   }
@@ -126,7 +126,6 @@ void TNoiseOccupancy::ReadEventData (std::vector <TPixHit> *Hits, int iboard, in
   unsigned char buffer[1024*4000]; 
   int           n_bytes_data, n_bytes_header, n_bytes_trailer;
   int           itrg = 0, trials = 0;
-  int           nBad = 0, prioErrors = 0;
   TBoardHeader  boardInfo;
 
   while (itrg < nTriggers * m_enabled[iboard]) {
@@ -162,9 +161,7 @@ void TNoiseOccupancy::FillHistos     (std::vector<TPixHit> *Hits, int board)
   common::TChipIndex idx;
   idx.boardIndex = board;
    
-  int chipId, region, dcol, address;
-
-  for (int i = 0; i < Hits->size(); i++) {
+  for (unsigned int i = 0; i < Hits->size(); i++) {
     idx.dataReceiver = Hits->at(i).channel;
     idx.chipId       = Hits->at(i).chipId;
 
@@ -194,10 +191,10 @@ void TNoiseOccupancy::Execute     ()
   // always send kTrigPerTrain triggers, except for last train (in case total nTrig is no multiple of kTrigPerTrain)
   int nTriggers = (m_value[0] == m_stop[0] - 1) ? m_nLast : kTrigPerTrain;
 
-  for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
     m_boards.at(iboard)->Trigger(nTriggers);
   }
-  for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
 		Hits->clear();
     ReadEventData(Hits, iboard, nTriggers);
     FillHistos   (Hits, iboard);
@@ -209,7 +206,7 @@ void TNoiseOccupancy::Execute     ()
 void TNoiseOccupancy::Terminate ()
 {
   TScan::Terminate();
-  for (int iboard = 0; iboard < m_boards.size(); iboard ++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
     TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(iboard));
     if (myMOSAIC) {
       myMOSAIC->StopRun();
