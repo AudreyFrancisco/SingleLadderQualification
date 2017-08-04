@@ -43,7 +43,7 @@ void THic::PowerOn()
 {
   if (IsPowered()) return;
 
-  // otherwise: power on
+  if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
 }
 
 
@@ -51,8 +51,35 @@ void THic::PowerOff()
 {
   if (!IsPowered()) return;
   
-  //otherwise: power off 
+  if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
   // Q: do we need to consider case where part of the channels is on?
+}
+
+
+float THic::GetIddd() 
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetDigitalCurrent(m_pbMod);
+  }
+  return 0;
+}
+
+
+float THic::GetIdda()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetAnalogCurrent(m_pbMod);
+  }
+  return 0;
+}
+
+
+float THic::GetIBias()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetBiasCurrent();
+  }
+  return 0;
 }
 
 

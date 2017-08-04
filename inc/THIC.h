@@ -26,9 +26,9 @@ class THic {
   bool                 IsPowered      ();
   void                 PowerOn        ();
   void                 PowerOff       ();
-  float                GetIddd        () {return 0;};
-  float                GetIdda        () {return 0;};
-  float                GetIBias       () {return 0;};
+  float                GetIddd        ();
+  float                GetIdda        ();
+  float                GetIBias       ();
   float                GetTemperature ();
   std::string          GetDbId        () {return m_dbId;};
   int                  GetModId       () {return m_moduleId;};
