@@ -40,10 +40,10 @@ THisto TFifoTest::CreateHisto ()
 void TFifoTest::Init() 
 {
   TScan::Init();
-  for (int i = 0; i < m_boards.size(); i++) {
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
   }
-  for (int i = 0; i < m_chips.size(); i++) {
+  for (unsigned int i = 0; i < m_chips.size(); i++) {
     AlpideConfig::ConfigureCMU(m_chips.at(i));
   }
 }
@@ -51,7 +51,7 @@ void TFifoTest::Init()
 
 int TFifoTest::GetChipById (std::vector <TAlpide*> chips, int id) 
 {
-  for (int i = 0; i < chips.size(); i++) {
+  for (unsigned int i = 0; i < chips.size(); i++) {
     if (chips.at(i)->GetConfig()->GetChipId() == id) return i;
   }
 

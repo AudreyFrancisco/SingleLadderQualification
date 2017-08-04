@@ -42,7 +42,7 @@ class TConfig {
   void          SetUsePowerBoard   (bool UsePB) {fUsePowerBoard = UsePB;};
   TChipConfig  *GetChipConfig      (unsigned int iChip);
   TChipConfig  *GetChipConfigById  (int chipId);
-  TBoardConfig *GetBoardConfig     (int iBoard);
+  TBoardConfig *GetBoardConfig     (unsigned int iBoard);
   TScanConfig  *GetScanConfig      () {return fScanConfig;};
   void          WriteToFile        (const char *fName);
 

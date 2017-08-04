@@ -91,7 +91,7 @@ TChipConfig *TConfig::GetChipConfig (unsigned int iChip) {
 }
 
 
-TBoardConfig *TConfig::GetBoardConfig (int iBoard){
+TBoardConfig *TConfig::GetBoardConfig (unsigned int iBoard){
   if (iBoard < fBoardConfigs.size()) {
     return fBoardConfigs.at(iBoard);
   }
@@ -289,10 +289,10 @@ void TConfig::DecodeLine(const char *Line)
     BoardStop  = fBoardConfigs.size();
   }
   else {
-    ChipStart  = (Index<fChipConfigs.size())  ? Index   : -1;
-    ChipStop   = (Index<fChipConfigs.size())  ? Index+1 : -1;
-    BoardStart = (Index<fBoardConfigs.size()) ? Index   : -1;
-    BoardStop  = (Index<fBoardConfigs.size()) ? Index+1 : -1;
+    ChipStart  = (Index< (int)fChipConfigs.size())  ? Index   : -1;
+    ChipStop   = (Index< (int)fChipConfigs.size())  ? Index+1 : -1;
+    BoardStart = (Index< (int)fBoardConfigs.size()) ? Index   : -1;
+    BoardStop  = (Index< (int)fBoardConfigs.size()) ? Index+1 : -1;
   }
 
   // Todo: correctly handle the number of readout boards

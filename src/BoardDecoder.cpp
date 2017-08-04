@@ -215,6 +215,7 @@ bool BoardDecoder::DecodeEventRU(unsigned char *data, int nBytes, int &nBytesHea
 {
   nBytesHeader = 0;
   nBytesTrailer = 0;
+  return true;
 }
 
 
@@ -241,7 +242,7 @@ bool BoardDecoder::DecodeEventMOSAIC(unsigned char *data, int nBytes, int &nByte
 		return false;
 
 	return true;
-};
+}
 
 
 // Adapt the (char x 4) -> (unsigned int) conversion depending to the endianess
