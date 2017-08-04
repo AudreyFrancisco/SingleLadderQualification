@@ -8,8 +8,21 @@
 #include "THisto.h"
 
 
+typedef struct {
+  float iddaSwitchon;
+  float idddSwitchon;
+  float iddaClocked;
+  float idddClocked;
+  float iddaConfigured;
+  float idddConfigured;
+  float ibias0;
+  float ibias3;
+} THicCurrents;
+
 class TPowerTest : public TScan {
  private: 
+  THic *m_testHic;
+  void CreateMeasurements();
  protected:
  public:
   TPowerTest  (TScanConfig                   *config, 
@@ -20,12 +33,12 @@ class TPowerTest : public TScan {
                std::mutex                    *aMutex);
   ~TPowerTest () {};
 
-  void Init        () {};
-  void Execute     () {};
-  void Terminate   () {};
-  void LoopStart   (int loopIndex) {};
+  void Init        ();
+  void Execute     ();
+  void Terminate   ();
+  void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void LoopEnd     (int loopIndex) {};
-  void PrepareStep (int loopIndex) {};
+  void PrepareStep (int loopIndex);
 };
 
 
