@@ -29,6 +29,10 @@ TPowerTest::TPowerTest (TScanConfig                   *config,
 void TPowerTest::CreateMeasurements()
 {
   // create map with measurement structure for each HIC
+  for (unsigned int i = 0; i < m_hics.size(); i++) {
+    THicCurrents hicCurrents;
+    m_hicCurrents.insert (std::pair<std::string, THicCurrents> (m_hics.at(i)->GetDbId(), hicCurrents));
+  }
 }
 
 

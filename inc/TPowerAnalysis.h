@@ -39,7 +39,7 @@ class TPowerAnalysis : public TScanAnalysis {
                  TPowerResult           *aResult = 0);
   void Initialize () {};
   void Run        () {};
-  void Finalize   () {};
+  void Finalize   ();
 };
 
 #endif

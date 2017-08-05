@@ -2,6 +2,8 @@
 #define TPOWERTEST_H
 
 #include <mutex>
+#include <map>
+#include <string>
 
 #include "Common.h"
 #include "TScan.h"
@@ -23,6 +25,7 @@ class TPowerTest : public TScan {
  private: 
   THic *m_testHic;
   void CreateMeasurements();
+  std::map <std::string, THicCurrents> m_hicCurrents;
  protected:
  public:
   TPowerTest  (TScanConfig                   *config, 
@@ -39,6 +42,7 @@ class TPowerTest : public TScan {
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void LoopEnd     (int loopIndex) {};
   void PrepareStep (int loopIndex);
+  std::map <std::string, THicCurrents> GetCurrents() {return m_hicCurrents;};
 };
 
 
