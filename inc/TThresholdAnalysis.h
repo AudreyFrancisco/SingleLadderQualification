@@ -109,6 +109,7 @@ class TThresholdResultChip : public TScanResultChip {
 
 class TThresholdResultHic : public TScanResultHic {
   friend class TThresholdAnalysis;
+  friend class TApplyTuning;
  private:
   int m_nPixelsNoThreshold;
  public: 

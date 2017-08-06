@@ -30,6 +30,14 @@ bool THic::ContainsChip (int index)
   return ContainsChip (idx);
 }
 
+TAlpide *THic::GetChipById (int chipId)
+{
+  for (unsigned int i = 0; i < m_chips.size(); i ++) {
+    if ( (chipId && 0xf) == (m_chips.at(i)->GetConfig()->GetChipId() &0xf == chipId & 0xf)) return m_chips.at(i);
+  }
+  return 0;
+}
+
 
 bool THic::IsPowered() 
 {

@@ -37,6 +37,7 @@ class THic {
   virtual bool         ContainsChip   (common::TChipIndex idx) = 0;
   bool                 ContainsChip   (int index);
   virtual common::TChipIndex GetChipIndex   (int i) = 0;
+  TAlpide             *GetChipById    (int chipId);
 };
 
 
