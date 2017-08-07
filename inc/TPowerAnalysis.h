@@ -27,7 +27,7 @@ class TPowerResultHic : public TScanResultHic {
  protected:
  public:
   TPowerResultHic () : TScanResultHic () {};
-  void WriteToFile (FILE *fp) {};
+  void WriteToFile (FILE *fp);
 };
 
 
@@ -52,6 +52,7 @@ class TPowerAnalysis : public TScanAnalysis {
   TScanResultHic  *GetHicResult () {TPowerResultHic  *result = new TPowerResultHic();  return result;};
   void             CreateResult () {};
   void             InitCounters () {};
+  void             WriteResult  ();
   void             AnalyseHisto (TScanHisto *histo) {};
  public:
   TPowerAnalysis(std::deque<TScanHisto> *histoQue, 

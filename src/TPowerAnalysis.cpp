@@ -38,7 +38,7 @@ void TPowerAnalysis::Finalize()
 
     hicResult->m_class        = GetClassification(hicCurrents);
   }
-
+  WriteResult();
 }
 
 
@@ -82,4 +82,44 @@ THicClassification TPowerAnalysis::GetClassificationOB (THicCurrents currents)
   return CLASS_GREEN;
 
   // TODO: Add orange for back bias
+}
+
+
+void TPowerAnalysis::WriteResult() 
+{
+  char fName[200];
+  
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    sprintf (fName, "PowerTestResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+                                                 m_config->GetfNameSuffix());
+    m_scan  ->WriteConditions (fName, m_hics.at(ihic));
+    
+    FILE *fp = fopen (fName, "a");
+  
+    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
+    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile(fp);
+    fclose(fp);
+    //    m_result->WriteToFile     (fName);
+ 
+  }
+
+}
+
+
+void TPowerResultHic::WriteToFile (FILE *fp) 
+{
+  fprintf (fp, "HIC Result: \n\n");
+
+  fprintf (fp, "HIC Classification: %s\n\n", WriteHicClassification());
+
+  fprintf (fp, "IDDD at switchon: %.3f\n", idddSwitchon);
+  fprintf (fp, "IDDA at switchon: %.3f\n", iddaSwitchon);
+  fprintf (fp, "IDDD with clock:  %.3f\n", idddClocked);
+  fprintf (fp, "IDDA with clock:  %.3f\n", iddaClocked);
+  fprintf (fp, "IDDD configured:  %.3f\n", idddConfigured);
+  fprintf (fp, "IDDA configured:  %.3f\n\n", iddaConfigured);
+
+  fprintf (fp, "IBias at 0V:      %.3f\n", ibias0);
+  fprintf (fp, "IBias at 3V:      %.3f\n", ibias3);
+
 }

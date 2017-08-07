@@ -72,6 +72,7 @@ void TPowerTest::Execute()
     TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(boardIndices.at(i));
     board->enableControlInterfaces(false);
   }
+
   m_testHic->PowerOn();
   sleep(1);
 
