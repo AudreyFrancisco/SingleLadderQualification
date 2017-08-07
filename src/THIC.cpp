@@ -33,7 +33,7 @@ bool THic::ContainsChip (int index)
 TAlpide *THic::GetChipById (int chipId)
 {
   for (unsigned int i = 0; i < m_chips.size(); i ++) {
-    if ( (chipId && 0xf) == (m_chips.at(i)->GetConfig()->GetChipId() &0xf == chipId & 0xf)) return m_chips.at(i);
+    if ( (m_chips.at(i)->GetConfig()->GetChipId() &0xf) == (chipId & 0xf)) return m_chips.at(i);
   }
   return 0;
 }
@@ -130,6 +130,15 @@ common::TChipIndex THicIB::GetChipIndex (int i)
 }
 
 
+std::vector<int> THicIB::GetBoardIndices () 
+{
+  std::vector<int> Indices;
+  Indices.push_back(m_boardidx);
+
+  return Indices;
+}
+
+
 bool THicIB::ContainsChip (common::TChipIndex idx)
 {
   // probably the check on board id is enough...
@@ -167,6 +176,16 @@ common::TChipIndex THicOB::GetChipIndex (int i)
   }
 
   return idx;
+}
+
+
+std::vector<int> THicOB::GetBoardIndices () 
+{
+  std::vector<int> Indices;
+  Indices.push_back(m_boardidx0);
+  Indices.push_back(m_boardidx8);
+
+  return Indices;
 }
 
 

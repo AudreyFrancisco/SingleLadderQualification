@@ -22,22 +22,24 @@ class THic {
   std::string           m_dbId;      // ... in db: int? string?
  public:
   THic (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
-  int                  GetNumber      () {return m_hicNumber;};
-  bool                 IsPowered      ();
-  void                 PowerOn        ();
-  void                 PowerOff       ();
-  float                GetIddd        ();
-  float                GetIdda        ();
-  float                GetIBias       ();
-  float                GetTemperature ();
-  std::string          GetDbId        () {return m_dbId;};
-  int                  GetModId       () {return m_moduleId;};
-  int                  GetNChips      () {return m_chips.size();};
-  int                  AddChip        (TAlpide *chip);
-  virtual bool         ContainsChip   (common::TChipIndex idx) = 0;
-  bool                 ContainsChip   (int index);
-  virtual common::TChipIndex GetChipIndex   (int i) = 0;
-  TAlpide             *GetChipById    (int chipId);
+  int                        GetNumber       () {return m_hicNumber;};
+  bool                       IsPowered       ();
+  void                       PowerOn         ();
+  void                       PowerOff        ();
+  float                      GetIddd         ();
+  float                      GetIdda         ();
+  float                      GetIBias        ();
+  float                      GetTemperature  ();
+  std::string                GetDbId         () {return m_dbId;};
+  int                        GetModId        () {return m_moduleId;};
+  int                        GetNChips       () {return m_chips.size();};
+  int                        AddChip         (TAlpide *chip);
+  virtual bool               ContainsChip    (common::TChipIndex idx) = 0;
+  bool                       ContainsChip    (int index);
+  virtual common::TChipIndex GetChipIndex    (int i) = 0;
+  virtual std::vector<int>   GetBoardIndices () = 0;
+  std::vector <TAlpide*>     GetChips        () {return m_chips;};
+  TAlpide                   *GetChipById     (int chipId);
 };
 
 
@@ -53,6 +55,7 @@ class THicOB : public THic {
  public:
   THicOB (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
   common::TChipIndex GetChipIndex    (int i);
+  std::vector<int>   GetBoardIndices ();
   bool               ContainsChip    (common::TChipIndex idx);
   void               ConfigureMaster (int Master, int board, int rcv, int ctrl);
 };
@@ -67,6 +70,7 @@ class THicIB : public THic {
  public:
   THicIB (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
   common::TChipIndex GetChipIndex (int i);
+  std::vector<int>   GetBoardIndices ();
   bool               ContainsChip (common::TChipIndex idx);
 };
 

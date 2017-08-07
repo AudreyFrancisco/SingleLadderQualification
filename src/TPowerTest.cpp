@@ -1,5 +1,6 @@
 #include <string.h>
 #include "TPowerTest.h"
+#include "AlpideConfig.h"
 
 TPowerTest::TPowerTest (TScanConfig                   *config, 
                         std::vector <TAlpide *>        chips, 
@@ -39,9 +40,8 @@ void TPowerTest::CreateMeasurements()
 void TPowerTest::Init()
 {
   TScan::Init();
- 
-  // - switch off power to all HICs
-  // - switch off clock of MOSAIC
+
+  // switch power off here or hic-wise in execute?
 
 }
 
@@ -62,12 +62,58 @@ void TPowerTest::PrepareStep(int loopIndex)
 
 void TPowerTest::Execute()
 {
-  // switch on power to m_testHic, wait, measure
-  // switch on clock, wait, measure
-  // configure, wait, measure
-  // Switch on bias at 0V, wait, measure
-  // change bias to 3V, wait, measure
-  // switch off
+  std::vector<int>       boardIndices = m_testHic->GetBoardIndices();
+  std::vector<TAlpide*>  chips        = m_testHic->GetChips();
+  
+  std::map<std::string, THicCurrents>::iterator currentIt = m_hicCurrents.find(m_testHic->GetDbId());
+
+  m_testHic->PowerOff();
+
+  for (unsigned int i = 0; i < boardIndices.size(); i++) {
+    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(i);
+    board->enableControlInterfaces(false);
+  }
+
+  m_testHic->PowerOn();
+  sleep(1);
+
+  // measure -> switchon, no clock
+  currentIt->second.idddSwitchon = m_testHic->GetIddd();
+  currentIt->second.iddaSwitchon = m_testHic->GetIdda();
+
+  for (unsigned int i = 0; i < boardIndices.size(); i++) {
+    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(i);
+    board->enableControlInterfaces(true);
+    board->SendOpCode (Alpide::OPCODE_GRST);
+  }  
+
+  sleep(1);
+
+  // measure -> Clocked
+  currentIt->second.idddClocked = m_testHic->GetIddd();
+  currentIt->second.iddaClocked = m_testHic->GetIdda();
+
+  for (unsigned int i = 0; i < chips.size(); i++) {
+    if (!(chips.at(i)->GetConfig()->IsEnabled())) continue;
+    AlpideConfig::BaseConfig  (chips.at(i));
+    AlpideConfig::ConfigureCMU(chips.at(i));
+  }
+  for (unsigned int i = 0; i < boardIndices.size(); i++) {
+    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(i);
+    board->SendOpCode (Alpide::OPCODE_RORST);
+  }  
+  sleep(1);
+
+  // measure -> Configured
+  currentIt->second.idddConfigured = m_testHic->GetIddd();
+  currentIt->second.iddaConfigured = m_testHic->GetIdda();
+
+  currentIt->second.ibias0 = m_testHic->GetIBias();
+
+  // TODO: change bias to 3V, wait, measure
+
+  // change bias back to 0 V
+  // switch off?
 }
 
 
