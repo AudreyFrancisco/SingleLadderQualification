@@ -36,13 +36,16 @@ FORMS    += mainwindow.ui \
 INCLUDEPATH += $(ROOTSYS)/include
 
 LIBS += -L/usr/local/lib -lusb-1.0 \
+        -L$$PWD/../DataBaseSrc \
+        -L$$PWD/../MosaicSrc/libmosaic \
+        -L$$PWD/../MosaicSrc/libpowerboard \
         $(shell root-config --glibs)
 
 DISTFILES +=
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../release/ -lalpide -lalpide_analysis
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../debug/ -lalpide -lalpide_analysis
-else:unix: LIBS += -L$$PWD/../ -lalpide -lalpide_analysis -lcurl -lxml2
+else:unix: LIBS += -L$$PWD/../ -lalpide -lalpide_analysis -lalucms -lcurl -lxml2
 
 INCLUDEPATH += $$PWD/../
 DEPENDPATH += $$PWD/../
