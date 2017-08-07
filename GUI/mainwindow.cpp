@@ -45,6 +45,7 @@
 #include  "inc/THIC.h"
 //#include "scanthread.h"
 //#include <QtCore>
+#include "dialog.h"
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -110,6 +111,7 @@ MainWindow::MainWindow(QWidget *parent) :
      connect(ui->obm6,SIGNAL(clicked()),this,SLOT(button_obm6_clicked()));
      connect(ui->obm7,SIGNAL(clicked()),this,SLOT(button_obm7_clicked()));
      connect (ui->testselection,SIGNAL(currentIndexChanged(int)),this, SLOT(combochanged(int)));
+     AlpideDB *myDB=new AlpideDB();
 
      QPixmap alice("alice.jpg");
      int w = ui->alicepic->width();
@@ -581,8 +583,8 @@ void MainWindow::digital(){
          ui->statusbar->setValue(0);
         ui->statusbar->show();
 
-	TDigitalScan *mydigital= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-	TDigitalAnalysis  *analysis = new TDigitalAnalysis(&fHistoQue,mydigital, fConfig->GetScanConfig(), fHics, &fMutex);
+    TDigitalScan *mydigital= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TDigitalAnalysis  *analysis = new TDigitalAnalysis(&fHistoQue,mydigital, fConfig->GetScanConfig(), fHICs, &fMutex);
 
    //scanLoop(mydigital);
     std::cout << "starting thread" << std::endl;
@@ -610,8 +612,8 @@ void MainWindow::fifotest(){
          ui->statuslabel->update();
           ui->statusbar->setValue(0);
         ui->statusbar->show();
-	TFifoTest *myfifo= new TFifoTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-	TFifoAnalysis  *analysis = new TFifoAnalysis(&fHistoQue,myfifo,fConfig->GetScanConfig(), fHics, &fMutex);
+    TFifoTest *myfifo= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TFifoAnalysis  *analysis = new TFifoAnalysis(&fHistoQue,myfifo,fConfig->GetScanConfig(), fHICs, &fMutex);
 
    //scanLoop(myfifo);
     std::cout << "starting thread" << std::endl;
@@ -681,6 +683,7 @@ void MainWindow::popup(QString message){
 void MainWindow::start_test(){
     fAnalysisVector.clear();
     fScanVector.clear();
+    fresultVector.clear();
     fChips.clear();
     fBoards.clear();
 
@@ -705,22 +708,55 @@ void MainWindow::start_test(){
 
 
 void MainWindow::fillingOBvectors(){
+
+  TFifoResult    *fiforesult=new TFifoResult();
+  TDigitalResult *digitalresult=new TDigitalResult();
+  TThresholdResult *threresult=new TThresholdResult();
+  TThresholdResult *vcasnresult=new TThresholdResult();
+  TThresholdResult *ithrresult=new TThresholdResult();
+  TLocalBusResult *localbusresult=new TLocalBusResult();
+  TNoiseResult *noiseresult=new TNoiseResult();
+  TtuneVCASNScan *vcasnscan=new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+  TtuneITHRScan *ithrscan=new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+   TLocalBusTest *localbusscan=new TLocalBusTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
   TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-  TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex);
+  TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesult);
+
+
     TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
     TNoiseOccupancy *noisescan=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex);
+    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresult);
     TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex);
-    TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(), fHICs,&fMutex);
+    TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,threresult);
+    TScanAnalysis *vcasnanalysis=new TThresholdAnalysis(&fHistoQue,vcasnscan, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresult,1);
+    TScanAnalysis *ithranalysis=new TThresholdAnalysis(&fHistoQue,ithrscan, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresult,-1);
+    TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresult);
+    TLocalBusAnalysis *localbusanalysis = new TLocalBusAnalysis(&fHistoQue,localbusscan, fConfig->GetScanConfig(), fHICs, &fMutex,localbusresult);
     fScanVector.push_back(fifoscan);
     fScanVector.push_back(digitalscan);
     fScanVector.push_back(thresholdscan);
     fScanVector.push_back(noisescan);
+    fScanVector.push_back(vcasnscan);
+    fScanVector.push_back(ithrscan);
+    fScanVector.push_back(localbusscan);
+    qDebug()<<"dimitra"<<endl;
     fAnalysisVector.push_back(fifoanalysis);
     fAnalysisVector.push_back(digitalanalysis);
     fAnalysisVector.push_back(thresholdanalysis);
     fAnalysisVector.push_back(noiseanalysis);
+    fAnalysisVector.push_back(vcasnanalysis);
+    fAnalysisVector.push_back(ithranalysis);
+    fAnalysisVector.push_back(localbusanalysis);
+
+
+    fresultVector.push_back(fiforesult);
+    fresultVector.push_back(digitalresult);
+    fresultVector.push_back(threresult);
+    fresultVector.push_back(noiseresult);
+    fresultVector.push_back(vcasnresult);
+    fresultVector.push_back(ithrresult);
+    fresultVector.push_back(localbusresult);
+
     WriteTests();
     qDebug()<<"dimitra"<<endl;
 
@@ -730,11 +766,16 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
     qDebug()<<s.size()<<endl;
     ui->statuslabel->setVisible(true);
      ui->statuslabel->update();
-    for (int i=0;i<s.size();i++){
+
+ // for (int i=6;i<s.size();i++){
+     for (int i=4;i<5;i++){
    // for (int i=0;i<2;i++){
       //   QApplication::processEvents() ;
+         qDebug()<<"out of range dimitroula1"<<endl;
        std::thread scanThread(&MainWindow::scanLoop,this,s[i]);
+ qDebug()<<"out of range dimitroula2"<<endl;
         a.at(i)->Initialize();
+
         qDebug()<<s.at(i)<<"g"<<endl;
 
       // ui->details->addItem("d");
@@ -742,7 +783,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
 
        // std::thread koumpi(&MainWindow::runscans,this);
       //  koumpi.join();
-        while (i<1){
+     /*   while (i<1){
               ui->fstatus->setText("50% Completed");
               ui->dstatus->setText("Waiting . . .");
               ui->tstatus->setText("Waiting . . .");
@@ -779,7 +820,14 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
               qApp->processEvents();
          break;
          }
-
+*/while (i<5 && i>3){
+            ui->fstatus->setText("no");
+            ui->dstatus->setText("no");
+            ui->tstatus->setText("no");
+            ui->nstatus->setText("vcasn 50");
+            qApp->processEvents();
+       break;
+       }
         std::thread analysisThread(&TScanAnalysis::Run, std::ref(a[i]));
         scanThread.join();
 
@@ -789,7 +837,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
 qDebug()<<"where is the problem :(";
         a.at(i)->Finalize();
 qDebug()<<"where is the problem";
-        while (i<1){
+   /*     while (i<1){
             ui->fstatus->setText("100% Completed");
             ui->dstatus->setText("Starting . . .");
             ui->tstatus->setText("Waiting . . .");
@@ -821,9 +869,19 @@ qDebug()<<"where is the problem";
             ui->nstatus->setText("100% Completed");
             qApp->processEvents();
         break;
-        }
+        }*/
+
+while (i<5 && i>3){
+     ui->fstatus->setText("no");
+     ui->dstatus->setText("no");
+     ui->tstatus->setText("no");
+     ui->nstatus->setText("100% vcasn");
+     qApp->processEvents();
+break;
+}
+
 qApp->processEvents();
-    }
+   }
     qApp->processEvents();
 }
 
@@ -951,7 +1009,7 @@ std::cout<<fScanVector.size()<<"the scan vector size";
     {
 
     while (i<1){
-        if (fScanVector.size()<5){
+        if (fScanVector.size()<8){
            ui->test1->setText(fScanVector[i]->GetName());
            ui->test2->setText(fScanVector[i+1]->GetName());
            ui->test3->setText(fScanVector[i+2]->GetName());

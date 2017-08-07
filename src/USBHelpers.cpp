@@ -63,7 +63,7 @@ int FindDAQBoards (TConfig *config, std::vector <TReadoutBoard *> * boards) {
         return -1;
     }
 
-    for (int iBoard = 0; iBoard < config->GetNBoards(); ++iBoard) {
+    for (unsigned int iBoard = 0; iBoard < config->GetNBoards(); ++iBoard) {
         TBoardConfigDAQ *boardConfig = dynamic_cast<TBoardConfigDAQ *>(config->GetBoardConfig(iBoard));
         for (ssize_t i = 0; i < cnt; i++) {
             libusb_device *device = list[i];

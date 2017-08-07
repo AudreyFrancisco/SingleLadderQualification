@@ -122,7 +122,7 @@ int initSetupHalfStave(TConfig                        *config,
                        const char                    **hicIds)
 {
   (*boardType) = boardMOSAIC;
-  for (int i = 0; i < config->GetNBoards(); i++) {
+  for (unsigned int i = 0; i < config->GetNBoards(); i++) {
     TBoardConfigMOSAIC* boardConfig = (TBoardConfigMOSAIC*) config->GetBoardConfig(i);
 
     boardConfig->SetInvertedData (false);  //already inverted in the adapter plug ?

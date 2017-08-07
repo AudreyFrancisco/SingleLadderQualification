@@ -593,7 +593,7 @@ void TThresholdAnalysis::Finalize()
    	     << "!!!"
    	     <<std::endl; exit(EXIT_FAILURE);;
   }
-  
+ 
   for (std::map<int,common::TStatVar>::iterator itr=m_threshold.begin();
        itr!=m_threshold.end(); 
        ++itr) {
@@ -673,12 +673,19 @@ void TThresholdAnalysis::Finalize()
     m_result->AddChipResult(itr->first,
 			    &(itr->second));
     
-
+    
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+      std::cout<<"pb1"<<std::endl;
       if (! (m_hics.at(ihic)->ContainsChip(itr->first))) continue;
+      std::cout<<"pb2"<<std::endl;
+      std::string dimitra =m_hics.at(ihic)->GetDbId();
+      std::cout<<dimitra<<std::endl;
       TThresholdResultHic *hicResult = (TThresholdResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+      std::cout<<"pb3"<<std::endl;
       hicResult->m_nPixelsNoThreshold += itr->second.GetCounterPixelsNoHits();
+      std::cout<<"pb4"<<std::endl;
       hicResult->m_nPixelsNoThreshold += itr->second.GetCounterPixelsNoThreshold();
+      std::cout<<"pb5"<<std::endl;
     }
   }
 }

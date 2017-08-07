@@ -41,6 +41,9 @@
 #include "TDigitalAnalysis.h"
 #include "TFifoTest.h"
 #include "TFifoAnalysis.h"
+#include "TLocalBusTest.h"
+#include "TLocalBusAnalysis.h"
+
 
 void scanLoop (TScan *myScan)
 {
@@ -97,9 +100,9 @@ int main(int argc, char** argv) {
 
   //TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
   //TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
-  TScan *myScan   = new TFifoTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  TScan *myScan   = new TLocalBusTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
 
-  TScanAnalysis  *analysis = new TFifoAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+  TScanAnalysis  *analysis = new TLocalBusAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
 
 
   //scanLoop(myScan);

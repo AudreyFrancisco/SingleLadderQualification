@@ -1,4 +1,13 @@
+/****************************************************************************
+** Form implementation generated from reading ui file 'dialog.ui'
+**
+** Created by User Interface Compiler
+**
+** WARNING! All changes made in this file will be lost!
+****************************************************************************/
+
 #include "dialog.h"
+
 #include "ui_dialog.h"
 
 Dialog::Dialog(QWidget *parent) :

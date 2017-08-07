@@ -35,6 +35,13 @@
 #include  "TNoiseOccupancy.h"
 #include  "TNoiseAnalysis.h"
 #include  "inc/THIC.h"
+#include "inc/TLocalBusAnalysis.h"
+#include "inc/TLocalBusTest.h"
+#include "DataBaseSrc/AlpideDB.h"
+#include "DataBaseSrc/CernSsoCookiesJar.h"
+#include "DataBaseSrc/AlpideDBEndPoints.h"
+#include "DataBaseSrc/AlpideDBManager.h"
+#include "DataBaseSrc/utilities.h"
 
 //#include "multipagewidget.h"
 //#include "scanthread.h"
@@ -55,6 +62,7 @@ public:
  //   void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     std::vector <TScan *> fScanVector;
     std::vector <TScanAnalysis *> fAnalysisVector;
+     std::vector <TScanResult *> fresultVector;
     std::vector <THic *> fHICs;
   //  void fillingvectors();
  std::vector <std::string> mapdetails;
@@ -86,6 +94,8 @@ public:
 public slots:
    void connectcombo(int value);
    void createbtn();
+   void popup(QString message);
+
       // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     /*
     void open();
@@ -117,7 +127,6 @@ private:
     TBoardType fBoardType;
     std::vector <TReadoutBoard *> fBoards;
     std::vector <TAlpide *>       fChips;
-    std::vector <THic *>          fHics;
     std::mutex fMutex;
     TConfig *fConfig;
     std::deque<TScanHisto>  fHistoQue;
@@ -146,7 +155,7 @@ private slots:
  void digital();
  void test();
  void fifotest();
- void popup(QString message);
+
  void start_test();
  void open();
  void applytests();

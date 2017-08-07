@@ -42,7 +42,7 @@ DISTFILES +=
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../release/ -lalpide -lalpide_analysis
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../debug/ -lalpide -lalpide_analysis
-else:unix: LIBS += -L$$PWD/../ -lalpide -lalpide_analysis
+else:unix: LIBS += -L$$PWD/../ -lalpide -lalpide_analysis -lcurl -lalucms -lxml2
 
 INCLUDEPATH += $$PWD/../
 DEPENDPATH += $$PWD/../
@@ -54,6 +54,9 @@ DEPENDPATH += $$PWD/../inc
 INCLUDEPATH += $$PWD/../MosaicSrc/
 DEPENDPATH += $$PWD/../MosaicSrc/
 
+INCLUDEPATH += $$PWD/../DataBaseSrc/
+DEPENDPATH += $$PWD/../DataBaseSrc/
+
 INCLUDEPATH += $$PWD/../MosaicSrc/libmosaic/include
 DEPENDPATH += $$PWD/../MosaicSrc/libmosaic/include
 
@@ -62,3 +65,6 @@ DEPENDPATH += $$PWD/../MosaicSrc/libpowerboard/include
 
 INCLUDEPATH += $$PWD/../ReadoutUnitSrc/
 DEPENDPATH += $$PWD/../ReadoutUnitSrc/
+
+INCLUDEPATH += /usr/include/libxml2
+DEPENDPATH += /usr/include/libxml2
