@@ -22,6 +22,20 @@ TScanConfig::TScanConfig()
   m_scanStep       = SCAN_STEP;
   m_speedy         = SPEEDY;
   m_localBusCutRed = LOCALBUSCUTRED;
+
+  m_powerCutMinIdda_OB        = POWER_CUT_MINIDDA_OB;
+  m_powerCutMinIddd_OB        = POWER_CUT_MINIDDD_OB;
+  m_powerCutMinIddaClocked_OB = POWER_CUT_MINIDDA_CLOCKED_OB;
+  m_powerCutMinIdddClocked_OB = POWER_CUT_MINIDDD_CLOCKED_OB;
+  m_powerCutMaxIddaClocked_OB = POWER_CUT_MAXIDDA_CLOCKED_OB;
+  m_powerCutMaxIdddClocked_OB = POWER_CUT_MAXIDDD_CLOCKED_OB;
+  m_powerCutMinIdda_IB        = POWER_CUT_MINIDDD_IB;
+  m_powerCutMinIddd_IB        = POWER_CUT_MINIDDA_IB;
+  m_powerCutMinIddaClocked_IB = POWER_CUT_MINIDDA_CLOCKED_IB;
+  m_powerCutMinIdddClocked_IB = POWER_CUT_MINIDDD_CLOCKED_IB;
+  m_powerCutMaxIddaClocked_IB = POWER_CUT_MAXIDDA_CLOCKED_IB;
+  m_powerCutMaxIdddClocked_IB = POWER_CUT_MAXIDDD_CLOCKED_IB;
+
   InitParamMap();
 }
 
@@ -45,6 +59,20 @@ void TScanConfig::InitParamMap ()
   fSettings["ITHR_STEP"]    = &m_ithrStep;
   fSettings["SCAN_STEP"]    = &m_scanStep;
   fSettings["SPEEDY"]       = &m_speedy;
+
+  fSettings["MINIDDA_OB"]         = &m_powerCutMinIdda_OB;
+  fSettings["MINIDDD_OB"]         = &m_powerCutMinIddd_OB;
+  fSettings["MINIDDA_CLOCKED_OB"] = &m_powerCutMinIddaClocked_OB;
+  fSettings["MINIDDD_CLOCKED_OB"] = &m_powerCutMinIdddClocked_OB;
+  fSettings["MAXIDDA_CLOCKED_OB"] = &m_powerCutMaxIddaClocked_OB;
+  fSettings["MAXIDDD_CLOCKED_OB"] = &m_powerCutMaxIdddClocked_OB;
+  fSettings["MINIDDA_IB"]         = &m_powerCutMinIdda_IB;
+  fSettings["MINIDDD_IB"]         = &m_powerCutMinIddd_IB;
+  fSettings["MINIDDA_CLOCKED_IB"] = &m_powerCutMinIddaClocked_IB;
+  fSettings["MINIDDD_CLOCKED_IB"] = &m_powerCutMinIdddClocked_IB;
+  fSettings["MAXIDDA_CLOCKED_IB"] = &m_powerCutMaxIddaClocked_IB;
+  fSettings["MAXIDDD_CLOCKED_IB"] = &m_powerCutMaxIdddClocked_IB;
+
 }
 
 

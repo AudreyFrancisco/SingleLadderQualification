@@ -28,6 +28,21 @@ namespace ScanConfig {
 
   const int LOCALBUSCUTRED = 1;
 
+  const int POWER_CUT_MINIDDA_OB = 50;
+  const int POWER_CUT_MINIDDD_OB = 50;
+  const int POWER_CUT_MINIDDD_IB = 50;
+  const int POWER_CUT_MINIDDA_IB = 50;
+
+  const int POWER_CUT_MINIDDA_CLOCKED_OB = 150;
+  const int POWER_CUT_MINIDDD_CLOCKED_OB = 600;
+  const int POWER_CUT_MAXIDDA_CLOCKED_OB = 250;
+  const int POWER_CUT_MAXIDDD_CLOCKED_OB = 850;
+
+  const int POWER_CUT_MINIDDA_CLOCKED_IB = 90;
+  const int POWER_CUT_MINIDDD_CLOCKED_IB = 400;
+  const int POWER_CUT_MAXIDDA_CLOCKED_IB = 180;
+  const int POWER_CUT_MAXIDDD_CLOCKED_IB = 550;
+  
 }
 
 
@@ -53,6 +68,19 @@ class TScanConfig {
   int  m_scanStep;   //16
   int  m_speedy;
   int  m_localBusCutRed;
+  int  m_powerCutMinIdda_OB;
+  int  m_powerCutMinIddd_OB;
+  int  m_powerCutMinIddaClocked_OB;
+  int  m_powerCutMinIdddClocked_OB;
+  int  m_powerCutMaxIddaClocked_OB;
+  int  m_powerCutMaxIdddClocked_OB;
+  int  m_powerCutMinIdda_IB;
+  int  m_powerCutMinIddd_IB;
+  int  m_powerCutMinIddaClocked_IB;
+  int  m_powerCutMinIdddClocked_IB;
+  int  m_powerCutMaxIddaClocked_IB;
+  int  m_powerCutMaxIdddClocked_IB;
+
  protected: 
  public:
   TScanConfig ();
@@ -62,21 +90,22 @@ class TScanConfig {
   int   GetParamValue   (const char *Name) ;
   bool  IsParameter     (const char *Name) {return (fSettings.count(Name) > 0);};
 
-  int   GetNInj         () {return m_nInj;};
-  int   GetChargeStart  () {return m_chargeStart;};
-  int   GetChargeStep   () {return m_chargeStep;};
-  int   GetChargeStop   () {return m_chargeStop;};
-  int   GetNMaskStages  () {return m_nMaskStages;};
-  char *GetfNameSuffix  () {return m_fNameSuffix;};  
-  int   GetIthrStart    () {return m_ithrStart;};
-  int   GetIthrStop     () {return m_ithrStop;};
-  int   GetIthrStep     () {return m_ithrStep;};
-  int   GetVcasnStart   () {return m_vcasnStart;};
-  int   GetVcasnStop    () {return m_vcasnStop;};
-  int   GetVcasnStep    () {return m_vcasnStep;};
-  int   GetScanStep     () {return m_scanStep;};
-  int   GetSpeedy       () {return m_speedy;};
+  int   GetNInj          () {return m_nInj;};
+  int   GetChargeStart   () {return m_chargeStart;};
+  int   GetChargeStep    () {return m_chargeStep;};
+  int   GetChargeStop    () {return m_chargeStop;};
+  int   GetNMaskStages   () {return m_nMaskStages;};
+  char *GetfNameSuffix   () {return m_fNameSuffix;};  
+  int   GetIthrStart     () {return m_ithrStart;};
+  int   GetIthrStop      () {return m_ithrStop;};
+  int   GetIthrStep      () {return m_ithrStep;};
+  int   GetVcasnStart    () {return m_vcasnStart;};
+  int   GetVcasnStop     () {return m_vcasnStop;};
+  int   GetVcasnStep     () {return m_vcasnStep;};
+  int   GetScanStep      () {return m_scanStep;};
+  int   GetSpeedy        () {return m_speedy;};
   int   GetLocalBusCutRed() {return m_localBusCutRed;};
+
 };
 
 

@@ -9,6 +9,14 @@
 class TPowerResultHic : public TScanResultHic {
   friend class TPowerAnalysis;
  private:
+  float    iddaSwitchon;
+  float    idddSwitchon;
+  float    iddaClocked;
+  float    idddClocked;
+  float    iddaConfigured;
+  float    idddConfigured;
+  float    ibias0;
+  float    ibias3;
  protected:
  public:
   TPowerResultHic () : TScanResultHic () {};
@@ -29,6 +37,9 @@ class TPowerResult : public TScanResult {
 
 class TPowerAnalysis : public TScanAnalysis {
  private:
+  THicClassification GetClassification   (THicCurrents currents);
+  THicClassification GetClassificationIB (THicCurrents currents);
+  THicClassification GetClassificationOB (THicCurrents currents);
  protected:
  public:
   TPowerAnalysis(std::deque<TScanHisto> *histoQue, 
