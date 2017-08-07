@@ -26,7 +26,7 @@ void TApplyTuning::Run()
       TThresholdResultChip *chipResult = (TThresholdResultChip*) it->second;
    
       // TODO: check rounding, fix makefile (unresolved reference)
-      //chip->GetConfig()->SetParamValue(GetDACName(), (int)chipResult->GetThresholdMean());
+      chip->GetConfig()->SetParamValue(GetDACName(), (int)chipResult->GetThresholdMean());
     }
   }
 
