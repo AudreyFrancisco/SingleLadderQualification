@@ -77,7 +77,7 @@ void TScanAnalysis::Run()
     
       TScanHisto histo = m_histoQue->front();
       if (m_first) {
-        histo.GetChipList(m_chipList);
+        //histo.GetChipList(m_chipList);
         InitCounters     ();
         m_first = false;
       }

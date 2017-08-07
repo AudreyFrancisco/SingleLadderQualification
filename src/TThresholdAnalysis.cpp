@@ -463,7 +463,7 @@ void TThresholdAnalysis::Initialize()
     pairDummy = std::make_pair(itr->first,noiseDummy);
     m_noise.insert(pairDummy);
   } 
-
+  ReadChipList    ();
   CreateHicResults();  
 }
 
