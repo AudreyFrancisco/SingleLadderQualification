@@ -4,10 +4,7 @@
 #include "TPowerBoard.h"
 #include <string.h>
 
-
 #define NEWALPIDEVERSION "1.1"
-
-
 
 
 //TODO: Create Hic Lists for all setup types
@@ -105,7 +102,7 @@ int initSetupOB(TConfig                        *config,
     }
     boards->at(0)-> AddChip        (chipId, control, receiver, chips->at(i));
   }
-  int nWorking = CheckControlInterface(config, boards, boardType, chips);
+  CheckControlInterface(config, boards, boardType, chips);
   //sleep(5);
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
@@ -122,7 +119,7 @@ int initSetupHalfStave(TConfig                        *config,
                        const char                    **hicIds)
 {
   (*boardType) = boardMOSAIC;
-  for (unsigned int i = 0; i < config->GetNBoards(); i++) {
+  for (int i = 0; i < config->GetNBoards(); i++) {
     TBoardConfigMOSAIC* boardConfig = (TBoardConfigMOSAIC*) config->GetBoardConfig(i);
 
     boardConfig->SetInvertedData (false);  //already inverted in the adapter plug ?
@@ -145,7 +142,7 @@ int initSetupHalfStave(TConfig                        *config,
     boards->at(mosaic)-> AddChip(chipId, ci, rcv, chips->at(i));
   }
 
-  int nWorking = CheckControlInterface(config, boards, boardType, chips);
+  CheckControlInterface(config, boards, boardType, chips);
   sleep(5);
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
@@ -354,7 +351,7 @@ int initSetupIB(TConfig                        *config,
     boards->at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver, chips->at(i));
   }
 
-  int nWorking = CheckControlInterface(config, boards, boardType, chips);
+  CheckControlInterface(config, boards, boardType, chips);
 
   return 0;
 }
@@ -407,7 +404,7 @@ int initSetupIBRU(TConfig                       *config,
   }
 
   // TODO: check whether CheckControlInterface works for readout unit
-  int nWorking = CheckControlInterface(config, boards, boardType, chips);
+  CheckControlInterface(config, boards, boardType, chips);
 
   return 0;
 }
@@ -456,8 +453,8 @@ int initSetupSingle(TConfig                       *config,
   chipConfig->SetParamValue("LINKSPEED", "-1");
   (*boardType)                    = boardDAQ;
   // values for control interface and receiver currently ignored for DAQ board
-  int               control     = chipConfig->GetParamValue("CONTROLINTERFACE");
-  int               receiver    = chipConfig->GetParamValue("RECEIVER");
+  //int               control     = chipConfig->GetParamValue("CONTROLINTERFACE");
+  //int               receiver    = chipConfig->GetParamValue("RECEIVER");
 
   InitLibUsb();
   //  The following code searches the USB bus for DAQ boards, creates them and adds them to the readout board vector:
@@ -653,7 +650,7 @@ int initSetupEndurance(TConfig                        *config,
 		((TReadoutBoardMOSAIC *)(boards->at(0)))->setInverted(InverRcvMap[mod][0], DataRcvMap[mod][0]);
 		((TReadoutBoardMOSAIC *)(boards->at(0)))->setInverted(InverRcvMap[mod][1], DataRcvMap[mod][1]);
 	}
-	int nWorking = CheckControlInterface(config, boards, boardType, chips);
+	CheckControlInterface(config, boards, boardType, chips);
 	sleep(5);
 	for(int mod=0; mod < NumberOfModules; mod++) {
 		MakeDaisyChain(config, boards, boardType, chips, mod * 14);
