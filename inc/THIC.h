@@ -9,6 +9,7 @@
 
 class TAlpide;
 
+typedef enum {HIC_IB, HIC_OB} THicType;
 
 class THic {
  private:
@@ -38,6 +39,7 @@ class THic {
   bool                       ContainsChip    (int index);
   virtual common::TChipIndex GetChipIndex    (int i) = 0;
   virtual std::vector<int>   GetBoardIndices () = 0;
+  virtual THicType           GetHicType      () = 0;
   std::vector <TAlpide*>     GetChips        () {return m_chips;};
   TAlpide                   *GetChipById     (int chipId);
 };
@@ -55,6 +57,7 @@ class THicOB : public THic {
  public:
   THicOB (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
   common::TChipIndex GetChipIndex    (int i);
+  THicType           GetHicType      () {return HIC_OB;};
   std::vector<int>   GetBoardIndices ();
   bool               ContainsChip    (common::TChipIndex idx);
   void               ConfigureMaster (int Master, int board, int rcv, int ctrl);
@@ -70,6 +73,7 @@ class THicIB : public THic {
  public:
   THicIB (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
   common::TChipIndex GetChipIndex (int i);
+  THicType           GetHicType      () {return HIC_IB;};
   std::vector<int>   GetBoardIndices ();
   bool               ContainsChip (common::TChipIndex idx);
 };

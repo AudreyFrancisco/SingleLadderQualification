@@ -8,17 +8,18 @@
 #include "Common.h"
 #include "TScan.h"
 #include "THisto.h"
-
+#include "THIC.h"
 
 typedef struct {
-  float iddaSwitchon;
-  float idddSwitchon;
-  float iddaClocked;
-  float idddClocked;
-  float iddaConfigured;
-  float idddConfigured;
-  float ibias0;
-  float ibias3;
+  THicType hicType;
+  float    iddaSwitchon;
+  float    idddSwitchon;
+  float    iddaClocked;
+  float    idddClocked;
+  float    iddaConfigured;
+  float    idddConfigured;
+  float    ibias0;
+  float    ibias3;
 } THicCurrents;
 
 class TPowerTest : public TScan {
