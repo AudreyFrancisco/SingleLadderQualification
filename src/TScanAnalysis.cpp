@@ -32,15 +32,14 @@ int TScanAnalysis::ReadChipList()
 
 void TScanAnalysis::CreateHicResults ()
 {
-  std::cout << "In create HIC results" << std::endl;
   if (m_hics.size() == 0) {
     std::cout  << "Warning (TScanAnalysis::CreateResult): hic list is empty, doing nothing" << std::endl;
     return;
   }  
-  if (m_chipList.size() == 0) {
-    std::cout  << "Warning (TScanAnalysis::CreateResult): chip list is empty, doing nothing" << std::endl;
-    return;
-  }
+  // if (m_chipList.size() == 0) {
+  //  std::cout  << "Warning (TScanAnalysis::CreateResult): chip list is empty, doing nothing" << std::endl;
+  //  return;
+  //}
 
   for (unsigned int i = 0; i < m_chipList.size(); i ++) {
     TScanResultChip    *chipResult = GetChipResult();
@@ -58,7 +57,6 @@ void TScanAnalysis::CreateHicResults ()
                                  m_result->GetChipResult(m_chipList.at(iChip)));
       }
     }
-    std::cout << "Adding result for HIC " << m_hics.at(i)->GetDbId() << std::endl;
     m_result->AddHicResult (m_hics.at(i)->GetDbId(), hicResult);
   }  
 

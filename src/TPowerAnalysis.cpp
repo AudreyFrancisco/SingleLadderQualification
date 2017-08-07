@@ -9,6 +9,8 @@ TPowerAnalysis::TPowerAnalysis(std::deque<TScanHisto> *histoQue,
                                TPowerResult           *aResult )
   : TScanAnalysis (histoQue, aScan, aScanConfig, hics, aMutex)
 {
+  if (aResult) m_result = aResult;
+  else         m_result = new TPowerResult(); 
 }
 
 

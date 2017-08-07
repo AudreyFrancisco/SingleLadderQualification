@@ -41,7 +41,6 @@ void TPowerTest::CreateMeasurements()
 void TPowerTest::Init()
 {
   TScan::Init();
-
   // switch power off here or hic-wise in execute?
 
 }
@@ -67,14 +66,12 @@ void TPowerTest::Execute()
   std::vector<TAlpide*>  chips        = m_testHic->GetChips();
   
   std::map<std::string, THicCurrents>::iterator currentIt = m_hicCurrents.find(m_testHic->GetDbId());
-
   m_testHic->PowerOff();
 
   for (unsigned int i = 0; i < boardIndices.size(); i++) {
-    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(i);
+    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(boardIndices.at(i));
     board->enableControlInterfaces(false);
   }
-
   m_testHic->PowerOn();
   sleep(1);
 
@@ -83,11 +80,10 @@ void TPowerTest::Execute()
   currentIt->second.iddaSwitchon = m_testHic->GetIdda();
 
   for (unsigned int i = 0; i < boardIndices.size(); i++) {
-    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(i);
+    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(boardIndices.at(i));
     board->enableControlInterfaces(true);
     board->SendOpCode (Alpide::OPCODE_GRST);
   }  
-
   sleep(1);
 
   // measure -> Clocked
@@ -100,11 +96,10 @@ void TPowerTest::Execute()
     AlpideConfig::ConfigureCMU(chips.at(i));
   }
   for (unsigned int i = 0; i < boardIndices.size(); i++) {
-    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(i);
+    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(boardIndices.at(i));
     board->SendOpCode (Alpide::OPCODE_RORST);
   }  
   sleep(1);
-
   // measure -> Configured
   currentIt->second.idddConfigured = m_testHic->GetIddd();
   currentIt->second.iddaConfigured = m_testHic->GetIdda();

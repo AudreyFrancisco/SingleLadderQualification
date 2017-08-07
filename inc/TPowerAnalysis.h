@@ -6,6 +6,13 @@
 #include "TScan.h"
 
 
+class TPowerResultChip : public TScanResultChip {
+ public: 
+  TPowerResultChip () : TScanResultChip () {};
+  void WriteToFile (FILE *fp) {};
+};
+
+
 class TPowerResultHic : public TScanResultHic {
   friend class TPowerAnalysis;
  private:
@@ -41,6 +48,11 @@ class TPowerAnalysis : public TScanAnalysis {
   THicClassification GetClassificationIB (THicCurrents currents);
   THicClassification GetClassificationOB (THicCurrents currents);
  protected:
+  TScanResultChip *GetChipResult() {TPowerResultChip *result = new TPowerResultChip(); return result;};
+  TScanResultHic  *GetHicResult () {TPowerResultHic  *result = new TPowerResultHic();  return result;};
+  void             CreateResult () {};
+  void             InitCounters () {};
+  void             AnalyseHisto (TScanHisto *histo) {};
  public:
   TPowerAnalysis(std::deque<TScanHisto> *histoQue, 
                  TScan                  *aScan, 
@@ -48,7 +60,7 @@ class TPowerAnalysis : public TScanAnalysis {
                  std::vector <THic*>     hics,
                  std::mutex             *aMutex, 
                  TPowerResult           *aResult = 0);
-  void Initialize () {};
+  void Initialize () {CreateHicResults();};
   void Run        () {};
   void Finalize   ();
 };
