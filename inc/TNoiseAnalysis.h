@@ -12,6 +12,7 @@
 #include "Common.h"
 #include "AlpideDecoder.h"
 
+
 class TNoiseResultChip : public TScanResultChip {
   friend class TNoiseAnalysis;
  private: 
@@ -19,9 +20,10 @@ class TNoiseResultChip : public TScanResultChip {
   double                m_occ;
  public: 
   TNoiseResultChip () : TScanResultChip () {};
-  void AddNoisyPixel (TPixHit pixel) {m_noisyPixels.push_back(pixel);};
+  void AddNoisyPixel (TPixHit pixel) {m_noisyPixels.push_back(pixel);};  
   void SetOccupancy  (double occ)    {m_occ = occ;};
   void WriteToFile   (FILE *fp);
+  std::vector <TPixHit> GetNoisyPixels() {return m_noisyPixels;};
 };
 
 

@@ -4,6 +4,8 @@
 #include "TConfig.h"
 #include <map>
 #include <string>
+#include <string.h>
+#include "AlpideDecoder.h"
 
 class TConfig;
 
@@ -108,6 +110,9 @@ class TChipConfig {
   int  fChargePump;
   int  fDtuDriver;
   int  fDtuPreemp;
+  // Mask file
+  char fMaskFile[200];
+  std::vector <TPixHit> m_noisyPixels;
  protected:
  public:
   TChipConfig               (TConfig *config, int chipId, const char *fName = 0);
@@ -154,6 +159,10 @@ class TChipConfig {
   void SetInitialToken         (bool AInitialToken)      {fInitialToken = AInitialToken;};
   void SetEnableDdr            (bool AEnableDdr)         {fEnableDdr    = AEnableDdr;};
   void SetDisableManchester    (bool ADisableManchester) {fDisableManchester = ADisableManchester;};
+
+  void SetMaskFile             (const char *fName)       {strcpy(fMaskFile, fName);};
+  void SetNoisyPixels          (std::vector <TPixHit> noisy) {m_noisyPixels = noisy;};
+  std::vector <TPixHit> GetNoisyPixels () {return m_noisyPixels;};
 };
 
 

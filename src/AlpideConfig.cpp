@@ -88,6 +88,16 @@ void AlpideConfig::WritePixRegSingle (TAlpide *chip, Alpide::TPixReg reg, bool d
 }
 
 
+int AlpideConfig::ApplyMask (TAlpide *chip)
+{
+  std::vector <TPixHit> mask = chip->GetConfig()->GetNoisyPixels();
+  for (unsigned int i = 0; i < mask.size(); i++) {
+    WritePixRegSingle (chip, Alpide::PIXREG_MASK, true, mask.at(i).address, mask.at(i).dcol);
+  }
+  return mask.size();
+}
+
+
 // Alpide 3 settings, to be confirmed
 void AlpideConfig::ApplyStandardDACSettings (TAlpide *chip, float backBias) {
   if (backBias == 0) {
