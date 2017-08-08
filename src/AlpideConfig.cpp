@@ -88,8 +88,11 @@ void AlpideConfig::WritePixRegSingle (TAlpide *chip, Alpide::TPixReg reg, bool d
 }
 
 
-int AlpideConfig::ApplyMask (TAlpide *chip)
+// Applies mask stored in TChipConfig::m_noisyPixels
+// if Clear is set, all pixels are unmasked before 
+int AlpideConfig::ApplyMask (TAlpide *chip, bool Clear)
 {
+  if (Clear) WritePixRegAll (chip, Alpide::PIXREG_MASK, false);
   std::vector <TPixHit> mask = chip->GetConfig()->GetNoisyPixels();
   for (unsigned int i = 0; i < mask.size(); i++) {
     WritePixRegSingle (chip, Alpide::PIXREG_MASK, true, mask.at(i).address, mask.at(i).dcol);

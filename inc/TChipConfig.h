@@ -162,6 +162,7 @@ class TChipConfig {
 
   void SetMaskFile             (const char *fName)       {strcpy(fMaskFile, fName);};
   void SetNoisyPixels          (std::vector <TPixHit> noisy) {m_noisyPixels = noisy;};
+  void ClearNoisyPixels        ()                        {m_noisyPixels.clear();};
   std::vector <TPixHit> GetNoisyPixels () {return m_noisyPixels;};
 };
 

@@ -59,6 +59,7 @@ void TNoiseOccupancy::ConfigureChip  (TAlpide *chip)
   AlpideConfig::BaseConfig   (chip);
   ConfigureFromu             (chip);
   ConfigureMask              (chip, 0);
+  AlpideConfig::ApplyMask    (chip, true);
   AlpideConfig::ConfigureCMU (chip);
 }
 
