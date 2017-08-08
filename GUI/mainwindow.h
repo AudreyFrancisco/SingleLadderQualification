@@ -1,50 +1,28 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
+#include <vector>
+#include <mutex>
 #include <deque>
-#include <thread>
-#include "dialog.h"
+
+#include <QMainWindow>
 #include <QDialog>
-#include <thread_db.h>
 #include <QtGui>
 #include <QtCore>
-#include "testselection.h"
-#include "inc/TAlpide.h"
-#include "inc/TDigitalAnalysis.h"
-#include "inc/TDigitalScan.h"
-#include "inc/AlpideConfig.h"
-#include "inc/TReadoutBoard.h"
-#include "inc/TReadoutBoardDAQ.h"
-#include "inc/TReadoutBoardMOSAIC.h"
-//#include "inc/USBHelpers.h"
-#include "inc/TConfig.h"
-#include "inc/AlpideDecoder.h"
-#include "inc/AlpideConfig.h"
-#include "qfiledialog.h"
-#include "inc/BoardDecoder.h"
-#include "inc/SetupHelpers.h"
-#include "inc/TSCurveScan.h"
-#include "inc/TScanConfig.h"
-#include "inc/THisto.h"
-#include "inc/TScanAnalysis.h"
-#include "inc/TScan.h"
-#include "inc/TThresholdAnalysis.h"
-#include  "TFifoTest.h"
-#include  "TFifoAnalysis.h"
-#include  "TNoiseOccupancy.h"
-#include  "TNoiseAnalysis.h"
-#include  "inc/THIC.h"
-#include "inc/TLocalBusAnalysis.h"
-#include "inc/TLocalBusTest.h"
-#include "DataBaseSrc/AlpideDB.h"
-#include "DataBaseSrc/CernSsoCookiesJar.h"
-#include "DataBaseSrc/AlpideDBEndPoints.h"
-#include "DataBaseSrc/AlpideDBManager.h"
-#include "DataBaseSrc/utilities.h"
 
-//#include "multipagewidget.h"
-//#include "scanthread.h"
+
+#include "dialog.h"
+#include "utilities.h"
+
+#include "TReadoutBoard.h"
+#include "TScanAnalysis.h"
+
+class TConfig;
+class TScan;
+class TScanAnalysis;
+class TScanResult;
+class TestSelection;
+class THic;
 
 namespace Ui {
 class MainWindow;
