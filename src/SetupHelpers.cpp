@@ -38,6 +38,8 @@ int initSetupOB(TConfig                        *config,
 
   TPowerBoard *pb = 0;
   if (config->GetUsePowerBoard()) {
+    TPowerBoardConfig *pbConfig = new TPowerBoardConfig(NULL);
+    pbConfig->SetDefaultsOB(0);
     pb = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0));
   }
 

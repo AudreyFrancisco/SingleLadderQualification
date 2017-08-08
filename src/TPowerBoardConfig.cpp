@@ -314,4 +314,28 @@ bool TPowerBoardConfig::WriteToFile(char *AFileName)
 }
 
 
+void TPowerBoardConfig::SetDefaultsOB(int mod) 
+{
+  fPBConfig.Modul[mod].AVset  = DEF_ANALOGVOLTAGE_OB;
+  fPBConfig.Modul[mod].AIset  = DEF_ANALOGMAXCURRENT_OB;
+  fPBConfig.Modul[mod].DVset  = DEF_DIGITALVOLTAGE_OB;
+  fPBConfig.Modul[mod].DIset  = DEF_DIGITALMAXCURRENT_OB;
+  fPBConfig.Modul[mod].BiasOn = DEF_BIASCHANNELON_OB;
+
+  fPBConfig.VBset             = DEF_BIASVOLTAGE_OB;
+}
+
+
+void TPowerBoardConfig::SetDefaultsIB(int mod) 
+{
+  fPBConfig.Modul[mod].AVset  = DEF_ANALOGVOLTAGE_IB;
+  fPBConfig.Modul[mod].AIset  = DEF_ANALOGMAXCURRENT_IB;
+  fPBConfig.Modul[mod].DVset  = DEF_DIGITALVOLTAGE_IB;
+  fPBConfig.Modul[mod].DIset  = DEF_DIGITALMAXCURRENT_IB;
+  fPBConfig.Modul[mod].BiasOn = DEF_BIASCHANNELON_IB;
+
+  fPBConfig.VBset             = DEF_BIASVOLTAGE_IB;
+}
+
+
 // ------------------  eof -----------------------

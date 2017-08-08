@@ -48,12 +48,31 @@
 
 
 // Default values table
+
+// a) Default values used in constructor
 #define DEF_BIASVOLTAGE	0.0
 #define DEF_ANALOGVOLTAGE	1.80
 #define DEF_ANALOGMAXCURRENT	1.00
 #define DEF_DIGITALVOLTAGE	1.80
 #define DEF_DIGITALMAXCURRENT	1.00
 #define DEF_BIASCHANNELON	false
+
+// b) Setup-specific default values - to be refined
+// (can be set by setter methods)
+#define DEF_BIASVOLTAGE_OB	 0.0
+#define DEF_ANALOGVOLTAGE_OB	 1.80
+#define DEF_ANALOGMAXCURRENT_OB	 0.3
+#define DEF_DIGITALVOLTAGE_OB	 1.80
+#define DEF_DIGITALMAXCURRENT_OB 1.50
+#define DEF_BIASCHANNELON_OB	 false
+
+#define DEF_BIASVOLTAGE_IB	 0.0
+#define DEF_ANALOGVOLTAGE_IB	 1.80
+#define DEF_ANALOGMAXCURRENT_IB	 0.3
+#define DEF_DIGITALVOLTAGE_IB	 1.80
+#define DEF_DIGITALMAXCURRENT_IB 1.00
+#define DEF_BIASCHANNELON_IB	 false
+
 
 // Class definition
 class TPowerBoardConfig  {
@@ -112,6 +131,8 @@ public:
 	void SetDigitalCurrent(int mod, float val) { fPBConfig.Modul[mod].DIset = val; };
 	void SetBiasOn(int mod, bool val) { fPBConfig.Modul[mod].BiasOn = val; };
 
+        void SetDefaultsOB(int mod);
+        void SetDefaultsIB(int mod);
 	// Utilities
 	bool ReadFromFile(char * AFileName);
 	bool WriteToFile(char *AFileName);
