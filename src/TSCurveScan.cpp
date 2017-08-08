@@ -122,16 +122,6 @@ void TSCurveScan::ConfigureFromu(TAlpide *chip)
   chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length 
 }
 
-
-/*void TSCurveScan::ConfigureChip(TAlpide *chip)
-{
-  AlpideConfig::BaseConfig(chip);
-
-  ConfigureFromu(chip);
-
-  AlpideConfig::ConfigureCMU (chip);
-}*/
-
 void TThresholdScan::ConfigureChip(TAlpide *chip)
 {
   AlpideConfig::BaseConfig(chip);
@@ -170,6 +160,7 @@ void TtuneITHRScan::ConfigureChip(TAlpide *chip)
 
 THisto TSCurveScan::CreateHisto() {
   THisto histo ("ThresholdHisto", "ThresholdHisto", 1024, 0, 1023, (m_stop[0] - m_start[0]) / m_step[0], m_start[0], m_stop[0]);
+  std::cout << "CREATING: " << (m_stop[0]-m_start[0])/m_step[0] << ", " << m_start[0] << ", " << m_stop[0] << std::endl;
   return histo;
 }
 
@@ -233,9 +224,6 @@ void TtuneVCASNScan::PrepareStep (int loopIndex)
     for (int ichip = 0; ichip < (int)m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_VCASN, m_value[0]);
-      //uint16_t tmp;
-      //m_chips.at(ichip)->ReadRegister(Alpide::REG_ITHR, tmp);
-      //std::cout << "v=" << m_value[0] << ", i=" << tmp << std::endl;
     }
     break;
   case 1:    // 2nd loop: mask staging
@@ -256,9 +244,6 @@ void TtuneITHRScan::PrepareStep (int loopIndex)
     for (int ichip = 0; ichip < (int)m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_ITHR, m_value[0]);
-      //uint16_t tmp;
-      //m_chips.at(ichip)->ReadRegister(Alpide::REG_VCASN, tmp);
-      //std::cout << m_value[0] << ", v=" << tmp << std::endl;
     }
     break;
   case 1:    // 2nd loop: mask staging
@@ -296,7 +281,6 @@ void TSCurveScan::FillHistos (std::vector<TPixHit> *Hits, int board)
 {
   common::TChipIndex idx; 
   idx.boardIndex = board;
-  
   for (int i = 0; i < (int)Hits->size(); i++) {
     if (Hits->at(i).address / 2 != m_row) continue;  // todo: keep track of spurious hits, i.e. hits in non-injected rows
     // !! This will not work when allowing several chips with the same Id
@@ -306,8 +290,10 @@ void TSCurveScan::FillHistos (std::vector<TPixHit> *Hits, int board)
     int col = Hits->at(i).region * 32 + Hits->at(i).dcol * 2;
     int leftRight = ((((Hits->at(i).address % 4) == 1) || ((Hits->at(i).address % 4) == 2))? 1:0); 
     col += leftRight;
-    m_histo->Incr(idx, col, m_value[0]);
+    m_histo->Incr(idx, col, m_value[0]); //m_value is too large (>20) often!!
+
   }
+  
   
 }
 

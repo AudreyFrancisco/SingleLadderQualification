@@ -45,6 +45,8 @@
 #include "TLocalBusAnalysis.h"
 
 
+#include <ctime>
+
 void scanLoop (TScan *myScan)
 {
   std::cout << "In scan loop function" << std::endl;
@@ -104,8 +106,8 @@ int main(int argc, char** argv) {
 
   TScanAnalysis  *analysis = new TLocalBusAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
 
-  TtuneVCASNScan *myScan = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TThresholdAnalysis *analysis = new TThresholdAnalysis(&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex, 1); //remember resultFactor...
+  TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  TThresholdAnalysis *analysis = new TThresholdAnalysis(&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
 
   //scanLoop(myScan);
   std::cout << "starting thread" << std::endl;
@@ -113,11 +115,16 @@ int main(int argc, char** argv) {
   analysis->Initialize();
   std::thread analysisThread(&TScanAnalysis::Run, std::ref(analysis));
 
+  std::clock_t start;
+  double elapsed;
+  start=std::clock();
   scanThread.join();
   analysisThread.join();
   analysis->Finalize();
+  elapsed=(std::clock()-start)/(double)CLOCKS_PER_SEC;
+  std::cout << "Time for scan+analysis: " << elapsed << " sec" << std::endl;
 
-  //std::cout << "Printing mean thresholds:" << std::endl; //need to know SPECIFIC chip number!!
+  std::cout << "Printing mean thresholds:" << std::endl; //need to know SPECIFIC chip number!!
   //want to go through each list in m_threshold.at(...) and print .mean.
   //std::map<int,common::TStatVar> thresh = analysis->DeleteThis();
   //for (std::map<int,common::TStatVar>::iterator it = thresh.begin(); it != thresh.end(); it++) {
