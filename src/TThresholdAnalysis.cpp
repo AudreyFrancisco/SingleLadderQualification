@@ -230,13 +230,13 @@ double meanGraph(TGraph* resultGraph) { //returns the weighted mean x value
   }
   //std::cout << "], sum=" << sum << ", norm=" << norm << std::endl;
 
-  if(abs(sum/norm) > 500) {  //outliers occur when a pixel is received twice; return 0.
-    std::cout << "nt" << std::endl;
-    return 0;
-  }
   if(norm==0) { //dead pixel
     std::cout << "dead" << std::endl;
     return -1;
+  }
+  if(abs(sum/norm) > 500) {  //outliers occur when a pixel is received twice; return 0.
+    std::cout << "nt" << std::endl;
+    return 0;
   }
   return sum/norm;
 }
@@ -271,6 +271,7 @@ void ddxGraph(TGraph* aGraph, TGraph* resultGraph) { //resultGraph contains the 
   for (int i = 0; i < aGraph->GetN()-1; i++) {
     //xval=avg of x1 and x2
     //std::cout << ys[i] << ",";
+    if(xs[i+1]==xs[i]) std::cout << "ERROR: repeated xval" << std::endl;
     resultGraph->SetPoint(resultGraph->GetN(), 0.5*(xs[i+1]+xs[i]), (ys[i+1]-ys[i])/(xs[i+1]-xs[i]));
   }
   //std::cout << "]" << std::endl;
@@ -282,6 +283,47 @@ double ErrorFunc(double* x, double* par)
   //double y = par[0]+par[1]*TMath::Erf( (x[0]-par[2]) / par[3] );
   double y = par[2]*(1+TMath::Erf( (x[0]-par[0]) / (sqrt(2)*par[1]) ) );
   return y;
+}
+
+float FindStart (TGraph* aGraph, int resultFactor) {
+  float Upper = -1;
+  float Lower = -1;
+  double * xs = aGraph->GetX();
+  double * ys = aGraph->GetY();
+  if(resultFactor>0) {
+    for (int i = 0; i < aGraph->GetN(); i ++) {
+      if (ys[i] == m_nPulseInj) {
+        Upper = (float) xs[i];
+        break;
+      }
+    }
+    if (Upper == -1) return -1;
+    for (int i = aGraph->GetN()-1; i > 0; i--) {
+      if (data[i] == 0) {
+        Lower = (float)xs[i];
+        break;
+      }
+    }
+    if ((Lower == -1) || (Upper < Lower)) return -1;
+    return (Upper + Lower)*resultFactor/2.0;
+
+  } else {
+    for (int i = aGraph->GetN()-1; i>-1 i++) {
+      if (ys[i] == m_nPulseInj) {
+        Lower = (float) xs[i];
+        break;
+      }
+    }
+    if(Lower==-1) return -1;
+    for (int i = 0; i < aGraph->GetN(); i++) {
+      if (data[i] == 0) {
+        Upper = (float)xs[i];
+        break;
+      }
+    }
+    if ((Lower == -1) || (Upper < Lower)) return -1;
+    return (Upper + Lower)*resultFactor/2.0;
+  }
 }
 
 common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
@@ -327,7 +369,7 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
     // slope of s-curve.  m_resultFactor MAY BE -1--make sure this doesn't cause any problems!! (WIP)
     //fitfcn->SetParameter(3,0.5);
 
-    fitfcn->SetParameter(0, .5*(m_stopPulseAmplitude-m_startPulseAmplitude)*m_resultFactor);
+    fitfcn->SetParameter(0, FindStart(aGraph, m_resultFactor));  //.5*(m_stopPulseAmplitude-m_startPulseAmplitude)*m_resultFactor);
     fitfcn->SetParameter(1, 8);
     fitfcn->SetParameter(2, .5*m_nPulseInj);
     aGraph->Fit("fitfcn","RQ");
