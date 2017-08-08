@@ -41,6 +41,7 @@ void TScan::Init()
   if (mosaic) {
     strcpy(m_conditions.m_fwVersion, mosaic->GetFwIdString());
   }
+  strcpy(m_conditions.m_swVersion, VERSION);
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart = m_hics.at(ihic)->GetTemperature();
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaStart = m_hics.at(ihic)->GetIdda();
@@ -208,7 +209,9 @@ void TScan::WriteConditions (const char *fName, THic *aHic)
 {
   FILE *fp = fopen (fName, "a");
 
-  fprintf (fp, "Firmware version: %s\n\n", m_conditions.m_fwVersion);
+  fprintf (fp, "Firmware version: %s\n",   m_conditions.m_fwVersion);
+  fprintf (fp, "Software version: %s\n\n", m_conditions.m_swVersion);
+
   fprintf (fp, "Temp (start): %.1f\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempStart);
   fprintf (fp, "Temp (end):   %.1f\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempEnd);
 
