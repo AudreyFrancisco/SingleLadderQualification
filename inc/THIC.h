@@ -31,6 +31,7 @@ class THic {
   float                      GetIdda         ();
   float                      GetIBias        ();
   float                      GetTemperature  ();
+  void                       ScaleVoltage    (float aFactor);
   std::string                GetDbId         () {return m_dbId;};
   int                        GetModId        () {return m_moduleId;};
   int                        GetNChips       () {return m_chips.size();};

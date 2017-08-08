@@ -91,6 +91,29 @@ float THic::GetIBias()
 }
 
 
+// scales all voltages and current limits of the HIC by a given factor
+// e.g. aFactor = 1.1 -> +10%
+// method takes the value from the config and writes the scaled value to the board
+// (config value is left unchanged)
+void THic::ScaleVoltage(float aFactor)
+{
+  if (!m_powerBoard) return;
+
+  TPowerBoardConfig *pbConfig = m_powerBoard->GetConfigurationHandler();
+  float              AVSet, AISet, DVSet, DISet;
+  bool               BiasOn;
+
+  pbConfig->GetModuleSetUp(m_pbMod, &AVSet, &AISet, &DVSet, &DISet, &BiasOn);
+
+  m_powerBoard->SetModule (m_pbMod, 
+                           AVSet *aFactor, 
+			   AISet *aFactor, 
+                           DVSet *aFactor, 
+			   DISet *aFactor, 
+			   BiasOn);
+}
+
+
 float THic::GetTemperature() 
 {
   float result = 0; 
