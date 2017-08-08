@@ -1,5 +1,4 @@
 CC=g++
-
 GIT_VERSION:=$(shell git describe --dirty --always)
 
 ### Static libraries which are located in subfolders

@@ -11,23 +11,24 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = GUI
 TEMPLATE = app
 
-CONFIG += c++11 -Wall -pedantic
+GIT_VERSION = $(shell git describe --dirty --always)
+
+CONFIG += c++11 -Wall -pedantic -DVERSION=\"$(GIT_VERSION)\"
 
 QMAKE_CXXFLAGS *= $(shell root-config --cflags)
 QMAKE_CFLAGS   *= $(shell root-config --cflags)
 QMAKE_LDFLAGS  *= $(shell root-config --ldflags)
 
-
 SOURCES += main.cpp\
            mainwindow.cpp\
            dialog.cpp \
            testselection.cpp \
-    scanthread.cpp
+           scanthread.cpp
 
 HEADERS  += mainwindow.h \
             dialog.h \
             testselection.h \
-    scanthread.h
+            scanthread.h
 
 FORMS    += mainwindow.ui \
             dialog.ui \
