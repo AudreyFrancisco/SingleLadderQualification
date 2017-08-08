@@ -37,6 +37,12 @@ TScan::TScan (TScanConfig                   *config,
 
 void TScan::Init()
 {
+  // Power on HIC if not yet done (PowerOn() checks if already powered)
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hics.at(ihic)->PowerOn();
+  }
+  sleep(1);
+
   TReadoutBoardMOSAIC *mosaic = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(0));
   if (mosaic) {
     strcpy(m_conditions.m_fwVersion, mosaic->GetFwIdString());
