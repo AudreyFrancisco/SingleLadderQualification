@@ -53,6 +53,7 @@
 #include "TNoiseOccupancy.h"
 #include "THIC.h"
 #include "AlpideDB.h"
+#include "AlpideDBEndPoints.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
