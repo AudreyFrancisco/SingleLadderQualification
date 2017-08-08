@@ -31,7 +31,7 @@ BASE_CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp A
   TPowerBoardConfig.cpp BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TPowerAnalysis.cpp \
   TDigitalAnalysis.cpp TFifoAnalysis.cpp TLocalBusAnalysis.cpp TNoiseAnalysis.cpp TScan.cpp \
   TPowerTest.cpp TFifoTest.cpp TSCurveScan.cpp TDigitalScan.cpp TNoiseOccupancy.cpp TLocalBusTest.cpp \
-  TScanConfig.cpp TestBeamTools.cpp Common.cpp TReadoutBoardRU.cpp TBoardConfigRU.cpp
+  TScanConfig.cpp TestBeamTools.cpp Common.cpp TReadoutBoardRU.cpp TBoardConfigRU.cpp TApplyMask.cpp
 BASE_OBJS = $(BASE_CLASSES:.cpp=.o)
 
 RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp \

@@ -15,6 +15,7 @@
 
 class TNoiseResultChip : public TScanResultChip {
   friend class TNoiseAnalysis;
+  friend class TApplyMask;
  private: 
   std::vector <TPixHit> m_noisyPixels;
   double                m_occ;
@@ -29,6 +30,7 @@ class TNoiseResultChip : public TScanResultChip {
 
 class TNoiseResultHic : public TScanResultHic {
   friend class TNoiseAnalysis;
+  friend class TApplyMask;
  private:
   double m_occ;
   int    m_nNoisy;
@@ -42,6 +44,7 @@ class TNoiseResultHic : public TScanResultHic {
 
 class TNoiseResult : public TScanResult {
   friend class TNoiseAnalysis;
+  friend class TApplyMask;
  private: 
   std::vector <TPixHit> m_noisyPixels;
  public: 

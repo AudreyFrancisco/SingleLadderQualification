@@ -25,7 +25,7 @@ void TApplyMask::Run()
       TNoiseResultChip *chipResult = (TNoiseResultChip*) it->second;
    
       // TODO: check rounding, fix makefile (unresolved reference)
-      chip->GetConfig()->SetParamValue(GetDACName(), (int)chipResult->GetThresholdMean());
+      chip->GetConfig()->SetNoisyPixels(chipResult->GetNoisyPixels());
     }
   }
 }
