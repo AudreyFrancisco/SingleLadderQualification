@@ -11,9 +11,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = GUI
 TEMPLATE = app
 
-GIT_VERSION = $(shell git describe --dirty --always)
+CONFIG += c++11 -Wall -pedantic
 
-CONFIG += c++11 -Wall -pedantic -DVERSION=\"$(GIT_VERSION)\"
+DEFINES = VERSION="\\\"$(shell git describe --dirty --always)\\\""
 
 QMAKE_CXXFLAGS *= $(shell root-config --cflags)
 QMAKE_CFLAGS   *= $(shell root-config --cflags)
