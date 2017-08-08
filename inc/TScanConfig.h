@@ -5,6 +5,7 @@
 
 #include <map>
 #include <string>
+#include <string.h>
 
 namespace ScanConfig {
   const int NINJ           = 50;        // number of injections in digital/threshold scans
@@ -105,7 +106,7 @@ class TScanConfig {
   int   GetScanStep      () {return m_scanStep;};
   int   GetSpeedy        () {return m_speedy;};
   int   GetLocalBusCutRed() {return m_localBusCutRed;};
-
+  void  SetfNameSuffix   (const char *aSuffix) {strcpy (m_fNameSuffix, aSuffix);};
 };
 
 
