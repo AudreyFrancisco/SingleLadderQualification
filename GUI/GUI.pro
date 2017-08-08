@@ -13,7 +13,7 @@ TEMPLATE = app
 
 CONFIG += c++11 -Wall -pedantic
 
-DEFINES = VERSION="\\\"$(shell git describe --dirty --always)\\\""
+DEFINES += VERSION="\\\"$(shell git describe --dirty --always)\\\""
 
 QMAKE_CXXFLAGS *= $(shell root-config --cflags)
 QMAKE_CFLAGS   *= $(shell root-config --cflags)
@@ -52,14 +52,13 @@ INCLUDEPATH += $$PWD/../
 DEPENDPATH += $$PWD/../
 
 INCLUDEPATH += $$PWD/../inc
-DEPENDPATH += $$PWD/../src
 DEPENDPATH += $$PWD/../inc
-
-INCLUDEPATH += $$PWD/../MosaicSrc/
-DEPENDPATH += $$PWD/../MosaicSrc/
 
 INCLUDEPATH += $$PWD/../DataBaseSrc/
 DEPENDPATH += $$PWD/../DataBaseSrc/
+
+INCLUDEPATH += $$PWD/../MosaicSrc/
+DEPENDPATH += $$PWD/../MosaicSrc/
 
 INCLUDEPATH += $$PWD/../MosaicSrc/libmosaic/include
 DEPENDPATH += $$PWD/../MosaicSrc/libmosaic/include

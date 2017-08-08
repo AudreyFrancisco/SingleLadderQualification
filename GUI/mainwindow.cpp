@@ -1,8 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
 #include <QtWidgets>
 #include <QCoreApplication>
 #include <QtDebug>
+#include <QFileDialog>
+#include <QFile>
+#include <QPixmap>
+#include <QMenuBar>
+//#include <QtCore>
+
 #include <deque>
 #include <mutex>
 #include <thread>
@@ -10,8 +17,15 @@
 #include <map>
 #include <string>
 #include <iostream>
+
 #include <qapplication.h>
 //#include "TQtWidgets.h"
+#include <typeinfo>
+#include <qpushbutton.h>
+//#include "scanthread.h"
+#include "dialog.h"
+#include "testselection.h"
+
 #include "TAlpide.h"
 #include "TDigitalAnalysis.h"
 #include "TDigitalScan.h"
@@ -23,7 +37,6 @@
 #include "TConfig.h"
 #include "AlpideDecoder.h"
 #include "AlpideConfig.h"
-#include <QFileDialog>
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 #include "TSCurveScan.h"
@@ -32,20 +45,15 @@
 #include "TScanAnalysis.h"
 #include "TScan.h"
 #include "TThresholdAnalysis.h"
-#include  "TFifoTest.h"
-#include  "TFifoAnalysis.h"
+#include "TLocalBusAnalysis.h"
+#include "TLocalBusTest.h"
+#include "TFifoTest.h"
+#include "TFifoAnalysis.h"
 #include "TNoiseAnalysis.h"
 #include "TNoiseOccupancy.h"
-#include <QFile>
-#include <typeinfo>
-#include <qpushbutton.h>
-#include <QPixmap>
-#include "testselection.h"
-#include <QMenuBar>
-#include  "inc/THIC.h"
-//#include "scanthread.h"
-//#include <QtCore>
-#include "dialog.h"
+#include "THIC.h"
+#include "AlpideDB.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -163,7 +171,7 @@ if (properconfig==1){
     if (device==2){
        ui->tob->setText("Outer Barrel module");
         ui->OBModule->show();
-        for (int i=0;i< fChips.size();i++){
+        for (unsigned int i=0;i< fChips.size();i++){
             int chipid;
             uint8_t module,side,pos;
             chipid=fChips.at(i)->GetConfig()->GetChipId();
@@ -176,7 +184,7 @@ if (properconfig==1){
     }
     if (device==3){
          ui->IBModule->show();
-         for (int i=0;i< fChips.size();i++){
+         for (unsigned int i=0;i< fChips.size();i++){
              int chipid;
              uint8_t module,side,pos;
              chipid=fChips.at(i)->GetConfig()->GetChipId();
@@ -189,7 +197,7 @@ if (properconfig==1){
     }
    if (device==5){
       ui->OBHALFSTAVE->show();
-      for (int i=0;i< fChips.size();i++){
+      for (unsigned int i=0;i< fChips.size();i++){
           int chipid;
           chipid=fChips.at(i)->GetConfig()->GetChipId();
           if(fChips.at(i)->GetConfig()->IsEnabled()){
@@ -207,7 +215,7 @@ void MainWindow::button_obm1_clicked(){
   chkBtnObm1 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("1");
-  for (int i=0;i< fChips.size();i++){
+  for (unsigned int i=0;i< fChips.size();i++){
       int chipid;
       uint8_t module,side,pos;
       chipid=fChips.at(i)->GetConfig()->GetChipId();
@@ -223,7 +231,7 @@ void MainWindow::button_obm2_clicked(){
   chkBtnObm2 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("2");
-  for (int i=0;i< fChips.size();i++){
+  for (unsigned int i=0;i< fChips.size();i++){
       int chipid;
       chipid=fChips.at(i)->GetConfig()->GetChipId();
       uint8_t module,side,pos;
@@ -238,7 +246,7 @@ void MainWindow::button_obm3_clicked(){
   chkBtnObm3 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("3");
-  for (int i=0;i< fChips.size();i++){
+  for (unsigned int i=0;i< fChips.size();i++){
       int chipid;
       chipid=fChips.at(i)->GetConfig()->GetChipId();
       uint8_t module,side,pos;
@@ -256,7 +264,7 @@ void MainWindow::button_obm4_clicked(){
   chkBtnObm4 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("4");
-  for (int i=0;i< fChips.size();i++){
+  for (unsigned int i=0;i< fChips.size();i++){
       int chipid;
       chipid=fChips.at(i)->GetConfig()->GetChipId();
       uint8_t module,side,pos;
@@ -273,7 +281,7 @@ void MainWindow::button_obm5_clicked(){
   chkBtnObm5 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("5");
-  for (int i=0;i< fChips.size();i++){
+  for (unsigned int i=0;i< fChips.size();i++){
       int chipid;
       chipid=fChips.at(i)->GetConfig()->GetChipId();
       uint8_t module,side,pos;
@@ -288,7 +296,7 @@ void MainWindow::button_obm6_clicked(){
   chkBtnObm6 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("6");
-  for (int i=0;i< fChips.size();i++){
+  for (unsigned int i=0;i< fChips.size();i++){
       int chipid;
       chipid=fChips.at(i)->GetConfig()->GetChipId();
       uint8_t module,side,pos;
@@ -303,7 +311,7 @@ void MainWindow::button_obm7_clicked(){
   chkBtnObm7 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("7");
-  for (int i=0;i< fChips.size();i++){
+  for (unsigned int i=0;i< fChips.size();i++){
       int chipid;
       chipid=fChips.at(i)->GetConfig()->GetChipId();
       uint8_t module,side,pos;
@@ -718,7 +726,7 @@ void MainWindow::fillingOBvectors(){
   TNoiseResult *noiseresult=new TNoiseResult();
   TtuneVCASNScan *vcasnscan=new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
   TtuneITHRScan *ithrscan=new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-   TLocalBusTest *localbusscan=new TLocalBusTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+  TLocalBusTest *localbusscan=new TLocalBusTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
   TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
   TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesult);
 
@@ -1005,7 +1013,7 @@ void MainWindow::applytests(){
 
 void MainWindow::WriteTests(){
 std::cout<<fScanVector.size()<<"the scan vector size";
-    for (int i=0;i<fScanVector.size();i++)
+    for (unsigned int i=0;i<fScanVector.size();i++)
     {
 
     while (i<1){
@@ -1093,7 +1101,7 @@ void MainWindow::fifolist(){
          mapdetails.push_back(d);
 
      }
-    for (int i=0; i<mapdetails.size();i++){
+    for (unsigned int i=0; i<mapdetails.size();i++){
         std::cout<<mapdetails[i]<<std::endl;
         ui->details->addItem(mapdetails[i].c_str());
     }
@@ -1116,7 +1124,7 @@ void MainWindow::digitallist(){
          mapdetails.push_back(d);
 
      }
-    for (int i=0; i<mapdetails.size();i++){
+    for (unsigned int i=0; i<mapdetails.size();i++){
         std::cout<<mapdetails[i]<<std::endl;
         ui->details->addItem(mapdetails[i].c_str());
     }
@@ -1138,7 +1146,7 @@ void MainWindow::thresholdlist(){
          mapdetails.push_back(d);
 
      }
-    for (int i=0; i<mapdetails.size();i++){
+    for (unsigned int i=0; i<mapdetails.size();i++){
         std::cout<<mapdetails[i]<<std::endl;
         ui->details->addItem(mapdetails[i].c_str());
     }
@@ -1161,7 +1169,7 @@ void MainWindow::noiselist(){
          mapdetails.push_back(d);
 
      }
-    for (int i=0; i<mapdetails.size();i++){
+    for (unsigned int i=0; i<mapdetails.size();i++){
         std::cout<<mapdetails[i]<<std::endl;
         ui->details->addItem(mapdetails[i].c_str());
     }
@@ -1208,7 +1216,7 @@ if (properconfig==1){
     if (device==2){
         ui->tob->setText("Outer Barrel module");
         ui->OBModule->show();
-        for (int i=0;i< fChips.size();i++){
+        for (unsigned int i=0;i< fChips.size();i++){
             int chipid;
             uint8_t module,side,pos;
             chipid=fChips.at(i)->GetConfig()->GetChipId();
@@ -1221,7 +1229,7 @@ if (properconfig==1){
     }
     if (device==3){
          ui->IBModule->show();
-         for (int i=0;i< fChips.size();i++){
+         for (unsigned int i=0;i< fChips.size();i++){
              int chipid;
              uint8_t module,side,pos;
              chipid=fChips.at(i)->GetConfig()->GetChipId();
@@ -1234,7 +1242,7 @@ if (properconfig==1){
     }
    if (device==5){
       ui->OBHALFSTAVE->show();
-      for (int i=0;i< fChips.size();i++){
+      for (unsigned int i=0;i< fChips.size();i++){
           int chipid;
           chipid=fChips.at(i)->GetConfig()->GetChipId();
           if(fChips.at(i)->GetConfig()->IsEnabled()){
@@ -1250,7 +1258,7 @@ if (properconfig==1){
 
 
 void MainWindow::setVI(float * vcasn, float * ithr) {
-  for(int i=0; i<fChips.size(); i++) {
+  for(unsigned int i=0; i<fChips.size(); i++) {
     //fChips.at(i)->GetConfig()->SetParamValue(ithr[i]);
     //WIP...
   }
