@@ -2,6 +2,7 @@
 #define CONFIG_H
 
 #include <vector>
+#include <string>
 #include "TChipConfig.h"
 #include "TBoardConfig.h"
 #include "TReadoutBoard.h"
@@ -46,6 +47,7 @@ class TConfig {
   TScanConfig  *GetScanConfig      () {return fScanConfig;};
   void          WriteToFile        (const char *fName);
 
+  std::string   GetSoftwareVersion() { return VERSION; }
 };
 
 
