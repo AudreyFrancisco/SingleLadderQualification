@@ -120,6 +120,22 @@ MainWindow::MainWindow(QWidget *parent) :
      connect(ui->obm7,SIGNAL(clicked()),this,SLOT(button_obm7_clicked()));
      connect (ui->testselection,SIGNAL(currentIndexChanged(int)),this, SLOT(combochanged(int)));
      AlpideDB *myDB=new AlpideDB();
+     ProjectDB *myproject=new ProjectDB(myDB);
+     MemberDB *mymember= new MemberDB(myDB);
+     ComponentDB *mycomponents=new ComponentDB(myDB);
+     std::vector <ProjectDB::project> projectlist;
+     myproject->GetList(&projectlist);
+     std::cout<<"The number of projects is "<<projectlist.size()<<std::endl;
+     for(int i=0; i<projectlist.size(); i++){
+
+         std::cout<<"Project"<<projectlist.at(i).Name<<std::endl;
+     }
+     std::vector<MemberDB::member> memberlist;
+     mymember->GetList(1,&memberlist);
+     for(int i=0; i<memberlist.size(); i++){
+
+         std::cout<<"Member"<<memberlist.at(i).FullName<<std::endl;
+     }
 
      QPixmap alice("alice.jpg");
      int w = ui->alicepic->width();
