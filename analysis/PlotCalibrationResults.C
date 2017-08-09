@@ -33,8 +33,8 @@ void fillData(float *ithr, float *RMS, float *actualRMS, int target, int Chips, 
     if(fp) {
       fscanf(fp, "%i %i %i %f %f %f %f", &old_vcas, &old_ith, &goodPixels, &current,
               &currentRMS, &noise, &noiseRMS);
-      ithr[i]=current;
-      RMS[i]=currentRMS;
+      ithr[i]=noise; //current;
+      RMS[i]=noiseRMS; //currentRMS;
       rmsSum += (current-target)*(current-target);
       fclose(fp);
       std::cout << "Read " << name << std::endl;
@@ -132,6 +132,57 @@ void PlotCalibrationResults(int Chips, int target, char * fileName1, char * file
     auto can = new TCanvas();
     cal1->DrawClone("APE");
     cal1->Print("ITHRorVCASN.pdf");*/
+    
+    TGraphErrors * cal1=NULL;
+
+    //cal1
+    float *thr1 = new float[Chips];
+    float *RMS1 = new float[Chips];
+    float *chipNums1 = new float[Chips];
+    char * filePrefix1; //must be null-terminated...
+    int length1 = strcspn(fileName1, "C")+4; //add 4 to include "Chip"
+    filePrefix1 = new char[length1+1];
+    for(int i=0; i<length1; i++) {
+      filePrefix1[i]=fileName1[i];
+    }
+    char nul = '\0';
+    filePrefix1[length1]=nul;
+    
+    float * actualRMS = new float;
+    int targetRMS=100;
+    fillData(thr1, RMS1, actualRMS, targetRMS, Chips, filePrefix1);
+    std::cout << "thr1 filled" << std::endl;
+    for(int i=0; i<Chips; i++) { //xvals
+      chipNums1[i]=i;
+    }
+    cal1 = new TGraphErrors(Chips, chipNums1, thr1, NULL, RMS1);
+    std::cout << "cal1 created" << std::endl;
+
+    
+    //Generating plot
+    std::string title = "Mean threshold, target=" + std::to_string(targetRMS) + ", RMS error=" + std::to_string(*actualRMS) + "; Chip number; Threshold";
+    std::cout << title << std::endl;
+    const char* ttl = title.c_str();
+    //cal1->SetTitle(ttl);
+    cal1->SetMarkerStyle(21);
+    cal1->SetMarkerColor(2);
+    cal1->SetLineColor(2);
+    auto axis1 = cal1->GetXaxis();
+    axis1->SetLimits(-.5,8.5);
+
+    TMultiGraph *mg = new TMultiGraph();
+    mg->Add(cal1);
+
+    TCanvas *c1 = new TCanvas("c1","multigraph",400,300);
+    c1->SetGrid();
+
+    mg->Draw("apl");
+    //mg->GetXaxis()->SetTitle("Chip number");
+    //mg->GetYaxis()->SetTitle("Threshold");
+    mg->SetTitle(ttl);
+
+    gPad->Update();
+    gPad->Modified();
 
   } else {  //first filename in red, second in blue
     TGraphErrors * cal1=NULL;

@@ -13,7 +13,7 @@ class TSCurveScan : public TMaskScan {
  protected:
   int         m_VPULSEH;
   void ConfigureFromu (TAlpide *chip);
-  void ConfigureChip  (TAlpide *chip);
+  virtual void ConfigureChip  (TAlpide *chip) = 0;
   void ConfigureBoard (TReadoutBoard *board);
   void FillHistos     (std::vector<TPixHit> *Hits, int board);
   //THisto CreateHisto    ();
@@ -49,6 +49,7 @@ class TThresholdScan : public TSCurveScan {
   //TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
   //  m_step[1] = 1;
   //}
+  void ConfigureChip  (TAlpide *chip);
   void PrepareStep (int loopIndex);
   ~TThresholdScan() {};
 };
@@ -66,6 +67,7 @@ class TtuneVCASNScan : public TSCurveScan {
   //TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
   //  m_step[1] = 16; //this will probably never change
   //}
+  void ConfigureChip  (TAlpide *chip);
   void PrepareStep (int loopIndex);
   ~TtuneVCASNScan() {};
 };
@@ -82,6 +84,7 @@ class TtuneITHRScan : public TSCurveScan {
   //TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
   //  m_step[1] = 16;
   // }
+  void ConfigureChip  (TAlpide *chip);
   void PrepareStep (int loopIndex);
   ~TtuneITHRScan() {};
 };

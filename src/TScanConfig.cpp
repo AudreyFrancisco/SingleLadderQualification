@@ -1,8 +1,8 @@
-#include "TScanConfig.h" 
+#include "TScanConfig.h"
 
 using namespace ScanConfig;
 
-TScanConfig::TScanConfig() 
+TScanConfig::TScanConfig()
 {
   // dummy values for first tests
   m_nInj           = NINJ;
@@ -22,6 +22,7 @@ TScanConfig::TScanConfig()
   m_scanStep       = SCAN_STEP;
   m_speedy         = SPEEDY;
   m_localBusCutRed = LOCALBUSCUTRED;
+  m_calVpulsel   = CAL_VPULSEL;
 
   m_powerCutMinIdda_OB        = POWER_CUT_MINIDDA_OB;
   m_powerCutMinIddd_OB        = POWER_CUT_MINIDDD_OB;
@@ -40,7 +41,7 @@ TScanConfig::TScanConfig()
 }
 
 
-void TScanConfig::InitParamMap () 
+void TScanConfig::InitParamMap ()
 {
   fSettings["NINJ"]         = &m_nInj;
   fSettings["NTRIG"]        = &m_nTrig;
@@ -73,10 +74,11 @@ void TScanConfig::InitParamMap ()
   fSettings["MAXIDDA_CLOCKED_IB"] = &m_powerCutMaxIddaClocked_IB;
   fSettings["MAXIDDD_CLOCKED_IB"] = &m_powerCutMaxIdddClocked_IB;
 
+  fSettings["CAL_VPULSEL"]  = &m_calVpulsel;
 }
 
 
-bool TScanConfig::SetParamValue (const char *Name, const char *Value) 
+bool TScanConfig::SetParamValue (const char *Name, const char *Value)
 {
   if (fSettings.find (Name) != fSettings.end()) {
     sscanf (Value, "%d", fSettings.find(Name)->second);
@@ -87,7 +89,7 @@ bool TScanConfig::SetParamValue (const char *Name, const char *Value)
 }
 
 
-int TScanConfig::GetParamValue (const char *Name) 
+int TScanConfig::GetParamValue (const char *Name)
 {
 
   if (fSettings.find (Name) != fSettings.end()) {
@@ -109,5 +111,3 @@ void TScanConfig::SetIthrArr (int hics, float *ithr) {
     m_ithr[i] = (int)(ithr[i]+.5); //rounding matters
   }
 }*/
-
-

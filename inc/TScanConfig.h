@@ -17,15 +17,14 @@ namespace ScanConfig {
   const int PIX_PER_REGION = 32;
   const int NOISECUT_INV   = 100000;   // inverse of pixel noise cut (e.g. 100000 = 1e-5)
 
-  const int ITHR_START     = 30;
+  const int ITHR_START     = 0; //30;
   const int ITHR_STOP      = 100;
   const int ITHR_STEP      = 1;
-  const int VCASN_START    = 40;
+  const int VCASN_START    = 0; //40
   const int VCASN_STOP     = 60;
   const int VCASN_STEP     = 1;
   const int SCAN_STEP      = 16; //Grab every Xth row (for tuneITHR/VCASN scan only).
                                  //Speeds up scan; changing this has little effect on result accuracy.
-  const int SPEEDY         = 1;  //Use slow fit if 0, differentiate->mean if 1.
 
   const int LOCALBUSCUTRED = 1;
 
@@ -44,12 +43,14 @@ namespace ScanConfig {
   const int POWER_CUT_MINIDDD_CLOCKED_IB = 400;
   const int POWER_CUT_MAXIDDA_CLOCKED_IB = 180;
   const int POWER_CUT_MAXIDDD_CLOCKED_IB = 550;
-  
+
+  const int SPEEDY         = 0;  //Use slow fit if 0, differentiate->mean if 1.
+  const int CAL_VPULSEL    = 155; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
 }
 
 
 class TScanConfig {
- private: 
+ private:
   std::map <std::string, int*> fSettings;
   int  m_nInj;
   int  m_nTrig;
@@ -82,8 +83,9 @@ class TScanConfig {
   int  m_powerCutMinIdddClocked_IB;
   int  m_powerCutMaxIddaClocked_IB;
   int  m_powerCutMaxIdddClocked_IB;
+  int  m_calVpulsel;
 
- protected: 
+ protected:
  public:
   TScanConfig ();
   ~TScanConfig() {};
@@ -97,7 +99,7 @@ class TScanConfig {
   int   GetChargeStep    () {return m_chargeStep;};
   int   GetChargeStop    () {return m_chargeStop;};
   int   GetNMaskStages   () {return m_nMaskStages;};
-  char *GetfNameSuffix   () {return m_fNameSuffix;};  
+  char *GetfNameSuffix   () {return m_fNameSuffix;};
   int   GetIthrStart     () {return m_ithrStart;};
   int   GetIthrStop      () {return m_ithrStop;};
   int   GetIthrStep      () {return m_ithrStep;};
@@ -108,8 +110,8 @@ class TScanConfig {
   int   GetSpeedy        () {return m_speedy;};
   int   GetLocalBusCutRed() {return m_localBusCutRed;};
   void  SetfNameSuffix   (const char *aSuffix) {strcpy (m_fNameSuffix, aSuffix);};
+  int   GetCalVpulsel   () {return m_calVpulsel;};
 };
-
 
 
 #endif
