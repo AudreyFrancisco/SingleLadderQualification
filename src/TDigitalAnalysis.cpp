@@ -211,7 +211,29 @@ void TDigitalAnalysis::Finalize() {
     }
   }
 
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    TDigitalResultHic *hicResult = (TDigitalResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+    if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
+      hicResult->m_class = GetClassificationOB(hicResult);
+    }
+    else {
+      hicResult->m_class = GetClassificationOB(hicResult);
+    }
+  }
   WriteResult      ();
+}
+
+
+//TODO: Add readout errors
+//TODO: Make two cuts (red and orange?)
+THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic* result) {
+  return CLASS_GREEN;
+
+}
+
+
+THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic* result) {
+  return CLASS_GREEN;
 }
 
 

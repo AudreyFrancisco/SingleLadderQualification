@@ -77,6 +77,8 @@ class TDigitalAnalysis : public TScanAnalysis {
   void WriteHitData     (TScanHisto *histo, int row); 
   void WriteResult      ();
   void WriteStuckPixels (THic *hic);
+  THicClassification GetClassificationOB(TDigitalResultHic *result);
+  THicClassification GetClassificationIB(TDigitalResultHic *result);
  protected:
   TScanResultChip *GetChipResult () {TDigitalResultChip *Result = new TDigitalResultChip(); return Result;};
   TScanResultHic  *GetHicResult  () {TDigitalResultHic  *Result = new TDigitalResultHic (); return Result;};

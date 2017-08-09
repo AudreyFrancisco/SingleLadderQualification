@@ -41,6 +41,13 @@ TScanConfig::TScanConfig()
 
   m_fifoCutMaxErr    = FIFO_CUT_MAXERR;
   m_fifoCutMaxFaulty = FIFO_CUT_MAXFAULTY;
+
+  m_digitalMaxBadPerChipOB = DIGITAL_MAXBAD_CHIP_OB;
+  m_digitalMaxBadPerChipIB = DIGITAL_MAXBAD_CHIP_IB;
+  m_digitalMaxBadPerHicOB = DIGITAL_MAXBAD_HIC_OB;
+  m_digitalMaxBadPerHicIB = DIGITAL_MAXBAD_HIC_IB;
+
+
   InitParamMap();
 }
 
@@ -80,6 +87,11 @@ void TScanConfig::InitParamMap ()
 
   fSettings["FIFO_MAXERR"]        = &m_fifoCutMaxErr;
   fSettings["FIFO_MAXFAULTY"]     = &m_fifoCutMaxFaulty;
+
+  fSettings["DIGITAL_MAXBAD_CHIP_OB"] = &m_digitalMaxBadPerChipOB;
+  fSettings["DIGITAL_MAXBAD_CHIP_IB"] = &m_digitalMaxBadPerChipIB;
+  fSettings["DIGITAL_MAXBAD_HIC_OB"] = &m_digitalMaxBadPerHicOB;
+  fSettings["DIGITAL_MAXBAD_HIC_IB"] = &m_digitalMaxBadPerHicIB;
 
   fSettings["CAL_VPULSEL"]        = &m_calVpulsel;
 }
