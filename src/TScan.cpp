@@ -27,12 +27,14 @@ TScan::TScan (TScanConfig                   *config,
 
   fScanAbort = false;
 
+  strcpy (m_state, "Waiting");
   CreateHicConditions();
 }
 
 
 void TScan::Init()
 {
+  strcpy(m_state, "Running");
   time_t       t = time(0);   // get time now
   struct tm *now = localtime( & t );
 
@@ -75,6 +77,7 @@ void TScan::Terminate()
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaEnd = m_hics.at(ihic)->GetIdda();
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddEnd = m_hics.at(ihic)->GetIddd();
   }
+  strcpy(m_state, "Done");
 }
 
 

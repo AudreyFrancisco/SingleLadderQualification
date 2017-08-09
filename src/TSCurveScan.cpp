@@ -209,6 +209,7 @@ void TThresholdScan::PrepareStep (int loopIndex)
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
     }
+    sprintf(m_state, "Running %d", m_value[1]);
     break;
   default:
     break;

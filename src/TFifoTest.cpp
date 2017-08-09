@@ -94,6 +94,7 @@ void TFifoTest::PrepareStep(int loopIndex)
   case 2:    // outermost loop: change chip
     m_testChip   = m_chips.at     (m_value[2]);
     m_boardIndex = FindBoardIndex (m_testChip);
+    sprintf(m_state, "Running %d", m_value[2]);
     break;
   default: 
     break;
