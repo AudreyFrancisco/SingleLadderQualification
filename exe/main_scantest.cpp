@@ -102,9 +102,8 @@ int main(int argc, char** argv) {
 
   //TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
   //TScanAnalysis  *analysis = new TDigitalAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
-  TScan *myScan   = new TLocalBusTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-
-  TScanAnalysis  *analysis = new TLocalBusAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+  //TScan *myScan   = new TLocalBusTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  //TScanAnalysis  *analysis = new TLocalBusAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
 
   TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
   TThresholdAnalysis *analysis = new TThresholdAnalysis(&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);

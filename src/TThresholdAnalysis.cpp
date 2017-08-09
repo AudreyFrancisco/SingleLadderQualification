@@ -348,44 +348,12 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
 			  m_stopPulseAmplitude*m_resultFactor,
 			  4);
     }
-<<<<<<< dbb11e350449a744cc517f986fd908b50b24f30b
-    // y@50%.
-    //fitfcn->SetParameter(0,0.5*m_nPulseInj);
-=======
-    // y@50%. //OLD
-    //fitfcn->SetParameter(0,0.5*m_nPulseInj);
->>>>>>> Clean up before merge
-    // 0.5 of max. amplitude.
-    //fitfcn->SetParameter(1,0.5*m_nPulseInj);
-    // x@50%.
-    //fitfcn->SetParameter(2,0.5*(m_stopPulseAmplitude - m_startPulseAmplitude)*m_resultFactor);
-    // slope of s-curve.  m_resultFactor MAY BE -1--make sure this doesn't cause any problems!! (WIP)
-    //fitfcn->SetParameter(3,0.5);
-<<<<<<< dbb11e350449a744cc517f986fd908b50b24f30b
+
     fitfcn->SetParameter(0, FindStart(aGraph, m_resultFactor, m_nPulseInj));  //.5*(m_stopPulseAmplitude-m_startPulseAmplitude)*m_resultFactor);
     fitfcn->SetParameter(1, 8);
     fitfcn->SetParameter(2, .5*m_nPulseInj);
     aGraph->Fit("fitfcn","RQ");
 
-    //common::TErrFuncFitResult fitResult_dummy;
-    /*if(fitfcn->GetParameter(0)>0 && m_resultFactor<0) {
-      std::cout << "ERROR in line 241 of TAnalogAnalysis:  Unexpected resultFactor/threshold sign!" << std::endl;
-      fitResult_dummy.threshold = 1;
-      return fitResult_dummy;
-    }
-    if(fitfcn->GetParameter(0) < 0) {
-      fitResult_dummy.threshold = -1*fitfcn->GetParameter(0);  //for the ithr case
-    } else {
-      fitResult_dummy.threshold = fitfcn->GetParameter(0);
-    }*/
-=======
-
-    fitfcn->SetParameter(0, FindStart(aGraph, m_resultFactor, m_nPulseInj));
-    fitfcn->SetParameter(1, 8);
-    fitfcn->SetParameter(2, .5*m_nPulseInj);
-    aGraph->Fit("fitfcn","RQ");
-
->>>>>>> Clean up before merge
     if(fitfcn->GetParameter(0)==0.5*m_nPulseInj) std::cout << "TTA328: fit parameter unchanged!" << std::endl;
     if(abs(fitfcn->GetParameter(0))<500 && abs(fitfcn->GetParameter(1))<100) {
       fitResult_dummy.threshold = abs(fitfcn->GetParameter(0));
