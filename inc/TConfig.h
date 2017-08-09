@@ -37,8 +37,8 @@ class TConfig {
   TConfig (int chipId, TBoardType boardType = boardDAQ);
 
   TDeviceType   GetDeviceType      ()           {return fDeviceType;};
-  int           GetNChips          ()           {return fChipConfigs.size();};
-  int           GetNBoards         ()           {return fBoardConfigs.size();};
+  unsigned int  GetNChips          ()           {return fChipConfigs.size();};
+  unsigned int  GetNBoards         ()           {return fBoardConfigs.size();};
   bool          GetUsePowerBoard   ()           {return fUsePowerBoard;};
   void          SetUsePowerBoard   (bool UsePB) {fUsePowerBoard = UsePB;};
   TChipConfig  *GetChipConfig      (unsigned int iChip);

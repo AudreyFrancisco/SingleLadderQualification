@@ -59,15 +59,15 @@ void AlpideDecoder::DecodeEmptyFrame (unsigned char *data, int &chipId, unsigned
 }
 
 
-void AlpideDecoder::DecodeDataWord (unsigned char         *data, 
-                                    int                    chip, 
-                                    int                    region, 
-                                    std::vector <TPixHit> *hits, 
-                                    bool                   datalong, 
+void AlpideDecoder::DecodeDataWord (unsigned char         *data,
+                                    int                    chip,
+                                    int                    region,
+                                    std::vector <TPixHit> *hits,
+                                    bool                   datalong,
                                     int                    boardIndex,
-                                    int                    channel, 
-                                    int                   &prioErrors, 
-                                    std::vector <TPixHit> *stuck) 
+                                    int                    channel,
+                                    int                   &prioErrors,
+                                    std::vector <TPixHit> *stuck)
 {
   TPixHit hit;
   int     address, hitmap_length;
@@ -117,13 +117,10 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
   bool      finished = false; // event trailer found
   TDataType type;
 
-  unsigned char last;
-
   eventStart = 0;
 
   isError = false;
   while (byte < nBytes) {
-    last = data[byte];
     type = GetDataType (data[byte]);
     switch (type) {
     case DT_IDLE:
@@ -204,13 +201,13 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
 }
 
 
-bool AlpideDecoder::DecodeEvent (unsigned char         *data, 
-                                 int                    nBytes, 
-                                 std::vector <TPixHit> *hits, 
-                                 int                    boardIndex, 
-                                 int                    channel, 
-                                 int                   &prioErrors, 
-                                 std::vector <TPixHit> *stuck) 
+bool AlpideDecoder::DecodeEvent (unsigned char         *data,
+                                 int                    nBytes,
+                                 std::vector <TPixHit> *hits,
+                                 int                    boardIndex,
+                                 int                    channel,
+                                 int                   &prioErrors,
+                                 std::vector <TPixHit> *stuck)
 {
   int       byte    = 0;
   int       region  = -1;

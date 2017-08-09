@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
   TConfig *config = new TConfig(1, chipIDs);
 
   std::cout << "Create chips\n";
-  for (int i = 0; i < config->GetNChips(); i++) {
+  for (unsigned int i = 0; i < config->GetNChips(); i++) {
     fChips.push_back(new TAlpide(config->GetChipConfigById(chipIDs.at(i))));
     fChips.at(i)->SetReadoutBoard(theBoard);
   }

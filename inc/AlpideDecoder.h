@@ -21,25 +21,25 @@ class AlpideDecoder {
    static void      DecodeChipTrailer  (unsigned char *data, int &flags);
    static void      DecodeRegionHeader (unsigned char *data, int &region);
    static void      DecodeEmptyFrame   (unsigned char *data, int &chipId, unsigned int &bunchCounter);
-   static void      DecodeDataWord     (unsigned char         *data, 
-                                        int                    chip, 
-                                        int                    region, 
-                                        std::vector <TPixHit> *hits, 
-                                        bool                   datalong, 
-                                        int                    boardIndex, 
-                                        int                    channel, 
-                                        int                   &prioErrors, 
+   static void      DecodeDataWord     (unsigned char         *data,
+                                        int                    chip,
+                                        int                    region,
+                                        std::vector <TPixHit> *hits,
+                                        bool                   datalong,
+                                        int                    boardIndex,
+                                        int                    channel,
+                                        int                   &prioErrors,
                                         std::vector <TPixHit> *stuck);
  protected:
  public:
    static TDataType GetDataType        (unsigned char dataWord);
    static int       GetWordLength      (TDataType dataType);
-   static bool      DecodeEvent        (unsigned char         *data, 
-                                        int                    nBytes, 
-                                        std::vector <TPixHit> *hits, 
-                                        int                    boardIndex, 
-                                        int                    channel, 
-                                        int                   &prioErrors, 
+   static bool      DecodeEvent        (unsigned char         *data,
+                                        int                    nBytes,
+                                        std::vector <TPixHit> *hits,
+                                        int                    boardIndex,
+                                        int                    channel,
+                                        int                   &prioErrors,
                                         std::vector <TPixHit> *stuck = 0);
    static bool      ExtractNextEvent    (unsigned char *data, int nBytes, int &eventStart, int &eventEnd, bool& isError, bool logging=false);
 };
