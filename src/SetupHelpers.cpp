@@ -40,7 +40,7 @@ int initSetupOB(TConfig                        *config,
   if (config->GetUsePowerBoard()) {
     TPowerBoardConfig *pbConfig = new TPowerBoardConfig(NULL);
     pbConfig->SetDefaultsOB(0);
-    pb = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0));
+    pb = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0), pbConfig);
   }
 
   if (hics) {
