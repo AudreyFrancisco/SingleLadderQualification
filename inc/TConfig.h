@@ -47,7 +47,7 @@ class TConfig {
   TScanConfig  *GetScanConfig      () {return fScanConfig;};
   void          WriteToFile        (const char *fName);
 
-  std::string   GetSoftwareVersion() { return VERSION; }
+  std::string   GetSoftwareVersion();
 };
 
 

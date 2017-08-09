@@ -337,3 +337,7 @@ void TConfig::DecodeLine(const char *Line)
 void TConfig::WriteToFile (const char *fName) {
 
 }
+
+std::string TConfig::GetSoftwareVersion() {
+  return VERSION;
+}
