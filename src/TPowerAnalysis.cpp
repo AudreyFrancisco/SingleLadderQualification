@@ -51,15 +51,14 @@ THicClassification TPowerAnalysis::GetClassification (THicCurrents currents)
 
 THicClassification TPowerAnalysis::GetClassificationIB (THicCurrents currents)
 {
-  // TODO: Check if currents in mA or in A
-  if ((currents.iddaSwitchon < m_config->GetParamValue("MINIDDA_IB")) || 
-      (currents.idddSwitchon < m_config->GetParamValue("MINIDDD_IB")))
+  if ((currents.iddaSwitchon * 1000 < m_config->GetParamValue("MINIDDA_IB")) || 
+      (currents.idddSwitchon * 1000 < m_config->GetParamValue("MINIDDD_IB")))
     return CLASS_RED;
 
-  if ((currents.iddaClocked < m_config->GetParamValue("MINIDDA_CLOCKED_IB")) ||
-      (currents.iddaClocked > m_config->GetParamValue("MAXIDDA_CLOCKED_IB")) ||
-      (currents.idddClocked < m_config->GetParamValue("MINIDDD_CLOCKED_IB")) ||
-      (currents.idddClocked > m_config->GetParamValue("MAXIDDD_CLOCKED_IB")))
+  if ((currents.iddaClocked * 1000 < m_config->GetParamValue("MINIDDA_CLOCKED_IB")) ||
+      (currents.iddaClocked * 1000 > m_config->GetParamValue("MAXIDDA_CLOCKED_IB")) ||
+      (currents.idddClocked * 1000 < m_config->GetParamValue("MINIDDD_CLOCKED_IB")) ||
+      (currents.idddClocked * 1000 > m_config->GetParamValue("MAXIDDD_CLOCKED_IB")))
     return CLASS_ORANGE;
 
   return CLASS_GREEN;
@@ -70,14 +69,14 @@ THicClassification TPowerAnalysis::GetClassificationIB (THicCurrents currents)
 
 THicClassification TPowerAnalysis::GetClassificationOB (THicCurrents currents)
 {
-  // TODO: Check if currents in mA or in A
-  if ((currents.iddaSwitchon < m_config->GetParamValue("MINIDDA_OB")) || 
-      (currents.idddSwitchon < m_config->GetParamValue("MINIDDD_OB")))
+  if ((currents.iddaSwitchon * 1000 < m_config->GetParamValue("MINIDDA_OB")) || 
+      (currents.idddSwitchon * 1000 < m_config->GetParamValue("MINIDDD_OB")))
       return CLASS_RED;
-  if ((currents.iddaClocked < m_config->GetParamValue("MINIDDA_CLOCKED_OB")) ||
-      (currents.iddaClocked > m_config->GetParamValue("MAXIDDA_CLOCKED_OB")) ||
-      (currents.idddClocked < m_config->GetParamValue("MINIDDD_CLOCKED_OB")) ||
-      (currents.idddClocked > m_config->GetParamValue("MAXIDDD_CLOCKED_OB")))
+
+  if ((currents.iddaClocked * 1000 < m_config->GetParamValue("MINIDDA_CLOCKED_OB")) ||
+      (currents.iddaClocked * 1000 > m_config->GetParamValue("MAXIDDA_CLOCKED_OB")) ||
+      (currents.idddClocked * 1000 < m_config->GetParamValue("MINIDDD_CLOCKED_OB")) ||
+      (currents.idddClocked * 1000 > m_config->GetParamValue("MAXIDDD_CLOCKED_OB")))
     return CLASS_ORANGE;
   return CLASS_GREEN;
 

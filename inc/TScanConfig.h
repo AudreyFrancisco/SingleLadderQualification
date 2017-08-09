@@ -29,10 +29,11 @@ namespace ScanConfig {
 
   const int LOCALBUSCUTRED = 1;
 
-  const int POWER_CUT_MINIDDA_OB = 50;
+  // current limits for powering test in mA
+  const int POWER_CUT_MINIDDA_OB = 20;
   const int POWER_CUT_MINIDDD_OB = 50;
   const int POWER_CUT_MINIDDD_IB = 50;
-  const int POWER_CUT_MINIDDA_IB = 50;
+  const int POWER_CUT_MINIDDA_IB = 20;
 
   const int POWER_CUT_MINIDDA_CLOCKED_OB = 150;
   const int POWER_CUT_MINIDDD_CLOCKED_OB = 600;

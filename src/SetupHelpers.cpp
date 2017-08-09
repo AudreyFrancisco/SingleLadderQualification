@@ -53,6 +53,8 @@ int initSetupOB(TConfig                        *config,
     else {
       hics->push_back(new THicOB("Dummy ID", modId, pb, 0));
     }
+    hics->at(0)->PowerOn();
+    sleep(1);
   }
 
   for (int i = 0; i < config->GetNChips(); i++) {

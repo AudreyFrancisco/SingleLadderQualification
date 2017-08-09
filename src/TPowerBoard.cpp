@@ -97,6 +97,7 @@ void TPowerBoard::Init()
 		return;
 	}
 
+        fMOSAICPowerBoard->startADC();
 	// Get the State
 	try {
 		fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::getAll);
@@ -198,6 +199,7 @@ bool TPowerBoard::readMonitor()
 		fPBoard.Modules[i].AchOn = thePowerBoardState->chOn & (0x0001 << (i*2));
 		fPBoard.Modules[i].DchOn = thePowerBoardState->chOn & (0x0001 << (i*2+1));
 	}
+
 	return(true);
 }
 
