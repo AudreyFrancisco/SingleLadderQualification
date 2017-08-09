@@ -11,7 +11,24 @@ TFifoTest::TFifoTest (TScanConfig                   *config,
                       std::mutex                    *aMutex) 
   : TScan (config, chips, hics, boards, histoQue, aMutex) 
 {
-  strcpy(m_name, "Fifo Scan");
+  m_voltageScale = config->GetVoltageScale();
+
+  if (m_voltageScale == 1.0) {
+    strcpy(m_name, "Fifo Scan");
+  }
+  else if (m_voltageScale == 1.1) {
+      strcpy(m_name, "Fifo Scan, V +10%");
+  }
+  else if (m_voltageScale == 0.9) {
+      strcpy(m_name, "Fifo Scan, V +10%");
+  }
+  else {
+    std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
+    m_voltageScale = 1.0;
+    strcpy(m_name, "Fifo Scan");    
+  }
+
+
   m_start[2] = 0;
   m_step [2] = 1;
   m_stop [2] = m_chips.size();
@@ -40,12 +57,19 @@ THisto TFifoTest::CreateHisto ()
 void TFifoTest::Init() 
 {
   TScan::Init();
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (m_voltageScale != 1.) {
+      m_hics.at(ihic)->ScaleVoltage(m_voltageScale);
+    }      
+  }
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
   }
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     AlpideConfig::ConfigureCMU(m_chips.at(i));
   }
+
 }
 
 
@@ -165,5 +189,13 @@ void TFifoTest::Execute()
 void TFifoTest::Terminate() 
 {
   TScan::Terminate();
+
+  // restore old voltage
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (m_voltageScale != 1.) {
+      m_hics.at(ihic)->ScaleVoltage(1.);
+    }      
+  }
+
   m_running = false;
 }

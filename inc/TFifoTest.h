@@ -16,6 +16,7 @@ class TFifoTest : public TScan {
   void     ReadMem        (TAlpide *chip, int ARegion, int AOffset, int &AValue);
   void     WriteMem       (TAlpide *chip, int ARegion, int AOffset, int AValue);
   bool     TestPattern    (int pattern);
+  float    m_voltageScale;
  protected: 
   THisto   CreateHisto();
  public:

@@ -14,7 +14,23 @@ TDigitalScan::TDigitalScan (TScanConfig                   *config,
                             std::mutex                    *aMutex) 
   : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
 {
-  strcpy(m_name, "Digital Scan");
+  m_voltageScale = config->GetVoltageScale();
+
+  if (m_voltageScale == 1.0) {
+    strcpy(m_name, "Digital Scan");
+  }
+  else if (m_voltageScale == 1.1) {
+      strcpy(m_name, "Digital Scan, V +10%%");
+  }
+  else if (m_voltageScale == 0.9) {
+      strcpy(m_name, "Digital Scan, V +10%%");
+  }
+  else {
+    std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
+    m_voltageScale = 1.0;
+    strcpy(m_name, "Digital Scan");    
+  }
+
   m_start[0] = 0;
   m_step [0] = 1;
   m_stop [0] = m_config->GetNMaskStages();
@@ -99,6 +115,13 @@ void TDigitalScan::Init        ()
   TScan::Init();
   m_running = true;
   CountEnabledChips();
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (m_voltageScale != 1.) {
+      m_hics.at(ihic)->ScaleVoltage(m_voltageScale);
+    }      
+  }
+
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     std::cout << "Board " << i << ", found " << m_enabled[i] << " enabled chips" << std::endl;
     ConfigureBoard(m_boards.at(i));
@@ -174,7 +197,14 @@ void TDigitalScan::Execute     ()
 void TDigitalScan::Terminate   ()
 {
   TScan::Terminate();
-  // write Data;
+
+  // restore old voltage
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (m_voltageScale != 1.) {
+      m_hics.at(ihic)->ScaleVoltage(1.);
+    }      
+  }
+
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
     TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(iboard));
     if (myMOSAIC) {

@@ -22,7 +22,9 @@ TScanConfig::TScanConfig()
   m_scanStep       = SCAN_STEP;
   m_speedy         = SPEEDY;
   m_localBusCutRed = LOCALBUSCUTRED;
-  m_calVpulsel   = CAL_VPULSEL;
+  m_calVpulsel     = CAL_VPULSEL;
+
+  m_voltageScale   = VOLTAGE_SCALE;
 
   m_powerCutMinIdda_OB        = POWER_CUT_MINIDDA_OB;
   m_powerCutMinIddd_OB        = POWER_CUT_MINIDDD_OB;
