@@ -93,6 +93,7 @@ int main(int argc, char** argv) {
   std::vector <THic *>          fHics;
   std::vector <TAlpide *>       fChips;
   TConfig *fConfig;
+  TThresholdResult *fResult = NULL;
 
   std::deque<TScanHisto>  fHistoQue;
   std::mutex              fMutex;
@@ -105,8 +106,8 @@ int main(int argc, char** argv) {
   //TScan *myScan   = new TLocalBusTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
   //TScanAnalysis  *analysis = new TLocalBusAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
 
-  TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TThresholdAnalysis *analysis = new TThresholdAnalysis(&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+  TtuneVCASNScan *myScan = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  TThresholdAnalysis *analysis = new TThresholdAnalysis(&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex, fResult, 1);
 
   //scanLoop(myScan);
   std::cout << "starting thread" << std::endl;
@@ -125,10 +126,10 @@ int main(int argc, char** argv) {
 
   std::cout << "Printing mean thresholds:" << std::endl; //need to know SPECIFIC chip number!!
   //want to go through each list in m_threshold.at(...) and print .mean.
-  //std::map<int,common::TStatVar> thresh = analysis->DeleteThis();
-  //for (std::map<int,common::TStatVar>::iterator it = thresh.begin(); it != thresh.end(); it++) {
-  //  std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
-  //}
+  std::map<int,common::TStatVar> thresh = analysis->DeleteThis();
+  for (std::map<int,common::TStatVar>::iterator it = thresh.begin(); it != thresh.end(); it++) {
+    std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
+  }
 
 
   // std::vector <TCounter> counters = ((TDigitalAnalysis*)analysis)->GetCounters();
