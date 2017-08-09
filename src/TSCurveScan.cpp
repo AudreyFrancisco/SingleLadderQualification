@@ -95,31 +95,31 @@ TtuneITHRScan::TtuneITHRScan   (TScanConfig                   *config,
 
 
 
-void TSCurveScan::ConfigureBoard(TReadoutBoard *board) 
+void TSCurveScan::ConfigureBoard(TReadoutBoard *board)
 {
   if (board->GetConfig()->GetBoardType() == boardDAQ) {
     // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns * strobe delay
     // pulse delay cannot be 0, therefore set strobe delay to 0 and use only pulse delay
-    board->SetTriggerConfig (true, false, 
+    board->SetTriggerConfig (true, false,
                              0,
                              2 * board->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
     board->SetTriggerSource (trigExt);
   }
   else {
-    board->SetTriggerConfig (true, true, 
+    board->SetTriggerConfig (true, true,
                              board->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
                              board->GetConfig()->GetParamValue("PULSEDELAY"));
     board->SetTriggerSource (trigInt);
   }
 }
 
- 
-void TSCurveScan::ConfigureFromu(TAlpide *chip) 
+
+void TSCurveScan::ConfigureFromu(TAlpide *chip)
 {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x20);      // analogue pulsing
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, chip->GetConfig()->GetParamValue("STROBEDELAYCHIP"));   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length 
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length
 }
 
 void TThresholdScan::ConfigureChip(TAlpide *chip)
@@ -139,7 +139,7 @@ void TtuneVCASNScan::ConfigureChip(TAlpide *chip)
 
   AlpideConfig::ConfigureCMU (chip);
 
-  for(int i = 0; i < (int)m_chips.size(); i++) {
+  for(unsigned int i = 0; i < m_chips.size(); i++) {
     m_chips.at(i)->WriteRegister(Alpide::REG_VPULSEL, (uint16_t)m_config->GetCalVpulsel());
   }
 }
@@ -152,7 +152,7 @@ void TtuneITHRScan::ConfigureChip(TAlpide *chip)
 
   AlpideConfig::ConfigureCMU (chip);
 
-  for(int i = 0; i < (int)m_chips.size(); i++) {
+  for(unsigned int i = 0; i < m_chips.size(); i++) {
     m_chips.at(i)->WriteRegister(Alpide::REG_VPULSEL, (uint16_t)m_config->GetCalVpulsel());
   }
 }
@@ -167,9 +167,9 @@ THisto TSCurveScan::CreateHisto() {
 
 void TSCurveScan::Init() {
   m_running = true;
-  
+
   CountEnabledChips();
-  for (int i = 0; i < (int)m_boards.size(); i++) {
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
     std::cout << "Board " << i << ", found " << m_enabled[i] << " enabled chips" << std::endl;
     ConfigureBoard(m_boards.at(i));
 
@@ -177,40 +177,40 @@ void TSCurveScan::Init() {
     m_boards.at(i)->SendOpCode (Alpide::OPCODE_PRST);
   }
 
-  for (int i = 0; i < (int)m_chips.size(); i ++) {
+  for (unsigned int i = 0; i < m_chips.size(); i ++) {
     if (! (m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     ConfigureChip (m_chips.at(i));
   }
 
-  for (int i = 0; i < (int)m_boards.size(); i++) {
-    m_boards.at(i)->SendOpCode (Alpide::OPCODE_RORST);     
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    m_boards.at(i)->SendOpCode (Alpide::OPCODE_RORST);
     TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(i));
 
     if (myMOSAIC) {
      myMOSAIC->StartRun();
-    } 
+    }
   }
-  
+
 }
 
 
 
-void TThresholdScan::PrepareStep (int loopIndex) 
+void TThresholdScan::PrepareStep (int loopIndex)
 {
   switch (loopIndex) {
   case 0:    // innermost loop: change VPULSEL
-    for (int ichip = 0; ichip < (int)m_chips.size(); ichip ++) {
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEH - m_value[0]);
     }
     break;
   case 1:    // 2nd loop: mask staging
-    for (int ichip = 0; ichip < (int)m_chips.size(); ichip ++) {
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
     }
     break;
-  default: 
+  default:
     break;
   }
 }
@@ -221,13 +221,13 @@ void TtuneVCASNScan::PrepareStep (int loopIndex)
 {
   switch (loopIndex) {
   case 0:    // innermost loop: change VCASN
-    for (int ichip = 0; ichip < (int)m_chips.size(); ichip ++) {
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_VCASN, m_value[0]);
     }
     break;
   case 1:    // 2nd loop: mask staging
-    for (int ichip = 0; ichip < (int)m_chips.size(); ichip ++) {
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
     }
@@ -241,13 +241,13 @@ void TtuneITHRScan::PrepareStep (int loopIndex)
 {
   switch (loopIndex) {
   case 0:    // innermost loop: change ITHR
-    for (int ichip = 0; ichip < (int)m_chips.size(); ichip ++) {
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_ITHR, m_value[0]);
     }
     break;
   case 1:    // 2nd loop: mask staging
-    for (int ichip = 0; ichip < (int)m_chips.size(); ichip ++) {
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
     }
@@ -259,15 +259,15 @@ void TtuneITHRScan::PrepareStep (int loopIndex)
 
 
 
-void TSCurveScan::Execute() 
+void TSCurveScan::Execute()
 {
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
-  for (int iboard = 0; iboard < (int)m_boards.size(); iboard ++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
     m_boards.at(iboard)->Trigger(m_nTriggers);
   }
 
-  for (int iboard = 0; iboard < (int)m_boards.size(); iboard ++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
 		Hits->clear();
     usleep(1000);
     ReadEventData (Hits, iboard);
@@ -279,26 +279,26 @@ void TSCurveScan::Execute()
 
 void TSCurveScan::FillHistos (std::vector<TPixHit> *Hits, int board)
 {
-  common::TChipIndex idx; 
+  common::TChipIndex idx;
   idx.boardIndex = board;
-  for (int i = 0; i < (int)Hits->size(); i++) {
+  for (unsigned int i = 0; i < Hits->size(); i++) {
     if (Hits->at(i).address / 2 != m_row) continue;  // todo: keep track of spurious hits, i.e. hits in non-injected rows
     // !! This will not work when allowing several chips with the same Id
     idx.dataReceiver = Hits->at(i).channel;
     idx.chipId       = Hits->at(i).chipId;
 
     int col = Hits->at(i).region * 32 + Hits->at(i).dcol * 2;
-    int leftRight = ((((Hits->at(i).address % 4) == 1) || ((Hits->at(i).address % 4) == 2))? 1:0); 
+    int leftRight = ((((Hits->at(i).address % 4) == 1) || ((Hits->at(i).address % 4) == 2))? 1:0);
     col += leftRight;
     m_histo->Incr(idx, col, m_value[0]); //m_value is too large (>20) often!!
 
   }
-  
-  
+
+
 }
 
 
-void TSCurveScan::LoopEnd(int loopIndex) 
+void TSCurveScan::LoopEnd(int loopIndex)
 {
   if (loopIndex == 0) {
     while (!(m_mutex->try_lock()));
@@ -311,10 +311,10 @@ void TSCurveScan::LoopEnd(int loopIndex)
 }
 
 
-void TSCurveScan::Terminate() 
+void TSCurveScan::Terminate()
 {
   // write Data;
-  for (int iboard = 0; iboard < (int)m_boards.size(); iboard ++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
     TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(iboard));
     if (myMOSAIC) {
       myMOSAIC->StopRun();
@@ -328,4 +328,3 @@ void TSCurveScan::Terminate()
   }
   m_running = false;
 }
-
