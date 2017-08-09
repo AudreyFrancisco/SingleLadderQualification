@@ -39,6 +39,8 @@ TScanConfig::TScanConfig()
   m_powerCutMaxIddaClocked_IB = POWER_CUT_MAXIDDA_CLOCKED_IB;
   m_powerCutMaxIdddClocked_IB = POWER_CUT_MAXIDDD_CLOCKED_IB;
 
+  m_fifoCutMaxErr    = FIFO_CUT_MAXERR;
+  m_fifoCutMaxFaulty = FIFO_CUT_MAXFAULTY;
   InitParamMap();
 }
 
@@ -76,7 +78,10 @@ void TScanConfig::InitParamMap ()
   fSettings["MAXIDDA_CLOCKED_IB"] = &m_powerCutMaxIddaClocked_IB;
   fSettings["MAXIDDD_CLOCKED_IB"] = &m_powerCutMaxIdddClocked_IB;
 
-  fSettings["CAL_VPULSEL"]  = &m_calVpulsel;
+  fSettings["FIFO_MAXERR"]        = &m_fifoCutMaxErr;
+  fSettings["FIFO_MAXFAULTY"]     = &m_fifoCutMaxFaulty;
+
+  fSettings["CAL_VPULSEL"]        = &m_calVpulsel;
 }
 
 

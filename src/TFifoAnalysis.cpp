@@ -61,11 +61,12 @@ void TFifoAnalysis::InitCounters()
 
   for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
     TFifoResultHic *result = (TFifoResultHic*) it->second;
-    result->m_nExceptions = 0;
-    result->m_err0        = 0;
-    result->m_err5        = 0;
-    result->m_erra        = 0;
-    result->m_errf        = 0;
+    result->m_nExceptions  = 0;
+    result->m_nFaultyChips = 0;
+    result->m_err0         = 0;
+    result->m_err5         = 0;
+    result->m_erra         = 0;
+    result->m_errf         = 0;
     for (itChip = result->m_chipResults.begin(); itChip != result->m_chipResults.end(); ++itChip) {
       TFifoResultChip *resultChip = (TFifoResultChip*) itChip->second;
       resultChip->m_err0       = 0;
@@ -128,10 +129,32 @@ void TFifoAnalysis::Finalize()
       hicResult->m_err5 += chipResult->m_err5;
       hicResult->m_erra += chipResult->m_erra;
       hicResult->m_errf += chipResult->m_errf;
+      if (chipResult->m_err0 + chipResult->m_err5 + chipResult->m_erra + chipResult->m_errf > 0)
+        hicResult->m_nFaultyChips ++;
     }
   }
- 
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++)  {
+    TFifoResultHic *hicResult = (TFifoResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+    hicResult->m_class = GetClassification(hicResult);
+  }
+
   WriteResult ();
+}
+
+
+THicClassification TFifoAnalysis::GetClassification (TFifoResultHic *result)
+{
+  if (result->m_nExceptions > 0) return CLASS_RED;
+  if (result->m_err0 + result->m_err5 + result->m_erra + result->m_errf == 0) return CLASS_GREEN;
+  
+  if ((result->m_err0 < m_config->GetParamValue("FIFO_MAXERR")) && 
+      (result->m_err5 < m_config->GetParamValue("FIFO_MAXERR")) && 
+      (result->m_erra < m_config->GetParamValue("FIFO_MAXERR")) && 
+      (result->m_errf < m_config->GetParamValue("FIFO_MAXERR")) && 
+      (result->m_nFaultyChips < m_config->GetParamValue("FIFO_MAXFAULTY"))) return CLASS_ORANGE;
+
+  return CLASS_RED;
 }
 
 
