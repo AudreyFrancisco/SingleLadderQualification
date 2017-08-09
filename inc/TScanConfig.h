@@ -25,7 +25,6 @@ namespace ScanConfig {
   const int VCASN_STEP     = 1;
   const int SCAN_STEP      = 16; //Grab every Xth row (for tuneITHR/VCASN scan only).
                                  //Speeds up scan; changing this has little effect on result accuracy.
-  const int SPEEDY         = 1;  //Use slow fit if 0, differentiate->mean if 1.
 
   const int LOCALBUSCUTRED = 1;
 
@@ -45,6 +44,7 @@ namespace ScanConfig {
   const int POWER_CUT_MAXIDDA_CLOCKED_IB = 180;
   const int POWER_CUT_MAXIDDD_CLOCKED_IB = 550;
 
+  const int SPEEDY         = 0;  //Use slow fit if 0, differentiate->mean if 1.
   const int CAL_VPULSEL    = 155; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
 }
 

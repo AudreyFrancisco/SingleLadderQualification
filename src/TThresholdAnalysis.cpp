@@ -285,11 +285,12 @@ double ErrorFunc(double* x, double* par)
   return y;
 }
 
-float FindStart (TGraph* aGraph, int resultFactor) {
+float FindStart (TGraph* aGraph, int resultFactor, int m_nPulseInj) {
   float Upper = -1;
   float Lower = -1;
   double * xs = aGraph->GetX();
   double * ys = aGraph->GetY();
+
   if(resultFactor>0) {
     for (int i = 0; i < aGraph->GetN(); i ++) {
       if (ys[i] == m_nPulseInj) {
@@ -299,16 +300,14 @@ float FindStart (TGraph* aGraph, int resultFactor) {
     }
     if (Upper == -1) return -1;
     for (int i = aGraph->GetN()-1; i > 0; i--) {
-      if (data[i] == 0) {
+      if (ys[i] == 0) {
         Lower = (float)xs[i];
         break;
       }
     }
-    if ((Lower == -1) || (Upper < Lower)) return -1;
-    return (Upper + Lower)*resultFactor/2.0;
 
   } else {
-    for (int i = aGraph->GetN()-1; i>-1 i++) {
+    for (int i = aGraph->GetN()-1; i>-1; i++) {
       if (ys[i] == m_nPulseInj) {
         Lower = (float) xs[i];
         break;
@@ -316,14 +315,16 @@ float FindStart (TGraph* aGraph, int resultFactor) {
     }
     if(Lower==-1) return -1;
     for (int i = 0; i < aGraph->GetN(); i++) {
-      if (data[i] == 0) {
+      if (ys[i] == 0) {
         Upper = (float)xs[i];
         break;
       }
     }
-    if ((Lower == -1) || (Upper < Lower)) return -1;
-    return (Upper + Lower)*resultFactor/2.0;
   }
+
+  if ((Lower == -1) || (Upper < Lower)) return -1;
+  std::cout << (Upper+Lower)/2.0 << std::endl;
+  return (Upper + Lower)/2.0;
 }
 
 common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
@@ -368,8 +369,7 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
     //fitfcn->SetParameter(2,0.5*(m_stopPulseAmplitude - m_startPulseAmplitude)*m_resultFactor);
     // slope of s-curve.  m_resultFactor MAY BE -1--make sure this doesn't cause any problems!! (WIP)
     //fitfcn->SetParameter(3,0.5);
-
-    fitfcn->SetParameter(0, FindStart(aGraph, m_resultFactor));  //.5*(m_stopPulseAmplitude-m_startPulseAmplitude)*m_resultFactor);
+    fitfcn->SetParameter(0, FindStart(aGraph, m_resultFactor, m_nPulseInj));  //.5*(m_stopPulseAmplitude-m_startPulseAmplitude)*m_resultFactor);
     fitfcn->SetParameter(1, 8);
     fitfcn->SetParameter(2, .5*m_nPulseInj);
     aGraph->Fit("fitfcn","RQ");
