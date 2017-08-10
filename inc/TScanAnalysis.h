@@ -39,6 +39,7 @@ class TScanResultHic {
   int                AddChipResult     (int aChipId, TScanResultChip *aChipResult);
   void               SetResultFile     (const char *fName) {strcpy(m_resultFile, fName);};
   THicClassification GetClassification ()                  {return m_class;};
+  std::map <int, TScanResultChip*> DeleteThisToo() {return m_chipResults;};
 };
 
 

@@ -55,6 +55,8 @@ void TScanAnalysis::CreateHicResults ()
       if (m_hics.at(i)->ContainsChip(m_chipList.at(iChip))) {
         hicResult->AddChipResult(m_chipList.at(iChip).chipId & 0xf, 
                                  m_result->GetChipResult(m_chipList.at(iChip)));
+
+        std::cout << "Adding chip " << (m_chipList.at(iChip).chipId & 0xf) << std::endl;
       }
     }
     m_result->AddHicResult (m_hics.at(i)->GetDbId(), hicResult);
@@ -104,7 +106,7 @@ int TScanResult::AddChipResult (int aIntIndex,
 				TScanResultChip *aChipResult) 
 {
   m_chipResults.insert(std::pair<int, TScanResultChip*> (aIntIndex,aChipResult));
-  
+
   return m_chipResults.size();
 }
 
