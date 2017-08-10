@@ -21,7 +21,8 @@ class TLocalBusResultChip : public TScanResultChip {
   int m_errBusyOff;
  public:
   TLocalBusResultChip() : TScanResultChip() {};
-  void WriteToFile (FILE *fp);
+  void  WriteToFile (FILE *fp);
+  float GetVariable (TResultVariable var);
 };
 
 
@@ -51,8 +52,9 @@ class TLocalBusResult : public TScanResult {
 
 class TLocalBusAnalysis : public TScanAnalysis {
  private:
-  void InitCounters();
-  void WriteResult ();
+  void InitCounters    ();
+  void WriteResult     ();
+  void FillVariableList();
  protected:
   TScanResultChip *GetChipResult () {TLocalBusResultChip *Result = new TLocalBusResultChip(); return Result;};
   TScanResultHic  *GetHicResult  () {TLocalBusResultHic  *Result = new TLocalBusResultHic (); return Result;}; 

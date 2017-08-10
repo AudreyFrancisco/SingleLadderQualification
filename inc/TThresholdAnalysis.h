@@ -102,7 +102,8 @@ class TThresholdResultChip : public TScanResultChip {
   FILE* GetFilePixelNoThreshold ();
   FILE* GetFilePixelFitResult   ();
   FILE* GetFileRawData          ();
-
+  // TODO!!!
+  float GetVariable             (TResultVariable var) {};
   void WriteToFile (FILE *fp) {};
 };
 

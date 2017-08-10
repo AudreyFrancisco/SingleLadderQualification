@@ -12,6 +12,8 @@ TLocalBusAnalysis::TLocalBusAnalysis (std::deque<TScanHisto> *histoQue,
     m_result = aResult;
   else 
     m_result = new TLocalBusResult();
+
+  FillVariableList();
 }
 
 
@@ -46,6 +48,17 @@ void TLocalBusAnalysis::Initialize()
   std::cout << "m_scan = " <<  m_scan << std::endl;
   ReadChipList     ();
   CreateHicResults ();
+}
+
+
+void TLocalBusAnalysis::FillVariableList ()
+{
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0x0000",   Err0));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0xffff",   Errf));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0x5555",   Err5));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0xaaaa",   Erra));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Busy On Errors",  ErrBusyOn));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Busy Off Errors", ErrBusyOff));
 }
 
 
@@ -118,6 +131,7 @@ void TLocalBusAnalysis::Finalize()
   }
  
   WriteResult();
+  m_finished = true;
 }
 
 
@@ -142,6 +156,27 @@ void TLocalBusResultHic::WriteToFile (FILE *fp)
   for (it = m_chipResults.begin(); it != m_chipResults.end(); it++) {
     fprintf(fp, "\nResult chip %d:\n\n", it->first);
     it->second->WriteToFile(fp);
+  }
+}
+
+
+float TLocalBusResultChip::GetVariable (TResultVariable var) {
+  switch (var) {
+  case Err0: 
+    return (float) m_err0;
+  case Err5: 
+    return (float) m_err5;
+  case Erra: 
+    return (float) m_erra;
+  case Errf: 
+    return (float) m_errf;
+  case ErrBusyOn: 
+    return (float) m_errBusyOn;
+  case ErrBusyOff: 
+    return (float) m_errBusyOff;
+  default:
+    std::cout << "Warning, bad result type for this analysis" << std::endl;
+    return 0;
   }
 }
 

@@ -32,7 +32,8 @@ class TDigitalResultChip : public TScanResultChip {
   std::vector <TPixHit> m_stuck;
  public:
   TDigitalResultChip () : TScanResultChip () {};
-  void WriteToFile (FILE *fp);
+  void  WriteToFile (FILE *fp);
+  float GetVariable (TResultVariable var);
 };
 
 

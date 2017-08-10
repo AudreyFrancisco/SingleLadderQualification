@@ -9,7 +9,8 @@
 class TPowerResultChip : public TScanResultChip {
  public: 
   TPowerResultChip () : TScanResultChip () {};
-  void WriteToFile (FILE *fp) {};
+  void  WriteToFile (FILE *fp)            {};
+  float GetVariable (TResultVariable var) {return 0;};
 };
 
 

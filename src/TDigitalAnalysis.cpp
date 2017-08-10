@@ -42,11 +42,11 @@ bool TDigitalAnalysis::HasData(TScanHisto &histo,  common::TChipIndex idx, int c
 
 void TDigitalAnalysis::FillVariableList () 
 {
-  m_variableList.insert (std::pair <const char *, TResultVariable> ("Chip Status", status));
+  //m_variableList.insert (std::pair <const char *, TResultVariable> ("Chip Status", status));
   m_variableList.insert (std::pair <const char *, TResultVariable> ("# of dead Pixels", deadPix));
   m_variableList.insert (std::pair <const char *, TResultVariable> ("# of noisy Pixels", noisyPix));
   m_variableList.insert (std::pair <const char *, TResultVariable> ("# of ineff Pixels", ineffPix));
-  m_variableList.insert (std::pair <const char *, TResultVariable> ("# of bad double columns", badDcol));
+  //m_variableList.insert (std::pair <const char *, TResultVariable> ("# of bad double columns", badDcol));
 }
 
 
@@ -221,6 +221,8 @@ void TDigitalAnalysis::Finalize() {
     }
   }
   WriteResult      ();
+
+  m_finished = true;
 }
 
 
@@ -288,4 +290,19 @@ void TDigitalResultChip::WriteToFile (FILE *fp)
   fprintf(fp, "Noisy pixels:       %d\n", m_nNoisy);
   fprintf(fp, "Bad double cols:    %d\n", m_nBadDcols);
   fprintf(fp, "Stuck pixels:       %d\n", m_nStuck);
+}
+
+
+float TDigitalResultChip::GetVariable (TResultVariable var) {
+  switch (var) {
+  case deadPix:
+    return (float) m_nDead;
+  case noisyPix: 
+    return (float) m_nNoisy;
+  case ineffPix: 
+    return (float) m_nIneff;
+  default:
+    std::cout << "Warning, bad result type for this analysis" << std::endl;
+    return 0;
+  }
 }

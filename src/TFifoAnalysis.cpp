@@ -33,10 +33,10 @@ void TFifoAnalysis::Initialize()
 
 void TFifoAnalysis::FillVariableList ()
 {
-  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0x0000", fifoErr0));
-  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0xffff", fifoErrf));
-  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0x5555", fifoErr5));
-  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0xaaaa", fifoErra));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0x0000", Err0));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0xffff", Errf));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0x5555", Err5));
+  m_variableList.insert (std::pair <const char *, TResultVariable> ("# Errors 0xaaaa", Erra));
 }
 
 
@@ -140,6 +140,8 @@ void TFifoAnalysis::Finalize()
   }
 
   WriteResult ();
+
+  m_finished = true;
 }
 
 
@@ -174,6 +176,23 @@ void TFifoResultHic::WriteToFile (FILE *fp)
   for (it = m_chipResults.begin(); it != m_chipResults.end(); it++) {
     fprintf(fp, "\nResult chip %d:\n\n", it->first);
     it->second->WriteToFile(fp);
+  }
+}
+
+
+float TFifoResultChip::GetVariable (TResultVariable var) {
+  switch (var) {
+  case Err0: 
+    return (float) m_err0;
+  case Err5: 
+    return (float) m_err5;
+  case Erra: 
+    return (float) m_erra;
+  case Errf: 
+    return (float) m_errf;
+  default:
+    std::cout << "Warning, bad result type for this analysis" << std::endl;
+    return 0;
   }
 }
 
