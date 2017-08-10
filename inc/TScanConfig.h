@@ -17,10 +17,10 @@ namespace ScanConfig {
   const int PIX_PER_REGION = 32;
   const int NOISECUT_INV   = 100000;   // inverse of pixel noise cut (e.g. 100000 = 1e-5)
 
-  const int ITHR_START     = 0; //30;
+  const int ITHR_START     = 30;
   const int ITHR_STOP      = 100;
   const int ITHR_STEP      = 1;
-  const int VCASN_START    = 0; //40
+  const int VCASN_START    = 40;
   const int VCASN_STOP     = 60;
   const int VCASN_STEP     = 1;
   const int SCAN_STEP      = 16; //Grab every Xth row (for tuneITHR/VCASN scan only).

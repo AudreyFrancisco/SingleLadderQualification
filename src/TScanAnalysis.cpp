@@ -118,7 +118,7 @@ int TScanResult::AddChipResult (int aIntIndex,
 				TScanResultChip *aChipResult) 
 {
   m_chipResults.insert(std::pair<int, TScanResultChip*> (aIntIndex,aChipResult));
-  
+
   return m_chipResults.size();
 }
 

@@ -165,7 +165,7 @@ TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
   m_stepPulseAmplitude  = m_config->GetChargeStep();
   m_nPulseInj           = m_config->GetNInj();
 
-  m_writeRawData        = true; //false;
+  m_writeRawData        = false;
   m_writeNoHitPixels    = false;
   m_writeNoThreshPixels = false;
   m_writeStuckPixels    = false;
@@ -220,10 +220,8 @@ double meanGraph(TGraph* resultGraph) { //returns the weighted mean x value
   double * xs = resultGraph->GetX();
   double * ys = resultGraph->GetY();
   for (int i = 0; i < resultGraph->GetN(); i++) {
-    if(abs(xs[i])>=20) {  //WARNING: TEMPORARY!!  Start from 0 for now!
-      sum += xs[i]*ys[i];  //xs=value, ys=weight
-      norm += ys[i];
-    }
+    sum += xs[i]*ys[i];  //xs=value, ys=weight
+    norm += ys[i];
   }
 
   if(norm==0) { //dead pixel
@@ -244,10 +242,8 @@ double rmsGraph(TGraph* resultGraph) {
   double * xs = resultGraph->GetX();
   double * ys = resultGraph->GetY();
   for (int i = 0; i < resultGraph->GetN(); i++) {
-    if(abs(xs[i])>=20) {
-      sum += ys[i]*(xs[i]-mean)*(xs[i]-mean);
-      norm += ys[i];
-    }
+    sum += ys[i]*(xs[i]-mean)*(xs[i]-mean);
+    norm += ys[i];
   }
   if(sqrt(abs(sum/norm))>500) {
     return 0;
@@ -312,7 +308,6 @@ float FindStart (TGraph* aGraph, int resultFactor, int m_nPulseInj) {
   }
 
   if ((Lower == -1) || (Upper < Lower)) return -1;
-  std::cout << (Upper+Lower)/2.0 << std::endl;
   return (Upper + Lower)/2.0;
 }
 
@@ -515,7 +510,7 @@ void TThresholdAnalysis::AnalyseHisto (TScanHisto *histo) {
     for (int iCol = 0; iCol < common::nCols; iCol ++) {
       int iPulseStart;
       int iPulseStop;
-    	TGraph* gDummy = new TGraph();
+      TGraph* gDummy = new TGraph();
       if(m_resultFactor > 1) { //regular scan
         iPulseStop = ((float)abs( m_startPulseAmplitude - m_stopPulseAmplitude))/ m_stepPulseAmplitude;
         iPulseStart = 0;
@@ -526,11 +521,12 @@ void TThresholdAnalysis::AnalyseHisto (TScanHisto *histo) {
         iPulseStart = m_config->GetParamValue("ITHR_START");
         iPulseStop  = m_config->GetParamValue("ITHR_STOP");
       }
-      for (int iPulse = iPulseStart; iPulse < iPulseStop; iPulse++) {
+      for (int iPulse = iPulseStart; iPulse < iPulseStop; iPulse++) { //iPulseStart
 
         int entries =(int)(*histo)(m_chipList.at(iChip),
                                    iCol,
-                                   iPulse);
+                                   iPulse - iPulseStart);
+        //std::cout << entries << ", (" << iCol << "," << iPulse << ")\n";
         gDummy->SetPoint(gDummy->GetN(),
                          iPulse*m_resultFactor,
                          entries);
@@ -716,25 +712,40 @@ void TThresholdAnalysis::Finalize()
     if (m_writeFitResults)     fclose(itr->second.GetFilePixelFitResult());
     if (m_writeRawData)        fclose(itr->second.GetFileRawData());
 
-    m_result->AddChipResult(itr->first,
-                            &(itr->second));
-
-
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
-      std::cout<<"pb1"<<std::endl;
       if (! (m_hics.at(ihic)->ContainsChip(itr->first))) continue;
-      std::cout<<"pb2"<<std::endl;
-      std::string dimitra =m_hics.at(ihic)->GetDbId();
-      std::cout<<dimitra<<std::endl;
-      std::cout << "HIC " << ihic << std::endl;
       TThresholdResultHic *hicResult = (TThresholdResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
-      std::cout<<"pb3"<<std::endl;
+      std::string dimitra =m_hics.at(ihic)->GetDbId();
       hicResult->m_nPixelsNoThreshold += itr->second.GetCounterPixelsNoHits();
-      std::cout<<"pb4"<<std::endl;
       hicResult->m_nPixelsNoThreshold += itr->second.GetCounterPixelsNoThreshold();
-      std::cout<<"pb5"<<std::endl;
     }
   }
+
+  std::map<int, TThresholdResultChip>::iterator itChip;
+  for(itChip = m_resultChip.begin(); itChip != m_resultChip.end(); itChip++) {
+    for(unsigned int i=0; i<m_chipList.size(); i++) {
+      TThresholdResultChip trc = itChip->second;
+      if(! (trc.GetBoardIndex()   == m_chipList.at(i).boardIndex   //if chips are the same
+         && trc.GetDataReceiver() == m_chipList.at(i).dataReceiver
+         && trc.GetChipId()       == m_chipList.at(i).chipId)  ) continue;
+      //set m_chipList's chip.threshold/etc equal to the one found in trc
+      TThresholdResultChip *chipResult = (TThresholdResultChip*) m_result->GetChipResult(m_chipList.at(i));
+      chipResult->SetThresholdMean(trc.GetThresholdMean());
+      chipResult->SetThresholdStdDev(trc.GetThresholdStdDev());
+      chipResult->SetNoiseMean(trc.GetNoiseMean());
+      chipResult->SetNoiseStdDev(trc.GetNoiseStdDev());
+    }
+  }
+
+
+
+  TThresholdResultHic *hicResult = (TThresholdResultHic*) m_result->GetHicResults().at(m_hics.at(0)->GetDbId());
+  std::map<int, TScanResultChip*> mp = hicResult->DeleteThisToo();
+  std::map<int, TScanResultChip*>::iterator it;
+  for (it = mp.begin(); it != mp.end(); ++it) {
+    TThresholdResultChip *chipResult = (TThresholdResultChip*) it->second;
+  }
+  
   m_finished = true;
 }
 

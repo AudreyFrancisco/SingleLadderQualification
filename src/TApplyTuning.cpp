@@ -27,6 +27,7 @@ void TApplyTuning::Run()
    
       // TODO: check rounding, fix makefile (unresolved reference)
       chip->GetConfig()->SetParamValue(GetDACName(), (int)chipResult->GetThresholdMean());
+      std::cout << "Setting chip " << it->first << ", thr=" << chipResult->GetThresholdMean() << std::endl;
     }
   }
 
