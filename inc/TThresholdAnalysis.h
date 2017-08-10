@@ -22,11 +22,14 @@ class TF1;
 class TGraph;
 
 class TThresholdResultChip : public TScanResultChip {
+  friend class TThresholdAnalysis;
+  friend class TThresholdResultHic;
  private:
-
   unsigned int m_boardIndex;
   unsigned int m_dataReceiver;
   unsigned int m_chipId;
+
+  float m_resultFactor;
 
   int m_vPulseL;    //?
   int m_vPulseH;    //?
@@ -104,7 +107,7 @@ class TThresholdResultChip : public TScanResultChip {
   FILE* GetFileRawData          ();
   // TODO!!!
   float GetVariable             (TResultVariable var) {};
-  void WriteToFile (FILE *fp) {};
+  void WriteToFile (FILE *fp);
 };
 
 
@@ -113,9 +116,10 @@ class TThresholdResultHic : public TScanResultHic {
   friend class TApplyTuning;
  private:
   int m_nPixelsNoThreshold;
+  int m_resultFactor;
  public:
   TThresholdResultHic () : TScanResultHic () {};
-  void WriteToFile (FILE *fp) {};
+  void WriteToFile (FILE *fp);
 };
 
 
@@ -135,7 +139,7 @@ class TThresholdResult : public TScanResult {
 //  TThresholdResult  &operator=(const TThresholdResult &_tresult){m_chipResults=_tresult.m_chipResults; return *this;}
    //TThresholdResult(const TScanResult &_result):TScanResult(_result){}
  // TThresholdResult *TThresholdResult:: clone() const {return new TThresholdResult(*this);}
-  void WriteToFileGlobal   (FILE *fp) {};
+  void WriteToFileGlobal   (FILE *fp);
   void WriteToDB     (const char *hicID) {};
 };
 
@@ -182,7 +186,7 @@ class TThresholdAnalysis : public TScanAnalysis {
   bool HasData(TScanHisto &scanHisto,
 	       common::TChipIndex idx,
 	       int col);
-
+  void WriteResult();
  protected:
   TScanResultChip *GetChipResult () {TThresholdResultChip *Result = new TThresholdResultChip(); return Result;};
   TScanResultHic  *GetHicResult  ()  {TThresholdResultHic  *Result = new TThresholdResultHic (); return Result;};

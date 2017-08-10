@@ -317,6 +317,7 @@ void TSCurveScan::LoopEnd(int loopIndex)
 
 void TSCurveScan::Terminate()
 {
+  TScan::Terminate();
   // write Data;
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
     TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(iboard));

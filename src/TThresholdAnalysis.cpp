@@ -669,6 +669,7 @@ void TThresholdAnalysis::Finalize()
        itr!=m_resultChip.end();
        ++itr) {
 
+    itr->second.m_resultFactor = m_resultFactor;
     itr->second.SetThresholdMean(m_threshold.at(itr->first).mean);
     itr->second.SetThresholdStdDev(m_threshold.at(itr->first).stdDev);
     itr->second.SetNoiseMean(m_noise.at(itr->first).mean);
@@ -701,9 +702,9 @@ void TThresholdAnalysis::Finalize()
       fprintf(itr->second.GetFileSummary(),
 	    "counterPixelsStuck: %d \n",
 	    itr->second.GetCounterPixelsStuck()); */
-    fprintf(itr->second.GetFileSummary(), "%d %d %d %.1f %.1f %.1f %.1f\n", 0, 0, 0, itr->second.GetThresholdMean(), itr->second.GetThresholdStdDev(),
-            itr->second.GetNoiseMean(), itr->second.GetNoiseStdDev());
-    fprintf(itr->second.GetFileSummary(), "%d %d\n", itr->second.GetCounterPixelsNoHits(), itr->second.GetCounterPixelsNoThreshold()); //NOT using GetPixelsStuck atm
+    //fprintf(itr->second.GetFileSummary(), "%d %d %d %.1f %.1f %.1f %.1f\n", 0, 0, 0, itr->second.GetThresholdMean(), itr->second.GetThresholdStdDev(),
+    //      itr->second.GetNoiseMean(), itr->second.GetNoiseStdDev());
+    //fprintf(itr->second.GetFileSummary(), "%d %d\n", itr->second.GetCounterPixelsNoHits(), itr->second.GetCounterPixelsNoThreshold()); //NOT using GetPixelsStuck atm
 
     fclose(itr->second.GetFileSummary());
     if (m_writeNoHitPixels)    fclose(itr->second.GetFilePixelNoHits());
@@ -716,6 +717,7 @@ void TThresholdAnalysis::Finalize()
       if (! (m_hics.at(ihic)->ContainsChip(itr->first))) continue;
       TThresholdResultHic *hicResult = (TThresholdResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
       std::string dimitra =m_hics.at(ihic)->GetDbId();
+      hicResult->m_resultFactor        = m_resultFactor;
       hicResult->m_nPixelsNoThreshold += itr->second.GetCounterPixelsNoHits();
       hicResult->m_nPixelsNoThreshold += itr->second.GetCounterPixelsNoThreshold();
     }
@@ -730,10 +732,10 @@ void TThresholdAnalysis::Finalize()
          && trc.GetChipId()       == m_chipList.at(i).chipId)  ) continue;
       //set m_chipList's chip.threshold/etc equal to the one found in trc
       TThresholdResultChip *chipResult = (TThresholdResultChip*) m_result->GetChipResult(m_chipList.at(i));
-      chipResult->SetThresholdMean(trc.GetThresholdMean());
+      chipResult->SetThresholdMean  (trc.GetThresholdMean());
       chipResult->SetThresholdStdDev(trc.GetThresholdStdDev());
-      chipResult->SetNoiseMean(trc.GetNoiseMean());
-      chipResult->SetNoiseStdDev(trc.GetNoiseStdDev());
+      chipResult->SetNoiseMean      (trc.GetNoiseMean());
+      chipResult->SetNoiseStdDev    (trc.GetNoiseStdDev());
     }
   }
 
@@ -749,6 +751,69 @@ void TThresholdAnalysis::Finalize()
   m_finished = true;
 }
 
+
+void TThresholdAnalysis::WriteResult()
+{
+  char fName[200];
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    sprintf(fName, "ThresholdScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+  	                                            m_config->GetfNameSuffix());
+    m_scan->WriteConditions (fName, m_hics.at(ihic));
+
+    FILE *fp = fopen (fName, "a");
+    m_result->WriteToFileGlobal(fp);
+    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
+    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile  (fp);
+    fclose(fp);
+  }	   				     
+}
+
+
 float TThresholdAnalysis::GetResultThreshold(int chip) {
   return m_threshold.at(chip).mean;
+}
+
+
+void TThresholdResult::WriteToFileGlobal (FILE *fp) 
+{
+  fprintf(fp, "8b10b errors:\t%d\n",    m_n8b10b);
+  fprintf(fp, "Corrupt events:\t%d\n",  m_nCorrupt);
+  fprintf(fp, "Timeouts:\t%d\n",        m_nTimeout);
+}
+
+
+void TThresholdResultHic::WriteToFile(FILE *fp) {
+  fprintf(fp, "HIC Result:\n\n");
+
+  fprintf(fp, "\nNumber of chips: %d\n\n", (int)m_chipResults.size());
+
+  std::map<int, TScanResultChip*>::iterator it;
+  
+  for (it = m_chipResults.begin(); it != m_chipResults.end(); it++) {
+    fprintf(fp, "\nResult chip %d:\n\n", it->first);
+    it->second->WriteToFile(fp);
+  }
+}
+
+
+void TThresholdResultChip::WriteToFile (FILE *fp) {
+  if (m_resultFactor > 1) {    // Threshold scan
+    fprintf(fp, "Pixels without hits:      %d\n",   m_counterPixelsNoHits);
+    fprintf(fp, "Pixels without threshold: %d\n\n", m_counterPixelsNoThreshold);
+
+    fprintf(fp, "Av. Threshold: %.1f\n", m_thresholdMean);
+    fprintf(fp, "Threshold RMS: %.1f\n", m_thresholdStdDev);
+
+    fprintf(fp, "Av. Noise:     %.1f\n", m_noiseMean);
+    fprintf(fp, "Noise RMS:     %.1f\n", m_noiseStdDev);
+
+  }
+  else if (m_resultFactor == 1) {  //VCASN
+    fprintf(fp, "Av. VCASN: %.1f\n", m_thresholdMean);
+    fprintf(fp, "VCASN RMS: %.1f\n", m_thresholdStdDev);
+  }
+  else {                            // ITHR
+    fprintf(fp, "Av. ITHR: %.1f\n", m_thresholdMean);
+    fprintf(fp, "ITHR RMS: %.1f\n", m_thresholdStdDev);
+  }
 }
