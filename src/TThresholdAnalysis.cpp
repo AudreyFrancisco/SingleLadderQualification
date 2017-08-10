@@ -785,6 +785,8 @@ void TThresholdResult::WriteToFileGlobal (FILE *fp)
 void TThresholdResultHic::WriteToFile(FILE *fp) {
   fprintf(fp, "HIC Result:\n\n");
 
+  fprintf (fp, "HIC Classification: %s\n\n", WriteHicClassification());
+
   fprintf(fp, "\nNumber of chips: %d\n\n", (int)m_chipResults.size());
 
   std::map<int, TScanResultChip*>::iterator it;
