@@ -188,6 +188,7 @@ int TReadoutBoardRU::SetTriggerConfig(bool enablePulse, bool enableTrigger,
   m_enableTrigger = enableTrigger;
   m_triggerDelay = triggerDelay;
   m_pulseDelay = pulseDelay;
+  return 0;
 }
 
 void TReadoutBoardRU::SetTriggerSource(TTriggerSource triggerSource) {}

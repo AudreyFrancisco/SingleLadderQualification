@@ -19,6 +19,8 @@ TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue,
   m_config   = aConfig;
   m_hics     = hics;
   m_first    = true;
+  m_started  = false;
+  m_finished = false;
   m_chipList.clear ();
 }
 
@@ -65,6 +67,8 @@ void TScanAnalysis::CreateHicResults ()
 
 void TScanAnalysis::Run() 
 {
+  m_started = true;
+
   while (m_histoQue->size() == 0) {
     sleep(1);
   }
@@ -88,6 +92,16 @@ void TScanAnalysis::Run()
     }
     else usleep (300);
   }
+}
+
+
+float TScanAnalysis::GetVariable(std::string aHic, int chip, TResultVariable var)
+{
+  if (!m_finished) {
+    std::cout << "Error: analysis not finished yet" << std::endl;
+    return 0;
+  }
+  return m_result->GetHicResult(aHic)->GetVariable(chip, var);
 }
 
 
@@ -132,6 +146,20 @@ const char* TScanResultHic::WriteHicClassification()
   else if (m_class == CLASS_RED)      return "Red";
   else if (m_class == CLASS_ORANGE)   return "Orange";
   else return "Unknown";
+}
+
+
+float TScanResultHic::GetVariable (int chip, TResultVariable var)
+{
+  std::map<int, TScanResultChip *>::iterator it;
+  it = m_chipResults.find(chip);
+  if (it != m_chipResults.end()) {
+    return it->second->GetVariable (var);
+  }
+  else {
+    std::cout << "Error, bad chip ID" << std::endl;
+    return 0;
+  }
 }
 
 

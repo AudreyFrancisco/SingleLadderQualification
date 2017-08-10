@@ -12,10 +12,11 @@
 
 class TDigitalScan : public TMaskScan {
  private:
-  void ConfigureFromu (TAlpide *chip);
-  void ConfigureChip  (TAlpide *chip);
-  void ConfigureBoard (TReadoutBoard *board);
-  void FillHistos     (std::vector<TPixHit> *Hits, int board);
+  void  ConfigureFromu (TAlpide *chip);
+  void  ConfigureChip  (TAlpide *chip);
+  void  ConfigureBoard (TReadoutBoard *board);
+  void  FillHistos     (std::vector<TPixHit> *Hits, int board);
+  float m_voltageScale;
  protected:
   THisto CreateHisto    ();
  public: 

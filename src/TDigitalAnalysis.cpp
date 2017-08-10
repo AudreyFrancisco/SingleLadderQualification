@@ -42,11 +42,11 @@ bool TDigitalAnalysis::HasData(TScanHisto &histo,  common::TChipIndex idx, int c
 
 void TDigitalAnalysis::FillVariableList () 
 {
-  m_variableList.insert (std::pair <const char *, TResultVariable> ("Chip Status", status));
+  //m_variableList.insert (std::pair <const char *, TResultVariable> ("Chip Status", status));
   m_variableList.insert (std::pair <const char *, TResultVariable> ("# of dead Pixels", deadPix));
   m_variableList.insert (std::pair <const char *, TResultVariable> ("# of noisy Pixels", noisyPix));
   m_variableList.insert (std::pair <const char *, TResultVariable> ("# of ineff Pixels", ineffPix));
-  m_variableList.insert (std::pair <const char *, TResultVariable> ("# of bad double columns", badDcol));
+  //m_variableList.insert (std::pair <const char *, TResultVariable> ("# of bad double columns", badDcol));
 }
 
 
@@ -211,7 +211,45 @@ void TDigitalAnalysis::Finalize() {
     }
   }
 
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    TDigitalResultHic *hicResult = (TDigitalResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+    if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
+      hicResult->m_class = GetClassificationOB(hicResult);
+    }
+    else {
+      hicResult->m_class = GetClassificationOB(hicResult);
+    }
+  }
   WriteResult      ();
+
+  m_finished = true;
+}
+
+
+//TODO: Add readout errors, requires dividing readout errors by hic (receiver)
+//TODO: Make two cuts (red and orange)?
+THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic* result) {
+  if (result->m_nBad > m_config->GetParamValue("DIGITAL_MAXBAD_HIC_OB")) return CLASS_ORANGE;
+  for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
+    TDigitalResultChip *chipResult = (TDigitalResultChip*) result->m_chipResults.at(ichip);
+    if (chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff 
+	> m_config->GetParamValue("DIGITAL_MAXBAD_CHIP_OB"))
+      return CLASS_ORANGE;
+  }
+  return CLASS_GREEN;
+
+}
+
+
+THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic* result) {
+  if (result->m_nBad > m_config->GetParamValue("DIGITAL_MAXBAD_HIC_IB")) return CLASS_ORANGE;
+  for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
+    TDigitalResultChip *chipResult = (TDigitalResultChip*) result->m_chipResults.at(ichip);
+    if (chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff 
+	> m_config->GetParamValue("DIGITAL_MAXBAD_CHIP_IB"))
+      return CLASS_ORANGE;
+  }
+  return CLASS_GREEN;
 }
 
 
@@ -252,4 +290,19 @@ void TDigitalResultChip::WriteToFile (FILE *fp)
   fprintf(fp, "Noisy pixels:       %d\n", m_nNoisy);
   fprintf(fp, "Bad double cols:    %d\n", m_nBadDcols);
   fprintf(fp, "Stuck pixels:       %d\n", m_nStuck);
+}
+
+
+float TDigitalResultChip::GetVariable (TResultVariable var) {
+  switch (var) {
+  case deadPix:
+    return (float) m_nDead;
+  case noisyPix: 
+    return (float) m_nNoisy;
+  case ineffPix: 
+    return (float) m_nIneff;
+  default:
+    std::cout << "Warning, bad result type for this analysis" << std::endl;
+    return 0;
+  }
 }

@@ -1,4 +1,4 @@
-// NAMESPACE CONTAINING TYPES AND FUNTIONS 
+// NAMESPACE CONTAINING TYPES AND FUNTIONS
 // FOR COMMON USE IN ANALYSIS AND SCAN CLASSES.
 
 #ifndef COMMON_H
@@ -15,68 +15,68 @@ class TScanHisto;
 class THic;
 
 namespace common{
-  
+
   const int nRows = 512;
   const int nCols = 1024;
-  
+
   typedef struct {
-    unsigned int boardIndex; 
-    unsigned int dataReceiver;
-    unsigned int chipId;
+    int boardIndex;
+    int dataReceiver;
+    int chipId;
   } TChipIndex;
-  
+
   typedef struct {
     double threshold;
     double noise;
     double redChi2;
   } TErrFuncFitResult;
-  
+
   typedef struct {
-    unsigned int boardIndex; 
+    unsigned int boardIndex;
     unsigned int dataReceiver;
     unsigned int chipId;
-    
+
     int vPulseL;
     int vPulseH;
     int vPulseStep;
     int nMask;
-    
+
     int counterPixelsNoHits;
     int counterPixelsStuck ;
     int counterPixelsNoThreshold;
-    
+
     double thresholdMean;
     double thresholdStdDev;
     double noiseMean;
     double noiseStdDev;
-    
+
     FILE* filePixelNoHits;
     FILE* filePixelStuck;
     FILE* filePixelNoThreshold; // To do, based on chi2 cut?
     FILE* filePixelFitResult;
-    FILE* fileRawData; 
-    
+    FILE* fileRawData;
+
   } TThresholdResult;
-  
+
   typedef struct {
     double sum;
     double sum2;
     int entries;
-    
+
     double mean;
-    double stdDev; 
-    
+    double stdDev;
+
   } TStatVar;
-  
-  extern std::string GetFileName(TChipIndex aChipIndex, 
+
+  extern std::string GetFileName(TChipIndex aChipIndex,
 				 std::string suffix);
   extern int GetFileName();
   extern int GetChipIntIndex(TChipIndex aChipIndex);
   extern TChipIndex GetChipIndex(int aIntIndex);
   extern std::vector<TChipIndex> GetChipList(TScanHisto* aScanHisto);
-  
-  bool HitBelongsToChip(TChipIndex aChipIndex, TPixHit aHit);  
-  bool HitBelongsToHic (THic       *aHic,      TPixHit aHit);  
+
+  bool HitBelongsToChip(TChipIndex aChipIndex, TPixHit aHit);
+  bool HitBelongsToHic (THic       *aHic,      TPixHit aHit);
   int  FindIndexForHit (std::vector <TChipIndex> aChipList, TPixHit aHit);
 }
 

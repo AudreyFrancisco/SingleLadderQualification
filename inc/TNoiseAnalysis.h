@@ -24,6 +24,7 @@ class TNoiseResultChip : public TScanResultChip {
   void AddNoisyPixel (TPixHit pixel) {m_noisyPixels.push_back(pixel);};  
   void SetOccupancy  (double occ)    {m_occ = occ;};
   void WriteToFile   (FILE *fp);
+  float GetVariable  (TResultVariable var);
   std::vector <TPixHit> GetNoisyPixels() {return m_noisyPixels;};
 };
 

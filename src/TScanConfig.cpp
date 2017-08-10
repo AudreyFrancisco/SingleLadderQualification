@@ -22,7 +22,9 @@ TScanConfig::TScanConfig()
   m_scanStep       = SCAN_STEP;
   m_speedy         = SPEEDY;
   m_localBusCutRed = LOCALBUSCUTRED;
-  m_calVpulsel   = CAL_VPULSEL;
+  m_calVpulsel     = CAL_VPULSEL;
+
+  m_voltageScale   = VOLTAGE_SCALE;
 
   m_powerCutMinIdda_OB        = POWER_CUT_MINIDDA_OB;
   m_powerCutMinIddd_OB        = POWER_CUT_MINIDDD_OB;
@@ -36,6 +38,15 @@ TScanConfig::TScanConfig()
   m_powerCutMinIdddClocked_IB = POWER_CUT_MINIDDD_CLOCKED_IB;
   m_powerCutMaxIddaClocked_IB = POWER_CUT_MAXIDDA_CLOCKED_IB;
   m_powerCutMaxIdddClocked_IB = POWER_CUT_MAXIDDD_CLOCKED_IB;
+
+  m_fifoCutMaxErr    = FIFO_CUT_MAXERR;
+  m_fifoCutMaxFaulty = FIFO_CUT_MAXFAULTY;
+
+  m_digitalMaxBadPerChipOB = DIGITAL_MAXBAD_CHIP_OB;
+  m_digitalMaxBadPerChipIB = DIGITAL_MAXBAD_CHIP_IB;
+  m_digitalMaxBadPerHicOB = DIGITAL_MAXBAD_HIC_OB;
+  m_digitalMaxBadPerHicIB = DIGITAL_MAXBAD_HIC_IB;
+
 
   InitParamMap();
 }
@@ -74,7 +85,15 @@ void TScanConfig::InitParamMap ()
   fSettings["MAXIDDA_CLOCKED_IB"] = &m_powerCutMaxIddaClocked_IB;
   fSettings["MAXIDDD_CLOCKED_IB"] = &m_powerCutMaxIdddClocked_IB;
 
-  fSettings["CAL_VPULSEL"]  = &m_calVpulsel;
+  fSettings["FIFO_MAXERR"]        = &m_fifoCutMaxErr;
+  fSettings["FIFO_MAXFAULTY"]     = &m_fifoCutMaxFaulty;
+
+  fSettings["DIGITAL_MAXBAD_CHIP_OB"] = &m_digitalMaxBadPerChipOB;
+  fSettings["DIGITAL_MAXBAD_CHIP_IB"] = &m_digitalMaxBadPerChipIB;
+  fSettings["DIGITAL_MAXBAD_HIC_OB"] = &m_digitalMaxBadPerHicOB;
+  fSettings["DIGITAL_MAXBAD_HIC_IB"] = &m_digitalMaxBadPerHicIB;
+
+  fSettings["CAL_VPULSEL"]        = &m_calVpulsel;
 }
 
 

@@ -721,8 +721,6 @@ void TThresholdAnalysis::Finalize()
     }
   }
 
-    
-
   std::map<int, TThresholdResultChip>::iterator itChip;
   for(itChip = m_resultChip.begin(); itChip != m_resultChip.end(); itChip++) {
     for(unsigned int i=0; i<m_chipList.size(); i++) {
@@ -748,6 +746,7 @@ void TThresholdAnalysis::Finalize()
     TThresholdResultChip *chipResult = (TThresholdResultChip*) it->second;
   }
   
+  m_finished = true;
 }
 
 float TThresholdAnalysis::GetResultThreshold(int chip) {

@@ -17,12 +17,16 @@ class TScanHisto;
 
 enum THicClassification {CLASS_UNTESTED, CLASS_GREEN, CLASS_RED, CLASS_ORANGE};
 
+typedef enum resultType {status, deadPix, noisyPix, ineffPix, badDcol, thresh, noise, threshRms, noiseRms, noiseOcc, Err0, Errf, Erra, Err5, ErrBusyOn, ErrBusyOff} TResultVariable;
+
+
 // base class for classes that contain chip results
 // derive class for each analysis
 class TScanResultChip {
  public:
   TScanResultChip () {};
-  virtual void WriteToFile (FILE *fp) = 0;
+  virtual void  WriteToFile (FILE *fp) = 0;
+  virtual float GetVariable (TResultVariable var) = 0;
 };
 
 
@@ -40,6 +44,7 @@ class TScanResultHic {
   void               SetResultFile     (const char *fName) {strcpy(m_resultFile, fName);};
   THicClassification GetClassification ()                  {return m_class;};
   std::map <int, TScanResultChip*> DeleteThisToo() {return m_chipResults;};
+  float              GetVariable       (int chip, TResultVariable var);
 };
 
 
@@ -71,8 +76,6 @@ class TScanResult {
 };
 
 
-typedef enum resultType {status, deadPix, noisyPix, ineffPix, badDcol, thresh, noise, threshRms, noiseRms, noiseOcc, fifoErr0, fifoErrf, fifoErra, fifoErr5} TResultVariable;
-
 
 class TScanAnalysis {
  protected:
@@ -85,6 +88,8 @@ class TScanAnalysis {
   TScanConfig                 *m_config;
   TScanResult                 *m_result;
   bool                         m_first;
+  bool                         m_started;
+  bool                         m_finished;
   virtual TScanResultChip     *GetChipResult     () = 0;
   virtual TScanResultHic      *GetHicResult      () = 0;
   void                         CreateHicResults  ();
@@ -98,10 +103,11 @@ class TScanAnalysis {
                  TScanConfig            *aScanConfig, 
                  std::vector <THic*>     hics,
                  std::mutex             *aMutex);
-  virtual void Initialize      () = 0; 
+  virtual void Initialize      () = 0;
   virtual void Run             ();
-  virtual void Finalize        () = 0; 
+  virtual void Finalize        () = 0;
   std::map <const char *, TResultVariable> GetVariableList () {return m_variableList;}
+  float   GetVariable(std::string aHic, int chip, TResultVariable var);
 };
 
 

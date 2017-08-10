@@ -126,6 +126,8 @@ void TNoiseAnalysis::Finalize()
   }
 
   WriteResult();
+
+  m_finished = true;
 }
 
 
@@ -133,6 +135,20 @@ void TNoiseResultChip::WriteToFile(FILE *fp)
 {
   fprintf(fp, "Noisy pixels:    %d\n", (int) m_noisyPixels.size());
   fprintf(fp, "Noise occupancy: %e\n", m_occ);
+}
+
+
+float TNoiseResultChip::GetVariable(TResultVariable var) 
+{
+  switch (var) {
+  case noiseOcc:
+    return m_occ;
+  case noisyPix:
+    return m_noisyPixels.size();
+  default:
+    std::cout << "Warning, bad result type for this analysis" << std::endl;
+    return 0;  
+  }
 }
 
 

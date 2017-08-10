@@ -57,7 +57,7 @@ int initSetupOB(TConfig                        *config,
     sleep(1);
   }
 
-  for (int i = 0; i < config->GetNChips(); i++) {
+  for (unsigned int i = 0; i < config->GetNChips(); i++) {
     TChipConfig *chipConfig = config    ->GetChipConfig(i);
     int          chipId     = chipConfig->GetChipId    ();
     int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
@@ -123,7 +123,7 @@ int initSetupHalfStave(TConfig                        *config,
                        const char                    **hicIds)
 {
   (*boardType) = boardMOSAIC;
-  for (int i = 0; i < config->GetNBoards(); i++) {
+  for (unsigned int i = 0; i < config->GetNBoards(); i++) {
     TBoardConfigMOSAIC* boardConfig = (TBoardConfigMOSAIC*) config->GetBoardConfig(i);
 
     boardConfig->SetInvertedData (false);  //already inverted in the adapter plug ?
@@ -132,7 +132,7 @@ int initSetupHalfStave(TConfig                        *config,
     boards->push_back (new TReadoutBoardMOSAIC(config, boardConfig));
   }
 
-  for (int i = 0; i < config->GetNChips(); i++) {
+  for (unsigned int i = 0; i < config->GetNChips(); i++) {
     TChipConfig* chipConfig = config   ->GetChipConfig(i);
     int          chipId     = chipConfig->GetChipId    ();
     int          mosaic     = (chipId & 0x1000) ? 1:0;
@@ -329,7 +329,7 @@ int initSetupIB(TConfig                        *config,
     }
   }
 
-  for (int i = 0; i < config->GetNChips(); i++) {
+  for (unsigned int i = 0; i < config->GetNChips(); i++) {
     TChipConfig *chipConfig = config->GetChipConfig(i);
     int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
     int          receiver   = chipConfig->GetParamValue("RECEIVER");
@@ -386,7 +386,7 @@ int initSetupIBRU(TConfig                       *config,
 
   boards->push_back (new TReadoutBoardRU(boardConfig));
 
-  for (int i = 0; i < config->GetNChips(); i++) {
+  for (unsigned int i = 0; i < config->GetNChips(); i++) {
     TChipConfig *chipConfig = config->GetChipConfig(i);
     int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
     int          receiver   = chipConfig->GetParamValue("RECEIVER");
