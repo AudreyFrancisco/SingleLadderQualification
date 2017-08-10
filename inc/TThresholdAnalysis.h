@@ -106,7 +106,7 @@ class TThresholdResultChip : public TScanResultChip {
   FILE* GetFilePixelFitResult   ();
   FILE* GetFileRawData          ();
   // TODO!!!
-  float GetVariable             (TResultVariable var) {};
+  float GetVariable             (TResultVariable var);
   void WriteToFile (FILE *fp);
 };
 
@@ -186,7 +186,8 @@ class TThresholdAnalysis : public TScanAnalysis {
   bool HasData(TScanHisto &scanHisto,
 	       common::TChipIndex idx,
 	       int col);
-  void WriteResult();
+  void WriteResult     ();
+  void FillVariableList();
   THicClassification GetClassificationOB(TThresholdResultHic *result);
   THicClassification GetClassificationIB(TThresholdResultHic *result);
  protected:

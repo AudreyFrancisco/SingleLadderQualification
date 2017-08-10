@@ -176,7 +176,29 @@ TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
   if (aResult) m_result = aResult;
   else         m_result = new TThresholdResult();
 
+  FillVariableList();
 }
+
+
+void TThresholdAnalysis::FillVariableList()
+{
+  if (m_resultFactor > 1) {    // Threshold scan
+    m_variableList.insert (std::pair <const char *, TResultVariable> ("Dead Pixels",   deadPix));
+    m_variableList.insert (std::pair <const char *, TResultVariable> ("Pixels without threshold",   noThreshPix));
+    m_variableList.insert (std::pair <const char *, TResultVariable> ("av. Threshold", thresh));
+    m_variableList.insert (std::pair <const char *, TResultVariable> ("Threshold RMS", threshRms));
+    m_variableList.insert (std::pair <const char *, TResultVariable> ("av. Noise",     noise));
+    m_variableList.insert (std::pair <const char *, TResultVariable> ("Noise RMS",     noiseRms));
+  }
+  else if (m_resultFactor == 1) {  //VCASN
+    m_variableList.insert (std::pair <const char *, TResultVariable> ("av. VCASN", vcasn));
+  }
+  else {                            // ITHR
+    m_variableList.insert (std::pair <const char *, TResultVariable> ("av. ITHR", ithr));
+  }
+
+}
+
 
 //TODO: Implement HasData.
 bool TThresholdAnalysis::HasData(TScanHisto &histo, common::TChipIndex idx, int col)
@@ -766,6 +788,8 @@ void TThresholdAnalysis::Finalize()
 //TODO: Add readout errors, requires dividing readout errors by hic (receiver)
 //TODO: Make two cuts (red and orange)?
 THicClassification TThresholdAnalysis::GetClassificationOB(TThresholdResultHic* result) {
+  if (m_resultFactor <= 1) return CLASS_GREEN;  // for the time being exclude class for tuning
+
   if (result->m_nPixelsNoThreshold > m_config->GetParamValue("THRESH_MAXBAD_HIC_OB")) return CLASS_ORANGE;
   for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
     TThresholdResultChip *chipResult = (TThresholdResultChip*) result->m_chipResults.at(ichip);
@@ -780,6 +804,8 @@ THicClassification TThresholdAnalysis::GetClassificationOB(TThresholdResultHic* 
 
 
 THicClassification TThresholdAnalysis::GetClassificationIB(TThresholdResultHic* result) {
+  if (m_resultFactor <= 1) return CLASS_GREEN;  // for the time being exclude class for tuning
+
   if (result->m_nPixelsNoThreshold > m_config->GetParamValue("THRESH_MAXBAD_HIC_IB")) return CLASS_ORANGE;
   for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
     TThresholdResultChip *chipResult = (TThresholdResultChip*) result->m_chipResults.at(ichip);
@@ -858,5 +884,30 @@ void TThresholdResultChip::WriteToFile (FILE *fp) {
   else {                            // ITHR
     fprintf(fp, "Av. ITHR: %.1f\n", m_thresholdMean);
     fprintf(fp, "ITHR RMS: %.1f\n", m_thresholdStdDev);
+  }
+}
+
+
+float TThresholdResultChip::GetVariable (TResultVariable var) {
+  switch (var) {
+  case vcasn: 
+    return m_thresholdMean;
+  case ithr:
+    return m_thresholdMean;
+  case thresh:
+    return m_thresholdMean;
+  case threshRms:
+    return m_thresholdStdDev;
+  case noise:
+    return m_noiseMean;
+  case noiseRms:
+    return m_noiseStdDev;
+  case deadPix:
+    return m_counterPixelsNoHits;
+  case noThreshPix:
+    return m_counterPixelsNoThreshold;
+  default:
+    std::cout << "Warning, bad result type for this analysis" << std::endl;
+    return 0;
   }
 }
