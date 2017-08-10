@@ -39,6 +39,7 @@ void TPowerAnalysis::Finalize()
     hicResult->m_class        = GetClassification(hicCurrents);
   }
   WriteResult();
+  m_finished = true;
 }
 
 

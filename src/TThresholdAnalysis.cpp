@@ -735,6 +735,7 @@ void TThresholdAnalysis::Finalize()
       std::cout<<"pb5"<<std::endl;
     }
   }
+  m_finished = true;
 }
 
 float TThresholdAnalysis::GetResultThreshold(int chip) {

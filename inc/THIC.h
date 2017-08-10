@@ -34,7 +34,7 @@ class THic {
   void                       ScaleVoltage    (float aFactor);
   std::string                GetDbId         () {return m_dbId;};
   int                        GetModId        () {return m_moduleId;};
-  int                        GetNChips       () {return m_chips.size();};
+  unsigned int               GetNChips       () {return m_chips.size();};
   int                        AddChip         (TAlpide *chip);
   virtual bool               ContainsChip    (common::TChipIndex idx) = 0;
   bool                       ContainsChip    (int index);
@@ -54,7 +54,7 @@ class THicOB : public THic {
   int                   m_rcv8;       // receiver for master 8
   int                   m_ctrl0;      // control interface for master 0
   int                   m_ctrl8;      // control interface for master 8
- protected: 
+ protected:
  public:
   THicOB (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
   common::TChipIndex GetChipIndex    (int i);
@@ -66,7 +66,7 @@ class THicOB : public THic {
 
 
 class THicIB : public THic {
- private: 
+ private:
   int                  m_boardidx;
   int                  m_rcv[9];
   int                  m_ctrl;       // control interface

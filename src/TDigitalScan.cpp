@@ -25,10 +25,11 @@ TDigitalScan::TDigitalScan (TScanConfig                   *config,
     std::cout << "2" << std::endl;
       strcpy(m_name, "Digital Scan, V +10%");
   }
+
   else if (m_voltageScale > 0.8 && m_voltageScale < 1.0) {
     std::cout << "3" << std::endl;
       strcpy(m_name, "Digital Scan, V -10%");
-  }
+}
   else {
     std::cout << "4" << std::endl;
     std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
@@ -155,6 +156,7 @@ void TDigitalScan::PrepareStep (int loopIndex)
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[0]);
     }
+    sprintf(m_state, "Running %d", m_value[0]);
     break;
   default:
     break;

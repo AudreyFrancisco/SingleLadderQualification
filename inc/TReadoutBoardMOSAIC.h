@@ -46,7 +46,7 @@ public:
 	DummyReceiver() {} ;
 	~DummyReceiver() {} ;
 
-	long parse(int numClosed) { return(dataBufferUsed); };
+	long parse(int numClosed) { (void)numClosed; return(dataBufferUsed); };
 };
 
 // -----------------------------------------------------
@@ -74,8 +74,8 @@ public:
 	void StartRun();
 	void StopRun();
 
-	int ReadRegister      (uint16_t Address, uint32_t &Value) { return(0);};
-	int WriteRegister     (uint16_t Address, uint32_t Value)  { return(0);};
+	int ReadRegister      (uint16_t Address, uint32_t &Value) { (void)Address; (void)Value; return(0);};
+	int WriteRegister     (uint16_t Address, uint32_t Value)  { (void)Address; (void)Value; return(0);};
 	void enableControlInterfaces(bool en);
 	void enableClockOutput(bool en) { enableControlInterfaces(en); return; } // just a wrapper
 	void setInverted (bool AInverted, int Aindex = -1);
@@ -127,12 +127,12 @@ private:
 
 private:
 	// extend WBB address definitions in mwbb.h
-	enum baseAddress_e {		
+	enum baseAddress_e {
 		add_i2cMaster				= (5 << 24),
 		add_controlInterface		= (6 << 24),
 		add_controlInterfaceB		= (7 << 24),
 		add_alpideRcv				= (8 << 24),
-		// total of 10 alpideRcv 
+		// total of 10 alpideRcv
 		add_trgRecorder				= (18 << 24),
 		add_controlInterface_0		= (19 << 24),
 		add_controlInterface_9		= (28 << 24),
@@ -149,13 +149,13 @@ private:
 
 	enum configBits_e {
 		CFG_EXTCLOCK_SEL_BIT	= (1<<0),		// 0: internal clock - 1: external clock
-		CFG_CLOCK_20MHZ_BIT		= (1<<1),		// 0: 40 MHz clock	- 1: 20 MHz clock	
+		CFG_CLOCK_20MHZ_BIT		= (1<<1),		// 0: 40 MHz clock	- 1: 20 MHz clock
 		CFG_RATE_MASK			= (0x03<<2),
 		CFG_RATE_1200			= (0<<2),
 		CFG_RATE_600			= (0x01<<2),
 		CFG_RATE_400			= (0x02<<2)
 	};
-	
+
 	static I2CSysPll::pllRegisters_t sysPLLregContent;
 };
 #endif    /* READOUTBOARDMOSAIC_H */

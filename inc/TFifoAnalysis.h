@@ -30,7 +30,8 @@ class TFifoResultChip : public TScanResultChip {
   int m_errf;
  public: 
   TFifoResultChip () : TScanResultChip () {};
-  void WriteToFile (FILE *fp);
+  void  WriteToFile (FILE *fp);
+  float GetVariable (TResultVariable var);
 };
 
 
@@ -42,6 +43,7 @@ class TFifoResultHic : public TScanResultHic {
   int m_erra;
   int m_errf;
   int m_nExceptions;
+  int m_nFaultyChips;
  public: 
   TFifoResultHic () : TScanResultHic () {};
   void WriteToFile (FILE *fp);
@@ -63,6 +65,7 @@ class TFifoAnalysis : public TScanAnalysis {
   void InitCounters     ();
   void WriteResult      ();
   void FillVariableList ();
+  THicClassification GetClassification(TFifoResultHic *result);
  protected:
   TScanResultChip *GetChipResult () {TFifoResultChip *Result = new TFifoResultChip(); return Result;};
   TScanResultHic  *GetHicResult  () {TFifoResultHic  *Result = new TFifoResultHic (); return Result;};

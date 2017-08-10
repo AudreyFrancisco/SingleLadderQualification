@@ -55,7 +55,8 @@ class TScan {
  private:
  protected: 
   TScanConfig                  *m_config;
-  char                          m_name[40];
+  char                          m_name [40];
+  char                          m_state[40];
   std::vector <TAlpide *>       m_chips;
   std::vector <THic *>          m_hics;
   std::vector <TReadoutBoard *> m_boards;
@@ -95,6 +96,7 @@ class TScan {
   bool         IsRunning         () {return m_running;};
   TScanHisto   GetTScanHisto     () {return *m_histo;};
   const char  *GetName           () {return m_name;};  
+  const char  *GetState          () {return m_state;};
   TScanConditions *GetConditions () {return &m_conditions;};
   void         CreateHicConditions();
   void         WriteConditions   (const char *fName, THic *aHic);

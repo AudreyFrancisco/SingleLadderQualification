@@ -43,6 +43,16 @@ namespace ScanConfig {
   const int POWER_CUT_MAXIDDA_CLOCKED_IB = 180;
   const int POWER_CUT_MAXIDDD_CLOCKED_IB = 550;
 
+  // cuts for fifo test
+  const int FIFO_CUT_MAXERR    = 128;  // max number of errors per pattern and hic
+  const int FIFO_CUT_MAXFAULTY = 1;   // max number of chips with errors
+
+  // cuts for digital scan
+  const int DIGITAL_MAXBAD_CHIP_OB = 1024;   // max number of bad pixels: 1 dcol
+  const int DIGITAL_MAXBAD_CHIP_IB = 524;    // 1 per mille
+  const int DIGITAL_MAXBAD_HIC_OB  = 7340;   // 1 per mille
+  const int DIGITAL_MAXBAD_HIC_IB  = 4700;   // 1 per mille
+
   const int SPEEDY         = 0;  //Use slow fit if 0, differentiate->mean if 1.
   const int CAL_VPULSEL    = 155; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
 
@@ -84,6 +94,12 @@ class TScanConfig {
   int  m_powerCutMinIdddClocked_IB;
   int  m_powerCutMaxIddaClocked_IB;
   int  m_powerCutMaxIdddClocked_IB;
+  int  m_fifoCutMaxErr;
+  int  m_fifoCutMaxFaulty;
+  int  m_digitalMaxBadPerChipOB;
+  int  m_digitalMaxBadPerChipIB;
+  int  m_digitalMaxBadPerHicOB;
+  int  m_digitalMaxBadPerHicIB;
   int  m_calVpulsel;
   float m_voltageScale;
  protected:
