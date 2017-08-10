@@ -166,12 +166,9 @@ THisto TSCurveScan::CreateHisto() {
 
 
 void TSCurveScan::Init() {
+  TScan::Init();
+
   m_running = true;
-
-  time_t       t = time(0);   // Not sure why this was missing...
-  struct tm *now = localtime( & t );
-
-  sprintf(m_config->GetfNameSuffix(), "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
   CountEnabledChips();
   for (unsigned int i = 0; i < m_boards.size(); i++) {

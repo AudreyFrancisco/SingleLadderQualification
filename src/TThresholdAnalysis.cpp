@@ -165,11 +165,11 @@ TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
   m_stepPulseAmplitude  = m_config->GetChargeStep();
   m_nPulseInj           = m_config->GetNInj();
 
-  m_writeRawData        = true;//false;
+  m_writeRawData        = false;
   m_writeNoHitPixels    = false;
   m_writeNoThreshPixels = false;
   m_writeStuckPixels    = false;
-  m_writeFitResults     = false; //true;
+  m_writeFitResults     = true;
   m_fDoFit              = true;
   m_resultFactor        = resultFactor;
 
@@ -220,10 +220,8 @@ double meanGraph(TGraph* resultGraph) { //returns the weighted mean x value
   double * xs = resultGraph->GetX();
   double * ys = resultGraph->GetY();
   for (int i = 0; i < resultGraph->GetN(); i++) {
-    //if(abs(xs[i])>=20) {  //WARNING: TEMPORARY!!  Start from 0 for now!
     sum += xs[i]*ys[i];  //xs=value, ys=weight
     norm += ys[i];
-    //}
   }
 
   if(norm==0) { //dead pixel
@@ -244,10 +242,8 @@ double rmsGraph(TGraph* resultGraph) {
   double * xs = resultGraph->GetX();
   double * ys = resultGraph->GetY();
   for (int i = 0; i < resultGraph->GetN(); i++) {
-    //if(abs(xs[i])>=20) {
     sum += ys[i]*(xs[i]-mean)*(xs[i]-mean);
     norm += ys[i];
-    //}
   }
   if(sqrt(abs(sum/norm))>500) {
     return 0;
@@ -677,9 +673,6 @@ void TThresholdAnalysis::Finalize()
     itr->second.SetThresholdStdDev(m_threshold.at(itr->first).stdDev);
     itr->second.SetNoiseMean(m_noise.at(itr->first).mean);
     itr->second.SetNoiseStdDev(m_noise.at(itr->first).stdDev);
-    std::cout << "680: " << itr->first << ", mean=" << itr->second.GetThresholdMean() << std::endl;
-
-    //itr->second.SetChipId();
 
     /*fprintf(itr->second.GetFileSummary(),
       "Threshold mean: %f \n",
@@ -719,50 +712,17 @@ void TThresholdAnalysis::Finalize()
     if (m_writeFitResults)     fclose(itr->second.GetFilePixelFitResult());
     if (m_writeRawData)        fclose(itr->second.GetFileRawData());
 
-    //m_result->AddChipResult(itr->first,
-    //                        &(itr->second));  //UNECCESSARY:  already added!  Access only.
-
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
-      //std::cout<<"pb1"<<std::endl;
       if (! (m_hics.at(ihic)->ContainsChip(itr->first))) continue;
-      //std::cout<<"pb2"<<std::endl;
       TThresholdResultHic *hicResult = (TThresholdResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
       std::string dimitra =m_hics.at(ihic)->GetDbId();
-      //std::cout<<dimitra<<std::endl;
-      //std::cout << "HIC " << ihic << std::endl;
-      //std::cout<<"pb3"<<std::endl;
       hicResult->m_nPixelsNoThreshold += itr->second.GetCounterPixelsNoHits();
-      //std::cout<<"pb4"<<std::endl;
       hicResult->m_nPixelsNoThreshold += itr->second.GetCounterPixelsNoThreshold();
-      //std::cout<<"pb5"<<std::endl;
     }
   }
 
-  //Fill m_result with data (map<int,TThresholdResultChip> m_resultChip is done):
-  /*for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    TThresholdResultHic *hicResult = (TThresholdResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
-    std::map<int, TScanResultChip*>::iterator it;
-    for (it = hicResult->m_chipResults.begin(); it != hicResult->m_chipResults.end(); ++it) {
-      //TAlpide              *chip       = m_hics.at(ihic)->GetChipById(it->first);
-      TThresholdResultChip *chipResult = (TThresholdResultChip*) it->second;
-      TThresholdResultChip doneResult  = m_resultChip[it->first];  //get the corresp. ThresholdResultChip in m_resultChip
-      chipResult->SetThresholdMean(doneResult.GetThresholdMean());
-      std::cout << "result 748: chip "     itr->second.SetChipId();<< it->first << " set to chip " << chipResult->GetChipId() <<", mean " << doneResult.GetThresholdMean() << std::endl;
-      chipResult->SetThresholdStdDev(doneResult.GetThresholdStdDev());
-      chipResult->SetNoiseMean(doneResult.GetThresholdMean());
-      chipResult->SetNoiseStdDev(doneResult.GetNoiseStdDev());
-      
-      //std::cout << "Setting chip " << it->first << ", thr=" << chipResult->GetThresholdMean() << std::endl;
-    }
-  }*/
+    
 
-  
-
-  //for each resultChip in map m_resultChip:
-  //  find the corresponding TChipIndex in m_chipList (vector of TChipIndexes)
-  //    Known:  id corresp. to chip (from it),...
-  //    ...and m_boardIndex/dataReceiver/chipId in TThresholdResultChip!!
-  //  ...by checking resultChip.GetBoardIndex()==m_chipList.at(i).boardIndex, etc.!
   std::map<int, TThresholdResultChip>::iterator itChip;
   for(itChip = m_resultChip.begin(); itChip != m_resultChip.end(); itChip++) {
     for(unsigned int i=0; i<m_chipList.size(); i++) {
@@ -776,7 +736,6 @@ void TThresholdAnalysis::Finalize()
       chipResult->SetThresholdStdDev(trc.GetThresholdStdDev());
       chipResult->SetNoiseMean(trc.GetNoiseMean());
       chipResult->SetNoiseStdDev(trc.GetNoiseStdDev());
-      std::cout << "Setting chip (779), thr=" << chipResult->GetThresholdMean() << std::endl;
     }
   }
 
@@ -787,7 +746,6 @@ void TThresholdAnalysis::Finalize()
   std::map<int, TScanResultChip*>::iterator it;
   for (it = mp.begin(); it != mp.end(); ++it) {
     TThresholdResultChip *chipResult = (TThresholdResultChip*) it->second;
-    std::cout << "Post-assignment 790: chip" << it->first << ", thr=" << chipResult->GetThresholdMean() << std::endl;
   }
   
 }
