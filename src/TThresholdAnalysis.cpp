@@ -670,10 +670,10 @@ void TThresholdAnalysis::Finalize()
        ++itr) {
 
     itr->second.m_resultFactor = m_resultFactor;
-    itr->second.SetThresholdMean(m_threshold.at(itr->first).mean);
-    itr->second.SetThresholdStdDev(m_threshold.at(itr->first).stdDev);
-    itr->second.SetNoiseMean(m_noise.at(itr->first).mean);
-    itr->second.SetNoiseStdDev(m_noise.at(itr->first).stdDev);
+    itr->second.SetThresholdMean   (m_threshold.at(itr->first).mean);
+    itr->second.SetThresholdStdDev (m_threshold.at(itr->first).stdDev);
+    itr->second.SetNoiseMean       (m_noise.at(itr->first).mean);
+    itr->second.SetNoiseStdDev     (m_noise.at(itr->first).stdDev);
 
     /*fprintf(itr->second.GetFileSummary(),
       "Threshold mean: %f \n",
@@ -741,14 +741,55 @@ void TThresholdAnalysis::Finalize()
 
 
 
-  TThresholdResultHic *hicResult = (TThresholdResultHic*) m_result->GetHicResults().at(m_hics.at(0)->GetDbId());
-  std::map<int, TScanResultChip*> mp = hicResult->DeleteThisToo();
-  std::map<int, TScanResultChip*>::iterator it;
-  for (it = mp.begin(); it != mp.end(); ++it) {
-    TThresholdResultChip *chipResult = (TThresholdResultChip*) it->second;
-  }
+  //TThresholdResultHic *hicResult = (TThresholdResultHic*) m_result->GetHicResults().at(m_hics.at(0)->GetDbId());
+  //std::map<int, TScanResultChip*> mp = hicResult->DeleteThisToo();
+  //std::map<int, TScanResultChip*>::iterator it;
+  //for (it = mp.begin(); it != mp.end(); ++it) {
+  //  TThresholdResultChip *chipResult = (TThresholdResultChip*) it->second;
+  //}
   
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    TThresholdResultHic *hicResult = (TThresholdResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+    if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
+      hicResult->m_class = GetClassificationOB(hicResult);
+    }
+    else {
+      hicResult->m_class = GetClassificationOB(hicResult);
+    }
+  }
+
+  WriteResult();
   m_finished = true;
+}
+
+
+//TODO: Add readout errors, requires dividing readout errors by hic (receiver)
+//TODO: Make two cuts (red and orange)?
+THicClassification TThresholdAnalysis::GetClassificationOB(TThresholdResultHic* result) {
+  if (result->m_nPixelsNoThreshold > m_config->GetParamValue("THRESH_MAXBAD_HIC_OB")) return CLASS_ORANGE;
+  for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
+    TThresholdResultChip *chipResult = (TThresholdResultChip*) result->m_chipResults.at(ichip);
+    if (chipResult->GetCounterPixelsNoHits() + chipResult->GetCounterPixelsNoThreshold()
+	> m_config->GetParamValue("THRESH_MAXBAD_CHIP_OB"))
+      return CLASS_ORANGE;
+    if (chipResult->GetNoiseMean() > (float) m_config->GetParamValue("THRESH_MAXNOISE_OB"))
+      return CLASS_ORANGE;
+  }
+  return CLASS_GREEN;
+}
+
+
+THicClassification TThresholdAnalysis::GetClassificationIB(TThresholdResultHic* result) {
+  if (result->m_nPixelsNoThreshold > m_config->GetParamValue("THRESH_MAXBAD_HIC_IB")) return CLASS_ORANGE;
+  for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
+    TThresholdResultChip *chipResult = (TThresholdResultChip*) result->m_chipResults.at(ichip);
+    if (chipResult->GetCounterPixelsNoHits() + chipResult->GetCounterPixelsNoThreshold()
+	> m_config->GetParamValue("THRESH_MAXBAD_CHIP_IB"))
+      return CLASS_ORANGE;
+    if (chipResult->GetNoiseMean() > (float) m_config->GetParamValue("THRESH_MAXNOISE_IB"))
+      return CLASS_ORANGE;
+  }
+  return CLASS_GREEN;
 }
 
 

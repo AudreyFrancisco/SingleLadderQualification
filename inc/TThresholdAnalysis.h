@@ -187,6 +187,8 @@ class TThresholdAnalysis : public TScanAnalysis {
 	       common::TChipIndex idx,
 	       int col);
   void WriteResult();
+  THicClassification GetClassificationOB(TThresholdResultHic *result);
+  THicClassification GetClassificationIB(TThresholdResultHic *result);
  protected:
   TScanResultChip *GetChipResult () {TThresholdResultChip *Result = new TThresholdResultChip(); return Result;};
   TScanResultHic  *GetHicResult  ()  {TThresholdResultHic  *Result = new TThresholdResultHic (); return Result;};

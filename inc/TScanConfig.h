@@ -53,6 +53,14 @@ namespace ScanConfig {
   const int DIGITAL_MAXBAD_HIC_OB  = 7340;   // 1 per mille
   const int DIGITAL_MAXBAD_HIC_IB  = 4700;   // 1 per mille
 
+  // cuts for threshold scan
+  const int THRESH_MAXBAD_CHIP_OB = 1024;   // max number of bad pixels: 1 dcol
+  const int THRESH_MAXBAD_CHIP_IB = 524;    // 1 per mille
+  const int THRESH_MAXBAD_HIC_OB  = 7340;   // 1 per mille
+  const int THRESH_MAXBAD_HIC_IB  = 4700;   // 1 per mille
+  const int THRESH_MAXNOISE_OB    = 10;     // max noise of a single chip
+  const int THRESH_MAXNOISE_IB    = 10;
+
   const int SPEEDY         = 0;  //Use slow fit if 0, differentiate->mean if 1.
   const int CAL_VPULSEL    = 155; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
 
@@ -100,6 +108,12 @@ class TScanConfig {
   int  m_digitalMaxBadPerChipIB;
   int  m_digitalMaxBadPerHicOB;
   int  m_digitalMaxBadPerHicIB;
+  int  m_threshMaxBadPerChipOB;
+  int  m_threshMaxBadPerChipIB;
+  int  m_threshMaxBadPerHicOB;
+  int  m_threshMaxBadPerHicIB;
+  int  m_threshMaxNoiseIB;
+  int  m_threshMaxNoiseOB;
   int  m_calVpulsel;
   float m_voltageScale;
  protected:
