@@ -65,6 +65,7 @@ void TNoiseAnalysis::Initialize()
 {
   ReadChipList      ();
   CreateHicResults  ();
+  std::cout << "In noise analysis, number of hic results: " << m_result->GetNHics() << std::endl;
 }
 
 

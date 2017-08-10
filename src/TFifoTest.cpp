@@ -13,14 +13,14 @@ TFifoTest::TFifoTest (TScanConfig                   *config,
 {
   m_voltageScale = config->GetVoltageScale();
 
-  if (m_voltageScale == 1.0) {
+  if (m_voltageScale > 0.9 && m_voltageScale < 1.1) {
     strcpy(m_name, "Fifo Scan");
   }
-  else if (m_voltageScale == 1.1) {
+  else if (m_voltageScale > 1.0 && m_voltageScale < 1.2) {
       strcpy(m_name, "Fifo Scan, V +10%");
   }
-  else if (m_voltageScale == 0.9) {
-      strcpy(m_name, "Fifo Scan, V +10%");
+  else if (m_voltageScale > 0.8 && m_voltageScale < 1.0) {
+      strcpy(m_name, "Fifo Scan, V -10%");
   }
   else {
     std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
