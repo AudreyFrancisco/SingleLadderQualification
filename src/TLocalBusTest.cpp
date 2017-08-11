@@ -239,4 +239,8 @@ void TLocalBusTest::Terminate()
 {
   TScan::Terminate();
   m_running = false;
+  for (unsigned int i = 0; i < m_hics.size(); i++) {
+    m_hics.at(i)->PowerOff();
+  }
+  sleep(1);
 }
