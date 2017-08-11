@@ -6,7 +6,8 @@ pbif.o: pbif.cpp ../libmosaic/include/mexception.h pbif.h \
  ../libmosaic/include/i2cslave.h ../libmosaic/include/i2cbus.h \
  ../libpowerboard/include/ltc2635.h ../libpowerboard/include/ad5254.h \
  ../libpowerboard/include/ad7997.h ../libpowerboard/include/sc18is602.h \
- ../libpowerboard/include/max31865.h
+ ../libpowerboard/include/max31865.h ../libpowerboard/include/max5419.h \
+ ../libpowerboard/include/ADC128D818.h
 pbctrl.o: pbctrl.cpp pbif.h ../libmosaic/include/ipbusudp.h \
  ../libmosaic/include/ipbus.h ../libmosaic/include/wishbonebus.h \
  ../libmosaic/include/i2cbus.h ../libmosaic/include/mwbbslave.h \
@@ -14,4 +15,5 @@ pbctrl.o: pbctrl.cpp pbif.h ../libmosaic/include/ipbusudp.h \
  ../libpowerboard/include/pcf8574.h ../libmosaic/include/i2cslave.h \
  ../libmosaic/include/i2cbus.h ../libpowerboard/include/ltc2635.h \
  ../libpowerboard/include/ad5254.h ../libpowerboard/include/ad7997.h \
- ../libpowerboard/include/sc18is602.h ../libpowerboard/include/max31865.h
+ ../libpowerboard/include/sc18is602.h ../libpowerboard/include/max31865.h \
+ ../libpowerboard/include/max5419.h ../libpowerboard/include/ADC128D818.h

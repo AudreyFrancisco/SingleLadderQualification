@@ -11,6 +11,7 @@ TLocalBusTest::TLocalBusTest (TScanConfig                   *config,
                               std::mutex                    *aMutex) 
   : TScan (config, chips, hics, boards, histoQue, aMutex) 
 {
+  strcpy(m_name, "Local Bus Test");
   FindDaisyChains(chips);
   m_start[2] = 0;
   m_stop [2] = m_daisyChains.size();
@@ -238,5 +239,10 @@ void TLocalBusTest::Execute()
 void TLocalBusTest::Terminate()
 {
   TScan::Terminate();
+ 
+  for (unsigned int i = 0; i < m_hics.size(); i++) {
+    m_hics.at(i)->PowerOff();
+  }
+  sleep(1);
   m_running = false;
 }
