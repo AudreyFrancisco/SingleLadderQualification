@@ -50,10 +50,13 @@
 #include "TFifoTest.h"
 #include "TFifoAnalysis.h"
 #include "TNoiseAnalysis.h"
+#include "TApplyMask.h"
 #include "TNoiseOccupancy.h"
 #include "THIC.h"
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
+#include "TPowerTest.h"
+#include "TPowerAnalysis.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -85,6 +88,14 @@ MainWindow::MainWindow(QWidget *parent) :
       ui->test3->setStyleSheet("border:none;");
       ui->test4->setStyleSheet("border:none;");
       ui->test5->setStyleSheet("border:none;");
+      ui->test6->setStyleSheet("border:none;");
+      ui->test7->setStyleSheet("border:none;");
+      ui->test8->setStyleSheet("border:none;");
+      ui->test9->setStyleSheet("border:none;");
+      ui->test10->setStyleSheet("border:none;");
+      ui->test11->setStyleSheet("border:none;");
+      ui->test12->setStyleSheet("border:none;");
+      ui->test13->setStyleSheet("border:none;");
       ui->statusbar->hide();
       ui->tab_2->setVisible(false);
       ui->statuslabel->setVisible(false);
@@ -120,6 +131,7 @@ MainWindow::MainWindow(QWidget *parent) :
      connect(ui->obm6,SIGNAL(clicked()),this,SLOT(button_obm6_clicked()));
      connect(ui->obm7,SIGNAL(clicked()),this,SLOT(button_obm7_clicked()));
      connect (ui->testselection,SIGNAL(currentIndexChanged(int)),this, SLOT(combochanged(int)));
+
      AlpideDB *myDB=new AlpideDB();
      ProjectDB *myproject=new ProjectDB(myDB);
      MemberDB *mymember= new MemberDB(myDB);
@@ -127,17 +139,73 @@ MainWindow::MainWindow(QWidget *parent) :
      std::vector <ProjectDB::project> projectlist;
      myproject->GetList(&projectlist);
      std::cout<<"The number of projects is "<<projectlist.size()<<std::endl;
-     for(int i=0; i<projectlist.size(); i++){
+    // for(int i=0; i<projectlist.size(); i++){
 
-         std::cout<<"Project"<<projectlist.at(i).Name<<std::endl;
-     }
+         //std::cout<<"Project "<<projectlist.at(i).Name<<"with id "<<projectlist.at(i).ID <<std::endl;
+  //   }
      std::vector<MemberDB::member> memberlist;
-     mymember->GetList(1,&memberlist);
+   //  for(int j=21;j<22;j++){
+     mymember->GetList(21,&memberlist);
      for(int i=0; i<memberlist.size(); i++){
 
-         std::cout<<"Member"<<memberlist.at(i).FullName<<std::endl;
+         std::cout<<"Member"<<memberlist.at(i).FullName<<"  "<<memberlist.at(i).PersonalID<<std::endl;
      }
+//}
+      std::vector<ComponentDB::componentType> componentlist;
+      mycomponents->GetTypeList(21,&componentlist);
+      for(int i=0; i<componentlist.size(); i++){
 
+          std::cout<<"component "<<componentlist.at(i).Name<<std::endl;
+
+     }
+      ActivityDB *myactivity=new ActivityDB(myDB);
+      ActivityDB::activity activ;
+      ActivityDB::member activmember;
+      ActivityDB::parameter activparameter;
+      ActivityDB::attach activattachment;
+
+
+  /*    activ.Location = 161;
+      activ.EndDate = time(NULL);
+      activ.Lot = "TestAntonio";
+      activ.Name = "Test_db";
+      activ.Position = "Position1";
+      activ.Result = 101;
+      activ.StartDate = time(NULL); //mktime(&ts);
+      activ.Status = 83; // open
+      activ.Type = 221;
+      activ.User = 1;
+
+      activmember.Leader = 0;
+     activmember.ProjectMember = 584;
+      activmember.User = 8791;
+      activ.Members.push_back(activmember);
+      activmember.ProjectMember = 201;
+      activmember.User = 4702;
+      activ.Members.push_back(activmember);
+
+      for(int i=0; i < 3; i++){
+          activparameter.ActivityParameter = 1;
+          activparameter.User = 1+i;
+          activparameter.Value = 9.5+i;
+          activ.Parameters.push_back(activparameter);
+      }
+
+      for(int i=0; i < 3; i++){
+          activattachment.Category = 41;
+          activattachment.LocalFileName = "AttachTest";
+          activattachment.LocalFileName.append( std::to_string( i));
+          activattachment.LocalFileName.append(".txt");
+          activattachment.User = i+1;
+          activattachment.RemoteFileName = "AttTe";
+          activattachment.RemoteFileName.append( std::to_string( i));
+          activattachment.RemoteFileName.append(".txt");
+          activ.Attachments.push_back(activattachment);
+      }
+
+      myactivity->Create(&activ);
+      cout << myactivity->DumpResponse() << endl;
+*/
      QPixmap alice("alice.jpg");
      int w = ui->alicepic->width();
      int h = ui->alicepic->height();
@@ -711,19 +779,40 @@ void MainWindow::start_test(){
     fresultVector.clear();
     fChips.clear();
     fBoards.clear();
-
+scanbuttons.clear();
     ui->fstatus->clear();
     ui->dstatus->clear();
     ui->tstatus->clear();
     ui->nstatus->clear();
     ui->ustatus->clear();
      ui->tob->clear();
+     ui->test1->setStyleSheet("border:none;");
+     ui->test2->setStyleSheet("border:none;");
+     ui->test3->setStyleSheet("border:none;");
+     ui->test4->setStyleSheet("border:none;");
+     ui->test5->setStyleSheet("border:none;");
+     ui->test6->setStyleSheet("border:none;");
+     ui->test7->setStyleSheet("border:none;");
+     ui->test8->setStyleSheet("border:none;");
+     ui->test9->setStyleSheet("border:none;");
+     ui->test10->setStyleSheet("border:none;");
+     ui->test11->setStyleSheet("border:none;");
+     ui->test12->setStyleSheet("border:none;");
+     ui->test13->setStyleSheet("border:none;");
 
     ui->test1->setText(" ");
     ui->test2->setText(" ");
     ui->test3->setText(" ");
     ui->test4->setText(" ");
     ui->test5->setText(" ");
+    ui->test6->setText(" ");
+    ui->test7->setText(" ");
+    ui->test8->setText(" ");
+    ui->test9->setText(" ");
+    ui->test10->setText(" ");
+    ui->test11->setText(" ");
+    ui->test12->setText(" ");
+    ui->test13->setText(" ");
     ui->testtypeselected->clear();
 
     // settingswindow->setAttribute(Qt::WA_DeleteOnClose);
@@ -733,54 +822,132 @@ void MainWindow::start_test(){
 
 
 void MainWindow::fillingOBvectors(){
-
+// // fConfigm10->GetScanConfig()->SetVoltageScale(0.9);
+//  fConfigp10->GetScanConfig()->SetVoltageScale(1.1);
   TFifoResult    *fiforesult=new TFifoResult();
+  TFifoResult    *fiforesultp10=new TFifoResult();
+  TFifoResult    *fiforesultm10=new TFifoResult();
   TDigitalResult *digitalresult=new TDigitalResult();
+  TDigitalResult *digitalresultm10=new TDigitalResult();
+  TDigitalResult *digitalresultp10=new TDigitalResult();
   TThresholdResult *threresult=new TThresholdResult();
   TThresholdResult *vcasnresult=new TThresholdResult();
   TThresholdResult *ithrresult=new TThresholdResult();
   TLocalBusResult *localbusresult=new TLocalBusResult();
   TNoiseResult *noiseresult=new TNoiseResult();
+  TNoiseResult *noiseresultmasked=0;
+  TNoiseResult *noiseresultafter=new TNoiseResult();
+  TPowerResult *powerresult=new TPowerResult();
+
   TtuneVCASNScan *vcasnscan=new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
   TtuneITHRScan *ithrscan=new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
   TLocalBusTest *localbusscan=new TLocalBusTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+  TPowerTest*powerscan=new TPowerTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+  TPowerAnalysis *poweranalysis= new TPowerAnalysis(&fHistoQue,powerscan,fConfig->GetScanConfig(), fHICs, &fMutex,powerresult);
   TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
   TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesult);
 
+  fConfig->GetScanConfig()->SetVoltageScale(1.1);
+  TFifoTest *fifoscanp10= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+  TFifoAnalysis  *fifoanalysisp10 = new TFifoAnalysis(&fHistoQue,fifoscanp10,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesultp10);
+
+  fConfig->GetScanConfig()->SetVoltageScale(0.9);
+  TFifoTest *fifoscanm10= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+  TFifoAnalysis  *fifoanalysism10 = new TFifoAnalysis(&fHistoQue,fifoscanm10,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesultm10);
+
+  fConfig->GetScanConfig()->SetVoltageScale(1);
 
     TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TNoiseOccupancy *noisescan=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
     TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresult);
+    fConfig->GetScanConfig()->SetVoltageScale(1.1);
+    std::cout<<fConfig->GetScanConfig()->GetVoltageScale()<<"FgrtsegrtT"<<std::endl;
+    TDigitalScan *digitalscanp10= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TDigitalAnalysis  *digitalanalysisp10 = new TDigitalAnalysis(&fHistoQue,digitalscanp10, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresultp10);
+    fConfig->GetScanConfig()->SetVoltageScale(0.9);
+    TDigitalScan *digitalscanm10= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TDigitalAnalysis  *digitalanalysism10 = new TDigitalAnalysis(&fHistoQue,digitalscanm10, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresultm10);
+    fConfig->GetScanConfig()->SetVoltageScale(1);
+    TNoiseOccupancy *noisescan=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TNoiseOccupancy *noisescanafter=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TNoiseOccupancy *noisescanzero=0;
+
+
+
+
     TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
     TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,threresult);
     TScanAnalysis *vcasnanalysis=new TThresholdAnalysis(&fHistoQue,vcasnscan, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresult,1);
     TScanAnalysis *ithranalysis=new TThresholdAnalysis(&fHistoQue,ithrscan, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresult,-1);
     TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresult);
+    TApplyMask *noisemask=new TApplyMask(&fHistoQue,noisescanzero, fConfig->GetScanConfig(), fHICs, &fMutex,noiseresult);
+    TNoiseAnalysis *noiseanalysisafter=new TNoiseAnalysis(&fHistoQue, noisescanafter, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresultafter);
     TLocalBusAnalysis *localbusanalysis = new TLocalBusAnalysis(&fHistoQue,localbusscan, fConfig->GetScanConfig(), fHICs, &fMutex,localbusresult);
+    fScanVector.push_back(powerscan);
     fScanVector.push_back(fifoscan);
+    fScanVector.push_back(fifoscanp10);
+    fScanVector.push_back(fifoscanm10);
+   // fScanVector.push_back(localbusscan);
     fScanVector.push_back(digitalscan);
+    fScanVector.push_back(digitalscanp10);
+    fScanVector.push_back(digitalscanm10);
     fScanVector.push_back(thresholdscan);
     fScanVector.push_back(noisescan);
+    fScanVector.push_back(noisescanzero);
+    fScanVector.push_back(noisescanafter);
     fScanVector.push_back(vcasnscan);
     fScanVector.push_back(ithrscan);
-    fScanVector.push_back(localbusscan);
+
     qDebug()<<"dimitra"<<endl;
+    fAnalysisVector.push_back(poweranalysis);
     fAnalysisVector.push_back(fifoanalysis);
+    fAnalysisVector.push_back(fifoanalysisp10);
+    fAnalysisVector.push_back(fifoanalysism10);
+ //  fAnalysisVector.push_back(localbusanalysis);
     fAnalysisVector.push_back(digitalanalysis);
+    fAnalysisVector.push_back(digitalanalysisp10);
+    fAnalysisVector.push_back(digitalanalysism10);
     fAnalysisVector.push_back(thresholdanalysis);
     fAnalysisVector.push_back(noiseanalysis);
+    fAnalysisVector.push_back(noisemask);
+    fAnalysisVector.push_back(noiseanalysisafter);
     fAnalysisVector.push_back(vcasnanalysis);
     fAnalysisVector.push_back(ithranalysis);
-    fAnalysisVector.push_back(localbusanalysis);
 
-
+  //  fmaskvector.resize(9);
+  //  fmaskvector.at(4)=noisemask;
+    fresultVector.push_back(powerresult);
     fresultVector.push_back(fiforesult);
+    fresultVector.push_back(fiforesultp10);
+    fresultVector.push_back(fiforesultm10);
+  //  fresultVector.push_back(localbusresult);
+ //   fresultVector.push_back(0);
     fresultVector.push_back(digitalresult);
+    fresultVector.push_back(digitalresultp10);
+    fresultVector.push_back(digitalresultm10);
     fresultVector.push_back(threresult);
     fresultVector.push_back(noiseresult);
+    fresultVector.push_back(noiseresultmasked);
+    fresultVector.push_back(noiseresultafter);
     fresultVector.push_back(vcasnresult);
     fresultVector.push_back(ithrresult);
-    fresultVector.push_back(localbusresult);
+
+    scanbuttons.push_back(ui->test1);
+    scanbuttons.push_back(ui->test2);
+    scanbuttons.push_back(ui->test3);
+    scanbuttons.push_back(ui->test4);
+   // scanbuttons.push_back(0);
+    scanbuttons.push_back(ui->test5);
+    scanbuttons.push_back(ui->test6);
+    scanbuttons.push_back(ui->test7);
+    scanbuttons.push_back(ui->test8);
+    scanbuttons.push_back(ui->test9); 
+     scanbuttons.push_back(0);
+    scanbuttons.push_back(ui->test10);
+
+    scanbuttons.push_back(ui->test11);
+    scanbuttons.push_back(ui->test12);
+   // scanbuttons.push_back(ui->test1);
+  //  scanbuttons.push_back(ui->test1);
 
     WriteTests();
     qDebug()<<"dimitra"<<endl;
@@ -788,15 +955,36 @@ void MainWindow::fillingOBvectors(){
 }
 
 void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysis *> a){
+
     qDebug()<<s.size()<<endl;
     ui->statuslabel->setVisible(true);
      ui->statuslabel->update();
 
  // for (int i=6;i<s.size();i++){
-     for (int i=4;i<5;i++){
+     for (int i=0;i<13;i++){
+
+
+
+
+       //  std::cout<<"The scan names are : "<<fScanVector[i]->GetName()<<std::endl;
+        // std::cout<<"The classification is : "<<fresultVector[i]->GetHicResults()->first<<std::endl;
+       //  std::cout<<"The state is : "<<fScanVector[i]->GetState()<<std::endl;
+         if (s.at(i)==0){
+          qDebug()<<"The scan pointer is zero doing the job only for analysis"<<endl;
+           a.at(i)->Initialize();
+       // fmaskvector[4]->Initialize();
+         std::thread analysisThread(&TScanAnalysis::Run, std::ref(a[i]));
+          // std::thread analysisThread(&TApplyMask::Run, std::ref(fmaskvector[4]));
+qDebug()<<"before join, it crashes in join"<<endl;
+            analysisThread.join();
+ qDebug()<<"before finalize"<<endl;
+            a.at(i)->Finalize();
+
+         }
+         else {
    // for (int i=0;i<2;i++){
       //   QApplication::processEvents() ;
-         qDebug()<<"out of range dimitroula1"<<endl;
+        // qDebug()<<"out of range dimitroula1"<<endl;
        std::thread scanThread(&MainWindow::scanLoop,this,s[i]);
  qDebug()<<"out of range dimitroula2"<<endl;
         a.at(i)->Initialize();
@@ -845,14 +1033,14 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
               qApp->processEvents();
          break;
          }
-*/while (i<5 && i>3){
+*//*while (i<7 && i>4){
             ui->fstatus->setText("no");
             ui->dstatus->setText("no");
             ui->tstatus->setText("no");
-            ui->nstatus->setText("vcasn 50");
+            ui->nstatus->setText("noise 50");
             qApp->processEvents();
        break;
-       }
+       }*/
         std::thread analysisThread(&TScanAnalysis::Run, std::ref(a[i]));
         scanThread.join();
 
@@ -860,7 +1048,31 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
 
         analysisThread.join();
 qDebug()<<"where is the problem :(";
+
         a.at(i)->Finalize();
+        //COLORING
+       //  std::cout<<"The state is : "<<fScanVector[i]->GetState()<<std::endl;
+        /* for  (std::map<std::string,TScanResultHic* >::iterator it=fresultVector.at(i)->GetHicResults().begin(); it!=fresultVector.at(i)->GetHicResults().end(); ++it){
+             int colour;
+             colour=it->second->GetClassification();
+             if (colour==CLASS_ORANGE){
+
+
+// ui->test3->setStyleSheet("color:red;");
+colororange();
+//ui->test1->acceptDrops();}
+               //  QPalette pal = ui->test1->palette();
+              // pal.setColor(QPalette::Window, Qt::blue);
+               //  ui->test1->setAutoFillBackground(true);
+             //   ui->test1->setPalette(pal);}
+                 //ui->test1}
+          // ui->test1->setStyleSheet("color:ffff00;");  }
+                 //ui->test3->
+           // ui->test3->setStyleSheet("color:red;");
+             }
+           // qApp->processEvents(); }
+         }*/
+        //  std::cout<<"The classification is : "<<fresultVector[i]->GetClassification()<<std::endl;
 qDebug()<<"where is the problem";
    /*     while (i<1){
             ui->fstatus->setText("100% Completed");
@@ -896,18 +1108,21 @@ qDebug()<<"where is the problem";
         break;
         }*/
 
-while (i<5 && i>3){
+/*while (i<7 && i>4){
      ui->fstatus->setText("no");
      ui->dstatus->setText("no");
      ui->tstatus->setText("no");
-     ui->nstatus->setText("100% vcasn");
+     ui->nstatus->setText("100% noise");
      qApp->processEvents();
 break;
-}
-
+}*/
+         }
 qApp->processEvents();
    }
     qApp->processEvents();
+
+
+
 }
 
 
@@ -1016,30 +1231,42 @@ void MainWindow::connectcombo(int value){
         break;}
 
     }
-
+ // ui->test1->setStyleSheet("color:orange;");
   connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
+//  ui->test1->setStyleSheet("color:orange;");
+// std::cout<<"is working"<<std::endl;}
    //connect(ui->start_test,SIGNAL(clicked()),this,SLOT(runscans()));
 }
 
 void MainWindow::applytests(){
 
     performtests(fScanVector,fAnalysisVector);
-
+    colorscans();
   // emit stopTimer();
 }
 
 void MainWindow::WriteTests(){
 std::cout<<fScanVector.size()<<"the scan vector size";
-    for (unsigned int i=0;i<fScanVector.size();i++)
-    {
+    for (unsigned int i=0;i<13;i++)
+    {std::cout<<ui->test1<<std::endl;
 
     while (i<1){
-        if (fScanVector.size()<8){
+        if (fScanVector.size()<14){
            ui->test1->setText(fScanVector[i]->GetName());
            ui->test2->setText(fScanVector[i+1]->GetName());
            ui->test3->setText(fScanVector[i+2]->GetName());
            ui->test4->setText(fScanVector[i+3]->GetName());
-}//           ui->test5->setText(fScanVector[i+4]->GetName());
+           ui->test5->setText(fScanVector[i+4]->GetName());
+           ui->test6->setText(fScanVector[i+5]->GetName());
+           ui->test7->setText(fScanVector[i+6]->GetName());
+           ui->test8->setText(fScanVector[i+7]->GetName());
+           ui->test9->setText(fScanVector[i+8]->GetName());
+           ui->test10->setText(fScanVector[i+10]->GetName());
+           ui->test11->setText(fScanVector[i+11]->GetName());
+           ui->test12->setText(fScanVector[i+12]->GetName());
+          // colororange();
+         //  ui->test12->setText(fScanVector[i+8]->GetName());
+}
 
         break;
 }
@@ -1279,4 +1506,44 @@ void MainWindow::setVI(float * vcasn, float * ithr) {
     //fChips.at(i)->GetConfig()->SetParamValue(ithr[i]);
     //WIP...
   }
+}
+
+void MainWindow::colorscans(){
+   // std::vector<QPushButton*> scanbuttons;
+    for (unsigned int i=0;i<13;i++){
+if (scanbuttons[i]!=0){
+if(fresultVector[i]==0){
+    for  (std::map<std::string,TScanResultHic* >::iterator it=fresultVector.at(i+1)->GetHicResults().begin(); it!=fresultVector.at(i+1)->GetHicResults().end(); ++it){
+                 int colour;
+                 colour=it->second->GetClassification();
+                  std::cout<<"no zero pointer "<< colour<<std::endl;
+                 if (colour==CLASS_ORANGE){scanbuttons[i]->setStyleSheet("color:orange;");
+break;}
+                 if (colour==CLASS_GREEN){scanbuttons[i]->setStyleSheet("color:green;");
+break;}
+                 if (colour==CLASS_RED){scanbuttons[i]->setStyleSheet("color:red;");
+break;}
+                 if (colour==CLASS_UNTESTED){scanbuttons[i]->setStyleSheet("color:pink;");
+break;}
+
+}}
+else{
+        for  (std::map<std::string,TScanResultHic* >::iterator it=fresultVector.at(i)->GetHicResults().begin(); it!=fresultVector.at(i)->GetHicResults().end(); ++it){
+                     int colour;
+                     colour=it->second->GetClassification();
+                      std::cout<<"no zero pointer "<< colour<<std::endl;
+                     if (colour==CLASS_ORANGE){scanbuttons[i]->setStyleSheet("color:orange;");
+    break;}
+                     if (colour==CLASS_GREEN){scanbuttons[i]->setStyleSheet("color:green;");
+    break;}
+                     if (colour==CLASS_RED){scanbuttons[i]->setStyleSheet("color:red;");
+    break;}
+                     if (colour==CLASS_UNTESTED){scanbuttons[i]->setStyleSheet("color:pink;");
+    break;}
+
+    }}
+
+
+ }
+    }
 }

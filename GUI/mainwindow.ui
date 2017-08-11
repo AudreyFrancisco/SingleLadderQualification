@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1437</width>
-    <height>722</height>
+    <height>670</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,9 +18,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>50</y>
+      <y>60</y>
       <width>361</width>
-      <height>371</height>
+      <height>511</height>
      </rect>
     </property>
     <column>
@@ -44,7 +44,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -977,6 +977,19 @@
        </rect>
       </property>
      </widget>
+     <widget class="QLabel" name="alicepic">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>310</y>
+        <width>211</width>
+        <height>201</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -1215,19 +1228,6 @@ Digital scan                     Waiting . .
      </attribute>
     </widget>
    </widget>
-   <widget class="QLabel" name="alicepic">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>430</y>
-      <width>321</width>
-      <height>241</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QLabel" name="testtypeselected">
     <property name="geometry">
      <rect>
@@ -1270,9 +1270,9 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test2">
     <property name="geometry">
      <rect>
-      <x>-30</x>
+      <x>-10</x>
       <y>140</y>
-      <width>151</width>
+      <width>161</width>
       <height>31</height>
      </rect>
     </property>
@@ -1283,9 +1283,9 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test3">
     <property name="geometry">
      <rect>
-      <x>-19</x>
+      <x>-20</x>
       <y>170</y>
-      <width>151</width>
+      <width>161</width>
       <height>31</height>
      </rect>
     </property>
@@ -1296,7 +1296,7 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test4">
     <property name="geometry">
      <rect>
-      <x>-10</x>
+      <x>0</x>
       <y>200</y>
       <width>151</width>
       <height>31</height>
@@ -1309,9 +1309,9 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test5">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>270</y>
-      <width>131</width>
+      <x>-20</x>
+      <y>230</y>
+      <width>161</width>
       <height>31</height>
      </rect>
     </property>
@@ -1336,7 +1336,7 @@ Digital scan                     Waiting . .
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>145</y>
+      <y>140</y>
       <width>171</width>
       <height>21</height>
      </rect>
@@ -1391,7 +1391,7 @@ Digital scan                     Waiting . .
     <property name="geometry">
      <rect>
       <x>127</x>
-      <y>80</y>
+      <y>83</y>
       <width>161</width>
       <height>31</height>
      </rect>
@@ -1412,7 +1412,7 @@ Digital scan                     Waiting . .
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>380</y>
+      <y>540</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -1424,8 +1424,8 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="abort">
     <property name="geometry">
      <rect>
-      <x>110</x>
-      <y>380</y>
+      <x>150</x>
+      <y>540</y>
       <width>95</width>
       <height>31</height>
      </rect>
@@ -1437,8 +1437,8 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="abortall">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>380</y>
+      <x>260</x>
+      <y>540</y>
       <width>95</width>
       <height>31</height>
      </rect>
@@ -1458,6 +1458,110 @@ Digital scan                     Waiting . .
     </property>
     <property name="text">
      <string>Quit</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test6">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>260</y>
+      <width>161</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test7">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>290</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test8">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>320</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test9">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>350</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test10">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>380</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test11">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>410</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test12">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>440</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test13">
+    <property name="geometry">
+     <rect>
+      <x>-30</x>
+      <y>470</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>

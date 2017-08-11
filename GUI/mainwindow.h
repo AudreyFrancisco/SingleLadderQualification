@@ -23,6 +23,8 @@ class TScanAnalysis;
 class TScanResult;
 class TestSelection;
 class THic;
+class TApplyMask;
+class TPowerTest;
 
 namespace Ui {
 class MainWindow;
@@ -40,13 +42,13 @@ public:
  //   void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     std::vector <TScan *> fScanVector;
     std::vector <TScanAnalysis *> fAnalysisVector;
+    // std::vector <TApplyMask *> fmaskvector;
+
      std::vector <TScanResult *> fresultVector;
     std::vector <THic *> fHICs;
   //  void fillingvectors();
  std::vector <std::string> mapdetails;
-
-
-
+std::vector<QPushButton*> scanbuttons;
 
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
    // void explore_halfstave(uint8_t chipid);
@@ -73,7 +75,7 @@ public slots:
    void connectcombo(int value);
    void createbtn();
    void popup(QString message);
-
+   void colorscans();
       // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     /*
     void open();
@@ -105,8 +107,11 @@ private:
     TBoardType fBoardType;
     std::vector <TReadoutBoard *> fBoards;
     std::vector <TAlpide *>       fChips;
+
     std::mutex fMutex;
     TConfig *fConfig;
+   // TConfig *fConfigp10;
+   // TConfig *fConfigm10;
     std::deque<TScanHisto>  fHistoQue;
     void color_red(int side, int pos);
     void color_green(int side, int pos);
@@ -129,6 +134,8 @@ private slots:
  void button_obm5_clicked();
  void button_obm6_clicked();
  void button_obm7_clicked();
+ void applytests();
+ void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
  void scantest();
  void digital();
  void test();
@@ -136,8 +143,7 @@ private slots:
 
  void start_test();
  void open();
- void applytests();
- void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
+
 // void connectcombo(int value);
  void  runscans();
  void fillingOBvectors();

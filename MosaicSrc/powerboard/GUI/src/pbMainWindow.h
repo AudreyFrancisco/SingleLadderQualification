@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2016.
@@ -52,12 +52,12 @@ class pbMainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    pbMainWindow( QWidget* parent = 0, Qt::WFlags fl = 0);
+    pbMainWindow( QWidget* parent = 0, Qt::WindowFlags fl = 0);
     ~pbMainWindow();
 
 
 private:
-	QWidget			*centralWidgetPtr;	
+	QWidget			*centralWidgetPtr;
 	QString 		cfgFilename;
 	QPixmap 		ledRedPixmap;
 	QPixmap 		ledGreyPixmap;
@@ -110,7 +110,7 @@ private slots:
 	void fileSaveAs();
 	void fileSave();
 	void configure();
-	
+
 private:
 	QWidget *topStatusBar();
 	QWidget *channel(int ch, QString chName);
