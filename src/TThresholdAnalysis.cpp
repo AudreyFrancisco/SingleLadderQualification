@@ -823,15 +823,15 @@ void TThresholdAnalysis::WriteResult()
 {
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
-    if (m_ResultFactor > 1) 
-      sprintf(fName, "ThresholdScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+    if (m_resultFactor > 1)
+      sprintf(fName, "ThresholdScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
     	                                              m_config->GetfNameSuffix());
-    else if (m_ResultFactor == 1) {
-      sprintf(fName, "VCASNTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+    else if (m_resultFactor == 1) {
+      sprintf(fName, "VCASNTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
     	                                              m_config->GetfNameSuffix());
     }
     else {
-      sprintf(fName, "ITHRTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+      sprintf(fName, "ITHRTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
     	                                              m_config->GetfNameSuffix());
     }
     m_scan->WriteConditions (fName, m_hics.at(ihic));
