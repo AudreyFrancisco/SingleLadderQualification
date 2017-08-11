@@ -21,14 +21,14 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
 #include <QApplication>
-#include <QMessageBox> 
+#include <QMessageBox>
 #include <QAction>
 #include <QMenuBar>
 #include <QFileDialog>
@@ -52,7 +52,7 @@
 static const char *WINDOW_TITLE = "Power Board Control";
 
 
-pbMainWindow::pbMainWindow( QWidget* parent, Qt::WFlags fl )
+pbMainWindow::pbMainWindow( QWidget* parent, Qt::WindowFlags fl )
     : QMainWindow( parent, fl )
 {
 	setWindowTitle(QString(WINDOW_TITLE));
@@ -98,7 +98,7 @@ pbMainWindow::pbMainWindow( QWidget* parent, Qt::WFlags fl )
 	// Central Widget & Vertical layout
 	centralWidgetPtr = new QWidget( this );
     setCentralWidget( centralWidgetPtr );
-    QVBoxLayout* verticalLayout = new QVBoxLayout(centralWidget()); 
+    QVBoxLayout* verticalLayout = new QVBoxLayout(centralWidget());
 
 	verticalLayout->setContentsMargins(0,0,0,0);
 	verticalLayout->addWidget(topStatusBar());
@@ -174,26 +174,26 @@ void pbMainWindow::setIPaddress(QString add)
 	boardAddress = add;
 
 	try{
-		board->setIPaddress(add.toAscii().data());
+		board->setIPaddress(add.toLatin1().data());
 	} catch (std::exception& e) {
-		qDebug("Error connecting board at address %s", add.toAscii().data());
+		qDebug("Error connecting board at address %s", add.toLatin1().data());
 		setOnline(false);
-		QMessageBox::critical ( this, WINDOW_TITLE, 
-			"Board comunication error", 
+		QMessageBox::critical ( this, WINDOW_TITLE,
+			"Board comunication error",
 			"OK");
 		return;
 	}
 
 	try{
 		if (!pb->isReady()){
-			throw MIPBusErrorWrite("Power board comunication error");			
+			throw MIPBusErrorWrite("Power board comunication error");
 		}
 		pb->startADC();
 	} catch (std::exception& e) {
 		qDebug("Power Board is not connected or is off");
 		setOnline(false);
-		QMessageBox::critical ( this, WINDOW_TITLE, 
-			"Power Board is not connected or is off", 
+		QMessageBox::critical ( this, WINDOW_TITLE,
+			"Power Board is not connected or is off",
 			"OK");
 		return;
 	}
@@ -211,7 +211,7 @@ void pbMainWindow::configure()
 	if (cfg.exec() == QDialog::Rejected)
 		return;
 
-	setIPaddress(cfg.address());	
+	setIPaddress(cfg.address());
 }
 
 
@@ -225,7 +225,7 @@ QWidget *pbMainWindow::topStatusBar()
     QFrame *statusFrame = new QFrame( this );
     statusFrame->setFrameShape( QFrame::StyledPanel );
     statusFrame->setFrameShadow( QFrame::Raised );
-    QHBoxLayout *statusFrameLayout = new QHBoxLayout( statusFrame ); 
+    QHBoxLayout *statusFrameLayout = new QHBoxLayout( statusFrame );
 	statusFrameLayout->setContentsMargins(3,3,3,3);
 	statusFrameLayout->setSpacing(6);
 
@@ -242,18 +242,18 @@ QWidget *pbMainWindow::topStatusBar()
 	}
 
 	// Vbias
-	statusFrameLayout->addStretch(2);	
+	statusFrameLayout->addStretch(2);
 	label = new QLabel(" <h1>Bias </h1>", this);
-	statusFrameLayout->addWidget(label);	
+	statusFrameLayout->addWidget(label);
 	label = new QLabel("Vset", this);
-	statusFrameLayout->addWidget(label);	
+	statusFrameLayout->addWidget(label);
 	VbiasText = new QLineEdit(this);
 	VbiasText->setInputMask("-9.99");
 	VbiasText->setText("-0.00");
 	VbiasText->setFixedWidth(metrics.width("-9.99") + 10);
 	VbiasText->setValidator(VbiasValidator);
-	statusFrameLayout->addWidget(VbiasText);	
-	connect(VbiasText, SIGNAL(editingFinished()), this, SLOT(VbiasSet())); 
+	statusFrameLayout->addWidget(VbiasText);
+	connect(VbiasText, SIGNAL(editingFinished()), this, SLOT(VbiasSet()));
 
 	VbiasLCD = newSmallLCD();
 	statusFrameLayout->addWidget(VbiasLCD);
@@ -265,9 +265,9 @@ QWidget *pbMainWindow::topStatusBar()
 	label = new QLabel("<h1>mA </h1>", this);
 	statusFrameLayout->addWidget(label);
 
-	statusFrameLayout->addStretch(10);	
+	statusFrameLayout->addStretch(10);
 
-	// Global ON/OFF 
+	// Global ON/OFF
 	QPushButton *onPushButton = new QPushButton("ALL ON");
 	statusFrameLayout->addWidget(onPushButton);
 	connect(onPushButton, SIGNAL(clicked()), this, SLOT(allON()));
@@ -288,7 +288,7 @@ QLCDNumber *pbMainWindow::newLargeLCD()
 
 	QLCDNumber *lcd;
 	lcd = new QLCDNumber( this );
-	lcd->setNumDigits(4);
+	lcd->setDigitCount(4);
 	lcd->setAutoFillBackground(true);
 	lcd->setPalette(Pal);
 	lcd->setSegmentStyle(QLCDNumber::Flat);
@@ -305,7 +305,7 @@ QLCDNumber *pbMainWindow::newSmallLCD()
 
 	QLCDNumber *lcd;
 	lcd = new QLCDNumber( this );
-	lcd->setNumDigits(4);
+	lcd->setDigitCount(4);
 	lcd->setAutoFillBackground(true);
 	lcd->setPalette(Pal);
 	lcd->setSegmentStyle(QLCDNumber::Flat);
@@ -324,7 +324,7 @@ QWidget *pbMainWindow::channel(int ch, QString chName)
 
 	QGroupBox *channelGroup = new QGroupBox(chName, this);
 	QGridLayout *gbox = new QGridLayout(channelGroup);
-	
+
 	// LED
 	channelLED[ch] = new QLabel(NULL);
 	channelLED[ch]->setPixmap(ledGreyPixmap);
@@ -362,13 +362,13 @@ QWidget *pbMainWindow::channel(int ch, QString chName)
 	IsetText[ch]->setFixedWidth(metrics.width("9.999") + 10);
 	IsetText[ch]->setValidator(IsetValidator);
 	gbox->addWidget(IsetText[ch], 1, col++, 1, 1);
-	
+
 	// ON/OFF pushbutton
 	QPushButton *onPushButton = new QPushButton("ON");
 	gbox->addWidget(onPushButton, 0, col, 1, 1);
 	QPushButton *offPushButton = new QPushButton("OFF");
 	gbox->addWidget(offPushButton, 1, col++, 1, 1);
-	
+
 	// Signal to mappers
 	ChannelSetOnMapper->setMapping(onPushButton, ch);
 	connect(onPushButton, SIGNAL(clicked()), ChannelSetOnMapper, SLOT(map()));
@@ -394,7 +394,7 @@ void pbMainWindow::channelSetON(int ch)
 	try{
 		// pb->onVout(ch);
 		pb->onVout(ch);
-	} catch (std::exception& e) {	
+	} catch (std::exception& e) {
 		comErrorExit(e);
 	}
 }
@@ -404,7 +404,7 @@ void pbMainWindow::channelSetOFF(int ch)
 	try{
 		// pb->setIth(ch, 0.0);
 		pb->offVout(ch);
-	} catch (std::exception& e) {	
+	} catch (std::exception& e) {
 		comErrorExit(e);
 	}
 }
@@ -413,16 +413,16 @@ void pbMainWindow::channelVset(int ch)
 {
 	QString s;
 	float V = VsetText[ch]->text().toFloat();
-	
+
 	if (V<0)
 		V = 0;
 	if (V>2.5)
 		V = 2.5;
 	s.setNum(V, 'F', 3);
- 
+
 	try{
 		pb->setVout(ch, V);
-	} catch (std::exception& e) {	
+	} catch (std::exception& e) {
 		comErrorExit(e);
 	}
 
@@ -433,7 +433,7 @@ void pbMainWindow::storeVset()
 {
 	try{
 		pb->storeAllVout();
-	} catch (std::exception& e) {	
+	} catch (std::exception& e) {
 		comErrorExit(e);
 	}
 }
@@ -442,17 +442,17 @@ void pbMainWindow::channelIset(int ch)
 {
 	QString s;
 	float I = IsetText[ch]->text().toFloat();
-	
+
 	if (I<0)
 		I = 0;
 	if (I>2.0)
 		I = 2.0;
 	s.setNum(I, 'F', 3);
 	IsetText[ch]->setText(s);
- 
+
 	try{
 		pb->setIth(ch, I);
-	} catch (std::exception& e) {	
+	} catch (std::exception& e) {
 		comErrorExit(e);
 	}
 
@@ -464,7 +464,7 @@ void pbMainWindow::VbiasSet()
 
 	try{
 		pb->setVbias(V);
-	} catch (std::exception& e) {	
+	} catch (std::exception& e) {
 		comErrorExit(e);
 	}
 
@@ -486,7 +486,7 @@ void pbMainWindow::enAllVbias(bool en)
 			pb->onAllVbias();
 		else
 			pb->offAllVbias();
-	} catch (std::exception& e) {	
+	} catch (std::exception& e) {
 		comErrorExit(e);
 	}
 }
@@ -499,7 +499,7 @@ void pbMainWindow::enVbias(bool en, int ch)
 			pb->onVbias(ch);
 		else
 			pb->offVbias(ch);
-	} catch (std::exception& e) {	
+	} catch (std::exception& e) {
 		comErrorExit(e);
 	}
 }
@@ -513,10 +513,10 @@ void pbMainWindow::refreshMonitor()
 
 	try{
 		pb->getState(&pbStat, powerboard::GetMonitor);
-	} catch (std::exception& e) {	
+	} catch (std::exception& e) {
 		comErrorExit(e);
 	}
-	
+
 	// Temperature sensors
 	float t = pbStat.T;
 	if (t<-9.99 || t>99.99)
@@ -587,7 +587,7 @@ void pbMainWindow::refreshSettings()
 
 	try{
 		pb->getState(&pbStat, powerboard::GetSettings);
-	} catch (std::exception& e) {	
+	} catch (std::exception& e) {
 		comErrorExit(e);
 	}
 
@@ -604,11 +604,11 @@ void pbMainWindow::refreshSettings()
 	Switch ON all channels
 */
 void pbMainWindow::allON()
-{	
+{
 	try{
 		pb->onAllVout();
-		pb->onAllVbias();	
-	} catch (std::exception& e) {	
+		pb->onAllVbias();
+	} catch (std::exception& e) {
 		comErrorExit(e);
 	}
 }
@@ -617,11 +617,11 @@ void pbMainWindow::allON()
 	Switch OFF all channels
 */
 void pbMainWindow::allOFF()
-{	
+{
 	try{
-		pb->offAllVbias();	
+		pb->offAllVbias();
 		pb->offAllVout();
-	} catch (std::exception& e) {	
+	} catch (std::exception& e) {
 		comErrorExit(e);
 	}
 }
@@ -635,7 +635,7 @@ void pbMainWindow::fileSave()
 		fileSaveAs();
 		return;
 	}
-	saveConfiguration();	
+	saveConfiguration();
 }
 
 void pbMainWindow::fileSaveAs()
@@ -650,17 +650,17 @@ void pbMainWindow::fileSaveAs()
 		filename.append(".cfg");
 
 	cfgFilename = filename;
-	saveConfiguration();	
+	saveConfiguration();
 }
 
 void pbMainWindow::saveConfiguration()
 {
-	qDebug("Saving configuration into file %s", cfgFilename.toAscii().data());
+	qDebug("Saving configuration into file %s", cfgFilename.toLatin1().data());
 
 	QFile of(cfgFilename);
 	if (!of.open(QFile::WriteOnly | QFile::Truncate)){
-		QMessageBox::critical ( this, WINDOW_TITLE, 
-					"Error opening file<br>", 
+		QMessageBox::critical ( this, WINDOW_TITLE,
+					"Error opening file<br>",
 					QMessageBox::Ok, Qt::NoButton,
 					Qt::NoButton );
 		return;
@@ -718,14 +718,14 @@ void pbMainWindow::fileOpen(char *fname)
 		if (filename.right(4)!=".cfg")
 			filename.append(".cfg");
 	}
-	
-	qDebug("Reading configuration from file %s", filename.toAscii().data());
+
+	qDebug("Reading configuration from file %s", filename.toLatin1().data());
 
 	// Open file
 	QFile ifile(filename);
 	if (!ifile.open(QIODevice::ReadOnly)){
-		QMessageBox::critical ( this, WINDOW_TITLE, 
-					"Error opening file<br>", 
+		QMessageBox::critical ( this, WINDOW_TITLE,
+					"Error opening file<br>",
 					QMessageBox::Ok, Qt::NoButton,
 					Qt::NoButton );
 		return;
@@ -733,9 +733,9 @@ void pbMainWindow::fileOpen(char *fname)
 
 	// read CFG file
 	QDomDocument doc;
-	if ( !doc.setContent( &ifile ) ){ 
-		QMessageBox::critical ( this, WINDOW_TITLE, 
-					"Error reading file<br>", 
+	if ( !doc.setContent( &ifile ) ){
+		QMessageBox::critical ( this, WINDOW_TITLE,
+					"Error reading file<br>",
 					QMessageBox::Ok, Qt::NoButton,
 					Qt::NoButton );
 		ifile.close();
@@ -746,8 +746,8 @@ void pbMainWindow::fileOpen(char *fname)
 	// parse file
 	QDomElement root = doc.documentElement();
 	if (root.tagName()!= "PowerBoardSetup"){
-		QMessageBox::critical ( this, WINDOW_TITLE, 
-					"Root tag != PowerBoardSetup<br>", 
+		QMessageBox::critical ( this, WINDOW_TITLE,
+					"Root tag != PowerBoardSetup<br>",
 					QMessageBox::Ok, Qt::NoButton,
 					Qt::NoButton );
 		return;
@@ -784,13 +784,13 @@ bool pbMainWindow::XMLreadChannel(QDomElement &root, int n)
 	QString chN, val;
 	chN.setNum(n);
 	chN = "Channel_" + chN;
-	
+
 	QDomElement channel = XMLgetTag(root, chN);
 	if (channel.isNull())
-		return FALSE;
+		return false;
 
 	val = channel.attribute ( "Vset", "0.000" );
-	VsetText[n]->setText(val); 
+	VsetText[n]->setText(val);
 	channelVset(n);
 	val = channel.attribute ( "Iset", "0.000" ); 
 	IsetText[n]->setText(val); 
@@ -823,7 +823,7 @@ bool pbMainWindow::XMLreadBias(QDomElement &root)
 		val = bias.attribute ( "M"+mN, "0" );
 		enVbias(val=="1", m);
 	}
-	
+
 	return true;
 }
 
@@ -886,9 +886,8 @@ void pbMainWindow::comErrorExit(std::exception& e)
 	qDebug(e.what());
 
 	setOnline(false);
-	QMessageBox::critical ( this, WINDOW_TITLE, 
-		"Board comunication error", 
+	QMessageBox::critical ( this, WINDOW_TITLE,
+		"Board comunication error",
 		"Exit");
 	exit(1);
 }
-
