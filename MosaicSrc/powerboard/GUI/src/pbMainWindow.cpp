@@ -131,12 +131,12 @@ pbMainWindow::pbMainWindow( QWidget* parent, Qt::WindowFlags fl )
 	}
 
     // signals and slots connections
-	connect( fileOpenAction, SIGNAL( activated() ), this, SLOT( fileOpen() ) );
-	connect( fileSaveAction, SIGNAL( activated() ), this, SLOT( fileSave() ) );
-	connect( fileSaveAsAction, SIGNAL( activated() ), this, SLOT( fileSaveAs() ) );
-	connect( fileExitAction, SIGNAL( activated() ), this, SLOT( close() ) );
-	connect( configureAction, SIGNAL( activated() ), this, SLOT( configure() ) );
-	connect( storeAction, SIGNAL( activated() ), this, SLOT( storeVset() ) );
+	connect( fileOpenAction, SIGNAL( triggered(bool) ), this, SLOT( fileOpen() ) );
+	connect( fileSaveAction, SIGNAL( triggered(bool) ), this, SLOT( fileSave() ) );
+	connect( fileSaveAsAction, SIGNAL( triggered(bool) ), this, SLOT( fileSaveAs() ) );
+	connect( fileExitAction, SIGNAL( triggered(bool) ), this, SLOT( close() ) );
+	connect( configureAction, SIGNAL( triggered(bool) ), this, SLOT( configure() ) );
+	connect( storeAction, SIGNAL( triggered(bool) ), this, SLOT( storeVset() ) );
 	connect( ChannelSetOnMapper, SIGNAL(mapped(int)), this, SLOT(channelSetON(int)));
 	connect( ChannelSetOffMapper, SIGNAL(mapped(int)), this, SLOT(channelSetOFF(int)));
 	connect( ChannelVsetMapper, SIGNAL(mapped(int)), this, SLOT(channelVset(int)));
