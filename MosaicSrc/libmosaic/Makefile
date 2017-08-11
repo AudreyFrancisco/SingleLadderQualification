@@ -34,13 +34,7 @@ all: $(TARGET_LIB)
 $(TARGET_LIB): $(LIB_OBJS)
 	$(RM) $@
 	$(AR) $@ $(LIB_OBJS)
-	
-	
-depend: .depend
 
-.depend: $(SRC)
-	rm -f ./.depend
-	$(CXX) $(CPPFLAGS) -MM $^>>./.depend;
 
 clean:
 	$(RM) $(LIB_OBJS)
@@ -51,6 +45,5 @@ cleanall:
 	$(RM) $(TARGET_LIB)
 
 dist-clean: clean
-	$(RM) *~ .depend
 
-include .depend
+.PHONY: clean cleanall dist-clean
