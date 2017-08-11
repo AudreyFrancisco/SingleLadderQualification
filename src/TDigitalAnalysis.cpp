@@ -265,6 +265,8 @@ void TDigitalResultHic::WriteToFile (FILE *fp)
 {
   fprintf(fp, "HIC Result:\n\n");
 
+  fprintf (fp, "HIC Classification: %s\n\n", WriteHicClassification());
+
   fprintf(fp, "Bad pixels:      %d\n", m_nBad);
   fprintf(fp, "Bad double cols: %d\n", m_nBadDcols);
   fprintf(fp, "Stuck pixels:    %d\n", m_nStuck);

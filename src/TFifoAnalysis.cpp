@@ -164,6 +164,8 @@ void TFifoResultHic::WriteToFile (FILE *fp)
 {
   fprintf (fp, "HIC Result:\n\n");
 
+  fprintf (fp, "HIC Classification: %s\n\n", WriteHicClassification());
+
   fprintf(fp, "Errors in pattern 0x0000: %d\n", m_err0);
   fprintf(fp, "Errors in pattern 0x5555: %d\n", m_err5);
   fprintf(fp, "Errors in pattern 0xaaaa: %d\n", m_erra);

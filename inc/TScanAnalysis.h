@@ -17,7 +17,7 @@ class TScanHisto;
 
 enum THicClassification {CLASS_UNTESTED, CLASS_GREEN, CLASS_RED, CLASS_ORANGE};
 
-typedef enum resultType {status, deadPix, noisyPix, ineffPix, badDcol, thresh, noise, threshRms, noiseRms, noiseOcc, Err0, Errf, Erra, Err5, ErrBusyOn, ErrBusyOff} TResultVariable;
+typedef enum resultType {status, deadPix, noisyPix, ineffPix, badDcol, thresh, noise, noThreshPix, threshRms, noiseRms, vcasn, ithr, noiseOcc, Err0, Errf, Erra, Err5, ErrBusyOn, ErrBusyOff} TResultVariable;
 
 
 // base class for classes that contain chip results
@@ -43,6 +43,7 @@ class TScanResultHic {
   int                AddChipResult     (int aChipId, TScanResultChip *aChipResult);
   void               SetResultFile     (const char *fName) {strcpy(m_resultFile, fName);};
   THicClassification GetClassification ()                  {return m_class;};
+  std::map <int, TScanResultChip*> DeleteThisToo() {return m_chipResults;};
   float              GetVariable       (int chip, TResultVariable var);
 };
 

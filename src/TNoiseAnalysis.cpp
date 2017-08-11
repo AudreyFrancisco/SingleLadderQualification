@@ -157,6 +157,8 @@ void TNoiseResultHic::WriteToFile(FILE *fp)
 {
   fprintf(fp, "HIC Result:\n\n");
 
+  fprintf (fp, "HIC Classification: %s\n\n", WriteHicClassification());
+
   fprintf(fp, "Noisy pixels:    %d\n", m_nNoisy);
   fprintf(fp, "Noise occupancy: %e\n", m_occ);  
 

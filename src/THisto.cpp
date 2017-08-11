@@ -227,6 +227,7 @@ void THisto::Set(unsigned int i, unsigned int j, double val) {
 
 
 void THisto::Incr (unsigned int i) {
+  //if (i>m_lim[0][0]-1 && i<m_lim[0][1]+1) {
   if (i<m_dim[0]) {
     if (m_size == 1) ((unsigned char **)m_histo)[0][i]++;
     if (m_size == 2) ((unsigned short int **)m_histo)[0][i]++;
@@ -237,7 +238,10 @@ void THisto::Incr (unsigned int i) {
 
 
 void THisto::Incr (unsigned int i, unsigned int j) {
+  //if (i>m_lim[0][0]-1 && i<m_lim[0][1]+1 && j>m_lim[1][0]-1 && j<m_lim[1][1]+1) {
   if (i<m_dim[0] && j<m_dim[1]) {
+    //std::cout << i << ", " << j << std::endl;
+    //std::cout << ((unsigned short int **)m_histo)[j][i] << std::endl;
     if (m_size == 1) ((unsigned char **)m_histo)[j][i]++;
     if (m_size == 2) ((unsigned short int **)m_histo)[j][i]++;
     if (m_size == 4) ((float **)m_histo)[j][i]++;
