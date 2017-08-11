@@ -59,7 +59,7 @@ void THic::PowerOff()
 {
   if (!IsPowered()) return;
   
-  if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
+  if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, false);
   // Q: do we need to consider case where part of the channels is on?
 }
 
