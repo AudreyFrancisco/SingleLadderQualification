@@ -11,36 +11,39 @@ class HP_E3631A:
     def get_device_name(self):
         self.con.write(b'*IDN?\n')
         print self.con.readline()
-        time.sleep(0.5)
         self.con.write(b'SYST:ERR?\n')
         print self.con.readline()
 
     def status(self):
+        val = ([0., 0., 0., 0.])
         self.con.write(b'MEAS:VOLT? P6V\n')
-        print self.con.readline()
-        time.sleep(0.5)
-        self.con.write(b'MEAS:VOLT? N25V\n')
-        print self.con.readline()
-        time.sleep(0.5)
+        val[0] = float(self.con.readline())
         self.con.write(b'MEAS:CURR? P6V\n')
-        print self.con.readline()
-        time.sleep(0.5)
+        val[1] = float(self.con.readline())
+        self.con.write(b'MEAS:VOLT? N25V\n')
+        val[2] = float(self.con.readline())
         self.con.write(b'MEAS:CURR? N25V\n')
-        print self.con.readline()
+        val[3] = float(self.con.readline())
+        print "%0.3fV\t%0.3fA\t%0.3fV\t%0.3fA" % (val[0], val[1], val[2], val[3])
+        self.con.write(b'MEAS:VOLT? P6V\n') # change the display to the 5V
+        self.con.readline()                 # read the return value from the buffer
 
     def init(self):
         self.con.write(b'*RST\n')
         time.sleep(2.)
         self.con.write(b'SYST:REM\n')
-        time.sleep(0.5)
+        time.sleep(0.1)
         self.con.write(b'APPL P6V, 5.0, 5.0\n')
-        time.sleep(0.5)
+        time.sleep(0.1)
         self.con.write(b'APPL N25V, -12.0, 0.5\n')
-        time.sleep(0.5)
+        time.sleep(0.1)
         self.con.write(b'OUTP ON\n')
-        time.sleep(0.5)
+        time.sleep(0.1)
         self.con.write(b'SYST:ERR?\n')
         print self.con.readline()
+        time.sleep(0.1)
+        self.con.write(b'MEAS:VOLT? P6V\n')
+        self.con.readline()
 
     def turn_off(self):
         self.con.write(b'OUTP OFF\n')
