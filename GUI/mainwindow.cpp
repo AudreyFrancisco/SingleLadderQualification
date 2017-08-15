@@ -115,14 +115,14 @@ MainWindow::MainWindow(QWidget *parent) :
       ui->tabWidget->removeTab(2);
       ui->tabWidget->removeTab(1);
       connect(ui->test1,SIGNAL(clicked()),this,SLOT(fifolist()));
-      connect(ui->test2,SIGNAL(clicked()),this,SLOT(digitallist()));
+      connect(ui->test2,SIGNAL(clicked()),this,SLOT(fifolist()));
       connect(ui->test3,SIGNAL(clicked()),this,SLOT(thresholdlist()));
       connect(ui->test4,SIGNAL(clicked()),this,SLOT(noiselist()));
       connect(ui->abortall,SIGNAL(clicked()),this,SLOT(StopScan()),Qt::DirectConnection);
      connect(newtestaction, SIGNAL(triggered()),this, SLOT(start_test()));
      connect(ui->newtest,SIGNAL(clicked()),SLOT(start_test()));
      connect( ui->cfg, SIGNAL( clicked()), this, SLOT(open()) );
-     connect(ui->quit,SIGNAL(clicked()),this,SLOT(close()));
+     connect(ui->quit,SIGNAL(clicked()),this,SLOT(quitall()));
      connect(ui->obm1,SIGNAL(clicked()),this,SLOT(button_obm1_clicked()));
      connect(ui->obm2,SIGNAL(clicked()),this,SLOT(button_obm2_clicked()));
      connect(ui->obm3,SIGNAL(clicked()),this,SLOT(button_obm3_clicked()));
@@ -131,6 +131,8 @@ MainWindow::MainWindow(QWidget *parent) :
      connect(ui->obm6,SIGNAL(clicked()),this,SLOT(button_obm6_clicked()));
      connect(ui->obm7,SIGNAL(clicked()),this,SLOT(button_obm7_clicked()));
      connect (ui->testselection,SIGNAL(currentIndexChanged(int)),this, SLOT(combochanged(int)));
+     connect(ui->details,SIGNAL(currentIndexChanged(int)),this, SLOT(detailscombo(int)));
+     connect(ui->poweroff,SIGNAL(clicked(bool)),this, SLOT(poweroff()));
 
      AlpideDB *myDB=new AlpideDB();
      ProjectDB *myproject=new ProjectDB(myDB);
@@ -225,7 +227,12 @@ void MainWindow::open(){
     settingswindow->hide();
     settingswindow->SaveSettings(operatorname,hicidnumber,counter);
     if (counter==0) {return;}
-   QString fileName="Config.cfg";
+    QString fileName;
+    if(numberofscan==1){
+    fileName="Config.cfg";}
+    else if (numberofscan==2){
+        fileName="Configib.cfg";
+    }
 
    // QString fileName = QFileDialog::getOpenFileName(this,
       //  tr("Open Configuration. . ."), "/home/palpidefs/Alpide/GUI_Dimitra/build-GUI-Desktop-Debug", tr("Configuration Files (*.cfg)"));
@@ -779,12 +786,13 @@ void MainWindow::start_test(){
     fresultVector.clear();
     fChips.clear();
     fBoards.clear();
-scanbuttons.clear();
-    ui->fstatus->clear();
-    ui->dstatus->clear();
-    ui->tstatus->clear();
-    ui->nstatus->clear();
-    ui->ustatus->clear();
+     scanbuttons.clear();
+     if(scanstatuslabels.size()>=1){
+         for (int i=0; i<scanstatuslabels.size();i++){
+             scanstatuslabels.at(i)->setText(" ");
+         }
+     }
+     scanstatuslabels.clear();
      ui->tob->clear();
      ui->test1->setStyleSheet("border:none;");
      ui->test2->setStyleSheet("border:none;");
@@ -949,6 +957,19 @@ void MainWindow::fillingOBvectors(){
    // scanbuttons.push_back(ui->test1);
   //  scanbuttons.push_back(ui->test1);
 
+    scanstatuslabels.push_back(ui->powers);
+    scanstatuslabels.push_back(ui->fifos);
+    scanstatuslabels.push_back(ui->fifops);
+    scanstatuslabels.push_back(ui->fifoms);
+    scanstatuslabels.push_back(ui->digitals);
+    scanstatuslabels.push_back(ui->digitalps);
+    scanstatuslabels.push_back(ui->digitalms);
+    scanstatuslabels.push_back(ui->thresholds);
+    scanstatuslabels.push_back(ui->noisebts);
+    scanstatuslabels.push_back(0);
+    scanstatuslabels.push_back(ui->noiseats);
+    //scanstatuslabels.push_back();
+
     WriteTests();
     qDebug()<<"dimitra"<<endl;
 
@@ -961,7 +982,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
      ui->statuslabel->update();
 
  // for (int i=6;i<s.size();i++){
-     for (int i=0;i<13;i++){
+     for (int i=0;i<11;i++){
 
 
 
@@ -1043,8 +1064,8 @@ qDebug()<<"before join, it crashes in join"<<endl;
        }*/
         std::thread analysisThread(&TScanAnalysis::Run, std::ref(a[i]));
         scanThread.join();
-
-
+if(scanstatuslabels.at(i)!=0){
+scanstatuslabels[i]->setText(fScanVector.at(i)->GetState());}
 
         analysisThread.join();
 qDebug()<<"where is the problem :(";
@@ -1072,7 +1093,10 @@ colororange();
              }
            // qApp->processEvents(); }
          }*/
-        //  std::cout<<"The classification is : "<<fresultVector[i]->GetClassification()<<std::endl;
+         if(scanstatuslabels.at(i)!=0){
+        scanstatuslabels[i]->setText(fScanVector.at(i)->GetState());}
+         //std::cout<<"The classification is : "<<fresultVector[i]->GetClassification()<<std::endl;
+
 qDebug()<<"where is the problem";
    /*     while (i<1){
             ui->fstatus->setText("100% Completed");
@@ -1141,6 +1165,7 @@ void MainWindow::connectcombo(int value){
         // ui->testtypeselected->setText("OB Reception Test");
         ui->testtypeselected->setText("OB Qualification Test");
       //  ui->example1->show();
+        numberofscan=1;
         open();
 
 
@@ -1153,8 +1178,11 @@ void MainWindow::connectcombo(int value){
         ui->testtypeselected->clear();
         ui->start_test->show();
         qDebug()<<"IB Qualification test selected";
-        openib();
+        numberofscan=2;
+       // openib();
+        open();//to be tested
         if (counter==0){break;}
+        fillingOBvectors();//to be tested
         //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
         break;}
 
@@ -1262,8 +1290,8 @@ std::cout<<fScanVector.size()<<"the scan vector size";
            ui->test8->setText(fScanVector[i+7]->GetName());
            ui->test9->setText(fScanVector[i+8]->GetName());
            ui->test10->setText(fScanVector[i+10]->GetName());
-           ui->test11->setText(fScanVector[i+11]->GetName());
-           ui->test12->setText(fScanVector[i+12]->GetName());
+         //  ui->test11->setText(fScanVector[i+11]->GetName());
+         //  ui->test12->setText(fScanVector[i+12]->GetName());
           // colororange();
          //  ui->test12->setText(fScanVector[i+8]->GetName());
 }
@@ -1383,17 +1411,57 @@ void MainWindow::thresholdlist(){
     for (std::map<const char*,resultType>::const_iterator it=fAnalysisVector.at(2)->GetVariableList().begin(); it!=fAnalysisVector.at(2)->GetVariableList().end(); ++it){
 
           std::cout << it->first << " => " << it->second << '\n';
+        //  it->second
           std::string d;
          d=(std::string(it->first));
+ mapd.push_back(std::make_pair(d,it->second));
          // d.append(++it->first);
         //  QVector <std::string> dimitra;
-         mapdetails.push_back(d);
+      //d   mapdetails.push_back(d);
 
      }
-    for (unsigned int i=0; i<mapdetails.size();i++){
-        std::cout<<mapdetails[i]<<std::endl;
-        ui->details->addItem(mapdetails[i].c_str());
-    }
+    for( auto const& v : mapd ) {
+      // v is a reference to a vector element
+      std::cout<<v.first<<std::endl;
+    std::cout<<v.second<<std::endl;
+    ui->details->addItem(v.first.c_str());
+     // fresultVector.at(3)->GetChipResult()->GetVariable(v.second);
+    // for( std::map<std::string,TScanResultChip* >::iterator it=fresultVector.at(3)->GetChipResult().begin(); it!=fresultVector.at(3)->GetChipResult().end(); ++it){
+        // (std::map<std::string,TScanResultHic* >::iterator it=fresultVector.at(i+1)->GetHicResults().begin()
+    for(int i=0; i<fChips.size();i++){
+      //  ->GetConfig()->GetChipId();
+         std::cout<<"prepei na mou dswei enan integer gia t sigekrimeno chipid "<<fAnalysisVector.at(2)->GetVariable("maroudiw",fChips[i]->GetConfig()->GetChipId()&0xf,v.second)<<std::endl;
+    //std::cout<<"prepei na mou dswei enan integer gia t sigekrimeno chipid "<<fAnalysisVector.at(3)->GetVariable(v.second)<<std::endl;
+   }
+    // }
+
+    //
+
+    //std::map<int,TScanResultChip* >::iterator itchip;
+//  std::map<std::string,TScanResultHic* >::iterator it;
+    //TScanResultHic* myhic;
+  // it=fresultVector.at(3)->GetChipResult();
+  //  std::cout<<it->second<<std::endl;
+   // for  (itchip=fresultVector.begin();itchip!=fresultVector){
+
+
+    //   }
+   // for (it = fresultVector.at(3)->GetHicResults().begin(); it != fresultVector.at(3)->GetHicResults().end(); ++it) {
+     //  TFifoResultHic *result = (TFifoResultHic*) it->second;
+      //  std::cout<<"poio einai t apotelesma"<<result->GetVariable(16,v.second)<<std::endl;
+    //   for (itchip = result->DeleteThisToo().begin(); itchip != result->DeleteThisToo().end(); ++itchip) {
+     //  TFifoResultChip *resultChip = (TFifoResultChip*) itchip->second;
+     //   resultChip->GetVariable(v.second);
+      //   std::cout<<"the floats i want are "<<resultChip->GetVariable(v.second)<<std::endl;
+//}
+      //  }
+     // }
+}
+
+ //   dfor (unsigned int i=0; i<mapdetails.size();i++){
+   //  d   std::cout<<mapdetails[i]<<std::endl;
+     // d  ui->details->addItem(mapdetails[i].c_str());
+    //d}
 ui->details->show();
 qApp->processEvents();
 ui->displaydetails->show();
@@ -1417,6 +1485,7 @@ void MainWindow::noiselist(){
         std::cout<<mapdetails[i]<<std::endl;
         ui->details->addItem(mapdetails[i].c_str());
     }
+
 ui->details->show();
 qApp->processEvents();
 ui->displaydetails->show();
@@ -1510,7 +1579,7 @@ void MainWindow::setVI(float * vcasn, float * ithr) {
 
 void MainWindow::colorscans(){
    // std::vector<QPushButton*> scanbuttons;
-    for (unsigned int i=0;i<13;i++){
+    for (unsigned int i=0;i<11;i++){
 if (scanbuttons[i]!=0){
 if(fresultVector[i]==0){
     for  (std::map<std::string,TScanResultHic* >::iterator it=fresultVector.at(i+1)->GetHicResults().begin(); it!=fresultVector.at(i+1)->GetHicResults().end(); ++it){
@@ -1547,3 +1616,40 @@ else{
  }
     }
 }
+
+void MainWindow::detailscombo(int dnumber){
+
+    switch(dnumber){
+    case 0:
+         std::cout<<"to miden theopoula"<<std::endl;
+
+        break;
+    case 1:{
+    std::cout<<"to eject einai to 1 theopoula"<<std::endl;
+
+        break;}
+
+}
+}
+
+void MainWindow::poweroff(){
+
+for(unsigned int i; i<fHICs.size();i++){
+    fHICs.at(i)->PowerOff();
+}
+
+}
+
+
+
+void MainWindow::quitall(){
+    if (fHICs.size()>=1){
+        poweroff();
+        close();
+    }
+    else{
+        close();
+    }
+}
+
+

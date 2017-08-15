@@ -990,6 +990,32 @@
        <string/>
       </property>
      </widget>
+     <widget class="QLabel" name="ledtext">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>70</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Scan Quality:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="led">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>100</y>
+        <width>71</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -1221,6 +1247,32 @@ Digital scan                     Waiting . .
 </string>
       </property>
      </widget>
+     <widget class="QPushButton" name="abortall">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>460</y>
+        <width>95</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Abort All</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="abort">
+      <property name="geometry">
+       <rect>
+        <x>80</x>
+        <y>470</y>
+        <width>95</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Abort</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -1319,7 +1371,7 @@ Digital scan                     Waiting . .
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="fstatus">
+   <widget class="QLabel" name="powers">
     <property name="geometry">
      <rect>
       <x>120</x>
@@ -1332,7 +1384,7 @@ Digital scan                     Waiting . .
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="dstatus">
+   <widget class="QLabel" name="fifos">
     <property name="geometry">
      <rect>
       <x>120</x>
@@ -1345,7 +1397,7 @@ Digital scan                     Waiting . .
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="tstatus">
+   <widget class="QLabel" name="fifops">
     <property name="geometry">
      <rect>
       <x>130</x>
@@ -1358,7 +1410,7 @@ Digital scan                     Waiting . .
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="nstatus">
+   <widget class="QLabel" name="fifoms">
     <property name="geometry">
      <rect>
       <x>150</x>
@@ -1419,32 +1471,6 @@ Digital scan                     Waiting . .
     </property>
     <property name="text">
      <string>Start Test</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="abort">
-    <property name="geometry">
-     <rect>
-      <x>150</x>
-      <y>540</y>
-      <width>95</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Abort</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="abortall">
-    <property name="geometry">
-     <rect>
-      <x>260</x>
-      <y>540</y>
-      <width>95</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Abort All</string>
     </property>
    </widget>
    <widget class="QPushButton" name="quit">
@@ -1558,6 +1584,97 @@ Digital scan                     Waiting . .
       <y>470</y>
       <width>131</width>
       <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="poweroff">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>540</y>
+      <width>95</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Power Off</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="digitals">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>240</y>
+      <width>171</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="digitalps">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>270</y>
+      <width>121</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="digitalms">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>300</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="thresholds">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>330</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="noisebts">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>360</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="noiseats">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>390</y>
+      <width>141</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
