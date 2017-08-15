@@ -277,13 +277,9 @@ int initSetupHalfStaveRU(TConfig* config, std::vector <TReadoutBoard *> * boards
     //chipConfig->SetDisableManchester (true);
     }
 
-    <<<<<<< HEAD
-    CheckControlInterface(config, boards, boardType, chips);
-    =======
     dynamic_cast<TReadoutBoardRU*>(boards->at(0))-> InitReceivers();
 
     int nWorking = CheckControlInterface(config, boards, boardType, chips);
-    >>>>>>> Ycm: Implement setup for HS test
     sleep(5);
     MakeDaisyChain(config, boards, boardType, chips);*/
   return 0;
@@ -465,42 +461,37 @@ int initSetupIB(TConfig                        *config,
       hics->push_back(new THicIB("Dummy ID", 0, 0, 0));
     }
   }
-
-  <<<<<<< HEAD
-            for (unsigned int i = 0; i < config->GetNChips(); i++) {
-              =======
-
-              for (int i = 0; i < config->GetNChips(); i++) {
-                >>>>>>> Ycm: Implement setup for HS test
-                TChipConfig *chipConfig = config->GetChipConfig(i);
-                int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
-                int          receiver   = chipConfig->GetParamValue("RECEIVER");
-
-                TAlpide *chip = new TAlpide(chipConfig);
-                if (hics) {
-                  chip        ->SetHic   (hics->at(0));
-                  hics->at(0) ->AddChip  (chip);
-                }
-
-                chips->push_back(chip);
-                chips->at(i) -> SetReadoutBoard(boards->at(0));
-
-                if (control  < 0) {
-                  chipConfig->SetParamValue("CONTROLINTERFACE", "0");
-                  control = 0;
-                }
-                if (receiver < 0) {
-                  chipConfig->SetParamValue("RECEIVER", RCVMAP[i]);
-                  receiver = RCVMAP[i];
-                }
-
-                boards->at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver, chips->at(i));
-              }
-
-              CheckControlInterface(config, boards, boardType, chips);
-
-              return 0;
-            }
+  
+  for (unsigned int i = 0; i < config->GetNChips(); i++) {
+      TChipConfig *chipConfig = config->GetChipConfig(i);
+      int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
+      int          receiver   = chipConfig->GetParamValue("RECEIVER");
+      
+      TAlpide *chip = new TAlpide(chipConfig);
+      if (hics) {
+          chip        ->SetHic   (hics->at(0));
+          hics->at(0) ->AddChip  (chip);
+      }
+      
+      chips->push_back(chip);
+      chips->at(i) -> SetReadoutBoard(boards->at(0));
+      
+      if (control  < 0) {
+          chipConfig->SetParamValue("CONTROLINTERFACE", "0");
+          control = 0;
+      }
+      if (receiver < 0) {
+          chipConfig->SetParamValue("RECEIVER", RCVMAP[i]);
+          receiver = RCVMAP[i];
+      }
+      
+      boards->at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver, chips->at(i));
+  }
+  
+  CheckControlInterface(config, boards, boardType, chips);
+  
+  return 0;
+}
 
 
 // Setup definition for inner barrel stave with readout unit

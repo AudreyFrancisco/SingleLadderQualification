@@ -45,8 +45,7 @@ public:
   bool          GetUsePowerBoard   ()           {return fUsePowerBoard;};
   void          SetUsePowerBoard   (bool UsePB) {fUsePowerBoard = UsePB;};
   TChipConfig  *GetChipConfig      (unsigned int iChip);
-  TChipConfig  *GetChipConfigById  (int chipId);
-  TBoardConfig *GetBoardConfig     (unsigned int iBoard);
+  TChipConfig  *GetChipConfigById  (unsigned int chipId);
   TBoardConfig *GetBoardConfig     (unsigned int iBoard);
   THicConfig   *GetHicConfig       (unsigned int iHic);
   THicConfig   *GetHicConfigById   (unsigned int modId);
