@@ -9,7 +9,7 @@
 #include <QDialog>
 #include <QtGui>
 #include <QtCore>
-
+#include <QLabel>
 
 #include "dialog.h"
 #include "utilities.h"
@@ -48,7 +48,11 @@ public:
     std::vector <THic *> fHICs;
   //  void fillingvectors();
  std::vector <std::string> mapdetails;
+ std::vector<pair<std::string,const resultType>> mapd;
 std::vector<QPushButton*> scanbuttons;
+std::vector<QLabel*>scanstatuslabels;
+int numberofscan=0;
+
 
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
    // void explore_halfstave(uint8_t chipid);
@@ -76,6 +80,8 @@ public slots:
    void createbtn();
    void popup(QString message);
    void colorscans();
+   void poweroff();
+   void quitall();
       // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     /*
     void open();
@@ -140,7 +146,7 @@ private slots:
  void digital();
  void test();
  void fifotest();
-
+ void detailscombo(int dnumber);
  void start_test();
  void open();
 
