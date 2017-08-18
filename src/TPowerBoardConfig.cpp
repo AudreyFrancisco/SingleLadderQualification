@@ -108,35 +108,40 @@ void TPowerBoardConfig::readConfiguration()
 	int p;
 
 
-	fgets(buffer, 4095, fhConfigFile);
+	if (!fgets(buffer, 4095, fhConfigFile)) {
+		return;
+	}
 	while(!feof(fhConfigFile)){
 		if(strlen(buffer) > 0 && buffer[0] != '#') { //a good line
-			fscanf(fhConfigFile, "%s\t%s", sName, sParam);
-			if(strcasecmp(sName,"BIASVOLTAGE") == 0) {
-				fPBConfig.VBset = atof(sParam);
-			}
-			if(strcasecmp(sName,"ANALOGVOLTAGE") == 0) {
-				p =0; ptr = sParam; while ((tok = strsep(&ptr, " ,:;\t")) != NULL) fPBConfig.Modul[p++].AVset = atof(tok);
-				while(p<MAX_MOULESPERMOSAIC && p>0) {fPBConfig.Modul[p].AVset = fPBConfig.Modul[p-1].AVset; p++;}
-			}
-			if(strcasecmp(sName,"ANALOGCURRENT") == 0) {
-				p =0; ptr = sParam; while ((tok = strsep(&ptr, " ,:;\t")) != NULL) fPBConfig.Modul[p++].AIset = atof(tok);
-				while(p<MAX_MOULESPERMOSAIC && p>0) {fPBConfig.Modul[p].AIset = fPBConfig.Modul[p-1].AIset; p++;}
-			}
-			if(strcasecmp(sName,"DIGITALVOLTAGE") == 0) {
-				p =0; ptr = sParam; while ((tok = strsep(&ptr, " ,:;\t")) != NULL) fPBConfig.Modul[p++].DVset = atof(tok);
-				while(p<MAX_MOULESPERMOSAIC && p>0) {fPBConfig.Modul[p].DVset = fPBConfig.Modul[p-1].DVset; p++;}
-			}
-			if(strcasecmp(sName,"DIGITALCURRENT") == 0) {
-				p =0; ptr = sParam; while ((tok = strsep(&ptr, " ,:;\t")) != NULL) fPBConfig.Modul[p++].DIset = atof(tok);
-				while(p<MAX_MOULESPERMOSAIC && p>0) {fPBConfig.Modul[p].DIset = fPBConfig.Modul[p-1].DIset; p++;}
-			}
-			if(strcasecmp(sName,"BIASON") == 0) {
-				p =0; ptr = sParam; while ((tok = strsep(&ptr, " ,:;\t")) != NULL) fPBConfig.Modul[p++].BiasOn = (strcasecmp(tok,"TRUE") == 0 ? true: false);
-				while(p<MAX_MOULESPERMOSAIC && p>0) {fPBConfig.Modul[p].BiasOn = fPBConfig.Modul[p-1].BiasOn; p++;}
+			if (fscanf(fhConfigFile, "%s\t%s", sName, sParam) == 2) {
+				if(strcasecmp(sName,"BIASVOLTAGE") == 0) {
+					fPBConfig.VBset = atof(sParam);
+				}
+				if(strcasecmp(sName,"ANALOGVOLTAGE") == 0) {
+					p =0; ptr = sParam; while ((tok = strsep(&ptr, " ,:;\t")) != NULL) fPBConfig.Modul[p++].AVset = atof(tok);
+					while(p<MAX_MOULESPERMOSAIC && p>0) {fPBConfig.Modul[p].AVset = fPBConfig.Modul[p-1].AVset; p++;}
+				}
+				if(strcasecmp(sName,"ANALOGCURRENT") == 0) {
+					p =0; ptr = sParam; while ((tok = strsep(&ptr, " ,:;\t")) != NULL) fPBConfig.Modul[p++].AIset = atof(tok);
+					while(p<MAX_MOULESPERMOSAIC && p>0) {fPBConfig.Modul[p].AIset = fPBConfig.Modul[p-1].AIset; p++;}
+				}
+				if(strcasecmp(sName,"DIGITALVOLTAGE") == 0) {
+					p =0; ptr = sParam; while ((tok = strsep(&ptr, " ,:;\t")) != NULL) fPBConfig.Modul[p++].DVset = atof(tok);
+					while(p<MAX_MOULESPERMOSAIC && p>0) {fPBConfig.Modul[p].DVset = fPBConfig.Modul[p-1].DVset; p++;}
+				}
+				if(strcasecmp(sName,"DIGITALCURRENT") == 0) {
+					p =0; ptr = sParam; while ((tok = strsep(&ptr, " ,:;\t")) != NULL) fPBConfig.Modul[p++].DIset = atof(tok);
+					while(p<MAX_MOULESPERMOSAIC && p>0) {fPBConfig.Modul[p].DIset = fPBConfig.Modul[p-1].DIset; p++;}
+				}
+				if(strcasecmp(sName,"BIASON") == 0) {
+					p =0; ptr = sParam; while ((tok = strsep(&ptr, " ,:;\t")) != NULL) fPBConfig.Modul[p++].BiasOn = (strcasecmp(tok,"TRUE") == 0 ? true: false);
+					while(p<MAX_MOULESPERMOSAIC && p>0) {fPBConfig.Modul[p].BiasOn = fPBConfig.Modul[p-1].BiasOn; p++;}
+				}
 			}
 		}
-		fgets(buffer, 4095, fhConfigFile);
+		if (!fgets(buffer, 4095, fhConfigFile)) {
+			return;
+		}
 	}
 
 }
@@ -314,7 +319,7 @@ bool TPowerBoardConfig::WriteToFile(char *AFileName)
 }
 
 
-void TPowerBoardConfig::SetDefaultsOB(int mod) 
+void TPowerBoardConfig::SetDefaultsOB(int mod)
 {
   fPBConfig.Modul[mod].AVset  = DEF_ANALOGVOLTAGE_OB;
   fPBConfig.Modul[mod].AIset  = DEF_ANALOGMAXCURRENT_OB;
@@ -322,11 +327,11 @@ void TPowerBoardConfig::SetDefaultsOB(int mod)
   fPBConfig.Modul[mod].DIset  = DEF_DIGITALMAXCURRENT_OB;
   fPBConfig.Modul[mod].BiasOn = DEF_BIASCHANNELON_OB;
 
-  fPBConfig.VBset             = DEF_BIASVOLTAGE_OB;
+  fPBConfig.VBset			 = DEF_BIASVOLTAGE_OB;
 }
 
 
-void TPowerBoardConfig::SetDefaultsIB(int mod) 
+void TPowerBoardConfig::SetDefaultsIB(int mod)
 {
   fPBConfig.Modul[mod].AVset  = DEF_ANALOGVOLTAGE_IB;
   fPBConfig.Modul[mod].AIset  = DEF_ANALOGMAXCURRENT_IB;
@@ -334,7 +339,7 @@ void TPowerBoardConfig::SetDefaultsIB(int mod)
   fPBConfig.Modul[mod].DIset  = DEF_DIGITALMAXCURRENT_IB;
   fPBConfig.Modul[mod].BiasOn = DEF_BIASCHANNELON_IB;
 
-  fPBConfig.VBset             = DEF_BIASVOLTAGE_IB;
+  fPBConfig.VBset			 = DEF_BIASVOLTAGE_IB;
 }
 
 
