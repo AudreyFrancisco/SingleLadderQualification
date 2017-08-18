@@ -51,11 +51,11 @@ const unsigned int kNdcol  =  512;
 const unsigned int kNaddr  = 1024;
 
 
-template <class T> T Sum(std::vector<T> __v, int __len)
+template <class T> T Sum(std::vector<T> __v, size_t __len)
 {
   T ret = __v.at(0);
   __len = (__len > __v.size()) ? __v.size() : __len;
-  for (int i=1; i<__len; ++i)
+  for (size_t i=1; i<__len; ++i)
     ret += __v.at(i);
 
   return ret;
@@ -231,7 +231,7 @@ void scan() {
     		//fChips.at(0)->ReadRegister(Alpide::REG_CMUDMU_CONFIG, Value);
     		//std::cout << "CMU DMU Config: 0x" << std::hex << Value << std::dec << std::endl;
     		//fChips.at(0)->ReadRegister(Alpide::REG_FROMU_STATUS1, Value);
-    		//std::cout << "Trigger counter before: " << Value << std::endl;	
+    		//std::cout << "Trigger counter before: " << Value << std::endl;
         rBoard->Trigger(nTrigsPerTrain);
 				//fChips.at(0)->ReadRegister(Alpide::REG_FROMU_STATUS1, Value);
     		//std::cout << "Trigger counter after: " << Value << std::endl;
