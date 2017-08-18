@@ -5,11 +5,11 @@
 //   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
 //
-// In order to have a generic scan, which works for single chips as well as for staves and modules, 
-// all chip accesses should be done with a loop over all elements of the chip vector. 
+// In order to have a generic scan, which works for single chips as well as for staves and modules,
+// all chip accesses should be done with a loop over all elements of the chip vector.
 // (see e.g. the configureChip loop in main)
-// Board accesses are to be done via fBoards.at(0);  
-// For an example how to access board-specific functions see the power off at the end of main. 
+// Board accesses are to be done via fBoards.at(0);
+// For an example how to access board-specific functions see the power off at the end of main.
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
@@ -96,7 +96,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
   char fNameTemp[100];
   sprintf(fNameTemp,"%s", fName);
   std::cout << "WriteData:  fNameTemp = " << fNameTemp << std::endl;
-  strtok (fNameTemp, "."); 
+  strtok (fNameTemp, ".");
   bool  HasData;
 
   for (unsigned int ichip = 0; ichip < fChips.size(); ichip ++) {
@@ -118,7 +118,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
         for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
           if (HitData[chipId][icharge - myChargeStart][icol][iaddr] > 0) HasData = true;
         }
-      
+
         if (HasData) {
           for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
             fprintf(fp, "%d %d %d %d\n", icol, iaddr, icharge, HitData[chipId][icharge - myChargeStart][icol][iaddr]);
@@ -135,7 +135,7 @@ void configureFromu(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x20);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, chip->GetConfig()->GetParamValue("STROBEDELAYCHIP"));   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length 
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length
   //return 0;
 }
 
@@ -170,7 +170,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "CHARGESTART %i\n", myChargeStart);
   fprintf(fp, "CHARGESTOP %i\n", myChargeStop);
 
-    
+
   fclose(fp);
 }
 
@@ -184,7 +184,7 @@ void fillVcasn(float *vcasn) { //WIP
   float noise;
   float noiseRMS;
   char name[100];
-  
+
   std::cout << "Filling Vcasn" << std::endl;
   for(unsigned int i = 0; i < fChips.size(); i++) {
     //get file; name of one of them is in summaryName.
@@ -194,8 +194,11 @@ void fillVcasn(float *vcasn) { //WIP
     FILE *fp = fopen(name, "r");
     //load file into array
     if(fp) {
-      fscanf(fp, "%i %i %i %f %f %f %f", &old_vcas, &old_ith, &goodPixels, &voltage,
-          &voltageRMS, &noise, &noiseRMS);
+      int result = fscanf(fp, "%i %i %i %f %f %f %f", &old_vcas, &old_ith, &goodPixels, &voltage,
+                          &voltageRMS, &noise, &noiseRMS);
+      if (result!=7) {
+          std::cout << "Did not read all 7 values" << std::endl;
+      }
       vcasn[i]=voltage;
       fclose(fp);
     } else {
@@ -207,8 +210,8 @@ void fillVcasn(float *vcasn) { //WIP
 
 
 
-void scan() {   
-  unsigned char         buffer[1024*4000]; 
+void scan() {
+  unsigned char         buffer[1024*4000];
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0;
   float *vcasn = new float[14]; //shouldn't have >14 chips
@@ -237,7 +240,7 @@ void scan() {
     //casts to int, with rounding
     fChips.at(i)->WriteRegister(Alpide::REG_VCASN2, (int)(vcasn[i]+.5)+12); //added recently
   }
- 
+
   for (int istage = 0; istage < myMaskStages; istage ++) {
     std::cout << "Mask stage " << istage << std::endl;
     for (unsigned int i = 0; i < fChips.size(); i ++) {
@@ -255,7 +258,7 @@ void scan() {
       }
       fBoards.at(0)->Trigger(myNTriggers);
 
-//std::cout << " >>>>" << myMOSAIC->GetConfig()->GetPollingDataTimeout() << endl; 
+//std::cout << " >>>>" << myMOSAIC->GetConfig()->GetPollingDataTimeout() << endl;
 
       int itrg = 0;
       int trials = 0;
@@ -286,7 +289,7 @@ void scan() {
             for (int iByte=0; iByte<n_bytes_data + 1; ++iByte) {
               fprintf (fDebug, "%02x ", (int) buffer[iByte]);
             }
-            fprintf(fDebug, "\nFull Event:\n"); 
+            fprintf(fDebug, "\nFull Event:\n");
             for (unsigned int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
               fprintf (fDebug, "%02x ", (int) fDebugBuffer.at(ibyte));
             }
@@ -342,15 +345,15 @@ int main(int argc, char** argv) {
   sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
-  
+
   if (fBoards.size() == 1) {
-     
+
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
 
     for (unsigned int i = 0; i < fChips.size(); i ++) {
       if (fChips.at(i)->GetConfig()->IsEnabled()) {
-        fEnabled ++;        
+        fEnabled ++;
         configureChip (fChips.at(i));
       }
       else if (fChips.at(i)->GetConfig()->HasEnabledSlave()) {
@@ -359,19 +362,19 @@ int main(int argc, char** argv) {
     }
 
     std::cout << "Found " << fEnabled << " enabled chips." << std::endl;
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);     
+    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
 
-    // put your test here... 
+    // put your test here...
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
       // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns * strobe delay
       // pulse delay cannot be 0, therefore set strobe delay to 0 and use only pulse delay
-      fBoards.at(0)->SetTriggerConfig (true, false, 
+      fBoards.at(0)->SetTriggerConfig (true, false,
                                        0,
                                        2 * fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
       fBoards.at(0)->SetTriggerSource (trigExt);
     }
     else {
-      fBoards.at(0)->SetTriggerConfig (true, true, 
+      fBoards.at(0)->SetTriggerConfig (true, true,
                                        fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
                                        fBoards.at(0)->GetConfig()->GetParamValue("PULSEDELAY"));
       fBoards.at(0)->SetTriggerSource (trigInt);

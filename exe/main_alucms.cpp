@@ -55,7 +55,11 @@ int main()
 	cout << endl << "------  MEMBERS DATABASE -----------" << endl;
 	int ProjectID = 0;
 	printf(" Input the Project id :");
-	scanf("%d",&ProjectID);
+	int err = scanf("%d",&ProjectID);
+	if (err!=1) {
+		printf(" Failed to read the project id ");
+		return -1;
+	}
 
 	theMembTable->GetList(ProjectID, &MemberList);
 	cout << theMembTable->DumpResponse() << endl;
@@ -73,7 +77,11 @@ int main()
 	cout << endl << "------  COMPONENT DATABASE -----------" <<endl;
 	ProjectID = 0;
 	printf(" Input the Project id :");
-	scanf("%d",&ProjectID);
+	err = scanf("%d",&ProjectID);
+	if (err!=1) {
+		printf(" Failed to read the project id ");
+		return -1;
+	}
 
 	theCompTable->GetTypeList(ProjectID,&ComponentList);
 	cout << theCompTable->DumpResponse() << endl;
@@ -86,7 +94,11 @@ int main()
 	cout << endl << "------  COMPONENT Type SPEC -----------" << endl;
 	int ComponentID = 0;
 	printf(" Input the Component id : ");
-	scanf("%d",&ComponentID);
+	err = scanf("%d",&ComponentID);
+	if (err!=1) {
+		printf(" Failed to read the  component id ");
+		return -1;
+	}
 
 	theCompTable->GetType(ComponentID,&oneComponent);
 	cout << theCompTable->DumpResponse() << endl;

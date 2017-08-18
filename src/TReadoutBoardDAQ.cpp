@@ -903,7 +903,8 @@ void TReadoutBoardDAQ::WriteCurrentLimits (bool ALDOEnable, bool AAutoshutdown)
 bool TReadoutBoardDAQ::ReadLDOStatus(int &AOverflow)
 {
   uint32_t ReadValue;
-  bool     err, reg0, reg1, reg2;
+  bool reg0, reg1, reg2;
+  int err;
 
   err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA0, ReadValue);
   if (err==-1) std::cout << "Failed reading from DAQ board" << std::endl;
