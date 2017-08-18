@@ -134,7 +134,7 @@ bool CernSsoCookieJar::fillTheJar()
     Command += " -o ";
     Command += theCookiePackFile;
 
-    system(Command.c_str());
+    if (system(Command.c_str()) != 0) {cout << "Failed to execute the command: " << Command << endl;}
     if(VERBOSITYLEVEL == 1) {cout << "Execute the bash :" << Command << endl;}
     if(!fileExists(theCookiePackFile)) { //the file doesn't exists. ACH !
         cerr << "Error to obtain the CERN SSO Cookies pack file. Abort !" << endl;
@@ -160,7 +160,7 @@ int CernSsoCookieJar::parseTheJar(string aCookieJarFile)
 	Cookie rigolo;
 	char Buffer[THECOOKIELENGTH];
 
-	fgets(Buffer, THECOOKIELENGTH, fh);
+	if (!fgets(Buffer, THECOOKIELENGTH, fh)) return 0;
 	while(!feof(fh)) {
 		if(Buffer[0] != '#' && Buffer[0] != 0 && Buffer[0] != '\n' && Buffer[0] != '\r'){
 
@@ -189,7 +189,7 @@ int CernSsoCookieJar::parseTheJar(string aCookieJarFile)
 				}
 			}
 		}
-		fgets(Buffer, THECOOKIELENGTH, fh);
+		if (!fgets(Buffer, THECOOKIELENGTH, fh)) return 0;
 	}
 	fclose(fh);
 	return(NumberOfCookies);
@@ -204,7 +204,7 @@ bool CernSsoCookieJar::testTheCERNSSO()
     remove("/tmp/exitus.txt");
 
     string Command = "type cern-get-sso-cookie > /tmp/exitus.txt";
-    system(Command.c_str());
+    if (system(Command.c_str()) != 0) {cout << "Failed to execute the command: " << Command << endl;}
     if(VERBOSITYLEVEL == 1) {cout << "Execute : " << Command << endl;}
 
     FILE *result;
@@ -229,7 +229,3 @@ bool CernSsoCookieJar::testTheCERNSSO()
 
 
 // ---------------- eof ------------------------
-
-
-
-
