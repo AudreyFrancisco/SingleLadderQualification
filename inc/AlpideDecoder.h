@@ -21,7 +21,7 @@ class AlpideDecoder {
    static void      DecodeChipTrailer  (unsigned char *data, int &flags);
    static void      DecodeRegionHeader (unsigned char *data, int &region);
    static void      DecodeEmptyFrame   (unsigned char *data, int &chipId, unsigned int &bunchCounter);
-   static void      DecodeDataWord     (unsigned char         *data,
+   static bool      DecodeDataWord     (unsigned char         *data,
                                         int                    chip,
                                         int                    region,
                                         std::vector <TPixHit> *hits,

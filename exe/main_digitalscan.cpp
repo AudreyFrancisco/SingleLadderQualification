@@ -103,7 +103,8 @@ void FillHisto(int board, std::vector <TPixHit> *Hits)
     idx.chipId       = hit.chipId;
     int dcol         = hit.dcol + 16 * hit.region;
     int addr         = hit.address;
-    if ((hit.channel < 0) || (hit.chipId < 0) || (dcol < 0) || (hit.region < 0) || (addr < 0)) {
+
+    if ((hit.channel < 0) || (hit.chipId < 0) || (dcol < 0) || (dcol > 511) || (hit.region < 0) || (addr < 0) || (addr > 1023)) {
       printf("%d %d %d %d %d \n", idx.dataReceiver, idx.chipId, dcol, hit.region, addr);
       std::cout <<"Bad pixel coordinates ( <0), skipping hit" << std::endl;
       abort();
