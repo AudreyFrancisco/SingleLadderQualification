@@ -52,6 +52,7 @@ public:
 std::vector<QPushButton*> scanbuttons;
 std::vector<QLabel*>scanstatuslabels;
 int numberofscan=0;
+int scanposition;
 
 
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
@@ -82,6 +83,19 @@ public slots:
    void colorscans();
    void poweroff();
    void quitall();
+   void connectscandetails();
+   void getresultdetails(int i);
+   void powerd();
+   void fifod();
+   void fifopd();
+   void fifomd();
+   void digitald();
+   void digitalpd();
+   void digitalmd();
+   void thresholdd();
+   void noisebd();
+   void noisead();
+
       // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     /*
     void open();
@@ -157,9 +171,9 @@ private slots:
  void StopScan();
  void fifolist();
  void digitallist();
- void thresholdlist();
+
  void noiselist();
- void openib();
+
 
  void setVI(float * vcasn, float * ithr);
 

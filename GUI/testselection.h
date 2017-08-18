@@ -17,7 +17,7 @@ public:
 
     explicit TestSelection(QWidget *parent = 0);
     ~TestSelection();
-    virtual void SaveSettings(QString &opname, int &hicid, int &counter);
+    virtual void SaveSettings(QString &opname, QString &hicid, int &counter);
 
 
 private:
