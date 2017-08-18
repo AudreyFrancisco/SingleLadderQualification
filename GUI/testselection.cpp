@@ -26,7 +26,7 @@ TestSelection::~TestSelection()
 }
 
 
-void TestSelection::SaveSettings(QString &opname, int &hicid, int &counter){
+void TestSelection::SaveSettings(QString &opname, QString &hicid, int &counter){
     if (ui->operatorstring->toPlainText().isEmpty() || ui->id->toPlainText().isEmpty())
     {
         qDebug()<<"Put your details little shit"<<endl;
@@ -35,7 +35,8 @@ void TestSelection::SaveSettings(QString &opname, int &hicid, int &counter){
     }
     else{
         opname = ui->operatorstring->toPlainText();
-        hicid=ui->id->toPlainText().toInt();
+        //hicid=ui->id->toPlainText().toInt();
+        hicid=ui->id->toPlainText();
         counter=1;
         qDebug()<<"The operator name is:"<<opname<<"and the id is: "<<hicid<<endl;
     }

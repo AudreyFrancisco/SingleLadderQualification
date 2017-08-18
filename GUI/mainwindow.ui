@@ -1296,8 +1296,8 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="tob">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>55</y>
+      <x>130</x>
+      <y>65</y>
       <width>201</width>
       <height>20</height>
      </rect>
@@ -1309,7 +1309,7 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test1">
     <property name="geometry">
      <rect>
-      <x>-40</x>
+      <x>0</x>
       <y>110</y>
       <width>151</width>
       <height>31</height>
@@ -1322,7 +1322,7 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test2">
     <property name="geometry">
      <rect>
-      <x>-10</x>
+      <x>0</x>
       <y>140</y>
       <width>161</width>
       <height>31</height>
@@ -1335,7 +1335,7 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test3">
     <property name="geometry">
      <rect>
-      <x>-20</x>
+      <x>0</x>
       <y>170</y>
       <width>161</width>
       <height>31</height>
@@ -1361,7 +1361,7 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test5">
     <property name="geometry">
      <rect>
-      <x>-20</x>
+      <x>0</x>
       <y>230</y>
       <width>161</width>
       <height>31</height>
@@ -1374,7 +1374,7 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="powers">
     <property name="geometry">
      <rect>
-      <x>120</x>
+      <x>160</x>
       <y>110</y>
       <width>181</width>
       <height>31</height>
@@ -1387,7 +1387,7 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="fifos">
     <property name="geometry">
      <rect>
-      <x>120</x>
+      <x>160</x>
       <y>140</y>
       <width>171</width>
       <height>21</height>
@@ -1400,7 +1400,7 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="fifops">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>160</x>
       <y>170</y>
       <width>191</width>
       <height>31</height>
@@ -1413,8 +1413,8 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="fifoms">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>205</y>
+      <x>160</x>
+      <y>200</y>
       <width>181</width>
       <height>21</height>
      </rect>
@@ -1427,7 +1427,7 @@ Digital scan                     Waiting . .
     <property name="geometry">
      <rect>
       <x>140</x>
-      <y>270</y>
+      <y>290</y>
       <width>181</width>
       <height>31</height>
      </rect>
@@ -1502,7 +1502,7 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test7">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>0</x>
       <y>290</y>
       <width>151</width>
       <height>31</height>
@@ -1515,7 +1515,7 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test8">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>0</x>
       <y>320</y>
       <width>131</width>
       <height>31</height>
@@ -1528,7 +1528,7 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test9">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>0</x>
       <y>350</y>
       <width>131</width>
       <height>31</height>
@@ -1567,7 +1567,7 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test12">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>0</x>
       <y>440</y>
       <width>131</width>
       <height>31</height>
@@ -1580,7 +1580,7 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="test13">
     <property name="geometry">
      <rect>
-      <x>-30</x>
+      <x>0</x>
       <y>470</y>
       <width>131</width>
       <height>31</height>
@@ -1607,7 +1607,7 @@ Digital scan                     Waiting . .
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>240</y>
+      <y>230</y>
       <width>171</width>
       <height>21</height>
      </rect>
@@ -1619,8 +1619,8 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="digitalps">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>270</y>
+      <x>160</x>
+      <y>260</y>
       <width>121</width>
       <height>21</height>
      </rect>
@@ -1632,7 +1632,7 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="digitalms">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>160</x>
       <y>300</y>
       <width>131</width>
       <height>21</height>
@@ -1645,8 +1645,8 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="thresholds">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>330</y>
+      <x>160</x>
+      <y>320</y>
       <width>131</width>
       <height>21</height>
      </rect>
@@ -1659,7 +1659,7 @@ Digital scan                     Waiting . .
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>360</y>
+      <y>350</y>
       <width>131</width>
       <height>21</height>
      </rect>
@@ -1671,8 +1671,8 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="noiseats">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>390</y>
+      <x>160</x>
+      <y>380</y>
       <width>141</width>
       <height>21</height>
      </rect>
