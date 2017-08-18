@@ -57,6 +57,7 @@ class TScanResult {
   std::map <std::string, TScanResultHic*> m_hicResults;
  public: 
   TScanResult   () {};
+  virtual ~TScanResult() {};
   //virtual TScanResult *clone() const=0;
  //TScanResult(const TScanResult &other){m_chipResults=other.m_chipResults;}
  //assignment operation from my base class 
@@ -103,6 +104,7 @@ class TScanAnalysis {
                  TScanConfig            *aScanConfig, 
                  std::vector <THic*>     hics,
                  std::mutex             *aMutex);
+  virtual ~TScanAnalysis() {};
   virtual void Initialize      () = 0;
   virtual void Run             ();
   virtual void Finalize        () = 0;

@@ -70,7 +70,7 @@ void TConfig::Init (int chipId, TBoardType boardType) {
 
 
 // getter functions for chip, board and hic config
-TChipConfig *TConfig::GetChipConfigById  (unsigned int chipId) {
+TChipConfig *TConfig::GetChipConfigById  (int chipId) {
   for (unsigned int i = 0; i < fChipConfigs.size(); i++) {
     if (fChipConfigs.at(i)->GetChipId() == chipId)
       return fChipConfigs.at(i);
@@ -100,8 +100,8 @@ TBoardConfig *TConfig::GetBoardConfig (unsigned int iBoard){
   }
 }
 
-THicConfig *TConfig::GetHicConfigById  (unsigned int modId) {
-  for (int i = 0; i < fHicConfigs.size(); i++) {
+THicConfig *TConfig::GetHicConfigById  (int modId) {
+  for (unsigned int i = 0; i < fHicConfigs.size(); i++) {
     if (fHicConfigs.at(i)->GetModId() == modId) 
       return fHicConfigs.at(i);
   }

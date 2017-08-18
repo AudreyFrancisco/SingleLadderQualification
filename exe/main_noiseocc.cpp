@@ -235,13 +235,14 @@ void scan() {
           // decode Chip event
           int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
           bool Decode = AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0, boardInfo.channel, prioErrors);
-          //if (!Decode) {
+          if (!Decode) {
+	    std::cout << "Failed to decode event" << std::endl;
           //  printf("Bad Event: ");
           //  for (int i = 0; i < n_bytes_chipevent; i++) {
           //    printf ("%02x ", buffer[n_bytes_header + i]);
 	  //  }
           //  printf ("\n");
-	  //}
+	  }
           itrg+=nClosedEvents;
         }
       }

@@ -130,16 +130,16 @@ int main(int argc, char** argv) {
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
-  if (fBoards.size()) { //Yasser (change to use more than one board)
+  if (fBoards.size()) {
 
     for (const auto& rBoard : fBoards) {
       rBoard->SendOpCode (Alpide::OPCODE_GRST);
       rBoard->SendOpCode (Alpide::OPCODE_PRST);
     }
 
-    for (int i = 0; i < fChips.size(); i ++) {
-      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-      configureChip (fChips.at(i));
+    for (const auto& rChip : fChips) {
+      if (! rChip->GetConfig()->IsEnabled()) continue;
+      configureChip(rChip);
     }
 
     for (const auto& rBoard : fBoards) {
@@ -148,12 +148,12 @@ int main(int argc, char** argv) {
 
     fTotalErr  = 0;
 
-    for (unsigned int ichip = 0; ichip < fChips.size(); ichip++) {
-      if (! fChips.at(ichip)->GetConfig()->IsEnabled()) continue;
+    for (const auto& rChip : fChips) {
+      if (! rChip->GetConfig()->IsEnabled()) continue;
 
-      fEnabled ++;
+      fEnabled++;
 
-      std::cout << std::endl << "Doing FIFO test on ControlInterface " << fChips.at(ichip)->GetConfig()->GetCtrInt( )<< "  chip ID " << fChips.at(ichip)->GetConfig()->GetChipId() << std::endl;
+      std::cout << std::endl << "Doing FIFO test on ControlInterface " << rChip->GetConfig()->GetCtrInt( )<< "  chip ID " << rChip->GetConfig()->GetChipId() << std::endl;
       // Reset error counters
       fErrCount0 = 0;
       fErrCount5 = 0;
@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
       for (int ireg = 0; ireg < 32; ireg++) {
         std::cout << "FIFO scan: region " << ireg << std::endl;
         for (int iadd = 0; iadd < 128; iadd ++) {
-          MemTest (fChips.at(ichip), ireg, iadd);
+          MemTest (rChip, ireg, iadd);
         }
       }
 

@@ -749,9 +749,9 @@ void TThresholdAnalysis::Finalize()
   for(itChip = m_resultChip.begin(); itChip != m_resultChip.end(); itChip++) {
     for(unsigned int i=0; i<m_chipList.size(); i++) {
       TThresholdResultChip trc = itChip->second;
-      if(! (trc.GetBoardIndex()   == m_chipList.at(i).boardIndex   //if chips are the same
-         && trc.GetDataReceiver() == m_chipList.at(i).dataReceiver
-         && trc.GetChipId()       == m_chipList.at(i).chipId)  ) continue;
+      if(! (trc.GetBoardIndex()   == (unsigned int)m_chipList.at(i).boardIndex   //if chips are the same
+         && trc.GetDataReceiver() == (unsigned int)m_chipList.at(i).dataReceiver
+         && trc.GetChipId()       == (unsigned int)m_chipList.at(i).chipId)  ) continue;
       //set m_chipList's chip.threshold/etc equal to the one found in trc
       TThresholdResultChip *chipResult = (TThresholdResultChip*) m_result->GetChipResult(m_chipList.at(i));
       chipResult->SetThresholdMean  (trc.GetThresholdMean());

@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
   TReadoutBoardMOSAIC *theBoard;
   TBoardConfigMOSAIC  *theBoardConfig;
-  for(int i=0; i < fConfig->GetNBoards(); i++){
+  for(unsigned int i=0; i < fConfig->GetNBoards(); i++){
     theBoardConfig = (TBoardConfigMOSAIC*)fConfig->GetBoardConfig(i);
     theBoard       =  new TReadoutBoardMOSAIC(fConfig, theBoardConfig);
     theBoard->enableControlInterfaces(true);

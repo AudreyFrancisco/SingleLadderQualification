@@ -144,12 +144,12 @@ int initSetupHalfStave(TConfig                        *config,
     pb = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0));
   }
 
-	std::vector <THic *>  m_Hics;
-	std::vector <THic *>* pHics = (hics) ? hics : &m_Hics;
+  std::vector <THic *>  m_Hics;
+  std::vector <THic *>* pHics = (hics) ? hics : &m_Hics;
 
-	for (int ihic = 0; ihic < config->GetNHics(); ihic++) {
-		pHics->push_back(new THicOB("Dummy ID", config->GetHicConfig(ihic)->GetModId(), pb, 0));
-	}
+  for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
+    pHics->push_back(new THicOB("Dummy ID", config->GetHicConfig(ihic)->GetModId(), pb, 0));
+  }
 
   for (unsigned int i = 0; i < config->GetNChips(); i++) {
     TChipConfig* chipConfig = config   ->GetChipConfig(i);
@@ -157,36 +157,36 @@ int initSetupHalfStave(TConfig                        *config,
     int          mosaic     = (chipId & 0x8) ? 1:0;  //Yasser (Fix master0/8 pattern)
     int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
     int          receiver   = chipConfig->GetParamValue("RECEIVER");
-    int          modId      = chipConfig->GetModuleId();
+    //int          modId      = chipConfig->GetModuleId();
 
-		BaseConfigOBchip(chipConfig);
+    BaseConfigOBchip(chipConfig);
 		
-		TAlpide* chip = new TAlpide(chipConfig);
-		int iHic = -1;
-		for(int ihic = 0; ihic < pHics->size(); ihic++) {
-			if (pHics->at(ihic)->GetModId() == chip->GetConfig()->GetModuleId()) {
-				iHic = ihic;
-				break;
-			}
-		}
-		if (iHic<0) {
-			std::cout << "Module Id from chip " << chip->GetConfig()->GetModuleId() << " no match any HIC" << std::endl;
-			abort();
-		}
-		pHics->at(iHic)->AddChip(chip);
-		chip->SetHic(pHics->at(iHic));
+    TAlpide* chip = new TAlpide(chipConfig);
+    int iHic = -1;
+    for(unsigned int ihic = 0; ihic < pHics->size(); ihic++) {
+      if (pHics->at(ihic)->GetModId() == chip->GetConfig()->GetModuleId()) {
+	iHic = ihic;
+	break;
+      }
+    }
+    if (iHic<0) {
+      std::cout << "Module Id from chip " << chip->GetConfig()->GetModuleId() << " no match any HIC" << std::endl;
+      abort();
+    }
+    pHics->at(iHic)->AddChip(chip);
+    chip->SetHic(pHics->at(iHic));
 		
-		chips->push_back(chip);
+    chips->push_back(chip);
     chips->at(i) -> SetReadoutBoard(boards->at(mosaic));
 		
-		THicConfigOB* hicOBconfig = (THicConfigOB*)config->GetHicConfig(iHic);
+    THicConfigOB* hicOBconfig = (THicConfigOB*)config->GetHicConfig(iHic);
     
-		// to be checked when final layout of adapter fixed
+    // to be checked when final layout of adapter fixed
     // recivers linked to module position
     // vector to define how modules were placed in HS
     bool LowHigh = (chipId & 0x8); //side A8 LowHigh = 1, side B0 LowHigh 0
     bool isSideEnable = (LowHigh && hicOBconfig->IsEnabledA8()) || (!LowHigh && hicOBconfig->IsEnabledB0());
-		int modPos = hicOBconfig->GetParamValue("HSPOSBYID");
+    int modPos = hicOBconfig->GetParamValue("HSPOSBYID");
     if ((modPos<=0) || !isSideEnable) { //Position for modId not found, disabling all chips for modId
       chipConfig->SetParamValue("RECEIVER", -1);
       boards->at(mosaic)->AddChip(chipId, 0, -1, chips->at(i));
@@ -209,14 +209,14 @@ int initSetupHalfStave(TConfig                        *config,
       boards->at(mosaic)-> AddChip(chipId, control, receiver, chips->at(i));
     }
   }
-	if (!hics) {
-		for (std::vector<THic*>::iterator it = pHics->begin(); it != pHics->end(); ++it)
-   	{
+  if (!hics) {
+    for (std::vector<THic*>::iterator it = pHics->begin(); it != pHics->end(); ++it)
+      {
      	delete (*it);
-   	}
-	}
+      }
+  }
   
-	int nWorking = CheckControlInterface(config, boards, boardType, chips);
+  CheckControlInterface(config, boards, boardType, chips); // returns nWorking : int
   sleep(5);
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
@@ -227,7 +227,7 @@ int initSetupHalfStave(TConfig                        *config,
 // - chips of master 0 of all modules are connected to 1st mosaic, chips of master 8 to 2nd MOSAIC
 int initSetupHalfStaveRU(TConfig* config, std::vector <TReadoutBoard *> * boards, TBoardType* boardType, std::vector <TAlpide *> * chips) {
   (*boardType) = boardRU;
-  for (int i = 0; i < config->GetNBoards(); i++) {
+  for (unsigned int i = 0; i < config->GetNBoards(); i++) {
     TBoardConfigRU* boardConfig = (TBoardConfigRU*) config->GetBoardConfig(i);
     boards->push_back (new TReadoutBoardRU(boardConfig));
   }

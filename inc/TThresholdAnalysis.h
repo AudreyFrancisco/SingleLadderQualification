@@ -133,7 +133,7 @@ class TThresholdResult : public TScanResult {
  // std::map <int, TScanResultChip*> abs_chipResults;
  public:
   TThresholdResult  ();
-  ~TThresholdResult ();
+  virtual ~TThresholdResult ();
  // virtual TThresholdResult *clone() const;
   //TThresholdResult (const TThresholdResult &_tresult):TScanResult(_tresult){};
 //  TThresholdResult  &operator=(const TThresholdResult &_tresult){m_chipResults=_tresult.m_chipResults; return *this;}

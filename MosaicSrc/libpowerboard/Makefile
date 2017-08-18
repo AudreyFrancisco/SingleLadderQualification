@@ -2,7 +2,7 @@ CC = gcc
 CXX = g++
 AR = ar rcs
 RM = rm -f
-CPPFLAGS = -O2 -g -Wall -std=gnu++11 -pedantic -fPIC -I../libmosaic/include -I./include
+CPPFLAGS = -O2 -g -Wall -Werror -std=gnu++11 -pedantic -fPIC -I../libmosaic/include -I./include
 LDFLAGS = ""
 LDLIBS = ""
 
