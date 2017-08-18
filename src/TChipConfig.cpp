@@ -125,7 +125,7 @@ int TChipConfig::GetParamValue (const char *Name)
 
 bool TChipConfig::HasEnabledSlave() {
   if (!IsOBMaster()) return false;
-  for (int i = fChipId + 1; i <= fChipId + 6; i++) {
+  for (unsigned int i = (unsigned int)fChipId + 1; i <= (unsigned int)fChipId + 6; i++) {
     if (fConfig->GetChipConfigById(i)->IsEnabled()) return true;
   }
   return false;
