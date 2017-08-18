@@ -321,7 +321,7 @@ void AlpideConfig::BaseConfig (TAlpide *chip)
 
 
   // CMU/DMU config: turn manchester encoding off or on etc, initial token=1, disable DDR
-  int cmudmu_config = 0x10 | ((chip->GetConfig()->GetDisableManchester()) ? 0x20 : 0x00);
+  //int cmudmu_config = 0x10 | ((chip->GetConfig()->GetDisableManchester()) ? 0x20 : 0x00);
 
   BaseConfigFromu(chip);
   BaseConfigDACs (chip);

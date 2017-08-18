@@ -34,7 +34,7 @@ int main()
 						"/etc/ssl/certs");  // the path of the CA certificates database
 	*/
 
-	AlpideTable::response *theResult;
+	//AlpideTable::response *theResult; // caused warning
 
 	// Access the projects Data Base
 	ProjectDB *theProjTable = new ProjectDB(theDB);
@@ -102,7 +102,7 @@ int main()
 	ActivityDB::parameter Par;
 	ActivityDB::attach Att;
 
-	tm ts; ts.tm_year = 2017 - 1900; ts.tm_mon = 6; ts.tm_mday = 13;
+	//tm ts; ts.tm_year = 2017 - 1900; ts.tm_mon = 6; ts.tm_mday = 13; // caused warning
 
 	Attiv.Location = 161;
 	Attiv.EndDate = time(NULL);

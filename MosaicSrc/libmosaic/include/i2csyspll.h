@@ -32,14 +32,19 @@
 #define I2CSYSPLL_H
 
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #include "i2cbus.h"
 
 class I2CSysPll: public I2Cbus
 {
 public:
 	typedef struct pllRegisters_s {
-			uint16_t reg[22];
-		} pllRegisters_t;
+		uint16_t reg[22];
+		pllRegisters_s(uint16_t* r) {
+			memcpy(reg, r, sizeof(uint16_t)*22);
+		}
+	} pllRegisters_t;
 
     I2CSysPll(WishboneBus *wbbPtr, uint32_t baseAddress);
 	void writeReg(uint8_t add, uint16_t d);

@@ -69,8 +69,8 @@ void CreateScanHisto()
 
   THisto histo ("DigScanHisto", "DigScanHisto", kNdcol, 0, kNdcol-1, kNaddr, 0, kNaddr); // dcol, address;
 
-  for (int iboard = 0; iboard < fBoards.size(); iboard ++) {
-    for (int ichip = 0; ichip < fChips.size(); ichip ++) {
+  for (unsigned int iboard = 0; iboard < fBoards.size(); iboard ++) {
+    for (unsigned int ichip = 0; ichip < fChips.size(); ichip ++) {
       if ((fChips.at(ichip)->GetConfig()->IsEnabled()) && (fChips.at(ichip)->GetReadoutBoard() == fBoards.at(iboard))) {
         id.boardIndex       = iboard;
         id.dataReceiver     = fChips.at(ichip)->GetConfig()->GetParamValue("RECEIVER");
@@ -95,21 +95,16 @@ void InitScanParameters()
 
 void FillHisto(int board, std::vector <TPixHit> *Hits)
 {
-	common::TChipIndex idx;
+  common::TChipIndex idx;
   idx.boardIndex = board;
 
-  int chipId;
-  int region;
-  int dcol;
-  int address;
-
-  for (int ihit = 0; ihit < Hits->size(); ihit ++) {
-    idx.dataReceiver = Hits->at(ihit).channel;
-    idx.chipId       = Hits->at(ihit).chipId;
-    int dcol         = Hits->at(ihit).dcol + 16 * Hits->at(ihit).region;
-    int addr         = Hits->at(ihit).address;
-    if ((Hits->at(ihit).channel < 0) || (Hits->at(ihit).chipId < 0) || (dcol < 0) || (region < 0) || (addr < 0)) {
-      printf("%d %d %d %d %d \n", idx.dataReceiver, idx.chipId, dcol, region, addr);
+  for (const auto& hit: *Hits) {
+    idx.dataReceiver = hit.channel;
+    idx.chipId       = hit.chipId;
+    int dcol         = hit.dcol + 16 * hit.region;
+    int addr         = hit.address;
+    if ((hit.channel < 0) || (hit.chipId < 0) || (dcol < 0) || (hit.region < 0) || (addr < 0)) {
+      printf("%d %d %d %d %d \n", idx.dataReceiver, idx.chipId, dcol, hit.region, addr);
       std::cout <<"Bad pixel coordinates ( <0), skipping hit" << std::endl;
       abort();
     }
@@ -124,8 +119,8 @@ void FillHisto(int board, std::vector <TPixHit> *Hits)
 
 bool HasData(const common::TChipIndex& idx)
 {
-  for (int icol = 0; icol < kNdcol; icol ++) {
-    for (int iaddr = 0; iaddr < kNaddr; iaddr ++) {
+  for (unsigned int icol = 0; icol < kNdcol; icol ++) {
+    for (unsigned int iaddr = 0; iaddr < kNaddr; iaddr ++) {
       if ((*fScanHisto)(idx,icol,iaddr) > 0) return true;
     }
   }
@@ -141,8 +136,8 @@ void WriteDataToFile (const char *fName, bool Recreate) {
   char fNameTemp[100];
   sprintf(fNameTemp,"%s", fName);
   strtok (fNameTemp, ".");
-  for (int ib = 0; ib < fBoards.size(); ++ib) {
-    for (int ichip = 0; ichip < fChips.size(); ichip ++) {
+  for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
+    for (unsigned int ichip = 0; ichip < fChips.size(); ichip ++) {
       if (!fChips.at(ichip)->GetConfig()->IsEnabled() || fChips.at(ichip)->GetReadoutBoard() != fBoards.at(ib)) continue;
 
       int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0x7F;
@@ -166,8 +161,8 @@ void WriteDataToFile (const char *fName, bool Recreate) {
 
       if (Recreate) fp = fopen(fNameChip, "w");
       else          fp = fopen(fNameChip, "a");
-      for (int icol = 0; icol < kNdcol; icol ++) {
-        for (int iaddr = 0; iaddr < kNaddr; iaddr ++) {
+      for (unsigned int icol = 0; icol < kNdcol; icol ++) {
+        for (unsigned int iaddr = 0; iaddr < kNaddr; iaddr ++) {
           double hits = (*fScanHisto)(idx,icol,iaddr);
           if (hits > 0) {
             fprintf(fp, "%d %d %d\n", icol, iaddr, (int)hits);
@@ -222,7 +217,7 @@ void scan() {
 
   for (int istage = 0; istage < myMaskStages; istage ++) {
     std::cout << std::endl << "Mask stage " << istage << std::endl;
-    for (int i = 0; i < fChips.size(); i ++) {
+    for (unsigned int i = 0; i < fChips.size(); i ++) {
       if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
       AlpideConfig::ConfigureMaskStage (fChips.at(i), myPixPerRegion, istage);
     }
@@ -246,7 +241,7 @@ void scan() {
 			}
 
 			//Read data for all boards
-      for (int ib = 0; ib < fBoards.size(); ++ib) {
+      for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
         int itrg = 0;
         int nTrials = 0;
         int MAXTRIALS = 3;
@@ -343,17 +338,17 @@ int main(int argc, char** argv) {
   if (fBoards.size()) {
 
     fEnPerBoard.resize(fBoards.size());
-    for (int ib = 0; ib < fBoards.size(); ++ib) {
+    for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
 
       fBoards.at(ib)->SendOpCode (Alpide::OPCODE_GRST);
       fBoards.at(ib)->SendOpCode (Alpide::OPCODE_PRST);
 
-      for (int i = 0; i < fChips.size(); i ++) {
+      for (unsigned int i = 0; i < fChips.size(); i ++) {
         if (fChips.at(i)->GetConfig()->IsEnabled() && fChips.at(i)->GetReadoutBoard() == fBoards.at(ib))
           fEnPerBoard.at(ib) ++;
       }
     }
-    for (int i = 0; i < fChips.size(); i ++) {
+    for (unsigned int i = 0; i < fChips.size(); i ++) {
       if (fChips.at(i)->GetConfig()->IsEnabled()) {
         std::cout << "Configuring chip " << i << ", chip ID = "<< fChips.at(i)->GetConfig()->GetChipId()<< std::endl;
         configureChip (fChips.at(i));

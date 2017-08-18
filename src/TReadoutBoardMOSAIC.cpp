@@ -57,8 +57,7 @@
 using namespace std;
 std::vector<unsigned char> fDebugBuffer;
 
-I2CSysPll::pllRegisters_t TReadoutBoardMOSAIC::sysPLLregContent = {
-	.reg = {
+I2CSysPll::pllRegisters_t TReadoutBoardMOSAIC::sysPLLregContent(new uint16_t[22]{
 		/* Register 0: */ 0x02A9,
 		/* Register 1: */ 0x0000,
 		/* Register 2: */ 0x000E,
@@ -82,7 +81,7 @@ I2CSysPll::pllRegisters_t TReadoutBoardMOSAIC::sysPLLregContent = {
 		/* Register 20: */ 0x0000,
 		/* Register 21: */ 0x0006			// RO register
 		}
-	};
+  );
 
 
 

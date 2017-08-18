@@ -2,7 +2,7 @@
 CC = gcc
 CXX = g++
 RM = rm -f
-CPPFLAGS = -O2 -g -Wall -pedantic -std=gnu++11 $(INC_DIR)
+CPPFLAGS = -O2 -g -Wall -Werror -pedantic -std=gnu++11 $(INC_DIR)
 LDFLAGS = -lpowerboard -std=gnu++11
 OBJS = $(SRC:.cpp=.o)
 

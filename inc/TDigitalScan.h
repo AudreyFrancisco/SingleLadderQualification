@@ -26,7 +26,7 @@ class TDigitalScan : public TMaskScan {
                   std::vector <TReadoutBoard *>  boards, 
                   std::deque<TScanHisto>        *histoque, 
                   std::mutex                    *aMutex);
-  ~TDigitalScan  () {};
+  virtual ~TDigitalScan  () {};
 
   void Init        ();
   void PrepareStep (int loopIndex);

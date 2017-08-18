@@ -906,10 +906,13 @@ bool TReadoutBoardDAQ::ReadLDOStatus(int &AOverflow)
   bool     err, reg0, reg1, reg2;
 
   err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA0, ReadValue);
+  if (err==-1) std::cout << "Failed reading from DAQ board" << std::endl;
   reg0 = ((ReadValue & 0x1000000) != 0); // LDO off if bit==0, on if bit==1
   err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA1, ReadValue);
+  if (err==-1) std::cout << "Failed reading from DAQ board" << std::endl;
   reg1 = ((ReadValue & 0x1000000) != 0);
   err  = ReadRegister ((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA2, ReadValue);
+  if (err==-1) std::cout << "Failed reading from DAQ board" << std::endl;
   reg2 = ((ReadValue & 0x1000000) != 0);
 
   err = ReadRegister((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_OVERFLOW, ReadValue);
@@ -1083,8 +1086,6 @@ bool TReadoutBoardDAQ::WriteSlaveDataEmulatorReg(uint32_t AWord) {
 
 void TReadoutBoardDAQ::WriteTriggerModuleConfigRegisters()
 {
-  bool err;
-
   //  busy config reg
   uint32_t config0 = 0;
   config0 |= fBoardConfigDAQ->GetBusyDuration();
@@ -1104,7 +1105,7 @@ void TReadoutBoardDAQ::WriteTriggerModuleConfigRegisters()
   uint32_t config2 = 0;
   config2 |= fBoardConfigDAQ->GetStrobeDelay();
   //std::cout << "config2: " << std::hex << config2 << std::dec << std::endl;
-  err = WriteRegister ((MODULE_TRIGGER << DAQBOARD_REG_ADDR_SIZE) + TRIG_DELAY, config2);
+  WriteRegister ((MODULE_TRIGGER << DAQBOARD_REG_ADDR_SIZE) + TRIG_DELAY, config2); // returns err: int
   //std::cout << err << std::endl;
   //  busy override config reg
   uint32_t config3 = 0;

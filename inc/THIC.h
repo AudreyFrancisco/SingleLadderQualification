@@ -23,6 +23,7 @@ class THic {
   std::string           m_dbId;      // ... in db: int? string?
  public:
   THic (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
+  virtual ~THic() {};
   int                        GetNumber       () {return m_hicNumber;};
   bool                       IsPowered       ();
   void                       PowerOn         ();
@@ -57,6 +58,7 @@ class THicOB : public THic {
  protected:
  public:
   THicOB (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
+  virtual ~THicOB() {};
   common::TChipIndex GetChipIndex    (int i);
   THicType           GetHicType      () {return HIC_OB;};
   std::vector<int>   GetBoardIndices ();
@@ -73,6 +75,7 @@ class THicIB : public THic {
  protected:
  public:
   THicIB (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
+  virtual ~THicIB() {};
   common::TChipIndex GetChipIndex (int i);
   THicType           GetHicType      () {return HIC_IB;};
   std::vector<int>   GetBoardIndices ();
