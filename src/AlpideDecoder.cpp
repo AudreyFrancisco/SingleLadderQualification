@@ -59,7 +59,7 @@ void AlpideDecoder::DecodeEmptyFrame (unsigned char *data, int &chipId, unsigned
 }
 
 
-void AlpideDecoder::DecodeDataWord (unsigned char         *data,
+bool AlpideDecoder::DecodeDataWord (unsigned char         *data,
                                     int                    chip,
                                     int                    region,
                                     std::vector <TPixHit> *hits,
@@ -81,6 +81,8 @@ void AlpideDecoder::DecodeDataWord (unsigned char         *data,
   hit.region     = region;
   hit.dcol       = (data_field & 0x3c00) >> 10;
   address        = (data_field & 0x03ff);
+
+  bool corrupt = ((hit.dcol < 0) || (hit.dcol > 511)) ? true : false;
 
   if ((hits->size() > 0) && (!newEvent)) {
     if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) && (address == hits->back().address)) {
@@ -105,10 +107,15 @@ void AlpideDecoder::DecodeDataWord (unsigned char         *data,
   for (int i = -1; i < hitmap_length; i ++) {
     if ((i >= 0) && (! (data[2] >> i) & 0x1)) continue;
     hit.address = address + (i + 1);
-  if (hit.chipId == -1) {std::cout << "Warning, found chip id -1" << std::endl;}
+    if (hit.chipId == -1) {std::cout << "Warning, found chip id -1" << std::endl;}
+    if ((hit.address < 0) || (hit.address > 1023)) {
+      std::cout << "Warning, found bogus address" << std::endl;
+      corrupt = true;
+    }
     hits->push_back (hit);
   }
   newEvent = false;
+  return corrupt;
 }
 
 bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &eventStart, int &eventEnd, bool &isError, bool logging) {
@@ -285,7 +292,10 @@ bool AlpideDecoder::DecodeEvent (unsigned char         *data,
 	  }
           printf("\n");
 	}
-        DecodeDataWord (data + byte, chip, region, hits, false, boardIndex, channel, prioErrors, stuck);
+        bool corrupted = DecodeDataWord (data + byte, chip, region, hits, false, boardIndex, channel, prioErrors, stuck);
+	if (corrupted) {
+	  corrupt = true;
+	}
       }
       byte += 2;
       break;
@@ -314,7 +324,6 @@ bool AlpideDecoder::DecodeEvent (unsigned char         *data,
       return false;
     }
   }
-  //std::cout << "Found " << Hits->size() - NOldHits << " hits" << std::endl;
   if (started && finished) return (!corrupt);
   else {
     if (started && !finished) {
