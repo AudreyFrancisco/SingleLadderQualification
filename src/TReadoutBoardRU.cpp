@@ -110,7 +110,7 @@ bool TReadoutBoardRU::flush() {
 void TReadoutBoardRU::readFromPort(uint8_t port, size_t size,
                                    UsbDev::DataBuffer &buffer) {
   buffer.resize(roundUpToMultiple(size, 1024));
-  size_t bytesRead = m_usb->readData(port, buffer, USB_TIMEOUT);
+  m_usb->readData(port, buffer, USB_TIMEOUT); // returns bytesRead : size_t
 
   // std::cout << "Port " << (int) port << ": Bytes Read: " << bytesRead << "(
   // ";
@@ -209,7 +209,6 @@ int TReadoutBoardRU::SendOpCode(uint16_t OpCode) {
 }
 
 int TReadoutBoardRU::SendOpCode(uint16_t OpCode, TAlpide *chipPtr) {
-  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   return SendOpCode(OpCode);
 }
 
@@ -345,7 +344,7 @@ int TReadoutBoardRU::Initialize() {
 
 
 void TReadoutBoardRU::StartRun() {
-  for(int i = 0; i < fChipPositions.size(); ++i) {
+  for(size_t i = 0; i < fChipPositions.size(); ++i) {
 
       if (fChipPositions.at(i).chipId & 0x7) continue;
       if (fChipPositions.at(i).receiver < 0) continue;
