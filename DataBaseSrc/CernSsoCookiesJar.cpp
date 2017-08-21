@@ -189,7 +189,7 @@ int CernSsoCookieJar::parseTheJar(string aCookieJarFile)
 				}
 			}
 		}
-		if (!fgets(Buffer, THECOOKIELENGTH, fh)) return 0;
+		if (!fgets(Buffer, THECOOKIELENGTH, fh)) break;
 	}
 	fclose(fh);
 	return(NumberOfCookies);
