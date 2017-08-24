@@ -240,7 +240,7 @@ void TReadoutBoardMOSAIC::init()
 {
 	setIPaddress(fBoardConfig->GetIPaddress(), fBoardConfig->GetTCPport());
 
-        getFirmwareVersion();
+	std::cout << "MOSAIC firmware version: " << getFirmwareVersion() << std::endl;
 	// I2C master (WBB slave) and connected peripherals
 	i2cBus = new I2Cbus(mIPbus, add_i2cMaster);
 	i2cBusAux = new I2Cbus(mIPbus, add_i2cAux);
