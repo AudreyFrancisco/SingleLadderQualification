@@ -590,7 +590,7 @@ ActivityDB::~ActivityDB()
 ActivityDB::response * ActivityDB::Create(activity *aActivity)
 {
 	char DateBuffer[40];
-	char DateMask[40] = "%m.%d.%Y";
+	char DateMask[40] = "%d/%m/%Y";
 	char *stringresult;
 	string theUrl;
 	string theQuery;
