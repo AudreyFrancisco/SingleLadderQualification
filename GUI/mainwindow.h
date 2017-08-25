@@ -95,7 +95,7 @@ public slots:
    void thresholdd();
    void noisebd();
    void noisead();
-
+   void attachtodatabase();
       // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     /*
     void open();
