@@ -17,7 +17,7 @@
 #include <map>
 #include <string>
 #include <iostream>
-
+#include <ctime>
 #include <qapplication.h>
 //#include "TQtWidgets.h"
 #include <typeinfo>
@@ -131,81 +131,9 @@ MainWindow::MainWindow(QWidget *parent) :
      connect (ui->testselection,SIGNAL(currentIndexChanged(int)),this, SLOT(combochanged(int)));
      connect(ui->details,SIGNAL(currentIndexChanged(int)),this, SLOT(detailscombo(int)));
      connect(ui->poweroff,SIGNAL(clicked(bool)),this, SLOT(poweroff()));
-//example for connection with the database
-  /*   AlpideDB *myDB=new AlpideDB();
-     ProjectDB *myproject=new ProjectDB(myDB);
-     MemberDB *mymember= new MemberDB(myDB);
-     ComponentDB *mycomponents=new ComponentDB(myDB);
-     std::vector <ProjectDB::project> projectlist;
-     myproject->GetList(&projectlist);
-    // std::cout<<"The number of projects is "<<projectlist.size()<<std::endl;
-    // for(int i=0; i<projectlist.size(); i++){
 
-         //std::cout<<"Project "<<projectlist.at(i).Name<<"with id "<<projectlist.at(i).ID <<std::endl;
-  //   }
-     std::vector<MemberDB::member> memberlist;
-   //  for(int j=21;j<22;j++){
-     mymember->GetList(21,&memberlist);
-     for(int i=0; i<memberlist.size(); i++){
 
-       //  std::cout<<"Member"<<memberlist.at(i).FullName<<"  "<<memberlist.at(i).PersonalID<<std::endl;
-     }
-//}
-      std::vector<ComponentDB::componentType> componentlist;
-      mycomponents->GetTypeList(21,&componentlist);
-      for(int i=0; i<componentlist.size(); i++){
 
-        //  std::cout<<"component "<<componentlist.at(i).Name<<std::endl;
-
-     }
-      ActivityDB *myactivity=new ActivityDB(myDB);
-      ActivityDB::activity activ;
-      ActivityDB::member activmember;
-      ActivityDB::parameter activparameter;
-      ActivityDB::attach activattachment;
-*/
-
-  /*    activ.Location = 161;
-      activ.EndDate = time(NULL);
-      activ.Lot = "TestAntonio";
-      activ.Name = "Test_db";
-      activ.Position = "Position1";
-      activ.Result = 101;
-      activ.StartDate = time(NULL); //mktime(&ts);
-      activ.Status = 83; // open
-      activ.Type = 221;
-      activ.User = 1;
-
-      activmember.Leader = 0;
-     activmember.ProjectMember = 584;
-      activmember.User = 8791;
-      activ.Members.push_back(activmember);
-      activmember.ProjectMember = 201;
-      activmember.User = 4702;
-      activ.Members.push_back(activmember);
-
-      for(int i=0; i < 3; i++){
-          activparameter.ActivityParameter = 1;
-          activparameter.User = 1+i;
-          activparameter.Value = 9.5+i;
-          activ.Parameters.push_back(activparameter);
-      }
-
-      for(int i=0; i < 3; i++){
-          activattachment.Category = 41;
-          activattachment.LocalFileName = "AttachTest";
-          activattachment.LocalFileName.append( std::to_string( i));
-          activattachment.LocalFileName.append(".txt");
-          activattachment.User = i+1;
-          activattachment.RemoteFileName = "AttTe";
-          activattachment.RemoteFileName.append( std::to_string( i));
-          activattachment.RemoteFileName.append(".txt");
-          activ.Attachments.push_back(activattachment);
-      }
-
-      myactivity->Create(&activ);
-      cout << myactivity->DumpResponse() << endl;
-*/
      QPixmap alice("alice.jpg");
      int w = ui->alicepic->width();
      int h = ui->alicepic->height();
@@ -1678,7 +1606,90 @@ void MainWindow::noisead(){
 }
 
 
+void MainWindow::attachtodatabase(){
 
+    //example for connection with the database
+         AlpideDB *myDB=new AlpideDB();
+         ProjectDB *myproject=new ProjectDB(myDB);
+         MemberDB *mymember= new MemberDB(myDB);
+         ComponentDB *mycomponents=new ComponentDB(myDB);
+         std::vector <ProjectDB::project> projectlist;
+         myproject->GetList(&projectlist);
+      //   std::cout<<"The number of projects is "<<projectlist.size()<<std::endl;
+        // for(int i=0; i<projectlist.size(); i++){
+
+           //  std::cout<<"Project "<<projectlist.at(i).Name<<"with id "<<projectlist.at(i).ID <<std::endl;
+       //  }
+         std::vector<MemberDB::member> memberlist;
+       //  for(int j=21;j<22;j++){
+         mymember->GetList(21,&memberlist);
+         for(int i=0; i<memberlist.size(); i++){
+
+     // std::cout<<"Member"<<memberlist.at(i).FullName<<"  "<<memberlist.at(i).PersonalID<<std::endl;
+         }
+    //}
+
+         std::vector<ComponentDB::componentType> componentlist;
+          mycomponents->GetTypeList(21,&componentlist);
+          for(int i=0; i<componentlist.size(); i++){
+
+    //      std::cout<<"component "<<componentlist.at(i).Name<<"The code is: "<< componentlist.at(i).ID<<std::endl;
+
+         }
+
+
+          QDateTime date;
+
+
+          ActivityDB *myactivity=new ActivityDB(myDB);
+
+          ActivityDB::activity activ;
+          ActivityDB::member activmember;
+          ActivityDB::parameter activparameter;
+          ActivityDB::attach activattachment;
+
+
+          activ.Location = 161;//cern
+          activ.EndDate = date.currentDateTime().toTime_t();
+          activ.Lot = "Test";//change everytime
+          activ.Name = "Test_felix";//change everytime
+          activ.Position = "Position98";//change everytime
+          activ.Result = 1; //check the value
+
+          activ.StartDate=date.currentDateTime().toTime_t();
+          activ.Status = 83; // open
+          activ.Type = 881;//obqualificatiom
+          activ.User = 20606;//me
+
+          activmember.Leader = 4646;//markus
+          activmember.ProjectMember = 1126;//myid
+          activmember.User = 20606;//myprojectid
+          activ.Members.push_back(activmember);
+
+
+
+          activparameter.ActivityParameter = 381;//number of chips//id of this parameter
+          activparameter.User = 20606;
+          activparameter.Value = 9;
+          activ.Parameters.push_back(activparameter);
+
+
+
+          activattachment.Category = 41;
+          activattachment.LocalFileName = "attachment_test";
+          activattachment.LocalFileName.append(".txt");
+          activattachment.User = 20606;
+          activattachment.RemoteFileName = "At";
+
+          activattachment.RemoteFileName.append(".txt");
+          activ.Attachments.push_back(activattachment);
+
+
+          myactivity->Create(&activ);
+
+     cout << myactivity->DumpResponse() << endl;
+
+}
 
 
 
