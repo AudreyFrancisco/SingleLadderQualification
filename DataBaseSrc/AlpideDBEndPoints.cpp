@@ -723,7 +723,7 @@ int ActivityDB::buildUrlEncoded(string aLocalFileName, string *Buffer)
 		} else {
 			*Buffer += '%';
 			*Buffer += exa[ch >> 4];
-			*Buffer += exa[ch && 4];
+			*Buffer += exa[ch &  4]; //YCM:FIXME if fix was not intended by [ch && 4]
 		}
 		ch = (unsigned char)fgetc(fh);
 	}

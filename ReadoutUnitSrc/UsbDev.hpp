@@ -165,7 +165,7 @@ private:
 
     try {
       bool deviceFound = false;
-      size_t nrDevices = libusb_get_device_list(m_ctx.get(), &list);
+      ssize_t nrDevices = libusb_get_device_list(m_ctx.get(), &list);
       if (nrDevices < 0) {
         checkError(nrDevices);
       }
@@ -186,7 +186,7 @@ private:
           std::string str;
           if (desc.iSerialNumber > 0) {
             std::vector<unsigned char> dataVec(maxLen);
-            size_t len = libusb_get_string_descriptor_ascii(
+            int len = libusb_get_string_descriptor_ascii(
                 m_device.get(), desc.iSerialNumber, &dataVec.front(), maxLen);
             if (len < 0) {
               checkError(len);
