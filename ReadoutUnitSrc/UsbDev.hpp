@@ -170,7 +170,7 @@ private:
         checkError(nrDevices);
       }
 
-      for (size_t idx = 0; idx < nrDevices && !deviceFound; ++idx) {
+      for (ssize_t idx = 0; idx < nrDevices && !deviceFound; ++idx) {
         libusb_device *device = list[idx];
         libusb_device_descriptor desc = { 0 };
         libusb_device_handle *dev_handle;
