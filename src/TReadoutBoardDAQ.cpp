@@ -12,6 +12,7 @@ TReadoutBoardDAQ::TReadoutBoardDAQ (libusb_device *ADevice, TBoardConfigDAQ *con
 {
   fTrigCnt            = 0;
   fEvtCnt             = 0;
+	fDiffTrigEvtCnt     = 0;
   fNTriggersTotal     = 0;
   fMaxDiffTrigEvtCnt  = MAX_DIFF_TRIG_EVT_CNT;
   fMaxEventBufferSize = MAX_EVT_BUFFSIZE;
@@ -116,7 +117,7 @@ int TReadoutBoardDAQ::WriteChipRegister (uint16_t address, uint16_t value, TAlpi
   //if(err < 0) return -1;
 
     uint32_t command[4];
-    bool err;
+    int err;
 
     //std::cout << "[ CHIP ] ADDRESS: " << std::hex << address << " (" << newAddress << ") " << " VALUE " << value << std::dec << std::endl;
     command[0] = CMU_DATA + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE);

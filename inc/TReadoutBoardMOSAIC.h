@@ -108,7 +108,7 @@ private:
 // Properties
 private:
 	TBoardConfigMOSAIC *fBoardConfig;
-	TConfig            *fConfig;
+	//TConfig            *fConfig; YCM:FIXME, not used
 	I2Cbus 	 			*i2cBus;
 	I2Cbus 	 			*i2cBusAux;
 	powerboard 			*pb;
@@ -117,7 +117,7 @@ private:
 	ALPIDErcv			*alpideRcv[MAX_MOSAICTRANRECV];
 	TAlpideDataParser	*alpideDataParser[MAX_MOSAICTRANRECV];
 	DummyReceiver 		*dr;
-	TBoardHeader 		theHeaderOfReadData;  // This will host the info catch from Packet header/trailer
+	//TBoardHeader 		theHeaderOfReadData;  // This will host the info catch from Packet header/trailer YCM: FIXME, not used
 
 	char 				theVersionId[50];  // Version properties
 	int					theVersionMaj;

@@ -89,7 +89,7 @@ private:
 
 #ifdef COMPILE_LIBCURL
 	CURL * myHandle;
-	CURLcode result; // We’ll store the result of CURL’s webpage retrieval, for simple error checking.
+	//CURLcode result; // We’ll store the result of CURL’s webpage retrieval, for simple error checking. YCM:FIXME, not used
 
 	#ifdef AUTH_X509
 		string theNSSNickName;

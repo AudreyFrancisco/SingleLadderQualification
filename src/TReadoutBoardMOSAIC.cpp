@@ -89,7 +89,7 @@ I2CSysPll::pllRegisters_t TReadoutBoardMOSAIC::sysPLLregContent(new uint16_t[22]
 TReadoutBoardMOSAIC::TReadoutBoardMOSAIC (TConfig* config, TBoardConfigMOSAIC *boardConfig)
   : TReadoutBoard(boardConfig)
   , fBoardConfig(boardConfig)
-  , fConfig(config)
+  //, fConfig(config) YCM: FIXME fConfig not used
 {
   init();
 }

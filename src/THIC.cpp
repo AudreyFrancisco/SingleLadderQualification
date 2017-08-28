@@ -133,6 +133,7 @@ float THic::GetTemperature()
 THicIB::THicIB (const char *dbId, int modId, TPowerBoard *pb, int pbMod)
   : THic (dbId, modId, pb, pbMod)
 {
+	m_ctrl=-1; //FIXME: init m_ctrl to avoid not used warning/error (clang)
 }
 
 
