@@ -53,7 +53,7 @@ private:
 		CMD_SelExtRef			= 0x70
 	};
 
-	uint8_t i2c_baseAddress;
+	//uint8_t i2c_baseAddress;
 
 public:
 	void WriteReg(uint8_t add, uint16_t data)

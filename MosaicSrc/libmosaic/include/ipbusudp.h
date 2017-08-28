@@ -60,7 +60,7 @@ private:
 	void sockWrite();
 
 private:
-	int port;
+	//int port;
 	int sockfd;
 	struct sockaddr_in sockAddress;
 	int rcvTimoutTime;

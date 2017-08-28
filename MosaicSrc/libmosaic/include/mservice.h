@@ -65,7 +65,7 @@ private:
 	void sockWrite(unsigned char *txBuffer, int txSize);
 
 private:
-	int port;
+	//int port;
 	int sockfd;
 	struct sockaddr_in sockAddress;
 	int rcvTimoutTime;
