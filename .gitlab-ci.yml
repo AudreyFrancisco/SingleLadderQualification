@@ -56,8 +56,6 @@ ubuntu1604clang:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu16.04-clang-dev
     script:
       - find -name Makefile -exec sed -i 's/g++/clang++/g' {} \;
-      - sed -i 's/test_threshold / /g' Makefile
-      - sed -i 's/\$(MCMODEL)//g' Makefile
       - sed -i 's/test_tuneITHR//g' Makefile
       - sed -i 's/test_tuneVCASN//g' Makefile
       - sed -i 's/test_ITHRthreshold//g' Makefile

@@ -45,9 +45,23 @@ int myChargeStep;  // currently unused
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
-int HitData     [15][100][512][1024];
+int**** HitData;
 int ChargePoints[100];
 int ievt = 0;
+
+void InitData() {
+  HitData = new int***[15];
+  for (int i=0; i<15; ++i) {
+    HitData[i] = new int**[100];
+    for (int j=0; j<100; ++j) {
+      HitData[i][j] = new int*[512];
+      for (int k=0; k<100; ++k) {
+        HitData[i][j][k] = new int[1024];
+      }
+    }
+  }
+}
+
 
 
 void InitScanParameters() {
@@ -270,6 +284,7 @@ void scan() {
 
 int main(int argc, char** argv) {
 
+  InitData();
   decodeCommandParameters(argc, argv);
   initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
   InitScanParameters();
