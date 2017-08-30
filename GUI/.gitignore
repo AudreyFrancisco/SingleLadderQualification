@@ -3,3 +3,4 @@ GUI
 Makefile
 moc_*
 ui_*
+*.app

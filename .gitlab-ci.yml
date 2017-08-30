@@ -70,4 +70,3 @@ ubuntu1604clang:
       - qmake -makefile
       - make clean
       - make
-      - gcc --version
