@@ -13,7 +13,6 @@
 #include <deque>
 #include <mutex>
 #include <thread>
-#include <thread_db.h>
 #include <map>
 #include <string>
 #include <iostream>
