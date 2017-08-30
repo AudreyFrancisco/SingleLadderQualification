@@ -105,7 +105,7 @@ bool AlpideDecoder::DecodeDataWord (unsigned char         *data,
   }
 
   for (int i = -1; i < hitmap_length; i ++) {
-    if ((i >= 0) && (! (data[2] >> i) & 0x1)) continue;
+    if ((i >= 0) && (!( (data[2] >> i) & 0x1) )) continue;
     hit.address = address + (i + 1);
     if (hit.chipId == -1) {std::cout << "Warning, found chip id -1" << std::endl;}
     if ((hit.address < 0) || (hit.address > 1023)) {
