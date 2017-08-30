@@ -49,7 +49,7 @@ int**** HitData;
 int ChargePoints[100];
 int ievt = 0;
 
-void InitData() {
+void InitHitData() {
   HitData = new int***[15];
   for (int i=0; i<15; ++i) {
     HitData[i] = new int**[100];
@@ -284,7 +284,7 @@ void scan() {
 
 int main(int argc, char** argv) {
 
-  InitData();
+  InitHitData();
   decodeCommandParameters(argc, argv);
   initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
   InitScanParameters();

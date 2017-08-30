@@ -51,11 +51,26 @@ int myChargeStep;  // currently unused
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
-int HitData     [16][100][512][1024];
+int**** HitData;
 int ChargePoints[100];
 int ievt = 0;
 
 std::string summaryName; //for reading ThresholdSummary files in fillVcasn
+
+
+void InitHitData() {
+  HitData = new int***[16];
+  for (int i=0; i<16; ++i) {
+    HitData[i] = new int**[100];
+    for (int j=0; j<100; ++j) {
+      HitData[i][j] = new int*[512];
+      for (int k=0; k<100; ++k) {
+        HitData[i][j][k] = new int[1024];
+      }
+    }
+  }
+}
+
 
 void InitScanParameters() {
   myMaskStages   = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
@@ -325,7 +340,6 @@ void scan() {
 
 
 int main(int argc, char** argv) {
-
   if(!argv[1]) {
     std::cout << "ERROR:  No Summary file provided by the command line!" << std::endl;
     return 1;
@@ -335,6 +349,7 @@ int main(int argc, char** argv) {
   std::cout << "Summary " << summaryName << std::endl;
 
   decodeCommandParameters(argc, argv);
+  InitHitData();
   initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
   InitScanParameters();
   char Suffix[20], fName[100]; //, Config[1000];
