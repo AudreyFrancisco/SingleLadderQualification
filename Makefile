@@ -26,9 +26,9 @@ ANALYSIS_LIBRARY=libalpide_analysis.so
 
 ### ROOT specific variables
 ROOTCONFIG   := $(shell which root-config)
-ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
+ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags | sed -e 's/-pthread//g')
 ROOTLDFLAGS  := $(shell $(ROOTCONFIG) --ldflags)
-ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs)
+ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs | sed -e 's/-lpthread//g')
 
 
 ### Source files
@@ -111,7 +111,7 @@ lib: $(DEPS)
 	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
 
 lib_analysis: $(DEPS) $(ROOT_OBJS)
-	$(CC) -shared $(ROOT_OBJS) $(CFLAGS) $(ROOTCFLAGS) $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -o $(ANALYSIS_LIBRARY)
+	$(CC) -shared $(ROOT_OBJS)  $(CFLAGS) $(ROOTCFLAGS) $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -L. -lalpide -o $(ANALYSIS_LIBRARY)
 
 ### STATIC LIBRARIES (in subfolders used by the executables and dynamic libraries)
 $(STATIC_LIBS):
