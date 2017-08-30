@@ -72,6 +72,26 @@ void InitHitData() {
 }
 
 
+void DeleteHitData() {
+  if (HitData) {
+    for (int i=0; i<16; ++i) {
+      if (HitData[i]) {
+        for (int j=0; j<100; ++j) {
+          if (HitData[i][j]) {
+            for (int k=0; k<100; ++k) {
+              delete[] HitData[i][j][k];
+            }
+            delete[] HitData[i][j];
+          }
+        }
+        delete[] HitData[i];
+      }
+    }
+    delete[] HitData;
+  }
+}
+
+
 void InitScanParameters() {
   myMaskStages   = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
   myPixPerRegion = fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
@@ -408,5 +428,6 @@ int main(int argc, char** argv) {
     }
   }
 
+  DeleteHitData();
   return 0;
 }
