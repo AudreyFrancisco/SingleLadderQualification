@@ -2,10 +2,11 @@
 
 int DbGetMemberId (AlpideDB *db, string Name)
 {
-  MemberDB                       *memberDB = new MemberDB (db);
-  std::vector <MemberDB::member>  memberList;
+  MemberDB                              *memberDB = new MemberDB (db);
+  static std::vector <MemberDB::member>  memberList;
 
-  memberDB->GetList(PROJECT_ID, &memberList);
+  // memberList should not change, so read only once
+  if (memberList.size() == 0) memberDB->GetList(PROJECT_ID, &memberList);
 
   for (unsigned int i = 0; i < memberList.size(); i++) {
     if (Name == memberList.at(i).FullName) return memberList.at(i).ID;
@@ -17,6 +18,7 @@ int DbGetMemberId (AlpideDB *db, string Name)
 
 int DbGetParameterId (AlpideDB *db, int ActivityTypeId, string Name)
 {
+  // note to self: for lazy evaluation, here on has to check also that activity ID has not changed;
   // TODO: Implement
   return 0;
 }
@@ -50,6 +52,7 @@ void DbAddAttachment (AlpideDB *db, ActivityDB::activity activity, int attCatego
   attachment.Category       = attCategory;
   attachment.LocalFileName  = localName;
   attachment.RemoteFileName = remoteName;
+
   activity.Attachments.push_back(attachment);
 }
 
