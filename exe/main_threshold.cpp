@@ -90,7 +90,6 @@ void InitScanParameters() {
   myChargeStart  = fConfig->GetScanConfig()->GetParamValue("CHARGESTART");
   myChargeStop   = fConfig->GetScanConfig()->GetParamValue("CHARGESTOP");
   myChargeStep   = fConfig->GetScanConfig()->GetParamValue("CHARGESTEP");
-  std::cout << myChargeStart << '\t' << myChargeStop << std::endl;
 }
 
 
