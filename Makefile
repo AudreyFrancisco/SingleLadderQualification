@@ -7,22 +7,17 @@ LIBPOWERBOARD_DIR=./MosaicSrc/libpowerboard
 LIBALUCMS_DIR=./DataBaseSrc
 STATIC_LIBS=$(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR)
 
-ifeq ($(OS),Windows_NT)
-	#Windows system default value used
-	MODEL= -mcmodel=medium
-else
-	UNAME_S := $(shell uname -s)
-	ifeq ($(UNAME_S),Darwin)
-		MODEL=''
-	else
-		MCMODEL= '-mcmodel=medium'
-	endif
-endif
-
 INCLUDE=-I. -Iinc -I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I/usr/include/libxml2
 LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic -L$(LIBALUCMS_DIR) -lalucms -lxml2 -lcurl
-CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -Wall -Werror -pedantic $(MCMODEL) $(INCLUDE) -DVERSION=\"$(GIT_VERSION)\"
-LINKFLAGS=-lusb-1.0 -ltinyxml -lpthread $(LIB)
+CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -Wall -Werror -pedantic $(INCLUDE) -DVERSION=\"$(GIT_VERSION)\"
+
+LINUX_LINKFLAGS=
+UNAME_S := $(shell uname -s)
+ifneq ($(UNAME_S),Darwin)
+	LINUX_LINKFLAGS=-lpthread
+endif
+
+LINKFLAGS=-lusb-1.0 -ltinyxml $(LIB) $(LINUX_LINKFLAGS)
 
 
 ### Libraries
@@ -31,9 +26,9 @@ ANALYSIS_LIBRARY=libalpide_analysis.so
 
 ### ROOT specific variables
 ROOTCONFIG   := $(shell which root-config)
-ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags)
+ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags | sed -e 's/-pthread//g')
 ROOTLDFLAGS  := $(shell $(ROOTCONFIG) --ldflags)
-ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs)
+ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs | sed -e 's/-lpthread//g')
 
 
 ### Source files
@@ -116,7 +111,7 @@ lib: $(DEPS)
 	$(CC) -shared $(OBJS) $(CFLAGS) $(LINKFLAGS) -o $(LIBRARY)
 
 lib_analysis: $(DEPS) $(ROOT_OBJS)
-	$(CC) -shared $(ROOT_OBJS) $(CFLAGS) $(ROOTCFLAGS) $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -o $(ANALYSIS_LIBRARY)
+	$(CC) -shared $(ROOT_OBJS)  $(CFLAGS) $(ROOTCFLAGS) $(LINKFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -L. -lalpide -o $(ANALYSIS_LIBRARY)
 
 ### STATIC LIBRARIES (in subfolders used by the executables and dynamic libraries)
 $(STATIC_LIBS):

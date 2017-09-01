@@ -16,6 +16,7 @@
 
 #include "TReadoutBoard.h"
 #include "TScanAnalysis.h"
+#include "THisto.h"
 
 class TConfig;
 class TScan;

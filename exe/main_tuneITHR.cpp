@@ -48,9 +48,42 @@ int myChargeStep;  // currently unused
 
 int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
 
-int HitData     [16][100][512][1024];
+int**** HitData;
 int ChargePoints[100];
 int ievt = 0;
+
+void InitHitData() {
+  HitData = new int***[16];
+  for (int i=0; i<16; ++i) {
+    HitData[i] = new int**[100];
+    for (int j=0; j<100; ++j) {
+      HitData[i][j] = new int*[512];
+      for (int k=0; k<100; ++k) {
+        HitData[i][j][k] = new int[1024];
+      }
+    }
+  }
+}
+
+
+void DeleteHitData() {
+  if (HitData) {
+    for (int i=0; i<16; ++i) {
+      if (HitData[i]) {
+        for (int j=0; j<100; ++j) {
+          if (HitData[i][j]) {
+            for (int k=0; k<100; ++k) {
+              delete[] HitData[i][j][k];
+            }
+            delete[] HitData[i][j];
+          }
+        }
+        delete[] HitData[i];
+      }
+    }
+    delete[] HitData;
+  }
+}
 
 
 void InitScanParameters() {
@@ -289,6 +322,8 @@ void scan(int maskStepSize, int VCASN_mean, bool automated) {
 int main(int argc, char** argv) {  //args have been added for convenience...remove later?
   //Accepts step size (default 1, should be a power of 2) and VCASN_mean (default leave unchanged).  NOT REQUIRED.
 
+  InitHitData();
+
   int maskStepSize = 1;
   int VCASN_mean = 0;
   bool automated = false;
@@ -366,5 +401,6 @@ int main(int argc, char** argv) {  //args have been added for convenience...remo
     fclose(id);
   }
 
+  DeleteHitData();
   return 0;
 }

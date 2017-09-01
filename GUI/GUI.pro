@@ -34,7 +34,7 @@ FORMS    += mainwindow.ui \
             dialog.ui \
             testselection.ui
 
-INCLUDEPATH += $(ROOTSYS)/include
+INCLUDEPATH += $(ROOTSYS)/include /usr/local/include
 
 LIBS += -L/usr/local/lib -lusb-1.0 \
         -L$$PWD/../DataBaseSrc \
