@@ -31,6 +31,7 @@ bool DbAddParameter (AlpideDB *db, ActivityDB::activity activity, string name, f
     return false;
   }
 
+  parameter.ID                = activity.ID;
   parameter.ActivityParameter = paramId;
   parameter.User              = activity.User;
   parameter.Value             = value;
