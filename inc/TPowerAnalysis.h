@@ -39,7 +39,7 @@ class TPowerResult : public TScanResult {
  public:
   TPowerResult () : TScanResult() {};
   void WriteToFileGlobal (FILE *fp) {};
-  void WriteToDB         (const char *hicID) {};
+  void WriteToDB         (AlpideDB *db, ActivityDB::activity activity) {};
 };
 
 

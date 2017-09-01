@@ -47,7 +47,7 @@ class TLocalBusResult : public TScanResult {
  public:
   TLocalBusResult () : TScanResult () {};
   void WriteToFileGlobal(FILE *fp) {};
-  void WriteToDB        (const char *hicID) {};
+  void WriteToDB        (AlpideDB *db, ActivityDB::activity activity) {};
 };
 
 class TLocalBusAnalysis : public TScanAnalysis {

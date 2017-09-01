@@ -64,7 +64,7 @@ class TDigitalResult : public TScanResult {
  // TDigitalResult& operator=(const TDigitalResult& other);
 //TDigitalResult& operator=(const TDigitalResult& other){/*handle self assignmet*/ if (&other!=this) return *this;/*handle base class assignemnt*/ TScanResult::operator=(other); return *this;}
   void WriteToFileGlobal (FILE *fp);
-  void WriteToDB         (const char *hicID) {};
+  void WriteToDB         (AlpideDB *db, ActivityDB::activity activity) {};
 };
 
 
