@@ -58,7 +58,7 @@ void InitHitData() {
     HitData[i] = new int**[100];
     for (int j=0; j<100; ++j) {
       HitData[i][j] = new int*[512];
-      for (int k=0; k<100; ++k) {
+      for (int k=0; k<1024; ++k) {
         HitData[i][j][k] = new int[1024];
       }
     }
@@ -72,7 +72,7 @@ void DeleteHitData() {
       if (HitData[i]) {
         for (int j=0; j<100; ++j) {
           if (HitData[i][j]) {
-            for (int k=0; k<100; ++k) {
+            for (int k=0; k<1024; ++k) {
               delete[] HitData[i][j][k];
             }
             delete[] HitData[i][j];
