@@ -7,7 +7,7 @@ CFLAGS= -O2 -pipe -fPIC -g  -Wall -Werror -pedantic -std=c++11 $(INCLUDE)
 LINKFLAGS=-lxml2 -lcurl $(LIBPATH)
 LIBRARY=libalucms.a
 
-CLASSES= AlpideDB.cpp AlpideDBEndPoints.cpp AlpideDBManager.cpp CernSsoCookiesJar.cpp utilities.cpp
+CLASSES= AlpideDB.cpp AlpideDBEndPoints.cpp AlpideDBManager.cpp CernSsoCookiesJar.cpp utilities.cpp DBHelpers.cpp
 OBJS = $(CLASSES:.cpp=.o)
 
 all: lib
