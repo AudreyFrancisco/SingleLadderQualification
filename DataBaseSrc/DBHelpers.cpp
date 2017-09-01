@@ -41,3 +41,18 @@ bool DbAddParameter (AlpideDB *db, ActivityDB::activity activity, string name, f
 }
 
 
+void DbAddAttachment (AlpideDB *db, ActivityDB::activity activity, int attCategory, string localName, string remoteName)
+{
+  ActivityDB::attach attachment;
+
+  attachment.ID             = activity.ID;
+  attachment.User           = activity.User;
+  attachment.Category       = attCategory;
+  attachment.LocalFileName  = localName;
+  attachment.RemoteFileName = remoteName;
+  activity.Attachments.push_back(attachment);
+}
+
+
+
+
