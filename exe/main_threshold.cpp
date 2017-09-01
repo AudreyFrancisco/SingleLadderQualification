@@ -68,7 +68,7 @@ void DeleteHitData() {
       if (HitData[i]) {
         for (int j=0; j<100; ++j) {
           if (HitData[i][j]) {
-            for (int k=0; k<1024; ++k) {
+            for (int k=0; k<512; ++k) {
               delete[] HitData[i][j][k];
             }
             delete[] HitData[i][j];
