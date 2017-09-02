@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
   std::deque<TScanHisto>  fHistoQue;
   std::mutex              fMutex;
   
-  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips, "", &fHics);
   
   TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
   TScanAnalysis *myAnalysis = new TThresholdAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
