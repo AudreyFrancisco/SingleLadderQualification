@@ -58,7 +58,7 @@ void InitHitData() {
     HitData[i] = new int**[100];
     for (int j=0; j<100; ++j) {
       HitData[i][j] = new int*[512];
-      for (int k=0; k<1024; ++k) {
+      for (int k=0; k<512; ++k) {
         HitData[i][j][k] = new int[1024];
       }
     }
@@ -74,14 +74,18 @@ void DeleteHitData() {
           if (HitData[i][j]) {
             for (int k=0; k<512; ++k) {
               delete[] HitData[i][j][k];
+              HitData[i][j][k] = 0x0;
             }
             delete[] HitData[i][j];
+            HitData[i][j] = 0x0;
           }
         }
         delete[] HitData[i];
+        HitData[i] = 0x0;
       }
     }
     delete[] HitData;
+    HitData = 0x0;
   }
 }
 
@@ -99,9 +103,9 @@ void InitScanParameters() {
 
 
 void ClearHitData() {
-  for (int ichip = 0; ichip < 16; ichip ++) {
-    for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
-      ChargePoints[icharge-myChargeStart] = icharge;
+  for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+    ChargePoints[icharge-myChargeStart] = icharge;
+    for (int ichip = 0; ichip < 16; ichip ++) {
       for (int icol = 0; icol < 512; icol ++) {
         for (int iaddr = 0; iaddr < 1024; iaddr ++) {
           HitData[ichip][icharge-myChargeStart][icol][iaddr] = 0;

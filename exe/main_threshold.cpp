@@ -55,7 +55,7 @@ void InitHitData() {
     HitData[i] = new int**[100];
     for (int j=0; j<100; ++j) {
       HitData[i][j] = new int*[512];
-      for (int k=0; k<1024; ++k) {
+      for (int k=0; k<512; ++k) {
         HitData[i][j][k] = new int[1024];
       }
     }
@@ -70,14 +70,18 @@ void DeleteHitData() {
           if (HitData[i][j]) {
             for (int k=0; k<512; ++k) {
               delete[] HitData[i][j][k];
+              HitData[i][j][k] = 0x0;
             }
             delete[] HitData[i][j];
+            HitData[i][j] = 0x0;
           }
         }
         delete[] HitData[i];
+        HitData[i] = 0x0;
       }
     }
     delete[] HitData;
+    HitData = 0x0;
   }
 }
 
@@ -94,9 +98,9 @@ void InitScanParameters() {
 
 
 void ClearHitData() {
-  for (int ichip = 0; ichip < 15; ichip ++) {
-    for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
-      ChargePoints[icharge-myChargeStart] = icharge;
+  for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+    ChargePoints[icharge-myChargeStart] = icharge;
+    for (int ichip = 0; ichip < 15; ichip ++) {
       for (int icol = 0; icol < 512; icol ++) {
         for (int iaddr = 0; iaddr < 1024; iaddr ++) {
           HitData[ichip][icharge-myChargeStart][icol][iaddr] = 0;
@@ -147,7 +151,7 @@ void WriteDataToFile (const char *fName, bool Recreate) {
         if (HasData) {
           for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
             fprintf(fp, "%d %d %d %d\n", icol, iaddr, icharge, HitData[chipId][icharge - myChargeStart][icol][iaddr]);
-	  }
+          }
         }
       }
     }
@@ -244,7 +248,7 @@ void scan() {
           usleep(1000); // Increment from 100us
           trials ++;
           if (trials == 10) {
-        	std::cout << "Reached 10 timeouts, giving up on this event" << std::endl;
+                std::cout << "Reached 10 timeouts, giving up on this event" << std::endl;
             itrg = myNTriggers * fEnabled;
             nSkipped ++;
             trials = 0;
@@ -258,10 +262,10 @@ void scan() {
           int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
           if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
           if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0, boardInfo.channel, prioErrors)) {
-   	    	std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
-	    	nBad ++;
+                       std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
+                    nBad ++;
             if (nBad > 10) continue;
-	    	FILE *fDebug = fopen ("DebugData.dat", "a");
+                    FILE *fDebug = fopen ("DebugData.dat", "a");
             fprintf(fDebug, "Bad event:\n");
             for (int iByte=0; iByte<n_bytes_data + 1; ++iByte) {
               fprintf (fDebug, "%02x ", (int) buffer[iByte]);
@@ -272,11 +276,11 @@ void scan() {
             }
             fprintf(fDebug, "\n\n");
             fclose (fDebug);
-	  	  }
+                    }
           itrg++;
         }
       }
-	  //usleep(100);
+          //usleep(100);
 
       //std::cout << "Number of hits: " << Hits->size() << std::endl;
       CopyHitData(Hits, icharge);
@@ -327,7 +331,7 @@ int main(int argc, char** argv) {
         configureChip (fChips.at(i));
       }
       else if (fChips.at(i)->GetConfig()->HasEnabledSlave()) {
-	AlpideConfig::BaseConfigPLL(fChips.at(i));
+        AlpideConfig::BaseConfigPLL(fChips.at(i));
       }
     }
 
