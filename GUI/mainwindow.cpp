@@ -153,7 +153,7 @@ void MainWindow::open(){
     settingswindow->SaveSettings(operatorname,hicidnumber,counter);
     if (counter==0) {return;}
     QString fileName;
-    if(numberofscan==1){
+    if(numberofscan==1||numberofscan==5 || numberofscan==6){
     fileName="Config.cfg";}
     else if (numberofscan==2){
         fileName="Configib.cfg";
@@ -201,6 +201,7 @@ if (properconfig==1){
         }
     }
     if (device==3){
+         ui->tob->setText("Inner Barrel module");
          ui->IBModule->show();
          for (unsigned int i=0;i< fChips.size();i++){
              int chipid;
@@ -790,7 +791,7 @@ void MainWindow::fillingOBvectors(){
   TThresholdResult *threresult=new TThresholdResult();
   TThresholdResult *vcasnresult=new TThresholdResult();
   TThresholdResult *ithrresult=new TThresholdResult();
-  TLocalBusResult *localbusresult=new TLocalBusResult();
+//  TLocalBusResult *localbusresult=new TLocalBusResult();
   TNoiseResult *noiseresult=new TNoiseResult();
   TNoiseResult *noiseresultmasked=0;
   TNoiseResult *noiseresultafter=new TNoiseResult();
@@ -798,7 +799,7 @@ void MainWindow::fillingOBvectors(){
 
   TtuneVCASNScan *vcasnscan=new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
   TtuneITHRScan *ithrscan=new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-  TLocalBusTest *localbusscan=new TLocalBusTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+//  TLocalBusTest *localbusscan=new TLocalBusTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
   TPowerTest*powerscan=new TPowerTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
   TPowerAnalysis *poweranalysis= new TPowerAnalysis(&fHistoQue,powerscan,fConfig->GetScanConfig(), fHICs, &fMutex,powerresult);
   TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
@@ -838,7 +839,7 @@ void MainWindow::fillingOBvectors(){
     TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresult);
     TApplyMask *noisemask=new TApplyMask(&fHistoQue,noisescanzero, fConfig->GetScanConfig(), fHICs, &fMutex,noiseresult);
     TNoiseAnalysis *noiseanalysisafter=new TNoiseAnalysis(&fHistoQue, noisescanafter, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresultafter);
-    TLocalBusAnalysis *localbusanalysis = new TLocalBusAnalysis(&fHistoQue,localbusscan, fConfig->GetScanConfig(), fHICs, &fMutex,localbusresult);
+ //   TLocalBusAnalysis *localbusanalysis = new TLocalBusAnalysis(&fHistoQue,localbusscan, fConfig->GetScanConfig(), fHICs, &fMutex,localbusresult);
     fScanVector.push_back(powerscan);
     fScanVector.push_back(fifoscan);
     fScanVector.push_back(fifoscanp10);
@@ -851,8 +852,8 @@ void MainWindow::fillingOBvectors(){
     fScanVector.push_back(noisescan);
     fScanVector.push_back(noisescanzero);
     fScanVector.push_back(noisescanafter);
-    fScanVector.push_back(vcasnscan);
-    fScanVector.push_back(ithrscan);
+ //   fScanVector.push_back(vcasnscan);
+  //  fScanVector.push_back(ithrscan);
 
    // qDebug()<<"dimitra"<<endl;
     fAnalysisVector.push_back(poweranalysis);
@@ -867,8 +868,8 @@ void MainWindow::fillingOBvectors(){
     fAnalysisVector.push_back(noiseanalysis);
     fAnalysisVector.push_back(noisemask);
     fAnalysisVector.push_back(noiseanalysisafter);
-    fAnalysisVector.push_back(vcasnanalysis);
-    fAnalysisVector.push_back(ithranalysis);
+ //   fAnalysisVector.push_back(vcasnanalysis);
+ //   fAnalysisVector.push_back(ithranalysis);
 
   //  fmaskvector.resize(9);
   //  fmaskvector.at(4)=noisemask;
@@ -885,8 +886,8 @@ void MainWindow::fillingOBvectors(){
     fresultVector.push_back(noiseresult);
     fresultVector.push_back(noiseresultmasked);
     fresultVector.push_back(noiseresultafter);
-    fresultVector.push_back(vcasnresult);
-    fresultVector.push_back(ithrresult);
+  //  fresultVector.push_back(vcasnresult);
+ //   fresultVector.push_back(ithrresult);
 
     scanbuttons.push_back(ui->test1);
     scanbuttons.push_back(ui->test2);
@@ -901,8 +902,8 @@ void MainWindow::fillingOBvectors(){
      scanbuttons.push_back(0);
     scanbuttons.push_back(ui->test10);
 
-    scanbuttons.push_back(ui->test11);
-    scanbuttons.push_back(ui->test12);
+ //   scanbuttons.push_back(ui->test11);
+ //   scanbuttons.push_back(ui->test12);
    // scanbuttons.push_back(ui->test1);
   //  scanbuttons.push_back(ui->test1);
 
@@ -931,7 +932,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
      ui->statuslabel->update();
 
  // for (int i=6;i<s.size();i++){
-     for (int i=0;i<11;i++){
+     for (int i=0;i<fScanVector.size();i++){
        //  std::cout<<"The scan names are : "<<fScanVector[i]->GetName()<<std::endl;
         // std::cout<<"The classification is : "<<fresultVector[i]->GetHicResults()->first<<std::endl;
        //  std::cout<<"The state is : "<<fScanVector[i]->GetState()<<std::endl;
@@ -1019,6 +1020,7 @@ void MainWindow::connectcombo(int value){
         ui->start_test->show();
        // qDebug()<<"IB Qualification test selected";
         numberofscan=2;
+        ui->testtypeselected->setText("IB Qualification Test");
        // openib();
         open();//to be tested
         if (counter==0){break;}
@@ -1040,7 +1042,7 @@ void MainWindow::connectcombo(int value){
         ui->testtypeselected->clear();
         ui->start_test->show();
        // qDebug()<<"IB Qualification test selected";
-         ui->testtypeselected->setText("OB Reception Test");
+       //  ui->testtypeselected->setText("OB Reception Test");
        // openib();
         //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
         break;}
@@ -1049,8 +1051,11 @@ void MainWindow::connectcombo(int value){
        {
         ui->testtypeselected->clear();
         ui->start_test->show();
-      //  qDebug()<<"IB Qualification test selected";
-       // openib();
+        numberofscan=5;
+          ui->testtypeselected->setText("OB Reception Test");
+        open();
+        if (counter==0){break;}
+        fillingreceptionscans();
         //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
         break;}
 
@@ -1058,6 +1063,12 @@ void MainWindow::connectcombo(int value){
        {
         ui->testtypeselected->clear();
         ui->start_test->show();
+        numberofscan=6;
+        ui->testtypeselected->setText("OB Powering Test");
+        open();
+        if (counter==0){break;}
+        poweringscan();
+
       //  qDebug()<<"IB Qualification test selected";
        // openib();
         //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
@@ -1116,7 +1127,7 @@ void MainWindow::applytests(){
 
 void MainWindow::WriteTests(){
 //std::cout<<fScanVector.size()<<"the scan vector size";
-    for (unsigned int i=0;i<13;i++)
+  /*  for (unsigned int i=0;i<13;i++)
     {//std::cout<<ui->test1<<std::endl;
 
     while (i<1){
@@ -1140,7 +1151,20 @@ void MainWindow::WriteTests(){
 
         break;
 }
-    }
+    }*///uncomment this
+
+  for (unsigned int i=0;i<fScanVector.size();i++){
+  if (fScanVector.at(i)!=0){
+scanbuttons.at(i)->setText(fScanVector[i]->GetName());
+  }
+  else if (fScanVector.at(i)=0){
+      scanbuttons.at(i)->setText(fScanVector[i+1]->GetName());
+
+  }
+
+  }
+
+
     for (int j=0;j<scanbuttons.size();j++){
         if(scanbuttons[j]!=0){
             scanbuttons.at(j)->setStyleSheet("Text-align:left;border:none;");
@@ -1347,7 +1371,7 @@ void MainWindow::setVI(float * vcasn, float * ithr) {
 
 void MainWindow::colorscans(){
    // std::vector<QPushButton*> scanbuttons;
-    for (unsigned int i=0;i<11;i++){
+    for (unsigned int i=0;i<fScanVector.size();i++){
 if (scanbuttons[i]!=0){
 if(fresultVector[i]==0){
     for  (std::map<std::string,TScanResultHic* >::iterator it=fresultVector.at(i+1)->GetHicResults().begin(); it!=fresultVector.at(i+1)->GetHicResults().end(); ++it){
@@ -1546,7 +1570,7 @@ void MainWindow::connectscandetails(){
     // connect (signalMapper, SIGNAL(mapped(int)), this, SLOT(thresholdlist(int))) ;
 
     //}        //connect(ui->obm1,SIGNAL(clicked()),this,SLOT(button_obm1_clicked()));
-  
+  if(numberofscan==1||numberofscan==2){
     connect(ui->test2,SIGNAL(clicked()),this,SLOT(fifod()));
     connect(ui->test3,SIGNAL(clicked()),this,SLOT(fifopd()));
     connect(ui->test4,SIGNAL(clicked()),this,SLOT(fifomd()));
@@ -1555,10 +1579,18 @@ void MainWindow::connectscandetails(){
     connect(ui->test7,SIGNAL(clicked()),this,SLOT(digitalmd()));
     connect(ui->test8,SIGNAL(clicked()),this,SLOT(thresholdd()));
     connect(ui->test9,SIGNAL(clicked()),this,SLOT(noisebd()));
-    connect(ui->test10,SIGNAL(clicked()),this,SLOT(noisead()));
+    connect(ui->test10,SIGNAL(clicked()),this,SLOT(noisead()));}
     //connect(ui->test3,SIGNAL(clicked()),this,SLOT(powerd()));
 
     // }
+
+
+  if(numberofscan==5){
+    connect(ui->test2,SIGNAL(clicked()),this,SLOT(fifod()));
+    connect(ui->test3,SIGNAL(clicked()),this,SLOT(digitald()));
+}
+
+
 
 }
 
@@ -1580,7 +1612,11 @@ void MainWindow::fifomd(){
 }
 
 void MainWindow::digitald(){
-    getresultdetails(4);
+    if (numberofscan==1){
+    getresultdetails(4);}
+    else if (numberofscan==5){
+         getresultdetails(2);
+    }
 }
 
 void MainWindow::digitalpd(){
@@ -1693,14 +1729,65 @@ void MainWindow::attachtodatabase(){
 
 
 
+void MainWindow::fillingreceptionscans(){
+
+
+    TFifoResult    *fiforesult=new TFifoResult();
+    TDigitalResult *digitalresult=new TDigitalResult();
+    TPowerResult *powerresult=new TPowerResult();
+
+    TPowerTest*powerscan=new TPowerTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TPowerAnalysis *poweranalysis= new TPowerAnalysis(&fHistoQue,powerscan,fConfig->GetScanConfig(), fHICs, &fMutex,powerresult);
+    TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesult);
+
+      TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+      TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresult);
+
+
+      fScanVector.push_back(powerscan);
+      fScanVector.push_back(fifoscan);
+      fScanVector.push_back(digitalscan);
+
+     // qDebug()<<"dimitra"<<endl;
+      fAnalysisVector.push_back(poweranalysis);
+      fAnalysisVector.push_back(fifoanalysis);
+      fAnalysisVector.push_back(digitalanalysis);
+
+
+
+      fresultVector.push_back(powerresult);
+      fresultVector.push_back(fiforesult);
+      fresultVector.push_back(digitalresult);
+
+      scanbuttons.push_back(ui->test1);
+      scanbuttons.push_back(ui->test2);
+      scanbuttons.push_back(ui->test3);
+
+
+      scanstatuslabels.push_back(ui->powers);
+      scanstatuslabels.push_back(ui->fifos);
+      scanstatuslabels.push_back(ui->fifops);
+      WriteTests();
+ }
 
 
 
 
 
 
+void MainWindow::poweringscan(){
+ TPowerResult *powerresult=new TPowerResult();
+ TPowerTest*powerscan=new TPowerTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+ TPowerAnalysis *poweranalysis= new TPowerAnalysis(&fHistoQue,powerscan,fConfig->GetScanConfig(), fHICs, &fMutex,powerresult);
+  fScanVector.push_back(powerscan);
+  fAnalysisVector.push_back(poweranalysis);
+  fresultVector.push_back(powerresult);
+  scanbuttons.push_back(ui->test1);
+  scanstatuslabels.push_back(ui->powers);
+  WriteTests();
 
-
+}
 
 
 

@@ -164,7 +164,8 @@ private slots:
  void detailscombo(int dnumber);
  void start_test();
  void open();
-
+ void fillingreceptionscans();
+ void poweringscan();
 // void connectcombo(int value);
  void  runscans();
  void fillingOBvectors();
