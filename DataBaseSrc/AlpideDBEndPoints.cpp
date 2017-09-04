@@ -711,7 +711,6 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParametersList(int aActiv
 	vector<parameterType> *theParamList = new vector<parameterType>;
 
 
-	char DateBuffer[40];
 	char *stringresult;
 	string theUrl;
 	string theQuery;
