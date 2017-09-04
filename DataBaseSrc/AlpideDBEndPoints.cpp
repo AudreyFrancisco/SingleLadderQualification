@@ -701,6 +701,83 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 }
 
 /* ----------------------
+ * Get the list of parameters ...
+ *
+ *
+----------------------- */
+
+std::vector<ActivityDB::parameterType> *ActivityDB::GetParametersList(int aActivityID)
+{
+	vector<parameterType> *theParamList = new vector<parameterType>;
+
+
+	char DateBuffer[40];
+	char *stringresult;
+	string theUrl;
+	string theQuery;
+	parameterType param;
+
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
+	theQuery = "activityTypeID="+std::to_string(aActivityID);
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+		return(theParamList);
+	} else {
+
+		xmlDocPtr doc;
+		doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+		if (doc == NULL) {
+		    cerr << "Failed to parse document" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theParamList);
+		}
+
+		// Get the root element node
+		xmlNode *root_element = NULL;
+		root_element = xmlDocGetRootElement(doc);
+		if(root_element == NULL) {
+		    cerr << "Failed Bad XML format no root element" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theParamList);
+		}
+		xmlNode *nod = root_element->children;
+		while (nod != NULL) {
+			if(strcmp((const char*)nod->name, "Parameters") == 0) {
+				xmlNode *n1 = nod->children;
+				while(n1 != NULL) {
+					if(strcmp((const char*)nod->name, "ActivityTypeParameter") == 0) {
+						xmlNode *n2 = n1->children;
+						while(n2 != NULL) {
+							if(strcmp((const char*)nod->name, "Parameter") == 0) {
+								xmlNode *n3 = n2->children;
+								while(n3 != NULL) {
+									if(strcmp((const char*)n3->name, "ID") == 0) param.ID = atoi( (const char*)n3->children->content);
+									else if (strcmp((const char*)n3->name, "Name") == 0) param.Name = n3->children->content;
+									else if (strcmp((const char*)n1->name, "Description") == 0) param.Description = n3->children->content);
+									n3 = n3->next;
+								}
+							}
+							theParamList->push_back(param);
+							n2 = n2->next;
+						}
+					}
+					n1 = n1->next;
+				}
+			}
+			nod = nod->next;
+		}
+
+		free(stringresult);
+		xmlFreeDoc(doc);       // free document
+		xmlCleanupParser();
+
+		SetResponse(AlpideTable::NoError, 0,0);
+	}
+	return(theParamList);
+}
+
+/* ----------------------
  * Converts the string into the URI encoding
  *
  *  not used !

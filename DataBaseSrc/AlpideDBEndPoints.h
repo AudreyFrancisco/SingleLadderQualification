@@ -206,6 +206,11 @@ public:
 		int User;
 	};
 
+	struct parameterType {
+		int ID;
+		string Name;
+		string Description;
+	};
 
 	struct activity {
 		int ID;
@@ -231,7 +236,7 @@ public:
     ~ActivityDB();
 
     AlpideTable::response *Create(activity *aActivity);
-
+    vector<parameterType> *GetParametersList(int aActivityID);
 
 private:
     unsigned long buildBase64Binary(string aLocalFileName, string * aBuffer);
