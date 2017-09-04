@@ -752,9 +752,17 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParametersList(int aActiv
 							if(strcmp((const char*)nod->name, "Parameter") == 0) {
 								xmlNode *n3 = n2->children;
 								while(n3 != NULL) {
-									if(strcmp((const char*)n3->name, "ID") == 0) param.ID = atoi( (const char*)n3->children->content);
-									else if (strcmp((const char*)n3->name, "Name") == 0) param.Name = n3->children->content;
-									else if (strcmp((const char*)n1->name, "Description") == 0) param.Description = n3->children->content);
+									if(strcmp((const char*)n3->name, "ID") == 0) {
+										param.ID = atoi( (const char*)(n3->children->content)) ;
+									} else {
+										if (strcmp((const char*)n3->name, "Name") == 0) {
+											param.Name = (const char*)(n3->children->content);
+										} else {
+											if (strcmp((const char*)n1->name, "Description") == 0) {
+												param.Description = (const char*)(n3->children->content);
+											}
+										}
+									}
 									n3 = n3->next;
 								}
 							}
