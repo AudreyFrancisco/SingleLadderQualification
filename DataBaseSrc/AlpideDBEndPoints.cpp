@@ -760,7 +760,6 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aAc
 		SetResponse(AlpideTable::SyncQuery);
 		return(theParamList);
 	} else {
-
 		xmlDocPtr doc;
 		doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
 		if (doc == NULL) {
@@ -782,27 +781,31 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aAc
 			if(strcmp((const char*)nod->name, "Parameters") == 0) {
 				xmlNode *n1 = nod->children;
 				while(n1 != NULL) {
-					if(strcmp((const char*)nod->name, "ActivityTypeParameter") == 0) {
+
+					if(strcmp((const char*)n1->name, "ActivityTypeParameter") == 0) {
 						xmlNode *n2 = n1->children;
 						while(n2 != NULL) {
-							if(strcmp((const char*)nod->name, "Parameter") == 0) {
+							if(strcmp((const char*)n2->name, "Parameter") == 0) {
 								xmlNode *n3 = n2->children;
+								param.ID =0;
+								param.Name = "";
+								param.Description = "";
 								while(n3 != NULL) {
 									if(strcmp((const char*)n3->name, "ID") == 0) {
-										param.ID = atoi( (const char*)(n3->children->content)) ;
+										if(n3->children != NULL ) param.ID = atoi( (const char*)(n3->children->content)) ;
 									} else {
 										if (strcmp((const char*)n3->name, "Name") == 0) {
-											param.Name = (const char*)(n3->children->content);
+											if(n3->children != NULL ) param.Name = (const char*)(n3->children->content);
 										} else {
 											if (strcmp((const char*)n3->name, "Description") == 0) {
-												param.Description = (const char*)(n3->children->content);
+												if(n3->children != NULL ) param.Description = (const char*)(n3->children->content);
 											}
 										}
 									}
 									n3 = n3->next;
 								}
+								theParamList->push_back(param);
 							}
-							theParamList->push_back(param);
 							n2 = n2->next;
 						}
 					}
@@ -864,21 +867,24 @@ std::vector<ActivityDB::activityType> *ActivityDB::GetActivityTypeList(int aProj
 		while (nod != NULL) {
 			if(strcmp((const char*)nod->name, "ActivityType") == 0) {
 				xmlNode *n1 = nod->children;
+				act.ID = 0;
+				act.Name = "";
+				act.Description = "";
 				while(n1 != NULL) {
 					if(strcmp((const char*)n1->name, "ID") == 0) {
-						act.ID = atoi( (const char*)(n1->children->content)) ;
+						if(n1->children != NULL) act.ID = atoi( (const char*)(n1->children->content)) ;
 					} else {
 						if (strcmp((const char*)n1->name, "Name") == 0) {
-							act.Name = (const char*)(n1->children->content);
+							if(n1->children != NULL) act.Name = (const char*)(n1->children->content);
 						} else {
 							if (strcmp((const char*)n1->name, "Description") == 0) {
-								act.Description = (const char*)(n1->children->content);
+								if(n1->children != NULL) act.Description = (const char*)(n1->children->content);
 							}
 						}
 					}
-					theTypeList->push_back(act);
 					n1 = n1->next;
 				}
+				theTypeList->push_back(act);
 			}
 			nod = nod->next;
 		}
@@ -908,7 +914,7 @@ std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActi
 	locationType loc;
 
 	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
-	theQuery = "projectID="+std::to_string(aActivityID);
+	theQuery = "activityTypeID="+std::to_string(aActivityID);
 
 	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 		SetResponse(AlpideTable::SyncQuery);
@@ -937,13 +943,15 @@ std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActi
 				xmlNode *n1 = nod->children;
 				while(n1 != NULL) {
 					if(strcmp((const char*)n1->name, "ActivityTypeLocation") == 0) {
-						xmlNode *n2 = nod->children;
+						xmlNode *n2 = n1->children;
+						loc.ID = 0;
+						loc.Name = "";
 						while(n2 != NULL) {
 							if(strcmp((const char*)n2->name, "ID") == 0) {
-								loc.ID = atoi( (const char*)(n2->children->content)) ;
+								if(n2->children != NULL ) loc.ID = atoi( (const char*)(n2->children->content)) ;
 							} else {
 								if (strcmp((const char*)n2->name, "Name") == 0) {
-									loc.Name = (const char*)(n2->children->content);
+									if(n2->children != NULL ) loc.Name = (const char*)(n2->children->content);
 								}
 							}
 							n2 = n2->next;
@@ -1009,23 +1017,25 @@ std::vector<ActivityDB::componentType> *ActivityDB::GetComponentTypeList(int aAc
 			if(strcmp((const char*)nod->name, "ActivityTypeComponentType") == 0) {
 				xmlNode *n1 = nod->children;
 				while(n1 != NULL) {
-					if(strcmp((const char*)nod->name, "ActivityTypeComponentTypeFull") == 0) {
+					if(strcmp((const char*)n1->name, "ActivityTypeComponentTypeFull") == 0) {
 						xmlNode *n2 = n1->children;
 						while(n2 != NULL) {
-							if(strcmp((const char*)nod->name, "ComponentType") == 0) {
+							if(strcmp((const char*)n2->name, "ComponentType") == 0) {
 								xmlNode *n3 = n2->children;
+								comp.ID = 0;
+								comp.Name = "";
 								while(n3 != NULL) {
 									if(strcmp((const char*)n3->name, "ID") == 0) {
-										comp.ID = atoi( (const char*)(n3->children->content)) ;
+										if(n3->children != NULL ) comp.ID = atoi( (const char*)(n3->children->content)) ;
 									} else {
 										if (strcmp((const char*)n3->name, "Name") == 0) {
-											comp.Name = (const char*)(n3->children->content);
+											if(n3->children != NULL ) comp.Name = (const char*)(n3->children->content);
 										}
 									}
 									n3 = n3->next;
 								}
+								theCompoList->push_back(comp);
 							}
-							theCompoList->push_back(comp);
 							n2 = n2->next;
 						}
 					}
@@ -1088,14 +1098,16 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityID)
 			if(strcmp((const char*)nod->name, "Result") == 0) {
 				xmlNode *n1 = nod->children;
 				while(n1 != NULL) {
-					if(strcmp((const char*)nod->name, "ActivityTypeResultFull") == 0) {
+					if(strcmp((const char*)n1->name, "ActivityTypeResultFull") == 0) {
 						xmlNode *n2 = n1->children;
+						resu.ID = 0;
+						resu.Name = "";
 						while(n2 != NULL) {
 							if(strcmp((const char*)n2->name, "ID") == 0) {
-								resu.ID = atoi( (const char*)(n2->children->content)) ;
+								if(n2->children != NULL) resu.ID = atoi( (const char*)(n2->children->content)) ;
 							} else {
 								if (strcmp((const char*)n2->name, "Name") == 0) {
-									resu.Name = (const char*)(n2->children->content);
+									if(n2->children != NULL)  resu.Name = (const char*)(n2->children->content);
 								}
 							}
 							n2 = n2->next;
@@ -1162,17 +1174,20 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityID)
 			if(strcmp((const char*)nod->name, "Status") == 0) {
 				xmlNode *n1 = nod->children;
 				while(n1 != NULL) {
-					if(strcmp((const char*)nod->name, "ActivityStatus") == 0) {
+					if(strcmp((const char*)n1->name, "ActivityStatus") == 0) {
 						xmlNode *n2 = n1->children;
+						stat.ID = 0;
+						stat.Code = "";
+						stat.Description = "";
 						while(n2 != NULL) {
 							if(strcmp((const char*)n2->name, "ID") == 0) {
-								stat.ID = atoi( (const char*)(n2->children->content)) ;
+								if(n2->children != NULL)  stat.ID = atoi( (const char*)(n2->children->content)) ;
 							} else {
 								if (strcmp((const char*)n2->name, "Code") == 0) {
-									stat.Code = (const char*)(n2->children->content);
+									if(n2->children != NULL)  stat.Code = (const char*)(n2->children->content);
 								} else {
 									if (strcmp((const char*)n2->name, "Description") == 0) {
-										stat.Description = (const char*)(n2->children->content);
+										if(n2->children != NULL) stat.Description = (const char*)(n2->children->content);
 									}
 								}
 							}
