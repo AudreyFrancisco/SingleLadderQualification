@@ -18,19 +18,19 @@ int DbGetMemberId (AlpideDB *db, string name)
 
 int DbGetParameterId (AlpideDB *db, int activityTypeId, string name)
 {
-  //ActivityDB                               *activityDB = new ActivityDB (db);
-  //static int                                myActTypeId;
-  //static std::vector <ActivityDB::activity> activityList;  
+  ActivityDB                                    *activityDB = new ActivityDB (db);
+  static int                                     myActTypeId;
+  static std::vector <ActivityDB::parameterType> parameterList;  
 
-  // for lazy evaluation, here one has to check also that activity ID has not changed;
-  //if ((activityList.size() == 0) || (activityTypeId != myActTypeId)) {
-  //  myActTypeId  = activityTypeId;
-  //  activityList = activityDB->GetActivityTypeList(PROJECT_ID);
-  //}
+  // for lazy evaluation, check also that activity ID has not changed;
+  if ((parameterList.size() == 0) || (activityTypeId != myActTypeId)) {
+    myActTypeId   = activityTypeId;
+    parameterList = *(activityDB->GetParameterTypeList(myActTypeId));
+  }
 
-  //for (unsigned int i = 0; i < activityList.size(); i++) {
-  //  if (name == activityList.at(i).Name) return activityList.at(i).ID;
-  //}
+  for (unsigned int i = 0; i < parameterList.size(); i++) {
+    if (name == parameterList.at(i).Name) return parameterList.at(i).ID;
+  }
   return -1;
 }
 
