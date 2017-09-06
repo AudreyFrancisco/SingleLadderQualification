@@ -1,6 +1,6 @@
 #include "DBHelpers.h"
 
-int DbGetMemberId (AlpideDB *db, string Name)
+int DbGetMemberId (AlpideDB *db, string name)
 {
   MemberDB                              *memberDB = new MemberDB (db);
   static std::vector <MemberDB::member>  memberList;
@@ -9,18 +9,29 @@ int DbGetMemberId (AlpideDB *db, string Name)
   if (memberList.size() == 0) memberDB->GetList(PROJECT_ID, &memberList);
 
   for (unsigned int i = 0; i < memberList.size(); i++) {
-    if (Name == memberList.at(i).FullName) return memberList.at(i).ID;
+    if (name == memberList.at(i).FullName) return memberList.at(i).ID;
   }
 
   return -1;
 }
 
 
-int DbGetParameterId (AlpideDB *db, int ActivityTypeId, string Name)
+int DbGetParameterId (AlpideDB *db, int activityTypeId, string name)
 {
-  // note to self: for lazy evaluation, here on has to check also that activity ID has not changed;
-  // TODO: Implement
-  return 0;
+  //ActivityDB                               *activityDB = new ActivityDB (db);
+  //static int                                myActTypeId;
+  //static std::vector <ActivityDB::activity> activityList;  
+
+  // for lazy evaluation, here one has to check also that activity ID has not changed;
+  //if ((activityList.size() == 0) || (activityTypeId != myActTypeId)) {
+  //  myActTypeId  = activityTypeId;
+  //  activityList = activityDB->GetActivityTypeList(PROJECT_ID);
+  //}
+
+  //for (unsigned int i = 0; i < activityList.size(); i++) {
+  //  if (name == activityList.at(i).Name) return activityList.at(i).ID;
+  //}
+  return -1;
 }
 
 
