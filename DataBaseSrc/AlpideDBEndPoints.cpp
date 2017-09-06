@@ -700,6 +700,518 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 	return(&theResponse);
 }
 
+/* -----------------
+*    AssignComponent := Add a new component to a defined activity
+*
+*		In Param : the activity ID
+*					the Component ID
+*					the Key for the COmponent Type
+*					The ID of the USER
+*		returns : a char pointer to a response type
+*---------------- */
+ActivityDB::response * ActivityDB::AssignComponent(int aActivityID, int aComponentID,
+													int aComponentTypeID, int aUserID)
+
+{
+	char *stringresult;
+	string theUrl;
+	string theQuery;
+
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityComponentAssign";
+	theQuery = "componentID="+std::to_string(aComponentID);
+	theQuery += "&activityID=" + std::to_string(aActivityID);
+	theQuery += "&actTypeCompTypeID=" + std::to_string(aComponentTypeID);
+	theQuery += "&userID=" + std::to_string(aUserID);
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+		return(&theResponse);
+	} else {
+		DecodeResponse(stringresult);
+		if(VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
+		SetResponse(AlpideTable::NoError);
+	}
+	return(&theResponse);
+}
+
+
+
+
+
+/* ----------------------
+ * Get the list of type parameters ...
+ *
+ *
+----------------------- */
+std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aActivityID)
+{
+	vector<parameterType> *theParamList = new vector<parameterType>;
+
+
+	char *stringresult;
+	string theUrl;
+	string theQuery;
+	parameterType param;
+
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
+	theQuery = "activityTypeID="+std::to_string(aActivityID);
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+		return(theParamList);
+	} else {
+		xmlDocPtr doc;
+		doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+		if (doc == NULL) {
+		    cerr << "Failed to parse document" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theParamList);
+		}
+
+		// Get the root element node
+		xmlNode *root_element = NULL;
+		root_element = xmlDocGetRootElement(doc);
+		if(root_element == NULL) {
+		    cerr << "Failed Bad XML format no root element" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theParamList);
+		}
+		xmlNode *nod = root_element->children;
+		while (nod != NULL) {
+			if(strcmp((const char*)nod->name, "Parameters") == 0) {
+				xmlNode *n1 = nod->children;
+				while(n1 != NULL) {
+
+					if(strcmp((const char*)n1->name, "ActivityTypeParameter") == 0) {
+						xmlNode *n2 = n1->children;
+						while(n2 != NULL) {
+							if(strcmp((const char*)n2->name, "Parameter") == 0) {
+								xmlNode *n3 = n2->children;
+								param.ID =0;
+								param.Name = "";
+								param.Description = "";
+								while(n3 != NULL) {
+									if(strcmp((const char*)n3->name, "ID") == 0) {
+										if(n3->children != NULL ) param.ID = atoi( (const char*)(n3->children->content)) ;
+									} else {
+										if (strcmp((const char*)n3->name, "Name") == 0) {
+											if(n3->children != NULL ) param.Name = (const char*)(n3->children->content);
+										} else {
+											if (strcmp((const char*)n3->name, "Description") == 0) {
+												if(n3->children != NULL ) param.Description = (const char*)(n3->children->content);
+											}
+										}
+									}
+									n3 = n3->next;
+								}
+								theParamList->push_back(param);
+							}
+							n2 = n2->next;
+						}
+					}
+					n1 = n1->next;
+				}
+			}
+			nod = nod->next;
+		}
+
+		free(stringresult);
+		xmlFreeDoc(doc);       // free document
+		xmlCleanupParser();
+
+		SetResponse(AlpideTable::NoError, 0,0);
+	}
+	return(theParamList);
+}
+
+/* ----------------------
+ * Get the list of type activity ...
+ *
+ *
+----------------------- */
+std::vector<ActivityDB::activityType> *ActivityDB::GetActivityTypeList(int aProjectID)
+{
+	vector<activityType> *theTypeList = new vector<activityType>;
+
+
+	char *stringresult;
+	string theUrl;
+	string theQuery;
+	activityType act;
+
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeRead";
+	theQuery = "projectID="+std::to_string(aProjectID);
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+		return(theTypeList);
+	} else {
+
+		xmlDocPtr doc;
+		doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+		if (doc == NULL) {
+		    cerr << "Failed to parse document" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theTypeList);
+		}
+
+		// Get the root element node
+		xmlNode *root_element = NULL;
+		root_element = xmlDocGetRootElement(doc);
+		if(root_element == NULL) {
+		    cerr << "Failed Bad XML format no root element" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theTypeList);
+		}
+		xmlNode *nod = root_element->children;
+		while (nod != NULL) {
+			if(strcmp((const char*)nod->name, "ActivityType") == 0) {
+				xmlNode *n1 = nod->children;
+				act.ID = 0;
+				act.Name = "";
+				act.Description = "";
+				while(n1 != NULL) {
+					if(strcmp((const char*)n1->name, "ID") == 0) {
+						if(n1->children != NULL) act.ID = atoi( (const char*)(n1->children->content)) ;
+					} else {
+						if (strcmp((const char*)n1->name, "Name") == 0) {
+							if(n1->children != NULL) act.Name = (const char*)(n1->children->content);
+						} else {
+							if (strcmp((const char*)n1->name, "Description") == 0) {
+								if(n1->children != NULL) act.Description = (const char*)(n1->children->content);
+							}
+						}
+					}
+					n1 = n1->next;
+				}
+				theTypeList->push_back(act);
+			}
+			nod = nod->next;
+		}
+
+		free(stringresult);
+		xmlFreeDoc(doc);       // free document
+		xmlCleanupParser();
+
+		SetResponse(AlpideTable::NoError, 0,0);
+	}
+	return(theTypeList);
+}
+
+/* ----------------------
+ * Get the list of type location ...
+ *
+ *
+----------------------- */
+std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActivityID)
+{
+	vector<locationType> *theLocationList = new vector<locationType>;
+
+
+	char *stringresult;
+	string theUrl;
+	string theQuery;
+	locationType loc;
+
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
+	theQuery = "activityTypeID="+std::to_string(aActivityID);
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+		return(theLocationList);
+	} else {
+
+		xmlDocPtr doc;
+		doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+		if (doc == NULL) {
+		    cerr << "Failed to parse document" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theLocationList);
+		}
+
+		// Get the root element node
+		xmlNode *root_element = NULL;
+		root_element = xmlDocGetRootElement(doc);
+		if(root_element == NULL) {
+		    cerr << "Failed Bad XML format no root element" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theLocationList);
+		}
+		xmlNode *nod = root_element->children;
+		while (nod != NULL) {
+			if(strcmp((const char*)nod->name, "Location") == 0) {
+				xmlNode *n1 = nod->children;
+				while(n1 != NULL) {
+					if(strcmp((const char*)n1->name, "ActivityTypeLocation") == 0) {
+						xmlNode *n2 = n1->children;
+						loc.ID = 0;
+						loc.Name = "";
+						while(n2 != NULL) {
+							if(strcmp((const char*)n2->name, "ID") == 0) {
+								if(n2->children != NULL ) loc.ID = atoi( (const char*)(n2->children->content)) ;
+							} else {
+								if (strcmp((const char*)n2->name, "Name") == 0) {
+									if(n2->children != NULL ) loc.Name = (const char*)(n2->children->content);
+								}
+							}
+							n2 = n2->next;
+						}
+						theLocationList->push_back(loc);
+					}
+					n1 = n1->next;
+				}
+			}
+			nod = nod->next;
+		}
+
+		free(stringresult);
+		xmlFreeDoc(doc);       // free document
+		xmlCleanupParser();
+
+		SetResponse(AlpideTable::NoError, 0,0);
+	}
+	return(theLocationList);
+}
+
+/* ----------------------
+ * Get the list of type component ...
+ *
+ *
+----------------------- */
+std::vector<ActivityDB::componentType> *ActivityDB::GetComponentTypeList(int aActivityID)
+{
+	vector<componentType> *theCompoList = new vector<componentType>;
+
+
+	char *stringresult;
+	string theUrl;
+	string theQuery;
+	componentType comp;
+
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
+	theQuery = "activityTypeID="+std::to_string(aActivityID);
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+		return(theCompoList);
+	} else {
+
+		xmlDocPtr doc;
+		doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+		if (doc == NULL) {
+		    cerr << "Failed to parse document" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theCompoList);
+		}
+
+		// Get the root element node
+		xmlNode *root_element = NULL;
+		root_element = xmlDocGetRootElement(doc);
+		if(root_element == NULL) {
+		    cerr << "Failed Bad XML format no root element" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theCompoList);
+		}
+		xmlNode *nod = root_element->children;
+		while (nod != NULL) {
+			if(strcmp((const char*)nod->name, "ActivityTypeComponentType") == 0) {
+				xmlNode *n1 = nod->children;
+				while(n1 != NULL) {
+					if(strcmp((const char*)n1->name, "ActivityTypeComponentTypeFull") == 0) {
+						xmlNode *n2 = n1->children;
+						while(n2 != NULL) {
+							if(strcmp((const char*)n2->name, "ComponentType") == 0) {
+								xmlNode *n3 = n2->children;
+								comp.ID = 0;
+								comp.Name = "";
+								while(n3 != NULL) {
+									if(strcmp((const char*)n3->name, "ID") == 0) {
+										if(n3->children != NULL ) comp.ID = atoi( (const char*)(n3->children->content)) ;
+									} else {
+										if (strcmp((const char*)n3->name, "Name") == 0) {
+											if(n3->children != NULL ) comp.Name = (const char*)(n3->children->content);
+										}
+									}
+									n3 = n3->next;
+								}
+								theCompoList->push_back(comp);
+							}
+							n2 = n2->next;
+						}
+					}
+					n1 = n1->next;
+				}
+			}
+			nod = nod->next;
+		}
+
+		free(stringresult);
+		xmlFreeDoc(doc);       // free document
+		xmlCleanupParser();
+
+		SetResponse(AlpideTable::NoError, 0,0);
+	}
+	return(theCompoList);
+}
+
+/* ----------------------
+ * Get the list of type results ...
+ *
+ *
+----------------------- */
+std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityID)
+{
+	vector<resultType> *theResultList = new vector<resultType>;
+
+
+	char *stringresult;
+	string theUrl;
+	string theQuery;
+	resultType resu;
+
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
+	theQuery = "activityTypeID="+std::to_string(aActivityID);
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+		return(theResultList);
+	} else {
+
+		xmlDocPtr doc;
+		doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+		if (doc == NULL) {
+		    cerr << "Failed to parse document" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theResultList);
+		}
+
+		// Get the root element node
+		xmlNode *root_element = NULL;
+		root_element = xmlDocGetRootElement(doc);
+		if(root_element == NULL) {
+		    cerr << "Failed Bad XML format no root element" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theResultList);
+		}
+		xmlNode *nod = root_element->children;
+		while (nod != NULL) {
+			if(strcmp((const char*)nod->name, "Result") == 0) {
+				xmlNode *n1 = nod->children;
+				while(n1 != NULL) {
+					if(strcmp((const char*)n1->name, "ActivityTypeResultFull") == 0) {
+						xmlNode *n2 = n1->children;
+						resu.ID = 0;
+						resu.Name = "";
+						while(n2 != NULL) {
+							if(strcmp((const char*)n2->name, "ID") == 0) {
+								if(n2->children != NULL) resu.ID = atoi( (const char*)(n2->children->content)) ;
+							} else {
+								if (strcmp((const char*)n2->name, "Name") == 0) {
+									if(n2->children != NULL)  resu.Name = (const char*)(n2->children->content);
+								}
+							}
+							n2 = n2->next;
+						}
+						theResultList->push_back(resu);
+					}
+					n1 = n1->next;
+				}
+			}
+			nod = nod->next;
+		}
+
+		free(stringresult);
+		xmlFreeDoc(doc);       // free document
+		xmlCleanupParser();
+
+		SetResponse(AlpideTable::NoError, 0,0);
+	}
+	return(theResultList);
+}
+
+
+/* ----------------------
+ * Get the list of type results ...
+ *
+ *
+----------------------- */
+std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityID)
+{
+	vector<statusType> *theStatusList = new vector<statusType>;
+
+
+	char *stringresult;
+	string theUrl;
+	string theQuery;
+	statusType stat;
+
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
+	theQuery = "activityTypeID="+std::to_string(aActivityID);
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+		return(theStatusList);
+	} else {
+
+		xmlDocPtr doc;
+		doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+		if (doc == NULL) {
+		    cerr << "Failed to parse document" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theStatusList);
+		}
+
+		// Get the root element node
+		xmlNode *root_element = NULL;
+		root_element = xmlDocGetRootElement(doc);
+		if(root_element == NULL) {
+		    cerr << "Failed Bad XML format no root element" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(theStatusList);
+		}
+		xmlNode *nod = root_element->children;
+		while (nod != NULL) {
+			if(strcmp((const char*)nod->name, "Status") == 0) {
+				xmlNode *n1 = nod->children;
+				while(n1 != NULL) {
+					if(strcmp((const char*)n1->name, "ActivityStatus") == 0) {
+						xmlNode *n2 = n1->children;
+						stat.ID = 0;
+						stat.Code = "";
+						stat.Description = "";
+						while(n2 != NULL) {
+							if(strcmp((const char*)n2->name, "ID") == 0) {
+								if(n2->children != NULL)  stat.ID = atoi( (const char*)(n2->children->content)) ;
+							} else {
+								if (strcmp((const char*)n2->name, "Code") == 0) {
+									if(n2->children != NULL)  stat.Code = (const char*)(n2->children->content);
+								} else {
+									if (strcmp((const char*)n2->name, "Description") == 0) {
+										if(n2->children != NULL) stat.Description = (const char*)(n2->children->content);
+									}
+								}
+							}
+							n2 = n2->next;
+						}
+						theStatusList->push_back(stat);
+					}
+					n1 = n1->next;
+				}
+			}
+			nod = nod->next;
+		}
+
+		free(stringresult);
+		xmlFreeDoc(doc);       // free document
+		xmlCleanupParser();
+
+		SetResponse(AlpideTable::NoError, 0,0);
+	}
+	return(theStatusList);
+}
+
+
+
 /* ----------------------
  * Converts the string into the URI encoding
  *

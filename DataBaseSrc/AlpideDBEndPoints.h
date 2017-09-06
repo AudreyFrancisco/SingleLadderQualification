@@ -206,6 +206,34 @@ public:
 		int User;
 	};
 
+	struct parameterType {
+		int ID;
+		string Name;
+		string Description;
+	};
+	struct activityType {
+		int ID;
+		string Name;
+		string Description;
+	};
+	struct locationType {
+		int ID;
+		string Name;
+	};
+	struct componentType {
+		int ID;
+		string Name;
+	};
+	struct resultType {
+		int ID;
+		string Name;
+	};
+	struct statusType {
+		int ID;
+		string Code;
+		string Description;
+	};
+
 
 	struct activity {
 		int ID;
@@ -231,7 +259,14 @@ public:
     ~ActivityDB();
 
     AlpideTable::response *Create(activity *aActivity);
+    AlpideTable::response *AssignComponent(int aActivityID, int aComponentID, int aComponentTypeID, int aUserID);
 
+    vector<parameterType> *GetParameterTypeList(int aActivityID);
+    vector<activityType> *GetActivityTypeList(int aProjectID);
+    vector<locationType> *GetLocationTypeList(int aActivityID);
+    vector<componentType> *GetComponentTypeList(int aActivityID);
+    vector<resultType> *GetResultList(int aActivityID);
+    vector<statusType> *GetStatusList(int aActivityID);
 
 private:
     unsigned long buildBase64Binary(string aLocalFileName, string * aBuffer);

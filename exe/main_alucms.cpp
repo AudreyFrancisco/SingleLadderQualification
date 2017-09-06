@@ -32,10 +32,10 @@ int main()
 						"/home/fap/.globus/usercert.pem",  // the path of the Certificate file
 						"/home/fap/.globus/userkey.pem",  // the path of the Key file
 						"/etc/ssl/certs");  // the path of the CA certificates database
-	*/
+
 
 	//AlpideTable::response *theResult; // caused warning
-
+*/
 	// Access the projects Data Base
 	ProjectDB *theProjTable = new ProjectDB(theDB);
 	vector<ProjectDB::project> ProjList;
@@ -105,10 +105,99 @@ int main()
 
 	cout << theCompTable->Print(&oneComponent) << endl;
 
+	cout << endl << "------  NEW METHODS ACTIVITY -----------" << endl<< endl;
+	ActivityDB *theActivityTable = new ActivityDB(theDB);
+
+	cout << endl << "------ Activity type-----------"<<endl;
+	ProjectID = 0;
+	printf(" Input the Project id :");
+	err = scanf("%d",&ProjectID);
+	if (err!=1) {
+		printf(" Failed to read the project id ");
+		return -1;
+	}
+	vector<ActivityDB::activityType> *act = theActivityTable->GetActivityTypeList(ProjectID);
+	for(unsigned int i=0;i<act->size();i++) {
+		cout << endl << act->at(i).ID << "\t" << act->at(i).Name << "\t" << act->at(i).Description ;
+	}
+
+	cout << endl << "------ Parameter type-----------"<<endl;
+	ProjectID = 0;
+	printf(" Input the Activity Type id :");
+	err = scanf("%d",&ProjectID);
+	if (err!=1) {
+		printf(" Failed to read the project id ");
+		return -1;
+	}
+	vector<ActivityDB::parameterType> *par = theActivityTable->GetParameterTypeList(ProjectID);
+	for(unsigned int i=0;i<par->size();i++) {
+		cout << endl << par->at(i).ID << "\t" << par->at(i).Name << "\t" << par->at(i).Description ;
+	}
+
+	cout << endl << "------ locationType type-----------"<<endl;
+	ProjectID = 0;
+	printf(" Input the Activity Type id :");
+	err = scanf("%d",&ProjectID);
+	if (err!=1) {
+		printf(" Failed to read the project id ");
+		return -1;
+	}
+	vector<ActivityDB::locationType> *loc = theActivityTable->GetLocationTypeList(ProjectID);
+	for(unsigned int i=0;i<loc->size();i++) {
+		cout << endl << loc->at(i).ID << " " << loc->at(i).Name ;
+	}
+
+	cout << endl << "------ resultType type-----------"<<endl;
+	ProjectID = 0;
+	printf(" Input the Activity Type id :");
+	err = scanf("%d",&ProjectID);
+	if (err!=1) {
+		printf(" Failed to read the project id ");
+		return -1;
+	}
+	vector<ActivityDB::resultType> *res = theActivityTable->GetResultList(ProjectID);
+	for(unsigned int i=0;i<res->size();i++) {
+		cout << endl << res->at(i).ID << " " << res->at(i).Name ;
+	}
+
+	cout << endl << "------ statusType type-----------"<<endl;
+	ProjectID = 0;
+	printf(" Input the Activity Type id :");
+	err = scanf("%d",&ProjectID);
+	if (err!=1) {
+		printf(" Failed to read the project id ");
+		return -1;
+	}
+	vector<ActivityDB::statusType> *sta = theActivityTable->GetStatusList(ProjectID);
+	for(unsigned int i=0;i<sta->size();i++) {
+		cout << endl << sta->at(i).ID << " " << sta->at(i).Code << "   " << sta->at(i).Description ;
+	}
+
+	cout << endl << "------ componentType type-----------"<<endl;
+	ProjectID = 0;
+	printf(" Input the Activity Type id :");
+	err = scanf("%d",&ProjectID);
+	if (err!=1) {
+		printf(" Failed to read the project id ");
+		return -1;
+	}
+	vector<ActivityDB::componentType> *com = theActivityTable->GetComponentTypeList(ProjectID);
+	for(unsigned int i=0;i<com->size();i++) {
+		cout << endl << com->at(i).ID << " " << com->at(i).Name ;
+	}
+
+	cout << endl << "-----------"<<endl;
+
+//	int ActivityID, ComponentID, ComponentTypeID, UserID;
+//	theActivityTable->AssignComponent(ActivityID, ComponentID, ComponentTypeID, UserID);
+//	cout << theActivityTable->DumpResponse() << endl;
+
+
+
 	cout << endl << "------  CREATE ACTIVITY -----------" << endl;
 
 	// --- create activity test
-	ActivityDB *theActivityTable = new ActivityDB(theDB);
+//	ActivityDB *theActivityTable = new ActivityDB(theDB);
 	ActivityDB::activity Attiv;
 	ActivityDB::member Mem;
 	ActivityDB::parameter Par;
@@ -156,5 +245,6 @@ int main()
 
 	theActivityTable->Create(&Attiv);
 	cout << theActivityTable->DumpResponse() << endl;
+
 
 }
