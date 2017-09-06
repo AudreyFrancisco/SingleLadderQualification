@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "TDigitalAnalysis.h"
+#include "DBHelpers.h"
 
 TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, 
                                    TScan                  *aScan, 
@@ -258,6 +259,23 @@ void TDigitalResult::WriteToFileGlobal (FILE *fp)
   fprintf(fp, "8b10b errors:\t%d\n",    m_n8b10b);
   fprintf(fp, "Corrupt events:\t%d\n",  m_nCorrupt);
   fprintf(fp, "Timeouts:\t%d\n",        m_nTimeout);
+}
+
+
+void TDigitalResult::WriteToDB (AlpideDB *db, ActivityDB::activity activity)
+{
+  DbAddParameter (db, activity, string("Number of Working Chips"), (float) m_chipResults.size());
+  std::map<std::string, TScanResultHic*>::iterator it;
+  for (it = m_hicResults.begin(); it != m_hicResults.end(); it++) {
+    TDigitalResultHic *hicResult = (TDigitalResultHic *) it->second;
+    hicResult->WriteToDB(db, activity);
+  }
+}
+
+
+void TDigitalResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity activity)
+{
+  DbAddParameter (db, activity, string("Number of Bad Pixels Digital"), (float) m_nBad);
 }
 
 

@@ -1,5 +1,21 @@
 #include "DBHelpers.h"
 
+
+int DbGetActivityTypeId (AlpideDB *db, string name)
+{
+  ActivityDB                                   *activityDB = new ActivityDB (db);
+  static std::vector <ActivityDB::activityType> activityList;
+
+  if (activityList.size() == 0) activityList = *(activityDB->GetActivityTypeList(PROJECT_ID));
+
+  for (unsigned int i = 0; i < activityList.size(); i++) {
+    if (name == activityList.at(i).Name) return activityList.at(i).ID;
+  }
+
+  return -1;
+}
+
+
 int DbGetMemberId (AlpideDB *db, string name)
 {
   MemberDB                              *memberDB = new MemberDB (db);
