@@ -78,8 +78,7 @@ public:
     const char *DumpResponse();
 
 protected:
-    bool _parseTheXML(char *stringresult, xmlDocPtr *doc);
-    bool _getTheRootElementChildren(xmlDocPtr doc, xmlNode **nod);
+    bool _getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod);
 
 };
 
@@ -195,6 +194,7 @@ public:
 		int Leader;
 		int User;
 	};
+	#define zMEMBER(a) a.ID = 0; a.ProjectMember = 0; a.Leader = 0; a.User = 0
 
 	struct parameter {
 		int ID;
@@ -202,6 +202,7 @@ public:
 		float Value;
 		int User;
 	};
+	#define zPARAMETER(a) a.ID = 0; a.ActivityParameter = 0; a.Value = 0.0; a.User = 0
 
 	struct attach {
 		int ID;
@@ -210,35 +211,46 @@ public:
 		string LocalFileName;
 		int User;
 	};
+	#define zATTACH(a) a.ID = 0; a.Category = 0; a.RemoteFileName = ""; a.LocalFileName = ""; a.User = 0
 
 	struct parameterType {
 		int ID;
 		string Name;
 		string Description;
 	};
+	#define zPARAMETERTYPE(a) a.ID = 0; a.Name = ""; a.Description = ""
+
 	struct activityType {
 		int ID;
 		string Name;
 		string Description;
 	};
+	#define zACTIVITYTYPE(a) a.ID = 0; a.Name = ""; a.Description = ""
+
 	struct locationType {
 		int ID;
 		string Name;
 	};
+	#define zLOCATIONTYPE(a) a.ID = 0; a.Name = ""
+
 	struct componentType {
 		int ID;
 		string Name;
 	};
+	#define zCOMPOTYPE(a) a.ID = 0; a.Name = ""
+
 	struct resultType {
 		int ID;
 		string Name;
 	};
+	#define zRESULTTYPE(a) a.ID = 0; a.Name = ""
+
 	struct statusType {
 		int ID;
 		string Code;
 		string Description;
 	};
-
+	#define zSTATUSTYPE(a) a.ID = 0; a.Code = ""; a.Description = ""
 
 	struct activity {
 		int ID;
@@ -255,8 +267,7 @@ public:
 		vector<member> Members;
 		vector<parameter> Parameters;
 		vector<attach> Attachments;
-	} ;
-
+	};
 
 // Methods
 public:
