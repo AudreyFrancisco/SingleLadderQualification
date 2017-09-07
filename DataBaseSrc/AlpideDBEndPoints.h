@@ -29,9 +29,11 @@
  *
  * ====================================================
  *
- *  Description : Header file for the
+ *  Description : Header file for the Alpide DB EndPoint
  *
  *  HISTORY
+ *
+ *  7/9/2017	-	Refine the XML parsing/reading
  *
  */
 #ifndef ALPIDEDBENDPOINTS_H_
@@ -289,12 +291,5 @@ private:
     int buildUrlEncoded(string aLocalFileName, string *Buffer);
 
 };
-
-
-
-
-
-
-
 
 #endif /* ALPIDEDBENDPOINTS_H_ */

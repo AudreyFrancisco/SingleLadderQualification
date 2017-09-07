@@ -29,11 +29,16 @@
  *
  * ====================================================
  *
- *  Description : Alpide DB  Class *
+ *  Description : Alpide DB  Classes for access tables
+ *
+ *  Ver 1.0 -
+ *
  *  HISTORY
  *
+ *  7/9/2017	-	Refine the XML parsing/reading function
  *
  */
+
 #include <stdio.h>
 #include <string.h>
 #include <ctime>
@@ -165,6 +170,40 @@ const char *AlpideTable::DumpResponse()
 	theGeneralBuffer += "ID=" + std::to_string(theResponse.ID) + " Session=" +std::to_string(theResponse.Session);
 	return(theGeneralBuffer.c_str());
 }
+
+/* --------------------
+ *
+ *    Parse the XML file and returns the first Child Node
+ *
+ *
+  -------------------- */
+bool AlpideTable::_getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod)
+{
+	// parse the XML
+	*doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0);
+	if (*doc == NULL) {
+	    cerr << "Failed to parse document" << endl;
+	    SetResponse(AlpideTable::BadXML, 0,0);
+	    *nod = NULL;
+		return(false);
+	}
+
+	// Get the root element node
+	xmlNode *root_element = NULL;
+	root_element = xmlDocGetRootElement(*doc);
+	if(root_element == NULL) {
+	    cerr << "Failed Bad XML format no root element" << endl;
+	    SetResponse(AlpideTable::BadXML, 0,0);
+	    *nod = NULL;
+		return(false);
+	}
+	*nod = root_element->children;
+	return(true);
+}
+
+
+
+
 
 /* --------------------------------------------------------
  *    ProjectDB   Class to manage the Projects Table
@@ -736,8 +775,6 @@ ActivityDB::response * ActivityDB::AssignComponent(int aActivityID, int aCompone
 
 
 
-
-
 /* ----------------------
  * Get the list of type parameters ...
  *
@@ -1014,30 +1051,6 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityID)
 	return(theResultList);
 }
 
-
-bool AlpideTable::_getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod)
-{
-	// parse the XML
-	*doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0);
-	if (*doc == NULL) {
-	    cerr << "Failed to parse document" << endl;
-	    SetResponse(AlpideTable::BadXML, 0,0);
-	    *nod = NULL;
-		return(false);
-	}
-
-	// Get the root element node
-	xmlNode *root_element = NULL;
-	root_element = xmlDocGetRootElement(*doc);
-	if(root_element == NULL) {
-	    cerr << "Failed Bad XML format no root element" << endl;
-	    SetResponse(AlpideTable::BadXML, 0,0);
-	    *nod = NULL;
-		return(false);
-	}
-	*nod = root_element->children;
-	return(true);
-}
 
 /* ----------------------
  * Get the list of type results ...
