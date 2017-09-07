@@ -1130,6 +1130,32 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityID)
 }
 
 
+bool AlpideTable::_parseTheXML(char *stringresult, xmlDocPtr *doc) {
+		*doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+		if (doc == NULL) {
+		    cerr << "Failed to parse document" << endl;
+		    SetResponse(AlpideTable::BadXML, 0,0);
+			return(false);
+		}
+		return(true);
+}
+
+
+bool AlpideTable::_getTheRootElementChildren(xmlDocPtr doc, xmlNode **nod)
+{
+	// Get the root element node
+	xmlNode *root_element = NULL;
+	root_element = xmlDocGetRootElement(doc);
+	if(root_element == NULL) {
+	    cerr << "Failed Bad XML format no root element" << endl;
+	    SetResponse(AlpideTable::BadXML, 0,0);
+	    *nod = NULL;
+		return(false);
+	}
+	*nod = root_element->children;
+	return(true);
+}
+
 /* ----------------------
  * Get the list of type results ...
  *
@@ -1138,7 +1164,6 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityID)
 std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityID)
 {
 	vector<statusType> *theStatusList = new vector<statusType>;
-
 
 	char *stringresult;
 	string theUrl;
@@ -1154,22 +1179,10 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityID)
 	} else {
 
 		xmlDocPtr doc;
-		doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
-		if (doc == NULL) {
-		    cerr << "Failed to parse document" << endl;
-		    SetResponse(AlpideTable::BadXML, 0,0);
-			return(theStatusList);
-		}
+		xmlNode *nod;
+		if(!_parseTheXML(stringresult, &doc)) return(theStatusList);
+		if(!_getTheRootElementChildren(doc, &nod)) return(theStatusList);
 
-		// Get the root element node
-		xmlNode *root_element = NULL;
-		root_element = xmlDocGetRootElement(doc);
-		if(root_element == NULL) {
-		    cerr << "Failed Bad XML format no root element" << endl;
-		    SetResponse(AlpideTable::BadXML, 0,0);
-			return(theStatusList);
-		}
-		xmlNode *nod = root_element->children;
 		while (nod != NULL) {
 			if(strcmp((const char*)nod->name, "Status") == 0) {
 				xmlNode *n1 = nod->children;
@@ -1180,16 +1193,10 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityID)
 						stat.Code = "";
 						stat.Description = "";
 						while(n2 != NULL) {
-							if(strcmp((const char*)n2->name, "ID") == 0) {
-								if(n2->children != NULL)  stat.ID = atoi( (const char*)(n2->children->content)) ;
-							} else {
-								if (strcmp((const char*)n2->name, "Code") == 0) {
-									if(n2->children != NULL)  stat.Code = (const char*)(n2->children->content);
-								} else {
-									if (strcmp((const char*)n2->name, "Description") == 0) {
-										if(n2->children != NULL) stat.Description = (const char*)(n2->children->content);
-									}
-								}
+							if(n2->children != NULL) {
+								if(strcmp((const char*)n2->name, "ID") == 0) stat.ID = atoi( (const char*)(n2->children->content)) ;
+								else if (strcmp((const char*)n2->name, "Code") == 0) stat.Code = (const char*)(n2->children->content);
+								else if (strcmp((const char*)n2->name, "Description") == 0) stat.Description = (const char*)(n2->children->content);
 							}
 							n2 = n2->next;
 						}
@@ -1200,11 +1207,9 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityID)
 			}
 			nod = nod->next;
 		}
-
 		free(stringresult);
 		xmlFreeDoc(doc);       // free document
 		xmlCleanupParser();
-
 		SetResponse(AlpideTable::NoError, 0,0);
 	}
 	return(theStatusList);

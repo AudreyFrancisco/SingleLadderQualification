@@ -76,6 +76,11 @@ public:
     response *DecodeResponse(char *returnedString, int Session = 0);
     void SetResponse(AlpideTable::ErrorCode, int ID=0, int Session=0);
     const char *DumpResponse();
+
+protected:
+    bool _parseTheXML(char *stringresult, xmlDocPtr *doc);
+    bool _getTheRootElementChildren(xmlDocPtr doc, xmlNode **nod);
+
 };
 
 
