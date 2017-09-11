@@ -150,9 +150,9 @@ bool TPowerBoard::compareSettings(powerboard::pbstate_t *aState)
 			match = false;
 			std::cout << "Power board : Module =" << i << " the Analog V Set is different ! Board:" << aState->Vout[i*2] << " Config:" << fPBoard.Modules[i].AVset << std::endl;
 		}
-		if(aState->Vout[i*2]+1 != fPBoard.Modules[i].DVset) {
+		if(aState->Vout[i*2+1] != fPBoard.Modules[i].DVset) {
 			match = false;
-			std::cout << "Power board : Module =" << i << " the Digital V Set is different ! Board:" << aState->Vout[i*2] << " Config:" << fPBoard.Modules[i].AVset << std::endl;
+			std::cout << "Power board : Module =" << i << " the Digital V Set is different ! Board:" << aState->Vout[i*2 + 1] << " Config:" << fPBoard.Modules[i].DVset << std::endl;
 		}
 	}
 	return(match);
