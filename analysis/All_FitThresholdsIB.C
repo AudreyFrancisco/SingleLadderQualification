@@ -36,7 +36,6 @@ int All_FitThresholdsIB(const char *fName, bool generateMap=true, bool threshold
 
   if(generateMap) {
     std::string slice= Prefix.substr(0, Prefix.rfind("/")+1) + "FitValues" + Prefix.substr(Prefix.rfind("ThresholdScan_")+13, 15);
-    std::cout << "Map file prefix = " << slice << std::endl;
     std::string line = ".x ThresholdMapIB.C+g(\"" + slice + "Chip0_0.dat\"," + std::to_string(thresholdNotNoise) + ")";
     gROOT->ProcessLine(line.c_str()); //arbitrary file
   }
