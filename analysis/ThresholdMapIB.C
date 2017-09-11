@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -25,9 +26,9 @@ void set_plot_style()
 int AddressToColumn(int ARegion, int ADoubleCol, int AAddress) {
     int Column    = ARegion * 32 + ADoubleCol * 2;    // Double columns before ADoubleCol
     int LeftRight = ((AAddress % 4) < 2 ? 1:0);       // Left or right column within the double column
-    
+
     Column += LeftRight;
-    
+
     return Column;
 }
 
@@ -62,7 +63,7 @@ void ReadFile (const char *fName, TH2F *hHitmap, int Chip, bool aNoise) {
     int Row    = AddressToRow   (col / 16, col % 16, row);
     nLines ++;
 
-    noiseSum  += noise; 
+    noiseSum  += noise;
     threshSum += thresh;
     noiseSq   += noise * noise;
     threshSq  += thresh * thresh;
@@ -80,7 +81,7 @@ void ReadFile (const char *fName, TH2F *hHitmap, int Chip, bool aNoise) {
     float avThresh = threshSum / nLines;
     float rmsNoise = sqrt (noiseSq / nLines - pow(avNoise, 2));
     float rmsThresh = sqrt (threshSq / nLines - pow (avThresh, 2));
-   
+
     std::cout << std::endl << "Chip " << Chip << ":" << std::endl;
     std::cout << "  Found " << nLines << " pixels, i.e. " << 512 * 1024 - nLines << " pixels without threshold" << std::endl;
     std::cout << "  Threshold: (" << avThresh << " +- " << rmsThresh << ") e." << std::endl;
@@ -99,7 +100,7 @@ void AddLabels(){
     TLine *line = new TLine (-.5 + i*1024,-.5,-.5 + i*1024, 511.5);
     line->Draw();
   }
-  
+
   for (int i = 0; i < 9; i++) {
     char text[10];
     sprintf(text, "Chip %d", i);
@@ -110,16 +111,17 @@ void AddLabels(){
 
 
 int ThresholdMapIB(const char *fName, bool noise = false) {
-  char Prefix[100], fNameChip[100];
-  
-  int PrefixLength = strcspn(fName, "C");
-  strncpy (Prefix, fName, PrefixLength-1);
+
+  std::string Prefix = fName;
+  Prefix.erase(Prefix.rfind("_Chip"));
+  std::cout << "Prefix: " << Prefix << std::endl;
 
   set_plot_style();
   TH2F *hHitmap = new TH2F("hHitmap", "Threshold map", 9216, -.5, 9215.5, 512, -.5, 511.5);
 
-  for (int ichip = 0; ichip < 9; ichip ++) {    
-    sprintf(fNameChip, "%s_Chip%d_0.dat", Prefix, ichip);
+  char fNameChip[500];
+  for (int ichip = 0; ichip < 9; ichip ++) {
+    sprintf(fNameChip, "%s_Chip%d_0.dat", Prefix.c_str(), ichip);
     ReadFile(fNameChip, hHitmap, ichip, noise);
   }
 
@@ -135,5 +137,3 @@ int ThresholdMapIB(const char *fName, bool noise = false) {
   AddLabels();
   return 1;
 }
-
-
