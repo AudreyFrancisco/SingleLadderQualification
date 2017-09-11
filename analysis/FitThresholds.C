@@ -25,7 +25,7 @@ int NPoints;
 
 FILE *fpOut;
 
-float ELECTRONS_PER_DAC = 7. *226/160;
+float ELECTRONS_PER_DAC = 10.;
 
 int NPixels;
 

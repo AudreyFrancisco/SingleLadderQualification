@@ -23,10 +23,7 @@ float data[256];
 float x   [256];
 int NPoints;
 
-char fNameOut [50];
 FILE *fpOut;
-
-float ELECTRONS_PER_DAC = 7. *226/160; 
 
 int NPixels;
 
@@ -88,7 +85,7 @@ bool GetThreshold(double *thresh,double *noise,double *chi2) {
    TGraph *g      = new TGraph(NPoints, x, data);
    TF1    *fitfcn = new TF1("fitfcn", erf,0,1500,2);
    double Start  = FindStart();
-  
+
    if (Start < 0) {
      NNostart ++;
      return false;
@@ -100,7 +97,7 @@ bool GetThreshold(double *thresh,double *noise,double *chi2) {
 
    fitfcn->SetParName(0, "Threshold");
    fitfcn->SetParName(1, "Noise");
- 
+
    //g->SetMarkerStyle(20);
    //g->Draw("AP");
    g->Fit("fitfcn","Q");
@@ -143,10 +140,11 @@ void ProcessFile (const char *fName) {
   NNostart = 0;
   NChisq   = 0;
 
-  //printf("strstr result: %s\n", strstr(
-  sprintf(fNameOut, "FitValues%s", strstr(fName,"_"));
-  //printf("Output file: %s\n", fNameOut);
-  fpOut = fopen(fNameOut, "w");
+
+  std::string fNameOut = fName;
+  fNameOut.insert(fNameOut.rfind("ITHRScan_"), "FitValues_");
+  fNameOut.erase(fNameOut.rfind("ITHRScan_"), 14);
+  fpOut = fopen(fNameOut.c_str(), "w");
 
   ResetData();
   while ((fscanf (fp, "%d %d %d %d", &col, &address, &ampl, &hits) == 4)) {
@@ -207,19 +205,20 @@ int FitThresholdTune(const char *fName, bool WriteToFile, int ITH, int VCASN, bo
   }
   for (int isec=0;isec<NSEC;++isec)
     std::cout << "Threshold sector "<<isec<<": " << hThresh[isec]->GetMean() << " +- " << hThresh[isec]->GetRMS() << " ( " << hThresh[isec]->GetEntries() << " entries)" << std::endl;
- 
+
   for (int isec=0;isec<NSEC;++isec)
     std::cout << "Noise sector "<<isec<<":     " << hNoise [isec]->GetMean() << " +- " << hNoise [isec]->GetRMS() << std::endl;
 
   if (WriteToFile) {
-      char summary[50];
-      sprintf(summary, "ThresholdSummary%s", strstr(fName,"_"));
-      //FILE *fp = fopen("ThresholdSummary.dat", "a"); //want this...chip num is right before .dat
-      FILE *fp = fopen(summary, "a");
+    std::string fSummary = fName;
+    fSummary.insert(fSummary.rfind("ITHRScan_"), "ITHRSummary_");
+    fSummary.erase(fSummary.rfind("ITHRScan_"), 14);
+    std::cout << "Summary file " << fSummary << std::endl;
+    FILE *fp = fopen(fSummary.c_str(), "a");
 
-      fprintf(fp, "%d %d %d %.1f %.1f %.1f %.1f\n", ITH, VCASN, GoodPixels, hThresh[0]->GetMean(), hThresh[0]->GetRMS(), 
-	  hNoise[0]->GetMean(), hNoise[0]->GetRMS());
-      fclose(fp);
+    fprintf(fp, "%d %d %d %.1f %.1f %.1f %.1f\n", ITH, VCASN, GoodPixels, hThresh[0]->GetMean(), hThresh[0]->GetRMS(),
+            hNoise[0]->GetMean(), hNoise[0]->GetRMS());
+    fclose(fp);
   }
 
 
