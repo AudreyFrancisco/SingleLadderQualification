@@ -275,7 +275,9 @@ void TDigitalResult::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 
 void TDigitalResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
-  DbAddParameter (db, activity, string("Number of Bad Pixels Digital"), (float) m_nBad);
+  // TODO: change hard coded attachment type
+  DbAddParameter  (db, activity, string("Number of Bad Pixels Digital"), (float) m_nBad);
+  DbAddAttachment (db, activity, 41, string(m_resultFile), string(m_resultFile));
 }
 
 
