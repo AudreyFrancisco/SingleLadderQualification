@@ -1276,7 +1276,7 @@ Digital scan                     Waiting . .
     </widget>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
-      <string>Analysis</string>
+      <string>Scan Configuration</string>
      </attribute>
     </widget>
    </widget>

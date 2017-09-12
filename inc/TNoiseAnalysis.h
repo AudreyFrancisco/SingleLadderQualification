@@ -51,7 +51,7 @@ class TNoiseResult : public TScanResult {
  public: 
   TNoiseResult () : TScanResult () {};
   void WriteToFileGlobal (FILE *fp)          {};
-  void WriteToDB         (AlpideDB *db, ActivityDB::activity activity) {};
+  void WriteToDB         (AlpideDB *db, ActivityDB::activity &activity) {};
 };
 
 
