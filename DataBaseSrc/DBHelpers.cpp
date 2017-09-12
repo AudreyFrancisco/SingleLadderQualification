@@ -72,7 +72,7 @@ bool DbAddParameter (AlpideDB *db, ActivityDB::activity &activity, string name, 
 }
 
 
-void DbAddAttachment (AlpideDB *db, ActivityDB::activity activity, int attCategory, string localName, string remoteName)
+void DbAddAttachment (AlpideDB *db, ActivityDB::activity &activity, int attCategory, string localName, string remoteName)
 {
   ActivityDB::attach attachment;
 
