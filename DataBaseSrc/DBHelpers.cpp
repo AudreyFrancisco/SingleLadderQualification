@@ -45,13 +45,15 @@ int DbGetParameterId (AlpideDB *db, int activityTypeId, string name)
   }
 
   for (unsigned int i = 0; i < parameterList.size(); i++) {
-    if (name == parameterList.at(i).Name) return parameterList.at(i).ID;
+    if (name == parameterList.at(i).Name) {
+      return parameterList.at(i).ID;
+    }
   }
   return -1;
 }
 
 
-bool DbAddParameter (AlpideDB *db, ActivityDB::activity activity, string name, float value) 
+bool DbAddParameter (AlpideDB *db, ActivityDB::activity &activity, string name, float value) 
 {
   ActivityDB::parameter parameter;
   int                   paramId = DbGetParameterId (db, activity.Type, name);

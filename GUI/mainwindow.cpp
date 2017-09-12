@@ -68,7 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
      ui->tab_2->setEnabled(false);
      ui->example1->hide();
 
-     ui->tab_3->setEnabled(false);
+     ui->tab_3->setEnabled(true);
     // qDebug()<<"Starting testing";
       ui->obm1->setStyleSheet("background-color:red;");
       ui->obm2->setStyleSheet("background-color:red;");
@@ -112,10 +112,10 @@ MainWindow::MainWindow(QWidget *parent) :
       menu1->addAction(writedb);
      // ui->abort->hide();
      // ui->abortall->hide();
-      ui->tabWidget->removeTab(2);
+   //   ui->tabWidget->removeTab(2);
       ui->tabWidget->removeTab(1);
-
-      connect(ui->abortall,SIGNAL(clicked()),this,SLOT(StopScan()),Qt::DirectConnection);
+     connect(writedb,SIGNAL(triggered()),this,SLOT(attachtodatabase()));
+     connect(ui->abortall,SIGNAL(clicked()),this,SLOT(StopScan()),Qt::DirectConnection);
      connect(newtestaction, SIGNAL(triggered()),this, SLOT(start_test()));
      connect(ui->newtest,SIGNAL(clicked()),SLOT(start_test()));
      connect( ui->cfg, SIGNAL( clicked()), this, SLOT(open()) );
@@ -131,7 +131,7 @@ MainWindow::MainWindow(QWidget *parent) :
      connect(ui->details,SIGNAL(currentIndexChanged(int)),this, SLOT(detailscombo(int)));
      connect(ui->poweroff,SIGNAL(clicked(bool)),this, SLOT(poweroff()));
 
-
+     //example();
 
      QPixmap alice("alice.jpg");
      int w = ui->alicepic->width();
@@ -147,11 +147,10 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::open(){
-    QString operatorname;
-    QString hicidnumber;
-    settingswindow->hide();
-    settingswindow->SaveSettings(operatorname,hicidnumber,counter);
-    if (counter==0) {return;}
+
+   // settingswindow->hide();
+   // settingswindow->SaveSettings(operatorname,hicidnumber,counter);
+    //if (counter==0) {return;}
     QString fileName;
     if(numberofscan==1||numberofscan==5 || numberofscan==6){
     fileName="Config.cfg";}
@@ -183,7 +182,7 @@ void MainWindow::open(){
 //std::cout<<properconfig<<"d4"<<endl;
 if (properconfig==1){
     ui->tab_2->setEnabled(true);
-    ui->tab_3->setEnabled(true);
+  //  ui->tab_3->setEnabled(true);
     int device=0;
     device=fConfig->GetDeviceType();
     if (device==2){
@@ -714,7 +713,10 @@ void MainWindow::start_test(){
          delete fScanVector.at(i); }}
     if (fresultVector.size()>=1){    for (unsigned int i =0; i<fresultVector.size();i++){
          delete fresultVector.at(i); }}
-
+     idofactivitytype=0;
+     idoflocationtype=0;
+     idofoperator=0;
+     locdetails.clear();
     fHICs.clear();
     fAnalysisVector.clear();
     fScanVector.clear();
@@ -1004,14 +1006,22 @@ void MainWindow::connectcombo(int value){
         ui->start_test->show();
       //  qDebug()<<"OB Qualification test selected";
         // ui->testtypeselected->setText("OB Reception Test");
-        ui->testtypeselected->setText("OB Qualification Test");
+        ui->testtypeselected->setText("OB HIC Qualification Test");
       //  ui->example1->show();
+
+        findidoftheactivitytype("OB HIC Qualification Test",idofactivitytype);
+        std::cout<<"the id of the selected test: "<<idofactivitytype<<std::endl;
+        locationcombo();
+
+        settingswindow->connectlocationcombo(locdetails);
+
+
         numberofscan=1;
-        open();
+     //  open();
 
 
-       if (counter==0) {break;}
-       fillingOBvectors();
+   //   if (counter==0) {break;}
+    //  fillingOBvectors();
 
         break;}
     case 2:
@@ -1022,9 +1032,9 @@ void MainWindow::connectcombo(int value){
         numberofscan=2;
         ui->testtypeselected->setText("IB Qualification Test");
        // openib();
-        open();//to be tested
-        if (counter==0){break;}
-        fillingOBvectors();//to be tested
+       // open();//to be tested
+      //  if (counter==0){break;}
+      //  fillingOBvectors();//to be tested
         //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
         break;}
 
@@ -1053,9 +1063,9 @@ void MainWindow::connectcombo(int value){
         ui->start_test->show();
         numberofscan=5;
           ui->testtypeselected->setText("OB Reception Test");
-        open();
-        if (counter==0){break;}
-        fillingreceptionscans();
+       // open();
+     //   if (counter==0){break;}
+      //  fillingreceptionscans();
         //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
         break;}
 
@@ -1065,10 +1075,10 @@ void MainWindow::connectcombo(int value){
         ui->start_test->show();
         numberofscan=6;
         ui->testtypeselected->setText("OB Powering Test");
-        open();
-        if (counter==0){break;}
-        poweringscan();
-
+       // open();
+    //    if (counter==0){break;}
+    //    poweringscan();
+//
       //  qDebug()<<"IB Qualification test selected";
        // openib();
         //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
@@ -1111,7 +1121,7 @@ void MainWindow::connectcombo(int value){
 
     }
  // ui->test1->setStyleSheet("color:orange;");
-  connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
+
 //  ui->test1->setStyleSheet("color:orange;");
 // std::cout<<"is working"<<std::endl;}
    //connect(ui->start_test,SIGNAL(clicked()),this,SLOT(runscans()));
@@ -1648,29 +1658,29 @@ void MainWindow::attachtodatabase(){
          ProjectDB *myproject=new ProjectDB(myDB);
          MemberDB *mymember= new MemberDB(myDB);
          ComponentDB *mycomponents=new ComponentDB(myDB);
-         std::vector <ProjectDB::project> projectlist;
-         myproject->GetList(&projectlist);
+       //  std::vector <ProjectDB::project> projectlist;
+       //  myproject->GetList(&projectlist);
       //   std::cout<<"The number of projects is "<<projectlist.size()<<std::endl;
         // for(int i=0; i<projectlist.size(); i++){
 
            //  std::cout<<"Project "<<projectlist.at(i).Name<<"with id "<<projectlist.at(i).ID <<std::endl;
        //  }
-         std::vector<MemberDB::member> memberlist;
+        // std::vector<MemberDB::member> memberlist;
        //  for(int j=21;j<22;j++){
-         mymember->GetList(21,&memberlist);
-         for(int i=0; i<memberlist.size(); i++){
+      // /  mymember->GetList(21,&memberlist);
+        // for(int i=0; i<memberlist.size(); i++){
 
      // std::cout<<"Member"<<memberlist.at(i).FullName<<"  "<<memberlist.at(i).PersonalID<<std::endl;
-         }
+  //       }
     //}
 
-         std::vector<ComponentDB::componentType> componentlist;
-          mycomponents->GetTypeList(21,&componentlist);
-          for(int i=0; i<componentlist.size(); i++){
+      //   std::vector<ComponentDB::componentType> componentlist;
+       //   mycomponents->GetTypeList(21,&componentlist);
+       //   for(int i=0; i<componentlist.size(); i++){
 
     //      std::cout<<"component "<<componentlist.at(i).Name<<"The code is: "<< componentlist.at(i).ID<<std::endl;
-
-         }
+//
+       //  }
 
 
           QDateTime date;
@@ -1684,31 +1694,52 @@ void MainWindow::attachtodatabase(){
           ActivityDB::attach activattachment;
 
 
-          activ.Location = 161;//cern
+         // activ.Location = 161;//cern
+          activ.Location=idoflocationtype;
           activ.EndDate = date.currentDateTime().toTime_t();
           activ.Lot = "Test";//change everytime
-          activ.Name = "Test_felix";//change everytime
+          activ.Name = hicidnumber.toStdString();//change everytime
           activ.Position = "Position98";//change everytime
           activ.Result = 1; //check the value
 
           activ.StartDate=date.currentDateTime().toTime_t();
           activ.Status = 83; // open
-          activ.Type = 881;//obqualificatiom
-          activ.User = 20606;//me
+          //activ.Type = 881;//obqualificatiom
+          activ.Type=idofactivitytype;
+         // activ.User = 20606;//me
+          activ.User=idofoperator;
 
-          activmember.Leader = 4646;//markus
+     /*     activmember.Leader = 4646;//markus
           activmember.ProjectMember = 1126;//myid
-          activmember.User = 20606;//myprojectid
+       //   activmember.User = 20606;//myprojectid
+          activ.User=idofoperator;
           activ.Members.push_back(activmember);
+*/
 
-
-
+/*
           activparameter.ActivityParameter = 381;//number of chips//id of this parameter
           activparameter.User = 20606;
           activparameter.Value = 9;
           activ.Parameters.push_back(activparameter);
+*/
 
 
+
+//std::map<std::string,TScanResultHic* >::iterator ithic;
+for(int i=0; i<fresultVector.size();i++){
+    if(fresultVector[i]!=0){
+ //for (ithic = fresultVector.at(4)->GetHicResults().begin(); ithic != fresultVector.at(4)->GetHicResults().end(); ++ithic) {
+ //for (ithic = fresultVector.at(scanposition)->GetHicResults().begin(); ithic != fresultVector.at(scanposition)->GetHicResults().end(); ++ithic) {
+   //TDigitalResultHic *result = (TDigitalResultHic*) ithic->second;
+        // result->WriteToDB(myDB,activ);}
+    fresultVector.at(i)->WriteToDB(myDB,activ);
+    std::cout<<"writing to database"<<std::endl;
+ }}//tis for toufresultsvector
+
+
+
+
+ /*
 
           activattachment.Category = 41;
           activattachment.LocalFileName = "attachment_test";
@@ -1718,7 +1749,7 @@ void MainWindow::attachtodatabase(){
 
           activattachment.RemoteFileName.append(".txt");
           activ.Attachments.push_back(activattachment);
-
+*/
 
           myactivity->Create(&activ);
 
@@ -1795,9 +1826,50 @@ void MainWindow::poweringscan(){
 
 
 
+void MainWindow::findidoftheactivitytype(std::string activitytypename, int &id){
+
+    AlpideDB *myDB=new AlpideDB();
+    ActivityDB *myactivity=new ActivityDB(myDB);
+    std::vector<ActivityDB::activityType> *activitytypelist;
+    activitytypelist= myactivity->GetActivityTypeList(21);
+    for(int i=0; i<activitytypelist->size(); i++){
+        if (strcmp(activitytypename.c_str(),activitytypelist->at(i).Name.c_str())==0){
+
+            id=activitytypelist->at(i).ID;
+        }
+
+
+    }
+    delete myDB;
+    delete myactivity;
+}
+
+
+void MainWindow::locationcombo(){
+    AlpideDB *myDB=new AlpideDB();
+     ActivityDB *myactivity=new ActivityDB(myDB);
+   locationtypelist=myactivity->GetLocationTypeList(idofactivitytype);
+   locdetails.push_back(std::make_pair(" ",0));
+   for(int i=0; i<locationtypelist->size(); i++){
+       std::cout<<"the location name is "<<locationtypelist->at(i).Name<<"and the ID is "<<locationtypelist->at(i).ID<<std::endl;
+   locdetails.push_back(std::make_pair(locationtypelist->at(i).Name,locationtypelist->at(i).ID));
+   }
+
+   delete myDB;
+   delete myactivity;
+
+
+}
 
 
 
-
-
-
+void MainWindow::savesettings(){
+     settingswindow->hide();
+     settingswindow->SaveSettings(operatorname,hicidnumber,counter,idoflocationtype, idofoperator);
+    open();
+    if (counter==0){return;}
+    if (numberofscan==1||numberofscan==2){fillingOBvectors();}
+    if (numberofscan==5){fillingreceptionscans();}
+     connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
+     std::cout<<operatorname.toStdString()<<hicidnumber.toStdString()<<idoflocationtype<<idofoperator<<std::endl;
+}

@@ -54,6 +54,13 @@ std::vector<QPushButton*> scanbuttons;
 std::vector<QLabel*>scanstatuslabels;
 int numberofscan=0;
 int scanposition;
+QString operatorname;
+QString hicidnumber;
+int idofactivitytype;
+int idoflocationtype;
+int idofoperator;
+std::vector<ActivityDB::locationType> *locationtypelist;
+std::vector<pair<std::string,int>> locdetails;
 
 
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
@@ -97,6 +104,11 @@ public slots:
    void noisebd();
    void noisead();
    void attachtodatabase();
+   void findidoftheactivitytype(std::string activitytypename, int &id);
+   void locationcombo();
+   void savesettings();
+
+
       // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     /*
     void open();

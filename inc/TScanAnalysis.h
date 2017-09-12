@@ -72,7 +72,7 @@ class TScanResult {
   int              GetNHics          ()     {return (int) m_hicResults.size();};
   void             WriteToFile       (const char *fName);
   virtual void     WriteToFileGlobal (FILE *fp)          = 0;
-  virtual void     WriteToDB         (AlpideDB *db, ActivityDB::activity activity) = 0;
+  virtual void     WriteToDB         (AlpideDB *db, ActivityDB::activity &activity) = 0;
   TScanResultChip *GetChipResult     (common::TChipIndex idx);
   TScanResultHic  *GetHicResult      (std::string hic);
   std::map <std::string, TScanResultHic*> GetHicResults () {return m_hicResults;};  
