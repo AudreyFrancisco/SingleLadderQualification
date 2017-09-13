@@ -165,7 +165,7 @@ TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
   m_stepPulseAmplitude  = m_config->GetChargeStep();
   m_nPulseInj           = m_config->GetNInj();
 
-  m_writeRawData        = false;
+  m_writeRawData        = true;
   m_writeNoHitPixels    = false;
   m_writeNoThreshPixels = false;
   m_writeStuckPixels    = false;
@@ -314,7 +314,7 @@ float FindStart (TGraph* aGraph, int resultFactor, int m_nPulseInj) {
     }
 
   } else {
-    for (int i = aGraph->GetN()-1; i>-1; i++) {
+    for (int i = aGraph->GetN()-1; i>-1; i--) {
       if (ys[i] == m_nPulseInj) {
         Lower = (float) xs[i];
         break;
@@ -329,7 +329,16 @@ float FindStart (TGraph* aGraph, int resultFactor, int m_nPulseInj) {
     }
   }
 
-  if ((Lower == -1) || (Upper < Lower)) return -1;
+  if ((Lower == -1) || (Upper == -1)) {
+    return -1;
+  }
+  if ((resultFactor > 0) && (Upper < Lower)) {
+    return -1;
+  }
+  if ((resultFactor < 0) && (Upper > Lower)) {
+    return -1;
+  }
+
   return (Upper + Lower)/2.0;
 }
 
@@ -367,7 +376,15 @@ common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph* aGraph, bool speedy)
     }
 
     fitfcn->SetParameter(0, FindStart(aGraph, m_resultFactor, m_nPulseInj));  //.5*(m_stopPulseAmplitude-m_startPulseAmplitude)*m_resultFactor);
-    fitfcn->SetParameter(1, 8);
+    if (m_resultFactor > 1) {   // Threshold scan
+      fitfcn->SetParameter(1, 5);
+    }
+    else if (m_resultFactor == 1) {   // VCASN Scan
+      fitfcn->SetParameter(1, 1);
+    }
+    else {  // ITHR scan
+      fitfcn->SetParameter(1, 8);
+    }
     fitfcn->SetParameter(2, .5*m_nPulseInj);
     aGraph->Fit("fitfcn","RQ");
 
@@ -397,7 +414,7 @@ void TThresholdAnalysis::Initialize()
   // Initializing TThresholdResult variables.
   // Initializing counters.
 
-  while (!m_scan->IsRunning()){sleep(1);}
+  while (!m_scan->IsRunning()){usleep(300);}
 
   std::cout << "Initializing " << m_analisysName << std::endl;
 
@@ -594,6 +611,7 @@ void TThresholdAnalysis::AnalyseHisto (TScanHisto *histo) {
 
       } else if (m_fDoFit){
 
+	//	std::cout << "fitting pixel " << intIndexDummy << " / " << iCol << " / " << row << std::endl;
         // MB - NEED TO SELECT GOOD FIT.
         common::TErrFuncFitResult fitResult;
         fitResult=DoFit(gDummy, m_config->GetParamValue("SPEEDY"));
