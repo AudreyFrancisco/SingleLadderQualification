@@ -165,7 +165,7 @@ TThresholdAnalysis::TThresholdAnalysis(std::deque<TScanHisto> *aScanHistoQue,
   m_stepPulseAmplitude  = m_config->GetChargeStep();
   m_nPulseInj           = m_config->GetNInj();
 
-  m_writeRawData        = true;
+  m_writeRawData        = m_config->GetParamValue("RAW_DATA");
   m_writeNoHitPixels    = false;
   m_writeNoThreshPixels = false;
   m_writeStuckPixels    = false;
