@@ -80,6 +80,7 @@ class THicIB : public THic {
   THicType           GetHicType      () {return HIC_IB;};
   std::vector<int>   GetBoardIndices ();
   bool               ContainsChip (common::TChipIndex idx);
+  void               ConfigureInterface (int board, int *rcv, int ctrl);
 };
 
 

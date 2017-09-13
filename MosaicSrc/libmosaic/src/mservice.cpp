@@ -54,7 +54,7 @@ MSrvcError::MSrvcError(const string& arg)
 MService::MService() 
 {
 	sockfd = -1;
-	seqNumber = 0;
+	seqNumber = (uint8_t) 0;
 }
 
 MService::MService(const char *IPaddr, int port) 

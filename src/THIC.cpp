@@ -137,6 +137,16 @@ THicIB::THicIB (const char *dbId, int modId, TPowerBoard *pb, int pbMod)
 }
 
 
+void THicIB::ConfigureInterface (int board, int *rcv, int ctrl) 
+{
+  m_boardidx = board;
+  m_ctrl     = ctrl;
+  for (int i = 0; i < 9; i++) {
+    m_rcv[i] = rcv[i];
+  }
+}
+
+
 common::TChipIndex THicIB::GetChipIndex (int i) 
 {
   common::TChipIndex idx;

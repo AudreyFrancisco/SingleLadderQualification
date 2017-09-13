@@ -25,6 +25,7 @@ TScan::TScan (TScanConfig                   *config,
   m_histoQue = histoQue;
   m_mutex    = aMutex;
 
+  m_running  = false;
   fScanAbort = false;
 
   strcpy (m_state, "Waiting");

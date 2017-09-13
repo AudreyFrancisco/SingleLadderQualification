@@ -460,6 +460,7 @@ int initSetupIB(TConfig                        *config,
     else {
       hics->push_back(new THicIB("Dummy ID", 0, 0, 0));
     }
+    ((THicIB*)(hics->at(0)))->ConfigureInterface (0, RCVMAP, 0);
   }
   
   for (unsigned int i = 0; i < config->GetNChips(); i++) {
