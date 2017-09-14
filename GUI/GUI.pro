@@ -23,16 +23,19 @@ SOURCES += main.cpp\
            mainwindow.cpp\
            dialog.cpp \
            testselection.cpp \
-           scanthread.cpp
+           scanthread.cpp \
+    scanconfiguration.cpp
 
 HEADERS  += mainwindow.h \
             dialog.h \
             testselection.h \
-            scanthread.h
+            scanthread.h \
+    scanconfiguration.h
 
 FORMS    += mainwindow.ui \
             dialog.ui \
-            testselection.ui
+            testselection.ui \
+    scanconfiguration.ui
 
 INCLUDEPATH += $(ROOTSYS)/include /usr/local/include
 
