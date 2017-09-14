@@ -85,7 +85,7 @@ do
     $SCRIPT_DIR/hameg.py 3                     | tee -a $LOG
     ./test_threshold -c $SCRIPT_DIR/Config.cfg | tee -a $LOG
     $SCRIPT_DIR/hameg.py 3                     | tee -a $LOG
-    OUT_FILE=$(ls -1lr $ROOT_DIR/Data/Threshold*.dat | tail -1)
+    OUT_FILE=$(ls -1tr $ROOT_DIR/Data/Threshold*.dat | tail -1)
     SUBFOLDER=$(printf "$DATA_DIR/VGO%0.3f" ${VGO})
     mkdir -p ${SUBFOLDER}
     mv -v ${OUT_FILE} ${SUBFOLDER}             | tee -a $LOG
@@ -100,7 +100,7 @@ do
     $SCRIPT_DIR/hameg.py 3                     | tee -a $LOG
     ./test_threshold -c $SCRIPT_DIR/Config.cfg | tee -a $LOG
     $SCRIPT_DIR/hameg.py 3                     | tee -a $LOG
-    OUT_FILE=$(ls -1lr $ROOT_DIR/Data/Threshold*.dat | tail -1)
+    OUT_FILE=$(ls -1tr $ROOT_DIR/Data/Threshold*.dat | tail -1)
     SUBFOLDER=$(printf "$DATA_DIR/VBB%0.3f" ${VBB})
     mkdir -p ${SUBFOLDER}
     mv -v ${OUT_FILE} ${SUBFOLDER}                | tee -a $LOG
