@@ -10,8 +10,8 @@ ROOT_DIR=$(readlink -f ${SCRIPT_DIR}/../../ )
 
 command -v root >/dev/null 2>&1 || { echo "CERN ROOT not found.  Aborting." >&2; exit 1; }
 
-#cd $(readlink -f ${SCRIPT_DIR}/../)
-#find ${INPUT_FOLDER} -name "ThresholdScan*Chip0_0.dat" -exec root -l -b -q All_FitThresholdsIB.C+g'("'{}'")' \;
+cd $(readlink -f ${SCRIPT_DIR}/../)
+find ${INPUT_FOLDER} -name "ThresholdScan*Chip0_0.dat" -exec root -l -b -q All_FitThresholdsIB.C+g'("'{}'")' \;
 
 
 for i in $(seq 0 8)
