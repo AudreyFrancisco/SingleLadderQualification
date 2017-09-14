@@ -14,11 +14,11 @@ class hameg:
         ### CONFIGURATION ###
         self.dev = [ serial.Serial("/dev/ttyHAMEG3", 9600, rtscts=True) ]
 
-        self.voltage = [ [ 1.80, 1.80, 0.00, 0.00 ] ]   # 3
+        self.voltage = [ [ 1.80, 1.80, 0.00, 0.000 ] ]   # 3
 
-        self.current = [ [ 1.30, 0.40, 0.03, 0.02 ] ]   # 3
+        self.current = [ [ 1.30, 0.40, 0.03, 0.005 ] ]   # 3
 
-        self.enable  = [ [ True, True, True, True ] ]   # 3
+        self.enable  = [ [ True, True, True, True  ] ]   # 3
 
         self.channels = [ int(4) ]
 
@@ -42,7 +42,7 @@ class hameg:
                 self.dev[i_dev].write("FUSE:DEL 200\n")
                 for j_ch in range(self.channels[i_dev]):
                     if i_ch != j_ch:
-                        self.dev[i_dev].write("FUSE:LINK %d\n" % j_ch)
+                        self.dev[i_dev].write("FUSE:LINK %d\n" % (j_ch+1))
                 self.dev[i_dev].write("SOUR:VOLT %f\n" % self.voltage[i_dev][i_ch])
                 self.dev[i_dev].write("SOUR:CURR %f\n" % self.current[i_dev][i_ch])
             time.sleep(2)
@@ -83,6 +83,7 @@ class hameg:
                 self.powerOnCh(i_dev, i_ch)
 
     def changeCh(self, i_dev, i_ch, voltage, current):
+        print "Channel: %d; voltage: %fV; current: %fA" %( i_ch, voltage, current) 
         self.dev[i_dev].write("INST OUT%d\n" % (i_ch+1))
         self.dev[i_dev].write("SOUR:VOLT %f\n" % float(voltage))
         self.dev[i_dev].write("SOUR:CURR %f\n" % float(current))
@@ -119,7 +120,7 @@ def main():
         if ch<0 or voltage<0 or current<0:
             print "Did not correctly specify <mode> <channel> <voltage> <current>"
         else:
-            h.changeCh(ch, voltage, current)
+            h.changeCh(0, ch, voltage, current)
     elif mode==3:
         # measure all channels
         h.measureAll()
