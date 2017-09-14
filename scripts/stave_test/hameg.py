@@ -86,7 +86,7 @@ class hameg:
                 self.dev[i_dev].write("FUSE:DEL 100\n")
                 for j_ch in range(self.channels[i_dev]):
                     if i_ch != j_ch:
-                        self.dev[i_dev].write("FUSE:UNLINK %d\n" % j_ch)
+                        self.dev[i_dev].write("FUSE:UNLINK %d\n" % (j_ch+1))
                 self.dev[i_dev].write("SOUR:VOLT %f\n" % self.voltage[i_dev][i_ch])
                 self.dev[i_dev].write("SOUR:CURR %f\n" % self.current[i_dev][i_ch])
             self.dev[i_dev].write("OUTP:GEN ON\n")
