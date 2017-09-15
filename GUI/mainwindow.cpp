@@ -24,7 +24,7 @@
 //#include "scanthread.h"
 #include "dialog.h"
 #include "testselection.h"
-
+#include "scanconfiguration.h"
 #include "TAlpide.h"
 #include "TDigitalAnalysis.h"
 #include "TDigitalScan.h"
@@ -67,7 +67,6 @@ MainWindow::MainWindow(QWidget *parent) :
      this->setWindowTitle(QString::fromUtf8("GUI"));
      ui->tab_2->setEnabled(false);
      ui->example1->hide();
-
      ui->tab_3->setEnabled(true);
     // qDebug()<<"Starting testing";
       ui->obm1->setStyleSheet("background-color:red;");
@@ -112,8 +111,9 @@ MainWindow::MainWindow(QWidget *parent) :
       menu1->addAction(writedb);
      // ui->abort->hide();
      // ui->abortall->hide();
-   //   ui->tabWidget->removeTab(2);
+       ui->tabWidget->removeTab(2);
       ui->tabWidget->removeTab(1);
+
      connect(writedb,SIGNAL(triggered()),this,SLOT(attachtodatabase()));
      connect(ui->abortall,SIGNAL(clicked()),this,SLOT(StopScan()),Qt::DirectConnection);
      connect(newtestaction, SIGNAL(triggered()),this, SLOT(start_test()));
@@ -1128,7 +1128,8 @@ void MainWindow::connectcombo(int value){
 }
 
 void MainWindow::applytests(){
-
+    if (numberofscan==1||numberofscan==2){fillingOBvectors();}
+    if (numberofscan==5){fillingreceptionscans();}
     performtests(fScanVector,fAnalysisVector);
     colorscans();
     connectscandetails();
@@ -1866,10 +1867,50 @@ void MainWindow::locationcombo(){
 void MainWindow::savesettings(){
      settingswindow->hide();
      settingswindow->SaveSettings(operatorname,hicidnumber,counter,idoflocationtype, idofoperator);
-    open();
-    if (counter==0){return;}
-    if (numberofscan==1||numberofscan==2){fillingOBvectors();}
-    if (numberofscan==5){fillingreceptionscans();}
-     connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
-     std::cout<<operatorname.toStdString()<<hicidnumber.toStdString()<<idoflocationtype<<idofoperator<<std::endl;
+     open();
+     scanconfigwindow= new ScanConfiguration(this);
+     scanconfigwindow->show();
+
+  //  if (counter==0){return;}
+   //  connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
+   //  std::cout<<operatorname.toStdString()<<hicidnumber.toStdString()<<idoflocationtype<<idofoperator<<std::endl;
 }
+
+
+void MainWindow::speedycheck(bool checked){
+
+     if (checked){
+         fConfig->GetScanConfig()->SetParamValue("SPEEDY","1");
+        std::cout<<"The speed is "<< fConfig->GetScanConfig()->GetSpeedy()<<std::endl;
+
+   }
+     else{
+         fConfig->GetScanConfig()->SetParamValue("SPEEDY","0");
+        std::cout<<"The speed is "<< fConfig->GetScanConfig()->GetSpeedy()<<std::endl;
+     }
+}
+
+
+
+
+
+
+void MainWindow::loadeditedconfig(){
+    scanconfigwindow->setnumberofmaskstages(nm);
+    if (counter==0){return;}
+     connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
+    std::cout<<operatorname.toStdString()<<hicidnumber.toStdString()<<idoflocationtype<<idofoperator<<std::endl;
+    scanconfigwindow->close();
+}
+
+
+void MainWindow::loaddefaultconfig(){
+    fConfig->GetScanConfig()->SetParamValue("SPEEDY","0");
+    std::cout<<"The speed is "<< fConfig->GetScanConfig()->GetSpeedy()<<std::endl;
+   if (counter==0){return;}
+    connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
+   std::cout<<operatorname.toStdString()<<hicidnumber.toStdString()<<idoflocationtype<<idofoperator<<std::endl;
+   scanconfigwindow->close();
+}
+
+

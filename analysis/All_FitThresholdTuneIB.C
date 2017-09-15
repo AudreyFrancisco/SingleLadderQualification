@@ -15,7 +15,7 @@ void runFit(int chipNum, std::string prefix) {
   //Write to file.  Need to manually give it ITH and VCASN??
   //   - BUT ITH varies constantly...?
   std::string commandStr = ".x ../../../analysis/FitThresholdTune.C+(\"" + name + "\", true)";
-  
+
   const char * input = commandStr.c_str();
   std::cout << "CHIP " << chipNum << ":" << std::endl;
   std::cout << input << std::endl;
@@ -27,30 +27,22 @@ void runFit(int chipNum, std::string prefix) {
   }
 }
 
-int All_FitThresholdTuneIB(const char *fName, bool generateMap=true) {  //Give it an arbitrary data file name...
-  char Prefix[100], fNameChip[100];
-  
-  int PrefixLength=strcspn(fName, "C"); //needs +"chipnum_rownum.dat"
-  strncpy(Prefix, fName, PrefixLength);
-  Prefix[PrefixLength]='\0';
-  std::string Pre(Prefix);
-  std::cout << Pre << std::endl;
-  
+int All_FitThresholdTuneIB(const char *fName, bool generateMap=true, bool thresholdNotNoise=false) {  //Give it an arbitrary data file name...
+  std::string Prefix = fName;
+  Prefix.erase(Prefix.rfind("Chip"));
+  std::cout << "Prefix: " << Prefix << std::endl;
+
+  char fNameChip[100];
+
   for(int i=0; i<9; i++) {
-    runFit(i,Pre);
+    runFit(i,Prefix);
   }
-  
-  /*for(int i=8; i<15; i++) {
-    suffix = 0;
-    runFit(i,Pre,suffix);
-  }*/
+
   if(generateMap) {
-    std::string slice="Plotting FitValues" + Pre.substr(13,15); //length-sensitive...
-    std::cout << slice << std::endl;
-    const char * line = (".x ../../../analysis/ThresholdMapIB.C+(\"" + slice + "Chip0_0.dat\", false)").c_str();  //I /think/ this is right...
-    gROOT->ProcessLine(line); //arbitrary file
+    std::string slice= Prefix.substr(0, Prefix.rfind("/")+1) + "FitValues" + Prefix.substr(Prefix.rfind("ThresholdScan_")+13, 15);
+
+    std::string line = ".x ThresholdMapIB.C+g(\"" + slice + "Chip0_0.dat\"," + std::to_string(thresholdNotNoise) + ")";
+    gROOT->ProcessLine(line.c_str());
   }
   return 0;
 }
-
-

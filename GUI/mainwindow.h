@@ -21,11 +21,13 @@
 class TConfig;
 class TScan;
 class TScanAnalysis;
+class TScanConfig;
 class TScanResult;
 class TestSelection;
 class THic;
 class TApplyMask;
 class TPowerTest;
+class ScanConfiguration;
 
 namespace Ui {
 class MainWindow;
@@ -39,6 +41,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     TestSelection *settingswindow;
+    ScanConfiguration *scanconfigwindow;
     void scanLoop (TScan *myScan);
  //   void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     std::vector <TScan *> fScanVector;
@@ -61,6 +64,7 @@ int idoflocationtype;
 int idofoperator;
 std::vector<ActivityDB::locationType> *locationtypelist;
 std::vector<pair<std::string,int>> locdetails;
+int nm;
 
 
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
@@ -107,6 +111,11 @@ public slots:
    void findidoftheactivitytype(std::string activitytypename, int &id);
    void locationcombo();
    void savesettings();
+   void speedycheck(bool checked);
+
+   void loaddefaultconfig();
+
+   void loadeditedconfig();
 
 
       // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);

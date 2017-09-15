@@ -374,7 +374,7 @@ int main(int argc, char** argv) {
 
     scan(maskStepSize);
 
-    sprintf(fName, "Data/VcASNScan_%s.dat", Suffix); //note the lowercase; necessary for All_FitThresholds
+    sprintf(fName, "Data/VCASNScan_%s.dat", Suffix);
     WriteDataToFile (fName, true);
     sprintf(fName, "Data/ScanConfig_%s_0.cfg", Suffix);
 
