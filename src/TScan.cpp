@@ -170,7 +170,7 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
 
   while (itrg < m_nTriggers * m_enabled[iboard]) {
     if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
-      usleep(100);
+      usleep(1000);
       trials ++;
       if (trials == 3) {
   	  std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event" << std::endl;
