@@ -27,6 +27,7 @@ void TPowerAnalysis::Finalize()
     THicCurrents     hicCurrents = it->second;
 
     // Copy currents from currents to result, apply cuts, write to file
+    hicResult->trip           = hicCurrents.trip;
     hicResult->iddaSwitchon   = hicCurrents.iddaSwitchon;
     hicResult->idddSwitchon   = hicCurrents.idddSwitchon;
     hicResult->iddaClocked    = hicCurrents.iddaClocked;
@@ -36,6 +37,9 @@ void TPowerAnalysis::Finalize()
     hicResult->ibias0         = hicCurrents.ibias0;
     hicResult->ibias3         = hicCurrents.ibias3;
 
+    for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
+      hicResult->ibias[i] = hicCurrents.ibias[i];
+    }
     hicResult->m_class        = GetClassification(hicCurrents);
   }
   WriteResult();
@@ -45,6 +49,7 @@ void TPowerAnalysis::Finalize()
 
 THicClassification TPowerAnalysis::GetClassification (THicCurrents currents) 
 {
+  if (currents.trip) return CLASS_RED;
   if (currents.hicType == HIC_IB) return GetClassificationIB(currents);
   else                            return GetClassificationOB(currents);
 }
@@ -85,6 +90,24 @@ THicClassification TPowerAnalysis::GetClassificationOB (THicCurrents currents)
 }
 
 
+
+void TPowerAnalysis::WriteIVCurve(THic *hic) 
+{
+  char fName[200];
+  sprintf(fName, "IVCurve_%s_%s.dat", hic->GetDbId().c_str(), 
+                                      m_config->GetfNameSuffix());
+  TPowerResultHic *result = (TPowerResultHic*) m_result->GetHicResult(hic->GetDbId());
+  result->SetIVFile (fName);
+
+  FILE *fp = fopen (fName, "w");
+  
+  for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
+    fprintf(fp, "%.3f %.1f", (float)i / 10, result->ibias[i]);
+  }
+  fclose (fp);
+}
+
+
 void TPowerAnalysis::WriteResult() 
 {
   char fName[200];
@@ -112,6 +135,7 @@ void TPowerResultHic::WriteToFile (FILE *fp)
 
   fprintf (fp, "HIC Classification: %s\n\n", WriteHicClassification());
 
+  fprintf (fp, "trip:             %d\n\n", trip?1:0);
   fprintf (fp, "IDDD at switchon: %.3f\n", idddSwitchon);
   fprintf (fp, "IDDA at switchon: %.3f\n", iddaSwitchon);
   fprintf (fp, "IDDD with clock:  %.3f\n", idddClocked);
@@ -122,4 +146,5 @@ void TPowerResultHic::WriteToFile (FILE *fp)
   fprintf (fp, "IBias at 0V:      %.3f\n", ibias0);
   fprintf (fp, "IBias at 3V:      %.3f\n", ibias3);
 
+  fprintf (fp, "\nI-V-curve file:   %s\n", m_ivFile);
 }

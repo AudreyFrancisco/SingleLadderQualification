@@ -17,6 +17,7 @@ class TPowerResultChip : public TScanResultChip {
 class TPowerResultHic : public TScanResultHic {
   friend class TPowerAnalysis;
  private:
+  bool     trip;
   float    iddaSwitchon;
   float    idddSwitchon;
   float    iddaClocked;
@@ -25,9 +26,12 @@ class TPowerResultHic : public TScanResultHic {
   float    idddConfigured;
   float    ibias0;
   float    ibias3;
+  float    ibias[50];
+  char     m_ivFile[200];
  protected:
  public:
   TPowerResultHic () : TScanResultHic () {};
+  void SetIVFile   (const char *fName) {strcpy(m_ivFile, fName);};
   void WriteToFile (FILE *fp);
 };
 
@@ -45,6 +49,7 @@ class TPowerResult : public TScanResult {
 
 class TPowerAnalysis : public TScanAnalysis {
  private:
+  void               WriteIVCurve        (THic *hic);
   THicClassification GetClassification   (THicCurrents currents);
   THicClassification GetClassificationIB (THicCurrents currents);
   THicClassification GetClassificationOB (THicCurrents currents);
