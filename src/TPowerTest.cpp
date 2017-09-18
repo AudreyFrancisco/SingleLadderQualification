@@ -66,7 +66,13 @@ void TPowerTest::DoIVCurve(THicCurrents result)
     float voltage = -i / 10;
     m_testHic->GetPowerBoard()->SetBiasVoltage(voltage);
     sleep(1);
-    result.ibias[i] = m_testHic->GetIBias();
+    result.ibias[i] = m_testHic->GetIBias() * 1000;   // convert in mA
+    //overcurrent protection; will be counted as trip
+    if (result.ibias[i] > m_config->GetParamValue("MAXIBIAS")) {
+      m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
+      sleep(1);
+      break;
+    }
   }
 }
 
