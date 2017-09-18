@@ -67,6 +67,11 @@ THicClassification TPowerAnalysis::GetClassificationIB (THicCurrents currents)
       (currents.idddClocked * 1000 > m_config->GetParamValue("MAXIDDD_CLOCKED_IB")))
     return CLASS_ORANGE;
 
+  // check for absolute value at 3V and for margin from breakthrough
+  if ((currents.ibias[30] > m_config->GetParamValue("MAXBIAS_3V_IB")) || 
+      (currents.ibias[40] > m_config->GetParamValue("MAXFACTOR_4V_IB") * currents.ibias[30])) 
+    return CLASS_ORANGE; 
+
   return CLASS_GREEN;
 
   // TODO: Add orange for back bias
@@ -84,6 +89,12 @@ THicClassification TPowerAnalysis::GetClassificationOB (THicCurrents currents)
       (currents.idddClocked * 1000 < m_config->GetParamValue("MINIDDD_CLOCKED_OB")) ||
       (currents.idddClocked * 1000 > m_config->GetParamValue("MAXIDDD_CLOCKED_OB")))
     return CLASS_ORANGE;
+
+  // check for absolute value at 3V and for margin from breakthrough
+  if ((currents.ibias[30] > m_config->GetParamValue("MAXBIAS_3V_IB")) || 
+      (currents.ibias[40] > m_config->GetParamValue("MAXFACTOR_4V_IB") * currents.ibias[30])) 
+    return CLASS_ORANGE; 
+
   return CLASS_GREEN;
 
   // TODO: Add orange for back bias

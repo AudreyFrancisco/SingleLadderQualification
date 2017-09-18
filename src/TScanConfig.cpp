@@ -42,6 +42,10 @@ TScanConfig::TScanConfig()
   m_powerCutMinIdddClocked_IB = POWER_CUT_MINIDDD_CLOCKED_IB;
   m_powerCutMaxIddaClocked_IB = POWER_CUT_MAXIDDA_CLOCKED_IB;
   m_powerCutMaxIdddClocked_IB = POWER_CUT_MAXIDDD_CLOCKED_IB;
+  m_powerCutMaxBias3V_IB      = POWER_CUT_MAXBIAS_3V_IB;
+  m_powerCutMaxBias3V_OB      = POWER_CUT_MAXBIAS_3V_OB;
+  m_powerMaxFactor4V_IB       = POWER_MAXFACTOR_4V_IB;
+  m_powerMaxFactor4V_OB       = POWER_MAXFACTOR_4V_OB;
 
   m_fifoCutMaxErr    = FIFO_CUT_MAXERR;
   m_fifoCutMaxFaulty = FIFO_CUT_MAXFAULTY;
@@ -97,6 +101,10 @@ void TScanConfig::InitParamMap ()
   fSettings["MINIDDD_CLOCKED_IB"] = &m_powerCutMinIdddClocked_IB;
   fSettings["MAXIDDA_CLOCKED_IB"] = &m_powerCutMaxIddaClocked_IB;
   fSettings["MAXIDDD_CLOCKED_IB"] = &m_powerCutMaxIdddClocked_IB;
+  fSettings["MAXBIAS_3V_IB"]      = &m_powerCutMaxBias3V_IB;
+  fSettings["MAXBIAS_3V_OB"]      = &m_powerCutMaxBias3V_OB;
+  fSettings["MAXFACTOR_4V_IB"]    = &m_powerMaxFactor4V_IB;
+  fSettings["MAXFACTOR_4V_OB"]    = &m_powerMaxFactor4V_OB;
 
   fSettings["FIFO_MAXERR"]        = &m_fifoCutMaxErr;
   fSettings["FIFO_MAXFAULTY"]     = &m_fifoCutMaxFaulty;

@@ -43,6 +43,12 @@ namespace ScanConfig {
   const int POWER_CUT_MAXIDDA_CLOCKED_IB = 180;
   const int POWER_CUT_MAXIDDD_CLOCKED_IB = 550;
 
+  const int POWER_CUT_MAXBIAS_3V_IB = 10;
+  const int POWER_CUT_MAXBIAS_3V_OB = 10;
+
+  const int POWER_MAXFACTOR_4V_IB = 3;
+  const int POWER_MAXFACTOR_4V_OB = 3;
+
   // cuts for fifo test
   const int FIFO_CUT_MAXERR    = 128;  // max number of errors per pattern and hic
   const int FIFO_CUT_MAXFAULTY = 1;   // max number of chips with errors
@@ -66,7 +72,7 @@ namespace ScanConfig {
   const int CAL_VPULSEL    = 160; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
   const int IVCURVE        = 1;   //Do I-V-curve on back bias
   const int IVPOINTS       = 40;  //number of 100 mV-points for back bias IV curve (max. 50 = 5V)
-  const int MAXIBIAS       = 20;  //current limit for I-V-curve in mA;
+  const int MAXIBIAS       = 50;  //current limit for I-V-curve in mA;
   const float VOLTAGE_SCALE = 1.0;
 }
 
@@ -109,6 +115,10 @@ class TScanConfig {
   int  m_powerCutMinIdddClocked_IB;
   int  m_powerCutMaxIddaClocked_IB;
   int  m_powerCutMaxIdddClocked_IB;
+  int  m_powerCutMaxBias3V_IB;
+  int  m_powerCutMaxBias3V_OB;
+  int  m_powerMaxFactor4V_IB;
+  int  m_powerMaxFactor4V_OB;
   int  m_fifoCutMaxErr;
   int  m_fifoCutMaxFaulty;
   int  m_digitalMaxBadPerChipOB;
