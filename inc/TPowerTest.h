@@ -29,7 +29,7 @@ class TPowerTest : public TScan {
   THic  *m_testHic;
   void   CreateMeasurements ();
   THisto CreateHisto        () {THisto histo; return histo;};
-  void   DoIVCurve          ();
+  void   DoIVCurve          (THicCurrents result);
   std::map <std::string, THicCurrents> m_hicCurrents;
  protected:
  public:

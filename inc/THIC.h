@@ -44,6 +44,8 @@ class THic {
   virtual THicType           GetHicType      () = 0;
   std::vector <TAlpide*>     GetChips        () {return m_chips;};
   TAlpide                   *GetChipById     (int chipId);
+  TPowerBoard               *GetPowerBoard   () {return m_powerBoard;};
+  int                        GetPbMod        () {return m_pbMod;};
 };
 
 

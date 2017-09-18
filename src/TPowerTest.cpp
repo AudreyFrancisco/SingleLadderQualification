@@ -60,8 +60,14 @@ void TPowerTest::PrepareStep(int loopIndex)
 }
 
 
-void TPowerTest::DoIVCurve() 
+void TPowerTest::DoIVCurve(THicCurrents result) 
 {
+  for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
+    float voltage = -i / 10;
+    m_testHic->GetPowerBoard()->SetBiasVoltage(voltage);
+    sleep(1);
+    result.ibias[i] = m_testHic->GetIBias();
+  }
 }
 
 
@@ -110,17 +116,37 @@ void TPowerTest::Execute()
   currentIt->second.idddConfigured = m_testHic->GetIddd();
   currentIt->second.iddaConfigured = m_testHic->GetIdda();
 
+  // switch on back bias only for module under test
+  for (int i = 0; i < 8; i++) {
+    if (i == m_testHic->GetPbMod()) {
+      m_testHic->GetPowerBoard()->SetBiasOn(i);
+    }
+    else {
+      m_testHic->GetPowerBoard()->SetBiasOff(i);
+    }
+  }
+
   currentIt->second.ibias0 = m_testHic->GetIBias();
 
+  // measure IV curve or only bias current at 3 V
   if (m_config->GetParamValue("IVCURVE")) {
-    DoIVCurve();
+    DoIVCurve(currentIt->second);
   }
   else {
-  // TODO: change bias to 3V, wait, measure
-  // change bias back to 0 V
+    m_testHic->GetPowerBoard()->SetBiasVoltage(3.0);    
+    sleep(1);
+    currentIt->second.ibias3 = m_testHic->GetIBias();
   }
 
-  // switch off?
+  // check if tripped
+  if ((m_testHic->GetPowerBoard()->GetBiasVoltage() < 1.0) || (!(m_testHic->IsPowered()))) {
+    currentIt->second.trip = true;
+  }
+  else {
+    currentIt->second.trip = false;
+  }
+  m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);    
+
 }
 
 
