@@ -12,6 +12,7 @@
 
 typedef struct {
   THicType hicType;
+  bool     trip;
   float    iddaSwitchon;
   float    idddSwitchon;
   float    iddaClocked;
@@ -20,15 +21,16 @@ typedef struct {
   float    idddConfigured;
   float    ibias0;
   float    ibias3;
+  float    ibias[50];
 } THicCurrents;
 
 class TPowerTest : public TScan {
  private: 
-  THic *m_testHic;
-  void CreateMeasurements();
-  THisto CreateHisto     () {THisto histo; return histo;};
+  THic  *m_testHic;
+  void   CreateMeasurements ();
+  THisto CreateHisto        () {THisto histo; return histo;};
+  void   DoIVCurve          ();
   std::map <std::string, THicCurrents> m_hicCurrents;
-
  protected:
  public:
   TPowerTest  (TScanConfig                   *config, 

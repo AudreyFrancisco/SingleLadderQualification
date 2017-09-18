@@ -22,6 +22,7 @@ TScanConfig::TScanConfig()
   m_scanStep       = SCAN_STEP;
   m_speedy         = SPEEDY;
   m_rawData        = RAWDATA;
+  m_ivCurve        = IVCURVE;
   m_localBusCutRed = LOCALBUSCUTRED;
   m_calVpulsel     = CAL_VPULSEL;
 
@@ -79,6 +80,7 @@ void TScanConfig::InitParamMap ()
   fSettings["SCAN_STEP"]    = &m_scanStep;
   fSettings["SPEEDY"]       = &m_speedy;
   fSettings["RAWDATA"]      = &m_rawData;
+  fSettings["IVCURVE"]      = &m_ivCurve;
 
   fSettings["MINIDDA_OB"]         = &m_powerCutMinIdda_OB;
   fSettings["MINIDDD_OB"]         = &m_powerCutMinIddd_OB;

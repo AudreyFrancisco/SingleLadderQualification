@@ -64,7 +64,7 @@ namespace ScanConfig {
   const int SPEEDY         = 0;  //Use slow fit if 0, differentiate->mean if 1.
   const int RAWDATA        = 0;
   const int CAL_VPULSEL    = 160; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
-
+  const int IVCURVE        = 1;   //Do I-V-curve on back bias
   const float VOLTAGE_SCALE = 1.0;
 }
 
@@ -91,6 +91,7 @@ class TScanConfig {
   int  m_scanStep;   //16
   int  m_speedy;
   int  m_rawData;
+  int  m_ivCurve;
   int  m_localBusCutRed;
   int  m_powerCutMinIdda_OB;
   int  m_powerCutMinIddd_OB;

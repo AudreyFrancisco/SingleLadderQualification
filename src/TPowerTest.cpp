@@ -60,6 +60,11 @@ void TPowerTest::PrepareStep(int loopIndex)
 }
 
 
+void TPowerTest::DoIVCurve() 
+{
+}
+
+
 void TPowerTest::Execute()
 {
   std::vector<int>       boardIndices = m_testHic->GetBoardIndices();
@@ -107,9 +112,14 @@ void TPowerTest::Execute()
 
   currentIt->second.ibias0 = m_testHic->GetIBias();
 
+  if (m_config->GetParamValue("IVCURVE")) {
+    DoIVCurve();
+  }
+  else {
   // TODO: change bias to 3V, wait, measure
-
   // change bias back to 0 V
+  }
+
   // switch off?
 }
 
