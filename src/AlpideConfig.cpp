@@ -199,27 +199,27 @@ void AlpideConfig::EnableDoubleColumns(TAlpide *chip) {
 
 
 // return value: active row (needed for threshold scan histogramming)
-int AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage) {
+int AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage, bool Mask, bool Select) {
   EnableDoubleColumns(chip);
   // check that nPix is one of (1, 2, 4, 8, 16, 32)
   if ((nPix <= 0) || (nPix & (nPix - 1)) || (nPix > 32)) {
     std::cout << "Warning: bad number of pixels for mask stage (" << nPix << ", using 1 instead" << std::endl;
     nPix = 1;
   }
-  WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
-  WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
+  if (Mask)   WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
+  if (Select) WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
 
   // complete row
   if (nPix == 32) {
-    WritePixRegRow(chip, Alpide::PIXREG_MASK,   false, iStage);
-    WritePixRegRow(chip, Alpide::PIXREG_SELECT, true, iStage);
+    if (Mask)   WritePixRegRow(chip, Alpide::PIXREG_MASK,   false, iStage);
+    if (Select) WritePixRegRow(chip, Alpide::PIXREG_SELECT, true, iStage);
     return iStage;
   }
   else {
     int colStep = 32 / nPix;
     for (int icol = 0; icol < 1024; icol += colStep) {
-      WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, iStage % 512, icol + iStage / 512);
-      WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  iStage % 512, icol + iStage / 512);
+      if (Mask)   WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, iStage % 512, icol + iStage / 512);
+      if (Select) WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  iStage % 512, icol + iStage / 512);
     }
     return (iStage % 512);
   }

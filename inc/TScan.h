@@ -110,8 +110,8 @@ class TMaskScan : public TScan {
   int                      m_row;
   std::vector <TPixHit>    m_stuck;
   TErrorCounter            m_errorCount;
-  void ConfigureMaskStage(TAlpide *chip, int istage);
-  void ReadEventData     (std::vector <TPixHit> *Hits, int iboard);
+  virtual void ConfigureMaskStage(TAlpide *chip, int istage);
+  void         ReadEventData     (std::vector <TPixHit> *Hits, int iboard);
  public: 
   TMaskScan  (TScanConfig                   *config, 
               std::vector <TAlpide *>        chips, 

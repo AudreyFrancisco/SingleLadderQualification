@@ -228,3 +228,45 @@ void TDigitalScan::Terminate   ()
 }
 
 
+
+TDigitalWhiteFrame::TDigitalWhiteFrame  (TScanConfig                   *config, 
+                                         std::vector <TAlpide *>        chips, 
+                                         std::vector <THic*>            hics,
+                                         std::vector <TReadoutBoard *>  boards, 
+                                         std::deque<TScanHisto>        *histoQue, 
+                                         std::mutex                    *aMutex) 
+  : TDigitalScan (config, chips, hics, boards, histoQue, aMutex) 
+{
+  strcpy(m_name, "Digital White Frame");    
+}
+
+
+void TDigitalWhiteFrame::ConfigureMaskStage(TAlpide *chip, int istage) {
+  m_row = AlpideConfig::ConfigureMaskStage (chip, m_pixPerStage, istage, false, true);
+}
+
+
+void TDigitalWhiteFrame::Init ()
+{
+  TScan::Init();
+  m_running = true;
+  CountEnabledChips();
+
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    std::cout << "Board " << i << ", found " << m_enabled[i] << " enabled chips" << std::endl;
+    ConfigureBoard(m_boards.at(i));
+
+    m_boards.at(i)->SendOpCode (Alpide::OPCODE_GRST);
+    m_boards.at(i)->SendOpCode (Alpide::OPCODE_PRST);
+  }
+
+  for (unsigned int i = 0; i < m_chips.size(); i ++) {
+    if (! (m_chips.at(i)->GetConfig()->IsEnabled())) continue;
+    ConfigureChip (m_chips.at(i));
+    AlpideConfig::WritePixRegAll (m_chips.at(i), Alpide::PIXREG_MASK, true);
+  }
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    m_boards.at(i)->SendOpCode (Alpide::OPCODE_RORST);     
+    m_boards.at(i)->StartRun   ();
+  }
+}
