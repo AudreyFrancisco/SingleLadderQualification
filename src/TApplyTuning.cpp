@@ -1,5 +1,5 @@
 #include "TApplyTuning.h"
-
+#include <cstring>
 
 TApplyTuning::TApplyTuning (std::deque<TScanHisto> *histoQue, 
                             TScan                  *aScan,
@@ -27,6 +27,8 @@ void TApplyTuning::Run()
    
       // TODO: check rounding, fix makefile (unresolved reference)
       chip->GetConfig()->SetParamValue(GetDACName(), (int)chipResult->GetThresholdMean());
+      if (strcmp(GetDACName(), "VCASN") == 0) 
+        chip->GetConfig()->SetParamValue("VCASN2", (int)chipResult->GetThresholdMean() + 12);
       std::cout << "Setting chip " << it->first << ", thr=" << chipResult->GetThresholdMean() << std::endl;
     }
   }

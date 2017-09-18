@@ -227,6 +227,7 @@ void TtuneVCASNScan::PrepareStep (int loopIndex)
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_VCASN, m_value[0]);
+      m_chips.at(ichip)->WriteRegister(Alpide::REG_VCASN2, m_value[0] + 12);
     }
     break;
   case 1:    // 2nd loop: mask staging

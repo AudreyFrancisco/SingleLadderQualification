@@ -20,7 +20,7 @@ namespace ScanConfig {
   const int ITHR_START     = 30;
   const int ITHR_STOP      = 100;
   const int ITHR_STEP      = 1;
-  const int VCASN_START    = 40;
+  const int VCASN_START    = 30;
   const int VCASN_STOP     = 70;
   const int VCASN_STEP     = 1;
   const int SCAN_STEP      = 16; //Grab every Xth row (for tuneITHR/VCASN scan only).
@@ -63,7 +63,7 @@ namespace ScanConfig {
 
   const int SPEEDY         = 0;  //Use slow fit if 0, differentiate->mean if 1.
   const int RAWDATA        = 0;
-  const int CAL_VPULSEL    = 155; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
+  const int CAL_VPULSEL    = 160; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
 
   const float VOLTAGE_SCALE = 1.0;
 }
