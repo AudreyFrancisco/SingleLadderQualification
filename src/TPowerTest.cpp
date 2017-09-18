@@ -132,16 +132,17 @@ void TPowerTest::Execute()
     }
   }
 
-  currentIt->second.ibias0 = m_testHic->GetIBias();
+  currentIt->second.ibias0 = m_testHic->GetIBias() *1000;
 
   // measure IV curve or only bias current at 3 V
   if (m_config->GetParamValue("IVCURVE")) {
     DoIVCurve(currentIt->second);
+    currentIt->second.ibias3 = currentIt->second.ibias[30];
   }
   else {
     m_testHic->GetPowerBoard()->SetBiasVoltage(3.0);    
     sleep(1);
-    currentIt->second.ibias3 = m_testHic->GetIBias();
+    currentIt->second.ibias3 = m_testHic->GetIBias() * 1000;
   }
 
   // check if tripped
