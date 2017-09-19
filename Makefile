@@ -36,7 +36,7 @@ BASE_CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp A
   USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp TReadoutBoardMOSAIC.cpp TChipConfig.cpp \
   TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp TPowerBoard.cpp \
   TPowerBoardConfig.cpp BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp \
-  TPowerAnalysis.cpp TDigitalAnalysis.cpp TFifoAnalysis.cpp TLocalBusAnalysis.cpp \
+  TPowerAnalysis.cpp TDigitalAnalysis.cpp TDigitalWFAnalysis.cpp TFifoAnalysis.cpp TLocalBusAnalysis.cpp \
   TNoiseAnalysis.cpp TScan.cpp TFifoTest.cpp TPowerTest.cpp TSCurveScan.cpp TDigitalScan.cpp \
   TNoiseOccupancy.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp Common.cpp \
   TReadoutBoardRU.cpp TBoardConfigRU.cpp TApplyMask.cpp THicConfig.cpp
