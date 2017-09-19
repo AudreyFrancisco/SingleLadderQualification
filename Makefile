@@ -67,7 +67,7 @@ EXE = startclk stopclk
 # test_* executables without ROOT
 TEST_EXE = test_mosaic test_noiseocc test_threshold test_digitalscan test_fifo test_dacscan \
   test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit \
-  test_localbus test_chip_count test_alucms
+  test_localbus test_chip_count test_alucms test_dacscan_voltage
 EXE += $(TEST_EXE)
 
 #
