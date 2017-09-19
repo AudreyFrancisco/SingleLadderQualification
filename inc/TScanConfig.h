@@ -59,6 +59,11 @@ namespace ScanConfig {
   const int DIGITAL_MAXBAD_HIC_OB  = 7340;   // 1 per mille
   const int DIGITAL_MAXBAD_HIC_IB  = 4700;   // 1 per mille
 
+  const int DIGITAL_MAXNOMASK_HIC_OB      = 7340;  // 1 per mille? 
+  const int DIGITAL_MAXNOMASK_HIC_IB      = 4700;  // 1 per mille?
+  const int DIGITAL_MAXNOMASKSTUCK_HIC_OB = 0;
+  const int DIGITAL_MAXNOMASKSTUCK_HIC_IB = 0;
+
   // cuts for threshold scan
   const int THRESH_MAXBAD_CHIP_OB = 1024;   // max number of bad pixels: 1 dcol
   const int THRESH_MAXBAD_CHIP_IB = 524;    // 1 per mille
@@ -125,6 +130,10 @@ class TScanConfig {
   int  m_digitalMaxBadPerChipIB;
   int  m_digitalMaxBadPerHicOB;
   int  m_digitalMaxBadPerHicIB;
+  int  m_digitalMaxNoMaskHicIB;
+  int  m_digitalMaxNoMaskHicOB;
+  int  m_digitalMaxNoMaskStuckHicIB;
+  int  m_digitalMaxNoMaskStuckHicOB;
   int  m_threshMaxBadPerChipOB;
   int  m_threshMaxBadPerChipIB;
   int  m_threshMaxBadPerHicOB;

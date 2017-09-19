@@ -55,6 +55,11 @@ TScanConfig::TScanConfig()
   m_digitalMaxBadPerHicOB  = DIGITAL_MAXBAD_HIC_OB;
   m_digitalMaxBadPerHicIB  = DIGITAL_MAXBAD_HIC_IB;
 
+  m_digitalMaxNoMaskHicIB      = DIGITAL_MAXNOMASK_HIC_IB;
+  m_digitalMaxNoMaskHicOB      = DIGITAL_MAXNOMASK_HIC_OB;
+  m_digitalMaxNoMaskStuckHicIB = DIGITAL_MAXNOMASKSTUCK_HIC_IB;
+  m_digitalMaxNoMaskStuckHicOB = DIGITAL_MAXNOMASKSTUCK_HIC_OB;
+
   m_threshMaxBadPerChipOB = THRESH_MAXBAD_CHIP_OB;
   m_threshMaxBadPerChipIB = THRESH_MAXBAD_CHIP_IB;
   m_threshMaxBadPerHicOB  = THRESH_MAXBAD_HIC_OB;
@@ -113,6 +118,11 @@ void TScanConfig::InitParamMap ()
   fSettings["DIGITAL_MAXBAD_CHIP_IB"] = &m_digitalMaxBadPerChipIB;
   fSettings["DIGITAL_MAXBAD_HIC_OB"]  = &m_digitalMaxBadPerHicOB;
   fSettings["DIGITAL_MAXBAD_HIC_IB"]  = &m_digitalMaxBadPerHicIB;
+
+  fSettings["DIGITAL_MAXNOMASK_HIC_OB"]       = &m_digitalMaxNoMaskHicOB;
+  fSettings["DIGITAL_MAXNOMASK_HIC_IB"]       = &m_digitalMaxNoMaskHicIB;
+  fSettings["DIGITAL_MAXNOMASKSTUCK_HIC_OB"]  = &m_digitalMaxNoMaskStuckHicOB;
+  fSettings["DIGITAL_MAXNOMASKSTUCK_HIC_IB"]  = &m_digitalMaxNoMaskStuckHicIB;
 
   fSettings["THRESH_MAXBAD_CHIP_OB"] = &m_threshMaxBadPerChipOB;
   fSettings["THRESH_MAXBAD_CHIP_IB"] = &m_threshMaxBadPerChipIB;
