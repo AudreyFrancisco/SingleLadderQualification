@@ -121,3 +121,7 @@ delete myDB;
     delete mymember;
 
 }
+
+void TestSelection::ClearLocations(){
+    ui->databaselocation->clear();
+}

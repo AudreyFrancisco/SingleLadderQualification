@@ -20,6 +20,7 @@ public:
     virtual void SaveSettings(QString &opname, QString &hicid, int &counter, int &lid, int &memberid);
     virtual void connectlocationcombo(std::vector<pair<std::string,int>> floc);
     virtual int GetLocationID(){return locid;}
+    virtual void ClearLocations();
 
 private:
 Ui::TestSelection *ui;
