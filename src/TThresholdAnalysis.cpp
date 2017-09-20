@@ -810,7 +810,8 @@ THicClassification TThresholdAnalysis::GetClassificationOB(TThresholdResultHic* 
 
   if (result->m_nPixelsNoThreshold > m_config->GetParamValue("THRESH_MAXBAD_HIC_OB")) return CLASS_ORANGE;
   for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
-    TThresholdResultChip *chipResult = (TThresholdResultChip*) result->m_chipResults.at(ichip);
+    int chipId = m_chipList.at(ichip).chipId & 0xf;
+    TThresholdResultChip *chipResult = (TThresholdResultChip*) result->m_chipResults.at(chipId);
     if (chipResult->GetCounterPixelsNoHits() + chipResult->GetCounterPixelsNoThreshold()
 	> m_config->GetParamValue("THRESH_MAXBAD_CHIP_OB"))
       return CLASS_ORANGE;
@@ -826,7 +827,8 @@ THicClassification TThresholdAnalysis::GetClassificationIB(TThresholdResultHic* 
 
   if (result->m_nPixelsNoThreshold > m_config->GetParamValue("THRESH_MAXBAD_HIC_IB")) return CLASS_ORANGE;
   for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
-    TThresholdResultChip *chipResult = (TThresholdResultChip*) result->m_chipResults.at(ichip);
+    int chipId = m_chipList.at(ichip).chipId & 0xf;
+    TThresholdResultChip *chipResult = (TThresholdResultChip*) result->m_chipResults.at(chipId);
     if (chipResult->GetCounterPixelsNoHits() + chipResult->GetCounterPixelsNoThreshold()
 	> m_config->GetParamValue("THRESH_MAXBAD_CHIP_IB"))
       return CLASS_ORANGE;
