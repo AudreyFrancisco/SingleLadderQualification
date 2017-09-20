@@ -233,7 +233,8 @@ void TDigitalAnalysis::Finalize() {
 THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic* result) {
   if (result->m_nBad > m_config->GetParamValue("DIGITAL_MAXBAD_HIC_OB")) return CLASS_ORANGE;
   for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
-    TDigitalResultChip *chipResult = (TDigitalResultChip*) result->m_chipResults.at(ichip);
+    int chipId = m_chipList.at(ichip).chipId & 0xf;
+    TDigitalResultChip *chipResult = (TDigitalResultChip*) result->m_chipResults.at(chipId);
     if (chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff 
 	> m_config->GetParamValue("DIGITAL_MAXBAD_CHIP_OB"))
       return CLASS_ORANGE;
@@ -246,7 +247,8 @@ THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic* resu
 THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic* result) {
   if (result->m_nBad > m_config->GetParamValue("DIGITAL_MAXBAD_HIC_IB")) return CLASS_ORANGE;
   for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
-    TDigitalResultChip *chipResult = (TDigitalResultChip*) result->m_chipResults.at(ichip);
+    int chipId = m_chipList.at(ichip).chipId & 0xf;
+    TDigitalResultChip *chipResult = (TDigitalResultChip*) result->m_chipResults.at(chipId);
     if (chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff 
 	> m_config->GetParamValue("DIGITAL_MAXBAD_CHIP_IB"))
       return CLASS_ORANGE;
