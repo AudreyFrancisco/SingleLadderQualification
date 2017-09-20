@@ -1,6 +1,8 @@
 #include "TPowerTest.h"
 #include "TPowerAnalysis.h"
 
+#include <string>
+
 TPowerAnalysis::TPowerAnalysis(std::deque<TScanHisto> *histoQue, 
                                TScan                  *aScan, 
                                TScanConfig            *aScanConfig, 

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 #include "TNoiseAnalysis.h"
 
 TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue, 

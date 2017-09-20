@@ -2,24 +2,24 @@
 
 THicConfig::THicConfig(TConfig* config, int modId)
 {
-	fConfig  = config;
-	fModId   = (modId & 0x7);
-	fEnabled = true;
-	InitParamMap();
+  fConfig  = config;
+  fModId   = (modId & 0x7);
+  fEnabled = true;
+  InitParamMap();
 }
 
 
 void THicConfig::InitParamMap () 
 {
-	fSettings["MODID"] = &fModId; 
+  fSettings["MODID"] = &fModId;
   fSettings["ENHIC"] = &fEnabled;
 }
 
 
-bool THicConfig::SetParamValue (const char *Name, const char *Value) 
+bool THicConfig::SetParamValue (std::string Name, std::string Value)
 {
   if (fSettings.find (Name) != fSettings.end()) {
-    sscanf (Value, "%d", fSettings.find(Name)->second);
+    *(fSettings.find(Name)->second) = std::stoi(Value);
     return true;
   }
 
@@ -27,7 +27,7 @@ bool THicConfig::SetParamValue (const char *Name, const char *Value)
 }
 
 
-bool THicConfig::SetParamValue (const char *Name, int Value) 
+bool THicConfig::SetParamValue (std::string Name, int Value)
 {
   if (fSettings.find (Name) != fSettings.end()) {
     *(fSettings.find(Name)->second) = Value;
@@ -37,7 +37,7 @@ bool THicConfig::SetParamValue (const char *Name, int Value)
   return false;
 }
 
-int THicConfig::GetParamValue (const char *Name) 
+int THicConfig::GetParamValue (std::string Name)
 {
   if (fSettings.find (Name) != fSettings.end()) {
     return *(fSettings.find(Name)->second);
@@ -47,21 +47,21 @@ int THicConfig::GetParamValue (const char *Name)
 
 
 THicConfigOB::THicConfigOB(TConfig* config, int modId):
-	THicConfig(config, modId)
+  THicConfig(config, modId)
 {
-	fEnabledA8 = true;
-	fEnabledB0 = true;
-	fHSPosById = GetModId();
+  fEnabledA8 = true;
+  fEnabledB0 = true;
+  fHSPosById = GetModId();
   
-	InitParamMap();
+  InitParamMap();
 }
 
 
 void THicConfigOB::InitParamMap()
 {
-	fSettings["ENSIDEA8"]  = &fEnabledA8;
-	fSettings["ENSIDEB0"]  = &fEnabledB0;
-	fSettings["HSPOSBYID"] = &fModId;  //Use modId as position in HS by default
+  fSettings["ENSIDEA8"]  = &fEnabledA8;
+  fSettings["ENSIDEB0"]  = &fEnabledB0;
+  fSettings["HSPOSBYID"] = &fModId;  //Use modId as position in HS by default
 
-	THicConfig::InitParamMap();	
+  THicConfig::InitParamMap();	
 }

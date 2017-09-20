@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "TLocalBusTest.h"
 #include "AlpideDebug.h"
 #include "AlpideConfig.h"

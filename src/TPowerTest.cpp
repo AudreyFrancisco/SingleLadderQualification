@@ -1,3 +1,4 @@
+#include <string>
 #include <string.h>
 #include "TPowerTest.h"
 #include "AlpideConfig.h"

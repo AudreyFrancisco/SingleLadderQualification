@@ -17,10 +17,10 @@ void TBoardConfig::InitParamMap()
 }
 
 
-bool TBoardConfig::SetParamValue (const char *Name, const char *Value) 
+bool TBoardConfig::SetParamValue (std::string Name, std::string Value)
 {
   if (fSettings.find (Name) != fSettings.end()) {
-    sscanf (Value, "%d", fSettings.find(Name)->second);
+    *(fSettings.find(Name)->second) = std::stoi(Value);
     return true;
   }
 
@@ -28,7 +28,7 @@ bool TBoardConfig::SetParamValue (const char *Name, const char *Value)
 }
 
 
-int TBoardConfig::GetParamValue (const char *Name) 
+int TBoardConfig::GetParamValue (std::string Name)
 {
   if (fSettings.find (Name) != fSettings.end()) {
     return *(fSettings.find(Name)->second);

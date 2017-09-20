@@ -93,10 +93,10 @@ void TChipConfig::InitParamMap ()
 }
 
 
-bool TChipConfig::SetParamValue (const char *Name, const char *Value) 
+bool TChipConfig::SetParamValue (std::string Name, std::string Value)
 {
   if (fSettings.find (Name) != fSettings.end()) {
-    sscanf (Value, "%d", fSettings.find(Name)->second);
+    *(fSettings.find(Name)->second) = std::stoi(Value);
     return true;
   }
 
@@ -104,7 +104,7 @@ bool TChipConfig::SetParamValue (const char *Name, const char *Value)
 }
 
 
-bool TChipConfig::SetParamValue (const char *Name, int Value) 
+bool TChipConfig::SetParamValue (std::string Name, int Value)
 {
   if (fSettings.find (Name) != fSettings.end()) {
     *(fSettings.find(Name)->second) = Value;
@@ -114,7 +114,7 @@ bool TChipConfig::SetParamValue (const char *Name, int Value)
   return false;
 }
 
-int TChipConfig::GetParamValue (const char *Name) 
+int TChipConfig::GetParamValue (std::string Name)
 {
   if (fSettings.find (Name) != fSettings.end()) {
     return *(fSettings.find(Name)->second);

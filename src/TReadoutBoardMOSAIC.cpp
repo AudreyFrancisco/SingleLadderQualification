@@ -53,6 +53,7 @@
 #include "SetupHelpers.h"
 #include "mexception.h"
 #include "mservice.h"
+#include <string>
 
 using namespace std;
 std::vector<unsigned char> fDebugBuffer;

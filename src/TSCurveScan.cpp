@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <string.h>
+#include <string>
 #include "TSCurveScan.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardDAQ.h"
