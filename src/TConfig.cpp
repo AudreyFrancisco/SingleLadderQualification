@@ -323,7 +323,7 @@ void TConfig::ParseLine(std::string Line, std::string& Param, std::string& Value
   end_pos = std::remove(Value.begin(), Value.end(), '\t');
   Value.erase(end_pos, Value.end());
 
-  if (Line.find("_")==std::string::npos) {
+  if (Line.find("_")==std::string::npos || Line.find("_")>Line.find(sep)) {
     *Chip = -1;
     Param = Line.substr(0, Line.find(sep));
   }
