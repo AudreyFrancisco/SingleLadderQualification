@@ -1,4 +1,5 @@
 #include "TScanConfig.h"
+#include <string>
 
 using namespace ScanConfig;
 
@@ -135,10 +136,10 @@ void TScanConfig::InitParamMap ()
 }
 
 
-bool TScanConfig::SetParamValue (const char *Name, const char *Value)
+bool TScanConfig::SetParamValue (std::string Name, std::string Value)
 {
   if (fSettings.find (Name) != fSettings.end()) {
-    sscanf (Value, "%d", fSettings.find(Name)->second);
+    *(fSettings.find(Name)->second) = std::stoi(Value);
     return true;
   }
 
@@ -146,7 +147,7 @@ bool TScanConfig::SetParamValue (const char *Name, const char *Value)
 }
 
 
-int TScanConfig::GetParamValue (const char *Name)
+int TScanConfig::GetParamValue (std::string Name)
 {
 
   if (fSettings.find (Name) != fSettings.end()) {

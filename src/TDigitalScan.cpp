@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <string.h>
+#include <string>
 #include "AlpideConfig.h"
 #include "TDigitalScan.h"
 #include "TReadoutBoardDAQ.h"

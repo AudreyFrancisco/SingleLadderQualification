@@ -2,6 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <thread>
+#include <string>
 
 #include "USB.h"
 #include "TAlpide.h"

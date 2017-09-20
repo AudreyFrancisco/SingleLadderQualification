@@ -3,6 +3,7 @@
 #include "USBHelpers.h"
 #include "TPowerBoard.h"
 #include <string.h>
+#include <string>
 
 #define NEWALPIDEVERSION "1.1"
 

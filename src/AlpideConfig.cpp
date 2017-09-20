@@ -1,7 +1,7 @@
 #include "AlpideConfig.h"
 #include "SetupHelpers.h"
 #include <iostream>
-
+#include <string>
 
 void AlpideConfig::Init (TAlpide *chip) {
 

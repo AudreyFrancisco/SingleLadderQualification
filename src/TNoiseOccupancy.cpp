@@ -1,4 +1,5 @@
 #include <string.h>
+#include <string>
 
 #include "TNoiseOccupancy.h"
 #include "AlpideConfig.h"

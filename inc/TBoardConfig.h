@@ -27,9 +27,9 @@ class TBoardConfig {
  public:
   TBoardConfig(const char *fName = 0, int boardIndex = 0);
   virtual void InitParamMap ();
-  bool SetParamValue        (const char *Name, const char *Value);
-  int  GetParamValue        (const char *Name) ;
-  bool IsParameter          (const char *Name) {return (fSettings.count(Name) > 0);};
+  bool SetParamValue        (std::string Name, std::string Value);
+  int  GetParamValue        (std::string Name) ;
+  bool IsParameter          (std::string Name) {return (fSettings.count(Name) > 0);};
 
   virtual TBoardType GetBoardType() {return fBoardType;};
 

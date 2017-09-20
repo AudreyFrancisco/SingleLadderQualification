@@ -3,7 +3,9 @@
 #include "TBoardConfigMOSAIC.h"
 #include "TBoardConfigRU.h"
 #include <iostream>
-#include <string.h>
+#include <fstream>
+#include <string>
+#include <algorithm>
 
 //construct Config from config file
 TConfig::TConfig (const char *fName) {
@@ -121,37 +123,42 @@ THicConfig *TConfig::GetHicConfig (unsigned int iHic) {
 }
 
 
-TDeviceType TConfig::ReadDeviceType (const char *deviceName) {
+TDeviceType TConfig::ReadDeviceType (std::string deviceName) {
   TDeviceType type = TYPE_UNKNOWN;
-  if (!strcmp (deviceName, "CHIP")) {
+
+  if (deviceName.find(" ")!=std::string::npos) deviceName.erase(deviceName.find(" "));
+  if (deviceName.find("\t")!=std::string::npos) deviceName.erase(deviceName.find("\t"));
+
+
+  if (deviceName.compare("CHIP")==0) {
     type = TYPE_CHIP;
   }
-  else if (!strcmp(deviceName, "TELESCOPE")) {
+  else if (deviceName.compare("TELESCOPE")==0) {
     type = TYPE_TELESCOPE;
   }
-  else if (!strcmp(deviceName, "OBHIC")) {
+  else if (deviceName.compare("OBHIC")==0) {
     type = TYPE_OBHIC;
   }
-  else if (!strcmp(deviceName, "OBHIC_PB")) {
+  else if (deviceName.compare("OBHIC_PB")==0) {
     SetUsePowerBoard(true);
     type = TYPE_OBHIC;
   }
-  else if (!strcmp(deviceName, "IBHIC")) {
+  else if (deviceName.compare("IBHIC")==0) {
     type = TYPE_IBHIC;
   }
-  else if (!strcmp(deviceName, "CHIPMOSAIC")) {
+  else if (deviceName.compare("CHIPMOSAIC")==0) {
     type = TYPE_CHIP_MOSAIC;
   }
-  else if (!strcmp(deviceName, "HALFSTAVE")) {
+  else if (deviceName.compare("HALFSTAVE")==0) {
     type = TYPE_HALFSTAVE;
   }
-  else if (!strcmp(deviceName, "HALFSTAVERU")) {
-		type = TYPE_HALFSTAVERU;
- 	}
-  else if (!strcmp(deviceName, "ENDURANCETEST")) {
+  else if (deviceName.compare("HALFSTAVERU")==0) {
+    type = TYPE_HALFSTAVERU;
+  }
+  else if (deviceName.compare("ENDURANCETEST")==0) {
     type = TYPE_ENDURANCE;
   }
-  else if (!strcmp(deviceName, "IBHICRU")) {
+  else if (deviceName.compare("IBHICRU")==0) {
     type = TYPE_IBHICRU;
   }
   else {
@@ -187,14 +194,14 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
     Init (1, chipIds, boardMOSAIC);
   }
   else if (AType == TYPE_ENDURANCE) {
-  	for(int mod=0; mod < 5; mod++) {
-  	  for (int i = 0; i < 15; i++) {
+    for(int mod=0; mod < 5; mod++) {
+      for (int i = 0; i < 15; i++) {
         if (i == 7) continue;
         int ModuleId = (NChips <= 0 ? DEFAULT_MODULE_ID : NChips) & 0x07;
         chipIds.push_back(i + (ModuleId << 4));
-  	  }
-  	}
-  	Init (1, chipIds, boardMOSAIC);
+      }
+    }
+    Init (1, chipIds, boardMOSAIC);
   }
   else if (AType == TYPE_IBHIC) {
     for (int i = 0; i < 9; i++) {
@@ -212,69 +219,76 @@ void TConfig::SetDeviceType (TDeviceType AType, int NChips) {
     // in case of half stave NChips contains number of modules
     for (int imod = 1; imod <= NChips; imod++) {
       int modId = (imod & 0x7);
-			fHicConfigs.push_back(new THicConfigOB(this,modId));
+      fHicConfigs.push_back(new THicConfigOB(this,modId));
       for (int i = 0; i < 15; i++) {
         if (i == 7) continue;
         chipIds.push_back(i + (modId << 4));
       }
     }
     if (AType == TYPE_HALFSTAVE) 
-			Init (2, chipIds, boardMOSAIC);
-		else 
-			Init (1, chipIds, boardRU);
+      Init (2, chipIds, boardMOSAIC);
+    else 
+      Init (1, chipIds, boardRU);
   }
 }
 
 
 void TConfig::ReadConfigFile (const char *fName)
 {
-  char        Line[1024], Param[50], Rest[50];
+  std::string line, param, value;
   bool        Initialised = false;
   int         NChips      = 0;
   int         NModules    = 0;
   int         ModuleId    = DEFAULT_MODULE_ID;
   int         Chip;
   TDeviceType type        = TYPE_UNKNOWN;
-  FILE       *fp          = fopen (fName, "r");
 
-  if (!fp) {
+  std::ifstream infile(fName);
+
+  if (!infile.good()) {
     std::cout << "WARNING: Config file " << fName << " not found, using default configuration." << std::endl;
     return;
   }
 
   // first look for the type of setup in order to initialise config structure
-  while ((!Initialised) && (fgets(Line, 1023, fp) != NULL)) {
-    if ((Line[0] == '\n') || (Line[0] == '#')) continue;
-    ParseLine (Line, Param, Rest, &Chip);
-    if (!strcmp(Param,"NCHIPS")){
-      sscanf(Rest, "%d", &NChips);
+  while ((!Initialised) && std::getline(infile, line)) {
+
+    // remove leading tabs or blanks
+    size_t p = line.find_first_not_of(" \t");
+    line.erase(0, p);
+
+    if ((line.size() == 0) || (line[0] == '#')) continue;
+    if (line.find("#")!=std::string::npos) line.erase(line.find("#"));
+    ParseLine (line, param, value, &Chip);
+    if (param.compare("NCHIPS")==0){
+      NChips = stoi(value);
     }
-    if (!strcmp(Param,"NMODULES")){
-      sscanf(Rest, "%d", &NModules);
+    if (param.compare("NMODULES")==0){
+      NModules = stoi(value);
     }
-    if (!strcmp(Param,"MODULE")){
-      sscanf(Rest, "%d", &ModuleId);
+    if (param.compare("MODULE")==0){
+      ModuleId = stoi(value);
     }
-    if (!strcmp(Param, "DEVICE")) {
-      type = ReadDeviceType (Rest);
+    if (param.compare("DEVICE")==0) {
+      type = ReadDeviceType(value);
     }
     if ((type != TYPE_UNKNOWN) &&
-			  ((type != TYPE_TELESCOPE) || (NChips > 0)) &&
-			  ((type != TYPE_HALFSTAVE) || (NModules > 0)) &&
-			  ((type != TYPE_HALFSTAVERU) || (NModules > 0))
-      ) {   // type and nchips has been found (nchips not needed for type chip)      
-			// SetDeviceType calls the appropriate init method, which in turn calls
+	((type != TYPE_TELESCOPE) || (NChips > 0)) &&
+	((type != TYPE_HALFSTAVE) || (NModules > 0)) &&
+	((type != TYPE_HALFSTAVERU) || (NModules > 0))
+	) {   // type and nchips has been found (nchips not needed for type chip)      
+      // SetDeviceType calls the appropriate init method, which in turn calls
       // the constructors for board and chip configs
       if (type == TYPE_OBHIC) {
-    	  SetDeviceType(type, ModuleId);
+	SetDeviceType(type, ModuleId);
       } else if (type == TYPE_ENDURANCE) {
-  	    SetDeviceType(type, ModuleId);
+	SetDeviceType(type, ModuleId);
       } else if (type == TYPE_HALFSTAVE) {
-    	  SetDeviceType(type, NModules);
-			} else if (type == TYPE_HALFSTAVERU) {
-				SetDeviceType(type, NModules);
+	SetDeviceType(type, NModules);
+      } else if (type == TYPE_HALFSTAVERU) {
+	SetDeviceType(type, NModules);
       } else {
-    	  SetDeviceType(type, NChips);
+	SetDeviceType(type, NChips);
       }
       Initialised = true;
     }
@@ -283,53 +297,69 @@ void TConfig::ReadConfigFile (const char *fName)
   fScanConfig = new TScanConfig();
 
   // now read the rest
-  while (fgets(Line, 1023, fp) != NULL) {
-    DecodeLine(Line);
+  while (std::getline(infile, line)) {
+    // remove leading blanks or white spaces
+    size_t p = line.find_first_not_of(" \t");
+    line.erase(0, p);
+
+    DecodeLine(line);
   }
 }
 
 
-void TConfig::ParseLine(const char *Line, char *Param, char *Rest, int *Chip) {
-  char MyParam[132];
-  char *MyParam2;
-  if (!strchr(Line, '_')) {
+void TConfig::ParseLine(std::string Line, std::string& Param, std::string& Value, int *Chip) {
+  std::string tmp;
+  std::string sep;
+
+  // find the seperating tab or blank, whichever is first
+  if      (Line.find("\t")!=std::string::npos && Line.find("\t")<Line.find(" ")) sep = "\t";
+  else if (Line.find(" " )!=std::string::npos && Line.find("\t")>Line.find(" ")) sep = " " ;
+  else return;
+
+  Value  = Line.substr(Line.find(sep)+1);
+  // remove tabs or blanks from the value
+  std::string::iterator end_pos = std::remove(Value.begin(), Value.end(), ' ');
+  Value.erase(end_pos, Value.end());
+  end_pos = std::remove(Value.begin(), Value.end(), '\t');
+  Value.erase(end_pos, Value.end());
+
+  if (Line.find("_")==std::string::npos) {
     *Chip = -1;
-    sscanf (Line,"%s\t%s",Param, Rest);
+    Param = Line.substr(0, Line.find(sep));
   }
   else {
-    sscanf (Line,"%s\t%s", MyParam, Rest);
-    MyParam2 = strtok(MyParam, "_");
-    sprintf(Param, "%s", MyParam2);
-    sscanf (strpbrk(Line, "_")+1, "%d", Chip);
+    tmp   = Line.substr(0, Line.find(sep));
+    Param = tmp.substr(0, Line.find("_"));
+    *Chip = stoi(tmp.substr(Line.find("_")));
   }
 }
 
 
-void TConfig::DecodeLine(const char *Line)
+void TConfig::DecodeLine(std::string Line)
 {
   int Index, ChipStart, ChipStop, BoardStart, BoardStop, HicStart, HicStop;
-  char Param[128], Rest[896];
-  if ((Line[0] == '\n') || (Line[0] == '#')) {   // empty Line or comment
+  std::string Param, Value;
+  if ((Line.size() == 0) || (Line[0] == '#')) {   // empty Line or comment
     return;
   }
 
-  ParseLine(Line, Param, Rest, &Index);
+  ParseLine(Line, Param, Value, &Index);
 
   if (Index == -1) {
     ChipStart = 0;
     ChipStop  = fChipConfigs.size();
     BoardStart = 0;
     BoardStop  = fBoardConfigs.size();
-		HicStart = 0;
-		HicStop  = 0;
+    HicStart = 0;
+    HicStop  = 0;
   }
   else {
     ChipStart  = (Index<(int)fChipConfigs.size())  ? Index   : -1;
     ChipStop   = (Index<(int)fChipConfigs.size())  ? Index+1 : -1;
     BoardStart = (Index<(int)fBoardConfigs.size()) ? Index   : -1;
     BoardStop  = (Index<(int)fBoardConfigs.size()) ? Index+1 : -1;
-		HicStart   = (Index<(int)fHicConfigs.size())   ? Index   : -1;
-		HicStop    = (Index<(int)fHicConfigs.size())   ? Index+1 : -1;
+    HicStart   = (Index<(int)fHicConfigs.size())   ? Index   : -1;
+    HicStop    = (Index<(int)fHicConfigs.size())   ? Index+1 : -1;
   }
 
   // Todo: correctly handle the number of readout boards
@@ -338,32 +368,30 @@ void TConfig::DecodeLine(const char *Line)
   // (or vice versa) will issue unknown-parameter warnings...
   if (ChipStart>=0 && fChipConfigs.at(ChipStart)->IsParameter(Param)) {
     for (int i = ChipStart; i < ChipStop; i++) {
-      fChipConfigs.at(i)->SetParamValue (Param, Rest);
+      fChipConfigs.at(i)->SetParamValue (Param, Value);
     }
   }
   else if (BoardStart>=0 && fBoardConfigs.at(BoardStart)->IsParameter(Param)) {
     for (int i = BoardStart; i < BoardStop; i++) {
-      fBoardConfigs.at(i)->SetParamValue (Param, Rest);
+      fBoardConfigs.at(i)->SetParamValue (Param, Value);
     }
   }
-	else if ((fHicConfigs.size() > 0) && (fHicConfigs.at(0)->IsParameter(Param))) {
-		for (int i = HicStart; i < HicStop; i++) {
-			fHicConfigs.at(i)->SetParamValue (Param, Rest);
-		}
-	}
-  else if (fScanConfig->IsParameter(Param)) {
-    fScanConfig->SetParamValue (Param, Rest);
+  else if ((fHicConfigs.size() > 0) && (fHicConfigs.at(0)->IsParameter(Param))) {
+    for (int i = HicStart; i < HicStop; i++) {
+      fHicConfigs.at(i)->SetParamValue (Param, Value);
+    }
   }
-  else if (BoardStart>=0 && !strcmp(Param, "ADDRESS")) {
+  else if (fScanConfig->IsParameter(Param)) {
+    fScanConfig->SetParamValue (Param, Value);
+  }
+  else if (BoardStart>=0 && Param.compare("ADDRESS")==0 ) {
     for (int i = BoardStart; i < BoardStop; i++) {
       if (fBoardConfigs.at(BoardStart)->GetBoardType() == boardMOSAIC) {
-        ((TBoardConfigMOSAIC *)fBoardConfigs.at(i))->SetIPaddress(Rest);
+        ((TBoardConfigMOSAIC *)fBoardConfigs.at(i))->SetIPaddress(Value.c_str());
       }
       else if (fBoardConfigs.at(BoardStart)->GetBoardType() == boardDAQ) {
-        if (!strchr(Rest, '.')) {
-          int address = -1;
-          sscanf (Rest, "%d", &address);
-          ((TBoardConfigDAQ *)fBoardConfigs.at(i))->SetBoardAddress(address);
+        if (Value.find('.')==std::string::npos) {
+          ((TBoardConfigDAQ *)fBoardConfigs.at(i))->SetBoardAddress(std::stoi(Value));
         }
       }
     }

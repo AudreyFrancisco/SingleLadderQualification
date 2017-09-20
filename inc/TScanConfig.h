@@ -147,9 +147,9 @@ class TScanConfig {
   TScanConfig ();
   ~TScanConfig() {};
   void  InitParamMap    ();
-  bool  SetParamValue   (const char *Name, const char *Value);
-  int   GetParamValue   (const char *Name) ;
-  bool  IsParameter     (const char *Name) {return (fSettings.count(Name) > 0);};
+  bool  SetParamValue   (std::string Name, std::string Value);
+  int   GetParamValue   (std::string Name) ;
+  bool  IsParameter     (std::string Name) {return (fSettings.count(Name) > 0);};
 
   int   GetNInj          () {return m_nInj;};
   int   GetChargeStart   () {return m_chargeStart;};

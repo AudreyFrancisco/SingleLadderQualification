@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string.h>
+#include <string>
 #include "TFifoTest.h"
 #include "AlpideConfig.h"
 

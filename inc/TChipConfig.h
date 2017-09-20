@@ -117,10 +117,10 @@ class TChipConfig {
  public:
   TChipConfig               (TConfig *config, int chipId, const char *fName = 0);
   void InitParamMap         ();
-  bool SetParamValue        (const char *Name, const char *Value);
-  bool SetParamValue        (const char *Name, int Value);
-  int  GetParamValue        (const char *Name) ;
-  bool IsParameter          (const char *Name) {return (fSettings.count(Name) > 0);};
+  bool SetParamValue        (std::string Name, std::string Value);
+  bool SetParamValue        (std::string Name, int Value);
+  int  GetParamValue        (std::string Name) ;
+  bool IsParameter          (std::string Name) {return (fSettings.count(Name) > 0);};
   int  GetChipId            () {return fChipId;};
   int  GetCtrInt            () {return fControlInterface;};
   int  GetDataLink          () {return fReceiver;};
