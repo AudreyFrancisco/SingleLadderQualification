@@ -212,12 +212,12 @@ int main(int argc, char** argv) {
     for (float voltage = 1.62; voltage < 2.00; voltage+=0.02) {
       char cmd[50];
       sprintf(cmd, "scripts/IBstaveStudies/hameg.py 2 0 %f 1.5", voltage);
-      system(cmd);
+      if (system(cmd) == 0) std::cerr << "Failed to set the digital supply voltage" << std::endl;
       sprintf(cmd, "scripts/IBstaveStudies/hameg.py 2 1 %f 0.5", voltage);
-      system(cmd);
+      if (system(cmd) == 0) std::cerr << "Failed to set the analogue supply voltage" << std::endl;
       sleep(1);
       sprintf(cmd, "scripts/IBstaveStudies/hameg.py 3");
-      system(cmd);
+      if (system(cmd) == 0) std::cerr << "Failed to read voltages and currents" << std::endl;
       for (unsigned int i = 0; i < fChips.size(); i ++) {
     	scanVoltageDac (fChips.at(i), Alpide::REG_VRESETP, "VRESETP", mySampleDist, voltage);
     	scanVoltageDac (fChips.at(i), Alpide::REG_VRESETD, "VRESETD", mySampleDist, voltage);
