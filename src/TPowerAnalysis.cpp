@@ -124,6 +124,7 @@ void TPowerAnalysis::WriteResult()
   char fName[200];
   
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    WriteIVCurve (m_hics.at(ihic));
     sprintf (fName, "PowerTestResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
                                                  m_config->GetfNameSuffix());
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
