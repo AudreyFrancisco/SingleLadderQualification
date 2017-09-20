@@ -1071,8 +1071,14 @@ void MainWindow::connectcombo(int value){
        {
         ui->testtypeselected->clear();
         ui->start_test->show();
-        numberofscan=5;
-          ui->testtypeselected->setText("OB Reception Test");
+
+          ui->testtypeselected->setText("OB HIC Reception Test");
+          findidoftheactivitytype("OB HIC Reception Test",idofactivitytype);
+          std::cout<<"the id of the selected test: "<<idofactivitytype<<std::endl;
+          locationcombo();
+
+          settingswindow->connectlocationcombo(locdetails);
+          numberofscan=5;
        // open();
      //   if (counter==0){break;}
       //  fillingreceptionscans();
