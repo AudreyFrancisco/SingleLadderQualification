@@ -71,7 +71,7 @@ THicClassification TPowerAnalysis::GetClassificationIB (THicCurrents currents)
 
   // check for absolute value at 3V and for margin from breakthrough
   if ((currents.ibias[30] > m_config->GetParamValue("MAXBIAS_3V_IB")) || 
-      (currents.ibias[40] > m_config->GetParamValue("MAXFACTOR_4V_IB") * currents.ibias[30])) 
+      (currents.ibias[40] > m_config->GetParamValue("MAXFACTOR_4V_IB") * (currents.ibias[30] + 1))) 
     return CLASS_ORANGE; 
 
   return CLASS_GREEN;
@@ -93,8 +93,10 @@ THicClassification TPowerAnalysis::GetClassificationOB (THicCurrents currents)
     return CLASS_ORANGE;
 
   // check for absolute value at 3V and for margin from breakthrough
-  if ((currents.ibias[30] > m_config->GetParamValue("MAXBIAS_3V_IB")) || 
-      (currents.ibias[40] > m_config->GetParamValue("MAXFACTOR_4V_IB") * currents.ibias[30])) 
+  if (currents.ibias[30] > m_config->GetParamValue("MAXBIAS_3V_IB"))
+    return CLASS_ORANGE;
+  // add 1 for the case where I(3V) = 0
+  if ((currents.ibias[40] > m_config->GetParamValue("MAXFACTOR_4V_IB") * (currents.ibias[30] + 1)))
     return CLASS_ORANGE; 
 
   return CLASS_GREEN;
@@ -115,7 +117,7 @@ void TPowerAnalysis::WriteIVCurve(THic *hic)
   FILE *fp = fopen (fName, "w");
   
   for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
-    fprintf(fp, "%.3f %.1f", (float)i / 10, result->ibias[i]);
+    fprintf(fp, "%.3f %.1f\n", (float)i / 10, result->ibias[i]);
   }
   fclose (fp);
 }

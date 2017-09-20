@@ -21,7 +21,7 @@ typedef struct {
   float    idddConfigured;
   float    ibias0;
   float    ibias3;
-  float    ibias[50];
+  float    ibias[61];
 } THicCurrents;
 
 class TPowerTest : public TScan {
@@ -29,7 +29,7 @@ class TPowerTest : public TScan {
   THic  *m_testHic;
   void   CreateMeasurements ();
   THisto CreateHisto        () {THisto histo; return histo;};
-  void   DoIVCurve          (THicCurrents result);
+  void   DoIVCurve          (THicCurrents &result);
   std::map <std::string, THicCurrents> m_hicCurrents;
  protected:
  public:

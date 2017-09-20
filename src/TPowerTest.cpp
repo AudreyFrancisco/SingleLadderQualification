@@ -61,7 +61,7 @@ void TPowerTest::PrepareStep(int loopIndex)
 }
 
 
-void TPowerTest::DoIVCurve(THicCurrents result) 
+void TPowerTest::DoIVCurve(THicCurrents &result) 
 {
   for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
     float voltage = -i / 10;
@@ -147,7 +147,8 @@ void TPowerTest::Execute()
   }
 
   // check if tripped
-  if ((m_testHic->GetPowerBoard()->GetBiasVoltage() < 1.0) || (!(m_testHic->IsPowered()))) {
+  if ((m_testHic->GetPowerBoard()->GetBiasVoltage() > -1.0) || (!(m_testHic->IsPowered()))) {
+    std::cout << "reading bias voltage of " << m_testHic->GetPowerBoard()->GetBiasVoltage() << std::endl;
     currentIt->second.trip = true;
   }
   else {

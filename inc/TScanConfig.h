@@ -76,7 +76,7 @@ namespace ScanConfig {
   const int RAWDATA        = 0;
   const int CAL_VPULSEL    = 160; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
   const int IVCURVE        = 1;   //Do I-V-curve on back bias
-  const int IVPOINTS       = 40;  //number of 100 mV-points for back bias IV curve (max. 50 = 5V)
+  const int IVPOINTS       = 41;  //number of 100 mV-points for back bias IV curve (max. 50 = 5V)
   const int MAXIBIAS       = 50;  //current limit for I-V-curve in mA;
   const float VOLTAGE_SCALE = 1.0;
 }
