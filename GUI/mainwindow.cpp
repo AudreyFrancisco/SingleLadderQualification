@@ -995,6 +995,9 @@ qApp->processEvents();
 
 void MainWindow::connectcombo(int value){
     counter=0;
+    idofactivitytype=0;
+
+
     switch(value){
     case 0:
         ui->testtypeselected->clear();
@@ -1002,6 +1005,7 @@ void MainWindow::connectcombo(int value){
         ui->start_test->hide();
         break;
     case 1:{
+
         ui->testtypeselected->clear();
         ui->start_test->show();
       //  qDebug()<<"OB Qualification test selected";
@@ -1029,8 +1033,14 @@ void MainWindow::connectcombo(int value){
         ui->testtypeselected->clear();
         ui->start_test->show();
        // qDebug()<<"IB Qualification test selected";
-        numberofscan=2;
-        ui->testtypeselected->setText("IB Qualification Test");
+        ui->testtypeselected->setText("IB HIC Qualification Test");
+        findidoftheactivitytype("IB HIC Qualification Test",idofactivitytype);
+        std::cout<<"the id of the selected test: "<<idofactivitytype<<std::endl;
+        locationcombo();
+
+        settingswindow->connectlocationcombo(locdetails);
+
+       numberofscan=2;
        // openib();
        // open();//to be tested
       //  if (counter==0){break;}
@@ -1061,8 +1071,14 @@ void MainWindow::connectcombo(int value){
        {
         ui->testtypeselected->clear();
         ui->start_test->show();
-        numberofscan=5;
-          ui->testtypeselected->setText("OB Reception Test");
+
+          ui->testtypeselected->setText("OB HIC Reception Test");
+          findidoftheactivitytype("OB HIC Reception Test",idofactivitytype);
+          std::cout<<"the id of the selected test: "<<idofactivitytype<<std::endl;
+          locationcombo();
+
+          settingswindow->connectlocationcombo(locdetails);
+          numberofscan=5;
        // open();
      //   if (counter==0){break;}
       //  fillingreceptionscans();
@@ -1847,6 +1863,11 @@ void MainWindow::findidoftheactivitytype(std::string activitytypename, int &id){
 
 
 void MainWindow::locationcombo(){
+    if (locdetails.size()>0){
+        for (int i=0;i<locdetails.size();i++)
+{ //std::cout<<"clear locdetails"<<std::endl;
+            locdetails.clear();
+        }    }
     AlpideDB *myDB=new AlpideDB();
      ActivityDB *myactivity=new ActivityDB(myDB);
    locationtypelist=myactivity->GetLocationTypeList(idofactivitytype);
