@@ -39,7 +39,8 @@ class TDigitalScan : public TMaskScan {
 
 
 class TDigitalWhiteFrame : public TDigitalScan {
-  TDigitalWhiteFrame   (TScanConfig                   *config, 
+ public:
+    TDigitalWhiteFrame   (TScanConfig                   *config,
                         std::vector <TAlpide *>        chips, 
                         std::vector <THic*>            hics, 
                         std::vector <TReadoutBoard *>  boards, 
