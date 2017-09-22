@@ -28,7 +28,7 @@ TScanConfig::TScanConfig()
   m_maxIbias       = MAXIBIAS;
   m_localBusCutRed = LOCALBUSCUTRED;
   m_calVpulsel     = CAL_VPULSEL;
-
+  m_targetThresh   = TARGET_THRESHOLD;
   m_voltageScale   = VOLTAGE_SCALE;
 
   m_powerCutMinIdda_OB        = POWER_CUT_MINIDDA_OB;
@@ -133,6 +133,7 @@ void TScanConfig::InitParamMap ()
   fSettings["THRESH_MAXNOISE_IB"]    = &m_threshMaxNoiseIB;
 
   fSettings["CAL_VPULSEL"]        = &m_calVpulsel;
+  fSettings["TARGETTHRESH"]        = &m_targetThresh;
 }
 
 
