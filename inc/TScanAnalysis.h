@@ -112,6 +112,7 @@ class TScanAnalysis {
   virtual void Finalize        () = 0;
   std::map <const char *, TResultVariable> GetVariableList () {return m_variableList;}
   float   GetVariable(std::string aHic, int chip, TResultVariable var);
+  THicClassification GetClassification ();
 };
 
 

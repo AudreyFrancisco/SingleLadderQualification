@@ -105,6 +105,33 @@ float TScanAnalysis::GetVariable(std::string aHic, int chip, TResultVariable var
 }
 
 
+
+// returns the classification of the scan
+// this is defined as the classification of the worst HIC
+THicClassification TScanAnalysis::GetClassification() 
+{
+  THicClassification result = CLASS_UNTESTED;
+  std::map <std::string, TScanResultHic*> hicResults = m_result->GetHicResults ();
+  std::map <std::string, TScanResultHic*>::iterator it;
+  for (it = hicResults.begin(); it != hicResults.end(); it++) {
+    switch (it->second->GetClassification()) {
+    case CLASS_GREEN: 
+      if (result == CLASS_UNTESTED) result = CLASS_GREEN;
+      break;
+    case CLASS_ORANGE:
+      if (result != CLASS_RED) result = CLASS_ORANGE;
+      break;
+    case CLASS_RED:
+      return CLASS_RED;
+      break;
+    default:
+      break;
+    }
+  }
+  return result;
+}
+
+
 int TScanResult::AddChipResult (common::TChipIndex idx,
 				TScanResultChip *aChipResult) 
 {
