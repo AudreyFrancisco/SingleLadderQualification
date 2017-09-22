@@ -28,6 +28,8 @@ class THic;
 class TApplyMask;
 class TPowerTest;
 class ScanConfiguration;
+class TDigitalWFanalysis;
+
 
 namespace Ui {
 class MainWindow;
@@ -104,6 +106,7 @@ public slots:
    void digitald();
    void digitalpd();
    void digitalmd();
+   void digitalwf();
    void thresholdd();
    void noisebd();
    void noisead();

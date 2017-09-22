@@ -42,6 +42,7 @@
 #include "TScanConfig.h"
 #include "THisto.h"
 #include "TScanAnalysis.h"
+#include "TDigitalWFAnalysis.h"
 #include "TScan.h"
 #include "TThresholdAnalysis.h"
 #include "TLocalBusAnalysis.h"
@@ -748,19 +749,23 @@ void MainWindow::start_test(){
      ui->test12->setStyleSheet("border:none;");
      ui->test13->setStyleSheet("border:none;");
  //std::cout<<"why3"<<std::endl;
-     disconnect(ui->test2,SIGNAL(clicked()),this,SLOT(fifod()));
+    // if (numberofscan==1||numberofscan==2)
+    // {
+         disconnect(ui->test2,SIGNAL(clicked()),this,SLOT(fifod()));
      disconnect(ui->test3,SIGNAL(clicked()),this,SLOT(fifopd()));
      disconnect(ui->test4,SIGNAL(clicked()),this,SLOT(fifomd()));
      disconnect(ui->test5,SIGNAL(clicked()),this,SLOT(digitald()));
      disconnect(ui->test6,SIGNAL(clicked()),this,SLOT(digitalpd()));
      disconnect(ui->test7,SIGNAL(clicked()),this,SLOT(digitalmd()));
-     disconnect(ui->test8,SIGNAL(clicked()),this,SLOT(thresholdd()));
-     disconnect(ui->test9,SIGNAL(clicked()),this,SLOT(noisebd()));
+      disconnect(ui->test8,SIGNAL(clicked()),this,SLOT(digitalwf()));
+     disconnect(ui->test9,SIGNAL(clicked()),this,SLOT(thresholdd()));
+     disconnect(ui->test10,SIGNAL(clicked()),this,SLOT(noisebd()));
+      disconnect(ui->test11,SIGNAL(clicked()),this,SLOT(noisebd()));//}
   //    std::cout<<"why4"<<std::endl;
      ui->details->hide();
     ui->displaydetails->hide();
  //std::cout<<"why5"<<std::endl;
-
+ disconnect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
     ui->test1->setText(" ");
     ui->test2->setText(" ");
     ui->test3->setText(" ");
@@ -793,6 +798,7 @@ void MainWindow::fillingOBvectors(){
   TThresholdResult *threresult=new TThresholdResult();
   TThresholdResult *vcasnresult=new TThresholdResult();
   TThresholdResult *ithrresult=new TThresholdResult();
+   TDigitalWFResult *digitalwfresult=new TDigitalWFResult();
 //  TLocalBusResult *localbusresult=new TLocalBusResult();
   TNoiseResult *noiseresult=new TNoiseResult();
   TNoiseResult *noiseresultmasked=0;
@@ -827,6 +833,8 @@ void MainWindow::fillingOBvectors(){
     TDigitalScan *digitalscanm10= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
     TDigitalAnalysis  *digitalanalysism10 = new TDigitalAnalysis(&fHistoQue,digitalscanm10, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresultm10);
     fConfig->GetScanConfig()->SetVoltageScale(1);
+    TDigitalWhiteFrame *digitalwfscan= new TDigitalWhiteFrame(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TDigitalWFAnalysis  *digitalwfanalysis = new TDigitalWFAnalysis(&fHistoQue,digitalwfscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalwfresult);
     TNoiseOccupancy *noisescan=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
     TNoiseOccupancy *noisescanafter=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
     TNoiseOccupancy *noisescanzero=0;
@@ -850,6 +858,7 @@ void MainWindow::fillingOBvectors(){
     fScanVector.push_back(digitalscan);
     fScanVector.push_back(digitalscanp10);
     fScanVector.push_back(digitalscanm10);
+    fScanVector.push_back(digitalwfscan);
     fScanVector.push_back(thresholdscan);
     fScanVector.push_back(noisescan);
     fScanVector.push_back(noisescanzero);
@@ -866,6 +875,7 @@ void MainWindow::fillingOBvectors(){
     fAnalysisVector.push_back(digitalanalysis);
     fAnalysisVector.push_back(digitalanalysisp10);
     fAnalysisVector.push_back(digitalanalysism10);
+    fAnalysisVector.push_back(digitalwfanalysis);
     fAnalysisVector.push_back(thresholdanalysis);
     fAnalysisVector.push_back(noiseanalysis);
     fAnalysisVector.push_back(noisemask);
@@ -884,6 +894,7 @@ void MainWindow::fillingOBvectors(){
     fresultVector.push_back(digitalresult);
     fresultVector.push_back(digitalresultp10);
     fresultVector.push_back(digitalresultm10);
+    fresultVector.push_back(digitalwfresult);
     fresultVector.push_back(threresult);
     fresultVector.push_back(noiseresult);
     fresultVector.push_back(noiseresultmasked);
@@ -901,10 +912,10 @@ void MainWindow::fillingOBvectors(){
     scanbuttons.push_back(ui->test7);
     scanbuttons.push_back(ui->test8);
     scanbuttons.push_back(ui->test9); 
-     scanbuttons.push_back(0);
-    scanbuttons.push_back(ui->test10);
 
- //   scanbuttons.push_back(ui->test11);
+    scanbuttons.push_back(ui->test10);
+    scanbuttons.push_back(0);
+    scanbuttons.push_back(ui->test11);
  //   scanbuttons.push_back(ui->test12);
    // scanbuttons.push_back(ui->test1);
   //  scanbuttons.push_back(ui->test1);
@@ -916,6 +927,7 @@ void MainWindow::fillingOBvectors(){
     scanstatuslabels.push_back(ui->digitals);
     scanstatuslabels.push_back(ui->digitalps);
     scanstatuslabels.push_back(ui->digitalms);
+    scanstatuslabels.push_back(ui->digitalwf);
     scanstatuslabels.push_back(ui->thresholds);
     scanstatuslabels.push_back(ui->noisebts);
     scanstatuslabels.push_back(0);
@@ -1146,6 +1158,7 @@ void MainWindow::connectcombo(int value){
 void MainWindow::applytests(){
     if (numberofscan==1||numberofscan==2){fillingOBvectors();}
     if (numberofscan==5){fillingreceptionscans();}
+    std::cout<<"the size of the scan vector is: "<<fScanVector.size()<<std::endl;
     performtests(fScanVector,fAnalysisVector);
     colorscans();
     connectscandetails();
@@ -1604,9 +1617,10 @@ void MainWindow::connectscandetails(){
     connect(ui->test5,SIGNAL(clicked()),this,SLOT(digitald()));
     connect(ui->test6,SIGNAL(clicked()),this,SLOT(digitalpd()));
     connect(ui->test7,SIGNAL(clicked()),this,SLOT(digitalmd()));
-    connect(ui->test8,SIGNAL(clicked()),this,SLOT(thresholdd()));
-    connect(ui->test9,SIGNAL(clicked()),this,SLOT(noisebd()));
-    connect(ui->test10,SIGNAL(clicked()),this,SLOT(noisead()));}
+    connect(ui->test8,SIGNAL(clicked()),this,SLOT(digitalwf()));
+    connect(ui->test9,SIGNAL(clicked()),this,SLOT(thresholdd()));
+    connect(ui->test10,SIGNAL(clicked()),this,SLOT(noisebd()));
+    connect(ui->test11,SIGNAL(clicked()),this,SLOT(noisead()));}
     //connect(ui->test3,SIGNAL(clicked()),this,SLOT(powerd()));
 
     // }
@@ -1654,17 +1668,21 @@ void MainWindow::digitalmd(){
    getresultdetails(6);
 }
 
-void MainWindow::thresholdd(){
+void MainWindow::digitalwf(){
     getresultdetails(7);
 }
 
-void MainWindow::noisebd(){
+void MainWindow::thresholdd(){
     getresultdetails(8);
+}
+
+void MainWindow::noisebd(){
+    getresultdetails(9);
 }
 
 
 void MainWindow::noisead(){
-    getresultdetails(10);
+    getresultdetails(11);
 }
 
 
@@ -1926,6 +1944,7 @@ void MainWindow::loadeditedconfig(){
 
 
 void MainWindow::loaddefaultconfig(){
+
     fConfig->GetScanConfig()->SetParamValue("SPEEDY","0");
     std::cout<<"The speed is "<< fConfig->GetScanConfig()->GetSpeedy()<<std::endl;
    if (counter==0){return;}
