@@ -59,22 +59,24 @@ void TDigitalWFAnalysis::AnalyseHisto (TScanHisto *histo)
     TDigitalWFResultChip *result = (TDigitalWFResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
     for (int icol = 0; icol < 1024; icol ++) {
       int hits = (int) (*histo) (m_chipList.at(ichip), icol);
-      if (hits > 0) result->m_nUnmaskable ++;
-      int dcol = icol / 2;
-      TPixHit hit;
-      hit.boardIndex = m_chipList.at(ichip).boardIndex;
-      hit.channel    = m_chipList.at(ichip).dataReceiver;
-      hit.chipId     = m_chipList.at(ichip).chipId;
-      hit.dcol       = dcol % 16;
-      hit.region     = dcol / 16; 
-      hit.address    = row *2;
-      if (row%2) {
-        hit.address += (1-(icol %2));
+      if (hits > 0) {
+        result->m_nUnmaskable ++;
+        int dcol = icol / 2;
+        TPixHit hit;
+        hit.boardIndex = m_chipList.at(ichip).boardIndex;
+        hit.channel    = m_chipList.at(ichip).dataReceiver;
+        hit.chipId     = m_chipList.at(ichip).chipId;
+        hit.dcol       = dcol % 16;
+        hit.region     = dcol / 16; 
+        hit.address    = row *2;
+        if (row%2) {
+          hit.address += (1-(icol %2));
+        }
+        else {
+          hit.address += (icol %2);
+        }
+        m_unmaskable.push_back(hit);
       }
-      else {
-        hit.address += (icol %2);
-      }
-      m_unmaskable.push_back(hit);
     }
   }
 }
