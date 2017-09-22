@@ -64,6 +64,13 @@ TtuneVCASNScan::TtuneVCASNScan (TScanConfig                   *config,
   m_stop [2]  = 1;
 
   m_VPULSEH   = 170;
+  m_TARGET    = m_config->GetParamValue("TARGETTHRESH");
+  if (m_TARGET % 10) {
+    m_TARGET -= (m_TARGET %10);
+    m_TARGET += 10;
+    std::cout << "Warning: threshold target not multiple of 10, rounding up to " << m_TARGET; 
+  }
+  m_VPULSEL = m_VPULSEH - m_TARGET / 10;
   m_nTriggers = m_config->GetParamValue("NINJ");
   CreateScanHisto();
 }
@@ -90,6 +97,13 @@ TtuneITHRScan::TtuneITHRScan   (TScanConfig                   *config,
   m_stop [2]  = 1;
 
   m_VPULSEH   = 170;
+  m_TARGET    = m_config->GetParamValue("TARGETTHRESH");
+  if (m_TARGET % 10) {
+    m_TARGET -= (m_TARGET %10);
+    m_TARGET += 10;
+    std::cout << "Warning: threshold target not multiple of 10, rounding up to " << m_TARGET; 
+  }
+  m_VPULSEL = m_VPULSEH - m_TARGET / 10;
   m_nTriggers = m_config->GetParamValue("NINJ");
   CreateScanHisto();
 }
@@ -141,7 +155,7 @@ void TtuneVCASNScan::ConfigureChip(TAlpide *chip)
   AlpideConfig::ConfigureCMU (chip);
 
   for(unsigned int i = 0; i < m_chips.size(); i++) {
-    m_chips.at(i)->WriteRegister(Alpide::REG_VPULSEL, (uint16_t)m_config->GetCalVpulsel());
+    m_chips.at(i)->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEL);
   }
 }
 
@@ -154,7 +168,7 @@ void TtuneITHRScan::ConfigureChip(TAlpide *chip)
   AlpideConfig::ConfigureCMU (chip);
 
   for(unsigned int i = 0; i < m_chips.size(); i++) {
-    m_chips.at(i)->WriteRegister(Alpide::REG_VPULSEL, (uint16_t)m_config->GetCalVpulsel());
+    m_chips.at(i)->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEL);
   }
 }
 

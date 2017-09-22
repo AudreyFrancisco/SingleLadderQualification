@@ -57,6 +57,9 @@ class TThresholdScan : public TSCurveScan {
 class TtuneVCASNScan : public TSCurveScan {
   //NOTE:  may need new destructor?
   //Conducts a threshold scan changing VCASN
+ protected: 
+  int m_TARGET;
+  int m_VPULSEL;
  public:
   TtuneVCASNScan (TScanConfig                   *config,
                   std::vector <TAlpide *>        chips,
@@ -74,6 +77,9 @@ class TtuneVCASNScan : public TSCurveScan {
 
 class TtuneITHRScan : public TSCurveScan {
   //Conducts a threshold scan changing ITHR (note:  needs data from VCASNscan first)
+ protected: 
+  int m_TARGET;
+  int m_VPULSEL;
  public:
   TtuneITHRScan  (TScanConfig                   *config,
                   std::vector <TAlpide *>        chips,

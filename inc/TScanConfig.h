@@ -72,13 +72,14 @@ namespace ScanConfig {
   const int THRESH_MAXNOISE_OB    = 10;     // max noise of a single chip
   const int THRESH_MAXNOISE_IB    = 10;
 
-  const int SPEEDY         = 0;  //Use slow fit if 0, differentiate->mean if 1.
-  const int RAWDATA        = 0;
-  const int CAL_VPULSEL    = 160; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
-  const int IVCURVE        = 1;   //Do I-V-curve on back bias
-  const int IVPOINTS       = 41;  //number of 100 mV-points for back bias IV curve (max. 50 = 5V)
-  const int MAXIBIAS       = 50;  //current limit for I-V-curve in mA;
-  const float VOLTAGE_SCALE = 1.0;
+  const int SPEEDY           = 0;  //Use slow fit if 0, differentiate->mean if 1.
+  const int RAWDATA          = 0;
+  const int CAL_VPULSEL      = 160; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
+  const int TARGET_THRESHOLD = 100;
+  const int IVCURVE          = 1;   //Do I-V-curve on back bias
+  const int IVPOINTS         = 41;  //number of 100 mV-points for back bias IV curve (max. 50 = 5V)
+  const int MAXIBIAS         = 50;  //current limit for I-V-curve in mA;
+  const float VOLTAGE_SCALE  = 1.0;
 }
 
 
@@ -141,6 +142,7 @@ class TScanConfig {
   int  m_threshMaxNoiseIB;
   int  m_threshMaxNoiseOB;
   int  m_calVpulsel;
+  int  m_targetThresh;
   float m_voltageScale;
  protected:
  public:
