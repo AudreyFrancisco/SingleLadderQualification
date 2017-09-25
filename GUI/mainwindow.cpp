@@ -25,6 +25,7 @@
 #include "dialog.h"
 #include "testselection.h"
 #include "scanconfiguration.h"
+#include "testingprogress.h"
 #include "TAlpide.h"
 #include "TDigitalAnalysis.h"
 #include "TDigitalScan.h"
@@ -134,7 +135,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
      //example();
 
-     QPixmap alice("alice.jpg");
+     QPixmap alice("alicethreshold.png");
      int w = ui->alicepic->width();
      int h = ui->alicepic->height();
      ui->alicepic->setPixmap(alice.scaled(w,h,Qt::KeepAspectRatio));
@@ -725,6 +726,7 @@ void MainWindow::start_test(){
     fChips.clear();
     fBoards.clear();
     scanbuttons.clear();
+    execution=true;
    // std::cout<<"why1"<<std::endl;
     if(scanstatuslabels.size()>=1){
          for (unsigned int i=0; i<scanstatuslabels.size();i++){
@@ -994,8 +996,9 @@ scanstatuslabels[i]->setText(fScanVector.at(i)->GetState());}
         scanstatuslabels[i]->setText(fScanVector.at(i)->GetState());}
          //std::cout<<"The classification is : "<<fresultVector[i]->GetClassification()<<std::endl;
 
-         }
-
+}
+           colorsinglescan(i);
+           if (execution==false) break;
 qApp->processEvents();
    }
     qApp->processEvents();
@@ -1160,7 +1163,7 @@ void MainWindow::applytests(){
     if (numberofscan==5){fillingreceptionscans();}
     std::cout<<"the size of the scan vector is: "<<fScanVector.size()<<std::endl;
     performtests(fScanVector,fAnalysisVector);
-    colorscans();
+  //  colorscans();
     connectscandetails();
   // emit stopTimer();
 }
@@ -1589,10 +1592,10 @@ for(unsigned int i; i<fHICs.size();i++){
 void MainWindow::quitall(){
     if (fHICs.size()>=1){
         poweroff();
-        close();
+       close();
     }
     else{
-        close();
+       close();
     }
 }
 
@@ -1954,3 +1957,44 @@ void MainWindow::loaddefaultconfig(){
 }
 
 
+void MainWindow::colorsinglescan(int i){
+
+if (scanbuttons[i]!=0){
+if(fresultVector[i]==0){
+                 colour=fAnalysisVector.at(i+1)->GetClassification();
+                 if (colour==CLASS_ORANGE){scanbuttons[i]->setStyleSheet("color:orange;");
+return;}
+                 if (colour==CLASS_GREEN){scanbuttons[i]->setStyleSheet("color:green;");
+return;}
+                 if (colour==CLASS_RED){scanbuttons[i]->setStyleSheet("color:red;");
+
+                     progresswindow= new Testingprogress(this);
+                     progresswindow->setnotification(fScanVector.at(i)->GetName());
+                     progresswindow->exec();
+
+                 }
+                 if (colour==CLASS_UNTESTED){scanbuttons[i]->setStyleSheet("color:blue;");
+return;}
+
+}
+else{
+                     colour=fAnalysisVector.at(i)->GetClassification();
+                     if (colour==CLASS_ORANGE){scanbuttons[i]->setStyleSheet("color:orange;");
+    return;}
+                     if (colour==CLASS_GREEN){scanbuttons[i]->setStyleSheet("color:green;");
+                       // progresswindow= new Testingprogress(this);
+                       // progresswindow->setnotification(fScanVector.at(i)->GetName());
+                      //  progresswindow->exec();
+                     }
+                     if (colour==CLASS_RED){scanbuttons[i]->setStyleSheet("color:red;");
+                         progresswindow= new Testingprogress(this);
+                         progresswindow->setnotification(fScanVector.at(i)->GetName());
+                         progresswindow->exec();
+
+                     }
+                     if (colour==CLASS_UNTESTED){scanbuttons[i]->setStyleSheet("color:blue;");
+    return;}
+
+ }
+    }
+}

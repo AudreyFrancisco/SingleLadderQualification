@@ -44,7 +44,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -750,7 +750,7 @@
         </palette>
        </property>
        <property name="text">
-        <string>Chip16</string>
+        <string>Chip14</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip15">
@@ -763,7 +763,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip15</string>
+        <string>Chip13</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip14">
@@ -776,7 +776,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip14</string>
+        <string>Chip12</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip13">
@@ -789,7 +789,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip13</string>
+        <string>Chip11</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip12">
@@ -802,7 +802,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip12</string>
+        <string>Chip10</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip11">
@@ -815,7 +815,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip11</string>
+        <string>Chip9</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip10">
@@ -828,7 +828,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip10</string>
+        <string>Chip8</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip00">
@@ -841,7 +841,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip00</string>
+        <string>Chip0</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip01">
@@ -854,7 +854,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip01</string>
+        <string>Chip1</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip02">
@@ -867,7 +867,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip02</string>
+        <string>Chip2</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip03">
@@ -880,7 +880,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip03</string>
+        <string>Chip3</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip04">
@@ -893,7 +893,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip04</string>
+        <string>Chip4</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip05">
@@ -906,7 +906,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip05</string>
+        <string>Chip5</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chip06">
@@ -919,7 +919,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Chip06</string>
+        <string>Chip6</string>
        </property>
       </widget>
       <widget class="QLabel" name="label">

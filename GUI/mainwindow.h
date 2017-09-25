@@ -17,6 +17,7 @@
 #include "TReadoutBoard.h"
 #include "TScanAnalysis.h"
 #include "THisto.h"
+#include "testingprogress.h"
 
 class TConfig;
 class TScan;
@@ -44,6 +45,7 @@ public:
     ~MainWindow();
     TestSelection *settingswindow;
     ScanConfiguration *scanconfigwindow;
+    Testingprogress *progresswindow;
     void scanLoop (TScan *myScan);
  //   void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     std::vector <TScan *> fScanVector;
@@ -67,7 +69,8 @@ int idofoperator;
 std::vector<ActivityDB::locationType> *locationtypelist;
 std::vector<pair<std::string,int>> locdetails;
 int nm;
-
+bool execution;
+int colour;
 
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
    // void explore_halfstave(uint8_t chipid);
@@ -120,7 +123,10 @@ public slots:
 
    void loadeditedconfig();
 
+   void colorsinglescan(int i);
 
+   void continuescans(){execution=true;progresswindow->close();delete progresswindow;}
+   void stopscans(){execution=false;progresswindow->close();delete progresswindow;}
       // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     /*
     void open();
