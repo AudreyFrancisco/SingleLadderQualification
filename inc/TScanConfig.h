@@ -171,13 +171,13 @@ class TScanConfig {
   int   GetScanStep      () {return m_scanStep;};
   int   GetSpeedy        () {return m_speedy;};
   int   GetLocalBusCutRed() {return m_localBusCutRed;};
-  void  SetfNameSuffix   (const char *aSuffix) {strcpy (m_fNameSuffix, aSuffix);};
   int   GetCalVpulsel    () {return m_calVpulsel;};
-  void  SetVoltageScale  (float aScale) {m_voltageScale = aScale;};
   float GetVoltageScale  () {return m_voltageScale;};
-  void  SetBackBias      (float aVoltage) {m_backBias = fabs(aVoltage);};
   float GetBackBias      () {return m_backBias;};
+  void  SetfNameSuffix   (const char *aSuffix) {strcpy (m_fNameSuffix, aSuffix);};
+  void  SetVoltageScale  (float aScale)        {m_voltageScale = aScale;};
+  void  SetBackBias      (float aVoltage)      {m_backBias = fabs(aVoltage);};
+  void  SetVcasnRange    (int start, int stop) {m_vcasnStart = start; m_vcasnStop = stop;};
 };
-
 
 #endif
