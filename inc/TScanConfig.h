@@ -4,6 +4,7 @@
 /* Eventually, this should get moved back to TScanConfig. */
 
 #include <map>
+#include <cmath>
 #include <string>
 #include <string.h>
 
@@ -80,6 +81,7 @@ namespace ScanConfig {
   const int IVPOINTS         = 41;  //number of 100 mV-points for back bias IV curve (max. 50 = 5V)
   const int MAXIBIAS         = 50;  //current limit for I-V-curve in mA;
   const float VOLTAGE_SCALE  = 1.0;
+  const float BACKBIAS       = 0;
 }
 
 
@@ -144,6 +146,7 @@ class TScanConfig {
   int  m_calVpulsel;
   int  m_targetThresh;
   float m_voltageScale;
+  float m_backBias;
  protected:
  public:
   TScanConfig ();
@@ -172,6 +175,8 @@ class TScanConfig {
   int   GetCalVpulsel    () {return m_calVpulsel;};
   void  SetVoltageScale  (float aScale) {m_voltageScale = aScale;};
   float GetVoltageScale  () {return m_voltageScale;};
+  void  SetBackBias      (float aVoltage) {m_backBias = fabs(aVoltage);};
+  float GetBackBias      () {return m_backBias;};
 };
 
 
