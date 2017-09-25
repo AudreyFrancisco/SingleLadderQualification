@@ -114,6 +114,17 @@ void THic::ScaleVoltage(float aFactor)
 }
 
 
+void THic::SwitchBias (bool on)
+{
+  if (on) {
+    m_powerBoard->SetBiasOn (m_pbMod);
+  }
+  else {
+    m_powerBoard->SetBiasOff(m_pbMod);
+  }
+}
+
+
 float THic::GetTemperature() 
 {
   float result = 0; 

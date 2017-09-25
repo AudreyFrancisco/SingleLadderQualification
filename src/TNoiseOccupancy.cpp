@@ -104,6 +104,19 @@ void TNoiseOccupancy::Init        ()
 {
   TScan::Init();
   m_running = true;
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (m_backBias == 0) {
+      m_hics.at(ihic)->SwitchBias (false);
+      m_hics.at(ihic)->GetPowerBoard()->SetBiasVoltage(0);
+    }
+    else {
+      m_hics.at(ihic)->SwitchBias   (true);
+      m_hics.at(ihic)->GetPowerBoard()->SetBiasVoltage( (-1.)* m_backBias);
+    }
+  }
+
+
   CountEnabledChips();
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     std::cout << "Board " << i << ", found " << m_enabled[i] << " enabled chips" << std::endl;
@@ -221,5 +234,13 @@ void TNoiseOccupancy::Terminate ()
       //delete myDAQBoard;
     }
   }
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (m_backBias != 0) {
+      m_hics.at(ihic)->SwitchBias (false);
+      m_hics.at(ihic)->GetPowerBoard()->SetBiasVoltage(0);
+    }
+  }
+
   m_running = false;
 }
