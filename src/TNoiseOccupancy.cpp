@@ -17,7 +17,8 @@ TNoiseOccupancy::TNoiseOccupancy (TScanConfig                   *config,
                                   std::mutex                    *aMutex) 
   : TScan (config, chips, hics, boards, histoQue, aMutex) 
 {
-  strcpy(m_name, "Noise Occupancy");
+  m_backBias  = m_config->GetBackBias  ();
+  sprintf(m_name, "Noise Occupancy %.1f V", m_backBias); 
 
   int nTriggers = m_config->GetParamValue("NTRIG");
 

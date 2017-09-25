@@ -24,7 +24,6 @@ TThresholdScan::TThresholdScan (TScanConfig                   *config,
                                 std::mutex                    *aMutex)
   : TSCurveScan (config, chips, hics, boards, histoQue, aMutex)
 {
-  strcpy(m_name, "Threshold Scan");
   m_start[0]  = m_config->GetChargeStart();
   m_stop [0]  = m_config->GetChargeStop ();
   m_step [0]  = m_config->GetChargeStep ();
@@ -38,7 +37,11 @@ TThresholdScan::TThresholdScan (TScanConfig                   *config,
   m_stop [2]  = 1;
 
   m_VPULSEH   = 170;
+  m_backBias  = m_config->GetBackBias  ();
   m_nTriggers = m_config->GetParamValue("NINJ");
+
+  sprintf(m_name, "Threshold Scan %.1f V", m_backBias); 
+
   CreateScanHisto();
 }
 

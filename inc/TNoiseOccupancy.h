@@ -14,8 +14,9 @@ const int kTrigPerTrain = 100;
 
 class TNoiseOccupancy : public TScan { 
  private:
-  int  m_nTrains;
-  int  m_nLast;
+  int   m_nTrains;
+  int   m_nLast;
+  float m_backBias;
   std::vector <TPixHit>    m_stuck;
   TErrorCounter            m_errorCount;
   void ConfigureFromu (TAlpide *chip);
