@@ -60,3 +60,11 @@ EOF
 
 ## archive the dat files
 tar cjf DAC_summary_${SUFFIX}_archive.tar.bz2 *DAC_*_${SUFFIX}.dat --remove-files
+
+## analyse the data
+for d in VCASN VCASP VCASN2 VCLIP
+do
+    echo "DAC: $d"
+    echo "###############"
+    root -l -b -q ${SCRIPT_DIR}/analyse_DAC.C'("'DAC_summary_${SUFFIX}.root'","'${d}'")'
+done
