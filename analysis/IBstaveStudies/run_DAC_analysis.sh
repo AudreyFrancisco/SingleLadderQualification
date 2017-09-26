@@ -16,6 +16,7 @@ cd ${INPUT_FOLDER}
 OUTFILE=DAC_summary_${SUFFIX}.dat
 echo -e "# DAC\tChip\tV\tDAC value\tADC value" > ${OUTFILE}
 
+## generate a summary file (ASCII table)
 for f in $(ls *DAC_*_${SUFFIX}.dat | grep -v summary )
 do
     DAC=$(echo $f   | cut -d'_' -f2 )
@@ -35,8 +36,27 @@ CHIPS=$(cat ${OUTFILE}      | grep -v "\#" | cut -f2 -d' ' | sort -u -n | tr '\n
 VOLTAGES=$(cat ${OUTFILE}   | grep -v "\#" | cut -f3 -d' ' | sort -u -n | tr '\n' ' ' )
 DAC_VALUES=$(cat ${OUTFILE} | grep -v "\#" | cut -f4 -d' ' | sort -u -n | tr '\n' ' ' )
 
-echo ${DACS}
-echo ${CHIPS}
-echo ${VOLTAGES}
-echo ${DAC_VALUES}
+echo
+echo "DACS: "${DACS}
+echo
+echo "CHIPS: "${CHIPS}
+echo
+echo "SUPPLY VOLTAGES: "${VOLTAGES}
+echo
+echo "SET VALUES: "${DAC_VALUES}
+echo
 
+## convert ASCII table to a ROOT TTree
+root -l -b <<EOF
+TFile* f = new TFile("DAC_summary_${SUFFIX}.root", "RECREATE");
+TTree*  t = new TTree("DACsummary","");
+Long64_t nlines = t->ReadFile("DAC_summary_${SUFFIX}.dat", "DAC/C:Chip/s:Voltage/D:SetValue/b:MeasValue/D");
+std::cout << "Read " << nlines << " lines into the TTree" << std::endl;
+t->Write();
+f->Close();
+delete f;
+f = 0x0;
+EOF
+
+## archive the dat files
+tar cjf DAC_summary_${SUFFIX}_archive.tar.bz2 *DAC_*_${SUFFIX}.dat --remove-files
