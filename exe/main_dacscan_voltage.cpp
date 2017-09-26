@@ -192,8 +192,8 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
 int main(int argc, char** argv) {
   time_t       t = time(0);   // get time now
   struct tm *now = localtime( & t );
-  char Suffix[13];
-  snprintf(Suffix, 13, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+  char Suffix[14];
+  snprintf(Suffix, 14, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
   decodeCommandParameters(argc, argv);
   initSetup(config, &fBoards, &boardType, &fChips);
