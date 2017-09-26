@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
 
     for (float voltage = 1.62; voltage < 2.00; voltage+=0.02) {
       char cmd[50];
-      sprintf(cmd, "scripts/IBstaveStudies/hameg.py 2 0 %f 1.5", voltage);
+      sprintf(cmd, "scripts/IBstaveStudies/hameg.py 2 0 %f 1.5", voltage+0.11);
       if (system(cmd) != 0) std::cerr << "Failed to set the digital supply voltage" << std::endl;
       sprintf(cmd, "scripts/IBstaveStudies/hameg.py 2 1 %f 0.5", voltage);
       if (system(cmd) != 0) std::cerr << "Failed to set the analogue supply voltage" << std::endl;
