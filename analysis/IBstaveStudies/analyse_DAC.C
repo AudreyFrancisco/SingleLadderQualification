@@ -18,10 +18,10 @@ void analyse_DAC(TString inputFile, TString DAC, Int_t chip = -1) {
   //std::cout << DAC << std::endl;
 
   TString draw_str = "Voltage:MeasValue";
-  TString cut_str  = "(SetValue==150)";
+  TString cut_str  = "(SetValue==160)";
   cut_str += TString::Format("&&(DAC==\"%s\")", DAC.Data());
 
-  float expected_value_base = 150./255.;
+  float expected_value_base = 160./255.;
 
   std::cout << std::setprecision(3);
 
