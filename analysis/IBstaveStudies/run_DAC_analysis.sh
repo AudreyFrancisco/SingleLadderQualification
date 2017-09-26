@@ -11,6 +11,10 @@ ROOT_DIR=$(readlink -f ${SCRIPT_DIR}/../../ )
 
 command -v root >/dev/null 2>&1 || { echo "CERN ROOT not found.  Aborting." >&2; exit 1; }
 
+
+#################################################################
+### EXECUTION
+#################################################################
 cd ${INPUT_FOLDER}
 
 OUTFILE=DAC_summary_${SUFFIX}.dat
