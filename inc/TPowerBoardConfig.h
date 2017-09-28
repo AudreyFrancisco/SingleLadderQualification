@@ -73,6 +73,16 @@
 #define DEF_DIGITALMAXCURRENT_IB 1.00
 #define DEF_BIASCHANNELON_IB	 false
 
+#define DEF_AVSCALE              1.0
+#define DEF_DVSCALE              1.0
+#define DEF_AVOFFSET             0.0
+#define DEF_DVOFFSET             0.0
+#define DEF_DIOFFSET             0.0
+#define DEF_AIOFFSET             0.0
+#define DEF_CALDLINER            0.0
+#define DEF_CALALINER            0.0
+#define DEF_BIASOFFSET           0.0
+#define DEF_BIASSCALE            1.0
 
 // Class definition
 class TPowerBoardConfig  {
@@ -80,16 +90,26 @@ class TPowerBoardConfig  {
 // structures a data types
 public:
 	typedef struct Mod {
-		bool BiasOn;
-		float AVset;
-		float AIset;
-		float DVset;
-		float DIset;
+	  bool BiasOn;
+	  float AVset;
+	  float AIset;
+	  float DVset;
+	  float DIset;
+          float CalAVScale;
+          float CalDVScale;
+          float CalAVOffset;
+          float CalDVOffset;
+          float CalDIOffset;
+	  float CalAIOffset;
+          float CalDLineR;
+          float CalALineR;
 	} Mod_t;
 
 	typedef struct PowBoard {
-		Mod_t Modul[MAX_MOULESPERMOSAIC];
-		float VBset;
+          Mod_t Modul[MAX_MOULESPERMOSAIC];
+	  float VBset;
+          float CalBiasOffset;
+          float CalBiasScale;
 	} PowBoard_t;
 
 // members

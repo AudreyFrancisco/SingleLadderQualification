@@ -48,20 +48,29 @@ using namespace std;
 	Constructor
 
 	Parameter : AConfigFileName := Path and filename of a configuration ASCII file
-
   -------------------------- */
 TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName)
 {
 	fBoardType = boardMOSAIC;
 
 	// Default values set
-	fPBConfig.VBset = DEF_BIASVOLTAGE;
+	fPBConfig.VBset         = DEF_BIASVOLTAGE;
+        fPBConfig.CalBiasOffset = DEF_BIASOFFSET;
+        fPBConfig.CalBiasScale  = DEF_BIASSCALE;
 	for(int i=0;i<MAX_MOULESPERMOSAIC;i++) {
-		fPBConfig.Modul[i].AVset = DEF_ANALOGVOLTAGE;
-		fPBConfig.Modul[i].AIset = DEF_ANALOGMAXCURRENT;
-		fPBConfig.Modul[i].DVset = DEF_DIGITALVOLTAGE;
-		fPBConfig.Modul[i].DIset = DEF_DIGITALMAXCURRENT;
-		fPBConfig.Modul[i].BiasOn = DEF_BIASCHANNELON;
+		fPBConfig.Modul[i].AVset       = DEF_ANALOGVOLTAGE;
+		fPBConfig.Modul[i].AIset       = DEF_ANALOGMAXCURRENT;
+		fPBConfig.Modul[i].DVset       = DEF_DIGITALVOLTAGE;
+		fPBConfig.Modul[i].DIset       = DEF_DIGITALMAXCURRENT;
+		fPBConfig.Modul[i].BiasOn      = DEF_BIASCHANNELON;
+                fPBConfig.Modul[i].CalAVScale  = DEF_AVSCALE;
+                fPBConfig.Modul[i].CalDVScale  = DEF_DVSCALE;
+                fPBConfig.Modul[i].CalAVOffset = DEF_AVOFFSET;
+                fPBConfig.Modul[i].CalDVOffset = DEF_DVOFFSET;
+                fPBConfig.Modul[i].CalDIOffset = DEF_DIOFFSET;
+                fPBConfig.Modul[i].CalAIOffset = DEF_AIOFFSET;
+                fPBConfig.Modul[i].CalDLineR   = DEF_CALDLINER;
+                fPBConfig.Modul[i].CalALineR   = DEF_CALALINER;
 	}
 
 	if (AConfigFileName) { // Read Configuration file
