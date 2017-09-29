@@ -88,6 +88,8 @@
 class TPowerBoardConfig  {
 
 // structures a data types
+// the configuration data types contain set values and calibration constants 
+// the set values correspond to the desired output value, i.e. the value before applying the calibration
 public:
 	typedef struct Mod {
 	  bool BiasOn;
@@ -126,30 +128,30 @@ public:
 	// Info
 
 	// Getters
-	float GetBiasVoltage() { return( fPBConfig.VBset); };
+	float GetBiasVoltage();
 
-	float GetAnalogVoltage(int mod) { return(fPBConfig.Modul[mod].AVset); };
-	float GetAnalogCurrent(int mod) { return(fPBConfig.Modul[mod].AIset); };
-	float GetDigitalVoltage(int mod) { return(fPBConfig.Modul[mod].DVset); };
-	float GetDigitalCurrent(int mod) { return(fPBConfig.Modul[mod].DIset); };
-	bool GetBiasOn(int mod) { return(fPBConfig.Modul[mod].BiasOn); };
+	float GetAnalogVoltage  (int mod);
+	float GetAnalogCurrent  (int mod) { return(fPBConfig.Modul[mod].AIset); };
+	float GetDigitalVoltage (int mod);
+	float GetDigitalCurrent (int mod) { return(fPBConfig.Modul[mod].DIset); };
+	bool  GetBiasOn         (int mod) { return(fPBConfig.Modul[mod].BiasOn); };
 
-	void GetModuleSetUp(int mod, float*AVSet, float*AISet, float*DVSet, float*DISet, bool*isBiasOn);
-	void GetAnalogVoltages(float * AVSet);
-	void GetDigitalVoltages(float * DVSet);
-	void GetAnalogCurrents(float * AISet);
-	void GetDigitalCurrents(float * DISet);
-	void GetBiasOnSets(bool * BIASOn);
+	void GetModuleSetUp     (int mod, float*AVSet, float*AISet, float*DVSet, float*DISet, bool*isBiasOn);
+	void GetAnalogVoltages  (float * AVSet);
+	void GetDigitalVoltages (float * DVSet);
+	void GetAnalogCurrents  (float * AISet);
+	void GetDigitalCurrents (float * DISet);
+	void GetBiasOnSets      (bool * BIASOn);
 
 	// Setters
 	void SetBiasVoltage(float val) { fPBConfig.VBset = val; };
 
-	void ModuleSetUp(int mod, float AVSet, float AISet, float DVSet, float DISet, bool isBiasOn);
-	void SetAnalogVoltage(int mod, float val) { fPBConfig.Modul[mod].AVset = val; };
-	void SetAnalogCurrent(int mod, float val) { fPBConfig.Modul[mod].AIset = val; };
-	void SetDigitalVoltage(int mod, float val) { fPBConfig.Modul[mod].DVset = val; };
-	void SetDigitalCurrent(int mod, float val) { fPBConfig.Modul[mod].DIset = val; };
-	void SetBiasOn(int mod, bool val) { fPBConfig.Modul[mod].BiasOn = val; };
+	void ModuleSetUp       (int mod, float AVSet, float AISet, float DVSet, float DISet, bool isBiasOn);
+	void SetAnalogVoltage  (int mod, float val) { fPBConfig.Modul[mod].AVset = val; };
+	void SetAnalogCurrent  (int mod, float val) { fPBConfig.Modul[mod].AIset = val; };
+	void SetDigitalVoltage (int mod, float val) { fPBConfig.Modul[mod].DVset = val; };
+	void SetDigitalCurrent (int mod, float val) { fPBConfig.Modul[mod].DIset = val; };
+	void SetBiasOn         (int mod, bool val)  { fPBConfig.Modul[mod].BiasOn = val; };
 
         void SetDefaultsOB(int mod);
         void SetDefaultsIB(int mod);

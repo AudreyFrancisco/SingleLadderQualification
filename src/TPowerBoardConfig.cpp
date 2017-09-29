@@ -167,9 +167,9 @@ void TPowerBoardConfig::readConfiguration()
 
   -------------------------- */
 void TPowerBoardConfig::GetModuleSetUp(int mod, float*AVSet, float*AISet, float*DVSet, float*DISet, bool*isBiasOn) {
-	*AVSet = fPBConfig.Modul[mod].AVset;
+        *AVSet = GetAnalogVoltage(mod);
 	*AISet = fPBConfig.Modul[mod].AIset;
-	*DVSet = fPBConfig.Modul[mod].DVset;
+	*DVSet = GetDigitalVoltage(mod);
 	*DISet = fPBConfig.Modul[mod].DIset;
 	*isBiasOn = fPBConfig.Modul[mod].BiasOn;
 	return;
@@ -198,30 +198,43 @@ void TPowerBoardConfig::ModuleSetUp(int mod, float AVSet, float AISet, float DVS
 
 /* -------------------------
 	GetAnalogVoltages()
-	Returns the array of Analogic Voltage setting for all 8 modules
+	Returns the array of Analogic Voltage setting for all 8 modules, including calibration
 
 	Parameter Output : pointer to a float array of 8 elements
 
   -------------------------- */
 void TPowerBoardConfig::GetAnalogVoltages(float * AVSet) {
 	for(int i=0;i<MAX_MOULESPERMOSAIC;i++) {
-		*(AVSet++) = fPBConfig.Modul[i].AVset;
+	  *(AVSet++) = GetAnalogVoltage(i);
 	}
 	return;
 }
 
+
+float TPowerBoardConfig::GetAnalogVoltage(int mod) 
+{ 
+  return(fPBConfig.Modul[mod].AVset * fPBConfig.Modul[mod].CalAVScale + fPBConfig.Modul[mod].CalAVOffset); 
+}
+
+
 /* -------------------------
 	GetDigitalVoltages()
-	Returns the array of Digital Voltage setting for all 8 modules
+	Returns the array of Digital Voltage setting for all 8 modules, including calibration
 
 	Parameter Output : pointer to a float array of 8 elements
 
   -------------------------- */
 void TPowerBoardConfig::GetDigitalVoltages(float * DVSet) {
 	for(int i=0;i<MAX_MOULESPERMOSAIC;i++) {
-		*(DVSet++) = fPBConfig.Modul[i].DVset;
+	  *(DVSet++) = GetDigitalVoltage(i);
 	}
 	return;
+}
+
+
+float TPowerBoardConfig::GetDigitalVoltage(int mod) 
+{ 
+  return(fPBConfig.Modul[mod].DVset * fPBConfig.Modul[mod].CalDVScale + fPBConfig.Modul[mod].CalDVOffset); 
 }
 
 /* -------------------------
@@ -265,6 +278,14 @@ void TPowerBoardConfig::GetBiasOnSets(bool * BIASOn) {
 	}
 	return;
 }
+
+
+// GetBiasVoltage: returns bias voltage including calibration
+float TPowerBoardConfig::GetBiasVoltage() 
+{ 
+  return (fPBConfig.VBset * fPBConfig.CalBiasScale + fPBConfig.CalBiasOffset); 
+}
+
 
 /* -------------------------
 	ReadFromFile()
