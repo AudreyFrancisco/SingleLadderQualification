@@ -13,7 +13,10 @@ TSCurveScan::TSCurveScan       (TScanConfig                   *config,
                                 std::vector <TReadoutBoard *>  boards,
                                 std::deque<TScanHisto>        *histoQue,
                                 std::mutex                    *aMutex)
-  : TMaskScan (config, chips, hics, boards, histoQue, aMutex) {}
+  : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
+{
+  m_backBias  = m_config->GetBackBias  ();
+}
 
 
 TThresholdScan::TThresholdScan (TScanConfig                   *config,
@@ -37,7 +40,6 @@ TThresholdScan::TThresholdScan (TScanConfig                   *config,
   m_stop [2]  = 1;
 
   m_VPULSEH   = 170;
-  m_backBias  = m_config->GetBackBias  ();
   m_nTriggers = m_config->GetParamValue("NINJ");
 
   sprintf(m_name, "Threshold Scan %.1f V", m_backBias); 
