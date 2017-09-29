@@ -218,10 +218,10 @@ bool TPowerBoard::readMonitor()
   -------------------------- */
 void TPowerBoard::SetModule(int module, float AV, float AI, float DV, float DI, bool BiasOn)
 {
-	fPBoard.Modules[module].AVmon  = AV;
-	fPBoard.Modules[module].DVmon  = DV;
-	fPBoard.Modules[module].AImon  = AI;
-	fPBoard.Modules[module].DImon  = DI;
+	fPBoard.Modules[module].AVset  = AV;
+	fPBoard.Modules[module].DVset  = DV;
+	fPBoard.Modules[module].AIset  = AI;
+	fPBoard.Modules[module].DIset  = DI;
 	fPBoard.Modules[module].BiasOn = BiasOn;
 
 	fMOSAICPowerBoard->setVout((unsigned char)(module * 2), AV);
