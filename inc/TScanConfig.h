@@ -28,6 +28,10 @@ namespace ScanConfig {
                                  //Speeds up scan; changing this has little effect on result accuracy.
   const int LOCALBUSCUTRED = 1;
 
+  const int DAC_START      = 0;
+  const int DAC_STOP       = 255;
+  const int DAC_STEP       = 8;
+
   // current limits for powering test in mA
   const int POWER_CUT_MINIDDA_OB = 20;
   const int POWER_CUT_MINIDDD_OB = 50;
@@ -93,6 +97,9 @@ class TScanConfig {
   int  m_chargeStart;
   int  m_chargeStop;
   int  m_chargeStep;
+  int  m_dacStart;
+  int  m_dacStop;
+  int  m_dacStep;
   int  m_nMaskStages;
   int  m_pixPerRegion;
   int  m_noiseCutInv;

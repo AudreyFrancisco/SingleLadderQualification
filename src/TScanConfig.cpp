@@ -20,6 +20,9 @@ TScanConfig::TScanConfig()
   m_ithrStart      = ITHR_START;
   m_ithrStop       = ITHR_STOP;
   m_ithrStep       = ITHR_STEP;
+  m_dacStart       = DAC_START;
+  m_dacStop        = DAC_STOP;
+  m_dacStep        = DAC_STEP;
   m_scanStep       = SCAN_STEP;
   m_speedy         = SPEEDY;
   m_rawData        = RAWDATA;
@@ -90,6 +93,9 @@ void TScanConfig::InitParamMap ()
   fSettings["ITHR_START"]   = &m_ithrStart;
   fSettings["ITHR_STOP"]    = &m_ithrStop;
   fSettings["ITHR_STEP"]    = &m_ithrStep;
+  fSettings["DACSTART"]     = &m_ithrStart;
+  fSettings["DACSTOP"]      = &m_ithrStop;
+  fSettings["DACSTEP"]      = &m_ithrStep;
   fSettings["SCAN_STEP"]    = &m_scanStep;
   fSettings["SPEEDY"]       = &m_speedy;
   fSettings["RAWDATA"]      = &m_rawData;
