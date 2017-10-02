@@ -64,26 +64,63 @@ void TDACScan::Init        ()
 }
 
 
+void TDACScan::PrepareStep (int loopIndex)
+{
+  switch (loopIndex) {
+  case 0:    // innermost loop: change DAC value 
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      m_chips.at(ichip)->WriteRegister((Alpide::TRegister) m_value[1], m_value[0]);
+    }
+  default:
+    break;
+  }
+}
+
+
 void TDACScan::Execute ()
 {
 }
 
 
-void TDACScan::Next (int loopIndex) 
-{
+void TDACScan::LoopStart (int loopIndex) 
+{  
+  m_value[loopIndex] = m_start[loopIndex];
+  // read current DAC value for first enabled chip; 
+  // this assumes that all chips have the same settings, which should be the case at this point
+  if (loopIndex == 0) {  
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      m_chips.at(ichip)->ReadRegister((Alpide::TRegister) m_value[1], m_restoreValue);
+      break;
+    }
+  }
 }
 
 
 void TDACScan::LoopEnd (int loopIndex)
 {
+  switch (loopIndex) {
+  case 0:   // innermost loop: set DAC value back
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;    
+      m_chips.at(ichip)->WriteRegister((Alpide::TRegister) m_value[1], m_restoreValue);
+    }
+  case 1:
+    while (!(m_mutex->try_lock()));
+    m_histo   ->SetIndex(m_value[2]); // in case we add a loop on e.g. voltage
+    m_histoQue->push_back(*m_histo);
+    m_mutex   ->unlock();
+    m_histo   ->Clear();
+  default:
+    break;
+  }
 }
 
-
-void TDACScan::PrepareStep (int loopIndex)
-{
-}
 
 
 void TDACScan::Terminate ()
 {
+  TScan::Terminate();
+  m_running = false;
 }

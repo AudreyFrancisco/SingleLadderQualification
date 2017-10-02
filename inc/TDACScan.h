@@ -8,7 +8,8 @@
 
 class TDACScan : public TScan {
  private:
-  void ConfigureChip  (TAlpide *chip);
+  void     ConfigureChip  (TAlpide *chip);
+  uint16_t m_restoreValue;
  protected: 
   THisto   CreateHisto();
  public:
@@ -23,8 +24,7 @@ class TDACScan : public TScan {
   void Execute   ();
   void Terminate ();
 
-  void Next        (int loopIndex);
-  void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
+  void LoopStart   (int loopIndex);
   void LoopEnd     (int loopIndex);
   void PrepareStep (int loopIndex);
 };
