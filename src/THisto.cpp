@@ -314,6 +314,17 @@ void TScanHisto::Incr (common::TChipIndex index, unsigned int i) {
   m_histos.at(int_index).Incr(i);
 }
 
+void TScanHisto::Set (common::TChipIndex index, unsigned int i, unsigned int j, double val) {
+  int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
+  m_histos.at(int_index).Set(i, j, val);
+}
+
+
+void TScanHisto::Set (common::TChipIndex index, unsigned int i, double val) {
+  int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
+  m_histos.at(int_index).Set(i, val);
+}
+
 
 //TODO clean up
 double TScanHisto::operator() (common::TChipIndex index, unsigned int i, unsigned int j) const

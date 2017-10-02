@@ -71,6 +71,8 @@ class TScanHisto {
   void Clear       ();
   void SetIndex    (int aIndex) {m_index = aIndex;};
   int  GetIndex    () const     {return m_index;};
+  void Set         (common::TChipIndex index, unsigned int i, double val);                 // Bin write access 1d
+  void Set         (common::TChipIndex index, unsigned int i, unsigned int j, double val); // Bin write access 2d   
   void Incr        (common::TChipIndex index, unsigned int i, unsigned int j);
   void Incr        (common::TChipIndex index, unsigned int i);
   std::map<int,THisto> GetHistoMap() {return m_histos;}  

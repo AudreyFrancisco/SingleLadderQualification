@@ -1,5 +1,6 @@
 #include "TDACScan.h"
 #include "AlpideConfig.h"
+#include "Common.h"
 
 TDACScan::TDACScan (TScanConfig                   *config, 
                     std::vector <TAlpide *>        chips, 
@@ -80,6 +81,35 @@ void TDACScan::PrepareStep (int loopIndex)
 
 void TDACScan::Execute ()
 {
+  common::TChipIndex idx;
+  float              average = 0;
+  int                N       = m_config->GetParamValue ("NDACSAMPLES");
+
+  if (N == 0) {
+    std::cout << "Warning, number of DAC samples 0; not doing anything...";
+    return;
+  }
+  
+  for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
+    if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+    idx.boardIndex   = FindBoardIndex (m_chips.at(ichip));
+    idx.chipId       = m_chips.at(ichip)->GetConfig()->GetChipId();
+    idx.dataReceiver = m_chips.at(ichip)->GetConfig()->GetParamValue("RECEIVER");
+
+    if (m_value[1] < Alpide::REG_IRESET) {  //voltage DAC
+      for (int i = 0; i < N; i ++) {
+        average += m_chips.at(ichip)->ReadDACVoltage ((Alpide::TRegister)m_value[1]);
+      }
+    }
+    else {  // current DAC
+      for (int i = 0; i < N; i ++) {
+        average += m_chips.at(ichip)->ReadDACCurrent ((Alpide::TRegister)m_value[1]);
+      }
+    }
+    average /= N;
+
+    m_histo->Set(idx, m_value[1] - m_start[1], m_value[0], average);
+  }
 }
 
 
