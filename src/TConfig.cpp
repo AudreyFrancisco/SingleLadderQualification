@@ -330,7 +330,7 @@ void TConfig::ParseLine(std::string Line, std::string& Param, std::string& Value
   else {
     tmp   = Line.substr(0, Line.find(sep));
     Param = tmp.substr(0, Line.find("_"));
-    *Chip = stoi(tmp.substr(Line.find("_")));
+    *Chip = stoi(tmp.substr(Line.find("_")+1));
   }
 }
 
