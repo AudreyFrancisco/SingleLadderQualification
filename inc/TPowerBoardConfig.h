@@ -142,7 +142,8 @@ public:
 	void GetAnalogCurrents  (float * AISet);
 	void GetDigitalCurrents (float * DISet);
 	void GetBiasOnSets      (bool * BIASOn);
-
+        void GetVCalibration    (int mod, float &AVScale, float &DVScale, float &AVOffset, float &DVOffset);
+        void SetVCalibration    (int mod, float AVScale,  float DVScale,  float AVOffset,  float DVOffset);
 	// Setters
 	void SetBiasVoltage(float val) { fPBConfig.VBset = val; };
 

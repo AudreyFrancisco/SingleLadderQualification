@@ -287,6 +287,25 @@ float TPowerBoardConfig::GetBiasVoltage()
 }
 
 
+void TPowerBoardConfig::GetVCalibration (int mod, float &AVScale, float &DVScale, float &AVOffset, float &DVOffset)
+{
+  AVScale  = fPBConfig.Modul[mod].CalAVScale;
+  DVScale  = fPBConfig.Modul[mod].CalDVScale;
+  AVOffset = fPBConfig.Modul[mod].CalAVOffset;
+  DVOffset = fPBConfig.Modul[mod].CalDVOffset;
+}
+
+
+void TPowerBoardConfig::SetVCalibration (int mod, float AVScale, float DVScale, float AVOffset, float DVOffset)
+{
+  fPBConfig.Modul[mod].CalAVScale = AVScale;
+  fPBConfig.Modul[mod].CalDVScale = DVScale;
+  fPBConfig.Modul[mod].CalAVOffset = AVOffset;
+  fPBConfig.Modul[mod].CalDVOffset = DVOffset;
+}
+
+
+
 /* -------------------------
 	ReadFromFile()
 	Read a complete configuration from a file and stores it into the class members

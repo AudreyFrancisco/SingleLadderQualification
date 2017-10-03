@@ -203,6 +203,60 @@ bool TPowerBoard::readMonitor()
 	return(true);
 }
 
+
+// Calibrate the output voltages of a given module
+// set calibration constants back to 1 / 0
+// set two different voltages and measure the output voltage for each setting
+// determine new calibration constants
+void TPowerBoard::CalibrateVoltage(int module) 
+{
+  // two set points that fall on a full bin
+  // set the lower voltage second to not risk applying 2.2 V to a HIC
+  float set2 = 1.58;
+  float set1 = 2.187;
+  float analog1, analog2, digital1, digital2;
+  float manalog, mdigital, banalog, bdigital;
+
+  // set calibration back to slope 1 / intercept 0
+  fPowerBoardConfig->SetVCalibration (module, 1, 1, 0, 0);
+
+  // set and measure first point
+  SetAnalogVoltage (module, set1);
+  SetDigitalVoltage(module, set1);
+  SwitchModule     (module, true);
+
+  analog1  = GetAnalogVoltage  (module);
+  digital1 = GetDigitalVoltage (module);
+
+  // set and measure second point
+  SetAnalogVoltage (module, set2);
+  SetDigitalVoltage(module, set2);
+
+  analog2  = GetAnalogVoltage  (module);
+  digital2 = GetDigitalVoltage (module);
+
+  // calculate slope and intercept for calibration Vout -> Vset
+  manalog  = (set1 - set2) / (analog1  - analog2);
+  mdigital = (set1 - set2) / (digital1 - digital2);
+  banalog  = set1 - manalog  * analog1;
+  bdigital = set1 - mdigital * digital1;
+
+  // set new calibration values and switch off module 
+  fPowerBoardConfig->SetVCalibration (module, manalog, mdigital, banalog, bdigital); 
+
+  SwitchModule (module, false);
+}
+
+
+// Calibrate the current offset for a given module
+// switch of the channel
+// measure the current
+void TPowerBoard::CalibrateCurrent(int module) 
+{
+}
+
+
+
 /* -------------------------
 	SetModule()
 

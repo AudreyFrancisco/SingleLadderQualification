@@ -114,18 +114,21 @@ public:
 	float GetBiasVoltage() { readMonitor(); return(fPBoard.VBmon);};
 	float GetBiasCurrent() { readMonitor(); return(fPBoard.IBmon);};
 
-	float GetAnalogVoltage(int module) { readMonitor(); return(fPBoard.Modules[module].AVmon);};
-	float GetAnalogCurrent(int module) { readMonitor(); return(fPBoard.Modules[module].AImon);};
+	float GetAnalogVoltage (int module) { readMonitor(); return(fPBoard.Modules[module].AVmon);};
+	float GetAnalogCurrent (int module) { readMonitor(); return(fPBoard.Modules[module].AImon);};
 	float GetDigitalVoltage(int module) { readMonitor(); return(fPBoard.Modules[module].DVmon);};
 	float GetDigitalCurrent(int module) { readMonitor(); return(fPBoard.Modules[module].DImon);};
-	bool IsAnalogChOn(int module) { readMonitor(); return(fPBoard.Modules[module].AchOn);};
-	bool IsDigitalChOn(int module) { readMonitor(); return(fPBoard.Modules[module].DchOn);};
-	bool IsBiasChOn(int module) { readMonitor(); return(fPBoard.Modules[module].BiasOn);};
+	bool  IsAnalogChOn     (int module) { readMonitor(); return(fPBoard.Modules[module].AchOn);};
+	bool  IsDigitalChOn    (int module) { readMonitor(); return(fPBoard.Modules[module].DchOn);};
+	bool  IsBiasChOn       (int module) { readMonitor(); return(fPBoard.Modules[module].BiasOn);};
 
-	void GetModule(int module, float* AV, float *AI, float *DV, float *DI, bool *BiasOn, bool *AChOn, bool *DChOn);
+        void CalibrateVoltage  (int module);
+        void CalibrateCurrent  (int module);
+
+	void  GetModule(int module, float* AV, float *AI, float *DV, float *DI, bool *BiasOn, bool *AChOn, bool *DChOn);
 
 	// Setters
-	void SetBiasVoltage(float aVal) { fPBoard.VBset = aVal; fMOSAICPowerBoard->setVbias(aVal);};
+	void  SetBiasVoltage(float aVal) { fPBoard.VBset = aVal; fMOSAICPowerBoard->setVbias(aVal);};
 
 	void SetAnalogVoltage(int mod, float val) { fPBoard.Modules[mod].AVset = val; fMOSAICPowerBoard->setVout((unsigned char)(mod*2),val);};
 	void SetAnalogCurrent(int mod, float val) { fPBoard.Modules[mod].AIset = val; fMOSAICPowerBoard->setIth((unsigned char)(mod*2),val);};
