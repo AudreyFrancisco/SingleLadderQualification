@@ -253,6 +253,15 @@ void TPowerBoard::CalibrateVoltage(int module)
 // measure the current
 void TPowerBoard::CalibrateCurrent(int module) 
 {
+  float aOffset, dOffset;
+  fPowerBoardConfig->SetICalibration (module, 0, 0);  
+
+  SwitchModule (module, false);
+
+  aOffset = GetAnalogCurrent  (module);
+  dOffset = GetDigitalCurrent (module);
+
+  fPowerBoardConfig->SetICalibration (module, aOffset, dOffset);  
 }
 
 

@@ -305,6 +305,19 @@ void TPowerBoardConfig::SetVCalibration (int mod, float AVScale, float DVScale, 
 }
 
 
+void TPowerBoardConfig::GetICalibration (int mod, float &AIOffset, float &DIOffset)
+{
+  AIOffset = fPBConfig.Modul[mod].CalAIOffset;
+  DIOffset = fPBConfig.Modul[mod].CalDIOffset;
+}
+
+
+void TPowerBoardConfig::SetICalibration (int mod, float AIOffset, float DIOffset)
+{
+  fPBConfig.Modul[mod].CalAIOffset = AIOffset;
+  fPBConfig.Modul[mod].CalDIOffset = DIOffset;
+}
+
 
 /* -------------------------
 	ReadFromFile()

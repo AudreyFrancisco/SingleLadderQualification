@@ -144,6 +144,8 @@ public:
 	void GetBiasOnSets      (bool * BIASOn);
         void GetVCalibration    (int mod, float &AVScale, float &DVScale, float &AVOffset, float &DVOffset);
         void SetVCalibration    (int mod, float AVScale,  float DVScale,  float AVOffset,  float DVOffset);
+        void GetICalibration    (int mod, float &AIOffset, float &DIOffset);
+        void SetICalibration    (int mod, float AIOffset, float DIOffset);
 	// Setters
 	void SetBiasVoltage(float val) { fPBConfig.VBset = val; };
 
