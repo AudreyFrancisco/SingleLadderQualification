@@ -200,8 +200,8 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, uns
 int main(int argc, char** argv) {
   time_t       t = time(0);   // get time now
   struct tm *now = localtime( & t );
-  char Suffix[13];
-  snprintf(Suffix, 13, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+  char Suffix[14];
+  snprintf(Suffix, 14, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
   decodeCommandParameters(argc, argv);
   initSetup(config, &fBoards, &boardType, &fChips);
@@ -247,11 +247,14 @@ int main(int argc, char** argv) {
       uint16_t theResult = 0;
       float    theValue  = 0.;
       fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
-      fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature, Alpide::COMP_296uA, Alpide::RAMP_1us);
+      usleep(5000);
+      fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
+      usleep(5000);
 
       for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
         fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(i));
-        fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVDD, theResult);
+        usleep(5000);
+        fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
         theValue = ((float)theResult - (float)(fChips.at(i)->GetADCBias())) * 0.823e-3; // first approximation
         fprintf (fp, "%d %.3f\n", repetition, theValue);
       }
@@ -263,7 +266,6 @@ int main(int argc, char** argv) {
 
       theResult = 0;
       theValue  = 0.;
-      fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
       fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature, Alpide::COMP_296uA, Alpide::RAMP_1us);
 
       for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {

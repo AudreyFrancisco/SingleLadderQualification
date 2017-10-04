@@ -255,11 +255,12 @@ int main(int argc, char** argv) {
         uint16_t theResult = 0;
         float    theValue  = 0.;
         fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
-        fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature, Alpide::COMP_296uA, Alpide::RAMP_1us);
+        fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
 
         for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
           fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(i));
-          fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVDD, theResult);
+          usleep(5000);
+          fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
           theValue = ((float)theResult - (float)(fChips.at(i)->GetADCBias())) * 0.823e-3; // first approximation
           fprintf (fp, "%d %.3f\n", repetition, theValue);
         }
