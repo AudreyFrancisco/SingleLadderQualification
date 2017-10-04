@@ -34,7 +34,8 @@ TBoardType boardType;
 std::vector <TAlpide *> fChips;
 TReadoutBoardDAQ *myDAQBoard;
 
-int mySampleDist = 16;
+unsigned int mySampleDist = 16;
+unsigned int mySampleRepetition = 10;
 
 
 int configureChip(TAlpide *chip) {
@@ -123,7 +124,7 @@ void SetDACMon (TAlpide *chip, Alpide::TRegister ADac, int IRef = 2) {
 }
 
 
-void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int sampleDist = 1, float AVDD = 1.8, string suffix = "") {
+void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, unsigned int sampleDist = 1, unsigned int sampleRepetition = 1, float AVDD = 1.8, string suffix = "") {
   char     fName[50];
   float    Current;
   uint16_t old;
@@ -137,18 +138,22 @@ void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
 
   chip->ReadRegister (ADac, old);
   if (!myDAQBoard) { // MOSAIC board internal ADC read
-    for (int i = 0; i < 256; i += sampleDist) {
-      chip->WriteRegister (ADac, i);
-      Current = chip->ReadDACCurrent(ADac);
-      fprintf (fp, "%d %.3f\n", i, Current);
+    for (unsigned int value = 0; value < 256; value += sampleDist) {
+      for (unsigned int repetition = 0; repetition < sampleRepetition; ++repetition) {
+        chip->WriteRegister (ADac, value);
+        Current = chip->ReadDACCurrent(ADac);
+        fprintf (fp, "%d %.3f\n", value, Current);
+      }
     }
   } else { // DAQ board : external ADC read
     SetDACMon (chip, ADac);
     usleep(100000);
-    for (int i = 0; i < 256; i += sampleDist) {
-      chip->WriteRegister (ADac, i);
-      Current = myDAQBoard->ReadMonI();
-      fprintf (fp, "%d %.3f\n", i, Current);
+    for (unsigned int value = 0; value < 256; value += sampleDist) {
+      for (unsigned int repetition = 0; repetition < sampleRepetition; ++repetition) {
+        chip->WriteRegister (ADac, value);
+        Current = myDAQBoard->ReadMonI();
+        fprintf (fp, "%d %.3f\n", value, Current);
+      }
     }
   }
   chip->WriteRegister (ADac, old);
@@ -156,12 +161,11 @@ void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
 }
 
 
-void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int sampleDist = 1, float AVDD=1.8, string suffix = "") {
+void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, unsigned int sampleDist = 1, int unsigned sampleRepetition = 1, float AVDD = 1.8, string suffix = "") {
   char     fName[50];
   float    Voltage;
   uint16_t old;
-
-  sprintf (fName, "Data/VDAC_%s_Chip%d_%d_%0.3fV_%s.dat", Name, chip->GetConfig()->GetChipId(), chip->GetConfig()->GetCtrInt(), AVDD, suffix.c_str() );
+  sprintf (fName, "Data/VDAC_%s_Chip%d_%d_%0.3fV_%s.dat", Name, chip->GetConfig()->GetChipId(), chip->GetConfig()->GetCtrInt(), AVDD, suffix.c_str());
   FILE *fp = fopen (fName, "w");
 
   myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
@@ -170,18 +174,22 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, int
 
   chip->ReadRegister (ADac, old);
   if (!myDAQBoard) { // MOSAIC board internal ADC read
-    for (int i = 0; i < 256; i += sampleDist) {
-      chip->WriteRegister (ADac, i);
-      Voltage = chip->ReadDACVoltage(ADac);
-      fprintf (fp, "%d %.3f\n", i, Voltage);
+    for (unsigned int value = 0; value < 256; value += sampleDist) {
+      for (unsigned int repetition = 0; repetition < sampleRepetition; ++repetition) {
+        chip->WriteRegister (ADac, value);
+        Voltage = chip->ReadDACVoltage(ADac);
+        fprintf (fp, "%d %.3f\n", value, Voltage);
+      }
     }
   } else { // DAQ board : external ADC read
     SetDACMon (chip, ADac);
     usleep(100000);
-    for (int i = 0; i < 256; i += sampleDist) {
-      chip->WriteRegister (ADac, i);
-      Voltage = myDAQBoard->ReadMonV();
-      fprintf (fp, "%d %.3f\n", i, Voltage);
+    for (unsigned int value = 0; value < 256; value += sampleDist) {
+      for (unsigned int repetition = 0; repetition < sampleRepetition; ++repetition) {
+        chip->WriteRegister (ADac, value);
+        Voltage = myDAQBoard->ReadMonV();
+        fprintf (fp, "%d %.3f\n", value, Voltage);
+      }
     }
   }
   chip->WriteRegister (ADac, old);
@@ -215,7 +223,7 @@ int main(int argc, char** argv) {
 
     for (float voltage = 1.62; voltage < 2.00; voltage+=0.02) {
       char cmd[50];
-      sprintf(cmd, "scripts/IBstaveStudies/hameg.py 2 0 %f 1.5", voltage+0.11);
+      sprintf(cmd, "scripts/IBstaveStudies/hameg.py 2 0 %f 1.5", voltage);
       if (system(cmd) != 0) std::cerr << "Failed to set the digital supply voltage" << std::endl;
       sprintf(cmd, "scripts/IBstaveStudies/hameg.py 2 1 %f 0.5", voltage);
       if (system(cmd) != 0) std::cerr << "Failed to set the analogue supply voltage" << std::endl;
@@ -223,21 +231,53 @@ int main(int argc, char** argv) {
       sprintf(cmd, "scripts/IBstaveStudies/hameg.py 3");
       if (system(cmd) != 0) std::cerr << "Failed to read voltages and currents" << std::endl;
       for (unsigned int i = 0; i < fChips.size(); i ++) {
-        scanVoltageDac (fChips.at(i), Alpide::REG_VRESETP, "VRESETP", mySampleDist, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VRESETD, "VRESETD", mySampleDist, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VCASP,   "VCASP",   mySampleDist, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VCASN,   "VCASN",   mySampleDist, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VPULSEH, "VPULSEH", mySampleDist, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VPULSEL, "VPULSEL", mySampleDist, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VCASN2,  "VCASN2",  mySampleDist, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VCLIP,   "VCLIP",   mySampleDist, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VTEMP,   "VTEMP",   mySampleDist, voltage, Suffix);
+        scanVoltageDac (fChips.at(i), Alpide::REG_VRESETP, "VRESETP", mySampleDist, mySampleRepetition, voltage, Suffix);
+        scanVoltageDac (fChips.at(i), Alpide::REG_VRESETD, "VRESETD", mySampleDist, mySampleRepetition, voltage, Suffix);
+        scanVoltageDac (fChips.at(i), Alpide::REG_VCASP,   "VCASP",   mySampleDist, mySampleRepetition, voltage, Suffix);
+        scanVoltageDac (fChips.at(i), Alpide::REG_VCASN,   "VCASN",   mySampleDist, mySampleRepetition, voltage, Suffix);
+        scanVoltageDac (fChips.at(i), Alpide::REG_VPULSEH, "VPULSEH", mySampleDist, mySampleRepetition, voltage, Suffix);
+        scanVoltageDac (fChips.at(i), Alpide::REG_VPULSEL, "VPULSEL", mySampleDist, mySampleRepetition, voltage, Suffix);
+        scanVoltageDac (fChips.at(i), Alpide::REG_VCASN2,  "VCASN2",  mySampleDist, mySampleRepetition, voltage, Suffix);
+        scanVoltageDac (fChips.at(i), Alpide::REG_VCLIP,   "VCLIP",   mySampleDist, mySampleRepetition, voltage, Suffix);
+        scanVoltageDac (fChips.at(i), Alpide::REG_VTEMP,   "VTEMP",   mySampleDist, mySampleRepetition, voltage, Suffix);
 
-        scanCurrentDac (fChips.at(i), Alpide::REG_IAUX2,   "IAUX2",   mySampleDist, voltage, Suffix);
-        scanCurrentDac (fChips.at(i), Alpide::REG_IRESET,  "IRESET",  mySampleDist, voltage, Suffix);
-        scanCurrentDac (fChips.at(i), Alpide::REG_IDB,     "IDB",     mySampleDist, voltage, Suffix);
-        scanCurrentDac (fChips.at(i), Alpide::REG_IBIAS,   "IBIAS",   mySampleDist, voltage, Suffix);
-        scanCurrentDac (fChips.at(i), Alpide::REG_ITHR,    "ITHR",    mySampleDist, voltage, Suffix);
+        scanCurrentDac (fChips.at(i), Alpide::REG_IAUX2,   "IAUX2",   mySampleDist, mySampleRepetition, voltage, Suffix);
+        scanCurrentDac (fChips.at(i), Alpide::REG_IRESET,  "IRESET",  mySampleDist, mySampleRepetition, voltage, Suffix);
+        scanCurrentDac (fChips.at(i), Alpide::REG_IDB,     "IDB",     mySampleDist, mySampleRepetition, voltage, Suffix);
+        scanCurrentDac (fChips.at(i), Alpide::REG_IBIAS,   "IBIAS",   mySampleDist, mySampleRepetition, voltage, Suffix);
+        scanCurrentDac (fChips.at(i), Alpide::REG_ITHR,    "ITHR",    mySampleDist, mySampleRepetition, voltage, Suffix);
+
+        // AVDD
+        char     fName[50];
+        snprintf (fName, 50, "Data/AVDD_Chip%d_%d_%s.dat", fChips.at(i)->GetConfig()->GetChipId(), fChips.at(i)->GetConfig()->GetCtrInt(), Suffix);
+        FILE *fp = fopen (fName, "w");
+
+        uint16_t theResult = 0;
+        float    theValue  = 0.;
+        fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
+        fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature, Alpide::COMP_296uA, Alpide::RAMP_1us);
+
+        for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
+          fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(i));
+          fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVDD, theResult);
+          theValue = ((float)theResult - (float)(fChips.at(i)->GetADCBias())) * 0.823e-3; // first approximation
+          fprintf (fp, "%d %.3f\n", repetition, theValue);
+        }
+        fclose (fp);
+
+        // Temperature
+        snprintf (fName, 50, "Data/TEMP_Chip%d_%d_%s.dat", fChips.at(i)->GetConfig()->GetChipId(), fChips.at(i)->GetConfig()->GetCtrInt(), Suffix);
+        fp = fopen (fName, "w");
+
+        theResult = 0;
+        theValue  = 0.;
+        fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
+        fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature, Alpide::COMP_296uA, Alpide::RAMP_1us);
+
+        for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
+          fprintf (fp, "%d %.3f\n", repetition, fChips.at(i)->ReadTemperature());
+        }
+        fclose (fp);
       }
     }
 
