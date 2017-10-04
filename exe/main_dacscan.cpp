@@ -255,7 +255,7 @@ int main(int argc, char** argv) {
         fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(i));
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
-        theValue = ((float)theResult - (float)(fChips.at(i)->GetADCBias())) * 0.823e-3; // first approximation
+        theValue = 2. * ((float)theResult - (float)(fChips.at(i)->GetADCBias())) * 0.823e-3; // first approximation
         fprintf (fp, "%d %.3f\n", repetition, theValue);
       }
       fclose (fp);
