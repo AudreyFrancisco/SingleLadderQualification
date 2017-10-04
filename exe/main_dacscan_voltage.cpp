@@ -249,7 +249,7 @@ int main(int argc, char** argv) {
 
         // AVDD
         char     fName[50];
-        snprintf (fName, 50, "Data/AVDD_Chip%d_%d_%s.dat", fChips.at(i)->GetConfig()->GetChipId(), fChips.at(i)->GetConfig()->GetCtrInt(), Suffix);
+        snprintf (fName, 50, "Data/AVDD_Chip%d_%d_%0.3f_%s.dat", fChips.at(i)->GetConfig()->GetChipId(), fChips.at(i)->GetConfig()->GetCtrInt(), voltage, Suffix);
         FILE *fp = fopen (fName, "w");
 
         uint16_t theResult = 0;
@@ -266,7 +266,7 @@ int main(int argc, char** argv) {
         fclose (fp);
 
         // Temperature
-        snprintf (fName, 50, "Data/TEMP_Chip%d_%d_%s.dat", fChips.at(i)->GetConfig()->GetChipId(), fChips.at(i)->GetConfig()->GetCtrInt(), Suffix);
+        snprintf (fName, 50, "Data/TEMP_Chip%d_%d_%0.3f_%s.dat", fChips.at(i)->GetConfig()->GetChipId(), fChips.at(i)->GetConfig()->GetCtrInt(), voltage, Suffix);
         fp = fopen (fName, "w");
 
         theResult = 0;
