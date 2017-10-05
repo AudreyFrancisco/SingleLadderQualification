@@ -255,17 +255,23 @@ int main(int argc, char** argv) {
         uint16_t theResult = 0;
         float    theValue  = 0.;
         float    vtemp     = 0.;
-        fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
-        fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
 
         for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
+          // measure AVDD
+          fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
+          fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
+          usleep(5000);
           fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(i));
           usleep(5000);
           fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
           theValue = 2. * ((float)theResult - (float)(fChips.at(i)->GetADCBias())) * 0.823e-3; // first approximation
+
+          // measure comparison point at VTEMP at DAC value 200
           fChips.at(i)->WriteRegister (Alpide::REG_VTEMP, 200);
           usleep(5000);
           vtemp = fChips.at(i)->ReadDACVoltage(Alpide::REG_VTEMP);
+
+          // write the file
           fprintf (fp, "%d %.3f %d %.3f %.3f\n", repetition, theValue, theResult, voltage, vtemp);
         }
         fclose (fp);
