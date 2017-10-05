@@ -19,7 +19,7 @@ class TScanHisto;
 
 enum THicClassification {CLASS_UNTESTED, CLASS_GREEN, CLASS_RED, CLASS_ORANGE};
 
-typedef enum resultType {status, deadPix, noisyPix, ineffPix, stuckPix, unmaskablePix, badDcol, thresh, noise, noThreshPix, threshRms, noiseRms, vcasn, ithr, noiseOcc, Err0, Errf, Erra, Err5, ErrBusyOn, ErrBusyOff} TResultVariable;
+typedef enum resultType {status, deadPix, noisyPix, ineffPix, stuckPix, unmaskablePix, badDcol, thresh, noise, noThreshPix, hotPix, threshRms, noiseRms, vcasn, ithr, noiseOcc, Err0, Errf, Erra, Err5, ErrBusyOn, ErrBusyOff} TResultVariable;
 
 
 // base class for classes that contain chip results
