@@ -231,6 +231,7 @@ int main(int argc, char** argv) {
       sprintf(cmd, "scripts/IBstaveStudies/hameg.py 3");
       if (system(cmd) != 0) std::cerr << "Failed to read voltages and currents" << std::endl;
       for (unsigned int i = 0; i < fChips.size(); i ++) {
+        fChips.at(i)->CalibrateADC();
         scanVoltageDac (fChips.at(i), Alpide::REG_VRESETP, "VRESETP", mySampleDist, mySampleRepetition, voltage, Suffix);
         scanVoltageDac (fChips.at(i), Alpide::REG_VRESETD, "VRESETD", mySampleDist, mySampleRepetition, voltage, Suffix);
         scanVoltageDac (fChips.at(i), Alpide::REG_VCASP,   "VCASP",   mySampleDist, mySampleRepetition, voltage, Suffix);
@@ -272,7 +273,7 @@ int main(int argc, char** argv) {
           vtemp = fChips.at(i)->ReadDACVoltage(Alpide::REG_VTEMP);
 
           // write the file
-          fprintf (fp, "%d %.3f %d %.3f %.3f\n", repetition, theValue, theResult, voltage, vtemp);
+          fprintf (fp, "%.3f %d %d %.3f %d %.3f\n", voltage, i, repetition, theValue, theResult, vtemp);
         }
         fclose (fp);
 
