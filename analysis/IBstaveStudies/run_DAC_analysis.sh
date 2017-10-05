@@ -66,7 +66,7 @@ EOF
 tar cjf DAC_summary_${SUFFIX}_archive.tar.bz2 *DAC_*_${SUFFIX}.dat --remove-files
 
 ## analyse the data
-for d in VCASN VCASP VCASN2 VCLIP
+for d in VCASN VCASP VCASN2 VCLIP VTEMP
 do
     echo "DAC: $d"
     echo "###############"
