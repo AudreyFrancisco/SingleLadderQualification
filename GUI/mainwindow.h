@@ -111,6 +111,29 @@ public slots:
    void digitalmd();
    void digitalwf();
    void thresholdd();
+   void vcasntd();
+
+   void ithrtd();
+
+   void thresholddthree();
+
+
+   void vcasntdthree();
+
+   void ithrtdthree();
+
+
+   void thresholddafterthree();
+
+
+   void noisebdthree();
+
+
+   void noiseadthree();
+
+
+
+   void thresholddafter();
    void noisebd();
    void noisead();
    void attachtodatabase();
