@@ -228,13 +228,16 @@ void TSCurveAnalysis::Finalize()
     if (m_writeRawData)    fclose(chipResult->m_rawFP);
     if (m_writeFitResults) fclose(chipResult->m_fitFP);
   }
+
+  WriteResult();
+  m_finished = true;
 }
 
 
 //TODO: Add readout errors, requires dividing readout errors by hic (receiver)
 //TODO: Make two cuts (red and orange)?
 THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic* result) {
-  if (m_resultFactor <= 1) return CLASS_GREEN;  // for the time being exclude class for tuning
+  if (!IsThresholdScan()) return CLASS_GREEN;  // for the time being exclude class for tuning
 
   if (result->m_nNoThresh > m_config->GetParamValue("THRESH_MAXBAD_HIC_OB")) return CLASS_ORANGE;
   for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
@@ -251,7 +254,7 @@ THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic* result
 
 
 THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic* result) {
-  if (m_resultFactor <= 1) return CLASS_GREEN;  // for the time being exclude class for tuning
+  if (!IsThresholdScan()) return CLASS_GREEN;  // for the time being exclude class for tuning
 
   if (result->m_nNoThresh > m_config->GetParamValue("THRESH_MAXBAD_HIC_IB")) return CLASS_ORANGE;
   for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
@@ -264,6 +267,32 @@ THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic* result
       return CLASS_ORANGE;
   }
   return CLASS_GREEN;
+}
+
+
+void TSCurveAnalysis::WriteResult()
+{
+  char fName[200];
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    if (IsThresholdScan())
+      sprintf(fName, "ThresholdScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
+    	                                              m_config->GetfNameSuffix());
+    else if (IsVCASNTuning()) {
+      sprintf(fName, "VCASNTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
+    	                                              m_config->GetfNameSuffix());
+    }
+    else {
+      sprintf(fName, "ITHRTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
+    	                                              m_config->GetfNameSuffix());
+    }
+    m_scan->WriteConditions (fName, m_hics.at(ihic));
+
+    FILE *fp = fopen (fName, "a");
+    m_result->WriteToFileGlobal(fp);
+    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
+    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile  (fp);
+    fclose(fp);
+  }	   				     
 }
 
 
