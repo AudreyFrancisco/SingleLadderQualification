@@ -25,6 +25,7 @@ TScanConfig::TScanConfig()
   m_dacStep        = DAC_STEP;
   m_nDacSamples    = NDACSAMPLES;
   m_scanStep       = SCAN_STEP;
+  m_tuningMaxrow   = TUNING_MAXROW;
   m_speedy         = SPEEDY;
   m_rawData        = RAWDATA;
   m_ivCurve        = IVCURVE;
@@ -99,6 +100,7 @@ void TScanConfig::InitParamMap ()
   fSettings["DACSTEP"]      = &m_ithrStep;
   fSettings["NDACSAMPLES"]  = &m_nDacSamples;
   fSettings["SCAN_STEP"]    = &m_scanStep;
+  fSettings["TUNINGMAXROW"] = &m_tuningMaxrow;
   fSettings["SPEEDY"]       = &m_speedy;
   fSettings["RAWDATA"]      = &m_rawData;
   fSettings["IVCURVE"]      = &m_ivCurve;

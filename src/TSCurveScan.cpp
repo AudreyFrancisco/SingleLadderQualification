@@ -62,7 +62,7 @@ TtuneVCASNScan::TtuneVCASNScan (TScanConfig                   *config,
 
   m_start[1]  = 0;
   m_step [1]  = m_config->GetScanStep   ();
-  m_stop [1]  = m_config->GetNMaskStages();
+  m_stop [1]  = m_config->GetParamValue ("TUNINGMAXROW");
 
   m_start[2]  = 0;
   m_step [2]  = 1;
@@ -95,7 +95,7 @@ TtuneITHRScan::TtuneITHRScan   (TScanConfig                   *config,
 
   m_start[1]  = 0;
   m_step [1]  = m_config->GetScanStep   ();
-  m_stop [1]  = m_config->GetNMaskStages();
+  m_stop [1]  = m_config->GetParamValue ("TUNINGMAXROW");
 
   m_start[2]  = 0;
   m_step [2]  = 1;

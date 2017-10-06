@@ -26,6 +26,7 @@ namespace ScanConfig {
   const int VCASN_STEP     = 1;
   const int SCAN_STEP      = 16; //Grab every Xth row (for tuneITHR/VCASN scan only).
                                  //Speeds up scan; changing this has little effect on result accuracy.
+  const int TUNING_MAXROW  = 512;
   const int LOCALBUSCUTRED = 1;
 
   const int DAC_START      = 0;
@@ -114,6 +115,7 @@ class TScanConfig {
   int  m_vcasnStop;  //usually 60
   int  m_vcasnStep;
   int  m_scanStep;   //16
+  int  m_tuningMaxrow;
   int  m_speedy;
   int  m_rawData;
   int  m_ivCurve;
