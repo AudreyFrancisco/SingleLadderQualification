@@ -54,7 +54,7 @@ echo
 root -l -b <<EOF
 TFile* f = new TFile("DAC_summary_${SUFFIX}.root", "RECREATE");
 TTree*  t = new TTree("DACsummary","");
-Long64_t nlines = t->ReadFile("DAC_summary_${SUFFIX}.dat", "DAC/C:Chip/s:Voltage/D:SetValue/b:MeasValue/D");
+Long64_t nlines = t->ReadFile("${OUTFILE}", "DAC/C:Chip/s:Voltage/D:SetValue/b:MeasValue/D");
 std::cout << "Read " << nlines << " lines into the TTree" << std::endl;
 t->Write();
 f->Close();
@@ -72,3 +72,24 @@ do
     echo "###############"
     root -l -b -q ${SCRIPT_DIR}/analyse_DAC.C'("'DAC_summary_${SUFFIX}.root'","'${d}'")'
 done
+
+
+## AVDD measurement file
+cat AVDD_*_${SUFFIX}.dat > AVDD_summary_${SUFFIX}.dat
+## convert ASCII table to a ROOT TTree
+root -l -b <<EOF
+TFile* f = new TFile("AVDD_summary_${SUFFIX}.root", "RECREATE");
+TTree*  t = new TTree("AVDDsummary","");
+Long64_t nlines = t->ReadFile("AVDD_summary_${SUFFIX}.dat", "AVDDsetV/D:Chip/s:Sample/b:AVDDmeasV/D:AVDDmeasADC/b:VTEMPmeasV/D:AVDDdacMeasV/D:AVDDdacMeasErrV/D");
+std::cout << "Read " << nlines << " lines into the TTree" << std::endl;
+t->Write();
+f->Close();
+delete f;
+f = 0x0;
+EOF
+
+## archive the dat files
+tar cjf AVDD_summary_${SUFFIX}_archive.tar.bz2 AVDD_*_${SUFFIX}.dat --remove-files
+root -l -b -q ${SCRIPT_DIR}/analysis_AVDD.C'("'AVDD_summary_${SUFFIX}.dat'")'
+
+echo "# done."
