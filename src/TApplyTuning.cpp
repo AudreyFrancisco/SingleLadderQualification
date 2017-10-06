@@ -6,7 +6,7 @@ TApplyTuning::TApplyTuning (std::deque<TScanHisto> *histoQue,
                             TScanConfig            *aScanConfig, 
                             std::vector<THic*>      hics,
                             std::mutex             *aMutex,
-                            TThresholdResult       *aResult)
+                            TSCurveResult          *aResult)
   : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex)
 {
   if (aResult) m_result = aResult;
@@ -19,11 +19,11 @@ void TApplyTuning::Run()
   if (!m_result) return;
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
-    TThresholdResultHic *hicResult = (TThresholdResultHic *) m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    TSCurveResultHic *hicResult = (TSCurveResultHic *) m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     std::map<int, TScanResultChip*>::iterator it;
     for (it = hicResult->m_chipResults.begin(); it != hicResult->m_chipResults.end(); ++it) {
-      TAlpide              *chip       = m_hics.at(ihic)->GetChipById(it->first);
-      TThresholdResultChip *chipResult = (TThresholdResultChip*) it->second;
+      TAlpide           *chip       = m_hics.at(ihic)->GetChipById(it->first);
+      TSCurveResultChip *chipResult = (TSCurveResultChip*) it->second;
    
       // TODO: check rounding, fix makefile (unresolved reference)
       chip->GetConfig()->SetParamValue(GetDACName(), (int)chipResult->GetThresholdMean());

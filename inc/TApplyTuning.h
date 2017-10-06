@@ -8,6 +8,7 @@
 #include "Common.h"
 #include "TScanAnalysis.h"
 #include "TThresholdAnalysis.h"
+#include "TSCurveAnalysis.h"
 #include "TScanConfig.h"
 #include "TScan.h"
 #include "THisto.h"
@@ -28,7 +29,7 @@ class TApplyTuning : public TScanAnalysis {
                 TScanConfig            *aScanConfig, 
                 std::vector<THic*>      hics,
                 std::mutex             *aMutex,
-                TThresholdResult       *aResult);
+                TSCurveResult          *aResult);
   void Initialize() {};
   void Finalize  () {};
   void Run       ();
@@ -44,7 +45,7 @@ class TApplyVCASNTuning : public TApplyTuning {
                     TScanConfig             *aScanConfig, 
                     std::vector<THic*>       hics,
                     std::mutex              *aMutex,
-                    TThresholdResult        *aResult)
+                    TSCurveResult           *aResult)
     : TApplyTuning (histoQue, aScan, aScanConfig, hics, aMutex, aResult) {};
 };
 
@@ -58,7 +59,7 @@ class TApplyITHRTuning : public TApplyTuning {
                     TScanConfig             *aScanConfig, 
                     std::vector<THic*>       hics,
                     std::mutex              *aMutex,
-                    TThresholdResult        *aResult)
+                    TSCurveResult           *aResult)
     : TApplyTuning (histoQue, aScan, aScanConfig, hics, aMutex, aResult) {};
 };
 

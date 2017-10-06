@@ -834,15 +834,15 @@ void MainWindow::fillingOBvectors(){
   TDigitalResult *digitalresultm10=new TDigitalResult();
   TDigitalResult *digitalresultp10=new TDigitalResult();
   TThresholdResult *threresult=new TThresholdResult();
-  TThresholdResult *vcasnresult=new TThresholdResult();
-  TThresholdResult *vcasnresultzero=0;
-  TThresholdResult *ithrresultzero=0;
-  TThresholdResult *ithrresult=new TThresholdResult();
-  TThresholdResult *threresultafter= new TThresholdResult();
- TThresholdResult *threresultthree= new TThresholdResult();
- TThresholdResult *vcasnresultthree=new TThresholdResult();
-  TThresholdResult *ithrresultthree=new TThresholdResult();
-  TThresholdResult *thresholdresultafterthree=new TThresholdResult();
+  TSCurveResult *vcasnresult=new TSCurveResult();
+  TSCurveResult *vcasnresultzero=0;
+  TSCurveResult *ithrresultzero=0;
+  TSCurveResult *ithrresult=new TSCurveResult();
+
+ TSCurveResult *threresultthree= new TSCurveResult();
+ TSCurveResult *vcasnresultthree=new TSCurveResult();
+  TSCurveResult *ithrresultthree=new TSCurveResult();
+  TSCurveResult *thresholdresultafterthree=new TSCurveResult();
    TDigitalWFResult *digitalwfresult=new TDigitalWFResult();
 //  TLocalBusResult *localbusresult=new TLocalBusResult();
   TNoiseResult *noiseresult=new TNoiseResult();
@@ -853,7 +853,7 @@ void MainWindow::fillingOBvectors(){
   TNoiseResult *noiseresultafterthree=new TNoiseResult();
   TPowerResult *powerresult=new TPowerResult();
   TSCurveResult *scurveresult=new TSCurveResult();
-
+  TSCurveResult *scurveresultafter=new TSCurveResult();
   fConfig->GetScanConfig()->SetBackBias(0.0);
       fConfig->GetScanConfig()->SetVcasnRange (30, 70);
 
@@ -899,12 +899,13 @@ void MainWindow::fillingOBvectors(){
     TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
   //  TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,threresult);
     TSCurveAnalysis *scurveanalysis=new TSCurveAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,scurveresult);
-    TScanAnalysis *vcasnanalysis=new TThresholdAnalysis(&fHistoQue,vcasnscan, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresult,1);
+    TSCurveAnalysis *vcasnanalysis=new TSCurveAnalysis(&fHistoQue,vcasnscan, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresult,1);
     TApplyVCASNTuning *vcasntuning=new TApplyVCASNTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresult);
-    TScanAnalysis *ithranalysis=new TThresholdAnalysis(&fHistoQue,ithrscan, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresult,-1);
+    TSCurveAnalysis *ithranalysis=new TSCurveAnalysis(&fHistoQue,ithrscan, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresult,-1);
     TApplyITHRTuning *ithrtuning=new TApplyITHRTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresult);
     TThresholdScan *thresholdscanafter=new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TScanAnalysis  *thresholdanalysisafter = new TThresholdAnalysis (&fHistoQue,thresholdscanafter, fConfig->GetScanConfig(), fHICs, &fMutex,threresultafter);
+   // TScanAnalysis  *thresholdanalysisafter = new TThresholdAnalysis (&fHistoQue,thresholdscanafter, fConfig->GetScanConfig(), fHICs, &fMutex,threresultafter);
+     TSCurveAnalysis *scurveanalysisafter=new TSCurveAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,scurveresultafter);
 
     TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresult);
     TApplyMask *noisemask=new TApplyMask(&fHistoQue,noisescanzero, fConfig->GetScanConfig(), fHICs, &fMutex,noiseresult);
@@ -925,13 +926,13 @@ void MainWindow::fillingOBvectors(){
         TNoiseOccupancy *noisescanafterthree=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
 
         TThresholdScan *thresholdscanthree= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-        TScanAnalysis  *thresholdanalysisthree = new TThresholdAnalysis (&fHistoQue,thresholdscanthree, fConfig->GetScanConfig(), fHICs, &fMutex,threresultthree);
-        TScanAnalysis *vcasnanalysisthree=new TThresholdAnalysis(&fHistoQue,vcasnscanthree, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresultthree,1);
+        TSCurveAnalysis  *thresholdanalysisthree = new TSCurveAnalysis (&fHistoQue,thresholdscanthree, fConfig->GetScanConfig(), fHICs, &fMutex,threresultthree);
+        TSCurveAnalysis *vcasnanalysisthree=new TSCurveAnalysis(&fHistoQue,vcasnscanthree, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresultthree,1);
         TApplyVCASNTuning *vcasntuningthree=new TApplyVCASNTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresultthree);
-        TScanAnalysis *ithranalysisthree=new TThresholdAnalysis(&fHistoQue,ithrscanthree, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresultthree,-1);
+        TSCurveAnalysis *ithranalysisthree=new TSCurveAnalysis(&fHistoQue,ithrscanthree, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresultthree,-1);
         TApplyITHRTuning *ithrtuningthree=new TApplyITHRTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresultthree);
         TThresholdScan *thresholdscanafterthree=new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-        TScanAnalysis  *thresholdanalysisafterthree = new TThresholdAnalysis (&fHistoQue,thresholdscanafterthree, fConfig->GetScanConfig(), fHICs, &fMutex,thresholdresultafterthree);
+        TSCurveAnalysis  *thresholdanalysisafterthree = new TSCurveAnalysis (&fHistoQue,thresholdscanafterthree, fConfig->GetScanConfig(), fHICs, &fMutex,thresholdresultafterthree);
 
         TNoiseAnalysis *noiseanalysisthree=new TNoiseAnalysis(&fHistoQue, noisescanthree, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresultthree);
         TApplyMask *noisemaskthree=new TApplyMask(&fHistoQue,noisescanzero, fConfig->GetScanConfig(), fHICs, &fMutex,noiseresultthree);
@@ -984,7 +985,8 @@ void MainWindow::fillingOBvectors(){
     fAnalysisVector.push_back(vcasntuning);
     fAnalysisVector.push_back(ithranalysis);
     fAnalysisVector.push_back(ithrtuning);
-    fAnalysisVector.push_back(thresholdanalysisafter);
+  //  fAnalysisVector.push_back(thresholdanalysisafter);
+    fAnalysisVector.push_back(scurveanalysisafter);
     fAnalysisVector.push_back(noiseanalysis);
     fAnalysisVector.push_back(noisemask);
     fAnalysisVector.push_back(noiseanalysisafter);
@@ -1018,7 +1020,8 @@ void MainWindow::fillingOBvectors(){
     fresultVector.push_back(vcasnresultzero);
     fresultVector.push_back(ithrresult);
     fresultVector.push_back(ithrresultzero);
-    fresultVector.push_back(threresultafter);
+   // fresultVector.push_back(threresultafter);
+    fresultVector.push_back(scurveresultafter);
     fresultVector.push_back(noiseresult);
     fresultVector.push_back(noiseresultmasked);
     fresultVector.push_back(noiseresultafter);
