@@ -90,6 +90,6 @@ EOF
 
 ## archive the dat files
 tar cjf AVDD_summary_${SUFFIX}_archive.tar.bz2 AVDD_*_${SUFFIX}.dat --remove-files
-root -l -b -q ${SCRIPT_DIR}/analysis_AVDD.C'("'AVDD_summary_${SUFFIX}.dat'")'
+root -l -b -q ${SCRIPT_DIR}/analyse_AVDD.C'("'AVDD_summary_${SUFFIX}.dat'")'
 
 echo "# done."
