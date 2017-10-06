@@ -81,6 +81,7 @@
 #define DEF_AIOFFSET             0.0
 #define DEF_CALDLINER            0.0
 #define DEF_CALALINER            0.0
+#define DEF_CALGNDLINER          0.0
 #define DEF_BIASOFFSET           0.0
 #define DEF_BIASSCALE            1.0
 
@@ -105,6 +106,7 @@ public:
 	  float CalAIOffset;
           float CalDLineR;
           float CalALineR;
+          float CalGNDLineR;
 	} Mod_t;
 
 	typedef struct PowBoard {

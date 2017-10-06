@@ -71,6 +71,7 @@ TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName)
                 fPBConfig.Modul[i].CalAIOffset = DEF_AIOFFSET;
                 fPBConfig.Modul[i].CalDLineR   = DEF_CALDLINER;
                 fPBConfig.Modul[i].CalALineR   = DEF_CALALINER;
+                fPBConfig.Modul[i].CalGNDLineR = DEF_CALGNDLINER;
 	}
 
 	if (AConfigFileName) { // Read Configuration file
