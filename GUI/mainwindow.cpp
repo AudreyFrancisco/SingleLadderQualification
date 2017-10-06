@@ -59,6 +59,9 @@
 #include "AlpideDBEndPoints.h"
 #include "TPowerTest.h"
 #include "TPowerAnalysis.h"
+#include "TSCurveAnalysis.h"
+
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -849,7 +852,7 @@ void MainWindow::fillingOBvectors(){
   TNoiseResult *noiseresultmaskedthree=0;
   TNoiseResult *noiseresultafterthree=new TNoiseResult();
   TPowerResult *powerresult=new TPowerResult();
-
+  TSCurveResult *scurveresult=new TSCurveResult();
 
   fConfig->GetScanConfig()->SetBackBias(0.0);
       fConfig->GetScanConfig()->SetVcasnRange (30, 70);
@@ -894,7 +897,8 @@ void MainWindow::fillingOBvectors(){
     TThresholdScan *thresholdscanzero=0;
 
     TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,threresult);
+  //  TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,threresult);
+    TSCurveAnalysis *scurveanalysis=new TSCurveAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,scurveresult);
     TScanAnalysis *vcasnanalysis=new TThresholdAnalysis(&fHistoQue,vcasnscan, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresult,1);
     TApplyVCASNTuning *vcasntuning=new TApplyVCASNTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresult);
     TScanAnalysis *ithranalysis=new TThresholdAnalysis(&fHistoQue,ithrscan, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresult,-1);
@@ -974,7 +978,8 @@ void MainWindow::fillingOBvectors(){
     fAnalysisVector.push_back(digitalanalysisp10);
     fAnalysisVector.push_back(digitalanalysism10);
     fAnalysisVector.push_back(digitalwfanalysis);
-    fAnalysisVector.push_back(thresholdanalysis);
+  //  fAnalysisVector.push_back(thresholdanalysis);
+    fAnalysisVector.push_back(scurveanalysis);
     fAnalysisVector.push_back(vcasnanalysis);
     fAnalysisVector.push_back(vcasntuning);
     fAnalysisVector.push_back(ithranalysis);
@@ -1007,7 +1012,8 @@ void MainWindow::fillingOBvectors(){
     fresultVector.push_back(digitalresultp10);
     fresultVector.push_back(digitalresultm10);
     fresultVector.push_back(digitalwfresult);
-    fresultVector.push_back(threresult);
+  //  fresultVector.push_back(threresult);
+    fresultVector.push_back(scurveresult);
     fresultVector.push_back(vcasnresult);
     fresultVector.push_back(vcasnresultzero);
     fresultVector.push_back(ithrresult);
