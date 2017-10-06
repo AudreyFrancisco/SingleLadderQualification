@@ -44,11 +44,11 @@ void analyse_AVDD(TString inputFile) {
 
   TFile* f_out = new TFile(TString::Format("%s_output.root", inputFileBaseName.Data()), "RECREATE");
 
-  TString draw_str[] = { "AVDDsetV:AVDDmeasV",               "AVDDsetV:VTEMPmeasV",              "AVDDmeasV:VTEMPmeasV"              };
-  TString name_str[] = { "gAVDDmeasVvsAVDDsetV_Chip%d",      "gVTEMPmeasVvsAVDDsetV_Chip%d",     "gVTEMPmeasVvsAVDDmeasV_Chip%d"     };
-  TString axes_str[] = { ";AVDD_{set} (V); AVDD_{meas} (V)", ";AVDD_{set} (V);VTEMP_{meas} (V)", ";AVDD_{meas} (V);VTEMP_{meas} (V)" };
-  Float_t fit_low_lim[] = { 1.299,                           1.55,                               1.55                                };
-  Float_t fit_up_lim[]  = { 1.721,                           2.05,                               1.701                               };
+  TString draw_str[] = { "AVDDsetV:AVDDmeasV",               "AVDDsetV:VTEMPmeasV",              "AVDDmeasV:VTEMPmeasV",              "AVDDsetV:AVDDdacMeasV:AVDDdacMeasErrV", "AVDDmeasV:AVDDdacMeasV:AVDDdacMeasErrV"};
+  TString name_str[] = { "gAVDDmeasVvsAVDDsetV_Chip%d",      "gVTEMPmeasVvsAVDDsetV_Chip%d",     "gVTEMPmeasVvsAVDDmeasV_Chip%d",     "gAVDDdacMeasVvsAVDDsetV_Chip%d",        "gAVDDdacMeasVvsAVDDmeasV_Chip%d"       };
+  TString axes_str[] = { ";AVDD_{set} (V); AVDD_{meas} (V)", ";AVDD_{set} (V);VTEMP_{meas} (V)", ";AVDD_{meas} (V);VTEMP_{meas} (V)", ";AVDD_{set} (V);VTEMP_{DACmeas} (V)",   ";AVDD_{set} (V);AVDD_{DACmeas} (V)"    };
+  Float_t fit_low_lim[] = { 1.299,                           1.55,                               1.55,                                1.55,                                    1.55                                    };
+  Float_t fit_up_lim[]  = { 1.721,                           2.05,                               1.701,                               2.05,                                    1.701                                   };
 
   gStyle->SetOptFit(111);
 
