@@ -265,6 +265,32 @@ void TPowerBoard::CalibrateCurrent(int module)
 }
 
 
+void TPowerBoard::CorrectVoltageDrop (int module) 
+{
+  // Measure the channel currents
+  // Calculate voltage drop
+  // Correct voltage drop for slope of voltage characteristics
+  // add corrected voltage drop to channel set voltage
+  float RAnalog, RDigital, RGround;
+  float dVAnalog, dVDigital;
+  float AVScale, DVScale, AVOffset, DVOffset;
+  float IDDA = GetAnalogCurrent (module);
+  float IDDD = GetDigitalCurrent(module);
+
+  fPowerBoardConfig->GetLineResistances (module, RAnalog, RDigital, RGround);
+  fPowerBoardConfig->GetVCalibration    (module, AVScale, DVScale,  AVOffset, DVOffset);
+  
+  dVAnalog  = IDDA * RAnalog  + (IDDA + IDDD) * RGround;
+  dVDigital = IDDD * RDigital + (IDDA + IDDD) * RGround;
+
+  dVAnalog  *= AVScale;
+  dVDigital *= DVScale;
+
+  // fPBoard contains the voltages corrected with the channel calibration
+  fMOSAICPowerBoard->setVout((unsigned char)(module*2),   fPBoard.Modules[module].AVset + dVAnalog);
+  fMOSAICPowerBoard->setVout((unsigned char)(module*2+1), fPBoard.Modules[module].DVset + dVDigital);
+}
+
 
 /* -------------------------
 	SetModule()

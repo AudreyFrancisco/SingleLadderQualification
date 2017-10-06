@@ -132,11 +132,16 @@ public:
 	// Getters
 	float GetBiasVoltage();
 
-	float GetAnalogVoltage  (int mod);
-	float GetAnalogCurrent  (int mod) { return(fPBConfig.Modul[mod].AIset); };
-	float GetDigitalVoltage (int mod);
-	float GetDigitalCurrent (int mod) { return(fPBConfig.Modul[mod].DIset); };
-	bool  GetBiasOn         (int mod) { return(fPBConfig.Modul[mod].BiasOn); };
+        // GetAnalogVoltage and GetDigitalVoltage return the voltages 
+        // taking into account the channel calibrations
+	float GetAnalogVoltage    (int mod);
+	float GetAnalogCurrent    (int mod) { return(fPBConfig.Modul[mod].AIset); };
+	float GetDigitalVoltage   (int mod);
+	float GetDigitalCurrent   (int mod) { return(fPBConfig.Modul[mod].DIset); };
+	bool  GetBiasOn           (int mod) { return(fPBConfig.Modul[mod].BiasOn); };
+
+        float GetAVDDUncalibrated (int mod) { return(fPBConfig.Modul[mod].AVset);};
+        float GetDVDDUncalibrated (int mod) { return(fPBConfig.Modul[mod].DVset);};
 
 	void GetModuleSetUp     (int mod, float*AVSet, float*AISet, float*DVSet, float*DISet, bool*isBiasOn);
 	void GetAnalogVoltages  (float * AVSet);
