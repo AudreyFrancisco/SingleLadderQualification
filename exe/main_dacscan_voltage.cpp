@@ -256,6 +256,8 @@ int main(int argc, char** argv) {
         uint16_t theResult = 0;
         float    theValue  = 0.;
         float    vtemp     = 0.;
+        float    meas_voltage     = 0.;
+        float    meas_voltage_err = 0.;
 
         for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
           // measure AVDD
@@ -272,8 +274,13 @@ int main(int argc, char** argv) {
           usleep(5000);
           vtemp = fChips.at(i)->ReadDACVoltage(Alpide::REG_VTEMP);
 
+          // calculated AVDD based on VTEMP
+          meas_voltage     = 0.3886 * vtemp;
+          meas_voltage_err = 0.0012 * vtemp;
+
           // write the file
-          fprintf (fp, "%.3f %d %d %.3f %d %.3f\n", voltage, i, repetition, theValue, theResult, vtemp);
+          fprintf (fp, "%.3f %d %d %.3f %d %.3f %.3f %.3f\n",
+                   voltage, i, repetition, theValue, theResult, vtemp, meas_voltage, meas_voltage_err);
         }
         fclose (fp);
 
