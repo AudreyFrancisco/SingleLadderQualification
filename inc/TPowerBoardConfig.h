@@ -148,6 +148,8 @@ public:
         void SetVCalibration    (int mod, float AVScale,  float DVScale,  float AVOffset,  float DVOffset);
         void GetICalibration    (int mod, float &AIOffset, float &DIOffset);
         void SetICalibration    (int mod, float AIOffset, float DIOffset);
+        void SetLineResistances (int mod, float ALineR, float DLineR, float GNDLineR);
+        void GetLineResistances (int mod, float &ALineR, float &DLineR, float &GNDLineR);
 	// Setters
 	void SetBiasVoltage(float val) { fPBConfig.VBset = val; };
 

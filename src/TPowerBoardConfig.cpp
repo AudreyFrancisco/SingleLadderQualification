@@ -320,6 +320,22 @@ void TPowerBoardConfig::SetICalibration (int mod, float AIOffset, float DIOffset
 }
 
 
+void TPowerBoardConfig::SetLineResistances (int mod, float ALineR, float DLineR, float GNDLineR)
+{
+  fPBConfig.Modul[mod].CalDLineR   = DLineR;
+  fPBConfig.Modul[mod].CalALineR   = ALineR;
+  fPBConfig.Modul[mod].CalGNDLineR = GNDLineR;
+}
+
+
+void TPowerBoardConfig::GetLineResistances (int mod, float &ALineR, float &DLineR, float &GNDLineR)
+{
+  DLineR   = fPBConfig.Modul[mod].CalDLineR;
+  ALineR   = fPBConfig.Modul[mod].CalALineR;
+  GNDLineR = fPBConfig.Modul[mod].CalGNDLineR;
+}
+
+
 /* -------------------------
 	ReadFromFile()
 	Read a complete configuration from a file and stores it into the class members
