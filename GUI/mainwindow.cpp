@@ -52,12 +52,16 @@
 #include "TFifoAnalysis.h"
 #include "TNoiseAnalysis.h"
 #include "TApplyMask.h"
+#include "TApplyTuning.h"
 #include "TNoiseOccupancy.h"
 #include "THIC.h"
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
 #include "TPowerTest.h"
 #include "TPowerAnalysis.h"
+#include "TSCurveAnalysis.h"
+
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -96,6 +100,13 @@ MainWindow::MainWindow(QWidget *parent) :
       ui->test11->setStyleSheet("border:none;");
       ui->test12->setStyleSheet("border:none;");
       ui->test13->setStyleSheet("border:none;");
+       ui->test14->setStyleSheet("border:none;");
+       ui->test15->setStyleSheet("border:none;");
+       ui->test16->setStyleSheet("border:none;");
+       ui->test17->setStyleSheet("border:none;");
+       ui->test18->setStyleSheet("border:none;");
+       ui->test19->setStyleSheet("border:none;");
+        ui->test20->setStyleSheet("border:none;");
       ui->statusbar->hide();
       ui->tab_2->setVisible(false);
       ui->statuslabel->setVisible(false);
@@ -750,6 +761,13 @@ void MainWindow::start_test(){
      ui->test11->setStyleSheet("border:none;");
      ui->test12->setStyleSheet("border:none;");
      ui->test13->setStyleSheet("border:none;");
+      ui->test14->setStyleSheet("border:none;");
+      ui->test15->setStyleSheet("border:none;");
+      ui->test16->setStyleSheet("border:none;");
+      ui->test17->setStyleSheet("border:none;");
+      ui->test18->setStyleSheet("border:none;");
+      ui->test19->setStyleSheet("border:none;");
+       ui->test20->setStyleSheet("border:none;");
  //std::cout<<"why3"<<std::endl;
     // if (numberofscan==1||numberofscan==2)
     // {
@@ -761,8 +779,18 @@ void MainWindow::start_test(){
      disconnect(ui->test7,SIGNAL(clicked()),this,SLOT(digitalmd()));
       disconnect(ui->test8,SIGNAL(clicked()),this,SLOT(digitalwf()));
      disconnect(ui->test9,SIGNAL(clicked()),this,SLOT(thresholdd()));
-     disconnect(ui->test10,SIGNAL(clicked()),this,SLOT(noisebd()));
-      disconnect(ui->test11,SIGNAL(clicked()),this,SLOT(noisebd()));//}
+     disconnect(ui->test10,SIGNAL(clicked()),this,SLOT(vcasntd()));
+      disconnect(ui->test11,SIGNAL(clicked()),this,SLOT(ithrtd()));
+     disconnect(ui->test12,SIGNAL(clicked()),this,SLOT(thresholddafter()));
+     disconnect(ui->test13,SIGNAL(clicked()),this,SLOT(noisebd()));
+     disconnect(ui->test14,SIGNAL(clicked()),this,SLOT(noisead()));
+     disconnect(ui->test15,SIGNAL(clicked()),this,SLOT(thresholddthree()));
+     disconnect(ui->test16,SIGNAL(clicked()),this,SLOT(vcasntdthree()));
+      disconnect(ui->test17,SIGNAL(clicked()),this,SLOT(ithrtdthree()));
+     disconnect(ui->test18,SIGNAL(clicked()),this,SLOT(thresholddafterthree()));
+     disconnect(ui->test19,SIGNAL(clicked()),this,SLOT(noisebdthree()));
+     disconnect(ui->test20,SIGNAL(clicked()),this,SLOT(noiseadthree()));
+     //}
   //    std::cout<<"why4"<<std::endl;
      ui->details->hide();
     ui->displaydetails->hide();
@@ -781,6 +809,14 @@ void MainWindow::start_test(){
     ui->test11->setText(" ");
     ui->test12->setText(" ");
     ui->test13->setText(" ");
+    ui->test14->setText(" ");
+    ui->test15->setText(" ");
+    ui->test16->setText(" ");
+    ui->test17->setText(" ");
+    ui->test18->setText(" ");
+    ui->test19->setText(" ");
+    ui->test20->setText(" ");
+
     ui->testtypeselected->clear();
 
    
@@ -798,14 +834,29 @@ void MainWindow::fillingOBvectors(){
   TDigitalResult *digitalresultm10=new TDigitalResult();
   TDigitalResult *digitalresultp10=new TDigitalResult();
   TThresholdResult *threresult=new TThresholdResult();
-  TThresholdResult *vcasnresult=new TThresholdResult();
-  TThresholdResult *ithrresult=new TThresholdResult();
+  TSCurveResult *vcasnresult=new TSCurveResult();
+  TSCurveResult *vcasnresultzero=0;
+  TSCurveResult *ithrresultzero=0;
+  TSCurveResult *ithrresult=new TSCurveResult();
+
+ TSCurveResult *threresultthree= new TSCurveResult();
+ TSCurveResult *vcasnresultthree=new TSCurveResult();
+  TSCurveResult *ithrresultthree=new TSCurveResult();
+  TSCurveResult *thresholdresultafterthree=new TSCurveResult();
    TDigitalWFResult *digitalwfresult=new TDigitalWFResult();
 //  TLocalBusResult *localbusresult=new TLocalBusResult();
   TNoiseResult *noiseresult=new TNoiseResult();
   TNoiseResult *noiseresultmasked=0;
   TNoiseResult *noiseresultafter=new TNoiseResult();
+  TNoiseResult *noiseresultthree=new TNoiseResult();
+  TNoiseResult *noiseresultmaskedthree=0;
+  TNoiseResult *noiseresultafterthree=new TNoiseResult();
   TPowerResult *powerresult=new TPowerResult();
+  TSCurveResult *scurveresult=new TSCurveResult();
+  TSCurveResult *scurveresultafter=new TSCurveResult();
+  fConfig->GetScanConfig()->SetBackBias(0.0);
+      fConfig->GetScanConfig()->SetVcasnRange (30, 70);
+
 
   TtuneVCASNScan *vcasnscan=new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
   TtuneITHRScan *ithrscan=new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
@@ -825,6 +876,7 @@ void MainWindow::fillingOBvectors(){
 
   fConfig->GetScanConfig()->SetVoltageScale(1);
 
+
     TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
     TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresult);
     fConfig->GetScanConfig()->SetVoltageScale(1.1);
@@ -842,15 +894,50 @@ void MainWindow::fillingOBvectors(){
     TNoiseOccupancy *noisescanzero=0;
 
 
-
+    TThresholdScan *thresholdscanzero=0;
 
     TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,threresult);
-    TScanAnalysis *vcasnanalysis=new TThresholdAnalysis(&fHistoQue,vcasnscan, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresult,1);
-    TScanAnalysis *ithranalysis=new TThresholdAnalysis(&fHistoQue,ithrscan, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresult,-1);
+  //  TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,threresult);
+    TSCurveAnalysis *scurveanalysis=new TSCurveAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,scurveresult);
+    TSCurveAnalysis *vcasnanalysis=new TSCurveAnalysis(&fHistoQue,vcasnscan, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresult,1);
+    TApplyVCASNTuning *vcasntuning=new TApplyVCASNTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresult);
+    TSCurveAnalysis *ithranalysis=new TSCurveAnalysis(&fHistoQue,ithrscan, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresult,-1);
+    TApplyITHRTuning *ithrtuning=new TApplyITHRTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresult);
+    TThresholdScan *thresholdscanafter=new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+   // TScanAnalysis  *thresholdanalysisafter = new TThresholdAnalysis (&fHistoQue,thresholdscanafter, fConfig->GetScanConfig(), fHICs, &fMutex,threresultafter);
+     TSCurveAnalysis *scurveanalysisafter=new TSCurveAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,scurveresultafter);
+
     TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresult);
     TApplyMask *noisemask=new TApplyMask(&fHistoQue,noisescanzero, fConfig->GetScanConfig(), fHICs, &fMutex,noiseresult);
     TNoiseAnalysis *noiseanalysisafter=new TNoiseAnalysis(&fHistoQue, noisescanafter, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresultafter);
+
+    fConfig->GetScanConfig()->SetBackBias(3.0);
+        fConfig->GetScanConfig()->SetVcasnRange (75, 110);
+
+        for (int i=0; i<fChips.size();i++){
+              fChips.at(i)->GetConfig()->SetParamValue ("ITHR", 50);
+               fChips.at(i)->GetConfig()->SetParamValue ("VCLIP", 60);
+         }
+
+        TtuneVCASNScan *vcasnscanthree=new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+        TtuneITHRScan *ithrscanthree=new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+
+        TNoiseOccupancy *noisescanthree=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+        TNoiseOccupancy *noisescanafterthree=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+
+        TThresholdScan *thresholdscanthree= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+        TSCurveAnalysis  *thresholdanalysisthree = new TSCurveAnalysis (&fHistoQue,thresholdscanthree, fConfig->GetScanConfig(), fHICs, &fMutex,threresultthree);
+        TSCurveAnalysis *vcasnanalysisthree=new TSCurveAnalysis(&fHistoQue,vcasnscanthree, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresultthree,1);
+        TApplyVCASNTuning *vcasntuningthree=new TApplyVCASNTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresultthree);
+        TSCurveAnalysis *ithranalysisthree=new TSCurveAnalysis(&fHistoQue,ithrscanthree, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresultthree,-1);
+        TApplyITHRTuning *ithrtuningthree=new TApplyITHRTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresultthree);
+        TThresholdScan *thresholdscanafterthree=new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+        TSCurveAnalysis  *thresholdanalysisafterthree = new TSCurveAnalysis (&fHistoQue,thresholdscanafterthree, fConfig->GetScanConfig(), fHICs, &fMutex,thresholdresultafterthree);
+
+        TNoiseAnalysis *noiseanalysisthree=new TNoiseAnalysis(&fHistoQue, noisescanthree, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresultthree);
+        TApplyMask *noisemaskthree=new TApplyMask(&fHistoQue,noisescanzero, fConfig->GetScanConfig(), fHICs, &fMutex,noiseresultthree);
+        TNoiseAnalysis *noiseanalysisafterthree=new TNoiseAnalysis(&fHistoQue, noisescanafterthree, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresultafterthree);
+
  //   TLocalBusAnalysis *localbusanalysis = new TLocalBusAnalysis(&fHistoQue,localbusscan, fConfig->GetScanConfig(), fHICs, &fMutex,localbusresult);
     fScanVector.push_back(powerscan);
     fScanVector.push_back(fifoscan);
@@ -862,9 +949,23 @@ void MainWindow::fillingOBvectors(){
     fScanVector.push_back(digitalscanm10);
     fScanVector.push_back(digitalwfscan);
     fScanVector.push_back(thresholdscan);
+    fScanVector.push_back(vcasnscan);
+    fScanVector.push_back(thresholdscanzero);
+    fScanVector.push_back(ithrscan);
+    fScanVector.push_back(thresholdscanzero);
+    fScanVector.push_back(thresholdscanafter);
     fScanVector.push_back(noisescan);
     fScanVector.push_back(noisescanzero);
     fScanVector.push_back(noisescanafter);
+    fScanVector.push_back(thresholdscanthree);
+    fScanVector.push_back(vcasnscanthree);
+    fScanVector.push_back(thresholdscanzero);
+    fScanVector.push_back(ithrscanthree);
+    fScanVector.push_back(thresholdscanzero);
+    fScanVector.push_back(thresholdscanafterthree);
+    fScanVector.push_back(noisescanthree);
+    fScanVector.push_back(noisescanzero);
+    fScanVector.push_back(noisescanafterthree);
  //   fScanVector.push_back(vcasnscan);
   //  fScanVector.push_back(ithrscan);
 
@@ -878,10 +979,26 @@ void MainWindow::fillingOBvectors(){
     fAnalysisVector.push_back(digitalanalysisp10);
     fAnalysisVector.push_back(digitalanalysism10);
     fAnalysisVector.push_back(digitalwfanalysis);
-    fAnalysisVector.push_back(thresholdanalysis);
+  //  fAnalysisVector.push_back(thresholdanalysis);
+    fAnalysisVector.push_back(scurveanalysis);
+    fAnalysisVector.push_back(vcasnanalysis);
+    fAnalysisVector.push_back(vcasntuning);
+    fAnalysisVector.push_back(ithranalysis);
+    fAnalysisVector.push_back(ithrtuning);
+  //  fAnalysisVector.push_back(thresholdanalysisafter);
+    fAnalysisVector.push_back(scurveanalysisafter);
     fAnalysisVector.push_back(noiseanalysis);
     fAnalysisVector.push_back(noisemask);
     fAnalysisVector.push_back(noiseanalysisafter);
+    fAnalysisVector.push_back(thresholdanalysisthree);
+    fAnalysisVector.push_back(vcasnanalysisthree);
+    fAnalysisVector.push_back(vcasntuningthree);
+    fAnalysisVector.push_back(ithranalysisthree);
+    fAnalysisVector.push_back(ithrtuningthree);
+    fAnalysisVector.push_back(thresholdanalysisafterthree);
+    fAnalysisVector.push_back(noiseanalysisthree);
+    fAnalysisVector.push_back(noisemaskthree);
+    fAnalysisVector.push_back(noiseanalysisafterthree);
  //   fAnalysisVector.push_back(vcasnanalysis);
  //   fAnalysisVector.push_back(ithranalysis);
 
@@ -897,12 +1014,26 @@ void MainWindow::fillingOBvectors(){
     fresultVector.push_back(digitalresultp10);
     fresultVector.push_back(digitalresultm10);
     fresultVector.push_back(digitalwfresult);
-    fresultVector.push_back(threresult);
+  //  fresultVector.push_back(threresult);
+    fresultVector.push_back(scurveresult);
+    fresultVector.push_back(vcasnresult);
+    fresultVector.push_back(vcasnresultzero);
+    fresultVector.push_back(ithrresult);
+    fresultVector.push_back(ithrresultzero);
+   // fresultVector.push_back(threresultafter);
+    fresultVector.push_back(scurveresultafter);
     fresultVector.push_back(noiseresult);
     fresultVector.push_back(noiseresultmasked);
     fresultVector.push_back(noiseresultafter);
-  //  fresultVector.push_back(vcasnresult);
- //   fresultVector.push_back(ithrresult);
+    fresultVector.push_back(threresultthree);
+    fresultVector.push_back(vcasnresultthree);
+    fresultVector.push_back(vcasnresultzero);
+    fresultVector.push_back(ithrresultthree);
+    fresultVector.push_back(ithrresultzero);
+    fresultVector.push_back(thresholdresultafterthree);
+    fresultVector.push_back(noiseresultthree);
+    fresultVector.push_back(noiseresultmasked);
+    fresultVector.push_back(noiseresultafterthree);
 
     scanbuttons.push_back(ui->test1);
     scanbuttons.push_back(ui->test2);
@@ -914,13 +1045,24 @@ void MainWindow::fillingOBvectors(){
     scanbuttons.push_back(ui->test7);
     scanbuttons.push_back(ui->test8);
     scanbuttons.push_back(ui->test9); 
-
     scanbuttons.push_back(ui->test10);
     scanbuttons.push_back(0);
-    scanbuttons.push_back(ui->test11);
- //   scanbuttons.push_back(ui->test12);
-   // scanbuttons.push_back(ui->test1);
-  //  scanbuttons.push_back(ui->test1);
+     scanbuttons.push_back(ui->test11);
+     scanbuttons.push_back(0);
+     scanbuttons.push_back(ui->test12);
+    scanbuttons.push_back(ui->test13);
+    scanbuttons.push_back(0);
+    scanbuttons.push_back(ui->test14);
+    scanbuttons.push_back(ui->test15);
+    scanbuttons.push_back(ui->test16);
+    scanbuttons.push_back(0);
+     scanbuttons.push_back(ui->test17);
+     scanbuttons.push_back(0);
+     scanbuttons.push_back(ui->test18);
+    scanbuttons.push_back(ui->test19);
+    scanbuttons.push_back(0);
+    scanbuttons.push_back(ui->test20);
+
 
     scanstatuslabels.push_back(ui->powers);
     scanstatuslabels.push_back(ui->fifos);
@@ -931,9 +1073,23 @@ void MainWindow::fillingOBvectors(){
     scanstatuslabels.push_back(ui->digitalms);
     scanstatuslabels.push_back(ui->digitalwf);
     scanstatuslabels.push_back(ui->thresholds);
+    scanstatuslabels.push_back(ui->vcasntuning);
+     scanstatuslabels.push_back(0);
+     scanstatuslabels.push_back(ui->ithrtuning);
+      scanstatuslabels.push_back(0);
+      scanstatuslabels.push_back(ui->thresholodafter);
     scanstatuslabels.push_back(ui->noisebts);
     scanstatuslabels.push_back(0);
     scanstatuslabels.push_back(ui->noiseats);
+    scanstatuslabels.push_back(ui->thresholdsthree);
+    scanstatuslabels.push_back(ui->vcasntuningthree);
+     scanstatuslabels.push_back(0);
+     scanstatuslabels.push_back(ui->ithrtuningthree);
+      scanstatuslabels.push_back(0);
+      scanstatuslabels.push_back(ui->thresholdafterthree);
+    scanstatuslabels.push_back(ui->noisebtsthree);
+    scanstatuslabels.push_back(0);
+    scanstatuslabels.push_back(ui->noiseatsthree);
     //scanstatuslabels.push_back();
 
     WriteTests();
@@ -1622,8 +1778,21 @@ void MainWindow::connectscandetails(){
     connect(ui->test7,SIGNAL(clicked()),this,SLOT(digitalmd()));
     connect(ui->test8,SIGNAL(clicked()),this,SLOT(digitalwf()));
     connect(ui->test9,SIGNAL(clicked()),this,SLOT(thresholdd()));
-    connect(ui->test10,SIGNAL(clicked()),this,SLOT(noisebd()));
-    connect(ui->test11,SIGNAL(clicked()),this,SLOT(noisead()));}
+    connect(ui->test10,SIGNAL(clicked()),this,SLOT(vcasntd()));
+     connect(ui->test11,SIGNAL(clicked()),this,SLOT(ithrtd()));
+      connect(ui->test12,SIGNAL(clicked()),this,SLOT(thresholddafter()));
+    connect(ui->test13,SIGNAL(clicked()),this,SLOT(noisebd()));
+    connect(ui->test14,SIGNAL(clicked()),this,SLOT(noisead()));
+    connect(ui->test15,SIGNAL(clicked()),this,SLOT(thresholddthree()));
+    connect(ui->test16,SIGNAL(clicked()),this,SLOT(vcasntdthree()));
+     connect(ui->test17,SIGNAL(clicked()),this,SLOT(ithrtdthree()));
+      connect(ui->test18,SIGNAL(clicked()),this,SLOT(thresholddafterthree()));
+    connect(ui->test19,SIGNAL(clicked()),this,SLOT(noisebdthree()));
+    connect(ui->test20,SIGNAL(clicked()),this,SLOT(noiseadthree()));
+
+
+
+  }
     //connect(ui->test3,SIGNAL(clicked()),this,SLOT(powerd()));
 
     // }
@@ -1679,13 +1848,56 @@ void MainWindow::thresholdd(){
     getresultdetails(8);
 }
 
-void MainWindow::noisebd(){
+
+void MainWindow::vcasntd(){
     getresultdetails(9);
+}
+
+void MainWindow::ithrtd(){
+    getresultdetails(11);
+}
+
+
+void MainWindow::thresholddafter(){
+    getresultdetails(13);
+}
+
+
+void MainWindow::noisebd(){
+    getresultdetails(14);
 }
 
 
 void MainWindow::noisead(){
-    getresultdetails(11);
+    getresultdetails(16);
+}
+
+void MainWindow::thresholddthree(){
+    getresultdetails(17);
+}
+
+
+void MainWindow::vcasntdthree(){
+    getresultdetails(18);
+}
+
+void MainWindow::ithrtdthree(){
+    getresultdetails(20);
+}
+
+
+void MainWindow::thresholddafterthree(){
+    getresultdetails(22);
+}
+
+
+void MainWindow::noisebdthree(){
+    getresultdetails(23);
+}
+
+
+void MainWindow::noiseadthree(){
+    getresultdetails(25);
 }
 
 

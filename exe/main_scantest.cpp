@@ -149,13 +149,13 @@ int main(int argc, char** argv) {
   }
 
   if(fResult) std::cout << "fResult OK" << std::endl;
-  TApplyVCASNTuning *apply_V = new TApplyVCASNTuning(&fHistoQue, NULL, fConfig->GetScanConfig(), fHics, &fMutex, fResult);
-  std::cout << "starting thread apply_V" << std::endl;
-  apply_V->Initialize();
-  std::thread analysisThread_apply_V(&TScanAnalysis::Run, std::ref(apply_V));
-  analysisThread_apply_V.join();
-  apply_V->Finalize();
-  std::cout << "Finalized apply_V" << std::endl;
+  //TApplyVCASNTuning *apply_V = new TApplyVCASNTuning(&fHistoQue, NULL, fConfig->GetScanConfig(), fHics, &fMutex, fResult);
+  // std::cout << "starting thread apply_V" << std::endl;
+  //apply_V->Initialize();
+  //std::thread analysisThread_apply_V(&TScanAnalysis::Run, std::ref(apply_V));
+  //analysisThread_apply_V.join();
+  //apply_V->Finalize();
+  //std::cout << "Finalized apply_V" << std::endl;
   
 
   /*fResult=new TThresholdResult();

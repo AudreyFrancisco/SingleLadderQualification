@@ -41,11 +41,14 @@ class TSCurveResultChip : public TScanResultChip {
   void  WriteToFile      (FILE *fp);
   float GetVariable      (TResultVariable var);
   void  CalculateAverages();
+  float GetThresholdMean () {return m_thresholdAv;};
+  
 };
 
 
 class TSCurveResultHic : public TScanResultHic {
   friend class TSCurveAnalysis;
+  friend class TApplyTuning;
  private:
   int  m_nDead;
   int  m_nNoThresh;

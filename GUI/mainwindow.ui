@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1437</width>
-    <height>670</height>
+    <width>1413</width>
+    <height>842</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
      <rect>
       <x>0</x>
       <y>60</y>
-      <width>361</width>
-      <height>511</height>
+      <width>351</width>
+      <height>751</height>
      </rect>
     </property>
     <column>
@@ -39,8 +39,8 @@
      <rect>
       <x>370</x>
       <y>20</y>
-      <width>961</width>
-      <height>551</height>
+      <width>951</width>
+      <height>741</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -980,8 +980,8 @@
      <widget class="QLabel" name="alicepic">
       <property name="geometry">
        <rect>
-        <x>0</x>
-        <y>310</y>
+        <x>10</x>
+        <y>500</y>
         <width>211</width>
         <height>201</height>
        </rect>
@@ -1464,7 +1464,7 @@ Digital scan                     Waiting . .
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>540</y>
+      <y>760</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -1476,8 +1476,8 @@ Digital scan                     Waiting . .
    <widget class="QPushButton" name="quit">
     <property name="geometry">
      <rect>
-      <x>1230</x>
-      <y>600</y>
+      <x>1210</x>
+      <y>770</y>
       <width>111</width>
       <height>31</height>
      </rect>
@@ -1582,7 +1582,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>470</y>
-      <width>131</width>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -1594,7 +1594,7 @@ Digital scan                     Waiting . .
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>540</y>
+      <y>760</y>
       <width>95</width>
       <height>31</height>
      </rect>
@@ -1658,8 +1658,8 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="noisebts">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>380</y>
+      <x>160</x>
+      <y>480</y>
       <width>131</width>
       <height>21</height>
      </rect>
@@ -1672,7 +1672,7 @@ Digital scan                     Waiting . .
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>410</y>
+      <y>500</y>
       <width>141</width>
       <height>21</height>
      </rect>
@@ -1686,6 +1686,214 @@ Digital scan                     Waiting . .
      <rect>
       <x>150</x>
       <y>330</y>
+      <width>121</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test14">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>500</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="thresholodafter">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>440</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ithrtuning">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>410</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="vcasntuning">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>380</y>
+      <width>121</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test15">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>530</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test16">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>560</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test17">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>590</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test18">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>620</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test19">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>650</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test20">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>680</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="thresholdsthree">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>540</y>
+      <width>121</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="vcasntuningthree">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>570</y>
+      <width>141</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ithrtuningthree">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>600</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="thresholdafterthree">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>630</y>
+      <width>131</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="noisebtsthree">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>660</y>
+      <width>121</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="noiseatsthree">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>690</y>
       <width>121</width>
       <height>21</height>
      </rect>
