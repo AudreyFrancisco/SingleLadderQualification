@@ -191,13 +191,15 @@ void TSCurveScan::Init() {
   m_running = true;
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
+    if (!pb) continue;
     if (m_backBias == 0) {
       m_hics.at(ihic)->SwitchBias (false);
-      m_hics.at(ihic)->GetPowerBoard()->SetBiasVoltage(0);
+      pb             ->SetBiasVoltage(0);
     }
     else {
       m_hics.at(ihic)->SwitchBias   (true);
-      m_hics.at(ihic)->GetPowerBoard()->SetBiasVoltage( (-1.)* m_backBias);
+      pb             ->SetBiasVoltage( (-1.)* m_backBias);
     }
   }
 

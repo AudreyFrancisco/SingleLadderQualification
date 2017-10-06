@@ -116,6 +116,7 @@ void THic::ScaleVoltage(float aFactor)
 
 void THic::SwitchBias (bool on)
 {
+  if (!m_powerBoard) return;
   if (on) {
     m_powerBoard->SetBiasOn (m_pbMod);
   }
