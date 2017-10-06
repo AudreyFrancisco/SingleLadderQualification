@@ -70,7 +70,7 @@ for d in VCASN VCASP VCASN2 VCLIP VTEMP
 do
     echo "DAC: $d"
     echo "###############"
-    root -l -b -q ${SCRIPT_DIR}/analyse_DAC.C'("'DAC_summary_${SUFFIX}.root'","'${d}'")'
+    root -l -b -q ${SCRIPT_DIR}/analyse_DAC.C'("'$(readlink -f DAC_summary_${SUFFIX}.root)'","'${d}'")'
 done
 
 
@@ -90,6 +90,6 @@ EOF
 
 ## archive the dat files
 tar cjf AVDD_summary_${SUFFIX}_archive.tar.bz2 AVDD_*_${SUFFIX}.dat --remove-files
-root -l -b -q ${SCRIPT_DIR}/analyse_AVDD.C'("'AVDD_summary_${SUFFIX}.dat'")'
+root -l -b -q ${SCRIPT_DIR}/analyse_AVDD.C'("'$(readlink -f AVDD_summary_${SUFFIX}.root)'")'
 
 echo "# done."
