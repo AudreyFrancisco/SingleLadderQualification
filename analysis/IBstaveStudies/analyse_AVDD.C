@@ -44,11 +44,16 @@ void analyse_AVDD(TString inputFile) {
 
   TFile* f_out = new TFile(TString::Format("%s_output.root", inputFileBaseName.Data()), "RECREATE");
 
-  TString draw_str[] = { "AVDDsetV:AVDDmeasV",               "AVDDsetV:VTEMPmeasV",              "AVDDmeasV:VTEMPmeasV",              "AVDDsetV:AVDDdacMeasV:AVDDdacMeasErrV", "AVDDmeasV:AVDDdacMeasV:AVDDdacMeasErrV"};
-  TString name_str[] = { "gAVDDmeasVvsAVDDsetV_Chip%d",      "gVTEMPmeasVvsAVDDsetV_Chip%d",     "gVTEMPmeasVvsAVDDmeasV_Chip%d",     "gAVDDdacMeasVvsAVDDsetV_Chip%d",        "gAVDDdacMeasVvsAVDDmeasV_Chip%d"       };
-  TString axes_str[] = { ";AVDD_{set} (V); AVDD_{meas} (V)", ";AVDD_{set} (V);VTEMP_{meas} (V)", ";AVDD_{meas} (V);VTEMP_{meas} (V)", ";AVDD_{set} (V);VTEMP_{DACmeas} (V)",   ";AVDD_{set} (V);AVDD_{DACmeas} (V)"    };
-  Float_t fit_low_lim[] = { 1.299,                           1.55,                               1.55,                                1.55,                                    1.55                                    };
-  Float_t fit_up_lim[]  = { 1.721,                           2.05,                               1.701,                               2.05,                                    1.701                                   };
+  TString draw_str[] = { "AVDDsetV:AVDDmeasV",               "AVDDsetV:VTEMPmeasV",              "AVDDmeasV:VTEMPmeasV",              "AVDDsetV:VTEMPmeasV/0.75",          "AVDDmeasV:VTEMPmeasV/0.75",         "AVDDsetV:VTEMPmeasV/0.75-AVDDsetV",      "AVDDmeasV:VTEMPmeasV/0.75-AVDDmeasV"     };
+  TString name_str[] = { "gAVDDmeasVvsAVDDsetV_Chip%d",      "gVTEMPmeasVvsAVDDsetV_Chip%d",     "gVTEMPmeasVvsAVDDmeasV_Chip%d",     "EstimatedAVDDvsAVDDsetV_Chip%d",    "EstimatedAVDDvsAVDDmeasV_Chip%d",   "EstDevAVDDvsAVDDsetV_Chip%d",            "EstDevAVDDvsAVDDmeasV_Chip%d"            };
+  TString axes_str[] = { ";AVDD_{set} (V); AVDD_{meas} (V)", ";AVDD_{set} (V);VTEMP_{meas} (V)", ";AVDD_{meas} (V);VTEMP_{meas} (V)", ";AVDD_{meas} (V);VTEMP_{meas} (V)", ";AVDD_{meas} (V);VTEMP_{meas} (V)", ";AVDD_{set} (V);# Delta AVDD_{set} (V)", ";AVDD_{meas} (V);#Delta AVDD_{meas} (V)" };
+  Float_t fit_low_lim[] = { 1.299,                           1.55,                               1.55,                                1.55,                                1.55,                                1.55,                                     1.55                                      };
+  Float_t fit_up_lim[]  = { 1.721,                           2.05,                               1.701,                               1.701,                               1.701,                               1.701,                                    1.701                                     };
+  TString func_str[] = { "[0]*x",                            "[0]*x",                            "[0]*x",                             "[1]*x+[0]",                         "[1]*x+[0]",                         "[1]*x+[0]",                              "[1]*x+[0]",                              };
+  Bool_t  sub_Xoffset[] = { kTRUE,                           kTRUE,                              kFALSE,                              kTRUE,                               kFALSE,                              kTRUE,                                    kFALSE                                    };
+  Bool_t  sub_Yoffset[] = { kFALSE,                          kFALSE,                             kFALSE,                              kFALSE,                              kFALSE,                              kTRUE,                                    kFALSE                                    };
+
+  Float_t offsets[] = { 0., -4e-3, -7e-3, -9e-3, -11e-3, -12e-3, -14e-3, -14e-3, -14e-3 };
 
   gStyle->SetOptFit(111);
 
@@ -71,10 +76,16 @@ void analyse_AVDD(TString inputFile) {
       g->SetName(TString::Format(name_str[i_draw_str].Data(), i_chip));
       g->SetTitle(axes_str[i_draw_str].Data());
 
-      TF1* func = new TF1("func_lin", "[0]*x", fit_low_lim[i_draw_str], fit_up_lim[i_draw_str]);
+      for (ULong64_t i_value = 0; i_value < n; ++i_value) {
+        if (sub_Xoffset[i_chip]) g->GetX()[i_value] += offsets[i_chip];
+        if (sub_Yoffset[i_chip]) g->GetY()[i_value] -= offsets[i_chip];
+      }
+
+      TF1* func = new TF1("func_lin", func_str[i_draw_str].Data(), fit_low_lim[i_draw_str], fit_up_lim[i_draw_str]);
       TFitResultPtr rslt = g->Fit(func, "SQ", "", fit_low_lim[i_draw_str], fit_up_lim[i_draw_str]);
-      f_out_fit << '\t' << rslt->Value(0) << '\t' << rslt->Error(0);
-      //          << '\t' << rslt->Value(1) << '\t' << rslt->Error(1);
+      for (Int_t i_par=0; i_par < func->GetNpar(); ++i_par) {
+        f_out_fit << '\t' << rslt->Value(i_par) << '\t' << rslt->Error(i_par);
+      }
       rslt->Write();
       g->Draw("AP");
       c->SetName(TString::Format("c_%s",g->GetName()));
