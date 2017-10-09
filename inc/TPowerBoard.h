@@ -125,6 +125,7 @@ public:
         void CalibrateVoltage  (int module);
         void CalibrateCurrent  (int module);
         void CorrectVoltageDrop(int module);
+        bool IsCalibrated      (int module) {return GetConfigurationHandler()->IsCalibrated (module);};
 
 	void  GetModule(int module, float* AV, float *AI, float *DV, float *DI, bool *BiasOn, bool *AChOn, bool *DChOn);
 

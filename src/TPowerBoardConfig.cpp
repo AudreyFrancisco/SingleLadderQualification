@@ -336,6 +336,31 @@ void TPowerBoardConfig::GetLineResistances (int mod, float &ALineR, float &DLine
 }
 
 
+void TPowerBoardConfig::WriteCalibrationFile ()
+{
+  float ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, DVScale, AVOffset, DVOffset;
+  FILE *fp = fopen ("PBCalib.dat", "w");
+  
+  for (int imod = 0; imod < MAX_MOULESPERMOSAIC; imod++) {
+    GetLineResistances (imod, ALineR, DLineR, GNDLineR);
+    GetICalibration    (imod, AIOffset, DIOffset);
+    GetVCalibration    (imod, AVScale, DVScale, AVOffset, DVOffset);
+    fprintf(fp, "%d %.0f %.0f %.0f %.3f %.3f %.3f %.3f %.3f %.3f\n",
+	    imod, ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, AVOffset, DVScale, DVOffset); 
+  }
+
+  fclose (fp);
+}
+
+
+bool TPowerBoardConfig::IsCalibrated (int mod) 
+{
+  float DLineR, ALineR, GNDLineR;
+  GetLineResistances (mod, ALineR, DLineR, GNDLineR);
+  if (DLineR + ALineR + GNDLineR == 0) return false;
+  return true;
+}
+
 /* -------------------------
 	ReadFromFile()
 	Read a complete configuration from a file and stores it into the class members
