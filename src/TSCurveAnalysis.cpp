@@ -169,6 +169,33 @@ void TSCurveAnalysis::InitCounters ()
 }
 
 
+// in some cases (VCASN tuning with back bias) the number of hits drops again after 
+// reaching the plateau, which confuses the root fit. In order to avoid this, fill 
+// the graph with 100% values, once the plateau has been reached.
+void TSCurveAnalysis::FillGraph(TGraph *aGraph) {
+  int      nMin          = m_nPulseInj - 1;
+  int      count         = 0;
+  int      minForPlateau = 3;
+  bool     plateau       = false;
+  Double_t x, y;
+
+  for (int i = 0; i < aGraph->GetN(); i++) {
+    aGraph->GetPoint(i, x, y);
+    if (!plateau) {  // search for N consecutive points above nMin
+      if (y > nMin) count ++;
+      else          count = 0;
+      if (count == minForPlateau) {
+        plateau = true;
+      }
+    }
+    else {
+      aGraph->SetPoint(i, x, m_nPulseInj);
+    }
+  }
+//        gPixel->SetPoint(gPixel->GetN(), iPulse * m_resultFactor, entries);
+}
+
+
 // TODO: Write Raw Data, write fit data
 void TSCurveAnalysis::AnalyseHisto (TScanHisto *histo) 
 {
@@ -191,6 +218,7 @@ void TSCurveAnalysis::AnalyseHisto (TScanHisto *histo)
       if      (CheckPixelNoHits(gPixel)) {chipResult->m_nDead++;}
       else if (CheckPixelHot   (gPixel)) {chipResult->m_nHot ++;}
       else {
+        if (IsVCASNTuning()) FillGraph(gPixel);
 	common::TErrFuncFitResult fitResult = DoFit (gPixel, m_speedy);
         if (fitResult.threshold == 0) {
           chipResult->m_nNoThresh++;

@@ -110,6 +110,7 @@ class TSCurveAnalysis : public TScanAnalysis {
   float  FindStartInverse          (TGraph* aGraph, int nInj);
   float  FindStart                 (TGraph* aGraph, int resultFactor, int nInj);
 
+  void   FillGraph                 (TGraph* aGraph);
   common::TErrFuncFitResult DoFit       (TGraph* aGraph, bool speedy = false);
   common::TErrFuncFitResult DoSpeedyFit (TGraph *aGraph);
   common::TErrFuncFitResult DoRootFit   (TGraph *aGraph);
