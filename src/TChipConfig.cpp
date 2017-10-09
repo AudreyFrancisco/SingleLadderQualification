@@ -114,6 +114,7 @@ bool TChipConfig::SetParamValue (std::string Name, int Value)
   return false;
 }
 
+
 int TChipConfig::GetParamValue (std::string Name)
 {
   if (fSettings.find (Name) != fSettings.end()) {

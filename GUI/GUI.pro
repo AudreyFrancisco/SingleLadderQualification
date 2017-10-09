@@ -25,20 +25,26 @@ SOURCES += main.cpp\
            testselection.cpp \
            scanthread.cpp \
     scanconfiguration.cpp \
-    testingprogress.cpp
+    testingprogress.cpp \
+    checkpbconfig.cpp \
+    calibrationpb.cpp
 
 HEADERS  += mainwindow.h \
             dialog.h \
             testselection.h \
             scanthread.h \
     scanconfiguration.h \
-    testingprogress.h
+    testingprogress.h \
+    checkpbconfig.h \
+    calibrationpb.h
 
 FORMS    += mainwindow.ui \
             dialog.ui \
             testselection.ui \
     scanconfiguration.ui \
-    testingprogress.ui
+    testingprogress.ui \
+    checkpbconfig.ui \
+    calibrationpb.ui
 
 INCLUDEPATH += $(ROOTSYS)/include /usr/local/include
 

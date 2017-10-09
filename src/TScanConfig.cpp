@@ -161,6 +161,17 @@ bool TScanConfig::SetParamValue (std::string Name, std::string Value)
 }
 
 
+bool TScanConfig::SetParamValue (std::string Name, int Value)
+{
+  if (fSettings.find (Name) != fSettings.end()) {
+    *(fSettings.find(Name)->second) = Value;
+    return true;
+  }
+
+  return false;
+}
+
+
 int TScanConfig::GetParamValue (std::string Name)
 {
 
