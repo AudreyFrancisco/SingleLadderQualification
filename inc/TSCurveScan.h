@@ -11,12 +11,14 @@
 
 class TSCurveScan : public TMaskScan {
  protected:
+  bool         m_nominal;
   int          m_VPULSEH;
   float        m_backBias;
-  void         ConfigureFromu (TAlpide *chip);
-  virtual void ConfigureChip  (TAlpide *chip) = 0;
-  void         ConfigureBoard (TReadoutBoard *board);
-  void         FillHistos     (std::vector<TPixHit> *Hits, int board);
+  void         ConfigureFromu        (TAlpide *chip);
+  virtual void ConfigureChip         (TAlpide *chip) = 0;
+  void         ConfigureBoard        (TReadoutBoard *board);
+  void         RestoreNominalSettings();
+  void         FillHistos            (std::vector<TPixHit> *Hits, int board);
   //THisto CreateHisto    ();
  public: 
   TSCurveScan  (TScanConfig                   *config,

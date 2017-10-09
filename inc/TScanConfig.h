@@ -88,6 +88,7 @@ namespace ScanConfig {
   const int MAXIBIAS         = 50;  //current limit for I-V-curve in mA;
   const float VOLTAGE_SCALE  = 1.0;
   const float BACKBIAS       = 0;
+  const int   NOMINAL        = 0;
 }
 
 
@@ -156,6 +157,7 @@ class TScanConfig {
   int  m_threshMaxNoiseOB;
   int  m_calVpulsel;
   int  m_targetThresh;
+  int  m_nominal;
   float m_voltageScale;
   float m_backBias;
  protected:

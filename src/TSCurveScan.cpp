@@ -16,6 +16,7 @@ TSCurveScan::TSCurveScan       (TScanConfig                   *config,
   : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
 {
   m_backBias  = m_config->GetBackBias  ();
+  m_nominal   = (m_config->GetParamValue("NOMINAL") == 1);
 }
 
 
@@ -115,6 +116,27 @@ TtuneITHRScan::TtuneITHRScan   (TScanConfig                   *config,
 
 
 
+void TSCurveScan::RestoreNominalSettings()
+{
+  if (m_backBias == 0.0) {
+    for (unsigned int i = 0; i < m_chips.size(); i++) {
+      m_chips.at(i)->GetConfig()->SetParamValue("ITHR",   50);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCASN",  50);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCASN2", 57);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCLIP",  0);
+    }
+  }
+  else if ((m_backBias > 2.99) && (m_backBias < 3.01)) {
+    for (unsigned int i = 0; i < m_chips.size(); i++) {
+      m_chips.at(i)->GetConfig()->SetParamValue("ITHR",   50);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCASN",  105);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCASN2", 117);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCLIP",  60);
+    }
+  }
+}
+
+
 void TSCurveScan::ConfigureBoard(TReadoutBoard *board)
 {
   if (board->GetConfig()->GetBoardType() == boardDAQ) {
@@ -187,6 +209,8 @@ THisto TSCurveScan::CreateHisto() {
 
 void TSCurveScan::Init() {
   TScan::Init();
+
+  if (m_nominal) RestoreNominalSettings();
 
   m_running = true;
 
