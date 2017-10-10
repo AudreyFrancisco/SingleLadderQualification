@@ -17,7 +17,7 @@ public:
 
 public slots:
     virtual void setresistances(int &analog,int &digital, int &bb);
-    virtual void getcalibration(float calv, float cali, float lineres);
+    virtual void getcalibration(float savdd,float iavdd, float sdvdd,float idvdd,float offsetia,float offsetid);
 
 private:
     Ui::Calibrationpb *ui;

@@ -33,12 +33,14 @@ void Calibrationpb::setresistances(int &analog,int &digital, int &bb){
 }
 
 
-void Calibrationpb::getcalibration(float calv,float cali, float lineres){
+void Calibrationpb::getcalibration(float savdd,float iavdd, float sdvdd,float idvdd,float offsetia,float offsetid){
 
-ui->Vcalibration->setText(QString::number(calv));
-ui->Icalibration->setText(QString::number(cali));
-ui->Lineresistances->setText(QString::number(lineres));
-
+ui->savdd->setText(QString::number(savdd));
+ui->iavdd->setText(QString::number(iavdd));
+ui->sdvdd->setText(QString::number(sdvdd));
+ui->idvdd->setText(QString::number(idvdd));
+ui->offsetia->setText(QString::number(offsetia));
+ui->offsetid->setText(QString::number(offsetid));
 std::cout<<"calibration done"<<std::endl;
 
 

@@ -923,7 +923,7 @@ void MainWindow::fillingOBvectors(){
     TNoiseAnalysis *noiseanalysisafter=new TNoiseAnalysis(&fHistoQue, noisescanafter, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresultafter);
 
          fConfig->GetScanConfig()->SetBackBias(3.0);
-        fConfig->GetScanConfig()->SetVcasnRange (75, 110);
+        fConfig->GetScanConfig()->SetVcasnRange (75, 160);
 
 
 
@@ -2257,12 +2257,13 @@ void MainWindow::setandgetcalibration(){
      pb->CalibrateCurrent(pbnumberofmodule);
 
 
-      float vre, ire,gndre;
+      float avscale,dvscale,avoffset,dvoffset,aioffset,dioffset;
 
+      pbconfig->GetVCalibration(pbnumberofmodule,avscale,dvscale,avoffset,dvoffset);
 
-      pbconfig->GetLineResistances(pbnumberofmodule,vre,ire,gndre);
+      pbconfig->GetICalibration(pbnumberofmodule,aioffset,dioffset);
 
-      calwindow->getcalibration(vre,ire,gndre);
+      calwindow->getcalibration(avscale,avoffset,dvscale,dvoffset,aioffset,dioffset);
 
 
 }
