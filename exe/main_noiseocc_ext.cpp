@@ -103,6 +103,7 @@ int configureChip(TAlpide *chip) {
 
   configureFromu(chip);
   configureMask (chip);
+  AlpideConfig::ConfigureCMU (chip);
 
   int readout_mode = (chip->GetConfig()->GetReadoutMode()) ? 0x2 : 0x1;
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x20 | (readout_mode & 0x3)); // strobed readout mode
