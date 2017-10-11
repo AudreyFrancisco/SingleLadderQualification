@@ -320,14 +320,17 @@ void TPowerBoardConfig::SetICalibration (int mod, float AIOffset, float DIOffset
 }
 
 
-void TPowerBoardConfig::SetLineResistances (int mod, float ALineR, float DLineR, float GNDLineR)
+// set the line resistances in the calibration part of the configuration
+// expects the external resistances (breakout board -> module) and adds the internal ones
+void TPowerBoardConfig::SetLineResistances (int mod, int powerUnit, float ALineR, float DLineR, float GNDLineR)
 {
-  fPBConfig.Modul[mod].CalDLineR   = DLineR;
-  fPBConfig.Modul[mod].CalALineR   = ALineR;
+  fPBConfig.Modul[mod].CalDLineR   = DLineR + RDigital[powerUnit][mod];
+  fPBConfig.Modul[mod].CalALineR   = ALineR + RAnalog [powerUnit][mod];
   fPBConfig.Modul[mod].CalGNDLineR = GNDLineR;
 }
 
 
+// GetLineResistances returns the total value of the line resistance (internal + external)
 void TPowerBoardConfig::GetLineResistances (int mod, float &ALineR, float &DLineR, float &GNDLineR)
 {
   DLineR   = fPBConfig.Modul[mod].CalDLineR;

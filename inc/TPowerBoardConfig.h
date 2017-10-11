@@ -85,6 +85,13 @@
 #define DEF_BIASOFFSET           0.0
 #define DEF_BIASSCALE            1.0
 
+// internal power board resistances between regulator and breakout board
+// according to power board manual version 1.2 (14/07/2017)
+// first index is the power unit (0 = bottom, 1 = top), second is module
+const float RAnalog [2][8] = {{0.035, 0.039, 0.047, 0.054, 0.033, 0.044, 0.051, 0.052}, 
+                              {0.033, 0.038, 0.044, 0.056, 0.033, 0.044, 0.059, 0.052}};
+const float RDigital[2][8] = {{0.034, 0.042, 0.043, 0.050, 0.036, 0.038, 0.044, 0.052}, 
+                              {0.033, 0.040, 0.041, 0.049, 0.034, 0.037, 0.040, 0.056}};
 // Class definition
 class TPowerBoardConfig  {
 
@@ -153,7 +160,7 @@ public:
         void SetVCalibration      (int mod, float AVScale,  float DVScale,  float AVOffset,  float DVOffset);
         void GetICalibration      (int mod, float &AIOffset, float &DIOffset);
         void SetICalibration      (int mod, float AIOffset, float DIOffset);
-        void SetLineResistances   (int mod, float ALineR, float DLineR, float GNDLineR);
+        void SetLineResistances   (int mod, int powerUnit, float ALineR, float DLineR, float GNDLineR);
         void GetLineResistances   (int mod, float &ALineR, float &DLineR, float &GNDLineR);
         bool IsCalibrated         (int mod);
         void WriteCalibrationFile ();
