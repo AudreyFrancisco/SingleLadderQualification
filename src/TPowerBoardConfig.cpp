@@ -320,12 +320,22 @@ void TPowerBoardConfig::SetICalibration (int mod, float AIOffset, float DIOffset
 }
 
 
-// set the line resistances in the calibration part of the configuration
+// sets the line resistances in the calibration part of the configuration
 // expects the external resistances (breakout board -> module) and adds the internal ones
-void TPowerBoardConfig::SetLineResistances (int mod, int powerUnit, float ALineR, float DLineR, float GNDLineR)
+void TPowerBoardConfig::EnterMeasuredLineResistances (int mod, int powerUnit, float ALineR, float DLineR, float GNDLineR)
 {
   fPBConfig.Modul[mod].CalDLineR   = DLineR + RDigital[powerUnit][mod];
   fPBConfig.Modul[mod].CalALineR   = ALineR + RAnalog [powerUnit][mod];
+  fPBConfig.Modul[mod].CalGNDLineR = GNDLineR;
+}
+
+
+// sets the line resistances in the calibration part of the configuration
+// WITHOUT adding the internal resistances (used when read from file)
+void TPowerBoardConfig::SetLineResistances (int mod, float ALineR, float DLineR, float GNDLineR)
+{
+  fPBConfig.Modul[mod].CalDLineR   = DLineR;
+  fPBConfig.Modul[mod].CalALineR   = ALineR;
   fPBConfig.Modul[mod].CalGNDLineR = GNDLineR;
 }
 
@@ -348,11 +358,28 @@ void TPowerBoardConfig::WriteCalibrationFile ()
     GetLineResistances (imod, ALineR, DLineR, GNDLineR);
     GetICalibration    (imod, AIOffset, DIOffset);
     GetVCalibration    (imod, AVScale, DVScale, AVOffset, DVOffset);
-    fprintf(fp, "%d %.0f %.0f %.0f %.3f %.3f %.3f %.3f %.3f %.3f\n",
+    fprintf(fp, "%d %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n",
 	    imod, ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, AVOffset, DVScale, DVOffset); 
   }
 
   fclose (fp);
+}
+
+
+void TPowerBoardConfig::ReadCalibrationFile() 
+{
+  float ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, DVScale, AVOffset, DVOffset;
+  int   mod;
+  FILE *fp = fopen ("PBCalib.dat", "r");
+  if (!fp) return;
+  while (fscanf(fp, "%d %f %f %f %f %f %f %f %f %f\n",
+		&mod, &ALineR, &DLineR, &GNDLineR, &AIOffset, &DIOffset, &AVScale, &AVOffset, &DVScale, &DVOffset) == 10)
+  {
+    SetLineResistances(mod, ALineR, DLineR, GNDLineR);
+    SetICalibration   (mod, AIOffset, DIOffset);
+    SetVCalibration   (mod, AVScale, DVScale, AVOffset, DVOffset);
+  } 
+  fclose(fp);
 }
 
 

@@ -36,6 +36,7 @@
  *
  */
 #include "TPowerBoard.h"
+#include <unistd.h>
 
 
 
@@ -225,12 +226,16 @@ void TPowerBoard::CalibrateVoltage(int module)
   SetDigitalVoltage(module, set1);
   SwitchModule     (module, true);
 
+  sleep(1);
+
   analog1  = GetAnalogVoltage  (module);
   digital1 = GetDigitalVoltage (module);
 
   // set and measure second point
   SetAnalogVoltage (module, set2);
   SetDigitalVoltage(module, set2);
+
+  sleep(1);
 
   analog2  = GetAnalogVoltage  (module);
   digital2 = GetDigitalVoltage (module);
@@ -257,6 +262,8 @@ void TPowerBoard::CalibrateCurrent(int module)
   fPowerBoardConfig->SetICalibration (module, 0, 0);  
 
   SwitchModule (module, false);
+
+  sleep(1);
 
   aOffset = GetAnalogCurrent  (module);
   dOffset = GetDigitalCurrent (module);
