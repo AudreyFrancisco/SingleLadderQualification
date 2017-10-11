@@ -74,6 +74,7 @@ TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName)
                 fPBConfig.Modul[i].CalGNDLineR = DEF_CALGNDLINER;
 	}
 
+        ReadCalibrationFile();
 	if (AConfigFileName) { // Read Configuration file
 		try {
 			if(AConfigFileName == NULL || strlen(AConfigFileName) == 0) throw std::invalid_argument("MOSAIC Config : invalid filename");
