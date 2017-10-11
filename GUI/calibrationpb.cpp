@@ -45,3 +45,18 @@ std::cout<<"calibration done"<<std::endl;
 
 
 }
+
+
+void Calibrationpb::setpowerunit(int &unit){
+
+    if(ui->top->isChecked()){
+        ui->bottom->setChecked(false);
+        unit=1;
+    }
+     if(ui->bottom->isChecked()){
+
+         ui->top->setChecked(false);
+         unit=0;
+     }
+
+}

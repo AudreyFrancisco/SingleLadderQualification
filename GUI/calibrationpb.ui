@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
-    <height>607</height>
+    <width>842</width>
+    <height>608</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -70,7 +70,7 @@
   <widget class="QPushButton" name="calibrate">
    <property name="geometry">
     <rect>
-     <x>560</x>
+     <x>700</x>
      <y>80</y>
      <width>111</width>
      <height>31</height>
@@ -148,8 +148,8 @@
   <widget class="QPushButton" name="cancel">
    <property name="geometry">
     <rect>
-     <x>590</x>
-     <y>560</y>
+     <x>720</x>
+     <y>550</y>
      <width>91</width>
      <height>28</height>
     </rect>
@@ -161,8 +161,8 @@
   <widget class="QPushButton" name="ok">
    <property name="geometry">
     <rect>
-     <x>490</x>
-     <y>560</y>
+     <x>630</x>
+     <y>550</y>
      <width>91</width>
      <height>28</height>
     </rect>
@@ -336,6 +336,50 @@
      <width>121</width>
      <height>31</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_13">
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>30</y>
+     <width>91</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>13</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Power Unit</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="top">
+   <property name="geometry">
+    <rect>
+     <x>550</x>
+     <y>80</y>
+     <width>111</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Top</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="bottom">
+   <property name="geometry">
+    <rect>
+     <x>550</x>
+     <y>120</y>
+     <width>111</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Bottom</string>
    </property>
   </widget>
  </widget>

@@ -2246,13 +2246,15 @@ pbconfig->WriteCalibrationFile();
 void MainWindow::setandgetcalibration(){
 
     int ares,gres, dres;
-
+    int unit;
 
 
      calwindow->setresistances(ares,dres,gres);
 
       std::cout<<ares<<" input values"<<dres<< std::endl;
-     pbconfig->SetLineResistances(pbnumberofmodule,ares,dres,gres);
+      calwindow->setpowerunit(unit);
+      std::cout<<unit<<"number of the unit"<<std::endl;
+     pbconfig->SetLineResistances(pbnumberofmodule,unit,ares,dres,gres);
       pb->CalibrateVoltage(pbnumberofmodule);
      pb->CalibrateCurrent(pbnumberofmodule);
 
