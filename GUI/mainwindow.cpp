@@ -2254,7 +2254,7 @@ void MainWindow::setandgetcalibration(){
       std::cout<<ares<<" input values"<<dres<< std::endl;
       calwindow->setpowerunit(unit);
       std::cout<<unit<<"number of the unit"<<std::endl;
-     pbconfig->SetLineResistances(pbnumberofmodule,unit,ares,dres,gres);
+     pbconfig->EnterMeasuredLineResistances(pbnumberofmodule,unit,ares,dres,gres);
       pb->CalibrateVoltage(pbnumberofmodule);
      pb->CalibrateCurrent(pbnumberofmodule);
 
