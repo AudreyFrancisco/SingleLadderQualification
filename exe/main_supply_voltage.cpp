@@ -85,10 +85,11 @@ int main(int argc, char** argv) {
       uint16_t theResult = 0;
 
       // AVDD direct
-      fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
-      fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
-      usleep(5000);
       for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
+        fChips.at(i)->CalibrateADC();
+        fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
+        fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
+        usleep(5000);
         fBoards.at(0)->SendOpCode (Alpide::OPCODE_ADCMEASURE, fChips.at(i));
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
@@ -108,6 +109,7 @@ int main(int argc, char** argv) {
       usleep(5000);
 
       for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
+        fChips.at(i)->CalibrateADC();
         // calculated AVDD based on VTEMP
         AVDD_VTEMP += fChips.at(i)->ReadDACVoltage(Alpide::REG_VTEMP) / 0.772 + 0.023;
       }
@@ -119,6 +121,10 @@ int main(int argc, char** argv) {
       fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_DVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
       usleep(5000);
       for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
+        fChips.at(i)->CalibrateADC();
+        fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
+        fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
+        usleep(5000);
         fBoards.at(0)->SendOpCode (Alpide::OPCODE_ADCMEASURE, fChips.at(i));
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
