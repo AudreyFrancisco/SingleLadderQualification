@@ -60,9 +60,9 @@
 // b) Setup-specific default values - to be refined
 // (can be set by setter methods)
 #define DEF_BIASVOLTAGE_OB	 0.0
-#define DEF_ANALOGVOLTAGE_OB	 1.75
+#define DEF_ANALOGVOLTAGE_OB	 1.82
 #define DEF_ANALOGMAXCURRENT_OB	 0.3
-#define DEF_DIGITALVOLTAGE_OB	 1.85
+#define DEF_DIGITALVOLTAGE_OB	 1.82
 #define DEF_DIGITALMAXCURRENT_OB 1.50
 #define DEF_BIASCHANNELON_OB	 false
 

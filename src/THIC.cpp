@@ -95,6 +95,9 @@ float THic::GetIBias()
 // e.g. aFactor = 1.1 -> +10%
 // method takes the value from the config and writes the scaled value to the board
 // (config value is left unchanged)
+
+// TODO: this should be more or less OK, but it neglects the offset in the power board
+// calibration.
 void THic::ScaleVoltage(float aFactor)
 {
   if (!m_powerBoard) return;

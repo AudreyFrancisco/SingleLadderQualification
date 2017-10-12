@@ -2245,7 +2245,7 @@ pbconfig->WriteCalibrationFile();
 
 void MainWindow::setandgetcalibration(){
 
-    int ares,gres, dres;
+    float ares,gres, dres;
     int unit;
 
 

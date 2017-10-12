@@ -16,7 +16,7 @@ public:
     ~Calibrationpb();
 
 public slots:
-    virtual void setresistances(int &analog,int &digital, int &bb);
+    virtual void setresistances(float &analog,float &digital, float &bb);
     virtual void getcalibration(float savdd,float iavdd, float sdvdd,float idvdd,float offsetia,float offsetid);
     virtual void setpowerunit(int &unit);
 

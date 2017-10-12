@@ -141,6 +141,15 @@ void TDigitalScan::Init        ()
     if (! (m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     ConfigureChip (m_chips.at(i));
   }
+
+  //  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+  //  m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+  //}
+
+  //char dummy[10];
+  //std::cout << "after configure chip, press enter to proceed" << std::endl;
+  //std::cin >> dummy;
+
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode (Alpide::OPCODE_RORST);     
     m_boards.at(i)->StartRun   ();

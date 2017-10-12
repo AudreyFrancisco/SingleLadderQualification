@@ -21,14 +21,14 @@ Calibrationpb::~Calibrationpb()
 }
 
 
-void Calibrationpb::setresistances(int &analog,int &digital, int &bb){
+void Calibrationpb::setresistances(float &analog,float &digital, float &bb){
     std::cout<<"seting resistances"<<std::endl;
     if (!ui->acal->toPlainText().isEmpty()){
-       analog=ui->acal->toPlainText().toInt();}
+       analog=ui->acal->toPlainText().toFloat();}
     if (!ui->dcal->toPlainText().isEmpty()){
-       digital=ui->dcal->toPlainText().toInt();}
+       digital=ui->dcal->toPlainText().toFloat();}
     if (!ui->bbcal->toPlainText().isEmpty()){
-       bb=ui->bbcal->toPlainText().toInt();}
+       bb=ui->bbcal->toPlainText().toFloat();}
 
 }
 
