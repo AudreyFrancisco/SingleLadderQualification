@@ -35,7 +35,7 @@ std::vector <TAlpide *> fChips;
 TReadoutBoardDAQ *myDAQBoard;
 
 unsigned int mySampleDist = 16;
-unsigned int mySampleRepetition = 10;
+unsigned int mySampleRepetition = 100;
 
 
 int configureChip(TAlpide *chip) {
@@ -222,9 +222,9 @@ int main(int argc, char** argv) {
 
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
 
-    for (float voltage = 1.62; voltage < 2.00; voltage+=0.02) {
+    for (float voltage = 1.3; voltage < 2.00; voltage+=0.02) {
       char cmd[50];
-      sprintf(cmd, "scripts/IBstaveStudies/hameg.py 2 0 %f 1.5", voltage);
+      sprintf(cmd, "scripts/IBstaveStudies/hameg.py 2 0 %f 1.5", 1.85);//voltage);
       if (system(cmd) != 0) std::cerr << "Failed to set the digital supply voltage" << std::endl;
       sprintf(cmd, "scripts/IBstaveStudies/hameg.py 2 1 %f 0.5", voltage);
       if (system(cmd) != 0) std::cerr << "Failed to set the analogue supply voltage" << std::endl;
@@ -234,20 +234,20 @@ int main(int argc, char** argv) {
       for (unsigned int i = 0; i < fChips.size(); i ++) {
         fChips.at(i)->CalibrateADC();
         scanVoltageDac (fChips.at(i), Alpide::REG_VRESETP, "VRESETP", mySampleDist, mySampleRepetition, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VRESETD, "VRESETD", mySampleDist, mySampleRepetition, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VCASP,   "VCASP",   mySampleDist, mySampleRepetition, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VCASN,   "VCASN",   mySampleDist, mySampleRepetition, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VPULSEH, "VPULSEH", mySampleDist, mySampleRepetition, voltage, Suffix);
+        //scanVoltageDac (fChips.at(i), Alpide::REG_VRESETD, "VRESETD", mySampleDist, mySampleRepetition, voltage, Suffix);
+        //scanVoltageDac (fChips.at(i), Alpide::REG_VCASP,   "VCASP",   mySampleDist, mySampleRepetition, voltage, Suffix);
+        //scanVoltageDac (fChips.at(i), Alpide::REG_VCASN,   "VCASN",   mySampleDist, mySampleRepetition, voltage, Suffix);
+        //scanVoltageDac (fChips.at(i), Alpide::REG_VPULSEH, "VPULSEH", mySampleDist, mySampleRepetition, voltage, Suffix);
         scanVoltageDac (fChips.at(i), Alpide::REG_VPULSEL, "VPULSEL", mySampleDist, mySampleRepetition, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VCASN2,  "VCASN2",  mySampleDist, mySampleRepetition, voltage, Suffix);
-        scanVoltageDac (fChips.at(i), Alpide::REG_VCLIP,   "VCLIP",   mySampleDist, mySampleRepetition, voltage, Suffix);
+        //scanVoltageDac (fChips.at(i), Alpide::REG_VCASN2,  "VCASN2",  mySampleDist, mySampleRepetition, voltage, Suffix);
+        //scanVoltageDac (fChips.at(i), Alpide::REG_VCLIP,   "VCLIP",   mySampleDist, mySampleRepetition, voltage, Suffix);
         scanVoltageDac (fChips.at(i), Alpide::REG_VTEMP,   "VTEMP",   mySampleDist, mySampleRepetition, voltage, Suffix);
 
         scanCurrentDac (fChips.at(i), Alpide::REG_IAUX2,   "IAUX2",   mySampleDist, mySampleRepetition, voltage, Suffix);
-        scanCurrentDac (fChips.at(i), Alpide::REG_IRESET,  "IRESET",  mySampleDist, mySampleRepetition, voltage, Suffix);
-        scanCurrentDac (fChips.at(i), Alpide::REG_IDB,     "IDB",     mySampleDist, mySampleRepetition, voltage, Suffix);
-        scanCurrentDac (fChips.at(i), Alpide::REG_IBIAS,   "IBIAS",   mySampleDist, mySampleRepetition, voltage, Suffix);
-        scanCurrentDac (fChips.at(i), Alpide::REG_ITHR,    "ITHR",    mySampleDist, mySampleRepetition, voltage, Suffix);
+        //scanCurrentDac (fChips.at(i), Alpide::REG_IRESET,  "IRESET",  mySampleDist, mySampleRepetition, voltage, Suffix);
+        //scanCurrentDac (fChips.at(i), Alpide::REG_IDB,     "IDB",     mySampleDist, mySampleRepetition, voltage, Suffix);
+        //scanCurrentDac (fChips.at(i), Alpide::REG_IBIAS,   "IBIAS",   mySampleDist, mySampleRepetition, voltage, Suffix);
+        //scanCurrentDac (fChips.at(i), Alpide::REG_ITHR,    "ITHR",    mySampleDist, mySampleRepetition, voltage, Suffix);
 
         // AVDD
         char     fName[50];
@@ -276,8 +276,8 @@ int main(int argc, char** argv) {
           vtemp = fChips.at(i)->ReadDACVoltage(Alpide::REG_VTEMP);
 
           // calculated AVDD based on VTEMP
-          meas_voltage     = 0.3886 * vtemp;
-          meas_voltage_err = 0.0012 * vtemp;
+          meas_voltage     = vtemp / 0.772 + 0.023;
+          meas_voltage_err = -1.;
 
           // write the file
           fprintf (fp, "%.3f %d %d %.3f %d %.3f %.3f %.3f\n",

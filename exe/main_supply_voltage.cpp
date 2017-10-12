@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
 
       for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
         // calculated AVDD based on VTEMP
-        AVDD_VTEMP += fChips.at(i)->ReadDACVoltage(Alpide::REG_VTEMP) / 0.75;
+        AVDD_VTEMP += fChips.at(i)->ReadDACVoltage(Alpide::REG_VTEMP) / 0.772 + 0.023;
       }
       AVDD_VTEMP /= mySampleRepetition;
       std::cout << "AVDD (via VTEMP @ 200 DAC): " << AVDD_VTEMP << "V" << std::endl;
