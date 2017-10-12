@@ -352,7 +352,7 @@ int TAlpide::CalibrateADC()
     ReadRegister( Alpide::REG_ADC_CALIB,theVal1);
     fADCOffset += theVal1;
   }
-  fADCOffset = static_cast<int>((static_cast<double>(fADCOffset)+0.5)/static_cast<double>(n_samples));
+  fADCOffset = static_cast<int>(static_cast<double>(fADCOffset)/static_cast<double>(n_samples)+0.5);
   return(fADCOffset);
 }
 
