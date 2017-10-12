@@ -166,6 +166,7 @@ class TScanConfig {
   ~TScanConfig() {};
   void  InitParamMap    ();
   bool  SetParamValue   (std::string Name, std::string Value);
+  bool  SetParamValue   (std::string Name, int Value);
   int   GetParamValue   (std::string Name) ;
   bool  IsParameter     (std::string Name) {return (fSettings.count(Name) > 0);};
 

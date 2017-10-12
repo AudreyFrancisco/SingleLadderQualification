@@ -45,8 +45,14 @@ void TScan::Init()
   // Power on HIC if not yet done (PowerOn() checks if already powered)
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->PowerOn();
+    //m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+  
   sleep(1);
+
+  //char dummy[10];
+  //std::cout << "after power on, press enter to proceed" << std::endl;
+  //std::cin >> dummy;
 
   TReadoutBoardMOSAIC *mosaic = dynamic_cast<TReadoutBoardMOSAIC*> (m_boards.at(0));
   if (mosaic) {

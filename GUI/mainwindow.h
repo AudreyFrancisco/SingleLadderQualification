@@ -13,12 +13,12 @@
 
 #include "dialog.h"
 #include "utilities.h"
-
+#include "checkpbconfig.h"
 #include "TReadoutBoard.h"
 #include "TScanAnalysis.h"
 #include "THisto.h"
 #include "testingprogress.h"
-
+#include "calibrationpb.h"
 class TConfig;
 class TScan;
 class TScanAnalysis;
@@ -51,6 +51,8 @@ public:
     std::vector <TScan *> fScanVector;
     std::vector <TScanAnalysis *> fAnalysisVector;
     // std::vector <TApplyMask *> fmaskvector;
+    TPowerBoard *pb;
+    TPowerBoardConfig *pbconfig;
 
      std::vector <TScanResult *> fresultVector;
     std::vector <THic *> fHICs;
@@ -71,7 +73,7 @@ std::vector<pair<std::string,int>> locdetails;
 int nm;
 bool execution;
 int colour;
-
+ int pbnumberofmodule=0;
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
    // void explore_halfstave(uint8_t chipid);
    // void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);
@@ -122,16 +124,17 @@ public slots:
 
    void ithrtdthree();
 
+   void writecalibrationfile();
 
    void thresholddafterthree();
 
 
    void noisebdthree();
 
-
+   void opencalibration();
    void noiseadthree();
 
-
+    void setandgetcalibration();
 
    void thresholddafter();
    void noisebd();
@@ -194,7 +197,8 @@ private:
     int counter;
     Dialog *windowex;
     bool properconfig=false;
-
+    checkpbconfig *pbcfgcheck=0;
+    Calibrationpb *calwindow=0;
    // QProgressBar * sbar;
 
 
