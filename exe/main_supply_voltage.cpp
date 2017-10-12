@@ -86,7 +86,6 @@ int main(int argc, char** argv) {
 
       // AVDD direct
       for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
-        fChips.at(i)->CalibrateADC();
         fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
         fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
         usleep(5000);
@@ -94,7 +93,7 @@ int main(int argc, char** argv) {
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
         if (theResult == 1055) AVDD_saturated = true;
-        AVDD_direct += 2. * ((float)theResult - (float)(fChips.at(i)->GetADCBias())) * 0.823e-3; // first approximation
+        AVDD_direct += 2. * ((float)theResult - (float)(fChips.at(i)->GetADCOffset())) * 0.823e-3; // first approximation
       }
       AVDD_direct /= mySampleRepetition;
       std::cout << "AVDD (direct measurement): " << AVDD_direct << "V";
@@ -109,7 +108,6 @@ int main(int argc, char** argv) {
       usleep(5000);
 
       for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
-        fChips.at(i)->CalibrateADC();
         // calculated AVDD based on VTEMP
         AVDD_VTEMP += fChips.at(i)->ReadDACVoltage(Alpide::REG_VTEMP) / 0.772 + 0.023;
       }
@@ -121,7 +119,6 @@ int main(int argc, char** argv) {
       fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_DVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
       usleep(5000);
       for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
-        fChips.at(i)->CalibrateADC();
         fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
         fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
         usleep(5000);
@@ -129,7 +126,7 @@ int main(int argc, char** argv) {
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
         if (theResult == 1055) DVDD_saturated = true;
-        DVDD_direct += 2. * ((float)theResult - (float)(fChips.at(i)->GetADCBias())) * 0.823e-3; // first approximation
+        DVDD_direct += 2. * ((float)theResult - (float)(fChips.at(i)->GetADCOffset())) * 0.823e-3; // first approximation
       }
       DVDD_direct /= mySampleRepetition;
       std::cout << "DVDD (direct measurement): " << DVDD_direct << "V";

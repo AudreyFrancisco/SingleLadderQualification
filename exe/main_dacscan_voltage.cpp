@@ -141,7 +141,6 @@ void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, uns
   if (!myDAQBoard) { // MOSAIC board internal ADC read
     for (unsigned int value = 0; value < 256; value += sampleDist) {
       for (unsigned int repetition = 0; repetition < sampleRepetition; ++repetition) {
-        chip->CalibrateADC();
         chip->WriteRegister (ADac, value);
         Current = chip->ReadDACCurrent(ADac);
         fprintf (fp, "%d %.3f\n", value, Current);
@@ -178,7 +177,6 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, uns
   if (!myDAQBoard) { // MOSAIC board internal ADC read
     for (unsigned int value = 0; value < 256; value += sampleDist) {
       for (unsigned int repetition = 0; repetition < sampleRepetition; ++repetition) {
-        chip->CalibrateADC();
         chip->WriteRegister (ADac, value);
         Voltage = chip->ReadDACVoltage(ADac);
         fprintf (fp, "%d %.3f\n", value, Voltage);
@@ -234,6 +232,8 @@ int main(int argc, char** argv) {
       sprintf(cmd, "scripts/IBstaveStudies/hameg.py 3");
       if (system(cmd) != 0) std::cerr << "Failed to read voltages and currents" << std::endl;
       for (unsigned int i = 0; i < fChips.size(); i ++) {
+        fChips.at(i)->CalibrateADC();
+
         scanVoltageDac (fChips.at(i), Alpide::REG_VRESETP, "VRESETP", mySampleDist, mySampleRepetition, voltage, Suffix);
         //scanVoltageDac (fChips.at(i), Alpide::REG_VRESETD, "VRESETD", mySampleDist, mySampleRepetition, voltage, Suffix);
         //scanVoltageDac (fChips.at(i), Alpide::REG_VCASP,   "VCASP",   mySampleDist, mySampleRepetition, voltage, Suffix);
@@ -264,18 +264,16 @@ int main(int argc, char** argv) {
 
           for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
             // measure AVDD
-            fChips.at(i)->CalibrateADC();
             fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
             fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
             usleep(5000);
             fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(i));
             usleep(5000);
             fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
-            theValue = 2. * ((float)theResult - (float)(fChips.at(i)->GetADCBias())) * 0.823e-3; // first approximation
+            theValue = 2. * ((float)theResult - (float)(fChips.at(i)->GetADCOffset())) * 0.823e-3; // first approximation
 
             // measure comparison point at VTEMP at DAC value 200
             fChips.at(i)->WriteRegister (Alpide::REG_VTEMP, 200);
-            fChips.at(i)->CalibrateADC();
             vtemp = fChips.at(i)->ReadDACVoltage(Alpide::REG_VTEMP);
 
             // calculated AVDD based on VTEMP
@@ -294,7 +292,6 @@ int main(int argc, char** argv) {
 
           theResult = 0;
           theValue  = 0.;
-          fChips.at(i)->CalibrateADC();
           fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
           fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature, Alpide::COMP_296uA, Alpide::RAMP_1us);
 

@@ -188,7 +188,7 @@ class TAlpide {
   THic          *fHic;
 
   // ADC calibration parameters
-  int		fADCBias;
+  int		fADCOffset;
   bool		fADCHalfLSB;
   bool		fADCSign;
 
@@ -219,7 +219,7 @@ class TAlpide {
 
 
 public:
-  int GetADCBias() { return(fADCBias); };
+  int GetADCOffset() { return(fADCOffset); };
   int CalibrateADC();
   void SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef = Alpide::IREF_100uA);
   uint16_t SetTheADCCtrlRegister(Alpide::TADCMode Mode, Alpide::TADCInput SelectInput, Alpide::TADCComparator ComparatorCurrent, Alpide::TADCRampSpeed RampSpeed);
