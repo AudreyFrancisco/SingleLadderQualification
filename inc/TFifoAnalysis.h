@@ -55,7 +55,6 @@ class TFifoResult : public TScanResult {
  public: 
   TFifoResult () : TScanResult () {};
   void WriteToFileGlobal (FILE *fp)          {};
-  void WriteToDB         (AlpideDB *db, ActivityDB::activity &activity) {};
 };
 
 

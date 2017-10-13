@@ -140,7 +140,6 @@ class TThresholdResult : public TScanResult {
    //TThresholdResult(const TScanResult &_result):TScanResult(_result){}
  // TThresholdResult *TThresholdResult:: clone() const {return new TThresholdResult(*this);}
   void WriteToFileGlobal   (FILE *fp);
-  void WriteToDB     (AlpideDB *db, ActivityDB::activity &activity) {};
 };
 
 class TThresholdAnalysis : public TScanAnalysis {

@@ -2,6 +2,7 @@
 #include <unistd.h>
 
 #include "TScanAnalysis.h"
+#include "DBHelpers.h"
 
 #include "THisto.h"
 #include "TScan.h"
@@ -190,6 +191,12 @@ float TScanResultHic::GetVariable (int chip, TResultVariable var)
 }
 
 
+void TScanResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
+{
+  DbAddAttachment (db, activity, RESULT_ATTACHMENT_TYPE, string(m_resultFile), string(m_resultFile));
+}
+
+
 TScanResultChip *TScanResult::GetChipResult (common::TChipIndex idx) 
 {
   for (std::map<int, TScanResultChip*>::iterator it = m_chipResults.begin(); it != m_chipResults.end(); ++it)  {
@@ -224,4 +231,14 @@ void TScanResult::WriteToFile(const char *fName)
   }      
 
   fclose (fp);
+}
+
+
+void TScanResult::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
+{
+  DbAddParameter (db, activity, string("Number of Working Chips"), (float) m_chipResults.size());
+  std::map<std::string, TScanResultHic*>::iterator it;
+  for (it = m_hicResults.begin(); it != m_hicResults.end(); it++) {
+    it->second->WriteToDB(db, activity);
+  }
 }

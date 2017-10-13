@@ -265,22 +265,12 @@ void TDigitalResult::WriteToFileGlobal (FILE *fp)
 }
 
 
-void TDigitalResult::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
-{
-  DbAddParameter (db, activity, string("Number of Working Chips"), (float) m_chipResults.size());
-  std::map<std::string, TScanResultHic*>::iterator it;
-  for (it = m_hicResults.begin(); it != m_hicResults.end(); it++) {
-    TDigitalResultHic *hicResult = (TDigitalResultHic *) it->second;
-    hicResult->WriteToDB(db, activity);
-  }
-}
-
-
 void TDigitalResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
   // TODO: change hard coded attachment type
+  TScanResultHic::WriteToDB(db, activity);
   DbAddParameter  (db, activity, string("Number of Bad Pixels Digital"), (float) m_nBad);
-  DbAddAttachment (db, activity, 41, string(m_resultFile), string(m_resultFile));
+  DbAddAttachment (db, activity, RESULT_ATTACHMENT_TYPE, string(m_resultFile), string(m_resultFile));
 }
 
 

@@ -8,6 +8,8 @@
 
 #define PROJECT_ID 21   // TODO: make function to get project id?
 
+#define RESULT_ATTACHMENT_TYPE 142  // TODO: same here
+
 int DbGetMemberId       (AlpideDB *db, string name);
 //int DbGetProjectId      (AlpideDB *db, string Name);
 int DbGetParameterId    (AlpideDB *db, int activityTypeId, string name);

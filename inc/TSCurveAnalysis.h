@@ -57,7 +57,6 @@ class TSCurveResultHic : public TScanResultHic {
   TSCurveResultHic () : TScanResultHic () {};
   void SetStuckFile (const char *fName) {strcpy(m_stuckFile, fName);};
   void WriteToFile  (FILE *fp);
-  void WriteToDB    (AlpideDB *db, ActivityDB::activity &activity);
 };
 
 
@@ -70,7 +69,6 @@ class TSCurveResult : public TScanResult {
  public:
   TSCurveResult () : TScanResult () {};
   void WriteToFileGlobal (FILE *fp);
-  void WriteToDB         (AlpideDB *db, ActivityDB::activity &activity); 
 };
 
 

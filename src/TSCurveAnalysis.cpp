@@ -630,13 +630,6 @@ void TSCurveResultHic::WriteToFile (FILE *fp)
 }
 
 
-// TODO
-void TSCurveResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
-{
-
-}
-
-
 void TSCurveResult::WriteToFileGlobal (FILE *fp)
 {
   fprintf(fp, "8b10b errors:\t%d\n",    m_n8b10b);
@@ -645,7 +638,3 @@ void TSCurveResult::WriteToFileGlobal (FILE *fp)
 }
 
 
-// TODO
-void TSCurveResult::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
-{
-}
