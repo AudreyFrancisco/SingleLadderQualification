@@ -62,6 +62,8 @@
 // to the power board
 #define MINIMUM_TIMELAPSEFORPOLLING	2
 
+#define SAFE_OUTPUT 2.2
+
 // Class definition
 class TPowerBoard {
 
@@ -74,7 +76,7 @@ public:
 		bool  DchOn;
 		float DVmon;
 		float DImon;
-		bool BiasOn;
+		bool  BiasOn;
 		float AVset;
 		float AIset;
 		float DVset;
