@@ -308,11 +308,6 @@ void TPowerBoard::CorrectVoltageDrop (int module, bool reset)
     dVDigital = 0;    
   }
 
-
-  //char dummy[10];
-  //std::cout << "Adding " << dVAnalog << " to AVDD, " << dVDigital << " to DVDD, press enter to proceed" << std::endl;
-  //std::cin >> dummy;
-
   // fPBoard contains the voltages corrected with the channel calibration
   fMOSAICPowerBoard->setVout((unsigned char)(module*2),   fPBoard.Modules[module].AVset + dVAnalog);
   fMOSAICPowerBoard->setVout((unsigned char)(module*2+1), fPBoard.Modules[module].DVset + dVDigital);
