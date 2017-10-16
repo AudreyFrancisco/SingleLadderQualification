@@ -318,6 +318,7 @@ void TPowerBoard::CorrectVoltageDrop (int module, bool reset)
     dVDigital = 0;
   }
   else {
+    sleep(1);
     float IDDA = GetAnalogCurrent (module);
     float IDDD = GetDigitalCurrent(module);
 
@@ -341,6 +342,7 @@ void TPowerBoard::CorrectVoltageDrop (int module, bool reset)
   // fPBoard contains the voltages corrected with the channel calibration
   fMOSAICPowerBoard->setVout((unsigned char)(module*2),   fPBoard.Modules[module].AVset + dVAnalog);
   fMOSAICPowerBoard->setVout((unsigned char)(module*2+1), fPBoard.Modules[module].DVset + dVDigital);
+  sleep(1);
 }
 
 

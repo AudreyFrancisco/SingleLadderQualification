@@ -92,7 +92,7 @@ void TPowerTest::Execute()
   }
 
   m_testHic->PowerOn();
-  sleep(1);
+  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
 
   // measure -> switchon, no clock
   currentIt->second.idddSwitchon = m_testHic->GetIddd();
@@ -103,7 +103,8 @@ void TPowerTest::Execute()
     board->enableControlInterfaces(true);
     board->SendOpCode (Alpide::OPCODE_GRST);
   }  
-  sleep(1);
+
+  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
 
   // measure -> Clocked
   currentIt->second.idddClocked = m_testHic->GetIddd();
@@ -118,7 +119,9 @@ void TPowerTest::Execute()
     TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(boardIndices.at(i));
     board->SendOpCode (Alpide::OPCODE_RORST);
   }  
-  sleep(1);
+
+  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
+
   // measure -> Configured
   currentIt->second.idddConfigured = m_testHic->GetIddd();
   currentIt->second.iddaConfigured = m_testHic->GetIdda();

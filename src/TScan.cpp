@@ -45,11 +45,9 @@ void TScan::Init()
   // Power on HIC if not yet done (PowerOn() checks if already powered)
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->PowerOn();
-    //m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
   
-  sleep(1);
-
   //char dummy[10];
   //std::cout << "after power on, press enter to proceed" << std::endl;
   //std::cin >> dummy;
@@ -86,6 +84,19 @@ void TScan::Terminate()
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddEnd = m_hics.at(ihic)->GetIddd();
   }
   strcpy(m_state, "Done");
+  
+  // reset voltage drop correction, reset chips, apply voltage drop correction to reset state
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), true);
+  }  
+
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    m_boards.at(i)->SendOpCode (Alpide::OPCODE_GRST);
+  }
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), false);
+  }  
 }
 
 
