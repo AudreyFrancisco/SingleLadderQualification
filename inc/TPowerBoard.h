@@ -117,9 +117,9 @@ public:
 	float GetBiasCurrent() { readMonitor(); return(fPBoard.IBmon);};
 
 	float GetAnalogVoltage (int module) { readMonitor(); return(fPBoard.Modules[module].AVmon);};
-	float GetAnalogCurrent (int module) { readMonitor(); return(fPBoard.Modules[module].AImon);};
+	float GetAnalogCurrent (int module);
 	float GetDigitalVoltage(int module) { readMonitor(); return(fPBoard.Modules[module].DVmon);};
-	float GetDigitalCurrent(int module) { readMonitor(); return(fPBoard.Modules[module].DImon);};
+	float GetDigitalCurrent(int module);
 	bool  IsAnalogChOn     (int module) { readMonitor(); return(fPBoard.Modules[module].AchOn);};
 	bool  IsDigitalChOn    (int module) { readMonitor(); return(fPBoard.Modules[module].DchOn);};
 	bool  IsBiasChOn       (int module) { readMonitor(); return(fPBoard.Modules[module].BiasOn);};

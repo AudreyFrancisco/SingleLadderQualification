@@ -205,6 +205,36 @@ bool TPowerBoard::readMonitor()
 }
 
 
+float TPowerBoard::GetAnalogCurrent (int module) 
+{ 
+  float AIOffset, DIOffset;
+  float Current = 0; 
+  int   N       = 20;
+  for (int i = 0; i < N; i ++) {
+    readMonitor(); 
+    Current += fPBoard.Modules[module].AImon;
+  }
+  Current /= N;
+  fPowerBoardConfig->GetICalibration(module, AIOffset, DIOffset);
+  return (Current - AIOffset);
+}
+
+
+float TPowerBoard::GetDigitalCurrent (int module) 
+{ 
+  float AIOffset, DIOffset;
+  float Current = 0; 
+  int   N       = 20;
+  for (int i = 0; i < N; i ++) {
+    readMonitor(); 
+    Current += fPBoard.Modules[module].DImon;
+  }
+  Current /= N;
+  fPowerBoardConfig->GetICalibration(module, AIOffset, DIOffset);
+  return (Current - DIOffset);
+}
+
+
 // Calibrate the output voltages of a given module
 // set calibration constants back to 1 / 0
 // set two different voltages and measure the output voltage for each setting
@@ -390,9 +420,9 @@ void TPowerBoard::GetModule(int module, float* AV, float *AI, float *DV, float *
 {
 	readMonitor();
 	*AV = fPBoard.Modules[module].AVmon;
-	*AI = fPBoard.Modules[module].AImon;
+	*AI = GetAnalogCurrent(module);
 	*DV = fPBoard.Modules[module].DVmon;
-	*DI = fPBoard.Modules[module].DImon;
+	*DI = GetDigitalCurrent(module);
 	*BiasOn = fPBoard.Modules[module].BiasOn;
 	*AChOn = fPBoard.Modules[module].AchOn;
 	*DChOn = fPBoard.Modules[module].DchOn;
