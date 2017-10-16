@@ -53,6 +53,10 @@ void TLocalBusTest::Init()
     m_chips.at(i)->GetConfig()->SetEnableDdr   (false);
     AlpideConfig::ConfigureCMU(m_chips.at(i));
   }
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+  }
 }
 
 

@@ -136,6 +136,9 @@ void TNoiseOccupancy::Init        ()
     m_boards.at(i)->SendOpCode (Alpide::OPCODE_RORST);     
     m_boards.at(i)->StartRun   ();
   }
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+  }
 }
 
 

@@ -59,6 +59,7 @@ void TFifoTest::Init()
 {
   TScan::Init();
 
+  // scale voltage, send GRST, correct drop, configure chips, correct drop
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (m_voltageScale != 1.) {
       m_hics.at(ihic)->ScaleVoltage(m_voltageScale);
@@ -67,10 +68,18 @@ void TFifoTest::Init()
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
   }
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+  }
+
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     AlpideConfig::ConfigureCMU(m_chips.at(i));
   }
 
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+  }
 }
 
 
