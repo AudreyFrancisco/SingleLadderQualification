@@ -272,7 +272,9 @@ void TPowerBoard::CalibrateCurrent(int module)
 }
 
 
-void TPowerBoard::CorrectVoltageDrop (int module) 
+// correct the output voltage for the (calculated) voltage drop
+// if reset is true, the correction is set to 0
+void TPowerBoard::CorrectVoltageDrop (int module, bool reset) 
 {
   // Measure the channel currents
   // Calculate voltage drop
@@ -281,18 +283,23 @@ void TPowerBoard::CorrectVoltageDrop (int module)
   float RAnalog, RDigital, RGround;
   float dVAnalog, dVDigital;
   float AVScale, DVScale, AVOffset, DVOffset;
-  float IDDA = GetAnalogCurrent (module);
-  float IDDD = GetDigitalCurrent(module);
+  if (reset) {
+    dVAnalog  = 0;
+    dVDigital = 0;
+  }
+  else {
+    float IDDA = GetAnalogCurrent (module);
+    float IDDD = GetDigitalCurrent(module);
 
-  fPowerBoardConfig->GetLineResistances (module, RAnalog, RDigital, RGround);
-  fPowerBoardConfig->GetVCalibration    (module, AVScale, DVScale,  AVOffset, DVOffset);
+    fPowerBoardConfig->GetLineResistances (module, RAnalog, RDigital, RGround);
+    fPowerBoardConfig->GetVCalibration    (module, AVScale, DVScale,  AVOffset, DVOffset);
   
-  dVAnalog  = IDDA * RAnalog  + (IDDA + IDDD) * RGround;
-  dVDigital = IDDD * RDigital + (IDDA + IDDD) * RGround;
+    dVAnalog  = IDDA * RAnalog  + (IDDA + IDDD) * RGround;
+    dVDigital = IDDD * RDigital + (IDDA + IDDD) * RGround;
 
-  dVAnalog  *= AVScale;
-  dVDigital *= DVScale;
-
+    dVAnalog  *= AVScale;
+    dVDigital *= DVScale;
+  }
   //char dummy[10];
   //std::cout << "Adding " << dVAnalog << " to AVDD, " << dVDigital << " to DVDD, press enter to proceed" << std::endl;
   //std::cin >> dummy;
