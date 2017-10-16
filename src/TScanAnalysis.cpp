@@ -236,7 +236,6 @@ void TScanResult::WriteToFile(const char *fName)
 
 void TScanResult::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
-  DbAddParameter (db, activity, string("Number of Working Chips"), (float) m_chipResults.size());
   std::map<std::string, TScanResultHic*>::iterator it;
   for (it = m_hicResults.begin(); it != m_hicResults.end(); it++) {
     it->second->WriteToDB(db, activity);
