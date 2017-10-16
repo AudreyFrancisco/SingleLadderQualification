@@ -1989,12 +1989,12 @@ void MainWindow::attachtodatabase(){
           activ.Members.push_back(activmember);
 */
 
-/*
+          if (fConfig->GetDeviceType()==2||fConfig->GetDeviceType()==3){
           activparameter.ActivityParameter = 381;//number of chips//id of this parameter
           activparameter.User = 20606;
-          activparameter.Value = 9;
-          activ.Parameters.push_back(activparameter);
-*/
+          activparameter.Value = fChips.size()-1;
+          activ.Parameters.push_back(activparameter);}
+
 
 
 
