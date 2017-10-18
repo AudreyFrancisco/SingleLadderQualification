@@ -1,16 +1,17 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-
+#include <qapplication.h>
+#include <QPixmap>
 #include <vector>
 #include <mutex>
 #include <deque>
-
+#include <QFile>
 #include <QMainWindow>
 #include <QDialog>
 #include <QtGui>
 #include <QtCore>
 #include <QLabel>
-
+#include <QPixmap>
 #include "dialog.h"
 #include "utilities.h"
 #include "checkpbconfig.h"
@@ -74,6 +75,11 @@ int nm;
 bool execution;
 int colour;
  int pbnumberofmodule=0;
+
+
+
+
+
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
    // void explore_halfstave(uint8_t chipid);
    // void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);

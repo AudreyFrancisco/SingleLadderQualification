@@ -9,7 +9,6 @@
 #include <QPixmap>
 #include <QMenuBar>
 //#include <QtCore>
-
 #include <deque>
 #include <mutex>
 #include <thread>
@@ -124,8 +123,7 @@ MainWindow::MainWindow(QWidget *parent) :
      // ui->abort->hide();
      // ui->abortall->hide();
        ui->tabWidget->removeTab(2);
-      ui->tabWidget->removeTab(1);
-
+       ui->tabWidget->removeTab(1);
      connect(writedb,SIGNAL(triggered()),this,SLOT(attachtodatabase()));
      connect(ui->abortall,SIGNAL(clicked()),this,SLOT(StopScan()),Qt::DirectConnection);
      connect(newtestaction, SIGNAL(triggered()),this, SLOT(start_test()));
@@ -143,7 +141,6 @@ MainWindow::MainWindow(QWidget *parent) :
      connect(ui->details,SIGNAL(currentIndexChanged(int)),this, SLOT(detailscombo(int)));
      connect(ui->poweroff,SIGNAL(clicked(bool)),this, SLOT(poweroff()));
 
-     //example();
 
      QPixmap alice("alicethreshold.png");
      int w = ui->alicepic->width();
