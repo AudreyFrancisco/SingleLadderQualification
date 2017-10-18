@@ -196,7 +196,7 @@
      <widget class="QGroupBox" name="OBHALFSTAVE">
       <property name="geometry">
        <rect>
-        <x>70</x>
+        <x>60</x>
         <y>20</y>
         <width>811</width>
         <height>121</height>
@@ -307,6 +307,19 @@
        </property>
        <property name="text">
         <string>Module 7</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>630</x>
+         <y>0</y>
+         <width>62</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Status</string>
        </property>
       </widget>
      </widget>
@@ -1009,6 +1022,19 @@
         <x>0</x>
         <y>100</y>
         <width>71</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="LED">
+      <property name="geometry">
+       <rect>
+        <x>771</x>
+        <y>10</y>
+        <width>51</width>
         <height>31</height>
        </rect>
       </property>
