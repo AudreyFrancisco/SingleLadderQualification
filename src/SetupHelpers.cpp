@@ -82,7 +82,7 @@ int initSetupOB(TConfig                        *config,
     int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
     int          receiver   = chipConfig->GetParamValue("RECEIVER");
 
-		BaseConfigOBchip(chipConfig);
+    BaseConfigOBchip(chipConfig);
 
     TAlpide *chip = new TAlpide(chipConfig);
     if (hics) {
@@ -750,6 +750,7 @@ int initSetupEndurance(TConfig                        *config,
   int                 NChipsPerModule = 14;
   int                 NChips          = NModules * NChipsPerModule;
   TBoardConfigMOSAIC *boardConfig[2];
+  TPowerBoard        *pb[2] = {0, 0};
 
   int CtrIntMap   [10][2] = { {3,2}, {5,4}, {7,6}, {9,8}, {11,10},
                               {3,2}, {5,4}, {7,6}, {9,8}, {11,10}};
@@ -774,6 +775,29 @@ int initSetupEndurance(TConfig                        *config,
     exit(0);
   }
 
+  if (config->GetUsePowerBoard()) {
+    TPowerBoardConfig *pbConfig = new TPowerBoardConfig(NULL);
+    pbConfig->SetDefaultsOB(0);
+    pb[0] = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0), pbConfig);
+    pb[1] = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(1), pbConfig);
+  }
+
+  // TODO: allow passing an array of module IDs
+  if (hics) {
+    for (int mod = 0; mod < NModules; mod++) {
+      int boardIndex = mod / 5;
+      int modId      = 7;
+      int pbMod      = mod % 5;   // TODO: check this
+      if (hicIds) {
+        hics->push_back(new THicOB(hicIds[mod], modId, pb[boardIndex], pbMod));
+      }
+      else {
+        hics->push_back(new THicOB("Dummy ID", modId, pb[boardIndex], pbMod));
+      }
+      hics->at(mod)->PowerOn();
+      sleep(1);
+    }
+  }
 
   // Loops for create all the Chip instances
 
@@ -801,6 +825,14 @@ int initSetupEndurance(TConfig                        *config,
       chipConfig->SetParamValue("RECEIVER",         receiver);
 
       // --- Finally create the ALPIDE object
+      TAlpide *chip = new TAlpide(chipConfig);
+      if (hics) {
+        chip          ->SetHic   (hics->at(mod));
+        hics->at(mod) ->AddChip  (chip);
+        // TODO: Move this into the correct place
+        ((THicOB*)(hics->at(mod)))->ConfigureMaster (0, boardIndex, DataRcvMap[mod][0], CtrIntMap[mod][0]);
+        ((THicOB*)(hics->at(mod)))->ConfigureMaster (8, boardIndex, DataRcvMap[mod][1], CtrIntMap[mod][1]);
+      }
       chips->push_back(new TAlpide(chipConfig));
       chips->at(chips->size()-1)->SetReadoutBoard(boards->at(boardIndex)); // Set the Board Handler
 
