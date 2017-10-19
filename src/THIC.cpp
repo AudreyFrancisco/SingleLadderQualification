@@ -39,10 +39,34 @@ TAlpide *THic::GetChipById (int chipId)
 }
 
 
+// IsEnabled: returns true if at least one chip on the HIC is enabled, false otherwise
+bool THic::IsEnabled ()
+{
+  for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
+    if (m_chips.at(ichip)->GetConfig()->IsEnabled()) return true;
+  }
+  return false;
+}
+
+
 bool THic::IsPowered() 
 {
   // TODO: what if partially powered? What about bias?
-  if (m_powerBoard && m_powerBoard->IsAnalogChOn(m_pbMod) && m_powerBoard->IsDigitalChOn(m_pbMod)) return true;
+  return ((IsPoweredAnalog()) && (IsPoweredDigital()));
+}
+
+
+bool THic::IsPoweredAnalog ()
+{
+  if (m_powerBoard && m_powerBoard->IsAnalogChOn(m_pbMod)) return true;
+  return false;
+}
+
+
+
+bool THic::IsPoweredDigital ()
+{
+  if (m_powerBoard && m_powerBoard->IsDigitalChOn(m_pbMod)) return true;
   return false;
 }
 

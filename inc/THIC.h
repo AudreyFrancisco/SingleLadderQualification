@@ -26,6 +26,9 @@ class THic {
   virtual ~THic() {};
   int                        GetNumber       () {return m_hicNumber;};
   bool                       IsPowered       ();
+  bool                       IsPoweredAnalog ();
+  bool                       IsPoweredDigital();
+  bool                       IsEnabled       ();
   void                       PowerOn         ();
   void                       PowerOff        ();
   float                      GetIddd         ();
