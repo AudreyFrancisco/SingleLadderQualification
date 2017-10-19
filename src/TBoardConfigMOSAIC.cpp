@@ -20,28 +20,28 @@ using namespace std;
 
 TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIndex)
 {
-	fBoardType = boardMOSAIC;
+  fBoardType = boardMOSAIC;
 
-	// Default values set
-	NumberOfControlInterfaces = MAX_MOSAICCTRLINT;
-	TCPPort = DEF_TCPPORT;
-	ControlInterfacePhase = DEF_CTRLINTPHASE;
-	RunCtrlAFThreshold = DEF_CTRLAFTHR;
-	RunCtrlLatMode = DEF_CTRLLATMODE; // 0 := latencyModeEoe, 1 := latencyModeTimeout, 2 := latencyModeMemory
-	RunCtrlTimeout = DEF_CTRLTIMEOUT;
-	pollDataTimeout = DEF_POLLDATATIMEOUT; // milliseconds
-	Inverted = DEF_POLARITYINVERSION;
-	SpeedMode = DEF_SPEEDMODE;
-
-	if (AConfigFileName) { // Read Configuration file
-		try {
-			if(AConfigFileName == NULL || strlen(AConfigFileName) == 0) throw std::invalid_argument("MOSAIC Config : invalid filename");
-			fhConfigFile = fopen(AConfigFileName,"r"); // opens the file
-			} catch (...) {
-				throw std::invalid_argument("MOSAIC Config : file not exists !");
-			}
-	}
-    InitParamMap();
+  // Default values set
+  NumberOfControlInterfaces = MAX_MOSAICCTRLINT;
+  TCPPort                   = DEF_TCPPORT;
+  ControlInterfacePhase     = DEF_CTRLINTPHASE;
+  RunCtrlAFThreshold        = DEF_CTRLAFTHR;
+  RunCtrlLatMode            = DEF_CTRLLATMODE; // 0 := latencyModeEoe, 1 := latencyModeTimeout, 2 := latencyModeMemory
+  RunCtrlTimeout            = DEF_CTRLTIMEOUT;
+  pollDataTimeout           = DEF_POLLDATATIMEOUT; // milliseconds
+  Inverted                  = DEF_POLARITYINVERSION;
+  SpeedMode                 = DEF_SPEEDMODE;
+  strcpy (IPAddress, DEF_IP_ADDRESS);
+  if (AConfigFileName) { // Read Configuration file
+    try {
+      if(AConfigFileName == NULL || strlen(AConfigFileName) == 0) throw std::invalid_argument("MOSAIC Config : invalid filename");
+      fhConfigFile = fopen(AConfigFileName,"r"); // opens the file
+    } catch (...) {
+      throw std::invalid_argument("MOSAIC Config : file not exists !");
+    }
+  }
+  InitParamMap();
 }
 
 

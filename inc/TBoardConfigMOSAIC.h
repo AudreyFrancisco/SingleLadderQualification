@@ -17,18 +17,19 @@
 #include "Mosaic.h"
 #include <stdio.h>
 
-#define MAX_MOSAICCTRLINT 12
-#define MAX_MOSAICTRANRECV 10
-#define MOSAIC_HEADER_LENGTH 64
+#define MAX_MOSAICCTRLINT     12
+#define MAX_MOSAICTRANRECV    10
+#define MOSAIC_HEADER_LENGTH  64
 
-#define DEF_TCPPORT 2000
-#define DEF_CTRLINTPHASE 2
-#define DEF_CTRLAFTHR 1250000
-#define DEF_CTRLLATMODE 0
-#define DEF_CTRLTIMEOUT 0
-#define DEF_POLLDATATIMEOUT 500
+#define DEF_TCPPORT           2000
+#define DEF_CTRLINTPHASE      2
+#define DEF_CTRLAFTHR         1250000
+#define DEF_CTRLLATMODE       0
+#define DEF_CTRLTIMEOUT       0
+#define DEF_POLLDATATIMEOUT   500
 #define DEF_POLARITYINVERSION 0
-#define DEF_SPEEDMODE 0
+#define DEF_SPEEDMODE         0
+#define DEF_IP_ADDRESS        "192.168.168.250"
 
 class TBoardConfigMOSAIC : public TBoardConfig {
 

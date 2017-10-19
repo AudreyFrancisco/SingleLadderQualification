@@ -738,70 +738,85 @@ int initSetupIB(TConfig                        *config,
  *
  *
  */
-  int initSetupEndurance(TConfig                        *config,
-                         std::vector <TReadoutBoard *>  *boards,
-                         TBoardType                     *boardType,
-                         std::vector <TAlpide *>        *chips,
-                         std::vector <THic *>           *hics,
-                         const char                    **hicIds)
-  {
-    std::cout << "Entry SetUp Endurance Test" << std::endl;
+int initSetupEndurance(TConfig                        *config,
+                       std::vector <TReadoutBoard *>  *boards,
+                       TBoardType                     *boardType,
+                       std::vector <TAlpide *>        *chips,
+                       std::vector <THic *>           *hics,
+                       const char                    **hicIds)
+{
+  int                 NBOARDS         = 2;
+  int                 NModules        = 5;
+  int                 NChipsPerModule = 14;
+  int                 NChips          = NModules * NChipsPerModule;
+  TBoardConfigMOSAIC *boardConfig[2];
 
-    // Create the MOSAIC board istance
-    (*boardType) = boardMOSAIC;
-    TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC*) config->GetBoardConfig(0);
-    boardConfig->SetSpeedMode(Mosaic::RCV_RATE_400);
-    boards->push_back (new TReadoutBoardMOSAIC(config, boardConfig));
+  int CtrIntMap   [10][2] = { {3,2}, {5,4}, {7,6}, {9,8}, {11,10},
+                              {3,2}, {5,4}, {7,6}, {9,8}, {11,10}};
+  int DataRcvMap  [10][2] = { {9,8}, {7,6}, {5,4}, {3,2}, {1,0},
+                              {9,8}, {7,6}, {5,4}, {3,2}, {1,0}};
+  bool InverRcvMap[10][2] = { {true, false}, {true, false}, {true, false}, {true, false}, {true, false},
+                              {true, false}, {true, false}, {true, false}, {true, false}, {true, false}};
 
-    // Create all the Constant values ...
-    int NumberOfModules = 5;
-    int NumberOfChipsForModule = 14;
-    int TotalNumOfChips = NumberOfModules * NumberOfChipsForModule;
+  std::cout << "Entry SetUp Endurance Test" << std::endl;
 
-    int CtrIntMap[5][2] = { {3,2},{5,4},{7,6},{9,8},{11,10} };
-    int DataRcvMap[5][2] = { {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0} };
-    bool InverRcvMap[5][2] = { {true, false},{true, false},{true, false},{true, false},{true, false} };
+  // Create the MOSAIC board instances
+  (*boardType) = boardMOSAIC;
 
-    // Loops for create all the Chip instances
-    for(int mod=0; mod < NumberOfModules; mod++) {
-      for (int i = 0; i < NumberOfChipsForModule; i++) {
-        int arrayIndex =  mod * NumberOfChipsForModule + i;
-        int LowHigh = (i < 7) ? 0 : 1;
-
-        std::cout << "    SetUp Chip "<<arrayIndex<<"/"<< TotalNumOfChips << "  m:" << mod<< " c:" << i  ;
-
-        // Update the Config info for the Aplpide Object
-		    TChipConfig *chipConfig = config->GetChipConfig(arrayIndex); // Get the Pointer to the Chip Configuration
-		    int chipId = chipConfig->GetChipId(); // Get the real OBmod chipid
-		    int control = CtrIntMap[mod][LowHigh];  // set the ctrlInt association
-		    int receiver = DataRcvMap[mod][LowHigh];  // set the receiver association
-        std::cout << "     ChipId=" << chipId<< " ctrlInt:" << control << " recV:" << receiver << std::endl;
-		    // --- Force the Link Speed values to 1.2 GHz in the Chip-Master
-		    if (chipId%8!=0)  { // deactivate the DTU/PLL for none master chips
-		    	chipConfig->SetParamValue("LINKSPEED", "-1");
-		    } else { // sets the Master to 1.2GHz
-		    	chipConfig->SetParamValue("LINKSPEED", "1200");
-		    }
-		    chipConfig->SetParamValue("CONTROLINTERFACE", control);
-		    chipConfig->SetParamValue("RECEIVER", receiver);
-
-		    // --- Finally create the ALPIDE object
-		    chips->push_back(new TAlpide(chipConfig));
-		    chips->at(chips->size()-1)->SetReadoutBoard(boards->at(0)); // Set the Board Handler
-
-		    // -- and Add the chip object to the MOSAIC directory
-		    boards->at(0)->AddChip(chipId, control, receiver, chips->at(chips->size()-1));
-      }
-      ((TReadoutBoardMOSAIC *)(boards->at(0)))->setInverted(InverRcvMap[mod][0], DataRcvMap[mod][0]);
-      ((TReadoutBoardMOSAIC *)(boards->at(0)))->setInverted(InverRcvMap[mod][1], DataRcvMap[mod][1]);
-    }
-    CheckControlInterface(config, boards, boardType, chips);
-    sleep(5);
-    for(int mod=0; mod < NumberOfModules; mod++) {
-      MakeDaisyChain(config, boards, boardType, chips, mod * 14);
-    }
-    return 0;
+  for (int i = 0; i < NBOARDS; i ++) {
+    boardConfig[i] = (TBoardConfigMOSAIC*) config->GetBoardConfig(i);
+    boardConfig[i]->SetSpeedMode(Mosaic::RCV_RATE_400);
+    boards->push_back (new TReadoutBoardMOSAIC(config, boardConfig[i]));
   }
+
+  if (strcmp(boardConfig[0]->GetIPaddress(), boardConfig[1]->GetIPaddress()) == 0) {
+    std::cout << "ERROR: did not find two different IP addresses" << std::endl;
+    exit(0);
+  }
+
+
+  // Loops for create all the Chip instances
+
+  for(int mod = 0; mod < NModules; mod++) {
+    int boardIndex = mod / 5;
+    for (int i = 0; i < NChipsPerModule; i++) {
+      int arrayIndex =  mod * NChipsPerModule + i;
+      int LowHigh    = (i < 7) ? 0 : 1;
+
+      std::cout << "    SetUp Chip "<<arrayIndex<<"/"<< NChips << "  m:" << mod<< " c:" << i  ;
+
+      // Update the Config info for the Aplpide Object
+      TChipConfig *chipConfig = config    ->GetChipConfig(arrayIndex); // Get the Pointer to the Chip Configuration
+      int          chipId     = chipConfig->GetChipId();               // Get the real OBmod chipid
+      int          control    = CtrIntMap [mod][LowHigh];              // set the ctrlInt association
+      int          receiver   = DataRcvMap[mod][LowHigh];              // set the receiver association
+      std::cout << "     ChipId=" << chipId<< " ctrlInt:" << control << " recV:" << receiver << std::endl;
+      // --- Force the Link Speed values to 1.2 GHz in the Chip-Master
+      if (chipId%8!=0)  { // deactivate the DTU/PLL for none master chips
+    	chipConfig->SetParamValue("LINKSPEED", "-1");
+      } else { // sets the Master to 1.2GHz
+    	chipConfig->SetParamValue("LINKSPEED", "1200");
+      }
+      chipConfig->SetParamValue("CONTROLINTERFACE", control);
+      chipConfig->SetParamValue("RECEIVER",         receiver);
+
+      // --- Finally create the ALPIDE object
+      chips->push_back(new TAlpide(chipConfig));
+      chips->at(chips->size()-1)->SetReadoutBoard(boards->at(boardIndex)); // Set the Board Handler
+
+      // -- and Add the chip object to the MOSAIC directory
+      boards->at(boardIndex)->AddChip(chipId, control, receiver, chips->at(chips->size()-1));
+    }
+    ((TReadoutBoardMOSAIC *)(boards->at(boardIndex)))->setInverted(InverRcvMap[mod][0], DataRcvMap[mod][0]);
+    ((TReadoutBoardMOSAIC *)(boards->at(boardIndex)))->setInverted(InverRcvMap[mod][1], DataRcvMap[mod][1]);
+  }
+  CheckControlInterface(config, boards, boardType, chips);
+  sleep(1);
+  for(int mod = 0; mod < NModules; mod++) {
+    MakeDaisyChain(config, boards, boardType, chips, mod * 14);
+  }
+  return 0;
+}
 
 
   int initConfig(TConfig*& config, const char *configFileName )
