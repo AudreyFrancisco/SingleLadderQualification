@@ -115,6 +115,20 @@ and can be run by invoking
 source ./env.sh
 ./GUI
 \end{lstlisting}
+In order to establish connection with the database Kerberos needs to be configured. In CC7 the configuration can be done as below
+\begin{lstlisting}
+locmap --enable kerberos; locmap --configure kerberos
+\end{lstlisting}
+After the configuration the user needs to create a ticket. This is done by using
+the credentials as following
+\begin{lstlisting}
+kinit <service account>
+\end{lstlisting}
+The user can check whether a ticket was created or not and until when it is valid, with the command
+\begin{lstlisting}
+klist
+\end{lstlisting}
+Once the ticket expires (after 3 days e.g.) the user needs to create a new one as before by using knit
 
 \paragraph{Executing Tests}\hfill \\
 After compiling the software package you will find a certain number of standard tests, described below, in the form of individual executables. Each executable performs a specific test once and, if applicable, writes the output data in a text file in the subdirectory \texttt{Data}. The settings of the chip(s), readout board(s) and the scan itself can be modified in the config file \texttt{Config.cfg}. Some of the available parameters are described below, for a more detailed description of the syntax and the available parameters please refer to the comments in the config file itself.
