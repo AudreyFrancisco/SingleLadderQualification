@@ -50,7 +50,7 @@ void readTemp() {
 	  if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
 	  theChipId = fChips.at(i)->GetConfig()->GetChipId();
 	  theValue = fChips.at(i)->ReadTemperature();
- 	  std::cout << i << ")\t" << theChipId << "\t" << fChips.at(i)->GetADCBias() << "\t" << theValue << " " << std::endl;
+         std::cout << i << ")\t" << theChipId << "\t" << fChips.at(i)->GetADCOffset() << "\t" << theValue << " " << std::endl;
 
   }
   // Deallocate memory
