@@ -178,6 +178,9 @@ public slots:
     void start_test();
 */
 
+  // void createLabel();
+
+
 signals:
    void stopTimer();
 

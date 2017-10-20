@@ -61,6 +61,9 @@
 #include "TSCurveAnalysis.h"
 #include "calibrationpb.h"
 
+
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -141,12 +144,27 @@ MainWindow::MainWindow(QWidget *parent) :
      connect(ui->details,SIGNAL(currentIndexChanged(int)),this, SLOT(detailscombo(int)));
      connect(ui->poweroff,SIGNAL(clicked(bool)),this, SLOT(poweroff()));
 
+     ui->pbstatus->hide();
 
      QPixmap alice("alicethreshold.png");
      int w = ui->alicepic->width();
      int h = ui->alicepic->height();
      ui->alicepic->setPixmap(alice.scaled(w,h,Qt::KeepAspectRatio));
 
+  /*  QThread *m_thread = new QThread(this);
+     QTimer* timer = new QTimer(0); // _not_ this!
+     timer->setInterval(1);
+     timer->moveToThread(m_thread);
+     // Use a direct connection to whoever does the work in order
+     // to make sure that the fumction  is called from m_thread.
+     connect(timer, SIGNAL(timeout()), SLOT(createLabel()), Qt::DirectConnection);
+     // Make sure the timer gets started from m_thread.
+
+     connect(m_thread, SIGNAL(started()),timer, SLOT(start()));
+
+      m_thread->start();
+
+*/
     }
 
 MainWindow::~MainWindow()
@@ -154,6 +172,9 @@ MainWindow::~MainWindow()
     delete ui;
 
 }
+
+
+
 
 void MainWindow::open(){
 
@@ -2273,3 +2294,23 @@ calwindow=new Calibrationpb(this);
 calwindow->exec();
 
 }
+
+/*
+void MainWindow::createLabel(){
+
+    if  (fHICs.size()>0) {
+
+           QPixmap off("ledoff.png");
+           QPixmap on("ledon.png");
+           int w = ui->LED->width();
+           int h = ui->LED->height();
+if (fHICs.at(0)->IsPowered()){
+           ui->LED->setPixmap(on.scaled(w,h,Qt::KeepAspectRatio));  }
+          else{
+     ui->LED->setPixmap(off.scaled(w,h,Qt::KeepAspectRatio));
+}
+
+
+}}
+
+*/
