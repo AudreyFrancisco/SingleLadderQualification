@@ -250,6 +250,7 @@ void TSCurveScan::Init() {
     }
   }
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if(!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 }
@@ -404,4 +405,10 @@ void TSCurveScan::Terminate()
   }
 
   m_running = false;
+  //YCM: Print error summary
+  std::cout << "Total number of 8b10b decoder errors: " << m_errorCount.n8b10b        << std::endl;
+  std::cout << "Number of corrupt events:             " << m_errorCount.nCorruptEvent << std::endl;
+  std::cout << "Number of skipped points:             " << m_errorCount.nTimeout      << std::endl;
+  std::cout << "Priority encoder errors:              " << m_errorCount.nPrioEncoder  << std::endl;
+  std::cout << std::endl;
 }

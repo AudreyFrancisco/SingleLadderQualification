@@ -45,6 +45,7 @@ void TScan::Init()
   // Power on HIC if not yet done (PowerOn() checks if already powered)
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->PowerOn();
+    if(!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
   
@@ -106,6 +107,7 @@ void TScan::Terminate()
   
   // reset voltage drop correction, reset chips, apply voltage drop correction to reset state
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if(!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), true);
   }  
 
@@ -114,6 +116,7 @@ void TScan::Terminate()
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if(!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), false);
   }  
 
