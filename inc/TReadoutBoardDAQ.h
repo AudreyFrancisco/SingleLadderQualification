@@ -175,8 +175,11 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   int  ReadRegister      (uint16_t address, uint32_t &value);
   int  WriteRegister     (uint16_t address, uint32_t value);
 
-  int  SendOpCode        (uint16_t  OpCode) ;
-  int  SendOpCode        (uint16_t  OpCode, TAlpide *chipPtr);
+  int  SendOpCode        (Alpide::TOpCode OpCode) ;
+  // DAQ board has only one control interface -> both methods are identical
+  int  SendOpCode        (Alpide::TOpCode OpCode, TAlpide *chipPtr) { return SendOpCode(OpCode) };
+
+  int  SendCommand       (Alpide::TCommand Command, TAlpide *chipPtr);
 
   int  SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
   void SetTriggerSource  (TTriggerSource triggerSource);

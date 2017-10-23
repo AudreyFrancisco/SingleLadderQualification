@@ -18,6 +18,7 @@
 #include <deque>
 
 #include "TReadoutBoard.h"
+#include "TAlpide.h"
 #include "TConfig.h"
 #include "TBoardConfig.h"
 #include "TBoardConfigMOSAIC.h"
@@ -61,9 +62,9 @@ public:
 
 	int WriteChipRegister (uint16_t address, uint16_t value, TAlpide *chipPtr);
 	int ReadChipRegister  (uint16_t address, uint16_t &value, TAlpide *chipPtr);
-	int SendOpCode        (uint16_t  OpCode, TAlpide *chipPtr);
-
-	int SendOpCode        (uint16_t  OpCode);
+	int SendOpCode        (Alpide::TOpCode OpCode, TAlpide *chipPtr);
+	int SendOpCode        (Alpide::TOpCode OpCode);
+	int SendCommand       (Alpide::TCommand Command, TAlpide *chipPtr);
         // Markus: changed trigger delay type from uint32_t to int, since changed upstream
 	int SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
 	void SetTriggerSource  (TTriggerSource triggerSource);

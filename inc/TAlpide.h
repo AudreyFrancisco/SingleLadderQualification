@@ -111,13 +111,16 @@ namespace Alpide {
     OPCODE_RORST        = 0x63,
     OPCODE_WROP         = 0x9c,
     OPCODE_RDOP         = 0x4e,
+  } TOpCode;
+
+  typedef enum {
     OPCODE_CMU_CLEARERR = 0xff00,
     OPCODE_FIFOTEST     = 0xff01,
     OPCODE_LOADOBDEFCFG = 0xff02,
     OPCODE_XOFF         = 0xff10,
     OPCODE_XON          = 0xff11,
     OPCODE_ADCMEASURE   = 0xff20
-  } TOpCode;
+  } TCommand;
 
   typedef enum {
     PIXREG_MASK   = 0x0,
