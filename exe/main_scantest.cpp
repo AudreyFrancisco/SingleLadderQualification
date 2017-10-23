@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
   std::cout << "starting thread VCASN" << std::endl;
   std::thread scanThread_V(scanLoop, myScan_V);
   analysis_V->Initialize();
-  std::thread analysisThread_V(&TScanAnalysis::Run, std::ref(analysis_V));
+  std::thread analysisThread_V(&TScanAnalysis::Run, analysis_V);
   scanThread_V.join();
   analysisThread_V.join();
   analysis_V->Finalize();
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
   //TApplyVCASNTuning *apply_V = new TApplyVCASNTuning(&fHistoQue, NULL, fConfig->GetScanConfig(), fHics, &fMutex, fResult);
   // std::cout << "starting thread apply_V" << std::endl;
   //apply_V->Initialize();
-  //std::thread analysisThread_apply_V(&TScanAnalysis::Run, std::ref(apply_V));
+  //std::thread analysisThread_apply_V(&TScanAnalysis::Run, apply_V);
   //analysisThread_apply_V.join();
   //apply_V->Finalize();
   //std::cout << "Finalized apply_V" << std::endl;
@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
   std::cout << "starting thread ITHR" << std::endl;
   std::thread scanThread_I(scanLoop, myScan_I);
   analysis_I->Initialize();
-  std::thread analysisThread_I(&TScanAnalysis::Run, std::ref(analysis_I));
+  std::thread analysisThread_I(&TScanAnalysis::Run, analysis_I);
   scanThread_I.join();
   analysisThread_I.join();
   analysis_I->Finalize();
@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
   TApplyITHRTuning *apply_I = new TApplyITHRTuning(&fHistoQue, NULL, fConfig->GetScanConfig(), fHics, &fMutex, fResult);
   std::cout << "starting thread apply_I" << std::endl;
   apply_I->Initialize();
-  std::thread analysisThread_apply_I(&TScanAnalysis::Run, std::ref(apply_I));
+  std::thread analysisThread_apply_I(&TScanAnalysis::Run, apply_I);
   analysisThread_apply_I.join();
   apply_I->Finalize();
   std::cout << "Finalized apply_I" << std::endl;
@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
   std::cout << "starting thread Threshold" << std::endl;
   std::thread scanThread_T(scanLoop, myScan_T);
   analysis_T->Initialize();
-  std::thread analysisThread_T(&TScanAnalysis::Run, std::ref(analysis_T));
+  std::thread analysisThread_T(&TScanAnalysis::Run, analysis_T);
   scanThread_T.join();
   analysisThread_T.join();
   analysis_T->Finalize();
