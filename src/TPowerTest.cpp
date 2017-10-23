@@ -1,29 +1,31 @@
 #include <string>
 #include <string.h>
 #include "TPowerTest.h"
+#include "TReadoutBoardMOSAIC.h"
 #include "AlpideConfig.h"
 
-TPowerTest::TPowerTest (TScanConfig                   *config, 
-                        std::vector <TAlpide *>        chips, 
-                        std::vector <THic*>            hics, 
-                        std::vector <TReadoutBoard *>  boards, 
-                        std::deque<TScanHisto>        *histoQue, 
-                        std::mutex                    *aMutex) 
-  : TScan (config, chips, hics, boards, histoQue, aMutex) 
+
+TPowerTest::TPowerTest (TScanConfig                   *config,
+                        std::vector <TAlpide *>        chips,
+                        std::vector <THic*>            hics,
+                        std::vector <TReadoutBoard *>  boards,
+                        std::deque<TScanHisto>        *histoQue,
+                        std::mutex                    *aMutex)
+  : TScan (config, chips, hics, boards, histoQue, aMutex)
 {
   strcpy(m_name, "Power Test");
   m_start[2] = 0;
   m_step [2] = 1;
   m_stop [2] = 1;
 
-  m_start[1] = 0; 
+  m_start[1] = 0;
   m_step [1] = 1;
   m_stop [1] = 1;
 
-  m_start[0] = 0; 
+  m_start[0] = 0;
   m_step [0] = 1;
   m_stop [0] = m_hics.size();
-  
+
   CreateMeasurements();
 }
 
@@ -47,7 +49,7 @@ void TPowerTest::Init()
 }
 
 
-void TPowerTest::PrepareStep(int loopIndex) 
+void TPowerTest::PrepareStep(int loopIndex)
 {
   switch (loopIndex) {
   case 0:  // innermost loop: change HIC
@@ -61,7 +63,7 @@ void TPowerTest::PrepareStep(int loopIndex)
 }
 
 
-void TPowerTest::DoIVCurve(THicCurrents &result) 
+void TPowerTest::DoIVCurve(THicCurrents &result)
 {
   for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
     float voltage = -i / 10;
@@ -82,7 +84,7 @@ void TPowerTest::Execute()
 {
   std::vector<int>       boardIndices = m_testHic->GetBoardIndices();
   std::vector<TAlpide*>  chips        = m_testHic->GetChips();
-  
+
   std::map<std::string, THicCurrents>::iterator currentIt = m_hicCurrents.find(m_testHic->GetDbId());
   m_testHic->PowerOff();
 
@@ -102,7 +104,7 @@ void TPowerTest::Execute()
     TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(boardIndices.at(i));
     board->enableControlInterfaces(true);
     board->SendOpCode (Alpide::OPCODE_GRST);
-  }  
+  }
 
   m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
 
@@ -118,7 +120,7 @@ void TPowerTest::Execute()
   for (unsigned int i = 0; i < boardIndices.size(); i++) {
     TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC*)m_boards.at(boardIndices.at(i));
     board->SendOpCode (Alpide::OPCODE_RORST);
-  }  
+  }
 
   m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
 
@@ -144,7 +146,7 @@ void TPowerTest::Execute()
     currentIt->second.ibias3 = currentIt->second.ibias[30];
   }
   else {
-    m_testHic->GetPowerBoard()->SetBiasVoltage(3.0);    
+    m_testHic->GetPowerBoard()->SetBiasVoltage(3.0);
     sleep(1);
     currentIt->second.ibias3 = m_testHic->GetIBias() * 1000;
   }
@@ -157,12 +159,12 @@ void TPowerTest::Execute()
   else {
     currentIt->second.trip = false;
   }
-  m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);    
+  m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
 
 }
 
 
-void TPowerTest::Terminate() 
+void TPowerTest::Terminate()
 {
   TScan::Terminate();
   m_running = false;

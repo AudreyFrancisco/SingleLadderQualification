@@ -12,7 +12,7 @@ bool AlpideDebug::ReadStream (TAlpide *chip, TRegister reg, uint16_t *stream, in
     std::cout << "Wrong header value 0x" << std::hex << stream[0] << std::dec << std::endl;
     return false;
   }
-  return true;  
+  return true;
 }
 
 

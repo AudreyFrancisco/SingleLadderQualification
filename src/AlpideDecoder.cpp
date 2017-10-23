@@ -4,10 +4,9 @@
 
 //using namespace AlpideDecoder;
 
-
 bool newEvent;
 
-TDataType AlpideDecoder::GetDataType(unsigned char dataWord) {
+TAlpideDataType AlpideDecoder::GetDataType(unsigned char dataWord) {
   if      (dataWord == 0xff)          return DT_IDLE;
   else if (dataWord == 0xf1)          return DT_BUSYON;
   else if (dataWord == 0xf0)          return DT_BUSYOFF;
@@ -21,7 +20,7 @@ TDataType AlpideDecoder::GetDataType(unsigned char dataWord) {
 }
 
 
-int AlpideDecoder::GetWordLength(TDataType dataType) {
+int AlpideDecoder::GetWordLength(TAlpideDataType dataType) {
   if (dataType == DT_DATALONG) {
     return 3;
   }
@@ -122,7 +121,7 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
   int       byte    = 0;
   bool      started = false; // event has started, i.e. chip header has been found
   bool      finished = false; // event trailer found
-  TDataType type;
+  TAlpideDataType type;
 
   eventStart = 0;
 
@@ -223,7 +222,7 @@ bool AlpideDecoder::DecodeEvent (unsigned char         *data,
   bool      started = false; // event has started, i.e. chip header has been found
   bool      finished = false; // event trailer found
   bool      corrupt  = false; // corrupt data found (i.e. data without region or chip)
-  TDataType type;
+  TAlpideDataType type;
 
   unsigned char last;
 
