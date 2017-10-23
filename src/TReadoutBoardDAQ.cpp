@@ -190,7 +190,7 @@ int TReadoutBoardDAQ::SendOpCode (uint16_t  OpCode, TAlpide *chipPtr)
   if (!(OpCode & 0xff00)) {
     this->SendOpCode(OpCode);
   }
-  else this->WriteChipRegister(Alpide::REG_COMMAND, OpCode, chipPtr);
+  else return this->WriteChipRegister(Alpide::REG_COMMAND, OpCode, chipPtr);
 }
 
 
