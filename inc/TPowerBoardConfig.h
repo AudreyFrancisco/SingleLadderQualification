@@ -39,8 +39,8 @@
 #define POWERBOARDCONFIG_H
 
 
+#include "TBoardConfig.h"
 #include <stdio.h>
-#include "TReadoutBoard.h"
 
 // The maximum number of modules of the power board
 // that the MOSAIC board can drive.
@@ -88,15 +88,15 @@
 // internal power board resistances between regulator and breakout board
 // according to power board manual version 1.2 (14/07/2017)
 // first index is the power unit (0 = bottom, 1 = top), second is module
-const float RAnalog [2][8] = {{0.035, 0.039, 0.047, 0.054, 0.033, 0.044, 0.051, 0.052}, 
+const float RAnalog [2][8] = {{0.035, 0.039, 0.047, 0.054, 0.033, 0.044, 0.051, 0.052},
                               {0.033, 0.038, 0.044, 0.056, 0.033, 0.044, 0.059, 0.052}};
-const float RDigital[2][8] = {{0.034, 0.042, 0.043, 0.050, 0.036, 0.038, 0.044, 0.052}, 
+const float RDigital[2][8] = {{0.034, 0.042, 0.043, 0.050, 0.036, 0.038, 0.044, 0.052},
                               {0.033, 0.040, 0.041, 0.049, 0.034, 0.037, 0.040, 0.056}};
 // Class definition
 class TPowerBoardConfig  {
 
 // structures a data types
-// the configuration data types contain set values and calibration constants 
+// the configuration data types contain set values and calibration constants
 // the set values correspond to the desired output value, i.e. the value before applying the calibration
 public:
 	typedef struct Mod {
@@ -139,7 +139,7 @@ public:
 	// Getters
 	float GetBiasVoltage();
 
-        // GetAnalogVoltage and GetDigitalVoltage return the voltages 
+        // GetAnalogVoltage and GetDigitalVoltage return the voltages
         // taking into account the channel calibrations
 	float GetAnalogVoltage    (int mod);
 	float GetAnalogCurrent    (int mod) { return(fPBConfig.Modul[mod].AIset); };

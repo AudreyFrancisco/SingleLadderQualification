@@ -45,13 +45,13 @@
 #include <vector>
 
 #include <powerboard.h>
-#include "TReadoutBoardMOSAIC.h"
+//#include "TReadoutBoardMOSAIC.h"
 #include "TPowerBoardConfig.h"
 
 //class TPowerBoardConfig;
 //class powerboard;
 
-//class TReadoutBoardMOSAIC;
+class TReadoutBoardMOSAIC;
 
 // The maximum number of modules of the power board
 // that the MOSAIC board can drive.

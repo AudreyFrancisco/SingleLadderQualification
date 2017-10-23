@@ -2,15 +2,17 @@
 #define BOARDCONFIG_H
 
 #include "stdint.h"
-#include "TReadoutBoard.h"
 #include <string>
 #include <map>
+
 
 namespace BoardConfig {
   const int PULSEDELAY  = 10000;
   const int STROBEDELAY = 20;
 }
 
+typedef enum {trigInt, trigExt} TTriggerSource;
+typedef enum {boardDAQ, boardMOSAIC, boardRU} TBoardType;
 
 class TBoardConfig {
  private:

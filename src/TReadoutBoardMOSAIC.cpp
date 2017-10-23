@@ -161,7 +161,7 @@ int TReadoutBoardMOSAIC::SendOpCode (Alpide::TOpCode OpCode)
 
 int TReadoutBoardMOSAIC::SendCommand (Alpide::TCommand Command, TAlpide *chipPtr)
 {
-    return WriteChiopRegister(Alpide::REG_COMMAND, Command, chipPtr);
+    return WriteChipRegister(Alpide::REG_COMMAND, Command, chipPtr);
 }
 
 

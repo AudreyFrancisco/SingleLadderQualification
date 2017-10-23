@@ -181,8 +181,9 @@ int TReadoutBoardDAQ::SendOpCode (Alpide::TOpCode OpCode)
 }
 
 
-int TReadoutBoardDQ::SendCommand(Alpide::TCommand Command, TAlpide *chipPtr)
-  return this->WriteChipRegister(Alpide::REG_COMMAND, Command, chipPtr);
+int TReadoutBoardDAQ::SendCommand(Alpide::TCommand Command, TAlpide *chipPtr)
+{
+  return WriteChipRegister(Alpide::REG_COMMAND, Command, chipPtr);
 }
 
 

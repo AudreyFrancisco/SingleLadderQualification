@@ -18,7 +18,6 @@
 #include <deque>
 
 #include "TReadoutBoard.h"
-#include "TAlpide.h"
 #include "TConfig.h"
 #include "TBoardConfig.h"
 #include "TBoardConfigMOSAIC.h"
