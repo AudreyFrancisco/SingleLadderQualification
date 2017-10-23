@@ -177,9 +177,21 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, TAlpi
 
 int TReadoutBoardDAQ::SendOpCode (uint16_t  OpCode)
 {
+  if (OpCode & 0xff00) {
+    std::cout << "This OpCode cannot be send as broadcast!" << std::endl;
+    return -1;
+  }
   return WriteRegister (CMU_INSTR + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), (int) OpCode);
 }
 
+
+int TReadoutBoardDAQ::SendOpCode (uint16_t  OpCode, TAlpide *chipPtr)
+{
+  if (!(OpCode & 0xff00)) {
+    this->SendOpCode(OpCode);
+  }
+  else this->WriteChipRegister(Alpide::REG_COMMAND, OpCode, chipPtr);
+}
 
 
 int TReadoutBoardDAQ::SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay)
