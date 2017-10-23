@@ -294,7 +294,7 @@ int main(int argc, char** argv) {
         usleep(5000);
 
         for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
-          fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(i));
+          fBoards.at(0)->SendCommand ( Alpide::COMMAND_ADCMEASURE, fChips.at(i));
           usleep(5000);
           fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
           theValue = 2. * ((float)theResult - (float)(fChips.at(i)->GetADCOffset())) * 0.823e-3; // first approximation

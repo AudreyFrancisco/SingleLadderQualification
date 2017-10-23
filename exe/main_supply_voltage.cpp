@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
         fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
         fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
         usleep(5000);
-        fBoards.at(0)->SendOpCode (Alpide::OPCODE_ADCMEASURE, fChips.at(i));
+        fBoards.at(0)->SendCommand (Alpide::COMMAND_ADCMEASURE, fChips.at(i));
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
         if (theResult == 1055) AVDD_saturated = true;
@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
         fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
         fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
         usleep(5000);
-        fBoards.at(0)->SendOpCode (Alpide::OPCODE_ADCMEASURE, fChips.at(i));
+        fBoards.at(0)->SendCommand (Alpide::COMMAND_ADCMEASURE, fChips.at(i));
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
         if (theResult == 1055) DVDD_saturated = true;

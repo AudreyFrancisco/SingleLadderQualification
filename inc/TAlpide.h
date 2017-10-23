@@ -114,12 +114,12 @@ namespace Alpide {
   } TOpCode;
 
   typedef enum {
-    OPCODE_CMU_CLEARERR = 0xff00,
-    OPCODE_FIFOTEST     = 0xff01,
-    OPCODE_LOADOBDEFCFG = 0xff02,
-    OPCODE_XOFF         = 0xff10,
-    OPCODE_XON          = 0xff11,
-    OPCODE_ADCMEASURE   = 0xff20
+    COMMAND_CMU_CLEARERR = 0xff00,
+    COMMAND_FIFOTEST     = 0xff01,
+    COMMAND_LOADOBDEFCFG = 0xff02,
+    COMMAND_XOFF         = 0xff10,
+    COMMAND_XON          = 0xff11,
+    COMMAND_ADCMEASURE   = 0xff20
   } TCommand;
 
   typedef enum {

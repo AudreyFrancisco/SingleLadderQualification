@@ -319,12 +319,12 @@ int TAlpide::CalibrateADC()
   fADCHalfLSB = false;
   fADCSign = false;
   SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
-  fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, this);
+  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE, this);
   usleep(4000); // > of 5 milli sec
   ReadRegister( Alpide::REG_ADC_CALIB, theVal1);
   fADCSign = true;
   SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
-  fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, this);
+  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE, this);
   usleep(4000); // > of 5 milli sec
   ReadRegister( Alpide::REG_ADC_CALIB, theVal2);
   fADCSign =  (theVal1 > theVal2) ? false : true;
@@ -332,12 +332,12 @@ int TAlpide::CalibrateADC()
   // Calibration Phase 2
   fADCHalfLSB = false;
   SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
-  fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, this);
+  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE, this);
   usleep(4000); // > of 5 milli sec
   ReadRegister( Alpide::REG_ADC_CALIB, theVal1);
   fADCHalfLSB = true;
   SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
-  fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, this);
+  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE, this);
   usleep(4000); // > of 5 milli sec
   ReadRegister( Alpide::REG_ADC_CALIB, theVal2);
   fADCHalfLSB =  (theVal1 > theVal2) ? false : true;
@@ -347,7 +347,7 @@ int TAlpide::CalibrateADC()
   unsigned int n_samples = 20;
   for (unsigned int i = 0; i<n_samples; ++i) {
     SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
-    fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE, this);
+    fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE, this);
     usleep(4000); // > of 5 milli sec
     ReadRegister( Alpide::REG_ADC_CALIB,theVal1);
     fADCOffset += theVal1;
@@ -377,7 +377,7 @@ float TAlpide::ReadTemperature() {
   SetTheDacMonitor(Alpide::REG_ANALOGMON); // uses the RE_ANALOGMON, in order to disable the monitoring !
   usleep(5000);
   SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature, Alpide::COMP_296uA, Alpide::RAMP_1us);
-  fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE,  this);
+  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE,  this);
   usleep(5000); // Wait for the measurement > of 5 milli sec
   ReadRegister( Alpide::REG_ADC_AVSS, theResult);
   theResult -=  (uint16_t)fADCOffset;
@@ -411,7 +411,7 @@ float TAlpide::ReadDACVoltage(Alpide::TRegister ADac) {
   SetTheDacMonitor(ADac);
   usleep(5000);
   SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_DACMONV, Alpide::COMP_296uA, Alpide::RAMP_1us);
-  fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE,  this);
+  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE,  this);
   usleep(5000); // Wait for the measurement > of 5 milli sec
   ReadRegister( Alpide::REG_ADC_AVSS, theRowValue);
   theResult = ((int)theRowValue) - fADCOffset;
@@ -446,7 +446,7 @@ float TAlpide::ReadDACCurrent(Alpide::TRegister ADac) {
   usleep(5000);
   SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_DACMONI, Alpide::COMP_296uA, Alpide::RAMP_1us);
 
-  fReadoutBoard->SendOpCode ( Alpide::OPCODE_ADCMEASURE,  this);
+  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE,  this);
   usleep(5000); // Wait for the measurement > of 5 milli sec
   ReadRegister( Alpide::REG_ADC_AVSS, theRowValue);
   theResult = ((int)theRowValue) - fADCOffset;
