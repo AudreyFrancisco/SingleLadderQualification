@@ -222,7 +222,7 @@ void scanADCDac(TAlpide *chip, unsigned int sampleDist = 1, unsigned int sampleR
     chip->SetTheADCCtrlRegister(Alpide::MODE_SUPERMANUAL, Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
 
     usleep(100000);
-    for (unsigned int value = 0; value < 1024; value += sampleDist) {
+    for (unsigned int value = 0; value < 2048; value += sampleDist) {
       for (unsigned int repetition = 0; repetition < sampleRepetition; ++repetition) {
         chip->WriteRegister (ADac, value);
         Voltage = myDAQBoard->ReadMonV();
