@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
   std::cout << "starting thread" << std::endl;
   std::thread scanThread(scanLoop, myScan);
   analysis->Initialize();
-  std::thread analysisThread(&TScanAnalysis::Run, std::ref(analysis));
+  std::thread analysisThread(&TScanAnalysis::Run, analysis);
 
   scanThread.join();
   analysisThread.join();

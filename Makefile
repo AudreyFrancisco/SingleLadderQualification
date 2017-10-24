@@ -7,7 +7,7 @@ LIBPOWERBOARD_DIR=./MosaicSrc/libpowerboard
 LIBALUCMS_DIR=./DataBaseSrc
 STATIC_LIBS=$(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR)
 
-INCLUDE=-I. -Iinc -I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I/usr/include/libxml2
+INCLUDE=-I. -Iinc -isystem/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -isystem/usr/include/libxml2
 LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic -L$(LIBALUCMS_DIR) -lalucms -lxml2 -lcurl
 CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -Wall -Werror -pedantic $(INCLUDE) -DVERSION=\"$(GIT_VERSION)\"
 
