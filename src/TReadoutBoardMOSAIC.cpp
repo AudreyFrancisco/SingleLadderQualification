@@ -127,6 +127,7 @@ int TReadoutBoardMOSAIC::WriteChipRegister (uint16_t address, uint16_t value, TA
 	return(0);
 }
 
+
 int TReadoutBoardMOSAIC::ReadChipRegister (uint16_t address, uint16_t &value, TAlpide *chipPtr)
 {
 	uint_fast16_t Cii = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
@@ -136,7 +137,8 @@ int TReadoutBoardMOSAIC::ReadChipRegister (uint16_t address, uint16_t &value, TA
 	return(0);
 }
 
-int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode, TAlpide *chipPtr)
+
+int TReadoutBoardMOSAIC::SendOpCode (Alpide::TOpCode OpCode, TAlpide *chipPtr)
 {
 	uint_fast16_t Cii = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
 	uint8_t chipId = chipPtr->GetConfig()->GetChipId();
@@ -146,7 +148,7 @@ int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode, TAlpide *chipPtr)
 }
 
 
-int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode)
+int TReadoutBoardMOSAIC::SendOpCode (Alpide::TOpCode OpCode)
 {
 	uint8_t ShortOpCode = (uint8_t)OpCode;
 	for(int Cii=0;Cii<MAX_MOSAICCTRLINT;Cii++){
@@ -155,6 +157,13 @@ int TReadoutBoardMOSAIC::SendOpCode (uint16_t  OpCode)
 	}
 	return(0);
 }
+
+
+int TReadoutBoardMOSAIC::SendCommand (Alpide::TCommand Command, TAlpide *chipPtr)
+{
+    return WriteChipRegister(Alpide::REG_COMMAND, Command, chipPtr);
+}
+
 
 int TReadoutBoardMOSAIC::SetTriggerConfig (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay)
 {

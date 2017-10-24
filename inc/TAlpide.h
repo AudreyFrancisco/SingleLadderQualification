@@ -2,7 +2,6 @@
 #define ALPIDE_H
 
 #include <unistd.h>
- // #include "TReadoutBoard.h"
 #include "TConfig.h"
 #include "THIC.h"
 
@@ -111,13 +110,16 @@ namespace Alpide {
     OPCODE_RORST        = 0x63,
     OPCODE_WROP         = 0x9c,
     OPCODE_RDOP         = 0x4e,
-    OPCODE_CMU_CLEARERR = 0xff00,
-    OPCODE_FIFOTEST     = 0xff01,
-    OPCODE_LOADOBDEFCFG = 0xff02,
-    OPCODE_XOFF         = 0xff10,
-    OPCODE_XON          = 0xff11,
-    OPCODE_ADCMEASURE   = 0xff20
   } TOpCode;
+
+  typedef enum {
+    COMMAND_CMU_CLEARERR = 0xff00,
+    COMMAND_FIFOTEST     = 0xff01,
+    COMMAND_LOADOBDEFCFG = 0xff02,
+    COMMAND_XOFF         = 0xff10,
+    COMMAND_XON          = 0xff11,
+    COMMAND_ADCMEASURE   = 0xff20
+  } TCommand;
 
   typedef enum {
     PIXREG_MASK   = 0x0,

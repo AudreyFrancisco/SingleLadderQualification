@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   for (int i = 0; i < 9; i++)
     chipIDs.push_back(i);
 
-    std::cout << "Create config\n";
+  std::cout << "Create config\n";
   TConfig *config = new TConfig(1, chipIDs);
 
   std::cout << "Create chips\n";

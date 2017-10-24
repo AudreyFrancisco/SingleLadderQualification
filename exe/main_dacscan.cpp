@@ -222,7 +222,7 @@ void scanADCDac(TAlpide *chip, unsigned int sampleDist = 1, unsigned int sampleR
     chip->SetTheADCCtrlRegister(Alpide::MODE_SUPERMANUAL, Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
 
     usleep(100000);
-    for (unsigned int value = 0; value < 256; value += sampleDist) {
+    for (unsigned int value = 0; value < 1024; value += sampleDist) {
       for (unsigned int repetition = 0; repetition < sampleRepetition; ++repetition) {
         chip->WriteRegister (ADac, value);
         Voltage = myDAQBoard->ReadMonV();
@@ -261,7 +261,7 @@ int main(int argc, char** argv) {
     fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
 
     for (unsigned int i = 0; i < fChips.size(); i ++) {
-
+      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
       scanVoltageDac (fChips.at(i), Alpide::REG_VRESETP, "VRESETP", mySampleDist, mySampleRepetition, Suffix);
       scanVoltageDac (fChips.at(i), Alpide::REG_VRESETD, "VRESETD", mySampleDist, mySampleRepetition, Suffix);
       scanVoltageDac (fChips.at(i), Alpide::REG_VCASP,   "VCASP",   mySampleDist, mySampleRepetition, Suffix);
@@ -280,41 +280,38 @@ int main(int argc, char** argv) {
 
       scanADCDac (fChips.at(i), mySampleDist, mySampleRepetition, Suffix);
 
-      if (!(myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0)))) { // measurement OP code let's DAQ board get stuck
-        // AVDD
-        char     fName[50];
-        snprintf (fName, 50, "Data/AVDD_Chip%d_%d_%s.dat", fChips.at(i)->GetConfig()->GetChipId(), fChips.at(i)->GetConfig()->GetCtrInt(), Suffix);
-        FILE *fp = fopen (fName, "w");
+      char     fName[50];
+      snprintf (fName, 50, "Data/AVDD_Chip%d_%d_%s.dat", fChips.at(i)->GetConfig()->GetChipId(), fChips.at(i)->GetConfig()->GetCtrInt(), Suffix);
+      FILE *fp = fopen (fName, "w");
 
-        uint16_t theResult = 0;
-        float    theValue  = 0.;
-        fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
+      uint16_t theResult = 0;
+      float    theValue  = 0.;
+      fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
+      usleep(5000);
+      fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
+      usleep(5000);
+
+      for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
+        fBoards.at(0)->SendCommand ( Alpide::COMMAND_ADCMEASURE, fChips.at(i));
         usleep(5000);
-        fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
-        usleep(5000);
-
-        for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
-          fBoards.at(0)->SendOpCode ( Alpide::OPCODE_ADCMEASURE, fChips.at(i));
-          usleep(5000);
-          fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
-          theValue = 2. * ((float)theResult - (float)(fChips.at(i)->GetADCOffset())) * 0.823e-3; // first approximation
-          fprintf (fp, "%d %.3f\n", repetition, theValue);
-        }
-        fclose (fp);
-
-        // Temperature
-        snprintf (fName, 50, "Data/TEMP_Chip%d_%d_%s.dat", fChips.at(i)->GetConfig()->GetChipId(), fChips.at(i)->GetConfig()->GetCtrInt(), Suffix);
-        fp = fopen (fName, "w");
-
-        theResult = 0;
-        theValue  = 0.;
-        fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature, Alpide::COMP_296uA, Alpide::RAMP_1us);
-
-        for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
-          fprintf (fp, "%d %.3f\n", repetition, fChips.at(i)->ReadTemperature());
-        }
-        fclose (fp);
+        fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
+        theValue = 2. * ((float)theResult - (float)(fChips.at(i)->GetADCOffset())) * 0.823e-3; // first approximation
+        fprintf (fp, "%d %.3f\n", repetition, theValue);
       }
+      fclose (fp);
+
+      // Temperature
+      snprintf (fName, 50, "Data/TEMP_Chip%d_%d_%s.dat", fChips.at(i)->GetConfig()->GetChipId(), fChips.at(i)->GetConfig()->GetCtrInt(), Suffix);
+      fp = fopen (fName, "w");
+
+      theResult = 0;
+      theValue  = 0.;
+      fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature, Alpide::COMP_296uA, Alpide::RAMP_1us);
+
+      for (unsigned int repetition = 0; repetition < mySampleRepetition; ++repetition) {
+        fprintf (fp, "%d %.3f\n", repetition, fChips.at(i)->ReadTemperature());
+      }
+      fclose (fp);
     }
 
     if (myDAQBoard) {

@@ -27,11 +27,11 @@ const uint32_t MAX_EVT_BUFFSIZE   = 1e3;    // max number of events in fEventBuf
 const int MAX_NTRIG_TRAIN         = 10;    // fNTriggers will be subdivided into trigger trains with fMaxNTriggersAtOnce, MAX_NTRIG_ATONCE is default
 
 //************************************************************
-// TReadOutBoardDAQ: implementationn for Cagliari DAQboard 
+// TReadOutBoardDAQ: implementationn for Cagliari DAQboard
 //************************************************************
 
 class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
- private: 
+ private:
   static const int NEndpoints = 4;
   static const int ENDPOINT_WRITE_REG =0;
   static const int ENDPOINT_READ_REG  =1;
@@ -45,9 +45,9 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
 
   //// Cagliari DAQ board register description
   //---------------------------------------------------------
-  
+
   /// module addresses
-  static const int MODULE_CONTROL   = 0x0; 
+  static const int MODULE_CONTROL   = 0x0;
   static const int MODULE_ADC       = 0x1;
   static const int MODULE_READOUT   = 0x2;
   static const int MODULE_TRIGGER   = 0x3;
@@ -67,20 +67,20 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   static const int ADC_DATA1    = 0x4; // Read only, previously ADC_READ1
   static const int ADC_DATA2    = 0x5; // Read only, previously ADC_READ2
   static const int ADC_OVERFLOW = 0x9; // Read only
-    
+
   // READOUT Module 0x2: Register sub-addresses
-  static const int READOUT_EVENTBUILDER_CONFIG    = 0x0; // previously   READOUT_CHIP_DATA 
-  static const int READOUT_EOR_COMMAND            = 0x1; // previously   READOUT_ENDOFRUN  
-  static const int READOUT_EVTID1                 = 0x2; //     
-  static const int READOUT_EVTID2                 = 0x3; //     
+  static const int READOUT_EVENTBUILDER_CONFIG    = 0x0; // previously   READOUT_CHIP_DATA
+  static const int READOUT_EOR_COMMAND            = 0x1; // previously   READOUT_ENDOFRUN
+  static const int READOUT_EVTID1                 = 0x2; //
+  static const int READOUT_EVTID2                 = 0x3; //
   static const int READOUT_RESYNC                 = 0x4; //
   static const int READOUT_SLAVE_DATA_EMULATOR    = 0x5; //
   static const int READOUT_TIMESTAMP1             = 0x6; // not existing in manual..
   static const int READOUT_TIMESTAMP2             = 0x7; // not existing in manual..
   static const int READOUT_MONITOR1               = 0x8; // not existing in manual..
-   
+
   // TRIGGER Module 0x3: Register sub-addresses
-  static const int TRIG_BUSY_DURATION    = 0x0; 
+  static const int TRIG_BUSY_DURATION    = 0x0;
   static const int TRIG_TRIGGER_CONFIG   = 0x1;
   static const int TRIG_START            = 0x2;
   static const int TRIG_STOP             = 0x3;
@@ -101,11 +101,11 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   static const int RESET_DURATION    = 0x0; // PULSE and PRST duration only used in pA1, became OPCODEs in later verstions; (D)RST using CMU interface for later versions? DRST == GRST!
   static const int RESET_DELAYS      = 0x1;
   static const int RESET_DRST        = 0x2;
-  static const int RESET_PRST        = 0x3; 
+  static const int RESET_PRST        = 0x3;
   static const int RESET_PULSE       = 0x4;
   static const int RESET_PULSE_DELAY = 0x5;
   static const int RESET_POR_DISABLE = 0x6;
-  
+
   // IDENTIFICATION Module 0x6: Register sub-addresses
   static const int ID_ADDRESS     = 0x0;
   static const int ID_CHIP        = 0x1;
@@ -117,10 +117,10 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   //static const int SOFTRESET_COMMAND    = 0x1; // previously SOFTRESET_FPGA_RESET?
   static const int SOFTRESET_FPGA_RESET = 0x1; // not existing in manual..
   static const int SOFTRESET_FX3_RESET  = 0x2; // not existing in manual..
-  
+
   //--------------------------------------
 
-  uint32_t fFirmwareVersion;    
+  uint32_t fFirmwareVersion;
 
   TBoardConfigDAQ *fBoardConfigDAQ;
 
@@ -159,11 +159,11 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   std::deque<unsigned char> fRawBuffer;  // double ended queue for raw data;
 
 
- protected: 
+ protected:
 
- public: 
+ public:
   TReadoutBoardDAQ(libusb_device *ADevice, TBoardConfigDAQ *config);
-  
+
   virtual ~TReadoutBoardDAQ ();
 
   void DumpConfig(const char *fName, bool writeFile=true, char *config=0);
@@ -175,9 +175,11 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   int  ReadRegister      (uint16_t address, uint32_t &value);
   int  WriteRegister     (uint16_t address, uint32_t value);
 
+  int  SendOpCode        (Alpide::TOpCode OpCode) ;
   // DAQ board has only one control interface -> both methods are identical
-  int  SendOpCode        (uint16_t  OpCode) ;
-  int  SendOpCode        (uint16_t  OpCode, TAlpide *chipPtr) {return SendOpCode (OpCode);};
+  int  SendOpCode        (Alpide::TOpCode OpCode, TAlpide *chipPtr) { return SendOpCode(OpCode); };
+
+  int  SendCommand       (Alpide::TCommand Command, TAlpide *chipPtr);
 
   int  SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
   void SetTriggerSource  (TTriggerSource triggerSource);
@@ -218,8 +220,8 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   float ReadIoI         (); // read digital I/O supply current
   float ReadTemperature (); // read temperature
 
-  float ReadMonI  (); // 
-  float ReadMonV  (); // 
+  float ReadMonI  (); //
+  float ReadMonV  (); //
 
   bool ReadLDOStatus(int &overflow);
   void DecodeOverflow(int overflow);
@@ -227,8 +229,8 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   void WriteADCModuleConfigRegisters (); // write current ADC module config (fBoardConfigDAQ) to registers
   //int  WriteADCConfig      ();
   void  WriteCurrentLimits  (bool LDOOn, bool autoshutdown); // just write current limits
- 
-   
+
+
   // READOUT Module:
   void WriteReadoutModuleConfigRegisters (); // write current Readout module config (fBoardConfigDAQ) to registers
   bool ResyncSerialPort ();
@@ -239,7 +241,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
   // TRIGGER Module:
   bool StartTrigger ();
   bool StopTrigger ();
-  
+
   void WriteTriggerModuleConfigRegisters (); // write current trigger module config (fBoardConfigDAQ) to registers
   bool WriteBusyOverrideReg(bool busyOverride);
 

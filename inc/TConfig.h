@@ -6,7 +6,6 @@
 #include "TChipConfig.h"
 #include "TBoardConfig.h"
 #include "THicConfig.h"
-#include "TReadoutBoard.h"
 #include "TScanConfig.h"
 
 const int DEFAULT_MODULE_ID = 1;
