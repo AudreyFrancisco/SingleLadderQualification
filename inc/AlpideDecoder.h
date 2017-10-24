@@ -4,8 +4,6 @@
 #include <vector>
 #include <cstdint>
 
-enum TDataType {DT_IDLE, DT_CHIPHEADER, DT_CHIPTRAILER, DT_EMPTYFRAME, DT_REGIONHEADER, DT_DATASHORT, DT_DATALONG, DT_BUSYON, DT_BUSYOFF, DT_UNKNOWN};
-
 typedef struct {
   int boardIndex;
   int channel;
@@ -14,6 +12,9 @@ typedef struct {
   int dcol;
   int address;
 } TPixHit;
+
+enum TAlpideDataType {DT_IDLE, DT_CHIPHEADER, DT_CHIPTRAILER, DT_EMPTYFRAME, DT_REGIONHEADER, DT_DATASHORT, DT_DATALONG, DT_BUSYON, DT_BUSYOFF, DT_UNKNOWN};
+
 
 class AlpideDecoder {
  private:
@@ -32,8 +33,8 @@ class AlpideDecoder {
                                         std::vector <TPixHit> *stuck);
  protected:
  public:
-   static TDataType GetDataType        (unsigned char dataWord);
-   static int       GetWordLength      (TDataType dataType);
+   static TAlpideDataType GetDataType  (unsigned char dataWord);
+   static int       GetWordLength      (TAlpideDataType dataType);
    static bool      DecodeEvent        (unsigned char         *data,
                                         int                    nBytes,
                                         std::vector <TPixHit> *hits,

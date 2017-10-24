@@ -190,7 +190,7 @@ int TReadoutBoardRU::WriteRegister(uint16_t Address, uint32_t Value) {
 
 int TReadoutBoardRU::WriteChipRegister(uint16_t Address, uint16_t Value,
                                        TAlpide *chipPtr) {
-	uint8_t chipId = chipPtr->GetConfig()->GetChipId();
+  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   dctrl->WriteChipRegister(Address, Value, chipId);
   return 0;
 }
@@ -203,14 +203,19 @@ int TReadoutBoardRU::ReadChipRegister(uint16_t Address, uint16_t &Value,
 
   return dctrl->ReadChipRegister(Address, Value, chipId);
 }
-int TReadoutBoardRU::SendOpCode(uint16_t OpCode) {
+int TReadoutBoardRU::SendOpCode(Alpide::TOpCode OpCode) {
   dctrl->SendOpCode(OpCode);
   return 0;
 }
 
-int TReadoutBoardRU::SendOpCode(uint16_t OpCode, TAlpide *chipPtr) {
+int TReadoutBoardRU::SendOpCode(Alpide::TOpCode OpCode, TAlpide *chipPtr) {
   return SendOpCode(OpCode);
 }
+
+int TReadoutBoardRU::SendCommand(Alpide::TCommand Command, TAlpide *chipPtr) {
+  return WriteChipRegister(Alpide::REG_COMMAND, Command, chipPtr);
+}
+
 
 int TReadoutBoardRU::SetTriggerConfig(bool enablePulse, bool enableTrigger,
                                       int triggerDelay, int pulseDelay) {

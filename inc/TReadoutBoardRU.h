@@ -78,8 +78,9 @@ public:
   virtual int WriteRegister(uint16_t Address, uint32_t Value);
   virtual int ReadChipRegister(uint16_t Address, uint16_t &Value,
                                TAlpide *chipPtr = 0);
-  virtual int SendOpCode(uint16_t OpCode);
-  virtual int SendOpCode(uint16_t OpCode, TAlpide *chipPtr);
+  virtual int SendOpCode(Alpide::TOpCode OpCode);
+  virtual int SendOpCode(Alpide::TOpCode OpCode, TAlpide *chipPtr);
+  virtual int SendCommand(Alpide::TCommand OpCode, TAlpide *chipPtr);
 
   virtual int SetTriggerConfig(bool enablePulse, bool enableTrigger,
                                int triggerDelay, int pulseDelay);

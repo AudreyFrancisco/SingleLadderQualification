@@ -175,11 +175,16 @@ int TReadoutBoardDAQ::ReadChipRegister (uint16_t address, uint16_t &value, TAlpi
 }
 
 
-int TReadoutBoardDAQ::SendOpCode (uint16_t  OpCode)
+int TReadoutBoardDAQ::SendOpCode (Alpide::TOpCode OpCode)
 {
   return WriteRegister (CMU_INSTR + (MODULE_CMU << DAQBOARD_REG_ADDR_SIZE), (int) OpCode);
 }
 
+
+int TReadoutBoardDAQ::SendCommand(Alpide::TCommand Command, TAlpide *chipPtr)
+{
+  return WriteChipRegister(Alpide::REG_COMMAND, Command, chipPtr);
+}
 
 
 int TReadoutBoardDAQ::SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay)

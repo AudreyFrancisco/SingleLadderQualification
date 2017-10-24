@@ -36,6 +36,7 @@
  *
  */
 #include "TPowerBoard.h"
+#include "TReadoutBoardMOSAIC.h"
 #include <unistd.h>
 
 
@@ -205,13 +206,13 @@ bool TPowerBoard::readMonitor()
 }
 
 
-float TPowerBoard::GetAnalogCurrent (int module) 
-{ 
+float TPowerBoard::GetAnalogCurrent (int module)
+{
   float AIOffset, DIOffset;
-  float Current = 0; 
+  float Current = 0;
   int   N       = 20;
   for (int i = 0; i < N; i ++) {
-    readMonitor(); 
+    readMonitor();
     Current += fPBoard.Modules[module].AImon;
   }
   Current /= N;
@@ -220,13 +221,13 @@ float TPowerBoard::GetAnalogCurrent (int module)
 }
 
 
-float TPowerBoard::GetDigitalCurrent (int module) 
-{ 
+float TPowerBoard::GetDigitalCurrent (int module)
+{
   float AIOffset, DIOffset;
-  float Current = 0; 
+  float Current = 0;
   int   N       = 20;
   for (int i = 0; i < N; i ++) {
-    readMonitor(); 
+    readMonitor();
     Current += fPBoard.Modules[module].DImon;
   }
   Current /= N;
@@ -239,7 +240,7 @@ float TPowerBoard::GetDigitalCurrent (int module)
 // set calibration constants back to 1 / 0
 // set two different voltages and measure the output voltage for each setting
 // determine new calibration constants
-void TPowerBoard::CalibrateVoltage(int module) 
+void TPowerBoard::CalibrateVoltage(int module)
 {
   // two set points that fall on a full bin
   // set the lower voltage second to not risk applying 2.2 V to a HIC
@@ -276,8 +277,8 @@ void TPowerBoard::CalibrateVoltage(int module)
   banalog  = set1 - manalog  * analog1;
   bdigital = set1 - mdigital * digital1;
 
-  // set new calibration values and switch off module 
-  fPowerBoardConfig->SetVCalibration (module, manalog, mdigital, banalog, bdigital); 
+  // set new calibration values and switch off module
+  fPowerBoardConfig->SetVCalibration (module, manalog, mdigital, banalog, bdigital);
 
   SwitchModule (module, false);
 }
@@ -286,10 +287,10 @@ void TPowerBoard::CalibrateVoltage(int module)
 // Calibrate the current offset for a given module
 // switch of the channel
 // measure the current
-void TPowerBoard::CalibrateCurrent(int module) 
+void TPowerBoard::CalibrateCurrent(int module)
 {
   float aOffset, dOffset;
-  fPowerBoardConfig->SetICalibration (module, 0, 0);  
+  fPowerBoardConfig->SetICalibration (module, 0, 0);
 
   SwitchModule (module, false);
 
@@ -298,13 +299,13 @@ void TPowerBoard::CalibrateCurrent(int module)
   aOffset = GetAnalogCurrent  (module);
   dOffset = GetDigitalCurrent (module);
 
-  fPowerBoardConfig->SetICalibration (module, aOffset, dOffset);  
+  fPowerBoardConfig->SetICalibration (module, aOffset, dOffset);
 }
 
 
 // correct the output voltage for the (calculated) voltage drop
 // if reset is true, the correction is set to 0
-void TPowerBoard::CorrectVoltageDrop (int module, bool reset) 
+void TPowerBoard::CorrectVoltageDrop (int module, bool reset)
 {
   // Measure the channel currents
   // Calculate voltage drop
@@ -324,7 +325,7 @@ void TPowerBoard::CorrectVoltageDrop (int module, bool reset)
 
     fPowerBoardConfig->GetLineResistances (module, RAnalog, RDigital, RGround);
     fPowerBoardConfig->GetVCalibration    (module, AVScale, DVScale,  AVOffset, DVOffset);
-  
+
     dVAnalog  = IDDA * RAnalog  + (IDDA + IDDD) * RGround;
     dVDigital = IDDD * RDigital + (IDDA + IDDD) * RGround;
 
@@ -332,11 +333,11 @@ void TPowerBoard::CorrectVoltageDrop (int module, bool reset)
     dVDigital *= DVScale;
   }
 
-  if ((fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) || 
+  if ((fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) ||
       (fPBoard.Modules[module].DVset + dVDigital > SAFE_OUTPUT)) {
     std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage above safe limit; using uncorrected values." << std::endl;
     dVAnalog  = 0;
-    dVDigital = 0;    
+    dVDigital = 0;
   }
 
   // fPBoard contains the voltages corrected with the channel calibration

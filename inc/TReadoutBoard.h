@@ -7,12 +7,9 @@
 #include <stdint.h>
 #include <vector>
 
-typedef enum {trigInt, trigExt} TTriggerSource;   // move these to TBoardConfig?
-typedef enum {boardDAQ, boardMOSAIC, boardRU} TBoardType;
+#include "TBoardConfig.h"
+#include "TAlpide.h"
 
-//#include "TBoardConfig.h"
-//#include "TAlpide.h"
-class TAlpide;
 class TBoardConfig;
 
 typedef struct {
@@ -72,9 +69,12 @@ class TReadoutBoard {
   virtual int  ReadChipRegister  (uint16_t Address, uint16_t &Value, TAlpide *chipPtr) = 0;
 
   // sends op code to all control interfaces
-  virtual int  SendOpCode        (uint16_t  OpCode) = 0;
+  virtual int  SendOpCode        (Alpide::TOpCode OpCode) = 0;
   // sends op code to control interface belonging to chip chipId
-  virtual int  SendOpCode        (uint16_t  OpCode, TAlpide *chipPtr) = 0;
+  virtual int  SendOpCode        (Alpide::TOpCode OpCode, TAlpide *chipPtr) = 0;
+
+  // sends command code to control interface belonging to chip chipId
+  virtual int  SendCommand       (Alpide::TCommand Command, TAlpide *chipPtr) = 0;
 
   virtual int  SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay) = 0;
   virtual void SetTriggerSource  (TTriggerSource triggerSource) = 0;
