@@ -76,6 +76,17 @@ int  TScan::FindBoardIndex (TAlpide *chip)
 }
 
 
+std::string TScan::FindHIC(int boardIndex, int rcv) 
+{
+  for (unsigned int i = 0; i < m_hics.size(); i++) {
+    if (m_hics.at(i)->ContainsReceiver(boardIndex, rcv)) {
+      return m_hics.at(i)->GetDbId();
+    }
+  }
+  return std::string ("None");
+}
+
+
 void TScan::Terminate()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {

@@ -73,8 +73,8 @@ class TScan {
 
   void           CountEnabledChips  ();
   int            FindBoardIndex     (TAlpide *chip);
+  std::string    FindHIC            (int boardIndex, int rcv);
   virtual THisto CreateHisto        () = 0;
-
  public:
   TScan (TScanConfig                   *config, 
          std::vector <TAlpide *>        chips, 

@@ -42,6 +42,7 @@ class THic {
   int                        AddChip         (TAlpide *chip);
   virtual bool               ContainsChip    (common::TChipIndex idx) = 0;
   bool                       ContainsChip    (int index);
+  virtual bool               ContainsReceiver(int boardIndex, int rcv) = 0;
   virtual common::TChipIndex GetChipIndex    (int i) = 0;
   virtual std::vector<int>   GetBoardIndices () = 0;
   virtual THicType           GetHicType      () = 0;
@@ -69,6 +70,7 @@ class THicOB : public THic {
   THicType           GetHicType      () {return HIC_OB;};
   std::vector<int>   GetBoardIndices ();
   bool               ContainsChip    (common::TChipIndex idx);
+  bool               ContainsReceiver(int boardIndex, int rcv);
   void               ConfigureMaster (int Master, int board, int rcv, int ctrl);
 };
 
@@ -86,6 +88,7 @@ class THicIB : public THic {
   THicType           GetHicType      () {return HIC_IB;};
   std::vector<int>   GetBoardIndices ();
   bool               ContainsChip (common::TChipIndex idx);
+  bool               ContainsReceiver(int boardIndex, int rcv);
   void               ConfigureInterface (int board, int *rcv, int ctrl);
 };
 
