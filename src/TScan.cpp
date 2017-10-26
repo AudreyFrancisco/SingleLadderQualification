@@ -168,6 +168,7 @@ void TScan::CreateScanHisto ()
 
 }
 
+
 TMaskScan::TMaskScan (TScanConfig                   *config,
                       std::vector <TAlpide *>        chips,
                       std::vector <THic *>           hics,
@@ -181,6 +182,42 @@ TMaskScan::TMaskScan (TScanConfig                   *config,
   m_errorCount   = {};
   FILE *fp = fopen ("DebugData.dat", "w");
   fclose(fp);
+  InitCounters();
+}
+
+
+void TMaskScan::InitCounters ()
+{
+  for (unsigned int i = 0; i < m_hics.size(); i++) {
+    TErrorCounter errCount;
+    errCount.nEnabled      = m_hics.at(i)->GetNEnabledChips();
+    errCount.n8b10b        = 0;
+    errCount.nCorruptEvent = 0;
+    errCount.nPrioEncoder  = 0;
+    errCount.nTimeout      = 0;
+    m_errorCounts.insert (std::pair<std::string, TErrorCounter> (m_hics.at(i)->GetDbId(), errCount));
+  }
+}
+
+
+// check which HIC caused the timeout, i.e. did not send enough events
+// called only in case a timeout occurs
+void TMaskScan::FindTimeoutHics (int iboard, int *triggerCounts)
+{
+  for (unsigned int iHic = 0; iHic < m_hics.size(); iHic++) {
+    bool isOnBoard = false;
+    int  nTrigs    = 0;
+    for (unsigned int iRcv = 0; iRcv < MAX_MOSAICTRANRECV; iRcv++) {
+      if (m_hics.at(iHic)->ContainsReceiver(iboard, iRcv)) {
+        isOnBoard = true;
+        nTrigs   += triggerCounts[iRcv];
+      }
+    }
+    // HIC is connected to this readout board AND did not send enough events
+    if ((isOnBoard) && (nTrigs < m_nTriggers * m_hics.at(iHic)->GetNEnabledChips())) {
+      m_errorCounts.at(m_hics.at(iHic)->GetDbId()).nTimeout ++;
+    }
+  }
 }
 
 
@@ -196,6 +233,11 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
   int           itrg = 0, trials = 0;
   int           nBad = 0;
   TBoardHeader  boardInfo;
+  int           nTrigPerHic[MAX_MOSAICTRANRECV];
+
+  for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
+    nTrigPerHic[i] = 0;
+  }
 
   while (itrg < m_nTriggers * m_enabled[iboard]) {
     if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
@@ -204,6 +246,7 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
       if (trials == 3) {
   	  std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event" << std::endl;
         itrg = m_nTriggers * m_enabled[iboard];
+        FindTimeoutHics(iboard, nTrigPerHic);
         m_errorCount.nTimeout ++;
         trials = 0;
       }
@@ -212,12 +255,20 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
     else {
       BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
       // decode Chip event
-      if (boardInfo.decoder10b8bError) m_errorCount.n8b10b++;
+      if (boardInfo.decoder10b8bError) {
+        m_errorCount.n8b10b++;
+        if (FindHIC(iboard, boardInfo.channel).compare ("None") != 0) {
+          m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).n8b10b++;
+	}
+      }
       int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
       if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
-      if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel, m_errorCount.nPrioEncoder, &m_stuck)) {
+      if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel, m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder, &m_stuck)) {
         std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
         m_errorCount.nCorruptEvent ++;
+        if (FindHIC(iboard, boardInfo.channel).compare ("None") != 0) {
+          m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nCorruptEvent++;
+	}
         if (nBad > 10) continue;
         FILE *fDebug = fopen ("DebugData.dat", "a");
         fprintf(fDebug, "Bad event:\n");
@@ -231,6 +282,7 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
         fprintf(fDebug, "\n\n");
         fclose (fDebug);
       }
+      nTrigPerHic[boardInfo.channel] ++;
       itrg++;
     }
   }

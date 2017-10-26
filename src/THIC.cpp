@@ -42,10 +42,17 @@ TAlpide *THic::GetChipById (int chipId)
 // IsEnabled: returns true if at least one chip on the HIC is enabled, false otherwise
 bool THic::IsEnabled ()
 {
+  return (GetNEnabledChips() > 0);
+}
+
+
+int THic::GetNEnabledChips ()
+{
+  int n = 0;
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-    if (m_chips.at(ichip)->GetConfig()->IsEnabled()) return true;
+    if (m_chips.at(ichip)->GetConfig()->IsEnabled()) n++;
   }
-  return false;
+  return n;
 }
 
 

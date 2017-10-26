@@ -18,6 +18,7 @@ const  int  MAXBOARDS    = 2;
 extern bool fScanAbort;
 
 typedef struct {
+  int nEnabled;
   int n8b10b;
   int nCorruptEvent;
   int nPrioEncoder;
@@ -105,12 +106,15 @@ class TScan {
 class TMaskScan : public TScan {
  private: 
  protected: 
-  int                      m_pixPerStage;
-  int                      m_nTriggers;
-  int                      m_row;
-  std::vector <TPixHit>    m_stuck;
-  TErrorCounter            m_errorCount;
+  int                                   m_pixPerStage;
+  int                                   m_nTriggers;
+  int                                   m_row;
+  std::vector <TPixHit>                 m_stuck;
+  TErrorCounter                         m_errorCount;
+  std::map <std::string, TErrorCounter> m_errorCounts;
   virtual void ConfigureMaskStage(TAlpide *chip, int istage);
+  void         InitCounters      ();
+  void         FindTimeoutHics   (int iboard, int *triggerCounts);
   void         ReadEventData     (std::vector <TPixHit> *Hits, int iboard);
  public: 
   TMaskScan  (TScanConfig                   *config, 
