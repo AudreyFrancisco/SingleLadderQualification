@@ -33,6 +33,7 @@ class TPowerResultHic : public TScanResultHic {
   TPowerResultHic () : TScanResultHic () {};
   void SetIVFile   (const char *fName) {strcpy(m_ivFile, fName);};
   void WriteToFile (FILE *fp);
+  void WriteToDB    (AlpideDB *db, ActivityDB::activity &activity);
 };
 
 
