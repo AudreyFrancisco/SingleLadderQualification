@@ -66,6 +66,8 @@ int numberofscan=0;
 int scanposition;
 QString operatorname;
 QString hicidnumber;
+QString toptwo, topthree, topfour, topfive;
+QString bottomone, bottomtwo, bottomthree, bottomfive, bottomfour;
 int idofactivitytype;
 int idoflocationtype;
 int idofoperator;

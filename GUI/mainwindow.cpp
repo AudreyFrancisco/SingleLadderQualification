@@ -1264,8 +1264,13 @@ void MainWindow::connectcombo(int value){
        {
         ui->testtypeselected->clear();
         ui->start_test->show();
-     //   qDebug()<<"IB Qualification test selected";
-       // openib();
+        ui->testtypeselected->setText("OB Endurance Test");
+       // findidoftheactivitytype("OB Endurance Test",idofactivitytype);
+        //locationcombo();
+        //settingswindow->connectlocationcombo(locdetails);
+        settingswindow->adjustendurance();
+        numberofscan=3;
+
         //Later no need to close the pop up window or to apply settings. everything will be done upon th loading of the cfg.
         break;}
 
@@ -2161,7 +2166,7 @@ void MainWindow::locationcombo(){
 
 void MainWindow::savesettings(){
      settingswindow->hide();
-     settingswindow->SaveSettings(operatorname,hicidnumber,counter,idoflocationtype, idofoperator);
+     settingswindow->SaveSettings(operatorname,hicidnumber,counter,idoflocationtype, idofoperator, toptwo, topthree, topfour, topfive, bottomone, bottomtwo, bottomthree, bottomfour, bottomfive);
      open();
      scanconfigwindow= new ScanConfiguration(this);
      scanconfigwindow->show();
