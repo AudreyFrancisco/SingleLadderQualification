@@ -248,7 +248,7 @@ void scan() {
           usleep(1000); // Increment from 100us
           trials ++;
           if (trials == 10) {
-                std::cout << "Reached 10 timeouts, giving up on this event" << std::endl;
+            std::cout << "Reached 10 timeouts, giving up on this event" << std::endl;
             itrg = myNTriggers * fEnabled;
             nSkipped ++;
             trials = 0;
@@ -262,10 +262,10 @@ void scan() {
           int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
           if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
           if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0, boardInfo.channel, prioErrors)) {
-                       std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
-                    nBad ++;
+            std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
+            nBad ++;
             if (nBad > 10) continue;
-                    FILE *fDebug = fopen ("DebugData.dat", "a");
+            FILE *fDebug = fopen ("DebugData.dat", "a");
             fprintf(fDebug, "Bad event:\n");
             for (int iByte=0; iByte<n_bytes_data + 1; ++iByte) {
               fprintf (fDebug, "%02x ", (int) buffer[iByte]);
@@ -276,11 +276,11 @@ void scan() {
             }
             fprintf(fDebug, "\n\n");
             fclose (fDebug);
-                    }
+          }
           itrg++;
         }
       }
-          //usleep(100);
+      //usleep(100);
 
       //std::cout << "Number of hits: " << Hits->size() << std::endl;
       CopyHitData(Hits, icharge);
@@ -360,9 +360,10 @@ int main(int argc, char** argv) {
     WriteDataToFile (fName, true);
     sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
 
+    WriteScanConfig (fName, fChips.at(0), myDAQBoard);
+    myDAQBoard->PowerOff();
+
     if (myDAQBoard) {
-      WriteScanConfig (fName, fChips.at(0), myDAQBoard);
-      myDAQBoard->PowerOff();
       delete myDAQBoard;
     }
   }

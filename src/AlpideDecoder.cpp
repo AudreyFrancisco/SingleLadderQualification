@@ -213,7 +213,9 @@ bool AlpideDecoder::DecodeEvent (unsigned char         *data,
                                  int                    boardIndex,
                                  int                    channel,
                                  int                   &prioErrors,
-                                 std::vector <TPixHit> *stuck)
+                                 std::vector <TPixHit> *stuck,
+                                 int                   *chipID,
+                                 unsigned int          *bunchCounter)
 {
   int       byte    = 0;
   int       region  = -1;
@@ -245,6 +247,8 @@ bool AlpideDecoder::DecodeEvent (unsigned char         *data,
       started = true;
       DecodeEmptyFrame (data + byte, chip, BunchCounterTmp);
       byte += 2;
+      if (chipID) *chipID = chip;
+      if (bunchCounter) *bunchCounter = BunchCounterTmp;
       finished = true;
       break;
     case DT_CHIPHEADER:
@@ -252,6 +256,8 @@ bool AlpideDecoder::DecodeEvent (unsigned char         *data,
       finished = false;
       DecodeChipHeader (data + byte, chip, BunchCounterTmp);
       byte += 2;
+      if (chipID) *chipID = chip;
+      if (bunchCounter) *bunchCounter = BunchCounterTmp;
       break;
     case DT_CHIPTRAILER:
       if (!started) {
@@ -334,6 +340,5 @@ bool AlpideDecoder::DecodeEvent (unsigned char         *data,
       return false;
     }
   }
-
   return (!corrupt);
 }

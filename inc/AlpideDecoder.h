@@ -41,7 +41,9 @@ class AlpideDecoder {
                                         int                    boardIndex,
                                         int                    channel,
                                         int                   &prioErrors,
-                                        std::vector <TPixHit> *stuck = 0);
+                                        std::vector <TPixHit> *stuck = 0,
+                                        int                   *chipID = 0,
+                                        unsigned int          *bunchCounter = 0);
    static bool      ExtractNextEvent    (unsigned char *data, int nBytes, int &eventStart, int &eventEnd, bool& isError, bool logging=false);
 };
 

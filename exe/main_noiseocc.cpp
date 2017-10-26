@@ -16,6 +16,7 @@
 
 #include <unistd.h>
 #include <string.h>
+#include <unordered_map>
 #include "TAlpide.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoard.h"
@@ -32,6 +33,7 @@ TBoardType fBoardType;
 std::vector <TReadoutBoard *> fBoards;
 std::vector <TAlpide *>       fChips;
 TConfig *fConfig;
+std::unordered_map<int, int> fReceivers;
 
 int myVCASN   = 57;
 int myITHR    = 50;
@@ -66,16 +68,16 @@ void ClearHitData() {
 
 void CopyHitData(std::vector <TPixHit> *Hits) {
   for (unsigned int ihit = 0; ihit < Hits->size(); ihit ++) {
-	int chipId  = Hits->at(ihit).chipId;
-	int dcol    = Hits->at(ihit).dcol;
-	int region  = Hits->at(ihit).region;
-	int address = Hits->at(ihit).address;
-	if ((chipId < 0) || (dcol < 0) || (region < 0) || (address < 0)) {
-	  std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
-	}
-	else {
-	  HitData[chipId][dcol + region * 16][address] ++;
-	}
+    int chipId  = Hits->at(ihit).chipId;
+    int dcol    = Hits->at(ihit).dcol;
+    int region  = Hits->at(ihit).region;
+    int address = Hits->at(ihit).address;
+    if ((chipId < 0) || (dcol < 0) || (region < 0) || (address < 0)) {
+      std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
+    }
+    else {
+      HitData[chipId][dcol + region * 16][address] ++;
+    }
   }
   Hits->clear();
 }
@@ -178,7 +180,8 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 
 void scan() {
   unsigned char         buffer[1024*4000];
-  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0, skipped = 0, prioErrors = 0;
+  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0;
+  int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0, errorsRecvChipID = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
@@ -207,51 +210,83 @@ void scan() {
       nTrigsThisTrain = nTrigsPerTrain;
     }
 
-      fBoards.at(0)->Trigger(nTrigsThisTrain);
+    fBoards.at(0)->Trigger(nTrigsThisTrain);
 
-      int itrg = 0;
-      int trials = 0;
-      while(itrg < nTrigsThisTrain * fEnabled) {
-        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
-          usleep(100);
-          trials ++;
-          if (trials == 3) {
+    int itrg = 0;
+    int trials = 0;
+    while(itrg < nTrigsThisTrain * fEnabled) {
+      if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
+        usleep(100);
+        trials ++;
+        if (trials == 3) {
         	std::cout << "Reached 3 timeouts, giving up on this event" << std::endl;
-            itrg = nTrigsThisTrain * fEnabled;
-            skipped ++;
-            trials = 0;
-          }
-          continue;
+          itrg = nTrigsThisTrain * fEnabled;
+          ++nSkipped;
+          trials = 0;
+        }
+        continue;
+      }
+      else {
+        // decode DAQboard event
+        BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+        int recv = boardInfo.channel;
+
+        if (boardInfo.decoder10b8bError) ++errors8b10b;
+        if (boardInfo.eoeCount) {
+          nClosedEvents = boardInfo.eoeCount;
         }
         else {
-          // decode DAQboard event
-          BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-          if (boardInfo.eoeCount) {
-            nClosedEvents = boardInfo.eoeCount;
+          nClosedEvents = 1;
+        }
+
+
+        // decode Chip event
+        int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
+        int chipID = -1;
+        unsigned int bunchCounter = 0;
+        bool Decode = AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0, boardInfo.channel, prioErrors, 0x0, &chipID, &bunchCounter);
+;
+        bool RecvMatched = false;
+        try {
+          int expected_recv = fReceivers.at(chipID);
+          if (expected_recv!=recv) {
+            std::cerr << "Expected Receiver: " << expected_recv << ", actual receiver: " << recv << std::endl;
           }
-          else {
-   	        nClosedEvents = 1;
-          }
-          // decode Chip event
-          int n_bytes_chipevent=n_bytes_data-n_bytes_header-n_bytes_trailer;
-          bool Decode = AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0, boardInfo.channel, prioErrors);
-          if (!Decode) {
-	    std::cout << "Failed to decode event" << std::endl;
+          else RecvMatched = true;
+        }
+        catch (const std::out_of_range& oor) { }
+        if (!RecvMatched) {
+          ++errorsRecvChipID;
+          std::cerr << "Chip ID did not match the receiver, discarding event data" << std::endl;
+        }
+        if (!Decode) {
+          ++nBad;
+          std::cout << "Failed to decode event" << std::endl;
           //  printf("Bad Event: ");
           //  for (int i = 0; i < n_bytes_chipevent; i++) {
           //    printf ("%02x ", buffer[n_bytes_header + i]);
-	  //  }
+          //  }
           //  printf ("\n");
-	  }
-          itrg+=nClosedEvents;
+
         }
+        itrg+=nClosedEvents;
+        if (Decode && RecvMatched) CopyHitData(Hits);
+        else                       ++nSkipped;
+
       }
-      //std::cout << "Number of hits: " << Hits->size() << std::endl;
-      CopyHitData(Hits);
+    }
+    //std::cout << "Number of hits: " << Hits->size() << std::endl;
   }
   if (myMOSAIC) {
     myMOSAIC->StopRun();
+    std::cout << "Total number of 8b10b decoder errors:               " << errors8b10b << std::endl;
+    std::cout << "Total number of receiver / chip ID matching errors: " << errorsRecvChipID << std::endl;
   }
+  std::cout << "Number of corrupt events:             " << nBad       << std::endl;
+  std::cout << "Number of skipped points:             " << nSkipped   << std::endl;
+  std::cout << "Priority encoder errors:              " << prioErrors << std::endl;
+  std::cout << std::endl;
+  std::cout << fEnabled << " chips were enabled for scan." << std::endl << std::endl;
 }
 
 
@@ -278,9 +313,10 @@ int main(int argc, char** argv) {
       if (fChips.at(i)->GetConfig()->IsEnabled()) {
         fEnabled ++;
         configureChip (fChips.at(i));
+        fReceivers[fChips.at(i)->GetConfig()->GetChipId()] = fChips.at(i)->GetConfig()->GetDataLink();
       }
       else if (fChips.at(i)->GetConfig()->HasEnabledSlave()) {
-	AlpideConfig::BaseConfigPLL(fChips.at(i));
+        AlpideConfig::BaseConfigPLL(fChips.at(i));
       }
     }
 
@@ -301,9 +337,10 @@ int main(int argc, char** argv) {
     sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
     WriteDataToFile (fName, true);
 
+    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    WriteScanConfig (fName, fChips.at(0), myDAQBoard);
+
     if (myDAQBoard) {
-      sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
-      WriteScanConfig (fName, fChips.at(0), myDAQBoard);
       myDAQBoard->PowerOff();
       delete myDAQBoard;
     }
