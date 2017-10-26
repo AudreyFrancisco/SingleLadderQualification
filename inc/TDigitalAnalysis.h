@@ -40,10 +40,11 @@ class TDigitalResultChip : public TScanResultChip {
 class TDigitalResultHic : public TScanResultHic {
   friend class TDigitalAnalysis;
  private:
-  int  m_nBad;
-  int  m_nStuck;
-  int  m_nBadDcols;
-  char m_stuckFile[200];
+  int           m_nBad;
+  int           m_nStuck;
+  int           m_nBadDcols;
+  char          m_stuckFile[200];
+  TErrorCounter m_errorCounter;
  public: 
   TDigitalResultHic () : TScanResultHic () {};
   void SetStuckFile (const char *fName) {strcpy(m_stuckFile, fName);};

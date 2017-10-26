@@ -126,6 +126,7 @@ class TMaskScan : public TScan {
   ~TMaskScan () {};
   std::vector <TPixHit> GetStuckPixels () {return m_stuck;};
   TErrorCounter         GetErrorCount  () {return m_errorCount;};
+  TErrorCounter         GetErrorCount  (std::string hicId);
 };
 
 #endif

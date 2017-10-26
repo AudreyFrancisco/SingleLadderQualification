@@ -289,6 +289,21 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
 }
 
 
+TErrorCounter TMaskScan::GetErrorCount (std::string hicId) 
+{
+  auto hicCount = m_errorCounts.find(hicId);
+
+  if (hicCount != m_errorCounts.end()) {
+    return hicCount->second;
+  }
+  else {
+    std::cout << "WARNING (TMaskScan::GetErrorCount), hic not found, returning empty counter" << std::endl;
+    TErrorCounter result;
+    return result;
+  }
+}
+
+
 void TScan::CreateHicConditions()
 {
   for (unsigned int i = 0; i < m_hics.size(); i++) {

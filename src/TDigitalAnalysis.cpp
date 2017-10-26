@@ -221,6 +221,7 @@ void TDigitalAnalysis::Finalize() {
     else {
       hicResult->m_class = GetClassificationOB(hicResult);
     }
+    hicResult->m_errorCounter = ((TMaskScan*)m_scan)->GetErrorCount(m_hics.at(ihic)->GetDbId());
   }
   WriteResult      ();
 
@@ -295,6 +296,10 @@ void TDigitalResultHic::WriteToFile (FILE *fp)
     it->second->WriteToFile(fp);
   }
 
+  std::cout << std::endl << "Error counts (Test feature): " << std::endl;
+  std::cout << "8b10b errors:  " << m_errorCounter.n8b10b << std::endl;
+  std::cout << "corrupt events " << m_errorCounter.nCorruptEvent << std::endl;
+  std::cout << "timeouts:      " << m_errorCounter.nTimeout << std::endl;
 }
 
 
