@@ -142,12 +142,38 @@ void TNoiseOccupancy::Init        ()
 }
 
 
+// check which HIC caused the timeout, i.e. did not send enough events
+// called only in case a timeout occurs
+void TNoiseOccupancy::FindTimeoutHics (int iboard, int *triggerCounts, int nTriggers)
+{
+  for (unsigned int iHic = 0; iHic < m_hics.size(); iHic++) {
+    bool isOnBoard = false;
+    int  nTrigs    = 0;
+    for (unsigned int iRcv = 0; iRcv < MAX_MOSAICTRANRECV; iRcv++) {
+      if (m_hics.at(iHic)->ContainsReceiver(iboard, iRcv)) {
+        isOnBoard = true;
+        nTrigs   += triggerCounts[iRcv];
+      }
+    }
+    // HIC is connected to this readout board AND did not send enough events
+    if ((isOnBoard) && (nTrigs < nTriggers * m_hics.at(iHic)->GetNEnabledChips())) {
+      m_errorCounts.at(m_hics.at(iHic)->GetDbId()).nTimeout ++;
+    }
+  }
+}
+
+
 void TNoiseOccupancy::ReadEventData (std::vector <TPixHit> *Hits, int iboard, int nTriggers)
 {
   unsigned char buffer[1024*4000]; 
   int           n_bytes_data, n_bytes_header, n_bytes_trailer;
   int           itrg = 0, trials = 0;
   TBoardHeader  boardInfo;
+  int           nTrigPerHic[MAX_MOSAICTRANRECV];
+
+  for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
+    nTrigPerHic[i] = 0;
+  }
 
   while (itrg < nTriggers * m_enabled[iboard]) {
     if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
@@ -156,6 +182,7 @@ void TNoiseOccupancy::ReadEventData (std::vector <TPixHit> *Hits, int iboard, in
       if (trials == 3) {
   	  std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event" << std::endl;
         itrg = nTriggers * m_enabled[iboard];
+        FindTimeoutHics(iboard, nTrigPerHic, nTriggers);
         m_errorCount.nTimeout ++;
         trials = 0;
       }
@@ -164,12 +191,20 @@ void TNoiseOccupancy::ReadEventData (std::vector <TPixHit> *Hits, int iboard, in
     else {
       BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
       // decode Chip event
-      if (boardInfo.decoder10b8bError) m_errorCount.n8b10b++;
+      if (boardInfo.decoder10b8bError) {
+        m_errorCount.n8b10b++;
+        if (FindHIC(iboard, boardInfo.channel).compare ("None") != 0) {
+          m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).n8b10b++;
+	}
+      }
       int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
       if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
       if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel, m_errorCount.nPrioEncoder, &m_stuck)) {
         std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
         m_errorCount.nCorruptEvent ++;
+        if (FindHIC(iboard, boardInfo.channel).compare ("None") != 0) {
+          m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nCorruptEvent++;
+	}
       }
       itrg++;
     }

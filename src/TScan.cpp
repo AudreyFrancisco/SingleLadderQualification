@@ -61,6 +61,14 @@ void TScan::Init()
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart = m_hics.at(ihic)->GetTemperature();
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaStart = m_hics.at(ihic)->GetIdda();
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddStart = m_hics.at(ihic)->GetIddd();
+
+    TErrorCounter errCount;
+    errCount.nEnabled      = m_hics.at(ihic)->GetNEnabledChips();
+    errCount.n8b10b        = 0;
+    errCount.nCorruptEvent = 0;
+    errCount.nPrioEncoder  = 0;
+    errCount.nTimeout      = 0;
+    m_errorCounts.insert (std::pair<std::string, TErrorCounter> (m_hics.at(ihic)->GetDbId(), errCount));
   }
 }
 
@@ -169,6 +177,21 @@ void TScan::CreateScanHisto ()
 }
 
 
+TErrorCounter TScan::GetErrorCount (std::string hicId) 
+{
+  auto hicCount = m_errorCounts.find(hicId);
+
+  if (hicCount != m_errorCounts.end()) {
+    return hicCount->second;
+  }
+  else {
+    std::cout << "WARNING (TScan::GetErrorCount), hic not found, returning empty counter" << std::endl;
+    TErrorCounter result;
+    return result;
+  }
+}
+
+
 TMaskScan::TMaskScan (TScanConfig                   *config,
                       std::vector <TAlpide *>        chips,
                       std::vector <THic *>           hics,
@@ -182,21 +205,6 @@ TMaskScan::TMaskScan (TScanConfig                   *config,
   m_errorCount   = {};
   FILE *fp = fopen ("DebugData.dat", "w");
   fclose(fp);
-  InitCounters();
-}
-
-
-void TMaskScan::InitCounters ()
-{
-  for (unsigned int i = 0; i < m_hics.size(); i++) {
-    TErrorCounter errCount;
-    errCount.nEnabled      = m_hics.at(i)->GetNEnabledChips();
-    errCount.n8b10b        = 0;
-    errCount.nCorruptEvent = 0;
-    errCount.nPrioEncoder  = 0;
-    errCount.nTimeout      = 0;
-    m_errorCounts.insert (std::pair<std::string, TErrorCounter> (m_hics.at(i)->GetDbId(), errCount));
-  }
 }
 
 
@@ -285,21 +293,6 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
       nTrigPerHic[boardInfo.channel] ++;
       itrg++;
     }
-  }
-}
-
-
-TErrorCounter TMaskScan::GetErrorCount (std::string hicId) 
-{
-  auto hicCount = m_errorCounts.find(hicId);
-
-  if (hicCount != m_errorCounts.end()) {
-    return hicCount->second;
-  }
-  else {
-    std::cout << "WARNING (TMaskScan::GetErrorCount), hic not found, returning empty counter" << std::endl;
-    TErrorCounter result;
-    return result;
   }
 }
 

@@ -219,9 +219,9 @@ void TDigitalAnalysis::Finalize() {
       hicResult->m_class = GetClassificationOB(hicResult);
     }
     else {
-      hicResult->m_class = GetClassificationOB(hicResult);
+      hicResult->m_class = GetClassificationIB(hicResult);
     }
-    hicResult->m_errorCounter = ((TMaskScan*)m_scan)->GetErrorCount(m_hics.at(ihic)->GetDbId());
+    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
   }
   WriteResult      ();
 

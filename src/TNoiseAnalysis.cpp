@@ -125,6 +125,7 @@ void TNoiseAnalysis::Finalize()
       hicResult->m_nNoisy += chipResult->m_noisyPixels.size();
     }
     hicResult->m_occ /= m_hics.at(ihic)->GetNChips();
+    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
   }
 
   WriteResult();
@@ -174,4 +175,8 @@ void TNoiseResultHic::WriteToFile(FILE *fp)
     it->second->WriteToFile(fp);
   }
   
+  std::cout << std::endl << "Error counts (Test feature): " << std::endl;
+  std::cout << "8b10b errors:  " << m_errorCounter.n8b10b << std::endl;
+  std::cout << "corrupt events " << m_errorCounter.nCorruptEvent << std::endl;
+  std::cout << "timeouts:      " << m_errorCounter.nTimeout << std::endl;
 }

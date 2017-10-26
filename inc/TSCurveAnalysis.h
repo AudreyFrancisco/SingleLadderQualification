@@ -50,9 +50,10 @@ class TSCurveResultHic : public TScanResultHic {
   friend class TSCurveAnalysis;
   friend class TApplyTuning;
  private:
-  int  m_nDead;
-  int  m_nNoThresh;
-  char m_stuckFile[200];
+  int           m_nDead;
+  int           m_nNoThresh;
+  char          m_stuckFile[200];
+  TErrorCounter m_errorCounter;
  public:
   TSCurveResultHic () : TScanResultHic () {};
   void SetStuckFile (const char *fName) {strcpy(m_stuckFile, fName);};

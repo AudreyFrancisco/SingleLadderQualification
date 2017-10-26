@@ -257,6 +257,16 @@ void TSCurveAnalysis::Finalize()
     if (m_writeFitResults) fclose(chipResult->m_fitFP);
   }
 
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    TSCurveResultHic *hicResult = (TSCurveResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+    if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
+      hicResult->m_class = GetClassificationOB(hicResult);
+    }
+    else {
+      hicResult->m_class = GetClassificationIB(hicResult);
+    }
+    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
+  }
   WriteResult();
   m_finished = true;
 }
@@ -627,6 +637,11 @@ void TSCurveResultHic::WriteToFile (FILE *fp)
     fprintf(fp, "\nResult chip %d:\n\n", it->first);
     it->second->WriteToFile(fp);
   }
+
+  std::cout << std::endl << "Error counts (Test feature): " << std::endl;
+  std::cout << "8b10b errors:  " << m_errorCounter.n8b10b << std::endl;
+  std::cout << "corrupt events " << m_errorCounter.nCorruptEvent << std::endl;
+  std::cout << "timeouts:      " << m_errorCounter.nTimeout << std::endl;
 }
 
 

@@ -33,9 +33,10 @@ class TNoiseResultHic : public TScanResultHic {
   friend class TNoiseAnalysis;
   friend class TApplyMask;
  private:
-  double m_occ;
-  int    m_nNoisy;
-  char   m_noisyFile[200];
+  double        m_occ;
+  int           m_nNoisy;
+  char          m_noisyFile[200];
+  TErrorCounter m_errorCounter;
  public: 
   TNoiseResultHic () : TScanResultHic () {};
   void SetNoisyFile (const char *fName) {strcpy(m_noisyFile, fName);};
