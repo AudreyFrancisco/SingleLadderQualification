@@ -44,6 +44,9 @@ class TDigitalResultHic : public TScanResultHic {
   int           m_nStuck;
   int           m_nBadDcols;
   char          m_stuckFile[200];
+  bool          m_lower;
+  bool          m_upper;
+  bool          m_nominal;
   TErrorCounter m_errorCounter;
  public: 
   TDigitalResultHic () : TScanResultHic () {};

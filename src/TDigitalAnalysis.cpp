@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include "TDigitalAnalysis.h"
+#include "TDigitalScan.h"
 #include "DBHelpers.h"
 
 TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, 
@@ -89,6 +90,9 @@ void TDigitalAnalysis::InitCounters ()
     result->m_nBad      = 0;
     result->m_nStuck    = 0;
     result->m_nBadDcols = 0;
+    result->m_lower     = ((TDigitalScan*) m_scan)->IsLower  ();
+    result->m_upper     = ((TDigitalScan*) m_scan)->IsUpper  ();
+    result->m_nominal   = ((TDigitalScan*) m_scan)->IsNominal();
   }
 
 }
@@ -268,10 +272,26 @@ void TDigitalResult::WriteToFileGlobal (FILE *fp)
 
 void TDigitalResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
+  std::string dvdd;
+  if (m_nominal) {
+    dvdd = string(" (nominal)");
+  }
+  else if (m_lower) {
+    dvdd = string(" (lower)");
+  }
+  else if (m_upper) {
+    dvdd = string(" (upper)");
+  }
   // TODO: change hard coded attachment type
-  TScanResultHic::WriteToDB(db, activity);
-  DbAddParameter  (db, activity, string("Number of Bad Pixels Digital"), (float) m_nBad);
-  DbAddAttachment (db, activity, RESULT_ATTACHMENT_TYPE, string(m_resultFile), string(m_resultFile));
+
+  DbAddParameter  (db, activity, string ("Number of timeouts digital") + dvdd,                (float) m_errorCounter.nTimeout);
+  DbAddParameter  (db, activity, string ("Number of 8b10b errors digital") + dvdd,            (float) m_errorCounter.n8b10b);
+  DbAddParameter  (db, activity, string ("Number of corrupt events digital") + dvdd,          (float) m_errorCounter.nCorruptEvent);
+  DbAddParameter  (db, activity, string ("Number of priority encoder errors digital") + dvdd, (float) m_errorCounter.nPrioEncoder);
+  DbAddParameter  (db, activity, string ("Number of bad double columns digital") + dvdd,      (float) m_nBadDcols);
+  DbAddParameter  (db, activity, string("Number of bad pixels digital") + dvdd,               (float) m_nBad);
+  DbAddAttachment (db, activity, RESULT_ATTACHMENT_TYPE, string(m_resultFile), string(m_resultFile) + dvdd);
+
 }
 
 
