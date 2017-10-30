@@ -148,6 +148,7 @@ int initSetupHalfStave(TConfig                        *config,
   std::vector <THic *>  m_Hics;
   std::vector <THic *>* pHics = (hics) ? hics : &m_Hics;
 
+  // TODO: Define power board mapping for half stave
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
     pHics->push_back(new THicOB("Dummy ID", config->GetHicConfig(ihic)->GetModId(), pb, 0));
   }
@@ -454,12 +455,19 @@ int initSetupIB(TConfig                        *config,
 
   boards->push_back (new TReadoutBoardMOSAIC(config, boardConfig));
 
+  TPowerBoard *pb = 0;
+  if (config->GetUsePowerBoard()) {
+    TPowerBoardConfig *pbConfig = new TPowerBoardConfig(NULL);
+    pbConfig->SetDefaultsIB(0);
+    pb = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0), pbConfig);
+  }
+
   if (hics) {
     if (hicIds) {
-      hics->push_back(new THicIB(hicIds[0], 0, 0, 0));
+      hics->push_back(new THicIB(hicIds[0], 0, pb, 0));
     }
     else {
-      hics->push_back(new THicIB("Dummy ID", 0, 0, 0));
+      hics->push_back(new THicIB("Dummy ID", 0, pb, 0));
     }
     ((THicIB*)(hics->at(0)))->ConfigureInterface (0, RCVMAP, 0);
   }

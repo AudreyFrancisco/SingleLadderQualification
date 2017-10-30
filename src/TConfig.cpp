@@ -146,16 +146,28 @@ TDeviceType TConfig::ReadDeviceType (std::string deviceName) {
   else if (deviceName.compare("IBHIC")==0) {
     type = TYPE_IBHIC;
   }
+  else if (deviceName.compare("IBHIC_PB")==0) {
+    SetUsePowerBoard(true);
+    type = TYPE_IBHIC;
+  }
   else if (deviceName.compare("CHIPMOSAIC")==0) {
     type = TYPE_CHIP_MOSAIC;
   }
   else if (deviceName.compare("HALFSTAVE")==0) {
     type = TYPE_HALFSTAVE;
   }
+  else if (deviceName.compare("HALFSTAVE_PB")==0) {
+    SetUsePowerBoard(true);
+    type = TYPE_HALFSTAVE;
+  }
   else if (deviceName.compare("HALFSTAVERU")==0) {
     type = TYPE_HALFSTAVERU;
   }
   else if (deviceName.compare("ENDURANCETEST")==0) {
+    type = TYPE_ENDURANCE;
+  }
+  else if (deviceName.compare("ENDURANCETEST_PB")==0) {
+    SetUsePowerBoard(true);
     type = TYPE_ENDURANCE;
   }
   else if (deviceName.compare("IBHICRU")==0) {
