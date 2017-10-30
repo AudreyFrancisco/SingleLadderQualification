@@ -29,6 +29,7 @@ class THic {
   bool                       IsPoweredAnalog ();
   bool                       IsPoweredDigital();
   bool                       IsEnabled       ();
+  void                       Disable         ();
   int                        GetNEnabledChips();
   void                       PowerOn         ();
   void                       PowerOff        ();

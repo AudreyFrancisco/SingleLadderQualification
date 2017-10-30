@@ -798,11 +798,14 @@ int initSetupEndurance(TConfig                        *config,
       int pbMod      = mod % 5;   // TODO: check this
       if (hicIds) {
         hics->push_back(new THicOB(hicIds[mod], modId, pb[boardIndex], pbMod));
+        if (!strcmp(hicIds[mod], "\0")) {
+          hics->at(mod)->Disable();
+	}
       }
       else {
         hics->push_back(new THicOB("Dummy ID", modId, pb[boardIndex], pbMod));
       }
-      hics->at(mod)->PowerOn();
+      if (hics->at(mod)->IsEnabled()) hics->at(mod)->PowerOn();
       sleep(1);
     }
   }

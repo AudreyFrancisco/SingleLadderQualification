@@ -56,6 +56,14 @@ int THic::GetNEnabledChips ()
 }
 
 
+void THic::Disable ()
+{
+  for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
+    m_chips.at(ichip)->GetConfig()->SetEnable(false);
+  }  
+}
+
+
 bool THic::IsPowered() 
 {
   // TODO: what if partially powered? What about bias?
