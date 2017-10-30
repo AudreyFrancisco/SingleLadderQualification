@@ -36,24 +36,34 @@
  */
 #include "AlpideDB.h"
 
-AlpideDB::AlpideDB()
-{
 
-	theQueryDomain = "https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx";
+AlpideDB::AlpideDB(bool isTestDB=true)
+{
+	if(isTestDB)
+		AlpideDB( "https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx", "https://test-alucmsapi.web.cern.ch");
+	else
+		AlpideDB( "https://alucmsapi.web.cern.ch/AlucmswebAPI.asmx", "https://alucmsapi.web.cern.ch");
+}
+
+AlpideDB::AlpideDB(string aQueryDomain, string aJarUrl)
+{
+	theQueryDomain = aQueryDomain;
+	theJarUrl = aJarUrl;
+
     theDBmanager = new AlpideDBManager();
 
 #ifdef AUTH_KERBEROS
-    isConnected = theDBmanager->Init("https://test-alucmsapi.web.cern.ch");
+    isConnected = theDBmanager->Init(theJarUrl);
 #endif
 
 #ifdef AUTH_X509
     if(theDBmanager->isLibCurlCompiled()){
-    	isConnected = theDBmanager->Init("https://test-alucmsapi.web.cern.ch",
+    	isConnected = theDBmanager->Init(theJarUrl,
     			"FrancoAntonio",
 				".",
 				"alpide4me");
     } else {
-    	isConnected = theDBmanager->Init("https://test-alucmsapi.web.cern.ch",
+    	isConnected = theDBmanager->Init(theJarUrl,
         	    		"/home/fap/.globus/usercert.pem",
         	    		"/home/fap/.globus/userkey.pem",
         				"/etc/ssl/certs");
