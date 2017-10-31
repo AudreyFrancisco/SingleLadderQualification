@@ -34,6 +34,7 @@ private:
       virtual void getlocationcombo(int value);
     virtual int GetMemberID();
     virtual void adjustendurance();
+    virtual void hideendurance();
 
     private slots:
     void popupmessage(QString m);

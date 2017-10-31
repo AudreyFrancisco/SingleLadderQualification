@@ -43,6 +43,7 @@ void TestSelection::SaveSettings(QString &opname, QString &hicid, int &counter, 
         qDebug()<<"Put your details little shit"<<endl;
         popupmessage("Info missing");
         counter=0;
+
     }
     else{
         if (!ui->t2->toPlainText().isEmpty()){
@@ -107,7 +108,8 @@ void TestSelection::popupmessage(QString m){
   this->setWindowFlags((windowFlags() & Qt::WindowStaysOnTopHint));
   this->setWindowFlags((windowFlags() & ~Qt::WindowStaysOnTopHint));
   missingsettings->append(m);
-  missingsettings->show();
+//  missingsettings->show();
+  missingsettings->exec();
 
  // missingsettings->activateWindow();
   //missingsettings->raise();
@@ -196,4 +198,17 @@ ui->d5->show();
 }
 
 
+void TestSelection::hideendurance(){
 
+    ui->t2->hide();
+    ui->t3->hide();
+    ui->t4->hide();
+    ui->t5->hide();
+    ui->d1->hide();
+    ui->d2->hide();
+    ui->d3->hide();
+    ui->d4->hide();
+
+    ui->d5->hide();
+
+}

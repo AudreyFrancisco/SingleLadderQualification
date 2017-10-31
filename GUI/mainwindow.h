@@ -20,6 +20,7 @@
 #include "THisto.h"
 #include "testingprogress.h"
 #include "calibrationpb.h"
+#include "databaseselection.h"
 class TConfig;
 class TScan;
 class TScanAnalysis;
@@ -47,6 +48,7 @@ public:
     TestSelection *settingswindow;
     ScanConfiguration *scanconfigwindow;
     Testingprogress *progresswindow;
+    DatabaseSelection *databasewindow=0;
     void scanLoop (TScan *myScan);
  //   void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
     std::vector <TScan *> fScanVector;
@@ -77,8 +79,9 @@ int nm;
 bool execution;
 int colour;
  int pbnumberofmodule=0;
-
-
+std::vector <QString> hicnames;
+std::vector <QPushButton*> endurancemodules;
+bool databasetype;
 
 
 
@@ -211,6 +214,7 @@ private:
     checkpbconfig *pbcfgcheck=0;
     Calibrationpb *calwindow=0;
    // QProgressBar * sbar;
+    void exploreendurancebox();
 
 
 private slots:
