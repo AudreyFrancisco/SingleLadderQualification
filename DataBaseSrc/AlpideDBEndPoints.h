@@ -292,7 +292,7 @@ public:
     vector<componentType> *GetComponentTypeList(int aActivityID);
     vector<resultType> *GetResultList(int aActivityID);
     vector<statusType> *GetStatusList(int aActivityID);
-    vector<attachmentType> *ActivityDB::GetAttachmentTypeList();
+    vector<attachmentType> *GetAttachmentTypeList();
 
 
 
