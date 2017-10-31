@@ -53,6 +53,22 @@ int DbGetParameterId (AlpideDB *db, int activityTypeId, string name)
 }
 
 
+int  DbGetAttachmentTypeId (AlpideDB *db, string name) 
+{
+  ActivityDB                                     *activityDB = new ActivityDB (db);
+  static std::vector <ActivityDB::attachmentType> attTypeList;
+
+  if (attTypeList.size() == 0) attTypeList = *(activityDB->GetAttachmentTypeList());
+
+  for (unsigned int i = 0; i < attTypeList.size(); i++) {
+    if (name == attTypeList.at(i).Category) {
+      return attTypeList.at(i).ID;
+    }
+  }
+  return -1;
+}
+
+
 bool DbAddParameter (AlpideDB *db, ActivityDB::activity &activity, string name, float value) 
 {
   ActivityDB::parameter parameter;
@@ -72,13 +88,24 @@ bool DbAddParameter (AlpideDB *db, ActivityDB::activity &activity, string name, 
 }
 
 
-void DbAddAttachment (AlpideDB *db, ActivityDB::activity &activity, int attCategory, string localName, string remoteName)
+void DbAddAttachment (AlpideDB *db, ActivityDB::activity &activity, TAttachmentType attType, string localName, string remoteName)
 {
   ActivityDB::attach attachment;
 
+  switch (attType) {
+  case attachResult:
+    attachment.Category = DbGetAttachmentTypeId (db, "HIC Result File");
+    break;
+  case attachLog: 
+    attachment.Category = DbGetAttachmentTypeId (db, "Test Log File");
+    break;
+  case attachErrors:
+    attachment.Category = DbGetAttachmentTypeId (db, "Error Output File");
+    break;
+  }
+
   attachment.ID             = activity.ID;
   attachment.User           = activity.User;
-  attachment.Category       = attCategory;
   attachment.LocalFileName  = localName;
   attachment.RemoteFileName = remoteName;
 

@@ -231,10 +231,9 @@ void TDigitalWFResult::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 
 void TDigitalWFResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity) 
 {
-  // TODO: change hard coded attachment type
   DbAddParameter  (db, activity, string("Number of Unmaskable Pixels"),       (float) m_nUnmaskable);
   DbAddParameter  (db, activity, string("Number of Unmaskable Stuck Pixels"), (float) m_nStuck);
-  DbAddAttachment (db, activity, RESULT_ATTACHMENT_TYPE, string(m_resultFile), string(m_resultFile));
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), string(m_resultFile));
 }
 
 

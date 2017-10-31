@@ -193,7 +193,7 @@ float TScanResultHic::GetVariable (int chip, TResultVariable var)
 
 void TScanResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
-  DbAddAttachment (db, activity, RESULT_ATTACHMENT_TYPE, string(m_resultFile), string(m_resultFile));
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), string(m_resultFile));
 }
 
 

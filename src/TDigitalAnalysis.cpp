@@ -282,7 +282,6 @@ void TDigitalResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
   else if (m_upper) {
     dvdd = string(" (upper)");
   }
-  // TODO: change hard coded attachment type
 
   DbAddParameter  (db, activity, string ("Number of timeouts digital") + dvdd,                (float) m_errorCounter.nTimeout);
   DbAddParameter  (db, activity, string ("Number of 8b10b errors digital") + dvdd,            (float) m_errorCounter.n8b10b);
@@ -290,7 +289,7 @@ void TDigitalResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
   DbAddParameter  (db, activity, string ("Number of priority encoder errors digital") + dvdd, (float) m_errorCounter.nPrioEncoder);
   DbAddParameter  (db, activity, string ("Number of bad double columns digital") + dvdd,      (float) m_nBadDcols);
   DbAddParameter  (db, activity, string("Number of bad pixels digital") + dvdd,               (float) m_nBad);
-  DbAddAttachment (db, activity, RESULT_ATTACHMENT_TYPE, string(m_resultFile), string(m_resultFile) + dvdd);
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), string(m_resultFile) + dvdd);
 
 }
 

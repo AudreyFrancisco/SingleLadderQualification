@@ -148,15 +148,14 @@ void TPowerAnalysis::WriteResult()
 
 void TPowerResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
-  // TODO: change hard coded attachment type
   TScanResultHic::WriteToDB(db, activity);
   DbAddParameter  (db, activity, string("IDDD"), idddConfigured);
   DbAddParameter  (db, activity, string("IDDA"), iddaConfigured);
   DbAddParameter  (db, activity, string("Back bias current 0V"), ibias0);
   DbAddParameter  (db, activity, string("Back bias current 3V"), ibias3);
 
-  DbAddAttachment (db, activity, RESULT_ATTACHMENT_TYPE, string(m_resultFile), string(m_resultFile));
-  DbAddAttachment (db, activity, RESULT_ATTACHMENT_TYPE, string(m_ivFile), string(m_ivFile));
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), string(m_resultFile));
+  DbAddAttachment (db, activity, attachResult, string(m_ivFile), string(m_ivFile));
 }
 
 
