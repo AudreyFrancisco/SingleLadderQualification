@@ -238,7 +238,7 @@ public:
 	struct attachmentType {
 		int ID;
 		string Category;
-		string Description
+		string Description;
 	};
 	#define zATTACHMENTTYPE(a) a.ID = 0; a.Category = ""; a.Description = "";
 
