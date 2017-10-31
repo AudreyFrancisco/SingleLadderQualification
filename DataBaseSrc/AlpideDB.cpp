@@ -37,7 +37,7 @@
 #include "AlpideDB.h"
 
 
-AlpideDB::AlpideDB(bool isTestDB=true)
+AlpideDB::AlpideDB(bool isTestDB)
 {
 	if(isTestDB)
 		AlpideDB( "https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx", "https://test-alucmsapi.web.cern.ch");
