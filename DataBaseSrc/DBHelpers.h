@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-#define PROJECT_ID 21   // TODO: make function to get project id?
-
 typedef enum {attachResult, attachLog, attachErrors} TAttachmentType;
 
 int  DbGetMemberId         (AlpideDB *db, string name);

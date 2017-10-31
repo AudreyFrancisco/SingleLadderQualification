@@ -39,10 +39,14 @@
 
 AlpideDB::AlpideDB(bool isTestDB)
 {
-	if(isTestDB)
-		AlpideDB( "https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx", "https://test-alucmsapi.web.cern.ch");
-	else
-		AlpideDB( "https://alucmsapi.web.cern.ch/AlucmswebAPI.asmx", "https://alucmsapi.web.cern.ch");
+  if(isTestDB) {
+    AlpideDB( "https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx", "https://test-alucmsapi.web.cern.ch");
+    m_projectId = PROJECT_ID_TEST;
+  }
+  else {
+    AlpideDB( "https://alucmsapi.web.cern.ch/AlucmswebAPI.asmx", "https://alucmsapi.web.cern.ch");
+    m_projectId = PROJECT_ID_PROD;
+  }
 }
 
 AlpideDB::AlpideDB(string aQueryDomain, string aJarUrl)

@@ -48,6 +48,9 @@
 
 #include "AlpideDBManager.h"
 
+#define PROJECT_ID_PROD 383
+#define PROJECT_ID_TEST 21
+
 using namespace std;
 
 
@@ -71,8 +74,8 @@ protected:
 	AlpideDBManager  *theDBmanager;
 	string theQueryDomain;
 	string theJarUrl;
-	bool isConnected;
-
+	bool   isConnected;
+        int    m_projectId;
 // Methods
 public:
 	AlpideDB(bool isTestDB = true);
@@ -84,7 +87,7 @@ public:
 
 	AlpideDBManager  * GetManagerHandle() { return(theDBmanager); };
 	bool isDBConnected() { return(isConnected); };
-
+	int GetProjectId () {return m_projectId;};
 private:
 
 };

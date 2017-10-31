@@ -6,7 +6,7 @@ int DbGetActivityTypeId (AlpideDB *db, string name)
   ActivityDB                                   *activityDB = new ActivityDB (db);
   static std::vector <ActivityDB::activityType> activityList;
 
-  if (activityList.size() == 0) activityList = *(activityDB->GetActivityTypeList(PROJECT_ID));
+  if (activityList.size() == 0) activityList = *(activityDB->GetActivityTypeList(db->GetProjectId()));
 
   for (unsigned int i = 0; i < activityList.size(); i++) {
     if (name == activityList.at(i).Name) return activityList.at(i).ID;
@@ -22,7 +22,7 @@ int DbGetMemberId (AlpideDB *db, string name)
   static std::vector <MemberDB::member>  memberList;
 
   // memberList should not change, so read only once
-  if (memberList.size() == 0) memberDB->GetList(PROJECT_ID, &memberList);
+  if (memberList.size() == 0) memberDB->GetList(db->GetProjectId(), &memberList);
 
   for (unsigned int i = 0; i < memberList.size(); i++) {
     if (name == memberList.at(i).FullName) return memberList.at(i).ID;
