@@ -75,8 +75,8 @@ protected:
 
 // Methods
 public:
-	AlpideDB::AlpideDB(bool isTestDB=true)
-	AlpideDB::AlpideDB(string aQueryDomain, string aJarUrl)
+	AlpideDB::AlpideDB(bool isTestDB=true);
+	AlpideDB::AlpideDB(string aQueryDomain, string aJarUrl);
     ~AlpideDB();
 
     string GetQueryDomain() { return(theQueryDomain); };
