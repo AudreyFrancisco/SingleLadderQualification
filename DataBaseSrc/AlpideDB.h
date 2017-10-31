@@ -70,11 +70,13 @@ public:
 protected:
 	AlpideDBManager  *theDBmanager;
 	string theQueryDomain;
+	string theJarUrl;
 	bool isConnected;
 
 // Methods
 public:
-	AlpideDB();
+	AlpideDB(bool isTestDB = true);
+	AlpideDB(string aQueryDomain, string aJarUrl);
     ~AlpideDB();
 
     string GetQueryDomain() { return(theQueryDomain); };

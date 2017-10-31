@@ -937,6 +937,52 @@ std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActi
 }
 
 /* ----------------------
+ * Get the list of type attachment ...
+ *
+ *
+----------------------- */
+std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList()
+{
+	vector<attachmentType> *theAttachmentList = new vector<attachmentType>;
+	char *stringresult;
+	string theUrl;
+	string theQuery;
+	attachmentType att;
+
+	theUrl = theParentDB->GetQueryDomain() + "/AttachmentCategoryRead";
+	theQuery = "";
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+		return(theAttachmentList);
+	} else {
+		xmlDocPtr doc;
+		xmlNode *nod;
+		if(_getTheRootElementChildren(stringresult, &doc, &nod)) {
+			while (nod != NULL) {
+				if(strcmp((const char*)nod->name, "AttachmentCategory") == 0) {
+					xmlNode *n1 = nod->children;
+					while(n1 != NULL) {
+						if(strcmp((const char*)n1->name, "ID") == 0) att.ID = atoi( (const char*)(n1->children->content)) ;
+						else if (strcmp((const char*)n1->name, "Category") == 0) att.Category = (const char*)(n1->children->content);
+						else if (strcmp((const char*)n1->name, "Description") == 0) att.Description = (const char*)(n1->children->content);
+						n1 = n1->next;
+					}
+					theAttachmentList->push_back(att);
+				}
+				nod = nod->next;
+			}
+			SetResponse(AlpideTable::NoError, 0,0);
+		}
+		free(stringresult);
+		xmlFreeDoc(doc);       // free document
+		xmlCleanupParser();
+	}
+	return(theAttachmentList);
+}
+
+
+/* ----------------------
  * Get the list of type component ...
  *
  *

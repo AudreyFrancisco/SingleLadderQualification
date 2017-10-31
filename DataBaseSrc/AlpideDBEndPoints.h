@@ -235,6 +235,13 @@ public:
 	};
 	#define zLOCATIONTYPE(a) a.ID = 0; a.Name = ""
 
+	struct attachmentType {
+		int ID;
+		string Category;
+		string Description;
+	};
+	#define zATTACHMENTTYPE(a) a.ID = 0; a.Category = ""; a.Description = "";
+
 	struct componentType {
 		int ID;
 		string Name;
@@ -285,6 +292,9 @@ public:
     vector<componentType> *GetComponentTypeList(int aActivityID);
     vector<resultType> *GetResultList(int aActivityID);
     vector<statusType> *GetStatusList(int aActivityID);
+    vector<attachmentType> *GetAttachmentTypeList();
+
+
 
 private:
     unsigned long buildBase64Binary(string aLocalFileName, string * aBuffer);
