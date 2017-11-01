@@ -79,7 +79,7 @@ protected:
 // Methods
 public:
 	AlpideDB(bool isTestDB = true);
-	AlpideDB(string aQueryDomain, string aJarUrl);
+
     ~AlpideDB();
 
     string GetQueryDomain() { return(theQueryDomain); };
@@ -89,7 +89,7 @@ public:
 	bool isDBConnected() { return(isConnected); };
 	int GetProjectId () {return m_projectId;};
 private:
-
+	void Init(string aQueryDomain, string aJarUrl);
 };
 
 
