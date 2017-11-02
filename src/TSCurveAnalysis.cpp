@@ -266,7 +266,7 @@ void TSCurveAnalysis::Finalize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TSCurveResultHic *hicResult = (TSCurveResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
-    for (int ichip = 0; ichip < hicResult->m_chipResults.size(); ichip ++) {
+    for (unsigned int ichip = 0; ichip < hicResult->m_chipResults.size(); ichip ++) {
       TSCurveResultChip *chipResult = (TSCurveResultChip*) hicResult->m_chipResults.at(ichip);
       if (chipResult->m_thresholdAv < hicResult->m_minChipAv) hicResult->m_minChipAv = chipResult->m_thresholdAv;
       if (chipResult->m_thresholdAv > hicResult->m_maxChipAv) hicResult->m_maxChipAv = chipResult->m_thresholdAv;   
