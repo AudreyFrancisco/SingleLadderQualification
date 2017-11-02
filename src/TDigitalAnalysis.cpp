@@ -272,7 +272,7 @@ void TDigitalResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
   DbAddParameter  (db, activity, string ("Corrupt events digital") + dvdd,          (float) m_errorCounter.nCorruptEvent);
   DbAddParameter  (db, activity, string ("Priority encoder errors digital") + dvdd, (float) m_errorCounter.nPrioEncoder);
   DbAddParameter  (db, activity, string ("Bad double columns digital") + dvdd,      (float) m_nBadDcols);
-  DbAddParameter  (db, activity, string ("Bad pixels digital") + dvdd,               (float) m_nBad);
+  DbAddParameter  (db, activity, string ("Bad pixels digital") + dvdd,              (float) m_nBad);
   DbAddAttachment (db, activity, attachResult, string(m_resultFile), string(m_resultFile) + dvdd);
 
 }

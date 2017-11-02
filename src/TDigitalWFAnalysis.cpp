@@ -220,7 +220,6 @@ void TDigitalWFResult::WriteToFileGlobal (FILE *fp)
 
 void TDigitalWFResult::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
-  DbAddParameter (db, activity, string("Number of Working Chips"), (float) m_chipResults.size());
   std::map<std::string, TScanResultHic*>::iterator it;
   for (it = m_hicResults.begin(); it != m_hicResults.end(); it++) {
     TDigitalWFResultHic *hicResult = (TDigitalWFResultHic *) it->second;
@@ -231,8 +230,8 @@ void TDigitalWFResult::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 
 void TDigitalWFResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity) 
 {
-  DbAddParameter  (db, activity, string("Number of Unmaskable Pixels"),       (float) m_nUnmaskable);
-  DbAddParameter  (db, activity, string("Number of Unmaskable Stuck Pixels"), (float) m_nStuck);
+  DbAddParameter  (db, activity, string("Unmaskable Pixels"),       (float) m_nUnmaskable);
+  DbAddParameter  (db, activity, string("Unmaskable Stuck Pixels"), (float) m_nStuck);
   DbAddAttachment (db, activity, attachResult, string(m_resultFile), string(m_resultFile));
 }
 
