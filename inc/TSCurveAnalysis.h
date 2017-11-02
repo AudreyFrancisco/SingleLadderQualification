@@ -8,6 +8,8 @@
 #include "Common.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
+#include "TSCurveScan.h"
+#include "DBHelpers.h"
 #include "TScan.h"
 #include "THisto.h"
 
@@ -52,12 +54,18 @@ class TSCurveResultHic : public TScanResultHic {
  private:
   int           m_nDead;
   int           m_nNoThresh;
+  float         m_backBias;
+  bool          m_nominal;
+  bool          m_VCASNTuning;
+  bool          m_ITHRTuning;
+  bool          m_thresholdScan;
   char          m_stuckFile[200];
   TErrorCounter m_errorCounter;
  public:
   TSCurveResultHic () : TScanResultHic () {};
   void SetStuckFile (const char *fName) {strcpy(m_stuckFile, fName);};
   void WriteToFile  (FILE *fp);
+  void WriteToDB    (AlpideDB *db, ActivityDB::activity &activity);
 };
 
 

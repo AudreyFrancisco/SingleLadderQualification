@@ -163,8 +163,13 @@ void TSCurveAnalysis::InitCounters ()
 
   for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
     TSCurveResultHic *result = (TSCurveResultHic*) it->second;
-    result->m_nDead     = 0;
-    result->m_nNoThresh = 0;
+    result->m_nDead         = 0;
+    result->m_nNoThresh     = 0;
+    result->m_backBias      = ((TSCurveScan *) m_scan)->GetBackbias();
+    result->m_nominal       = ((TSCurveScan *) m_scan)->GetNominal ();
+    result->m_VCASNTuning   = IsVCASNTuning  ();
+    result->m_ITHRTuning    = IsITHRTuning   ();
+    result->m_thresholdScan = IsThresholdScan();
   }
 }
 
@@ -620,6 +625,33 @@ float TSCurveResultChip::GetVariable (TResultVariable var)
     std::cout << "Warning, bad result type for this analysis" << std::endl;
     return 0;
   }
+}
+
+
+void TSCurveResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
+{
+  std::string scan;
+  if (m_thresholdScan) {
+    if (m_nominal) {
+      scan = " threshold nominal ";
+    }
+    else {
+      scan = " threshold tuned ";
+    }
+  }
+  else if (m_VCASNTuning) {
+    scan = " VCASN tune ";
+  }
+  else if (m_ITHRTuning) {
+    scan = " ITHR tune ";
+  }
+  scan += std::to_string((int) m_backBias) + std::string("V");
+
+  if (m_thresholdScan) {
+    DbAddParameter (db, activity, string ("Dead pixels,") + scan,              (float) m_nNoThresh);
+    DbAddParameter (db, activity, string ("Pixels without threshold,") + scan, (float) m_nNoThresh);
+  }
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), string(m_resultFile) + scan);  
 }
 
 

@@ -37,6 +37,7 @@ class TSCurveScan : public TMaskScan {
   void  Execute     ();
   void  Terminate   ();
   float GetBackbias () {return m_backBias;};
+  bool  GetNominal  () {return m_nominal;};
 };
 
 
