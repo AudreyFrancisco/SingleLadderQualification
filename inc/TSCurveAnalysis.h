@@ -52,6 +52,8 @@ class TSCurveResultHic : public TScanResultHic {
   friend class TSCurveAnalysis;
   friend class TApplyTuning;
  private:
+  int           m_minChipAv;
+  int           m_maxChipAv;
   int           m_nDead;
   int           m_nNoThresh;
   float         m_backBias;

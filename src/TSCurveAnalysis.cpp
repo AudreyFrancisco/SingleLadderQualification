@@ -165,6 +165,8 @@ void TSCurveAnalysis::InitCounters ()
     TSCurveResultHic *result = (TSCurveResultHic*) it->second;
     result->m_nDead         = 0;
     result->m_nNoThresh     = 0;
+    result->m_minChipAv     = -1;
+    result->m_maxChipAv     = 999;
     result->m_backBias      = ((TSCurveScan *) m_scan)->GetBackbias();
     result->m_nominal       = ((TSCurveScan *) m_scan)->GetNominal ();
     result->m_VCASNTuning   = IsVCASNTuning  ();
@@ -264,6 +266,11 @@ void TSCurveAnalysis::Finalize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TSCurveResultHic *hicResult = (TSCurveResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+    for (int ichip = 0; ichip < hicResult->m_chipResults.size(); ichip ++) {
+      TSCurveResultChip *chipResult = (TSCurveResultChip*) hicResult->m_chipResults.at(ichip);
+      if (chipResult->m_thresholdAv < hicResult->m_minChipAv) hicResult->m_minChipAv = chipResult->m_thresholdAv;
+      if (chipResult->m_thresholdAv > hicResult->m_maxChipAv) hicResult->m_maxChipAv = chipResult->m_thresholdAv;   
+    }
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
     }
@@ -651,6 +658,8 @@ void TSCurveResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
     DbAddParameter (db, activity, string ("Dead pixels,") + scan,              (float) m_nNoThresh);
     DbAddParameter (db, activity, string ("Pixels without threshold,") + scan, (float) m_nNoThresh);
   }
+  DbAddParameter (db, activity, string ("Minimum chip av.,") + scan, (float) m_minChipAv);
+  DbAddParameter (db, activity, string ("Maximum chip av.,") + scan, (float) m_maxChipAv);
   DbAddAttachment (db, activity, attachResult, string(m_resultFile), string(m_resultFile) + scan);  
 }
 
