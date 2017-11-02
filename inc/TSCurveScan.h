@@ -32,11 +32,11 @@ class TSCurveScan : public TMaskScan {
   THisto CreateHisto(); //public in TScan, so...
   void Init        ();
   virtual void PrepareStep (int loopIndex) = 0;
-  void LoopEnd     (int loopIndex);
-  void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
-  void Execute     ();
-  void Terminate   ();
-
+  void  LoopEnd     (int loopIndex);
+  void  LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
+  void  Execute     ();
+  void  Terminate   ();
+  float GetBackbias () {return m_backBias;};
 };
 
 
