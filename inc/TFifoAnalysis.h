@@ -38,15 +38,19 @@ class TFifoResultChip : public TScanResultChip {
 class TFifoResultHic : public TScanResultHic {
   friend class TFifoAnalysis;
  private:
-  int m_err0;
-  int m_err5;
-  int m_erra;
-  int m_errf;
-  int m_nExceptions;
-  int m_nFaultyChips;
+  int  m_err0;
+  int  m_err5;
+  int  m_erra;
+  int  m_errf;
+  bool m_upper;
+  bool m_lower;
+  bool m_nominal;
+  int  m_nExceptions;
+  int  m_nFaultyChips;
  public: 
-  TFifoResultHic () : TScanResultHic () {};
+  TFifoResultHic   () : TScanResultHic () {};
   void WriteToFile (FILE *fp);
+  void WriteToDB   (AlpideDB *db, ActivityDB::activity &activity);
 };
 
 

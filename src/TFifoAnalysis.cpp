@@ -2,7 +2,8 @@
 #include <vector>
 #include <string>
 #include "TFifoAnalysis.h"
-
+#include "TFifoTest.h"
+#include "DBHelpers.h"
 
 // TODO: Add number of exceptions to result
 // TODO: Add errors per region to chip result
@@ -68,6 +69,9 @@ void TFifoAnalysis::InitCounters()
     result->m_err5         = 0;
     result->m_erra         = 0;
     result->m_errf         = 0;
+    result->m_lower        = ((TFifoTest*) m_scan)->IsLower  ();
+    result->m_upper        = ((TFifoTest*) m_scan)->IsUpper  ();
+    result->m_nominal      = ((TFifoTest*) m_scan)->IsNominal();
     for (itChip = result->m_chipResults.begin(); itChip != result->m_chipResults.end(); ++itChip) {
       TFifoResultChip *resultChip = (TFifoResultChip*) itChip->second;
       resultChip->m_err0       = 0;
@@ -180,6 +184,24 @@ void TFifoResultHic::WriteToFile (FILE *fp)
     fprintf(fp, "\nResult chip %d:\n\n", it->first);
     it->second->WriteToFile(fp);
   }
+}
+
+
+void TFifoResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
+{
+  std::string dvdd;
+  if (m_nominal) {
+    dvdd = string(" (nominal)");
+  }
+  else if (m_lower) {
+    dvdd = string(" (lower)");
+  }
+  else if (m_upper) {
+    dvdd = string(" (upper)");
+  }
+
+  DbAddParameter (db, activity, string ("FIFO errors") + dvdd,            (float) (m_err0 + m_err5 + m_erra + m_errf));
+  DbAddParameter (db, activity, string ("Chips with FIFO errors") + dvdd, (float)m_nFaultyChips);
 }
 
 

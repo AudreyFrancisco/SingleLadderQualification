@@ -33,7 +33,9 @@ class TFifoTest : public TScan {
   void LoopEnd     (int loopIndex);
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void PrepareStep (int loopIndex);
-
+  bool IsNominal   () {return ((m_voltageScale > 0.99) && (m_voltageScale < 1.01));};
+  bool IsLower     () {return (m_voltageScale < 0.9);};
+  bool IsUpper     () {return (m_voltageScale > 1.1);};
 };
 
 #endif
