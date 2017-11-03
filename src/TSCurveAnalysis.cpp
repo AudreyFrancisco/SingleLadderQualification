@@ -33,6 +33,7 @@ TSCurveAnalysis::TSCurveAnalysis(std::deque<TScanHisto> *histoQue,
   m_writeStuckPixels    = false;
   m_writeFitResults     = true;
   m_fDoFit              = true;
+
   m_speedy              = (m_config->GetParamValue("SPEEDY") != 0);
   if (IsThresholdScan()) {
     m_startPulseAmplitude = m_config->GetChargeStart();
@@ -207,10 +208,8 @@ void TSCurveAnalysis::FillGraph(TGraph *aGraph) {
 void TSCurveAnalysis::AnalyseHisto (TScanHisto *histo) 
 {
   int row = histo->GetIndex ();
-
   for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip ++) {
     TSCurveResultChip *chipResult = (TSCurveResultChip *) m_result->GetChipResult (m_chipList.at(iChip));
-
     for (int iCol = 0; iCol < common::nCols; iCol ++) {
       TGraph *gPixel = new TGraph();
       for (int iPulse = m_startPulseAmplitude; iPulse < m_stopPulseAmplitude; iPulse ++) {
@@ -419,7 +418,7 @@ common::TErrFuncFitResult TSCurveAnalysis::DoRootFit (TGraph *aGraph)
 
 common::TErrFuncFitResult TSCurveAnalysis::DoFit(TGraph* aGraph, bool speedy)
 {
-  if (speedy == 1) {
+  if (speedy) {
     return DoSpeedyFit(aGraph);
   }
   else {

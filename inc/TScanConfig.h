@@ -79,7 +79,7 @@ namespace ScanConfig {
   const int THRESH_MAXNOISE_OB    = 10;     // max noise of a single chip
   const int THRESH_MAXNOISE_IB    = 10;
 
-  const int SPEEDY           = 0;  //Use slow fit if 0, differentiate->mean if 1.
+  const int SPEEDY           = 1;  //Use slow fit if 0, differentiate->mean if 1.
   const int RAWDATA          = 1;
   const int CAL_VPULSEL      = 160; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
   const int TARGET_THRESHOLD = 100;
