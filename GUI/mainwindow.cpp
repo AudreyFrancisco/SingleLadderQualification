@@ -720,7 +720,7 @@ void MainWindow::digital(){
     }
 
 }
-
+/*
 void MainWindow::fifotest(){
     try{
         ui->statuslabel->setVisible(true);
@@ -750,8 +750,7 @@ void MainWindow::fifotest(){
     }
 
 }
-
-
+*/
 
 
 
@@ -803,7 +802,7 @@ void MainWindow::start_test(){
     if (fresultVector.size()>=1){    for (unsigned int i =0; i<fresultVector.size();i++){
          delete fresultVector.at(i); }}
     if (endurancemodules.size()>0){
-    for (int i=0; i<endurancemodules.size(); i++){
+    for (unsigned int i=0; i<endurancemodules.size(); i++){
         endurancemodules.at(i)->setText(" ");
     }}
     endurancemodules.clear();
@@ -1046,7 +1045,7 @@ void MainWindow::fillingOBvectors(){
 
 
         TNoiseResult *noiseresultthree=new TNoiseResult();
-        TNoiseResult *noiseresultmaskedthree=0;
+      //  TNoiseResult *noiseresultmaskedthree=0;
         TNoiseResult *noiseresultafterthree=new TNoiseResult();
 
         TNoiseOccupancy *noisescanthree=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
@@ -1222,7 +1221,8 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
      ui->statuslabel->update();
 
  // for (int i=6;i<s.size();i++){
-     for (int i=0;i<fScanVector.size();i++){
+     for (unsigned int i=0;i<fScanVector.size();i++){
+         try{
        //  std::cout<<"The scan names are : "<<fScanVector[i]->GetName()<<std::endl;
         // std::cout<<"The classification is : "<<fresultVector[i]->GetHicResults()->first<<std::endl;
        //  std::cout<<"The state is : "<<fScanVector[i]->GetState()<<std::endl;
@@ -1256,12 +1256,13 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
 
         std::thread analysisThread(&TScanAnalysis::Run, std::ref(a[i]));
       //  std::cout<<"out of range dimitroula3"<<endl;
-
+ std::cout<<"BEFORE THE SCAN THREAD"<<std::endl;
         scanThread.join();
+   std::cout<<"AFTER THE SCAN THREAD"<<std::endl;
     //  std::cout<<"out of range dimitroula4"<<endl;
 if(scanstatuslabels.at(i)!=0){
 scanstatuslabels[i]->setText(fScanVector.at(i)->GetState());}
-
+std::cout<<"BEFORE THE ANALYSIS THREAD"<<std::endl;
         analysisThread.join();
 
 
@@ -1274,7 +1275,11 @@ scanstatuslabels[i]->setText(fScanVector.at(i)->GetState());}
            colorsinglescan(i);
            if (execution==false) break;
 qApp->processEvents();
-   }
+  }
+         catch(exception &ex){
+             std::cout<<ex.what()<<"is the thrown exception"<<std::endl;
+         }
+     }
     qApp->processEvents();
 
 
@@ -1489,7 +1494,7 @@ scanbuttons.at(i)->setText(fScanVector[i]->GetName());
   }
 
 
-    for (int j=0;j<scanbuttons.size();j++){
+    for (unsigned int j=0;j<scanbuttons.size();j++){
         if(scanbuttons[j]!=0){
             scanbuttons.at(j)->setStyleSheet("Text-align:left;border:none;");
         }
@@ -1685,14 +1690,14 @@ ui->displaydetails->show();
 
 
 
-
+/*
 void MainWindow::setVI(float * vcasn, float * ithr) {
   for(unsigned int i=0; i<fChips.size(); i++) {
     //fChips.at(i)->GetConfig()->SetParamValue(ithr[i]);
     //WIP...
   }
 }
-
+*/
 void MainWindow::colorscans(){
    // std::vector<QPushButton*> scanbuttons;
     for (unsigned int i=0;i<fScanVector.size();i++){
@@ -1862,7 +1867,7 @@ TResultVariable rvar;
 
 void MainWindow::poweroff(){
 
-for(unsigned int i; i<fHICs.size();i++){
+for(unsigned int i=0; i<fHICs.size();i++){
     fHICs.at(i)->PowerOff();
 }
 
@@ -2030,9 +2035,9 @@ void MainWindow::attachtodatabase(){
 
     //example for connection with the database
          AlpideDB *myDB=new AlpideDB(databasetype);
-         ProjectDB *myproject=new ProjectDB(myDB);
-         MemberDB *mymember= new MemberDB(myDB);
-         ComponentDB *mycomponents=new ComponentDB(myDB);
+       //  ProjectDB *myproject=new ProjectDB(myDB);
+   //      MemberDB *mymember= new MemberDB(myDB);
+   //      ComponentDB *mycomponents=new ComponentDB(myDB);
        //  std::vector <ProjectDB::project> projectlist;
        //  myproject->GetList(&projectlist);
       //   std::cout<<"The number of projects is "<<projectlist.size()<<std::endl;
@@ -2064,7 +2069,7 @@ void MainWindow::attachtodatabase(){
           ActivityDB *myactivity=new ActivityDB(myDB);
 
           ActivityDB::activity activ;
-          ActivityDB::member activmember;
+          //ActivityDB::member activmember;
           ActivityDB::parameter activparameter;
           ActivityDB::attach activattachment;
 
@@ -2101,7 +2106,7 @@ void MainWindow::attachtodatabase(){
 
 
 //std::map<std::string,TScanResultHic* >::iterator ithic;
-for(int i=0; i<fresultVector.size();i++){
+for(unsigned int i=0; i<fresultVector.size();i++){
     if(fresultVector[i]!=0){
  //for (ithic = fresultVector.at(4)->GetHicResults().begin(); ithic != fresultVector.at(4)->GetHicResults().end(); ++ithic) {
  //for (ithic = fresultVector.at(scanposition)->GetHicResults().begin(); ithic != fresultVector.at(scanposition)->GetHicResults().end(); ++ithic) {
@@ -2115,7 +2120,6 @@ for(int i=0; i<fresultVector.size();i++){
 
 
  /*
-
           activattachment.Category = 41;
           activattachment.LocalFileName = "attachment_test";
           activattachment.LocalFileName.append(".txt");
@@ -2207,7 +2211,7 @@ void MainWindow::findidoftheactivitytype(std::string activitytypename, int &id){
     ActivityDB *myactivity=new ActivityDB(myDB);
     std::vector<ActivityDB::activityType> *activitytypelist;
     activitytypelist= myactivity->GetActivityTypeList(myDB->GetProjectId());
-    for(int i=0; i<activitytypelist->size(); i++){
+    for(unsigned int i=0; i<activitytypelist->size(); i++){
         if (strcmp(activitytypename.c_str(),activitytypelist->at(i).Name.c_str())==0){
 
             id=activitytypelist->at(i).ID;
@@ -2222,7 +2226,7 @@ void MainWindow::findidoftheactivitytype(std::string activitytypename, int &id){
 
 void MainWindow::locationcombo(){
     if (locdetails.size()>0){
-        for (int i=0;i<locdetails.size();i++)
+        for (unsigned int i=0;i<locdetails.size();i++)
 { //std::cout<<"clear locdetails"<<std::endl;
             locdetails.clear();
         }    }
@@ -2230,7 +2234,7 @@ void MainWindow::locationcombo(){
      ActivityDB *myactivity=new ActivityDB(myDB);
    locationtypelist=myactivity->GetLocationTypeList(idofactivitytype);
    locdetails.push_back(std::make_pair(" ",0));
-   for(int i=0; i<locationtypelist->size(); i++){
+   for(unsigned int i=0; i<locationtypelist->size(); i++){
        std::cout<<"the location name is "<<locationtypelist->at(i).Name<<"and the ID is "<<locationtypelist->at(i).ID<<std::endl;
    locdetails.push_back(std::make_pair(locationtypelist->at(i).Name,locationtypelist->at(i).ID));
    }
@@ -2251,6 +2255,9 @@ void MainWindow::savesettings(){
      open();
      scanconfigwindow= new ScanConfiguration(this);
      scanconfigwindow->show();
+     setdefaultvalues(scanfit,nm);
+     scanconfigwindow->setdefaultspeed(scanfit);
+     scanconfigwindow->setdeaulmaskstages(nm);
  }
   //  if (counter==0){return;}
    //  connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
@@ -2277,10 +2284,20 @@ void MainWindow::speedycheck(bool checked){
 
 
 void MainWindow::loadeditedconfig(){
+
     scanconfigwindow->setnumberofmaskstages(nm);
+    // std::cout<<"the nm that should change is "<<nm<<std::endl;
     if (counter==0){return;}
+  //   std::cout<<"the nm that should change is "<<nm<<std::endl;
+     std::string final;
+     std::stringstream convert;
+     convert << nm;
+    final = convert.str();
+    fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES",final.c_str());
      connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
     std::cout<<operatorname.toStdString()<<hicidnumber.toStdString()<<idoflocationtype<<idofoperator<<std::endl;
+    std::cout<<"the speed is set to "<<fConfig->GetScanConfig()->GetSpeedy()<<std::endl;
+    std::cout<<"the number of mask stages is "<<fConfig->GetScanConfig()->GetNMaskStages()<<std::endl;
     scanconfigwindow->close();
 }
 
@@ -2403,13 +2420,21 @@ if (fHICs.at(0)->IsPowered()){
 
 void MainWindow::exploreendurancebox(){
 
-  for (int i =0; i<fHICs.size();i++){
+  for (unsigned int i =0; i<fHICs.size();i++){
 
-     if (fHICs[i]!=0){
+     if (fHICs[i]->IsEnabled()){
          endurancemodules[i]->setText(hicnames[i]);
          endurancemodules[i]->setStyleSheet("background-color:green;");
      }
-     else {endurancemodules[i]->setStyleSheet("background-color:red;");}
+     else {endurancemodules[i]->setStyleSheet("background-color:black;");}
       }
   }
 
+
+
+void MainWindow::setdefaultvalues(bool &fit, int &numberofstages){
+
+    fit= fConfig->GetScanConfig()->GetSpeedy();
+    numberofstages=fConfig->GetScanConfig()->GetNMaskStages();
+
+}

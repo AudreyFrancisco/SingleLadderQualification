@@ -75,14 +75,14 @@ int idoflocationtype;
 int idofoperator;
 std::vector<ActivityDB::locationType> *locationtypelist;
 std::vector<pair<std::string,int>> locdetails;
-int nm;
+ int nm;
 bool execution;
 int colour;
  int pbnumberofmodule=0;
 std::vector <QString> hicnames;
 std::vector <QPushButton*> endurancemodules;
 bool databasetype;
-
+bool scanfit;
 
 
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
@@ -162,6 +162,8 @@ public slots:
 
    void colorsinglescan(int i);
 
+   void setdefaultvalues(bool &fit, int &numberofstages);
+
    void continuescans(){execution=true;progresswindow->close();delete progresswindow;}
    void stopscans(){execution=false;progresswindow->close();delete progresswindow;}
       // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
@@ -232,7 +234,7 @@ private slots:
  void scantest();
  void digital();
  void test();
- void fifotest();
+ //void fifotest();
  void detailscombo(int dnumber);
  void start_test();
  void open();
@@ -249,7 +251,7 @@ private slots:
  void noiselist();
 
 
- void setVI(float * vcasn, float * ithr);
+ //void setVI(float * vcasn, float * ithr);
 
 };
 #endif // MAINWINDOW_H

@@ -20,6 +20,8 @@ public slots:
     virtual void setnumberofmaskstages(int &numberofmaskstages);
   // virtual const char *getfitspeed(){return speed;}
    // void speedycheck(bool checked);
+    virtual void setdefaultspeed(bool fit);
+    virtual void setdeaulmaskstages(int ms);
 
 private:
     Ui::ScanConfiguration *ui;
