@@ -56,6 +56,7 @@ void TNoiseOccupancy::ConfigureFromu (TAlpide *chip)
 }
 
 
+//TODO: save number of masked pixels (return value of ApplyMask)
 void TNoiseOccupancy::ConfigureChip  (TAlpide *chip)
 {
   AlpideConfig::BaseConfig   (chip);

@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 #include "TNoiseAnalysis.h"
+#include "TNoiseOccupancy.h"
+#include "DBHelpers.h"
 
 TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue, 
                                TScan                  *aScan, 
@@ -67,6 +69,16 @@ void TNoiseAnalysis::Initialize()
   ReadChipList      ();
   CreateHicResults  ();
   std::cout << "In noise analysis, number of hic results: " << m_result->GetNHics() << std::endl;
+}
+
+
+void TNoiseAnalysis::InitCounters()
+{
+  std::map<std::string, TScanResultHic*>::iterator it;
+  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+    TNoiseResultHic *result = (TNoiseResultHic*) it->second;
+    result->m_backBias = ((TNoiseOccupancy*) m_scan)->GetBackbias();
+  }
 }
 
 
@@ -179,4 +191,29 @@ void TNoiseResultHic::WriteToFile(FILE *fp)
   std::cout << "8b10b errors:  " << m_errorCounter.n8b10b << std::endl;
   std::cout << "corrupt events " << m_errorCounter.nCorruptEvent << std::endl;
   std::cout << "timeouts:      " << m_errorCounter.nTimeout << std::endl;
+}
+
+
+//TODO: add information on masking (number of masked pixels?)
+void TNoiseResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix) 
+{
+  suffix      = (std::to_string((int) m_backBias) + std::string("V"));
+  file_suffix = (string("_") + std::to_string((int) m_backBias) + std::string("V"));
+}
+
+void TNoiseResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity) 
+{
+  std::string suffix, file_suffix, fileName;
+  std::size_t point;
+  DbAddParameter (db, activity, string ("Noisy pixels, ") + suffix, (float) m_nNoisy);
+  DbAddParameter (db, activity, string ("Noise occupancy, ") + suffix, (float) m_occ);
+
+  point = string(m_resultFile).find_last_of(".");
+  fileName = string(m_resultFile).substr (0, point) + file_suffix + ".dat";
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), fileName);
+
+  point = string(m_noisyFile).find_last_of(".");
+  fileName = string(m_noisyFile).substr (0, point) + file_suffix + ".dat";
+  DbAddAttachment (db, activity, attachResult, string(m_noisyFile), fileName);
+
 }

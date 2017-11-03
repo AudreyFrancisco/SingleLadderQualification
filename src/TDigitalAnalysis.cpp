@@ -254,7 +254,8 @@ void TDigitalResult::WriteToFileGlobal (FILE *fp)
 }
 
 
-void TDigitalResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix) {
+void TDigitalResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix) 
+{
   if (m_nominal) {
     suffix      = string(" (nominal)");
     file_suffix = string("_nominal");

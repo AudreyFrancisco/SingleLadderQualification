@@ -21,9 +21,9 @@ class TNoiseResultChip : public TScanResultChip {
   double                m_occ;
  public: 
   TNoiseResultChip () : TScanResultChip () {};
-  void AddNoisyPixel (TPixHit pixel) {m_noisyPixels.push_back(pixel);};  
-  void SetOccupancy  (double occ)    {m_occ = occ;};
-  void WriteToFile   (FILE *fp);
+  void  AddNoisyPixel(TPixHit pixel) {m_noisyPixels.push_back(pixel);};  
+  void  SetOccupancy (double occ)    {m_occ = occ;};
+  void  WriteToFile  (FILE *fp);
   float GetVariable  (TResultVariable var);
   std::vector <TPixHit> GetNoisyPixels() {return m_noisyPixels;};
 };
@@ -35,12 +35,15 @@ class TNoiseResultHic : public TScanResultHic {
  private:
   double        m_occ;
   int           m_nNoisy;
+  float         m_backBias;
   char          m_noisyFile[200];
   TErrorCounter m_errorCounter;
+  void          GetParameterSuffix (std::string &suffix, std::string &file_suffix);
  public: 
   TNoiseResultHic () : TScanResultHic () {};
   void SetNoisyFile (const char *fName) {strcpy(m_noisyFile, fName);};
   void WriteToFile  (FILE *fp);
+  void WriteToDB    (AlpideDB *db, ActivityDB::activity &activity);
 };
 
 
@@ -59,6 +62,7 @@ class TNoiseAnalysis : public TScanAnalysis {
  private: 
   int          m_nTrig;
   float        m_noiseCut;
+  bool         m_masked;
   void         WriteResult      ();
   void         FillVariableList ();
   void         WriteNoisyPixels (THic *hic);
@@ -67,7 +71,7 @@ class TNoiseAnalysis : public TScanAnalysis {
   TScanResultHic  *GetHicResult  () {TNoiseResultHic  *Result = new TNoiseResultHic (); return Result;};
   void             CreateResult  () {};
   void             AnalyseHisto  (TScanHisto *histo);
-  void             InitCounters  (){};
+  void             InitCounters  ();
  public: 
   TNoiseAnalysis(std::deque<TScanHisto> *histoQue, 
                  TScan                  *aScan, 
