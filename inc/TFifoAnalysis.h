@@ -47,6 +47,7 @@ class TFifoResultHic : public TScanResultHic {
   bool m_nominal;
   int  m_nExceptions;
   int  m_nFaultyChips;
+  void GetParameterSuffix (std::string &suffix, std::string &file_suffix);
  public: 
   TFifoResultHic   () : TScanResultHic () {};
   void WriteToFile (FILE *fp);

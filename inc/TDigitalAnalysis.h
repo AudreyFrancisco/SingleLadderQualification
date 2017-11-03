@@ -48,6 +48,7 @@ class TDigitalResultHic : public TScanResultHic {
   bool          m_upper;
   bool          m_nominal;
   TErrorCounter m_errorCounter;
+  void          GetParameterSuffix (std::string &suffix, std::string &file_suffix);
  public: 
   TDigitalResultHic () : TScanResultHic () {};
   void SetStuckFile (const char *fName) {strcpy(m_stuckFile, fName);};

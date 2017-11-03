@@ -63,6 +63,7 @@ class TSCurveResultHic : public TScanResultHic {
   bool          m_thresholdScan;
   char          m_stuckFile[200];
   TErrorCounter m_errorCounter;
+  void          GetParameterSuffix (std::string &suffix, std::string &file_suffix);
  public:
   TSCurveResultHic () : TScanResultHic () {};
   void SetStuckFile (const char *fName) {strcpy(m_stuckFile, fName);};

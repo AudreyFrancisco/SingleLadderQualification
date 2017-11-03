@@ -254,26 +254,37 @@ void TDigitalResult::WriteToFileGlobal (FILE *fp)
 }
 
 
-void TDigitalResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
-{
-  std::string dvdd;
+void TDigitalResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix) {
   if (m_nominal) {
-    dvdd = string(" (nominal)");
+    suffix      = string(" (nominal)");
+    file_suffix = string("_nominal");
   }
   else if (m_lower) {
-    dvdd = string(" (lower)");
+    suffix      = string(" (lower)");
+    file_suffix = string("_lower");
   }
   else if (m_upper) {
-    dvdd = string(" (upper)");
+    suffix      = string(" (upper)");
+    file_suffix = string("_upper");
   }
+}
 
-  DbAddParameter  (db, activity, string ("Timeouts digital") + dvdd,                (float) m_errorCounter.nTimeout);
-  DbAddParameter  (db, activity, string ("8b10b errors digital") + dvdd,            (float) m_errorCounter.n8b10b);
-  DbAddParameter  (db, activity, string ("Corrupt events digital") + dvdd,          (float) m_errorCounter.nCorruptEvent);
-  DbAddParameter  (db, activity, string ("Priority encoder errors digital") + dvdd, (float) m_errorCounter.nPrioEncoder);
-  DbAddParameter  (db, activity, string ("Bad double columns digital") + dvdd,      (float) m_nBadDcols);
-  DbAddParameter  (db, activity, string ("Bad pixels digital") + dvdd,              (float) m_nBad);
-  DbAddAttachment (db, activity, attachResult, string(m_resultFile), string(m_resultFile) + dvdd);
+
+void TDigitalResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
+{
+  std::string suffix, file_suffix, fileName;
+  GetParameterSuffix (suffix, file_suffix);
+  DbAddParameter  (db, activity, string ("Timeouts digital") + suffix,                (float) m_errorCounter.nTimeout);
+  DbAddParameter  (db, activity, string ("8b10b errors digital") + suffix,            (float) m_errorCounter.n8b10b);
+  DbAddParameter  (db, activity, string ("Corrupt events digital") + suffix,          (float) m_errorCounter.nCorruptEvent);
+  DbAddParameter  (db, activity, string ("Priority encoder errors digital") + suffix, (float) m_errorCounter.nPrioEncoder);
+  DbAddParameter  (db, activity, string ("Bad double columns digital") + suffix,      (float) m_nBadDcols);
+  DbAddParameter  (db, activity, string ("Bad pixels digital") + suffix,              (float) m_nBad);
+
+
+  std::size_t point = string(m_resultFile).find_last_of(".");
+  fileName = string(m_resultFile).substr (0, point) + file_suffix + ".dat";
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), fileName);
 
 }
 

@@ -187,21 +187,33 @@ void TFifoResultHic::WriteToFile (FILE *fp)
 }
 
 
-void TFifoResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
-{
-  std::string dvdd;
+void TFifoResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix) {
   if (m_nominal) {
-    dvdd = string(" (nominal)");
+    suffix      = string(" (nominal)");
+    file_suffix = string("_nominal");
   }
   else if (m_lower) {
-    dvdd = string(" (lower)");
+    suffix      = string(" (lower)");
+    file_suffix = string("_lower");
   }
   else if (m_upper) {
-    dvdd = string(" (upper)");
+    suffix      = string(" (upper)");
+    file_suffix = string("_upper");
   }
+}
 
-  DbAddParameter (db, activity, string ("FIFO errors") + dvdd,            (float) (m_err0 + m_err5 + m_erra + m_errf));
-  DbAddParameter (db, activity, string ("Chips with FIFO errors") + dvdd, (float)m_nFaultyChips);
+
+void TFifoResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
+{
+  std::string suffix, file_suffix, fileName;
+  GetParameterSuffix (suffix, file_suffix);
+
+  DbAddParameter (db, activity, string ("FIFO errors") + suffix,            (float) (m_err0 + m_err5 + m_erra + m_errf));
+  DbAddParameter (db, activity, string ("Chips with FIFO errors") + suffix, (float)m_nFaultyChips);
+
+  std::size_t point = string(m_resultFile).find_last_of(".");
+  fileName = string(m_resultFile).substr (0, point) + file_suffix + ".dat";
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), fileName);
 }
 
 

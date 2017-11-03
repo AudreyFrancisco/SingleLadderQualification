@@ -634,32 +634,46 @@ float TSCurveResultChip::GetVariable (TResultVariable var)
 }
 
 
-void TSCurveResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
-{
-  std::string scan;
+void TSCurveResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix) {
   if (m_thresholdScan) {
     if (m_nominal) {
-      scan = " threshold nominal ";
+      suffix      = " threshold nominal ";
+      file_suffix = "ThreshNominal";
     }
     else {
-      scan = " threshold tuned ";
+      suffix      = " threshold tuned ";
+      file_suffix = "ThreshTuned";
     }
   }
   else if (m_VCASNTuning) {
-    scan = " VCASN tune ";
+    suffix      = " VCASN tune ";
+    file_suffix = "VCASNTune";
   }
   else if (m_ITHRTuning) {
-    scan = " ITHR tune ";
+    suffix      = " ITHR tune ";
+    file_suffix = "ITHRTune";
   }
-  scan += std::to_string((int) m_backBias) + std::string("V");
+  suffix      += (std::to_string((int) m_backBias) + std::string("V"));
+  file_suffix += (string("_") + std::to_string((int) m_backBias) + std::string("V"));
+}
+
+
+void TSCurveResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
+{
+  std::string suffix, file_suffix, fileName;
+
 
   if (m_thresholdScan) {
-    DbAddParameter (db, activity, string ("Dead pixels,") + scan,              (float) m_nNoThresh);
-    DbAddParameter (db, activity, string ("Pixels without threshold,") + scan, (float) m_nNoThresh);
+    DbAddParameter (db, activity, string ("Dead pixels,") + suffix,              (float) m_nNoThresh);
+    DbAddParameter (db, activity, string ("Pixels without threshold,") + suffix, (float) m_nNoThresh);
   }
-  DbAddParameter (db, activity, string ("Minimum chip av.,") + scan, (float) m_minChipAv);
-  DbAddParameter (db, activity, string ("Maximum chip av.,") + scan, (float) m_maxChipAv);
-  DbAddAttachment (db, activity, attachResult, string(m_resultFile), string(m_resultFile) + scan);  
+  DbAddParameter (db, activity, string ("Minimum chip av.,") + suffix, (float) m_minChipAv);
+  DbAddParameter (db, activity, string ("Maximum chip av.,") + suffix, (float) m_maxChipAv);
+
+  std::size_t point = string(m_resultFile).find_last_of(".");
+  fileName = string(m_resultFile).substr (0, point) + file_suffix + ".dat";
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), fileName);
+
 }
 
 
