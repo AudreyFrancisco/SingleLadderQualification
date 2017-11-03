@@ -17,25 +17,27 @@ public:
 
     explicit TestSelection(QWidget *parent = 0);
     ~TestSelection();
-    virtual void SaveSettings(QString &opname, QString &hicid, int &counter, int &lid, int &memberid);
+    virtual void SaveSettings(QString &opname, QString &hicid, int &counter, int &lid, int &memberid, QString &ttwo, QString &tthree, QString &tfour, QString &tfive, QString &done, QString &dtwo, QString dthree, QString dfour, QString dfive);
     virtual void connectlocationcombo(std::vector<std::pair<std::string,int>> floc);
     virtual int GetLocationID(){return locid;}
     virtual void ClearLocations();
 
 private:
-Ui::TestSelection *ui;
-Dialog *missingsettings;
-int locid;
-int memid;
+    Ui::TestSelection *ui;
+    Dialog *missingsettings;
+    int locid;
+    int memid;
+    QString toptwo, topthree, topfour, topfive;
+    QString downone, downtwo,downthree, downfour,downfive;
 
-public slots:
-virtual void getlocationcombo(int value);
-virtual int GetMemberID();
+    public slots:
+      virtual void getlocationcombo(int value);
+    virtual int GetMemberID();
+    virtual void adjustendurance();
+    virtual void hideendurance();
 
-private slots:
-void popupmessage(QString m);
-
-
+    private slots:
+    void popupmessage(QString m);
 };
 
 #endif // TESTSELECTION_H

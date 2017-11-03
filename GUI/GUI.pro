@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     scanconfiguration.cpp \
     testingprogress.cpp \
     checkpbconfig.cpp \
-    calibrationpb.cpp
+    calibrationpb.cpp \
+    databaseselection.cpp
 
 HEADERS  += mainwindow.h \
             dialog.h \
@@ -36,7 +37,8 @@ HEADERS  += mainwindow.h \
     scanconfiguration.h \
     testingprogress.h \
     checkpbconfig.h \
-    calibrationpb.h
+    calibrationpb.h \
+    databaseselection.h
 
 FORMS    += mainwindow.ui \
             dialog.ui \
@@ -44,7 +46,8 @@ FORMS    += mainwindow.ui \
     scanconfiguration.ui \
     testingprogress.ui \
     checkpbconfig.ui \
-    calibrationpb.ui
+    calibrationpb.ui \
+    databaseselection.ui
 
 INCLUDEPATH += $(ROOTSYS)/include /usr/local/include
 

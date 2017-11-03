@@ -13,6 +13,7 @@ ScanConfiguration::ScanConfiguration(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->speedyfit->setChecked(false);
+    ui->close->hide();
     connect(ui->speedyfit, SIGNAL(clicked(bool)),this->parent(), SLOT(speedycheck(bool)));
      connect(ui->close,SIGNAL(clicked()),this->parent(),SLOT(loaddefaultconfig()));
     connect(ui->load_configuration,SIGNAL(clicked()),this->parent(), SLOT(loadeditedconfig()));
@@ -36,4 +37,13 @@ void ScanConfiguration::setnumberofmaskstages(int &numberofmaskstages){
 
 
 
+void ScanConfiguration::setdefaultspeed(bool fit){
+    if (fit){ui->speedyfit->setChecked(fit);}
+    else{ui->speedyfit->setChecked(false);}
 
+}
+
+void ScanConfiguration::setdeaulmaskstages(int ms){
+    QString s= QString::number(ms);
+    ui->nmaskstages->setText(s);
+}
