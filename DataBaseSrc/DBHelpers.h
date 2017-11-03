@@ -15,4 +15,5 @@ int  DbGetActivityTypeId   (AlpideDB *db, string name);
 int  DbGetAttachmentTypeId (AlpideDB *db, string name);
 bool DbAddParameter        (AlpideDB *db, ActivityDB::activity &activity, string name, float value);
 void DbAddAttachment       (AlpideDB *db, ActivityDB::activity &activity, TAttachmentType attType, string localName, string remoteName);
+bool FileExists            (string fileName);
 #endif

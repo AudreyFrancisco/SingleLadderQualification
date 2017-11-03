@@ -1,5 +1,5 @@
 #include "DBHelpers.h"
-
+#include <fstream>
 
 int DbGetActivityTypeId (AlpideDB *db, string name)
 {
@@ -88,8 +88,19 @@ bool DbAddParameter (AlpideDB *db, ActivityDB::activity &activity, string name, 
 }
 
 
+bool FileExists(string fileName)
+{
+    ifstream f(fileName.c_str());
+    return f.good();
+}
+
+
 void DbAddAttachment (AlpideDB *db, ActivityDB::activity &activity, TAttachmentType attType, string localName, string remoteName)
 {
+  if (!FileExists(localName)) {
+    std::cout << "Warning: did not find file " << localName << ", ignored" << std::endl;
+    return;
+  }
   ActivityDB::attach attachment;
 
   switch (attType) {
