@@ -353,9 +353,13 @@ void TSCurveScan::FillHistos (std::vector<TPixHit> *Hits, int board)
     int col = Hits->at(i).region * 32 + Hits->at(i).dcol * 2;
     int leftRight = ((((Hits->at(i).address % 4) == 1) || ((Hits->at(i).address % 4) == 2))? 1:0);
     col += leftRight;
-    //std::cout << "Old value: " << (*m_histo)(idx,col,m_value[0] - m_start[0]) << ", (" << col << "," << m_value[0] - m_start[0] << ")\n";
-    m_histo->Incr(idx, col, m_value[0] - m_start[0]); //m_value is too large (>20) often!!
-    //std::cout << "Current value: " << (*m_histo)(idx,col,m_value[0] - m_start[0]) << ", (" << col << "," << m_value[0]-m_start[0] << ")\n";
+    // TODO: Catch this case earlier (do not fill hit vector for corrupt events
+    try {
+      m_histo->Incr(idx, col, m_value[0] - m_start[0]); //m_value is too large (>20) often!!
+    }
+    catch (...) {
+      std::cout << "Caught exception in TSCurveScan::FillHistos, trying to fill histo for chipID " << idx.chipId << ", receiver " << idx.dataReceiver << std::endl;
+    }
   }
 
 
