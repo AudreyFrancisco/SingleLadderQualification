@@ -62,7 +62,6 @@ class TNoiseAnalysis : public TScanAnalysis {
  private: 
   int          m_nTrig;
   float        m_noiseCut;
-  bool         m_masked;
   void         WriteResult      ();
   void         FillVariableList ();
   void         WriteNoisyPixels (THic *hic);
