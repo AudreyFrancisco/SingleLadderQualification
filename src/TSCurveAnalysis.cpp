@@ -355,6 +355,8 @@ common::TErrFuncFitResult TSCurveAnalysis::DoSpeedyFit (TGraph *aGraph)
   Result.threshold = abs(meanGraph(diffGraph));
   Result.noise     = rmsGraph(diffGraph);
   Result.redChi2   = 0;
+
+  delete diffGraph;
   return Result;
 }
 
