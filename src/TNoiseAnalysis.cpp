@@ -205,6 +205,9 @@ void TNoiseResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
   std::string suffix, file_suffix, fileName;
   std::size_t point;
+
+  GetParameterSuffix(suffix, file_suffix);
+
   DbAddParameter (db, activity, string ("Noisy pixels, ") + suffix, (float) m_nNoisy);
   DbAddParameter (db, activity, string ("Noise occupancy, ") + suffix, (float) m_occ);
 

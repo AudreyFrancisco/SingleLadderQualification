@@ -662,6 +662,7 @@ void TSCurveResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
   std::string suffix, file_suffix, fileName;
 
+  GetParameterSuffix(suffix, file_suffix);
 
   if (m_thresholdScan) {
     DbAddParameter (db, activity, string ("Dead pixels,") + suffix,              (float) m_nNoThresh);
