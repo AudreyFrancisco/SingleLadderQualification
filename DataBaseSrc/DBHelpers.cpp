@@ -108,12 +108,17 @@ void DbAddAttachment (AlpideDB *db, ActivityDB::activity &activity, TAttachmentT
     attachment.Category = DbGetAttachmentTypeId (db, "HIC Result File");
     break;
   case attachLog: 
-    attachment.Category = DbGetAttachmentTypeId (db, "Test Log File");
+    attachment.Category = DbGetAttachmentTypeId (db, "HIC Log File");
     break;
   case attachErrors:
-    attachment.Category = DbGetAttachmentTypeId (db, "Error Output File");
+    attachment.Category = DbGetAttachmentTypeId (db, "HIC Error Log");
     break;
+  case attachConfig:
+    attachment.Category = DbGetAttachmentTypeId (db, "HIC Config File");
+    break;    
   }
+
+  std::cout << "Attaching file " << localName << " with remote name " << remoteName << " and category " << attachment.Category << std::endl;
 
   attachment.ID             = activity.ID;
   attachment.User           = activity.User;

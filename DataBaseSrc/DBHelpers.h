@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-typedef enum {attachResult, attachLog, attachErrors} TAttachmentType;
+typedef enum {attachResult, attachLog, attachErrors, attachConfig} TAttachmentType;
 
 int  DbGetMemberId         (AlpideDB *db, string name);
 //int  DbGetProjectId      (AlpideDB *db, string Name);
