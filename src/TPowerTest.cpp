@@ -27,6 +27,7 @@ TPowerTest::TPowerTest (TScanConfig                   *config,
   m_stop [0] = m_hics.size();
 
   CreateMeasurements();
+  m_histo = 0;
 }
 
 
