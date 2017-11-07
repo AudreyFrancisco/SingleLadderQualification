@@ -960,7 +960,7 @@ std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList()
 		xmlNode *nod;
 		if(_getTheRootElementChildren(stringresult, &doc, &nod)) {
 			while (nod != NULL) {
-				if(strcmp((const char*)nod->name, "AttachmentCategory") == 0) {
+				if(strcmp((const char*)nod->name, "AttachmentCatagory") == 0) {
 					xmlNode *n1 = nod->children;
 					while(n1 != NULL) {
 						if(strcmp((const char*)n1->name, "ID") == 0) att.ID = atoi( (const char*)(n1->children->content)) ;
