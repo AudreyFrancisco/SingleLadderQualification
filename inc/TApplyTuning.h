@@ -7,7 +7,6 @@
 
 #include "Common.h"
 #include "TScanAnalysis.h"
-#include "TThresholdAnalysis.h"
 #include "TSCurveAnalysis.h"
 #include "TScanConfig.h"
 #include "TScan.h"

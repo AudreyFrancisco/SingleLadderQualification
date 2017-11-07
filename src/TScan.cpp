@@ -116,6 +116,8 @@ void TScan::Terminate()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), false);
   }  
+
+  if (m_histo) delete m_histo;
 }
 
 
@@ -173,7 +175,7 @@ void TScan::CreateScanHisto ()
     }
   }
   std::cout << "CreateHisto: generated map with " << m_histo->GetSize() << " elements" << std::endl;
-
+  m_histo->GetChipList(m_chipList);
 }
 
 

@@ -37,7 +37,7 @@
 #include "TScanConfig.h"
 #include "THisto.h"
 #include "TScanAnalysis.h"
-#include "TThresholdAnalysis.h"
+#include "TSCurveAnalysis.h"
 #include "TDigitalAnalysis.h"
 #include "TFifoTest.h"
 #include "TFifoAnalysis.h"
@@ -84,6 +84,8 @@ void scanLoop (TScan *myScan)
 
 
 
+// TODO:: Clean this UP !!!!
+
 int main(int argc, char** argv) {
 
   decodeCommandParameters(argc, argv);
@@ -93,7 +95,7 @@ int main(int argc, char** argv) {
   std::vector <THic *>          fHics;
   std::vector <TAlpide *>       fChips;
   TConfig *fConfig;
-  TThresholdResult *fResult = new TThresholdResult();
+  TSCurveResult *fResult = new TSCurveResult();
 
   std::deque<TScanHisto>  fHistoQue;
   std::mutex              fMutex;
@@ -117,7 +119,7 @@ int main(int argc, char** argv) {
 
 
   TtuneVCASNScan *myScan_V = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TThresholdAnalysis *analysis_V = new TThresholdAnalysis(&fHistoQue, myScan_V, fConfig->GetScanConfig(), fHics, &fMutex, fResult, 1);
+  TSCurveAnalysis *analysis_V = new TSCurveAnalysis(&fHistoQue, myScan_V, fConfig->GetScanConfig(), fHics, &fMutex, fResult, 1);
   std::cout << "starting thread VCASN" << std::endl;
   std::thread scanThread_V(scanLoop, myScan_V);
   analysis_V->Initialize();
@@ -130,23 +132,23 @@ int main(int argc, char** argv) {
   std::cout << "Time for scan+analysis: " << elapsed << " sec" << std::endl;
 
   std::cout << "Printing mean VCASN thresholds:" << std::endl;
-  std::map<int,common::TStatVar> thresh_V = analysis_V->DeleteThis();
-  for (std::map<int,common::TStatVar>::iterator it = thresh_V.begin(); it != thresh_V.end(); it++) {
-    std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
-  }
+  //  std::map<int,common::TStatVar> thresh_V = analysis_V->DeleteThis();
+  //for (std::map<int,common::TStatVar>::iterator it = thresh_V.begin(); it != thresh_V.end(); it++) {
+  //  std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
+  // }
 
-  for (unsigned int ihic = 0; ihic < fHics.size(); ihic ++) {
-    TThresholdResultHic *hicResult = (TThresholdResultHic *) fResult->GetHicResult(fHics.at(ihic)->GetDbId());
-    std::map<int, TScanResultChip*> mp = hicResult->DeleteThisToo();
-    std::map<int, TScanResultChip*>::iterator it;
-    for (it = mp.begin(); it != mp.end(); ++it) {
+  //for (unsigned int ihic = 0; ihic < fHics.size(); ihic ++) {
+    //TSCurveResultHic *hicResult = (TSCurveResultHic *) fResult->GetHicResult(fHics.at(ihic)->GetDbId());
+    //    std::map<int, TScanResultChip*> mp = hicResult->DeleteThisToo();
+    //std::map<int, TScanResultChip*>::iterator it;
+    //for (it = mp.begin(); it != mp.end(); ++it) {
       //TAlpide              *chip       = fHics.at(ihic)->GetChipById(it->first);
-      TThresholdResultChip *chipResult = (TThresholdResultChip*) it->second;
-
+      //TSCurveResultChip *chipResult = (TSCurveResultChip*) it->second;
+      //
       //chip->GetConfig()->SetParamValue(GetDACName(), (int)chipResult->GetThresholdMean());
-      std::cout << "Found in Config: " << it->first << ", thr=" << chipResult->GetThresholdMean() << std::endl;
-    }
-  }
+    //  std::cout << "Found in Config: " << it->first << ", thr=" << chipResult->GetThresholdMean() << std::endl;
+    //}
+  //}
 
   if(fResult) std::cout << "fResult OK" << std::endl;
   //TApplyVCASNTuning *apply_V = new TApplyVCASNTuning(&fHistoQue, NULL, fConfig->GetScanConfig(), fHics, &fMutex, fResult);

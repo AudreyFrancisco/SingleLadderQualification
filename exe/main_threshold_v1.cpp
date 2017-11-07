@@ -37,7 +37,7 @@
 #include "TScanConfig.h"
 #include "THisto.h"
 #include "TScanAnalysis.h"
-#include "TThresholdAnalysis.h"
+#include "TSCurveAnalysis.h"
 
 void scanLoop (TScan *myScan)
 {
@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
   initSetup(fConfig, &fBoards, &fBoardType, &fChips, "", &fHics);
   
   TThresholdScan *myScan = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TScanAnalysis *myAnalysis = new TThresholdAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
+  TScanAnalysis *myAnalysis = new TSCurveAnalysis (&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex);
   
   std::thread scanThread(scanLoop, myScan);
   std::thread analysisThread(scanAnalysis, myAnalysis);

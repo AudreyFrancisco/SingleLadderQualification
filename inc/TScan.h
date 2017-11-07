@@ -61,6 +61,7 @@ class TScan {
   std::vector <TAlpide *>               m_chips;
   std::vector <THic *>                  m_hics;
   std::vector <TReadoutBoard *>         m_boards;
+  std::vector <common::TChipIndex>      m_chipList;
   TScanHisto                           *m_histo;
   std::deque <TScanHisto>              *m_histoQue;
   std::mutex                           *m_mutex;
@@ -96,13 +97,15 @@ class TScan {
   virtual void     Next              (int loopIndex); 
   void             CreateScanHisto   ();
   bool             IsRunning         () {return m_running;};
-  TScanHisto       GetTScanHisto     () {return *m_histo;};
+  //  TScanHisto       GetTScanHisto     () {return *m_histo;};
   const char      *GetName           () {return m_name;};  
   const char      *GetState          () {return m_state;};
   TScanConditions *GetConditions () {return &m_conditions;};
   TErrorCounter    GetErrorCount (std::string hicId);
   void             CreateHicConditions();
   void             WriteConditions   (const char *fName, THic *aHic);
+  std::vector <common::TChipIndex> GetChipList () {return m_chipList;};
+
 };
 
 class TMaskScan : public TScan {

@@ -54,7 +54,7 @@ MOSAIC_OBJS = $(MOSAIC_SOURCES:.cpp=.o)
 OBJS=$(BASE_OBJS) $(RU_OBJS) $(MOSAIC_OBJS)
 
 ### Source files using ROOT classes
-ROOT_CLASSES= TThresholdAnalysis.cpp TSCurveAnalysis.cpp TApplyTuning.cpp
+ROOT_CLASSES= TSCurveAnalysis.cpp TApplyTuning.cpp
 ROOT_OBJS  = $(ROOT_CLASSES:.cpp=.o)
 
 ### Dependencies
