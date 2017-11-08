@@ -641,20 +641,20 @@ void TSCurveResultHic::GetParameterSuffix (std::string &suffix, std::string &fil
   if (m_thresholdScan) {
     if (m_nominal) {
       suffix      = " threshold nominal ";
-      file_suffix = "ThreshNominal";
+      file_suffix = "_ThreshNominal";
     }
     else {
       suffix      = " threshold tuned ";
-      file_suffix = "ThreshTuned";
+      file_suffix = "_ThreshTuned";
     }
   }
   else if (m_VCASNTuning) {
     suffix      = " VCASN tune ";
-    file_suffix = "VCASNTune";
+    file_suffix = "_VCASNTune";
   }
   else if (m_ITHRTuning) {
     suffix      = " ITHR tune ";
-    file_suffix = "ITHRTune";
+    file_suffix = "_ITHRTune";
   }
   suffix      += (std::to_string((int) m_backBias) + std::string("V"));
   file_suffix += (string("_") + std::to_string((int) m_backBias) + std::string("V"));
@@ -668,11 +668,11 @@ void TSCurveResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
   GetParameterSuffix(suffix, file_suffix);
 
   if (m_thresholdScan) {
-    DbAddParameter (db, activity, string ("Dead pixels,") + suffix,              (float) m_nNoThresh);
-    DbAddParameter (db, activity, string ("Pixels without threshold,") + suffix, (float) m_nNoThresh);
+    DbAddParameter (db, activity, string ("Dead pixels") + suffix,              (float) m_nNoThresh);
+    DbAddParameter (db, activity, string ("Pixels without threshold") + suffix, (float) m_nNoThresh);
   }
-  DbAddParameter (db, activity, string ("Minimum chip av.,") + suffix, (float) m_minChipAv);
-  DbAddParameter (db, activity, string ("Maximum chip av.,") + suffix, (float) m_maxChipAv);
+  DbAddParameter (db, activity, string ("Minimum chip avg") + suffix, (float) m_minChipAv);
+  DbAddParameter (db, activity, string ("Maximum chip avg") + suffix, (float) m_maxChipAv);
 
   std::size_t point = string(m_resultFile).find_last_of(".");
   fileName = string(m_resultFile).substr (0, point) + file_suffix + ".dat";
