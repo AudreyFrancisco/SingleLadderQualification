@@ -2141,7 +2141,7 @@ void MainWindow::attachtodatabase(){
   int i_dec= std::stoi (currentdate.str(),&sz);
   // std::string name;
   // name="Number of working chips in a HIC";
-std::cout<<i_dec<<std::endl;
+  std::cout<<i_dec<<std::endl;
   // DbAddParameter(myDB, activ,"Number of working chips in a HIC" , 90);
   //int time= 10000*hours+100*minutes+sec;
   //  dbtime.Value=i_dec;
