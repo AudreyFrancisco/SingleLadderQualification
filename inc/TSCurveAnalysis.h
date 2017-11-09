@@ -52,8 +52,13 @@ class TSCurveResultHic : public TScanResultHic {
   friend class TSCurveAnalysis;
   friend class TApplyTuning;
  private:
-  int           m_minChipAv;
-  int           m_maxChipAv;
+  float         m_noiseAv;
+  float         m_noiseRms;
+  int           m_nEntries;
+  float         m_noiseSq;
+  float         m_minChipAv;
+  float         m_maxChipAv;
+  float         m_maxChipNoise;
   int           m_nDead;
   int           m_nNoThresh;
   float         m_backBias;
@@ -66,6 +71,7 @@ class TSCurveResultHic : public TScanResultHic {
   void          GetParameterSuffix (std::string &suffix, std::string &file_suffix);
  public:
   TSCurveResultHic () : TScanResultHic () {};
+  void CalculateAverages();
   void SetStuckFile (const char *fName) {strcpy(m_stuckFile, fName);};
   void WriteToFile  (FILE *fp);
   void WriteToDB    (AlpideDB *db, ActivityDB::activity &activity);

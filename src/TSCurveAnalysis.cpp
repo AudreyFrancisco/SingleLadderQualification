@@ -168,6 +168,11 @@ void TSCurveAnalysis::InitCounters ()
     result->m_nNoThresh     = 0;
     result->m_minChipAv     = -1;
     result->m_maxChipAv     = 999;
+    result->m_maxChipNoise  = 999;
+    result->m_noiseAv       = 0;
+    result->m_noiseRms      = 0;
+    result->m_nEntries      = 0;
+    result->m_noiseSq       = 0;    
     result->m_backBias      = ((TSCurveScan *) m_scan)->GetBackbias();
     result->m_nominal       = ((TSCurveScan *) m_scan)->GetNominal ();
     result->m_VCASNTuning   = IsVCASNTuning  ();
@@ -235,6 +240,13 @@ void TSCurveAnalysis::AnalyseHisto (TScanHisto *histo)
           chipResult->m_noiseSq     += pow(fitResult.noise, 2);
           chipResult->m_threshSq    += pow(fitResult.threshold, 2);
           chipResult->m_nEntries    ++;
+	  for (int iHic = 0; iHic < m_hics.size(); iHic ++) {
+            if (! (m_hics.at(iHic)->ContainsChip(m_chipList.at(iChip)))) continue;
+            TSCurveResultHic *hicResult = (TSCurveResultHic*) m_result->GetHicResults().at(m_hics.at(iHic)->GetDbId());
+            hicResult->m_noiseAv     += fitResult.noise;
+            hicResult->m_noiseSq     += pow(fitResult.noise, 2);
+            hicResult->m_nEntries    ++;         
+    	  }
 	}
         if (m_writeFitResults) {
           fprintf (chipResult->m_fitFP, "%d %d %f %f %f\n", 
@@ -265,11 +277,13 @@ void TSCurveAnalysis::Finalize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TSCurveResultHic *hicResult = (TSCurveResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+    hicResult->CalculateAverages();
     for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip ++) {
       if (! (m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TSCurveResultChip *chipResult = (TSCurveResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
       if (chipResult->m_thresholdAv < hicResult->m_minChipAv) hicResult->m_minChipAv = chipResult->m_thresholdAv;
-      if (chipResult->m_thresholdAv > hicResult->m_maxChipAv) hicResult->m_maxChipAv = chipResult->m_thresholdAv;   
+      if (chipResult->m_thresholdAv > hicResult->m_maxChipAv) hicResult->m_maxChipAv = chipResult->m_thresholdAv;
+      if (chipResult->m_noiseAv     > hicResult->m_maxChipNoise) hicResult->m_maxChipNoise = chipResult->m_noiseAv;
     }
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
@@ -670,6 +684,8 @@ void TSCurveResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
   if (m_thresholdScan) {
     DbAddParameter (db, activity, string ("Dead pixels") + suffix,              (float) m_nNoThresh);
     DbAddParameter (db, activity, string ("Pixels without") + suffix, (float) m_nNoThresh);
+    DbAddParameter (db, activity, string ("Average noise") + suffix, (float) m_noiseAv);
+    DbAddParameter (db, activity, string ("Maximum chip noise") + suffix, (float) m_maxChipNoise);
   }
   DbAddParameter (db, activity, string ("Minimum chip avg") + suffix, (float) m_minChipAv);
   DbAddParameter (db, activity, string ("Maximum chip avg") + suffix, (float) m_maxChipAv);
@@ -711,3 +727,10 @@ void TSCurveResult::WriteToFileGlobal (FILE *fp)
 }
 
 
+void TSCurveResultHic::CalculateAverages() 
+{
+  if (m_nEntries > 0) {
+    m_noiseAv     /= m_nEntries;
+    m_noiseRms     = sqrt (m_noiseSq  / m_nEntries - pow(m_noiseAv,     2));
+  }
+}
