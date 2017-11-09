@@ -4,24 +4,24 @@
 #include <QDialog>
 
 namespace Ui {
-class Dialog;
+  class Dialog;
 }
 
 class Dialog : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
-public:
-explicit  Dialog(QWidget *parent=0);
-    ~Dialog();
-     void append(QString error);
+ public:
+  explicit  Dialog(QWidget *parent=0);
+  ~Dialog();
+  void append(QString error);
 
-private:
-    Ui::Dialog *ui;
+ private:
+  Ui::Dialog *ui;
 
-private slots:
+  private slots:
 
-//public slots:
+    //public slots:
     //void append(QString error);
 
 

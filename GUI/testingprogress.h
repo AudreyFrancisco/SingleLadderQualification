@@ -4,25 +4,25 @@
 #include <QDialog>
 
 namespace Ui {
-class Testingprogress;
+  class Testingprogress;
 }
 
 class Testingprogress : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
-public:
-    explicit Testingprogress(QWidget *parent = 0);
-    ~Testingprogress();
+ public:
+  explicit Testingprogress(QWidget *parent = 0);
+  ~Testingprogress();
 
-public slots:
-virtual void setnotification(QString notification);
-
-
+  public slots:
+    virtual void setnotification(QString notification);
 
 
-private:
-    Ui::Testingprogress *ui;
+
+
+ private:
+  Ui::Testingprogress *ui;
 };
 
 #endif // TESTINGPROGRESS_H

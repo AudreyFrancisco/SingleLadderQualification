@@ -4,16 +4,16 @@
 #include <QtCore>
 class ScanThread:public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 
 
 
-signals:
-    void resultReady();
+ signals:
+  void resultReady();
 
-public slots:
+  public slots:
     void process();
-public:
+ public:
     ScanThread();
     //void run();
 
