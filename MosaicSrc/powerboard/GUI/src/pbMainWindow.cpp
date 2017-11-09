@@ -772,8 +772,8 @@ void pbMainWindow::fileOpen(char *fname)
 	return;
 
 cfgReadError:
-	QMessageBox::critical ( this, WINDOW_TITLE, 
-			"Error reading configuration<br>", 
+	QMessageBox::critical ( this, WINDOW_TITLE,
+			"Error reading configuration<br>",
 			QMessageBox::Ok, QMessageBox::NoButton,
 			QMessageBox::NoButton );
 	return;
@@ -792,10 +792,10 @@ bool pbMainWindow::XMLreadChannel(QDomElement &root, int n)
 	val = channel.attribute ( "Vset", "0.000" );
 	VsetText[n]->setText(val);
 	channelVset(n);
-	val = channel.attribute ( "Iset", "0.000" ); 
-	IsetText[n]->setText(val); 
+	val = channel.attribute ( "Iset", "0.000" );
+	IsetText[n]->setText(val);
 	channelIset(n);
-	val = channel.attribute ( "ON", "0" ); 
+	val = channel.attribute ( "ON", "0" );
 	if (val=="1")
 		channelSetON(n);
 	else
@@ -883,7 +883,7 @@ void pbMainWindow::setOnline(bool online)
 
 void pbMainWindow::comErrorExit(std::exception& e)
 {
-	qDebug(e.what());
+	qDebug("%s", e.what());
 
 	setOnline(false);
 	QMessageBox::critical ( this, WINDOW_TITLE,

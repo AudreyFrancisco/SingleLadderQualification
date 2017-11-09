@@ -6,7 +6,7 @@ TEMPLATE = app
 INCLUDEPATH += ..
 # CONFIG += qt warn_on release thread
 CONFIG += qt warn_on thread
-QMAKE_CXXFLAGS += -std=gnu++11
+QMAKE_CXXFLAGS += -std=gnu++11 -Werror -pedantic
 
 INCLUDEPATH += .. ../../libpowerboard/include ../../libmosaic/include
 LIBS += -L../../libpowerboard -lpowerboard -L../../libmosaic -lmosaic
