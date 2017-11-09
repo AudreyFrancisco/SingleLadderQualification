@@ -122,16 +122,16 @@ int main()
 	}
 
 	cout << endl << "------ Parameter type-----------"<<endl;
-	ProjectID = 0;
+	int ActivityID = 0;
 	printf(" Input the Activity Type id :");
-	err = scanf("%d",&ProjectID);
+	err = scanf("%d",&ActivityID);
 	if (err!=1) {
 		printf(" Failed to read the project id ");
 		return -1;
 	}
-	vector<ActivityDB::parameterType> *par = theActivityTable->GetParameterTypeList(ProjectID);
+	vector<ActivityDB::parameterType> *par = theActivityTable->GetParameterTypeList(ActivityID);
 	for(unsigned int i=0;i<par->size();i++) {
-		cout << endl << par->at(i).ID << "\t" << par->at(i).Name << "\t" << par->at(i).Description ;
+		cout << endl << par->at(i).ID << "\t" << par->at(i).ParameterID << "\t" << par->at(i).Name << "\t" << par->at(i).Description ;
 	}
 
 	cout << endl << "------ locationType type-----------"<<endl;

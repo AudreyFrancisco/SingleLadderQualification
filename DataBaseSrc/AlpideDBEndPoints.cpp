@@ -36,6 +36,7 @@
  *  HISTORY
  *
  *  7/9/2017	-	Refine the XML parsing/reading function
+ *  9/11/2017   -   Modify the GetParameterList method
  *
  */
 
@@ -804,10 +805,12 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aAc
 					while(n1 != NULL) {
 						if(strcmp((const char*)n1->name, "ActivityTypeParameter") == 0) {
 							xmlNode *n2 = n1->children;
+							zPARAMETERTYPE(param);
 							while(n2 != NULL) {
-								if(strcmp((const char*)n2->name, "Parameter") == 0) {
+								if(strcmp((const char*)n2->name, "ID") == 0) {
+									param.ParameterID = atoi( (const char*)(n2->children->content)) ;
+								} else if(strcmp((const char*)n2->name, "Parameter") == 0) {
 									xmlNode *n3 = n2->children;
-									zPARAMETERTYPE(param);
 									while(n3 != NULL) {
 										if(n3->children != NULL )  {
 											if(strcmp((const char*)n3->name, "ID") == 0) param.ID = atoi( (const char*)(n3->children->content)) ;
