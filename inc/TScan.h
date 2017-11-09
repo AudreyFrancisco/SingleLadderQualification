@@ -28,25 +28,25 @@ typedef struct {
 
 class TScanConditionsHic {
   friend class TScan;
- private: 
+ private:
   float m_tempStart;
   float m_tempEnd;
   float m_iddaStart;
   float m_iddaEnd;
   float m_idddStart;
   float m_idddEnd;
- public: 
+ public:
   TScanConditionsHic() {};
 };
 
 
 class TScanConditions {
   friend class TScan;
- private: 
+ private:
   char m_fwVersion[50];
   char m_swVersion[50];
   std::map <std::string, TScanConditionsHic*> m_hicConditions;
- public: 
+ public:
   TScanConditions() {};
   int AddHicConditions (std::string hicId, TScanConditionsHic *hicCond);
 };
@@ -54,7 +54,7 @@ class TScanConditions {
 
 class TScan {
  private:
- protected: 
+ protected:
   TScanConfig                          *m_config;
   char                                  m_name [40];
   char                                  m_state[40];
@@ -79,13 +79,13 @@ class TScan {
   std::string    FindHIC            (int boardIndex, int rcv);
   virtual THisto CreateHisto        () = 0;
  public:
-  TScan (TScanConfig                   *config, 
-         std::vector <TAlpide *>        chips, 
+  TScan (TScanConfig                   *config,
+         std::vector <TAlpide *>        chips,
          std::vector <THic*>            hics,
-         std::vector <TReadoutBoard *>  boards, 
-         std::deque<TScanHisto>        *histoQue, 
+         std::vector <TReadoutBoard *>  boards,
+         std::deque<TScanHisto>        *histoQue,
          std::mutex                    *aMutex);
-  ~TScan() {};
+  virtual ~TScan() {};
 
   virtual void     Init              ();
   virtual void     Terminate         ();
@@ -94,11 +94,11 @@ class TScan {
   virtual void     PrepareStep       (int loopIndex) = 0;
   virtual void     Execute           ()              = 0;
   bool             Loop              (int loopIndex);
-  virtual void     Next              (int loopIndex); 
+  virtual void     Next              (int loopIndex);
   void             CreateScanHisto   ();
   bool             IsRunning         () {return m_running;};
   //  TScanHisto       GetTScanHisto     () {return *m_histo;};
-  const char      *GetName           () {return m_name;};  
+  const char      *GetName           () {return m_name;};
   const char      *GetState          () {return m_state;};
   TScanConditions *GetConditions () {return &m_conditions;};
   TErrorCounter    GetErrorCount (std::string hicId);
@@ -109,8 +109,8 @@ class TScan {
 };
 
 class TMaskScan : public TScan {
- private: 
- protected: 
+ private:
+ protected:
   int                                   m_pixPerStage;
   int                                   m_nTriggers;
   int                                   m_row;
@@ -119,12 +119,12 @@ class TMaskScan : public TScan {
   virtual void ConfigureMaskStage(TAlpide *chip, int istage);
   void         FindTimeoutHics   (int iboard, int *triggerCounts);
   void         ReadEventData     (std::vector <TPixHit> *Hits, int iboard);
- public: 
-  TMaskScan  (TScanConfig                   *config, 
-              std::vector <TAlpide *>        chips, 
-              std::vector <THic *>           hics, 
-              std::vector <TReadoutBoard *>  boards, 
-              std::deque<TScanHisto>        *histoQue, 
+ public:
+  TMaskScan  (TScanConfig                   *config,
+              std::vector <TAlpide *>        chips,
+              std::vector <THic *>           hics,
+              std::vector <TReadoutBoard *>  boards,
+              std::deque<TScanHisto>        *histoQue,
               std::mutex                    *aMutex);
   ~TMaskScan () {};
   std::vector <TPixHit> GetStuckPixels () {return m_stuck;};

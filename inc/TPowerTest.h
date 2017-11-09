@@ -25,7 +25,7 @@ typedef struct {
 } THicCurrents;
 
 class TPowerTest : public TScan {
- private: 
+ private:
   THic  *m_testHic;
   void   CreateMeasurements ();
   THisto CreateHisto        () {THisto histo; return histo;};
@@ -33,11 +33,11 @@ class TPowerTest : public TScan {
   std::map <std::string, THicCurrents> m_hicCurrents;
  protected:
  public:
-  TPowerTest  (TScanConfig                   *config, 
-               std::vector <TAlpide *>        chips, 
+  TPowerTest  (TScanConfig                   *config,
+               std::vector <TAlpide *>        chips,
                std::vector <THic*>            hics,
-               std::vector <TReadoutBoard *>  boards, 
-               std::deque<TScanHisto>        *histoque, 
+               std::vector <TReadoutBoard *>  boards,
+               std::deque<TScanHisto>        *histoque,
                std::mutex                    *aMutex);
   ~TPowerTest () {};
 
@@ -45,7 +45,7 @@ class TPowerTest : public TScan {
   void Execute     ();
   void Terminate   ();
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
-  void LoopEnd     (int loopIndex) {};
+  void LoopEnd     (int loopIndex) { (void)(&loopIndex); };
   void PrepareStep (int loopIndex);
   std::map <std::string, THicCurrents> GetCurrents() {return m_hicCurrents;};
 };

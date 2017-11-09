@@ -177,7 +177,7 @@ class TReadoutBoardDAQ : public TUSBBoard, public TReadoutBoard {
 
   int  SendOpCode        (Alpide::TOpCode OpCode) ;
   // DAQ board has only one control interface -> both methods are identical
-  int  SendOpCode        (Alpide::TOpCode OpCode, TAlpide *chipPtr) { return SendOpCode(OpCode); };
+  int  SendOpCode        (Alpide::TOpCode OpCode, TAlpide *chipPtr) { (void)chipPtr; return SendOpCode(OpCode); };
 
   int  SendCommand       (Alpide::TCommand Command, TAlpide *chipPtr);
 

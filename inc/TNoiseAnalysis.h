@@ -16,12 +16,12 @@
 class TNoiseResultChip : public TScanResultChip {
   friend class TNoiseAnalysis;
   friend class TApplyMask;
- private: 
+ private:
   std::vector <TPixHit> m_noisyPixels;
   double                m_occ;
- public: 
+ public:
   TNoiseResultChip () : TScanResultChip () {};
-  void  AddNoisyPixel(TPixHit pixel) {m_noisyPixels.push_back(pixel);};  
+  void  AddNoisyPixel(TPixHit pixel) {m_noisyPixels.push_back(pixel);};
   void  SetOccupancy (double occ)    {m_occ = occ;};
   void  WriteToFile  (FILE *fp);
   float GetVariable  (TResultVariable var);
@@ -39,7 +39,7 @@ class TNoiseResultHic : public TScanResultHic {
   char          m_noisyFile[200];
   TErrorCounter m_errorCounter;
   void          GetParameterSuffix (std::string &suffix, std::string &file_suffix);
- public: 
+ public:
   TNoiseResultHic () : TScanResultHic () {};
   void SetNoisyFile (const char *fName) {strcpy(m_noisyFile, fName);};
   void WriteToFile  (FILE *fp);
@@ -50,33 +50,33 @@ class TNoiseResultHic : public TScanResultHic {
 class TNoiseResult : public TScanResult {
   friend class TNoiseAnalysis;
   friend class TApplyMask;
- private: 
+ private:
   std::vector <TPixHit> m_noisyPixels;
- public: 
-  TNoiseResult () : TScanResult () {};
-  void WriteToFileGlobal (FILE *fp)          {};
+ public:
+  TNoiseResult () : TScanResult ()  {};
+  void WriteToFileGlobal (FILE *fp) { (void)fp; };
 };
 
 
 class TNoiseAnalysis : public TScanAnalysis {
- private: 
+ private:
   int          m_nTrig;
   float        m_noiseCut;
   void         WriteResult      ();
   void         FillVariableList ();
   void         WriteNoisyPixels (THic *hic);
- protected: 
-  TScanResultChip *GetChipResult () {TNoiseResultChip *Result = new TNoiseResultChip(); return Result;};  
+ protected:
+  TScanResultChip *GetChipResult () {TNoiseResultChip *Result = new TNoiseResultChip(); return Result;};
   TScanResultHic  *GetHicResult  () {TNoiseResultHic  *Result = new TNoiseResultHic (); return Result;};
   void             CreateResult  () {};
   void             AnalyseHisto  (TScanHisto *histo);
   void             InitCounters  ();
- public: 
-  TNoiseAnalysis(std::deque<TScanHisto> *histoQue, 
-                 TScan                  *aScan, 
-                 TScanConfig            *aScanConfig, 
+ public:
+  TNoiseAnalysis(std::deque<TScanHisto> *histoQue,
+                 TScan                  *aScan,
+                 TScanConfig            *aScanConfig,
                  std::vector <THic*>     hics,
-                 std::mutex             *aMutex, 
+                 std::mutex             *aMutex,
                  TNoiseResult           *aResult = 0);
   void Initialize ();
   void Finalize   ();

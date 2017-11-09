@@ -15,16 +15,16 @@
 
 class TApplyMask : public TScanAnalysis {
  private:
- protected: 
+ protected:
   TScanResultChip    *GetChipResult () {return 0;};
   TScanResultHic     *GetHicResult  () {return 0;};
   void                CreateResult  () {};
-  void                AnalyseHisto  (TScanHisto *histo) {};
+  void                AnalyseHisto  (TScanHisto *histo) { (void)histo; };
   void                InitCounters  () {};
  public:
-  TApplyMask (std::deque<TScanHisto> *histoQue, 
+  TApplyMask (std::deque<TScanHisto> *histoQue,
               TScan                  *aScan,
-              TScanConfig            *aScanConfig, 
+              TScanConfig            *aScanConfig,
               std::vector<THic*>      hics,
               std::mutex             *aMutex,
               TNoiseResult           *aResult);
