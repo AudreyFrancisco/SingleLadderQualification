@@ -28,7 +28,7 @@ class TFifoResultChip : public TScanResultChip {
   int m_err5;
   int m_erra;
   int m_errf;
- public: 
+ public:
   TFifoResultChip () : TScanResultChip () {};
   void  WriteToFile (FILE *fp);
   float GetVariable (TResultVariable var);
@@ -48,7 +48,7 @@ class TFifoResultHic : public TScanResultHic {
   int  m_nExceptions;
   int  m_nFaultyChips;
   void GetParameterSuffix (std::string &suffix, std::string &file_suffix);
- public: 
+ public:
   TFifoResultHic   () : TScanResultHic () {};
   void WriteToFile (FILE *fp);
   void WriteToDB   (AlpideDB *db, ActivityDB::activity &activity);
@@ -57,15 +57,15 @@ class TFifoResultHic : public TScanResultHic {
 
 class TFifoResult : public TScanResult {
   friend class TFifoAnalysis;
- public: 
+ public:
   TFifoResult () : TScanResult () {};
-  void WriteToFileGlobal (FILE *fp)          {};
+  void WriteToFileGlobal (FILE *fp) { (void)fp; };
 };
 
 
 class TFifoAnalysis : public TScanAnalysis {
  private:
-  std::vector <TFifoCounter> m_counters; 
+  std::vector <TFifoCounter> m_counters;
   void InitCounters     ();
   void WriteResult      ();
   void FillVariableList ();
@@ -76,11 +76,11 @@ class TFifoAnalysis : public TScanAnalysis {
   void             CreateResult  () {};
   void             AnalyseHisto  (TScanHisto *histo);
  public:
-  TFifoAnalysis(std::deque<TScanHisto> *histoQue, 
-                TScan                  *aScan, 
-                TScanConfig            *aScanConfig, 
+  TFifoAnalysis(std::deque<TScanHisto> *histoQue,
+                TScan                  *aScan,
+                TScanConfig            *aScanConfig,
                 std::vector <THic*>     hics,
-                std::mutex             *aMutex, 
+                std::mutex             *aMutex,
                 TFifoResult            *aResult = 0);
   void Initialize ();
   void Finalize   ();

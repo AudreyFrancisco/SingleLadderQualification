@@ -7,10 +7,10 @@
 
 
 class TPowerResultChip : public TScanResultChip {
- public: 
+ public:
   TPowerResultChip () : TScanResultChip () {};
-  void  WriteToFile (FILE *fp)            {};
-  float GetVariable (TResultVariable var) {return 0;};
+  void  WriteToFile (FILE *fp)            {(void)fp;};
+  float GetVariable (TResultVariable var) {(void)(&var); return 0;};
 };
 
 
@@ -43,7 +43,7 @@ class TPowerResult : public TScanResult {
  protected:
  public:
   TPowerResult () : TScanResult() {};
-  void WriteToFileGlobal (FILE *fp) {};
+  void WriteToFileGlobal (FILE *fp) {(void)fp;};
 };
 
 
@@ -59,13 +59,13 @@ class TPowerAnalysis : public TScanAnalysis {
   void             CreateResult () {};
   void             InitCounters () {};
   void             WriteResult  ();
-  void             AnalyseHisto (TScanHisto *histo) {};
+  void             AnalyseHisto (TScanHisto *histo) {(void)&histo;};
  public:
-  TPowerAnalysis(std::deque<TScanHisto> *histoQue, 
-                 TScan                  *aScan, 
-                 TScanConfig            *aScanConfig, 
+  TPowerAnalysis(std::deque<TScanHisto> *histoQue,
+                 TScan                  *aScan,
+                 TScanConfig            *aScanConfig,
                  std::vector <THic*>     hics,
-                 std::mutex             *aMutex, 
+                 std::mutex             *aMutex,
                  TPowerResult           *aResult = 0);
   void Initialize () {CreateHicResults();};
   void Run        () {};

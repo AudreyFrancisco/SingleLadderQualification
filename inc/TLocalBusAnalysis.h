@@ -12,7 +12,7 @@
 
 class TLocalBusResultChip : public TScanResultChip {
   friend class TLocalBusAnalysis;
- private: 
+ private:
   int m_err0;
   int m_err5;
   int m_erra;
@@ -46,7 +46,7 @@ class TLocalBusResult : public TScanResult {
  private:
  public:
   TLocalBusResult () : TScanResult () {};
-  void WriteToFileGlobal(FILE *fp) {};
+  void WriteToFileGlobal(FILE *fp) { (void)fp; };
 };
 
 class TLocalBusAnalysis : public TScanAnalysis {
@@ -56,20 +56,20 @@ class TLocalBusAnalysis : public TScanAnalysis {
   void FillVariableList();
  protected:
   TScanResultChip *GetChipResult () {TLocalBusResultChip *Result = new TLocalBusResultChip(); return Result;};
-  TScanResultHic  *GetHicResult  () {TLocalBusResultHic  *Result = new TLocalBusResultHic (); return Result;}; 
+  TScanResultHic  *GetHicResult  () {TLocalBusResultHic  *Result = new TLocalBusResultHic (); return Result;};
   void             CreateResult(){};
   void             AnalyseHisto  (TScanHisto *histo);
- 
+
  public:
-  TLocalBusAnalysis (std::deque<TScanHisto> *histoQue, 
-                     TScan                  *aScan, 
-                     TScanConfig            *aScanConfig, 
+  TLocalBusAnalysis (std::deque<TScanHisto> *histoQue,
+                     TScan                  *aScan,
+                     TScanConfig            *aScanConfig,
                      std::vector <THic*>     hics,
-                     std::mutex             *aMutex, 
+                     std::mutex             *aMutex,
                      TLocalBusResult        *aResult = 0);
   void Initialize();
   void Finalize  ();
- 
+
 };
 
 

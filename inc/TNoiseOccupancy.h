@@ -14,7 +14,7 @@
 
 const int kTrigPerTrain = 100;
 
-class TNoiseOccupancy : public TScan { 
+class TNoiseOccupancy : public TScan {
  private:
   int                                   m_nTrains;
   int                                   m_nLast;
@@ -31,15 +31,15 @@ class TNoiseOccupancy : public TScan {
  protected:
   THisto CreateHisto();
  public:
-  TNoiseOccupancy   (TScanConfig                   *config, 
-                     std::vector <TAlpide *>        chips, 
-                     std::vector <THic*>            hics, 
-                     std::vector <TReadoutBoard *>  boards, 
-                     std::deque<TScanHisto>        *histoque, 
+  TNoiseOccupancy   (TScanConfig                   *config,
+                     std::vector <TAlpide *>        chips,
+                     std::vector <THic*>            hics,
+                     std::vector <TReadoutBoard *>  boards,
+                     std::deque<TScanHisto>        *histoque,
                      std::mutex                    *aMutex);
   ~TNoiseOccupancy  () {};
   void  Init         ();
-  void  PrepareStep  (int loopIndex) {};
+  void  PrepareStep  (int loopIndex) { (void)(&loopIndex); };
   void  LoopStart    (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void  LoopEnd      (int loopIndex);
   void  Execute      ();

@@ -15,17 +15,17 @@
 
 class TApplyTuning : public TScanAnalysis {
  private:
- protected: 
+ protected:
   TScanResultChip    *GetChipResult () {return 0;};
   TScanResultHic     *GetHicResult  () {return 0;};
   void                CreateResult  () {};
-  void                AnalyseHisto  (TScanHisto *histo) {};
+  void                AnalyseHisto  (TScanHisto *histo) { (void)histo; };
   void                InitCounters  () {};
   virtual const char* GetDACName    () = 0;
  public:
-  TApplyTuning (std::deque<TScanHisto> *histoQue, 
+  TApplyTuning (std::deque<TScanHisto> *histoQue,
                 TScan                  *aScan,
-                TScanConfig            *aScanConfig, 
+                TScanConfig            *aScanConfig,
                 std::vector<THic*>      hics,
                 std::mutex             *aMutex,
                 TSCurveResult          *aResult);
@@ -39,9 +39,9 @@ class TApplyVCASNTuning : public TApplyTuning {
  protected:
   const char *GetDACName () {return "VCASN";};
  public:
-  TApplyVCASNTuning (std::deque<TScanHisto> *histoQue, 
+  TApplyVCASNTuning (std::deque<TScanHisto> *histoQue,
                     TScan                   *aScan,
-                    TScanConfig             *aScanConfig, 
+                    TScanConfig             *aScanConfig,
                     std::vector<THic*>       hics,
                     std::mutex              *aMutex,
                     TSCurveResult           *aResult)
@@ -53,9 +53,9 @@ class TApplyITHRTuning : public TApplyTuning {
  protected:
   const char *GetDACName () {return "ITHR";};
  public:
-  TApplyITHRTuning (std::deque<TScanHisto> *histoQue, 
+  TApplyITHRTuning (std::deque<TScanHisto> *histoQue,
                     TScan                   *aScan,
-                    TScanConfig             *aScanConfig, 
+                    TScanConfig             *aScanConfig,
                     std::vector<THic*>       hics,
                     std::mutex              *aMutex,
                     TSCurveResult           *aResult)

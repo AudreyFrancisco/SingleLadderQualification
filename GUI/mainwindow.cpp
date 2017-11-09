@@ -1161,7 +1161,7 @@ void MainWindow::fillingOBvectors(){
     scanbuttons.push_back(ui->test6);
     scanbuttons.push_back(ui->test7);
     scanbuttons.push_back(ui->test8);
-    scanbuttons.push_back(ui->test9); 
+    scanbuttons.push_back(ui->test9);
     scanbuttons.push_back(ui->test10);
     scanbuttons.push_back(0);
      scanbuttons.push_back(ui->test11);
@@ -1486,7 +1486,7 @@ void MainWindow::WriteTests(){
   if (fScanVector.at(i)!=0){
 scanbuttons.at(i)->setText(fScanVector[i]->GetName());
   }
-  else if (fScanVector.at(i)=0){
+  else if (fScanVector.at(i)==0){
       scanbuttons.at(i)->setText(fScanVector[i+1]->GetName());
 
   }
