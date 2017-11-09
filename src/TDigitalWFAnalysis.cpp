@@ -230,8 +230,8 @@ void TDigitalWFResult::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 
 void TDigitalWFResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity) 
 {
-  DbAddParameter  (db, activity, string("Unmaskable Pixels"),       (float) m_nUnmaskable);
-  DbAddParameter  (db, activity, string("Unmaskable Stuck Pixels"), (float) m_nStuck);
+  DbAddParameter  (db, activity, string("Unmaskable pixels"),       (float) m_nUnmaskable);
+  DbAddParameter  (db, activity, string("Unmaskable stuck pixels"), (float) m_nStuck);
   DbAddAttachment (db, activity, attachResult, string(m_resultFile), string(m_resultFile));
 }
 
