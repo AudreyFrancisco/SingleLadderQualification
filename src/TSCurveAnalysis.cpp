@@ -240,7 +240,7 @@ void TSCurveAnalysis::AnalyseHisto (TScanHisto *histo)
           chipResult->m_noiseSq     += pow(fitResult.noise, 2);
           chipResult->m_threshSq    += pow(fitResult.threshold, 2);
           chipResult->m_nEntries    ++;
-	  for (int iHic = 0; iHic < m_hics.size(); iHic ++) {
+	  for (unsigned int iHic = 0; iHic < m_hics.size(); iHic ++) {
             if (! (m_hics.at(iHic)->ContainsChip(m_chipList.at(iChip)))) continue;
             TSCurveResultHic *hicResult = (TSCurveResultHic*) m_result->GetHicResults().at(m_hics.at(iHic)->GetDbId());
             hicResult->m_noiseAv     += fitResult.noise;
