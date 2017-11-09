@@ -669,7 +669,7 @@ void TSCurveResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 
   if (m_thresholdScan) {
     DbAddParameter (db, activity, string ("Dead pixels") + suffix,              (float) m_nNoThresh);
-    DbAddParameter (db, activity, string ("Pixels without ") + suffix, (float) m_nNoThresh);
+    DbAddParameter (db, activity, string ("Pixels without") + suffix, (float) m_nNoThresh);
   }
   DbAddParameter (db, activity, string ("Minimum chip avg") + suffix, (float) m_minChipAv);
   DbAddParameter (db, activity, string ("Maximum chip avg") + suffix, (float) m_maxChipAv);
