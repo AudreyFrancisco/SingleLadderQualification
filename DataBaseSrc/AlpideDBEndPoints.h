@@ -34,6 +34,7 @@
  *  HISTORY
  *
  *  7/9/2017	-	Refine the XML parsing/reading
+ *  9/11/2017   - Add ParameterID field to the parameter type struct
  *
  */
 #ifndef ALPIDEDBENDPOINTS_H_
@@ -217,10 +218,11 @@ public:
 
 	struct parameterType {
 		int ID;
+		int ParameterID;
 		string Name;
 		string Description;
 	};
-	#define zPARAMETERTYPE(a) a.ID = 0; a.Name = ""; a.Description = ""
+	#define zPARAMETERTYPE(a) a.ID = 0; a.ParameterID = 0; a.Name = ""; a.Description = ""
 
 	struct activityType {
 		int ID;
