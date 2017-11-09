@@ -46,7 +46,7 @@ int DbGetParameterId (AlpideDB *db, int activityTypeId, string name)
 
   for (unsigned int i = 0; i < parameterList.size(); i++) {
     if (name == parameterList.at(i).Name) {
-      return parameterList.at(i).ID;
+      return parameterList.at(i).ParameterID;
     }
   }
   return -1;
@@ -60,7 +60,9 @@ int  DbGetAttachmentTypeId (AlpideDB *db, string name)
 
   if (attTypeList.size() == 0) attTypeList = *(activityDB->GetAttachmentTypeList());
 
+  //  std::cout << "TypeListSize: " << attTypeList.size() << std::endl;
   for (unsigned int i = 0; i < attTypeList.size(); i++) {
+    //    std::cout << "  Searching " << name << ", found " << attTypeList.at(i).Category << std::endl;
     if (name == attTypeList.at(i).Category) {
       return attTypeList.at(i).ID;
     }
