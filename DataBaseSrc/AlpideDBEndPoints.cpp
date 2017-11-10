@@ -1292,6 +1292,73 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityID)
 
 
 /* ----------------------
+ * Get the list of activities ...
+ *
+ *
+----------------------- */
+std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProjectID, int aActivityID)
+{
+	vector<activityShort> *theActList = new vector<activityShort>;
+	char *stringresult;
+	string theUrl;
+	string theQuery;
+	activityShort act;
+
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityRead";
+	theQuery = "projectID="+std::to_string(aProjectID) + "activityTypeID="+std::to_string(aActivityID);
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+		return(theActList);
+	} else {
+		xmlDocPtr doc;
+		xmlNode *nod;
+		if(_getTheRootElementChildren(stringresult, &doc, &nod)) {
+			while (nod != NULL) {
+				if(strcmp((const char*)nod->name, "Activity") == 0) {
+					xmlNode *n1 = nod->children;
+					zACTIVITYSHORT(act);
+					while(n1 != NULL) {
+						if(strcmp((const char*)n1->name, "ID") == 0) act.ID = atoi( (const char*)(n1->children->content)) ;
+						else if (strcmp((const char*)n1->name, "Name") == 0) act.Name = (const char*)(n1->children->content);
+						else if (strcmp((const char*)n1->name, "StartDate") == 0) str2timeDate((const char*)(n1->children->content), &act.StartDate);
+						else if (strcmp((const char*)n1->name, "EndDate") == 0) str2timeDate((const char*)(n1->children->content), &act.EndDate);
+						if(strcmp((const char*)n1->name, "ActivityType") == 0) {
+							xmlNode *n2 = n1->children;
+							while(n2 != NULL) {
+								if(strcmp((const char*)n2->name, "ID") == 0) act.Type.ID = atoi( (const char*)(n2->children->content)) ;
+								else if (strcmp((const char*)n2->name, "Name") == 0) act.Type.Name = (const char*)(n2->children->content);
+								else if (strcmp((const char*)n2->name, "Description") == 0) act.Type.Description = (const char*)(n2->children->content);
+								n2 = n2->next;
+							}
+						}
+						if(strcmp((const char*)n1->name, "ActivityStatus") == 0) {
+							xmlNode *n2 = n1->children;
+							while(n2 != NULL) {
+								if(strcmp((const char*)n2->name, "ID") == 0) act.Status.ID = atoi( (const char*)(n2->children->content)) ;
+								else if (strcmp((const char*)n2->name, "Code") == 0) act.Status.Code = (const char*)(n2->children->content);
+								else if (strcmp((const char*)n2->name, "Description") == 0) act.Status.Description = (const char*)(n2->children->content);
+								n2 = n2->next;
+							}
+						}
+						n1 = n1->next;
+					}
+					theActList->push_back(act);
+				}
+				nod = nod->next;
+			}
+			SetResponse(AlpideTable::NoError, 0,0);
+		}
+		free(stringresult);
+		xmlFreeDoc(doc);       // free document
+		xmlCleanupParser();
+	}
+	return(theActList);
+}
+
+
+
+/* ----------------------
  * Converts the string into the URI encoding
  *
  *  not used !

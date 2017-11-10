@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include "utilities.h"
 #include <algorithm>
+#include <stdio.h>
 
 bool fileExists(string filewithpath) {
 
@@ -106,5 +107,32 @@ Uri Uri::Parse(const std::string &uri)
 
    return result;
 }   // Parse
+
+
+void str2timeDate(const char *sDate, time_t *tDate)
+{
+	int dd, mm, yy;
+	struct tm date = {0};
+	sscanf(sDate, "%d.%d.%d", &dd, &mm, &yy);
+	date.tm_year = yy;
+	date.tm_mon = mm;
+	date.tm_mday = dd;
+	*tDate = mktime(&date);
+	return;
+}
+
+
+void str2timeTime(const char *sDate, time_t *tDate)
+{
+	int hh, mm, ss;
+	struct tm date = {0};
+	sscanf(sDate, "%d:%d:%d", &hh, &mm, &ss);
+	date.tm_hour = hh;
+	date.tm_min = mm;
+	date.tm_sec = ss;
+	*tDate = mktime(&date);
+	return;
+}
+
 
 

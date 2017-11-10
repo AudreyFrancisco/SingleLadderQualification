@@ -325,6 +325,18 @@ public:
 		vector<attach> Attachments;
 	};
 
+	// ---------------
+	struct activityShort {
+		int ID;
+		string Name;
+		time_t StartDate;
+		time_t EndDate;
+		activityType Type;
+		statusType Status;
+	};
+	#define zACTIVITYSHORT(a) a.ID = 0; a.Name = ""; a.Type.ID = 0; a.Status.ID = 0
+
+
 // Methods
 public:
 	ActivityDB(AlpideDB * DBhandle);
@@ -340,7 +352,7 @@ public:
     vector<resultType> *GetResultList(int aActivityID);
     vector<statusType> *GetStatusList(int aActivityID);
     vector<attachmentType> *GetAttachmentTypeList();
-
+    vector<activityShort> *GetActivityList(int aProjectID, int aActivityID);
 
 
 private:
