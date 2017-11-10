@@ -10,7 +10,7 @@
 
 namespace ScanConfig {
   const int NINJ           = 50;        // number of injections in digital/threshold scans
-  const int NTRIG          = 1000000;   // number of triggers for noise occupancy scans
+  const int NTRIG          = 10000;   // number of triggers for noise occupancy scans
   const int CHARGE_START   = 0;
   const int CHARGE_STOP    = 50;
   const int CHARGE_STEP    = 1;
@@ -24,7 +24,7 @@ namespace ScanConfig {
   const int VCASN_START    = 30;
   const int VCASN_STOP     = 70;
   const int VCASN_STEP     = 1;
-  const int SCAN_STEP      = 16; //Grab every Xth row (for tuneITHR/VCASN scan only).
+  const int SCAN_STEP      = 256; //Grab every Xth row (for tuneITHR/VCASN scan only).
                                  //Speeds up scan; changing this has little effect on result accuracy.
   const int TUNING_MAXROW  = 512;
   const int LOCALBUSCUTRED = 1;
@@ -158,6 +158,7 @@ class TScanConfig {
   int  m_calVpulsel;
   int  m_targetThresh;
   int  m_nominal;
+  bool m_isMasked;
   float m_voltageScale;
   float m_backBias;
  protected:
@@ -187,11 +188,13 @@ class TScanConfig {
   int   GetLocalBusCutRed() {return m_localBusCutRed;};
   int   GetCalVpulsel    () {return m_calVpulsel;};
   float GetVoltageScale  () {return m_voltageScale;};
+  bool  GetIsMasked      () {return m_isMasked;};
   float GetBackBias      () {return m_backBias;};
   void  SetfNameSuffix   (const char *aSuffix) {strcpy (m_fNameSuffix, aSuffix);};
   void  SetVoltageScale  (float aScale)        {m_voltageScale = aScale;};
   void  SetBackBias      (float aVoltage)      {m_backBias = fabs(aVoltage);};
   void  SetVcasnRange    (int start, int stop) {m_vcasnStart = start; m_vcasnStop = stop;};
+  void  SetIsMasked      (bool masked)         {m_isMasked = masked;};
 };
 
 #endif

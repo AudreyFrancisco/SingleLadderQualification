@@ -33,6 +33,7 @@ class TNoiseResultHic : public TScanResultHic {
   friend class TNoiseAnalysis;
   friend class TApplyMask;
  private:
+  bool          m_isMasked;
   double        m_occ;
   int           m_nNoisy;
   float         m_backBias;
@@ -62,6 +63,7 @@ class TNoiseAnalysis : public TScanAnalysis {
  private:
   int          m_nTrig;
   float        m_noiseCut;
+  bool         m_isMasked;
   void         WriteResult      ();
   void         FillVariableList ();
   void         WriteNoisyPixels (THic *hic);

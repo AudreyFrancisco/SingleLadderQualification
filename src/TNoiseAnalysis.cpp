@@ -68,6 +68,7 @@ void TNoiseAnalysis::Initialize()
 {
   ReadChipList      ();
   CreateHicResults  ();
+  m_isMasked = m_config->GetIsMasked();
   std::cout << "In noise analysis, number of hic results: " << m_result->GetNHics() << std::endl;
 }
 
@@ -78,6 +79,7 @@ void TNoiseAnalysis::InitCounters()
   for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
     TNoiseResultHic *result = (TNoiseResultHic*) it->second;
     result->m_backBias = ((TNoiseOccupancy*) m_scan)->GetBackbias();
+    result->m_isMasked = m_isMasked;
   }
 }
 
@@ -197,9 +199,18 @@ void TNoiseResultHic::WriteToFile(FILE *fp)
 //TODO: add information on masking (number of masked pixels?)
 void TNoiseResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix) 
 {
-  suffix      = (std::to_string((int) m_backBias) + std::string("V"));
-  file_suffix = (string("_") + std::to_string((int) m_backBias) + std::string("V"));
+  if (m_isMasked) {
+    suffix      = "masked ";
+    file_suffix = "_masked";
+  }
+  else {
+    suffix      = "";
+    file_suffix = "";
+  }
+  suffix      += (std::to_string((int) m_backBias) + std::string("V"));
+  file_suffix += (string("_") + std::to_string((int) m_backBias) + std::string("V"));
 }
+
 
 void TNoiseResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity) 
 {

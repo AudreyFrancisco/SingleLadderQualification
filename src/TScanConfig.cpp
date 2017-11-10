@@ -37,6 +37,7 @@ TScanConfig::TScanConfig()
   m_voltageScale   = VOLTAGE_SCALE;
   m_backBias       = BACKBIAS;
   m_nominal        = NOMINAL;
+  m_isMasked       = false;
 
   m_powerCutMinIdda_OB        = POWER_CUT_MINIDDA_OB;
   m_powerCutMinIddd_OB        = POWER_CUT_MINIDDD_OB;
