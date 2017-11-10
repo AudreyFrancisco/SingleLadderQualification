@@ -573,6 +573,140 @@ AlpideTable::response * ComponentDB::Create(string ComponentTypeID, string Compo
 }
 
 /* -----------------
+ * 	PRIVATE
+ *    extractTheComponent := get the component definition
+ *
+ *		In Param : the XML node that contains the Component definition
+ *		Out Param : a Reference to a Component struct that will contains the values parsed
+ *
+ * ---------------- */
+void ComponentDB::extractTheComponent(xmlNode *ns, component *pro)
+{
+	xmlNode *n1,*n2,*n3, *n4,*n5;
+	n1 = ns;
+	while(n1 != NULL) {
+		if(strcmp((const char*)n1->name, "ID") == 0) pro->ID = atoi( (const char*)n1->children->content);
+		else if (strcmp((const char*)n1->name, "ComponentID") == 0) pro->ComponentID.assign( (const char *)n1->children->content);
+		else if (strcmp((const char*)n1->name, "SupplierComponentID") == 0) pro->SupplierComponentID.assign( (const char *)n1->children->content);
+		else if (strcmp((const char*)n1->name, "Description") == 0) pro->Description.assign((const char *)n1->children->content);
+		else if (strcmp((const char*)n1->name, "LotID") == 0) pro->LotID.assign((const char *)n1->children->content);
+		else if (strcmp((const char*)n1->name, "PackageID") == 0) pro->PackageID.assign((const char *)n1->children->content);
+
+		else if (strcmp((const char*)n1->name, "ComponentType") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ID") == 0) pro->Type.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Name") == 0) pro->Type.Name.assign( (const char *)n2->children->content);
+				n2 =n2->next;
+			}
+		}
+		else if (strcmp((const char*)n1->name, "PhysicalStatus") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ID") == 0) pro->PhysicalState.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Name") == 0) pro->PhysicalState.Name.assign( (const char *)n2->children->content);
+				n2 =n2->next;
+			}
+		}
+		else if (strcmp((const char*)n1->name, "FunctionalStatus") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ID") == 0) pro->FunctionalState.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Name") == 0) pro->FunctionalState.Name.assign( (const char *)n2->children->content);
+				n2 =n2->next;
+			}
+		}
+		if(strcmp((const char*)n1->name, "Composition") == 0)  {
+			n2 = n1->children;
+			compComposition ap1;
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ComponentComposition") == 0)  {
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) ap1.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Position") == 0)  ap1.Position = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Component") == 0) {
+							n4 = n3->children;
+							while(n4 != NULL) {
+								if(strcmp((const char*)n4->name, "ID") == 0) ap1.Component.ID = atoi( (const char*)n4->children->content);
+								else if(strcmp((const char*)n4->name, "ComponentID") == 0) ap1.Component.ComponentID.assign( (const char *)n4->children->content);
+								else if(strcmp((const char*)n4->name, "ComponentType") == 0) {
+									n5 = n4->children;
+									while(n5 != NULL) {
+										if(strcmp((const char*)n5->name, "ID") == 0) ap1.Component.ComponentType.ID = atoi( (const char*)n5->children->content);
+										else if(strcmp((const char*)n5->name, "Name") == 0) ap1.Component.ComponentType.Name.assign( (const char *)n5->children->content);
+										n5 = n5->next;
+									}
+								}
+								n4 = n4->next;
+							}
+						}
+						n3 = n3->next;
+					}
+					pro->Composition.push_back(ap1);
+					zCOMPCOMPOSITION(ap1);
+				}
+				n2 =n2->next;
+			}
+		}
+		n1 = n1->next;
+	}
+}
+
+
+/* -----------------
+*    Read := Get a component
+*
+*		In Param : ... all the items describing ...
+*		returns : a response struct that contains the error code
+*---------------- */
+AlpideTable::response * ComponentDB::Read(int ID, component *Result)
+{
+	std::string sID = std::to_string(ID);
+	return(readComponent(sID, "", Result));
+}
+
+AlpideTable::response * ComponentDB::Read(string ComponentID, component *Result)
+{
+	return(readComponent("-999", ComponentID, Result));
+}
+
+AlpideTable::response * ComponentDB::readComponent(string ID, string ComponentID, component *Result)
+{
+
+	string theUrl = theParentDB->GetQueryDomain() + "/ComponentReadOne";
+	string theQuery = "ID="+ID+"&componentID="+ComponentID;
+	char *stringresult;
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0)  {
+	    cerr << "Failed to execute the Query" << endl;
+	    SetResponse(AlpideTable::SyncQuery, 0,0);
+		return(&theResponse);
+	}
+	xmlDocPtr doc;
+	doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+	if (doc == NULL) {
+	    cerr << "Failed to parse document" << endl;
+	    SetResponse(AlpideTable::BadXML, 0,0);
+		return(&theResponse);
+	}
+	// Get the root element node
+	xmlNode *root_element = NULL;
+	root_element = xmlDocGetRootElement(doc);
+	if(root_element == NULL) {
+	    SetResponse(AlpideTable::BadXML, 0,0);
+		return(&theResponse);
+	}
+
+	xmlNode *n1 = root_element->children;
+	extractTheComponent(n1, Result);
+
+    SetResponse(AlpideTable::NoError, 0,0);
+	return(&theResponse);
+}
+
+
+/* -----------------
 *    Print := Dumps a human readable form of the Component Type definition
 *
 *		In Param : the component type struct
