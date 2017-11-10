@@ -382,6 +382,26 @@
     <string>Bottom</string>
    </property>
   </widget>
+  <widget class="QLabel" name="label_14">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>181</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <italic>true</italic>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>HIC should not be attached</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
