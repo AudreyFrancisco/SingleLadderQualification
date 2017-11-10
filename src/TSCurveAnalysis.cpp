@@ -166,9 +166,9 @@ void TSCurveAnalysis::InitCounters ()
     TSCurveResultHic *result = (TSCurveResultHic*) it->second;
     result->m_nDead         = 0;
     result->m_nNoThresh     = 0;
-    result->m_minChipAv     = -1;
-    result->m_maxChipAv     = 999;
-    result->m_maxChipNoise  = 999;
+    result->m_minChipAv     = 999;
+    result->m_maxChipAv     = -1;
+    result->m_maxChipNoise  = -1;
     result->m_noiseAv       = 0;
     result->m_noiseRms      = 0;
     result->m_nEntries      = 0;
