@@ -4,22 +4,22 @@
 #include <QDialog>
 
 namespace Ui {
-class DatabaseSelection;
+  class DatabaseSelection;
 }
 
 class DatabaseSelection : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
-public:
-    explicit DatabaseSelection(QWidget *parent = 0);
-    ~DatabaseSelection();
+ public:
+  explicit DatabaseSelection(QWidget *parent = 0);
+  ~DatabaseSelection();
 
-public slots:
+  public slots:
     virtual void setdatabase(bool &database);
 
-private:
-    Ui::DatabaseSelection *ui;
+ private:
+  Ui::DatabaseSelection *ui;
 };
 
 #endif // DATABASESELECTION_H

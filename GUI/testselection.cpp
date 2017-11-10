@@ -39,12 +39,12 @@ TestSelection::~TestSelection()
 
 void TestSelection::SaveSettings(QString &opname, QString &hicid, int &counter, int &lid, int &memberid, QString &ttwo, QString &tthree, QString &tfour, QString &tfive, QString &done, QString &dtwo, QString dthree, QString dfour, QString dfive){
   if (ui->operatorstring->toPlainText().isEmpty() || ui->id->toPlainText().isEmpty() || locid== 0)
-  {
-    qDebug()<<"Put your details little shit"<<endl;
-    popupmessage("Info missing");
-    counter=0;
+    {
+      qDebug()<<"Put your details little shit"<<endl;
+      popupmessage("Info missing");
+      counter=0;
 
-  }
+    }
   else{
     if (!ui->t2->toPlainText().isEmpty()){
       ttwo=ui->t2->toPlainText();
@@ -108,7 +108,7 @@ void TestSelection::popupmessage(QString m){
   this->setWindowFlags((windowFlags() & Qt::WindowStaysOnTopHint));
   this->setWindowFlags((windowFlags() & ~Qt::WindowStaysOnTopHint));
   missingsettings->append(m);
-//  missingsettings->show();
+  //  missingsettings->show();
   missingsettings->exec();
 
   // missingsettings->activateWindow();
@@ -136,25 +136,25 @@ void TestSelection::getlocationcombo(int value){
     locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
     break;}
   case 3:
-  {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
+    {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
       break;
-  }
+    }
   case 4:
-  {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
-    break;
-  }
+    {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
+      break;
+    }
   case 5:
-  {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
-    break;
-  }
+    {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
+      break;
+    }
   case 6:
-  {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
-    break;
-  }
+    {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
+      break;
+    }
   case 7:
-  {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
-    break;
-  }
+    {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
+      break;
+    }
   }}
 
 
