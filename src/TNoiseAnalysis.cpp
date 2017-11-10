@@ -78,8 +78,9 @@ void TNoiseAnalysis::InitCounters()
   std::map<std::string, TScanResultHic*>::iterator it;
   for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
     TNoiseResultHic *result = (TNoiseResultHic*) it->second;
-    result->m_backBias = ((TNoiseOccupancy*) m_scan)->GetBackbias();
-    result->m_isMasked = m_isMasked;
+    result->m_backBias   = ((TNoiseOccupancy*) m_scan)->GetBackbias();
+    result->m_isMasked   = m_isMasked;
+    result->m_maxChipOcc = 0;
   }
 }
 
@@ -137,6 +138,7 @@ void TNoiseAnalysis::Finalize()
       TNoiseResultChip *chipResult = (TNoiseResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
       hicResult->m_occ    += chipResult->m_occ;
       hicResult->m_nNoisy += chipResult->m_noisyPixels.size();
+      if (chipResult->m_occ > hicResult->m_maxChipOcc) hicResult->m_maxChipOcc = chipResult->m_occ;
     }
     hicResult->m_occ /= m_hics.at(ihic)->GetNChips();
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
@@ -221,6 +223,7 @@ void TNoiseResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 
   DbAddParameter (db, activity, string ("Noisy pixels ") + suffix, (float) m_nNoisy);
   DbAddParameter (db, activity, string ("Noise occupancy ") + suffix, (float) m_occ);
+  DbAddParameter (db, activity, string ("Maximum chip occupancy ") + suffix, (float) m_occ);
 
   point = string(m_resultFile).find_last_of(".");
   fileName = string(m_resultFile).substr (0, point) + file_suffix + ".dat";

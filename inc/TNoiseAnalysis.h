@@ -35,6 +35,7 @@ class TNoiseResultHic : public TScanResultHic {
  private:
   bool          m_isMasked;
   double        m_occ;
+  double        m_maxChipOcc;
   int           m_nNoisy;
   float         m_backBias;
   char          m_noisyFile[200];
