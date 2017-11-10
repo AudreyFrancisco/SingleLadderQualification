@@ -261,6 +261,14 @@ public:
 	};
 	#define zATTACH(a) a.ID = 0; a.Category = 0; a.RemoteFileName = ""; a.LocalFileName = ""; a.User = 0
 
+	struct uriattach {
+		int ID;
+		string UriPath;
+		string UriDescription;
+		int User;
+	};
+	#define zURIATTACH(a) a.ID = 0; a.UriPath = ""; a.UriDescription = ""; a.User = 0
+
 	struct parameterType {
 		int ID;
 		int ParameterID;
@@ -308,6 +316,18 @@ public:
 	};
 	#define zSTATUSTYPE(a) a.ID = 0; a.Code = ""; a.Description = ""
 
+	struct statusphysical {
+		int ID;
+		string Name;
+	};
+	#define zSTATUSPHYSICAL(a) a.ID = 0; a.Name = ""
+
+	struct statusfunctional {
+		int ID;
+		string Name;
+	};
+	#define zSTATUSFUNCTIONAL(a) a.ID = 0; a.Name = ""
+
 	struct activity {
 		int ID;
 		int Type;
@@ -336,6 +356,77 @@ public:
 	};
 	#define zACTIVITYSHORT(a) a.ID = 0; a.Name = ""; a.Type.ID = 0; a.Status.ID = 0
 
+	struct actTypeCompType {
+		int ID;
+		int Quantity;
+		string Direction;
+	};
+	#define zACTTYPECOMPTYPE(a) a.ID =0; a.Quantity = 0; a.Direction ="in"
+
+	struct actComp {
+		int ID;
+		string ComponentID;
+		componentType Type;
+	};
+	#define zACTCOMP(a) a.ID=0; a.ComponentID = ""; zCOMPOTYPE(a.Type)
+
+	struct actComponent {
+		int ID;
+		int Conformity;
+		actTypeCompType ActivityComponentType;
+		actComp Component;
+		statusphysical PhysicalStatus;
+		statusfunctional FunctionalStatus;
+	};
+	#define zACTCOMPONENT(a) a.ID =0; a.Conformity = 0; zACTTYPECOMPTYPE(a.ActivityComponentType); zACTCOMP(a.Component);
+
+	struct actParameter {
+		int ID;
+		float Value;
+		parameterType Type;
+	};
+	#define zACTPARAMETER(a) a.ID =0; a.Value=0.0; zPARAMETERTYPE(a.Type)
+
+	struct actAttachment {
+		int ID;
+		string FileName;
+		attachmentType Type;
+	};
+	#define zACTATTACHMENT(a) a.ID =0; a.FileName=""; zATTACHMENTTYPE(a.Type)
+
+	struct actMember {
+			int ID;
+			int Leader;
+			member Type;
+	};
+	#define zACTMEMBER(a) a.ID =0; a.Leader=0
+
+	struct actUri {
+		int ID;
+		string Path;
+		string Description;
+	};
+	#define zACTURI(a) a.ID =0; a.Path=""; a.Description =""
+
+	struct activityLong {
+		int ID;
+		string Name;
+		string LotID;
+		time_t StartDate;
+		time_t EndDate;
+		resultType Result;
+		activityType Type;
+		statusType Status;
+		locationType Location;
+		vector<actComponent> Components;
+		vector<actParameter> Parameters;
+		vector<actAttachment> Attachments;
+		vector<actMember> Members;
+		vector<actUri> Uris;
+	};
+	#define zACTIVITYLOND(a) a.ID = 0; a.Name = ""; a.LotID + ""; zRESULTTYPE(a.Result); zACTIVITYTYPE(a.Type); zSTATUSTYPE(a.Status); zLOCATIONTYPE(a.Location); Components.clear();Parameters.clear();Attachments.clear();Members.clear();Uris.clear()
+
+
 
 // Methods
 public:
@@ -353,12 +444,14 @@ public:
     vector<statusType> *GetStatusList(int aActivityID);
     vector<attachmentType> *GetAttachmentTypeList();
     vector<activityShort> *GetActivityList(int aProjectID, int aActivityID);
+    AlpideTable::response *Read(int ID, activityLong *Result);
 
 
 private:
     unsigned long buildBase64Binary(string aLocalFileName, string * aBuffer);
     int buildUrlEncoded(string aLocalFileName, string *Buffer);
-
+    AlpideTable::response *readActivity(string ID, activityLong *Result);
+    void extractTheActivity(xmlNode *ns, activityLong *pro);
 };
 
 #endif /* ALPIDEDBENDPOINTS_H_ */
