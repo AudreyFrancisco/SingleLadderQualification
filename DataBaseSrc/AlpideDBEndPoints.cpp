@@ -966,9 +966,9 @@ std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList()
 				if(strcmp((const char*)nod->name, "AttachmentCatagory") == 0) {
 					xmlNode *n1 = nod->children;
 					while(n1 != NULL) {
-						if(strcmp((const char*)n1->name, "ID") == 0) att.ID = atoi( (const char*)(n1->children->content)) ;
-						else if (strcmp((const char*)n1->name, "Category") == 0) att.Category = (const char*)(n1->children->content);
-						else if (strcmp((const char*)n1->name, "Description") == 0) att.Description = (const char*)(n1->children->content);
+                                          if((strcmp((const char*)n1->name, "ID") == 0) && n1->children) att.ID = atoi( (const char*)(n1->children->content)) ;
+                                          else if ((strcmp((const char*)n1->name, "Category") == 0) && n1->children) att.Category = (const char*)(n1->children->content);
+                                          else if ((strcmp((const char*)n1->name, "Description") == 0) && n1->children) att.Description = (const char*)(n1->children->content);
 						n1 = n1->next;
 					}
 					theAttachmentList->push_back(att);
