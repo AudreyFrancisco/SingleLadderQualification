@@ -2422,6 +2422,7 @@ void MainWindow::colorsinglescan(int i){
 void MainWindow::writecalibrationfile(){
 
     pbconfig->WriteCalibrationFile();
+    calwindow->close();
 
 }
 
