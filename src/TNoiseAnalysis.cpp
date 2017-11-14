@@ -223,7 +223,7 @@ void TNoiseResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 
   DbAddParameter (db, activity, string ("Noisy pixels ") + suffix, (float) m_nNoisy);
   DbAddParameter (db, activity, string ("Noise occupancy ") + suffix, (float) m_occ);
-  DbAddParameter (db, activity, string ("Maximum chip occupancy ") + suffix, (float) m_occ);
+  DbAddParameter (db, activity, string ("Maximum chip occupancy ") + suffix, (float) m_maxChipOcc);
 
   point = string(m_resultFile).find_last_of(".");
   fileName = string(m_resultFile).substr (0, point) + file_suffix + ".dat";
