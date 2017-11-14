@@ -730,7 +730,7 @@ void MainWindow::digital(){
         //scanLoop(mydigital);
         //  std::cout << "starting thread" << std::endl;
         std::thread scanThread(&MainWindow::scanLoop,this,mydigital);
-        std::thread analysisThread(&TScanAnalysis::Run, std::ref(analysis));
+        std::thread analysisThread(&TScanAnalysis::Run, analysis);
         ui->statusbar->setValue(50);
         scanThread.join();
         analysisThread.join();
