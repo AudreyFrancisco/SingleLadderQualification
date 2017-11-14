@@ -166,6 +166,7 @@ void TSCurveAnalysis::InitCounters ()
     TSCurveResultHic *result = (TSCurveResultHic*) it->second;
     result->m_nDead         = 0;
     result->m_nNoThresh     = 0;
+    result->m_nHot          = 0;
     result->m_minChipAv     = 999;
     result->m_maxChipAv     = -1;
     result->m_maxChipNoise  = -1;
@@ -284,6 +285,9 @@ void TSCurveAnalysis::Finalize()
       if (chipResult->m_thresholdAv < hicResult->m_minChipAv) hicResult->m_minChipAv = chipResult->m_thresholdAv;
       if (chipResult->m_thresholdAv > hicResult->m_maxChipAv) hicResult->m_maxChipAv = chipResult->m_thresholdAv;
       if (chipResult->m_noiseAv     > hicResult->m_maxChipNoise) hicResult->m_maxChipNoise = chipResult->m_noiseAv;
+      hicResult->m_nDead     += chipResult->m_nDead;
+      hicResult->m_nNoThresh += chipResult->m_nNoThresh;
+      hicResult->m_nHot      += chipResult->m_nHot;
     }
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
@@ -682,9 +686,9 @@ void TSCurveResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
   GetParameterSuffix(suffix, file_suffix);
 
   if (m_thresholdScan) {
-    DbAddParameter (db, activity, string ("Dead pixels") + suffix,              (float) m_nNoThresh);
+    DbAddParameter (db, activity, string ("Dead pixels") + suffix,    (float) m_nDead);
     DbAddParameter (db, activity, string ("Pixels without") + suffix, (float) m_nNoThresh);
-    DbAddParameter (db, activity, string ("Average noise") + suffix, (float) m_noiseAv);
+    DbAddParameter (db, activity, string ("Average noise") + suffix,  (float) m_noiseAv);
     DbAddParameter (db, activity, string ("Maximum chip noise") + suffix, (float) m_maxChipNoise);
   }
   DbAddParameter (db, activity, string ("Minimum chip avg") + suffix, (float) m_minChipAv);
