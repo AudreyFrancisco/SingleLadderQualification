@@ -52,6 +52,7 @@
 
 using namespace std;
 
+#define MATCHNODE(nod, tag) (nod->children && strcmp((const char*)nod->name,tag) == 0)
 
 class AlpideDB;
 

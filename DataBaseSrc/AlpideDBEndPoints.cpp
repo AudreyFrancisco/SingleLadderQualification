@@ -105,17 +105,10 @@ AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Ses
 	}
 	xmlNode *n1 = root_element->children;
 	while (n1 != NULL) {
-		if(strcmp((const char*)n1->name, "ErrorCode") == 0) {
-			if(n1->children != NULL)
-				theResponse.ErrorCode = atoi( (const char*)n1->children->content);
-		} else if(strcmp((const char*)n1->name, "ErrorMessage") == 0) {
-			if(n1->children != NULL)
-				theResponse.ErrorMessage = (const char*)n1->children->content;
-		} else if(strcmp((const char*)n1->name, "ID") == 0) {
-			if(n1->children != NULL)
-				theResponse.ID = atoi( (const char*)n1->children->content);
-		} else if(strcmp((const char*)n1->name, "text") == 0) { // we need to skip this
-			// do nothing
+		if( MATCHNODE(n1, "ErrorCode") ) { theResponse.ErrorCode = atoi( (const char*)n1->children->content);
+		} else if(MATCHNODE(n1, "ErrorMessage")) { theResponse.ErrorMessage = (const char*)n1->children->content;
+		} else if(MATCHNODE(n1, "ID")) { theResponse.ID = atoi( (const char*)n1->children->content);
+		} else if(MATCHNODE(n1, "text")) { // we need to skip this
 		} else  { // we reach the parent of results
 			bGoChildren = true;
 		}
@@ -264,8 +257,8 @@ AlpideTable::response *ProjectDB::GetList(vector<project> *Result)
 		if(strcmp((const char*)nod->name, "Project") == 0) {
 			xmlNode *n1 = nod->children;
 			while(n1 != NULL) {
-				if(strcmp((const char*)n1->name, "ID") == 0) pro.ID = atoi( (const char*)n1->children->content);
-				else if (strcmp((const char*)n1->name, "Name") == 0) pro.Name.assign( (const char *)n1->children->content);
+				if(MATCHNODE(n1, "ID")) pro.ID = atoi( (const char*)n1->children->content);
+				else if (MATCHNODE(n1, "Name")) pro.Name.assign( (const char *)n1->children->content);
 				n1 = n1->next;
 			}
 			Result->push_back(pro);
@@ -339,9 +332,9 @@ AlpideTable::response *MemberDB::GetList(int projectID, vector<member> *Result)
 		if(strcmp((const char*)nod->name, "ProjectMember") == 0) {
 			xmlNode *n1 = nod->children;
 			while(n1 != NULL) {
-				if(strcmp((const char*)n1->name, "ID") == 0) pro.ID = atoi( (const char*)n1->children->content);
-				else if (strcmp((const char*)n1->name, "PersonID") == 0) pro.PersonalID = atoi( (const char*)n1->children->content);
-				else if (strcmp((const char*)n1->name, "FullName") == 0) pro.FullName.assign( (const char *) n1->children->content);
+				if(MATCHNODE(n1,"ID")) pro.ID = atoi( (const char*)n1->children->content);
+				else if (MATCHNODE(n1,"PersonID")) pro.PersonalID = atoi( (const char*)n1->children->content);
+				else if (MATCHNODE(n1,"FullName")) pro.FullName.assign( (const char *) n1->children->content);
 				n1 = n1->next;
 			}
 			Result->push_back(pro);
@@ -446,26 +439,26 @@ void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro)
 	n1 = ns;
 
 	while(n1 != NULL) {
-		if(strcmp((const char*)n1->name, "ID") == 0) pro->ID = atoi( (const char*)n1->children->content);
-		else if (strcmp((const char*)n1->name, "Name") == 0) pro->Name.assign( (const char *)n1->children->content);
-		else if (strcmp((const char*)n1->name, "Code") == 0) pro->Code.assign( (const char *)n1->children->content);
-		else if (strcmp((const char*)n1->name, "Description") == 0) pro->Description.assign((const char *)n1->children->content);
-		else if (strcmp((const char*)n1->name, "Composition") == 0) {
+		if(MATCHNODE(n1,"ID")) pro->ID = atoi( (const char*)n1->children->content);
+		else if (MATCHNODE(n1,"Name")) pro->Name.assign( (const char *)n1->children->content);
+		else if (MATCHNODE(n1,"Code")) pro->Code.assign( (const char *)n1->children->content);
+		else if (MATCHNODE(n1,"Description")) pro->Description.assign((const char *)n1->children->content);
+		else if (MATCHNODE(n1,"Composition")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if(strcmp((const char*)n2->name, "ComponentTypeComposition") == 0)  {
+				if(MATCHNODE(n2,"ComponentTypeComposition"))  {
 					n3 = n2->children;
 					composition ap1;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ComponentType") == 0)  {
+						if(MATCHNODE(n3,"ComponentType") == 0)  {
 							n4 = n3->children;
 							while(n4 != NULL) {
-								if(strcmp((const char*)n4->name, "ID") == 0) ap1.ID = atoi( (const char*)n4->children->content);
-								else if(strcmp((const char*)n4->name, "Name") == 0)  ap1.ComponentType.assign( (const char *)n4->children->content);
+								if(MATCHNODE(n4,"ID") == 0) ap1.ID = atoi( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"Name") == 0)  ap1.ComponentType.assign( (const char *)n4->children->content);
 								n4 = n4->next;
 							}
 						}
-						else if(strcmp((const char*)n3->name, "Quantity") == 0)  ap1.Quantity = atoi( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"Quantity") == 0)  ap1.Quantity = atoi( (const char*)n3->children->content);
 						n3 =n3->next;
 					}
 					pro->Composition.push_back(ap1);
@@ -473,15 +466,15 @@ void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro)
 				n2 =n2->next;
 			}
 		}
-		else if (strcmp((const char*)n1->name, "PhysicalStatus") == 0) {
+		else if (MATCHNODE(n1,"PhysicalStatus")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if(strcmp((const char*)n2->name, "StatusPhysical") == 0)  {
+				if(MATCHNODE(n2,"StatusPhysical"))  {
 					n3 = n2->children;
 					statusphysical ap1;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0) ap1.ID = atoi((const char *)n3->children->content);
-						else if(strcmp((const char*)n3->name, "Name") == 0)  ap1.Name.assign( (const char *)n3->children->content);
+						if(MATCHNODE(n3,"ID")) ap1.ID = atoi((const char *)n3->children->content);
+						else if(MATCHNODE(n3,"Name"))  ap1.Name.assign( (const char *)n3->children->content);
 						n3 = n3->next;
 					}
 					pro->PhysicalStatus.push_back(ap1);
@@ -489,15 +482,15 @@ void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro)
 				n2 =n2->next;
 			}
 		}
-		else if (strcmp((const char*)n1->name, "FunctionalStatus") == 0) {
+		else if (MATCHNODE(n1,"FunctionalStatus")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if(strcmp((const char*)n2->name, "StatusFunctional") == 0)  {
+				if(MATCHNODE(n2,"StatusFunctional"))  {
 					n3 = n2->children;
 					statusfunctional ap1;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0)  ap1.ID = atoi((const char *)n3->children->content);
-						else if(strcmp((const char*)n3->name, "Name") == 0)  ap1.Name.assign( (const char *)n3->children->content );
+						if(MATCHNODE(n3,"ID"))  ap1.ID = atoi((const char *)n3->children->content);
+						else if(MATCHNODE(n3,"Name"))  ap1.Name.assign( (const char *)n3->children->content );
 						n3 = n3->next;
 					}
 					pro->FunctionalStatus.push_back(ap1);
@@ -585,56 +578,56 @@ void ComponentDB::extractTheComponent(xmlNode *ns, component *pro)
 	xmlNode *n1,*n2,*n3, *n4,*n5;
 	n1 = ns;
 	while(n1 != NULL) {
-		if(strcmp((const char*)n1->name, "ID") == 0) pro->ID = atoi( (const char*)n1->children->content);
-		else if (strcmp((const char*)n1->name, "ComponentID") == 0) pro->ComponentID.assign( (const char *)n1->children->content);
-		else if (strcmp((const char*)n1->name, "SupplierComponentID") == 0) pro->SupplierComponentID.assign( (const char *)n1->children->content);
-		else if (strcmp((const char*)n1->name, "Description") == 0) pro->Description.assign((const char *)n1->children->content);
-		else if (strcmp((const char*)n1->name, "LotID") == 0) pro->LotID.assign((const char *)n1->children->content);
-		else if (strcmp((const char*)n1->name, "PackageID") == 0) pro->PackageID.assign((const char *)n1->children->content);
+		if(MATCHNODE(n1,"ID")) pro->ID = atoi( (const char*)n1->children->content);
+		else if (MATCHNODE(n1,"ComponentID")) pro->ComponentID.assign( (const char *)n1->children->content);
+		else if (MATCHNODE(n1,"SupplierComponentID")) pro->SupplierComponentID.assign( (const char *)n1->children->content);
+		else if (MATCHNODE(n1,"Description")) pro->Description.assign((const char *)n1->children->content);
+		else if (MATCHNODE(n1,"LotID")) pro->LotID.assign((const char *)n1->children->content);
+		else if (MATCHNODE(n1,"PackageID")) pro->PackageID.assign((const char *)n1->children->content);
 
-		else if (strcmp((const char*)n1->name, "ComponentType") == 0) {
+		else if (MATCHNODE(n1,"ComponentType")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if(strcmp((const char*)n2->name, "ID") == 0) pro->Type.ID = atoi( (const char*)n2->children->content);
-				else if(strcmp((const char*)n2->name, "Name") == 0) pro->Type.Name.assign( (const char *)n2->children->content);
+				if(MATCHNODE(n2,"ID")) pro->Type.ID = atoi( (const char*)n2->children->content);
+				else if(MATCHNODE(n2,"Name")) pro->Type.Name.assign( (const char *)n2->children->content);
 				n2 =n2->next;
 			}
 		}
-		else if (strcmp((const char*)n1->name, "PhysicalStatus") == 0) {
+		else if (MATCHNODE(n1,"PhysicalStatus")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if(strcmp((const char*)n2->name, "ID") == 0) pro->PhysicalState.ID = atoi( (const char*)n2->children->content);
-				else if(strcmp((const char*)n2->name, "Name") == 0) pro->PhysicalState.Name.assign( (const char *)n2->children->content);
+				if(MATCHNODE(n2,"ID")) pro->PhysicalState.ID = atoi( (const char*)n2->children->content);
+				else if(MATCHNODE(n2,"Name")) pro->PhysicalState.Name.assign( (const char *)n2->children->content);
 				n2 =n2->next;
 			}
 		}
-		else if (strcmp((const char*)n1->name, "FunctionalStatus") == 0) {
+		else if (MATCHNODE(n1,"FunctionalStatus")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if(strcmp((const char*)n2->name, "ID") == 0) pro->FunctionalState.ID = atoi( (const char*)n2->children->content);
-				else if(strcmp((const char*)n2->name, "Name") == 0) pro->FunctionalState.Name.assign( (const char *)n2->children->content);
+				if(MATCHNODE(n2,"ID")) pro->FunctionalState.ID = atoi( (const char*)n2->children->content);
+				else if(MATCHNODE(n2,"Name")) pro->FunctionalState.Name.assign( (const char *)n2->children->content);
 				n2 =n2->next;
 			}
 		}
-		if(strcmp((const char*)n1->name, "Composition") == 0)  {
+		if(MATCHNODE(n1,"Composition"))  {
 			n2 = n1->children;
 			compComposition ap1;
 			while(n2 != NULL) {
-				if(strcmp((const char*)n2->name, "ComponentComposition") == 0)  {
+				if(MATCHNODE(n2,"ComponentComposition"))  {
 					n3 = n2->children;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0) ap1.ID = atoi( (const char*)n3->children->content);
-						else if(strcmp((const char*)n3->name, "Position") == 0)  ap1.Position = atoi( (const char*)n3->children->content);
-						else if(strcmp((const char*)n3->name, "Component") == 0) {
+						if(MATCHNODE(n3,"ID")) ap1.ID = atoi( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"Position"))  ap1.Position = atoi( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"Component")) {
 							n4 = n3->children;
 							while(n4 != NULL) {
-								if(strcmp((const char*)n4->name, "ID") == 0) ap1.Component.ID = atoi( (const char*)n4->children->content);
-								else if(strcmp((const char*)n4->name, "ComponentID") == 0) ap1.Component.ComponentID.assign( (const char *)n4->children->content);
-								else if(strcmp((const char*)n4->name, "ComponentType") == 0) {
+								if(MATCHNODE(n4,"ID")) ap1.Component.ID = atoi( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"ComponentID")) ap1.Component.ComponentID.assign( (const char *)n4->children->content);
+								else if(MATCHNODE(n4,"ComponentType")) {
 									n5 = n4->children;
 									while(n5 != NULL) {
-										if(strcmp((const char*)n5->name, "ID") == 0) ap1.Component.ComponentType.ID = atoi( (const char*)n5->children->content);
-										else if(strcmp((const char*)n5->name, "Name") == 0) ap1.Component.ComponentType.Name.assign( (const char *)n5->children->content);
+										if(MATCHNODE(n5,"ID")) ap1.Component.ComponentType.ID = atoi( (const char*)n5->children->content);
+										else if(MATCHNODE(n5,"Name")) ap1.Component.ComponentType.Name.assign( (const char *)n5->children->content);
 										n5 = n5->next;
 									}
 								}
@@ -733,35 +726,35 @@ void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actL
 	n1 = ns;
 	compActivity theAct;
 	while(n1 != NULL) {
-		if (strcmp((const char*)n1->name, "ComponentActivityHistory") == 0) {
+		if (MATCHNODE(n1,"ComponentActivityHistory")) {
 			n2 = n1->children;
 			zCOMPACTIVITY(theAct);
 			while(n2 != NULL) {
-				if(strcmp((const char*)n2->name, "ActivityID") == 0) theAct.ID = atoi( (const char*)n2->children->content);
-				else if(strcmp((const char*)n2->name, "ActivityName") == 0) theAct.Name.assign( (const char *)n2->children->content);
-				else if(strcmp((const char*)n2->name, "ActivityStartDate") == 0) str2timeDate((const char*)(n2->children->content), &(theAct.StartDate));
-				else if(strcmp((const char*)n2->name, "ActivityEndDate") == 0) str2timeDate((const char*)(n2->children->content), &(theAct.EndDate));
-				if (strcmp((const char*)n2->name, "ActivityResult") == 0) {
+				if(MATCHNODE(n2,"ActivityID")) theAct.ID = atoi( (const char*)n2->children->content);
+				else if(MATCHNODE(n2,"ActivityName")) theAct.Name.assign( (const char *)n2->children->content);
+				else if(MATCHNODE(n2,"ActivityStartDate")) str2timeDate((const char*)(n2->children->content), &(theAct.StartDate));
+				else if(MATCHNODE(n2,"ActivityEndDate")) str2timeDate((const char*)(n2->children->content), &(theAct.EndDate));
+				if (MATCHNODE(n2,"ActivityResult")) {
 					n3 = n2->children;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0) theAct.Result.ID = atoi( (const char*)n3->children->content);
-						else if(strcmp((const char*)n3->name, "Name") == 0) theAct.Result.Name.assign( (const char *)n3->children->content);
+						if(MATCHNODE(n3,"ID")) theAct.Result.ID = atoi( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"Name")) theAct.Result.Name.assign( (const char *)n3->children->content);
 						n3 =n3->next;
 					}
 				}
-				if (strcmp((const char*)n2->name, "ActivityStatus") == 0) {
+				if (MATCHNODE(n2,"ActivityStatus")) {
 					n3 = n2->children;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0) theAct.Status.ID = atoi( (const char*)n3->children->content);
-						else if(strcmp((const char*)n3->name, "Code") == 0) theAct.Status.Code.assign( (const char *)n3->children->content);
-						else if(strcmp((const char*)n3->name, "Description") == 0) theAct.Status.Description.assign( (const char *)n3->children->content);
+						if(MATCHNODE(n3,"ID")) theAct.Status.ID = atoi( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"Code")) theAct.Status.Code.assign( (const char *)n3->children->content);
+						else if(MATCHNODE(n3,"Description")) theAct.Status.Description.assign( (const char *)n3->children->content);
 						n3 =n3->next;
 					}
 				}
-				if (strcmp((const char*)n2->name, "ActivityType") == 0) {
+				if (MATCHNODE(n2,"ActivityType")) {
 					n3 = n2->children;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0) theAct.Type = atoi( (const char*)n3->children->content);
+						if(MATCHNODE(n3,"ID")) theAct.Type = atoi( (const char*)n3->children->content);
 						n3 =n3->next;
 					}
 				}
@@ -806,15 +799,6 @@ AlpideTable::response * ComponentDB::readComponentActivities(int ID, vector<comp
     SetResponse(AlpideTable::NoError, 0,0);
 	return(&theResponse);
 }
-
-
-
-
-
-
-
-
-
 
 
 /* -----------------
@@ -1045,23 +1029,20 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aAc
 		xmlNode *nod;
 		if(_getTheRootElementChildren(stringresult, &doc, &nod)) {
 			while (nod != NULL) {
-				if(strcmp((const char*)nod->name, "Parameters") == 0) {
+				if(MATCHNODE(nod,"Parameters")) {
 					xmlNode *n1 = nod->children;
 					while(n1 != NULL) {
-						if(strcmp((const char*)n1->name, "ActivityTypeParameter") == 0) {
+						if(MATCHNODE(n1,"ActivityTypeParameter")) {
 							xmlNode *n2 = n1->children;
 							zPARAMETERTYPE(param);
 							while(n2 != NULL) {
-								if(strcmp((const char*)n2->name, "ID") == 0) {
-									param.ParameterID = atoi( (const char*)(n2->children->content)) ;
-								} else if(strcmp((const char*)n2->name, "Parameter") == 0) {
+								if(MATCHNODE(n2,"ID")) param.ParameterID = atoi( (const char*)(n2->children->content));
+								else if(MATCHNODE(n2,"Parameter")) {
 									xmlNode *n3 = n2->children;
 									while(n3 != NULL) {
-										if(n3->children != NULL )  {
-											if(strcmp((const char*)n3->name, "ID") == 0) param.ID = atoi( (const char*)(n3->children->content)) ;
-											else if (strcmp((const char*)n3->name, "Name") == 0) param.Name = (const char*)(n3->children->content);
-											else if (strcmp((const char*)n3->name, "Description") == 0) param.Description = (const char*)(n3->children->content);
-										}
+										if(MATCHNODE(n3,"ID")) param.ID = atoi( (const char*)(n3->children->content)) ;
+										else if (MATCHNODE(n3,"Name")) param.Name = (const char*)(n3->children->content);
+										else if (MATCHNODE(n3,"Description")) param.Description = (const char*)(n3->children->content);
 										n3 = n3->next;
 									}
 									theParamList->push_back(param);
@@ -1107,15 +1088,13 @@ std::vector<ActivityDB::activityType> *ActivityDB::GetActivityTypeList(int aProj
 		xmlNode *nod;
 		if(_getTheRootElementChildren(stringresult, &doc, &nod)) {
 			while (nod != NULL) {
-				if(strcmp((const char*)nod->name, "ActivityType") == 0) {
+				if(MATCHNODE(nod,"ActivityType")) {
 					xmlNode *n1 = nod->children;
 					zACTIVITYTYPE(act);
 					while(n1 != NULL) {
-						if(n1->children != NULL) {
-							if(strcmp((const char*)n1->name, "ID") == 0) act.ID = atoi( (const char*)(n1->children->content)) ;
-							else if (strcmp((const char*)n1->name, "Name") == 0) act.Name = (const char*)(n1->children->content);
-							else if (strcmp((const char*)n1->name, "Description") == 0) act.Description = (const char*)(n1->children->content);
-						}
+						if(MATCHNODE(n1,"ID")) act.ID = atoi( (const char*)(n1->children->content)) ;
+						else if(MATCHNODE(n1,"Name")) act.Name = (const char*)(n1->children->content);
+						else if(MATCHNODE(n1,"Description")) act.Description = (const char*)(n1->children->content);
 						n1 = n1->next;
 					}
 					theTypeList->push_back(act);
@@ -1155,17 +1134,15 @@ std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActi
 		xmlNode *nod;
 		if(_getTheRootElementChildren(stringresult, &doc, &nod)) {
 			while (nod != NULL) {
-				if(strcmp((const char*)nod->name, "Location") == 0) {
+				if(MATCHNODE(nod,"Location")) {
 					xmlNode *n1 = nod->children;
 					while(n1 != NULL) {
-						if(strcmp((const char*)n1->name, "ActivityTypeLocation") == 0) {
+						if(MATCHNODE(n1,"ActivityTypeLocation")) {
 							xmlNode *n2 = n1->children;
 							zLOCATIONTYPE(loc);
 							while(n2 != NULL) {
-								if(n2->children != NULL ) {
-									if(strcmp((const char*)n2->name, "ID") == 0) loc.ID = atoi( (const char*)(n2->children->content)) ;
-									else if (strcmp((const char*)n2->name, "Name") == 0) loc.Name = (const char*)(n2->children->content);
-								}
+								if(MATCHNODE(n2,"ID")) loc.ID = atoi( (const char*)(n2->children->content)) ;
+								else if(MATCHNODE(n2,"Name")) loc.Name = (const char*)(n2->children->content);
 								n2 = n2->next;
 							}
 							theLocationList->push_back(loc);
@@ -1208,12 +1185,12 @@ std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList()
 		xmlNode *nod;
 		if(_getTheRootElementChildren(stringresult, &doc, &nod)) {
 			while (nod != NULL) {
-				if(strcmp((const char*)nod->name, "AttachmentCatagory") == 0) {
+				if(MATCHNODE(nod,"AttachmentCatagory")) {
 					xmlNode *n1 = nod->children;
 					while(n1 != NULL) {
-                                          if((strcmp((const char*)n1->name, "ID") == 0) && n1->children) att.ID = atoi( (const char*)(n1->children->content)) ;
-                                          else if ((strcmp((const char*)n1->name, "Category") == 0) && n1->children) att.Category = (const char*)(n1->children->content);
-                                          else if ((strcmp((const char*)n1->name, "Description") == 0) && n1->children) att.Description = (const char*)(n1->children->content);
+                        if(MATCHNODE(n1,"ID")) att.ID = atoi( (const char*)(n1->children->content)) ;
+                        else if (MATCHNODE(n1,"Category")) att.Category = (const char*)(n1->children->content);
+                        else if (MATCHNODE(n1,"Description")) att.Description = (const char*)(n1->children->content);
 						n1 = n1->next;
 					}
 					theAttachmentList->push_back(att);
@@ -1228,7 +1205,6 @@ std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList()
 	}
 	return(theAttachmentList);
 }
-
 
 /* ----------------------
  * Get the list of type component ...
@@ -1255,20 +1231,18 @@ std::vector<ActivityDB::componentType> *ActivityDB::GetComponentTypeList(int aAc
 		xmlNode *nod;
 		if(_getTheRootElementChildren(stringresult, &doc, &nod)) {
 			while (nod != NULL) {
-				if(strcmp((const char*)nod->name, "ActivityTypeComponentType") == 0) {
+				if(MATCHNODE(nod, "ActivityTypeComponentType")) {
 					xmlNode *n1 = nod->children;
 					while(n1 != NULL) {
-						if(strcmp((const char*)n1->name, "ActivityTypeComponentTypeFull") == 0) {
+						if(MATCHNODE(n1,"ActivityTypeComponentTypeFull")) {
 							xmlNode *n2 = n1->children;
 							while(n2 != NULL) {
-								if(strcmp((const char*)n2->name, "ComponentType") == 0) {
+								if(MATCHNODE(n2,"ComponentType")) {
 									xmlNode *n3 = n2->children;
 									zCOMPOTYPE(comp);
 									while(n3 != NULL) {
-										if(n3->children != NULL ) {
-											if(strcmp((const char*)n3->name, "ID") == 0) comp.ID = atoi( (const char*)(n3->children->content)) ;
-											else if (strcmp((const char*)n3->name, "Name") == 0) comp.Name = (const char*)(n3->children->content);
-										}
+										if(MATCHNODE(n3,"ID")) comp.ID = atoi( (const char*)(n3->children->content)) ;
+										else if(MATCHNODE(n3,"Name")) comp.Name = (const char*)(n3->children->content);
 										n3 = n3->next;
 									}
 									theCompoList->push_back(comp);
@@ -1316,17 +1290,15 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityID)
 		xmlNode *nod;
 		if(_getTheRootElementChildren(stringresult, &doc, &nod)) {
 			while (nod != NULL) {
-				if(strcmp((const char*)nod->name, "Result") == 0) {
+				if(MATCHNODE(nod,"Result")) {
 					xmlNode *n1 = nod->children;
 					while(n1 != NULL) {
-						if(strcmp((const char*)n1->name, "ActivityTypeResultFull") == 0) {
+						if(MATCHNODE(n1,"ActivityTypeResultFull")) {
 							xmlNode *n2 = n1->children;
 							zRESULTTYPE(resu);
 							while(n2 != NULL) {
-								if(n2->children != NULL) {
-									if(strcmp((const char*)n2->name, "ID") == 0) resu.ID = atoi( (const char*)(n2->children->content)) ;
-									else if (strcmp((const char*)n2->name, "Name") == 0) resu.Name = (const char*)(n2->children->content);
-								}
+								if(MATCHNODE(n2,"ID")) resu.ID = atoi( (const char*)(n2->children->content)) ;
+								else if(MATCHNODE(n2,"Name")) resu.Name = (const char*)(n2->children->content);
 								n2 = n2->next;
 							}
 							theResultList->push_back(resu);
@@ -1371,18 +1343,16 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityID)
 		xmlNode *nod;
 		if(_getTheRootElementChildren(stringresult, &doc, &nod)) {
 			while (nod != NULL) {
-				if(strcmp((const char*)nod->name, "Status") == 0) {
+				if(MATCHNODE(nod,"Status")) {
 					xmlNode *n1 = nod->children;
 					while(n1 != NULL) {
-						if(strcmp((const char*)n1->name, "ActivityStatus") == 0) {
+						if(MATCHNODE(n1,"ActivityStatus")) {
 							xmlNode *n2 = n1->children;
 							zSTATUSTYPE(stat);
 							while(n2 != NULL) {
-								if(n2->children != NULL) {
-									if(strcmp((const char*)n2->name, "ID") == 0) stat.ID = atoi( (const char*)(n2->children->content)) ;
-									else if (strcmp((const char*)n2->name, "Code") == 0) stat.Code = (const char*)(n2->children->content);
-									else if (strcmp((const char*)n2->name, "Description") == 0) stat.Description = (const char*)(n2->children->content);
-								}
+								if(MATCHNODE(n2,"ID")) stat.ID = atoi( (const char*)(n2->children->content)) ;
+								else if(MATCHNODE(n2,"Code")) stat.Code = (const char*)(n2->children->content);
+								else if(MATCHNODE(n2,"Description")) stat.Description = (const char*)(n2->children->content);
 								n2 = n2->next;
 							}
 							theStatusList->push_back(stat);
@@ -1426,29 +1396,29 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
 		xmlNode *nod;
 		if(_getTheRootElementChildren(stringresult, &doc, &nod)) {
 			while (nod != NULL) {
-				if(strcmp((const char*)nod->name, "Activity") == 0) {
+				if(MATCHNODE(nod,"Activity")) {
 					xmlNode *n1 = nod->children;
 					zACTIVITYSHORT(act);
 					while(n1 != NULL) {
-						if(strcmp((const char*)n1->name, "ID") == 0) act.ID = atoi( (const char*)(n1->children->content)) ;
-						else if (strcmp((const char*)n1->name, "Name") == 0) act.Name = (const char*)(n1->children->content);
-						else if (strcmp((const char*)n1->name, "StartDate") == 0) str2timeDate((const char*)(n1->children->content), &act.StartDate);
-						else if (strcmp((const char*)n1->name, "EndDate") == 0) str2timeDate((const char*)(n1->children->content), &act.EndDate);
-						if(strcmp((const char*)n1->name, "ActivityType") == 0) {
+						if(MATCHNODE(n1,"ID")) act.ID = atoi( (const char*)(n1->children->content)) ;
+						else if(MATCHNODE(n1,"Name")) act.Name = (const char*)(n1->children->content);
+						else if(MATCHNODE(n1,"StartDate")) str2timeDate((const char*)(n1->children->content), &act.StartDate);
+						else if(MATCHNODE(n1,"EndDate")) str2timeDate((const char*)(n1->children->content), &act.EndDate);
+						else if(MATCHNODE(n1,"ActivityType")) {
 							xmlNode *n2 = n1->children;
 							while(n2 != NULL) {
-								if(strcmp((const char*)n2->name, "ID") == 0) act.Type.ID = atoi( (const char*)(n2->children->content)) ;
-								else if (strcmp((const char*)n2->name, "Name") == 0) act.Type.Name = (const char*)(n2->children->content);
-								else if (strcmp((const char*)n2->name, "Description") == 0) act.Type.Description = (const char*)(n2->children->content);
+								if(MATCHNODE(n2,"ID")) act.Type.ID = atoi( (const char*)(n2->children->content)) ;
+								else if(MATCHNODE(n2,"Name")) act.Type.Name = (const char*)(n2->children->content);
+								else if(MATCHNODE(n2,"Description")) act.Type.Description = (const char*)(n2->children->content);
 								n2 = n2->next;
 							}
 						}
-						if(strcmp((const char*)n1->name, "ActivityStatus") == 0) {
+						if(MATCHNODE(n1,"ActivityStatus")) {
 							xmlNode *n2 = n1->children;
 							while(n2 != NULL) {
-								if(strcmp((const char*)n2->name, "ID") == 0) act.Status.ID = atoi( (const char*)(n2->children->content)) ;
-								else if (strcmp((const char*)n2->name, "Code") == 0) act.Status.Code = (const char*)(n2->children->content);
-								else if (strcmp((const char*)n2->name, "Description") == 0) act.Status.Description = (const char*)(n2->children->content);
+								if(MATCHNODE(n2,"ID")) act.Status.ID = atoi( (const char*)(n2->children->content)) ;
+								else if(MATCHNODE(n2,"Code")) act.Status.Code = (const char*)(n2->children->content);
+								else if(MATCHNODE(n2,"Description")) act.Status.Description = (const char*)(n2->children->content);
 								n2 = n2->next;
 							}
 						}
@@ -1481,92 +1451,92 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act)
 	xmlNode *n1,*n2,*n3, *n4,*n5;
 	n1 = ns;
 	while(n1 != NULL) {
-		if(strcmp((const char*)n1->name, "ID") == 0) act->ID = atoi( (const char*)n1->children->content);
-		else if (strcmp((const char*)n1->name, "Name") == 0) act->Name.assign( (const char *)n1->children->content);
-		else if (strcmp((const char*)n1->name, "LotID") == 0) act->LotID.assign( (const char *)n1->children->content);
-		else if (strcmp((const char*)n1->name, "StartDate") == 0) str2timeDate((const char*)(n1->children->content), &act->StartDate);
-		else if (strcmp((const char*)n1->name, "EndDate") == 0) str2timeDate((const char*)(n1->children->content), &act->EndDate);
-		else if (strcmp((const char*)n1->name, "ActivityResult") == 0) {
+		if(MATCHNODE(n1,"ID")) act->ID = atoi( (const char*)n1->children->content);
+		else if(MATCHNODE(n1,"Name")) act->Name.assign( (const char *)n1->children->content);
+		else if(MATCHNODE(n1,"LotID")) act->LotID.assign( (const char *)n1->children->content);
+		else if(MATCHNODE(n1,"StartDate")) str2timeDate((const char*)(n1->children->content), &act->StartDate);
+		else if(MATCHNODE(n1,"EndDate")) str2timeDate((const char*)(n1->children->content), &act->EndDate);
+		else if(MATCHNODE(n1,"ActivityResult")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if(strcmp((const char*)n2->name, "ID") == 0) act->Result.ID = atoi( (const char*)n2->children->content);
-				else if(strcmp((const char*)n2->name, "Name") == 0) act->Result.Name.assign( (const char *)n2->children->content);
+				if(MATCHNODE(n2,"ID")) act->Result.ID = atoi( (const char*)n2->children->content);
+				else if(MATCHNODE(n2,"Name")) act->Result.Name.assign( (const char *)n2->children->content);
 				n2 =n2->next;
 			}
 		}
-		else if (strcmp((const char*)n1->name, "ActivityType") == 0) {
+		else if(MATCHNODE(n1,"ActivityType")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if(strcmp((const char*)n2->name, "ID") == 0) act->Type.ID = atoi( (const char*)n2->children->content);
-				else if(strcmp((const char*)n2->name, "Name") == 0) act->Type.Name.assign( (const char *)n2->children->content);
-				else if(strcmp((const char*)n2->name, "Description") == 0) act->Type.Description.assign( (const char *)n2->children->content);
+				if(MATCHNODE(n2,"ID")) act->Type.ID = atoi( (const char*)n2->children->content);
+				else if(MATCHNODE(n2,"Name")) act->Type.Name.assign( (const char *)n2->children->content);
+				else if(MATCHNODE(n2,"Description")) act->Type.Description.assign( (const char *)n2->children->content);
 				n2 =n2->next;
 			}
 		}
-		else if (strcmp((const char*)n1->name, "ActivityStatus") == 0) {
+		else if(MATCHNODE(n1,"ActivityStatus")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if(strcmp((const char*)n2->name, "ID") == 0) act->Status.ID = atoi( (const char*)n2->children->content);
-				else if(strcmp((const char*)n2->name, "Code") == 0) act->Status.Code.assign( (const char *)n2->children->content);
-				else if(strcmp((const char*)n2->name, "Description") == 0) act->Status.Description.assign( (const char *)n2->children->content);
+				if(MATCHNODE(n2,"ID")) act->Status.ID = atoi( (const char*)n2->children->content);
+				else if(MATCHNODE(n2,"Code")) act->Status.Code.assign( (const char *)n2->children->content);
+				else if(MATCHNODE(n2,"Description")) act->Status.Description.assign( (const char *)n2->children->content);
 				n2 =n2->next;
 			}
 		}
-		else if (strcmp((const char*)n1->name, "ActivityLocation") == 0) {
+		else if(MATCHNODE(n1,"ActivityLocation")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if(strcmp((const char*)n2->name, "ID") == 0) act->Location.ID = atoi( (const char*)n2->children->content);
-				else if(strcmp((const char*)n2->name, "Name") == 0) act->Location.Name.assign( (const char *)n2->children->content);
+				if(MATCHNODE(n2,"ID")) act->Location.ID = atoi( (const char*)n2->children->content);
+				else if(MATCHNODE(n2,"Name")) act->Location.Name.assign( (const char *)n2->children->content);
 				n2 =n2->next;
 			}
 		}
-		else if (strcmp((const char*)n1->name, "Components") == 0) {
+		else if(MATCHNODE(n1,"Components")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if (strcmp((const char*)n2->name, "ActivityComponent") == 0) {
+				if(MATCHNODE(n2,"ActivityComponent")) {
 					actComponent com;
 					n3 = n2->children;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0) com.ID = atoi( (const char*)n3->children->content);
-						else if(strcmp((const char*)n3->name, "Conformity") == 0) com.Conformity = atoi( (const char*)n3->children->content);
-						else if (strcmp((const char*)n3->name, "ActivityTypeComponentType") == 0) {
+						if(MATCHNODE(n3,"ID")) com.ID = atoi( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"Conformity")) com.Conformity = atoi( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"ActivityTypeComponentType")) {
 							n4 = n3->children;
 							while(n4 != NULL) {
-								if(strcmp((const char*)n4->name, "ID") == 0) com.ActivityComponentType.ID = atoi( (const char*)n4->children->content);
-								else if(strcmp((const char*)n4->name, "Quantity") == 0) com.ActivityComponentType.Quantity = atoi( (const char*)n4->children->content);
-								else if(strcmp((const char*)n4->name, "Direction") == 0) com.ActivityComponentType.Direction.assign( (const char*)n4->children->content);
+								if(MATCHNODE(n4,"ID")) com.ActivityComponentType.ID = atoi( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"Quantity")) com.ActivityComponentType.Quantity = atoi( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"Direction")) com.ActivityComponentType.Direction.assign( (const char*)n4->children->content);
 								n4 =n4->next;
 							}
 						}
-						else if (strcmp((const char*)n3->name, "Component") == 0) {
+						else if(MATCHNODE(n3,"Component")) {
 							n4 = n3->children;
 							while(n4 != NULL) {
-								if(strcmp((const char*)n4->name, "ID") == 0) com.Component.ID = atoi( (const char*)n4->children->content);
-								else if(strcmp((const char*)n4->name, "ComponentID") == 0) com.Component.ComponentID.assign( (const char*)n4->children->content);
-								else if (strcmp((const char*)n4->name, "ComponentType") == 0) {
+								if(MATCHNODE(n4,"ID")) com.Component.ID = atoi( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"ComponentID")) com.Component.ComponentID.assign( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"ComponentType")) {
 									n5 = n4->children;
 									while(n5 != NULL) {
-										if(strcmp((const char*)n5->name, "ID") == 0) com.Component.Type.ID = atoi( (const char*)n5->children->content);
-										else if(strcmp((const char*)n5->name, "Name") == 0) com.Component.Type.Name.assign( (const char*)n5->children->content);
+										if(MATCHNODE(n5,"ID")) com.Component.Type.ID = atoi( (const char*)n5->children->content);
+										else if(MATCHNODE(n5,"Name")) com.Component.Type.Name.assign( (const char*)n5->children->content);
 										n5 =n5->next;
 									}
 								}
 								n4 =n4->next;
 							}
 						}
-						else if (strcmp((const char*)n3->name, "PhysicalStatus") == 0) {
+						else if(MATCHNODE(n3,"PhysicalStatus")) {
 							n4 = n3->children;
 							while(n4 != NULL) {
-								if(strcmp((const char*)n4->name, "ID") == 0) com.PhysicalStatus.ID = atoi( (const char*)n4->children->content);
-								else if(strcmp((const char*)n4->name, "Name") == 0) com.PhysicalStatus.Name.assign( (const char*)n4->children->content);
+								if(MATCHNODE(n4,"ID")) com.PhysicalStatus.ID = atoi( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"Name")) com.PhysicalStatus.Name.assign( (const char*)n4->children->content);
 								n4 =n4->next;
 							}
 						}
-						else if (strcmp((const char*)n3->name, "FunctionalStatus") == 0) {
+						else if(MATCHNODE(n3,"FunctionalStatus")) {
 							n4 = n3->children;
 							while(n4 != NULL) {
-								if(strcmp((const char*)n4->name, "ID") == 0) com.FunctionalStatus.ID = atoi( (const char*)n4->children->content);
-								else if(strcmp((const char*)n4->name, "Name") == 0) com.FunctionalStatus.Name.assign( (const char*)n4->children->content);
+								if(MATCHNODE(n4,"ID")) com.FunctionalStatus.ID = atoi( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"Name")) com.FunctionalStatus.Name.assign( (const char*)n4->children->content);
 								n4 =n4->next;
 							}
 						}
@@ -1578,25 +1548,25 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act)
 				n2 =n2->next;
 			}
 		}
-		else if (strcmp((const char*)n1->name, "Parameters") == 0) {
+		else if(MATCHNODE(n1,"Parameters")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if (strcmp((const char*)n2->name, "ActivityParameter") == 0) {
+				if(MATCHNODE(n2,"ActivityParameter")) {
 					actParameter par;
 					n3 = n2->children;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0) par.ID = atoi( (const char*)n3->children->content);
-						else if(strcmp((const char*)n3->name, "Value") == 0) par.Value = atof( (const char*)n3->children->content);
-						else if (strcmp((const char*)n3->name, "ActivityTypeParameter") == 0) {
+						if(MATCHNODE(n3,"ID")) par.ID = atoi( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"Value")) par.Value = atof( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"ActivityTypeParameter")) {
 							n4 = n3->children;
 							while(n4 != NULL) {
-								if(strcmp((const char*)n4->name, "ID") == 0) par.Type.ID = atoi( (const char*)n4->children->content);
-								else if (strcmp((const char*)n4->name, "Parameter") == 0) {
+								if(MATCHNODE(n4,"ID")) par.Type.ID = atoi( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"Parameter")) {
 									n5 = n4->children;
 									while(n5 != NULL) {
-										if(strcmp((const char*)n5->name, "ID") == 0) par.Type.Parameter.ID = atoi( (const char*)n5->children->content);
-										else if(strcmp((const char*)n5->name, "Description") == 0) par.Type.Parameter.Description.assign( (const char*)n5->children->content);
-										else if(strcmp((const char*)n5->name, "Name") == 0) par.Type.Parameter.Name.assign( (const char*)n5->children->content);
+										if(MATCHNODE(n5,"ID")) par.Type.Parameter.ID = atoi( (const char*)n5->children->content);
+										else if(MATCHNODE(n5,"Description")) par.Type.Parameter.Description.assign( (const char*)n5->children->content);
+										else if(MATCHNODE(n5,"Name")) par.Type.Parameter.Name.assign( (const char*)n5->children->content);
 										n5 = n5->next;
 									}
 								}
@@ -1611,21 +1581,21 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act)
 				n2 = n2->next;
 			}
 		}
-		else if (strcmp((const char*)n1->name, "Attachments") == 0) {
+		else if(MATCHNODE(n1,"Attachments")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if (strcmp((const char*)n2->name, "ActivityAttachment") == 0) {
+				if(MATCHNODE(n2,"ActivityAttachment")) {
 					actAttachment att;
 					n3 = n2->children;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0) att.ID = atoi( (const char*)n3->children->content);
-						else if(strcmp((const char*)n3->name, "FileName") == 0) att.FileName.assign( (const char*)n3->children->content);
-						else if (strcmp((const char*)n3->name, "AttachmentCatagory") == 0) {
+						if(MATCHNODE(n3,"ID")) att.ID = atoi( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"FileName")) att.FileName.assign( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"AttachmentCatagory")) {
 							n4 = n3->children;
 							while(n4 != NULL) {
-								if(strcmp((const char*)n4->name, "ID") == 0) att.Type.ID = atoi( (const char*)n4->children->content);
-								else if(strcmp((const char*)n4->name, "Category") == 0) att.Type.Category.assign( (const char*)n4->children->content);
-								else if(strcmp((const char*)n4->name, "Description") == 0) att.Type.Description.assign( (const char*)n4->children->content);
+								if(MATCHNODE(n4,"ID")) att.Type.ID = atoi( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"Category")) att.Type.Category.assign( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"Description")) att.Type.Description.assign( (const char*)n4->children->content);
 								n4 = n4->next;
 							}
 						}
@@ -1637,21 +1607,21 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act)
 				n2 = n2->next;
 			}
 		}
-		else if (strcmp((const char*)n1->name, "Members") == 0) {
+		else if(MATCHNODE(n1,"Members")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if (strcmp((const char*)n2->name, "ActivityMember") == 0) {
+				if(MATCHNODE(n2,"ActivityMember")) {
 					actMember mem;
 					n3 = n2->children;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0) mem.ID = atoi( (const char*)n3->children->content);
-						else if(strcmp((const char*)n3->name, "Leader") == 0) mem.Leader = atoi( (const char*)n3->children->content);
-						else if (strcmp((const char*)n3->name, "Member") == 0) {
+						if(MATCHNODE(n3,"ID")) mem.ID = atoi( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"Leader")) mem.Leader = atoi( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"Member")) {
 							n4 = n3->children;
 							while(n4 != NULL) {
-								if(strcmp((const char*)n4->name, "ID") == 0) mem.Member.ID = atoi( (const char*)n4->children->content);
-								else if(strcmp((const char*)n4->name, "PersonID") == 0) mem.Member.PersonID = atoi( (const char*)n4->children->content);
-								else if(strcmp((const char*)n4->name, "FullName") == 0) mem.Member.FullName.assign( (const char*)n4->children->content);
+								if(MATCHNODE(n4,"ID")) mem.Member.ID = atoi( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"PersonID")) mem.Member.PersonID = atoi( (const char*)n4->children->content);
+								else if(MATCHNODE(n4,"FullName")) mem.Member.FullName.assign( (const char*)n4->children->content);
 								n4 = n4->next;
 							}
 						}
@@ -1663,16 +1633,16 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act)
 				n2 = n2->next;
 			}
 		}
-		else if (strcmp((const char*)n1->name, "Uris") == 0) {
+		else if(MATCHNODE(n1,"Uris")) {
 			n2 = n1->children;
 			while(n2 != NULL) {
-				if (strcmp((const char*)n2->name, "ActivityUri") == 0) {
+				if(MATCHNODE(n2,"ActivityUri")) {
 					actUri uri;
 					n3 = n2->children;
 					while(n3 != NULL) {
-						if(strcmp((const char*)n3->name, "ID") == 0) uri.ID = atoi( (const char*)n3->children->content);
-						else if(strcmp((const char*)n3->name, "Path") == 0) uri.Path.assign( (const char*)n3->children->content);
-						else if(strcmp((const char*)n3->name, "Description") == 0) uri.Description.assign( (const char*)n3->children->content);
+						if(MATCHNODE(n3,"ID")) uri.ID = atoi( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"Path")) uri.Path.assign( (const char*)n3->children->content);
+						else if(MATCHNODE(n3,"Description")) uri.Description.assign( (const char*)n3->children->content);
 						n3 = n3->next;
 					}
 					act->Uris.push_back(uri);
