@@ -63,6 +63,17 @@ bool pathExists(string path);
 void str2timeDate(const char *sDate, time_t *tDate);
 void str2timeTime(const char *sDate, time_t *tDate);
 
+
+
+class Uri {
+private:
+public:
+	std::string URI;
+	std::string QueryString, Path;
+	std::string Protocol, Host, Port, User;
+	static Uri Parse(const std::string &uri);
+};
+
 #endif // UTILITIES_H
 
 
