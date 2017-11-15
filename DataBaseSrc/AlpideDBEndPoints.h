@@ -206,6 +206,30 @@ public:
 	};
 	#define zCOMPONENT(a) a.ID=0; a.ComponentID=""; a.SupplierComponentID=""; a.Description=""; a.LotID=""; a.PackageID=""; zCOMPTYPE(a.Type); zSTATUSPHYSICAL(a.PhysicalState); zSTATUSFUNCTIONAL(a.FunctionalState); a.Composition.clear()
 
+	struct compActResult {
+		int ID;
+		string Name;
+	};
+	#define zCOMPACTRESULT(a) a.ID=0; a.Name=""
+
+	struct compActStatus {
+		int ID;
+		string Code;
+		string Description;
+	};
+	#define zCOMPACTSTATUS(a) a.ID=0; a.Code=""; a.Description =""
+
+	struct compActivity {
+			int ID;
+			string Name;
+			time_t StartDate;
+			time_t EndDate;
+			compActResult Result;
+			compActStatus Status;
+			int Type;
+	};
+	#define zCOMPACTIVITY(a) a.ID=0; a.Name=""; a.Type =0; zCOMPACTRESULT(a.Result); zCOMPACTSTATUS(a.Status)
+
 // Methods
 public:
 	ComponentDB(AlpideDB * DBhandle);
@@ -220,12 +244,18 @@ public:
     AlpideTable::response * Read(int ID, component *Result);
     AlpideTable::response * Read(string ComponentID, component *Result);
 
+    AlpideTable::response * GetComponentActivities(string ComponentID, vector<compActivity> *Result);
+    AlpideTable::response * GetComponentActivities(int ID, vector<compActivity> *Result);
+
 	string Print(componentType *co);
 
 private:
 	void extractTheComponentType(xmlNode *n1, componentType *pro);
 	AlpideTable::response * readComponent(string ID, string ComponentID, component *Result);
 	void extractTheComponent(xmlNode *ns, component *pro);
+	AlpideTable::response * readComponentActivities(int ID, vector<compActivity> *Result);
+	void extractTheActivityList(xmlNode *ns, vector<compActivity> *actList);
+
 };
 
 // --------------------
@@ -380,12 +410,25 @@ public:
 	};
 	#define zACTCOMPONENT(a) a.ID =0; a.Conformity = 0; zACTTYPECOMPTYPE(a.ActivityComponentType); zACTCOMP(a.Component);
 
+	struct actParParameter {
+		int ID;
+		string Name;
+		string Description;
+	};
+	#define zACTPARPARAMETER(a) a.ID = 0; a.Name = ""; a.Description = ""
+
+	struct actParameterType {
+			int ID;
+			actParParameter Parameter;
+	};
+	#define zACTPARAMETERTYPE(a) a.ID = 0; zACTPARPARAMETER(a.Parameter)
+
 	struct actParameter {
 		int ID;
 		float Value;
-		parameterType Type;
+		actParameterType Type;
 	};
-	#define zACTPARAMETER(a) a.ID =0; a.Value=0.0; zPARAMETERTYPE(a.Type)
+	#define zACTPARAMETER(a) a.ID =0; a.Value=0.0; zACTPARAMETERTYPE(a.Type)
 
 	struct actAttachment {
 		int ID;
@@ -394,12 +437,19 @@ public:
 	};
 	#define zACTATTACHMENT(a) a.ID =0; a.FileName=""; zATTACHMENTTYPE(a.Type)
 
-	struct actMember {
-			int ID;
-			int Leader;
-			member Type;
+	struct actMemMemmber {
+		int ID;
+		int PersonID;
+		string FullName;
 	};
-	#define zACTMEMBER(a) a.ID =0; a.Leader=0
+	#define zACTMEMMEMBER(a) a.ID =0; a.PersonID=0; a.FullName =""
+
+	struct actMember {
+		int ID;
+		int Leader;
+		actMemMemmber Member;
+	};
+	#define zACTMEMBER(a) a.ID =0; a.Leader=0; zACTMEMMEMBER(a.Member)
 
 	struct actUri {
 		int ID;
