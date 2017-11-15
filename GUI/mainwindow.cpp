@@ -2133,7 +2133,7 @@ void MainWindow::attachtodatabase(){
         //activ.Parameters.push_back(activparameter);
         std::cout<<"before adding parameter"<<std::endl;
 
-        DbAddParameter(myDB, activ,"Number of Working Chips" , fChips.size()-1);
+        DbAddParameter(myDB, activ,"Number of Working Chips" , fHICs[0]->GetNEnabledChips());
         std::cout<<"after adding parameter"<<std::endl;
     }
 
