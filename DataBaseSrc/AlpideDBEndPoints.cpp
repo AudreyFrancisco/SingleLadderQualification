@@ -715,7 +715,7 @@ AlpideTable::response * ComponentDB::GetComponentActivities(string ComponentID, 
 	component theComponent;
 	AlpideTable::response * theRes = readComponent("-999", ComponentID, &theComponent);
 	if( theRes->ErrorCode != 0 )
-		return(&theRes);
+		return(theRes);
 	int ID = theComponent.ID;
 	return(readComponentActivities(ID, Result));
 }
@@ -739,8 +739,8 @@ void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actL
 			while(n2 != NULL) {
 				if(strcmp((const char*)n2->name, "ActivityID") == 0) theAct.ID = atoi( (const char*)n2->children->content);
 				else if(strcmp((const char*)n2->name, "ActivityName") == 0) theAct.Name.assign( (const char *)n2->children->content);
-				else if(strcmp((const char*)n2->name, "ActivityStartDate") == 0) str2timeDate((const char*)(n2->children->content), &theAct.StartDate);
-				else if(strcmp((const char*)n2->name, "ActivityEndDate") == 0) str2timeDate((const char*)(n2->children->content), &theAct.StartDate);
+				else if(strcmp((const char*)n2->name, "ActivityStartDate") == 0) str2timeDate((const char*)(n2->children->content), &(theAct.StartDate));
+				else if(strcmp((const char*)n2->name, "ActivityEndDate") == 0) str2timeDate((const char*)(n2->children->content), &(theAct.EndDate));
 				if (strcmp((const char*)n2->name, "ActivityResult") == 0) {
 					n3 = n2->children;
 					while(n3 != NULL) {
