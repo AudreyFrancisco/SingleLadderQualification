@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1413</width>
-    <height>842</height>
+    <width>1373</width>
+    <height>890</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,10 +37,10 @@
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>30</y>
-      <width>951</width>
-      <height>741</height>
+      <x>370</x>
+      <y>60</y>
+      <width>961</width>
+      <height>751</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -1506,7 +1506,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>140</y>
-      <width>161</width>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -1519,7 +1519,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>170</y>
-      <width>161</width>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -1545,7 +1545,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>230</y>
-      <width>161</width>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -1659,7 +1659,7 @@ Digital scan                     Waiting . .
     <property name="geometry">
      <rect>
       <x>1210</x>
-      <y>770</y>
+      <y>820</y>
       <width>111</width>
       <height>31</height>
      </rect>
@@ -1673,7 +1673,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>260</y>
-      <width>161</width>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -1699,7 +1699,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>320</y>
-      <width>131</width>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -1712,7 +1712,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>350</y>
-      <width>131</width>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -1725,7 +1725,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>380</y>
-      <width>131</width>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -1738,7 +1738,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>410</y>
-      <width>131</width>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -1751,7 +1751,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>440</y>
-      <width>131</width>
+      <width>151</width>
       <height>31</height>
      </rect>
     </property>
@@ -1764,7 +1764,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>470</y>
-      <width>151</width>
+      <width>161</width>
       <height>31</height>
      </rect>
     </property>
@@ -1827,7 +1827,7 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="thresholds">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>160</x>
       <y>350</y>
       <width>131</width>
       <height>21</height>
@@ -1866,7 +1866,7 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="digitalwf">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>160</x>
       <y>330</y>
       <width>121</width>
       <height>21</height>
@@ -1881,7 +1881,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>500</y>
-      <width>151</width>
+      <width>161</width>
       <height>31</height>
      </rect>
     </property>
@@ -1985,7 +1985,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>650</y>
-      <width>151</width>
+      <width>161</width>
       <height>31</height>
      </rect>
     </property>
@@ -1998,7 +1998,7 @@ Digital scan                     Waiting . .
      <rect>
       <x>0</x>
       <y>680</y>
-      <width>151</width>
+      <width>161</width>
       <height>31</height>
      </rect>
     </property>
@@ -2009,8 +2009,8 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="thresholdsthree">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>540</y>
+      <x>160</x>
+      <y>530</y>
       <width>121</width>
       <height>21</height>
      </rect>
@@ -2023,7 +2023,7 @@ Digital scan                     Waiting . .
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>570</y>
+      <y>560</y>
       <width>141</width>
       <height>21</height>
      </rect>
@@ -2035,8 +2035,8 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="ithrtuningthree">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>600</y>
+      <x>160</x>
+      <y>590</y>
       <width>131</width>
       <height>21</height>
      </rect>
@@ -2074,10 +2074,23 @@ Digital scan                     Waiting . .
    <widget class="QLabel" name="noiseatsthree">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>160</x>
       <y>690</y>
       <width>121</width>
       <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="alicelogo">
+    <property name="geometry">
+     <rect>
+      <x>1250</x>
+      <y>0</y>
+      <width>151</width>
+      <height>81</height>
      </rect>
     </property>
     <property name="text">

@@ -152,6 +152,12 @@ MainWindow::MainWindow(QWidget *parent) :
     int h = ui->alicepic->height();
     ui->alicepic->setPixmap(alice.scaled(w,h,Qt::KeepAspectRatio));
 
+    QPixmap alicelog("logo.png");
+    int width = ui->alicelogo->width();
+    int height = ui->alicelogo->height();
+    ui->alicelogo->setPixmap(alicelog.scaled(width,height,Qt::KeepAspectRatio));
+
+
 
     ui->start_test->hide();
     /*  QThread *m_thread = new QThread(this);
@@ -724,7 +730,7 @@ void MainWindow::digital(){
         //scanLoop(mydigital);
         //  std::cout << "starting thread" << std::endl;
         std::thread scanThread(&MainWindow::scanLoop,this,mydigital);
-        std::thread analysisThread(&TScanAnalysis::Run, std::ref(analysis));
+        std::thread analysisThread(&TScanAnalysis::Run, analysis);
         ui->statusbar->setValue(50);
         scanThread.join();
         analysisThread.join();
@@ -1250,7 +1256,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
                 //  qDebug()<<"The scan pointer is zero doing the job only for analysis"<<endl;
                 a.at(i)->Initialize();
                 // fmaskvector[4]->Initialize();
-                std::thread analysisThread(&TScanAnalysis::Run, std::ref(a[i]));
+                std::thread analysisThread(&TScanAnalysis::Run, a[i]);
                 // std::thread analysisThread(&TApplyMask::Run, std::ref(fmaskvector[4]));
                 //qDebug()<<"before join, it crashes in join"<<endl;
                 analysisThread.join();
@@ -1274,7 +1280,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
                 // std::thread koumpi(&MainWindow::runscans,this);
                 //  koumpi.join();
 
-                std::thread analysisThread(&TScanAnalysis::Run, std::ref(a[i]));
+                std::thread analysisThread(&TScanAnalysis::Run, a[i]);
                 //  std::cout<<"out of range dimitroula3"<<endl;
                 std::cout<<"BEFORE THE SCAN THREAD"<<std::endl;
                 scanThread.join();
@@ -1303,6 +1309,7 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
     qApp->processEvents();
 
 
+    qApp->processEvents();
 
 }
 
@@ -1724,13 +1731,13 @@ void MainWindow::colorscans(){
                     int colour;
                     colour=it->second->GetClassification();
                     // std::cout<<"no zero pointer "<< colour<<std::endl;
-                    if (colour==CLASS_ORANGE){scanbuttons[i]->setStyleSheet("color:orange;");
+                    if (colour==CLASS_ORANGE){scanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
                         break;}
-                    if (colour==CLASS_GREEN){scanbuttons[i]->setStyleSheet("color:green;");
+                    if (colour==CLASS_GREEN){scanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
                         break;}
-                    if (colour==CLASS_RED){scanbuttons[i]->setStyleSheet("color:red;");
+                    if (colour==CLASS_RED){scanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
                         break;}
-                    if (colour==CLASS_UNTESTED){scanbuttons[i]->setStyleSheet("color:blue;");
+                    if (colour==CLASS_UNTESTED){scanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
                         break;}
 
                 }}
@@ -1739,13 +1746,13 @@ void MainWindow::colorscans(){
                     int colour;
                     colour=it->second->GetClassification();
                     //  std::cout<<"no zero pointer "<< colour<<std::endl;
-                    if (colour==CLASS_ORANGE){scanbuttons[i]->setStyleSheet("color:orange;");
+                    if (colour==CLASS_ORANGE){scanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
                         break;}
-                    if (colour==CLASS_GREEN){scanbuttons[i]->setStyleSheet("color:green;");
+                    if (colour==CLASS_GREEN){scanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
                         break;}
-                    if (colour==CLASS_RED){scanbuttons[i]->setStyleSheet("color:red;");
+                    if (colour==CLASS_RED){scanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
                         break;}
-                    if (colour==CLASS_UNTESTED){scanbuttons[i]->setStyleSheet("color:blue;");
+                    if (colour==CLASS_UNTESTED){scanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
                         break;}
 
                 }}
@@ -2090,7 +2097,7 @@ void MainWindow::attachtodatabase(){
     //ActivityDB::member activmember;
     //ActivityDB::parameter activparameter;
     // ActivityDB::parameter dbtime;
-   //ActivityDB::attach activattachment;
+    //ActivityDB::attach activattachment;
 
 
     // activ.Location = 161;//cern
@@ -2099,10 +2106,13 @@ void MainWindow::attachtodatabase(){
     activ.Lot = "Test";//change everytime
     activ.Name = hicidnumber.toStdString();//change everytime
     activ.Position = "Position98";//change everytime
-    activ.Result = 1; //check the value
+    activ.Result = -999; //check the value//BEFORE IT WAS 1//522
 
     activ.StartDate=date.currentDateTime().toTime_t();
-    activ.Status = 83; // open
+    if(databasetype){
+        activ.Status = 83;}
+    else{activ.Status=450;}
+    std::cout<<"the activity status is : "<<activ.Status<<std::endl;
     //activ.Type = 881;//obqualificatiom
     activ.Type=idofactivitytype;
     // activ.User = 20606;//me
@@ -2121,7 +2131,10 @@ void MainWindow::attachtodatabase(){
         //activparameter.User = 20606;
         //activparameter.Value = fChips.size()-1;
         //activ.Parameters.push_back(activparameter);
+        std::cout<<"before adding parameter"<<std::endl;
+
         DbAddParameter(myDB, activ,"Number of Working Chips" , fChips.size()-1);
+        std::cout<<"after adding parameter"<<std::endl;
     }
 
     //time parameter
@@ -2144,7 +2157,7 @@ void MainWindow::attachtodatabase(){
     // std::string name;
     // name="Number of working chips in a HIC";
     std::cout<<i_dec<<std::endl;
-    DbAddParameter(myDB, activ,string("Number of Working Chips"),(float)i_dec);
+    DbAddParameter(myDB, activ,string("Time"),(float)i_dec);
     //int time= 10000*hours+100*minutes+sec;
     //  dbtime.Value=i_dec;
     //activ.Parameters.push_back(dbtime);
@@ -2158,6 +2171,7 @@ void MainWindow::attachtodatabase(){
             //for (ithic = fresultVector.at(scanposition)->GetHicResults().begin(); ithic != fresultVector.at(scanposition)->GetHicResults().end(); ++ithic) {
             //TDigitalResultHic *result = (TDigitalResultHic*) ithic->second;
             // result->WriteToDB(myDB,activ);}
+            std::cout<<"before writing db"<<std::endl;
             fresultVector.at(i)->WriteToDB(myDB,activ);
             std::cout<<"writing to database"<<std::endl;
         }}//tis for toufresultsvector
@@ -2171,7 +2185,7 @@ void MainWindow::attachtodatabase(){
         DbAddAttachment(myDB, activ,attachConfig ,string ("Config.cfg"), string ("Config.cfg"));
     }
     else if(numberofscan==2){
-          DbAddAttachment(myDB, activ,attachConfig ,string ("Configib.cfg"), string ("Configib.cfg"));
+        DbAddAttachment(myDB, activ,attachConfig ,string ("Configib.cfg"), string ("Configib.cfg"));
     }
 
 
@@ -2365,37 +2379,37 @@ void MainWindow::colorsinglescan(int i){
     if (scanbuttons[i]!=0){
         if(fresultVector[i]==0){
             colour=fAnalysisVector.at(i+1)->GetClassification();
-            if (colour==CLASS_ORANGE){scanbuttons[i]->setStyleSheet("color:orange;");
+            if (colour==CLASS_ORANGE){scanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
                 return;}
-            if (colour==CLASS_GREEN){scanbuttons[i]->setStyleSheet("color:green;");
+            if (colour==CLASS_GREEN){scanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
                 return;}
-            if (colour==CLASS_RED){scanbuttons[i]->setStyleSheet("color:red;");
+            if (colour==CLASS_RED){scanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
 
                 progresswindow= new Testingprogress(this);
                 progresswindow->setnotification(fScanVector.at(i)->GetName());
                 progresswindow->exec();
 
             }
-            if (colour==CLASS_UNTESTED){scanbuttons[i]->setStyleSheet("color:blue;");
+            if (colour==CLASS_UNTESTED){scanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
                 return;}
 
         }
         else{
             colour=fAnalysisVector.at(i)->GetClassification();
-            if (colour==CLASS_ORANGE){scanbuttons[i]->setStyleSheet("color:orange;");
+            if (colour==CLASS_ORANGE){scanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
                 return;}
-            if (colour==CLASS_GREEN){scanbuttons[i]->setStyleSheet("color:green;");
+            if (colour==CLASS_GREEN){scanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
                 // progresswindow= new Testingprogress(this);
                 // progresswindow->setnotification(fScanVector.at(i)->GetName());
                 //  progresswindow->exec();
             }
-            if (colour==CLASS_RED){scanbuttons[i]->setStyleSheet("color:red;");
+            if (colour==CLASS_RED){scanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
                 progresswindow= new Testingprogress(this);
                 progresswindow->setnotification(fScanVector.at(i)->GetName());
                 progresswindow->exec();
 
             }
-            if (colour==CLASS_UNTESTED){scanbuttons[i]->setStyleSheet("color:blue;");
+            if (colour==CLASS_UNTESTED){scanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
                 return;}
 
         }
@@ -2408,6 +2422,7 @@ void MainWindow::colorsinglescan(int i){
 void MainWindow::writecalibrationfile(){
 
     pbconfig->WriteCalibrationFile();
+    calwindow->close();
 
 }
 
