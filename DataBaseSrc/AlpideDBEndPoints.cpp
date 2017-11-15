@@ -777,7 +777,7 @@ AlpideTable::response * ComponentDB::readComponentActivities(int ID, vector<comp
 {
 
 	string theUrl = theParentDB->GetQueryDomain() + "/ComponentActivityHistoryRead";
-	string theQuery = "ID="+ID;
+	string theQuery = "ID="+std::to_string(ID);
 	char *stringresult;
 
 	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0)  {
