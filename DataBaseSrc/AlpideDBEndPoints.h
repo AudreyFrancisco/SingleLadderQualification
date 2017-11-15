@@ -240,7 +240,7 @@ public:
     AlpideTable::response *GetTypeList(int ProjectID , vector<componentType> *Result);
 
     AlpideTable::response *Create(string ComponentTypeID, string ComponentID, string SupplyCompID,
-			string Description, string lotID, string PackaageID, string userID );
+			string Description, string lotID, string PackageID, string userID );
 
     AlpideTable::response * Read(int ID, component *Result);
     AlpideTable::response * Read(string ComponentID, component *Result);
@@ -487,15 +487,15 @@ public:
     AlpideTable::response *Create(activity *aActivity);
     AlpideTable::response *AssignComponent(int aActivityID, int aComponentID, int aComponentTypeID, int aUserID);
 
-    vector<parameterType> *GetParameterTypeList(int aActivityID);
+    vector<parameterType> *GetParameterTypeList(int aActivityTypeID);
     vector<activityType> *GetActivityTypeList(int aProjectID);
-    vector<locationType> *GetLocationTypeList(int aActivityID);
-    vector<componentType> *GetComponentTypeList(int aActivityID);
-    vector<resultType> *GetResultList(int aActivityID);
-    vector<statusType> *GetStatusList(int aActivityID);
+    vector<locationType> *GetLocationTypeList(int aActivityTypeID);
+    vector<componentType> *GetComponentTypeList(int aActivityTypeID);
+    vector<resultType> *GetResultList(int aActivityTypeID);
+    vector<statusType> *GetStatusList(int aActivityTypeID);
     vector<attachmentType> *GetAttachmentTypeList();
-    vector<activityShort> *GetActivityList(int aProjectID, int aActivityID);
-    AlpideTable::response *Read(int ID, activityLong *Result);
+    vector<activityShort> *GetActivityList(int aProjectID, int aActivityTypeID);
+    AlpideTable::response *Read(int ActivityID, activityLong *Result);
 
 
 private:

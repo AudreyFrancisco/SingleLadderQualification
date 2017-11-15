@@ -1010,7 +1010,7 @@ ActivityDB::response * ActivityDB::AssignComponent(int aActivityID, int aCompone
  *
  *
 ----------------------- */
-std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aActivityID)
+std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aActivityTypeID)
 {
 	vector<parameterType> *theParamList = new vector<parameterType>;
 	char *stringresult;
@@ -1019,7 +1019,7 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aAc
 	parameterType param;
 
 	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
-	theQuery = "activityTypeID="+std::to_string(aActivityID);
+	theQuery = "activityTypeID="+std::to_string(aActivityTypeID);
 
 	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 		SetResponse(AlpideTable::SyncQuery);
@@ -1115,7 +1115,7 @@ std::vector<ActivityDB::activityType> *ActivityDB::GetActivityTypeList(int aProj
  *
  *
 ----------------------- */
-std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActivityID)
+std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActivityTypeID)
 {
 	vector<locationType> *theLocationList = new vector<locationType>;
 	char *stringresult;
@@ -1124,7 +1124,7 @@ std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActi
 	locationType loc;
 
 	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
-	theQuery = "activityTypeID="+std::to_string(aActivityID);
+	theQuery = "activityTypeID="+std::to_string(aActivityTypeID);
 
 	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 		SetResponse(AlpideTable::SyncQuery);
@@ -1211,7 +1211,7 @@ std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList()
  *
  *
 ----------------------- */
-std::vector<ActivityDB::componentType> *ActivityDB::GetComponentTypeList(int aActivityID)
+std::vector<ActivityDB::componentType> *ActivityDB::GetComponentTypeList(int aActivityTypeID)
 {
 	vector<componentType> *theCompoList = new vector<componentType>;
 
@@ -1221,7 +1221,7 @@ std::vector<ActivityDB::componentType> *ActivityDB::GetComponentTypeList(int aAc
 	componentType comp;
 
 	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
-	theQuery = "activityTypeID="+std::to_string(aActivityID);
+	theQuery = "activityTypeID="+std::to_string(aActivityTypeID);
 
 	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 		SetResponse(AlpideTable::SyncQuery);
@@ -1269,7 +1269,7 @@ std::vector<ActivityDB::componentType> *ActivityDB::GetComponentTypeList(int aAc
  *
  *
 ----------------------- */
-std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityID)
+std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityTypeID)
 {
 	vector<resultType> *theResultList = new vector<resultType>;
 
@@ -1280,7 +1280,7 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityID)
 	resultType resu;
 
 	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
-	theQuery = "activityTypeID="+std::to_string(aActivityID);
+	theQuery = "activityTypeID="+std::to_string(aActivityTypeID);
 
 	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 		SetResponse(AlpideTable::SyncQuery);
@@ -1323,7 +1323,7 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityID)
  *
  *
 ----------------------- */
-std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityID)
+std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityTypeID)
 {
 	vector<statusType> *theStatusList = new vector<statusType>;
 
@@ -1333,7 +1333,7 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityID)
 	statusType stat;
 
 	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
-	theQuery = "activityTypeID="+std::to_string(aActivityID);
+	theQuery = "activityTypeID="+std::to_string(aActivityTypeID);
 
 	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 		SetResponse(AlpideTable::SyncQuery);
@@ -1377,7 +1377,7 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityID)
  *
  *
 ----------------------- */
-std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProjectID, int aActivityID)
+std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProjectID, int aActivityTypeID)
 {
 	vector<activityShort> *theActList = new vector<activityShort>;
 	char *stringresult;
@@ -1386,7 +1386,7 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
 	activityShort act;
 
 	theUrl = theParentDB->GetQueryDomain() + "/ActivityRead";
-	theQuery = "projectID="+std::to_string(aProjectID) + "activityTypeID="+std::to_string(aActivityID);
+	theQuery = "projectID="+std::to_string(aProjectID) + "activityTypeID="+std::to_string(aActivityTypeID);
 
 	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 		SetResponse(AlpideTable::SyncQuery);
@@ -1656,9 +1656,9 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act)
 }
 
 
-AlpideTable::response * ActivityDB::Read(int ID, activityLong *Result)
+AlpideTable::response * ActivityDB::Read(int ActivityID, activityLong *Result)
 {
-	std::string sID = std::to_string(ID);
+	std::string sID = std::to_string(ActivityID);
 	return(readActivity(sID, Result));
 }
 
