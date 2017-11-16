@@ -52,20 +52,21 @@ int main(int argc, char** argv) {
   decodeCommandParameters(argc, argv);
   initSetup(config, &fBoards, &boardType, &fChips);
 
+  if (fBoards.size()) {
 
-  for (auto board : fBoards) {
-    myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (board);
-
-    board->SendOpCode (Alpide::OPCODE_GRST);
-    board->SendOpCode (Alpide::OPCODE_PRST);
-
-    if ((myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (board))) {
-      for (unsigned int i = 0; i < fChips.size(); i ++) {
-        configureChip (fChips.at(i));
-      }
+    for (const auto& rBoard : fBoards) {
+      rBoard->SendOpCode (Alpide::OPCODE_GRST);
+      rBoard->SendOpCode (Alpide::OPCODE_PRST);
     }
 
-    board->SendOpCode (Alpide::OPCODE_RORST);
+    for (const auto& rChip : fChips) {
+      if (! rChip->GetConfig()->IsEnabled()) continue;
+      configureChip(rChip);
+    }
+
+    for (const auto& rBoard : fBoards) {
+      rBoard->SendOpCode (Alpide::OPCODE_RORST);
+    }
 
     std::cout << std::endl << std::endl;
     std::cout << std::setprecision(4);
@@ -73,7 +74,7 @@ int main(int argc, char** argv) {
     for (unsigned int i = 0; i < fChips.size(); i ++) {
       if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
       std::cout << std::endl << std::endl;
-      std::cout << "== Chip " << i << std::endl;
+      std::cout << "== Chip " << i << ", ID: " << fChips.at(i)->GetConfig()->GetChipId() << std::endl;
       fChips.at(i)->CalibrateADC();
 
       float AVDD_direct = 0.;
@@ -90,7 +91,7 @@ int main(int argc, char** argv) {
         fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
         fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
         usleep(5000);
-        board->SendCommand (Alpide::COMMAND_ADCMEASURE, fChips.at(i));
+        fChips.at(i)->GetReadoutBoard()->SendCommand (Alpide::COMMAND_ADCMEASURE, fChips.at(i));
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
         if (theResult == 1055) AVDD_saturated = true;
@@ -123,7 +124,7 @@ int main(int argc, char** argv) {
         fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
         fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
         usleep(5000);
-        board->SendCommand (Alpide::COMMAND_ADCMEASURE, fChips.at(i));
+        fChips.at(i)->GetReadoutBoard()->SendCommand (Alpide::COMMAND_ADCMEASURE, fChips.at(i));
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
         if (theResult == 1055) DVDD_saturated = true;
@@ -138,9 +139,12 @@ int main(int argc, char** argv) {
 
     std::cout << std::endl << std::endl;
 
-    if (myDAQBoard) {
-      myDAQBoard->PowerOff();
-      delete myDAQBoard;
+    for (const auto& rBoard : fBoards) {
+      TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (rBoard);
+      if (myDAQBoard) {
+        myDAQBoard->PowerOff();
+        delete myDAQBoard;
+      }
     }
   }
 
