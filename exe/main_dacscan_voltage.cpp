@@ -207,20 +207,19 @@ int main(int argc, char** argv) {
   decodeCommandParameters(argc, argv);
   initSetup(config, &fBoards, &boardType, &fChips);
 
-  myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+  for (auto board : fBoards) {
+    myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (board);
 
-  if (fBoards.size() == 1) {
+    board->SendOpCode (Alpide::OPCODE_GRST);
+    board->SendOpCode (Alpide::OPCODE_PRST);
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
-
-    if ((myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0)))) {
+    if ((myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (board))) {
       for (unsigned int i = 0; i < fChips.size(); i ++) {
         configureChip (fChips.at(i));
       }
     }
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
+    board->SendOpCode (Alpide::OPCODE_RORST);
 
     for (float voltage = 1.3; voltage < 2.00; voltage+=0.02) {
       char cmd[50];
@@ -267,7 +266,7 @@ int main(int argc, char** argv) {
           fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
           fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
           usleep(5000);
-          fBoards.at(0)->SendCommand ( Alpide::COMMAND_ADCMEASURE, fChips.at(i));
+          board->SendCommand ( Alpide::COMMAND_ADCMEASURE, fChips.at(i));
           usleep(5000);
           fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
           theValue = 2. * ((float)theResult - (float)(fChips.at(i)->GetADCOffset())) * 0.823e-3; // first approximation

@@ -52,25 +52,26 @@ int main(int argc, char** argv) {
   decodeCommandParameters(argc, argv);
   initSetup(config, &fBoards, &boardType, &fChips);
 
-  myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
 
-  if (fBoards.size() == 1) {
+  for (auto board : fBoards) {
+    myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (board);
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
+    board->SendOpCode (Alpide::OPCODE_GRST);
+    board->SendOpCode (Alpide::OPCODE_PRST);
 
-    if ((myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0)))) {
+    if ((myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (board))) {
       for (unsigned int i = 0; i < fChips.size(); i ++) {
         configureChip (fChips.at(i));
       }
     }
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
+    board->SendOpCode (Alpide::OPCODE_RORST);
 
     std::cout << std::endl << std::endl;
     std::cout << std::setprecision(4);
 
     for (unsigned int i = 0; i < fChips.size(); i ++) {
+      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
       std::cout << std::endl << std::endl;
       std::cout << "== Chip " << i << std::endl;
       fChips.at(i)->CalibrateADC();
@@ -89,7 +90,7 @@ int main(int argc, char** argv) {
         fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
         fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
         usleep(5000);
-        fBoards.at(0)->SendCommand (Alpide::COMMAND_ADCMEASURE, fChips.at(i));
+        board->SendCommand (Alpide::COMMAND_ADCMEASURE, fChips.at(i));
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
         if (theResult == 1055) AVDD_saturated = true;
@@ -100,7 +101,7 @@ int main(int argc, char** argv) {
       if (AVDD_saturated)
         std::cout << ", out-of-range (>1.72V)!";
       std::cout << std::endl;
-      if (AVDD_direct < 1.55)
+      if (AVDD_direct < 1.55 && AVDD_direct > 0.)
         std::cout << "AVDD below 1.55V, indirect measurement unreliable" << std::endl;
 
       // AVDD via VTEMP @ 200
@@ -122,7 +123,7 @@ int main(int argc, char** argv) {
         fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
         fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
         usleep(5000);
-        fBoards.at(0)->SendCommand (Alpide::COMMAND_ADCMEASURE, fChips.at(i));
+        board->SendCommand (Alpide::COMMAND_ADCMEASURE, fChips.at(i));
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
         if (theResult == 1055) DVDD_saturated = true;
