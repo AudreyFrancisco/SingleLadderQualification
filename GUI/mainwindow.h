@@ -1,5 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <qapplication.h>
 #include <QPixmap>
 #include <vector>
@@ -83,7 +86,7 @@ class MainWindow : public QMainWindow
   std::vector <QPushButton*> endurancemodules;
   bool databasetype;
   bool scanfit;
-
+  void makeDir(const char *aDir);
 
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
   // void explore_halfstave(uint8_t chipid);
