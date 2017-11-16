@@ -31,7 +31,7 @@ class THic {
   bool                       IsEnabled       ();
   void                       Disable         ();
   int                        GetNEnabledChips();
-  void                       PowerOn         ();
+  virtual void               PowerOn         ();
   void                       PowerOff        ();
   float                      GetIddd         ();
   float                      GetIdda         ();
@@ -92,6 +92,7 @@ class THicIB : public THic {
   bool               ContainsChip (common::TChipIndex idx);
   bool               ContainsReceiver(int boardIndex, int rcv);
   void               ConfigureInterface (int board, int *rcv, int ctrl);
+  void               PowerOn         ();
 };
 
 

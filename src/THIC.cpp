@@ -1,4 +1,6 @@
 #include "THIC.h"
+#include "TReadoutBoardMOSAIC.h"
+
 #include <cstring>
 
 THic::THic (const char *id, int modId, TPowerBoard *pb, int pbMod)
@@ -198,6 +200,18 @@ void THicIB::ConfigureInterface (int board, int *rcv, int ctrl)
   for (int i = 0; i < 9; i++) {
     m_rcv[i] = rcv[i];
   }
+}
+
+
+void THicIB::PowerOn()
+{
+  if (IsPowered()) return;
+  TReadoutBoardMOSAIC *mosaic = (TReadoutBoardMOSAIC*) m_chips.at(0)->GetReadoutBoard();
+  mosaic->enableClockOutput(false);
+  sleep(1);
+  if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
+  sleep(1);
+  mosaic->enableClockOutput(true);
 }
 
 

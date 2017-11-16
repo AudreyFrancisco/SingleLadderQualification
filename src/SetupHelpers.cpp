@@ -497,7 +497,11 @@ int initSetupIB(TConfig                        *config,
       
       boards->at(0)-> AddChip        (chipConfig->GetChipId(), control, receiver, chips->at(i));
   }
-  
+
+  if (hics) {
+    hics->at(0)->PowerOn();
+    sleep(1);
+  }  
   CheckControlInterface(config, boards, boardType, chips);
   
   return 0;
