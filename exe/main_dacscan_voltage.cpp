@@ -32,7 +32,6 @@ TConfig* config;
 std::vector <TReadoutBoard *> fBoards;
 TBoardType boardType;
 std::vector <TAlpide *> fChips;
-TReadoutBoardDAQ *myDAQBoard;
 
 unsigned int mySampleDist = 16;
 unsigned int mySampleRepetition = 100;
@@ -133,7 +132,7 @@ void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, uns
   sprintf (fName, "Data/IDAC_%s_Chip%d_%d_%0.3fV_%s.dat", Name, chip->GetConfig()->GetChipId(), chip->GetConfig()->GetCtrInt(), AVDD, suffix.c_str() );
   FILE *fp = fopen (fName, "w");
 
-  myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+  TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
 
   std::cout << "ChipID = " << chip->GetConfig()->GetChipId() << "    Scanning DAC " << Name << std::endl;
 
@@ -169,7 +168,7 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name, uns
   sprintf (fName, "Data/VDAC_%s_Chip%d_%d_%0.3fV_%s.dat", Name, chip->GetConfig()->GetChipId(), chip->GetConfig()->GetCtrInt(), AVDD, suffix.c_str());
   FILE *fp = fopen (fName, "w");
 
-  myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+  TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
 
   std::cout << "ChipID = " << chip->GetConfig()->GetChipId() << "    Scanning DAC " << Name << std::endl;
 
@@ -207,19 +206,21 @@ int main(int argc, char** argv) {
   decodeCommandParameters(argc, argv);
   initSetup(config, &fBoards, &boardType, &fChips);
 
-  for (auto board : fBoards) {
-    myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (board);
+  if (fBoards.size()) {
 
-    board->SendOpCode (Alpide::OPCODE_GRST);
-    board->SendOpCode (Alpide::OPCODE_PRST);
-
-    if ((myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (board))) {
-      for (unsigned int i = 0; i < fChips.size(); i ++) {
-        configureChip (fChips.at(i));
-      }
+    for (const auto& rBoard : fBoards) {
+      rBoard->SendOpCode (Alpide::OPCODE_GRST);
+      rBoard->SendOpCode (Alpide::OPCODE_PRST);
     }
 
-    board->SendOpCode (Alpide::OPCODE_RORST);
+    for (const auto& rChip : fChips) {
+      if (! rChip->GetConfig()->IsEnabled()) continue;
+      configureChip(rChip);
+    }
+
+    for (const auto& rBoard : fBoards) {
+      rBoard->SendOpCode (Alpide::OPCODE_RORST);
+    }
 
     for (float voltage = 1.3; voltage < 2.00; voltage+=0.02) {
       char cmd[50];
@@ -266,7 +267,7 @@ int main(int argc, char** argv) {
           fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
           fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
           usleep(5000);
-          board->SendCommand ( Alpide::COMMAND_ADCMEASURE, fChips.at(i));
+          fChips.at(i)->GetReadoutBoard()->SendCommand ( Alpide::COMMAND_ADCMEASURE, fChips.at(i));
           usleep(5000);
           fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
           theValue = 2. * ((float)theResult - (float)(fChips.at(i)->GetADCOffset())) * 0.823e-3; // first approximation
@@ -301,9 +302,12 @@ int main(int argc, char** argv) {
       }
     }
 
-    if (myDAQBoard) {
-      myDAQBoard->PowerOff();
-      delete myDAQBoard;
+    for (const auto& rBoard : fBoards) {
+      TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (rBoard);
+      if (myDAQBoard) {
+        myDAQBoard->PowerOff();
+        delete myDAQBoard;
+      }
     }
   }
 

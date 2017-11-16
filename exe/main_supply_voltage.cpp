@@ -34,7 +34,6 @@ TConfig* config;
 std::vector <TReadoutBoard *> fBoards;
 TBoardType boardType;
 std::vector <TAlpide *> fChips;
-TReadoutBoardDAQ *myDAQBoard;
 
 unsigned int mySampleRepetition = 50;
 
