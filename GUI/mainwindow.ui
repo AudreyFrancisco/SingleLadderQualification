@@ -2097,6 +2097,19 @@ Digital scan                     Waiting . .
      <string/>
     </property>
    </widget>
+   <widget class="QPushButton" name="testib">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>760</y>
+      <width>91</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TEST_IB</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">

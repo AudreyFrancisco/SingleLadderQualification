@@ -168,6 +168,9 @@ class MainWindow : public QMainWindow
 
     void setdefaultvalues(bool &fit, int &numberofstages);
 
+    void IBBasicTest();
+    void fillingibvectors();
+
     void continuescans(){execution=true;progresswindow->close();delete progresswindow;}
     void stopscans(){execution=false;progresswindow->close();delete progresswindow;}
     // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);

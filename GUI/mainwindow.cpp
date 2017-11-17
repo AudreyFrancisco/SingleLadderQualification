@@ -190,7 +190,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //  float percise = std::stof(currentdate.str());
     //  std::cout<<final<<" FRFDSFVDV"<<std::endl;
     //s std::cout<<"in integer "<<i_dec<<std::endl;
-
+ connect(ui->testib,SIGNAL(clicked()),this,SLOT(IBBasicTest()));
+ ui->testib->hide();
 
 }
 
@@ -2528,4 +2529,95 @@ void MainWindow::makeDir(const char *aDir)
       std::cout << "Error creating directory" << aDir << std::endl;
     }
   }
+}
+
+void MainWindow::IBBasicTest(){
+start_test();
+databasetype=true;
+settingswindow->close();
+numberofscan=1;
+hicidnumber="IB_HIC";
+open();
+fillingibvectors();
+for (unsigned int i=0;i<fScanVector.size();i++){
+    try{
+
+        if (fScanVector.at(i)==0){
+
+            fAnalysisVector.at(i)->Initialize();
+
+            std::thread analysisThread(&TScanAnalysis::Run, fAnalysisVector[i]);
+
+            analysisThread.join();
+
+            fAnalysisVector.at(i)->Finalize();
+
+        }
+        else {
+
+            std::thread scanThread(&MainWindow::scanLoop,this,fScanVector[i]);
+
+            fAnalysisVector.at(i)->Initialize();
+
+
+            std::thread analysisThread(&TScanAnalysis::Run, fAnalysisVector[i]);
+
+
+            scanThread.join();
+
+
+
+            analysisThread.join();
+
+
+            fAnalysisVector.at(i)->Finalize();
+
+
+        }
+
+           }
+    catch(exception &ex){
+        std::cout<<ex.what()<<"is the thrown exception"<<std::endl;
+    }
+
+
+}
+std::cout<<"Test complete :D"<<std::endl;
+}
+
+void MainWindow::fillingibvectors(){
+
+    TFifoResult    *fiforesult=new TFifoResult();
+    TDigitalResult *digitalresult=new TDigitalResult();
+    TSCurveResult *thresholdres=new TSCurveResult();
+
+
+
+    TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesult);
+
+    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresult);
+
+
+    TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TSCurveAnalysis *sa=new TSCurveAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,thresholdres);
+
+
+    fScanVector.push_back(fifoscan);
+    fScanVector.push_back(digitalscan);
+    fScanVector.push_back(thresholdscan);
+
+
+    fAnalysisVector.push_back(fifoanalysis);
+    fAnalysisVector.push_back(digitalanalysis);
+    fAnalysisVector.push_back(sa);
+
+
+
+    fresultVector.push_back(fiforesult);
+    fresultVector.push_back(digitalresult);
+    fresultVector.push_back(thresholdres);
+
+
 }
