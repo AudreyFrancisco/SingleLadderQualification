@@ -71,6 +71,39 @@ int  DbGetAttachmentTypeId (AlpideDB *db, string name)
 }
 
 
+int  DbGetComponentTypeId  (AlpideDB *db, int projectId, string name)
+{
+  ComponentDB *componentDB = new ComponentDB (db);
+  static std::vector <ComponentDB::componentType> componentTypeList;
+
+  if (componentTypeList.size() == 0) componentDB->GetTypeList(projectId, &componentTypeList);
+
+  for (unsigned int i = 0; i < componentTypeList.size(); i++) {
+    if (name == componentTypeList.at(i).Name) {
+      return componentTypeList.at(i).ID;
+    }
+  }
+  return -1;
+}
+
+
+int DbGetComponentId (AlpideDB *db, int projectId, int typeId, string name)
+{
+  ComponentDB *componentDB = new ComponentDB (db);
+  static std::vector <ComponentDB::componentShort> componentList;  
+
+  if (componentList.size() == 0) componentDB->GetListByType(projectId, typeId, &componentList);
+
+  for (unsigned int i = 0; i < componentList.size(); i++) {
+    if (name == componentList.at(i).ComponentID) {
+      return componentList.at(i).ID;
+    }
+  }
+
+  return -1;
+}  
+
+
 bool DbAddParameter (AlpideDB *db, ActivityDB::activity &activity, string name, float value) 
 {
   ActivityDB::parameter parameter;
