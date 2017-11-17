@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {   chkBtnObm1=chkBtnObm2=chkBtnObm3=chkBtnObm4=chkBtnObm5=chkBtnObm6=chkBtnObm7=false;
 
-
+    makeDir("Data");
     ui->setupUi(this);
     this->setWindowTitle(QString::fromUtf8("GUI"));
     ui->tab_2->setEnabled(false);
@@ -1472,6 +1472,14 @@ void MainWindow::connectcombo(int value){
 }
 
 void MainWindow::applytests(){
+    for (unsigned int i=0; i<fHICs.size();i++){
+        if(fHICs.at(i)->IsEnabled()){
+            std::string name="";
+            name.append("Data/");
+            name.append(hicnames.at(i).toStdString());
+        makeDir(name.c_str());
+        }
+    }
     ui->start_test->hide();
     qApp->processEvents();
     if (numberofscan==1||numberofscan==2){fillingOBvectors();}
@@ -2056,7 +2064,8 @@ void MainWindow::noiseadthree(){
 
 
 void MainWindow::attachtodatabase(){
-
+    for (unsigned int i=0; i<fHICs.size();i++){
+    if(fHICs.at(i)->IsEnabled()){
     //example for connection with the database
     AlpideDB *myDB=new AlpideDB(databasetype);
     //  ProjectDB *myproject=new ProjectDB(myDB);
@@ -2104,7 +2113,7 @@ void MainWindow::attachtodatabase(){
     activ.Location=idoflocationtype;
     activ.EndDate = date.currentDateTime().toTime_t();
     activ.Lot = "Test";//change everytime
-    activ.Name = hicidnumber.toStdString();//change everytime
+    activ.Name = hicnames[i].toStdString();//change everytime
     activ.Position = "Position98";//change everytime
     activ.Result = -999; //check the value//BEFORE IT WAS 1//522
 
@@ -2126,16 +2135,16 @@ void MainWindow::attachtodatabase(){
   */
 
     //number of chips parameter
-    if (fConfig->GetDeviceType()==2||fConfig->GetDeviceType()==3){
+   // if (fConfig->GetDeviceType()==2||fConfig->GetDeviceType()==3){//nomizw oti auti i if mporei na fygei
         //activparameter.ActivityParameter = 381;//number of chips//id of this parameter
         //activparameter.User = 20606;
         //activparameter.Value = fChips.size()-1;
         //activ.Parameters.push_back(activparameter);
         std::cout<<"before adding parameter"<<std::endl;
 
-        DbAddParameter(myDB, activ,"Number of Working Chips" , fHICs[0]->GetNEnabledChips());
+        DbAddParameter(myDB, activ,"Number of Working Chips" , fHICs[i]->GetNEnabledChips());
         std::cout<<"after adding parameter"<<std::endl;
-    }
+   // }
 
     //time parameter
     //  dbtime.ActivityParameter=381;
@@ -2164,24 +2173,27 @@ void MainWindow::attachtodatabase(){
 
 
 
-    //std::map<std::string,TScanResultHic* >::iterator ithic;
-    for(unsigned int i=0; i<fresultVector.size();i++){
-        if(fresultVector[i]!=0){
-            //for (ithic = fresultVector.at(4)->GetHicResults().begin(); ithic != fresultVector.at(4)->GetHicResults().end(); ++ithic) {
-            //for (ithic = fresultVector.at(scanposition)->GetHicResults().begin(); ithic != fresultVector.at(scanposition)->GetHicResults().end(); ++ithic) {
-            //TDigitalResultHic *result = (TDigitalResultHic*) ithic->second;
-            // result->WriteToDB(myDB,activ);}
-            std::cout<<"before writing db"<<std::endl;
-            fresultVector.at(i)->WriteToDB(myDB,activ);
-            std::cout<<"writing to database"<<std::endl;
-        }}//tis for toufresultsvector
+
+    for(unsigned int j=0; j<fresultVector.size();j++){
+        if(fresultVector[j]!=0){
+
+            std::map<std::string,TScanResultHic* > mymap=fresultVector.at(j)->GetHicResults();
+
+            for (auto ihic=mymap.begin(); ihic!=mymap.end(); ++ihic){
+
+                TScanResultHic *result = (TScanResultHic*) ihic->second;
+
+
+                if (strcmp(ihic->first.c_str(), hicnames.at(i).toStdString().c_str())==0){
+                    result->WriteToDB(myDB,activ);}
+            }
+        }}
 
 
 
 
 
-
-    if (numberofscan==1||numberofscan==5||numberofscan==6){
+    if (numberofscan==1||numberofscan==5||numberofscan==6||numberofscan==3){
         DbAddAttachment(myDB, activ,attachConfig ,string ("Config.cfg"), string ("Config.cfg"));
     }
     else if(numberofscan==2){
@@ -2194,7 +2206,10 @@ void MainWindow::attachtodatabase(){
 
     cout << myactivity->DumpResponse() << endl;
 
-}
+ //   delete myDB;
+  //  delete myactivity;
+
+}}}
 
 
 
@@ -2499,4 +2514,18 @@ void MainWindow::setdefaultvalues(bool &fit, int &numberofstages){
     fit= fConfig->GetScanConfig()->GetSpeedy();
     numberofstages=fConfig->GetScanConfig()->GetNMaskStages();
 
+}
+
+void MainWindow::makeDir(const char *aDir)
+{
+  struct stat myStat;
+  if ((stat(aDir, &myStat) == 0) && (S_ISDIR(myStat.st_mode))) {
+    std::cout << "Directory " << aDir << " found" << std::endl;
+  }
+  else {
+    std::cout << "Directory " << aDir << " not found. Creating..." << std::endl;
+    if (mkdir (aDir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+      std::cout << "Error creating directory" << aDir << std::endl;
+    }
+  }
 }
