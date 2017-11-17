@@ -137,10 +137,10 @@ void TPowerAnalysis::WriteResult()
   char fName[200];
   
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
-    TPowerResultHic *result = (TPowerResultHic*) m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     WriteIVCurve (m_hics.at(ihic));
     if (m_config->GetUseDataPath()) {
-      sprintf (fName, "%s/PowerTestResult_%s.dat", result->GetOutputPath().c_str(),
+      sprintf (fName, "%s/PowerTestResult_%s.dat", hicResult->GetOutputPath().c_str(),
                                                    m_config->GetfNameSuffix());
     }
     else {
@@ -151,11 +151,9 @@ void TPowerAnalysis::WriteResult()
     
     FILE *fp = fopen (fName, "a");
   
-    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
-    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile(fp);
+    hicResult->SetResultFile(fName);
+    hicResult->WriteToFile(fp);
     fclose(fp);
-    //    m_result->WriteToFile     (fName);
- 
   }
 
 }

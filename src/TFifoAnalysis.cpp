@@ -86,19 +86,24 @@ void TFifoAnalysis::InitCounters()
 
 void TFifoAnalysis::WriteResult () {
   char fName[200];
- 
+
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
-    sprintf (fName, "FifoScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
-                                                m_config->GetfNameSuffix());
+    TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId()); 
+    if (m_config->GetUseDataPath()) {
+      sprintf (fName, "%s/FifoScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
+                                                  m_config->GetfNameSuffix());
+    }
+    else {
+      sprintf (fName, "FifoScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+                                                  m_config->GetfNameSuffix());
+    }
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
     
     FILE *fp = fopen (fName, "a");
   
-    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
-    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile(fp);
+    hicResult->SetResultFile(fName);
+    hicResult->WriteToFile(fp);
     fclose(fp);
-    //    m_result->WriteToFile     (fName);
- 
   }
 }
 

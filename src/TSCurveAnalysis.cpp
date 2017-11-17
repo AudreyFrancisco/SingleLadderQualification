@@ -110,25 +110,41 @@ void TSCurveAnalysis::PrepareFiles ()
 {
   char fName[200];
   for (unsigned int i = 0; i < m_chipList.size(); i++) {
-    TSCurveResultChip *result = (TSCurveResultChip*) m_result->GetChipResult(m_chipList.at(i));
+    TSCurveResultChip *chipResult = (TSCurveResultChip*) m_result->GetChipResult(m_chipList.at(i));
     if (m_writeRawData) {
-      sprintf(fName, "Threshold_RawData_%s_B%d_Rcv%d_Ch%d.dat", 
-                      m_config->GetfNameSuffix(), 
-  	              m_chipList.at(i).boardIndex, 
-                      m_chipList.at(i).dataReceiver, 
-                      m_chipList.at(i).chipId);
-      result->SetRawFile(fName);
-      result->m_rawFP = fopen(fName, "w");
+      if (m_config->GetUseDataPath()) {
+        sprintf(fName, "%s/Threshold_RawData_%s_Chip%d.dat", 
+ 		        chipResult->GetOutputPath().c_str(),
+                        m_config->GetfNameSuffix(), 
+                        m_chipList.at(i).chipId);        
+      }
+      else {
+        sprintf(fName, "Threshold_RawData_%s_B%d_Rcv%d_Ch%d.dat", 
+                        m_config->GetfNameSuffix(), 
+    	                m_chipList.at(i).boardIndex, 
+                        m_chipList.at(i).dataReceiver, 
+                        m_chipList.at(i).chipId);
+      }
+      chipResult->SetRawFile(fName);
+      chipResult->m_rawFP = fopen(fName, "w");
     }
 
     if (m_writeFitResults) {
-      sprintf(fName, "Threshold_FitResults__%s_B%d_Rcv%d_Ch%d.dat", 
-                     m_config->GetfNameSuffix(), 
-  	             m_chipList.at(i).boardIndex, 
-                     m_chipList.at(i).dataReceiver, 
-                     m_chipList.at(i).chipId);
-      result->SetFitFile(fName);
-      result->m_fitFP = fopen(fName, "w");
+      if (m_config->GetUseDataPath()) {
+        sprintf(fName, "%s/Threshold_FitResults_%s_Chip%d.dat", 
+ 		        chipResult->GetOutputPath().c_str(),
+                        m_config->GetfNameSuffix(), 
+                        m_chipList.at(i).chipId);        
+      }
+      else {
+        sprintf(fName, "Threshold_FitResults__%s_B%d_Rcv%d_Ch%d.dat", 
+                       m_config->GetfNameSuffix(), 
+  	               m_chipList.at(i).boardIndex, 
+                       m_chipList.at(i).dataReceiver, 
+                       m_chipList.at(i).chipId);
+      }
+      chipResult->SetFitFile(fName);
+      chipResult->m_fitFP = fopen(fName, "w");
     }
   }
 }
@@ -342,23 +358,39 @@ void TSCurveAnalysis::WriteResult()
 {
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
-    if (IsThresholdScan())
-      sprintf(fName, "ThresholdScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
-    	                                              m_config->GetfNameSuffix());
-    else if (IsVCASNTuning()) {
-      sprintf(fName, "VCASNTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
-    	                                              m_config->GetfNameSuffix());
+    TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (m_config->GetUseDataPath()) {
+      if (IsThresholdScan())
+        sprintf(fName, "%s/ThresholdScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
+    	                                                m_config->GetfNameSuffix());
+      else if (IsVCASNTuning()) {
+        sprintf(fName, "%s/VCASNTuneResult_%s.dat", hicResult->GetOutputPath().c_str(),
+    	                                            m_config->GetfNameSuffix());
+      }
+      else {
+        sprintf(fName, "%s/ITHRTuneResult_%s.dat", hicResult->GetOutputPath().c_str(),
+    	                                           m_config->GetfNameSuffix());
+      }
     }
     else {
-      sprintf(fName, "ITHRTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
-    	                                              m_config->GetfNameSuffix());
+      if (IsThresholdScan())
+        sprintf(fName, "ThresholdScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
+    	                                                m_config->GetfNameSuffix());
+      else if (IsVCASNTuning()) {
+        sprintf(fName, "VCASNTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
+    	                                            m_config->GetfNameSuffix());
+      }
+      else {
+        sprintf(fName, "ITHRTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
+    	                                           m_config->GetfNameSuffix());
+      }
     }
     m_scan->WriteConditions (fName, m_hics.at(ihic));
 
     FILE *fp = fopen (fName, "a");
     m_result->WriteToFileGlobal(fp);
-    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
-    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile  (fp);
+    hicResult->SetResultFile(fName);
+    hicResult->WriteToFile  (fp);
     fclose(fp);
   }	   				     
 }

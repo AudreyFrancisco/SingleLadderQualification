@@ -26,17 +26,23 @@ void TNoiseAnalysis::WriteResult()
 {
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     WriteNoisyPixels (m_hics.at(ihic));
-    sprintf (fName, "NoiseOccResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
-                                                m_config->GetfNameSuffix());
+    if (m_config->GetUseDataPath()) {
+      sprintf (fName, "%s/NoiseOccResult_%s.dat", hicResult->GetOutputPath().c_str(),
+                                                  m_config->GetfNameSuffix());
+    }
+    else {
+      sprintf (fName, "NoiseOccResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+                                                  m_config->GetfNameSuffix());
+    }
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
 
     FILE *fp = fopen (fName, "a");
-    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
-    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile  (fp);
+    hicResult->SetResultFile(fName);
+    hicResult->WriteToFile  (fp);
     
     fclose(fp);
-    //    m_result->WriteToFile     (fName);
   }
 }
 
@@ -44,12 +50,19 @@ void TNoiseAnalysis::WriteResult()
 void TNoiseAnalysis::WriteNoisyPixels(THic *hic)
 {
   char fName[200];
-  TNoiseResult *result = (TNoiseResult*) m_result;
+  TNoiseResult    *result    = (TNoiseResult*)    m_result;
+  TNoiseResultHic *hicResult = (TNoiseResultHic*) m_result->GetHicResult(hic->GetDbId());
  
-  sprintf (fName, "NoisyPixels_%s_%s.dat", hic->GetDbId().c_str(), 
-                                           m_config->GetfNameSuffix());
+  if (m_config->GetUseDataPath()) {
+    sprintf (fName, "%s/NoisyPixels_%s.dat", hicResult->GetOutputPath().c_str(),
+                                             m_config->GetfNameSuffix());
+  }
+  else {
+    sprintf (fName, "NoisyPixels_%s_%s.dat", hic->GetDbId().c_str(), 
+                                             m_config->GetfNameSuffix());
+  }
   
-  ((TNoiseResultHic*)result->GetHicResult(hic->GetDbId()))->SetNoisyFile(fName);
+  hicResult->SetNoisyFile(fName);
 
   FILE *fp     = fopen (fName, "w");
 

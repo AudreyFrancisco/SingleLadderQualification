@@ -155,17 +155,24 @@ void TDigitalWFAnalysis::WriteResult()
   // write both paths to result structure
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     WriteStuckPixels    (m_hics.at(ihic));
     WriteUnmaskedPixels (m_hics.at(ihic));
 
-    sprintf (fName, "DigitalWFScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
-                                                     m_config->GetfNameSuffix());
+    if (m_config->GetUseDataPath()) {
+      sprintf (fName, "%s/DigitalWFScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
+                                                       m_config->GetfNameSuffix());
+    }
+    else {
+      sprintf (fName, "DigitalWFScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+                                                       m_config->GetfNameSuffix());
+    }
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
 
     FILE *fp = fopen (fName, "a");
-    m_result->WriteToFileGlobal(fp);
-    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
-    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile  (fp);
+    m_result ->WriteToFileGlobal(fp);
+    hicResult->SetResultFile(fName);
+    hicResult->WriteToFile  (fp);
     fclose (fp);
     //    m_result->WriteToFile     (fName);
   }
@@ -175,8 +182,15 @@ void TDigitalWFAnalysis::WriteResult()
 void TDigitalWFAnalysis::WriteStuckPixels(THic *hic) 
 {
   char fName[100];
-  sprintf (fName, "StuckPixels_%s_%s.dat", hic->GetDbId().c_str(), 
-                                           m_config->GetfNameSuffix());
+  TScanResultHic *hicResult = m_result->GetHicResult(hic->GetDbId());
+  if (m_config->GetUseDataPath()) {
+    sprintf (fName, "%s/StuckPixels_%s.dat", hicResult->GetOutputPath().c_str(),
+                                             m_config->GetfNameSuffix());
+  }
+  else {
+    sprintf (fName, "StuckPixels_%s_%s.dat", hic->GetDbId().c_str(), 
+                                             m_config->GetfNameSuffix());
+  }
   
   ((TDigitalWFResultHic*)m_result->GetHicResult(hic->GetDbId()))->SetStuckFile(fName);
   std::vector<TPixHit>  pixels = ((TMaskScan*)m_scan)->GetStuckPixels();
@@ -188,8 +202,15 @@ void TDigitalWFAnalysis::WriteStuckPixels(THic *hic)
 void TDigitalWFAnalysis::WriteUnmaskedPixels(THic *hic) 
 {
   char fName[100];
-  sprintf (fName, "UnmaskedPixels_%s_%s.dat", hic->GetDbId().c_str(), 
-                                           m_config->GetfNameSuffix());
+  TScanResultHic *hicResult = m_result->GetHicResult(hic->GetDbId());
+  if (m_config->GetUseDataPath()) {
+    sprintf (fName, "%s/UnmaskedPixels_%s.dat", hicResult->GetOutputPath().c_str(),
+                                                m_config->GetfNameSuffix());
+  }
+  else {
+    sprintf (fName, "UnmaskedPixels_%s_%s.dat", hic->GetDbId().c_str(), 
+                                                m_config->GetfNameSuffix());
+  }
   
   ((TDigitalWFResultHic*)m_result->GetHicResult(hic->GetDbId()))->SetUnmaskedFile(fName);
   std::vector<TPixHit>  pixels = m_unmaskable;

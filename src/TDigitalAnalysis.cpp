@@ -86,10 +86,18 @@ void TDigitalAnalysis::WriteHitData(TScanHisto *histo, int row)
 {
   char fName[100];
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
-    sprintf(fName, "Digital_%s_B%d_Rcv%d_Ch%d.dat", m_config->GetfNameSuffix(), 
-	                                            m_chipList.at(ichip).boardIndex, 
-                                                    m_chipList.at(ichip).dataReceiver, 
-                                                    m_chipList.at(ichip).chipId);
+    TScanResultChip *chipResult = m_result->GetChipResult(m_chipList.at(ichip));
+    if (m_config->GetUseDataPath()) {
+      sprintf(fName, "%s/Digital_%s_Chip%d.dat", chipResult->GetOutputPath().c_str(),
+                                                 m_config->GetfNameSuffix(), 
+  	                                         m_chipList.at(ichip).chipId);
+    }
+    else {
+      sprintf(fName, "Digital_%s_B%d_Rcv%d_Ch%d.dat", m_config->GetfNameSuffix(), 
+  	                                              m_chipList.at(ichip).boardIndex, 
+                                                      m_chipList.at(ichip).dataReceiver, 
+                                                      m_chipList.at(ichip).chipId);
+    }
     FILE *fp = fopen (fName, "a");
     for (int icol = 0; icol < 1024; icol ++) {
       if ((*histo)(m_chipList.at(ichip), icol) > 0) {  // write only non-zero values
@@ -110,17 +118,23 @@ void TDigitalAnalysis::WriteResult()
   // write both paths to result structure
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     WriteStuckPixels (m_hics.at(ihic));
-    sprintf (fName, "DigitalScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
-                                                   m_config->GetfNameSuffix());
+    if (m_config->GetUseDataPath()) {
+      sprintf (fName, "%s/DigitalScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
+                                                     m_config->GetfNameSuffix());
+    }
+    else {
+      sprintf (fName, "DigitalScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+                                                     m_config->GetfNameSuffix());
+    }
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
 
     FILE *fp = fopen (fName, "a");
     m_result->WriteToFileGlobal(fp);
-    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
-    m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile  (fp);
+    hicResult->SetResultFile(fName);
+    hicResult->WriteToFile  (fp);
     fclose (fp);
-    //    m_result->WriteToFile     (fName);
   }
 }
 
@@ -128,11 +142,17 @@ void TDigitalAnalysis::WriteResult()
 void TDigitalAnalysis::WriteStuckPixels(THic *hic) 
 {
   char fName[100];
-  sprintf (fName, "StuckPixels_%s_%s.dat", hic->GetDbId().c_str(), 
-                                           m_config->GetfNameSuffix());
+  TDigitalResultHic *hicResult = (TDigitalResultHic*)m_result->GetHicResult(hic->GetDbId());
+  if (m_config->GetUseDataPath()) {
+    sprintf (fName, "%s/StuckPixels_%s.dat", hicResult->GetOutputPath().c_str(),
+                                             m_config->GetfNameSuffix());   
+  }
+  else {
+    sprintf (fName, "StuckPixels_%s_%s.dat", hic->GetDbId().c_str(), 
+                                             m_config->GetfNameSuffix());
+  }
   
-  ((TDigitalResultHic*)m_result->GetHicResult(hic->GetDbId()))->SetStuckFile(fName);
-
+  hicResult->SetStuckFile(fName);
   FILE                 *fp     = fopen (fName, "w");
   std::vector<TPixHit>  pixels = ((TMaskScan*)m_scan)->GetStuckPixels();
 
