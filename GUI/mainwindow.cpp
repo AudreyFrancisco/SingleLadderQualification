@@ -190,6 +190,26 @@ MainWindow::MainWindow(QWidget *parent) :
     //  float percise = std::stof(currentdate.str());
     //  std::cout<<final<<" FRFDSFVDV"<<std::endl;
     //s std::cout<<"in integer "<<i_dec<<std::endl;
+
+  /*  time_t t = time(0);   // get time now
+    tm * now = localtime( & t );
+
+    std::stringstream currentdate;
+    //currentdate<<std::setprecision(8);
+    //  currentdate<<now->tm_mday
+    //          << 1 + now->tm_mon
+    //        << 1900.0 + now->tm_year;
+    currentdate <<now->tm_hour
+               <<now->tm_min
+              <<now->tm_sec;
+    std::string::size_type sz;
+    int i_dec= std::stoi (currentdate.str(),&sz);
+    // std::string name;
+    // name="Number of working chips in a HIC";
+    std::cout<<i_dec<<std::endl;
+    */
+
+
  connect(ui->testib,SIGNAL(clicked()),this,SLOT(IBBasicTest()));
  ui->testib->hide();
 
@@ -268,6 +288,7 @@ void MainWindow::open(){
 
         }
         initSetup(fConfig, &fBoards, &fBoardType, &fChips,fileName.toStdString().c_str(), &fHICs,ar);
+        fConfig->GetScanConfig()->SetUseDataPath(true);
         pb=fHICs.at(0)->GetPowerBoard();
         pbconfig=pb->GetConfigurationHandler();
         pbnumberofmodule=fHICs.at(0)->GetPbMod();
@@ -2171,7 +2192,7 @@ void MainWindow::attachtodatabase(){
     //int time= 10000*hours+100*minutes+sec;
     //  dbtime.Value=i_dec;
     //activ.Parameters.push_back(dbtime);
-
+   //DbGetComponentTypeId(myDB, idofactivitytype,"Outer Barrel HIC Module");
 
 
 
@@ -2538,6 +2559,7 @@ settingswindow->close();
 numberofscan=1;
 hicidnumber="IB_HIC";
 open();
+fConfig->GetScanConfig()->SetUseDataPath(false);
 fillingibvectors();
 for (unsigned int i=0;i<fScanVector.size();i++){
     try{
