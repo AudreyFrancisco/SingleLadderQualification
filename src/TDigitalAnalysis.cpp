@@ -293,7 +293,7 @@ void TDigitalResultHic::GetParameterSuffix (std::string &suffix, std::string &fi
 
 void TDigitalResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
-  std::string suffix, file_suffix, fileName;
+  std::string suffix, file_suffix, fileName, remoteName;
   GetParameterSuffix (suffix, file_suffix);
   DbAddParameter  (db, activity, string ("Timeouts digital") + suffix,                (float) m_errorCounter.nTimeout);
   DbAddParameter  (db, activity, string ("8b10b errors digital") + suffix,            (float) m_errorCounter.n8b10b);
@@ -303,9 +303,11 @@ void TDigitalResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
   DbAddParameter  (db, activity, string ("Bad pixels digital") + suffix,              (float) m_nBad);
 
 
-  std::size_t point = string(m_resultFile).find_last_of(".");
-  fileName = string(m_resultFile).substr (0, point) + file_suffix + ".dat";
-  DbAddAttachment (db, activity, attachResult, string(m_resultFile), fileName);
+  std::size_t slash = string(m_resultFile).find_last_of("/");
+  fileName          = string(m_resultFile).substr (slash +1);    // strip path
+  std::size_t point = fileName.find_last_of(".");
+  remoteName        = fileName.substr (0, point) + file_suffix + ".dat";
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), remoteName);
 
 }
 

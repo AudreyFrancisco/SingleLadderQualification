@@ -161,14 +161,22 @@ void TPowerAnalysis::WriteResult()
 
 void TPowerResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
-  TScanResultHic::WriteToDB(db, activity);
+  string      fileName, ivName;
+  std::size_t slash;
+
   DbAddParameter  (db, activity, string("IDDD"), idddConfigured);
   DbAddParameter  (db, activity, string("IDDA"), iddaConfigured);
   DbAddParameter  (db, activity, string("Back bias current 0V"), ibias0);
   DbAddParameter  (db, activity, string("Back bias current 3V"), ibias3);
 
-  DbAddAttachment (db, activity, attachResult, string(m_resultFile), string(m_resultFile));
-  DbAddAttachment (db, activity, attachResult, string(m_ivFile), string(m_ivFile));
+  slash    = string(m_resultFile).find_last_of("/");
+  fileName = string(m_resultFile).substr (slash +1);    // strip path
+
+  slash    = string(m_ivFile).find_last_of("/");
+  ivName   = string(m_ivFile).substr (slash +1);    // strip path
+
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), fileName);
+  DbAddAttachment (db, activity, attachResult, string(m_ivFile),     ivName);
 }
 
 

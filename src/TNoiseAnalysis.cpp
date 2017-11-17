@@ -229,8 +229,8 @@ void TNoiseResultHic::GetParameterSuffix (std::string &suffix, std::string &file
 
 void TNoiseResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity) 
 {
-  std::string suffix, file_suffix, fileName;
-  std::size_t point;
+  std::string suffix, file_suffix, fileName, remoteName;
+  std::size_t point, slash;
 
   GetParameterSuffix(suffix, file_suffix);
 
@@ -238,12 +238,16 @@ void TNoiseResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
   DbAddParameter (db, activity, string ("Noise occupancy ") + suffix, (float) m_occ);
   DbAddParameter (db, activity, string ("Maximum chip occupancy ") + suffix, (float) m_maxChipOcc);
 
-  point = string(m_resultFile).find_last_of(".");
-  fileName = string(m_resultFile).substr (0, point) + file_suffix + ".dat";
-  DbAddAttachment (db, activity, attachResult, string(m_resultFile), fileName);
+  slash      = string(m_resultFile).find_last_of("/");
+  fileName   = string(m_resultFile).substr (slash +1);    // strip path
+  point      = fileName.find_last_of(".");
+  remoteName = fileName.substr (0, point) + file_suffix + ".dat";
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), remoteName);
 
-  point = string(m_noisyFile).find_last_of(".");
-  fileName = string(m_noisyFile).substr (0, point) + file_suffix + ".dat";
-  DbAddAttachment (db, activity, attachResult, string(m_noisyFile), fileName);
+  slash      = string(m_noisyFile).find_last_of("/");
+  fileName   = string(m_noisyFile).substr (slash +1);    // strip path
+  point      = fileName.find_last_of(".");
+  remoteName = fileName.substr (0, point) + file_suffix + ".dat";
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), remoteName);
 
 }
