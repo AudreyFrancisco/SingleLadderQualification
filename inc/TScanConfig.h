@@ -95,72 +95,73 @@ namespace ScanConfig {
 class TScanConfig {
  private:
   std::map <std::string, int*> fSettings;
-  int  m_nInj;
-  int  m_nTrig;
-  int  m_chargeStart;
-  int  m_chargeStop;
-  int  m_chargeStep;
-  int  m_dacStart;
-  int  m_dacStop;
-  int  m_dacStep;
-  int  m_nDacSamples;
-  int  m_nMaskStages;
-  int  m_pixPerRegion;
-  int  m_noiseCutInv;
-  char m_fNameSuffix[20];
+  int    m_nInj;
+  int    m_nTrig;
+  int    m_chargeStart;
+  int    m_chargeStop;
+  int    m_chargeStep;
+  int    m_dacStart;
+  int    m_dacStop;
+  int    m_dacStep;
+  int    m_nDacSamples;
+  int    m_nMaskStages;
+  int    m_pixPerRegion;
+  int    m_noiseCutInv;
+  char   m_fNameSuffix[20];
   //NEW--added for additional scans
-  int  m_ithrStart;  //usually 30
-  int  m_ithrStop;   //usually 100
-  int  m_ithrStep;
-  int  m_vcasnStart; //usually 40
-  int  m_vcasnStop;  //usually 60
-  int  m_vcasnStep;
-  int  m_scanStep;   //16
-  int  m_tuningMaxrow;
-  int  m_speedy;
-  int  m_rawData;
-  int  m_ivCurve;
-  int  m_ivPoints;
-  int  m_maxIbias;
-  int  m_localBusCutRed;
-  int  m_powerCutMinIdda_OB;
-  int  m_powerCutMinIddd_OB;
-  int  m_powerCutMinIddaClocked_OB;
-  int  m_powerCutMinIdddClocked_OB;
-  int  m_powerCutMaxIddaClocked_OB;
-  int  m_powerCutMaxIdddClocked_OB;
-  int  m_powerCutMinIdda_IB;
-  int  m_powerCutMinIddd_IB;
-  int  m_powerCutMinIddaClocked_IB;
-  int  m_powerCutMinIdddClocked_IB;
-  int  m_powerCutMaxIddaClocked_IB;
-  int  m_powerCutMaxIdddClocked_IB;
-  int  m_powerCutMaxBias3V_IB;
-  int  m_powerCutMaxBias3V_OB;
-  int  m_powerMaxFactor4V_IB;
-  int  m_powerMaxFactor4V_OB;
-  int  m_fifoCutMaxErr;
-  int  m_fifoCutMaxFaulty;
-  int  m_digitalMaxBadPerChipOB;
-  int  m_digitalMaxBadPerChipIB;
-  int  m_digitalMaxBadPerHicOB;
-  int  m_digitalMaxBadPerHicIB;
-  int  m_digitalMaxNoMaskHicIB;
-  int  m_digitalMaxNoMaskHicOB;
-  int  m_digitalMaxNoMaskStuckHicIB;
-  int  m_digitalMaxNoMaskStuckHicOB;
-  int  m_threshMaxBadPerChipOB;
-  int  m_threshMaxBadPerChipIB;
-  int  m_threshMaxBadPerHicOB;
-  int  m_threshMaxBadPerHicIB;
-  int  m_threshMaxNoiseIB;
-  int  m_threshMaxNoiseOB;
-  int  m_calVpulsel;
-  int  m_targetThresh;
-  int  m_nominal;
-  bool m_isMasked;
-  float m_voltageScale;
-  float m_backBias;
+  int    m_ithrStart;  //usually 30
+  int    m_ithrStop;   //usually 100
+  int    m_ithrStep;
+  int    m_vcasnStart; //usually 40
+  int    m_vcasnStop;  //usually 60
+  int    m_vcasnStep;
+  int    m_scanStep;   //16
+  int    m_tuningMaxrow;
+  int    m_speedy;
+  int    m_rawData;
+  int    m_ivCurve;
+  int    m_ivPoints;
+  int    m_maxIbias;
+  int    m_localBusCutRed;
+  int    m_powerCutMinIdda_OB;
+  int    m_powerCutMinIddd_OB;
+  int    m_powerCutMinIddaClocked_OB;
+  int    m_powerCutMinIdddClocked_OB;
+  int    m_powerCutMaxIddaClocked_OB;
+  int    m_powerCutMaxIdddClocked_OB;
+  int    m_powerCutMinIdda_IB;
+  int    m_powerCutMinIddd_IB;
+  int    m_powerCutMinIddaClocked_IB;
+  int    m_powerCutMinIdddClocked_IB;
+  int    m_powerCutMaxIddaClocked_IB;
+  int    m_powerCutMaxIdddClocked_IB;
+  int    m_powerCutMaxBias3V_IB;
+  int    m_powerCutMaxBias3V_OB;
+  int    m_powerMaxFactor4V_IB;
+  int    m_powerMaxFactor4V_OB;
+  int    m_fifoCutMaxErr;
+  int    m_fifoCutMaxFaulty;
+  int    m_digitalMaxBadPerChipOB;
+  int    m_digitalMaxBadPerChipIB;
+  int    m_digitalMaxBadPerHicOB;
+  int    m_digitalMaxBadPerHicIB;
+  int    m_digitalMaxNoMaskHicIB;
+  int    m_digitalMaxNoMaskHicOB;
+  int    m_digitalMaxNoMaskStuckHicIB;
+  int    m_digitalMaxNoMaskStuckHicOB;
+  int    m_threshMaxBadPerChipOB;
+  int    m_threshMaxBadPerChipIB;
+  int    m_threshMaxBadPerHicOB;
+  int    m_threshMaxBadPerHicIB;
+  int    m_threshMaxNoiseIB;
+  int    m_threshMaxNoiseOB;
+  int    m_calVpulsel;
+  int    m_targetThresh;
+  int    m_nominal;
+  bool   m_isMasked;
+  float  m_voltageScale;
+  float  m_backBias;
+  bool   m_useDataPath;  // for compatibility with standalone scans, set true for GUI
  protected:
  public:
   TScanConfig ();
@@ -190,11 +191,13 @@ class TScanConfig {
   float GetVoltageScale  () {return m_voltageScale;};
   bool  GetIsMasked      () {return m_isMasked;};
   float GetBackBias      () {return m_backBias;};
+  bool  GetUseDataPath   () {return m_useDataPath;};
   void  SetfNameSuffix   (const char *aSuffix) {strcpy (m_fNameSuffix, aSuffix);};
   void  SetVoltageScale  (float aScale)        {m_voltageScale = aScale;};
   void  SetBackBias      (float aVoltage)      {m_backBias = fabs(aVoltage);};
   void  SetVcasnRange    (int start, int stop) {m_vcasnStart = start; m_vcasnStop = stop;};
   void  SetIsMasked      (bool masked)         {m_isMasked = masked;};
+  void  SetUseDataPath   (bool usePath)        {m_useDataPath = usePath;};
 };
 
 #endif

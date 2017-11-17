@@ -25,10 +25,14 @@ typedef enum resultType {status, deadPix, noisyPix, ineffPix, stuckPix, unmaskab
 // base class for classes that contain chip results
 // derive class for each analysis
 class TScanResultChip {
+ protected:
+  string m_outputPath;
  public:
   TScanResultChip () {};
-  virtual void  WriteToFile (FILE *fp) = 0;
-  virtual float GetVariable (TResultVariable var) = 0;
+  virtual void  WriteToFile   (FILE *fp) = 0;
+  virtual float GetVariable   (TResultVariable var) = 0;
+  void          SetOutputPath (string path) {m_outputPath = path;};
+  string        GetOutputPath ()            {return m_outputPath;};
 };
 
 
@@ -39,6 +43,7 @@ class TScanResultHic {
   char                             m_resultFile[200];
   THicClassification               m_class;
   const char*                      WriteHicClassification();
+  string                           m_outputPath;
  public:
   TScanResultHic () {};
   virtual void       WriteToFile       (FILE *fp) = 0;
@@ -48,6 +53,7 @@ class TScanResultHic {
   THicClassification GetClassification ()                  {return m_class;};
   std::map <int, TScanResultChip*> DeleteThisToo() {return m_chipResults;};
   float              GetVariable       (int chip, TResultVariable var);
+  string             GetOutputPath     () {return m_outputPath;};
 };
 
 

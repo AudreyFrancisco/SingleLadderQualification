@@ -76,6 +76,8 @@ TScanConfig::TScanConfig()
   m_threshMaxNoiseOB      = THRESH_MAXNOISE_OB;
   m_threshMaxNoiseIB      = THRESH_MAXNOISE_IB;
 
+  m_useDataPath = false;
+
   InitParamMap();
 }
 

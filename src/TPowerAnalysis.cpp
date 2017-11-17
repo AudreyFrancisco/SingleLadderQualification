@@ -109,10 +109,18 @@ THicClassification TPowerAnalysis::GetClassificationOB (THicCurrents currents)
 
 void TPowerAnalysis::WriteIVCurve(THic *hic) 
 {
-  char fName[200];
-  sprintf(fName, "IVCurve_%s_%s.dat", hic->GetDbId().c_str(), 
-                                      m_config->GetfNameSuffix());
+  char             fName[200];
   TPowerResultHic *result = (TPowerResultHic*) m_result->GetHicResult(hic->GetDbId());
+
+  if (m_config->GetUseDataPath()) {
+    sprintf(fName, "%s/IVCurve_%s.dat", result  ->GetOutputPath().c_str(), 
+                                        m_config->GetfNameSuffix());
+  }
+  else {
+    sprintf(fName, "IVCurve_%s_%s.dat", hic     ->GetDbId().c_str(), 
+                                        m_config->GetfNameSuffix());
+  }
+
   result->SetIVFile (fName);
 
   FILE *fp = fopen (fName, "w");
@@ -129,9 +137,16 @@ void TPowerAnalysis::WriteResult()
   char fName[200];
   
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    TPowerResultHic *result = (TPowerResultHic*) m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     WriteIVCurve (m_hics.at(ihic));
-    sprintf (fName, "PowerTestResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
-                                                 m_config->GetfNameSuffix());
+    if (m_config->GetUseDataPath()) {
+      sprintf (fName, "%s/PowerTestResult_%s.dat", result->GetOutputPath().c_str(),
+                                                   m_config->GetfNameSuffix());
+    }
+    else {
+      sprintf (fName, "PowerTestResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+                                                   m_config->GetfNameSuffix());
+    }
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
     
     FILE *fp = fopen (fName, "a");
