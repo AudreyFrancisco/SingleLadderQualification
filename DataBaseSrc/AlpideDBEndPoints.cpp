@@ -573,6 +573,325 @@ AlpideTable::response * ComponentDB::Create(string ComponentTypeID, string Compo
 }
 
 /* -----------------
+ * 	PRIVATE
+ *    extractTheComponent := get the component definition
+ *
+ *		In Param : the XML node that contains the Component definition
+ *		Out Param : a Reference to a Component struct that will contains the values parsed
+ *
+ * ---------------- */
+void ComponentDB::extractTheComponent(xmlNode *ns, componentLong *pro)
+{
+	xmlNode *n1,*n2,*n3, *n4,*n5;
+	n1 = ns;
+	while(n1 != NULL) {
+		if(strcmp((const char*)n1->name, "ID") == 0) pro->ID = atoi( (const char*)n1->children->content);
+		else if (strcmp((const char*)n1->name, "ComponentID") == 0) pro->ComponentID.assign( (const char *)n1->children->content);
+		else if (strcmp((const char*)n1->name, "SupplierComponentID") == 0) pro->SupplierComponentID.assign( (const char *)n1->children->content);
+		else if (strcmp((const char*)n1->name, "Description") == 0) pro->Description.assign((const char *)n1->children->content);
+		else if (strcmp((const char*)n1->name, "LotID") == 0) pro->LotID.assign((const char *)n1->children->content);
+		else if (strcmp((const char*)n1->name, "PackageID") == 0) pro->PackageID.assign((const char *)n1->children->content);
+
+		else if (strcmp((const char*)n1->name, "ComponentType") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ID") == 0) pro->Type.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Name") == 0) pro->Type.Name.assign( (const char *)n2->children->content);
+				n2 =n2->next;
+			}
+		}
+		else if (strcmp((const char*)n1->name, "PhysicalStatus") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ID") == 0) pro->PhysicalState.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Name") == 0) pro->PhysicalState.Name.assign( (const char *)n2->children->content);
+				n2 =n2->next;
+			}
+		}
+		else if (strcmp((const char*)n1->name, "FunctionalStatus") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ID") == 0) pro->FunctionalState.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Name") == 0) pro->FunctionalState.Name.assign( (const char *)n2->children->content);
+				n2 =n2->next;
+			}
+		}
+		if(strcmp((const char*)n1->name, "Composition") == 0)  {
+			n2 = n1->children;
+			compComposition ap1;
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ComponentComposition") == 0)  {
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) ap1.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Position") == 0)  ap1.Position = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Component") == 0) {
+							n4 = n3->children;
+							while(n4 != NULL) {
+								if(strcmp((const char*)n4->name, "ID") == 0) ap1.Component.ID = atoi( (const char*)n4->children->content);
+								else if(strcmp((const char*)n4->name, "ComponentID") == 0) ap1.Component.ComponentID.assign( (const char *)n4->children->content);
+								else if(strcmp((const char*)n4->name, "ComponentType") == 0) {
+									n5 = n4->children;
+									while(n5 != NULL) {
+										if(strcmp((const char*)n5->name, "ID") == 0) ap1.Component.ComponentType.ID = atoi( (const char*)n5->children->content);
+										else if(strcmp((const char*)n5->name, "Name") == 0) ap1.Component.ComponentType.Name.assign( (const char *)n5->children->content);
+										n5 = n5->next;
+									}
+								}
+								n4 = n4->next;
+							}
+						}
+						n3 = n3->next;
+					}
+					pro->Composition.push_back(ap1);
+					zCOMPCOMPOSITION(ap1);
+				}
+				n2 =n2->next;
+			}
+		}
+		n1 = n1->next;
+	}
+}
+
+
+/* -----------------
+*    Read := Get a component
+*
+*		In Param : ... all the items describing ...
+*		returns : a response struct that contains the error code
+*---------------- */
+AlpideTable::response * ComponentDB::Read(int ID, componentLong *Result)
+{
+	std::string sID = std::to_string(ID);
+	return(readComponent(sID, "", Result));
+}
+
+AlpideTable::response * ComponentDB::Read(string ComponentID, componentLong *Result)
+{
+	return(readComponent("-999", ComponentID, Result));
+}
+
+AlpideTable::response * ComponentDB::readComponent(string ID, string ComponentID, componentLong *Result)
+{
+
+	string theUrl = theParentDB->GetQueryDomain() + "/ComponentReadOne";
+	string theQuery = "ID="+ID+"&componentID="+ComponentID;
+	char *stringresult;
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0)  {
+	    cerr << "Failed to execute the Query" << endl;
+	    SetResponse(AlpideTable::SyncQuery, 0,0);
+		return(&theResponse);
+	}
+	xmlDocPtr doc;
+	doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+	if (doc == NULL) {
+	    cerr << "Failed to parse document" << endl;
+	    SetResponse(AlpideTable::BadXML, 0,0);
+		return(&theResponse);
+	}
+	// Get the root element node
+	xmlNode *root_element = NULL;
+	root_element = xmlDocGetRootElement(doc);
+	if(root_element == NULL) {
+	    SetResponse(AlpideTable::BadXML, 0,0);
+		return(&theResponse);
+	}
+
+	xmlNode *n1 = root_element->children;
+	extractTheComponent(n1, Result);
+
+    SetResponse(AlpideTable::NoError, 0,0);
+	return(&theResponse);
+}
+
+
+/* -----------------
+*    Read := Get a List of components
+*
+*		In Param : ...the componet type id...
+*		returns : a response struct that contains the error code
+*---------------- */
+AlpideTable::response * ComponentDB::readComponents(std::string ProjectId, std::string ComponentTypeID, vector<componentShort> *compoList)
+{
+	string theUrl = theParentDB->GetQueryDomain() + "/ComponentRead";
+	string theQuery = "projectID="+ProjectId+"&componentTypeID="+ComponentTypeID;
+	char *stringresult;
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0)  {
+	    cerr << "Failed to execute the Query" << endl;
+	    SetResponse(AlpideTable::SyncQuery, 0,0);
+		return(&theResponse);
+	}
+	xmlDocPtr doc;
+	doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+	if (doc == NULL) {
+	    cerr << "Failed to parse document" << endl;
+	    SetResponse(AlpideTable::BadXML, 0,0);
+		return(&theResponse);
+	}
+	// Get the root element node
+	xmlNode *root_element = NULL;
+	root_element = xmlDocGetRootElement(doc);
+	if(root_element == NULL) {
+	    SetResponse(AlpideTable::BadXML, 0,0);
+		return(&theResponse);
+	}
+
+	xmlNode *n1,*n2,*n3;
+	n1 = root_element->children;
+	componentShort theComponent;
+	while(n1 != NULL) {
+		if (strcmp((const char*)n1->name, "Component") == 0) {
+			n2 = n1->children;
+			zCOMPONENTS(theComponent);
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ID") == 0) theComponent.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "ComponentID") == 0) theComponent.ComponentID.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "SupplierComponentID") == 0) theComponent.SupplierComponentID.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Description") == 0) theComponent.Description.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "LotID") == 0) theComponent.LotID.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "PackageID") == 0) theComponent.PackageID.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "LotID") == 0) theComponent.LotID.assign( (const char *)n2->children->content);
+				if (strcmp((const char*)n2->name, "PhysicalStatus") == 0) {
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) theComponent.PhysicalState.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Name") == 0) theComponent.PhysicalState.Name.assign( (const char *)n3->children->content);
+						n3 =n3->next;
+					}
+				}
+				if (strcmp((const char*)n2->name, "FunctionalStatus") == 0) {
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) theComponent.FunctionalState.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Name") == 0) theComponent.FunctionalState.Name.assign( (const char *)n3->children->content);
+						n3 =n3->next;
+					}
+				}
+				n2 =n2->next;
+			}
+			compoList->push_back(theComponent);
+		}
+	}
+    SetResponse(AlpideTable::NoError, 0,0);
+	return(&theResponse);
+}
+
+
+
+AlpideTable::response * ComponentDB::GetListByType(int ProjectID, int ComponentTypeID, vector<componentShort> *Result)
+{
+	std::string sProject = std::to_string(ProjectID);
+	std::string sTypeId = std::to_string(ComponentTypeID);
+	return(readComponents(sProject, sTypeId, Result));
+}
+
+
+
+/* -----------------
+*    Read := Get the activity list for a component activity
+*
+*		In Param : ...
+*---------------- */
+AlpideTable::response * ComponentDB::GetComponentActivities(string ComponentID, vector<compActivity> *Result)
+{
+	componentLong theComponent;
+	AlpideTable::response * theRes = readComponent("-999", ComponentID, &theComponent);
+	if( theRes->ErrorCode != 0 )
+		return(theRes);
+	int ID = theComponent.ID;
+	return(readComponentActivities(ID, Result));
+}
+
+AlpideTable::response * ComponentDB::GetComponentActivities(int ID, vector<compActivity> *Result)
+{
+	return(readComponentActivities(ID, Result));
+}
+
+
+
+void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actList)
+{
+	xmlNode *n1,*n2,*n3;
+	n1 = ns;
+	compActivity theAct;
+	while(n1 != NULL) {
+		if (strcmp((const char*)n1->name, "ComponentActivityHistory") == 0) {
+			n2 = n1->children;
+			zCOMPACTIVITY(theAct);
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ActivityID") == 0) theAct.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "ActivityName") == 0) theAct.Name.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "ActivityStartDate") == 0) str2timeDate((const char*)(n2->children->content), &(theAct.StartDate));
+				else if(strcmp((const char*)n2->name, "ActivityEndDate") == 0) str2timeDate((const char*)(n2->children->content), &(theAct.EndDate));
+				if (strcmp((const char*)n2->name, "ActivityResult") == 0) {
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) theAct.Result.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Name") == 0) theAct.Result.Name.assign( (const char *)n3->children->content);
+						n3 =n3->next;
+					}
+				}
+				if (strcmp((const char*)n2->name, "ActivityStatus") == 0) {
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) theAct.Status.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Code") == 0) theAct.Status.Code.assign( (const char *)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Description") == 0) theAct.Status.Description.assign( (const char *)n3->children->content);
+						n3 =n3->next;
+					}
+				}
+				if (strcmp((const char*)n2->name, "ActivityType") == 0) {
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) theAct.Type = atoi( (const char*)n3->children->content);
+						n3 =n3->next;
+					}
+				}
+				n2 =n2->next;
+			}
+			actList->push_back(theAct);
+		}
+	}
+}
+
+
+AlpideTable::response * ComponentDB::readComponentActivities(int ID, vector<compActivity> *Result)
+{
+
+	string theUrl = theParentDB->GetQueryDomain() + "/ComponentActivityHistoryRead";
+	string theQuery = "ID="+std::to_string(ID);
+	char *stringresult;
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0)  {
+	    cerr << "Failed to execute the Query" << endl;
+	    SetResponse(AlpideTable::SyncQuery, 0,0);
+		return(&theResponse);
+	}
+	xmlDocPtr doc;
+	doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+	if (doc == NULL) {
+	    cerr << "Failed to parse document" << endl;
+	    SetResponse(AlpideTable::BadXML, 0,0);
+		return(&theResponse);
+	}
+	// Get the root element node
+	xmlNode *root_element = NULL;
+	root_element = xmlDocGetRootElement(doc);
+	if(root_element == NULL) {
+	    SetResponse(AlpideTable::BadXML, 0,0);
+		return(&theResponse);
+	}
+
+	xmlNode *n1 = root_element->children;
+	extractTheActivityList(n1, Result);
+
+    SetResponse(AlpideTable::NoError, 0,0);
+	return(&theResponse);
+}
+
+/* -----------------
 *    Print := Dumps a human readable form of the Component Type definition
 *
 *		In Param : the component type struct
@@ -1154,6 +1473,332 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityID)
 		xmlCleanupParser();
 	}
 	return(theStatusList);
+}
+
+
+/* ----------------------
+ * Get the list of activities ...
+ *
+ *
+----------------------- */
+std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProjectID, int aActivityID)
+{
+	vector<activityShort> *theActList = new vector<activityShort>;
+	char *stringresult;
+	string theUrl;
+	string theQuery;
+	activityShort act;
+
+	theUrl = theParentDB->GetQueryDomain() + "/ActivityRead";
+	theQuery = "projectID="+std::to_string(aProjectID) + "activityTypeID="+std::to_string(aActivityID);
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+		return(theActList);
+	} else {
+		xmlDocPtr doc;
+		xmlNode *nod;
+		if(_getTheRootElementChildren(stringresult, &doc, &nod)) {
+			while (nod != NULL) {
+				if(strcmp((const char*)nod->name, "Activity") == 0) {
+					xmlNode *n1 = nod->children;
+					zACTIVITYSHORT(act);
+					while(n1 != NULL) {
+						if(strcmp((const char*)n1->name, "ID") == 0) act.ID = atoi( (const char*)(n1->children->content)) ;
+						else if (strcmp((const char*)n1->name, "Name") == 0) act.Name = (const char*)(n1->children->content);
+						else if (strcmp((const char*)n1->name, "StartDate") == 0) str2timeDate((const char*)(n1->children->content), &act.StartDate);
+						else if (strcmp((const char*)n1->name, "EndDate") == 0) str2timeDate((const char*)(n1->children->content), &act.EndDate);
+						if(strcmp((const char*)n1->name, "ActivityType") == 0) {
+							xmlNode *n2 = n1->children;
+							while(n2 != NULL) {
+								if(strcmp((const char*)n2->name, "ID") == 0) act.Type.ID = atoi( (const char*)(n2->children->content)) ;
+								else if (strcmp((const char*)n2->name, "Name") == 0) act.Type.Name = (const char*)(n2->children->content);
+								else if (strcmp((const char*)n2->name, "Description") == 0) act.Type.Description = (const char*)(n2->children->content);
+								n2 = n2->next;
+							}
+						}
+						if(strcmp((const char*)n1->name, "ActivityStatus") == 0) {
+							xmlNode *n2 = n1->children;
+							while(n2 != NULL) {
+								if(strcmp((const char*)n2->name, "ID") == 0) act.Status.ID = atoi( (const char*)(n2->children->content)) ;
+								else if (strcmp((const char*)n2->name, "Code") == 0) act.Status.Code = (const char*)(n2->children->content);
+								else if (strcmp((const char*)n2->name, "Description") == 0) act.Status.Description = (const char*)(n2->children->content);
+								n2 = n2->next;
+							}
+						}
+						n1 = n1->next;
+					}
+					theActList->push_back(act);
+				}
+				nod = nod->next;
+			}
+			SetResponse(AlpideTable::NoError, 0,0);
+		}
+		free(stringresult);
+		xmlFreeDoc(doc);       // free document
+		xmlCleanupParser();
+	}
+	return(theActList);
+}
+
+
+
+
+/* -----------------
+*    Read := Get an activity
+*
+*		In Param : ...
+*		returns : a response struct that contains the error code
+*---------------- */
+void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act)
+{
+	xmlNode *n1,*n2,*n3, *n4,*n5;
+	n1 = ns;
+	while(n1 != NULL) {
+		if(strcmp((const char*)n1->name, "ID") == 0) act->ID = atoi( (const char*)n1->children->content);
+		else if (strcmp((const char*)n1->name, "Name") == 0) act->Name.assign( (const char *)n1->children->content);
+		else if (strcmp((const char*)n1->name, "LotID") == 0) act->LotID.assign( (const char *)n1->children->content);
+		else if (strcmp((const char*)n1->name, "StartDate") == 0) str2timeDate((const char*)(n1->children->content), &act->StartDate);
+		else if (strcmp((const char*)n1->name, "EndDate") == 0) str2timeDate((const char*)(n1->children->content), &act->EndDate);
+		else if (strcmp((const char*)n1->name, "ActivityResult") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ID") == 0) act->Result.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Name") == 0) act->Result.Name.assign( (const char *)n2->children->content);
+				n2 =n2->next;
+			}
+		}
+		else if (strcmp((const char*)n1->name, "ActivityType") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ID") == 0) act->Type.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Name") == 0) act->Type.Name.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Description") == 0) act->Type.Description.assign( (const char *)n2->children->content);
+				n2 =n2->next;
+			}
+		}
+		else if (strcmp((const char*)n1->name, "ActivityStatus") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ID") == 0) act->Status.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Code") == 0) act->Status.Code.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Description") == 0) act->Status.Description.assign( (const char *)n2->children->content);
+				n2 =n2->next;
+			}
+		}
+		else if (strcmp((const char*)n1->name, "ActivityLocation") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ID") == 0) act->Location.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Name") == 0) act->Location.Name.assign( (const char *)n2->children->content);
+				n2 =n2->next;
+			}
+		}
+		else if (strcmp((const char*)n1->name, "Components") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if (strcmp((const char*)n2->name, "ActivityComponent") == 0) {
+					actComponent com;
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) com.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Conformity") == 0) com.Conformity = atoi( (const char*)n3->children->content);
+						else if (strcmp((const char*)n3->name, "ActivityTypeComponentType") == 0) {
+							n4 = n3->children;
+							while(n4 != NULL) {
+								if(strcmp((const char*)n4->name, "ID") == 0) com.ActivityComponentType.ID = atoi( (const char*)n4->children->content);
+								else if(strcmp((const char*)n4->name, "Quantity") == 0) com.ActivityComponentType.Quantity = atoi( (const char*)n4->children->content);
+								else if(strcmp((const char*)n4->name, "Direction") == 0) com.ActivityComponentType.Direction.assign( (const char*)n4->children->content);
+								n4 =n4->next;
+							}
+						}
+						else if (strcmp((const char*)n3->name, "Component") == 0) {
+							n4 = n3->children;
+							while(n4 != NULL) {
+								if(strcmp((const char*)n4->name, "ID") == 0) com.Component.ID = atoi( (const char*)n4->children->content);
+								else if(strcmp((const char*)n4->name, "ComponentID") == 0) com.Component.ComponentID.assign( (const char*)n4->children->content);
+								else if (strcmp((const char*)n4->name, "ComponentType") == 0) {
+									n5 = n4->children;
+									while(n5 != NULL) {
+										if(strcmp((const char*)n5->name, "ID") == 0) com.Component.Type.ID = atoi( (const char*)n5->children->content);
+										else if(strcmp((const char*)n5->name, "Name") == 0) com.Component.Type.Name.assign( (const char*)n5->children->content);
+										n5 =n5->next;
+									}
+								}
+								n4 =n4->next;
+							}
+						}
+						else if (strcmp((const char*)n3->name, "PhysicalStatus") == 0) {
+							n4 = n3->children;
+							while(n4 != NULL) {
+								if(strcmp((const char*)n4->name, "ID") == 0) com.PhysicalStatus.ID = atoi( (const char*)n4->children->content);
+								else if(strcmp((const char*)n4->name, "Name") == 0) com.PhysicalStatus.Name.assign( (const char*)n4->children->content);
+								n4 =n4->next;
+							}
+						}
+						else if (strcmp((const char*)n3->name, "FunctionalStatus") == 0) {
+							n4 = n3->children;
+							while(n4 != NULL) {
+								if(strcmp((const char*)n4->name, "ID") == 0) com.FunctionalStatus.ID = atoi( (const char*)n4->children->content);
+								else if(strcmp((const char*)n4->name, "Name") == 0) com.FunctionalStatus.Name.assign( (const char*)n4->children->content);
+								n4 =n4->next;
+							}
+						}
+						n3 = n3->next;
+					}
+					act->Components.push_back(com);
+					zACTCOMPONENT(com);
+				}
+				n2 =n2->next;
+			}
+		}
+		else if (strcmp((const char*)n1->name, "Parameters") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if (strcmp((const char*)n2->name, "ActivityParameter") == 0) {
+					actParameter par;
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) par.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Value") == 0) par.Value = atof( (const char*)n3->children->content);
+						else if (strcmp((const char*)n3->name, "ActivityTypeParameter") == 0) {
+							n4 = n3->children;
+							while(n4 != NULL) {
+								if(strcmp((const char*)n4->name, "ID") == 0) par.Type.ID = atoi( (const char*)n4->children->content);
+								else if (strcmp((const char*)n4->name, "Parameter") == 0) {
+									n5 = n4->children;
+									while(n5 != NULL) {
+										if(strcmp((const char*)n5->name, "ID") == 0) par.Type.Parameter.ID = atoi( (const char*)n5->children->content);
+										else if(strcmp((const char*)n5->name, "Description") == 0) par.Type.Parameter.Description.assign( (const char*)n5->children->content);
+										else if(strcmp((const char*)n5->name, "Name") == 0) par.Type.Parameter.Name.assign( (const char*)n5->children->content);
+										n5 = n5->next;
+									}
+								}
+								n4 = n4->next;
+							}
+						}
+						n3 = n3->next;
+					}
+					act->Parameters.push_back(par);
+					zACTPARAMETER(par);
+				}
+				n2 = n2->next;
+			}
+		}
+		else if (strcmp((const char*)n1->name, "Attachments") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if (strcmp((const char*)n2->name, "ActivityAttachment") == 0) {
+					actAttachment att;
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) att.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "FileName") == 0) att.FileName.assign( (const char*)n3->children->content);
+						else if (strcmp((const char*)n3->name, "AttachmentCatagory") == 0) {
+							n4 = n3->children;
+							while(n4 != NULL) {
+								if(strcmp((const char*)n4->name, "ID") == 0) att.Type.ID = atoi( (const char*)n4->children->content);
+								else if(strcmp((const char*)n4->name, "Category") == 0) att.Type.Category.assign( (const char*)n4->children->content);
+								else if(strcmp((const char*)n4->name, "Description") == 0) att.Type.Description.assign( (const char*)n4->children->content);
+								n4 = n4->next;
+							}
+						}
+						n3 = n3->next;
+					}
+					act->Attachments.push_back(att);
+					zACTATTACHMENT(att);
+				}
+				n2 = n2->next;
+			}
+		}
+		else if (strcmp((const char*)n1->name, "Members") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if (strcmp((const char*)n2->name, "ActivityMember") == 0) {
+					actMember mem;
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) mem.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Leader") == 0) mem.Leader = atoi( (const char*)n3->children->content);
+						else if (strcmp((const char*)n3->name, "Member") == 0) {
+							n4 = n3->children;
+							while(n4 != NULL) {
+								if(strcmp((const char*)n4->name, "ID") == 0) mem.Member.ID = atoi( (const char*)n4->children->content);
+								else if(strcmp((const char*)n4->name, "PersonID") == 0) mem.Member.PersonID = atoi( (const char*)n4->children->content);
+								else if(strcmp((const char*)n4->name, "FullName") == 0) mem.Member.FullName.assign( (const char*)n4->children->content);
+								n4 = n4->next;
+							}
+						}
+						n3 = n3->next;
+					}
+					act->Members.push_back(mem);
+					zACTMEMBER(mem);
+				}
+				n2 = n2->next;
+			}
+		}
+		else if (strcmp((const char*)n1->name, "Uris") == 0) {
+			n2 = n1->children;
+			while(n2 != NULL) {
+				if (strcmp((const char*)n2->name, "ActivityUri") == 0) {
+					actUri uri;
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) uri.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Path") == 0) uri.Path.assign( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Description") == 0) uri.Description.assign( (const char*)n3->children->content);
+						n3 = n3->next;
+					}
+					act->Uris.push_back(uri);
+					zACTURI(uri);
+				}
+				n2 = n2->next;
+			}
+		}
+		n1 = n1->next;
+	}
+}
+
+
+AlpideTable::response * ActivityDB::Read(int ID, activityLong *Result)
+{
+	std::string sID = std::to_string(ID);
+	return(readActivity(sID, Result));
+}
+
+
+AlpideTable::response * ActivityDB::readActivity(string ID, activityLong *Result)
+{
+
+	string theUrl = theParentDB->GetQueryDomain() + "/ActivityReadOne";
+	string theQuery = "ID="+ID;
+	char *stringresult;
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0)  {
+	    cerr << "Failed to execute the Query" << endl;
+	    SetResponse(AlpideTable::SyncQuery, 0,0);
+		return(&theResponse);
+	}
+	xmlDocPtr doc;
+	doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+	if (doc == NULL) {
+	    cerr << "Failed to parse document" << endl;
+	    SetResponse(AlpideTable::BadXML, 0,0);
+		return(&theResponse);
+	}
+	// Get the root element node
+	xmlNode *root_element = NULL;
+	root_element = xmlDocGetRootElement(doc);
+	if(root_element == NULL) {
+	    SetResponse(AlpideTable::BadXML, 0,0);
+		return(&theResponse);
+	}
+
+	xmlNode *n1 = root_element->children;
+	extractTheActivity(n1, Result);
+
+    SetResponse(AlpideTable::NoError, 0,0);
+	return(&theResponse);
 }
 
 
