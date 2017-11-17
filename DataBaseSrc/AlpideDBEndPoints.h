@@ -192,7 +192,7 @@ public:
 	};
 	#define zCOMPCOMPOSITION(a) a.ID = 0; a.Position = 0; zCOMPCOMPONENT(a.Component)
 
-	struct component {
+	struct componentLong {
 		int ID;
 		string ComponentID;
 		string SupplierComponentID;
@@ -204,7 +204,20 @@ public:
 		statusfunctional FunctionalState;
 		vector<compComposition>  Composition;
 	};
-	#define zCOMPONENT(a) a.ID=0; a.ComponentID=""; a.SupplierComponentID=""; a.Description=""; a.LotID=""; a.PackageID=""; zCOMPTYPE(a.Type); zSTATUSPHYSICAL(a.PhysicalState); zSTATUSFUNCTIONAL(a.FunctionalState); a.Composition.clear()
+	#define zCOMPONENTL(a) a.ID=0; a.ComponentID=""; a.SupplierComponentID=""; a.Description=""; a.LotID=""; a.PackageID=""; zCOMPTYPE(a.Type); zSTATUSPHYSICAL(a.PhysicalState); zSTATUSFUNCTIONAL(a.FunctionalState); a.Composition.clear()
+
+	struct componentShort {
+		int ID;
+		string ComponentID;
+		string SupplierComponentID;
+		string Description;
+		string LotID;
+		string PackageID;
+		statusphysical PhysicalState;
+		statusfunctional FunctionalState;
+	};
+	#define zCOMPONENTS(a) a.ID=0; a.ComponentID=""; a.SupplierComponentID=""; a.Description=""; a.LotID=""; a.PackageID=""; zSTATUSPHYSICAL(a.PhysicalState); zSTATUSFUNCTIONAL(a.FunctionalState)
+
 
 	struct compActResult {
 		int ID;
@@ -241,18 +254,20 @@ public:
     AlpideTable::response *Create(string ComponentTypeID, string ComponentID, string SupplyCompID,
 			string Description, string lotID, string PackaageID, string userID );
 
-    AlpideTable::response * Read(int ID, component *Result);
-    AlpideTable::response * Read(string ComponentID, component *Result);
+    AlpideTable::response * Read(int ID, componentLong *Result);
+    AlpideTable::response * Read(string ComponentID, componentLong *Result);
 
     AlpideTable::response * GetComponentActivities(string ComponentID, vector<compActivity> *Result);
     AlpideTable::response * GetComponentActivities(int ID, vector<compActivity> *Result);
 
+    AlpideTable::response * GetListByType(int ProjectID, int ComponentTypeID, vector<componentShort> *Result);
 	string Print(componentType *co);
 
 private:
 	void extractTheComponentType(xmlNode *n1, componentType *pro);
-	AlpideTable::response * readComponent(string ID, string ComponentID, component *Result);
-	void extractTheComponent(xmlNode *ns, component *pro);
+	AlpideTable::response * readComponent(string ID, string ComponentID, componentLong *Result);
+	AlpideTable::response * readComponents(std::string ProjectId, std::string ComponentTypeID, vector<componentShort> *compoList);
+	void extractTheComponent(xmlNode *ns, componentLong *pro);
 	AlpideTable::response * readComponentActivities(int ID, vector<compActivity> *Result);
 	void extractTheActivityList(xmlNode *ns, vector<compActivity> *actList);
 

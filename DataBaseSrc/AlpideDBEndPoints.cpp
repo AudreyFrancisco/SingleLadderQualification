@@ -580,7 +580,7 @@ AlpideTable::response * ComponentDB::Create(string ComponentTypeID, string Compo
  *		Out Param : a Reference to a Component struct that will contains the values parsed
  *
  * ---------------- */
-void ComponentDB::extractTheComponent(xmlNode *ns, component *pro)
+void ComponentDB::extractTheComponent(xmlNode *ns, componentLong *pro)
 {
 	xmlNode *n1,*n2,*n3, *n4,*n5;
 	n1 = ns;
@@ -660,18 +660,18 @@ void ComponentDB::extractTheComponent(xmlNode *ns, component *pro)
 *		In Param : ... all the items describing ...
 *		returns : a response struct that contains the error code
 *---------------- */
-AlpideTable::response * ComponentDB::Read(int ID, component *Result)
+AlpideTable::response * ComponentDB::Read(int ID, componentLong *Result)
 {
 	std::string sID = std::to_string(ID);
 	return(readComponent(sID, "", Result));
 }
 
-AlpideTable::response * ComponentDB::Read(string ComponentID, component *Result)
+AlpideTable::response * ComponentDB::Read(string ComponentID, componentLong *Result)
 {
 	return(readComponent("-999", ComponentID, Result));
 }
 
-AlpideTable::response * ComponentDB::readComponent(string ID, string ComponentID, component *Result)
+AlpideTable::response * ComponentDB::readComponent(string ID, string ComponentID, componentLong *Result)
 {
 
 	string theUrl = theParentDB->GetQueryDomain() + "/ComponentReadOne";
@@ -705,6 +705,90 @@ AlpideTable::response * ComponentDB::readComponent(string ID, string ComponentID
 	return(&theResponse);
 }
 
+
+/* -----------------
+*    Read := Get a List of components
+*
+*		In Param : ...the componet type id...
+*		returns : a response struct that contains the error code
+*---------------- */
+AlpideTable::response * ComponentDB::readComponents(std::string ProjectId, std::string ComponentTypeID, vector<componentShort> *compoList)
+{
+	string theUrl = theParentDB->GetQueryDomain() + "/ComponentRead";
+	string theQuery = "projectID="+ProjectId+"&componentTypeID="+ComponentTypeID;
+	char *stringresult;
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0)  {
+	    cerr << "Failed to execute the Query" << endl;
+	    SetResponse(AlpideTable::SyncQuery, 0,0);
+		return(&theResponse);
+	}
+	xmlDocPtr doc;
+	doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
+	if (doc == NULL) {
+	    cerr << "Failed to parse document" << endl;
+	    SetResponse(AlpideTable::BadXML, 0,0);
+		return(&theResponse);
+	}
+	// Get the root element node
+	xmlNode *root_element = NULL;
+	root_element = xmlDocGetRootElement(doc);
+	if(root_element == NULL) {
+	    SetResponse(AlpideTable::BadXML, 0,0);
+		return(&theResponse);
+	}
+
+	xmlNode *n1,*n2,*n3;
+	n1 = root_element->children;
+	componentShort theComponent;
+	while(n1 != NULL) {
+		if (strcmp((const char*)n1->name, "Component") == 0) {
+			n2 = n1->children;
+			zCOMPONENTS(theComponent);
+			while(n2 != NULL) {
+				if(strcmp((const char*)n2->name, "ID") == 0) theComponent.ID = atoi( (const char*)n2->children->content);
+				else if(strcmp((const char*)n2->name, "ComponentID") == 0) theComponent.ComponentID.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "SupplierComponentID") == 0) theComponent.SupplierComponentID.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "Description") == 0) theComponent.Description.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "LotID") == 0) theComponent.LotID.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "PackageID") == 0) theComponent.PackageID.assign( (const char *)n2->children->content);
+				else if(strcmp((const char*)n2->name, "LotID") == 0) theComponent.LotID.assign( (const char *)n2->children->content);
+				if (strcmp((const char*)n2->name, "PhysicalStatus") == 0) {
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) theComponent.PhysicalState.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Name") == 0) theComponent.PhysicalState.Name.assign( (const char *)n3->children->content);
+						n3 =n3->next;
+					}
+				}
+				if (strcmp((const char*)n2->name, "FunctionalStatus") == 0) {
+					n3 = n2->children;
+					while(n3 != NULL) {
+						if(strcmp((const char*)n3->name, "ID") == 0) theComponent.FunctionalState.ID = atoi( (const char*)n3->children->content);
+						else if(strcmp((const char*)n3->name, "Name") == 0) theComponent.FunctionalState.Name.assign( (const char *)n3->children->content);
+						n3 =n3->next;
+					}
+				}
+				n2 =n2->next;
+			}
+			compoList->push_back(theComponent);
+		}
+	}
+    SetResponse(AlpideTable::NoError, 0,0);
+	return(&theResponse);
+}
+
+
+
+AlpideTable::response * ComponentDB::GetListByType(int ProjectID, int ComponentTypeID, vector<componentShort> *Result)
+{
+	std::string sProject = std::to_string(ProjectID);
+	std::string sTypeId = std::to_string(ComponentTypeID);
+	return(readComponents(sProject, sTypeId, Result));
+}
+
+
+
 /* -----------------
 *    Read := Get the activity list for a component activity
 *
@@ -712,7 +796,7 @@ AlpideTable::response * ComponentDB::readComponent(string ID, string ComponentID
 *---------------- */
 AlpideTable::response * ComponentDB::GetComponentActivities(string ComponentID, vector<compActivity> *Result)
 {
-	component theComponent;
+	componentLong theComponent;
 	AlpideTable::response * theRes = readComponent("-999", ComponentID, &theComponent);
 	if( theRes->ErrorCode != 0 )
 		return(theRes);
@@ -806,16 +890,6 @@ AlpideTable::response * ComponentDB::readComponentActivities(int ID, vector<comp
     SetResponse(AlpideTable::NoError, 0,0);
 	return(&theResponse);
 }
-
-
-
-
-
-
-
-
-
-
 
 /* -----------------
 *    Print := Dumps a human readable form of the Component Type definition
