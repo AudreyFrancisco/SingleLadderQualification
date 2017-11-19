@@ -16,6 +16,21 @@ int DbGetActivityTypeId (AlpideDB *db, string name)
 }
 
 
+// returns the ID of the previous activity
+// parameter name is the name of the current activity
+// if the previous activity acts on the children, onChildren is set true
+int  DbGetPrevActivityTypeId (AlpideDB *db, string name, bool &onChildren)
+{
+  // example:
+  if (name.compare ("OB HIC Endurance Test") == 0) {
+    onChildren = false;
+    return DbGetActivityTypeId(db, "OB HIC Qualification Test");
+  }
+  onChildren = false;
+  return -1;
+}
+
+
 int DbGetMemberId (AlpideDB *db, string name)
 {
   MemberDB                              *memberDB = new MemberDB (db);
@@ -87,6 +102,7 @@ int  DbGetComponentTypeId  (AlpideDB *db, int projectId, string name)
 }
 
 
+//TODO: complete list of tests
 int DbGetComponentId (AlpideDB *db, int projectId, int typeId, string name)
 {
   ComponentDB *componentDB = new ComponentDB (db);
@@ -102,6 +118,23 @@ int DbGetComponentId (AlpideDB *db, int projectId, int typeId, string name)
 
   return -1;
 }  
+
+
+// TODO: check; need also position?
+int DbGetListOfChildren     (AlpideDB *db, int Id, std::vector<int> &children)
+{
+  ComponentDB               *componentDB = new ComponentDB (db);
+  ComponentDB::componentLong component;
+
+  children    .clear();
+  componentDB->Read(Id, &component);
+
+  for (int i = 0; i < component.Composition.size(); i++) {
+    ComponentDB::compComposition child = component.Composition.at(i);
+    children.push_back(child.Component.ID);
+  }
+  return children.size();
+}
 
 
 bool DbAddParameter (AlpideDB *db, ActivityDB::activity &activity, string name, float value) 
