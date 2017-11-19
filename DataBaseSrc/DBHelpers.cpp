@@ -137,6 +137,23 @@ int DbGetListOfChildren     (AlpideDB *db, int Id, std::vector<int> &children)
 }
 
 
+// looks for a component of type activityTypeId in the history of component compId
+int DbGetComponentActivity  (AlpideDB *db, int compId, int activityTypeId)
+{
+  ComponentDB *componentDB = new ComponentDB (db);
+  std::vector <ComponentDB::compActivity> activities;
+  
+  componentDB->GetComponentActivities(compId, &activities);
+
+  for (unsigned int i = 0; i < activities.size(); i++) {
+    if (activities.at(i).Type == activityTypeId) {
+      return activities.at(i).ID;
+    }
+  }
+  return -1;
+}
+
+
 bool DbAddParameter (AlpideDB *db, ActivityDB::activity &activity, string name, float value) 
 {
   ActivityDB::parameter parameter;
