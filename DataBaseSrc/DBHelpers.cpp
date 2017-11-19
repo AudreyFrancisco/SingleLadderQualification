@@ -129,7 +129,7 @@ int DbGetListOfChildren     (AlpideDB *db, int Id, std::vector<int> &children)
   children    .clear();
   componentDB->Read(Id, &component);
 
-  for (int i = 0; i < component.Composition.size(); i++) {
+  for (unsigned int i = 0; i < component.Composition.size(); i++) {
     ComponentDB::compComposition child = component.Composition.at(i);
     children.push_back(child.Component.ID);
   }
