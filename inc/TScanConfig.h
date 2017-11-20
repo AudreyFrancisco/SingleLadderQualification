@@ -8,6 +8,10 @@
 #include <string>
 #include <string.h>
 
+
+typedef enum {OBQualification, OBEndurance, OBReception, OBHalfStaveOL, OBHalfStaveML, 
+              IBQualification, IBEndurance, IBStave} TTestType;
+
 namespace ScanConfig {
   const int NINJ           = 50;        // number of injections in digital/threshold scans
   const int NTRIG          = 10000;   // number of triggers for noise occupancy scans
@@ -162,6 +166,7 @@ class TScanConfig {
   float  m_voltageScale;
   float  m_backBias;
   bool   m_useDataPath;  // for compatibility with standalone scans, set true for GUI
+  TTestType m_testType;
  protected:
  public:
   TScanConfig ();
@@ -198,6 +203,8 @@ class TScanConfig {
   void  SetVcasnRange    (int start, int stop) {m_vcasnStart = start; m_vcasnStop = stop;};
   void  SetIsMasked      (bool masked)         {m_isMasked = masked;};
   void  SetUseDataPath   (bool usePath)        {m_useDataPath = usePath;};
+  void  SetTestType      (TTestType type)      {m_testType = type;};
+  TTestType GetTestType  ()                    {return m_testType;};
 };
 
 #endif
