@@ -105,10 +105,18 @@ AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Ses
 	}
 	xmlNode *n1 = root_element->children;
 	while (n1 != NULL) {
-		if( MATCHNODE(n1, "ErrorCode") ) { theResponse.ErrorCode = atoi( (const char*)n1->children->content);
-		} else if(MATCHNODE(n1, "ErrorMessage")) { theResponse.ErrorMessage = (const char*)n1->children->content;
-		} else if(MATCHNODE(n1, "ID")) { theResponse.ID = atoi( (const char*)n1->children->content);
-		} else if(MATCHNODE(n1, "text")) { // we need to skip this
+
+		if(strcmp((const char*)n1->name, "ErrorCode") == 0) {
+			if(n1->children != NULL)
+				theResponse.ErrorCode = atoi( (const char*)n1->children->content);
+		} else if(strcmp((const char*)n1->name, "ErrorMessage") == 0) {
+			if(n1->children != NULL)
+				theResponse.ErrorMessage = (const char*)n1->children->content;
+		} else if(strcmp((const char*)n1->name, "ID") == 0) {
+			if(n1->children != NULL)
+				theResponse.ID = atoi( (const char*)n1->children->content);
+		} else if(strcmp((const char*)n1->name, "text") == 0) { // we need to skip this
+			// do nothing
 		} else  { // we reach the parent of results
 			bGoChildren = true;
 		}
@@ -118,6 +126,7 @@ AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Ses
 		} else {
 			n1 = n1->next;
 		}
+
 	}
 	theResponse.Session = Session;
 	return(&theResponse);
