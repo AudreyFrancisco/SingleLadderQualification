@@ -191,23 +191,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //  std::cout<<final<<" FRFDSFVDV"<<std::endl;
     //s std::cout<<"in integer "<<i_dec<<std::endl;
 
-  /*  time_t t = time(0);   // get time now
-    tm * now = localtime( & t );
 
-    std::stringstream currentdate;
-    //currentdate<<std::setprecision(8);
-    //  currentdate<<now->tm_mday
-    //          << 1 + now->tm_mon
-    //        << 1900.0 + now->tm_year;
-    currentdate <<now->tm_hour
-               <<now->tm_min
-              <<now->tm_sec;
-    std::string::size_type sz;
-    int i_dec= std::stoi (currentdate.str(),&sz);
-    // std::string name;
-    // name="Number of working chips in a HIC";
-    std::cout<<i_dec<<std::endl;
-    */
+
 
 
  connect(ui->testib,SIGNAL(clicked()),this,SLOT(IBBasicTest()));
@@ -2170,19 +2155,17 @@ void MainWindow::attachtodatabase(){
 
     //time parameter
     //  dbtime.ActivityParameter=381;
-    //  dbtime.User=idofoperator;
+    //  dbtime.User=idofoperato
 
     time_t t = time(0);   // get time now
     tm * now = localtime( & t );
 
     std::stringstream currentdate;
-    //currentdate<<std::setprecision(8);
-    //  currentdate<<now->tm_mday
-    //          << 1 + now->tm_mon
-    //        << 1900.0 + now->tm_year;
-    currentdate <<now->tm_hour
-               <<now->tm_min
-              <<now->tm_sec;
+    int hours=now->tm_hour;
+    int min=now->tm_min;
+    int sec=now->tm_sec;
+    int time= hours*10000+min*100+sec;
+    currentdate<<time;
     std::string::size_type sz;
     int i_dec= std::stoi (currentdate.str(),&sz);
     // std::string name;
@@ -2228,8 +2211,8 @@ void MainWindow::attachtodatabase(){
 
     cout << myactivity->DumpResponse() << endl;
 
- //   delete myDB;
-  //  delete myactivity;
+    delete myDB;
+    delete myactivity;
 
 }}}
 
