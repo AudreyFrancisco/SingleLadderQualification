@@ -359,11 +359,10 @@ int main(int argc, char** argv) {
     sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
     WriteDataToFile (fName, true);
     sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
-
     WriteScanConfig (fName, fChips.at(0), myDAQBoard);
-    myDAQBoard->PowerOff();
 
     if (myDAQBoard) {
+      myDAQBoard->PowerOff();
       delete myDAQBoard;
     }
   }
