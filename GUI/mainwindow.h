@@ -171,6 +171,8 @@ class MainWindow : public QMainWindow
     void IBBasicTest();
     void fillingibvectors();
 
+    void fillingendurancevectors();
+
     void continuescans(){execution=true;progresswindow->close();delete progresswindow;}
     void stopscans(){execution=false;progresswindow->close();delete progresswindow;}
     // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);

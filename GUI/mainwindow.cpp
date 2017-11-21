@@ -215,7 +215,7 @@ void MainWindow::open(){
     // settingswindow->SaveSettings(operatorname,hicidnumber,counter);
     //if (counter==0) {return;}
     QString fileName;
-    if(numberofscan==1||numberofscan==5 || numberofscan==6){
+    if(numberofscan==1||numberofscan==5 || numberofscan==6 || numberofscan==3){
         fileName="Config.cfg";}
     else if (numberofscan==2){
         fileName="Configib.cfg";
@@ -343,7 +343,7 @@ void MainWindow::open(){
 
         if(device==8){
             ui->endurancebox->show();
-            // exploreendurancebox();
+            exploreendurancebox();
         }
     }
     //TestSelection *saveinput;
@@ -1383,9 +1383,9 @@ void MainWindow::connectcombo(int value){
         ui->testtypeselected->clear();
         //  ui->start_test->show();
         ui->testtypeselected->setText("OB Endurance Test");
-        // findidoftheactivitytype("OB Endurance Test",idofactivitytype);
-        //locationcombo();
-        //settingswindow->connectlocationcombo(locdetails);
+        findidoftheactivitytype("OB Endurance Test",idofactivitytype);
+        locationcombo();
+        settingswindow->connectlocationcombo(locdetails);
         settingswindow->adjustendurance();
         numberofscan=3;
 
@@ -1403,7 +1403,7 @@ void MainWindow::connectcombo(int value){
         break;}
 
     case 5:
-    {
+    {   settingswindow->hideendurance();
         ui->testtypeselected->clear();
         // ui->start_test->show();
 
@@ -1491,10 +1491,12 @@ void MainWindow::applytests(){
     qApp->processEvents();
     if (numberofscan==1||numberofscan==2){fillingOBvectors();}
     if (numberofscan==5){fillingreceptionscans();}
+    if (numberofscan==3){fillingendurancevectors();}
     std::cout<<"the size of the scan vector is: "<<fScanVector.size()<<std::endl;
     performtests(fScanVector,fAnalysisVector);
     //  colorscans();
-    connectscandetails();
+    if(numberofscan!=3){
+    connectscandetails();}
     // emit stopTimer();
 }
 
@@ -2626,3 +2628,48 @@ void MainWindow::fillingibvectors(){
 
 
 }
+
+void MainWindow::fillingendurancevectors(){
+
+    TFifoResult    *fiforesult=new TFifoResult();
+    TDigitalResult *digitalresult=new TDigitalResult();
+    TSCurveResult *thresult=new TSCurveResult();
+
+    TThresholdScan*thresholdscan=new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TSCurveAnalysis *thanalysis= new TSCurveAnalysis(&fHistoQue,thresholdscan,fConfig->GetScanConfig(), fHICs, &fMutex,thresult);
+    TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesult);
+
+    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresult);
+
+
+
+    fScanVector.push_back(fifoscan);
+    fScanVector.push_back(digitalscan);
+     fScanVector.push_back(thresholdscan);
+
+    // qDebug()<<"dimitra"<<endl;
+
+    fAnalysisVector.push_back(fifoanalysis);
+    fAnalysisVector.push_back(digitalanalysis);
+    fAnalysisVector.push_back(thanalysis);
+
+
+
+    fresultVector.push_back(fiforesult);
+    fresultVector.push_back(digitalresult);
+     fresultVector.push_back(thresult);
+
+    scanbuttons.push_back(ui->test1);
+    scanbuttons.push_back(ui->test2);
+    scanbuttons.push_back(ui->test3);
+
+
+    scanstatuslabels.push_back(ui->powers);
+    scanstatuslabels.push_back(ui->fifos);
+    scanstatuslabels.push_back(ui->fifops);
+
+    WriteTests();
+}
+
