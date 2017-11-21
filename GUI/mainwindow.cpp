@@ -192,6 +192,12 @@ MainWindow::MainWindow(QWidget *parent) :
     //s std::cout<<"in integer "<<i_dec<<std::endl;
 
 
+
+
+
+ connect(ui->testib,SIGNAL(clicked()),this,SLOT(IBBasicTest()));
+ ui->testib->hide();
+
 }
 
 MainWindow::~MainWindow()
@@ -209,7 +215,7 @@ void MainWindow::open(){
     // settingswindow->SaveSettings(operatorname,hicidnumber,counter);
     //if (counter==0) {return;}
     QString fileName;
-    if(numberofscan==1||numberofscan==5 || numberofscan==6){
+    if(numberofscan==1||numberofscan==5 || numberofscan==6 || numberofscan==3){
         fileName="Config.cfg";}
     else if (numberofscan==2){
         fileName="Configib.cfg";
@@ -267,6 +273,7 @@ void MainWindow::open(){
 
         }
         initSetup(fConfig, &fBoards, &fBoardType, &fChips,fileName.toStdString().c_str(), &fHICs,ar);
+        fConfig->GetScanConfig()->SetUseDataPath(true);
         pb=fHICs.at(0)->GetPowerBoard();
         pbconfig=pb->GetConfigurationHandler();
         pbnumberofmodule=fHICs.at(0)->GetPbMod();
@@ -336,7 +343,7 @@ void MainWindow::open(){
 
         if(device==8){
             ui->endurancebox->show();
-            // exploreendurancebox();
+            exploreendurancebox();
         }
     }
     //TestSelection *saveinput;
@@ -1376,9 +1383,9 @@ void MainWindow::connectcombo(int value){
         ui->testtypeselected->clear();
         //  ui->start_test->show();
         ui->testtypeselected->setText("OB Endurance Test");
-        // findidoftheactivitytype("OB Endurance Test",idofactivitytype);
-        //locationcombo();
-        //settingswindow->connectlocationcombo(locdetails);
+        findidoftheactivitytype("OB Endurance Test",idofactivitytype);
+        locationcombo();
+        settingswindow->connectlocationcombo(locdetails);
         settingswindow->adjustendurance();
         numberofscan=3;
 
@@ -1396,7 +1403,7 @@ void MainWindow::connectcombo(int value){
         break;}
 
     case 5:
-    {
+    {   settingswindow->hideendurance();
         ui->testtypeselected->clear();
         // ui->start_test->show();
 
@@ -1484,10 +1491,12 @@ void MainWindow::applytests(){
     qApp->processEvents();
     if (numberofscan==1||numberofscan==2){fillingOBvectors();}
     if (numberofscan==5){fillingreceptionscans();}
+    if (numberofscan==3){fillingendurancevectors();}
     std::cout<<"the size of the scan vector is: "<<fScanVector.size()<<std::endl;
     performtests(fScanVector,fAnalysisVector);
     //  colorscans();
-    connectscandetails();
+    if(numberofscan!=3){
+    connectscandetails();}
     // emit stopTimer();
 }
 
@@ -2148,19 +2157,17 @@ void MainWindow::attachtodatabase(){
 
     //time parameter
     //  dbtime.ActivityParameter=381;
-    //  dbtime.User=idofoperator;
+    //  dbtime.User=idofoperato
 
     time_t t = time(0);   // get time now
     tm * now = localtime( & t );
 
     std::stringstream currentdate;
-    //currentdate<<std::setprecision(8);
-    //  currentdate<<now->tm_mday
-    //          << 1 + now->tm_mon
-    //        << 1900.0 + now->tm_year;
-    currentdate <<now->tm_hour
-               <<now->tm_min
-              <<now->tm_sec;
+    int hours=now->tm_hour;
+    int min=now->tm_min;
+    int sec=now->tm_sec;
+    int time= hours*10000+min*100+sec;
+    currentdate<<time;
     std::string::size_type sz;
     int i_dec= std::stoi (currentdate.str(),&sz);
     // std::string name;
@@ -2170,7 +2177,7 @@ void MainWindow::attachtodatabase(){
     //int time= 10000*hours+100*minutes+sec;
     //  dbtime.Value=i_dec;
     //activ.Parameters.push_back(dbtime);
-
+   //DbGetComponentTypeId(myDB, idofactivitytype,"Outer Barrel HIC Module");
 
 
 
@@ -2206,8 +2213,8 @@ void MainWindow::attachtodatabase(){
 
     cout << myactivity->DumpResponse() << endl;
 
- //   delete myDB;
-  //  delete myactivity;
+    delete myDB;
+    delete myactivity;
 
 }}}
 
@@ -2529,3 +2536,140 @@ void MainWindow::makeDir(const char *aDir)
     }
   }
 }
+
+void MainWindow::IBBasicTest(){
+start_test();
+databasetype=true;
+settingswindow->close();
+numberofscan=1;
+hicidnumber="IB_HIC";
+open();
+fConfig->GetScanConfig()->SetUseDataPath(false);
+fillingibvectors();
+for (unsigned int i=0;i<fScanVector.size();i++){
+    try{
+
+        if (fScanVector.at(i)==0){
+
+            fAnalysisVector.at(i)->Initialize();
+
+            std::thread analysisThread(&TScanAnalysis::Run, fAnalysisVector[i]);
+
+            analysisThread.join();
+
+            fAnalysisVector.at(i)->Finalize();
+
+        }
+        else {
+
+            std::thread scanThread(&MainWindow::scanLoop,this,fScanVector[i]);
+
+            fAnalysisVector.at(i)->Initialize();
+
+
+            std::thread analysisThread(&TScanAnalysis::Run, fAnalysisVector[i]);
+
+
+            scanThread.join();
+
+
+
+            analysisThread.join();
+
+
+            fAnalysisVector.at(i)->Finalize();
+
+
+        }
+
+           }
+    catch(exception &ex){
+        std::cout<<ex.what()<<"is the thrown exception"<<std::endl;
+    }
+
+
+}
+std::cout<<"Test complete :D"<<std::endl;
+}
+
+void MainWindow::fillingibvectors(){
+
+    TFifoResult    *fiforesult=new TFifoResult();
+    TDigitalResult *digitalresult=new TDigitalResult();
+    TSCurveResult *thresholdres=new TSCurveResult();
+
+
+
+    TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesult);
+
+    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresult);
+
+
+    TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TSCurveAnalysis *sa=new TSCurveAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,thresholdres);
+
+
+    fScanVector.push_back(fifoscan);
+    fScanVector.push_back(digitalscan);
+    fScanVector.push_back(thresholdscan);
+
+
+    fAnalysisVector.push_back(fifoanalysis);
+    fAnalysisVector.push_back(digitalanalysis);
+    fAnalysisVector.push_back(sa);
+
+
+
+    fresultVector.push_back(fiforesult);
+    fresultVector.push_back(digitalresult);
+    fresultVector.push_back(thresholdres);
+
+
+}
+
+void MainWindow::fillingendurancevectors(){
+
+    TFifoResult    *fiforesult=new TFifoResult();
+    TDigitalResult *digitalresult=new TDigitalResult();
+    TSCurveResult *thresult=new TSCurveResult();
+
+    TThresholdScan*thresholdscan=new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TSCurveAnalysis *thanalysis= new TSCurveAnalysis(&fHistoQue,thresholdscan,fConfig->GetScanConfig(), fHICs, &fMutex,thresult);
+    TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesult);
+
+    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresult);
+
+
+
+    fScanVector.push_back(fifoscan);
+    fScanVector.push_back(digitalscan);
+     fScanVector.push_back(thresholdscan);
+
+    // qDebug()<<"dimitra"<<endl;
+
+    fAnalysisVector.push_back(fifoanalysis);
+    fAnalysisVector.push_back(digitalanalysis);
+    fAnalysisVector.push_back(thanalysis);
+
+
+
+    fresultVector.push_back(fiforesult);
+    fresultVector.push_back(digitalresult);
+     fresultVector.push_back(thresult);
+
+    scanbuttons.push_back(ui->test1);
+    scanbuttons.push_back(ui->test2);
+    scanbuttons.push_back(ui->test3);
+
+
+    scanstatuslabels.push_back(ui->powers);
+    scanstatuslabels.push_back(ui->fifos);
+    scanstatuslabels.push_back(ui->fifops);
+
+    WriteTests();
+}
+

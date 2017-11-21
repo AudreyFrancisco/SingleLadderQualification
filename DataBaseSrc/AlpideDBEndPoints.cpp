@@ -87,49 +87,40 @@ AlpideTable::~AlpideTable()
 
 AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Session)
 {
-	bool bGoChildren = false;
-//	cout << ">>--Returned string--->>" <<  ReturnedString << endl;
-	xmlDocPtr doc;
-	doc = xmlReadMemory(ReturnedString, strlen(ReturnedString), "noname.xml", NULL, 0); // parse the XML
-	if (doc == NULL) {
-	    cerr << "Failed to parse document" << endl;
-	    SetResponse(AlpideTable::BadXML, 0, Session);
-		return(&theResponse);
-	}
-	xmlNode *root_element = NULL;
-	root_element = xmlDocGetRootElement(doc);
-	if(root_element == NULL) {
-	    cerr << "Failed to parse document: No root element" << endl;
-	    SetResponse(AlpideTable::BadXML, 0, Session);
-		return(&theResponse);
-	}
-	xmlNode *n1 = root_element->children;
-	while (n1 != NULL) {
-
-		if(strcmp((const char*)n1->name, "ErrorCode") == 0) {
-			if(n1->children != NULL)
-				theResponse.ErrorCode = atoi( (const char*)n1->children->content);
-		} else if(strcmp((const char*)n1->name, "ErrorMessage") == 0) {
-			if(n1->children != NULL)
-				theResponse.ErrorMessage = (const char*)n1->children->content;
-		} else if(strcmp((const char*)n1->name, "ID") == 0) {
-			if(n1->children != NULL)
-				theResponse.ID = atoi( (const char*)n1->children->content);
-		} else if(strcmp((const char*)n1->name, "text") == 0) { // we need to skip this
-			// do nothing
-		} else  { // we reach the parent of results
-			bGoChildren = true;
-		}
-		if(bGoChildren) {
-			n1 = n1->children;
-			bGoChildren = false;
-		} else {
-			n1 = n1->next;
-		}
-
-	}
-	theResponse.Session = Session;
-	return(&theResponse);
+    bool bGoChildren = false;
+    xmlDocPtr doc;
+    doc = xmlReadMemory(ReturnedString, strlen(ReturnedString), "noname.xml", NULL, 0); // parse the XML
+    if (doc == NULL) {
+        cerr << "Failed to parse document" << endl;
+        SetResponse(AlpideTable::BadXML, 0, Session);
+        return(&theResponse);
+    }
+    xmlNode *root_element = NULL;
+    root_element = xmlDocGetRootElement(doc);
+    if(root_element == NULL) {
+        cerr << "Failed to parse document: No root element" << endl;
+        SetResponse(AlpideTable::BadXML, 0, Session);
+        return(&theResponse);
+    }
+    xmlNode *n1 = root_element->children;
+    while (n1 != NULL) {
+        if( MATCHNODE(n1, "ErrorCode") ) { theResponse.ErrorCode = atoi( (const char*)n1->children->content);
+        } else if(MATCHNODE(n1, "ErrorMessage")) { theResponse.ErrorMessage = (const char*)n1->children->content;
+        } else if(MATCHNODE(n1, "ID")) { theResponse.ID = atoi( (const char*)n1->children->content);
+        } else if(strcmp((const char*)n1->name, "text") == 0) { // we need to skip this empty node ?
+            // do nothing
+        } else  { // we reach the parent of results
+            bGoChildren = true; // go down one level
+        }
+        if(bGoChildren) {
+            n1 = n1->children;  // got the children
+            bGoChildren = false; // go for the brothers
+        } else {
+            n1 = n1->next;  // skip to the brother
+        }
+    }
+    theResponse.Session = Session;
+    return(&theResponse);
 }
 
 
