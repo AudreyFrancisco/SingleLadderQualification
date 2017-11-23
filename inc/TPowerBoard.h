@@ -114,7 +114,7 @@ public:
 	// Getters
 	float GetTemperature() { readMonitor(); return(fPBoard.Temp);};
 	float GetBiasVoltage() { readMonitor(); return(fPBoard.VBmon);};
-	float GetBiasCurrent() { readMonitor(); return(fPBoard.IBmon);};
+	float GetBiasCurrent();
 
 	float GetAnalogVoltage (int module) { readMonitor(); return(fPBoard.Modules[module].AVmon);};
 	float GetAnalogCurrent (int module);
@@ -126,6 +126,7 @@ public:
 
         void CalibrateVoltage  (int module);
         void CalibrateCurrent  (int module);
+	void CalibrateBiasCurrent ();
         void CorrectVoltageDrop(int module, bool reset = false);
         bool IsCalibrated      (int module) {return GetConfigurationHandler()->IsCalibrated (module);};
 

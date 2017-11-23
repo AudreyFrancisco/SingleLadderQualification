@@ -236,6 +236,22 @@ float TPowerBoard::GetDigitalCurrent (int module)
 }
 
 
+float TPowerBoard::GetBiasCurrent() 
+{ 
+  float Offset;
+  float Current = 0; 
+  int   N       = 20;
+  for (int i = 0; i < N; i ++) {
+    readMonitor();
+    Current += fPBoard.IBmon;
+  }
+  Current /= N;
+  fPowerBoardConfig->GetIBiasCalibration (Offset);
+
+  return (Current - Offset);
+}
+
+
 // Calibrate the output voltages of a given module
 // set calibration constants back to 1 / 0
 // set two different voltages and measure the output voltage for each setting
@@ -300,6 +316,23 @@ void TPowerBoard::CalibrateCurrent(int module)
   dOffset = GetDigitalCurrent (module);
 
   fPowerBoardConfig->SetICalibration (module, aOffset, dOffset);
+}
+
+
+void TPowerBoard::CalibrateBiasCurrent ()
+{
+  float Offset;
+  fPowerBoardConfig->SetIBiasCalibration(0);
+
+  SetBiasVoltage (0);
+  // this is in principle unneccessary as the calibration should be done without HIC attached
+  SwitchOFF();
+  for (int imod = 0; imod < MAX_MOULESPERMOSAIC; imod ++) {
+    SetBiasOff(imod);
+  }
+
+  Offset = GetBiasCurrent();
+  fPowerBoardConfig->SetIBiasCalibration (Offset);
 }
 
 

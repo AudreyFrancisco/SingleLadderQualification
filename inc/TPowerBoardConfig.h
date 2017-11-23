@@ -61,7 +61,7 @@
 // (can be set by setter methods)
 #define DEF_BIASVOLTAGE_OB	 0.0
 #define DEF_ANALOGVOLTAGE_OB	 1.82
-#define DEF_ANALOGMAXCURRENT_OB	 0.3
+#define DEF_ANALOGMAXCURRENT_OB	 0.5
 #define DEF_DIGITALVOLTAGE_OB	 1.82
 #define DEF_DIGITALMAXCURRENT_OB 1.50
 #define DEF_BIASCHANNELON_OB	 false
@@ -84,6 +84,7 @@
 #define DEF_CALGNDLINER          0.0
 #define DEF_BIASOFFSET           0.0
 #define DEF_BIASSCALE            1.0
+#define DEF_IBIASOFFSET          0.0
 
 // internal power board resistances between regulator and breakout board
 // according to power board manual version 1.2 (14/07/2017)
@@ -121,6 +122,7 @@ public:
 	  float VBset;
           float CalBiasOffset;
           float CalBiasScale;
+          float CalIBiasOffset;
 	} PowBoard_t;
 
 // members
@@ -160,6 +162,10 @@ public:
         void SetVCalibration      (int mod, float AVScale,  float DVScale,  float AVOffset,  float DVOffset);
         void GetICalibration      (int mod, float &AIOffset, float &DIOffset);
         void SetICalibration      (int mod, float AIOffset, float DIOffset);
+        void SetVBiasCalibration  (float AScale, float AOffset);
+        void SetIBiasCalibration  (float AOffset);
+        void GetVBiasCalibration  (float &AScale, float &AOffset);
+        void GetIBiasCalibration  (float &AOffset);
         void SetLineResistances   (int mod, float ALineR, float DLineR, float GNDLineR);
         void EnterMeasuredLineResistances   (int mod, int powerUnit, float ALineR, float DLineR, float GNDLineR);
         void GetLineResistances   (int mod, float &ALineR, float &DLineR, float &GNDLineR);

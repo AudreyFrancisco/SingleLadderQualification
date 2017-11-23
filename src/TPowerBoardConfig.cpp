@@ -54,9 +54,10 @@ TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName)
 	fBoardType = boardMOSAIC;
 
 	// Default values set
-	fPBConfig.VBset         = DEF_BIASVOLTAGE;
-        fPBConfig.CalBiasOffset = DEF_BIASOFFSET;
-        fPBConfig.CalBiasScale  = DEF_BIASSCALE;
+	fPBConfig.VBset          = DEF_BIASVOLTAGE;
+        fPBConfig.CalBiasOffset  = DEF_BIASOFFSET;
+        fPBConfig.CalBiasScale   = DEF_BIASSCALE;
+        fPBConfig.CalIBiasOffset = DEF_IBIASOFFSET;
 	for(int i=0;i<MAX_MOULESPERMOSAIC;i++) {
 		fPBConfig.Modul[i].AVset       = DEF_ANALOGVOLTAGE;
 		fPBConfig.Modul[i].AIset       = DEF_ANALOGMAXCURRENT;
@@ -318,6 +319,32 @@ void TPowerBoardConfig::SetICalibration (int mod, float AIOffset, float DIOffset
 {
   fPBConfig.Modul[mod].CalAIOffset = AIOffset;
   fPBConfig.Modul[mod].CalDIOffset = DIOffset;
+}
+
+
+void TPowerBoardConfig::SetVBiasCalibration (float AScale, float AOffset)
+{ 
+  fPBConfig.CalBiasOffset = AOffset;
+  fPBConfig.CalBiasScale  = AScale;
+}
+
+
+void TPowerBoardConfig::SetIBiasCalibration (float AOffset)
+{
+  fPBConfig.CalIBiasOffset = AOffset;
+}
+
+
+void TPowerBoardConfig::GetVBiasCalibration (float &AScale, float &AOffset)
+{
+  AOffset = fPBConfig.CalBiasOffset;
+  AScale  = fPBConfig.CalBiasScale;
+}
+
+
+void TPowerBoardConfig::GetIBiasCalibration (float &AOffset)
+{
+  AOffset = fPBConfig.CalIBiasOffset;
 }
 
 
