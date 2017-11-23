@@ -766,6 +766,7 @@ int initSetupEndurance(TConfig                        *config,
   int                 NChipsPerModule = 14;
   int                 NChips          = NModules * NChipsPerModule;
   TBoardConfigMOSAIC *boardConfig[2];
+  TPowerBoardConfig  *pbConfig   [2];
   TPowerBoard        *pb[2] = {0, 0};
 
   int CtrIntMap   [10][2] = { {3,2}, {5,4}, {7,6}, {9,8}, {11,10},
@@ -792,10 +793,13 @@ int initSetupEndurance(TConfig                        *config,
   }
 
   if (config->GetUsePowerBoard()) {
-    TPowerBoardConfig *pbConfig = new TPowerBoardConfig(NULL);
-    pbConfig->SetDefaultsOB(0);
-    pb[0] = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0), pbConfig);
-    pb[1] = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(1), pbConfig);
+    for (int i = 0; i < NBOARDS; i++) {
+      pbConfig[i] = new TPowerBoardConfig(NULL);
+      for (int imod = 0; imod < NModules; imod ++) {
+        pbConfig[i]->SetDefaultsOB(imod);
+      }
+      pb[i] = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(i), pbConfig[i]);
+    }
   }
 
   // TODO: allow passing an array of module IDs
