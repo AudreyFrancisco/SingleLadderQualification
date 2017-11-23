@@ -72,8 +72,6 @@ int initSetupOB(TConfig                        *config,
     else {
       hics->push_back(new THicOB("Dummy ID", modId, pb, 0));
     }
-    hics->at(0)->PowerOn();
-    sleep(1);
   }
 
   for (unsigned int i = 0; i < config->GetNChips(); i++) {
@@ -117,6 +115,12 @@ int initSetupOB(TConfig                        *config,
     }
     boards->at(0)-> AddChip        (chipId, control, receiver, chips->at(i));
   }
+
+  if (hics) {
+    hics->at(0)->PowerOn();
+    sleep(1);
+  }
+
   CheckControlInterface(config, boards, boardType, chips);
   //sleep(5);
   MakeDaisyChain(config, boards, boardType, chips);
@@ -809,8 +813,6 @@ int initSetupEndurance(TConfig                        *config,
       else {
         hics->push_back(new THicOB("Dummy ID", modId, pb[boardIndex], pbMod));
       }
-      if (hics->at(mod)->IsEnabled()) hics->at(mod)->PowerOn();
-      sleep(1);
     }
   }
 
@@ -856,6 +858,11 @@ int initSetupEndurance(TConfig                        *config,
     }
     ((TReadoutBoardMOSAIC *)(boards->at(boardIndex)))->setInverted(InverRcvMap[mod][0], DataRcvMap[mod][0]);
     ((TReadoutBoardMOSAIC *)(boards->at(boardIndex)))->setInverted(InverRcvMap[mod][1], DataRcvMap[mod][1]);
+
+    if (hics) {
+      if (hics->at(mod)->IsEnabled()) hics->at(mod)->PowerOn();
+      sleep(1);
+    }
   }
   CheckControlInterface(config, boards, boardType, chips);
   sleep(1);

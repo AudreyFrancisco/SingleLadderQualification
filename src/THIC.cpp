@@ -94,11 +94,13 @@ void THic::PowerOn()
   
   if (IsPowered()) return;
   mosaic = (TReadoutBoardMOSAIC*) m_chips.at(0)->GetReadoutBoard();
+
   // OB-HS -> 2 different MOSAICs
-  // all other HIC types (IB and OB HIC alone) have the same MOSAIC on chip 0 and 7
+  // all other HIC types (IB and OB HIC alone) have the same MOSAIC on chip 0 and 7 
   if (m_chips.at(7)->GetReadoutBoard() != m_chips.at(0)->GetReadoutBoard()) {  
     mosaic2 = (TReadoutBoardMOSAIC*) m_chips.at(7)->GetReadoutBoard();
   }
+ 
   mosaic->enableClockOutput(false);
   if (mosaic2) mosaic2->enableClockOutput(false);
   sleep(1);
