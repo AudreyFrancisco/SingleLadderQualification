@@ -124,11 +124,12 @@ public:
 	bool  IsDigitalChOn    (int module) { readMonitor(); return(fPBoard.Modules[module].DchOn);};
 	bool  IsBiasChOn       (int module) { readMonitor(); return(fPBoard.Modules[module].BiasOn);};
 
-        void CalibrateVoltage  (int module);
-        void CalibrateCurrent  (int module);
+        void CalibrateVoltage     (int module);
+        void CalibrateCurrent     (int module);
 	void CalibrateBiasCurrent ();
-        void CorrectVoltageDrop(int module, bool reset = false);
-        bool IsCalibrated      (int module) {return GetConfigurationHandler()->IsCalibrated (module);};
+        void CalibrateBiasVoltage ();
+        void CorrectVoltageDrop   (int module, bool reset = false);
+        bool IsCalibrated         (int module) {return GetConfigurationHandler()->IsCalibrated (module);};
 
 	void  GetModule(int module, float* AV, float *AI, float *DV, float *DI, bool *BiasOn, bool *AChOn, bool *DChOn);
 

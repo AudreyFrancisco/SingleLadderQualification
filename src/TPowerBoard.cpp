@@ -252,7 +252,7 @@ float TPowerBoard::GetBiasCurrent()
 }
 
 
-// Calibrate the output voltages of a given module
+// Calibrate the bias voltage
 // set calibration constants back to 1 / 0
 // set two different voltages and measure the output voltage for each setting
 // determine new calibration constants
@@ -260,8 +260,8 @@ void TPowerBoard::CalibrateVoltage(int module)
 {
   // two set points that fall on a full bin
   // set the lower voltage second to not risk applying 2.2 V to a HIC
-  float set2 = 1.58;
-  float set1 = 2.187;
+  float set2 = -0.4;
+  float set1 = -4;
   float analog1, analog2, digital1, digital2;
   float manalog, mdigital, banalog, bdigital;
 
@@ -333,6 +333,38 @@ void TPowerBoard::CalibrateBiasCurrent ()
 
   Offset = GetBiasCurrent();
   fPowerBoardConfig->SetIBiasCalibration (Offset);
+}
+
+
+void TPowerBoard::CalibrateBiasVoltage()
+{
+  // two set points that fall on a full bin
+  // set the lower voltage second to not risk applying 2.2 V to a HIC
+  float set2 = 1.58;
+  float set1 = 2.187;
+  float measured1, measured2;
+  float m, b;
+
+  // set calibration back to slope 1 / intercept 0
+  fPowerBoardConfig->SetVBiasCalibration (1, 0);
+
+  // set and measure first point
+  SetBiasVoltage (set1);
+  sleep(1);
+  measured1  = GetBiasVoltage();
+
+  // set and measure second point
+  SetBiasVoltage (set2);
+  sleep(1);
+  measured2  = GetBiasVoltage();
+
+  
+  // calculate slope and intercept for calibration Vout -> Vset
+  m = (set1 - set2) / (measured1  - measured2);
+  b = set1 - m * measured1;
+
+  // set new calibration values and switch off module
+  fPowerBoardConfig->SetVBiasCalibration (m, b);
 }
 
 
