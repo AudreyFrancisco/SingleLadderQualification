@@ -92,7 +92,6 @@ class THicIB : public THic {
   bool               ContainsChip (common::TChipIndex idx);
   bool               ContainsReceiver(int boardIndex, int rcv);
   void               ConfigureInterface (int board, int *rcv, int ctrl);
-  void               PowerOn         ();
 };
 
 

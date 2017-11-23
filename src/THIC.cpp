@@ -90,9 +90,22 @@ bool THic::IsPoweredDigital ()
 
 void THic::PowerOn()
 {
+  TReadoutBoardMOSAIC *mosaic, *mosaic2 = 0;
+  
   if (IsPowered()) return;
-
+  mosaic = (TReadoutBoardMOSAIC*) m_chips.at(0)->GetReadoutBoard();
+  // OB-HS -> 2 different MOSAICs
+  // all other HIC types (IB and OB HIC alone) have the same MOSAIC on chip 0 and 7
+  if (m_chips.at(7)->GetReadoutBoard() != m_chips.at(0)->GetReadoutBoard()) {  
+    mosaic2 = (TReadoutBoardMOSAIC*) m_chips.at(7)->GetReadoutBoard();
+  }
+  mosaic->enableClockOutput(false);
+  if (mosaic2) mosaic2->enableClockOutput(false);
+  sleep(1);
   if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
+  sleep(1);
+  mosaic->enableClockOutput(true);
+  if (mosaic2) mosaic2->enableClockOutput(true);
 }
 
 
@@ -200,18 +213,6 @@ void THicIB::ConfigureInterface (int board, int *rcv, int ctrl)
   for (int i = 0; i < 9; i++) {
     m_rcv[i] = rcv[i];
   }
-}
-
-
-void THicIB::PowerOn()
-{
-  if (IsPowered()) return;
-  TReadoutBoardMOSAIC *mosaic = (TReadoutBoardMOSAIC*) m_chips.at(0)->GetReadoutBoard();
-  mosaic->enableClockOutput(false);
-  sleep(1);
-  if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
-  sleep(1);
-  mosaic->enableClockOutput(true);
 }
 
 
