@@ -86,6 +86,8 @@ TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName)
 			readConfiguration();
 			fclose(fhConfigFile);
 	}
+
+        m_bottom = DEF_BOTTOM;
 }
 
 /* -------------------------
@@ -157,6 +159,36 @@ void TPowerBoardConfig::readConfiguration()
 	}
 
 }
+
+
+
+void TPowerBoardConfig::InitParamMap() 
+{
+  fSettings["PBBOTTOM"] = &m_bottom;
+}
+
+
+bool TPowerBoardConfig::SetParamValue (std::string Name, std::string Value)
+{
+  if (fSettings.find (Name) != fSettings.end()) {
+    *(fSettings.find(Name)->second) = std::stoi(Value);
+    return true;
+  }
+
+  return false;
+}
+
+
+int TPowerBoardConfig::GetParamValue (std::string Name)
+{
+  if (fSettings.find (Name) != fSettings.end()) {
+    return *(fSettings.find(Name)->second);
+  }
+  return -1;
+}
+
+
+
 /* -------------------------
 	GetModuleSetUp()
 	Returns the settings for one specified module.

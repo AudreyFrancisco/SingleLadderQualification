@@ -57,7 +57,7 @@ int initSetupOB(TConfig                        *config,
 
   TPowerBoard *pb = 0;
   if (config->GetUsePowerBoard()) {
-    TPowerBoardConfig *pbConfig = new TPowerBoardConfig(NULL);
+    TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
     pbConfig->SetDefaultsOB(0);
     pb = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0), pbConfig);
   }
@@ -461,7 +461,7 @@ int initSetupIB(TConfig                        *config,
 
   TPowerBoard *pb = 0;
   if (config->GetUsePowerBoard()) {
-    TPowerBoardConfig *pbConfig = new TPowerBoardConfig(NULL);
+    TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
     pbConfig->SetDefaultsIB(0);
     pb = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0), pbConfig);
   }
@@ -794,7 +794,7 @@ int initSetupEndurance(TConfig                        *config,
 
   if (config->GetUsePowerBoard()) {
     for (int i = 0; i < NBOARDS; i++) {
-      pbConfig[i] = new TPowerBoardConfig(NULL);
+      pbConfig[i] = config->GetPBConfig(i);
       for (int imod = 0; imod < NModules; imod ++) {
         pbConfig[i]->SetDefaultsOB(imod);
       }

@@ -5,6 +5,7 @@
 #include <string>
 #include "TChipConfig.h"
 #include "TBoardConfig.h"
+#include "TPowerBoardConfig.h"
 #include "THicConfig.h"
 #include "TScanConfig.h"
 
@@ -17,12 +18,13 @@ class TChipConfig;
 
 class TConfig {
 private:
-  std::vector <TBoardConfig *> fBoardConfigs;
-  std::vector <TChipConfig *>  fChipConfigs;
-  std::vector <THicConfig *>   fHicConfigs;
-  TScanConfig                 *fScanConfig;
-  TDeviceType                  fDeviceType;
-  bool                         fUsePowerBoard;
+  std::vector <TBoardConfig *>     fBoardConfigs;
+  std::vector <TChipConfig *>      fChipConfigs;
+  std::vector <THicConfig *>       fHicConfigs;
+  std::vector <TPowerBoardConfig*> fPBConfigs;
+  TScanConfig                     *fScanConfig;
+  TDeviceType                      fDeviceType;
+  bool                             fUsePowerBoard;
 
   void        ReadConfigFile (const char *fName);
   void        Init           (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC);
@@ -37,19 +39,20 @@ public:
   TConfig (int nBoards, std::vector <int> chipIds, TBoardType boardType = boardMOSAIC);
   TConfig (int chipId, TBoardType boardType = boardDAQ);
 
-  TDeviceType   GetDeviceType      ()           {return fDeviceType;};
-  unsigned int  GetNChips          ()           {return fChipConfigs.size();};
-  unsigned int  GetNBoards         ()           {return fBoardConfigs.size();};
-  unsigned int  GetNHics           ()           {return fHicConfigs.size();};
-  bool          GetUsePowerBoard   ()           {return fUsePowerBoard;};
-  void          SetUsePowerBoard   (bool UsePB) {fUsePowerBoard = UsePB;};
-  TChipConfig  *GetChipConfig      (unsigned int iChip);
-  TChipConfig  *GetChipConfigById  (int chipId);
-  TBoardConfig *GetBoardConfig     (unsigned int iBoard);
-  THicConfig   *GetHicConfig       (unsigned int iHic);
-  THicConfig   *GetHicConfigById   (int modId);
-  TScanConfig  *GetScanConfig      () {return fScanConfig;};
-  void          WriteToFile        (const char *fName);
+  TDeviceType        GetDeviceType      ()           {return fDeviceType;};
+  unsigned int       GetNChips          ()           {return fChipConfigs.size();};
+  unsigned int       GetNBoards         ()           {return fBoardConfigs.size();};
+  unsigned int       GetNHics           ()           {return fHicConfigs.size();};
+  bool               GetUsePowerBoard   ()           {return fUsePowerBoard;};
+  void               SetUsePowerBoard   (bool UsePB) {fUsePowerBoard = UsePB;};
+  TChipConfig       *GetChipConfig      (unsigned int iChip);
+  TChipConfig       *GetChipConfigById  (int chipId);
+  TBoardConfig      *GetBoardConfig     (unsigned int iBoard);
+  TPowerBoardConfig *GetPBConfig   (unsigned int iBoard);
+  THicConfig        *GetHicConfig       (unsigned int iHic);
+  THicConfig        *GetHicConfigById   (int modId);
+  TScanConfig       *GetScanConfig      () {return fScanConfig;};
+  void               WriteToFile        (const char *fName);
 
   std::string   GetSoftwareVersion();
 };

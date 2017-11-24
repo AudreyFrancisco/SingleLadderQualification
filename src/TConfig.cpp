@@ -1,6 +1,7 @@
 #include "TConfig.h"
 #include "TBoardConfigDAQ.h"
 #include "TBoardConfigMOSAIC.h"
+#include "TPowerBoardConfig.h"
 #include "TBoardConfigRU.h"
 #include <iostream>
 #include <fstream>
@@ -39,6 +40,7 @@ void TConfig::Init (int nBoards, std::vector <int> chipIds, TBoardType boardType
     }
     else if (boardType == boardMOSAIC) {
       fBoardConfigs.push_back (new TBoardConfigMOSAIC());
+      if (fUsePowerBoard) fPBConfigs.push_back (new TPowerBoardConfig(NULL));
     }
     else if (boardType == boardRU) {
       fBoardConfigs.push_back (new TBoardConfigRU());
@@ -61,6 +63,7 @@ void TConfig::Init (int chipId, TBoardType boardType) {
   else if (boardType == boardMOSAIC) {
     fDeviceType = TYPE_CHIP_MOSAIC;
     fBoardConfigs.push_back (new TBoardConfigMOSAIC());
+    if (fUsePowerBoard) fPBConfigs.push_back (new TPowerBoardConfig(NULL));
   }
   else {
     fDeviceType = TYPE_UNKNOWN;
@@ -101,6 +104,18 @@ TBoardConfig *TConfig::GetBoardConfig (unsigned int iBoard){
     return 0;
   }
 }
+
+
+TPowerBoardConfig *TConfig::GetPBConfig   (unsigned int iBoard) 
+{
+  if (iBoard < fPBConfigs.size()) {
+    return fPBConfigs.at(iBoard);
+  }
+  else {  // throw exception
+    return 0;
+  }
+}
+
 
 THicConfig *TConfig::GetHicConfigById  (int modId) {
   for (unsigned int i = 0; i < fHicConfigs.size(); i++) {
@@ -407,6 +422,11 @@ void TConfig::DecodeLine(std::string Line)
         }
       }
     }
+  }
+  else if ((fPBConfigs.size() > 0) && (fPBConfigs.at(0)->IsParameter(Param))) {
+    for (int i = BoardStart; i < BoardStop; i++) {
+      fPBConfigs.at(i)->SetParamValue (Param, Value);
+    }    
   }
   else {
     std::cout << "Warning: Unknown parameter " << Param << std::endl;

@@ -49,6 +49,8 @@
 
 // Default values table
 
+#define DEF_BOTTOM 0 // default: top power unit
+
 // a) Default values used in constructor
 #define DEF_BIASVOLTAGE	0.0
 #define DEF_ANALOGVOLTAGE	1.80
@@ -130,8 +132,8 @@ private:
 	FILE *fhConfigFile; // the file handle of the Configuration File
 	PowBoard_t	fPBConfig;
 	TBoardType	fBoardType;
-        bool            m_bottom;
-
+        int             m_bottom;
+        std::map <std::string, int*> fSettings;
 
 // methods
 public:
@@ -186,12 +188,15 @@ public:
         void SetDefaultsOB(int mod);
         void SetDefaultsIB(int mod);
 	// Utilities
-	bool ReadFromFile(char * AFileName);
-	bool WriteToFile (char *AFileName);
-	bool DumpConfig  () { return false; }; // TODO: not yet implemented
-        bool GetIsBottom () { return m_bottom; };
-        void SetIsBottom (bool bottom) { m_bottom = bottom;};
-
+	bool ReadFromFile  (char * AFileName);
+	bool WriteToFile   (char *AFileName);
+	bool DumpConfig    () { return false; }; // TODO: not yet implemented
+        bool GetIsBottom   () { return (m_bottom == 1); };
+        void SetIsBottom   (bool bottom) { m_bottom = bottom?1:0;};
+        void InitParamMap  ();
+        bool SetParamValue (std::string Name, std::string Value);
+        int  GetParamValue (std::string Name) ;
+        bool IsParameter   (std::string Name) {return (fSettings.count(Name) > 0);};
 private:
     void readConfiguration();
 
