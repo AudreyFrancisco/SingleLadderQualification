@@ -409,9 +409,12 @@ void TPowerBoardConfig::GetLineResistances (int mod, float &ALineR, float &DLine
 }
 
 
+// TODO: change filename to PBCalibTop.cfg, PBCalibBottom.cfg
+// requires: correct setting of PBBOTTOM in config file
 void TPowerBoardConfig::WriteCalibrationFile ()
 {
   float ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, DVScale, AVOffset, DVOffset;
+  float VBScale, VBOffset, IBOffset;
   FILE *fp = fopen ("PBCalib.dat", "w");
   
   for (int imod = 0; imod < MAX_MOULESPERMOSAIC; imod++) {
@@ -421,7 +424,9 @@ void TPowerBoardConfig::WriteCalibrationFile ()
     fprintf(fp, "%d %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n",
 	    imod, ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, AVOffset, DVScale, DVOffset); 
   }
-
+  GetVBiasCalibration (VBScale, VBOffset);
+  GetIBiasCalibration (IBOffset);
+  fprintf (fp, "%.3f %.3f %.3f\n", IBOffset, VBScale, VBOffset);
   fclose (fp);
 }
 
@@ -429,16 +434,31 @@ void TPowerBoardConfig::WriteCalibrationFile ()
 void TPowerBoardConfig::ReadCalibrationFile() 
 {
   float ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, DVScale, AVOffset, DVOffset;
+  float VBScale, VBOffset, IBOffset;
   int   mod;
+  int   nLines = 0;
   FILE *fp = fopen ("PBCalib.dat", "r");
   if (!fp) return;
-  while (fscanf(fp, "%d %f %f %f %f %f %f %f %f %f\n",
-		&mod, &ALineR, &DLineR, &GNDLineR, &AIOffset, &DIOffset, &AVScale, &AVOffset, &DVScale, &DVOffset) == 10)
-  {
-    SetLineResistances(mod, ALineR, DLineR, GNDLineR);
-    SetICalibration   (mod, AIOffset, DIOffset);
-    SetVCalibration   (mod, AVScale, DVScale, AVOffset, DVOffset);
-  } 
+  for (int imod = 0; imod < MAX_MOULESPERMOSAIC; imod++) {
+    if (fscanf(fp, "%d %f %f %f %f %f %f %f %f %f\n",
+  		  &mod, &ALineR, &DLineR, &GNDLineR, &AIOffset, &DIOffset, &AVScale, &AVOffset, &DVScale, &DVOffset) == 10)
+    {
+      SetLineResistances(mod, ALineR, DLineR, GNDLineR);
+      SetICalibration   (mod, AIOffset, DIOffset);
+      SetVCalibration   (mod, AVScale, DVScale, AVOffset, DVOffset);
+      nLines ++;
+    }
+    else {
+      std::cout << "WARNING: calibration file corrupt, read " << nLines << " lines instead of " << MAX_MOULESPERMOSAIC << std::endl;
+    }
+  }
+  if (fscanf(fp, "%f %f %f\n", &IBOffset, &VBScale, &VBOffset) == 3) {
+    SetVBiasCalibration (VBScale, VBOffset);
+    SetIBiasCalibration (IBOffset);
+  }
+  else {
+    std::cout << "WARNING: back bias calibration not found, using default" << std::endl;
+  }
   fclose(fp);
 }
 
