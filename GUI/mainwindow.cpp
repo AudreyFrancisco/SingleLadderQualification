@@ -2448,6 +2448,29 @@ void MainWindow::writecalibrationfile(){
 
 }
 
+
+// method sets the top bottom switch correctly for all power board configs
+// input parameter unit gives the power unit for hic 0
+// unit == 1 -> top, unit == 0 -> bottom
+// loop over all HICs, if config different from the one of HIC 0 is found, set opposite
+void MainWindow::setTopBottom(int unit) 
+{
+  TPowerBoardConfig *pbconfig0 = fHICs.at(0)->GetPowerBoard()->GetConfigurationHandler();
+  TPowerBoardConfig *pbconfig;
+  bool               isBottom = (unit == 0);
+
+  pbconfig0->SetIsBottom (isBottom);
+
+  for (unsigned int i = 1; i < fHICs.size(); i++) {
+    pbconfig = fHICs.at(i)->GetPowerBoard()->GetConfigurationHandler();
+    if (pbconfig != pbconfig0) {
+      pbconfig->SetIsBottom(!isBottom);
+      return;    // assume maximum of 2 power boards in setup
+    }
+  }
+}
+
+
 void MainWindow::setandgetcalibration(){
 
     float ares,gres, dres;
@@ -2459,6 +2482,7 @@ void MainWindow::setandgetcalibration(){
     std::cout<<ares<<" input values"<<dres<< std::endl;
     calwindow->setpowerunit(unit);
     std::cout<<unit<<"number of the unit"<<std::endl;
+    setTopBottom (unit);
     pbconfig->EnterMeasuredLineResistances(pbnumberofmodule,unit,ares,dres,gres);
     pb->CalibrateVoltage(pbnumberofmodule);
     pb->CalibrateCurrent(pbnumberofmodule);

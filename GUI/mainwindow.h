@@ -150,7 +150,7 @@ class MainWindow : public QMainWindow
     void noiseadthree();
 
     void setandgetcalibration();
-
+    void setTopBottom        (int unit);
     void thresholddafter();
     void noisebd();
     void noisead();

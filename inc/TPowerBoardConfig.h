@@ -130,6 +130,7 @@ private:
 	FILE *fhConfigFile; // the file handle of the Configuration File
 	PowBoard_t	fPBConfig;
 	TBoardType	fBoardType;
+        bool            m_bottom;
 
 
 // methods
@@ -186,8 +187,10 @@ public:
         void SetDefaultsIB(int mod);
 	// Utilities
 	bool ReadFromFile(char * AFileName);
-	bool WriteToFile(char *AFileName);
-	bool DumpConfig() { return false; }; // TODO: not yet implemented
+	bool WriteToFile (char *AFileName);
+	bool DumpConfig  () { return false; }; // TODO: not yet implemented
+        bool GetIsBottom () { return m_bottom; };
+        void SetIsBottom (bool bottom) { m_bottom = bottom;};
 
 private:
     void readConfiguration();
