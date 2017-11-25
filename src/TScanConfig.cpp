@@ -1,4 +1,5 @@
 #include "TScanConfig.h"
+#include "TChipConfig.h"
 #include <string>
 
 using namespace ScanConfig;
@@ -38,6 +39,7 @@ TScanConfig::TScanConfig()
   m_backBias       = BACKBIAS;
   m_nominal        = NOMINAL;
   m_isMasked       = false;
+  m_mlvdsStrength  = ChipConfig::DCTRL_DRIVER;
 
   m_powerCutMinIdda_OB        = POWER_CUT_MINIDDA_OB;
   m_powerCutMinIddd_OB        = POWER_CUT_MINIDDD_OB;

@@ -90,6 +90,7 @@ void TChipConfig::InitParamMap ()
   fSettings["CHARGEPUMP"]       = &fChargePump;
   fSettings["DTUDRIVER"]        = &fDtuDriver;
   fSettings["DTUPREEMP"]        = &fDtuPreemp;
+  fSettings["DCTRLDRIVER"]      = &fDctrlDriver;
 }
 
 

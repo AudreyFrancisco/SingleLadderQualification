@@ -22,6 +22,7 @@ namespace ScanConfig {
   const int PIX_PER_REGION = 32;
   const int NOISECUT_INV   = 100000;   // inverse of pixel noise cut (e.g. 100000 = 1e-5)
 
+
   const int ITHR_START     = 30;
   const int ITHR_STOP      = 100;
   const int ITHR_STEP      = 1;
@@ -164,6 +165,7 @@ class TScanConfig {
   int    m_nominal;
   bool   m_isMasked;
   float  m_voltageScale;
+  int    m_mlvdsStrength;
   float  m_backBias;
   bool   m_useDataPath;  // for compatibility with standalone scans, set true for GUI
   TTestType m_testType;
@@ -194,11 +196,13 @@ class TScanConfig {
   int   GetLocalBusCutRed() {return m_localBusCutRed;};
   int   GetCalVpulsel    () {return m_calVpulsel;};
   float GetVoltageScale  () {return m_voltageScale;};
+  int   GetMlvdsStrength () {return m_mlvdsStrength;};
   bool  GetIsMasked      () {return m_isMasked;};
   float GetBackBias      () {return m_backBias;};
   bool  GetUseDataPath   () {return m_useDataPath;};
   void  SetfNameSuffix   (const char *aSuffix) {strcpy (m_fNameSuffix, aSuffix);};
   void  SetVoltageScale  (float aScale)        {m_voltageScale = aScale;};
+  void  SetMlvdsStrength (int aStrength)       {m_mlvdsStrength = aStrength;};
   void  SetBackBias      (float aVoltage)      {m_backBias = fabs(aVoltage);};
   void  SetVcasnRange    (int start, int stop) {m_vcasnStart = start; m_vcasnStop = stop;};
   void  SetIsMasked      (bool masked)         {m_isMasked = masked;};
