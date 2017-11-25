@@ -55,6 +55,7 @@ void TFifoAnalysis::InitCounters()
     counter.err5       = 0;
     counter.erra       = 0;
     counter.errf       = 0;
+    counter.exc        = 0;
     m_counters.push_back(counter);
   }
 
@@ -63,7 +64,7 @@ void TFifoAnalysis::InitCounters()
 
   for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
     TFifoResultHic *result = (TFifoResultHic*) it->second;
-    result->m_nExceptions  = 0;
+    result->m_exc          = 0;
     result->m_nFaultyChips = 0;
     result->m_err0         = 0;
     result->m_err5         = 0;
@@ -78,6 +79,7 @@ void TFifoAnalysis::InitCounters()
       resultChip->m_err5       = 0;
       resultChip->m_erra       = 0;
       resultChip->m_errf       = 0;
+      resultChip->m_exc        = 0;
     }
   }
 
@@ -117,6 +119,7 @@ void TFifoAnalysis::AnalyseHisto (TScanHisto *histo)
       m_counters.at(ichip).erra += (int) ((*histo) (m_chipList.at(ichip), ireg, 0xa));
       m_counters.at(ichip).errf += (int) ((*histo) (m_chipList.at(ichip), ireg, 0xf));
     }
+    m_counters.at(ichip).exc  += (int) ((*histo) (m_chipList.at(ichip), 32, 0));
   }
 }
 
@@ -131,7 +134,8 @@ void TFifoAnalysis::Finalize()
     chipResult->m_err5 = m_counters.at(ichip).err5;
     chipResult->m_erra = m_counters.at(ichip).erra;
     chipResult->m_errf = m_counters.at(ichip).errf;
-
+    chipResult->m_exc  = m_counters.at(ichip).exc;
+    
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
       if (! (m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TFifoResultHic *hicResult = (TFifoResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
@@ -139,6 +143,8 @@ void TFifoAnalysis::Finalize()
       hicResult->m_err5 += chipResult->m_err5;
       hicResult->m_erra += chipResult->m_erra;
       hicResult->m_errf += chipResult->m_errf;
+      hicResult->m_exc  += chipResult->m_exc;
+      
       if (chipResult->m_err0 + chipResult->m_err5 + chipResult->m_erra + chipResult->m_errf > 0)
         hicResult->m_nFaultyChips ++;
     }
@@ -157,7 +163,7 @@ void TFifoAnalysis::Finalize()
 
 THicClassification TFifoAnalysis::GetClassification (TFifoResultHic *result)
 {
-  if (result->m_nExceptions > 0) return CLASS_RED;
+  if (result->m_exc > 0) return CLASS_RED;
   if (result->m_err0 + result->m_err5 + result->m_erra + result->m_errf == 0) return CLASS_GREEN;
   
   if ((result->m_err0 < m_config->GetParamValue("FIFO_MAXERR")) && 
@@ -176,6 +182,8 @@ void TFifoResultHic::WriteToFile (FILE *fp)
 
   fprintf (fp, "HIC Classification: %s\n\n", WriteHicClassification());
 
+  fprintf (fp, "Exceptions: %d\n\n", m_exc);
+  
   fprintf(fp, "Errors in pattern 0x0000: %d\n", m_err0);
   fprintf(fp, "Errors in pattern 0x5555: %d\n", m_err5);
   fprintf(fp, "Errors in pattern 0xaaaa: %d\n", m_erra);
@@ -214,7 +222,8 @@ void TFifoResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
   GetParameterSuffix (suffix, file_suffix);
 
   DbAddParameter (db, activity, string ("FIFO errors") + suffix,            (float) (m_err0 + m_err5 + m_erra + m_errf));
-  DbAddParameter (db, activity, string ("Chips with FIFO errors") + suffix, (float)m_nFaultyChips);
+  DbAddParameter (db, activity, string ("FIFO Exceptions") + suffix,        (float) m_exc);  
+  DbAddParameter (db, activity, string ("Chips with FIFO errors") + suffix, (float) m_nFaultyChips);
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   fileName          = string(m_resultFile).substr (slash +1);    // strip path
@@ -243,6 +252,7 @@ float TFifoResultChip::GetVariable (TResultVariable var) {
 
 void TFifoResultChip::WriteToFile (FILE *fp) 
 {
+  fprintf(fp, "Exceptions: %d\n", m_exc);
   fprintf(fp, "Errors in pattern 0x0000: %d\n", m_err0);
   fprintf(fp, "Errors in pattern 0x5555: %d\n", m_err5);
   fprintf(fp, "Errors in pattern 0xaaaa: %d\n", m_erra);

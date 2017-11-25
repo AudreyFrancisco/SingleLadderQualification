@@ -18,6 +18,7 @@ typedef struct {
   int err5;
   int erra;
   int errf;
+  int exc;
 } TFifoCounter;
 
 
@@ -28,6 +29,7 @@ class TFifoResultChip : public TScanResultChip {
   int m_err5;
   int m_erra;
   int m_errf;
+  int m_exc;
  public:
   TFifoResultChip () : TScanResultChip () {};
   void  WriteToFile (FILE *fp);
@@ -45,7 +47,7 @@ class TFifoResultHic : public TScanResultHic {
   bool m_upper;
   bool m_lower;
   bool m_nominal;
-  int  m_nExceptions;
+  int  m_exc;
   int  m_nFaultyChips;
   void GetParameterSuffix (std::string &suffix, std::string &file_suffix);
  public:

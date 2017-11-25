@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string.h>
 #include <string>
+#include <exception>
 #include "TFifoTest.h"
 #include "AlpideConfig.h"
 
@@ -50,7 +51,8 @@ THisto TFifoTest::CreateHisto ()
 {
   // count errors in bins corresponding to pattern, 
   // e.g. error in pattern 0xaaaa in region 16 -> Incr(16, 10)
-  THisto histo ("ErrorHisto", "ErrorHisto", 32, 0 , 31, 16, 0, 15);
+  // exception counter: bin 32, 0
+  THisto histo ("ErrorHisto", "ErrorHisto", 33, 0 , 32, 16, 0, 15);
   return histo;
 }
 
@@ -133,17 +135,25 @@ void TFifoTest::WriteMem (TAlpide *chip, int ARegion, int AOffset, int AValue) {
 }
 
 
-void TFifoTest::ReadMem (TAlpide *chip, int ARegion, int AOffset, int &AValue) {
+void TFifoTest::ReadMem (TAlpide *chip, int ARegion, int AOffset, int &AValue, bool &exception) {
   if ((ARegion > 31) || (AOffset > 127)) {
     std::cout << "ReadMem: invalid parameters" << std::endl;
     return;
   }
   uint16_t LowAdd  = Alpide::REG_RRU_MEB_LSB_BASE | (ARegion << 11) | AOffset;
   uint16_t HighAdd = Alpide::REG_RRU_MEB_MSB_BASE | (ARegion << 11) | AOffset;
- 
+  
   uint16_t LowVal, HighVal;
+  int      err;
 
-  int err = chip->ReadRegister (LowAdd, LowVal);
+  try {
+    err = chip->ReadRegister (LowAdd, LowVal);
+  }
+  catch (std::exception &e) {
+    exception = true;
+    return;
+  }
+  exception = false;
   if (err >= 0) err = chip->ReadRegister (HighAdd, HighVal);
 
   if (err < 0) {
@@ -160,10 +170,11 @@ void TFifoTest::ReadMem (TAlpide *chip, int ARegion, int AOffset, int &AValue) {
 }
 
 
-bool TFifoTest::TestPattern (int pattern) {
+bool TFifoTest::TestPattern (int pattern, bool &exception) {
   int readBack;
   WriteMem (m_testChip, m_value[1], m_value[0], pattern); 
-  ReadMem  (m_testChip, m_value[1], m_value[0], readBack);
+  ReadMem  (m_testChip, m_value[1], m_value[0], readBack, exception);
+  if (exception)           return false;
   if (readBack != pattern) return false;
   return true;
 
@@ -184,15 +195,27 @@ void TFifoTest::LoopEnd(int loopIndex)
 void TFifoTest::Execute() 
 {
   common::TChipIndex idx;
+  bool               exception, result;
   idx.boardIndex   = m_boardIndex;
   idx.chipId       = m_testChip->GetConfig()->GetChipId    ();
   idx.dataReceiver = m_testChip->GetConfig()->GetParamValue("RECEIVER");
 
+  // Test readback of four different patterns
+  // if exception in readback increment bin (32, 0)
+  // otherwise in case of false readback increment corresponding bin
   if (m_testChip->GetConfig()->IsEnabled()) {
-    if (!TestPattern (0xffff)) m_histo->Incr(idx, m_value[1], 0xf);
-    if (!TestPattern (0x0))    m_histo->Incr(idx, m_value[1], 0x0);;
-    if (!TestPattern (0xaaaa)) m_histo->Incr(idx, m_value[1], 0xa);;
-    if (!TestPattern (0x5555)) m_histo->Incr(idx, m_value[1], 0x5);;
+    result = TestPattern(0xffff, exception);
+    if      (exception) m_histo->Incr(idx, 32,         0); 
+    else if (!result)   m_histo->Incr(idx, m_value[1], 0xf);
+    result = TestPattern(0x0, exception);
+    if      (exception) m_histo->Incr(idx, 32,         0);     
+    else if (!result)   m_histo->Incr(idx, m_value[1], 0x0);
+    result = TestPattern(0xaaaa, exception);
+    if      (exception) m_histo->Incr(idx, 32,         0);     
+    else if (!result)   m_histo->Incr(idx, m_value[1], 0xa);
+    result = TestPattern(0x5555, exception);
+    if      (exception) m_histo->Incr(idx, 32,         0);     
+    else if (!result)   m_histo->Incr(idx, m_value[1], 0x5);
   }
 }
 

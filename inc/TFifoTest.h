@@ -13,9 +13,9 @@ class TFifoTest : public TScan {
   int      m_boardIndex;
 
   int      GetChipById    (std::vector <TAlpide *> chips, int previousId);
-  void     ReadMem        (TAlpide *chip, int ARegion, int AOffset, int &AValue);
+  void     ReadMem        (TAlpide *chip, int ARegion, int AOffset, int &AValue, bool &exception);
   void     WriteMem       (TAlpide *chip, int ARegion, int AOffset, int AValue);
-  bool     TestPattern    (int pattern);
+  bool     TestPattern    (int pattern, bool &exception);
   float    m_voltageScale;
  protected: 
   THisto   CreateHisto();
