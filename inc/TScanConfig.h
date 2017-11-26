@@ -84,16 +84,18 @@ namespace ScanConfig {
   const int THRESH_MAXNOISE_OB    = 10;     // max noise of a single chip
   const int THRESH_MAXNOISE_IB    = 10;
 
-  const int SPEEDY           = 1;  //Use slow fit if 0, differentiate->mean if 1.
-  const int RAWDATA          = 1;
-  const int CAL_VPULSEL      = 160; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
-  const int TARGET_THRESHOLD = 100;
-  const int IVCURVE          = 1;   //Do I-V-curve on back bias
-  const int IVPOINTS         = 41;  //number of 100 mV-points for back bias IV curve (max. 50 = 5V)
-  const int MAXIBIAS         = 50;  //current limit for I-V-curve in mA;
-  const float VOLTAGE_SCALE  = 1.0;
-  const float BACKBIAS       = 0;
-  const int   NOMINAL        = 0;
+  const int SPEEDY               = 1;  //Use slow fit if 0, differentiate->mean if 1.
+  const int RAWDATA              = 1;
+  const int CAL_VPULSEL          = 160; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
+  const int TARGET_THRESHOLD     = 100;
+  const int IVCURVE              = 1;   //Do I-V-curve on back bias
+  const int IVPOINTS             = 41;  //number of 100 mV-points for back bias IV curve (max. 50 = 5V)
+  const int MAXIBIAS             = 50;  //current limit for I-V-curve in mA;
+  const float VOLTAGE_SCALE      = 1.0;
+  const float BACKBIAS           = 0;
+  const int   NOMINAL            = 0;
+  const int   ENDURANCE_CYCLES   = 3;
+  const int   ENDURANCE_TRIGGERS = 10000;
 }
 
 
@@ -168,6 +170,8 @@ class TScanConfig {
   int    m_mlvdsStrength;
   float  m_backBias;
   bool   m_useDataPath;  // for compatibility with standalone scans, set true for GUI
+  int    m_enduranceCycles;
+  int    m_enduranceTriggers;
   TTestType m_testType;
  protected:
  public:

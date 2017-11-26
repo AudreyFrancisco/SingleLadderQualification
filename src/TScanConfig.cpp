@@ -78,6 +78,9 @@ TScanConfig::TScanConfig()
   m_threshMaxNoiseOB      = THRESH_MAXNOISE_OB;
   m_threshMaxNoiseIB      = THRESH_MAXNOISE_IB;
 
+  m_enduranceCycles   = ENDURANCE_CYCLES;
+  m_enduranceTriggers = ENDURANCE_TRIGGERS;
+  
   m_useDataPath = false;
 
   InitParamMap();
@@ -152,6 +155,9 @@ void TScanConfig::InitParamMap ()
   fSettings["CAL_VPULSEL"]        = &m_calVpulsel;
   fSettings["TARGETTHRESH"]        = &m_targetThresh;
   fSettings["NOMINAL"]            = &m_nominal;
+
+  fSettings["ENDURANCECYCLES"]    = &m_enduranceCycles;
+  fSettings["ENDURANCETRIGGERS"]  = &m_enduranceTriggers;
 }
 
 
