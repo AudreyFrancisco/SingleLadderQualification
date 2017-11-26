@@ -322,6 +322,9 @@ void TScan::WriteConditions (const char *fName, THic *aHic)
   fprintf (fp, "Temp (start): %.1f\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempStart);
   fprintf (fp, "Temp (end):   %.1f\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempEnd);
 
+  fprintf (fp, "Analogue Supply Voltage (start): %.3f\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaStart);
+  fprintf (fp, "Analogue Supply Voltage (end):   %.3f\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaEnd);
+
   fprintf (fp, "IDDD (start): %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_idddStart);
   fprintf (fp, "IDDD (end):   %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_idddEnd);
   fprintf (fp, "IDDA (start): %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaStart);
