@@ -70,7 +70,7 @@ int initSetupOB(TConfig                        *config,
       hics->push_back(new THicOB(hicIds[0], modId, pb, 0));
     }
     else {
-      hics->push_back(new THicOB("Dummy ID", modId, pb, 0));
+      hics->push_back(new THicOB("Dummy_ID", modId, pb, 0));
     }
   }
 
@@ -154,9 +154,9 @@ int initSetupHalfStave(TConfig                        *config,
 
   // TODO: Define power board mapping for half stave
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
-    pHics->push_back(new THicOB(std::string("Dummy ID " + std::to_string(ihic+1)).c_str(), config->GetHicConfig(ihic)->GetModId(), pb, 0));
-    ((THicOB*)(hics->at(ihic)))->ConfigureMaster (0, 0, ihic, 0);
-    ((THicOB*)(hics->at(ihic)))->ConfigureMaster (8, 1, ihic, 0);
+    pHics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic+1)).c_str(), config->GetHicConfig(ihic)->GetModId(), pb, 0));
+    ((THicOB*)(pHics->at(ihic)))->ConfigureMaster (0, 0, ihic, 0);
+    ((THicOB*)(pHics->at(ihic)))->ConfigureMaster (8, 1, ihic, 0);
   }
 
   for (unsigned int i = 0; i < config->GetNChips(); i++) {
@@ -473,7 +473,7 @@ int initSetupIB(TConfig                        *config,
       hics->push_back(new THicIB(hicIds[0], 0, pb, 0));
     }
     else {
-      hics->push_back(new THicIB("Dummy ID", 0, pb, 0));
+      hics->push_back(new THicIB("Dummy_ID", 0, pb, 0));
     }
     ((THicIB*)(hics->at(0)))->ConfigureInterface (0, RCVMAP, 0);
   }
@@ -666,9 +666,9 @@ int initSetup(TConfig                       *&config,
               std::vector <TReadoutBoard *> * boards,
               TBoardType                    * boardType,
               std::vector <TAlpide *>       * chips,
-              const char                    * configFileName,
-              std::vector <THic *>          * hics,
-              const char                    **hicIds)
+              const char                    * configFileName /*=""*/,
+              std::vector <THic *>          * hics   /*=0*/,
+              const char                    **hicIds /*=0*/)
 {
 
   if(strlen(configFileName) == 0) // if length is 0 => use the default name or the Command Parameter
@@ -817,7 +817,7 @@ int initSetupEndurance(TConfig                        *config,
         }
       }
       else {
-        hics->push_back(new THicOB("Dummy ID", modId, pb[boardIndex], pbMod));
+        hics->push_back(new THicOB("Dummy_ID", modId, pb[boardIndex], pbMod));
       }
     }
   }
