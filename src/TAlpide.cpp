@@ -425,12 +425,6 @@ float TAlpide::ReadAnalogueVoltage() {
     AVDD_direct += 2. * ((float)theResult - (float)(GetADCOffset())) * 0.823e-3; // first approximation
   }
   AVDD_direct /= nSamples;
-  std::cout << "AVDD (direct measurement): " << AVDD_direct << "V";
-  if (AVDD_saturated)
-    std::cout << ", out-of-range (>1.72V)!";
-  std::cout << std::endl;
-  if (AVDD_direct < 1.55 && AVDD_direct > 0.)
-    std::cout << "AVDD below 1.55V, indirect measurement unreliable" << std::endl;
 
   // AVDD via VTEMP @ 200
   WriteRegister (Alpide::REG_VTEMP, 200);
