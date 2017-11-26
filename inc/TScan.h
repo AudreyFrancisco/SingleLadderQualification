@@ -28,33 +28,35 @@ typedef struct {
 
 class TScanConditionsHic {
   friend class TScan;
- private:
+private:
   float m_tempStart;
   float m_tempEnd;
+  float m_vddaStart;
+  float m_vddaEnd;
   float m_iddaStart;
   float m_iddaEnd;
   float m_idddStart;
   float m_idddEnd;
- public:
+public:
   TScanConditionsHic() {};
 };
 
 
 class TScanConditions {
   friend class TScan;
- private:
+private:
   char m_fwVersion[50];
   char m_swVersion[50];
   std::map <std::string, TScanConditionsHic*> m_hicConditions;
- public:
+public:
   TScanConditions() {};
   int AddHicConditions (std::string hicId, TScanConditionsHic *hicCond);
 };
 
 
 class TScan {
- private:
- protected:
+private:
+protected:
   TScanConfig                          *m_config;
   char                                  m_name [40];
   char                                  m_state[40];
@@ -78,7 +80,7 @@ class TScan {
   int            FindBoardIndex     (TAlpide *chip);
   std::string    FindHIC            (int boardIndex, int rcv);
   virtual THisto CreateHisto        () = 0;
- public:
+public:
   TScan (TScanConfig                   *config,
          std::vector <TAlpide *>        chips,
          std::vector <THic*>            hics,
@@ -109,8 +111,8 @@ class TScan {
 };
 
 class TMaskScan : public TScan {
- private:
- protected:
+private:
+protected:
   int                                   m_pixPerStage;
   int                                   m_nTriggers;
   int                                   m_row;
@@ -119,7 +121,7 @@ class TMaskScan : public TScan {
   virtual void ConfigureMaskStage(TAlpide *chip, int istage);
   void         FindTimeoutHics   (int iboard, int *triggerCounts);
   void         ReadEventData     (std::vector <TPixHit> *Hits, int iboard);
- public:
+public:
   TMaskScan  (TScanConfig                   *config,
               std::vector <TAlpide *>        chips,
               std::vector <THic *>           hics,

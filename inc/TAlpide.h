@@ -138,36 +138,36 @@ namespace Alpide {
   } TChipMode;
 
   typedef enum {
-	IREF_025uA = 0,
-	IREF_075uA = 1,
-	IREF_100uA = 2,
-	IREF_125uA = 3
+    IREF_025uA = 0,
+    IREF_075uA = 1,
+    IREF_100uA = 2,
+    IREF_125uA = 3
   } TDACMonIref;
 
   typedef enum {
-	MODE_MANUAL = 0,
-	MODE_CALIBRATE = 1,
-	MODO_AUTO = 2,
-	MODE_SUPERMANUAL = 3
+    MODE_MANUAL = 0,
+    MODE_CALIBRATE = 1,
+    MODO_AUTO = 2,
+    MODE_SUPERMANUAL = 3
   } TADCMode;
 
   typedef enum {
-	INP_AVSS = 0,
-	INP_DVSS = 1,
-	INP_AVDD = 2,
-	INP_DVDD = 3,
-	INP_VBGthVolScal = 4,
-	INP_DACMONV = 5,
-	INP_DACMONI = 6,
-	INP_Bandgap = 7,
-	INP_Temperature = 8
+    INP_AVSS = 0,
+    INP_DVSS = 1,
+    INP_AVDD = 2,
+    INP_DVDD = 3,
+    INP_VBGthVolScal = 4,
+    INP_DACMONV = 5,
+    INP_DACMONI = 6,
+    INP_Bandgap = 7,
+    INP_Temperature = 8
   } TADCInput;
 
   typedef enum {
   	COMP_180uA = 0,
- 	COMP_190uA = 1,
- 	COMP_296uA = 2,
- 	COMP_410uA = 3
+    COMP_190uA = 1,
+    COMP_296uA = 2,
+    COMP_410uA = 3
   } TADCComparator;
 
   typedef enum {
@@ -183,7 +183,7 @@ class TReadoutBoard;
 class THic;
 
 class TAlpide {
- private:
+private:
   TChipConfig   *fConfig;
   int            fChipId;
   TReadoutBoard *fReadoutBoard;
@@ -195,8 +195,8 @@ class TAlpide {
   bool		fADCSign;
 
 
- protected:
- public:
+protected:
+public:
   TAlpide (TChipConfig *config);
   TAlpide (TChipConfig *config, TReadoutBoard *readoutBoard);
   TChipConfig   *GetConfig ()                {return fConfig;};
@@ -226,6 +226,7 @@ public:
   void SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef = Alpide::IREF_100uA);
   uint16_t SetTheADCCtrlRegister(Alpide::TADCMode Mode, Alpide::TADCInput SelectInput, Alpide::TADCComparator ComparatorCurrent, Alpide::TADCRampSpeed RampSpeed);
   float ReadTemperature();
+  float ReadAnalogueVoltage();
   float ReadDACVoltage(Alpide::TRegister ADac);
   float ReadDACCurrent(Alpide::TRegister ADac);
 

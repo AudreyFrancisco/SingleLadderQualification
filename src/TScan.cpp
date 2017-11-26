@@ -48,7 +48,7 @@ void TScan::Init()
     if(!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
-  
+
   //char dummy[10];
   //std::cout << "after power on, press enter to proceed" << std::endl;
   //std::cin >> dummy;
@@ -60,6 +60,7 @@ void TScan::Init()
   strcpy(m_conditions.m_swVersion, VERSION);
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart = m_hics.at(ihic)->GetTemperature();
+    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaStart = m_hics.at(ihic)->GetAnalogueVoltage();
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaStart = m_hics.at(ihic)->GetIdda();
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddStart = m_hics.at(ihic)->GetIddd();
 
@@ -76,7 +77,7 @@ void TScan::Init()
 
 // seems the board index is not accessible anywhere.
 // for the time being do like this...
-int  TScan::FindBoardIndex (TAlpide *chip) 
+int  TScan::FindBoardIndex (TAlpide *chip)
 {
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     if (m_boards.at(i) == chip->GetReadoutBoard()) return i;
@@ -85,7 +86,7 @@ int  TScan::FindBoardIndex (TAlpide *chip)
 }
 
 
-std::string TScan::FindHIC(int boardIndex, int rcv) 
+std::string TScan::FindHIC(int boardIndex, int rcv)
 {
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     if (m_hics.at(i)->ContainsReceiver(boardIndex, rcv)) {
@@ -100,16 +101,17 @@ void TScan::Terminate()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd = m_hics.at(ihic)->GetTemperature();
+    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaEnd = m_hics.at(ihic)->GetAnalogueVoltage();
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaEnd = m_hics.at(ihic)->GetIdda();
     m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddEnd = m_hics.at(ihic)->GetIddd();
   }
   strcpy(m_state, "Done");
-  
+
   // reset voltage drop correction, reset chips, apply voltage drop correction to reset state
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if(!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), true);
-  }  
+  }
 
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode (Alpide::OPCODE_GRST);
@@ -118,7 +120,7 @@ void TScan::Terminate()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if(!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), false);
-  }  
+  }
 
   if (m_histo) delete m_histo;
 }
@@ -182,7 +184,7 @@ void TScan::CreateScanHisto ()
 }
 
 
-TErrorCounter TScan::GetErrorCount (std::string hicId) 
+TErrorCounter TScan::GetErrorCount (std::string hicId)
 {
   auto hicCount = m_errorCounts.find(hicId);
 
@@ -257,7 +259,7 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
       usleep(1000);
       trials ++;
       if (trials == 3) {
-  	  std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event" << std::endl;
+        std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event" << std::endl;
         itrg = m_nTriggers * m_enabled[iboard];
         FindTimeoutHics(iboard, nTrigPerHic);
         m_errorCount.nTimeout ++;
@@ -272,7 +274,7 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
         m_errorCount.n8b10b++;
         if (FindHIC(iboard, boardInfo.channel).compare ("None") != 0) {
           m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).n8b10b++;
-	}
+        }
       }
       int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
       if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
@@ -281,7 +283,7 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
         m_errorCount.nCorruptEvent ++;
         if (FindHIC(iboard, boardInfo.channel).compare ("None") != 0) {
           m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nCorruptEvent++;
-	}
+        }
         if (nBad > 10) continue;
         FILE *fDebug = fopen ("DebugData.dat", "a");
         fprintf(fDebug, "Bad event:\n");

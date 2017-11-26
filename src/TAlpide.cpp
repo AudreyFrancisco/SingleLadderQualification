@@ -386,7 +386,66 @@ float TAlpide::ReadTemperature() {
   ReadRegister( Alpide::REG_ADC_AVSS, theResult);
   theResult -=  (uint16_t)fADCOffset;
   theValue =  ( ((float)theResult) * 0.1281) + 6.8; // first approximation
-  return(theValue);
+  return theValue;
+}
+
+/* ------------------------------------------------------
+ * Reads the analogue supply voltage by means of internal ADC
+ *
+ * Returns  : the value in Volts.
+ *
+ * Note  : if this was the first measure after the chip
+ *         configuration phase, a calibration will be
+ *         automatically executed.
+ *
+ */
+float TAlpide::ReadAnalogueVoltage() {
+
+  if(fADCOffset == -1) { // needs calibration
+    CalibrateADC();
+  }
+
+  float AVDD_direct = 0.;
+  float AVDD_VTEMP  = 0.;
+
+  bool AVDD_saturated = false;
+
+  uint16_t theResult = 0;
+  const unsigned int nSamples = 30;
+
+  // AVDD direct
+  for (unsigned int repetition = 0; repetition < nSamples; ++repetition) {
+    SetTheDacMonitor(Alpide::REG_ANALOGMON);
+    SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
+    usleep(5000);
+    GetReadoutBoard()->SendCommand (Alpide::COMMAND_ADCMEASURE, this);
+    usleep(5000);
+    ReadRegister(Alpide::REG_ADC_AVSS, theResult);
+    if (theResult == 1055) AVDD_saturated = true;
+    AVDD_direct += 2. * ((float)theResult - (float)(GetADCOffset())) * 0.823e-3; // first approximation
+  }
+  AVDD_direct /= nSamples;
+  std::cout << "AVDD (direct measurement): " << AVDD_direct << "V";
+  if (AVDD_saturated)
+    std::cout << ", out-of-range (>1.72V)!";
+  std::cout << std::endl;
+  if (AVDD_direct < 1.55 && AVDD_direct > 0.)
+    std::cout << "AVDD below 1.55V, indirect measurement unreliable" << std::endl;
+
+  // AVDD via VTEMP @ 200
+  WriteRegister (Alpide::REG_VTEMP, 200);
+  usleep(5000);
+
+  for (unsigned int repetition = 0; repetition < nSamples; ++repetition) {
+    // calculated AVDD based on VTEMP
+    AVDD_VTEMP += ReadDACVoltage(Alpide::REG_VTEMP) / 0.772 + 0.023;
+  }
+  AVDD_VTEMP /= nSamples;
+
+  if (AVDD_direct < 1.7)
+    return AVDD_direct;
+  else
+    return AVDD_VTEMP;
 }
 
 /* ------------------------------------------------------

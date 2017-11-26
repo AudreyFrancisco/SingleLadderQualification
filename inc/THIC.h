@@ -52,7 +52,8 @@ class THic {
   TAlpide                   *GetChipById     (int chipId);
   TPowerBoard               *GetPowerBoard   () {return m_powerBoard;};
   int                        GetPbMod        () {return m_pbMod;};
-  void                       SwitchBias      (bool on); 
+  void                       SwitchBias      (bool on);
+  float                      GetAnalogueVoltage();
 };
 
 

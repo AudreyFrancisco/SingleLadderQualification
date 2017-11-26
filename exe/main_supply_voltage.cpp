@@ -35,7 +35,7 @@ std::vector <TReadoutBoard *> fBoards;
 TBoardType boardType;
 std::vector <TAlpide *> fChips;
 
-unsigned int mySampleRepetition = 50;
+unsigned int mySampleRepetition = 30;
 
 
 int configureChip(TAlpide *chip) {

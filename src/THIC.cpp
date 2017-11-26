@@ -15,9 +15,9 @@ THic::THic (const char *id, int modId, TPowerBoard *pb, int pbMod)
 }
 
 
-int THic::AddChip (TAlpide *chip) 
+int THic::AddChip (TAlpide *chip)
 {
-  m_chips.push_back(chip); 
+  m_chips.push_back(chip);
   return GetNChips();
 }
 
@@ -28,7 +28,7 @@ bool THic::ContainsChip (int index)
   idx.boardIndex   = (index >> 8) & 0xf;
   idx.dataReceiver = (index >> 4) & 0xf;
   idx.chipId       = index & 0xf;
-  
+
   return ContainsChip (idx);
 }
 
@@ -62,11 +62,11 @@ void THic::Disable ()
 {
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
     m_chips.at(ichip)->GetConfig()->SetEnable(false);
-  }  
+  }
 }
 
 
-bool THic::IsPowered() 
+bool THic::IsPowered()
 {
   // TODO: what if partially powered? What about bias?
   return ((IsPoweredAnalog()) && (IsPoweredDigital()));
@@ -91,16 +91,16 @@ bool THic::IsPoweredDigital ()
 void THic::PowerOn()
 {
   TReadoutBoardMOSAIC *mosaic, *mosaic2 = 0;
-  
+
   if (IsPowered()) return;
   mosaic = (TReadoutBoardMOSAIC*) m_chips.at(0)->GetReadoutBoard();
 
   // OB-HS -> 2 different MOSAICs
-  // all other HIC types (IB and OB HIC alone) have the same MOSAIC on chip 0 and 7 
-  if (m_chips.at(7)->GetReadoutBoard() != m_chips.at(0)->GetReadoutBoard()) {  
+  // all other HIC types (IB and OB HIC alone) have the same MOSAIC on chip 0 and 7
+  if (m_chips.at(7)->GetReadoutBoard() != m_chips.at(0)->GetReadoutBoard()) {
     mosaic2 = (TReadoutBoardMOSAIC*) m_chips.at(7)->GetReadoutBoard();
   }
- 
+
   mosaic->enableClockOutput(false);
   if (mosaic2) mosaic2->enableClockOutput(false);
   sleep(1);
@@ -114,13 +114,13 @@ void THic::PowerOn()
 void THic::PowerOff()
 {
   if (!IsPowered()) return;
-  
+
   if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, false);
   // Q: do we need to consider case where part of the channels is on?
 }
 
 
-float THic::GetIddd() 
+float THic::GetIddd()
 {
   if (m_powerBoard) {
     return m_powerBoard->GetDigitalCurrent(m_pbMod);
@@ -164,11 +164,11 @@ void THic::ScaleVoltage(float aFactor)
 
   pbConfig->GetModuleSetUp(m_pbMod, &AVSet, &AISet, &DVSet, &DISet, &BiasOn);
 
-  m_powerBoard->SetModule (m_pbMod, 
-                           AVSet *aFactor, 
-			   AISet *aFactor, 
-                           DVSet *aFactor, 
-			   DISet *aFactor, 
+  m_powerBoard->SetModule (m_pbMod,
+                           AVSet *aFactor,
+			   AISet *aFactor,
+                           DVSet *aFactor,
+			   DISet *aFactor,
 			   BiasOn);
 }
 
@@ -185,19 +185,35 @@ void THic::SwitchBias (bool on)
 }
 
 
-float THic::GetTemperature() 
+float THic::GetTemperature()
 {
-  float result = 0; 
+  float result = 0;
   int   nChips = 0;
 
-  for (int i = 0; i < (int)m_chips.size(); i++) {
+  for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (! m_chips.at(i)->GetConfig()->IsEnabled()) continue;
     result += m_chips.at(i)->ReadTemperature();
     nChips ++;
   }
-  
-  if (nChips > 0) return result / nChips;
-  else return 0;
+
+  if (nChips > 0) return result / (float)nChips;
+  else return 0.;
+}
+
+
+float THic::GetAnalogueVoltage()
+{
+  float result = 0;
+  int   nChips = 0;
+
+  for (unsigned int i = 0; i < m_chips.size(); i++) {
+    if (! m_chips.at(i)->GetConfig()->IsEnabled()) continue;
+    result += m_chips.at(i)->ReadAnalogueVoltage();
+    nChips ++;
+  }
+
+  if (nChips > 0.) return result / (float)nChips;
+  else return 0.;
 }
 
 
@@ -208,7 +224,7 @@ THicIB::THicIB (const char *dbId, int modId, TPowerBoard *pb, int pbMod)
 }
 
 
-void THicIB::ConfigureInterface (int board, int *rcv, int ctrl) 
+void THicIB::ConfigureInterface (int board, int *rcv, int ctrl)
 {
   m_boardidx = board;
   m_ctrl     = ctrl;
@@ -218,7 +234,7 @@ void THicIB::ConfigureInterface (int board, int *rcv, int ctrl)
 }
 
 
-common::TChipIndex THicIB::GetChipIndex (int i) 
+common::TChipIndex THicIB::GetChipIndex (int i)
 {
   common::TChipIndex idx;
   if (i > (int)m_chips.size()) {
@@ -235,7 +251,7 @@ common::TChipIndex THicIB::GetChipIndex (int i)
 }
 
 
-std::vector<int> THicIB::GetBoardIndices () 
+std::vector<int> THicIB::GetBoardIndices ()
 {
   std::vector<int> Indices;
   Indices.push_back(m_boardidx);
@@ -270,7 +286,7 @@ THicOB::THicOB (const char *dbId, int modId, TPowerBoard *pb, int pbMod)
 }
 
 
-common::TChipIndex THicOB::GetChipIndex (int i) 
+common::TChipIndex THicOB::GetChipIndex (int i)
 {
   common::TChipIndex idx;
   if (i > (int)m_chips.size()) {
@@ -294,7 +310,7 @@ common::TChipIndex THicOB::GetChipIndex (int i)
 }
 
 
-std::vector<int> THicOB::GetBoardIndices () 
+std::vector<int> THicOB::GetBoardIndices ()
 {
   std::vector<int> Indices;
   Indices.push_back(m_boardidx0);
@@ -304,7 +320,7 @@ std::vector<int> THicOB::GetBoardIndices ()
 }
 
 
-void THicOB::ConfigureMaster (int Master, int board, int rcv, int ctrl) 
+void THicOB::ConfigureMaster (int Master, int board, int rcv, int ctrl)
 {
   if (Master == 0) {
     m_boardidx0 = board;
@@ -322,17 +338,17 @@ void THicOB::ConfigureMaster (int Master, int board, int rcv, int ctrl)
 }
 
 
-bool THicOB::ContainsChip (common::TChipIndex idx) 
+bool THicOB::ContainsChip (common::TChipIndex idx)
 {
   if (idx.chipId < 7) {
     if (((int)idx.boardIndex   == m_boardidx0) &&
-        ((int)idx.dataReceiver == m_rcv0)) 
+        ((int)idx.dataReceiver == m_rcv0))
       return true;
   }
   else {
     if (((int)idx.boardIndex   == m_boardidx8) &&
-        ((int)idx.dataReceiver == m_rcv8)) 
-      return true;    
+        ((int)idx.dataReceiver == m_rcv8))
+      return true;
   }
 
   return false;
