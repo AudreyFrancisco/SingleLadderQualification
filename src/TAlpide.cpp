@@ -436,7 +436,7 @@ float TAlpide::ReadAnalogueVoltage() {
   }
   AVDD_VTEMP /= nSamples;
 
-  if (AVDD_direct < 1.7)
+  if (AVDD_direct < 1.7 && !AVDD_saturated)
     return AVDD_direct;
   else
     return AVDD_VTEMP;

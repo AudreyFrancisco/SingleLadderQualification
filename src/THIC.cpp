@@ -166,10 +166,10 @@ void THic::ScaleVoltage(float aFactor)
 
   m_powerBoard->SetModule (m_pbMod,
                            AVSet *aFactor,
-			   AISet *aFactor,
+                           AISet *aFactor,
                            DVSet *aFactor,
-			   DISet *aFactor,
-			   BiasOn);
+                           DISet *aFactor,
+                           BiasOn);
 }
 
 
