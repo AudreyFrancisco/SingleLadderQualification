@@ -81,6 +81,7 @@ TPowerBoard::TPowerBoard(TReadoutBoardMOSAIC *board)
   -------------------------- */
 void TPowerBoard::Init()
 {
+  fPowerBoardConfig->ReadCalibrationFile();
 	thePowerBoardState = new powerboard::pbstate;
 
 	fPBoard.VBset = fPowerBoardConfig->GetBiasVoltage();
@@ -260,8 +261,8 @@ void TPowerBoard::CalibrateVoltage(int module)
 {
   // two set points that fall on a full bin
   // set the lower voltage second to not risk applying 2.2 V to a HIC
-  float set2 = -0.4;
-  float set1 = -4;
+  float set2 = 1.58;  //-0.4;
+  float set1 = 2.187; // -4;
   float analog1, analog2, digital1, digital2;
   float manalog, mdigital, banalog, bdigital;
 
@@ -340,8 +341,8 @@ void TPowerBoard::CalibrateBiasVoltage()
 {
   // two set points that fall on a full bin
   // set the lower voltage second to not risk applying 2.2 V to a HIC
-  float set2 = 1.58;
-  float set1 = 2.187;
+  float set2 = -0.4;// 1.58;  
+  float set1 = -4; // 2.187;
   float measured1, measured2;
   float m, b;
 

@@ -46,17 +46,3 @@ void Calibrationpb::getcalibration(float savdd,float iavdd, float sdvdd,float id
 
 }
 
-
-void Calibrationpb::setpowerunit(int &unit){
-
-  if(ui->top->isChecked()){
-    ui->bottom->setChecked(false);
-    unit=1;
-  }
-  if(ui->bottom->isChecked()){
-
-    ui->top->setChecked(false);
-    unit=0;
-  }
-
-}

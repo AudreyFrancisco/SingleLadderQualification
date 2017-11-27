@@ -75,7 +75,6 @@ TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName)
                 fPBConfig.Modul[i].CalGNDLineR = DEF_CALGNDLINER;
 	}
 
-        ReadCalibrationFile();
 	if (AConfigFileName) { // Read Configuration file
 		try {
 			if(AConfigFileName == NULL || strlen(AConfigFileName) == 0) throw std::invalid_argument("MOSAIC Config : invalid filename");
@@ -88,6 +87,7 @@ TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName)
 	}
 
         m_bottom = DEF_BOTTOM;
+	InitParamMap();
 }
 
 /* -------------------------
@@ -382,8 +382,11 @@ void TPowerBoardConfig::GetIBiasCalibration (float &AOffset)
 
 // sets the line resistances in the calibration part of the configuration
 // expects the external resistances (breakout board -> module) and adds the internal ones
-void TPowerBoardConfig::EnterMeasuredLineResistances (int mod, int powerUnit, float ALineR, float DLineR, float GNDLineR)
+
+// TODO: substitute powerUnit by Top/Bottom variable
+void TPowerBoardConfig::EnterMeasuredLineResistances (int mod, float ALineR, float DLineR, float GNDLineR)
 {
+  int powerUnit = ((m_bottom == 0)?1:0);
   fPBConfig.Modul[mod].CalDLineR   = DLineR + RDigital[powerUnit][mod];
   fPBConfig.Modul[mod].CalALineR   = ALineR + RAnalog [powerUnit][mod];
   fPBConfig.Modul[mod].CalGNDLineR = GNDLineR;
@@ -415,8 +418,13 @@ void TPowerBoardConfig::WriteCalibrationFile ()
 {
   float ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, DVScale, AVOffset, DVOffset;
   float VBScale, VBOffset, IBOffset;
-  FILE *fp = fopen ("PBCalib.dat", "w");
-  
+  FILE  *fp;
+  if (m_bottom) {
+    fp = fopen ("PBBottomCalib.cfg", "w");
+  }
+  else {
+    fp = fopen ("PBTopCalib.cfg", "w");
+  }
   for (int imod = 0; imod < MAX_MOULESPERMOSAIC; imod++) {
     GetLineResistances (imod, ALineR, DLineR, GNDLineR);
     GetICalibration    (imod, AIOffset, DIOffset);
@@ -437,8 +445,18 @@ void TPowerBoardConfig::ReadCalibrationFile()
   float VBScale, VBOffset, IBOffset;
   int   mod;
   int   nLines = 0;
-  FILE *fp = fopen ("PBCalib.dat", "r");
-  if (!fp) return;
+  FILE  *fp;
+  if (m_bottom) {
+    fp = fopen ("PBBottomCalib.cfg", "r");
+  }
+  else {
+    fp = fopen ("PBTopCalib.cfg", "r");
+  }
+
+  if (!fp) {
+    std::cout << "No calibration file found" << std::endl; 
+    return;
+  }
   for (int imod = 0; imod < MAX_MOULESPERMOSAIC; imod++) {
     if (fscanf(fp, "%d %f %f %f %f %f %f %f %f %f\n",
   		  &mod, &ALineR, &DLineR, &GNDLineR, &AIOffset, &DIOffset, &AVScale, &AVOffset, &DVScale, &DVOffset) == 10)

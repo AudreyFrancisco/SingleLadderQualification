@@ -170,7 +170,7 @@ public:
         void GetVBiasCalibration  (float &AScale, float &AOffset);
         void GetIBiasCalibration  (float &AOffset);
         void SetLineResistances   (int mod, float ALineR, float DLineR, float GNDLineR);
-        void EnterMeasuredLineResistances   (int mod, int powerUnit, float ALineR, float DLineR, float GNDLineR);
+        void EnterMeasuredLineResistances   (int mod, float ALineR, float DLineR, float GNDLineR);
         void GetLineResistances   (int mod, float &ALineR, float &DLineR, float &GNDLineR);
         bool IsCalibrated         (int mod);
         void WriteCalibrationFile ();

@@ -2442,9 +2442,19 @@ void MainWindow::colorsinglescan(int i){
 
 
 void MainWindow::writecalibrationfile(){
+  TPowerBoard *powerBoard0 = fHICs.at(0)->GetPowerBoard();
 
-    pbconfig->WriteCalibrationFile();
-    calwindow->close();
+  powerBoard0->GetConfigurationHandler()->WriteCalibrationFile();
+
+  for (unsigned int i = 1; i < fHICs.size(); i++) {  // check if 2nd powerunit used
+    TPowerBoard *powerBoard = fHICs.at(i)->GetPowerBoard();
+    if (powerBoard != powerBoard0) {
+      powerBoard->GetConfigurationHandler()->WriteCalibrationFile();
+      calwindow->close();
+      return;    // assume maximum of 2 power boards in setup
+    }
+  }
+  calwindow->close();
 
 }
 
@@ -2474,25 +2484,39 @@ void MainWindow::setTopBottom(int unit)
 void MainWindow::setandgetcalibration(){
 
     float ares,gres, dres;
-    int unit;
-
+    TPowerBoard *powerBoard0 = fHICs.at(0)->GetPowerBoard();
+    TPowerBoard *powerBoard1 = 0;
 
     calwindow->setresistances(ares,dres,gres);
 
     std::cout<<ares<<" input values"<<dres<< std::endl;
-    calwindow->setpowerunit(unit);
-    std::cout<<unit<<"number of the unit"<<std::endl;
-    setTopBottom (unit);
-    pbconfig->EnterMeasuredLineResistances(pbnumberofmodule,unit,ares,dres,gres);
-    pb->CalibrateVoltage(pbnumberofmodule);
-    pb->CalibrateCurrent(pbnumberofmodule);
+    //calwindow->setpowerunit(unit);
+    //std::cout<<unit<<"number of the unit"<<std::endl;
+    //setTopBottom (unit);
 
+    for (unsigned int ihic = 0; ihic < fHICs.size(); ihic++) {
+      TPowerBoard *powerBoard = fHICs.at(ihic)->GetPowerBoard();
+      if (powerBoard != powerBoard0) { // second power unit used
+        powerBoard1 = powerBoard;
+      }
+      powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(fHICs.at(ihic)->GetPbMod(),ares,dres,gres);
+      pb->CalibrateVoltage(fHICs.at(ihic)->GetPbMod());
+      pb->CalibrateCurrent(fHICs.at(ihic)->GetPbMod());
+    }
 
+    powerBoard0->CalibrateBiasVoltage();
+    powerBoard0->CalibrateBiasCurrent();
+    
+    if (powerBoard1 != 0) {
+      powerBoard1->CalibrateBiasVoltage();
+      powerBoard1->CalibrateBiasCurrent();
+    }
+    // display calibration of HIC 0
     float avscale,dvscale,avoffset,dvoffset,aioffset,dioffset;
 
-    pbconfig->GetVCalibration(pbnumberofmodule,avscale,dvscale,avoffset,dvoffset);
+    pbconfig->GetVCalibration(fHICs.at(0)->GetPbMod(),avscale,dvscale,avoffset,dvoffset);
 
-    pbconfig->GetICalibration(pbnumberofmodule,aioffset,dioffset);
+    pbconfig->GetICalibration(fHICs.at(0)->GetPbMod(),aioffset,dioffset);
 
     calwindow->getcalibration(avscale,avoffset,dvscale,dvoffset,aioffset,dioffset);
 

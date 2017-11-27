@@ -338,50 +338,6 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="label_13">
-   <property name="geometry">
-    <rect>
-     <x>560</x>
-     <y>30</y>
-     <width>91</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>13</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Power Unit</string>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="top">
-   <property name="geometry">
-    <rect>
-     <x>550</x>
-     <y>80</y>
-     <width>111</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Top</string>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="bottom">
-   <property name="geometry">
-    <rect>
-     <x>550</x>
-     <y>120</y>
-     <width>111</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Bottom</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_14">
    <property name="geometry">
     <rect>

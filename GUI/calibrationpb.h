@@ -18,7 +18,6 @@ class Calibrationpb : public QDialog
   public slots:
     virtual void setresistances(float &analog,float &digital, float &bb);
   virtual void getcalibration(float savdd,float iavdd, float sdvdd,float idvdd,float offsetia,float offsetid);
-  virtual void setpowerunit(int &unit);
 
  private:
   Ui::Calibrationpb *ui;
