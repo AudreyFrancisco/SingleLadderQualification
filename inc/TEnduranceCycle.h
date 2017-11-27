@@ -11,16 +11,16 @@
 #include "THIC.h"
 
 typedef struct {
-  THicType hicType;
-  bool     trip;
-  float    iddaClocked;
-  float    idddClocked;
-  float    iddaConfigured;
-  float    idddConfigured;
-  float    tempStart;
-  float    tempEnd;
-  int      nWorkingChips;
-} THicResult;
+  THicType m_hicType;
+  bool     m_trip;
+  float    m_iddaClocked;
+  float    m_idddClocked;
+  float    m_iddaConfigured;
+  float    m_idddConfigured;
+  float    m_tempStart;
+  float    m_tempEnd;
+  int      m_nWorkingChips;
+} THicCounter;
 
 class TEnduranceCycle : public TScan {
  private:
@@ -33,8 +33,8 @@ class TEnduranceCycle : public TScan {
   void   ConfigureChip      (TAlpide *chip);
   void   ConfigureMask      (TAlpide *chip);
   void   CountWorkingChips  ();
-  std::map    <std::string, THicResult>            m_hicResults;
-  std::vector <std::map <std::string, THicResult>> m_resultVector;
+  std::map    <std::string, THicCounter>            m_hicCounters;
+  std::vector <std::map <std::string, THicCounter>> m_counterVector;
  protected:
  public:
   TEnduranceCycle  (TScanConfig                   *config,
@@ -51,7 +51,7 @@ class TEnduranceCycle : public TScan {
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void LoopEnd     (int loopIndex);
   void PrepareStep (int loopIndex) {};
-  std::vector <std::map <std::string, THicResult>> GetResults () {return m_resultVector;};
+  std::vector <std::map <std::string, THicCounter>> GetCounters () {return m_counterVector;};
 };
 
 

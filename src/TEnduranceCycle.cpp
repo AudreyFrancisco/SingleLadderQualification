@@ -37,9 +37,9 @@ void TEnduranceCycle::CreateMeasurements()
 {
   // create map with measurement structure for each HIC
   for (unsigned int i = 0; i < m_hics.size(); i++) {
-    THicResult hicResult;
-    hicResult.hicType = m_hics.at(i)->GetHicType();
-    m_hicResults.insert (std::pair<std::string, THicResult> (m_hics.at(i)->GetDbId(), hicResult));
+    THicCounter hicCounter;
+    hicCounter.m_hicType = m_hics.at(i)->GetHicType();
+    m_hicCounters.insert (std::pair<std::string, THicCounter> (m_hics.at(i)->GetDbId(), hicCounter));
   }
 }
 
@@ -47,7 +47,7 @@ void TEnduranceCycle::CreateMeasurements()
 void TEnduranceCycle::ClearCounters()
 {
   for (unsigned int i = 0; i < m_hics.size(); i++) {
-    m_hicResults.at(m_hics.at(i)->GetDbId()).nWorkingChips = 0;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_nWorkingChips = 0;
   }						 
 }
 
@@ -83,7 +83,7 @@ void TEnduranceCycle::CountWorkingChips ()
       m_chips.at(i)->ReadRegister (0x60d, Value);
       if (WriteValue == Value) {
 	THic *hic = m_chips.at(i)->GetHic();
-        m_hicResults.at(hic->GetDbId()).nWorkingChips ++;
+        m_hicCounters.at(hic->GetDbId()).m_nWorkingChips ++;
 	m_chips.at(i)->SetEnable(true);
       }
       else {
@@ -150,16 +150,16 @@ void TEnduranceCycle::Execute()
   // 1) Power on all HICs, check for trips, measure currents
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->PowerOn();
-    m_hicResults.at(m_hics.at(ihic)->GetDbId()).idddClocked = m_hics.at(ihic)->GetIddd();
-    m_hicResults.at(m_hics.at(ihic)->GetDbId()).iddaClocked = m_hics.at(ihic)->GetIdda();
-    m_hicResults.at(m_hics.at(ihic)->GetDbId()).trip        = !(m_hics.at(ihic)->IsPowered());
+    m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_idddClocked = m_hics.at(ihic)->GetIddd();
+    m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_iddaClocked = m_hics.at(ihic)->GetIdda();
+    m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_trip        = !(m_hics.at(ihic)->IsPowered());
   }
 
   // 2) enable all chips, check control interfaces -> number of working chips
   //    measure initial temperature (here and not earlier to avoid non-working chips
   CountWorkingChips();
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_hicResults.at(m_hics.at(ihic)->GetDbId()).tempStart = m_hics.at(ihic)->GetTemperature();    
+    m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_tempStart = m_hics.at(ihic)->GetTemperature();    
   }
   
   // 3) configure chips, measure currents
@@ -178,8 +178,8 @@ void TEnduranceCycle::Execute()
   }
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-    m_hicResults.at(m_hics.at(ihic)->GetDbId()).idddConfigured = m_hics.at(ihic)->GetIddd();
-    m_hicResults.at(m_hics.at(ihic)->GetDbId()).iddaConfigured = m_hics.at(ihic)->GetIdda();
+    m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_idddConfigured = m_hics.at(ihic)->GetIddd();
+    m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_iddaConfigured = m_hics.at(ihic)->GetIdda();
   }
 
   // 4) trigger
@@ -189,7 +189,7 @@ void TEnduranceCycle::Execute()
 
   // 5) measure final temperature & power off
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_hicResults.at(m_hics.at(ihic)->GetDbId()).tempEnd = m_hics.at(ihic)->GetTemperature();
+    m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_tempEnd = m_hics.at(ihic)->GetTemperature();
     m_hics.at(ihic)->PowerOff();
   }  
 }
@@ -198,7 +198,7 @@ void TEnduranceCycle::Execute()
 void TEnduranceCycle::LoopEnd(int loopIndex)
 {
   if (loopIndex == 0) {
-    m_resultVector.push_back(m_hicResults);
+    m_counterVector.push_back(m_hicCounters);
     ClearCounters();
   }  
 }
