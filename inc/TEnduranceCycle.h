@@ -17,6 +17,8 @@ typedef struct {
   float    idddClocked;
   float    iddaConfigured;
   float    idddConfigured;
+  float    tempStart;
+  float    tempEnd;
   int      nWorkingChips;
 } THicResult;
 

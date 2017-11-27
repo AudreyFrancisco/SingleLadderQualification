@@ -156,7 +156,11 @@ void TEnduranceCycle::Execute()
   }
 
   // 2) enable all chips, check control interfaces -> number of working chips
+  //    measure initial temperature (here and not earlier to avoid non-working chips
   CountWorkingChips();
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hicResults.at(m_hics.at(ihic)->GetDbId()).tempStart = m_hics.at(ihic)->GetTemperature();    
+  }
   
   // 3) configure chips, measure currents
   for (unsigned int i = 0; i < m_boards.size(); i++) {
@@ -183,8 +187,9 @@ void TEnduranceCycle::Execute()
     m_boards.at(iboard)->Trigger(m_triggers);
   }
 
-  // 5) power off
+  // 5) measure final temperature & power off
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hicResults.at(m_hics.at(ihic)->GetDbId()).tempEnd = m_hics.at(ihic)->GetTemperature();
     m_hics.at(ihic)->PowerOff();
   }  
 }
