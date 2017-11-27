@@ -47,8 +47,7 @@ void TEnduranceCycle::CreateMeasurements()
 void TEnduranceCycle::ClearCounters()
 {
   for (unsigned int i = 0; i < m_hics.size(); i++) {
-    THicResult result = m_hicResults.at(m_hics.at(i)->GetDbId());
-    result.nWorkingChips = 0;
+    m_hicResults.at(m_hics.at(i)->GetDbId()).nWorkingChips = 0;
   }						 
 }
 
