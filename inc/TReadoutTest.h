@@ -16,10 +16,6 @@
 
 class TReadoutTest : public TDataTaking {
  private:
-  int                   m_nTrains;
-  int                   m_nLast;
-  std::vector <TPixHit> m_stuck;
-  TErrorCounter         m_errorCount;
   void                  ConfigureChip (TAlpide *chip);
   void                  ConfigureMask (TAlpide *chip, std::vector <TPixHit> *MaskedPixels);
  protected:
