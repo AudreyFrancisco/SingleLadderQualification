@@ -66,7 +66,7 @@ public:
 	int SendCommand       (Alpide::TCommand Command, TAlpide *chipPtr);
         // Markus: changed trigger delay type from uint32_t to int, since changed upstream
 	int SetTriggerConfig  (bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
-	void SetTriggerSource  (TTriggerSource triggerSource);
+	void SetTriggerSource (TTriggerSource triggerSource);
 	int Trigger           (int nTriggers);
         // Markus: changed data type from char to unsigned char; check that no problem
         // (should be OK at least for memcpy)
@@ -85,9 +85,8 @@ public:
 
 	int  GetFwMajVersion() { return(theVersionMaj); };
 	int  GetFwMinVersion() { return(theVersionMin); };
-	char *GetFwIdString() { return(theVersionId); };
+	char *GetFwIdString () { return(theVersionId); };
 	powerboard *GetPowerBoardHandle() { return(pb); };
-
 
 
 private:

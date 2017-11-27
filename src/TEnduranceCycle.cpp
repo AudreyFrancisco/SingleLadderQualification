@@ -56,8 +56,15 @@ void TEnduranceCycle::ClearCounters()
 void TEnduranceCycle::Init()
 {
   TScan::Init();
-  // switch power off here or hic-wise in execute?
-
+  // configure readout boards
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    ConfigureBoard(m_boards.at(i));
+  }
+  // disable all receivers
+  for (unsigned int i = 0; i < m_chips.size(); i ++) {
+    if (! (m_chips.at(i)->GetConfig()->IsEnabled())) continue;
+    m_chips.at(i)->GetReadoutBoard()->SetChipEnable(m_chips.at(i), false);
+  }
 }
 
 
@@ -91,7 +98,6 @@ void TEnduranceCycle::CountWorkingChips ()
 }
 
 
-// TODO: Disable all MOSAIC receivers
 void TEnduranceCycle::ConfigureBoard (TReadoutBoard *board)
 {
   if (board->GetConfig()->GetBoardType() == boardDAQ) {
@@ -133,7 +139,10 @@ void TEnduranceCycle::ConfigureMask (TAlpide *chip)
 {
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
-  //TODO: unmask and select fixed amount of pixels
+
+  //TODO: decide on correct masking; for the time being: enable row 0
+  AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_MASK,   false, 0);
+  AlpideConfig::WritePixRegRow(chip, Alpide::PIXREG_SELECT, true,  0);
 }
 
 
@@ -152,8 +161,6 @@ void TEnduranceCycle::Execute()
   
   // 3) configure chips, measure currents
   for (unsigned int i = 0; i < m_boards.size(); i++) {
-    ConfigureBoard(m_boards.at(i));
-
     m_boards.at(i)->SendOpCode (Alpide::OPCODE_GRST);
     m_boards.at(i)->SendOpCode (Alpide::OPCODE_PRST);
   }
@@ -184,11 +191,10 @@ void TEnduranceCycle::Execute()
 }
 
 
-
 void TEnduranceCycle::LoopEnd(int loopIndex)
 {
   if (loopIndex == 0) {
-    // TODO: push result into vector
+    m_resultVector.push_back(m_hicResults);
     ClearCounters();
   }  
 }
@@ -198,4 +204,9 @@ void TEnduranceCycle::Terminate()
 {
   TScan::Terminate();
   m_running = false;
+  // re-enable receivers in readout board for all enabled chips
+  for (unsigned int i = 0; i < m_chips.size(); i ++) {
+    m_chips.at(i)->GetReadoutBoard()->SetChipEnable(m_chips.at(i), 
+                                                    m_chips.at(i)->GetConfig()->IsEnabled());
+  }
 }

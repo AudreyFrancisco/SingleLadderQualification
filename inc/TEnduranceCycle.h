@@ -31,7 +31,8 @@ class TEnduranceCycle : public TScan {
   void   ConfigureChip      (TAlpide *chip);
   void   ConfigureMask      (TAlpide *chip);
   void   CountWorkingChips  ();
-  std::map <std::string, THicResult> m_hicResults;
+  std::map    <std::string, THicResult>            m_hicResults;
+  std::vector <std::map <std::string, THicResult>> m_resultVector;
  protected:
  public:
   TEnduranceCycle  (TScanConfig                   *config,
@@ -48,7 +49,7 @@ class TEnduranceCycle : public TScan {
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void LoopEnd     (int loopIndex);
   void PrepareStep (int loopIndex) {};
-  //std::map <std::string, THicCurrents> GetCurrents() {return m_hicCurrents;};
+  std::vector <std::map <std::string, THicResult>> GetResults () {return m_resultVector;};
 };
 
 
