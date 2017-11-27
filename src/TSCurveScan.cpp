@@ -181,9 +181,7 @@ void TtuneVCASNScan::ConfigureChip(TAlpide *chip)
 
   AlpideConfig::ConfigureCMU (chip);
 
-  for(unsigned int i = 0; i < m_chips.size(); i++) {
-    m_chips.at(i)->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEL);
-  }
+  chip->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEL);
 }
 
 void TtuneITHRScan::ConfigureChip(TAlpide *chip)
@@ -194,9 +192,7 @@ void TtuneITHRScan::ConfigureChip(TAlpide *chip)
 
   AlpideConfig::ConfigureCMU (chip);
 
-  for(unsigned int i = 0; i < m_chips.size(); i++) {
-    m_chips.at(i)->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEL);
-  }
+  chip->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEL);
 }
 
 
