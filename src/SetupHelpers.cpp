@@ -17,12 +17,10 @@ char ConfigurationFileName[1024] = "Config.cfg";
 // --------------------------------------
 
 
-//Ycm: Use the same cade for all OB setup (initSetupOB, initSetupHalfStave, initSetupHalfStaveRU)
 void BaseConfigOBchip(TChipConfig*& chipConfig)
 {
   // --- Force the Link Speed values to 1.2 GHz in the Chip-Master
   //   in order to prevent wrong settings that stuck the DataLink
-  //   Antonio : 30/3/17
   int chipId = chipConfig->GetChipId();
   if (chipId%8!=0)  { // deactivate the DTU/PLL for none master chips
     chipConfig->SetParamValue("LINKSPEED", "-1");
@@ -139,9 +137,9 @@ int initSetupHalfStave(TConfig                        *config,
 {
   (*boardType) = boardMOSAIC;
   for (unsigned int i = 0; i < config->GetNBoards(); i++) {
-    TBoardConfigMOSAIC* boardConfig = (TBoardConfigMOSAIC*) config->GetBoardConfig(i);
-    boardConfig->SetSpeedMode    (Mosaic::RCV_RATE_400);
-    boards->push_back (new TReadoutBoardMOSAIC(config, boardConfig));
+    TBoardConfigMOSAIC* boardConfig = (TBoardConfigMOSAIC*)config->GetBoardConfig(i);
+    boardConfig->SetSpeedMode(Mosaic::RCV_RATE_400);
+    boards->push_back(new TReadoutBoardMOSAIC(config, boardConfig));
   }
 
   TPowerBoard *pb = 0;
@@ -149,20 +147,19 @@ int initSetupHalfStave(TConfig                        *config,
     pb = new TPowerBoard ((TReadoutBoardMOSAIC*) boards->at(0));
   }
 
-  std::vector <THic *>  m_Hics;
-  std::vector <THic *>* pHics = (hics) ? hics : &m_Hics;
+  if (!hics) hics = new std::vector<THic*>(); // create if not existent
 
   // TODO: Define power board mapping for half stave
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
-    pHics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic+1)).c_str(), config->GetHicConfig(ihic)->GetModId(), pb, 0));
-    ((THicOB*)(pHics->at(ihic)))->ConfigureMaster (0, 0, ihic, 0);
-    ((THicOB*)(pHics->at(ihic)))->ConfigureMaster (8, 1, ihic, 0);
+    hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic+1)).c_str(), config->GetHicConfig(ihic)->GetModId(), pb, 0));
+    ((THicOB*)(hics->at(ihic)))->ConfigureMaster (0, 0, ihic, 0);
+    ((THicOB*)(hics->at(ihic)))->ConfigureMaster (8, 1, ihic, 0);
   }
 
   for (unsigned int i = 0; i < config->GetNChips(); i++) {
-    TChipConfig* chipConfig = config   ->GetChipConfig(i);
-    int          chipId     = chipConfig->GetChipId    ();
-    int          mosaic     = (chipId & 0x8) ? 1:0;  //Yasser (Fix master0/8 pattern)
+    TChipConfig* chipConfig = config->GetChipConfig(i);
+    int          chipId     = chipConfig->GetChipId();
+    int          mosaic     = (chipId & 0x8) ? 1:0; // Side A8 = 1, side B0 = 0
     int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
     int          receiver   = chipConfig->GetParamValue("RECEIVER");
     //int          modId      = chipConfig->GetModuleId();
@@ -171,8 +168,8 @@ int initSetupHalfStave(TConfig                        *config,
 
     TAlpide* chip = new TAlpide(chipConfig);
     int iHic = -1;
-    for(unsigned int ihic = 0; ihic < pHics->size(); ihic++) {
-      if (pHics->at(ihic)->GetModId() == chip->GetConfig()->GetModuleId()) {
+    for(unsigned int ihic = 0; ihic < hics->size(); ihic++) {
+      if (hics->at(ihic)->GetModId() == chip->GetConfig()->GetModuleId()) {
         iHic = ihic;
         break;
       }
@@ -181,46 +178,38 @@ int initSetupHalfStave(TConfig                        *config,
       std::cout << "Module Id from chip " << chip->GetConfig()->GetModuleId() << " no match any HIC" << std::endl;
       abort();
     }
-    pHics->at(iHic)->AddChip(chip);
-    chip->SetHic(pHics->at(iHic));
+    hics->at(iHic)->AddChip(chip);
+    chip->SetHic(hics->at(iHic));
+
+    if (!hics->at(iHic)->IsEnabled()) chipConfig->SetParamValue("ENABLED", 0); // deactivate chip if the module is deactivated
 
     chips->push_back(chip);
-    chips->at(i) -> SetReadoutBoard(boards->at(mosaic));
+    chips->at(i)->SetReadoutBoard(boards->at(mosaic));
 
     THicConfigOB* hicOBconfig = (THicConfigOB*)config->GetHicConfig(iHic);
 
-    // to be checked when final layout of adapter fixed
-    // recivers linked to module position
     // vector to define how modules were placed in HS
-    bool LowHigh = (chipId & 0x8); //side A8 LowHigh = 1, side B0 LowHigh 0
-    bool isSideEnable = (LowHigh && hicOBconfig->IsEnabledA8()) || (!LowHigh && hicOBconfig->IsEnabledB0());
+    bool isSideEnable = (mosaic==1 && hicOBconfig->IsEnabledA8()) || (mosaic==0 && hicOBconfig->IsEnabledB0());
     int modPos = hicOBconfig->GetParamValue("HSPOSBYID");
     if ((modPos<=0) || !isSideEnable) { //Position for modId not found, disabling all chips for modId
       chipConfig->SetParamValue("RECEIVER", -1);
       boards->at(mosaic)->AddChip(chipId, 0, -1, chips->at(i));
       chips->at(i)->SetEnable(false);
     }
-    else {
+    else { // configure module
       if (control < 0) {
         control = 0;
         chipConfig->SetParamValue("CONTROLINTERFACE", control);
       }
-
       if (receiver < 0) {
         receiver = modPos-1;
-        if (mosaic) {
-          if (!receiver) receiver = 1;
+        if (mosaic==1) {
+          if (receiver==0) receiver = 1;
           else if (receiver == 1) receiver = 0;
         }
         chipConfig->SetParamValue("RECEIVER", receiver);
       }
       boards->at(mosaic)-> AddChip(chipId, control, receiver, chips->at(i));
-    }
-  }
-  if (!hics) {
-    for (std::vector<THic*>::iterator it = pHics->begin(); it != pHics->end(); ++it)
-    {
-       delete (*it);
     }
   }
 
