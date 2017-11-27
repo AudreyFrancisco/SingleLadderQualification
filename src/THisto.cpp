@@ -302,10 +302,14 @@ void TScanHisto::Clear()
 }
 
 
-//TODO (for all) check index for validity
 void TScanHisto::Incr (common::TChipIndex index, unsigned int i, unsigned int j) {
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
-  m_histos.at(int_index).Incr(i,j);
+  try {
+    m_histos.at(int_index).Incr(i,j);
+  }
+  catch (const std::out_of_range& e) {
+	std::cerr << "Invalid index: board " << index.boardIndex << ", dataReceiver " << index.dataReceiver << ", chipID " << index.chipId << "!" << std::endl;
+  }
 }
 
 
