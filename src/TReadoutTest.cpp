@@ -1,7 +1,7 @@
 #include <string.h>
 #include <string>
 
-#include "TNoiseOccupancy.h"
+#include "TReadoutTest.h"
 #include "AlpideConfig.h"
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
@@ -9,7 +9,7 @@
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
 
-TNoiseOccupancy::TNoiseOccupancy (TScanConfig                   *config, 
+TReadoutTest::TReadoutTest (TScanConfig                   *config, 
                                   std::vector <TAlpide *>        chips, 
                                   std::vector <THic*>            hics, 
                                   std::vector <TReadoutBoard *>  boards, 
@@ -17,12 +17,13 @@ TNoiseOccupancy::TNoiseOccupancy (TScanConfig                   *config,
                                   std::mutex                    *aMutex) 
   : TDataTaking (config, chips, hics, boards, histoQue, aMutex) 
 {
-  sprintf(m_name, "Noise Occupancy %.1f V", m_backBias); 
+  sprintf(m_name, "ReadoutTest"); 
+  // variables needed: occupancy, DTU settings, trigger frequency
 }
 
 
 //TODO: save number of masked pixels (return value of ApplyMask)
-void TNoiseOccupancy::ConfigureChip  (TAlpide *chip)
+void TReadoutTest::ConfigureChip  (TAlpide *chip)
 {
   AlpideConfig::BaseConfig   (chip);
   ConfigureFromu             (chip);
@@ -32,21 +33,23 @@ void TNoiseOccupancy::ConfigureChip  (TAlpide *chip)
 }
 
 
-void TNoiseOccupancy::ConfigureMask (TAlpide *chip, std::vector <TPixHit> *MaskedPixels)
+// TODO: Add masking / selecting of given occupancy
+void TReadoutTest::ConfigureMask (TAlpide *chip, std::vector <TPixHit> *MaskedPixels)
 {
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   false);
+  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
+
 }
 
 
-THisto TNoiseOccupancy::CreateHisto () 
+THisto TReadoutTest::CreateHisto () 
 {
   THisto histo ("HitmapHisto", "HitmapHisto", 1024, 0, 1023, 512, 0, 511);
   return histo;
 }
 
 
-void TNoiseOccupancy::Init ()
+void TReadoutTest::Init ()
 {
   TDataTaking::Init();
   m_running = true;

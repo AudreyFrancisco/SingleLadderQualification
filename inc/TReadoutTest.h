@@ -1,5 +1,5 @@
-#ifndef TNOISEOCCUPANCY_H
-#define TNOISEOCCUPANCY_H
+#ifndef TREADOUTTEST_H
+#define TREADOUTTEST_H
 
 #include <deque>
 #include <mutex>
@@ -14,7 +14,7 @@
 #include "TDataTaking.h"
 
 
-class TNoiseOccupancy : public TDataTaking {
+class TReadoutTest : public TDataTaking {
  private:
   int                   m_nTrains;
   int                   m_nLast;
@@ -25,13 +25,13 @@ class TNoiseOccupancy : public TDataTaking {
  protected:
   THisto CreateHisto();
  public:
-  TNoiseOccupancy       (TScanConfig                   *config,
+  TReadoutTest          (TScanConfig                   *config,
                          std::vector <TAlpide *>        chips,
                          std::vector <THic*>            hics,
                          std::vector <TReadoutBoard *>  boards,
                          std::deque<TScanHisto>        *histoque,
                          std::mutex                    *aMutex);
-  ~TNoiseOccupancy      () {};
+  ~TReadoutTest         () {};
   void                  Init         ();
   void                  PrepareStep  (int loopIndex) { (void)(&loopIndex); };
   void                  LoopStart    (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
