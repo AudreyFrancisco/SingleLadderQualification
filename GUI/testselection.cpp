@@ -37,10 +37,10 @@ TestSelection::~TestSelection()
 }
 
 
-void TestSelection::SaveSettings(QString &opname, QString &hicid, int &counter, int &lid, int &memberid, QString &ttwo, QString &tthree, QString &tfour, QString &tfive, QString &done, QString &dtwo, QString dthree, QString dfour, QString dfive){
-  if (ui->operatorstring->toPlainText().isEmpty() || ui->id->toPlainText().isEmpty() || locid== 0)
+void TestSelection::SaveSettings(QString &opname, QString &hicid, int &counter, int &lid, int &memberid, QString &ttwo, QString &tthree, QString &tfour, QString &tfive, QString &done, QString &dtwo, QString &dthree, QString &dfour, QString &dfive){
+  if (ui->operatorstring->toPlainText().isEmpty() || /*ui->id->toPlainText().isEmpty() || */locid== 0)
     {
-      qDebug()<<"Put your details little shit"<<endl;
+      qDebug()<<"Put your details"<<endl;
       popupmessage("Info missing");
       counter=0;
 
