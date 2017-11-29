@@ -229,27 +229,28 @@ void MainWindow::open(){
 
         hicnames.push_back(hicidnumber);
         QByteArray conv = hicidnumber.toLatin1();
+        QByteArray conv2, conv3, conv4, conv5, conv6, conv7, conv8, conv9, conv10;
         // const char *ar[1]={conv.data()};
         const char * ar[10];
         ar[0]={conv.data()};
         if (numberofscan==3){
-            QByteArray conv2 = toptwo.toLatin1();
+            conv2 = toptwo.toLatin1();
             ar[1]={conv2.data()};
-            QByteArray conv3 = topthree.toLatin1();
+            conv3 = topthree.toLatin1();
             ar[2]={conv3.data()};
-            QByteArray conv4 = topfour.toLatin1();
+            conv4 = topfour.toLatin1();
             ar[3]={conv4.data()};
-            QByteArray conv5 = topfive.toLatin1();
+            conv5 = topfive.toLatin1();
             ar[4]={conv5.data()};
-            QByteArray conv6 = bottomone.toLatin1();
+            conv6 = bottomone.toLatin1();
             ar[5]={conv6.data()};
-            QByteArray conv7 = bottomtwo.toLatin1();
+            conv7 = bottomtwo.toLatin1();
             ar[6]={conv7.data()};
-            QByteArray conv8 = bottomthree.toLatin1();
+            conv8 = bottomthree.toLatin1();
             ar[7]={conv8.data()};
-            QByteArray conv9 = bottomfour.toLatin1();
+            conv9 = bottomfour.toLatin1();
             ar[8]={conv9.data()};
-            QByteArray conv10= bottomfive.toLatin1();
+            conv10= bottomfive.toLatin1();
             ar[9]={conv10.data()};
             hicnames.push_back(toptwo);
             hicnames.push_back(topthree);
@@ -272,7 +273,7 @@ void MainWindow::open(){
             endurancemodules.push_back(ui->down5);
 
         }
-        initSetup(fConfig, &fBoards, &fBoardType, &fChips,fileName.toStdString().c_str(), &fHICs,ar);
+        initSetup(fConfig, &fBoards, &fBoardType, &fChips,fileName.toStdString().c_str(), &fHICs, ar);
         fConfig->GetScanConfig()->SetUseDataPath(true);
         pb=fHICs.at(0)->GetPowerBoard();
         pbconfig=pb->GetConfigurationHandler();
@@ -1383,7 +1384,7 @@ void MainWindow::connectcombo(int value){
         ui->testtypeselected->clear();
         //  ui->start_test->show();
         ui->testtypeselected->setText("OB Endurance Test");
-        findidoftheactivitytype("OB Endurance Test",idofactivitytype);
+        findidoftheactivitytype("OB HIC Endurance Test",idofactivitytype);
         locationcombo();
         settingswindow->connectlocationcombo(locdetails);
         settingswindow->adjustendurance();
