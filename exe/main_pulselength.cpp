@@ -31,30 +31,28 @@ std::vector <TReadoutBoard *> fBoards;
 std::vector <TAlpide *>       fChips;
 TConfig *fConfig;
 
+int myMaskStages;
+int myPixPerRegion;
+int rows;
+int nStages;
+
 // test setttings ----------------------------------------------------------------------
 
 int myStrobeLength = 10;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;       // not needed right now as strobe generated on DAQ board
 int myPulseLength  = 2000;    // 2000 = 50 us
 
-int myNTriggers    = 50;
-
-// Pixel to test
-int myRow = 5;
-//int myCol = 13;
-int myCol = 8; // Col within region, 0:15
+int myNTriggers    = 10;
 
 // charge range
-int myChargeStart  = 1; // 1 default
+int myChargeStart  = 1;   // 1 default
 int myChargeStop   = 160; // 160 default
-//int myChargeStop   = 4; // 160 default
-int myChargeStep   = 2;
+int myChargeStep   = 1;
 
 // delay between pulse and strobe seems to be 50 ns + 12.5 ns * PulseDelay + 25 ns * StrobeDelay
-int myPulseDelayStart   = 36;    // 36 = 500 ns
-//int myPulseDelayStop    = 1600;  // 1000 = 12550 ns
-int myPulseDelayStop    = 1200;  // 1200 = 15050 ns
-int myPulseDelayStep    = 16;     // 200 ns
+int myPulseDelayStart   = 36;      // 36 = 500 ns
+int myPulseDelayStop    = 1000;    // 1200 = 15050 ns and 1000 = 12550 ns
+int myPulseDelayStep    = 10;      // def 16 = 200 ns
 
 // -------------------------------------------------------------------------------------
 
@@ -77,35 +75,40 @@ int AddressToRow         (int ARegion, int ADoubleCol, int AAddress)
 }
 
 
+void InitScanParameters() {
+  myMaskStages   = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
+  myPixPerRegion = fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
+}
 
 
 void WriteDataToFile (const char *fName, std::vector<TPixHit> *Hits, int charge, int delay, bool Recreate) {
   FILE *fp;
   int   nHits = 0;
   int   col, row;
+  int   count = 0;
   if (Recreate) fp = fopen(fName, "w");
   else          fp = fopen(fName, "a");
 
-  for (int ireg = 0; ireg < 32; ireg ++) {
-    nHits = 0;
-    //std::cout << ireg << std::endl;
-    for (unsigned int i = 0; i < Hits->size(); i ++) {
-      col = AddressToColumn(Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
-      row = AddressToRow   (Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
+  for (int istage = 0; istage < 512; istage += (rows/nStages)) {
+    for (int icol = 0; icol < 1024; icol += (32/myPixPerRegion)) {
+      nHits = 0;
+      for (unsigned int i = 0; i < Hits->size(); i ++) {
+	col = AddressToColumn(Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
+	row = AddressToRow   (Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
 
-      if ((col == ireg*32+myCol) && (row == myRow)) {
-        nHits ++;
+	if ((col == icol) && (row == istage)) {
+	  nHits ++;
+	}
+      }
+      if (nHits) {
+	fprintf(fp, "%d %d %d %d %d\n", icol, istage, charge, delay, nHits);
       }
     }
-    if (nHits) {
-      //printf("       %d %d %d %d %d\n", ireg*32+myCol, row, charge, delay, nHits);
-      fprintf(fp, "%d %d %d %d %d\n", ireg*32+myCol, row, charge, delay, nHits);
-    }
+    count += 1;
+    if (count == myMaskStages) break;
   }
   Hits->clear();
-
   fclose (fp);
-
 }
 
 void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {
@@ -122,8 +125,10 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "\n");
 
   fprintf(fp, "NTRIGGERS %i\n", myNTriggers);
-  fprintf(fp, "ROW %i\n", myRow);
-  fprintf(fp, "COL %i\n", myCol);
+  //fprintf(fp, "ROW %i\n", myRow);
+  //fprintf(fp, "COL %i\n", myCol);
+  fprintf(fp, "MASKSTAGES %i\n", myMaskStages);
+  fprintf(fp, "PIXPERREGION %i\n", myPixPerRegion);
 
   fprintf(fp, "CHARGESTART %i\n", myChargeStart);
   fprintf(fp, "CHARGESTOP %i\n", myChargeStop);
@@ -148,7 +153,7 @@ int configureFromu(TAlpide *chip) {
 
 
 // initialisation of fixed mask
-int configureMask(TAlpide *chip) {
+/*int configureMask(TAlpide *chip) {
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
   AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
 
@@ -157,14 +162,14 @@ int configureMask(TAlpide *chip) {
     AlpideConfig::WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  myRow, ireg*32+myCol);
   }
   return 0;
-}
+  } */
 
 
 int configureChip(TAlpide *chip) {
   AlpideConfig::BaseConfig(chip);
 
   configureFromu(chip);
-  configureMask (chip);
+  // configureMask (chip);
 
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
 
@@ -178,9 +183,16 @@ void scan(const char *fName) {
   unsigned char         buffer[1024*4000];
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nSkipped = 0, prioErrors =0;
+  int                   counter = 0;
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
+  for (int istage = 0; istage < 512; istage += (rows/nStages)) {
+    std::cout << "Mask stage " << istage << std::endl;
+    for (unsigned int i = 0; i < fChips.size(); i ++) {
+      //if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+      AlpideConfig::ConfigureMaskStage(fChips.at(i), myPixPerRegion, istage);
+    }
 
     //for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
     for (int icharge = myChargeStart; icharge < myChargeStop; icharge += myChargeStep) {
@@ -216,8 +228,8 @@ void scan(const char *fName) {
 
             itrg++;
           }
- 	      }
-        if ((idelay == myPulseDelayStart) && (icharge == myChargeStart)) {
+	}
+        if ((idelay == myPulseDelayStart) && (icharge == myChargeStart) && (istage == 0)) {
           WriteDataToFile (fName, Hits, icharge, idelay, true);
           //std::cout << "Wrote data to new file" << std::endl;
         }
@@ -226,8 +238,11 @@ void scan(const char *fName) {
           //std::cout << "Wrote data to file" << std::endl;
         }
       }
-
     }
+    counter += 1;
+    if (counter == myMaskStages) break;
+  }
+  cout << "MY DEBUG: scan counter status " << counter << endl;
 }
 
 
@@ -236,6 +251,19 @@ int main(int argc, char** argv) {
   decodeCommandParameters(argc, argv);
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
+  InitScanParameters();
+  cout << "MY DEBUG STAGES:  " << myMaskStages << endl;
+  cout << "MY DEBUG PixPerReg:  " << myPixPerRegion << endl;
+
+  // condition for sweeping uniformly the whole range of mask stages:
+  if (512%myMaskStages == 0){
+    rows = 512;
+    nStages = myMaskStages;
+  }
+  else {
+    rows = 511;
+    nStages = myMaskStages - 1;
+  }
 
   char Suffix[20], fName[100];
 

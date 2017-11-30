@@ -29,8 +29,8 @@ CHIP_ID=$1
 
 ##########################################
 # DCOL (0..15) and ROW (0..512) of pulsed pixels
-COL=8
-ROW=5
+#COL=8
+#ROW=5
 
 #TEMPERATURE
 TEMP=30
@@ -40,25 +40,28 @@ TEMP=30
 # VBB
 #N_VBB=3
 #VBB_LIST=( 0.0 3.0 6.0 )
-N_VBB=2
-VBB_LIST=( 3.0 6.0 )
+N_VBB=1
+VBB_LIST=( 0.0 )
+
+
 
 # VCASN
-N_VCASN=2
+N_VCASN=1
 declare -A VCASN_LIST
-## 0V
-#VCASN_LIST[0,0]=44
+# 0V
+VCASN_LIST[0,0]=50 
+#44
 #VCASN_LIST[0,1]=50
 ## -3V
-VCASN_LIST[0,0]=99
-VCASN_LIST[0,1]=105
+#VCASN_LIST[1,0]=99
+#VCASN_LIST[1,1]=105
 ## -6V
-VCASN_LIST[1,0]=129
-VCASN_LIST[1,1]=135
+#VCASN_LIST[1,0]=129
+#VCASN_LIST[1,1]=135
 
 #N_VCASN=6
 #declare -A VCASN_LIST
-## 0V
+##  0V
 #VCASN_LIST[0,0]=32
 #VCASN_LIST[0,1]=38
 #VCASN_LIST[0,2]=44
@@ -81,8 +84,8 @@ VCASN_LIST[1,1]=135
 #VCASN_LIST[2,5]=147
 
 # ITHR
-#ITHR_LIST=( 30 50 100 150)
-ITHR_LIST=( 30 50 100 150 250 )
+ITHR_LIST=( 100 )
+#ITHR_LIST=( 30 50 100 150 250 )
 
 # VCASN2
 VCASN2=0 # should be VCASN+12, assigned later
@@ -97,12 +100,12 @@ IDB_LIST=( 29 )
 N_VCLIP=1
 declare -A VCLIP_LIST
 # 0V
-#VCLIP_LIST[0,0]=0
+VCLIP_LIST[0,0]=0
 # -3V
-VCLIP_LIST[0,0]=60
+#VCLIP_LIST[0,0]=60
 #VCLIP_LIST[1,0]=60
 # -6V
-VCLIP_LIST[1,0]=100
+#VCLIP_LIST[1,0]=100
 #VCLIP_LIST[2,0]=100
 
 #N_VCLIP=5
@@ -130,17 +133,17 @@ VCLIP_LIST[1,0]=100
 N_VRESETP=1
 declare -A VRESETP_LIST
 VRESETP_LIST[0,0]=117
-VRESETP_LIST[1,0]=117
+#VRESETP_LIST[1,0]=117
 #VRESETP_LIST[2,0]=117
 
 # VRESETD
 N_VRESETD=1
 declare -A VRESETD_LIST
+VRESETD_LIST[0,0]=117
+#VRESETD_LIST[1,0]=117
+#VRESETD_LIST[2,0]=147
 #VRESETD_LIST[0,0]=147
-#VRESETD_LIST[1,0]=147
-#VRESETD_LIST[2,0]=170
-VRESETD_LIST[0,0]=147
-VRESETD_LIST[1,0]=170
+#VRESETD_LIST[1,0]=170
 
 
 ##########################################
@@ -183,7 +186,7 @@ fi
 
 ##### program fx3
 #FX3_DIR=$SOFTWARE_DIR/../fx3
-FX3_DIR=/home/jvanhoor/alice-its-alpide-software/fx3/
+FX3_DIR=/home/palpidefs/alice-its-alpide-software/fx3/
 cd $FX3_DIR
 is_programmed=1
 i_try=0
@@ -453,7 +456,7 @@ do
             do
                 echo "------ ITHR $ITHR" | tee -a $LOG
                 # change config
-                cp Config_template.cfg Config.cfg 
+                cp Config_template_pulselength.cfg Config.cfg 
                 sed -i -e s/#VCASN/VCASN/g Config.cfg
                 sed -i -e 's/vcasnTmp/'${VCASN}'/g' Config.cfg
                 sed -i -e s/#ITHR/ITHR/g Config.cfg
@@ -471,25 +474,25 @@ do
                 sed -i -e s/#IRESET/IRESET/g Config.cfg
                 sed -i -e 's/iresetTmp/'${IRESET}'/g' Config.cfg
 
-                # threshold measurement
-                cd $SOFTWARE_DIR
-                #sleep 4
-                #./runTest THRESHOLD 164 0 50 2>&1 | tee -a $LOG
-                #./runTest THRESHOLD 82 0 70 2>&1 | tee -a $LOG
-                timeout 1200 ./test_threshold 2>&1 | tee -a $LOG
-                wait
-                cd $SOFTWARE_DIR/Data
-                RUN_DATA_FILE=`ls -tr1 Threshold*.dat | tail -1`
-                RUN_CFG_FILE=`ls -tr1 ScanConfig*.cfg | tail -1`
-                echo "" >> $SOFTWARE_DIR/Data/$RUN_CFG_FILE
-                echo "CHIP $CHIP_ID" >> $SOFTWARE_DIR/Data/$RUN_CFG_FILE
-                echo "VBB  $VBB" >> $SOFTWARE_DIR/Data/$RUN_CFG_FILE
-                # copy data files into folder structure
-                mv $SOFTWARE_DIR/Data/$RUN_CFG_FILE $VBB_DIR/threshold/
-                mv $SOFTWARE_DIR/Data/$RUN_DATA_FILE $VBB_DIR/threshold/
-                wait
+                ## threshold measurement
+                #cd $SOFTWARE_DIR
+                ##sleep 4
+                ##./runTest THRESHOLD 164 0 50 2>&1 | tee -a $LOG
+                ##./runTest THRESHOLD 82 0 70 2>&1 | tee -a $LOG
+                #timeout 1200 ./test_threshold 2>&1 | tee -a $LOG
+                #wait
+                #cd $SOFTWARE_DIR/Data
+                #RUN_DATA_FILE=`ls -tr1 Threshold*.dat | tail -1`
+                #RUN_CFG_FILE=`ls -tr1 ScanConfig*.cfg | tail -1`
+                #echo "" >> $SOFTWARE_DIR/Data/$RUN_CFG_FILE
+                #echo "CHIP $CHIP_ID" >> $SOFTWARE_DIR/Data/$RUN_CFG_FILE
+                #echo "VBB  $VBB" >> $SOFTWARE_DIR/Data/$RUN_CFG_FILE
+                ## copy data files into folder structure
+                #mv $SOFTWARE_DIR/Data/$RUN_CFG_FILE $VBB_DIR/threshold/
+                #mv $SOFTWARE_DIR/Data/$RUN_DATA_FILE $VBB_DIR/threshold/
+                #wait
 
-                sleep 10
+                #sleep 10
 
 
                 # change config for pulseshape 
@@ -537,23 +540,23 @@ do
                 #    continue
                 #fi
 
-                # fhr measurement
-                cd $SOFTWARE_DIR
-                timeout 240 ./test_noiseocc 2>&1 | tee -a $LOG
-                wait
-                cd $SOFTWARE_DIR/Data
-                RUN_DATA_FILE=`ls -tr1 NoiseOccupancy*.dat | tail -1`
-                RUN_CFG_FILE=`ls -tr1 ScanConfig*.cfg | tail -1`
-                echo "" >> $SOFTWARE_DIR/Data/$RUN_CFG_FILE
-                echo "CHIP $CHIP_ID" >> $SOFTWARE_DIR/Data/$RUN_CFG_FILE
-                echo "VBB  $VBB" >> $SOFTWARE_DIR/Data/$RUN_CFG_FILE
-                # copy data files into folder structure
-                mv $SOFTWARE_DIR/Data/$RUN_CFG_FILE $VBB_DIR/fhr/
-                mv $SOFTWARE_DIR/Data/$RUN_DATA_FILE $VBB_DIR/fhr/
-                wait
+                ## fhr measurement
+                #cd $SOFTWARE_DIR
+                #timeout 240 ./test_noiseocc 2>&1 | tee -a $LOG
+                #wait
+                #cd $SOFTWARE_DIR/Data
+                #RUN_DATA_FILE=`ls -tr1 NoiseOccupancy*.dat | tail -1`
+                #RUN_CFG_FILE=`ls -tr1 ScanConfig*.cfg | tail -1`
+                #echo "" >> $SOFTWARE_DIR/Data/$RUN_CFG_FILE
+                #echo "CHIP $CHIP_ID" >> $SOFTWARE_DIR/Data/$RUN_CFG_FILE
+                #echo "VBB  $VBB" >> $SOFTWARE_DIR/Data/$RUN_CFG_FILE
+                ## copy data files into folder structure
+                #mv $SOFTWARE_DIR/Data/$RUN_CFG_FILE $VBB_DIR/fhr/
+                #mv $SOFTWARE_DIR/Data/$RUN_DATA_FILE $VBB_DIR/fhr/
+                #wait
 
-                sleep 10
-                cd $SOFTWARE_DIR
+                #sleep 10
+                #cd $SOFTWARE_DIR
 
 
             done

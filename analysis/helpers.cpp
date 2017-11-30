@@ -30,16 +30,14 @@ void reset_meas_config(MeasConfig_t *conf) {
     conf->PULSEDELAY  = -1;
     // stuff for pulselength measurements
     conf->NTRIGGERS   = -1;
-    conf->ROW         = -1;
-    conf->COL         = -1;
+    conf->MASKSTAGES  = -1;
+    conf->PIXPERREGION  = -1;
     conf->CHARGESTART = -1;
     conf->CHARGESTOP  = -1;
     conf->CHARGESTEP  = -1;
     conf->PULSEDELAYSTART = -1;
     conf->PULSEDELAYSTOP  = -1;
     conf->PULSEDELAYSTEP  = -1;
-    // threshold scan
-    conf->MASKSTAGES   = -1;
     // chiller temperature
     conf->TEMP_SET  = -1;
     // VBB
@@ -115,8 +113,6 @@ void decode_line(const char *line, MeasConfig_t *conf) {
     if (!strcmp(param,"VCLIP")) {
         read_int_parameter(line, &(conf->VCLIP));
     }
-
-
     if (!strcmp(param,"FROMU_CONFIG2")) {
         read_int_parameter(line, &(conf->STROBELENGTH), true);
     }
@@ -126,15 +122,14 @@ void decode_line(const char *line, MeasConfig_t *conf) {
     if (!strcmp(param,"PULSEDELAY")) {
         read_int_parameter(line, &(conf->PULSEDELAY), true);
     }
-
     if (!strcmp(param,"NTRIGGERS")) {
         read_int_parameter(line, &(conf->NTRIGGERS), true);
     }
-    if (!strcmp(param,"ROW")) {
-        read_int_parameter(line, &(conf->ROW), true);
+    if (!strcmp(param,"MASKSTAGES")) {
+        read_int_parameter(line, &(conf->MASKSTAGES), true);
     }
-    if (!strcmp(param,"COL")) {
-        read_int_parameter(line, &(conf->COL), true);
+    if (!strcmp(param,"PIXPERREGION")) {
+        read_int_parameter(line, &(conf->PIXPERREGION), true);
     }
     if (!strcmp(param,"CHARGESTART")) {
         read_int_parameter(line, &(conf->CHARGESTART), true);
@@ -153,10 +148,6 @@ void decode_line(const char *line, MeasConfig_t *conf) {
     }
     if (!strcmp(param,"PULSEDELAYSTEP")) {
         read_int_parameter(line, &(conf->PULSEDELAYSTEP), true);
-    }
-
-    if (!strcmp(param,"MASKSTAGES")) {
-        read_int_parameter(line, &(conf->MASKSTAGES), true);
     }
 
     if (!strcmp(param,"TEMP")) {
@@ -193,16 +184,15 @@ void print_meas_config(MeasConfig_t conf) {
     std::cout << "PULSEDELAY:       " << conf.PULSEDELAY << std::endl; 
     std::cout << std::endl;
     std::cout << "NTRIGGERS:        " << conf.NTRIGGERS << std::endl; 
-    std::cout << "ROW:              " << conf.ROW << std::endl; 
-    std::cout << "COL:              " << conf.COL << std::endl; 
+    std::cout << "MASKSTAGES:       " << conf.MASKSTAGES << std::endl;
+    std::cout << "PIXPERREGION:     " << conf.PIXPERREGION << std::endl;
+    std::cout << std::endl;
     std::cout << "CHARGESTART:      " << conf.CHARGESTART << std::endl; 
     std::cout << "CHARGESTOP:       " << conf.CHARGESTOP << std::endl; 
     std::cout << "CHARGESTEP:       " << conf.CHARGESTEP << std::endl; 
     std::cout << "PULSEDELAYSTART:  " << conf.PULSEDELAYSTART << std::endl; 
     std::cout << "PULSEDELAYSTOP:   " << conf.PULSEDELAYSTOP << std::endl; 
     std::cout << "PULSEDELAYSTEP:   " << conf.PULSEDELAYSTEP << std::endl; 
-    std::cout << std::endl;
-    std::cout << "MASKSTAGES:   " << conf.MASKSTAGES << std::endl; 
     std::cout << std::endl;
     std::cout << "TEMP SET: " << conf.TEMP_SET  << std::endl; 
     std::cout << "VBB:      " << conf.VBB       << std::endl; 

@@ -22,8 +22,16 @@ struct MeasConfig_t {
     Int_t PULSEDELAY;
     // stuff for pulselength measurements
     Int_t NTRIGGERS;
-    Int_t ROW;
+  /* Int_t ROW;
     Int_t COL;
+    Int_t FIRSTROW;
+    Int_t LASTROW;
+    Int_t STEPROW;
+    Int_t FIRSTCOL;
+    Int_t LASTCOL;
+    Int_t STEPCOL;*/
+  // Int_t MASKSTAGES;
+    Int_t PIXPERREGION;
     Int_t CHARGESTART;
     Int_t CHARGESTOP;
     Int_t CHARGESTEP;
