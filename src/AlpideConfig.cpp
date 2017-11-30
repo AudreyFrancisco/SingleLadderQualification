@@ -230,12 +230,32 @@ void AlpideConfig::WriteControlReg (TAlpide *chip, Alpide::TChipMode chipMode, T
   if (!config) config = chip->GetConfig();
 
   uint16_t controlreg = 0;
+  uint16_t speedvalue;
+
+  switch (chip->GetConfig()->GetParamValue("LINKSPEED")) {
+  case -1: // DTU not activated
+	speedvalue = 0x2;
+	break;
+  case 400:
+    speedvalue = 0x0;
+    break;
+  case 600:
+    speedvalue = 0x1;
+    break;
+  case 1200:
+    speedvalue = 0x2;
+    break;
+  default:
+    std::cout << "Warning: invalid link speed, using 1200" << std::endl;
+    speedvalue = 0x2;
+    break;
+  }
 
   controlreg |= (uint16_t) chipMode;
 
   controlreg |= (config->GetEnableClustering    () ? 1:0) << 2;
   controlreg |= (config->GetMatrixReadoutSpeed  () & 0x1) << 3;
-  controlreg |= (config->GetSerialLinkSpeed     () & 0x3) << 4;
+  controlreg |= (speedvalue                        & 0x3) << 4;
   controlreg |= (config->GetEnableSkewingGlobal () ? 1:0) << 6;
   controlreg |= (config->GetEnableSkewingStartRO() ? 1:0) << 7;
   controlreg |= (config->GetEnableClockGating   () ? 1:0) << 8;
@@ -317,8 +337,6 @@ void AlpideConfig::BaseConfig (TAlpide *chip)
   // put all chip configurations before the start of the test here
 
   chip->WriteRegister (Alpide::REG_MODECONTROL, 0x20); // set chip to config mode
-  //TODO: use chip config here, the config should be written accordingly at this point!
-
 
   // CMU/DMU config: turn manchester encoding off or on etc, initial token=1, disable DDR
   //int cmudmu_config = 0x10 | ((chip->GetConfig()->GetDisableManchester()) ? 0x20 : 0x00);
@@ -328,28 +346,7 @@ void AlpideConfig::BaseConfig (TAlpide *chip)
   BaseConfigMask (chip);
   BaseConfigPLL  (chip);
 
-  uint16_t value;
-
-  switch (chip->GetConfig()->GetParamValue("LINKSPEED")) {
-  case -1: // DTU not activated
-	value = 0x21;
-	break;
-  case 400:
-    value = 0x01;
-    break;
-  case 600:
-    value = 0x11;
-    break;
-  case 1200:
-    value = 0x21;
-    break;
-  default:
-    std::cout << "Warning: invalid link speed, using 1200" << std::endl;
-    value = 0x21;
-    break;
-  }
-
-  chip->WriteRegister (Alpide::REG_MODECONTROL, value); // strobed readout mode
+  WriteControlReg (chip, Alpide::MODE_TRIGGERED, chip->GetConfig());
 }
 
 

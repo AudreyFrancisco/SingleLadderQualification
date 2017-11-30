@@ -22,7 +22,7 @@ namespace ChipConfig {     // to avoid clashes with other configs (e.g. for STRO
   const bool ENABLE_CLUSTERING      = true;
   const int  MATRIX_READOUT_SPEED   = 1;
   const int  SERIAL_LINK_SPEED      = 1200;
-  const bool ENABLE_SKEWING_GLOBAL  = false;
+  const bool ENABLE_SKEWING_GLOBAL  = true;
   const bool ENABLE_SKEWING_STARTRO = false;
   const bool ENABLE_CLOCK_GATING    = false;
   const bool ENABLE_CMU_READOUT     = false;

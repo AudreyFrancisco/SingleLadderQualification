@@ -39,6 +39,12 @@ namespace ScanConfig {
   const int DAC_STEP       = 8;
   const int NDACSAMPLES    = 10;
 
+  // settings for readout test
+  const int READOUTSPEED   = 1200;
+  const int READOUTOCC     = 32;
+  const int READOUTDRIVER  = 10;
+  const int READOUTPREEMP  = 10;
+
   // current limits for powering test in mA
   const int POWER_CUT_MINIDDA_OB = 20;
   const int POWER_CUT_MINIDDD_OB = 50;
@@ -172,6 +178,10 @@ class TScanConfig {
   bool   m_useDataPath;  // for compatibility with standalone scans, set true for GUI
   int    m_enduranceCycles;
   int    m_enduranceTriggers;
+  int    m_readoutSpeed;
+  int    m_readoutOcc;
+  int    m_readoutDriver;
+  int    m_readoutPreemp;
   TTestType m_testType;
  protected:
  public:

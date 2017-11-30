@@ -16,21 +16,25 @@
 
 class TReadoutTest : public TDataTaking {
  private:
-  void                  ConfigureChip (TAlpide *chip);
-  void                  ConfigureMask (TAlpide *chip, std::vector <TPixHit> *MaskedPixels);
+  int  m_linkSpeed;
+  int  m_occupancy;
+  int  m_driverStrength;
+  int  m_preemp;
+  void ConfigureChip (TAlpide *chip);
+  void ConfigureMask (TAlpide *chip, std::vector <TPixHit> *MaskedPixels);
  protected:
   THisto CreateHisto();
  public:
-  TReadoutTest          (TScanConfig                   *config,
-                         std::vector <TAlpide *>        chips,
-                         std::vector <THic*>            hics,
-                         std::vector <TReadoutBoard *>  boards,
-                         std::deque<TScanHisto>        *histoque,
-                         std::mutex                    *aMutex);
-  ~TReadoutTest         () {};
-  void                  Init         ();
-  void                  PrepareStep  (int loopIndex) { (void)(&loopIndex); };
-  void                  LoopStart    (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
+  TReadoutTest     (TScanConfig                   *config,
+                    std::vector <TAlpide *>        chips,
+                    std::vector <THic*>            hics,
+                    std::vector <TReadoutBoard *>  boards,
+                    std::deque<TScanHisto>        *histoque,
+                    std::mutex                    *aMutex);
+  ~TReadoutTest    () {};
+  void Init        ();
+  void PrepareStep (int loopIndex) { (void)(&loopIndex); };
+  void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
 };
 
 

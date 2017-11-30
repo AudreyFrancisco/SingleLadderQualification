@@ -40,6 +40,11 @@ TScanConfig::TScanConfig()
   m_nominal        = NOMINAL;
   m_isMasked       = false;
   m_mlvdsStrength  = ChipConfig::DCTRL_DRIVER;
+  m_readoutSpeed   = READOUTSPEED;
+  m_readoutOcc     = READOUTOCC;
+  m_readoutDriver  = READOUTDRIVER;
+  m_readoutPreemp  = READOUTPREEMP;
+
 
   m_powerCutMinIdda_OB        = POWER_CUT_MINIDDA_OB;
   m_powerCutMinIddd_OB        = POWER_CUT_MINIDDD_OB;
@@ -158,6 +163,11 @@ void TScanConfig::InitParamMap ()
 
   fSettings["ENDURANCECYCLES"]    = &m_enduranceCycles;
   fSettings["ENDURANCETRIGGERS"]  = &m_enduranceTriggers;
+
+  fSettings["READOUTSPEED"]  = &m_readoutSpeed;
+  fSettings["READOUTOCC"]    = &m_readoutOcc;
+  fSettings["READOUTDRIVER"] = &m_readoutDriver;
+  fSettings["READOUTPREEMP"] = &m_readoutPreemp;
 }
 
 
