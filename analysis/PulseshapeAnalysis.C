@@ -486,7 +486,7 @@ Bool_t PulseshapeAnalysis(TString file_path) {
   // hist for saving the min Thr of the pixels: 
   TH2F *hMinThr           = new TH2F(Form("hMinThr%s", run_id_full.Data()),"Min Threshold [DAC]; Columns; Rows", 
 				     32*myPixPerRegion, 0, 32*myPixPerRegion, myMaskStages, 0, myMaskStages);
-  hMinThr->GetZaxis()->SetRangeUser(0,0);
+
   // hist for saving the min Thr delay value of the pixels: 
   TH2F *hMinThrDel        = new TH2F(Form("hMinThrDel%s", run_id_full.Data()),"Delay at Min Threshold [#mus]; Columns; Rows", 
 				     32*myPixPerRegion, 0, 32*myPixPerRegion, myMaskStages, 0, myMaskStages); 
@@ -589,9 +589,6 @@ Bool_t PulseshapeAnalysis(TString file_path) {
   f_out_dat.close();
   f_out_root->cd();
 
-  TCanvas *hu = new TCanvas ("hu","hu",800,600);
-  hu->cd();
-  hMinThr->Draw("colz");
   hMinThr->Write();
   hMinThrDel->Write();
   hMinThrNoise->Write();
