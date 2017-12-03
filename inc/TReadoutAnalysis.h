@@ -15,9 +15,14 @@
 
 class TReadoutResultChip : public TScanResultChip {
 friend class TReadoutAnalysis;
- private: 
+ private:
+  int m_missingHits;
+  int m_deadPixels;
+  int m_ineffPixels;
+  int m_extraHits;
+  int m_noisyPixels;
  public:
-  void WriteToFile  (FILE *fp) {(void) fp;}; 
+  void WriteToFile  (FILE *fp); 
   float GetVariable  (TResultVariable var) {return 0;};
   TReadoutResultChip () : TScanResultChip () {};
 };
@@ -28,9 +33,14 @@ class TReadoutResultHic : public TScanResultHic {
 friend class TReadoutAnalysis;
  private: 
   TErrorCounter m_errorCounter;
+  int           m_missingHits;
+  int           m_deadPixels;
+  int           m_ineffPixels;
+  int           m_extraHits;
+  int           m_noisyPixels;
  public:
   TReadoutResultHic () : TScanResultHic () {};
-  void WriteToFile  (FILE *fp) {(void) fp;}; 
+  void WriteToFile  (FILE *fp); 
   void WriteToDB    (AlpideDB *db, ActivityDB::activity &activity) {};
 };
 
@@ -48,7 +58,10 @@ class TReadoutAnalysis : public TScanAnalysis {
  private:
   int  m_nTrig; 
   int  m_occ;
+  int  m_row;
   void FillVariableList () {};
+  bool IsInjected       (int col, int row);
+  void WriteResult      ();  
  protected: 
   TScanResultChip *GetChipResult () {TReadoutResultChip *Result = new TReadoutResultChip(); return Result;};
   TScanResultHic  *GetHicResult  () {TReadoutResultHic  *Result = new TReadoutResultHic (); return Result;};

@@ -33,6 +33,7 @@ class TReadoutTest : public TDataTaking {
                     std::deque<TScanHisto>        *histoque,
                     std::mutex                    *aMutex);
   ~TReadoutTest    () {};
+  int  GetRow      () {return m_row;};
   void Init        ();
   void PrepareStep (int loopIndex) { (void)(&loopIndex); };
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
