@@ -87,6 +87,7 @@ public:
 	int  GetFwMinVersion() { return(theVersionMin); };
 	char *GetFwIdString () { return(theVersionId); };
 	powerboard *GetPowerBoardHandle() { return(pb); };
+	void setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex = -1);
 
 
 private:
@@ -99,7 +100,6 @@ private:
 			return;
 		};
 
-	void setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex = -1);
 
 	uint32_t decodeError();
 	char *getFirmwareVersion();

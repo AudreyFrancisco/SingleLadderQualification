@@ -16,6 +16,7 @@
 
 class TReadoutTest : public TDataTaking {
  private:
+  int  m_row;
   int  m_linkSpeed;
   int  m_occupancy;
   int  m_driverStrength;

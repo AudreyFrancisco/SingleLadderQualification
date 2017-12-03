@@ -18,8 +18,9 @@ TReadoutTest::TReadoutTest (TScanConfig                   *config,
   : TDataTaking (config, chips, hics, boards, histoQue, aMutex) 
 {
   sprintf(m_name, "ReadoutTest"); 
-  // variables needed: readout speed, occupancy, DTU settings, trigger frequency
+  //TODO: configurable row, trigger frequency, number of triggers
 
+  m_row            = 0;
   m_linkSpeed      = config->GetParamValue ("READOUTSPEED");
   m_occupancy      = config->GetParamValue ("READOUTOCC");
   m_driverStrength = config->GetParamValue ("READOUTDRIVER");
@@ -34,8 +35,10 @@ void TReadoutTest::ConfigureChip  (TAlpide *chip)
   // (used by BaseConfig -> BaseConfigPLL
   int backupDriver = chip->GetConfig()->GetParamValue("DTUDRIVER");
   int backupPreemp = chip->GetConfig()->GetParamValue("DTUPREEMP");
+  int backupSpeed  = chip->GetConfig()->GetParamValue("LINKSPEED");
   chip->GetConfig()->SetParamValue("DTUDRIVER", m_driverStrength);
   chip->GetConfig()->SetParamValue("DTUPREEMP", m_preemp);
+  chip->GetConfig()->SetParamValue("LINKSPEED", m_linkSpeed);
   AlpideConfig::BaseConfig   (chip);
   ConfigureFromu             (chip);
   ConfigureMask              (chip, 0);
@@ -44,15 +47,16 @@ void TReadoutTest::ConfigureChip  (TAlpide *chip)
   // restore previous settings
   chip->GetConfig()->SetParamValue("DTUDRIVER", backupDriver);
   chip->GetConfig()->SetParamValue("DTUPREEMP", backupPreemp);
+  chip->GetConfig()->SetParamValue("LINKSPEED", backupSpeed);
 }
 
 
 // TODO: Add masking / selecting of given occupancy
 void TReadoutTest::ConfigureMask (TAlpide *chip, std::vector <TPixHit> *MaskedPixels)
 {
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
-  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
-
+  AlpideConfig::ConfigureMaskStage (chip, m_occupancy, m_row, true, true);
+  //  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
+  //AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
 }
 
 
@@ -65,6 +69,14 @@ THisto TReadoutTest::CreateHisto ()
 
 void TReadoutTest::Init ()
 {
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    TReadoutBoardMOSAIC *mosaic = (TReadoutBoardMOSAIC *)m_boards.at(i);
+    if (mosaic) {
+      if      (m_linkSpeed == 400)  mosaic-> setSpeedMode (Mosaic::RCV_RATE_400);
+      else if (m_linkSpeed == 600)  mosaic-> setSpeedMode (Mosaic::RCV_RATE_600);
+      else if (m_linkSpeed == 1200) mosaic-> setSpeedMode (Mosaic::RCV_RATE_1200);
+    }
+  }
   TDataTaking::Init();
   m_running = true;
 }

@@ -115,7 +115,9 @@ void TDataTaking::Init        ()
     m_boards.at(i)->StartRun   ();
   }
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+    TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
+    if (!pb) continue;
+    pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 }
 
@@ -255,8 +257,10 @@ void TDataTaking::Terminate ()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (m_backBias != 0) {
+      TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
+      if (!pb) continue;
       m_hics.at(ihic)->SwitchBias (false);
-      m_hics.at(ihic)->GetPowerBoard()->SetBiasVoltage(0);
+      pb->SetBiasVoltage(0);
     }
   }
 

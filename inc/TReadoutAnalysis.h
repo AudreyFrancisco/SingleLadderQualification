@@ -17,6 +17,8 @@ class TReadoutResultChip : public TScanResultChip {
 friend class TReadoutAnalysis;
  private: 
  public:
+  void WriteToFile  (FILE *fp) {(void) fp;}; 
+  float GetVariable  (TResultVariable var) {return 0;};
   TReadoutResultChip () : TScanResultChip () {};
 };
 
@@ -28,6 +30,8 @@ friend class TReadoutAnalysis;
   TErrorCounter m_errorCounter;
  public:
   TReadoutResultHic () : TScanResultHic () {};
+  void WriteToFile  (FILE *fp) {(void) fp;}; 
+  void WriteToDB    (AlpideDB *db, ActivityDB::activity &activity) {};
 };
 
 
@@ -46,6 +50,11 @@ class TReadoutAnalysis : public TScanAnalysis {
   int  m_occ;
   void FillVariableList () {};
  protected: 
+  TScanResultChip *GetChipResult () {TReadoutResultChip *Result = new TReadoutResultChip(); return Result;};
+  TScanResultHic  *GetHicResult  () {TReadoutResultHic  *Result = new TReadoutResultHic (); return Result;};
+  void             CreateResult  () {};
+  void             AnalyseHisto  (TScanHisto *histo);
+  void             InitCounters  ();
  public:
   TReadoutAnalysis(std::deque<TScanHisto> *histoQue,
                    TScan                  *aScan,
