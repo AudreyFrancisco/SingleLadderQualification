@@ -226,3 +226,6 @@ void TReadoutResultChip::WriteToFile (FILE *fp)
   fprintf (fp, "Inefficient pixels: %d\n", m_ineffPixels);
   fprintf (fp, "Noisy pixels:       %d\n", m_noisyPixels);
 }
+
+
+// TODO: classification

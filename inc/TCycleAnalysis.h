@@ -31,7 +31,7 @@ class TCycleResultHic : public TScanResultHic {
  protected:
  public:
   TCycleResultHic () : TScanResultHic () {};
-  void WriteToFile (FILE *fp)            {(void) fp;};   // TODO: implement
+  void WriteToFile (FILE *fp);
 };
 
 
@@ -42,7 +42,7 @@ class TCycleResult : public TScanResult {
  protected:
  public:
   TCycleResult () : TScanResult() {};
-  void WriteToFileGlobal (FILE *fp) {(void)fp;};
+  void WriteToFileGlobal (FILE *fp);
 };
 
 
@@ -53,6 +53,7 @@ class TCycleAnalysis : public TScanAnalysis {
   TScanResultHic  *GetHicResult  () {TCycleResultHic  *Result = new TCycleResultHic (); return Result;};
   void             CreateResult () {};
   void             InitCounters ();
+  void             WriteResult  ();
  public:
   TCycleAnalysis(std::deque<TScanHisto> *histoQue,
                  TScan                  *aScan,

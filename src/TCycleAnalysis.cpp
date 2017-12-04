@@ -84,7 +84,61 @@ void TCycleAnalysis::Finalize()
     hicResult->m_avIdda   /= ((TCycleResult*)m_result)->m_nCycles;
     hicResult->m_avIddd   /= ((TCycleResult*)m_result)->m_nCycles;
   }
+
+  WriteResult();
+
+  m_finished = true;
 }
 
 
-// TODO: Write to DB, write to result file
+void TCycleAnalysis::WriteResult() 
+{
+  char fName[200];
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (m_config->GetUseDataPath()) {
+      sprintf (fName, "%s/CycleResult_%s.dat", hicResult->GetOutputPath().c_str(),
+                                               m_config->GetfNameSuffix());
+    }
+    else {
+      sprintf (fName, "CycleResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+                                               m_config->GetfNameSuffix());
+    }
+    m_scan  ->WriteConditions (fName, m_hics.at(ihic));
+
+    FILE *fp = fopen (fName, "a");
+    m_result->WriteToFileGlobal(fp);
+    hicResult->SetResultFile(fName);
+    hicResult->WriteToFile  (fp);
+    fclose (fp);
+  }
+
+}
+
+
+void TCycleResult::WriteToFileGlobal (FILE*fp) 
+{
+  fprintf (fp, "Number of cycles: %d\n\n", m_nCycles);
+}
+
+
+void TCycleResultHic::WriteToFile(FILE *fp) 
+{
+  fprintf(fp, "HIC Result:\n\n");
+
+  fprintf (fp, "HIC Classification: %s\n\n", WriteHicClassification());
+
+  fprintf (fp, "Trips:                   %d\n", m_nTrips);
+  fprintf (fp, "Min. number of chips:    %d\n", m_minWorkingChips);
+  fprintf (fp, "Number of chip failures: %d\n", m_nChipFailures);
+  fprintf (fp, "Average delta T:         %.1f\n", m_avDeltaT);
+  fprintf (fp, "Maximum delta T:         %.1f\n", m_maxDeltaT);
+  fprintf (fp, "Average Idda:            %.3f\n", m_avIdda);
+  fprintf (fp, "Maximum Idda:            %.3f\n", m_maxIdda);
+  fprintf (fp, "Minimum Idda:            %.3f\n", m_minIdda);
+  fprintf (fp, "Average Iddd:            %.3f\n", m_avIddd);
+  fprintf (fp, "Maximum Iddd:            %.3f\n", m_maxIddd);
+  fprintf (fp, "Minimum Iddd:            %.3f\n", m_minIddd);
+}
+
+// TODO: Write to DB, classification
