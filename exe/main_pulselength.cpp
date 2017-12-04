@@ -38,7 +38,7 @@ int nStages;
 
 // test setttings ----------------------------------------------------------------------
 
-int myStrobeLength = 10;      // strobe length in units of 25 ns
+int myStrobeLength = 16;      // strobe length in units of 25 ns
 int myStrobeDelay  = 0;       // not needed right now as strobe generated on DAQ board
 int myPulseLength  = 2000;    // 2000 = 50 us
 
@@ -47,12 +47,12 @@ int myNTriggers    = 10;
 // charge range
 int myChargeStart  = 1;   // 1 default
 int myChargeStop   = 160; // 160 default
-int myChargeStep   = 1;
+int myChargeStep   = 2;
 
 // delay between pulse and strobe seems to be 50 ns + 12.5 ns * PulseDelay + 25 ns * StrobeDelay
 int myPulseDelayStart   = 36;      // 36 = 500 ns
 int myPulseDelayStop    = 1000;    // 1200 = 15050 ns and 1000 = 12550 ns
-int myPulseDelayStep    = 10;      // def 16 = 200 ns
+int myPulseDelayStep    = 16;      // def 16 = 200 ns
 
 // -------------------------------------------------------------------------------------
 
@@ -188,7 +188,7 @@ void scan(const char *fName) {
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
   for (int istage = 0; istage < 512; istage += (rows/nStages)) {
-    std::cout << "Mask stage " << istage << std::endl;
+    std::cout << "---> MASK STAGE: " << istage << std::endl;
     for (unsigned int i = 0; i < fChips.size(); i ++) {
       //if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
       AlpideConfig::ConfigureMaskStage(fChips.at(i), myPixPerRegion, istage);
@@ -242,7 +242,6 @@ void scan(const char *fName) {
     counter += 1;
     if (counter == myMaskStages) break;
   }
-  cout << "MY DEBUG: scan counter status " << counter << endl;
 }
 
 
@@ -252,8 +251,6 @@ int main(int argc, char** argv) {
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
   InitScanParameters();
-  cout << "MY DEBUG STAGES:  " << myMaskStages << endl;
-  cout << "MY DEBUG PixPerReg:  " << myPixPerRegion << endl;
 
   // condition for sweeping uniformly the whole range of mask stages:
   if (512%myMaskStages == 0){
