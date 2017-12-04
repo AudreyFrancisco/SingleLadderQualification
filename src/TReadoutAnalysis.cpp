@@ -33,7 +33,9 @@ void TReadoutAnalysis::InitCounters ()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
     TReadoutResultHic *hicResult = (TReadoutResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
-    
+    hicResult->m_linkSpeed   = ((TReadoutTest*)m_scan)->GetLinkSpeed();
+    hicResult->m_driver      = ((TReadoutTest*)m_scan)->GetDriver   ();
+    hicResult->m_preemp      = ((TReadoutTest*)m_scan)->GetPreemp   ();
     hicResult->m_missingHits = 0;
     hicResult->m_deadPixels  = 0;
     hicResult->m_ineffPixels = 0;
@@ -178,6 +180,41 @@ void TReadoutResultHic::WriteToFile (FILE *fp)
     fprintf(fp, "\nResult chip %d:\n\n", it->first);
     it->second->WriteToFile(fp);
   }
+}
+
+
+
+void TReadoutResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix)
+{
+  suffix = string (" ") + to_string(m_linkSpeed);
+  suffix += string(" D") + to_string(m_driver);
+  suffix += string(" P") + to_string(m_preemp);
+
+  file_suffix = string("_") + to_string(m_linkSpeed);
+  suffix += string("_D") + to_string(m_driver);
+  suffix += string("_P") + to_string(m_preemp);
+}
+
+
+void TReadoutResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity) 
+{
+  std::string suffix, file_suffix, fileName, remoteName;
+  GetParameterSuffix (suffix, file_suffix);
+
+  DbAddParameter  (db, activity, string ("Timeouts readout") + suffix,          (float) m_errorCounter.nTimeout);
+  DbAddParameter  (db, activity, string ("8b10b errors readout") + suffix,      (float) m_errorCounter.n8b10b);
+  DbAddParameter  (db, activity, string ("Corrupt events readout") + suffix,    (float) m_errorCounter.nCorruptEvent);
+  DbAddParameter  (db, activity, string ("Dead pixels readout") + suffix,       (float) m_deadPixels);
+  DbAddParameter  (db, activity, string ("Inefficient pixels readout") + suffix,(float) m_ineffPixels);
+  DbAddParameter  (db, activity, string ("Dead pixels readout") + suffix,       (float) m_noisyPixels);
+  DbAddParameter  (db, activity, string ("Missing hits") + suffix,              (float) m_missingHits);
+  DbAddParameter  (db, activity, string ("Extra hits") + suffix,                (float) m_extraHits);
+
+  std::size_t slash = string(m_resultFile).find_last_of("/");
+  fileName          = string(m_resultFile).substr (slash +1);    // strip path
+  std::size_t point = fileName.find_last_of(".");
+  remoteName        = fileName.substr (0, point) + file_suffix + ".dat";
+  DbAddAttachment (db, activity, attachResult, string(m_resultFile), remoteName);
 }
 
 

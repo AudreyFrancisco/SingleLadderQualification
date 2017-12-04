@@ -14,7 +14,7 @@ typedef enum {OBQualification, OBEndurance, OBReception, OBHalfStaveOL, OBHalfSt
 
 namespace ScanConfig {
   const int NINJ           = 50;        // number of injections in digital/threshold scans
-  const int NTRIG          = 10000;   // number of triggers for noise occupancy scans
+  const int NTRIG          = 100000;   // number of triggers for noise occupancy scans
   const int CHARGE_START   = 0;
   const int CHARGE_STOP    = 50;
   const int CHARGE_STEP    = 1;
@@ -41,9 +41,10 @@ namespace ScanConfig {
 
   // settings for readout test
   const int READOUTSPEED   = 1200;
-  const int READOUTOCC     = 32;
-  const int READOUTDRIVER  = 10;
-  const int READOUTPREEMP  = 10;
+  const int READOUTOCC     = 16;
+  const int READOUTDRIVER  = 1;
+  const int READOUTPREEMP  = 1;
+  const int READOUTROW     = 0;
 
   // current limits for powering test in mA
   const int POWER_CUT_MINIDDA_OB = 20;
@@ -182,6 +183,7 @@ class TScanConfig {
   int    m_readoutOcc;
   int    m_readoutDriver;
   int    m_readoutPreemp;
+  int    m_readoutRow;
   TTestType m_testType;
  protected:
  public:

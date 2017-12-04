@@ -33,15 +33,19 @@ class TReadoutResultHic : public TScanResultHic {
 friend class TReadoutAnalysis;
  private: 
   TErrorCounter m_errorCounter;
+  int           m_linkSpeed;
+  int           m_driver;
+  int           m_preemp;
   int           m_missingHits;
   int           m_deadPixels;
   int           m_ineffPixels;
   int           m_extraHits;
   int           m_noisyPixels;
+  void          GetParameterSuffix (std::string &suffix, std::string &file_suffix);
  public:
   TReadoutResultHic () : TScanResultHic () {};
   void WriteToFile  (FILE *fp); 
-  void WriteToDB    (AlpideDB *db, ActivityDB::activity &activity) {};
+  void WriteToDB    (AlpideDB *db, ActivityDB::activity &activity);
 };
 
 

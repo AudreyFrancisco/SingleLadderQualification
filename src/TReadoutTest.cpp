@@ -18,9 +18,11 @@ TReadoutTest::TReadoutTest (TScanConfig                   *config,
   : TDataTaking (config, chips, hics, boards, histoQue, aMutex) 
 {
   sprintf(m_name, "ReadoutTest"); 
-  //TODO: configurable row, trigger frequency, number of triggers
 
-  m_row            = 0;
+  // trigger frequency, number of triggers have to be set in scan config
+  // before creating readout test object
+
+  m_row            = config->GetParamValue ("READOUTROW");
   m_linkSpeed      = config->GetParamValue ("READOUTSPEED");
   m_occupancy      = config->GetParamValue ("READOUTOCC");
   m_driverStrength = config->GetParamValue ("READOUTDRIVER");

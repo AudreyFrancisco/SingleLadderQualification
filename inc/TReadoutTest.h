@@ -34,6 +34,9 @@ class TReadoutTest : public TDataTaking {
                     std::mutex                    *aMutex);
   ~TReadoutTest    () {};
   int  GetRow      () {return m_row;};
+  int  GetDriver   () {return m_driverStrength;};
+  int  GetLinkSpeed() {return m_linkSpeed;};
+  int  GetPreemp   () {return m_preemp;};
   void Init        ();
   void PrepareStep (int loopIndex) { (void)(&loopIndex); };
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
