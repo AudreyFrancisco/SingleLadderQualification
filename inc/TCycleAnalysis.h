@@ -28,6 +28,8 @@ class TCycleResultHic : public TScanResultHic {
   float m_avIddd;
   float m_maxIddd;
   float m_minIddd;
+  char  m_cycleFile[200];
+  void  SetCycleFile (const char *fName) {strcpy(m_cycleFile, fName);};
  protected:
  public:
   TCycleResultHic () : TScanResultHic () {};

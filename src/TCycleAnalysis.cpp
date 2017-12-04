@@ -42,14 +42,38 @@ void TCycleAnalysis::InitCounters()
 // Q: 1 file per HIC? -> yes, since attachment per activity, activity is per HIC
 void TCycleAnalysis::Finalize() 
 {
+  char fName[200]; 
   std::vector <std::map <std::string, THicCounter>> counters = ((TEnduranceCycle*) m_scan)->GetCounters ();
   ((TCycleResult*)m_result)->m_nCycles = counters.size();
-  for (unsigned int icycle = 0; icycle < counters.size(); icycle ++) {
-    std::map <std::string, THicCounter> hicCounters = counters.at(icycle);
+ 
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    TCycleResultHic *hicResult  = (TCycleResultHic*)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
 
-    for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-      THicCounter      hicCounter = hicCounters.at(m_hics.at(ihic)->GetDbId());
-      TCycleResultHic *hicResult  = (TCycleResultHic*)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+    if (m_config->GetUseDataPath()) {
+      sprintf (fName, "%s/CycleFile_%s.dat", hicResult->GetOutputPath().c_str(),
+                                             m_config->GetfNameSuffix());
+    }
+    else {
+      sprintf (fName, "CycleFile_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+                                           m_config->GetfNameSuffix());
+    }
+    hicResult->SetCycleFile(fName);
+    FILE *fp = fopen (fName, "w");
+
+    for (unsigned int icycle = 0; icycle < counters.size(); icycle ++) {
+      std::map <std::string, THicCounter> hicCounters = counters.at(icycle);
+      THicCounter                         hicCounter  = hicCounters.at(m_hics.at(ihic)->GetDbId());
+
+      fprintf (fp, "%d %d %d %.3f %.3f %.3f %.3f %.1f %.1f\n", 
+                   icycle, 
+	           hicCounter.m_trip?1:0,
+                   hicCounter.m_nWorkingChips,
+                   hicCounter.m_iddaClocked,
+                   hicCounter.m_idddClocked,
+                   hicCounter.m_iddaConfigured,
+                   hicCounter.m_idddConfigured, 
+                   hicCounter.m_tempStart,
+                   hicCounter.m_tempEnd);
 
       if (hicCounter.m_trip)
 	hicResult->m_nTrips++;
@@ -75,6 +99,7 @@ void TCycleAnalysis::Finalize()
       hicResult->m_avIddd   += hicCounter.m_idddClocked;
 	  
     }
+    fclose (fp);
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
