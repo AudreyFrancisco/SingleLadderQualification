@@ -22,6 +22,8 @@ TReadoutTest::TReadoutTest (TScanConfig                   *config,
   // trigger frequency, number of triggers have to be set in scan config
   // before creating readout test object
 
+  m_pulse          = true;
+  m_pulseLength    = chips.at(0)->GetConfig()->GetParamValue("PULSEDURATION");
   m_row            = config->GetParamValue ("READOUTROW");
   m_linkSpeed      = config->GetParamValue ("READOUTSPEED");
   m_occupancy      = config->GetParamValue ("READOUTOCC");

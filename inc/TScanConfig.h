@@ -41,7 +41,7 @@ namespace ScanConfig {
 
   // settings for readout test
   const int READOUTSPEED   = 1200;
-  const int READOUTOCC     = 16;
+  const int READOUTOCC     = 32;
   const int READOUTDRIVER  = 1;
   const int READOUTPREEMP  = 1;
   const int READOUTROW     = 0;

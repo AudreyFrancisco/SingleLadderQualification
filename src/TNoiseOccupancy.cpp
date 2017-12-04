@@ -18,6 +18,8 @@ TNoiseOccupancy::TNoiseOccupancy (TScanConfig                   *config,
   : TDataTaking (config, chips, hics, boards, histoQue, aMutex) 
 {
   sprintf(m_name, "Noise Occupancy %.1f V", m_backBias); 
+  m_pulse       = false;
+  m_pulseLength = 0;
 }
 
 

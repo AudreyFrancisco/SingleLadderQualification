@@ -50,7 +50,7 @@ void TDataTaking::ConfigureFromu (TAlpide *chip)
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x0);    // digital pulsing        
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
   chip->WriteRegister(Alpide::REG_FROMU_PULSING1, chip->GetConfig()->GetParamValue("STROBEDELAYCHIP"));   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, 0);   // fromu pulsing 2: pulse length
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, m_pulseLength);   // fromu pulsing 2: pulse length
 }
 
 
@@ -65,7 +65,7 @@ void TDataTaking::ConfigureBoard (TReadoutBoard *board)
     board->SetTriggerSource (trigExt);
   }
   else {
-    board->SetTriggerConfig (false, true, 
+    board->SetTriggerConfig (m_pulse, true, 
                              board->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
                              board->GetConfig()->GetParamValue("PULSEDELAY"));
     board->SetTriggerSource (trigInt);

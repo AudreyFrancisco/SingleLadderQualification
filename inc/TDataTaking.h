@@ -27,6 +27,8 @@ class TDataTaking : public TScan {
   void                  FindTimeoutHics (int iboard, int *triggerCounts, int nTriggers);
  protected:
   THisto                CreateHisto     ();
+  bool                  m_pulse;
+  int                   m_pulseLength;
   float                 m_backBias;
   void                  ConfigureFromu  (TAlpide *chip);
  public:
