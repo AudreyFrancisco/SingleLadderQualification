@@ -23,7 +23,7 @@ friend class TReadoutAnalysis;
   int m_noisyPixels;
  public:
   void WriteToFile  (FILE *fp); 
-  float GetVariable  (TResultVariable var) {return 0;};
+  float GetVariable  (TResultVariable var);
   TReadoutResultChip () : TScanResultChip () {};
 };
 

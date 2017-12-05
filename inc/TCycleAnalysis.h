@@ -10,7 +10,7 @@ class TCycleResultChip : public TScanResultChip {
  public:
   TCycleResultChip () : TScanResultChip () {};
   void  WriteToFile (FILE *fp)             {(void)fp;};
-  float GetVariable (TResultVariable var)  {return 0;};  
+  float GetVariable (TResultVariable var);  
 };
 
 
@@ -53,9 +53,10 @@ class TCycleAnalysis : public TScanAnalysis {
  protected:
   TScanResultChip *GetChipResult () {TCycleResultChip *Result = new TCycleResultChip(); return Result;};
   TScanResultHic  *GetHicResult  () {TCycleResultHic  *Result = new TCycleResultHic (); return Result;};
-  void             CreateResult () {};
-  void             InitCounters ();
-  void             WriteResult  ();
+  void             CreateResult  () {};
+  void             InitCounters  ();
+  void             WriteResult   ();
+  void             AnalyseHisto  (TScanHisto *histo) {(void)histo;};
  public:
   TCycleAnalysis(std::deque<TScanHisto> *histoQue,
                  TScan                  *aScan,

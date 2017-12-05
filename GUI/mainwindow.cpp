@@ -61,6 +61,10 @@
 #include "TPowerAnalysis.h"
 #include "TSCurveAnalysis.h"
 #include "calibrationpb.h"
+#include "TReadoutTest.h"
+#include "TReadoutAnalysis.h"
+#include "TEnduranceCycle.h"
+#include "TCycleAnalysis.h"
 
 
 
@@ -967,341 +971,92 @@ void MainWindow::start_test(){
 
 void MainWindow::fillingOBvectors(){
 
-TFifoResult    *fiforesult=new TFifoResult();
-    TFifoResult    *fiforesultp10=new TFifoResult();
-    TFifoResult    *fiforesultm10=new TFifoResult();
-    TDigitalResult *digitalresult=new TDigitalResult();
-    TDigitalResult *digitalresultm10=new TDigitalResult();
-    TDigitalResult *digitalresultp10=new TDigitalResult();
-    TDigitalWFResult *digitalwfresult=new TDigitalWFResult();
-    //  TLocalBusResult *localbusresult=new TLocalBusResult();
+  ClearVectors();
 
+  AddScan(STPower);
 
-    TPowerResult *powerresult=new TPowerResult();
+  // FIFO and digital scan at three different supply voltages
+  AddScan(STFifo);
+  fConfig->GetScanConfig()->SetVoltageScale(1.1);
+  AddScan(STFifo);
+  fConfig->GetScanConfig()->SetVoltageScale(0.9);
+  AddScan(STFifo);
+  fConfig->GetScanConfig()->SetVoltageScale(1.0);
+  AddScan(STDigital);
+  fConfig->GetScanConfig()->SetVoltageScale(1.1);
+  AddScan(STDigital);
+  fConfig->GetScanConfig()->SetVoltageScale(0.9);
+  AddScan(STDigital);
+  fConfig->GetScanConfig()->SetVoltageScale(1.0);
 
-    fConfig->GetScanConfig()->SetBackBias(0.0);
-    fConfig->GetScanConfig()->SetVcasnRange (30, 70);
+  // digital white frame
+  AddScan(STDigitalWF);
 
+  // threshold scans and tuning at 0V back bias
+  fConfig->GetScanConfig()->SetBackBias(0.0);
+  fConfig->GetScanConfig()->SetVcasnRange (30, 70);
 
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL",1);  
+  AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL",0);  
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+  AddScan(STThreshold);
+  // noise occupancy with and without mask at 0V back bias
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
 
-    //  TLocalBusTest *localbusscan=new TLocalBusTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TPowerTest*powerscan=new TPowerTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TPowerAnalysis *poweranalysis= new TPowerAnalysis(&fHistoQue,powerscan,fConfig->GetScanConfig(), fHICs, &fMutex,powerresult);
-    TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesult);
+  // threshold scans and tuning at 0V back bias
+  fConfig->GetScanConfig()->SetBackBias(3.0);
+  fConfig->GetScanConfig()->SetVcasnRange (75, 160);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL",1);
+  AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL",0);  
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+  AddScan(STThreshold);
+  // noise occupancy with and without mask at 3V back bias
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
 
-    fConfig->GetScanConfig()->SetVoltageScale(1.1);
-    TFifoTest *fifoscanp10= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TFifoAnalysis  *fifoanalysisp10 = new TFifoAnalysis(&fHistoQue,fifoscanp10,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesultp10);
-
-    fConfig->GetScanConfig()->SetVoltageScale(0.9);
-    TFifoTest *fifoscanm10= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TFifoAnalysis  *fifoanalysism10 = new TFifoAnalysis(&fHistoQue,fifoscanm10,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesultm10);
-
-    fConfig->GetScanConfig()->SetVoltageScale(1);
-
-
-    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresult);
-    fConfig->GetScanConfig()->SetVoltageScale(1.1);
-    //  std::cout<<fConfig->GetScanConfig()->GetVoltageScale()<<"FgrtsegrtT"<<std::endl;
-    TDigitalScan *digitalscanp10= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TDigitalAnalysis  *digitalanalysisp10 = new TDigitalAnalysis(&fHistoQue,digitalscanp10, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresultp10);
-    fConfig->GetScanConfig()->SetVoltageScale(0.9);
-    TDigitalScan *digitalscanm10= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TDigitalAnalysis  *digitalanalysism10 = new TDigitalAnalysis(&fHistoQue,digitalscanm10, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresultm10);
-    fConfig->GetScanConfig()->SetVoltageScale(1);
-    TDigitalWhiteFrame *digitalwfscan= new TDigitalWhiteFrame(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TDigitalWFAnalysis  *digitalwfanalysis = new TDigitalWFAnalysis(&fHistoQue,digitalwfscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalwfresult);
-
-
-    fConfig->GetScanConfig()->SetParamValue("NOMINAL",1);
-    TSCurveResult *vcasnresult=new TSCurveResult();
-    TSCurveResult *vcasnresultzero=0;
-    TSCurveResult *ithrresultzero=0;
-    TSCurveResult *ithrresult=new TSCurveResult();
-    TSCurveResult *scurveresult=new TSCurveResult();
-    TSCurveResult *scurveresultafter=new TSCurveResult();
-    TThresholdScan *thresholdscanzero=0;
-
-    TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TSCurveAnalysis *scurveanalysis=new TSCurveAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,scurveresult);
-    fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
-    //  TScanAnalysis  *thresholdanalysis = new TThresholdAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,threresult);
-    TtuneVCASNScan *vcasnscan=new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TtuneITHRScan *ithrscan=new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-
-    TSCurveAnalysis *vcasnanalysis=new TSCurveAnalysis(&fHistoQue,vcasnscan, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresult,1);
-    TApplyVCASNTuning *vcasntuning=new TApplyVCASNTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresult);
-    TSCurveAnalysis *ithranalysis=new TSCurveAnalysis(&fHistoQue,ithrscan, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresult,-1);
-    TApplyITHRTuning *ithrtuning=new TApplyITHRTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresult);
-    TThresholdScan *thresholdscanafter=new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    // TScanAnalysis  *thresholdanalysisafter = new TThresholdAnalysis (&fHistoQue,thresholdscanafter, fConfig->GetScanConfig(), fHICs, &fMutex,threresultafter);
-    TSCurveAnalysis *scurveanalysisafter=new TSCurveAnalysis (&fHistoQue,thresholdscanafter, fConfig->GetScanConfig(), fHICs, &fMutex,scurveresultafter);
-
-
-
-    TNoiseResult *noiseresult=new TNoiseResult();
-    TNoiseResult *noiseresultmasked=0;
-    TNoiseResult *noiseresultafter=new TNoiseResult();
-    TNoiseOccupancy *noisescan=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TNoiseOccupancy *noisescanafter=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TNoiseOccupancy *noisescanzero=0;
-    TNoiseAnalysis *noiseanalysis=new TNoiseAnalysis(&fHistoQue, noisescan, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresult);
-    TApplyMask *noisemask=new TApplyMask(&fHistoQue,noisescanzero, fConfig->GetScanConfig(), fHICs, &fMutex,noiseresult);
-    TNoiseAnalysis *noiseanalysisafter=new TNoiseAnalysis(&fHistoQue, noisescanafter, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresultafter);
-
-    fConfig->GetScanConfig()->SetBackBias(3.0);
-    fConfig->GetScanConfig()->SetVcasnRange (75, 160);
-
-
-
-
-    fConfig->GetScanConfig()->SetParamValue("NOMINAL",1);
-
-    TSCurveResult *threresultthree= new TSCurveResult();
-    TSCurveResult *vcasnresultthree=new TSCurveResult();
-    TSCurveResult *ithrresultthree=new TSCurveResult();
-    TSCurveResult *thresholdresultafterthree=new TSCurveResult();
-
-    TThresholdScan *thresholdscanthree= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TSCurveAnalysis  *thresholdanalysisthree = new TSCurveAnalysis (&fHistoQue,thresholdscanthree, fConfig->GetScanConfig(), fHICs, &fMutex,threresultthree);
-    fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
-    TtuneVCASNScan *vcasnscanthree=new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TtuneITHRScan *ithrscanthree=new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TSCurveAnalysis *vcasnanalysisthree=new TSCurveAnalysis(&fHistoQue,vcasnscanthree, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresultthree,1);
-    TApplyVCASNTuning *vcasntuningthree=new TApplyVCASNTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,vcasnresultthree);
-    TSCurveAnalysis *ithranalysisthree=new TSCurveAnalysis(&fHistoQue,ithrscanthree, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresultthree,-1);
-    TApplyITHRTuning *ithrtuningthree=new TApplyITHRTuning(&fHistoQue,thresholdscanzero, fConfig->GetScanConfig(), fHICs, &fMutex,ithrresultthree);
-    TThresholdScan *thresholdscanafterthree=new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TSCurveAnalysis  *thresholdanalysisafterthree = new TSCurveAnalysis (&fHistoQue,thresholdscanafterthree, fConfig->GetScanConfig(), fHICs, &fMutex,thresholdresultafterthree);
-
-
-
-
-    TNoiseResult *noiseresultthree=new TNoiseResult();
-    //  TNoiseResult *noiseresultmaskedthree=0;
-    TNoiseResult *noiseresultafterthree=new TNoiseResult();
-
-    TNoiseOccupancy *noisescanthree=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TNoiseOccupancy *noisescanafterthree=new TNoiseOccupancy(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-
-    TNoiseAnalysis *noiseanalysisthree=new TNoiseAnalysis(&fHistoQue, noisescanthree, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresultthree);
-    TApplyMask *noisemaskthree=new TApplyMask(&fHistoQue,noisescanzero, fConfig->GetScanConfig(), fHICs, &fMutex,noiseresultthree);
-    TNoiseAnalysis *noiseanalysisafterthree=new TNoiseAnalysis(&fHistoQue, noisescanafterthree, fConfig->GetScanConfig(), fHICs,&fMutex,noiseresultafterthree);
-
-    //   TLocalBusAnalysis *localbusanalysis = new TLocalBusAnalysis(&fHistoQue,localbusscan, fConfig->GetScanConfig(), fHICs, &fMutex,localbusresult);
-    fScanVector.push_back(powerscan);
-    fScanVector.push_back(fifoscan);
-    fScanVector.push_back(fifoscanp10);
-    fScanVector.push_back(fifoscanm10);
-    // fScanVector.push_back(localbusscan);
-    fScanVector.push_back(digitalscan);
-    fScanVector.push_back(digitalscanp10);
-    fScanVector.push_back(digitalscanm10);
-    fScanVector.push_back(digitalwfscan);
-    fScanVector.push_back(thresholdscan);
-    fScanVector.push_back(vcasnscan);
-    fScanVector.push_back(thresholdscanzero);
-    fScanVector.push_back(ithrscan);
-    fScanVector.push_back(thresholdscanzero);
-    fScanVector.push_back(thresholdscanafter);
-    fScanVector.push_back(noisescan);
-    fScanVector.push_back(noisescanzero);
-    fScanVector.push_back(noisescanafter);
-    fScanVector.push_back(thresholdscanthree);
-    fScanVector.push_back(vcasnscanthree);
-    fScanVector.push_back(thresholdscanzero);
-    fScanVector.push_back(ithrscanthree);
-    fScanVector.push_back(thresholdscanzero);
-    fScanVector.push_back(thresholdscanafterthree);
-    fScanVector.push_back(noisescanthree);
-    fScanVector.push_back(noisescanzero);
-    fScanVector.push_back(noisescanafterthree);
-    //   fScanVector.push_back(vcasnscan);
-    //  fScanVector.push_back(ithrscan);
-
-    // qDebug()<<"dimitra"<<endl;
-    fAnalysisVector.push_back(poweranalysis);
-    fAnalysisVector.push_back(fifoanalysis);
-    fAnalysisVector.push_back(fifoanalysisp10);
-    fAnalysisVector.push_back(fifoanalysism10);
-    //  fAnalysisVector.push_back(localbusanalysis);
-    fAnalysisVector.push_back(digitalanalysis);
-    fAnalysisVector.push_back(digitalanalysisp10);
-    fAnalysisVector.push_back(digitalanalysism10);
-    fAnalysisVector.push_back(digitalwfanalysis);
-    //  fAnalysisVector.push_back(thresholdanalysis);
-    fAnalysisVector.push_back(scurveanalysis);
-    fAnalysisVector.push_back(vcasnanalysis);
-    fAnalysisVector.push_back(vcasntuning);
-    fAnalysisVector.push_back(ithranalysis);
-    fAnalysisVector.push_back(ithrtuning);
-    //  fAnalysisVector.push_back(thresholdanalysisafter);
-    fAnalysisVector.push_back(scurveanalysisafter);
-    fAnalysisVector.push_back(noiseanalysis);
-    fAnalysisVector.push_back(noisemask);
-    fAnalysisVector.push_back(noiseanalysisafter);
-    fAnalysisVector.push_back(thresholdanalysisthree);
-    fAnalysisVector.push_back(vcasnanalysisthree);
-    fAnalysisVector.push_back(vcasntuningthree);
-    fAnalysisVector.push_back(ithranalysisthree);
-    fAnalysisVector.push_back(ithrtuningthree);
-    fAnalysisVector.push_back(thresholdanalysisafterthree);
-    fAnalysisVector.push_back(noiseanalysisthree);
-    fAnalysisVector.push_back(noisemaskthree);
-    fAnalysisVector.push_back(noiseanalysisafterthree);
-    //   fAnalysisVector.push_back(vcasnanalysis);
-    //   fAnalysisVector.push_back(ithranalysis);
-
-    //  fmaskvector.resize(9);
-    //  fmaskvector.at(4)=noisemask;
-    fresultVector.push_back(powerresult);
-    fresultVector.push_back(fiforesult);
-    fresultVector.push_back(fiforesultp10);
-    fresultVector.push_back(fiforesultm10);
-    //  fresultVector.push_back(localbusresult);
-    //   fresultVector.push_back(0);
-    fresultVector.push_back(digitalresult);
-    fresultVector.push_back(digitalresultp10);
-    fresultVector.push_back(digitalresultm10);
-    fresultVector.push_back(digitalwfresult);
-    //  fresultVector.push_back(threresult);
-    fresultVector.push_back(scurveresult);
-    fresultVector.push_back(vcasnresult);
-    fresultVector.push_back(vcasnresultzero);
-    fresultVector.push_back(ithrresult);
-    fresultVector.push_back(ithrresultzero);
-    // fresultVector.push_back(threresultafter);
-    fresultVector.push_back(scurveresultafter);
-    fresultVector.push_back(noiseresult);
-    fresultVector.push_back(noiseresultmasked);
-    fresultVector.push_back(noiseresultafter);
-    fresultVector.push_back(threresultthree);
-    fresultVector.push_back(vcasnresultthree);
-    fresultVector.push_back(vcasnresultzero);
-    fresultVector.push_back(ithrresultthree);
-    fresultVector.push_back(ithrresultzero);
-    fresultVector.push_back(thresholdresultafterthree);
-    fresultVector.push_back(noiseresultthree);
-    fresultVector.push_back(noiseresultmasked);
-    fresultVector.push_back(noiseresultafterthree);
-
-    scanbuttons.push_back(ui->test1);
-    scanbuttons.push_back(ui->test2);
-    scanbuttons.push_back(ui->test3);
-    scanbuttons.push_back(ui->test4);
-    // scanbuttons.push_back(0);
-    scanbuttons.push_back(ui->test5);
-    scanbuttons.push_back(ui->test6);
-    scanbuttons.push_back(ui->test7);
-    scanbuttons.push_back(ui->test8);
-    scanbuttons.push_back(ui->test9);
-    scanbuttons.push_back(ui->test10);
-    scanbuttons.push_back(0);
-    scanbuttons.push_back(ui->test11);
-    scanbuttons.push_back(0);
-    scanbuttons.push_back(ui->test12);
-    scanbuttons.push_back(ui->test13);
-    scanbuttons.push_back(0);
-    scanbuttons.push_back(ui->test14);
-    scanbuttons.push_back(ui->test15);
-    scanbuttons.push_back(ui->test16);
-    scanbuttons.push_back(0);
-    scanbuttons.push_back(ui->test17);
-    scanbuttons.push_back(0);
-    scanbuttons.push_back(ui->test18);
-    scanbuttons.push_back(ui->test19);
-    scanbuttons.push_back(0);
-    scanbuttons.push_back(ui->test20);
-
-
-    scanstatuslabels.push_back(ui->powers);
-    scanstatuslabels.push_back(ui->fifos);
-    scanstatuslabels.push_back(ui->fifops);
-    scanstatuslabels.push_back(ui->fifoms);
-    scanstatuslabels.push_back(ui->digitals);
-    scanstatuslabels.push_back(ui->digitalps);
-    scanstatuslabels.push_back(ui->digitalms);
-    scanstatuslabels.push_back(ui->digitalwf);
-    scanstatuslabels.push_back(ui->thresholds);
-    scanstatuslabels.push_back(ui->vcasntuning);
-    scanstatuslabels.push_back(0);
-    scanstatuslabels.push_back(ui->ithrtuning);
-    scanstatuslabels.push_back(0);
-    scanstatuslabels.push_back(ui->thresholodafter);
-    scanstatuslabels.push_back(ui->noisebts);
-    scanstatuslabels.push_back(0);
-    scanstatuslabels.push_back(ui->noiseats);
-    scanstatuslabels.push_back(ui->thresholdsthree);
-    scanstatuslabels.push_back(ui->vcasntuningthree);
-    scanstatuslabels.push_back(0);
-    scanstatuslabels.push_back(ui->ithrtuningthree);
-    scanstatuslabels.push_back(0);
-    scanstatuslabels.push_back(ui->thresholdafterthree);
-    scanstatuslabels.push_back(ui->noisebtsthree);
-    scanstatuslabels.push_back(0);
-    scanstatuslabels.push_back(ui->noiseatsthree);
-    //scanstatuslabels.push_back();
-
-    WriteTests();
-    // qDebug()<<"dimitra"<<endl;
-
-
+  return;
 }
+
 
 void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysis *> a){
 
-    //  qDebug()<<s.size()<<endl;
     ui->statuslabel->setVisible(true);
     ui->statuslabel->update();
 
-    // for (int i=6;i<s.size();i++){
     for (unsigned int i=0;i<fScanVector.size();i++){
         try{
-            //  std::cout<<"The scan names are : "<<fScanVector[i]->GetName()<<std::endl;
-            // std::cout<<"The classification is : "<<fresultVector[i]->GetHicResults()->first<<std::endl;
-            //  std::cout<<"The state is : "<<fScanVector[i]->GetState()<<std::endl;
             if (s.at(i)==0){
-                //  qDebug()<<"The scan pointer is zero doing the job only for analysis"<<endl;
                 a.at(i)->Initialize();
-                // fmaskvector[4]->Initialize();
                 std::thread analysisThread(&TScanAnalysis::Run, a[i]);
-                // std::thread analysisThread(&TApplyMask::Run, std::ref(fmaskvector[4]));
-                //qDebug()<<"before join, it crashes in join"<<endl;
                 analysisThread.join();
-                //qDebug()<<"before finalize"<<endl;
                 a.at(i)->Finalize();
-
             }
             else {
-                // for (int i=0;i<2;i++){
-                //   QApplication::processEvents() ;
-                // qDebug()<<"out of range dimitroula1"<<endl;
                 std::thread scanThread(&MainWindow::scanLoop,this,s[i]);
-                //std::cout<<"out of range dimitroula1"<<endl;
                 a.at(i)->Initialize();
-                //std::cout<<"out of range dimitroula2"<<endl;
-                //  qDebug()<<s.at(i)<<"g"<<endl;
-
-                // ui->details->addItem("d");
-
-
-                // std::thread koumpi(&MainWindow::runscans,this);
-                //  koumpi.join();
-
                 std::thread analysisThread(&TScanAnalysis::Run, a[i]);
-                //  std::cout<<"out of range dimitroula3"<<endl;
                 std::cout<<"BEFORE THE SCAN THREAD"<<std::endl;
                 scanThread.join();
                 std::cout<<"AFTER THE SCAN THREAD"<<std::endl;
-                //  std::cout<<"out of range dimitroula4"<<endl;
-                if(scanstatuslabels.at(i)!=0){
-                    scanstatuslabels[i]->setText(fScanVector.at(i)->GetState());}
                 std::cout<<"BEFORE THE ANALYSIS THREAD"<<std::endl;
+
+                if(scanstatuslabels.at(i)!=0){
+                    scanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
+                    scanstatuslabels[i]->update();
+                }
+
                 analysisThread.join();
-
-
                 a.at(i)->Finalize();
                 if(scanstatuslabels.at(i)!=0){
                     scanstatuslabels[i]->setText(fScanVector.at(i)->GetState());}
@@ -1492,60 +1247,22 @@ void MainWindow::applytests(){
     }
     ui->start_test->hide();
     qApp->processEvents();
+    signalMapper = new QSignalMapper(this);
     if (numberofscan==1||numberofscan==2){fillingOBvectors();}
     if (numberofscan==5){fillingreceptionscans();}
     if (numberofscan==3){fillingendurancevectors();}
+
+    qApp->processEvents();
     std::cout<<"the size of the scan vector is: "<<fScanVector.size()<<std::endl;
+    
     performtests(fScanVector,fAnalysisVector);
     //  colorscans();
-    if(numberofscan!=3){
-    connectscandetails();}
+    //if(numberofscan!=3){
+      //connectscandetails();}
     // emit stopTimer();
+    connect(signalMapper, SIGNAL(mapped(int)), this, SLOT (getresultdetails(int)));
 }
 
-void MainWindow::WriteTests(){
-    //std::cout<<fScanVector.size()<<"the scan vector size";
-    /*  for (unsigned int i=0;i<13;i++)
-      {//std::cout<<ui->test1<<std::endl;
-
-      while (i<1){
-      if (fScanVector.size()<14){
-      ui->test1->setText(fScanVector[i]->GetName());
-      ui->test2->setText(fScanVector[i+1]->GetName());
-      ui->test3->setText(fScanVector[i+2]->GetName());
-      ui->test4->setText(fScanVector[i+3]->GetName());
-      ui->test5->setText(fScanVector[i+4]->GetName());
-      ui->test6->setText(fScanVector[i+5]->GetName());
-      ui->test7->setText(fScanVector[i+6]->GetName());
-      ui->test8->setText(fScanVector[i+7]->GetName());
-      ui->test9->setText(fScanVector[i+8]->GetName());
-      ui->test10->setText(fScanVector[i+10]->GetName());
-
-      //  ui->test11->setText(fScanVector[i+11]->GetName());
-      //  ui->test12->setText(fScanVector[i+12]->GetName());
-      // colororange();
-      //  ui->test12->setText(fScanVector[i+8]->GetName());
-      }
-
-      break;
-      }
-      }*///uncomment this
-
-    for (unsigned int i=0;i<fScanVector.size();i++){
-        if (fScanVector.at(i)!=0){
-            scanbuttons.at(i)->setText(fScanVector[i]->GetName());
-        }
-    }
-
-
-    for (unsigned int j=0;j<scanbuttons.size();j++){
-        if(scanbuttons[j]!=0){
-            scanbuttons.at(j)->setStyleSheet("Text-align:left;border:none;");
-        }
-    }
-
-
-}
 
 void MainWindow::runscans(){
     /*QTimer* timer;
@@ -1930,151 +1647,6 @@ void MainWindow::quitall(){
 }
 
 
-void MainWindow::connectscandetails(){
-
-    //  for (unsigned int i=0;i<scanbuttons.size(); i++){
-    //    std::cout<<"prin gemisei"<<std::endl;
-    //    if(scanbs[i]!=0){
-    //std::cout<<"enw gemizei"<<std::endl;
-    //scanposition=i;
-    //QSignalMapper* signalMapper = new QSignalMapper (this) ;
-    //  connect(scanbuttons[i],SIGNAL(clicked()),this,SLOT(map()));
-    //  signalMapper-> setMapping (scanbuttons[i], i);
-    // connect (signalMapper, SIGNAL(mapped(int)), this, SLOT(thresholdlist(int))) ;
-
-    //}        //connect(ui->obm1,SIGNAL(clicked()),this,SLOT(button_obm1_clicked()));
-    if(numberofscan==1||numberofscan==2){
-        connect(ui->test2,SIGNAL(clicked()),this,SLOT(fifod()));
-        connect(ui->test3,SIGNAL(clicked()),this,SLOT(fifopd()));
-        connect(ui->test4,SIGNAL(clicked()),this,SLOT(fifomd()));
-        connect(ui->test5,SIGNAL(clicked()),this,SLOT(digitald()));
-        connect(ui->test6,SIGNAL(clicked()),this,SLOT(digitalpd()));
-        connect(ui->test7,SIGNAL(clicked()),this,SLOT(digitalmd()));
-        connect(ui->test8,SIGNAL(clicked()),this,SLOT(digitalwf()));
-        connect(ui->test9,SIGNAL(clicked()),this,SLOT(thresholdd()));
-        connect(ui->test10,SIGNAL(clicked()),this,SLOT(vcasntd()));
-        connect(ui->test11,SIGNAL(clicked()),this,SLOT(ithrtd()));
-        connect(ui->test12,SIGNAL(clicked()),this,SLOT(thresholddafter()));
-        connect(ui->test13,SIGNAL(clicked()),this,SLOT(noisebd()));
-        connect(ui->test14,SIGNAL(clicked()),this,SLOT(noisead()));
-        connect(ui->test15,SIGNAL(clicked()),this,SLOT(thresholddthree()));
-        connect(ui->test16,SIGNAL(clicked()),this,SLOT(vcasntdthree()));
-        connect(ui->test17,SIGNAL(clicked()),this,SLOT(ithrtdthree()));
-        connect(ui->test18,SIGNAL(clicked()),this,SLOT(thresholddafterthree()));
-        connect(ui->test19,SIGNAL(clicked()),this,SLOT(noisebdthree()));
-        connect(ui->test20,SIGNAL(clicked()),this,SLOT(noiseadthree()));
-
-
-
-    }
-    //connect(ui->test3,SIGNAL(clicked()),this,SLOT(powerd()));
-
-    // }
-
-
-    if(numberofscan==5){
-        connect(ui->test2,SIGNAL(clicked()),this,SLOT(fifod()));
-        connect(ui->test3,SIGNAL(clicked()),this,SLOT(digitald()));
-    }
-
-
-
-}
-
-
-void MainWindow::powerd(){
-    getresultdetails(0);
-}
-
-void MainWindow::fifod(){
-    getresultdetails(1);
-}
-
-void MainWindow::fifopd(){
-    getresultdetails(2);
-}
-
-void MainWindow::fifomd(){
-    getresultdetails(3);
-}
-
-void MainWindow::digitald(){
-    if (numberofscan==1){
-        getresultdetails(4);}
-    else if (numberofscan==5){
-        getresultdetails(2);
-    }
-}
-
-void MainWindow::digitalpd(){
-    getresultdetails(5);
-}
-
-void MainWindow::digitalmd(){
-    getresultdetails(6);
-}
-
-void MainWindow::digitalwf(){
-    getresultdetails(7);
-}
-
-void MainWindow::thresholdd(){
-    getresultdetails(8);
-}
-
-
-void MainWindow::vcasntd(){
-    getresultdetails(9);
-}
-
-void MainWindow::ithrtd(){
-    getresultdetails(11);
-}
-
-
-void MainWindow::thresholddafter(){
-    getresultdetails(13);
-}
-
-
-void MainWindow::noisebd(){
-    getresultdetails(14);
-}
-
-
-void MainWindow::noisead(){
-    getresultdetails(16);
-}
-
-void MainWindow::thresholddthree(){
-    getresultdetails(17);
-}
-
-
-void MainWindow::vcasntdthree(){
-    getresultdetails(18);
-}
-
-void MainWindow::ithrtdthree(){
-    getresultdetails(20);
-}
-
-
-void MainWindow::thresholddafterthree(){
-    getresultdetails(22);
-}
-
-
-void MainWindow::noisebdthree(){
-    getresultdetails(23);
-}
-
-
-void MainWindow::noiseadthree(){
-    getresultdetails(25);
-}
-
-
 void WriteToEos (string hicName) {
   char command[256];
   char account[20] = "aliceits";
@@ -2236,71 +1808,32 @@ void MainWindow::attachtodatabase(){
 
 
 
-
-void MainWindow::fillingreceptionscans(){
-
-
-    TFifoResult    *fiforesult=new TFifoResult();
-    TDigitalResult *digitalresult=new TDigitalResult();
-    TPowerResult *powerresult=new TPowerResult();
-
-    TPowerTest*powerscan=new TPowerTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TPowerAnalysis *poweranalysis= new TPowerAnalysis(&fHistoQue,powerscan,fConfig->GetScanConfig(), fHICs, &fMutex,powerresult);
-    TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesult);
-
-    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresult);
-
-
-    fScanVector.push_back(powerscan);
-    fScanVector.push_back(fifoscan);
-    fScanVector.push_back(digitalscan);
-
-    // qDebug()<<"dimitra"<<endl;
-    fAnalysisVector.push_back(poweranalysis);
-    fAnalysisVector.push_back(fifoanalysis);
-    fAnalysisVector.push_back(digitalanalysis);
-
-
-
-    fresultVector.push_back(powerresult);
-    fresultVector.push_back(fiforesult);
-    fresultVector.push_back(digitalresult);
-
-    scanbuttons.push_back(ui->test1);
-    scanbuttons.push_back(ui->test2);
-    scanbuttons.push_back(ui->test3);
-
-
-    scanstatuslabels.push_back(ui->powers);
-    scanstatuslabels.push_back(ui->fifos);
-    scanstatuslabels.push_back(ui->fifops);
-    WriteTests();
+void MainWindow::ClearVectors()
+{
+  fScanVector     .clear();
+  fAnalysisVector .clear();
+  fresultVector   .clear();
+  scanbuttons     .clear();
+  scanstatuslabels.clear();
 }
 
 
+void MainWindow::fillingreceptionscans()
+{
+  ClearVectors();
 
+  AddScan(STPower);
+  AddScan(STFifo);
+  AddScan(STDigital);
 
+}
 
 
 void MainWindow::poweringscan(){
-    TPowerResult *powerresult=new TPowerResult();
-    TPowerTest*powerscan=new TPowerTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TPowerAnalysis *poweranalysis= new TPowerAnalysis(&fHistoQue,powerscan,fConfig->GetScanConfig(), fHICs, &fMutex,powerresult);
-    fScanVector.push_back(powerscan);
-    fAnalysisVector.push_back(poweranalysis);
-    fresultVector.push_back(powerresult);
-    scanbuttons.push_back(ui->test1);
-    scanstatuslabels.push_back(ui->powers);
-    WriteTests();
+  ClearVectors();
 
+  AddScan(STPower);
 }
-
-
-
-
-
 
 
 void MainWindow::findidoftheactivitytype(std::string activitytypename, int &id){
@@ -2587,6 +2120,165 @@ void MainWindow::setdefaultvalues(bool &fit, int &numberofstages){
 
 }
 
+
+bool MainWindow::CreateScanObjects(TScanType       scanType, 
+                                   TScanConfig    *config, 
+                                   TScan         **scan, 
+                                   TScanAnalysis **analysis, 
+                                   TScanResult   **result,
+                                   bool          &hasButton)
+{
+  switch (scanType) {
+  case STPower: 
+    *scan      = new TPowerTest       (config, fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    *result    = new TPowerResult     ();
+    *analysis  = new TPowerAnalysis   (&fHistoQue, (TPowerTest*) *scan, config, fHICs, &fMutex, (TPowerResult*) *result);
+    hasButton  = true;
+    return true;
+  case STFifo:
+    *scan      = new TFifoTest        (config, fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    *result    = new TFifoResult      ();
+    *analysis  = new TFifoAnalysis    (&fHistoQue, (TFifoTest*) *scan, config, fHICs, &fMutex, (TFifoResult*) *result);
+    hasButton  = true;
+    return true;
+  case STLocalBus:
+    *scan      = new TLocalBusTest    (config, fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    *result    = new TLocalBusResult  ();
+    *analysis  = new TLocalBusAnalysis(&fHistoQue, (TLocalBusTest*) *scan, config, fHICs, &fMutex, (TLocalBusResult*) *result);
+    hasButton  = true;
+    return true;
+  case STDigital:
+    *scan      = new TDigitalScan     (config, fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    *result    = new TDigitalResult   ();
+    *analysis  = new TDigitalAnalysis (&fHistoQue, (TDigitalScan*) *scan, config, fHICs, &fMutex, (TDigitalResult*) *result);
+    hasButton  = true;
+    return true;
+  case STDigitalWF:
+    *scan      = new TDigitalWhiteFrame (config, fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    *result    = new TDigitalWFResult   ();
+    *analysis  = new TDigitalWFAnalysis (&fHistoQue, (TDigitalWhiteFrame*) *scan, config, fHICs, &fMutex, (TDigitalWFResult*) *result);
+    hasButton  = true;
+    return true;
+  case STThreshold:
+    *scan      = new TThresholdScan   (config, fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    *result    = new TSCurveResult    ();
+    *analysis  = new TSCurveAnalysis  (&fHistoQue, (TThresholdScan*) *scan, config, fHICs, &fMutex, (TSCurveResult*) *result);
+    hasButton  = true;
+    return true;
+  case STVCASN:
+    *scan      = new TtuneVCASNScan   (config, fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    *result    = new TSCurveResult    ();
+    *analysis  = new TSCurveAnalysis  (&fHistoQue, (TtuneVCASNScan*) *scan, config, fHICs, &fMutex, (TSCurveResult*) *result, 1);
+    hasButton  = true;
+    return true;
+  case STITHR:
+    *scan      = new TtuneITHRScan    (config, fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    *result    = new TSCurveResult    ();
+    *analysis  = new TSCurveAnalysis  (&fHistoQue, (TtuneITHRScan*) *scan, config, fHICs, &fMutex, (TSCurveResult*) *result, -1);
+    hasButton  = true;
+    return true;
+    // apply tuning masks: scan = 0, analysis gets previous result as input
+    // result value has to stay unchanged here; however AddScan will push back 0 into result vector
+  case STApplyITHR:
+    *scan      = 0;
+    *analysis  = new TApplyITHRTuning (&fHistoQue, 0, config, fHICs, &fMutex, (TSCurveResult*) *result);
+    hasButton  = false;
+    return true;
+  case STApplyVCASN:
+    *scan      = 0;
+    *analysis  = new TApplyVCASNTuning (&fHistoQue, 0, config, fHICs, &fMutex, (TSCurveResult*) *result);
+    hasButton  = false;
+    return true;
+  case STNoise:
+    *scan      = new TNoiseOccupancy  (config, fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    *result    = new TNoiseResult     ();
+    *analysis  = new TNoiseAnalysis   (&fHistoQue, (TNoiseOccupancy*) *scan, config, fHICs, &fMutex, (TNoiseResult*) *result);
+    hasButton  = true;
+    return true;
+  case STApplyMask:
+    *scan      = 0;
+    *analysis  = new TApplyMask (&fHistoQue, 0, config, fHICs, &fMutex, (TNoiseResult*) *result);
+    hasButton  = false;
+    return true;
+  case STReadout:
+    *scan      = new TReadoutTest      (config, fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    *result    = new TReadoutResult    ();
+    *analysis  = new TReadoutAnalysis  (&fHistoQue, (TReadoutTest*) *scan, config, fHICs, &fMutex, (TReadoutResult*) *result);
+    hasButton  = true;
+    return true;
+  case STEndurance:
+    *scan      = new TEnduranceCycle   (config, fChips, fHICs, fBoards, &fHistoQue,&fMutex);
+    *result    = new TCycleResult      ();
+    *analysis  = new TCycleAnalysis    (&fHistoQue, (TEnduranceCycle*) *scan, config, fHICs, &fMutex, (TCycleResult*) *result);
+    hasButton  = true;
+    return true;   
+  default: 
+    std::cout << "Warning: unknown scantype " << (int) scanType << ", ignoring" << std::endl;
+    return false;
+  }
+}
+
+
+int MainWindow::GetNButtons () {
+  int result = 0;
+  for (unsigned int i = 0; i < scanbuttons.size(); i++) {
+    if (scanbuttons.at(i) != 0) result++;
+  }
+  return result;
+}
+
+
+void MainWindow::AddScan(TScanType scanType, TScanResult *aResult)
+{
+  TScan         *scan;
+  TScanAnalysis *analysis;
+  TScanResult   *result = 0;
+  TScanConfig   *config = fConfig->GetScanConfig();
+  bool           hasButton;
+  QPushButton   *button;
+  QLabel        *label;
+
+  if (aResult == 0) {  // standard version
+    if (CreateScanObjects (scanType, config, &scan, &analysis, &result, hasButton)) {
+      fScanVector.    push_back(scan);
+      fAnalysisVector.push_back(analysis);
+      fresultVector.  push_back(result);
+    }
+  }
+  else {  // apply tuning etc: receive result from previous scan (tuning) and push 0 into result vector
+    if (CreateScanObjects (scanType, config, &scan, &analysis, &aResult, hasButton)) {
+      fScanVector.    push_back(scan);
+      fAnalysisVector.push_back(analysis);
+      fresultVector.  push_back(0);
+    }
+  }
+
+
+  if (hasButton) {
+    button = new QPushButton(scan->GetName(), ui->centralWidget);
+    button->setGeometry(QRect(0, 110 + 30*GetNButtons(), 151, 31));
+    button->setStyleSheet("border:none;");
+    button->show();
+    signalMapper->setMapping (button, fAnalysisVector.size() - 1);
+    connect (button, SIGNAL(clicked()), signalMapper, SLOT (map()));
+    scanbuttons.push_back(button);
+    
+    label = new QLabel(ui->centralWidget);
+    label->setObjectName(QStringLiteral());
+    label->setGeometry(QRect(160, 110 + 30*(GetNButtons() - 1), 181, 31));
+    label->setText    (scan->GetState());
+    label->show();
+    scanstatuslabels.push_back(label);
+
+  }
+  else {
+    scanbuttons.push_back(0);
+    scanstatuslabels.push_back(0);
+  }
+  
+}
+     
+
 void MainWindow::makeDir(const char *aDir)
 {
   struct stat myStat;
@@ -2600,6 +2292,7 @@ void MainWindow::makeDir(const char *aDir)
     }
   }
 }
+
 
 void MainWindow::IBBasicTest(){
 start_test();
@@ -2656,84 +2349,22 @@ for (unsigned int i=0;i<fScanVector.size();i++){
 std::cout<<"Test complete :D"<<std::endl;
 }
 
-void MainWindow::fillingibvectors(){
+void MainWindow::fillingibvectors()
+{
+  ClearVectors();
 
-    TFifoResult    *fiforesult=new TFifoResult();
-    TDigitalResult *digitalresult=new TDigitalResult();
-    TSCurveResult *thresholdres=new TSCurveResult();
-
-
-
-    TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesult);
-
-    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresult);
-
-
-    TThresholdScan *thresholdscan= new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TSCurveAnalysis *sa=new TSCurveAnalysis (&fHistoQue,thresholdscan, fConfig->GetScanConfig(), fHICs, &fMutex,thresholdres);
-
-
-    fScanVector.push_back(fifoscan);
-    fScanVector.push_back(digitalscan);
-    fScanVector.push_back(thresholdscan);
-
-
-    fAnalysisVector.push_back(fifoanalysis);
-    fAnalysisVector.push_back(digitalanalysis);
-    fAnalysisVector.push_back(sa);
-
-
-
-    fresultVector.push_back(fiforesult);
-    fresultVector.push_back(digitalresult);
-    fresultVector.push_back(thresholdres);
-
-
+  AddScan(STFifo);
+  AddScan(STDigital);
+  AddScan(STThreshold);
 }
 
-void MainWindow::fillingendurancevectors(){
+void MainWindow::fillingendurancevectors()
+{
+  ClearVectors();
 
-    TFifoResult    *fiforesult=new TFifoResult();
-    TDigitalResult *digitalresult=new TDigitalResult();
-    TSCurveResult *thresult=new TSCurveResult();
+  AddScan(STFifo);
+  AddScan(STDigital);
+  AddScan(STThreshold);
 
-    TThresholdScan*thresholdscan=new TThresholdScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TSCurveAnalysis *thanalysis= new TSCurveAnalysis(&fHistoQue,thresholdscan,fConfig->GetScanConfig(), fHICs, &fMutex,thresult);
-    TFifoTest *fifoscan= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TFifoAnalysis  *fifoanalysis = new TFifoAnalysis(&fHistoQue,fifoscan,fConfig->GetScanConfig(), fHICs, &fMutex,fiforesult);
-
-    TDigitalScan *digitalscan= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-    TDigitalAnalysis  *digitalanalysis = new TDigitalAnalysis(&fHistoQue,digitalscan, fConfig->GetScanConfig(), fHICs, &fMutex,digitalresult);
-
-
-
-    fScanVector.push_back(fifoscan);
-    fScanVector.push_back(digitalscan);
-     fScanVector.push_back(thresholdscan);
-
-    // qDebug()<<"dimitra"<<endl;
-
-    fAnalysisVector.push_back(fifoanalysis);
-    fAnalysisVector.push_back(digitalanalysis);
-    fAnalysisVector.push_back(thanalysis);
-
-
-
-    fresultVector.push_back(fiforesult);
-    fresultVector.push_back(digitalresult);
-     fresultVector.push_back(thresult);
-
-    scanbuttons.push_back(ui->test1);
-    scanbuttons.push_back(ui->test2);
-    scanbuttons.push_back(ui->test3);
-
-
-    scanstatuslabels.push_back(ui->powers);
-    scanstatuslabels.push_back(ui->fifos);
-    scanstatuslabels.push_back(ui->fifops);
-
-    WriteTests();
 }
 

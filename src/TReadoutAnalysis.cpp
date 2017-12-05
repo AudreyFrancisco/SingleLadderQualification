@@ -218,6 +218,16 @@ void TReadoutResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 }
 
 
+float TReadoutResultChip::GetVariable(TResultVariable var) 
+{
+  switch (var) {
+  default:
+    std::cout << "Warning, bad result type for this analysis" << std::endl;
+    return 0;  
+  }
+}
+
+
 void TReadoutResultChip::WriteToFile (FILE *fp)
 {
   fprintf (fp, "Missing hits:       %d\n", m_missingHits);

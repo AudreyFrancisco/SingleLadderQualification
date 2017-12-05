@@ -166,4 +166,14 @@ void TCycleResultHic::WriteToFile(FILE *fp)
   fprintf (fp, "Minimum Iddd:            %.3f\n", m_minIddd);
 }
 
+
+float TCycleResultChip::GetVariable(TResultVariable var) 
+{
+  switch (var) {
+  default:
+    std::cout << "Warning, bad result type for this analysis" << std::endl;
+    return 0;  
+  }
+}
+
 // TODO: Write to DB, classification

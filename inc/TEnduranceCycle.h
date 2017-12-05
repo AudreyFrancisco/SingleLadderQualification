@@ -50,7 +50,7 @@ class TEnduranceCycle : public TScan {
   void Terminate   ();
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void LoopEnd     (int loopIndex);
-  void PrepareStep (int loopIndex) {};
+  void PrepareStep (int loopIndex) {(void) loopIndex;};
   std::vector <std::map <std::string, THicCounter>> GetCounters () {return m_counterVector;};
 };
 

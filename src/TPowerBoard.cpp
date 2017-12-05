@@ -377,6 +377,7 @@ void TPowerBoard::CorrectVoltageDrop (int module, bool reset)
   // Calculate voltage drop
   // Correct voltage drop for slope of voltage characteristics
   // add corrected voltage drop to channel set voltage
+
   float RAnalog, RDigital, RGround;
   float dVAnalog, dVDigital;
   float AVScale, DVScale, AVOffset, DVOffset;

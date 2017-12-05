@@ -41,6 +41,8 @@ namespace Ui {
   class MainWindow;
 }
 
+typedef enum {STPower, STFifo, STLocalBus, STDigital, STDigitalWF, STThreshold, STVCASN, STITHR, STApplyITHR, STApplyVCASN, STApplyMask, STNoise, STReadout, STEndurance} TScanType;
+
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
@@ -67,6 +69,9 @@ class MainWindow : public QMainWindow
   std::vector<pair<std::string,const resultType>> mapd;
   std::vector<QPushButton*> scanbuttons;
   std::vector<QLabel*>scanstatuslabels;
+
+  QSignalMapper *signalMapper;
+
   int numberofscan=0;
   int scanposition;
   QString operatorname;
@@ -86,8 +91,16 @@ class MainWindow : public QMainWindow
   std::vector <QPushButton*> endurancemodules;
   bool databasetype;
   bool scanfit;
-  void makeDir(const char *aDir);
-
+  void makeDir          (const char *aDir);
+  bool CreateScanObjects(TScanType       scanType, 
+                         TScanConfig    *config, 
+                         TScan         **scan, 
+                         TScanAnalysis **analysis, 
+                         TScanResult   **result, 
+                         bool           &hasButton);
+  void AddScan          (TScanType scanType, TScanResult *aResult = 0);
+  void ClearVectors     ();
+  int  GetNButtons      ();
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
   // void explore_halfstave(uint8_t chipid);
   // void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);
@@ -116,44 +129,13 @@ class MainWindow : public QMainWindow
     void colorscans();
     void poweroff();
     void quitall();
-    void connectscandetails();
     void getresultdetails(int i);
-    void powerd();
-    void fifod();
-    void fifopd();
-    void fifomd();
-    void digitald();
-    void digitalpd();
-    void digitalmd();
-    void digitalwf();
-    void thresholdd();
-    void vcasntd();
-
-    void ithrtd();
-
-    void thresholddthree();
-
-
-
-    void vcasntdthree();
-
-    void ithrtdthree();
-
     void writecalibrationfile();
-
-    void thresholddafterthree();
-
-
-    void noisebdthree();
-
     void opencalibration();
-    void noiseadthree();
 
     void setandgetcalibration();
     void setTopBottom        (int unit);
-    void thresholddafter();
-    void noisebd();
-    void noisead();
+
     void attachtodatabase();
     void findidoftheactivitytype(std::string activitytypename, int &id);
     void locationcombo();
@@ -252,7 +234,6 @@ class MainWindow : public QMainWindow
       // void connectcombo(int value);
       void  runscans();
       void fillingOBvectors();
-      void WriteTests();
       void StopScan();
       void fifolist();
       void digitallist();
