@@ -42,8 +42,8 @@ namespace ScanConfig {
   // settings for readout test
   const int READOUTSPEED   = 1200;
   const int READOUTOCC     = 32;
-  const int READOUTDRIVER  = 1;
-  const int READOUTPREEMP  = 1;
+  const int READOUTDRIVER  = 10;
+  const int READOUTPREEMP  = 10;
   const int READOUTROW     = 0;
 
   // current limits for powering test in mA
