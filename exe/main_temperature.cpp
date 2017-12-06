@@ -38,8 +38,8 @@ void readTemp() {
   // Allocate the memory for host the results
   uint16_t *theResult = (uint16_t *)malloc(sizeof(uint16_t) * (fChips.size()+1) ); //
   if( theResult == NULL ) {
-	  std::cerr << "Test_temperature : Error to allocate memory" << std::endl;
-	  return;
+    std::cerr << "Test_temperature : Error to allocate memory" << std::endl;
+    return;
   }
   float theValue;
   uint16_t theChipId;
@@ -47,10 +47,10 @@ void readTemp() {
   std::cout <<  "\tChipId\tBias\tTemp."  << std::endl;
   // Set all chips for Temperature Measurement
   for (unsigned int i = 0; i < fChips.size(); i ++) {
-	  if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-	  theChipId = fChips.at(i)->GetConfig()->GetChipId();
-	  theValue = fChips.at(i)->ReadTemperature();
-         std::cout << i << ")\t" << theChipId << "\t" << fChips.at(i)->GetADCOffset() << "\t" << theValue << " " << std::endl;
+    if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+    theChipId = fChips.at(i)->GetConfig()->GetChipId();
+    theValue = fChips.at(i)->ReadTemperature();
+    std::cout << i << ")\t" << theChipId << "\t" << fChips.at(i)->GetADCOffset() << "\t" << theValue << "\t" << fChips.at(i)->ReadAnalogueVoltage() << std::endl;
 
   }
   // Deallocate memory
@@ -62,32 +62,41 @@ void readTemp() {
 
 char *makeTimeStamp(char *ABuffer)
 {
-	time_t       t = time(0);   // get time now
-	struct tm *now = localtime( & t );
-	sprintf(ABuffer, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
-	return(ABuffer);
+  time_t       t = time(0);   // get time now
+  struct tm *now = localtime( & t );
+  sprintf(ABuffer, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+  return(ABuffer);
 }
 
 int main(int argc, char** argv) {
 
-    decodeCommandParameters(argc, argv);
+  decodeCommandParameters(argc, argv);
 
-    initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
+  initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
 
-	char TimeStamp[20];
-	if (fBoards.size() == 1) {
-		fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
-		fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
-		for (unsigned int i = 0; i < fChips.size(); i ++) {
-			if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
-			fEnabled ++;
-//			configureChip (fChips.at(i));
-		}
-		std::cout << "Found " << fEnabled << " enabled chips." << std::endl;
-		fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
-		makeTimeStamp(TimeStamp);
-		std::cout << "Temperature test : " << TimeStamp << std::endl;
-		readTemp();
-	}
-	return 0;
+  char TimeStamp[20];
+  if (fBoards.size()) {
+    for (const auto& rBoard : fBoards) {
+      rBoard->SendOpCode (Alpide::OPCODE_GRST);
+      rBoard->SendOpCode (Alpide::OPCODE_PRST);
+    }
+
+    for (const auto& rChip : fChips) {
+      if (! rChip->GetConfig()->IsEnabled()) continue;
+      ++fEnabled;
+    }
+
+    for (const auto& rBoard : fBoards) {
+      rBoard->SendOpCode (Alpide::OPCODE_RORST);
+    }
+
+    std::cout << std::endl << std::endl;
+
+    std::cout << "Found " << fEnabled << " enabled chips." << std::endl;
+
+    makeTimeStamp(TimeStamp);
+    std::cout << "Temperature test : " << TimeStamp << std::endl;
+    readTemp();
+  }
+  return 0;
 }
