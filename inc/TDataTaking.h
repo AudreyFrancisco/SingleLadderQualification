@@ -40,7 +40,7 @@ class TDataTaking : public TScan {
                         std::mutex                    *aMutex);
   ~TDataTaking          () {};
   void                  Init            ();
-  void                  PrepareStep     (int loopIndex) { (void)(&loopIndex); };
+  void                  PrepareStep     (int loopIndex) {if (loopIndex == 0) std::cout << "sending train " << m_value[0] << std::endl; };
   void                  LoopStart       (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void                  LoopEnd         (int loopIndex);
   void                  Execute         ();

@@ -204,11 +204,9 @@ void TReadoutResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
   DbAddParameter  (db, activity, string ("Timeouts readout") + suffix,          (float) m_errorCounter.nTimeout);
   DbAddParameter  (db, activity, string ("8b10b errors readout") + suffix,      (float) m_errorCounter.n8b10b);
   DbAddParameter  (db, activity, string ("Corrupt events readout") + suffix,    (float) m_errorCounter.nCorruptEvent);
-  DbAddParameter  (db, activity, string ("Dead pixels readout") + suffix,       (float) m_deadPixels);
-  DbAddParameter  (db, activity, string ("Inefficient pixels readout") + suffix,(float) m_ineffPixels);
-  DbAddParameter  (db, activity, string ("Dead pixels readout") + suffix,       (float) m_noisyPixels);
-  DbAddParameter  (db, activity, string ("Missing hits") + suffix,              (float) m_missingHits);
-  DbAddParameter  (db, activity, string ("Extra hits") + suffix,                (float) m_extraHits);
+  DbAddParameter  (db, activity, string ("Bad pixels readout") + suffix,        (float) (m_deadPixels +
+                                                                                         m_ineffPixels + 
+                                                                                         m_noisyPixels));
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   fileName          = string(m_resultFile).substr (slash +1);    // strip path

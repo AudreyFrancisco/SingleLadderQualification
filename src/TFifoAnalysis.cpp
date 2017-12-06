@@ -4,6 +4,7 @@
 #include "TFifoAnalysis.h"
 #include "TFifoTest.h"
 #include "DBHelpers.h"
+#include "AlpideConfig.h"
 
 // TODO: Add number of exceptions to result
 // TODO: Add errors per region to chip result
@@ -73,6 +74,7 @@ void TFifoAnalysis::InitCounters()
     result->m_lower        = ((TFifoTest*) m_scan)->IsLower  ();
     result->m_upper        = ((TFifoTest*) m_scan)->IsUpper  ();
     result->m_nominal      = ((TFifoTest*) m_scan)->IsNominal();
+    result->m_driver       = ((TFifoTest*) m_scan)->GetDriver();
     for (itChip = result->m_chipResults.begin(); itChip != result->m_chipResults.end(); ++itChip) {
       TFifoResultChip *resultChip = (TFifoResultChip*) itChip->second;
       resultChip->m_err0       = 0;
@@ -202,8 +204,14 @@ void TFifoResultHic::WriteToFile (FILE *fp)
 
 void TFifoResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix) {
   if (m_nominal) {
-    suffix      = string(" (nominal)");
-    file_suffix = string("_nominal");
+    if (m_driver != ChipConfig::DCTRL_DRIVER) {
+      suffix = string (" (Driver ") + to_string(m_driver) + string (")");
+      file_suffix = string ("_Driver_") + to_string(m_driver);
+    }
+    else { 
+      suffix      = string(" (nominal)");
+      file_suffix = string("_nominal");
+    }
   }
   else if (m_lower) {
     suffix      = string(" (lower)");

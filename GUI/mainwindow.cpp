@@ -1163,7 +1163,8 @@ void MainWindow::applytests(){
     ui->start_test->hide();
     qApp->processEvents();
     signalMapper = new QSignalMapper(this);
-    if (numberofscan==1||numberofscan==2){fillingOBvectors();}
+    if (numberofscan==1){fillingOBvectors();}
+    if (numberofscan==2){fillingibvectors();}
     if (numberofscan==5){fillingreceptionscans();}
     if (numberofscan==3){fillingendurancevectors();}
 
@@ -2266,11 +2267,77 @@ std::cout<<"Test complete :D"<<std::endl;
 
 void MainWindow::fillingibvectors()
 {
-  ClearVectors();
 
+  ClearVectors();
+  AddScan(STPower);
+
+  // FIFO and digital scan at three different supply voltages
+  AddScan(STFifo);
+  fConfig->GetScanConfig()->SetVoltageScale(1.1);
+  AddScan(STFifo);
+  fConfig->GetScanConfig()->SetVoltageScale(0.9);
+  AddScan(STFifo);
+  fConfig->GetScanConfig()->SetVoltageScale(1.0);
+  fConfig->GetScanConfig()->SetMlvdsStrength(1);
   AddScan(STFifo);
   AddScan(STDigital);
+  fConfig->GetScanConfig()->SetVoltageScale(1.1);
+  AddScan(STDigital);
+  fConfig->GetScanConfig()->SetVoltageScale(0.9);
+  AddScan(STDigital);
+  fConfig->GetScanConfig()->SetVoltageScale(1.0);
+
+  // digital white frame
+  AddScan(STDigitalWF);
+  
+  // readout tests
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 10);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
+  AddScan(STReadout);
+
+  // threshold scan, no tuning for the time being, 0V back bias
+  fConfig->GetScanConfig()->SetBackBias(0.0);
+  //fConfig->GetScanConfig()->SetVcasnRange (30, 70);
+
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL",1);  
   AddScan(STThreshold);
+  //AddScan(STVCASN);
+  //fConfig->GetScanConfig()->SetParamValue("NOMINAL",0);  
+  //AddScan(STApplyVCASN, fresultVector.back());
+  //AddScan(STITHR);
+  //AddScan(STApplyITHR, fresultVector.back());
+  //AddScan(STThreshold);
+
+  // noise occupancy with and without mask at 0V back bias
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+
+  // threshold scan at 3V back bias, also here no tuning for the time being
+  fConfig->GetScanConfig()->SetBackBias(3.0);
+  //fConfig->GetScanConfig()->SetVcasnRange (75, 160);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL",1);
+  AddScan(STThreshold);
+  //AddScan(STVCASN);
+  //fConfig->GetScanConfig()->SetParamValue("NOMINAL",0);  
+  //AddScan(STApplyVCASN, fresultVector.back());
+  //AddScan(STITHR);
+  //AddScan(STApplyITHR, fresultVector.back());
+  //AddScan(STThreshold);
+
+  // noise occupancy with and without mask at 3V back bias
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
 }
 
 void MainWindow::fillingendurancevectors()

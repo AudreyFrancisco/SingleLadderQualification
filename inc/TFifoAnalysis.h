@@ -47,6 +47,7 @@ class TFifoResultHic : public TScanResultHic {
   bool m_upper;
   bool m_lower;
   bool m_nominal;
+  int  m_driver;
   int  m_exc;
   int  m_nFaultyChips;
   void GetParameterSuffix (std::string &suffix, std::string &file_suffix);

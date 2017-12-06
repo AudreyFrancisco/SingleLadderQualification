@@ -17,8 +17,6 @@ TReadoutTest::TReadoutTest (TScanConfig                   *config,
                             std::mutex                    *aMutex) 
   : TDataTaking (config, chips, hics, boards, histoQue, aMutex) 
 {
-  sprintf(m_name, "ReadoutTest"); 
-
   // trigger frequency, number of triggers have to be set in scan config
   // before creating readout test object
 
@@ -29,6 +27,8 @@ TReadoutTest::TReadoutTest (TScanConfig                   *config,
   m_occupancy      = config->GetParamValue ("READOUTOCC");
   m_driverStrength = config->GetParamValue ("READOUTDRIVER");
   m_preemp         = config->GetParamValue ("READOUTPREEMP");
+
+  sprintf(m_name, "ReadoutTest %d %d %d", m_linkSpeed, m_driverStrength, m_preemp); 
 }
 
 
