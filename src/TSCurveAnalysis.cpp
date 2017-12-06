@@ -306,10 +306,10 @@ void TSCurveAnalysis::Finalize()
       hicResult->m_nHot      += chipResult->m_nHot;
     }
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
-      hicResult->m_class = GetClassificationOB(hicResult);
+      hicResult->m_class = GetClassificationOB(hicResult, m_hics.at(ihic));
     }
     else {
-      hicResult->m_class = GetClassificationIB(hicResult);
+      hicResult->m_class = GetClassificationIB(hicResult, m_hics.at(ihic));
     }
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
   }
@@ -320,12 +320,13 @@ void TSCurveAnalysis::Finalize()
 
 //TODO: Add readout errors, requires dividing readout errors by hic (receiver)
 //TODO: Make two cuts (red and orange)?
-THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic* result) {
+THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic* result, THic* hic) {
   if (!IsThresholdScan()) return CLASS_GREEN;  // for the time being exclude class for tuning
 
   if (result->m_nNoThresh > m_config->GetParamValue("THRESH_MAXBAD_HIC_OB")) return CLASS_ORANGE;
-  for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
-    int chipId = m_chipList.at(ichip).chipId & 0xf;
+  for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
+    if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled()) continue;
+    int chipId = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
     TSCurveResultChip *chipResult = (TSCurveResultChip*) result->m_chipResults.at(chipId);
     if (chipResult->m_nDead + chipResult->m_nNoThresh
 	> m_config->GetParamValue("THRESH_MAXBAD_CHIP_OB"))
@@ -337,12 +338,13 @@ THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic* result
 }
 
 
-THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic* result) {
+THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic* result, THic* hic) {
   if (!IsThresholdScan()) return CLASS_GREEN;  // for the time being exclude class for tuning
 
   if (result->m_nNoThresh > m_config->GetParamValue("THRESH_MAXBAD_HIC_IB")) return CLASS_ORANGE;
-  for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
-    int chipId = m_chipList.at(ichip).chipId & 0xf;
+  for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
+    if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled()) continue;
+    int chipId = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
     TSCurveResultChip *chipResult = (TSCurveResultChip*) result->m_chipResults.at(chipId);
     if (chipResult->m_nDead + chipResult->m_nNoThresh
 	> m_config->GetParamValue("THRESH_MAXBAD_CHIP_IB"))

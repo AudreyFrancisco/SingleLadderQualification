@@ -131,8 +131,8 @@ class TSCurveAnalysis : public TScanAnalysis {
   common::TErrFuncFitResult DoFit       (TGraph* aGraph, bool speedy = false);
   common::TErrFuncFitResult DoSpeedyFit (TGraph *aGraph);
   common::TErrFuncFitResult DoRootFit   (TGraph *aGraph);
-  THicClassification GetClassificationOB(TSCurveResultHic *result);
-  THicClassification GetClassificationIB(TSCurveResultHic *result);
+  THicClassification GetClassificationOB(TSCurveResultHic *result, THic *hic);
+  THicClassification GetClassificationIB(TSCurveResultHic *result, THic *hic);
  protected: 
   TScanResultChip *GetChipResult () {TSCurveResultChip *Result = new TSCurveResultChip(this); return Result;};
   TScanResultHic  *GetHicResult  () {TSCurveResultHic  *Result = new TSCurveResultHic(); return Result;};
