@@ -923,6 +923,7 @@ void MainWindow::fillingOBvectors(){
   AddScan(STNoise);
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
+  AddScan(STClearMask);
 
   // threshold scans and tuning at 0V back bias
   fConfig->GetScanConfig()->SetBackBias(3.0);
@@ -939,7 +940,7 @@ void MainWindow::fillingOBvectors(){
   AddScan(STNoise);
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
-
+  AddScan(STClearMask);
   return;
 }
 
