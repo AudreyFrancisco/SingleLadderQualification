@@ -41,7 +41,7 @@ namespace Ui {
   class MainWindow;
 }
 
-typedef enum {STPower, STFifo, STLocalBus, STDigital, STDigitalWF, STThreshold, STVCASN, STITHR, STApplyITHR, STApplyVCASN, STApplyMask, STNoise, STReadout, STEndurance} TScanType;
+typedef enum {STPower, STFifo, STLocalBus, STDigital, STDigitalWF, STThreshold, STVCASN, STITHR, STApplyITHR, STApplyVCASN, STApplyMask, STClearMask, STNoise, STReadout, STEndurance} TScanType;
 
 class MainWindow : public QMainWindow
 {

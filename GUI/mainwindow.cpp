@@ -2116,6 +2116,11 @@ bool MainWindow::CreateScanObjects(TScanType       scanType,
     *analysis  = new TApplyMask (&fHistoQue, 0, config, fHICs, &fMutex, (TNoiseResult*) *result);
     hasButton  = false;
     return true;
+  case STClearMask:
+    *scan      = 0;
+    *analysis  = new TApplyMask (&fHistoQue, 0, config, fHICs, &fMutex, 0);
+    hasButton  = false;
+    return true;
   case STReadout:
     *scan      = new TReadoutTest      (config, fChips, fHICs, fBoards, &fHistoQue,&fMutex);
     *result    = new TReadoutResult    ();
@@ -2286,7 +2291,7 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetVoltageScale(0.9);
   AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(1.0);
-
+  
   // digital white frame
   AddScan(STDigitalWF);
   
@@ -2303,7 +2308,7 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
   fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
   AddScan(STReadout);
-
+  
   // threshold scan, no tuning for the time being, 0V back bias
   fConfig->GetScanConfig()->SetBackBias(0.0);
   //fConfig->GetScanConfig()->SetVcasnRange (30, 70);
@@ -2321,7 +2326,7 @@ void MainWindow::fillingibvectors()
   AddScan(STNoise);
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
-
+  AddScan(STClearMask);
   // threshold scan at 3V back bias, also here no tuning for the time being
   fConfig->GetScanConfig()->SetBackBias(3.0);
   //fConfig->GetScanConfig()->SetVcasnRange (75, 160);
@@ -2338,6 +2343,7 @@ void MainWindow::fillingibvectors()
   AddScan(STNoise);
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
+  AddScan(STClearMask);
 }
 
 void MainWindow::fillingendurancevectors()
