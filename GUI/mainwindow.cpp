@@ -287,7 +287,7 @@ void MainWindow::open(){
         //  ui->tab_3->setEnabled(true);
         int device=0;
         device=fConfig->GetDeviceType();
-        if (device==2){
+        if (device == TYPE_OBHIC){
             ui->tob->setText("Outer Barrel module");
             ui->OBModule->show();
             for (unsigned int i=0;i< fChips.size();i++){
@@ -302,7 +302,7 @@ void MainWindow::open(){
             }
 
         }
-        if (device==3){
+        if (device == TYPE_IBHIC){
             ui->tob->setText("Inner Barrel module");
             ui->IBModule->show();
             for (unsigned int i=0;i< fChips.size();i++){
@@ -316,7 +316,7 @@ void MainWindow::open(){
                     color_red_IB(pos);}
             }
         }
-        if (device==5){
+        if (device == TYPE_HALFSTAVE){
             ui->OBHALFSTAVE->show();
             for (unsigned int i=0;i< fChips.size();i++){
                 int chipid;
@@ -327,7 +327,7 @@ void MainWindow::open(){
             }
         }
 
-        if(device==8){
+        if(device == TYPE_ENDURANCE){
             ui->endurancebox->show();
             exploreendurancebox();
         }
