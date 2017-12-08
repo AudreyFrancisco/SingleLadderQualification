@@ -1456,17 +1456,89 @@ void MainWindow::quitall(){
 }
 
 
-void WriteToEos (string hicName) {
-  char command[256];
-  char account[20] = "aliceits";
+void MainWindow::WriteToEos (string hicName) {
+  char   command[256];
+  string instFolder;
+  string account = GetServiceAccount (institute.toStdString(), instFolder);
+  string testFolder = GetTestFolder();
 
-  sprintf (command, "rsync -rv -e \"ssh\" Data/%s/ %s@lxplus.cern.ch:/eos/project/a/alice-its/test/IBQualification/%s", 
-           hicName.c_str(), account, hicName.c_str());
+  sprintf (command, "rsync -rv -e \"ssh\" Data/%s/ %s@lxplus.cern.ch:/eos/project/a/alice-its/HicTests/%s/%s/%s", 
+                     hicName.c_str(), account.c_str(), testFolder.c_str(), instFolder.c_str(), hicName.c_str());
   std::cout << "Trying to copy to eos with command " << command << std::endl;
   int status = system (command);
   std::cout << "Done, status code = " << status << std::endl;
 }
 
+
+// TODO: complete
+string MainWindow::GetTestFolder () {
+  switch (numberofscan) {
+  case 1: return string ("OBQualification");
+  case 2: return string ("IBQualification");
+  case 3: return string ("OBEndurance");
+  case 4: return string ("IBEndurance");
+  case 5: return string ("OBReception");
+  default: return string ("Unknown");
+  }
+}
+
+
+//TODO: use a map or sth more intelligent than this?
+//TODO: check service accounts for stave sites
+string MainWindow::GetServiceAccount (string institute, string &folder) {
+  if (! institute.compare ("European Organization for Nuclear Research (CERN), Geneva")) { 
+    folder = string("CERN");
+    return string("aliceits"); 
+  }
+  else if (! institute.compare ("Central China Normal University, Wuhan")) {
+    folder = string("Wuhan");
+    return string("aliceitswuhan");
+  }
+  else if (! institute.compare ("Department of Physics, Pusan National University, Pusan")) {
+    folder = string("Pusan");
+    return string("itspusan");
+  }
+  else if (! institute.compare ("Dipartimento Interateneo di Fisica `M. Merlin' and Sezione INFN, Bari")) {
+    folder = string("Bari");
+    return string("aliceitsbari");
+  }
+  else if (! institute.compare ("Sezione INFN, Bari")) {
+    folder = string("Bari");
+    return string("aliceitsbari");
+  }
+  else if (! institute.compare ("Institut Pluridisciplinaire Hubert Curien (IPHC), Universite de Strasbourg, CNRS-IN2P3, Strasbourg")) {
+    folder = string("Strasbourg");
+    return string("aliceitssbg");
+  }
+  else if (! institute.compare ("University of Liverpool, Liverpool")) {
+    folder = string("Liverpool");
+    return string("aliceitslpool");
+  }
+  else if (! institute.compare ("INFN e Laboratori Nazionali di Frascati, Frascati")) {
+    folder = string("Frascati");
+    return string("aliceitslnf");
+  }
+  else if (! institute.compare ("Lawrence Berkeley National Laboratory, Berkeley, California")) {
+    folder = string("Berkeley");
+    return string("aliceitslbl");
+  }
+  else if (! institute.compare ("Nikhef, National institute for subatomic physics, Amsterdam")) {
+    folder = string("Nikhef");
+    return string("itsnik");
+  }
+  else if (! institute.compare ("STFC Daresbury Laboratory, Daresbury")) {
+    folder = string("Daresbury");
+    return string("aliceitsdl");
+  }
+  else if (! institute.compare ("Sezione INFN, Turin")) {
+    folder = string("Torino");
+    return string("aliceitstorino");
+  }
+  else {
+    folder = string("unknown");
+    return string("unknown");
+  }
+}
 
 void MainWindow::attachtodatabase(){
     for (unsigned int i=0; i<fHICs.size();i++){
@@ -1501,7 +1573,7 @@ void MainWindow::attachtodatabase(){
     //  }
 
 
-    //WriteToEos (fHICs.at(i)->GetDbId());
+    WriteToEos (fHICs.at(i)->GetDbId());
     QDateTime date;
 
 
@@ -1679,7 +1751,7 @@ void MainWindow::locationcombo(){
 
 void MainWindow::savesettings(){
     settingswindow->hide();
-    settingswindow->SaveSettings(operatorname,hicidnumber,counter,idoflocationtype, idofoperator, toptwo, topthree, topfour, topfive, bottomone, bottomtwo, bottomthree, bottomfour, bottomfive);
+    settingswindow->SaveSettings(institute, operatorname,hicidnumber,counter,idoflocationtype, idofoperator, toptwo, topthree, topfour, topfive, bottomone, bottomtwo, bottomthree, bottomfour, bottomfive);
     if (counter==0){return;}
     else{
         open();
@@ -2161,6 +2233,7 @@ void MainWindow::fillingibvectors()
 
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
+
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(0.9);

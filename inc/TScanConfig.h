@@ -92,7 +92,7 @@ namespace ScanConfig {
   const int THRESH_MAXNOISE_IB    = 10;
 
   const int SPEEDY               = 1;  //Use slow fit if 0, differentiate->mean if 1.
-  const int RAWDATA              = 1;
+  const int RAWDATA              = 0;
   const int CAL_VPULSEL          = 160; //VPULSEH assumed 170.  Used for ITHR and VCASN scans.
   const int TARGET_THRESHOLD     = 100;
   const int IVCURVE              = 1;   //Do I-V-curve on back bias

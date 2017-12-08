@@ -1,5 +1,6 @@
 #include "testselection.h"
 #include "ui_testselection.h"
+#include "DBHelpers.h"
 #include "mainwindow.h"
 #include <iostream>
 #include <QtCore/QCoreApplication>
@@ -37,7 +38,7 @@ TestSelection::~TestSelection()
 }
 
 
-void TestSelection::SaveSettings(QString &opname, QString &hicid, int &counter, int &lid, int &memberid, QString &ttwo, QString &tthree, QString &tfour, QString &tfive, QString &done, QString &dtwo, QString &dthree, QString &dfour, QString &dfive){
+void TestSelection::SaveSettings(QString &institute, QString &opname, QString &hicid, int &counter, int &lid, int &memberid, QString &ttwo, QString &tthree, QString &tfour, QString &tfive, QString &done, QString &dtwo, QString &dthree, QString &dfour, QString &dfive){
   if (ui->operatorstring->toPlainText().isEmpty() || /*ui->id->toPlainText().isEmpty() || */locid== 0)
     {
       qDebug()<<"Put your details"<<endl;
@@ -89,13 +90,14 @@ void TestSelection::SaveSettings(QString &opname, QString &hicid, int &counter, 
       dfive=ui->d5->toPlainText();
     }
     else{dfive='\0';}
-    opname = ui->operatorstring->toPlainText();
-    //hicid=ui->id->toPlainText().toInt();
-    hicid=ui->id->toPlainText();
-    counter=1;
-    lid=locid;
-    GetMemberID();
-    memberid=memid;
+
+    opname    = ui->operatorstring->toPlainText();
+    hicid     = ui->id->toPlainText();
+    counter   = 1;
+    lid       = locid;
+    institute = location;
+    memberid  = GetMemberID();
+
     qDebug()<<"The operator name is:"<<opname<<"and the hic id is: "<<hicid<<endl;
   }
 }
@@ -124,58 +126,25 @@ void TestSelection::connectlocationcombo(std::vector<pair<std::string,int>> floc
   }
 }
 
-void TestSelection::getlocationcombo(int value){
-  locid=0;
-  switch(value){
-  case 0:{
-    break;}
-  case 1:{
-    locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
-    break;}
-  case 2:{
-    locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
-    break;}
-  case 3:
-    {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
-      break;
-    }
-  case 4:
-    {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
-      break;
-    }
-  case 5:
-    {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
-      break;
-    }
-  case 6:
-    {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
-      break;
-    }
-  case 7:
-    {locid=ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
-      break;
-    }
-  }}
+
+void TestSelection::getlocationcombo(int value)
+{
+  locid = 0;
+  if (value > 0) {   // first item is empty
+    locid    = ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
+    location = ui->databaselocation->currentText();
+  }
+}
 
 
 int TestSelection::GetMemberID(){
-  AlpideDB *myDB=new AlpideDB();
-  ProjectDB *myproject=new ProjectDB(myDB);
-  MemberDB *mymember= new MemberDB(myDB);
-  std::vector<MemberDB::member> memberlist;
-  mymember->GetList(21,&memberlist);
-  for(unsigned int i=0; i<memberlist.size(); i++){
-    if (strcmp(ui->operatorstring->toPlainText().toLatin1(),memberlist.at(i).FullName.c_str())==0){
-      std::cout<<"Member "<<memberlist.at(i).FullName<<"  "<<memberlist.at(i).PersonalID<<std::endl;
-      memid=memberlist.at(i).PersonalID;
-    }
+  AlpideDB *myDB = new AlpideDB();
+  int       result;
 
-  }
+  result = DbGetMemberId (myDB, ui->operatorstring->toPlainText().toStdString());
   delete myDB;
-  delete myproject;
-  delete mymember;
 
-  return 0;
+  return result;
 }
 
 void TestSelection::ClearLocations(){

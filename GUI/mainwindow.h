@@ -75,6 +75,7 @@ class MainWindow : public QMainWindow
   int numberofscan=0;
   int scanposition;
   QString operatorname;
+  QString institute;
   QString hicidnumber;
   QString toptwo, topthree, topfour, topfive;
   QString bottomone, bottomtwo, bottomthree, bottomfive, bottomfour;
@@ -89,18 +90,21 @@ class MainWindow : public QMainWindow
   int pbnumberofmodule=0;
   std::vector <QString> hicnames;
   std::vector <QPushButton*> endurancemodules;
-  bool databasetype;
-  bool scanfit;
-  void makeDir          (const char *aDir);
-  bool CreateScanObjects(TScanType       scanType, 
-                         TScanConfig    *config, 
-                         TScan         **scan, 
-                         TScanAnalysis **analysis, 
-                         TScanResult   **result, 
-                         bool           &hasButton);
-  void AddScan          (TScanType scanType, TScanResult *aResult = 0);
-  void ClearVectors     ();
-  int  GetNButtons      ();
+  bool   databasetype;
+  bool   scanfit;
+  void   makeDir           (const char *aDir);
+  bool   CreateScanObjects (TScanType       scanType, 
+                            TScanConfig    *config, 
+                            TScan         **scan, 
+                            TScanAnalysis **analysis, 
+                            TScanResult   **result, 
+                            bool           &hasButton);
+  void   AddScan           (TScanType scanType, TScanResult *aResult = 0);
+  void   ClearVectors      ();
+  int    GetNButtons       ();
+  void   WriteToEos        (string hicName);
+  string GetServiceAccount (string Institute, string &folder);
+  string GetTestFolder     ();
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
   // void explore_halfstave(uint8_t chipid);
   // void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);
