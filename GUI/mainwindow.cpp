@@ -1756,19 +1756,9 @@ void MainWindow::poweringscan(){
 void MainWindow::findidoftheactivitytype(std::string activitytypename, int &id){
 
     AlpideDB *myDB=new AlpideDB(databasetype);
-    ActivityDB *myactivity=new ActivityDB(myDB);
-    std::vector<ActivityDB::activityType> *activitytypelist;
-    activitytypelist= myactivity->GetActivityTypeList(myDB->GetProjectId());
-    for(unsigned int i=0; i<activitytypelist->size(); i++){
-        if (strcmp(activitytypename.c_str(),activitytypelist->at(i).Name.c_str())==0){
+    id = DbGetActivityTypeId (myDB, activitytypename);
 
-            id=activitytypelist->at(i).ID;
-        }
-
-
-    }
     delete myDB;
-    delete myactivity;
 }
 
 
