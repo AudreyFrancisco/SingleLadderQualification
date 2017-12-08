@@ -1416,132 +1416,24 @@ void MainWindow::colorscans(){
     }
 }
 
+
+// TODO: check that correct; probably dnumber not needed at all, since duplicate of ui->details->currentIndex()
+// TODO: color chips according to result or add mouseover
 void MainWindow::detailscombo(int dnumber){
-    int  var=0;;
-    TResultVariable rvar;
-    switch(dnumber){
-    case 0:
-    { //std::cout<<"to miden theopoula"<<std::endl;
-        // std::cout<<"o arimtos pou thelw einai"<<ui->details->itemData(ui->details->currentIndex()).toInt()<<std::endl;
-        for(unsigned int i=0; i<fChips.size();i++){
-            //  ->GetConfig()->GetChipId();
-            int tautotita;
-            var=ui->details->itemData(ui->details->currentIndex()).toInt();
-            rvar=static_cast<TResultVariable>(var);
-            // TResultVariable rvar = qvariant_cast<TResultVariable>(var);
-            if(fChips[i]->GetConfig()->IsEnabled()){
-                tautotita=fChips[i]->GetConfig()->GetChipId()&0xf;
-                std::map<std::string,TScanResultHic* >::iterator ithic;
-                for (ithic = fresultVector.at(scanposition)->GetHicResults().begin(); ithic != fresultVector.at(scanposition)->GetHicResults().end(); ++ithic) {
-                    TFifoResultHic *result = (TFifoResultHic*) ithic->second;
-                    std::cout<<"The variable value of chip with ID "<<tautotita<<" is: "<<result->GetVariable(tautotita,rvar)<<std::endl;}
-                //  std::cout<<" the value of chip is "<<fAnalysisVector.at(scanposition)->GetVariable("maroudiw",fChips[i]->GetConfig()->GetChipId()&0xf,rvar)<<std::endl;
+  (void) dnumber;
+  int             var  = ui->details->itemData(ui->details->currentIndex()).toInt();
+  TResultVariable rvar = static_cast<TResultVariable>(var);
 
-            }}
-
-        break;}
-    case 1:{
-        // std::cout<<"to eject einai to 1 theopoula"<<std::endl;
-        //  std::cout<<"o arimtos pou thelw einai"<<ui->details->itemData(ui->details->currentIndex()).toInt()<<std::endl;
-        for(unsigned int i=0; i<fChips.size();i++){
-            //  ->GetConfig()->GetChipId();
-            int tautotita;
-            var=ui->details->itemData(ui->details->currentIndex()).toInt();
-            rvar=static_cast<TResultVariable>(var);
-            // TResultVariable rvar = qvariant_cast<TResultVariable>(var);
-            if(fChips[i]->GetConfig()->IsEnabled()){
-                tautotita=fChips[i]->GetConfig()->GetChipId()&0xf;
-                std::map<std::string,TScanResultHic* >::iterator ithic;
-                for (ithic = fresultVector.at(scanposition)->GetHicResults().begin(); ithic != fresultVector.at(scanposition)->GetHicResults().end(); ++ithic) {
-                    TFifoResultHic *result = (TFifoResultHic*) ithic->second;
-                    std::cout<<"The variable value of chip with ID "<<tautotita<<" is: "<<result->GetVariable(tautotita,rvar)<<std::endl;}
-                //  std::cout<<" the value of chip is "<<fAnalysisVector.at(scanposition)->GetVariable("maroudiw",fChips[i]->GetConfig()->GetChipId()&0xf,rvar)<<std::endl;
-
-            }}
-
-        break;}
-    case 2:{
-        // std::cout<<"to eject einai to 1 theopoula"<<std::endl;
-        //  std::cout<<"o arimtos pou thelw einai"<<ui->details->itemData(ui->details->currentIndex()).toInt()<<std::endl;
-        for(unsigned int i=0; i<fChips.size();i++){
-            //  ->GetConfig()->GetChipId();
-            int tautotita;
-            var=ui->details->itemData(ui->details->currentIndex()).toInt();
-            rvar=static_cast<TResultVariable>(var);
-            // TResultVariable rvar = qvariant_cast<TResultVariable>(var);
-            if(fChips[i]->GetConfig()->IsEnabled()){
-                tautotita=fChips[i]->GetConfig()->GetChipId()&0xf;
-                std::map<std::string,TScanResultHic* >::iterator ithic;
-                for (ithic = fresultVector.at(scanposition)->GetHicResults().begin(); ithic != fresultVector.at(scanposition)->GetHicResults().end(); ++ithic) {
-                    TFifoResultHic *result = (TFifoResultHic*) ithic->second;
-                    std::cout<<"The variable value of chip with ID "<<tautotita<<" is: "<<result->GetVariable(tautotita,rvar)<<std::endl;}
-                // std::cout<<" the value of chip is "<<fAnalysisVector.at(scanposition)->GetVariable("maroudiw",fChips[i]->GetConfig()->GetChipId()&0xf,rvar)<<std::endl;
-
-            }}
-
-        break;}
-    case 3:
-    {// std::cout<<"to miden theopoula"<<std::endl;
-        // std::cout<<"o arimtos pou thelw einai"<<ui->details->itemData(ui->details->currentIndex()).toInt()<<std::endl;
-        for(unsigned int i=0; i<fChips.size();i++){
-            //  ->GetConfig()->GetChipId();
-            int tautotita;
-            var=ui->details->itemData(ui->details->currentIndex()).toInt();
-            rvar=static_cast<TResultVariable>(var);
-            // TResultVariable rvar = qvariant_cast<TResultVariable>(var);
-            if(fChips[i]->GetConfig()->IsEnabled()){
-                tautotita=fChips[i]->GetConfig()->GetChipId()&0xf;
-                std::map<std::string,TScanResultHic* >::iterator ithic;
-                for (ithic = fresultVector.at(scanposition)->GetHicResults().begin(); ithic != fresultVector.at(scanposition)->GetHicResults().end(); ++ithic) {
-                    TFifoResultHic *result = (TFifoResultHic*) ithic->second;
-                    std::cout<<"The variable value of chip with ID "<<tautotita<<" is: "<<result->GetVariable(tautotita,rvar)<<std::endl;}
-                // std::cout<<" the value of chip is "<<fAnalysisVector.at(scanposition)->GetVariable("maroudiw",fChips[i]->GetConfig()->GetChipId()&0xf,rvar)<<std::endl;
-
-            }}
-
-        break;}
-    case 4:
-    { //std::cout<<"to miden theopoula"<<std::endl;
-        // std::cout<<"o arimtos pou thelw einai"<<ui->details->itemData(ui->details->currentIndex()).toInt()<<std::endl;
-        for(unsigned int i=0; i<fChips.size();i++){
-            //  ->GetConfig()->GetChipId();
-            int tautotita;
-            var=ui->details->itemData(ui->details->currentIndex()).toInt();
-            rvar=static_cast<TResultVariable>(var);
-            // TResultVariable rvar = qvariant_cast<TResultVariable>(var);
-            if(fChips[i]->GetConfig()->IsEnabled()){
-                tautotita=fChips[i]->GetConfig()->GetChipId()&0xf;
-                std::map<std::string,TScanResultHic* >::iterator ithic;
-                for (ithic = fresultVector.at(scanposition)->GetHicResults().begin(); ithic != fresultVector.at(scanposition)->GetHicResults().end(); ++ithic) {
-                    TFifoResultHic *result = (TFifoResultHic*) ithic->second;
-                    std::cout<<"The variable value of chip with ID "<<tautotita<<" is: "<<result->GetVariable(tautotita,rvar)<<std::endl;}
-                // std::cout<<" the value of chip is "<<fAnalysisVector.at(scanposition)->GetVariable("maroudiw",fChips[i]->GetConfig()->GetChipId()&0xf,rvar)<<std::endl;
-
-            }}
-
-        break;}
-    case 5:
-    {// std::cout<<"to miden theopoula"<<std::endl;
-        //  std::cout<<"o arimtos pou thelw einai"<<ui->details->itemData(ui->details->currentIndex()).toInt()<<std::endl;
-        for(unsigned int i=0; i<fChips.size();i++){
-            //  ->GetConfig()->GetChipId();
-            int tautotita;
-            var=ui->details->itemData(ui->details->currentIndex()).toInt();
-            rvar=static_cast<TResultVariable>(var);
-            // TResultVariable rvar = qvariant_cast<TResultVariable>(var);
-            if(fChips[i]->GetConfig()->IsEnabled()){
-                tautotita=fChips[i]->GetConfig()->GetChipId()&0xf;
-                std::map<std::string,TScanResultHic* >::iterator ithic;
-                for (ithic = fresultVector.at(scanposition)->GetHicResults().begin(); ithic != fresultVector.at(scanposition)->GetHicResults().end(); ++ithic) {
-                    TFifoResultHic *result = (TFifoResultHic*) ithic->second;
-                    std::cout<<"The variable value of chip with ID "<<tautotita<<" is: "<<result->GetVariable(tautotita,rvar)<<std::endl;}
-                // std::cout<<" the value of chip is "<<fAnalysisVector.at(scanposition)->GetVariable("maroudiw",fChips[i]->GetConfig()->GetChipId()&0xf,rvar)<<std::endl;
-
-            }}
-
-        break;}
+  for(unsigned int i=0; i<fChips.size();i++){
+    if (fChips[i]->GetConfig()->IsEnabled()) {
+      int             tautotita = fChips[i]->GetConfig()->GetChipId()&0xf;
+      THic           *hic       = fChips.at(i)->GetHic();
+      TScanResultHic *result    = fresultVector.at(scanposition)->GetHicResult(hic->GetDbId());
+      std::cout<<"The variable value of chip with ID "<<tautotita<<" is: "<<result->GetVariable(tautotita,rvar)<<std::endl;
     }
+  }
 }
+
 
 void MainWindow::poweroff(){
 
@@ -2276,13 +2168,14 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetVoltageScale(1.0);
   fConfig->GetScanConfig()->SetMlvdsStrength(1);
   AddScan(STFifo);
+  fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
   AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
   AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(0.9);
   AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(1.0);
-  
+  return;
   // digital white frame
   AddScan(STDigitalWF);
   
