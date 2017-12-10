@@ -4,6 +4,7 @@
 #include "TScanAnalysis.h"
 #include "DBHelpers.h"
 
+#include "THIC.h"
 #include "THisto.h"
 #include "TScan.h"
 #include "TScanConfig.h"

@@ -10,7 +10,7 @@ THic::THic (const char *id, int modId, TPowerBoard *pb, int pbMod)
   m_powerBoard = pb;
   m_pbMod      = pbMod;
   m_moduleId   = modId;
-
+  m_class      = CLASS_UNTESTED;
   m_chips.clear();
 }
 
@@ -48,9 +48,9 @@ bool THic::IsEnabled ()
 }
 
 
-int THic::GetNEnabledChips ()
+unsigned int THic::GetNEnabledChips ()
 {
-  int n = 0;
+  unsigned int n = 0;
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
     if (m_chips.at(ichip)->GetConfig()->IsEnabled()) n++;
   }
@@ -214,6 +214,14 @@ float THic::GetAnalogueVoltage()
 
   if (nChips > 0.) return result / (float)nChips;
   else return 0.;
+}
+
+
+void THic::AddClassification (THicClassification aClass)
+{
+  if      (aClass == CLASS_RED)                 m_class = CLASS_RED;
+  else if (GetNEnabledChips() < m_chips.size()) m_class = CLASS_PARTIAL;
+  else if ((int) aClass > (int) m_class)        m_class = aClass;
 }
 
 

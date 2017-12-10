@@ -7,7 +7,7 @@
 #include <string>
 #include <string.h>
 
-#include "THIC.h"
+//#include "THIC.h"
 #include "Common.h"
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
@@ -16,10 +16,12 @@ class THisto;
 class TScan;
 class TScanConfig;
 class TScanHisto;
+class THic;
 
-enum THicClassification {CLASS_UNTESTED, CLASS_GREEN, CLASS_RED, CLASS_ORANGE};
+// Warning: has to stay ordered such, that worse test result = higher entry
+typedef enum hicClassification {CLASS_UNTESTED, CLASS_GREEN, CLASS_ORANGE, CLASS_PARTIAL, CLASS_RED} THicClassification;
 
-typedef enum resultType {status, deadPix, noisyPix, ineffPix, stuckPix, unmaskablePix, badDcol, thresh, noise, noThreshPix, hotPix, threshRms, noiseRms, vcasn, ithr, noiseOcc, Err0, Errf, Erra, Err5, ErrBusyOn, ErrBusyOff} TResultVariable;
+typedef enum {status, deadPix, noisyPix, ineffPix, stuckPix, unmaskablePix, badDcol, thresh, noise, noThreshPix, hotPix, threshRms, noiseRms, vcasn, ithr, noiseOcc, Err0, Errf, Erra, Err5, ErrBusyOn, ErrBusyOff} TResultVariable;
 
 
 // base class for classes that contain chip results

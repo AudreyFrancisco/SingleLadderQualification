@@ -6,10 +6,12 @@
 #include "TAlpide.h"
 #include "TPowerBoard.h"
 #include "Common.h"
+#include "TScanAnalysis.h"
 
 class TAlpide;
 
 typedef enum {HIC_IB, HIC_OB} THicType;
+
 
 class THic {
  private:
@@ -21,6 +23,7 @@ class THic {
   // unique identifiers
   int                   m_hicNumber; // TODO: find out name and format ...
   std::string           m_dbId;      // ... in db: int? string?
+  THicClassification  m_class;
  public:
   THic (const char *dbId, int modId, TPowerBoard *pb, int pbMod);
   virtual ~THic() {};
@@ -30,7 +33,7 @@ class THic {
   bool                       IsPoweredDigital();
   bool                       IsEnabled       ();
   void                       Disable         ();
-  int                        GetNEnabledChips();
+  unsigned int               GetNEnabledChips();
   virtual void               PowerOn         ();
   void                       PowerOff        ();
   float                      GetIddd         ();
@@ -54,6 +57,8 @@ class THic {
   int                        GetPbMod        () {return m_pbMod;};
   void                       SwitchBias      (bool on);
   float                      GetAnalogueVoltage();
+  void                       AddClassification (THicClassification aClass);
+  THicClassification         GetClassification () {return m_class;};
 };
 
 

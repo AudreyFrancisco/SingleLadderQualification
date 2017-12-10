@@ -1243,7 +1243,7 @@ void MainWindow::createbtn(){
 void MainWindow::fifolist(){
     mapdetails.clear();
     ui->details->clear();
-    for (std::map<const char*,resultType>::const_iterator it=fAnalysisVector.at(0)->GetVariableList().begin(); it!=fAnalysisVector.at(0)->GetVariableList().end(); ++it){
+    for (std::map<const char*,TResultVariable>::const_iterator it=fAnalysisVector.at(0)->GetVariableList().begin(); it!=fAnalysisVector.at(0)->GetVariableList().end(); ++it){
 
         //  std::cout << it->first << " => " << it->second << '\n';
         std::string d;
@@ -1266,7 +1266,7 @@ void MainWindow::fifolist(){
 void MainWindow::digitallist(){
     mapdetails.clear();
     ui->details->clear();
-    for (std::map<const char*,resultType>::const_iterator it=fAnalysisVector.at(1)->GetVariableList().begin(); it!=fAnalysisVector.at(1)->GetVariableList().end(); ++it){
+    for (std::map<const char*, TResultVariable>::const_iterator it=fAnalysisVector.at(1)->GetVariableList().begin(); it!=fAnalysisVector.at(1)->GetVariableList().end(); ++it){
 
         //  std::cout << it->first << " => " << it->second << '\n';
         std::string d;
@@ -1297,7 +1297,7 @@ void MainWindow::getresultdetails(int i){
     myvariables=fAnalysisVector.at(scanposition)->GetVariableList();
     //for (std::map<const char*,resultType>::const_iterator it=fAnalysisVector.at(scanposition)->GetVariableList().begin(); it!=fAnalysisVector.at(scanposition)->GetVariableList().end(); ++it){
     //for (auto const &it : myvariables){
-    for(std::map<const char*,resultType>::const_iterator it=myvariables.begin();it!=myvariables.end();++it){
+    for(std::map<const char*, TResultVariable>::const_iterator it=myvariables.begin();it!=myvariables.end();++it){
         //  std::cout << it->first << " => " << it->second << '\n';
 
         std::string d;
@@ -1345,7 +1345,7 @@ void MainWindow::getresultdetails(int i){
 void MainWindow::noiselist(){
     mapdetails.clear();
     ui->details->clear();
-    for (std::map<const char*,resultType>::const_iterator it=fAnalysisVector.at(3)->GetVariableList().begin(); it!=fAnalysisVector.at(3)->GetVariableList().end(); ++it){
+    for (std::map<const char*, TResultVariable>::const_iterator it=fAnalysisVector.at(3)->GetVariableList().begin(); it!=fAnalysisVector.at(3)->GetVariableList().end(); ++it){
 
         //  std::cout << it->first << " => " << it->second << '\n';
         std::string d;
@@ -1376,6 +1376,10 @@ void MainWindow::noiselist(){
   }
   }
 */
+
+
+// TODO: check (i+1)-logic for case of fresultVector[i]==0)
+// TODO: correct colour logic to *worst* HIC result, not last HIC result
 void MainWindow::colorscans(){
     // std::vector<QPushButton*> scanbuttons;
     for (unsigned int i=0;i<fScanVector.size();i++){
@@ -1414,6 +1418,32 @@ void MainWindow::colorscans(){
 
         }
     }
+}
+
+
+THic *MainWindow::FindHic(std::string hicName)
+{
+  for (unsigned int i = 0; i < fHICs.size(); i ++) {
+    if (!(fHICs.at(i)->GetDbId().compare(hicName))) return fHICs.at(i);
+  }
+  return 0;
+}
+
+
+void MainWindow::SetHicClassifications()
+{
+  for (unsigned int i = 0; i < fresultVector.size();i++) {
+    TScanResult *scanResult = fresultVector.at(i);
+    if (scanResult != 0) {
+      std::map<std::string, TScanResultHic*>::iterator it;
+      for  (it = fresultVector.at(i)->GetHicResults().begin(); it != fresultVector.at(i)->GetHicResults().end(); ++it){
+	THic *hic = FindHic(it->first);
+	if (hic != 0) {
+          hic->AddClassification(it->second->GetClassification());
+	}
+      }
+    }
+  }
 }
 
 

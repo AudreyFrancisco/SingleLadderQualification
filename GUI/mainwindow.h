@@ -66,9 +66,9 @@ class MainWindow : public QMainWindow
   std::vector <THic *> fHICs;
   //  void fillingvectors();
   std::vector <std::string> mapdetails;
-  std::vector<pair<std::string,const resultType>> mapd;
-  std::vector<QPushButton*> scanbuttons;
-  std::vector<QLabel*>scanstatuslabels;
+  std::vector <pair<std::string, const TResultVariable>> mapd;
+  std::vector <QPushButton*> scanbuttons;
+  std::vector <QLabel*>scanstatuslabels;
 
   QSignalMapper *signalMapper;
 
@@ -92,19 +92,21 @@ class MainWindow : public QMainWindow
   std::vector <QPushButton*> endurancemodules;
   bool   databasetype;
   bool   scanfit;
-  void   makeDir           (const char *aDir);
-  bool   CreateScanObjects (TScanType       scanType, 
-                            TScanConfig    *config, 
-                            TScan         **scan, 
-                            TScanAnalysis **analysis, 
-                            TScanResult   **result, 
-                            bool           &hasButton);
-  void   AddScan           (TScanType scanType, TScanResult *aResult = 0);
-  void   ClearVectors      ();
-  int    GetNButtons       ();
-  void   WriteToEos        (string hicName);
-  string GetServiceAccount (string Institute, string &folder);
-  string GetTestFolder     ();
+  void   makeDir             (const char *aDir);
+  bool   CreateScanObjects   (TScanType       scanType, 
+                              TScanConfig    *config, 
+                              TScan         **scan, 
+                              TScanAnalysis **analysis, 
+                              TScanResult   **result, 
+                              bool           &hasButton);
+  void   AddScan              (TScanType scanType, TScanResult *aResult = 0);
+  void   ClearVectors         ();
+  int    GetNButtons          ();
+  void   WriteToEos           (string hicName);
+  string GetServiceAccount    (string Institute, string &folder);
+  string GetTestFolder        ();
+  THic  *FindHic              (string hicName);
+  void   SetHicClassifications();
   //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
   // void explore_halfstave(uint8_t chipid);
   // void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);
