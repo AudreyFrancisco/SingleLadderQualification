@@ -229,7 +229,7 @@ void TMaskScan::FindTimeoutHics (int iboard, int *triggerCounts)
       }
     }
     // HIC is connected to this readout board AND did not send enough events
-    if ((isOnBoard) && (nTrigs < m_nTriggers * m_hics.at(iHic)->GetNEnabledChips())) {
+    if ((isOnBoard) && (nTrigs < m_nTriggers * (int)(m_hics.at(iHic)->GetNEnabledChips()))) {
       m_errorCounts.at(m_hics.at(iHic)->GetDbId()).nTimeout ++;
     }
   }
