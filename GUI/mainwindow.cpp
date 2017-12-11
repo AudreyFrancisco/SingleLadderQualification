@@ -1627,7 +1627,7 @@ void MainWindow::attachtodatabase(){
       activ.Lot       = "";
       activ.Name      = CreateActivityName (fHICs.at(i)->GetDbId(), GetTestType());
       activ.Position  = "";
-      activ.Result    = -999; //TODO: change this
+      activ.Result    = DbGetResultId(myDB, idofactivitytype, fHICs.at(i)->GetClassification());
 
       if(databasetype){  // status open; currently no getter implemented to read from database
         activ.Status = 83;

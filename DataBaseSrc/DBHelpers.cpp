@@ -86,6 +86,52 @@ int  DbGetAttachmentTypeId (AlpideDB *db, string name)
 }
 
 
+int DbGetResultId (AlpideDB *db, int activityTypeId, THicClassification classification)
+{
+  ActivityDB                                 *activityDB = new ActivityDB (db);
+  static std::vector <ActivityDB::resultType> resultTypeList;
+
+  if (resultTypeList.size() == 0) resultTypeList = *(activityDB->GetResultList(activityTypeId));
+
+  for (unsigned int i = 0; i < resultTypeList.size(); i++) {
+    string Name = resultTypeList.at(i).Name;
+    switch (classification) {
+    case CLASS_GREEN:
+      if (Name.find("GOLD") != string::npos) 
+        return resultTypeList.at(i).ID; 
+    case CLASS_ORANGE:
+      if (Name.find("SILVER") != string::npos) 
+        return resultTypeList.at(i).ID; 
+    case CLASS_PARTIAL:
+      if (Name.find("partially") != string::npos) 
+        return resultTypeList.at(i).ID; 
+    case CLASS_RED:
+      if (Name.find("not") != string::npos) 
+        return resultTypeList.at(i).ID; 
+    default:
+      break;
+    }
+  }
+  return -1;
+}
+
+
+int DbGetResultId (AlpideDB *db, int activityTypeId, string resultName) 
+{
+  ActivityDB                                 *activityDB = new ActivityDB (db);
+  static std::vector <ActivityDB::resultType> resultTypeList;
+
+  if (resultTypeList.size() == 0) resultTypeList = *(activityDB->GetResultList(activityTypeId));
+
+  for (unsigned int i = 0; i < resultTypeList.size(); i++) {
+    if (resultName == resultTypeList.at(i).Name) {
+      return resultTypeList.at(i).ID;
+    }
+  }
+  return -1;
+}
+
+
 int  DbGetComponentTypeId  (AlpideDB *db, int projectId, string name)
 {
   ComponentDB *componentDB = new ComponentDB (db);

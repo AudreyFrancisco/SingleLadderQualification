@@ -3,7 +3,8 @@
 
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
-#include "../inc/TScanConfig.h"
+#include "TScanConfig.h"
+#include "TScanAnalysis.h"
 #include <string>
 #include <vector>
 
@@ -12,6 +13,8 @@ typedef enum {attachResult, attachLog, attachErrors, attachConfig} TAttachmentTy
 int    DbGetMemberId           (AlpideDB *db, string name);
 //int  DbGetProjectId        (AlpideDB *db, string Name);
 int    DbGetParameterId        (AlpideDB *db, int activityTypeId, string name);
+int    DbGetResultId           (AlpideDB *db, int activityTypeId, string resultName);
+int    DbGetResultId           (AlpideDB *db, int activityTypeId, THicClassification classification);
 int    DbGetActivityTypeId     (AlpideDB *db, string name);
 int    DbGetPrevActivityTypeId (AlpideDB *db, string name, bool &onChildren);
 int    DbGetAttachmentTypeId   (AlpideDB *db, string name);
