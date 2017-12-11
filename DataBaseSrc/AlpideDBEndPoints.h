@@ -500,8 +500,10 @@ public:
     ~ActivityDB();
 
     AlpideTable::response *Create(activity *aActivity);
+    AlpideTable::response *Change(activity *aActivity);
     AlpideTable::response *AssignComponent(int aActivityID, int aComponentID, int aComponentTypeID, int aUserID);
 
+    
     vector<parameterType> *GetParameterTypeList(int aActivityTypeID);
     vector<activityType> *GetActivityTypeList(int aProjectID);
     vector<locationType> *GetLocationTypeList(int aActivityTypeID);

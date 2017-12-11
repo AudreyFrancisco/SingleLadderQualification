@@ -1052,6 +1052,42 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 	return(&theResponse);
 }
 
+
+ActivityDB::response * ActivityDB::Change(activity *aActivity)
+{
+	char DateBuffer[40];
+	char DateMask[40] = "%d/%m/%Y";
+	char *stringresult;
+	string theUrl;
+	string theQuery;
+
+	theUrl   = theParentDB->GetQueryDomain() + "/ActivityChange";
+	theQuery = "ID="+std::to_string(aActivity->ID);
+	theQuery += "activityTypeID="+std::to_string(aActivity->Type);
+	theQuery += "&locationID=" + std::to_string(aActivity->Location);
+	theQuery += "&lotID=" + aActivity->Lot;
+	theQuery += "&activityName=" + aActivity->Name;
+	strftime(DateBuffer, 40, DateMask,(const tm *)(localtime(&(aActivity->StartDate))));
+	theQuery += "&startDate=";
+	theQuery.append( DateBuffer );
+	strftime(DateBuffer, 40, DateMask,(const tm *)(localtime(&(aActivity->EndDate))));
+	theQuery += "&endDate=";
+	theQuery.append( DateBuffer );
+	theQuery += "&position=" + aActivity->Position;
+	theQuery += "&resultID=" + std::to_string(aActivity->Result);
+	theQuery += "&statusID=" + std::to_string(aActivity->Status);
+	theQuery += "&userID=" +  std::to_string(aActivity->User);
+
+	if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
+		SetResponse(AlpideTable::SyncQuery);
+		return(&theResponse);
+	} else {
+		DecodeResponse(stringresult);
+		if(VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
+		aActivity->ID = theResponse.ID;
+	}
+	return (&theResponse);
+}
 /* -----------------
 *    AssignComponent := Add a new component to a defined activity
 *
