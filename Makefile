@@ -67,16 +67,12 @@ EXE = startclk stopclk
 # test_* executables without ROOT
 TEST_EXE = test_mosaic test_noiseocc test_threshold test_digitalscan test_fifo test_dacscan \
   test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit \
-  test_localbus test_chip_count test_alucms test_dacscan_voltage test_supply_voltage
+  test_localbus test_chip_count test_alucms test_dacscan_voltage test_supply_voltage test_GRST
 EXE += $(TEST_EXE)
-
-#
-TEST_HS = test_GRST test_scantest_digital
-EXE += $(TEST_HS)
 
 # test_* executables with ROOT
 TEST_EXE_ROOT =  test_roottest test_scantest test_threshold_v1 test_tuneITHR test_ITHRthreshold \
-  test_tuneVCASN test_VCASNthreshold
+  test_tuneVCASN test_VCASNthreshold test_scantest_digital
 EXE += $(TEST_EXE_ROOT)
 
 
@@ -102,10 +98,6 @@ stopclk: exe/main_stopclk.cpp $(DEPS)
 
 startclk: exe/main_startclk.cpp $(DEPS)
 	$(CC) -o startclk $(OBJS) $(CFLAGS) $< $(LINKFLAGS)
-
-#
-$(TEST_HS): test_% : exe/main_%.cpp $(DEPS)
-	$(CC) -o $@ $(OBJS) $(CFLAGS) $< $(LINKFLAGS)
 
 ### DYNAMIC LIBRARIES
 lib: $(DEPS)
