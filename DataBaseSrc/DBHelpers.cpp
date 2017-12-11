@@ -163,13 +163,26 @@ bool DbAddParameter (AlpideDB *db, ActivityDB::activity &activity, string name, 
     return false;
   }
 
-  parameter.ID                = activity.ID;
+  parameter.ID                = activity.ID; // will be set correctly in ActivityDB::Create
   parameter.ActivityParameter = paramId;
   parameter.User              = activity.User;
   parameter.Value             = value;
 
   activity.Parameters.push_back(parameter);
   return true;
+}
+
+
+void DbAddMember (AlpideDB *db, ActivityDB::activity &activity, int memberId) 
+{
+  ActivityDB::member member;
+
+  member.ID            = activity.ID; // will be set correctly in ActivityDB::Create
+  member.ProjectMember = memberId;
+  member.Leader        = memberId;    // TODO: chose different persons?
+  member.User          = memberId;    
+  
+  activity.Members.push_back(member);
 }
 
 

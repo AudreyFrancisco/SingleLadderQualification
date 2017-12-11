@@ -21,6 +21,7 @@ int    DbGetListOfChildren     (AlpideDB *db, int Id, std::vector<int> &children
 int    DbGetComponentActivity  (AlpideDB *db, int compId, int activityTypeId);
 bool   DbAddParameter          (AlpideDB *db, ActivityDB::activity &activity, string name, float value);
 void   DbAddAttachment         (AlpideDB *db, ActivityDB::activity &activity, TAttachmentType attType, string localName, string remoteName);
+void   DbAddMember             (AlpideDB *db, ActivityDB::activity &activity, int memberId);
 bool   FileExists              (string fileName);
 string CreateActivityName      (string compName, TTestType test);
 #endif

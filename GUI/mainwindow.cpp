@@ -1661,6 +1661,8 @@ void MainWindow::attachtodatabase(){
         DbAddAttachment(myDB, activ,attachConfig ,string ("Configib.cfg"), string ("Configib.cfg"));
       }
 
+      DbAddMember (myDB, activ, idofoperator);
+
       myactivity->Create(&activ);
       cout << myactivity->DumpResponse() << endl;
 
