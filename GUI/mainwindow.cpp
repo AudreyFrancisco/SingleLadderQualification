@@ -193,7 +193,7 @@ MainWindow::~MainWindow()
 
 
 
-
+//TODO: try to substitute numberofscan by TScanType (defined in TScanConfig.h)
 void MainWindow::open(){
 
     // settingswindow->hide();
@@ -995,6 +995,12 @@ void MainWindow::performtests(std::vector <TScan *> s, std::vector <TScanAnalysi
 }
 
 
+// TODO: 
+// 1) fill combo box from source code, using insertItem
+//    for each item associate correct TTestType as userData
+// 2) change variable int numberofscan to TTestType testType
+// 3) do *not* cast back to int ;-)
+// 4) eliminate helper function GetTestType
 void MainWindow::connectcombo(int value){
     counter=0;
     idofactivitytype=0;
@@ -1430,6 +1436,9 @@ THic *MainWindow::FindHic(std::string hicName)
 }
 
 
+// Combine the classifications inside the results of the different scans to one classification per HIC
+// Actual combination "algorithm" is inside THic::AddClassification 
+// (currently: HIC classification = worst scan classification for that HIC)
 void MainWindow::SetHicClassifications()
 {
   for (unsigned int i = 0; i < fresultVector.size();i++) {
@@ -1501,7 +1510,8 @@ void MainWindow::WriteToEos (string hicName) {
 
 
 // TODO: complete
-string MainWindow::GetTestFolder () {
+string MainWindow::GetTestFolder () 
+{
   switch (numberofscan) {
   case 1: return string ("OBQualification");
   case 2: return string ("IBQualification");
@@ -1512,6 +1522,20 @@ string MainWindow::GetTestFolder () {
   }
 }
 
+
+// Temporary function
+// TODO: to be eliminated once number of scan has been converted to TTestType variable
+TTestType MainWindow::GetTestType () 
+{
+  switch (numberofscan) {
+  case 1: return OBQualification;
+  case 2: return IBQualification;
+  case 3: return OBEndurance;
+  case 4: return IBEndurance;
+  case 5: return OBReception;
+  default: return OBQualification;
+  }
+}
 
 //TODO: use a map or sth more intelligent than this?
 //TODO: check service accounts for stave sites
@@ -1570,152 +1594,90 @@ string MainWindow::GetServiceAccount (string institute, string &folder) {
   }
 }
 
+
+// return time as 6-digit int in format HHMMSS
+int MainWindow::GetTime() 
+{
+  time_t t     = time     (0);   // get time now
+  tm    *now   = localtime(&t);  // convert to tm structure
+  int    hours = now->tm_hour;
+  int    min   = now->tm_min;
+  int    sec   = now->tm_sec;
+  int    time  = hours*10000 + min*100 + sec;
+
+  return time; 
+}
+
+
 void MainWindow::attachtodatabase(){
-    for (unsigned int i=0; i<fHICs.size();i++){
-    if(fHICs.at(i)->IsEnabled()){
-    //example for connection with the database
-    AlpideDB *myDB=new AlpideDB(databasetype);
-    //  ProjectDB *myproject=new ProjectDB(myDB);
-    //      MemberDB *mymember= new MemberDB(myDB);
-    //      ComponentDB *mycomponents=new ComponentDB(myDB);
-    //  std::vector <ProjectDB::project> projectlist;
-    //  myproject->GetList(&projectlist);
-    //   std::cout<<"The number of projects is "<<projectlist.size()<<std::endl;
-    // for(int i=0; i<projectlist.size(); i++){
+  AlpideDB *myDB=new AlpideDB(databasetype);
+  SetHicClassifications();
 
-    //  std::cout<<"Project "<<projectlist.at(i).Name<<"with id "<<projectlist.at(i).ID <<std::endl;
-    //  }
-    // std::vector<MemberDB::member> memberlist;
-    //  for(int j=21;j<22;j++){
-    // /  mymember->GetList(21,&memberlist);
-    // for(int i=0; i<memberlist.size(); i++){
+  for (unsigned int i=0; i<fHICs.size();i++) {
+    if(fHICs.at(i)->IsEnabled()) {
+      QDateTime date;
+      WriteToEos (fHICs.at(i)->GetDbId());
 
-    // std::cout<<"Member"<<memberlist.at(i).FullName<<"  "<<memberlist.at(i).PersonalID<<std::endl;
-    //       }
-    //}
+      ActivityDB *myactivity=new ActivityDB(myDB);
+ 
+      ActivityDB::activity activ;
 
-    //   std::vector<ComponentDB::componentType> componentlist;
-    //   mycomponents->GetTypeList(21,&componentlist);
-    //   for(int i=0; i<componentlist.size(); i++){
+      // TODO: check that the idof... are filled in the correct place
+      // set activity parameters
+      activ.Type      = idofactivitytype;
+      activ.Location  = idoflocationtype;
+      activ.User      = idofoperator;
+      activ.StartDate = date.currentDateTime().toTime_t();
+      activ.EndDate   = date.currentDateTime().toTime_t();
+      activ.Lot       = "";
+      activ.Name      = CreateActivityName (fHICs.at(i)->GetDbId(), GetTestType());
+      activ.Position  = "";
+      activ.Result    = -999; //TODO: change this
 
-    //      std::cout<<"component "<<componentlist.at(i).Name<<"The code is: "<< componentlist.at(i).ID<<std::endl;
-    //
-    //  }
+      if(databasetype){  // status open; currently no getter implemented to read from database
+        activ.Status = 83;
+      }
+      else{
+        activ.Status = 450;
+      }
 
+      // add global parameters (not accessible from within results)
+      DbAddParameter(myDB, activ, "Number of Working Chips" , fHICs.at(i)->GetNEnabledChips());
+      DbAddParameter(myDB, activ, "Time",                     GetTime());
 
-    WriteToEos (fHICs.at(i)->GetDbId());
-    QDateTime date;
-
-
-
-    ActivityDB *myactivity=new ActivityDB(myDB);
-
-    ActivityDB::activity activ;
-    //ActivityDB::member activmember;
-    //ActivityDB::parameter activparameter;
-    // ActivityDB::parameter dbtime;
-    //ActivityDB::attach activattachment;
-
-
-    // activ.Location = 161;//cern
-    activ.Location=idoflocationtype;
-    activ.EndDate = date.currentDateTime().toTime_t();
-    activ.Lot = "Test";//change everytime
-    activ.Name = hicnames[i].toStdString();//change everytime
-    activ.Position = "Position98";//change everytime
-    activ.Result = -999; //check the value//BEFORE IT WAS 1//522
-
-    activ.StartDate=date.currentDateTime().toTime_t();
-    if(databasetype){
-        activ.Status = 83;}
-    else{activ.Status=450;}
-    std::cout<<"the activity status is : "<<activ.Status<<std::endl;
-    //activ.Type = 881;//obqualificatiom
-    activ.Type=idofactivitytype;
-    // activ.User = 20606;//me
-    activ.User=idofoperator;
-
-    /*     activmember.Leader = 4646;//markus
-     activmember.ProjectMember = 1126;//myid
-     //   activmember.User = 20606;//myprojectid
-     activ.User=idofoperator;
-     activ.Members.push_back(activmember);
-  */
-
-    //number of chips parameter
-   // if (fConfig->GetDeviceType()==2||fConfig->GetDeviceType()==3){//nomizw oti auti i if mporei na fygei
-        //activparameter.ActivityParameter = 381;//number of chips//id of this parameter
-        //activparameter.User = 20606;
-        //activparameter.Value = fChips.size()-1;
-        //activ.Parameters.push_back(activparameter);
-        std::cout<<"before adding parameter"<<std::endl;
-
-        DbAddParameter(myDB, activ,"Number of Working Chips" , fHICs[i]->GetNEnabledChips());
-        std::cout<<"after adding parameter"<<std::endl;
-   // }
-
-    //time parameter
-    //  dbtime.ActivityParameter=381;
-    //  dbtime.User=idofoperato
-
-    time_t t = time(0);   // get time now
-    tm * now = localtime( & t );
-
-    std::stringstream currentdate;
-    int hours=now->tm_hour;
-    int min=now->tm_min;
-    int sec=now->tm_sec;
-    int time= hours*10000+min*100+sec;
-    currentdate<<time;
-    std::string::size_type sz;
-    int i_dec= std::stoi (currentdate.str(),&sz);
-    // std::string name;
-    // name="Number of working chips in a HIC";
-    std::cout<<i_dec<<std::endl;
-    DbAddParameter(myDB, activ,string("Time"),(float)i_dec);
-    //int time= 10000*hours+100*minutes+sec;
-    //  dbtime.Value=i_dec;
-    //activ.Parameters.push_back(dbtime);
-   //DbGetComponentTypeId(myDB, idofactivitytype,"Outer Barrel HIC Module");
-
-
-
-    for(unsigned int j=0; j<fresultVector.size();j++){
+      // loop over results and write to DB
+      for(unsigned int j=0; j<fresultVector.size();j++){
         if(fresultVector[j]!=0){
+          std::map<std::string,TScanResultHic* > mymap = fresultVector.at(j)->GetHicResults();
+          for (auto ihic=mymap.begin(); ihic!=mymap.end(); ++ihic) {
+            TScanResultHic *result = (TScanResultHic*) ihic->second;
+            if (ihic->first.compare(hicnames.at(i).toStdString()) == 0){
+              result->WriteToDB(myDB,activ);
+	    }
+	  }
+        }
+      }
 
-            std::map<std::string,TScanResultHic* > mymap=fresultVector.at(j)->GetHicResults();
-
-            for (auto ihic=mymap.begin(); ihic!=mymap.end(); ++ihic){
-
-                TScanResultHic *result = (TScanResultHic*) ihic->second;
-
-
-                if (strcmp(ihic->first.c_str(), hicnames.at(i).toStdString().c_str())==0){
-                    result->WriteToDB(myDB,activ);}
-            }
-        }}
-
-
-
-
-
-    if (numberofscan==1||numberofscan==5||numberofscan==6||numberofscan==3){
+      // attach config file
+      if (numberofscan==1||numberofscan==5||numberofscan==6||numberofscan==3){
         DbAddAttachment(myDB, activ,attachConfig ,string ("Config.cfg"), string ("Config.cfg"));
-    }
-    else if(numberofscan==2){
+      }
+      else if(numberofscan==2){
         DbAddAttachment(myDB, activ,attachConfig ,string ("Configib.cfg"), string ("Configib.cfg"));
+      }
+
+      myactivity->Create(&activ);
+      cout << myactivity->DumpResponse() << endl;
+
+      // TODO: add components (in / out) 
+      // TODO: add member
+      // TODO: set result, close activity
+
+      delete myactivity;
     }
-
-
-
-    myactivity->Create(&activ);
-
-    cout << myactivity->DumpResponse() << endl;
-
-    delete myDB;
-    delete myactivity;
-
-}}}
+  }
+  delete myDB;
+}
 
 
 
@@ -1749,7 +1711,7 @@ void MainWindow::poweringscan(){
 
 void MainWindow::findidoftheactivitytype(std::string activitytypename, int &id){
 
-    AlpideDB *myDB=new AlpideDB(databasetype);
+    AlpideDB *myDB = new AlpideDB(databasetype);
     id = DbGetActivityTypeId (myDB, activitytypename);
 
     delete myDB;

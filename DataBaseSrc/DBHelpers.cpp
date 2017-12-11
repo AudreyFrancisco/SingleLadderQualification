@@ -214,5 +214,43 @@ void DbAddAttachment (AlpideDB *db, ActivityDB::activity &activity, TAttachmentT
 }
 
 
+string CreateActivityName (string compName, TTestType test) 
+{
+  string testName;
+  switch (test) {
+  case OBQualification: 
+    testName = string ("OB Qualification Test ");
+    break;
+  case OBEndurance: 
+    testName = string ("OB Endurance Test ");
+    break;
+  case OBReception: 
+    testName = string ("OB Reception Test ");
+    break;
+  case OBHalfStaveOL: 
+    testName = string ("OL Half-Stave Test ");
+    break;
+  case OBHalfStaveML: 
+    testName = string ("ML Half-Stave Test ");
+    break;
+  case IBQualification:
+    testName = string ("IB Qualification Test ");
+    break;
+  case IBEndurance: 
+    testName = string ("IB Endurance Test ");
+    break;
+  case IBStave: 
+    testName = string ("IB Stave Test ");
+    break;
+  case IBStaveEndurance: 
+    testName = string ("IB Stave Endurance Test ");
+    break;
+  default:
+    testName = string ("");
+    break;
+  }
+  return (testName + compName);
+}
+
 
 

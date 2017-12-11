@@ -10,7 +10,7 @@
 
 
 typedef enum {OBQualification, OBEndurance, OBReception, OBHalfStaveOL, OBHalfStaveML, 
-              IBQualification, IBEndurance, IBStave} TTestType;
+              IBQualification, IBEndurance, IBStave, IBStaveEndurance} TTestType;
 
 namespace ScanConfig {
   const int NINJ           = 50;        // number of injections in digital/threshold scans
