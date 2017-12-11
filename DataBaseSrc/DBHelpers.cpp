@@ -132,7 +132,24 @@ int DbGetResultId (AlpideDB *db, int activityTypeId, string resultName)
 }
 
 
-int  DbGetComponentTypeId  (AlpideDB *db, int projectId, string name)
+int DbGetStatusId (AlpideDB *db, int activityTypeId, string statusCode)
+{
+  ActivityDB                                 *activityDB = new ActivityDB (db);
+  static std::vector <ActivityDB::statusType> statusTypeList;
+
+  if (statusTypeList.size() == 0) statusTypeList = *(activityDB->GetStatusList(activityTypeId));
+
+  for (unsigned int i = 0; i < statusTypeList.size(); i++) {
+    if (statusCode == statusTypeList.at(i).Code) {
+      return statusTypeList.at(i).ID;
+    }
+  }
+
+  return -1;
+}
+
+
+int DbGetComponentTypeId  (AlpideDB *db, int projectId, string name)
 {
   ComponentDB *componentDB = new ComponentDB (db);
   static std::vector <ComponentDB::componentType> componentTypeList;

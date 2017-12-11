@@ -1628,13 +1628,7 @@ void MainWindow::attachtodatabase(){
       activ.Name      = CreateActivityName (fHICs.at(i)->GetDbId(), GetTestType());
       activ.Position  = "";
       activ.Result    = DbGetResultId(myDB, idofactivitytype, fHICs.at(i)->GetClassification());
-
-      if(databasetype){  // status open; currently no getter implemented to read from database
-        activ.Status = 83;
-      }
-      else{
-        activ.Status = 450;
-      }
+      activ.Status    = DbGetStatusId(myDB, idofactivitytype, "OPEN");
 
       // add global parameters (not accessible from within results)
       DbAddParameter(myDB, activ, "Number of Working Chips" , fHICs.at(i)->GetNEnabledChips());
