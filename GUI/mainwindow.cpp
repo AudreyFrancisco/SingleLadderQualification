@@ -1444,14 +1444,14 @@ void MainWindow::SetHicClassifications()
   for (unsigned int i = 0; i < fresultVector.size();i++) {
     TScanResult *scanResult = fresultVector.at(i);
     if (scanResult != 0) {
-      std::map<std::string, TScanResultHic*>::iterator it;
-      for  (it = fresultVector.at(i)->GetHicResults().begin(); it != fresultVector.at(i)->GetHicResults().end(); ++it){
-	THic *hic = FindHic(it->first);
-	if (hic != 0) {
-          hic->AddClassification(it->second->GetClassification());
+      //std::map<std::string, TScanResultHic*>::iterator it;
+      for (unsigned int ihic = 0; ihic < fHICs.size(); ihic++) {
+        TScanResultHic *hicResult = scanResult->GetHicResult(fHICs.at(ihic)->GetDbId());
+        if (hicResult != 0) {
+          fHICs.at(ihic)->AddClassification(hicResult->GetClassification());
 	}
       }
-    }
+    }      
   }
 }
 
@@ -1624,10 +1624,10 @@ void MainWindow::attachtodatabase(){
       activ.User      = idofoperator;
       activ.StartDate = date.currentDateTime().toTime_t();
       activ.EndDate   = date.currentDateTime().toTime_t();
-      activ.Lot       = "";
+      activ.Lot       = " ";
       activ.Name      = CreateActivityName (fHICs.at(i)->GetDbId(), GetTestType());
-      activ.Position  = "";
-      activ.Result    = DbGetResultId(myDB, idofactivitytype, fHICs.at(i)->GetClassification());
+      activ.Position  = " ";
+      activ.Result    = -999;  // apparently has to stay open here, otherwise activity is considered closed
       activ.Status    = DbGetStatusId(myDB, idofactivitytype, "OPEN");
 
       // add global parameters (not accessible from within results)
@@ -1662,7 +1662,16 @@ void MainWindow::attachtodatabase(){
 
       // TODO: add components (in / out) 
       // TODO: add member
-      // TODO: set result, close activity
+      // TODO: close activity (needs implementation of activityChange)
+      //      e.g. 
+      //      activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSED");
+      //      myactivity->Change (&activ);
+      //   check that activity ID (not activity type ID) is set within activ
+
+      //std::cout << "trying to close activity" << std::endl;
+      //activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSED");
+      //activ.Result = DbGetResultId(myDB, idofactivitytype, fHICs.at(i)->GetClassification());
+      //myactivity->Change (&activ);
 
       delete myactivity;
     }
@@ -2211,9 +2220,12 @@ std::cout<<"Test complete :D"<<std::endl;
 void MainWindow::fillingibvectors()
 {
 
-  ClearVectors();
-  AddScan(STPower);
 
+  ClearVectors();
+  //AddScan(STDigital);
+  //return;
+  AddScan(STPower);
+  //return;
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
 
