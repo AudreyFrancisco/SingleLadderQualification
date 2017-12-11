@@ -97,17 +97,21 @@ int DbGetResultId (AlpideDB *db, int activityTypeId, THicClassification classifi
     string Name = resultTypeList.at(i).Name;
     switch (classification) {
     case CLASS_GREEN:
-      if (Name.find("GOLD") != string::npos) 
+      if (Name.find("GOLD") != string::npos)
         return resultTypeList.at(i).ID; 
+      break;
     case CLASS_ORANGE:
       if (Name.find("SILVER") != string::npos) 
         return resultTypeList.at(i).ID; 
+      break;
     case CLASS_PARTIAL:
       if (Name.find("partially") != string::npos) 
         return resultTypeList.at(i).ID; 
+      break;
     case CLASS_RED:
       if (Name.find("not") != string::npos) 
         return resultTypeList.at(i).ID; 
+      break;
     default:
       break;
     }
