@@ -1538,53 +1538,48 @@ TTestType MainWindow::GetTestType ()
 }
 
 //TODO: use a map or sth more intelligent than this?
-//TODO: check service accounts for stave sites
 string MainWindow::GetServiceAccount (string institute, string &folder) {
-  if (! institute.compare ("European Organization for Nuclear Research (CERN), Geneva")) { 
+  if (institute.find ("CERN") != string::npos) {
     folder = string("CERN");
     return string("aliceits"); 
   }
-  else if (! institute.compare ("Central China Normal University, Wuhan")) {
+  else if (institute.find ("Wuhan") != string::npos) {
     folder = string("Wuhan");
     return string("aliceitswuhan");
   }
-  else if (! institute.compare ("Department of Physics, Pusan National University, Pusan")) {
+  else if (institute.find ("Pusan") != string::npos) {
     folder = string("Pusan");
     return string("itspusan");
   }
-  else if (! institute.compare ("Dipartimento Interateneo di Fisica `M. Merlin' and Sezione INFN, Bari")) {
+  else if (institute.find ("Bari") != string::npos) {
     folder = string("Bari");
     return string("aliceitsbari");
   }
-  else if (! institute.compare ("Sezione INFN, Bari")) {
-    folder = string("Bari");
-    return string("aliceitsbari");
-  }
-  else if (! institute.compare ("Institut Pluridisciplinaire Hubert Curien (IPHC), Universite de Strasbourg, CNRS-IN2P3, Strasbourg")) {
+  else if (institute.find ("Strasbourg") != string::npos) {
     folder = string("Strasbourg");
     return string("aliceitssbg");
   }
-  else if (! institute.compare ("University of Liverpool, Liverpool")) {
+  else if (institute.find ("Liverpool") != string::npos) {
     folder = string("Liverpool");
     return string("aliceitslpool");
   }
-  else if (! institute.compare ("INFN e Laboratori Nazionali di Frascati, Frascati")) {
+  else if (institute.find ("Frascati") != string::npos) {
     folder = string("Frascati");
     return string("aliceitslnf");
   }
-  else if (! institute.compare ("Lawrence Berkeley National Laboratory, Berkeley, California")) {
+  else if (institute.find ("Berkeley") != string::npos) {
     folder = string("Berkeley");
     return string("aliceitslbl");
   }
-  else if (! institute.compare ("Nikhef, National institute for subatomic physics, Amsterdam")) {
+  else if (institute.find ("Nikhef") != string::npos) {
     folder = string("Nikhef");
     return string("itsnik");
   }
-  else if (! institute.compare ("STFC Daresbury Laboratory, Daresbury")) {
+  else if (institute.find ("Daresbury") != string::npos) {
     folder = string("Daresbury");
     return string("aliceitsdl");
   }
-  else if (! institute.compare ("Sezione INFN, Turin")) {
+  else if (institute.find ("Turin") != string::npos) {
     folder = string("Torino");
     return string("aliceitstorino");
   }
