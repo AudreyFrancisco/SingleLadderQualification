@@ -242,8 +242,8 @@ void DbAddMember (AlpideDB *db, ActivityDB::activity &activity, int memberId)
 
   member.ID            = activity.ID; // will be set correctly in ActivityDB::Create
   member.ProjectMember = memberId;
-  member.Leader        = memberId;    // TODO: chose different persons?
-  member.User          = memberId;    
+  member.Leader        = 0;           // 1 if site leader for this activity; not yet defined
+  member.User          = -22;         // for some reason...
   
   activity.Members.push_back(member);
 }
