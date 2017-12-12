@@ -174,14 +174,14 @@ int main()
 	}
 
 	cout << endl << "------ componentType type-----------"<<endl;
-	ProjectID = 0;
+	int ActTypeID = 0;
 	printf(" Input the Activity Type id :");
-	err = scanf("%d",&ProjectID);
+	err = scanf("%d",&ActTypeID);
 	if (err!=1) {
 		printf(" Failed to read the project id ");
 		return -1;
 	}
-	vector<ActivityDB::componentType> *com = theActivityTable->GetComponentTypeList(ProjectID);
+	vector<ActivityDB::actTypeCompType> *com = theActivityTable->GetComponentTypeList(ActTypeID);
 	for(unsigned int i=0;i<com->size();i++) {
 		cout << endl << com->at(i).ID << " " << com->at(i).Name ;
 	}
