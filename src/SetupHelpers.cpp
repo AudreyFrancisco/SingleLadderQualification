@@ -801,9 +801,6 @@ int initSetupEndurance(TConfig                        *config,
       int pbMod      = mod % 5;   // TODO: check this
       if (hicIds) {
         hics->push_back(new THicOB(hicIds[mod], modId, pb[boardIndex], pbMod));
-        if (!strcmp(hicIds[mod], "\0")) {
-          hics->at(mod)->Disable();
-        }
       }
       else {
         hics->push_back(new THicOB("Dummy_ID", modId, pb[boardIndex], pbMod));
@@ -844,8 +841,11 @@ int initSetupEndurance(TConfig                        *config,
         // TODO: Move this into the correct place
         ((THicOB*)(hics->at(mod)))->ConfigureMaster (0, boardIndex, DataRcvMap[mod][0], CtrIntMap[mod][0]);
         ((THicOB*)(hics->at(mod)))->ConfigureMaster (8, boardIndex, DataRcvMap[mod][1], CtrIntMap[mod][1]);
+        if ((hicIds) && (!strcmp(hicIds[mod], "\0"))) {
+          hics->at(mod)->Disable();
+        }
       }
-      chips->push_back(new TAlpide(chipConfig));
+      chips->push_back(chip);
       chips->at(chips->size()-1)->SetReadoutBoard(boards->at(boardIndex)); // Set the Board Handler
 
       // -- and Add the chip object to the MOSAIC directory
@@ -858,6 +858,7 @@ int initSetupEndurance(TConfig                        *config,
       if (hics->at(mod)->IsEnabled()) hics->at(mod)->PowerOn();
       sleep(1);
     }
+
   }
   CheckControlInterface(config, boards, boardType, chips);
   sleep(1);
