@@ -406,8 +406,9 @@ public:
 		int ID;
 		int Quantity;
 		string Direction;
+		componentType Type;
 	};
-	#define zACTTYPECOMPTYPE(a) a.ID =0; a.Quantity = 0; a.Direction ="in"
+	#define zACTTYPECOMPTYPE(a) a.ID =0; a.Quantity = 0; a.Direction ="in"; zCOMPONENTTYPE(a)
 
 	struct actComp {
 		int ID;
