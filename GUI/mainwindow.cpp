@@ -68,7 +68,6 @@
 
 
 
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -879,7 +878,7 @@ void MainWindow::start_test(){
     databasewindow->exec();
     databasewindow->setdatabase(databasetype);
     std::cout<<databasetype<<"the selected database"<<std::endl;
-    settingswindow= new TestSelection(this);
+    settingswindow= new TestSelection(this, databasetype);
     settingswindow->show();
 }
 

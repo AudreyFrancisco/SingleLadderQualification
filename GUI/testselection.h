@@ -15,7 +15,7 @@ class TestSelection : public QDialog
 
  public:
 
-  explicit TestSelection(QWidget *parent = 0);
+  explicit TestSelection(QWidget *parent = 0, bool testDatabase = true);
   ~TestSelection();
   virtual void SaveSettings(QString &institute, QString &opname, QString &hicid, int &counter, int &lid, int &memberid, QString &ttwo, QString &tthree, QString &tfour, QString &tfive, QString &done, QString &dtwo, QString &dthree, QString &dfour, QString &dfive);
   virtual void connectlocationcombo(std::vector<std::pair<std::string,int>> floc);
@@ -25,8 +25,9 @@ class TestSelection : public QDialog
  private:
   Ui::TestSelection *ui;
   Dialog *missingsettings;
-  int locid;
-  int memid;
+  int     locid;
+  int     memid;
+  bool    m_testDatabase;
   QString location;
   QString toptwo, topthree, topfour, topfive;
   QString downone, downtwo,downthree, downfour,downfive;

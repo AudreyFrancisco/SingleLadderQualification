@@ -6,7 +6,7 @@
 #include <QtCore/QCoreApplication>
 #include <iomanip>
 #include "TFifoTest.h"
-TestSelection::TestSelection(QWidget *parent) :
+TestSelection::TestSelection(QWidget *parent, bool testDatabase) :
   QDialog(parent),
   ui(new Ui::TestSelection)
 {
@@ -21,6 +21,8 @@ TestSelection::TestSelection(QWidget *parent) :
   ui->d3->hide();
   ui->d4->hide();
   ui->d5->hide();
+
+  m_testDatabase = testDatabase;
 
   connect(ui->settings, SIGNAL(clicked()), this->parent(), SLOT(savesettings()));
 
@@ -138,7 +140,7 @@ void TestSelection::getlocationcombo(int value)
 
 
 int TestSelection::GetMemberID(){
-  AlpideDB *myDB = new AlpideDB();
+  AlpideDB *myDB = new AlpideDB(m_testDatabase);
   int       result;
 
   result = DbGetMemberId (myDB, ui->operatorstring->toPlainText().toStdString());
