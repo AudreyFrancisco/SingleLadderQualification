@@ -183,7 +183,7 @@ int main()
 	}
 	vector<ActivityDB::actTypeCompType> *com = theActivityTable->GetComponentTypeList(ActTypeID);
 	for(unsigned int i=0;i<com->size();i++) {
-		cout << endl << com->at(i).ID << " " << com->at(i).Name ;
+		cout << endl << com->at(i).ID << " " << com->at(i).Type.Name ;
 	}
 
 	cout << endl << "-----------"<<endl;
