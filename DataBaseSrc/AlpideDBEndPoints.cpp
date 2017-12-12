@@ -1330,14 +1330,14 @@ std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList()
  *
  *
 ----------------------- */
-std::vector<ActivityDB::componentType> *ActivityDB::GetComponentTypeList(int aActivityTypeID)
+std::vector<ActivityDB::actTypeCompType> *ActivityDB::GetComponentTypeList(int aActivityTypeID)
 {
-	vector<componentType> *theCompoList = new vector<componentType>;
+	vector<actTypeCompType> *theCompoList = new vector<actTypeCompType>;
 
 	char *stringresult;
 	string theUrl;
 	string theQuery;
-	componentType comp;
+	actTypeCompType comp;
 
 	theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
 	theQuery = "activityTypeID="+std::to_string(aActivityTypeID);
@@ -1355,19 +1355,22 @@ std::vector<ActivityDB::componentType> *ActivityDB::GetComponentTypeList(int aAc
 					while(n1 != NULL) {
 						if(MATCHNODE(n1,"ActivityTypeComponentTypeFull")) {
 							xmlNode *n2 = n1->children;
+							zACTTYPECOMPTYPE(comp);
 							while(n2 != NULL) {
-								if(MATCHNODE(n2,"ComponentType")) {
+								if(MATCHNODE(n2,"ID")) comp.ID = atoi( (const char*)(n2->children->content)) ;
+								else if(MATCHNODE(n2,"Quantity")) comp.Quantity = atoi( (const char*)(n2->children->content)) ;
+								else if(MATCHNODE(n2,"Direction")) comp.Direction = (const char*)(n2->children->content) ;
+								else if(MATCHNODE(n2,"ComponentType")) {
 									xmlNode *n3 = n2->children;
-									zCOMPOTYPE(comp);
 									while(n3 != NULL) {
-										if(MATCHNODE(n3,"ID")) comp.ID = atoi( (const char*)(n3->children->content)) ;
-										else if(MATCHNODE(n3,"Name")) comp.Name = (const char*)(n3->children->content);
+										if(MATCHNODE(n3,"ID")) comp.Type.ID = atoi( (const char*)(n3->children->content)) ;
+										else if(MATCHNODE(n3,"Name")) comp.Type.Name = (const char*)(n3->children->content);
 										n3 = n3->next;
 									}
-									theCompoList->push_back(comp);
 								}
 								n2 = n2->next;
 							}
+							theCompoList->push_back(comp);
 						}
 						n1 = n1->next;
 					}
