@@ -508,13 +508,12 @@ public:
     vector<parameterType> *GetParameterTypeList(int aActivityTypeID);
     vector<activityType> *GetActivityTypeList(int aProjectID);
     vector<locationType> *GetLocationTypeList(int aActivityTypeID);
-    vector<componentType> *GetComponentTypeList(int aActivityTypeID);
+    vector<actTypeCompType> *GetComponentTypeList(int aActivityTypeID);
     vector<resultType> *GetResultList(int aActivityTypeID);
     vector<statusType> *GetStatusList(int aActivityTypeID);
     vector<attachmentType> *GetAttachmentTypeList();
     vector<activityShort> *GetActivityList(int aProjectID, int aActivityTypeID);
     AlpideTable::response *Read(int ActivityID, activityLong *Result);
-
 
 private:
     unsigned long buildBase64Binary(string aLocalFileName, string * aBuffer);
