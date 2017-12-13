@@ -89,9 +89,13 @@ int  DbGetAttachmentTypeId (AlpideDB *db, string name)
 int DbGetResultId (AlpideDB *db, int activityTypeId, THicClassification classification)
 {
   ActivityDB                                 *activityDB = new ActivityDB (db);
+  static int                                  myActTypeId;
   static std::vector <ActivityDB::resultType> resultTypeList;
 
-  if (resultTypeList.size() == 0) resultTypeList = *(activityDB->GetResultList(activityTypeId));
+  if ((resultTypeList.size() == 0) || (activityTypeId != myActTypeId)) {
+    myActTypeId    = activityTypeId;
+    resultTypeList = *(activityDB->GetResultList(myActTypeId));
+  }
 
   for (unsigned int i = 0; i < resultTypeList.size(); i++) {
     string Name = resultTypeList.at(i).Name;
@@ -123,9 +127,13 @@ int DbGetResultId (AlpideDB *db, int activityTypeId, THicClassification classifi
 int DbGetResultId (AlpideDB *db, int activityTypeId, string resultName) 
 {
   ActivityDB                                 *activityDB = new ActivityDB (db);
+  static int                                  myActTypeId;
   static std::vector <ActivityDB::resultType> resultTypeList;
 
-  if (resultTypeList.size() == 0) resultTypeList = *(activityDB->GetResultList(activityTypeId));
+  if ((resultTypeList.size() == 0) || (activityTypeId != myActTypeId)) {
+    myActTypeId    = activityTypeId;
+    resultTypeList = *(activityDB->GetResultList(myActTypeId));
+  }
 
   for (unsigned int i = 0; i < resultTypeList.size(); i++) {
     if (resultName == resultTypeList.at(i).Name) {
@@ -139,9 +147,13 @@ int DbGetResultId (AlpideDB *db, int activityTypeId, string resultName)
 int DbGetStatusId (AlpideDB *db, int activityTypeId, string statusCode)
 {
   ActivityDB                                 *activityDB = new ActivityDB (db);
+  static int                                  myActTypeId;
   static std::vector <ActivityDB::statusType> statusTypeList;
 
-  if (statusTypeList.size() == 0) statusTypeList = *(activityDB->GetStatusList(activityTypeId));
+  if ((statusTypeList.size() == 0) || (activityTypeId != myActTypeId)) {
+    myActTypeId    = activityTypeId;
+    statusTypeList = *(activityDB->GetStatusList(myActTypeId));
+  }
 
   for (unsigned int i = 0; i < statusTypeList.size(); i++) {
     if (statusCode == statusTypeList.at(i).Code) {
@@ -169,13 +181,37 @@ int DbGetComponentTypeId  (AlpideDB *db, int projectId, string name)
 }
 
 
+int DbGetActComponentTypeId (AlpideDB *db, int activityTypeId, string Direction)
+{
+  ActivityDB                                      *activityDB = new ActivityDB (db);
+  static int                                       myActTypeId;
+  static std::vector <ActivityDB::actTypeCompType> actCompTypeList;
+
+  if ((actCompTypeList.size() == 0) || (activityTypeId != myActTypeId)) {
+    myActTypeId     = activityTypeId;
+    actCompTypeList = *(activityDB->GetComponentTypeList(myActTypeId)); 
+  }
+
+  for (unsigned int i = 0; i < actCompTypeList.size(); i++) {
+    if (Direction == actCompTypeList.at(i).Direction) {
+      return actCompTypeList.at(i).ID;
+    }
+  }
+  return -1;
+}
+
+
 //TODO: complete list of tests
 int DbGetComponentId (AlpideDB *db, int projectId, int typeId, string name)
 {
-  ComponentDB *componentDB = new ComponentDB (db);
+  ComponentDB                                     *componentDB = new ComponentDB (db);
+  static int                                       myTypeId;
   static std::vector <ComponentDB::componentShort> componentList;  
 
-  if (componentList.size() == 0) componentDB->GetListByType(projectId, typeId, &componentList);
+  if ((componentList.size() == 0) || (typeId != myTypeId)) {
+    myTypeId = typeId;
+    componentDB->GetListByType(projectId, myTypeId, &componentList);
+  }
 
   for (unsigned int i = 0; i < componentList.size(); i++) {
     if (name == componentList.at(i).ComponentID) {
