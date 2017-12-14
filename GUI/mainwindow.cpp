@@ -896,6 +896,9 @@ void MainWindow::fillingOBvectors(){
   fConfig->GetScanConfig()->SetVoltageScale(0.9);
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(1.0);
+  fConfig->GetScanConfig()->SetMlvdsStrength(1);
+  AddScan(STFifo);
+  fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
   AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
   AddScan(STDigital);
@@ -1015,11 +1018,7 @@ void MainWindow::connectcombo(int value){
     case 1:{
         settingswindow->hideendurance();
         ui->testtypeselected->clear();
-        // ui->start_test->show();
-        //  qDebug()<<"OB Qualification test selected";
-        // ui->testtypeselected->setText("OB Reception Test");
         ui->testtypeselected->setText("OB HIC Qualification Test");
-        //  ui->example1->show();
 
         findidoftheactivitytype("OB HIC Qualification Test",idofactivitytype);
         std::cout<<"the id of the selected test: "<<idofactivitytype<<std::endl;
@@ -1029,11 +1028,6 @@ void MainWindow::connectcombo(int value){
 
 
         numberofscan=1;
-        //  open();
-
-
-        //   if (counter==0) {break;}
-        //  fillingOBvectors();
 
         break;}
     case 2:
