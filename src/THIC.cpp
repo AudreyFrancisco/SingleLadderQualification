@@ -104,7 +104,12 @@ void THic::PowerOn()
   mosaic->enableClockOutput(false);
   if (mosaic2) mosaic2->enableClockOutput(false);
   sleep(1);
-  if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
+  if (m_powerBoard) {
+    m_powerBoard->SwitchAnalogOn (m_pbMod);
+    sleep(1);
+    m_powerBoard->SwitchDigitalOn(m_pbMod);
+  }
+  //if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
   sleep(1);
   mosaic->enableClockOutput(true);
   if (mosaic2) mosaic2->enableClockOutput(true);
@@ -224,6 +229,12 @@ void THic::AddClassification (THicClassification aClass)
   else if ((int) aClass > (int) m_class)        m_class = aClass;
 }
 
+
+THicClassification THic::GetClassification () 
+{
+  if (GetNEnabledChips() == 0) return CLASS_RED; 
+  else                         return m_class;
+}
 
 THicIB::THicIB (const char *dbId, int modId, TPowerBoard *pb, int pbMod)
   : THic (dbId, modId, pb, pbMod)
