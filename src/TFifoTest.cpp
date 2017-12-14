@@ -72,14 +72,16 @@ void TFifoTest::Init()
       m_hics.at(ihic)->ScaleVoltage(m_voltageScale);
     }      
   }
+
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
+  }
+
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
     if (m_mlvdsStrength != ChipConfig::DCTRL_DRIVER) {
       m_chips.at(ichip)->GetConfig()->SetParamValue("DCTRLDRIVER", m_mlvdsStrength);
       AlpideConfig::ConfigureBuffers (m_chips.at(ichip), m_chips.at(ichip)->GetConfig());
     }
-  }
-  for (unsigned int i = 0; i < m_boards.size(); i++) {
-    m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
