@@ -27,7 +27,7 @@ TSCurveAnalysis::TSCurveAnalysis(std::deque<TScanHisto> *histoQue,
 {
   m_nPulseInj           = m_config->GetNInj();
   m_resultFactor        = resultFactor;
-  m_writeRawData        = m_config->GetParamValue("RAW_DATA");
+  m_writeRawData        = m_config->GetParamValue("RAWDATA");
   m_writeNoHitPixels    = false;
   m_writeNoThreshPixels = false;
   m_writeStuckPixels    = false;
