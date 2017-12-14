@@ -167,7 +167,16 @@ void TFifoTest::ReadMem (TAlpide *chip, int ARegion, int AOffset, int &AValue, b
     return;
   }
   exception = false;
-  if (err >= 0) err = chip->ReadRegister (HighAdd, HighVal);
+  if (err >= 0) {
+    try {
+      err = chip->ReadRegister (HighAdd, HighVal);
+    }
+    catch (std::exception &e) {
+      exception = true;
+      return;
+    }
+  }
+
 
   if (err < 0) {
     std::cout << "Cannot read chip register. Exiting ... " << std::endl;

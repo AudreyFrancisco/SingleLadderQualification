@@ -2212,13 +2212,10 @@ std::cout<<"Test complete :D"<<std::endl;
 
 void MainWindow::fillingibvectors()
 {
-
-
   ClearVectors();
-  //AddScan(STDigital);
-  //return;
+ 
   AddScan(STPower);
-  //return;
+ 
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
 
@@ -2236,7 +2233,7 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetVoltageScale(0.9);
   AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(1.0);
-  return;
+
   // digital white frame
   AddScan(STDigitalWF);
   
