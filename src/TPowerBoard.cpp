@@ -395,14 +395,18 @@ void TPowerBoard::CorrectVoltageDrop (int module, bool reset)
 
     dVAnalog  = IDDA * RAnalog  + (IDDA + IDDD) * RGround;
     dVDigital = IDDD * RDigital + (IDDA + IDDD) * RGround;
-
+    std::cout << "RDigital = " << RDigital << ", IDDD = " << IDDD << " dVD = " << dVDigital << std::endl;
     dVAnalog  *= AVScale;
     dVDigital *= DVScale;
+    std::cout << "scaled dVD = " << dVDigital;
   }
+
+  std::cout << "trying to set DVDD to " << fPBoard.Modules[module].DVset + dVDigital << std::endl;
+  std::cout << "trying to set AVDD to " << fPBoard.Modules[module].AVset + dVAnalog << std::endl;
 
   if ((fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) ||
       (fPBoard.Modules[module].DVset + dVDigital > SAFE_OUTPUT)) {
-    std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage above safe limit; using uncorrected values." << std::endl;
+    std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage above safe limit; using uncorrected values" << std::endl;
     dVAnalog  = 0;
     dVDigital = 0;
   }
