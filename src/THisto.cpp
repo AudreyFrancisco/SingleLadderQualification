@@ -308,25 +308,40 @@ void TScanHisto::Incr (common::TChipIndex index, unsigned int i, unsigned int j)
     m_histos.at(int_index).Incr(i,j);
   }
   catch (const std::out_of_range& e) {
-	std::cerr << "Invalid index: board " << index.boardIndex << ", dataReceiver " << index.dataReceiver << ", chipID " << index.chipId << "!" << std::endl;
+    std::cerr << "Invalid index: board " << index.boardIndex << ", dataReceiver " << index.dataReceiver << ", chipID " << index.chipId << "!" << std::endl;
   }
 }
 
 
 void TScanHisto::Incr (common::TChipIndex index, unsigned int i) {
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
-  m_histos.at(int_index).Incr(i);
+  try {
+    m_histos.at(int_index).Incr(i);
+  }
+  catch (const std::out_of_range& e) {
+    std::cerr << "Invalid index: board " << index.boardIndex << ", dataReceiver " << index.dataReceiver << ", chipID " << index.chipId << "!" << std::endl;
+  }
 }
 
 void TScanHisto::Set (common::TChipIndex index, unsigned int i, unsigned int j, double val) {
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
-  m_histos.at(int_index).Set(i, j, val);
+  try {
+    m_histos.at(int_index).Set(i, j, val);
+  }
+  catch (const std::out_of_range& e) {
+    std::cerr << "Invalid index: board " << index.boardIndex << ", dataReceiver " << index.dataReceiver << ", chipID " << index.chipId << "!" << std::endl;
+  }
 }
 
 
 void TScanHisto::Set (common::TChipIndex index, unsigned int i, double val) {
   int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
-  m_histos.at(int_index).Set(i, val);
+  try {
+    m_histos.at(int_index).Set(i, val);
+  }
+  catch (const std::out_of_range& e) {
+    std::cerr << "Invalid index: board " << index.boardIndex << ", dataReceiver " << index.dataReceiver << ", chipID " << index.chipId << "!" << std::endl;
+  }
 }
 
 
