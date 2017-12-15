@@ -65,7 +65,9 @@ class TReadoutAnalysis : public TScanAnalysis {
   int  m_row;
   void FillVariableList () {};
   bool IsInjected       (int col, int row);
-  void WriteResult      ();  
+  void WriteResult      ();
+  THicClassification GetClassificationOB(TReadoutResultHic *result);
+  THicClassification GetClassificationIB(TReadoutResultHic *result);  
  protected: 
   TScanResultChip *GetChipResult () {TReadoutResultChip *Result = new TReadoutResultChip(); return Result;};
   TScanResultHic  *GetHicResult  () {TReadoutResultHic  *Result = new TReadoutResultHic (); return Result;};

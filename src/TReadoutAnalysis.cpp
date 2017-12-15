@@ -126,6 +126,15 @@ void TReadoutAnalysis::Finalize()
     }
   }
 
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
+    TReadoutResultHic *hicResult = (TReadoutResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+    if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
+      hicResult->m_class = GetClassificationOB(hicResult);
+    }
+    else {
+      hicResult->m_class = GetClassificationIB(hicResult);
+    }
+  }
   WriteResult      ();
 
   m_finished = true;
@@ -153,6 +162,25 @@ void TReadoutAnalysis::WriteResult()
     hicResult->WriteToFile  (fp);
     fclose (fp);
   }
+}
+
+
+// TODO: make configurable cuts? different for OB/IB?
+// Different depending on driver setting? (e.g. if errors at 10 -> Red, if errors at 2 -> Orange)?
+
+THicClassification TReadoutAnalysis::GetClassificationOB(TReadoutResultHic* result) {
+  if (result->m_errorCounter.nCorruptEvent > 0) return CLASS_RED;
+  if (result->m_errorCounter.nTimeout > 0) return CLASS_RED;
+  if (result->m_errorCounter.n8b10b > 0) return CLASS_ORANGE;
+  return CLASS_GREEN;
+}
+
+
+THicClassification TReadoutAnalysis::GetClassificationIB(TReadoutResultHic* result) {
+  if (result->m_errorCounter.nCorruptEvent > 0) return CLASS_RED;
+  if (result->m_errorCounter.nTimeout > 0) return CLASS_RED;
+  if (result->m_errorCounter.n8b10b > 0) return CLASS_ORANGE;
+  return CLASS_GREEN;
 }
 
 
@@ -236,4 +264,3 @@ void TReadoutResultChip::WriteToFile (FILE *fp)
 }
 
 
-// TODO: classification
