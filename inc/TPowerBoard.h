@@ -62,7 +62,7 @@ class TReadoutBoardMOSAIC;
 // to the power board
 #define MINIMUM_TIMELAPSEFORPOLLING	2
 
-#define SAFE_OUTPUT 2.3
+#define SAFE_OUTPUT 2.2
 
 // Class definition
 class TPowerBoard {
