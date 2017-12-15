@@ -58,7 +58,7 @@ class THic {
   void                       SwitchBias      (bool on);
   float                      GetAnalogueVoltage();
   void                       AddClassification (THicClassification aClass);
-  THicClassification         GetClassification () {return m_class;};
+  THicClassification         GetClassification ();
 };
 
 

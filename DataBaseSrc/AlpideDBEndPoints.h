@@ -406,8 +406,9 @@ public:
 		int ID;
 		int Quantity;
 		string Direction;
+		componentType Type;
 	};
-	#define zACTTYPECOMPTYPE(a) a.ID =0; a.Quantity = 0; a.Direction ="in"
+	#define zACTTYPECOMPTYPE(a) a.ID =0; a.Quantity = 0; a.Direction ="in"; zCOMPOTYPE(a.Type)
 
 	struct actComp {
 		int ID;
@@ -507,13 +508,12 @@ public:
     vector<parameterType> *GetParameterTypeList(int aActivityTypeID);
     vector<activityType> *GetActivityTypeList(int aProjectID);
     vector<locationType> *GetLocationTypeList(int aActivityTypeID);
-    vector<componentType> *GetComponentTypeList(int aActivityTypeID);
+    vector<actTypeCompType> *GetComponentTypeList(int aActivityTypeID);
     vector<resultType> *GetResultList(int aActivityTypeID);
     vector<statusType> *GetStatusList(int aActivityTypeID);
     vector<attachmentType> *GetAttachmentTypeList();
     vector<activityShort> *GetActivityList(int aProjectID, int aActivityTypeID);
     AlpideTable::response *Read(int ActivityID, activityLong *Result);
-
 
 private:
     unsigned long buildBase64Binary(string aLocalFileName, string * aBuffer);
