@@ -2250,7 +2250,14 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
   fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
   AddScan(STReadout);
-  
+
+  // reset previous values 
+  // (TODO: this is not exactly correct because it resets to the values defined in the header file and 
+  // ignores the settings in the config file)
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", ChipConfig::DTU_DRIVER);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", ChipConfig::DTU_PREEMP);
+    
   // threshold scan, no tuning for the time being, 0V back bias
   fConfig->GetScanConfig()->SetBackBias(0.0);
   //fConfig->GetScanConfig()->SetVcasnRange (30, 70);
