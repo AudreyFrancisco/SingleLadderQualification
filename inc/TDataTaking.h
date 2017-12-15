@@ -44,7 +44,7 @@ class TDataTaking : public TScan {
   void                  LoopStart       (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};
   void                  LoopEnd         (int loopIndex);
   void                  Execute         ();
-  void                  Terminate       ();
+  virtual void          Terminate       ();
   float                 GetBackbias     () {return m_backBias;};
 };
 

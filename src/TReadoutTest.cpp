@@ -84,3 +84,19 @@ void TReadoutTest::Init ()
   TDataTaking::Init();
   m_running = true;
 }
+
+
+void TReadoutTest::Terminate() 
+{
+  TDataTaking::Terminate();
+  // reset link speed in mosaic; chip configs have been reset already in ConfigureChip()
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    TReadoutBoardMOSAIC *mosaic = (TReadoutBoardMOSAIC *)m_boards.at(i);
+    if (mosaic) {
+      int linkSpeed = m_chips.at(0)->GetConfig()->GetParamValue("LINKSPEED");
+      if      (linkSpeed == 400)  mosaic-> setSpeedMode (Mosaic::RCV_RATE_400);
+      else if (linkSpeed == 600)  mosaic-> setSpeedMode (Mosaic::RCV_RATE_600);
+      else if (linkSpeed == 1200) mosaic-> setSpeedMode (Mosaic::RCV_RATE_1200);
+    }
+  }
+}
