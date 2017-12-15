@@ -1690,6 +1690,9 @@ void MainWindow::fillingreceptionscans()
 
   AddScan(STPower);
   AddScan(STFifo);
+  fConfig->GetScanConfig()->SetMlvdsStrength(4);
+  AddScan(STFifo);
+  fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
   AddScan(STDigital);
 
 }
