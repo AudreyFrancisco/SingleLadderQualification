@@ -17,27 +17,28 @@
 #include "Mosaic.h"
 #include <stdio.h>
 
-#define MAX_MOSAICCTRLINT     12
-#define MAX_MOSAICTRANRECV    10
-#define MOSAIC_HEADER_LENGTH  64
-
-#define DEF_TCPPORT           2000
-#define DEF_CTRLINTPHASE      2
-#define DEF_CTRLAFTHR         1250000
-#define DEF_CTRLLATMODE       0
-#define DEF_CTRLTIMEOUT       0
-#define DEF_POLLDATATIMEOUT   500
-#define DEF_POLARITYINVERSION 0
-#define DEF_SPEEDMODE         0
-#define DEF_IP_ADDRESS        "192.168.168.250"
+#define MAX_MOSAICCTRLINT 12
+#define MAX_MOSAICTRANRECV 10
+#define MOSAIC_HEADER_LENGTH 64
 
 class TBoardConfigMOSAIC : public TBoardConfig {
 
 private:
 	FILE *fhConfigFile; // the file handle of the Configuration File
 
-protected:
+    const int  DEF_TCPPORT = 2000;
+    const int  DEF_CTRLINTPHASE = 2;
+    const int  DEF_CTRLAFTHR = 1250000;
+    const int  DEF_CTRLLATMODE = 0;
+    const int  DEF_CTRLTIMEOUT = 0;
+    const int  DEF_POLLDATATIMEOUT = 500;
+    const int  DEF_POLARITYINVERSION = 0;
+    const int  DEF_SPEEDMODE = 0;
+    static char* DEF_IP_ADDRESS;
+    const int  DEF_MANCHESTERDISABLE = 0;
 
+
+protected:
     void     InitParamMap ();
 
     int NumberOfControlInterfaces;
@@ -49,6 +50,8 @@ protected:
 	int pollDataTimeout;
     int Inverted;
     int SpeedMode;
+    int ManchesterDisable;     //     0; 0: enable manchester encoding; 1: disable
+
 
     char IPAddress[30];
 //	Mosaic::TReceiverSpeed  SpeedMode;
@@ -68,6 +71,7 @@ public:
 	uint16_t GetCtrlLatMode        () {return((uint16_t)RunCtrlLatMode);}
 	uint32_t GetCtrlTimeout        () {return((uint32_t)RunCtrlTimeout);}
 	uint32_t GetPollingDataTimeout () {return((uint32_t)pollDataTimeout);}
+	uint32_t GetManchesterDisable  () {return((uint32_t)ManchesterDisable);}
 	bool     IsInverted            () {return((bool)Inverted);}
     Mosaic::TReceiverSpeed    GetSpeedMode        ();
 
@@ -79,8 +83,9 @@ public:
 	void SetCtrlAFThreshold    (uint32_t ACtrlAFThreshold)     { RunCtrlAFThreshold = (int)ACtrlAFThreshold;}
 	void SetCtrlLatMode        (uint16_t ARunCtrlLatencyMode)  { RunCtrlLatMode = (int)ARunCtrlLatencyMode;}
 	void SetCtrlTimeout        (uint32_t ARunCtrlTimeout)      { RunCtrlTimeout = (int)ARunCtrlTimeout;}
-        void SetInvertedData       (bool     AIsInverted)          { Inverted       = (int)AIsInverted;};
+    void SetInvertedData       (bool     AIsInverted)          { Inverted       = (int)AIsInverted;};
 	void SetPollingDataTimeout (uint32_t APollDataTimeout)     { pollDataTimeout = (int)APollDataTimeout;}
+	void SetManchesterDisable  (uint32_t AIsManchesterDisabled){ ManchesterDisable = (int)AIsManchesterDisabled;}
 	void SetSpeedMode          (Mosaic::TReceiverSpeed ASpeedMode);
 
 };
