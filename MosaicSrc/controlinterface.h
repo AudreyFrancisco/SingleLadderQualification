@@ -54,6 +54,7 @@ public:
 	void setBusAddress(WishboneBus *wbbPtr, uint32_t baseAddress);
 	void setPhase(uint8_t phase);
 	void addEnable(bool en);
+	void addDisableME(bool dis);
 	void addGetErrorCounter(uint32_t *ctr);
 	void addSendCmd(uint8_t cmd);
 	void addWriteReg(uint8_t chipID, uint16_t address, uint16_t data);
@@ -95,7 +96,8 @@ private:					// WBB Slave registers map
 
 	enum configBits_e {
 		CFG_PHASE_MASK	= 0x03,
-		CFG_EN			= (1<<3)	
+		CFG_EN			= (1<<3),	
+		CFG_DISABLE_ME	= (1<<4)	
 	};
 
 private:

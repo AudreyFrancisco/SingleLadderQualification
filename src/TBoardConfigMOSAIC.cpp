@@ -17,6 +17,7 @@
 
 using namespace std;
 
+char* TBoardConfigMOSAIC::DEF_IP_ADDRESS = (char *) "192.168.168.250";
 
 TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIndex)
 {
@@ -32,6 +33,8 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
   pollDataTimeout           = DEF_POLLDATATIMEOUT; // milliseconds
   Inverted                  = DEF_POLARITYINVERSION;
   SpeedMode                 = DEF_SPEEDMODE;
+  ManchesterDisable		    = DEF_MANCHESTERDISABLE;
+
   strcpy (IPAddress, DEF_IP_ADDRESS);
   if (AConfigFileName) { // Read Configuration file
     try {
@@ -56,7 +59,7 @@ void TBoardConfigMOSAIC::InitParamMap()
 	fSettings["POLLINGDATATIMEOUT"] = &pollDataTimeout;
 	fSettings["DATALINKPOLARITY"] = &Inverted;
 	fSettings["DATALINKSPEED"] = &SpeedMode;
-
+	fSettings["MANCHESTERDISABLED"] = &ManchesterDisable;
 	TBoardConfig::InitParamMap();
 }
 

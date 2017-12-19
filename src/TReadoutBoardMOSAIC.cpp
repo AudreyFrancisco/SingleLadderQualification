@@ -378,6 +378,7 @@ void TReadoutBoardMOSAIC::enableControlInterfaces(bool en)
 {
 	for(int Cii=0;Cii<MAX_MOSAICCTRLINT;Cii++){
 		controlInterface[Cii]->addEnable(en);
+		controlInterface[Cii]->addDisableME(fBoardConfig->GetManchesterDisable() == 1 ? true : false);
 		controlInterface[Cii]->execute();
 	}
 }
