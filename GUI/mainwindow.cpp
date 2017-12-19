@@ -144,43 +144,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     ui->start_test->hide();
-    /*  QThread *m_thread = new QThread(this);
-      QTimer* timer = new QTimer(0); // _not_ this!
-      timer->setInterval(1);
-      timer->moveToThread(m_thread);
-      // Use a direct connection to whoever does the work in order
-      // to make sure that the fumction  is called from m_thread.
-      connect(timer, SIGNAL(timeout()), SLOT(createLabel()), Qt::DirectConnection);
-      // Make sure the timer gets started from m_thread.
 
-      connect(m_thread, SIGNAL(started()),timer, SLOT(start()));
-
-      m_thread->start();
-
-  */
-
-
-    //  double final=(double)i_dec;
-    // float final;==
-    // final=i_dec*1.0;
-
-    //std::string s=currentdate.str();
-    //float final=std::strtof(s.c_str(),0);
-    //printf("float value : %4.8f\n" ,strtof(s.c_str(), NULL));
-
-    //  printf("%4.8f",final);
-
-    //currentdate  << std::setprecision(14);
-    //  float percise = std::stof(currentdate.str());
-    //  std::cout<<final<<" FRFDSFVDV"<<std::endl;
-    //s std::cout<<"in integer "<<i_dec<<std::endl;
-
-
-
-
-
- connect(ui->testib,SIGNAL(clicked()),this,SLOT(IBBasicTest()));
- ui->testib->hide();
+    connect(ui->testib,SIGNAL(clicked()),this,SLOT(IBBasicTest()));
+    ui->testib->hide();
 
 }
 
@@ -570,208 +536,6 @@ void MainWindow::test(){
     //  qDebug()<< "Testing ...";
 }
 
-void MainWindow::combochanged(int index){
-    switch(index){
-    case 0:
-        //    qDebug()<<"No Test selected";
-        //   ui->start_test->hide();
-        break;
-    case 1:
-        //  ui->start_test->show();
-        // qDebug()<<"Fifo Test Selected";
-        disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(test()));
-        disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(scantest()));
-        disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(digital()));
-        connect (ui->start_test,SIGNAL(clicked()),this,SLOT(fifotest()));
-        break;
-    case 2:
-        //  ui->start_test->show();
-        //   qDebug()<<"Threshold Scan Selected";
-        disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(test()));
-        disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(digital()));
-        disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(fifotest()));
-        connect (ui->start_test,SIGNAL(clicked()),this,SLOT(scantest()));
-        break;
-    case 3:
-        //ui->start_test->show();
-        // qDebug()<<"Digital Scan Selected";
-        disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(scantest()));
-        disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(test()));
-        disconnect (ui->start_test,SIGNAL(clicked()),this,SLOT(fifotest()));
-        connect (ui->start_test,SIGNAL(clicked()),this,SLOT(digital()));
-        break;
-    }
-}
-
-void MainWindow::scantest() {
-    /* Runs tuneVCASN, tuneITHR, and ITHRthreshold, each using the preceeding results. */
-    try {
-        ui->statuslabel->setVisible(true);
-        ui->statuslabel->update();
-        ui->statusbar->setValue(0);
-        ui->statusbar->show();
-
-        /* FIRST: tuneVCASN */
-
-        //TtuneVCASNScan *myTuneVScan = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-        //TAnalogAnalysis  *analysisTuneV = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex, 1);
-
-        //std::cout << "starting thread (tuneVCASN)" << std::endl;
-        //std::thread scanThread(&MainWindow::scanLoop,this,mytuneVScan);
-        //std::thread analysisThread(&TAnalogAnalysis::Run, std::ref(analysisTuneV));
-        /*NOTE**:  will need to give analysisThread an AnalogAnalysis argument type, plus extend change to other classes... */
-        //analysisTuneV->Initialize();
-
-        //ui->statusbar->setValue(50);
-        //scanThread.join();
-        //analysisThread.join();
-
-        //analysisTuneV->Finalize();
-
-        //float vcasn[fHics.size()]; //has one entry for each HIC
-        //int finishedChips = 0; //chips set so far
-        //float sum = 0;
-        //for(int i=0; i<fHics.size(), i++) {
-        // for(int j=0; i<fHics.at(i).GetNChips(); j++) {
-        //   sum += analysisTuneV->GetResultThreshold(finishedChips+j);
-        //  }
-        //  finishedChips += hHics.at(i).GetNChips();
-        //  vcasn[i] = sum/fHics.at(i).GetNChips();
-        //  sum=0;
-        //}
-
-        //fConfig->GetScanConfig()->SetVcasnArr(fHics.size(), vcasn);
-
-        // ui->statusbar->setValue(100);
-        //delete myTuneVScan;
-        //delete analysisTuneV;
-
-        /* NEXT: tuneITHR */
-
-        //TtuneVCASNScan *myTuneIScan = new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-        //TAnalogAnalysis  *analysisTuneI = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex, -1);
-
-        //std::cout << "starting thread (tuneITHR)" << std::endl;
-        //std::thread scanThread(&MainWindow::scanLoop,this,myTuneIScan);
-
-        //std::thread analysisThread(&TAnalogAnalysis::Run, std::ref(analysisTuneI));
-        /*NOTE**:  will need to give analysisThread an AnalogAnalysis argument type */
-        //analysisTuneI->Initialize();
-
-        //ui->statusbar->setValue(50);
-        //scanThread.join();
-        //analysisThread.join();
-
-        //analysisTuneI->Finalize();
-
-        //float ithr[fChips.size()]; //has one entry for each chip
-        //for(int i=0; i<fChips.size(), i++) {
-        //get the mean ithr value for each chip and assign them here
-        // ithr[i]=analysisTuneI->GetResultThreshold(i);
-        // }
-        //fConfig->GetScanConfig()->SetIthrArr(fChips.size(), ithr); //vcasn has already been set
-
-        //ui->statusbar->setValue(100);
-
-        //delete myTuneIScan;
-        //delete analysisTuneI;
-
-        /* LAST: ITHRthreshold */
-
-        //TtuneVCASNScan *myIthrScan = new TITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue,&fMutex);
-        //TAnalogAnalysis  *analysisIthr = new TThresholdAnalysis (&fHistoQue,myScan, fConfig->GetScanConfig(), fHics, &fMutex);
-        //NOTE:  config is passed by reference.
-
-        //std::cout << "starting thread (tuneITHR)" << std::endl;
-        //std::thread scanThread(&MainWindow::scanLoop,this,myIthrScan);
-
-        //std::thread analysisThread(&TAnalogAnalysis::Run, std::ref(analysisIthr));
-        /*NOTE**:  will need to give analysisThread an AnalogAnalysis argument type */
-        //analysisIthr->Initialize();
-
-        //ui->statusbar->setValue(50);
-        //scanThread.join();
-        //analysisThread.join();
-
-        //analysisIthr->Finalize(); //produce final results; rms may be useful as usual...
-
-        //ui->statusbar->setValue(100);
-
-        //delete myIthrScan;
-        //delete analysisIthr;
-
-        //setVI(vcasn, ithr); //set config/save results for all future scans
-
-    } catch(exception &scanex) {
-        //   std::cout<<scanex.what()<<endl;
-        popup(scanex.what());
-    }
-}
-
-
-void MainWindow::digital(){
-    try{
-        ui->statuslabel->setVisible(true);
-        ui->statuslabel->update();
-        ui->statusbar->setValue(0);
-        ui->statusbar->show();
-
-        TDigitalScan *mydigital= new TDigitalScan(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-        TDigitalAnalysis  *analysis = new TDigitalAnalysis(&fHistoQue,mydigital, fConfig->GetScanConfig(), fHICs, &fMutex);
-
-        //scanLoop(mydigital);
-        //  std::cout << "starting thread" << std::endl;
-        std::thread scanThread(&MainWindow::scanLoop,this,mydigital);
-        std::thread analysisThread(&TScanAnalysis::Run, analysis);
-        ui->statusbar->setValue(50);
-        scanThread.join();
-        analysisThread.join();
-        analysis->Finalize();
-
-        delete mydigital;
-        delete analysis;
-        ui->statusbar->setValue(100);
-    }
-    catch(exception &edigital){
-        // std::cout<<edigital.what()<<endl;
-        popup(edigital.what());
-    }
-
-}
-/*
-  void MainWindow::fifotest(){
-  try{
-  ui->statuslabel->setVisible(true);
-  ui->statuslabel->update();
-  ui->statusbar->setValue(0);
-  ui->statusbar->show();
-  TFifoTest *myfifo= new TFifoTest(fConfig->GetScanConfig(), fChips, fHICs, fBoards, &fHistoQue,&fMutex);
-  TFifoAnalysis  *analysis = new TFifoAnalysis(&fHistoQue,myfifo,fConfig->GetScanConfig(), fHICs, &fMutex);
-
-  //scanLoop(myfifo);
-  //   std::cout << "starting thread" << std::endl;
-  std::thread scanThread(&MainWindow::scanLoop,this,myfifo);
-  std::thread analysisThread(&TScanAnalysis::Run, std::ref(analysis));
-  ui->statusbar->setValue(50);
-  scanThread.join();
-  analysisThread.join();
-  analysis->Finalize();
-
-  delete myfifo;
-  delete analysis;
-  ui->statusbar->setValue(100);
-
-  }
-  catch(exception &efifo){
-  //   std::cout<<efifo.what()<<endl;
-  popup(efifo.what());
-  }
-
-  }
-*/
-
-
-
 
 void MainWindow::scanLoop (TScan *myScan)
 { myScan->Init();
@@ -802,11 +566,6 @@ void MainWindow::scanLoop (TScan *myScan)
 
 void MainWindow::popup(QString message){
 
-    //Dialog exwindow;
-    //exwindow.setModal(true);
-    //exwindow.exec();
-    //check this Attribute
-    //    windowex->setAttribute(Qt::WA_DeleteOnClose);
     windowex=new Dialog(this);
     windowex->append(message);
     windowex->show();
@@ -1180,51 +939,7 @@ void MainWindow::applytests(){
 }
 
 
-void MainWindow::runscans(){
-    /*QTimer* timer;
-    timer=new QTimer(this);
-    connect(timer,SIGNAL(timeout()),this,SLOT(applytests()));
-    connect(ui->abortall,SIGNAL(clicked()),timer,SLOT(stop()));
-    connect(ui->abortall,SIGNAL(clicked()),timer,SLOT(deleteLater()));
-    connect(this, SIGNAL(stopTimer()),timer,SLOT(deleteLater()));
-    connect(this, SIGNAL(stopTimer()),timer,SLOT(stop()));
-    timer->setInterval(0);
-    timer->setSingleShot(false);
-    timer->start();
-  */
-    //QPushButton *dimitra=new QPushButton("dsxfvgdvg", parent->thread());
-    //connect(dimitra,SIGNAL(clicked()),this,SLOT(StopScan());
-    //QThread *thread=new QThread;
-    //ScanThread *dim= new ScanThread();
-    //dim->moveToThread(thread);
-    //std::cout<<"RTg"<<std::endl;
-    //connect(thread,SIGNAL(started()),dim, SLOT(run()));
-    //std::cout<<"RTg"<<std::endl;
-    //connect(thread, SIGNAL(started()),dim,SLOT(process()));
 
-    //connect(dim,SIGNAL(ScanThread::resultReady()),thread, SLOT(quit()));
-    //thread->start();
-    //dim->start();
-    //std::cout<<"RTg"<<std::endl;
-    //QThread *thread=new QThread(this);
-    //dimitra->moveToThread(thread);
-    //connect(timer, SIGNAL(timeout()),this,SLOT(applytests()));
-    /*connect(thread,SIGNAL(started()),this,SLOT(applytests()));
-    connect(dimitra,SIGNAL(finished()),thread,SLOT(quit()));
-    connect(dimitra,SIGNAL(finished()),dimitra,SLOT(deleteLater()));
-    connect(thread,SIGNAL(finished()),thread,SLOT(deleteLater()));
-    thread->start();
-  */
-    //while (!thread->isFinished()) QCoreApplication::processEvents();
-    //if (ui->abortall->isChecked()){
-    //thread->isFinished();
-    //}
-    //timer->start();
-    //std::thread t1(&MainWindow::performtests,this, fScanVector,fAnalysisVector);
-
-    // std::thread t2(&MainWindow::createbtn,this);
-    //t2.join();
-}
 
 void MainWindow::StopScan(){
 
@@ -1239,50 +954,7 @@ void MainWindow::createbtn(){
 
 }
 
-void MainWindow::fifolist(){
-    mapdetails.clear();
-    ui->details->clear();
-    for (std::map<const char*,TResultVariable>::const_iterator it=fAnalysisVector.at(0)->GetVariableList().begin(); it!=fAnalysisVector.at(0)->GetVariableList().end(); ++it){
 
-        //  std::cout << it->first << " => " << it->second << '\n';
-        std::string d;
-        d=(std::string(it->first));
-        // d.append(++it->first);
-        //  QVector <std::string> dimitra;
-        mapdetails.push_back(d);
-
-    }
-    for (unsigned int i=0; i<mapdetails.size();i++){
-        //   std::cout<<mapdetails[i]<<std::endl;
-        ui->details->addItem(mapdetails[i].c_str());
-    }
-    ui->details->show();
-    qApp->processEvents();
-    ui->displaydetails->show();
-}
-
-
-void MainWindow::digitallist(){
-    mapdetails.clear();
-    ui->details->clear();
-    for (std::map<const char*, TResultVariable>::const_iterator it=fAnalysisVector.at(1)->GetVariableList().begin(); it!=fAnalysisVector.at(1)->GetVariableList().end(); ++it){
-
-        //  std::cout << it->first << " => " << it->second << '\n';
-        std::string d;
-        d=(std::string(it->first));
-        // d.append(++it->first);
-        //  QVector <std::string> dimitra;
-        mapdetails.push_back(d);
-
-    }
-    for (unsigned int i=0; i<mapdetails.size();i++){
-        //  std::cout<<mapdetails[i]<<std::endl;
-        ui->details->addItem(mapdetails[i].c_str());
-    }
-    ui->details->show();
-    qApp->processEvents();
-    ui->displaydetails->show();
-}
 
 void MainWindow::getresultdetails(int i){
     mapdetails.clear();
@@ -1341,28 +1013,6 @@ void MainWindow::getresultdetails(int i){
 }
 
 
-void MainWindow::noiselist(){
-    mapdetails.clear();
-    ui->details->clear();
-    for (std::map<const char*, TResultVariable>::const_iterator it=fAnalysisVector.at(3)->GetVariableList().begin(); it!=fAnalysisVector.at(3)->GetVariableList().end(); ++it){
-
-        //  std::cout << it->first << " => " << it->second << '\n';
-        std::string d;
-        d=(std::string(it->first));
-        // d.append(++it->first);
-        //  QVector <std::string> dimitra;
-        mapdetails.push_back(d);
-
-    }
-    for (unsigned int i=0; i<mapdetails.size();i++){
-        // std::cout<<mapdetails[i]<<std::endl;
-        ui->details->addItem(mapdetails[i].c_str());
-    }
-
-    ui->details->show();
-    qApp->processEvents();
-    ui->displaydetails->show();
-}
 
 
 

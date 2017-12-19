@@ -56,10 +56,8 @@ class MainWindow : public QMainWindow
   Testingprogress *progresswindow;
   DatabaseSelection *databasewindow=0;
   void scanLoop (TScan *myScan);
-  //   void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
   std::vector <TScan *> fScanVector;
   std::vector <TScanAnalysis *> fAnalysisVector;
-  // std::vector <TApplyMask *> fmaskvector;
   TPowerBoard *pb;
   TPowerBoardConfig *pbconfig;
 
@@ -111,26 +109,7 @@ class MainWindow : public QMainWindow
   void      SetHicClassifications();
   TTestType GetTestType          ();
   int       GetTime              (); 
-  //  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6,  chkBtnObm7;
-  // void explore_halfstave(uint8_t chipid);
-  // void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);
 
-  /*
-    TBoardType fBoardType;
-    std::vector <TReadoutBoard *> fBoards;
-    std::vector <TAlpide *>       fChips;
-    std::mutex fMutex;
-    TConfig *fConfig;
-    std::deque<TScanHisto>  fHistoQue;
-  */
-  //void color_red(int side, int pos);
-  // void color_green(int side, int pos);
-  // void color_green_IB(int position);
-  // void color_red_IB(int position);
-  // void scanLoop (TScan *myScan);
-  //Dialog *windowex;
-  // bool properconfig=false;
-  //*/
 
   public slots:
     void connectcombo(int value);
@@ -167,26 +146,6 @@ class MainWindow : public QMainWindow
 
     void continuescans(){execution=true;progresswindow->close();delete progresswindow;}
     void stopscans(){execution=false;progresswindow->close();delete progresswindow;}
-    // void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
-    /*
-      void open();
-      void combochanged(int index);
-      void button_obm1_clicked();
-      void button_obm2_clicked();
-      void button_obm3_clicked();
-      void button_obm4_clicked();
-      void button_obm5_clicked();
-      void button_obm6_clicked();
-      void button_obm7_clicked();
-      void scantest();
-      void digital();
-      void test();
-      void fifotest();
-      void popup(QString message);
-      void start_test();
-    */
-
-    // void createLabel();
 
 
  signals:
@@ -204,8 +163,6 @@ class MainWindow : public QMainWindow
 
     std::mutex fMutex;
     TConfig *fConfig;
-    // TConfig *fConfigp10;
-    // TConfig *fConfigm10;
     std::deque<TScanHisto>  fHistoQue;
     void color_red(int side, int pos);
     void color_green(int side, int pos);
@@ -216,13 +173,10 @@ class MainWindow : public QMainWindow
     bool properconfig=false;
     checkpbconfig *pbcfgcheck=0;
     Calibrationpb *calwindow=0;
-    // QProgressBar * sbar;
     void exploreendurancebox();
 
 
     private slots:
-
-      void combochanged(int index);
       void button_obm1_clicked();
       void button_obm2_clicked();
       void button_obm3_clicked();
@@ -232,23 +186,18 @@ class MainWindow : public QMainWindow
       void button_obm7_clicked();
       void applytests();
       void performtests(std::vector <TScan *>, std::vector <TScanAnalysis *>);
-      void scantest();
-      void digital();
       void test();
-      //void fifotest();
       void detailscombo(int dnumber);
       void start_test();
       void open();
       void fillingreceptionscans();
       void poweringscan();
-      // void connectcombo(int value);
-      void  runscans();
       void fillingOBvectors();
       void StopScan();
-      void fifolist();
-      void digitallist();
 
-      void noiselist();
+
+
+
 
 
       //void setVI(float * vcasn, float * ithr);
