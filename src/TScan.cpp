@@ -74,7 +74,7 @@ void TScan::Init()
   }
 
   for (const auto& rChip : m_chips) {
-    m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
+    if (rChip->GetConfig()->IsEnabled()) m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
   }
 }
 
@@ -122,7 +122,7 @@ void TScan::Terminate()
   }
 
   for (const auto& rChip : m_chips) {
-    m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
+    if (rChip->GetConfig()->IsEnabled()) m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
