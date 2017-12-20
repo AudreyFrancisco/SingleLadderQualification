@@ -73,9 +73,9 @@ void TScan::Init()
     m_errorCounts.insert (std::pair<std::string, TErrorCounter> (m_hics.at(ihic)->GetDbId(), errCount));
   }
 
-  for (const auto& rChip : m_chips) {
-    //if (rChip->GetConfig()->IsEnabled()) m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
-  }
+  //for (const auto& rChip : m_chips) {
+  //  if (rChip->GetConfig()->IsEnabled()) m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
+  //}
 }
 
 
