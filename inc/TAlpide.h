@@ -1,6 +1,7 @@
 #ifndef ALPIDE_H
 #define ALPIDE_H
 
+#include <string>
 #include <unistd.h>
 #include "TConfig.h"
 #include "THIC.h"
@@ -218,9 +219,8 @@ public:
 
   void DumpConfig(const char *fName, bool writeFile=true, char *Config=0);
 
+  std::string DumpRegisters();
 
-
-public:
   int GetADCOffset() { return(fADCOffset); };
   int CalibrateADC();
   void SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef = Alpide::IREF_100uA);

@@ -2,7 +2,7 @@
 #include "TReadoutBoard.h"
 
 #include <iostream>
-
+#include <sstream>
 
 
 using namespace Alpide;
@@ -194,8 +194,41 @@ void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
   // CMU DMU config reg
   ReadRegister(0x10, value);
   sprintf(config, "%sCMUDMU_CONFIG  %i\n", config, value);
-
 }
+
+std::string TAlpide::DumpRegisters()
+{
+  std::stringstream dump;
+
+  int chipId = fConfig->GetChipId();
+
+  // Periphery config
+  dump << "# Address\tValue" << std::endl;
+  for (unsigned int reg = (unsigned int)Alpide::REG_MODECONTROL; reg <= (unsigned int)Alpide::REG_BUSY_MINWIDTH; ++reg) {
+    uint16_t value = 0xDEAD;
+    this->ReadRegister((Alpide::TRegister)reg, value);
+    dump << chipId << "\t0x" << std::hex << reg << "\t" << value << std::endl;
+  }
+
+  // Pixel config: read-only do nothing
+
+  // DAC and monitoring
+  for (unsigned int reg = (unsigned int)Alpide::REG_ANALOGMON; reg <= (unsigned int)Alpide::REG_ADC_T2V; ++reg) {
+    uint16_t value = 0xDEAD;
+    this->ReadRegister((Alpide::TRegister)reg, value);
+    dump << chipId << "\t0x" << std::hex << reg << "\t" << value << std::endl;
+  }
+
+  // Test and debug control
+  for (unsigned int reg = (unsigned int)Alpide::REG_SEU_ERROR_COUNT; reg <= (unsigned int)Alpide::REG_ADC_DEBUG; ++reg) {
+    uint16_t value = 0xDEAD;
+    this->ReadRegister((Alpide::TRegister)reg, value);
+    dump << chipId << "\t0x" << std::hex << reg << "\t" << value << std::endl;
+  }
+
+  return dump.str();
+}
+
 
 // ---------- DAC / ADC section -----------------------
 
