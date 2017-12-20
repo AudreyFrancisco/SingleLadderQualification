@@ -4,6 +4,7 @@
 #include <deque>
 #include <mutex>
 #include <vector>
+#include <string>
 
 #include "TAlpide.h"
 #include "THIC.h"
@@ -48,6 +49,8 @@ private:
   char m_fwVersion[50];
   char m_swVersion[50];
   std::map <std::string, TScanConditionsHic*> m_hicConditions;
+  std::vector<std::string> m_chipConfigStart;
+  std::vector<std::string> m_chipConfigEnd;
 public:
   TScanConditions() {};
   int AddHicConditions (std::string hicId, TScanConditionsHic *hicCond);

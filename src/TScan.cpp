@@ -72,6 +72,10 @@ void TScan::Init()
     errCount.nTimeout      = 0;
     m_errorCounts.insert (std::pair<std::string, TErrorCounter> (m_hics.at(ihic)->GetDbId(), errCount));
   }
+
+  for (const auto& rChip : m_chips) {
+    m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
+  }
 }
 
 
@@ -115,6 +119,10 @@ void TScan::Terminate()
 
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode (Alpide::OPCODE_GRST);
+  }
+
+  for (const auto& rChip : m_chips) {
+    m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
@@ -331,6 +339,12 @@ void TScan::WriteConditions (const char *fName, THic *aHic)
   fprintf (fp, "IDDA (end):   %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaEnd);
 
   fprintf (fp, "\n");
+
+  fputs   ("== Chip registers (start)\n", fp);
+  for (const auto& str : m_conditions.m_chipConfigStart) fprintf(fp, "%s", str.c_str());
+  fputs   ("== Chip registers (end)\n", fp);
+  for (const auto& str : m_conditions.m_chipConfigEnd)   fprintf(fp, "%s", str.c_str());
+
   fclose (fp);
 }
 
