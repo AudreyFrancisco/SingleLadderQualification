@@ -1958,3 +1958,19 @@ void MainWindow::fillingendurancevectors()
 
 }
 
+void MainWindow::ConnectTestCombo(int value){
+    counter=0;
+    idofactivitytype=0;
+    ui->testtypeselected->clear();
+    settingswindow->hideendurance();
+  //  QString testname;
+    settingswindow->GetTestTypeName(numberofscan,testname);
+    ui->testtypeselected->setText(testname);
+    std::string name;
+    name.append(testname.toStdString());
+    findidoftheactivitytype(name,idofactivitytype);
+    std::cout<<"the id of the selected test: "<<idofactivitytype<<std::endl;
+    locationcombo();
+    settingswindow->connectlocationcombo(locdetails);
+    std::cout<<"the numbeofscan is: "<<numberofscan<<"and the value is: "<<value<<std::endl;
+   }
