@@ -113,7 +113,7 @@ class MainWindow : public QMainWindow
 
 
   public slots:
-    void connectcombo(int value);
+    //void connectcombo(int value);
     void createbtn();
     void popup(QString message);
     void colorscans();

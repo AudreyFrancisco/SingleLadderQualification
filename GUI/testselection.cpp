@@ -31,7 +31,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase) :
   //ui->typetest->addItem("OB Half-Stave Test", OBHalfStaveML);
   //ui->typetest->addItem("OB Stave Test", OBStave);
   //ui->typetest->addItem("IB Stave Test", IBStave);
-  ui->typetest->hide();
+  ui->typeoftest->hide();
 
   m_testDatabase = testDatabase;
 
@@ -197,8 +197,8 @@ void TestSelection::hideendurance(){
 
 void TestSelection::GetTestTypeName(int &value, QString &testname){
 
-      value    = ui->typetest->itemData(ui->typetest->currentIndex()).toInt();
-      testname = ui->typetest->currentText();
-      std::cout<<"the value is: "<<value<< "and the string is: "<<testname.toStdString().c_str()<<std::endl;
+  value    = ui->typetest->itemData(ui->typetest->currentIndex()).toInt();
+  testname = ui->typetest->currentText();
+  std::cout<<"the value is: "<<value<< "and the string is: "<<testname.toStdString().c_str()<<std::endl;
 
 }
