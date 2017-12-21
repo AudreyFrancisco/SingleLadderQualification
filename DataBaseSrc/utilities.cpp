@@ -134,5 +134,17 @@ void str2timeTime(const char *sDate, time_t *tDate)
 	return;
 }
 
+std::string float2str(float value)
+{
+	char valueCharArray[100];
+	snprintf(valueCharArray,100,"%f",value);
+    char *pt = valueCharArray;
+    while(*pt!='\0') {
+    	if(*pt==',') *pt='.';
+        pt++;
+    }
+	return std::string(valueCharArray);
+}
+
 
 

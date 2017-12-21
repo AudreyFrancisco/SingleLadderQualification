@@ -993,7 +993,7 @@ ActivityDB::response * ActivityDB::Create(activity *aActivity)
 	for(unsigned int i=0; i< aActivity->Parameters.size();i++) {
 		theQuery = "activityID=" + std::to_string(aActivity->ID);
 		theQuery += "&activityParameterID=" + std::to_string(aActivity->Parameters.at(i).ActivityParameter);
-		theQuery += "&value=" + std::to_string(aActivity->Parameters.at(i).Value);
+		theQuery += "&value=" + float2str(aActivity->Parameters.at(i).Value);
 		theQuery += "&userID=" + std::to_string(aActivity->Parameters.at(i).User);
 
 		if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
