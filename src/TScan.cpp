@@ -344,6 +344,7 @@ void TScan::WriteConditions (const char *fName, THic *aHic)
   for (const auto& str : m_conditions.m_chipConfigStart) fprintf(fp, "%s", str.c_str());
   fputs   ("== Chip registers (end)\n", fp);
   for (const auto& str : m_conditions.m_chipConfigEnd)   fprintf(fp, "%s", str.c_str());
+  fputs   ("==\n", fp);
 
   fclose (fp);
 }

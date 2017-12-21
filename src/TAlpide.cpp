@@ -203,7 +203,7 @@ std::string TAlpide::DumpRegisters()
   int chipId = fConfig->GetChipId();
 
   // Periphery config
-  dump << "# Address\tValue" << std::endl;
+  dump << "# Chip ID\tAddress\tValue" << std::endl;
   for (unsigned int reg = (unsigned int)Alpide::REG_MODECONTROL; reg <= (unsigned int)Alpide::REG_BUSY_MINWIDTH; ++reg) {
     uint16_t value = 0xDEAD;
     this->ReadRegister((Alpide::TRegister)reg, value);
@@ -223,7 +223,7 @@ std::string TAlpide::DumpRegisters()
   for (unsigned int reg = (unsigned int)Alpide::REG_SEU_ERROR_COUNT; reg <= (unsigned int)Alpide::REG_ADC_DEBUG; ++reg) {
     uint16_t value = 0xDEAD;
     this->ReadRegister((Alpide::TRegister)reg, value);
-    dump << chipId << "\t0x" << std::hex << reg << "\t" << value << std::endl;
+    dump << chipId << "\t0x" << std::hex << reg << "\t0x" << value << std::dec << std::endl;
   }
 
   return dump.str();
