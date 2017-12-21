@@ -21,6 +21,17 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase) :
   ui->d3->hide();
   ui->d4->hide();
   ui->d5->hide();
+  ui->typetest->addItem(" ", 0);
+  ui->typetest->addItem("OB HIC Qualification Test", OBQualification);
+  ui->typetest->addItem("IB HIC Qualification Test", IBQualification);
+  ui->typetest->addItem("OB Endurance Test", OBEndurance);
+  ui->typetest->addItem("IB Endurance Test", IBEndurance);
+  ui->typetest->addItem("OB Reception Test", OBReception);
+  //ui->typetest->addItem("OB Powering Test", OBPowering);
+  //ui->typetest->addItem("OB Half-Stave Test", OBHalfStaveML);
+  //ui->typetest->addItem("OB Stave Test", OBStave);
+  //ui->typetest->addItem("IB Stave Test", IBStave);
+  ui->typeoftest->hide();
 
   m_testDatabase = testDatabase;
 
@@ -30,7 +41,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase) :
   connect(ui->close,SIGNAL(clicked()),this,SLOT(close()));
   connect(ui->databaselocation,SIGNAL(currentIndexChanged(int)),this->parent(),SLOT(connectlocationcombo(int)));
   connect(ui->databaselocation,SIGNAL(currentIndexChanged(int)),this,SLOT(getlocationcombo(int)));
-
+  connect(ui->typetest,SIGNAL(currentIndexChanged(int)),this->parent(),SLOT(ConnectTestCombo(int)));
 }
 
 TestSelection::~TestSelection()
@@ -180,7 +191,14 @@ void TestSelection::hideendurance(){
   ui->d2->hide();
   ui->d3->hide();
   ui->d4->hide();
-
   ui->d5->hide();
+
+}
+
+void TestSelection::GetTestTypeName(int &value, QString &testname){
+
+  value    = ui->typetest->itemData(ui->typetest->currentIndex()).toInt();
+  testname = ui->typetest->currentText();
+  std::cout<<"the value is: "<<value<< "and the string is: "<<testname.toStdString().c_str()<<std::endl;
 
 }

@@ -72,6 +72,7 @@ class MainWindow : public QMainWindow
   QSignalMapper *signalMapper;
 
   int numberofscan=0;
+  QString testname;
   int scanposition;
   QString operatorname;
   QString institute;
@@ -112,7 +113,7 @@ class MainWindow : public QMainWindow
 
 
   public slots:
-    void connectcombo(int value);
+    //void connectcombo(int value);
     void createbtn();
     void popup(QString message);
     void colorscans();
@@ -146,6 +147,7 @@ class MainWindow : public QMainWindow
 
     void continuescans(){execution=true;progresswindow->close();delete progresswindow;}
     void stopscans(){execution=false;progresswindow->close();delete progresswindow;}
+    void ConnectTestCombo(int value);
 
 
  signals:

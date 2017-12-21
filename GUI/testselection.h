@@ -33,10 +33,12 @@ class TestSelection : public QDialog
   QString downone, downtwo,downthree, downfour,downfive;
 
   public slots:
-    virtual void getlocationcombo(int value);
+  virtual void getlocationcombo(int value);
   virtual int GetMemberID();
   virtual void adjustendurance();
   virtual void hideendurance();
+  virtual void GetTestTypeName(int &value, QString &testname);
+
 
   private slots:
     void popupmessage(QString m);
