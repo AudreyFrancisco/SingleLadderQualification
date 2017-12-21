@@ -207,7 +207,7 @@ std::string TAlpide::DumpRegisters()
   for (unsigned int reg = (unsigned int)Alpide::REG_MODECONTROL; reg <= (unsigned int)Alpide::REG_BUSY_MINWIDTH; ++reg) {
     uint16_t value = 0xDEAD;
     this->ReadRegister((Alpide::TRegister)reg, value);
-    dump << chipId << "\t0x" << std::hex << reg << "\t" << value << std::endl;
+    dump << chipId << "\t0x" << std::hex << reg << "\t0x" << value << std::dec << std::endl;
   }
 
   // Pixel config: read-only do nothing
@@ -216,7 +216,7 @@ std::string TAlpide::DumpRegisters()
   for (unsigned int reg = (unsigned int)Alpide::REG_ANALOGMON; reg <= (unsigned int)Alpide::REG_ADC_T2V; ++reg) {
     uint16_t value = 0xDEAD;
     this->ReadRegister((Alpide::TRegister)reg, value);
-    dump << chipId << "\t0x" << std::hex << reg << "\t" << value << std::endl;
+    dump << chipId << "\t0x" << std::hex << reg << "\t0x" << value << std::dec <<  std::endl;
   }
 
   // Test and debug control
