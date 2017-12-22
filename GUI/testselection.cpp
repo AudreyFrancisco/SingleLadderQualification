@@ -24,9 +24,9 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase) :
   ui->typetest->addItem(" ", 0);
   ui->typetest->addItem("OB HIC Qualification Test", OBQualification);
   ui->typetest->addItem("IB HIC Qualification Test", IBQualification);
-  ui->typetest->addItem("OB Endurance Test", OBEndurance);
-  ui->typetest->addItem("IB Endurance Test", IBEndurance);
-  ui->typetest->addItem("OB Reception Test", OBReception);
+  ui->typetest->addItem("OB HIC Endurance Test", OBEndurance);
+  ui->typetest->addItem("IB HIC Endurance Test", IBEndurance);
+  ui->typetest->addItem("OB HIC Reception Test", OBReception);
   //ui->typetest->addItem("OB Powering Test", OBPowering);
   //ui->typetest->addItem("OB Half-Stave Test", OBHalfStaveML);
   //ui->typetest->addItem("OB Stave Test", OBStave);

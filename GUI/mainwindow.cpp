@@ -1162,11 +1162,11 @@ void MainWindow::WriteToEos (string hicName) {
 string MainWindow::GetTestFolder () 
 {
   switch (numberofscan) {
-  case 1: return string ("OBQualification");
-  case 2: return string ("IBQualification");
-  case 3: return string ("OBEndurance");
-  case 4: return string ("IBEndurance");
-  case 5: return string ("OBReception");
+  case OBQualification: return string ("OBQualification");
+  case IBQualification: return string ("IBQualification");
+  case OBEndurance: return string ("OBEndurance");
+  case IBEndurance: return string ("IBEndurance");
+  case OBReception: return string ("OBReception");
   default: return string ("Unknown");
   }
 }
@@ -1177,11 +1177,11 @@ string MainWindow::GetTestFolder ()
 TTestType MainWindow::GetTestType () 
 {
   switch (numberofscan) {
-  case 1: return OBQualification;
-  case 2: return IBQualification;
-  case 3: return OBEndurance;
-  case 4: return IBEndurance;
-  case 5: return OBReception;
+  case OBQualification: return OBQualification;
+  case IBQualification: return IBQualification;
+  case OBEndurance: return OBEndurance;
+  case IBEndurance: return IBEndurance;
+  case OBReception: return OBReception;
   default: return OBQualification;
   }
 }
