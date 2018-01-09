@@ -606,9 +606,9 @@ void MainWindow::start_test(){
     delete pbcfgcheck;}
   if (calwindow!=0){
     delete calwindow;}
-  if (databasewindow!=0){
-    delete databasewindow;
-  }
+  //if (databasewindow!=0){
+   // delete databasewindow;
+ // }
   // std::cout<<"why1"<<std::endl;
   if(scanstatuslabels.size()>=1){
     for (unsigned int i=0; i<scanstatuslabels.size();i++){
@@ -625,9 +625,6 @@ void MainWindow::start_test(){
 
   disconnect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));
   ui->testtypeselected->clear();
-
-
-
   hicidnumber='\0';
   toptwo='\0';
   topthree='\0';
@@ -639,9 +636,10 @@ void MainWindow::start_test(){
   bottomfive='\0';
   bottomfour='\0';
   numberofscan=0;
+  if (databasewindow==0){
   databasewindow=new DatabaseSelection(this);
   databasewindow->exec();
-  databasewindow->setdatabase(databasetype);
+  databasewindow->setdatabase(databasetype);}
   std::cout<<databasetype<<"the selected database"<<std::endl;
   settingswindow= new TestSelection(this, databasetype);
   settingswindow->show();
