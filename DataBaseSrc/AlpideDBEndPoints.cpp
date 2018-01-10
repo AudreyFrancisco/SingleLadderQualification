@@ -1069,7 +1069,7 @@ AlpideTable::response * ActivityDB::AssignUris(int aActivityID, int aUserId, vec
 	AlpideTable::response *theResult;
 
 	// first read the activity
-	theResult = Read(int ActivityID, &theActivity);
+	theResult = Read(ActivityID, &theActivity);
 	if( theResult->ErrorCode != AlpideTable::NoError) {
 		if(VERBOSITYLEVEL == 1) cout << "Invalid activity ID !" << DumpResponse() << endl;
 		return(&theResponse);
