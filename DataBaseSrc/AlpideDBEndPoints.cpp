@@ -1063,7 +1063,7 @@ ActivityDB::response * ActivityDB::Change(activity *aActivity)
 
 	theUrl   = theParentDB->GetQueryDomain() + "/ActivityChange";
 	theQuery = "ID="+std::to_string(aActivity->ID);
-	theQuery += "activityTypeID="+std::to_string(aActivity->Type);
+	theQuery += "&activityTypeID="+std::to_string(aActivity->Type);
 	theQuery += "&locationID=" + std::to_string(aActivity->Location);
 	theQuery += "&lotID=" + aActivity->Lot;
 	theQuery += "&activityName=" + aActivity->Name;
