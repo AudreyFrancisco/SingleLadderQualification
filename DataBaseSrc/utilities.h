@@ -54,7 +54,7 @@ using namespace std;
 #define SOAPVERSION 11
 
 // Set the verbosity level 0 or 1
-#define VERBOSITYLEVEL 0
+#define VERBOSITYLEVEL 1
 
 
 bool fileExists(string path);

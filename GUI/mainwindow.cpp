@@ -1317,8 +1317,9 @@ void MainWindow::attachtodatabase(){
 
       //std::cout << "trying to close activity" << std::endl;
       //activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSED");
-      //activ.Result = DbGetResultId(myDB, idofactivitytype, fHICs.at(i)->GetClassification());
-      //myactivity->Change (&activ);
+      activ.Result = DbGetResultId(myDB, idofactivitytype, fHICs.at(i)->GetClassification());
+      std::cout<< "the activity result is: "<< activ.Result<<std::endl;
+      myactivity->Change (&activ);
 
       delete myactivity;
     }
