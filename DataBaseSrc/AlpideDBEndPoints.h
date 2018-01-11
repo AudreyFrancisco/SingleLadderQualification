@@ -504,6 +504,8 @@ public:
     AlpideTable::response *Change(activity *aActivity);
     AlpideTable::response *AssignComponent(int aActivityID, int aComponentID, int aComponentTypeID, int aUserID);
 
+    AlpideTable::response *AssignUris(int aActivityID, int aUserId, vector<actUri> *aUris);
+
     
     vector<parameterType> *GetParameterTypeList(int aActivityTypeID);
     vector<activityType> *GetActivityTypeList(int aProjectID);
