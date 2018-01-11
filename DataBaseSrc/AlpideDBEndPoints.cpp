@@ -37,6 +37,7 @@
  *
  *  7/9/2017	-	Refine the XML parsing/reading function
  *  9/11/2017   -   Modify the GetParameterList method
+ *  11/1/2018   -   Add Assign URIs method
  *
  */
 
@@ -1068,20 +1069,20 @@ AlpideTable::response * ActivityDB::AssignUris(int aActivityID, int aUserId, vec
 	activityLong theActivity;
 	AlpideTable::response *theResult;
 
-	// first read the activity
+	// First : read the activity and obtain the actual URIs list
 	theResult = Read(aActivityID, &theActivity);
 	if( theResult->ErrorCode != AlpideTable::NoError) {
 		if(VERBOSITYLEVEL == 1) cout << "Invalid activity ID !" << DumpResponse() << endl;
 		return(&theResponse);
 	}
 
-	//Search for Uri to remove /change
+	// Search for URIs to remove or change
 	bool bToDelete;
 	for(unsigned int i=0; i< theActivity.Uris.size();i++) {
 		bToDelete = true;
 		for(unsigned int j=0; j< aUris->size();j++) {
-			if(aUris->at(j).Path == theActivity.Uris.at(i).Path) {
-				if(aUris->at(j).Description != theActivity.Uris.at(i).Description) { // Change
+			if(aUris->at(j).Path == theActivity.Uris.at(i).Path) {  // Find a URI
+				if(aUris->at(j).Description != theActivity.Uris.at(i).Description) { // It is to change
 					theUrl = theParentDB->GetQueryDomain() + "/ActivityUriChange";
 					theQuery = "activitysUriID=" + std::to_string(theActivity.Uris.at(i).ID);
 					theQuery += "&uriPath=" + aUris->at(j).Path;
@@ -1089,31 +1090,33 @@ AlpideTable::response * ActivityDB::AssignUris(int aActivityID, int aUserId, vec
 					theQuery += "&userID=" + std::to_string(aUserId);
 					if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 						SetResponse(AlpideTable::SyncQuery);
+						if(VERBOSITYLEVEL == 1) cout << "Error in Activity URI Change ! (Path=" << aUris->at(j).Path << " ) " << DumpResponse() << endl;
 						return(&theResponse);
 					}
 				}
-				bToDelete = false;
-				j = 9999;
+				bToDelete = false; // mark this for not delete !
+				break;
 			}
 		}
-		if(bToDelete) {
+		if(bToDelete) { // Trigger URI remove
 			theUrl = theParentDB->GetQueryDomain() + "/ActivityUriRemove";
 			theQuery = "uriID=" + std::to_string(theActivity.Uris.at(i).ID);
 			if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 				SetResponse(AlpideTable::SyncQuery);
+				if(VERBOSITYLEVEL == 1) cout << "Failed Activity URI Remove ! (Path=" << theActivity.Uris.at(i).Path << " ) " << DumpResponse() << endl;
 				return(&theResponse);
 			}
 		}
 	}
 
-	//Search for Uri to create
+	// Search for URIs to create
 	bool bToCreate;
 	for(unsigned int j=0; j< aUris->size();j++) {
 		bToCreate = true;
 		for(unsigned int i=0; i< theActivity.Uris.size();i++) {
-			if(aUris->at(j).Path == theActivity.Uris.at(i).Path) {
+			if(aUris->at(j).Path == theActivity.Uris.at(i).Path) { // we find, not create it !
 				bToCreate = false;
-				i = 9999;
+				break;
 			}
 		}
 		if(bToCreate) {
@@ -1124,11 +1127,12 @@ AlpideTable::response * ActivityDB::AssignUris(int aActivityID, int aUserId, vec
 			theQuery += "&userID=" + std::to_string(aUserId);
 			if( theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
 				SetResponse(AlpideTable::SyncQuery);
+				if(VERBOSITYLEVEL == 1) cout << "Failed Activity URI Create ! (Path=" << aUris->at(j).Path << " ) " << DumpResponse() << endl;
 				return(&theResponse);
 			}
 		}
 	}
-	SetResponse(AlpideTable::NoError);
+	SetResponse(AlpideTable::NoError, aActivityID);
 	if(VERBOSITYLEVEL == 1) cout << "Activity URIs change Done !" << DumpResponse() << endl;
 	return(&theResponse);
 }
