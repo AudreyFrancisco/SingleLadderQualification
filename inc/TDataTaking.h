@@ -16,6 +16,7 @@ const int kTrigPerTrain = 100;
 
 class TDataTaking : public TScan {
  private:
+  int                   m_nTriggers;
   int                   m_nTrains;
   int                   m_nLast;
   std::vector <TPixHit> m_stuck;

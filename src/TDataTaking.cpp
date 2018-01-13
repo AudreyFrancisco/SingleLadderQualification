@@ -17,16 +17,16 @@ TDataTaking::TDataTaking (TScanConfig                   *config,
                           std::mutex                    *aMutex) 
   : TScan (config, chips, hics, boards, histoQue, aMutex) 
 {
-  m_backBias    = m_config->GetBackBias  ();
-  int nTriggers = m_config->GetParamValue("NTRIG");
+  m_backBias  = m_config->GetBackBias  ();
+  m_nTriggers = m_config->GetParamValue("NTRIG");
 
-  if (nTriggers % kTrigPerTrain == 0) {
+  if (m_nTriggers % kTrigPerTrain == 0) {
     m_nLast   = kTrigPerTrain;
-    m_nTrains = nTriggers / kTrigPerTrain;
+    m_nTrains = m_nTriggers / kTrigPerTrain;
   }
   else {
-    m_nLast   = nTriggers % kTrigPerTrain;
-    m_nTrains = nTriggers / kTrigPerTrain + 1;
+    m_nLast   = m_nTriggers % kTrigPerTrain;
+    m_nTrains = m_nTriggers / kTrigPerTrain + 1;
   }
   // divide triggers in trains
   m_start[0] = 0;
