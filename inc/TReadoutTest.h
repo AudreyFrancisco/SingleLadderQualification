@@ -21,6 +21,8 @@ class TReadoutTest : public TDataTaking {
   int  m_occupancy;
   int  m_driverStrength;
   int  m_preemp;
+  int  m_pllStages;
+  int  m_voltageScale;
   void ConfigureChip (TAlpide *chip);
   void ConfigureMask (TAlpide *chip, std::vector <TPixHit> *MaskedPixels);
  protected:
@@ -31,7 +33,8 @@ class TReadoutTest : public TDataTaking {
                     std::vector <THic*>            hics,
                     std::vector <TReadoutBoard *>  boards,
                     std::deque<TScanHisto>        *histoque,
-                    std::mutex                    *aMutex);
+                    std::mutex                    *aMutex,
+		    int                            pllStages = -1);
   ~TReadoutTest    () {};
   int  GetRow      () {return m_row;};
   int  GetDriver   () {return m_driverStrength;};

@@ -14,7 +14,8 @@ TReadoutTest::TReadoutTest (TScanConfig                   *config,
                             std::vector <THic*>            hics, 
                             std::vector <TReadoutBoard *>  boards, 
                             std::deque<TScanHisto>        *histoQue, 
-                            std::mutex                    *aMutex) 
+                            std::mutex                    *aMutex,
+			    int                            pllStages) 
   : TDataTaking (config, chips, hics, boards, histoQue, aMutex) 
 {
   // trigger frequency, number of triggers have to be set in scan config
@@ -27,6 +28,8 @@ TReadoutTest::TReadoutTest (TScanConfig                   *config,
   m_occupancy      = config->GetParamValue ("READOUTOCC");
   m_driverStrength = config->GetParamValue ("READOUTDRIVER");
   m_preemp         = config->GetParamValue ("READOUTPREEMP");
+  m_pllStages      = pllStages;
+  m_voltageScale   = config->GetVoltageScale();
 
   sprintf(m_name, "ReadoutTest %d %d %d", m_linkSpeed, m_driverStrength, m_preemp); 
 }
@@ -40,9 +43,14 @@ void TReadoutTest::ConfigureChip  (TAlpide *chip)
   int backupDriver = chip->GetConfig()->GetParamValue("DTUDRIVER");
   int backupPreemp = chip->GetConfig()->GetParamValue("DTUPREEMP");
   int backupSpeed  = chip->GetConfig()->GetParamValue("LINKSPEED");
+  int backupStages;
   chip->GetConfig()->SetParamValue("DTUDRIVER", m_driverStrength);
   chip->GetConfig()->SetParamValue("DTUPREEMP", m_preemp);
   chip->GetConfig()->SetParamValue("LINKSPEED", m_linkSpeed);
+  if (m_pllStages >= 0) {
+    backupStages = chip->GetConfig()->GetParamValue("PLLSTAGES");
+    chip->GetConfig()->SetParamValue("PLLSTAGES", m_linkSpeed);    
+  }
   AlpideConfig::BaseConfig   (chip);
   ConfigureFromu             (chip);
   ConfigureMask              (chip, 0);
@@ -52,6 +60,9 @@ void TReadoutTest::ConfigureChip  (TAlpide *chip)
   chip->GetConfig()->SetParamValue("DTUDRIVER", backupDriver);
   chip->GetConfig()->SetParamValue("DTUPREEMP", backupPreemp);
   chip->GetConfig()->SetParamValue("LINKSPEED", backupSpeed);
+  if (m_pllStages >= 0) {
+    chip->GetConfig()->SetParamValue("PLLSTAGES", backupStages);    
+  }
 }
 
 
@@ -81,6 +92,13 @@ void TReadoutTest::Init ()
       else if (m_linkSpeed == 1200) mosaic-> setSpeedMode (Mosaic::RCV_RATE_1200);
     }
   }
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (m_voltageScale != 1.) {
+      m_hics.at(ihic)->ScaleVoltage(m_voltageScale);
+    }      
+  }
+    
   TDataTaking::Init();
   m_running = true;
 }
@@ -89,6 +107,14 @@ void TReadoutTest::Init ()
 void TReadoutTest::Terminate() 
 {
   TDataTaking::Terminate();
+
+  // restore old voltage
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (m_voltageScale != 1.) {
+      m_hics.at(ihic)->ScaleVoltage(1.);
+    }      
+  }
+  
   // reset link speed in mosaic; chip configs have been reset already in ConfigureChip()
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     TReadoutBoardMOSAIC *mosaic = (TReadoutBoardMOSAIC *)m_boards.at(i);
