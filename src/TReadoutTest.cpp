@@ -43,12 +43,11 @@ void TReadoutTest::ConfigureChip  (TAlpide *chip)
   int backupDriver = chip->GetConfig()->GetParamValue("DTUDRIVER");
   int backupPreemp = chip->GetConfig()->GetParamValue("DTUPREEMP");
   int backupSpeed  = chip->GetConfig()->GetParamValue("LINKSPEED");
-  int backupStages;
+  int backupStages = chip->GetConfig()->GetParamValue("PLLSTAGES");
   chip->GetConfig()->SetParamValue("DTUDRIVER", m_driverStrength);
   chip->GetConfig()->SetParamValue("DTUPREEMP", m_preemp);
   chip->GetConfig()->SetParamValue("LINKSPEED", m_linkSpeed);
   if (m_pllStages >= 0) {
-    backupStages = chip->GetConfig()->GetParamValue("PLLSTAGES");
     chip->GetConfig()->SetParamValue("PLLSTAGES", m_linkSpeed);    
   }
   AlpideConfig::BaseConfig   (chip);
