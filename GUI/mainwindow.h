@@ -103,7 +103,7 @@ class MainWindow : public QMainWindow
   void      AddScan              (TScanType scanType, TScanResult *aResult = 0);
   void      ClearVectors         ();
   int       GetNButtons          ();
-  void      WriteToEos           (string hicName);
+  void      WriteToEos           (string hicName, ActivityDB::actUri &uri);
   string    GetServiceAccount    (string Institute, string &folder);
   string    GetTestFolder        ();
   THic     *FindHic              (string hicName);
