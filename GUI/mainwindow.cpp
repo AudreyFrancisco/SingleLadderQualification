@@ -1142,14 +1142,21 @@ void MainWindow::quitall(){
 }
 
 
-void MainWindow::WriteToEos (string hicName) {
+void MainWindow::WriteToEos (string hicName, ActivityDB::actUri &uri)
+ {
   char   command[256];
+  char   path[256];
   string instFolder;
   string account = GetServiceAccount (institute.toStdString(), instFolder);
   string testFolder = GetTestFolder();
 
   sprintf (command, "rsync -rv -e \"ssh\" Data/%s/ %s@lxplus.cern.ch:/eos/project/a/alice-its/HicTests/%s/%s/%s",
            hicName.c_str(), account.c_str(), testFolder.c_str(), instFolder.c_str(), hicName.c_str());
+  sprintf (path, "eos/project/a/alice-its/HicTests/%s/%s/%s",
+          testFolder.c_str(), instFolder.c_str(), hicName.c_str());
+
+  uri.Description="uri path";
+  uri.Path=std::string(path);
   std::cout << "Trying to copy to eos with command " << command << std::endl;
   int status = system (command);
   std::cout << "Done, status code = " << status << std::endl;
@@ -1258,7 +1265,8 @@ void MainWindow::attachtodatabase(){
   for (unsigned int i=0; i<fHICs.size();i++) {
     if(fHICs.at(i)->IsEnabled()) {
       QDateTime date;
-      WriteToEos (fHICs.at(i)->GetDbId());
+      ActivityDB::actUri uri;
+      WriteToEos (fHICs.at(i)->GetDbId(),uri);
 
       ActivityDB *myactivity=new ActivityDB(myDB);
 
@@ -1304,8 +1312,16 @@ void MainWindow::attachtodatabase(){
 
       DbAddMember (myDB, activ, idofoperator);
 
+
+
+      std::vector <ActivityDB::actUri>uris;
+
+      uris.push_back(uri);
+
       myactivity->Create(&activ);
       cout << myactivity->DumpResponse() << endl;
+      myactivity->AssignUris(activ.ID,idofoperator,(&uris));
+
 
       // TODO: add components (in / out)
       // TODO: add member
