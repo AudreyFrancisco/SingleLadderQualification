@@ -11,6 +11,7 @@
 
 bool fScanAbort;
 
+
 TScan::TScan (TScanConfig                   *config,
               std::vector <TAlpide *>        chips,
               std::vector <THic *>           hics,

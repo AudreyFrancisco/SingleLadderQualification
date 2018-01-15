@@ -214,11 +214,27 @@ void TReadoutResultHic::WriteToFile (FILE *fp)
 
 void TReadoutResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix)
 {
-  suffix = string (" ") + to_string(m_linkSpeed);
+  TReadoutParameters *params = (TReadoutParameters*)m_scanParameters;
+
+  if ((params->voltageScale != 1) || (params->pllStages >= 0)) {
+    suffix = string (" ") + to_string(m_linkSpeed)
+             + to_string (params->voltageScale) + string ("xDVDD ") 
+             + to_string (params->pllStages);
+  }
+  else {
+    suffix = string (" ") + to_string(m_linkSpeed);
+  }
   suffix += string(" D") + to_string(m_driver);
   suffix += string(" P") + to_string(m_preemp);
 
-  file_suffix = string("_") + to_string(m_linkSpeed);
+  if ((params->voltageScale != 1) || (params->pllStages >= 0)) {
+    file_suffix = string (" ") + to_string(m_linkSpeed)
+                  + to_string (params->voltageScale) + string ("xDVDD ") 
+                  + to_string (params->pllStages);
+  }
+  else {
+    file_suffix = string("_") + to_string(m_linkSpeed);
+  }
   file_suffix += string("_D") + to_string(m_driver);
   file_suffix += string("_P") + to_string(m_preemp);
 }

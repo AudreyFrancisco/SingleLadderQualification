@@ -12,11 +12,13 @@
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
 
-class THisto;
-class TScan;
-class TScanConfig;
-class TScanHisto;
-class THic;
+class   THisto;
+class   TScan;
+class   TScanConfig;
+class   TScanHisto;
+class   THic;
+struct  TScanParameters__;
+typedef TScanParameters__ TScanParameters;
 
 // Warning: has to stay ordered such, that worse test result = higher entry
 typedef enum hicClassification {CLASS_UNTESTED, CLASS_GREEN, CLASS_ORANGE, CLASS_PARTIAL, CLASS_RED} THicClassification;
@@ -46,6 +48,7 @@ class TScanResultHic {
   THicClassification               m_class;
   const char*                      WriteHicClassification();
   string                           m_outputPath;
+  TScanParameters                  *m_scanParameters;
  public:
   TScanResultHic () {};
   virtual void       WriteToFile       (FILE *fp) = 0;

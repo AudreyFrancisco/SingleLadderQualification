@@ -20,35 +20,47 @@ TReadoutTest::TReadoutTest (TScanConfig                   *config,
 {
   // trigger frequency, number of triggers have to be set in scan config
   // before creating readout test object
+  m_pulse       = true;
+  m_pulseLength = chips.at(0)->GetConfig()->GetParamValue("PULSEDURATION");
 
-  m_pulse          = true;
-  m_pulseLength    = chips.at(0)->GetConfig()->GetParamValue("PULSEDURATION");
-  m_row            = config->GetParamValue ("READOUTROW");
-  m_linkSpeed      = config->GetParamValue ("READOUTSPEED");
-  m_occupancy      = config->GetParamValue ("READOUTOCC");
-  m_driverStrength = config->GetParamValue ("READOUTDRIVER");
-  m_preemp         = config->GetParamValue ("READOUTPREEMP");
-  m_pllStages      = pllStages;
-  m_voltageScale   = config->GetVoltageScale();
+  m_parameters  = new TReadoutParameters;
 
-  sprintf(m_name, "ReadoutTest %d %d %d", m_linkSpeed, m_driverStrength, m_preemp); 
+  ((TReadoutParameters *)m_parameters)->row            = config->GetParamValue ("READOUTROW");
+  ((TReadoutParameters *)m_parameters)->triggers       = m_nTriggers;
+  ((TReadoutParameters *)m_parameters)->linkSpeed      = config->GetParamValue ("READOUTSPEED");;
+  ((TReadoutParameters *)m_parameters)->occupancy      = config->GetParamValue ("READOUTOCC");;
+  ((TReadoutParameters *)m_parameters)->driverStrength = config->GetParamValue ("READOUTDRIVER");;
+  ((TReadoutParameters *)m_parameters)->preemp         = config->GetParamValue ("READOUTPREEMP");;
+  ((TReadoutParameters *)m_parameters)->pllStages      = pllStages;
+  ((TReadoutParameters *)m_parameters)->voltageScale   = config->GetVoltageScale();;
+
+  if (pllStages != -1) {
+    sprintf(m_name, "ReadoutTest %.1f %d", ((TReadoutParameters*)m_parameters)->voltageScale, 
+ 	                                   ((TReadoutParameters*)m_parameters)->pllStages);
+  }
+  else {
+    sprintf(m_name, "ReadoutTest %d %d %d", ((TReadoutParameters*)m_parameters)->linkSpeed, 
+                                            ((TReadoutParameters*)m_parameters)->driverStrength, 
+                                            ((TReadoutParameters*)m_parameters)->preemp); 
+  }
 }
 
 
 //TODO: save number of masked pixels (return value of ApplyMask)
 void TReadoutTest::ConfigureChip  (TAlpide *chip)
 {
+  TReadoutParameters *params = (TReadoutParameters*) m_parameters;
   // store driver settings and set temporary ones, used in this scan 
   // (used by BaseConfig -> BaseConfigPLL
   int backupDriver = chip->GetConfig()->GetParamValue("DTUDRIVER");
   int backupPreemp = chip->GetConfig()->GetParamValue("DTUPREEMP");
   int backupSpeed  = chip->GetConfig()->GetParamValue("LINKSPEED");
   int backupStages = chip->GetConfig()->GetParamValue("PLLSTAGES");
-  chip->GetConfig()->SetParamValue("DTUDRIVER", m_driverStrength);
-  chip->GetConfig()->SetParamValue("DTUPREEMP", m_preemp);
-  chip->GetConfig()->SetParamValue("LINKSPEED", m_linkSpeed);
-  if (m_pllStages >= 0) {
-    chip->GetConfig()->SetParamValue("PLLSTAGES", m_linkSpeed);    
+  chip->GetConfig()->SetParamValue("DTUDRIVER", params->driverStrength);
+  chip->GetConfig()->SetParamValue("DTUPREEMP", params->preemp);
+  chip->GetConfig()->SetParamValue("LINKSPEED", params->linkSpeed);
+  if (params->pllStages >= 0) {
+    chip->GetConfig()->SetParamValue("PLLSTAGES", params->linkSpeed);    
   }
   AlpideConfig::BaseConfig   (chip);
   ConfigureFromu             (chip);
@@ -59,7 +71,7 @@ void TReadoutTest::ConfigureChip  (TAlpide *chip)
   chip->GetConfig()->SetParamValue("DTUDRIVER", backupDriver);
   chip->GetConfig()->SetParamValue("DTUPREEMP", backupPreemp);
   chip->GetConfig()->SetParamValue("LINKSPEED", backupSpeed);
-  if (m_pllStages >= 0) {
+  if (params->pllStages >= 0) {
     chip->GetConfig()->SetParamValue("PLLSTAGES", backupStages);    
   }
 }
@@ -68,9 +80,10 @@ void TReadoutTest::ConfigureChip  (TAlpide *chip)
 // TODO: Add masking / selecting of given occupancy
 void TReadoutTest::ConfigureMask (TAlpide *chip, std::vector <TPixHit> *MaskedPixels)
 {
-  AlpideConfig::ConfigureMaskStage (chip, m_occupancy, m_row, true, true);
-  //  AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_MASK,   true);
-  //AlpideConfig::WritePixRegAll (chip, Alpide::PIXREG_SELECT, false);
+  AlpideConfig::ConfigureMaskStage (chip, 
+                                    ((TReadoutParameters*)m_parameters)->occupancy, 
+                                    ((TReadoutParameters*)m_parameters)->row, 
+                                    true, true);
 }
 
 
@@ -83,18 +96,20 @@ THisto TReadoutTest::CreateHisto ()
 
 void TReadoutTest::Init ()
 {
+  int linkSpeed    = ((TReadoutParameters*)m_parameters)->linkSpeed;
+  int voltageScale = ((TReadoutParameters*)m_parameters)->voltageScale;
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     TReadoutBoardMOSAIC *mosaic = (TReadoutBoardMOSAIC *)m_boards.at(i);
     if (mosaic) {
-      if      (m_linkSpeed == 400)  mosaic-> setSpeedMode (Mosaic::RCV_RATE_400);
-      else if (m_linkSpeed == 600)  mosaic-> setSpeedMode (Mosaic::RCV_RATE_600);
-      else if (m_linkSpeed == 1200) mosaic-> setSpeedMode (Mosaic::RCV_RATE_1200);
+      if      (linkSpeed == 400)  mosaic-> setSpeedMode (Mosaic::RCV_RATE_400);
+      else if (linkSpeed == 600)  mosaic-> setSpeedMode (Mosaic::RCV_RATE_600);
+      else if (linkSpeed == 1200) mosaic-> setSpeedMode (Mosaic::RCV_RATE_1200);
     }
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (m_voltageScale != 1.) {
-      m_hics.at(ihic)->ScaleVoltage(m_voltageScale);
+    if (voltageScale != 1.) {
+      m_hics.at(ihic)->ScaleVoltage(voltageScale);
     }      
   }
     
@@ -108,8 +123,9 @@ void TReadoutTest::Terminate()
   TDataTaking::Terminate();
 
   // restore old voltage
+  int voltageScale = ((TReadoutParameters*)m_parameters)->voltageScale;
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (m_voltageScale != 1.) {
+    if (voltageScale != 1.) {
       m_hics.at(ihic)->ScaleVoltage(1.);
     }      
   }

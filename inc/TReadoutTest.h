@@ -13,16 +13,21 @@
 #include "TScan.h"
 #include "TDataTaking.h"
 
+typedef struct __TReadoutParameters : TScanParameters 
+{
+  int   row;
+  int   triggers;
+  int   linkSpeed;
+  int   occupancy;
+  int   driverStrength;
+  int   preemp;
+  int   pllStages;
+  float voltageScale;
+} TReadoutParameters;
+
 
 class TReadoutTest : public TDataTaking {
  private:
-  int  m_row;
-  int  m_linkSpeed;
-  int  m_occupancy;
-  int  m_driverStrength;
-  int  m_preemp;
-  int  m_pllStages;
-  int  m_voltageScale;
   void ConfigureChip (TAlpide *chip);
   void ConfigureMask (TAlpide *chip, std::vector <TPixHit> *MaskedPixels);
  protected:
@@ -36,10 +41,10 @@ class TReadoutTest : public TDataTaking {
                     std::mutex                    *aMutex,
 		    int                            pllStages = -1);
   ~TReadoutTest    () {};
-  int  GetRow      () {return m_row;};
-  int  GetDriver   () {return m_driverStrength;};
-  int  GetLinkSpeed() {return m_linkSpeed;};
-  int  GetPreemp   () {return m_preemp;};
+  int  GetRow      () {return ((TReadoutParameters*)m_parameters)->row;};
+  int  GetDriver   () {return ((TReadoutParameters*)m_parameters)->driverStrength;};
+  int  GetLinkSpeed() {return ((TReadoutParameters*)m_parameters)->linkSpeed;};
+  int  GetPreemp   () {return ((TReadoutParameters*)m_parameters)->preemp;};
   void Init        ();
   void PrepareStep (int loopIndex) { (void)(&loopIndex); };
   void LoopStart   (int loopIndex) {m_value[loopIndex] = m_start[loopIndex];};

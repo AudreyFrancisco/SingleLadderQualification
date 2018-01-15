@@ -26,6 +26,7 @@ typedef struct {
   int nTimeout;
 } TErrorCounter;
 
+typedef struct TScanParameters__ {} TScanParameters;
 
 class TScanConditionsHic {
   friend class TScan;
@@ -61,6 +62,7 @@ class TScan {
 private:
 protected:
   TScanConfig                          *m_config;
+  TScanParameters                      *m_parameters;
   char                                  m_name [40];
   char                                  m_state[40];
   std::vector <TAlpide *>               m_chips;
@@ -92,23 +94,24 @@ public:
          std::mutex                    *aMutex);
   virtual ~TScan() {};
 
-  virtual void     Init              ();
-  virtual void     Terminate         ();
-  virtual void     LoopStart         (int loopIndex) = 0;
-  virtual void     LoopEnd           (int loopIndex) = 0;
-  virtual void     PrepareStep       (int loopIndex) = 0;
-  virtual void     Execute           ()              = 0;
-  bool             Loop              (int loopIndex);
-  virtual void     Next              (int loopIndex);
-  void             CreateScanHisto   ();
-  bool             IsRunning         () {return m_running;};
+  virtual void     Init               ();
+  virtual void     Terminate          ();
+  virtual void     LoopStart          (int loopIndex) = 0;
+  virtual void     LoopEnd            (int loopIndex) = 0;
+  virtual void     PrepareStep        (int loopIndex) = 0;
+  virtual void     Execute            ()              = 0;
+  bool             Loop               (int loopIndex);
+  virtual void     Next               (int loopIndex);
+  void             CreateScanHisto    ();
+  bool             IsRunning          () {return m_running;};
   //  TScanHisto       GetTScanHisto     () {return *m_histo;};
-  const char      *GetName           () {return m_name;};
-  const char      *GetState          () {return m_state;};
-  TScanConditions *GetConditions () {return &m_conditions;};
-  TErrorCounter    GetErrorCount (std::string hicId);
+  const char      *GetName            () {return m_name;};
+  const char      *GetState           () {return m_state;};
+  TScanConditions *GetConditions      () {return &m_conditions;};
+  TScanParameters *GetParameters      () {return m_parameters;};
+  TErrorCounter    GetErrorCount      (std::string hicId);
   void             CreateHicConditions();
-  void             WriteConditions   (const char *fName, THic *aHic);
+  void             WriteConditions    (const char *fName, THic *aHic);
   std::vector <common::TChipIndex> GetChipList () {return m_chipList;};
 
 };

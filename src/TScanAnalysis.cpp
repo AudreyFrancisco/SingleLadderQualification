@@ -53,10 +53,10 @@ void TScanAnalysis::CreateHicResults ()
 
 
   for (unsigned int i = 0; i < m_hics.size(); i ++) {
-    TScanResultHic *hicResult = GetHicResult();
-    hicResult->m_class        = CLASS_UNTESTED;
-    hicResult->m_outputPath   = string("Data/") + m_hics.at(i)->GetDbId();
-
+    TScanResultHic *hicResult   = GetHicResult();
+    hicResult->m_class          = CLASS_UNTESTED;
+    hicResult->m_outputPath     = string("Data/") + m_hics.at(i)->GetDbId();
+    hicResult->m_scanParameters = m_scan->GetParameters();
     for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip ++) {
       if (m_hics.at(i)->ContainsChip(m_chipList.at(iChip))) {
         m_result->GetChipResult(m_chipList.at(iChip))->SetOutputPath (hicResult->GetOutputPath());

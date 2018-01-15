@@ -16,7 +16,6 @@ const int kTrigPerTrain = 100;
 
 class TDataTaking : public TScan {
  private:
-  int                   m_nTriggers;
   int                   m_nTrains;
   int                   m_nLast;
   std::vector <TPixHit> m_stuck;
@@ -28,6 +27,7 @@ class TDataTaking : public TScan {
   void                  FindTimeoutHics (int iboard, int *triggerCounts, int nTriggers);
  protected:
   THisto                CreateHisto     ();
+  int                   m_nTriggers;
   bool                  m_pulse;
   int                   m_pulseLength;
   float                 m_backBias;
