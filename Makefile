@@ -138,4 +138,10 @@ clean-all:	clean
 	$(MAKE) -C $(LIBPOWERBOARD_DIR) cleanall
 	$(MAKE) -C $(LIBALUCMS_DIR) clean-all
 
-.PHONY:	all clean clean-all $(STATIC_LIBS) lib lib_analysis
+format:
+	/bin/bash -c './.format.sh'
+
+format-check:
+	/bin/bash -c './.format-check.sh'
+
+.PHONY:	all clean clean-all $(STATIC_LIBS) lib lib_analysis format format-check
