@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
@@ -33,29 +33,17 @@
 #include <QDialog>
 #include <QLineEdit>
 
-class optionsDialog : public QDialog
-{
-    Q_OBJECT
+class optionsDialog : public QDialog {
+  Q_OBJECT
 
 public:
-	optionsDialog( QWidget* parent = 0, Qt::WindowFlags fl = 0 );
-    ~optionsDialog();
-	QString	address()
-		{
-			return addressText->text();
-		}
-	void setAddress(QString s)
-		{
-			addressText->setText(s);
-		}
-
+  optionsDialog(QWidget *parent = 0, Qt::WindowFlags fl = 0);
+  ~optionsDialog();
+  QString address() { return addressText->text(); }
+  void setAddress(QString s) { addressText->setText(s); }
 
 private:
-	QLineEdit *addressText;
-
+  QLineEdit *addressText;
 };
-
-
-
 
 #endif // OPTIONSDIALOG_H

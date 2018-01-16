@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -34,91 +34,75 @@
 #include <exception>
 #include <string>
 
-//class string;
+// class string;
 using namespace std;
 
-class MException : public exception 
-{
+class MException : public exception {
 public:
-	/** Takes a character string describing the error.  */
-	explicit MException();
-	explicit MException(const string& __arg);
-	~MException() throw();
+  /** Takes a character string describing the error.  */
+  explicit MException();
+  explicit MException(const string &__arg);
+  ~MException() throw();
 
-	/** Returns a C-style character string describing the general cause of
-	 *  the current error (the same string passed to the ctor).  */
-	virtual const char* what() const throw();
+  /** Returns a C-style character string describing the general cause of
+   *  the current error (the same string passed to the ctor).  */
+  virtual const char *what() const throw();
 
 protected:
-    string msg;
+  string msg;
 };
 
 // IPBus  error
-class MIPBusError : public MException 
-{
+class MIPBusError : public MException {
 public:
-	explicit MIPBusError(const string& __arg);
+  explicit MIPBusError(const string &__arg);
 };
 
 // IPBus error - Remote Bus Write error
-class MIPBusErrorWrite : public MException 
-{
+class MIPBusErrorWrite : public MException {
 public:
-	explicit MIPBusErrorWrite(const string& __arg);
+  explicit MIPBusErrorWrite(const string &__arg);
 };
 
 // IPBus error - Remote Bus Read error
-class MIPBusErrorReadTimeout : public MException 
-{
+class MIPBusErrorReadTimeout : public MException {
 public:
-	explicit MIPBusErrorReadTimeout(const string& __arg);
+  explicit MIPBusErrorReadTimeout(const string &__arg);
 };
 
 // IPBus over UDP error
-class MIPBusUDPError : public MException 
-{
+class MIPBusUDPError : public MException {
 public:
-	explicit MIPBusUDPError(const string& __arg);
+  explicit MIPBusUDPError(const string &__arg);
 };
 
 // IPBus over UDP Timeout
-class MIPBusUDPTimeout : public MException 
-{
+class MIPBusUDPTimeout : public MException {
 public:
-	explicit MIPBusUDPTimeout();
+  explicit MIPBusUDPTimeout();
 };
 
 // Data connection over TCP error
-class MDataConnectError : public MException 
-{
+class MDataConnectError : public MException {
 public:
-	explicit MDataConnectError(const string& __arg);
+  explicit MDataConnectError(const string &__arg);
 };
 
 // Data receive over TCP
-class MDataReceiveError : public MException 
-{
+class MDataReceiveError : public MException {
 public:
-	explicit MDataReceiveError(const string& __arg);
+  explicit MDataReceiveError(const string &__arg);
 };
 
 // Data parser
-class MDataParserError : public MException 
-{
+class MDataParserError : public MException {
 public:
-	explicit MDataParserError(const string& __arg);
+  explicit MDataParserError(const string &__arg);
 };
 
-class MBoardInitError : public MException 
-{
+class MBoardInitError : public MException {
 public:
-	explicit MBoardInitError(const string& __arg);
+  explicit MBoardInitError(const string &__arg);
 };
-
-
-
-
-
-
 
 #endif // MEXCEPTION

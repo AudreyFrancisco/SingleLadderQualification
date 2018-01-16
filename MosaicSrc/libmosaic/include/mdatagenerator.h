@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -34,31 +34,27 @@
 #include <stdint.h>
 #include "mwbbslave.h"
 
-class MDataGenerator: public MWbbSlave
-{
+class MDataGenerator : public MWbbSlave {
 public:
-    MDataGenerator();
-    MDataGenerator(WishboneBus *wbbPtr, uint32_t baseAddress);
-	void setup(uint32_t evSize, uint32_t evDelay, bool on=true);
-	void getSetup(uint32_t *evSize, uint32_t *evDelay, bool *on);
-	void setOnOff(bool on);
-	void start() { return setOnOff(true); }
-	void stop() { return setOnOff(false); }
+  MDataGenerator();
+  MDataGenerator(WishboneBus *wbbPtr, uint32_t baseAddress);
+  void setup(uint32_t evSize, uint32_t evDelay, bool on = true);
+  void getSetup(uint32_t *evSize, uint32_t *evDelay, bool *on);
+  void setOnOff(bool on);
+  void start() { return setOnOff(true); }
+  void stop() { return setOnOff(false); }
 
-private:					// WBB Slave registers map 
-	enum regAddress_e {
-		regModeOn					= 0,		// Run control register
-		regEventSize 				= 1,		// Event size
-		regEventDelay				= 2			// delay between events
-	};
+private: // WBB Slave registers map
+  enum regAddress_e {
+    regModeOn = 0,    // Run control register
+    regEventSize = 1, // Event size
+    regEventDelay = 2 // delay between events
+  };
 
-	enum modeOn_e {
-		MODEON_ON				= (1<<0),
-		MODEON_MODE				= (1<<1)	 // NOT implemented
-	};
-
+  enum modeOn_e {
+    MODEON_ON = (1 << 0),
+    MODEON_MODE = (1 << 1) // NOT implemented
+  };
 };
-
-
 
 #endif // MDATAGENERATOR_H

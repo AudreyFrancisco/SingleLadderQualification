@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -34,17 +34,14 @@
 #include <stdint.h>
 #include "i2cbus.h"
 
-class I2Cslave
-{
+class I2Cslave {
 public:
-	I2Cslave(I2Cbus *bus, uint8_t address=0);
-	void execute();
+  I2Cslave(I2Cbus *bus, uint8_t address = 0);
+  void execute();
 
 protected:
-	I2Cbus *i2cBus;	
-	uint8_t i2c_deviceAddress;
+  I2Cbus *i2cBus;
+  uint8_t i2c_deviceAddress;
 };
-
-
 
 #endif // SPD_H

@@ -44,86 +44,84 @@
 #include "powerboard.h"
 
 #define NUM_TSENSORS 1
-#define NUM_MODULES  8
+#define NUM_MODULES 8
 #define NUM_CHANNELS 16
 
-class pbMainWindow : public QMainWindow
-{
-    Q_OBJECT
+class pbMainWindow : public QMainWindow {
+  Q_OBJECT
 
 public:
-    pbMainWindow( QWidget* parent = 0, Qt::WindowFlags fl = 0);
-    ~pbMainWindow();
-
-
-private:
-	QWidget			*centralWidgetPtr;
-	QString 		cfgFilename;
-	QPixmap 		ledRedPixmap;
-	QPixmap 		ledGreyPixmap;
-	QLCDNumber 		*temperatureLCD[NUM_TSENSORS];
-	QCheckBox 		*chVbiasOn[NUM_MODULES];
-	QLabel 			*VbiasLED;
-	QLabel			*channelLED[NUM_CHANNELS];
-	bool			channelON[NUM_CHANNELS];
-	QLCDNumber		*VbiasLCD;
-	QLCDNumber		*IbiasLCD;
-	QLCDNumber 		*VoltLCD[NUM_CHANNELS];
-	QLCDNumber 		*AmpLCD[NUM_CHANNELS];
-	QLineEdit 		*VsetText[NUM_CHANNELS];
-	QLineEdit 		*IsetText[NUM_CHANNELS];
-	QLineEdit 		*VbiasText;
-	QSignalMapper 	*ChannelSetOnMapper;
-	QSignalMapper 	*ChannelSetOffMapper;
-	QSignalMapper 	*ChannelVsetMapper;
-	QSignalMapper 	*ChannelIsetMapper;
-	QSignalMapper 	*ChannelBiasMapper;
-	QTimer			*refreshTimer;
-	setValidator 	*VbiasValidator;
-	setValidator 	*VsetValidator;
-	setValidator 	*IsetValidator;
-	PBif 			*board;
-	powerboard 		*pb;
-	bool			boardIsOnline;
-	QString			boardAddress;
-
-
-public slots:
-	void fileOpen(char *fname=0);
-
-private slots:
-	void channelSetON(int ch);
-	void channelSetOFF(int ch);
-	void channelVset(int ch);
-	void channelIset(int ch);
-	void biasCheckBoxChanged(int ch);
-	void storeVset();
-	void VbiasSet();
-//	void enAllVbias(bool en);
-	void enVbias(bool en, int ch);
-	void refreshMonitor();
-	void refreshSettings();
-	void allON();
-	void allOFF();
-
-	void saveConfiguration();
-	void fileSaveAs();
-	void fileSave();
-	void configure();
+  pbMainWindow(QWidget *parent = 0, Qt::WindowFlags fl = 0);
+  ~pbMainWindow();
 
 private:
-	QWidget *topStatusBar();
-	QWidget *channel(int ch, QString chName);
-	QLCDNumber *newLargeLCD();
-	QLCDNumber *newSmallLCD();
-	bool XMLreadChannel(QDomElement &root, int n);
-	bool XMLreadBias(QDomElement &root);
-	bool XMLreadMOSAIC(QDomElement &root);
-	QDomElement XMLgetTag(QDomElement &e, QString tagName);
-	void comErrorExit(std::exception& e);
-	void setIPaddress(QString add);
-	void setOnline(bool online);
+  QWidget *centralWidgetPtr;
+  QString cfgFilename;
+  QPixmap ledRedPixmap;
+  QPixmap ledGreyPixmap;
+  QLCDNumber *temperatureLCD[NUM_TSENSORS];
+  QCheckBox *chVbiasOn[NUM_MODULES];
+  QLabel *VbiasLED;
+  QLabel *channelLED[NUM_CHANNELS];
+  bool channelON[NUM_CHANNELS];
+  QLCDNumber *VbiasLCD;
+  QLCDNumber *IbiasLCD;
+  QLCDNumber *VoltLCD[NUM_CHANNELS];
+  QLCDNumber *AmpLCD[NUM_CHANNELS];
+  QLineEdit *VsetText[NUM_CHANNELS];
+  QLineEdit *IsetText[NUM_CHANNELS];
+  QLineEdit *VbiasText;
+  QSignalMapper *ChannelSetOnMapper;
+  QSignalMapper *ChannelSetOffMapper;
+  QSignalMapper *ChannelVsetMapper;
+  QSignalMapper *ChannelIsetMapper;
+  QSignalMapper *ChannelBiasMapper;
+  QTimer *refreshTimer;
+  setValidator *VbiasValidator;
+  setValidator *VsetValidator;
+  setValidator *IsetValidator;
+  PBif *board;
+  powerboard *pb;
+  bool boardIsOnline;
+  QString boardAddress;
+
+public
+slots:
+  void fileOpen(char *fname = 0);
+
+private
+slots:
+  void channelSetON(int ch);
+  void channelSetOFF(int ch);
+  void channelVset(int ch);
+  void channelIset(int ch);
+  void biasCheckBoxChanged(int ch);
+  void storeVset();
+  void VbiasSet();
+  //	void enAllVbias(bool en);
+  void enVbias(bool en, int ch);
+  void refreshMonitor();
+  void refreshSettings();
+  void allON();
+  void allOFF();
+
+  void saveConfiguration();
+  void fileSaveAs();
+  void fileSave();
+  void configure();
+
+private:
+  QWidget *topStatusBar();
+  QWidget *channel(int ch, QString chName);
+  QLCDNumber *newLargeLCD();
+  QLCDNumber *newSmallLCD();
+  bool XMLreadChannel(QDomElement &root, int n);
+  bool XMLreadBias(QDomElement &root);
+  bool XMLreadMOSAIC(QDomElement &root);
+  QDomElement XMLgetTag(QDomElement &e, QString tagName);
+  void comErrorExit(std::exception &e);
+  void setIPaddress(QString add);
+  void setOnline(bool online);
 };
-
 
 #endif // PBMAINWINDOW

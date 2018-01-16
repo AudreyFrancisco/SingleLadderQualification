@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -39,31 +39,30 @@
 #include <string>
 #include "ipbus.h"
 
-#define DEFAULT_PACKET_SIZE 		1400
-#define DEFAULT_PORT				2000
-#define RCV_LONG_TIMEOUT			2000	// timeout in ms for the first rx datagrams
-#define RCV_SHORT_TIMEOUT			100		// timeout in ms for rx datagrams
+#define DEFAULT_PACKET_SIZE 1400
+#define DEFAULT_PORT 2000
+#define RCV_LONG_TIMEOUT 2000 // timeout in ms for the first rx datagrams
+#define RCV_SHORT_TIMEOUT 100 // timeout in ms for rx datagrams
 
-class IPbusUDP : public IPbus
-{
+class IPbusUDP : public IPbus {
 public:
-	IPbusUDP(int pktSize=DEFAULT_PACKET_SIZE);
-    IPbusUDP(const char *brdName, int port=DEFAULT_PORT, int pktsize=DEFAULT_PACKET_SIZE);
-    ~IPbusUDP();
-	void setIPaddress(const char *brdName, int port=DEFAULT_PORT);
-	void execute();
-	const std::string name() {return "IPbusUDP";}
+  IPbusUDP(int pktSize = DEFAULT_PACKET_SIZE);
+  IPbusUDP(const char *brdName, int port = DEFAULT_PORT, int pktsize = DEFAULT_PACKET_SIZE);
+  ~IPbusUDP();
+  void setIPaddress(const char *brdName, int port = DEFAULT_PORT);
+  void execute();
+  const std::string name() { return "IPbusUDP"; }
 
 private:
-	void testConnection();
-	void sockRead();
-	void sockWrite();
+  void testConnection();
+  void sockRead();
+  void sockWrite();
 
 private:
-	//int port;
-	int sockfd;
-	struct sockaddr_in sockAddress;
-	int rcvTimoutTime;
+  // int port;
+  int sockfd;
+  struct sockaddr_in sockAddress;
+  int rcvTimoutTime;
 };
 
 #endif // IPBUSUDP_H

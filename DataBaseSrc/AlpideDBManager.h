@@ -45,27 +45,26 @@
 #include "utilities.h"
 
 // --- Definition of constants for auth methods
-	#define COOKIEPACK "/tmp/cerncookie.txt"
-	#define SSOURL "https://test-alucmsapi.web.cern.ch"
+#define COOKIEPACK "/tmp/cerncookie.txt"
+#define SSOURL "https://test-alucmsapi.web.cern.ch"
 
 #ifdef AUTH_X509
-	#define CAPATH "/etc/pki/tls/certs"
-	#define CAFILE "/etc/pki/tls/certs/ca-bundle.crt"
-	#define CA1FILE "CERN_Grid_Certification_Authority.pem"
-	#define CA2FILE	"AddTrustExternalCARoot.pem"
+#define CAPATH "/etc/pki/tls/certs"
+#define CAFILE "/etc/pki/tls/certs/ca-bundle.crt"
+#define CA1FILE "CERN_Grid_Certification_Authority.pem"
+#define CA2FILE "AddTrustExternalCARoot.pem"
 
-	#ifdef COMPILE_LIBCURL
-		#define NSSDATABASEPATH "."
-		#define NSSCERTNICKNAME "FrancoAntonio"
-		#define NSSDBPASSWD "alpide4me"
-		#define USERCERT "/tmp/usercert.pem"
-		#define USERKEY "/tmp/userkey.pem"
-	#else
-		#define USERCERT "/home/fap/.globus/usercert.pem"
-    	#define USERKEY "/home/fap/.globus/userkey.pem"
-	#endif
+#ifdef COMPILE_LIBCURL
+#define NSSDATABASEPATH "."
+#define NSSCERTNICKNAME "FrancoAntonio"
+#define NSSDBPASSWD "alpide4me"
+#define USERCERT "/tmp/usercert.pem"
+#define USERKEY "/tmp/userkey.pem"
+#else
+#define USERCERT "/home/fap/.globus/usercert.pem"
+#define USERKEY "/home/fap/.globus/userkey.pem"
 #endif
-
+#endif
 
 #ifdef COMPILE_LIBCURL
 #include <curl/curl.h>
@@ -74,92 +73,119 @@
 #include "utilities.h"
 #include "CernSsoCookiesJar.h"
 
-class AlpideDBManager
-{
+class AlpideDBManager {
 
-struct ReceiveBuffer {
-	char *memory;
-	size_t size;
-};
+  struct ReceiveBuffer {
+    char *memory;
+    size_t size;
+  };
 
-
-
-// Members
+  // Members
 private:
-
 #ifdef COMPILE_LIBCURL
-	CURL * myHandle;
-	//CURLcode result; // We’ll store the result of CURL’s webpage retrieval, for simple error checking. YCM:FIXME, not used
+  CURL *myHandle;
+// CURLcode result; // We’ll store the result of CURL’s webpage retrieval, for simple error
+// checking. YCM:FIXME, not used
 
-	#ifdef AUTH_X509
-		string theNSSNickName;
-		string theNSSDBPath;
-		string theNSSDBPassword;
-	#endif
+#ifdef AUTH_X509
+  string theNSSNickName;
+  string theNSSDBPath;
+  string theNSSDBPassword;
+#endif
 #endif
 
 #ifdef AUTH_X509
-	string	theCliCer;
-	string	theCliKey;
-	string  theCertificationAuthorityPath;
+  string theCliCer;
+  string theCliKey;
+  string theCertificationAuthorityPath;
 #endif
 
-	CernSsoCookieJar	*theCookieJar;
-	string	theJarUrl;
-	int		thePendingRequests;
+  CernSsoCookieJar *theCookieJar;
+  string theJarUrl;
+  int thePendingRequests;
 
-// Methods
+  // Methods
 public:
-	AlpideDBManager();
-    ~AlpideDBManager();
+  AlpideDBManager();
+  ~AlpideDBManager();
 
 #ifdef COMPILE_LIBCURL
-    bool isLibCurlCompiled(void) { return(true); };
+  bool isLibCurlCompiled(void) {
+    return (true);
+  };
 #else
-    bool isLibCurlCompiled(void) { return(false); };
+  bool isLibCurlCompiled(void) {
+    return (false);
+  };
 #endif
-
 
 #ifdef AUTH_KERBEROS
-	bool Init(string aSslUrl);
+  bool Init(string aSslUrl);
 #endif
 #ifdef AUTH_X509
-	#ifdef COMPILE_LIBCURL
-    	bool Init(string aSslUrl, string aNickName, string aNSSDBPath, string aNSSDBPassFile);
-    	string getNSSDBNickName() { return(theNSSNickName);};
-    	string getNSSDBPath() { return(theNSSDBPath);};
-    	string getNSSDBPass() { return(theNSSDBPassword);};
-    	void setNSSDBNickName(string aNickName) { theNSSNickName = aNickName;};
-    	void setNSSDBPath(string aNSSDBPath) { theNSSDBPath = aNSSDBPath;};
-    	void setNSSDBPass(string aNSSDBPass) { theNSSDBPassword = aNSSDBPass;};
-	#else
-    	bool Init(string aSslUrl, string aCliCer, string aCliKey,  string aCAPath);
-        string getClientCertFile() { return(theCliCer);};
-        string getClientKeyFile() { return(theCliKey);};
-        void setClientCertFile(string aCliCer) { theCliCer = aCliCer;};
-        void setClientKeyFile(string aCliKey) { theCliKey = aCliKey;};
-        string getCAPath() { return(theCertificationAuthorityPath);};
-        void setCAPath(string aCAPath) { theCertificationAuthorityPath = aCAPath;};
-	#endif
+#ifdef COMPILE_LIBCURL
+  bool Init(string aSslUrl, string aNickName, string aNSSDBPath, string aNSSDBPassFile);
+  string getNSSDBNickName() {
+    return (theNSSNickName);
+  };
+  string getNSSDBPath() {
+    return (theNSSDBPath);
+  };
+  string getNSSDBPass() {
+    return (theNSSDBPassword);
+  };
+  void setNSSDBNickName(string aNickName) {
+    theNSSNickName = aNickName;
+  };
+  void setNSSDBPath(string aNSSDBPath) {
+    theNSSDBPath = aNSSDBPath;
+  };
+  void setNSSDBPass(string aNSSDBPass) {
+    theNSSDBPassword = aNSSDBPass;
+  };
+#else
+  bool Init(string aSslUrl, string aCliCer, string aCliKey, string aCAPath);
+  string getClientCertFile() {
+    return (theCliCer);
+  };
+  string getClientKeyFile() {
+    return (theCliKey);
+  };
+  void setClientCertFile(string aCliCer) {
+    theCliCer = aCliCer;
+  };
+  void setClientKeyFile(string aCliKey) {
+    theCliKey = aCliKey;
+  };
+  string getCAPath() {
+    return (theCertificationAuthorityPath);
+  };
+  void setCAPath(string aCAPath) {
+    theCertificationAuthorityPath = aCAPath;
+  };
+#endif
 #endif
 
-    bool Init();
-    string getSSOCookieUrl() { return(theJarUrl);};
-    void setSSOCookieUrl(string aJarUrl) { theJarUrl = aJarUrl;};
+  bool Init();
+  string getSSOCookieUrl() {
+    return (theJarUrl);
+  };
+  void setSSOCookieUrl(string aJarUrl) {
+    theJarUrl = aJarUrl;
+  };
 
 public:
-	int makeDBQuery(const string Url, const char *Payload, char **Result, bool isSOAPrequest = false, const char *SOAPAction = NULL);
+  int makeDBQuery(const string Url, const char *Payload, char **Result, bool isSOAPrequest = false,
+                  const char *SOAPAction = NULL);
 
 #ifdef COMPILE_LIBCURL
-	static size_t readResponseCB(void *contents, size_t size, size_t nmemb, void *userp);
+  static size_t readResponseCB(void *contents, size_t size, size_t nmemb, void *userp);
 #endif
 
 private:
-
 #ifdef COMPILE_LIBCURL
-	void print_cookies(CURL *curl);
+  void print_cookies(CURL *curl);
 #endif
-
 };
 
 #endif // ALPIDEDBMANAGER_H_

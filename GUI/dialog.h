@@ -7,24 +7,22 @@ namespace Ui {
   class Dialog;
 }
 
-class Dialog : public QDialog
-{
+class Dialog : public QDialog {
   Q_OBJECT
 
- public:
-  explicit  Dialog(QWidget *parent=0);
+public:
+  explicit Dialog(QWidget *parent = 0);
   ~Dialog();
   void append(QString error);
 
- private:
+private:
   Ui::Dialog *ui;
 
-  private slots:
+private
+slots:
 
-    //public slots:
-    //void append(QString error);
-
-
+  // public slots:
+  // void append(QString error);
 };
 
 #endif // DIALOG_H

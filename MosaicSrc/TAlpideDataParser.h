@@ -35,42 +35,41 @@
 #include "mdatareceiver.h"
 #include "BoardDecoder.h"
 
-class TAlpideDataParser : public MDataReceiver
-{
+class TAlpideDataParser : public MDataReceiver {
 public:
-	TAlpideDataParser();
-	void flush() {};
-	int  ReadEventData(int &nBytes, unsigned char *buffer);
-	bool hasData() { return (numClosedData!=0); }
+  TAlpideDataParser();
+  void flush() {};
+  int ReadEventData(int &nBytes, unsigned char *buffer);
+  bool hasData() { return (numClosedData != 0); }
 
 protected:
-	long parse(int numClosed);
+  long parse(int numClosed);
 
 private:
-	enum dataCode_e {
-		DCODE_IDLE			= 0xff,
-		DCODE_CHIP_EMPTY	= 0x0e,
-		DSHIFT_CHIP_EMPTY	= 4,
-		DCODE_REGION_HEADER	= 0x06,
-		DSHIFT_REGION_HEADER = 5,
-		DCODE_DATA_SHORT	= 0x01,			// 16 bits long
-		DSHIFT_DATA_SHORT	= 6,
-		DCODE_DATA_LONG		= 0x00,			// 24 bits long
-		DSHIFT_DATA_LONG	= 6,
-		DCODE_CHIP_HEADER	= 0x0a,			// Chip Header
-		DSHIFT_CHIP_HEADER	= 4,
-		DCODE_CHIP_TRAILER	= 0x0b,			// Chip trailer
-		DSHIFT_CHIP_TRAILER	= 4
-	};
+  enum dataCode_e {
+    DCODE_IDLE = 0xff,
+    DCODE_CHIP_EMPTY = 0x0e,
+    DSHIFT_CHIP_EMPTY = 4,
+    DCODE_REGION_HEADER = 0x06,
+    DSHIFT_REGION_HEADER = 5,
+    DCODE_DATA_SHORT = 0x01, // 16 bits long
+    DSHIFT_DATA_SHORT = 6,
+    DCODE_DATA_LONG = 0x00, // 24 bits long
+    DSHIFT_DATA_LONG = 6,
+    DCODE_CHIP_HEADER = 0x0a, // Chip Header
+    DSHIFT_CHIP_HEADER = 4,
+    DCODE_CHIP_TRAILER = 0x0b, // Chip trailer
+    DSHIFT_CHIP_TRAILER = 4
+  };
 
 private:
-	long checkEvent(unsigned char *dBuffer, unsigned char *evFlagsPtr);
+  long checkEvent(unsigned char *dBuffer, unsigned char *evFlagsPtr);
 
 public:
-	enum eventFlag_e {
-		flagHeaderError			= (1 << 0),
-		flagDecoder10b8bError	= (1 << 1)
-		};
+  enum eventFlag_e {
+    flagHeaderError = (1 << 0),
+    flagDecoder10b8bError = (1 << 1)
+  };
 };
 
 #endif // TALPIDEDATAPARSER_H

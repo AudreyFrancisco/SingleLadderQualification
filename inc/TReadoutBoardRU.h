@@ -14,14 +14,14 @@
 #include "ReadoutUnitSrc/TRuDctrlModule.h"
 #include "ReadoutUnitSrc/TRuTransceiverModule.h"
 
-
 class TReadoutBoardRU : public TReadoutBoard {
 public:
   struct ReadResult {
     uint16_t address;
     uint16_t data;
     bool error;
-    ReadResult(uint16_t address, uint16_t data, bool error) : address(address),data(data),error(error){}
+    ReadResult(uint16_t address, uint16_t data, bool error)
+        : address(address), data(data), error(error) {}
   };
 
   static const int VID;
@@ -43,6 +43,7 @@ public:
   static const uint8_t MODULE_DATA0;
 
   static const uint8_t MASTER_DP23_SOURCE;
+
 private:
   std::shared_ptr<UsbDev> m_usb;
   TBoardConfigRU *m_config;
@@ -57,9 +58,8 @@ private:
   int m_triggerDelay;
   int m_pulseDelay;
 
-
-  std::map<uint8_t, std::vector<uint8_t> > m_readoutBuffers;
-  std::deque<std::vector<uint8_t> > m_events;
+  std::map<uint8_t, std::vector<uint8_t>> m_readoutBuffers;
+  std::deque<std::vector<uint8_t>> m_events;
 
   // Readout streams
   void fetchEventData();
@@ -68,22 +68,21 @@ public:
   // Modules
   std::shared_ptr<TRuDctrlModule> dctrl;
   std::shared_ptr<TRuWishboneModule> master;
-  std::map<uint8_t, std::shared_ptr<TRuTransceiverModule> > transceiver_array;
+  std::map<uint8_t, std::shared_ptr<TRuTransceiverModule>> transceiver_array;
+
 public:
   TReadoutBoardRU(TBoardConfigRU *config);
 
-  virtual int WriteChipRegister(uint16_t Address, uint16_t Value,
-                                TAlpide *chipPtr = 0);
+  virtual int WriteChipRegister(uint16_t Address, uint16_t Value, TAlpide *chipPtr = 0);
   virtual int ReadRegister(uint16_t Address, uint32_t &Value);
   virtual int WriteRegister(uint16_t Address, uint32_t Value);
-  virtual int ReadChipRegister(uint16_t Address, uint16_t &Value,
-                               TAlpide *chipPtr = 0);
+  virtual int ReadChipRegister(uint16_t Address, uint16_t &Value, TAlpide *chipPtr = 0);
   virtual int SendOpCode(Alpide::TOpCode OpCode);
   virtual int SendOpCode(Alpide::TOpCode OpCode, TAlpide *chipPtr);
   virtual int SendCommand(Alpide::TCommand OpCode, TAlpide *chipPtr);
 
-  virtual int SetTriggerConfig(bool enablePulse, bool enableTrigger,
-                               int triggerDelay, int pulseDelay);
+  virtual int SetTriggerConfig(bool enablePulse, bool enableTrigger, int triggerDelay,
+                               int pulseDelay);
   virtual void SetTriggerSource(TTriggerSource triggerSource);
   virtual void StartRun();
   virtual int Trigger(int nTriggers);
@@ -91,7 +90,7 @@ public:
 
   // RU specific functions
 
-  void setDataportSource(uint8_t DP2Source=255, uint8_t DP3Source=255);
+  void setDataportSource(uint8_t DP2Source = 255, uint8_t DP3Source = 255);
 
   // Initialize Readout Unit to start readout with given configuration
   int Initialize();
@@ -104,7 +103,6 @@ public:
 
   void checkGitHash();
   void InitReceivers();
-
 };
 
 #endif // TREADOUTBOARDRU_H
