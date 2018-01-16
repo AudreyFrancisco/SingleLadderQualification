@@ -40,11 +40,12 @@ namespace ScanConfig {
   const int NDACSAMPLES    = 10;
 
   // settings for readout test
-  const int READOUTSPEED   = 1200;
-  const int READOUTOCC     = 32;
-  const int READOUTDRIVER  = 10;
-  const int READOUTPREEMP  = 10;
-  const int READOUTROW     = 0;
+  const int READOUTSPEED     = 1200;
+  const int READOUTOCC       = 32;
+  const int READOUTDRIVER    = 10;
+  const int READOUTPREEMP    = 10;
+  const int READOUTROW       = 0;
+  const int READOUTPLLSTAGES = -1;    // -1 meaning using the standard setting from the chip config
 
   // current limits for powering test in mA
   const int POWER_CUT_MINIDDA_OB = 20;
@@ -184,6 +185,7 @@ class TScanConfig {
   int    m_readoutDriver;
   int    m_readoutPreemp;
   int    m_readoutRow;
+  int    m_readoutPllStages;
   TTestType m_testType;
  protected:
  public:

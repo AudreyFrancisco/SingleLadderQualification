@@ -1884,6 +1884,29 @@ void MainWindow::IBBasicTest(){
   std::cout<<"Test complete :D"<<std::endl;
 }
 
+
+void MainWindow::IBParameterScan()
+{
+  int backupTrigger = fConfig->GetScanConfig()->GetParamValue("NTRIG");
+
+  fConfig->GetScanConfig()->SetParamValue("NTRIG",        10000);
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
+
+  for (int pll = 0; pll < 3; pll++) {
+    fConfig->GetScanConfig()->SetParamValue  ("READOUTPLLSTAGES", pll);
+    fConfig->GetScanConfig()->SetVoltageScale(1.0);
+    AddScan(STReadout);
+    fConfig->GetScanConfig()->SetVoltageScale(1.1);
+    AddScan(STReadout);
+    fConfig->GetScanConfig()->SetVoltageScale(0.9);
+    AddScan(STReadout);
+  }
+  fConfig->GetScanConfig()->SetVoltageScale(1.0);
+  fConfig->GetScanConfig()->SetParamValue  ("READOUTPLLSTAGES", -1);
+  fConfig->GetScanConfig()->SetParamValue  ("NTRIG", backupTrigger);
+}
+
+
 void MainWindow::fillingibvectors()
 {
   ClearVectors();
@@ -1912,6 +1935,7 @@ void MainWindow::fillingibvectors()
   AddScan(STDigitalWF);
   
   // readout tests
+  IBParameterScan();
   fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
   AddScan(STReadout);
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);

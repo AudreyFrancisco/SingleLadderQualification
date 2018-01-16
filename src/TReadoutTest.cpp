@@ -14,8 +14,7 @@ TReadoutTest::TReadoutTest (TScanConfig                   *config,
                             std::vector <THic*>            hics, 
                             std::vector <TReadoutBoard *>  boards, 
                             std::deque<TScanHisto>        *histoQue, 
-                            std::mutex                    *aMutex,
-			    int                            pllStages) 
+                            std::mutex                    *aMutex)
   : TDataTaking (config, chips, hics, boards, histoQue, aMutex) 
 {
   // trigger frequency, number of triggers have to be set in scan config
@@ -27,14 +26,14 @@ TReadoutTest::TReadoutTest (TScanConfig                   *config,
 
   ((TReadoutParameters *)m_parameters)->row            = config->GetParamValue ("READOUTROW");
   ((TReadoutParameters *)m_parameters)->triggers       = m_nTriggers;
-  ((TReadoutParameters *)m_parameters)->linkSpeed      = config->GetParamValue ("READOUTSPEED");;
-  ((TReadoutParameters *)m_parameters)->occupancy      = config->GetParamValue ("READOUTOCC");;
-  ((TReadoutParameters *)m_parameters)->driverStrength = config->GetParamValue ("READOUTDRIVER");;
-  ((TReadoutParameters *)m_parameters)->preemp         = config->GetParamValue ("READOUTPREEMP");;
-  ((TReadoutParameters *)m_parameters)->pllStages      = pllStages;
-  ((TReadoutParameters *)m_parameters)->voltageScale   = config->GetVoltageScale();;
+  ((TReadoutParameters *)m_parameters)->linkSpeed      = config->GetParamValue ("READOUTSPEED");
+  ((TReadoutParameters *)m_parameters)->occupancy      = config->GetParamValue ("READOUTOCC");
+  ((TReadoutParameters *)m_parameters)->driverStrength = config->GetParamValue ("READOUTDRIVER");
+  ((TReadoutParameters *)m_parameters)->preemp         = config->GetParamValue ("READOUTPREEMP");
+  ((TReadoutParameters *)m_parameters)->pllStages      = config->GetParamValue ("READOUTPLLSTAGES");
+  ((TReadoutParameters *)m_parameters)->voltageScale   = config->GetVoltageScale();
 
-  if (pllStages != -1) {
+  if (((TReadoutParameters*)m_parameters)->pllStages != -1) {
     sprintf(m_name, "ReadoutTest %.1f %d", ((TReadoutParameters*)m_parameters)->voltageScale, 
  	                                   ((TReadoutParameters*)m_parameters)->pllStages);
   }

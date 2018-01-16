@@ -141,6 +141,7 @@ class MainWindow : public QMainWindow
     void setdefaultvalues(bool &fit, int &numberofstages);
 
     void IBBasicTest();
+    void IBParameterScan();
     void fillingibvectors();
 
     void fillingendurancevectors();

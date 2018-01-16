@@ -38,8 +38,7 @@ class TReadoutTest : public TDataTaking {
                     std::vector <THic*>            hics,
                     std::vector <TReadoutBoard *>  boards,
                     std::deque<TScanHisto>        *histoque,
-                    std::mutex                    *aMutex,
-		    int                            pllStages = -1);
+                    std::mutex                    *aMutex);
   ~TReadoutTest    () {};
   int  GetRow      () {return ((TReadoutParameters*)m_parameters)->row;};
   int  GetDriver   () {return ((TReadoutParameters*)m_parameters)->driverStrength;};
