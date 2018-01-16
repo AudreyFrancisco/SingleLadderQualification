@@ -38,7 +38,6 @@
 #ifndef POWERBOARDCONFIG_H
 #define POWERBOARDCONFIG_H
 
-
 #include "TBoardConfig.h"
 #include <stdio.h>
 
@@ -46,163 +45,193 @@
 // that the MOSAIC board can drive.
 #define MAX_MOULESPERMOSAIC 8
 
-
 // Default values table
 
 #define DEF_BOTTOM 0 // default: top power unit
 
 // a) Default values used in constructor
-#define DEF_BIASVOLTAGE	0.0
-#define DEF_ANALOGVOLTAGE	1.80
-#define DEF_ANALOGMAXCURRENT	1.00
-#define DEF_DIGITALVOLTAGE	1.80
-#define DEF_DIGITALMAXCURRENT	1.50
-#define DEF_BIASCHANNELON	false
+#define DEF_BIASVOLTAGE 0.0
+#define DEF_ANALOGVOLTAGE 1.80
+#define DEF_ANALOGMAXCURRENT 1.00
+#define DEF_DIGITALVOLTAGE 1.80
+#define DEF_DIGITALMAXCURRENT 1.50
+#define DEF_BIASCHANNELON false
 
 // b) Setup-specific default values - to be refined
 // (can be set by setter methods)
-#define DEF_BIASVOLTAGE_OB	 0.0
-#define DEF_ANALOGVOLTAGE_OB	 1.82
-#define DEF_ANALOGMAXCURRENT_OB	 0.5
-#define DEF_DIGITALVOLTAGE_OB	 1.82
+#define DEF_BIASVOLTAGE_OB 0.0
+#define DEF_ANALOGVOLTAGE_OB 1.82
+#define DEF_ANALOGMAXCURRENT_OB 0.5
+#define DEF_DIGITALVOLTAGE_OB 1.82
 #define DEF_DIGITALMAXCURRENT_OB 1.50
-#define DEF_BIASCHANNELON_OB	 false
+#define DEF_BIASCHANNELON_OB false
 
-#define DEF_BIASVOLTAGE_IB	 0.0
-#define DEF_ANALOGVOLTAGE_IB	 1.80
-#define DEF_ANALOGMAXCURRENT_IB	 2.0
-#define DEF_DIGITALVOLTAGE_IB	 1.80
+#define DEF_BIASVOLTAGE_IB 0.0
+#define DEF_ANALOGVOLTAGE_IB 1.80
+#define DEF_ANALOGMAXCURRENT_IB 2.0
+#define DEF_DIGITALVOLTAGE_IB 1.80
 #define DEF_DIGITALMAXCURRENT_IB 2.0
-#define DEF_BIASCHANNELON_IB	 false
+#define DEF_BIASCHANNELON_IB false
 
-#define DEF_AVSCALE              1.0
-#define DEF_DVSCALE              1.0
-#define DEF_AVOFFSET             0.0
-#define DEF_DVOFFSET             0.0
-#define DEF_DIOFFSET             0.0
-#define DEF_AIOFFSET             0.0
-#define DEF_CALDLINER            0.0
-#define DEF_CALALINER            0.0
-#define DEF_CALGNDLINER          0.0
-#define DEF_BIASOFFSET           0.0
-#define DEF_BIASSCALE            1.0
-#define DEF_IBIASOFFSET          0.0
+#define DEF_AVSCALE 1.0
+#define DEF_DVSCALE 1.0
+#define DEF_AVOFFSET 0.0
+#define DEF_DVOFFSET 0.0
+#define DEF_DIOFFSET 0.0
+#define DEF_AIOFFSET 0.0
+#define DEF_CALDLINER 0.0
+#define DEF_CALALINER 0.0
+#define DEF_CALGNDLINER 0.0
+#define DEF_BIASOFFSET 0.0
+#define DEF_BIASSCALE 1.0
+#define DEF_IBIASOFFSET 0.0
 
 // internal power board resistances between regulator and breakout board
 // according to power board manual version 1.2 (14/07/2017)
 // first index is the power unit (0 = bottom, 1 = top), second is module
-const float RAnalog [2][8] = {{0.035, 0.039, 0.047, 0.054, 0.033, 0.044, 0.051, 0.052},
-                              {0.033, 0.038, 0.044, 0.056, 0.033, 0.044, 0.059, 0.052}};
+const float RAnalog[2][8] = {{0.035, 0.039, 0.047, 0.054, 0.033, 0.044, 0.051, 0.052},
+                             {0.033, 0.038, 0.044, 0.056, 0.033, 0.044, 0.059, 0.052}};
 const float RDigital[2][8] = {{0.034, 0.042, 0.043, 0.050, 0.036, 0.038, 0.044, 0.052},
                               {0.033, 0.040, 0.041, 0.049, 0.034, 0.037, 0.040, 0.056}};
 // Class definition
-class TPowerBoardConfig  {
+class TPowerBoardConfig {
 
-// structures a data types
-// the configuration data types contain set values and calibration constants
-// the set values correspond to the desired output value, i.e. the value before applying the calibration
+  // structures a data types
+  // the configuration data types contain set values and calibration constants
+  // the set values correspond to the desired output value, i.e. the value before applying the
+  // calibration
 public:
-	typedef struct Mod {
-	  bool BiasOn;
-	  float AVset;
-	  float AIset;
-	  float DVset;
-	  float DIset;
-          float CalAVScale;
-          float CalDVScale;
-          float CalAVOffset;
-          float CalDVOffset;
-          float CalDIOffset;
-	  float CalAIOffset;
-          float CalDLineR;
-          float CalALineR;
-          float CalGNDLineR;
-	} Mod_t;
+  typedef struct Mod {
+    bool BiasOn;
+    float AVset;
+    float AIset;
+    float DVset;
+    float DIset;
+    float CalAVScale;
+    float CalDVScale;
+    float CalAVOffset;
+    float CalDVOffset;
+    float CalDIOffset;
+    float CalAIOffset;
+    float CalDLineR;
+    float CalALineR;
+    float CalGNDLineR;
+  } Mod_t;
 
-	typedef struct PowBoard {
-          Mod_t Modul[MAX_MOULESPERMOSAIC];
-	  float VBset;
-          float CalBiasOffset;
-          float CalBiasScale;
-          float CalIBiasOffset;
-	} PowBoard_t;
+  typedef struct PowBoard {
+    Mod_t Modul[MAX_MOULESPERMOSAIC];
+    float VBset;
+    float CalBiasOffset;
+    float CalBiasScale;
+    float CalIBiasOffset;
+  } PowBoard_t;
 
-// members
+  // members
 private:
-	FILE *fhConfigFile; // the file handle of the Configuration File
-	PowBoard_t	fPBConfig;
-	TBoardType	fBoardType;
-        int             m_bottom;
-        std::map <std::string, int*> fSettings;
+  FILE *fhConfigFile; // the file handle of the Configuration File
+  PowBoard_t fPBConfig;
+  TBoardType fBoardType;
+  int m_bottom;
+  std::map<std::string, int *> fSettings;
 
-// methods
+  // methods
 public:
-	TPowerBoardConfig(const char *AConfigFileName);
+  TPowerBoardConfig(const char *AConfigFileName);
 
-	// Info
+  // Info
 
-	// Getters
-	float GetBiasVoltage();
+  // Getters
+  float GetBiasVoltage();
 
-        // GetAnalogVoltage and GetDigitalVoltage return the voltages
-        // taking into account the channel calibrations
-	float GetAnalogVoltage    (int mod);
-	float GetAnalogCurrent    (int mod) { return(fPBConfig.Modul[mod].AIset); };
-	float GetDigitalVoltage   (int mod);
-	float GetDigitalCurrent   (int mod) { return(fPBConfig.Modul[mod].DIset); };
-	bool  GetBiasOn           (int mod) { return(fPBConfig.Modul[mod].BiasOn); };
+  // GetAnalogVoltage and GetDigitalVoltage return the voltages
+  // taking into account the channel calibrations
+  float GetAnalogVoltage(int mod);
+  float GetAnalogCurrent(int mod) {
+    return (fPBConfig.Modul[mod].AIset);
+  };
+  float GetDigitalVoltage(int mod);
+  float GetDigitalCurrent(int mod) {
+    return (fPBConfig.Modul[mod].DIset);
+  };
+  bool GetBiasOn(int mod) {
+    return (fPBConfig.Modul[mod].BiasOn);
+  };
 
-        float GetAVDDUncalibrated (int mod) { return(fPBConfig.Modul[mod].AVset);};
-        float GetDVDDUncalibrated (int mod) { return(fPBConfig.Modul[mod].DVset);};
+  float GetAVDDUncalibrated(int mod) {
+    return (fPBConfig.Modul[mod].AVset);
+  };
+  float GetDVDDUncalibrated(int mod) {
+    return (fPBConfig.Modul[mod].DVset);
+  };
 
-	void GetModuleSetUp       (int mod, float*AVSet, float*AISet, float*DVSet, float*DISet, bool*isBiasOn);
-	void GetAnalogVoltages    (float * AVSet);
-	void GetDigitalVoltages   (float * DVSet);
-	void GetAnalogCurrents    (float * AISet);
-	void GetDigitalCurrents   (float * DISet);
-	void GetBiasOnSets        (bool * BIASOn);
-        void GetVCalibration      (int mod, float &AVScale, float &DVScale, float &AVOffset, float &DVOffset);
-        void SetVCalibration      (int mod, float AVScale,  float DVScale,  float AVOffset,  float DVOffset);
-        void GetICalibration      (int mod, float &AIOffset, float &DIOffset);
-        void SetICalibration      (int mod, float AIOffset, float DIOffset);
-        void SetVBiasCalibration  (float AScale, float AOffset);
-        void SetIBiasCalibration  (float AOffset);
-        void GetVBiasCalibration  (float &AScale, float &AOffset);
-        void GetIBiasCalibration  (float &AOffset);
-        void SetLineResistances   (int mod, float ALineR, float DLineR, float GNDLineR);
-        void EnterMeasuredLineResistances   (int mod, float ALineR, float DLineR, float GNDLineR);
-        void GetLineResistances   (int mod, float &ALineR, float &DLineR, float &GNDLineR);
-        bool IsCalibrated         (int mod);
-        void WriteCalibrationFile ();
-        void ReadCalibrationFile  ();
-	// Setters
-	void SetBiasVoltage(float val) { fPBConfig.VBset = val; };
+  void GetModuleSetUp(int mod, float *AVSet, float *AISet, float *DVSet, float *DISet,
+                      bool *isBiasOn);
+  void GetAnalogVoltages(float *AVSet);
+  void GetDigitalVoltages(float *DVSet);
+  void GetAnalogCurrents(float *AISet);
+  void GetDigitalCurrents(float *DISet);
+  void GetBiasOnSets(bool *BIASOn);
+  void GetVCalibration(int mod, float &AVScale, float &DVScale, float &AVOffset, float &DVOffset);
+  void SetVCalibration(int mod, float AVScale, float DVScale, float AVOffset, float DVOffset);
+  void GetICalibration(int mod, float &AIOffset, float &DIOffset);
+  void SetICalibration(int mod, float AIOffset, float DIOffset);
+  void SetVBiasCalibration(float AScale, float AOffset);
+  void SetIBiasCalibration(float AOffset);
+  void GetVBiasCalibration(float &AScale, float &AOffset);
+  void GetIBiasCalibration(float &AOffset);
+  void SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
+  void EnterMeasuredLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
+  void GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR);
+  bool IsCalibrated(int mod);
+  void WriteCalibrationFile();
+  void ReadCalibrationFile();
+  // Setters
+  void SetBiasVoltage(float val) {
+    fPBConfig.VBset = val;
+  };
 
-	void ModuleSetUp       (int mod, float AVSet, float AISet, float DVSet, float DISet, bool isBiasOn);
-	void SetAnalogVoltage  (int mod, float val) { fPBConfig.Modul[mod].AVset = val; };
-	void SetAnalogCurrent  (int mod, float val) { fPBConfig.Modul[mod].AIset = val; };
-	void SetDigitalVoltage (int mod, float val) { fPBConfig.Modul[mod].DVset = val; };
-	void SetDigitalCurrent (int mod, float val) { fPBConfig.Modul[mod].DIset = val; };
-	void SetBiasOn         (int mod, bool val)  { fPBConfig.Modul[mod].BiasOn = val; };
+  void ModuleSetUp(int mod, float AVSet, float AISet, float DVSet, float DISet, bool isBiasOn);
+  void SetAnalogVoltage(int mod, float val) {
+    fPBConfig.Modul[mod].AVset = val;
+  };
+  void SetAnalogCurrent(int mod, float val) {
+    fPBConfig.Modul[mod].AIset = val;
+  };
+  void SetDigitalVoltage(int mod, float val) {
+    fPBConfig.Modul[mod].DVset = val;
+  };
+  void SetDigitalCurrent(int mod, float val) {
+    fPBConfig.Modul[mod].DIset = val;
+  };
+  void SetBiasOn(int mod, bool val) {
+    fPBConfig.Modul[mod].BiasOn = val;
+  };
 
-        void SetDefaultsOB(int mod);
-        void SetDefaultsIB(int mod);
-	// Utilities
-	bool ReadFromFile  (char * AFileName);
-	bool WriteToFile   (char *AFileName);
-	bool DumpConfig    () { return false; }; // TODO: not yet implemented
-        bool GetIsBottom   () { return (m_bottom == 1); };
-        void SetIsBottom   (bool bottom) { m_bottom = bottom?1:0;};
-        void InitParamMap  ();
-        bool SetParamValue (std::string Name, std::string Value);
-        int  GetParamValue (std::string Name) ;
-        bool IsParameter   (std::string Name) {return (fSettings.count(Name) > 0);};
+  void SetDefaultsOB(int mod);
+  void SetDefaultsIB(int mod);
+  // Utilities
+  bool ReadFromFile(char *AFileName);
+  bool WriteToFile(char *AFileName);
+  bool DumpConfig() {
+    return false;
+  }; // TODO: not yet implemented
+  bool GetIsBottom() {
+    return (m_bottom == 1);
+  };
+  void SetIsBottom(bool bottom) {
+    m_bottom = bottom ? 1 : 0;
+  };
+  void InitParamMap();
+  bool SetParamValue(std::string Name, std::string Value);
+  int GetParamValue(std::string Name);
+  bool IsParameter(std::string Name) {
+    return (fSettings.count(Name) > 0);
+  };
+
 private:
-    void readConfiguration();
-
-
+  void readConfiguration();
 };
 
-#endif   /* BOARDCONFIGMOSAIC_H */
+#endif /* BOARDCONFIGMOSAIC_H */
 
 // ---------------- eof -------------------------

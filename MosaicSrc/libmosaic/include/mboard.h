@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -44,61 +44,59 @@
 #include "i2cbus.h"
 #include "mwbb.h"
 
-#define DEFAULT_PACKET_SIZE 		1400
-#define DEFAULT_UDP_PORT			2000
-#define DEFAULT_TCP_BUFFER_SIZE		(512*1024)			// if set to 0 : automatic
-#define DEFAULT_TCP_PORT			3333
-#define MOSAIC_HEADER_SIZE			64
+#define DEFAULT_PACKET_SIZE 1400
+#define DEFAULT_UDP_PORT 2000
+#define DEFAULT_TCP_BUFFER_SIZE (512 * 1024) // if set to 0 : automatic
+#define DEFAULT_TCP_PORT 3333
+#define MOSAIC_HEADER_SIZE 64
 
 using namespace std;
 
 class MDataReceiver;
 
-class MBoard
-{
+class MBoard {
 public:
-	MBoard();
-	MBoard(const char *IPaddr, int UDPport=DEFAULT_UDP_PORT);
-    ~MBoard();
+  MBoard();
+  MBoard(const char *IPaddr, int UDPport = DEFAULT_UDP_PORT);
+  ~MBoard();
 
-	void setIPaddress(const char *IPaddr, int UDPport=DEFAULT_UDP_PORT);
-	void initHardware();
-	void connectTCP(int port=DEFAULT_TCP_PORT, int rcvBufferSize=DEFAULT_TCP_BUFFER_SIZE);
-	void closeTCP();
-	long pollTCP(int timeout, MDataReceiver **dr);
-	long pollData(int timeout);
-	void addDataReceiver(int id, MDataReceiver *dc);
-	void flushDataReceivers();
-	static unsigned int buf2ui(unsigned char *buf);
+  void setIPaddress(const char *IPaddr, int UDPport = DEFAULT_UDP_PORT);
+  void initHardware();
+  void connectTCP(int port = DEFAULT_TCP_PORT, int rcvBufferSize = DEFAULT_TCP_BUFFER_SIZE);
+  void closeTCP();
+  long pollTCP(int timeout, MDataReceiver **dr);
+  long pollData(int timeout);
+  void addDataReceiver(int id, MDataReceiver *dc);
+  void flushDataReceivers();
+  static unsigned int buf2ui(unsigned char *buf);
 
 public:
-	MDataGenerator 	*mDataGenerator;
-	IPbusUDP 		*mIPbus;
-	MRunControl 	*mRunControl;
-	MTriggerControl *mTriggerControl;
-	I2CSysPll		*mSysPLL;
+  MDataGenerator *mDataGenerator;
+  IPbusUDP *mIPbus;
+  MRunControl *mRunControl;
+  MTriggerControl *mTriggerControl;
+  I2CSysPll *mSysPLL;
 
 private:
-	void init();
-	ssize_t recvTCP(void *buffer, size_t count, int timeout);
-	ssize_t readTCPData(void *buffer, size_t count, int timeout);
+  void init();
+  ssize_t recvTCP(void *buffer, size_t count, int timeout);
+  ssize_t readTCPData(void *buffer, size_t count, int timeout);
 
-// private:
+  // private:
 public:
-	int				tcp_sockfd;
-	int				numReceivers;
-	std::vector<MDataReceiver *> receivers;
-
+  int tcp_sockfd;
+  int numReceivers;
+  std::vector<MDataReceiver *> receivers;
 
 public:
-	enum dataBlockFlag_e {
-		flagClosedEvent			= (1 << 0),
-		flagOverflow			= (1 << 1),
-		flagTimeout			    = (1 << 2),
-		flagCloseRun			= (1 << 3)
-		};
+  enum dataBlockFlag_e {
+    flagClosedEvent = (1 << 0),
+    flagOverflow = (1 << 1),
+    flagTimeout = (1 << 2),
+    flagCloseRun = (1 << 3)
+  };
 
-	string IPaddress;
+  string IPaddress;
 };
 
 #endif // MBOARD_H

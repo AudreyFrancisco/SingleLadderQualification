@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
@@ -46,11 +46,10 @@
 #include "TAlpideDataParser.h"
 
 namespace Mosaic {
-	typedef enum rcvRate_e {			// Receiver data rate (in Mbps)
-		RCV_RATE_400,
-		RCV_RATE_600,
-		RCV_RATE_1200
-	}  TReceiverSpeed;
+  typedef enum rcvRate_e { // Receiver data rate (in Mbps)
+    RCV_RATE_400,
+    RCV_RATE_600,
+    RCV_RATE_1200} TReceiverSpeed;
 }
 
 #endif // MOSAIC_H

@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -34,19 +34,16 @@
 #include <stdint.h>
 #include "wishbonebus.h"
 
-class MWbbSlave
-{
+class MWbbSlave {
 public:
-    MWbbSlave();
-    MWbbSlave(WishboneBus *wbbPtr, uint32_t baseAddress);
-	void setBusAddress(WishboneBus *wbbPtr, uint32_t baseAdd);
-	void execute();
+  MWbbSlave();
+  MWbbSlave(WishboneBus *wbbPtr, uint32_t baseAddress);
+  void setBusAddress(WishboneBus *wbbPtr, uint32_t baseAdd);
+  void execute();
 
 protected:
-	WishboneBus *wbb;
-	uint32_t baseAddress;
+  WishboneBus *wbb;
+  uint32_t baseAddress;
 };
-
-
 
 #endif // MWBBSLAVE_H

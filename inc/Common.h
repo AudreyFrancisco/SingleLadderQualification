@@ -14,7 +14,7 @@
 class TScanHisto;
 class THic;
 
-namespace common{
+namespace common {
 
   const int nRows = 512;
   const int nCols = 1024;
@@ -42,7 +42,7 @@ namespace common{
     int nMask;
 
     int counterPixelsNoHits;
-    int counterPixelsStuck ;
+    int counterPixelsStuck;
     int counterPixelsNoThreshold;
 
     double thresholdMean;
@@ -50,11 +50,11 @@ namespace common{
     double noiseMean;
     double noiseStdDev;
 
-    FILE* filePixelNoHits;
-    FILE* filePixelStuck;
-    FILE* filePixelNoThreshold; // To do, based on chi2 cut?
-    FILE* filePixelFitResult;
-    FILE* fileRawData;
+    FILE *filePixelNoHits;
+    FILE *filePixelStuck;
+    FILE *filePixelNoThreshold; // To do, based on chi2 cut?
+    FILE *filePixelFitResult;
+    FILE *fileRawData;
 
   } TThresholdResult;
 
@@ -68,16 +68,15 @@ namespace common{
 
   } TStatVar;
 
-  extern std::string GetFileName(TChipIndex aChipIndex,
-				 std::string suffix);
+  extern std::string GetFileName(TChipIndex aChipIndex, std::string suffix);
   extern int GetFileName();
   extern int GetChipIntIndex(TChipIndex aChipIndex);
   extern TChipIndex GetChipIndex(int aIntIndex);
-  extern std::vector<TChipIndex> GetChipList(TScanHisto* aScanHisto);
+  extern std::vector<TChipIndex> GetChipList(TScanHisto *aScanHisto);
 
   bool HitBelongsToChip(TChipIndex aChipIndex, TPixHit aHit);
-  bool HitBelongsToHic (THic       *aHic,      TPixHit aHit);
-  int  FindIndexForHit (std::vector <TChipIndex> aChipList, TPixHit aHit);
+  bool HitBelongsToHic(THic *aHic, TPixHit aHit);
+  int FindIndexForHit(std::vector<TChipIndex> aChipList, TPixHit aHit);
 }
 
 #endif

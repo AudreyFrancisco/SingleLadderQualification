@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
@@ -34,65 +34,46 @@
 #include <stdint.h>
 #include "i2cslave.h"
 
-
-class AD5254 : public I2Cslave
-{
+class AD5254 : public I2Cslave {
 public:
-	AD5254(I2Cbus *bus, uint8_t address);
-	void write(uint8_t cmd, uint8_t ch, uint8_t data);
-	void write(uint8_t cmd, uint8_t ch);
-	uint8_t read(uint8_t cmd, uint8_t add);
-	void ackPolling();
-
+  AD5254(I2Cbus *bus, uint8_t address);
+  void write(uint8_t cmd, uint8_t ch, uint8_t data);
+  void write(uint8_t cmd, uint8_t ch);
+  uint8_t read(uint8_t cmd, uint8_t add);
+  void ackPolling();
 
 private:
-	enum {
-		CMD_SetRDAC			= 0x00,
-		CMD_WriteEEMEM		= 0x20,		// Write (store) RDAC Setting and User-defined Data to EEMEM
-		CMD_ReadEEMEM		= 0x20,		// Read (restore) RDAC Setting and User-defined Data from EEMEM
-
-		CMD_NOP				= 0x00,		// NOP command
-		CMD_RestoreAll		= 0xb8,		// Restore EEMEMs to all RDACs
-		CMD_RestoreRDAC		= 0x88,		// Restore single EEMEM to RDAC
-		CMD_StoreRDAC		= 0x90,		// Store single RDAC to EEMEM
-	};
+  enum {
+    CMD_SetRDAC = 0x00,
+    CMD_WriteEEMEM = 0x20,  // Write (store) RDAC Setting and User-defined Data to EEMEM
+    CMD_ReadEEMEM = 0x20,   // Read (restore) RDAC Setting and User-defined Data from EEMEM
+    CMD_NOP = 0x00,         // NOP command
+    CMD_RestoreAll = 0xb8,  // Restore EEMEMs to all RDACs
+    CMD_RestoreRDAC = 0x88, // Restore single EEMEM to RDAC
+    CMD_StoreRDAC = 0x90,   // Store single RDAC to EEMEM
+  };
 
 public:
-	void restoreAll()
-		{
-			write(CMD_RestoreAll, 0);
-			ackPolling();
-		}
+  void restoreAll() {
+    write(CMD_RestoreAll, 0);
+    ackPolling();
+  }
 
-	void setRDAC(uint8_t ch, uint8_t data)
-		{
-			write(CMD_SetRDAC, ch, data);
-		}
+  void setRDAC(uint8_t ch, uint8_t data) { write(CMD_SetRDAC, ch, data); }
 
-	void storeRDAC(uint8_t ch)
-		{
-			write(CMD_StoreRDAC, ch);
-			ackPolling();
-		}
+  void storeRDAC(uint8_t ch) {
+    write(CMD_StoreRDAC, ch);
+    ackPolling();
+  }
 
-	void restoreRDAC(uint8_t ch)
-		{
-			write(CMD_RestoreRDAC, ch);
-			write(CMD_NOP, 0);
-		}
+  void restoreRDAC(uint8_t ch) {
+    write(CMD_RestoreRDAC, ch);
+    write(CMD_NOP, 0);
+  }
 
-	uint8_t getRDAC(uint8_t ch)
-		{
-			return read(CMD_SetRDAC, ch);
-		}
+  uint8_t getRDAC(uint8_t ch) { return read(CMD_SetRDAC, ch); }
 
-	uint8_t getEEMEM(uint8_t add)
-		{
-			return read(CMD_WriteEEMEM, add);
-		}
-
+  uint8_t getEEMEM(uint8_t add) { return read(CMD_WriteEEMEM, add); }
 };
-
-
 
 #endif // AD5254_H

@@ -8,18 +8,18 @@ namespace Ui {
   class checkpbconfig;
 }
 
-class checkpbconfig : public QDialog
-{
+class checkpbconfig : public QDialog {
   Q_OBJECT
 
- public:
+public:
   explicit checkpbconfig(QWidget *parent = 0);
   ~checkpbconfig();
 
-  public slots:
-    // void opencalibration();
+public
+slots:
+  // void opencalibration();
 
-    private:
+private:
   Ui::checkpbconfig *ui;
 };
 

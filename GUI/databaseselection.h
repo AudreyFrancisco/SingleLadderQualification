@@ -7,18 +7,18 @@ namespace Ui {
   class DatabaseSelection;
 }
 
-class DatabaseSelection : public QDialog
-{
+class DatabaseSelection : public QDialog {
   Q_OBJECT
 
- public:
+public:
   explicit DatabaseSelection(QWidget *parent = 0);
   ~DatabaseSelection();
 
-  public slots:
-    virtual void setdatabase(bool &database);
+public
+slots:
+  virtual void setdatabase(bool &database);
 
- private:
+private:
   Ui::DatabaseSelection *ui;
 };
 

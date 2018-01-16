@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -35,31 +35,24 @@
 #include "mdatareceiver.h"
 
 // function pointer
-typedef void (*saveFunction_t)(char* hdr, int hdrLen, char* data, int dataLen);
+typedef void (*saveFunction_t)(char *hdr, int hdrLen, char *data, int dataLen);
 
-class MDataSave : public MDataReceiver
-{
+class MDataSave : public MDataReceiver {
 public:
-	MDataSave();
-	void setEventSize(long evSize) { eventSize = evSize; }
-	void flush();
-	void setSaveFunction(saveFunction_t s) { saveFunction = s; }
-	
+  MDataSave();
+  void setEventSize(long evSize) { eventSize = evSize; }
+  void flush();
+  void setSaveFunction(saveFunction_t s) { saveFunction = s; }
+
 protected:
-	long parse(int numClosed);
+  long parse(int numClosed);
 
 private:
-	long eventSize;
-	saveFunction_t saveFunction;
+  long eventSize;
+  saveFunction_t saveFunction;
 
 public:
-	uint32_t expectedData;
-
+  uint32_t expectedData;
 };
-
-
-
-
-
 
 #endif // MDATASAVE_H

@@ -7,21 +7,18 @@ namespace Ui {
   class Testingprogress;
 }
 
-class Testingprogress : public QDialog
-{
+class Testingprogress : public QDialog {
   Q_OBJECT
 
- public:
+public:
   explicit Testingprogress(QWidget *parent = 0);
   ~Testingprogress();
 
-  public slots:
-    virtual void setnotification(QString notification);
+public
+slots:
+  virtual void setnotification(QString notification);
 
-
-
-
- private:
+private:
   Ui::Testingprogress *ui;
 };
 

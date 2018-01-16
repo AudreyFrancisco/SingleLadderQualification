@@ -9,7 +9,6 @@
 #include "TScanConfig.h"
 #include "TScan.h"
 
-
 typedef struct {
   int boardIndex;
   int receiver;
@@ -21,72 +20,79 @@ typedef struct {
   int exc;
 } TFifoCounter;
 
-
 class TFifoResultChip : public TScanResultChip {
   friend class TFifoAnalysis;
- private:
+
+private:
   int m_err0;
   int m_err5;
   int m_erra;
   int m_errf;
   int m_exc;
- public:
-  TFifoResultChip () : TScanResultChip () {};
-  void  WriteToFile (FILE *fp);
-  float GetVariable (TResultVariable var);
-};
 
+public:
+  TFifoResultChip() : TScanResultChip() {};
+  void WriteToFile(FILE *fp);
+  float GetVariable(TResultVariable var);
+};
 
 class TFifoResultHic : public TScanResultHic {
   friend class TFifoAnalysis;
- private:
-  int  m_err0;
-  int  m_err5;
-  int  m_erra;
-  int  m_errf;
+
+private:
+  int m_err0;
+  int m_err5;
+  int m_erra;
+  int m_errf;
   bool m_upper;
   bool m_lower;
   bool m_nominal;
-  int  m_driver;
-  int  m_exc;
-  int  m_nFaultyChips;
-  void GetParameterSuffix (std::string &suffix, std::string &file_suffix);
- public:
-  TFifoResultHic   () : TScanResultHic () {};
-  void WriteToFile (FILE *fp);
-  void WriteToDB   (AlpideDB *db, ActivityDB::activity &activity);
-};
+  int m_driver;
+  int m_exc;
+  int m_nFaultyChips;
+  void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
+public:
+  TFifoResultHic() : TScanResultHic() {};
+  void WriteToFile(FILE *fp);
+  void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
+};
 
 class TFifoResult : public TScanResult {
   friend class TFifoAnalysis;
- public:
-  TFifoResult () : TScanResult () {};
-  void WriteToFileGlobal (FILE *fp) { (void)fp; };
+
+public:
+  TFifoResult() : TScanResult() {};
+  void WriteToFileGlobal(FILE *fp) {
+    (void)fp;
+  };
 };
 
-
 class TFifoAnalysis : public TScanAnalysis {
- private:
-  std::vector <TFifoCounter> m_counters;
-  void InitCounters     ();
-  void WriteResult      ();
-  void FillVariableList ();
+private:
+  std::vector<TFifoCounter> m_counters;
+  void InitCounters();
+  void WriteResult();
+  void FillVariableList();
   THicClassification GetClassification(TFifoResultHic *result);
- protected:
-  TScanResultChip *GetChipResult () {TFifoResultChip *Result = new TFifoResultChip(); return Result;};
-  TScanResultHic  *GetHicResult  () {TFifoResultHic  *Result = new TFifoResultHic (); return Result;};
-  void             CreateResult  () {};
-  void             AnalyseHisto  (TScanHisto *histo);
- public:
-  TFifoAnalysis(std::deque<TScanHisto> *histoQue,
-                TScan                  *aScan,
-                TScanConfig            *aScanConfig,
-                std::vector <THic*>     hics,
-                std::mutex             *aMutex,
-                TFifoResult            *aResult = 0);
-  void Initialize ();
-  void Finalize   ();
- };
+
+protected:
+  TScanResultChip *GetChipResult() {
+    TFifoResultChip *Result = new TFifoResultChip();
+    return Result;
+  };
+  TScanResultHic *GetHicResult() {
+    TFifoResultHic *Result = new TFifoResultHic();
+    return Result;
+  };
+  void CreateResult() {};
+  void AnalyseHisto(TScanHisto *histo);
+
+public:
+  TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
+                std::vector<THic *> hics, std::mutex *aMutex, TFifoResult *aResult = 0);
+  void Initialize();
+  void Finalize();
+};
 
 #endif

@@ -138,6 +138,8 @@ clean-all:	clean
 	$(MAKE) -C $(LIBPOWERBOARD_DIR) cleanall
 	$(MAKE) -C $(LIBALUCMS_DIR) clean-all
 
+
+## clang format (formatting + testing)
 format:
 	/bin/bash -c './.format.sh'
 

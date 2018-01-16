@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
@@ -34,67 +34,41 @@
 #include <stdint.h>
 #include "i2cslave.h"
 
-
-class LTC2635 : public I2Cslave
-{
+class LTC2635 : public I2Cslave {
 public:
-	LTC2635(I2Cbus *bus, uint8_t address);
-	void write(uint8_t cmd, uint8_t add=0, uint16_t data=0);
+  LTC2635(I2Cbus *bus, uint8_t address);
+  void write(uint8_t cmd, uint8_t add = 0, uint16_t data = 0);
 
 private:
-	enum {
-		CMD_WriteReg			= 0x00,
-		CMD_UpdateReg			= 0x10,
-		CMD_WriteRegUpdateAll	= 0x20,
-		CMD_WriteUpdateReg		= 0x30,
-		CMD_PowerDownN			= 0x40,
-		CMD_PowerDownChip		= 0x50,
-		CMD_SelIntRef			= 0x60,
-		CMD_SelExtRef			= 0x70
-	};
+  enum {
+    CMD_WriteReg = 0x00,
+    CMD_UpdateReg = 0x10,
+    CMD_WriteRegUpdateAll = 0x20,
+    CMD_WriteUpdateReg = 0x30,
+    CMD_PowerDownN = 0x40,
+    CMD_PowerDownChip = 0x50,
+    CMD_SelIntRef = 0x60,
+    CMD_SelExtRef = 0x70
+  };
 
-	//uint8_t i2c_baseAddress;
+  // uint8_t i2c_baseAddress;
 
 public:
-	void WriteReg(uint8_t add, uint16_t data)
-		{
-			write(CMD_WriteReg, add, data);
-		}
+  void WriteReg(uint8_t add, uint16_t data) { write(CMD_WriteReg, add, data); }
 
-	void UpdateReg(uint8_t add)
-		{
-			write(CMD_UpdateReg, add);
-		}
+  void UpdateReg(uint8_t add) { write(CMD_UpdateReg, add); }
 
-	void WriteRegUpdateAll(uint8_t add, uint16_t data)
-		{
-			write(CMD_WriteRegUpdateAll, add, data);
-		}
+  void WriteRegUpdateAll(uint8_t add, uint16_t data) { write(CMD_WriteRegUpdateAll, add, data); }
 
-	void WriteUpdateReg(uint8_t add, uint16_t data)
-		{
-			write(CMD_WriteUpdateReg, add, data);
-		}
+  void WriteUpdateReg(uint8_t add, uint16_t data) { write(CMD_WriteUpdateReg, add, data); }
 
-	void PowerDownN(uint8_t add)
-		{
-			write(CMD_PowerDownN, add);
-		}
+  void PowerDownN(uint8_t add) { write(CMD_PowerDownN, add); }
 
-	void PowerDownChip()
-		{
-			write(CMD_PowerDownChip);
-		}
+  void PowerDownChip() { write(CMD_PowerDownChip); }
 
-	void SelIntRef()
-		{
-			write(CMD_SelIntRef);
-		}
+  void SelIntRef() { write(CMD_SelIntRef); }
 
-	void SelExtRef()
-		{
-			write(CMD_SelExtRef);
-		}
+  void SelExtRef() { write(CMD_SelExtRef); }
 };
 
 #endif // LTC2635_H
