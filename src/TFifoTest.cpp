@@ -13,25 +13,27 @@ TFifoTest::TFifoTest (TScanConfig                   *config,
                       std::mutex                    *aMutex) 
   : TScan (config, chips, hics, boards, histoQue, aMutex) 
 {
-  m_voltageScale  = config->GetVoltageScale  ();
-  m_mlvdsStrength = config->GetMlvdsStrength ();
-  if (m_voltageScale > 0.9 && m_voltageScale < 1.1) {
-    if (m_mlvdsStrength == ChipConfig::DCTRL_DRIVER) {
+  float voltageScale  = config->GetVoltageScale  ();
+  int   mlvdsStrength = config->GetMlvdsStrength ();
+  ((TFifoParameters*)m_parameters)->voltageScale  = voltageScale; 
+  ((TFifoParameters*)m_parameters)->mlvdsStrength = mlvdsStrength;
+  if (voltageScale > 0.9 && voltageScale < 1.1) {
+    if (mlvdsStrength == ChipConfig::DCTRL_DRIVER) {
       strcpy(m_name, "Fifo Scan");
     }
     else {
-      sprintf (m_name, "FIFO Scan, Driver %d", m_mlvdsStrength);
+      sprintf (m_name, "FIFO Scan, Driver %d", mlvdsStrength);
     }
   }
-  else if (m_voltageScale > 1.0 && m_voltageScale < 1.2) {
+  else if (voltageScale > 1.0 && voltageScale < 1.2) {
       strcpy(m_name, "Fifo Scan, V +10%");
   }
-  else if (m_voltageScale > 0.8 && m_voltageScale < 1.0) {
+  else if (voltageScale > 0.8 && voltageScale < 1.0) {
       strcpy(m_name, "Fifo Scan, V -10%");
   }
   else {
     std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
-    m_voltageScale = 1.0;
+    voltageScale = 1.0;
     strcpy(m_name, "Fifo Scan");    
   }
 
@@ -65,11 +67,12 @@ THisto TFifoTest::CreateHisto ()
 void TFifoTest::Init() 
 {
   TScan::Init();
-
+  float voltageScale  = ((TFifoParameters*)m_parameters)->voltageScale;
+  int   mlvdsStrength = ((TFifoParameters*)m_parameters)->mlvdsStrength;
   // scale voltage, send GRST, correct drop, configure chips, correct drop
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (m_voltageScale != 1.) {
-      m_hics.at(ihic)->ScaleVoltage(m_voltageScale);
+    if (voltageScale != 1.) {
+      m_hics.at(ihic)->ScaleVoltage(voltageScale);
     }      
   }
 
@@ -78,8 +81,8 @@ void TFifoTest::Init()
   }
 
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-    if (m_mlvdsStrength != ChipConfig::DCTRL_DRIVER) {
-      m_chips.at(ichip)->GetConfig()->SetParamValue("DCTRLDRIVER", m_mlvdsStrength);
+    if (mlvdsStrength != ChipConfig::DCTRL_DRIVER) {
+      m_chips.at(ichip)->GetConfig()->SetParamValue("DCTRLDRIVER", mlvdsStrength);
       AlpideConfig::ConfigureBuffers (m_chips.at(ichip), m_chips.at(ichip)->GetConfig());
     }
   }
@@ -245,16 +248,17 @@ void TFifoTest::Execute()
 void TFifoTest::Terminate() 
 {
   TScan::Terminate();
-
+  float voltageScale  = ((TFifoParameters*)m_parameters)->voltageScale;
+  int   mlvdsStrength = ((TFifoParameters*)m_parameters)->mlvdsStrength;
   // restore old voltage
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (m_voltageScale != 1.) {
+    if (voltageScale != 1.) {
       m_hics.at(ihic)->ScaleVoltage(1.);
     }      
   }
   // restore old driver setting
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-    if (m_mlvdsStrength != ChipConfig::DCTRL_DRIVER) {
+    if (mlvdsStrength != ChipConfig::DCTRL_DRIVER) {
       m_chips.at(ichip)->GetConfig()->SetParamValue("DCTRLDRIVER", ChipConfig::DCTRL_DRIVER);
       AlpideConfig::ConfigureBuffers (m_chips.at(ichip), m_chips.at(ichip)->GetConfig());
     }
