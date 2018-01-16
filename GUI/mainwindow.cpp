@@ -1399,7 +1399,8 @@ void MainWindow::locationcombo(){
     std::cout<<"the location name is "<<locationtypelist->at(i).Name<<"and the ID is "<<locationtypelist->at(i).ID<<std::endl;
     locdetails.push_back(std::make_pair(locationtypelist->at(i).Name,locationtypelist->at(i).ID));
   }
-
+  // std::cout<<"the in "<<DbGetActComponentTypeId (myDB, idofactivitytype, "in")<<std::endl;
+  //std::cout<<"the out "<< DbGetActComponentTypeId (myDB, idofactivitytype, "out")<<std::endl;
   delete myDB;
   delete myactivity;
 
@@ -1414,11 +1415,21 @@ void MainWindow::savesettings(){
   if (counter==0){return;}
   else{
     open();
+   /* AlpideDB *myDB=new AlpideDB(databasetype);
+    int projectid;
+    int id;
+    projectid=myDB->GetProjectId();
+    id=DbGetComponentTypeId (myDB, projectid, "Outer Barrel HIC Module");
+    int comp;
+    comp=DbGetComponentId (myDB,projectid,id,hicidnumber.toStdString());
+    std::cout<<"the hic name is "<<hicidnumber.toStdString()<<std::endl;
+    std::cout<<"the component id is: "<< comp<<std::endl;*/
     scanconfigwindow= new ScanConfiguration(this);
     scanconfigwindow->show();
     setdefaultvalues(scanfit,nm);
     scanconfigwindow->setdefaultspeed(scanfit);
     scanconfigwindow->setdeaulmaskstages(nm);
+    //delete myDB;
   }
   //  if (counter==0){return;}
   //  connect(ui->start_test,SIGNAL(clicked()),this,SLOT(applytests()));

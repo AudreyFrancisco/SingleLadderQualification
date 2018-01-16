@@ -767,7 +767,8 @@ AlpideTable::response * ComponentDB::readComponents(std::string ProjectId, std::
 			}
 			compoList->push_back(theComponent);
 		}
-	}
+                n1=n1->next;	
+}
     SetResponse(AlpideTable::NoError, 0,0);
 	return(&theResponse);
 }
