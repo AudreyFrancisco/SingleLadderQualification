@@ -59,6 +59,7 @@ public:
   virtual bool ContainsChip(common::TChipIndex idx) = 0;
   bool ContainsChip(int index);
   virtual bool ContainsReceiver(int boardIndex, int rcv) = 0;
+  virtual int GetReceiver(int boardIndex, int chipId) = 0;
   virtual common::TChipIndex GetChipIndex(int i) = 0;
   virtual std::vector<int> GetBoardIndices() = 0;
   virtual THicType GetHicType() = 0;
@@ -97,6 +98,7 @@ public:
   std::vector<int> GetBoardIndices();
   bool ContainsChip(common::TChipIndex idx);
   bool ContainsReceiver(int boardIndex, int rcv);
+  virtual int GetReceiver(int boardIndex, int chipId);
   void ConfigureMaster(int Master, int board, int rcv, int ctrl);
 };
 
@@ -116,6 +118,7 @@ public:
   std::vector<int> GetBoardIndices();
   bool ContainsChip(common::TChipIndex idx);
   bool ContainsReceiver(int boardIndex, int rcv);
+  virtual int GetReceiver(int boardIndex, int chipId);
   void ConfigureInterface(int board, int *rcv, int ctrl);
 };
 

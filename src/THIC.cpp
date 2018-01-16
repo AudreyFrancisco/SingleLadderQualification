@@ -298,6 +298,12 @@ bool THicIB::ContainsReceiver(int boardIndex, int rcv)
   return false;
 }
 
+int THicIB::GetReceiver(int boardIndex, int chipId)
+{
+  if (boardIndex != m_boardidx) return -1;
+  return m_rcv[chipId&0xf];
+}
+
 
 THicOB::THicOB (const char *dbId, int modId, TPowerBoard *pb, int pbMod)
   : THic (dbId, modId, pb, pbMod)
@@ -380,4 +386,13 @@ bool THicOB::ContainsReceiver(int boardIndex, int rcv)
   if ((boardIndex == m_boardidx8) && (rcv == m_rcv8)) return true;
 
   return false;
+}
+
+int THicOB::GetReceiver(int boardIndex, int chipId)
+{
+  if (boardIndex == m_boardidx0 && (chipId&0xf)<8 ) return m_rcv0;
+  if (boardIndex == m_boardidx8 && (chipId&0xf)>=8) return m_rcv8;
+
+  return -1;
+
 }

@@ -24,6 +24,10 @@ TScan::TScan (TScanConfig                   *config,
   m_hics   = hics;
   m_boards = boards;
 
+  m_firstEnabledChipId = -1;
+  m_firstEnabledBoard = -1U;
+  m_firstEnabledChannel = -1U;
+
   m_histoQue = histoQue;
   m_mutex    = aMutex;
 
@@ -192,6 +196,47 @@ void TScan::CreateScanHisto ()
   m_histo->GetChipList(m_chipList);
 }
 
+void TScan::ActivateTimestampLog() {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard ++) {
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
+      if ((m_chips.at(ichip)->GetConfig()->IsEnabled()) && (m_chips.at(ichip)->GetReadoutBoard() == m_boards.at(iboard))) {
+        m_firstEnabledChipId = m_chips.at(ichip)->GetConfig()->GetChipId() & 0xf;
+        m_firstEnabledBoard = iboard;
+        m_firstEnabledChannel = m_chips.at(ichip)->GetHic()->GetReceiver(iboard, m_firstEnabledChipId);
+        std::cout << "Chip ID used for timestamp logging: " <<  m_firstEnabledChipId << std::endl;
+        std::cout << m_firstEnabledChipId << '\t' << m_firstEnabledBoard << '\t' << m_firstEnabledChannel << std::endl;
+        return;
+      }
+    }
+  }
+}
+
+void TScan::WriteTimestampLog() {
+  std::cout << "Writing Timestamp Log" << std::endl;
+  uint32_t lastBC = 0;
+
+  uint32_t histo[256] = { 0 };
+  for (unsigned int iEvent = 0; iEvent < m_eventIds.size(); iEvent ++) {
+    unsigned int diff = (lastBC<m_bunchCounters[iEvent]) ? (m_bunchCounters[iEvent]-lastBC) : 256-lastBC+m_bunchCounters[iEvent];
+    if (diff>0 && diff<256) {
+      ++histo[diff];
+    }
+    else {
+      std::cerr << "Index out of range" << std::endl;
+    }
+    std::cout << iEvent << '\t' << m_eventIds[iEvent] << '\t' << m_timestamps[iEvent] << '\t'
+              << m_bunchCounters[iEvent] << '\t'
+              << m_bunchCounters[iEvent]*200 << '\t'
+              << diff*200 << '\t'
+              << std::endl;
+    lastBC = m_bunchCounters[iEvent];
+  }
+
+  std::cout << std::endl << std::endl;
+  for (unsigned int i=0; i<256; ++i) {
+    std::cout << i << "\t" << i*200 << "\t" << histo[i] << "\t" << (double)histo[i]/(double)m_eventIds.size() << std::endl;
+  }
+}
 
 TErrorCounter TScan::GetErrorCount (std::string hicId)
 {
@@ -287,7 +332,9 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
       }
       int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
       if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
-      if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel, m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder, &m_stuck)) {
+      unsigned int bunchCounter = -1U;
+      int chipId = -1U;
+      if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel, m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder, &m_stuck, &chipId, &bunchCounter)) {
         std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
         m_errorCount.nCorruptEvent ++;
         if (FindHIC(iboard, boardInfo.channel).compare ("None") != 0) {
@@ -305,6 +352,13 @@ void TMaskScan::ReadEventData (std::vector <TPixHit> *Hits, int iboard)
         }
         fprintf(fDebug, "\n\n");
         fclose (fDebug);
+      }
+      if (((chipId&0xf)==m_firstEnabledChipId) &&
+          (boardInfo.channel==m_firstEnabledChannel) &&
+          (iboard==m_firstEnabledBoard)) {
+        m_eventIds.push_back(boardInfo.eventId);
+        m_timestamps.push_back(boardInfo.timestamp);
+        m_bunchCounters.push_back(bunchCounter);
       }
       nTrigPerHic[boardInfo.channel] ++;
       itrg++;
