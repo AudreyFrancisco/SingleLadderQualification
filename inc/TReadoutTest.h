@@ -13,7 +13,7 @@
 #include "TScan.h"
 #include "TDataTaking.h"
 
-typedef struct __TReadoutParameters : TScanParameters {
+typedef struct __TReadoutParameters : TDataTakingParameters {
   int row;
   int triggers;
   int linkSpeed;

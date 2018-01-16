@@ -13,6 +13,10 @@
 #include "TScan.h"
 #include "TDataTaking.h"
 
+typedef struct __TNoiseParameters : TDataTakingParameters {
+  bool isMasked;
+} TNoiseParameters;
+
 class TNoiseOccupancy : public TDataTaking {
 private:
   void ConfigureChip(TAlpide *chip);

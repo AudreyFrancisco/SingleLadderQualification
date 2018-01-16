@@ -9,6 +9,14 @@
 #include "THisto.h"
 #include "TScan.h"
 
+typedef struct __TSCurveParameters : TScanParameters {
+  bool nominal;
+  int VPULSEH;
+  int VPULSEL;
+  int TARGET;
+  float m_backBias;
+} TSCurveParameters;
+
 class TSCurveScan : public TMaskScan {
 protected:
   bool m_nominal;

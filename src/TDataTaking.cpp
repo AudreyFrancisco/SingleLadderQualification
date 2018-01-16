@@ -19,6 +19,7 @@ TDataTaking::TDataTaking (TScanConfig                   *config,
 {
   m_backBias  = m_config->GetBackBias  ();
   m_nTriggers = m_config->GetParamValue("NTRIG");
+  ((TDataTakingParameters *)m_parameters)->nTriggers = m_config->GetParamValue("NTRIG");;
 
   if (m_nTriggers % kTrigPerTrain == 0) {
     m_nLast   = kTrigPerTrain;

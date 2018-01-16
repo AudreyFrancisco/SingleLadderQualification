@@ -25,7 +25,6 @@ TReadoutTest::TReadoutTest (TScanConfig                   *config,
   m_parameters  = new TReadoutParameters;
 
   ((TReadoutParameters *)m_parameters)->row            = config->GetParamValue ("READOUTROW");
-  ((TReadoutParameters *)m_parameters)->triggers       = m_nTriggers;
   ((TReadoutParameters *)m_parameters)->linkSpeed      = config->GetParamValue ("READOUTSPEED");
   ((TReadoutParameters *)m_parameters)->occupancy      = config->GetParamValue ("READOUTOCC");
   ((TReadoutParameters *)m_parameters)->driverStrength = config->GetParamValue ("READOUTDRIVER");

@@ -10,6 +10,10 @@
 #include "THisto.h"
 #include "TScan.h"
 
+typedef struct __TDigitalParameters : TScanParameters {
+  float voltageScale;
+} TDigitalParameters;
+
 class TDigitalScan : public TMaskScan {
 private:
   void ConfigureFromu(TAlpide *chip);
