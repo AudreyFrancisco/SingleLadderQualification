@@ -15,6 +15,8 @@ slc6:
       - qmake-qt5 -makefile
       - make clean
       - make
+      - cd ../../../
+      - make format-check
 
 cc7:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-cc7-dev
@@ -33,6 +35,8 @@ cc7:
       - qmake-qt5 -makefile
       - make clean
       - make
+      - cd ../../../
+      - make format-check
 
 ubuntu1604:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu16.04-dev

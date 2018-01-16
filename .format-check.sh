@@ -3,10 +3,12 @@
 # change if your executable is named different
 CLANG_FORMAT=clang-format
 
-# add all the files and directories that may not be reformatted, 
+# add all the files and directories that may not be reformatted,
 # relative to the project's root directory
 IGNORE_SET=(
     analysis
+    ui_
+    moc_
 )
 
 ####################################################################################

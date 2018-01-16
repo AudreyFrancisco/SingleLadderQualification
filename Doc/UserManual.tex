@@ -24,7 +24,7 @@ The software is currently supported to run only on the three following operating
 \item \textbf{Ubuntu 16.04 LTS:}
   \begin{lstlisting}
     apt-get update -y && \
-    apt-get install -qq -y man git subversion dpkg-dev make cmake \
+    apt-get install -qq -y man git subversion dpkg-dev make cmake clang-format \
                            wget binutils python python-dev libxml2-dev \
                            software-properties-common gcc g++ krb5-user \
                            libusb-1.0-0-dev libtinyxml-dev qt5-default qt5-qmake && \
@@ -40,7 +40,7 @@ The software is currently supported to run only on the three following operating
   \newpage
 \item \textbf{CentOS CERN 7:}
   \begin{lstlisting}
-    yum install -y gcc gcc-c++ make cmake tar zlib wget subversion \
+    yum install -y gcc gcc-c++ make cmake tar zlib wget subversion clang \
       git libusb1-devel tinyxml-devel qt5-qtbase-devel krb5-workstation cern-get-sso-cookie
       wget -O /opt/root.tar.gz \
         https://root.cern.ch/download/root_v6.08.06.Linux-centos7-x86_64-gcc4.8.tar.gz
@@ -53,7 +53,7 @@ The software is currently supported to run only on the three following operating
 \item \textbf{Scientific Linux CERN 6 *DEPRECATED*:}
   \begin{lstlisting}
     yum install -y sl-release-scl
-    yum install -y git cmake binutils which \
+    yum install -y git cmake binutils which clang \
       libX11-devel libXpm-devel libXft-devel libXext-devel \
       gsl-static curl tar devtoolset-4-gcc-c++  \
       python27 libusb1-devel tinyxml-devel qt5-qtbase-devel \
