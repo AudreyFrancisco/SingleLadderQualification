@@ -72,6 +72,12 @@ protected:
   std::vector<THic *> m_hics;
   std::vector<TReadoutBoard *> m_boards;
   std::vector<common::TChipIndex> m_chipList;
+  std::vector<uint64_t> m_eventIds;
+  std::vector<uint64_t> m_timestamps;
+  std::vector<uint32_t> m_bunchCounters;
+  int m_firstEnabledChipId;
+  int m_firstEnabledBoard;
+  int m_firstEnabledChannel;
   TScanHisto *m_histo;
   std::deque<TScanHisto> *m_histoQue;
   std::mutex *m_mutex;
@@ -123,6 +129,8 @@ public:
   void CreateHicConditions();
   void WriteConditions(const char *fName, THic *aHic);
   void WriteChipRegisters(const char *fName);
+  void ActivateTimestampLog();
+  void WriteTimestampLog(const char *fName);
   std::vector<common::TChipIndex> GetChipList() {
     return m_chipList;
   };

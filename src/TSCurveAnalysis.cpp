@@ -396,6 +396,7 @@ void TSCurveAnalysis::WriteResult()
     fclose(fp);
 
     m_scan->WriteChipRegisters(fName);
+    m_scan->WriteTimestampLog(fName);
   }
 }
 
