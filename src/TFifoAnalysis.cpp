@@ -9,25 +9,25 @@
 // TODO: Add number of exceptions to result
 // TODO: Add errors per region to chip result
 
-TFifoAnalysis::TFifoAnalysis(std::deque<TScanHisto> *histoQue, 
-                             TScan                  *aScan, 
+TFifoAnalysis::TFifoAnalysis(std::deque<TScanHisto> *histoQue,
+                             TScan                  *aScan,
                              TScanConfig            *aScanConfig,
-                             std::vector <THic*>     hics, 
-                             std::mutex             *aMutex, 
+                             std::vector <THic*>     hics,
+                             std::mutex             *aMutex,
                              TFifoResult            *aResult)
-: TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) 
+: TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex)
 {
-  if (aResult) 
+  if (aResult)
     m_result = aResult;
   else
     m_result = new TFifoResult();
 
-  
+
   FillVariableList ();
 }
 
 
-void TFifoAnalysis::Initialize() 
+void TFifoAnalysis::Initialize()
 {
   ReadChipList     ();
   CreateHicResults ();
@@ -43,7 +43,7 @@ void TFifoAnalysis::FillVariableList ()
 }
 
 
-void TFifoAnalysis::InitCounters() 
+void TFifoAnalysis::InitCounters()
 {
   m_counters.clear();
 
@@ -92,22 +92,24 @@ void TFifoAnalysis::WriteResult () {
   char fName[200];
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
-    TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId()); 
+    TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     if (m_config->GetUseDataPath()) {
       sprintf (fName, "%s/FifoScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
                                                   m_config->GetfNameSuffix());
     }
     else {
-      sprintf (fName, "FifoScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+      sprintf (fName, "FifoScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
                                                   m_config->GetfNameSuffix());
     }
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
-    
+
     FILE *fp = fopen (fName, "a");
-  
+
     hicResult->SetResultFile(fName);
     hicResult->WriteToFile(fp);
     fclose(fp);
+
+    m_scan->WriteChipRegisters(fName);
   }
 }
 
@@ -137,7 +139,7 @@ void TFifoAnalysis::Finalize()
     chipResult->m_erra = m_counters.at(ichip).erra;
     chipResult->m_errf = m_counters.at(ichip).errf;
     chipResult->m_exc  = m_counters.at(ichip).exc;
-    
+
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
       if (! (m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TFifoResultHic *hicResult = (TFifoResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
@@ -146,7 +148,7 @@ void TFifoAnalysis::Finalize()
       hicResult->m_erra += chipResult->m_erra;
       hicResult->m_errf += chipResult->m_errf;
       hicResult->m_exc  += chipResult->m_exc;
-      
+
       if (chipResult->m_err0 + chipResult->m_err5 + chipResult->m_erra + chipResult->m_errf > 0)
         hicResult->m_nFaultyChips ++;
     }
@@ -167,30 +169,30 @@ THicClassification TFifoAnalysis::GetClassification (TFifoResultHic *result)
 {
   if (result->m_exc > 0) return CLASS_RED;
   if (result->m_err0 + result->m_err5 + result->m_erra + result->m_errf == 0) return CLASS_GREEN;
-  
-  if ((result->m_err0 < m_config->GetParamValue("FIFO_MAXERR")) && 
-      (result->m_err5 < m_config->GetParamValue("FIFO_MAXERR")) && 
-      (result->m_erra < m_config->GetParamValue("FIFO_MAXERR")) && 
-      (result->m_errf < m_config->GetParamValue("FIFO_MAXERR")) && 
+
+  if ((result->m_err0 < m_config->GetParamValue("FIFO_MAXERR")) &&
+      (result->m_err5 < m_config->GetParamValue("FIFO_MAXERR")) &&
+      (result->m_erra < m_config->GetParamValue("FIFO_MAXERR")) &&
+      (result->m_errf < m_config->GetParamValue("FIFO_MAXERR")) &&
       (result->m_nFaultyChips < m_config->GetParamValue("FIFO_MAXFAULTY"))) return CLASS_ORANGE;
 
   return CLASS_RED;
 }
 
 
-void TFifoResultHic::WriteToFile (FILE *fp) 
+void TFifoResultHic::WriteToFile (FILE *fp)
 {
   fprintf (fp, "HIC Result:\n\n");
 
   fprintf (fp, "HIC Classification: %s\n\n", WriteHicClassification());
 
   fprintf (fp, "Exceptions: %d\n\n", m_exc);
-  
+
   fprintf(fp, "Errors in pattern 0x0000: %d\n", m_err0);
   fprintf(fp, "Errors in pattern 0x5555: %d\n", m_err5);
   fprintf(fp, "Errors in pattern 0xaaaa: %d\n", m_erra);
   fprintf(fp, "Errors in pattern 0xffff: %d\n", m_errf);
-  
+
   fprintf(fp, "\nNumber of chips: %d\n\n", (int) m_chipResults.size());
 
   std::map<int, TScanResultChip*>::iterator it;
@@ -208,7 +210,7 @@ void TFifoResultHic::GetParameterSuffix (std::string &suffix, std::string &file_
       suffix = string (" (Driver ") + to_string(m_driver) + string (")");
       file_suffix = string ("_Driver_") + to_string(m_driver);
     }
-    else { 
+    else {
       suffix      = string(" (nominal)");
       file_suffix = string("_nominal");
     }
@@ -230,7 +232,7 @@ void TFifoResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
   GetParameterSuffix (suffix, file_suffix);
 
   DbAddParameter (db, activity, string ("FIFO errors") + suffix,            (float) (m_err0 + m_err5 + m_erra + m_errf));
-  DbAddParameter (db, activity, string ("FIFO Exceptions") + suffix,        (float) m_exc);  
+  DbAddParameter (db, activity, string ("FIFO Exceptions") + suffix,        (float) m_exc);
   DbAddParameter (db, activity, string ("Chips with FIFO errors") + suffix, (float) m_nFaultyChips);
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
@@ -243,13 +245,13 @@ void TFifoResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 
 float TFifoResultChip::GetVariable (TResultVariable var) {
   switch (var) {
-  case Err0: 
+  case Err0:
     return (float) m_err0;
-  case Err5: 
+  case Err5:
     return (float) m_err5;
-  case Erra: 
+  case Erra:
     return (float) m_erra;
-  case Errf: 
+  case Errf:
     return (float) m_errf;
   default:
     std::cout << "Warning, bad result type for this analysis" << std::endl;
@@ -258,7 +260,7 @@ float TFifoResultChip::GetVariable (TResultVariable var) {
 }
 
 
-void TFifoResultChip::WriteToFile (FILE *fp) 
+void TFifoResultChip::WriteToFile (FILE *fp)
 {
   fprintf(fp, "Exceptions: %d\n", m_exc);
   fprintf(fp, "Errors in pattern 0x0000: %d\n", m_err0);

@@ -1,16 +1,16 @@
 #include "TLocalBusAnalysis.h"
 
-TLocalBusAnalysis::TLocalBusAnalysis (std::deque<TScanHisto> *histoQue, 
-                                      TScan                  *aScan, 
-                                      TScanConfig            *aScanConfig, 
+TLocalBusAnalysis::TLocalBusAnalysis (std::deque<TScanHisto> *histoQue,
+                                      TScan                  *aScan,
+                                      TScanConfig            *aScanConfig,
                                       std::vector <THic*>     hics,
-                                      std::mutex             *aMutex, 
+                                      std::mutex             *aMutex,
                                       TLocalBusResult        *aResult)
   : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex)
 {
   if (aResult)
     m_result = aResult;
-  else 
+  else
     m_result = new TLocalBusResult();
 
   FillVariableList();
@@ -20,7 +20,7 @@ TLocalBusAnalysis::TLocalBusAnalysis (std::deque<TScanHisto> *histoQue,
 void TLocalBusAnalysis::InitCounters()
 {
   std::map<std::string, TScanResultHic*>::iterator it;
- 
+
   for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
     TLocalBusResultHic *result = (TLocalBusResultHic*) it->second;
     result->m_err0       = 0;
@@ -62,7 +62,7 @@ void TLocalBusAnalysis::FillVariableList ()
 }
 
 
-void TLocalBusAnalysis::AnalyseHisto(TScanHisto *histo) 
+void TLocalBusAnalysis::AnalyseHisto(TScanHisto *histo)
 {
   common::TChipIndex   idx;
   TLocalBusResultChip *result;
@@ -76,29 +76,31 @@ void TLocalBusAnalysis::AnalyseHisto(TScanHisto *histo)
       result->m_errf       += (*histo)(idx, second, 0xf);
       result->m_errBusyOff += (*histo)(idx, second, 16);
       result->m_errBusyOff += (*histo)(idx, second, 17);
-    }	
-  } 
+    }
+  }
 }
 
 
 void TLocalBusAnalysis::WriteResult () {
   char fName[200];
- 
+
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
-    sprintf (fName, "LocalBusScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+    sprintf (fName, "LocalBusScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
                                                 m_config->GetfNameSuffix());
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
-    
+
     FILE *fp = fopen (fName, "a");
-  
+
     m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
     m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile(fp);
     fclose(fp);
+
+    m_scan->WriteChipRegisters(fName);
   }
 }
 
 
-void TLocalBusAnalysis::Finalize() 
+void TLocalBusAnalysis::Finalize()
 {
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip ++) {
     TLocalBusResultChip* chipResult = (TLocalBusResultChip*) m_result->GetChipResult(m_chipList.at(ichip));
@@ -118,7 +120,7 @@ void TLocalBusAnalysis::Finalize()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     int             Total     = 0;
     TLocalBusResultHic *hicResult = (TLocalBusResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
-   
+
     Total += hicResult->m_err0;
     Total += hicResult->m_err5;
     Total += hicResult->m_erra;
@@ -129,7 +131,7 @@ void TLocalBusAnalysis::Finalize()
     if (Total >= m_config->GetLocalBusCutRed()) hicResult->m_class = CLASS_RED;
     else                                        hicResult->m_class = CLASS_GREEN;
   }
- 
+
   WriteResult();
   m_finished = true;
 }
@@ -162,17 +164,17 @@ void TLocalBusResultHic::WriteToFile (FILE *fp)
 
 float TLocalBusResultChip::GetVariable (TResultVariable var) {
   switch (var) {
-  case Err0: 
+  case Err0:
     return (float) m_err0;
-  case Err5: 
+  case Err5:
     return (float) m_err5;
-  case Erra: 
+  case Erra:
     return (float) m_erra;
-  case Errf: 
+  case Errf:
     return (float) m_errf;
-  case ErrBusyOn: 
+  case ErrBusyOn:
     return (float) m_errBusyOn;
-  case ErrBusyOff: 
+  case ErrBusyOff:
     return (float) m_errBusyOff;
   default:
     std::cout << "Warning, bad result type for this analysis" << std::endl;
@@ -191,4 +193,3 @@ void TLocalBusResultChip::WriteToFile (FILE *fp)
   fprintf(fp, "Errors for Busy on:  %d\n", m_errBusyOn);
   fprintf(fp, "Errors for Busy off: %d\n", m_errBusyOff);
 }
-

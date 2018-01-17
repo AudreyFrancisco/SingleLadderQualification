@@ -4,11 +4,11 @@
 
 #include <string>
 
-TCycleAnalysis::TCycleAnalysis(std::deque<TScanHisto> *histoQue, 
-                               TScan                  *aScan, 
-                               TScanConfig            *aScanConfig, 
+TCycleAnalysis::TCycleAnalysis(std::deque<TScanHisto> *histoQue,
+                               TScan                  *aScan,
+                               TScanConfig            *aScanConfig,
                                std::vector <THic*>     hics,
-                               std::mutex             *aMutex, 
+                               std::mutex             *aMutex,
                                TCycleResult           *aResult )
   : TScanAnalysis (histoQue, aScan, aScanConfig, hics, aMutex)
 {
@@ -40,12 +40,12 @@ void TCycleAnalysis::InitCounters()
 
 // TODO write cycle variables to file
 // Q: 1 file per HIC? -> yes, since attachment per activity, activity is per HIC
-void TCycleAnalysis::Finalize() 
+void TCycleAnalysis::Finalize()
 {
-  char fName[200]; 
+  char fName[200];
   std::vector <std::map <std::string, THicCounter>> counters = ((TEnduranceCycle*) m_scan)->GetCounters ();
   ((TCycleResult*)m_result)->m_nCycles = counters.size();
- 
+
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TCycleResultHic *hicResult  = (TCycleResultHic*)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
 
@@ -54,7 +54,7 @@ void TCycleAnalysis::Finalize()
                                              m_config->GetfNameSuffix());
     }
     else {
-      sprintf (fName, "CycleFile_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+      sprintf (fName, "CycleFile_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
                                            m_config->GetfNameSuffix());
     }
     hicResult->SetCycleFile(fName);
@@ -64,14 +64,14 @@ void TCycleAnalysis::Finalize()
       std::map <std::string, THicCounter> hicCounters = counters.at(icycle);
       THicCounter                         hicCounter  = hicCounters.at(m_hics.at(ihic)->GetDbId());
 
-      fprintf (fp, "%d %d %d %.3f %.3f %.3f %.3f %.1f %.1f\n", 
-                   icycle, 
+      fprintf (fp, "%d %d %d %.3f %.3f %.3f %.3f %.1f %.1f\n",
+                   icycle,
 	           hicCounter.m_trip?1:0,
                    hicCounter.m_nWorkingChips,
                    hicCounter.m_iddaClocked,
                    hicCounter.m_idddClocked,
                    hicCounter.m_iddaConfigured,
-                   hicCounter.m_idddConfigured, 
+                   hicCounter.m_idddConfigured,
                    hicCounter.m_tempStart,
                    hicCounter.m_tempEnd);
 
@@ -97,7 +97,7 @@ void TCycleAnalysis::Finalize()
       hicResult->m_avDeltaT += hicCounter.m_tempEnd - hicCounter.m_tempStart;
       hicResult->m_avIdda   += hicCounter.m_iddaClocked;
       hicResult->m_avIddd   += hicCounter.m_idddClocked;
-	  
+
     }
     fclose (fp);
   }
@@ -116,7 +116,7 @@ void TCycleAnalysis::Finalize()
 }
 
 
-void TCycleAnalysis::WriteResult() 
+void TCycleAnalysis::WriteResult()
 {
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
@@ -126,7 +126,7 @@ void TCycleAnalysis::WriteResult()
                                                m_config->GetfNameSuffix());
     }
     else {
-      sprintf (fName, "CycleResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+      sprintf (fName, "CycleResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
                                                m_config->GetfNameSuffix());
     }
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
@@ -136,18 +136,20 @@ void TCycleAnalysis::WriteResult()
     hicResult->SetResultFile(fName);
     hicResult->WriteToFile  (fp);
     fclose (fp);
+
+    m_scan->WriteChipRegisters(fName);
   }
 
 }
 
 
-void TCycleResult::WriteToFileGlobal (FILE*fp) 
+void TCycleResult::WriteToFileGlobal (FILE*fp)
 {
   fprintf (fp, "Number of cycles: %d\n\n", m_nCycles);
 }
 
 
-void TCycleResultHic::WriteToFile(FILE *fp) 
+void TCycleResultHic::WriteToFile(FILE *fp)
 {
   fprintf(fp, "HIC Result:\n\n");
 
@@ -167,12 +169,12 @@ void TCycleResultHic::WriteToFile(FILE *fp)
 }
 
 
-float TCycleResultChip::GetVariable(TResultVariable var) 
+float TCycleResultChip::GetVariable(TResultVariable var)
 {
   switch (var) {
   default:
     std::cout << "Warning, bad result type for this analysis" << std::endl;
-    return 0;  
+    return 0;
   }
 }
 

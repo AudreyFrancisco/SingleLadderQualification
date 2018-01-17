@@ -787,7 +787,7 @@ void TThresholdAnalysis::Finalize()
   //for (it = mp.begin(); it != mp.end(); ++it) {
   //  TThresholdResultChip *chipResult = (TThresholdResultChip*) it->second;
   //}
-  
+
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
     TThresholdResultHic *hicResult = (TThresholdResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
@@ -861,7 +861,9 @@ void TThresholdAnalysis::WriteResult()
     m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->SetResultFile(fName);
     m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->WriteToFile  (fp);
     fclose(fp);
-  }	   				     
+
+    m_scan->WriteChipRegisters(fName);
+  }
 }
 
 
@@ -870,7 +872,7 @@ float TThresholdAnalysis::GetResultThreshold(int chip) {
 }
 
 
-void TThresholdResult::WriteToFileGlobal (FILE *fp) 
+void TThresholdResult::WriteToFileGlobal (FILE *fp)
 {
   fprintf(fp, "8b10b errors:\t%d\n",    m_n8b10b);
   fprintf(fp, "Corrupt events:\t%d\n",  m_nCorrupt);
@@ -886,7 +888,7 @@ void TThresholdResultHic::WriteToFile(FILE *fp) {
   fprintf(fp, "\nNumber of chips: %d\n\n", (int)m_chipResults.size());
 
   std::map<int, TScanResultChip*>::iterator it;
-  
+
   for (it = m_chipResults.begin(); it != m_chipResults.end(); it++) {
     fprintf(fp, "\nResult chip %d:\n\n", it->first);
     it->second->WriteToFile(fp);
@@ -919,7 +921,7 @@ void TThresholdResultChip::WriteToFile (FILE *fp) {
 
 float TThresholdResultChip::GetVariable (TResultVariable var) {
   switch (var) {
-  case vcasn: 
+  case vcasn:
     return m_thresholdMean;
   case ithr:
     return m_thresholdMean;

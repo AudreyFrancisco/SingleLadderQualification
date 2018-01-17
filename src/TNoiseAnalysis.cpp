@@ -5,13 +5,13 @@
 #include "TNoiseOccupancy.h"
 #include "DBHelpers.h"
 
-TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue, 
-                               TScan                  *aScan, 
+TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue,
+                               TScan                  *aScan,
                                TScanConfig            *aScanConfig,
-                               std::vector <THic*>     hics, 
-                               std::mutex             *aMutex, 
-                               TNoiseResult           *aResult) 
-: TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) 
+                               std::vector <THic*>     hics,
+                               std::mutex             *aMutex,
+                               TNoiseResult           *aResult)
+: TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex)
 {
   m_nTrig    = m_config->GetParamValue("NTRIG");
   m_noiseCut = m_nTrig / m_config->GetParamValue("NOISECUT_INV");
@@ -22,7 +22,7 @@ TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue,
 }
 
 
-void TNoiseAnalysis::WriteResult() 
+void TNoiseAnalysis::WriteResult()
 {
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
@@ -33,7 +33,7 @@ void TNoiseAnalysis::WriteResult()
                                                   m_config->GetfNameSuffix());
     }
     else {
-      sprintf (fName, "NoiseOccResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+      sprintf (fName, "NoiseOccResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
                                                   m_config->GetfNameSuffix());
     }
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
@@ -41,8 +41,10 @@ void TNoiseAnalysis::WriteResult()
     FILE *fp = fopen (fName, "a");
     hicResult->SetResultFile(fName);
     hicResult->WriteToFile  (fp);
-    
+
     fclose(fp);
+
+    m_scan->WriteChipRegisters(fName);
   }
 }
 
@@ -52,27 +54,27 @@ void TNoiseAnalysis::WriteNoisyPixels(THic *hic)
   char fName[200];
   TNoiseResult    *result    = (TNoiseResult*)    m_result;
   TNoiseResultHic *hicResult = (TNoiseResultHic*) m_result->GetHicResult(hic->GetDbId());
- 
+
   if (m_config->GetUseDataPath()) {
     sprintf (fName, "%s/NoisyPixels_%s.dat", hicResult->GetOutputPath().c_str(),
                                              m_config->GetfNameSuffix());
   }
   else {
-    sprintf (fName, "NoisyPixels_%s_%s.dat", hic->GetDbId().c_str(), 
+    sprintf (fName, "NoisyPixels_%s_%s.dat", hic->GetDbId().c_str(),
                                              m_config->GetfNameSuffix());
   }
-  
+
   hicResult->SetNoisyFile(fName);
 
   FILE *fp     = fopen (fName, "w");
 
   for (unsigned int i = 0; i < result->m_noisyPixels.size(); i++) {
     if (!common::HitBelongsToHic(hic, result->m_noisyPixels.at(i))) continue;
-    fprintf (fp, "%d %d %d %d\n", result->m_noisyPixels.at(i).chipId, 
-                                  result->m_noisyPixels.at(i).region, 
-                                  result->m_noisyPixels.at(i).dcol, 
+    fprintf (fp, "%d %d %d %d\n", result->m_noisyPixels.at(i).chipId,
+                                  result->m_noisyPixels.at(i).region,
+                                  result->m_noisyPixels.at(i).dcol,
                                   result->m_noisyPixels.at(i).address);
-  }  
+  }
   fclose(fp);
 }
 
@@ -98,7 +100,7 @@ void TNoiseAnalysis::InitCounters()
 }
 
 
-void TNoiseAnalysis::FillVariableList() 
+void TNoiseAnalysis::FillVariableList()
 {
   m_variableList.insert (std::pair <const char *, TResultVariable> ("# of noisy Pixels",noisyPix));
   m_variableList.insert (std::pair <const char *, TResultVariable> ("Noise occupancy",noiseOcc));
@@ -121,7 +123,7 @@ void TNoiseAnalysis::AnalyseHisto (TScanHisto *histo)
           continue;
 	}
         for (int icol = 0; icol < 1024; icol ++) {
-          for (int irow = 0; irow < 512; irow ++) {            
+          for (int irow = 0; irow < 512; irow ++) {
             // if entry > noise cut: add pixel to chipResult->AddNoisyPixel
             if ((*histo)(m_chipList.at(ichip), icol, irow) > m_noiseCut) {
 	      TPixHit pixel = {boardIndex, channel, chipId, 0, icol, irow};
@@ -138,11 +140,11 @@ void TNoiseAnalysis::AnalyseHisto (TScanHisto *histo)
 }
 
 
-void TNoiseAnalysis::Finalize() 
+void TNoiseAnalysis::Finalize()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic ++) {
     TNoiseResultHic *hicResult = (TNoiseResultHic*) m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
-    hicResult->m_occ    = 0; 
+    hicResult->m_occ    = 0;
     hicResult->m_nNoisy = 0;
     if (m_hics.at(ihic)->GetNChips() == 0) continue;
 
@@ -163,14 +165,14 @@ void TNoiseAnalysis::Finalize()
 }
 
 
-void TNoiseResultChip::WriteToFile(FILE *fp) 
+void TNoiseResultChip::WriteToFile(FILE *fp)
 {
   fprintf(fp, "Noisy pixels:    %d\n", (int) m_noisyPixels.size());
   fprintf(fp, "Noise occupancy: %e\n", m_occ);
 }
 
 
-float TNoiseResultChip::GetVariable(TResultVariable var) 
+float TNoiseResultChip::GetVariable(TResultVariable var)
 {
   switch (var) {
   case noiseOcc:
@@ -179,7 +181,7 @@ float TNoiseResultChip::GetVariable(TResultVariable var)
     return m_noisyPixels.size();
   default:
     std::cout << "Warning, bad result type for this analysis" << std::endl;
-    return 0;  
+    return 0;
   }
 }
 
@@ -191,7 +193,7 @@ void TNoiseResultHic::WriteToFile(FILE *fp)
   fprintf (fp, "HIC Classification: %s\n\n", WriteHicClassification());
 
   fprintf(fp, "Noisy pixels:    %d\n", m_nNoisy);
-  fprintf(fp, "Noise occupancy: %e\n", m_occ);  
+  fprintf(fp, "Noise occupancy: %e\n", m_occ);
 
   fprintf(fp, "\nNoisy pixel file: %s\n", m_noisyFile);
 
@@ -203,7 +205,7 @@ void TNoiseResultHic::WriteToFile(FILE *fp)
     fprintf(fp, "\nResults chip %d:\n\n", it->first);
     it->second->WriteToFile(fp);
   }
-  
+
   std::cout << std::endl << "Error counts (Test feature): " << std::endl;
   std::cout << "8b10b errors:  " << m_errorCounter.n8b10b << std::endl;
   std::cout << "corrupt events " << m_errorCounter.nCorruptEvent << std::endl;
@@ -212,7 +214,7 @@ void TNoiseResultHic::WriteToFile(FILE *fp)
 
 
 //TODO: add information on masking (number of masked pixels?)
-void TNoiseResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix) 
+void TNoiseResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix)
 {
   if (m_isMasked) {
     suffix      = "masked ";
@@ -227,7 +229,7 @@ void TNoiseResultHic::GetParameterSuffix (std::string &suffix, std::string &file
 }
 
 
-void TNoiseResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity) 
+void TNoiseResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
   std::string suffix, file_suffix, fileName, remoteName;
   std::size_t point, slash;

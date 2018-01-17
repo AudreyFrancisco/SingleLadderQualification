@@ -3,22 +3,22 @@
 #include "TDigitalWFAnalysis.h"
 #include "DBHelpers.h"
 
-TDigitalWFAnalysis::TDigitalWFAnalysis(std::deque<TScanHisto> *histoQue, 
-                                       TScan                  *aScan, 
-                                       TScanConfig            *aScanConfig, 
+TDigitalWFAnalysis::TDigitalWFAnalysis(std::deque<TScanHisto> *histoQue,
+                                       TScan                  *aScan,
+                                       TScanConfig            *aScanConfig,
                                        std::vector <THic*>     hics,
-                                       std::mutex             *aMutex, 
-                                       TDigitalWFResult       *aResult) 
-: TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) 
+                                       std::mutex             *aMutex,
+                                       TDigitalWFResult       *aResult)
+: TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex)
 {
   m_ninj   = m_config->GetParamValue("NINJ");
   if (aResult) m_result = aResult;
-  else         m_result = new TDigitalWFResult(); 
+  else         m_result = new TDigitalWFResult();
   FillVariableList ();
 }
 
 
-void TDigitalWFAnalysis::FillVariableList () 
+void TDigitalWFAnalysis::FillVariableList ()
 {
   m_variableList.insert (std::pair <const char *, TResultVariable> ("# of unmaskable Pixels", unmaskablePix));
   m_variableList.insert (std::pair <const char *, TResultVariable> ("# of stuck Pixels",      stuckPix));
@@ -32,7 +32,7 @@ void TDigitalWFAnalysis::Initialize()
 }
 
 
-void TDigitalWFAnalysis::InitCounters () 
+void TDigitalWFAnalysis::InitCounters ()
 {
   for (unsigned int i = 0; i < m_chipList.size(); i++) {
     TDigitalWFResultChip *result = (TDigitalWFResultChip*) m_result->GetChipResult(m_chipList.at(i));
@@ -51,7 +51,7 @@ void TDigitalWFAnalysis::InitCounters ()
 }
 
 
-void TDigitalWFAnalysis::AnalyseHisto (TScanHisto *histo) 
+void TDigitalWFAnalysis::AnalyseHisto (TScanHisto *histo)
 {
   int row = histo->GetIndex();
   std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size() << std::endl;
@@ -67,7 +67,7 @@ void TDigitalWFAnalysis::AnalyseHisto (TScanHisto *histo)
         hit.channel    = m_chipList.at(ichip).dataReceiver;
         hit.chipId     = m_chipList.at(ichip).chipId;
         hit.dcol       = dcol % 16;
-        hit.region     = dcol / 16; 
+        hit.region     = dcol / 16;
         hit.address    = row *2;
         if (row%2) {
           hit.address += (1-(icol %2));
@@ -85,12 +85,12 @@ void TDigitalWFAnalysis::AnalyseHisto (TScanHisto *histo)
 void TDigitalWFAnalysis::Finalize() {
   TErrorCounter         errCount = ((TMaskScan*)m_scan)->GetErrorCount();
   TDigitalWFResult     *result   = (TDigitalWFResult*) m_result;
-  std::vector<TPixHit>  stuck    = ((TMaskScan*)m_scan)->GetStuckPixels();  
+  std::vector<TPixHit>  stuck    = ((TMaskScan*)m_scan)->GetStuckPixels();
 
   result->m_nTimeout       = errCount.nTimeout;
   result->m_n8b10b         = errCount.n8b10b;
   result->m_nCorrupt       = errCount.nCorruptEvent;
-     
+
   // for the time being divide stuck pixels on different chips here
   // later: change AlpideDecoder?
 
@@ -147,7 +147,7 @@ THicClassification TDigitalWFAnalysis::GetClassificationIB(TDigitalWFResultHic* 
 }
 
 
-void TDigitalWFAnalysis::WriteResult() 
+void TDigitalWFAnalysis::WriteResult()
 {
 
   // should write to file: Conditions, global, results
@@ -164,7 +164,7 @@ void TDigitalWFAnalysis::WriteResult()
                                                        m_config->GetfNameSuffix());
     }
     else {
-      sprintf (fName, "DigitalWFScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(), 
+      sprintf (fName, "DigitalWFScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
                                                        m_config->GetfNameSuffix());
     }
     m_scan  ->WriteConditions (fName, m_hics.at(ihic));
@@ -175,11 +175,13 @@ void TDigitalWFAnalysis::WriteResult()
     hicResult->WriteToFile  (fp);
     fclose (fp);
     //    m_result->WriteToFile     (fName);
+
+    m_scan->WriteChipRegisters(fName);
   }
 }
 
 
-void TDigitalWFAnalysis::WriteStuckPixels(THic *hic) 
+void TDigitalWFAnalysis::WriteStuckPixels(THic *hic)
 {
   char fName[100];
   TScanResultHic *hicResult = m_result->GetHicResult(hic->GetDbId());
@@ -188,10 +190,10 @@ void TDigitalWFAnalysis::WriteStuckPixels(THic *hic)
                                              m_config->GetfNameSuffix());
   }
   else {
-    sprintf (fName, "StuckPixels_%s_%s.dat", hic->GetDbId().c_str(), 
+    sprintf (fName, "StuckPixels_%s_%s.dat", hic->GetDbId().c_str(),
                                              m_config->GetfNameSuffix());
   }
-  
+
   ((TDigitalWFResultHic*)m_result->GetHicResult(hic->GetDbId()))->SetStuckFile(fName);
   std::vector<TPixHit>  pixels = ((TMaskScan*)m_scan)->GetStuckPixels();
 
@@ -199,7 +201,7 @@ void TDigitalWFAnalysis::WriteStuckPixels(THic *hic)
 }
 
 
-void TDigitalWFAnalysis::WriteUnmaskedPixels(THic *hic) 
+void TDigitalWFAnalysis::WriteUnmaskedPixels(THic *hic)
 {
   char fName[100];
   TScanResultHic *hicResult = m_result->GetHicResult(hic->GetDbId());
@@ -208,10 +210,10 @@ void TDigitalWFAnalysis::WriteUnmaskedPixels(THic *hic)
                                                 m_config->GetfNameSuffix());
   }
   else {
-    sprintf (fName, "UnmaskedPixels_%s_%s.dat", hic->GetDbId().c_str(), 
+    sprintf (fName, "UnmaskedPixels_%s_%s.dat", hic->GetDbId().c_str(),
                                                 m_config->GetfNameSuffix());
   }
-  
+
   ((TDigitalWFResultHic*)m_result->GetHicResult(hic->GetDbId()))->SetUnmaskedFile(fName);
   std::vector<TPixHit>  pixels = m_unmaskable;
 
@@ -219,7 +221,7 @@ void TDigitalWFAnalysis::WriteUnmaskedPixels(THic *hic)
 }
 
 
-void TDigitalWFAnalysis::WritePixels (THic *hic, std::vector <TPixHit> pixels, const char *fName) 
+void TDigitalWFAnalysis::WritePixels (THic *hic, std::vector <TPixHit> pixels, const char *fName)
 {
   FILE *fp     = fopen (fName, "w");
 
@@ -231,7 +233,7 @@ void TDigitalWFAnalysis::WritePixels (THic *hic, std::vector <TPixHit> pixels, c
 }
 
 
-void TDigitalWFResult::WriteToFileGlobal (FILE *fp) 
+void TDigitalWFResult::WriteToFileGlobal (FILE *fp)
 {
   fprintf(fp, "8b10b errors:\t%d\n",    m_n8b10b);
   fprintf(fp, "Corrupt events:\t%d\n",  m_nCorrupt);
@@ -249,7 +251,7 @@ void TDigitalWFResult::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 }
 
 
-void TDigitalWFResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity) 
+void TDigitalWFResultHic::WriteToDB (AlpideDB *db, ActivityDB::activity &activity)
 {
   string remoteName;
   DbAddParameter  (db, activity, string("Unmaskable pixels"),       (float) m_nUnmaskable);
@@ -276,7 +278,7 @@ void TDigitalWFResultHic::WriteToFile (FILE *fp)
   fprintf(fp, "\nNumber of chips: %d\n\n", (int) m_chipResults.size());
 
   std::map<int, TScanResultChip*>::iterator it;
-  
+
   for (it = m_chipResults.begin(); it != m_chipResults.end(); it++) {
     fprintf(fp, "\nResult chip %d:\n\n", it->first);
     it->second->WriteToFile(fp);
@@ -292,17 +294,15 @@ void TDigitalWFResultChip::WriteToFile (FILE *fp)
 }
 
 
-float TDigitalWFResultChip::GetVariable (TResultVariable var) 
+float TDigitalWFResultChip::GetVariable (TResultVariable var)
 {
   switch (var) {
-  case unmaskablePix: 
+  case unmaskablePix:
     return (float) m_nUnmaskable;
-  case stuckPix: 
-    return (float) m_nStuck; 
+  case stuckPix:
+    return (float) m_nStuck;
   default:
     std::cout << "Warning, bad result type for this analysis" << std::endl;
     return 0;
   }
 }
-
-

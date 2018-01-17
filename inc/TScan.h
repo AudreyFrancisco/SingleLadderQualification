@@ -122,6 +122,7 @@ public:
   TErrorCounter GetErrorCount(std::string hicId);
   void CreateHicConditions();
   void WriteConditions(const char *fName, THic *aHic);
+  void WriteChipRegisters(const char *fName);
   std::vector<common::TChipIndex> GetChipList() {
     return m_chipList;
   };
