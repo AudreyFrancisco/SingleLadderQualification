@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string.h>
 #include <string>
 
@@ -211,8 +212,13 @@ void TScan::ActivateTimestampLog() {
   }
 }
 
-void TScan::WriteTimestampLog() {
-  std::cout << "Writing Timestamp Log" << std::endl;
+void TScan::WriteTimestampLog(const char *fName)
+{
+  if (m_eventIds.size() == 0) return;
+
+  std::ofstream output(fName, std::fstream::out | std::fstream::app);
+
+  output << "### Timestamp Log" << std::endl;
   uint32_t lastBC = 0;
 
   uint32_t histo[256] = { 0 };
@@ -222,9 +228,9 @@ void TScan::WriteTimestampLog() {
       ++histo[diff];
     }
     else {
-      std::cerr << "Index out of range" << std::endl;
+      std::cerr << "WriteTimestampLog: Index out of range" << std::endl;
     }
-    std::cout << iEvent << '\t' << m_eventIds[iEvent] << '\t' << m_timestamps[iEvent] << '\t'
+    output << iEvent << '\t' << m_eventIds[iEvent] << '\t' << m_timestamps[iEvent] << '\t'
               << m_bunchCounters[iEvent] << '\t'
               << m_bunchCounters[iEvent]*200 << '\t'
               << diff*200 << '\t'
@@ -232,10 +238,13 @@ void TScan::WriteTimestampLog() {
     lastBC = m_bunchCounters[iEvent];
   }
 
-  std::cout << std::endl << std::endl;
+  output << std::endl << std::endl;
+  output << " ## Timestamp histogram" << std::endl;
   for (unsigned int i=0; i<256; ++i) {
-    std::cout << i << "\t" << i*200 << "\t" << histo[i] << "\t" << (double)histo[i]/(double)m_eventIds.size() << std::endl;
+    output << i << "\t" << i*200 << "\t" << histo[i] << "\t" << (double)histo[i]/(double)m_eventIds.size() << std::endl;
   }
+  output << std::endl;
+  output.close();
 }
 
 TErrorCounter TScan::GetErrorCount (std::string hicId)

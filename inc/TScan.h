@@ -130,7 +130,7 @@ public:
   void WriteConditions(const char *fName, THic *aHic);
   void WriteChipRegisters(const char *fName);
   void ActivateTimestampLog();
-  void WriteTimestampLog();
+  void WriteTimestampLog(const char *fName);
   std::vector<common::TChipIndex> GetChipList() {
     return m_chipList;
   };
