@@ -15,8 +15,9 @@ TSCurveScan::TSCurveScan       (TScanConfig                   *config,
                                 std::mutex                    *aMutex)
   : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
 {
-  m_backBias  = m_config->GetBackBias  ();
-  m_nominal   = (m_config->GetParamValue("NOMINAL") == 1);
+  m_backBias   = m_config->GetBackBias  ();
+  m_nominal    = (m_config->GetParamValue("NOMINAL") == 1);
+  m_parameters = new TSCurveParameters;
 }
 
 

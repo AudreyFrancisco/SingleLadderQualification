@@ -23,7 +23,7 @@ TReadoutTest::TReadoutTest (TScanConfig                   *config,
   m_pulseLength = chips.at(0)->GetConfig()->GetParamValue("PULSEDURATION");
 
   m_parameters  = new TReadoutParameters;
-
+  ((TReadoutParameters *)m_parameters)->nTriggers      = config->GetParamValue("NTRIG");;
   ((TReadoutParameters *)m_parameters)->row            = config->GetParamValue ("READOUTROW");
   ((TReadoutParameters *)m_parameters)->linkSpeed      = config->GetParamValue ("READOUTSPEED");
   ((TReadoutParameters *)m_parameters)->occupancy      = config->GetParamValue ("READOUTOCC");
@@ -58,7 +58,7 @@ void TReadoutTest::ConfigureChip  (TAlpide *chip)
   chip->GetConfig()->SetParamValue("DTUPREEMP", params->preemp);
   chip->GetConfig()->SetParamValue("LINKSPEED", params->linkSpeed);
   if (params->pllStages >= 0) {
-    chip->GetConfig()->SetParamValue("PLLSTAGES", params->linkSpeed);    
+    chip->GetConfig()->SetParamValue("PLLSTAGES", params->pllStages);    
   }
   AlpideConfig::BaseConfig   (chip);
   ConfigureFromu             (chip);
@@ -94,8 +94,8 @@ THisto TReadoutTest::CreateHisto ()
 
 void TReadoutTest::Init ()
 {
-  int linkSpeed    = ((TReadoutParameters*)m_parameters)->linkSpeed;
-  int voltageScale = ((TReadoutParameters*)m_parameters)->voltageScale;
+  int   linkSpeed    = ((TReadoutParameters*)m_parameters)->linkSpeed;
+  float voltageScale = ((TReadoutParameters*)m_parameters)->voltageScale;
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     TReadoutBoardMOSAIC *mosaic = (TReadoutBoardMOSAIC *)m_boards.at(i);
     if (mosaic) {

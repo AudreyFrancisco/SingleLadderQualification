@@ -123,12 +123,13 @@ void TScan::Terminate()
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), true);
   }
 
-  for (unsigned int i = 0; i < m_boards.size(); i++) {
-    m_boards.at(i)->SendOpCode (Alpide::OPCODE_GRST);
-  }
 
   for (const auto& rChip : m_chips) {
     if (rChip->GetConfig()->IsEnabled()) m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
+  }
+
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    m_boards.at(i)->SendOpCode (Alpide::OPCODE_GRST);
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {

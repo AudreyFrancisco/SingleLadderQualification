@@ -16,6 +16,7 @@ TDigitalScan::TDigitalScan (TScanConfig                   *config,
   : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
 {
   m_voltageScale = config->GetVoltageScale();
+  m_parameters   = new TDigitalParameters;
 
   std::cout << "m_voltageScale = " << m_voltageScale << std::endl;
   if (IsNominal()) {

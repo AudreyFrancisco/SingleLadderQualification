@@ -20,6 +20,10 @@ TNoiseOccupancy::TNoiseOccupancy (TScanConfig                   *config,
   sprintf(m_name, "Noise Occupancy %.1f V", m_backBias); 
   m_pulse       = false;
   m_pulseLength = 0;
+  m_parameters  = new TNoiseParameters;
+  ((TNoiseParameters *)m_parameters)->nTriggers = config->GetParamValue("NTRIG");;
+
+
 }
 
 
