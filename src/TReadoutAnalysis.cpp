@@ -193,6 +193,14 @@ void TReadoutResultHic::WriteToFile (FILE *fp)
 
   fprintf (fp, "HIC Classification: %s\n\n", WriteHicClassification());
 
+  fprintf (fp, "== Scan parameters:\n");
+  fprintf (fp, "Voltage Scale:   %.1f\n", ((TReadoutParameters *) m_scanParameters)->voltageScale);
+  fprintf (fp, "PLL Stages:      %d\n",   ((TReadoutParameters *) m_scanParameters)->pllStages);
+  fprintf (fp, "LinkSpeed:       %d\n",   ((TReadoutParameters *) m_scanParameters)->linkSpeed);
+  fprintf (fp, "Driver Strength: %d\n",   ((TReadoutParameters *) m_scanParameters)->driverStrength);
+  fprintf (fp, "Preemphasis:     %d\n",   ((TReadoutParameters *) m_scanParameters)->preemp);
+  fprintf (fp, "==\n\n");
+
   fprintf (fp, "8b10b errors:   %d\n", m_errorCounter.n8b10b);
   fprintf (fp, "Corrupt events: %d\n", m_errorCounter.nCorruptEvent);
   fprintf (fp, "Timeouts:       %d\n", m_errorCounter.nTimeout);
