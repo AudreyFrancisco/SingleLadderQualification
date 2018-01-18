@@ -13,6 +13,8 @@ TFifoTest::TFifoTest (TScanConfig                   *config,
                       std::mutex                    *aMutex) 
   : TScan (config, chips, hics, boards, histoQue, aMutex) 
 {
+  m_parameters  = new TFifoParameters;
+
   float voltageScale  = config->GetVoltageScale  ();
   int   mlvdsStrength = config->GetMlvdsStrength ();
   ((TFifoParameters*)m_parameters)->voltageScale  = voltageScale; 
