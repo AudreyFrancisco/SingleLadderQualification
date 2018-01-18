@@ -228,9 +228,9 @@ void TReadoutResultHic::GetParameterSuffix (std::string &suffix, std::string &fi
   TReadoutParameters *params = (TReadoutParameters*)m_scanParameters;
 
   if ((params->voltageScale != 1) || (params->pllStages >= 0)) {
-    suffix = string (" ") + to_string(m_linkSpeed)
-             + to_string (params->voltageScale) + string ("xDVDD ")
-             + to_string (params->pllStages);
+    suffix = string (" ") + to_string(m_linkSpeed) + string (" ")
+             + to_string (params->voltageScale) + string ("xDVDD")
+             + string (" ") + to_string (params->pllStages);
   }
   else {
     suffix = string (" ") + to_string(m_linkSpeed);
@@ -239,9 +239,9 @@ void TReadoutResultHic::GetParameterSuffix (std::string &suffix, std::string &fi
   suffix += string(" P") + to_string(m_preemp);
 
   if ((params->voltageScale != 1) || (params->pllStages >= 0)) {
-    file_suffix = string (" ") + to_string(m_linkSpeed)
-                  + to_string (params->voltageScale) + string ("xDVDD ")
-                  + to_string (params->pllStages);
+    file_suffix = string ("_") + to_string(m_linkSpeed)+ string ("_")
+                  + to_string (params->voltageScale) + string ("xDVDD")
+                  + string ("_") + to_string (params->pllStages);
   }
   else {
     file_suffix = string("_") + to_string(m_linkSpeed);
