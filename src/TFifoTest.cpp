@@ -18,8 +18,6 @@ TFifoTest::TFifoTest (TScanConfig                   *config,
   float voltageScale  = config->GetVoltageScale  ();
   int   mlvdsStrength = config->GetMlvdsStrength ();
 
-  m_parameters = new TFifoParameters;
-
   ((TFifoParameters*)m_parameters)->voltageScale  = voltageScale; 
   ((TFifoParameters*)m_parameters)->mlvdsStrength = mlvdsStrength;
   if (voltageScale > 0.9 && voltageScale < 1.1) {
