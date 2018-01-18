@@ -82,6 +82,12 @@ void TScan::Init()
   for (const auto& rChip : m_chips) {
     if (rChip->GetConfig()->IsEnabled()) m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
   }
+
+  for (const auto& rBoard : m_boards) {
+    if (TReadoutBoardMOSAIC* rMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*>(rBoard)) {
+      m_conditions.m_boardConfigStart.push_back(rMOSAIC->GetRegisterDump());
+    }
+  }
 }
 
 
@@ -123,9 +129,14 @@ void TScan::Terminate()
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), true);
   }
 
-
   for (const auto& rChip : m_chips) {
     if (rChip->GetConfig()->IsEnabled()) m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
+  }
+
+  for (const auto& rBoard : m_boards) {
+    if (TReadoutBoardMOSAIC* rMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*>(rBoard)) {
+      m_conditions.m_boardConfigEnd.push_back(rMOSAIC->GetRegisterDump());
+    }
   }
 
   for (unsigned int i = 0; i < m_boards.size(); i++) {
@@ -403,7 +414,7 @@ void TScan::WriteConditions (const char *fName, THic *aHic)
   fprintf (fp, "IDDA (start): %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaStart);
   fprintf (fp, "IDDA (end):   %.3f A\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaEnd);
 
-  fprintf (fp, "\n");
+  fputs("\n", fp);
 
   fclose (fp);
 }
@@ -412,17 +423,32 @@ void TScan::WriteChipRegisters(const char *fName)
 {
   FILE *fp = fopen (fName, "a");
 
-  fprintf (fp, "\n");
+  fputs("\n", fp);
 
-  fputs   ("== Chip registers (start)\n", fp);
+  fputs("== Chip registers (start)\n", fp);
   for (const auto& str : m_conditions.m_chipConfigStart) fprintf(fp, "%s", str.c_str());
-  fputs   ("== Chip registers (end)\n", fp);
+  fputs("== Chip registers (end)\n", fp);
   for (const auto& str : m_conditions.m_chipConfigEnd)   fprintf(fp, "%s", str.c_str());
-  fputs   ("==\n", fp);
+  fputs("==\n", fp);
 
   fclose (fp);
 }
 
+
+void TScan::WriteBoardRegisters(const char *fName)
+{
+  FILE *fp = fopen (fName, "a");
+
+  fputs("\n", fp);
+
+  fputs("== Board registers (start)\n", fp);
+  for (const auto& str : m_conditions.m_boardConfigStart) fprintf(fp, "%s", str.c_str());
+  fputs("== Board registers (end)\n", fp);
+  for (const auto& str : m_conditions.m_boardConfigEnd)   fprintf(fp, "%s", str.c_str());
+  fputs("==\n", fp);
+
+  fclose (fp);
+}
 
 int TScanConditions::AddHicConditions (std::string hicId, TScanConditionsHic *hicCond)
 {

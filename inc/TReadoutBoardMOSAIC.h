@@ -106,6 +106,7 @@ public:
   powerboard *GetPowerBoardHandle() {
     return (pb);
   };
+  std::string GetRegisterDump();
   void setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex = -1);
 
 private:

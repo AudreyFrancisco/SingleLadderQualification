@@ -478,5 +478,16 @@ void TReadoutBoardMOSAIC::PowerOff()
   return;
 }
 
+std::string TReadoutBoardMOSAIC::GetRegisterDump()
+{
+  std::string result;
+  result += "Pulser\n";
+  result += pulser->dumpRegisters();
+  result += "mRunControl\n";
+  result += mRunControl->dumpRegisters();
+  result += "mRunTriggerControl\n";
+  result += mTriggerControl->dumpRegisters();
+  return result;
+}
 
 // ================================== EOF ========================================
