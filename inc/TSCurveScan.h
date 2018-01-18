@@ -14,14 +14,14 @@ typedef struct __TSCurveParameters : TScanParameters {
   int VPULSEH;
   int VPULSEL;
   int TARGET;
-  float m_backBias;
+  float backBias;
 } TSCurveParameters;
 
 class TSCurveScan : public TMaskScan {
 protected:
-  bool m_nominal;
-  int m_VPULSEH;
-  float m_backBias;
+  //  bool m_nominal;
+  // int m_VPULSEH;
+  // float m_backBias;
   void ConfigureFromu(TAlpide *chip);
   virtual void ConfigureChip(TAlpide *chip) = 0;
   void ConfigureBoard(TReadoutBoard *board);
@@ -44,10 +44,10 @@ public:
   void Execute();
   void Terminate();
   float GetBackbias() {
-    return m_backBias;
+    return ((TSCurveParameters *)m_parameters)->backBias;
   };
   bool GetNominal() {
-    return m_nominal;
+    return ((TSCurveParameters *)m_parameters)->nominal;
   };
 };
 
@@ -69,8 +69,8 @@ class TtuneVCASNScan : public TSCurveScan {
   // NOTE:  may need new destructor?
   // Conducts a threshold scan changing VCASN
 protected:
-  int m_TARGET;
-  int m_VPULSEL;
+  // int m_TARGET;
+  // int m_VPULSEL;
 
 public:
   TtuneVCASNScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
@@ -87,8 +87,8 @@ public:
 class TtuneITHRScan : public TSCurveScan {
   // Conducts a threshold scan changing ITHR (note:  needs data from VCASNscan first)
 protected:
-  int m_TARGET;
-  int m_VPULSEL;
+  // int m_TARGET;
+  // int m_VPULSEL;
 
 public:
   TtuneITHRScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,

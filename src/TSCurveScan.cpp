@@ -15,9 +15,9 @@ TSCurveScan::TSCurveScan       (TScanConfig                   *config,
                                 std::mutex                    *aMutex)
   : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
 {
-  m_backBias   = m_config->GetBackBias  ();
-  m_nominal    = (m_config->GetParamValue("NOMINAL") == 1);
   m_parameters = new TSCurveParameters;
+  ((TSCurveParameters*)m_parameters)->backBias = m_config->GetBackBias  ();
+  ((TSCurveParameters*)m_parameters)->nominal  = (m_config->GetParamValue("NOMINAL") == 1);
 }
 
 
@@ -41,10 +41,10 @@ TThresholdScan::TThresholdScan (TScanConfig                   *config,
   m_step [2]  = 1;
   m_stop [2]  = 1;
 
-  m_VPULSEH   = 170;
+  ((TSCurveParameters*)m_parameters)->VPULSEH = 170;
   m_nTriggers = m_config->GetParamValue("NINJ");
 
-  sprintf(m_name, "Threshold Scan %.1f V", m_backBias); 
+  sprintf(m_name, "Threshold Scan %.1f V", ((TSCurveParameters*)m_parameters)->backBias); 
 
   CreateScanHisto();
 }
@@ -70,14 +70,14 @@ TtuneVCASNScan::TtuneVCASNScan (TScanConfig                   *config,
   m_step [2]  = 1;
   m_stop [2]  = 1;
 
-  m_VPULSEH   = 170;
-  m_TARGET    = m_config->GetParamValue("TARGETTHRESH");
-  if (m_TARGET % 10) {
-    m_TARGET -= (m_TARGET %10);
-    m_TARGET += 10;
-    std::cout << "Warning: threshold target not multiple of 10, rounding up to " << m_TARGET; 
+  ((TSCurveParameters*)m_parameters)->VPULSEH   = 170;
+  ((TSCurveParameters*)m_parameters)->TARGET    = m_config->GetParamValue("TARGETTHRESH");
+  if (((TSCurveParameters*)m_parameters)->TARGET % 10) {
+    ((TSCurveParameters*)m_parameters)->TARGET -= (((TSCurveParameters*)m_parameters)->TARGET %10);
+    ((TSCurveParameters*)m_parameters)->TARGET += 10;
+    std::cout << "Warning: threshold target not multiple of 10, rounding up to " << ((TSCurveParameters*)m_parameters)->TARGET; 
   }
-  m_VPULSEL = m_VPULSEH - m_TARGET / 10;
+  ((TSCurveParameters*)m_parameters)->VPULSEL = ((TSCurveParameters*)m_parameters)->VPULSEH - ((TSCurveParameters*)m_parameters)->TARGET / 10;
   m_nTriggers = m_config->GetParamValue("NINJ");
   CreateScanHisto();
 }
@@ -103,14 +103,14 @@ TtuneITHRScan::TtuneITHRScan   (TScanConfig                   *config,
   m_step [2]  = 1;
   m_stop [2]  = 1;
 
-  m_VPULSEH   = 170;
-  m_TARGET    = m_config->GetParamValue("TARGETTHRESH");
-  if (m_TARGET % 10) {
-    m_TARGET -= (m_TARGET %10);
-    m_TARGET += 10;
-    std::cout << "Warning: threshold target not multiple of 10, rounding up to " << m_TARGET; 
+  ((TSCurveParameters*)m_parameters)->VPULSEH   = 170;
+  ((TSCurveParameters*)m_parameters)->TARGET    = m_config->GetParamValue("TARGETTHRESH");
+  if (((TSCurveParameters*)m_parameters)->TARGET % 10) {
+    ((TSCurveParameters*)m_parameters)->TARGET -= (((TSCurveParameters*)m_parameters)->TARGET %10);
+    ((TSCurveParameters*)m_parameters)->TARGET += 10;
+    std::cout << "Warning: threshold target not multiple of 10, rounding up to " << ((TSCurveParameters*)m_parameters)->TARGET; 
   }
-  m_VPULSEL = m_VPULSEH - m_TARGET / 10;
+  ((TSCurveParameters*)m_parameters)->VPULSEL = ((TSCurveParameters*)m_parameters)->VPULSEH - ((TSCurveParameters*)m_parameters)->TARGET / 10;
   m_nTriggers = m_config->GetParamValue("NINJ");
   CreateScanHisto();
 }
@@ -119,7 +119,7 @@ TtuneITHRScan::TtuneITHRScan   (TScanConfig                   *config,
 
 void TSCurveScan::RestoreNominalSettings()
 {
-  if (m_backBias == 0.0) {
+  if (((TSCurveParameters*)m_parameters)->backBias == 0.0) {
     for (unsigned int i = 0; i < m_chips.size(); i++) {
       m_chips.at(i)->GetConfig()->SetParamValue("ITHR",   50);
       m_chips.at(i)->GetConfig()->SetParamValue("VCASN",  50);
@@ -127,7 +127,8 @@ void TSCurveScan::RestoreNominalSettings()
       m_chips.at(i)->GetConfig()->SetParamValue("VCLIP",  0);
     }
   }
-  else if ((m_backBias > 2.99) && (m_backBias < 3.01)) {
+  else if ((((TSCurveParameters*)m_parameters)->backBias > 2.99) && 
+           (((TSCurveParameters*)m_parameters)->backBias < 3.01)) {
     for (unsigned int i = 0; i < m_chips.size(); i++) {
       m_chips.at(i)->GetConfig()->SetParamValue("ITHR",   50);
       m_chips.at(i)->GetConfig()->SetParamValue("VCASN",  105);
@@ -182,7 +183,7 @@ void TtuneVCASNScan::ConfigureChip(TAlpide *chip)
 
   AlpideConfig::ConfigureCMU (chip);
 
-  chip->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEL);
+  chip->WriteRegister(Alpide::REG_VPULSEL, ((TSCurveParameters*)m_parameters)->VPULSEL);
 }
 
 void TtuneITHRScan::ConfigureChip(TAlpide *chip)
@@ -193,7 +194,7 @@ void TtuneITHRScan::ConfigureChip(TAlpide *chip)
 
   AlpideConfig::ConfigureCMU (chip);
 
-  chip->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEL);
+  chip->WriteRegister(Alpide::REG_VPULSEL, ((TSCurveParameters*)m_parameters)->VPULSEL);
 }
 
 
@@ -207,20 +208,20 @@ THisto TSCurveScan::CreateHisto() {
 void TSCurveScan::Init() {
   TScan::Init();
 
-  if (m_nominal) RestoreNominalSettings();
+  if (((TSCurveParameters*)m_parameters)->nominal) RestoreNominalSettings();
 
   m_running = true;
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
     if (!pb) continue;
-    if (m_backBias == 0) {
+    if (((TSCurveParameters*)m_parameters)->backBias == 0) {
       m_hics.at(ihic)->SwitchBias (false);
       pb             ->SetBiasVoltage(0);
     }
     else {
       m_hics.at(ihic)->SwitchBias   (true);
-      pb             ->SetBiasVoltage( (-1.)* m_backBias);
+      pb             ->SetBiasVoltage( (-1.)* ((TSCurveParameters*)m_parameters)->backBias);
     }
   }
 
@@ -260,7 +261,7 @@ void TThresholdScan::PrepareStep (int loopIndex)
   case 0:    // innermost loop: change VPULSEL
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip ++) {
       if (! m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
-      m_chips.at(ichip)->WriteRegister(Alpide::REG_VPULSEL, m_VPULSEH - m_value[0]);
+      m_chips.at(ichip)->WriteRegister(Alpide::REG_VPULSEL, ((TSCurveParameters*)m_parameters)->VPULSEH - m_value[0]);
     }
     break;
   case 1:    // 2nd loop: mask staging
@@ -395,7 +396,7 @@ void TSCurveScan::Terminate()
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (m_backBias != 0) {
+    if (((TSCurveParameters*)m_parameters)->backBias != 0) {
       m_hics.at(ihic)->SwitchBias (false);
       m_hics.at(ihic)->GetPowerBoard()->SetBiasVoltage(0);
     }

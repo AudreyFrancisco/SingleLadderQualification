@@ -22,7 +22,7 @@ TNoiseOccupancy::TNoiseOccupancy (TScanConfig                   *config,
   m_pulseLength = 0;
   m_parameters  = new TNoiseParameters;
   ((TNoiseParameters *)m_parameters)->nTriggers = config->GetParamValue("NTRIG");;
-
+  ((TNoiseParameters *)m_parameters)->isMasked  = config->GetIsMasked();
 
 }
 

@@ -15,25 +15,27 @@ TDigitalScan::TDigitalScan (TScanConfig                   *config,
                             std::mutex                    *aMutex) 
   : TMaskScan (config, chips, hics, boards, histoQue, aMutex) 
 {
-  m_voltageScale = config->GetVoltageScale();
-  m_parameters   = new TDigitalParameters;
+  float voltageScale = config->GetVoltageScale();
+  m_parameters       = new TDigitalParameters;
 
-  std::cout << "m_voltageScale = " << m_voltageScale << std::endl;
+  std::cout << "voltageScale = " << voltageScale << std::endl;
   if (IsNominal()) {
     strcpy(m_name, "Digital Scan");
   }
-  else if (IsUpper() && (m_voltageScale < 1.2)) {
+  else if (IsUpper() && (voltageScale < 1.2)) {
     strcpy(m_name, "Digital Scan, V +10%");
   }
 
-  else if (m_voltageScale > 0.8 && IsLower()) {
+  else if (voltageScale > 0.8 && IsLower()) {
     strcpy(m_name, "Digital Scan, V -10%");
   }
   else {
     std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
-    m_voltageScale = 1.0;
+    voltageScale = 1.0;
     strcpy(m_name, "Digital Scan");    
   }
+
+  ((TDigitalParameters*)m_parameters)->voltageScale = voltageScale;
 
   m_start[0] = 0;
   m_step [0] = 1;
@@ -121,8 +123,8 @@ void TDigitalScan::Init        ()
   CountEnabledChips();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (m_voltageScale != 1.) {
-      m_hics.at(ihic)->ScaleVoltage(m_voltageScale);
+    if (((TDigitalParameters*)m_parameters)->voltageScale != 1.) {
+      m_hics.at(ihic)->ScaleVoltage(((TDigitalParameters*)m_parameters)->voltageScale);
     }      
   }
 
@@ -222,7 +224,7 @@ void TDigitalScan::Terminate   ()
 
   // restore old voltage
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (m_voltageScale != 1.) {
+    if (((TDigitalParameters*)m_parameters)->voltageScale != 1.) {
       m_hics.at(ihic)->ScaleVoltage(1.);
     }      
   }

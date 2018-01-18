@@ -18,7 +18,6 @@ class TDigitalScan : public TMaskScan {
 private:
   void ConfigureFromu(TAlpide *chip);
   void FillHistos(std::vector<TPixHit> *Hits, int board);
-  float m_voltageScale;
 
 protected:
   void ConfigureChip(TAlpide *chip);
@@ -41,13 +40,14 @@ public:
   void Execute();
   void Terminate();
   bool IsNominal() {
-    return ((m_voltageScale > 0.99) && (m_voltageScale < 1.01));
+    return ((((TDigitalParameters *)m_parameters)->voltageScale > 0.99) &&
+            (((TDigitalParameters *)m_parameters)->voltageScale < 1.01));
   };
   bool IsLower() {
-    return (m_voltageScale < 0.9);
+    return (((TDigitalParameters *)m_parameters)->voltageScale < 0.9);
   };
   bool IsUpper() {
-    return (m_voltageScale > 1.1);
+    return (((TDigitalParameters *)m_parameters)->voltageScale > 1.1);
   };
 };
 
