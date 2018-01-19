@@ -69,10 +69,12 @@ TScanConfig::TScanConfig()
   m_fifoCutMaxErr    = FIFO_CUT_MAXERR;
   m_fifoCutMaxFaulty = FIFO_CUT_MAXFAULTY;
 
-  m_digitalMaxBadPerChipOB = DIGITAL_MAXBAD_CHIP_OB;
-  m_digitalMaxBadPerChipIB = DIGITAL_MAXBAD_CHIP_IB;
-  m_digitalMaxBadPerHicOB  = DIGITAL_MAXBAD_HIC_OB;
-  m_digitalMaxBadPerHicIB  = DIGITAL_MAXBAD_HIC_IB;
+  m_digitalMaxBadPerChipOB      = DIGITAL_MAXBAD_CHIP_OB;
+  m_digitalMaxBadPerChipIB      = DIGITAL_MAXBAD_CHIP_IB;
+  m_digitalMaxBadPerHicOB       = DIGITAL_MAXBAD_HIC_OB;
+  m_digitalMaxBadPerHicIB       = DIGITAL_MAXBAD_HIC_IB;
+  m_digitalMaxDeadPerChipGreen  = DIGITAL_MAXDEAD_CHIP_GREEN;
+  m_digitalMaxDeadPerChipOrange = DIGITAL_MAXDEAD_CHIP_ORANGE;
 
   m_digitalMaxNoMaskHicIB      = DIGITAL_MAXNOMASK_HIC_IB;
   m_digitalMaxNoMaskHicOB      = DIGITAL_MAXNOMASK_HIC_OB;
@@ -147,6 +149,8 @@ void TScanConfig::InitParamMap ()
   fSettings["DIGITAL_MAXBAD_CHIP_IB"] = &m_digitalMaxBadPerChipIB;
   fSettings["DIGITAL_MAXBAD_HIC_OB"]  = &m_digitalMaxBadPerHicOB;
   fSettings["DIGITAL_MAXBAD_HIC_IB"]  = &m_digitalMaxBadPerHicIB;
+  fSettings["DIGITAL_MAXDEAD_CHIP_GREEN"] = &m_digitalMaxDeadPerChipGreen;
+  fSettings["DIGITAL_MAXDEAD_CHIP_ORANGE"] = &m_digitalMaxDeadPerChipOrange;
 
   fSettings["DIGITAL_MAXNOMASK_HIC_OB"]       = &m_digitalMaxNoMaskHicOB;
   fSettings["DIGITAL_MAXNOMASK_HIC_IB"]       = &m_digitalMaxNoMaskHicIB;

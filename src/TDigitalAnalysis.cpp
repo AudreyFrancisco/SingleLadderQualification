@@ -261,6 +261,9 @@ THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic* resu
   for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip ++) {
     int chipId = m_chipList.at(ichip).chipId & 0xf;
     TDigitalResultChip *chipResult = (TDigitalResultChip*) result->m_chipResults.at(chipId);
+    if      (chipResult->m_nDead > m_config->GetParamValue("DIGITAL_MAXDEAD_CHIP_ORANGE")) return CLASS_RED;
+    else if (chipResult->m_nDead > m_config->GetParamValue("DIGITAL_MAXDEAD_CHIP_GREEN"))  return CLASS_ORANGE;
+
     if (chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff
 	> m_config->GetParamValue("DIGITAL_MAXBAD_CHIP_IB"))
       return CLASS_ORANGE;

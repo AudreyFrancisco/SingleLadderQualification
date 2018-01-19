@@ -83,6 +83,8 @@ namespace ScanConfig {
   // cuts for digital scan
   const int DIGITAL_MAXBAD_CHIP_OB = 1024; // max number of bad pixels: 1 dcol
   const int DIGITAL_MAXBAD_CHIP_IB = 524;  // 1 per mille
+  const int DIGITAL_MAXDEAD_CHIP_GREEN = 10;
+  const int DIGITAL_MAXDEAD_CHIP_ORANGE = 5120;
   const int DIGITAL_MAXBAD_HIC_OB = 7340;  // 1 per mille
   const int DIGITAL_MAXBAD_HIC_IB = 4700;  // 1 per mille
 
@@ -166,6 +168,8 @@ private:
   int m_digitalMaxBadPerChipIB;
   int m_digitalMaxBadPerHicOB;
   int m_digitalMaxBadPerHicIB;
+  int m_digitalMaxDeadPerChipGreen;
+  int m_digitalMaxDeadPerChipOrange;
   int m_digitalMaxNoMaskHicIB;
   int m_digitalMaxNoMaskHicOB;
   int m_digitalMaxNoMaskStuckHicIB;
