@@ -4,12 +4,11 @@
 #include <QDialog>
 
 namespace Ui {
-class ActivityStatus;
+  class ActivityStatus;
 }
 
-class ActivityStatus : public QDialog
-{
-  Q_OBJECT
+class ActivityStatus : public QDialog {
+ Q_OBJECT
 
 public:
   explicit ActivityStatus(QWidget *parent = 0);
