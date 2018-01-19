@@ -65,11 +65,15 @@ void TScan::Init()
   }
   strcpy(m_conditions.m_swVersion, VERSION);
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart = m_hics.at(ihic)->GetTemperature();
-    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaStart = m_hics.at(ihic)->GetAnalogueVoltage();
-    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaStart = m_hics.at(ihic)->GetIdda();
-    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddStart = m_hics.at(ihic)->GetIddd();
-
+    try {
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart = m_hics.at(ihic)->GetTemperature();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaStart = m_hics.at(ihic)->GetAnalogueVoltage();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaStart = m_hics.at(ihic)->GetIdda();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddStart = m_hics.at(ihic)->GetIddd();
+    }
+    catch (std::exception &e) {
+      std::cout << "Exception " << e.what() << " when reading temp / currents" << std::endl;
+    }
     TErrorCounter errCount;
     errCount.nEnabled      = m_hics.at(ihic)->GetNEnabledChips();
     errCount.n8b10b        = 0;
@@ -80,7 +84,14 @@ void TScan::Init()
   }
 
   for (const auto& rChip : m_chips) {
-    if (rChip->GetConfig()->IsEnabled()) m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
+    if (rChip->GetConfig()->IsEnabled()) {
+      try {
+        m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
+      }
+      catch (std::exception &e) {
+        std::cout << "Terminate: exception " << e.what() << " when reading registers" << std::endl;
+      }
+    }
   }
 
   for (const auto& rBoard : m_boards) {
@@ -116,10 +127,15 @@ std::string TScan::FindHIC(int boardIndex, int rcv)
 void TScan::Terminate()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd = m_hics.at(ihic)->GetTemperature();
-    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaEnd = m_hics.at(ihic)->GetAnalogueVoltage();
-    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaEnd = m_hics.at(ihic)->GetIdda();
-    m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddEnd = m_hics.at(ihic)->GetIddd();
+    try {
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd = m_hics.at(ihic)->GetTemperature();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaEnd = m_hics.at(ihic)->GetAnalogueVoltage();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaEnd = m_hics.at(ihic)->GetIdda();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddEnd = m_hics.at(ihic)->GetIddd();
+    }
+    catch (std::exception &e) {
+      std::cout << "Terminate: exception " << e.what() << " when reading temp / currents" << std::endl;
+    }
   }
   strcpy(m_state, "Done");
 
@@ -130,7 +146,14 @@ void TScan::Terminate()
   }
 
   for (const auto& rChip : m_chips) {
-    if (rChip->GetConfig()->IsEnabled()) m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
+    if (rChip->GetConfig()->IsEnabled()) {
+      try {
+        m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
+      }
+      catch (std::exception &e) {
+        std::cout << "Terminate: exception " << e.what() << " when reading registers" << std::endl;
+      }
+    }
   }
 
   for (const auto& rBoard : m_boards) {
