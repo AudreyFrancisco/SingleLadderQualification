@@ -31,7 +31,9 @@ SOURCES += main.cpp\
            testingprogress.cpp \
            checkpbconfig.cpp \
            calibrationpb.cpp \
-           databaseselection.cpp
+           databaseselection.cpp \
+    resultstorage.cpp \
+    activitystatus.cpp
 
 HEADERS  += mainwindow.h \
             dialog.h \
@@ -41,7 +43,9 @@ HEADERS  += mainwindow.h \
             testingprogress.h \
             checkpbconfig.h \
             calibrationpb.h \
-            databaseselection.h
+            databaseselection.h \
+    resultstorage.h \
+    activitystatus.h
 
 FORMS    += mainwindow.ui \
             dialog.ui \
@@ -50,7 +54,9 @@ FORMS    += mainwindow.ui \
             testingprogress.ui \
             checkpbconfig.ui \
             calibrationpb.ui \
-            databaseselection.ui
+            databaseselection.ui \
+    resultstorage.ui \
+    activitystatus.ui
 
 INCLUDEPATH += $(ROOTSYS)/include /usr/local/include
 
