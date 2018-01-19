@@ -124,6 +124,27 @@ int DbGetResultId (AlpideDB *db, int activityTypeId, THicClassification classifi
 }
 
 
+// counts the activities of a given type for a given component
+// assumes that the component name is contained in the activity name
+int DbCountActivities (AlpideDB *db, int activityTypeId, string compName) 
+{
+  ActivityDB                                    *activityDB = new ActivityDB (db);
+  static int                                     myActTypeId;
+  static std::vector <ActivityDB::activityShort> activityList;
+  int                                            count = 0;
+
+  if ((activityList.size() == 0) || (activityTypeId != myActTypeId)) {
+    myActTypeId  = activityTypeId;
+    activityList = *(activityDB->GetActivityList(db->GetProjectId(), activityTypeId));
+  }
+  for (unsigned int i = 0; i < activityList.size(); i++) {
+    if (activityList.at(i).Name.find(compName) != string::npos) count ++;
+  }
+  
+  return count;
+}
+
+
 int DbGetResultId (AlpideDB *db, int activityTypeId, string resultName) 
 {
   ActivityDB                                 *activityDB = new ActivityDB (db);

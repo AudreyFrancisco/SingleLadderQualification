@@ -21,6 +21,7 @@ int DbGetParameterId(AlpideDB *db, int activityTypeId, string name);
 int DbGetResultId(AlpideDB *db, int activityTypeId, string resultName);
 int DbGetResultId(AlpideDB *db, int activityTypeId, THicClassification classification);
 int DbGetStatusId(AlpideDB *db, int activityTypeId, string statusCode);
+int DbCountActivities(AlpideDB *db, int activityTypeId, string compName);
 int DbGetActivityTypeId(AlpideDB *db, string name);
 int DbGetPrevActivityTypeId(AlpideDB *db, string name, bool &onChildren);
 int DbGetAttachmentTypeId(AlpideDB *db, string name);
