@@ -6,7 +6,7 @@ ActivityStatus::ActivityStatus(QWidget *parent) :
   ui(new Ui::ActivityStatus)
 {
   ui->setupUi(this);
-   connect(ui->save,SIGNAL(clicked()),this,SLOT(close()));
+  connect(ui->save,SIGNAL(clicked()),this,SLOT(close()));
 }
 
 ActivityStatus::~ActivityStatus()

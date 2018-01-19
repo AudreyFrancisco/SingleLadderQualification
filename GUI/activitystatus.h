@@ -14,9 +14,10 @@ class ActivityStatus : public QDialog
 public:
   explicit ActivityStatus(QWidget *parent = 0);
   ~ActivityStatus();
+
 public
-  slots:
-    virtual void getactivitystatus(bool &status);
+slots:
+  virtual void getactivitystatus(bool &status);
 
 private:
   Ui::ActivityStatus *ui;
