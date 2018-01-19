@@ -227,10 +227,13 @@ void TReadoutResultHic::WriteToFile (FILE *fp)
 void TReadoutResultHic::GetParameterSuffix (std::string &suffix, std::string &file_suffix)
 {
   TReadoutParameters *params = (TReadoutParameters*)m_scanParameters;
+  char                scale[5];
+  
+  sprintf (scale, "%.1f", params->voltageScale);
 
   if ((params->voltageScale != 1) || (params->pllStages >= 0)) {
     suffix = string (" ") + to_string(m_linkSpeed) + string (" ")
-             + to_string (params->voltageScale) + string ("xDVDD")
+             + string (scale) + string ("xDVDD")
              + string (" ") + to_string (params->pllStages);
   }
   else {
@@ -241,7 +244,7 @@ void TReadoutResultHic::GetParameterSuffix (std::string &suffix, std::string &fi
 
   if ((params->voltageScale != 1) || (params->pllStages >= 0)) {
     file_suffix = string ("_") + to_string(m_linkSpeed)+ string ("_")
-                  + to_string (params->voltageScale) + string ("xDVDD")
+                  + string (scale) + string ("xDVDD")
                   + string ("_") + to_string (params->pllStages);
   }
   else {
