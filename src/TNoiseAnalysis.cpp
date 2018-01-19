@@ -45,6 +45,7 @@ void TNoiseAnalysis::WriteResult()
     fclose(fp);
 
     m_scan->WriteChipRegisters(fName);
+    m_scan->WriteBoardRegisters(fName);
     m_scan->WriteTimestampLog(fName);
   }
 }

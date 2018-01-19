@@ -32,6 +32,7 @@
 #define PULSER_H
 
 #include <stdint.h>
+#include <string>
 #include "mwbbslave.h"
 
 class Pulser : public MWbbSlave {
@@ -45,6 +46,7 @@ public:
   void getConfig(uint32_t *triggerDelay, uint32_t *pulseDelay, uint32_t *opMode);
   void run(uint32_t numPulses);
   void getStatus(uint32_t *numPulses);
+  std::string dumpRegisters();
 
 private: // WBB Slave registers map
   enum regAddress_e {

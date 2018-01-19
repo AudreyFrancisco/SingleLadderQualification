@@ -55,6 +55,8 @@ private:
   std::map<std::string, TScanConditionsHic *> m_hicConditions;
   std::vector<std::string> m_chipConfigStart;
   std::vector<std::string> m_chipConfigEnd;
+  std::vector<std::string> m_boardConfigStart;
+  std::vector<std::string> m_boardConfigEnd;
 
 public:
   TScanConditions() {};
@@ -129,6 +131,7 @@ public:
   void CreateHicConditions();
   void WriteConditions(const char *fName, THic *aHic);
   void WriteChipRegisters(const char *fName);
+  void WriteBoardRegisters(const char *fName);
   void ActivateTimestampLog();
   void WriteTimestampLog(const char *fName);
   std::vector<common::TChipIndex> GetChipList() {

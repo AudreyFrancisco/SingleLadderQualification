@@ -32,6 +32,7 @@
 #define MRUNCONTROL_H
 
 #include <stdint.h>
+#include <string>
 #include "mwbbslave.h"
 
 class MRunControl : public MWbbSlave {
@@ -49,6 +50,7 @@ public:
   void getStatus(uint32_t *st);
   void startRun();
   void stopRun();
+  std::string dumpRegisters();
 
 private: // WBB Slave registers map
   enum regAddress_e {

@@ -32,6 +32,7 @@
 #define MTRIGGERCONTROL_H
 
 #include <stdint.h>
+#include <string>
 #include "mwbbslave.h"
 
 class MTriggerControl : public MWbbSlave {
@@ -39,6 +40,7 @@ public:
   MTriggerControl(WishboneBus *wbbPtr, uint32_t baseAddress);
   void addEnableExtTrigger(bool en, bool levelSensitive = 0);
   void getTriggerCounter(uint32_t *counter);
+  std::string dumpRegisters();
 
 private: // WBB Slave registers map
   enum regAddress_e {
