@@ -4,11 +4,10 @@
 #include <QDialog>
 
 namespace Ui {
-class resultstorage;
+  class resultstorage;
 }
 
-class resultstorage : public QDialog
-{
+class resultstorage : public QDialog {
   Q_OBJECT
 
 public:

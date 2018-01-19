@@ -125,7 +125,6 @@ public:
   int GetTime();
   QAction *writedb;
 
-
 public
 slots:
   // void connectcombo(int value);
@@ -174,7 +173,6 @@ slots:
   void ConnectTestCombo(int value);
   void ContinueWithoutWriting();
 
-
 signals:
   void stopTimer();
 
@@ -200,7 +198,7 @@ private:
   bool properconfig = false;
   checkpbconfig *pbcfgcheck = 0;
   Calibrationpb *calwindow = 0;
-  ActivityStatus * activitywindow=0;
+  ActivityStatus *activitywindow = 0;
   void exploreendurancebox();
 
 private

@@ -8,7 +8,7 @@ namespace Ui {
 }
 
 class ActivityStatus : public QDialog {
- Q_OBJECT
+  Q_OBJECT
 
 public:
   explicit ActivityStatus(QWidget *parent = 0);
