@@ -85,8 +85,8 @@ namespace ScanConfig {
   const int DIGITAL_MAXBAD_CHIP_IB = 524;  // 1 per mille
   const int DIGITAL_MAXDEAD_CHIP_GREEN = 10;
   const int DIGITAL_MAXDEAD_CHIP_ORANGE = 5120;
-  const int DIGITAL_MAXBAD_HIC_OB = 7340;  // 1 per mille
-  const int DIGITAL_MAXBAD_HIC_IB = 4700;  // 1 per mille
+  const int DIGITAL_MAXBAD_HIC_OB = 7340; // 1 per mille
+  const int DIGITAL_MAXBAD_HIC_IB = 4700; // 1 per mille
 
   const int DIGITAL_MAXNOMASK_HIC_OB = 7340; // 1 per mille?
   const int DIGITAL_MAXNOMASK_HIC_IB = 4700; // 1 per mille?
