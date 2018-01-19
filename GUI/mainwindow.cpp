@@ -105,14 +105,15 @@ QMainWindow(parent),
   QMenu *menu1;
   menu1=menu->addMenu("&Options");
   QAction *newtestaction = new QAction("&New test", menu);
-  QAction *writedb = new QAction("&Write to database", menu);
+  writedb = new QAction("&Write to database", menu);
   menu1->addAction(newtestaction);
   menu1->addAction(writedb);
+  writedb->setVisible(false);
   // ui->abort->hide();
   // ui->abortall->hide();
   ui->tabWidget->removeTab(2);
   ui->tabWidget->removeTab(1);
-  connect(writedb,SIGNAL(triggered()),this,SLOT(attachtodatabase()));
+  //connect(writedb,SIGNAL(triggered()),this,SLOT(attachtodatabase()));
   connect(ui->abortall,SIGNAL(clicked()),this,SLOT(StopScan()),Qt::DirectConnection);
   connect(newtestaction, SIGNAL(triggered()),this, SLOT(start_test()));
   connect(ui->newtest,SIGNAL(clicked()),SLOT(start_test()));
@@ -588,6 +589,8 @@ void MainWindow::start_test(){
         scanbuttons.at(i)->hide();
       }
     }}
+  writedb->setVisible(false);
+  disconnect(writedb,SIGNAL(triggered()),this,SLOT(attachtodatabase()));
   endurancemodules.clear();
   idofactivitytype=0;
   idoflocationtype=0;
@@ -940,6 +943,8 @@ void MainWindow::applytests(){
   //connectscandetails();}
   // emit stopTimer();
   connect(signalMapper, SIGNAL(mapped(int)), this, SLOT (getresultdetails(int)));
+  resultwindow=new resultstorage(this);
+  resultwindow->exec();
 }
 
 
@@ -1259,6 +1264,7 @@ int MainWindow::GetTime()
 
 
 void MainWindow::attachtodatabase(){
+  if(resultwindow->isVisible()){resultwindow->close();}
   AlpideDB *myDB=new AlpideDB(databasetype);
   SetHicClassifications();
 
@@ -1267,6 +1273,11 @@ void MainWindow::attachtodatabase(){
       QDateTime date;
       ActivityDB::actUri uri;
       WriteToEos (fHICs.at(i)->GetDbId(),uri);
+
+      bool status;
+      activitywindow=new ActivityStatus(this);
+      activitywindow->exec();
+      activitywindow->getactivitystatus(status);
 
       ActivityDB *myactivity=new ActivityDB(myDB);
 
@@ -1283,7 +1294,14 @@ void MainWindow::attachtodatabase(){
       activ.Name      = CreateActivityName (fHICs.at(i)->GetDbId(), GetTestType());
       activ.Position  = " ";
       activ.Result    = -999;  // apparently has to stay open here, otherwise activity is considered closed
+      if(status){
       activ.Status    = DbGetStatusId(myDB, idofactivitytype, "OPEN");
+      std::cout<<"the activ is open"<<std::endl;
+      }
+      else{
+      activ.Status    = DbGetStatusId(myDB, idofactivitytype, "CLOSE");
+      std::cout<<"the activ is closed"<<std::endl;
+      }
 
       // add global parameters (not accessible from within results)
       DbAddParameter(myDB, activ, "Number of Working Chips" , fHICs.at(i)->GetNEnabledChips());
@@ -2030,3 +2048,12 @@ void MainWindow::ConnectTestCombo(int value){
   settingswindow->connectlocationcombo(locdetails);
   std::cout<<"the numbeofscan is: "<<numberofscan<<"and the value is: "<<value<<std::endl;
 }
+
+
+void MainWindow::ContinueWithoutWriting(){
+writedb->setVisible(true);
+connect(writedb,SIGNAL(triggered()),this,SLOT(attachtodatabase()));
+resultwindow->close();
+popup("You still have the possibility \n to write to the database \n later through the menu :)");
+}
+

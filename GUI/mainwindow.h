@@ -24,6 +24,8 @@
 #include "testingprogress.h"
 #include "calibrationpb.h"
 #include "databaseselection.h"
+#include "resultstorage.h"
+#include "activitystatus.h"
 class TConfig;
 class TScan;
 class TScanAnalysis;
@@ -69,6 +71,7 @@ public:
   ScanConfiguration *scanconfigwindow;
   Testingprogress *progresswindow;
   DatabaseSelection *databasewindow = 0;
+  resultstorage *resultwindow;
   void scanLoop(TScan *myScan);
   std::vector<TScan *> fScanVector;
   std::vector<TScanAnalysis *> fAnalysisVector;
@@ -120,6 +123,8 @@ public:
   void SetHicClassifications();
   TTestType GetTestType();
   int GetTime();
+  QAction *writedb;
+
 
 public
 slots:
@@ -167,6 +172,8 @@ slots:
     delete progresswindow;
   }
   void ConnectTestCombo(int value);
+  void ContinueWithoutWriting();
+
 
 signals:
   void stopTimer();
@@ -193,6 +200,7 @@ private:
   bool properconfig = false;
   checkpbconfig *pbcfgcheck = 0;
   Calibrationpb *calwindow = 0;
+  ActivityStatus * activitywindow=0;
   void exploreendurancebox();
 
 private
