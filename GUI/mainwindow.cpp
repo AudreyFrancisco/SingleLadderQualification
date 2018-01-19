@@ -1905,12 +1905,13 @@ void MainWindow::IBParameterScan()
 
   for (int pll = 0; pll < 3; pll++) {
     fConfig->GetScanConfig()->SetParamValue  ("READOUTPLLSTAGES", pll);
-    fConfig->GetScanConfig()->SetVoltageScale(1.0);
-    AddScan(STReadout);
-    fConfig->GetScanConfig()->SetVoltageScale(1.1);
-    AddScan(STReadout);
     fConfig->GetScanConfig()->SetVoltageScale(0.9);
     AddScan(STReadout);
+    fConfig->GetScanConfig()->SetVoltageScale(1.0);
+    AddScan(STReadout);
+    //if (pll < 2) continue;
+    //fConfig->GetScanConfig()->SetVoltageScale(1.1);
+    //AddScan(STReadout);
   }
   fConfig->GetScanConfig()->SetVoltageScale(1.0);
   fConfig->GetScanConfig()->SetParamValue  ("READOUTPLLSTAGES", -1);
@@ -1921,12 +1922,11 @@ void MainWindow::IBParameterScan()
 void MainWindow::fillingibvectors()
 {
   ClearVectors();
-
   AddScan(STPower);
-
+  // Do this scan immediately after power as it sometimes crashes
+  IBParameterScan();
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
-
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(0.9);
@@ -1944,9 +1944,7 @@ void MainWindow::fillingibvectors()
 
   // digital white frame
   AddScan(STDigitalWF);
-  
   // readout tests
-  IBParameterScan();
   fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
   AddScan(STReadout);
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
