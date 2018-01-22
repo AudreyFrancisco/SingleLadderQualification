@@ -26,6 +26,7 @@
 #include "databaseselection.h"
 #include "resultstorage.h"
 #include "activitystatus.h"
+#include "dbnotice.h"
 class TConfig;
 class TScan;
 class TScanAnalysis;
@@ -77,7 +78,7 @@ public:
   std::vector<TScanAnalysis *> fAnalysisVector;
   TPowerBoard *pb;
   TPowerBoardConfig *pbconfig;
-
+  DBnotice *noticewindow = 0;
   std::vector<TScanResult *> fresultVector;
   std::vector<THic *> fHICs;
   //  void fillingvectors();
@@ -172,6 +173,7 @@ slots:
   }
   void ConnectTestCombo(int value);
   void ContinueWithoutWriting();
+  void finalwrite();
 
 signals:
   void stopTimer();
