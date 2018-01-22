@@ -207,8 +207,8 @@ public:
   bool SetParamValue(std::string Name, std::string Value);
   bool SetParamValue(std::string Name, int Value);
   int GetParamValue(std::string Name);
-  std::string GetDataPath (std::string HicName);
-  std::string GetRemoteHicPath (std::string HicName);
+  std::string GetDataPath(std::string HicName);
+  std::string GetRemoteHicPath(std::string HicName);
   bool IsParameter(std::string Name) {
     return (fSettings.count(Name) > 0);
   };
