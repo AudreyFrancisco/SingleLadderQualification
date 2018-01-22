@@ -33,7 +33,8 @@ SOURCES += main.cpp\
            calibrationpb.cpp \
            databaseselection.cpp \
     resultstorage.cpp \
-    activitystatus.cpp
+    activitystatus.cpp \
+    dbnotice.cpp
 
 HEADERS  += mainwindow.h \
             dialog.h \
@@ -45,7 +46,8 @@ HEADERS  += mainwindow.h \
             calibrationpb.h \
             databaseselection.h \
     resultstorage.h \
-    activitystatus.h
+    activitystatus.h \
+    dbnotice.h
 
 FORMS    += mainwindow.ui \
             dialog.ui \
@@ -56,7 +58,8 @@ FORMS    += mainwindow.ui \
             calibrationpb.ui \
             databaseselection.ui \
     resultstorage.ui \
-    activitystatus.ui
+    activitystatus.ui \
+    dbnotice.ui
 
 INCLUDEPATH += $(ROOTSYS)/include /usr/local/include
 
