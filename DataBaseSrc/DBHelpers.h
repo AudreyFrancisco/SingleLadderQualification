@@ -26,7 +26,7 @@ int DbGetActivityTypeId(AlpideDB *db, string name);
 int DbGetPrevActivityTypeId(AlpideDB *db, string name, bool &onChildren);
 int DbGetAttachmentTypeId(AlpideDB *db, string name);
 int DbGetComponentTypeId(AlpideDB *db, int projectId, string name);
-int DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, string Direction);
+int DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int &componentId, string Direction);
 int DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name);
 int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<int> &children);
 int DbGetComponentActivity(AlpideDB *db, int compId, int activityTypeId);
