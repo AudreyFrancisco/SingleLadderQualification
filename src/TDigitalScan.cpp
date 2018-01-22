@@ -18,24 +18,25 @@ TDigitalScan::TDigitalScan (TScanConfig                   *config,
   float voltageScale = config->GetVoltageScale();
   m_parameters       = new TDigitalParameters;
 
+  ((TDigitalParameters*)m_parameters)->voltageScale = voltageScale;
+
   std::cout << "voltageScale = " << voltageScale << std::endl;
   if (IsNominal()) {
     strcpy(m_name, "Digital Scan");
   }
-  else if (IsUpper() && (voltageScale < 1.2)) {
+  else if (IsUpper() && (((TDigitalParameters*)m_parameters)->voltageScale < 1.2)) {
     strcpy(m_name, "Digital Scan, V +10%");
   }
 
-  else if (voltageScale > 0.8 && IsLower()) {
+  else if (((TDigitalParameters*)m_parameters)->voltageScale > 0.8 && IsLower()) {
     strcpy(m_name, "Digital Scan, V -10%");
   }
   else {
     std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
-    voltageScale = 1.0;
+    ((TDigitalParameters*)m_parameters)->voltageScale = 1.0;
     strcpy(m_name, "Digital Scan");    
   }
 
-  ((TDigitalParameters*)m_parameters)->voltageScale = voltageScale;
 
   m_start[0] = 0;
   m_step [0] = 1;
