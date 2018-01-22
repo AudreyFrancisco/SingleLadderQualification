@@ -6,6 +6,7 @@ using namespace ScanConfig;
 
 TScanConfig::TScanConfig()
 {
+  m_retest         = 0;
   // dummy values for first tests
   m_nInj           = NINJ;
   m_nTrig          = NTRIG;
@@ -211,6 +212,26 @@ int TScanConfig::GetParamValue (std::string Name)
   return -1;
 }
 
+
+std::string TScanConfig::GetDataPath (std::string HicName)
+{
+  std::string result = std::string ("Data/") + HicName;
+  if (GetRetestNumber() > 0) {
+    result.append("_Retest_");
+    result.append(std::to_string(GetRetestNumber()));
+  }
+  return result;
+}
+
+std::string TScanConfig::GetRemoteHicPath (std::string HicName)
+{
+  std::string result = HicName;
+  if (GetRetestNumber() > 0) {
+    result.append("_Retest_");
+    result.append(std::to_string(GetRetestNumber()));
+  }
+  return result;
+}
 
 /*void TScanConfig::SetVcasnArr (int hics, float *vcasn) { //copy vcasn array to m_vcasn
   m_vcasn = new int[hics];
