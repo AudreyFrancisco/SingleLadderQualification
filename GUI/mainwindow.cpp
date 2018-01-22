@@ -920,10 +920,7 @@ void MainWindow::connectcombo(int value){
 void MainWindow::applytests(){
   for (unsigned int i=0; i<fHICs.size();i++){
     if(fHICs.at(i)->IsEnabled()){
-      std::string name="";
-      name.append("Data/");
-      name.append(hicnames.at(i).toStdString());
-      makeDir(name.c_str());
+      makeDir((fConfig->GetScanConfig()->GetDataPath(hicnames.at(i).toStdString())).c_str());
     }
   }
   ui->start_test->hide();
@@ -1155,10 +1152,14 @@ void MainWindow::WriteToEos (string hicName, ActivityDB::actUri &uri)
   string account = GetServiceAccount (institute.toStdString(), instFolder);
   string testFolder = GetTestFolder();
 
-  sprintf (command, "rsync -rv -e \"ssh\" Data/%s/ %s@lxplus.cern.ch:/eos/project/a/alice-its/HicTests/%s/%s/%s",
-           hicName.c_str(), account.c_str(), testFolder.c_str(), instFolder.c_str(), hicName.c_str());
+  sprintf (command, "rsync -rv -e \"ssh\" %s %s@lxplus.cern.ch:/eos/project/a/alice-its/HicTests/%s/%s/%s",
+           (fConfig->GetScanConfig()->GetDataPath(hicName)).c_str(),
+	   account.c_str(),
+	   testFolder.c_str(),
+	   instFolder.c_str(),
+	   (fConfig->GetScanConfig()->GetRemoteHicPath(hicName)).c_str());
   sprintf (path, "eos/project/a/alice-its/HicTests/%s/%s/%s",
-          testFolder.c_str(), instFolder.c_str(), hicName.c_str());
+          testFolder.c_str(), instFolder.c_str(), (fConfig->GetScanConfig()->GetRemoteHicPath(hicName)).c_str());
 
   uri.Description="uri path";
   uri.Path=std::string(path);
