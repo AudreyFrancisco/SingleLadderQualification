@@ -5,6 +5,7 @@
 #include "TReadoutBoardDAQ.h"
 #include "USBHelpers.h"
 #include "TConfig.h"
+#include "scope_control.h"
 
 int main() {
   uint16_t          status;
@@ -12,6 +13,7 @@ int main() {
   int               overflow;
   TReadoutBoardDAQ  *myDAQBoard;
   TConfig *config = new TConfig (16);
+  scope_control scope;
 
   // if (config->BoardType == DAQBoard)
   // 
