@@ -22,8 +22,8 @@
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
 #include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "BoardDecoder.h"
+# include "AlpideDecoder.h"
+ #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
 TBoardType fBoardType;
@@ -32,7 +32,7 @@ std::vector <TAlpide *>       fChips;
 TConfig *fConfig;
 
 int myVCASN   = 57;
-int myITHR    = 51;
+   int myITHR    = 51;
 int myVCASN2  = 64;
 int myVCLIP   = 0;
 int myVRESETD = 147;
