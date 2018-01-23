@@ -16,9 +16,16 @@ IGNORE_SET=(
 function join { local IFS="$1"; shift; echo "$*"; }
 IGNORE_STRING=$(join \| "${IGNORE_SET[@]}")
 
-SOURCES=$(find . | egrep -v ${IGNORE_STRING} | egrep "\.h$|\.hh$|\.c$|\.cc$|\.C$")
+SOURCES=$(find . | egrep -v ${IGNORE_STRING} | egrep "\.h$|\.hh$|\.c$|\.cc$|\.C$|\.cpp$")
 
+echo "Formatting..."
 for FILE in $SOURCES
 do
-    ${CLANG_FORMAT} -i $FILE
+    var=$(${CLANG_FORMAT} "$FILE" | diff "$FILE" - | wc -l)
+    if [[ "$var" -ne 0 ]]
+    then
+        echo $FILE
+        ${CLANG_FORMAT} -i $FILE
+    fi
 done
+echo "done."
