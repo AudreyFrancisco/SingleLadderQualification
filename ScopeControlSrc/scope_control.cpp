@@ -328,14 +328,14 @@ void scope_control::get_quick_meas()
 
 void scope_control::throw_ex(const char* text)
 {
-  printf(text);
+  printf("%s", text);
   // Throw an exception
 }
 
 void scope_control::debug_print(const char* text)
 {
   if (debug_en)
-    printf(text);
+    printf("%s", text);
 }
 
 void scope_control::msleep(unsigned long milliseconds) {
