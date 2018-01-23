@@ -26,7 +26,9 @@ protected:
     (void)histo;
   };
   void InitCounters() {};
-
+  string GetPreviousTestType() {
+    return string("");
+  }; // no analysis result
 public:
   TApplyMask(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
              std::vector<THic *> hics, std::mutex *aMutex, TNoiseResult *aResult);

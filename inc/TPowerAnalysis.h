@@ -77,6 +77,7 @@ protected:
   void AnalyseHisto(TScanHisto *histo) {
     (void)&histo;
   };
+  string GetPreviousTestType();
 
 public:
   TPowerAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

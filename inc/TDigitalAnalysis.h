@@ -97,6 +97,7 @@ protected:
   };
   void CreateResult() {};
   void AnalyseHisto(TScanHisto *histo);
+  string GetPreviousTestType();
 
 public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

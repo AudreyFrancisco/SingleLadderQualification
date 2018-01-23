@@ -69,7 +69,9 @@ protected:
   void AnalyseHisto(TScanHisto *histo) {
     (void)histo;
   };
-
+  string GetPreviousTestType() {
+    return string("");
+  }; // done only once
 public:
   TCycleAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                  std::vector<THic *> hics, std::mutex *aMutex, TCycleResult *aResult = 0);

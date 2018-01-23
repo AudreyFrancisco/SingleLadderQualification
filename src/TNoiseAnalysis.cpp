@@ -22,6 +22,21 @@ TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue,
 }
 
 
+// done only in hic qualification and stave test?
+string TNoiseAnalysis::GetPreviousTestType() {
+  switch (m_config->GetTestType()) {
+  case OBHalfStaveOL:
+    return string("OB HIC Qualification Test");
+  case OBHalfStaveML: 
+    return string("OB HIC Qualification Test");
+  case IBStave:
+    return string("IB HIC Qualification Test");
+  default:
+    return string("");
+  }
+}
+
+
 void TNoiseAnalysis::WriteResult()
 {
   char fName[200];

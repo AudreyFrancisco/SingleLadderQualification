@@ -27,7 +27,9 @@ protected:
   };
   void InitCounters() {};
   virtual const char *GetDACName() = 0;
-
+  string GetPreviousTestType() {
+    return string("");
+  }; // no analysis output
 public:
   TApplyTuning(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                std::vector<THic *> hics, std::mutex *aMutex, TSCurveResult *aResult);

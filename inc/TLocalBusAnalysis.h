@@ -71,7 +71,9 @@ protected:
   };
   void CreateResult() {};
   void AnalyseHisto(TScanHisto *histo);
-
+  string GetPreviousTestType() {
+    return string("");
+  }; // done only once
 public:
   TLocalBusAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                     std::vector<THic *> hics, std::mutex *aMutex, TLocalBusResult *aResult = 0);

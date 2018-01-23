@@ -27,6 +27,12 @@ TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue,
 }
 
 
+int TScanAnalysis::GetPreviousActivityType () 
+{
+  return DbGetActivityTypeId(m_config->GetDatabase(), GetPreviousTestType());
+}
+
+
 int TScanAnalysis::ReadChipList() 
 {
   m_chipList = m_scan->GetChipList();

@@ -43,6 +43,32 @@ void TFifoAnalysis::FillVariableList ()
 }
 
 
+string TFifoAnalysis::GetPreviousTestType() {
+  switch (m_config->GetTestType()) {
+  case OBQualification: 
+    return string("ALPIDEB Chip Testing Analysis");
+  case OBEndurance: 
+    return string("OB HIC Qualification Test");
+  case OBReception: 
+    return string("OB HIC Endurance Test");
+  case OBHalfStaveOL:
+    return string("OB HIC Reception Test");
+  case OBHalfStaveML: 
+    return string("OB HIC Reception Test");
+  case IBQualification: 
+    return string("ALPIDEB Chip Testing Analysis");
+  case IBEndurance:
+    return string("IB HIC Qualification Test");
+  case IBStave:
+    return string("IB HIC Qualification Test");
+  case IBStaveEndurance:
+    return string("IB Stave Qualification Test");
+  default:
+    return string("");
+  }
+}
+
+
 void TFifoAnalysis::InitCounters()
 {
   m_counters.clear();

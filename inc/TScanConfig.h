@@ -7,6 +7,7 @@
 #include <cmath>
 #include <string>
 #include <string.h>
+#include "AlpideDB.h"
 
 typedef enum {
   OBQualification,
@@ -198,6 +199,7 @@ private:
   int m_readoutRow;
   int m_readoutPllStages;
   TTestType m_testType;
+  AlpideDB *m_db;
 
 protected:
 public:
@@ -309,6 +311,12 @@ public:
   };
   TTestType GetTestType() {
     return m_testType;
+  };
+  void SetDatabase(AlpideDB *db) {
+    m_db = db;
+  };
+  AlpideDB *GetDatabase() {
+    return m_db;
   };
 };
 

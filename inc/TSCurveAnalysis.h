@@ -164,6 +164,7 @@ protected:
   };
   void CreateResult() {};
   void AnalyseHisto(TScanHisto *histo);
+  virtual string GetPreviousTestType();
 
 public:
   // constructor: result factor determines type of analysis

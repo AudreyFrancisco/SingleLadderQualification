@@ -93,6 +93,7 @@ protected:
   void CreateResult() {};
   void AnalyseHisto(TScanHisto *histo);
   void InitCounters();
+  string GetPreviousTestType();
 
 public:
   TNoiseAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
