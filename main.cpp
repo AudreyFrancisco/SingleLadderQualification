@@ -5,6 +5,7 @@
 #include "TReadoutBoardDAQ.h"
 #include "USBHelpers.h"
 #include "TConfig.h"
+#include "scope_control.h"
 
 int main() {
   uint16_t status;
