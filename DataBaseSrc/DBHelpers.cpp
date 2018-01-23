@@ -145,7 +145,9 @@ int DbCountActivities (AlpideDB *db, int activityTypeId, string compName)
 }
 
 
-std::vector<int> DbGetActivities(AlpideDB *db, int activityTypeId, string compName)
+// returns a list of activity IDs of a given type for a given component
+// assumes that the component name is contained in the activity name
+std::vector<int> DbGetActivityIds(AlpideDB *db, int activityTypeId, string compName)
 {
   ActivityDB                                    *activityDB = new ActivityDB (db);
   static int                                     myActTypeId;
@@ -161,6 +163,22 @@ std::vector<int> DbGetActivities(AlpideDB *db, int activityTypeId, string compNa
     if (activityList.at(i).Name.find(compName) != string::npos) result.push_back (activityList.at(i).ID);
   }
 
+  return result;
+}
+
+
+// returns the vector of activity structures corresponding to the vector of Ids 
+std::vector<ActivityDB::activityLong> DbGetActivityIds(AlpideDB *db, std::vector<int> activityIds)
+{
+  ActivityDB *activityDB = new ActivityDB (db);
+  std::vector<ActivityDB::activityLong> result;
+
+  result.clear();
+  for (unsigned int i = 0; i < activityIds.size(); i++) {
+    ActivityDB::activityLong activity;
+    AlpideTable::response *response = activityDB->Read(activityIds.at(i), &activity);
+    if (response->ErrorCode == AlpideTable::NoError) result.push_back(activity);
+  }
   return result;
 }
 
