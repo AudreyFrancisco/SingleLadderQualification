@@ -195,10 +195,11 @@ void TestSelection::hideendurance(){
 
 }
 
-void TestSelection::GetTestTypeName(int &value, QString &testname){
-
+void TestSelection::GetTestTypeName(TTestType &typetest, QString &testname){
+  int value;
   value    = ui->typetest->itemData(ui->typetest->currentIndex()).toInt();
   testname = ui->typetest->currentText();
-  std::cout<<"the value is: "<<value<< "and the string is: "<<testname.toStdString().c_str()<<std::endl;
+  typetest=(TTestType)value;
+  std::cout<<"the value is: "<<value<<" the test type is "<<typetest<< "and the string is: "<<testname.toStdString().c_str()<<std::endl;
 
 }

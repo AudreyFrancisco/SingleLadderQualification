@@ -725,7 +725,7 @@ void MainWindow::start_test() {
   }
   // std::cout<<"why2"<<std::endl;
   scanstatuslabels.clear();
-  numberofscan = 0;
+
   ui->tob->clear();
   ui->details->hide();
   ui->displaydetails->hide();
@@ -742,7 +742,7 @@ void MainWindow::start_test() {
   bottomthree = '\0';
   bottomfive = '\0';
   bottomfour = '\0';
-  numberofscan = 0;
+
   if (databasewindow == 0) {
     databasewindow = new DatabaseSelection(this);
     databasewindow->exec();
@@ -1034,6 +1034,7 @@ void MainWindow::applytests(){
       makeDir((fConfig->GetScanConfig()->GetDataPath(hicnames.at(i).toStdString())).c_str());
     }
   }
+  fConfig->GetScanConfig()->SetTestType(numberofscan);
   ui->start_test->hide();
   qApp->processEvents();
   signalMapper = new QSignalMapper(this);

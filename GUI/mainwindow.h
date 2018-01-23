@@ -89,7 +89,7 @@ public:
 
   QSignalMapper *signalMapper;
 
-  int numberofscan = 0;
+  TTestType numberofscan;
   QString testname;
   int scanposition;
   QString operatorname;
