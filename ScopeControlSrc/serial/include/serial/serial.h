@@ -55,7 +55,12 @@ namespace serial {
   /*!
    * Enumeration defines the possible bytesizes for the serial port.
    */
-  typedef enum { fivebits = 5, sixbits = 6, sevenbits = 7, eightbits = 8 } bytesize_t;
+  typedef enum {
+    fivebits = 5,
+    sixbits = 6,
+    sevenbits = 7,
+    eightbits = 8
+  } bytesize_t;
 
   /*!
    * Enumeration defines the possible parity types for the serial port.
@@ -71,12 +76,20 @@ namespace serial {
   /*!
    * Enumeration defines the possible stopbit types for the serial port.
    */
-  typedef enum { stopbits_one = 1, stopbits_two = 2, stopbits_one_point_five } stopbits_t;
+  typedef enum {
+    stopbits_one = 1,
+    stopbits_two = 2,
+    stopbits_one_point_five
+  } stopbits_t;
 
   /*!
    * Enumeration defines the possible flowcontrol types for the serial port.
    */
-  typedef enum { flowcontrol_none = 0, flowcontrol_software, flowcontrol_hardware } flowcontrol_t;
+  typedef enum {
+    flowcontrol_none = 0,
+    flowcontrol_software,
+    flowcontrol_hardware
+  } flowcontrol_t;
 
   /*!
    * Structure for setting the timeout of the serial port, times are
