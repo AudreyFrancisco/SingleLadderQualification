@@ -39,7 +39,7 @@ slots:
   virtual int GetMemberID();
   virtual void adjustendurance();
   virtual void hideendurance();
-  virtual void GetTestTypeName(int &value, QString &testname);
+  virtual void GetTestTypeName(TTestType &typetest, QString &testname);
 
 private
 slots:
