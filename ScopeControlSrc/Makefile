@@ -33,7 +33,8 @@ test_scope_control: ./test/tester.cpp $(LIBRARY)
 	$(CXX) $(CPPFLAGS) -lscopecontrol -L. -o test_scope_control ./test/tester.cpp $(LIBRARY)
 
 clean:
-	rm -rf *.o
+	$(RM) $(OBJS)
+	$(RM) test_scope_control
 
 clean-all: clean
 	rm -rf $(LIBRARY)
