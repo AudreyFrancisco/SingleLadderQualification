@@ -145,6 +145,26 @@ int DbCountActivities (AlpideDB *db, int activityTypeId, string compName)
 }
 
 
+std::vector<int> DbGetActivities(AlpideDB *db, int activityTypeId, string compName)
+{
+  ActivityDB                                    *activityDB = new ActivityDB (db);
+  static int                                     myActTypeId;
+  static std::vector <ActivityDB::activityShort> activityList;
+  std::vector <int>                              result;
+
+  result.clear();
+  if ((activityList.size() == 0) || (activityTypeId != myActTypeId)) {
+    myActTypeId  = activityTypeId;
+    activityList = *(activityDB->GetActivityList(db->GetProjectId(), activityTypeId));
+  }
+  for (unsigned int i = 0; i < activityList.size(); i++) {
+    if (activityList.at(i).Name.find(compName) != string::npos) result.push_back (activityList.at(i).ID);
+  }
+
+  return result;
+}
+
+
 int DbGetResultId (AlpideDB *db, int activityTypeId, string resultName) 
 {
   ActivityDB                                 *activityDB = new ActivityDB (db);
