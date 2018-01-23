@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -30,8 +30,6 @@
 
 #include "pexception.h"
 
-PControlInterfaceError::PControlInterfaceError(const string& arg)
-{
-	 msg = "Control Interface Error: " + arg;
+PControlInterfaceError::PControlInterfaceError(const string &arg) {
+  msg = "Control Interface Error: " + arg;
 }
-

@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
@@ -31,15 +31,8 @@
 #include <stdlib.h>
 #include "trgrecorder.h"
 
+TrgRecorder::TrgRecorder(WishboneBus *wbbPtr, uint32_t baseAdd) : MWbbSlave(wbbPtr, baseAdd) {}
 
-TrgRecorder::TrgRecorder(WishboneBus *wbbPtr, uint32_t baseAdd): 
-			MWbbSlave(wbbPtr, baseAdd)
-{
+void TrgRecorder::addEnable(bool en) {
+  wbb->addWrite(baseAddress + regControl, en ? CONTROL_ENABLE : 0);
 }
-
-
-void TrgRecorder::addEnable(bool en)
-{
-	wbb->addWrite(baseAddress+regControl, en ? CONTROL_ENABLE : 0);
-}
-

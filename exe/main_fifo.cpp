@@ -2,7 +2,8 @@
 // ==========================================
 //
 // After successful call to initSetup() the elements of the setup are accessible in the two vectors
-//   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
+//   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e.
+// fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
 //
 // In order to have a generic scan, which works for single chips as well as for staves and modules,
@@ -12,7 +13,6 @@
 // For an example how to access board-specific functions see the power off at the end of main.
 //
 // The functions that should be modified for the specific test are configureChip() and main()
-
 
 #include <unistd.h>
 #include "TAlpide.h"
@@ -26,70 +26,67 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 
-
-
 TBoardType fBoardType;
-std::vector <TReadoutBoard *> fBoards;
-std::vector <TAlpide *>       fChips;
+std::vector<TReadoutBoard *> fBoards;
+std::vector<TAlpide *> fChips;
 TConfig *fConfig;
 
 bool Verbose = false;
-int  fErrCount0;
-int  fErrCount5;
-int  fErrCountf;
+int fErrCount0;
+int fErrCount5;
+int fErrCountf;
 
-int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
+int fEnabled = 0; // variable to count number of enabled chips; leave at 0
 
 int fTotalErr;
 
 int configureChip(TAlpide *chip) {
   // put all chip configurations before the start of the test here
-  chip->WriteRegister (Alpide::REG_MODECONTROL,   0x20);
+  chip->WriteRegister(Alpide::REG_MODECONTROL, 0x20);
   if (fConfig->GetDeviceType() == TYPE_CHIP)
-    chip->WriteRegister (Alpide::REG_CMUDMU_CONFIG, 0x60);
+    chip->WriteRegister(Alpide::REG_CMUDMU_CONFIG, 0x60);
 
   return 0;
 }
 
-
-void WriteMem (TAlpide *chip, int ARegion, int AOffset, int AValue) {
+void WriteMem(TAlpide *chip, int ARegion, int AOffset, int AValue) {
   if ((ARegion > 31) || (AOffset > 127)) {
     std::cout << "WriteMem: invalid parameters" << std::endl;
     return;
   }
-  uint16_t LowAdd  = Alpide::REG_RRU_MEB_LSB_BASE | (ARegion << 11) | AOffset;
+  uint16_t LowAdd = Alpide::REG_RRU_MEB_LSB_BASE | (ARegion << 11) | AOffset;
   uint16_t HighAdd = Alpide::REG_RRU_MEB_MSB_BASE | (ARegion << 11) | AOffset;
 
-  uint16_t LowVal  = AValue & 0xffff;
+  uint16_t LowVal = AValue & 0xffff;
   uint16_t HighVal = (AValue >> 16) & 0xff;
 
-  int err = chip->WriteRegister (LowAdd,  LowVal);
-  if (err >= 0) err = chip->WriteRegister (HighAdd, HighVal);
+  int err = chip->WriteRegister(LowAdd, LowVal);
+  if (err >= 0)
+    err = chip->WriteRegister(HighAdd, HighVal);
 
   if (err < 0) {
     std::cout << "Cannot write chip register. Exiting ... " << std::endl;
-    exit (1);
+    exit(1);
   }
-
 }
 
-
-void ReadMem (TAlpide *chip, int ARegion, int AOffset, int &AValue) {
+void ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue) {
   if ((ARegion > 31) || (AOffset > 127)) {
     std::cout << "ReadMem: invalid parameters" << std::endl;
     return;
   }
-  uint16_t LowAdd  = Alpide::REG_RRU_MEB_LSB_BASE | (ARegion << 11) | AOffset;
+  uint16_t LowAdd = Alpide::REG_RRU_MEB_LSB_BASE | (ARegion << 11) | AOffset;
   uint16_t HighAdd = Alpide::REG_RRU_MEB_MSB_BASE | (ARegion << 11) | AOffset;
 
   uint16_t LowVal, HighVal;
 
-  int err = chip->ReadRegister (LowAdd, LowVal);
-  if (err >= 0) err = chip->ReadRegister (HighAdd, HighVal);
+  int err = chip->ReadRegister(LowAdd, LowVal);
+  if (err >= 0)
+    err = chip->ReadRegister(HighAdd, HighVal);
 
   if (err < 0) {
     std::cout << "Cannot read chip register. Exiting ... " << std::endl;
-    exit (1);
+    exit(1);
   }
 
   // Note to self: if you want to shorten the following lines,
@@ -100,31 +97,32 @@ void ReadMem (TAlpide *chip, int ARegion, int AOffset, int &AValue) {
   AValue |= LowVal;
 }
 
-
-bool MemReadback (TAlpide *chip, int ARegion, int AOffset, int AValue) {
+bool MemReadback(TAlpide *chip, int ARegion, int AOffset, int AValue) {
   int Value;
 
-  WriteMem (chip, ARegion, AOffset, AValue);
-  ReadMem  (chip, ARegion, AOffset, Value);
+  WriteMem(chip, ARegion, AOffset, AValue);
+  ReadMem(chip, ARegion, AOffset, Value);
 
   if (Value != AValue) {
     if (Verbose) {
-      std::cout << "Error in mem " << ARegion << "/0x" << std::hex << AOffset << ": wrote " << AValue << ", read: " << Value << std::dec << std::endl;
+      std::cout << "Error in mem " << ARegion << "/0x" << std::hex << AOffset << ": wrote "
+                << AValue << ", read: " << Value << std::dec << std::endl;
     }
     return false;
   }
   return true;
 }
 
-
-void MemTest (TAlpide *chip, int ARegion, int AOffset) {
-  if (! MemReadback (chip, ARegion, AOffset, 0x0))      fErrCount0 ++;
-  if (! MemReadback (chip, ARegion, AOffset, 0x555555)) fErrCount5 ++;
-  if (! MemReadback (chip, ARegion, AOffset, 0xffffff)) fErrCountf ++;
+void MemTest(TAlpide *chip, int ARegion, int AOffset) {
+  if (!MemReadback(chip, ARegion, AOffset, 0x0))
+    fErrCount0++;
+  if (!MemReadback(chip, ARegion, AOffset, 0x555555))
+    fErrCount5++;
+  if (!MemReadback(chip, ARegion, AOffset, 0xffffff))
+    fErrCountf++;
 }
 
-
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
   decodeCommandParameters(argc, argv);
 
@@ -132,28 +130,32 @@ int main(int argc, char** argv) {
 
   if (fBoards.size()) {
 
-    for (const auto& rBoard : fBoards) {
-      rBoard->SendOpCode (Alpide::OPCODE_GRST);
-      rBoard->SendOpCode (Alpide::OPCODE_PRST);
+    for (const auto &rBoard : fBoards) {
+      rBoard->SendOpCode(Alpide::OPCODE_GRST);
+      rBoard->SendOpCode(Alpide::OPCODE_PRST);
     }
 
-    for (const auto& rChip : fChips) {
-      if (! rChip->GetConfig()->IsEnabled()) continue;
+    for (const auto &rChip : fChips) {
+      if (!rChip->GetConfig()->IsEnabled())
+        continue;
       configureChip(rChip);
     }
 
-    for (const auto& rBoard : fBoards) {
-      rBoard->SendOpCode (Alpide::OPCODE_RORST);
+    for (const auto &rBoard : fBoards) {
+      rBoard->SendOpCode(Alpide::OPCODE_RORST);
     }
 
-    fTotalErr  = 0;
+    fTotalErr = 0;
 
-    for (const auto& rChip : fChips) {
-      if (! rChip->GetConfig()->IsEnabled()) continue;
+    for (const auto &rChip : fChips) {
+      if (!rChip->GetConfig()->IsEnabled())
+        continue;
 
       fEnabled++;
 
-      std::cout << std::endl << "Doing FIFO test on ControlInterface " << rChip->GetConfig()->GetCtrInt( )<< "  chip ID " << rChip->GetConfig()->GetChipId() << std::endl;
+      std::cout << std::endl << "Doing FIFO test on ControlInterface "
+                << rChip->GetConfig()->GetCtrInt() << "  chip ID "
+                << rChip->GetConfig()->GetChipId() << std::endl;
       // Reset error counters
       fErrCount0 = 0;
       fErrCount5 = 0;
@@ -162,8 +164,8 @@ int main(int argc, char** argv) {
       // Do the loop over all memories
       for (int ireg = 0; ireg < 32; ireg++) {
         std::cout << "FIFO scan: region " << ireg << std::endl;
-        for (int iadd = 0; iadd < 128; iadd ++) {
-          MemTest (rChip, ireg, iadd);
+        for (int iadd = 0; iadd < 128; iadd++) {
+          MemTest(rChip, ireg, iadd);
         }
       }
 
@@ -179,12 +181,13 @@ int main(int argc, char** argv) {
       fTotalErr += fErrCount0 + fErrCount5 + fErrCountf;
     }
 
-    std::cout << std::endl << "Total error count (all chips): " << fTotalErr << std::endl << std::endl;
+    std::cout << std::endl << "Total error count (all chips): " << fTotalErr << std::endl
+              << std::endl;
 
     std::cout << fEnabled << " chips were enabled for scan." << std::endl << std::endl << std::endl;
 
-    for (const auto& rBoard : fBoards) {
-      TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (rBoard);
+    for (const auto &rBoard : fBoards) {
+      TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(rBoard);
       if (myDAQBoard) {
         myDAQBoard->PowerOff();
         delete myDAQBoard;
