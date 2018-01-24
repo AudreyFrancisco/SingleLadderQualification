@@ -1,5 +1,6 @@
 #include "activitystatus.h"
 #include "ui_activitystatus.h"
+#include "iostream"
 
 ActivityStatus::ActivityStatus(QWidget *parent) : QDialog(parent), ui(new Ui::ActivityStatus) {
   ui->setupUi(this);
@@ -18,5 +19,12 @@ void ActivityStatus::getactivitystatus(bool &status) {
 
     ui->openactiv->setChecked(false);
     status = 0;
+  }
+}
+
+void ActivityStatus::GetComment(QString &comment) {
+  if (!ui->com->toPlainText().isEmpty()) {
+    comment = ui->com->toPlainText();
+    std::cout << "the comment is : " << comment.toStdString() << std::endl;
   }
 }

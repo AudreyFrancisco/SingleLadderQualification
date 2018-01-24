@@ -1035,6 +1035,7 @@ void MainWindow::applytests() {
     }
   }
   fConfig->GetScanConfig()->SetTestType(numberofscan);
+  fConfig->GetScanConfig()->SetDatabase(myDB);
   ui->start_test->hide();
   qApp->processEvents();
   signalMapper = new QSignalMapper(this);
@@ -1379,19 +1380,36 @@ void MainWindow::attachtodatabase() {
   if (resultwindow->isVisible()) {
     resultwindow->close();
   }
-  AlpideDB *myDB = new AlpideDB(databasetype);
+
   SetHicClassifications();
 
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     if (fHICs.at(i)->IsEnabled()) {
+      QString comment;
       QDateTime date;
       ActivityDB::actUri uri;
       WriteToEos(fHICs.at(i)->GetDbId(), uri);
-
+      int oldtests;
+      oldtests = DbCountActivities(myDB, idofactivitytype, hicnames.at(i).toStdString());
+      std::cout << "the number of old tests is " << oldtests << std::endl;
+      fConfig->GetScanConfig()->SetRetestNumber(oldtests);
       bool status;
       activitywindow = new ActivityStatus(this);
       activitywindow->exec();
       activitywindow->getactivitystatus(status);
+      activitywindow->GetComment(comment);
+      std::string path;
+      path = fConfig->GetScanConfig()->GetDataPath(hicnames.at(i).toStdString()) + "/Comment.txt";
+      mfile = new QFile(QString::fromStdString(path));
+      mfile->open(QIODevice::ReadWrite);
+      if (mfile->isOpen()) {
+        QByteArray buffer;
+        buffer = buffer.append(comment);
+        mfile->write(buffer); // Writes a QByteArray to the file.
+      }
+      if (mfile) {
+        mfile->close();
+      }
 
       ActivityDB *myactivity = new ActivityDB(myDB);
 
@@ -1441,7 +1459,7 @@ void MainWindow::attachtodatabase() {
       } else if (numberofscan == IBQualification) {
         DbAddAttachment(myDB, activ, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
       }
-
+      DbAddAttachment(myDB, activ, attachText, string(path), string("Comment.txt"));
       DbAddMember(myDB, activ, idofoperator);
 
       std::vector<ActivityDB::actUri> uris;
@@ -1467,6 +1485,7 @@ void MainWindow::attachtodatabase() {
       myactivity->Change(&activ);
 
       delete myactivity;
+      delete mfile;
     }
   }
   delete myDB;
@@ -1500,10 +1519,10 @@ void MainWindow::poweringscan() {
 
 void MainWindow::findidoftheactivitytype(std::string activitytypename, int &id) {
 
-  AlpideDB *myDB = new AlpideDB(databasetype);
+  myDB = new AlpideDB(databasetype);
   id = DbGetActivityTypeId(myDB, activitytypename);
 
-  delete myDB;
+  // delete myDB;
 }
 
 void MainWindow::locationcombo() {
@@ -1513,7 +1532,7 @@ void MainWindow::locationcombo() {
       locdetails.clear();
     }
   }
-  AlpideDB *myDB = new AlpideDB(databasetype);
+  // AlpideDB *myDB = new AlpideDB(databasetype);
   ActivityDB *myactivity = new ActivityDB(myDB);
   locationtypelist = myactivity->GetLocationTypeList(idofactivitytype);
   locdetails.push_back(std::make_pair(" ", 0));
@@ -1522,9 +1541,11 @@ void MainWindow::locationcombo() {
               << locationtypelist->at(i).ID << std::endl;
     locdetails.push_back(std::make_pair(locationtypelist->at(i).Name, locationtypelist->at(i).ID));
   }
-  // std::cout<<"the in "<<DbGetActComponentTypeId (myDB, idofactivitytype, "in")<<std::endl;
+  // int ci;
+  // DbGetActComponentTypeId (myDB, idofactivitytype,ci, "in");
+  // std::cout<<"the in "<<ci<<std::endl;
   // std::cout<<"the out "<< DbGetActComponentTypeId (myDB, idofactivitytype, "out")<<std::endl;
-  delete myDB;
+  // delete myDB;
   delete myactivity;
 }
 
@@ -1537,15 +1558,14 @@ void MainWindow::savesettings() {
     return;
   } else {
     open();
-    /* AlpideDB *myDB=new AlpideDB(databasetype);
-     int projectid;
-     int id;
-     projectid=myDB->GetProjectId();
-     id=DbGetComponentTypeId (myDB, projectid, "Outer Barrel HIC Module");
-     int comp;
-     comp=DbGetComponentId (myDB,projectid,id,hicidnumber.toStdString());
-     std::cout<<"the hic name is "<<hicidnumber.toStdString()<<std::endl;
-     std::cout<<"the component id is: "<< comp<<std::endl;*/
+    /*int projectid;
+    int id;
+    projectid=myDB->GetProjectId();
+    id=DbGetComponentTypeId (myDB, projectid, "Outer Barrel HIC Module");
+    int comp;
+    comp=DbGetComponentId (myDB,projectid,id,hicidnumber.toStdString());
+    std::cout<<"the hic name is "<<hicidnumber.toStdString()<<std::endl;
+    std::cout<<"the component id is: "<< comp<<std::endl;*/
     scanconfigwindow = new ScanConfiguration(this);
     scanconfigwindow->show();
     setdefaultvalues(scanfit, nm);

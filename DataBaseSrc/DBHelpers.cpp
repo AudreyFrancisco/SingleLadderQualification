@@ -407,6 +407,9 @@ void DbAddAttachment(AlpideDB *db, ActivityDB::activity &activity, TAttachmentTy
   case attachConfig:
     attachment.Category = DbGetAttachmentTypeId(db, "HIC Config File");
     break;
+  case attachText:
+    attachment.Category = DbGetAttachmentTypeId(db, "Text File");
+    break;
   }
 
   std::cout << "Attaching file " << localName << " with remote name " << remoteName

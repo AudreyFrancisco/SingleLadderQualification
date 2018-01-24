@@ -1632,7 +1632,7 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
   activityShort act;
 
   theUrl = theParentDB->GetQueryDomain() + "/ActivityRead";
-  theQuery = "projectID=" + std::to_string(aProjectID) + "activityTypeID=" +
+  theQuery = "projectID=" + std::to_string(aProjectID) + "&activityTypeID=" +
              std::to_string(aActivityTypeID);
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
