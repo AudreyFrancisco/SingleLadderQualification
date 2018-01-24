@@ -23,8 +23,11 @@ int DbGetResultId(AlpideDB *db, int activityTypeId, THicClassification classific
 int DbGetStatusId(AlpideDB *db, int activityTypeId, string statusCode);
 int DbCountActivities(AlpideDB *db, int activityTypeId, string compName);
 std::vector<int> DbGetActivityIds(AlpideDB *db, int activityTypeId, string compName);
-std::vector<ActivityDB::activityLong> DbGetActivityIds(AlpideDB *db, std::vector<int> activityIds);
+std::vector<ActivityDB::activityLong> DbGetActivities(AlpideDB *db, std::vector<int> activityIds);
+int DbIsNewer (ActivityDB::activityLong act0, ActivityDB::activityLong act1);
+bool DbGetLatestActivity(AlpideDB *db, int activityTypeId, string compName, ActivityDB::activityLong &activity);
 int DbGetActivityTypeId(AlpideDB *db, string name);
+bool DbFindParamValue (vector<ActivityDB::actParameter> pars, string parName, float &parValue);
 int DbGetPrevActivityTypeId(AlpideDB *db, string name, bool &onChildren);
 int DbGetAttachmentTypeId(AlpideDB *db, string name);
 int DbGetComponentTypeId(AlpideDB *db, int projectId, string name);
