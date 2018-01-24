@@ -12,7 +12,8 @@ typedef enum {
   attachResult,
   attachLog,
   attachErrors,
-  attachConfig
+  attachConfig,
+  attachText
 } TAttachmentType;
 
 int DbGetMemberId(AlpideDB *db, string name);

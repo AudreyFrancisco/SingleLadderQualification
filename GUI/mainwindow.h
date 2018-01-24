@@ -27,6 +27,7 @@
 #include "resultstorage.h"
 #include "activitystatus.h"
 #include "dbnotice.h"
+
 class TConfig;
 class TScan;
 class TScanAnalysis;
@@ -125,6 +126,8 @@ public:
   TTestType GetTestType();
   int GetTime();
   QAction *writedb;
+  AlpideDB *myDB;
+  QFile *mfile;
 
 public
 slots:
