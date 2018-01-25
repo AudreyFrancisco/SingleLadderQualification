@@ -67,6 +67,9 @@ void AlpideDB::Init(string aQueryDomain, string aJarUrl) {
 #endif
 }
 
-AlpideDB::~AlpideDB() {}
+AlpideDB::~AlpideDB() {
+  delete theDBmanager;
+  theDBmanager = 0x0;
+}
 
 // ---------------- eof ------------------------

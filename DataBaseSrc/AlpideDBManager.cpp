@@ -63,7 +63,10 @@ AlpideDBManager::AlpideDBManager() {
 #endif
 }
 
-AlpideDBManager::~AlpideDBManager() {}
+AlpideDBManager::~AlpideDBManager() {
+  delete theCookieJar;
+  theCookieJar = 0x0;
+}
 
 #ifdef AUTH_KERBEROS
 bool AlpideDBManager::Init(string aSslUrl) {
