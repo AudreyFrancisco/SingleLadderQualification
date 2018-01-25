@@ -2147,6 +2147,7 @@ void MainWindow::ConnectTestCombo(int value) {
   std::cout << "the id of the selected test: " << idofactivitytype << std::endl;
   locationcombo();
   settingswindow->connectlocationcombo(locdetails);
+  settingswindow->adjustendurance();
   std::cout << "the numbeofscan is: " << numberofscan << "and the value is: " << value << std::endl;
 }
 
