@@ -505,7 +505,7 @@ void TThresholdAnalysis::AnalyseHisto(TScanHisto *histo) {
 
   for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip++) {
     int deadPix = 0; // no response (-1)
-    int ntPix = 0; // no threshold (0)
+    int ntPix = 0;   // no threshold (0)
 
     for (int iCol = 0; iCol < common::nCols; iCol++) {
       int iPulseStart;
@@ -515,11 +515,11 @@ void TThresholdAnalysis::AnalyseHisto(TScanHisto *histo) {
         iPulseStop =
             ((float)abs(m_startPulseAmplitude - m_stopPulseAmplitude)) / m_stepPulseAmplitude;
         iPulseStart = 0;
-      } else if (m_resultFactor == 1) { // vcasn
+      } else if (m_resultFactor == 1) {                       // vcasn
         iPulseStart = m_config->GetParamValue("VCASN_START"); // range of vcasn values scanned over.
         iPulseStop = m_config->GetParamValue(
             "VCASN_STOP"); // not changing in the forseeable future...but might.
-      } else { // else ithr
+      } else {             // else ithr
         iPulseStart = m_config->GetParamValue("ITHR_START");
         iPulseStop = m_config->GetParamValue("ITHR_STOP");
       }
@@ -571,7 +571,7 @@ void TThresholdAnalysis::AnalyseHisto(TScanHisto *histo) {
       } else if (m_fDoFit) {
 
         //	std::cout << "fitting pixel " << intIndexDummy << " / " << iCol << " / " << row <<
-        //std::endl;
+        // std::endl;
         // MB - NEED TO SELECT GOOD FIT.
         common::TErrFuncFitResult fitResult;
         fitResult = DoFit(gDummy, m_config->GetParamValue("SPEEDY"));
@@ -581,12 +581,12 @@ void TThresholdAnalysis::AnalyseHisto(TScanHisto *histo) {
                   row, fitResult.threshold, fitResult.noise, fitResult.redChi2);
         }
         if (fitResult.threshold != 0 && fitResult.threshold != -1 && fitResult.noise != 0 &&
-            fitResult.noise != -1) { // if no error/dead pixel
+            fitResult.noise != -1) {                                // if no error/dead pixel
           m_threshold.at(intIndexDummy).sum += fitResult.threshold; // row;
           m_threshold.at(intIndexDummy).sum2 += pow(fitResult.threshold, 2); // row*row
           m_threshold.at(intIndexDummy).entries += 1;
 
-          m_noise.at(intIndexDummy).sum += fitResult.noise; // row
+          m_noise.at(intIndexDummy).sum += fitResult.noise;          // row
           m_noise.at(intIndexDummy).sum2 += pow(fitResult.noise, 2); // row*row
           m_noise.at(intIndexDummy).entries += 1;
         }

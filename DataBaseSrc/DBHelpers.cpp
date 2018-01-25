@@ -159,9 +159,7 @@ std::vector<int> DbGetActivityIds(AlpideDB *db, int activityTypeId, string compN
   return result;
 }
 
-
-bool DbFindParamValue (vector<ActivityDB::actParameter> pars, string parName, float &parValue)
-{
+bool DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, float &parValue) {
   for (unsigned int i = 0; i < pars.size(); i++) {
     if (pars.at(i).Type.Parameter.Name == parName) {
       parValue = pars.at(i).Value;
@@ -171,37 +169,41 @@ bool DbFindParamValue (vector<ActivityDB::actParameter> pars, string parName, fl
   return false;
 }
 
-
-int DbIsNewer (ActivityDB::activityLong act0, ActivityDB::activityLong act1)
-{
+int DbIsNewer(ActivityDB::activityLong act0, ActivityDB::activityLong act1) {
   float time0, time1;
-  // first check the start dates; 
-  // not sure about the precision of the member StartDate, but it should be either equal 
+  // first check the start dates;
+  // not sure about the precision of the member StartDate, but it should be either equal
   // or have a difference of at least 1 day = 86400 sec
-  if (difftime (act0.StartDate, act1.StartDate) < -86000) return 1;  // date of act0 before date of act1
-  if (difftime (act0.StartDate, act1.StartDate) > 86000) return 0;
+  if (difftime(act0.StartDate, act1.StartDate) < -86000)
+    return 1; // date of act0 before date of act1
+  if (difftime(act0.StartDate, act1.StartDate) > 86000)
+    return 0;
 
   // if start dates are equal, check the time parameter
-  if (DbFindParamValue(act0.Parameters, "Time", time0) && DbFindParamValue(act1.Parameters, "Time", time1)) {
-    if (time0 < time1) return 1;
-    else if (time1 < time0) return 0;
+  if (DbFindParamValue(act0.Parameters, "Time", time0) &&
+      DbFindParamValue(act1.Parameters, "Time", time1)) {
+    if (time0 < time1)
+      return 1;
+    else if (time1 < time0)
+      return 0;
   }
   // if still no decision, use the activity ids
-  if (act0.ID < act1.ID) return 1;
+  if (act0.ID < act1.ID)
+    return 1;
   return 0;
 }
 
-
-// get the latest activity of a certain type, performed on a given component 
+// get the latest activity of a certain type, performed on a given component
 // returns false if no activity found, true otherwise
-bool DbGetLatestActivity(AlpideDB *db, int activityTypeId, string compName, ActivityDB::activityLong &activity)
-{
-  std::vector<int>                      ids        = DbGetActivityIds(db, activityTypeId, compName);
-  std::vector<ActivityDB::activityLong> activities = DbGetActivities (db, ids);
+bool DbGetLatestActivity(AlpideDB *db, int activityTypeId, string compName,
+                         ActivityDB::activityLong &activity) {
+  std::vector<int> ids = DbGetActivityIds(db, activityTypeId, compName);
+  std::vector<ActivityDB::activityLong> activities = DbGetActivities(db, ids);
 
   int latestIdx = 0;
 
-  if (activities.size() == 0) return false;
+  if (activities.size() == 0)
+    return false;
   for (unsigned int i = 0; i < activities.size(); i++) {
     if (DbIsNewer(activities.at(latestIdx), activities.at(i)) == 1) {
       latestIdx = i;
@@ -212,11 +214,9 @@ bool DbGetLatestActivity(AlpideDB *db, int activityTypeId, string compName, Acti
   return true;
 }
 
-
-// returns the vector of activity structures corresponding to the vector of Ids 
-std::vector<ActivityDB::activityLong> DbGetActivities(AlpideDB *db, std::vector<int> activityIds)
-{
-  ActivityDB *activityDB = new ActivityDB (db);
+// returns the vector of activity structures corresponding to the vector of Ids
+std::vector<ActivityDB::activityLong> DbGetActivities(AlpideDB *db, std::vector<int> activityIds) {
+  ActivityDB *activityDB = new ActivityDB(db);
   std::vector<ActivityDB::activityLong> result;
 
   result.clear();

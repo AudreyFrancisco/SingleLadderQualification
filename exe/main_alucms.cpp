@@ -216,7 +216,7 @@ int main() {
   Attiv.Position = "Position1";
   Attiv.Result = 101;
   Attiv.StartDate = time(NULL); // mktime(&ts);
-  Attiv.Status = 83; // open
+  Attiv.Status = 83;            // open
   Attiv.Type = 221;
   Attiv.User = 1;
 

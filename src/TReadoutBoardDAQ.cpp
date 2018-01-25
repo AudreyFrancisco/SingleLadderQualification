@@ -354,7 +354,7 @@ void TReadoutBoardDAQ::DAQReadData() {
         std::cout << "timeout" << std::endl;
         fStatusReadData = -2;
         return; // TODO: this has to be handled better with
-        // return -2;
+                // return -2;
       } else if (evt_length < 1) {
         std::cout << std::endl;
         std::cout << "ERROR, received data returned with " << evt_length << std::endl;
