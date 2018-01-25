@@ -126,7 +126,7 @@ public:
   TTestType GetTestType();
   int GetTime();
   QAction *writedb;
-  AlpideDB *myDB;
+  AlpideDB *DB;
   QFile *mfile;
 
 public
@@ -164,7 +164,7 @@ slots:
 
   void fillingendurancevectors();
 
-  // void ibscansforageing();
+  void ibscansforageing();
 
   void continuescans() {
     execution = true;
@@ -185,7 +185,7 @@ signals:
 
 private:
   Ui::MainWindow *ui;
-  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6, chkBtnObm7;
+  bool fChkBtnObm1, fChkBtnObm2, fChkBtnObm3, fChkBtnObm4, fChkBtnObm5, fChkBtnObm6, fChkBtnObm7;
   void explore_halfstave(uint8_t chipid);
   void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);
 
@@ -200,12 +200,12 @@ private:
   void color_green(int side, int pos);
   void color_green_IB(int position);
   void color_red_IB(int position);
-  int counter;
-  Dialog *windowex;
-  bool properconfig = false;
-  checkpbconfig *pbcfgcheck = 0;
-  Calibrationpb *calwindow = 0;
-  ActivityStatus *activitywindow = 0;
+  int fCounter;
+  Dialog *fWindowex;
+  bool fProperconfig = false;
+  checkpbconfig *fPbcfgcheck = 0;
+  Calibrationpb *fCalwindow = 0;
+  ActivityStatus *fActivitywindow = 0;
   void exploreendurancebox();
 
 private

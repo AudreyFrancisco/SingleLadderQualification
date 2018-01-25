@@ -69,7 +69,8 @@
 bool writingdb;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-  chkBtnObm1 = chkBtnObm2 = chkBtnObm3 = chkBtnObm4 = chkBtnObm5 = chkBtnObm6 = chkBtnObm7 = false;
+  fChkBtnObm1 = fChkBtnObm2 = fChkBtnObm3 = fChkBtnObm4 = fChkBtnObm5 = fChkBtnObm6 = fChkBtnObm7 =
+      false;
 
   makeDir("Data");
   ui->setupUi(this);
@@ -225,11 +226,11 @@ void MainWindow::open() {
     pbnumberofmodule = fHICs.at(0)->GetPbMod();
     if (!pb->IsCalibrated(pbnumberofmodule)) {
       std::cout << "its not calibrated" << std::endl;
-      pbcfgcheck = new checkpbconfig(this);
-      pbcfgcheck->exec();
+      fPbcfgcheck = new checkpbconfig(this);
+      fPbcfgcheck->exec();
     }
     //  std::cout<<fHICs.size()<<"the hics vector size";
-    properconfig = true;
+    fProperconfig = true;
 
     //    std::cout<<properconfig<<"d2"<<endl;
     // fillingvectors();
@@ -237,11 +238,11 @@ void MainWindow::open() {
   catch (exception &e) {
     //     std::cout<<e.what()<<endl;
     popup(e.what());
-    properconfig = false;
+    fProperconfig = false;
     //  std::cout<<properconfig<<"d3"<<endl;
   }
   // std::cout<<properconfig<<"d4"<<endl;
-  if (properconfig == 1) {
+  if (fProperconfig == 1) {
     ui->tab_2->setEnabled(true);
     //  ui->tab_3->setEnabled(true);
     int device = 0;
@@ -299,7 +300,7 @@ void MainWindow::open() {
 }
 
 void MainWindow::button_obm1_clicked() {
-  chkBtnObm1 = true;
+  fChkBtnObm1 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("1");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -315,7 +316,7 @@ void MainWindow::button_obm1_clicked() {
 }
 
 void MainWindow::button_obm2_clicked() {
-  chkBtnObm2 = true;
+  fChkBtnObm2 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("2");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -331,7 +332,7 @@ void MainWindow::button_obm2_clicked() {
 }
 
 void MainWindow::button_obm3_clicked() {
-  chkBtnObm3 = true;
+  fChkBtnObm3 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("3");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -348,7 +349,7 @@ void MainWindow::button_obm3_clicked() {
 }
 
 void MainWindow::button_obm4_clicked() {
-  chkBtnObm4 = true;
+  fChkBtnObm4 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("4");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -365,7 +366,7 @@ void MainWindow::button_obm4_clicked() {
 }
 
 void MainWindow::button_obm5_clicked() {
-  chkBtnObm5 = true;
+  fChkBtnObm5 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("5");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -381,7 +382,7 @@ void MainWindow::button_obm5_clicked() {
 }
 
 void MainWindow::button_obm6_clicked() {
-  chkBtnObm6 = true;
+  fChkBtnObm6 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("6");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -398,7 +399,7 @@ void MainWindow::button_obm6_clicked() {
 }
 
 void MainWindow::button_obm7_clicked() {
-  chkBtnObm7 = true;
+  fChkBtnObm7 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("7");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -656,9 +657,9 @@ void MainWindow::scanLoop(TScan *myScan) {
 
 void MainWindow::popup(QString message) {
 
-  windowex = new Dialog(this);
-  windowex->append(message);
-  windowex->show();
+  fWindowex = new Dialog(this);
+  fWindowex->append(message);
+  fWindowex->show();
 }
 
 void MainWindow::start_test() {
@@ -709,11 +710,11 @@ void MainWindow::start_test() {
   scanbuttons.clear();
   hicnames.clear();
   execution = true;
-  if (pbcfgcheck != 0) {
-    delete pbcfgcheck;
+  if (fPbcfgcheck != 0) {
+    delete fPbcfgcheck;
   }
-  if (calwindow != 0) {
-    delete calwindow;
+  if (fCalwindow != 0) {
+    delete fCalwindow;
   }
   // if (databasewindow!=0){
   // delete databasewindow;
@@ -1038,7 +1039,7 @@ void MainWindow::applytests() {
     }
   }
   fConfig->GetScanConfig()->SetTestType(numberofscan);
-  fConfig->GetScanConfig()->SetDatabase(myDB);
+  fConfig->GetScanConfig()->SetDatabase(DB);
   ui->start_test->hide();
   qApp->processEvents();
   signalMapper = new QSignalMapper(this);
@@ -1393,14 +1394,14 @@ void MainWindow::attachtodatabase() {
       ActivityDB::actUri uri;
       WriteToEos(fHICs.at(i)->GetDbId(), uri);
       int oldtests;
-      oldtests = DbCountActivities(myDB, idofactivitytype, hicnames.at(i).toStdString());
+      oldtests = DbCountActivities(DB, idofactivitytype, hicnames.at(i).toStdString());
       std::cout << "the number of old tests is " << oldtests << std::endl;
       fConfig->GetScanConfig()->SetRetestNumber(oldtests);
       bool status;
-      activitywindow = new ActivityStatus(this);
-      activitywindow->exec();
-      activitywindow->getactivitystatus(status);
-      activitywindow->GetComment(comment);
+      fActivitywindow = new ActivityStatus(this);
+      fActivitywindow->exec();
+      fActivitywindow->getactivitystatus(status);
+      fActivitywindow->GetComment(comment);
       std::string path;
       path = fConfig->GetScanConfig()->GetDataPath(hicnames.at(i).toStdString()) + "/Comment.txt";
       mfile = new QFile(QString::fromStdString(path));
@@ -1414,7 +1415,7 @@ void MainWindow::attachtodatabase() {
         mfile->close();
       }
 
-      ActivityDB *myactivity = new ActivityDB(myDB);
+      ActivityDB *myactivity = new ActivityDB(DB);
 
       ActivityDB::activity activ;
 
@@ -1431,16 +1432,16 @@ void MainWindow::attachtodatabase() {
       activ.Result =
           -999; // apparently has to stay open here, otherwise activity is considered closed
       if (status) {
-        activ.Status = DbGetStatusId(myDB, idofactivitytype, "OPEN");
+        activ.Status = DbGetStatusId(DB, idofactivitytype, "OPEN");
         std::cout << "the activ is open" << std::endl;
       } else {
-        activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSE");
+        activ.Status = DbGetStatusId(DB, idofactivitytype, "CLOSE");
         std::cout << "the activ is closed" << std::endl;
       }
 
       // add global parameters (not accessible from within results)
-      DbAddParameter(myDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips());
-      DbAddParameter(myDB, activ, "Time", GetTime());
+      DbAddParameter(DB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips());
+      DbAddParameter(DB, activ, "Time", GetTime());
 
       // loop over results and write to DB
       for (unsigned int j = 0; j < fresultVector.size(); j++) {
@@ -1449,7 +1450,7 @@ void MainWindow::attachtodatabase() {
           for (auto ihic = mymap.begin(); ihic != mymap.end(); ++ihic) {
             TScanResultHic *result = (TScanResultHic *)ihic->second;
             if (ihic->first.compare(hicnames.at(i).toStdString()) == 0) {
-              result->WriteToDB(myDB, activ);
+              result->WriteToDB(DB, activ);
             }
           }
         }
@@ -1458,12 +1459,12 @@ void MainWindow::attachtodatabase() {
       // attach config file
       if (numberofscan == OBQualification || numberofscan == OBReception ||
           numberofscan == OBEndurance) {
-        DbAddAttachment(myDB, activ, attachConfig, string("Config.cfg"), string("Config.cfg"));
+        DbAddAttachment(DB, activ, attachConfig, string("Config.cfg"), string("Config.cfg"));
       } else if (numberofscan == IBQualification) {
-        DbAddAttachment(myDB, activ, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
+        DbAddAttachment(DB, activ, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
       }
-      DbAddAttachment(myDB, activ, attachText, string(path), string("Comment.txt"));
-      DbAddMember(myDB, activ, idofoperator);
+      DbAddAttachment(DB, activ, attachText, string(path), string("Comment.txt"));
+      DbAddMember(DB, activ, idofoperator);
 
       std::vector<ActivityDB::actUri> uris;
 
@@ -1483,7 +1484,7 @@ void MainWindow::attachtodatabase() {
 
       // std::cout << "trying to close activity" << std::endl;
       // activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSED");
-      activ.Result = DbGetResultId(myDB, idofactivitytype, fHICs.at(i)->GetClassification());
+      activ.Result = DbGetResultId(DB, idofactivitytype, fHICs.at(i)->GetClassification());
       std::cout << "the activity result is: " << activ.Result << std::endl;
       myactivity->Change(&activ);
 
@@ -1491,8 +1492,8 @@ void MainWindow::attachtodatabase() {
       delete mfile;
     }
   }
-  delete myDB;
-  myDB = 0x0;
+  delete DB;
+  DB = 0x0;
   writingdb = true;
 }
 
@@ -1523,8 +1524,8 @@ void MainWindow::poweringscan() {
 
 void MainWindow::findidoftheactivitytype(std::string activitytypename, int &id) {
 
-  myDB = new AlpideDB(databasetype);
-  id = DbGetActivityTypeId(myDB, activitytypename);
+  DB = new AlpideDB(databasetype);
+  id = DbGetActivityTypeId(DB, activitytypename);
 
   // delete myDB;
 }
@@ -1537,7 +1538,7 @@ void MainWindow::locationcombo() {
     }
   }
   // AlpideDB *myDB = new AlpideDB(databasetype);
-  ActivityDB *myactivity = new ActivityDB(myDB);
+  ActivityDB *myactivity = new ActivityDB(DB);
   locationtypelist = myactivity->GetLocationTypeList(idofactivitytype);
   locdetails.push_back(std::make_pair(" ", 0));
   for (unsigned int i = 0; i < locationtypelist->size(); i++) {
@@ -1555,10 +1556,10 @@ void MainWindow::locationcombo() {
 
 void MainWindow::savesettings() {
   settingswindow->hide();
-  settingswindow->SaveSettings(institute, operatorname, hicidnumber, counter, idoflocationtype,
+  settingswindow->SaveSettings(institute, operatorname, hicidnumber, fCounter, idoflocationtype,
                                idofoperator, toptwo, topthree, topfour, topfive, bottomone,
                                bottomtwo, bottomthree, bottomfour, bottomfive);
-  if (counter == 0) {
+  if (fCounter == 0) {
     return;
   } else {
     open();
@@ -1598,7 +1599,7 @@ void MainWindow::loadeditedconfig() {
 
   scanconfigwindow->setnumberofmaskstages(nm);
   // std::cout<<"the nm that should change is "<<nm<<std::endl;
-  if (counter == 0) {
+  if (fCounter == 0) {
     return;
   }
   //   std::cout<<"the nm that should change is "<<nm<<std::endl;
@@ -1621,7 +1622,7 @@ void MainWindow::loaddefaultconfig() {
 
   fConfig->GetScanConfig()->SetParamValue("SPEEDY", "0");
   std::cout << "The speed is " << fConfig->GetScanConfig()->GetSpeedy() << std::endl;
-  if (counter == 0) {
+  if (fCounter == 0) {
     return;
   }
   connect(ui->start_test, SIGNAL(clicked()), this, SLOT(applytests()));
@@ -1690,11 +1691,11 @@ void MainWindow::writecalibrationfile() {
     TPowerBoard *powerBoard = fHICs.at(i)->GetPowerBoard();
     if (powerBoard != powerBoard0) {
       powerBoard->GetConfigurationHandler()->WriteCalibrationFile();
-      calwindow->close();
+      fCalwindow->close();
       return; // assume maximum of 2 power boards in setup
     }
   }
-  calwindow->close();
+  fCalwindow->close();
 }
 
 // method sets the top bottom switch correctly for all power board configs
@@ -1723,7 +1724,7 @@ void MainWindow::setandgetcalibration() {
   TPowerBoard *powerBoard0 = fHICs.at(0)->GetPowerBoard();
   TPowerBoard *powerBoard1 = 0;
 
-  calwindow->setresistances(ares, dres, gres);
+  fCalwindow->setresistances(ares, dres, gres);
 
   std::cout << ares << " input values" << dres << std::endl;
   // calwindow->setpowerunit(unit);
@@ -1755,13 +1756,13 @@ void MainWindow::setandgetcalibration() {
 
   pbconfig->GetICalibration(fHICs.at(0)->GetPbMod(), aioffset, dioffset);
 
-  calwindow->getcalibration(avscale, avoffset, dvscale, dvoffset, aioffset, dioffset);
+  fCalwindow->getcalibration(avscale, avoffset, dvscale, dvoffset, aioffset, dioffset);
 }
 
 void MainWindow::opencalibration() {
-  pbcfgcheck->close();
-  calwindow = new Calibrationpb(this);
-  calwindow->exec();
+  fPbcfgcheck->close();
+  fCalwindow = new Calibrationpb(this);
+  fCalwindow->exec();
 }
 
 /*
@@ -1989,7 +1990,7 @@ void MainWindow::IBBasicTest() {
   hicidnumber = "IB_HIC";
   open();
   fConfig->GetScanConfig()->SetUseDataPath(false);
-  fillingibvectors();
+  ibscansforageing();
   for (unsigned int i = 0; i < fScanVector.size(); i++) {
     try {
 
@@ -2138,7 +2139,7 @@ void MainWindow::fillingendurancevectors() {
 }
 
 void MainWindow::ConnectTestCombo(int value) {
-  counter = 0;
+  fCounter = 0;
   idofactivitytype = 0;
   ui->testtypeselected->clear();
   settingswindow->hideendurance();
@@ -2151,7 +2152,9 @@ void MainWindow::ConnectTestCombo(int value) {
   std::cout << "the id of the selected test: " << idofactivitytype << std::endl;
   locationcombo();
   settingswindow->connectlocationcombo(locdetails);
-  settingswindow->adjustendurance();
+  if (numberofscan == OBEndurance) {
+    settingswindow->adjustendurance();
+  }
   std::cout << "the numbeofscan is: " << numberofscan << "and the value is: " << value << std::endl;
 }
 
@@ -2165,4 +2168,46 @@ void MainWindow::ContinueWithoutWriting() {
 void MainWindow::finalwrite() {
   noticewindow->close();
   attachtodatabase();
+}
+
+void MainWindow::ibscansforageing() {
+  ClearVectors();
+
+  AddScan(STFifo);
+
+  AddScan(STDigital);
+
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 10);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
+  AddScan(STReadout);
+
+  // reset previous values
+  // (TODO: this is not exactly correct because it resets to the values defined in the header file
+  // and
+  // ignores the settings in the config file)
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", ChipConfig::DTU_DRIVER);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", ChipConfig::DTU_PREEMP);
+
+  // threshold scan, no tuning for the time being, 0V back bias
+  fConfig->GetScanConfig()->SetBackBias(0.0);
+  // fConfig->GetScanConfig()->SetVcasnRange (30, 70);
+
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STThreshold);
+
+  // threshold scan at 3V back bias, also here no tuning for the time being
+  fConfig->GetScanConfig()->SetBackBias(3.0);
+  // fConfig->GetScanConfig()->SetVcasnRange (75, 160);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STThreshold);
 }
