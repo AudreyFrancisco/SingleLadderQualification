@@ -150,8 +150,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() {
   delete ui;
   ui = 0x0;
-  delete myDB;
-  myDB = 0x0;
 }
 
 // TODO: try to substitute numberofscan by TScanType (defined in TScanConfig.h)
@@ -1494,6 +1492,7 @@ void MainWindow::attachtodatabase() {
     }
   }
   delete myDB;
+  myDB = 0x0;
   writingdb = true;
 }
 
