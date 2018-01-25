@@ -126,7 +126,6 @@ public:
   TTestType GetTestType();
   int GetTime();
   QAction *writedb;
-  AlpideDB *DB;
   QFile *mfile;
 
 public
@@ -188,7 +187,7 @@ private:
   bool fChkBtnObm1, fChkBtnObm2, fChkBtnObm3, fChkBtnObm4, fChkBtnObm5, fChkBtnObm6, fChkBtnObm7;
   void explore_halfstave(uint8_t chipid);
   void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);
-
+  AlpideDB *fDB;
   TBoardType fBoardType;
   std::vector<TReadoutBoard *> fBoards;
   std::vector<TAlpide *> fChips;

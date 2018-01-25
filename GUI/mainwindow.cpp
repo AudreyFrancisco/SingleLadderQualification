@@ -1039,7 +1039,7 @@ void MainWindow::applytests() {
     }
   }
   fConfig->GetScanConfig()->SetTestType(numberofscan);
-  fConfig->GetScanConfig()->SetDatabase(DB);
+  fConfig->GetScanConfig()->SetDatabase(fDB);
   ui->start_test->hide();
   qApp->processEvents();
   signalMapper = new QSignalMapper(this);
@@ -1394,7 +1394,7 @@ void MainWindow::attachtodatabase() {
       ActivityDB::actUri uri;
       WriteToEos(fHICs.at(i)->GetDbId(), uri);
       int oldtests;
-      oldtests = DbCountActivities(DB, idofactivitytype, hicnames.at(i).toStdString());
+      oldtests = DbCountActivities(fDB, idofactivitytype, hicnames.at(i).toStdString());
       std::cout << "the number of old tests is " << oldtests << std::endl;
       fConfig->GetScanConfig()->SetRetestNumber(oldtests);
       bool status;
@@ -1415,7 +1415,7 @@ void MainWindow::attachtodatabase() {
         mfile->close();
       }
 
-      ActivityDB *myactivity = new ActivityDB(DB);
+      ActivityDB *myactivity = new ActivityDB(fDB);
 
       ActivityDB::activity activ;
 
@@ -1432,16 +1432,16 @@ void MainWindow::attachtodatabase() {
       activ.Result =
           -999; // apparently has to stay open here, otherwise activity is considered closed
       if (status) {
-        activ.Status = DbGetStatusId(DB, idofactivitytype, "OPEN");
+        activ.Status = DbGetStatusId(fDB, idofactivitytype, "OPEN");
         std::cout << "the activ is open" << std::endl;
       } else {
-        activ.Status = DbGetStatusId(DB, idofactivitytype, "CLOSE");
+        activ.Status = DbGetStatusId(fDB, idofactivitytype, "CLOSE");
         std::cout << "the activ is closed" << std::endl;
       }
 
       // add global parameters (not accessible from within results)
-      DbAddParameter(DB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips());
-      DbAddParameter(DB, activ, "Time", GetTime());
+      DbAddParameter(fDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips());
+      DbAddParameter(fDB, activ, "Time", GetTime());
 
       // loop over results and write to DB
       for (unsigned int j = 0; j < fresultVector.size(); j++) {
@@ -1450,7 +1450,7 @@ void MainWindow::attachtodatabase() {
           for (auto ihic = mymap.begin(); ihic != mymap.end(); ++ihic) {
             TScanResultHic *result = (TScanResultHic *)ihic->second;
             if (ihic->first.compare(hicnames.at(i).toStdString()) == 0) {
-              result->WriteToDB(DB, activ);
+              result->WriteToDB(fDB, activ);
             }
           }
         }
@@ -1459,12 +1459,12 @@ void MainWindow::attachtodatabase() {
       // attach config file
       if (numberofscan == OBQualification || numberofscan == OBReception ||
           numberofscan == OBEndurance) {
-        DbAddAttachment(DB, activ, attachConfig, string("Config.cfg"), string("Config.cfg"));
+        DbAddAttachment(fDB, activ, attachConfig, string("Config.cfg"), string("Config.cfg"));
       } else if (numberofscan == IBQualification) {
-        DbAddAttachment(DB, activ, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
+        DbAddAttachment(fDB, activ, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
       }
-      DbAddAttachment(DB, activ, attachText, string(path), string("Comment.txt"));
-      DbAddMember(DB, activ, idofoperator);
+      DbAddAttachment(fDB, activ, attachText, string(path), string("Comment.txt"));
+      DbAddMember(fDB, activ, idofoperator);
 
       std::vector<ActivityDB::actUri> uris;
 
@@ -1484,7 +1484,7 @@ void MainWindow::attachtodatabase() {
 
       // std::cout << "trying to close activity" << std::endl;
       // activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSED");
-      activ.Result = DbGetResultId(DB, idofactivitytype, fHICs.at(i)->GetClassification());
+      activ.Result = DbGetResultId(fDB, idofactivitytype, fHICs.at(i)->GetClassification());
       std::cout << "the activity result is: " << activ.Result << std::endl;
       myactivity->Change(&activ);
 
@@ -1492,8 +1492,8 @@ void MainWindow::attachtodatabase() {
       delete mfile;
     }
   }
-  delete DB;
-  DB = 0x0;
+  delete fDB;
+  fDB = 0x0;
   writingdb = true;
 }
 
@@ -1524,8 +1524,8 @@ void MainWindow::poweringscan() {
 
 void MainWindow::findidoftheactivitytype(std::string activitytypename, int &id) {
 
-  DB = new AlpideDB(databasetype);
-  id = DbGetActivityTypeId(DB, activitytypename);
+  fDB = new AlpideDB(databasetype);
+  id = DbGetActivityTypeId(fDB, activitytypename);
 
   // delete myDB;
 }
@@ -1538,7 +1538,7 @@ void MainWindow::locationcombo() {
     }
   }
   // AlpideDB *myDB = new AlpideDB(databasetype);
-  ActivityDB *myactivity = new ActivityDB(DB);
+  ActivityDB *myactivity = new ActivityDB(fDB);
   locationtypelist = myactivity->GetLocationTypeList(idofactivitytype);
   locdetails.push_back(std::make_pair(" ", 0));
   for (unsigned int i = 0; i < locationtypelist->size(); i++) {
