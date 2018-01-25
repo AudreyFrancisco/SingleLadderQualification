@@ -20,6 +20,12 @@ IGNORE_STRING=$(join \| "${IGNORE_SET[@]}")
 
 SOURCES=$(find . | egrep -v ${IGNORE_STRING} | egrep "\.h$|\.hh$|\.c$|\.cc$|\.C$|\.cpp$")
 
+if [[ ! "$(lsb_release -d | egrep "CentOS Linux release 7|Scientific Linux CERN SLC release 6" | wc -l 2> /dev/null) " -eq 1 ]]
+then
+    "automatic formatting only available on CentOS CERN 7 or SLC6";
+    exit 2
+fi
+
 echo "Checking format with clang-format version:"
 $CLANG_FORMAT --version
 
@@ -38,6 +44,6 @@ if [[ "$EXIT_VAL" -eq 0 ]]
 then
     echo "done."
 else
-    echo "finished, format errors fount!"
+    echo "finished, format errors found!"
 fi
 exit $EXIT_VAL

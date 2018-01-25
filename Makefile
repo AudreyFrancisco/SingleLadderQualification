@@ -139,7 +139,7 @@ clean-all:	clean
 	$(MAKE) -C $(LIBMOSAIC_DIR) cleanall
 	$(MAKE) -C $(LIBPOWERBOARD_DIR) cleanall
 	$(MAKE) -C $(LIBALUCMS_DIR) clean-all
-	$(MAKE) -C $(LIBSCOPECONTROL_DIR) clean
+	$(MAKE) -C $(LIBSCOPECONTROL_DIR) clean-all
 
 
 ## clang format (formatting + testing)
@@ -151,7 +151,7 @@ format-check:
 
 ### Config.cfg
 githooks:
-	/bin/bash -c 'version=$$(lsb_release -d | grep "CentOS Linux release 7" | wc -l) ;if [[ "$$version" -eq 1 ]]; then cp -v .pre-commit-clang-format .git/hooks/pre-commit ; else echo "automatic formatting only available on CentOS CERN 7"; fi'
+	/bin/bash -c 'version=$$(lsb_release -d | grep "CentOS Linux release 7" | wc -l 2> /dev/null) ;if [[ "$$version" -eq 1 ]]; then cp -v .pre-commit-clang-format .git/hooks/pre-commit ; else echo "automatic formatting only available on CentOS CERN 7"; fi'
 
 
 .PHONY:	all clean clean-all $(STATIC_LIBS) lib lib_analysis format format-check githooks
