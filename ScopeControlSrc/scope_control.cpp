@@ -46,7 +46,8 @@ bool scope_control::open(std::string port, uint32_t baud, uint32_t timeoutms) {
       link->close();
   try {
     link = new serial::Serial(port, baud, serial::Timeout::simpleTimeout(timeoutms));
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     throw_ex(e.what());
     link_init = true;
     return false;
@@ -70,7 +71,8 @@ bool scope_control::open_auto(uint32_t timeoutms) {
     debug_print(text);
     try {
       link = new serial::Serial(port, 9600, serial::Timeout::simpleTimeout(timeoutms));
-    } catch (std::exception &e) {
+    }
+    catch (std::exception &e) {
       throw_ex(e.what());
       link_init = true;
       return false;
