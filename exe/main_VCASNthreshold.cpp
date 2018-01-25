@@ -183,7 +183,7 @@ void configureFromu(TAlpide *chip) {
   chip->WriteRegister(
       Alpide::REG_FROMU_PULSING2,
       chip->GetConfig()->GetParamValue("PULSEDURATION")); // fromu pulsing 2: pulse length
-  // return 0;
+                                                          // return 0;
 }
 
 void configureChip(TAlpide *chip) {
@@ -220,7 +220,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 }
 
 void fillVcasn(float *vcasn) { // WIP
-  int old_vcas; // only current is used for now; the rest may be used later
+  int old_vcas;                // only current is used for now; the rest may be used later
   int old_ith;
   int goodPixels;
   float voltage;
