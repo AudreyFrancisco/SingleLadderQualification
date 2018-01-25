@@ -63,7 +63,12 @@ AlpideDBManager::AlpideDBManager() {
 #endif
 }
 
-AlpideDBManager::~AlpideDBManager() {}
+AlpideDBManager::~AlpideDBManager() {
+  delete theCookieJar;
+  theCookieJar = 0x0;
+  remove("/tmp/tempappo.xml");
+  remove("/tmp/Queryresult.xml");
+}
 
 #ifdef AUTH_KERBEROS
 bool AlpideDBManager::Init(string aSslUrl) {
@@ -303,6 +308,8 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   FILE *res = fopen("/tmp/Queryresult.xml", "r");
   if (res == NULL) {
     cerr << "Error to Access the File buffer of Query. Abort !" << endl;
+    remove("/tmp/tempappo.xml");
+    remove("/tmp/Queryresult.xml");
     return (false);
   }
   fseek(res, 0L, SEEK_END);
@@ -314,6 +321,8 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   if (ptrBuf == NULL) {
     cerr << "Error to Allocate buffer in memory. Abort !" << endl;
     fclose(res);
+    remove("/tmp/tempappo.xml");
+    remove("/tmp/Queryresult.xml");
     return (false);
   }
   // read the response
@@ -321,11 +330,15 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   if (nre != sz) {
     cerr << "Error reading the file buffer. Abort !" << endl;
     fclose(res);
+    remove("/tmp/tempappo.xml");
+    remove("/tmp/Queryresult.xml");
     return (false);
   }
   // close and return
   fclose(res);
   *Result = ptrBuf;
+  remove("/tmp/tempappo.xml");
+  remove("/tmp/Queryresult.xml");
   return (true);
 
 #endif

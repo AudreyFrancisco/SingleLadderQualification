@@ -147,7 +147,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   writingdb = true;
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+  delete ui;
+  ui = 0x0;
+}
 
 // TODO: try to substitute numberofscan by TScanType (defined in TScanConfig.h)
 void MainWindow::open() {
@@ -1489,6 +1492,7 @@ void MainWindow::attachtodatabase() {
     }
   }
   delete myDB;
+  myDB = 0x0;
   writingdb = true;
 }
 
@@ -2147,6 +2151,7 @@ void MainWindow::ConnectTestCombo(int value) {
   std::cout << "the id of the selected test: " << idofactivitytype << std::endl;
   locationcombo();
   settingswindow->connectlocationcombo(locdetails);
+  settingswindow->adjustendurance();
   std::cout << "the numbeofscan is: " << numberofscan << "and the value is: " << value << std::endl;
 }
 
