@@ -69,69 +69,9 @@ class MainWindow : public QMainWindow {
 public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
-  TestSelection *settingswindow;
-  ScanConfiguration *scanconfigwindow;
-  Testingprogress *progresswindow;
-  DatabaseSelection *databasewindow = 0;
-  resultstorage *resultwindow;
-  void scanLoop(TScan *myScan);
-  std::vector<TScan *> fScanVector;
-  std::vector<TScanAnalysis *> fAnalysisVector;
-  TPowerBoard *pb;
-  TPowerBoardConfig *pbconfig;
-  DBnotice *noticewindow = 0;
-  std::vector<TScanResult *> fresultVector;
-  std::vector<THic *> fHICs;
-  //  void fillingvectors();
-  std::vector<std::string> mapdetails;
-  std::vector<pair<std::string, const TResultVariable>> mapd;
-  std::vector<QPushButton *> scanbuttons;
-  std::vector<QLabel *> scanstatuslabels;
-
-  QSignalMapper *signalMapper;
-
-  TTestType numberofscan;
-  QString testname;
-  int scanposition;
-  QString operatorname;
-  QString institute;
-  QString hicidnumber;
-  QString toptwo, topthree, topfour, topfive;
-  QString bottomone, bottomtwo, bottomthree, bottomfive, bottomfour;
-  int idofactivitytype;
-  int idoflocationtype;
-  int idofoperator;
-  std::vector<ActivityDB::locationType> *locationtypelist;
-  std::vector<pair<std::string, int>> locdetails;
-  int nm;
-  bool execution;
-  int colour;
-  int pbnumberofmodule = 0;
-  std::vector<QString> hicnames;
-  std::vector<QPushButton *> endurancemodules;
-  bool databasetype;
-  bool scanfit;
-
-  void makeDir(const char *aDir);
-  bool CreateScanObjects(TScanType scanType, TScanConfig *config, TScan **scan,
-                         TScanAnalysis **analysis, TScanResult **result, bool &hasButton);
-  void AddScan(TScanType scanType, TScanResult *aResult = 0);
-  void ClearVectors();
-  int GetNButtons();
-  void WriteToEos(string hicName, ActivityDB::actUri &uri);
-  string GetServiceAccount(string Institute, string &folder);
-  string GetTestFolder();
-  THic *FindHic(string hicName);
-  void SetHicClassifications();
-  TTestType GetTestType();
-  int GetTime();
-  QAction *writedb;
-  AlpideDB *myDB;
-  QFile *mfile;
 
 public
 slots:
-  // void connectcombo(int value);
   void createbtn();
   void popup(QString message);
   void colorscans();
@@ -164,17 +104,17 @@ slots:
 
   void fillingendurancevectors();
 
-  // void ibscansforageing();
+  void ibscansforageing();
 
   void continuescans() {
-    execution = true;
-    progresswindow->close();
-    delete progresswindow;
+    fExecution = true;
+    fProgresswindow->close();
+    delete fProgresswindow;
   }
   void stopscans() {
-    execution = false;
-    progresswindow->close();
-    delete progresswindow;
+    fExecution = false;
+    fProgresswindow->close();
+    delete fProgresswindow;
   }
   void ConnectTestCombo(int value);
   void ContinueWithoutWriting();
@@ -185,14 +125,13 @@ signals:
 
 private:
   Ui::MainWindow *ui;
-  bool chkBtnObm1, chkBtnObm2, chkBtnObm3, chkBtnObm4, chkBtnObm5, chkBtnObm6, chkBtnObm7;
+  bool fChkBtnObm1, fChkBtnObm2, fChkBtnObm3, fChkBtnObm4, fChkBtnObm5, fChkBtnObm6, fChkBtnObm7;
   void explore_halfstave(uint8_t chipid);
   void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);
-
+  AlpideDB *fDB;
   TBoardType fBoardType;
   std::vector<TReadoutBoard *> fBoards;
   std::vector<TAlpide *> fChips;
-
   std::mutex fMutex;
   TConfig *fConfig;
   std::deque<TScanHisto> fHistoQue;
@@ -200,13 +139,68 @@ private:
   void color_green(int side, int pos);
   void color_green_IB(int position);
   void color_red_IB(int position);
-  int counter;
-  Dialog *windowex;
-  bool properconfig = false;
-  checkpbconfig *pbcfgcheck = 0;
-  Calibrationpb *calwindow = 0;
-  ActivityStatus *activitywindow = 0;
+  int fCounter;
+  Dialog *fWindowex;
+  bool fProperconfig = false;
+  checkpbconfig *fPbcfgcheck = 0;
+  Calibrationpb *fCalwindow = 0;
+  ActivityStatus *fActivitywindow = 0;
   void exploreendurancebox();
+  TestSelection *fSettingswindow;
+  ScanConfiguration *fScanconfigwindow;
+  Testingprogress *fProgresswindow;
+  DatabaseSelection *fDatabasewindow = 0;
+  resultstorage *fResultwindow;
+  void scanLoop(TScan *myScan);
+  std::vector<TScan *> fScanVector;
+  std::vector<TScanAnalysis *> fAnalysisVector;
+  TPowerBoard *fPb;
+  TPowerBoardConfig *fPbconfig;
+  DBnotice *fNoticewindow = 0;
+  std::vector<TScanResult *> fresultVector;
+  std::vector<THic *> fHICs;
+  //  void fillingvectors();
+  std::vector<std::string> fMapdetails;
+  std::vector<pair<std::string, const TResultVariable>> fMapd;
+  std::vector<QPushButton *> fScanbuttons;
+  std::vector<QLabel *> fScanstatuslabels;
+  QSignalMapper *fSignalMapper;
+  TTestType fNumberofscan;
+  QString fTestname;
+  int fScanposition;
+  QString fOperatorname;
+  QString fInstitute;
+  QString fHicidnumber;
+  QString fToptwo, fTopthree, fTopfour, fTopfive;
+  QString fBottomone, fBottomtwo, fBottomthree, fBottomfive, fBottomfour;
+  int fIdofactivitytype;
+  int fIdoflocationtype;
+  int fIdofoperator;
+  std::vector<ActivityDB::locationType> *fLocationtypelist;
+  std::vector<pair<std::string, int>> fLocdetails;
+  int fNm;
+  bool fExecution;
+  int fColour;
+  int fPbnumberofmodule = 0;
+  std::vector<QString> fHicnames;
+  std::vector<QPushButton *> fEndurancemodules;
+  bool fDatabasetype;
+  bool fScanfit;
+  void makeDir(const char *aDir);
+  bool CreateScanObjects(TScanType scanType, TScanConfig *config, TScan **scan,
+                         TScanAnalysis **analysis, TScanResult **result, bool &hasButton);
+  void AddScan(TScanType scanType, TScanResult *aResult = 0);
+  void ClearVectors();
+  int GetNButtons();
+  void WriteToEos(string hicName, ActivityDB::actUri &uri);
+  string GetServiceAccount(string Institute, string &folder);
+  string GetTestFolder();
+  THic *FindHic(string hicName);
+  void SetHicClassifications();
+  TTestType GetTestType();
+  int GetTime();
+  QAction *fWritedb;
+  QFile *fMfile;
 
 private
 slots:
