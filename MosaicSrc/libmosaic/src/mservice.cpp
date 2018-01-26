@@ -27,16 +27,16 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2016.
  *
  */
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include "mservice.h"
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <string.h>
+#include <netinet/in.h>
 #include <poll.h>
-#include "mservice.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <sys/socket.h>
 
 #define PKT_ACK 0x06
 #define PKT_NAK 0x15

@@ -28,12 +28,12 @@
  *
  * 21/12/2015	Added mutex for multithread operation
  */
+#include "ipbus.h"
+#include "mexception.h"
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <iostream>
-#include "ipbus.h"
-#include "mexception.h"
 
 // #define TRACE_IPBUS
 
@@ -314,8 +314,7 @@ void IPbus::processAnswer() {
     }
     clearList();
     lastRxPktId = pktId; // store the last packet ID
-  }
-  catch (...) {
+  } catch (...) {
     clearList();
     throw;
   }

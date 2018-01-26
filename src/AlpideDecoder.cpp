@@ -1,6 +1,6 @@
 #include "AlpideDecoder.h"
-#include <stdint.h>
 #include <iostream>
+#include <stdint.h>
 
 // using namespace AlpideDecoder;
 

@@ -3,14 +3,14 @@
  *
  ----------------- */
 
+#include "SetupHelpers.h"
+#include "TBoardConfigMOSAIC.h"
+#include "TConfig.h"
+#include "TReadoutBoardMOSAIC.h"
+#include <exception>
 #include <iostream>
 #include <unistd.h>
 #include <vector>
-#include "TReadoutBoardMOSAIC.h"
-#include "TBoardConfigMOSAIC.h"
-#include "TConfig.h"
-#include "SetupHelpers.h"
-#include <exception>
 
 int main(int argc, char **argv) {
   TConfig *fConfig;

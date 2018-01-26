@@ -1,12 +1,12 @@
 #include <math.h>
 #include <string.h>
-#include <unistd.h>
-#include <thread>
 #include <string>
+#include <thread>
+#include <unistd.h>
 
-#include "USB.h"
 #include "TAlpide.h"
 #include "TReadoutBoardDAQ.h"
+#include "USB.h"
 
 // constructor
 TReadoutBoardDAQ::TReadoutBoardDAQ(libusb_device *ADevice, TBoardConfigDAQ *config)
@@ -369,7 +369,8 @@ void TReadoutBoardDAQ::DAQReadData() {
                   << " instead of expected >= "
                   << (BoardDecoder::GetDAQEventHeaderLength(fFirmwareVersion,
                                                             fBoardConfigDAQ->GetHeaderType()) +
-                      BoardDecoder::GetDAQEventTrailerLength() + 4) << std::endl;
+                      BoardDecoder::GetDAQEventTrailerLength() + 4)
+                  << std::endl;
         std::cout << std::endl;
       } else {
         for (int i = 0; i < evt_length; i++) {
@@ -928,7 +929,7 @@ float TReadoutBoardDAQ::ReadDigitalI() {
 float TReadoutBoardDAQ::ReadIoI() {
   uint32_t ReadValue;
   ReadRegister((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA2, ReadValue);
-  int Value = (ReadValue) & 0xfff;
+  int Value = (ReadValue)&0xfff;
 
   return ADCToSupplyCurrent(Value);
 }
@@ -947,7 +948,7 @@ float TReadoutBoardDAQ::ReadMonV() {
 float TReadoutBoardDAQ::ReadMonI() {
   uint32_t ReadValue;
   ReadRegister((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA1, ReadValue);
-  int Value = (ReadValue) & 0xfff;
+  int Value = (ReadValue)&0xfff;
 
   return ADCToDacmonCurrent(Value);
 }
@@ -956,7 +957,7 @@ float TReadoutBoardDAQ::ReadTemperature() {
   uint32_t ReadValue;
   ReadRegister((MODULE_ADC << DAQBOARD_REG_ADDR_SIZE) + ADC_DATA0, ReadValue);
   // printf("NTC ADC: 0x%08X\n",Reading);
-  int Value = (ReadValue) & 0xfff;
+  int Value = (ReadValue)&0xfff;
 
   return ADCToTemperature(Value);
 }

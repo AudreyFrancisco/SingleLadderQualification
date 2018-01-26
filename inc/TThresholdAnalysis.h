@@ -120,7 +120,7 @@ private:
   int m_resultFactor;
 
 public:
-  TThresholdResultHic() : TScanResultHic() {};
+  TThresholdResultHic() : TScanResultHic(){};
   void WriteToFile(FILE *fp);
 };
 
@@ -172,8 +172,8 @@ private:
   int m_sumGoodThresholds;
   int m_counterGoodThresholds;
 
-  int
-  m_resultFactor; // basically determines scan type; 10 default if regular, 1 if vcasn, -1 if ithr
+  int m_resultFactor; // basically determines scan type; 10 default if regular, 1 if vcasn, -1 if
+                      // ithr
 
   double m_cutChi2; // Or float ?
 
@@ -201,8 +201,8 @@ protected:
     TThresholdResultHic *Result = new TThresholdResultHic();
     return Result;
   };
-  void CreateResult() {};
-  void InitCounters() {};
+  void CreateResult(){};
+  void InitCounters(){};
   void AnalyseHisto(TScanHisto *histo);
 
 public:
@@ -211,7 +211,7 @@ public:
                      float resultFactor = m_electronPerDac); // MUST BE 1 for a vcasn scan, and *-1*
                                                              // for an ithr scan!!!  Else use
                                                              // default.
-  virtual ~TThresholdAnalysis() {};
+  virtual ~TThresholdAnalysis(){};
 
   void Initialize();
   void Finalize();

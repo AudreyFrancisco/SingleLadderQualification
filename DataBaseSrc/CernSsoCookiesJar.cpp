@@ -37,14 +37,13 @@
  *	2/8/2017   -   Add the X509/Kerberos authentication switch
  *
  */
-#include "utilities.h"
 #include "CernSsoCookiesJar.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 // / #include <string>
 
 CernSsoCookieJar::CernSsoCookieJar(string aCookiePackFileName) {

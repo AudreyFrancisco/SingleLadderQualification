@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "TDigitalWFAnalysis.h"
 #include "DBHelpers.h"
+#include "TDigitalWFAnalysis.h"
 
 TDigitalWFAnalysis::TDigitalWFAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
                                        TScanConfig *aScanConfig, std::vector<THic *> hics,

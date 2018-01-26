@@ -8,8 +8,7 @@ class ScanThread : public QObject {
 signals:
   void resultReady();
 
-public
-slots:
+public slots:
   void process();
 
 public:

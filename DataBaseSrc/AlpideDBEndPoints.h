@@ -44,25 +44,21 @@
 #include <string>
 #include <vector>
 
-#include <libxml/tree.h>
 #include <libxml/parser.h>
+#include <libxml/tree.h>
 
 #include "utilities.h"
 
 using namespace std;
 
-#define MATCHNODE(nod, tag) (nod->children &&strcmp((const char *)nod->name, tag) == 0)
+#define MATCHNODE(nod, tag) (nod->children && strcmp((const char *)nod->name, tag) == 0)
 
 class AlpideDB;
 
 // The base class
 class AlpideTable {
 public:
-  enum ErrorCode {
-    NoError = 0,
-    SyncQuery = 20,
-    BadXML = 21
-  };
+  enum ErrorCode { NoError = 0, SyncQuery = 20, BadXML = 21 };
 
   struct response {
     int Session;
@@ -131,8 +127,8 @@ public:
 
   AlpideTable::response *GetList(int projectID, vector<member> *Result);
   string Print(member *me) {
-    return ("Member : ID=" + std::to_string(me->ID) + " Personal ID=" +
-            std::to_string(me->PersonalID) + " Name=" + me->FullName);
+    return ("Member : ID=" + std::to_string(me->ID) +
+            " Personal ID=" + std::to_string(me->PersonalID) + " Name=" + me->FullName);
   };
 };
 

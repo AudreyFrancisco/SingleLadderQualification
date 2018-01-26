@@ -31,8 +31,8 @@
 #ifndef AD7997_H
 #define AD7997_H
 
-#include <stdint.h>
 #include "i2cslave.h"
+#include <stdint.h>
 
 class AD7997 : public I2Cslave {
 public:

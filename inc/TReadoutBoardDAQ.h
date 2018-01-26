@@ -5,19 +5,18 @@
 #ifndef READOUTBOARDDAQ_H
 #define READOUTBOARDDAQ_H
 
-#include <iostream>
 #include <deque>
+#include <iostream>
 #include <mutex>
 #include <thread>
 #include <vector>
-#include <iostream>
 
-#include "USB.h"
-#include "TReadoutBoard.h"
-#include "TAlpide.h"
-#include "TConfig.h"
-#include "TBoardConfigDAQ.h"
 #include "BoardDecoder.h"
+#include "TAlpide.h"
+#include "TBoardConfigDAQ.h"
+#include "TConfig.h"
+#include "TReadoutBoard.h"
+#include "USB.h"
 
 // enum TTriggerSource {TRIG_INT, TRIG_EXT};
 
@@ -154,12 +153,12 @@ private:
   int fEvtCnt;                   // counter of events read/in queue
   int fDiffTrigEvtCnt;           // difference between number triggers and events read
   int fMaxDiffTrigEvtCnt; // maximum allowed difference between number triggers and events read
-  uint32_t
-  fMaxEventBufferSize; // maximum number of events in fEventBuffer; TODO: maximum queue size ~1 Gb?
-  int fNTriggersTotal; // total number of triggers to be launched
-  int fMaxNTriggersTrain; // fNTriggersTotal will be subdivided into trigger trains with
-                          // fMaxNTriggersAtOnce
-  std::mutex fMtx;        //  mutex for read/write acces to fEventBuffer
+  uint32_t fMaxEventBufferSize; // maximum number of events in fEventBuffer; TODO: maximum queue
+                                // size ~1 Gb?
+  int fNTriggersTotal;          // total number of triggers to be launched
+  int fMaxNTriggersTrain;       // fNTriggersTotal will be subdivided into trigger trains with
+                                // fMaxNTriggersAtOnce
+  std::mutex fMtx;              //  mutex for read/write acces to fEventBuffer
 
   std::deque<std::vector<unsigned char>> fEventBuffer; // double ended queue for DAQboard event
                                                        // data; vector<unsigned char> for saving
@@ -196,9 +195,7 @@ public:
 
   //// methods only for Cagliari DAQ board
   //---------------------------------------------------------
-  TBoardConfigDAQ *GetBoardConfig() {
-    return fBoardConfigDAQ;
-  };
+  TBoardConfigDAQ *GetBoardConfig() { return fBoardConfigDAQ; };
 
   bool PowerOn(int &overflow);
   void PowerOff();
@@ -248,7 +245,7 @@ public:
     return WriteRegister((MODULE_READOUT << DAQBOARD_REG_ADDR_SIZE) + READOUT_EOR_COMMAND, 5);
   };
 
-  void StartRun() {};
+  void StartRun(){};
   // TRIGGER Module:
   bool StartTrigger();
   bool StopTrigger();

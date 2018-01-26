@@ -160,10 +160,10 @@ void Serial::SerialImpl::reconfigurePort() {
   options.c_oflag &= (tcflag_t) ~(OPOST);
   options.c_iflag &= (tcflag_t) ~(INLCR | IGNCR | ICRNL | IGNBRK);
 #ifdef IUCLC
-  options.c_iflag &= (tcflag_t) ~IUCLC;
+  options.c_iflag &= (tcflag_t)~IUCLC;
 #endif
 #ifdef PARMRK
-  options.c_iflag &= (tcflag_t) ~PARMRK;
+  options.c_iflag &= (tcflag_t)~PARMRK;
 #endif
 
   // setup baud rate
@@ -403,7 +403,7 @@ void Serial::SerialImpl::reconfigurePort() {
   }
 
   // setup char len
-  options.c_cflag &= (tcflag_t) ~CSIZE;
+  options.c_cflag &= (tcflag_t)~CSIZE;
   if (bytesize_ == eightbits)
     options.c_cflag |= CS8;
   else if (bytesize_ == sevenbits)

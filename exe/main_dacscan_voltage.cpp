@@ -14,17 +14,17 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-#include <unistd.h>
-#include "TAlpide.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "BoardDecoder.h"
-#include "SetupHelpers.h"
+#include <unistd.h>
 
 TConfig *config;
 std::vector<TReadoutBoard *> fBoards;

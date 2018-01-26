@@ -343,8 +343,8 @@ void TReadoutBoardRU::StartRun() {
     std::cout << "initialising transceiver for chip id " << std::dec << fChipPositions.at(i).chipId
               << std::endl;
     TBoardConfigRU *config = (TBoardConfigRU *)GetConfig();
-    auto tr = transceiver_array
-        [fChipPositions.at(i).chipId]; // TODO: Mapping between transceiver and chipid
+    auto tr = transceiver_array[fChipPositions.at(i).chipId]; // TODO: Mapping between transceiver
+                                                              // and chipid
     tr->Initialize(config->getReadoutSpeed(), config->getInvertPolarity());
     std::cout << "Done" << std::endl;
     bool alignedBefore = tr->IsAligned();

@@ -1,6 +1,6 @@
 #include "activitystatus.h"
-#include "ui_activitystatus.h"
 #include "iostream"
+#include "ui_activitystatus.h"
 
 ActivityStatus::ActivityStatus(QWidget *parent) : QDialog(parent), ui(new Ui::ActivityStatus) {
   ui->setupUi(this);

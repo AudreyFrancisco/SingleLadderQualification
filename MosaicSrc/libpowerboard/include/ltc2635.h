@@ -31,8 +31,8 @@
 #ifndef LTC2635_H
 #define LTC2635_H
 
-#include <stdint.h>
 #include "i2cslave.h"
+#include <stdint.h>
 
 class LTC2635 : public I2Cslave {
 public:

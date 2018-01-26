@@ -242,9 +242,9 @@ double rmsGraph(TGraph *resultGraph) {
   return sqrt(abs(sum / norm));
 }
 
-void
-ddxGraph(TGraph *aGraph,
-         TGraph *resultGraph) { // resultGraph contains the derivative of aGraph wrt x (1st order)
+void ddxGraph(
+    TGraph *aGraph,
+    TGraph *resultGraph) { // resultGraph contains the derivative of aGraph wrt x (1st order)
   // Results are at MIDPOINTS of the old graph!
   double *xs = aGraph->GetX(); // all x-coords
   double *ys = aGraph->GetY();
@@ -316,9 +316,9 @@ float FindStart(TGraph *aGraph, int resultFactor, int m_nPulseInj) {
 }
 
 common::TErrFuncFitResult TThresholdAnalysis::DoFit(TGraph *aGraph, bool speedy)
-    // speedy=true will run the fast analysis in place of the slower fit.  Much faster,
-    //  but potentially less accurate.  (Shouldn't be a huge difference, though.)
-    // Note:  The slower version isn't working right now!
+// speedy=true will run the fast analysis in place of the slower fit.  Much faster,
+//  but potentially less accurate.  (Shouldn't be a huge difference, though.)
+// Note:  The slower version isn't working right now!
 {
   common::TErrFuncFitResult fitResult_dummy;
 
@@ -726,8 +726,7 @@ void TThresholdAnalysis::Finalize() {
       TThresholdResultChip trc = itChip->second;
       if (!(trc.GetBoardIndex() ==
                 (unsigned int)m_chipList.at(i).boardIndex // if chips are the same
-            &&
-            trc.GetDataReceiver() == (unsigned int)m_chipList.at(i).dataReceiver &&
+            && trc.GetDataReceiver() == (unsigned int)m_chipList.at(i).dataReceiver &&
             trc.GetChipId() == (unsigned int)m_chipList.at(i).chipId))
         continue;
       // set m_chipList's chip.threshold/etc equal to the one found in trc

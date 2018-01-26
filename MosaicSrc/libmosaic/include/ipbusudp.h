@@ -31,13 +31,13 @@
 #ifndef IPBUSUDP_H
 #define IPBUSUDP_H
 
-#include <stdint.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include "ipbus.h"
 #include <arpa/inet.h>
 #include <mutex>
+#include <netinet/in.h>
+#include <stdint.h>
 #include <string>
-#include "ipbus.h"
+#include <sys/socket.h>
 
 #define DEFAULT_PACKET_SIZE 1400
 #define DEFAULT_PORT 2000

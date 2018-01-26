@@ -31,9 +31,9 @@
 #ifndef MTRIGGERCONTROL_H
 #define MTRIGGERCONTROL_H
 
+#include "mwbbslave.h"
 #include <stdint.h>
 #include <string>
-#include "mwbbslave.h"
 
 class MTriggerControl : public MWbbSlave {
 public:
@@ -50,10 +50,7 @@ private: // WBB Slave registers map
     regTimeH = 3,          // TIMER from first trigger bits 63:32 - Read only. Reset by RUN signal
   };
 
-  enum cfgBits_e {
-    EN_EXT_TRIGGER = (1 << 0),
-    EXT_TRG_LEVEL = (1 << 1)
-  };
+  enum cfgBits_e { EN_EXT_TRIGGER = (1 << 0), EXT_TRG_LEVEL = (1 << 1) };
 };
 
 #endif // MTRIGGERCONTROL_H

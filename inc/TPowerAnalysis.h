@@ -1,16 +1,15 @@
 #ifndef TPOWERANALYSIS_H
 #define TPOWERANALYSIS_H
 
+#include "TPowerTest.h"
+#include "TScan.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
-#include "TScan.h"
 
 class TPowerResultChip : public TScanResultChip {
 public:
-  TPowerResultChip() : TScanResultChip() {};
-  void WriteToFile(FILE *fp) {
-    (void)fp;
-  };
+  TPowerResultChip() : TScanResultChip(){};
+  void WriteToFile(FILE *fp) { (void)fp; };
   float GetVariable(TResultVariable var) {
     (void)(&var);
     return 0;
@@ -35,10 +34,8 @@ private:
 
 protected:
 public:
-  TPowerResultHic() : TScanResultHic() {};
-  void SetIVFile(const char *fName) {
-    strcpy(m_ivFile, fName);
-  };
+  TPowerResultHic() : TScanResultHic(){};
+  void SetIVFile(const char *fName) { strcpy(m_ivFile, fName); };
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
 };
@@ -49,10 +46,8 @@ class TPowerResult : public TScanResult {
 private:
 protected:
 public:
-  TPowerResult() : TScanResult() {};
-  void WriteToFileGlobal(FILE *fp) {
-    (void)fp;
-  };
+  TPowerResult() : TScanResult(){};
+  void WriteToFileGlobal(FILE *fp) { (void)fp; };
 };
 
 class TPowerAnalysis : public TScanAnalysis {
@@ -71,21 +66,17 @@ protected:
     TPowerResultHic *result = new TPowerResultHic();
     return result;
   };
-  void CreateResult() {};
-  void InitCounters() {};
+  void CreateResult(){};
+  void InitCounters(){};
   void WriteResult();
-  void AnalyseHisto(TScanHisto *histo) {
-    (void)&histo;
-  };
+  void AnalyseHisto(TScanHisto *histo) { (void)&histo; };
   string GetPreviousTestType();
 
 public:
   TPowerAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                  std::vector<THic *> hics, std::mutex *aMutex, TPowerResult *aResult = 0);
-  void Initialize() {
-    CreateHicResults();
-  };
-  void Run() {};
+  void Initialize() { CreateHicResults(); };
+  void Run(){};
   void Finalize();
 };
 

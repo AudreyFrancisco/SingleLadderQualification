@@ -27,10 +27,10 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "powerboard.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "powerboard.h"
 
 powerboard::powerboard(I2Cbus *busMaster, I2Cbus *busAux) {
   i2cBus = busMaster;

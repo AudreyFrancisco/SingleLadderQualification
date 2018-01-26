@@ -28,10 +28,10 @@
  *
  * 21/12/2015	Added mutex for multithread operation
  */
+#include "controlinterface.h"
+#include "pexception.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "pexception.h"
-#include "controlinterface.h"
 
 ControlInterface::ControlInterface() {
   readReqest = NULL;
@@ -172,8 +172,7 @@ void ControlInterface::execute() {
       *readReqest[i].readDataPtr = (d & 0xffff);
     }
     numReadRequest = 0;
-  }
-  catch (...) {
+  } catch (...) {
     numReadRequest = 0;
     throw;
   }

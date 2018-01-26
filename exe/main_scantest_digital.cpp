@@ -14,30 +14,29 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-#include <unistd.h>
-#include <deque>
-#include <thread>
-#include <mutex>
-#include "TAlpide.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "TAlpide.h"
+#include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "AlpideConfig.h"
+#include <deque>
+#include <mutex>
+#include <thread>
+#include <unistd.h>
 
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
-#include "TScan.h"
-#include "TSCurveScan.h"
-#include "TDigitalScan.h"
-#include "TScanConfig.h"
-#include "THisto.h"
-#include "TScanAnalysis.h"
-#include "TThresholdAnalysis.h"
 #include "TDigitalAnalysis.h"
+#include "TDigitalScan.h"
+#include "THisto.h"
+#include "TSCurveScan.h"
+#include "TScan.h"
+#include "TScanAnalysis.h"
+#include "TScanConfig.h"
+#include "TThresholdAnalysis.h"
 
 void scanLoop(TScan *myScan) {
   std::cout << "In scan loop functiokn" << std::endl;

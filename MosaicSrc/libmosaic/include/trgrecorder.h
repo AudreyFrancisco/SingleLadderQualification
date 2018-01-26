@@ -31,8 +31,8 @@
 #ifndef TRGRECORDER_H
 #define TRGRECORDER_H
 
-#include <stdint.h>
 #include "mwbbslave.h"
+#include <stdint.h>
 
 class TrgRecorder : public MWbbSlave {
 public:
@@ -44,9 +44,7 @@ private: // WBB Slave registers map
     regControl = 0 // Control register
   };
 
-  enum controlBits_e {
-    CONTROL_ENABLE = (1 << 0)
-  };
+  enum controlBits_e { CONTROL_ENABLE = (1 << 0) };
 };
 
 #endif // TRGRECORDER_H

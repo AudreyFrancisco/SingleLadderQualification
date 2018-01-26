@@ -1,12 +1,12 @@
 #include "TConfig.h"
 #include "TBoardConfigDAQ.h"
 #include "TBoardConfigMOSAIC.h"
-#include "TPowerBoardConfig.h"
 #include "TBoardConfigRU.h"
-#include <iostream>
-#include <fstream>
-#include <string>
+#include "TPowerBoardConfig.h"
 #include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 // construct Config from config file
 TConfig::TConfig(const char *fName) {

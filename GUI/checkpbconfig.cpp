@@ -1,10 +1,10 @@
 #include "checkpbconfig.h"
-#include "ui_checkpbconfig.h"
 #include "mainwindow.h"
+#include "ui_checkpbconfig.h"
 #include "ui_mainwindow.h"
-#include <iostream>
 #include <QtCore/QCoreApplication>
 #include <iomanip>
+#include <iostream>
 
 checkpbconfig::checkpbconfig(QWidget *parent) : QDialog(parent), ui(new Ui::checkpbconfig) {
   ui->setupUi(this);

@@ -3,16 +3,16 @@
  *
  ----------------- */
 
-#include <iostream>
-#include <unistd.h>
-#include "TReadoutBoard.h"
-#include "TReadoutBoardMOSAIC.h"
+#include "TAlpide.h"
 #include "TBoardConfig.h"
 #include "TBoardConfigMOSAIC.h"
-#include "TPowerBoard.h"
 #include "TConfig.h"
-#include "TAlpide.h"
+#include "TPowerBoard.h"
+#include "TReadoutBoard.h"
+#include "TReadoutBoardMOSAIC.h"
 #include <exception>
+#include <iostream>
+#include <unistd.h>
 
 #include <strings.h>
 

@@ -28,11 +28,11 @@
  *
  */
 
-#include <QVBoxLayout>
+#include "optionsDialog.h"
 #include <QDialogButtonBox>
 #include <QLabel>
 #include <QLineEdit>
-#include "optionsDialog.h"
+#include <QVBoxLayout>
 
 static const char *WINDOW_TITLE = "Option editor";
 

@@ -1,10 +1,10 @@
 #include "testingprogress.h"
-#include "ui_testingprogress.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <iostream>
+#include "ui_testingprogress.h"
 #include <QtCore/QCoreApplication>
 #include <iomanip>
+#include <iostream>
 Testingprogress::Testingprogress(QWidget *parent) : QDialog(parent), ui(new Ui::Testingprogress) {
   ui->setupUi(this);
   connect(ui->continuetest, SIGNAL(clicked()), this->parent(), SLOT(continuescans()));

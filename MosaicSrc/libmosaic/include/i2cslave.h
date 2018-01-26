@@ -31,8 +31,8 @@
 #ifndef I2CSLAVE_H
 #define I2CSLAVE_H
 
-#include <stdint.h>
 #include "i2cbus.h"
+#include <stdint.h>
 
 class I2Cslave {
 public:

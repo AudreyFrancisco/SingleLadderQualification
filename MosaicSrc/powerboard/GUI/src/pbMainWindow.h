@@ -30,18 +30,18 @@
 #ifndef PBMAINWINDOW_H
 #define PBMAINWINDOW_H
 
-#include <QDomElement>
-#include <QMainWindow>
-#include <QLCDNumber>
-#include <QPixmap>
-#include <QLabel>
-#include <QLineEdit>
-#include <QSignalMapper>
-#include <QTimer>
-#include <QCheckBox>
-#include "setValidator.h"
 #include "pbif.h"
 #include "powerboard.h"
+#include "setValidator.h"
+#include <QCheckBox>
+#include <QDomElement>
+#include <QLCDNumber>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMainWindow>
+#include <QPixmap>
+#include <QSignalMapper>
+#include <QTimer>
 
 #define NUM_TSENSORS 1
 #define NUM_MODULES 8
@@ -85,12 +85,10 @@ private:
   bool boardIsOnline;
   QString boardAddress;
 
-public
-slots:
+public slots:
   void fileOpen(char *fname = 0);
 
-private
-slots:
+private slots:
   void channelSetON(int ch);
   void channelSetOFF(int ch);
   void channelVset(int ch);

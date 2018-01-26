@@ -1,11 +1,11 @@
 #ifndef CHIPCONFIG_H
 #define CHIPCONFIG_H
 
+#include "AlpideDecoder.h"
 #include "TConfig.h"
 #include <map>
-#include <string>
 #include <string.h>
-#include "AlpideDecoder.h"
+#include <string>
 
 class TConfig;
 
@@ -119,124 +119,50 @@ public:
   bool SetParamValue(std::string Name, std::string Value);
   bool SetParamValue(std::string Name, int Value);
   int GetParamValue(std::string Name);
-  bool IsParameter(std::string Name) {
-    return (fSettings.count(Name) > 0);
-  };
-  int GetChipId() {
-    return fChipId;
-  };
-  int GetCtrInt() {
-    return fControlInterface;
-  };
-  int GetDataLink() {
-    return fReceiver;
-  };
-  bool IsEnabled() {
-    return (fEnabled != 0);
-  };
-  void SetEnable(bool Enabled) {
-    fEnabled = Enabled ? 1 : 0;
-  };
-  int GetModuleId() {
-    return (fChipId & 0x70) >> 4;
-  };
-  bool IsOBMaster() {
-    return ((fChipId % 8 == 0) && (GetModuleId() > 0));
-  };
+  bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
+  int GetChipId() { return fChipId; };
+  int GetCtrInt() { return fControlInterface; };
+  int GetDataLink() { return fReceiver; };
+  bool IsEnabled() { return (fEnabled != 0); };
+  void SetEnable(bool Enabled) { fEnabled = Enabled ? 1 : 0; };
+  int GetModuleId() { return (fChipId & 0x70) >> 4; };
+  bool IsOBMaster() { return ((fChipId % 8 == 0) && (GetModuleId() > 0)); };
   bool HasEnabledSlave();
 
-  bool GetReadoutMode() {
-    return fReadoutMode;
-  };
-  bool GetEnableClustering() {
-    return fEnableClustering;
-  };
-  int GetMatrixReadoutSpeed() {
-    return fMatrixReadoutSpeed;
-  };
-  int GetSerialLinkSpeed() {
-    return fSerialLinkSpeed;
-  };
-  bool GetEnableSkewingGlobal() {
-    return fEnableSkewingGlobal;
-  };
-  bool GetEnableSkewingStartRO() {
-    return fEnableSkewingStartRO;
-  };
-  bool GetEnableClockGating() {
-    return fEnableClockGating;
-  };
-  bool GetEnableCMUReadout() {
-    return fEnableCMUReadout;
-  };
+  bool GetReadoutMode() { return fReadoutMode; };
+  bool GetEnableClustering() { return fEnableClustering; };
+  int GetMatrixReadoutSpeed() { return fMatrixReadoutSpeed; };
+  int GetSerialLinkSpeed() { return fSerialLinkSpeed; };
+  bool GetEnableSkewingGlobal() { return fEnableSkewingGlobal; };
+  bool GetEnableSkewingStartRO() { return fEnableSkewingStartRO; };
+  bool GetEnableClockGating() { return fEnableClockGating; };
+  bool GetEnableCMUReadout() { return fEnableCMUReadout; };
 
-  int GetTriggerDelay() {
-    return fTriggerDelay;
-  };
-  int GetStrobeDuration() {
-    return fStrobeDuration;
-  };
-  int GetStrobeDelay() {
-    return fStrobeDelay;
-  };
-  int GetPulseDuration() {
-    return fPulseDuration;
-  };
+  int GetTriggerDelay() { return fTriggerDelay; };
+  int GetStrobeDuration() { return fStrobeDuration; };
+  int GetStrobeDelay() { return fStrobeDelay; };
+  int GetPulseDuration() { return fPulseDuration; };
 
-  int GetDclkReceiver() {
-    return fDclkReceiver;
-  };
-  int GetDclkDriver() {
-    return fDclkDriver;
-  };
-  int GetMclkReceiver() {
-    return fMclkReceiver;
-  };
-  int GetDctrlReceiver() {
-    return fDctrlReceiver;
-  };
-  int GetDctrlDriver() {
-    return fDctrlDriver;
-  };
+  int GetDclkReceiver() { return fDclkReceiver; };
+  int GetDclkDriver() { return fDclkDriver; };
+  int GetMclkReceiver() { return fMclkReceiver; };
+  int GetDctrlReceiver() { return fDctrlReceiver; };
+  int GetDctrlDriver() { return fDctrlDriver; };
 
-  int GetPreviousId() {
-    return fPreviousId;
-  };
-  bool GetInitialToken() {
-    return fInitialToken;
-  };
-  bool GetDisableManchester() {
-    return fDisableManchester;
-  };
-  bool GetEnableDdr() {
-    return fEnableDdr;
-  };
+  int GetPreviousId() { return fPreviousId; };
+  bool GetInitialToken() { return fInitialToken; };
+  bool GetDisableManchester() { return fDisableManchester; };
+  bool GetEnableDdr() { return fEnableDdr; };
 
-  void SetPreviousId(int APreviousId) {
-    fPreviousId = APreviousId;
-  };
-  void SetInitialToken(bool AInitialToken) {
-    fInitialToken = AInitialToken;
-  };
-  void SetEnableDdr(bool AEnableDdr) {
-    fEnableDdr = AEnableDdr;
-  };
-  void SetDisableManchester(bool ADisableManchester) {
-    fDisableManchester = ADisableManchester;
-  };
+  void SetPreviousId(int APreviousId) { fPreviousId = APreviousId; };
+  void SetInitialToken(bool AInitialToken) { fInitialToken = AInitialToken; };
+  void SetEnableDdr(bool AEnableDdr) { fEnableDdr = AEnableDdr; };
+  void SetDisableManchester(bool ADisableManchester) { fDisableManchester = ADisableManchester; };
 
-  void SetMaskFile(const char *fName) {
-    strcpy(fMaskFile, fName);
-  };
-  void SetNoisyPixels(std::vector<TPixHit> noisy) {
-    m_noisyPixels = noisy;
-  };
-  void ClearNoisyPixels() {
-    m_noisyPixels.clear();
-  };
-  std::vector<TPixHit> GetNoisyPixels() {
-    return m_noisyPixels;
-  };
+  void SetMaskFile(const char *fName) { strcpy(fMaskFile, fName); };
+  void SetNoisyPixels(std::vector<TPixHit> noisy) { m_noisyPixels = noisy; };
+  void ClearNoisyPixels() { m_noisyPixels.clear(); };
+  std::vector<TPixHit> GetNoisyPixels() { return m_noisyPixels; };
 };
 
 #endif /* CHIPCONFIG_H */

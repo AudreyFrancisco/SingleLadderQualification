@@ -31,8 +31,8 @@
 #ifndef ALPIDERCV_H
 #define ALPIDERCV_H
 
-#include <stdint.h>
 #include "mwbbslave.h"
+#include <stdint.h>
 
 class ALPIDErcv : public MWbbSlave {
 public:
@@ -49,16 +49,10 @@ public:
   void addSetRDPRegField(uint16_t address, uint16_t size, uint16_t offset, uint16_t val);
 
 private: // WBB Slave registers map
-  enum regAddress_e {
-    regOpMode = 0,
-    rdpBase = 0x00800000
-  };
+  enum regAddress_e { regOpMode = 0, rdpBase = 0x00800000 };
 
 private:
-  enum opModeBits_e {
-    OPMODE_RCVENABLE = (1 << 0),
-    OPMODE_INVERT_POLARITY = (1 << 1)
-  };
+  enum opModeBits_e { OPMODE_RCVENABLE = (1 << 0), OPMODE_INVERT_POLARITY = (1 << 1) };
 };
 
 #endif // ALPIDERCV_H

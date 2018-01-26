@@ -31,11 +31,11 @@
 #ifndef MSERVICE_H
 #define MSERVICE_H
 
+#include "mexception.h"
+#include <arpa/inet.h>
+#include <netinet/in.h>
 #include <stdint.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include "mexception.h"
 
 #define FIRMWARE_PORT 65000
 #define RCV_LONG_TIMEOUT 2000 // timeout in ms for the first rx datagrams

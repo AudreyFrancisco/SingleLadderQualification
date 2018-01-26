@@ -1,9 +1,9 @@
+#include "TFifoTest.h"
+#include "AlpideConfig.h"
+#include <exception>
 #include <iostream>
 #include <string.h>
 #include <string>
-#include <exception>
-#include "TFifoTest.h"
-#include "AlpideConfig.h"
 
 TFifoTest::TFifoTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                      std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
@@ -150,8 +150,7 @@ void TFifoTest::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bo
 
   try {
     err = chip->ReadRegister(LowAdd, LowVal);
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     exception = true;
     return;
   }
@@ -159,8 +158,7 @@ void TFifoTest::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bo
   if (err >= 0) {
     try {
       err = chip->ReadRegister(HighAdd, HighVal);
-    }
-    catch (std::exception &e) {
+    } catch (std::exception &e) {
       exception = true;
       return;
     }

@@ -1,8 +1,8 @@
 #include "TestBeamTools.h"
 
+#include "TAlpide.h"
 #include <iostream>
 #include <tinyxml.h>
-#include "TAlpide.h"
 
 unsigned int Bitmask(int width) {
   unsigned int tmp = 0;

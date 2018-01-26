@@ -31,8 +31,8 @@
 #ifndef ADC128D818_H
 #define ADC128D818_H
 
-#include <stdint.h>
 #include "i2cslave.h"
+#include <stdint.h>
 
 class ADC128D818 : public I2Cslave {
 public:

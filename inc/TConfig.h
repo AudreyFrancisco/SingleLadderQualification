@@ -1,13 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <vector>
-#include <string>
-#include "TChipConfig.h"
 #include "TBoardConfig.h"
-#include "TPowerBoardConfig.h"
+#include "TChipConfig.h"
 #include "THicConfig.h"
+#include "TPowerBoardConfig.h"
 #include "TScanConfig.h"
+#include <string>
+#include <vector>
 
 const int DEFAULT_MODULE_ID = 1;
 
@@ -50,33 +50,19 @@ public:
   TConfig(int nBoards, std::vector<int> chipIds, TBoardType boardType = boardMOSAIC);
   TConfig(int chipId, TBoardType boardType = boardDAQ);
 
-  TDeviceType GetDeviceType() {
-    return fDeviceType;
-  };
-  unsigned int GetNChips() {
-    return fChipConfigs.size();
-  };
-  unsigned int GetNBoards() {
-    return fBoardConfigs.size();
-  };
-  unsigned int GetNHics() {
-    return fHicConfigs.size();
-  };
-  bool GetUsePowerBoard() {
-    return fUsePowerBoard;
-  };
-  void SetUsePowerBoard(bool UsePB) {
-    fUsePowerBoard = UsePB;
-  };
+  TDeviceType GetDeviceType() { return fDeviceType; };
+  unsigned int GetNChips() { return fChipConfigs.size(); };
+  unsigned int GetNBoards() { return fBoardConfigs.size(); };
+  unsigned int GetNHics() { return fHicConfigs.size(); };
+  bool GetUsePowerBoard() { return fUsePowerBoard; };
+  void SetUsePowerBoard(bool UsePB) { fUsePowerBoard = UsePB; };
   TChipConfig *GetChipConfig(unsigned int iChip);
   TChipConfig *GetChipConfigById(int chipId);
   TBoardConfig *GetBoardConfig(unsigned int iBoard);
   TPowerBoardConfig *GetPBConfig(unsigned int iBoard);
   THicConfig *GetHicConfig(unsigned int iHic);
   THicConfig *GetHicConfigById(int modId);
-  TScanConfig *GetScanConfig() {
-    return fScanConfig;
-  };
+  TScanConfig *GetScanConfig() { return fScanConfig; };
   void WriteToFile(const char *fName);
 
   std::string GetSoftwareVersion();

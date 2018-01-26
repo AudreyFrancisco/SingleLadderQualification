@@ -14,19 +14,19 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-#include <unistd.h>
-#include <string.h>
-#include <unordered_map>
-#include "TAlpide.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "BoardDecoder.h"
-#include "SetupHelpers.h"
+#include <string.h>
+#include <unistd.h>
+#include <unordered_map>
 
 TBoardType fBoardType;
 std::vector<TReadoutBoard *> fBoards;
@@ -253,8 +253,7 @@ void scan() {
                       << std::endl;
           } else
             RecvMatched = true;
-        }
-        catch (const std::out_of_range &oor) {
+        } catch (const std::out_of_range &oor) {
         }
         if (!RecvMatched) {
           ++errorsRecvChipID;

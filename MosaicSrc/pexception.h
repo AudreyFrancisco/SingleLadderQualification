@@ -31,8 +31,8 @@
 #ifndef PEXCEPTION_H
 #define PEXCEPTION_H
 
-#include <string>
 #include "mexception.h"
+#include <string>
 
 // class string;
 using namespace std;

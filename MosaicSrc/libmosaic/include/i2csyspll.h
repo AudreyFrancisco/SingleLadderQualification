@@ -31,10 +31,10 @@
 #ifndef I2CSYSPLL_H
 #define I2CSYSPLL_H
 
+#include "i2cbus.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include "i2cbus.h"
 
 class I2CSysPll : public I2Cbus {
 public:

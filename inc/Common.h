@@ -5,8 +5,8 @@
 #define COMMON_H
 
 #include <cstdio>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "AlpideDecoder.h"
 //#include "THIC.h"

@@ -31,9 +31,9 @@
 #ifndef MDATARECEIVER_H
 #define MDATARECEIVER_H
 
-#include <vector>
-#include <stdlib.h>
 #include "mboard.h"
+#include <stdlib.h>
+#include <vector>
 
 typedef std::vector<char> dataBuffer_t;
 

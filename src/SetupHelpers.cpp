@@ -1,7 +1,7 @@
-#include <iostream>
 #include "SetupHelpers.h"
-#include "USBHelpers.h"
 #include "TPowerBoard.h"
+#include "USBHelpers.h"
+#include <iostream>
 #include <string.h>
 #include <string>
 
@@ -373,7 +373,8 @@ int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
   int nWorking = 0;
 
   std::cout
-      << std::endl << "Before starting actual test:" << std::endl
+      << std::endl
+      << "Before starting actual test:" << std::endl
       << "Checking the control interfaces of all chips by doing a single register readback test"
       << std::endl;
   for (unsigned int i = 0; i < boards->size(); i++) {
@@ -397,8 +398,7 @@ int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
                   << "), disabling." << std::endl;
         chips->at(i)->SetEnable(false); // GetConfig()->SetEnable(false);
       }
-    }
-    catch (exception &e) {
+    } catch (exception &e) {
       std::cout << "Pos:" << i << "  Chip ID " << chips->at(i)->GetConfig()->GetChipId()
                 << ", not answering, disabling." << std::endl;
       chips->at(i)->SetEnable(false); // GetConfig()->SetEnable(false);
@@ -731,20 +731,13 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   TPowerBoardConfig *pbConfig[2];
   TPowerBoard *pb[2] = {0, 0};
 
-  int CtrIntMap[10][2] = {
-      {3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10}, {3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10}};
-  int DataRcvMap[10][2] = {
-      {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0}, {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0}};
-  bool InverRcvMap[10][2] = {{true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false}};
+  int CtrIntMap[10][2] = {{3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10},
+                          {3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10}};
+  int DataRcvMap[10][2] = {{9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0},
+                           {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0}};
+  bool InverRcvMap[10][2] = {{true, false}, {true, false}, {true, false}, {true, false},
+                             {true, false}, {true, false}, {true, false}, {true, false},
+                             {true, false}, {true, false}};
 
   std::cout << "Entry SetUp Endurance Test" << std::endl;
 

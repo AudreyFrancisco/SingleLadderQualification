@@ -1,11 +1,11 @@
-#include <unistd.h>
-#include <string.h>
-#include <string>
-#include "AlpideConfig.h"
 #include "TDigitalScan.h"
+#include "AlpideConfig.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
+#include <string.h>
+#include <string>
+#include <unistd.h>
 
 TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
                            std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,

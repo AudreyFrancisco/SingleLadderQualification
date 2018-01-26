@@ -27,10 +27,10 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "pbMainWindow.h"
 #include <QApplication>
 #include <QMessageBox>
 #include <string.h>
-#include "pbMainWindow.h"
 
 pbMainWindow *theMainWindow;
 

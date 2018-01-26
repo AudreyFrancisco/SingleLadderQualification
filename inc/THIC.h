@@ -1,19 +1,16 @@
 #ifndef HIC_H
 #define HIC_H
 
-#include <vector>
-#include <string>
+#include "Common.h"
 #include "TAlpide.h"
 #include "TPowerBoard.h"
-#include "Common.h"
 #include "TScanAnalysis.h"
+#include <string>
+#include <vector>
 
 class TAlpide;
 
-typedef enum {
-  HIC_IB,
-  HIC_OB
-} THicType;
+typedef enum { HIC_IB, HIC_OB } THicType;
 
 class THic {
 private:
@@ -29,10 +26,8 @@ protected:
 
 public:
   THic(const char *dbId, int modId, TPowerBoard *pb, int pbMod);
-  virtual ~THic() {};
-  int GetNumber() {
-    return m_hicNumber;
-  };
+  virtual ~THic(){};
+  int GetNumber() { return m_hicNumber; };
   bool IsPowered();
   bool IsPoweredAnalog();
   bool IsPoweredDigital();
@@ -46,15 +41,9 @@ public:
   float GetIBias();
   float GetTemperature();
   void ScaleVoltage(float aFactor);
-  std::string GetDbId() {
-    return m_dbId;
-  };
-  int GetModId() {
-    return m_moduleId;
-  };
-  unsigned int GetNChips() {
-    return m_chips.size();
-  };
+  std::string GetDbId() { return m_dbId; };
+  int GetModId() { return m_moduleId; };
+  unsigned int GetNChips() { return m_chips.size(); };
   int AddChip(TAlpide *chip);
   virtual bool ContainsChip(common::TChipIndex idx) = 0;
   bool ContainsChip(int index);
@@ -63,16 +52,10 @@ public:
   virtual common::TChipIndex GetChipIndex(int i) = 0;
   virtual std::vector<int> GetBoardIndices() = 0;
   virtual THicType GetHicType() = 0;
-  std::vector<TAlpide *> GetChips() {
-    return m_chips;
-  };
+  std::vector<TAlpide *> GetChips() { return m_chips; };
   TAlpide *GetChipById(int chipId);
-  TPowerBoard *GetPowerBoard() {
-    return m_powerBoard;
-  };
-  int GetPbMod() {
-    return m_pbMod;
-  };
+  TPowerBoard *GetPowerBoard() { return m_powerBoard; };
+  int GetPbMod() { return m_pbMod; };
   void SwitchBias(bool on);
   float GetAnalogueVoltage();
   void AddClassification(THicClassification aClass);
@@ -90,11 +73,9 @@ private:
 protected:
 public:
   THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod);
-  virtual ~THicOB() {};
+  virtual ~THicOB(){};
   common::TChipIndex GetChipIndex(int i);
-  THicType GetHicType() {
-    return HIC_OB;
-  };
+  THicType GetHicType() { return HIC_OB; };
   std::vector<int> GetBoardIndices();
   bool ContainsChip(common::TChipIndex idx);
   bool ContainsReceiver(int boardIndex, int rcv);
@@ -110,11 +91,9 @@ private:
 protected:
 public:
   THicIB(const char *dbId, int modId, TPowerBoard *pb, int pbMod);
-  virtual ~THicIB() {};
+  virtual ~THicIB(){};
   common::TChipIndex GetChipIndex(int i);
-  THicType GetHicType() {
-    return HIC_IB;
-  };
+  THicType GetHicType() { return HIC_IB; };
   std::vector<int> GetBoardIndices();
   bool ContainsChip(common::TChipIndex idx);
   bool ContainsReceiver(int boardIndex, int rcv);

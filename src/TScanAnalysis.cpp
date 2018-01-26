@@ -1,8 +1,8 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "TScanAnalysis.h"
 #include "DBHelpers.h"
+#include "TScanAnalysis.h"
 
 #include "THIC.h"
 #include "THisto.h"

@@ -27,12 +27,12 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <sstream>
 #include "mruncontrol.h"
 #include "mexception.h"
+#include <iostream>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
 
 MRunControl::MRunControl(WishboneBus *wbbPtr, uint32_t baseAdd) : MWbbSlave(wbbPtr, baseAdd) {}
 
@@ -109,9 +109,12 @@ std::string MRunControl::dumpRegisters() {
   if (!wbb)
     throw MIPBusUDPError("No IPBus configured");
 
-  regAddress_e addrs[] = {
-      regRunCtrl, regErrorState,                   regAlmostFullThreshold,
-      regLatency, /* regTemperature, */ regStatus, /* regReserved0, regReserved1,*/ regConfig};
+  regAddress_e addrs[] = {regRunCtrl,
+                          regErrorState,
+                          regAlmostFullThreshold,
+                          regLatency,
+                          /* regTemperature, */ regStatus,
+                          /* regReserved0, regReserved1,*/ regConfig};
   uint32_t nAddrs = sizeof(addrs) / sizeof(regAddress_e);
 
   std::stringstream ss;
@@ -122,8 +125,7 @@ std::string MRunControl::dumpRegisters() {
     try {
       wbb->addRead(baseAddress + addrs[iAddr], &result);
       execute();
-    }
-    catch (...) {
+    } catch (...) {
       std::cerr << "MRunControl read error: address 0x" << std::hex << baseAddress + addrs[iAddr]
                 << " (0x" << addrs[iAddr] << ")!" << std::dec << std::endl;
     };

@@ -27,11 +27,11 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
-#include <stdio.h>
-#include <sstream>
+#include "mdatasave.h"
 #include "mboard.h"
 #include "mexception.h"
-#include "mdatasave.h"
+#include <sstream>
+#include <stdio.h>
 
 MDataSave::MDataSave() {
   eventSize = 0;

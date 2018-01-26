@@ -6,10 +6,10 @@
 #include <vector>
 
 #include "Common.h"
+#include "THisto.h"
+#include "TScan.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
-#include "TScan.h"
-#include "THisto.h"
 
 class TDigitalWFResultChip : public TScanResultChip {
   friend class TDigitalWFAnalysis;
@@ -20,7 +20,7 @@ private:
   std::vector<TPixHit> m_stuck;
 
 public:
-  TDigitalWFResultChip() : TScanResultChip() {};
+  TDigitalWFResultChip() : TScanResultChip(){};
   void WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
 };
@@ -35,13 +35,9 @@ private:
   char m_unmaskedFile[200];
 
 public:
-  TDigitalWFResultHic() : TScanResultHic() {};
-  void SetStuckFile(const char *fName) {
-    strcpy(m_stuckFile, fName);
-  };
-  void SetUnmaskedFile(const char *fName) {
-    strcpy(m_unmaskedFile, fName);
-  };
+  TDigitalWFResultHic() : TScanResultHic(){};
+  void SetStuckFile(const char *fName) { strcpy(m_stuckFile, fName); };
+  void SetUnmaskedFile(const char *fName) { strcpy(m_unmaskedFile, fName); };
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
 };
@@ -55,7 +51,7 @@ private:
   int m_nCorrupt;
 
 public:
-  TDigitalWFResult() : TScanResult() {};
+  TDigitalWFResult() : TScanResult(){};
   void WriteToFileGlobal(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
 };
@@ -83,11 +79,9 @@ protected:
     TDigitalWFResultHic *Result = new TDigitalWFResultHic();
     return Result;
   };
-  void CreateResult() {};
+  void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
-  string GetPreviousTestType() {
-    return string("");
-  }; // done only once
+  string GetPreviousTestType() { return string(""); }; // done only once
 public:
   TDigitalWFAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                      std::vector<THic *> hics, std::mutex *aMutex, TDigitalWFResult *aResult = 0);

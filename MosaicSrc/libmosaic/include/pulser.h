@@ -31,9 +31,9 @@
 #ifndef PULSER_H
 #define PULSER_H
 
+#include "mwbbslave.h"
 #include <stdint.h>
 #include <string>
-#include "mwbbslave.h"
 
 class Pulser : public MWbbSlave {
 public:

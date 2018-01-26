@@ -1,8 +1,8 @@
+#include "TLocalBusTest.h"
+#include "AlpideConfig.h"
+#include "AlpideDebug.h"
 #include <iostream>
 #include <string>
-#include "TLocalBusTest.h"
-#include "AlpideDebug.h"
-#include "AlpideConfig.h"
 
 TLocalBusTest::TLocalBusTest(TScanConfig *config, std::vector<TAlpide *> chips,
                              std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,

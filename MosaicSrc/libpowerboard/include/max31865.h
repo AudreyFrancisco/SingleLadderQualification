@@ -31,18 +31,13 @@
 #ifndef MAX31865_H
 #define MAX31865_H
 
-#include <stdint.h>
 #include "sc18is602.h"
+#include <stdint.h>
 
 class MAX31865 {
 private:
   // Register list
-  enum {
-    REG_Configuration = 0x00,
-    REG_RTD_MSB = 0x01,
-    REG_RTD_LSB = 0x02,
-    REG_WRITE = 0x80
-  };
+  enum { REG_Configuration = 0x00, REG_RTD_MSB = 0x01, REG_RTD_LSB = 0x02, REG_WRITE = 0x80 };
 
   // Configuration register bits
   enum {

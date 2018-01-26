@@ -35,10 +35,10 @@
  *
  *
  */
-#include <iostream>
-#include <exception>
-#include <stdexcept>
 #include <cstring>
+#include <exception>
+#include <iostream>
+#include <stdexcept>
 
 #include "TPowerBoardConfig.h"
 
@@ -79,8 +79,7 @@ TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName) {
       if (AConfigFileName == NULL || strlen(AConfigFileName) == 0)
         throw std::invalid_argument("MOSAIC Config : invalid filename");
       fhConfigFile = fopen(AConfigFileName, "r"); // opens the file
-    }
-    catch (...) {
+    } catch (...) {
       throw std::invalid_argument("Power Board Config : file not exists !");
     }
     readConfiguration();

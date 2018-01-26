@@ -31,8 +31,8 @@
 #ifndef SC18IS602_H
 #define SC18IS602_H
 
-#include <stdint.h>
 #include "i2cslave.h"
+#include <stdint.h>
 
 class SC18IS602 : public I2Cslave {
 public:

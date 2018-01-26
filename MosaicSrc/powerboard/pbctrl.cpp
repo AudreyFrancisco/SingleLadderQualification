@@ -1,16 +1,16 @@
 /* Power Board test program */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <strings.h>
-#include <string.h>
-#include <unistd.h>
-#include <iostream>
-#include <errno.h>
 #include "pbif.h"
+#include <arpa/inet.h>
+#include <errno.h>
+#include <iostream>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -199,8 +199,7 @@ int main(int argc, char **argv) {
     }
 
     delete board;
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     cout << e.what() << endl;
   }
 

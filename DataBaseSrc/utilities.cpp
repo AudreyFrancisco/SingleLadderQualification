@@ -4,11 +4,11 @@
  *  Created on: Mar 16, 2017
  *      Author: fap
  */
-#include <sys/stat.h>
-#include <unistd.h>
 #include "utilities.h"
 #include <algorithm>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 bool fileExists(string filewithpath) {
 

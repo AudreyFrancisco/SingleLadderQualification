@@ -2,15 +2,15 @@
 #define TREADOUTANALYSIS_H
 
 #include <deque>
+#include <map>
 #include <mutex>
 #include <vector>
-#include <map>
 
+#include "AlpideDecoder.h"
+#include "Common.h"
+#include "TScan.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
-#include "TScan.h"
-#include "Common.h"
-#include "AlpideDecoder.h"
 
 class TReadoutResultChip : public TScanResultChip {
   friend class TReadoutAnalysis;
@@ -25,7 +25,7 @@ private:
 public:
   void WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
-  TReadoutResultChip() : TScanResultChip() {};
+  TReadoutResultChip() : TScanResultChip(){};
 };
 
 class TReadoutResultHic : public TScanResultHic {
@@ -44,7 +44,7 @@ private:
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 public:
-  TReadoutResultHic() : TScanResultHic() {};
+  TReadoutResultHic() : TScanResultHic(){};
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
 };
@@ -54,10 +54,8 @@ class TReadoutResult : public TScanResult {
 
 private:
 public:
-  TReadoutResult() : TScanResult() {};
-  void WriteToFileGlobal(FILE *fp) {
-    (void)fp;
-  };
+  TReadoutResult() : TScanResult(){};
+  void WriteToFileGlobal(FILE *fp) { (void)fp; };
 };
 
 class TReadoutAnalysis : public TScanAnalysis {
@@ -65,7 +63,7 @@ private:
   int m_nTrig;
   int m_occ;
   int m_row;
-  void FillVariableList() {};
+  void FillVariableList(){};
   bool IsInjected(int col, int row);
   void WriteResult();
   THicClassification GetClassificationOB(TReadoutResultHic *result);
@@ -80,12 +78,10 @@ protected:
     TReadoutResultHic *Result = new TReadoutResultHic();
     return Result;
   };
-  void CreateResult() {};
+  void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
   void InitCounters();
-  string GetPreviousTestType() {
-    return string("");
-  }; // done only once ?
+  string GetPreviousTestType() { return string(""); }; // done only once ?
 public:
   TReadoutAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                    std::vector<THic *> hics, std::mutex *aMutex, TReadoutResult *aResult = 0);

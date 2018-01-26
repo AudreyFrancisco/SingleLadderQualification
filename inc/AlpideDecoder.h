@@ -1,8 +1,8 @@
 #ifndef ALPIDEDECODER_H
 #define ALPIDEDECODER_H
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 typedef struct {
   int boardIndex;

@@ -1,7 +1,7 @@
 #include "TRuDctrlModule.h"
 
-#include "TReadoutBoardRU.h"
 #include "TAlpide.h"
+#include "TReadoutBoardRU.h"
 
 TRuDctrlModule::TRuDctrlModule(TReadoutBoardRU &board, uint8_t moduleId, bool logging)
     : TRuWishboneModule(board, moduleId, logging), m_connector(0), m_connectorSet(false) {}

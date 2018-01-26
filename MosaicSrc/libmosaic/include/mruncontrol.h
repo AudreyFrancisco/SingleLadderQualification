@@ -31,9 +31,9 @@
 #ifndef MRUNCONTROL_H
 #define MRUNCONTROL_H
 
+#include "mwbbslave.h"
 #include <stdint.h>
 #include <string>
-#include "mwbbslave.h"
 
 class MRunControl : public MWbbSlave {
 public:
@@ -66,17 +66,10 @@ private: // WBB Slave registers map
     regConfig = 8 // Configuration register
   };
 
-  enum runCtrlBits_e {
-    RUN_CTRL_RUN = (1 << 0),
-    RUN_CTRL_PAUSE = (1 << 1)
-  };
+  enum runCtrlBits_e { RUN_CTRL_RUN = (1 << 0), RUN_CTRL_PAUSE = (1 << 1) };
 
 public:
-  enum latencyMode_e {
-    latencyModeEoe = 0,
-    latencyModeTimeout = 1,
-    latencyModeMemory = 2
-  };
+  enum latencyMode_e { latencyModeEoe = 0, latencyModeTimeout = 1, latencyModeMemory = 2 };
 };
 
 #endif // MRUNCONTROL_H

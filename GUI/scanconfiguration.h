@@ -15,8 +15,7 @@ public:
   ~ScanConfiguration();
   const char *speed;
 
-public
-slots:
+public slots:
   virtual void setnumberofmaskstages(int &numberofmaskstages);
   // virtual const char *getfitspeed(){return speed;}
   // void speedycheck(bool checked);

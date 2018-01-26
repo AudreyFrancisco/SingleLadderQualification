@@ -3,11 +3,11 @@
 
 /* Eventually, this should get moved back to TScanConfig. */
 
-#include <map>
-#include <cmath>
-#include <string>
-#include <string.h>
 #include "AlpideDB.h"
+#include <cmath>
+#include <map>
+#include <string.h>
+#include <string>
 
 typedef enum {
   OBQualification,
@@ -204,120 +204,52 @@ private:
 protected:
 public:
   TScanConfig();
-  ~TScanConfig() {};
+  ~TScanConfig(){};
   void InitParamMap();
   bool SetParamValue(std::string Name, std::string Value);
   bool SetParamValue(std::string Name, int Value);
   int GetParamValue(std::string Name);
   std::string GetDataPath(std::string HicName);
   std::string GetRemoteHicPath(std::string HicName);
-  bool IsParameter(std::string Name) {
-    return (fSettings.count(Name) > 0);
-  };
+  bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
 
-  int GetRetestNumber() {
-    return m_retest;
-  };
-  int GetNInj() {
-    return m_nInj;
-  };
-  int GetChargeStart() {
-    return m_chargeStart;
-  };
-  int GetChargeStep() {
-    return m_chargeStep;
-  };
-  int GetChargeStop() {
-    return m_chargeStop;
-  };
-  int GetNMaskStages() {
-    return m_nMaskStages;
-  };
-  char *GetfNameSuffix() {
-    return m_fNameSuffix;
-  };
-  int GetIthrStart() {
-    return m_ithrStart;
-  };
-  int GetIthrStop() {
-    return m_ithrStop;
-  };
-  int GetIthrStep() {
-    return m_ithrStep;
-  };
-  int GetVcasnStart() {
-    return m_vcasnStart;
-  };
-  int GetVcasnStop() {
-    return m_vcasnStop;
-  };
-  int GetVcasnStep() {
-    return m_vcasnStep;
-  };
-  int GetScanStep() {
-    return m_scanStep;
-  };
-  int GetSpeedy() {
-    return m_speedy;
-  };
-  int GetLocalBusCutRed() {
-    return m_localBusCutRed;
-  };
-  int GetCalVpulsel() {
-    return m_calVpulsel;
-  };
-  float GetVoltageScale() {
-    return m_voltageScale;
-  };
-  int GetMlvdsStrength() {
-    return m_mlvdsStrength;
-  };
-  bool GetIsMasked() {
-    return m_isMasked;
-  };
-  float GetBackBias() {
-    return m_backBias;
-  };
-  bool GetUseDataPath() {
-    return m_useDataPath;
-  };
-  void SetRetestNumber(int aRetest) {
-    m_retest = aRetest;
-  };
-  void SetfNameSuffix(const char *aSuffix) {
-    strcpy(m_fNameSuffix, aSuffix);
-  };
-  void SetVoltageScale(float aScale) {
-    m_voltageScale = aScale;
-  };
-  void SetMlvdsStrength(int aStrength) {
-    m_mlvdsStrength = aStrength;
-  };
-  void SetBackBias(float aVoltage) {
-    m_backBias = fabs(aVoltage);
-  };
+  int GetRetestNumber() { return m_retest; };
+  int GetNInj() { return m_nInj; };
+  int GetChargeStart() { return m_chargeStart; };
+  int GetChargeStep() { return m_chargeStep; };
+  int GetChargeStop() { return m_chargeStop; };
+  int GetNMaskStages() { return m_nMaskStages; };
+  char *GetfNameSuffix() { return m_fNameSuffix; };
+  int GetIthrStart() { return m_ithrStart; };
+  int GetIthrStop() { return m_ithrStop; };
+  int GetIthrStep() { return m_ithrStep; };
+  int GetVcasnStart() { return m_vcasnStart; };
+  int GetVcasnStop() { return m_vcasnStop; };
+  int GetVcasnStep() { return m_vcasnStep; };
+  int GetScanStep() { return m_scanStep; };
+  int GetSpeedy() { return m_speedy; };
+  int GetLocalBusCutRed() { return m_localBusCutRed; };
+  int GetCalVpulsel() { return m_calVpulsel; };
+  float GetVoltageScale() { return m_voltageScale; };
+  int GetMlvdsStrength() { return m_mlvdsStrength; };
+  bool GetIsMasked() { return m_isMasked; };
+  float GetBackBias() { return m_backBias; };
+  bool GetUseDataPath() { return m_useDataPath; };
+  void SetRetestNumber(int aRetest) { m_retest = aRetest; };
+  void SetfNameSuffix(const char *aSuffix) { strcpy(m_fNameSuffix, aSuffix); };
+  void SetVoltageScale(float aScale) { m_voltageScale = aScale; };
+  void SetMlvdsStrength(int aStrength) { m_mlvdsStrength = aStrength; };
+  void SetBackBias(float aVoltage) { m_backBias = fabs(aVoltage); };
   void SetVcasnRange(int start, int stop) {
     m_vcasnStart = start;
     m_vcasnStop = stop;
   };
-  void SetIsMasked(bool masked) {
-    m_isMasked = masked;
-  };
-  void SetUseDataPath(bool usePath) {
-    m_useDataPath = usePath;
-  };
-  void SetTestType(TTestType type) {
-    m_testType = type;
-  };
-  TTestType GetTestType() {
-    return m_testType;
-  };
-  void SetDatabase(AlpideDB *db) {
-    m_db = db;
-  };
-  AlpideDB *GetDatabase() {
-    return m_db;
-  };
+  void SetIsMasked(bool masked) { m_isMasked = masked; };
+  void SetUseDataPath(bool usePath) { m_useDataPath = usePath; };
+  void SetTestType(TTestType type) { m_testType = type; };
+  TTestType GetTestType() { return m_testType; };
+  void SetDatabase(AlpideDB *db) { m_db = db; };
+  AlpideDB *GetDatabase() { return m_db; };
 };
 
 #endif

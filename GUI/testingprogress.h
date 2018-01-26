@@ -14,8 +14,7 @@ public:
   explicit Testingprogress(QWidget *parent = 0);
   ~Testingprogress();
 
-public
-slots:
+public slots:
   virtual void setnotification(QString notification);
 
 private:

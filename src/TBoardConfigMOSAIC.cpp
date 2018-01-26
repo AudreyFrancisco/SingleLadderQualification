@@ -9,11 +9,11 @@
  *
  *
  */
-#include <iostream>
-#include <exception>
-#include <stdexcept>
-#include <cstring>
 #include "TBoardConfigMOSAIC.h"
+#include <cstring>
+#include <exception>
+#include <iostream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -41,8 +41,7 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
       if (AConfigFileName == NULL || strlen(AConfigFileName) == 0)
         throw std::invalid_argument("MOSAIC Config : invalid filename");
       fhConfigFile = fopen(AConfigFileName, "r"); // opens the file
-    }
-    catch (...) {
+    } catch (...) {
       throw std::invalid_argument("MOSAIC Config : file not exists !");
     }
   }
@@ -107,8 +106,7 @@ void TBoardConfigMOSAIC::SetIPaddress(const char *AIPaddress) {
     if (AIPaddress == NULL)
       throw std::invalid_argument("MOSAIC Config : invalid IP number");
     strcpy(IPAddress, AIPaddress);
-  }
-  catch (...) {
+  } catch (...) {
     throw std::invalid_argument("MOSAIC Config : bad IP parameter specification");
   }
   return;

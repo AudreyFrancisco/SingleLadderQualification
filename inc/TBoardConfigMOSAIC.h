@@ -13,8 +13,8 @@
 #ifndef BOARDCONFIGMOSAIC_H
 #define BOARDCONFIGMOSAIC_H
 
-#include "TBoardConfig.h"
 #include "Mosaic.h"
+#include "TBoardConfig.h"
 #include <stdio.h>
 
 #define MAX_MOSAICCTRLINT 12
@@ -84,9 +84,7 @@ public:
   void SetCtrlAFThreshold(uint32_t ACtrlAFThreshold) { RunCtrlAFThreshold = (int)ACtrlAFThreshold; }
   void SetCtrlLatMode(uint16_t ARunCtrlLatencyMode) { RunCtrlLatMode = (int)ARunCtrlLatencyMode; }
   void SetCtrlTimeout(uint32_t ARunCtrlTimeout) { RunCtrlTimeout = (int)ARunCtrlTimeout; }
-  void SetInvertedData(bool AIsInverted) {
-    Inverted = (int)AIsInverted;
-  };
+  void SetInvertedData(bool AIsInverted) { Inverted = (int)AIsInverted; };
   void SetPollingDataTimeout(uint32_t APollDataTimeout) { pollDataTimeout = (int)APollDataTimeout; }
   void SetManchesterDisable(uint32_t AIsManchesterDisabled) {
     ManchesterDisable = (int)AIsManchesterDisabled;

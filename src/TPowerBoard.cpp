@@ -91,8 +91,7 @@ void TPowerBoard::Init() {
   // first of all test the presence of the power board
   try {
     fMOSAICPowerBoard->isReady();
-  }
-  catch (...) {
+  } catch (...) {
     std::cerr << "No Power board found ! Abort." << std::endl;
     return;
   }
@@ -101,8 +100,7 @@ void TPowerBoard::Init() {
   // Get the State
   try {
     fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::getAll);
-  }
-  catch (...) {
+  } catch (...) {
     std::cerr << "Error accessing the Power board found ! Abort." << std::endl;
     return;
   }
@@ -385,7 +383,8 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset) {
   if ((fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) ||
       (fPBoard.Modules[module].DVset + dVDigital > SAFE_OUTPUT)) {
     std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage above safe limit; using "
-                 "uncorrected values." << std::endl;
+                 "uncorrected values."
+              << std::endl;
     dVAnalog = 0;
     dVDigital = 0;
   }
@@ -492,16 +491,14 @@ bool TPowerBoard::IsOK() {
   // first of all test the presence of the power board
   try {
     fMOSAICPowerBoard->isReady();
-  }
-  catch (...) {
+  } catch (...) {
     std::cerr << "No Power board found ! Abort." << std::endl;
     return (false);
   }
   // Now read the state
   try {
     fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::GetMonitor);
-  }
-  catch (...) {
+  } catch (...) {
     std::cerr << "Error accessing the Power board found ! Abort." << std::endl;
     return (false);
   }

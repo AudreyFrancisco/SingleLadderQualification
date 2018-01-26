@@ -31,16 +31,16 @@
 #ifndef POWERBOARD_H
 #define POWERBOARD_H
 
-#include <stdint.h>
-#include "i2cbus.h"
-#include "pcf8574.h"
-#include "ltc2635.h"
+#include "ADC128D818.h"
 #include "ad5254.h"
 #include "ad7997.h"
-#include "sc18is602.h"
+#include "i2cbus.h"
+#include "ltc2635.h"
 #include "max31865.h"
 #include "max5419.h"
-#include "ADC128D818.h"
+#include "pcf8574.h"
+#include "sc18is602.h"
+#include <stdint.h>
 
 class powerboard {
 public:
@@ -55,12 +55,7 @@ public:
     float T;
   } pbstate_t;
 
-  enum getFlags {
-    GetMonitor = 0x01,
-    GetSettings = 0x02,
-    WaitTconv = 0x04,
-    getAll = 0x07
-  };
+  enum getFlags { GetMonitor = 0x01, GetSettings = 0x02, WaitTconv = 0x04, getAll = 0x07 };
 
 public:
   powerboard(I2Cbus *busMaster, I2Cbus *busAux);

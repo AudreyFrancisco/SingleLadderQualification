@@ -1,9 +1,9 @@
 #include "TRuTransceiverModule.h"
 
+#include <algorithm>
+#include <initializer_list>
 #include <iostream>
 #include <map>
-#include <initializer_list>
-#include <algorithm>
 
 #include "TReadoutBoardRU.h"
 
@@ -81,12 +81,19 @@ void TRuTransceiverModule::ResetCounters() {
 }
 
 std::map<std::string, uint16_t> TRuTransceiverModule::ReadCounters() {
-  static std::vector<std::string> counterNames{
-      "8b10b Code Error",      "8b10b disparity Error",  "Idlesupress idle counter",
-      "Idlesuppress overflow", "Idlesuppress Full",      "Events NrEvents",
-      "Events EventErrors",    "Events Errors",          "Events Busyviolations",
-      "Events Double Busy On", "Events Double Busy Off", "Events Empty Regions",
-      "Prbs Errors"};
+  static std::vector<std::string> counterNames{"8b10b Code Error",
+                                               "8b10b disparity Error",
+                                               "Idlesupress idle counter",
+                                               "Idlesuppress overflow",
+                                               "Idlesuppress Full",
+                                               "Events NrEvents",
+                                               "Events EventErrors",
+                                               "Events Errors",
+                                               "Events Busyviolations",
+                                               "Events Double Busy On",
+                                               "Events Double Busy Off",
+                                               "Events Empty Regions",
+                                               "Prbs Errors"};
   static std::vector<uint8_t> counterAddr{7,   8,    9,    10,   11,   0xD, 0xE,
                                           0xF, 0x10, 0x11, 0x12, 0x13, 0x14};
 

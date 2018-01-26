@@ -1,9 +1,9 @@
 #ifndef TLOCALBUSTEST_H
 #define TLOCALBUSTEST_H
 
-#include <mutex>
-#include "TScan.h"
 #include "THisto.h"
+#include "TScan.h"
+#include <mutex>
 
 class TLocalBusTest : public TScan {
 private:
@@ -23,15 +23,13 @@ public:
   TLocalBusTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                 std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
                 std::mutex *aMutex);
-  ~TLocalBusTest() {};
+  ~TLocalBusTest(){};
   void Init();
   void Execute();
   void Terminate();
 
   void Next(int loopIndex);
-  void LoopStart(int loopIndex) {
-    m_value[loopIndex] = m_start[loopIndex];
-  };
+  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
   void LoopEnd(int loopIndex);
   void PrepareStep(int loopIndex);
 };

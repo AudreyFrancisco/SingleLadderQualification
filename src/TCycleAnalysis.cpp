@@ -1,6 +1,6 @@
-#include "TEnduranceCycle.h"
 #include "TCycleAnalysis.h"
 #include "DBHelpers.h"
+#include "TEnduranceCycle.h"
 
 #include <string>
 

@@ -1,9 +1,9 @@
 #ifndef TESTSELECTION_H
 #define TESTSELECTION_H
-#include <TFifoTest.h>
+#include "dialog.h"
 #include <QDialog>
 #include <QPushButton>
-#include "dialog.h"
+#include <TFifoTest.h>
 
 namespace Ui {
   class TestSelection;
@@ -33,16 +33,14 @@ private:
   QString toptwo, topthree, topfour, topfive;
   QString downone, downtwo, downthree, downfour, downfive;
 
-public
-slots:
+public slots:
   virtual void getlocationcombo(int value);
   virtual int GetMemberID();
   virtual void adjustendurance();
   virtual void hideendurance();
   virtual void GetTestTypeName(TTestType &typetest, QString &testname);
 
-private
-slots:
+private slots:
   void popupmessage(QString m);
 };
 

@@ -5,9 +5,9 @@
 #include <mutex>
 #include <vector>
 
+#include "TScan.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
-#include "TScan.h"
 
 typedef struct {
   int boardIndex;
@@ -31,7 +31,7 @@ private:
   int m_exc;
 
 public:
-  TFifoResultChip() : TScanResultChip() {};
+  TFifoResultChip() : TScanResultChip(){};
   void WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
 };
@@ -53,7 +53,7 @@ private:
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 public:
-  TFifoResultHic() : TScanResultHic() {};
+  TFifoResultHic() : TScanResultHic(){};
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
 };
@@ -62,10 +62,8 @@ class TFifoResult : public TScanResult {
   friend class TFifoAnalysis;
 
 public:
-  TFifoResult() : TScanResult() {};
-  void WriteToFileGlobal(FILE *fp) {
-    (void)fp;
-  };
+  TFifoResult() : TScanResult(){};
+  void WriteToFileGlobal(FILE *fp) { (void)fp; };
 };
 
 class TFifoAnalysis : public TScanAnalysis {
@@ -85,7 +83,7 @@ protected:
     TFifoResultHic *Result = new TFifoResultHic();
     return Result;
   };
-  void CreateResult() {};
+  void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
 
