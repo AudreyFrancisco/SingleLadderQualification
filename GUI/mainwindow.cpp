@@ -151,12 +151,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() {
   delete ui;
   ui = 0x0;
-  fPbcfgcheck = 0x0;
-  fActivitywindow = 0x0;
-  fCalwindow = 0x0;
-  fDatabasewindow = 0x0;
-  fNoticewindow = 0x0;
-  fPbnumberofmodule = 0;
 }
 
 // TODO: try to substitute numberofscan by TScanType (defined in TScanConfig.h)
