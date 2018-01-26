@@ -71,7 +71,12 @@ bool writingdb;
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   fChkBtnObm1 = fChkBtnObm2 = fChkBtnObm3 = fChkBtnObm4 = fChkBtnObm5 = fChkBtnObm6 = fChkBtnObm7 =
       false;
-
+  fPbcfgcheck = 0;
+  fCalwindow = 0;
+  fActivitywindow = 0;
+  fDatabasewindow = 0;
+  fNoticewindow = 0;
+  fPbnumberofmodule = 0;
   makeDir("Data");
   ui->setupUi(this);
   this->setWindowTitle(QString::fromUtf8("GUI"));
@@ -1253,6 +1258,11 @@ void MainWindow::poweroff() {
 }
 
 void MainWindow::quitall() {
+  if (writingdb == false) {
+    fNoticewindow = new DBnotice(this);
+    fNoticewindow->adjustingtemplate();
+    fNoticewindow->exec();
+  }
   if (fHICs.size() >= 1) {
     poweroff();
     close();
