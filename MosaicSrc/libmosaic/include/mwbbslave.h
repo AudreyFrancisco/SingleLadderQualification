@@ -31,8 +31,8 @@
 #ifndef MWBBSLAVE_H
 #define MWBBSLAVE_H
 
-#include <stdint.h>
 #include "wishbonebus.h"
+#include <stdint.h>
 
 class MWbbSlave {
 public:

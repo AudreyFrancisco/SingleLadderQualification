@@ -27,11 +27,11 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
+#include "i2csyspll.h"
+#include "mexception.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include "mexception.h"
-#include "i2csyspll.h"
 
 #define CDCM6208_ADDRESS 0x54
 

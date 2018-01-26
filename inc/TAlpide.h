@@ -1,10 +1,10 @@
 #ifndef ALPIDE_H
 #define ALPIDE_H
 
-#include <string>
-#include <unistd.h>
 #include "TConfig.h"
 #include "THIC.h"
+#include <string>
+#include <unistd.h>
 
 namespace Alpide {
   typedef enum {
@@ -122,28 +122,13 @@ namespace Alpide {
     COMMAND_ADCMEASURE = 0xff20
   } TCommand;
 
-  typedef enum {
-    PIXREG_MASK = 0x0,
-    PIXREG_SELECT = 0x1
-  } TPixReg;
+  typedef enum { PIXREG_MASK = 0x0, PIXREG_SELECT = 0x1 } TPixReg;
 
-  typedef enum {
-    PT_DIGITAL = 0,
-    PT_ANALOGUE = 1
-  } TPulseType;
+  typedef enum { PT_DIGITAL = 0, PT_ANALOGUE = 1 } TPulseType;
 
-  typedef enum {
-    MODE_CONFIG = 0,
-    MODE_TRIGGERED = 1,
-    MODE_CONTINUOUS = 2
-  } TChipMode;
+  typedef enum { MODE_CONFIG = 0, MODE_TRIGGERED = 1, MODE_CONTINUOUS = 2 } TChipMode;
 
-  typedef enum {
-    IREF_025uA = 0,
-    IREF_075uA = 1,
-    IREF_100uA = 2,
-    IREF_125uA = 3
-  } TDACMonIref;
+  typedef enum { IREF_025uA = 0, IREF_075uA = 1, IREF_100uA = 2, IREF_125uA = 3 } TDACMonIref;
 
   typedef enum {
     MODE_MANUAL = 0,
@@ -164,19 +149,9 @@ namespace Alpide {
     INP_Temperature = 8
   } TADCInput;
 
-  typedef enum {
-    COMP_180uA = 0,
-    COMP_190uA = 1,
-    COMP_296uA = 2,
-    COMP_410uA = 3
-  } TADCComparator;
+  typedef enum { COMP_180uA = 0, COMP_190uA = 1, COMP_296uA = 2, COMP_410uA = 3 } TADCComparator;
 
-  typedef enum {
-    RAMP_500ms = 0,
-    RAMP_1us = 1,
-    RAMP_2us = 2,
-    RAMP_4us = 3
-  } TADCRampSpeed;
+  typedef enum { RAMP_500ms = 0, RAMP_1us = 1, RAMP_2us = 2, RAMP_4us = 3 } TADCRampSpeed;
 }
 
 class TReadoutBoard;
@@ -198,21 +173,11 @@ protected:
 public:
   TAlpide(TChipConfig *config);
   TAlpide(TChipConfig *config, TReadoutBoard *readoutBoard);
-  TChipConfig *GetConfig() {
-    return fConfig;
-  };
-  void SetReadoutBoard(TReadoutBoard *readoutBoard) {
-    fReadoutBoard = readoutBoard;
-  };
-  TReadoutBoard *GetReadoutBoard() {
-    return fReadoutBoard;
-  };
-  THic *GetHic() {
-    return fHic;
-  };
-  void SetHic(THic *hic) {
-    fHic = hic;
-  };
+  TChipConfig *GetConfig() { return fConfig; };
+  void SetReadoutBoard(TReadoutBoard *readoutBoard) { fReadoutBoard = readoutBoard; };
+  TReadoutBoard *GetReadoutBoard() { return fReadoutBoard; };
+  THic *GetHic() { return fHic; };
+  void SetHic(THic *hic) { fHic = hic; };
 
   int ReadRegister(Alpide::TRegister address, uint16_t &value);
   int WriteRegister(Alpide::TRegister address, uint16_t value, bool verify = false);
@@ -230,9 +195,7 @@ public:
 
   std::string DumpRegisters();
 
-  int GetADCOffset() {
-    return (fADCOffset);
-  };
+  int GetADCOffset() { return (fADCOffset); };
   int CalibrateADC();
   void SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef = Alpide::IREF_100uA);
   uint16_t SetTheADCCtrlRegister(Alpide::TADCMode Mode, Alpide::TADCInput SelectInput,

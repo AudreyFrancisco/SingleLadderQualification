@@ -6,10 +6,10 @@
 #include <vector>
 
 #include "Common.h"
+#include "THisto.h"
+#include "TScan.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
-#include "TScan.h"
-#include "THisto.h"
 
 typedef struct {
   int boardIndex;
@@ -32,7 +32,7 @@ private:
   std::vector<TPixHit> m_stuck;
 
 public:
-  TDigitalResultChip() : TScanResultChip() {};
+  TDigitalResultChip() : TScanResultChip(){};
   void WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
 };
@@ -52,10 +52,8 @@ private:
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 public:
-  TDigitalResultHic() : TScanResultHic() {};
-  void SetStuckFile(const char *fName) {
-    strcpy(m_stuckFile, fName);
-  };
+  TDigitalResultHic() : TScanResultHic(){};
+  void SetStuckFile(const char *fName) { strcpy(m_stuckFile, fName); };
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
 };
@@ -69,7 +67,7 @@ private:
   int m_nCorrupt;
 
 public:
-  TDigitalResult() : TScanResult() {};
+  TDigitalResult() : TScanResult(){};
   void WriteToFileGlobal(FILE *fp);
 };
 
@@ -95,7 +93,7 @@ protected:
     TDigitalResultHic *Result = new TDigitalResultHic();
     return Result;
   };
-  void CreateResult() {};
+  void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
 
@@ -106,9 +104,7 @@ public:
   void Initialize();
   void Finalize();
 
-  std::vector<TDigitalCounter> GetCounters() {
-    return m_counters;
-  };
+  std::vector<TDigitalCounter> GetCounters() { return m_counters; };
 };
 
 #endif

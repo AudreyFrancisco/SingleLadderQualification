@@ -1,32 +1,31 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <qapplication.h>
-#include <QPixmap>
-#include <vector>
-#include <mutex>
-#include <deque>
-#include <QFile>
-#include <QMainWindow>
-#include <QDialog>
-#include <QtGui>
-#include <QtCore>
-#include <QLabel>
-#include <QPixmap>
-#include "dialog.h"
-#include "utilities.h"
-#include "checkpbconfig.h"
+#include "THisto.h"
 #include "TReadoutBoard.h"
 #include "TScanAnalysis.h"
-#include "THisto.h"
-#include "testingprogress.h"
-#include "calibrationpb.h"
-#include "databaseselection.h"
-#include "resultstorage.h"
 #include "activitystatus.h"
+#include "calibrationpb.h"
+#include "checkpbconfig.h"
+#include "databaseselection.h"
 #include "dbnotice.h"
+#include "dialog.h"
+#include "resultstorage.h"
+#include "testingprogress.h"
+#include "utilities.h"
+#include <QDialog>
+#include <QFile>
+#include <QLabel>
+#include <QMainWindow>
+#include <QPixmap>
+#include <QtCore>
+#include <QtGui>
+#include <deque>
+#include <mutex>
+#include <qapplication.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <vector>
 
 class TConfig;
 class TScan;
@@ -70,8 +69,7 @@ public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
 
-public
-slots:
+public slots:
   void createbtn();
   void popup(QString message);
   void colorscans();
@@ -202,8 +200,7 @@ private:
   QAction *fWritedb;
   QFile *fMfile;
 
-private
-slots:
+private slots:
   void button_obm1_clicked();
   void button_obm2_clicked();
   void button_obm3_clicked();

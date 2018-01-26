@@ -14,8 +14,7 @@ public:
   explicit DatabaseSelection(QWidget *parent = 0);
   ~DatabaseSelection();
 
-public
-slots:
+public slots:
   virtual void setdatabase(bool &database);
 
 private:

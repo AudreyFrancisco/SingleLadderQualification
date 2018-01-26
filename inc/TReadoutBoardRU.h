@@ -1,18 +1,18 @@
 #ifndef TREADOUTBOARDRU_H
 #define TREADOUTBOARDRU_H
 
-#include "TReadoutBoard.h"
-#include "TConfig.h"
 #include "TBoardConfigRU.h"
+#include "TConfig.h"
+#include "TReadoutBoard.h"
 #include "USB.h"
 
-#include <memory>
-#include <map>
 #include <deque>
+#include <map>
+#include <memory>
 
-#include "ReadoutUnitSrc/UsbDev.hpp"
 #include "ReadoutUnitSrc/TRuDctrlModule.h"
 #include "ReadoutUnitSrc/TRuTransceiverModule.h"
+#include "ReadoutUnitSrc/UsbDev.hpp"
 
 class TReadoutBoardRU : public TReadoutBoard {
 public:

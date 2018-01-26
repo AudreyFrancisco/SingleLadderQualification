@@ -39,9 +39,9 @@
 #define TPOWERBOARD_H
 
 #include <iostream>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <vector>
 
 #include <powerboard.h>
@@ -104,7 +104,7 @@ private:
 public:
   TPowerBoard(TReadoutBoardMOSAIC *board);
   TPowerBoard(TReadoutBoardMOSAIC *board, TPowerBoardConfig *config);
-  ~TPowerBoard() {};
+  ~TPowerBoard(){};
 
   // Info and Mode
   bool IsOK();
@@ -112,9 +112,7 @@ public:
     realTimeRead = realTime;
     return;
   };
-  TPowerBoardConfig *GetConfigurationHandler() {
-    return (fPowerBoardConfig);
-  };
+  TPowerBoardConfig *GetConfigurationHandler() { return (fPowerBoardConfig); };
 
   // Getters
   float GetTemperature() {
@@ -155,9 +153,7 @@ public:
   void CalibrateBiasCurrent();
   void CalibrateBiasVoltage();
   void CorrectVoltageDrop(int module, bool reset = false);
-  bool IsCalibrated(int module) {
-    return GetConfigurationHandler()->IsCalibrated(module);
-  };
+  bool IsCalibrated(int module) { return GetConfigurationHandler()->IsCalibrated(module); };
 
   void GetModule(int module, float *AV, float *AI, float *DV, float *DI, bool *BiasOn, bool *AChOn,
                  bool *DChOn);

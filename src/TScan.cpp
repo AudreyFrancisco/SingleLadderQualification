@@ -1,13 +1,13 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string.h>
 #include <string>
 
-#include "Common.h"
 #include "AlpideConfig.h"
+#include "Common.h"
+#include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
-#include "TReadoutBoardDAQ.h"
 #include "TScan.h"
 
 bool fScanAbort;
@@ -69,8 +69,7 @@ void TScan::Init() {
           m_hics.at(ihic)->GetIdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddStart =
           m_hics.at(ihic)->GetIddd();
-    }
-    catch (std::exception &e) {
+    } catch (std::exception &e) {
       std::cout << "Exception " << e.what() << " when reading temp / currents" << std::endl;
     }
     TErrorCounter errCount;
@@ -87,8 +86,7 @@ void TScan::Init() {
     if (rChip->GetConfig()->IsEnabled()) {
       try {
         m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
-      }
-      catch (std::exception &e) {
+      } catch (std::exception &e) {
         std::cout << "Terminate: exception " << e.what() << " when reading registers" << std::endl;
       }
     }
@@ -131,8 +129,7 @@ void TScan::Terminate() {
           m_hics.at(ihic)->GetIdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddEnd =
           m_hics.at(ihic)->GetIddd();
-    }
-    catch (std::exception &e) {
+    } catch (std::exception &e) {
       std::cout << "Terminate: exception " << e.what() << " when reading temp / currents"
                 << std::endl;
     }
@@ -150,8 +147,7 @@ void TScan::Terminate() {
     if (rChip->GetConfig()->IsEnabled()) {
       try {
         m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
-      }
-      catch (std::exception &e) {
+      } catch (std::exception &e) {
         std::cout << "Terminate: exception " << e.what() << " when reading registers" << std::endl;
       }
     }
@@ -371,9 +367,9 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard) {
       unsigned int bunchCounter = -1U;
       int chipId = -1U;
       if (!AlpideDecoder::DecodeEvent(
-               buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel,
-               m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder, &m_stuck, &chipId,
-               &bunchCounter)) {
+              buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel,
+              m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder, &m_stuck, &chipId,
+              &bunchCounter)) {
         std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
         m_errorCount.nCorruptEvent++;
         if (FindHIC(iboard, boardInfo.channel).compare("None") != 0) {

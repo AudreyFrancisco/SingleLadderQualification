@@ -3,15 +3,15 @@
  *
  ----------------- */
 
-#include <iostream>
-#include <unistd.h>
-#include "TReadoutBoardRU.h"
-#include "TAlpide.h"
-#include <exception>
-#include "SetupHelpers.h"
 #include "AlpideConfig.h"
-#include <thread>
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "TReadoutBoardRU.h"
 #include <chrono>
+#include <exception>
+#include <iostream>
+#include <thread>
+#include <unistd.h>
 
 #include <fstream>
 
@@ -66,8 +66,7 @@ int main(int argc, char **argv) {
       fChips.at(i)->ReadRegister(0x60d, Value);
       std::cout << "Chip ID " << chipIDs.at(i) << ", Value = 0x" << std::hex << (int)Value
                 << std::dec << std::endl;
-    }
-    catch (exception &e) {
+    } catch (exception &e) {
       std::cout << "Chip ID " << chipIDs.at(i) << ", not answering, exception: " << e.what()
                 << std::endl;
     }

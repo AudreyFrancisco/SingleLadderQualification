@@ -36,24 +36,24 @@
  *  22/05/17 - Review for Auxiliary COntrol Interfaces facility
  *
  */
+#include "TReadoutBoardMOSAIC.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "mexception.h"
+#include "mservice.h"
+#include <algorithm>
+#include <iostream>
 #include <math.h>
+#include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <iostream>
-#include <algorithm>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <poll.h>
-#include "TReadoutBoardMOSAIC.h"
-#include "BoardDecoder.h"
-#include "AlpideDecoder.h"
-#include "TAlpide.h"
-#include "SetupHelpers.h"
-#include "mexception.h"
-#include "mservice.h"
 #include <string>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 using namespace std;
 std::vector<unsigned char> fDebugBuffer;
@@ -87,7 +87,7 @@ I2CSysPll::pllRegisters_t TReadoutBoardMOSAIC::sysPLLregContent(new uint16_t[22]
 // ---- Constructor
 TReadoutBoardMOSAIC::TReadoutBoardMOSAIC(TConfig *config, TBoardConfigMOSAIC *boardConfig)
     : TReadoutBoard(boardConfig), fBoardConfig(boardConfig)
-      //, fConfig(config) YCM: FIXME fConfig not used
+//, fConfig(config) YCM: FIXME fConfig not used
 {
   init();
 }
@@ -210,8 +210,7 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer) {
       readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), (MDataReceiver **)&dr);
       if (readDataSize == 0)
         return -1;
-    }
-    catch (exception &e) {
+    } catch (exception &e) {
       cerr << e.what() << endl;
       StopRun();
       decodeError();

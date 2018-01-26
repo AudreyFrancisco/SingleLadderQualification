@@ -27,9 +27,9 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "max5419.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "max5419.h"
 
 MAX5419::MAX5419(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address) {}
 

@@ -27,16 +27,16 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
+#include "mboard.h"
+#include "mdatareceiver.h"
+#include "mexception.h"
+#include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <poll.h>
-#include "mexception.h"
-#include "mdatareceiver.h"
-#include "mboard.h"
+#include <sys/types.h>
+#include <unistd.h>
 
 #define PLATFORM_IS_LITTLE_ENDIAN
 

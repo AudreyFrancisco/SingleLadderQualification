@@ -31,22 +31,15 @@
 #ifndef I2CBUS_H
 #define I2CBUS_H
 
-#include <stdint.h>
 #include "mwbbslave.h"
+#include <stdint.h>
 
 class I2Cbus : public MWbbSlave {
 public:
-  enum readWriteN_e {
-    I2C_Write = 0,
-    I2C_Read = 1
-  };
+  enum readWriteN_e { I2C_Write = 0, I2C_Read = 1 };
   typedef readWriteN_e readWriteN_t;
 
-  enum readWriteFlags_e {
-    RWF_start = 0x01,
-    RWF_stop = 0x02,
-    RWF_dontAck = 0x04
-  };
+  enum readWriteFlags_e { RWF_start = 0x01, RWF_stop = 0x02, RWF_dontAck = 0x04 };
   typedef readWriteFlags_e readWriteFlags_t;
 
 public:
@@ -58,11 +51,7 @@ public:
   void execute();
 
 private: // WBB Slave registers map
-  enum regAddress_e {
-    regWriteAdd = 0,
-    regReadAdd = 1,
-    regParInAdd = 2
-  };
+  enum regAddress_e { regWriteAdd = 0, regReadAdd = 1, regParInAdd = 2 };
 
   enum writeRegBits_e {
     I2C_STOP_BIT = (1 << 31),

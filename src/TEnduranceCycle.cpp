@@ -1,8 +1,8 @@
-#include <string>
-#include <string.h>
 #include "TEnduranceCycle.h"
-#include "TReadoutBoardMOSAIC.h"
 #include "AlpideConfig.h"
+#include "TReadoutBoardMOSAIC.h"
+#include <string.h>
+#include <string>
 
 TEnduranceCycle::TEnduranceCycle(TScanConfig *config, std::vector<TAlpide *> chips,
                                  std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
@@ -76,8 +76,7 @@ void TEnduranceCycle::CountWorkingChips() {
       } else {
         m_chips.at(i)->SetEnable(false);
       }
-    }
-    catch (exception &e) {
+    } catch (exception &e) {
       m_chips.at(i)->SetEnable(false);
     }
   }

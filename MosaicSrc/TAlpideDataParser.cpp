@@ -27,13 +27,13 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
-#include <iostream>
-#include <stdio.h>
-#include <string.h>
-#include <sstream>
+#include "TAlpideDataParser.h"
 #include "mboard.h"
 #include "mexception.h"
-#include "TAlpideDataParser.h"
+#include <iostream>
+#include <sstream>
+#include <stdio.h>
+#include <string.h>
 
 TAlpideDataParser::TAlpideDataParser() {}
 

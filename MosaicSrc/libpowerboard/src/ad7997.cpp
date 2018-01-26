@@ -27,9 +27,9 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "ad7997.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "ad7997.h"
 
 AD7997::AD7997(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address) {}
 

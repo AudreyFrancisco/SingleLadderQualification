@@ -27,9 +27,9 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
+#include "mdatagenerator.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "mdatagenerator.h"
 
 MDataGenerator::MDataGenerator() {}
 

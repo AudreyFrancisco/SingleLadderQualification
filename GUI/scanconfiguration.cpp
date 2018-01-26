@@ -1,12 +1,12 @@
 #include "scanconfiguration.h"
-#include "ui_scanconfiguration.h"
-#include "testselection.h"
-#include "ui_testselection.h"
 #include "mainwindow.h"
+#include "testselection.h"
 #include "ui_mainwindow.h"
-#include <iostream>
+#include "ui_scanconfiguration.h"
+#include "ui_testselection.h"
 #include <QtCore/QCoreApplication>
 #include <iomanip>
+#include <iostream>
 ScanConfiguration::ScanConfiguration(QWidget *parent)
     : QDialog(parent), ui(new Ui::ScanConfiguration) {
   ui->setupUi(this);

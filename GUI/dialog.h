@@ -18,8 +18,7 @@ public:
 private:
   Ui::Dialog *ui;
 
-private
-slots:
+private slots:
 
   // public slots:
   // void append(QString error);

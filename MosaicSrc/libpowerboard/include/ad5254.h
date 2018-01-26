@@ -31,8 +31,8 @@
 #ifndef AD5254_H
 #define AD5254_H
 
-#include <stdint.h>
 #include "i2cslave.h"
+#include <stdint.h>
 
 class AD5254 : public I2Cslave {
 public:

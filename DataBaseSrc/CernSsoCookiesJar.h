@@ -40,6 +40,7 @@
 #ifndef CERNSSOCOOKIEJAR_H
 #define CERNSSOCOOKIEJAR_H
 
+#include "utilities.h"
 #include <iostream>
 #include <string>
 #include <vector>

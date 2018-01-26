@@ -136,8 +136,9 @@ int main() {
   }
   vector<ActivityDB::parameterType> *par = theActivityTable->GetParameterTypeList(ActivityID);
   for (unsigned int i = 0; i < par->size(); i++) {
-    cout << endl << par->at(i).ID << "\t" << par->at(i).ParameterID << "\t" << par->at(i).Name
-         << "\t" << par->at(i).Description;
+    cout << endl
+         << par->at(i).ID << "\t" << par->at(i).ParameterID << "\t" << par->at(i).Name << "\t"
+         << par->at(i).Description;
   }
 
   cout << endl << "------ locationType type-----------" << endl;

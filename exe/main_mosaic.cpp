@@ -3,16 +3,16 @@
  *
  ----------------- */
 
-#include <iostream>
-#include <unistd.h>
-#include "TReadoutBoard.h"
-#include "TReadoutBoardMOSAIC.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
 #include "TBoardConfig.h"
 #include "TBoardConfigMOSAIC.h"
 #include "TConfig.h"
-#include "TAlpide.h"
+#include "TReadoutBoard.h"
+#include "TReadoutBoardMOSAIC.h"
 #include <exception>
-#include "SetupHelpers.h"
+#include <iostream>
+#include <unistd.h>
 
 int main(int argc, char **argv) {
 
@@ -55,8 +55,7 @@ int main(int argc, char **argv) {
       fChips.at(i)->ReadRegister(0x60d, Value);
       std::cout << "Chip ID " << chipIDs.at(i) << ", Value = 0x" << std::hex << (int)Value
                 << std::dec << std::endl;
-    }
-    catch (exception &e) {
+    } catch (exception &e) {
       std::cout << "Chip ID " << chipIDs.at(i) << ", not answering, exception: " << e.what()
                 << std::endl;
     }

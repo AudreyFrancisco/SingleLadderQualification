@@ -3,18 +3,12 @@
 
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
-#include "TScanConfig.h"
 #include "TScanAnalysis.h"
+#include "TScanConfig.h"
 #include <string>
 #include <vector>
 
-typedef enum {
-  attachResult,
-  attachLog,
-  attachErrors,
-  attachConfig,
-  attachText
-} TAttachmentType;
+typedef enum { attachResult, attachLog, attachErrors, attachConfig, attachText } TAttachmentType;
 
 int DbGetMemberId(AlpideDB *db, string name);
 // int  DbGetProjectId        (AlpideDB *db, string Name);

@@ -27,10 +27,10 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
+#include "alpidercv.h"
+#include "pexception.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "pexception.h"
-#include "alpidercv.h"
 
 ALPIDErcv::ALPIDErcv() {}
 

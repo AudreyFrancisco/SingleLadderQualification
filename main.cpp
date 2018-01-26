@@ -1,11 +1,11 @@
-#include <unistd.h>
-#include "TAlpide.h"
 #include "AlpideConfig.h"
+#include "TAlpide.h"
+#include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
 #include "scope_control.h"
+#include <unistd.h>
 
 int main() {
   uint16_t status;

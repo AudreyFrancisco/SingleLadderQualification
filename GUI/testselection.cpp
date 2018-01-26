@@ -1,11 +1,11 @@
 #include "testselection.h"
-#include "ui_testselection.h"
 #include "DBHelpers.h"
+#include "TFifoTest.h"
 #include "mainwindow.h"
-#include <iostream>
+#include "ui_testselection.h"
 #include <QtCore/QCoreApplication>
 #include <iomanip>
-#include "TFifoTest.h"
+#include <iostream>
 TestSelection::TestSelection(QWidget *parent, bool testDatabase)
     : QDialog(parent), ui(new Ui::TestSelection) {
   ui->setupUi(this);

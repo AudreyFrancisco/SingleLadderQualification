@@ -27,12 +27,12 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <sstream>
 #include "mtriggercontrol.h"
 #include "mexception.h"
+#include <iostream>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
 
 MTriggerControl::MTriggerControl(WishboneBus *wbbPtr, uint32_t baseAdd)
     : MWbbSlave(wbbPtr, baseAdd) {}
@@ -66,8 +66,7 @@ std::string MTriggerControl::dumpRegisters() {
     try {
       wbb->addRead(baseAddress + addrs[iAddr], &result);
       execute();
-    }
-    catch (...) {
+    } catch (...) {
       std::cerr << "MTriggerControl read error: address 0x" << std::hex
                 << baseAddress + addrs[iAddr] << " (0x" << addrs[iAddr] << ")!" << std::dec
                 << std::endl;

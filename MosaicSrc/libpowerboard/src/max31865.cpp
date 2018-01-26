@@ -27,10 +27,10 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "max31865.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "max31865.h"
 
 MAX31865::MAX31865(SC18IS602 *spi, uint8_t slave) {
   spiBus = spi;

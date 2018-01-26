@@ -6,12 +6,12 @@
 #include <vector>
 
 #include "Common.h"
+#include "DBHelpers.h"
+#include "THisto.h"
+#include "TSCurveScan.h"
+#include "TScan.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
-#include "TSCurveScan.h"
-#include "DBHelpers.h"
-#include "TScan.h"
-#include "THisto.h"
 
 #include <TF1.h>
 #include <TGraph.h>
@@ -39,21 +39,13 @@ private:
   FILE *m_fitFP;
 
 public:
-  TSCurveResultChip(TSCurveAnalysis *aAnalysis) : TScanResultChip() {
-    m_analysis = aAnalysis;
-  };
-  void SetRawFile(const char *fName) {
-    strcpy(m_rawFile, fName);
-  };
-  void SetFitFile(const char *fName) {
-    strcpy(m_fitFile, fName);
-  };
+  TSCurveResultChip(TSCurveAnalysis *aAnalysis) : TScanResultChip() { m_analysis = aAnalysis; };
+  void SetRawFile(const char *fName) { strcpy(m_rawFile, fName); };
+  void SetFitFile(const char *fName) { strcpy(m_fitFile, fName); };
   void WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
   void CalculateAverages();
-  float GetThresholdMean() {
-    return m_thresholdAv;
-  };
+  float GetThresholdMean() { return m_thresholdAv; };
 };
 
 class TSCurveResultHic : public TScanResultHic {
@@ -81,11 +73,9 @@ private:
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 public:
-  TSCurveResultHic() : TScanResultHic() {};
+  TSCurveResultHic() : TScanResultHic(){};
   void CalculateAverages();
-  void SetStuckFile(const char *fName) {
-    strcpy(m_stuckFile, fName);
-  };
+  void SetStuckFile(const char *fName) { strcpy(m_stuckFile, fName); };
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
 };
@@ -99,7 +89,7 @@ private:
   int m_nCorrupt;
 
 public:
-  TSCurveResult() : TScanResult() {};
+  TSCurveResult() : TScanResult(){};
   void WriteToFileGlobal(FILE *fp);
 };
 
@@ -127,15 +117,9 @@ private:
   void WriteResult();
   void PrepareFiles();
   void CloseFiles();
-  bool IsVCASNTuning() {
-    return (fabs(m_resultFactor - 1) < 0.01);
-  };
-  bool IsThresholdScan() {
-    return (m_resultFactor > 1);
-  };
-  bool IsITHRTuning() {
-    return (m_resultFactor < 0);
-  };
+  bool IsVCASNTuning() { return (fabs(m_resultFactor - 1) < 0.01); };
+  bool IsThresholdScan() { return (m_resultFactor > 1); };
+  bool IsITHRTuning() { return (m_resultFactor < 0); };
   bool CheckPixelNoHits(TGraph *aGraph);
   bool CheckPixelHot(TGraph *aGraph);
   double meanGraph(TGraph *resultGraph);
@@ -162,7 +146,7 @@ protected:
     TSCurveResultHic *Result = new TSCurveResultHic();
     return Result;
   };
-  void CreateResult() {};
+  void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
   virtual string GetPreviousTestType();
 

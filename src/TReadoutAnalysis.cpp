@@ -1,9 +1,9 @@
-#include <iostream>
-#include <vector>
-#include <string>
 #include "TReadoutAnalysis.h"
-#include "TReadoutTest.h"
 #include "DBHelpers.h"
+#include "TReadoutTest.h"
+#include <iostream>
+#include <string>
+#include <vector>
 
 TReadoutAnalysis::TReadoutAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
                                    TScanConfig *aScanConfig, std::vector<THic *> hics,

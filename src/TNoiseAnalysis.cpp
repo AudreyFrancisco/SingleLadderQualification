@@ -1,9 +1,9 @@
-#include <iostream>
-#include <vector>
-#include <string>
 #include "TNoiseAnalysis.h"
-#include "TNoiseOccupancy.h"
 #include "DBHelpers.h"
+#include "TNoiseOccupancy.h"
+#include <iostream>
+#include <string>
+#include <vector>
 
 TNoiseAnalysis::TNoiseAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
                                TScanConfig *aScanConfig, std::vector<THic *> hics,

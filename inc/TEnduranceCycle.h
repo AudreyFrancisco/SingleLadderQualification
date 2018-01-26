@@ -1,14 +1,14 @@
 #ifndef TENDURANCECYCLE_H
 #define TENDURANCECYCLE_H
 
-#include <mutex>
 #include <map>
+#include <mutex>
 #include <string>
 
 #include "Common.h"
-#include "TScan.h"
-#include "THisto.h"
 #include "THIC.h"
+#include "THisto.h"
+#include "TScan.h"
 
 typedef struct {
   THicType m_hicType;
@@ -44,21 +44,15 @@ public:
   TEnduranceCycle(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                   std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
                   std::mutex *aMutex);
-  ~TEnduranceCycle() {};
+  ~TEnduranceCycle(){};
 
   void Init();
   void Execute();
   void Terminate();
-  void LoopStart(int loopIndex) {
-    m_value[loopIndex] = m_start[loopIndex];
-  };
+  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
   void LoopEnd(int loopIndex);
-  void PrepareStep(int loopIndex) {
-    (void)loopIndex;
-  };
-  std::vector<std::map<std::string, THicCounter>> GetCounters() {
-    return m_counterVector;
-  };
+  void PrepareStep(int loopIndex) { (void)loopIndex; };
+  std::vector<std::map<std::string, THicCounter>> GetCounters() { return m_counterVector; };
 };
 
 #endif

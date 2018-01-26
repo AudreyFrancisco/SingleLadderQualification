@@ -14,17 +14,17 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-#include <unistd.h>
-#include "TAlpide.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "BoardDecoder.h"
-#include "SetupHelpers.h"
+#include <unistd.h>
 
 TBoardType fBoardType;
 std::vector<TReadoutBoard *> fBoards;
@@ -153,9 +153,9 @@ int main(int argc, char **argv) {
 
       fEnabled++;
 
-      std::cout << std::endl << "Doing FIFO test on ControlInterface "
-                << rChip->GetConfig()->GetCtrInt() << "  chip ID "
-                << rChip->GetConfig()->GetChipId() << std::endl;
+      std::cout << std::endl
+                << "Doing FIFO test on ControlInterface " << rChip->GetConfig()->GetCtrInt()
+                << "  chip ID " << rChip->GetConfig()->GetChipId() << std::endl;
       // Reset error counters
       fErrCount0 = 0;
       fErrCount5 = 0;
@@ -181,7 +181,8 @@ int main(int argc, char **argv) {
       fTotalErr += fErrCount0 + fErrCount5 + fErrCountf;
     }
 
-    std::cout << std::endl << "Total error count (all chips): " << fTotalErr << std::endl
+    std::cout << std::endl
+              << "Total error count (all chips): " << fTotalErr << std::endl
               << std::endl;
 
     std::cout << fEnabled << " chips were enabled for scan." << std::endl << std::endl << std::endl;

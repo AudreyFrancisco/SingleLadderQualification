@@ -1,16 +1,14 @@
 #ifndef TCYCLEANALYSIS_H
 #define TCYCLEANALYSIS_H
 
+#include "TScan.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
-#include "TScan.h"
 
 class TCycleResultChip : public TScanResultChip {
 public:
-  TCycleResultChip() : TScanResultChip() {};
-  void WriteToFile(FILE *fp) {
-    (void)fp;
-  };
+  TCycleResultChip() : TScanResultChip(){};
+  void WriteToFile(FILE *fp) { (void)fp; };
   float GetVariable(TResultVariable var);
 };
 
@@ -30,13 +28,11 @@ private:
   float m_maxIddd;
   float m_minIddd;
   char m_cycleFile[200];
-  void SetCycleFile(const char *fName) {
-    strcpy(m_cycleFile, fName);
-  };
+  void SetCycleFile(const char *fName) { strcpy(m_cycleFile, fName); };
 
 protected:
 public:
-  TCycleResultHic() : TScanResultHic() {};
+  TCycleResultHic() : TScanResultHic(){};
   void WriteToFile(FILE *fp);
 };
 
@@ -48,7 +44,7 @@ private:
 
 protected:
 public:
-  TCycleResult() : TScanResult() {};
+  TCycleResult() : TScanResult(){};
   void WriteToFileGlobal(FILE *fp);
 };
 
@@ -63,22 +59,16 @@ protected:
     TCycleResultHic *Result = new TCycleResultHic();
     return Result;
   };
-  void CreateResult() {};
+  void CreateResult(){};
   void InitCounters();
   void WriteResult();
-  void AnalyseHisto(TScanHisto *histo) {
-    (void)histo;
-  };
-  string GetPreviousTestType() {
-    return string("");
-  }; // done only once
+  void AnalyseHisto(TScanHisto *histo) { (void)histo; };
+  string GetPreviousTestType() { return string(""); }; // done only once
 public:
   TCycleAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                  std::vector<THic *> hics, std::mutex *aMutex, TCycleResult *aResult = 0);
-  void Initialize() {
-    CreateHicResults();
-  };
-  void Run() {};
+  void Initialize() { CreateHicResults(); };
+  void Run(){};
   void Finalize();
 };
 

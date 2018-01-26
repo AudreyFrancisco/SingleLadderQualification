@@ -31,8 +31,8 @@
 #ifndef MDATAGENERATOR_H
 #define MDATAGENERATOR_H
 
-#include <stdint.h>
 #include "mwbbslave.h"
+#include <stdint.h>
 
 class MDataGenerator : public MWbbSlave {
 public:

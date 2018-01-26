@@ -28,18 +28,18 @@
  *
  * 21/12/2015	Added mutex for multithread operation
  */
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <string.h>
-#include <poll.h>
-#include <iostream>
 #include "ipbusudp.h"
 #include "mexception.h"
+#include <arpa/inet.h>
+#include <iostream>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <poll.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <sys/socket.h>
 
 IPbusUDP::IPbusUDP(int pktSize) : IPbus(pktSize) { sockfd = -1; }
 
@@ -74,8 +74,7 @@ void IPbusUDP::testConnection() {
     addIdle();
     execute();
     rcvTimoutTime = RCV_SHORT_TIMEOUT;
-  }
-  catch (MIPBusUDPError) {
+  } catch (MIPBusUDPError) {
     throw MIPBusUDPError("Board connection error in IPbusUDP::testConnection");
   }
 }
@@ -132,8 +131,7 @@ void IPbusUDP::execute() {
       // check the answer packet content
       processAnswer();
       return;
-    }
-    catch (MIPBusUDPTimeout) {
+    } catch (MIPBusUDPTimeout) {
       // shoult increase the timeout
       // cout << "Timeout from sockRead" << endl;
     }

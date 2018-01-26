@@ -13,8 +13,8 @@ main() {
 
   for (int ichip = 0; ichip < myConfig->GetNChips(); ichip++) {
     Chips->push_back(new TAlpide(myConfig, ichip)); // create ichipth chip out of the config
-    Chips[ichip]
-        ->SetReadoutBoard(myReadoutBoard); // set pointer to readout board in the chip object
+    Chips[ichip]->SetReadoutBoard(
+        myReadoutBoard); // set pointer to readout board in the chip object
     myReadoutBoard->AddChip(
         myConfig->GetChipId(ichip),           // add ChipId / ControlInterface / Receiver settings
         myConfig->GetControlInterface(ichip), // to readout board

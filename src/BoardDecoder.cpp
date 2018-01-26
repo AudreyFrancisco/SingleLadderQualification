@@ -55,8 +55,8 @@ bool BoardDecoder::DecodeEventDAQ(unsigned char *data, int nBytes, int &nBytesHe
   bool AFull = false;
   int TrigType = -1;
   int BufferDepth = -1;
-  uint64_t Event_ID = (uint64_t) - 1;
-  uint64_t TimeStamp = (uint64_t) - 1;
+  uint64_t Event_ID = (uint64_t)-1;
+  uint64_t TimeStamp = (uint64_t)-1;
   int StrobeCountTotal = (header_length > 5) ? Header[5] : -1;
   int TrigCountChipBusy = -1;
   int TrigCountDAQbusy = -1;
@@ -74,8 +74,8 @@ bool BoardDecoder::DecodeEventDAQ(unsigned char *data, int nBytes, int &nBytesHe
       Event_ID = (uint64_t)Header[0] & 0x00ffffff;
       // TimeStamp        = (uint64_t)Header[1] & 0x7fffffff | ((uint64_t)Header[0] & 0x7f000000) <<
       // 7; // Original
-      TimeStamp = ((uint64_t)Header[1] & 0x7fffffff) | ((uint64_t)Header[0] & 0x7f000000)
-                                                           << 7; // Caterina: added ()
+      TimeStamp = ((uint64_t)Header[1] & 0x7fffffff) |
+                  ((uint64_t)Header[0] & 0x7f000000) << 7; // Caterina: added ()
     }
     TrigCountDAQbusy = (Header[2] & 0x7fff0000) >> 8;
     StrobeCountTotal = (Header[2] & 0x00007fff);

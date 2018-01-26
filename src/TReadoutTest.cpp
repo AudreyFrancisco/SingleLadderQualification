@@ -1,13 +1,13 @@
 #include <string.h>
 #include <string>
 
-#include "TReadoutTest.h"
 #include "AlpideConfig.h"
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
+#include "TReadoutTest.h"
 
 TReadoutTest::TReadoutTest(TScanConfig *config, std::vector<TAlpide *> chips,
                            std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,

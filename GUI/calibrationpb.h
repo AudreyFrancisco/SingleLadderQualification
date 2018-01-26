@@ -1,8 +1,8 @@
 #ifndef CALIBRATIONPB_H
 #define CALIBRATIONPB_H
 
-#include <QDialog>
 #include "iostream"
+#include <QDialog>
 namespace Ui {
   class Calibrationpb;
 }
@@ -14,8 +14,7 @@ public:
   explicit Calibrationpb(QWidget *parent = 0);
   ~Calibrationpb();
 
-public
-slots:
+public slots:
   virtual void setresistances(float &analog, float &digital, float &bb);
   virtual void getcalibration(float savdd, float iavdd, float sdvdd, float idvdd, float offsetia,
                               float offsetid);

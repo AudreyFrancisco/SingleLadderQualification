@@ -2,15 +2,15 @@
 #define TSCANALYSIS_H
 
 #include <deque>
-#include <mutex>
 #include <map>
-#include <string>
+#include <mutex>
 #include <string.h>
+#include <string>
 
 //#include "THIC.h"
-#include "Common.h"
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
+#include "Common.h"
 
 class THisto;
 class TScan;
@@ -61,15 +61,11 @@ protected:
   string m_outputPath;
 
 public:
-  TScanResultChip() {};
+  TScanResultChip(){};
   virtual void WriteToFile(FILE *fp) = 0;
   virtual float GetVariable(TResultVariable var) = 0;
-  void SetOutputPath(string path) {
-    m_outputPath = path;
-  };
-  string GetOutputPath() {
-    return m_outputPath;
-  };
+  void SetOutputPath(string path) { m_outputPath = path; };
+  string GetOutputPath() { return m_outputPath; };
 };
 
 class TScanResultHic {
@@ -84,23 +80,15 @@ protected:
   TScanParameters *m_scanParameters;
 
 public:
-  TScanResultHic() {};
+  TScanResultHic(){};
   virtual void WriteToFile(FILE *fp) = 0;
   virtual void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
   int AddChipResult(int aChipId, TScanResultChip *aChipResult);
-  void SetResultFile(const char *fName) {
-    strcpy(m_resultFile, fName);
-  };
-  THicClassification GetClassification() {
-    return m_class;
-  };
-  std::map<int, TScanResultChip *> DeleteThisToo() {
-    return m_chipResults;
-  };
+  void SetResultFile(const char *fName) { strcpy(m_resultFile, fName); };
+  THicClassification GetClassification() { return m_class; };
+  std::map<int, TScanResultChip *> DeleteThisToo() { return m_chipResults; };
   float GetVariable(int chip, TResultVariable var);
-  string GetOutputPath() {
-    return m_outputPath;
-  };
+  string GetOutputPath() { return m_outputPath; };
 };
 
 // base class for classes containing complete results
@@ -112,8 +100,8 @@ protected:
   std::map<std::string, TScanResultHic *> m_hicResults;
 
 public:
-  TScanResult() {};
-  virtual ~TScanResult() {};
+  TScanResult(){};
+  virtual ~TScanResult(){};
   // virtual TScanResult *clone() const=0;
   // TScanResult(const TScanResult &other){m_chipResults=other.m_chipResults;}
   // assignment operation from my base class
@@ -122,20 +110,14 @@ public:
   int AddChipResult(common::TChipIndex idx, TScanResultChip *aChipResult);
   int AddChipResult(int aIntIndex, TScanResultChip *aChipResult);
   int AddHicResult(std::string hicId, TScanResultHic *aHicResult);
-  int GetNChips() {
-    return (int)m_chipResults.size();
-  };
-  int GetNHics() {
-    return (int)m_hicResults.size();
-  };
+  int GetNChips() { return (int)m_chipResults.size(); };
+  int GetNHics() { return (int)m_hicResults.size(); };
   void WriteToFile(const char *fName);
   virtual void WriteToFileGlobal(FILE *fp) = 0;
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
   TScanResultChip *GetChipResult(common::TChipIndex idx);
   TScanResultHic *GetHicResult(std::string hic);
-  std::map<std::string, TScanResultHic *> GetHicResults() {
-    return m_hicResults;
-  };
+  std::map<std::string, TScanResultHic *> GetHicResults() { return m_hicResults; };
 };
 
 class TScanAnalysis {
@@ -164,7 +146,7 @@ protected:
 public:
   TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                 std::vector<THic *> hics, std::mutex *aMutex);
-  virtual ~TScanAnalysis() {};
+  virtual ~TScanAnalysis(){};
   virtual void Initialize() = 0;
   virtual void Run();
   virtual void Finalize() = 0;

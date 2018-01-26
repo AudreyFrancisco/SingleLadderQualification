@@ -5,10 +5,10 @@
 #include <mutex>
 #include <vector>
 
+#include "Common.h"
+#include "TScan.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
-#include "TScan.h"
-#include "Common.h"
 
 class TLocalBusResultChip : public TScanResultChip {
   friend class TLocalBusAnalysis;
@@ -22,7 +22,7 @@ private:
   int m_errBusyOff;
 
 public:
-  TLocalBusResultChip() : TScanResultChip() {};
+  TLocalBusResultChip() : TScanResultChip(){};
   void WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
 };
@@ -39,7 +39,7 @@ private:
   int m_errBusyOff;
 
 public:
-  TLocalBusResultHic() : TScanResultHic() {};
+  TLocalBusResultHic() : TScanResultHic(){};
   void WriteToFile(FILE *fp);
 };
 
@@ -48,10 +48,8 @@ class TLocalBusResult : public TScanResult {
 
 private:
 public:
-  TLocalBusResult() : TScanResult() {};
-  void WriteToFileGlobal(FILE *fp) {
-    (void)fp;
-  };
+  TLocalBusResult() : TScanResult(){};
+  void WriteToFileGlobal(FILE *fp) { (void)fp; };
 };
 
 class TLocalBusAnalysis : public TScanAnalysis {
@@ -69,11 +67,9 @@ protected:
     TLocalBusResultHic *Result = new TLocalBusResultHic();
     return Result;
   };
-  void CreateResult() {};
+  void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
-  string GetPreviousTestType() {
-    return string("");
-  }; // done only once
+  string GetPreviousTestType() { return string(""); }; // done only once
 public:
   TLocalBusAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                     std::vector<THic *> hics, std::mutex *aMutex, TLocalBusResult *aResult = 0);

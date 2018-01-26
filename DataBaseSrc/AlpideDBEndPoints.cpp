@@ -41,12 +41,12 @@
  *
  */
 
+#include <ctime>
 #include <stdio.h>
 #include <string.h>
-#include <ctime>
 
-#include "AlpideDBEndPoints.h"
 #include "AlpideDB.h"
+#include "AlpideDBEndPoints.h"
 
 /* --------------------------------------------------------
  *    AlpideDB Table Base class
@@ -908,19 +908,19 @@ string ComponentDB::Print(componentType *co) {
        " Description=" + co->Description + "\n";
   ap += "   Composition : {";
   for (unsigned int i = 0; i < co->Composition.size(); i++)
-    ap += "( ID=" + std::to_string(co->Composition.at(i).ID) + ",Type=" +
-          co->Composition.at(i).ComponentType + ",Q.ty=" +
-          std::to_string(co->Composition.at(i).Quantity) + ")";
+    ap += "( ID=" + std::to_string(co->Composition.at(i).ID) +
+          ",Type=" + co->Composition.at(i).ComponentType +
+          ",Q.ty=" + std::to_string(co->Composition.at(i).Quantity) + ")";
   ap += "}\n";
   ap += "   Physical Status  : {";
   for (unsigned int i = 0; i < co->PhysicalStatus.size(); i++)
-    ap += "( ID=" + std::to_string(co->PhysicalStatus.at(i).ID) + ",Name=" +
-          co->PhysicalStatus.at(i).Name + ")";
+    ap += "( ID=" + std::to_string(co->PhysicalStatus.at(i).ID) +
+          ",Name=" + co->PhysicalStatus.at(i).Name + ")";
   ap += "}\n";
   ap += "   Functional Status  : {";
   for (unsigned int i = 0; i < co->FunctionalStatus.size(); i++)
-    ap += "( ID=" + std::to_string(co->FunctionalStatus.at(i).ID) + ",Name=" +
-          co->FunctionalStatus.at(i).Name + ")";
+    ap += "( ID=" + std::to_string(co->FunctionalStatus.at(i).ID) +
+          ",Name=" + co->FunctionalStatus.at(i).Name + ")";
   ap += "}\n";
   return (ap);
 }
@@ -1632,8 +1632,8 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
   activityShort act;
 
   theUrl = theParentDB->GetQueryDomain() + "/ActivityRead";
-  theQuery = "projectID=" + std::to_string(aProjectID) + "&activityTypeID=" +
-             std::to_string(aActivityTypeID);
+  theQuery = "projectID=" + std::to_string(aProjectID) +
+             "&activityTypeID=" + std::to_string(aActivityTypeID);
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);

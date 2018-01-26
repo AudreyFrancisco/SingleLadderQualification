@@ -1,10 +1,10 @@
 #include <string.h>
 #include <string>
 
-#include "TNoiseOccupancy.h"
 #include "AlpideConfig.h"
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
+#include "TNoiseOccupancy.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"

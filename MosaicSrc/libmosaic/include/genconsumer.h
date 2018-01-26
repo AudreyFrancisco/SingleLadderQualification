@@ -31,8 +31,8 @@
 #ifndef GENCONSUMER_H
 #define GENCONSUMER_H
 
-#include <stdint.h>
 #include "mdatareceiver.h"
+#include <stdint.h>
 
 class GenConsumer : public MDataReceiver {
 public:

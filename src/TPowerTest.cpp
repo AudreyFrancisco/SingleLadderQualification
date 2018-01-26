@@ -1,8 +1,8 @@
-#include <string>
-#include <string.h>
 #include "TPowerTest.h"
-#include "TReadoutBoardMOSAIC.h"
 #include "AlpideConfig.h"
+#include "TReadoutBoardMOSAIC.h"
+#include <string.h>
+#include <string>
 
 TPowerTest::TPowerTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                        std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,

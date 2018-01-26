@@ -74,7 +74,8 @@ int TUSBBoard::DisconnectUSBDevice() {
   err = libusb_release_interface(fHandle, INTERFACE_NUMBER);
   if (err) {
     std::cout << "The device interface is not getting released, if system hangs please disconnect "
-                 "the device" << std::endl;
+                 "the device"
+              << std::endl;
     return -1;
   }
   libusb_close(fHandle);
@@ -220,8 +221,8 @@ TUSBEndpoint::TUSBEndpoint(TUSBBoard *ABoard, const libusb_endpoint_descriptor *
  * Initialize the values object variables.
  */
 void TUSBEndpoint::Init() {
-  fType = (libusb_transfer_type) - 1;
-  fDirection = (libusb_endpoint_direction) - 1;
+  fType = (libusb_transfer_type)-1;
+  fDirection = (libusb_endpoint_direction)-1;
   fEndpointAddress = 0;
   fMaxPacketSize = 0;
   fTimeout = 35000; // 5000 milliseconds

@@ -1,10 +1,10 @@
-#include <iostream>
-#include <vector>
-#include <string>
 #include "TFifoAnalysis.h"
-#include "TFifoTest.h"
-#include "DBHelpers.h"
 #include "AlpideConfig.h"
+#include "DBHelpers.h"
+#include "TFifoTest.h"
+#include <iostream>
+#include <string>
+#include <vector>
 
 // TODO: Add number of exceptions to result
 // TODO: Add errors per region to chip result

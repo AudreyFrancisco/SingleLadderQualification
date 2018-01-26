@@ -2,8 +2,8 @@
 
 #include "Common.h"
 
-#include "THisto.h"
 #include "THIC.h"
+#include "THisto.h"
 
 std::string common::GetFileName(TChipIndex aChipIndex, std::string suffix) {
   std::string fileName;

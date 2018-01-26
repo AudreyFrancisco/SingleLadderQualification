@@ -27,11 +27,11 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "ad5254.h"
+#include "mexception.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "ad5254.h"
-#include "mexception.h"
 
 AD5254::AD5254(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address) {}
 
@@ -89,8 +89,7 @@ void AD5254::ackPolling() {
       i2cBus->addWriteData(CMD_NOP, I2Cbus::RWF_stop);
       i2cBus->execute();
       break;
-    }
-    catch (MIPBusErrorWrite) {
+    } catch (MIPBusErrorWrite) {
       // wait and retry
       usleep(200);
     }

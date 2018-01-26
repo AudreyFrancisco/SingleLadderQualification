@@ -15,8 +15,6 @@ slc6:
       - qmake-qt5 -makefile
       - make clean
       - make
-      - cd ../../../
-      - make format-check
 
 cc7:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-cc7-dev

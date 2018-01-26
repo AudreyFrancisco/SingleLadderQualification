@@ -13,16 +13,16 @@
 #ifndef READOUTBOARDMOSAIC_H
 #define READOUTBOARDMOSAIC_H
 
+#include <deque>
 #include <exception>
 #include <string>
-#include <deque>
 
-#include "TReadoutBoard.h"
-#include "TConfig.h"
-#include "TBoardConfig.h"
-#include "TBoardConfigMOSAIC.h"
 #include "BoardDecoder.h"
 #include "Mosaic.h"
+#include "TBoardConfig.h"
+#include "TBoardConfigMOSAIC.h"
+#include "TConfig.h"
+#include "TReadoutBoard.h"
 #include "powerboard.h"
 
 // Constant Definitions
@@ -40,8 +40,8 @@ extern std::vector<unsigned char> fDebugBuffer;
 
 class DummyReceiver : public MDataReceiver {
 public:
-  DummyReceiver() {};
-  ~DummyReceiver() {};
+  DummyReceiver(){};
+  ~DummyReceiver(){};
 
   long parse(int numClosed) {
     (void)numClosed;
@@ -94,18 +94,10 @@ public:
   bool PowerOn();
   void PowerOff();
 
-  int GetFwMajVersion() {
-    return (theVersionMaj);
-  };
-  int GetFwMinVersion() {
-    return (theVersionMin);
-  };
-  char *GetFwIdString() {
-    return (theVersionId);
-  };
-  powerboard *GetPowerBoardHandle() {
-    return (pb);
-  };
+  int GetFwMajVersion() { return (theVersionMaj); };
+  int GetFwMinVersion() { return (theVersionMin); };
+  char *GetFwIdString() { return (theVersionId); };
+  powerboard *GetPowerBoardHandle() { return (pb); };
   std::string GetRegisterDump();
   void setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex = -1);
 

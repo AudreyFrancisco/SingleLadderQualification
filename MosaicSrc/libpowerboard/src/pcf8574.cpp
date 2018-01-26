@@ -27,9 +27,9 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2015.
  *
  */
+#include "pcf8574.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "pcf8574.h"
 
 PCF8574::PCF8574(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address) {}
 

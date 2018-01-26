@@ -27,12 +27,12 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
-#include <stdio.h>
-#include <stdlib.h>
+#include "pulser.h"
+#include "mexception.h"
 #include <iostream>
 #include <sstream>
-#include "mexception.h"
-#include "pulser.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 Pulser::Pulser() {}
 
@@ -106,8 +106,7 @@ std::string Pulser::dumpRegisters() {
     try {
       wbb->addRead(baseAddress + addrs[iAddr], &result);
       execute();
-    }
-    catch (...) {
+    } catch (...) {
       std::cerr << "Pulser read error: address 0x" << std::hex << baseAddress + addrs[iAddr]
                 << " (0x" << addrs[iAddr] << ")!" << std::dec << std::endl;
     };

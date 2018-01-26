@@ -27,9 +27,9 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "sc18is602.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "sc18is602.h"
 
 #define BUFFER_LEN 200
 

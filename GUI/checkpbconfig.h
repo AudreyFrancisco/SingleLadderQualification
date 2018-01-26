@@ -1,8 +1,8 @@
 #ifndef CHECKPBCONFIG_H
 #define CHECKPBCONFIG_H
 
-#include <QDialog>
 #include "calibrationpb.h"
+#include <QDialog>
 
 namespace Ui {
   class checkpbconfig;
@@ -15,8 +15,7 @@ public:
   explicit checkpbconfig(QWidget *parent = 0);
   ~checkpbconfig();
 
-public
-slots:
+public slots:
   // void opencalibration();
 
 private:

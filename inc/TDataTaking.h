@@ -2,10 +2,10 @@
 #define TDATATAKING_H
 
 #include <deque>
-#include <mutex>
-#include <vector>
 #include <map>
+#include <mutex>
 #include <string>
+#include <vector>
 
 #include "AlpideDecoder.h"
 #include "Common.h"
@@ -43,21 +43,17 @@ public:
   TDataTaking(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
               std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
               std::mutex *aMutex);
-  ~TDataTaking() {};
+  ~TDataTaking(){};
   void Init();
   void PrepareStep(int loopIndex) {
     if (loopIndex == 0)
       std::cout << "sending train " << m_value[0] << std::endl;
   };
-  void LoopStart(int loopIndex) {
-    m_value[loopIndex] = m_start[loopIndex];
-  };
+  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
   void LoopEnd(int loopIndex);
   void Execute();
   virtual void Terminate();
-  float GetBackbias() {
-    return m_backBias;
-  };
+  float GetBackbias() { return m_backBias; };
 };
 
 #endif

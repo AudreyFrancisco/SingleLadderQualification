@@ -34,6 +34,21 @@ FILE_EXTS=".c .h .cpp .hpp .cc .hh .cxx .m"
 ##################################################################
 # There should be no need to change anything below this line.
 
+os_version=$(lsb_release -d | grep "CentOS Linux release 7" | wc -l 2> /dev/null)
+if [[ "$os_version" -ne 1 ]]
+then
+    "automatic formatting only available on CentOS Linux release 7"
+    exit 0
+fi
+
+if [[ !"$(clang-format --version | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p' | tr -d '.' 2>/dev/null)" -gt 400 ]]
+then
+    "automatic formatting only available if clang-format 4.0.0 or newer are available";
+    exit 0
+fi
+
+
+
 # Reference: http://stackoverflow.com/questions/1055671/how-can-i-get-the-behavior-of-gnus-readlink-f-on-a-mac
 canonicalize_filename () {
     local target_file=$1

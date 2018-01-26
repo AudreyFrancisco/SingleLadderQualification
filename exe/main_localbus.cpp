@@ -14,26 +14,25 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-#include <unistd.h>
-#include <deque>
-#include <mutex>
-#include "TAlpide.h"
-#include "THIC.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "TAlpide.h"
+#include "TConfig.h"
+#include "THIC.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "AlpideConfig.h"
+#include <deque>
+#include <mutex>
+#include <unistd.h>
 
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
-#include "TLocalBusTest.h"
-#include "TScanConfig.h"
 #include "THisto.h"
+#include "TLocalBusTest.h"
 #include "TScanAnalysis.h"
+#include "TScanConfig.h"
 
 int main(int argc, char **argv) {
 

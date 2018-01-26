@@ -1,9 +1,9 @@
-#include <iostream>
-#include <vector>
-#include <string>
 #include "TDigitalAnalysis.h"
-#include "TDigitalScan.h"
 #include "DBHelpers.h"
+#include "TDigitalScan.h"
+#include <iostream>
+#include <string>
+#include <vector>
 
 TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
                                    TScanConfig *aScanConfig, std::vector<THic *> hics,

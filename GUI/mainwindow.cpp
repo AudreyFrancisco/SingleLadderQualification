@@ -1,70 +1,70 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QtWidgets>
 #include <QCoreApplication>
-#include <QtDebug>
-#include <QFileDialog>
 #include <QFile>
-#include <QPixmap>
+#include <QFileDialog>
 #include <QMenuBar>
+#include <QPixmap>
+#include <QtDebug>
+#include <QtWidgets>
 //#include <QtCore>
-#include <deque>
-#include <mutex>
-#include <thread>
-#include <map>
-#include <string>
-#include <iostream>
-#include <ctime>
-#include <qapplication.h>
 #include <cstdlib>
+#include <ctime>
+#include <deque>
+#include <iostream>
+#include <map>
+#include <mutex>
+#include <qapplication.h>
+#include <string>
+#include <thread>
 //#include "TQtWidgets.h"
-#include <typeinfo>
 #include <qpushbutton.h>
+#include <typeinfo>
 //#include "scanthread.h"
-#include "dialog.h"
-#include "testselection.h"
-#include "scanconfiguration.h"
-#include "testingprogress.h"
+#include "AlpideConfig.h"
 #include "TAlpide.h"
 #include "TDigitalAnalysis.h"
 #include "TDigitalScan.h"
-#include "AlpideConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
+#include "dialog.h"
+#include "scanconfiguration.h"
+#include "testingprogress.h"
+#include "testselection.h"
 //#include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
 #include "AlpideConfig.h"
-#include "BoardDecoder.h"
-#include "SetupHelpers.h"
-#include "TSCurveScan.h"
-#include "TScanConfig.h"
-#include "THisto.h"
-#include "TScanAnalysis.h"
-#include "TDigitalWFAnalysis.h"
-#include "TScan.h"
-#include "TThresholdAnalysis.h"
-#include "TLocalBusAnalysis.h"
-#include "TLocalBusTest.h"
-#include "TFifoTest.h"
-#include "TFifoAnalysis.h"
-#include "TNoiseAnalysis.h"
-#include "TApplyMask.h"
-#include "TApplyTuning.h"
-#include "TNoiseOccupancy.h"
-#include "THIC.h"
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
-#include "TPowerTest.h"
-#include "TPowerAnalysis.h"
-#include "TSCurveAnalysis.h"
-#include "calibrationpb.h"
-#include "TReadoutTest.h"
-#include "TReadoutAnalysis.h"
-#include "TEnduranceCycle.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TApplyMask.h"
+#include "TApplyTuning.h"
+#include "TConfig.h"
 #include "TCycleAnalysis.h"
+#include "TDigitalWFAnalysis.h"
+#include "TEnduranceCycle.h"
+#include "TFifoAnalysis.h"
+#include "TFifoTest.h"
+#include "THIC.h"
+#include "THisto.h"
+#include "TLocalBusAnalysis.h"
+#include "TLocalBusTest.h"
+#include "TNoiseAnalysis.h"
+#include "TNoiseOccupancy.h"
+#include "TPowerAnalysis.h"
+#include "TPowerTest.h"
+#include "TReadoutAnalysis.h"
+#include "TReadoutTest.h"
+#include "TSCurveAnalysis.h"
+#include "TSCurveScan.h"
+#include "TScan.h"
+#include "TScanAnalysis.h"
+#include "TScanConfig.h"
+#include "TThresholdAnalysis.h"
+#include "calibrationpb.h"
 
 bool writingdb;
 
@@ -229,8 +229,7 @@ void MainWindow::open() {
 
     //    std::cout<<properconfig<<"d2"<<endl;
     // fillingvectors();
-  }
-  catch (exception &e) {
+  } catch (exception &e) {
     //     std::cout<<e.what()<<endl;
     popup(e.what());
     fProperconfig = false;
@@ -853,8 +852,7 @@ void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis 
       if (fExecution == false)
         break;
       qApp->processEvents();
-    }
-    catch (exception &ex) {
+    } catch (exception &ex) {
       std::cout << ex.what() << "is the thrown exception" << std::endl;
     }
   }
@@ -2015,8 +2013,7 @@ void MainWindow::IBBasicTest() {
 
         fAnalysisVector.at(i)->Finalize();
       }
-    }
-    catch (exception &ex) {
+    } catch (exception &ex) {
       std::cout << ex.what() << "is the thrown exception" << std::endl;
     }
   }

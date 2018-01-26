@@ -14,36 +14,35 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-#include <unistd.h>
-#include <deque>
-#include <thread>
-#include <mutex>
-#include "TAlpide.h"
-#include "THIC.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "TAlpide.h"
+#include "TConfig.h"
+#include "THIC.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "AlpideConfig.h"
+#include <deque>
+#include <mutex>
+#include <thread>
+#include <unistd.h>
 
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
-#include "TScan.h"
-#include "TSCurveScan.h"
-#include "TDigitalScan.h"
-#include "TScanConfig.h"
-#include "THisto.h"
-#include "TScanAnalysis.h"
-#include "TSCurveAnalysis.h"
-#include "TDigitalAnalysis.h"
-#include "TFifoTest.h"
-#include "TFifoAnalysis.h"
-#include "TLocalBusTest.h"
-#include "TLocalBusAnalysis.h"
 #include "TApplyTuning.h"
+#include "TDigitalAnalysis.h"
+#include "TDigitalScan.h"
+#include "TFifoAnalysis.h"
+#include "TFifoTest.h"
+#include "THisto.h"
+#include "TLocalBusAnalysis.h"
+#include "TLocalBusTest.h"
+#include "TSCurveAnalysis.h"
+#include "TSCurveScan.h"
+#include "TScan.h"
+#include "TScanAnalysis.h"
+#include "TScanConfig.h"
 
 #include <ctime>
 

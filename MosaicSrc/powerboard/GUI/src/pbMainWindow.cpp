@@ -27,27 +27,27 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
-#include <QApplication>
-#include <QMessageBox>
+#include "pbMainWindow.h"
+#include "ledGrey.xpm"
+#include "ledRed.xpm"
+#include "mexception.h"
+#include "optionsDialog.h"
 #include <QAction>
-#include <QMenuBar>
+#include <QApplication>
+#include <QCheckBox>
 #include <QFileDialog>
-#include <QVBoxLayout>
-#include <QSplitter>
-#include <QStatusBar>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QScrollArea>
 #include <QScrollBar>
-#include <QGroupBox>
-#include <QPushButton>
+#include <QSplitter>
+#include <QStatusBar>
 #include <QTextStream>
-#include <QCheckBox>
-#include "mexception.h"
-#include "pbMainWindow.h"
-#include "optionsDialog.h"
-#include "ledRed.xpm"
-#include "ledGrey.xpm"
+#include <QVBoxLayout>
 
 static const char *WINDOW_TITLE = "Power Board Control";
 
@@ -167,8 +167,7 @@ void pbMainWindow::setIPaddress(QString add) {
 
   try {
     board->setIPaddress(add.toLatin1().data());
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     qDebug("Error connecting board at address %s", add.toLatin1().data());
     setOnline(false);
     QMessageBox::critical(this, WINDOW_TITLE, "Board comunication error", "OK");
@@ -180,8 +179,7 @@ void pbMainWindow::setIPaddress(QString add) {
       throw MIPBusErrorWrite("Power board comunication error");
     }
     pb->startADC();
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     qDebug("Power Board is not connected or is off");
     setOnline(false);
     QMessageBox::critical(this, WINDOW_TITLE, "Power Board is not connected or is off", "OK");
@@ -374,8 +372,7 @@ void pbMainWindow::channelSetON(int ch) {
   try {
     // pb->onVout(ch);
     pb->onVout(ch);
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     comErrorExit(e);
   }
 }
@@ -384,8 +381,7 @@ void pbMainWindow::channelSetOFF(int ch) {
   try {
     // pb->setIth(ch, 0.0);
     pb->offVout(ch);
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     comErrorExit(e);
   }
 }
@@ -402,8 +398,7 @@ void pbMainWindow::channelVset(int ch) {
 
   try {
     pb->setVout(ch, V);
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     comErrorExit(e);
   }
 
@@ -413,8 +408,7 @@ void pbMainWindow::channelVset(int ch) {
 void pbMainWindow::storeVset() {
   try {
     pb->storeAllVout();
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     comErrorExit(e);
   }
 }
@@ -432,8 +426,7 @@ void pbMainWindow::channelIset(int ch) {
 
   try {
     pb->setIth(ch, I);
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     comErrorExit(e);
   }
 }
@@ -443,8 +436,7 @@ void pbMainWindow::VbiasSet() {
 
   try {
     pb->setVbias(V);
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     comErrorExit(e);
   }
 
@@ -476,8 +468,7 @@ void pbMainWindow::enVbias(bool en, int ch) {
       pb->onVbias(ch);
     else
       pb->offVbias(ch);
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     comErrorExit(e);
   }
 }
@@ -488,8 +479,7 @@ void pbMainWindow::refreshMonitor() {
 
   try {
     pb->getState(&pbStat, powerboard::GetMonitor);
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     comErrorExit(e);
   }
 
@@ -562,8 +552,7 @@ void pbMainWindow::refreshSettings() {
 
   try {
     pb->getState(&pbStat, powerboard::GetSettings);
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     comErrorExit(e);
   }
 
@@ -582,8 +571,7 @@ void pbMainWindow::allON() {
   try {
     pb->onAllVout();
     pb->onAllVbias();
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     comErrorExit(e);
   }
 }
@@ -595,8 +583,7 @@ void pbMainWindow::allOFF() {
   try {
     pb->offAllVbias();
     pb->offAllVout();
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     comErrorExit(e);
   }
 }

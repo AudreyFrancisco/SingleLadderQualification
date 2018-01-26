@@ -1,8 +1,8 @@
-#include <iostream>
-#include <vector>
-#include <string>
 #include "TSCurveAnalysis.h"
 #include "DBHelpers.h"
+#include <iostream>
+#include <string>
+#include <vector>
 
 #include <TMath.h>
 

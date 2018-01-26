@@ -1,10 +1,10 @@
-#include <unistd.h>
+#include "TSCurveScan.h"
+#include "AlpideConfig.h"
+#include "TReadoutBoardDAQ.h"
+#include "TReadoutBoardMOSAIC.h"
 #include <string.h>
 #include <string>
-#include "TSCurveScan.h"
-#include "TReadoutBoardMOSAIC.h"
-#include "TReadoutBoardDAQ.h"
-#include "AlpideConfig.h"
+#include <unistd.h>
 
 TSCurveScan::TSCurveScan(TScanConfig *config, std::vector<TAlpide *> chips,
                          std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
@@ -340,8 +340,7 @@ void TSCurveScan::FillHistos(std::vector<TPixHit> *Hits, int board) {
     // TODO: Catch this case earlier (do not fill hit vector for corrupt events
     try {
       m_histo->Incr(idx, col, m_value[0] - m_start[0]); // m_value is too large (>20) often!!
-    }
-    catch (...) {
+    } catch (...) {
       std::cout << "Caught exception in TSCurveScan::FillHistos, trying to fill histo for chipID "
                 << idx.chipId << ", receiver " << idx.dataReceiver << std::endl;
     }

@@ -1,24 +1,19 @@
 #ifndef SETUPHELPERS_H
 #define SETUPHELPERS_H
 
-#include <unistd.h>
+#include "TAlpide.h"
+#include "THIC.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
-#include "TAlpide.h"
-#include "THIC.h"
+#include <unistd.h>
 
 // definition of standard setup types:
 //   - single chip with DAQ board
 //   - IB stave with MOSAIC
 //   - OB module with MOSAIC
 
-typedef enum {
-  setupSingle,
-  setupIB,
-  setupOB,
-  setupSingleM
-} TSetupType;
+typedef enum { setupSingle, setupIB, setupOB, setupSingleM } TSetupType;
 
 int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                        std::vector<TAlpide *> *chips, std::vector<THic *> *hics,

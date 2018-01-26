@@ -31,18 +31,18 @@
 #ifndef MBOARD_H
 #define MBOARD_H
 
-#include <stdint.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <vector>
-#include <string>
+#include "i2cbus.h"
+#include "i2csyspll.h"
 #include "ipbusudp.h"
+#include "mdatagenerator.h"
 #include "mruncontrol.h"
 #include "mtriggercontrol.h"
-#include "i2csyspll.h"
-#include "mdatagenerator.h"
-#include "i2cbus.h"
 #include "mwbb.h"
+#include <stdint.h>
+#include <string>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <vector>
 
 #define DEFAULT_PACKET_SIZE 1400
 #define DEFAULT_UDP_PORT 2000

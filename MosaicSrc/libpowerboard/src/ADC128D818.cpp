@@ -27,11 +27,11 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "ADC128D818.h"
+#include "mexception.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "ADC128D818.h"
-#include "mexception.h"
 
 ADC128D818::ADC128D818(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address) {}
 

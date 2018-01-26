@@ -3,12 +3,12 @@
 
 #include <deque>
 #include <mutex>
-#include <vector>
 #include <string>
+#include <vector>
 
+#include "AlpideDecoder.h"
 #include "TAlpide.h"
 #include "THIC.h"
-#include "AlpideDecoder.h"
 #include "THisto.h"
 #include "TReadoutBoard.h"
 #include "TScanConfig.h"
@@ -43,7 +43,7 @@ private:
   float m_idddEnd;
 
 public:
-  TScanConditionsHic() {};
+  TScanConditionsHic(){};
 };
 
 class TScanConditions {
@@ -59,7 +59,7 @@ private:
   std::vector<std::string> m_boardConfigEnd;
 
 public:
-  TScanConditions() {};
+  TScanConditions(){};
   int AddHicConditions(std::string hicId, TScanConditionsHic *hicCond);
 };
 
@@ -100,7 +100,7 @@ protected:
 public:
   TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
         std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex);
-  virtual ~TScan() {};
+  virtual ~TScan(){};
 
   virtual void Init();
   virtual void Terminate();
@@ -111,22 +111,12 @@ public:
   bool Loop(int loopIndex);
   virtual void Next(int loopIndex);
   void CreateScanHisto();
-  bool IsRunning() {
-    return m_running;
-  };
+  bool IsRunning() { return m_running; };
   //  TScanHisto       GetTScanHisto     () {return *m_histo;};
-  const char *GetName() {
-    return m_name;
-  };
-  const char *GetState() {
-    return m_state;
-  };
-  TScanConditions *GetConditions() {
-    return &m_conditions;
-  };
-  TScanParameters *GetParameters() {
-    return m_parameters;
-  };
+  const char *GetName() { return m_name; };
+  const char *GetState() { return m_state; };
+  TScanConditions *GetConditions() { return &m_conditions; };
+  TScanParameters *GetParameters() { return m_parameters; };
   TErrorCounter GetErrorCount(std::string hicId);
   void CreateHicConditions();
   void WriteConditions(const char *fName, THic *aHic);
@@ -134,9 +124,7 @@ public:
   void WriteBoardRegisters(const char *fName);
   void ActivateTimestampLog();
   void WriteTimestampLog(const char *fName);
-  std::vector<common::TChipIndex> GetChipList() {
-    return m_chipList;
-  };
+  std::vector<common::TChipIndex> GetChipList() { return m_chipList; };
 };
 
 class TMaskScan : public TScan {
@@ -155,13 +143,9 @@ public:
   TMaskScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
             std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
             std::mutex *aMutex);
-  ~TMaskScan() {};
-  std::vector<TPixHit> GetStuckPixels() {
-    return m_stuck;
-  };
-  TErrorCounter GetErrorCount() {
-    return m_errorCount;
-  };
+  ~TMaskScan(){};
+  std::vector<TPixHit> GetStuckPixels() { return m_stuck; };
+  TErrorCounter GetErrorCount() { return m_errorCount; };
 };
 
 #endif

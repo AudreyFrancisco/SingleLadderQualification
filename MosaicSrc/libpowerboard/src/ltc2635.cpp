@@ -27,9 +27,9 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "ltc2635.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "ltc2635.h"
 
 LTC2635::LTC2635(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address) {}
 

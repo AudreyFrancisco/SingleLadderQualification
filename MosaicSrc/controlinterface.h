@@ -31,9 +31,9 @@
 #ifndef CONTROLINTERFACE_H
 #define CONTROLINTERFACE_H
 
-#include <stdint.h>
-#include <mutex>
 #include "mwbbslave.h"
+#include <mutex>
+#include <stdint.h>
 
 class CiReadRequest {
 public:
@@ -76,12 +76,7 @@ public:
   };
 
 private: // WBB Slave registers map
-  enum regAddress_e {
-    regWriteCtrl = 0,
-    regWriteData = 1,
-    regReadData = 2,
-    regConfig = 3
-  };
+  enum regAddress_e { regWriteCtrl = 0, regWriteData = 1, regReadData = 2, regConfig = 3 };
 
   enum readFlagsBits_e {
     FLAG_SYNC_BIT = (1 << 3),
@@ -90,11 +85,7 @@ private: // WBB Slave registers map
     FLAG_DATAH_BIT = (1 << 0)
   };
 
-  enum configBits_e {
-    CFG_PHASE_MASK = 0x03,
-    CFG_EN = (1 << 3),
-    CFG_DISABLE_ME = (1 << 4)
-  };
+  enum configBits_e { CFG_PHASE_MASK = 0x03, CFG_EN = (1 << 3), CFG_DISABLE_ME = (1 << 4) };
 
 private:
   CiReadRequest *readReqest;

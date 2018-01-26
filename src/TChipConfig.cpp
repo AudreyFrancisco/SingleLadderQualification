@@ -1,7 +1,7 @@
 #include "TChipConfig.h"
-#include <string.h>
-#include <stdio.h>
 #include <iostream>
+#include <stdio.h>
+#include <string.h>
 
 using namespace ChipConfig;
 

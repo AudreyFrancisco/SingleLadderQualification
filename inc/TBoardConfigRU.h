@@ -23,17 +23,11 @@ public:
 
   uint8_t getConnector() const;
 
-  enum class ReadoutSpeed {
-    RO_400,
-    RO_600,
-    RO_1200
-  };
+  enum class ReadoutSpeed { RO_400, RO_600, RO_1200 };
   ReadoutSpeed getReadoutSpeed() const;
   bool getInvertPolarity() const;
   bool enableLogging() const;
-  void InitParamMap() {
-    TBoardConfig::InitParamMap();
-  };
+  void InitParamMap() { TBoardConfig::InitParamMap(); };
 };
 
 #endif // BOARDCONFIGRU_H

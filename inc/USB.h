@@ -41,30 +41,14 @@ public:
   int SendData(unsigned char *data_buf, int packetSize, int *error = 0x0);
   int ReceiveData(unsigned char *data_buf, int packetSize, int *error = 0x0);
   void DumpEndpointInfo();
-  libusb_transfer_type GetType() {
-    return fType;
-  }; // Return Type of endpoint.
-  libusb_endpoint_direction GetDirection() {
-    return fDirection;
-  }; // Return Direction of endpoint.
-  unsigned int GetAddress() {
-    return fEndpointAddress;
-  }; // Return address of endpoint.
-  unsigned int GetMaxPacketSize() {
-    return fMaxPacketSize;
-  }; // Return Maximum packet size.
-  bool IsBulk() {
-    return fType == LIBUSB_TRANSFER_TYPE_BULK;
-  };
-  bool IsControl() {
-    return fType == LIBUSB_TRANSFER_TYPE_CONTROL;
-  };
-  bool IsIso() {
-    return fType == LIBUSB_TRANSFER_TYPE_ISOCHRONOUS;
-  };
-  bool IsInterrupt() {
-    return fType == LIBUSB_TRANSFER_TYPE_INTERRUPT;
-  };
+  libusb_transfer_type GetType() { return fType; };                // Return Type of endpoint.
+  libusb_endpoint_direction GetDirection() { return fDirection; }; // Return Direction of endpoint.
+  unsigned int GetAddress() { return fEndpointAddress; };          // Return address of endpoint.
+  unsigned int GetMaxPacketSize() { return fMaxPacketSize; };      // Return Maximum packet size.
+  bool IsBulk() { return fType == LIBUSB_TRANSFER_TYPE_BULK; };
+  bool IsControl() { return fType == LIBUSB_TRANSFER_TYPE_CONTROL; };
+  bool IsIso() { return fType == LIBUSB_TRANSFER_TYPE_ISOCHRONOUS; };
+  bool IsInterrupt() { return fType == LIBUSB_TRANSFER_TYPE_INTERRUPT; };
 };
 
 class TUSBBoard {
@@ -83,56 +67,32 @@ private:
   int DisconnectUSBDevice();
   int SetDeviceInfo();
   void CreateEndpoints();
-  int GetBusNumber() {
-    return fBusNum;
-  }; // Return Bus Number.
-  int GetDevNumber() {
-    return fDevNum;
-  }; // Return Device Number.
-  uint16_t GetIdVendor() {
-    return fVendorId;
-  }; // Return Id Vendor.
-  uint16_t GetIdProduct() {
-    return fProductId;
-  }; // Return Id Product.
-  std::string GetChipType() {
-    return fUsbChipType;
-  }; // Return type of device (FX3, FX2, OTHER)
-  int GetNumInterface() {
-    return fNumInterface;
-  }; // Return number of Interface
-  int GetNumEndpoints() {
-    return fNumEndpoints;
-  }; // Return number of Endpoints
+  int GetBusNumber() { return fBusNum; };             // Return Bus Number.
+  int GetDevNumber() { return fDevNum; };             // Return Device Number.
+  uint16_t GetIdVendor() { return fVendorId; };       // Return Id Vendor.
+  uint16_t GetIdProduct() { return fProductId; };     // Return Id Product.
+  std::string GetChipType() { return fUsbChipType; }; // Return type of device (FX3, FX2, OTHER)
+  int GetNumInterface() { return fNumInterface; };    // Return number of Interface
+  int GetNumEndpoints() { return fNumEndpoints; };    // Return number of Endpoints
 
   // GetEndpointType Return Type of endpoint (CONTROL, INTERRUPT, BULK, ISOCHRONUS).
-  libusb_transfer_type GetEndpointType(int id) {
-    return fEndpoints.at(id)->GetType();
-  };
+  libusb_transfer_type GetEndpointType(int id) { return fEndpoints.at(id)->GetType(); };
   // GetEndpointDirection Return Direction of endpoint(IN, OUT).
   libusb_endpoint_direction GetEndpointDirection(int id) {
     return fEndpoints.at(id)->GetDirection();
   };
   // GetEndpointAddress Return address of endpoint.
-  unsigned int GetEndpointAddress(int id) {
-    return fEndpoints.at(id)->GetAddress();
-  };
+  unsigned int GetEndpointAddress(int id) { return fEndpoints.at(id)->GetAddress(); };
   // GetEndpointMaxPacketSize Return Maximum packet size.
-  unsigned int GetEndpointMaxPacketSize(int id) {
-    return fEndpoints.at(id)->GetMaxPacketSize();
-  };
+  unsigned int GetEndpointMaxPacketSize(int id) { return fEndpoints.at(id)->GetMaxPacketSize(); };
 
 protected:
   std::vector<TUSBEndpoint *> fEndpoints; // Vector that contains the endpoints object.
 public:
   TUSBBoard(libusb_device *ADevice);
   ~TUSBBoard();
-  libusb_device_handle *GetHandle() {
-    return fHandle;
-  };
-  TUSBEndpoint *GetEndpoint(int i) {
-    return fEndpoints.at(i);
-  };
+  libusb_device_handle *GetHandle() { return fHandle; };
+  TUSBEndpoint *GetEndpoint(int i) { return fEndpoints.at(i); };
   void DumpDeviceInfo() const;
   // int                   TransferData        (int idEndpoint, unsigned char * data_buf, int
   // packetSize, int* error=0x0);

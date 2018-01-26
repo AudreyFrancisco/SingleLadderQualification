@@ -31,9 +31,9 @@
 #ifndef IPBUS_H
 #define IPBUS_H
 
-#include <stdint.h>
 #include "wishbonebus.h"
 #include <mutex>
+#include <stdint.h>
 #include <string>
 
 #define IPBUS_PROTOCOL_VERSION 2

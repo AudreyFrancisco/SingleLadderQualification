@@ -151,7 +151,6 @@ format-check:
 
 ### Config.cfg
 githooks:
-	/bin/bash -c 'version=$$(lsb_release -d | grep "CentOS Linux release 7" | wc -l 2> /dev/null) ;if [[ "$$version" -eq 1 ]]; then if [[ -f .git/hooks ]]; then cp -v .pre-commit-clang-format .git/hooks/pre-commit ; else echo "could not install pre-commit hook for the format checking"; fi; else echo "automatic formatting only available on CentOS CERN 7"; fi'
-
+	/bin/bash -c 'if [[ -d .git/hooks ]]; then cp -v .pre-commit-clang-format .git/hooks/pre-commit ; else echo "could not install pre-commit hook for the format checking"; fi'
 
 .PHONY:	all clean clean-all $(STATIC_LIBS) lib lib_analysis format format-check githooks

@@ -27,11 +27,11 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
-#include <stdio.h>
-#include <sstream>
+#include "genconsumer.h"
 #include "mboard.h"
 #include "mexception.h"
-#include "genconsumer.h"
+#include <sstream>
+#include <stdio.h>
 
 GenConsumer::GenConsumer() {
   eventSize = 0;

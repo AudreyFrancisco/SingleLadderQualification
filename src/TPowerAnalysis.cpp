@@ -1,6 +1,6 @@
-#include "TPowerTest.h"
 #include "TPowerAnalysis.h"
 #include "DBHelpers.h"
+#include "TPowerTest.h"
 
 #include <string>
 

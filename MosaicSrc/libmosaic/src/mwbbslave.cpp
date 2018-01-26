@@ -27,10 +27,10 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
-#include <stdio.h>
-#include <stdlib.h>
 #include "mwbbslave.h"
 #include "mexception.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 MWbbSlave::MWbbSlave() {
   wbb = NULL;
