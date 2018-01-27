@@ -36,6 +36,7 @@ TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic
 
 void TScan::Init() {
   strcpy(m_state, "Running");
+  std::cout << std::endl << std::endl << ">>>>>>>> Starting scan " << GetName() << std::endl << std::endl;
   time_t t = time(0); // get time now
   struct tm *now = localtime(&t);
 

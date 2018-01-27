@@ -836,10 +836,7 @@ void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis 
         std::thread scanThread(&MainWindow::scanLoop, this, s[i]);
         a.at(i)->Initialize();
         std::thread analysisThread(&TScanAnalysis::Run, a[i]);
-        std::cout << "BEFORE THE SCAN THREAD" << std::endl;
         scanThread.join();
-        std::cout << "AFTER THE SCAN THREAD" << std::endl;
-        std::cout << "BEFORE THE ANALYSIS THREAD" << std::endl;
 
         if (fScanstatuslabels.at(i) != 0) {
           fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
