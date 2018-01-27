@@ -1430,7 +1430,7 @@ void MainWindow::attachtodatabase() {
       activ.StartDate = date.currentDateTime().toTime_t();
       activ.EndDate = date.currentDateTime().toTime_t();
       activ.Lot = " ";
-      activ.Name = CreateActivityName(fHICs.at(i)->GetDbId(), GetTestType());
+      activ.Name = CreateActivityName(fHICs.at(i)->GetDbId(), fConfig->GetScanConfig());
       activ.Position = " ";
       activ.Result =
           -999; // apparently has to stay open here, otherwise activity is considered closed

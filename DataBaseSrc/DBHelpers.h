@@ -36,5 +36,5 @@ void DbAddAttachment(AlpideDB *db, ActivityDB::activity &activity, TAttachmentTy
                      string localName, string remoteName);
 void DbAddMember(AlpideDB *db, ActivityDB::activity &activity, int memberId);
 bool FileExists(string fileName);
-string CreateActivityName(string compName, TTestType test);
+string CreateActivityName(string compName, TScanConfig *config);
 #endif

@@ -423,9 +423,9 @@ void DbAddAttachment(AlpideDB *db, ActivityDB::activity &activity, TAttachmentTy
   activity.Attachments.push_back(attachment);
 }
 
-string CreateActivityName(string compName, TTestType test) {
-  string testName;
-  switch (test) {
+string CreateActivityName(string compName, TScanConfig *config) {
+  string testName, result;
+  switch (config->GetTestType()) {
   case OBQualification:
     testName = string("OB Qualification Test ");
     break;
@@ -457,5 +457,10 @@ string CreateActivityName(string compName, TTestType test) {
     testName = string("");
     break;
   }
-  return (testName + compName);
+  result = testName + compName;
+  if (config->GetRetestNumber() > 0) {
+    result.append(" Retest ");
+    result.append(std::to_string(config->GetRetestNumber()));
+  }
+  return result;
 }
