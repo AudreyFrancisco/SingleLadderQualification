@@ -14,6 +14,8 @@ TScanConfig::TScanConfig()
   m_chargeStep     = CHARGE_STEP;
   m_nMaskStages    = N_MASK_STAGES;
   m_pixPerRegion   = PIX_PER_REGION;
+  m_sweepStages    = SWEEP_STAGES; 
+  m_DCside         = DC_SIDE;
   m_noiseCutInv    = NOISECUT_INV;
   m_vcasnStart     = VCASN_START;
   m_vcasnStop      = VCASN_STOP;
@@ -101,6 +103,8 @@ void TScanConfig::InitParamMap ()
   fSettings["CHARGESTEP"]   = &m_chargeStep;
   fSettings["NMASKSTAGES"]  = &m_nMaskStages;
   fSettings["PIXPERREGION"] = &m_pixPerRegion;
+  fSettings["SWEEPSTAGES"]  = &m_sweepStages;
+  fSettings["DCSIDE"]       = &m_DCside;
   fSettings["NOISECUT_INV"] = &m_noiseCutInv;
 
   fSettings["VCASN_START"]  = &m_vcasnStart;

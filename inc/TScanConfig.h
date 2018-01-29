@@ -13,15 +13,16 @@ typedef enum {OBQualification, OBEndurance, OBReception, OBHalfStaveOL, OBHalfSt
               IBQualification, IBEndurance, IBStave} TTestType;
 
 namespace ScanConfig {
-  const int NINJ           = 50;        // number of injections in digital/threshold scans
+  const int NINJ           = 50;      // number of injections in digital/threshold scans
   const int NTRIG          = 10000;   // number of triggers for noise occupancy scans
   const int CHARGE_START   = 0;
   const int CHARGE_STOP    = 50;
   const int CHARGE_STEP    = 1;
   const int N_MASK_STAGES  = 3;
   const int PIX_PER_REGION = 32;
+  const int SWEEP_STAGES   = 1;        // sweep the whole range of mask stages ? -> use it as a bool!
+  const int DC_SIDE        = 0;        // side of the pulsed double column - Left=0 / Right=1
   const int NOISECUT_INV   = 100000;   // inverse of pixel noise cut (e.g. 100000 = 1e-5)
-
 
   const int ITHR_START     = 30;
   const int ITHR_STOP      = 100;
@@ -119,6 +120,8 @@ class TScanConfig {
   int    m_nDacSamples;
   int    m_nMaskStages;
   int    m_pixPerRegion;
+  int    m_sweepStages;
+  int    m_DCside;
   int    m_noiseCutInv;
   char   m_fNameSuffix[20];
   //NEW--added for additional scans
@@ -182,6 +185,7 @@ class TScanConfig {
   int    m_readoutOcc;
   int    m_readoutDriver;
   int    m_readoutPreemp;
+
   TTestType m_testType;
  protected:
  public:

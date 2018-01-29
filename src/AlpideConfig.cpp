@@ -199,7 +199,7 @@ void AlpideConfig::EnableDoubleColumns(TAlpide *chip) {
 
 
 // return value: active row (needed for threshold scan histogramming)
-int AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage, bool Mask, bool Select) {
+int AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage, bool Mask/*=true*/, bool Select/*=true*/, int Side/*=0*/) {
   EnableDoubleColumns(chip);
   // check that nPix is one of (1, 2, 4, 8, 16, 32)
   if ((nPix <= 0) || (nPix & (nPix - 1)) || (nPix > 32)) {
@@ -217,7 +217,7 @@ int AlpideConfig::ConfigureMaskStage (TAlpide *chip, int nPix, int iStage, bool 
   }
   else {
     int colStep = 32 / nPix;
-    for (int icol = 0; icol < 1024; icol += colStep) {
+    for (int icol = Side; icol < 1024; icol += colStep) {
       if (Mask)   WritePixRegSingle (chip, Alpide::PIXREG_MASK,   false, iStage % 512, icol + iStage / 512);
       if (Select) WritePixRegSingle (chip, Alpide::PIXREG_SELECT, true,  iStage % 512, icol + iStage / 512);
     }
