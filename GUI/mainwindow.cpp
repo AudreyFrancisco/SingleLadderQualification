@@ -754,7 +754,6 @@ void MainWindow::start_test() {
   std::cout << fDatabasetype << "the selected database" << std::endl;
   fSettingswindow = new TestSelection(this, fDatabasetype);
   fSettingswindow->exec();
-  writingdb = false;
 }
 
 void MainWindow::fillingOBvectors() {
@@ -1028,11 +1027,17 @@ th loading of the cfg.
 }*/
 
 void MainWindow::applytests() {
+  writingdb = false;
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     if (fHICs.at(i)->IsEnabled()) {
+      int oldtests;
+      oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
+      std::cout << "the number of old tests is " << oldtests << std::endl;
+      fConfig->GetScanConfig()->SetRetestNumber(oldtests);
       makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
     }
   }
+
   fConfig->GetScanConfig()->SetTestType(fNumberofscan);
   fConfig->GetScanConfig()->SetDatabase(fDB);
   ui->start_test->hide();
@@ -1393,10 +1398,6 @@ void MainWindow::attachtodatabase() {
       QDateTime date;
       ActivityDB::actUri uri;
       WriteToEos(fHICs.at(i)->GetDbId(), uri);
-      int oldtests;
-      oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
-      std::cout << "the number of old tests is " << oldtests << std::endl;
-      fConfig->GetScanConfig()->SetRetestNumber(oldtests);
       bool status;
       fActivitywindow = new ActivityStatus(this);
       fActivitywindow->exec();
