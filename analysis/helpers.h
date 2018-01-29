@@ -20,18 +20,12 @@ struct MeasConfig_t {
     // general DAQBOARD config
     Int_t TRIGGERDELAY;
     Int_t PULSEDELAY;
-    // stuff for pulselength measurements
+    // stuff for pulselength measurements:
     Int_t NTRIGGERS;
-  /* Int_t ROW;
-    Int_t COL;
-    Int_t FIRSTROW;
-    Int_t LASTROW;
-    Int_t STEPROW;
-    Int_t FIRSTCOL;
-    Int_t LASTCOL;
-    Int_t STEPCOL;*/
-  // Int_t MASKSTAGES;
+    Int_t MASKSTAGES;
+    Int_t SWEEPSTAGES;
     Int_t PIXPERREGION;
+    Int_t DCSIDE;
     Int_t CHARGESTART;
     Int_t CHARGESTOP;
     Int_t CHARGESTEP;
@@ -39,7 +33,6 @@ struct MeasConfig_t {
     Int_t PULSEDELAYSTOP;
     Int_t PULSEDELAYSTEP;
 
-    Int_t MASKSTAGES;
     // chiller temperature
     Int_t TEMP_SET;
     // vbb

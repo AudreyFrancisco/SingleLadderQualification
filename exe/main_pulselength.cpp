@@ -126,7 +126,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "MASKSTAGES %i\n", myMaskStages);
   fprintf(fp, "SWEEPSTAGES %i\n", sweepStages);
   fprintf(fp, "PIXPERREGION %i\n", myPixPerRegion);
-  fprintf(fp, "DCSIDE %i\n", myDCside);
+  fprintf(fp, "DCSIDE %i\n\n", myDCside);
 
   fprintf(fp, "CHARGESTART %i\n", myChargeStart);
   fprintf(fp, "CHARGESTOP %i\n", myChargeStop);

@@ -31,7 +31,9 @@ void reset_meas_config(MeasConfig_t *conf) {
     // stuff for pulselength measurements
     conf->NTRIGGERS   = -1;
     conf->MASKSTAGES  = -1;
-    conf->PIXPERREGION  = -1;
+    conf->SWEEPSTAGES = -1;
+    conf->PIXPERREGION= -1;
+    conf->DCSIDE      = -1;
     conf->CHARGESTART = -1;
     conf->CHARGESTOP  = -1;
     conf->CHARGESTEP  = -1;
@@ -128,8 +130,14 @@ void decode_line(const char *line, MeasConfig_t *conf) {
     if (!strcmp(param,"MASKSTAGES")) {
         read_int_parameter(line, &(conf->MASKSTAGES), true);
     }
+    if (!strcmp(param,"SWEEPSTAGES")) {
+        read_int_parameter(line, &(conf->SWEEPSTAGES), true);
+    }
     if (!strcmp(param,"PIXPERREGION")) {
         read_int_parameter(line, &(conf->PIXPERREGION), true);
+    }
+    if (!strcmp(param,"DCSIDE")) {
+        read_int_parameter(line, &(conf->DCSIDE), true);
     }
     if (!strcmp(param,"CHARGESTART")) {
         read_int_parameter(line, &(conf->CHARGESTART), true);
@@ -181,16 +189,18 @@ void print_meas_config(MeasConfig_t conf) {
     std::cout << "STROBELENGTH:     " << conf.STROBELENGTH << std::endl; 
     std::cout << std::endl;
     std::cout << "TRIGGERDELAY:     " << conf.TRIGGERDELAY << std::endl; 
-    std::cout << "PULSEDELAY:       " << conf.PULSEDELAY << std::endl; 
+    std::cout << "PULSEDELAY:       " << conf.PULSEDELAY   << std::endl; 
     std::cout << std::endl;
-    std::cout << "NTRIGGERS:        " << conf.NTRIGGERS << std::endl; 
-    std::cout << "MASKSTAGES:       " << conf.MASKSTAGES << std::endl;
+    std::cout << "NTRIGGERS:        " << conf.NTRIGGERS    << std::endl; 
+    std::cout << "MASKSTAGES:       " << conf.MASKSTAGES   << std::endl;
+    std::cout << "SWEEPSTAGES:      " << conf.SWEEPSTAGES   << std::endl;
     std::cout << "PIXPERREGION:     " << conf.PIXPERREGION << std::endl;
+    std::cout << "DCSIDE:           " << conf.DCSIDE       << std::endl;
     std::cout << std::endl;
-    std::cout << "CHARGESTART:      " << conf.CHARGESTART << std::endl; 
-    std::cout << "CHARGESTOP:       " << conf.CHARGESTOP << std::endl; 
-    std::cout << "CHARGESTEP:       " << conf.CHARGESTEP << std::endl; 
-    std::cout << "PULSEDELAYSTART:  " << conf.PULSEDELAYSTART << std::endl; 
+    std::cout << "CHARGESTART:      " << conf.CHARGESTART  << std::endl; 
+    std::cout << "CHARGESTOP:       " << conf.CHARGESTOP   << std::endl; 
+    std::cout << "CHARGESTEP:       " << conf.CHARGESTEP   << std::endl; 
+    std::cout << "PULSEDELAYSTART:  " << conf.PULSEDELAYSTART<< std::endl; 
     std::cout << "PULSEDELAYSTOP:   " << conf.PULSEDELAYSTOP << std::endl; 
     std::cout << "PULSEDELAYSTEP:   " << conf.PULSEDELAYSTEP << std::endl; 
     std::cout << std::endl;

@@ -89,8 +89,8 @@ do
         fi
 
         cd $ANA_DIR
-        # Convert RAW to Root file:
-        root -b -l <<EOF >> $LOG 
+	# Convert RAW to Root file:
+	root -b -l <<EOF >> $LOG 
         .L helpers.cpp+g
         .L PulseshapeRawToHisto.C++
         .x PulseshapeRawToHisto.C+g("$DATA_FILE")

@@ -20,10 +20,14 @@
 #include "TLegend.h"
 #include "helpers.h"
 
-#define NSEC 1
+#define NSEC 32
 
 using namespace std;
 
+Int_t col[32] = {kBlack, kGray+2, kGray, kViolet+1, kViolet+10,  kBlue+2, kBlue, kAzure+1, kAzure+10, kCyan+2, kCyan, kTeal, kTeal+1,  kGreen+1, kGreen+3, kSpring+9, kSpring+2, kYellow-3, kYellow-7, kYellow, kOrange, kOrange+7, kOrange+10, kPink, kPink+1, kMagenta-10, kPink+7, kMagenta, kRed-7, kRed, kRed+2, kOrange-7};
+
+//Int_t col[16] = {kBlack, kGray, kViolet+1, kBlue, kAzure+1, kCyan, kTeal, kTeal+1,  kGreen+1, kYellow-3, kYellow-7, kOrange, kOrange+7, kPink+1, kMagenta, kRed};
+Int_t colpt[8] = {kViolet+1, kBlue, kAzure+10, kTeal+1, kGreen+1, kPink+1, kRed-7, kMagenta};
 
 char fNameCfg   [1024];
 char fNameOut   [1024];
@@ -322,7 +326,7 @@ void PrepareOutputFile (TString fName) {
 
 Bool_t PulseshapeAnalysis(TString file_path) {
 
-  Int_t counter, rowStep, colStep;
+  Int_t counter, rowEnd, rowStep, colStep;
   cout << "\nPulseshapeAnalysis:" << endl;
 
   // Load input files:
@@ -347,14 +351,23 @@ Bool_t PulseshapeAnalysis(TString file_path) {
   MeasConfig_t conf = read_config_file(Form("%s%s", fPathOut, fNameCfg));
   print_meas_config(conf);
   Int_t myMaskStages    = conf.MASKSTAGES;
+  Int_t sweepStages   = conf.SWEEPSTAGES;
   Int_t myPixPerRegion  = conf.PIXPERREGION;
+  Int_t myDCside        = conf.DCSIDE;
   Int_t Strobe_B_length = conf.STROBELENGTH;
 
 
-  // Condition for sweeping uniformly the whole range of mask stages:
+  // Sweeping mask stages:
   //-----------------------------------------------------------------------------------------------
-  if (512%myMaskStages == 0) rowStep = 512/myMaskStages;
-  else rowStep = 511/(myMaskStages-1);
+  if (sweepStages != 0) {    // condition for sweeping uniformly the whole range of mask stages:
+    if (512%myMaskStages == 0) rowStep = 512/myMaskStages;
+    else rowStep = 511/(myMaskStages-1);
+    rowEnd = 512;
+  }
+  else {   // scan stages consecutively:
+    rowEnd  = myMaskStages;
+    rowStep = 1; 
+  }
   colStep = 32/myPixPerRegion;
 
 
@@ -365,12 +378,13 @@ Bool_t PulseshapeAnalysis(TString file_path) {
   TH2F ***hPulse;
   hPulse = new TH2F**[1024];
 
-  for (Int_t icol = 0; icol < 1024; icol += colStep) {
+  for (Int_t icol = myDCside; icol < 1024; icol += colStep) {
+
     in_file->cd(Form("Region_%i", icol/32));
     hPulse[icol] = new TH2F*[512];
     counter = 0;
 
-    for (Int_t irow = 0; irow < 512; irow += rowStep) {
+    for (Int_t irow = 0; irow < rowEnd; irow += rowStep) {
       hPulse[icol][irow] = (TH2F*)gDirectory->Get(Form("hPulse_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i_strbBlen%i__PIX_%i_%i_%i",
 					      conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
 					      conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
@@ -406,7 +420,9 @@ Bool_t PulseshapeAnalysis(TString file_path) {
 
   // Output ROOT file & subdirectories for each region:
   //-----------------------------------------------------------------------------------------------
+  //TString f_out_name_root = f_out_name_base + run_id_full + "_mean.root";
   TString f_out_name_root = f_out_name_base + run_id_full + ".root";
+
   TFile *f_out_root = new TFile(f_out_name_root, "RECREATE");
   f_out_root->cd();
 
@@ -441,18 +457,26 @@ Bool_t PulseshapeAnalysis(TString file_path) {
   Double_t y=0;
   MinThreshold_t minThr;
   MaxPulseLengthBin_t maxPL;
-  const Int_t n_bins_y = hPulse[0][0]->GetYaxis()->GetNbins();
+  const Int_t n_bins_y = hPulse[myDCside][0]->GetYaxis()->GetNbins();
 
   //Arrays:
-  Float_t x_err[n_bins_y];
-  Float_t charge[n_bins_y];
-  Float_t av_tot[NSEC][n_bins_y];
-  Float_t av_tot_err[NSEC][n_bins_y];
-  Float_t av_tw[NSEC][n_bins_y];
-  Float_t av_tw_err[NSEC][n_bins_y];
-  Float_t av_tw_abovethr[NSEC][n_bins_y];
+  Float_t x_err             [n_bins_y];
+  Float_t charge            [n_bins_y];
+  Float_t av_tot            [NSEC][n_bins_y];
+  Float_t av_tot_err        [NSEC][n_bins_y];
+  Float_t av_tw             [NSEC][n_bins_y];
+  Float_t av_tw_err         [NSEC][n_bins_y];
+  Float_t av_tw_abovethr    [NSEC][n_bins_y];
   Float_t av_tw_abovethr_err[NSEC][n_bins_y];
 
+  Float_t av_tot_stages            [myMaskStages][n_bins_y];
+  Float_t av_tot_stages_err        [myMaskStages][n_bins_y];
+  Float_t av_tw_stages             [myMaskStages][n_bins_y];
+  Float_t av_tw_stages_err         [myMaskStages][n_bins_y];
+  Float_t av_tw_abovethr_stages    [myMaskStages][n_bins_y];
+  Float_t av_tw_abovethr_stages_err[myMaskStages][n_bins_y];
+
+  // Initialization of arrays (IMPORTANT!):
   for (Int_t i_sec=0; i_sec<NSEC; i_sec++) { 
     for (Int_t i_point=0; i_point<n_bins_y; i_point++) { 
       av_tot            [i_sec][i_point] = 0;
@@ -461,6 +485,17 @@ Bool_t PulseshapeAnalysis(TString file_path) {
       av_tw_err         [i_sec][i_point] = 0;
       av_tw_abovethr    [i_sec][i_point] = 0;
       av_tw_abovethr_err[i_sec][i_point] = 0;
+    }
+  }
+
+  for (Int_t irow = 0; irow < myMaskStages; irow++) { 
+    for (Int_t i_point = 0; i_point < n_bins_y; i_point++) { 
+      av_tot_stages             [irow][i_point] = 0;
+      av_tot_stages_err         [irow][i_point] = 0;
+      av_tw_stages              [irow][i_point] = 0;
+      av_tw_stages_err          [irow][i_point] = 0;
+      av_tw_abovethr_stages     [irow][i_point] = 0;
+      av_tw_abovethr_stages_err [irow][i_point] = 0;
     }
   }
    
@@ -472,15 +507,29 @@ Bool_t PulseshapeAnalysis(TString file_path) {
   gTimeWalk         = new TGraph**[1024];
   gTimeWalkAboveThr = new TGraph**[1024];  
 
-  TGraphErrors *gAvToT[NSEC];
-  TGraphErrors *gAvTimeWalk[NSEC];
-  TGraphErrors *gAvTimeWalkAboveThr[NSEC];
-  TMultiGraph  *mgToT                = new TMultiGraph();
-  TMultiGraph  *mgTimeWalk           = new TMultiGraph();
-  TMultiGraph  *mgTimeWalkAboveThr   = new TMultiGraph();
-  TMultiGraph  *mgAvToT              = new TMultiGraph();
-  TMultiGraph  *mgAvTimeWalk         = new TMultiGraph();
-  TMultiGraph  *mgAvTimeWalkAboveThr = new TMultiGraph();
+  TGraphErrors *gAvToT                   [NSEC];
+  TGraphErrors *gAvTimeWalk              [NSEC];
+  TGraphErrors *gAvTimeWalkAboveThr      [NSEC];
+  TGraphErrors *gAvToTstages             [myMaskStages];
+  TGraphErrors *gAvTimeWalkstages        [myMaskStages];
+  TGraphErrors *gAvTimeWalkAboveThrstages[myMaskStages];
+
+  /*TGraph *gAvToT                   [NSEC];
+  TGraph *gAvTimeWalk              [NSEC];
+  TGraph *gAvTimeWalkAboveThr      [NSEC];
+  TGraph *gAvToTstages             [myMaskStages];
+  TGraph *gAvTimeWalkstages        [myMaskStages];
+  TGraph *gAvTimeWalkAboveThrstages[myMaskStages];*/
+
+  TMultiGraph  *mgToT                 = new TMultiGraph();
+  TMultiGraph  *mgTimeWalk            = new TMultiGraph();
+  TMultiGraph  *mgTimeWalkAboveThr    = new TMultiGraph();
+  TMultiGraph  *mgAvToT               = new TMultiGraph();
+  TMultiGraph  *mgAvTimeWalk          = new TMultiGraph();
+  TMultiGraph  *mgAvTimeWalkAboveThr  = new TMultiGraph();
+  TMultiGraph  *mgAvToTS              = new TMultiGraph();
+  TMultiGraph  *mgAvTimeWalkS         = new TMultiGraph();
+  TMultiGraph  *mgAvTimeWalkAboveThrS = new TMultiGraph();
 
   // Histograms:
   // hist for saving the min Thr of the pixels: 
@@ -503,6 +552,24 @@ Bool_t PulseshapeAnalysis(TString file_path) {
   TH2F *hMaxPulseLenCharge= new TH2F(Form("hMaxPulseLenCharge%s", run_id_full.Data()),"Charge at Max Pulse Length [DAC]; Columns; Rows", 
 				     32*myPixPerRegion, 0, 32*myPixPerRegion, myMaskStages, 0, myMaskStages); 
 
+  // hist for the slice distribution of the ToT for all scanned pixels:
+  Int_t nSlices = 4;
+  Int_t slicesAT[4] = {300, 500, 800, 1200};   // 4 slices at: 300, 500, 800, 1200 e- 
+  TH1F **hSliceAll;
+  hSliceAll = new TH1F*[nSlices];
+
+
+  // slice histograms for each region (or sector):
+  TH1F ***hSlice;
+  hSlice = new TH1F**[nSlices];
+  for (Int_t iSlice = 0; iSlice < nSlices; iSlice++) {
+    hSliceAll[iSlice] = new TH1F(Form("hSliceAll_charge%de-", slicesAT[iSlice]),"Slice histogram ToT for all scanned pixels;Time(#mus)",50, 0, 10);
+    hSlice   [iSlice] = new TH1F*[NSEC];
+    for (Int_t iSector = 0; iSector < NSEC; iSector++) {
+      hSlice[iSlice][iSector] = new TH1F(Form("hSlice_reg%d_charge%de-", iSector, slicesAT[iSlice]),"Slice histogram ToT;Time(#mus)",50, 0, 10);
+    }
+  }
+
 
   TCanvas *c_test = new TCanvas("c_test", "c_test", 800, 600);
   c_test->cd();
@@ -510,7 +577,7 @@ Bool_t PulseshapeAnalysis(TString file_path) {
 
   // Filling graphs & histograms:
   //-----------------------------------------------------------------------------------------------
-  for (Int_t icol = 0; icol < 1024; icol += colStep) {
+  for (Int_t icol = myDCside; icol < 1024; icol += colStep) {
     gToT[icol]              = new TGraph*[512];
     gTimeWalk[icol]         = new TGraph*[512];
     gTimeWalkAboveThr[icol] = new TGraph*[512]; 
@@ -519,7 +586,7 @@ Bool_t PulseshapeAnalysis(TString file_path) {
     f_out_root->cd(Form("Region_%i", ireg));
     counter = 0;
 
-    for (Int_t irow = 0; irow < 512; irow += rowStep) {
+    for (Int_t irow = 0; irow < rowEnd; irow += rowStep) {
       // Filling 2D histograms:
       minThr = getMinThreshold(hPulse[icol][irow]);
       cout << setiosflags(ios::fixed) << setprecision(2) 
@@ -554,17 +621,17 @@ Bool_t PulseshapeAnalysis(TString file_path) {
       getTimeWalk(hPulse[icol][irow], gTimeWalk[icol][irow], gTimeWalkAboveThr[icol][irow], n_bins_y, minThr.Time);
 
       gToT[icol][irow]->SetName(Form("gToT%s_reg%i_col%i_row%i", run_id_short.Data(), ireg, icol%32, irow)); 
-      gToT[icol][irow]->SetTitle(Form("gToT_%i/%i/%i; charge (DAC); time (#mus)", ireg, icol%32, irow));
+      gToT[icol][irow]->SetTitle(Form("gToT_%i/%i/%i;Charge (DAC);Time (#mus)", ireg, icol%32, irow));
       gToT[icol][irow]->Write();
       mgToT->Add(gToT[icol][irow], "pl");
 
       gTimeWalk[icol][irow]->SetName(Form("gTimeWalk%s_reg%i_col%i_row%i", run_id_short.Data(), ireg, icol%32, irow)); 
-      gTimeWalk[icol][irow]->SetTitle(Form("gTimeWalk_%i/%i/%i; charge (DAC); time (#mus)", ireg, icol%32, irow));
+      gTimeWalk[icol][irow]->SetTitle(Form("gTimeWalk_%i/%i/%i;Charge (DAC);Time (#mus)", ireg, icol%32, irow));
       gTimeWalk[icol][irow]->Write();
       mgTimeWalk->Add(gTimeWalk[icol][irow], "pl");
 
       gTimeWalkAboveThr[icol][irow]->SetName(Form("gTimeWalkAboveThr%s_reg%i_col%i_row%i", run_id_short.Data(), ireg, icol%32, irow)); 
-      gTimeWalkAboveThr[icol][irow]->SetTitle(Form("gTimeWalkAboveThr_%i/%i/%i; charge (DAC); time (#mus)", ireg, icol%32, irow));
+      gTimeWalkAboveThr[icol][irow]->SetTitle(Form("gTimeWalkAboveThr_%i/%i/%i;Charge (DAC);Time (#mus)", ireg, icol%32, irow));
       gTimeWalkAboveThr[icol][irow]->Write();
       mgTimeWalkAboveThr->Add(gTimeWalkAboveThr[icol][irow], "pl");
 
@@ -572,12 +639,23 @@ Bool_t PulseshapeAnalysis(TString file_path) {
       for (Int_t i_point=0; i_point<n_bins_y; i_point++) {
 	gToT[icol][irow]->GetPoint(i_point, x, y);
 	av_tot[ireg/(32/NSEC)][i_point] += y;
+	av_tot_stages[irow/rowStep][i_point] += y;
+
+	// Filling of the slice histos (i.e. one slice of the ToT graph):
+	for (Int_t iSlice = 0; iSlice < nSlices; iSlice++) {
+	  if (i_point==(slicesAT[iSlice]/20)) {   
+	    hSlice[iSlice][ireg/(32/NSEC)]->Fill(y);
+	    hSliceAll[iSlice]->Fill(y);
+	  }
+	}
 
 	gTimeWalk[icol][irow]->GetPoint(i_point, x, y);
 	av_tw[ireg/(32/NSEC)][i_point] += y;
+	av_tw_stages[irow/rowStep][i_point] += y;
 
 	gTimeWalkAboveThr[icol][irow]->GetPoint(i_point, x, y);
 	av_tw_abovethr[ireg/(32/NSEC)][i_point] += y;
+	av_tw_abovethr_stages[irow/rowStep][i_point] += y;
 
 	charge[i_point] = hPulse[icol][irow]->GetYaxis()->GetBinCenter(i_point+1);
       }
@@ -610,73 +688,167 @@ Bool_t PulseshapeAnalysis(TString file_path) {
     }
   }
 
+  for (Int_t irow = 0; irow < myMaskStages; irow++) { 
+    for (Int_t i_point=0; i_point < n_bins_y; i_point++) { 
+      av_tot_stages[irow][i_point] /= 32;  
+      av_tw_stages[irow][i_point] /= 32;
+      av_tw_abovethr_stages[irow][i_point] /= 32;
+    }
+  }
+
 
   // Calculation of the RMS for error bars:
   //-----------------------------------------------------------------------------------------------
-  for (Int_t icol = 0; icol < 1024; icol += colStep) {
+  for (Int_t icol = myDCside; icol < 1024; icol += colStep) {
     ireg = icol/32;
     counter = 0;
-    for (Int_t irow = 0; irow < 512; irow += rowStep) {
+    for (Int_t irow = 0; irow < rowEnd; irow += rowStep) {
       for (Int_t i_point = 0; i_point < n_bins_y; i_point++) { 
 	gToT[icol][irow]->GetPoint(i_point, x, y);
 	av_tot_err[ireg/(32/NSEC)][i_point] += (y-av_tot[ireg/(32/NSEC)][i_point])*(y-av_tot[ireg/(32/NSEC)][i_point]);
+	av_tot_stages_err[irow/rowStep][i_point] += (y-av_tot_stages[irow/rowStep][i_point])*(y-av_tot_stages[irow/rowStep][i_point]);
 
 	gTimeWalk[icol][irow]->GetPoint(i_point, x, y);
 	av_tw_err[ireg/(32/NSEC)][i_point] += (y-av_tw[ireg/(32/NSEC)][i_point])*(y-av_tw[ireg/(32/NSEC)][i_point]);
+	av_tw_stages_err[irow/rowStep][i_point] += (y-av_tw_stages[irow/rowStep][i_point])*(y-av_tw_stages[irow/rowStep][i_point]);
 
 	gTimeWalkAboveThr[icol][irow]->GetPoint(i_point, x, y);
 	av_tw_abovethr_err[ireg/(32/NSEC)][i_point] += (y-av_tw_abovethr[ireg/(32/NSEC)][i_point])*(y-av_tw_abovethr[ireg/(32/NSEC)][i_point]);
+	av_tw_abovethr_stages_err[irow/rowStep][i_point] += (y-av_tw_abovethr_stages[irow/rowStep][i_point])*(y-av_tw_abovethr_stages[irow/rowStep][i_point]);
 	x_err[i_point]=(charge[1]-charge[0])/2;
       }
       counter += 1;
       if (counter == myMaskStages) break;
     }
   }
-   
+
+
+  // Comparison of different SECTORS:
+  //=================================================================================================
+  TLegend *leg1 = new TLegend(0.85, 0, 0.98, 1);
+  TDirectory *subdir_sectors = f_out_root->mkdir("SectorBySector");
+  f_out_root->cd("SectorBySector");
   for (Int_t i_sec=0; i_sec<NSEC; i_sec++) { 
+    // Finish the calculation of RMS:
     for (Int_t i_point=0; i_point<n_bins_y; i_point++) { 
-      av_tot_err[i_sec][i_point] = sqrt(av_tot_err[i_sec][i_point]/(32/NSEC-1));
-      av_tw_err[i_sec][i_point] = sqrt(av_tw_err[i_sec][i_point]/(32/NSEC-1));
-      av_tw_abovethr_err[i_sec][i_point] = sqrt(av_tw_abovethr_err[i_sec][i_point]/(32/NSEC-1));
+      av_tot_err[i_sec][i_point] = sqrt(av_tot_err[i_sec][i_point]/((myMaskStages*32/NSEC)-1));
+      av_tw_err[i_sec][i_point] = sqrt(av_tw_err[i_sec][i_point]/((myMaskStages*32/NSEC)-1));
+      av_tw_abovethr_err[i_sec][i_point] = sqrt(av_tw_abovethr_err[i_sec][i_point]/((myMaskStages*32/NSEC)-1));
     }
     gAvToT[i_sec] = new TGraphErrors(n_bins_y, charge, av_tot[i_sec], 0, av_tot_err[i_sec]); 
-    gAvToT[i_sec]->SetLineColor(1+i_sec);
-    gAvToT[i_sec]->SetMarkerColor(1+i_sec);
-    gAvToT[i_sec]->SetMarkerStyle(20+i_sec);
-    gAvToT[i_sec]->SetMarkerSize(0.8);
+    //gAvToT[i_sec] = new TGraph(n_bins_y, charge, av_tot[i_sec]); 
+    gAvToT[i_sec]->SetLineColor(col[i_sec]);
+    gAvToT[i_sec]->SetMarkerColor(col[i_sec]);
+    gAvToT[i_sec]->SetMarkerStyle(20);
+    gAvToT[i_sec]->SetMarkerSize(0.6);
     gAvToT[i_sec]->SetName(Form("gAvToT_sec%i", i_sec)); 
-    gAvToT[i_sec]->SetTitle(Form("gAvToT_sec%i", i_sec));
+    gAvToT[i_sec]->SetTitle(Form("gAvToT_sec%i;Charge (DAC);Time (#mus)", i_sec));
     gAvToT[i_sec]->Write();
-    mgAvToT->Add(gAvToT[i_sec], "p");
+    mgAvToT->Add(gAvToT[i_sec], "pl");
+    leg1->AddEntry(gAvToT[i_sec], Form("Sector %i", i_sec), "lp");
 
     gAvTimeWalk[i_sec] = new TGraphErrors(n_bins_y, charge, av_tw[i_sec], 0, av_tw_err[i_sec]); 
-    gAvTimeWalk[i_sec]->SetLineColor(1+i_sec);
-    gAvTimeWalk[i_sec]->SetMarkerColor(1+i_sec);
-    gAvTimeWalk[i_sec]->SetMarkerStyle(20+i_sec);
-    gAvTimeWalk[i_sec]->SetMarkerSize(0.8);
+    //gAvTimeWalk[i_sec] = new TGraph(n_bins_y, charge, av_tw[i_sec]);
+    gAvTimeWalk[i_sec]->SetLineColor(col[i_sec]);
+    gAvTimeWalk[i_sec]->SetMarkerColor(col[i_sec]);
+    gAvTimeWalk[i_sec]->SetMarkerStyle(20);
+    gAvTimeWalk[i_sec]->SetMarkerSize(0.6);
     gAvTimeWalk[i_sec]->SetName(Form("gAvTimeWalk_sec%i", i_sec)); 
-    gAvTimeWalk[i_sec]->SetTitle(Form("gAvTimeWalk_sec%i", i_sec));
+    gAvTimeWalk[i_sec]->SetTitle(Form("gAvTimeWalk_sec%i;Charge (DAC);Time (#mus)", i_sec));
     gAvTimeWalk[i_sec]->Write();
-    mgAvTimeWalk->Add(gAvTimeWalk[i_sec], "p");
+    mgAvTimeWalk->Add(gAvTimeWalk[i_sec], "pl");
 
-    gAvTimeWalkAboveThr[i_sec] = new TGraphErrors(n_bins_y, charge, av_tw_abovethr[i_sec], x_err, av_tw_abovethr_err[i_sec]); 
-    gAvTimeWalkAboveThr[i_sec]->SetLineColor(1+i_sec);
-    gAvTimeWalkAboveThr[i_sec]->SetMarkerColor(1+i_sec);
-    gAvTimeWalkAboveThr[i_sec]->SetMarkerStyle(20+i_sec);
-    gAvTimeWalkAboveThr[i_sec]->SetMarkerSize(0.8);
+    gAvTimeWalkAboveThr[i_sec] = new TGraphErrors(n_bins_y, charge, av_tw_abovethr[i_sec], 0, av_tw_abovethr_err[i_sec]); 
+    //gAvTimeWalkAboveThr[i_sec] = new TGraph(n_bins_y, charge, av_tw_abovethr[i_sec]) ;
+    gAvTimeWalkAboveThr[i_sec]->SetLineColor(col[i_sec]);
+    gAvTimeWalkAboveThr[i_sec]->SetMarkerColor(col[i_sec]);
+    gAvTimeWalkAboveThr[i_sec]->SetMarkerStyle(20);
+    gAvTimeWalkAboveThr[i_sec]->SetMarkerSize(0.6);
     gAvTimeWalkAboveThr[i_sec]->SetName(Form("gAvTimeWalkAboveThr_sec%i", i_sec)); 
-    gAvTimeWalkAboveThr[i_sec]->SetTitle(Form("gAvTimeWalkAboveThr_sec%i", i_sec));
+    gAvTimeWalkAboveThr[i_sec]->SetTitle(Form("gAvTimeWalkAboveThr_sec%i;Charge (DAC);Time (#mus)", i_sec));
     gAvTimeWalkAboveThr[i_sec]->Write();
-    mgAvTimeWalkAboveThr->Add(gAvTimeWalkAboveThr[i_sec], "p");
+    mgAvTimeWalkAboveThr->Add(gAvTimeWalkAboveThr[i_sec], "pl");
   }
+  mgAvToT->Write("mgAvToT");
+  mgAvTimeWalk->Write("mgAvTimeWalk");
+  mgAvTimeWalkAboveThr->Write("mgAvTimeWalkAboveThr");
+
+
+
+  // Comparison of different STAGES:
+  //=================================================================================================
+  TLegend *leg2 = new TLegend(0.8, 0.3, 0.95, 0.7);
+  TDirectory *subdir_stages = f_out_root->mkdir("StageByStage");
+  f_out_root->cd("StageByStage");
+  for (Int_t irow = 0; irow < myMaskStages; irow++) { 
+    // Finish the calculation of RMS:
+    for (Int_t i_point=0; i_point < n_bins_y; i_point++) { 
+      av_tot_stages_err        [irow][i_point] = sqrt(av_tot_stages_err[irow][i_point]/(32-1));    
+      av_tw_stages_err         [irow][i_point] = sqrt(av_tw_stages_err[irow][i_point]/(32-1));
+      av_tw_abovethr_stages_err[irow][i_point] = sqrt(av_tw_abovethr_stages_err[irow][i_point]/(32-1));
+    }
+    gAvToTstages[irow] = new TGraphErrors(n_bins_y, charge, av_tot_stages[irow], 0, av_tot_stages_err[irow]);
+    //gAvToTstages[irow] = new TGraph(n_bins_y, charge, av_tot_stages[irow]); 
+    gAvToTstages[irow]->SetLineColor(col[irow%32]);
+    gAvToTstages[irow]->SetMarkerColor(col[irow%32]);
+    gAvToTstages[irow]->SetMarkerStyle(20);
+    gAvToTstages[irow]->SetMarkerSize(0.6);
+    gAvToTstages[irow]->SetName(Form("gAvToT_stage%i", irow)); 
+    gAvToTstages[irow]->SetTitle(Form("gAvToT_stage%i;Charge (DAC);Time (#mus)", irow));
+    gAvToTstages[irow]->Write();
+    mgAvToTS->Add(gAvToTstages[irow], "pl");
+    leg2->AddEntry(gAvToTstages[irow], Form("Stage %i", irow), "lp");
+
+    gAvTimeWalkstages[irow] = new TGraphErrors(n_bins_y, charge, av_tw_stages[irow], 0, av_tot_stages_err[irow]);
+    //gAvTimeWalkstages[irow] = new TGraph(n_bins_y, charge, av_tw_stages[irow]); 
+    gAvTimeWalkstages[irow]->SetLineColor(col[irow%32]);
+    gAvTimeWalkstages[irow]->SetMarkerColor(col[irow%32]);
+    gAvTimeWalkstages[irow]->SetMarkerStyle(20);
+    gAvTimeWalkstages[irow]->SetMarkerSize(0.6);
+    gAvTimeWalkstages[irow]->SetName(Form("gAvTimeWalk_stage%i", irow)); 
+    gAvTimeWalkstages[irow]->SetTitle(Form("gAvTimeWalk_stage%i;Charge (DAC);Time (#mus)", irow));
+    gAvTimeWalkstages[irow]->Write();
+    mgAvTimeWalkS->Add(gAvTimeWalkstages[irow], "pl");
+
+    gAvTimeWalkAboveThrstages[irow] = new TGraphErrors(n_bins_y, charge, av_tw_abovethr_stages[irow], 0, av_tw_abovethr_stages_err[irow]);
+    //gAvTimeWalkAboveThrstages[irow] = new TGraph(n_bins_y, charge, av_tw_abovethr_stages[irow]); 
+    gAvTimeWalkAboveThrstages[irow]->SetLineColor(col[irow%32]);
+    gAvTimeWalkAboveThrstages[irow]->SetMarkerColor(col[irow%32]);
+    gAvTimeWalkAboveThrstages[irow]->SetMarkerStyle(20);
+    gAvTimeWalkAboveThrstages[irow]->SetMarkerSize(0.6);
+    gAvTimeWalkAboveThrstages[irow]->SetName(Form("gAvTimeWalkAbove_stage%i", irow)); 
+    gAvTimeWalkAboveThrstages[irow]->SetTitle(Form("gAvTimeWalkAbove_stage%i;Charge (DAC);Time (#mus)", irow));
+    gAvTimeWalkAboveThrstages[irow]->Write();
+    mgAvTimeWalkAboveThrS->Add(gAvTimeWalkAboveThrstages[irow], "pl");
+  }
+
+  f_out_root->cd();
 
   mgAvToT->Write("mgAvToT");
   mgAvTimeWalk->Write("mgAvTimeWalk");
   mgAvTimeWalkAboveThr->Write("mgAvTimeWalkAboveThr");
 
-  f_out_root->Close();
+  mgAvToTS->Write("mgAvToTstages");
+  mgAvTimeWalkS->Write("mgAvTimeWalkS");
+  mgAvTimeWalkAboveThrS->Write("mgAvTimeWalkAboveThrS");
 
+
+
+
+  // Comparison of different Slices:
+  //=================================================================================================
+  TDirectory **subdir_slices;
+  subdir_slices = new TDirectory*[nSlices];
+  for (Int_t iSlice = 0; iSlice < nSlices; iSlice++) {
+    subdir_slices[iSlice] = f_out_root->mkdir(Form("SliceAT_%d", slicesAT[iSlice]));
+    f_out_root->cd(Form("SliceAT_%d", slicesAT[iSlice]));
+    for (Int_t i_sec=0; i_sec<NSEC; i_sec++) {
+      hSlice[iSlice][i_sec]->Write();
+    }
+    hSliceAll[iSlice]->Write(); 
+  }
+
+  f_out_root->Close();
   cout << "Analysis done: root file written." << endl;
   return kTRUE;
 }
-
