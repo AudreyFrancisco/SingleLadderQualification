@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014
+ * Copyright (C) 2018
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,26 +24,32 @@
  * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
- * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
+ * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2018.
  *
  */
 
-#ifndef I2CSYSPLL_H
-#define I2CSYSPLL_H
+#ifndef MCOORDINATOR_H
+#define MCOORDINATOR_H
 
-#include "i2cbus.h"
+#include "mwbbslave.h"
 #include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
-class I2CSysPll : public I2Cbus {
+class MCoordinator : public MWbbSlave {
 public:
-  typedef struct pllRegisters_s { uint16_t reg[22]; } pllRegisters_t;
+  typedef enum mode_e { Alone = 0, Master = 1, Slave = 2 } mode_t;
 
-  I2CSysPll(WishboneBus *wbbPtr, uint32_t baseAddress);
-  void writeReg(uint8_t add, uint16_t d);
-  void readReg(uint8_t add, uint16_t *d);
-  void setup(pllRegisters_t regs);
+public:
+  MCoordinator(WishboneBus *wbbPtr, uint32_t baseAddress);
+  void addEnableExtClock(bool en);
+  void addSetMode(mode_t mode);
+  void setMode(mode_t mode);
+
+private: // WBB Slave registers map
+  enum regAddress_e {
+    regCfg = 0, // enable external trigger
+  };
+
+  enum cfgBits_e { ALONE = (1 << 0), MASTER = (1 << 1), EXT_CLK = (1 << 2) };
 };
 
-#endif // I2CBUS_H
+#endif // MCOORDINATOR_H
