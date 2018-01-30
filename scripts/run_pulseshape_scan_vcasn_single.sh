@@ -2,7 +2,7 @@
 
 ######################################################################################
 #
-# script for running threshold & pulselength measurements with different settings
+# script for running threshold measurements with different settings
 # written by jacobus - j.w.van.hoorne@cern.ch
 #
 ######################################################################################
@@ -27,30 +27,35 @@ CHIP_ID=$1
 ### measurement config
 #################################################################
 
+##########################################
+# DCOL (0..15) and ROW (0..512) of pulsed pixels
+#COL=8
+#ROW=5
+
 #TEMPERATURE
 TEMP=30
 
 # Subset of testbeam settings
-#############################
-##### VBB
-N_VBB=3
-VBB_LIST=( 0.0 3.0 6.0 )
+########################
+# VBB
+#N_VBB=3
+#VBB_LIST=( 0.0 3.0 6.0 )
+N_VBB=1
+VBB_LIST=( 0.0 )
 
 
-##### VCASN
+
+# VCASN
 N_VCASN=1
 declare -A VCASN_LIST
-#  0V
+# 0V
 VCASN_LIST[0,0]=50 
-# -3V
-VCASN_LIST[1,0]=105 
-# -6V
-VCASN_LIST[2,0]=135
+## -3V
+#VCASN_LIST[1,0]=105 
+## -6V
+#VCASN_LIST[2,0]=135
 
-#N_VCASN=2
-#declare -A VCASN_LIST
-##  0V
-#VCASN_LIST[0,0]=44
+#44
 #VCASN_LIST[0,1]=50
 ## -3V
 #VCASN_LIST[1,0]=99
@@ -83,28 +88,30 @@ VCASN_LIST[2,0]=135
 #VCASN_LIST[2,4]=141
 #VCASN_LIST[2,5]=147
 
-###### ITHR
+# ITHR
 ITHR_LIST=( 100 )
 #ITHR_LIST=( 30 50 100 150 250 )
 
-###### VCASN2
+# VCASN2
 VCASN2=0 # should be VCASN+12, assigned later
 
-###### IRESET
+# IRESET
 IRESET_LIST=( 100 )
 
-###### IDB
+# IDB
 IDB_LIST=( 29 )
 
-###### VCLIP
+# VCLIP
 N_VCLIP=1
 declare -A VCLIP_LIST
-#  0V
+# 0V
 VCLIP_LIST[0,0]=0
-# -3V
-VCLIP_LIST[1,0]=60
-# -6V
-VCLIP_LIST[2,0]=100
+## -3V
+##VCLIP_LIST[0,0]=60
+#VCLIP_LIST[1,0]=60
+## -6V
+##VCLIP_LIST[1,0]=100
+#VCLIP_LIST[2,0]=100
 
 #N_VCLIP=5
 #declare -A VCLIP_LIST
@@ -127,24 +134,25 @@ VCLIP_LIST[2,0]=100
 #VCLIP_LIST[2,3]=140
 #VCLIP_LIST[2,4]=160
 
-
-###### VRESETP (NOTE: this one doesn't matter keep it constant)
+# VRESETP (NOTE: this one doesn't matter keep it constant)
 N_VRESETP=1
 declare -A VRESETP_LIST
 VRESETP_LIST[0,0]=117
-VRESETP_LIST[1,0]=117
-VRESETP_LIST[2,0]=117
+#VRESETP_LIST[1,0]=117
+#VRESETP_LIST[2,0]=117
 
-###### VRESETD (NOTE: VBB0->117, VBB3->147, VBB6->170)
+# VRESETD (NOTE: VBB0->117, VBB3->147, VBB6->170)
 N_VRESETD=1
 declare -A VRESETD_LIST
 VRESETD_LIST[0,0]=117
-VRESETD_LIST[1,0]=147
-VRESETD_LIST[2,0]=170
+#VRESETD_LIST[1,0]=147
+#VRESETD_LIST[2,0]=170
+
+#VRESETD_LIST[0,0]=147
+#VRESETD_LIST[1,0]=170
 
 
-########################################################################
-########################################################################
+##########################################
 
 # measurement home dir
 HOME_DIR=`pwd`
@@ -556,6 +564,8 @@ do
 
                 #sleep 10
                 #cd $SOFTWARE_DIR
+
+
             done
         done
     done
