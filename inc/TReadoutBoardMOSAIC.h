@@ -99,6 +99,7 @@ public:
   int GetFwMinVersion() { return (theVersionMin); };
   char *GetFwIdString() { return (theVersionId); };
   powerboard *GetPowerBoardHandle() { return (pb); };
+  MCoordinator *GetCoordinatorHandle() { return (coordinator); };
   std::string GetRegisterDump();
   void setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex = -1);
 
