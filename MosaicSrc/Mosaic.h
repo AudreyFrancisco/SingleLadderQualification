@@ -38,12 +38,14 @@
 #include "i2csyspll.h"
 #include "ipbusudp.h"
 #include "mboard.h"
+#include "mcoordinator.h"
 #include "mdatagenerator.h"
 #include "mdatareceiver.h"
 #include "mruncontrol.h"
 #include "mtriggercontrol.h"
 #include "mwbb.h"
 #include "pulser.h"
+#include "trgrecorder.h"
 
 namespace Mosaic {
   typedef enum rcvRate_e { // Receiver data rate (in Mbps)

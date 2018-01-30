@@ -49,7 +49,7 @@ RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverM
 RU_OBJS = $(RU_SOURCES:.cpp=.o)
 
 MOSAIC_SOURCES = MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/pexception.cpp \
-  MosaicSrc/TAlpideDataParser.cpp
+  MosaicSrc/TAlpideDataParser.cpp MosaicSrc/trgrecorderparser.cpp
 MOSAIC_OBJS = $(MOSAIC_SOURCES:.cpp=.o)
 
 OBJS=$(BASE_OBJS) $(RU_OBJS) $(MOSAIC_OBJS)

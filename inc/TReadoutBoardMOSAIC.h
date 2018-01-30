@@ -24,6 +24,7 @@
 #include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "powerboard.h"
+#include "trgrecorderparser.h"
 
 // Constant Definitions
 #define DEFAULT_PACKET_SIZE 1400
@@ -132,6 +133,9 @@ private:
   char theVersionId[50]; // Version properties
   int theVersionMaj;
   int theVersionMin;
+  TrgRecorder *trgRecorder;
+  TrgRecorderParser *trgDataParser;
+  MCoordinator *coordinator;
 
 private:
   // extend WBB address definitions in mwbb.h
@@ -144,7 +148,8 @@ private:
     add_trgRecorder = (18 << 24),
     add_controlInterface_0 = (19 << 24),
     add_controlInterface_9 = (28 << 24),
-    add_i2cAux = (29 << 24)
+    add_i2cAux = (29 << 24),
+    add_coordinator = (30 << 24)
   };
 
   // status register bits
