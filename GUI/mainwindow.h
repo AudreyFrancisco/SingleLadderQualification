@@ -6,6 +6,7 @@
 #include "activitystatus.h"
 #include "calibrationpb.h"
 #include "checkpbconfig.h"
+#include "components.h"
 #include "databaseselection.h"
 #include "dbnotice.h"
 #include "dialog.h"
@@ -117,6 +118,7 @@ public slots:
   void ConnectTestCombo(int value);
   void ContinueWithoutWriting();
   void finalwrite();
+  void quittest();
 
 signals:
   void stopTimer();
@@ -199,6 +201,11 @@ private:
   int GetTime();
   QAction *fWritedb;
   QFile *fMfile;
+  std::vector<pair<int, int>> fActComponentTypeIDs;
+  std::vector<int> fComponentIDs;
+  Components *fComponentWindow;
+  bool fstop;
+  int fComponentTypeID;
 
 private slots:
   void button_obm1_clicked();
