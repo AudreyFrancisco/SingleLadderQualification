@@ -114,6 +114,33 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
   return 0;
 }
 
+// minimal setup for powering test after tab cutting
+int initSetupPower(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
+                   std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds) {
+  (*boardType) = boardMOSAIC;
+  TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
+
+  boards->push_back(new TReadoutBoardMOSAIC(config, boardConfig));
+
+  TPowerBoard *pb = 0;
+  if (config->GetUsePowerBoard()) {
+    TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
+    pbConfig->SetDefaultsOB(0);
+    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0), pbConfig);
+  }
+
+  if (hics) {
+    int modId = 7; // should not matter;
+    if (hicIds) {
+      hics->push_back(new THicOB(hicIds[0], modId, pb, 0));
+    } else {
+      hics->push_back(new THicOB("Dummy_ID", modId, pb, 0));
+    }
+  }
+
+  return 0;
+}
+
 // implicit assumptions on the setup in this method
 // - chips of master 0 of all modules are connected to 1st mosaic, chips of master 8 to 2nd MOSAIC
 int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
@@ -664,6 +691,9 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
     break;
   case TYPE_HALFSTAVERU:
     initSetupHalfStaveRU(config, boards, boardType, chips);
+    break;
+  case TYPE_POWER:
+    initSetupPower(config, boards, boardType, chips, hics, hicIds);
     break;
   default:
     std::cout << "Unknown setup type, doing nothing" << std::endl;

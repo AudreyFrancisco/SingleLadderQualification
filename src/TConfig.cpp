@@ -160,6 +160,9 @@ TDeviceType TConfig::ReadDeviceType(std::string deviceName) {
     type = TYPE_ENDURANCE;
   } else if (deviceName.compare("IBHICRU") == 0) {
     type = TYPE_IBHICRU;
+  } else if (deviceName.compare("POWER") == 0) {
+    SetUsePowerBoard(true);
+    type = TYPE_POWER;
   } else {
     std::cout << "Error, unknown setup type found: " << deviceName << std::endl;
     exit(EXIT_FAILURE);
@@ -223,6 +226,9 @@ void TConfig::SetDeviceType(TDeviceType AType, int NChips) {
       Init(2, chipIds, boardMOSAIC);
     else
       Init(1, chipIds, boardRU);
+  } else if (AType == TYPE_POWER) {
+    chipIds.clear();
+    Init(1, chipIds, boardMOSAIC);
   }
 }
 

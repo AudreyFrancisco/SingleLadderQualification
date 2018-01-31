@@ -31,6 +31,8 @@ int initSetupSingleMosaic(TConfig *config, std::vector<TReadoutBoard *> *boards,
 int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                        std::vector<TAlpide *> *chips, std::vector<THic *> *hics,
                        const char **hicIds);
+int initSetupPower(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
+                   std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds);
 int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
               std::vector<TAlpide *> *chips, const char *configFileName = "",
               std::vector<THic *> *hics = 0, const char **hicIds = 0);
