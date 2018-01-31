@@ -112,49 +112,17 @@ int main(int argc, char **argv) {
   std::clock_t start;
   double elapsed;
   start = std::clock();
-  //...
-  // elapsed=(std::clock()-start)/(double)CLOCKS_PER_SEC;
-  // std::cout << "Time for scan+analysis: " << elapsed << " sec" << std::endl;
-
-  TtuneVCASNScan *myScan_V =
-      new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TSCurveAnalysis *analysis_V = new TSCurveAnalysis(&fHistoQue, myScan_V, fConfig->GetScanConfig(),
-                                                    fHics, &fMutex, fResult, 1);
-  std::cout << "starting thread VCASN" << std::endl;
-  std::thread scanThread_V(scanLoop, myScan_V);
-  analysis_V->Initialize();
-  std::thread analysisThread_V(&TScanAnalysis::Run, analysis_V);
-  scanThread_V.join();
-  analysisThread_V.join();
-  analysis_V->Finalize();
-
-  elapsed = (std::clock() - start) / (double)CLOCKS_PER_SEC;
-  std::cout << "Time for scan+analysis: " << elapsed << " sec" << std::endl;
-
-  std::cout << "Printing mean VCASN thresholds:" << std::endl;
-  //  std::map<int,common::TStatVar> thresh_V = analysis_V->DeleteThis();
-  // for (std::map<int,common::TStatVar>::iterator it = thresh_V.begin(); it != thresh_V.end();
-  // it++) {
-  //  std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
-  // }
-
-  // for (unsigned int ihic = 0; ihic < fHics.size(); ihic ++) {
-  // TSCurveResultHic *hicResult = (TSCurveResultHic *)
-  // fResult->GetHicResult(fHics.at(ihic)->GetDbId());
-  //    std::map<int, TScanResultChip*> mp = hicResult->DeleteThisToo();
-  // std::map<int, TScanResultChip*>::iterator it;
-  // for (it = mp.begin(); it != mp.end(); ++it) {
-  // TAlpide              *chip       = fHics.at(ihic)->GetChipById(it->first);
-  // TSCurveResultChip *chipResult = (TSCurveResultChip*) it->second;
-  //
-  // chip->GetConfig()->SetParamValue(GetDACName(), (int)chipResult->GetThresholdMean());
-  //  std::cout << "Found in Config: " << it->first << ", thr=" << chipResult->GetThresholdMean() <<
-  // std::endl;
-  //}
-  //}
-
-  if (fResult)
-    std::cout << "fResult OK" << std::endl;
+  // TtuneVCASNScan *myScan_V = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips,
+  // fHics, fBoards, &fHistoQue, &fMutex);
+  // TSCurveAnalysis *analysis_V = new TSCurveAnalysis(&fHistoQue, myScan_V,
+  // fConfig->GetScanConfig(), fHics, &fMutex, fResult, 1);
+  // std::cout << "starting thread VCASN" << std::endl;
+  // std::thread scanThread_V(scanLoop, myScan_V);
+  // analysis_V->Initialize();
+  // std::thread analysisThread_V(&TScanAnalysis::Run, analysis_V);
+  // scanThread_V.join();
+  // analysisThread_V.join();
+  // analysis_V->Finalize();
   // TApplyVCASNTuning *apply_V = new TApplyVCASNTuning(&fHistoQue, NULL, fConfig->GetScanConfig(),
   // fHics, &fMutex, fResult);
   // std::cout << "starting thread apply_V" << std::endl;
@@ -163,41 +131,55 @@ int main(int argc, char **argv) {
   // analysisThread_apply_V.join();
   // apply_V->Finalize();
   // std::cout << "Finalized apply_V" << std::endl;
+  // if(fResult) std::cout << "fResult OK" << std::endl;
+  // TApplyVCASNTuning *apply_V = new TApplyVCASNTuning(&fHistoQue, NULL,
+  // fConfig->GetScanConfig(), fHics, &fMutex, fResult);
+  // std::cout << "starting thread apply_V" << std::endl;
+  // apply_V->Initialize();
+  // std::thread analysisThread_apply_V(&TScanAnalysis::Run, apply_V);
+  // analysisThread_apply_V.join();
+  // apply_V->Finalize();
+  // std::cout << "Finalized apply_V" << std::endl;
 
   /*fResult=new TThresholdResult();
-  TtuneITHRScan *myScan_I = new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHics, fBoards,
-  &fHistoQue, &fMutex);
-  TThresholdAnalysis *analysis_I = new TThresholdAnalysis(&fHistoQue, myScan_I,
-  fConfig->GetScanConfig(), fHics, &fMutex, fResult, -1);
-  std::cout << "starting thread ITHR" << std::endl;
-  std::thread scanThread_I(scanLoop, myScan_I);
-  analysis_I->Initialize();
-  std::thread analysisThread_I(&TScanAnalysis::Run, analysis_I);
-  scanThread_I.join();
-  analysisThread_I.join();
-  analysis_I->Finalize();
-  std::cout << "Printing mean ITHR thresholds:" << std::endl;
-  std::map<int,common::TStatVar> thresh_I = analysis_I->DeleteThis();
-  for (std::map<int,common::TStatVar>::iterator it = thresh_I.begin(); it != thresh_I.end(); it++) {
+    TtuneITHRScan *myScan_I = new TtuneITHRScan(fConfig->GetScanConfig(), fChips, fHics,
+    fBoards,
+    &fHistoQue, &fMutex);
+    TThresholdAnalysis *analysis_I = new TThresholdAnalysis(&fHistoQue, myScan_I,
+    fConfig->GetScanConfig(), fHics, &fMutex, fResult, -1);
+    std::cout << "starting thread ITHR" << std::endl;
+    std::thread scanThread_I(scanLoop, myScan_I);
+    analysis_I->Initialize();
+    std::thread analysisThread_I(&TScanAnalysis::Run, analysis_I);
+    scanThread_I.join();
+    analysisThread_I.join();
+    analysis_I->Finalize();
+    std::cout << "Printing mean ITHR thresholds:" << std::endl;
+    std::map<int,common::TStatVar> thresh_I = analysis_I->DeleteThis();
+    for (std::map<int,common::TStatVar>::iterator it = thresh_I.begin(); it != thresh_I.end();
+    it++) {
     std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
-  }
+    }
 
-  if(fResult) std::cout << "fResult OK 2" << std::endl;
-  TApplyITHRTuning *apply_I = new TApplyITHRTuning(&fHistoQue, NULL, fConfig->GetScanConfig(),
-  fHics, &fMutex, fResult);
-  std::cout << "starting thread apply_I" << std::endl;
-  apply_I->Initialize();
-  std::thread analysisThread_apply_I(&TScanAnalysis::Run, apply_I);
-  analysisThread_apply_I.join();
-  apply_I->Finalize();
-  std::cout << "Finalized apply_I" << std::endl;
+    if(fResult) std::cout << "fResult OK 2" << std::endl;
+    TApplyITHRTuning *apply_I = new TApplyITHRTuning(&fHistoQue, NULL, fConfig->GetScanConfig(),
+    fHics, &fMutex, fResult);
+    std::cout << "starting thread apply_I" << std::endl;
+    apply_I->Initialize();
+    std::thread analysisThread_apply_I(&TScanAnalysis::Run, apply_I);
+    analysisThread_apply_I.join();
+    apply_I->Finalize();
+    std::cout << "Finalized apply_I" << std::endl;
   */
 
-  /*fResult=NULL;
-  TThresholdScan *myScan_T = new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards,
-  &fHistoQue, &fMutex);
-  TThresholdAnalysis *analysis_T = new TThresholdAnalysis(&fHistoQue, myScan_T,
-  fConfig->GetScanConfig(), fHics, &fMutex, fResult);
+  fResult = NULL;
+  std::cout << "Number of HICs: " << fHics.size() << std::endl;
+  TThresholdScan *myScan_T =
+      new TThresholdScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  myScan_T->ActivateTimestampLog();
+  TSCurveAnalysis *analysis_T =
+      new TSCurveAnalysis(&fHistoQue, myScan_T, fConfig->GetScanConfig(), fHics, &fMutex, fResult);
+
   std::cout << "starting thread Threshold" << std::endl;
   std::thread scanThread_T(scanLoop, myScan_T);
   analysis_T->Initialize();
@@ -206,10 +188,11 @@ int main(int argc, char **argv) {
   analysisThread_T.join();
   analysis_T->Finalize();
   std::cout << "Printing mean thresholds:" << std::endl;
-  std::map<int,common::TStatVar> thresh_T = analysis_T->DeleteThis();
-  for (std::map<int,common::TStatVar>::iterator it = thresh_T.begin(); it != thresh_T.end(); it++) {
-    std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
-  }*/
+  // std::map<int,common::TStatVar> thresh_T = analysis_T->DeleteThis();
+  // for (std::map<int,common::TStatVar>::iterator it = thresh_T.begin(); it != thresh_T.end();
+  // it++) {
+  //  std::cout << "Chip " << it->first << ", mean threshold " << it->second.mean << std::endl;
+  //}
 
   // std::vector <TCounter> counters = ((TDigitalAnalysis*)analysis)->GetCounters();
 
@@ -219,14 +202,17 @@ int main(int argc, char **argv) {
   // std::endl;
   // }
 
-  delete myScan_V;
-  delete analysis_V;
+  elapsed = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+  std::cout << "Time for scan+analysis: " << elapsed << " sec" << std::endl;
+
+  // delete myScan_V;
+  // delete analysis_V;
   // delete apply_V;
   // delete myScan_I;
   // delete analysis_I;
   // delete apply_I;
-  // delete myScan_T;
-  // delete analysis_T;
+  delete myScan_T;
+  delete analysis_T;
   delete fResult;
 
   return 0;
