@@ -493,7 +493,7 @@ void TReadoutBoardMOSAIC::WriteTransceiverDRP(size_t Aindex, uint16_t address, u
 */
 void TReadoutBoardMOSAIC::WriteTransceiverDRPField(size_t Aindex, uint16_t address,
                                                    uint16_t size, uint16_t offset, uint16_t value, bool execute) {
-  if(Aindex < 0 || Aindex >= MAX_MOSAICTRANRECV) {
+  if(Aindex >= MAX_MOSAICTRANRECV) {
     std::cout << "Invalid Transceiver index " << Aindex << "\n";
     return;
   }
@@ -511,7 +511,7 @@ void TReadoutBoardMOSAIC::WriteTransceiverDRPField(size_t Aindex, uint16_t addre
                execute - execute transaction
 */
 void TReadoutBoardMOSAIC::ReadTransceiverDRP(size_t Aindex, uint16_t address, uint32_t *value, bool execute) {
-  if(Aindex < 0 || Aindex >= MAX_MOSAICTRANRECV) {
+  if(Aindex >= MAX_MOSAICTRANRECV) {
     std::cout << "Invalid Transceiver index " << Aindex << "\n";
     return;
   }
