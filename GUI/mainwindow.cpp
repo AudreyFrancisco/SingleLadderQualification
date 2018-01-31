@@ -151,6 +151,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->testib, SIGNAL(clicked()), this, SLOT(IBBasicTest()));
   ui->testib->hide();
   writingdb = true;
+  fstop = false;
 }
 
 MainWindow::~MainWindow() {
@@ -685,6 +686,12 @@ void MainWindow::start_test() {
     for (unsigned int i = 0; i < fEndurancemodules.size(); i++) {
       fEndurancemodules.at(i)->setText(" ");
     }
+  }
+  if (fActComponentTypeIDs.size() > 0) {
+    fActComponentTypeIDs.clear();
+  }
+  if (fComponentIDs.size() > 0) {
+    fComponentIDs.clear();
   }
   if (fScanbuttons.size() > 0) {
     for (unsigned int i = 0; i < fScanbuttons.size(); i++) {
@@ -1474,7 +1481,10 @@ void MainWindow::attachtodatabase() {
       myactivity->Create(&activ);
       cout << myactivity->DumpResponse() << endl;
       myactivity->AssignUris(activ.ID, fIdofoperator, (&uris));
-
+      myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).first,
+                                  fIdofoperator);
+      myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second,
+                                  fIdofoperator);
       // TODO: add components (in / out)
       // TODO: add member
       // TODO: close activity (needs implementation of activityChange)
@@ -1548,16 +1558,19 @@ void MainWindow::locationcombo() {
     fLocdetails.push_back(
         std::make_pair(fLocationtypelist->at(i).Name, fLocationtypelist->at(i).ID));
   }
-  // int ci;
-  // DbGetActComponentTypeId (myDB, idofactivitytype,ci, "in");
-  // std::cout<<"the in "<<ci<<std::endl;
-  // std::cout<<"the out "<< DbGetActComponentTypeId (myDB, idofactivitytype, "out")<<std::endl;
-  // delete myDB;
+  int projectid = 0;
+  projectid = fDB->GetProjectId();
+  if (fNumberofscan == OBQualification || fNumberofscan == OBEndurance ||
+      fNumberofscan == OBReception) {
+    fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
+  } else if (fNumberofscan == IBQualification || fNumberofscan == IBEndurance) {
+    fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Inner Barrel HIC Module");
+  }
   delete myactivity;
 }
 
 void MainWindow::savesettings() {
-  fSettingswindow->hide();
+  fSettingswindow->close();
   fSettingswindow->SaveSettings(fInstitute, fOperatorname, fHicidnumber, fCounter,
                                 fIdoflocationtype, fIdofoperator, fToptwo, fTopthree, fTopfour,
                                 fTopfive, fBottomone, fBottomtwo, fBottomthree, fBottomfour,
@@ -1566,16 +1579,31 @@ void MainWindow::savesettings() {
     return;
   } else {
     open();
-    /*int projectid;
-    int id;
-    projectid=myDB->GetProjectId();
-    id=DbGetComponentTypeId (myDB, projectid, "Outer Barrel HIC Module");
-    int comp;
-    comp=DbGetComponentId (myDB,projectid,id,hicidnumber.toStdString());
-    std::cout<<"the hic name is "<<hicidnumber.toStdString()<<std::endl;
-    std::cout<<"the component id is: "<< comp<<std::endl;*/
+
+    for (unsigned int i = 0; i < fHICs.size(); i++) {
+      fstop = false;
+      int in = 0;
+      int out = 0;
+      int projectid = 0;
+      int comp = 0;
+      projectid = fDB->GetProjectId();
+      in = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "in");
+      out = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "out");
+      comp = DbGetComponentId(fDB, projectid, fComponentTypeID, fHicnames.at(i).toStdString());
+      if (comp == -1) {
+        fComponentWindow = new Components(this);
+        fComponentWindow->WriteToLabel(fHicnames.at(i));
+        fComponentWindow->exec();
+        if (fstop) {
+          return;
+        }
+      }
+      fActComponentTypeIDs.push_back(make_pair(in, out));
+      fComponentIDs.push_back(comp);
+      // std::cout<<"the component id is: "<< comp<<" or"<< fComponentIDs.at(i)<<std::endl;
+    }
     fScanconfigwindow = new ScanConfiguration(this);
-    fScanconfigwindow->show();
+    fScanconfigwindow->exec();
     setdefaultvalues(fScanfit, fNm);
     fScanconfigwindow->setdefaultspeed(fScanfit);
     fScanconfigwindow->setdeaulmaskstages(fNm);
@@ -2213,4 +2241,9 @@ void MainWindow::ibscansforageing() {
   // fConfig->GetScanConfig()->SetVcasnRange (75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STThreshold);
+}
+
+void MainWindow::quittest() {
+  fComponentWindow->close();
+  fstop = true;
 }
