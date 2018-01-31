@@ -33,11 +33,13 @@
 
 #include "mwbbslave.h"
 #include <stdint.h>
+#include <string>
 
 class TrgRecorder : public MWbbSlave {
 public:
   TrgRecorder(WishboneBus *wbbPtr, uint32_t baseAddress);
   void addEnable(bool en);
+  std::string dumpRegisters();
 
 private: // WBB Slave registers map
   enum regAddress_e {

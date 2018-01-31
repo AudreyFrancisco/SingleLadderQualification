@@ -33,6 +33,7 @@
 
 #include "mwbbslave.h"
 #include <stdint.h>
+#include <string>
 
 class MCoordinator : public MWbbSlave {
 public:
@@ -43,6 +44,7 @@ public:
   void addEnableExtClock(bool en);
   void addSetMode(mode_t mode);
   void setMode(mode_t mode);
+  std::string dumpRegisters();
 
 private: // WBB Slave registers map
   enum regAddress_e {

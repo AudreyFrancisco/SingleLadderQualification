@@ -469,12 +469,19 @@ void TReadoutBoardMOSAIC::PowerOff() {
 
 std::string TReadoutBoardMOSAIC::GetRegisterDump() {
   std::string result;
+  result += "IP Address: ";
+  result += fBoardConfig->GetIPaddress();
+  result += '\n';
   result += "Pulser\n";
   result += pulser->dumpRegisters();
   result += "mRunControl\n";
   result += mRunControl->dumpRegisters();
   result += "mRunTriggerControl\n";
   result += mTriggerControl->dumpRegisters();
+  result += "mTrgRecorder\n";
+  result += trgRecorder->dumpRegisters();
+  result += "coordinator\n";
+  result += coordinator->dumpRegisters();
   return result;
 }
 
