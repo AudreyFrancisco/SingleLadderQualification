@@ -212,6 +212,14 @@ int AlpideConfig::ConfigureMaskStage(TAlpide *chip, int nPix, int iStage, bool M
     }
     return (iStage % 512);
   }
+  // HACK disable all but the first double column to be fast
+  for (int ireg = 0; ireg < 1; ireg++) {
+    uint16_t Register = Alpide::REG_DCOL_DISABLE_BASE | (ireg < 11);
+    if (ireg % 2 == 0)
+      chip->WriteRegister(Register, 0xfffe);
+    else
+      chip->WriteRegister(Register, 0xffff);
+  }
 }
 
 void AlpideConfig::WriteControlReg(TAlpide *chip, Alpide::TChipMode chipMode, TChipConfig *config) {
