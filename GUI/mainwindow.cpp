@@ -1281,7 +1281,7 @@ void MainWindow::WriteToEos(string hicName, ActivityDB::actUri &uri) {
   string testFolder = GetTestFolder();
 
   sprintf(command,
-          "rsync -rv -e \"ssh\" %s %s@lxplus.cern.ch:/eos/project/a/alice-its/HicTests/%s/%s/%s",
+          "rsync -rv -e \"ssh -K\" %s %s@lxplus.cern.ch:/eos/project/a/alice-its/HicTests/%s/%s/%s",
           (fConfig->GetScanConfig()->GetDataPath(hicName)).c_str(), account.c_str(),
           testFolder.c_str(), instFolder.c_str(),
           (fConfig->GetScanConfig()->GetRemoteHicPath(hicName)).c_str());
