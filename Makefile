@@ -10,7 +10,7 @@ STATIC_LIBS=$(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR) $(LIBSCOPECON
 
 INCLUDE=-I. -Iinc -isystem/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I$(LIBSCOPECONTROL_DIR) -isystem/opt/local/include -isystem/usr/include/libxml2 -isystem/opt/local/include/libxml2
 LIB=-L/usr/local/lib -L/opt/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic -L$(LIBALUCMS_DIR) -lalucms -lscopecontrol -L$(LIBSCOPECONTROL_DIR) -lxml2 -lcurl
-CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -Wall -Werror -pedantic $(INCLUDE) -DVERSION=\"$(GIT_VERSION)\"
+CFLAGS=-pipe -fPIC -g -std=c++11 -Wall -Werror -pedantic $(INCLUDE) -DVERSION=\"$(GIT_VERSION)\"
 
 LINUX_LINKFLAGS=
 UNAME_S := $(shell uname -s)
