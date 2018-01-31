@@ -543,7 +543,7 @@ std::string TReadoutBoardMOSAIC::GetRegisterDump()
               execute - execute transaction
  */
 void TReadoutBoardMOSAIC::WriteTransceiverDRP(size_t Aindex, uint16_t address, uint16_t val, bool execute) {
-  if(Aindex < 0 || Aindex >= MAX_MOSAICTRANRECV) {
+  if(Aindex >= MAX_MOSAICTRANRECV) {
     std::cout << "Invalid Transceiver index " << Aindex << "\n";
     return;
   }
