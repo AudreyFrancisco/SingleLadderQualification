@@ -108,6 +108,10 @@ public:
   std::string   GetRegisterDump();
   void setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex = -1);
 
+  void WriteTransceiverDRP(size_t Aindex, uint16_t address, uint16_t value, bool execute=true);
+  void WriteTransceiverDRPField(size_t Aindex, uint16_t address, uint16_t size, uint16_t offset, uint16_t value, bool execute=true);
+  void ReadTransceiverDRP(size_t Aindex, uint16_t address, uint32_t *value, bool execute=true);
+
 private:
   void init();
   void enableDefinedReceivers();
