@@ -214,7 +214,6 @@ bool CernSsoCookieJar::testTheCERNSSO() {
   result = fopen("/tmp/exitus.txt", "r");
   if (result == NULL) {
     cerr << "Error to access /tmp folder ! Abort" << endl;
-    remove("/tmp/exitus.txt");
     return (false);
   }
 
@@ -224,15 +223,12 @@ bool CernSsoCookieJar::testTheCERNSSO() {
       cout << "The CERN-SSO package is installed !" << endl;
     }
     fclose(result);
-    remove("/tmp/exitus.txt");
     return (true);
   } else {
     cerr << "CERN-SSO package not Found ! Abort" << endl;
     fclose(result);
-    remove("/tmp/exitus.txt");
     return (false);
   }
-  remove("/tmp/exitus.txt");
   return (false);
 }
 

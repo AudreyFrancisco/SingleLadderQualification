@@ -170,6 +170,8 @@ bool AlpideDBManager::Init() {
 int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **Result,
                                  bool isSOAPrequest, const char *SOAPAction) {
 
+  remove("/tmp/Queryresult.xml");
+
   // in order to maintain the connection over the 24hours
   if (!theCookieJar->isJarValid()) {
     if (!theCookieJar->fillTheJar()) {
@@ -308,8 +310,6 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   FILE *res = fopen("/tmp/Queryresult.xml", "r");
   if (res == NULL) {
     cerr << "Error to Access the File buffer of Query. Abort !" << endl;
-    remove("/tmp/tempappo.xml");
-    remove("/tmp/Queryresult.xml");
     return (false);
   }
   fseek(res, 0L, SEEK_END);
@@ -321,8 +321,6 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   if (ptrBuf == NULL) {
     cerr << "Error to Allocate buffer in memory. Abort !" << endl;
     fclose(res);
-    remove("/tmp/tempappo.xml");
-    remove("/tmp/Queryresult.xml");
     return (false);
   }
   // read the response
@@ -330,15 +328,11 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   if (nre != sz) {
     cerr << "Error reading the file buffer. Abort !" << endl;
     fclose(res);
-    remove("/tmp/tempappo.xml");
-    remove("/tmp/Queryresult.xml");
     return (false);
   }
   // close and return
   fclose(res);
   *Result = ptrBuf;
-  remove("/tmp/tempappo.xml");
-  remove("/tmp/Queryresult.xml");
   return (true);
 
 #endif
