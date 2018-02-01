@@ -1571,7 +1571,6 @@ void MainWindow::locationcombo() {
 
 void MainWindow::savesettings() {
   fSettingswindow->hide();
-  fSettingswindow->SetDB(fDB);
   fSettingswindow->SaveSettings(fInstitute, fOperatorname, fHicidnumber, fCounter,
                                 fIdoflocationtype, fIdofoperator, fToptwo, fTopthree, fTopfour,
                                 fTopfive, fBottomone, fBottomtwo, fBottomthree, fBottomfour,
@@ -2248,3 +2247,5 @@ void MainWindow::quittest() {
   fComponentWindow->close();
   fstop = true;
 }
+
+AlpideDB *MainWindow::GetDB() { return fDB; }
