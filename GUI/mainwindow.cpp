@@ -1570,7 +1570,8 @@ void MainWindow::locationcombo() {
 }
 
 void MainWindow::savesettings() {
-  fSettingswindow->close();
+  fSettingswindow->hide();
+  fSettingswindow->SetDB(fDB);
   fSettingswindow->SaveSettings(fInstitute, fOperatorname, fHicidnumber, fCounter,
                                 fIdoflocationtype, fIdofoperator, fToptwo, fTopthree, fTopfour,
                                 fTopfive, fBottomone, fBottomtwo, fBottomthree, fBottomfour,
@@ -1603,7 +1604,7 @@ void MainWindow::savesettings() {
       // std::cout<<"the component id is: "<< comp<<" or"<< fComponentIDs.at(i)<<std::endl;
     }
     fScanconfigwindow = new ScanConfiguration(this);
-    fScanconfigwindow->exec();
+    fScanconfigwindow->show();
     setdefaultvalues(fScanfit, fNm);
     fScanconfigwindow->setdefaultspeed(fScanfit);
     fScanconfigwindow->setdeaulmaskstages(fNm);

@@ -29,6 +29,7 @@ private:
   int locid;
   int memid;
   bool m_testDatabase;
+  AlpideDB *fDB;
   QString location;
   QString toptwo, topthree, topfour, topfive;
   QString downone, downtwo, downthree, downfour, downfive;
@@ -39,7 +40,7 @@ public slots:
   virtual void adjustendurance();
   virtual void hideendurance();
   virtual void GetTestTypeName(TTestType &typetest, QString &testname);
-
+  virtual void SetDB(AlpideDB *DB);
 private slots:
   void popupmessage(QString m);
 };

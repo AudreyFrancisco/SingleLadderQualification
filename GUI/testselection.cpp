@@ -153,12 +153,8 @@ void TestSelection::getlocationcombo(int value) {
 }
 
 int TestSelection::GetMemberID() {
-  AlpideDB *myDB = new AlpideDB(m_testDatabase);
   int result;
-
-  result = DbGetMemberId(myDB, ui->operatorstring->toPlainText().toStdString());
-  delete myDB;
-
+  result = DbGetMemberId(fDB, ui->operatorstring->toPlainText().toStdString());
   return result;
 }
 
@@ -199,3 +195,5 @@ void TestSelection::GetTestTypeName(TTestType &typetest, QString &testname) {
   std::cout << "the value is: " << value << " the test type is " << typetest
             << "and the string is: " << testname.toStdString().c_str() << std::endl;
 }
+
+void TestSelection::SetDB(AlpideDB *DB) { fDB = DB; }
