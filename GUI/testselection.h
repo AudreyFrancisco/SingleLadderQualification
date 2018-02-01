@@ -1,10 +1,10 @@
 #ifndef TESTSELECTION_H
 #define TESTSELECTION_H
 #include "dialog.h"
+#include "mainwindow.h"
 #include <QDialog>
 #include <QPushButton>
 #include <TFifoTest.h>
-
 namespace Ui {
   class TestSelection;
 }
@@ -29,10 +29,10 @@ private:
   int locid;
   int memid;
   bool m_testDatabase;
-  AlpideDB *fDB;
   QString location;
   QString toptwo, topthree, topfour, topfive;
   QString downone, downtwo, downthree, downfour, downfive;
+  MainWindow *fmainwindow;
 
 public slots:
   virtual void getlocationcombo(int value);
@@ -40,7 +40,7 @@ public slots:
   virtual void adjustendurance();
   virtual void hideendurance();
   virtual void GetTestTypeName(TTestType &typetest, QString &testname);
-  virtual void SetDB(AlpideDB *DB);
+
 private slots:
   void popupmessage(QString m);
 };

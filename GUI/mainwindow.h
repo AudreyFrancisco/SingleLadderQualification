@@ -119,6 +119,7 @@ public slots:
   void ContinueWithoutWriting();
   void finalwrite();
   void quittest();
+  AlpideDB *GetDB();
 
 signals:
   void stopTimer();
