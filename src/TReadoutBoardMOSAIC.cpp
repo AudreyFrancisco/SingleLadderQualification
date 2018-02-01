@@ -278,9 +278,15 @@ void TReadoutBoardMOSAIC::init() {
   trgDataParser = new TrgRecorderParser();
   addDataReceiver(11, trgDataParser); // ID 11;
 
-  // Master/Slave coordinator
-  coordinator = new MCoordinator(mIPbus, add_coordinator);
-  coordinator->setMode(MCoordinator::Alone);
+  try {
+    // Master/Slave coordinator
+    coordinator = new MCoordinator(mIPbus, add_coordinator);
+    coordinator->setMode(MCoordinator::Alone);
+  } catch (...) {
+    std::cerr
+        << "Could not communicate with the Master/Slave coordinator, please update your firmware!"
+        << std::endl;
+  }
 
 #ifdef ENABLE_EXTERNAL_CLOCK
   // Enable external clock input
