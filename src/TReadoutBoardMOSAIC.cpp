@@ -55,6 +55,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+// #define ENABLE_EXTERNAL_CLOCK
+
 using namespace std;
 std::vector<unsigned char> fDebugBuffer;
 
@@ -259,6 +261,10 @@ void TReadoutBoardMOSAIC::init() {
     alpideRcv[i]->execute();
   }
 
+  // Trigger recorder
+  trgRecorder = new TrgRecorder(mIPbus, add_trgRecorder);
+  trgRecorder->addEnable(false);
+
   // The data consumer for hardware generators
   dr = new DummyReceiver;
   addDataReceiver(0, dr);
@@ -268,13 +274,34 @@ void TReadoutBoardMOSAIC::init() {
     addDataReceiver(i + 1, alpideDataParser[i]);
   }
 
+  // Trigger data recorder
+  trgDataParser = new TrgRecorderParser();
+  addDataReceiver(11, trgDataParser); // ID 11;
+
+  // Master/Slave coordinator
+  coordinator = new MCoordinator(mIPbus, add_coordinator);
+  coordinator->setMode(MCoordinator::Alone);
+
+#ifdef ENABLE_EXTERNAL_CLOCK
+  // Enable external clock input
+  mRunControl->setConfigReg(CFG_EXTCLOCK_SEL_BIT); // can be OR of ALPIDEboard::configBits_e
+  printf("Enabling external clock\n");
+#else
+  mRunControl->setConfigReg(0);
+#endif
+
   // ----- Now do the initilization -------
   // Initialize the System PLL
   mSysPLL->setup(sysPLLregContent);
 
+#ifdef ENABLE_EXTERNAL_CLOCK
+  uint32_t boardStatusReady = (BOARD_STATUS_FEPLL_LOCK);
+#else
+  // Disable this code if using an external clock != 40 MHz
   // wait for board to be ready
   uint32_t boardStatusReady = (BOARD_STATUS_GTP_RESET_DONE | BOARD_STATUS_GTPLL_LOCK |
                                BOARD_STATUS_EXTPLL_LOCK | BOARD_STATUS_FEPLL_LOCK);
+#endif
 
   // wait 1s for transceivers reset done
   long int init_try;
@@ -442,12 +469,19 @@ void TReadoutBoardMOSAIC::PowerOff() {
 
 std::string TReadoutBoardMOSAIC::GetRegisterDump() {
   std::string result;
+  result += "IP Address: ";
+  result += fBoardConfig->GetIPaddress();
+  result += '\n';
   result += "Pulser\n";
   result += pulser->dumpRegisters();
   result += "mRunControl\n";
   result += mRunControl->dumpRegisters();
   result += "mRunTriggerControl\n";
   result += mTriggerControl->dumpRegisters();
+  result += "mTrgRecorder\n";
+  result += trgRecorder->dumpRegisters();
+  result += "coordinator\n";
+  result += coordinator->dumpRegisters();
   return result;
 }
 

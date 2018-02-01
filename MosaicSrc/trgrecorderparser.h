@@ -27,43 +27,32 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
-#include "trgrecorder.h"
-#include "mexception.h"
-#include <iostream>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 
-TrgRecorder::TrgRecorder(WishboneBus *wbbPtr, uint32_t baseAdd) : MWbbSlave(wbbPtr, baseAdd) {}
+#ifndef TRGRECORDERPARSER_H
+#define TRGRECORDERPARSER_H
 
-void TrgRecorder::addEnable(bool en) {
-  wbb->addWrite(baseAddress + regControl, en ? CONTROL_ENABLE : 0);
-}
+#include "mdatareceiver.h"
+#include <stdint.h>
 
-std::string TrgRecorder::dumpRegisters() {
-  if (!wbb)
-    throw MIPBusUDPError("No IPBus configured");
+#define TRIGGERDATA_SIZE 12 // 4 bytes: Trigger number. 8 bytes: Time stamp
 
-  regAddress_e addrs[] = {regControl};
-  uint32_t nAddrs = sizeof(addrs) / sizeof(regAddress_e);
+class TrgRecorderParser : public MDataReceiver {
+public:
+  TrgRecorderParser();
+  void flush();
 
-  std::stringstream ss;
-  ss << std::hex;
+protected:
+  long parse(int numClosed);
 
-  for (uint32_t iAddr = 0; iAddr < nAddrs; ++iAddr) {
-    uint32_t result = 0xDEADBEEF;
-    try {
-      wbb->addRead(baseAddress + addrs[iAddr], &result);
-      execute();
-    } catch (...) {
-      std::cerr << "Pulser read error: address 0x" << std::hex << baseAddress + addrs[iAddr]
-                << " (0x" << addrs[iAddr] << ")!" << std::dec << std::endl;
-    };
+private:
+  bool verbose;
 
-    ss << "0x" << addrs[iAddr] << "\t0x" << result << std::endl;
-  }
+private:
+  uint32_t buf2uint32(unsigned char *buf);
+  uint64_t buf2uint64(unsigned char *buf);
 
-  ss << std::endl;
+public:
+  void setVerbose(bool v) { verbose = v; }
+};
 
-  return ss.str();
-}
+#endif // TRGRECORDERPARSER_H

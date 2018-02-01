@@ -153,6 +153,9 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     boards->push_back(new TReadoutBoardMOSAIC(config, boardConfig));
   }
 
+  ((TReadoutBoardMOSAIC *)boards->at(0))->GetCoordinatorHandle()->setMode(MCoordinator::Master);
+  ((TReadoutBoardMOSAIC *)boards->at(1))->GetCoordinatorHandle()->setMode(MCoordinator::Slave);
+
   TPowerBoard *pb = 0;
   if (config->GetUsePowerBoard()) {
     pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0));

@@ -63,7 +63,7 @@ void I2CSysPll::readReg(uint8_t add, uint16_t *d) {
 
 void I2CSysPll::setup(pllRegisters_t regs) {
   uint16_t r;
-  int lookTry;
+  //	int lookTry;
 
   // Write
   for (int i = 0; i < 20; i++) {
@@ -81,14 +81,16 @@ void I2CSysPll::setup(pllRegisters_t regs) {
   writeReg(3, regs.reg[3] & ~(1 << 6));
   writeReg(3, regs.reg[3]);
 
-  // wait for PLL to lock
-  lookTry = 500;
-  while (--lookTry) {
-    readReg(21, &r);
-    if ((r & 0x0004) == 0)
-      break;
-  }
+#if 0 // lock check is done at upper level
+	// wait for PLL to lock
+	lookTry = 500;
+	while (--lookTry){
+		readReg(21, &r);
+		if ((r&0x0004) == 0)
+			break;
+	}
 
-  if (lookTry == 0)
-    throw MBoardInitError("System PLL NOT locked!");
+	if (lookTry==0)
+			throw MBoardInitError("System PLL NOT locked!");
+#endif
 }

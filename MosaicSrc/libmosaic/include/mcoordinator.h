@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017
+ * Copyright (C) 2018
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,29 +24,34 @@
  * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
- * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
+ * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2018.
  *
  */
 
-#ifndef TRGRECORDER_H
-#define TRGRECORDER_H
+#ifndef MCOORDINATOR_H
+#define MCOORDINATOR_H
 
 #include "mwbbslave.h"
 #include <stdint.h>
 #include <string>
 
-class TrgRecorder : public MWbbSlave {
+class MCoordinator : public MWbbSlave {
 public:
-  TrgRecorder(WishboneBus *wbbPtr, uint32_t baseAddress);
-  void addEnable(bool en);
+  typedef enum mode_e { Alone = 0, Master = 1, Slave = 2 } mode_t;
+
+public:
+  MCoordinator(WishboneBus *wbbPtr, uint32_t baseAddress);
+  void addEnableExtClock(bool en);
+  void addSetMode(mode_t mode);
+  void setMode(mode_t mode);
   std::string dumpRegisters();
 
 private: // WBB Slave registers map
   enum regAddress_e {
-    regControl = 0 // Control register
+    regCfg = 0, // enable external trigger
   };
 
-  enum controlBits_e { CONTROL_ENABLE = (1 << 0) };
+  enum cfgBits_e { ALONE = (1 << 0), MASTER = (1 << 1), EXT_CLK = (1 << 2) };
 };
 
-#endif // TRGRECORDER_H
+#endif // MCOORDINATOR_H

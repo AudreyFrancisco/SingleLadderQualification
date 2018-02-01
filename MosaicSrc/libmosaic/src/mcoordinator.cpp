@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017
+ * Copyright (C) 2018
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,27 +24,55 @@
  * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
- * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
+ * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2018.
  *
  */
-#include "trgrecorder.h"
+#include "mcoordinator.h"
 #include "mexception.h"
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 
-TrgRecorder::TrgRecorder(WishboneBus *wbbPtr, uint32_t baseAdd) : MWbbSlave(wbbPtr, baseAdd) {}
+MCoordinator::MCoordinator(WishboneBus *wbbPtr, uint32_t baseAdd) : MWbbSlave(wbbPtr, baseAdd) {}
 
-void TrgRecorder::addEnable(bool en) {
-  wbb->addWrite(baseAddress + regControl, en ? CONTROL_ENABLE : 0);
+void MCoordinator::addEnableExtClock(bool en) {
+  uint32_t tmp;
+
+  tmp = en ? EXT_CLK : 0;
+  wbb->addRMWbits(baseAddress + regCfg, ~EXT_CLK, tmp);
 }
 
-std::string TrgRecorder::dumpRegisters() {
+void MCoordinator::addSetMode(mode_t mode) {
+  uint32_t tmp = 0;
+
+  switch (mode) {
+  case Alone:
+    tmp = ALONE;
+    break;
+
+  case Master:
+    tmp = MASTER;
+    break;
+
+  case Slave:
+    tmp = 0;
+    break;
+  }
+
+  wbb->addRMWbits(baseAddress + regCfg, ~(ALONE | MASTER), tmp);
+}
+
+void MCoordinator::setMode(mode_t mode) {
+  addSetMode(mode);
+  wbb->execute();
+}
+
+std::string MCoordinator::dumpRegisters() {
   if (!wbb)
     throw MIPBusUDPError("No IPBus configured");
 
-  regAddress_e addrs[] = {regControl};
+  regAddress_e addrs[] = {regCfg};
   uint32_t nAddrs = sizeof(addrs) / sizeof(regAddress_e);
 
   std::stringstream ss;
