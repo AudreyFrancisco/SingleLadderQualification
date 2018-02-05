@@ -41,6 +41,7 @@ class TDigitalResultHic : public TScanResultHic {
   friend class TDigitalAnalysis;
 
 private:
+  int m_nDead;
   int m_nBad;
   int m_nStuck;
   int m_nBadDcols;

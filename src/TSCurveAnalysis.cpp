@@ -326,11 +326,18 @@ void TSCurveAnalysis::Finalize() {
 // TODO: Add readout errors, requires dividing readout errors by hic (receiver)
 // TODO: Make two cuts (red and orange)?
 THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic *result, THic *hic) {
+  THicClassification returnValue = CLASS_GREEN;
   if (!IsThresholdScan())
     return CLASS_GREEN; // for the time being exclude class for tuning
-
+  // check on dead pixels per HIC
+  if (result->m_nDead > m_config->GetParamValue("THRESH_MAXDEAD_HIC_ORANGE_OB"))
+    return CLASS_RED;
+  else if (result->m_nDead > m_config->GetParamValue("THRESH_MAXDEAD_HIC_GREEN_OB"))
+    returnValue = CLASS_ORANGE;
+  // check on no threshold pixels per HIC
   if (result->m_nNoThresh > m_config->GetParamValue("THRESH_MAXBAD_HIC_OB"))
-    return CLASS_ORANGE;
+    returnValue = CLASS_ORANGE;
+  // chipwise checks
   for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
     if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled())
       continue;
@@ -338,19 +345,25 @@ THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic *result
     TSCurveResultChip *chipResult = (TSCurveResultChip *)result->m_chipResults.at(chipId);
     if (chipResult->m_nDead + chipResult->m_nNoThresh >
         m_config->GetParamValue("THRESH_MAXBAD_CHIP_OB"))
-      return CLASS_ORANGE;
+      returnValue = CLASS_ORANGE;
     if (chipResult->m_noiseAv > (float)m_config->GetParamValue("THRESH_MAXNOISE_OB"))
-      return CLASS_ORANGE;
+      returnValue = CLASS_ORANGE;
   }
-  return CLASS_GREEN;
+  return returnValue;
 }
 
 THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic *result, THic *hic) {
+  THicClassification returnValue = CLASS_GREEN;
   if (!IsThresholdScan())
     return CLASS_GREEN; // for the time being exclude class for tuning
-
+  // check on dead pixels per HIC
+  if (result->m_nDead > m_config->GetParamValue("THRESH_MAXDEAD_HIC_ORANGE_IB"))
+    return CLASS_RED;
+  else if (result->m_nDead > m_config->GetParamValue("THRESH_MAXDEAD_HIC_GREEN_IB"))
+    returnValue = CLASS_ORANGE;
+  // check on no threshold pixels per HIC
   if (result->m_nNoThresh > m_config->GetParamValue("THRESH_MAXBAD_HIC_IB"))
-    return CLASS_ORANGE;
+    returnValue = CLASS_ORANGE;
   for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
     if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled())
       continue;
@@ -358,11 +371,11 @@ THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic *result
     TSCurveResultChip *chipResult = (TSCurveResultChip *)result->m_chipResults.at(chipId);
     if (chipResult->m_nDead + chipResult->m_nNoThresh >
         m_config->GetParamValue("THRESH_MAXBAD_CHIP_IB"))
-      return CLASS_ORANGE;
+      returnValue = CLASS_ORANGE;
     if (chipResult->m_noiseAv > (float)m_config->GetParamValue("THRESH_MAXNOISE_IB"))
-      return CLASS_ORANGE;
+      returnValue = CLASS_ORANGE;
   }
-  return CLASS_GREEN;
+  return returnValue;
 }
 
 void TSCurveAnalysis::WriteResult() {

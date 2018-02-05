@@ -86,6 +86,11 @@ namespace ScanConfig {
   const int DIGITAL_MAXBAD_CHIP_IB = 524;  // 1 per mille
   const int DIGITAL_MAXDEAD_CHIP_GREEN = 10;
   const int DIGITAL_MAXDEAD_CHIP_ORANGE = 5120;
+  const int DIGITAL_MAXDEAD_HIC_GREEN_OB = 140;
+  const int DIGITAL_MAXDEAD_HIC_GREEN_IB = 90;
+  const int DIGITAL_MAXDEAD_HIC_ORANGE_OB = 71680;
+  const int DIGITAL_MAXDEAD_HIC_ORANGE_IB = 46080;
+
   const int DIGITAL_MAXBAD_HIC_OB = 7340; // 1 per mille
   const int DIGITAL_MAXBAD_HIC_IB = 4700; // 1 per mille
 
@@ -101,6 +106,10 @@ namespace ScanConfig {
   const int THRESH_MAXBAD_HIC_IB = 4700;  // 1 per mille
   const int THRESH_MAXNOISE_OB = 10;      // max noise of a single chip
   const int THRESH_MAXNOISE_IB = 10;
+  const int THRESH_MAXDEAD_HIC_GREEN_OB = 140;
+  const int THRESH_MAXDEAD_HIC_GREEN_IB = 90;
+  const int THRESH_MAXDEAD_HIC_ORANGE_OB = 71680;
+  const int THRESH_MAXDEAD_HIC_ORANGE_IB = 46080;
 
   const int SPEEDY = 1; // Use slow fit if 0, differentiate->mean if 1.
   const int RAWDATA = 0;
@@ -172,6 +181,10 @@ private:
   int m_digitalMaxBadPerHicIB;
   int m_digitalMaxDeadPerChipGreen;
   int m_digitalMaxDeadPerChipOrange;
+  int m_digitalMaxDeadPerHicGreenOB;
+  int m_digitalMaxDeadPerHicGreenIB;
+  int m_digitalMaxDeadPerHicOrangeOB;
+  int m_digitalMaxDeadPerHicOrangeIB;
   int m_digitalMaxNoMaskHicIB;
   int m_digitalMaxNoMaskHicOB;
   int m_digitalMaxNoMaskStuckHicIB;
@@ -180,6 +193,10 @@ private:
   int m_threshMaxBadPerChipIB;
   int m_threshMaxBadPerHicOB;
   int m_threshMaxBadPerHicIB;
+  int m_threshMaxDeadPerHicGreenOB;
+  int m_threshMaxDeadPerHicGreenIB;
+  int m_threshMaxDeadPerHicOrangeOB;
+  int m_threshMaxDeadPerHicOrangeIB;
   int m_threshMaxNoiseIB;
   int m_threshMaxNoiseOB;
   int m_calVpulsel;

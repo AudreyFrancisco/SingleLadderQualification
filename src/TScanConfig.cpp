@@ -74,12 +74,20 @@ TScanConfig::TScanConfig() {
   m_digitalMaxBadPerHicIB = DIGITAL_MAXBAD_HIC_IB;
   m_digitalMaxDeadPerChipGreen = DIGITAL_MAXDEAD_CHIP_GREEN;
   m_digitalMaxDeadPerChipOrange = DIGITAL_MAXDEAD_CHIP_ORANGE;
+  m_digitalMaxDeadPerHicGreenOB = DIGITAL_MAXDEAD_HIC_GREEN_OB;
+  m_digitalMaxDeadPerHicGreenIB = DIGITAL_MAXDEAD_HIC_GREEN_IB;
+  m_digitalMaxDeadPerHicOrangeOB = DIGITAL_MAXDEAD_HIC_ORANGE_OB;
+  m_digitalMaxDeadPerHicOrangeIB = DIGITAL_MAXDEAD_HIC_ORANGE_IB;
 
   m_digitalMaxNoMaskHicIB = DIGITAL_MAXNOMASK_HIC_IB;
   m_digitalMaxNoMaskHicOB = DIGITAL_MAXNOMASK_HIC_OB;
   m_digitalMaxNoMaskStuckHicIB = DIGITAL_MAXNOMASKSTUCK_HIC_IB;
   m_digitalMaxNoMaskStuckHicOB = DIGITAL_MAXNOMASKSTUCK_HIC_OB;
 
+  m_threshMaxDeadPerHicGreenOB = THRESH_MAXDEAD_HIC_GREEN_OB;
+  m_threshMaxDeadPerHicGreenIB = THRESH_MAXDEAD_HIC_GREEN_IB;
+  m_threshMaxDeadPerHicOrangeOB = THRESH_MAXDEAD_HIC_ORANGE_OB;
+  m_threshMaxDeadPerHicOrangeIB = THRESH_MAXDEAD_HIC_ORANGE_IB;
   m_threshMaxBadPerChipOB = THRESH_MAXBAD_CHIP_OB;
   m_threshMaxBadPerChipIB = THRESH_MAXBAD_CHIP_IB;
   m_threshMaxBadPerHicOB = THRESH_MAXBAD_HIC_OB;
