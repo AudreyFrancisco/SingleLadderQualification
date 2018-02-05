@@ -82,6 +82,10 @@ namespace ScanConfig {
   const int FIFO_CUT_MAXFAULTY = 1; // max number of chips with errors
 
   // cuts for digital scan
+  const int DIGITAL_MAXTIMEOUT_GREEN = 0;
+  const int DIGITAL_MAXCORRUPT_GREEN = 0;
+  const int DIGITAL_MAXTIMEOUT_ORANGE = 1;
+  const int DIGITAL_MAXCORRUPT_ORANGE = 1;
   const int DIGITAL_MAXBAD_CHIP_OB = 1024; // max number of bad pixels: 1 dcol
   const int DIGITAL_MAXBAD_CHIP_IB = 524;  // 1 per mille
   const int DIGITAL_MAXDEAD_CHIP_GREEN = 10;
@@ -100,6 +104,10 @@ namespace ScanConfig {
   const int DIGITAL_MAXNOMASKSTUCK_HIC_IB = 0;
 
   // cuts for threshold scan
+  const int THRESH_MAXTIMEOUT_GREEN = 0;
+  const int THRESH_MAXCORRUPT_GREEN = 0;
+  const int THRESH_MAXTIMEOUT_ORANGE = 1;
+  const int THRESH_MAXCORRUPT_ORANGE = 1;
   const int THRESH_MAXBAD_CHIP_OB = 1024; // max number of bad pixels: 1 dcol
   const int THRESH_MAXBAD_CHIP_IB = 524;  // 1 per mille
   const int THRESH_MAXBAD_HIC_OB = 7340;  // 1 per mille
@@ -175,6 +183,10 @@ private:
   int m_powerMaxFactor4V_OB;
   int m_fifoCutMaxErr;
   int m_fifoCutMaxFaulty;
+  int m_digitalMaxTimeoutOrange;
+  int m_digitalMaxTimeoutGreen;
+  int m_digitalMaxCorruptOrange;
+  int m_digitalMaxCorruptGreen;
   int m_digitalMaxBadPerChipOB;
   int m_digitalMaxBadPerChipIB;
   int m_digitalMaxBadPerHicOB;
@@ -189,6 +201,10 @@ private:
   int m_digitalMaxNoMaskHicOB;
   int m_digitalMaxNoMaskStuckHicIB;
   int m_digitalMaxNoMaskStuckHicOB;
+  int m_threshMaxTimeoutOrange;
+  int m_threshMaxTimeoutGreen;
+  int m_threshMaxCorruptOrange;
+  int m_threshMaxCorruptGreen;
   int m_threshMaxBadPerChipOB;
   int m_threshMaxBadPerChipIB;
   int m_threshMaxBadPerHicOB;

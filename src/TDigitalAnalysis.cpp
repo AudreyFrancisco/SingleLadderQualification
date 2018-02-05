@@ -256,6 +256,17 @@ void TDigitalAnalysis::Finalize() {
 // TODO: Make two cuts (red and orange)?
 THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic *result) {
   THicClassification returnValue = CLASS_GREEN;
+  // check data taking variables
+  if (result->m_errorCounter.nTimeout > m_config->GetParamValue("DIGITAL_MAXTIMEOUT_ORANGE"))
+    return CLASS_RED;
+  else if (result->m_errorCounter.nTimeout > m_config->GetParamValue("DIGITAL_MAXTIMEOUT_GREEN"))
+    returnValue = CLASS_ORANGE;
+  if (result->m_errorCounter.nCorruptEvent > m_config->GetParamValue("DIGITAL_MAXCORRUPT_GREEN"))
+    return CLASS_RED;
+  else if (result->m_errorCounter.nCorruptEvent >
+           m_config->GetParamValue("DIGITAL_MAXCORRUPT_GREEN"))
+    returnValue = CLASS_ORANGE;
+
   // check on dead pixels per HIC
   if (result->m_nDead > m_config->GetParamValue("DIGITAL_MAXDEAD_HIC_ORANGE_OB"))
     return CLASS_RED;
@@ -282,6 +293,16 @@ THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic *resu
 
 THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic *result) {
   THicClassification returnValue = CLASS_GREEN;
+  // check data taking variables
+  if (result->m_errorCounter.nTimeout > m_config->GetParamValue("DIGITAL_MAXTIMEOUT_ORANGE"))
+    return CLASS_RED;
+  else if (result->m_errorCounter.nTimeout > m_config->GetParamValue("DIGITAL_MAXTIMEOUT_GREEN"))
+    returnValue = CLASS_ORANGE;
+  if (result->m_errorCounter.nCorruptEvent > m_config->GetParamValue("DIGITAL_MAXCORRUPT_GREEN"))
+    return CLASS_RED;
+  else if (result->m_errorCounter.nCorruptEvent >
+           m_config->GetParamValue("DIGITAL_MAXCORRUPT_GREEN"))
+    returnValue = CLASS_ORANGE;
   // check on dead pixels per HIC
   if (result->m_nDead > m_config->GetParamValue("DIGITAL_MAXDEAD_HIC_ORANGE_IB"))
     return CLASS_RED;

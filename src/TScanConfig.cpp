@@ -68,6 +68,10 @@ TScanConfig::TScanConfig() {
   m_fifoCutMaxErr = FIFO_CUT_MAXERR;
   m_fifoCutMaxFaulty = FIFO_CUT_MAXFAULTY;
 
+  m_digitalMaxTimeoutGreen = DIGITAL_MAXTIMEOUT_GREEN;
+  m_digitalMaxTimeoutOrange = DIGITAL_MAXTIMEOUT_ORANGE;
+  m_digitalMaxCorruptGreen = DIGITAL_MAXCORRUPT_GREEN;
+  m_digitalMaxCorruptOrange = DIGITAL_MAXCORRUPT_ORANGE;
   m_digitalMaxBadPerChipOB = DIGITAL_MAXBAD_CHIP_OB;
   m_digitalMaxBadPerChipIB = DIGITAL_MAXBAD_CHIP_IB;
   m_digitalMaxBadPerHicOB = DIGITAL_MAXBAD_HIC_OB;
@@ -84,6 +88,10 @@ TScanConfig::TScanConfig() {
   m_digitalMaxNoMaskStuckHicIB = DIGITAL_MAXNOMASKSTUCK_HIC_IB;
   m_digitalMaxNoMaskStuckHicOB = DIGITAL_MAXNOMASKSTUCK_HIC_OB;
 
+  m_threshMaxTimeoutGreen = THRESH_MAXTIMEOUT_GREEN;
+  m_threshMaxTimeoutOrange = THRESH_MAXTIMEOUT_ORANGE;
+  m_threshMaxCorruptGreen = THRESH_MAXCORRUPT_GREEN;
+  m_threshMaxCorruptOrange = THRESH_MAXCORRUPT_ORANGE;
   m_threshMaxDeadPerHicGreenOB = THRESH_MAXDEAD_HIC_GREEN_OB;
   m_threshMaxDeadPerHicGreenIB = THRESH_MAXDEAD_HIC_GREEN_IB;
   m_threshMaxDeadPerHicOrangeOB = THRESH_MAXDEAD_HIC_ORANGE_OB;
@@ -150,22 +158,38 @@ void TScanConfig::InitParamMap() {
   fSettings["FIFO_MAXERR"] = &m_fifoCutMaxErr;
   fSettings["FIFO_MAXFAULTY"] = &m_fifoCutMaxFaulty;
 
+  fSettings["DIGITAL_MAXTIMEOUT_GREEN"] = &m_digitalMaxTimeoutGreen;
+  fSettings["DIGITAL_MAXTIMEOUT_ORANGE"] = &m_digitalMaxTimeoutOrange;
+  fSettings["DIGITAL_MAXCORRUPT_GREEN"] = &m_digitalMaxCorruptGreen;
+  fSettings["DIGITAL_MAXCORRUPT_ORANGE"] = &m_digitalMaxCorruptOrange;
   fSettings["DIGITAL_MAXBAD_CHIP_OB"] = &m_digitalMaxBadPerChipOB;
   fSettings["DIGITAL_MAXBAD_CHIP_IB"] = &m_digitalMaxBadPerChipIB;
   fSettings["DIGITAL_MAXBAD_HIC_OB"] = &m_digitalMaxBadPerHicOB;
   fSettings["DIGITAL_MAXBAD_HIC_IB"] = &m_digitalMaxBadPerHicIB;
   fSettings["DIGITAL_MAXDEAD_CHIP_GREEN"] = &m_digitalMaxDeadPerChipGreen;
   fSettings["DIGITAL_MAXDEAD_CHIP_ORANGE"] = &m_digitalMaxDeadPerChipOrange;
+  fSettings["DIGITAL_MAXDEAD_HIC_GREEN_OB"] = &m_digitalMaxDeadPerHicGreenOB;
+  fSettings["DIGITAL_MAXDEAD_HIC_GREEN_IB"] = &m_digitalMaxDeadPerHicGreenIB;
+  fSettings["DIGITAL_MAXDEAD_HIC_ORANGE_OB"] = &m_digitalMaxDeadPerHicOrangeOB;
+  fSettings["DIGITAL_MAXDEAD_HIC_ORANGE_IB"] = &m_digitalMaxDeadPerHicOrangeIB;
 
   fSettings["DIGITAL_MAXNOMASK_HIC_OB"] = &m_digitalMaxNoMaskHicOB;
   fSettings["DIGITAL_MAXNOMASK_HIC_IB"] = &m_digitalMaxNoMaskHicIB;
   fSettings["DIGITAL_MAXNOMASKSTUCK_HIC_OB"] = &m_digitalMaxNoMaskStuckHicOB;
   fSettings["DIGITAL_MAXNOMASKSTUCK_HIC_IB"] = &m_digitalMaxNoMaskStuckHicIB;
 
+  fSettings["THRESH_MAXTIMEOUT_GREEN"] = &m_threshMaxTimeoutGreen;
+  fSettings["THRESH_MAXTIMEOUT_ORANGE"] = &m_threshMaxTimeoutOrange;
+  fSettings["THRESH_MAXCORRUPT_GREEN"] = &m_threshMaxCorruptGreen;
+  fSettings["THRESH_MAXCORRUPT_ORANGE"] = &m_threshMaxCorruptOrange;
   fSettings["THRESH_MAXBAD_CHIP_OB"] = &m_threshMaxBadPerChipOB;
   fSettings["THRESH_MAXBAD_CHIP_IB"] = &m_threshMaxBadPerChipIB;
   fSettings["THRESH_MAXBAD_HIC_OB"] = &m_threshMaxBadPerHicOB;
   fSettings["THRESH_MAXBAD_HIC_IB"] = &m_threshMaxBadPerHicIB;
+  fSettings["THRESH_MAXDEAD_HIC_GREEN_OB"] = &m_threshMaxDeadPerHicGreenOB;
+  fSettings["THRESH_MAXDEAD_HIC_GREEN_IB"] = &m_threshMaxDeadPerHicGreenIB;
+  fSettings["THRESH_MAXDEAD_HIC_ORANGE_OB"] = &m_threshMaxDeadPerHicOrangeOB;
+  fSettings["THRESH_MAXDEAD_HIC_ORANGE_IB"] = &m_threshMaxDeadPerHicOrangeIB;
   fSettings["THRESH_MAXNOISE_OB"] = &m_threshMaxNoiseOB;
   fSettings["THRESH_MAXNOISE_IB"] = &m_threshMaxNoiseIB;
 
