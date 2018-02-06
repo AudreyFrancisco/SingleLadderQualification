@@ -1393,6 +1393,10 @@ int MainWindow::GetTime() {
 }
 
 void MainWindow::attachtodatabase() {
+  if (fDB) {
+    delete fDB;
+  }
+  fDB = new AlpideDB(fDatabasetype);
   if (fResultwindow->isVisible()) {
     fResultwindow->close();
   }
