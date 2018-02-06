@@ -756,7 +756,7 @@ int decodeCommandParameters(int argc, char **argv) {
 int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                        std::vector<TAlpide *> *chips, std::vector<THic *> *hics,
                        const char **hicIds) {
-  int NBOARDS = 2;
+  int NBOARDS = 1;
   int NModules = 5;
   int NChipsPerModule = 14;
   int NChips = NModules * NChipsPerModule;
@@ -780,13 +780,15 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   for (int i = 0; i < NBOARDS; i++) {
     boardConfig[i] = (TBoardConfigMOSAIC *)config->GetBoardConfig(i);
     boardConfig[i]->SetSpeedMode(Mosaic::RCV_RATE_400);
-    boards->push_back(new TReadoutBoardMOSAIC(config, boardConfig[i]));
+    TReadoutBoardMOSAIC *board = new TReadoutBoardMOSAIC(config, boardConfig[i]);
+    board->enableControlInterfaces(false);
+    boards->push_back(board);
   }
 
-  if (strcmp(boardConfig[0]->GetIPaddress(), boardConfig[1]->GetIPaddress()) == 0) {
-    std::cout << "ERROR: did not find two different IP addresses" << std::endl;
-    exit(0);
-  }
+  //if (strcmp(boardConfig[0]->GetIPaddress(), boardConfig[1]->GetIPaddress()) == 0) {
+  //  std::cout << "ERROR: did not find two different IP addresses" << std::endl;
+  //  exit(0);
+  //}
 
   if (config->GetUsePowerBoard()) {
     for (int i = 0; i < NBOARDS; i++) {

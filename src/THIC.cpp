@@ -70,35 +70,6 @@ bool THic::IsPoweredDigital() {
   return false;
 }
 
-void THic::PowerOn() {
-  TReadoutBoardMOSAIC *mosaic, *mosaic2 = 0;
-
-  if (IsPowered())
-    return;
-  mosaic = (TReadoutBoardMOSAIC *)m_chips.at(0)->GetReadoutBoard();
-
-  // OB-HS -> 2 different MOSAICs
-  // all other HIC types (IB and OB HIC alone) have the same MOSAIC on chip 0 and 7
-  if (m_chips.at(7)->GetReadoutBoard() != m_chips.at(0)->GetReadoutBoard()) {
-    mosaic2 = (TReadoutBoardMOSAIC *)m_chips.at(7)->GetReadoutBoard();
-  }
-
-  mosaic->enableClockOutput(false);
-  if (mosaic2)
-    mosaic2->enableClockOutput(false);
-  sleep(1);
-  if (m_powerBoard) {
-    m_powerBoard->SwitchAnalogOn(m_pbMod);
-    sleep(1);
-    m_powerBoard->SwitchDigitalOn(m_pbMod);
-  }
-  // if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
-  sleep(1);
-  mosaic->enableClockOutput(true);
-  if (mosaic2)
-    mosaic2->enableClockOutput(true);
-}
-
 void THic::PowerOff() {
   if (!IsPowered())
     return;
@@ -268,6 +239,25 @@ int THicIB::GetReceiver(int boardIndex, int chipId) {
   return m_rcv[chipId & 0xf];
 }
 
+void THicIB::PowerOn () {
+  TReadoutBoardMOSAIC *mosaic = 0;
+
+  if (IsPowered())
+    return;
+  mosaic = (TReadoutBoardMOSAIC *)m_chips.at(0)->GetReadoutBoard();
+
+  mosaic->enableClockOutput(m_ctrl, false);
+  sleep(1);
+  if (m_powerBoard) {
+    m_powerBoard->SwitchAnalogOn(m_pbMod);
+    sleep(1);
+    m_powerBoard->SwitchDigitalOn(m_pbMod);
+  }
+  // if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
+  sleep(1);
+  mosaic->enableClockOutput(m_ctrl, true);
+}
+
 THicOB::THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod)
     : THic(dbId, modId, pb, pbMod) {}
 
@@ -342,4 +332,37 @@ int THicOB::GetReceiver(int boardIndex, int chipId) {
     return m_rcv8;
 
   return -1;
+}
+
+void THicOB::PowerOn() {
+  TReadoutBoardMOSAIC *mosaic, *mosaic2 = 0;
+
+  if (IsPowered())
+    return;
+  mosaic = (TReadoutBoardMOSAIC *)m_chips.at(0)->GetReadoutBoard();
+
+  // OB-HS -> 2 different MOSAICs
+  // all other HIC types (IB and OB HIC alone) have the same MOSAIC on chip 0 and 7
+  if (m_chips.at(7)->GetReadoutBoard() != m_chips.at(0)->GetReadoutBoard()) {
+    mosaic2 = (TReadoutBoardMOSAIC *)m_chips.at(7)->GetReadoutBoard();
+  }
+
+  mosaic->enableClockOutput(m_ctrl0, false);
+  if (mosaic2)
+    mosaic2->enableClockOutput(m_ctrl8, false);
+  else
+    mosaic->enableClockOutput(m_ctrl8, false);
+  sleep(1);
+  if (m_powerBoard) {
+    m_powerBoard->SwitchAnalogOn(m_pbMod);
+    sleep(1);
+    m_powerBoard->SwitchDigitalOn(m_pbMod);
+  }
+  // if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
+  sleep(1);
+  mosaic->enableClockOutput(m_ctrl0, true);
+  if (mosaic2)
+    mosaic2->enableClockOutput(m_ctrl8, true);
+  else
+    mosaic->enableClockOutput(m_ctrl8, true);
 }

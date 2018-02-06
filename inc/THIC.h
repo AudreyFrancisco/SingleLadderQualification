@@ -34,7 +34,7 @@ public:
   bool IsEnabled();
   void Disable();
   unsigned int GetNEnabledChips();
-  virtual void PowerOn();
+  virtual void PowerOn() = 0;
   void PowerOff();
   float GetIddd();
   float GetIdda();
@@ -81,6 +81,7 @@ public:
   bool ContainsReceiver(int boardIndex, int rcv);
   virtual int GetReceiver(int boardIndex, int chipId);
   void ConfigureMaster(int Master, int board, int rcv, int ctrl);
+  void PowerOn();
 };
 
 class THicIB : public THic {
@@ -99,6 +100,7 @@ public:
   bool ContainsReceiver(int boardIndex, int rcv);
   virtual int GetReceiver(int boardIndex, int chipId);
   void ConfigureInterface(int board, int *rcv, int ctrl);
+  void PowerOn();
 };
 
 #endif

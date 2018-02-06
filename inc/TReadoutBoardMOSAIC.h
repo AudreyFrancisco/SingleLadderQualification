@@ -86,8 +86,9 @@ public:
     return (0);
   };
   void enableControlInterfaces(bool en);
-  void enableClockOutput(bool en) {
-    enableControlInterfaces(en);
+  void enableControlInterface(int interface, bool en);
+  void enableClockOutput(int interface, bool en) {
+    enableControlInterface(interface, en);
     return;
   } // just a wrapper
   void setInverted(bool AInverted, int Aindex = -1);
