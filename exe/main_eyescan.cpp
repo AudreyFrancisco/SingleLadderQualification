@@ -172,9 +172,11 @@ public:
       m_board.ReadTransceiverDRP(m_chipId, ES_SAMPLE_COUNT, &sampleCountReg,
                                  true);
       if(m_verbose) {
+	printf("Ch: %d ", static_cast<int>(m_chipId));
+	printf("vOffset: %d ", vOffset);
         printf("hOffset: %d ", hOffset);
-        printf("errorCountReg: %u ", (unsigned int)errorCountReg);
-        printf("sampleCountReg: %u ", (unsigned int)sampleCountReg);
+        printf("errorCount: %u ", (unsigned int)errorCountReg);
+        printf("sampleCount: %u ", (unsigned int)sampleCountReg);
         printf("currPrescale: %u \n", (unsigned int)currPrescale);
       }
 
@@ -294,7 +296,7 @@ public:
   }
 
 private:
-  TReadoutBoardMOSAIC m_board;
+  TReadoutBoardMOSAIC &m_board;
   size_t m_chipId;
   std::ofstream dataFile;
   bool m_verbose;
@@ -362,8 +364,15 @@ int main(int argc, char **argv) {
     // Eyescan
     bool verbose = true;
     int chipId = 0;
-    eyescan::EyeScan scan(*myMOSAIC, chipId, "eye.dat",verbose);
-    scan.runFullScan();
+    for (const auto &rChip : fChips) {
+      if (!rChip->GetConfig()->IsEnabled())
+        continue;
+      std::string filename("eye_ch");
+      filename += std::to_string(rChip->GetConfig()->GetChipId());
+      filename += ".dat";
+      eyescan::EyeScan scan(*myMOSAIC, chipId, filename,verbose);
+      scan.runFullScan();
+    }
   }
 
   return 0;
