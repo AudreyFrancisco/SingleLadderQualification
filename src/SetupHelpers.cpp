@@ -785,7 +785,7 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     boards->push_back(board);
   }
 
-  //if (strcmp(boardConfig[0]->GetIPaddress(), boardConfig[1]->GetIPaddress()) == 0) {
+  // if (strcmp(boardConfig[0]->GetIPaddress(), boardConfig[1]->GetIPaddress()) == 0) {
   //  std::cout << "ERROR: did not find two different IP addresses" << std::endl;
   //  exit(0);
   //}
