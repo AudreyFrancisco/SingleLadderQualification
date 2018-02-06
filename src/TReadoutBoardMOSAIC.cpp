@@ -394,11 +394,11 @@ void TReadoutBoardMOSAIC::enableControlInterfaces(bool en) {
 void TReadoutBoardMOSAIC::enableControlInterface(int interface, bool en) {
   if (interface < MAX_MOSAICCTRLINT) {
     controlInterface[interface]->addEnable(en);
-    controlInterface[interface]->addDisableME(fBoardConfig->GetManchesterDisable() == 1 ? true : false);
+    controlInterface[interface]->addDisableME(fBoardConfig->GetManchesterDisable() == 1 ? true
+                                                                                        : false);
     controlInterface[interface]->execute();
   }
 }
-
 
 void TReadoutBoardMOSAIC::setInverted(bool AInverted, int Aindex) {
   int st, en;

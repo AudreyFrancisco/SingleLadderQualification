@@ -239,7 +239,7 @@ int THicIB::GetReceiver(int boardIndex, int chipId) {
   return m_rcv[chipId & 0xf];
 }
 
-void THicIB::PowerOn () {
+void THicIB::PowerOn() {
   TReadoutBoardMOSAIC *mosaic = 0;
 
   if (IsPowered())
