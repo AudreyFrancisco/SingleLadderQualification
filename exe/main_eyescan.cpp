@@ -217,7 +217,8 @@ public:
     int hMax = MAX_HORZ_OFFSET - MAX_HORZ_OFFSET % hStep;
 
     for (int hOffset = hMin; hOffset < 0; hOffset+= hStep) {
-      b = ber[hOffset - MIN_HORZ_OFFSET] =
+      size_t idx = (hOffset-hMin)/hStep;
+      b = ber[idx] =
           BERmeasure(hOffset, vOffset, MAX_PRESCALE);
       //	printf("UI: %0.3f BER: %e\n",
       //(float)hOffset/(float)(MAX_HORZ_OFFSET*2),
@@ -232,7 +233,8 @@ public:
 
     zeroCount = 0;
     for (int hOffset = hMax; hOffset >= 0; hOffset-= hStep) {
-      b = ber[hOffset - MIN_HORZ_OFFSET] =
+      size_t idx = (hOffset-hMin)/hStep;
+      b = ber[idx] =
           BERmeasure(hOffset, vOffset, MAX_PRESCALE);
       //	printf("UI: %0.3f BER: %e\n",
       //(float)hOffset/(float)(MAX_HORZ_OFFSET*2),
@@ -249,8 +251,8 @@ public:
   void runFullScan() {
     int hMin = MIN_HORZ_OFFSET + std::abs(MIN_HORZ_OFFSET) % hStep;
     int hMax = MAX_HORZ_OFFSET - MAX_HORZ_OFFSET % hStep;
-    size_t hPoints = (hMax-hMin)/hStep + 1; 
-    
+    size_t hPoints = (hMax-hMin)/hStep + 1;
+
     const int resSize = hPoints;
     std::vector<double> ber(resSize);
     const double minMeasure =
