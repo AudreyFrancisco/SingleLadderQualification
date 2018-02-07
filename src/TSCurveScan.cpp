@@ -251,6 +251,7 @@ void TThresholdScan::PrepareStep(int loopIndex) {
     }
     break;
   case 1: // 2nd loop: mask staging
+    std::cout << "mask stage " << m_value[1] << std::endl;
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
       if (!m_chips.at(ichip)->GetConfig()->IsEnabled())
         continue;
@@ -352,7 +353,6 @@ void TSCurveScan::LoopEnd(int loopIndex) {
     while (!(m_mutex->try_lock()))
       ;
     m_histo->SetIndex(m_row);
-    std::cout << "SCAN: Writing histo with row " << m_histo->GetIndex() << std::endl;
     m_histoQue->push_back(*m_histo);
     m_mutex->unlock();
     m_histo->Clear();

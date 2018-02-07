@@ -172,8 +172,6 @@ void TDigitalAnalysis::WriteStuckPixels(THic *hic) {
 
 void TDigitalAnalysis::AnalyseHisto(TScanHisto *histo) {
   int row = histo->GetIndex();
-  std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size()
-            << std::endl;
   WriteHitData(histo, row);
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     for (int icol = 0; icol < 1024; icol++) {
