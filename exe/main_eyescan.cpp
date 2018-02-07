@@ -111,8 +111,8 @@ enum GTP_DRP_ADDR {
 
 class EyeScan {
 public:
-  EyeScan(TReadoutBoardMOSAIC &board, size_t chipId, std::string filename, bool verbose=false)
-      : m_board(board), m_chipId(chipId), m_verbose(verbose) {
+  EyeScan(TReadoutBoardMOSAIC &board, size_t chipId, std::string filename, int hStep=1, int vStep=1, bool verbose=false)
+    : m_board(board), m_chipId(chipId), hStep(hStep), vStep(vStep), m_verbose(verbose) {
     dataFile.open(filename);
     dataFile.setf(std::ios_base::scientific);
   }
@@ -213,7 +213,10 @@ public:
     m_board.WriteTransceiverDRPField(m_chipId, ES_CONTROL, ES_CONTROL_SIZE,
                                      ES_CONTROL_OFFSET, 0x0, true);
 
-    for (int hOffset = MIN_HORZ_OFFSET; hOffset < 0; hOffset++) {
+    int hMin = MIN_HORZ_OFFSET + std::abs(MIN_HORZ_OFFSET) % hStep;
+    int hMax = MAX_HORZ_OFFSET - MAX_HORZ_OFFSET % hStep;
+
+    for (int hOffset = hMin; hOffset < 0; hOffset+= hStep) {
       b = ber[hOffset - MIN_HORZ_OFFSET] =
           BERmeasure(hOffset, vOffset, MAX_PRESCALE);
       //	printf("UI: %0.3f BER: %e\n",
@@ -228,7 +231,7 @@ public:
     }
 
     zeroCount = 0;
-    for (int hOffset = MAX_HORZ_OFFSET; hOffset >= 0; hOffset--) {
+    for (int hOffset = hMax; hOffset >= 0; hOffset-= hStep) {
       b = ber[hOffset - MIN_HORZ_OFFSET] =
           BERmeasure(hOffset, vOffset, MAX_PRESCALE);
       //	printf("UI: %0.3f BER: %e\n",
@@ -244,8 +247,12 @@ public:
   }
 
   void runFullScan() {
-    const int resSize = 2 * MAX_HORZ_OFFSET + 1;
-    double ber[resSize];
+    int hMin = MIN_HORZ_OFFSET + std::abs(MIN_HORZ_OFFSET) % hStep;
+    int hMax = MAX_HORZ_OFFSET - MAX_HORZ_OFFSET % hStep;
+    size_t hPoints = (hMax-hMin)/hStep + 1; 
+    
+    const int resSize = hPoints;
+    std::vector<double> ber(resSize);
     const double minMeasure =
         ((double)1.0 / ((double)BUS_WIDTH * (double)0xffff *
                         (double)(1UL << (MAX_PRESCALE + 1))));
@@ -256,10 +263,13 @@ public:
       printf("\n");
     */
 
-    for (int vOffset = MIN_VERT_OFFSET; vOffset <= MAX_VERT_OFFSET; vOffset++) {
+    int vMin = MIN_VERT_OFFSET + std::abs(MIN_VERT_OFFSET) % vStep;
+    int vMax = MAX_VERT_OFFSET - MAX_VERT_OFFSET % vStep;
+
+    for (int vOffset = vMin; vOffset <= vMax; vOffset+= vStep) {
       for (int i = 0; i < resSize; i++)
         ber[i] = 0.0;
-      runHScan(ber, vOffset);
+      runHScan(ber.data(), vOffset);
       for (int i = 0; i < resSize; i++)
         if (ber[i] == 0.0)
           ber[i] = minMeasure;
@@ -299,6 +309,8 @@ private:
   TReadoutBoardMOSAIC &m_board;
   size_t m_chipId;
   std::ofstream dataFile;
+  int hStep;
+  int vStep;
   bool m_verbose;
 };
 
@@ -363,14 +375,14 @@ int main(int argc, char **argv) {
 
     // Eyescan
     bool verbose = true;
-    int chipId = 0;
     for (const auto &rChip : fChips) {
       if (!rChip->GetConfig()->IsEnabled())
         continue;
       std::string filename("eye_ch");
-      filename += std::to_string(rChip->GetConfig()->GetChipId());
+      int chipId = rChip->GetConfig()->GetChipId();
+      filename += std::to_string(chipId);
       filename += ".dat";
-      eyescan::EyeScan scan(*myMOSAIC, chipId, filename,verbose);
+      eyescan::EyeScan scan(*myMOSAIC, chipId, filename,4,4,verbose);
       scan.runFullScan();
     }
   }
