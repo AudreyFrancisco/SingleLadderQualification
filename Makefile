@@ -36,7 +36,7 @@ ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs | sed -e 's/-lpthread//g')
 BASE_CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp THIC.cpp \
   USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp TReadoutBoardMOSAIC.cpp TChipConfig.cpp \
   TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp TPowerBoard.cpp \
-  TPowerBoardConfig.cpp BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp \
+  TPowerBoardConfig.cpp BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TFastPowerAnalysis.cpp\
   TPowerAnalysis.cpp TDigitalAnalysis.cpp TDigitalWFAnalysis.cpp TFifoAnalysis.cpp TLocalBusAnalysis.cpp \
   TDACScan.cpp TDataTaking.cpp TReadoutTest.cpp TEnduranceCycle.cpp TCycleAnalysis.cpp TReadoutAnalysis.cpp \
   TNoiseAnalysis.cpp TScan.cpp TFifoTest.cpp TPowerTest.cpp TFastPowerTest.cpp TSCurveScan.cpp TDigitalScan.cpp \

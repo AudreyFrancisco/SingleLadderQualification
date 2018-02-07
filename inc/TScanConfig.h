@@ -13,6 +13,7 @@ typedef enum {
   OBQualification,
   OBEndurance,
   OBReception,
+  OBPower,
   OBHalfStaveOL,
   OBHalfStaveML,
   IBQualification,
@@ -58,6 +59,8 @@ namespace ScanConfig {
   // current limits for powering test in mA
   const int POWER_CUT_MINIDDA_OB = 20;
   const int POWER_CUT_MINIDDD_OB = 50;
+  const int POWER_CUT_MAXIDDA_OB = 200; // for fast power test
+  const int POWER_CUT_MAXIDDD_OB = 200; // for fast power test
   const int POWER_CUT_MINIDDD_IB = 50;
   const int POWER_CUT_MINIDDA_IB = 20;
 
@@ -167,6 +170,8 @@ private:
   int m_localBusCutRed;
   int m_powerCutMinIdda_OB;
   int m_powerCutMinIddd_OB;
+  int m_powerCutMaxIdda_OB;
+  int m_powerCutMaxIddd_OB;
   int m_powerCutMinIddaClocked_OB;
   int m_powerCutMinIdddClocked_OB;
   int m_powerCutMaxIddaClocked_OB;

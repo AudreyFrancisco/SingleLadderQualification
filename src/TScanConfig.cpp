@@ -50,6 +50,8 @@ TScanConfig::TScanConfig() {
 
   m_powerCutMinIdda_OB = POWER_CUT_MINIDDA_OB;
   m_powerCutMinIddd_OB = POWER_CUT_MINIDDD_OB;
+  m_powerCutMaxIdda_OB = POWER_CUT_MAXIDDA_OB;
+  m_powerCutMaxIddd_OB = POWER_CUT_MAXIDDD_OB;
   m_powerCutMinIddaClocked_OB = POWER_CUT_MINIDDA_CLOCKED_OB;
   m_powerCutMinIdddClocked_OB = POWER_CUT_MINIDDD_CLOCKED_OB;
   m_powerCutMaxIddaClocked_OB = POWER_CUT_MAXIDDA_CLOCKED_OB;
@@ -140,6 +142,8 @@ void TScanConfig::InitParamMap() {
   fSettings["MAXIBIAS"] = &m_maxIbias;
   fSettings["MINIDDA_OB"] = &m_powerCutMinIdda_OB;
   fSettings["MINIDDD_OB"] = &m_powerCutMinIddd_OB;
+  fSettings["MAXIDDA_OB"] = &m_powerCutMaxIdda_OB;
+  fSettings["MAXIDDD_OB"] = &m_powerCutMaxIddd_OB;
   fSettings["MINIDDA_CLOCKED_OB"] = &m_powerCutMinIddaClocked_OB;
   fSettings["MINIDDD_CLOCKED_OB"] = &m_powerCutMinIdddClocked_OB;
   fSettings["MAXIDDA_CLOCKED_OB"] = &m_powerCutMaxIddaClocked_OB;
