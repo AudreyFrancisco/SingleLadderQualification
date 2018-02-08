@@ -130,6 +130,8 @@ void TEnduranceCycle::ConfigureMask(TAlpide *chip) {
 void TEnduranceCycle::Execute() {
   // 1) Power on all HICs, check for trips, measure currents
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled())
+      continue;
     m_hics.at(ihic)->PowerOn();
     m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_idddClocked = m_hics.at(ihic)->GetIddd();
     m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_iddaClocked = m_hics.at(ihic)->GetIdda();
@@ -140,6 +142,8 @@ void TEnduranceCycle::Execute() {
   //    measure initial temperature (here and not earlier to avoid non-working chips
   CountWorkingChips();
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled())
+      continue;
     m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_tempStart = m_hics.at(ihic)->GetTemperature();
   }
 
@@ -159,6 +163,8 @@ void TEnduranceCycle::Execute() {
     m_boards.at(i)->StartRun();
   }
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled())
+      continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
     m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_idddConfigured = m_hics.at(ihic)->GetIddd();
     m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_iddaConfigured = m_hics.at(ihic)->GetIdda();
@@ -171,16 +177,19 @@ void TEnduranceCycle::Execute() {
 
   // 5) measure final temperature & power off
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled())
+      continue;
     m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_tempEnd = m_hics.at(ihic)->GetTemperature();
     m_hics.at(ihic)->PowerOff();
   }
 }
 
-void TEnduranceCycle::LoopEnd(int loopIndex) {
+void TEnduranceCycle::Next(int loopIndex) {
   if (loopIndex == 0) {
     m_counterVector.push_back(m_hicCounters);
     ClearCounters();
   }
+  TScan::Next(loopIndex);
 }
 
 void TEnduranceCycle::Terminate() {

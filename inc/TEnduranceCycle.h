@@ -49,8 +49,9 @@ public:
   void Init();
   void Execute();
   void Terminate();
+  void Next(int loopIndex);
   void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
-  void LoopEnd(int loopIndex);
+  void LoopEnd(int loopIndex) { (void)loopIndex; };
   void PrepareStep(int loopIndex) { (void)loopIndex; };
   std::vector<std::map<std::string, THicCounter>> GetCounters() { return m_counterVector; };
 };
