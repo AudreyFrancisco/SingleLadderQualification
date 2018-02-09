@@ -9,6 +9,12 @@ TEnduranceCycle::TEnduranceCycle(TScanConfig *config, std::vector<TAlpide *> chi
                                  std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex) {
   strcpy(m_name, "Endurance Cycle");
+
+  m_parameters = new TCycleParameters;
+  ((TCycleParameters *)m_parameters)->nTriggers = config->GetParamValue("ENDURANCETRIGGERS");
+  ((TCycleParameters *)m_parameters)->upTime = config->GetParamValue("ENDURANCEUPTIME");
+  ((TCycleParameters *)m_parameters)->downTime = config->GetParamValue("ENDURANCEDOWNTIME");
+  ((TCycleParameters *)m_parameters)->nCycles = config->GetParamValue("ENDURANCECYCLES");
   m_start[2] = 0;
   m_step[2] = 1;
   m_stop[2] = 1;
@@ -19,9 +25,7 @@ TEnduranceCycle::TEnduranceCycle(TScanConfig *config, std::vector<TAlpide *> chi
 
   m_start[0] = 0;
   m_step[0] = 1;
-  m_stop[0] = config->GetParamValue("ENDURANCECYCLES"); // loop over hics?
-
-  m_triggers = config->GetParamValue("ENDURANCETRIGGERS");
+  m_stop[0] = ((TCycleParameters *)m_parameters)->nCycles;
 
   CreateMeasurements();
   m_histo = 0;
@@ -53,6 +57,17 @@ void TEnduranceCycle::Init() {
     if (!(m_chips.at(i)->GetConfig()->IsEnabled()))
       continue;
     m_chips.at(i)->GetReadoutBoard()->SetChipEnable(m_chips.at(i), false);
+  }
+}
+
+void TEnduranceCycle::PrepareStep(int loopIndex) {
+  switch (loopIndex) {
+  case 0: // innermost loop: cycling
+    std::cout << "Starting cycle " << m_value[0] << std::endl;
+    sprintf(m_state, "Running %d", m_value[0]);
+    break;
+  default:
+    break;
   }
 }
 
@@ -129,10 +144,12 @@ void TEnduranceCycle::ConfigureMask(TAlpide *chip) {
 
 void TEnduranceCycle::Execute() {
   // 1) Power on all HICs, check for trips, measure currents
+  std::cout << "  Powering on";
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled())
       continue;
     m_hics.at(ihic)->PowerOn();
+    sleep(1);
     m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_idddClocked = m_hics.at(ihic)->GetIddd();
     m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_iddaClocked = m_hics.at(ihic)->GetIdda();
     m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_trip = !(m_hics.at(ihic)->IsPowered());
@@ -171,17 +188,23 @@ void TEnduranceCycle::Execute() {
   }
 
   // 4) trigger
+  std::cout << "  Triggering" << std::endl;
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
-    m_boards.at(iboard)->Trigger(m_triggers);
+    m_boards.at(iboard)->Trigger(((TCycleParameters *)m_parameters)->nTriggers);
   }
 
-  // 5) measure final temperature & power off
+  // 5) wait, measure final temperature & power off, sleep again
+  std::cout << "  Waiting" << std::endl;
+  sleep(((TCycleParameters *)m_parameters)->upTime);
+  std::cout << "  Powering off" << std::endl;
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled())
       continue;
     m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_tempEnd = m_hics.at(ihic)->GetTemperature();
     m_hics.at(ihic)->PowerOff();
   }
+  std::cout << "  Waiting" << std::endl;
+  sleep(((TCycleParameters *)m_parameters)->downTime);
 }
 
 void TEnduranceCycle::Next(int loopIndex) {

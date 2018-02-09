@@ -133,6 +133,8 @@ namespace ScanConfig {
   const float BACKBIAS = 0;
   const int NOMINAL = 0;
   const int ENDURANCE_CYCLES = 3;
+  const int ENDURANCE_UPTIME = 60;
+  const int ENDURANCE_DOWNTIME = 120;
   const int ENDURANCE_TRIGGERS = 10000;
 }
 
@@ -229,6 +231,8 @@ private:
   float m_backBias;
   bool m_useDataPath; // for compatibility with standalone scans, set true for GUI
   int m_enduranceCycles;
+  int m_enduranceUptime;
+  int m_enduranceDowntime;
   int m_enduranceTriggers;
   int m_readoutSpeed;
   int m_readoutOcc;
