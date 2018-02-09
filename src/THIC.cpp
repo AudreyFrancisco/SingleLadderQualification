@@ -49,7 +49,7 @@ unsigned int THic::GetNEnabledChips() {
 
 void THic::Disable() {
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-    m_chips.at(ichip)->GetConfig()->SetEnable(false);
+    m_chips.at(ichip)->SetEnable(false);
   }
 }
 

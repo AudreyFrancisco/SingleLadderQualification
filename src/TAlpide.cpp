@@ -11,7 +11,8 @@ TAlpide::TAlpide(TChipConfig *config)
       fADCHalfLSB(false), fADCSign(false) {}
 
 void TAlpide::SetEnable(bool Enable) {
-  fReadoutBoard->SetChipEnable(this, Enable);
+  if (fReadoutBoard)
+    fReadoutBoard->SetChipEnable(this, Enable);
   fConfig->SetEnable(Enable);
 }
 

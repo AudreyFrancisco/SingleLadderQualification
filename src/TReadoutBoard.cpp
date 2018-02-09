@@ -12,7 +12,8 @@ int TReadoutBoard::AddChip(uint8_t chipId, int controlInterface, int receiver, T
   newChip.chipId = chipId;
   newChip.controlInterface = controlInterface;
   newChip.receiver = receiver;
-  newChip.enabled = true; // create chip positions by default enabled?
+  newChip.enabled = chipPtr->GetConfig()->IsEnabled();
+  // true; // create chip positions by default enabled?
   newChip.alpidePtr = chipPtr;
 
   fChipPositions.push_back(newChip);
