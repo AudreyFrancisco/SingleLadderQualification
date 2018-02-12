@@ -49,15 +49,16 @@ protected:
   virtual void flush();
 
 protected:
-  long dataBufferUsed;
-  long numClosedData;
-  long blockFlags;
-  long blockSrc;
-  dataBuffer_t dataBuffer;
+  long          dataBufferUsed;
+  long          numClosedData;
+  long          blockFlags;
+  long          blockSrc;
+  dataBuffer_t  dataBuffer;
   unsigned char blockHeader[MOSAIC_HEADER_SIZE];
 
 protected:
-  void *getWritePtr(size_t size) {
+  void *getWritePtr(size_t size)
+  {
     // resize the buffer if needed
     if (dataBufferUsed + size > dataBuffer.size()) {
       dataBuffer.resize(dataBufferUsed + size);

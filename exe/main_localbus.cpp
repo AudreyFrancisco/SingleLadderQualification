@@ -34,18 +34,19 @@
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
 
-  TBoardType fBoardType;
+  TBoardType                   fBoardType;
   std::vector<TReadoutBoard *> fBoards;
-  std::vector<THic *> fHics;
-  std::vector<TAlpide *> fChips;
-  TConfig *fConfig;
+  std::vector<THic *>          fHics;
+  std::vector<TAlpide *>       fChips;
+  TConfig *                    fConfig;
 
   std::deque<TScanHisto> fHistoQue;
-  std::mutex fMutex;
+  std::mutex             fMutex;
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 

@@ -26,19 +26,21 @@
 #include "USBHelpers.h"
 #include <unistd.h>
 
-int configureChip(TAlpide *chip) {
+int configureChip(TAlpide *chip)
+{
   // put all chip configurations before the start of the test here
   return 0;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
 
-  TBoardType fBoardType;
+  TBoardType                   fBoardType;
   std::vector<TReadoutBoard *> fBoards;
-  std::vector<TAlpide *> fChips;
-  TConfig *fConfig;
+  std::vector<TAlpide *>       fChips;
+  TConfig *                    fConfig;
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 

@@ -38,6 +38,8 @@
 #include "THisto.h"
 #include "TLocalBusAnalysis.h"
 #include "TLocalBusTest.h"
+#include "TReadoutAnalysis.h"
+#include "TReadoutTest.h"
 #include "TSCurveAnalysis.h"
 #include "TSCurveScan.h"
 #include "TScan.h"
@@ -46,7 +48,8 @@
 
 #include <ctime>
 
-void scanLoop(TScan *myScan) {
+void scanLoop(TScan *myScan)
+{
   std::cout << "In scan loop function" << std::endl;
   myScan->Init();
 
@@ -82,21 +85,23 @@ void scanLoop(TScan *myScan) {
 
 // TODO:: Clean this UP !!!!
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
 
-  TBoardType fBoardType;
+  TBoardType                   fBoardType;
   std::vector<TReadoutBoard *> fBoards;
-  std::vector<THic *> fHics;
-  std::vector<TAlpide *> fChips;
-  TConfig *fConfig;
-  TSCurveResult *fResult = new TSCurveResult();
+  std::vector<THic *>          fHics;
+  std::vector<TAlpide *>       fChips;
+  TConfig *                    fConfig;
+  TReadoutResult *             fResult = new TReadoutResult();
 
   std::deque<TScanHisto> fHistoQue;
-  std::mutex fMutex;
+  std::mutex             fMutex;
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips, "Config.cfg", &fHics);
+
 
   // TDigitalScan *myScan   = new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards,
   // &fHistoQue, &fMutex);
@@ -109,29 +114,36 @@ int main(int argc, char **argv) {
 
   // Now testing full calibration!
   // Timing:
-  std::clock_t start;
-  double elapsed;
-  start = std::clock();
+  // std::clock_t start;
+  // double elapsed;
+  // start=std::clock();
+
   //...
   // elapsed=(std::clock()-start)/(double)CLOCKS_PER_SEC;
   // std::cout << "Time for scan+analysis: " << elapsed << " sec" << std::endl;
 
-  TtuneVCASNScan *myScan_V =
-      new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
-  TSCurveAnalysis *analysis_V = new TSCurveAnalysis(&fHistoQue, myScan_V, fConfig->GetScanConfig(),
-                                                    fHics, &fMutex, fResult, 1);
-  std::cout << "starting thread VCASN" << std::endl;
-  std::thread scanThread_V(scanLoop, myScan_V);
-  analysis_V->Initialize();
-  std::thread analysisThread_V(&TScanAnalysis::Run, analysis_V);
-  scanThread_V.join();
-  analysisThread_V.join();
-  analysis_V->Finalize();
 
-  elapsed = (std::clock() - start) / (double)CLOCKS_PER_SEC;
-  std::cout << "Time for scan+analysis: " << elapsed << " sec" << std::endl;
+  TScan *myScan =
+      new TReadoutTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+  TScanAnalysis *myAnalysis =
+      new TReadoutAnalysis(&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex, fResult);
+  // TtuneVCASNScan *myScan_V = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards,
+  // &fHistoQue, &fMutex);
+  // TSCurveAnalysis *analysis_V = new TSCurveAnalysis(&fHistoQue, myScan_V,
+  // fConfig->GetScanConfig(), fHics, &fMutex, fResult, 1);
 
-  std::cout << "Printing mean VCASN thresholds:" << std::endl;
+  std::thread scanThread(scanLoop, myScan);
+  myAnalysis->Initialize();
+  std::thread analysisThread(&TScanAnalysis::Run, myAnalysis);
+  scanThread.join();
+  analysisThread.join();
+  myAnalysis->Finalize();
+
+  // elapsed=(std::clock()-start)/(double)CLOCKS_PER_SEC;
+  // std::cout << "Time for scan+analysis: " << elapsed << " sec" << std::endl;
+
+
+  // std::cout << "Printing mean VCASN thresholds:" << std::endl;
   //  std::map<int,common::TStatVar> thresh_V = analysis_V->DeleteThis();
   // for (std::map<int,common::TStatVar>::iterator it = thresh_V.begin(); it != thresh_V.end();
   // it++) {
@@ -153,8 +165,7 @@ int main(int argc, char **argv) {
   //}
   //}
 
-  if (fResult)
-    std::cout << "fResult OK" << std::endl;
+  if (fResult) std::cout << "fResult OK" << std::endl;
   // TApplyVCASNTuning *apply_V = new TApplyVCASNTuning(&fHistoQue, NULL, fConfig->GetScanConfig(),
   // fHics, &fMutex, fResult);
   // std::cout << "starting thread apply_V" << std::endl;
@@ -219,8 +230,8 @@ int main(int argc, char **argv) {
   // std::endl;
   // }
 
-  delete myScan_V;
-  delete analysis_V;
+  delete myScan;
+  delete myAnalysis;
   // delete apply_V;
   // delete myScan_I;
   // delete analysis_I;

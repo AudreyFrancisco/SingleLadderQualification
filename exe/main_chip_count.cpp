@@ -26,23 +26,24 @@
 #include "USBHelpers.h"
 #include <unistd.h>
 
-TBoardType fBoardType;
+TBoardType                   fBoardType;
 std::vector<TReadoutBoard *> fBoards;
-std::vector<TAlpide *> fChips;
-TConfig *fConfig;
+std::vector<TAlpide *>       fChips;
+TConfig *                    fConfig;
 
 int fEnabled = 0; // variable to count number of enabled chips; leave at 0
 
-int configureChip(TAlpide *chip) {
+int configureChip(TAlpide *chip)
+{
   // put all chip configurations before the start of the test here
   chip->WriteRegister(Alpide::REG_MODECONTROL, 0x20);
-  if (fConfig->GetDeviceType() == TYPE_CHIP)
-    chip->WriteRegister(Alpide::REG_CMUDMU_CONFIG, 0x60);
+  if (fConfig->GetDeviceType() == TYPE_CHIP) chip->WriteRegister(Alpide::REG_CMUDMU_CONFIG, 0x60);
 
   return 0;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
 
@@ -62,8 +63,7 @@ int main(int argc, char **argv) {
     fBoards.at(0)->SendOpCode(Alpide::OPCODE_RORST);
 
     for (unsigned int ichip = 0; ichip < fChips.size(); ichip++) {
-      if (!fChips.at(ichip)->GetConfig()->IsEnabled())
-        continue;
+      if (!fChips.at(ichip)->GetConfig()->IsEnabled()) continue;
 
       fEnabled++;
     }

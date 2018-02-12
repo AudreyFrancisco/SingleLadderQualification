@@ -7,9 +7,9 @@
 
 class TLocalBusTest : public TScan {
 private:
-  TAlpide *m_readChip;
-  TAlpide *m_writeChip;
-  int m_boardIndex;
+  TAlpide *                           m_readChip;
+  TAlpide *                           m_writeChip;
+  int                                 m_boardIndex;
   std::vector<std::vector<TAlpide *>> m_daisyChains;
   void FindDaisyChains(std::vector<TAlpide *> chips);
   int GetChipById(std::vector<TAlpide *> chips, int previousId);

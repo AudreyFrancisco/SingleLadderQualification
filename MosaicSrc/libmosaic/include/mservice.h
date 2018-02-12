@@ -44,12 +44,12 @@
 class MService {
 public:
   typedef struct fw_info {
-    int ver_maj;
-    int ver_min;
+    int           ver_maj;
+    int           ver_min;
     unsigned char flash_id[3];
     unsigned char flash_status_register;
-    char sw_identity[33];
-    char fw_identity[33];
+    char          sw_identity[33];
+    char          fw_identity[33];
   } fw_info_t;
 
 public:
@@ -65,10 +65,10 @@ private:
 
 private:
   // int port;
-  int sockfd;
+  int                sockfd;
   struct sockaddr_in sockAddress;
-  int rcvTimoutTime;
-  uint8_t seqNumber;
+  int                rcvTimoutTime;
+  uint8_t            seqNumber;
 };
 
 class MSrvcError : public MException {

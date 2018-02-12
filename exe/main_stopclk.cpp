@@ -12,17 +12,18 @@
 #include <unistd.h>
 #include <vector>
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   TConfig *fConfig;
 
   decodeCommandParameters(argc, argv);
   initConfig(fConfig);
 
   TReadoutBoardMOSAIC *theBoard;
-  TBoardConfigMOSAIC *theBoardConfig;
+  TBoardConfigMOSAIC * theBoardConfig;
   for (unsigned int i = 0; i < fConfig->GetNBoards(); i++) {
     theBoardConfig = (TBoardConfigMOSAIC *)fConfig->GetBoardConfig(i);
-    theBoard = new TReadoutBoardMOSAIC(fConfig, theBoardConfig);
+    theBoard       = new TReadoutBoardMOSAIC(fConfig, theBoardConfig);
     theBoard->enableControlInterfaces(false);
   }
 

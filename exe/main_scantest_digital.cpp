@@ -38,7 +38,8 @@
 #include "TScanConfig.h"
 #include "TThresholdAnalysis.h"
 
-void scanLoop(TScan *myScan) {
+void scanLoop(TScan *myScan)
+{
   std::cout << "In scan loop functiokn" << std::endl;
   myScan->Init();
 
@@ -64,18 +65,19 @@ void scanLoop(TScan *myScan) {
   myScan->Terminate();
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
 
-  TBoardType fBoardType;
+  TBoardType                   fBoardType;
   std::vector<TReadoutBoard *> fBoards;
-  std::vector<THic *> fHics;
-  std::vector<TAlpide *> fChips;
-  TConfig *fConfig;
+  std::vector<THic *>          fHics;
+  std::vector<TAlpide *>       fChips;
+  TConfig *                    fConfig;
 
   std::deque<TScanHisto> fHistoQue;
-  std::mutex fMutex;
+  std::mutex             fMutex;
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 

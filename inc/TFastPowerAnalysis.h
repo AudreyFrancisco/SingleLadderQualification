@@ -11,7 +11,8 @@ class TFastPowerResultChip : public TScanResultChip {
 public:
   TFastPowerResultChip() : TScanResultChip(){};
   void WriteToFile(FILE *fp) { (void)fp; };
-  float GetVariable(TResultVariable var) {
+  float GetVariable(TResultVariable var)
+  {
     (void)(&var);
     return 0;
   };
@@ -21,13 +22,13 @@ class TFastPowerResultHic : public TScanResultHic {
   friend class TFastPowerAnalysis;
 
 private:
-  bool trip;
+  bool  trip;
   float iddaSwitchon;
   float idddSwitchon;
   float ibias0;
   float ibias3;
   float ibias[50];
-  char m_ivFile[200];
+  char  m_ivFile[200];
 
 protected:
 public:
@@ -55,11 +56,13 @@ private:
   THicClassification GetClassificationOB(THicCurrents currents);
 
 protected:
-  TScanResultChip *GetChipResult() {
+  TScanResultChip *GetChipResult()
+  {
     TFastPowerResultChip *result = new TFastPowerResultChip();
     return result;
   };
-  TScanResultHic *GetHicResult() {
+  TScanResultHic *GetHicResult()
+  {
     TFastPowerResultHic *result = new TFastPowerResultHic();
     return result;
   };
@@ -67,7 +70,7 @@ protected:
   void InitCounters(){};
   void WriteResult();
   void AnalyseHisto(TScanHisto *histo) { (void)&histo; };
-  string GetPreviousTestType();
+  string                        GetPreviousTestType();
 
 public:
   TFastPowerAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

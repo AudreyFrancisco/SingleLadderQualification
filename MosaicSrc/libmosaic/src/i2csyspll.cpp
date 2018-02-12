@@ -37,7 +37,8 @@
 
 I2CSysPll::I2CSysPll(WishboneBus *wbbPtr, uint32_t baseAdd) : I2Cbus(wbbPtr, baseAdd) {}
 
-void I2CSysPll::writeReg(uint8_t add, uint16_t d) {
+void I2CSysPll::writeReg(uint8_t add, uint16_t d)
+{
   addAddress(CDCM6208_ADDRESS, I2Cbus::I2C_Write);
   addWriteData(0x00);
   addWriteData(add);
@@ -46,7 +47,8 @@ void I2CSysPll::writeReg(uint8_t add, uint16_t d) {
   execute();
 }
 
-void I2CSysPll::readReg(uint8_t add, uint16_t *d) {
+void I2CSysPll::readReg(uint8_t add, uint16_t *d)
+{
   uint32_t *r = new uint32_t[2];
 
   addAddress(CDCM6208_ADDRESS, I2Cbus::I2C_Write);
@@ -61,7 +63,8 @@ void I2CSysPll::readReg(uint8_t add, uint16_t *d) {
   *d = ((r[0] & 0xff) << 8) | (r[1] & 0xff);
 }
 
-void I2CSysPll::setup(pllRegisters_t regs) {
+void I2CSysPll::setup(pllRegisters_t regs)
+{
   uint16_t r;
   //	int lookTry;
 
@@ -73,8 +76,7 @@ void I2CSysPll::setup(pllRegisters_t regs) {
   // Verify
   for (int i = 0; i < 20; i++) {
     readReg(i, &r);
-    if (r != regs.reg[i])
-      throw MBoardInitError("System PLL verify error");
+    if (r != regs.reg[i]) throw MBoardInitError("System PLL verify error");
   }
 
   // Cycle the reset

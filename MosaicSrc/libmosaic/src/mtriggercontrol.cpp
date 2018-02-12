@@ -34,10 +34,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-MTriggerControl::MTriggerControl(WishboneBus *wbbPtr, uint32_t baseAdd)
-    : MWbbSlave(wbbPtr, baseAdd) {}
+MTriggerControl::MTriggerControl(WishboneBus *wbbPtr, uint32_t baseAdd) : MWbbSlave(wbbPtr, baseAdd)
+{
+}
 
-void MTriggerControl::addEnableExtTrigger(bool en, bool levelSensitive) {
+void MTriggerControl::addEnableExtTrigger(bool en, bool levelSensitive)
+{
   uint32_t tmp;
 
   tmp = en ? EN_EXT_TRIGGER : 0;
@@ -46,17 +48,18 @@ void MTriggerControl::addEnableExtTrigger(bool en, bool levelSensitive) {
   wbb->addWrite(baseAddress + regCfg, tmp);
 }
 
-void MTriggerControl::getTriggerCounter(uint32_t *counter) {
+void MTriggerControl::getTriggerCounter(uint32_t *counter)
+{
   wbb->addRead(baseAddress + regTriggerCounter, counter);
   wbb->execute();
 }
 
-std::string MTriggerControl::dumpRegisters() {
-  if (!wbb)
-    throw MIPBusUDPError("No IPBus configured");
+std::string MTriggerControl::dumpRegisters()
+{
+  if (!wbb) throw MIPBusUDPError("No IPBus configured");
 
   regAddress_e addrs[] = {regCfg, regTriggerCounter, regTimeL, regTimeH};
-  uint32_t nAddrs = sizeof(addrs) / sizeof(regAddress_e);
+  uint32_t     nAddrs  = sizeof(addrs) / sizeof(regAddress_e);
 
   std::stringstream ss;
   ss << std::hex;
@@ -66,7 +69,8 @@ std::string MTriggerControl::dumpRegisters() {
     try {
       wbb->addRead(baseAddress + addrs[iAddr], &result);
       execute();
-    } catch (...) {
+    }
+    catch (...) {
       std::cerr << "MTriggerControl read error: address 0x" << std::hex
                 << baseAddress + addrs[iAddr] << " (0x" << addrs[iAddr] << ")!" << std::dec
                 << std::endl;

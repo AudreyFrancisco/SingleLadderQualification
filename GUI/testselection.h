@@ -20,23 +20,23 @@ public:
                             QString &tfive, QString &done, QString &dtwo, QString &dthree,
                             QString &dfour, QString &dfive);
   virtual void connectlocationcombo(std::vector<std::pair<std::string, int>> floc);
-  virtual int GetLocationID() { return locid; }
+  virtual int  GetLocationID() { return locid; }
   virtual void ClearLocations();
 
 private:
   Ui::TestSelection *ui;
-  Dialog *missingsettings;
-  int locid;
-  int memid;
-  bool m_testDatabase;
-  QString location;
-  QString toptwo, topthree, topfour, topfive;
-  QString downone, downtwo, downthree, downfour, downfive;
-  MainWindow *fmainwindow;
+  Dialog *           missingsettings;
+  int                locid;
+  int                memid;
+  bool               m_testDatabase;
+  QString            location;
+  QString            toptwo, topthree, topfour, topfive;
+  QString            downone, downtwo, downthree, downfour, downfive;
+  MainWindow *       fmainwindow;
 
 public slots:
   virtual void getlocationcombo(int value);
-  virtual int GetMemberID();
+  virtual int  GetMemberID();
   virtual void adjustendurance();
   virtual void hideendurance();
   virtual void GetTestTypeName(TTestType &typetest, QString &testname);

@@ -44,6 +44,6 @@ void MakeDaisyChain(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
 int decodeCommandParameters(int argc, char **argv);
 
 void BaseConfigOBchip(TChipConfig *&chipConfig);
-int initConfig(TConfig *&config,
+int initConfig(TConfig *&  config,
                const char *configFileName = ""); // YCM: init config from command parameter
 #endif

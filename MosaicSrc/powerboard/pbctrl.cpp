@@ -17,22 +17,23 @@ using namespace std;
 #define BOARD_NAME_LEN 128
 
 typedef struct options_s {
-  char board[BOARD_NAME_LEN];
-  bool readState;
-  int IthN;
+  char  board[BOARD_NAME_LEN];
+  bool  readState;
+  int   IthN;
   float IthVal;
   float Vbias;
-  int VoutN;
+  int   VoutN;
   float VoutVal;
-  int storeVout;
-  bool storeAllVout;
-  bool restoreAllVout;
-  bool on;
-  bool off;
+  int   storeVout;
+  bool  storeAllVout;
+  bool  restoreAllVout;
+  bool  on;
+  bool  off;
 } options_t;
 options_t OPTIONS;
 
-void dump(unsigned char *buffer, int size) {
+void dump(unsigned char *buffer, int size)
+{
   int i, j;
 
   for (i = 0; i < size;) {
@@ -44,7 +45,8 @@ void dump(unsigned char *buffer, int size) {
   }
 }
 
-void print_help() {
+void print_help()
+{
   printf("pbctrl [options] board_address\n"
          "\n"
          "Options list:\n"
@@ -64,74 +66,75 @@ void print_help() {
         Read options from command line
         return -1 if error, 0 if OK
 */
-int readopt(int argc, char *argv[]) {
+int readopt(int argc, char *argv[])
+{
   int pc = 1;
 
-  if (argc < 3)
-    return -1;
+  if (argc < 3) return -1;
 
   errno = 0; //  needed for strto* functions
 
-  OPTIONS.readState = false;
-  OPTIONS.IthN = -1;
-  OPTIONS.Vbias = 1;
-  OPTIONS.VoutN = -1;
-  OPTIONS.storeVout = -1;
-  OPTIONS.storeAllVout = false;
+  OPTIONS.readState      = false;
+  OPTIONS.IthN           = -1;
+  OPTIONS.Vbias          = 1;
+  OPTIONS.VoutN          = -1;
+  OPTIONS.storeVout      = -1;
+  OPTIONS.storeAllVout   = false;
   OPTIONS.restoreAllVout = false;
-  OPTIONS.on = false;
-  OPTIONS.off = false;
+  OPTIONS.on             = false;
+  OPTIONS.off            = false;
 
   while (pc < argc) {
     if (strcmp(argv[pc], "-state") == 0) {
       OPTIONS.readState = true;
-    } else if (strcmp(argv[pc], "-Ith") == 0) {
-      if (pc >= (argc - 2))
-        return -1;
-      OPTIONS.IthN = strtol(argv[++pc], NULL, 10);
+    }
+    else if (strcmp(argv[pc], "-Ith") == 0) {
+      if (pc >= (argc - 2)) return -1;
+      OPTIONS.IthN   = strtol(argv[++pc], NULL, 10);
       OPTIONS.IthVal = strtof(argv[++pc], NULL);
-      if (OPTIONS.IthN < 0 || OPTIONS.IthN > 15 || OPTIONS.IthVal < 0)
-        return -1;
-    } else if (strcmp(argv[pc], "-Vbias") == 0) {
-      if (pc >= (argc - 1))
-        return -1;
+      if (OPTIONS.IthN < 0 || OPTIONS.IthN > 15 || OPTIONS.IthVal < 0) return -1;
+    }
+    else if (strcmp(argv[pc], "-Vbias") == 0) {
+      if (pc >= (argc - 1)) return -1;
       OPTIONS.Vbias = strtof(argv[++pc], NULL);
-      if (OPTIONS.Vbias > 0)
-        return -1;
-    } else if (strcmp(argv[pc], "-Vout") == 0) {
-      if (pc >= (argc - 2))
-        return -1;
-      OPTIONS.VoutN = strtol(argv[++pc], NULL, 10);
+      if (OPTIONS.Vbias > 0) return -1;
+    }
+    else if (strcmp(argv[pc], "-Vout") == 0) {
+      if (pc >= (argc - 2)) return -1;
+      OPTIONS.VoutN   = strtol(argv[++pc], NULL, 10);
       OPTIONS.VoutVal = strtof(argv[++pc], NULL);
-      if (OPTIONS.VoutN < 0 || OPTIONS.VoutN > 15 || OPTIONS.VoutVal < 0)
-        return -1;
-    } else if (strcmp(argv[pc], "-store") == 0) {
-      if (pc >= (argc - 1))
-        return -1;
+      if (OPTIONS.VoutN < 0 || OPTIONS.VoutN > 15 || OPTIONS.VoutVal < 0) return -1;
+    }
+    else if (strcmp(argv[pc], "-store") == 0) {
+      if (pc >= (argc - 1)) return -1;
       OPTIONS.storeVout = strtol(argv[++pc], NULL, 10);
-      if (OPTIONS.storeVout < 0)
-        return -1;
-    } else if (strcmp(argv[pc], "-storeall") == 0) {
+      if (OPTIONS.storeVout < 0) return -1;
+    }
+    else if (strcmp(argv[pc], "-storeall") == 0) {
       OPTIONS.storeAllVout = true;
-    } else if (strcmp(argv[pc], "-restoreall") == 0) {
+    }
+    else if (strcmp(argv[pc], "-restoreall") == 0) {
       OPTIONS.restoreAllVout = true;
-    } else if (strcmp(argv[pc], "-on") == 0) {
+    }
+    else if (strcmp(argv[pc], "-on") == 0) {
       OPTIONS.on = true;
-    } else if (strcmp(argv[pc], "-off") == 0) {
+    }
+    else if (strcmp(argv[pc], "-off") == 0) {
       OPTIONS.off = true;
-    } else {
+    }
+    else {
       break;
     }
     pc++;
   }
-  if (pc >= argc || argv[pc][0] == '-')
-    return -1;
+  if (pc >= argc || argv[pc][0] == '-') return -1;
 
   strncpy(OPTIONS.board, argv[pc], BOARD_NAME_LEN);
   return 0;
 }
 
-void printState(powerboard::pbstate_t *pbStat) {
+void printState(powerboard::pbstate_t *pbStat)
+{
   printf("\nPower board state:\n");
 
   printf("T:%5.1f ", pbStat->T);
@@ -151,7 +154,8 @@ void printState(powerboard::pbstate_t *pbStat) {
   printf("\n\n");
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   powerboard::pbstate pbStat;
 
   if (readopt(argc, argv) < 0) {
@@ -160,8 +164,8 @@ int main(int argc, char **argv) {
   }
 
   try {
-    PBif *board = new PBif(OPTIONS.board);
-    powerboard *pb = board->pb;
+    PBif *      board = new PBif(OPTIONS.board);
+    powerboard *pb    = board->pb;
 
     // check board connection
     if (!pb->isReady()) {
@@ -169,18 +173,12 @@ int main(int argc, char **argv) {
       exit(0);
     }
 
-    if (OPTIONS.IthN >= 0)
-      pb->setIth(OPTIONS.IthN, OPTIONS.IthVal);
-    if (OPTIONS.Vbias <= 0)
-      pb->setVbias(OPTIONS.Vbias);
-    if (OPTIONS.VoutN >= 0)
-      pb->setVout(OPTIONS.VoutN, OPTIONS.VoutVal);
-    if (OPTIONS.storeVout >= 0)
-      pb->storeVout(OPTIONS.storeVout);
-    if (OPTIONS.storeAllVout)
-      pb->storeAllVout();
-    if (OPTIONS.restoreAllVout)
-      pb->restoreAllVout();
+    if (OPTIONS.IthN >= 0) pb->setIth(OPTIONS.IthN, OPTIONS.IthVal);
+    if (OPTIONS.Vbias <= 0) pb->setVbias(OPTIONS.Vbias);
+    if (OPTIONS.VoutN >= 0) pb->setVout(OPTIONS.VoutN, OPTIONS.VoutVal);
+    if (OPTIONS.storeVout >= 0) pb->storeVout(OPTIONS.storeVout);
+    if (OPTIONS.storeAllVout) pb->storeAllVout();
+    if (OPTIONS.restoreAllVout) pb->restoreAllVout();
     if (OPTIONS.on) {
       pb->onAllVout();
       pb->onAllVbias();
@@ -199,7 +197,8 @@ int main(int argc, char **argv) {
     }
 
     delete board;
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     cout << e.what() << endl;
   }
 

@@ -47,19 +47,19 @@ protected:
 
 private:
   enum dataCode_e {
-    DCODE_IDLE = 0xff,
-    DCODE_CHIP_EMPTY = 0x0e,
-    DSHIFT_CHIP_EMPTY = 4,
-    DCODE_REGION_HEADER = 0x06,
+    DCODE_IDLE           = 0xff,
+    DCODE_CHIP_EMPTY     = 0x0e,
+    DSHIFT_CHIP_EMPTY    = 4,
+    DCODE_REGION_HEADER  = 0x06,
     DSHIFT_REGION_HEADER = 5,
-    DCODE_DATA_SHORT = 0x01, // 16 bits long
-    DSHIFT_DATA_SHORT = 6,
-    DCODE_DATA_LONG = 0x00, // 24 bits long
-    DSHIFT_DATA_LONG = 6,
-    DCODE_CHIP_HEADER = 0x0a, // Chip Header
-    DSHIFT_CHIP_HEADER = 4,
-    DCODE_CHIP_TRAILER = 0x0b, // Chip trailer
-    DSHIFT_CHIP_TRAILER = 4
+    DCODE_DATA_SHORT     = 0x01, // 16 bits long
+    DSHIFT_DATA_SHORT    = 6,
+    DCODE_DATA_LONG      = 0x00, // 24 bits long
+    DSHIFT_DATA_LONG     = 6,
+    DCODE_CHIP_HEADER    = 0x0a, // Chip Header
+    DSHIFT_CHIP_HEADER   = 4,
+    DCODE_CHIP_TRAILER   = 0x0b, // Chip trailer
+    DSHIFT_CHIP_TRAILER  = 4
   };
 
 private:

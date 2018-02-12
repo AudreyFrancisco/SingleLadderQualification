@@ -33,14 +33,14 @@ class TReadoutResultHic : public TScanResultHic {
 
 private:
   TErrorCounter m_errorCounter;
-  int m_linkSpeed;
-  int m_driver;
-  int m_preemp;
-  int m_missingHits;
-  int m_deadPixels;
-  int m_ineffPixels;
-  int m_extraHits;
-  int m_noisyPixels;
+  int           m_linkSpeed;
+  int           m_driver;
+  int           m_preemp;
+  int           m_missingHits;
+  int           m_deadPixels;
+  int           m_ineffPixels;
+  int           m_extraHits;
+  int           m_noisyPixels;
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 public:
@@ -60,27 +60,29 @@ public:
 
 class TReadoutAnalysis : public TScanAnalysis {
 private:
-  int m_nTrig;
-  int m_occ;
-  int m_row;
+  int  m_nTrig;
+  int  m_occ;
+  int  m_row;
   void FillVariableList(){};
   bool IsInjected(int col, int row);
-  void WriteResult();
+  void               WriteResult();
   THicClassification GetClassificationOB(TReadoutResultHic *result);
   THicClassification GetClassificationIB(TReadoutResultHic *result);
 
 protected:
-  TScanResultChip *GetChipResult() {
+  TScanResultChip *GetChipResult()
+  {
     TReadoutResultChip *Result = new TReadoutResultChip();
     return Result;
   };
-  TScanResultHic *GetHicResult() {
+  TScanResultHic *GetHicResult()
+  {
     TReadoutResultHic *Result = new TReadoutResultHic();
     return Result;
   };
   void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
-  void InitCounters();
+  void   InitCounters();
   string GetPreviousTestType() { return string(""); }; // done only once ?
 public:
   TReadoutAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

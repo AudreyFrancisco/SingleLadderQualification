@@ -19,20 +19,21 @@ using namespace std;
 
 char *TBoardConfigMOSAIC::DEF_IP_ADDRESS = (char *)"192.168.168.250";
 
-TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIndex) {
+TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIndex)
+{
   fBoardType = boardMOSAIC;
 
   // Default values set
   NumberOfControlInterfaces = MAX_MOSAICCTRLINT;
-  TCPPort = DEF_TCPPORT;
-  ControlInterfacePhase = DEF_CTRLINTPHASE;
-  RunCtrlAFThreshold = DEF_CTRLAFTHR;
+  TCPPort                   = DEF_TCPPORT;
+  ControlInterfacePhase     = DEF_CTRLINTPHASE;
+  RunCtrlAFThreshold        = DEF_CTRLAFTHR;
   RunCtrlLatMode =
       DEF_CTRLLATMODE; // 0 := latencyModeEoe, 1 := latencyModeTimeout, 2 := latencyModeMemory
-  RunCtrlTimeout = DEF_CTRLTIMEOUT;
-  pollDataTimeout = DEF_POLLDATATIMEOUT; // milliseconds
-  Inverted = DEF_POLARITYINVERSION;
-  SpeedMode = DEF_SPEEDMODE;
+  RunCtrlTimeout    = DEF_CTRLTIMEOUT;
+  pollDataTimeout   = DEF_POLLDATATIMEOUT; // milliseconds
+  Inverted          = DEF_POLARITYINVERSION;
+  SpeedMode         = DEF_SPEEDMODE;
   ManchesterDisable = DEF_MANCHESTERDISABLE;
 
   strcpy(IPAddress, DEF_IP_ADDRESS);
@@ -41,28 +42,31 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
       if (AConfigFileName == NULL || strlen(AConfigFileName) == 0)
         throw std::invalid_argument("MOSAIC Config : invalid filename");
       fhConfigFile = fopen(AConfigFileName, "r"); // opens the file
-    } catch (...) {
+    }
+    catch (...) {
       throw std::invalid_argument("MOSAIC Config : file not exists !");
     }
   }
   InitParamMap();
 }
 
-void TBoardConfigMOSAIC::InitParamMap() {
+void TBoardConfigMOSAIC::InitParamMap()
+{
   fSettings["NUMBEROFCONTROLINTERFACES"] = &NumberOfControlInterfaces;
-  fSettings["TCPPORTNUMBER"] = &TCPPort;
-  fSettings["CONTROLINTERFACEPHASE"] = &ControlInterfacePhase;
-  fSettings["CONTROLAFTHRESHOLD"] = &RunCtrlAFThreshold;
-  fSettings["CONTROLLATENCYMODE"] = &RunCtrlLatMode;
-  fSettings["CONTROLTIMEOUT"] = &RunCtrlTimeout;
-  fSettings["POLLINGDATATIMEOUT"] = &pollDataTimeout;
-  fSettings["DATALINKPOLARITY"] = &Inverted;
-  fSettings["DATALINKSPEED"] = &SpeedMode;
-  fSettings["MANCHESTERDISABLED"] = &ManchesterDisable;
+  fSettings["TCPPORTNUMBER"]             = &TCPPort;
+  fSettings["CONTROLINTERFACEPHASE"]     = &ControlInterfacePhase;
+  fSettings["CONTROLAFTHRESHOLD"]        = &RunCtrlAFThreshold;
+  fSettings["CONTROLLATENCYMODE"]        = &RunCtrlLatMode;
+  fSettings["CONTROLTIMEOUT"]            = &RunCtrlTimeout;
+  fSettings["POLLINGDATATIMEOUT"]        = &pollDataTimeout;
+  fSettings["DATALINKPOLARITY"]          = &Inverted;
+  fSettings["DATALINKSPEED"]             = &SpeedMode;
+  fSettings["MANCHESTERDISABLED"]        = &ManchesterDisable;
   TBoardConfig::InitParamMap();
 }
 
-Mosaic::TReceiverSpeed TBoardConfigMOSAIC::GetSpeedMode() {
+Mosaic::TReceiverSpeed TBoardConfigMOSAIC::GetSpeedMode()
+{
   switch (SpeedMode) {
   case 0:
     return (Mosaic::RCV_RATE_400);
@@ -79,7 +83,8 @@ Mosaic::TReceiverSpeed TBoardConfigMOSAIC::GetSpeedMode() {
   }
 }
 
-void TBoardConfigMOSAIC::SetSpeedMode(Mosaic::TReceiverSpeed ASpeedMode) {
+void TBoardConfigMOSAIC::SetSpeedMode(Mosaic::TReceiverSpeed ASpeedMode)
+{
   switch (ASpeedMode) {
   case Mosaic::RCV_RATE_400:
     SpeedMode = 0;
@@ -100,13 +105,14 @@ void TBoardConfigMOSAIC::SetSpeedMode(Mosaic::TReceiverSpeed ASpeedMode) {
 // ----- private methods ----
 
 // sets the IP address
-void TBoardConfigMOSAIC::SetIPaddress(const char *AIPaddress) {
+void TBoardConfigMOSAIC::SetIPaddress(const char *AIPaddress)
+{
   std::cout << "IP Address " << AIPaddress << std::endl;
   try {
-    if (AIPaddress == NULL)
-      throw std::invalid_argument("MOSAIC Config : invalid IP number");
+    if (AIPaddress == NULL) throw std::invalid_argument("MOSAIC Config : invalid IP number");
     strcpy(IPAddress, AIPaddress);
-  } catch (...) {
+  }
+  catch (...) {
     throw std::invalid_argument("MOSAIC Config : bad IP parameter specification");
   }
   return;

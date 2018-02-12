@@ -51,14 +51,15 @@
 
 static const char *WINDOW_TITLE = "Power Board Control";
 
-pbMainWindow::pbMainWindow(QWidget *parent, Qt::WindowFlags fl) : QMainWindow(parent, fl) {
+pbMainWindow::pbMainWindow(QWidget *parent, Qt::WindowFlags fl) : QMainWindow(parent, fl)
+{
   setWindowTitle(QString(WINDOW_TITLE));
   (void)statusBar();
 
   // Voltage input string validator
   VbiasValidator = new setValidator(-4.5, 0.0, 2); // from -6.0 to 0.0 volts 2 decimals
-  VsetValidator = new setValidator(1.5, 2.5, 3);   // from 1.5 to 2.0 volts 3 decimals
-  IsetValidator = new setValidator(0.0, 2.0, 3);   // from 0 to 2.0 Amp 3 decimals
+  VsetValidator  = new setValidator(1.5, 2.5, 3);  // from 1.5 to 2.0 volts 3 decimals
+  IsetValidator  = new setValidator(0.0, 2.0, 3);  // from 0 to 2.0 Amp 3 decimals
 
   // actions
   QAction *fileSaveAction = new QAction("&Save", this);
@@ -106,18 +107,18 @@ pbMainWindow::pbMainWindow(QWidget *parent, Qt::WindowFlags fl) : QMainWindow(pa
   verticalLayout->addWidget(scrollArea);
   QWidget *w = new QWidget(this);
   scrollArea->setWidget(w);
-  ChannelSetOnMapper = new QSignalMapper;
+  ChannelSetOnMapper  = new QSignalMapper;
   ChannelSetOffMapper = new QSignalMapper;
-  ChannelVsetMapper = new QSignalMapper;
-  ChannelIsetMapper = new QSignalMapper;
-  ChannelBiasMapper = new QSignalMapper;
+  ChannelVsetMapper   = new QSignalMapper;
+  ChannelIsetMapper   = new QSignalMapper;
+  ChannelBiasMapper   = new QSignalMapper;
 
   QGridLayout *channelLayout = new QGridLayout(w);
-  int ch = 0;
+  int          ch            = 0;
   for (int r = 0; r < NUM_MODULES; r++) {
-    QGroupBox *chVbiasGroup = new QGroupBox("Vbias", this);
-    QGridLayout *gbox = new QGridLayout(chVbiasGroup);
-    chVbiasOn[r] = new QCheckBox("ON", this);
+    QGroupBox *  chVbiasGroup = new QGroupBox("Vbias", this);
+    QGridLayout *gbox         = new QGridLayout(chVbiasGroup);
+    chVbiasOn[r]              = new QCheckBox("ON", this);
     gbox->addWidget(chVbiasOn[r]);
     ChannelBiasMapper->setMapping(chVbiasOn[r], r);
     connect(chVbiasOn[r], SIGNAL(stateChanged(int)), ChannelBiasMapper, SLOT(map()));
@@ -149,8 +150,8 @@ pbMainWindow::pbMainWindow(QWidget *parent, Qt::WindowFlags fl) : QMainWindow(pa
   refreshTimer = new QTimer(this);
   connect(refreshTimer, SIGNAL(timeout()), this, SLOT(refreshMonitor()));
 
-  board = new PBif();
-  pb = board->pb;
+  board        = new PBif();
+  pb           = board->pb;
   boardAddress = QString("0.0.0.0");
   setOnline(false);
 }
@@ -158,16 +159,19 @@ pbMainWindow::pbMainWindow(QWidget *parent, Qt::WindowFlags fl) : QMainWindow(pa
 /*
  *  Destroys the object and frees any allocated resources
  */
-pbMainWindow::~pbMainWindow() {
+pbMainWindow::~pbMainWindow()
+{
   // no need to delete child widgets, Qt does it all for us
 }
 
-void pbMainWindow::setIPaddress(QString add) {
+void pbMainWindow::setIPaddress(QString add)
+{
   boardAddress = add;
 
   try {
     board->setIPaddress(add.toLatin1().data());
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     qDebug("Error connecting board at address %s", add.toLatin1().data());
     setOnline(false);
     QMessageBox::critical(this, WINDOW_TITLE, "Board comunication error", "OK");
@@ -179,7 +183,8 @@ void pbMainWindow::setIPaddress(QString add) {
       throw MIPBusErrorWrite("Power board comunication error");
     }
     pb->startADC();
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     qDebug("Power Board is not connected or is off");
     setOnline(false);
     QMessageBox::critical(this, WINDOW_TITLE, "Power Board is not connected or is off", "OK");
@@ -191,18 +196,19 @@ void pbMainWindow::setIPaddress(QString add) {
   refreshMonitor();
 }
 
-void pbMainWindow::configure() {
+void pbMainWindow::configure()
+{
   optionsDialog cfg(this);
   cfg.setAddress(boardAddress);
-  if (cfg.exec() == QDialog::Rejected)
-    return;
+  if (cfg.exec() == QDialog::Rejected) return;
 
   setIPaddress(cfg.address());
 }
 
-QWidget *pbMainWindow::topStatusBar() {
+QWidget *pbMainWindow::topStatusBar()
+{
   QFontMetrics metrics(QApplication::font());
-  QPalette Pal(palette());
+  QPalette     Pal(palette());
   Pal.setColor(QPalette::Background, Qt::black);
   Pal.setColor(QPalette::Foreground, Qt::red);
 
@@ -213,7 +219,7 @@ QWidget *pbMainWindow::topStatusBar() {
   statusFrameLayout->setContentsMargins(3, 3, 3, 3);
   statusFrameLayout->setSpacing(6);
 
-  ledRedPixmap = QPixmap(ledRed);
+  ledRedPixmap  = QPixmap(ledRed);
   ledGreyPixmap = QPixmap(ledGrey);
 
   QLabel *label;
@@ -264,7 +270,8 @@ QWidget *pbMainWindow::topStatusBar() {
   return statusFrame;
 }
 
-QLCDNumber *pbMainWindow::newLargeLCD() {
+QLCDNumber *pbMainWindow::newLargeLCD()
+{
   QPalette Pal(palette());
   Pal.setColor(QPalette::Background, Qt::black);
   Pal.setColor(QPalette::Foreground, Qt::green);
@@ -280,7 +287,8 @@ QLCDNumber *pbMainWindow::newLargeLCD() {
   return lcd;
 }
 
-QLCDNumber *pbMainWindow::newSmallLCD() {
+QLCDNumber *pbMainWindow::newSmallLCD()
+{
   QPalette Pal(palette());
   Pal.setColor(QPalette::Background, Qt::black);
   Pal.setColor(QPalette::Foreground, Qt::red);
@@ -296,13 +304,14 @@ QLCDNumber *pbMainWindow::newSmallLCD() {
   return lcd;
 }
 
-QWidget *pbMainWindow::channel(int ch, QString chName) {
-  QLabel *label;
-  int col = 0;
+QWidget *pbMainWindow::channel(int ch, QString chName)
+{
+  QLabel *     label;
+  int          col = 0;
   QFontMetrics metrics(QApplication::font());
 
-  QGroupBox *channelGroup = new QGroupBox(chName, this);
-  QGridLayout *gbox = new QGridLayout(channelGroup);
+  QGroupBox *  channelGroup = new QGroupBox(chName, this);
+  QGridLayout *gbox         = new QGridLayout(channelGroup);
 
   // LED
   channelLED[ch] = new QLabel(NULL);
@@ -367,83 +376,92 @@ QWidget *pbMainWindow::channel(int ch, QString chName) {
 /*
         SLOTS
 */
-void pbMainWindow::channelSetON(int ch) {
+void pbMainWindow::channelSetON(int ch)
+{
   channelIset(ch);
   try {
     // pb->onVout(ch);
     pb->onVout(ch);
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     comErrorExit(e);
   }
 }
 
-void pbMainWindow::channelSetOFF(int ch) {
+void pbMainWindow::channelSetOFF(int ch)
+{
   try {
     // pb->setIth(ch, 0.0);
     pb->offVout(ch);
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     comErrorExit(e);
   }
 }
 
-void pbMainWindow::channelVset(int ch) {
+void pbMainWindow::channelVset(int ch)
+{
   QString s;
-  float V = VsetText[ch]->text().toFloat();
+  float   V = VsetText[ch]->text().toFloat();
 
-  if (V < 0)
-    V = 0;
-  if (V > 2.5)
-    V = 2.5;
+  if (V < 0) V   = 0;
+  if (V > 2.5) V = 2.5;
   s.setNum(V, 'F', 3);
 
   try {
     pb->setVout(ch, V);
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     comErrorExit(e);
   }
 
   refreshSettings();
 }
 
-void pbMainWindow::storeVset() {
+void pbMainWindow::storeVset()
+{
   try {
     pb->storeAllVout();
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     comErrorExit(e);
   }
 }
 
-void pbMainWindow::channelIset(int ch) {
+void pbMainWindow::channelIset(int ch)
+{
   QString s;
-  float I = IsetText[ch]->text().toFloat();
+  float   I = IsetText[ch]->text().toFloat();
 
-  if (I < 0)
-    I = 0;
-  if (I > 2.0)
-    I = 2.0;
+  if (I < 0) I   = 0;
+  if (I > 2.0) I = 2.0;
   s.setNum(I, 'F', 3);
   IsetText[ch]->setText(s);
 
   try {
     pb->setIth(ch, I);
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     comErrorExit(e);
   }
 }
 
-void pbMainWindow::VbiasSet() {
+void pbMainWindow::VbiasSet()
+{
   float V = VbiasText->text().toFloat();
 
   try {
     pb->setVbias(V);
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     comErrorExit(e);
   }
 
   //	enVbias(V!=0.0);
 }
 
-void pbMainWindow::biasCheckBoxChanged(int ch) {
+void pbMainWindow::biasCheckBoxChanged(int ch)
+{
   bool on = chVbiasOn[ch]->isChecked();
   enVbias(on, ch);
 }
@@ -462,24 +480,28 @@ void pbMainWindow::enAllVbias(bool en)
 }
 */
 
-void pbMainWindow::enVbias(bool en, int ch) {
+void pbMainWindow::enVbias(bool en, int ch)
+{
   try {
     if (en)
       pb->onVbias(ch);
     else
       pb->offVbias(ch);
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     comErrorExit(e);
   }
 }
 
-void pbMainWindow::refreshMonitor() {
-  QString s;
+void pbMainWindow::refreshMonitor()
+{
+  QString             s;
   powerboard::pbstate pbStat;
 
   try {
     pb->getState(&pbStat, powerboard::GetMonitor);
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     comErrorExit(e);
   }
 
@@ -496,7 +518,8 @@ void pbMainWindow::refreshMonitor() {
     if (pbStat.chOn & 1 << i) {
       channelON[i] = true;
       channelLED[i]->setPixmap(ledRedPixmap);
-    } else {
+    }
+    else {
       channelON[i] = false;
       channelLED[i]->setPixmap(ledGreyPixmap);
     }
@@ -546,13 +569,15 @@ void pbMainWindow::refreshMonitor() {
 /*
         read back settings from power board
 */
-void pbMainWindow::refreshSettings() {
-  QString s;
+void pbMainWindow::refreshSettings()
+{
+  QString             s;
   powerboard::pbstate pbStat;
 
   try {
     pb->getState(&pbStat, powerboard::GetSettings);
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     comErrorExit(e);
   }
 
@@ -567,11 +592,13 @@ void pbMainWindow::refreshSettings() {
 /*
         Switch ON all channels
 */
-void pbMainWindow::allON() {
+void pbMainWindow::allON()
+{
   try {
     pb->onAllVout();
     pb->onAllVbias();
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     comErrorExit(e);
   }
 }
@@ -579,11 +606,13 @@ void pbMainWindow::allON() {
 /*
         Switch OFF all channels
 */
-void pbMainWindow::allOFF() {
+void pbMainWindow::allOFF()
+{
   try {
     pb->offAllVbias();
     pb->offAllVout();
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     comErrorExit(e);
   }
 }
@@ -591,7 +620,8 @@ void pbMainWindow::allOFF() {
 /*
         Confiuration load/save
 */
-void pbMainWindow::fileSave() {
+void pbMainWindow::fileSave()
+{
   if (cfgFilename.isEmpty()) {
     fileSaveAs();
     return;
@@ -599,21 +629,21 @@ void pbMainWindow::fileSave() {
   saveConfiguration();
 }
 
-void pbMainWindow::fileSaveAs() {
+void pbMainWindow::fileSaveAs()
+{
   QString filename;
 
   filename = QFileDialog::getSaveFileName(this, "Save Configuration", ".", "Config file (*.cfg)");
-  if (filename.isEmpty())
-    return;
+  if (filename.isEmpty()) return;
 
-  if (filename.right(4) != ".cfg")
-    filename.append(".cfg");
+  if (filename.right(4) != ".cfg") filename.append(".cfg");
 
   cfgFilename = filename;
   saveConfiguration();
 }
 
-void pbMainWindow::saveConfiguration() {
+void pbMainWindow::saveConfiguration()
+{
   qDebug("Saving configuration into file %s", cfgFilename.toLatin1().data());
 
   QFile of(cfgFilename);
@@ -624,9 +654,9 @@ void pbMainWindow::saveConfiguration() {
   }
 
   // Create XML config document
-  QTextStream stream(&of);
+  QTextStream  stream(&of);
   QDomDocument doc("CFG");
-  QDomElement root = doc.createElement("PowerBoardSetup");
+  QDomElement  root = doc.createElement("PowerBoardSetup");
   doc.appendChild(root);
 
   QDomElement mosaic = doc.createElement("MOSAIC");
@@ -661,18 +691,18 @@ void pbMainWindow::saveConfiguration() {
   of.close();
 }
 
-void pbMainWindow::fileOpen(char *fname) {
+void pbMainWindow::fileOpen(char *fname)
+{
   QString filename;
 
   if (fname && strlen(fname) > 0) {
     filename = fname;
-  } else {
+  }
+  else {
     filename = QFileDialog::getOpenFileName(this, "Load Configuration", ".", "Config file (*.cfg)");
-    if (filename.isEmpty())
-      return;
+    if (filename.isEmpty()) return;
 
-    if (filename.right(4) != ".cfg")
-      filename.append(".cfg");
+    if (filename.right(4) != ".cfg") filename.append(".cfg");
   }
 
   qDebug("Reading configuration from file %s", filename.toLatin1().data());
@@ -704,17 +734,14 @@ void pbMainWindow::fileOpen(char *fname) {
   }
 
   // Read MOSAIC board address
-  if (!XMLreadMOSAIC(root))
-    goto cfgReadError;
+  if (!XMLreadMOSAIC(root)) goto cfgReadError;
 
   // Read Vbias settings
-  if (!XMLreadBias(root))
-    goto cfgReadError;
+  if (!XMLreadBias(root)) goto cfgReadError;
 
   // read channel settings
   for (int i = 0; i < NUM_CHANNELS; i++) {
-    if (!XMLreadChannel(root, i))
-      goto cfgReadError;
+    if (!XMLreadChannel(root, i)) goto cfgReadError;
   }
 
   cfgFilename = filename;
@@ -727,14 +754,14 @@ cfgReadError:
   return;
 }
 
-bool pbMainWindow::XMLreadChannel(QDomElement &root, int n) {
+bool pbMainWindow::XMLreadChannel(QDomElement &root, int n)
+{
   QString chN, val;
   chN.setNum(n);
   chN = "Channel_" + chN;
 
   QDomElement channel = XMLgetTag(root, chN);
-  if (channel.isNull())
-    return false;
+  if (channel.isNull()) return false;
 
   val = channel.attribute("Vset", "0.000");
   VsetText[n]->setText(val);
@@ -751,13 +778,13 @@ bool pbMainWindow::XMLreadChannel(QDomElement &root, int n) {
   return true;
 }
 
-bool pbMainWindow::XMLreadBias(QDomElement &root) {
+bool pbMainWindow::XMLreadBias(QDomElement &root)
+{
   QString val;
 
   // Read Vbias settings
   QDomElement bias = XMLgetTag(root, "Bias");
-  if (bias.isNull())
-    return false;
+  if (bias.isNull()) return false;
 
   val = bias.attribute("Vbias", "-0.00");
   VbiasText->setText(val);
@@ -773,20 +800,21 @@ bool pbMainWindow::XMLreadBias(QDomElement &root) {
   return true;
 }
 
-bool pbMainWindow::XMLreadMOSAIC(QDomElement &root) {
+bool pbMainWindow::XMLreadMOSAIC(QDomElement &root)
+{
   QString val;
 
   // Read Vbias settings
   QDomElement mosaic = XMLgetTag(root, "MOSAIC");
-  if (mosaic.isNull())
-    return false;
+  if (mosaic.isNull()) return false;
 
   val = mosaic.attribute("IP", "0.0.0.0");
   setIPaddress(val);
   return true;
 }
 
-QDomElement pbMainWindow::XMLgetTag(QDomElement &e, QString tagName) {
+QDomElement pbMainWindow::XMLgetTag(QDomElement &e, QString tagName)
+{
   QDomElement ret;
 
   // enter in TAG
@@ -812,7 +840,8 @@ QDomElement pbMainWindow::XMLgetTag(QDomElement &e, QString tagName) {
   return ret;
 }
 
-void pbMainWindow::setOnline(bool online) {
+void pbMainWindow::setOnline(bool online)
+{
   boardIsOnline = online;
   centralWidgetPtr->setEnabled(online);
   if (online)
@@ -821,7 +850,8 @@ void pbMainWindow::setOnline(bool online) {
     refreshTimer->stop();
 }
 
-void pbMainWindow::comErrorExit(std::exception &e) {
+void pbMainWindow::comErrorExit(std::exception &e)
+{
   qDebug("%s", e.what());
 
   setOnline(false);

@@ -51,19 +51,19 @@ using namespace std;
 
 class CernSsoCookieJar {
   struct Cookie {
-    string domain;
-    bool tailmatch;
-    string path;
-    bool secure;
+    string            domain;
+    bool              tailmatch;
+    string            path;
+    bool              secure;
     unsigned long int expires;
-    string name;
-    string value;
+    string            name;
+    string            value;
   };
 
   // Members
 private:
-  string theSslUrl;
-  string theCookiePackFile;
+  string         theSslUrl;
+  string         theCookiePackFile;
   vector<Cookie> theJar;
 
 #ifdef AUTH_X509

@@ -41,9 +41,9 @@ ALPIDErcv::~ALPIDErcv() {}
 //
 // set register
 //
-void ALPIDErcv::addSetReg(uint16_t address, uint16_t val) {
-  if (!wbb)
-    throw PControlInterfaceError("No IPBus configured");
+void ALPIDErcv::addSetReg(uint16_t address, uint16_t val)
+{
+  if (!wbb) throw PControlInterfaceError("No IPBus configured");
 
   wbb->addWrite(baseAddress + address, val);
 }
@@ -51,9 +51,9 @@ void ALPIDErcv::addSetReg(uint16_t address, uint16_t val) {
 //
 // Read register
 //
-void ALPIDErcv::addGetReg(uint16_t address, uint32_t *val) {
-  if (!wbb)
-    throw PControlInterfaceError("No IPBus configured");
+void ALPIDErcv::addGetReg(uint16_t address, uint32_t *val)
+{
+  if (!wbb) throw PControlInterfaceError("No IPBus configured");
 
   wbb->addRead(baseAddress + address, val);
 }
@@ -61,20 +61,22 @@ void ALPIDErcv::addGetReg(uint16_t address, uint32_t *val) {
 //
 // Disable (or enable) the receiver
 //
-void ALPIDErcv::addEnable(bool d) {
+void ALPIDErcv::addEnable(bool d)
+{
   wbb->addRMWbits(baseAddress + regOpMode, ~OPMODE_RCVENABLE, d ? OPMODE_RCVENABLE : 0);
 }
 
-void ALPIDErcv::addInvertInput(bool d) {
+void ALPIDErcv::addInvertInput(bool d)
+{
   wbb->addRMWbits(baseAddress + regOpMode, ~OPMODE_INVERT_POLARITY, d ? OPMODE_INVERT_POLARITY : 0);
 }
 
 //
 // set RDP register
 //
-void ALPIDErcv::addSetRDPReg(uint16_t address, uint16_t val) {
-  if (!wbb)
-    throw PControlInterfaceError("No IPBus configured");
+void ALPIDErcv::addSetRDPReg(uint16_t address, uint16_t val)
+{
+  if (!wbb) throw PControlInterfaceError("No IPBus configured");
 
   wbb->addWrite(baseAddress + rdpBase + address, val);
 }
@@ -82,9 +84,9 @@ void ALPIDErcv::addSetRDPReg(uint16_t address, uint16_t val) {
 //
 // Read RDP register
 //
-void ALPIDErcv::addGetRDPReg(uint16_t address, uint32_t *val) {
-  if (!wbb)
-    throw PControlInterfaceError("No IPBus configured");
+void ALPIDErcv::addGetRDPReg(uint16_t address, uint32_t *val)
+{
+  if (!wbb) throw PControlInterfaceError("No IPBus configured");
 
   wbb->addRead(baseAddress + rdpBase + address, val);
 }
@@ -92,14 +94,14 @@ void ALPIDErcv::addGetRDPReg(uint16_t address, uint32_t *val) {
 //
 //  Read Modify Write a RDP register
 //
-void ALPIDErcv::addSetRDPRegField(uint16_t address, uint16_t size, uint16_t offset, uint16_t val) {
+void ALPIDErcv::addSetRDPRegField(uint16_t address, uint16_t size, uint16_t offset, uint16_t val)
+{
   uint16_t mask = ((1 << (size)) - 1) << offset;
 
   val <<= offset;
   val &= mask;
 
-  if (!wbb)
-    throw PControlInterfaceError("No IPBus configured");
+  if (!wbb) throw PControlInterfaceError("No IPBus configured");
 
   wbb->addRMWbits(baseAddress + rdpBase + address, ~mask, val);
 }

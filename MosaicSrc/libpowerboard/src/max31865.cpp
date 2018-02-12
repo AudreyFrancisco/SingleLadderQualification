@@ -32,12 +32,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-MAX31865::MAX31865(SC18IS602 *spi, uint8_t slave) {
-  spiBus = spi;
+MAX31865::MAX31865(SC18IS602 *spi, uint8_t slave)
+{
+  spiBus   = spi;
   spiSlave = slave;
 }
 
-void MAX31865::writeRegister(uint8_t reg, uint8_t data) {
+void MAX31865::writeRegister(uint8_t reg, uint8_t data)
+{
   uint8_t buffer[2];
 
   buffer[0] = reg | REG_WRITE;
@@ -46,7 +48,8 @@ void MAX31865::writeRegister(uint8_t reg, uint8_t data) {
   spiBus->spiWrite(spiSlave, 2, buffer);
 }
 
-uint8_t MAX31865::readRegister(uint8_t reg) {
+uint8_t MAX31865::readRegister(uint8_t reg)
+{
   uint8_t buffer[2];
 
   buffer[0] = reg;
@@ -60,7 +63,8 @@ uint8_t MAX31865::readRegister(uint8_t reg) {
 
 void MAX31865::configure(uint8_t cfg) { writeRegister(REG_Configuration, cfg); }
 
-uint16_t MAX31865::getRTD() {
+uint16_t MAX31865::getRTD()
+{
   uint16_t resH = readRegister(REG_RTD_MSB);
   uint16_t resL = readRegister(REG_RTD_LSB);
 

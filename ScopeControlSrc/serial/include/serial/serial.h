@@ -61,10 +61,10 @@ namespace serial {
    * Enumeration defines the possible parity types for the serial port.
    */
   typedef enum {
-    parity_none = 0,
-    parity_odd = 1,
-    parity_even = 2,
-    parity_mark = 3,
+    parity_none  = 0,
+    parity_odd   = 1,
+    parity_even  = 2,
+    parity_mark  = 3,
     parity_space = 4
   } parity_t;
 
@@ -98,7 +98,8 @@ namespace serial {
      *
      * \return Timeout struct that represents this simple timeout provided.
      */
-    static Timeout simpleTimeout(uint32_t timeout) {
+    static Timeout simpleTimeout(uint32_t timeout)
+    {
       return Timeout(max(), timeout, 0, timeout, 0);
     }
 
@@ -123,7 +124,9 @@ namespace serial {
         : inter_byte_timeout(inter_byte_timeout_), read_timeout_constant(read_timeout_constant_),
           read_timeout_multiplier(read_timeout_multiplier_),
           write_timeout_constant(write_timeout_constant_),
-          write_timeout_multiplier(write_timeout_multiplier_) {}
+          write_timeout_multiplier(write_timeout_multiplier_)
+    {
+    }
   };
 
   /*!
@@ -425,7 +428,8 @@ namespace serial {
     /*! Sets the timeout for reads and writes. */
     void setTimeout(uint32_t inter_byte_timeout, uint32_t read_timeout_constant,
                     uint32_t read_timeout_multiplier, uint32_t write_timeout_constant,
-                    uint32_t write_timeout_multiplier) {
+                    uint32_t write_timeout_multiplier)
+    {
       Timeout timeout(inter_byte_timeout, read_timeout_constant, read_timeout_multiplier,
                       write_timeout_constant, write_timeout_multiplier);
       return setTimeout(timeout);
@@ -605,10 +609,11 @@ namespace serial {
   class SerialException : public std::exception {
     // Disable copy constructors
     SerialException &operator=(const SerialException &);
-    std::string e_what_;
+    std::string      e_what_;
 
   public:
-    SerialException(const char *description) {
+    SerialException(const char *description)
+    {
       std::stringstream ss;
       ss << "SerialException " << description << " failed.";
       e_what_ = ss.str();
@@ -621,14 +626,15 @@ namespace serial {
   class IOException : public std::exception {
     // Disable copy constructors
     IOException &operator=(const IOException &);
-    std::string file_;
-    int line_;
-    std::string e_what_;
-    int errno_;
+    std::string  file_;
+    int          line_;
+    std::string  e_what_;
+    int          errno_;
 
   public:
     explicit IOException(std::string file, int line, int errnum)
-        : file_(file), line_(line), errno_(errnum) {
+        : file_(file), line_(line), errno_(errnum)
+    {
       std::stringstream ss;
 #if defined(_WIN32) && !defined(__MINGW32__)
       char error_str[1024];
@@ -641,7 +647,8 @@ namespace serial {
       e_what_ = ss.str();
     }
     explicit IOException(std::string file, int line, const char *description)
-        : file_(file), line_(line), errno_(0) {
+        : file_(file), line_(line), errno_(0)
+    {
       std::stringstream ss;
       ss << "IO Exception: " << description;
       ss << ", file " << file_ << ", line " << line_ << ".";
@@ -649,7 +656,9 @@ namespace serial {
     }
     virtual ~IOException() throw() {}
     IOException(const IOException &other)
-        : line_(other.line_), e_what_(other.e_what_), errno_(other.errno_) {}
+        : line_(other.line_), e_what_(other.e_what_), errno_(other.errno_)
+    {
+    }
 
     int getErrorNumber() const { return errno_; }
 
@@ -662,7 +671,8 @@ namespace serial {
     std::string e_what_;
 
   public:
-    PortNotOpenedException(const char *description) {
+    PortNotOpenedException(const char *description)
+    {
       std::stringstream ss;
       ss << "PortNotOpenedException " << description << " failed.";
       e_what_ = ss.str();

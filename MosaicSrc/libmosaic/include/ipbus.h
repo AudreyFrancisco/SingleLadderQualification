@@ -42,11 +42,11 @@
 
 class IPbusTransaction {
 public:
-  uint8_t version;
-  uint16_t words;
-  uint8_t typeId;
-  uint8_t transactionId;
-  uint8_t infoCode;
+  uint8_t   version;
+  uint16_t  words;
+  uint8_t   typeId;
+  uint8_t   transactionId;
+  uint8_t   infoCode;
   uint32_t *readDataPtr;
 };
 
@@ -63,8 +63,8 @@ public:
   void addNIRead(int size, uint32_t address, uint32_t *data);
   void addRMWbits(uint32_t address, uint32_t mask, uint32_t data, uint32_t *rData = NULL);
   void addRMWsum(uint32_t address, uint32_t data, uint32_t *rData = NULL);
-  virtual void execute() = 0;
-  int getBufferSize() { return bufferSize; }
+  virtual void              execute() = 0;
+  int                       getBufferSize() { return bufferSize; }
   virtual const std::string name() = 0;
 
   // test functions
@@ -84,49 +84,49 @@ private:
 public:
   // IPBus info codes (errors)
   enum infoCode_e {
-    infoCodeSuccess = 0x0,
-    infoCodeBadHeader = 0x1,
-    infoCodeBusErrRead = 0x2,
-    infoCodeBusErrWrite = 0x3,
-    infoCodeBusTimeoutRead = 0x4,
+    infoCodeSuccess         = 0x0,
+    infoCodeBadHeader       = 0x1,
+    infoCodeBusErrRead      = 0x2,
+    infoCodeBusErrWrite     = 0x3,
+    infoCodeBusTimeoutRead  = 0x4,
     infoCodeBusTimeoutWrite = 0x5,
-    infoCodeBufferOverflaw = 0x6,
+    infoCodeBufferOverflaw  = 0x6,
     infoCodeBufferUnderflaw = 0x7,
-    infoCodeRequest = 0xf
+    infoCodeRequest         = 0xf
   };
 
   // IPBus type of transaction
   enum typeId_e {
-    typeIdRead = 0x0,
-    typeIdWrite = 0x1,
-    typeIdNIRead = 0x2,
+    typeIdRead    = 0x0,
+    typeIdWrite   = 0x1,
+    typeIdNIRead  = 0x2,
     typeIdNIWrite = 0x3,
     typeIdRMWbits = 0x4,
-    typeIdRMWsum = 0x5,
-    typeIdIdle = 0xf
+    typeIdRMWsum  = 0x5,
+    typeIdIdle    = 0xf
   };
 
 protected:
-  uint8_t *txBuffer;
-  uint8_t *rxBuffer;
-  int txSize;
-  int rxSize;
-  int errorCode;
+  uint8_t *            txBuffer;
+  uint8_t *            rxBuffer;
+  int                  txSize;
+  int                  rxSize;
+  int                  errorCode;
   std::recursive_mutex mutex;
 
 private:
-  int bufferSize;
+  int                     bufferSize;
   class IPbusTransaction *transactionList;
-  int numTransactions;
-  uint8_t transactionId;
-  int expectedRxSize;
-  int rxPtr;
-  int lastRxPktId;
+  int                     numTransactions;
+  uint8_t                 transactionId;
+  int                     expectedRxSize;
+  int                     rxPtr;
+  int                     lastRxPktId;
 
 protected:
   bool duplicatedRxPkt();
   void processAnswer();
-  int getExpectedRxSize() { return expectedRxSize; }
+  int  getExpectedRxSize() { return expectedRxSize; }
 };
 
 #endif // IPBUS_H

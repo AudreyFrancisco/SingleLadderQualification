@@ -10,10 +10,10 @@
 #include "TScan.h"
 
 typedef struct __TSCurveParameters : TScanParameters {
-  bool nominal;
-  int VPULSEH;
-  int VPULSEL;
-  int TARGET;
+  bool  nominal;
+  int   VPULSEH;
+  int   VPULSEL;
+  int   TARGET;
   float backBias;
 } TSCurveParameters;
 
@@ -34,15 +34,15 @@ public:
               std::mutex *aMutex);
   virtual ~TSCurveScan(){};
 
-  THisto CreateHisto(); // public in TScan, so...
-  void Init();
+  THisto       CreateHisto(); // public in TScan, so...
+  void         Init();
   virtual void PrepareStep(int loopIndex) = 0;
   void LoopEnd(int loopIndex);
   void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
-  void Execute();
-  void Terminate();
-  float GetBackbias() { return ((TSCurveParameters *)m_parameters)->backBias; };
-  bool GetNominal() { return ((TSCurveParameters *)m_parameters)->nominal; };
+  void               Execute();
+  void               Terminate();
+  float              GetBackbias() { return ((TSCurveParameters *)m_parameters)->backBias; };
+  bool               GetNominal() { return ((TSCurveParameters *)m_parameters)->nominal; };
 };
 
 class TThresholdScan : public TSCurveScan {

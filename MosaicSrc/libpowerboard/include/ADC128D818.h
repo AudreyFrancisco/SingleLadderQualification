@@ -48,45 +48,45 @@ public:
 
 private:
   enum {
-    CMD_NOP = 0x00,
-    CMD_CONV1 = 0x80,   // Convert Vin1
-    CMD_CONV2 = 0x90,   // Convert Vin2
-    CMD_CONV3 = 0xa0,   // Convert Vin3
-    CMD_CONV4 = 0xb0,   // Convert Vin4
-    CMD_CONV5 = 0xc0,   // Convert Vin5
-    CMD_CONV6 = 0xd0,   // Convert Vin6
-    CMD_CONV7 = 0xe0,   // Convert Vin7
-    CMD_CONV8 = 0xf0,   // Convert Vin8
-    CMD_CONV_SEQ = 0x70 // Convert sequence of configured channels
+    CMD_NOP      = 0x00,
+    CMD_CONV1    = 0x80, // Convert Vin1
+    CMD_CONV2    = 0x90, // Convert Vin2
+    CMD_CONV3    = 0xa0, // Convert Vin3
+    CMD_CONV4    = 0xb0, // Convert Vin4
+    CMD_CONV5    = 0xc0, // Convert Vin5
+    CMD_CONV6    = 0xd0, // Convert Vin6
+    CMD_CONV7    = 0xe0, // Convert Vin7
+    CMD_CONV8    = 0xf0, // Convert Vin8
+    CMD_CONV_SEQ = 0x70  // Convert sequence of configured channels
   };
 
 public:
   enum {
-    REG_Configuration = 0x00,
-    REG_InterruptStatus = 0x01,
-    REG_IterruptMask = 0x03,
-    REG_ConvertionRate = 0x07,
-    REG_ChanneDisable = 0x08,
-    REG_OneShot = 0x09,
-    REG_DeepShutdown = 0x0a,
+    REG_Configuration         = 0x00,
+    REG_InterruptStatus       = 0x01,
+    REG_IterruptMask          = 0x03,
+    REG_ConvertionRate        = 0x07,
+    REG_ChanneDisable         = 0x08,
+    REG_OneShot               = 0x09,
+    REG_DeepShutdown          = 0x0a,
     REG_AdvancedConfiguration = 0x0b,
-    REG_BusyStatus = 0x0c,
-    REG_ChannelReadings = 0x20, // from 0x20 to 0x27	(16 bits)
-    REG_Limit = 0x2a,           // from 0x2a to 0x39
-    REG_ManufacturerID = 0x3e,
-    REG_RevisionID = 0x3f
+    REG_BusyStatus            = 0x0c,
+    REG_ChannelReadings       = 0x20, // from 0x20 to 0x27	(16 bits)
+    REG_Limit                 = 0x2a, // from 0x2a to 0x39
+    REG_ManufacturerID        = 0x3e,
+    REG_RevisionID            = 0x3f
   };
 
   enum {
     ADV_CFG_ExtRefEnable = 0x01 << 0,
-    ADV_CFG_Mode0 = 0x00 << 1,
-    ADV_CFG_Mode1 = 0x01 << 1,
-    ADV_CFG_Mode2 = 0x02 << 1,
-    ADV_CFG_Mode3 = 0x03 << 1,
-    CFG_Start = 1 << 0,
-    CFG_INTnn_En = 1 << 1,
-    CFG_INTnn_Clr = 1 << 3,
-    CFG_INIT = 1 << 7
+    ADV_CFG_Mode0        = 0x00 << 1,
+    ADV_CFG_Mode1        = 0x01 << 1,
+    ADV_CFG_Mode2        = 0x02 << 1,
+    ADV_CFG_Mode3        = 0x03 << 1,
+    CFG_Start            = 1 << 0,
+    CFG_INTnn_En         = 1 << 1,
+    CFG_INTnn_Clr        = 1 << 3,
+    CFG_INIT             = 1 << 7
   };
 };
 

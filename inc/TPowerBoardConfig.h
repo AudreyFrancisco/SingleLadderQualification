@@ -102,7 +102,7 @@ class TPowerBoardConfig {
   // calibration
 public:
   typedef struct Mod {
-    bool BiasOn;
+    bool  BiasOn;
     float AVset;
     float AIset;
     float DVset;
@@ -128,10 +128,10 @@ public:
 
   // members
 private:
-  FILE *fhConfigFile; // the file handle of the Configuration File
+  FILE *     fhConfigFile; // the file handle of the Configuration File
   PowBoard_t fPBConfig;
   TBoardType fBoardType;
-  int m_bottom;
+  int        m_bottom;
   std::map<std::string, int *> fSettings;
 
   // methods
@@ -193,7 +193,7 @@ public:
   bool DumpConfig() { return false; }; // TODO: not yet implemented
   bool GetIsBottom() { return (m_bottom == 1); };
   void SetIsBottom(bool bottom) { m_bottom = bottom ? 1 : 0; };
-  void InitParamMap();
+  void                  InitParamMap();
   bool SetParamValue(std::string Name, std::string Value);
   int GetParamValue(std::string Name);
   bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };

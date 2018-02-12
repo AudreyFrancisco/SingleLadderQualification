@@ -61,7 +61,7 @@ namespace common {
   typedef struct {
     double sum;
     double sum2;
-    int entries;
+    int    entries;
 
     double mean;
     double stdDev;

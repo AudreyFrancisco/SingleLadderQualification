@@ -13,9 +13,10 @@
 
 class TFastPowerTest : public TScan {
 private:
-  THic *m_testHic;
-  void CreateMeasurements();
-  THisto CreateHisto() {
+  THic * m_testHic;
+  void   CreateMeasurements();
+  THisto CreateHisto()
+  {
     THisto histo;
     return histo;
   };

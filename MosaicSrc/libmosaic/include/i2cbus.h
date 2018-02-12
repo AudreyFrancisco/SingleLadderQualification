@@ -54,8 +54,8 @@ private: // WBB Slave registers map
   enum regAddress_e { regWriteAdd = 0, regReadAdd = 1, regParInAdd = 2 };
 
   enum writeRegBits_e {
-    I2C_STOP_BIT = (1 << 31),
-    I2C_START_BIT = (1 << 30),
+    I2C_STOP_BIT       = (1 << 31),
+    I2C_START_BIT      = (1 << 30),
     I2C_MASTER_ACK_BIT = (1 << 29),
     I2C_IGNORE_ACK_BIT = (1 << 28)
   };

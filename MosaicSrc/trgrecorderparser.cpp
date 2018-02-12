@@ -40,7 +40,8 @@ TrgRecorderParser::TrgRecorderParser() { verbose = false; }
 
 void TrgRecorderParser::flush() {}
 
-uint32_t TrgRecorderParser::buf2uint32(unsigned char *buf) {
+uint32_t TrgRecorderParser::buf2uint32(unsigned char *buf)
+{
 #ifdef PLATFORM_IS_LITTLE_ENDIAN
   return (*(uint32_t *)buf) & 0xffffffff;
 #else
@@ -55,7 +56,8 @@ uint32_t TrgRecorderParser::buf2uint32(unsigned char *buf) {
 #endif
 }
 
-uint64_t TrgRecorderParser::buf2uint64(unsigned char *buf) {
+uint64_t TrgRecorderParser::buf2uint64(unsigned char *buf)
+{
 #ifdef PLATFORM_IS_LITTLE_ENDIAN
   return (*(uint64_t *)buf) & 0xffffffffffffffff;
 #else
@@ -75,12 +77,13 @@ uint64_t TrgRecorderParser::buf2uint64(unsigned char *buf) {
 }
 
 // parse the data starting from begin of buffer
-long TrgRecorderParser::parse(int numClosed) {
+long TrgRecorderParser::parse(int numClosed)
+{
   unsigned char *dBuffer = (unsigned char *)&dataBuffer[0];
-  unsigned char *p = dBuffer;
-  long evSize = TRIGGERDATA_SIZE;
-  uint32_t trgNum;
-  uint64_t trgTime;
+  unsigned char *p       = dBuffer;
+  long           evSize  = TRIGGERDATA_SIZE;
+  uint32_t       trgNum;
+  uint64_t       trgTime;
 
   // check avalaible data size
   if (dataBufferUsed < numClosed * evSize) {
@@ -91,11 +94,10 @@ long TrgRecorderParser::parse(int numClosed) {
   }
 
   while (numClosed) {
-    trgNum = buf2uint32(p);
+    trgNum  = buf2uint32(p);
     trgTime = buf2uint64(p + 4);
 
-    if (verbose)
-      printf("Trigger %d @ %ld\n", trgNum, trgTime);
+    if (verbose) printf("Trigger %d @ %ld\n", trgNum, trgTime);
 
     p += evSize;
     numClosed--;

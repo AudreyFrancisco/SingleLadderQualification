@@ -7,25 +7,27 @@
 TFastPowerTest::TFastPowerTest(TScanConfig *config, std::vector<TAlpide *> chips,
                                std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                                std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
-    : TScan(config, chips, hics, boards, histoQue, aMutex) {
+    : TScan(config, chips, hics, boards, histoQue, aMutex)
+{
   strcpy(m_name, "Fast Power Test");
   m_start[2] = 0;
-  m_step[2] = 1;
-  m_stop[2] = 1;
+  m_step[2]  = 1;
+  m_stop[2]  = 1;
 
   m_start[1] = 0;
-  m_step[1] = 1;
-  m_stop[1] = 1;
+  m_step[1]  = 1;
+  m_stop[1]  = 1;
 
   m_start[0] = 0;
-  m_step[0] = 1;
-  m_stop[0] = m_hics.size();
+  m_step[0]  = 1;
+  m_stop[0]  = m_hics.size();
 
   CreateMeasurements();
   m_histo = 0;
 }
 
-void TFastPowerTest::CreateMeasurements() {
+void TFastPowerTest::CreateMeasurements()
+{
   // create map with measurement structure for each HIC
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     THicCurrents hicCurrents;
@@ -37,7 +39,8 @@ void TFastPowerTest::CreateMeasurements() {
 
 void TFastPowerTest::Init() {}
 
-void TFastPowerTest::PrepareStep(int loopIndex) {
+void TFastPowerTest::PrepareStep(int loopIndex)
+{
   switch (loopIndex) {
   case 0: // innermost loop: change HIC
     m_testHic = m_hics.at(m_value[0]);
@@ -49,7 +52,8 @@ void TFastPowerTest::PrepareStep(int loopIndex) {
   }
 }
 
-void TFastPowerTest::DoIVCurve(THicCurrents &result) {
+void TFastPowerTest::DoIVCurve(THicCurrents &result)
+{
   for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
     float voltage = -i / 10;
     m_testHic->GetPowerBoard()->SetBiasVoltage(voltage);
@@ -64,7 +68,8 @@ void TFastPowerTest::DoIVCurve(THicCurrents &result) {
   }
 }
 
-void TFastPowerTest::Execute() {
+void TFastPowerTest::Execute()
+{
   std::vector<int> boardIndices = m_testHic->GetBoardIndices();
 
   std::map<std::string, THicCurrents>::iterator currentIt =
@@ -81,7 +86,8 @@ void TFastPowerTest::Execute() {
   for (int i = 0; i < 8; i++) {
     if (i == m_testHic->GetPbMod()) {
       m_testHic->GetPowerBoard()->SetBiasOn(i);
-    } else {
+    }
+    else {
       m_testHic->GetPowerBoard()->SetBiasOff(i);
     }
   }
@@ -92,7 +98,8 @@ void TFastPowerTest::Execute() {
   if (m_config->GetParamValue("IVCURVE")) {
     DoIVCurve(currentIt->second);
     currentIt->second.ibias3 = currentIt->second.ibias[30];
-  } else {
+  }
+  else {
     m_testHic->GetPowerBoard()->SetBiasVoltage(3.0);
     sleep(1);
     currentIt->second.ibias3 = m_testHic->GetIBias() * 1000;
@@ -103,7 +110,8 @@ void TFastPowerTest::Execute() {
     std::cout << "reading bias voltage of " << m_testHic->GetPowerBoard()->GetBiasVoltage()
               << std::endl;
     currentIt->second.trip = true;
-  } else {
+  }
+  else {
     currentIt->second.trip = false;
   }
   m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);

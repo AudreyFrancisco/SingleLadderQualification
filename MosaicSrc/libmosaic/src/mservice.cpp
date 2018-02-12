@@ -46,91 +46,91 @@
 // Service error - Remote Bus Write error
 MSrvcError::MSrvcError(const string &arg) { msg = "Service connection Error: " + arg; }
 
-MService::MService() {
-  sockfd = -1;
+MService::MService()
+{
+  sockfd    = -1;
   seqNumber = (uint8_t)0;
 }
 
-MService::MService(const char *IPaddr, int port) {
+MService::MService(const char *IPaddr, int port)
+{
   sockfd = -1;
   setIPaddress(IPaddr, port);
   seqNumber = 0;
 }
 
-void MService::setIPaddress(const char *IPaddr, int port) {
+void MService::setIPaddress(const char *IPaddr, int port)
+{
   struct hostent *he;
 
   if ((he = gethostbyname(IPaddr)) == NULL) // get the host address
     throw MSrvcError("Can not resolve board IP address");
 
-  if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-    throw MSrvcError("Can not create socket");
+  if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) throw MSrvcError("Can not create socket");
 
-  sockAddress.sin_family = AF_INET;   // host byte order
-  sockAddress.sin_port = htons(port); // short, network byte order
-  sockAddress.sin_addr = *((struct in_addr *)he->h_addr);
+  sockAddress.sin_family = AF_INET;     // host byte order
+  sockAddress.sin_port   = htons(port); // short, network byte order
+  sockAddress.sin_addr   = *((struct in_addr *)he->h_addr);
   memset(sockAddress.sin_zero, '\0', sizeof sockAddress.sin_zero);
 }
 
 MService::~MService() {}
 
-int MService::sockRead(unsigned char *rxBuffer, int bufSize) {
+int MService::sockRead(unsigned char *rxBuffer, int bufSize)
+{
   struct sockaddr_in peer_addr;
-  socklen_t peer_addr_len;
-  struct pollfd ufds;
-  int rv;
-  int rxSize = 0;
+  socklen_t          peer_addr_len;
+  struct pollfd      ufds;
+  int                rv;
+  int                rxSize = 0;
 
-  ufds.fd = sockfd;
+  ufds.fd     = sockfd;
   ufds.events = POLLIN; // check for normal
-  rv = poll(&ufds, 1, rcvTimoutTime);
+  rv          = poll(&ufds, 1, rcvTimoutTime);
 
-  if (rv == -1)
-    throw MSrvcError("Poll system call");
+  if (rv == -1) throw MSrvcError("Poll system call");
 
-  if (rv == 0)
-    throw MIPBusUDPTimeout();
+  if (rv == 0) throw MIPBusUDPTimeout();
 
   // check for events on sockfd:
   if (ufds.revents & POLLIN) {
     peer_addr_len = sizeof(struct sockaddr);
-    rxSize = recvfrom(sockfd, rxBuffer, bufSize, 0, (struct sockaddr *)&peer_addr,
+    rxSize        = recvfrom(sockfd, rxBuffer, bufSize, 0, (struct sockaddr *)&peer_addr,
                       (socklen_t *)&peer_addr_len);
   }
 
-  if (rxSize < 0)
-    throw MSrvcError("Datagram receive system call");
+  if (rxSize < 0) throw MSrvcError("Datagram receive system call");
 
-  if (rxBuffer[0] != seqNumber)
-    throw MSrvcError("Wrong sequence number");
+  if (rxBuffer[0] != seqNumber) throw MSrvcError("Wrong sequence number");
 
-  if (rxBuffer[1] != PKT_ACK)
-    throw MSrvcError("NACK on response\n");
+  if (rxBuffer[1] != PKT_ACK) throw MSrvcError("NACK on response\n");
 
   return rxSize;
 }
 
-void MService::sockWrite(unsigned char *txBuffer, int txSize) {
+void MService::sockWrite(unsigned char *txBuffer, int txSize)
+{
   txBuffer[0] = ++seqNumber;
   if (sendto(sockfd, txBuffer, txSize, 0, (struct sockaddr *)&sockAddress,
              sizeof(struct sockaddr)) == -1)
     throw MSrvcError("Datagram send system call");
 }
 
-void MService::readFWinfo(fw_info_t *info) {
-  const int pktSize = 1400;
+void MService::readFWinfo(fw_info_t *info)
+{
+  const int     pktSize = 1400;
   unsigned char txBuffer[pktSize];
-  int txSize;
+  int           txSize;
   unsigned char rxBuffer[pktSize];
-  ssize_t nread;
-  int i;
+  ssize_t       nread;
+  int           i;
 
   rcvTimoutTime = RCV_LONG_TIMEOUT;
 
   /*
           setup the request message
   */
-  txSize = 1; // the sequence number
+  txSize             = 1; // the sequence number
   txBuffer[txSize++] = CMD_FW_INFO;
   sockWrite(txBuffer, txSize);
 
@@ -141,12 +141,11 @@ void MService::readFWinfo(fw_info_t *info) {
 
   rcvTimoutTime = RCV_SHORT_TIMEOUT;
 
-  if (nread < 8)
-    throw MSrvcError("Response datagram too short");
+  if (nread < 8) throw MSrvcError("Response datagram too short");
 
-  i = 2;
-  info->ver_maj = rxBuffer[i++];
-  info->ver_min = rxBuffer[i++];
+  i                 = 2;
+  info->ver_maj     = rxBuffer[i++];
+  info->ver_min     = rxBuffer[i++];
   info->flash_id[0] = rxBuffer[i++];
   info->flash_id[1] = rxBuffer[i++];
   info->flash_id[2] = rxBuffer[i++];
@@ -160,7 +159,8 @@ void MService::readFWinfo(fw_info_t *info) {
     memcpy(info->fw_identity, rxBuffer + i, 32);
     info->fw_identity[32] = 0;
     i += 32;
-  } else {
+  }
+  else {
     info->sw_identity[0] = 0;
     info->fw_identity[0] = 0;
   }

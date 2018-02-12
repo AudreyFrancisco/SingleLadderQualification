@@ -36,20 +36,23 @@
  */
 #include "AlpideDB.h"
 
-AlpideDB::AlpideDB(bool isTestDB) {
+AlpideDB::AlpideDB(bool isTestDB)
+{
   if (isTestDB) {
     Init("https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx",
          "https://test-alucmsapi.web.cern.ch");
     m_projectId = PROJECT_ID_TEST;
-  } else {
+  }
+  else {
     Init("https://alucmsapi.web.cern.ch/AlucmswebAPI.asmx", "https://alucmsapi.web.cern.ch");
     m_projectId = PROJECT_ID_PROD;
   }
 }
 
-void AlpideDB::Init(string aQueryDomain, string aJarUrl) {
+void AlpideDB::Init(string aQueryDomain, string aJarUrl)
+{
   theQueryDomain = aQueryDomain;
-  theJarUrl = aJarUrl;
+  theJarUrl      = aJarUrl;
 
   theDBmanager = new AlpideDBManager();
 
@@ -60,14 +63,16 @@ void AlpideDB::Init(string aQueryDomain, string aJarUrl) {
 #ifdef AUTH_X509
   if (theDBmanager->isLibCurlCompiled()) {
     isConnected = theDBmanager->Init(theJarUrl, "FrancoAntonio", ".", "alpide4me");
-  } else {
+  }
+  else {
     isConnected = theDBmanager->Init(theJarUrl, "/home/fap/.globus/usercert.pem",
                                      "/home/fap/.globus/userkey.pem", "/etc/ssl/certs");
   }
 #endif
 }
 
-AlpideDB::~AlpideDB() {
+AlpideDB::~AlpideDB()
+{
   delete theDBmanager;
   theDBmanager = 0x0;
 }

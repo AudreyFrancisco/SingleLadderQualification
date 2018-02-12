@@ -36,16 +36,17 @@
 
 TrgRecorder::TrgRecorder(WishboneBus *wbbPtr, uint32_t baseAdd) : MWbbSlave(wbbPtr, baseAdd) {}
 
-void TrgRecorder::addEnable(bool en) {
+void TrgRecorder::addEnable(bool en)
+{
   wbb->addWrite(baseAddress + regControl, en ? CONTROL_ENABLE : 0);
 }
 
-std::string TrgRecorder::dumpRegisters() {
-  if (!wbb)
-    throw MIPBusUDPError("No IPBus configured");
+std::string TrgRecorder::dumpRegisters()
+{
+  if (!wbb) throw MIPBusUDPError("No IPBus configured");
 
   regAddress_e addrs[] = {regControl};
-  uint32_t nAddrs = sizeof(addrs) / sizeof(regAddress_e);
+  uint32_t     nAddrs  = sizeof(addrs) / sizeof(regAddress_e);
 
   std::stringstream ss;
   ss << std::hex;
@@ -55,7 +56,8 @@ std::string TrgRecorder::dumpRegisters() {
     try {
       wbb->addRead(baseAddress + addrs[iAddr], &result);
       execute();
-    } catch (...) {
+    }
+    catch (...) {
       std::cerr << "Pulser read error: address 0x" << std::hex << baseAddress + addrs[iAddr]
                 << " (0x" << addrs[iAddr] << ")!" << std::dec << std::endl;
     };

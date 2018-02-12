@@ -39,10 +39,11 @@ TAlpideDataParser::TAlpideDataParser() {}
 
 // fast parse of input frame
 // return the size of the data for the event pointed by dBuffer.
-long TAlpideDataParser::checkEvent(unsigned char *dBuffer, unsigned char *evFlagsPtr) {
+long TAlpideDataParser::checkEvent(unsigned char *dBuffer, unsigned char *evFlagsPtr)
+{
   unsigned char *p = dBuffer;
-  unsigned char h;
-  int d;
+  unsigned char  h;
+  int            d;
 
   for (int closed = 0; !closed;) {
     if (p - dBuffer > dataBufferUsed)
@@ -52,18 +53,24 @@ long TAlpideDataParser::checkEvent(unsigned char *dBuffer, unsigned char *evFlag
     if ((h >> DSHIFT_CHIP_EMPTY) == DCODE_CHIP_EMPTY) {
       p++;
       closed = 1;
-    } else if ((h >> DSHIFT_CHIP_HEADER) == DCODE_CHIP_HEADER) {
+    }
+    else if ((h >> DSHIFT_CHIP_HEADER) == DCODE_CHIP_HEADER) {
       p++;
-    } else if ((h >> DSHIFT_CHIP_TRAILER) == DCODE_CHIP_TRAILER) {
+    }
+    else if ((h >> DSHIFT_CHIP_TRAILER) == DCODE_CHIP_TRAILER) {
       closed = 1;
       // additional trailer
       *evFlagsPtr = *p++;
-    } else if ((h >> DSHIFT_REGION_HEADER) == DCODE_REGION_HEADER) {
-    } else if ((h >> DSHIFT_DATA_SHORT) == DCODE_DATA_SHORT) {
+    }
+    else if ((h >> DSHIFT_REGION_HEADER) == DCODE_REGION_HEADER) {
+    }
+    else if ((h >> DSHIFT_DATA_SHORT) == DCODE_DATA_SHORT) {
       p++;
-    } else if ((h >> DSHIFT_DATA_LONG) == DCODE_DATA_LONG) {
+    }
+    else if ((h >> DSHIFT_DATA_LONG) == DCODE_DATA_LONG) {
       p += 2;
-    } else {
+    }
+    else {
       d = h;
       cout << " Unknow data header: " << std::hex << d << endl;
     }
@@ -73,11 +80,12 @@ long TAlpideDataParser::checkEvent(unsigned char *dBuffer, unsigned char *evFlag
 }
 
 // parse all data starting from begin of buffer
-long TAlpideDataParser::parse(int numClosed) {
+long TAlpideDataParser::parse(int numClosed)
+{
   unsigned char *dBuffer = (unsigned char *)&dataBuffer[0];
-  unsigned char *p = dBuffer;
-  long evSize;
-  unsigned char evFlags;
+  unsigned char *p       = dBuffer;
+  long           evSize;
+  unsigned char  evFlags;
 
   while (numClosed) {
     evSize = checkEvent(p, &evFlags);
@@ -91,14 +99,14 @@ long TAlpideDataParser::parse(int numClosed) {
 //
 // Read only one frame of data
 // return the size of data frame
-int TAlpideDataParser::ReadEventData(int &nBytes, unsigned char *buffer) {
+int TAlpideDataParser::ReadEventData(int &nBytes, unsigned char *buffer)
+{
   unsigned char *dBuffer = (unsigned char *)&dataBuffer[0];
-  unsigned char *p = dBuffer;
-  long evSize;
-  unsigned char evFlags;
+  unsigned char *p       = dBuffer;
+  long           evSize;
+  unsigned char  evFlags;
 
-  if (numClosedData == 0)
-    return 0;
+  if (numClosedData == 0) return 0;
 
   evSize = checkEvent(p, &evFlags);
 
@@ -111,8 +119,7 @@ int TAlpideDataParser::ReadEventData(int &nBytes, unsigned char *buffer) {
 
   // move unused bytes to the begin of buffer
   size_t bytesToMove = dataBufferUsed - evSize;
-  if (bytesToMove > 0)
-    memmove(&dataBuffer[0], &dataBuffer[evSize], bytesToMove);
+  if (bytesToMove > 0) memmove(&dataBuffer[0], &dataBuffer[evSize], bytesToMove);
   dataBufferUsed -= evSize;
   numClosedData--;
   return evSize;

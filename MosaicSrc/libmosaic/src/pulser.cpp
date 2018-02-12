@@ -43,9 +43,9 @@ Pulser::~Pulser() {}
 //
 // setup the pulser registers
 //
-void Pulser::setConfig(uint32_t triggerDelay, uint32_t pulseDelay, uint32_t opMode) {
-  if (!wbb)
-    throw MIPBusUDPError("No IPBus configured");
+void Pulser::setConfig(uint32_t triggerDelay, uint32_t pulseDelay, uint32_t opMode)
+{
+  if (!wbb) throw MIPBusUDPError("No IPBus configured");
 
   wbb->addWrite(baseAddress + regTriggerDelay, triggerDelay);
   wbb->addWrite(baseAddress + regPulseDelay, pulseDelay);
@@ -56,9 +56,9 @@ void Pulser::setConfig(uint32_t triggerDelay, uint32_t pulseDelay, uint32_t opMo
 //
 // Read the pulser registers
 //
-void Pulser::getConfig(uint32_t *triggerDelay, uint32_t *pulseDelay, uint32_t *opMode) {
-  if (!wbb)
-    throw MIPBusUDPError("No IPBus configured");
+void Pulser::getConfig(uint32_t *triggerDelay, uint32_t *pulseDelay, uint32_t *opMode)
+{
+  if (!wbb) throw MIPBusUDPError("No IPBus configured");
 
   wbb->addRead(baseAddress + regTriggerDelay, triggerDelay);
   wbb->addRead(baseAddress + regPulseDelay, pulseDelay);
@@ -69,9 +69,9 @@ void Pulser::getConfig(uint32_t *triggerDelay, uint32_t *pulseDelay, uint32_t *o
 //
 // generate N pulses. If N==0 stop the generator
 //
-void Pulser::run(uint32_t numPulses) {
-  if (!wbb)
-    throw MIPBusUDPError("No IPBus configured");
+void Pulser::run(uint32_t numPulses)
+{
+  if (!wbb) throw MIPBusUDPError("No IPBus configured");
 
   wbb->addWrite(baseAddress + regNumPulses, numPulses);
   execute();
@@ -80,9 +80,9 @@ void Pulser::run(uint32_t numPulses) {
 //
 //	readout the number of pulsed to be generated
 //
-void Pulser::getStatus(uint32_t *numPulses) {
-  if (!wbb)
-    throw MIPBusUDPError("No IPBus configured");
+void Pulser::getStatus(uint32_t *numPulses)
+{
+  if (!wbb) throw MIPBusUDPError("No IPBus configured");
 
   wbb->addRead(baseAddress + regStatus, numPulses);
   execute();
@@ -91,12 +91,12 @@ void Pulser::getStatus(uint32_t *numPulses) {
 //
 //	dump all the registers to an output file
 //
-std::string Pulser::dumpRegisters() {
-  if (!wbb)
-    throw MIPBusUDPError("No IPBus configured");
+std::string Pulser::dumpRegisters()
+{
+  if (!wbb) throw MIPBusUDPError("No IPBus configured");
 
   regAddress_e addrs[] = {regOpMode, regTriggerDelay, regPulseDelay, regNumPulses, regStatus};
-  uint32_t nAddrs = sizeof(addrs) / sizeof(regAddress_e);
+  uint32_t     nAddrs  = sizeof(addrs) / sizeof(regAddress_e);
 
   std::stringstream ss;
   ss << std::hex;
@@ -106,7 +106,8 @@ std::string Pulser::dumpRegisters() {
     try {
       wbb->addRead(baseAddress + addrs[iAddr], &result);
       execute();
-    } catch (...) {
+    }
+    catch (...) {
       std::cerr << "Pulser read error: address 0x" << std::hex << baseAddress + addrs[iAddr]
                 << " (0x" << addrs[iAddr] << ")!" << std::dec << std::endl;
     };

@@ -61,16 +61,16 @@ public:
   enum ErrorCode { NoError = 0, SyncQuery = 20, BadXML = 21 };
 
   struct response {
-    int Session;
-    int ErrorCode;
+    int    Session;
+    int    ErrorCode;
     string ErrorMessage;
-    int ID;
+    int    ID;
   };
 
 protected:
   AlpideDB *theParentDB;
-  response theResponse;
-  string theGeneralBuffer;
+  response  theResponse;
+  string    theGeneralBuffer;
 
 public:
   explicit AlpideTable(AlpideDB *DBhandle);
@@ -88,7 +88,7 @@ class ProjectDB : public AlpideTable {
   // Members
 public:
   struct project {
-    int ID;
+    int    ID;
     string Name;
   };
 
@@ -102,7 +102,8 @@ public:
 
 public:
   AlpideTable::response *GetList(vector<ProjectDB::project> *Result);
-  string Print(ProjectDB::project *pr) {
+  string Print(ProjectDB::project *pr)
+  {
     return ("Project : ID=" + std::to_string(pr->ID) + " Name=" + pr->Name);
   };
 };
@@ -112,8 +113,8 @@ class MemberDB : public AlpideTable {
   // Members
 public:
   struct member {
-    int ID;
-    int PersonalID;
+    int    ID;
+    int    PersonalID;
     string FullName;
   };
 
@@ -126,7 +127,8 @@ public:
   ~MemberDB();
 
   AlpideTable::response *GetList(int projectID, vector<member> *Result);
-  string Print(member *me) {
+  string Print(member *me)
+  {
     return ("Member : ID=" + std::to_string(me->ID) +
             " Personal ID=" + std::to_string(me->PersonalID) + " Name=" + me->FullName);
   };
@@ -140,150 +142,150 @@ private:
 
 public:
   struct composition {
-    int ID;
+    int    ID;
     string ComponentType;
-    int Quantity;
+    int    Quantity;
   };
 #define zCOMPOSITION(a)                                                                            \
-  a.ID = 0;                                                                                        \
+  a.ID            = 0;                                                                             \
   a.ComponentType = "";                                                                            \
-  a.Quantity = 0
+  a.Quantity      = 0
 
   struct statusphysical {
-    int ID;
+    int    ID;
     string Name;
   };
 #define zSTATUSPHYSICAL(a)                                                                         \
-  a.ID = 0;                                                                                        \
+  a.ID   = 0;                                                                                      \
   a.Name = ""
 
   struct statusfunctional {
-    int ID;
+    int    ID;
     string Name;
   };
 #define zSTATUSFUNCTIONAL(a)                                                                       \
-  a.ID = 0;                                                                                        \
+  a.ID   = 0;                                                                                      \
   a.Name = ""
 
   struct componentType {
-    int ID;
-    string Name;
-    string Code;
-    string Description;
-    vector<composition> Composition;
-    vector<statusphysical> PhysicalStatus;
+    int                      ID;
+    string                   Name;
+    string                   Code;
+    string                   Description;
+    vector<composition>      Composition;
+    vector<statusphysical>   PhysicalStatus;
     vector<statusfunctional> FunctionalStatus;
   };
 #define zCOMPONENTTYPE(a)                                                                          \
-  a.ID = 0;                                                                                        \
-  a.Name = "";                                                                                     \
-  a.Code = "";                                                                                     \
+  a.ID          = 0;                                                                               \
+  a.Name        = "";                                                                              \
+  a.Code        = "";                                                                              \
   a.Description = "";                                                                              \
   a.Composition.clear();                                                                           \
   a.PhysicalStatus.clear();                                                                        \
   a.FunctionalStatus.clear()
 
   struct compType {
-    int ID;
+    int    ID;
     string Name;
   };
 #define zCOMPTYPE(a)                                                                               \
-  a.ID = 0;                                                                                        \
+  a.ID   = 0;                                                                                      \
   a.Name = ""
 
   struct compComponent {
-    int ID;
-    string ComponentID;
+    int      ID;
+    string   ComponentID;
     compType ComponentType;
   };
 #define zCOMPCOMPONENT(a)                                                                          \
-  a.ID = 0;                                                                                        \
+  a.ID          = 0;                                                                               \
   a.ComponentID = "";                                                                              \
   zCOMPTYPE(a.ComponentType)
 
   struct compComposition {
-    int ID;
-    int Position;
+    int           ID;
+    int           Position;
     compComponent Component;
   };
 #define zCOMPCOMPOSITION(a)                                                                        \
-  a.ID = 0;                                                                                        \
+  a.ID       = 0;                                                                                  \
   a.Position = 0;                                                                                  \
   zCOMPCOMPONENT(a.Component)
 
   struct componentLong {
-    int ID;
-    string ComponentID;
-    string SupplierComponentID;
-    string Description;
-    string LotID;
-    string PackageID;
-    compType Type;
-    statusphysical PhysicalState;
-    statusfunctional FunctionalState;
+    int                     ID;
+    string                  ComponentID;
+    string                  SupplierComponentID;
+    string                  Description;
+    string                  LotID;
+    string                  PackageID;
+    compType                Type;
+    statusphysical          PhysicalState;
+    statusfunctional        FunctionalState;
     vector<compComposition> Composition;
   };
 #define zCOMPONENTL(a)                                                                             \
-  a.ID = 0;                                                                                        \
-  a.ComponentID = "";                                                                              \
+  a.ID                  = 0;                                                                       \
+  a.ComponentID         = "";                                                                      \
   a.SupplierComponentID = "";                                                                      \
-  a.Description = "";                                                                              \
-  a.LotID = "";                                                                                    \
-  a.PackageID = "";                                                                                \
+  a.Description         = "";                                                                      \
+  a.LotID               = "";                                                                      \
+  a.PackageID           = "";                                                                      \
   zCOMPTYPE(a.Type);                                                                               \
   zSTATUSPHYSICAL(a.PhysicalState);                                                                \
   zSTATUSFUNCTIONAL(a.FunctionalState);                                                            \
   a.Composition.clear()
 
   struct componentShort {
-    int ID;
-    string ComponentID;
-    string SupplierComponentID;
-    string Description;
-    string LotID;
-    string PackageID;
-    statusphysical PhysicalState;
+    int              ID;
+    string           ComponentID;
+    string           SupplierComponentID;
+    string           Description;
+    string           LotID;
+    string           PackageID;
+    statusphysical   PhysicalState;
     statusfunctional FunctionalState;
   };
 #define zCOMPONENTS(a)                                                                             \
-  a.ID = 0;                                                                                        \
-  a.ComponentID = "";                                                                              \
+  a.ID                  = 0;                                                                       \
+  a.ComponentID         = "";                                                                      \
   a.SupplierComponentID = "";                                                                      \
-  a.Description = "";                                                                              \
-  a.LotID = "";                                                                                    \
-  a.PackageID = "";                                                                                \
+  a.Description         = "";                                                                      \
+  a.LotID               = "";                                                                      \
+  a.PackageID           = "";                                                                      \
   zSTATUSPHYSICAL(a.PhysicalState);                                                                \
   zSTATUSFUNCTIONAL(a.FunctionalState)
 
   struct compActResult {
-    int ID;
+    int    ID;
     string Name;
   };
 #define zCOMPACTRESULT(a)                                                                          \
-  a.ID = 0;                                                                                        \
+  a.ID   = 0;                                                                                      \
   a.Name = ""
 
   struct compActStatus {
-    int ID;
+    int    ID;
     string Code;
     string Description;
   };
 #define zCOMPACTSTATUS(a)                                                                          \
-  a.ID = 0;                                                                                        \
-  a.Code = "";                                                                                     \
+  a.ID          = 0;                                                                               \
+  a.Code        = "";                                                                              \
   a.Description = ""
 
   struct compActivity {
-    int ID;
-    string Name;
-    time_t StartDate;
-    time_t EndDate;
+    int           ID;
+    string        Name;
+    time_t        StartDate;
+    time_t        EndDate;
     compActResult Result;
     compActStatus Status;
-    int Type;
+    int           Type;
   };
 #define zCOMPACTIVITY(a)                                                                           \
-  a.ID = 0;                                                                                        \
+  a.ID   = 0;                                                                                      \
   a.Name = "";                                                                                     \
   a.Type = 0;                                                                                      \
   zCOMPACTRESULT(a.Result);                                                                        \
@@ -333,211 +335,211 @@ public:
     int User;
   };
 #define zMEMBER(a)                                                                                 \
-  a.ID = 0;                                                                                        \
+  a.ID            = 0;                                                                             \
   a.ProjectMember = 0;                                                                             \
-  a.Leader = 0;                                                                                    \
-  a.User = 0
+  a.Leader        = 0;                                                                             \
+  a.User          = 0
 
   struct parameter {
-    int ID;
-    int ActivityParameter;
+    int   ID;
+    int   ActivityParameter;
     float Value;
-    int User;
+    int   User;
   };
 #define zPARAMETER(a)                                                                              \
-  a.ID = 0;                                                                                        \
+  a.ID                = 0;                                                                         \
   a.ActivityParameter = 0;                                                                         \
-  a.Value = 0.0;                                                                                   \
-  a.User = 0
+  a.Value             = 0.0;                                                                       \
+  a.User              = 0
 
   struct attach {
-    int ID;
-    int Category;
+    int    ID;
+    int    Category;
     string RemoteFileName;
     string LocalFileName;
-    int User;
+    int    User;
   };
 #define zATTACH(a)                                                                                 \
-  a.ID = 0;                                                                                        \
-  a.Category = 0;                                                                                  \
+  a.ID             = 0;                                                                            \
+  a.Category       = 0;                                                                            \
   a.RemoteFileName = "";                                                                           \
-  a.LocalFileName = "";                                                                            \
-  a.User = 0
+  a.LocalFileName  = "";                                                                           \
+  a.User           = 0
 
   struct uriattach {
-    int ID;
+    int    ID;
     string UriPath;
     string UriDescription;
-    int User;
+    int    User;
   };
 #define zURIATTACH(a)                                                                              \
-  a.ID = 0;                                                                                        \
-  a.UriPath = "";                                                                                  \
+  a.ID             = 0;                                                                            \
+  a.UriPath        = "";                                                                           \
   a.UriDescription = "";                                                                           \
-  a.User = 0
+  a.User           = 0
 
   struct parameterType {
-    int ID;
-    int ParameterID;
+    int    ID;
+    int    ParameterID;
     string Name;
     string Description;
   };
 #define zPARAMETERTYPE(a)                                                                          \
-  a.ID = 0;                                                                                        \
+  a.ID          = 0;                                                                               \
   a.ParameterID = 0;                                                                               \
-  a.Name = "";                                                                                     \
+  a.Name        = "";                                                                              \
   a.Description = ""
 
   struct activityType {
-    int ID;
+    int    ID;
     string Name;
     string Description;
   };
 #define zACTIVITYTYPE(a)                                                                           \
-  a.ID = 0;                                                                                        \
-  a.Name = "";                                                                                     \
+  a.ID          = 0;                                                                               \
+  a.Name        = "";                                                                              \
   a.Description = ""
 
   struct locationType {
-    int ID;
+    int    ID;
     string Name;
   };
 #define zLOCATIONTYPE(a)                                                                           \
-  a.ID = 0;                                                                                        \
+  a.ID   = 0;                                                                                      \
   a.Name = ""
 
   struct attachmentType {
-    int ID;
+    int    ID;
     string Category;
     string Description;
   };
 #define zATTACHMENTTYPE(a)                                                                         \
-  a.ID = 0;                                                                                        \
-  a.Category = "";                                                                                 \
+  a.ID          = 0;                                                                               \
+  a.Category    = "";                                                                              \
   a.Description = "";
 
   struct componentType {
-    int ID;
+    int    ID;
     string Name;
   };
 #define zCOMPOTYPE(a)                                                                              \
-  a.ID = 0;                                                                                        \
+  a.ID   = 0;                                                                                      \
   a.Name = ""
 
   struct resultType {
-    int ID;
+    int    ID;
     string Name;
   };
 #define zRESULTTYPE(a)                                                                             \
-  a.ID = 0;                                                                                        \
+  a.ID   = 0;                                                                                      \
   a.Name = ""
 
   struct statusType {
-    int ID;
+    int    ID;
     string Code;
     string Description;
   };
 #define zSTATUSTYPE(a)                                                                             \
-  a.ID = 0;                                                                                        \
-  a.Code = "";                                                                                     \
+  a.ID          = 0;                                                                               \
+  a.Code        = "";                                                                              \
   a.Description = ""
 
   struct statusphysical {
-    int ID;
+    int    ID;
     string Name;
   };
 #define zSTATUSPHYSICAL(a)                                                                         \
-  a.ID = 0;                                                                                        \
+  a.ID   = 0;                                                                                      \
   a.Name = ""
 
   struct statusfunctional {
-    int ID;
+    int    ID;
     string Name;
   };
 #define zSTATUSFUNCTIONAL(a)                                                                       \
-  a.ID = 0;                                                                                        \
+  a.ID   = 0;                                                                                      \
   a.Name = ""
 
   struct activity {
-    int ID;
-    int Type;
-    int Location;
-    string Lot;
-    string Name;
-    time_t StartDate;
-    time_t EndDate;
-    string Position;
-    int Result;
-    int Status;
-    int User;
-    vector<member> Members;
+    int               ID;
+    int               Type;
+    int               Location;
+    string            Lot;
+    string            Name;
+    time_t            StartDate;
+    time_t            EndDate;
+    string            Position;
+    int               Result;
+    int               Status;
+    int               User;
+    vector<member>    Members;
     vector<parameter> Parameters;
-    vector<attach> Attachments;
+    vector<attach>    Attachments;
   };
 
   // ---------------
   struct activityShort {
-    int ID;
-    string Name;
-    time_t StartDate;
-    time_t EndDate;
+    int          ID;
+    string       Name;
+    time_t       StartDate;
+    time_t       EndDate;
     activityType Type;
-    statusType Status;
+    statusType   Status;
   };
 #define zACTIVITYSHORT(a)                                                                          \
-  a.ID = 0;                                                                                        \
-  a.Name = "";                                                                                     \
-  a.Type.ID = 0;                                                                                   \
+  a.ID        = 0;                                                                                 \
+  a.Name      = "";                                                                                \
+  a.Type.ID   = 0;                                                                                 \
   a.Status.ID = 0
 
   struct actTypeCompType {
-    int ID;
-    int Quantity;
-    string Direction;
+    int           ID;
+    int           Quantity;
+    string        Direction;
     componentType Type;
   };
 #define zACTTYPECOMPTYPE(a)                                                                        \
-  a.ID = 0;                                                                                        \
-  a.Quantity = 0;                                                                                  \
+  a.ID        = 0;                                                                                 \
+  a.Quantity  = 0;                                                                                 \
   a.Direction = "in";                                                                              \
   zCOMPOTYPE(a.Type)
 
   struct actComp {
-    int ID;
-    string ComponentID;
+    int           ID;
+    string        ComponentID;
     componentType Type;
   };
 #define zACTCOMP(a)                                                                                \
-  a.ID = 0;                                                                                        \
+  a.ID          = 0;                                                                               \
   a.ComponentID = "";                                                                              \
   zCOMPOTYPE(a.Type)
 
   struct actComponent {
-    int ID;
-    int Conformity;
-    actTypeCompType ActivityComponentType;
-    actComp Component;
-    statusphysical PhysicalStatus;
+    int              ID;
+    int              Conformity;
+    actTypeCompType  ActivityComponentType;
+    actComp          Component;
+    statusphysical   PhysicalStatus;
     statusfunctional FunctionalStatus;
   };
 #define zACTCOMPONENT(a)                                                                           \
-  a.ID = 0;                                                                                        \
+  a.ID         = 0;                                                                                \
   a.Conformity = 0;                                                                                \
   zACTTYPECOMPTYPE(a.ActivityComponentType);                                                       \
   zACTCOMP(a.Component);
 
   struct actParParameter {
-    int ID;
+    int    ID;
     string Name;
     string Description;
   };
 #define zACTPARPARAMETER(a)                                                                        \
-  a.ID = 0;                                                                                        \
-  a.Name = "";                                                                                     \
+  a.ID          = 0;                                                                               \
+  a.Name        = "";                                                                              \
   a.Description = ""
 
   struct actParameterType {
-    int ID;
+    int             ID;
     actParParameter Parameter;
   };
 #define zACTPARAMETERTYPE(a)                                                                       \
@@ -545,73 +547,73 @@ public:
   zACTPARPARAMETER(a.Parameter)
 
   struct actParameter {
-    int ID;
-    float Value;
+    int              ID;
+    float            Value;
     actParameterType Type;
   };
 #define zACTPARAMETER(a)                                                                           \
-  a.ID = 0;                                                                                        \
+  a.ID    = 0;                                                                                     \
   a.Value = 0.0;                                                                                   \
   zACTPARAMETERTYPE(a.Type)
 
   struct actAttachment {
-    int ID;
-    string FileName;
+    int            ID;
+    string         FileName;
     attachmentType Type;
   };
 #define zACTATTACHMENT(a)                                                                          \
-  a.ID = 0;                                                                                        \
+  a.ID       = 0;                                                                                  \
   a.FileName = "";                                                                                 \
   zATTACHMENTTYPE(a.Type)
 
   struct actMemMemmber {
-    int ID;
-    int PersonID;
+    int    ID;
+    int    PersonID;
     string FullName;
   };
 #define zACTMEMMEMBER(a)                                                                           \
-  a.ID = 0;                                                                                        \
+  a.ID       = 0;                                                                                  \
   a.PersonID = 0;                                                                                  \
   a.FullName = ""
 
   struct actMember {
-    int ID;
-    int Leader;
+    int           ID;
+    int           Leader;
     actMemMemmber Member;
   };
 #define zACTMEMBER(a)                                                                              \
-  a.ID = 0;                                                                                        \
+  a.ID     = 0;                                                                                    \
   a.Leader = 0;                                                                                    \
   zACTMEMMEMBER(a.Member)
 
   struct actUri {
-    int ID;
+    int    ID;
     string Path;
     string Description;
   };
 #define zACTURI(a)                                                                                 \
-  a.ID = 0;                                                                                        \
-  a.Path = "";                                                                                     \
+  a.ID          = 0;                                                                               \
+  a.Path        = "";                                                                              \
   a.Description = ""
 
   struct activityLong {
-    int ID;
-    string Name;
-    string LotID;
-    time_t StartDate;
-    time_t EndDate;
-    resultType Result;
-    activityType Type;
-    statusType Status;
-    locationType Location;
-    vector<actComponent> Components;
-    vector<actParameter> Parameters;
+    int                   ID;
+    string                Name;
+    string                LotID;
+    time_t                StartDate;
+    time_t                EndDate;
+    resultType            Result;
+    activityType          Type;
+    statusType            Status;
+    locationType          Location;
+    vector<actComponent>  Components;
+    vector<actParameter>  Parameters;
     vector<actAttachment> Attachments;
-    vector<actMember> Members;
-    vector<actUri> Uris;
+    vector<actMember>     Members;
+    vector<actUri>        Uris;
   };
 #define zACTIVITYLOND(a)                                                                           \
-  a.ID = 0;                                                                                        \
+  a.ID   = 0;                                                                                      \
   a.Name = "";                                                                                     \
   a.LotID + "";                                                                                    \
   zRESULTTYPE(a.Result);                                                                           \

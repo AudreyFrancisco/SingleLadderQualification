@@ -2,13 +2,14 @@
 #include "TReadoutBoardRU.h"
 #include <iostream>
 
-void TRuWishboneModule::Write(uint8_t address, uint16_t data, bool commit) {
+void TRuWishboneModule::Write(uint8_t address, uint16_t data, bool commit)
+{
   m_board.registeredWrite(m_moduleId, address, data);
-  if (commit)
-    m_board.flush();
+  if (commit) m_board.flush();
 }
 
-uint16_t TRuWishboneModule::Read(uint8_t address, bool commit) {
+uint16_t TRuWishboneModule::Read(uint8_t address, bool commit)
+{
   m_board.registeredRead(m_moduleId, address);
   if (commit) {
     m_board.flush();
@@ -17,10 +18,12 @@ uint16_t TRuWishboneModule::Read(uint8_t address, bool commit) {
       if (m_logging)
         std::cout << "TReadoutBoardRU: Expected 1 result, got " << results.size() << "\n";
       return 0;
-    } else {
+    }
+    else {
       return results[0].data;
     }
-  } else {
+  }
+  else {
     return 0;
   }
 }

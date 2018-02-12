@@ -70,13 +70,13 @@ class TPowerBoard {
   // Structures and Data types
 public:
   struct pbModule {
-    bool AchOn;
+    bool  AchOn;
     float AVmon;
     float AImon;
-    bool DchOn;
+    bool  DchOn;
     float DVmon;
     float DImon;
-    bool BiasOn;
+    bool  BiasOn;
     float AVset;
     float AIset;
     float DVset;
@@ -85,19 +85,19 @@ public:
 
   struct pbBoard {
     pbModule Modules[MAX_MOULESPERMOSAIC];
-    float VBset;
-    float VBmon;
-    float IBmon;
-    float Temp;
-    time_t TimeStamp;
+    float    VBset;
+    float    VBmon;
+    float    IBmon;
+    float    Temp;
+    time_t   TimeStamp;
   };
 
   // Members
 private:
-  powerboard *fMOSAICPowerBoard;        // The handle to the low level object of MOSAIC framework
-  pbBoard fPBoard;                      // The 'powerboard' data structure
-  bool realTimeRead;                    // forces the access to Power Board hardware
-  TPowerBoardConfig *fPowerBoardConfig; // the configuration set
+  powerboard *         fMOSAICPowerBoard; // The handle to the low level object of MOSAIC framework
+  pbBoard              fPBoard;           // The 'powerboard' data structure
+  bool                 realTimeRead;      // forces the access to Power Board hardware
+  TPowerBoardConfig *  fPowerBoardConfig; // the configuration set
   powerboard::pbstate *thePowerBoardState;
 
   // Methods
@@ -108,42 +108,50 @@ public:
 
   // Info and Mode
   bool IsOK();
-  void SetRealTimeMode(bool realTime) {
+  void SetRealTimeMode(bool realTime)
+  {
     realTimeRead = realTime;
     return;
   };
   TPowerBoardConfig *GetConfigurationHandler() { return (fPowerBoardConfig); };
 
   // Getters
-  float GetTemperature() {
+  float GetTemperature()
+  {
     readMonitor();
     return (fPBoard.Temp);
   };
-  float GetBiasVoltage() {
+  float GetBiasVoltage()
+  {
     readMonitor();
     return (fPBoard.VBmon);
   };
   float GetBiasCurrent();
 
-  float GetAnalogVoltage(int module) {
+  float GetAnalogVoltage(int module)
+  {
     readMonitor();
     return (fPBoard.Modules[module].AVmon);
   };
   float GetAnalogCurrent(int module);
-  float GetDigitalVoltage(int module) {
+  float GetDigitalVoltage(int module)
+  {
     readMonitor();
     return (fPBoard.Modules[module].DVmon);
   };
   float GetDigitalCurrent(int module);
-  bool IsAnalogChOn(int module) {
+  bool IsAnalogChOn(int module)
+  {
     readMonitor();
     return (fPBoard.Modules[module].AchOn);
   };
-  bool IsDigitalChOn(int module) {
+  bool IsDigitalChOn(int module)
+  {
     readMonitor();
     return (fPBoard.Modules[module].DchOn);
   };
-  bool IsBiasChOn(int module) {
+  bool IsBiasChOn(int module)
+  {
     readMonitor();
     return (fPBoard.Modules[module].BiasOn);
   };
@@ -159,59 +167,72 @@ public:
                  bool *DChOn);
 
   // Setters
-  void SetBiasVoltage(float aVal) {
+  void SetBiasVoltage(float aVal)
+  {
     fPBoard.VBset = aVal;
     fMOSAICPowerBoard->setVbias(aVal);
   };
 
-  void SetAnalogVoltage(int mod, float val) {
+  void SetAnalogVoltage(int mod, float val)
+  {
     fPBoard.Modules[mod].AVset = val;
     fMOSAICPowerBoard->setVout((unsigned char)(mod * 2), val);
   };
-  void SetAnalogCurrent(int mod, float val) {
+  void SetAnalogCurrent(int mod, float val)
+  {
     fPBoard.Modules[mod].AIset = val;
     fMOSAICPowerBoard->setIth((unsigned char)(mod * 2), val);
   };
-  void SetDigitalVoltage(int mod, float val) {
+  void SetDigitalVoltage(int mod, float val)
+  {
     fPBoard.Modules[mod].DVset = val;
     fMOSAICPowerBoard->setVout((unsigned char)(mod * 2 + 1), val);
   };
-  void SetDigitalCurrent(int mod, float val) {
+  void SetDigitalCurrent(int mod, float val)
+  {
     fPBoard.Modules[mod].DIset = val;
     fMOSAICPowerBoard->setIth((unsigned char)(mod * 2 + 1), val);
   };
   void SetModule(int module, float AV, float AI, float DV, float DI, bool BiasOn);
-  void SetBiasOn(int mod) {
+  void SetBiasOn(int mod)
+  {
     fPBoard.Modules[mod].BiasOn = true;
     fMOSAICPowerBoard->onVbias((unsigned char)mod);
   };
-  void SetBiasOff(int mod) {
+  void SetBiasOff(int mod)
+  {
     fPBoard.Modules[mod].BiasOn = false;
     fMOSAICPowerBoard->offVbias((unsigned char)mod);
   };
 
-  void SwitchAnalogOn(int mod) {
+  void SwitchAnalogOn(int mod)
+  {
     fPBoard.Modules[mod].AchOn = true;
     fMOSAICPowerBoard->onVout((unsigned char)(mod * 2));
   };
-  void SwitchAnalogOff(int mod) {
+  void SwitchAnalogOff(int mod)
+  {
     fPBoard.Modules[mod].AchOn = false;
     fMOSAICPowerBoard->offVout((unsigned char)(mod * 2));
   };
-  void SwitchDigitalOn(int mod) {
+  void SwitchDigitalOn(int mod)
+  {
     fPBoard.Modules[mod].DchOn = true;
     fMOSAICPowerBoard->onVout((unsigned char)(mod * 2 + 1));
   };
-  void SwitchDigitalOff(int mod) {
+  void SwitchDigitalOff(int mod)
+  {
     fPBoard.Modules[mod].DchOn = false;
     fMOSAICPowerBoard->offVout((unsigned char)(mod * 2 + 1));
   };
   void SwitchModule(int module, bool value);
-  void SwitchON() {
+  void SwitchON()
+  {
     fMOSAICPowerBoard->onAllVout();
     return;
   };
-  void SwitchOFF() {
+  void SwitchOFF()
+  {
     fMOSAICPowerBoard->offAllVout();
     return;
   };

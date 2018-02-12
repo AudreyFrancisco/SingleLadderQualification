@@ -150,7 +150,7 @@ class TThresholdAnalysis : public TScanAnalysis {
 
 private:
   static constexpr float m_electronPerDac = 10; //[e/DAC], around 10
-  const std::string m_analisysName = "TThresholdAnalysis";
+  const std::string      m_analisysName   = "TThresholdAnalysis";
 
   int m_startPulseAmplitude;
   int m_stopPulseAmplitude;
@@ -178,8 +178,8 @@ private:
   double m_cutChi2; // Or float ?
 
   std::map<int, TThresholdResultChip> m_resultChip;
-  std::map<int, common::TStatVar> m_threshold;
-  std::map<int, common::TStatVar> m_noise;
+  std::map<int, common::TStatVar>     m_threshold;
+  std::map<int, common::TStatVar>     m_noise;
 
   std::string GetFileName(common::TChipIndex aChipIndex, std::string fileType);
   bool CheckPixelNoHits(TGraph *aGraph);
@@ -187,17 +187,19 @@ private:
   common::TErrFuncFitResult DoFit(TGraph *aGraph, bool speedy = false);
 
   bool HasData(TScanHisto &scanHisto, common::TChipIndex idx, int col);
-  void WriteResult();
-  void FillVariableList();
+  void               WriteResult();
+  void               FillVariableList();
   THicClassification GetClassificationOB(TThresholdResultHic *result);
   THicClassification GetClassificationIB(TThresholdResultHic *result);
 
 protected:
-  TScanResultChip *GetChipResult() {
+  TScanResultChip *GetChipResult()
+  {
     TThresholdResultChip *Result = new TThresholdResultChip();
     return Result;
   };
-  TScanResultHic *GetHicResult() {
+  TScanResultHic *GetHicResult()
+  {
     TThresholdResultHic *Result = new TThresholdResultHic();
     return Result;
   };

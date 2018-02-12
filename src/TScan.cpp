@@ -14,33 +14,35 @@ bool fScanAbort;
 
 TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
              std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
-             std::mutex *aMutex) {
+             std::mutex *aMutex)
+{
   m_config = config;
-  m_chips = chips;
-  m_hics = hics;
+  m_chips  = chips;
+  m_hics   = hics;
   m_boards = boards;
 
-  m_firstEnabledChipId = -1;
-  m_firstEnabledBoard = -1U;
+  m_firstEnabledChipId  = -1;
+  m_firstEnabledBoard   = -1U;
   m_firstEnabledChannel = -1U;
 
   m_histoQue = histoQue;
-  m_mutex = aMutex;
+  m_mutex    = aMutex;
 
-  m_running = false;
+  m_running  = false;
   fScanAbort = false;
 
   strcpy(m_state, "Waiting");
   CreateHicConditions();
 }
 
-void TScan::Init() {
+void TScan::Init()
+{
   strcpy(m_state, "Running");
   std::cout << std::endl
             << std::endl
             << ">>>>>>>> Starting scan " << GetName() << std::endl
             << std::endl;
-  time_t t = time(0); // get time now
+  time_t     t   = time(0); // get time now
   struct tm *now = localtime(&t);
 
   sprintf(m_config->GetfNameSuffix(), "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100,
@@ -49,8 +51,7 @@ void TScan::Init() {
   // Power on HIC if not yet done (PowerOn() checks if already powered)
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->PowerOn();
-    if (!m_hics.at(ihic)->GetPowerBoard())
-      continue;
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 
@@ -73,15 +74,16 @@ void TScan::Init() {
           m_hics.at(ihic)->GetIdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddStart =
           m_hics.at(ihic)->GetIddd();
-    } catch (std::exception &e) {
+    }
+    catch (std::exception &e) {
       std::cout << "Exception " << e.what() << " when reading temp / currents" << std::endl;
     }
     TErrorCounter errCount;
-    errCount.nEnabled = m_hics.at(ihic)->GetNEnabledChips();
-    errCount.n8b10b = 0;
+    errCount.nEnabled      = m_hics.at(ihic)->GetNEnabledChips();
+    errCount.n8b10b        = 0;
     errCount.nCorruptEvent = 0;
-    errCount.nPrioEncoder = 0;
-    errCount.nTimeout = 0;
+    errCount.nPrioEncoder  = 0;
+    errCount.nTimeout      = 0;
     m_errorCounts.insert(
         std::pair<std::string, TErrorCounter>(m_hics.at(ihic)->GetDbId(), errCount));
   }
@@ -90,7 +92,8 @@ void TScan::Init() {
     if (rChip->GetConfig()->IsEnabled()) {
       try {
         m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
-      } catch (std::exception &e) {
+      }
+      catch (std::exception &e) {
         std::cout << "Terminate: exception " << e.what() << " when reading registers" << std::endl;
       }
     }
@@ -105,15 +108,16 @@ void TScan::Init() {
 
 // seems the board index is not accessible anywhere.
 // for the time being do like this...
-int TScan::FindBoardIndex(TAlpide *chip) {
+int TScan::FindBoardIndex(TAlpide *chip)
+{
   for (unsigned int i = 0; i < m_boards.size(); i++) {
-    if (m_boards.at(i) == chip->GetReadoutBoard())
-      return i;
+    if (m_boards.at(i) == chip->GetReadoutBoard()) return i;
   }
   return -1;
 }
 
-std::string TScan::FindHIC(int boardIndex, int rcv) {
+std::string TScan::FindHIC(int boardIndex, int rcv)
+{
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     if (m_hics.at(i)->ContainsReceiver(boardIndex, rcv)) {
       return m_hics.at(i)->GetDbId();
@@ -122,7 +126,8 @@ std::string TScan::FindHIC(int boardIndex, int rcv) {
   return std::string("None");
 }
 
-void TScan::Terminate() {
+void TScan::Terminate()
+{
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     try {
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd =
@@ -133,7 +138,8 @@ void TScan::Terminate() {
           m_hics.at(ihic)->GetIdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddEnd =
           m_hics.at(ihic)->GetIddd();
-    } catch (std::exception &e) {
+    }
+    catch (std::exception &e) {
       std::cout << "Terminate: exception " << e.what() << " when reading temp / currents"
                 << std::endl;
     }
@@ -142,8 +148,7 @@ void TScan::Terminate() {
 
   // reset voltage drop correction, reset chips, apply voltage drop correction to reset state
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (!m_hics.at(ihic)->GetPowerBoard())
-      continue;
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), true);
   }
 
@@ -151,7 +156,8 @@ void TScan::Terminate() {
     if (rChip->GetConfig()->IsEnabled()) {
       try {
         m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
-      } catch (std::exception &e) {
+      }
+      catch (std::exception &e) {
         std::cout << "Terminate: exception " << e.what() << " when reading registers" << std::endl;
       }
     }
@@ -168,18 +174,16 @@ void TScan::Terminate() {
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (!m_hics.at(ihic)->GetPowerBoard())
-      continue;
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), false);
   }
 
-  if (m_histo)
-    delete m_histo;
+  if (m_histo) delete m_histo;
 }
 
-bool TScan::Loop(int loopIndex) {
-  if (fScanAbort)
-    return false; // check for abort flag first
+bool TScan::Loop(int loopIndex)
+{
+  if (fScanAbort) return false; // check for abort flag first
 
   if ((m_step[loopIndex] > 0) && (m_value[loopIndex] < m_stop[loopIndex]))
     return true; // limit check for positive steps
@@ -191,7 +195,8 @@ bool TScan::Loop(int loopIndex) {
 
 void TScan::Next(int loopIndex) { m_value[loopIndex] += m_step[loopIndex]; }
 
-void TScan::CountEnabledChips() {
+void TScan::CountEnabledChips()
+{
 
   // std::cout << "in count enabled chips, boards_size = " << m_boards.size() << ", chips_size = "
   // << m_chips.size() << std::endl;
@@ -208,7 +213,8 @@ void TScan::CountEnabledChips() {
   }
 }
 
-void TScan::CreateScanHisto() {
+void TScan::CreateScanHisto()
+{
   common::TChipIndex id;
   m_histo = new TScanHisto();
 
@@ -218,9 +224,9 @@ void TScan::CreateScanHisto() {
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
       if ((m_chips.at(ichip)->GetConfig()->IsEnabled()) &&
           (m_chips.at(ichip)->GetReadoutBoard() == m_boards.at(iboard))) {
-        id.boardIndex = iboard;
+        id.boardIndex   = iboard;
         id.dataReceiver = m_chips.at(ichip)->GetConfig()->GetParamValue("RECEIVER");
-        id.chipId = m_chips.at(ichip)->GetConfig()->GetChipId();
+        id.chipId       = m_chips.at(ichip)->GetConfig()->GetChipId();
 
         m_histo->AddHisto(id, histo);
       }
@@ -230,13 +236,14 @@ void TScan::CreateScanHisto() {
   m_histo->GetChipList(m_chipList);
 }
 
-void TScan::ActivateTimestampLog() {
+void TScan::ActivateTimestampLog()
+{
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
       if ((m_chips.at(ichip)->GetConfig()->IsEnabled()) &&
           (m_chips.at(ichip)->GetReadoutBoard() == m_boards.at(iboard))) {
         m_firstEnabledChipId = m_chips.at(ichip)->GetConfig()->GetChipId() & 0xf;
-        m_firstEnabledBoard = iboard;
+        m_firstEnabledBoard  = iboard;
         m_firstEnabledChannel =
             m_chips.at(ichip)->GetHic()->GetReceiver(iboard, m_firstEnabledChipId);
         std::cout << "Chip ID used for timestamp logging: " << m_firstEnabledChipId << std::endl;
@@ -248,9 +255,9 @@ void TScan::ActivateTimestampLog() {
   }
 }
 
-void TScan::WriteTimestampLog(const char *fName) {
-  if (m_eventIds.size() == 0)
-    return;
+void TScan::WriteTimestampLog(const char *fName)
+{
+  if (m_eventIds.size() == 0) return;
 
   std::ofstream output(fName, std::fstream::out | std::fstream::app);
 
@@ -263,7 +270,8 @@ void TScan::WriteTimestampLog(const char *fName) {
                                                            : 256 - lastBC + m_bunchCounters[iEvent];
     if (diff > 0 && diff < 256) {
       ++histo[diff];
-    } else {
+    }
+    else {
       std::cerr << "WriteTimestampLog: Index out of range" << std::endl;
     }
     output << iEvent << '\t' << m_eventIds[iEvent] << '\t' << m_timestamps[iEvent] << '\t'
@@ -282,12 +290,14 @@ void TScan::WriteTimestampLog(const char *fName) {
   output.close();
 }
 
-TErrorCounter TScan::GetErrorCount(std::string hicId) {
+TErrorCounter TScan::GetErrorCount(std::string hicId)
+{
   auto hicCount = m_errorCounts.find(hicId);
 
   if (hicCount != m_errorCounts.end()) {
     return hicCount->second;
-  } else {
+  }
+  else {
     std::cout << "WARNING (TScan::GetErrorCount), hic not found, returning empty counter"
               << std::endl;
     TErrorCounter result;
@@ -298,20 +308,22 @@ TErrorCounter TScan::GetErrorCount(std::string hicId) {
 TMaskScan::TMaskScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                      std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
                      std::mutex *aMutex)
-    : TScan(config, chips, hics, boards, histoQue, aMutex) {
+    : TScan(config, chips, hics, boards, histoQue, aMutex)
+{
   m_pixPerStage = m_config->GetParamValue("PIXPERREGION");
   m_stuck.clear();
   m_errorCount = {};
-  FILE *fp = fopen("DebugData.dat", "w");
+  FILE *fp     = fopen("DebugData.dat", "w");
   fclose(fp);
 }
 
 // check which HIC caused the timeout, i.e. did not send enough events
 // called only in case a timeout occurs
-void TMaskScan::FindTimeoutHics(int iboard, int *triggerCounts) {
+void TMaskScan::FindTimeoutHics(int iboard, int *triggerCounts)
+{
   for (unsigned int iHic = 0; iHic < m_hics.size(); iHic++) {
     bool isOnBoard = false;
-    int nTrigs = 0;
+    int  nTrigs    = 0;
     for (unsigned int iRcv = 0; iRcv < MAX_MOSAICTRANRECV; iRcv++) {
       if (m_hics.at(iHic)->ContainsReceiver(iboard, iRcv)) {
         isOnBoard = true;
@@ -326,17 +338,19 @@ void TMaskScan::FindTimeoutHics(int iboard, int *triggerCounts) {
   }
 }
 
-void TMaskScan::ConfigureMaskStage(TAlpide *chip, int istage) {
+void TMaskScan::ConfigureMaskStage(TAlpide *chip, int istage)
+{
   m_row = AlpideConfig::ConfigureMaskStage(chip, m_pixPerStage, istage);
 }
 
-void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard) {
+void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
+{
   unsigned char buffer[1024 * 4000];
-  int n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int itrg = 0, trials = 0;
-  int nBad = 0;
-  TBoardHeader boardInfo;
-  int nTrigPerHic[MAX_MOSAICTRANRECV];
+  int           n_bytes_data, n_bytes_header, n_bytes_trailer;
+  int           itrg = 0, trials = 0;
+  int           nBad = 0;
+  TBoardHeader  boardInfo;
+  int           nTrigPerHic[MAX_MOSAICTRANRECV];
 
   for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
     nTrigPerHic[i] = 0;
@@ -356,7 +370,8 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard) {
         trials = 0;
       }
       continue;
-    } else {
+    }
+    else {
       BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer,
                                 n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
       // decode Chip event
@@ -367,10 +382,9 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard) {
         }
       }
       int n_bytes_chipevent = n_bytes_data - n_bytes_header; //-n_bytes_trailer;
-      if (boardInfo.eoeCount < 2)
-        n_bytes_chipevent -= n_bytes_trailer;
+      if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
       unsigned int bunchCounter = -1U;
-      int chipId = -1U;
+      int          chipId       = -1U;
       if (!AlpideDecoder::DecodeEvent(
               buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel,
               m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder, &m_stuck, &chipId,
@@ -380,8 +394,7 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard) {
         if (FindHIC(iboard, boardInfo.channel).compare("None") != 0) {
           m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nCorruptEvent++;
         }
-        if (nBad > 10)
-          continue;
+        if (nBad > 10) continue;
         FILE *fDebug = fopen("DebugData.dat", "a");
         fprintf(fDebug, "Bad event:\n");
         for (int iByte = 0; iByte < n_bytes_data + 1; ++iByte) {
@@ -406,13 +419,15 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard) {
   }
 }
 
-void TScan::CreateHicConditions() {
+void TScan::CreateHicConditions()
+{
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     m_conditions.AddHicConditions(m_hics.at(i)->GetDbId(), new TScanConditionsHic());
   }
 }
 
-void TScan::WriteConditions(const char *fName, THic *aHic) {
+void TScan::WriteConditions(const char *fName, THic *aHic)
+{
   FILE *fp = fopen(fName, "a");
 
   fprintf(fp, "Firmware version: %s\n", m_conditions.m_fwVersion);
@@ -441,7 +456,8 @@ void TScan::WriteConditions(const char *fName, THic *aHic) {
   fclose(fp);
 }
 
-void TScan::WriteChipRegisters(const char *fName) {
+void TScan::WriteChipRegisters(const char *fName)
+{
   FILE *fp = fopen(fName, "a");
 
   fputs("\n", fp);
@@ -457,7 +473,8 @@ void TScan::WriteChipRegisters(const char *fName) {
   fclose(fp);
 }
 
-void TScan::WriteBoardRegisters(const char *fName) {
+void TScan::WriteBoardRegisters(const char *fName)
+{
   FILE *fp = fopen(fName, "a");
 
   fputs("\n", fp);
@@ -473,7 +490,8 @@ void TScan::WriteBoardRegisters(const char *fName) {
   fclose(fp);
 }
 
-int TScanConditions::AddHicConditions(std::string hicId, TScanConditionsHic *hicCond) {
+int TScanConditions::AddHicConditions(std::string hicId, TScanConditionsHic *hicCond)
+{
   m_hicConditions.insert(std::pair<std::string, TScanConditionsHic *>(hicId, hicCond));
 
   return m_hicConditions.size();

@@ -23,20 +23,20 @@ class TSCurveResultChip : public TScanResultChip {
 
 private:
   TSCurveAnalysis *m_analysis;
-  float m_thresholdAv;
-  float m_thresholdRms;
-  float m_noiseAv;
-  float m_noiseRms;
-  int m_nEntries;
-  float m_noiseSq;
-  float m_threshSq;
-  int m_nNoThresh;
-  int m_nDead;
-  int m_nHot;
-  char m_rawFile[200];
-  char m_fitFile[200];
-  FILE *m_rawFP;
-  FILE *m_fitFP;
+  float            m_thresholdAv;
+  float            m_thresholdRms;
+  float            m_noiseAv;
+  float            m_noiseRms;
+  int              m_nEntries;
+  float            m_noiseSq;
+  float            m_threshSq;
+  int              m_nNoThresh;
+  int              m_nDead;
+  int              m_nHot;
+  char             m_rawFile[200];
+  char             m_fitFile[200];
+  FILE *           m_rawFP;
+  FILE *           m_fitFP;
 
 public:
   TSCurveResultChip(TSCurveAnalysis *aAnalysis) : TScanResultChip() { m_analysis = aAnalysis; };
@@ -44,7 +44,7 @@ public:
   void SetFitFile(const char *fName) { strcpy(m_fitFile, fName); };
   void WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
-  void CalculateAverages();
+  void  CalculateAverages();
   float GetThresholdMean() { return m_thresholdAv; };
 };
 
@@ -53,22 +53,22 @@ class TSCurveResultHic : public TScanResultHic {
   friend class TApplyTuning;
 
 private:
-  float m_noiseAv;
-  float m_noiseRms;
-  int m_nEntries;
-  float m_noiseSq;
-  float m_minChipAv;
-  float m_maxChipAv;
-  float m_maxChipNoise;
-  int m_nDead;
-  int m_nNoThresh;
-  int m_nHot;
-  float m_backBias;
-  bool m_nominal;
-  bool m_VCASNTuning;
-  bool m_ITHRTuning;
-  bool m_thresholdScan;
-  char m_stuckFile[200];
+  float         m_noiseAv;
+  float         m_noiseRms;
+  int           m_nEntries;
+  float         m_noiseSq;
+  float         m_minChipAv;
+  float         m_maxChipAv;
+  float         m_maxChipNoise;
+  int           m_nDead;
+  int           m_nNoThresh;
+  int           m_nHot;
+  float         m_backBias;
+  bool          m_nominal;
+  bool          m_VCASNTuning;
+  bool          m_ITHRTuning;
+  bool          m_thresholdScan;
+  char          m_stuckFile[200];
   TErrorCounter m_errorCounter;
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
@@ -98,11 +98,11 @@ class TSCurveAnalysis : public TScanAnalysis {
 
 private:
   static constexpr float m_electronPerDac = 10;
-  float m_resultFactor;
-  int m_nPulseInj;
-  int m_startPulseAmplitude;
-  int m_stopPulseAmplitude;
-  int m_stepPulseAmplitude;
+  float                  m_resultFactor;
+  int                    m_nPulseInj;
+  int                    m_startPulseAmplitude;
+  int                    m_stopPulseAmplitude;
+  int                    m_stepPulseAmplitude;
 
   bool m_fDoFit;
   bool m_speedy;
@@ -138,11 +138,13 @@ private:
   THicClassification GetClassificationIB(TSCurveResultHic *result, THic *hic);
 
 protected:
-  TScanResultChip *GetChipResult() {
+  TScanResultChip *GetChipResult()
+  {
     TSCurveResultChip *Result = new TSCurveResultChip(this);
     return Result;
   };
-  TScanResultHic *GetHicResult() {
+  TScanResultHic *GetHicResult()
+  {
     TSCurveResultHic *Result = new TSCurveResultHic();
     return Result;
   };

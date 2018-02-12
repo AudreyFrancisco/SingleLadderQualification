@@ -13,10 +13,10 @@
 class TBoardConfig;
 
 typedef struct {
-  int chipId;
-  int controlInterface;
-  int receiver;
-  bool enabled;
+  int      chipId;
+  int      controlInterface;
+  int      receiver;
+  bool     enabled;
   TAlpide *alpidePtr;
 } TChipPos;
 
@@ -30,7 +30,7 @@ private:
 
 protected:
   std::vector<TChipPos>
-      fChipPositions; // Antonio : change in protected to access from derived class
+                fChipPositions; // Antonio : change in protected to access from derived class
   TBoardConfig *fBoardConfig;
 
   virtual int WriteChipRegister(uint16_t Address, uint16_t Value, TAlpide *chipPtr) = 0;
@@ -76,11 +76,11 @@ public:
   virtual int SendCommand(Alpide::TCommand Command, TAlpide *chipPtr) = 0;
 
   virtual int SetTriggerConfig(bool enablePulse, bool enableTrigger, int triggerDelay,
-                               int pulseDelay) = 0;
+                               int pulseDelay)                = 0;
   virtual void SetTriggerSource(TTriggerSource triggerSource) = 0;
-  virtual void StartRun() = 0;
-  virtual int Trigger(int nTriggers) = 0;
-  virtual int ReadEventData(int &NBytes,
+  virtual void StartRun()                                     = 0;
+  virtual int Trigger(int nTriggers)                          = 0;
+  virtual int ReadEventData(int &          NBytes,
                             unsigned char *Buffer) = 0; // TODO: max buffer size not needed??
 };
 

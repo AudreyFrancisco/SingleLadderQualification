@@ -12,8 +12,8 @@ private:
 protected:
   std::map<std::string, int *> fSettings;
   TConfig *fConfig;
-  int fModId;
-  int fEnabled;
+  int      fModId;
+  int      fEnabled;
 
 public:
   THicConfig(TConfig *config, int modId);
@@ -22,8 +22,8 @@ public:
   bool SetParamValue(std::string Name, int Value);
   int GetParamValue(std::string Name);
   bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
-  int GetModId() { return fModId; };
-  bool IsEnabled() { return (fEnabled != 0); };
+  int                          GetModId() { return fModId; };
+  bool                         IsEnabled() { return (fEnabled != 0); };
   void SetEnable(bool Enabled) { fEnabled = Enabled ? 1 : 0; };
 };
 
@@ -41,6 +41,7 @@ public:
   bool IsEnabledB0() { return (IsEnabled() && (fEnabledB0 != 0)); };
 };
 
-class THicConfigIB : public THicConfig {};
+class THicConfigIB : public THicConfig {
+};
 
 #endif

@@ -7,24 +7,26 @@
 TLocalBusTest::TLocalBusTest(TScanConfig *config, std::vector<TAlpide *> chips,
                              std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                              std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
-    : TScan(config, chips, hics, boards, histoQue, aMutex) {
+    : TScan(config, chips, hics, boards, histoQue, aMutex)
+{
   strcpy(m_name, "Local Bus Test");
   FindDaisyChains(chips);
   m_start[2] = 0;
-  m_stop[2] = m_daisyChains.size();
-  m_step[2] = 1;
+  m_stop[2]  = m_daisyChains.size();
+  m_step[2]  = 1;
 
   // stop values here have to be set on the fly as they depend on the number of enabled chips
   m_start[1] = 0;
-  m_step[1] = 1;
+  m_step[1]  = 1;
 
   m_start[0] = 0;
-  m_step[0] = 1;
+  m_step[0]  = 1;
 
   CreateScanHisto();
 }
 
-THisto TLocalBusTest::CreateHisto() {
+THisto TLocalBusTest::CreateHisto()
+{
   // count errors in bins corresponding to pattern,
   // e.g. error in pattern 0xa in communication with chip 3 -> Incr(3, 10)
   // for the time being: count errors both for read and write chip in the
@@ -35,7 +37,8 @@ THisto TLocalBusTest::CreateHisto() {
   return histo;
 }
 
-void TLocalBusTest::Init() {
+void TLocalBusTest::Init()
+{
   TScan::Init();
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
@@ -51,19 +54,20 @@ void TLocalBusTest::Init() {
   }
 }
 
-int TLocalBusTest::GetChipById(std::vector<TAlpide *> chips, int id) {
+int TLocalBusTest::GetChipById(std::vector<TAlpide *> chips, int id)
+{
   for (unsigned int i = 0; i < chips.size(); i++) {
-    if (chips.at(i)->GetConfig()->GetChipId() == id)
-      return i;
+    if (chips.at(i)->GetConfig()->GetChipId() == id) return i;
   }
 
   return -1;
 }
 
-void TLocalBusTest::FindDaisyChains(std::vector<TAlpide *> chips) {
-  int totalChips = 0;
-  int iChip = 0;
-  int maxChip = -1;
+void TLocalBusTest::FindDaisyChains(std::vector<TAlpide *> chips)
+{
+  int                    totalChips = 0;
+  int                    iChip      = 0;
+  int                    maxChip    = -1;
   std::vector<TAlpide *> daisyChain;
 
   while ((totalChips < (int)chips.size()) && (maxChip < (int)chips.size() - 1)) {
@@ -88,8 +92,7 @@ void TLocalBusTest::FindDaisyChains(std::vector<TAlpide *> chips) {
         std::cout << "Something went wrong, Did not find chip Id" << previousId << std::endl;
         exit(1);
       }
-      if (iiChip > maxChip)
-        maxChip = iiChip;
+      if (iiChip > maxChip) maxChip = iiChip;
       totalChips++;
       daisyChain.push_back(chips.at(iiChip));
     }
@@ -107,14 +110,15 @@ void TLocalBusTest::FindDaisyChains(std::vector<TAlpide *> chips) {
   }
 }
 
-void TLocalBusTest::PrepareStep(int loopIndex) {
+void TLocalBusTest::PrepareStep(int loopIndex)
+{
 
   switch (loopIndex) {
   case 0: // innermost loop: change read chip
     m_readChip = m_daisyChains.at(m_value[2]).at(m_value[0]);
     break;
   case 1: // 2nd loop: change write chip
-    m_writeChip = m_daisyChains.at(m_value[2]).at(m_value[1]);
+    m_writeChip  = m_daisyChains.at(m_value[2]).at(m_value[1]);
     m_boardIndex = FindBoardIndex(m_writeChip);
     // give token to write chip, take away in loop end
 
@@ -130,7 +134,8 @@ void TLocalBusTest::PrepareStep(int loopIndex) {
   }
 }
 
-void TLocalBusTest::LoopEnd(int loopIndex) {
+void TLocalBusTest::LoopEnd(int loopIndex)
+{
   if (loopIndex == 2) {
     while (!(m_mutex->try_lock()))
       ;
@@ -140,27 +145,29 @@ void TLocalBusTest::LoopEnd(int loopIndex) {
   }
 }
 
-void TLocalBusTest::Next(int loopIndex) {
+void TLocalBusTest::Next(int loopIndex)
+{
   if (loopIndex == 1) {
     m_writeChip->ModifyRegisterBits(Alpide::REG_CMUDMU_CONFIG, 4, 1, 0);
   }
   TScan::Next(loopIndex);
 }
 
-bool TLocalBusTest::TestPattern(int pattern) {
+bool TLocalBusTest::TestPattern(int pattern)
+{
   TDMUDebugStream debugStream;
-  int readId = m_readChip->GetConfig()->GetChipId();
-  int writeId = m_writeChip->GetConfig()->GetChipId();
-  uint16_t Value = 1 | ((pattern & 0xf) << 1);
+  int             readId  = m_readChip->GetConfig()->GetChipId();
+  int             writeId = m_writeChip->GetConfig()->GetChipId();
+  uint16_t        Value   = 1 | ((pattern & 0xf) << 1);
 
   common::TChipIndex read_idx, write_idx;
 
-  read_idx.boardIndex = m_boardIndex;
-  read_idx.chipId = readId;
+  read_idx.boardIndex   = m_boardIndex;
+  read_idx.chipId       = readId;
   read_idx.dataReceiver = m_readChip->GetConfig()->GetParamValue("RECEIVER");
 
-  write_idx.boardIndex = m_boardIndex;
-  write_idx.chipId = writeId;
+  write_idx.boardIndex   = m_boardIndex;
+  write_idx.chipId       = writeId;
   write_idx.dataReceiver = m_writeChip->GetConfig()->GetParamValue("RECEIVER");
 
   m_writeChip->WriteRegister(REG_TEST_CONTROL, Value);
@@ -181,19 +188,20 @@ bool TLocalBusTest::TestPattern(int pattern) {
   return true;
 }
 
-bool TLocalBusTest::TestBusy(bool busy) {
+bool TLocalBusTest::TestBusy(bool busy)
+{
   TBMUDebugStream bmuDebugStream;
-  int readId = m_readChip->GetConfig()->GetChipId();
-  int writeId = m_writeChip->GetConfig()->GetChipId();
+  int             readId  = m_readChip->GetConfig()->GetChipId();
+  int             writeId = m_writeChip->GetConfig()->GetChipId();
 
   common::TChipIndex read_idx, write_idx;
 
-  read_idx.boardIndex = m_boardIndex;
-  read_idx.chipId = readId;
+  read_idx.boardIndex   = m_boardIndex;
+  read_idx.chipId       = readId;
   read_idx.dataReceiver = m_readChip->GetConfig()->GetParamValue("RECEIVER");
 
-  write_idx.boardIndex = m_boardIndex;
-  write_idx.chipId = writeId;
+  write_idx.boardIndex   = m_boardIndex;
+  write_idx.chipId       = writeId;
   write_idx.dataReceiver = m_writeChip->GetConfig()->GetParamValue("RECEIVER");
 
   m_writeChip->WriteRegister(REG_TEST_CONTROL, busy ? 0x200 : 0x000);
@@ -215,7 +223,8 @@ bool TLocalBusTest::TestBusy(bool busy) {
   return true;
 }
 
-void TLocalBusTest::Execute() {
+void TLocalBusTest::Execute()
+{
   TestPattern(0xf);
   TestPattern(0x0);
   TestPattern(0xa);
@@ -225,7 +234,8 @@ void TLocalBusTest::Execute() {
   TestBusy(false);
 }
 
-void TLocalBusTest::Terminate() {
+void TLocalBusTest::Terminate()
+{
   TScan::Terminate();
 
   for (unsigned int i = 0; i < m_hics.size(); i++) {

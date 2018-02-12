@@ -6,24 +6,24 @@
 namespace Alpide {
 
   typedef struct {
-    int BusyRequestSM;
-    int BusyGeneratorSM;
+    int  BusyRequestSM;
+    int  BusyGeneratorSM;
     bool BusyInState;
     bool SEUErrorOR;
   } TBMUDebugStream;
 
   typedef struct {
-    int DataFIFOReadPointer[3];
-    int DataFIFOWritePointer[3];
-    int BusyFIFOReadPointer;
-    int BusyFIFOWritePointer;
-    int LocalBusValue;
-    int LocalBusOENGenSM;
-    int MuxFIFOCtrlSM;
-    int CtrlWordDecoderLocalBusSM;
-    int TokenGrantorSM;
-    int SendCommaSM;
-    int DataPackingSM;
+    int  DataFIFOReadPointer[3];
+    int  DataFIFOWritePointer[3];
+    int  BusyFIFOReadPointer;
+    int  BusyFIFOWritePointer;
+    int  LocalBusValue;
+    int  LocalBusOENGenSM;
+    int  MuxFIFOCtrlSM;
+    int  CtrlWordDecoderLocalBusSM;
+    int  TokenGrantorSM;
+    int  SendCommaSM;
+    int  DataPackingSM;
     bool SEUErrorOR;
     bool BusyMismatchError;
     bool BusyFIFOError;
@@ -31,39 +31,39 @@ namespace Alpide {
   } TDMUDebugStream;
 
   typedef struct {
-    int FrameStartFIFOReadPointer[3];
-    int FrameStartFIFOWritePointer[3];
-    int FrameEndFIFOReadPointer;
-    int FrameEndFIFOWritePointer;
-    int TRUSM;
-    int ClockEnableSM;
+    int  FrameStartFIFOReadPointer[3];
+    int  FrameStartFIFOWritePointer[3];
+    int  FrameEndFIFOReadPointer;
+    int  FrameEndFIFOWritePointer;
+    int  TRUSM;
+    int  ClockEnableSM;
     bool SEUErrorOR;
     bool FrameStartFIFOError;
     bool FrameEndFIFOError;
   } TTRUDebugStream;
 
   typedef struct {
-    int MEBFIFOReadPointer[32];
-    int MEBFIFOWritePointer[32];
-    int MEBFIFOSM[32];
+    int  MEBFIFOReadPointer[32];
+    int  MEBFIFOWritePointer[32];
+    int  MEBFIFOSM[32];
     bool SEUErrorOR[32];
-    int RegionReadoutSM[32];
-    int RegionValidDM[32];
-    int GenRgnSM[32];
-    int FIFOSelfTestSM[32];
-    int RoClockEnableSM[32];
-    int TruClockEnableSM[32];
-    int CfgClockEnableSM[32];
-    int FtClockEnableSM[32];
+    int  RegionReadoutSM[32];
+    int  RegionValidDM[32];
+    int  GenRgnSM[32];
+    int  FIFOSelfTestSM[32];
+    int  RoClockEnableSM[32];
+    int  TruClockEnableSM[32];
+    int  CfgClockEnableSM[32];
+    int  FtClockEnableSM[32];
   } TRRUDebugStream;
 
   typedef struct {
     bool SEUErrorOR;
-    int BunchCounter;
-    int TriggerCounter;
-    int StrobeCounter;
-    int FrameCounter;
-    int ReadoutCounter;
+    int  BunchCounter;
+    int  TriggerCounter;
+    int  StrobeCounter;
+    int  FrameCounter;
+    int  ReadoutCounter;
     // int  BunchCounter;
     int StrobeManagerSM;
     int FlushValue;
@@ -78,11 +78,11 @@ namespace Alpide {
 
   typedef struct {
     bool ComparatorOut;
-    int SampledValue;
-    int SelectDACRow;
-    int SelectDACColumn;
-    int ADCSM;
-    int ADCSequencerState;
+    int  SampledValue;
+    int  SelectDACRow;
+    int  SelectDACColumn;
+    int  ADCSM;
+    int  ADCSequencerState;
     bool SEUErrorOR;
   } TADCDebugStream;
 }

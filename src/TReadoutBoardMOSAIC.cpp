@@ -95,7 +95,8 @@ TReadoutBoardMOSAIC::TReadoutBoardMOSAIC(TConfig *config, TBoardConfigMOSAIC *bo
 }
 
 // Distructor
-TReadoutBoardMOSAIC::~TReadoutBoardMOSAIC() {
+TReadoutBoardMOSAIC::~TReadoutBoardMOSAIC()
+{
   delete dr;
   delete pulser;
   for (int i = 0; i < MAX_MOSAICTRANRECV; i++)
@@ -112,31 +113,35 @@ TReadoutBoardMOSAIC::~TReadoutBoardMOSAIC() {
    -------------------------- */
 
 // Read/Write registers
-int TReadoutBoardMOSAIC::WriteChipRegister(uint16_t address, uint16_t value, TAlpide *chipPtr) {
-  uint_fast16_t Cii = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
-  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
+int TReadoutBoardMOSAIC::WriteChipRegister(uint16_t address, uint16_t value, TAlpide *chipPtr)
+{
+  uint_fast16_t Cii    = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
+  uint8_t       chipId = chipPtr->GetConfig()->GetChipId();
   controlInterface[Cii]->addWriteReg(chipId, address, value);
   controlInterface[Cii]->execute();
   return (0);
 }
 
-int TReadoutBoardMOSAIC::ReadChipRegister(uint16_t address, uint16_t &value, TAlpide *chipPtr) {
-  uint_fast16_t Cii = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
-  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
+int TReadoutBoardMOSAIC::ReadChipRegister(uint16_t address, uint16_t &value, TAlpide *chipPtr)
+{
+  uint_fast16_t Cii    = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
+  uint8_t       chipId = chipPtr->GetConfig()->GetChipId();
   controlInterface[Cii]->addReadReg(chipId, address, &value);
   controlInterface[Cii]->execute();
   return (0);
 }
 
-int TReadoutBoardMOSAIC::SendOpCode(Alpide::TOpCode OpCode, TAlpide *chipPtr) {
-  uint_fast16_t Cii = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
-  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
+int TReadoutBoardMOSAIC::SendOpCode(Alpide::TOpCode OpCode, TAlpide *chipPtr)
+{
+  uint_fast16_t Cii    = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
+  uint8_t       chipId = chipPtr->GetConfig()->GetChipId();
   controlInterface[Cii]->addWriteReg(chipId, Alpide::REG_COMMAND, OpCode);
   controlInterface[Cii]->execute();
   return (0);
 }
 
-int TReadoutBoardMOSAIC::SendOpCode(Alpide::TOpCode OpCode) {
+int TReadoutBoardMOSAIC::SendOpCode(Alpide::TOpCode OpCode)
+{
   uint8_t ShortOpCode = (uint8_t)OpCode;
   for (int Cii = 0; Cii < MAX_MOSAICCTRLINT; Cii++) {
     controlInterface[Cii]->addSendCmd(ShortOpCode);
@@ -145,74 +150,80 @@ int TReadoutBoardMOSAIC::SendOpCode(Alpide::TOpCode OpCode) {
   return (0);
 }
 
-int TReadoutBoardMOSAIC::SendCommand(Alpide::TCommand Command, TAlpide *chipPtr) {
+int TReadoutBoardMOSAIC::SendCommand(Alpide::TCommand Command, TAlpide *chipPtr)
+{
   return WriteChipRegister(Alpide::REG_COMMAND, Command, chipPtr);
 }
 
 int TReadoutBoardMOSAIC::SetTriggerConfig(bool enablePulse, bool enableTrigger, int triggerDelay,
-                                          int pulseDelay) {
+                                          int pulseDelay)
+{
   uint16_t pulseMode = 0;
 
-  if (enablePulse)
-    pulseMode |= Pulser::OPMODE_ENPLS_BIT;
-  if (enableTrigger)
-    pulseMode |= Pulser::OPMODE_ENTRG_BIT;
+  if (enablePulse) pulseMode |= Pulser::OPMODE_ENPLS_BIT;
+  if (enableTrigger) pulseMode |= Pulser::OPMODE_ENTRG_BIT;
   pulser->setConfig(triggerDelay, pulseDelay, pulseMode);
   return (pulseMode);
 }
 
-void TReadoutBoardMOSAIC::SetTriggerSource(TTriggerSource triggerSource) {
+void TReadoutBoardMOSAIC::SetTriggerSource(TTriggerSource triggerSource)
+{
   if (triggerSource == trigInt) {
     // Internal Trigger
     mTriggerControl->addEnableExtTrigger(false, 0);
-  } else {
+  }
+  else {
     // external trigger
     mTriggerControl->addEnableExtTrigger(true, 0);
   }
   mTriggerControl->execute();
 }
 
-uint32_t TReadoutBoardMOSAIC::GetTriggerCount() {
+uint32_t TReadoutBoardMOSAIC::GetTriggerCount()
+{
   uint32_t counter = 0xDEADBEEF;
   mTriggerControl->getTriggerCounter(&counter);
   return counter;
 }
 
-int TReadoutBoardMOSAIC::Trigger(int nTriggers) {
+int TReadoutBoardMOSAIC::Trigger(int nTriggers)
+{
   pulser->run(nTriggers);
   return (nTriggers);
 }
 
-void TReadoutBoardMOSAIC::StartRun() {
+void TReadoutBoardMOSAIC::StartRun()
+{
   enableDefinedReceivers();
   connectTCP();            // open TCP connection
   mRunControl->startRun(); // start run
   usleep(5000);
 }
 
-void TReadoutBoardMOSAIC::StopRun() {
+void TReadoutBoardMOSAIC::StopRun()
+{
   pulser->run(0);
   mRunControl->stopRun();
   closeTCP(); // FIXME: this could cause the lost of the tail of the buffer ...
 }
 
-int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer) {
+int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
+{
   TAlpideDataParser *dr;
-  long readDataSize;
+  long               readDataSize;
 
   // check for data in the receivers buffer
   for (int i = 0; i < MAX_MOSAICTRANRECV; i++) {
-    if (alpideDataParser[i]->hasData())
-      return (alpideDataParser[i]->ReadEventData(nBytes, buffer));
+    if (alpideDataParser[i]->hasData()) return (alpideDataParser[i]->ReadEventData(nBytes, buffer));
   }
 
   // try to read from TCP connection
   for (;;) {
     try {
       readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), (MDataReceiver **)&dr);
-      if (readDataSize == 0)
-        return -1;
-    } catch (exception &e) {
+      if (readDataSize == 0) return -1;
+    }
+    catch (exception &e) {
       cerr << e.what() << endl;
       StopRun();
       decodeError();
@@ -220,8 +231,7 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer) {
     }
 
     // get event data from the selected data receiver
-    if (dr->hasData())
-      return (dr->ReadEventData(nBytes, buffer));
+    if (dr->hasData()) return (dr->ReadEventData(nBytes, buffer));
   }
   return -1;
 }
@@ -230,12 +240,13 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer) {
  * 		Private Methods
  ------------------------- */
 // Private : Init the board
-void TReadoutBoardMOSAIC::init() {
+void TReadoutBoardMOSAIC::init()
+{
   setIPaddress(fBoardConfig->GetIPaddress(), fBoardConfig->GetTCPport());
 
   std::cout << "MOSAIC firmware version: " << getFirmwareVersion() << std::endl;
   // I2C master (WBB slave) and connected peripherals
-  i2cBus = new I2Cbus(mIPbus, add_i2cMaster);
+  i2cBus    = new I2Cbus(mIPbus, add_i2cMaster);
   i2cBusAux = new I2Cbus(mIPbus, add_i2cAux);
 
   // Master Powerboard
@@ -244,7 +255,7 @@ void TReadoutBoardMOSAIC::init() {
   // CMU Control interface
   controlInterface[0] = new ControlInterface(mIPbus, add_controlInterface);
   controlInterface[1] = new ControlInterface(mIPbus, add_controlInterfaceB);
-  int addDisp = 0;
+  int addDisp         = 0;
   for (int i = 2; i < MAX_MOSAICCTRLINT; i++) {
     controlInterface[i] = new ControlInterface(mIPbus, add_controlInterface_0 + (addDisp << 24));
     addDisp++;
@@ -282,7 +293,8 @@ void TReadoutBoardMOSAIC::init() {
     // Master/Slave coordinator
     coordinator = new MCoordinator(mIPbus, add_coordinator);
     coordinator->setMode(MCoordinator::Alone);
-  } catch (...) {
+  }
+  catch (...) {
     std::cerr
         << "Could not communicate with the Master/Slave coordinator, please update your firmware!"
         << std::endl;
@@ -315,11 +327,9 @@ void TReadoutBoardMOSAIC::init() {
     uint32_t st;
     usleep(1000);
     mRunControl->getStatus(&st);
-    if ((st & boardStatusReady) == boardStatusReady)
-      break;
+    if ((st & boardStatusReady) == boardStatusReady) break;
   }
-  if (init_try == 0)
-    throw MBoardInitError("Timeout setting MOSAIC system PLL");
+  if (init_try == 0) throw MBoardInitError("Timeout setting MOSAIC system PLL");
 
   for (int i = 0; i < MAX_MOSAICCTRLINT; i++)
     setPhase(fBoardConfig->GetCtrlInterfacePhase(), i); // set the Phase shift on the line
@@ -340,7 +350,8 @@ void TReadoutBoardMOSAIC::init() {
 // ============================== DATA receivers private methods
 // =======================================
 
-void TReadoutBoardMOSAIC::enableDefinedReceivers() {
+void TReadoutBoardMOSAIC::enableDefinedReceivers()
+{
   bool Used[MAX_MOSAICTRANRECV];
   for (int i = 0; i < MAX_MOSAICTRANRECV; i++) {
     Used[i] = false;
@@ -355,7 +366,8 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers() {
         alpideRcv[dataLink]->addEnable(true);
         Used[dataLink] = true;
         // alpideRcv[dataLink]->execute();
-      } else if (!Used[dataLink]) {
+      }
+      else if (!Used[dataLink]) {
         //        std::cout << "DISabling receiver " << dataLink << std::endl;
         alpideRcv[dataLink]->addEnable(false);
       }
@@ -364,7 +376,8 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers() {
   return;
 }
 
-void TReadoutBoardMOSAIC::setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex) {
+void TReadoutBoardMOSAIC::setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex)
+{
   int regSet = 0;
 
   switch (ASpeed) {
@@ -383,7 +396,8 @@ void TReadoutBoardMOSAIC::setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex
   mRunControl->rmwConfigReg(~CFG_RATE_MASK, regSet);
 }
 
-void TReadoutBoardMOSAIC::enableControlInterfaces(bool en) {
+void TReadoutBoardMOSAIC::enableControlInterfaces(bool en)
+{
   for (int Cii = 0; Cii < MAX_MOSAICCTRLINT; Cii++) {
     controlInterface[Cii]->addEnable(en);
     controlInterface[Cii]->addDisableME(fBoardConfig->GetManchesterDisable() == 1 ? true : false);
@@ -391,7 +405,8 @@ void TReadoutBoardMOSAIC::enableControlInterfaces(bool en) {
   }
 }
 
-void TReadoutBoardMOSAIC::enableControlInterface(int interface, bool en) {
+void TReadoutBoardMOSAIC::enableControlInterface(int interface, bool en)
+{
   if (interface < MAX_MOSAICCTRLINT) {
     controlInterface[interface]->addEnable(en);
     controlInterface[interface]->addDisableME(fBoardConfig->GetManchesterDisable() == 1 ? true
@@ -400,7 +415,8 @@ void TReadoutBoardMOSAIC::enableControlInterface(int interface, bool en) {
   }
 }
 
-void TReadoutBoardMOSAIC::setInverted(bool AInverted, int Aindex) {
+void TReadoutBoardMOSAIC::setInverted(bool AInverted, int Aindex)
+{
   int st, en;
   //	Aindex = -1;
   st = (Aindex != -1) ? Aindex : 0;
@@ -415,13 +431,13 @@ void TReadoutBoardMOSAIC::setInverted(bool AInverted, int Aindex) {
 }
 
 // Decode the Mosaic Error register
-uint32_t TReadoutBoardMOSAIC::decodeError() {
+uint32_t TReadoutBoardMOSAIC::decodeError()
+{
   uint32_t runErrors;
   mRunControl->getErrors(&runErrors);
   if (runErrors) {
     std::cout << "MOSAIC Error register: 0x" << std::hex << runErrors << std::dec << " ";
-    if (runErrors & (1 << 0))
-      std::cout << "Board memory overflow, ";
+    if (runErrors & (1 << 0)) std::cout << "Board memory overflow, ";
     if (runErrors & (1 << 1))
       std::cout << "Board detected TCP/IP connection closed while running, ";
     for (int i = 0; i < 10; i++)
@@ -435,12 +451,13 @@ uint32_t TReadoutBoardMOSAIC::decodeError() {
 /* ------------------  Firmware Version --------------------
 
  */
-char *TReadoutBoardMOSAIC::getFirmwareVersion() {
+char *TReadoutBoardMOSAIC::getFirmwareVersion()
+{
   char *theIPAddr;
   theIPAddr = fBoardConfig->GetIPaddress();
 
   MService::fw_info_t MOSAICinfo;
-  MService *endPoint = new MService();
+  MService *          endPoint = new MService();
   endPoint->setIPaddress(theIPAddr);
   endPoint->readFWinfo(&MOSAICinfo);
 
@@ -454,7 +471,8 @@ char *TReadoutBoardMOSAIC::getFirmwareVersion() {
 /* -------------------------
    Power Board control methods
    ------------------------- */
-bool TReadoutBoardMOSAIC::PowerOn() {
+bool TReadoutBoardMOSAIC::PowerOn()
+{
   powerboard *thePower = pb;  // gets the handler to the power board
   if (!thePower->isReady()) { // there is not a PwB connected !
     std::cout << "No power board detected !" << std::endl;
@@ -469,7 +487,8 @@ bool TReadoutBoardMOSAIC::PowerOn() {
   return (true);
 }
 
-void TReadoutBoardMOSAIC::PowerOff() {
+void TReadoutBoardMOSAIC::PowerOff()
+{
   // Switch Off the CtrInterface
   enableControlInterfaces(false);
 
@@ -482,7 +501,8 @@ void TReadoutBoardMOSAIC::PowerOff() {
   return;
 }
 
-std::string TReadoutBoardMOSAIC::GetRegisterDump() {
+std::string TReadoutBoardMOSAIC::GetRegisterDump()
+{
   std::string result;
   result += "IP Address: ";
   result += fBoardConfig->GetIPaddress();

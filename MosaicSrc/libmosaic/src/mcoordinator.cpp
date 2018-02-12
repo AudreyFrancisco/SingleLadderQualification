@@ -36,14 +36,16 @@
 
 MCoordinator::MCoordinator(WishboneBus *wbbPtr, uint32_t baseAdd) : MWbbSlave(wbbPtr, baseAdd) {}
 
-void MCoordinator::addEnableExtClock(bool en) {
+void MCoordinator::addEnableExtClock(bool en)
+{
   uint32_t tmp;
 
   tmp = en ? EXT_CLK : 0;
   wbb->addRMWbits(baseAddress + regCfg, ~EXT_CLK, tmp);
 }
 
-void MCoordinator::addSetMode(mode_t mode) {
+void MCoordinator::addSetMode(mode_t mode)
+{
   uint32_t tmp = 0;
 
   switch (mode) {
@@ -63,17 +65,18 @@ void MCoordinator::addSetMode(mode_t mode) {
   wbb->addRMWbits(baseAddress + regCfg, ~(ALONE | MASTER), tmp);
 }
 
-void MCoordinator::setMode(mode_t mode) {
+void MCoordinator::setMode(mode_t mode)
+{
   addSetMode(mode);
   wbb->execute();
 }
 
-std::string MCoordinator::dumpRegisters() {
-  if (!wbb)
-    throw MIPBusUDPError("No IPBus configured");
+std::string MCoordinator::dumpRegisters()
+{
+  if (!wbb) throw MIPBusUDPError("No IPBus configured");
 
   regAddress_e addrs[] = {regCfg};
-  uint32_t nAddrs = sizeof(addrs) / sizeof(regAddress_e);
+  uint32_t     nAddrs  = sizeof(addrs) / sizeof(regAddress_e);
 
   std::stringstream ss;
   ss << std::hex;
@@ -83,7 +86,8 @@ std::string MCoordinator::dumpRegisters() {
     try {
       wbb->addRead(baseAddress + addrs[iAddr], &result);
       execute();
-    } catch (...) {
+    }
+    catch (...) {
       std::cerr << "Pulser read error: address 0x" << std::hex << baseAddress + addrs[iAddr]
                 << " (0x" << addrs[iAddr] << ")!" << std::dec << std::endl;
     };

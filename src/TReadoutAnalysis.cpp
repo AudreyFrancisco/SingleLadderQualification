@@ -8,10 +8,11 @@
 TReadoutAnalysis::TReadoutAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
                                    TScanConfig *aScanConfig, std::vector<THic *> hics,
                                    std::mutex *aMutex, TReadoutResult *aResult)
-    : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) {
+    : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex)
+{
   m_nTrig = m_config->GetParamValue("NTRIG");
-  m_occ = m_config->GetParamValue("READOUTOCC");
-  m_row = ((TReadoutTest *)m_scan)->GetRow();
+  m_occ   = m_config->GetParamValue("READOUTOCC");
+  m_row   = ((TReadoutTest *)m_scan)->GetRow();
   if (aResult)
     m_result = aResult;
   else
@@ -19,22 +20,24 @@ TReadoutAnalysis::TReadoutAnalysis(std::deque<TScanHisto> *histoQue, TScan *aSca
   FillVariableList();
 }
 
-void TReadoutAnalysis::Initialize() {
+void TReadoutAnalysis::Initialize()
+{
   ReadChipList();
   CreateHicResults();
 }
 
-void TReadoutAnalysis::InitCounters() {
+void TReadoutAnalysis::InitCounters()
+{
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TReadoutResultHic *hicResult =
         (TReadoutResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
-    hicResult->m_linkSpeed = ((TReadoutTest *)m_scan)->GetLinkSpeed();
-    hicResult->m_driver = ((TReadoutTest *)m_scan)->GetDriver();
-    hicResult->m_preemp = ((TReadoutTest *)m_scan)->GetPreemp();
+    hicResult->m_linkSpeed   = ((TReadoutTest *)m_scan)->GetLinkSpeed();
+    hicResult->m_driver      = ((TReadoutTest *)m_scan)->GetDriver();
+    hicResult->m_preemp      = ((TReadoutTest *)m_scan)->GetPreemp();
     hicResult->m_missingHits = 0;
-    hicResult->m_deadPixels = 0;
+    hicResult->m_deadPixels  = 0;
     hicResult->m_ineffPixels = 0;
-    hicResult->m_extraHits = 0;
+    hicResult->m_extraHits   = 0;
     hicResult->m_noisyPixels = 0;
   }
 
@@ -42,26 +45,25 @@ void TReadoutAnalysis::InitCounters() {
     TReadoutResultChip *chipResult =
         (TReadoutResultChip *)m_result->GetChipResult(m_chipList.at(i));
     chipResult->m_missingHits = 0;
-    chipResult->m_deadPixels = 0;
+    chipResult->m_deadPixels  = 0;
     chipResult->m_ineffPixels = 0;
-    chipResult->m_extraHits = 0;
+    chipResult->m_extraHits   = 0;
     chipResult->m_noisyPixels = 0;
   }
 }
 
-bool TReadoutAnalysis::IsInjected(int col, int row) {
-  if (row != m_row)
-    return false; // wrong row
-  if (m_occ == 32)
-    return true; // correct row, all pixels in row injected
+bool TReadoutAnalysis::IsInjected(int col, int row)
+{
+  if (row != m_row) return false; // wrong row
+  if (m_occ == 32) return true;   // correct row, all pixels in row injected
 
   int colStep = 32 / m_occ;
-  if (col % colStep == 0)
-    return true;
+  if (col % colStep == 0) return true;
   return false;
 }
 
-void TReadoutAnalysis::AnalyseHisto(TScanHisto *histo) {
+void TReadoutAnalysis::AnalyseHisto(TScanHisto *histo)
+{
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     TReadoutResultChip *chipResult =
         (TReadoutResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
@@ -81,11 +83,13 @@ void TReadoutAnalysis::AnalyseHisto(TScanHisto *histo) {
           if ((*histo)(m_chipList.at(ichip), icol, irow) == 0) {
             chipResult->m_missingHits += m_nTrig;
             chipResult->m_deadPixels++;
-          } else if (!((*histo)(m_chipList.at(ichip), icol, irow) == m_nTrig)) {
+          }
+          else if (!((*histo)(m_chipList.at(ichip), icol, irow) == m_nTrig)) {
             chipResult->m_missingHits += m_nTrig - (*histo)(m_chipList.at(ichip), icol, irow);
             chipResult->m_ineffPixels++;
           }
-        } else {
+        }
+        else {
           if ((*histo)(m_chipList.at(ichip), icol, irow) != 0) {
             chipResult->m_extraHits += (*histo)(m_chipList.at(ichip), icol, irow);
             chipResult->m_noisyPixels++;
@@ -96,7 +100,8 @@ void TReadoutAnalysis::AnalyseHisto(TScanHisto *histo) {
   }
 }
 
-void TReadoutAnalysis::Finalize() {
+void TReadoutAnalysis::Finalize()
+{
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TReadoutResultHic *hicResult =
         (TReadoutResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
@@ -106,8 +111,7 @@ void TReadoutAnalysis::Finalize() {
 
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-      if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip))))
-        continue;
+      if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TReadoutResultChip *chipResult =
           (TReadoutResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
       TReadoutResultHic *hicResult =
@@ -126,7 +130,8 @@ void TReadoutAnalysis::Finalize() {
         (TReadoutResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
-    } else {
+    }
+    else {
       hicResult->m_class = GetClassificationIB(hicResult);
     }
   }
@@ -135,14 +140,16 @@ void TReadoutAnalysis::Finalize() {
   m_finished = true;
 }
 
-void TReadoutAnalysis::WriteResult() {
+void TReadoutAnalysis::WriteResult()
+{
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/ReadoutScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
               m_config->GetfNameSuffix());
-    } else {
+    }
+    else {
       sprintf(fName, "ReadoutScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
               m_config->GetfNameSuffix());
     }
@@ -163,27 +170,24 @@ void TReadoutAnalysis::WriteResult() {
 // TODO: make configurable cuts? different for OB/IB?
 // Different depending on driver setting? (e.g. if errors at 10 -> Red, if errors at 2 -> Orange)?
 
-THicClassification TReadoutAnalysis::GetClassificationOB(TReadoutResultHic *result) {
-  if (result->m_errorCounter.nCorruptEvent > 0)
-    return CLASS_RED;
-  if (result->m_errorCounter.nTimeout > 0)
-    return CLASS_RED;
-  if (result->m_errorCounter.n8b10b > 0)
-    return CLASS_ORANGE;
+THicClassification TReadoutAnalysis::GetClassificationOB(TReadoutResultHic *result)
+{
+  if (result->m_errorCounter.nCorruptEvent > 0) return CLASS_RED;
+  if (result->m_errorCounter.nTimeout > 0) return CLASS_RED;
+  if (result->m_errorCounter.n8b10b > 0) return CLASS_ORANGE;
   return CLASS_GREEN;
 }
 
-THicClassification TReadoutAnalysis::GetClassificationIB(TReadoutResultHic *result) {
-  if (result->m_errorCounter.nCorruptEvent > 0)
-    return CLASS_RED;
-  if (result->m_errorCounter.nTimeout > 0)
-    return CLASS_RED;
-  if (result->m_errorCounter.n8b10b > 0)
-    return CLASS_ORANGE;
+THicClassification TReadoutAnalysis::GetClassificationIB(TReadoutResultHic *result)
+{
+  if (result->m_errorCounter.nCorruptEvent > 0) return CLASS_RED;
+  if (result->m_errorCounter.nTimeout > 0) return CLASS_RED;
+  if (result->m_errorCounter.n8b10b > 0) return CLASS_ORANGE;
   return CLASS_GREEN;
 }
 
-void TReadoutResultHic::WriteToFile(FILE *fp) {
+void TReadoutResultHic::WriteToFile(FILE *fp)
+{
   fprintf(fp, "HIC Result:\n\n");
 
   fprintf(fp, "HIC Classification: %s\n\n", WriteHicClassification());
@@ -216,16 +220,18 @@ void TReadoutResultHic::WriteToFile(FILE *fp) {
   }
 }
 
-void TReadoutResultHic::GetParameterSuffix(std::string &suffix, std::string &file_suffix) {
+void TReadoutResultHic::GetParameterSuffix(std::string &suffix, std::string &file_suffix)
+{
   TReadoutParameters *params = (TReadoutParameters *)m_scanParameters;
-  char scale[5];
+  char                scale[5];
 
   sprintf(scale, "%.1f", params->voltageScale);
 
   if ((params->voltageScale != 1) || (params->pllStages >= 0)) {
     suffix = string(" ") + to_string(m_linkSpeed) + string(" ") + string(scale) + string("xDVDD") +
              string(" ") + to_string(params->pllStages);
-  } else {
+  }
+  else {
     suffix = string(" ") + to_string(m_linkSpeed);
   }
   suffix += string(" D") + to_string(m_driver);
@@ -234,14 +240,16 @@ void TReadoutResultHic::GetParameterSuffix(std::string &suffix, std::string &fil
   if ((params->voltageScale != 1) || (params->pllStages >= 0)) {
     file_suffix = string("_") + to_string(m_linkSpeed) + string("_") + string(scale) +
                   string("xDVDD") + string("_") + to_string(params->pllStages);
-  } else {
+  }
+  else {
     file_suffix = string("_") + to_string(m_linkSpeed);
   }
   file_suffix += string("_D") + to_string(m_driver);
   file_suffix += string("_P") + to_string(m_preemp);
 }
 
-void TReadoutResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity) {
+void TReadoutResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
+{
   std::string suffix, file_suffix, fileName, remoteName;
   GetParameterSuffix(suffix, file_suffix);
 
@@ -254,13 +262,14 @@ void TReadoutResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity) 
                  (float)(m_deadPixels + m_ineffPixels + m_noisyPixels));
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
-  fileName = string(m_resultFile).substr(slash + 1); // strip path
+  fileName          = string(m_resultFile).substr(slash + 1); // strip path
   std::size_t point = fileName.find_last_of(".");
-  remoteName = fileName.substr(0, point) + file_suffix + ".dat";
+  remoteName        = fileName.substr(0, point) + file_suffix + ".dat";
   DbAddAttachment(db, activity, attachResult, string(m_resultFile), remoteName);
 }
 
-float TReadoutResultChip::GetVariable(TResultVariable var) {
+float TReadoutResultChip::GetVariable(TResultVariable var)
+{
   switch (var) {
   default:
     std::cout << "Warning, bad result type for this analysis" << std::endl;
@@ -268,7 +277,8 @@ float TReadoutResultChip::GetVariable(TResultVariable var) {
   }
 }
 
-void TReadoutResultChip::WriteToFile(FILE *fp) {
+void TReadoutResultChip::WriteToFile(FILE *fp)
+{
   fprintf(fp, "Missing hits:       %d\n", m_missingHits);
   fprintf(fp, "Extra hits:         %d\n", m_extraHits);
   fprintf(fp, "Dead pixels:        %d\n", m_deadPixels);

@@ -30,6 +30,7 @@
 
 #include "pexception.h"
 
-PControlInterfaceError::PControlInterfaceError(const string &arg) {
+PControlInterfaceError::PControlInterfaceError(const string &arg)
+{
   msg = "Control Interface Error: " + arg;
 }

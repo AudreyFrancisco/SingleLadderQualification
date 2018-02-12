@@ -19,14 +19,16 @@ public:
   struct ReadResult {
     uint16_t address;
     uint16_t data;
-    bool error;
+    bool     error;
     ReadResult(uint16_t address, uint16_t data, bool error)
-        : address(address), data(data), error(error) {}
+        : address(address), data(data), error(error)
+    {
+    }
   };
 
-  static const int VID;
-  static const int PID;
-  static const int INTERFACE_NUMBER;
+  static const int     VID;
+  static const int     PID;
+  static const int     INTERFACE_NUMBER;
   static const uint8_t EP_CTL_OUT;
   static const uint8_t EP_CTL_IN;
   static const uint8_t EP_DATA0_IN;
@@ -34,7 +36,7 @@ public:
 
   static const size_t EVENT_DATA_READ_CHUNK;
   static const size_t USB_TIMEOUT;
-  static const int MAX_RETRIES_READ;
+  static const int    MAX_RETRIES_READ;
 
   static const uint8_t MODULE_MASTER;
   static const uint8_t MODULE_STATUS;
@@ -46,17 +48,17 @@ public:
 
 private:
   std::shared_ptr<UsbDev> m_usb;
-  TBoardConfigRU *m_config;
-  UsbDev::DataBuffer m_buffer;
-  uint32_t m_readBytes;
+  TBoardConfigRU *        m_config;
+  UsbDev::DataBuffer      m_buffer;
+  uint32_t                m_readBytes;
 
   bool m_logging;
 
   // Triggeroptions
   bool m_enablePulse;
   bool m_enableTrigger;
-  int m_triggerDelay;
-  int m_pulseDelay;
+  int  m_triggerDelay;
+  int  m_pulseDelay;
 
   std::map<uint8_t, std::vector<uint8_t>> m_readoutBuffers;
   std::deque<std::vector<uint8_t>> m_events;
@@ -66,7 +68,7 @@ private:
 
 public:
   // Modules
-  std::shared_ptr<TRuDctrlModule> dctrl;
+  std::shared_ptr<TRuDctrlModule>    dctrl;
   std::shared_ptr<TRuWishboneModule> master;
   std::map<uint8_t, std::shared_ptr<TRuTransceiverModule>> transceiver_array;
 

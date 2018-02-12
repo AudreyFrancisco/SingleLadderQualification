@@ -50,7 +50,7 @@ public:
   IPbusUDP(const char *brdName, int port = DEFAULT_PORT, int pktsize = DEFAULT_PACKET_SIZE);
   ~IPbusUDP();
   void setIPaddress(const char *brdName, int port = DEFAULT_PORT);
-  void execute();
+  void              execute();
   const std::string name() { return "IPbusUDP"; }
 
 private:
@@ -60,9 +60,9 @@ private:
 
 private:
   // int port;
-  int sockfd;
+  int                sockfd;
   struct sockaddr_in sockAddress;
-  int rcvTimoutTime;
+  int                rcvTimoutTime;
 };
 
 #endif // IPBUSUDP_H

@@ -47,43 +47,43 @@ public:
 
 private:
   enum {
-    CMD_NOP = 0x00,
-    CMD_CONV1 = 0x80,   // Convert Vin1
-    CMD_CONV2 = 0x90,   // Convert Vin2
-    CMD_CONV3 = 0xa0,   // Convert Vin3
-    CMD_CONV4 = 0xb0,   // Convert Vin4
-    CMD_CONV5 = 0xc0,   // Convert Vin5
-    CMD_CONV6 = 0xd0,   // Convert Vin6
-    CMD_CONV7 = 0xe0,   // Convert Vin7
-    CMD_CONV8 = 0xf0,   // Convert Vin8
-    CMD_CONV_SEQ = 0x70 // Convert sequence of configured channels
+    CMD_NOP      = 0x00,
+    CMD_CONV1    = 0x80, // Convert Vin1
+    CMD_CONV2    = 0x90, // Convert Vin2
+    CMD_CONV3    = 0xa0, // Convert Vin3
+    CMD_CONV4    = 0xb0, // Convert Vin4
+    CMD_CONV5    = 0xc0, // Convert Vin5
+    CMD_CONV6    = 0xd0, // Convert Vin6
+    CMD_CONV7    = 0xe0, // Convert Vin7
+    CMD_CONV8    = 0xf0, // Convert Vin8
+    CMD_CONV_SEQ = 0x70  // Convert sequence of configured channels
   };
 
 public:
   enum {
     REG_ConvertionReult = 0x00,
-    REG_AllertStatus = 0x01,
-    REG_Configuration = 0x02,
-    REG_CycleTimer = 0x03,
-    REG_DataL_CH1 = 0x04,
-    REG_DataH_CH1 = 0x05,
-    REG_Hysteresis_CH1 = 0x06,
-    REG_DataL_CH2 = 0x07,
-    REG_DataH_CH2 = 0x08,
-    REG_Hysteresis_CH2 = 0x09,
-    REG_DataL_CH3 = 0x0a,
-    REG_DataH_CH3 = 0x0b,
-    REG_Hysteresis_CH3 = 0x0c,
-    REG_DataL_CH4 = 0x0d,
-    REG_DataH_CH4 = 0x0e,
-    REG_Hysteresis_CH4 = 0x0f
+    REG_AllertStatus    = 0x01,
+    REG_Configuration   = 0x02,
+    REG_CycleTimer      = 0x03,
+    REG_DataL_CH1       = 0x04,
+    REG_DataH_CH1       = 0x05,
+    REG_Hysteresis_CH1  = 0x06,
+    REG_DataL_CH2       = 0x07,
+    REG_DataH_CH2       = 0x08,
+    REG_Hysteresis_CH2  = 0x09,
+    REG_DataL_CH3       = 0x0a,
+    REG_DataH_CH3       = 0x0b,
+    REG_Hysteresis_CH3  = 0x0c,
+    REG_DataL_CH4       = 0x0d,
+    REG_DataH_CH4       = 0x0e,
+    REG_Hysteresis_CH4  = 0x0f
   };
 
   enum {
     CFG_BusyAllertPolarity = 1 << 0,
-    CFG_BusyAllert = 1 << 1,
-    CFG_AllertEn = 1 << 2,
-    CFG_FLTR = 1 << 3
+    CFG_BusyAllert         = 1 << 1,
+    CFG_AllertEn           = 1 << 2,
+    CFG_FLTR               = 1 << 3
   };
 };
 

@@ -36,7 +36,8 @@ pbMainWindow *theMainWindow;
 
 #define PROGRAM_VERSION "Ver. 1.1.0"
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   char cfgFileName[2000];
 
   QApplication *a;
@@ -54,8 +55,7 @@ int main(int argc, char **argv) {
 
   theMainWindow = new pbMainWindow();
   theMainWindow->show();
-  if (cfgFileName[0])
-    theMainWindow->fileOpen(cfgFileName);
+  if (cfgFileName[0]) theMainWindow->fileOpen(cfgFileName);
   return a->exec();
 
 invokeError:

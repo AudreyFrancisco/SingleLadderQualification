@@ -60,7 +60,7 @@ namespace serial {
 
   private:
     static timespec timespec_now();
-    timespec expiry;
+    timespec        expiry;
   };
 
   class serial::Serial::SerialImpl {
@@ -151,19 +151,19 @@ namespace serial {
 
   private:
     string port_; // Path to the file descriptor
-    int fd_;      // The current file descriptor
+    int    fd_;   // The current file descriptor
 
     bool is_open_;
     bool xonxoff_;
     bool rtscts_;
 
-    Timeout timeout_;        // Timeout for read operations
-    unsigned long baudrate_; // Baudrate
-    uint32_t byte_time_ns_;  // Nanoseconds to transmit/receive a single byte
+    Timeout       timeout_;      // Timeout for read operations
+    unsigned long baudrate_;     // Baudrate
+    uint32_t      byte_time_ns_; // Nanoseconds to transmit/receive a single byte
 
-    parity_t parity_;           // Parity
-    bytesize_t bytesize_;       // Size of the bytes
-    stopbits_t stopbits_;       // Stop Bits
+    parity_t      parity_;      // Parity
+    bytesize_t    bytesize_;    // Size of the bytes
+    stopbits_t    stopbits_;    // Stop Bits
     flowcontrol_t flowcontrol_; // Flow Control
 
     // Mutex used to lock the read functions

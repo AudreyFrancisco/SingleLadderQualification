@@ -38,7 +38,8 @@ SC18IS602::SC18IS602(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address
 /*
         Configure the bridge
 */
-void SC18IS602::configure(uint8_t cfg) {
+void SC18IS602::configure(uint8_t cfg)
+{
   i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Write);
   i2cBus->addWriteData(FUN_CONFIG);
   i2cBus->addWriteData(cfg, I2Cbus::RWF_stop);
@@ -48,15 +49,13 @@ void SC18IS602::configure(uint8_t cfg) {
 /*
         Write data to bridge buffer
 */
-void SC18IS602::spiWrite(uint8_t slave, int len, uint8_t *data) {
-  if (slave > 3)
-    slave = 3;
+void SC18IS602::spiWrite(uint8_t slave, int len, uint8_t *data)
+{
+  if (slave > 3) slave = 3;
 
-  if (len == 0)
-    return;
+  if (len == 0) return;
 
-  if (len > BUFFER_LEN)
-    len = BUFFER_LEN;
+  if (len > BUFFER_LEN) len = BUFFER_LEN;
 
   i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Write);
   i2cBus->addWriteData(FUN_SPI | (1 << slave));
@@ -71,16 +70,15 @@ void SC18IS602::spiWrite(uint8_t slave, int len, uint8_t *data) {
 /*
         Read data from bridge buffer
 */
-void SC18IS602::spiReadBuffer(int len, uint8_t *data) {
-  uint32_t readBuffer[BUFFER_LEN];
+void SC18IS602::spiReadBuffer(int len, uint8_t *data)
+{
+  uint32_t  readBuffer[BUFFER_LEN];
   uint32_t *rb = readBuffer;
-  int l;
+  int       l;
 
-  if (len == 0)
-    return;
+  if (len == 0) return;
 
-  if (len > BUFFER_LEN)
-    len = BUFFER_LEN;
+  if (len > BUFFER_LEN) len = BUFFER_LEN;
 
   // Read data
   i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Read);
@@ -92,7 +90,7 @@ void SC18IS602::spiReadBuffer(int len, uint8_t *data) {
   i2cBus->execute();
 
   // copy data
-  l = len;
+  l  = len;
   rb = readBuffer;
   while (l--)
     *data++ = *rb++;

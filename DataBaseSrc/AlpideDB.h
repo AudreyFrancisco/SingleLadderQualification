@@ -67,10 +67,10 @@ public:
 public:
 protected:
   AlpideDBManager *theDBmanager;
-  string theQueryDomain;
-  string theJarUrl;
-  bool isConnected;
-  int m_projectId;
+  string           theQueryDomain;
+  string           theJarUrl;
+  bool             isConnected;
+  int              m_projectId;
   // Methods
 public:
   AlpideDB(bool isTestDB = true);
@@ -81,8 +81,8 @@ public:
   void SetQueryDomain(string aQueryDomain) { theQueryDomain = aQueryDomain; };
 
   AlpideDBManager *GetManagerHandle() { return (theDBmanager); };
-  bool isDBConnected() { return (isConnected); };
-  int GetProjectId() { return m_projectId; };
+  bool             isDBConnected() { return (isConnected); };
+  int              GetProjectId() { return m_projectId; };
 
 private:
   void Init(string aQueryDomain, string aJarUrl);

@@ -7,7 +7,8 @@
 #include <iomanip>
 #include <iostream>
 TestSelection::TestSelection(QWidget *parent, bool testDatabase)
-    : QDialog(parent), ui(new Ui::TestSelection) {
+    : QDialog(parent), ui(new Ui::TestSelection)
+{
   ui->setupUi(this);
   fmainwindow = qobject_cast<MainWindow *>(parent);
   //  ui->settings->hide();
@@ -52,79 +53,90 @@ TestSelection::~TestSelection() { delete ui; }
 void TestSelection::SaveSettings(QString &institute, QString &opname, QString &hicid, int &counter,
                                  int &lid, int &memberid, QString &ttwo, QString &tthree,
                                  QString &tfour, QString &tfive, QString &done, QString &dtwo,
-                                 QString &dthree, QString &dfour, QString &dfive) {
+                                 QString &dthree, QString &dfour, QString &dfive)
+{
   if (ui->operatorstring->toPlainText().isEmpty() ||
       /*ui->id->toPlainText().isEmpty() || */ locid == 0) {
     qDebug() << "Put your details" << endl;
     popupmessage("Info missing");
     counter = 0;
-
-  } else {
+  }
+  else {
     if (!ui->t2->toPlainText().isEmpty()) {
       ttwo = ui->t2->toPlainText();
-    } else {
+    }
+    else {
       ttwo = '\0';
     }
 
     if (!ui->t3->toPlainText().isEmpty()) {
       tthree = ui->t3->toPlainText();
-    } else {
+    }
+    else {
       tthree = '\0';
     }
 
     if (!ui->t4->toPlainText().isEmpty()) {
       tfour = ui->t4->toPlainText();
-    } else {
+    }
+    else {
       tfour = '\0';
     }
 
     if (!ui->t5->toPlainText().isEmpty()) {
       tfive = ui->t5->toPlainText();
-    } else {
+    }
+    else {
       tfive = '\0';
     }
 
     if (!ui->d1->toPlainText().isEmpty()) {
       done = ui->d1->toPlainText();
-    } else {
+    }
+    else {
       done = '\0';
     }
 
     if (!ui->d2->toPlainText().isEmpty()) {
       dtwo = ui->d2->toPlainText();
-    } else {
+    }
+    else {
       dtwo = '\0';
     }
     if (!ui->d3->toPlainText().isEmpty()) {
       dthree = ui->d3->toPlainText();
-    } else {
+    }
+    else {
       dthree = '\0';
     }
 
     if (!ui->d4->toPlainText().isEmpty()) {
       dfour = ui->d4->toPlainText();
-    } else {
+    }
+    else {
       dfour = '\0';
     }
 
     if (!ui->d5->toPlainText().isEmpty()) {
       dfive = ui->d5->toPlainText();
-    } else {
+    }
+    else {
       dfive = '\0';
     }
 
-    opname = ui->operatorstring->toPlainText();
-    hicid = ui->id->toPlainText();
-    counter = 1;
-    lid = locid;
+    opname    = ui->operatorstring->toPlainText();
+    hicid     = ui->id->toPlainText();
+    counter   = 1;
+    lid       = locid;
     institute = location;
-    memberid = GetMemberID();
+    memberid  = GetMemberID();
 
     qDebug() << "The operator name is:" << opname << "and the hic id is: " << hicid << endl;
   }
 }
 
-void TestSelection::popupmessage(QString m) {
+void TestSelection::popupmessage(QString m)
+{
   missingsettings = new Dialog(this);
   // need to check this Attribute
   // missingsettings->setAttribute(Qt::WA_DeleteOnClose);
@@ -138,22 +150,25 @@ void TestSelection::popupmessage(QString m) {
   // missingsettings->raise();
 }
 
-void TestSelection::connectlocationcombo(std::vector<pair<std::string, int>> floc) {
+void TestSelection::connectlocationcombo(std::vector<pair<std::string, int>> floc)
+{
 
   for (auto const &v : floc) {
     ui->databaselocation->addItem(v.first.c_str(), v.second);
   }
 }
 
-void TestSelection::getlocationcombo(int value) {
+void TestSelection::getlocationcombo(int value)
+{
   locid = 0;
   if (value > 0) { // first item is empty
-    locid = ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
+    locid    = ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
     location = ui->databaselocation->currentText();
   }
 }
 
-int TestSelection::GetMemberID() {
+int TestSelection::GetMemberID()
+{
   AlpideDB *DB;
   DB = fmainwindow->GetDB();
   int result;
@@ -163,7 +178,8 @@ int TestSelection::GetMemberID() {
 
 void TestSelection::ClearLocations() { ui->databaselocation->clear(); }
 
-void TestSelection::adjustendurance() {
+void TestSelection::adjustendurance()
+{
 
   ui->t2->show();
   ui->t3->show();
@@ -177,7 +193,8 @@ void TestSelection::adjustendurance() {
   ui->d5->show();
 }
 
-void TestSelection::hideendurance() {
+void TestSelection::hideendurance()
+{
 
   ui->t2->hide();
   ui->t3->hide();
@@ -190,9 +207,10 @@ void TestSelection::hideendurance() {
   ui->d5->hide();
 }
 
-void TestSelection::GetTestTypeName(TTestType &typetest, QString &testname) {
+void TestSelection::GetTestTypeName(TTestType &typetest, QString &testname)
+{
   int value;
-  value = ui->typetest->itemData(ui->typetest->currentIndex()).toInt();
+  value    = ui->typetest->itemData(ui->typetest->currentIndex()).toInt();
   testname = ui->typetest->currentText();
   typetest = (TTestType)value;
   std::cout << "the value is: " << value << " the test type is " << typetest

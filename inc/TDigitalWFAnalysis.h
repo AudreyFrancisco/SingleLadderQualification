@@ -15,8 +15,8 @@ class TDigitalWFResultChip : public TScanResultChip {
   friend class TDigitalWFAnalysis;
 
 private:
-  int m_nStuck;
-  int m_nUnmaskable;
+  int                  m_nStuck;
+  int                  m_nUnmaskable;
   std::vector<TPixHit> m_stuck;
 
 public:
@@ -29,8 +29,8 @@ class TDigitalWFResultHic : public TScanResultHic {
   friend class TDigitalWFAnalysis;
 
 private:
-  int m_nStuck;
-  int m_nUnmaskable;
+  int  m_nStuck;
+  int  m_nUnmaskable;
   char m_stuckFile[200];
   char m_unmaskedFile[200];
 
@@ -58,7 +58,7 @@ public:
 
 class TDigitalWFAnalysis : public TScanAnalysis {
 private:
-  int m_ninj;
+  int  m_ninj;
   void InitCounters();
   void FillVariableList();
   //  void WriteHitData     (TScanHisto *histo, int row);
@@ -71,11 +71,13 @@ private:
   std::vector<TPixHit> m_unmaskable;
 
 protected:
-  TScanResultChip *GetChipResult() {
+  TScanResultChip *GetChipResult()
+  {
     TDigitalWFResultChip *Result = new TDigitalWFResultChip();
     return Result;
   };
-  TScanResultHic *GetHicResult() {
+  TScanResultHic *GetHicResult()
+  {
     TDigitalWFResultHic *Result = new TDigitalWFResultHic();
     return Result;
   };

@@ -80,8 +80,9 @@ AlpideTable::~AlpideTable() {}
 // TODO: Need to make two routines to decode the response in order to be compliant with SOAP/POST
 // versions.
 
-AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Session) {
-  bool bGoChildren = false;
+AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Session)
+{
+  bool      bGoChildren = false;
   xmlDocPtr doc;
   doc =
       xmlReadMemory(ReturnedString, strlen(ReturnedString), "noname.xml", NULL, 0); // parse the XML
@@ -91,7 +92,7 @@ AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Ses
     return (&theResponse);
   }
   xmlNode *root_element = NULL;
-  root_element = xmlDocGetRootElement(doc);
+  root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
     cerr << "Failed to parse document: No root element" << endl;
     SetResponse(AlpideTable::BadXML, 0, Session);
@@ -101,19 +102,24 @@ AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Ses
   while (n1 != NULL) {
     if (MATCHNODE(n1, "ErrorCode")) {
       theResponse.ErrorCode = atoi((const char *)n1->children->content);
-    } else if (MATCHNODE(n1, "ErrorMessage")) {
+    }
+    else if (MATCHNODE(n1, "ErrorMessage")) {
       theResponse.ErrorMessage = (const char *)n1->children->content;
-    } else if (MATCHNODE(n1, "ID")) {
+    }
+    else if (MATCHNODE(n1, "ID")) {
       theResponse.ID = atoi((const char *)n1->children->content);
-    } else if (strcmp((const char *)n1->name, "text") == 0) { // we need to skip this empty node ?
-                                                              // do nothing
-    } else {                                                  // we reach the parent of results
-      bGoChildren = true;                                     // go down one level
+    }
+    else if (strcmp((const char *)n1->name, "text") == 0) { // we need to skip this empty node ?
+                                                            // do nothing
+    }
+    else {                // we reach the parent of results
+      bGoChildren = true; // go down one level
     }
     if (bGoChildren) {
-      n1 = n1->children;   // got the children
-      bGoChildren = false; // go for the brothers
-    } else {
+      n1          = n1->children; // got the children
+      bGoChildren = false;        // go for the brothers
+    }
+    else {
       n1 = n1->next; // skip to the brother
     }
   }
@@ -130,10 +136,11 @@ AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Ses
  *				  Session := a Session Index Value (reserved for future use)
  *
  *---------------- */
-void AlpideTable::SetResponse(AlpideTable::ErrorCode ErrNum, int ID, int Session) {
+void AlpideTable::SetResponse(AlpideTable::ErrorCode ErrNum, int ID, int Session)
+{
   theResponse.ErrorCode = (int)ErrNum;
-  theResponse.ID = ID;
-  theResponse.Session = Session;
+  theResponse.ID        = ID;
+  theResponse.Session   = Session;
 
   switch (ErrNum) {
   case AlpideTable::BadXML:
@@ -154,7 +161,8 @@ void AlpideTable::SetResponse(AlpideTable::ErrorCode ErrNum, int ID, int Session
 /* -----------------
 
  *---------------- */
-const char *AlpideTable::DumpResponse() {
+const char *AlpideTable::DumpResponse()
+{
   theGeneralBuffer = "Return : Message =" + theResponse.ErrorMessage + "(" +
                      std::to_string(theResponse.ErrorCode) + ") ";
   theGeneralBuffer +=
@@ -168,7 +176,8 @@ const char *AlpideTable::DumpResponse() {
  *
  *
   -------------------- */
-bool AlpideTable::_getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod) {
+bool AlpideTable::_getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod)
+{
   // parse the XML
   *doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0);
   if (*doc == NULL) {
@@ -180,7 +189,7 @@ bool AlpideTable::_getTheRootElementChildren(char *stringresult, xmlDocPtr *doc,
 
   // Get the root element node
   xmlNode *root_element = NULL;
-  root_element = xmlDocGetRootElement(*doc);
+  root_element          = xmlDocGetRootElement(*doc);
   if (root_element == NULL) {
     cerr << "Failed Bad XML format no root element" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
@@ -211,10 +220,11 @@ ProjectDB::~ProjectDB() {}
  *projects
  *		returns : a response struct that contains the error code
  *---------------- */
-AlpideTable::response *ProjectDB::GetList(vector<project> *Result) {
-  string theUrl = theParentDB->GetQueryDomain() + "/ProjectRead";
-  string theQuery = "";
-  char *result;
+AlpideTable::response *ProjectDB::GetList(vector<project> *Result)
+{
+  string  theUrl   = theParentDB->GetQueryDomain() + "/ProjectRead";
+  string  theQuery = "";
+  char *  result;
   project pro;
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &result) == 0) {
@@ -232,7 +242,7 @@ AlpideTable::response *ProjectDB::GetList(vector<project> *Result) {
 
   // Get the root element node
   xmlNode *root_element = NULL;
-  root_element = xmlDocGetRootElement(doc);
+  root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
@@ -283,10 +293,11 @@ MemberDB::~MemberDB() {}
  *member
  *		returns : a response struct that contains the error code
  *---------------- */
-AlpideTable::response *MemberDB::GetList(int projectID, vector<member> *Result) {
-  string theUrl = theParentDB->GetQueryDomain() + "/ProjectMemberRead";
+AlpideTable::response *MemberDB::GetList(int projectID, vector<member> *Result)
+{
+  string theUrl   = theParentDB->GetQueryDomain() + "/ProjectMemberRead";
   string theQuery = "projectID=" + std::to_string(projectID);
-  char *result;
+  char * result;
   member pro;
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &result) == 0) {
@@ -304,7 +315,7 @@ AlpideTable::response *MemberDB::GetList(int projectID, vector<member> *Result) 
 
   // Get the root element node
   xmlNode *root_element = NULL;
-  root_element = xmlDocGetRootElement(doc);
+  root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
     cerr << "Failed Bad XML format no root element" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
@@ -358,10 +369,11 @@ ComponentDB::~ComponentDB() {}
 *component types
 *		returns : a response struct that contains the error code
 *---------------- */
-AlpideTable::response *ComponentDB::GetTypeList(int ProjectID, vector<componentType> *Result) {
-  string theUrl = theParentDB->GetQueryDomain() + "/ComponentTypeRead";
-  string theQuery = "projectID=" + std::to_string(ProjectID);
-  char *stringresult;
+AlpideTable::response *ComponentDB::GetTypeList(int ProjectID, vector<componentType> *Result)
+{
+  string        theUrl   = theParentDB->GetQueryDomain() + "/ComponentTypeRead";
+  string        theQuery = "projectID=" + std::to_string(ProjectID);
+  char *        stringresult;
   componentType pro;
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
@@ -380,7 +392,7 @@ AlpideTable::response *ComponentDB::GetTypeList(int ProjectID, vector<componentT
 
   // Get the root element node
   xmlNode *root_element = NULL;
-  root_element = xmlDocGetRootElement(doc);
+  root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
@@ -414,7 +426,8 @@ AlpideTable::response *ComponentDB::GetTypeList(int ProjectID, vector<componentT
  *parsed
  *
  * ---------------- */
-void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro) {
+void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro)
+{
   xmlNode *n1, *n2, *n3, *n4;
   n1 = ns;
 
@@ -443,15 +456,17 @@ void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro) {
                   ap1.ComponentType.assign((const char *)n4->children->content);
                 n4 = n4->next;
               }
-            } else if (MATCHNODE(n3, "Quantity") == 0)
+            }
+            else if (MATCHNODE(n3, "Quantity") == 0)
               ap1.Quantity = atoi((const char *)n3->children->content);
-            n3 = n3->next;
+            n3             = n3->next;
           }
           pro->Composition.push_back(ap1);
         }
         n2 = n2->next;
       }
-    } else if (MATCHNODE(n1, "PhysicalStatus")) {
+    }
+    else if (MATCHNODE(n1, "PhysicalStatus")) {
       n2 = n1->children;
       while (n2 != NULL) {
         if (MATCHNODE(n2, "StatusPhysical")) {
@@ -468,7 +483,8 @@ void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro) {
         }
         n2 = n2->next;
       }
-    } else if (MATCHNODE(n1, "FunctionalStatus")) {
+    }
+    else if (MATCHNODE(n1, "FunctionalStatus")) {
       n2 = n1->children;
       while (n2 != NULL) {
         if (MATCHNODE(n2, "StatusFunctional")) {
@@ -498,10 +514,11 @@ void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro) {
 *type definition
 *		returns : a response struct that contains the error code
 *---------------- */
-AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *Result) {
-  string theUrl = theParentDB->GetQueryDomain() + "/ComponentTypeReadAll";
-  string theQuery = "componentTypeID=" + std::to_string(ComponentTypeID);
-  char *stringresult;
+AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *Result)
+{
+  string        theUrl   = theParentDB->GetQueryDomain() + "/ComponentTypeReadAll";
+  string        theQuery = "componentTypeID=" + std::to_string(ComponentTypeID);
+  char *        stringresult;
   componentType pro;
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
@@ -518,7 +535,7 @@ AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *
   }
   // Get the root element node
   xmlNode *root_element = NULL;
-  root_element = xmlDocGetRootElement(doc);
+  root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
@@ -539,8 +556,9 @@ AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *
 *---------------- */
 AlpideTable::response *ComponentDB::Create(string ComponentTypeID, string ComponentID,
                                            string SupplyCompID, string Description, string LotID,
-                                           string PackageID, string UserID) {
-  string theUrl = theParentDB->GetQueryDomain() + "/ComponentCreate";
+                                           string PackageID, string UserID)
+{
+  string theUrl   = theParentDB->GetQueryDomain() + "/ComponentCreate";
   string theQuery = "componentTypeID=" + ComponentTypeID + "&componentID=" + ComponentID +
                     "&supplierComponentID=" + SupplyCompID + "&description=" + Description +
                     "&lotID=" + LotID + "&packageID=" + PackageID + "&userID=" + UserID;
@@ -548,7 +566,8 @@ AlpideTable::response *ComponentDB::Create(string ComponentTypeID, string Compon
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
-  } else {
+  }
+  else {
     DecodeResponse(stringresult);
   }
   return (&theResponse);
@@ -562,7 +581,8 @@ AlpideTable::response *ComponentDB::Create(string ComponentTypeID, string Compon
  *		Out Param : a Reference to a Component struct that will contains the values parsed
  *
  * ---------------- */
-void ComponentDB::extractTheComponent(xmlNode *ns, componentLong *pro) {
+void ComponentDB::extractTheComponent(xmlNode *ns, componentLong *pro)
+{
   xmlNode *n1, *n2, *n3, *n4, *n5;
   n1 = ns;
   while (n1 != NULL) {
@@ -588,7 +608,8 @@ void ComponentDB::extractTheComponent(xmlNode *ns, componentLong *pro) {
           pro->Type.Name.assign((const char *)n2->children->content);
         n2 = n2->next;
       }
-    } else if (MATCHNODE(n1, "PhysicalStatus")) {
+    }
+    else if (MATCHNODE(n1, "PhysicalStatus")) {
       n2 = n1->children;
       while (n2 != NULL) {
         if (MATCHNODE(n2, "ID"))
@@ -597,7 +618,8 @@ void ComponentDB::extractTheComponent(xmlNode *ns, componentLong *pro) {
           pro->PhysicalState.Name.assign((const char *)n2->children->content);
         n2 = n2->next;
       }
-    } else if (MATCHNODE(n1, "FunctionalStatus")) {
+    }
+    else if (MATCHNODE(n1, "FunctionalStatus")) {
       n2 = n1->children;
       while (n2 != NULL) {
         if (MATCHNODE(n2, "ID"))
@@ -656,21 +678,24 @@ void ComponentDB::extractTheComponent(xmlNode *ns, componentLong *pro) {
 *		In Param : ... all the items describing ...
 *		returns : a response struct that contains the error code
 *---------------- */
-AlpideTable::response *ComponentDB::Read(int ID, componentLong *Result) {
+AlpideTable::response *ComponentDB::Read(int ID, componentLong *Result)
+{
   std::string sID = std::to_string(ID);
   return (readComponent(sID, "", Result));
 }
 
-AlpideTable::response *ComponentDB::Read(string ComponentID, componentLong *Result) {
+AlpideTable::response *ComponentDB::Read(string ComponentID, componentLong *Result)
+{
   return (readComponent("-999", ComponentID, Result));
 }
 
 AlpideTable::response *ComponentDB::readComponent(string ID, string ComponentID,
-                                                  componentLong *Result) {
+                                                  componentLong *Result)
+{
 
-  string theUrl = theParentDB->GetQueryDomain() + "/ComponentReadOne";
+  string theUrl   = theParentDB->GetQueryDomain() + "/ComponentReadOne";
   string theQuery = "ID=" + ID + "&componentID=" + ComponentID;
-  char *stringresult;
+  char * stringresult;
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     cerr << "Failed to execute the Query" << endl;
@@ -686,7 +711,7 @@ AlpideTable::response *ComponentDB::readComponent(string ID, string ComponentID,
   }
   // Get the root element node
   xmlNode *root_element = NULL;
-  root_element = xmlDocGetRootElement(doc);
+  root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
@@ -705,12 +730,13 @@ AlpideTable::response *ComponentDB::readComponent(string ID, string ComponentID,
 *		In Param : ...the componet type id...
 *		returns : a response struct that contains the error code
 *---------------- */
-AlpideTable::response *ComponentDB::readComponents(std::string ProjectId,
-                                                   std::string ComponentTypeID,
-                                                   vector<componentShort> *compoList) {
-  string theUrl = theParentDB->GetQueryDomain() + "/ComponentRead";
+AlpideTable::response *ComponentDB::readComponents(std::string             ProjectId,
+                                                   std::string             ComponentTypeID,
+                                                   vector<componentShort> *compoList)
+{
+  string theUrl   = theParentDB->GetQueryDomain() + "/ComponentRead";
   string theQuery = "projectID=" + ProjectId + "&componentTypeID=" + ComponentTypeID;
-  char *stringresult;
+  char * stringresult;
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     cerr << "Failed to execute the Query" << endl;
@@ -726,7 +752,7 @@ AlpideTable::response *ComponentDB::readComponents(std::string ProjectId,
   }
   // Get the root element node
   xmlNode *root_element = NULL;
-  root_element = xmlDocGetRootElement(doc);
+  root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
@@ -785,9 +811,10 @@ AlpideTable::response *ComponentDB::readComponents(std::string ProjectId,
 }
 
 AlpideTable::response *ComponentDB::GetListByType(int ProjectID, int ComponentTypeID,
-                                                  vector<componentShort> *Result) {
+                                                  vector<componentShort> *Result)
+{
   std::string sProject = std::to_string(ProjectID);
-  std::string sTypeId = std::to_string(ComponentTypeID);
+  std::string sTypeId  = std::to_string(ComponentTypeID);
   return (readComponents(sProject, sTypeId, Result));
 }
 
@@ -796,21 +823,23 @@ AlpideTable::response *ComponentDB::GetListByType(int ProjectID, int ComponentTy
 *
 *		In Param : ...
 *---------------- */
-AlpideTable::response *ComponentDB::GetComponentActivities(string ComponentID,
-                                                           vector<compActivity> *Result) {
-  componentLong theComponent;
+AlpideTable::response *ComponentDB::GetComponentActivities(string                ComponentID,
+                                                           vector<compActivity> *Result)
+{
+  componentLong          theComponent;
   AlpideTable::response *theRes = readComponent("-999", ComponentID, &theComponent);
-  if (theRes->ErrorCode != 0)
-    return (theRes);
+  if (theRes->ErrorCode != 0) return (theRes);
   int ID = theComponent.ID;
   return (readComponentActivities(ID, Result));
 }
 
-AlpideTable::response *ComponentDB::GetComponentActivities(int ID, vector<compActivity> *Result) {
+AlpideTable::response *ComponentDB::GetComponentActivities(int ID, vector<compActivity> *Result)
+{
   return (readComponentActivities(ID, Result));
 }
 
-void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actList) {
+void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actList)
+{
   xmlNode *n1, *n2, *n3;
   n1 = ns;
   compActivity theAct;
@@ -852,8 +881,7 @@ void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actL
         if (MATCHNODE(n2, "ActivityType")) {
           n3 = n2->children;
           while (n3 != NULL) {
-            if (MATCHNODE(n3, "ID"))
-              theAct.Type = atoi((const char *)n3->children->content);
+            if (MATCHNODE(n3, "ID")) theAct.Type = atoi((const char *)n3->children->content);
             n3 = n3->next;
           }
         }
@@ -864,11 +892,12 @@ void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actL
   }
 }
 
-AlpideTable::response *ComponentDB::readComponentActivities(int ID, vector<compActivity> *Result) {
+AlpideTable::response *ComponentDB::readComponentActivities(int ID, vector<compActivity> *Result)
+{
 
-  string theUrl = theParentDB->GetQueryDomain() + "/ComponentActivityHistoryRead";
+  string theUrl   = theParentDB->GetQueryDomain() + "/ComponentActivityHistoryRead";
   string theQuery = "ID=" + std::to_string(ID);
-  char *stringresult;
+  char * stringresult;
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     cerr << "Failed to execute the Query" << endl;
@@ -884,7 +913,7 @@ AlpideTable::response *ComponentDB::readComponentActivities(int ID, vector<compA
   }
   // Get the root element node
   xmlNode *root_element = NULL;
-  root_element = xmlDocGetRootElement(doc);
+  root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
@@ -903,7 +932,8 @@ AlpideTable::response *ComponentDB::readComponentActivities(int ID, vector<compA
 *		In Param : the component type struct
 *		returns : a char pointer to a string buffer
 *---------------- */
-string ComponentDB::Print(componentType *co) {
+string ComponentDB::Print(componentType *co)
+{
   ap = "Component : ID=" + std::to_string(co->ID) + " Name=" + co->Name + " Code=" + co->Code +
        " Description=" + co->Description + "\n";
   ap += "   Composition : {";
@@ -946,14 +976,15 @@ ActivityDB::~ActivityDB() {}
 *---------------- */
 // TODO: evaluate the error conditions return policy ??
 
-ActivityDB::response *ActivityDB::Create(activity *aActivity) {
-  char DateBuffer[40];
-  char DateMask[40] = "%d/%m/%Y";
-  char *stringresult;
+ActivityDB::response *ActivityDB::Create(activity *aActivity)
+{
+  char   DateBuffer[40];
+  char   DateMask[40] = "%d/%m/%Y";
+  char * stringresult;
   string theUrl;
   string theQuery;
 
-  theUrl = theParentDB->GetQueryDomain() + "/ActivityCreate";
+  theUrl   = theParentDB->GetQueryDomain() + "/ActivityCreate";
   theQuery = "activityTypeID=" + std::to_string(aActivity->Type);
   theQuery += "&locationID=" + std::to_string(aActivity->Location);
   theQuery += "&lotID=" + aActivity->Lot;
@@ -972,10 +1003,10 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity) {
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
     return (&theResponse);
-  } else {
+  }
+  else {
     DecodeResponse(stringresult);
-    if (VERBOSITYLEVEL == 1)
-      cout << "Activity creation :" << DumpResponse() << endl;
+    if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
     aActivity->ID = theResponse.ID;
   }
 
@@ -990,10 +1021,10 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity) {
         0) {
       SetResponse(AlpideTable::SyncQuery);
       return (&theResponse);
-    } else {
+    }
+    else {
       DecodeResponse(stringresult);
-      if (VERBOSITYLEVEL == 1)
-        cout << "Activity Member creation :" << DumpResponse() << endl;
+      if (VERBOSITYLEVEL == 1) cout << "Activity Member creation :" << DumpResponse() << endl;
       aActivity->Members.at(i).ID = theResponse.ID;
     }
   }
@@ -1010,10 +1041,10 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity) {
         0) {
       SetResponse(AlpideTable::SyncQuery);
       return (&theResponse);
-    } else {
+    }
+    else {
       DecodeResponse(stringresult);
-      if (VERBOSITYLEVEL == 1)
-        cout << "Activity Parameter creation :" << DumpResponse() << endl;
+      if (VERBOSITYLEVEL == 1) cout << "Activity Parameter creation :" << DumpResponse() << endl;
       aActivity->Parameters.at(i).ID = theResponse.ID;
     }
   }
@@ -1037,7 +1068,8 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity) {
       theQuery += "</fileName><userID>";
       theQuery += std::to_string(aActivity->Attachments.at(i).User);
       theQuery += "</userID></ActivityAttachmentCreate></soap:Body></soap:Envelope>";
-    } else {
+    }
+    else {
       theQuery += "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
                   "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" "
                   "xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">";
@@ -1062,10 +1094,10 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity) {
             "http://tempuri.org/ActivityAttachmentCreate") == 0) {
       SetResponse(AlpideTable::SyncQuery);
       return (&theResponse);
-    } else {
+    }
+    else {
       DecodeResponse(stringresult);
-      if (VERBOSITYLEVEL == 1)
-        cout << "Activity Attachment creation :" << DumpResponse() << endl;
+      if (VERBOSITYLEVEL == 1) cout << "Activity Attachment creation :" << DumpResponse() << endl;
       aActivity->Attachments.at(i).ID = theResponse.ID;
     }
   }
@@ -1081,19 +1113,19 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity) {
 *		returns : a char pointer to a string buffer
 *---------------- */
 AlpideTable::response *ActivityDB::AssignUris(int aActivityID, int aUserId,
-                                              vector<ActivityDB::actUri> *aUris) {
-  char *stringresult;
+                                              vector<ActivityDB::actUri> *aUris)
+{
+  char * stringresult;
   string theUrl;
   string theQuery;
 
-  activityLong theActivity;
+  activityLong           theActivity;
   AlpideTable::response *theResult;
 
   // First : read the activity and obtain the actual URIs list
   theResult = Read(aActivityID, &theActivity);
   if (theResult->ErrorCode != AlpideTable::NoError) {
-    if (VERBOSITYLEVEL == 1)
-      cout << "Invalid activity ID !" << DumpResponse() << endl;
+    if (VERBOSITYLEVEL == 1) cout << "Invalid activity ID !" << DumpResponse() << endl;
     return (&theResponse);
   }
 
@@ -1104,7 +1136,7 @@ AlpideTable::response *ActivityDB::AssignUris(int aActivityID, int aUserId,
     for (unsigned int j = 0; j < aUris->size(); j++) {
       if (aUris->at(j).Path == theActivity.Uris.at(i).Path) {                 // Find a URI
         if (aUris->at(j).Description != theActivity.Uris.at(i).Description) { // It is to change
-          theUrl = theParentDB->GetQueryDomain() + "/ActivityUriChange";
+          theUrl   = theParentDB->GetQueryDomain() + "/ActivityUriChange";
           theQuery = "activitysUriID=" + std::to_string(theActivity.Uris.at(i).ID);
           theQuery += "&uriPath=" + aUris->at(j).Path;
           theQuery += "&uriDescription=" + aUris->at(j).Description;
@@ -1123,7 +1155,7 @@ AlpideTable::response *ActivityDB::AssignUris(int aActivityID, int aUserId,
       }
     }
     if (bToDelete) { // Trigger URI remove
-      theUrl = theParentDB->GetQueryDomain() + "/ActivityUriRemove";
+      theUrl   = theParentDB->GetQueryDomain() + "/ActivityUriRemove";
       theQuery = "uriID=" + std::to_string(theActivity.Uris.at(i).ID);
       if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) ==
           0) {
@@ -1147,7 +1179,7 @@ AlpideTable::response *ActivityDB::AssignUris(int aActivityID, int aUserId,
       }
     }
     if (bToCreate) {
-      theUrl = theParentDB->GetQueryDomain() + "/ActivityUriCreate";
+      theUrl   = theParentDB->GetQueryDomain() + "/ActivityUriCreate";
       theQuery = "activityID=" + std::to_string(aActivityID);
       theQuery += "&uriPath=" + aUris->at(j).Path;
       theQuery += "&uriDescription=" + aUris->at(j).Description;
@@ -1163,19 +1195,19 @@ AlpideTable::response *ActivityDB::AssignUris(int aActivityID, int aUserId,
     }
   }
   SetResponse(AlpideTable::NoError, aActivityID);
-  if (VERBOSITYLEVEL == 1)
-    cout << "Activity URIs change Done !" << DumpResponse() << endl;
+  if (VERBOSITYLEVEL == 1) cout << "Activity URIs change Done !" << DumpResponse() << endl;
   return (&theResponse);
 }
 
-ActivityDB::response *ActivityDB::Change(activity *aActivity) {
-  char DateBuffer[40];
-  char DateMask[40] = "%d/%m/%Y";
-  char *stringresult;
+ActivityDB::response *ActivityDB::Change(activity *aActivity)
+{
+  char   DateBuffer[40];
+  char   DateMask[40] = "%d/%m/%Y";
+  char * stringresult;
   string theUrl;
   string theQuery;
 
-  theUrl = theParentDB->GetQueryDomain() + "/ActivityChange";
+  theUrl   = theParentDB->GetQueryDomain() + "/ActivityChange";
   theQuery = "ID=" + std::to_string(aActivity->ID);
   theQuery += "&activityTypeID=" + std::to_string(aActivity->Type);
   theQuery += "&locationID=" + std::to_string(aActivity->Location);
@@ -1195,10 +1227,10 @@ ActivityDB::response *ActivityDB::Change(activity *aActivity) {
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
     return (&theResponse);
-  } else {
+  }
+  else {
     DecodeResponse(stringresult);
-    if (VERBOSITYLEVEL == 1)
-      cout << "Activity creation :" << DumpResponse() << endl;
+    if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
     aActivity->ID = theResponse.ID;
   }
   return (&theResponse);
@@ -1213,12 +1245,13 @@ ActivityDB::response *ActivityDB::Change(activity *aActivity) {
 *		returns : a char pointer to a response type
 *---------------- */
 ActivityDB::response *ActivityDB::AssignComponent(int aActivityID, int aComponentID,
-                                                  int aComponentTypeID, int aUserID) {
-  char *stringresult;
+                                                  int aComponentTypeID, int aUserID)
+{
+  char * stringresult;
   string theUrl;
   string theQuery;
 
-  theUrl = theParentDB->GetQueryDomain() + "/ActivityComponentAssign";
+  theUrl   = theParentDB->GetQueryDomain() + "/ActivityComponentAssign";
   theQuery = "componentID=" + std::to_string(aComponentID);
   theQuery += "&activityID=" + std::to_string(aActivityID);
   theQuery += "&actTypeCompTypeID=" + std::to_string(aComponentTypeID);
@@ -1227,10 +1260,10 @@ ActivityDB::response *ActivityDB::AssignComponent(int aActivityID, int aComponen
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
     return (&theResponse);
-  } else {
+  }
+  else {
     DecodeResponse(stringresult);
-    if (VERBOSITYLEVEL == 1)
-      cout << "Activity creation :" << DumpResponse() << endl;
+    if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
     SetResponse(AlpideTable::NoError);
   }
   return (&theResponse);
@@ -1241,22 +1274,24 @@ ActivityDB::response *ActivityDB::AssignComponent(int aActivityID, int aComponen
  *
  *
 ----------------------- */
-std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aActivityTypeID) {
+std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aActivityTypeID)
+{
   vector<parameterType> *theParamList = new vector<parameterType>;
-  char *stringresult;
-  string theUrl;
-  string theQuery;
-  parameterType param;
+  char *                 stringresult;
+  string                 theUrl;
+  string                 theQuery;
+  parameterType          param;
 
-  theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
+  theUrl   = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
   theQuery = "activityTypeID=" + std::to_string(aActivityTypeID);
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
     return (theParamList);
-  } else {
+  }
+  else {
     xmlDocPtr doc;
-    xmlNode *nod;
+    xmlNode * nod;
     if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "Parameters")) {
@@ -1277,7 +1312,7 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aAc
                       param.Name = (const char *)(n3->children->content);
                     else if (MATCHNODE(n3, "Description"))
                       param.Description = (const char *)(n3->children->content);
-                    n3 = n3->next;
+                    n3                  = n3->next;
                   }
                   theParamList->push_back(param);
                 }
@@ -1303,22 +1338,24 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aAc
  *
  *
 ----------------------- */
-std::vector<ActivityDB::activityType> *ActivityDB::GetActivityTypeList(int aProjectID) {
+std::vector<ActivityDB::activityType> *ActivityDB::GetActivityTypeList(int aProjectID)
+{
   vector<activityType> *theTypeList = new vector<activityType>;
-  char *stringresult;
-  string theUrl;
-  string theQuery;
-  activityType act;
+  char *                stringresult;
+  string                theUrl;
+  string                theQuery;
+  activityType          act;
 
-  theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeRead";
+  theUrl   = theParentDB->GetQueryDomain() + "/ActivityTypeRead";
   theQuery = "projectID=" + std::to_string(aProjectID);
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
     return (theTypeList);
-  } else {
+  }
+  else {
     xmlDocPtr doc;
-    xmlNode *nod;
+    xmlNode * nod;
     if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "ActivityType")) {
@@ -1331,7 +1368,7 @@ std::vector<ActivityDB::activityType> *ActivityDB::GetActivityTypeList(int aProj
               act.Name = (const char *)(n1->children->content);
             else if (MATCHNODE(n1, "Description"))
               act.Description = (const char *)(n1->children->content);
-            n1 = n1->next;
+            n1                = n1->next;
           }
           theTypeList->push_back(act);
         }
@@ -1351,22 +1388,24 @@ std::vector<ActivityDB::activityType> *ActivityDB::GetActivityTypeList(int aProj
  *
  *
 ----------------------- */
-std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActivityTypeID) {
+std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActivityTypeID)
+{
   vector<locationType> *theLocationList = new vector<locationType>;
-  char *stringresult;
-  string theUrl;
-  string theQuery;
-  locationType loc;
+  char *                stringresult;
+  string                theUrl;
+  string                theQuery;
+  locationType          loc;
 
-  theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
+  theUrl   = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
   theQuery = "activityTypeID=" + std::to_string(aActivityTypeID);
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
     return (theLocationList);
-  } else {
+  }
+  else {
     xmlDocPtr doc;
-    xmlNode *nod;
+    xmlNode * nod;
     if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "Location")) {
@@ -1380,7 +1419,7 @@ std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActi
                   loc.ID = atoi((const char *)(n2->children->content));
                 else if (MATCHNODE(n2, "Name"))
                   loc.Name = (const char *)(n2->children->content);
-                n2 = n2->next;
+                n2         = n2->next;
               }
               theLocationList->push_back(loc);
             }
@@ -1403,22 +1442,24 @@ std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActi
  *
  *
 ----------------------- */
-std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList() {
+std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList()
+{
   vector<attachmentType> *theAttachmentList = new vector<attachmentType>;
-  char *stringresult;
-  string theUrl;
-  string theQuery;
-  attachmentType att;
+  char *                  stringresult;
+  string                  theUrl;
+  string                  theQuery;
+  attachmentType          att;
 
-  theUrl = theParentDB->GetQueryDomain() + "/AttachmentCategoryRead";
+  theUrl   = theParentDB->GetQueryDomain() + "/AttachmentCategoryRead";
   theQuery = "";
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
     return (theAttachmentList);
-  } else {
+  }
+  else {
     xmlDocPtr doc;
-    xmlNode *nod;
+    xmlNode * nod;
     if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "AttachmentCatagory")) {
@@ -1430,7 +1471,7 @@ std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList() {
               att.Category = (const char *)(n1->children->content);
             else if (MATCHNODE(n1, "Description"))
               att.Description = (const char *)(n1->children->content);
-            n1 = n1->next;
+            n1                = n1->next;
           }
           theAttachmentList->push_back(att);
         }
@@ -1450,23 +1491,25 @@ std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList() {
  *
  *
 ----------------------- */
-std::vector<ActivityDB::actTypeCompType> *ActivityDB::GetComponentTypeList(int aActivityTypeID) {
+std::vector<ActivityDB::actTypeCompType> *ActivityDB::GetComponentTypeList(int aActivityTypeID)
+{
   vector<actTypeCompType> *theCompoList = new vector<actTypeCompType>;
 
-  char *stringresult;
-  string theUrl;
-  string theQuery;
+  char *          stringresult;
+  string          theUrl;
+  string          theQuery;
   actTypeCompType comp;
 
-  theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
+  theUrl   = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
   theQuery = "activityTypeID=" + std::to_string(aActivityTypeID);
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
     return (theCompoList);
-  } else {
+  }
+  else {
     xmlDocPtr doc;
-    xmlNode *nod;
+    xmlNode * nod;
     if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "ActivityTypeComponentType")) {
@@ -1489,7 +1532,7 @@ std::vector<ActivityDB::actTypeCompType> *ActivityDB::GetComponentTypeList(int a
                       comp.Type.ID = atoi((const char *)(n3->children->content));
                     else if (MATCHNODE(n3, "Name"))
                       comp.Type.Name = (const char *)(n3->children->content);
-                    n3 = n3->next;
+                    n3               = n3->next;
                   }
                 }
                 n2 = n2->next;
@@ -1515,23 +1558,25 @@ std::vector<ActivityDB::actTypeCompType> *ActivityDB::GetComponentTypeList(int a
  *
  *
 ----------------------- */
-std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityTypeID) {
+std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityTypeID)
+{
   vector<resultType> *theResultList = new vector<resultType>;
 
-  char *stringresult;
-  string theUrl;
-  string theQuery;
+  char *     stringresult;
+  string     theUrl;
+  string     theQuery;
   resultType resu;
 
-  theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
+  theUrl   = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
   theQuery = "activityTypeID=" + std::to_string(aActivityTypeID);
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
     return (theResultList);
-  } else {
+  }
+  else {
     xmlDocPtr doc;
-    xmlNode *nod;
+    xmlNode * nod;
     if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "Result")) {
@@ -1545,7 +1590,7 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityType
                   resu.ID = atoi((const char *)(n2->children->content));
                 else if (MATCHNODE(n2, "Name"))
                   resu.Name = (const char *)(n2->children->content);
-                n2 = n2->next;
+                n2          = n2->next;
               }
               theResultList->push_back(resu);
             }
@@ -1568,23 +1613,25 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityType
  *
  *
 ----------------------- */
-std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityTypeID) {
+std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityTypeID)
+{
   vector<statusType> *theStatusList = new vector<statusType>;
 
-  char *stringresult;
-  string theUrl;
-  string theQuery;
+  char *     stringresult;
+  string     theUrl;
+  string     theQuery;
   statusType stat;
 
-  theUrl = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
+  theUrl   = theParentDB->GetQueryDomain() + "/ActivityTypeReadAll";
   theQuery = "activityTypeID=" + std::to_string(aActivityTypeID);
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
     return (theStatusList);
-  } else {
+  }
+  else {
     xmlDocPtr doc;
-    xmlNode *nod;
+    xmlNode * nod;
     if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "Status")) {
@@ -1600,7 +1647,7 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityType
                   stat.Code = (const char *)(n2->children->content);
                 else if (MATCHNODE(n2, "Description"))
                   stat.Description = (const char *)(n2->children->content);
-                n2 = n2->next;
+                n2                 = n2->next;
               }
               theStatusList->push_back(stat);
             }
@@ -1624,23 +1671,25 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityType
  *
 ----------------------- */
 std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProjectID,
-                                                                    int aActivityTypeID) {
+                                                                    int aActivityTypeID)
+{
   vector<activityShort> *theActList = new vector<activityShort>;
-  char *stringresult;
-  string theUrl;
-  string theQuery;
-  activityShort act;
+  char *                 stringresult;
+  string                 theUrl;
+  string                 theQuery;
+  activityShort          act;
 
-  theUrl = theParentDB->GetQueryDomain() + "/ActivityRead";
+  theUrl   = theParentDB->GetQueryDomain() + "/ActivityRead";
   theQuery = "projectID=" + std::to_string(aProjectID) +
              "&activityTypeID=" + std::to_string(aActivityTypeID);
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
     return (theActList);
-  } else {
+  }
+  else {
     xmlDocPtr doc;
-    xmlNode *nod;
+    xmlNode * nod;
     if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "Activity")) {
@@ -1664,7 +1713,7 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
                   act.Type.Name = (const char *)(n2->children->content);
                 else if (MATCHNODE(n2, "Description"))
                   act.Type.Description = (const char *)(n2->children->content);
-                n2 = n2->next;
+                n2                     = n2->next;
               }
             }
             if (MATCHNODE(n1, "ActivityStatus")) {
@@ -1676,7 +1725,7 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
                   act.Status.Code = (const char *)(n2->children->content);
                 else if (MATCHNODE(n2, "Description"))
                   act.Status.Description = (const char *)(n2->children->content);
-                n2 = n2->next;
+                n2                       = n2->next;
               }
             }
             n1 = n1->next;
@@ -1700,7 +1749,8 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
 *		In Param : ...
 *		returns : a response struct that contains the error code
 *---------------- */
-void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
+void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act)
+{
   xmlNode *n1, *n2, *n3, *n4, *n5;
   n1 = ns;
   while (n1 != NULL) {
@@ -1723,7 +1773,8 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
           act->Result.Name.assign((const char *)n2->children->content);
         n2 = n2->next;
       }
-    } else if (MATCHNODE(n1, "ActivityType")) {
+    }
+    else if (MATCHNODE(n1, "ActivityType")) {
       n2 = n1->children;
       while (n2 != NULL) {
         if (MATCHNODE(n2, "ID"))
@@ -1734,7 +1785,8 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
           act->Type.Description.assign((const char *)n2->children->content);
         n2 = n2->next;
       }
-    } else if (MATCHNODE(n1, "ActivityStatus")) {
+    }
+    else if (MATCHNODE(n1, "ActivityStatus")) {
       n2 = n1->children;
       while (n2 != NULL) {
         if (MATCHNODE(n2, "ID"))
@@ -1745,7 +1797,8 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
           act->Status.Description.assign((const char *)n2->children->content);
         n2 = n2->next;
       }
-    } else if (MATCHNODE(n1, "ActivityLocation")) {
+    }
+    else if (MATCHNODE(n1, "ActivityLocation")) {
       n2 = n1->children;
       while (n2 != NULL) {
         if (MATCHNODE(n2, "ID"))
@@ -1754,7 +1807,8 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
           act->Location.Name.assign((const char *)n2->children->content);
         n2 = n2->next;
       }
-    } else if (MATCHNODE(n1, "Components")) {
+    }
+    else if (MATCHNODE(n1, "Components")) {
       n2 = n1->children;
       while (n2 != NULL) {
         if (MATCHNODE(n2, "ActivityComponent")) {
@@ -1776,7 +1830,8 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
                   com.ActivityComponentType.Direction.assign((const char *)n4->children->content);
                 n4 = n4->next;
               }
-            } else if (MATCHNODE(n3, "Component")) {
+            }
+            else if (MATCHNODE(n3, "Component")) {
               n4 = n3->children;
               while (n4 != NULL) {
                 if (MATCHNODE(n4, "ID"))
@@ -1795,7 +1850,8 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
                 }
                 n4 = n4->next;
               }
-            } else if (MATCHNODE(n3, "PhysicalStatus")) {
+            }
+            else if (MATCHNODE(n3, "PhysicalStatus")) {
               n4 = n3->children;
               while (n4 != NULL) {
                 if (MATCHNODE(n4, "ID"))
@@ -1804,7 +1860,8 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
                   com.PhysicalStatus.Name.assign((const char *)n4->children->content);
                 n4 = n4->next;
               }
-            } else if (MATCHNODE(n3, "FunctionalStatus")) {
+            }
+            else if (MATCHNODE(n3, "FunctionalStatus")) {
               n4 = n3->children;
               while (n4 != NULL) {
                 if (MATCHNODE(n4, "ID"))
@@ -1821,7 +1878,8 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
         }
         n2 = n2->next;
       }
-    } else if (MATCHNODE(n1, "Parameters")) {
+    }
+    else if (MATCHNODE(n1, "Parameters")) {
       n2 = n1->children;
       while (n2 != NULL) {
         if (MATCHNODE(n2, "ActivityParameter")) {
@@ -1859,7 +1917,8 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
         }
         n2 = n2->next;
       }
-    } else if (MATCHNODE(n1, "Attachments")) {
+    }
+    else if (MATCHNODE(n1, "Attachments")) {
       n2 = n1->children;
       while (n2 != NULL) {
         if (MATCHNODE(n2, "ActivityAttachment")) {
@@ -1889,7 +1948,8 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
         }
         n2 = n2->next;
       }
-    } else if (MATCHNODE(n1, "Members")) {
+    }
+    else if (MATCHNODE(n1, "Members")) {
       n2 = n1->children;
       while (n2 != NULL) {
         if (MATCHNODE(n2, "ActivityMember")) {
@@ -1919,7 +1979,8 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
         }
         n2 = n2->next;
       }
-    } else if (MATCHNODE(n1, "Uris")) {
+    }
+    else if (MATCHNODE(n1, "Uris")) {
       n2 = n1->children;
       while (n2 != NULL) {
         if (MATCHNODE(n2, "ActivityUri")) {
@@ -1944,16 +2005,18 @@ void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act) {
   }
 }
 
-AlpideTable::response *ActivityDB::Read(int ActivityID, activityLong *Result) {
+AlpideTable::response *ActivityDB::Read(int ActivityID, activityLong *Result)
+{
   std::string sID = std::to_string(ActivityID);
   return (readActivity(sID, Result));
 }
 
-AlpideTable::response *ActivityDB::readActivity(string ID, activityLong *Result) {
+AlpideTable::response *ActivityDB::readActivity(string ID, activityLong *Result)
+{
 
-  string theUrl = theParentDB->GetQueryDomain() + "/ActivityReadOne";
+  string theUrl   = theParentDB->GetQueryDomain() + "/ActivityReadOne";
   string theQuery = "ID=" + ID;
-  char *stringresult;
+  char * stringresult;
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     cerr << "Failed to execute the Query" << endl;
@@ -1969,7 +2032,7 @@ AlpideTable::response *ActivityDB::readActivity(string ID, activityLong *Result)
   }
   // Get the root element node
   xmlNode *root_element = NULL;
-  root_element = xmlDocGetRootElement(doc);
+  root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
@@ -1987,7 +2050,8 @@ AlpideTable::response *ActivityDB::readActivity(string ID, activityLong *Result)
  *
  *  not used !
 ----------------------- */
-int ActivityDB::buildUrlEncoded(string aLocalFileName, string *Buffer) {
+int ActivityDB::buildUrlEncoded(string aLocalFileName, string *Buffer)
+{
   FILE *fh = fopen(aLocalFileName.c_str(), "rb");
   if (fh == NULL) {
     cerr << "Failed to open the file :" << aLocalFileName << "Abort !" << endl;
@@ -2001,7 +2065,8 @@ int ActivityDB::buildUrlEncoded(string aLocalFileName, string *Buffer) {
   while (!feof(fh)) {
     if (isalnum(ch) || ch == '~' || ch == '-' || ch == '.' || ch == '_') { // rfc3986
       *Buffer += ch;
-    } else {
+    }
+    else {
       *Buffer += '%';
       *Buffer += exa[ch >> 4];
       *Buffer += exa[ch & 4]; // YCM:FIXME if fix was not intended by [ch && 4]
@@ -2016,7 +2081,8 @@ int ActivityDB::buildUrlEncoded(string aLocalFileName, string *Buffer) {
  *
  * must be improved !
 ----------------------- */
-unsigned long ActivityDB::buildBase64Binary(string aLocalFileName, string *Buffer) {
+unsigned long ActivityDB::buildBase64Binary(string aLocalFileName, string *Buffer)
+{
 
   static const string base64chars =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -2031,8 +2097,8 @@ unsigned long ActivityDB::buildBase64Binary(string aLocalFileName, string *Buffe
   unsigned char cBufferIn[3];
   unsigned char cBufferOut[4];
 
-  int i = 0;
-  int j = 0;
+  int           i = 0;
+  int           j = 0;
   unsigned char ch;
 
   ch = (unsigned char)fgetc(fh);
@@ -2050,12 +2116,12 @@ unsigned long ActivityDB::buildBase64Binary(string aLocalFileName, string *Buffe
     ch = (unsigned char)fgetc(fh);
   }
   if (i) {
-    for (j = i; j < 3; j++)
+    for (j         = i; j < 3; j++)
       cBufferIn[j] = '\0';
-    cBufferOut[0] = (cBufferIn[0] & 0xfc) >> 2;
-    cBufferOut[1] = ((cBufferIn[0] & 0x03) << 4) + ((cBufferIn[1] & 0xf0) >> 4);
-    cBufferOut[2] = ((cBufferIn[1] & 0x0f) << 2) + ((cBufferIn[2] & 0xc0) >> 6);
-    cBufferOut[3] = cBufferIn[2] & 0x3f;
+    cBufferOut[0]  = (cBufferIn[0] & 0xfc) >> 2;
+    cBufferOut[1]  = ((cBufferIn[0] & 0x03) << 4) + ((cBufferIn[1] & 0xf0) >> 4);
+    cBufferOut[2]  = ((cBufferIn[1] & 0x0f) << 2) + ((cBufferIn[2] & 0xc0) >> 6);
+    cBufferOut[3]  = cBufferIn[2] & 0x3f;
     for (j = 0; (j < i + 1); j++)
       *Buffer += base64chars[cBufferOut[j]];
     while ((i++ < 3))

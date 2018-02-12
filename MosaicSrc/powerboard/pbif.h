@@ -55,9 +55,9 @@ private:
   enum baseAddress_e { add_i2cMaster = (5 << 24), add_i2cAux = (29 << 24) };
 
   std::string IPaddress;
-  IPbusUDP *mIPbus;
-  I2Cbus *i2cBus;
-  I2Cbus *i2cBusAux;
+  IPbusUDP *  mIPbus;
+  I2Cbus *    i2cBus;
+  I2Cbus *    i2cBusAux;
 
 public:
   powerboard *pb;

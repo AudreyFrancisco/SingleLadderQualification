@@ -10,7 +10,9 @@
 #include "THisto.h"
 #include "TScan.h"
 
-typedef struct __TDigitalParameters : TScanParameters { float voltageScale; } TDigitalParameters;
+typedef struct __TDigitalParameters : TScanParameters {
+  float voltageScale;
+} TDigitalParameters;
 
 class TDigitalScan : public TMaskScan {
 private:
@@ -33,9 +35,10 @@ public:
   void LoopEnd(int loopIndex);
   void Next(int loopIndex);
   void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
-  void Execute();
-  void Terminate();
-  bool IsNominal() {
+  void               Execute();
+  void               Terminate();
+  bool               IsNominal()
+  {
     return ((((TDigitalParameters *)m_parameters)->voltageScale > 0.99) &&
             (((TDigitalParameters *)m_parameters)->voltageScale < 1.01));
   };

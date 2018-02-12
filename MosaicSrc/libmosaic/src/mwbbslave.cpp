@@ -32,23 +32,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-MWbbSlave::MWbbSlave() {
-  wbb = NULL;
+MWbbSlave::MWbbSlave()
+{
+  wbb         = NULL;
   baseAddress = 0;
 }
 
-MWbbSlave::MWbbSlave(WishboneBus *wbbPtr, uint32_t baseAdd) {
-  wbb = wbbPtr;
+MWbbSlave::MWbbSlave(WishboneBus *wbbPtr, uint32_t baseAdd)
+{
+  wbb         = wbbPtr;
   baseAddress = baseAdd;
 }
 
-void MWbbSlave::setBusAddress(WishboneBus *wbbPtr, uint32_t baseAdd) {
-  wbb = wbbPtr;
+void MWbbSlave::setBusAddress(WishboneBus *wbbPtr, uint32_t baseAdd)
+{
+  wbb         = wbbPtr;
   baseAddress = baseAdd;
 }
 
-void MWbbSlave::execute() {
-  if (!wbb)
-    throw MException("IPBus is not configured");
+void MWbbSlave::execute()
+{
+  if (!wbb) throw MException("IPBus is not configured");
   wbb->execute();
 }

@@ -29,14 +29,15 @@
 #include <iomanip>
 #include <iostream>
 
-TConfig *config;
+TConfig *                    config;
 std::vector<TReadoutBoard *> fBoards;
-TBoardType boardType;
-std::vector<TAlpide *> fChips;
+TBoardType                   boardType;
+std::vector<TAlpide *>       fChips;
 
 unsigned int mySampleRepetition = 30;
 
-int configureChip(TAlpide *chip) {
+int configureChip(TAlpide *chip)
+{
   // put all chip configurations before the start of the test here
   chip->WriteRegister(Alpide::REG_MODECONTROL, 0x20);
   chip->WriteRegister(Alpide::REG_CMUDMU_CONFIG, 0x60);
@@ -44,7 +45,8 @@ int configureChip(TAlpide *chip) {
   return 0;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   decodeCommandParameters(argc, argv);
   initSetup(config, &fBoards, &boardType, &fChips);
 
@@ -56,8 +58,7 @@ int main(int argc, char **argv) {
     }
 
     for (const auto &rChip : fChips) {
-      if (!rChip->GetConfig()->IsEnabled())
-        continue;
+      if (!rChip->GetConfig()->IsEnabled()) continue;
       configureChip(rChip);
     }
 
@@ -69,15 +70,14 @@ int main(int argc, char **argv) {
     std::cout << std::setprecision(4);
 
     for (unsigned int i = 0; i < fChips.size(); i++) {
-      if (!fChips.at(i)->GetConfig()->IsEnabled())
-        continue;
+      if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
       std::cout << std::endl << std::endl;
       std::cout << "== Chip " << i << ", ID: " << fChips.at(i)->GetConfig()->GetChipId()
                 << std::endl;
       fChips.at(i)->CalibrateADC();
 
       float AVDD_direct = 0.;
-      float AVDD_VTEMP = 0.;
+      float AVDD_VTEMP  = 0.;
       float DVDD_direct = 0.;
 
       bool AVDD_saturated = false;
@@ -94,15 +94,13 @@ int main(int argc, char **argv) {
         fChips.at(i)->GetReadoutBoard()->SendCommand(Alpide::COMMAND_ADCMEASURE, fChips.at(i));
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
-        if (theResult == 1055)
-          AVDD_saturated = true;
+        if (theResult == 1055) AVDD_saturated = true;
         AVDD_direct += 2. * ((float)theResult - (float)(fChips.at(i)->GetADCOffset())) *
                        0.823e-3; // first approximation
       }
       AVDD_direct /= mySampleRepetition;
       std::cout << "AVDD (direct measurement): " << AVDD_direct << "V";
-      if (AVDD_saturated)
-        std::cout << ", out-of-range (>1.72V)!";
+      if (AVDD_saturated) std::cout << ", out-of-range (>1.72V)!";
       std::cout << std::endl;
       if (AVDD_direct < 1.55 && AVDD_direct > 0.)
         std::cout << "AVDD below 1.55V, indirect measurement unreliable" << std::endl;
@@ -130,15 +128,13 @@ int main(int argc, char **argv) {
         fChips.at(i)->GetReadoutBoard()->SendCommand(Alpide::COMMAND_ADCMEASURE, fChips.at(i));
         usleep(5000);
         fChips.at(i)->ReadRegister(Alpide::REG_ADC_AVSS, theResult);
-        if (theResult == 1055)
-          DVDD_saturated = true;
+        if (theResult == 1055) DVDD_saturated = true;
         DVDD_direct += 2. * ((float)theResult - (float)(fChips.at(i)->GetADCOffset())) *
                        0.823e-3; // first approximation
       }
       DVDD_direct /= mySampleRepetition;
       std::cout << "DVDD (direct measurement): " << DVDD_direct << "V";
-      if (DVDD_saturated)
-        std::cout << ", out-of-range (>1.72V)!";
+      if (DVDD_saturated) std::cout << ", out-of-range (>1.72V)!";
       std::cout << std::endl;
     }
 

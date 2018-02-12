@@ -43,16 +43,17 @@
 #include <stdio.h>
 #include <string.h>
 
-AlpideDBManager::AlpideDBManager() {
-  theJarUrl = SSOURL;
+AlpideDBManager::AlpideDBManager()
+{
+  theJarUrl    = SSOURL;
   theCookieJar = new CernSsoCookieJar(COOKIEPACK);
 #ifdef AUTH_X509
 #ifdef COMPILE_LIBCURL
-  theNSSNickName = NSSCERTNICKNAME;
-  theNSSDBPath = NSSDATABASEPATH;
-  theNSSDBPassword = NSSDBPASSWD;
-  theCliCer = USERCERT;
-  theCliKey = USERKEY;
+  theNSSNickName                = NSSCERTNICKNAME;
+  theNSSDBPath                  = NSSDATABASEPATH;
+  theNSSDBPassword              = NSSDBPASSWD;
+  theCliCer                     = USERCERT;
+  theCliKey                     = USERKEY;
   theCertificationAuthorityPath = CAPATH;
 #endif
 #endif
@@ -63,7 +64,8 @@ AlpideDBManager::AlpideDBManager() {
 #endif
 }
 
-AlpideDBManager::~AlpideDBManager() {
+AlpideDBManager::~AlpideDBManager()
+{
   delete theCookieJar;
   theCookieJar = 0x0;
   remove("/tmp/tempappo.xml");
@@ -71,7 +73,8 @@ AlpideDBManager::~AlpideDBManager() {
 }
 
 #ifdef AUTH_KERBEROS
-bool AlpideDBManager::Init(string aSslUrl) {
+bool AlpideDBManager::Init(string aSslUrl)
+{
   theJarUrl = aSslUrl;
   return (Init());
 }
@@ -79,10 +82,11 @@ bool AlpideDBManager::Init(string aSslUrl) {
 
 #ifdef AUTH_X509
 #ifdef COMPILE_LIBCURL
-bool AlpideDBManager::Init(string aSslUrl, string aNickName, string aNSSDBPath, string aNSSDBPass) {
-  theJarUrl = aSslUrl;
-  theNSSNickName = aNickName;
-  theNSSDBPath = aNSSDBPath;
+bool AlpideDBManager::Init(string aSslUrl, string aNickName, string aNSSDBPath, string aNSSDBPass)
+{
+  theJarUrl        = aSslUrl;
+  theNSSNickName   = aNickName;
+  theNSSDBPath     = aNSSDBPath;
   theNSSDBPassword = aNSSDBPass;
 
   string command;
@@ -124,17 +128,19 @@ bool AlpideDBManager::Init(string aSslUrl, string aNickName, string aNSSDBPath, 
   return (Init());
 }
 #else
-bool AlpideDBManager::Init(string aSslUrl, string aCliCer, string aCliKey, string aCAPath) {
-  theJarUrl = aSslUrl;
-  theCliCer = aCliCer;
-  theCliKey = aCliKey;
+bool AlpideDBManager::Init(string aSslUrl, string aCliCer, string aCliKey, string aCAPath)
+{
+  theJarUrl                     = aSslUrl;
+  theCliCer                     = aCliCer;
+  theCliKey                     = aCliKey;
   theCertificationAuthorityPath = aCAPath;
   return (Init());
 }
 #endif
 #endif
 
-bool AlpideDBManager::Init() {
+bool AlpideDBManager::Init()
+{
 #ifdef AUTH_KERBEROS
   if (!theCookieJar->fillTheJar(theJarUrl)) {
     cerr << "Error to Init the DB manager with Kerberos authentication. Exit !\n" << endl;
@@ -168,7 +174,8 @@ bool AlpideDBManager::Init() {
 }
 
 int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **Result,
-                                 bool isSOAPrequest, const char *SOAPAction) {
+                                 bool isSOAPrequest, const char *SOAPAction)
+{
 
   remove("/tmp/Queryresult.xml");
 
@@ -183,7 +190,8 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
     cout << endl << "DBQuery :" << Url << endl;
     if (strlen(Payload) > 512) {
       printf(" Payload : %.*s ...\n", 500, Payload);
-    } else {
+    }
+    else {
       cout << " Payload:" << Payload << endl;
     }
   }
@@ -205,21 +213,23 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
 
   // Compose the heasder
   struct curl_slist *headers = NULL;
-  appo = "Host: ";
+  appo                       = "Host: ";
   appo += theUrl.Host;
   headers = curl_slist_append(headers, appo.c_str());
 
   if (isSOAPrequest) {
     if (SOAPVERSION == 11) {
       headers = curl_slist_append(headers, "Content-Type: text/xml; charset=utf-8");
-      appo = "SOAPAction:\"";
+      appo    = "SOAPAction:\"";
       appo += SOAPAction;
       appo += "\"";
       headers = curl_slist_append(headers, appo.c_str());
-    } else {
+    }
+    else {
       headers = curl_slist_append(headers, "Content-Type: application/soap+xml; charset=utf-8");
     }
-  } else {
+  }
+  else {
     headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
   }
   curl_easy_setopt(myHandle, CURLOPT_HTTPHEADER, headers);
@@ -230,7 +240,7 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   // we pass our 'chunk' struct to the callback function
   struct ReceiveBuffer theBuffer;
   theBuffer.memory = (char *)malloc(1); // will be grown as needed by the realloc above
-  theBuffer.size = 0;                   // no data at this point
+  theBuffer.size   = 0;                 // no data at this point
   curl_easy_setopt(myHandle, CURLOPT_WRITEDATA, (void *)&theBuffer);
 
   // Put the Post data ...
@@ -254,7 +264,8 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   if (res != CURLE_OK) { // Check for errors
     cerr << "Curl_easy_perform() failed: " << curl_easy_strerror(res) << endl;
     return (0);
-  } else {
+  }
+  else {
     *Result = theBuffer.memory;
   }
   curl_slist_free_all(headers);
@@ -286,7 +297,8 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
     Command += "\"' -X POST -H 'Content-type: text/xml' -d @/tmp/tempappo.xml \"";
     Command += Url;
     Command += "\"";
-  } else {
+  }
+  else {
     Command += " \"";
     Command += Url;
     Command += "?";
@@ -340,9 +352,10 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
 
 #ifdef COMPILE_LIBCURL
 
-size_t AlpideDBManager::readResponseCB(void *contents, size_t size, size_t nmemb, void *userp) {
-  size_t realsize = size * nmemb;
-  struct ReceiveBuffer *mem = (struct ReceiveBuffer *)userp;
+size_t AlpideDBManager::readResponseCB(void *contents, size_t size, size_t nmemb, void *userp)
+{
+  size_t                realsize = size * nmemb;
+  struct ReceiveBuffer *mem      = (struct ReceiveBuffer *)userp;
 
   mem->memory = (char *)realloc(mem->memory, mem->size + realsize + 1);
   if (mem->memory == NULL) {
@@ -357,11 +370,12 @@ size_t AlpideDBManager::readResponseCB(void *contents, size_t size, size_t nmemb
   return realsize;
 }
 
-void AlpideDBManager::print_cookies(CURL *curl) {
-  CURLcode res;
+void AlpideDBManager::print_cookies(CURL *curl)
+{
+  CURLcode           res;
   struct curl_slist *cookies;
   struct curl_slist *nc;
-  int i;
+  int                i;
 
   printf("Cookies, curl knows:\n");
   res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
@@ -370,7 +384,7 @@ void AlpideDBManager::print_cookies(CURL *curl) {
     exit(1);
   }
   nc = cookies;
-  i = 1;
+  i  = 1;
   while (nc) {
     printf("[%d]: %s\n", i, nc->data);
     nc = nc->next;

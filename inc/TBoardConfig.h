@@ -6,7 +6,7 @@
 #include <string>
 
 namespace BoardConfig {
-  const int PULSEDELAY = 10000;
+  const int PULSEDELAY  = 10000;
   const int STROBEDELAY = 20;
 }
 
@@ -17,13 +17,13 @@ class TBoardConfig {
 private:
 protected:
   std::map<std::string, int *> fSettings;
-  bool fTriggerEnable;
-  bool fPulseEnable;
-  int fNTriggers;
-  int fTriggerDelay;
-  int fPulseDelay;
+  bool           fTriggerEnable;
+  bool           fPulseEnable;
+  int            fNTriggers;
+  int            fTriggerDelay;
+  int            fPulseDelay;
   TTriggerSource fTriggerSource;
-  TBoardType fBoardType;
+  TBoardType     fBoardType;
 
 public:
   TBoardConfig(const char *fName = 0, int boardIndex = 0);
@@ -34,11 +34,11 @@ public:
 
   virtual TBoardType GetBoardType() { return fBoardType; };
 
-  bool GetTriggerEnable() { return fTriggerEnable; };
-  bool GetPulseEnable() { return fPulseEnable; };
-  int GetNTriggers() { return fNTriggers; };
-  int GetTriggerDelay() { return fTriggerDelay; };
-  int GetPulseDelay() { return fPulseDelay; };
+  bool           GetTriggerEnable() { return fTriggerEnable; };
+  bool           GetPulseEnable() { return fPulseEnable; };
+  int            GetNTriggers() { return fNTriggers; };
+  int            GetTriggerDelay() { return fTriggerDelay; };
+  int            GetPulseDelay() { return fPulseDelay; };
   TTriggerSource GetTriggerSource() { return fTriggerSource; };
 
   void SetTriggerEnable(bool trigEnable) { fTriggerEnable = trigEnable; };

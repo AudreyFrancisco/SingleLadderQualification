@@ -18,7 +18,7 @@ class TNoiseResultChip : public TScanResultChip {
 
 private:
   std::vector<TPixHit> m_noisyPixels;
-  double m_occ;
+  double               m_occ;
 
 public:
   TNoiseResultChip() : TScanResultChip(){};
@@ -34,12 +34,12 @@ class TNoiseResultHic : public TScanResultHic {
   friend class TApplyMask;
 
 private:
-  bool m_isMasked;
-  double m_occ;
-  double m_maxChipOcc;
-  int m_nNoisy;
-  float m_backBias;
-  char m_noisyFile[200];
+  bool          m_isMasked;
+  double        m_occ;
+  double        m_maxChipOcc;
+  int           m_nNoisy;
+  float         m_backBias;
+  char          m_noisyFile[200];
   TErrorCounter m_errorCounter;
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
@@ -64,25 +64,27 @@ public:
 
 class TNoiseAnalysis : public TScanAnalysis {
 private:
-  int m_nTrig;
+  int   m_nTrig;
   float m_noiseCut;
-  bool m_isMasked;
-  void WriteResult();
-  void FillVariableList();
+  bool  m_isMasked;
+  void  WriteResult();
+  void  FillVariableList();
   void WriteNoisyPixels(THic *hic);
 
 protected:
-  TScanResultChip *GetChipResult() {
+  TScanResultChip *GetChipResult()
+  {
     TNoiseResultChip *Result = new TNoiseResultChip();
     return Result;
   };
-  TScanResultHic *GetHicResult() {
+  TScanResultHic *GetHicResult()
+  {
     TNoiseResultHic *Result = new TNoiseResultHic();
     return Result;
   };
   void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
-  void InitCounters();
+  void   InitCounters();
   string GetPreviousTestType();
 
 public:

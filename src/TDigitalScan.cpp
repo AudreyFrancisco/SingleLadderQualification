@@ -10,43 +10,48 @@
 TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
                            std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                            std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
-    : TMaskScan(config, chips, hics, boards, histoQue, aMutex) {
+    : TMaskScan(config, chips, hics, boards, histoQue, aMutex)
+{
   float voltageScale = config->GetVoltageScale();
-  m_parameters = new TDigitalParameters;
+  m_parameters       = new TDigitalParameters;
 
   ((TDigitalParameters *)m_parameters)->voltageScale = voltageScale;
 
   std::cout << "voltageScale = " << voltageScale << std::endl;
   if (IsNominal()) {
     strcpy(m_name, "Digital Scan");
-  } else if (IsUpper() && (((TDigitalParameters *)m_parameters)->voltageScale < 1.2)) {
+  }
+  else if (IsUpper() && (((TDigitalParameters *)m_parameters)->voltageScale < 1.2)) {
     strcpy(m_name, "Digital Scan, V +10%");
-  } else if (((TDigitalParameters *)m_parameters)->voltageScale > 0.8 && IsLower()) {
+  }
+  else if (((TDigitalParameters *)m_parameters)->voltageScale > 0.8 && IsLower()) {
     strcpy(m_name, "Digital Scan, V -10%");
-  } else {
+  }
+  else {
     std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
     ((TDigitalParameters *)m_parameters)->voltageScale = 1.0;
     strcpy(m_name, "Digital Scan");
   }
 
   m_start[0] = 0;
-  m_step[0] = 1;
-  m_stop[0] = m_config->GetNMaskStages();
+  m_step[0]  = 1;
+  m_stop[0]  = m_config->GetNMaskStages();
 
   m_start[1] = 0;
-  m_step[1] = 1;
-  m_stop[1] = 1;
+  m_step[1]  = 1;
+  m_stop[1]  = 1;
 
   m_start[2] = 0;
-  m_step[2] = 1;
-  m_stop[2] = 1;
+  m_step[2]  = 1;
+  m_stop[2]  = 1;
 
   m_nTriggers = m_config->GetParamValue("NINJ");
 
   CreateScanHisto();
 }
 
-void TDigitalScan::ConfigureFromu(TAlpide *chip) {
+void TDigitalScan::ConfigureFromu(TAlpide *chip)
+{
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1, 0x0); // digital pulsing
   chip->WriteRegister(
       Alpide::REG_FROMU_CONFIG2,
@@ -62,13 +67,15 @@ void TDigitalScan::ConfigureFromu(TAlpide *chip) {
       chip->GetConfig()->GetParamValue("PULSEDURATION")); // fromu pulsing 2: pulse length
 }
 
-void TDigitalScan::ConfigureChip(TAlpide *chip) {
+void TDigitalScan::ConfigureChip(TAlpide *chip)
+{
   AlpideConfig::BaseConfig(chip);
   ConfigureFromu(chip);
   AlpideConfig::ConfigureCMU(chip);
 }
 
-void TDigitalScan::ConfigureBoard(TReadoutBoard *board) {
+void TDigitalScan::ConfigureBoard(TReadoutBoard *board)
+{
   if (board->GetConfig()->GetBoardType() == boardDAQ) {
     // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns * strobe
     // delay
@@ -76,14 +83,16 @@ void TDigitalScan::ConfigureBoard(TReadoutBoard *board) {
     board->SetTriggerConfig(true, false, 0,
                             2 * board->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
     board->SetTriggerSource(trigExt);
-  } else {
+  }
+  else {
     board->SetTriggerConfig(true, true, board->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
                             board->GetConfig()->GetParamValue("PULSEDELAY"));
     board->SetTriggerSource(trigInt);
   }
 }
 
-void TDigitalScan::FillHistos(std::vector<TPixHit> *Hits, int board) {
+void TDigitalScan::FillHistos(std::vector<TPixHit> *Hits, int board)
+{
   common::TChipIndex idx;
   idx.boardIndex = board;
 
@@ -91,7 +100,7 @@ void TDigitalScan::FillHistos(std::vector<TPixHit> *Hits, int board) {
     if (Hits->at(i).address / 2 != m_row)
       continue; // todo: keep track of spurious hits, i.e. hits in non-injected rows
     idx.dataReceiver = Hits->at(i).channel;
-    idx.chipId = Hits->at(i).chipId;
+    idx.chipId       = Hits->at(i).chipId;
 
     int col = Hits->at(i).region * 32 + Hits->at(i).dcol * 2;
     int leftRight =
@@ -101,12 +110,14 @@ void TDigitalScan::FillHistos(std::vector<TPixHit> *Hits, int board) {
   }
 }
 
-THisto TDigitalScan::CreateHisto() {
+THisto TDigitalScan::CreateHisto()
+{
   THisto histo("HitmapHisto", "HitmapHisto", 1024, 0, 1023);
   return histo;
 }
 
-void TDigitalScan::Init() {
+void TDigitalScan::Init()
+{
   TScan::Init();
   m_running = true;
   CountEnabledChips();
@@ -130,8 +141,7 @@ void TDigitalScan::Init() {
   }
 
   for (unsigned int i = 0; i < m_chips.size(); i++) {
-    if (!(m_chips.at(i)->GetConfig()->IsEnabled()))
-      continue;
+    if (!(m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     ConfigureChip(m_chips.at(i));
   }
 
@@ -153,13 +163,13 @@ void TDigitalScan::Init() {
   }
 }
 
-void TDigitalScan::PrepareStep(int loopIndex) {
+void TDigitalScan::PrepareStep(int loopIndex)
+{
   switch (loopIndex) {
   case 0: // innermost loop: mask staging
     std::cout << "mask stage " << m_value[0] << std::endl;
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-      if (!m_chips.at(ichip)->GetConfig()->IsEnabled())
-        continue;
+      if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[0]);
     }
     sprintf(m_state, "Running %d", m_value[0]);
@@ -171,7 +181,8 @@ void TDigitalScan::PrepareStep(int loopIndex) {
 
 void TDigitalScan::LoopEnd(int loopIndex) {}
 
-void TDigitalScan::Next(int loopIndex) {
+void TDigitalScan::Next(int loopIndex)
+{
   if (loopIndex == 0) {
     while (!(m_mutex->try_lock()))
       ;
@@ -184,7 +195,8 @@ void TDigitalScan::Next(int loopIndex) {
   TScan::Next(loopIndex);
 }
 
-void TDigitalScan::Execute() {
+void TDigitalScan::Execute()
+{
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
@@ -199,7 +211,8 @@ void TDigitalScan::Execute() {
   delete Hits;
 }
 
-void TDigitalScan::Terminate() {
+void TDigitalScan::Terminate()
+{
   TScan::Terminate();
 
   // restore old voltage
@@ -225,18 +238,21 @@ void TDigitalScan::Terminate() {
 }
 
 TDigitalWhiteFrame::TDigitalWhiteFrame(TScanConfig *config, std::vector<TAlpide *> chips,
-                                       std::vector<THic *> hics,
+                                       std::vector<THic *>          hics,
                                        std::vector<TReadoutBoard *> boards,
                                        std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
-    : TDigitalScan(config, chips, hics, boards, histoQue, aMutex) {
+    : TDigitalScan(config, chips, hics, boards, histoQue, aMutex)
+{
   strcpy(m_name, "Digital White Frame");
 }
 
-void TDigitalWhiteFrame::ConfigureMaskStage(TAlpide *chip, int istage) {
+void TDigitalWhiteFrame::ConfigureMaskStage(TAlpide *chip, int istage)
+{
   m_row = AlpideConfig::ConfigureMaskStage(chip, m_pixPerStage, istage, false, true);
 }
 
-void TDigitalWhiteFrame::Init() {
+void TDigitalWhiteFrame::Init()
+{
   TScan::Init();
   m_running = true;
   CountEnabledChips();
@@ -250,8 +266,7 @@ void TDigitalWhiteFrame::Init() {
   }
 
   for (unsigned int i = 0; i < m_chips.size(); i++) {
-    if (!(m_chips.at(i)->GetConfig()->IsEnabled()))
-      continue;
+    if (!(m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     ConfigureChip(m_chips.at(i));
     AlpideConfig::WritePixRegAll(m_chips.at(i), Alpide::PIXREG_MASK, true);
   }

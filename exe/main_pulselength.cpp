@@ -26,16 +26,16 @@
 #include "USBHelpers.h"
 #include <unistd.h>
 
-TBoardType fBoardType;
+TBoardType                   fBoardType;
 std::vector<TReadoutBoard *> fBoards;
-std::vector<TAlpide *> fChips;
-TConfig *fConfig;
+std::vector<TAlpide *>       fChips;
+TConfig *                    fConfig;
 
 // test setttings ----------------------------------------------------------------------
 
-int myStrobeLength = 10;  // strobe length in units of 25 ns
-int myStrobeDelay = 0;    // not needed right now as strobe generated on DAQ board
-int myPulseLength = 2000; // 2000 = 50 us
+int myStrobeLength = 10;   // strobe length in units of 25 ns
+int myStrobeDelay  = 0;    // not needed right now as strobe generated on DAQ board
+int myPulseLength  = 2000; // 2000 = 50 us
 
 int myNTriggers = 50;
 
@@ -45,8 +45,8 @@ int myRow = 5;
 int myCol = 8; // Col within region, 0:15
 
 // charge range
-int myChargeStart = 1;  // 1 default
-int myChargeStop = 160; // 160 default
+int myChargeStart = 1;   // 1 default
+int myChargeStop  = 160; // 160 default
 // int myChargeStop   = 4; // 160 default
 int myChargeStep = 2;
 
@@ -58,8 +58,9 @@ int myPulseDelayStep = 16;   // 200 ns
 
 // -------------------------------------------------------------------------------------
 
-int AddressToColumn(int ARegion, int ADoubleCol, int AAddress) {
-  int Column = ARegion * 32 + ADoubleCol * 2; // Double columns before ADoubleCol
+int AddressToColumn(int ARegion, int ADoubleCol, int AAddress)
+{
+  int Column    = ARegion * 32 + ADoubleCol * 2; // Double columns before ADoubleCol
   int LeftRight = ((((AAddress % 4) == 1) || ((AAddress % 4) == 2))
                        ? 1
                        : 0); // Left or right column within the double column
@@ -69,16 +70,18 @@ int AddressToColumn(int ARegion, int ADoubleCol, int AAddress) {
   return Column;
 }
 
-int AddressToRow(int ARegion, int ADoubleCol, int AAddress) {
+int AddressToRow(int ARegion, int ADoubleCol, int AAddress)
+{
   int Row = AAddress / 2;
   return Row;
 }
 
 void WriteDataToFile(const char *fName, std::vector<TPixHit> *Hits, int charge, int delay,
-                     bool Recreate) {
+                     bool Recreate)
+{
   FILE *fp;
-  int nHits = 0;
-  int col, row;
+  int   nHits = 0;
+  int   col, row;
   if (Recreate)
     fp = fopen(fName, "w");
   else
@@ -105,8 +108,9 @@ void WriteDataToFile(const char *fName, std::vector<TPixHit> *Hits, int charge, 
   fclose(fp);
 }
 
-void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {
-  char Config[1000];
+void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard)
+{
+  char  Config[1000];
   FILE *fp = fopen(fName, "w");
 
   chip->DumpConfig("", false, Config);
@@ -134,7 +138,8 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 }
 
 // initialisation of Fromu
-int configureFromu(TAlpide *chip) {
+int configureFromu(TAlpide *chip)
+{
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,
                       0x20); // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2, myStrobeLength); // fromu config 2: strobe length
@@ -146,7 +151,8 @@ int configureFromu(TAlpide *chip) {
 }
 
 // initialisation of fixed mask
-int configureMask(TAlpide *chip) {
+int configureMask(TAlpide *chip)
+{
   AlpideConfig::WritePixRegAll(chip, Alpide::PIXREG_MASK, true);
   AlpideConfig::WritePixRegAll(chip, Alpide::PIXREG_SELECT, false);
 
@@ -157,7 +163,8 @@ int configureMask(TAlpide *chip) {
   return 0;
 }
 
-int configureChip(TAlpide *chip) {
+int configureChip(TAlpide *chip)
+{
   AlpideConfig::BaseConfig(chip);
 
   configureFromu(chip);
@@ -170,11 +177,12 @@ int configureChip(TAlpide *chip) {
   return 0;
 }
 
-void scan(const char *fName) {
-  unsigned char buffer[1024 * 4000];
-  int n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int nSkipped = 0, prioErrors = 0;
-  TBoardHeader boardInfo;
+void scan(const char *fName)
+{
+  unsigned char         buffer[1024 * 4000];
+  int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
+  int                   nSkipped = 0, prioErrors = 0;
+  TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
   // for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
@@ -188,7 +196,7 @@ void scan(const char *fName) {
       fBoards.at(0)->SetTriggerConfig(true, false, myStrobeDelay, idelay);
       fBoards.at(0)->Trigger(myNTriggers);
 
-      int itrg = 0;
+      int itrg   = 0;
       int trials = 0;
       while (itrg < myNTriggers) {
         if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) ==
@@ -202,7 +210,8 @@ void scan(const char *fName) {
             trials = 0;
           }
           continue;
-        } else {
+        }
+        else {
           // decode DAQboard event
           BoardDecoder::DecodeEvent(boardDAQ, buffer, n_bytes_data, n_bytes_header, n_bytes_trailer,
                                     boardInfo);
@@ -217,7 +226,8 @@ void scan(const char *fName) {
       if ((idelay == myPulseDelayStart) && (icharge == myChargeStart)) {
         WriteDataToFile(fName, Hits, icharge, idelay, true);
         // std::cout << "Wrote data to new file" << std::endl;
-      } else {
+      }
+      else {
         WriteDataToFile(fName, Hits, icharge, idelay, false);
         // std::cout << "Wrote data to file" << std::endl;
       }
@@ -225,7 +235,8 @@ void scan(const char *fName) {
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
 
@@ -233,7 +244,7 @@ int main(int argc, char **argv) {
 
   char Suffix[20], fName[100];
 
-  time_t t = time(0); // get time now
+  time_t     t   = time(0); // get time now
   struct tm *now = localtime(&t);
   sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday,
           now->tm_hour, now->tm_min, now->tm_sec);

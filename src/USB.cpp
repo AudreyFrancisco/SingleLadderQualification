@@ -11,7 +11,8 @@
 //                                                                    //
 ////////////////////////////////////////////////////////////////////////
 
-TUSBBoard::TUSBBoard(libusb_device *ADevice) {
+TUSBBoard::TUSBBoard(libusb_device *ADevice)
+{
   // open device and get handle;
   fDevice = ADevice;
   if (fDevice) {
@@ -22,20 +23,21 @@ TUSBBoard::TUSBBoard(libusb_device *ADevice) {
   }
 }
 
-TUSBBoard::~TUSBBoard() {
-  if (fDevice)
-    DisconnectUSBDevice();
+TUSBBoard::~TUSBBoard()
+{
+  if (fDevice) DisconnectUSBDevice();
 }
 
 /*
  * Initialize the values of the object variables.
  */
-void TUSBBoard::Init() {
-  fBusNum = 0;
-  fDevNum = 0;
-  fVendorId = 0;
-  fProductId = 0;
-  fUsbChipType = "";
+void TUSBBoard::Init()
+{
+  fBusNum       = 0;
+  fDevNum       = 0;
+  fVendorId     = 0;
+  fProductId    = 0;
+  fUsbChipType  = "";
   fNumInterface = 0;
   fNumEndpoints = 0;
 }
@@ -44,7 +46,8 @@ void TUSBBoard::Init() {
  * Establish the connection with device and interface.
  * Return:    -1 if the operation failed          1 if it is ok.
  */
-int TUSBBoard::ConnectUSBDevice() {
+int TUSBBoard::ConnectUSBDevice()
+{
   int err = 0;
 
   // open the device handle for all future operations
@@ -69,7 +72,8 @@ int TUSBBoard::ConnectUSBDevice() {
  * Disconnect the interface and the device .
  * Return:    -1 if the operation failed          1 if it is ok.
  */
-int TUSBBoard::DisconnectUSBDevice() {
+int TUSBBoard::DisconnectUSBDevice()
+{
   int err;
   err = libusb_release_interface(fHandle, INTERFACE_NUMBER);
   if (err) {
@@ -96,8 +100,9 @@ int TUSBBoard::DisconnectUSBDevice() {
  * fNumEndpoints contains the number of endpoints.
  * fEndpoints_vec It is the vector that contains the object of type TUSBEndpoint.
  */
-int TUSBBoard::SetDeviceInfo() {
-  struct libusb_device_descriptor desc;
+int TUSBBoard::SetDeviceInfo()
+{
+  struct libusb_device_descriptor  desc;
   struct libusb_config_descriptor *config;
 
   int r = libusb_get_device_descriptor(fDevice, &desc);
@@ -106,9 +111,9 @@ int TUSBBoard::SetDeviceInfo() {
     return -1;
   }
 
-  fBusNum = libusb_get_bus_number(fDevice);
-  fDevNum = libusb_get_device_address(fDevice);
-  fVendorId = desc.idVendor;
+  fBusNum    = libusb_get_bus_number(fDevice);
+  fDevNum    = libusb_get_device_address(fDevice);
+  fVendorId  = desc.idVendor;
   fProductId = desc.idProduct;
 
   if ((fVendorId == 0x04b4) && (fProductId == 0x00F0 || fProductId == 0x00F1))
@@ -126,24 +131,25 @@ int TUSBBoard::SetDeviceInfo() {
   return 1;
 }
 
-void TUSBBoard::CreateEndpoints() {
-  struct libusb_config_descriptor *config;
-  const struct libusb_interface *inter;
+void TUSBBoard::CreateEndpoints()
+{
+  struct libusb_config_descriptor *         config;
+  const struct libusb_interface *           inter;
   const struct libusb_interface_descriptor *interdesc;
-  const struct libusb_endpoint_descriptor *epdesc;
-  uint8_t epattrib;
-  libusb_transfer_type ttype;
+  const struct libusb_endpoint_descriptor * epdesc;
+  uint8_t                                   epattrib;
+  libusb_transfer_type                      ttype;
 
   libusb_get_config_descriptor(fDevice, 0, &config);
 
-  inter = &config->interface[0];
-  interdesc = &inter->altsetting[0];
+  inter         = &config->interface[0];
+  interdesc     = &inter->altsetting[0];
   fNumEndpoints = (int)interdesc->bNumEndpoints;
 
   for (int k = 0; k < fNumEndpoints; k++) {
-    epdesc = &interdesc->endpoint[k];
+    epdesc   = &interdesc->endpoint[k];
     epattrib = epdesc->bmAttributes;
-    ttype = (libusb_transfer_type)(epattrib & 0x3);
+    ttype    = (libusb_transfer_type)(epattrib & 0x3);
     switch (ttype) {
     case LIBUSB_TRANSFER_TYPE_BULK:
       fEndpoints.push_back(new TUSBEndpointBulk(this, epdesc));
@@ -174,18 +180,21 @@ void TUSBBoard::CreateEndpoints() {
 //}
 
 int TUSBBoard::SendData(int idEndpoint, unsigned char *data_buf, int packetSize,
-                        int *error /*=0x0*/) const {
+                        int *error /*=0x0*/) const
+{
   int num_byte_tr = fEndpoints.at(idEndpoint)->SendData(data_buf, packetSize, error);
   return num_byte_tr;
 }
 
 int TUSBBoard::ReceiveData(int idEndpoint, unsigned char *data_buf, int packetSize,
-                           int *error /*=0x0*/) const {
+                           int *error /*=0x0*/) const
+{
   int num_byte_tr = fEndpoints.at(idEndpoint)->ReceiveData(data_buf, packetSize, error);
   return num_byte_tr;
 }
 
-void TUSBBoard::DumpDeviceInfo() const {
+void TUSBBoard::DumpDeviceInfo() const
+{
   std::cout << "***** Information about USB Device *****" << std::endl;
   std::cout << "   Number of Bus:          " << fBusNum << std::endl;
   std::cout << "   Address of Device:      " << fDevNum << std::endl;
@@ -210,9 +219,10 @@ void TUSBBoard::DumpDeviceInfo() const {
 //                                                                    //
 ////////////////////////////////////////////////////////////////////////
 
-TUSBEndpoint::TUSBEndpoint(TUSBBoard *ABoard, const libusb_endpoint_descriptor *desc) {
+TUSBEndpoint::TUSBEndpoint(TUSBBoard *ABoard, const libusb_endpoint_descriptor *desc)
+{
   fMyBoard = ABoard;
-  fHandle = fMyBoard->GetHandle();
+  fHandle  = fMyBoard->GetHandle();
   Init();
   SetEndpointInfo(desc);
 }
@@ -220,13 +230,14 @@ TUSBEndpoint::TUSBEndpoint(TUSBBoard *ABoard, const libusb_endpoint_descriptor *
 /*
  * Initialize the values object variables.
  */
-void TUSBEndpoint::Init() {
-  fType = (libusb_transfer_type)-1;
-  fDirection = (libusb_endpoint_direction)-1;
+void TUSBEndpoint::Init()
+{
+  fType            = (libusb_transfer_type)-1;
+  fDirection       = (libusb_endpoint_direction)-1;
   fEndpointAddress = 0;
-  fMaxPacketSize = 0;
-  fTimeout = 35000; // 5000 milliseconds
-                    // fTimeout         = 0; // milliseconds
+  fMaxPacketSize   = 0;
+  fTimeout         = 35000; // 5000 milliseconds
+                            // fTimeout         = 0; // milliseconds
 }
 
 /*
@@ -240,15 +251,16 @@ void TUSBEndpoint::Init() {
  * direction of endpoint.
  * The values 0x81 and 0x1 can be change with the firmware. It is just a example.
  */
-int TUSBEndpoint::SetEndpointInfo(const libusb_endpoint_descriptor *desc) {
+int TUSBEndpoint::SetEndpointInfo(const libusb_endpoint_descriptor *desc)
+{
   uint8_t parameters;
 
   fEndpointAddress = desc->bEndpointAddress;
-  fMaxPacketSize = desc->wMaxPacketSize;
+  fMaxPacketSize   = desc->wMaxPacketSize;
 
   fDirection = (libusb_endpoint_direction)(fEndpointAddress & 0x80);
   parameters = desc->bmAttributes;
-  fType = (libusb_transfer_type)(parameters & 3);
+  fType      = (libusb_transfer_type)(parameters & 3);
 
   return 1;
 }
@@ -256,7 +268,8 @@ int TUSBEndpoint::SetEndpointInfo(const libusb_endpoint_descriptor *desc) {
 /*
  * Dump the information about endpoint.
  */
-void TUSBEndpoint::DumpEndpointInfo() {
+void TUSBEndpoint::DumpEndpointInfo()
+{
   std::cout << "     Type:                 " << fType << std::endl;
   std::cout << "     Direction:            " << fDirection << std::endl;
   std::cout << "     Address:              0x" << std::hex << (int)fEndpointAddress << std::dec
@@ -264,27 +277,32 @@ void TUSBEndpoint::DumpEndpointInfo() {
   std::cout << "     Maximum Packet Size:  " << fMaxPacketSize << std::endl;
 }
 
-int TUSBEndpoint::TransferData(unsigned char *data_buf, int packetSize, int *error /*=0x0*/) {
+int TUSBEndpoint::TransferData(unsigned char *data_buf, int packetSize, int *error /*=0x0*/)
+{
   std::cout << "Transfer Data not yet implemented for this type of endpoint " << std::endl;
   return -1;
 }
 
-int TUSBEndpoint::SendData(unsigned char *data_buf, int packetSize, int *error /*=0x0*/) {
+int TUSBEndpoint::SendData(unsigned char *data_buf, int packetSize, int *error /*=0x0*/)
+{
 
   if (fDirection == LIBUSB_ENDPOINT_IN) {
     std::cout << "Warning, trying to write to in-endpoint. Doing nothing ... " << std::endl;
     return -1;
-  } else {
+  }
+  else {
     int Result = TransferData(data_buf, packetSize, error);
     return Result;
   }
 }
 
-int TUSBEndpoint::ReceiveData(unsigned char *data_buf, int packetSize, int *error /*=0x0*/) {
+int TUSBEndpoint::ReceiveData(unsigned char *data_buf, int packetSize, int *error /*=0x0*/)
+{
   if (fDirection == LIBUSB_ENDPOINT_OUT) {
     std::cout << "Warning, trying to read from out-endpoint. Doing nothing ... " << std::endl;
     return -1;
-  } else
+  }
+  else
     return TransferData(data_buf, packetSize, error);
 }
 
@@ -297,18 +315,19 @@ int TUSBEndpoint::ReceiveData(unsigned char *data_buf, int packetSize, int *erro
 ////////////////////////////////////////////////////////////////////////
 
 TUSBEndpointBulk::TUSBEndpointBulk(TUSBBoard *ABoard, const libusb_endpoint_descriptor *desc)
-    : TUSBEndpoint(ABoard, desc) {
+    : TUSBEndpoint(ABoard, desc)
+{
   fType = LIBUSB_TRANSFER_TYPE_BULK;
 }
 
-int TUSBEndpointBulk::TransferData(unsigned char *data_buf, int packetSize, int *error /*=0x0*/) {
+int TUSBEndpointBulk::TransferData(unsigned char *data_buf, int packetSize, int *error /*=0x0*/)
+{
   int err;
   int num_byte_transferred = 0;
 
   err = libusb_bulk_transfer(fHandle, fEndpointAddress, data_buf, packetSize, &num_byte_transferred,
                              fTimeout);
-  if (error)
-    *error = err;
+  if (error) *error = err;
   if (err == LIBUSB_ERROR_TIMEOUT) {
     return num_byte_transferred;
   }
@@ -338,16 +357,18 @@ int TUSBEndpointBulk::TransferData(unsigned char *data_buf, int packetSize, int 
 ////////////////////////////////////////////////////////////////////////
 
 TUSBEndpointControl::TUSBEndpointControl(TUSBBoard *ABoard, const libusb_endpoint_descriptor *desc)
-    : TUSBEndpoint(ABoard, desc) {
+    : TUSBEndpoint(ABoard, desc)
+{
   fType = LIBUSB_TRANSFER_TYPE_CONTROL;
 }
 
-int TUSBEndpointControl::GetConfiguration() {
+int TUSBEndpointControl::GetConfiguration()
+{
   uint8_t request_type =
       LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_STANDARD | LIBUSB_RECIPIENT_DEVICE;
-  uint8_t request = LIBUSB_REQUEST_GET_CONFIGURATION;
+  uint8_t       request = LIBUSB_REQUEST_GET_CONFIGURATION;
   unsigned char data[1];
-  int size = libusb_control_transfer(fHandle, request_type, request, 0, 0, data, 1, 1000);
+  int           size = libusb_control_transfer(fHandle, request_type, request, 0, 0, data, 1, 1000);
   std::cout << "Received data 0x" << std::hex << (int)data[0] << std::dec << std::endl;
   return size;
 }

@@ -40,7 +40,8 @@
 
 #define PLATFORM_IS_LITTLE_ENDIAN
 
-void MBoard::init() {
+void MBoard::init()
+{
   mIPbus = new IPbusUDP();
 
   // Data Generator
@@ -55,23 +56,26 @@ void MBoard::init() {
   // System PLL on I2C bus
   mSysPLL = new I2CSysPll(mIPbus, WbbBaseAddress::i2cSysPLL);
 
-  tcp_sockfd = -1;
+  tcp_sockfd   = -1;
   numReceivers = 0;
 }
 
 MBoard::MBoard() { init(); }
 
-MBoard::MBoard(const char *IPaddr, int port) {
+MBoard::MBoard(const char *IPaddr, int port)
+{
   init();
   setIPaddress(IPaddr, port);
 }
 
-void MBoard::setIPaddress(const char *IPaddr, int port) {
+void MBoard::setIPaddress(const char *IPaddr, int port)
+{
   IPaddress = IPaddr;
   mIPbus->setIPaddress(IPaddr, port);
 }
 
-MBoard::~MBoard() {
+MBoard::~MBoard()
+{
   // close the TCP connection
   closeTCP();
 
@@ -82,14 +86,15 @@ MBoard::~MBoard() {
   delete mIPbus;
 }
 
-void MBoard::addDataReceiver(int id, MDataReceiver *dr) {
-  if (id + 1 > numReceivers)
-    receivers.resize(id + 1, NULL);
+void MBoard::addDataReceiver(int id, MDataReceiver *dr)
+{
+  if (id + 1 > numReceivers) receivers.resize(id + 1, NULL);
   receivers[id] = dr;
-  numReceivers = id + 1;
+  numReceivers  = id + 1;
 }
 
-void MBoard::flushDataReceivers() {
+void MBoard::flushDataReceivers()
+{
   for (int i = 0; i < numReceivers; i++)
     if (receivers[i] != NULL) {
       receivers[i]->dataBufferUsed = 0;
@@ -97,14 +102,14 @@ void MBoard::flushDataReceivers() {
     }
 }
 
-void MBoard::connectTCP(int port, int rcvBufferSize) {
+void MBoard::connectTCP(int port, int rcvBufferSize)
+{
   struct sockaddr_in servaddr;
 
   closeTCP();
 
   tcp_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (tcp_sockfd == -1)
-    throw MDataConnectError("Socket creation");
+  if (tcp_sockfd == -1) throw MDataConnectError("Socket creation");
 
   if (rcvBufferSize != 0) {
     // Limit the maximum ammount of "in-flight" data
@@ -117,9 +122,9 @@ void MBoard::connectTCP(int port, int rcvBufferSize) {
   }
 
   bzero(&servaddr, sizeof(servaddr));
-  servaddr.sin_family = AF_INET;
+  servaddr.sin_family      = AF_INET;
   servaddr.sin_addr.s_addr = inet_addr(IPaddress.c_str());
-  servaddr.sin_port = htons(port);
+  servaddr.sin_port        = htons(port);
 
   if (::connect(tcp_sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == -1) {
     closeTCP();
@@ -127,26 +132,25 @@ void MBoard::connectTCP(int port, int rcvBufferSize) {
   }
 }
 
-void MBoard::closeTCP() {
-  if (tcp_sockfd != -1)
-    ::close(tcp_sockfd);
+void MBoard::closeTCP()
+{
+  if (tcp_sockfd != -1) ::close(tcp_sockfd);
   tcp_sockfd = -1;
 }
 
-ssize_t MBoard::recvTCP(void *rxBuffer, size_t count, int timeout) {
+ssize_t MBoard::recvTCP(void *rxBuffer, size_t count, int timeout)
+{
   struct pollfd ufds;
-  int rv;
-  ssize_t rxSize;
+  int           rv;
+  ssize_t       rxSize;
 
-  ufds.fd = tcp_sockfd;
+  ufds.fd     = tcp_sockfd;
   ufds.events = POLLIN | POLLNVAL; // check for normal read or error
-  rv = poll(&ufds, 1, timeout);
+  rv          = poll(&ufds, 1, timeout);
 
-  if (rv == -1)
-    throw MDataReceiveError("Poll system call");
+  if (rv == -1) throw MDataReceiveError("Poll system call");
 
-  if (rv == 0)
-    return 0; // timeout
+  if (rv == 0) return 0; // timeout
 
   // check for events on sockfd:
   rxSize = 0;
@@ -154,22 +158,23 @@ ssize_t MBoard::recvTCP(void *rxBuffer, size_t count, int timeout) {
     rxSize = recv(tcp_sockfd, rxBuffer, count, 0);
     if (rxSize == 0 || rxSize == -1)
       throw MDataReceiveError("Board connection closed. Fatal error!");
-  } else if (ufds.revents & POLLNVAL) {
+  }
+  else if (ufds.revents & POLLNVAL) {
     throw MDataReceiveError("Invalid file descriptor in poll system call");
   }
 
   return rxSize;
 }
 
-ssize_t MBoard::readTCPData(void *buffer, size_t count, int timeout) {
+ssize_t MBoard::readTCPData(void *buffer, size_t count, int timeout)
+{
   ssize_t p = 0;
   ssize_t res;
 
   while (count) {
     res = recvTCP(buffer, count, timeout);
 
-    if (res == 0)
-      return p;
+    if (res == 0) return p;
     p += res;
     buffer = (char *)buffer + res;
     count -= res;
@@ -179,7 +184,8 @@ ssize_t MBoard::readTCPData(void *buffer, size_t count, int timeout) {
   return p;
 }
 
-unsigned int MBoard::buf2ui(unsigned char *buf) {
+unsigned int MBoard::buf2ui(unsigned char *buf)
+{
 #ifdef PLATFORM_IS_LITTLE_ENDIAN
   return (*(unsigned int *)buf) & 0xffffffff;
 #else
@@ -212,28 +218,29 @@ static void dump(unsigned char *buffer, int size)
 //
 //	Read data from the TCP socket and dispatch them to the receivers
 //
-long MBoard::pollTCP(int timeout, MDataReceiver **drPtr) {
+long MBoard::pollTCP(int timeout, MDataReceiver **drPtr)
+{
   const unsigned int bufferSize = 64 * 1024;
-  unsigned char rcvbuffer[bufferSize];
+  unsigned char      rcvbuffer[bufferSize];
   const unsigned int headerSize = MOSAIC_HEADER_SIZE;
-  unsigned char header[headerSize];
-  unsigned int flags;
-  long blockSize, readBlockSize;
-  long closedDataCounter;
-  long readDataSize = headerSize;
-  int dataSrc;
-  ssize_t n;
+  unsigned char      header[headerSize];
+  unsigned int       flags;
+  long               blockSize, readBlockSize;
+  long               closedDataCounter;
+  long               readDataSize = headerSize;
+  int                dataSrc;
+  ssize_t            n;
 
   *drPtr = NULL;
-  n = readTCPData(header, headerSize, timeout);
+  n      = readTCPData(header, headerSize, timeout);
 
   if (n == 0) // timeout
     return 0;
 
-  blockSize = buf2ui(header);
-  flags = buf2ui(header + 4);
+  blockSize         = buf2ui(header);
+  flags             = buf2ui(header + 4);
   closedDataCounter = buf2ui(header + 8);
-  dataSrc = buf2ui(header + 12);
+  dataSrc           = buf2ui(header + 12);
 
   if (flags & flagOverflow)
     printf("****** Received data block with overflow flag set from source %d\n", dataSrc);
@@ -263,15 +270,14 @@ long MBoard::pollTCP(int timeout, MDataReceiver **drPtr) {
 
   // read data into the consumer buffer
   MDataReceiver *dr = receivers[dataSrc];
-  dr->blockFlags = flags;
-  dr->blockSrc = dataSrc;
+  dr->blockFlags    = flags;
+  dr->blockSrc      = dataSrc;
   memcpy(dr->blockHeader, header, MOSAIC_HEADER_SIZE);
   *drPtr = dr;
 
   if (readBlockSize != 0) {
     n = readTCPData(dr->getWritePtr(readBlockSize), readBlockSize, -1);
-    if (n == 0)
-      return 0;
+    if (n == 0) return 0;
 
     // update the size of data in the buffer
     if (n < blockSize)
@@ -290,9 +296,10 @@ long MBoard::pollTCP(int timeout, MDataReceiver **drPtr) {
 //
 //	Read data from the TCP socket and send it to the receivers
 //
-long MBoard::pollData(int timeout) {
-  long readDataSize;
-  long closedDataCounter;
+long MBoard::pollData(int timeout)
+{
+  long           readDataSize;
+  long           closedDataCounter;
   MDataReceiver *dr;
 
   readDataSize = pollTCP(timeout, &dr);
@@ -303,8 +310,7 @@ long MBoard::pollData(int timeout) {
 
       // move unused bytes to the begin of buffer
       size_t bytesToMove = dr->dataBufferUsed - parsedBytes;
-      if (bytesToMove > 0)
-        memmove(&dr->dataBuffer[0], &dr->dataBuffer[parsedBytes], bytesToMove);
+      if (bytesToMove > 0) memmove(&dr->dataBuffer[0], &dr->dataBuffer[parsedBytes], bytesToMove);
       dr->dataBufferUsed -= parsedBytes;
       dr->numClosedData = 0;
     }

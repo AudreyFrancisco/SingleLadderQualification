@@ -43,7 +43,7 @@ public:
 
 protected:
   WishboneBus *wbb;
-  uint32_t baseAddress;
+  uint32_t     baseAddress;
 };
 
 #endif // MWBBSLAVE_H

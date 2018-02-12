@@ -4,19 +4,20 @@
 #include <iostream>
 #include <tinyxml.h>
 
-unsigned int Bitmask(int width) {
+unsigned int Bitmask(int width)
+{
   unsigned int tmp = 0;
   for (int i = 0; i < width; i++)
     tmp |= 1 << i;
   return tmp;
 }
 
-void ParseXML(TAlpide *dut, TiXmlNode *node, int base, int rgn, bool readwrite) {
+void ParseXML(TAlpide *dut, TiXmlNode *node, int base, int rgn, bool readwrite)
+{
   // readwrite (from Chip): true = read; false = write
   for (TiXmlNode *pChild = node->FirstChild("address"); pChild != 0;
-       pChild = pChild->NextSibling("address")) {
-    if (pChild->Type() != TiXmlNode::TINYXML_ELEMENT)
-      continue;
+       pChild            = pChild->NextSibling("address")) {
+    if (pChild->Type() != TiXmlNode::TINYXML_ELEMENT) continue;
     //         printf( "Element %d [%s] %d %d\n", pChild->Type(), pChild->Value(),
     //         base, rgn);
     TiXmlElement *elem = pChild->ToElement();
@@ -26,20 +27,22 @@ void ParseXML(TAlpide *dut, TiXmlNode *node, int base, int rgn, bool readwrite) 
         break;
       }
       ParseXML(dut, pChild, atoi(elem->Attribute("base")), -1, readwrite);
-    } else if (rgn == -1) {
+    }
+    else if (rgn == -1) {
       if (!elem->Attribute("rgn")) {
         std::cout << "Rgn attribute not found!" << std::endl;
         break;
       }
       ParseXML(dut, pChild, base, atoi(elem->Attribute("rgn")), readwrite);
-    } else {
+    }
+    else {
       if (!elem->Attribute("sub")) {
         std::cout << "Sub attribute not found!" << std::endl;
         break;
       }
-      int sub = atoi(elem->Attribute("sub"));
+      int      sub     = atoi(elem->Attribute("sub"));
       uint16_t address = ((rgn << 11) + (base << 8) + sub);
-      uint16_t value = 0;
+      uint16_t value   = 0;
       // std::cout << "region" << rgn << " " << base << " " << sub << std::endl;
 
       if (readwrite) {
@@ -50,7 +53,7 @@ void ParseXML(TAlpide *dut, TiXmlNode *node, int base, int rgn, bool readwrite) 
       }
 
       for (TiXmlNode *valueChild = pChild->FirstChild("value"); valueChild != 0;
-           valueChild = valueChild->NextSibling("value")) {
+           valueChild            = valueChild->NextSibling("value")) {
         if (!valueChild->ToElement()->Attribute("begin")) {
           std::cout << "begin attribute not found!" << std::endl;
           break;
@@ -70,11 +73,12 @@ void ParseXML(TAlpide *dut, TiXmlNode *node, int base, int rgn, bool readwrite) 
           break;
         }
         if (readwrite) {
-          int subvalue = (value >> begin) & Bitmask(width);
+          int  subvalue = (value >> begin) & Bitmask(width);
           char tmp[5];
           sprintf(tmp, "0x%X", subvalue);
           valueChild->FirstChild("content")->FirstChild()->SetValue(tmp);
-        } else {
+        }
+        else {
           int content =
               (int)strtol(valueChild->FirstChild("content")->FirstChild()->Value(), 0, 16);
 

@@ -1,6 +1,7 @@
 #include "scope_control.h"
 
-int main() {
+int main()
+{
   scope_control scope;
   scope.debug_en = true;
   scope.open_auto();

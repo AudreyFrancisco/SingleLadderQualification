@@ -38,7 +38,7 @@ class GenConsumer : public MDataReceiver {
 public:
   GenConsumer();
   void setEventSize(long evSize) { eventSize = evSize; }
-  void flush();
+  void                   flush();
 
 protected:
   long parse(int numClosed);

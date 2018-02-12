@@ -40,16 +40,16 @@ class TFifoResultHic : public TScanResultHic {
   friend class TFifoAnalysis;
 
 private:
-  int m_err0;
-  int m_err5;
-  int m_erra;
-  int m_errf;
+  int  m_err0;
+  int  m_err5;
+  int  m_erra;
+  int  m_errf;
   bool m_upper;
   bool m_lower;
   bool m_nominal;
-  int m_driver;
-  int m_exc;
-  int m_nFaultyChips;
+  int  m_driver;
+  int  m_exc;
+  int  m_nFaultyChips;
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 public:
@@ -69,17 +69,19 @@ public:
 class TFifoAnalysis : public TScanAnalysis {
 private:
   std::vector<TFifoCounter> m_counters;
-  void InitCounters();
-  void WriteResult();
-  void FillVariableList();
+  void                      InitCounters();
+  void                      WriteResult();
+  void                      FillVariableList();
   THicClassification GetClassification(TFifoResultHic *result);
 
 protected:
-  TScanResultChip *GetChipResult() {
+  TScanResultChip *GetChipResult()
+  {
     TFifoResultChip *Result = new TFifoResultChip();
     return Result;
   };
-  TScanResultHic *GetHicResult() {
+  TScanResultHic *GetHicResult()
+  {
     TFifoResultHic *Result = new TFifoResultHic();
     return Result;
   };

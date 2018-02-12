@@ -67,33 +67,33 @@ public:
   long pollTCP(int timeout, MDataReceiver **dr);
   long pollData(int timeout);
   void addDataReceiver(int id, MDataReceiver *dc);
-  void flushDataReceivers();
+  void                flushDataReceivers();
   static unsigned int buf2ui(unsigned char *buf);
 
 public:
-  MDataGenerator *mDataGenerator;
-  IPbusUDP *mIPbus;
-  MRunControl *mRunControl;
+  MDataGenerator * mDataGenerator;
+  IPbusUDP *       mIPbus;
+  MRunControl *    mRunControl;
   MTriggerControl *mTriggerControl;
-  I2CSysPll *mSysPLL;
+  I2CSysPll *      mSysPLL;
 
 private:
-  void init();
+  void    init();
   ssize_t recvTCP(void *buffer, size_t count, int timeout);
   ssize_t readTCPData(void *buffer, size_t count, int timeout);
 
   // private:
 public:
-  int tcp_sockfd;
-  int numReceivers;
+  int                          tcp_sockfd;
+  int                          numReceivers;
   std::vector<MDataReceiver *> receivers;
 
 public:
   enum dataBlockFlag_e {
     flagClosedEvent = (1 << 0),
-    flagOverflow = (1 << 1),
-    flagTimeout = (1 << 2),
-    flagCloseRun = (1 << 3)
+    flagOverflow    = (1 << 1),
+    flagTimeout     = (1 << 2),
+    flagCloseRun    = (1 << 3)
   };
 
   string IPaddress;

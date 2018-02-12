@@ -6,7 +6,8 @@
 #include <iomanip>
 #include <iostream>
 
-checkpbconfig::checkpbconfig(QWidget *parent) : QDialog(parent), ui(new Ui::checkpbconfig) {
+checkpbconfig::checkpbconfig(QWidget *parent) : QDialog(parent), ui(new Ui::checkpbconfig)
+{
   ui->setupUi(this);
   connect(ui->no, SIGNAL(clicked()), this, SLOT(close()));
   connect(ui->yes, SIGNAL(clicked()), this->parent(), SLOT(opencalibration()));

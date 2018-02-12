@@ -59,11 +59,13 @@ private:
   void FillVariableList();
 
 protected:
-  TScanResultChip *GetChipResult() {
+  TScanResultChip *GetChipResult()
+  {
     TLocalBusResultChip *Result = new TLocalBusResultChip();
     return Result;
   };
-  TScanResultHic *GetHicResult() {
+  TScanResultHic *GetHicResult()
+  {
     TLocalBusResultHic *Result = new TLocalBusResultHic();
     return Result;
   };

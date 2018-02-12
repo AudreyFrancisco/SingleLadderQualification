@@ -27,30 +27,30 @@
 #include <string.h>
 #include <unistd.h>
 
-TConfig *fConfig;
+TConfig *                    fConfig;
 std::vector<TReadoutBoard *> fBoards;
-TBoardType fBoardType;
-std::vector<TAlpide *> fChips;
+TBoardType                   fBoardType;
+std::vector<TAlpide *>       fChips;
 
 int fEnabled = 0; // variable to count number of enabled chips; leave at 0
 
-void readTemp() {
+void readTemp()
+{
   // Allocate the memory for host the results
   uint16_t *theResult = (uint16_t *)malloc(sizeof(uint16_t) * (fChips.size() + 1)); //
   if (theResult == NULL) {
     std::cerr << "Test_temperature : Error to allocate memory" << std::endl;
     return;
   }
-  float theValue;
+  float    theValue;
   uint16_t theChipId;
 
   std::cout << "\tChipId\tBias\tTemp." << std::endl;
   // Set all chips for Temperature Measurement
   for (unsigned int i = 0; i < fChips.size(); i++) {
-    if (!fChips.at(i)->GetConfig()->IsEnabled())
-      continue;
+    if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
     theChipId = fChips.at(i)->GetConfig()->GetChipId();
-    theValue = fChips.at(i)->ReadTemperature();
+    theValue  = fChips.at(i)->ReadTemperature();
     std::cout << i << ")\t" << theChipId << "\t" << fChips.at(i)->GetADCOffset() << "\t" << theValue
               << "\t" << fChips.at(i)->ReadAnalogueVoltage() << std::endl;
   }
@@ -61,15 +61,17 @@ void readTemp() {
   return;
 }
 
-char *makeTimeStamp(char *ABuffer) {
-  time_t t = time(0); // get time now
+char *makeTimeStamp(char *ABuffer)
+{
+  time_t     t   = time(0); // get time now
   struct tm *now = localtime(&t);
   sprintf(ABuffer, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday,
           now->tm_hour, now->tm_min, now->tm_sec);
   return (ABuffer);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
 
@@ -83,8 +85,7 @@ int main(int argc, char **argv) {
     }
 
     for (const auto &rChip : fChips) {
-      if (!rChip->GetConfig()->IsEnabled())
-        continue;
+      if (!rChip->GetConfig()->IsEnabled()) continue;
       ++fEnabled;
     }
 

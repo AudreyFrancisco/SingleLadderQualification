@@ -10,7 +10,8 @@ class TPowerResultChip : public TScanResultChip {
 public:
   TPowerResultChip() : TScanResultChip(){};
   void WriteToFile(FILE *fp) { (void)fp; };
-  float GetVariable(TResultVariable var) {
+  float GetVariable(TResultVariable var)
+  {
     (void)(&var);
     return 0;
   };
@@ -20,7 +21,7 @@ class TPowerResultHic : public TScanResultHic {
   friend class TPowerAnalysis;
 
 private:
-  bool trip;
+  bool  trip;
   float iddaSwitchon;
   float idddSwitchon;
   float iddaClocked;
@@ -30,7 +31,7 @@ private:
   float ibias0;
   float ibias3;
   float ibias[50];
-  char m_ivFile[200];
+  char  m_ivFile[200];
 
 protected:
 public:
@@ -58,11 +59,13 @@ private:
   THicClassification GetClassificationOB(THicCurrents currents);
 
 protected:
-  TScanResultChip *GetChipResult() {
+  TScanResultChip *GetChipResult()
+  {
     TPowerResultChip *result = new TPowerResultChip();
     return result;
   };
-  TScanResultHic *GetHicResult() {
+  TScanResultHic *GetHicResult()
+  {
     TPowerResultHic *result = new TPowerResultHic();
     return result;
   };
@@ -70,7 +73,7 @@ protected:
   void InitCounters(){};
   void WriteResult();
   void AnalyseHisto(TScanHisto *histo) { (void)&histo; };
-  string GetPreviousTestType();
+  string                        GetPreviousTestType();
 
 public:
   TPowerAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

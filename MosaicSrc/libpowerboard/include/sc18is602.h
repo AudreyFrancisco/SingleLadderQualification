@@ -44,24 +44,24 @@ public:
 private:
   // bridge functions
   enum {
-    FUN_SPI = 0x00,       // bits 3-0 are the SPI target SSn pins
-    FUN_CONFIG = 0xf0,    // bridge configuration
+    FUN_SPI       = 0x00, // bits 3-0 are the SPI target SSn pins
+    FUN_CONFIG    = 0xf0, // bridge configuration
     FUN_CLEAR_INT = 0xf1, // Clear the interrupt
-    FUN_IDLE = 0xf2,      // Set Idle mode (Low power)
-    FUN_GPIO_WR = 0xf4,   // Write the GPIO port
-    FUN_GPIO_RD = 0xf5,   // Read the GPIO port
-    FUN_GPIO_EN = 0xf6,
-    FUN_GPIO_CFG = 0xf7
+    FUN_IDLE      = 0xf2, // Set Idle mode (Low power)
+    FUN_GPIO_WR   = 0xf4, // Write the GPIO port
+    FUN_GPIO_RD   = 0xf5, // Read the GPIO port
+    FUN_GPIO_EN   = 0xf6,
+    FUN_GPIO_CFG  = 0xf7
   };
 
   // bits for function "config"
   enum {
     CFG_RATE_1843 = 0x00, // SPI clock at 1843 KHz
-    CFG_RATE_461 = 0x01,  // SPI clock at 461 KHz
-    CFG_RATE_115 = 0x02,  // SPI clock at 115 KHz
-    CFG_RATE_58 = 0x03,   // SPI clock at 58 KHz
-    CFG_CPHA = 0x04,
-    CFG_CPOL = 0x08,
+    CFG_RATE_461  = 0x01, // SPI clock at 461 KHz
+    CFG_RATE_115  = 0x02, // SPI clock at 115 KHz
+    CFG_RATE_58   = 0x03, // SPI clock at 58 KHz
+    CFG_CPHA      = 0x04,
+    CFG_CPOL      = 0x08,
     CFG_ORDER_LSB = 0x20 // LSB transmitted first
   };
 };

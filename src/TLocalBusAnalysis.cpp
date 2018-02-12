@@ -3,7 +3,8 @@
 TLocalBusAnalysis::TLocalBusAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
                                      TScanConfig *aScanConfig, std::vector<THic *> hics,
                                      std::mutex *aMutex, TLocalBusResult *aResult)
-    : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) {
+    : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex)
+{
   if (aResult)
     m_result = aResult;
   else
@@ -12,37 +13,40 @@ TLocalBusAnalysis::TLocalBusAnalysis(std::deque<TScanHisto> *histoQue, TScan *aS
   FillVariableList();
 }
 
-void TLocalBusAnalysis::InitCounters() {
+void TLocalBusAnalysis::InitCounters()
+{
   std::map<std::string, TScanResultHic *>::iterator it;
 
   for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
     TLocalBusResultHic *result = (TLocalBusResultHic *)it->second;
-    result->m_err0 = 0;
-    result->m_err5 = 0;
-    result->m_erra = 0;
-    result->m_errf = 0;
-    result->m_errBusyOn = 0;
-    result->m_errBusyOff = 0;
+    result->m_err0             = 0;
+    result->m_err5             = 0;
+    result->m_erra             = 0;
+    result->m_errf             = 0;
+    result->m_errBusyOn        = 0;
+    result->m_errBusyOff       = 0;
     std::map<int, TScanResultChip *>::iterator itChip;
     for (itChip = result->m_chipResults.begin(); itChip != result->m_chipResults.end(); ++itChip) {
       TLocalBusResultChip *resultChip = (TLocalBusResultChip *)itChip->second;
-      resultChip->m_err0 = 0;
-      resultChip->m_err5 = 0;
-      resultChip->m_erra = 0;
-      resultChip->m_errf = 0;
-      resultChip->m_errBusyOn = 0;
-      resultChip->m_errBusyOff = 0;
+      resultChip->m_err0              = 0;
+      resultChip->m_err5              = 0;
+      resultChip->m_erra              = 0;
+      resultChip->m_errf              = 0;
+      resultChip->m_errBusyOn         = 0;
+      resultChip->m_errBusyOff        = 0;
     }
   }
 }
 
-void TLocalBusAnalysis::Initialize() {
+void TLocalBusAnalysis::Initialize()
+{
   std::cout << "m_scan = " << m_scan << std::endl;
   ReadChipList();
   CreateHicResults();
 }
 
-void TLocalBusAnalysis::FillVariableList() {
+void TLocalBusAnalysis::FillVariableList()
+{
   m_variableList.insert(std::pair<const char *, TResultVariable>("# Errors 0x0000", Err0));
   m_variableList.insert(std::pair<const char *, TResultVariable>("# Errors 0xffff", Errf));
   m_variableList.insert(std::pair<const char *, TResultVariable>("# Errors 0x5555", Err5));
@@ -51,11 +55,12 @@ void TLocalBusAnalysis::FillVariableList() {
   m_variableList.insert(std::pair<const char *, TResultVariable>("# Busy Off Errors", ErrBusyOff));
 }
 
-void TLocalBusAnalysis::AnalyseHisto(TScanHisto *histo) {
-  common::TChipIndex idx;
+void TLocalBusAnalysis::AnalyseHisto(TScanHisto *histo)
+{
+  common::TChipIndex   idx;
   TLocalBusResultChip *result;
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
-    idx = m_chipList.at(ichip);
+    idx    = m_chipList.at(ichip);
     result = (TLocalBusResultChip *)m_result->GetChipResult(idx);
     for (int second = 0; second < 15; second++) {
       result->m_err0 += (*histo)(idx, second, 0x0);
@@ -68,7 +73,8 @@ void TLocalBusAnalysis::AnalyseHisto(TScanHisto *histo) {
   }
 }
 
-void TLocalBusAnalysis::WriteResult() {
+void TLocalBusAnalysis::WriteResult()
+{
   char fName[200];
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
@@ -88,15 +94,14 @@ void TLocalBusAnalysis::WriteResult() {
   }
 }
 
-void TLocalBusAnalysis::Finalize() {
+void TLocalBusAnalysis::Finalize()
+{
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     TLocalBusResultChip *chipResult =
         (TLocalBusResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
-    if (!chipResult)
-      std::cout << "WARNING: chipResult = 0" << std::endl;
+    if (!chipResult) std::cout << "WARNING: chipResult = 0" << std::endl;
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-      if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip))))
-        continue;
+      if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TLocalBusResultHic *hicResult =
           (TLocalBusResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
       hicResult->m_err0 += chipResult->m_err0;
@@ -109,7 +114,7 @@ void TLocalBusAnalysis::Finalize() {
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    int Total = 0;
+    int                 Total = 0;
     TLocalBusResultHic *hicResult =
         (TLocalBusResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
 
@@ -130,7 +135,8 @@ void TLocalBusAnalysis::Finalize() {
   m_finished = true;
 }
 
-void TLocalBusResultHic::WriteToFile(FILE *fp) {
+void TLocalBusResultHic::WriteToFile(FILE *fp)
+{
   fprintf(fp, "HIC Result:\n\n");
 
   fprintf(fp, "HIC Classification: %s\n\n", WriteHicClassification());
@@ -153,7 +159,8 @@ void TLocalBusResultHic::WriteToFile(FILE *fp) {
   }
 }
 
-float TLocalBusResultChip::GetVariable(TResultVariable var) {
+float TLocalBusResultChip::GetVariable(TResultVariable var)
+{
   switch (var) {
   case Err0:
     return (float)m_err0;
@@ -173,7 +180,8 @@ float TLocalBusResultChip::GetVariable(TResultVariable var) {
   }
 }
 
-void TLocalBusResultChip::WriteToFile(FILE *fp) {
+void TLocalBusResultChip::WriteToFile(FILE *fp)
+{
   fprintf(fp, "Errors in pattern 0x0: %d\n", m_err0);
   fprintf(fp, "Errors in pattern 0x5: %d\n", m_err5);
   fprintf(fp, "Errors in pattern 0xa: %d\n", m_erra);

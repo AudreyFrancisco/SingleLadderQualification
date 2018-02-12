@@ -13,7 +13,9 @@
 #include "THisto.h"
 #include "TScan.h"
 
-typedef struct __TNoiseParameters : TDataTakingParameters { bool isMasked; } TNoiseParameters;
+typedef struct __TNoiseParameters : TDataTakingParameters {
+  bool isMasked;
+} TNoiseParameters;
 
 class TNoiseOccupancy : public TDataTaking {
 private:

@@ -38,7 +38,8 @@ ADC128D818::ADC128D818(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, addre
 /*
         Single byte write operation
 */
-void ADC128D818::write(uint8_t address, uint8_t data) {
+void ADC128D818::write(uint8_t address, uint8_t data)
+{
   i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Write);
   i2cBus->addWriteData(address);
   i2cBus->addWriteData(data, I2Cbus::RWF_stop);
@@ -47,7 +48,8 @@ void ADC128D818::write(uint8_t address, uint8_t data) {
   i2cBus->execute();
 }
 
-void ADC128D818::addWriteAddressPointer(uint8_t address) {
+void ADC128D818::addWriteAddressPointer(uint8_t address)
+{
   i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Write);
   i2cBus->addWriteData(address, I2Cbus::RWF_stop);
 }
@@ -55,7 +57,8 @@ void ADC128D818::addWriteAddressPointer(uint8_t address) {
 /*
         Single byte read
 */
-void ADC128D818::read(uint8_t address, uint8_t *data) {
+void ADC128D818::read(uint8_t address, uint8_t *data)
+{
   uint32_t r;
 
   // Write the address pointer
@@ -73,7 +76,8 @@ void ADC128D818::read(uint8_t address, uint8_t *data) {
 /*
         2 byte read
 */
-void ADC128D818::read(uint8_t address, uint16_t *data) {
+void ADC128D818::read(uint8_t address, uint16_t *data)
+{
   uint32_t rh, rl;
 
   // Write the address pointer
@@ -92,7 +96,8 @@ void ADC128D818::read(uint8_t address, uint16_t *data) {
 /*
         Configure the channels to read
 */
-void ADC128D818::setConfiguration() {
+void ADC128D818::setConfiguration()
+{
   write(REG_Configuration, 0); // enter in configuration mode
   write(REG_AdvancedConfiguration, ADV_CFG_Mode1);
   write(REG_ConvertionRate, 1);        // set Continuous Convertion Mode
@@ -101,7 +106,8 @@ void ADC128D818::setConfiguration() {
 
 void ADC128D818::getConfiguration(uint8_t *data) { read(REG_Configuration, data); }
 
-void ADC128D818::convert(uint16_t *result) {
+void ADC128D818::convert(uint16_t *result)
+{
   for (int i = 0; i < 8; i++) {
     read(REG_ChannelReadings + i, result);
     result++;

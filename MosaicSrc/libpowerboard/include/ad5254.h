@@ -44,29 +44,32 @@ public:
 
 private:
   enum {
-    CMD_SetRDAC = 0x00,
-    CMD_WriteEEMEM = 0x20,  // Write (store) RDAC Setting and User-defined Data to EEMEM
-    CMD_ReadEEMEM = 0x20,   // Read (restore) RDAC Setting and User-defined Data from EEMEM
-    CMD_NOP = 0x00,         // NOP command
-    CMD_RestoreAll = 0xb8,  // Restore EEMEMs to all RDACs
+    CMD_SetRDAC     = 0x00,
+    CMD_WriteEEMEM  = 0x20, // Write (store) RDAC Setting and User-defined Data to EEMEM
+    CMD_ReadEEMEM   = 0x20, // Read (restore) RDAC Setting and User-defined Data from EEMEM
+    CMD_NOP         = 0x00, // NOP command
+    CMD_RestoreAll  = 0xb8, // Restore EEMEMs to all RDACs
     CMD_RestoreRDAC = 0x88, // Restore single EEMEM to RDAC
-    CMD_StoreRDAC = 0x90,   // Store single RDAC to EEMEM
+    CMD_StoreRDAC   = 0x90, // Store single RDAC to EEMEM
   };
 
 public:
-  void restoreAll() {
+  void restoreAll()
+  {
     write(CMD_RestoreAll, 0);
     ackPolling();
   }
 
   void setRDAC(uint8_t ch, uint8_t data) { write(CMD_SetRDAC, ch, data); }
 
-  void storeRDAC(uint8_t ch) {
+  void storeRDAC(uint8_t ch)
+  {
     write(CMD_StoreRDAC, ch);
     ackPolling();
   }
 
-  void restoreRDAC(uint8_t ch) {
+  void restoreRDAC(uint8_t ch)
+  {
     write(CMD_RestoreRDAC, ch);
     write(CMD_NOP, 0);
   }

@@ -10,28 +10,32 @@
 #include "TScanConfig.h"
 
 TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aConfig,
-                             std::vector<THic *> hics, std::mutex *aMutex) {
+                             std::vector<THic *> hics, std::mutex *aMutex)
+{
   m_histoQue = histoQue;
-  m_mutex = aMutex;
-  m_scan = aScan;
-  m_config = aConfig;
-  m_hics = hics;
-  m_first = true;
-  m_started = false;
+  m_mutex    = aMutex;
+  m_scan     = aScan;
+  m_config   = aConfig;
+  m_hics     = hics;
+  m_first    = true;
+  m_started  = false;
   m_finished = false;
   m_chipList.clear();
 }
 
-int TScanAnalysis::GetPreviousActivityType() {
+int TScanAnalysis::GetPreviousActivityType()
+{
   return DbGetActivityTypeId(m_config->GetDatabase(), GetPreviousTestType());
 }
 
-int TScanAnalysis::ReadChipList() {
+int TScanAnalysis::ReadChipList()
+{
   m_chipList = m_scan->GetChipList();
   return m_chipList.size();
 }
 
-void TScanAnalysis::CreateHicResults() {
+void TScanAnalysis::CreateHicResults()
+{
   if (m_hics.size() == 0) {
     std::cout << "Warning (TScanAnalysis::CreateResult): hic list is empty, doing nothing"
               << std::endl;
@@ -44,15 +48,15 @@ void TScanAnalysis::CreateHicResults() {
   //}
 
   for (unsigned int i = 0; i < m_chipList.size(); i++) {
-    TScanResultChip *chipResult = GetChipResult();
-    common::TChipIndex idx = m_chipList.at(i);
+    TScanResultChip *  chipResult = GetChipResult();
+    common::TChipIndex idx        = m_chipList.at(i);
     m_result->AddChipResult(idx, chipResult);
   }
 
   for (unsigned int i = 0; i < m_hics.size(); i++) {
-    TScanResultHic *hicResult = GetHicResult();
-    hicResult->m_class = CLASS_UNTESTED;
-    hicResult->m_outputPath = m_config->GetDataPath(m_hics.at(i)->GetDbId());
+    TScanResultHic *hicResult   = GetHicResult();
+    hicResult->m_class          = CLASS_UNTESTED;
+    hicResult->m_outputPath     = m_config->GetDataPath(m_hics.at(i)->GetDbId());
     hicResult->m_scanParameters = m_scan->GetParameters();
     for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip++) {
       if (m_hics.at(i)->ContainsChip(m_chipList.at(iChip))) {
@@ -65,7 +69,8 @@ void TScanAnalysis::CreateHicResults() {
   }
 }
 
-void TScanAnalysis::Run() {
+void TScanAnalysis::Run()
+{
   m_started = true;
 
   while (m_histoQue->size() == 0) {
@@ -88,13 +93,14 @@ void TScanAnalysis::Run() {
       m_mutex->unlock();
 
       AnalyseHisto(&histo);
-
-    } else
+    }
+    else
       usleep(300);
   }
 }
 
-float TScanAnalysis::GetVariable(std::string aHic, int chip, TResultVariable var) {
+float TScanAnalysis::GetVariable(std::string aHic, int chip, TResultVariable var)
+{
   if (!m_finished) {
     std::cout << "Error: analysis not finished yet" << std::endl;
     return 0;
@@ -104,19 +110,18 @@ float TScanAnalysis::GetVariable(std::string aHic, int chip, TResultVariable var
 
 // returns the classification of the scan
 // this is defined as the classification of the worst HIC
-THicClassification TScanAnalysis::GetClassification() {
+THicClassification TScanAnalysis::GetClassification()
+{
   THicClassification result = CLASS_UNTESTED;
-  std::map<std::string, TScanResultHic *> hicResults = m_result->GetHicResults();
+  std::map<std::string, TScanResultHic *>           hicResults = m_result->GetHicResults();
   std::map<std::string, TScanResultHic *>::iterator it;
   for (it = hicResults.begin(); it != hicResults.end(); it++) {
     switch (it->second->GetClassification()) {
     case CLASS_GREEN:
-      if (result == CLASS_UNTESTED)
-        result = CLASS_GREEN;
+      if (result == CLASS_UNTESTED) result = CLASS_GREEN;
       break;
     case CLASS_ORANGE:
-      if (result != CLASS_RED)
-        result = CLASS_ORANGE;
+      if (result != CLASS_RED) result = CLASS_ORANGE;
       break;
     case CLASS_RED:
       return CLASS_RED;
@@ -128,31 +133,36 @@ THicClassification TScanAnalysis::GetClassification() {
   return result;
 }
 
-int TScanResult::AddChipResult(common::TChipIndex idx, TScanResultChip *aChipResult) {
+int TScanResult::AddChipResult(common::TChipIndex idx, TScanResultChip *aChipResult)
+{
   int id = (idx.boardIndex << 8) | (idx.dataReceiver << 4) | (idx.chipId & 0xf);
   m_chipResults.insert(std::pair<int, TScanResultChip *>(id, aChipResult));
   return m_chipResults.size();
 }
 
-int TScanResult::AddChipResult(int aIntIndex, TScanResultChip *aChipResult) {
+int TScanResult::AddChipResult(int aIntIndex, TScanResultChip *aChipResult)
+{
   m_chipResults.insert(std::pair<int, TScanResultChip *>(aIntIndex, aChipResult));
 
   return m_chipResults.size();
 }
 
-int TScanResult::AddHicResult(std::string hicId, TScanResultHic *aHicResult) {
+int TScanResult::AddHicResult(std::string hicId, TScanResultHic *aHicResult)
+{
   m_hicResults.insert(std::pair<std::string, TScanResultHic *>(hicId, aHicResult));
 
   return m_hicResults.size();
 }
 
-int TScanResultHic::AddChipResult(int aChipId, TScanResultChip *aChipResult) {
+int TScanResultHic::AddChipResult(int aChipId, TScanResultChip *aChipResult)
+{
   m_chipResults.insert(std::pair<int, TScanResultChip *>(aChipId, aChipResult));
 
   return m_chipResults.size();
 }
 
-const char *TScanResultHic::WriteHicClassification() {
+const char *TScanResultHic::WriteHicClassification()
+{
   if (m_class == CLASS_UNTESTED)
     return "Untested";
   else if (m_class == CLASS_GREEN)
@@ -165,40 +175,44 @@ const char *TScanResultHic::WriteHicClassification() {
     return "Unknown";
 }
 
-float TScanResultHic::GetVariable(int chip, TResultVariable var) {
+float TScanResultHic::GetVariable(int chip, TResultVariable var)
+{
   std::map<int, TScanResultChip *>::iterator it;
   it = m_chipResults.find(chip);
   if (it != m_chipResults.end()) {
     return it->second->GetVariable(var);
-  } else {
+  }
+  else {
     std::cout << "Error, bad chip ID" << std::endl;
     return 0;
   }
 }
 
-void TScanResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity) {
+void TScanResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
+{
   DbAddAttachment(db, activity, attachResult, string(m_resultFile), string(m_resultFile));
 }
 
-TScanResultChip *TScanResult::GetChipResult(common::TChipIndex idx) {
+TScanResultChip *TScanResult::GetChipResult(common::TChipIndex idx)
+{
   for (std::map<int, TScanResultChip *>::iterator it = m_chipResults.begin();
        it != m_chipResults.end(); ++it) {
     int id = (idx.boardIndex << 8) | (idx.dataReceiver << 4) | (idx.chipId & 0xf);
-    if (it->first == id)
-      return it->second;
+    if (it->first == id) return it->second;
   }
   return 0;
 }
 
-TScanResultHic *TScanResult::GetHicResult(std::string hic) {
+TScanResultHic *TScanResult::GetHicResult(std::string hic)
+{
   std::map<std::string, TScanResultHic *>::iterator it;
   it = m_hicResults.find(hic);
-  if (it != m_hicResults.end())
-    return it->second;
+  if (it != m_hicResults.end()) return it->second;
   return 0;
 }
 
-void TScanResult::WriteToFile(const char *fName) {
+void TScanResult::WriteToFile(const char *fName)
+{
   FILE *fp = fopen(fName, "a");
 
   fprintf(fp, "Number of chips: %d\n", (int)m_chipResults.size());
@@ -216,7 +230,8 @@ void TScanResult::WriteToFile(const char *fName) {
   fclose(fp);
 }
 
-void TScanResult::WriteToDB(AlpideDB *db, ActivityDB::activity &activity) {
+void TScanResult::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
+{
   std::map<std::string, TScanResultHic *>::iterator it;
   for (it = m_hicResults.begin(); it != m_hicResults.end(); it++) {
     it->second->WriteToDB(db, activity);

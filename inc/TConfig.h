@@ -29,13 +29,13 @@ class TChipConfig;
 
 class TConfig {
 private:
-  std::vector<TBoardConfig *> fBoardConfigs;
-  std::vector<TChipConfig *> fChipConfigs;
-  std::vector<THicConfig *> fHicConfigs;
+  std::vector<TBoardConfig *>      fBoardConfigs;
+  std::vector<TChipConfig *>       fChipConfigs;
+  std::vector<THicConfig *>        fHicConfigs;
   std::vector<TPowerBoardConfig *> fPBConfigs;
-  TScanConfig *fScanConfig;
-  TDeviceType fDeviceType;
-  bool fUsePowerBoard;
+  TScanConfig *                    fScanConfig;
+  TDeviceType                      fDeviceType;
+  bool                             fUsePowerBoard;
 
   void ReadConfigFile(const char *fName);
   void Init(int nBoards, std::vector<int> chipIds, TBoardType boardType = boardMOSAIC);
@@ -51,11 +51,11 @@ public:
   TConfig(int nBoards, std::vector<int> chipIds, TBoardType boardType = boardMOSAIC);
   TConfig(int chipId, TBoardType boardType = boardDAQ);
 
-  TDeviceType GetDeviceType() { return fDeviceType; };
+  TDeviceType  GetDeviceType() { return fDeviceType; };
   unsigned int GetNChips() { return fChipConfigs.size(); };
   unsigned int GetNBoards() { return fBoardConfigs.size(); };
   unsigned int GetNHics() { return fHicConfigs.size(); };
-  bool GetUsePowerBoard() { return fUsePowerBoard; };
+  bool         GetUsePowerBoard() { return fUsePowerBoard; };
   void SetUsePowerBoard(bool UsePB) { fUsePowerBoard = UsePB; };
   TChipConfig *GetChipConfig(unsigned int iChip);
   TChipConfig *GetChipConfigById(int chipId);

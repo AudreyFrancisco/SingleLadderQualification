@@ -17,7 +17,9 @@ public:
     uint8_t chipId;
     uint8_t transceiverId;
     TransceiverMapping(uint8_t chipId, uint8_t transceiverId)
-        : chipId(chipId), transceiverId(transceiverId) {}
+        : chipId(chipId), transceiverId(transceiverId)
+    {
+    }
   };
   std::vector<TransceiverMapping> getTransceiverMappings();
 
@@ -25,9 +27,9 @@ public:
 
   enum class ReadoutSpeed { RO_400, RO_600, RO_1200 };
   ReadoutSpeed getReadoutSpeed() const;
-  bool getInvertPolarity() const;
-  bool enableLogging() const;
-  void InitParamMap() { TBoardConfig::InitParamMap(); };
+  bool         getInvertPolarity() const;
+  bool         enableLogging() const;
+  void         InitParamMap() { TBoardConfig::InitParamMap(); };
 };
 
 #endif // BOARDCONFIGRU_H

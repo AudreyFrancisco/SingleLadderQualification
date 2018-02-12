@@ -33,7 +33,8 @@
 
 LTC2635::LTC2635(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address) {}
 
-void LTC2635::write(uint8_t cmd, uint8_t add, uint16_t data) {
+void LTC2635::write(uint8_t cmd, uint8_t add, uint16_t data)
+{
   add &= 0x0f;
 
   uint16_t d = data << 4; // data alignment for LTC2635-12

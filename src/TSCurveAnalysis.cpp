@@ -6,7 +6,8 @@
 
 #include <TMath.h>
 
-double ErrorFunc2(double *x, double *par) {
+double ErrorFunc2(double *x, double *par)
+{
   // double y = par[0]+par[1]*TMath::Erf( (x[0]-par[2]) / par[3] );
   double y = par[2] * (1 + TMath::Erf((x[0] - par[0]) / (sqrt(2) * par[1])));
   return y;
@@ -15,29 +16,32 @@ double ErrorFunc2(double *x, double *par) {
 TSCurveAnalysis::TSCurveAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
                                  TScanConfig *aScanConfig, std::vector<THic *> hics,
                                  std::mutex *aMutex, TSCurveResult *aResult, float resultFactor)
-    : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) {
-  m_nPulseInj = m_config->GetNInj();
-  m_resultFactor = resultFactor;
-  m_writeRawData = m_config->GetParamValue("RAWDATA");
-  m_writeNoHitPixels = false;
+    : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex)
+{
+  m_nPulseInj           = m_config->GetNInj();
+  m_resultFactor        = resultFactor;
+  m_writeRawData        = m_config->GetParamValue("RAWDATA");
+  m_writeNoHitPixels    = false;
   m_writeNoThreshPixels = false;
-  m_writeStuckPixels = false;
-  m_writeFitResults = true;
-  m_fDoFit = true;
+  m_writeStuckPixels    = false;
+  m_writeFitResults     = true;
+  m_fDoFit              = true;
 
   m_speedy = (m_config->GetParamValue("SPEEDY") != 0);
   if (IsThresholdScan()) {
     m_startPulseAmplitude = m_config->GetChargeStart();
-    m_stopPulseAmplitude = m_config->GetChargeStop();
-    m_stepPulseAmplitude = m_config->GetChargeStep();
-  } else if (IsVCASNTuning()) {
+    m_stopPulseAmplitude  = m_config->GetChargeStop();
+    m_stepPulseAmplitude  = m_config->GetChargeStep();
+  }
+  else if (IsVCASNTuning()) {
     m_startPulseAmplitude = m_config->GetVcasnStart();
-    m_stopPulseAmplitude = m_config->GetVcasnStop();
-    m_stepPulseAmplitude = m_config->GetVcasnStep();
-  } else {
+    m_stopPulseAmplitude  = m_config->GetVcasnStop();
+    m_stepPulseAmplitude  = m_config->GetVcasnStep();
+  }
+  else {
     m_startPulseAmplitude = m_config->GetIthrStart();
-    m_stopPulseAmplitude = m_config->GetIthrStop();
-    m_stepPulseAmplitude = m_config->GetIthrStep();
+    m_stopPulseAmplitude  = m_config->GetIthrStop();
+    m_stepPulseAmplitude  = m_config->GetIthrStep();
   }
 
   if (aResult)
@@ -47,7 +51,8 @@ TSCurveAnalysis::TSCurveAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
   FillVariableList();
 }
 
-void TSCurveAnalysis::FillVariableList() {
+void TSCurveAnalysis::FillVariableList()
+{
   if (IsThresholdScan()) {
     m_variableList.insert(std::pair<const char *, TResultVariable>("Dead Pixels", deadPix));
     m_variableList.insert(
@@ -57,14 +62,17 @@ void TSCurveAnalysis::FillVariableList() {
     m_variableList.insert(std::pair<const char *, TResultVariable>("Threshold RMS", threshRms));
     m_variableList.insert(std::pair<const char *, TResultVariable>("av. Noise", noise));
     m_variableList.insert(std::pair<const char *, TResultVariable>("Noise RMS", noiseRms));
-  } else if (IsVCASNTuning()) {
+  }
+  else if (IsVCASNTuning()) {
     m_variableList.insert(std::pair<const char *, TResultVariable>("av. VCASN", vcasn));
-  } else {
+  }
+  else {
     m_variableList.insert(std::pair<const char *, TResultVariable>("av. ITHR", ithr));
   }
 }
 
-string TSCurveAnalysis::GetPreviousTestType() {
+string TSCurveAnalysis::GetPreviousTestType()
+{
   switch (m_config->GetTestType()) {
   case OBQualification:
     return string("ALPIDEB Chip Testing Analysis");
@@ -89,7 +97,8 @@ string TSCurveAnalysis::GetPreviousTestType() {
   }
 }
 
-bool TSCurveAnalysis::CheckPixelNoHits(TGraph *aGraph) {
+bool TSCurveAnalysis::CheckPixelNoHits(TGraph *aGraph)
+{
 
   for (int itrPoint = 0; itrPoint < aGraph->GetN(); itrPoint++) {
     double x = 0;
@@ -103,7 +112,8 @@ bool TSCurveAnalysis::CheckPixelNoHits(TGraph *aGraph) {
   return true;
 }
 
-bool TSCurveAnalysis::CheckPixelHot(TGraph *aGraph) {
+bool TSCurveAnalysis::CheckPixelHot(TGraph *aGraph)
+{
   for (int itrPoint = 0; itrPoint < aGraph->GetN(); itrPoint++) {
     double x = 0;
     double y = 0;
@@ -116,7 +126,8 @@ bool TSCurveAnalysis::CheckPixelHot(TGraph *aGraph) {
   return true;
 }
 
-void TSCurveAnalysis::PrepareFiles() {
+void TSCurveAnalysis::PrepareFiles()
+{
   char fName[200];
   for (unsigned int i = 0; i < m_chipList.size(); i++) {
     TSCurveResultChip *chipResult = (TSCurveResultChip *)m_result->GetChipResult(m_chipList.at(i));
@@ -124,7 +135,8 @@ void TSCurveAnalysis::PrepareFiles() {
       if (m_config->GetUseDataPath()) {
         sprintf(fName, "%s/Threshold_RawData_%s_Chip%d.dat", chipResult->GetOutputPath().c_str(),
                 m_config->GetfNameSuffix(), m_chipList.at(i).chipId);
-      } else {
+      }
+      else {
         sprintf(fName, "Threshold_RawData_%s_B%d_Rcv%d_Ch%d.dat", m_config->GetfNameSuffix(),
                 m_chipList.at(i).boardIndex, m_chipList.at(i).dataReceiver,
                 m_chipList.at(i).chipId);
@@ -137,7 +149,8 @@ void TSCurveAnalysis::PrepareFiles() {
       if (m_config->GetUseDataPath()) {
         sprintf(fName, "%s/Threshold_FitResults_%s_Chip%d.dat", chipResult->GetOutputPath().c_str(),
                 m_config->GetfNameSuffix(), m_chipList.at(i).chipId);
-      } else {
+      }
+      else {
         sprintf(fName, "Threshold_FitResults__%s_B%d_Rcv%d_Ch%d.dat", m_config->GetfNameSuffix(),
                 m_chipList.at(i).boardIndex, m_chipList.at(i).dataReceiver,
                 m_chipList.at(i).chipId);
@@ -148,59 +161,62 @@ void TSCurveAnalysis::PrepareFiles() {
   }
 }
 
-void TSCurveAnalysis::Initialize() {
+void TSCurveAnalysis::Initialize()
+{
   ReadChipList();
   CreateHicResults();
   PrepareFiles();
 }
 
 // TODO: set file names here???
-void TSCurveAnalysis::InitCounters() {
+void TSCurveAnalysis::InitCounters()
+{
   for (unsigned int i = 0; i < m_chipList.size(); i++) {
     TSCurveResultChip *result = (TSCurveResultChip *)m_result->GetChipResult(m_chipList.at(i));
 
-    result->m_thresholdAv = 0;
+    result->m_thresholdAv  = 0;
     result->m_thresholdRms = 0;
-    result->m_noiseAv = 0;
-    result->m_noiseRms = 0;
-    result->m_nEntries = 0;
-    result->m_noiseSq = 0;
-    result->m_threshSq = 0;
-    result->m_nNoThresh = 0;
-    result->m_nDead = 0;
-    result->m_nHot = 0;
+    result->m_noiseAv      = 0;
+    result->m_noiseRms     = 0;
+    result->m_nEntries     = 0;
+    result->m_noiseSq      = 0;
+    result->m_threshSq     = 0;
+    result->m_nNoThresh    = 0;
+    result->m_nDead        = 0;
+    result->m_nHot         = 0;
   }
 
   std::map<std::string, TScanResultHic *>::iterator it;
 
   for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
     TSCurveResultHic *result = (TSCurveResultHic *)it->second;
-    result->m_nDead = 0;
-    result->m_nNoThresh = 0;
-    result->m_nHot = 0;
-    result->m_minChipAv = 999;
-    result->m_maxChipAv = -1;
-    result->m_maxChipNoise = -1;
-    result->m_noiseAv = 0;
-    result->m_noiseRms = 0;
-    result->m_nEntries = 0;
-    result->m_noiseSq = 0;
-    result->m_backBias = ((TSCurveScan *)m_scan)->GetBackbias();
-    result->m_nominal = ((TSCurveScan *)m_scan)->GetNominal();
-    result->m_VCASNTuning = IsVCASNTuning();
-    result->m_ITHRTuning = IsITHRTuning();
-    result->m_thresholdScan = IsThresholdScan();
+    result->m_nDead          = 0;
+    result->m_nNoThresh      = 0;
+    result->m_nHot           = 0;
+    result->m_minChipAv      = 999;
+    result->m_maxChipAv      = -1;
+    result->m_maxChipNoise   = -1;
+    result->m_noiseAv        = 0;
+    result->m_noiseRms       = 0;
+    result->m_nEntries       = 0;
+    result->m_noiseSq        = 0;
+    result->m_backBias       = ((TSCurveScan *)m_scan)->GetBackbias();
+    result->m_nominal        = ((TSCurveScan *)m_scan)->GetNominal();
+    result->m_VCASNTuning    = IsVCASNTuning();
+    result->m_ITHRTuning     = IsITHRTuning();
+    result->m_thresholdScan  = IsThresholdScan();
   }
 }
 
 // in some cases (VCASN tuning with back bias) the number of hits drops again after
 // reaching the plateau, which confuses the root fit. In order to avoid this, fill
 // the graph with 100% values, once the plateau has been reached.
-void TSCurveAnalysis::FillGraph(TGraph *aGraph) {
-  int nMin = m_nPulseInj - 1;
-  int count = 0;
-  int minForPlateau = 3;
-  bool plateau = false;
+void TSCurveAnalysis::FillGraph(TGraph *aGraph)
+{
+  int      nMin          = m_nPulseInj - 1;
+  int      count         = 0;
+  int      minForPlateau = 3;
+  bool     plateau       = false;
   Double_t x, y;
 
   for (int i = 0; i < aGraph->GetN(); i++) {
@@ -213,7 +229,8 @@ void TSCurveAnalysis::FillGraph(TGraph *aGraph) {
       if (count == minForPlateau) {
         plateau = true;
       }
-    } else {
+    }
+    else {
       aGraph->SetPoint(i, x, m_nPulseInj);
     }
   }
@@ -221,7 +238,8 @@ void TSCurveAnalysis::FillGraph(TGraph *aGraph) {
 }
 
 // TODO: Write Raw Data, write fit data
-void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo) {
+void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo)
+{
   int row = histo->GetIndex();
   for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip++) {
     TSCurveResultChip *chipResult =
@@ -241,23 +259,24 @@ void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo) {
       }
       if (CheckPixelNoHits(gPixel)) {
         chipResult->m_nDead++;
-      } else if (CheckPixelHot(gPixel)) {
+      }
+      else if (CheckPixelHot(gPixel)) {
         chipResult->m_nHot++;
-      } else {
-        if (IsVCASNTuning())
-          FillGraph(gPixel);
+      }
+      else {
+        if (IsVCASNTuning()) FillGraph(gPixel);
         common::TErrFuncFitResult fitResult = DoFit(gPixel, m_speedy);
         if (fitResult.threshold == 0) {
           chipResult->m_nNoThresh++;
-        } else {
+        }
+        else {
           chipResult->m_thresholdAv += fitResult.threshold;
           chipResult->m_noiseAv += fitResult.noise;
           chipResult->m_noiseSq += pow(fitResult.noise, 2);
           chipResult->m_threshSq += pow(fitResult.threshold, 2);
           chipResult->m_nEntries++;
           for (unsigned int iHic = 0; iHic < m_hics.size(); iHic++) {
-            if (!(m_hics.at(iHic)->ContainsChip(m_chipList.at(iChip))))
-              continue;
+            if (!(m_hics.at(iHic)->ContainsChip(m_chipList.at(iChip)))) continue;
             TSCurveResultHic *hicResult =
                 (TSCurveResultHic *)m_result->GetHicResults().at(m_hics.at(iHic)->GetDbId());
             hicResult->m_noiseAv += fitResult.noise;
@@ -275,22 +294,21 @@ void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo) {
   }
 }
 
-void TSCurveAnalysis::Finalize() {
-  TErrorCounter errCount = ((TMaskScan *)m_scan)->GetErrorCount();
-  TSCurveResult *result = (TSCurveResult *)m_result;
+void TSCurveAnalysis::Finalize()
+{
+  TErrorCounter  errCount = ((TMaskScan *)m_scan)->GetErrorCount();
+  TSCurveResult *result   = (TSCurveResult *)m_result;
 
   result->m_nTimeout = errCount.nTimeout;
-  result->m_n8b10b = errCount.n8b10b;
+  result->m_n8b10b   = errCount.n8b10b;
   result->m_nCorrupt = errCount.nCorruptEvent;
 
   for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip++) {
     TSCurveResultChip *chipResult =
         (TSCurveResultChip *)m_result->GetChipResult(m_chipList.at(iChip));
     chipResult->CalculateAverages();
-    if (m_writeRawData)
-      fclose(chipResult->m_rawFP);
-    if (m_writeFitResults)
-      fclose(chipResult->m_fitFP);
+    if (m_writeRawData) fclose(chipResult->m_rawFP);
+    if (m_writeFitResults) fclose(chipResult->m_fitFP);
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
@@ -298,8 +316,7 @@ void TSCurveAnalysis::Finalize() {
         (TSCurveResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
     hicResult->CalculateAverages();
     for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
-      if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip))))
-        continue;
+      if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TSCurveResultChip *chipResult =
           (TSCurveResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
       if (chipResult->m_thresholdAv < hicResult->m_minChipAv)
@@ -314,7 +331,8 @@ void TSCurveAnalysis::Finalize() {
     }
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult, m_hics.at(ihic));
-    } else {
+    }
+    else {
       hicResult->m_class = GetClassificationIB(hicResult, m_hics.at(ihic));
     }
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
@@ -325,10 +343,10 @@ void TSCurveAnalysis::Finalize() {
 
 // TODO: Add readout errors, requires dividing readout errors by hic (receiver)
 // TODO: Make two cuts (red and orange)?
-THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic *result, THic *hic) {
+THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic *result, THic *hic)
+{
   THicClassification returnValue = CLASS_GREEN;
-  if (!IsThresholdScan())
-    return CLASS_GREEN; // for the time being exclude class for tuning
+  if (!IsThresholdScan()) return CLASS_GREEN; // for the time being exclude class for tuning
   // check on dead pixels per HIC
   if (result->m_nDead > m_config->GetParamValue("THRESH_MAXDEAD_HIC_ORANGE_OB"))
     return CLASS_RED;
@@ -339,9 +357,8 @@ THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic *result
     returnValue = CLASS_ORANGE;
   // chipwise checks
   for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
-    if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled())
-      continue;
-    int chipId = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
+    if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled()) continue;
+    int                chipId     = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
     TSCurveResultChip *chipResult = (TSCurveResultChip *)result->m_chipResults.at(chipId);
     if (chipResult->m_nDead + chipResult->m_nNoThresh >
         m_config->GetParamValue("THRESH_MAXBAD_CHIP_OB"))
@@ -352,10 +369,10 @@ THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic *result
   return returnValue;
 }
 
-THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic *result, THic *hic) {
+THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic *result, THic *hic)
+{
   THicClassification returnValue = CLASS_GREEN;
-  if (!IsThresholdScan())
-    return CLASS_GREEN; // for the time being exclude class for tuning
+  if (!IsThresholdScan()) return CLASS_GREEN; // for the time being exclude class for tuning
   // check on dead pixels per HIC
   if (result->m_nDead > m_config->GetParamValue("THRESH_MAXDEAD_HIC_ORANGE_IB"))
     return CLASS_RED;
@@ -365,9 +382,8 @@ THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic *result
   if (result->m_nNoThresh > m_config->GetParamValue("THRESH_MAXBAD_HIC_IB"))
     returnValue = CLASS_ORANGE;
   for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
-    if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled())
-      continue;
-    int chipId = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
+    if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled()) continue;
+    int                chipId     = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
     TSCurveResultChip *chipResult = (TSCurveResultChip *)result->m_chipResults.at(chipId);
     if (chipResult->m_nDead + chipResult->m_nNoThresh >
         m_config->GetParamValue("THRESH_MAXBAD_CHIP_IB"))
@@ -378,7 +394,8 @@ THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic *result
   return returnValue;
 }
 
-void TSCurveAnalysis::WriteResult() {
+void TSCurveAnalysis::WriteResult()
+{
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
@@ -389,18 +406,21 @@ void TSCurveAnalysis::WriteResult() {
       else if (IsVCASNTuning()) {
         sprintf(fName, "%s/VCASNTuneResult_%s.dat", hicResult->GetOutputPath().c_str(),
                 m_config->GetfNameSuffix());
-      } else {
+      }
+      else {
         sprintf(fName, "%s/ITHRTuneResult_%s.dat", hicResult->GetOutputPath().c_str(),
                 m_config->GetfNameSuffix());
       }
-    } else {
+    }
+    else {
       if (IsThresholdScan())
         sprintf(fName, "ThresholdScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
                 m_config->GetfNameSuffix());
       else if (IsVCASNTuning()) {
         sprintf(fName, "VCASNTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
                 m_config->GetfNameSuffix());
-      } else {
+      }
+      else {
         sprintf(fName, "ITHRTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
                 m_config->GetfNameSuffix());
       }
@@ -419,28 +439,31 @@ void TSCurveAnalysis::WriteResult() {
   }
 }
 
-common::TErrFuncFitResult TSCurveAnalysis::DoSpeedyFit(TGraph *aGraph) {
+common::TErrFuncFitResult TSCurveAnalysis::DoSpeedyFit(TGraph *aGraph)
+{
   common::TErrFuncFitResult Result;
-  TGraph *diffGraph = new TGraph;
+  TGraph *                  diffGraph = new TGraph;
 
   ddxGraph(aGraph, diffGraph);
 
   Result.threshold = abs(meanGraph(diffGraph));
-  Result.noise = rmsGraph(diffGraph);
-  Result.redChi2 = 0;
+  Result.noise     = rmsGraph(diffGraph);
+  Result.redChi2   = 0;
 
   delete diffGraph;
   return Result;
 }
 
-common::TErrFuncFitResult TSCurveAnalysis::DoRootFit(TGraph *aGraph) {
+common::TErrFuncFitResult TSCurveAnalysis::DoRootFit(TGraph *aGraph)
+{
   common::TErrFuncFitResult Result;
-  TF1 *fitfcn;
+  TF1 *                     fitfcn;
 
   if (IsITHRTuning()) {
     fitfcn = new TF1("fitfcn", ErrorFunc2, m_stopPulseAmplitude * m_resultFactor,
                      m_startPulseAmplitude * m_resultFactor, 4);
-  } else {
+  }
+  else {
     fitfcn = new TF1("fitfcn", ErrorFunc2, m_startPulseAmplitude * m_resultFactor,
                      m_stopPulseAmplitude * m_resultFactor, 4);
   }
@@ -450,9 +473,11 @@ common::TErrFuncFitResult TSCurveAnalysis::DoRootFit(TGraph *aGraph) {
   // Noise start value
   if (IsThresholdScan()) {
     fitfcn->SetParameter(1, 5);
-  } else if (IsVCASNTuning()) {
+  }
+  else if (IsVCASNTuning()) {
     fitfcn->SetParameter(1, 1);
-  } else { // ITHR tuning
+  }
+  else { // ITHR tuning
     fitfcn->SetParameter(1, 8);
   }
   // Amplitude start value
@@ -465,12 +490,13 @@ common::TErrFuncFitResult TSCurveAnalysis::DoRootFit(TGraph *aGraph) {
   if ((threshold > abs(m_startPulseAmplitude * m_resultFactor)) &&
       (threshold < abs(m_stopPulseAmplitude * m_resultFactor))) {
     Result.threshold = threshold;
-    Result.noise = fitfcn->GetParameter(1);
-    Result.redChi2 = fitfcn->GetChisquare() / fitfcn->GetNDF();
-  } else { // result is outside scanned range -> usually unreliable values
+    Result.noise     = fitfcn->GetParameter(1);
+    Result.redChi2   = fitfcn->GetChisquare() / fitfcn->GetNDF();
+  }
+  else { // result is outside scanned range -> usually unreliable values
     Result.threshold = 0;
-    Result.noise = 0;
-    Result.redChi2 = 0;
+    Result.noise     = 0;
+    Result.redChi2   = 0;
   }
 
   delete fitfcn;
@@ -478,10 +504,12 @@ common::TErrFuncFitResult TSCurveAnalysis::DoRootFit(TGraph *aGraph) {
   return Result;
 }
 
-common::TErrFuncFitResult TSCurveAnalysis::DoFit(TGraph *aGraph, bool speedy) {
+common::TErrFuncFitResult TSCurveAnalysis::DoFit(TGraph *aGraph, bool speedy)
+{
   if (speedy) {
     return DoSpeedyFit(aGraph);
-  } else {
+  }
+  else {
     return DoRootFit(aGraph);
   }
 }
@@ -495,11 +523,12 @@ common::TErrFuncFitResult TSCurveAnalysis::DoFit(TGraph *aGraph, bool speedy) {
 //
 ////////////////////////////////////////////////////////////////////
 
-double TSCurveAnalysis::meanGraph(TGraph *resultGraph) { // returns the weighted mean x value
-  double sum = 0.0;
-  double norm = 0.0;
-  double *xs = resultGraph->GetX();
-  double *ys = resultGraph->GetY();
+double TSCurveAnalysis::meanGraph(TGraph *resultGraph)
+{ // returns the weighted mean x value
+  double  sum  = 0.0;
+  double  norm = 0.0;
+  double *xs   = resultGraph->GetX();
+  double *ys   = resultGraph->GetY();
 
   for (int i = 0; i < resultGraph->GetN(); i++) {
     sum += xs[i] * ys[i]; // xs=value, ys=weight
@@ -515,15 +544,14 @@ double TSCurveAnalysis::meanGraph(TGraph *resultGraph) { // returns the weighted
   return sum / norm;
 }
 
-double TSCurveAnalysis::rmsGraph(TGraph *resultGraph) {
-  double sum = 0.0;
+double TSCurveAnalysis::rmsGraph(TGraph *resultGraph)
+{
+  double sum  = 0.0;
   double norm = 0.0;
   double mean = meanGraph(resultGraph);
 
-  if (mean == 0)
-    return 0;
-  if (mean == -1)
-    return -1;
+  if (mean == 0) return 0;
+  if (mean == -1) return -1;
 
   double *xs = resultGraph->GetX();
   double *ys = resultGraph->GetY();
@@ -539,17 +567,15 @@ double TSCurveAnalysis::rmsGraph(TGraph *resultGraph) {
   return sqrt(abs(sum / norm));
 }
 
-void TSCurveAnalysis::ddxGraph(
-    TGraph *aGraph,
-    TGraph *resultGraph) { // resultGraph contains the derivative of aGraph wrt x (1st order)
+void TSCurveAnalysis::ddxGraph(TGraph *aGraph, TGraph *resultGraph)
+{ // resultGraph contains the derivative of aGraph wrt x (1st order)
   // Results are at MIDPOINTS of the old graph!
   double *xs = aGraph->GetX(); // all x-coords
   double *ys = aGraph->GetY();
 
   for (int i = 0; i < aGraph->GetN() - 1; i++) {
     // xval=avg of x1 and x2
-    if (xs[i + 1] == xs[i])
-      std::cout << "ERROR: repeated xval" << std::endl;
+    if (xs[i + 1] == xs[i]) std::cout << "ERROR: repeated xval" << std::endl;
     resultGraph->SetPoint(resultGraph->GetN(), 0.5 * (xs[i + 1] + xs[i]),
                           (ys[i + 1] - ys[i]) / (xs[i + 1] - xs[i]));
   }
@@ -561,11 +587,12 @@ void TSCurveAnalysis::ddxGraph(
 //
 ////////////////////////////////////////////////////////////////////
 
-float TSCurveAnalysis::FindStartStandard(TGraph *aGraph, int nInj) {
-  float Upper = -1;
-  float Lower = -1;
-  double *xs = aGraph->GetX();
-  double *ys = aGraph->GetY();
+float TSCurveAnalysis::FindStartStandard(TGraph *aGraph, int nInj)
+{
+  float   Upper = -1;
+  float   Lower = -1;
+  double *xs    = aGraph->GetX();
+  double *ys    = aGraph->GetY();
 
   for (int i = 0; i < aGraph->GetN(); i++) {
     if (ys[i] == nInj) {
@@ -573,8 +600,7 @@ float TSCurveAnalysis::FindStartStandard(TGraph *aGraph, int nInj) {
       break;
     }
   }
-  if (Upper == -1)
-    return -1;
+  if (Upper == -1) return -1;
   for (int i = aGraph->GetN() - 1; i > 0; i--) {
     if (ys[i] == 0) {
       Lower = (float)xs[i];
@@ -590,11 +616,12 @@ float TSCurveAnalysis::FindStartStandard(TGraph *aGraph, int nInj) {
   return (Upper + Lower) / 2.0;
 }
 
-float TSCurveAnalysis::FindStartInverse(TGraph *aGraph, int nInj) {
-  float Upper = -1;
-  float Lower = -1;
-  double *xs = aGraph->GetX();
-  double *ys = aGraph->GetY();
+float TSCurveAnalysis::FindStartInverse(TGraph *aGraph, int nInj)
+{
+  float   Upper = -1;
+  float   Lower = -1;
+  double *xs    = aGraph->GetX();
+  double *ys    = aGraph->GetY();
 
   for (int i = aGraph->GetN() - 1; i > -1; i--) {
     if (ys[i] == nInj) {
@@ -602,8 +629,7 @@ float TSCurveAnalysis::FindStartInverse(TGraph *aGraph, int nInj) {
       break;
     }
   }
-  if (Lower == -1)
-    return -1;
+  if (Lower == -1) return -1;
   for (int i = 0; i < aGraph->GetN(); i++) {
     if (ys[i] == 0) {
       Upper = (float)xs[i];
@@ -619,24 +645,28 @@ float TSCurveAnalysis::FindStartInverse(TGraph *aGraph, int nInj) {
   return (Upper + Lower) / 2.0;
 }
 
-float TSCurveAnalysis::FindStart(TGraph *aGraph, int resultFactor, int nInj) {
+float TSCurveAnalysis::FindStart(TGraph *aGraph, int resultFactor, int nInj)
+{
   if (resultFactor > 0) {
     return FindStartStandard(aGraph, nInj);
-  } else {
+  }
+  else {
     return FindStartInverse(aGraph, nInj);
   }
 }
 
-void TSCurveResultChip::CalculateAverages() {
+void TSCurveResultChip::CalculateAverages()
+{
   if (m_nEntries > 0) {
     m_thresholdAv /= m_nEntries;
     m_noiseAv /= m_nEntries;
     m_thresholdRms = sqrt(m_threshSq / m_nEntries - pow(m_thresholdAv, 2));
-    m_noiseRms = sqrt(m_noiseSq / m_nEntries - pow(m_noiseAv, 2));
+    m_noiseRms     = sqrt(m_noiseSq / m_nEntries - pow(m_noiseAv, 2));
   }
 }
 
-void TSCurveResultChip::WriteToFile(FILE *fp) {
+void TSCurveResultChip::WriteToFile(FILE *fp)
+{
   if (m_analysis->IsThresholdScan()) {
     fprintf(fp, "Pixels without hits:      %d\n", m_nDead);
     fprintf(fp, "Pixels without threshold: %d\n", m_nNoThresh);
@@ -647,17 +677,19 @@ void TSCurveResultChip::WriteToFile(FILE *fp) {
 
     fprintf(fp, "Av. Noise:     %.1f\n", m_noiseAv);
     fprintf(fp, "Noise RMS:     %.1f\n", m_noiseRms);
-
-  } else if (m_analysis->IsVCASNTuning()) {
+  }
+  else if (m_analysis->IsVCASNTuning()) {
     fprintf(fp, "Av. VCASN: %.1f\n", m_thresholdAv);
     fprintf(fp, "VCASN RMS: %.1f\n", m_thresholdRms);
-  } else { // ITHR
+  }
+  else { // ITHR
     fprintf(fp, "Av. ITHR: %.1f\n", m_thresholdAv);
     fprintf(fp, "ITHR RMS: %.1f\n", m_thresholdRms);
   }
 }
 
-float TSCurveResultChip::GetVariable(TResultVariable var) {
+float TSCurveResultChip::GetVariable(TResultVariable var)
+{
   switch (var) {
   case vcasn:
     return m_thresholdAv;
@@ -683,27 +715,32 @@ float TSCurveResultChip::GetVariable(TResultVariable var) {
   }
 }
 
-void TSCurveResultHic::GetParameterSuffix(std::string &suffix, std::string &file_suffix) {
+void TSCurveResultHic::GetParameterSuffix(std::string &suffix, std::string &file_suffix)
+{
   if (m_thresholdScan) {
     if (m_nominal) {
-      suffix = " threshold nominal ";
+      suffix      = " threshold nominal ";
       file_suffix = "_ThreshNominal";
-    } else {
-      suffix = " threshold tuned ";
+    }
+    else {
+      suffix      = " threshold tuned ";
       file_suffix = "_ThreshTuned";
     }
-  } else if (m_VCASNTuning) {
-    suffix = " VCASN tune ";
+  }
+  else if (m_VCASNTuning) {
+    suffix      = " VCASN tune ";
     file_suffix = "_VCASNTune";
-  } else if (m_ITHRTuning) {
-    suffix = " ITHR tune ";
+  }
+  else if (m_ITHRTuning) {
+    suffix      = " ITHR tune ";
     file_suffix = "_ITHRTune";
   }
   suffix += (std::to_string((int)m_backBias) + std::string("V"));
   file_suffix += (string("_") + std::to_string((int)m_backBias) + std::string("V"));
 }
 
-void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity) {
+void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
+{
   std::string suffix, file_suffix, fileName, remoteName;
 
   GetParameterSuffix(suffix, file_suffix);
@@ -718,13 +755,14 @@ void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity) {
   DbAddParameter(db, activity, string("Maximum chip avg") + suffix, (float)m_maxChipAv);
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
-  fileName = string(m_resultFile).substr(slash + 1); // strip path
+  fileName          = string(m_resultFile).substr(slash + 1); // strip path
   std::size_t point = fileName.find_last_of(".");
-  remoteName = fileName.substr(0, point) + file_suffix + ".dat";
+  remoteName        = fileName.substr(0, point) + file_suffix + ".dat";
   DbAddAttachment(db, activity, attachResult, string(m_resultFile), remoteName);
 }
 
-void TSCurveResultHic::WriteToFile(FILE *fp) {
+void TSCurveResultHic::WriteToFile(FILE *fp)
+{
   fprintf(fp, "HIC Result:\n\n");
 
   fprintf(fp, "HIC Classification: %s\n\n", WriteHicClassification());
@@ -744,13 +782,15 @@ void TSCurveResultHic::WriteToFile(FILE *fp) {
   std::cout << "timeouts:      " << m_errorCounter.nTimeout << std::endl;
 }
 
-void TSCurveResult::WriteToFileGlobal(FILE *fp) {
+void TSCurveResult::WriteToFileGlobal(FILE *fp)
+{
   fprintf(fp, "8b10b errors:\t%d\n", m_n8b10b);
   fprintf(fp, "Corrupt events:\t%d\n", m_nCorrupt);
   fprintf(fp, "Timeouts:\t%d\n", m_nTimeout);
 }
 
-void TSCurveResultHic::CalculateAverages() {
+void TSCurveResultHic::CalculateAverages()
+{
   if (m_nEntries > 0) {
     m_noiseAv /= m_nEntries;
     m_noiseRms = sqrt(m_noiseSq / m_nEntries - pow(m_noiseAv, 2));

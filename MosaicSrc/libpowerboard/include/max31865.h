@@ -41,12 +41,12 @@ private:
 
   // Configuration register bits
   enum {
-    CFG_FREQ_50Hz = 0x01,
+    CFG_FREQ_50Hz   = 0x01,
     CFG_FAULT_CLEAR = 0x02,
-    CFG_3WIRE = 0x10,
-    CFG_1SHORT = 0x20,
-    CFG_CONV_AUTO = 0x40,
-    CFG_Vbias_ON = 0x80
+    CFG_3WIRE       = 0x10,
+    CFG_1SHORT      = 0x20,
+    CFG_CONV_AUTO   = 0x40,
+    CFG_Vbias_ON    = 0x80
   };
 
 public:
@@ -58,7 +58,7 @@ public:
 
 private:
   SC18IS602 *spiBus;
-  uint8_t spiSlave;
+  uint8_t    spiSlave;
 };
 
 #endif // MAX31865_H

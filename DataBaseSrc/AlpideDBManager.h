@@ -76,7 +76,7 @@
 class AlpideDBManager {
 
   struct ReceiveBuffer {
-    char *memory;
+    char * memory;
     size_t size;
   };
 
@@ -101,8 +101,8 @@ private:
 #endif
 
   CernSsoCookieJar *theCookieJar;
-  string theJarUrl;
-  int thePendingRequests;
+  string            theJarUrl;
+  int               thePendingRequests;
 
   // Methods
 public:
@@ -133,12 +133,12 @@ public:
   string getClientKeyFile() { return (theCliKey); };
   void setClientCertFile(string aCliCer) { theCliCer = aCliCer; };
   void setClientKeyFile(string aCliKey) { theCliKey = aCliKey; };
-  string getCAPath() { return (theCertificationAuthorityPath); };
+  string                       getCAPath() { return (theCertificationAuthorityPath); };
   void setCAPath(string aCAPath) { theCertificationAuthorityPath = aCAPath; };
 #endif
 #endif
 
-  bool Init();
+  bool   Init();
   string getSSOCookieUrl() { return (theJarUrl); };
   void setSSOCookieUrl(string aJarUrl) { theJarUrl = aJarUrl; };
 

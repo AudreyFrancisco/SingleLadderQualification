@@ -6,7 +6,7 @@
 #include <libusb-1.0/libusb.h>
 #include <vector>
 
-int InitLibUsb();
+int  InitLibUsb();
 bool IsDAQBoard(libusb_device *device);
 int AddDAQBoard(libusb_device *device, TBoardConfigDAQ *boardConfig,
                 std::vector<TReadoutBoard *> *boards);

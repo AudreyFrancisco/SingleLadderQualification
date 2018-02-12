@@ -14,7 +14,7 @@
 #include "TScanConfig.h"
 
 const int MAXLOOPLEVEL = 3;
-const int MAXBOARDS = 2;
+const int MAXBOARDS    = 2;
 
 extern bool fScanAbort;
 
@@ -66,25 +66,25 @@ public:
 class TScan {
 private:
 protected:
-  TScanConfig *m_config;
-  TScanParameters *m_parameters;
-  char m_name[40];
-  char m_state[40];
-  std::vector<TAlpide *> m_chips;
-  std::vector<THic *> m_hics;
-  std::vector<TReadoutBoard *> m_boards;
+  TScanConfig *                   m_config;
+  TScanParameters *               m_parameters;
+  char                            m_name[40];
+  char                            m_state[40];
+  std::vector<TAlpide *>          m_chips;
+  std::vector<THic *>             m_hics;
+  std::vector<TReadoutBoard *>    m_boards;
   std::vector<common::TChipIndex> m_chipList;
-  std::vector<uint64_t> m_eventIds;
-  std::vector<uint64_t> m_timestamps;
-  std::vector<uint32_t> m_bunchCounters;
-  int m_firstEnabledChipId;
-  int m_firstEnabledBoard;
-  int m_firstEnabledChannel;
-  TScanHisto *m_histo;
-  std::deque<TScanHisto> *m_histoQue;
-  std::mutex *m_mutex;
-  bool m_running;
-  TScanConditions m_conditions;
+  std::vector<uint64_t>           m_eventIds;
+  std::vector<uint64_t>           m_timestamps;
+  std::vector<uint32_t>           m_bunchCounters;
+  int                             m_firstEnabledChipId;
+  int                             m_firstEnabledBoard;
+  int                             m_firstEnabledChannel;
+  TScanHisto *                    m_histo;
+  std::deque<TScanHisto> *        m_histoQue;
+  std::mutex *                    m_mutex;
+  bool                            m_running;
+  TScanConditions                 m_conditions;
   std::map<std::string, TErrorCounter> m_errorCounts;
   int m_start[MAXLOOPLEVEL];
   int m_stop[MAXLOOPLEVEL];
@@ -104,17 +104,17 @@ public:
 
   virtual void Init();
   virtual void Terminate();
-  virtual void LoopStart(int loopIndex) = 0;
-  virtual void LoopEnd(int loopIndex) = 0;
+  virtual void LoopStart(int loopIndex)   = 0;
+  virtual void LoopEnd(int loopIndex)     = 0;
   virtual void PrepareStep(int loopIndex) = 0;
-  virtual void Execute() = 0;
+  virtual void Execute()                  = 0;
   bool Loop(int loopIndex);
   virtual void Next(int loopIndex);
   void CreateScanHisto();
   bool IsRunning() { return m_running; };
   //  TScanHisto       GetTScanHisto     () {return *m_histo;};
-  const char *GetName() { return m_name; };
-  const char *GetState() { return m_state; };
+  const char *     GetName() { return m_name; };
+  const char *     GetState() { return m_state; };
   TScanConditions *GetConditions() { return &m_conditions; };
   TScanParameters *GetParameters() { return m_parameters; };
   TErrorCounter GetErrorCount(std::string hicId);
@@ -130,11 +130,11 @@ public:
 class TMaskScan : public TScan {
 private:
 protected:
-  int m_pixPerStage;
-  int m_nTriggers;
-  int m_row;
+  int                  m_pixPerStage;
+  int                  m_nTriggers;
+  int                  m_row;
   std::vector<TPixHit> m_stuck;
-  TErrorCounter m_errorCount;
+  TErrorCounter        m_errorCount;
   virtual void ConfigureMaskStage(TAlpide *chip, int istage);
   void FindTimeoutHics(int iboard, int *triggerCounts);
   void ReadEventData(std::vector<TPixHit> *Hits, int iboard);
@@ -145,7 +145,7 @@ public:
             std::mutex *aMutex);
   ~TMaskScan(){};
   std::vector<TPixHit> GetStuckPixels() { return m_stuck; };
-  TErrorCounter GetErrorCount() { return m_errorCount; };
+  TErrorCounter        GetErrorCount() { return m_errorCount; };
 };
 
 #endif

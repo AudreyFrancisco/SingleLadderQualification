@@ -24,11 +24,11 @@ class TDigitalResultChip : public TScanResultChip {
   friend class TDigitalAnalysis;
 
 private:
-  int m_nDead;
-  int m_nNoisy;
-  int m_nIneff;
-  int m_nStuck;
-  int m_nBadDcols;
+  int                  m_nDead;
+  int                  m_nNoisy;
+  int                  m_nIneff;
+  int                  m_nStuck;
+  int                  m_nBadDcols;
   std::vector<TPixHit> m_stuck;
 
 public:
@@ -41,14 +41,14 @@ class TDigitalResultHic : public TScanResultHic {
   friend class TDigitalAnalysis;
 
 private:
-  int m_nDead;
-  int m_nBad;
-  int m_nStuck;
-  int m_nBadDcols;
-  char m_stuckFile[200];
-  bool m_lower;
-  bool m_upper;
-  bool m_nominal;
+  int           m_nDead;
+  int           m_nBad;
+  int           m_nStuck;
+  int           m_nBadDcols;
+  char          m_stuckFile[200];
+  bool          m_lower;
+  bool          m_upper;
+  bool          m_nominal;
   TErrorCounter m_errorCounter;
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
@@ -75,7 +75,7 @@ public:
 class TDigitalAnalysis : public TScanAnalysis {
 private:
   std::vector<TDigitalCounter> m_counters;
-  int m_ninj;
+  int                          m_ninj;
   bool HasData(TScanHisto &histo, common::TChipIndex idx, int col);
   void InitCounters();
   void FillVariableList();
@@ -86,11 +86,13 @@ private:
   THicClassification GetClassificationIB(TDigitalResultHic *result);
 
 protected:
-  TScanResultChip *GetChipResult() {
+  TScanResultChip *GetChipResult()
+  {
     TDigitalResultChip *Result = new TDigitalResultChip();
     return Result;
   };
-  TScanResultHic *GetHicResult() {
+  TScanResultHic *GetHicResult()
+  {
     TDigitalResultHic *Result = new TDigitalResultHic();
     return Result;
   };

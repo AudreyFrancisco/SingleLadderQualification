@@ -48,22 +48,22 @@ public:
   void setLatency(uint8_t mode, uint32_t d);
   void getLatency(uint8_t *mode, uint32_t *d);
   void getStatus(uint32_t *st);
-  void startRun();
-  void stopRun();
+  void        startRun();
+  void        stopRun();
   std::string dumpRegisters();
 
 private: // WBB Slave registers map
   enum regAddress_e {
-    regRunCtrl = 0,             // Run control register
-    regErrorState = 1,          // Error state register
+    regRunCtrl             = 0, // Run control register
+    regErrorState          = 1, // Error state register
     regAlmostFullThreshold = 2, // Threshold of almost full flag for the ddr3 memory buffer
-    regLatency = 3,             // Data Latency control register
+    regLatency             = 3, // Data Latency control register
     // FPGA and Temprature and reserved location
     regTemperature = 4, // NOT IMPLEMENTED
-    regStatus = 5,      // Board status flags
-    regReserved0 = 6,
-    regReserved1 = 7,
-    regConfig = 8 // Configuration register
+    regStatus      = 5, // Board status flags
+    regReserved0   = 6,
+    regReserved1   = 7,
+    regConfig      = 8 // Configuration register
   };
 
   enum runCtrlBits_e { RUN_CTRL_RUN = (1 << 0), RUN_CTRL_PAUSE = (1 << 1) };
