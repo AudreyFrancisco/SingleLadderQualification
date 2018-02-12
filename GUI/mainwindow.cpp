@@ -1401,7 +1401,8 @@ void MainWindow::attachtodatabase() {
     fResultwindow->close();
   }
 
-  if (fDB) delete fDB;
+  if (fDB)
+    delete fDB;
   fDB = new AlpideDB(fDatabasetype);
   SetHicClassifications();
 
@@ -2087,7 +2088,7 @@ void MainWindow::fillingibvectors() {
   ClearVectors();
   AddScan(STPower);
   // Do this scan immediately after power as it sometimes crashes
-  //IBParameterScan();
+  // IBParameterScan();
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
