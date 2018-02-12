@@ -320,6 +320,7 @@ void TMaskScan::FindTimeoutHics(int iboard, int *triggerCounts) {
     }
     // HIC is connected to this readout board AND did not send enough events
     if ((isOnBoard) && (nTrigs < m_nTriggers * (int)(m_hics.at(iHic)->GetNEnabledChips()))) {
+      std::cout << "identified timeout on HIC " << m_hics.at(iHic)->GetDbId() << std::endl;
       m_errorCounts.at(m_hics.at(iHic)->GetDbId()).nTimeout++;
     }
   }

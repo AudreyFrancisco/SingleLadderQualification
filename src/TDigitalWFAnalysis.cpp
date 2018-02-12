@@ -45,8 +45,8 @@ void TDigitalWFAnalysis::InitCounters() {
 
 void TDigitalWFAnalysis::AnalyseHisto(TScanHisto *histo) {
   int row = histo->GetIndex();
-  std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size()
-            << std::endl;
+  //std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size()
+  //          << std::endl;
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     TDigitalWFResultChip *result =
         (TDigitalWFResultChip *)m_result->GetChipResult(m_chipList.at(ichip));

@@ -1401,6 +1401,8 @@ void MainWindow::attachtodatabase() {
     fResultwindow->close();
   }
 
+  if (fDB) delete fDB;
+  fDB = new AlpideDB(fDatabasetype);
   SetHicClassifications();
 
   for (unsigned int i = 0; i < fHICs.size(); i++) {
@@ -2085,7 +2087,7 @@ void MainWindow::fillingibvectors() {
   ClearVectors();
   AddScan(STPower);
   // Do this scan immediately after power as it sometimes crashes
-  IBParameterScan();
+  //IBParameterScan();
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
@@ -2129,33 +2131,34 @@ void MainWindow::fillingibvectors() {
 
   // threshold scan, no tuning for the time being, 0V back bias
   fConfig->GetScanConfig()->SetBackBias(0.0);
-  // fConfig->GetScanConfig()->SetVcasnRange (30, 70);
+  fConfig->GetScanConfig()->SetVcasnRange(30, 70);
 
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STThreshold);
-  // AddScan(STVCASN);
-  // fConfig->GetScanConfig()->SetParamValue("NOMINAL",0);
-  // AddScan(STApplyVCASN, fresultVector.back());
-  // AddScan(STITHR);
-  // AddScan(STApplyITHR, fresultVector.back());
-  // AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+  AddScan(STThreshold);
 
   // noise occupancy with and without mask at 0V back bias
   AddScan(STNoise);
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
   AddScan(STClearMask);
+  // return;
   // threshold scan at 3V back bias, also here no tuning for the time being
   fConfig->GetScanConfig()->SetBackBias(3.0);
-  // fConfig->GetScanConfig()->SetVcasnRange (75, 160);
+  fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STThreshold);
-  // AddScan(STVCASN);
-  // fConfig->GetScanConfig()->SetParamValue("NOMINAL",0);
-  // AddScan(STApplyVCASN, fresultVector.back());
-  // AddScan(STITHR);
-  // AddScan(STApplyITHR, fresultVector.back());
-  // AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+  AddScan(STThreshold);
 
   // noise occupancy with and without mask at 3V back bias
   AddScan(STNoise);
