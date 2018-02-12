@@ -15,8 +15,6 @@ TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aSca
   else
     m_result = new TDigitalResult();
   FillVariableList();
-
-
 }
 
 // TODO: Implement HasData
@@ -181,7 +179,7 @@ void TDigitalAnalysis::WriteStuckPixels(THic *hic) {
 
 void TDigitalAnalysis::AnalyseHisto(TScanHisto *histo) {
   int row = histo->GetIndex();
-  //std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size()
+  // std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size()
   //          << std::endl;
   WriteHitData(histo, row);
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
@@ -304,24 +302,24 @@ THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic *resu
   THicClassification returnValue = CLASS_GREEN;
   // check data taking variables
   if (result->m_errorCounter.nTimeout > m_config->GetParamValue("DIGITAL_MAXTIMEOUT_ORANGE")) {
-    std::cout << "RED: nTimeout = " << result->m_errorCounter.nTimeout << " > " << m_config->GetParamValue("DIGITAL_MAXTIMEOUT_ORANGE") << std::endl;
+    std::cout << "RED: nTimeout = " << result->m_errorCounter.nTimeout << " > "
+              << m_config->GetParamValue("DIGITAL_MAXTIMEOUT_ORANGE") << std::endl;
     return CLASS_RED;
-  }
-  else if (result->m_errorCounter.nTimeout > m_config->GetParamValue("DIGITAL_MAXTIMEOUT_GREEN"))
+  } else if (result->m_errorCounter.nTimeout > m_config->GetParamValue("DIGITAL_MAXTIMEOUT_GREEN"))
     returnValue = CLASS_ORANGE;
   if (result->m_errorCounter.nCorruptEvent > m_config->GetParamValue("DIGITAL_MAXCORRUPT_ORANGE")) {
-    std::cout << "RED: nCorruptEvents > " << m_config->GetParamValue("DIGITAL_MAXCORRUPT_ORANGE") << std::endl;
+    std::cout << "RED: nCorruptEvents > " << m_config->GetParamValue("DIGITAL_MAXCORRUPT_ORANGE")
+              << std::endl;
     return CLASS_RED;
-  }
-  else if (result->m_errorCounter.nCorruptEvent >
-           m_config->GetParamValue("DIGITAL_MAXCORRUPT_GREEN"))
+  } else if (result->m_errorCounter.nCorruptEvent >
+             m_config->GetParamValue("DIGITAL_MAXCORRUPT_GREEN"))
     returnValue = CLASS_ORANGE;
   // check on dead pixels per HIC
   if (result->m_nDead > m_config->GetParamValue("DIGITAL_MAXDEAD_HIC_ORANGE_IB")) {
-    std::cout << "RED: nDead > " << m_config->GetParamValue("DIGITAL_MAXDEAD_HIC_ORANGE_IB") << std::endl;
+    std::cout << "RED: nDead > " << m_config->GetParamValue("DIGITAL_MAXDEAD_HIC_ORANGE_IB")
+              << std::endl;
     return CLASS_RED;
-  }
-  else if (result->m_nDead > m_config->GetParamValue("DIGITAL_MAXDEAD_HIC_GREEN_IB"))
+  } else if (result->m_nDead > m_config->GetParamValue("DIGITAL_MAXDEAD_HIC_GREEN_IB"))
     returnValue = CLASS_ORANGE;
   // check on bad pixels (i.e. dead + noisy + inefficient) per HIC
   if (result->m_nBad > m_config->GetParamValue("DIGITAL_MAXBAD_HIC_IB"))
