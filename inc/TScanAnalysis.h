@@ -139,9 +139,11 @@ protected:
   virtual void             CreateResult() = 0;
   int                      ReadChipList();
   virtual void AnalyseHisto(TScanHisto *histo) = 0;
-  virtual void   InitCounters()                = 0;
-  int            GetPreviousActivityType();
-  virtual string GetPreviousTestType() = 0;
+  virtual void       InitCounters()            = 0;
+  int                GetPreviousActivityType();
+  virtual string     GetPreviousTestType() = 0;
+  THicClassification DoCut(THicClassification oldClass, THicClassification failClass, float value,
+                           float cut, string cutName, bool greaterThan = false);
 
 public:
   TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
@@ -152,6 +154,7 @@ public:
   virtual void Finalize() = 0;
   std::map<const char *, TResultVariable> GetVariableList() { return m_variableList; }
   float GetVariable(std::string aHic, int chip, TResultVariable var);
+  static const char *WriteHicClassification(THicClassification hicClass);
   THicClassification GetClassification();
 };
 

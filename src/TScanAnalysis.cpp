@@ -133,6 +133,42 @@ THicClassification TScanAnalysis::GetClassification()
   return result;
 }
 
+const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
+{
+  if (hicClass == CLASS_UNTESTED)
+    return "Untested";
+  else if (hicClass == CLASS_GREEN)
+    return "Green";
+  else if (hicClass == CLASS_RED)
+    return "Red";
+  else if (hicClass == CLASS_ORANGE)
+    return "Orange";
+  else
+    return "Unknown";
+}
+
+THicClassification TScanAnalysis::DoCut(THicClassification oldClass, THicClassification failClass,
+                                        float value, float cut, string cutName, bool greaterThan)
+{
+  bool failed = false;
+  if (greaterThan) {
+    if (value < cut) failed = true;
+  }
+  else {
+    if (value > cut) failed = true;
+  }
+  // the message is printed for every failed cut;
+  // however the classification is changed only if the new classification is worse than the previous
+  // one
+  if (failed) {
+    std::cout << "Hic failed " << WriteHicClassification(failClass) << " cut " << cutName
+              << ": cut = " << cut << ", value = " << value << std::endl;
+    if (failClass > oldClass) return failClass;
+  }
+  return oldClass;
+}
+
+
 int TScanResult::AddChipResult(common::TChipIndex idx, TScanResultChip *aChipResult)
 {
   int id = (idx.boardIndex << 8) | (idx.dataReceiver << 4) | (idx.chipId & 0xf);
@@ -163,16 +199,7 @@ int TScanResultHic::AddChipResult(int aChipId, TScanResultChip *aChipResult)
 
 const char *TScanResultHic::WriteHicClassification()
 {
-  if (m_class == CLASS_UNTESTED)
-    return "Untested";
-  else if (m_class == CLASS_GREEN)
-    return "Green";
-  else if (m_class == CLASS_RED)
-    return "Red";
-  else if (m_class == CLASS_ORANGE)
-    return "Orange";
-  else
-    return "Unknown";
+  return TScanAnalysis::WriteHicClassification(m_class);
 }
 
 float TScanResultHic::GetVariable(int chip, TResultVariable var)
