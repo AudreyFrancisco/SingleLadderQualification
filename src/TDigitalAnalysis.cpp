@@ -312,45 +312,34 @@ THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic *resu
 THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic *result)
 {
   THicClassification returnValue = CLASS_GREEN;
+
   // check data taking variables
-  if (result->m_errorCounter.nTimeout > m_config->GetParamValue("DIGITAL_MAXTIMEOUT_ORANGE")) {
-    std::cout << "RED: nTimeout = " << result->m_errorCounter.nTimeout << " > "
-              << m_config->GetParamValue("DIGITAL_MAXTIMEOUT_ORANGE") << std::endl;
-    return CLASS_RED;
-  }
-  else if (result->m_errorCounter.nTimeout > m_config->GetParamValue("DIGITAL_MAXTIMEOUT_GREEN"))
-    returnValue = CLASS_ORANGE;
-  if (result->m_errorCounter.nCorruptEvent > m_config->GetParamValue("DIGITAL_MAXCORRUPT_ORANGE")) {
-    std::cout << "RED: nCorruptEvents > " << m_config->GetParamValue("DIGITAL_MAXCORRUPT_ORANGE")
-              << std::endl;
-    return CLASS_RED;
-  }
-  else if (result->m_errorCounter.nCorruptEvent >
-           m_config->GetParamValue("DIGITAL_MAXCORRUPT_GREEN"))
-    returnValue = CLASS_ORANGE;
+  returnValue =
+      DoCut(returnValue, CLASS_ORANGE, result->m_errorCounter.nTimeout, "DIGITAL_MAXTIMEOUT_GREEN");
+  returnValue =
+      DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "DIGITAL_MAXTIMEOUT_ORANGE");
+  returnValue = DoCut(returnValue, CLASS_ORANGE, result->m_errorCounter.nCorruptEvent,
+                      "DIGITAL_MAXCORRUPT_GREEN");
+  returnValue = DoCut(returnValue, CLASS_RED, result->m_errorCounter.nCorruptEvent,
+                      "DIGITAL_MAXCORRUPT_ORANGE");
   // check on dead pixels per HIC
-  if (result->m_nDead > m_config->GetParamValue("DIGITAL_MAXDEAD_HIC_ORANGE_IB")) {
-    std::cout << "RED: nDead > " << m_config->GetParamValue("DIGITAL_MAXDEAD_HIC_ORANGE_IB")
-              << std::endl;
-    return CLASS_RED;
-  }
-  else if (result->m_nDead > m_config->GetParamValue("DIGITAL_MAXDEAD_HIC_GREEN_IB"))
-    returnValue = CLASS_ORANGE;
+  returnValue = DoCut(returnValue, CLASS_RED, result->m_nDead, "DIGITAL_MAXDEAD_HIC_ORANGE_IB");
+  returnValue = DoCut(returnValue, CLASS_ORANGE, result->m_nDead, "DIGITAL_MAXDEAD_HIC_GREEN_IB");
+
   // check on bad pixels (i.e. dead + noisy + inefficient) per HIC
-  if (result->m_nBad > m_config->GetParamValue("DIGITAL_MAXBAD_HIC_IB")) returnValue = CLASS_ORANGE;
+  returnValue = DoCut(returnValue, CLASS_ORANGE, result->m_nBad, "DIGITAL_MAXBAD_HIC_IB");
 
   // chip-wise check
   for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip++) {
     int                 chipId     = m_chipList.at(ichip).chipId & 0xf;
     TDigitalResultChip *chipResult = (TDigitalResultChip *)result->m_chipResults.at(chipId);
-    if (chipResult->m_nDead > m_config->GetParamValue("DIGITAL_MAXDEAD_CHIP_ORANGE"))
-      return CLASS_RED;
-    else if (chipResult->m_nDead > m_config->GetParamValue("DIGITAL_MAXDEAD_CHIP_GREEN"))
-      returnValue = CLASS_ORANGE;
-    if (chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff >
-        m_config->GetParamValue("DIGITAL_MAXBAD_CHIP_IB"))
-      returnValue = CLASS_ORANGE;
+    returnValue = DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_ORANGE");
+    returnValue =
+        DoCut(returnValue, CLASS_ORANGE, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_GREEN");
+    int nBad    = chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff;
+    returnValue = DoCut(returnValue, CLASS_ORANGE, nBad, "DIGITAL_MAXBAD_CHIP_IB");
   }
+
   return returnValue;
 }
 

@@ -148,9 +148,10 @@ const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
 }
 
 THicClassification TScanAnalysis::DoCut(THicClassification oldClass, THicClassification failClass,
-                                        float value, float cut, string cutName, bool greaterThan)
+                                        int value, string cutName, bool greaterThan)
 {
   bool failed = false;
+  int  cut    = m_config->GetParamValue(cutName);
   if (greaterThan) {
     if (value < cut) failed = true;
   }
@@ -162,7 +163,7 @@ THicClassification TScanAnalysis::DoCut(THicClassification oldClass, THicClassif
   // one
   if (failed) {
     std::cout << "Hic failed " << WriteHicClassification(failClass) << " cut " << cutName
-              << ": cut = " << cut << ", value = " << value << std::endl;
+              << ": cut = " << m_config << ", value = " << value << std::endl;
     if (failClass > oldClass) return failClass;
   }
   return oldClass;
