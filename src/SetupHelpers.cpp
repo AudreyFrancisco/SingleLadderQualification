@@ -773,8 +773,8 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
                        std::vector<TAlpide *> *chips, std::vector<THic *> *hics,
                        const char **hicIds)
 {
-  int                 NBOARDS         = 1;
-  int                 NModules        = 5;
+  int                 NBOARDS         = 2;
+  int                 NModules        = 10;
   int                 NChipsPerModule = 14;
   int                 NChips          = NModules * NChipsPerModule;
   TBoardConfigMOSAIC *boardConfig[2];
@@ -802,10 +802,10 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     boards->push_back(board);
   }
 
-  // if (strcmp(boardConfig[0]->GetIPaddress(), boardConfig[1]->GetIPaddress()) == 0) {
-  //  std::cout << "ERROR: did not find two different IP addresses" << std::endl;
-  //  exit(0);
-  //}
+  if (strcmp(boardConfig[0]->GetIPaddress(), boardConfig[1]->GetIPaddress()) == 0) {
+    std::cout << "ERROR: did not find two different IP addresses" << std::endl;
+    exit(0);
+  }
 
   if (config->GetUsePowerBoard()) {
     for (int i = 0; i < NBOARDS; i++) {
