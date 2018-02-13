@@ -16,9 +16,11 @@ TEnduranceCycle::TEnduranceCycle(TScanConfig *config, std::vector<TAlpide *> chi
   ((TCycleParameters *)m_parameters)->upTime    = config->GetParamValue("ENDURANCEUPTIME");
   ((TCycleParameters *)m_parameters)->downTime  = config->GetParamValue("ENDURANCEDOWNTIME");
   ((TCycleParameters *)m_parameters)->nCycles   = config->GetParamValue("ENDURANCECYCLES");
-  m_start[2]                                    = 0;
-  m_step[2]                                     = 1;
-  m_stop[2]                                     = 1;
+  ((TCycleParameters *)m_parameters)->timeLimit = config->GetParamValue("ENDURANCETIMELIMIT");
+
+  m_start[2] = 0;
+  m_step[2]  = 1;
+  m_stop[2]  = 1;
 
   m_start[1] = 0;
   m_step[1]  = 1;
@@ -52,6 +54,7 @@ void TEnduranceCycle::ClearCounters()
 void TEnduranceCycle::Init()
 {
   TScan::Init();
+  time(&m_startTime);
   // configure readout boards
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     ConfigureBoard(m_boards.at(i));
@@ -217,9 +220,15 @@ void TEnduranceCycle::Execute()
 
 void TEnduranceCycle::Next(int loopIndex)
 {
+  time_t timeNow;
   if (loopIndex == 0) {
     m_counterVector.push_back(m_hicCounters);
     ClearCounters();
+
+    time(&timeNow);
+    if (difftime(timeNow, m_startTime) > ((TCycleParameters *)m_parameters)->timeLimit * 3600) {
+      fScanAbort = true;
+    }
   }
   TScan::Next(loopIndex);
 }

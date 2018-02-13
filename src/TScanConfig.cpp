@@ -110,6 +110,7 @@ TScanConfig::TScanConfig()
   m_enduranceTriggers = ENDURANCE_TRIGGERS;
   m_enduranceUptime   = ENDURANCE_UPTIME;
   m_enduranceDowntime = ENDURANCE_DOWNTIME;
+  m_enduranceLimit    = ENDURANCE_LIMIT;
   m_useDataPath       = false;
 
   InitParamMap();
@@ -204,10 +205,11 @@ void TScanConfig::InitParamMap()
   fSettings["TARGETTHRESH"] = &m_targetThresh;
   fSettings["NOMINAL"]      = &m_nominal;
 
-  fSettings["ENDURANCECYCLES"]   = &m_enduranceCycles;
-  fSettings["ENDURANCETRIGGERS"] = &m_enduranceTriggers;
-  fSettings["ENDURANCEUPTIME"]   = &m_enduranceUptime;
-  fSettings["ENDURANCEDOWNTIME"] = &m_enduranceDowntime;
+  fSettings["ENDURANCECYCLES"]    = &m_enduranceCycles;
+  fSettings["ENDURANCETRIGGERS"]  = &m_enduranceTriggers;
+  fSettings["ENDURANCEUPTIME"]    = &m_enduranceUptime;
+  fSettings["ENDURANCEDOWNTIME"]  = &m_enduranceDowntime;
+  fSettings["ENDURANCETIMELIMIT"] = &m_enduranceLimit;
 
   fSettings["READOUTSPEED"]     = &m_readoutSpeed;
   fSettings["READOUTOCC"]       = &m_readoutOcc;
