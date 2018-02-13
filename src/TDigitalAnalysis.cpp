@@ -339,7 +339,7 @@ THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic *resu
     int nBad    = chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff;
     returnValue = DoCut(returnValue, CLASS_ORANGE, nBad, "DIGITAL_MAXBAD_CHIP_IB");
   }
-
+  std::cout << "Classification: " << WriteHicClassification(returnValue) << std::endl;
   return returnValue;
 }
 
