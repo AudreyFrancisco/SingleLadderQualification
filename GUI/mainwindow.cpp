@@ -2259,8 +2259,7 @@ void MainWindow::fillingendurancevectors()
   ClearVectors();
 
   AddScan(STFifo);
-  AddScan(STDigital);
-  AddScan(STThreshold);
+  AddScan(STEndurance);
 }
 
 void MainWindow::ConnectTestCombo(int value)
