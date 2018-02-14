@@ -163,7 +163,7 @@ THicClassification TScanAnalysis::DoCut(THicClassification oldClass, THicClassif
   // one
   if (failed) {
     std::cout << "Hic failed " << WriteHicClassification(failClass) << " cut " << cutName
-              << ": cut = " << m_config << ", value = " << value << std::endl;
+              << ": cut = " << cut << ", value = " << value << std::endl;
     if (failClass > oldClass) return failClass;
   }
   return oldClass;
