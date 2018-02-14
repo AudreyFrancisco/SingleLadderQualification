@@ -39,6 +39,7 @@ class TApplyMask;
 class TPowerTest;
 class ScanConfiguration;
 class TDigitalWFanalysis;
+class TFastPowerTest;
 
 namespace Ui {
   class MainWindow;
@@ -60,7 +61,8 @@ typedef enum {
   STClearMask,
   STNoise,
   STReadout,
-  STEndurance
+  STEndurance,
+  STFastPowerTest
 } TScanType;
 
 class MainWindow : public QMainWindow {
@@ -102,6 +104,7 @@ public slots:
   void fillingibvectors();
 
   void fillingendurancevectors();
+  void fillingfastpower();
 
   void ibscansforageing();
 

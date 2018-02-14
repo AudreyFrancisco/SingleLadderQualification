@@ -46,6 +46,8 @@
 #include "TCycleAnalysis.h"
 #include "TDigitalWFAnalysis.h"
 #include "TEnduranceCycle.h"
+#include "TFastPowerAnalysis.h"
+#include "TFastPowerTest.h"
 #include "TFifoAnalysis.h"
 #include "TFifoTest.h"
 #include "THIC.h"
@@ -175,6 +177,9 @@ void MainWindow::open()
   }
   else if (fNumberofscan == IBQualification) {
     fileName = "Configib.cfg";
+  }
+  else if (fNumberofscan == OBPower) {
+    fileName = "ConfigPower.cfg";
   }
 
   try {
@@ -878,12 +883,14 @@ void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis 
         if (fScanstatuslabels.at(i) != 0) {
           fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
           fScanstatuslabels[i]->update();
+          qApp->processEvents();
         }
 
         analysisThread.join();
         a.at(i)->Finalize();
         if (fScanstatuslabels.at(i) != 0) {
           fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
+          qApp->processEvents();
         }
         // std::cout<<"The classification is : "<<fresultVector[i]->GetClassification()<<std::endl;
       }
@@ -1094,6 +1101,10 @@ void MainWindow::applytests()
   if (fNumberofscan == OBEndurance) {
     fillingendurancevectors();
   }
+  if (fNumberofscan == OBPower) {
+    fillingfastpower();
+  }
+
 
   qApp->processEvents();
   std::cout << "the size of the scan vector is: " << fScanVector.size() << std::endl;
@@ -1537,6 +1548,10 @@ void MainWindow::attachtodatabase()
       else if (fNumberofscan == IBQualification) {
         DbAddAttachment(fDB, activ, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
       }
+      else if (fNumberofscan == OBPower) {
+        DbAddAttachment(fDB, activ, attachConfig, string("ConfigPower.cfg"),
+                        string("ConfigPower.cfg"));
+      }
       DbAddAttachment(fDB, activ, attachText, string(path), string("Comment.txt"));
       DbAddMember(fDB, activ, fIdofoperator);
 
@@ -1632,7 +1647,7 @@ void MainWindow::locationcombo()
   int projectid = 0;
   projectid     = fDB->GetProjectId();
   if (fNumberofscan == OBQualification || fNumberofscan == OBEndurance ||
-      fNumberofscan == OBReception) {
+      fNumberofscan == OBReception || fNumberofscan == OBPower) {
     fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
   }
   else if (fNumberofscan == IBQualification || fNumberofscan == IBEndurance) {
@@ -2025,6 +2040,13 @@ bool MainWindow::CreateScanObjects(TScanType scanType, TScanConfig *config, TSca
                                    (TCycleResult *)*result);
     hasButton = true;
     return true;
+  case STFastPowerTest:
+    *scan     = new TFastPowerTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TFastPowerResult();
+    *analysis = new TFastPowerAnalysis(&fHistoQue, (TFifoTest *)*scan, config, fHICs, &fMutex,
+                                       (TFastPowerResult *)*result);
+    hasButton = true;
+    return true;
   default:
     std::cout << "Warning: unknown scantype " << (int)scanType << ", ignoring" << std::endl;
     return false;
@@ -2259,8 +2281,7 @@ void MainWindow::fillingendurancevectors()
   ClearVectors();
 
   AddScan(STFifo);
-  AddScan(STDigital);
-  AddScan(STThreshold);
+  AddScan(STEndurance);
 }
 
 void MainWindow::ConnectTestCombo(int value)
@@ -2349,3 +2370,9 @@ void MainWindow::quittest()
 }
 
 AlpideDB *MainWindow::GetDB() { return fDB; }
+
+void MainWindow::fillingfastpower()
+{
+  ClearVectors();
+  AddScan(STFastPowerTest);
+}

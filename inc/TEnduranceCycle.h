@@ -4,11 +4,13 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <time.h>
 
 #include "Common.h"
 #include "THIC.h"
 #include "THisto.h"
 #include "TScan.h"
+
 
 typedef struct {
   THicType m_hicType;
@@ -27,10 +29,12 @@ typedef struct __TCycleParameters : TScanParameters {
   int downTime;
   int nTriggers;
   int nCycles;
+  int timeLimit;
 } TCycleParameters;
 
 class TEnduranceCycle : public TScan {
 private:
+  time_t m_startTime;
   void   CreateMeasurements();
   void   ClearCounters();
   THisto CreateHisto()
