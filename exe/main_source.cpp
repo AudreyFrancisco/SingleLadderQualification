@@ -37,7 +37,7 @@ int myVCASN2  = 64;
 int myVCLIP   = 0;
 int myVRESETD = 147;
 
-int myStrobeLength = 10; // strobe length in units of 25 ns
+int myStrobeLength = 2000; // strobe length in units of 25 ns
 int myStrobeDelay  = 0;
 int myPulseLength  = 0;
 
@@ -47,13 +47,17 @@ int myNTriggers  = 1000;
 
 char fNameRaw[1024];
 
-int HitData[512][1024];
+int HitData[10][16][512][1024];
 
 void ClearHitData()
 {
-  for (int icol = 0; icol < 512; icol++) {
-    for (int iaddr = 0; iaddr < 1024; iaddr++) {
-      HitData[icol][iaddr] = 0;
+  for (int imod = 0; imod < 10; imod++) {
+    for (int ichip = 0; ichip < 16; ichip++) {
+      for (int icol = 0; icol < 512; icol++) {
+        for (int iaddr = 0; iaddr < 1024; iaddr++) {
+          HitData[imod][ichip][icol][iaddr] = 0;
+        }
+      }
     }
   }
 }
@@ -61,15 +65,33 @@ void ClearHitData()
 void CopyHitData(std::vector<TPixHit> *Hits)
 {
   for (unsigned int ihit = 0; ihit < Hits->size(); ihit++) {
-    HitData[Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address]++;
+    int chipId  = Hits->at(ihit).chipId & 0xf;
+    int modId   = (chipId >> 4) & 0x7;
+    int dcol    = Hits->at(ihit).dcol;
+    int region  = Hits->at(ihit).region;
+    int address = Hits->at(ihit).address;
+    HitData[modId][chipId][dcol + region * 16][address]++;
   }
   Hits->clear();
 }
 
+bool HasDataChip(int chipId)
+{
+  for (int imod = 0; imod < 10; imod++) {
+    for (int icol = 0; icol < 512; icol++) {
+      for (int iaddr = 0; iaddr < 1024; iaddr++) {
+        if (HitData[imod][chipId][icol][iaddr] > 0) return true;
+      }
+    }
+  }
+  return false;
+}
+
 void WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits, TBoardHeader boardInfo)
 {
-  int dcol, address, event;
+  int ChipId, dcol, address, event;
   for (unsigned int ihit = oldHits; ihit < Hits->size(); ihit++) {
+    ChipId  = Hits->at(ihit).chipId;
     dcol    = Hits->at(ihit).dcol + Hits->at(ihit).region * 16;
     address = Hits->at(ihit).address;
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
@@ -78,26 +100,47 @@ void WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits, TBoardHeade
     else {
       event = boardInfo.eoeCount;
     }
-    fprintf(fp, "%d %d %d\n", event, dcol, address);
+    fprintf(fp, "%d %d %d %d\n", event, ChipId, dcol, address);
   }
 }
 
 void WriteDataToFile(const char *fName, bool Recreate)
 {
   FILE *fp;
-  if (Recreate)
-    fp = fopen(fName, "w");
-  else
-    fp = fopen(fName, "a");
 
-  for (int icol = 0; icol < 512; icol++) {
-    for (int iaddr = 0; iaddr < 1024; iaddr++) {
-      if (HitData[icol][iaddr] > 0) {
-        fprintf(fp, "%d %d %d\n", icol, iaddr, HitData[icol][iaddr]);
+  char fNameChip[100];
+  char fNameTemp[100];
+
+  sprintf(fNameTemp, "%s", fName);
+  strtok(fNameTemp, ".");
+
+  for (unsigned int imod = 0; imod < 10; imod++) {
+    for (unsigned int ichip = 0; ichip < fChips.size(); ichip++) {
+      int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
+      int modId  = (chipId >> 4) & 0x7;
+      if (!HasDataChip(chipId)) continue; // write files only for chips with data
+      if (fChips.size() > 1) {
+        sprintf(fNameChip, "%s_Chip%d_%d.dat", fNameTemp, modId, chipId);
       }
+      else {
+        sprintf(fNameChip, "%s.dat", fNameTemp);
+      }
+      std::cout << "Writing data to file " << fNameChip << std::endl;
+      if (Recreate)
+        fp = fopen(fName, "w");
+      else
+        fp = fopen(fName, "a");
+      for (int icol = 0; icol < 512; icol++) {
+        for (int iaddr = 0; iaddr < 1024; iaddr++) {
+          if (HitData[imod][ichip][icol][iaddr] > 0) {
+            fprintf(fp, "%d %d %d %d %d\n", modId, chipId, icol, iaddr,
+                    HitData[imod][ichip][icol][iaddr]);
+          }
+        }
+      }
+      fclose(fp);
     }
   }
-  fclose(fp);
 }
 
 // initialisation of Fromu
@@ -128,6 +171,7 @@ int configureChip(TAlpide *chip)
 
   configureFromu(chip);
   configureMask(chip);
+  AlpideConfig::ConfigureCMU(chip);
 
   chip->WriteRegister(Alpide::REG_MODECONTROL, 0x21); // strobed readout mode
   return 0;
@@ -237,17 +281,21 @@ int main(int argc, char **argv)
           now->tm_hour, now->tm_min, now->tm_sec);
 
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(fBoards.at(0));
+  if (fBoards.size()) {
 
-  if (fBoards.size() == 1) {
-
-    fBoards.at(0)->SendOpCode(Alpide::OPCODE_GRST);
-    fBoards.at(0)->SendOpCode(Alpide::OPCODE_PRST);
-
-    for (unsigned int i = 0; i < fChips.size(); i++) {
-      configureChip(fChips.at(i));
+    for (const auto &rBoard : fBoards) {
+      rBoard->SendOpCode(Alpide::OPCODE_GRST);
+      rBoard->SendOpCode(Alpide::OPCODE_PRST);
     }
 
-    fBoards.at(0)->SendOpCode(Alpide::OPCODE_RORST);
+    for (const auto &rChip : fChips) {
+      if (!rChip->GetConfig()->IsEnabled()) continue;
+      configureChip(rChip);
+    }
+
+    for (const auto &rBoard : fBoards) {
+      rBoard->SendOpCode(Alpide::OPCODE_RORST);
+    }
 
     // put your test here...
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
