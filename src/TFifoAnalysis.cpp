@@ -110,6 +110,7 @@ void TFifoAnalysis::WriteResult()
   char fName[200];
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/FifoScanResult_%s.dat", hicResult->GetOutputPath().c_str(),

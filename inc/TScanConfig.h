@@ -132,11 +132,15 @@ namespace ScanConfig {
   const float VOLTAGE_SCALE = 1.0;
   const float BACKBIAS      = 0;
   const int   NOMINAL       = 0;
-  const int   ENDURANCE_CYCLES   = 5;  // total number of cycles
-  const int   ENDURANCE_UPTIME   = 60; // up and down wait time in seconds
-  const int   ENDURANCE_DOWNTIME = 120;
-  const int   ENDURANCE_TRIGGERS = 10000;
-  const int   ENDURANCE_LIMIT    = 168; // time limit in hours
+  const int   ENDURANCE_CYCLES             = 5;  // total number of cycles
+  const int   ENDURANCE_UPTIME             = 60; // up and down wait time in seconds
+  const int   ENDURANCE_DOWNTIME           = 120;
+  const int   ENDURANCE_TRIGGERS           = 10000;
+  const int   ENDURANCE_LIMIT              = 168; // time limit in hours
+  const int   ENDURANCE_MAXTRIPS_GREEN     = 0;
+  const int   ENDURANCE_MAXTRIPS_ORANGE    = 1;
+  const int   ENDURANCE_MINCHIPS_GREEN     = 14;
+  const int   ENDURANCE_MAXFAILURES_ORANGE = 1;
 }
 
 class TScanConfig {
@@ -236,6 +240,10 @@ private:
   int       m_enduranceDowntime;
   int       m_enduranceTriggers;
   int       m_enduranceLimit;
+  int       m_enduranceMaxtripsGreen;
+  int       m_enduranceMaxtripsOrange;
+  int       m_enduranceMinchipsGreen;
+  int       m_enduranceMaxfailuresOrange;
   int       m_readoutSpeed;
   int       m_readoutOcc;
   int       m_readoutDriver;

@@ -106,12 +106,16 @@ TScanConfig::TScanConfig()
   m_threshMaxNoiseOB            = THRESH_MAXNOISE_OB;
   m_threshMaxNoiseIB            = THRESH_MAXNOISE_IB;
 
-  m_enduranceCycles   = ENDURANCE_CYCLES;
-  m_enduranceTriggers = ENDURANCE_TRIGGERS;
-  m_enduranceUptime   = ENDURANCE_UPTIME;
-  m_enduranceDowntime = ENDURANCE_DOWNTIME;
-  m_enduranceLimit    = ENDURANCE_LIMIT;
-  m_useDataPath       = false;
+  m_enduranceCycles            = ENDURANCE_CYCLES;
+  m_enduranceTriggers          = ENDURANCE_TRIGGERS;
+  m_enduranceUptime            = ENDURANCE_UPTIME;
+  m_enduranceDowntime          = ENDURANCE_DOWNTIME;
+  m_enduranceLimit             = ENDURANCE_LIMIT;
+  m_enduranceMaxtripsGreen     = ENDURANCE_MAXTRIPS_GREEN;
+  m_enduranceMaxtripsOrange    = ENDURANCE_MAXTRIPS_ORANGE;
+  m_enduranceMinchipsGreen     = ENDURANCE_MINCHIPS_GREEN;
+  m_enduranceMaxfailuresOrange = ENDURANCE_MAXFAILURES_ORANGE;
+  m_useDataPath                = false;
 
   InitParamMap();
 }
@@ -210,6 +214,12 @@ void TScanConfig::InitParamMap()
   fSettings["ENDURANCEUPTIME"]    = &m_enduranceUptime;
   fSettings["ENDURANCEDOWNTIME"]  = &m_enduranceDowntime;
   fSettings["ENDURANCETIMELIMIT"] = &m_enduranceLimit;
+
+
+  fSettings["ENDURANCEMAXTRIPSGREEN"]     = &m_enduranceMaxtripsGreen;
+  fSettings["ENDURANCEMAXTRIPSORANGE"]    = &m_enduranceMaxtripsOrange;
+  fSettings["ENDURANCEMINCHIPSGREEN"]     = &m_enduranceMinchipsGreen;
+  fSettings["ENDURANCEMAXFAILURESORANGE"] = &m_enduranceMaxfailuresOrange;
 
   fSettings["READOUTSPEED"]     = &m_readoutSpeed;
   fSettings["READOUTOCC"]       = &m_readoutOcc;

@@ -143,7 +143,7 @@ protected:
   int                GetPreviousActivityType();
   virtual string     GetPreviousTestType() = 0;
   THicClassification DoCut(THicClassification oldClass, THicClassification failClass, int value,
-                           string cutName, bool greaterThan = false);
+                           string cutName, bool minCut = false);
 
 public:
   TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

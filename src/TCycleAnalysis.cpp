@@ -100,6 +100,12 @@ void TCycleAnalysis::Finalize()
     hicResult->m_avDeltaT /= ((TCycleResult *)m_result)->m_nCycles;
     hicResult->m_avIdda /= ((TCycleResult *)m_result)->m_nCycles;
     hicResult->m_avIddd /= ((TCycleResult *)m_result)->m_nCycles;
+    if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
+      hicResult->m_class = GetClassificationOB(hicResult);
+    }
+    else {
+      std::cout << "Classification not implemented for IB HIC" << std::endl;
+    }
   }
 
   WriteResult();
@@ -107,10 +113,27 @@ void TCycleAnalysis::Finalize()
   m_finished = true;
 }
 
+
+THicClassification TCycleAnalysis::GetClassificationOB(TCycleResultHic *result)
+{
+  THicClassification returnValue = CLASS_GREEN;
+
+  returnValue = DoCut(returnValue, CLASS_ORANGE, result->m_nTrips, "ENDURANCEMAXTRIPSGREEN");
+  returnValue = DoCut(returnValue, CLASS_RED, result->m_nTrips, "ENDURANCEMAXTRIPSORANGE");
+  returnValue =
+      DoCut(returnValue, CLASS_ORANGE, result->m_minWorkingChips, "ENDURANCEMINCHIPSGREEN", true);
+  returnValue =
+      DoCut(returnValue, CLASS_RED, result->m_nChipFailures, "ENDURANCEMAXFAILURESORANGE");
+
+  return returnValue;
+}
+
+
 void TCycleAnalysis::WriteResult()
 {
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/CycleResult_%s.dat", hicResult->GetOutputPath().c_str(),

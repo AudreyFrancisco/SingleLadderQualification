@@ -148,11 +148,11 @@ const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
 }
 
 THicClassification TScanAnalysis::DoCut(THicClassification oldClass, THicClassification failClass,
-                                        int value, string cutName, bool greaterThan)
+                                        int value, string cutName, bool minCut)
 {
   bool failed = false;
   int  cut    = m_config->GetParamValue(cutName);
-  if (greaterThan) {
+  if (minCut) {
     if (value < cut) failed = true;
   }
   else {
