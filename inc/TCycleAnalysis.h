@@ -34,6 +34,7 @@ protected:
 public:
   TCycleResultHic() : TScanResultHic(){};
   void WriteToFile(FILE *fp);
+  void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
 };
 
 class TCycleResult : public TScanResult {

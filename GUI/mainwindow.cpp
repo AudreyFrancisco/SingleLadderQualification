@@ -1514,14 +1514,10 @@ void MainWindow::attachtodatabase()
       activ.Position  = " ";
       activ.Result =
           -999; // apparently has to stay open here, otherwise activity is considered closed
-      if (status) {
-        activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "OPEN");
-        std::cout << "the activ is open" << std::endl;
-      }
-      else {
-        activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSE");
-        std::cout << "the activ is closed" << std::endl;
-      }
+
+      activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "OPEN");
+      std::cout << "the activ is open" << std::endl;
+
 
       // add global parameters (not accessible from within results)
       DbAddParameter(fDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips());
@@ -1566,6 +1562,10 @@ void MainWindow::attachtodatabase()
                                   fIdofoperator);
       myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second,
                                   fIdofoperator);
+      if (status == false) {
+        activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
+        std::cout << "the activ is closed" << std::endl;
+      }
       // TODO: add components (in / out)
       // TODO: add member
       // TODO: close activity (needs implementation of activityChange)
