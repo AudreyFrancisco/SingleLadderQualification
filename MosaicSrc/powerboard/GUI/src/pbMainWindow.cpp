@@ -59,7 +59,7 @@ pbMainWindow::pbMainWindow(QWidget *parent, Qt::WindowFlags fl) : QMainWindow(pa
   // Voltage input string validator
   VbiasValidator = new setValidator(-4.5, 0.0, 2); // from -6.0 to 0.0 volts 2 decimals
   VsetValidator  = new setValidator(1.5, 2.5, 3);  // from 1.5 to 2.0 volts 3 decimals
-  IsetValidator  = new setValidator(0.0, 2.0, 3);  // from 0 to 2.0 Amp 3 decimals
+  IsetValidator  = new setValidator(0.0, 3.0, 3);  // from 0 to 3.0 Amp 3 decimals
 
   // actions
   QAction *fileSaveAction = new QAction("&Save", this);
@@ -434,7 +434,7 @@ void pbMainWindow::channelIset(int ch)
   float   I = IsetText[ch]->text().toFloat();
 
   if (I < 0) I   = 0;
-  if (I > 2.0) I = 2.0;
+  if (I > 3.0) I = 3.0;
   s.setNum(I, 'F', 3);
   IsetText[ch]->setText(s);
 
