@@ -24,6 +24,7 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
+#include <string.h>
 #include <unistd.h>
 
 TBoardType                   fBoardType;
@@ -37,13 +38,15 @@ int myVCASN2  = 64;
 int myVCLIP   = 0;
 int myVRESETD = 147;
 
-int myStrobeLength = 2000; // strobe length in units of 25 ns
-int myStrobeDelay  = 0;
-int myPulseLength  = 0;
+int myStrobeLength = 20; // strobe length in units of 25 ns
+int myStrobeDelay  = 10;
+int myPulseLength  = 4000;
 
-int myPulseDelay = 50;
-int myNTriggers  = 1000;
-// int myNTriggers    = 1000;
+int myPulseDelay = 40;
+// int myNTriggers  = 1000000;
+int myNTriggers = 2000000;
+// int myNTriggers    = 100;
+
 
 char fNameRaw[1024];
 
@@ -126,10 +129,12 @@ void WriteDataToFile(const char *fName, bool Recreate)
         sprintf(fNameChip, "%s.dat", fNameTemp);
       }
       std::cout << "Writing data to file " << fNameChip << std::endl;
-      if (Recreate)
-        fp = fopen(fName, "w");
+      if (Recreate) {
+        fp       = fopen(fNameChip, "w");
+        Recreate = false;
+      }
       else
-        fp = fopen(fName, "a");
+        fp = fopen(fNameChip, "a");
       for (int icol = 0; icol < 512; icol++) {
         for (int iaddr = 0; iaddr < 1024; iaddr++) {
           if (HitData[imod][ichip][icol][iaddr] > 0) {
@@ -138,7 +143,7 @@ void WriteDataToFile(const char *fName, bool Recreate)
           }
         }
       }
-      fclose(fp);
+      if (fp) fclose(fp);
     }
   }
 }
