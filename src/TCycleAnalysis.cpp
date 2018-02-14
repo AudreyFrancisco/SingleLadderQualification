@@ -162,6 +162,32 @@ void TCycleResult::WriteToFileGlobal(FILE *fp)
   fprintf(fp, "Number of cycles: %d\n\n", m_nCycles);
 }
 
+void TCycleResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
+{
+  std::string fileName, cycleName;
+  std::size_t slash;
+  DbAddParameter(db, activity, string("Number of trips"), (float)m_nTrips);
+  DbAddParameter(db, activity, string("Min. number of working chips"), (float)m_minWorkingChips);
+  DbAddParameter(db, activity, string("Number of chip failures"), (float)m_nChipFailures);
+  DbAddParameter(db, activity, string("Av. delta T"), (float)m_avDeltaT);
+  DbAddParameter(db, activity, string("Max. delta T"), (float)m_maxDeltaT);
+  DbAddParameter(db, activity, string("Av. IDDA"), (float)m_avIdda);
+  DbAddParameter(db, activity, string("Min. IDDA"), (float)m_minIdda);
+  DbAddParameter(db, activity, string("Max. IDDA"), (float)m_maxIdda);
+  DbAddParameter(db, activity, string("Av. IDDD"), (float)m_avIddd);
+  DbAddParameter(db, activity, string("Min. IDDD"), (float)m_minIddd);
+  DbAddParameter(db, activity, string("Max. IDDD"), (float)m_maxIddd);
+
+  slash    = string(m_resultFile).find_last_of("/");
+  fileName = string(m_resultFile).substr(slash + 1); // strip path
+
+  slash     = string(m_cycleFile).find_last_of("/");
+  cycleName = string(m_cycleFile).substr(slash + 1); // strip path
+
+  DbAddAttachment(db, activity, attachResult, string(m_resultFile), fileName);
+  DbAddAttachment(db, activity, attachResult, string(m_cycleFile), cycleName);
+}
+
 void TCycleResultHic::WriteToFile(FILE *fp)
 {
   fprintf(fp, "HIC Result:\n\n");
