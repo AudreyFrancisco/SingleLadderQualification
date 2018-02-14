@@ -118,4 +118,8 @@ void TFastPowerTest::Execute()
   m_testHic->PowerOff();
 }
 
-void TFastPowerTest::Terminate() { m_running = false; }
+void TFastPowerTest::Terminate()
+{
+  m_running = false;
+  strcpy(m_state, "Done");
+}
