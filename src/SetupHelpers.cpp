@@ -782,15 +782,10 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
 
   int CtrIntMap[10][2] = {{3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10},
                           {3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10}};
-  // int DataRcvMap[10][2] = //{{7, 6},
-  // {5, 4},
-  //                        {2, 3},
-  //                       {1, 0},
-  //                       {9, 8},
-  int DataRcvMap[10][2] = {{8, 7}, {6, 5}, {4, 3}, {9, 0}, {0, 0},
+  int DataRcvMap[10][2] = {{9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0},
                            {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0}};
-  bool InverRcvMap[10][2] = {{true, false}, {false, false}, {true, false}, {true, false},
-                             {true, false}, {true, false},  {true, false}, {true, false},
+  bool InverRcvMap[10][2] = {{true, false}, {true, false}, {true, false}, {true, false},
+                             {true, false}, {true, false}, {true, false}, {true, false},
                              {true, false}, {true, false}};
 
   std::cout << "Entry SetUp Endurance Test" << std::endl;
