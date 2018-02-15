@@ -1929,9 +1929,8 @@ void MainWindow::exploreendurancebox()
 
 void MainWindow::setdefaultvalues(bool &fit, int &numberofstages)
 {
-  TScanConfig *scanconfig = fConfig->GetScanConfig();
-  fit                     = fConfig->GetScanConfig()->GetSpeedy();
-  numberofstages          = fConfig->GetScanConfig()->GetNMaskStages();
+  fit            = fConfig->GetScanConfig()->GetSpeedy();
+  numberofstages = fConfig->GetScanConfig()->GetNMaskStages();
 }
 
 bool MainWindow::CreateScanObjects(TScanType scanType, TScanConfig *config, TScan **scan,
