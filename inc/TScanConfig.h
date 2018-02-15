@@ -57,12 +57,13 @@ namespace ScanConfig {
   const int READOUTPLLSTAGES = -1; // -1 meaning using the standard setting from the chip config
 
   // current limits for powering test in mA
-  const int POWER_CUT_MINIDDA_OB = 20;
-  const int POWER_CUT_MINIDDD_OB = 50;
-  const int POWER_CUT_MAXIDDA_OB = 200; // for fast power test
-  const int POWER_CUT_MAXIDDD_OB = 200; // for fast power test
-  const int POWER_CUT_MINIDDD_IB = 50;
-  const int POWER_CUT_MINIDDA_IB = 20;
+  const int POWER_CUT_MINIDDA_OB        = 20;
+  const int POWER_CUT_MINIDDD_OB        = 50;
+  const int POWER_CUT_MAXIDDA_OB        = 200; // for fast power test
+  const int POWER_CUT_MAXIDDD_GREEN_OB  = 200; // for fast power test
+  const int POWER_CUT_MAXIDDD_ORANGE_OB = 800; // for fast power test
+  const int POWER_CUT_MINIDDD_IB        = 50;
+  const int POWER_CUT_MINIDDA_IB        = 20;
 
   const int POWER_CUT_MINIDDA_CLOCKED_OB = 150;
   const int POWER_CUT_MINIDDD_CLOCKED_OB = 600;
@@ -178,7 +179,8 @@ private:
   int       m_powerCutMinIdda_OB;
   int       m_powerCutMinIddd_OB;
   int       m_powerCutMaxIdda_OB;
-  int       m_powerCutMaxIddd_OB;
+  int       m_powerCutMaxIddd_Green_OB;
+  int       m_powerCutMaxIddd_Orange_OB;
   int       m_powerCutMinIddaClocked_OB;
   int       m_powerCutMinIdddClocked_OB;
   int       m_powerCutMaxIddaClocked_OB;

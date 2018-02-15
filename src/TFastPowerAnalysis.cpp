@@ -70,8 +70,10 @@ THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents currents
       (currents.idddSwitchon * 1000 < m_config->GetParamValue("MINIDDD_OB")))
     return CLASS_RED;
   if ((currents.iddaSwitchon * 1000 > m_config->GetParamValue("MAXIDDA_OB")) ||
-      (currents.idddSwitchon * 1000 > m_config->GetParamValue("MAXIDDD_OB")))
+      (currents.idddSwitchon * 1000 > m_config->GetParamValue("MAXIDDD_ORANGE_OB")))
     return CLASS_RED;
+  if (currents.idddSwitchon * 1000 > m_config->GetParamValue("MAXIDDD_GREEN_OB"))
+    return CLASS_ORANGE;
 
   // check for absolute value at 3V and for margin from breakthrough
   if (currents.ibias[30] > m_config->GetParamValue("MAXBIAS_3V_IB")) return CLASS_ORANGE;
