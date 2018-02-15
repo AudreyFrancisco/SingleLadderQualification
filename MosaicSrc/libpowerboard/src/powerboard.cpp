@@ -108,7 +108,7 @@ void powerboard::setIth(uint8_t ch, float value)
   // evaluate the dac value from current value
   data = 410 + (3685.0 / 3.0) * value;
 
-  if (data > 0xfff) data = 0xff;
+  if (data > 0x0fff) data = 0x0fff;
 
   dac->WriteUpdateReg(ch & 0x03, data);
 }
