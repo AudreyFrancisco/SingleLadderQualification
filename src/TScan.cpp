@@ -380,6 +380,7 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
     else {
       BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer,
                                 n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+      std::cout << "Event found, channel = " << boardInfo.channel << std::endl;
       // decode Chip event
       if (boardInfo.decoder10b8bError) {
         m_errorCount.n8b10b++;

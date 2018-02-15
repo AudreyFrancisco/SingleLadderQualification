@@ -162,6 +162,7 @@ void TFifoTest::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bo
   }
   catch (std::exception &e) {
     exception = true;
+    // std::cout << "Exception " << e.what() << " when reading low value" << std::endl;
     return;
   }
   exception = false;
@@ -170,6 +171,7 @@ void TFifoTest::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bo
       err = chip->ReadRegister(HighAdd, HighVal);
     }
     catch (std::exception &e) {
+      // std::cout << "Exception " << e.what() << " when reading high value" << std::endl;
       exception = true;
       return;
     }

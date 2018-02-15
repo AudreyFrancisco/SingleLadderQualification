@@ -181,7 +181,6 @@ void MainWindow::open()
   else if (fNumberofscan == OBPower) {
     fileName = "ConfigPower.cfg";
   }
-
   try {
 
     fHicnames.push_back(fHicidnumber);
@@ -246,7 +245,7 @@ void MainWindow::open()
     // fillingvectors();
   }
   catch (exception &e) {
-    //     std::cout<<e.what()<<endl;
+    // std::cout<<e.what()<<endl;
     popup(e.what());
     fProperconfig = false;
     //  std::cout<<properconfig<<"d3"<<endl;
@@ -1930,9 +1929,9 @@ void MainWindow::exploreendurancebox()
 
 void MainWindow::setdefaultvalues(bool &fit, int &numberofstages)
 {
-
-  fit            = fConfig->GetScanConfig()->GetSpeedy();
-  numberofstages = fConfig->GetScanConfig()->GetNMaskStages();
+  TScanConfig *scanconfig = fConfig->GetScanConfig();
+  fit                     = fConfig->GetScanConfig()->GetSpeedy();
+  numberofstages          = fConfig->GetScanConfig()->GetNMaskStages();
 }
 
 bool MainWindow::CreateScanObjects(TScanType scanType, TScanConfig *config, TScan **scan,

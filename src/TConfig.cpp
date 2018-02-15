@@ -406,12 +406,12 @@ void TConfig::DecodeLine(std::string Line)
   // currently only one is written
   // Note: having a config file with parameters for the mosaic board, but a setup with a DAQ board
   // (or vice versa) will issue unknown-parameter warnings...
-  if (ChipStart >= 0 && fChipConfigs.at(ChipStart)->IsParameter(Param)) {
+  if (ChipStart >= 0 && ChipStop > 0 && fChipConfigs.at(ChipStart)->IsParameter(Param)) {
     for (int i = ChipStart; i < ChipStop; i++) {
       fChipConfigs.at(i)->SetParamValue(Param, Value);
     }
   }
-  else if (BoardStart >= 0 && fBoardConfigs.at(BoardStart)->IsParameter(Param)) {
+  else if (BoardStart >= 0 && BoardStop > 0 && fBoardConfigs.at(BoardStart)->IsParameter(Param)) {
     for (int i = BoardStart; i < BoardStop; i++) {
       fBoardConfigs.at(i)->SetParamValue(Param, Value);
     }

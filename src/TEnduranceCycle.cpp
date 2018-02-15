@@ -160,7 +160,7 @@ void TEnduranceCycle::ConfigureMask(TAlpide *chip)
 void TEnduranceCycle::Execute()
 {
   // 1) Power on all HICs, check for trips, measure currents
-  std::cout << "  Powering on";
+  std::cout << "  Powering on" << std::endl;
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     m_hics.at(ihic)->PowerOn();
