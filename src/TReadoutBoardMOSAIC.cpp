@@ -214,7 +214,10 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 
   // check for data in the receivers buffer
   for (int i = 0; i < MAX_MOSAICTRANRECV; i++) {
-    if (alpideDataParser[i]->hasData()) return (alpideDataParser[i]->ReadEventData(nBytes, buffer));
+    if (alpideDataParser[i]->hasData()) {
+      std::cout << "has data in receivers" << std::endl;
+      return (alpideDataParser[i]->ReadEventData(nBytes, buffer));
+    }
   }
 
   // try to read from TCP connection
@@ -231,7 +234,10 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
     }
 
     // get event data from the selected data receiver
-    if (dr->hasData()) return (dr->ReadEventData(nBytes, buffer));
+    if (dr->hasData()) {
+      std::cout << "has data in selected receiver" << std::endl;
+      return (dr->ReadEventData(nBytes, buffer));
+    }
   }
   return -1;
 }

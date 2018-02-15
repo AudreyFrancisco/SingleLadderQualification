@@ -19,6 +19,7 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 #include "TAlpide.h"
+#include "TChipConfig.h"
 #include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
@@ -44,7 +45,7 @@ int myPulseLength  = 4000;
 
 int myPulseDelay = 40;
 // int myNTriggers  = 1000000;
-int myNTriggers = 2000000;
+int myNTriggers = 200;
 // int myNTriggers    = 100;
 
 
@@ -201,17 +202,37 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fclose(fp);
 }
 
+void WriteChipList(const char *fName, bool Recreate)
+{
+  char  Chip[200];
+  FILE *fp;
+
+  if (Recreate) {
+    fp       = fopen(Chip, "w");
+    Recreate = false;
+  }
+  else
+    fp = fopen(Chip, "a");
+  for (unsigned int i = 0; i < fConfig->GetNChips(); i++) {
+    TChipConfig *chipConfig = fConfig->GetChipConfig(i);
+    int          chipId     = chipConfig->GetChipId();
+    fprintf(fp, " %d\n", chipId);
+  }
+  if (fp) fclose(fp);
+}
+
 void scan()
 {
-  unsigned char         buffer[1024 * 4000];
-  int                   n_bytes_data, n_bytes_header, n_bytes_trailer, oldHits;
-  int                   prioErrors;
-  TBoardHeader          boardInfo;
+  unsigned char buffer[1024 * 4000];
+  int           n_bytes_data, n_bytes_header, n_bytes_trailer, oldHits;
+  int           prioErrors;
+  TBoardHeader  boardInfo;
+
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
   FILE *rawFile = fopen(fNameRaw, "w");
 
-  int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 1;
+  int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 10;
 
   nTrains = myNTriggers / nTrigsPerTrain;
   nRest   = myNTriggers % nTrigsPerTrain;
@@ -226,44 +247,47 @@ void scan()
   if (myMOSAIC) {
     myMOSAIC->StartRun();
   }
-
-  int count;
-  for (int itrain = 0; itrain <= nTrains; itrain++) {
-    std::cout << "Train: " << itrain << std::endl;
-    if (itrain == nTrains) {
-      nTrigsThisTrain = nRest;
-    }
-    else {
-      nTrigsThisTrain = nTrigsPerTrain;
-    }
-
-    fBoards.at(0)->Trigger(nTrigsThisTrain);
-
-    int itrg = 0;
-    count    = 0;
-    while (itrg < nTrigsThisTrain) {
-      if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) ==
-          -1) { // no event available in buffer yet, wait a bit
-        usleep(100);
-        if (count > 50) break;
-        count++;
-        continue;
+  for (unsigned int i = 0; i < fConfig->GetNChips(); i++) {
+    TChipConfig *chipConfig = fConfig->GetChipConfig(i);
+    std::cout << "chipId  " << chipConfig->GetChipId() << std::endl;
+    int count;
+    for (int itrain = 0; itrain <= nTrains; itrain++) {
+      std::cout << "Train: " << itrain << std::endl;
+      if (itrain == nTrains) {
+        nTrigsThisTrain = nRest;
       }
       else {
-        // decode DAQboard event
-        BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data,
-                                  n_bytes_header, n_bytes_trailer, boardInfo);
-        // decode Chip event
-        int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
-        oldHits               = Hits->size();
-        AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
-                                   boardInfo.channel, prioErrors);
-        WriteRawData(rawFile, Hits, oldHits, boardInfo);
-        itrg++;
+        nTrigsThisTrain = nTrigsPerTrain;
       }
+
+      fBoards.at(0)->Trigger(nTrigsThisTrain);
+
+      int itrg = 0;
+      count    = 0;
+      while (itrg < nTrigsThisTrain) {
+        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) ==
+            -1) { // no event available in buffer yet, wait a bit
+          usleep(100);
+          if (count > 50) break;
+          count++;
+          continue;
+        }
+        else {
+          // decode DAQboard event
+          BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer,
+                                    n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+          // decode Chip event
+          int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
+          oldHits               = Hits->size();
+          AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
+                                     boardInfo.channel, prioErrors);
+          WriteRawData(rawFile, Hits, oldHits, boardInfo);
+          itrg++;
+        }
+      }
+      // std::cout << "Number of hits: " << Hits->size() << std::endl;
+      CopyHitData(Hits);
     }
-    // std::cout << "Number of hits: " << Hits->size() << std::endl;
-    CopyHitData(Hits);
   }
   if (myMOSAIC) {
     myMOSAIC->StopRun();
@@ -277,7 +301,7 @@ int main(int argc, char **argv)
   decodeCommandParameters(argc, argv);
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
-  char Suffix[20], fName[100];
+  char Suffix[30], fName[1000];
 
   ClearHitData();
   time_t     t   = time(0); // get time now
@@ -320,6 +344,9 @@ int main(int argc, char **argv)
 
     sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
     WriteScanConfig(fName, fChips.at(0), myDAQBoard);
+
+    sprintf(fName, "Data/ChipList_%s.dat", Suffix);
+    WriteChipList(fName, true);
 
     if (myDAQBoard) {
       myDAQBoard->PowerOff();
