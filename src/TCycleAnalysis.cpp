@@ -45,6 +45,7 @@ void TCycleAnalysis::Finalize()
   ((TCycleResult *)m_result)->m_nCycles = counters.size();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
     TCycleResultHic *hicResult =
         (TCycleResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
 
@@ -94,6 +95,7 @@ void TCycleAnalysis::Finalize()
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
     TCycleResultHic *hicResult =
         (TCycleResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
 
