@@ -861,7 +861,6 @@ void MainWindow::fillingOBvectors()
 
 void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis *> a)
 {
-
   ui->statuslabel->setVisible(true);
   ui->statuslabel->update();
 
@@ -878,13 +877,11 @@ void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis 
         a.at(i)->Initialize();
         std::thread analysisThread(&TScanAnalysis::Run, a[i]);
         scanThread.join();
-
         if (fScanstatuslabels.at(i) != 0) {
           fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
           fScanstatuslabels[i]->update();
           qApp->processEvents();
         }
-
         analysisThread.join();
         a.at(i)->Finalize();
         if (fScanstatuslabels.at(i) != 0) {
@@ -1074,7 +1071,7 @@ void MainWindow::applytests()
 {
   writingdb = false;
   for (unsigned int i = 0; i < fHICs.size(); i++) {
-    if (fHICs.at(i)->IsEnabled()) {
+    if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
       int oldtests;
       oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
       std::cout << "the number of old tests is " << oldtests << std::endl;
@@ -1472,9 +1469,8 @@ void MainWindow::attachtodatabase()
   if (fDB) delete fDB;
   fDB = new AlpideDB(fDatabasetype);
   SetHicClassifications();
-
   for (unsigned int i = 0; i < fHICs.size(); i++) {
-    if (fHICs.at(i)->IsEnabled()) {
+    if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
       QString            comment;
       QDateTime          date;
       ActivityDB::actUri uri;
