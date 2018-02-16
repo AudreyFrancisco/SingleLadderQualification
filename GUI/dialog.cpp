@@ -7,15 +7,19 @@
  ****************************************************************************/
 
 #include "dialog.h"
-
 #include "ui_dialog.h"
 
 Dialog::Dialog(QWidget *parent) : QDialog(parent), ui(new Ui::Dialog)
 {
   ui->setupUi(this);
-  connect(ui->quitex, SIGNAL(clicked()), this, SLOT(close()));
+  connect(ui->quitex, SIGNAL(clicked()), this->parent(), SLOT(nextstep()));
+  connect(ui->quit, SIGNAL(clicked()), this, SLOT(close()));
 }
 
 Dialog::~Dialog() { delete ui; }
 
 void Dialog::append(QString error) { ui->labelex->setText(error); }
+
+void Dialog::hideignore() { ui->quit->hide(); }
+
+void Dialog::hidequit() { ui->quitex->hide(); }

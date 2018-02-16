@@ -7,6 +7,7 @@
 #include "calibrationpb.h"
 #include "checkpbconfig.h"
 #include "components.h"
+#include "databasefailure.h"
 #include "databaseselection.h"
 #include "dbnotice.h"
 #include "dialog.h"
@@ -84,7 +85,7 @@ public slots:
 
   void setandgetcalibration();
   void setTopBottom(int unit);
-
+  void attachtodatabaseretry();
   void attachtodatabase();
   void findidoftheactivitytype(std::string activitytypename, int &id);
   void locationcombo();
@@ -157,6 +158,7 @@ private:
   Testingprogress *  fProgresswindow;
   DatabaseSelection *fDatabasewindow;
   resultstorage *    fResultwindow;
+  Databasefailure *  fDatabasefailure;
   void scanLoop(TScan *myScan);
   std::vector<TScan *>         fScanVector;
   std::vector<TScanAnalysis *> fAnalysisVector;
@@ -192,13 +194,14 @@ private:
   std::vector<QPushButton *> fEndurancemodules;
   bool                       fDatabasetype;
   bool                       fScanfit;
+  bool                       fStatus;
   void makeDir(const char *aDir);
   bool CreateScanObjects(TScanType scanType, TScanConfig *config, TScan **scan,
                          TScanAnalysis **analysis, TScanResult **result, bool &hasButton);
   void AddScan(TScanType scanType, TScanResult *aResult = 0);
   void ClearVectors();
   int  GetNButtons();
-  void WriteToEos(string hicName, ActivityDB::actUri &uri);
+  void WriteToEos(string hicName, ActivityDB::actUri &uri, bool write);
   string GetServiceAccount(string Institute, string &folder);
   string GetTestFolder();
   THic *FindHic(string hicName);
@@ -212,6 +215,7 @@ private:
   Components *     fComponentWindow;
   bool             fstop;
   int              fComponentTypeID;
+  std::vector<int> fActivityResults;
 
 private slots:
   void button_obm1_clicked();

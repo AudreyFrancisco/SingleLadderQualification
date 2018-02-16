@@ -13,7 +13,8 @@ Components::~Components() { delete ui; }
 void Components::WriteToLabel(QString name)
 {
   QString comment;
-  comment = "The component: \n" + name +
-            "\nis not a member of the database. \nHow to you want to proceed?";
+  comment = "The component: \n" + name + "\nis not a member of the database. \nHow to you want to "
+                                         "proceed? \nIn case you decide to continue \nkeep in mind "
+                                         "that the activity \nwill remain open in the database";
   ui->compstatus->setText(comment);
 }
