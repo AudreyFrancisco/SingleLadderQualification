@@ -35,7 +35,8 @@ SOURCES += main.cpp\
            resultstorage.cpp \
            activitystatus.cpp \
            dbnotice.cpp \
-           components.cpp
+           components.cpp \
+    databasefailure.cpp
 
 HEADERS  += mainwindow.h \
             dialog.h \
@@ -49,7 +50,8 @@ HEADERS  += mainwindow.h \
             resultstorage.h \
             activitystatus.h \
             dbnotice.h \
-            components.h
+            components.h \
+    databasefailure.h
 
 FORMS    += mainwindow.ui \
             dialog.ui \
@@ -62,7 +64,8 @@ FORMS    += mainwindow.ui \
             resultstorage.ui \
             activitystatus.ui \
             dbnotice.ui \
-            components.ui
+            components.ui \
+    databasefailure.ui
 
 INCLUDEPATH += $(ROOTSYS)/include /usr/local/include
 

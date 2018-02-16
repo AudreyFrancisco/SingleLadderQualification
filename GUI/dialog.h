@@ -14,14 +14,14 @@ public:
   explicit Dialog(QWidget *parent = 0);
   ~Dialog();
   void append(QString error);
+  void hideignore();
+  void hidequit();
 
 private:
   Ui::Dialog *ui;
 
-private slots:
 
-  // public slots:
-  // void append(QString error);
+private slots:
 };
 
 #endif // DIALOG_H
