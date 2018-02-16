@@ -208,11 +208,11 @@ void WriteChipList(const char *fName, bool Recreate)
   FILE *fp;
 
   if (Recreate) {
-    fp       = fopen(Chip, "w");
+    fp       = fopen(fName, "w");
     Recreate = false;
   }
   else
-    fp = fopen(Chip, "a");
+    fp = fopen(fName, "a");
   for (unsigned int i = 0; i < fConfig->GetNChips(); i++) {
     TChipConfig *chipConfig = fConfig->GetChipConfig(i);
     int          chipId     = chipConfig->GetChipId();
