@@ -33,6 +33,7 @@ private:
   QString            toptwo, topthree, topfour, topfive;
   QString            downone, downtwo, downthree, downfour, downfive;
   MainWindow *       fmainwindow;
+  int                fCounter;
 
 public slots:
   virtual void getlocationcombo(int value);
@@ -40,6 +41,10 @@ public slots:
   virtual void adjustendurance();
   virtual void hideendurance();
   virtual void GetTestTypeName(TTestType &typetest, QString &testname);
+  virtual void nextstep();
+  virtual void getwindow();
+  virtual int  getcounter();
+
 
 private slots:
   void popupmessage(QString m);

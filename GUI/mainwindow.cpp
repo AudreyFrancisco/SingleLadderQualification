@@ -690,6 +690,7 @@ void MainWindow::popup(QString message)
 
   fWindowex = new Dialog(this);
   fWindowex->append(message);
+  fWindowex->hidequit();
   fWindowex->show();
 }
 
@@ -801,7 +802,7 @@ void MainWindow::fillingOBvectors()
   ClearVectors();
 
   AddScan(STPower);
-
+  return;
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
@@ -927,7 +928,7 @@ void MainWindow::connectcombo(int value){
     ui->testtypeselected->clear();
     ui->testtypeselected->setText("OB HIC Qualification Test");
 
-    findidoftheactivitytype("OB HIC Qualification Test",idofactivitytype);
+    ("OB HIC Qualification Test",idofactivitytype);
     std::cout<<"the id of the selected test: "<<idofactivitytype<<std::endl;
     locationcombo();
 
@@ -944,7 +945,7 @@ void MainWindow::connectcombo(int value){
       //   ui->start_test->show();
       // qDebug()<<"IB Qualification test selected";
       ui->testtypeselected->setText("IB HIC Qualification Test");
-      findidoftheactivitytype("IB HIC Qualification Test",idofactivitytype);
+      ("IB HIC Qualification Test",idofactivitytype);
       std::cout<<"the id of the selected test: "<<idofactivitytype<<std::endl;
       locationcombo();
 
@@ -964,7 +965,7 @@ th loading of the cfg.
       ui->testtypeselected->clear();
       //  ui->start_test->show();
       ui->testtypeselected->setText("OB Endurance Test");
-      findidoftheactivitytype("OB HIC Endurance Test",idofactivitytype);
+      ("OB HIC Endurance Test",idofactivitytype);
       locationcombo();
       settingswindow->connectlocationcombo(locdetails);
       settingswindow->adjustendurance();
@@ -991,7 +992,7 @@ th loading of the cfg.
       // ui->start_test->show();
 
       ui->testtypeselected->setText("OB HIC Reception Test");
-      findidoftheactivitytype("OB HIC Reception Test",idofactivitytype);
+      ("OB HIC Reception Test",idofactivitytype);
       std::cout<<"the id of the selected test: "<<idofactivitytype<<std::endl;
       locationcombo();
 
@@ -1328,27 +1329,30 @@ void MainWindow::quitall()
   }
 }
 
-void MainWindow::WriteToEos(string hicName, ActivityDB::actUri &uri)
+void MainWindow::WriteToEos(string hicName, ActivityDB::actUri &uri, bool write)
 {
-  char   command[256];
-  char   path[256];
   string instFolder;
   string account    = GetServiceAccount(fInstitute.toStdString(), instFolder);
   string testFolder = GetTestFolder();
+  if (write) {
+    char command[256];
+    sprintf(
+        command,
+        "rsync -rv -e \"ssh -K\" %s %s@lxplus.cern.ch:/eos/project/a/alice-its/HicTests/%s/%s/%s",
+        (fConfig->GetScanConfig()->GetDataPath(hicName)).c_str(), account.c_str(),
+        testFolder.c_str(), instFolder.c_str(),
+        (fConfig->GetScanConfig()->GetRemoteHicPath(hicName)).c_str());
+    std::cout << "Trying to copy to eos with command " << command << std::endl;
+    int status = system(command);
+    std::cout << "Done, status code = " << status << std::endl;
+  }
 
-  sprintf(command,
-          "rsync -rv -e \"ssh -K\" %s %s@lxplus.cern.ch:/eos/project/a/alice-its/HicTests/%s/%s/%s",
-          (fConfig->GetScanConfig()->GetDataPath(hicName)).c_str(), account.c_str(),
-          testFolder.c_str(), instFolder.c_str(),
-          (fConfig->GetScanConfig()->GetRemoteHicPath(hicName)).c_str());
+  char path[256];
   sprintf(path, "eos/project/a/alice-its/HicTests/%s/%s/%s", testFolder.c_str(), instFolder.c_str(),
           (fConfig->GetScanConfig()->GetRemoteHicPath(hicName)).c_str());
 
   uri.Description = "uri path";
   uri.Path        = std::string(path);
-  std::cout << "Trying to copy to eos with command " << command << std::endl;
-  int status = system(command);
-  std::cout << "Done, status code = " << status << std::endl;
 }
 
 // TODO: complete
@@ -1458,10 +1462,7 @@ int MainWindow::GetTime()
 
 void MainWindow::attachtodatabase()
 {
-  if (fDB) {
-    delete fDB;
-  }
-  fDB = new AlpideDB(fDatabasetype);
+  fActivityResults.clear();
   if (fResultwindow->isVisible()) {
     fResultwindow->close();
   }
@@ -1474,11 +1475,12 @@ void MainWindow::attachtodatabase()
       QString            comment;
       QDateTime          date;
       ActivityDB::actUri uri;
-      WriteToEos(fHICs.at(i)->GetDbId(), uri);
-      bool status;
+      bool               write;
+      write = true;
+      WriteToEos(fHICs.at(i)->GetDbId(), uri, write);
       fActivitywindow = new ActivityStatus(this);
       fActivitywindow->exec();
-      fActivitywindow->getactivitystatus(status);
+      fActivitywindow->getactivitystatus(fStatus);
       fActivitywindow->GetComment(comment);
       std::string path;
       path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) + "/Comment.txt";
@@ -1557,7 +1559,7 @@ void MainWindow::attachtodatabase()
                                   fIdofoperator);
       myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second,
                                   fIdofoperator);
-      if (status == false) {
+      if (fStatus == false) {
         activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
         std::cout << "the activ is closed" << std::endl;
       }
@@ -1572,16 +1574,32 @@ void MainWindow::attachtodatabase()
       // std::cout << "trying to close activity" << std::endl;
       // activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSED");
       activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
-      std::cout << "the activity result is: " << activ.Result << std::endl;
       myactivity->Change(&activ);
-
+      std::cout << "the activity result is: " << activ.Result << std::endl;
+      fActivityResults.push_back(activ.Result);
       delete myactivity;
       delete fMfile;
     }
   }
   delete fDB;
-  fDB       = 0x0;
-  writingdb = true;
+  fDB = 0x0;
+  for (unsigned int i = 0; i < fActivityResults.size(); i++) {
+    if (fActivityResults.at(i) != -1) {
+      writingdb = true;
+    }
+    else {
+      writingdb = false;
+      break;
+    }
+  }
+  // checking ...
+  // writingdb=false;
+  if (writingdb == false) {
+    if (!fDatabasefailure) {
+      fDatabasefailure = new Databasefailure(this);
+    }
+    fDatabasefailure->exec();
+  }
 }
 
 void MainWindow::ClearVectors()
@@ -2280,7 +2298,7 @@ void MainWindow::fillingendurancevectors()
 
 void MainWindow::ConnectTestCombo(int value)
 {
-  fCounter          = 0;
+  fCounter          = 1;
   fIdofactivitytype = 0;
   ui->testtypeselected->clear();
   fSettingswindow->hideendurance();
@@ -2290,6 +2308,15 @@ void MainWindow::ConnectTestCombo(int value)
   std::string name;
   name.append(fTestname.toStdString());
   findidoftheactivitytype(name, fIdofactivitytype);
+  // fIdofactivitytype=-1;
+  if (fIdofactivitytype == -1) {
+    fSettingswindow->getwindow();
+    fCounter = fSettingswindow->getcounter();
+  }
+  if (fCounter == 0) {
+    fSettingswindow->close();
+    return;
+  }
   std::cout << "the id of the selected test: " << fIdofactivitytype << std::endl;
   locationcombo();
   fSettingswindow->connectlocationcombo(fLocdetails);
@@ -2369,4 +2396,125 @@ void MainWindow::fillingfastpower()
 {
   ClearVectors();
   AddScan(STFastPowerTest);
+}
+
+void MainWindow::attachtodatabaseretry()
+{
+  SetHicClassifications();
+  fDatabasefailure->close();
+  if (fDB) delete fDB;
+  fDB = new AlpideDB(fDatabasetype);
+  for (unsigned int i = 0; i < fHICs.size(); i++) {
+    if (fHICs.at(i)->IsEnabled()) {
+      QDateTime          date;
+      ActivityDB::actUri uri;
+      bool               write;
+      write = false;
+      WriteToEos(fHICs.at(i)->GetDbId(), uri, write);
+      std::string path;
+      path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) + "/Comment.txt";
+
+      ActivityDB *myactivity = new ActivityDB(fDB);
+
+      ActivityDB::activity activ;
+
+      // TODO: check that the idof... are filled in the correct place
+      // set activity parameters
+      activ.Type      = fIdofactivitytype;
+      activ.Location  = fIdoflocationtype;
+      activ.User      = fIdofoperator;
+      activ.StartDate = date.currentDateTime().toTime_t();
+      activ.EndDate   = date.currentDateTime().toTime_t();
+      activ.Lot       = " ";
+      activ.Name      = CreateActivityName(fHICs.at(i)->GetDbId(), fConfig->GetScanConfig());
+      activ.Position  = " ";
+      activ.Result =
+          -999; // apparently has to stay open here, otherwise activity is considered closed
+
+      activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "OPEN");
+      std::cout << "the activ is open" << std::endl;
+
+
+      // add global parameters (not accessible from within results)
+      DbAddParameter(fDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips());
+      DbAddParameter(fDB, activ, "Time", GetTime());
+
+      // loop over results and write to DB
+      for (unsigned int j = 0; j < fresultVector.size(); j++) {
+        if (fresultVector[j] != 0) {
+          std::map<std::string, TScanResultHic *> mymap = fresultVector.at(j)->GetHicResults();
+          for (auto ihic = mymap.begin(); ihic != mymap.end(); ++ihic) {
+            TScanResultHic *result = (TScanResultHic *)ihic->second;
+            if (ihic->first.compare(fHicnames.at(i).toStdString()) == 0) {
+              result->WriteToDB(fDB, activ);
+            }
+          }
+        }
+      }
+
+      // attach config file
+      if (fNumberofscan == OBQualification || fNumberofscan == OBReception ||
+          fNumberofscan == OBEndurance) {
+        DbAddAttachment(fDB, activ, attachConfig, string("Config.cfg"), string("Config.cfg"));
+      }
+      else if (fNumberofscan == IBQualification) {
+        DbAddAttachment(fDB, activ, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
+      }
+      else if (fNumberofscan == OBPower) {
+        DbAddAttachment(fDB, activ, attachConfig, string("ConfigPower.cfg"),
+                        string("ConfigPower.cfg"));
+      }
+      DbAddAttachment(fDB, activ, attachText, string(path), string("Comment.txt"));
+      DbAddMember(fDB, activ, fIdofoperator);
+
+      std::vector<ActivityDB::actUri> uris;
+
+      uris.push_back(uri);
+
+      myactivity->Create(&activ);
+      cout << myactivity->DumpResponse() << endl;
+      myactivity->AssignUris(activ.ID, fIdofoperator, (&uris));
+      myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).first,
+                                  fIdofoperator);
+      myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second,
+                                  fIdofoperator);
+      if (fStatus == false) {
+        activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
+        std::cout << "the activ is closed" << std::endl;
+      }
+      // TODO: add components (in / out)
+      // TODO: add member
+      // TODO: close activity (needs implementation of activityChange)
+      //      e.g.
+      //      activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSED");
+      //      myactivity->Change (&activ);
+      //   check that activity ID (not activity type ID) is set within activ
+
+      // std::cout << "trying to close activity" << std::endl;
+      // activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSED");
+      activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
+      myactivity->Change(&activ);
+      std::cout << "the activity result is: " << activ.Result << std::endl;
+      fActivityResults.push_back(activ.Result);
+      delete myactivity;
+    }
+  }
+  delete fDB;
+  fDB = 0x0;
+  for (unsigned int i = 0; i < fActivityResults.size(); i++) {
+    if (fActivityResults.at(i) != -1) {
+      writingdb = true;
+    }
+    else {
+      writingdb = false;
+      break;
+    }
+  }
+  if (writingdb == false) {
+    if (!fDatabasefailure) {
+
+      fDatabasefailure = new Databasefailure(this);
+    }
+    fDatabasefailure->exec();
+  }
 }
