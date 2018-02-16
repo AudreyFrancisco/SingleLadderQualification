@@ -133,8 +133,8 @@ namespace ScanConfig {
   const float VOLTAGE_SCALE = 1.0;
   const float BACKBIAS      = 0;
   const int   NOMINAL       = 0;
-  const int   ENDURANCE_CYCLES             = 5;  // total number of cycles
-  const int   ENDURANCE_UPTIME             = 60; // up and down wait time in seconds
+  const int   ENDURANCE_CYCLES             = 3000; // total number of cycles
+  const int   ENDURANCE_UPTIME             = 60;   // up and down wait time in seconds
   const int   ENDURANCE_DOWNTIME           = 120;
   const int   ENDURANCE_TRIGGERS           = 10000;
   const int   ENDURANCE_LIMIT              = 168; // time limit in hours

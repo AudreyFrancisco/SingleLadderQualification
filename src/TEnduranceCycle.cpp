@@ -48,6 +48,7 @@ void TEnduranceCycle::ClearCounters()
 {
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_nWorkingChips = 0;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_trip          = false;
   }
 }
 
