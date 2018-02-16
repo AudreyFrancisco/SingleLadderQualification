@@ -139,9 +139,9 @@ namespace ScanConfig {
   const int   ENDURANCE_TRIGGERS           = 10000;
   const int   ENDURANCE_LIMIT              = 168; // time limit in hours
   const int   ENDURANCE_MAXTRIPS_GREEN     = 0;
-  const int   ENDURANCE_MAXTRIPS_ORANGE    = 1;
+  const int   ENDURANCE_MAXTRIPS_ORANGE    = 3; // approx. 1 per 1000 cycles
   const int   ENDURANCE_MINCHIPS_GREEN     = 14;
-  const int   ENDURANCE_MAXFAILURES_ORANGE = 1;
+  const int   ENDURANCE_MAXFAILURES_ORANGE = 30; // approx. 1 per 100 cycles
 }
 
 class TScanConfig {
