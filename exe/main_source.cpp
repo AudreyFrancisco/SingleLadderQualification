@@ -204,7 +204,6 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 
 void WriteChipList(const char *fName, bool Recreate)
 {
-  char  Chip[200];
   FILE *fp;
 
   if (Recreate) {
