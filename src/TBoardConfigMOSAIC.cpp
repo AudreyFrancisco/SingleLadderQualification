@@ -35,6 +35,7 @@ TBoardConfigMOSAIC::TBoardConfigMOSAIC(const char *AConfigFileName, int ABoardIn
   Inverted          = DEF_POLARITYINVERSION;
   SpeedMode         = DEF_SPEEDMODE;
   ManchesterDisable = DEF_MANCHESTERDISABLE;
+  MasterSlave       = DEF_MASTERSLAVE;
 
   strcpy(IPAddress, DEF_IP_ADDRESS);
   if (AConfigFileName) { // Read Configuration file
@@ -62,6 +63,7 @@ void TBoardConfigMOSAIC::InitParamMap()
   fSettings["DATALINKPOLARITY"]          = &Inverted;
   fSettings["DATALINKSPEED"]             = &SpeedMode;
   fSettings["MANCHESTERDISABLED"]        = &ManchesterDisable;
+  fSettings["MASTERSLAVE"]               = &MasterSlave;
   TBoardConfig::InitParamMap();
 }
 
