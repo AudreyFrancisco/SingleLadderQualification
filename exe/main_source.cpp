@@ -246,50 +246,45 @@ void scan()
   for (const auto &rBoard : fBoards)
     rBoard->StartRun();
 
-  for (unsigned int i = 0; i < fConfig->GetNChips(); i++) {
-    TChipConfig *chipConfig = fConfig->GetChipConfig(i);
-    std::cout << "chipId  " << chipConfig->GetChipId() << std::endl;
+  int count;
+  for (int itrain = 0; itrain <= nTrains; itrain++) {
+    std::cout << "Train: " << itrain << std::endl;
 
-    int count;
-    for (int itrain = 0; itrain <= nTrains; itrain++) {
-      std::cout << "Train: " << itrain << std::endl;
+    for (const auto &rBoard : fBoards) {
+      rBoard->Trigger(nTrigsPerTrain);
+    }
 
-      for (const auto &rBoard : fBoards) {
-        rBoard->Trigger(nTrigsPerTrain);
-      }
+    for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
+      int itrg = 0;
+      count    = 0;
 
-
-      for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
-        int itrg = 0;
-        count    = 0;
-
-        int fEnabled = fEnPerBoard.at(ib);
-        while (itrg < nTrigsPerTrain * fEnabled) {
-          if (fBoards.at(ib)->ReadEventData(n_bytes_data, buffer) ==
-              -1) { // no event available in buffer yet, wait a bit
-            usleep(100);
-            if (count > 50) break;
-            count++;
-            continue;
-          }
-          else {
-            // decode event
-            BoardDecoder::DecodeEvent(fBoards.at(ib)->GetConfig()->GetBoardType(), buffer,
-                                      n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-            // decode Chip event
-            int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
-            oldHits               = Hits->size();
-            AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
-                                       boardInfo.channel, prioErrors);
-            WriteRawData(rawFile, Hits, oldHits, boardInfo);
-            itrg++;
-          }
+      int fEnabled = fEnPerBoard.at(ib);
+      while (itrg < nTrigsPerTrain * fEnabled) {
+        if (fBoards.at(ib)->ReadEventData(n_bytes_data, buffer) ==
+            -1) { // no event available in buffer yet, wait a bit
+          usleep(100);
+          if (count > 50) break;
+          count++;
+          continue;
+        }
+        else {
+          // decode event
+          BoardDecoder::DecodeEvent(fBoards.at(ib)->GetConfig()->GetBoardType(), buffer,
+                                    n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+          // decode Chip event
+          int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
+          oldHits               = Hits->size();
+          AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
+                                     boardInfo.channel, prioErrors);
+          WriteRawData(rawFile, Hits, oldHits, boardInfo);
+          itrg++;
         }
       }
-      // std::cout << "Number of hits: " << Hits->size() << std::endl;
-      CopyHitData(Hits);
     }
+    // std::cout << "Number of hits: " << Hits->size() << std::endl;
+    CopyHitData(Hits);
   }
+
 
   std::cout << std::endl;
   for (const auto &rBoard : fBoards) {
@@ -318,6 +313,19 @@ int main(int argc, char **argv)
 
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(fBoards.at(0));
   if (fBoards.size()) {
+
+    fEnPerBoard.resize(fBoards.size());
+    for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
+
+      fBoards.at(ib)->SendOpCode(Alpide::OPCODE_GRST);
+      fBoards.at(ib)->SendOpCode(Alpide::OPCODE_PRST);
+
+      for (unsigned int i = 0; i < fChips.size(); i++) {
+        if (fChips.at(i)->GetConfig()->IsEnabled() &&
+            fChips.at(i)->GetReadoutBoard() == fBoards.at(ib))
+          fEnPerBoard.at(ib)++;
+      }
+    }
 
     for (const auto &rBoard : fBoards) {
       rBoard->SendOpCode(Alpide::OPCODE_GRST);

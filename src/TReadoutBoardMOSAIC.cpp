@@ -211,11 +211,9 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 {
   TAlpideDataParser *dr;
   long               readDataSize;
-  std::cout << "Read Event Data was called!" << std::endl;
   // check for data in the receivers buffer
   for (int i = 0; i < MAX_MOSAICTRANRECV; i++) {
     if (alpideDataParser[i]->hasData()) {
-      std::cout << "has data in receivers" << std::endl;
       return (alpideDataParser[i]->ReadEventData(nBytes, buffer));
     }
   }
@@ -235,7 +233,6 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 
     // get event data from the selected data receiver
     if (dr->hasData()) {
-      std::cout << "has data in selected receiver" << std::endl;
       return (dr->ReadEventData(nBytes, buffer));
     }
   }
