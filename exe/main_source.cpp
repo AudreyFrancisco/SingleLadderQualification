@@ -33,6 +33,8 @@ std::vector<TReadoutBoard *> fBoards;
 std::vector<TAlpide *>       fChips;
 TConfig *                    fConfig;
 
+std::vector<int> fEnPerBoard;
+
 int myVCASN   = 57;
 int myITHR    = 51;
 int myVCASN2  = 64;
@@ -45,7 +47,7 @@ int myPulseLength  = 4000;
 
 int myPulseDelay = 40;
 // int myNTriggers  = 1000000;
-int myNTriggers = 3;
+int myNTriggers = 200;
 // int myNTriggers    = 100;
 
 
@@ -231,7 +233,7 @@ void scan()
 
   FILE *rawFile = fopen(fNameRaw, "w");
 
-  int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 1;
+  int nTrains, nRest, nTrigsPerTrain = 1;
 
   nTrains = myNTriggers / nTrigsPerTrain;
   nRest   = myNTriggers % nTrigsPerTrain;
@@ -241,62 +243,61 @@ void scan()
   std::cout << "NTrains: " << nTrains << std::endl;
   std::cout << "NRest: " << nRest << std::endl;
 
-  TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(fBoards.at(0));
+  for (const auto &rBoard : fBoards)
+    rBoard->StartRun();
 
-  if (myMOSAIC) {
-    std::cout << "mosaic found" << std::endl;
-    myMOSAIC->StartRun();
-  }
+  for (unsigned int i = 0; i < fConfig->GetNChips(); i++) {
+    TChipConfig *chipConfig = fConfig->GetChipConfig(i);
+    std::cout << "chipId  " << chipConfig->GetChipId() << std::endl;
 
-  int count;
-  for (int itrain = 0; itrain <= nTrains; itrain++) {
-    std::cout << "Train: " << itrain << std::endl;
-    for (unsigned int i = 0; i < fConfig->GetNChips(); i++) {
-      TChipConfig *chipConfig = fConfig->GetChipConfig(i);
-      std::cout << "chipId  " << chipConfig->GetChipId() << std::endl;
-    }
-    if (itrain == nTrains) {
-      nTrigsThisTrain = nRest;
-    }
-    else {
-      nTrigsThisTrain = nTrigsPerTrain;
-    }
+    int count;
+    for (int itrain = 0; itrain <= nTrains; itrain++) {
+      std::cout << "Train: " << itrain << std::endl;
 
-    fBoards.at(0)->Trigger(nTrigsThisTrain);
+      for (const auto &rBoard : fBoards) {
+        rBoard->Trigger(nTrigsPerTrain);
+      }
 
-    int itrg = 0;
-    count    = 0;
-    while (itrg < nTrigsThisTrain) {
-      if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) ==
-          -1) { // no event available in buffer yet, wait a bit
-        usleep(200);
-        if (count > 50) {
-          std::cout << "count>50" << std::endl;
-          break;
+
+      for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
+        int itrg = 0;
+        count    = 0;
+
+        int fEnabled = fEnPerBoard.at(ib);
+        while (itrg < nTrigsPerTrain * fEnabled) {
+          if (fBoards.at(ib)->ReadEventData(n_bytes_data, buffer) ==
+              -1) { // no event available in buffer yet, wait a bit
+            usleep(100);
+            if (count > 50) break;
+            count++;
+            continue;
+          }
+          else {
+            // decode event
+            BoardDecoder::DecodeEvent(fBoards.at(ib)->GetConfig()->GetBoardType(), buffer,
+                                      n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+            // decode Chip event
+            int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
+            oldHits               = Hits->size();
+            AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
+                                       boardInfo.channel, prioErrors);
+            WriteRawData(rawFile, Hits, oldHits, boardInfo);
+            itrg++;
+          }
         }
-        count++;
-        continue;
       }
-      else {
-        // decode DAQboard event
-        std::cout << "Decode Event" << std::endl;
-        BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data,
-                                  n_bytes_header, n_bytes_trailer, boardInfo);
-        // decode Chip event
-        int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
-        oldHits               = Hits->size();
-        AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
-                                   boardInfo.channel, prioErrors);
-        WriteRawData(rawFile, Hits, oldHits, boardInfo);
-        itrg++;
-      }
-
       // std::cout << "Number of hits: " << Hits->size() << std::endl;
       CopyHitData(Hits);
     }
   }
-  if (myMOSAIC) {
-    myMOSAIC->StopRun();
+
+  std::cout << std::endl;
+  for (const auto &rBoard : fBoards) {
+    TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(rBoard);
+
+    if (myMOSAIC) {
+      myMOSAIC->StopRun();
+    }
   }
   fclose(rawFile);
 }
@@ -318,8 +319,6 @@ int main(int argc, char **argv)
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(fBoards.at(0));
   if (fBoards.size()) {
 
-    std::cout << fBoards.at(0) << std::endl;
-
     for (const auto &rBoard : fBoards) {
       rBoard->SendOpCode(Alpide::OPCODE_GRST);
       rBoard->SendOpCode(Alpide::OPCODE_PRST);
@@ -334,34 +333,41 @@ int main(int argc, char **argv)
       rBoard->SendOpCode(Alpide::OPCODE_RORST);
     }
 
-    // put your test here...
-    if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
-      std::cout << "Board Type Mosaic" << std::endl;
-      fBoards.at(0)->SetTriggerConfig(false, true, myPulseDelay, myStrobeLength * 2);
-      fBoards.at(0)->SetTriggerSource(trigInt);
+    for (const auto &rBoard : fBoards) {
+
+      rBoard->SendOpCode(Alpide::OPCODE_RORST);
+      // put your test here...
+      if (rBoard->GetConfig()->GetBoardType() == boardDAQ) {
+        // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns *
+        // strobe delay
+        // pulse delay cannot be 0, therefore set strobe delay to 0 and use only pulse delay
+        rBoard->SetTriggerConfig(true, false, 0,
+                                 2 * rBoard->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
+        rBoard->SetTriggerSource(trigExt);
+      }
+      else {
+        rBoard->SetTriggerConfig(true, true, rBoard->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
+                                 rBoard->GetConfig()->GetParamValue("PULSEDELAY"));
+        rBoard->SetTriggerSource(trigInt);
+      }
     }
-    else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
-      fBoards.at(0)->SetTriggerConfig(true, false, myStrobeDelay, myPulseDelay);
-      fBoards.at(0)->SetTriggerSource(trigExt);
-    }
+  }
 
-    sprintf(fNameRaw, "Data/SourceRaw_%s.dat", Suffix);
-    scan();
+  sprintf(fNameRaw, "Data/SourceRaw_%s.dat", Suffix);
+  scan();
 
-    sprintf(fName, "Data/Source_%s.dat", Suffix);
-    WriteDataToFile(fName, true);
+  sprintf(fName, "Data/Source_%s.dat", Suffix);
+  WriteDataToFile(fName, true);
 
-    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
-    WriteScanConfig(fName, fChips.at(0), myDAQBoard);
+  sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+  WriteScanConfig(fName, fChips.at(0), myDAQBoard);
 
-    sprintf(fName, "Data/ChipList_%s.dat", Suffix);
-    WriteChipList(fName, true);
+  sprintf(fName, "Data/ChipList_%s.dat", Suffix);
+  WriteChipList(fName, true);
 
-    if (myDAQBoard) {
-      std::cout << "myDaqBoard???" << std::endl;
-      myDAQBoard->PowerOff();
-      delete myDAQBoard;
-    }
+  if (myDAQBoard) {
+    myDAQBoard->PowerOff();
+    delete myDAQBoard;
   }
 
   // sprintf(fName, "Data/NoiseOccupancy_%s.dat", Suffix);
