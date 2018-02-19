@@ -45,7 +45,7 @@ int myPulseLength  = 4000;
 
 int myPulseDelay = 40;
 // int myNTriggers  = 1000000;
-int myNTriggers = 200;
+int myNTriggers = 3;
 // int myNTriggers    = 100;
 
 
@@ -231,7 +231,7 @@ void scan()
 
   FILE *rawFile = fopen(fNameRaw, "w");
 
-  int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 10;
+  int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 1;
 
   nTrains = myNTriggers / nTrigsPerTrain;
   nRest   = myNTriggers % nTrigsPerTrain;
@@ -244,46 +244,53 @@ void scan()
   TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(fBoards.at(0));
 
   if (myMOSAIC) {
+    std::cout << "mosaic found" << std::endl;
     myMOSAIC->StartRun();
   }
-  for (unsigned int i = 0; i < fConfig->GetNChips(); i++) {
-    TChipConfig *chipConfig = fConfig->GetChipConfig(i);
-    std::cout << "chipId  " << chipConfig->GetChipId() << std::endl;
-    int count;
-    for (int itrain = 0; itrain <= nTrains; itrain++) {
-      std::cout << "Train: " << itrain << std::endl;
-      if (itrain == nTrains) {
-        nTrigsThisTrain = nRest;
+
+  int count;
+  for (int itrain = 0; itrain <= nTrains; itrain++) {
+    std::cout << "Train: " << itrain << std::endl;
+    for (unsigned int i = 0; i < fConfig->GetNChips(); i++) {
+      TChipConfig *chipConfig = fConfig->GetChipConfig(i);
+      std::cout << "chipId  " << chipConfig->GetChipId() << std::endl;
+    }
+    if (itrain == nTrains) {
+      nTrigsThisTrain = nRest;
+    }
+    else {
+      nTrigsThisTrain = nTrigsPerTrain;
+    }
+
+    fBoards.at(0)->Trigger(nTrigsThisTrain);
+
+    int itrg = 0;
+    count    = 0;
+    while (itrg < nTrigsThisTrain) {
+      if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) ==
+          -1) { // no event available in buffer yet, wait a bit
+        usleep(200);
+        if (count > 50) {
+          std::cout << "count>50" << std::endl;
+          break;
+        }
+        count++;
+        continue;
       }
       else {
-        nTrigsThisTrain = nTrigsPerTrain;
+        // decode DAQboard event
+        std::cout << "Decode Event" << std::endl;
+        BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data,
+                                  n_bytes_header, n_bytes_trailer, boardInfo);
+        // decode Chip event
+        int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
+        oldHits               = Hits->size();
+        AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
+                                   boardInfo.channel, prioErrors);
+        WriteRawData(rawFile, Hits, oldHits, boardInfo);
+        itrg++;
       }
 
-      fBoards.at(0)->Trigger(nTrigsThisTrain);
-
-      int itrg = 0;
-      count    = 0;
-      while (itrg < nTrigsThisTrain) {
-        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) ==
-            -1) { // no event available in buffer yet, wait a bit
-          usleep(100);
-          if (count > 50) break;
-          count++;
-          continue;
-        }
-        else {
-          // decode DAQboard event
-          BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer,
-                                    n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-          // decode Chip event
-          int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
-          oldHits               = Hits->size();
-          AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
-                                     boardInfo.channel, prioErrors);
-          WriteRawData(rawFile, Hits, oldHits, boardInfo);
-          itrg++;
-        }
-      }
       // std::cout << "Number of hits: " << Hits->size() << std::endl;
       CopyHitData(Hits);
     }
@@ -311,6 +318,8 @@ int main(int argc, char **argv)
   TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(fBoards.at(0));
   if (fBoards.size()) {
 
+    std::cout << fBoards.at(0) << std::endl;
+
     for (const auto &rBoard : fBoards) {
       rBoard->SendOpCode(Alpide::OPCODE_GRST);
       rBoard->SendOpCode(Alpide::OPCODE_PRST);
@@ -327,6 +336,7 @@ int main(int argc, char **argv)
 
     // put your test here...
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
+      std::cout << "Board Type Mosaic" << std::endl;
       fBoards.at(0)->SetTriggerConfig(false, true, myPulseDelay, myStrobeLength * 2);
       fBoards.at(0)->SetTriggerSource(trigInt);
     }
@@ -348,6 +358,7 @@ int main(int argc, char **argv)
     WriteChipList(fName, true);
 
     if (myDAQBoard) {
+      std::cout << "myDaqBoard???" << std::endl;
       myDAQBoard->PowerOff();
       delete myDAQBoard;
     }
