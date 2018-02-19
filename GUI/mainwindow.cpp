@@ -802,7 +802,6 @@ void MainWindow::fillingOBvectors()
   ClearVectors();
 
   AddScan(STPower);
-  return;
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
