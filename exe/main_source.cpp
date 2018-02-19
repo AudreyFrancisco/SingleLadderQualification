@@ -273,10 +273,10 @@ void scan()
             continue;
           }
           else {
-          // decode event
+            // decode event
             BoardDecoder::DecodeEvent(fBoards.at(ib)->GetConfig()->GetBoardType(), buffer,
                                       n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-          // decode Chip event
+            // decode Chip event
             int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
             oldHits               = Hits->size();
             AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
@@ -335,15 +335,15 @@ int main(int argc, char **argv)
 
     for (const auto &rBoard : fBoards) {
 
-     rBoard->SendOpCode(Alpide::OPCODE_RORST);
-    // put your test here...
-     if (rBoard->GetConfig()->GetBoardType() == boardDAQ) {
-       // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns *
-       // strobe delay
-       // pulse delay cannot be 0, therefore set strobe delay to 0 and use only pulse delay
-       rBoard->SetTriggerConfig(true, false, 0,
-                                2 * rBoard->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
-       rBoard->SetTriggerSource(trigExt);
+      rBoard->SendOpCode(Alpide::OPCODE_RORST);
+      // put your test here...
+      if (rBoard->GetConfig()->GetBoardType() == boardDAQ) {
+        // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns *
+        // strobe delay
+        // pulse delay cannot be 0, therefore set strobe delay to 0 and use only pulse delay
+        rBoard->SetTriggerConfig(true, false, 0,
+                                 2 * rBoard->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
+        rBoard->SetTriggerSource(trigExt);
       }
       else {
         rBoard->SetTriggerConfig(true, true, rBoard->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
