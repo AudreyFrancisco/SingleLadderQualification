@@ -87,9 +87,15 @@ protected:
   std::vector<uint64_t>           m_eventIds;
   std::vector<uint64_t>           m_timestamps;
   std::vector<uint32_t>           m_bunchCounters;
+  std::vector<uint64_t>           m_eventIds_ref;
+  std::vector<uint64_t>           m_timestamps_ref;
+  std::vector<uint32_t>           m_bunchCounters_ref;
   int                             m_firstEnabledChipId;
   int                             m_firstEnabledBoard;
   int                             m_firstEnabledChannel;
+  int                             m_firstEnabledChipId_ref;
+  int                             m_firstEnabledBoard_ref;
+  int                             m_firstEnabledChannel_ref;
   TScanHisto *                    m_histo;
   std::deque<TScanHisto> *        m_histoQue;
   std::mutex *                    m_mutex;
