@@ -181,6 +181,9 @@ void MainWindow::open()
   else if (fNumberofscan == OBPower) {
     fileName = "ConfigPower.cfg";
   }
+  else if (fNumberofscan == OBHalfStaveOL) {
+    fileName = "Config_HS_OL.cfg";
+  }
   try {
 
     fHicnames.push_back(fHicidnumber);
@@ -233,6 +236,9 @@ void MainWindow::open()
     fPb               = fHICs.at(0)->GetPowerBoard();
     fPbconfig         = fPb->GetConfigurationHandler();
     fPbnumberofmodule = fHICs.at(0)->GetPbMod();
+    // chip->GetConfig()->GetModuleId())
+    // fHICs.at(0)->GetModId()
+    // std::cout<<"mipws edw einai t thema?"<<fChips.at(0)->GetConfig()->GetModuleId()<<std::endl;
     if (!fPb->IsCalibrated(fPbnumberofmodule)) {
       std::cout << "its not calibrated" << std::endl;
       fPbcfgcheck = new checkpbconfig(this);
@@ -768,7 +774,9 @@ void MainWindow::start_test()
   }
   // std::cout<<"why2"<<std::endl;
   fScanstatuslabels.clear();
-
+  ui->OBModule->hide();
+  ui->OBHALFSTAVE->hide();
+  ui->IBModule->hide();
   ui->tob->clear();
   ui->details->hide();
   ui->displaydetails->hide();
@@ -1100,8 +1108,9 @@ void MainWindow::applytests()
   if (fNumberofscan == OBPower) {
     fillingfastpower();
   }
-
-
+  if (fNumberofscan == OBHalfStaveOL) {
+    fillingHSscans();
+  }
   qApp->processEvents();
   std::cout << "the size of the scan vector is: " << fScanVector.size() << std::endl;
 
@@ -1533,17 +1542,8 @@ void MainWindow::attachtodatabase()
       }
 
       // attach config file
-      if (fNumberofscan == OBQualification || fNumberofscan == OBReception ||
-          fNumberofscan == OBEndurance) {
-        DbAddAttachment(fDB, activ, attachConfig, string("Config.cfg"), string("Config.cfg"));
-      }
-      else if (fNumberofscan == IBQualification) {
-        DbAddAttachment(fDB, activ, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
-      }
-      else if (fNumberofscan == OBPower) {
-        DbAddAttachment(fDB, activ, attachConfig, string("ConfigPower.cfg"),
-                        string("ConfigPower.cfg"));
-      }
+
+      attachConfigFile(activ);
       DbAddAttachment(fDB, activ, attachText, string(path), string("Comment.txt"));
       DbAddMember(fDB, activ, fIdofoperator);
 
@@ -1664,6 +1664,9 @@ void MainWindow::locationcombo()
   }
   else if (fNumberofscan == IBQualification || fNumberofscan == IBEndurance) {
     fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Inner Barrel HIC Module");
+  }
+  else if (fNumberofscan == OBHalfStaveOL) {
+    fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Outer Layer Half-Stave Upper");
   }
   delete myactivity;
 }
@@ -2456,17 +2459,7 @@ void MainWindow::attachtodatabaseretry()
       }
 
       // attach config file
-      if (fNumberofscan == OBQualification || fNumberofscan == OBReception ||
-          fNumberofscan == OBEndurance) {
-        DbAddAttachment(fDB, activ, attachConfig, string("Config.cfg"), string("Config.cfg"));
-      }
-      else if (fNumberofscan == IBQualification) {
-        DbAddAttachment(fDB, activ, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
-      }
-      else if (fNumberofscan == OBPower) {
-        DbAddAttachment(fDB, activ, attachConfig, string("ConfigPower.cfg"),
-                        string("ConfigPower.cfg"));
-      }
+      attachConfigFile(activ);
       DbAddAttachment(fDB, activ, attachText, string(path), string("Comment.txt"));
       DbAddMember(fDB, activ, fIdofoperator);
 
@@ -2519,5 +2512,33 @@ void MainWindow::attachtodatabaseretry()
       fDatabasefailure = new Databasefailure(this);
     }
     fDatabasefailure->exec();
+  }
+}
+
+void MainWindow::fillingHSscans()
+{
+
+  ClearVectors();
+
+  AddScan(STFifo);
+}
+
+void MainWindow::attachConfigFile(ActivityDB::activity &activity)
+{
+
+  if (fNumberofscan == OBQualification || fNumberofscan == OBReception ||
+      fNumberofscan == OBEndurance) {
+    DbAddAttachment(fDB, activity, attachConfig, string("Config.cfg"), string("Config.cfg"));
+  }
+  else if (fNumberofscan == IBQualification) {
+    DbAddAttachment(fDB, activity, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
+  }
+  else if (fNumberofscan == OBPower) {
+    DbAddAttachment(fDB, activity, attachConfig, string("ConfigPower.cfg"),
+                    string("ConfigPower.cfg"));
+  }
+  else if (fNumberofscan == OBHalfStaveOL) {
+    DbAddAttachment(fDB, activity, attachConfig, string("Config_HS_OL.cfg"),
+                    string("Config_HS_OL.cfg"));
   }
 }

@@ -1,5 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include "../DataBaseSrc/DBHelpers.h"
 #include "THisto.h"
 #include "TReadoutBoard.h"
 #include "TScanAnalysis.h"
@@ -91,7 +92,7 @@ public slots:
   void locationcombo();
   void savesettings();
   void speedycheck(bool checked);
-
+  void attachConfigFile(ActivityDB::activity &activity);
   void loaddefaultconfig();
 
   void loadeditedconfig();
@@ -106,7 +107,7 @@ public slots:
 
   void fillingendurancevectors();
   void fillingfastpower();
-
+  void fillingHSscans();
   void ibscansforageing();
 
   void continuescans()
