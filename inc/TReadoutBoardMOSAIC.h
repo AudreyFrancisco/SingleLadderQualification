@@ -60,6 +60,9 @@ public:
   TReadoutBoardMOSAIC(TConfig *config, TBoardConfigMOSAIC *boardConfig);
   virtual ~TReadoutBoardMOSAIC();
 
+  void DumpConfig(const char *fName, bool writeFile = true, char *config = 0);
+
+
   int WriteChipRegister(uint16_t address, uint16_t value, TAlpide *chipPtr);
   int ReadChipRegister(uint16_t address, uint16_t &value, TAlpide *chipPtr);
   int SendOpCode(Alpide::TOpCode OpCode, TAlpide *chipPtr);

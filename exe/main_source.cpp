@@ -47,7 +47,7 @@ int myPulseLength  = 4000;
 
 int myPulseDelay = 40;
 // int myNTriggers  = 1000000;
-int myNTriggers = 200;
+int myNTriggers = 5;
 // int myNTriggers    = 100;
 
 
@@ -72,7 +72,7 @@ void CopyHitData(std::vector<TPixHit> *Hits)
 {
   for (unsigned int ihit = 0; ihit < Hits->size(); ihit++) {
     int chipId  = Hits->at(ihit).chipId & 0xf;
-    int modId   = (chipId >> 4) & 0x7;
+    int modId   = ((Hits->at(ihit).chipId) >> 4) & 0x7;
     int dcol    = Hits->at(ihit).dcol;
     int region  = Hits->at(ihit).region;
     int address = Hits->at(ihit).address;
@@ -100,6 +100,7 @@ void WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits, TBoardHeade
     ChipId  = Hits->at(ihit).chipId;
     dcol    = Hits->at(ihit).dcol + Hits->at(ihit).region * 16;
     address = Hits->at(ihit).address;
+
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
       event = boardInfo.eventId;
     }
@@ -119,11 +120,10 @@ void WriteDataToFile(const char *fName, bool Recreate)
 
   sprintf(fNameTemp, "%s", fName);
   strtok(fNameTemp, ".");
-
   for (unsigned int imod = 0; imod < 10; imod++) {
     for (unsigned int ichip = 0; ichip < fChips.size(); ichip++) {
       int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
-      int modId  = (chipId >> 4) & 0x7;
+      int modId  = ((fChips.at(ichip)->GetConfig()->GetChipId()) >> 4) & 0x7;
       if (!HasDataChip(chipId)) continue; // write files only for chips with data
       if (fChips.size() > 1) {
         sprintf(fNameChip, "%s_Chip%d_%d.dat", fNameTemp, modId, chipId);
@@ -220,6 +220,7 @@ void WriteChipList(const char *fName, bool Recreate)
     fprintf(fp, " %d\n", chipId);
   }
   if (fp) fclose(fp);
+  Recreate = true;
 }
 
 void scan()
@@ -321,15 +322,11 @@ int main(int argc, char **argv)
       fBoards.at(ib)->SendOpCode(Alpide::OPCODE_PRST);
 
       for (unsigned int i = 0; i < fChips.size(); i++) {
+
         if (fChips.at(i)->GetConfig()->IsEnabled() &&
             fChips.at(i)->GetReadoutBoard() == fBoards.at(ib))
           fEnPerBoard.at(ib)++;
       }
-    }
-
-    for (const auto &rBoard : fBoards) {
-      rBoard->SendOpCode(Alpide::OPCODE_GRST);
-      rBoard->SendOpCode(Alpide::OPCODE_PRST);
     }
 
     for (const auto &rChip : fChips) {

@@ -89,8 +89,6 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
 
   bool corrupt = ((hit.dcol < 0) || (hit.dcol > 511)) ? true : false;
 
-  if (newEvent) std::cout << "new event" << chip << std::endl;
-
   if ((hits->size() > 0) && (!newEvent)) {
     if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) &&
         (address == hits->back().address)) {
