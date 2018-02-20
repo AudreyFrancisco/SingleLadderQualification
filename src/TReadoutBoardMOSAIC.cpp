@@ -471,6 +471,24 @@ char *TReadoutBoardMOSAIC::getFirmwareVersion()
   return (theVersionId);
 }
 
+void TReadoutBoardMOSAIC::DumpConfig(const char *fName, bool writeFile, char *config)
+{
+  config[0] = '\0';
+  if (writeFile) {
+    FILE *fp = fopen(fName, "w");
+    fprintf(fp, "FIRMWARE  %s\n", getFirmwareVersion());
+    fprintf(fp, "TRIGGERDELAY  %i\n",
+            fBoardConfig->GetTriggerDelay()); // same as StrobeDelay on DAQboard
+    fprintf(fp, "PULSEDELAY  %i\n", fBoardConfig->GetPulseDelay());
+    fclose(fp);
+  }
+
+  sprintf(config, "FIRMWARE  0x%s\n", getFirmwareVersion());
+  sprintf(config, "%sTRIGGERDELAY  %i\n", config, fBoardConfig->GetTriggerDelay());
+  sprintf(config, "%sPULSEDELAY  %i\n", config, fBoardConfig->GetPulseDelay());
+}
+
+
 /* -------------------------
    Power Board control methods
    ------------------------- */

@@ -185,7 +185,7 @@ int configureChip(TAlpide *chip)
   return 0;
 }
 
-void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard)
+void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardMOSAIC *mosaicBoard)
 {
   char  Config[1000];
   FILE *fp = fopen(fName, "w");
@@ -193,7 +193,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   chip->DumpConfig("", false, Config);
   // std::cout << Config << std::endl;
   fprintf(fp, "%s\n", Config);
-  if (daqBoard) daqBoard->DumpConfig("", false, Config);
+  if (mosaicBoard) mosaicBoard->DumpConfig("", false, Config);
   fprintf(fp, "%s\n", Config);
   // std::cout << Config << std::endl;
 
@@ -364,8 +364,11 @@ int main(int argc, char **argv)
   sprintf(fName, "Data/Source_%s.dat", Suffix);
   WriteDataToFile(fName, true);
 
-  sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
-  WriteScanConfig(fName, fChips.at(0), myDAQBoard);
+  for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
+    TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(fBoards.at(ib));
+    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    WriteScanConfig(fName, fChips.at(0), myMOSAIC);
+  }
 
   sprintf(fName, "Data/ChipList_%s.dat", Suffix);
   WriteChipList(fName, true);
