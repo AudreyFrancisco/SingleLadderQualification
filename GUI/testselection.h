@@ -19,7 +19,6 @@ public:
                             int &lid, int &memberid, QString &ttwo, QString &tthree, QString &tfour,
                             QString &tfive, QString &done, QString &dtwo, QString &dthree,
                             QString &dfour, QString &dfive);
-  virtual void connectlocationcombo(std::vector<std::pair<std::string, int>> floc);
   virtual int  GetLocationID() { return locid; }
   virtual void ClearLocations();
 
@@ -44,6 +43,7 @@ public slots:
   virtual void nextstep();
   virtual void getwindow();
   virtual int  getcounter();
+  virtual void connectlocationcombo(std::vector<std::pair<std::string, int>> floc);
 
 
 private slots:

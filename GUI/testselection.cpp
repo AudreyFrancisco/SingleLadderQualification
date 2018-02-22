@@ -39,12 +39,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   m_testDatabase = testDatabase;
 
   connect(ui->settings, SIGNAL(clicked()), this->parent(), SLOT(savesettings()));
-
-  connect(ui->typeoftest, SIGNAL(currentIndexChanged(int)), this->parent(),
-          SLOT(connectcombo(int)));
   connect(ui->close, SIGNAL(clicked()), this, SLOT(close()));
-  connect(ui->databaselocation, SIGNAL(currentIndexChanged(int)), this->parent(),
-          SLOT(connectlocationcombo(int)));
   connect(ui->databaselocation, SIGNAL(currentIndexChanged(int)), this,
           SLOT(getlocationcombo(int)));
   connect(ui->typetest, SIGNAL(currentIndexChanged(int)), this->parent(),
