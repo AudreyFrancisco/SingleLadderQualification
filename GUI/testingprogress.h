@@ -16,6 +16,7 @@ public:
 
 public slots:
   virtual void setnotification(QString notification);
+  virtual void stopaddingscans();
 
 private:
   Ui::Testingprogress *ui;

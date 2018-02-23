@@ -724,6 +724,9 @@ void MainWindow::start_test()
       }
     }
   }
+  if (fScanTypes.size() > 0) {
+    fScanTypes.clear();
+  }
   fWritedb->setVisible(false);
   disconnect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
   fEndurancemodules.clear();
@@ -851,42 +854,29 @@ void MainWindow::fillingOBvectors()
 
 void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis *> a)
 {
+  // fVoltageScale.clear();
+  // fBackBias.clear();
+  // fMlvdStr.clear();
+  fAddingScans = true;
+  fExtraScans  = 0;
   ui->statuslabel->setVisible(true);
   ui->statuslabel->update();
+  fNewScans.clear();
+  fInitialScans = fScanVector.size();
 
   for (unsigned int i = 0; i < fScanVector.size(); i++) {
-    try {
-      if (s.at(i) == 0) {
-        a.at(i)->Initialize();
-        std::thread analysisThread(&TScanAnalysis::Run, a[i]);
-        analysisThread.join();
-        a.at(i)->Finalize();
-      }
-      else {
-        std::thread scanThread(&MainWindow::scanLoop, this, s[i]);
-        a.at(i)->Initialize();
-        std::thread analysisThread(&TScanAnalysis::Run, a[i]);
-        scanThread.join();
-        if (fScanstatuslabels.at(i) != 0) {
-          fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
-          fScanstatuslabels[i]->update();
-          qApp->processEvents();
-        }
-        analysisThread.join();
-        a.at(i)->Finalize();
-        if (fScanstatuslabels.at(i) != 0) {
-          fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
-          qApp->processEvents();
-        }
-      }
-      colorsinglescan(i);
-      if (fExecution == false) break;
-      qApp->processEvents();
-    }
-    catch (exception &ex) {
-      std::cout << ex.what() << "is the thrown exception" << std::endl;
+    // doing default scans
+    executescans(s, a, i);
+  }
+
+  if (fExtraScans > 0) {
+    for (unsigned int j = 0; j < fExtraScans; j++) {
+      // SetConfigExtraScans(j);
+      AddScan(fNewScans.at(j));
     }
   }
+
+
   qApp->processEvents();
 
   qApp->processEvents();
@@ -933,6 +923,9 @@ void MainWindow::applytests()
   std::cout << "the size of the scan vector is: " << fScanVector.size() << std::endl;
 
   performtests(fScanVector, fAnalysisVector);
+  if (fExtraScans > 0) {
+    PerformExtraScans(fScanVector, fAnalysisVector);
+  }
 
   connect(fSignalMapper, SIGNAL(mapped(int)), this, SLOT(getresultdetails(int)));
   fResultwindow = new resultstorage(this);
@@ -1372,6 +1365,7 @@ void MainWindow::ClearVectors()
   fresultVector.clear();
   fScanbuttons.clear();
   fScanstatuslabels.clear();
+  fScanTypes.clear();
 }
 
 void MainWindow::fillingreceptionscans()
@@ -1379,6 +1373,7 @@ void MainWindow::fillingreceptionscans()
   ClearVectors();
 
   AddScan(STPower);
+  return;
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetMlvdsStrength(5);
   AddScan(STFifo);
@@ -1542,9 +1537,7 @@ void MainWindow::colorsinglescan(int i)
       if (fColour == CLASS_RED) {
         fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
 
-        fProgresswindow = new Testingprogress(this);
-        fProgresswindow->setnotification(fScanVector.at(i)->GetName());
-        fProgresswindow->exec();
+        notifyuser(i);
       }
       if (fColour == CLASS_UNTESTED) {
         fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
@@ -1562,9 +1555,7 @@ void MainWindow::colorsinglescan(int i)
       }
       if (fColour == CLASS_RED) {
         fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
-        fProgresswindow = new Testingprogress(this);
-        fProgresswindow->setnotification(fScanVector.at(i)->GetName());
-        fProgresswindow->exec();
+        notifyuser(i);
       }
       if (fColour == CLASS_UNTESTED) {
         fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
@@ -1825,6 +1816,7 @@ void MainWindow::AddScan(TScanType scanType, TScanResult *aResult)
       fScanVector.push_back(scan);
       fAnalysisVector.push_back(analysis);
       fresultVector.push_back(result);
+      fScanTypes.push_back(scanType);
     }
   }
   else { // apply tuning etc: receive result from previous scan (tuning) and push 0 into result
@@ -1833,6 +1825,7 @@ void MainWindow::AddScan(TScanType scanType, TScanResult *aResult)
       fScanVector.push_back(scan);
       fAnalysisVector.push_back(analysis);
       fresultVector.push_back(0);
+      fScanTypes.push_back(scanType);
     }
   }
 
@@ -2266,3 +2259,92 @@ void MainWindow::attachConfigFile(ActivityDB::activity &activity)
                     string("Config_HS_OL.cfg"));
   }
 }
+
+TScanType MainWindow::GetScanType(int scannumber) { return fScanTypes[scannumber]; }
+
+void MainWindow::retryfailedscan()
+{
+  fTestAgain = true;
+  continuescans();
+}
+
+
+void MainWindow::executescans(std::vector<TScan *> s, std::vector<TScanAnalysis *> a,
+                              unsigned int i)
+{
+
+  try {
+    fTestAgain = false;
+    if (s.at(i) == 0) {
+      a.at(i)->Initialize();
+      std::thread analysisThread(&TScanAnalysis::Run, a[i]);
+      analysisThread.join();
+      a.at(i)->Finalize();
+    }
+    else {
+      std::thread scanThread(&MainWindow::scanLoop, this, s[i]);
+      a.at(i)->Initialize();
+      std::thread analysisThread(&TScanAnalysis::Run, a[i]);
+      scanThread.join();
+      if (fScanstatuslabels.at(i) != 0) {
+        fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
+        fScanstatuslabels[i]->update();
+        qApp->processEvents();
+      }
+      analysisThread.join();
+      a.at(i)->Finalize();
+      if (fScanstatuslabels.at(i) != 0) {
+        fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
+        qApp->processEvents();
+      }
+    }
+    colorsinglescan(i);
+    if (fExecution == false) return;
+    if (fTestAgain) {
+      // GetConfigExtraScans();
+      fNewScans.push_back(GetScanType(i));
+      fExtraScans++;
+    }
+    qApp->processEvents();
+  }
+  catch (exception &ex) {
+    std::cout << ex.what() << " is the thrown exception" << std::endl;
+  }
+}
+
+void MainWindow::PerformExtraScans(std::vector<TScan *> s, std::vector<TScanAnalysis *> a)
+{
+  fAddingScans = false;
+  unsigned int totalscans;
+  totalscans = fInitialScans + fExtraScans;
+  for (unsigned int i = fInitialScans; i < totalscans; i++) {
+
+    executescans(s, a, i);
+  }
+}
+
+void MainWindow::notifyuser(unsigned int position)
+{
+  fProgresswindow = new Testingprogress(this);
+  if (!fAddingScans) {
+    fProgresswindow->stopaddingscans();
+  }
+  fProgresswindow->setnotification(fScanVector.at(position)->GetName());
+  fProgresswindow->exec();
+}
+/*
+void MainWindow::GetConfigExtraScans(){
+  std::cout<<" I get ..."<<std ::endl;
+  fVoltageScale.push_back(fConfig->GetScanConfig()->GetVoltageScale());
+  fBackBias.push_back(fConfig->GetScanConfig()->GetBackBias());
+  fMlvdStr.push_back(fConfig->GetScanConfig()->GetMlvdsStrength());
+}
+
+void MainWindow::SetConfigExtraScans(unsigned int i){
+  std::cout<< "I set"<< fVoltageScale.at(i)<<std::endl;
+   fConfig->GetScanConfig()->SetVoltageScale(fVoltageScale.at(i));
+   fConfig->GetScanConfig()->SetBackBias(fBackBias.at(i));
+   fConfig->GetScanConfig()->SetMlvdsStrength(fMlvdStr.at(i));
+
+}
+*/

@@ -127,6 +127,9 @@ public slots:
   void      finalwrite();
   void      quittest();
   AlpideDB *GetDB();
+  void      retryfailedscan();
+  void executescans(std::vector<TScan *> s, std::vector<TScanAnalysis *> a, unsigned int i);
+  void notifyuser(unsigned int position);
 
 signals:
   void stopTimer();
@@ -217,6 +220,19 @@ private:
   bool             fstop;
   int              fComponentTypeID;
   std::vector<int> fActivityResults;
+  TScanType GetScanType(int scannumber);
+  std::vector<TScanType> fScanTypes;
+  bool                   fTestAgain;
+  std::vector<TScanType> fNewScans;
+  unsigned int           fExtraScans = 0;
+  unsigned int           fInitialScans;
+  void PerformExtraScans(std::vector<TScan *> s, std::vector<TScanAnalysis *> a);
+  bool fAddingScans;
+  /*void SetConfigExtraScans(unsigned int i);
+  void GetConfigExtraScans();
+  std::vector<float> fVoltageScale;
+  std::vector<float> fBackBias;
+  std::vector <float> fMlvdStr;*/
 
 private slots:
   void button_obm1_clicked();
