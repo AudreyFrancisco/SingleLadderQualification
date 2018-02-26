@@ -31,16 +31,16 @@
 #ifndef CONTROLINTERFACE_H
 #define CONTROLINTERFACE_H
 
-#include <stdint.h>
-#include <mutex>
 #include "mwbbslave.h"
+#include <mutex>
+#include <stdint.h>
 
 class CiReadRequest {
 public:
-  uint8_t chipID;         // requested Chip
-  uint16_t address;       // register address
-  uint32_t IPBusReadData; // space where put IPBus read
-  uint16_t *readDataPtr;  // pointer to the final data place
+  uint8_t   chipID;        // requested Chip
+  uint16_t  address;       // register address
+  uint32_t  IPBusReadData; // space where put IPBus read
+  uint16_t *readDataPtr;   // pointer to the final data place
 };
 
 class ControlInterface : public MWbbSlave {
@@ -59,47 +59,38 @@ public:
   void execute();
 
   enum opCode_e {
-    OPCODE_STROBE_2 = 0xb1,  // Trigger
-    OPCODE_GRST = 0xd2,      // Global chip reset
-    OPCODE_RORST = 0x63,     // Readout reset
-    OPCODE_PRST = 0xe4,      // Pixel matrix reset
-    OPCODE_STROBE_6 = 0x55,  // Trigger
-    OPCODE_BCRST = 0x36,     // Bunch Counter Reset
-    OPCODE_ECRST = 0x87,     // Event Counter Reset
-    OPCODE_PULSE = 0x78,     // Calibration Pulse trigger
+    OPCODE_STROBE_2  = 0xb1, // Trigger
+    OPCODE_GRST      = 0xd2, // Global chip reset
+    OPCODE_RORST     = 0x63, // Readout reset
+    OPCODE_PRST      = 0xe4, // Pixel matrix reset
+    OPCODE_STROBE_6  = 0x55, // Trigger
+    OPCODE_BCRST     = 0x36, // Bunch Counter Reset
+    OPCODE_ECRST     = 0x87, // Event Counter Reset
+    OPCODE_PULSE     = 0x78, // Calibration Pulse trigger
     OPCODE_STROBE_10 = 0xc9, // Trigger
-    OPCODE_RSVD1 = 0xaa,     // Reserved for future use
-    OPCODE_RSVD2 = 0x1b,     // Reserved for future use
-    OPCODE_WROP = 0x9c,      // Start Unicast or Multicast Write
+    OPCODE_RSVD1     = 0xaa, // Reserved for future use
+    OPCODE_RSVD2     = 0x1b, // Reserved for future use
+    OPCODE_WROP      = 0x9c, // Start Unicast or Multicast Write
     OPCODE_STROBE_14 = 0x2d, // Trigger
-    OPCODE_RDOP = 0x4e       // Start Unicast Read
+    OPCODE_RDOP      = 0x4e  // Start Unicast Read
   };
 
 private: // WBB Slave registers map
-  enum regAddress_e {
-    regWriteCtrl = 0,
-    regWriteData = 1,
-    regReadData = 2,
-    regConfig = 3
-  };
+  enum regAddress_e { regWriteCtrl = 0, regWriteData = 1, regReadData = 2, regConfig = 3 };
 
   enum readFlagsBits_e {
-    FLAG_SYNC_BIT = (1 << 3),
+    FLAG_SYNC_BIT   = (1 << 3),
     FLAG_CHIPID_BIT = (1 << 2),
-    FLAG_DATAL_BIT = (1 << 1),
-    FLAG_DATAH_BIT = (1 << 0)
+    FLAG_DATAL_BIT  = (1 << 1),
+    FLAG_DATAH_BIT  = (1 << 0)
   };
 
-  enum configBits_e {
-    CFG_PHASE_MASK = 0x03,
-    CFG_EN = (1 << 3),
-    CFG_DISABLE_ME = (1 << 4)
-  };
+  enum configBits_e { CFG_PHASE_MASK = 0x03, CFG_EN = (1 << 3), CFG_DISABLE_ME = (1 << 4) };
 
 private:
-  CiReadRequest *readReqest;
-  int readRequestSize;
-  int numReadRequest;
+  CiReadRequest *      readReqest;
+  int                  readRequestSize;
+  int                  numReadRequest;
   std::recursive_mutex mutex;
 };
 

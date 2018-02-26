@@ -35,10 +35,10 @@
  *
  *
  */
-#include <iostream>
-#include <exception>
-#include <stdexcept>
 #include <cstring>
+#include <exception>
+#include <iostream>
+#include <stdexcept>
 
 #include "TPowerBoardConfig.h"
 
@@ -49,28 +49,29 @@ using namespace std;
 
         Parameter : AConfigFileName := Path and filename of a configuration ASCII file
   -------------------------- */
-TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName) {
+TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName)
+{
   fBoardType = boardMOSAIC;
 
   // Default values set
-  fPBConfig.VBset = DEF_BIASVOLTAGE;
-  fPBConfig.CalBiasOffset = DEF_BIASOFFSET;
-  fPBConfig.CalBiasScale = DEF_BIASSCALE;
+  fPBConfig.VBset          = DEF_BIASVOLTAGE;
+  fPBConfig.CalBiasOffset  = DEF_BIASOFFSET;
+  fPBConfig.CalBiasScale   = DEF_BIASSCALE;
   fPBConfig.CalIBiasOffset = DEF_IBIASOFFSET;
   for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
-    fPBConfig.Modul[i].AVset = DEF_ANALOGVOLTAGE;
-    fPBConfig.Modul[i].AIset = DEF_ANALOGMAXCURRENT;
-    fPBConfig.Modul[i].DVset = DEF_DIGITALVOLTAGE;
-    fPBConfig.Modul[i].DIset = DEF_DIGITALMAXCURRENT;
-    fPBConfig.Modul[i].BiasOn = DEF_BIASCHANNELON;
-    fPBConfig.Modul[i].CalAVScale = DEF_AVSCALE;
-    fPBConfig.Modul[i].CalDVScale = DEF_DVSCALE;
+    fPBConfig.Modul[i].AVset       = DEF_ANALOGVOLTAGE;
+    fPBConfig.Modul[i].AIset       = DEF_ANALOGMAXCURRENT;
+    fPBConfig.Modul[i].DVset       = DEF_DIGITALVOLTAGE;
+    fPBConfig.Modul[i].DIset       = DEF_DIGITALMAXCURRENT;
+    fPBConfig.Modul[i].BiasOn      = DEF_BIASCHANNELON;
+    fPBConfig.Modul[i].CalAVScale  = DEF_AVSCALE;
+    fPBConfig.Modul[i].CalDVScale  = DEF_DVSCALE;
     fPBConfig.Modul[i].CalAVOffset = DEF_AVOFFSET;
     fPBConfig.Modul[i].CalDVOffset = DEF_DVOFFSET;
     fPBConfig.Modul[i].CalDIOffset = DEF_DIOFFSET;
     fPBConfig.Modul[i].CalAIOffset = DEF_AIOFFSET;
-    fPBConfig.Modul[i].CalDLineR = DEF_CALDLINER;
-    fPBConfig.Modul[i].CalALineR = DEF_CALALINER;
+    fPBConfig.Modul[i].CalDLineR   = DEF_CALDLINER;
+    fPBConfig.Modul[i].CalALineR   = DEF_CALALINER;
     fPBConfig.Modul[i].CalGNDLineR = DEF_CALGNDLINER;
   }
 
@@ -117,12 +118,13 @@ TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName) {
 
 
   -------------------------- */
-void TPowerBoardConfig::readConfiguration() {
-  char buffer[4096];
-  char sName[4096];
-  char sParam[4096];
+void TPowerBoardConfig::readConfiguration()
+{
+  char  buffer[4096];
+  char  sName[4096];
+  char  sParam[4096];
   char *tok, *ptr;
-  int p;
+  int   p;
 
   if (!fgets(buffer, 4095, fhConfigFile)) {
     return;
@@ -134,9 +136,9 @@ void TPowerBoardConfig::readConfiguration() {
           fPBConfig.VBset = atof(sParam);
         }
         if (strcasecmp(sName, "ANALOGVOLTAGE") == 0) {
-          p = 0;
+          p   = 0;
           ptr = sParam;
-          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok                  = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].AVset = atof(tok);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].AVset = fPBConfig.Modul[p - 1].AVset;
@@ -144,9 +146,9 @@ void TPowerBoardConfig::readConfiguration() {
           }
         }
         if (strcasecmp(sName, "ANALOGCURRENT") == 0) {
-          p = 0;
+          p   = 0;
           ptr = sParam;
-          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok                  = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].AIset = atof(tok);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].AIset = fPBConfig.Modul[p - 1].AIset;
@@ -154,9 +156,9 @@ void TPowerBoardConfig::readConfiguration() {
           }
         }
         if (strcasecmp(sName, "DIGITALVOLTAGE") == 0) {
-          p = 0;
+          p   = 0;
           ptr = sParam;
-          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok                  = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].DVset = atof(tok);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].DVset = fPBConfig.Modul[p - 1].DVset;
@@ -164,9 +166,9 @@ void TPowerBoardConfig::readConfiguration() {
           }
         }
         if (strcasecmp(sName, "DIGITALCURRENT") == 0) {
-          p = 0;
+          p   = 0;
           ptr = sParam;
-          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok                  = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].DIset = atof(tok);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].DIset = fPBConfig.Modul[p - 1].DIset;
@@ -174,9 +176,9 @@ void TPowerBoardConfig::readConfiguration() {
           }
         }
         if (strcasecmp(sName, "BIASON") == 0) {
-          p = 0;
+          p   = 0;
           ptr = sParam;
-          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok                   = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].BiasOn = (strcasecmp(tok, "TRUE") == 0 ? true : false);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].BiasOn = fPBConfig.Modul[p - 1].BiasOn;
@@ -193,7 +195,8 @@ void TPowerBoardConfig::readConfiguration() {
 
 void TPowerBoardConfig::InitParamMap() { fSettings["PBBOTTOM"] = &m_bottom; }
 
-bool TPowerBoardConfig::SetParamValue(std::string Name, std::string Value) {
+bool TPowerBoardConfig::SetParamValue(std::string Name, std::string Value)
+{
   if (fSettings.find(Name) != fSettings.end()) {
     *(fSettings.find(Name)->second) = std::stoi(Value);
     return true;
@@ -202,7 +205,8 @@ bool TPowerBoardConfig::SetParamValue(std::string Name, std::string Value) {
   return false;
 }
 
-int TPowerBoardConfig::GetParamValue(std::string Name) {
+int TPowerBoardConfig::GetParamValue(std::string Name)
+{
   if (fSettings.find(Name) != fSettings.end()) {
     return *(fSettings.find(Name)->second);
   }
@@ -225,11 +229,12 @@ int TPowerBoardConfig::GetParamValue(std::string Name) {
 
   -------------------------- */
 void TPowerBoardConfig::GetModuleSetUp(int mod, float *AVSet, float *AISet, float *DVSet,
-                                       float *DISet, bool *isBiasOn) {
-  *AVSet = GetAnalogVoltage(mod);
-  *AISet = fPBConfig.Modul[mod].AIset;
-  *DVSet = GetDigitalVoltage(mod);
-  *DISet = fPBConfig.Modul[mod].DIset;
+                                       float *DISet, bool *isBiasOn)
+{
+  *AVSet    = GetAnalogVoltage(mod);
+  *AISet    = fPBConfig.Modul[mod].AIset;
+  *DVSet    = GetDigitalVoltage(mod);
+  *DISet    = fPBConfig.Modul[mod].DIset;
   *isBiasOn = fPBConfig.Modul[mod].BiasOn;
   return;
 }
@@ -247,11 +252,12 @@ void TPowerBoardConfig::GetModuleSetUp(int mod, float *AVSet, float *AISet, floa
 
   -------------------------- */
 void TPowerBoardConfig::ModuleSetUp(int mod, float AVSet, float AISet, float DVSet, float DISet,
-                                    bool isBiasOn) {
-  fPBConfig.Modul[mod].AVset = AVSet;
-  fPBConfig.Modul[mod].AIset = AISet;
-  fPBConfig.Modul[mod].DVset = DVSet;
-  fPBConfig.Modul[mod].DIset = DISet;
+                                    bool isBiasOn)
+{
+  fPBConfig.Modul[mod].AVset  = AVSet;
+  fPBConfig.Modul[mod].AIset  = AISet;
+  fPBConfig.Modul[mod].DVset  = DVSet;
+  fPBConfig.Modul[mod].DIset  = DISet;
   fPBConfig.Modul[mod].BiasOn = isBiasOn;
   return;
 }
@@ -263,14 +269,16 @@ void TPowerBoardConfig::ModuleSetUp(int mod, float AVSet, float AISet, float DVS
         Parameter Output : pointer to a float array of 8 elements
 
   -------------------------- */
-void TPowerBoardConfig::GetAnalogVoltages(float *AVSet) {
+void TPowerBoardConfig::GetAnalogVoltages(float *AVSet)
+{
   for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
     *(AVSet++) = GetAnalogVoltage(i);
   }
   return;
 }
 
-float TPowerBoardConfig::GetAnalogVoltage(int mod) {
+float TPowerBoardConfig::GetAnalogVoltage(int mod)
+{
   return (fPBConfig.Modul[mod].AVset * fPBConfig.Modul[mod].CalAVScale +
           fPBConfig.Modul[mod].CalAVOffset);
 }
@@ -282,14 +290,16 @@ float TPowerBoardConfig::GetAnalogVoltage(int mod) {
         Parameter Output : pointer to a float array of 8 elements
 
   -------------------------- */
-void TPowerBoardConfig::GetDigitalVoltages(float *DVSet) {
+void TPowerBoardConfig::GetDigitalVoltages(float *DVSet)
+{
   for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
     *(DVSet++) = GetDigitalVoltage(i);
   }
   return;
 }
 
-float TPowerBoardConfig::GetDigitalVoltage(int mod) {
+float TPowerBoardConfig::GetDigitalVoltage(int mod)
+{
   return (fPBConfig.Modul[mod].DVset * fPBConfig.Modul[mod].CalDVScale +
           fPBConfig.Modul[mod].CalDVOffset);
 }
@@ -301,7 +311,8 @@ float TPowerBoardConfig::GetDigitalVoltage(int mod) {
         Parameter Output : pointer to a float array of 8 elements
 
   -------------------------- */
-void TPowerBoardConfig::GetAnalogCurrents(float *AISet) {
+void TPowerBoardConfig::GetAnalogCurrents(float *AISet)
+{
   for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
     *(AISet++) = fPBConfig.Modul[i].AIset;
   }
@@ -315,7 +326,8 @@ void TPowerBoardConfig::GetAnalogCurrents(float *AISet) {
         Parameter Output : pointer to a float array of 8 elements
 
   -------------------------- */
-void TPowerBoardConfig::GetDigitalCurrents(float *DISet) {
+void TPowerBoardConfig::GetDigitalCurrents(float *DISet)
+{
   for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
     *(DISet++) = fPBConfig.Modul[i].AVset;
   }
@@ -329,7 +341,8 @@ void TPowerBoardConfig::GetDigitalCurrents(float *DISet) {
         Parameter Output : pointer to a bool array of 8 elements
 
   -------------------------- */
-void TPowerBoardConfig::GetBiasOnSets(bool *BIASOn) {
+void TPowerBoardConfig::GetBiasOnSets(bool *BIASOn)
+{
   for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
     *(BIASOn++) = fPBConfig.Modul[i].BiasOn;
   }
@@ -337,46 +350,53 @@ void TPowerBoardConfig::GetBiasOnSets(bool *BIASOn) {
 }
 
 // GetBiasVoltage: returns bias voltage including calibration
-float TPowerBoardConfig::GetBiasVoltage() {
+float TPowerBoardConfig::GetBiasVoltage()
+{
   return (fPBConfig.VBset * fPBConfig.CalBiasScale + fPBConfig.CalBiasOffset);
 }
 
 void TPowerBoardConfig::GetVCalibration(int mod, float &AVScale, float &DVScale, float &AVOffset,
-                                        float &DVOffset) {
-  AVScale = fPBConfig.Modul[mod].CalAVScale;
-  DVScale = fPBConfig.Modul[mod].CalDVScale;
+                                        float &DVOffset)
+{
+  AVScale  = fPBConfig.Modul[mod].CalAVScale;
+  DVScale  = fPBConfig.Modul[mod].CalDVScale;
   AVOffset = fPBConfig.Modul[mod].CalAVOffset;
   DVOffset = fPBConfig.Modul[mod].CalDVOffset;
 }
 
 void TPowerBoardConfig::SetVCalibration(int mod, float AVScale, float DVScale, float AVOffset,
-                                        float DVOffset) {
-  fPBConfig.Modul[mod].CalAVScale = AVScale;
-  fPBConfig.Modul[mod].CalDVScale = DVScale;
+                                        float DVOffset)
+{
+  fPBConfig.Modul[mod].CalAVScale  = AVScale;
+  fPBConfig.Modul[mod].CalDVScale  = DVScale;
   fPBConfig.Modul[mod].CalAVOffset = AVOffset;
   fPBConfig.Modul[mod].CalDVOffset = DVOffset;
 }
 
-void TPowerBoardConfig::GetICalibration(int mod, float &AIOffset, float &DIOffset) {
+void TPowerBoardConfig::GetICalibration(int mod, float &AIOffset, float &DIOffset)
+{
   AIOffset = fPBConfig.Modul[mod].CalAIOffset;
   DIOffset = fPBConfig.Modul[mod].CalDIOffset;
 }
 
-void TPowerBoardConfig::SetICalibration(int mod, float AIOffset, float DIOffset) {
+void TPowerBoardConfig::SetICalibration(int mod, float AIOffset, float DIOffset)
+{
   fPBConfig.Modul[mod].CalAIOffset = AIOffset;
   fPBConfig.Modul[mod].CalDIOffset = DIOffset;
 }
 
-void TPowerBoardConfig::SetVBiasCalibration(float AScale, float AOffset) {
+void TPowerBoardConfig::SetVBiasCalibration(float AScale, float AOffset)
+{
   fPBConfig.CalBiasOffset = AOffset;
-  fPBConfig.CalBiasScale = AScale;
+  fPBConfig.CalBiasScale  = AScale;
 }
 
 void TPowerBoardConfig::SetIBiasCalibration(float AOffset) { fPBConfig.CalIBiasOffset = AOffset; }
 
-void TPowerBoardConfig::GetVBiasCalibration(float &AScale, float &AOffset) {
+void TPowerBoardConfig::GetVBiasCalibration(float &AScale, float &AOffset)
+{
   AOffset = fPBConfig.CalBiasOffset;
-  AScale = fPBConfig.CalBiasScale;
+  AScale  = fPBConfig.CalBiasScale;
 }
 
 void TPowerBoardConfig::GetIBiasCalibration(float &AOffset) { AOffset = fPBConfig.CalIBiasOffset; }
@@ -386,37 +406,42 @@ void TPowerBoardConfig::GetIBiasCalibration(float &AOffset) { AOffset = fPBConfi
 
 // TODO: substitute powerUnit by Top/Bottom variable
 void TPowerBoardConfig::EnterMeasuredLineResistances(int mod, float ALineR, float DLineR,
-                                                     float GNDLineR) {
-  int powerUnit = ((m_bottom == 0) ? 1 : 0);
-  fPBConfig.Modul[mod].CalDLineR = DLineR + RDigital[powerUnit][mod];
-  fPBConfig.Modul[mod].CalALineR = ALineR + RAnalog[powerUnit][mod];
+                                                     float GNDLineR)
+{
+  int powerUnit                    = ((m_bottom == 0) ? 1 : 0);
+  fPBConfig.Modul[mod].CalDLineR   = DLineR + RDigital[powerUnit][mod];
+  fPBConfig.Modul[mod].CalALineR   = ALineR + RAnalog[powerUnit][mod];
   fPBConfig.Modul[mod].CalGNDLineR = GNDLineR;
 }
 
 // sets the line resistances in the calibration part of the configuration
 // WITHOUT adding the internal resistances (used when read from file)
-void TPowerBoardConfig::SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR) {
-  fPBConfig.Modul[mod].CalDLineR = DLineR;
-  fPBConfig.Modul[mod].CalALineR = ALineR;
+void TPowerBoardConfig::SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR)
+{
+  fPBConfig.Modul[mod].CalDLineR   = DLineR;
+  fPBConfig.Modul[mod].CalALineR   = ALineR;
   fPBConfig.Modul[mod].CalGNDLineR = GNDLineR;
 }
 
 // GetLineResistances returns the total value of the line resistance (internal + external)
-void TPowerBoardConfig::GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR) {
-  DLineR = fPBConfig.Modul[mod].CalDLineR;
-  ALineR = fPBConfig.Modul[mod].CalALineR;
+void TPowerBoardConfig::GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR)
+{
+  DLineR   = fPBConfig.Modul[mod].CalDLineR;
+  ALineR   = fPBConfig.Modul[mod].CalALineR;
   GNDLineR = fPBConfig.Modul[mod].CalGNDLineR;
 }
 
 // TODO: change filename to PBCalibTop.cfg, PBCalibBottom.cfg
 // requires: correct setting of PBBOTTOM in config file
-void TPowerBoardConfig::WriteCalibrationFile() {
+void TPowerBoardConfig::WriteCalibrationFile()
+{
   float ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, DVScale, AVOffset, DVOffset;
   float VBScale, VBOffset, IBOffset;
   FILE *fp;
   if (m_bottom) {
     fp = fopen("PBBottomCalib.cfg", "w");
-  } else {
+  }
+  else {
     fp = fopen("PBTopCalib.cfg", "w");
   }
   for (int imod = 0; imod < MAX_MOULESPERMOSAIC; imod++) {
@@ -432,15 +457,17 @@ void TPowerBoardConfig::WriteCalibrationFile() {
   fclose(fp);
 }
 
-void TPowerBoardConfig::ReadCalibrationFile() {
+void TPowerBoardConfig::ReadCalibrationFile()
+{
   float ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, DVScale, AVOffset, DVOffset;
   float VBScale, VBOffset, IBOffset;
-  int mod;
-  int nLines = 0;
+  int   mod;
+  int   nLines = 0;
   FILE *fp;
   if (m_bottom) {
     fp = fopen("PBBottomCalib.cfg", "r");
-  } else {
+  }
+  else {
     fp = fopen("PBTopCalib.cfg", "r");
   }
 
@@ -455,7 +482,8 @@ void TPowerBoardConfig::ReadCalibrationFile() {
       SetICalibration(mod, AIOffset, DIOffset);
       SetVCalibration(mod, AVScale, DVScale, AVOffset, DVOffset);
       nLines++;
-    } else {
+    }
+    else {
       std::cout << "WARNING: calibration file corrupt, read " << nLines << " lines instead of "
                 << MAX_MOULESPERMOSAIC << std::endl;
     }
@@ -463,17 +491,18 @@ void TPowerBoardConfig::ReadCalibrationFile() {
   if (fscanf(fp, "%f %f %f\n", &IBOffset, &VBScale, &VBOffset) == 3) {
     SetVBiasCalibration(VBScale, VBOffset);
     SetIBiasCalibration(IBOffset);
-  } else {
+  }
+  else {
     std::cout << "WARNING: back bias calibration not found, using default" << std::endl;
   }
   fclose(fp);
 }
 
-bool TPowerBoardConfig::IsCalibrated(int mod) {
+bool TPowerBoardConfig::IsCalibrated(int mod)
+{
   float DLineR, ALineR, GNDLineR;
   GetLineResistances(mod, ALineR, DLineR, GNDLineR);
-  if (DLineR + ALineR + GNDLineR == 0)
-    return false;
+  if (DLineR + ALineR + GNDLineR == 0) return false;
   return true;
 }
 
@@ -487,17 +516,20 @@ bool TPowerBoardConfig::IsCalibrated(int mod) {
         Return : false in case of error
 
   -------------------------- */
-bool TPowerBoardConfig::ReadFromFile(char *AFileName) {
+bool TPowerBoardConfig::ReadFromFile(char *AFileName)
+{
   if (AFileName != NULL && strlen(AFileName) != 0) {
     fhConfigFile = fopen(AFileName, "r"); // opens the file
     if (fhConfigFile != NULL) {
       readConfiguration();
       fclose(fhConfigFile);
       return (true);
-    } else {
+    }
+    else {
       cerr << "Error opening the Config file for read !" << endl;
     }
-  } else {
+  }
+  else {
     cerr << "Bad Config file name for read !" << endl;
   }
   return (false);
@@ -513,7 +545,8 @@ bool TPowerBoardConfig::ReadFromFile(char *AFileName) {
         Return : false in case of error
 
   -------------------------- */
-bool TPowerBoardConfig::WriteToFile(char *AFileName) {
+bool TPowerBoardConfig::WriteToFile(char *AFileName)
+{
   int i;
   if (AFileName != NULL && strlen(AFileName) != 0) {
     fhConfigFile = fopen(AFileName, "w"); // opens the file
@@ -539,30 +572,34 @@ bool TPowerBoardConfig::WriteToFile(char *AFileName) {
       fprintf(fhConfigFile, "\n# --- eof ----\n");
       fclose(fhConfigFile);
       return (true);
-    } else {
+    }
+    else {
       cerr << "Error opening the Config file for write !" << endl;
     }
-  } else {
+  }
+  else {
     cerr << "Bad Config file name for write !" << endl;
   }
   return (false);
 }
 
-void TPowerBoardConfig::SetDefaultsOB(int mod) {
-  fPBConfig.Modul[mod].AVset = DEF_ANALOGVOLTAGE_OB;
-  fPBConfig.Modul[mod].AIset = DEF_ANALOGMAXCURRENT_OB;
-  fPBConfig.Modul[mod].DVset = DEF_DIGITALVOLTAGE_OB;
-  fPBConfig.Modul[mod].DIset = DEF_DIGITALMAXCURRENT_OB;
+void TPowerBoardConfig::SetDefaultsOB(int mod)
+{
+  fPBConfig.Modul[mod].AVset  = DEF_ANALOGVOLTAGE_OB;
+  fPBConfig.Modul[mod].AIset  = DEF_ANALOGMAXCURRENT_OB;
+  fPBConfig.Modul[mod].DVset  = DEF_DIGITALVOLTAGE_OB;
+  fPBConfig.Modul[mod].DIset  = DEF_DIGITALMAXCURRENT_OB;
   fPBConfig.Modul[mod].BiasOn = DEF_BIASCHANNELON_OB;
 
   fPBConfig.VBset = DEF_BIASVOLTAGE_OB;
 }
 
-void TPowerBoardConfig::SetDefaultsIB(int mod) {
-  fPBConfig.Modul[mod].AVset = DEF_ANALOGVOLTAGE_IB;
-  fPBConfig.Modul[mod].AIset = DEF_ANALOGMAXCURRENT_IB;
-  fPBConfig.Modul[mod].DVset = DEF_DIGITALVOLTAGE_IB;
-  fPBConfig.Modul[mod].DIset = DEF_DIGITALMAXCURRENT_IB;
+void TPowerBoardConfig::SetDefaultsIB(int mod)
+{
+  fPBConfig.Modul[mod].AVset  = DEF_ANALOGVOLTAGE_IB;
+  fPBConfig.Modul[mod].AIset  = DEF_ANALOGMAXCURRENT_IB;
+  fPBConfig.Modul[mod].DVset  = DEF_DIGITALVOLTAGE_IB;
+  fPBConfig.Modul[mod].DIset  = DEF_DIGITALMAXCURRENT_IB;
   fPBConfig.Modul[mod].BiasOn = DEF_BIASCHANNELON_IB;
 
   fPBConfig.VBset = DEF_BIASVOLTAGE_IB;

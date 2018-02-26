@@ -18,10 +18,20 @@ IGNORE_STRING=$(join \| "${IGNORE_SET[@]}")
 
 SOURCES=$(find . | egrep -v ${IGNORE_STRING} | egrep "\.h$|\.hh$|\.c$|\.cc$|\.C$|\.cpp$")
 
-if [[ ! "$(lsb_release -d | egrep "CentOS Linux release 7|Scientific Linux CERN SLC release 6" | wc -l)" -eq 1 ]]
+if [ "$(uname)" == "Darwin" ]
 then
-    "automatic formatting only available on CentOS CERN 7 or SLC6";
-    exit 0
+    if [[ "$(clang-format --version)" != *4.0.1* ]]
+    then
+        echo "automatic formatting on MAC OS X only available if clang-format 4.0.1";
+        exit 2
+    fi
+else
+    CLANG_VERSION=$(clang-format --version | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p' | tr -d '.' 2>/dev/null)
+    if [[ "${CLANG_VERSION}" -lt 400 ]] || [[ "${CLANG_VERSION}" -gt 401 ]]
+    then
+        echo "automatic formatting only available if clang-format 4.0.0 or 4.0.1 are available";
+        exit 2
+    fi
 fi
 
 echo "Formatting..."
@@ -31,7 +41,7 @@ do
     if [[ "$var" -ne 0 ]]
     then
         echo $FILE
-        ${CLANG_FORMAT} -i $FILE
+        ${CLANG_FORMAT} -style=file -i $FILE
     fi
 done
 echo "done."

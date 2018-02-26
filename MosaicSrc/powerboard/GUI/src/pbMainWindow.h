@@ -30,18 +30,18 @@
 #ifndef PBMAINWINDOW_H
 #define PBMAINWINDOW_H
 
-#include <QDomElement>
-#include <QMainWindow>
-#include <QLCDNumber>
-#include <QPixmap>
-#include <QLabel>
-#include <QLineEdit>
-#include <QSignalMapper>
-#include <QTimer>
-#include <QCheckBox>
-#include "setValidator.h"
 #include "pbif.h"
 #include "powerboard.h"
+#include "setValidator.h"
+#include <QCheckBox>
+#include <QDomElement>
+#include <QLCDNumber>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMainWindow>
+#include <QPixmap>
+#include <QSignalMapper>
+#include <QTimer>
 
 #define NUM_TSENSORS 1
 #define NUM_MODULES 8
@@ -55,42 +55,40 @@ public:
   ~pbMainWindow();
 
 private:
-  QWidget *centralWidgetPtr;
-  QString cfgFilename;
-  QPixmap ledRedPixmap;
-  QPixmap ledGreyPixmap;
-  QLCDNumber *temperatureLCD[NUM_TSENSORS];
-  QCheckBox *chVbiasOn[NUM_MODULES];
-  QLabel *VbiasLED;
-  QLabel *channelLED[NUM_CHANNELS];
-  bool channelON[NUM_CHANNELS];
-  QLCDNumber *VbiasLCD;
-  QLCDNumber *IbiasLCD;
-  QLCDNumber *VoltLCD[NUM_CHANNELS];
-  QLCDNumber *AmpLCD[NUM_CHANNELS];
-  QLineEdit *VsetText[NUM_CHANNELS];
-  QLineEdit *IsetText[NUM_CHANNELS];
-  QLineEdit *VbiasText;
+  QWidget *      centralWidgetPtr;
+  QString        cfgFilename;
+  QPixmap        ledRedPixmap;
+  QPixmap        ledGreyPixmap;
+  QLCDNumber *   temperatureLCD[NUM_TSENSORS];
+  QCheckBox *    chVbiasOn[NUM_MODULES];
+  QLabel *       VbiasLED;
+  QLabel *       channelLED[NUM_CHANNELS];
+  bool           channelON[NUM_CHANNELS];
+  QLCDNumber *   VbiasLCD;
+  QLCDNumber *   IbiasLCD;
+  QLCDNumber *   VoltLCD[NUM_CHANNELS];
+  QLCDNumber *   AmpLCD[NUM_CHANNELS];
+  QLineEdit *    VsetText[NUM_CHANNELS];
+  QLineEdit *    IsetText[NUM_CHANNELS];
+  QLineEdit *    VbiasText;
   QSignalMapper *ChannelSetOnMapper;
   QSignalMapper *ChannelSetOffMapper;
   QSignalMapper *ChannelVsetMapper;
   QSignalMapper *ChannelIsetMapper;
   QSignalMapper *ChannelBiasMapper;
-  QTimer *refreshTimer;
-  setValidator *VbiasValidator;
-  setValidator *VsetValidator;
-  setValidator *IsetValidator;
-  PBif *board;
-  powerboard *pb;
-  bool boardIsOnline;
-  QString boardAddress;
+  QTimer *       refreshTimer;
+  setValidator * VbiasValidator;
+  setValidator * VsetValidator;
+  setValidator * IsetValidator;
+  PBif *         board;
+  powerboard *   pb;
+  bool           boardIsOnline;
+  QString        boardAddress;
 
-public
-slots:
+public slots:
   void fileOpen(char *fname = 0);
 
-private
-slots:
+private slots:
   void channelSetON(int ch);
   void channelSetOFF(int ch);
   void channelVset(int ch);

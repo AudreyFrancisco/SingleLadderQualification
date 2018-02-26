@@ -3,19 +3,20 @@
  *
  ----------------- */
 
-#include <iostream>
-#include <unistd.h>
-#include "TReadoutBoardRU.h"
-#include "TAlpide.h"
-#include <exception>
-#include "SetupHelpers.h"
 #include "AlpideConfig.h"
-#include <thread>
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "TReadoutBoardRU.h"
 #include <chrono>
+#include <exception>
+#include <iostream>
+#include <thread>
+#include <unistd.h>
 
 #include <fstream>
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   using namespace std;
 
@@ -23,12 +24,12 @@ int main(int argc, char **argv) {
   decodeCommandParameters(argc, argv);
 
   std::cout << "Create BoardConfig+Board\n";
-  TBoardConfigRU ru_config;
+  TBoardConfigRU  ru_config;
   TReadoutBoardRU ru_board(&ru_config);
 
   TReadoutBoardRU *theBoard = &ru_board;
 
-  std::vector<int> chipIDs;
+  std::vector<int>       chipIDs;
   std::vector<TAlpide *> fChips;
 
   for (int i = 0; i < 9; i++)
@@ -75,7 +76,7 @@ int main(int argc, char **argv) {
 
   // Setup chips and transceivers for readout
   for (unsigned int i = 0; i < fChips.size(); i++) {
-    auto ch = fChips.at(i);
+    auto ch     = fChips.at(i);
     auto chipId = chipIDs.at(i);
 
     std::cout << "Configure chip " << (int)chipId << "\n";
@@ -94,7 +95,8 @@ int main(int argc, char **argv) {
     tr->ActivateReadout();
     if (tr->IsAligned()) {
       std::cout << "Transceiver " << i << " is aligned (before: " << alignedBefore << " )\n";
-    } else {
+    }
+    else {
       std::cout << "Transceiver " << i << " is NOT aligned \n";
     }
     tr->ResetCounters();
@@ -115,7 +117,7 @@ int main(int argc, char **argv) {
   // check counters
   std::cout << "Transceiver; Events; Overflow bytes; 8b10b Errors\n";
   for (unsigned int i = 0; i < chipIDs.size(); ++i) {
-    auto tr = theBoard->transceiver_array[i]; // TODO: Mapping between transceiver and chipid
+    auto tr       = theBoard->transceiver_array[i]; // TODO: Mapping between transceiver and chipid
     auto counters = tr->ReadCounters();
     std::cout << i << ";" << counters["Events NrEvents"] << ";" << counters["Idlesuppress overflow"]
               << ";" << counters["8b10b Code Error"] << "\n";
@@ -126,7 +128,7 @@ int main(int argc, char **argv) {
 
     theBoard->ReadEventData(bytesRead, buffer.data());
     std::cout << "Pass " << i << ", Bytes Read: " << bytesRead << "\n";
-    std::string filename = std::string("event_") + std::to_string(i) + ".dat";
+    std::string   filename = std::string("event_") + std::to_string(i) + ".dat";
     std::ofstream of(filename, ios::binary);
     of.write((char *)buffer.data(), bytesRead);
   }

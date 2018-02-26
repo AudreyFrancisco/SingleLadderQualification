@@ -36,11 +36,11 @@
 class WbbBaseAddress {
 public:
   enum baseAddress_e {
-    i2cSysPLL = (0 << 24),
-    runControl = (1 << 24),
+    i2cSysPLL      = (0 << 24),
+    runControl     = (1 << 24),
     triggerControl = (2 << 24),
-    dataGenerator = (3 << 24),
-    pulser = (4 << 24)
+    dataGenerator  = (3 << 24),
+    pulser         = (4 << 24)
   };
 };
 

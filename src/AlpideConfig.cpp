@@ -8,14 +8,16 @@ void AlpideConfig::Init(TAlpide *chip) { ClearPixSelectBits(chip, true); }
 // clear all column and row select bits
 // if clearPulseGating is set also the pulse gating registers will be reset
 // (possibly useful at startup, but not in-between setting of mask patterns)
-void AlpideConfig::ClearPixSelectBits(TAlpide *chip, bool clearPulseGating) {
+void AlpideConfig::ClearPixSelectBits(TAlpide *chip, bool clearPulseGating)
+{
   if (clearPulseGating)
     chip->WriteRegister(0x48f, 0);
   else
     chip->WriteRegister(0x487, 0);
 }
 
-void AlpideConfig::WritePixConfReg(TAlpide *chip, Alpide::TPixReg reg, bool data) {
+void AlpideConfig::WritePixConfReg(TAlpide *chip, Alpide::TPixReg reg, bool data)
+{
   uint16_t pixconfig = (int)reg & 0x1;
   pixconfig |= (data ? 1 : 0) << 1;
 
@@ -24,7 +26,8 @@ void AlpideConfig::WritePixConfReg(TAlpide *chip, Alpide::TPixReg reg, bool data
 
 // This method writes data to the selected pixel register in the whole matrix simultaneously
 // To be checked whether this works or whether a loop over rows has to be implemented
-void AlpideConfig::WritePixRegAll(TAlpide *chip, Alpide::TPixReg reg, bool data) {
+void AlpideConfig::WritePixRegAll(TAlpide *chip, Alpide::TPixReg reg, bool data)
+{
   WritePixConfReg(chip, reg, data);
 
   // set all colsel and all rowsel to 1
@@ -34,7 +37,8 @@ void AlpideConfig::WritePixRegAll(TAlpide *chip, Alpide::TPixReg reg, bool data)
 }
 
 // Writes data to complete row. This assumes that select bits have been cleared before
-void AlpideConfig::WritePixRegRow(TAlpide *chip, Alpide::TPixReg reg, bool data, int row) {
+void AlpideConfig::WritePixRegRow(TAlpide *chip, Alpide::TPixReg reg, bool data, int row)
+{
   WritePixConfReg(chip, reg, data);
 
   // set all colsel to 1 and leave all rowsel at 0
@@ -42,10 +46,10 @@ void AlpideConfig::WritePixRegRow(TAlpide *chip, Alpide::TPixReg reg, bool data,
 
   // for correct region set one rowsel to 1
   int region = row / 16;
-  int bit = row % 16;
+  int bit    = row % 16;
 
   int address = 0x404 | (region << 11);
-  int value = 1 << bit;
+  int value   = 1 << bit;
 
   chip->WriteRegister(address, value);
 
@@ -53,25 +57,26 @@ void AlpideConfig::WritePixRegRow(TAlpide *chip, Alpide::TPixReg reg, bool data,
 }
 
 void AlpideConfig::WritePixRegSingle(TAlpide *chip, Alpide::TPixReg reg, bool data, int row,
-                                     int col) {
+                                     int col)
+{
   WritePixConfReg(chip, reg, data);
 
   // set correct colsel bit
-  int region = col / 32;         // region that contains the corresponding col select
-  int bit = col % 16;            // bit that has to be written (0 - 15)
+  int region  = col / 32;        // region that contains the corresponding col select
+  int bit     = col % 16;        // bit that has to be written (0 - 15)
   int highlow = (col % 32) / 16; // decide between col <15:0> (0) and col <31:16> (1)
 
   int address = 0x400 | (region << 11) | (1 << highlow);
-  int value = 1 << bit;
+  int value   = 1 << bit;
 
   chip->WriteRegister(address, value);
 
   // set correct rowsel bit
   region = row / 16;
-  bit = row % 16;
+  bit    = row % 16;
 
   address = 0x404 | (region << 11);
-  value = 1 << bit;
+  value   = 1 << bit;
 
   chip->WriteRegister(address, value);
 
@@ -80,9 +85,9 @@ void AlpideConfig::WritePixRegSingle(TAlpide *chip, Alpide::TPixReg reg, bool da
 
 // Applies mask stored in TChipConfig::m_noisyPixels
 // if Clear is set, all pixels are unmasked before
-int AlpideConfig::ApplyMask(TAlpide *chip, bool Clear) {
-  if (Clear)
-    WritePixRegAll(chip, Alpide::PIXREG_MASK, false);
+int AlpideConfig::ApplyMask(TAlpide *chip, bool Clear)
+{
+  if (Clear) WritePixRegAll(chip, Alpide::PIXREG_MASK, false);
   std::vector<TPixHit> mask = chip->GetConfig()->GetNoisyPixels();
   for (unsigned int i = 0; i < mask.size(); i++) {
     WritePixRegSingle(chip, Alpide::PIXREG_MASK, true, mask.at(i).address, mask.at(i).dcol);
@@ -91,25 +96,29 @@ int AlpideConfig::ApplyMask(TAlpide *chip, bool Clear) {
 }
 
 // Alpide 3 settings, to be confirmed
-void AlpideConfig::ApplyStandardDACSettings(TAlpide *chip, float backBias) {
+void AlpideConfig::ApplyStandardDACSettings(TAlpide *chip, float backBias)
+{
   if (backBias == 0) {
     chip->WriteRegister(Alpide::REG_VCASN, 60);
     chip->WriteRegister(Alpide::REG_VCASN2, 62);
     chip->WriteRegister(Alpide::REG_VRESETD, 147);
     chip->WriteRegister(Alpide::REG_IDB, 29);
-  } else if (backBias == 3) {
+  }
+  else if (backBias == 3) {
     chip->WriteRegister(Alpide::REG_VCASN, 105);
     chip->WriteRegister(Alpide::REG_VCASN2, 117);
     chip->WriteRegister(Alpide::REG_VCLIP, 60);
     chip->WriteRegister(Alpide::REG_VRESETD, 147);
     chip->WriteRegister(Alpide::REG_IDB, 29);
-  } else if (backBias == 6) {
+  }
+  else if (backBias == 6) {
     chip->WriteRegister(Alpide::REG_VCASN, 135);
     chip->WriteRegister(Alpide::REG_VCASN2, 147);
     chip->WriteRegister(Alpide::REG_VCLIP, 100);
     chip->WriteRegister(Alpide::REG_VRESETD, 170);
     chip->WriteRegister(Alpide::REG_IDB, 29);
-  } else {
+  }
+  else {
     std::cout << "Settings not defined for back bias " << backBias << " V. Please set manually."
               << std::endl;
   }
@@ -117,15 +126,15 @@ void AlpideConfig::ApplyStandardDACSettings(TAlpide *chip, float backBias) {
 
 // should it be allowed to pass a config or should always the chip config be used?
 void AlpideConfig::ConfigureFromu(TAlpide *chip, Alpide::TPulseType pulseType, bool testStrobe,
-                                  TChipConfig *config) {
+                                  TChipConfig *config)
+{
   // for the time being use these hard coded values; if needed move to configuration
-  int mebmask = 0;
+  int  mebmask          = 0;
   bool rotatePulseLines = false;
-  bool internalStrobe = false; // strobe sequencer for continuous mode
-  bool busyMonitoring = true;
+  bool internalStrobe   = false; // strobe sequencer for continuous mode
+  bool busyMonitoring   = true;
 
-  if (!config)
-    config = chip->GetConfig();
+  if (!config) config = chip->GetConfig();
 
   uint16_t fromuconfig = 0;
 
@@ -143,9 +152,9 @@ void AlpideConfig::ConfigureFromu(TAlpide *chip, Alpide::TPulseType pulseType, b
   chip->WriteRegister(Alpide::REG_FROMU_PULSING2, config->GetPulseDuration());
 }
 
-void AlpideConfig::ConfigureBuffers(TAlpide *chip, TChipConfig *config) {
-  if (!config)
-    config = chip->GetConfig();
+void AlpideConfig::ConfigureBuffers(TAlpide *chip, TChipConfig *config)
+{
+  if (!config) config = chip->GetConfig();
 
   uint16_t clocks = 0, ctrl = 0;
 
@@ -160,9 +169,9 @@ void AlpideConfig::ConfigureBuffers(TAlpide *chip, TChipConfig *config) {
   chip->WriteRegister(Alpide::REG_CMUIO_DACS, ctrl);
 }
 
-void AlpideConfig::ConfigureCMU(TAlpide *chip, TChipConfig *config) {
-  if (!config)
-    config = chip->GetConfig();
+void AlpideConfig::ConfigureCMU(TAlpide *chip, TChipConfig *config)
+{
+  if (!config) config = chip->GetConfig();
 
   uint16_t cmuconfig = 0;
 
@@ -174,7 +183,8 @@ void AlpideConfig::ConfigureCMU(TAlpide *chip, TChipConfig *config) {
   chip->WriteRegister(Alpide::REG_CMUDMU_CONFIG, cmuconfig);
 }
 
-void AlpideConfig::EnableDoubleColumns(TAlpide *chip) {
+void AlpideConfig::EnableDoubleColumns(TAlpide *chip)
+{
   for (int ireg = 0; ireg < 32; ireg++) {
     uint16_t Register = Alpide::REG_DCOL_DISABLE_BASE | (ireg < 11);
     chip->WriteRegister(Register, 0x0);
@@ -182,7 +192,8 @@ void AlpideConfig::EnableDoubleColumns(TAlpide *chip) {
 }
 
 // return value: active row (needed for threshold scan histogramming)
-int AlpideConfig::ConfigureMaskStage(TAlpide *chip, int nPix, int iStage, bool Mask, bool Select) {
+int AlpideConfig::ConfigureMaskStage(TAlpide *chip, int nPix, int iStage, bool Mask, bool Select)
+{
   EnableDoubleColumns(chip);
   // check that nPix is one of (1, 2, 4, 8, 16, 32)
   if ((nPix <= 0) || (nPix & (nPix - 1)) || (nPix > 32)) {
@@ -190,19 +201,16 @@ int AlpideConfig::ConfigureMaskStage(TAlpide *chip, int nPix, int iStage, bool M
               << std::endl;
     nPix = 1;
   }
-  if (Mask)
-    WritePixRegAll(chip, Alpide::PIXREG_MASK, true);
-  if (Select)
-    WritePixRegAll(chip, Alpide::PIXREG_SELECT, false);
+  if (Mask) WritePixRegAll(chip, Alpide::PIXREG_MASK, true);
+  if (Select) WritePixRegAll(chip, Alpide::PIXREG_SELECT, false);
 
   // complete row
   if (nPix == 32) {
-    if (Mask)
-      WritePixRegRow(chip, Alpide::PIXREG_MASK, false, iStage);
-    if (Select)
-      WritePixRegRow(chip, Alpide::PIXREG_SELECT, true, iStage);
+    if (Mask) WritePixRegRow(chip, Alpide::PIXREG_MASK, false, iStage);
+    if (Select) WritePixRegRow(chip, Alpide::PIXREG_SELECT, true, iStage);
     return iStage;
-  } else {
+  }
+  else {
     int colStep = 32 / nPix;
     for (int icol = 0; icol < 1024; icol += colStep) {
       if (Mask)
@@ -214,9 +222,9 @@ int AlpideConfig::ConfigureMaskStage(TAlpide *chip, int nPix, int iStage, bool M
   }
 }
 
-void AlpideConfig::WriteControlReg(TAlpide *chip, Alpide::TChipMode chipMode, TChipConfig *config) {
-  if (!config)
-    config = chip->GetConfig();
+void AlpideConfig::WriteControlReg(TAlpide *chip, Alpide::TChipMode chipMode, TChipConfig *config)
+{
+  if (!config) config = chip->GetConfig();
 
   uint16_t controlreg = 0;
   uint16_t speedvalue;
@@ -253,16 +261,16 @@ void AlpideConfig::WriteControlReg(TAlpide *chip, Alpide::TChipMode chipMode, TC
   chip->WriteRegister(Alpide::REG_MODECONTROL, controlreg);
 }
 
-void AlpideConfig::BaseConfigPLL(TAlpide *chip) {
+void AlpideConfig::BaseConfigPLL(TAlpide *chip)
+{
   TChipConfig *config = chip->GetConfig();
-  if (config->GetParamValue("LINKSPEED") == -1)
-    return; // high-speed link deactivated
+  if (config->GetParamValue("LINKSPEED") == -1) return; // high-speed link deactivated
 
-  uint16_t Phase = config->GetParamValue("PLLPHASE");   // 4bit Value, default 8
+  uint16_t Phase  = config->GetParamValue("PLLPHASE");  // 4bit Value, default 8
   uint16_t Stages = config->GetParamValue("PLLSTAGES"); // 0 = 3 stages, 1 = 4,  3 = 5 (typical 4)
   uint16_t ChargePump = config->GetParamValue("CHARGEPUMP");
-  uint16_t Driver = config->GetParamValue("DTUDRIVER");
-  uint16_t Preemp = config->GetParamValue("DTUPREEMP");
+  uint16_t Driver     = config->GetParamValue("DTUDRIVER");
+  uint16_t Preemp     = config->GetParamValue("DTUPREEMP");
   uint16_t Value;
 
   Value = (Stages & 0x3) | 0x4 | 0x8 | ((Phase & 0xf) << 4); // 0x4: narrow bandwidth, 0x8: PLL off
@@ -284,14 +292,16 @@ void AlpideConfig::BaseConfigPLL(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_DTU_CONFIG, Value);
 }
 
-void AlpideConfig::BaseConfigMask(TAlpide *chip) {
+void AlpideConfig::BaseConfigMask(TAlpide *chip)
+{
   AlpideConfig::WritePixRegAll(chip, Alpide::PIXREG_MASK, true);
   AlpideConfig::WritePixRegAll(chip, Alpide::PIXREG_SELECT, false);
 }
 
 void AlpideConfig::BaseConfigFromu(TAlpide *chip) {}
 
-void AlpideConfig::BaseConfigDACs(TAlpide *chip) {
+void AlpideConfig::BaseConfigDACs(TAlpide *chip)
+{
   chip->WriteRegister(Alpide::REG_VPULSEH, chip->GetConfig()->GetParamValue("VPULSEH"));
   chip->WriteRegister(Alpide::REG_VPULSEL, chip->GetConfig()->GetParamValue("VPULSEL"));
   chip->WriteRegister(Alpide::REG_VRESETD, chip->GetConfig()->GetParamValue("VRESETD"));
@@ -309,7 +319,8 @@ void AlpideConfig::BaseConfigDACs(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_IAUX2, chip->GetConfig()->GetParamValue("IAUX2"));
 }
 
-void AlpideConfig::BaseConfig(TAlpide *chip) {
+void AlpideConfig::BaseConfig(TAlpide *chip)
+{
   // put all chip configurations before the start of the test here
 
   chip->WriteRegister(Alpide::REG_MODECONTROL, 0x20); // set chip to config mode
@@ -325,7 +336,8 @@ void AlpideConfig::BaseConfig(TAlpide *chip) {
   WriteControlReg(chip, Alpide::MODE_TRIGGERED, chip->GetConfig());
 }
 
-void AlpideConfig::PrintDebugStream(TAlpide *chip) {
+void AlpideConfig::PrintDebugStream(TAlpide *chip)
+{
   uint16_t Value;
 
   std::cout << "Debug Stream chip id " << chip->GetConfig()->GetChipId() << ": " << std::endl;

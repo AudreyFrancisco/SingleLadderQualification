@@ -1,24 +1,19 @@
 #ifndef SETUPHELPERS_H
 #define SETUPHELPERS_H
 
-#include <unistd.h>
+#include "TAlpide.h"
+#include "THIC.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
-#include "TAlpide.h"
-#include "THIC.h"
+#include <unistd.h>
 
 // definition of standard setup types:
 //   - single chip with DAQ board
 //   - IB stave with MOSAIC
 //   - OB module with MOSAIC
 
-typedef enum {
-  setupSingle,
-  setupIB,
-  setupOB,
-  setupSingleM
-} TSetupType;
+typedef enum { setupSingle, setupIB, setupOB, setupSingleM } TSetupType;
 
 int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                        std::vector<TAlpide *> *chips, std::vector<THic *> *hics,
@@ -36,6 +31,8 @@ int initSetupSingleMosaic(TConfig *config, std::vector<TReadoutBoard *> *boards,
 int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                        std::vector<TAlpide *> *chips, std::vector<THic *> *hics,
                        const char **hicIds);
+int initSetupPower(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
+                   std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds);
 int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
               std::vector<TAlpide *> *chips, const char *configFileName = "",
               std::vector<THic *> *hics = 0, const char **hicIds = 0);
@@ -47,6 +44,6 @@ void MakeDaisyChain(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
 int decodeCommandParameters(int argc, char **argv);
 
 void BaseConfigOBchip(TChipConfig *&chipConfig);
-int initConfig(TConfig *&config,
+int initConfig(TConfig *&  config,
                const char *configFileName = ""); // YCM: init config from command parameter
 #endif

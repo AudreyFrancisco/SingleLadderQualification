@@ -3,18 +3,19 @@
  *
  ----------------- */
 
-#include <iostream>
-#include <unistd.h>
-#include "TReadoutBoard.h"
-#include "TReadoutBoardMOSAIC.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
 #include "TBoardConfig.h"
 #include "TBoardConfigMOSAIC.h"
 #include "TConfig.h"
-#include "TAlpide.h"
+#include "TReadoutBoard.h"
+#include "TReadoutBoardMOSAIC.h"
 #include <exception>
-#include "SetupHelpers.h"
+#include <iostream>
+#include <unistd.h>
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
   TReadoutBoard *theBoard;
@@ -24,7 +25,7 @@ int main(int argc, char **argv) {
   // could be useful a constructor without param
   // Then create an instance of the board
 
-  std::vector<int> chipIDs;
+  std::vector<int>       chipIDs;
   std::vector<TAlpide *> fChips;
 
   for (int i = 0; i < 30; i++)
@@ -69,8 +70,8 @@ int main(int argc, char **argv) {
   /* Initialize Chips */
 
   /* Data Tacking */
-  int numberOfReadByte;     // the bytes of row event
-  unsigned char *theBuffer; // the buffer containing the event
+  int            numberOfReadByte; // the bytes of row event
+  unsigned char *theBuffer;        // the buffer containing the event
 
   int enablePulse, enableTrigger, triggerDelay, pulseDelay,
       nTriggers; // variables that define the trigger/pulse
@@ -78,8 +79,8 @@ int main(int argc, char **argv) {
   theBuffer = (unsigned char *)malloc(200 * 1024); // allocates 200 kilobytes ...
 
   bool isDataTackingEnd = false; // break the execution of read polling
-  int returnCode = 0;
-  int timeoutLimit = 10; // ten seconds
+  int  returnCode       = 0;
+  int  timeoutLimit     = 10; // ten seconds
 
   // sets the trigger
   theBoard->SetTriggerConfig(enablePulse, enableTrigger, triggerDelay, pulseDelay);
@@ -95,9 +96,9 @@ int main(int argc, char **argv) {
       std::cout << "Read an event !  Dimension :" << numberOfReadByte
                 << std::endl; // Consume the buffer ...
       usleep(20000);          // wait
-    } else {                  // read nothing is finished ?
-      if (timeoutLimit-- == 0)
-        isDataTackingEnd = true;
+    }
+    else { // read nothing is finished ?
+      if (timeoutLimit-- == 0) isDataTackingEnd = true;
       sleep(1);
     }
   }

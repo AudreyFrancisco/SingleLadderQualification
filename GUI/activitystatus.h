@@ -14,9 +14,9 @@ public:
   explicit ActivityStatus(QWidget *parent = 0);
   ~ActivityStatus();
 
-public
-slots:
+public slots:
   virtual void getactivitystatus(bool &status);
+  virtual void GetComment(QString &comment);
 
 private:
   Ui::ActivityStatus *ui;

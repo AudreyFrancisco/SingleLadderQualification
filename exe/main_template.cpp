@@ -14,23 +14,25 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-#include <unistd.h>
-#include "TAlpide.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "BoardDecoder.h"
-#include "SetupHelpers.h"
+#include <unistd.h>
 
-int configureChip(TAlpide *chip) {
+int configureChip(TAlpide *chip)
+{
   // put all chip configurations before the start of the test here
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
 

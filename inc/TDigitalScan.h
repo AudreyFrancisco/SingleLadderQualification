@@ -28,27 +28,22 @@ public:
   TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
                std::mutex *aMutex);
-  virtual ~TDigitalScan() {};
+  virtual ~TDigitalScan(){};
 
   virtual void Init();
   void PrepareStep(int loopIndex);
   void LoopEnd(int loopIndex);
   void Next(int loopIndex);
-  void LoopStart(int loopIndex) {
-    m_value[loopIndex] = m_start[loopIndex];
-  };
-  void Execute();
-  void Terminate();
-  bool IsNominal() {
+  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
+  void               Execute();
+  void               Terminate();
+  bool               IsNominal()
+  {
     return ((((TDigitalParameters *)m_parameters)->voltageScale > 0.99) &&
             (((TDigitalParameters *)m_parameters)->voltageScale < 1.01));
   };
-  bool IsLower() {
-    return (((TDigitalParameters *)m_parameters)->voltageScale < 0.9);
-  };
-  bool IsUpper() {
-    return (((TDigitalParameters *)m_parameters)->voltageScale > 1.1);
-  };
+  bool IsLower() { return (((TDigitalParameters *)m_parameters)->voltageScale < 0.9); };
+  bool IsUpper() { return (((TDigitalParameters *)m_parameters)->voltageScale > 1.1); };
 };
 
 class TDigitalWhiteFrame : public TDigitalScan {
@@ -56,7 +51,7 @@ public:
   TDigitalWhiteFrame(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                      std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
                      std::mutex *aMutex);
-  virtual ~TDigitalWhiteFrame() {};
+  virtual ~TDigitalWhiteFrame(){};
   void ConfigureMaskStage(TAlpide *chip, int istage);
   void Init();
 };

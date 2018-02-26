@@ -31,11 +31,11 @@
 #ifndef MSERVICE_H
 #define MSERVICE_H
 
+#include "mexception.h"
+#include <arpa/inet.h>
+#include <netinet/in.h>
 #include <stdint.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include "mexception.h"
 
 #define FIRMWARE_PORT 65000
 #define RCV_LONG_TIMEOUT 2000 // timeout in ms for the first rx datagrams
@@ -44,12 +44,12 @@
 class MService {
 public:
   typedef struct fw_info {
-    int ver_maj;
-    int ver_min;
+    int           ver_maj;
+    int           ver_min;
     unsigned char flash_id[3];
     unsigned char flash_status_register;
-    char sw_identity[33];
-    char fw_identity[33];
+    char          sw_identity[33];
+    char          fw_identity[33];
   } fw_info_t;
 
 public:
@@ -65,10 +65,10 @@ private:
 
 private:
   // int port;
-  int sockfd;
+  int                sockfd;
   struct sockaddr_in sockAddress;
-  int rcvTimoutTime;
-  uint8_t seqNumber;
+  int                rcvTimoutTime;
+  uint8_t            seqNumber;
 };
 
 class MSrvcError : public MException {

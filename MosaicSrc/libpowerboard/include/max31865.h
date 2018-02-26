@@ -31,27 +31,22 @@
 #ifndef MAX31865_H
 #define MAX31865_H
 
-#include <stdint.h>
 #include "sc18is602.h"
+#include <stdint.h>
 
 class MAX31865 {
 private:
   // Register list
-  enum {
-    REG_Configuration = 0x00,
-    REG_RTD_MSB = 0x01,
-    REG_RTD_LSB = 0x02,
-    REG_WRITE = 0x80
-  };
+  enum { REG_Configuration = 0x00, REG_RTD_MSB = 0x01, REG_RTD_LSB = 0x02, REG_WRITE = 0x80 };
 
   // Configuration register bits
   enum {
-    CFG_FREQ_50Hz = 0x01,
+    CFG_FREQ_50Hz   = 0x01,
     CFG_FAULT_CLEAR = 0x02,
-    CFG_3WIRE = 0x10,
-    CFG_1SHORT = 0x20,
-    CFG_CONV_AUTO = 0x40,
-    CFG_Vbias_ON = 0x80
+    CFG_3WIRE       = 0x10,
+    CFG_1SHORT      = 0x20,
+    CFG_CONV_AUTO   = 0x40,
+    CFG_Vbias_ON    = 0x80
   };
 
 public:
@@ -63,7 +58,7 @@ public:
 
 private:
   SC18IS602 *spiBus;
-  uint8_t spiSlave;
+  uint8_t    spiSlave;
 };
 
 #endif // MAX31865_H

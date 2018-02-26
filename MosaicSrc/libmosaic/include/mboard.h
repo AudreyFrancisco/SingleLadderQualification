@@ -31,18 +31,18 @@
 #ifndef MBOARD_H
 #define MBOARD_H
 
-#include <stdint.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <vector>
-#include <string>
+#include "i2cbus.h"
+#include "i2csyspll.h"
 #include "ipbusudp.h"
+#include "mdatagenerator.h"
 #include "mruncontrol.h"
 #include "mtriggercontrol.h"
-#include "i2csyspll.h"
-#include "mdatagenerator.h"
-#include "i2cbus.h"
 #include "mwbb.h"
+#include <stdint.h>
+#include <string>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <vector>
 
 #define DEFAULT_PACKET_SIZE 1400
 #define DEFAULT_UDP_PORT 2000
@@ -67,33 +67,33 @@ public:
   long pollTCP(int timeout, MDataReceiver **dr);
   long pollData(int timeout);
   void addDataReceiver(int id, MDataReceiver *dc);
-  void flushDataReceivers();
+  void                flushDataReceivers();
   static unsigned int buf2ui(unsigned char *buf);
 
 public:
-  MDataGenerator *mDataGenerator;
-  IPbusUDP *mIPbus;
-  MRunControl *mRunControl;
+  MDataGenerator * mDataGenerator;
+  IPbusUDP *       mIPbus;
+  MRunControl *    mRunControl;
   MTriggerControl *mTriggerControl;
-  I2CSysPll *mSysPLL;
+  I2CSysPll *      mSysPLL;
 
 private:
-  void init();
+  void    init();
   ssize_t recvTCP(void *buffer, size_t count, int timeout);
   ssize_t readTCPData(void *buffer, size_t count, int timeout);
 
   // private:
 public:
-  int tcp_sockfd;
-  int numReceivers;
+  int                          tcp_sockfd;
+  int                          numReceivers;
   std::vector<MDataReceiver *> receivers;
 
 public:
   enum dataBlockFlag_e {
     flagClosedEvent = (1 << 0),
-    flagOverflow = (1 << 1),
-    flagTimeout = (1 << 2),
-    flagCloseRun = (1 << 3)
+    flagOverflow    = (1 << 1),
+    flagTimeout     = (1 << 2),
+    flagCloseRun    = (1 << 3)
   };
 
   string IPaddress;

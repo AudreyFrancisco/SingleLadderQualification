@@ -27,16 +27,17 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "ad7997.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "ad7997.h"
 
 AD7997::AD7997(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address) {}
 
 /*
         Single byte write operation
 */
-void AD7997::write(uint8_t address, uint8_t data) {
+void AD7997::write(uint8_t address, uint8_t data)
+{
   i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Write);
   i2cBus->addWriteData(address);
   i2cBus->addWriteData(data, I2Cbus::RWF_stop);
@@ -48,7 +49,8 @@ void AD7997::write(uint8_t address, uint8_t data) {
 /*
         2 byte write operation
 */
-void AD7997::write(uint8_t address, uint16_t data) {
+void AD7997::write(uint8_t address, uint16_t data)
+{
   i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Write);
   i2cBus->addWriteData(address);
   i2cBus->addWriteData(data >> 8);
@@ -58,7 +60,8 @@ void AD7997::write(uint8_t address, uint16_t data) {
   i2cBus->execute();
 }
 
-void AD7997::addWriteAddressPointer(uint8_t address) {
+void AD7997::addWriteAddressPointer(uint8_t address)
+{
   i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Write);
   i2cBus->addWriteData(address, I2Cbus::RWF_stop);
 }
@@ -66,7 +69,8 @@ void AD7997::addWriteAddressPointer(uint8_t address) {
 /*
         Single byte read
 */
-void AD7997::read(uint8_t address, uint8_t *data) {
+void AD7997::read(uint8_t address, uint8_t *data)
+{
   uint32_t r;
 
   // Write the address pointer
@@ -84,7 +88,8 @@ void AD7997::read(uint8_t address, uint8_t *data) {
 /*
         2 byte read
 */
-void AD7997::read(uint8_t address, uint16_t *data) {
+void AD7997::read(uint8_t address, uint16_t *data)
+{
   uint32_t rh, rl;
 
   // Write the address pointer
@@ -103,17 +108,18 @@ void AD7997::read(uint8_t address, uint16_t *data) {
 /*
         Configure the channels to read
 */
-void AD7997::setConfiguration(uint8_t chMap) {
+void AD7997::setConfiguration(uint8_t chMap)
+{
   uint16_t data = (uint16_t)chMap << 4;
 
   write(CMD_NOP | REG_Configuration, (uint16_t)(data | CFG_FLTR));
 }
 
-void AD7997::convert(int nch, uint16_t *result) {
+void AD7997::convert(int nch, uint16_t *result)
+{
   uint32_t rh[8], rl[8];
 
-  if (nch > 8)
-    nch = 8;
+  if (nch > 8) nch = 8;
 
   // start sequential convertion and select the read register
   i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Write);

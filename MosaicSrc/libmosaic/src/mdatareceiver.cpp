@@ -29,11 +29,12 @@
  */
 #include "mdatareceiver.h"
 
-MDataReceiver::MDataReceiver() {
+MDataReceiver::MDataReceiver()
+{
   dataBufferUsed = 0;
-  numClosedData = 0;
-  blockFlags = 0;
-  blockSrc = 0;
+  numClosedData  = 0;
+  blockFlags     = 0;
+  blockSrc       = 0;
 }
 
 MDataReceiver::~MDataReceiver() {}

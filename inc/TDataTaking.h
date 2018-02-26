@@ -2,10 +2,10 @@
 #define TDATATAKING_H
 
 #include <deque>
-#include <mutex>
-#include <vector>
 #include <map>
+#include <mutex>
 #include <string>
+#include <vector>
 
 #include "AlpideDecoder.h"
 #include "Common.h"
@@ -15,16 +15,16 @@
 const int kTrigPerTrain = 100;
 
 typedef struct __TDataTakingParameters : TScanParameters {
-  int nTriggers;
+  int   nTriggers;
   float backBias;
 } TDataTakingParameters;
 
 class TDataTaking : public TScan {
 private:
-  int m_nTrains;
-  int m_nLast;
+  int                  m_nTrains;
+  int                  m_nLast;
   std::vector<TPixHit> m_stuck;
-  TErrorCounter m_errorCount;
+  TErrorCounter        m_errorCount;
   virtual void ConfigureChip(TAlpide *chip) = 0;
   void ConfigureBoard(TReadoutBoard *board);
   void FillHistos(std::vector<TPixHit> *Hits, int board);
@@ -33,31 +33,27 @@ private:
 
 protected:
   THisto CreateHisto();
-  int m_nTriggers;
-  bool m_pulse;
-  int m_pulseLength;
-  float m_backBias;
+  int    m_nTriggers;
+  bool   m_pulse;
+  int    m_pulseLength;
+  float  m_backBias;
   void ConfigureFromu(TAlpide *chip);
 
 public:
   TDataTaking(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
               std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
               std::mutex *aMutex);
-  ~TDataTaking() {};
+  ~TDataTaking(){};
   void Init();
-  void PrepareStep(int loopIndex) {
-    if (loopIndex == 0)
-      std::cout << "sending train " << m_value[0] << std::endl;
+  void PrepareStep(int loopIndex)
+  {
+    if (loopIndex == 0) std::cout << "sending train " << m_value[0] << std::endl;
   };
-  void LoopStart(int loopIndex) {
-    m_value[loopIndex] = m_start[loopIndex];
-  };
+  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
   void LoopEnd(int loopIndex);
-  void Execute();
+  void         Execute();
   virtual void Terminate();
-  float GetBackbias() {
-    return m_backBias;
-  };
+  float        GetBackbias() { return m_backBias; };
 };
 
 #endif

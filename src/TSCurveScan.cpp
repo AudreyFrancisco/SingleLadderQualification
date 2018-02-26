@@ -1,38 +1,40 @@
-#include <unistd.h>
+#include "TSCurveScan.h"
+#include "AlpideConfig.h"
+#include "TReadoutBoardDAQ.h"
+#include "TReadoutBoardMOSAIC.h"
 #include <string.h>
 #include <string>
-#include "TSCurveScan.h"
-#include "TReadoutBoardMOSAIC.h"
-#include "TReadoutBoardDAQ.h"
-#include "AlpideConfig.h"
+#include <unistd.h>
 
 TSCurveScan::TSCurveScan(TScanConfig *config, std::vector<TAlpide *> chips,
                          std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                          std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
-    : TMaskScan(config, chips, hics, boards, histoQue, aMutex) {
-  m_parameters = new TSCurveParameters;
+    : TMaskScan(config, chips, hics, boards, histoQue, aMutex)
+{
+  m_parameters                                  = new TSCurveParameters;
   ((TSCurveParameters *)m_parameters)->backBias = m_config->GetBackBias();
-  ((TSCurveParameters *)m_parameters)->nominal = (m_config->GetParamValue("NOMINAL") == 1);
+  ((TSCurveParameters *)m_parameters)->nominal  = (m_config->GetParamValue("NOMINAL") == 1);
 }
 
 TThresholdScan::TThresholdScan(TScanConfig *config, std::vector<TAlpide *> chips,
                                std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                                std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
-    : TSCurveScan(config, chips, hics, boards, histoQue, aMutex) {
+    : TSCurveScan(config, chips, hics, boards, histoQue, aMutex)
+{
   m_start[0] = m_config->GetChargeStart();
-  m_stop[0] = m_config->GetChargeStop();
-  m_step[0] = m_config->GetChargeStep();
+  m_stop[0]  = m_config->GetChargeStop();
+  m_step[0]  = m_config->GetChargeStep();
 
   m_start[1] = 0;
-  m_step[1] = 1;
-  m_stop[1] = m_config->GetNMaskStages();
+  m_step[1]  = 1;
+  m_stop[1]  = m_config->GetNMaskStages();
 
   m_start[2] = 0;
-  m_step[2] = 1;
-  m_stop[2] = 1;
+  m_step[2]  = 1;
+  m_stop[2]  = 1;
 
   ((TSCurveParameters *)m_parameters)->VPULSEH = 170;
-  m_nTriggers = m_config->GetParamValue("NINJ");
+  m_nTriggers                                  = m_config->GetParamValue("NINJ");
 
   sprintf(m_name, "Threshold Scan %.1f V", ((TSCurveParameters *)m_parameters)->backBias);
 
@@ -42,22 +44,23 @@ TThresholdScan::TThresholdScan(TScanConfig *config, std::vector<TAlpide *> chips
 TtuneVCASNScan::TtuneVCASNScan(TScanConfig *config, std::vector<TAlpide *> chips,
                                std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                                std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
-    : TSCurveScan(config, chips, hics, boards, histoQue, aMutex) {
+    : TSCurveScan(config, chips, hics, boards, histoQue, aMutex)
+{
   strcpy(m_name, "Tune VCASN Scan");
   m_start[0] = m_config->GetVcasnStart();
-  m_stop[0] = m_config->GetVcasnStop();
-  m_step[0] = m_config->GetVcasnStep();
+  m_stop[0]  = m_config->GetVcasnStop();
+  m_step[0]  = m_config->GetVcasnStep();
 
   m_start[1] = 0;
-  m_step[1] = m_config->GetScanStep();
-  m_stop[1] = m_config->GetParamValue("TUNINGMAXROW");
+  m_step[1]  = m_config->GetScanStep();
+  m_stop[1]  = m_config->GetParamValue("TUNINGMAXROW");
 
   m_start[2] = 0;
-  m_step[2] = 1;
-  m_stop[2] = 1;
+  m_step[2]  = 1;
+  m_stop[2]  = 1;
 
   ((TSCurveParameters *)m_parameters)->VPULSEH = 170;
-  ((TSCurveParameters *)m_parameters)->TARGET = m_config->GetParamValue("TARGETTHRESH");
+  ((TSCurveParameters *)m_parameters)->TARGET  = m_config->GetParamValue("TARGETTHRESH");
   if (((TSCurveParameters *)m_parameters)->TARGET % 10) {
     ((TSCurveParameters *)m_parameters)->TARGET -=
         (((TSCurveParameters *)m_parameters)->TARGET % 10);
@@ -74,22 +77,23 @@ TtuneVCASNScan::TtuneVCASNScan(TScanConfig *config, std::vector<TAlpide *> chips
 TtuneITHRScan::TtuneITHRScan(TScanConfig *config, std::vector<TAlpide *> chips,
                              std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                              std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
-    : TSCurveScan(config, chips, hics, boards, histoQue, aMutex) {
+    : TSCurveScan(config, chips, hics, boards, histoQue, aMutex)
+{
   strcpy(m_name, "Tune ITHR Scan");
   m_start[0] = m_config->GetIthrStart();
-  m_stop[0] = m_config->GetIthrStop();
-  m_step[0] = m_config->GetIthrStep();
+  m_stop[0]  = m_config->GetIthrStop();
+  m_step[0]  = m_config->GetIthrStep();
 
   m_start[1] = 0;
-  m_step[1] = m_config->GetScanStep();
-  m_stop[1] = m_config->GetParamValue("TUNINGMAXROW");
+  m_step[1]  = m_config->GetScanStep();
+  m_stop[1]  = m_config->GetParamValue("TUNINGMAXROW");
 
   m_start[2] = 0;
-  m_step[2] = 1;
-  m_stop[2] = 1;
+  m_step[2]  = 1;
+  m_stop[2]  = 1;
 
   ((TSCurveParameters *)m_parameters)->VPULSEH = 170;
-  ((TSCurveParameters *)m_parameters)->TARGET = m_config->GetParamValue("TARGETTHRESH");
+  ((TSCurveParameters *)m_parameters)->TARGET  = m_config->GetParamValue("TARGETTHRESH");
   if (((TSCurveParameters *)m_parameters)->TARGET % 10) {
     ((TSCurveParameters *)m_parameters)->TARGET -=
         (((TSCurveParameters *)m_parameters)->TARGET % 10);
@@ -103,7 +107,8 @@ TtuneITHRScan::TtuneITHRScan(TScanConfig *config, std::vector<TAlpide *> chips,
   CreateScanHisto();
 }
 
-void TSCurveScan::RestoreNominalSettings() {
+void TSCurveScan::RestoreNominalSettings()
+{
   if (((TSCurveParameters *)m_parameters)->backBias == 0.0) {
     for (unsigned int i = 0; i < m_chips.size(); i++) {
       m_chips.at(i)->GetConfig()->SetParamValue("ITHR", 50);
@@ -111,8 +116,9 @@ void TSCurveScan::RestoreNominalSettings() {
       m_chips.at(i)->GetConfig()->SetParamValue("VCASN2", 57);
       m_chips.at(i)->GetConfig()->SetParamValue("VCLIP", 0);
     }
-  } else if ((((TSCurveParameters *)m_parameters)->backBias > 2.99) &&
-             (((TSCurveParameters *)m_parameters)->backBias < 3.01)) {
+  }
+  else if ((((TSCurveParameters *)m_parameters)->backBias > 2.99) &&
+           (((TSCurveParameters *)m_parameters)->backBias < 3.01)) {
     for (unsigned int i = 0; i < m_chips.size(); i++) {
       m_chips.at(i)->GetConfig()->SetParamValue("ITHR", 50);
       m_chips.at(i)->GetConfig()->SetParamValue("VCASN", 105);
@@ -122,7 +128,8 @@ void TSCurveScan::RestoreNominalSettings() {
   }
 }
 
-void TSCurveScan::ConfigureBoard(TReadoutBoard *board) {
+void TSCurveScan::ConfigureBoard(TReadoutBoard *board)
+{
   if (board->GetConfig()->GetBoardType() == boardDAQ) {
     // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns * strobe
     // delay
@@ -130,14 +137,16 @@ void TSCurveScan::ConfigureBoard(TReadoutBoard *board) {
     board->SetTriggerConfig(true, false, 0,
                             2 * board->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
     board->SetTriggerSource(trigExt);
-  } else {
+  }
+  else {
     board->SetTriggerConfig(true, true, board->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
                             board->GetConfig()->GetParamValue("PULSEDELAY"));
     board->SetTriggerSource(trigInt);
   }
 }
 
-void TSCurveScan::ConfigureFromu(TAlpide *chip) {
+void TSCurveScan::ConfigureFromu(TAlpide *chip)
+{
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1, 0x20); // analogue pulsing
   chip->WriteRegister(
       Alpide::REG_FROMU_CONFIG2,
@@ -153,7 +162,8 @@ void TSCurveScan::ConfigureFromu(TAlpide *chip) {
       chip->GetConfig()->GetParamValue("PULSEDURATION")); // fromu pulsing 2: pulse length
 }
 
-void TThresholdScan::ConfigureChip(TAlpide *chip) {
+void TThresholdScan::ConfigureChip(TAlpide *chip)
+{
   AlpideConfig::BaseConfig(chip);
 
   ConfigureFromu(chip);
@@ -161,17 +171,8 @@ void TThresholdScan::ConfigureChip(TAlpide *chip) {
   AlpideConfig::ConfigureCMU(chip);
 }
 
-void TtuneVCASNScan::ConfigureChip(TAlpide *chip) {
-  AlpideConfig::BaseConfig(chip);
-
-  ConfigureFromu(chip);
-
-  AlpideConfig::ConfigureCMU(chip);
-
-  chip->WriteRegister(Alpide::REG_VPULSEL, ((TSCurveParameters *)m_parameters)->VPULSEL);
-}
-
-void TtuneITHRScan::ConfigureChip(TAlpide *chip) {
+void TtuneVCASNScan::ConfigureChip(TAlpide *chip)
+{
   AlpideConfig::BaseConfig(chip);
 
   ConfigureFromu(chip);
@@ -181,7 +182,19 @@ void TtuneITHRScan::ConfigureChip(TAlpide *chip) {
   chip->WriteRegister(Alpide::REG_VPULSEL, ((TSCurveParameters *)m_parameters)->VPULSEL);
 }
 
-THisto TSCurveScan::CreateHisto() {
+void TtuneITHRScan::ConfigureChip(TAlpide *chip)
+{
+  AlpideConfig::BaseConfig(chip);
+
+  ConfigureFromu(chip);
+
+  AlpideConfig::ConfigureCMU(chip);
+
+  chip->WriteRegister(Alpide::REG_VPULSEL, ((TSCurveParameters *)m_parameters)->VPULSEL);
+}
+
+THisto TSCurveScan::CreateHisto()
+{
   THisto histo("ThresholdHisto", "ThresholdHisto", 1024, 0, 1023,
                1 + (m_stop[0] - m_start[0]) / m_step[0], m_start[0], m_stop[0]);
   std::cout << "CREATING: " << (m_stop[0] - m_start[0]) / m_step[0] << ", " << m_start[0] << ", "
@@ -189,22 +202,22 @@ THisto TSCurveScan::CreateHisto() {
   return histo;
 }
 
-void TSCurveScan::Init() {
+void TSCurveScan::Init()
+{
   TScan::Init();
 
-  if (((TSCurveParameters *)m_parameters)->nominal)
-    RestoreNominalSettings();
+  if (((TSCurveParameters *)m_parameters)->nominal) RestoreNominalSettings();
 
   m_running = true;
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
-    if (!pb)
-      continue;
+    if (!pb) continue;
     if (((TSCurveParameters *)m_parameters)->backBias == 0) {
       m_hics.at(ihic)->SwitchBias(false);
       pb->SetBiasVoltage(0);
-    } else {
+    }
+    else {
       m_hics.at(ihic)->SwitchBias(true);
       pb->SetBiasVoltage((-1.) * ((TSCurveParameters *)m_parameters)->backBias);
     }
@@ -220,8 +233,7 @@ void TSCurveScan::Init() {
   }
 
   for (unsigned int i = 0; i < m_chips.size(); i++) {
-    if (!(m_chips.at(i)->GetConfig()->IsEnabled()))
-      continue;
+    if (!(m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     ConfigureChip(m_chips.at(i));
   }
 
@@ -234,26 +246,25 @@ void TSCurveScan::Init() {
     }
   }
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (!m_hics.at(ihic)->GetPowerBoard())
-      continue;
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 }
 
-void TThresholdScan::PrepareStep(int loopIndex) {
+void TThresholdScan::PrepareStep(int loopIndex)
+{
   switch (loopIndex) {
   case 0: // innermost loop: change VPULSEL
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-      if (!m_chips.at(ichip)->GetConfig()->IsEnabled())
-        continue;
+      if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_VPULSEL,
                                        ((TSCurveParameters *)m_parameters)->VPULSEH - m_value[0]);
     }
     break;
   case 1: // 2nd loop: mask staging
+    std::cout << "mask stage " << m_value[1] << std::endl;
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-      if (!m_chips.at(ichip)->GetConfig()->IsEnabled())
-        continue;
+      if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
     }
     sprintf(m_state, "Running %d", m_value[1]);
@@ -264,20 +275,19 @@ void TThresholdScan::PrepareStep(int loopIndex) {
 }
 
 // Need different registers for different classes...
-void TtuneVCASNScan::PrepareStep(int loopIndex) {
+void TtuneVCASNScan::PrepareStep(int loopIndex)
+{
   switch (loopIndex) {
   case 0: // innermost loop: change VCASN
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-      if (!m_chips.at(ichip)->GetConfig()->IsEnabled())
-        continue;
+      if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_VCASN, m_value[0]);
       m_chips.at(ichip)->WriteRegister(Alpide::REG_VCASN2, m_value[0] + 12);
     }
     break;
   case 1: // 2nd loop: mask staging
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-      if (!m_chips.at(ichip)->GetConfig()->IsEnabled())
-        continue;
+      if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
     }
     break;
@@ -286,19 +296,18 @@ void TtuneVCASNScan::PrepareStep(int loopIndex) {
   }
 }
 
-void TtuneITHRScan::PrepareStep(int loopIndex) {
+void TtuneITHRScan::PrepareStep(int loopIndex)
+{
   switch (loopIndex) {
   case 0: // innermost loop: change ITHR
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-      if (!m_chips.at(ichip)->GetConfig()->IsEnabled())
-        continue;
+      if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_ITHR, m_value[0]);
     }
     break;
   case 1: // 2nd loop: mask staging
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-      if (!m_chips.at(ichip)->GetConfig()->IsEnabled())
-        continue;
+      if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
     }
     break;
@@ -307,7 +316,8 @@ void TtuneITHRScan::PrepareStep(int loopIndex) {
   }
 }
 
-void TSCurveScan::Execute() {
+void TSCurveScan::Execute()
+{
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
@@ -323,7 +333,8 @@ void TSCurveScan::Execute() {
   delete Hits;
 }
 
-void TSCurveScan::FillHistos(std::vector<TPixHit> *Hits, int board) {
+void TSCurveScan::FillHistos(std::vector<TPixHit> *Hits, int board)
+{
   common::TChipIndex idx;
   idx.boardIndex = board;
   for (unsigned int i = 0; i < Hits->size(); i++) {
@@ -331,7 +342,7 @@ void TSCurveScan::FillHistos(std::vector<TPixHit> *Hits, int board) {
       continue; // todo: keep track of spurious hits, i.e. hits in non-injected rows
     // !! This will not work when allowing several chips with the same Id
     idx.dataReceiver = Hits->at(i).channel;
-    idx.chipId = Hits->at(i).chipId;
+    idx.chipId       = Hits->at(i).chipId;
 
     int col = Hits->at(i).region * 32 + Hits->at(i).dcol * 2;
     int leftRight =
@@ -348,19 +359,21 @@ void TSCurveScan::FillHistos(std::vector<TPixHit> *Hits, int board) {
   }
 }
 
-void TSCurveScan::LoopEnd(int loopIndex) {
+void TSCurveScan::LoopEnd(int loopIndex)
+{
   if (loopIndex == 0) {
     while (!(m_mutex->try_lock()))
       ;
     m_histo->SetIndex(m_row);
-    std::cout << "SCAN: Writing histo with row " << m_histo->GetIndex() << std::endl;
+    // std::cout << "SCAN: Writing histo with row " << m_histo->GetIndex() << std::endl;
     m_histoQue->push_back(*m_histo);
     m_mutex->unlock();
     m_histo->Clear();
   }
 }
 
-void TSCurveScan::Terminate() {
+void TSCurveScan::Terminate()
+{
   TScan::Terminate();
   // write Data;
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {

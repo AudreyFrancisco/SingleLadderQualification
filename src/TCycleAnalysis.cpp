@@ -1,13 +1,14 @@
-#include "TEnduranceCycle.h"
 #include "TCycleAnalysis.h"
 #include "DBHelpers.h"
+#include "TEnduranceCycle.h"
 
 #include <string>
 
 TCycleAnalysis::TCycleAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
                                TScanConfig *aScanConfig, std::vector<THic *> hics,
                                std::mutex *aMutex, TCycleResult *aResult)
-    : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) {
+    : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex)
+{
   if (aResult)
     m_result = aResult;
   else
@@ -15,40 +16,44 @@ TCycleAnalysis::TCycleAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
   InitCounters();
 }
 
-void TCycleAnalysis::InitCounters() {
+void TCycleAnalysis::InitCounters()
+{
   std::map<std::string, TScanResultHic *>::iterator it;
   for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
-    TCycleResultHic *result = (TCycleResultHic *)it->second;
-    result->m_nTrips = 0;
+    TCycleResultHic *result   = (TCycleResultHic *)it->second;
+    result->m_nTrips          = 0;
     result->m_minWorkingChips = 14;
-    result->m_nChipFailures = 0;
-    result->m_avDeltaT = 0;
-    result->m_maxDeltaT = 0;
-    result->m_avIdda = 0;
-    result->m_maxIdda = 0;
-    result->m_minIdda = 999;
-    result->m_avIddd = 0;
-    result->m_maxIddd = 0;
-    result->m_minIddd = 999;
+    result->m_nChipFailures   = 0;
+    result->m_avDeltaT        = 0;
+    result->m_maxDeltaT       = 0;
+    result->m_avIdda          = 0;
+    result->m_maxIdda         = 0;
+    result->m_minIdda         = 999;
+    result->m_avIddd          = 0;
+    result->m_maxIddd         = 0;
+    result->m_minIddd         = 999;
   }
 }
 
 // TODO write cycle variables to file
 // Q: 1 file per HIC? -> yes, since attachment per activity, activity is per HIC
-void TCycleAnalysis::Finalize() {
+void TCycleAnalysis::Finalize()
+{
   char fName[200];
   std::vector<std::map<std::string, THicCounter>> counters =
       ((TEnduranceCycle *)m_scan)->GetCounters();
   ((TCycleResult *)m_result)->m_nCycles = counters.size();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
     TCycleResultHic *hicResult =
         (TCycleResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
 
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/CycleFile_%s.dat", hicResult->GetOutputPath().c_str(),
               m_config->GetfNameSuffix());
-    } else {
+    }
+    else {
       sprintf(fName, "CycleFile_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
               m_config->GetfNameSuffix());
     }
@@ -64,8 +69,7 @@ void TCycleAnalysis::Finalize() {
               hicCounter.m_iddaConfigured, hicCounter.m_idddConfigured, hicCounter.m_tempStart,
               hicCounter.m_tempEnd);
 
-      if (hicCounter.m_trip)
-        hicResult->m_nTrips++;
+      if (hicCounter.m_trip) hicResult->m_nTrips++;
       if (hicCounter.m_tempEnd - hicCounter.m_tempStart > hicResult->m_maxDeltaT)
         hicResult->m_maxDeltaT = hicCounter.m_tempEnd - hicCounter.m_tempStart;
       if (hicCounter.m_nWorkingChips < hicResult->m_minWorkingChips)
@@ -91,12 +95,19 @@ void TCycleAnalysis::Finalize() {
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
     TCycleResultHic *hicResult =
         (TCycleResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
 
     hicResult->m_avDeltaT /= ((TCycleResult *)m_result)->m_nCycles;
     hicResult->m_avIdda /= ((TCycleResult *)m_result)->m_nCycles;
     hicResult->m_avIddd /= ((TCycleResult *)m_result)->m_nCycles;
+    if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
+      hicResult->m_class = GetClassificationOB(hicResult);
+    }
+    else {
+      std::cout << "Classification not implemented for IB HIC" << std::endl;
+    }
   }
 
   WriteResult();
@@ -104,14 +115,33 @@ void TCycleAnalysis::Finalize() {
   m_finished = true;
 }
 
-void TCycleAnalysis::WriteResult() {
+
+THicClassification TCycleAnalysis::GetClassificationOB(TCycleResultHic *result)
+{
+  THicClassification returnValue = CLASS_GREEN;
+
+  returnValue = DoCut(returnValue, CLASS_ORANGE, result->m_nTrips, "ENDURANCEMAXTRIPSGREEN");
+  returnValue = DoCut(returnValue, CLASS_RED, result->m_nTrips, "ENDURANCEMAXTRIPSORANGE");
+  returnValue =
+      DoCut(returnValue, CLASS_ORANGE, result->m_minWorkingChips, "ENDURANCEMINCHIPSGREEN", true);
+  returnValue =
+      DoCut(returnValue, CLASS_RED, result->m_nChipFailures, "ENDURANCEMAXFAILURESORANGE");
+
+  return returnValue;
+}
+
+
+void TCycleAnalysis::WriteResult()
+{
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/CycleResult_%s.dat", hicResult->GetOutputPath().c_str(),
               m_config->GetfNameSuffix());
-    } else {
+    }
+    else {
       sprintf(fName, "CycleResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
               m_config->GetfNameSuffix());
     }
@@ -129,11 +159,39 @@ void TCycleAnalysis::WriteResult() {
   }
 }
 
-void TCycleResult::WriteToFileGlobal(FILE *fp) {
+void TCycleResult::WriteToFileGlobal(FILE *fp)
+{
   fprintf(fp, "Number of cycles: %d\n\n", m_nCycles);
 }
 
-void TCycleResultHic::WriteToFile(FILE *fp) {
+void TCycleResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
+{
+  std::string fileName, cycleName;
+  std::size_t slash;
+  DbAddParameter(db, activity, string("Number of trips"), (float)m_nTrips);
+  DbAddParameter(db, activity, string("Min. number of working chips"), (float)m_minWorkingChips);
+  DbAddParameter(db, activity, string("Number of chip failures"), (float)m_nChipFailures);
+  DbAddParameter(db, activity, string("Av. delta T"), (float)m_avDeltaT);
+  DbAddParameter(db, activity, string("Max. delta T"), (float)m_maxDeltaT);
+  DbAddParameter(db, activity, string("Av. IDDA"), (float)m_avIdda);
+  DbAddParameter(db, activity, string("Min. IDDA"), (float)m_minIdda);
+  DbAddParameter(db, activity, string("Max. IDDA"), (float)m_maxIdda);
+  DbAddParameter(db, activity, string("Av. IDDD"), (float)m_avIddd);
+  DbAddParameter(db, activity, string("Min. IDDD"), (float)m_minIddd);
+  DbAddParameter(db, activity, string("Max. IDDD"), (float)m_maxIddd);
+
+  slash    = string(m_resultFile).find_last_of("/");
+  fileName = string(m_resultFile).substr(slash + 1); // strip path
+
+  slash     = string(m_cycleFile).find_last_of("/");
+  cycleName = string(m_cycleFile).substr(slash + 1); // strip path
+
+  DbAddAttachment(db, activity, attachResult, string(m_resultFile), fileName);
+  DbAddAttachment(db, activity, attachResult, string(m_cycleFile), cycleName);
+}
+
+void TCycleResultHic::WriteToFile(FILE *fp)
+{
   fprintf(fp, "HIC Result:\n\n");
 
   fprintf(fp, "HIC Classification: %s\n\n", WriteHicClassification());
@@ -151,7 +209,8 @@ void TCycleResultHic::WriteToFile(FILE *fp) {
   fprintf(fp, "Minimum Iddd:            %.3f\n", m_minIddd);
 }
 
-float TCycleResultChip::GetVariable(TResultVariable var) {
+float TCycleResultChip::GetVariable(TResultVariable var)
+{
   switch (var) {
   default:
     std::cout << "Warning, bad result type for this analysis" << std::endl;

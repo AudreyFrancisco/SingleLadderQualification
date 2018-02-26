@@ -1,20 +1,22 @@
-#include "TPowerTest.h"
 #include "TPowerAnalysis.h"
 #include "DBHelpers.h"
+#include "TPowerTest.h"
 
 #include <string>
 
 TPowerAnalysis::TPowerAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
                                TScanConfig *aScanConfig, std::vector<THic *> hics,
                                std::mutex *aMutex, TPowerResult *aResult)
-    : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex) {
+    : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex)
+{
   if (aResult)
     m_result = aResult;
   else
     m_result = new TPowerResult();
 }
 
-string TPowerAnalysis::GetPreviousTestType() {
+string TPowerAnalysis::GetPreviousTestType()
+{
   switch (m_config->GetTestType()) {
   case OBQualification:
     return string("ALPIDEB Chip Testing Analysis");
@@ -39,7 +41,8 @@ string TPowerAnalysis::GetPreviousTestType() {
   }
 }
 
-void TPowerAnalysis::Finalize() {
+void TPowerAnalysis::Finalize()
+{
   TPowerTest *powerTest = (TPowerTest *)m_scan;
 
   std::map<std::string, THicCurrents> currents = powerTest->GetCurrents();
@@ -47,19 +50,19 @@ void TPowerAnalysis::Finalize() {
   std::map<std::string, THicCurrents>::iterator it, itResult;
 
   for (it = currents.begin(); it != currents.end(); ++it) {
-    TPowerResultHic *hicResult = (TPowerResultHic *)m_result->GetHicResult(it->first);
-    THicCurrents hicCurrents = it->second;
+    TPowerResultHic *hicResult   = (TPowerResultHic *)m_result->GetHicResult(it->first);
+    THicCurrents     hicCurrents = it->second;
 
     // Copy currents from currents to result, apply cuts, write to file
-    hicResult->trip = hicCurrents.trip;
-    hicResult->iddaSwitchon = hicCurrents.iddaSwitchon;
-    hicResult->idddSwitchon = hicCurrents.idddSwitchon;
-    hicResult->iddaClocked = hicCurrents.iddaClocked;
-    hicResult->idddClocked = hicCurrents.idddClocked;
+    hicResult->trip           = hicCurrents.trip;
+    hicResult->iddaSwitchon   = hicCurrents.iddaSwitchon;
+    hicResult->idddSwitchon   = hicCurrents.idddSwitchon;
+    hicResult->iddaClocked    = hicCurrents.iddaClocked;
+    hicResult->idddClocked    = hicCurrents.idddClocked;
     hicResult->iddaConfigured = hicCurrents.iddaConfigured;
     hicResult->idddConfigured = hicCurrents.idddConfigured;
-    hicResult->ibias0 = hicCurrents.ibias0;
-    hicResult->ibias3 = hicCurrents.ibias3;
+    hicResult->ibias0         = hicCurrents.ibias0;
+    hicResult->ibias3         = hicCurrents.ibias3;
 
     for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
       hicResult->ibias[i] = hicCurrents.ibias[i];
@@ -70,16 +73,17 @@ void TPowerAnalysis::Finalize() {
   m_finished = true;
 }
 
-THicClassification TPowerAnalysis::GetClassification(THicCurrents currents) {
-  if (currents.trip)
-    return CLASS_RED;
+THicClassification TPowerAnalysis::GetClassification(THicCurrents currents)
+{
+  if (currents.trip) return CLASS_RED;
   if (currents.hicType == HIC_IB)
     return GetClassificationIB(currents);
   else
     return GetClassificationOB(currents);
 }
 
-THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents currents) {
+THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents currents)
+{
   if ((currents.iddaSwitchon * 1000 < m_config->GetParamValue("MINIDDA_IB")) ||
       (currents.idddSwitchon * 1000 < m_config->GetParamValue("MINIDDD_IB")))
     return CLASS_RED;
@@ -100,7 +104,8 @@ THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents currents) {
   // TODO: Add orange for back bias
 }
 
-THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents currents) {
+THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents currents)
+{
   if ((currents.iddaSwitchon * 1000 < m_config->GetParamValue("MINIDDA_OB")) ||
       (currents.idddSwitchon * 1000 < m_config->GetParamValue("MINIDDD_OB")))
     return CLASS_RED;
@@ -112,8 +117,7 @@ THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents currents) {
     return CLASS_ORANGE;
 
   // check for absolute value at 3V and for margin from breakthrough
-  if (currents.ibias[30] > m_config->GetParamValue("MAXBIAS_3V_IB"))
-    return CLASS_ORANGE;
+  if (currents.ibias[30] > m_config->GetParamValue("MAXBIAS_3V_IB")) return CLASS_ORANGE;
   // add 1 for the case where I(3V) = 0
   if ((currents.ibias[40] > m_config->GetParamValue("MAXFACTOR_4V_IB") * (currents.ibias[30] + 1)))
     return CLASS_ORANGE;
@@ -123,14 +127,16 @@ THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents currents) {
   // TODO: Add orange for back bias
 }
 
-void TPowerAnalysis::WriteIVCurve(THic *hic) {
-  char fName[200];
+void TPowerAnalysis::WriteIVCurve(THic *hic)
+{
+  char             fName[200];
   TPowerResultHic *result = (TPowerResultHic *)m_result->GetHicResult(hic->GetDbId());
 
   if (m_config->GetUseDataPath()) {
     sprintf(fName, "%s/IVCurve_%s.dat", result->GetOutputPath().c_str(),
             m_config->GetfNameSuffix());
-  } else {
+  }
+  else {
     sprintf(fName, "IVCurve_%s_%s.dat", hic->GetDbId().c_str(), m_config->GetfNameSuffix());
   }
 
@@ -144,7 +150,8 @@ void TPowerAnalysis::WriteIVCurve(THic *hic) {
   fclose(fp);
 }
 
-void TPowerAnalysis::WriteResult() {
+void TPowerAnalysis::WriteResult()
+{
   char fName[200];
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
@@ -153,7 +160,8 @@ void TPowerAnalysis::WriteResult() {
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/PowerTestResult_%s.dat", hicResult->GetOutputPath().c_str(),
               m_config->GetfNameSuffix());
-    } else {
+    }
+    else {
       sprintf(fName, "PowerTestResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
               m_config->GetfNameSuffix());
     }
@@ -171,8 +179,9 @@ void TPowerAnalysis::WriteResult() {
   }
 }
 
-void TPowerResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity) {
-  string fileName, ivName;
+void TPowerResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
+{
+  string      fileName, ivName;
   std::size_t slash;
 
   DbAddParameter(db, activity, string("IDDD"), idddConfigured);
@@ -180,17 +189,18 @@ void TPowerResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity) {
   DbAddParameter(db, activity, string("Back bias current 0V"), ibias0);
   DbAddParameter(db, activity, string("Back bias current 3V"), ibias3);
 
-  slash = string(m_resultFile).find_last_of("/");
+  slash    = string(m_resultFile).find_last_of("/");
   fileName = string(m_resultFile).substr(slash + 1); // strip path
 
-  slash = string(m_ivFile).find_last_of("/");
+  slash  = string(m_ivFile).find_last_of("/");
   ivName = string(m_ivFile).substr(slash + 1); // strip path
 
   DbAddAttachment(db, activity, attachResult, string(m_resultFile), fileName);
   DbAddAttachment(db, activity, attachResult, string(m_ivFile), ivName);
 }
 
-void TPowerResultHic::WriteToFile(FILE *fp) {
+void TPowerResultHic::WriteToFile(FILE *fp)
+{
   fprintf(fp, "HIC Result: \n\n");
 
   fprintf(fp, "HIC Classification: %s\n\n", WriteHicClassification());

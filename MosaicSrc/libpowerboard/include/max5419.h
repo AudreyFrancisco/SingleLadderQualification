@@ -31,8 +31,8 @@
 #ifndef MAX5419_H
 #define MAX5419_H
 
-#include <stdint.h>
 #include "i2cslave.h"
+#include <stdint.h>
 
 class MAX5419 : public I2Cslave {
 public:
@@ -43,12 +43,7 @@ public:
   void storeRDAC();
 
 private:
-  enum {
-    CMD_VREG = 0x11,
-    CMD_NVREG = 0x21,
-    CMD_NVREGxVREG = 0x61,
-    CMD_VREGxNVREG = 0x51
-  };
+  enum { CMD_VREG = 0x11, CMD_NVREG = 0x21, CMD_NVREGxVREG = 0x61, CMD_VREGxNVREG = 0x51 };
 };
 
 #endif // MAX5419_H

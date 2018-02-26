@@ -31,8 +31,8 @@
 #ifndef MDATAGENERATOR_H
 #define MDATAGENERATOR_H
 
-#include <stdint.h>
 #include "mwbbslave.h"
+#include <stdint.h>
 
 class MDataGenerator : public MWbbSlave {
 public:
@@ -46,13 +46,13 @@ public:
 
 private: // WBB Slave registers map
   enum regAddress_e {
-    regModeOn = 0,    // Run control register
-    regEventSize = 1, // Event size
-    regEventDelay = 2 // delay between events
+    regModeOn     = 0, // Run control register
+    regEventSize  = 1, // Event size
+    regEventDelay = 2  // delay between events
   };
 
   enum modeOn_e {
-    MODEON_ON = (1 << 0),
+    MODEON_ON   = (1 << 0),
     MODEON_MODE = (1 << 1) // NOT implemented
   };
 };

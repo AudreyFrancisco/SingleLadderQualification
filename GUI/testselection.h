@@ -1,10 +1,10 @@
 #ifndef TESTSELECTION_H
 #define TESTSELECTION_H
-#include <TFifoTest.h>
+#include "dialog.h"
+#include "mainwindow.h"
 #include <QDialog>
 #include <QPushButton>
-#include "dialog.h"
-
+#include <TFifoTest.h>
 namespace Ui {
   class TestSelection;
 }
@@ -20,29 +20,33 @@ public:
                             QString &tfive, QString &done, QString &dtwo, QString &dthree,
                             QString &dfour, QString &dfive);
   virtual void connectlocationcombo(std::vector<std::pair<std::string, int>> floc);
-  virtual int GetLocationID() { return locid; }
+  virtual int  GetLocationID() { return locid; }
   virtual void ClearLocations();
 
 private:
   Ui::TestSelection *ui;
-  Dialog *missingsettings;
-  int locid;
-  int memid;
-  bool m_testDatabase;
-  QString location;
-  QString toptwo, topthree, topfour, topfive;
-  QString downone, downtwo, downthree, downfour, downfive;
+  Dialog *           missingsettings;
+  int                locid;
+  int                memid;
+  bool               m_testDatabase;
+  QString            location;
+  QString            toptwo, topthree, topfour, topfive;
+  QString            downone, downtwo, downthree, downfour, downfive;
+  MainWindow *       fmainwindow;
+  int                fCounter;
 
-public
-slots:
+public slots:
   virtual void getlocationcombo(int value);
-  virtual int GetMemberID();
+  virtual int  GetMemberID();
   virtual void adjustendurance();
   virtual void hideendurance();
   virtual void GetTestTypeName(TTestType &typetest, QString &testname);
+  virtual void nextstep();
+  virtual void getwindow();
+  virtual int  getcounter();
 
-private
-slots:
+
+private slots:
   void popupmessage(QString m);
 };
 

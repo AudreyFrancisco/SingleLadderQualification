@@ -31,8 +31,8 @@
 #ifndef LTC2635_H
 #define LTC2635_H
 
-#include <stdint.h>
 #include "i2cslave.h"
+#include <stdint.h>
 
 class LTC2635 : public I2Cslave {
 public:
@@ -41,14 +41,14 @@ public:
 
 private:
   enum {
-    CMD_WriteReg = 0x00,
-    CMD_UpdateReg = 0x10,
+    CMD_WriteReg          = 0x00,
+    CMD_UpdateReg         = 0x10,
     CMD_WriteRegUpdateAll = 0x20,
-    CMD_WriteUpdateReg = 0x30,
-    CMD_PowerDownN = 0x40,
-    CMD_PowerDownChip = 0x50,
-    CMD_SelIntRef = 0x60,
-    CMD_SelExtRef = 0x70
+    CMD_WriteUpdateReg    = 0x30,
+    CMD_PowerDownN        = 0x40,
+    CMD_PowerDownChip     = 0x50,
+    CMD_SelIntRef         = 0x60,
+    CMD_SelExtRef         = 0x70
   };
 
   // uint8_t i2c_baseAddress;

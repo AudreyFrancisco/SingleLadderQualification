@@ -41,8 +41,8 @@
 #ifndef ALPIDEDBMANAGER_H_
 #define ALPIDEDBMANAGER_H_
 
-#include <locale>
 #include "utilities.h"
+#include <locale>
 
 // --- Definition of constants for auth methods
 #define COOKIEPACK "/tmp/cerncookie.txt"
@@ -70,13 +70,13 @@
 #include <curl/curl.h>
 #endif
 
-#include "utilities.h"
 #include "CernSsoCookiesJar.h"
+#include "utilities.h"
 
 class AlpideDBManager {
 
   struct ReceiveBuffer {
-    char *memory;
+    char * memory;
     size_t size;
   };
 
@@ -101,8 +101,8 @@ private:
 #endif
 
   CernSsoCookieJar *theCookieJar;
-  string theJarUrl;
-  int thePendingRequests;
+  string            theJarUrl;
+  int               thePendingRequests;
 
   // Methods
 public:
@@ -110,13 +110,9 @@ public:
   ~AlpideDBManager();
 
 #ifdef COMPILE_LIBCURL
-  bool isLibCurlCompiled(void) {
-    return (true);
-  };
+  bool isLibCurlCompiled(void) { return (true); };
 #else
-  bool isLibCurlCompiled(void) {
-    return (false);
-  };
+  bool isLibCurlCompiled(void) { return (false); };
 #endif
 
 #ifdef AUTH_KERBEROS
@@ -125,54 +121,26 @@ public:
 #ifdef AUTH_X509
 #ifdef COMPILE_LIBCURL
   bool Init(string aSslUrl, string aNickName, string aNSSDBPath, string aNSSDBPassFile);
-  string getNSSDBNickName() {
-    return (theNSSNickName);
-  };
-  string getNSSDBPath() {
-    return (theNSSDBPath);
-  };
-  string getNSSDBPass() {
-    return (theNSSDBPassword);
-  };
-  void setNSSDBNickName(string aNickName) {
-    theNSSNickName = aNickName;
-  };
-  void setNSSDBPath(string aNSSDBPath) {
-    theNSSDBPath = aNSSDBPath;
-  };
-  void setNSSDBPass(string aNSSDBPass) {
-    theNSSDBPassword = aNSSDBPass;
-  };
+  string getNSSDBNickName() { return (theNSSNickName); };
+  string getNSSDBPath() { return (theNSSDBPath); };
+  string getNSSDBPass() { return (theNSSDBPassword); };
+  void setNSSDBNickName(string aNickName) { theNSSNickName = aNickName; };
+  void setNSSDBPath(string aNSSDBPath) { theNSSDBPath = aNSSDBPath; };
+  void setNSSDBPass(string aNSSDBPass) { theNSSDBPassword = aNSSDBPass; };
 #else
   bool Init(string aSslUrl, string aCliCer, string aCliKey, string aCAPath);
-  string getClientCertFile() {
-    return (theCliCer);
-  };
-  string getClientKeyFile() {
-    return (theCliKey);
-  };
-  void setClientCertFile(string aCliCer) {
-    theCliCer = aCliCer;
-  };
-  void setClientKeyFile(string aCliKey) {
-    theCliKey = aCliKey;
-  };
-  string getCAPath() {
-    return (theCertificationAuthorityPath);
-  };
-  void setCAPath(string aCAPath) {
-    theCertificationAuthorityPath = aCAPath;
-  };
+  string getClientCertFile() { return (theCliCer); };
+  string getClientKeyFile() { return (theCliKey); };
+  void setClientCertFile(string aCliCer) { theCliCer = aCliCer; };
+  void setClientKeyFile(string aCliKey) { theCliKey = aCliKey; };
+  string                       getCAPath() { return (theCertificationAuthorityPath); };
+  void setCAPath(string aCAPath) { theCertificationAuthorityPath = aCAPath; };
 #endif
 #endif
 
-  bool Init();
-  string getSSOCookieUrl() {
-    return (theJarUrl);
-  };
-  void setSSOCookieUrl(string aJarUrl) {
-    theJarUrl = aJarUrl;
-  };
+  bool   Init();
+  string getSSOCookieUrl() { return (theJarUrl); };
+  void setSSOCookieUrl(string aJarUrl) { theJarUrl = aJarUrl; };
 
 public:
   int makeDBQuery(const string Url, const char *Payload, char **Result, bool isSOAPrequest = false,

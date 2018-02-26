@@ -32,16 +32,17 @@
 setValidator::setValidator(QObject *parent) : QDoubleValidator(parent) {}
 
 setValidator::setValidator(double bottom, double top, int decimals, QObject *parent)
-    : QDoubleValidator(bottom, top, decimals, parent) {}
+    : QDoubleValidator(bottom, top, decimals, parent)
+{
+}
 
 setValidator::~setValidator() {}
 
-void setValidator::fixup(QString &input) const {
-  double value = input.toFloat();
-  if (value < bottom())
-    value = bottom();
-  if (value > top())
-    value = top();
+void setValidator::fixup(QString &input) const
+{
+  double value                = input.toFloat();
+  if (value < bottom()) value = bottom();
+  if (value > top()) value    = top();
 
   input.setNum(value, 'f', decimals());
 }

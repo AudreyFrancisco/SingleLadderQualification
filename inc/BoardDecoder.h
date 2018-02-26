@@ -11,8 +11,8 @@ typedef struct {
   // common
   //  int  size;
   // MOSAIC
-  int channel;
-  int eoeCount;
+  int  channel;
+  int  eoeCount;
   bool timeout;
   bool endOfRun;
   bool overflow;
@@ -20,17 +20,17 @@ typedef struct {
   bool decoder10b8bError; // the MOSAIC board reports a 10b8b conversion error
 
   // DAQ board
-  bool almostFull;
-  int trigType;
-  int bufferDepth;
+  bool     almostFull;
+  int      trigType;
+  int      bufferDepth;
   uint64_t eventId;
   uint64_t timestamp;
-  int eventSize;
-  bool truncated;
-  int strobeCount;
-  int trigCountChipBusy;
-  int trigCountDAQBusy;
-  int extTrigCount;
+  int      eventSize;
+  bool     truncated;
+  int      strobeCount;
+  int      trigCountChipBusy;
+  int      trigCountDAQBusy;
+  int      extTrigCount;
 } TBoardHeader;
 
 // Board Decoder decodes the information contained in the readout board header and trailer
@@ -57,9 +57,7 @@ public:
                           int &nBytesTrailer, TBoardHeader &boardInfo,
                           uint32_t firmwareVersion = 0x247E0611, int headerType = 0x1);
   static int GetDAQEventHeaderLength(uint32_t firmwareVersion = 0x247E0611, int headerType = 1);
-  static int GetDAQEventTrailerLength() {
-    return 8;
-  };
+  static int GetDAQEventTrailerLength() { return 8; };
 };
 
 #endif

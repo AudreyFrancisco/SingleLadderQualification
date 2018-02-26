@@ -31,25 +31,28 @@
 #ifndef MOSAIC_H
 #define MOSAIC_H
 
-#include "mwbb.h"
-#include "ipbusudp.h"
-#include "mruncontrol.h"
-#include "i2cbus.h"
-#include "controlinterface.h"
-#include "pulser.h"
-#include "mtriggercontrol.h"
-#include "alpidercv.h"
-#include "i2csyspll.h"
-#include "mboard.h"
-#include "mdatareceiver.h"
-#include "mdatagenerator.h"
 #include "TAlpideDataParser.h"
+#include "alpidercv.h"
+#include "controlinterface.h"
+#include "i2cbus.h"
+#include "i2csyspll.h"
+#include "ipbusudp.h"
+#include "mboard.h"
+#include "mcoordinator.h"
+#include "mdatagenerator.h"
+#include "mdatareceiver.h"
+#include "mruncontrol.h"
+#include "mtriggercontrol.h"
+#include "mwbb.h"
+#include "pulser.h"
+#include "trgrecorder.h"
 
 namespace Mosaic {
   typedef enum rcvRate_e { // Receiver data rate (in Mbps)
     RCV_RATE_400,
     RCV_RATE_600,
-    RCV_RATE_1200} TReceiverSpeed;
+    RCV_RATE_1200
+  } TReceiverSpeed;
 }
 
 #endif // MOSAIC_H

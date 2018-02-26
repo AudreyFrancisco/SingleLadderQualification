@@ -36,10 +36,10 @@ ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs | sed -e 's/-lpthread//g')
 BASE_CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp THIC.cpp \
   USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp TReadoutBoardMOSAIC.cpp TChipConfig.cpp \
   TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp TPowerBoard.cpp \
-  TPowerBoardConfig.cpp BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp \
+  TPowerBoardConfig.cpp BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TFastPowerAnalysis.cpp\
   TPowerAnalysis.cpp TDigitalAnalysis.cpp TDigitalWFAnalysis.cpp TFifoAnalysis.cpp TLocalBusAnalysis.cpp \
   TDACScan.cpp TDataTaking.cpp TReadoutTest.cpp TEnduranceCycle.cpp TCycleAnalysis.cpp TReadoutAnalysis.cpp \
-  TNoiseAnalysis.cpp TScan.cpp TFifoTest.cpp TPowerTest.cpp TSCurveScan.cpp TDigitalScan.cpp \
+  TNoiseAnalysis.cpp TScan.cpp TFifoTest.cpp TPowerTest.cpp TFastPowerTest.cpp TSCurveScan.cpp TDigitalScan.cpp \
   TNoiseOccupancy.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp Common.cpp \
   TReadoutBoardRU.cpp TBoardConfigRU.cpp TApplyMask.cpp THicConfig.cpp
 BASE_OBJS = $(BASE_CLASSES:.cpp=.o)
@@ -49,7 +49,7 @@ RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverM
 RU_OBJS = $(RU_SOURCES:.cpp=.o)
 
 MOSAIC_SOURCES = MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/pexception.cpp \
-  MosaicSrc/TAlpideDataParser.cpp
+  MosaicSrc/TAlpideDataParser.cpp MosaicSrc/trgrecorderparser.cpp
 MOSAIC_OBJS = $(MOSAIC_SOURCES:.cpp=.o)
 
 OBJS=$(BASE_OBJS) $(RU_OBJS) $(MOSAIC_OBJS)
@@ -139,7 +139,7 @@ clean-all:	clean
 	$(MAKE) -C $(LIBMOSAIC_DIR) cleanall
 	$(MAKE) -C $(LIBPOWERBOARD_DIR) cleanall
 	$(MAKE) -C $(LIBALUCMS_DIR) clean-all
-	$(MAKE) -C $(LIBSCOPECONTROL_DIR) clean
+	$(MAKE) -C $(LIBSCOPECONTROL_DIR) clean-all
 
 
 ## clang format (formatting + testing)
@@ -151,7 +151,6 @@ format-check:
 
 ### Config.cfg
 githooks:
-	/bin/bash -c 'if [[ "$(lsb_release -d | grep "CentOS Linux release 7" | wc -l)" -eq 1 ]]; then cp -v .pre-commit-clang-format .git/hooks/pre-commit ; else echo "automatic formatting only available on CentOS CERN 7"; fi'
-
+	/bin/bash -c 'if [[ -d .git/hooks ]]; then cp -v .pre-commit-clang-format .git/hooks/pre-commit ; else echo "could not install pre-commit hook for the format checking"; fi'
 
 .PHONY:	all clean clean-all $(STATIC_LIBS) lib lib_analysis format format-check githooks

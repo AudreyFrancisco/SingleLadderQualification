@@ -27,15 +27,16 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "ad5254.h"
+#include "mexception.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "ad5254.h"
-#include "mexception.h"
 
 AD5254::AD5254(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address) {}
 
-void AD5254::write(uint8_t cmd, uint8_t ch, uint8_t data) {
+void AD5254::write(uint8_t cmd, uint8_t ch, uint8_t data)
+{
   ch &= 0x03;
 
   // Write command and data
@@ -48,7 +49,8 @@ void AD5254::write(uint8_t cmd, uint8_t ch, uint8_t data) {
 }
 
 // two bytes version for quick commands
-void AD5254::write(uint8_t cmd, uint8_t ch) {
+void AD5254::write(uint8_t cmd, uint8_t ch)
+{
   ch &= 0x03;
 
   // Write command and data
@@ -59,7 +61,8 @@ void AD5254::write(uint8_t cmd, uint8_t ch) {
   i2cBus->execute();
 }
 
-uint8_t AD5254::read(uint8_t cmd, uint8_t add) {
+uint8_t AD5254::read(uint8_t cmd, uint8_t add)
+{
   uint32_t r;
 
   // dummy write to set address
@@ -78,9 +81,10 @@ uint8_t AD5254::read(uint8_t cmd, uint8_t add) {
 /*
         Wait for the completition of current operation
 */
-void AD5254::ackPolling() {
+void AD5254::ackPolling()
+{
   const int maxTry = 500;
-  int i;
+  int       i;
 
   usleep(200);
   for (i = 0; i < maxTry; i++) {
@@ -96,6 +100,5 @@ void AD5254::ackPolling() {
     }
   }
 
-  if (i >= maxTry)
-    throw MIPBusErrorWrite("AD5254::ackPolling timeout");
+  if (i >= maxTry) throw MIPBusErrorWrite("AD5254::ackPolling timeout");
 }

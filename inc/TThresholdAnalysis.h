@@ -120,7 +120,7 @@ private:
   int m_resultFactor;
 
 public:
-  TThresholdResultHic() : TScanResultHic() {};
+  TThresholdResultHic() : TScanResultHic(){};
   void WriteToFile(FILE *fp);
 };
 
@@ -150,7 +150,7 @@ class TThresholdAnalysis : public TScanAnalysis {
 
 private:
   static constexpr float m_electronPerDac = 10; //[e/DAC], around 10
-  const std::string m_analisysName = "TThresholdAnalysis";
+  const std::string      m_analisysName   = "TThresholdAnalysis";
 
   int m_startPulseAmplitude;
   int m_stopPulseAmplitude;
@@ -172,14 +172,14 @@ private:
   int m_sumGoodThresholds;
   int m_counterGoodThresholds;
 
-  int
-  m_resultFactor; // basically determines scan type; 10 default if regular, 1 if vcasn, -1 if ithr
+  int m_resultFactor; // basically determines scan type; 10 default if regular, 1 if vcasn, -1 if
+                      // ithr
 
   double m_cutChi2; // Or float ?
 
   std::map<int, TThresholdResultChip> m_resultChip;
-  std::map<int, common::TStatVar> m_threshold;
-  std::map<int, common::TStatVar> m_noise;
+  std::map<int, common::TStatVar>     m_threshold;
+  std::map<int, common::TStatVar>     m_noise;
 
   std::string GetFileName(common::TChipIndex aChipIndex, std::string fileType);
   bool CheckPixelNoHits(TGraph *aGraph);
@@ -187,22 +187,24 @@ private:
   common::TErrFuncFitResult DoFit(TGraph *aGraph, bool speedy = false);
 
   bool HasData(TScanHisto &scanHisto, common::TChipIndex idx, int col);
-  void WriteResult();
-  void FillVariableList();
+  void               WriteResult();
+  void               FillVariableList();
   THicClassification GetClassificationOB(TThresholdResultHic *result);
   THicClassification GetClassificationIB(TThresholdResultHic *result);
 
 protected:
-  TScanResultChip *GetChipResult() {
+  TScanResultChip *GetChipResult()
+  {
     TThresholdResultChip *Result = new TThresholdResultChip();
     return Result;
   };
-  TScanResultHic *GetHicResult() {
+  TScanResultHic *GetHicResult()
+  {
     TThresholdResultHic *Result = new TThresholdResultHic();
     return Result;
   };
-  void CreateResult() {};
-  void InitCounters() {};
+  void CreateResult(){};
+  void InitCounters(){};
   void AnalyseHisto(TScanHisto *histo);
 
 public:
@@ -211,7 +213,7 @@ public:
                      float resultFactor = m_electronPerDac); // MUST BE 1 for a vcasn scan, and *-1*
                                                              // for an ithr scan!!!  Else use
                                                              // default.
-  virtual ~TThresholdAnalysis() {};
+  virtual ~TThresholdAnalysis(){};
 
   void Initialize();
   void Finalize();

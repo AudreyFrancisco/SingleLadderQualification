@@ -14,26 +14,26 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-#include <unistd.h>
-#include <string.h>
-#include "TAlpide.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "TConfig.h"
+#include "THisto.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "BoardDecoder.h"
-#include "SetupHelpers.h"
-#include "THisto.h"
+#include <string.h>
+#include <unistd.h>
 
 // !!! NOTE: Scan parameters are now set via Config file
 
-TBoardType fBoardType;
+TBoardType                   fBoardType;
 std::vector<TReadoutBoard *> fBoards;
-std::vector<TAlpide *> fChips;
-TConfig *fConfig;
+std::vector<TAlpide *>       fChips;
+TConfig *                    fConfig;
 
 int myNTriggers;
 int myMaskStages;
@@ -47,7 +47,8 @@ TScanHisto *fScanHisto;
 const unsigned int kNdcol = 512;
 const unsigned int kNaddr = 1024;
 
-template <class T> T Sum(std::vector<T> __v, size_t __len) {
+template <class T> T Sum(std::vector<T> __v, size_t __len)
+{
   T ret = __v.at(0);
   __len = (__len > __v.size()) ? __v.size() : __len;
   for (size_t i = 1; i < __len; ++i)
@@ -56,7 +57,8 @@ template <class T> T Sum(std::vector<T> __v, size_t __len) {
   return ret;
 }
 
-void CreateScanHisto() {
+void CreateScanHisto()
+{
   common::TChipIndex id;
   fScanHisto = new TScanHisto();
 
@@ -67,9 +69,9 @@ void CreateScanHisto() {
     for (unsigned int ichip = 0; ichip < fChips.size(); ichip++) {
       if ((fChips.at(ichip)->GetConfig()->IsEnabled()) &&
           (fChips.at(ichip)->GetReadoutBoard() == fBoards.at(iboard))) {
-        id.boardIndex = iboard;
+        id.boardIndex   = iboard;
         id.dataReceiver = fChips.at(ichip)->GetConfig()->GetParamValue("RECEIVER");
-        id.chipId = fChips.at(ichip)->GetConfig()->GetChipId();
+        id.chipId       = fChips.at(ichip)->GetConfig()->GetChipId();
 
         fScanHisto->AddHisto(id, histo);
       }
@@ -80,29 +82,32 @@ void CreateScanHisto() {
   return;
 }
 
-void InitScanParameters() {
-  myMaskStages = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
-  myPixPerRegion = fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
-  myNTriggers = fConfig->GetScanConfig()->GetParamValue("NINJ");
+void InitScanParameters()
+{
+  myMaskStages     = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
+  myPixPerRegion   = fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
+  myNTriggers      = fConfig->GetScanConfig()->GetParamValue("NINJ");
   maxTrigsPerTrain = fConfig->GetScanConfig()->GetParamValue("MAXNTRIGTRAIN");
 }
 
-void FillHisto(int board, std::vector<TPixHit> *Hits) {
+void FillHisto(int board, std::vector<TPixHit> *Hits)
+{
   common::TChipIndex idx;
   idx.boardIndex = board;
 
   for (const auto &hit : *Hits) {
     idx.dataReceiver = hit.channel;
-    idx.chipId = hit.chipId;
-    int dcol = hit.dcol + 16 * hit.region;
-    int addr = hit.address;
+    idx.chipId       = hit.chipId;
+    int dcol         = hit.dcol + 16 * hit.region;
+    int addr         = hit.address;
 
     if ((hit.channel < 0) || (hit.chipId < 0) || (dcol < 0) || (dcol > 511) || (hit.region < 0) ||
         (addr < 0) || (addr > 1023)) {
       printf("%d %d %d %d %d \n", idx.dataReceiver, idx.chipId, dcol, hit.region, addr);
       std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
       abort();
-    } else {
+    }
+    else {
       fScanHisto->Incr(idx, dcol, addr);
     }
   }
@@ -110,19 +115,20 @@ void FillHisto(int board, std::vector<TPixHit> *Hits) {
   return;
 }
 
-bool HasData(const common::TChipIndex &idx) {
+bool HasData(const common::TChipIndex &idx)
+{
   for (unsigned int icol = 0; icol < kNdcol; icol++) {
     for (unsigned int iaddr = 0; iaddr < kNaddr; iaddr++) {
-      if ((*fScanHisto)(idx, icol, iaddr) > 0)
-        return true;
+      if ((*fScanHisto)(idx, icol, iaddr) > 0) return true;
     }
   }
 
   return false;
 }
 
-void WriteDataToFile(const char *fName, bool Recreate) {
-  char fNameChip[100];
+void WriteDataToFile(const char *fName, bool Recreate)
+{
+  char  fNameChip[100];
   FILE *fp;
 
   char fNameTemp[100];
@@ -139,16 +145,16 @@ void WriteDataToFile(const char *fName, bool Recreate) {
       int channel = fBoards.at(ib)->GetReceiver(chipId); // Get receiver
 
       common::TChipIndex idx;
-      idx.boardIndex = ib;
+      idx.boardIndex   = ib;
       idx.dataReceiver = channel;
-      idx.chipId = chipId;
+      idx.chipId       = chipId;
 
-      if (!HasData(idx))
-        continue; // write files only for chips with data
+      if (!HasData(idx)) continue; // write files only for chips with data
 
       if (fChips.size() > 1) {
         sprintf(fNameChip, "%s_Mod%d-Chip%d.dat", fNameTemp, (chipId & 0x70) >> 4, chipId & 0xF);
-      } else {
+      }
+      else {
         sprintf(fNameChip, "%s.dat", fNameTemp);
       }
       std::cout << "Writing data to file " << fNameChip << std::endl;
@@ -165,15 +171,15 @@ void WriteDataToFile(const char *fName, bool Recreate) {
           }
         }
       }
-      if (fp)
-        fclose(fp);
+      if (fp) fclose(fp);
     }
   }
   fScanHisto->Clear();
 }
 
 // initialisation of Fromu
-int configureFromu(TAlpide *chip) {
+int configureFromu(TAlpide *chip)
+{
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,
                       0x0); // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(
@@ -191,7 +197,8 @@ int configureFromu(TAlpide *chip) {
   return 0;
 }
 
-int configureChip(TAlpide *chip) {
+int configureChip(TAlpide *chip)
+{
   AlpideConfig::BaseConfig(chip);
 
   configureFromu(chip);
@@ -201,13 +208,14 @@ int configureChip(TAlpide *chip) {
   return 0;
 }
 
-void scan() {
+void scan()
+{
   unsigned char buffer[1024 * 4000];
-  int n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b = 0, nClosedEvents = 0;
-  int nBad = 0;
-  int nSkipped = 0;
-  int prioErrors = 0;
-  TBoardHeader boardInfo;
+  int           n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b = 0, nClosedEvents = 0;
+  int           nBad       = 0;
+  int           nSkipped   = 0;
+  int           prioErrors = 0;
+  TBoardHeader  boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
   int nTrigsPerTrain = (maxTrigsPerTrain > 0) ? maxTrigsPerTrain : myNTriggers;
@@ -223,8 +231,7 @@ void scan() {
   for (int istage = 0; istage < myMaskStages; istage++) {
     std::cout << std::endl << "Mask stage " << istage << std::endl;
     for (unsigned int i = 0; i < fChips.size(); i++) {
-      if (!fChips.at(i)->GetConfig()->IsEnabled())
-        continue;
+      if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
       AlpideConfig::ConfigureMaskStage(fChips.at(i), myPixPerRegion, istage);
     }
 
@@ -248,8 +255,8 @@ void scan() {
 
       // Read data for all boards
       for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
-        int itrg = 0;
-        int nTrials = 0;
+        int itrg      = 0;
+        int nTrials   = 0;
         int MAXTRIALS = 3;
 
         int fEnabled = fEnPerBoard.at(ib);
@@ -267,7 +274,8 @@ void scan() {
               nTrials = 0;
             }
             continue;
-          } else {
+          }
+          else {
             // std::cout << "received Event" << itrg << " with length " << n_bytes_data <<
             // std::endl;
             // for (int iByte=0; iByte<n_bytes_data; ++iByte) {
@@ -280,19 +288,18 @@ void scan() {
             // std::cout << "Closed data counter: " <<  boardInfo.eoeCount << std::endl;
             if (boardInfo.eoeCount) {
               nClosedEvents = boardInfo.eoeCount;
-            } else {
+            }
+            else {
               nClosedEvents = 1;
             }
-            if (boardInfo.decoder10b8bError)
-              errors8b10b++;
+            if (boardInfo.decoder10b8bError) errors8b10b++;
             // decode Chip event
             int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
             if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
                                             boardInfo.channel, prioErrors)) {
               std::cout << "Found bad event " << std::endl;
               nBad++;
-              if (nBad > 10)
-                continue;
+              if (nBad > 10) continue;
               FILE *fDebug = fopen("DebugData.dat", "a");
               for (int iByte = 0; iByte < n_bytes_data; ++iByte) {
                 fprintf(fDebug, "%02x ", (int)buffer[iByte]);
@@ -330,7 +337,8 @@ void scan() {
   std::cout << sum_of_en << " chips were enabled for scan." << std::endl << std::endl;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
@@ -340,7 +348,7 @@ int main(int argc, char **argv) {
 
   InitScanParameters();
   CreateScanHisto();
-  time_t t = time(0); // get time now
+  time_t     t   = time(0); // get time now
   struct tm *now = localtime(&t);
   sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday,
           now->tm_hour, now->tm_min, now->tm_sec);
@@ -366,7 +374,8 @@ int main(int argc, char **argv) {
         std::cout << "Configuring chip " << i
                   << ", chip ID = " << fChips.at(i)->GetConfig()->GetChipId() << std::endl;
         configureChip(fChips.at(i));
-      } else if (fChips.at(i)->GetConfig()->HasEnabledSlave()) {
+      }
+      else if (fChips.at(i)->GetConfig()->HasEnabledSlave()) {
         std::cout << "Configuring PLL of chip " << i
                   << ", chip ID = " << fChips.at(i)->GetConfig()->GetChipId() << std::endl;
         AlpideConfig::BaseConfigPLL(fChips.at(i));
@@ -387,7 +396,8 @@ int main(int argc, char **argv) {
         rBoard->SetTriggerConfig(true, false, 0,
                                  2 * rBoard->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
         rBoard->SetTriggerSource(trigExt);
-      } else {
+      }
+      else {
         rBoard->SetTriggerConfig(true, true, rBoard->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
                                  rBoard->GetConfig()->GetParamValue("PULSEDELAY"));
         rBoard->SetTriggerSource(trigInt);

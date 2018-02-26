@@ -102,7 +102,7 @@ class TPowerBoardConfig {
   // calibration
 public:
   typedef struct Mod {
-    bool BiasOn;
+    bool  BiasOn;
     float AVset;
     float AIset;
     float DVset;
@@ -128,10 +128,10 @@ public:
 
   // members
 private:
-  FILE *fhConfigFile; // the file handle of the Configuration File
+  FILE *     fhConfigFile; // the file handle of the Configuration File
   PowBoard_t fPBConfig;
   TBoardType fBoardType;
-  int m_bottom;
+  int        m_bottom;
   std::map<std::string, int *> fSettings;
 
   // methods
@@ -146,23 +146,13 @@ public:
   // GetAnalogVoltage and GetDigitalVoltage return the voltages
   // taking into account the channel calibrations
   float GetAnalogVoltage(int mod);
-  float GetAnalogCurrent(int mod) {
-    return (fPBConfig.Modul[mod].AIset);
-  };
+  float GetAnalogCurrent(int mod) { return (fPBConfig.Modul[mod].AIset); };
   float GetDigitalVoltage(int mod);
-  float GetDigitalCurrent(int mod) {
-    return (fPBConfig.Modul[mod].DIset);
-  };
-  bool GetBiasOn(int mod) {
-    return (fPBConfig.Modul[mod].BiasOn);
-  };
+  float GetDigitalCurrent(int mod) { return (fPBConfig.Modul[mod].DIset); };
+  bool GetBiasOn(int mod) { return (fPBConfig.Modul[mod].BiasOn); };
 
-  float GetAVDDUncalibrated(int mod) {
-    return (fPBConfig.Modul[mod].AVset);
-  };
-  float GetDVDDUncalibrated(int mod) {
-    return (fPBConfig.Modul[mod].DVset);
-  };
+  float GetAVDDUncalibrated(int mod) { return (fPBConfig.Modul[mod].AVset); };
+  float GetDVDDUncalibrated(int mod) { return (fPBConfig.Modul[mod].DVset); };
 
   void GetModuleSetUp(int mod, float *AVSet, float *AISet, float *DVSet, float *DISet,
                       bool *isBiasOn);
@@ -186,47 +176,27 @@ public:
   void WriteCalibrationFile();
   void ReadCalibrationFile();
   // Setters
-  void SetBiasVoltage(float val) {
-    fPBConfig.VBset = val;
-  };
+  void SetBiasVoltage(float val) { fPBConfig.VBset = val; };
 
   void ModuleSetUp(int mod, float AVSet, float AISet, float DVSet, float DISet, bool isBiasOn);
-  void SetAnalogVoltage(int mod, float val) {
-    fPBConfig.Modul[mod].AVset = val;
-  };
-  void SetAnalogCurrent(int mod, float val) {
-    fPBConfig.Modul[mod].AIset = val;
-  };
-  void SetDigitalVoltage(int mod, float val) {
-    fPBConfig.Modul[mod].DVset = val;
-  };
-  void SetDigitalCurrent(int mod, float val) {
-    fPBConfig.Modul[mod].DIset = val;
-  };
-  void SetBiasOn(int mod, bool val) {
-    fPBConfig.Modul[mod].BiasOn = val;
-  };
+  void SetAnalogVoltage(int mod, float val) { fPBConfig.Modul[mod].AVset = val; };
+  void SetAnalogCurrent(int mod, float val) { fPBConfig.Modul[mod].AIset = val; };
+  void SetDigitalVoltage(int mod, float val) { fPBConfig.Modul[mod].DVset = val; };
+  void SetDigitalCurrent(int mod, float val) { fPBConfig.Modul[mod].DIset = val; };
+  void SetBiasOn(int mod, bool val) { fPBConfig.Modul[mod].BiasOn = val; };
 
   void SetDefaultsOB(int mod);
   void SetDefaultsIB(int mod);
   // Utilities
   bool ReadFromFile(char *AFileName);
   bool WriteToFile(char *AFileName);
-  bool DumpConfig() {
-    return false;
-  }; // TODO: not yet implemented
-  bool GetIsBottom() {
-    return (m_bottom == 1);
-  };
-  void SetIsBottom(bool bottom) {
-    m_bottom = bottom ? 1 : 0;
-  };
-  void InitParamMap();
+  bool DumpConfig() { return false; }; // TODO: not yet implemented
+  bool GetIsBottom() { return (m_bottom == 1); };
+  void SetIsBottom(bool bottom) { m_bottom = bottom ? 1 : 0; };
+  void                  InitParamMap();
   bool SetParamValue(std::string Name, std::string Value);
   int GetParamValue(std::string Name);
-  bool IsParameter(std::string Name) {
-    return (fSettings.count(Name) > 0);
-  };
+  bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
 
 private:
   void readConfiguration();

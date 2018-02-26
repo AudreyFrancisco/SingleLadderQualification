@@ -1,10 +1,10 @@
 #ifndef TDACSCAN_H
 #define TDACSCAN_H
 
-#include <mutex>
-#include "TScan.h"
-#include "THisto.h"
 #include "TAlpide.h"
+#include "THisto.h"
+#include "TScan.h"
+#include <mutex>
 
 class TDACScan : public TScan {
 private:
@@ -18,7 +18,7 @@ public:
   TDACScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
            std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
            std::mutex *aMutex);
-  ~TDACScan() {};
+  ~TDACScan(){};
   void Init();
   void Execute();
   void Terminate();

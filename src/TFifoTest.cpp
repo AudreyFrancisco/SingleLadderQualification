@@ -1,53 +1,59 @@
+#include "TFifoTest.h"
+#include "AlpideConfig.h"
+#include <exception>
 #include <iostream>
 #include <string.h>
 #include <string>
-#include <exception>
-#include "TFifoTest.h"
-#include "AlpideConfig.h"
 
 TFifoTest::TFifoTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                      std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
                      std::mutex *aMutex)
-    : TScan(config, chips, hics, boards, histoQue, aMutex) {
+    : TScan(config, chips, hics, boards, histoQue, aMutex)
+{
   m_parameters = new TFifoParameters;
 
-  float voltageScale = config->GetVoltageScale();
-  int mlvdsStrength = config->GetMlvdsStrength();
+  float voltageScale  = config->GetVoltageScale();
+  int   mlvdsStrength = config->GetMlvdsStrength();
 
-  ((TFifoParameters *)m_parameters)->voltageScale = voltageScale;
+  ((TFifoParameters *)m_parameters)->voltageScale  = voltageScale;
   ((TFifoParameters *)m_parameters)->mlvdsStrength = mlvdsStrength;
   if (voltageScale > 0.9 && voltageScale < 1.1) {
     if (mlvdsStrength == ChipConfig::DCTRL_DRIVER) {
       strcpy(m_name, "Fifo Scan");
-    } else {
+    }
+    else {
       sprintf(m_name, "FIFO Scan, Driver %d", mlvdsStrength);
     }
-  } else if (voltageScale > 1.0 && voltageScale < 1.2) {
+  }
+  else if (voltageScale > 1.0 && voltageScale < 1.2) {
     strcpy(m_name, "Fifo Scan, V +10%");
-  } else if (voltageScale > 0.8 && voltageScale < 1.0) {
+  }
+  else if (voltageScale > 0.8 && voltageScale < 1.0) {
     strcpy(m_name, "Fifo Scan, V -10%");
-  } else {
+  }
+  else {
     std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
     voltageScale = 1.0;
     strcpy(m_name, "Fifo Scan");
   }
 
   m_start[2] = 0;
-  m_step[2] = 1;
-  m_stop[2] = m_chips.size();
+  m_step[2]  = 1;
+  m_stop[2]  = m_chips.size();
 
   m_start[1] = 0;
-  m_step[1] = 1;
-  m_stop[1] = 32;
+  m_step[1]  = 1;
+  m_stop[1]  = 32;
 
   m_start[0] = 0;
-  m_step[0] = 1;
-  m_stop[0] = 128;
+  m_step[0]  = 1;
+  m_stop[0]  = 128;
 
   CreateScanHisto();
 }
 
-THisto TFifoTest::CreateHisto() {
+THisto TFifoTest::CreateHisto()
+{
   // count errors in bins corresponding to pattern,
   // e.g. error in pattern 0xaaaa in region 16 -> Incr(16, 10)
   // exception counter: bin 32, 0
@@ -55,10 +61,11 @@ THisto TFifoTest::CreateHisto() {
   return histo;
 }
 
-void TFifoTest::Init() {
+void TFifoTest::Init()
+{
   TScan::Init();
-  float voltageScale = ((TFifoParameters *)m_parameters)->voltageScale;
-  int mlvdsStrength = ((TFifoParameters *)m_parameters)->mlvdsStrength;
+  float voltageScale  = ((TFifoParameters *)m_parameters)->voltageScale;
+  int   mlvdsStrength = ((TFifoParameters *)m_parameters)->mlvdsStrength;
   // scale voltage, send GRST, correct drop, configure chips, correct drop
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (voltageScale != 1.) {
@@ -90,16 +97,17 @@ void TFifoTest::Init() {
   }
 }
 
-int TFifoTest::GetChipById(std::vector<TAlpide *> chips, int id) {
+int TFifoTest::GetChipById(std::vector<TAlpide *> chips, int id)
+{
   for (unsigned int i = 0; i < chips.size(); i++) {
-    if (chips.at(i)->GetConfig()->GetChipId() == id)
-      return i;
+    if (chips.at(i)->GetConfig()->GetChipId() == id) return i;
   }
 
   return -1;
 }
 
-void TFifoTest::PrepareStep(int loopIndex) {
+void TFifoTest::PrepareStep(int loopIndex)
+{
 
   switch (loopIndex) {
   case 0: // innermost loop
@@ -107,7 +115,7 @@ void TFifoTest::PrepareStep(int loopIndex) {
   case 1: // 2nd loop
     break;
   case 2: // outermost loop: change chip
-    m_testChip = m_chips.at(m_value[2]);
+    m_testChip   = m_chips.at(m_value[2]);
     m_boardIndex = FindBoardIndex(m_testChip);
     sprintf(m_state, "Running %d", m_value[2]);
     break;
@@ -116,20 +124,20 @@ void TFifoTest::PrepareStep(int loopIndex) {
   }
 }
 
-void TFifoTest::WriteMem(TAlpide *chip, int ARegion, int AOffset, int AValue) {
+void TFifoTest::WriteMem(TAlpide *chip, int ARegion, int AOffset, int AValue)
+{
   if ((ARegion > 31) || (AOffset > 127)) {
     std::cout << "WriteMem: invalid parameters" << std::endl;
     return;
   }
-  uint16_t LowAdd = Alpide::REG_RRU_MEB_LSB_BASE | (ARegion << 11) | AOffset;
+  uint16_t LowAdd  = Alpide::REG_RRU_MEB_LSB_BASE | (ARegion << 11) | AOffset;
   uint16_t HighAdd = Alpide::REG_RRU_MEB_MSB_BASE | (ARegion << 11) | AOffset;
 
-  uint16_t LowVal = AValue & 0xffff;
+  uint16_t LowVal  = AValue & 0xffff;
   uint16_t HighVal = (AValue >> 16) & 0xff;
 
-  int err = chip->WriteRegister(LowAdd, LowVal);
-  if (err >= 0)
-    err = chip->WriteRegister(HighAdd, HighVal);
+  int err           = chip->WriteRegister(LowAdd, LowVal);
+  if (err >= 0) err = chip->WriteRegister(HighAdd, HighVal);
 
   if (err < 0) {
     std::cout << "Cannot write chip register. Exiting ... " << std::endl;
@@ -137,22 +145,24 @@ void TFifoTest::WriteMem(TAlpide *chip, int ARegion, int AOffset, int AValue) {
   }
 }
 
-void TFifoTest::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bool &exception) {
+void TFifoTest::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bool &exception)
+{
   if ((ARegion > 31) || (AOffset > 127)) {
     std::cout << "ReadMem: invalid parameters" << std::endl;
     return;
   }
-  uint16_t LowAdd = Alpide::REG_RRU_MEB_LSB_BASE | (ARegion << 11) | AOffset;
+  uint16_t LowAdd  = Alpide::REG_RRU_MEB_LSB_BASE | (ARegion << 11) | AOffset;
   uint16_t HighAdd = Alpide::REG_RRU_MEB_MSB_BASE | (ARegion << 11) | AOffset;
 
   uint16_t LowVal, HighVal;
-  int err;
+  int      err;
 
   try {
     err = chip->ReadRegister(LowAdd, LowVal);
   }
   catch (std::exception &e) {
     exception = true;
+    // std::cout << "Exception " << e.what() << " when reading low value" << std::endl;
     return;
   }
   exception = false;
@@ -161,6 +171,7 @@ void TFifoTest::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bo
       err = chip->ReadRegister(HighAdd, HighVal);
     }
     catch (std::exception &e) {
+      // std::cout << "Exception " << e.what() << " when reading high value" << std::endl;
       exception = true;
       return;
     }
@@ -179,18 +190,18 @@ void TFifoTest::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bo
   AValue |= LowVal;
 }
 
-bool TFifoTest::TestPattern(int pattern, bool &exception) {
+bool TFifoTest::TestPattern(int pattern, bool &exception)
+{
   int readBack;
   WriteMem(m_testChip, m_value[1], m_value[0], pattern);
   ReadMem(m_testChip, m_value[1], m_value[0], readBack, exception);
-  if (exception)
-    return false;
-  if (readBack != pattern)
-    return false;
+  if (exception) return false;
+  if (readBack != pattern) return false;
   return true;
 }
 
-void TFifoTest::LoopEnd(int loopIndex) {
+void TFifoTest::LoopEnd(int loopIndex)
+{
   if (loopIndex == 2) {
     while (!(m_mutex->try_lock()))
       ;
@@ -200,11 +211,12 @@ void TFifoTest::LoopEnd(int loopIndex) {
   }
 }
 
-void TFifoTest::Execute() {
+void TFifoTest::Execute()
+{
   common::TChipIndex idx;
-  bool exception, result;
-  idx.boardIndex = m_boardIndex;
-  idx.chipId = m_testChip->GetConfig()->GetChipId();
+  bool               exception, result;
+  idx.boardIndex   = m_boardIndex;
+  idx.chipId       = m_testChip->GetConfig()->GetChipId();
   idx.dataReceiver = m_testChip->GetConfig()->GetParamValue("RECEIVER");
 
   // Test readback of four different patterns
@@ -234,10 +246,11 @@ void TFifoTest::Execute() {
   }
 }
 
-void TFifoTest::Terminate() {
+void TFifoTest::Terminate()
+{
   TScan::Terminate();
-  float voltageScale = ((TFifoParameters *)m_parameters)->voltageScale;
-  int mlvdsStrength = ((TFifoParameters *)m_parameters)->mlvdsStrength;
+  float voltageScale  = ((TFifoParameters *)m_parameters)->voltageScale;
+  int   mlvdsStrength = ((TFifoParameters *)m_parameters)->mlvdsStrength;
   // restore old voltage
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (voltageScale != 1.) {

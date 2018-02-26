@@ -5,8 +5,8 @@
 #define COMMON_H
 
 #include <cstdio>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "AlpideDecoder.h"
 //#include "THIC.h"
@@ -61,7 +61,7 @@ namespace common {
   typedef struct {
     double sum;
     double sum2;
-    int entries;
+    int    entries;
 
     double mean;
     double stdDev;

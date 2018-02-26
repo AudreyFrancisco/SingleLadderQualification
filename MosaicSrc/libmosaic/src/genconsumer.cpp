@@ -27,22 +27,24 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
-#include <stdio.h>
-#include <sstream>
+#include "genconsumer.h"
 #include "mboard.h"
 #include "mexception.h"
-#include "genconsumer.h"
+#include <sstream>
+#include <stdio.h>
 
-GenConsumer::GenConsumer() {
-  eventSize = 0;
+GenConsumer::GenConsumer()
+{
+  eventSize    = 0;
   expectedData = 0;
 }
 
 void GenConsumer::flush() { expectedData = 0; }
 
 // parse the data starting from begin of buffer
-long GenConsumer::parse(int numClosed) {
-  uint32_t d;
+long GenConsumer::parse(int numClosed)
+{
+  uint32_t       d;
   unsigned char *p = (unsigned char *)&dataBuffer[0];
 
   // printf("Called GenConsumer::parse ne:%d from buffer at 0x%08x\n", numClosed, (unsigned long)

@@ -1,76 +1,85 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QtWidgets>
 #include <QCoreApplication>
-#include <QtDebug>
-#include <QFileDialog>
 #include <QFile>
-#include <QPixmap>
+#include <QFileDialog>
 #include <QMenuBar>
+#include <QPixmap>
+#include <QtDebug>
+#include <QtWidgets>
 //#include <QtCore>
-#include <deque>
-#include <mutex>
-#include <thread>
-#include <map>
-#include <string>
-#include <iostream>
-#include <ctime>
-#include <qapplication.h>
 #include <cstdlib>
+#include <ctime>
+#include <deque>
+#include <iostream>
+#include <map>
+#include <mutex>
+#include <qapplication.h>
+#include <string>
+#include <thread>
 //#include "TQtWidgets.h"
-#include <typeinfo>
 #include <qpushbutton.h>
+#include <typeinfo>
 //#include "scanthread.h"
-#include "dialog.h"
-#include "testselection.h"
-#include "scanconfiguration.h"
-#include "testingprogress.h"
+#include "AlpideConfig.h"
 #include "TAlpide.h"
 #include "TDigitalAnalysis.h"
 #include "TDigitalScan.h"
-#include "AlpideConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
+#include "dialog.h"
+#include "scanconfiguration.h"
+#include "testingprogress.h"
+#include "testselection.h"
 //#include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
 #include "AlpideConfig.h"
-#include "BoardDecoder.h"
-#include "SetupHelpers.h"
-#include "TSCurveScan.h"
-#include "TScanConfig.h"
-#include "THisto.h"
-#include "TScanAnalysis.h"
-#include "TDigitalWFAnalysis.h"
-#include "TScan.h"
-#include "TThresholdAnalysis.h"
-#include "TLocalBusAnalysis.h"
-#include "TLocalBusTest.h"
-#include "TFifoTest.h"
-#include "TFifoAnalysis.h"
-#include "TNoiseAnalysis.h"
-#include "TApplyMask.h"
-#include "TApplyTuning.h"
-#include "TNoiseOccupancy.h"
-#include "THIC.h"
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
-#include "TPowerTest.h"
-#include "TPowerAnalysis.h"
-#include "TSCurveAnalysis.h"
-#include "calibrationpb.h"
-#include "TReadoutTest.h"
-#include "TReadoutAnalysis.h"
-#include "TEnduranceCycle.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TApplyMask.h"
+#include "TApplyTuning.h"
+#include "TConfig.h"
 #include "TCycleAnalysis.h"
+#include "TDigitalWFAnalysis.h"
+#include "TEnduranceCycle.h"
+#include "TFastPowerAnalysis.h"
+#include "TFastPowerTest.h"
+#include "TFifoAnalysis.h"
+#include "TFifoTest.h"
+#include "THIC.h"
+#include "THisto.h"
+#include "TLocalBusAnalysis.h"
+#include "TLocalBusTest.h"
+#include "TNoiseAnalysis.h"
+#include "TNoiseOccupancy.h"
+#include "TPowerAnalysis.h"
+#include "TPowerTest.h"
+#include "TReadoutAnalysis.h"
+#include "TReadoutTest.h"
+#include "TSCurveAnalysis.h"
+#include "TSCurveScan.h"
+#include "TScan.h"
+#include "TScanAnalysis.h"
+#include "TScanConfig.h"
+#include "TThresholdAnalysis.h"
+#include "calibrationpb.h"
 
 bool writingdb;
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-  chkBtnObm1 = chkBtnObm2 = chkBtnObm3 = chkBtnObm4 = chkBtnObm5 = chkBtnObm6 = chkBtnObm7 = false;
-
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+{
+  fChkBtnObm1 = fChkBtnObm2 = fChkBtnObm3 = fChkBtnObm4 = fChkBtnObm5 = fChkBtnObm6 = fChkBtnObm7 =
+      false;
+  fPbcfgcheck       = 0;
+  fCalwindow        = 0;
+  fActivitywindow   = 0;
+  fDatabasewindow   = 0;
+  fNoticewindow     = 0;
+  fPbnumberofmodule = 0;
   makeDir("Data");
   ui->setupUi(this);
   this->setWindowTitle(QString::fromUtf8("GUI"));
@@ -100,13 +109,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->testselection->hide();
   ui->ledtext->hide();
   QMenuBar *menu = new QMenuBar(this);
-  QMenu *menu1;
-  menu1 = menu->addMenu("&Options");
+  QMenu *   menu1;
+  menu1                  = menu->addMenu("&Options");
   QAction *newtestaction = new QAction("&New test", menu);
-  writedb = new QAction("&Write to database", menu);
+  fWritedb               = new QAction("&Write to database", menu);
   menu1->addAction(newtestaction);
-  menu1->addAction(writedb);
-  writedb->setVisible(false);
+  menu1->addAction(fWritedb);
+  fWritedb->setVisible(false);
   // ui->abort->hide();
   // ui->abortall->hide();
   ui->tabWidget->removeTab(2);
@@ -131,13 +140,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->pbstatus->hide();
 
   QPixmap alice("alicethreshold.png");
-  int w = ui->alicepic->width();
-  int h = ui->alicepic->height();
+  int     w = ui->alicepic->width();
+  int     h = ui->alicepic->height();
   ui->alicepic->setPixmap(alice.scaled(w, h, Qt::KeepAspectRatio));
 
   QPixmap alicelog("logo.png");
-  int width = ui->alicelogo->width();
-  int height = ui->alicelogo->height();
+  int     width  = ui->alicelogo->width();
+  int     height = ui->alicelogo->height();
   ui->alicelogo->setPixmap(alicelog.scaled(width, height, Qt::KeepAspectRatio));
 
   ui->start_test->hide();
@@ -145,115 +154,120 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->testib, SIGNAL(clicked()), this, SLOT(IBBasicTest()));
   ui->testib->hide();
   writingdb = true;
+  fstop     = false;
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow()
+{
+  delete ui;
+  ui = 0x0;
+}
 
 // TODO: try to substitute numberofscan by TScanType (defined in TScanConfig.h)
-void MainWindow::open() {
+void MainWindow::open()
+{
 
   // settingswindow->hide();
   // settingswindow->SaveSettings(operatorname,hicidnumber,counter);
   // if (counter==0) {return;}
   QString fileName;
-  if (numberofscan == OBQualification || numberofscan == OBEndurance ||
-      numberofscan == OBReception) {
+  if (fNumberofscan == OBQualification || fNumberofscan == OBEndurance ||
+      fNumberofscan == OBReception) {
     fileName = "Config.cfg";
-  } else if (numberofscan == IBQualification) {
+  }
+  else if (fNumberofscan == IBQualification) {
     fileName = "Configib.cfg";
   }
-
-  // QString fileName = QFileDialog::getOpenFileName(this,
-  //  tr("Open Configuration. . ."), "/home/palpidefs/Alpide/GUI_Dimitra/build-GUI-Desktop-Debug",
-  // tr("Configuration Files (*.cfg)"));
+  else if (fNumberofscan == OBPower) {
+    fileName = "ConfigPower.cfg";
+  }
   try {
-    //  std::cout<<properconfig<<"d1"<<endl;
-    // initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str());
 
-    hicnames.push_back(hicidnumber);
-    QByteArray conv = hicidnumber.toLatin1();
+    fHicnames.push_back(fHicidnumber);
+    QByteArray conv = fHicidnumber.toLatin1();
     QByteArray conv2, conv3, conv4, conv5, conv6, conv7, conv8, conv9, conv10;
     // const char *ar[1]={conv.data()};
     const char *ar[10];
     ar[0] = {conv.data()};
-    if (numberofscan == OBEndurance) {
-      conv2 = toptwo.toLatin1();
-      ar[1] = {conv2.data()};
-      conv3 = topthree.toLatin1();
-      ar[2] = {conv3.data()};
-      conv4 = topfour.toLatin1();
-      ar[3] = {conv4.data()};
-      conv5 = topfive.toLatin1();
-      ar[4] = {conv5.data()};
-      conv6 = bottomone.toLatin1();
-      ar[5] = {conv6.data()};
-      conv7 = bottomtwo.toLatin1();
-      ar[6] = {conv7.data()};
-      conv8 = bottomthree.toLatin1();
-      ar[7] = {conv8.data()};
-      conv9 = bottomfour.toLatin1();
-      ar[8] = {conv9.data()};
-      conv10 = bottomfive.toLatin1();
-      ar[9] = {conv10.data()};
-      hicnames.push_back(toptwo);
-      hicnames.push_back(topthree);
-      hicnames.push_back(topfour);
-      hicnames.push_back(topfive);
-      hicnames.push_back(bottomone);
-      hicnames.push_back(bottomtwo);
-      hicnames.push_back(bottomthree);
-      hicnames.push_back(bottomfour);
-      hicnames.push_back(bottomfive);
-      endurancemodules.push_back(ui->top1);
-      endurancemodules.push_back(ui->top2);
-      endurancemodules.push_back(ui->top3);
-      endurancemodules.push_back(ui->top4);
-      endurancemodules.push_back(ui->top5);
-      endurancemodules.push_back(ui->down1);
-      endurancemodules.push_back(ui->down2);
-      endurancemodules.push_back(ui->down3);
-      endurancemodules.push_back(ui->down4);
-      endurancemodules.push_back(ui->down5);
+    if (fNumberofscan == OBEndurance) {
+      conv2  = fToptwo.toLatin1();
+      ar[1]  = {conv2.data()};
+      conv3  = fTopthree.toLatin1();
+      ar[2]  = {conv3.data()};
+      conv4  = fTopfour.toLatin1();
+      ar[3]  = {conv4.data()};
+      conv5  = fTopfive.toLatin1();
+      ar[4]  = {conv5.data()};
+      conv6  = fBottomone.toLatin1();
+      ar[5]  = {conv6.data()};
+      conv7  = fBottomtwo.toLatin1();
+      ar[6]  = {conv7.data()};
+      conv8  = fBottomthree.toLatin1();
+      ar[7]  = {conv8.data()};
+      conv9  = fBottomfour.toLatin1();
+      ar[8]  = {conv9.data()};
+      conv10 = fBottomfive.toLatin1();
+      ar[9]  = {conv10.data()};
+      fHicnames.push_back(fToptwo);
+      fHicnames.push_back(fTopthree);
+      fHicnames.push_back(fTopfour);
+      fHicnames.push_back(fTopfive);
+      fHicnames.push_back(fBottomone);
+      fHicnames.push_back(fBottomtwo);
+      fHicnames.push_back(fBottomthree);
+      fHicnames.push_back(fBottomfour);
+      fHicnames.push_back(fBottomfive);
+      fEndurancemodules.push_back(ui->top1);
+      fEndurancemodules.push_back(ui->top2);
+      fEndurancemodules.push_back(ui->top3);
+      fEndurancemodules.push_back(ui->top4);
+      fEndurancemodules.push_back(ui->top5);
+      fEndurancemodules.push_back(ui->down1);
+      fEndurancemodules.push_back(ui->down2);
+      fEndurancemodules.push_back(ui->down3);
+      fEndurancemodules.push_back(ui->down4);
+      fEndurancemodules.push_back(ui->down5);
     }
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
     fConfig->GetScanConfig()->SetUseDataPath(true);
-    pb = fHICs.at(0)->GetPowerBoard();
-    pbconfig = pb->GetConfigurationHandler();
-    pbnumberofmodule = fHICs.at(0)->GetPbMod();
-    if (!pb->IsCalibrated(pbnumberofmodule)) {
+    fPb               = fHICs.at(0)->GetPowerBoard();
+    fPbconfig         = fPb->GetConfigurationHandler();
+    fPbnumberofmodule = fHICs.at(0)->GetPbMod();
+    if (!fPb->IsCalibrated(fPbnumberofmodule)) {
       std::cout << "its not calibrated" << std::endl;
-      pbcfgcheck = new checkpbconfig(this);
-      pbcfgcheck->exec();
+      fPbcfgcheck = new checkpbconfig(this);
+      fPbcfgcheck->exec();
     }
     //  std::cout<<fHICs.size()<<"the hics vector size";
-    properconfig = true;
+    fProperconfig = true;
 
     //    std::cout<<properconfig<<"d2"<<endl;
     // fillingvectors();
   }
   catch (exception &e) {
-    //     std::cout<<e.what()<<endl;
+    // std::cout<<e.what()<<endl;
     popup(e.what());
-    properconfig = false;
+    fProperconfig = false;
     //  std::cout<<properconfig<<"d3"<<endl;
   }
   // std::cout<<properconfig<<"d4"<<endl;
-  if (properconfig == 1) {
+  if (fProperconfig == 1) {
     ui->tab_2->setEnabled(true);
     //  ui->tab_3->setEnabled(true);
     int device = 0;
-    device = fConfig->GetDeviceType();
+    device     = fConfig->GetDeviceType();
     if (device == TYPE_OBHIC) {
       ui->tob->setText("Outer Barrel module");
       ui->OBModule->show();
       for (unsigned int i = 0; i < fChips.size(); i++) {
-        int chipid;
+        int     chipid;
         uint8_t module, side, pos;
         chipid = fChips.at(i)->GetConfig()->GetChipId();
         if (fChips.at(i)->GetConfig()->IsEnabled()) {
           DecodeId(chipid, module, side, pos);
           color_green(side, pos);
-        } else {
+        }
+        else {
           DecodeId(chipid, module, side, pos);
           color_red(side, pos);
         }
@@ -263,13 +277,14 @@ void MainWindow::open() {
       ui->tob->setText("Inner Barrel module");
       ui->IBModule->show();
       for (unsigned int i = 0; i < fChips.size(); i++) {
-        int chipid;
+        int     chipid;
         uint8_t module, side, pos;
         chipid = fChips.at(i)->GetConfig()->GetChipId();
         if (fChips.at(i)->GetConfig()->IsEnabled()) {
           DecodeId(chipid, module, side, pos);
           color_green_IB(pos);
-        } else {
+        }
+        else {
           DecodeId(chipid, module, side, pos);
           color_red_IB(pos);
         }
@@ -295,24 +310,27 @@ void MainWindow::open() {
   // saveinput->SaveSettings(operatorname,hicidnumber);
 }
 
-void MainWindow::button_obm1_clicked() {
-  chkBtnObm1 = true;
+void MainWindow::button_obm1_clicked()
+{
+  fChkBtnObm1 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("1");
   for (unsigned int i = 0; i < fChips.size(); i++) {
-    int chipid;
+    int     chipid;
     uint8_t module, side, pos;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
     DecodeId(chipid, module, side, pos);
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 1) {
       color_green(side, pos);
-    } else
+    }
+    else
       color_red(side, pos);
   }
 }
 
-void MainWindow::button_obm2_clicked() {
-  chkBtnObm2 = true;
+void MainWindow::button_obm2_clicked()
+{
+  fChkBtnObm2 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("2");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -322,13 +340,15 @@ void MainWindow::button_obm2_clicked() {
     DecodeId(chipid, module, side, pos);
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 2) {
       color_green(side, pos);
-    } else
+    }
+    else
       color_red(side, pos);
   }
 }
 
-void MainWindow::button_obm3_clicked() {
-  chkBtnObm3 = true;
+void MainWindow::button_obm3_clicked()
+{
+  fChkBtnObm3 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("3");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -338,14 +358,15 @@ void MainWindow::button_obm3_clicked() {
     DecodeId(chipid, module, side, pos);
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 3) {
       color_green(side, pos);
-
-    } else
+    }
+    else
       color_red(side, pos);
   }
 }
 
-void MainWindow::button_obm4_clicked() {
-  chkBtnObm4 = true;
+void MainWindow::button_obm4_clicked()
+{
+  fChkBtnObm4 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("4");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -355,14 +376,15 @@ void MainWindow::button_obm4_clicked() {
     DecodeId(chipid, module, side, pos);
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 4) {
       color_green(side, pos);
-
-    } else
+    }
+    else
       color_red(side, pos);
   }
 }
 
-void MainWindow::button_obm5_clicked() {
-  chkBtnObm5 = true;
+void MainWindow::button_obm5_clicked()
+{
+  fChkBtnObm5 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("5");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -372,13 +394,15 @@ void MainWindow::button_obm5_clicked() {
     DecodeId(chipid, module, side, pos);
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 5) {
       color_green(side, pos);
-    } else
+    }
+    else
       color_red(side, pos);
   }
 }
 
-void MainWindow::button_obm6_clicked() {
-  chkBtnObm6 = true;
+void MainWindow::button_obm6_clicked()
+{
+  fChkBtnObm6 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("6");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -388,14 +412,15 @@ void MainWindow::button_obm6_clicked() {
     DecodeId(chipid, module, side, pos);
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 6) {
       color_green(side, pos);
-
-    } else
+    }
+    else
       color_red(side, pos);
   }
 }
 
-void MainWindow::button_obm7_clicked() {
-  chkBtnObm7 = true;
+void MainWindow::button_obm7_clicked()
+{
+  fChkBtnObm7 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("7");
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -405,12 +430,14 @@ void MainWindow::button_obm7_clicked() {
     DecodeId(chipid, module, side, pos);
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 7) {
       color_green(side, pos);
-    } else
+    }
+    else
       color_red(side, pos);
   }
 }
 
-void MainWindow::explore_halfstave(uint8_t chipid) {
+void MainWindow::explore_halfstave(uint8_t chipid)
+{
 
   uint8_t module, side, position;
 
@@ -452,21 +479,23 @@ void MainWindow::explore_halfstave(uint8_t chipid) {
   }
 }
 
-void MainWindow::DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position) {
+void MainWindow::DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position)
+{
   module = (chipId & 0x70) >> 4;
 
   if (module == 0) { // IB module
     position = chipId & 0x0F;
-    side = 0;
+    side     = 0;
     return;
   }
   // Must be an OB module here
-  side = (chipId & 0x08) >> 3;
+  side     = (chipId & 0x08) >> 3;
   position = (chipId & 0x07);
   return;
 }
 
-void MainWindow::color_green(int side, int pos) {
+void MainWindow::color_green(int side, int pos)
+{
 
   if (side == 0 && pos == 0) {
     ui->chip00->setStyleSheet("background-color:green;");
@@ -512,7 +541,8 @@ void MainWindow::color_green(int side, int pos) {
   }
 }
 
-void MainWindow::color_red(int side, int pos) {
+void MainWindow::color_red(int side, int pos)
+{
 
   if (side == 0 && pos == 0) {
     ui->chip00->setStyleSheet("background-color:red;");
@@ -558,7 +588,8 @@ void MainWindow::color_red(int side, int pos) {
   }
 }
 
-void MainWindow::color_green_IB(int position) {
+void MainWindow::color_green_IB(int position)
+{
 
   if (position == 0) {
     ui->chip0->setStyleSheet("background-color:green;");
@@ -589,7 +620,8 @@ void MainWindow::color_green_IB(int position) {
   }
 }
 
-void MainWindow::color_red_IB(int position) {
+void MainWindow::color_red_IB(int position)
+{
 
   if (position == 0) {
     ui->chip0->setStyleSheet("background-color:red;");
@@ -620,11 +652,13 @@ void MainWindow::color_red_IB(int position) {
   }
 }
 
-void MainWindow::test() {
+void MainWindow::test()
+{
   //  qDebug()<< "Testing ...";
 }
 
-void MainWindow::scanLoop(TScan *myScan) {
+void MainWindow::scanLoop(TScan *myScan)
+{
   myScan->Init();
   myScan->LoopStart(2);
   // QApplication::processEvents() ;
@@ -651,17 +685,20 @@ void MainWindow::scanLoop(TScan *myScan) {
   myScan->Terminate();
 }
 
-void MainWindow::popup(QString message) {
+void MainWindow::popup(QString message)
+{
 
-  windowex = new Dialog(this);
-  windowex->append(message);
-  windowex->show();
+  fWindowex = new Dialog(this);
+  fWindowex->append(message);
+  fWindowex->hidequit();
+  fWindowex->show();
 }
 
-void MainWindow::start_test() {
+void MainWindow::start_test()
+{
   if (writingdb == false) {
-    noticewindow = new DBnotice(this);
-    noticewindow->exec();
+    fNoticewindow = new DBnotice(this);
+    fNoticewindow->exec();
   }
   if (fAnalysisVector.size() >= 1) {
     for (unsigned int i = 0; i < fAnalysisVector.size(); i++) {
@@ -678,53 +715,59 @@ void MainWindow::start_test() {
       delete fresultVector.at(i);
     }
   }
-  if (endurancemodules.size() > 0) {
-    for (unsigned int i = 0; i < endurancemodules.size(); i++) {
-      endurancemodules.at(i)->setText(" ");
+  if (fEndurancemodules.size() > 0) {
+    for (unsigned int i = 0; i < fEndurancemodules.size(); i++) {
+      fEndurancemodules.at(i)->setText(" ");
     }
   }
-  if (scanbuttons.size() > 0) {
-    for (unsigned int i = 0; i < scanbuttons.size(); i++) {
-      if (scanbuttons.at(i)) {
-        scanbuttons.at(i)->hide();
+  if (fActComponentTypeIDs.size() > 0) {
+    fActComponentTypeIDs.clear();
+  }
+  if (fComponentIDs.size() > 0) {
+    fComponentIDs.clear();
+  }
+  if (fScanbuttons.size() > 0) {
+    for (unsigned int i = 0; i < fScanbuttons.size(); i++) {
+      if (fScanbuttons.at(i)) {
+        fScanbuttons.at(i)->hide();
       }
     }
   }
-  writedb->setVisible(false);
-  disconnect(writedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
-  endurancemodules.clear();
-  idofactivitytype = 0;
-  idoflocationtype = 0;
-  idofoperator = 0;
-  locdetails.clear();
+  fWritedb->setVisible(false);
+  disconnect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
+  fEndurancemodules.clear();
+  fIdofactivitytype = 0;
+  fIdoflocationtype = 0;
+  fIdofoperator     = 0;
+  fLocdetails.clear();
   fHICs.clear();
   fAnalysisVector.clear();
   fScanVector.clear();
   fresultVector.clear();
   fChips.clear();
   fBoards.clear();
-  scanbuttons.clear();
-  hicnames.clear();
-  execution = true;
-  if (pbcfgcheck != 0) {
-    delete pbcfgcheck;
+  fScanbuttons.clear();
+  fHicnames.clear();
+  fExecution = true;
+  if (fPbcfgcheck != 0) {
+    delete fPbcfgcheck;
   }
-  if (calwindow != 0) {
-    delete calwindow;
+  if (fCalwindow != 0) {
+    delete fCalwindow;
   }
   // if (databasewindow!=0){
   // delete databasewindow;
   // }
   // std::cout<<"why1"<<std::endl;
-  if (scanstatuslabels.size() >= 1) {
-    for (unsigned int i = 0; i < scanstatuslabels.size(); i++) {
-      if (scanstatuslabels.at(i) != 0) {
-        scanstatuslabels.at(i)->setText(" ");
+  if (fScanstatuslabels.size() >= 1) {
+    for (unsigned int i = 0; i < fScanstatuslabels.size(); i++) {
+      if (fScanstatuslabels.at(i) != 0) {
+        fScanstatuslabels.at(i)->setText(" ");
       }
     }
   }
   // std::cout<<"why2"<<std::endl;
-  scanstatuslabels.clear();
+  fScanstatuslabels.clear();
 
   ui->tob->clear();
   ui->details->hide();
@@ -732,34 +775,33 @@ void MainWindow::start_test() {
 
   disconnect(ui->start_test, SIGNAL(clicked()), this, SLOT(applytests()));
   ui->testtypeselected->clear();
-  hicidnumber = '\0';
-  toptwo = '\0';
-  topthree = '\0';
-  topfour = '\0';
-  topfive = '\0';
-  bottomone = '\0';
-  bottomtwo = '\0';
-  bottomthree = '\0';
-  bottomfive = '\0';
-  bottomfour = '\0';
+  fHicidnumber = '\0';
+  fToptwo      = '\0';
+  fTopthree    = '\0';
+  fTopfour     = '\0';
+  fTopfive     = '\0';
+  fBottomone   = '\0';
+  fBottomtwo   = '\0';
+  fBottomthree = '\0';
+  fBottomfive  = '\0';
+  fBottomfour  = '\0';
 
-  if (databasewindow == 0) {
-    databasewindow = new DatabaseSelection(this);
-    databasewindow->exec();
-    databasewindow->setdatabase(databasetype);
+  if (fDatabasewindow == 0) {
+    fDatabasewindow = new DatabaseSelection(this);
+    fDatabasewindow->exec();
+    fDatabasewindow->setdatabase(fDatabasetype);
   }
-  std::cout << databasetype << "the selected database" << std::endl;
-  settingswindow = new TestSelection(this, databasetype);
-  settingswindow->exec();
-  writingdb = false;
+  std::cout << fDatabasetype << "the selected database" << std::endl;
+  fSettingswindow = new TestSelection(this, fDatabasetype);
+  fSettingswindow->exec();
 }
 
-void MainWindow::fillingOBvectors() {
+void MainWindow::fillingOBvectors()
+{
 
   ClearVectors();
 
   AddScan(STPower);
-
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
@@ -817,8 +859,8 @@ void MainWindow::fillingOBvectors() {
   return;
 }
 
-void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis *> a) {
-
+void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis *> a)
+{
   ui->statuslabel->setVisible(true);
   ui->statuslabel->update();
 
@@ -829,30 +871,27 @@ void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis 
         std::thread analysisThread(&TScanAnalysis::Run, a[i]);
         analysisThread.join();
         a.at(i)->Finalize();
-      } else {
+      }
+      else {
         std::thread scanThread(&MainWindow::scanLoop, this, s[i]);
         a.at(i)->Initialize();
         std::thread analysisThread(&TScanAnalysis::Run, a[i]);
-        std::cout << "BEFORE THE SCAN THREAD" << std::endl;
         scanThread.join();
-        std::cout << "AFTER THE SCAN THREAD" << std::endl;
-        std::cout << "BEFORE THE ANALYSIS THREAD" << std::endl;
-
-        if (scanstatuslabels.at(i) != 0) {
-          scanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
-          scanstatuslabels[i]->update();
+        if (fScanstatuslabels.at(i) != 0) {
+          fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
+          fScanstatuslabels[i]->update();
+          qApp->processEvents();
         }
-
         analysisThread.join();
         a.at(i)->Finalize();
-        if (scanstatuslabels.at(i) != 0) {
-          scanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
+        if (fScanstatuslabels.at(i) != 0) {
+          fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
+          qApp->processEvents();
         }
         // std::cout<<"The classification is : "<<fresultVector[i]->GetClassification()<<std::endl;
       }
       colorsinglescan(i);
-      if (execution == false)
-        break;
+      if (fExecution == false) break;
       qApp->processEvents();
     }
     catch (exception &ex) {
@@ -888,7 +927,7 @@ void MainWindow::connectcombo(int value){
     ui->testtypeselected->clear();
     ui->testtypeselected->setText("OB HIC Qualification Test");
 
-    findidoftheactivitytype("OB HIC Qualification Test",idofactivitytype);
+    ("OB HIC Qualification Test",idofactivitytype);
     std::cout<<"the id of the selected test: "<<idofactivitytype<<std::endl;
     locationcombo();
 
@@ -905,7 +944,7 @@ void MainWindow::connectcombo(int value){
       //   ui->start_test->show();
       // qDebug()<<"IB Qualification test selected";
       ui->testtypeselected->setText("IB HIC Qualification Test");
-      findidoftheactivitytype("IB HIC Qualification Test",idofactivitytype);
+      ("IB HIC Qualification Test",idofactivitytype);
       std::cout<<"the id of the selected test: "<<idofactivitytype<<std::endl;
       locationcombo();
 
@@ -925,7 +964,7 @@ th loading of the cfg.
       ui->testtypeselected->clear();
       //  ui->start_test->show();
       ui->testtypeselected->setText("OB Endurance Test");
-      findidoftheactivitytype("OB HIC Endurance Test",idofactivitytype);
+      ("OB HIC Endurance Test",idofactivitytype);
       locationcombo();
       settingswindow->connectlocationcombo(locdetails);
       settingswindow->adjustendurance();
@@ -952,7 +991,7 @@ th loading of the cfg.
       // ui->start_test->show();
 
       ui->testtypeselected->setText("OB HIC Reception Test");
-      findidoftheactivitytype("OB HIC Reception Test",idofactivitytype);
+      ("OB HIC Reception Test",idofactivitytype);
       std::cout<<"the id of the selected test: "<<idofactivitytype<<std::endl;
       locationcombo();
 
@@ -1028,28 +1067,40 @@ th loading of the cfg.
   //connect(ui->start_test,SIGNAL(clicked()),this,SLOT(runscans()));
 }*/
 
-void MainWindow::applytests() {
+void MainWindow::applytests()
+{
+  writingdb = false;
   for (unsigned int i = 0; i < fHICs.size(); i++) {
-    if (fHICs.at(i)->IsEnabled()) {
-      makeDir((fConfig->GetScanConfig()->GetDataPath(hicnames.at(i).toStdString())).c_str());
+    if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
+      int oldtests;
+      oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
+      std::cout << "the number of old tests is " << oldtests << std::endl;
+      fConfig->GetScanConfig()->SetRetestNumber(oldtests);
+      makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
     }
   }
-  fConfig->GetScanConfig()->SetTestType(numberofscan);
+
+  fConfig->GetScanConfig()->SetTestType(fNumberofscan);
+  fConfig->GetScanConfig()->SetDatabase(fDB);
   ui->start_test->hide();
   qApp->processEvents();
-  signalMapper = new QSignalMapper(this);
-  if (numberofscan == OBQualification) {
+  fSignalMapper = new QSignalMapper(this);
+  if (fNumberofscan == OBQualification) {
     fillingOBvectors();
   }
-  if (numberofscan == IBQualification) {
+  if (fNumberofscan == IBQualification) {
     fillingibvectors();
   }
-  if (numberofscan == OBReception) {
+  if (fNumberofscan == OBReception) {
     fillingreceptionscans();
   }
-  if (numberofscan == OBEndurance) {
+  if (fNumberofscan == OBEndurance) {
     fillingendurancevectors();
   }
+  if (fNumberofscan == OBPower) {
+    fillingfastpower();
+  }
+
 
   qApp->processEvents();
   std::cout << "the size of the scan vector is: " << fScanVector.size() << std::endl;
@@ -1059,29 +1110,31 @@ void MainWindow::applytests() {
   // if(numberofscan!=3){
   // connectscandetails();}
   // emit stopTimer();
-  connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(getresultdetails(int)));
-  resultwindow = new resultstorage(this);
-  resultwindow->exec();
+  connect(fSignalMapper, SIGNAL(mapped(int)), this, SLOT(getresultdetails(int)));
+  fResultwindow = new resultstorage(this);
+  fResultwindow->exec();
 }
 
 void MainWindow::StopScan() { fScanAbort = true; }
 
-void MainWindow::createbtn() {
+void MainWindow::createbtn()
+{
 
   QPushButton *dimitra = new QPushButton("dsxfvgdvg", this);
   connect(dimitra, SIGNAL(clicked()), this, SLOT(StopScan()));
 }
 
-void MainWindow::getresultdetails(int i) {
-  mapdetails.clear();
-  mapd.clear();
+void MainWindow::getresultdetails(int i)
+{
+  fMapdetails.clear();
+  fMapd.clear();
   ui->details->clear();
   // scanposition=0;
-  scanposition = i;
+  fScanposition = i;
   //  std::cout<<"this is the scan position"<<scanposition<<std::endl;
   // std::cout<<"before filling the combo"<<std::endl;
   std::map<const char *, TResultVariable> myvariables;
-  myvariables = fAnalysisVector.at(scanposition)->GetVariableList();
+  myvariables = fAnalysisVector.at(fScanposition)->GetVariableList();
   // for (std::map<const char*,resultType>::const_iterator
   // it=fAnalysisVector.at(scanposition)->GetVariableList().begin();
   // it!=fAnalysisVector.at(scanposition)->GetVariableList().end(); ++it){
@@ -1092,9 +1145,9 @@ void MainWindow::getresultdetails(int i) {
 
     std::string d;
     d = (std::string(it->first));
-    mapd.push_back(std::make_pair(d, it->second));
+    fMapd.push_back(std::make_pair(d, it->second));
   }
-  for (auto const &v : mapd) {
+  for (auto const &v : fMapd) {
     // v is a reference to a vector element
     //   std::cout<<v.first<<std::endl;
     //   std::cout<<v.second<<std::endl;
@@ -1144,10 +1197,11 @@ void MainWindow::getresultdetails(int i) {
 
 // TODO: check (i+1)-logic for case of fresultVector[i]==0)
 // TODO: correct colour logic to *worst* HIC result, not last HIC result
-void MainWindow::colorscans() {
+void MainWindow::colorscans()
+{
   // std::vector<QPushButton*> scanbuttons;
   for (unsigned int i = 0; i < fScanVector.size(); i++) {
-    if (scanbuttons[i] != 0) {
+    if (fScanbuttons[i] != 0) {
       if (fresultVector[i] == 0) {
         for (std::map<std::string, TScanResultHic *>::iterator it =
                  fresultVector.at(i + 1)->GetHicResults().begin();
@@ -1156,23 +1210,24 @@ void MainWindow::colorscans() {
           colour = it->second->GetClassification();
           // std::cout<<"no zero pointer "<< colour<<std::endl;
           if (colour == CLASS_ORANGE) {
-            scanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
+            fScanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
             break;
           }
           if (colour == CLASS_GREEN) {
-            scanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
+            fScanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
             break;
           }
           if (colour == CLASS_RED) {
-            scanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
+            fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
             break;
           }
           if (colour == CLASS_UNTESTED) {
-            scanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
+            fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
             break;
           }
         }
-      } else {
+      }
+      else {
         for (std::map<std::string, TScanResultHic *>::iterator it =
                  fresultVector.at(i)->GetHicResults().begin();
              it != fresultVector.at(i)->GetHicResults().end(); ++it) {
@@ -1180,19 +1235,19 @@ void MainWindow::colorscans() {
           colour = it->second->GetClassification();
           //  std::cout<<"no zero pointer "<< colour<<std::endl;
           if (colour == CLASS_ORANGE) {
-            scanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
+            fScanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
             break;
           }
           if (colour == CLASS_GREEN) {
-            scanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
+            fScanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
             break;
           }
           if (colour == CLASS_RED) {
-            scanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
+            fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
             break;
           }
           if (colour == CLASS_UNTESTED) {
-            scanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
+            fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
             break;
           }
         }
@@ -1201,10 +1256,10 @@ void MainWindow::colorscans() {
   }
 }
 
-THic *MainWindow::FindHic(std::string hicName) {
+THic *MainWindow::FindHic(std::string hicName)
+{
   for (unsigned int i = 0; i < fHICs.size(); i++) {
-    if (!(fHICs.at(i)->GetDbId().compare(hicName)))
-      return fHICs.at(i);
+    if (!(fHICs.at(i)->GetDbId().compare(hicName))) return fHICs.at(i);
   }
   return 0;
 }
@@ -1213,7 +1268,8 @@ THic *MainWindow::FindHic(std::string hicName) {
 // HIC
 // Actual combination "algorithm" is inside THic::AddClassification
 // (currently: HIC classification = worst scan classification for that HIC)
-void MainWindow::SetHicClassifications() {
+void MainWindow::SetHicClassifications()
+{
   for (unsigned int i = 0; i < fresultVector.size(); i++) {
     TScanResult *scanResult = fresultVector.at(i);
     if (scanResult != 0) {
@@ -1231,63 +1287,77 @@ void MainWindow::SetHicClassifications() {
 // TODO: check that correct; probably dnumber not needed at all, since duplicate of
 // ui->details->currentIndex()
 // TODO: color chips according to result or add mouseover
-void MainWindow::detailscombo(int dnumber) {
+void MainWindow::detailscombo(int dnumber)
+{
   (void)dnumber;
-  int var = ui->details->itemData(ui->details->currentIndex()).toInt();
+  int             var  = ui->details->itemData(ui->details->currentIndex()).toInt();
   TResultVariable rvar = static_cast<TResultVariable>(var);
 
   for (unsigned int i = 0; i < fChips.size(); i++) {
     if (fChips[i]->GetConfig()->IsEnabled()) {
-      int tautotita = fChips[i]->GetConfig()->GetChipId() & 0xf;
-      THic *hic = fChips.at(i)->GetHic();
-      TScanResultHic *result = fresultVector.at(scanposition)->GetHicResult(hic->GetDbId());
+      int             tautotita = fChips[i]->GetConfig()->GetChipId() & 0xf;
+      THic *          hic       = fChips.at(i)->GetHic();
+      TScanResultHic *result    = fresultVector.at(fScanposition)->GetHicResult(hic->GetDbId());
       std::cout << "The variable value of chip with ID " << tautotita
                 << " is: " << result->GetVariable(tautotita, rvar) << std::endl;
     }
   }
 }
 
-void MainWindow::poweroff() {
+void MainWindow::poweroff()
+{
 
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     fHICs.at(i)->PowerOff();
   }
 }
 
-void MainWindow::quitall() {
+void MainWindow::quitall()
+{
+  if (writingdb == false) {
+    fNoticewindow = new DBnotice(this);
+    fNoticewindow->adjustingtemplate();
+    fNoticewindow->exec();
+  }
   if (fHICs.size() >= 1) {
     poweroff();
     close();
-  } else {
+  }
+  else {
     close();
   }
 }
 
-void MainWindow::WriteToEos(string hicName, ActivityDB::actUri &uri) {
-  char command[256];
-  char path[256];
+void MainWindow::WriteToEos(string hicName, ActivityDB::actUri &uri, bool write)
+{
   string instFolder;
-  string account = GetServiceAccount(institute.toStdString(), instFolder);
+  string account    = GetServiceAccount(fInstitute.toStdString(), instFolder);
   string testFolder = GetTestFolder();
+  if (write) {
+    char command[256];
+    sprintf(
+        command,
+        "rsync -rv -e \"ssh -K\" %s %s@lxplus.cern.ch:/eos/project/a/alice-its/HicTests/%s/%s/%s",
+        (fConfig->GetScanConfig()->GetDataPath(hicName)).c_str(), account.c_str(),
+        testFolder.c_str(), instFolder.c_str(),
+        (fConfig->GetScanConfig()->GetRemoteHicPath(hicName)).c_str());
+    std::cout << "Trying to copy to eos with command " << command << std::endl;
+    int status = system(command);
+    std::cout << "Done, status code = " << status << std::endl;
+  }
 
-  sprintf(command,
-          "rsync -rv -e \"ssh\" %s %s@lxplus.cern.ch:/eos/project/a/alice-its/HicTests/%s/%s/%s",
-          (fConfig->GetScanConfig()->GetDataPath(hicName)).c_str(), account.c_str(),
-          testFolder.c_str(), instFolder.c_str(),
-          (fConfig->GetScanConfig()->GetRemoteHicPath(hicName)).c_str());
+  char path[256];
   sprintf(path, "eos/project/a/alice-its/HicTests/%s/%s/%s", testFolder.c_str(), instFolder.c_str(),
           (fConfig->GetScanConfig()->GetRemoteHicPath(hicName)).c_str());
 
   uri.Description = "uri path";
-  uri.Path = std::string(path);
-  std::cout << "Trying to copy to eos with command " << command << std::endl;
-  int status = system(command);
-  std::cout << "Done, status code = " << status << std::endl;
+  uri.Path        = std::string(path);
 }
 
 // TODO: complete
-string MainWindow::GetTestFolder() {
-  switch (numberofscan) {
+string MainWindow::GetTestFolder()
+{
+  switch (fNumberofscan) {
   case OBQualification:
     return string("OBQualification");
   case IBQualification:
@@ -1305,8 +1375,9 @@ string MainWindow::GetTestFolder() {
 
 // Temporary function
 // TODO: to be eliminated once number of scan has been converted to TTestType variable
-TTestType MainWindow::GetTestType() {
-  switch (numberofscan) {
+TTestType MainWindow::GetTestType()
+{
+  switch (fNumberofscan) {
   case OBQualification:
     return OBQualification;
   case IBQualification:
@@ -1323,103 +1394,130 @@ TTestType MainWindow::GetTestType() {
 }
 
 // TODO: use a map or sth more intelligent than this?
-string MainWindow::GetServiceAccount(string institute, string &folder) {
+string MainWindow::GetServiceAccount(string institute, string &folder)
+{
   if (institute.find("CERN") != string::npos) {
     folder = string("CERN");
     return string("aliceits");
-  } else if (institute.find("Wuhan") != string::npos) {
+  }
+  else if (institute.find("Wuhan") != string::npos) {
     folder = string("Wuhan");
     return string("aliceitswuhan");
-  } else if (institute.find("Pusan") != string::npos) {
+  }
+  else if (institute.find("Pusan") != string::npos) {
     folder = string("Pusan");
     return string("itspusan");
-  } else if (institute.find("Bari") != string::npos) {
+  }
+  else if (institute.find("Bari") != string::npos) {
     folder = string("Bari");
     return string("aliceitsbari");
-  } else if (institute.find("Strasbourg") != string::npos) {
+  }
+  else if (institute.find("Strasbourg") != string::npos) {
     folder = string("Strasbourg");
     return string("aliceitssbg");
-  } else if (institute.find("Liverpool") != string::npos) {
+  }
+  else if (institute.find("Liverpool") != string::npos) {
     folder = string("Liverpool");
     return string("aliceitslpool");
-  } else if (institute.find("Frascati") != string::npos) {
+  }
+  else if (institute.find("Frascati") != string::npos) {
     folder = string("Frascati");
     return string("aliceitslnf");
-  } else if (institute.find("Berkeley") != string::npos) {
+  }
+  else if (institute.find("Berkeley") != string::npos) {
     folder = string("Berkeley");
     return string("aliceitslbl");
-  } else if (institute.find("Nikhef") != string::npos) {
+  }
+  else if (institute.find("Nikhef") != string::npos) {
     folder = string("Nikhef");
     return string("itsnik");
-  } else if (institute.find("Daresbury") != string::npos) {
+  }
+  else if (institute.find("Daresbury") != string::npos) {
     folder = string("Daresbury");
     return string("aliceitsdl");
-  } else if (institute.find("Turin") != string::npos) {
+  }
+  else if (institute.find("Turin") != string::npos) {
     folder = string("Torino");
     return string("aliceitstorino");
-  } else {
+  }
+  else {
     folder = string("unknown");
     return string("unknown");
   }
 }
 
 // return time as 6-digit int in format HHMMSS
-int MainWindow::GetTime() {
-  time_t t = time(0);      // get time now
-  tm *now = localtime(&t); // convert to tm structure
-  int hours = now->tm_hour;
-  int min = now->tm_min;
-  int sec = now->tm_sec;
-  int time = hours * 10000 + min * 100 + sec;
+int MainWindow::GetTime()
+{
+  time_t t     = time(0);       // get time now
+  tm *   now   = localtime(&t); // convert to tm structure
+  int    hours = now->tm_hour;
+  int    min   = now->tm_min;
+  int    sec   = now->tm_sec;
+  int    time  = hours * 10000 + min * 100 + sec;
 
   return time;
 }
 
-void MainWindow::attachtodatabase() {
-  if (resultwindow->isVisible()) {
-    resultwindow->close();
+void MainWindow::attachtodatabase()
+{
+  fActivityResults.clear();
+  if (fResultwindow->isVisible()) {
+    fResultwindow->close();
   }
-  AlpideDB *myDB = new AlpideDB(databasetype);
+
+  if (fDB) delete fDB;
+  fDB = new AlpideDB(fDatabasetype);
   SetHicClassifications();
-
   for (unsigned int i = 0; i < fHICs.size(); i++) {
-    if (fHICs.at(i)->IsEnabled()) {
-      QDateTime date;
+    if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
+      QString            comment;
+      QDateTime          date;
       ActivityDB::actUri uri;
-      WriteToEos(fHICs.at(i)->GetDbId(), uri);
+      bool               write;
+      write = true;
+      WriteToEos(fHICs.at(i)->GetDbId(), uri, write);
+      fActivitywindow = new ActivityStatus(this);
+      fActivitywindow->exec();
+      fActivitywindow->getactivitystatus(fStatus);
+      fActivitywindow->GetComment(comment);
+      std::string path;
+      path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) + "/Comment.txt";
+      fMfile = new QFile(QString::fromStdString(path));
+      fMfile->open(QIODevice::ReadWrite);
+      if (fMfile->isOpen()) {
+        QByteArray buffer;
+        buffer = buffer.append(comment);
+        fMfile->write(buffer); // Writes a QByteArray to the file.
+      }
+      if (fMfile) {
+        fMfile->close();
+      }
 
-      bool status;
-      activitywindow = new ActivityStatus(this);
-      activitywindow->exec();
-      activitywindow->getactivitystatus(status);
-
-      ActivityDB *myactivity = new ActivityDB(myDB);
+      ActivityDB *myactivity = new ActivityDB(fDB);
 
       ActivityDB::activity activ;
 
       // TODO: check that the idof... are filled in the correct place
       // set activity parameters
-      activ.Type = idofactivitytype;
-      activ.Location = idoflocationtype;
-      activ.User = idofoperator;
+      activ.Type      = fIdofactivitytype;
+      activ.Location  = fIdoflocationtype;
+      activ.User      = fIdofoperator;
       activ.StartDate = date.currentDateTime().toTime_t();
-      activ.EndDate = date.currentDateTime().toTime_t();
-      activ.Lot = " ";
-      activ.Name = CreateActivityName(fHICs.at(i)->GetDbId(), GetTestType());
-      activ.Position = " ";
+      activ.EndDate   = date.currentDateTime().toTime_t();
+      activ.Lot       = " ";
+      activ.Name      = CreateActivityName(fHICs.at(i)->GetDbId(), fConfig->GetScanConfig());
+      activ.Position  = " ";
       activ.Result =
           -999; // apparently has to stay open here, otherwise activity is considered closed
-      if (status) {
-        activ.Status = DbGetStatusId(myDB, idofactivitytype, "OPEN");
-        std::cout << "the activ is open" << std::endl;
-      } else {
-        activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSE");
-        std::cout << "the activ is closed" << std::endl;
-      }
+
+      activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "OPEN");
+      std::cout << "the activ is open" << std::endl;
+
 
       // add global parameters (not accessible from within results)
-      DbAddParameter(myDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips());
-      DbAddParameter(myDB, activ, "Time", GetTime());
+      DbAddParameter(fDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips());
+      DbAddParameter(fDB, activ, "Time", GetTime());
 
       // loop over results and write to DB
       for (unsigned int j = 0; j < fresultVector.size(); j++) {
@@ -1427,22 +1525,27 @@ void MainWindow::attachtodatabase() {
           std::map<std::string, TScanResultHic *> mymap = fresultVector.at(j)->GetHicResults();
           for (auto ihic = mymap.begin(); ihic != mymap.end(); ++ihic) {
             TScanResultHic *result = (TScanResultHic *)ihic->second;
-            if (ihic->first.compare(hicnames.at(i).toStdString()) == 0) {
-              result->WriteToDB(myDB, activ);
+            if (ihic->first.compare(fHicnames.at(i).toStdString()) == 0) {
+              result->WriteToDB(fDB, activ);
             }
           }
         }
       }
 
       // attach config file
-      if (numberofscan == OBQualification || numberofscan == OBReception ||
-          numberofscan == OBEndurance) {
-        DbAddAttachment(myDB, activ, attachConfig, string("Config.cfg"), string("Config.cfg"));
-      } else if (numberofscan == IBQualification) {
-        DbAddAttachment(myDB, activ, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
+      if (fNumberofscan == OBQualification || fNumberofscan == OBReception ||
+          fNumberofscan == OBEndurance) {
+        DbAddAttachment(fDB, activ, attachConfig, string("Config.cfg"), string("Config.cfg"));
       }
-
-      DbAddMember(myDB, activ, idofoperator);
+      else if (fNumberofscan == IBQualification) {
+        DbAddAttachment(fDB, activ, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
+      }
+      else if (fNumberofscan == OBPower) {
+        DbAddAttachment(fDB, activ, attachConfig, string("ConfigPower.cfg"),
+                        string("ConfigPower.cfg"));
+      }
+      DbAddAttachment(fDB, activ, attachText, string(path), string("Comment.txt"));
+      DbAddMember(fDB, activ, fIdofoperator);
 
       std::vector<ActivityDB::actUri> uris;
 
@@ -1450,8 +1553,15 @@ void MainWindow::attachtodatabase() {
 
       myactivity->Create(&activ);
       cout << myactivity->DumpResponse() << endl;
-      myactivity->AssignUris(activ.ID, idofoperator, (&uris));
-
+      myactivity->AssignUris(activ.ID, fIdofoperator, (&uris));
+      myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).first,
+                                  fIdofoperator);
+      myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second,
+                                  fIdofoperator);
+      if (fStatus == false) {
+        activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
+        std::cout << "the activ is closed" << std::endl;
+      }
       // TODO: add components (in / out)
       // TODO: add member
       // TODO: close activity (needs implementation of activityChange)
@@ -1462,95 +1572,142 @@ void MainWindow::attachtodatabase() {
 
       // std::cout << "trying to close activity" << std::endl;
       // activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSED");
-      activ.Result = DbGetResultId(myDB, idofactivitytype, fHICs.at(i)->GetClassification());
-      std::cout << "the activity result is: " << activ.Result << std::endl;
+      activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
       myactivity->Change(&activ);
-
+      std::cout << "the activity result is: " << activ.Result << std::endl;
+      fActivityResults.push_back(activ.Result);
       delete myactivity;
+      delete fMfile;
     }
   }
-  delete myDB;
-  writingdb = true;
+  delete fDB;
+  fDB = 0x0;
+  for (unsigned int i = 0; i < fActivityResults.size(); i++) {
+    if (fActivityResults.at(i) != -1) {
+      writingdb = true;
+    }
+    else {
+      writingdb = false;
+      break;
+    }
+  }
+  // checking ...
+  // writingdb=false;
+  if (writingdb == false) {
+    if (!fDatabasefailure) {
+      fDatabasefailure = new Databasefailure(this);
+    }
+    fDatabasefailure->exec();
+  }
 }
 
-void MainWindow::ClearVectors() {
+void MainWindow::ClearVectors()
+{
   fScanVector.clear();
   fAnalysisVector.clear();
   fresultVector.clear();
-  scanbuttons.clear();
-  scanstatuslabels.clear();
+  fScanbuttons.clear();
+  fScanstatuslabels.clear();
 }
 
-void MainWindow::fillingreceptionscans() {
+void MainWindow::fillingreceptionscans()
+{
   ClearVectors();
 
   AddScan(STPower);
   AddScan(STFifo);
-  fConfig->GetScanConfig()->SetMlvdsStrength(4);
+  fConfig->GetScanConfig()->SetMlvdsStrength(5);
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
   AddScan(STDigital);
 }
 
-void MainWindow::poweringscan() {
+void MainWindow::poweringscan()
+{
   ClearVectors();
 
   AddScan(STPower);
 }
 
-void MainWindow::findidoftheactivitytype(std::string activitytypename, int &id) {
+void MainWindow::findidoftheactivitytype(std::string activitytypename, int &id)
+{
 
-  AlpideDB *myDB = new AlpideDB(databasetype);
-  id = DbGetActivityTypeId(myDB, activitytypename);
+  fDB = new AlpideDB(fDatabasetype);
+  id  = DbGetActivityTypeId(fDB, activitytypename);
 
-  delete myDB;
+  // delete myDB;
 }
 
-void MainWindow::locationcombo() {
-  if (locdetails.size() > 0) {
-    for (unsigned int i = 0; i < locdetails.size();
+void MainWindow::locationcombo()
+{
+  if (fLocdetails.size() > 0) {
+    for (unsigned int i = 0; i < fLocdetails.size();
          i++) { // std::cout<<"clear locdetails"<<std::endl;
-      locdetails.clear();
+      fLocdetails.clear();
     }
   }
-  AlpideDB *myDB = new AlpideDB(databasetype);
-  ActivityDB *myactivity = new ActivityDB(myDB);
-  locationtypelist = myactivity->GetLocationTypeList(idofactivitytype);
-  locdetails.push_back(std::make_pair(" ", 0));
-  for (unsigned int i = 0; i < locationtypelist->size(); i++) {
-    std::cout << "the location name is " << locationtypelist->at(i).Name << "and the ID is "
-              << locationtypelist->at(i).ID << std::endl;
-    locdetails.push_back(std::make_pair(locationtypelist->at(i).Name, locationtypelist->at(i).ID));
+  // AlpideDB *myDB = new AlpideDB(databasetype);
+  ActivityDB *myactivity = new ActivityDB(fDB);
+  fLocationtypelist      = myactivity->GetLocationTypeList(fIdofactivitytype);
+  fLocdetails.push_back(std::make_pair(" ", 0));
+  for (unsigned int i = 0; i < fLocationtypelist->size(); i++) {
+    std::cout << "the location name is " << fLocationtypelist->at(i).Name << "and the ID is "
+              << fLocationtypelist->at(i).ID << std::endl;
+    fLocdetails.push_back(
+        std::make_pair(fLocationtypelist->at(i).Name, fLocationtypelist->at(i).ID));
   }
-  // std::cout<<"the in "<<DbGetActComponentTypeId (myDB, idofactivitytype, "in")<<std::endl;
-  // std::cout<<"the out "<< DbGetActComponentTypeId (myDB, idofactivitytype, "out")<<std::endl;
-  delete myDB;
+  int projectid = 0;
+  projectid     = fDB->GetProjectId();
+  if (fNumberofscan == OBQualification || fNumberofscan == OBEndurance ||
+      fNumberofscan == OBReception || fNumberofscan == OBPower) {
+    fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
+  }
+  else if (fNumberofscan == IBQualification || fNumberofscan == IBEndurance) {
+    fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Inner Barrel HIC Module");
+  }
   delete myactivity;
 }
 
-void MainWindow::savesettings() {
-  settingswindow->hide();
-  settingswindow->SaveSettings(institute, operatorname, hicidnumber, counter, idoflocationtype,
-                               idofoperator, toptwo, topthree, topfour, topfive, bottomone,
-                               bottomtwo, bottomthree, bottomfour, bottomfive);
-  if (counter == 0) {
+void MainWindow::savesettings()
+{
+  fSettingswindow->hide();
+  fSettingswindow->SaveSettings(fInstitute, fOperatorname, fHicidnumber, fCounter,
+                                fIdoflocationtype, fIdofoperator, fToptwo, fTopthree, fTopfour,
+                                fTopfive, fBottomone, fBottomtwo, fBottomthree, fBottomfour,
+                                fBottomfive);
+  if (fCounter == 0) {
     return;
-  } else {
+  }
+  else {
     open();
-    /* AlpideDB *myDB=new AlpideDB(databasetype);
-     int projectid;
-     int id;
-     projectid=myDB->GetProjectId();
-     id=DbGetComponentTypeId (myDB, projectid, "Outer Barrel HIC Module");
-     int comp;
-     comp=DbGetComponentId (myDB,projectid,id,hicidnumber.toStdString());
-     std::cout<<"the hic name is "<<hicidnumber.toStdString()<<std::endl;
-     std::cout<<"the component id is: "<< comp<<std::endl;*/
-    scanconfigwindow = new ScanConfiguration(this);
-    scanconfigwindow->show();
-    setdefaultvalues(scanfit, nm);
-    scanconfigwindow->setdefaultspeed(scanfit);
-    scanconfigwindow->setdeaulmaskstages(nm);
+
+    for (unsigned int i = 0; i < fHICs.size(); i++) {
+      fstop         = false;
+      int in        = 0;
+      int out       = 0;
+      int projectid = 0;
+      int comp      = 0;
+      projectid     = fDB->GetProjectId();
+      in            = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "in");
+      out           = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "out");
+      comp = DbGetComponentId(fDB, projectid, fComponentTypeID, fHicnames.at(i).toStdString());
+      if (comp == -1) {
+        fComponentWindow = new Components(this);
+        fComponentWindow->WriteToLabel(fHicnames.at(i));
+        fComponentWindow->exec();
+        if (fstop) {
+          return;
+        }
+      }
+      fActComponentTypeIDs.push_back(make_pair(in, out));
+      fComponentIDs.push_back(comp);
+      // std::cout<<"the component id is: "<< comp<<" or"<< fComponentIDs.at(i)<<std::endl;
+    }
+    fScanconfigwindow = new ScanConfiguration(this);
+    fScanconfigwindow->show();
+    setdefaultvalues(fScanfit, fNm);
+    fScanconfigwindow->setdefaultspeed(fScanfit);
+    fScanconfigwindow->setdeaulmaskstages(fNm);
     // delete myDB;
   }
   //  if (counter==0){return;}
@@ -1558,106 +1715,111 @@ void MainWindow::savesettings() {
   //  std::cout<<operatorname.toStdString()<<hicidnumber.toStdString()<<idoflocationtype<<idofoperator<<std::endl;
 }
 
-void MainWindow::speedycheck(bool checked) {
+void MainWindow::speedycheck(bool checked)
+{
 
   if (checked) {
     fConfig->GetScanConfig()->SetParamValue("SPEEDY", "1");
     std::cout << "The speed is " << fConfig->GetScanConfig()->GetSpeedy() << std::endl;
-
-  } else {
+  }
+  else {
     fConfig->GetScanConfig()->SetParamValue("SPEEDY", "0");
     std::cout << "The speed is " << fConfig->GetScanConfig()->GetSpeedy() << std::endl;
   }
 }
 
-void MainWindow::loadeditedconfig() {
+void MainWindow::loadeditedconfig()
+{
 
-  scanconfigwindow->setnumberofmaskstages(nm);
+  fScanconfigwindow->setnumberofmaskstages(fNm);
   // std::cout<<"the nm that should change is "<<nm<<std::endl;
-  if (counter == 0) {
+  if (fCounter == 0) {
     return;
   }
   //   std::cout<<"the nm that should change is "<<nm<<std::endl;
-  std::string final;
+  std::string       final;
   std::stringstream convert;
-  convert << nm;
+  convert << fNm;
   final = convert.str();
   fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", final.c_str());
   connect(ui->start_test, SIGNAL(clicked()), this, SLOT(applytests()));
-  std::cout << operatorname.toStdString() << hicidnumber.toStdString() << idoflocationtype
-            << idofoperator << std::endl;
+  std::cout << fOperatorname.toStdString() << fHicidnumber.toStdString() << fIdoflocationtype
+            << fIdofoperator << std::endl;
   std::cout << "the speed is set to " << fConfig->GetScanConfig()->GetSpeedy() << std::endl;
   std::cout << "the number of mask stages is " << fConfig->GetScanConfig()->GetNMaskStages()
             << std::endl;
-  scanconfigwindow->close();
+  fScanconfigwindow->close();
   ui->start_test->show();
 }
 
-void MainWindow::loaddefaultconfig() {
+void MainWindow::loaddefaultconfig()
+{
 
   fConfig->GetScanConfig()->SetParamValue("SPEEDY", "0");
   std::cout << "The speed is " << fConfig->GetScanConfig()->GetSpeedy() << std::endl;
-  if (counter == 0) {
+  if (fCounter == 0) {
     return;
   }
   connect(ui->start_test, SIGNAL(clicked()), this, SLOT(applytests()));
-  std::cout << operatorname.toStdString() << hicidnumber.toStdString() << idoflocationtype
-            << idofoperator << std::endl;
-  scanconfigwindow->close();
+  std::cout << fOperatorname.toStdString() << fHicidnumber.toStdString() << fIdoflocationtype
+            << fIdofoperator << std::endl;
+  fScanconfigwindow->close();
 }
 
-void MainWindow::colorsinglescan(int i) {
+void MainWindow::colorsinglescan(int i)
+{
 
-  if (scanbuttons[i] != 0) {
+  if (fScanbuttons[i] != 0) {
     if (fresultVector[i] == 0) {
-      colour = fAnalysisVector.at(i + 1)->GetClassification();
-      if (colour == CLASS_ORANGE) {
-        scanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
+      fColour = fAnalysisVector.at(i + 1)->GetClassification();
+      if (fColour == CLASS_ORANGE) {
+        fScanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
         return;
       }
-      if (colour == CLASS_GREEN) {
-        scanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
+      if (fColour == CLASS_GREEN) {
+        fScanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
         return;
       }
-      if (colour == CLASS_RED) {
-        scanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
+      if (fColour == CLASS_RED) {
+        fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
 
-        progresswindow = new Testingprogress(this);
-        progresswindow->setnotification(fScanVector.at(i)->GetName());
-        progresswindow->exec();
+        fProgresswindow = new Testingprogress(this);
+        fProgresswindow->setnotification(fScanVector.at(i)->GetName());
+        fProgresswindow->exec();
       }
-      if (colour == CLASS_UNTESTED) {
-        scanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
+      if (fColour == CLASS_UNTESTED) {
+        fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
         return;
       }
-
-    } else {
-      colour = fAnalysisVector.at(i)->GetClassification();
-      if (colour == CLASS_ORANGE) {
-        scanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
+    }
+    else {
+      fColour = fAnalysisVector.at(i)->GetClassification();
+      if (fColour == CLASS_ORANGE) {
+        fScanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
         return;
       }
-      if (colour == CLASS_GREEN) {
-        scanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
+      if (fColour == CLASS_GREEN) {
+        fScanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
         // progresswindow= new Testingprogress(this);
         // progresswindow->setnotification(fScanVector.at(i)->GetName());
         //  progresswindow->exec();
       }
-      if (colour == CLASS_RED) {
-        scanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
-        progresswindow = new Testingprogress(this);
-        progresswindow->setnotification(fScanVector.at(i)->GetName());
-        progresswindow->exec();
+      if (fColour == CLASS_RED) {
+        fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
+        fProgresswindow = new Testingprogress(this);
+        fProgresswindow->setnotification(fScanVector.at(i)->GetName());
+        fProgresswindow->exec();
       }
-      if (colour == CLASS_UNTESTED) {
-        scanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
+      if (fColour == CLASS_UNTESTED) {
+        fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
         return;
       }
     }
   }
 }
 
-void MainWindow::writecalibrationfile() {
+void MainWindow::writecalibrationfile()
+{
   TPowerBoard *powerBoard0 = fHICs.at(0)->GetPowerBoard();
 
   powerBoard0->GetConfigurationHandler()->WriteCalibrationFile();
@@ -1666,21 +1828,22 @@ void MainWindow::writecalibrationfile() {
     TPowerBoard *powerBoard = fHICs.at(i)->GetPowerBoard();
     if (powerBoard != powerBoard0) {
       powerBoard->GetConfigurationHandler()->WriteCalibrationFile();
-      calwindow->close();
+      fCalwindow->close();
       return; // assume maximum of 2 power boards in setup
     }
   }
-  calwindow->close();
+  fCalwindow->close();
 }
 
 // method sets the top bottom switch correctly for all power board configs
 // input parameter unit gives the power unit for hic 0
 // unit == 1 -> top, unit == 0 -> bottom
 // loop over all HICs, if config different from the one of HIC 0 is found, set opposite
-void MainWindow::setTopBottom(int unit) {
+void MainWindow::setTopBottom(int unit)
+{
   TPowerBoardConfig *pbconfig0 = fHICs.at(0)->GetPowerBoard()->GetConfigurationHandler();
   TPowerBoardConfig *pbconfig;
-  bool isBottom = (unit == 0);
+  bool               isBottom = (unit == 0);
 
   pbconfig0->SetIsBottom(isBottom);
 
@@ -1693,13 +1856,14 @@ void MainWindow::setTopBottom(int unit) {
   }
 }
 
-void MainWindow::setandgetcalibration() {
+void MainWindow::setandgetcalibration()
+{
 
-  float ares, gres, dres;
+  float        ares, gres, dres;
   TPowerBoard *powerBoard0 = fHICs.at(0)->GetPowerBoard();
   TPowerBoard *powerBoard1 = 0;
 
-  calwindow->setresistances(ares, dres, gres);
+  fCalwindow->setresistances(ares, dres, gres);
 
   std::cout << ares << " input values" << dres << std::endl;
   // calwindow->setpowerunit(unit);
@@ -1713,8 +1877,8 @@ void MainWindow::setandgetcalibration() {
     }
     powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(fHICs.at(ihic)->GetPbMod(),
                                                                         ares, dres, gres);
-    pb->CalibrateVoltage(fHICs.at(ihic)->GetPbMod());
-    pb->CalibrateCurrent(fHICs.at(ihic)->GetPbMod());
+    fPb->CalibrateVoltage(fHICs.at(ihic)->GetPbMod());
+    fPb->CalibrateCurrent(fHICs.at(ihic)->GetPbMod());
   }
 
   powerBoard0->CalibrateBiasVoltage();
@@ -1727,17 +1891,18 @@ void MainWindow::setandgetcalibration() {
   // display calibration of HIC 0
   float avscale, dvscale, avoffset, dvoffset, aioffset, dioffset;
 
-  pbconfig->GetVCalibration(fHICs.at(0)->GetPbMod(), avscale, dvscale, avoffset, dvoffset);
+  fPbconfig->GetVCalibration(fHICs.at(0)->GetPbMod(), avscale, dvscale, avoffset, dvoffset);
 
-  pbconfig->GetICalibration(fHICs.at(0)->GetPbMod(), aioffset, dioffset);
+  fPbconfig->GetICalibration(fHICs.at(0)->GetPbMod(), aioffset, dioffset);
 
-  calwindow->getcalibration(avscale, avoffset, dvscale, dvoffset, aioffset, dioffset);
+  fCalwindow->getcalibration(avscale, avoffset, dvscale, dvoffset, aioffset, dioffset);
 }
 
-void MainWindow::opencalibration() {
-  pbcfgcheck->close();
-  calwindow = new Calibrationpb(this);
-  calwindow->exec();
+void MainWindow::opencalibration()
+{
+  fPbcfgcheck->close();
+  fCalwindow = new Calibrationpb(this);
+  fCalwindow->exec();
 }
 
 /*
@@ -1760,81 +1925,83 @@ void MainWindow::opencalibration() {
 
 */
 
-void MainWindow::exploreendurancebox() {
+void MainWindow::exploreendurancebox()
+{
 
   for (unsigned int i = 0; i < fHICs.size(); i++) {
 
     if (fHICs[i]->IsEnabled()) {
-      endurancemodules[i]->setText(hicnames[i]);
-      endurancemodules[i]->setStyleSheet("background-color:green;");
-    } else {
-      endurancemodules[i]->setStyleSheet("background-color:black;");
+      fEndurancemodules[i]->setText(fHicnames[i]);
+      fEndurancemodules[i]->setStyleSheet("background-color:green;");
+    }
+    else {
+      fEndurancemodules[i]->setStyleSheet("background-color:black;");
     }
   }
 }
 
-void MainWindow::setdefaultvalues(bool &fit, int &numberofstages) {
-
-  fit = fConfig->GetScanConfig()->GetSpeedy();
+void MainWindow::setdefaultvalues(bool &fit, int &numberofstages)
+{
+  fit            = fConfig->GetScanConfig()->GetSpeedy();
   numberofstages = fConfig->GetScanConfig()->GetNMaskStages();
 }
 
 bool MainWindow::CreateScanObjects(TScanType scanType, TScanConfig *config, TScan **scan,
-                                   TScanAnalysis **analysis, TScanResult **result,
-                                   bool &hasButton) {
+                                   TScanAnalysis **analysis, TScanResult **result, bool &hasButton)
+{
   switch (scanType) {
   case STPower:
-    *scan = new TPowerTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result = new TPowerResult();
+    *scan     = new TPowerTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TPowerResult();
     *analysis = new TPowerAnalysis(&fHistoQue, (TPowerTest *)*scan, config, fHICs, &fMutex,
                                    (TPowerResult *)*result);
     hasButton = true;
     return true;
   case STFifo:
-    *scan = new TFifoTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result = new TFifoResult();
+    *scan     = new TFifoTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TFifoResult();
     *analysis = new TFifoAnalysis(&fHistoQue, (TFifoTest *)*scan, config, fHICs, &fMutex,
                                   (TFifoResult *)*result);
     hasButton = true;
     return true;
   case STLocalBus:
-    *scan = new TLocalBusTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result = new TLocalBusResult();
+    *scan     = new TLocalBusTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TLocalBusResult();
     *analysis = new TLocalBusAnalysis(&fHistoQue, (TLocalBusTest *)*scan, config, fHICs, &fMutex,
                                       (TLocalBusResult *)*result);
     hasButton = true;
     return true;
   case STDigital:
-    *scan = new TDigitalScan(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result = new TDigitalResult();
+    *scan     = new TDigitalScan(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TDigitalResult();
     *analysis = new TDigitalAnalysis(&fHistoQue, (TDigitalScan *)*scan, config, fHICs, &fMutex,
                                      (TDigitalResult *)*result);
     hasButton = true;
     return true;
   case STDigitalWF:
-    *scan = new TDigitalWhiteFrame(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result = new TDigitalWFResult();
+    *scan     = new TDigitalWhiteFrame(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TDigitalWFResult();
     *analysis = new TDigitalWFAnalysis(&fHistoQue, (TDigitalWhiteFrame *)*scan, config, fHICs,
                                        &fMutex, (TDigitalWFResult *)*result);
     hasButton = true;
     return true;
   case STThreshold:
-    *scan = new TThresholdScan(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result = new TSCurveResult();
+    *scan     = new TThresholdScan(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TSCurveResult();
     *analysis = new TSCurveAnalysis(&fHistoQue, (TThresholdScan *)*scan, config, fHICs, &fMutex,
                                     (TSCurveResult *)*result);
     hasButton = true;
     return true;
   case STVCASN:
-    *scan = new TtuneVCASNScan(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result = new TSCurveResult();
+    *scan     = new TtuneVCASNScan(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TSCurveResult();
     *analysis = new TSCurveAnalysis(&fHistoQue, (TtuneVCASNScan *)*scan, config, fHICs, &fMutex,
                                     (TSCurveResult *)*result, 1);
     hasButton = true;
     return true;
   case STITHR:
-    *scan = new TtuneITHRScan(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result = new TSCurveResult();
+    *scan     = new TtuneITHRScan(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TSCurveResult();
     *analysis = new TSCurveAnalysis(&fHistoQue, (TtuneITHRScan *)*scan, config, fHICs, &fMutex,
                                     (TSCurveResult *)*result, -1);
     hasButton = true;
@@ -1854,34 +2021,41 @@ bool MainWindow::CreateScanObjects(TScanType scanType, TScanConfig *config, TSca
     hasButton = false;
     return true;
   case STNoise:
-    *scan = new TNoiseOccupancy(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result = new TNoiseResult();
+    *scan     = new TNoiseOccupancy(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TNoiseResult();
     *analysis = new TNoiseAnalysis(&fHistoQue, (TNoiseOccupancy *)*scan, config, fHICs, &fMutex,
                                    (TNoiseResult *)*result);
     hasButton = true;
     return true;
   case STApplyMask:
-    *scan = 0;
+    *scan     = 0;
     *analysis = new TApplyMask(&fHistoQue, 0, config, fHICs, &fMutex, (TNoiseResult *)*result);
     hasButton = false;
     return true;
   case STClearMask:
-    *scan = 0;
+    *scan     = 0;
     *analysis = new TApplyMask(&fHistoQue, 0, config, fHICs, &fMutex, 0);
     hasButton = false;
     return true;
   case STReadout:
-    *scan = new TReadoutTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result = new TReadoutResult();
+    *scan     = new TReadoutTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TReadoutResult();
     *analysis = new TReadoutAnalysis(&fHistoQue, (TReadoutTest *)*scan, config, fHICs, &fMutex,
                                      (TReadoutResult *)*result);
     hasButton = true;
     return true;
   case STEndurance:
-    *scan = new TEnduranceCycle(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result = new TCycleResult();
+    *scan     = new TEnduranceCycle(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TCycleResult();
     *analysis = new TCycleAnalysis(&fHistoQue, (TEnduranceCycle *)*scan, config, fHICs, &fMutex,
                                    (TCycleResult *)*result);
+    hasButton = true;
+    return true;
+  case STFastPowerTest:
+    *scan     = new TFastPowerTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TFastPowerResult();
+    *analysis = new TFastPowerAnalysis(&fHistoQue, (TFifoTest *)*scan, config, fHICs, &fMutex,
+                                       (TFastPowerResult *)*result);
     hasButton = true;
     return true;
   default:
@@ -1890,23 +2064,24 @@ bool MainWindow::CreateScanObjects(TScanType scanType, TScanConfig *config, TSca
   }
 }
 
-int MainWindow::GetNButtons() {
+int MainWindow::GetNButtons()
+{
   int result = 0;
-  for (unsigned int i = 0; i < scanbuttons.size(); i++) {
-    if (scanbuttons.at(i) != 0)
-      result++;
+  for (unsigned int i = 0; i < fScanbuttons.size(); i++) {
+    if (fScanbuttons.at(i) != 0) result++;
   }
   return result;
 }
 
-void MainWindow::AddScan(TScanType scanType, TScanResult *aResult) {
-  TScan *scan;
+void MainWindow::AddScan(TScanType scanType, TScanResult *aResult)
+{
+  TScan *        scan;
   TScanAnalysis *analysis;
-  TScanResult *result = 0;
-  TScanConfig *config = fConfig->GetScanConfig();
-  bool hasButton;
-  QPushButton *button;
-  QLabel *label;
+  TScanResult *  result = 0;
+  TScanConfig *  config = fConfig->GetScanConfig();
+  bool           hasButton;
+  QPushButton *  button;
+  QLabel *       label;
 
   if (aResult == 0) { // standard version
     if (CreateScanObjects(scanType, config, &scan, &analysis, &result, hasButton)) {
@@ -1914,8 +2089,9 @@ void MainWindow::AddScan(TScanType scanType, TScanResult *aResult) {
       fAnalysisVector.push_back(analysis);
       fresultVector.push_back(result);
     }
-  } else { // apply tuning etc: receive result from previous scan (tuning) and push 0 into result
-           // vector
+  }
+  else { // apply tuning etc: receive result from previous scan (tuning) and push 0 into result
+         // vector
     if (CreateScanObjects(scanType, config, &scan, &analysis, &aResult, hasButton)) {
       fScanVector.push_back(scan);
       fAnalysisVector.push_back(analysis);
@@ -1928,28 +2104,30 @@ void MainWindow::AddScan(TScanType scanType, TScanResult *aResult) {
     button->setGeometry(QRect(0, 110 + 30 * GetNButtons(), 151, 31));
     button->setStyleSheet("border:none;");
     button->show();
-    signalMapper->setMapping(button, fAnalysisVector.size() - 1);
-    connect(button, SIGNAL(clicked()), signalMapper, SLOT(map()));
-    scanbuttons.push_back(button);
+    fSignalMapper->setMapping(button, fAnalysisVector.size() - 1);
+    connect(button, SIGNAL(clicked()), fSignalMapper, SLOT(map()));
+    fScanbuttons.push_back(button);
 
     label = new QLabel(ui->centralWidget);
     label->setObjectName(QStringLiteral());
     label->setGeometry(QRect(160, 110 + 30 * (GetNButtons() - 1), 181, 31));
     label->setText(scan->GetState());
     label->show();
-    scanstatuslabels.push_back(label);
-
-  } else {
-    scanbuttons.push_back(0);
-    scanstatuslabels.push_back(0);
+    fScanstatuslabels.push_back(label);
+  }
+  else {
+    fScanbuttons.push_back(0);
+    fScanstatuslabels.push_back(0);
   }
 }
 
-void MainWindow::makeDir(const char *aDir) {
+void MainWindow::makeDir(const char *aDir)
+{
   struct stat myStat;
   if ((stat(aDir, &myStat) == 0) && (S_ISDIR(myStat.st_mode))) {
     std::cout << "Directory " << aDir << " found" << std::endl;
-  } else {
+  }
+  else {
     std::cout << "Directory " << aDir << " not found. Creating..." << std::endl;
     if (mkdir(aDir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
       std::cout << "Error creating directory" << aDir << std::endl;
@@ -1957,15 +2135,16 @@ void MainWindow::makeDir(const char *aDir) {
   }
 }
 
-void MainWindow::IBBasicTest() {
+void MainWindow::IBBasicTest()
+{
   start_test();
-  databasetype = true;
-  settingswindow->close();
-  numberofscan = IBQualification;
-  hicidnumber = "IB_HIC";
+  fDatabasetype = true;
+  fSettingswindow->close();
+  fNumberofscan = IBQualification;
+  fHicidnumber  = "IB_HIC";
   open();
   fConfig->GetScanConfig()->SetUseDataPath(false);
-  fillingibvectors();
+  ibscansforageing();
   for (unsigned int i = 0; i < fScanVector.size(); i++) {
     try {
 
@@ -1978,8 +2157,8 @@ void MainWindow::IBBasicTest() {
         analysisThread.join();
 
         fAnalysisVector.at(i)->Finalize();
-
-      } else {
+      }
+      else {
 
         std::thread scanThread(&MainWindow::scanLoop, this, fScanVector[i]);
 
@@ -2001,7 +2180,8 @@ void MainWindow::IBBasicTest() {
   std::cout << "Test complete :D" << std::endl;
 }
 
-void MainWindow::IBParameterScan() {
+void MainWindow::IBParameterScan()
+{
   int backupTrigger = fConfig->GetScanConfig()->GetParamValue("NTRIG");
 
   fConfig->GetScanConfig()->SetParamValue("NTRIG", 10000);
@@ -2022,11 +2202,12 @@ void MainWindow::IBParameterScan() {
   fConfig->GetScanConfig()->SetParamValue("NTRIG", backupTrigger);
 }
 
-void MainWindow::fillingibvectors() {
+void MainWindow::fillingibvectors()
+{
   ClearVectors();
   AddScan(STPower);
   // Do this scan immediately after power as it sometimes crashes
-  IBParameterScan();
+  // IBParameterScan();
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
@@ -2070,33 +2251,34 @@ void MainWindow::fillingibvectors() {
 
   // threshold scan, no tuning for the time being, 0V back bias
   fConfig->GetScanConfig()->SetBackBias(0.0);
-  // fConfig->GetScanConfig()->SetVcasnRange (30, 70);
+  fConfig->GetScanConfig()->SetVcasnRange(30, 70);
 
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STThreshold);
-  // AddScan(STVCASN);
-  // fConfig->GetScanConfig()->SetParamValue("NOMINAL",0);
-  // AddScan(STApplyVCASN, fresultVector.back());
-  // AddScan(STITHR);
-  // AddScan(STApplyITHR, fresultVector.back());
-  // AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+  AddScan(STThreshold);
 
   // noise occupancy with and without mask at 0V back bias
   AddScan(STNoise);
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
   AddScan(STClearMask);
+  // return;
   // threshold scan at 3V back bias, also here no tuning for the time being
   fConfig->GetScanConfig()->SetBackBias(3.0);
-  // fConfig->GetScanConfig()->SetVcasnRange (75, 160);
+  fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STThreshold);
-  // AddScan(STVCASN);
-  // fConfig->GetScanConfig()->SetParamValue("NOMINAL",0);
-  // AddScan(STApplyVCASN, fresultVector.back());
-  // AddScan(STITHR);
-  // AddScan(STApplyITHR, fresultVector.back());
-  // AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+  AddScan(STThreshold);
 
   // noise occupancy with and without mask at 3V back bias
   AddScan(STNoise);
@@ -2105,39 +2287,233 @@ void MainWindow::fillingibvectors() {
   AddScan(STClearMask);
 }
 
-void MainWindow::fillingendurancevectors() {
+void MainWindow::fillingendurancevectors()
+{
   ClearVectors();
 
   AddScan(STFifo);
-  AddScan(STDigital);
-  AddScan(STThreshold);
+  AddScan(STEndurance);
 }
 
-void MainWindow::ConnectTestCombo(int value) {
-  counter = 0;
-  idofactivitytype = 0;
+void MainWindow::ConnectTestCombo(int value)
+{
+  fCounter          = 1;
+  fIdofactivitytype = 0;
   ui->testtypeselected->clear();
-  settingswindow->hideendurance();
+  fSettingswindow->hideendurance();
   //  QString testname;
-  settingswindow->GetTestTypeName(numberofscan, testname);
-  ui->testtypeselected->setText(testname);
+  fSettingswindow->GetTestTypeName(fNumberofscan, fTestname);
+  ui->testtypeselected->setText(fTestname);
   std::string name;
-  name.append(testname.toStdString());
-  findidoftheactivitytype(name, idofactivitytype);
-  std::cout << "the id of the selected test: " << idofactivitytype << std::endl;
+  name.append(fTestname.toStdString());
+  findidoftheactivitytype(name, fIdofactivitytype);
+  // fIdofactivitytype=-1;
+  if (fIdofactivitytype == -1) {
+    fSettingswindow->getwindow();
+    fCounter = fSettingswindow->getcounter();
+  }
+  if (fCounter == 0) {
+    fSettingswindow->close();
+    return;
+  }
+  std::cout << "the id of the selected test: " << fIdofactivitytype << std::endl;
   locationcombo();
-  settingswindow->connectlocationcombo(locdetails);
-  std::cout << "the numbeofscan is: " << numberofscan << "and the value is: " << value << std::endl;
+  fSettingswindow->connectlocationcombo(fLocdetails);
+  if (fNumberofscan == OBEndurance) {
+    fSettingswindow->adjustendurance();
+  }
+  std::cout << "the numbeofscan is: " << fNumberofscan << "and the value is: " << value
+            << std::endl;
 }
 
-void MainWindow::ContinueWithoutWriting() {
-  writedb->setVisible(true);
-  connect(writedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
-  resultwindow->close();
+void MainWindow::ContinueWithoutWriting()
+{
+  fWritedb->setVisible(true);
+  connect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
+  fResultwindow->close();
   popup("You still have the possibility \n to write to the database \n later through the menu :)");
 }
 
-void MainWindow::finalwrite() {
-  noticewindow->close();
+void MainWindow::finalwrite()
+{
+  fNoticewindow->close();
   attachtodatabase();
+}
+
+void MainWindow::ibscansforageing()
+{
+  ClearVectors();
+
+  AddScan(STFifo);
+
+  AddScan(STDigital);
+
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 10);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
+  AddScan(STReadout);
+
+  // reset previous values
+  // (TODO: this is not exactly correct because it resets to the values defined in the header file
+  // and
+  // ignores the settings in the config file)
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", ChipConfig::DTU_DRIVER);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", ChipConfig::DTU_PREEMP);
+
+  // threshold scan, no tuning for the time being, 0V back bias
+  fConfig->GetScanConfig()->SetBackBias(0.0);
+  // fConfig->GetScanConfig()->SetVcasnRange (30, 70);
+
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STThreshold);
+
+  // threshold scan at 3V back bias, also here no tuning for the time being
+  fConfig->GetScanConfig()->SetBackBias(3.0);
+  // fConfig->GetScanConfig()->SetVcasnRange (75, 160);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STThreshold);
+}
+
+void MainWindow::quittest()
+{
+  fComponentWindow->close();
+  fstop = true;
+}
+
+AlpideDB *MainWindow::GetDB() { return fDB; }
+
+void MainWindow::fillingfastpower()
+{
+  ClearVectors();
+  AddScan(STFastPowerTest);
+}
+
+void MainWindow::attachtodatabaseretry()
+{
+  SetHicClassifications();
+  fDatabasefailure->close();
+  if (fDB) delete fDB;
+  fDB = new AlpideDB(fDatabasetype);
+  for (unsigned int i = 0; i < fHICs.size(); i++) {
+    if (fHICs.at(i)->IsEnabled()) {
+      QDateTime          date;
+      ActivityDB::actUri uri;
+      bool               write;
+      write = false;
+      WriteToEos(fHICs.at(i)->GetDbId(), uri, write);
+      std::string path;
+      path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) + "/Comment.txt";
+
+      ActivityDB *myactivity = new ActivityDB(fDB);
+
+      ActivityDB::activity activ;
+
+      // TODO: check that the idof... are filled in the correct place
+      // set activity parameters
+      activ.Type      = fIdofactivitytype;
+      activ.Location  = fIdoflocationtype;
+      activ.User      = fIdofoperator;
+      activ.StartDate = date.currentDateTime().toTime_t();
+      activ.EndDate   = date.currentDateTime().toTime_t();
+      activ.Lot       = " ";
+      activ.Name      = CreateActivityName(fHICs.at(i)->GetDbId(), fConfig->GetScanConfig());
+      activ.Position  = " ";
+      activ.Result =
+          -999; // apparently has to stay open here, otherwise activity is considered closed
+
+      activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "OPEN");
+      std::cout << "the activ is open" << std::endl;
+
+
+      // add global parameters (not accessible from within results)
+      DbAddParameter(fDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips());
+      DbAddParameter(fDB, activ, "Time", GetTime());
+
+      // loop over results and write to DB
+      for (unsigned int j = 0; j < fresultVector.size(); j++) {
+        if (fresultVector[j] != 0) {
+          std::map<std::string, TScanResultHic *> mymap = fresultVector.at(j)->GetHicResults();
+          for (auto ihic = mymap.begin(); ihic != mymap.end(); ++ihic) {
+            TScanResultHic *result = (TScanResultHic *)ihic->second;
+            if (ihic->first.compare(fHicnames.at(i).toStdString()) == 0) {
+              result->WriteToDB(fDB, activ);
+            }
+          }
+        }
+      }
+
+      // attach config file
+      if (fNumberofscan == OBQualification || fNumberofscan == OBReception ||
+          fNumberofscan == OBEndurance) {
+        DbAddAttachment(fDB, activ, attachConfig, string("Config.cfg"), string("Config.cfg"));
+      }
+      else if (fNumberofscan == IBQualification) {
+        DbAddAttachment(fDB, activ, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
+      }
+      else if (fNumberofscan == OBPower) {
+        DbAddAttachment(fDB, activ, attachConfig, string("ConfigPower.cfg"),
+                        string("ConfigPower.cfg"));
+      }
+      DbAddAttachment(fDB, activ, attachText, string(path), string("Comment.txt"));
+      DbAddMember(fDB, activ, fIdofoperator);
+
+      std::vector<ActivityDB::actUri> uris;
+
+      uris.push_back(uri);
+
+      myactivity->Create(&activ);
+      cout << myactivity->DumpResponse() << endl;
+      myactivity->AssignUris(activ.ID, fIdofoperator, (&uris));
+      myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).first,
+                                  fIdofoperator);
+      myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second,
+                                  fIdofoperator);
+      if (fStatus == false) {
+        activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
+        std::cout << "the activ is closed" << std::endl;
+      }
+      // TODO: add components (in / out)
+      // TODO: add member
+      // TODO: close activity (needs implementation of activityChange)
+      //      e.g.
+      //      activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSED");
+      //      myactivity->Change (&activ);
+      //   check that activity ID (not activity type ID) is set within activ
+
+      // std::cout << "trying to close activity" << std::endl;
+      // activ.Status = DbGetStatusId(myDB, idofactivitytype, "CLOSED");
+      activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
+      myactivity->Change(&activ);
+      std::cout << "the activity result is: " << activ.Result << std::endl;
+      fActivityResults.push_back(activ.Result);
+      delete myactivity;
+    }
+  }
+  delete fDB;
+  fDB = 0x0;
+  for (unsigned int i = 0; i < fActivityResults.size(); i++) {
+    if (fActivityResults.at(i) != -1) {
+      writingdb = true;
+    }
+    else {
+      writingdb = false;
+      break;
+    }
+  }
+  if (writingdb == false) {
+    if (!fDatabasefailure) {
+
+      fDatabasefailure = new Databasefailure(this);
+    }
+    fDatabasefailure->exec();
+  }
 }

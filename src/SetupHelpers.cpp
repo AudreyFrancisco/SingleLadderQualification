@@ -1,7 +1,7 @@
-#include <iostream>
 #include "SetupHelpers.h"
-#include "USBHelpers.h"
 #include "TPowerBoard.h"
+#include "USBHelpers.h"
+#include <iostream>
 #include <string.h>
 #include <string>
 
@@ -11,17 +11,19 @@
 // Include power boards
 
 // ----- Global variables (deprecated but ) -
-int VerboseLevel = 0;
+int  VerboseLevel                = 0;
 char ConfigurationFileName[1024] = "Config.cfg";
 // --------------------------------------
 
-void BaseConfigOBchip(TChipConfig *&chipConfig) {
+void BaseConfigOBchip(TChipConfig *&chipConfig)
+{
   // --- Force the Link Speed values to 1.2 GHz in the Chip-Master
   //   in order to prevent wrong settings that stuck the DataLink
   int chipId = chipConfig->GetChipId();
   if (chipId % 8 != 0) { // deactivate the DTU/PLL for none master chips
     chipConfig->SetParamValue("LINKSPEED", "-1");
-  } else { // sets the Master to 1.2GHz
+  }
+  else { // sets the Master to 1.2GHz
     chipConfig->SetParamValue("LINKSPEED", "1200");
   }
 
@@ -36,8 +38,9 @@ void BaseConfigOBchip(TChipConfig *&chipConfig) {
 //    - receiver number for slaves set to -1 (not connected directly to receiver)
 //      (this ensures that a receiver is disabled only if the connected master is disabled)
 int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
-                std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds) {
-  (*boardType) = boardMOSAIC;
+                std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
+{
+  (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
 
   boardConfig->SetSpeedMode(Mosaic::RCV_RATE_400);
@@ -53,20 +56,21 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
 
   if (hics) {
     TChipConfig *chipConfig = config->GetChipConfig(0);
-    int chipId = chipConfig->GetChipId();
-    int modId = (chipId >> 4) & 0x7;
+    int          chipId     = chipConfig->GetChipId();
+    int          modId      = (chipId >> 4) & 0x7;
     if (hicIds) {
       hics->push_back(new THicOB(hicIds[0], modId, pb, 0));
-    } else {
+    }
+    else {
       hics->push_back(new THicOB("Dummy_ID", modId, pb, 0));
     }
   }
 
   for (unsigned int i = 0; i < config->GetNChips(); i++) {
     TChipConfig *chipConfig = config->GetChipConfig(i);
-    int chipId = chipConfig->GetChipId();
-    int control = chipConfig->GetParamValue("CONTROLINTERFACE");
-    int receiver = chipConfig->GetParamValue("RECEIVER");
+    int          chipId     = chipConfig->GetChipId();
+    int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
+    int          receiver   = chipConfig->GetParamValue("RECEIVER");
 
     BaseConfigOBchip(chipConfig);
 
@@ -90,7 +94,8 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
         receiver = 9;
         chipConfig->SetParamValue("RECEIVER", 9);
       }
-    } else { // second master-slave row
+    }
+    else { // second master-slave row
       if (control < 0) {
         control = 0;
         chipConfig->SetParamValue("CONTROLINTERFACE", 0);
@@ -114,11 +119,41 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
   return 0;
 }
 
+// minimal setup for powering test after tab cutting
+int initSetupPower(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
+                   std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
+{
+  (*boardType)                    = boardMOSAIC;
+  TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
+
+  boards->push_back(new TReadoutBoardMOSAIC(config, boardConfig));
+
+  TPowerBoard *pb = 0;
+  if (config->GetUsePowerBoard()) {
+    TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
+    pbConfig->SetDefaultsOB(0);
+    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0), pbConfig);
+  }
+
+  if (hics) {
+    int modId = 7; // should not matter;
+    if (hicIds) {
+      hics->push_back(new THicOB(hicIds[0], modId, pb, 0));
+    }
+    else {
+      hics->push_back(new THicOB("Dummy_ID", modId, pb, 0));
+    }
+  }
+
+  return 0;
+}
+
 // implicit assumptions on the setup in this method
 // - chips of master 0 of all modules are connected to 1st mosaic, chips of master 8 to 2nd MOSAIC
 int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                        std::vector<TAlpide *> *chips, std::vector<THic *> *hics,
-                       const char **hicIds) {
+                       const char **hicIds)
+{
   (*boardType) = boardMOSAIC;
   for (unsigned int i = 0; i < config->GetNBoards(); i++) {
     TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(i);
@@ -126,13 +161,16 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     boards->push_back(new TReadoutBoardMOSAIC(config, boardConfig));
   }
 
+  if (((TBoardConfigMOSAIC *)config->GetBoardConfig(0))->GetMasterSlaveMode()) {
+    ((TReadoutBoardMOSAIC *)boards->at(0))->GetCoordinatorHandle()->setMode(MCoordinator::Master);
+    ((TReadoutBoardMOSAIC *)boards->at(1))->GetCoordinatorHandle()->setMode(MCoordinator::Slave);
+  }
   TPowerBoard *pb = 0;
   if (config->GetUsePowerBoard()) {
     pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0));
   }
 
-  if (!hics)
-    hics = new std::vector<THic *>(); // create if not existent
+  if (!hics) hics = new std::vector<THic *>(); // create if not existent
 
   // TODO: Define power board mapping for half stave
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
@@ -144,16 +182,16 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
 
   for (unsigned int i = 0; i < config->GetNChips(); i++) {
     TChipConfig *chipConfig = config->GetChipConfig(i);
-    int chipId = chipConfig->GetChipId();
-    int mosaic = (chipId & 0x8) ? 1 : 0; // Side A8 = 1, side B0 = 0
-    int control = chipConfig->GetParamValue("CONTROLINTERFACE");
-    int receiver = chipConfig->GetParamValue("RECEIVER");
+    int          chipId     = chipConfig->GetChipId();
+    int          mosaic     = (chipId & 0x8) ? 1 : 0; // Side A8 = 1, side B0 = 0
+    int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
+    int          receiver   = chipConfig->GetParamValue("RECEIVER");
     // int          modId      = chipConfig->GetModuleId();
 
     BaseConfigOBchip(chipConfig);
 
     TAlpide *chip = new TAlpide(chipConfig);
-    int iHic = -1;
+    int      iHic = -1;
     for (unsigned int ihic = 0; ihic < hics->size(); ihic++) {
       if (hics->at(ihic)->GetModId() == chip->GetConfig()->GetModuleId()) {
         iHic = ihic;
@@ -185,7 +223,8 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
       chipConfig->SetParamValue("RECEIVER", -1);
       boards->at(mosaic)->AddChip(chipId, 0, -1, chips->at(i));
       chips->at(i)->SetEnable(false);
-    } else { // configure module
+    }
+    else { // configure module
       if (control < 0) {
         control = 0;
         chipConfig->SetParamValue("CONTROLINTERFACE", control);
@@ -213,7 +252,8 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
 // implicit assumptions on the setup in this method
 // - chips of master 0 of all modules are connected to 1st mosaic, chips of master 8 to 2nd MOSAIC
 int initSetupHalfStaveRU(TConfig *config, std::vector<TReadoutBoard *> *boards,
-                         TBoardType *boardType, std::vector<TAlpide *> *chips) {
+                         TBoardType *boardType, std::vector<TAlpide *> *chips)
+{
   (*boardType) = boardRU;
   for (unsigned int i = 0; i < config->GetNBoards(); i++) {
     TBoardConfigRU *boardConfig = (TBoardConfigRU *)config->GetBoardConfig(i);
@@ -281,42 +321,37 @@ int initSetupHalfStaveRU(TConfig *config, std::vector<TReadoutBoard *> *boards,
 // Modify the function in order to scan a sub set of chips. The dimension is fixed to 14 !!
 //
 void MakeDaisyChain(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
-                    std::vector<TAlpide *> *chips, int startPtr) {
+                    std::vector<TAlpide *> *chips, int startPtr)
+{
 
   int firstLow[8], firstHigh[8], lastLow[8], lastHigh[8];
   int startChipIndex = (startPtr == -1) ? 0 : startPtr;
-  int endChipIndex = (startPtr == -1) ? chips->size() : startPtr + 14;
+  int endChipIndex   = (startPtr == -1) ? chips->size() : startPtr + 14;
 
   for (int imod = 0; imod < 8; imod++) {
-    firstLow[imod] = 0x77;
+    firstLow[imod]  = 0x77;
     firstHigh[imod] = 0x7f;
-    lastLow[imod] = 0x0;
-    lastHigh[imod] = 0x8;
+    lastLow[imod]   = 0x0;
+    lastHigh[imod]  = 0x8;
   }
 
   // find the first and last enabled chip in each row
   for (int i = startChipIndex; i < endChipIndex; i++) {
-    if (!chips->at(i)->GetConfig()->IsEnabled())
-      continue;
+    if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
     int chipId = chips->at(i)->GetConfig()->GetChipId();
-    int modId = (chipId & 0x70) >> 4;
+    int modId  = (chipId & 0x70) >> 4;
 
-    if ((chipId & 0x8) && (chipId < firstHigh[modId]))
-      firstHigh[modId] = chipId;
-    if (!(chipId & 0x8) && (chipId < firstLow[modId]))
-      firstLow[modId] = chipId;
+    if ((chipId & 0x8) && (chipId < firstHigh[modId])) firstHigh[modId] = chipId;
+    if (!(chipId & 0x8) && (chipId < firstLow[modId])) firstLow[modId]  = chipId;
 
-    if ((chipId & 0x8) && (chipId > lastHigh[modId]))
-      lastHigh[modId] = chipId;
-    if (!(chipId & 0x8) && (chipId > lastLow[modId]))
-      lastLow[modId] = chipId;
+    if ((chipId & 0x8) && (chipId > lastHigh[modId])) lastHigh[modId] = chipId;
+    if (!(chipId & 0x8) && (chipId > lastLow[modId])) lastLow[modId]  = chipId;
   }
 
   for (int i = startChipIndex; i < endChipIndex; i++) {
-    if (!chips->at(i)->GetConfig()->IsEnabled())
-      continue;
-    int chipId = chips->at(i)->GetConfig()->GetChipId();
-    int modId = (chipId & 0x70) >> 4;
+    if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
+    int chipId   = chips->at(i)->GetConfig()->GetChipId();
+    int modId    = (chipId & 0x70) >> 4;
     int previous = -1;
 
     // first chip in row gets token and previous chip is last chip in row (for each module)
@@ -324,7 +359,8 @@ void MakeDaisyChain(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
     if (chipId == firstLow[modId]) {
       chips->at(i)->GetConfig()->SetInitialToken(true);
       chips->at(i)->GetConfig()->SetPreviousId(lastLow[modId]);
-    } else if (chipId == firstHigh[modId]) {
+    }
+    else if (chipId == firstHigh[modId]) {
       chips->at(i)->GetConfig()->SetInitialToken(true);
       chips->at(i)->GetConfig()->SetPreviousId(lastHigh[modId]);
     }
@@ -335,8 +371,7 @@ void MakeDaisyChain(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
       int iprev = chipId - 1;
       while ((iprev >= firstHigh[modId]) && (previous == -1)) {
         for (int j = startChipIndex; j < endChipIndex; j++) {
-          if (!chips->at(j)->GetConfig()->IsEnabled())
-            continue;
+          if (!chips->at(j)->GetConfig()->IsEnabled()) continue;
           if (chips->at(j)->GetConfig()->GetChipId() == iprev) {
             previous = iprev;
           }
@@ -344,13 +379,13 @@ void MakeDaisyChain(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
         iprev--;
       }
       chips->at(i)->GetConfig()->SetPreviousId(previous);
-    } else if (!(chipId & 0x8)) {
+    }
+    else if (!(chipId & 0x8)) {
       chips->at(i)->GetConfig()->SetInitialToken(false);
       int iprev = chipId - 1;
       while ((iprev >= firstLow[modId]) && (previous == -1)) {
         for (int j = startChipIndex; j < endChipIndex; j++) {
-          if (!chips->at(j)->GetConfig()->IsEnabled())
-            continue;
+          if (!chips->at(j)->GetConfig()->IsEnabled()) continue;
           if (chips->at(j)->GetConfig()->GetChipId() == iprev) {
             previous = iprev;
           }
@@ -367,13 +402,15 @@ void MakeDaisyChain(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
 
 // Try to communicate with all chips, disable chips that are not answering
 int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
-                          TBoardType *boardType, std::vector<TAlpide *> *chips) {
+                          TBoardType *boardType, std::vector<TAlpide *> *chips)
+{
   uint16_t WriteValue = 10;
   uint16_t Value;
-  int nWorking = 0;
+  int      nWorking = 0;
 
   std::cout
-      << std::endl << "Before starting actual test:" << std::endl
+      << std::endl
+      << "Before starting actual test:" << std::endl
       << "Checking the control interfaces of all chips by doing a single register readback test"
       << std::endl;
   for (unsigned int i = 0; i < boards->size(); i++) {
@@ -381,8 +418,7 @@ int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
   }
 
   for (unsigned int i = 0; i < chips->size(); i++) {
-    if (!chips->at(i)->GetConfig()->IsEnabled())
-      continue;
+    if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
     // std::cout << "Writing chip " << i << std::endl;
     chips->at(i)->WriteRegister(0x60d, WriteValue);
     try {
@@ -391,7 +427,8 @@ int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
         std::cout << "Pos:" << i << "  Chip ID " << chips->at(i)->GetConfig()->GetChipId()
                   << ", readback correct." << std::endl;
         nWorking++;
-      } else {
+      }
+      else {
         std::cout << "Pos:" << i << "  Chip ID " << chips->at(i)->GetConfig()->GetChipId()
                   << ", wrong readback value (" << Value << " instead of " << WriteValue
                   << "), disabling." << std::endl;
@@ -412,10 +449,11 @@ int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
 //    - all chips connected to same control interface
 //    - each chip has its own receiver, mapping defined in RCVMAP
 int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
-                std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds) {
+                std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
+{
   int RCVMAP[] = {3, 5, 7, 8, 6, 4, 2, 1, 0};
 
-  (*boardType) = boardMOSAIC;
+  (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
 
   boardConfig->SetInvertedData(false);
@@ -452,7 +490,8 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
   if (hics) {
     if (hicIds) {
       hics->push_back(new THicIB(hicIds[0], 0, pb, 0));
-    } else {
+    }
+    else {
       hics->push_back(new THicIB("Dummy_ID", 0, pb, 0));
     }
     ((THicIB *)(hics->at(0)))->ConfigureInterface(0, RCVMAP, 0);
@@ -460,8 +499,8 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
 
   for (unsigned int i = 0; i < config->GetNChips(); i++) {
     TChipConfig *chipConfig = config->GetChipConfig(i);
-    int control = chipConfig->GetParamValue("CONTROLINTERFACE");
-    int receiver = chipConfig->GetParamValue("RECEIVER");
+    int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
+    int          receiver   = chipConfig->GetParamValue("RECEIVER");
 
     TAlpide *chip = new TAlpide(chipConfig);
     if (hics) {
@@ -497,8 +536,9 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
 //    - all chips connected to same control interface
 //    - each chip has its own receiver, assume connector 0 -> transceiver number = chip id
 int initSetupIBRU(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
-                  std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds) {
-  (*boardType) = boardRU;
+                  std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
+{
+  (*boardType)                = boardRU;
   TBoardConfigRU *boardConfig = (TBoardConfigRU *)config->GetBoardConfig(0);
 
   switch (config->GetChipConfig(0)->GetParamValue("LINKSPEED")) {
@@ -515,8 +555,8 @@ int initSetupIBRU(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardT
 
   for (unsigned int i = 0; i < config->GetNChips(); i++) {
     TChipConfig *chipConfig = config->GetChipConfig(i);
-    int control = chipConfig->GetParamValue("CONTROLINTERFACE");
-    int receiver = chipConfig->GetParamValue("RECEIVER");
+    int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
+    int          receiver   = chipConfig->GetParamValue("RECEIVER");
 
     if (control < 0) {
       chipConfig->SetParamValue("CONTROLINTERFACE", "0");
@@ -541,12 +581,13 @@ int initSetupIBRU(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardT
 }
 
 int initSetupSingleMosaic(TConfig *config, std::vector<TReadoutBoard *> *boards,
-                          TBoardType *boardType, std::vector<TAlpide *> *chips) {
-  TChipConfig *chipConfig = config->GetChipConfig(0);
-  (*boardType) = boardMOSAIC;
+                          TBoardType *boardType, std::vector<TAlpide *> *chips)
+{
+  TChipConfig *chipConfig         = config->GetChipConfig(0);
+  (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
-  int control = chipConfig->GetParamValue("CONTROLINTERFACE");
-  int receiver = chipConfig->GetParamValue("RECEIVER");
+  int                 control     = chipConfig->GetParamValue("CONTROLINTERFACE");
+  int                 receiver    = chipConfig->GetParamValue("RECEIVER");
 
   if (receiver < 0) {
     chipConfig->SetParamValue("RECEIVER", 3);
@@ -569,9 +610,10 @@ int initSetupSingleMosaic(TConfig *config, std::vector<TReadoutBoard *> *boards,
 }
 
 int initSetupSingle(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
-                    std::vector<TAlpide *> *chips) {
+                    std::vector<TAlpide *> *chips)
+{
   TReadoutBoardDAQ *myDAQBoard = 0;
-  TChipConfig *chipConfig = config->GetChipConfig(0);
+  TChipConfig *     chipConfig = config->GetChipConfig(0);
   chipConfig->SetParamValue("LINKSPEED", "-1");
   (*boardType) = boardDAQ;
   // values for control interface and receiver currently ignored for DAQ board
@@ -607,7 +649,8 @@ int initSetupSingle(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
   return 0;
 }
 
-int powerOn(TReadoutBoardDAQ *aDAQBoard) {
+int powerOn(TReadoutBoardDAQ *aDAQBoard)
+{
   int overflow;
 
   if (aDAQBoard->PowerOn(overflow))
@@ -632,8 +675,8 @@ int powerOn(TReadoutBoardDAQ *aDAQBoard) {
  */
 int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
               std::vector<TAlpide *> *chips, const char *configFileName /*=""*/,
-              std::vector<THic *> *hics /*=0*/, const char **hicIds /*=0*/) {
-
+              std::vector<THic *> *hics /*=0*/, const char **hicIds /*=0*/)
+{
   if (strlen(configFileName) ==
       0) // if length is 0 => use the default name or the Command Parameter
     config = new TConfig(ConfigurationFileName);
@@ -665,6 +708,9 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
   case TYPE_HALFSTAVERU:
     initSetupHalfStaveRU(config, boards, boardType, chips);
     break;
+  case TYPE_POWER:
+    initSetupPower(config, boards, boardType, chips, hics, hicIds);
+    break;
   default:
     std::cout << "Unknown setup type, doing nothing" << std::endl;
     return -1;
@@ -674,7 +720,8 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
 
 // ---------- Decode line command parameters ----------
 
-int decodeCommandParameters(int argc, char **argv) {
+int decodeCommandParameters(int argc, char **argv)
+{
   int c;
 
   while ((c = getopt(argc, argv, "hv:c:")) != -1)
@@ -698,10 +745,12 @@ int decodeCommandParameters(int argc, char **argv) {
     case '?':
       if (optopt == 'c') {
         std::cerr << "Option -" << optopt << " requires an argument." << std::endl;
-      } else {
+      }
+      else {
         if (isprint(optopt)) {
           std::cerr << "Unknown option `-" << optopt << "`" << std::endl;
-        } else {
+        }
+        else {
           std::cerr << "Unknown option character `" << std::hex << optopt << std::dec << "`"
                     << std::endl;
         }
@@ -722,29 +771,23 @@ int decodeCommandParameters(int argc, char **argv) {
  */
 int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                        std::vector<TAlpide *> *chips, std::vector<THic *> *hics,
-                       const char **hicIds) {
-  int NBOARDS = 2;
-  int NModules = 5;
-  int NChipsPerModule = 14;
-  int NChips = NModules * NChipsPerModule;
+                       const char **hicIds)
+{
+  int                 NBOARDS         = 2;
+  int                 NModules        = 10;
+  int                 NChipsPerModule = 14;
+  int                 NChips          = NModules * NChipsPerModule;
   TBoardConfigMOSAIC *boardConfig[2];
-  TPowerBoardConfig *pbConfig[2];
-  TPowerBoard *pb[2] = {0, 0};
+  TPowerBoardConfig * pbConfig[2];
+  TPowerBoard *       pb[2] = {0, 0};
 
-  int CtrIntMap[10][2] = {
-      {3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10}, {3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10}};
-  int DataRcvMap[10][2] = {
-      {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0}, {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0}};
-  bool InverRcvMap[10][2] = {{true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false},
-                             {true, false}};
+  int CtrIntMap[10][2] = {{3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10},
+                          {3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10}};
+  int DataRcvMap[10][2] = {{9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0},
+                           {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0}};
+  bool InverRcvMap[10][2] = {{true, false}, {true, false}, {true, false}, {true, false},
+                             {true, false}, {true, false}, {true, false}, {true, false},
+                             {true, false}, {true, false}};
 
   std::cout << "Entry SetUp Endurance Test" << std::endl;
 
@@ -754,7 +797,9 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   for (int i = 0; i < NBOARDS; i++) {
     boardConfig[i] = (TBoardConfigMOSAIC *)config->GetBoardConfig(i);
     boardConfig[i]->SetSpeedMode(Mosaic::RCV_RATE_400);
-    boards->push_back(new TReadoutBoardMOSAIC(config, boardConfig[i]));
+    TReadoutBoardMOSAIC *board = new TReadoutBoardMOSAIC(config, boardConfig[i]);
+    board->enableControlInterfaces(false);
+    boards->push_back(board);
   }
 
   if (strcmp(boardConfig[0]->GetIPaddress(), boardConfig[1]->GetIPaddress()) == 0) {
@@ -776,11 +821,12 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   if (hics) {
     for (int mod = 0; mod < NModules; mod++) {
       int boardIndex = mod / 5;
-      int modId = 7;
-      int pbMod = mod % 5; // TODO: check this
+      int modId      = 7;
+      int pbMod      = mod % 5; // TODO: check this
       if (hicIds) {
         hics->push_back(new THicOB(hicIds[mod], modId, pb[boardIndex], pbMod));
-      } else {
+      }
+      else {
         hics->push_back(new THicOB("Dummy_ID", modId, pb[boardIndex], pbMod));
       }
     }
@@ -792,22 +838,23 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     int boardIndex = mod / 5;
     for (int i = 0; i < NChipsPerModule; i++) {
       int arrayIndex = mod * NChipsPerModule + i;
-      int LowHigh = (i < 7) ? 0 : 1;
+      int LowHigh    = (i < 7) ? 0 : 1;
 
       std::cout << "    SetUp Chip " << arrayIndex << "/" << NChips << "  m:" << mod << " c:" << i;
 
       // Update the Config info for the Aplpide Object
       TChipConfig *chipConfig =
           config->GetChipConfig(arrayIndex);   // Get the Pointer to the Chip Configuration
-      int chipId = chipConfig->GetChipId();    // Get the real OBmod chipid
-      int control = CtrIntMap[mod][LowHigh];   // set the ctrlInt association
+      int chipId   = chipConfig->GetChipId();  // Get the real OBmod chipid
+      int control  = CtrIntMap[mod][LowHigh];  // set the ctrlInt association
       int receiver = DataRcvMap[mod][LowHigh]; // set the receiver association
       std::cout << "     ChipId=" << chipId << " ctrlInt:" << control << " recV:" << receiver
                 << std::endl;
       // --- Force the Link Speed values to 1.2 GHz in the Chip-Master
       if (chipId % 8 != 0) { // deactivate the DTU/PLL for none master chips
         chipConfig->SetParamValue("LINKSPEED", "-1");
-      } else { // sets the Master to 1.2GHz
+      }
+      else { // sets the Master to 1.2GHz
         chipConfig->SetParamValue("LINKSPEED", "1200");
       }
       chipConfig->SetParamValue("CONTROLINTERFACE", control);
@@ -840,8 +887,7 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
         ->setInverted(InverRcvMap[mod][1], DataRcvMap[mod][1]);
 
     if (hics) {
-      if (hics->at(mod)->IsEnabled())
-        hics->at(mod)->PowerOn();
+      if (hics->at(mod)->IsEnabled()) hics->at(mod)->PowerOn();
       sleep(1);
     }
   }
@@ -853,7 +899,8 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   return 0;
 }
 
-int initConfig(TConfig *&config, const char *configFileName) {
+int initConfig(TConfig *&config, const char *configFileName)
+{
   if (strlen(configFileName) == 0) // use default or command parameter name
     config = new TConfig(ConfigurationFileName);
   else

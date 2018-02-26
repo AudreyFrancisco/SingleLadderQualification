@@ -27,13 +27,14 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2015.
  *
  */
+#include "pcf8574.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "pcf8574.h"
 
 PCF8574::PCF8574(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address) {}
 
-void PCF8574::write(uint8_t b) {
+void PCF8574::write(uint8_t b)
+{
   // Write Control register content
   i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Write);
   i2cBus->addWriteData(b, I2Cbus::RWF_stop);
@@ -42,7 +43,8 @@ void PCF8574::write(uint8_t b) {
   i2cBus->execute();
 }
 
-uint8_t PCF8574::read() {
+uint8_t PCF8574::read()
+{
   uint32_t r;
 
   // Read Control register content

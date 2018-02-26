@@ -3,16 +3,16 @@
  *
  ----------------- */
 
-#include <iostream>
-#include <unistd.h>
-#include "TReadoutBoard.h"
-#include "TReadoutBoardMOSAIC.h"
+#include "TAlpide.h"
 #include "TBoardConfig.h"
 #include "TBoardConfigMOSAIC.h"
-#include "TPowerBoard.h"
 #include "TConfig.h"
-#include "TAlpide.h"
+#include "TPowerBoard.h"
+#include "TReadoutBoard.h"
+#include "TReadoutBoardMOSAIC.h"
 #include <exception>
+#include <iostream>
+#include <unistd.h>
 
 #include <strings.h>
 
@@ -22,9 +22,10 @@ using namespace std;
 TPowerBoard *thePowerBoard;
 
 // Display the Status of the Power BOARD
-void DisplayStatus(int numModules) {
+void DisplayStatus(int numModules)
+{
   float AV, AI, DV, DI;
-  bool BiON, AChON, DChON;
+  bool  BiON, AChON, DChON;
 
   cout << endl << "---- POWER BOARD : Defined Modules :" << numModules << " -----" << endl;
   cout << "The board is connected and ready : " << (thePowerBoard->IsOK() ? "YES" : "NOT") << endl;
@@ -45,7 +46,8 @@ void DisplayStatus(int numModules) {
 }
 
 // Display the menu of commands
-void DisplayMenu(int numModules) {
+void DisplayMenu(int numModules)
+{
   cout << endl << "****  POWER BOARD MENU  ****" << endl;
   cout << " 1) \t Display status" << endl;
   cout << " 2) \t Set module" << endl;
@@ -61,21 +63,22 @@ void DisplayMenu(int numModules) {
   return;
 }
 
-int GetChoice() {
+int GetChoice()
+{
   int cho;
   cout << endl << "Type the choice : ";
   scanf("%d", &cho);
-  if (cho == 0)
-    cho = -1;
+  if (cho == 0) cho = -1;
   cout << endl;
   return (cho);
 }
 
-void DoJob(int choice, int numModules) {
-  int mod;
-  float AV, AI, DV, DI;
-  bool BiON, AChON, DChON;
-  char buf[255];
+void DoJob(int choice, int numModules)
+{
+  int                mod;
+  float              AV, AI, DV, DI;
+  bool               BiON, AChON, DChON;
+  char               buf[255];
   TPowerBoardConfig *theConfig;
 
   switch (choice) {
@@ -85,8 +88,7 @@ void DoJob(int choice, int numModules) {
   case 2:
     cout << endl << "What module :";
     scanf("%d", &mod);
-    if (mod < 0 && mod >= numModules)
-      return;
+    if (mod < 0 && mod >= numModules) return;
     cout << endl << "Analog voltage :";
     scanf("%f", &AV);
     cout << endl << "Analog max current :";
@@ -103,8 +105,7 @@ void DoJob(int choice, int numModules) {
   case 3:
     cout << endl << "What module to switch:";
     scanf("%d", &mod);
-    if (mod < 0 && mod >= numModules)
-      return;
+    if (mod < 0 && mod >= numModules) return;
     cout << endl << "Module [ON,OFF] :";
     scanf("%s", buf);
     AChON = (strcasecmp((const char *)buf, "ON") == 0) ? true : false;
@@ -134,8 +135,9 @@ void DoJob(int choice, int numModules) {
   return;
 }
 
-int main() {
-  TBoardConfigMOSAIC *theBoardConfiguration;
+int main()
+{
+  TBoardConfigMOSAIC * theBoardConfiguration;
   TReadoutBoardMOSAIC *theBoard;
 
   TConfig *config = new TConfig("Config.cfg");

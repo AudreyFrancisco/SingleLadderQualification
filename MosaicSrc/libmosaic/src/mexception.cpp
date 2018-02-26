@@ -51,7 +51,8 @@ MIPBusErrorWrite::MIPBusErrorWrite(const string &arg) { msg = "IPBus Error: " + 
 MIPBusErrorReadTimeout::MIPBusErrorReadTimeout(const string &arg) { msg = "IPBus Error: " + arg; }
 
 // Data connection over TCP error
-MDataConnectError::MDataConnectError(const string &arg) {
+MDataConnectError::MDataConnectError(const string &arg)
+{
   msg = "TCP Data connection Error: " + arg;
 }
 

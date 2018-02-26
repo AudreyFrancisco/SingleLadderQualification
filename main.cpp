@@ -1,18 +1,19 @@
-#include <unistd.h>
-#include "TAlpide.h"
 #include "AlpideConfig.h"
+#include "TAlpide.h"
+#include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
 #include "scope_control.h"
+#include <unistd.h>
 
-int main() {
-  uint16_t status;
-  uint32_t version;
-  int overflow;
+int main()
+{
+  uint16_t          status;
+  uint32_t          version;
+  int               overflow;
   TReadoutBoardDAQ *myDAQBoard;
-  TConfig *config = new TConfig(16);
+  TConfig *         config = new TConfig(16);
 
   // if (config->BoardType == DAQBoard)
   //
@@ -65,7 +66,8 @@ int main() {
       std::cout << "IBias register value: 0x" << std::hex << status << std::dec << std::endl;
 
       // libusb_exit(fContext);
-    } else {
+    }
+    else {
       std::cout << "Type cast failed" << std::endl;
     }
   }

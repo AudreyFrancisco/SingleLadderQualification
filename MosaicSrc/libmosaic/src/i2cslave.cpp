@@ -27,12 +27,13 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
+#include "i2cslave.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "i2cslave.h"
 
-I2Cslave::I2Cslave(I2Cbus *bus, uint8_t address) {
-  i2cBus = bus;
+I2Cslave::I2Cslave(I2Cbus *bus, uint8_t address)
+{
+  i2cBus            = bus;
   i2c_deviceAddress = address;
 }
 

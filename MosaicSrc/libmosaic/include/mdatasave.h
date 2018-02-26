@@ -31,8 +31,8 @@
 #ifndef MDATASAVE_H
 #define MDATASAVE_H
 
-#include <stdint.h>
 #include "mdatareceiver.h"
+#include <stdint.h>
 
 // function pointer
 typedef void (*saveFunction_t)(char *hdr, int hdrLen, char *data, int dataLen);
@@ -41,14 +41,14 @@ class MDataSave : public MDataReceiver {
 public:
   MDataSave();
   void setEventSize(long evSize) { eventSize = evSize; }
-  void flush();
+  void                   flush();
   void setSaveFunction(saveFunction_t s) { saveFunction = s; }
 
 protected:
   long parse(int numClosed);
 
 private:
-  long eventSize;
+  long           eventSize;
   saveFunction_t saveFunction;
 
 public:

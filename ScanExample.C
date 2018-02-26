@@ -1,4 +1,5 @@
-main() {
+main()
+{
 
   // initialise setup
   // 1) Create config object (here: from config file)
@@ -6,15 +7,15 @@ main() {
   // 3) Pass pointer to readout board to chip objects
   // 4) Pass information on ChipId / ControlInterface / Receiver to readout board
 
-  TConfig *myConfig = new TConfig("Config.cfg");
+  TConfig *      myConfig       = new TConfig("Config.cfg");
   TReadoutBoard *myReadoutBoard = new TMOSAIC(myConfig);
 
   std::vector<TAlpide *> Chips;
 
   for (int ichip = 0; ichip < myConfig->GetNChips(); ichip++) {
     Chips->push_back(new TAlpide(myConfig, ichip)); // create ichipth chip out of the config
-    Chips[ichip]
-        ->SetReadoutBoard(myReadoutBoard); // set pointer to readout board in the chip object
+    Chips[ichip]->SetReadoutBoard(
+        myReadoutBoard); // set pointer to readout board in the chip object
     myReadoutBoard->AddChip(
         myConfig->GetChipId(ichip),           // add ChipId / ControlInterface / Receiver settings
         myConfig->GetControlInterface(ichip), // to readout board
@@ -38,7 +39,7 @@ main() {
 
   // do the scan
 
-  int NBytes;
+  int  NBytes;
   char Buffer[];
 
   myReadoutBoard->Trigger(myConfig->GetNTriggers(), OPCODE_PULSE);

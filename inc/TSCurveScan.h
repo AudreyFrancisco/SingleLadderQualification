@@ -10,10 +10,10 @@
 #include "TScan.h"
 
 typedef struct __TSCurveParameters : TScanParameters {
-  bool nominal;
-  int VPULSEH;
-  int VPULSEL;
-  int TARGET;
+  bool  nominal;
+  int   VPULSEH;
+  int   VPULSEL;
+  int   TARGET;
   float backBias;
 } TSCurveParameters;
 
@@ -32,23 +32,17 @@ public:
   TSCurveScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
               std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
               std::mutex *aMutex);
-  virtual ~TSCurveScan() {};
+  virtual ~TSCurveScan(){};
 
-  THisto CreateHisto(); // public in TScan, so...
-  void Init();
+  THisto       CreateHisto(); // public in TScan, so...
+  void         Init();
   virtual void PrepareStep(int loopIndex) = 0;
   void LoopEnd(int loopIndex);
-  void LoopStart(int loopIndex) {
-    m_value[loopIndex] = m_start[loopIndex];
-  };
-  void Execute();
-  void Terminate();
-  float GetBackbias() {
-    return ((TSCurveParameters *)m_parameters)->backBias;
-  };
-  bool GetNominal() {
-    return ((TSCurveParameters *)m_parameters)->nominal;
-  };
+  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
+  void               Execute();
+  void               Terminate();
+  float              GetBackbias() { return ((TSCurveParameters *)m_parameters)->backBias; };
+  bool               GetNominal() { return ((TSCurveParameters *)m_parameters)->nominal; };
 };
 
 class TThresholdScan : public TSCurveScan {
@@ -62,7 +56,7 @@ public:
   //}
   void ConfigureChip(TAlpide *chip);
   void PrepareStep(int loopIndex);
-  ~TThresholdScan() {};
+  ~TThresholdScan(){};
 };
 
 class TtuneVCASNScan : public TSCurveScan {
@@ -81,7 +75,7 @@ public:
   //}
   void ConfigureChip(TAlpide *chip);
   void PrepareStep(int loopIndex);
-  ~TtuneVCASNScan() {};
+  ~TtuneVCASNScan(){};
 };
 
 class TtuneITHRScan : public TSCurveScan {
@@ -99,7 +93,7 @@ public:
   // }
   void ConfigureChip(TAlpide *chip);
   void PrepareStep(int loopIndex);
-  ~TtuneITHRScan() {};
+  ~TtuneITHRScan(){};
 };
 
 #endif

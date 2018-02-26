@@ -4,7 +4,8 @@
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
 
-int main() {
+int main()
+{
   // the default setting mode, it depends from compilation flags
   AlpideDB *theDB = new AlpideDB();
 
@@ -39,7 +40,7 @@ int main() {
   //AlpideTable::response *theResult; // caused warning
 */
   // Access the projects Data Base
-  ProjectDB *theProjTable = new ProjectDB(theDB);
+  ProjectDB *                theProjTable = new ProjectDB(theDB);
   vector<ProjectDB::project> ProjList;
   cout << "------  PROJECTS DATABASE -----------" << endl;
   theProjTable->GetList(&ProjList);
@@ -51,9 +52,9 @@ int main() {
   }
 
   // Access the members Data Base
-  MemberDB *theMembTable = new MemberDB(theDB);
+  MemberDB *               theMembTable = new MemberDB(theDB);
   vector<MemberDB::member> MemberList;
-  MemberDB::member oneMember;
+  MemberDB::member         oneMember;
   cout << endl << "------  MEMBERS DATABASE -----------" << endl;
   int ProjectID = 0;
   printf(" Input the Project id :");
@@ -74,9 +75,9 @@ int main() {
   }
 
   // Access the components Data Base
-  ComponentDB *theCompTable = new ComponentDB(theDB);
+  ComponentDB *                      theCompTable = new ComponentDB(theDB);
   vector<ComponentDB::componentType> ComponentList;
-  ComponentDB::componentType oneComponent;
+  ComponentDB::componentType         oneComponent;
   cout << endl << "------  COMPONENT DATABASE -----------" << endl;
   ProjectID = 0;
   printf(" Input the Project id :");
@@ -136,8 +137,9 @@ int main() {
   }
   vector<ActivityDB::parameterType> *par = theActivityTable->GetParameterTypeList(ActivityID);
   for (unsigned int i = 0; i < par->size(); i++) {
-    cout << endl << par->at(i).ID << "\t" << par->at(i).ParameterID << "\t" << par->at(i).Name
-         << "\t" << par->at(i).Description;
+    cout << endl
+         << par->at(i).ID << "\t" << par->at(i).ParameterID << "\t" << par->at(i).Name << "\t"
+         << par->at(i).Description;
   }
 
   cout << endl << "------ locationType type-----------" << endl;
@@ -202,45 +204,45 @@ int main() {
 
   // --- create activity test
   //	ActivityDB *theActivityTable = new ActivityDB(theDB);
-  ActivityDB::activity Attiv;
-  ActivityDB::member Mem;
+  ActivityDB::activity  Attiv;
+  ActivityDB::member    Mem;
   ActivityDB::parameter Par;
-  ActivityDB::attach Att;
+  ActivityDB::attach    Att;
 
   // tm ts; ts.tm_year = 2017 - 1900; ts.tm_mon = 6; ts.tm_mday = 13; // caused warning
 
-  Attiv.Location = 161;
-  Attiv.EndDate = time(NULL);
-  Attiv.Lot = "TestAntonio";
-  Attiv.Name = "Test_db";
-  Attiv.Position = "Position1";
-  Attiv.Result = 101;
+  Attiv.Location  = 161;
+  Attiv.EndDate   = time(NULL);
+  Attiv.Lot       = "TestAntonio";
+  Attiv.Name      = "Test_db";
+  Attiv.Position  = "Position1";
+  Attiv.Result    = 101;
   Attiv.StartDate = time(NULL); // mktime(&ts);
-  Attiv.Status = 83; // open
-  Attiv.Type = 221;
-  Attiv.User = 1;
+  Attiv.Status    = 83;         // open
+  Attiv.Type      = 221;
+  Attiv.User      = 1;
 
-  Mem.Leader = 0;
+  Mem.Leader        = 0;
   Mem.ProjectMember = 584;
-  Mem.User = 8791;
+  Mem.User          = 8791;
   Attiv.Members.push_back(Mem);
   Mem.ProjectMember = 201;
-  Mem.User = 4702;
+  Mem.User          = 4702;
   Attiv.Members.push_back(Mem);
 
   for (int i = 0; i < 3; i++) {
     Par.ActivityParameter = 1;
-    Par.User = 1 + i;
-    Par.Value = 9.5 + i;
+    Par.User              = 1 + i;
+    Par.Value             = 9.5 + i;
     Attiv.Parameters.push_back(Par);
   }
 
   for (int i = 0; i < 3; i++) {
-    Att.Category = 41;
+    Att.Category      = 41;
     Att.LocalFileName = "AttachTest";
     Att.LocalFileName.append(std::to_string(i));
     Att.LocalFileName.append(".txt");
-    Att.User = i + 1;
+    Att.User           = i + 1;
     Att.RemoteFileName = "AttTe";
     Att.RemoteFileName.append(std::to_string(i));
     Att.RemoteFileName.append(".txt");

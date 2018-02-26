@@ -14,32 +14,32 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-#include <unistd.h>
-#include <deque>
-#include <thread>
-#include <mutex>
-#include "TAlpide.h"
-#include "THIC.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "TAlpide.h"
+#include "TConfig.h"
+#include "THIC.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "AlpideConfig.h"
+#include <deque>
+#include <mutex>
+#include <thread>
+#include <unistd.h>
 
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
-#include "TScan.h"
-#include "TSCurveScan.h"
 #include "TDigitalScan.h"
-#include "TScanConfig.h"
 #include "THisto.h"
-#include "TScanAnalysis.h"
 #include "TSCurveAnalysis.h"
+#include "TSCurveScan.h"
+#include "TScan.h"
+#include "TScanAnalysis.h"
+#include "TScanConfig.h"
 
-void scanLoop(TScan *myScan) {
+void scanLoop(TScan *myScan)
+{
   std::cout << "In scan loop functiokn" << std::endl;
   myScan->Init();
 
@@ -67,25 +67,27 @@ void scanLoop(TScan *myScan) {
   myScan->Terminate();
 }
 
-void scanAnalysis(TScanAnalysis *myAnalysis) {
+void scanAnalysis(TScanAnalysis *myAnalysis)
+{
 
   myAnalysis->Initialize();
   myAnalysis->Run();
   myAnalysis->Finalize();
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
 
-  TBoardType fBoardType;
+  TBoardType                   fBoardType;
   std::vector<TReadoutBoard *> fBoards;
-  std::vector<THic *> fHics;
-  std::vector<TAlpide *> fChips;
-  TConfig *fConfig;
+  std::vector<THic *>          fHics;
+  std::vector<TAlpide *>       fChips;
+  TConfig *                    fConfig;
 
   std::deque<TScanHisto> fHistoQue;
-  std::mutex fMutex;
+  std::mutex             fMutex;
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips, "", &fHics);
 

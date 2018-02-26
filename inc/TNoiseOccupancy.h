@@ -2,16 +2,16 @@
 #define TNOISEOCCUPANCY_H
 
 #include <deque>
-#include <mutex>
-#include <vector>
 #include <map>
+#include <mutex>
 #include <string>
+#include <vector>
 
 #include "AlpideDecoder.h"
 #include "Common.h"
+#include "TDataTaking.h"
 #include "THisto.h"
 #include "TScan.h"
-#include "TDataTaking.h"
 
 typedef struct __TNoiseParameters : TDataTakingParameters {
   bool isMasked;
@@ -29,14 +29,10 @@ public:
   TNoiseOccupancy(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                   std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
                   std::mutex *aMutex);
-  ~TNoiseOccupancy() {};
+  ~TNoiseOccupancy(){};
   void Init();
-  void PrepareStep(int loopIndex) {
-    (void)(&loopIndex);
-  };
-  void LoopStart(int loopIndex) {
-    m_value[loopIndex] = m_start[loopIndex];
-  };
+  void PrepareStep(int loopIndex) { (void)(&loopIndex); };
+  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
 };
 
 #endif

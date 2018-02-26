@@ -1,9 +1,10 @@
 #include "scanthread.h"
-#include <iostream>
 #include <QDebug>
 #include <QtCore>
+#include <iostream>
 ScanThread::ScanThread() {}
-void ScanThread::process() {
+void ScanThread::process()
+{
 
   std::cout << "Iam sad";
   emit resultReady();

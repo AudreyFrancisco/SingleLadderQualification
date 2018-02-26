@@ -3,7 +3,8 @@
 
 static struct libusb_context *fContext = 0;
 
-int InitLibUsb() {
+int InitLibUsb()
+{
   int err = libusb_init(&fContext);
   if (err) {
     std::cout << "Error " << err << " while trying to init libusb " << std::endl;
@@ -11,7 +12,8 @@ int InitLibUsb() {
   return err;
 }
 
-bool IsDAQBoard(libusb_device *device) {
+bool IsDAQBoard(libusb_device *device)
+{
 
   libusb_device_descriptor desc;
   libusb_get_device_descriptor(device, &desc);
@@ -28,7 +30,8 @@ bool IsDAQBoard(libusb_device *device) {
 }
 
 int AddDAQBoard(libusb_device *device, TBoardConfigDAQ *boardConfig,
-                std::vector<TReadoutBoard *> *boards) {
+                std::vector<TReadoutBoard *> *boards)
+{
   TReadoutBoard *readoutBoard;
   readoutBoard = new TReadoutBoardDAQ(device, boardConfig);
 
@@ -37,16 +40,19 @@ int AddDAQBoard(libusb_device *device, TBoardConfigDAQ *boardConfig,
       boards->push_back(readoutBoard);
       std::cout << "boards.size = " << boards->size() << std::endl;
       return 0;
-    } else {
+    }
+    else {
       return -2;
     }
-  } else {
+  }
+  else {
     return -1;
   }
 }
 
-int FindDAQBoards(TConfig *config, std::vector<TReadoutBoard *> *boards) {
-  int err = 0;
+int FindDAQBoards(TConfig *config, std::vector<TReadoutBoard *> *boards)
+{
+  int             err = 0;
   libusb_device **list;
 
   if (fContext == 0) { // replace by exception
@@ -70,7 +76,8 @@ int FindDAQBoards(TConfig *config, std::vector<TReadoutBoard *> *boards) {
           std::cout << "Problem adding DAQ board" << std::endl;
           libusb_free_device_list(list, 1);
           return err;
-        } else if (err == 0)
+        }
+        else if (err == 0)
           continue;
       }
     }

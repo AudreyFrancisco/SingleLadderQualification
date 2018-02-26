@@ -46,10 +46,11 @@
                                         config, TPowerBoardConfig pointer to a Power Board Config
   object
   -------------------------- */
-TPowerBoard::TPowerBoard(TReadoutBoardMOSAIC *board, TPowerBoardConfig *config) {
+TPowerBoard::TPowerBoard(TReadoutBoardMOSAIC *board, TPowerBoardConfig *config)
+{
   fMOSAICPowerBoard = board->GetPowerBoardHandle();
   fPowerBoardConfig = config;
-  realTimeRead = false;
+  realTimeRead      = false;
   Init();
 }
 
@@ -60,11 +61,12 @@ TPowerBoard::TPowerBoard(TReadoutBoardMOSAIC *board, TPowerBoardConfig *config) 
 
         NOTE: this constructor allows to load a default configuration into the data set.
   -------------------------- */
-TPowerBoard::TPowerBoard(TReadoutBoardMOSAIC *board) {
+TPowerBoard::TPowerBoard(TReadoutBoardMOSAIC *board)
+{
   TPowerBoardConfig *theConfig = new TPowerBoardConfig(NULL);
-  fMOSAICPowerBoard = board->GetPowerBoardHandle();
-  fPowerBoardConfig = theConfig;
-  realTimeRead = false;
+  fMOSAICPowerBoard            = board->GetPowerBoardHandle();
+  fPowerBoardConfig            = theConfig;
+  realTimeRead                 = false;
   Init();
 }
 
@@ -76,16 +78,17 @@ TPowerBoard::TPowerBoard(TReadoutBoardMOSAIC *board) {
         the settings and finally read the power board status.
 
   -------------------------- */
-void TPowerBoard::Init() {
+void TPowerBoard::Init()
+{
   fPowerBoardConfig->ReadCalibrationFile();
   thePowerBoardState = new powerboard::pbstate;
 
   fPBoard.VBset = fPowerBoardConfig->GetBiasVoltage();
   for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
-    fPBoard.Modules[i].AIset = fPowerBoardConfig->GetAnalogCurrent(i);
-    fPBoard.Modules[i].AVset = fPowerBoardConfig->GetAnalogVoltage(i);
-    fPBoard.Modules[i].DIset = fPowerBoardConfig->GetDigitalCurrent(i);
-    fPBoard.Modules[i].DVset = fPowerBoardConfig->GetDigitalVoltage(i);
+    fPBoard.Modules[i].AIset  = fPowerBoardConfig->GetAnalogCurrent(i);
+    fPBoard.Modules[i].AVset  = fPowerBoardConfig->GetAnalogVoltage(i);
+    fPBoard.Modules[i].DIset  = fPowerBoardConfig->GetDigitalCurrent(i);
+    fPBoard.Modules[i].DVset  = fPowerBoardConfig->GetDigitalVoltage(i);
     fPBoard.Modules[i].BiasOn = fPowerBoardConfig->GetBiasOn(i);
   }
   // first of all test the presence of the power board
@@ -142,9 +145,10 @@ void TPowerBoard::Init() {
         Return : false is there is a mismatch
 
   -------------------------- */
-bool TPowerBoard::compareSettings(powerboard::pbstate_t *aState) {
+bool TPowerBoard::compareSettings(powerboard::pbstate_t *aState)
+{
   bool match = true;
-  int i;
+  int  i;
   for (i = 0; i < MAX_MOULESPERMOSAIC; i++) {
     if (aState->Vout[i * 2] != fPBoard.Modules[i].AVset) {
       match = false;
@@ -173,15 +177,15 @@ bool TPowerBoard::compareSettings(powerboard::pbstate_t *aState) {
         Return : true if a physical access is done in order to monitor the power board
 
   -------------------------- */
-bool TPowerBoard::readMonitor() {
+bool TPowerBoard::readMonitor()
+{
   int i;
 
   // test if the values are considered valid
   if (realTimeRead) {
     time_t now;
     time(&now);
-    if (now <= fPBoard.TimeStamp + MINIMUM_TIMELAPSEFORPOLLING)
-      return (false);
+    if (now <= fPBoard.TimeStamp + MINIMUM_TIMELAPSEFORPOLLING) return (false);
   }
 
   // Read the board
@@ -191,25 +195,26 @@ bool TPowerBoard::readMonitor() {
   time(&fPBoard.TimeStamp); // mark the time stamp
   fPBoard.VBmon = thePowerBoardState->Vbias;
   fPBoard.IBmon = thePowerBoardState->Ibias;
-  fPBoard.Temp = thePowerBoardState->T;
+  fPBoard.Temp  = thePowerBoardState->T;
 
   for (i = 0; i < MAX_MOULESPERMOSAIC; i++) { // for each module
-    fPBoard.Modules[i].AVmon = thePowerBoardState->Vmon[i * 2];
-    fPBoard.Modules[i].DVmon = thePowerBoardState->Vmon[i * 2 + 1];
-    fPBoard.Modules[i].AImon = thePowerBoardState->Imon[i * 2];
-    fPBoard.Modules[i].DImon = thePowerBoardState->Imon[i * 2 + 1];
+    fPBoard.Modules[i].AVmon  = thePowerBoardState->Vmon[i * 2];
+    fPBoard.Modules[i].DVmon  = thePowerBoardState->Vmon[i * 2 + 1];
+    fPBoard.Modules[i].AImon  = thePowerBoardState->Imon[i * 2];
+    fPBoard.Modules[i].DImon  = thePowerBoardState->Imon[i * 2 + 1];
     fPBoard.Modules[i].BiasOn = thePowerBoardState->biasOn & (0x01 << i);
-    fPBoard.Modules[i].AchOn = thePowerBoardState->chOn & (0x0001 << (i * 2));
-    fPBoard.Modules[i].DchOn = thePowerBoardState->chOn & (0x0001 << (i * 2 + 1));
+    fPBoard.Modules[i].AchOn  = thePowerBoardState->chOn & (0x0001 << (i * 2));
+    fPBoard.Modules[i].DchOn  = thePowerBoardState->chOn & (0x0001 << (i * 2 + 1));
   }
 
   return (true);
 }
 
-float TPowerBoard::GetAnalogCurrent(int module) {
+float TPowerBoard::GetAnalogCurrent(int module)
+{
   float AIOffset, DIOffset;
   float Current = 0;
-  int N = 20;
+  int   N       = 20;
   for (int i = 0; i < N; i++) {
     readMonitor();
     Current += fPBoard.Modules[module].AImon;
@@ -219,10 +224,11 @@ float TPowerBoard::GetAnalogCurrent(int module) {
   return (Current - AIOffset);
 }
 
-float TPowerBoard::GetDigitalCurrent(int module) {
+float TPowerBoard::GetDigitalCurrent(int module)
+{
   float AIOffset, DIOffset;
   float Current = 0;
-  int N = 20;
+  int   N       = 20;
   for (int i = 0; i < N; i++) {
     readMonitor();
     Current += fPBoard.Modules[module].DImon;
@@ -232,10 +238,11 @@ float TPowerBoard::GetDigitalCurrent(int module) {
   return (Current - DIOffset);
 }
 
-float TPowerBoard::GetBiasCurrent() {
+float TPowerBoard::GetBiasCurrent()
+{
   float Offset;
   float Current = 0;
-  int N = 20;
+  int   N       = 20;
   for (int i = 0; i < N; i++) {
     readMonitor();
     Current += fPBoard.IBmon;
@@ -250,7 +257,8 @@ float TPowerBoard::GetBiasCurrent() {
 // set calibration constants back to 1 / 0
 // set two different voltages and measure the output voltage for each setting
 // determine new calibration constants
-void TPowerBoard::CalibrateVoltage(int module) {
+void TPowerBoard::CalibrateVoltage(int module)
+{
   // two set points that fall on a full bin
   // set the lower voltage second to not risk applying 2.2 V to a HIC
   float set2 = 1.58;  //-0.4;
@@ -268,7 +276,7 @@ void TPowerBoard::CalibrateVoltage(int module) {
 
   sleep(1);
 
-  analog1 = GetAnalogVoltage(module);
+  analog1  = GetAnalogVoltage(module);
   digital1 = GetDigitalVoltage(module);
 
   // set and measure second point
@@ -277,13 +285,13 @@ void TPowerBoard::CalibrateVoltage(int module) {
 
   sleep(1);
 
-  analog2 = GetAnalogVoltage(module);
+  analog2  = GetAnalogVoltage(module);
   digital2 = GetDigitalVoltage(module);
 
   // calculate slope and intercept for calibration Vout -> Vset
-  manalog = (set1 - set2) / (analog1 - analog2);
+  manalog  = (set1 - set2) / (analog1 - analog2);
   mdigital = (set1 - set2) / (digital1 - digital2);
-  banalog = set1 - manalog * analog1;
+  banalog  = set1 - manalog * analog1;
   bdigital = set1 - mdigital * digital1;
 
   // set new calibration values and switch off module
@@ -295,7 +303,8 @@ void TPowerBoard::CalibrateVoltage(int module) {
 // Calibrate the current offset for a given module
 // switch of the channel
 // measure the current
-void TPowerBoard::CalibrateCurrent(int module) {
+void TPowerBoard::CalibrateCurrent(int module)
+{
   float aOffset, dOffset;
   fPowerBoardConfig->SetICalibration(module, 0, 0);
 
@@ -309,7 +318,8 @@ void TPowerBoard::CalibrateCurrent(int module) {
   fPowerBoardConfig->SetICalibration(module, aOffset, dOffset);
 }
 
-void TPowerBoard::CalibrateBiasCurrent() {
+void TPowerBoard::CalibrateBiasCurrent()
+{
   float Offset;
   fPowerBoardConfig->SetIBiasCalibration(0);
 
@@ -324,7 +334,8 @@ void TPowerBoard::CalibrateBiasCurrent() {
   fPowerBoardConfig->SetIBiasCalibration(Offset);
 }
 
-void TPowerBoard::CalibrateBiasVoltage() {
+void TPowerBoard::CalibrateBiasVoltage()
+{
   // two set points that fall on a full bin
   // set the lower voltage second to not risk applying 2.2 V to a HIC
   float set2 = -0.4; // 1.58;
@@ -355,7 +366,8 @@ void TPowerBoard::CalibrateBiasVoltage() {
 
 // correct the output voltage for the (calculated) voltage drop
 // if reset is true, the correction is set to 0
-void TPowerBoard::CorrectVoltageDrop(int module, bool reset) {
+void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
+{
   // Measure the channel currents
   // Calculate voltage drop
   // Correct voltage drop for slope of voltage characteristics
@@ -365,9 +377,10 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset) {
   float dVAnalog, dVDigital;
   float AVScale, DVScale, AVOffset, DVOffset;
   if (reset) {
-    dVAnalog = 0;
+    dVAnalog  = 0;
     dVDigital = 0;
-  } else {
+  }
+  else {
     sleep(1);
     float IDDA = GetAnalogCurrent(module);
     float IDDD = GetDigitalCurrent(module);
@@ -375,7 +388,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset) {
     fPowerBoardConfig->GetLineResistances(module, RAnalog, RDigital, RGround);
     fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
 
-    dVAnalog = IDDA * RAnalog + (IDDA + IDDD) * RGround;
+    dVAnalog  = IDDA * RAnalog + (IDDA + IDDD) * RGround;
     dVDigital = IDDD * RDigital + (IDDA + IDDD) * RGround;
 
     dVAnalog *= AVScale;
@@ -385,8 +398,9 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset) {
   if ((fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) ||
       (fPBoard.Modules[module].DVset + dVDigital > SAFE_OUTPUT)) {
     std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage above safe limit; using "
-                 "uncorrected values." << std::endl;
-    dVAnalog = 0;
+                 "uncorrected values."
+              << std::endl;
+    dVAnalog  = 0;
     dVDigital = 0;
   }
 
@@ -410,11 +424,12 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset) {
                                         BiasOn bool. Set up of the Back Bias channel
 
   -------------------------- */
-void TPowerBoard::SetModule(int module, float AV, float AI, float DV, float DI, bool BiasOn) {
-  fPBoard.Modules[module].AVset = AV;
-  fPBoard.Modules[module].DVset = DV;
-  fPBoard.Modules[module].AIset = AI;
-  fPBoard.Modules[module].DIset = DI;
+void TPowerBoard::SetModule(int module, float AV, float AI, float DV, float DI, bool BiasOn)
+{
+  fPBoard.Modules[module].AVset  = AV;
+  fPBoard.Modules[module].DVset  = DV;
+  fPBoard.Modules[module].AIset  = AI;
+  fPBoard.Modules[module].DIset  = DI;
   fPBoard.Modules[module].BiasOn = BiasOn;
 
   fMOSAICPowerBoard->setVout((unsigned char)(module * 2), AV);
@@ -437,13 +452,15 @@ void TPowerBoard::SetModule(int module, float AV, float AI, float DV, float DI, 
                                         value, bool. The switch value ON := true, OFF := false
 
   -------------------------- */
-void TPowerBoard::SwitchModule(int module, bool value) {
+void TPowerBoard::SwitchModule(int module, bool value)
+{
   fPBoard.Modules[module].AchOn = value;
   fPBoard.Modules[module].DchOn = value;
   if (value) {
     fMOSAICPowerBoard->onVout(module * 2);
     fMOSAICPowerBoard->onVout(module * 2 + 1);
-  } else {
+  }
+  else {
     fMOSAICPowerBoard->offVout(module * 2);
     fMOSAICPowerBoard->offVout(module * 2 + 1);
   }
@@ -469,15 +486,16 @@ void TPowerBoard::SwitchModule(int module, bool value) {
   ON, false := OFF
   -------------------------- */
 void TPowerBoard::GetModule(int module, float *AV, float *AI, float *DV, float *DI, bool *BiasOn,
-                            bool *AChOn, bool *DChOn) {
+                            bool *AChOn, bool *DChOn)
+{
   readMonitor();
-  *AV = fPBoard.Modules[module].AVmon;
-  *AI = GetAnalogCurrent(module);
-  *DV = fPBoard.Modules[module].DVmon;
-  *DI = GetDigitalCurrent(module);
+  *AV     = fPBoard.Modules[module].AVmon;
+  *AI     = GetAnalogCurrent(module);
+  *DV     = fPBoard.Modules[module].DVmon;
+  *DI     = GetDigitalCurrent(module);
   *BiasOn = fPBoard.Modules[module].BiasOn;
-  *AChOn = fPBoard.Modules[module].AchOn;
-  *DChOn = fPBoard.Modules[module].DchOn;
+  *AChOn  = fPBoard.Modules[module].AchOn;
+  *DChOn  = fPBoard.Modules[module].DchOn;
   return;
 }
 
@@ -488,7 +506,8 @@ void TPowerBoard::GetModule(int module, float *AV, float *AI, float *DV, float *
 
         Return : true if the power board is OK
   -------------------------- */
-bool TPowerBoard::IsOK() {
+bool TPowerBoard::IsOK()
+{
   // first of all test the presence of the power board
   try {
     fMOSAICPowerBoard->isReady();

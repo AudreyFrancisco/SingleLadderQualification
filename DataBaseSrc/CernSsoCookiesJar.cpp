@@ -37,42 +37,46 @@
  *	2/8/2017   -   Add the X509/Kerberos authentication switch
  *
  */
-#include "utilities.h"
 #include "CernSsoCookiesJar.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 // / #include <string>
 
-CernSsoCookieJar::CernSsoCookieJar(string aCookiePackFileName) {
+CernSsoCookieJar::CernSsoCookieJar(string aCookiePackFileName)
+{
   if (!testTheCERNSSO()) {
     exit(1);
   }
-  theSslUrl = "";
+  theSslUrl         = "";
   theCookiePackFile = aCookiePackFileName;
 
 #ifdef AUTH_X509
   theCliCert = "";
-  theCliKey = "";
+  theCliKey  = "";
 #endif
 }
 
-CernSsoCookieJar::~CernSsoCookieJar() {}
+CernSsoCookieJar::~CernSsoCookieJar()
+{
+  remove("/tmp/exitus.txt");
+  remove(theCookiePackFile.c_str());
+}
 
 /* -----------------------------------
  * Examine if the Jar is valid
  * ----------------------------------- */
-bool CernSsoCookieJar::isJarValid() {
-  int i;
-  int n = theJar.size();
+bool CernSsoCookieJar::isJarValid()
+{
+  int               i;
+  int               n             = theJar.size();
   unsigned long int theActualTime = time(NULL);
   unsigned long int theExpiration;
 
-  if (n == 0)
-    return (false); // the Jar is empty
+  if (n == 0) return (false); // the Jar is empty
   for (i = 0; i < n; i++) {
     theExpiration = theJar.at(i).expires;
     if (theExpiration <= theActualTime) {
@@ -88,21 +92,24 @@ bool CernSsoCookieJar::isJarValid() {
  * the cookie jar
  * ----------------------------------- */
 #ifdef AUTH_X509
-bool CernSsoCookieJar::fillTheJar(string aCliCert, string aCliKey, string aSslUrl) {
+bool CernSsoCookieJar::fillTheJar(string aCliCert, string aCliKey, string aSslUrl)
+{
   theCliCert = aCliCert;
-  theCliKey = aCliKey;
-  theSslUrl = aSslUrl;
+  theCliKey  = aCliKey;
+  theSslUrl  = aSslUrl;
   return (fillTheJar());
 }
 #endif
 #ifdef AUTH_KERBEROS
-bool CernSsoCookieJar::fillTheJar(string aSslUrl) {
+bool CernSsoCookieJar::fillTheJar(string aSslUrl)
+{
   theSslUrl = aSslUrl;
   return (fillTheJar());
 }
 #endif
 
-bool CernSsoCookieJar::fillTheJar() {
+bool CernSsoCookieJar::fillTheJar()
+{
   // run the CERN SSO in order to obtain the cookies file
   if (remove(theCookiePackFile.c_str())) { // the file exists... delete!
     if (VERBOSITYLEVEL == 1) {
@@ -136,8 +143,7 @@ bool CernSsoCookieJar::fillTheJar() {
   }
 
   int numOfCookies = parseTheJar(theCookiePackFile);
-  if (numOfCookies < 1)
-    return (false);
+  if (numOfCookies < 1) return (false);
   if (VERBOSITYLEVEL == 1) {
     cout << "The CERN cookie jar contains " << numOfCookies << " valid cookies !" << endl;
   }
@@ -145,19 +151,19 @@ bool CernSsoCookieJar::fillTheJar() {
   return (true);
 }
 
-int CernSsoCookieJar::parseTheJar(string aCookieJarFile) {
+int CernSsoCookieJar::parseTheJar(string aCookieJarFile)
+{
   FILE *fh = fopen(aCookieJarFile.c_str(), "r");
   if (fh == NULL) {
     cerr << "Error to read the CookieJar file ! Abort" << endl;
     return (-1);
   }
 
-  int NumberOfCookies = 0;
+  int    NumberOfCookies = 0;
   Cookie rigolo;
-  char Buffer[THECOOKIELENGTH];
+  char   Buffer[THECOOKIELENGTH];
 
-  if (!fgets(Buffer, THECOOKIELENGTH, fh))
-    return 0;
+  if (!fgets(Buffer, THECOOKIELENGTH, fh)) return 0;
   while (!feof(fh)) {
     if (Buffer[0] != '#' && Buffer[0] != 0 && Buffer[0] != '\n' && Buffer[0] != '\r') {
 
@@ -186,8 +192,7 @@ int CernSsoCookieJar::parseTheJar(string aCookieJarFile) {
         }
       }
     }
-    if (!fgets(Buffer, THECOOKIELENGTH, fh))
-      break;
+    if (!fgets(Buffer, THECOOKIELENGTH, fh)) break;
   }
   fclose(fh);
   return (NumberOfCookies);
@@ -196,7 +201,8 @@ int CernSsoCookieJar::parseTheJar(string aCookieJarFile) {
 /* ------------------------------------
  * tests the presence of CERNSSO
  * ------------------------------------ */
-bool CernSsoCookieJar::testTheCERNSSO() {
+bool CernSsoCookieJar::testTheCERNSSO()
+{
 
   remove("/tmp/exitus.txt");
 
@@ -222,7 +228,8 @@ bool CernSsoCookieJar::testTheCERNSSO() {
     }
     fclose(result);
     return (true);
-  } else {
+  }
+  else {
     cerr << "CERN-SSO package not Found ! Abort" << endl;
     fclose(result);
     return (false);

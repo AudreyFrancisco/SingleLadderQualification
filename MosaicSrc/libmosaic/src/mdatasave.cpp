@@ -27,21 +27,23 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
-#include <stdio.h>
-#include <sstream>
+#include "mdatasave.h"
 #include "mboard.h"
 #include "mexception.h"
-#include "mdatasave.h"
+#include <sstream>
+#include <stdio.h>
 
-MDataSave::MDataSave() {
-  eventSize = 0;
+MDataSave::MDataSave()
+{
+  eventSize    = 0;
   saveFunction = NULL;
 }
 
 void MDataSave::flush() {}
 
 // parse the data starting from begin of buffer
-long MDataSave::parse(int numClosed) {
+long MDataSave::parse(int numClosed)
+{
   unsigned char *p = (unsigned char *)&dataBuffer[0];
 
   // check avalaible data size

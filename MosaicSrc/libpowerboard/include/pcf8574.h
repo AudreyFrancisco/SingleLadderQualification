@@ -31,8 +31,8 @@
 #ifndef PCF8574_H
 #define PCF8574_H
 
-#include <stdint.h>
 #include "i2cslave.h"
+#include <stdint.h>
 
 class PCF8574 : public I2Cslave {
 public:

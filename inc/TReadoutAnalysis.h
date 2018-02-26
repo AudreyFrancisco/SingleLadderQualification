@@ -2,15 +2,15 @@
 #define TREADOUTANALYSIS_H
 
 #include <deque>
+#include <map>
 #include <mutex>
 #include <vector>
-#include <map>
 
+#include "AlpideDecoder.h"
+#include "Common.h"
+#include "TScan.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
-#include "TScan.h"
-#include "Common.h"
-#include "AlpideDecoder.h"
 
 class TReadoutResultChip : public TScanResultChip {
   friend class TReadoutAnalysis;
@@ -25,7 +25,7 @@ private:
 public:
   void WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
-  TReadoutResultChip() : TScanResultChip() {};
+  TReadoutResultChip() : TScanResultChip(){};
 };
 
 class TReadoutResultHic : public TScanResultHic {
@@ -33,18 +33,18 @@ class TReadoutResultHic : public TScanResultHic {
 
 private:
   TErrorCounter m_errorCounter;
-  int m_linkSpeed;
-  int m_driver;
-  int m_preemp;
-  int m_missingHits;
-  int m_deadPixels;
-  int m_ineffPixels;
-  int m_extraHits;
-  int m_noisyPixels;
+  int           m_linkSpeed;
+  int           m_driver;
+  int           m_preemp;
+  int           m_missingHits;
+  int           m_deadPixels;
+  int           m_ineffPixels;
+  int           m_extraHits;
+  int           m_noisyPixels;
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 public:
-  TReadoutResultHic() : TScanResultHic() {};
+  TReadoutResultHic() : TScanResultHic(){};
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
 };
@@ -54,38 +54,36 @@ class TReadoutResult : public TScanResult {
 
 private:
 public:
-  TReadoutResult() : TScanResult() {};
-  void WriteToFileGlobal(FILE *fp) {
-    (void)fp;
-  };
+  TReadoutResult() : TScanResult(){};
+  void WriteToFileGlobal(FILE *fp) { (void)fp; };
 };
 
 class TReadoutAnalysis : public TScanAnalysis {
 private:
-  int m_nTrig;
-  int m_occ;
-  int m_row;
-  void FillVariableList() {};
+  int  m_nTrig;
+  int  m_occ;
+  int  m_row;
+  void FillVariableList(){};
   bool IsInjected(int col, int row);
-  void WriteResult();
+  void               WriteResult();
   THicClassification GetClassificationOB(TReadoutResultHic *result);
   THicClassification GetClassificationIB(TReadoutResultHic *result);
 
 protected:
-  TScanResultChip *GetChipResult() {
+  TScanResultChip *GetChipResult()
+  {
     TReadoutResultChip *Result = new TReadoutResultChip();
     return Result;
   };
-  TScanResultHic *GetHicResult() {
+  TScanResultHic *GetHicResult()
+  {
     TReadoutResultHic *Result = new TReadoutResultHic();
     return Result;
   };
-  void CreateResult() {};
+  void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
-  void InitCounters();
-  string GetPreviousTestType() {
-    return string("");
-  }; // done only once ?
+  void   InitCounters();
+  string GetPreviousTestType() { return string(""); }; // done only once ?
 public:
   TReadoutAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                    std::vector<THic *> hics, std::mutex *aMutex, TReadoutResult *aResult = 0);

@@ -28,27 +28,29 @@
  *
  * 21/12/2015	Added mutex for multithread operation
  */
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <string.h>
-#include <poll.h>
-#include <iostream>
 #include "ipbusudp.h"
 #include "mexception.h"
+#include <arpa/inet.h>
+#include <iostream>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <poll.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <sys/socket.h>
 
 IPbusUDP::IPbusUDP(int pktSize) : IPbus(pktSize) { sockfd = -1; }
 
-IPbusUDP::IPbusUDP(const char *IPaddr, int port, int pktSize) : IPbus(pktSize) {
+IPbusUDP::IPbusUDP(const char *IPaddr, int port, int pktSize) : IPbus(pktSize)
+{
   sockfd = -1;
   setIPaddress(IPaddr, port);
 }
 
-void IPbusUDP::setIPaddress(const char *IPaddr, int port) {
+void IPbusUDP::setIPaddress(const char *IPaddr, int port)
+{
   struct hostent *he;
 
   if ((he = gethostbyname(IPaddr)) == NULL) // get the host address
@@ -57,9 +59,9 @@ void IPbusUDP::setIPaddress(const char *IPaddr, int port) {
   if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
     throw MIPBusUDPError("Can not create socket");
 
-  sockAddress.sin_family = AF_INET;   // host byte order
-  sockAddress.sin_port = htons(port); // short, network byte order
-  sockAddress.sin_addr = *((struct in_addr *)he->h_addr);
+  sockAddress.sin_family = AF_INET;     // host byte order
+  sockAddress.sin_port   = htons(port); // short, network byte order
+  sockAddress.sin_addr   = *((struct in_addr *)he->h_addr);
   memset(sockAddress.sin_zero, '\0', sizeof sockAddress.sin_zero);
 
   // Check the connection
@@ -68,7 +70,8 @@ void IPbusUDP::setIPaddress(const char *IPaddr, int port) {
 
 IPbusUDP::~IPbusUDP() {}
 
-void IPbusUDP::testConnection() {
+void IPbusUDP::testConnection()
+{
   try {
     rcvTimoutTime = RCV_LONG_TIMEOUT;
     addIdle();
@@ -80,44 +83,43 @@ void IPbusUDP::testConnection() {
   }
 }
 
-void IPbusUDP::sockRead() {
+void IPbusUDP::sockRead()
+{
   struct sockaddr_in peer_addr;
-  socklen_t peer_addr_len;
-  struct pollfd ufds;
-  int rv;
+  socklen_t          peer_addr_len;
+  struct pollfd      ufds;
+  int                rv;
 
-  ufds.fd = sockfd;
+  ufds.fd     = sockfd;
   ufds.events = POLLIN; // check for normal
-  rv = poll(&ufds, 1, rcvTimoutTime);
+  rv          = poll(&ufds, 1, rcvTimoutTime);
 
-  if (rv == -1)
-    throw MIPBusUDPError("poll system call");
+  if (rv == -1) throw MIPBusUDPError("poll system call");
 
-  if (rv == 0)
-    throw MIPBusUDPTimeout();
+  if (rv == 0) throw MIPBusUDPTimeout();
 
   // check for events on sockfd:
   if (ufds.revents & POLLIN) {
     peer_addr_len = sizeof(struct sockaddr);
-    rxSize = recvfrom(sockfd, rxBuffer, getBufferSize(), 0, (struct sockaddr *)&peer_addr,
+    rxSize        = recvfrom(sockfd, rxBuffer, getBufferSize(), 0, (struct sockaddr *)&peer_addr,
                       (socklen_t *)&peer_addr_len);
   }
 
-  if (rxSize < 0)
-    throw MIPBusUDPError("Datagram receive system call");
+  if (rxSize < 0) throw MIPBusUDPError("Datagram receive system call");
 }
 
-void IPbusUDP::sockWrite() {
+void IPbusUDP::sockWrite()
+{
   if (sendto(sockfd, txBuffer, txSize, 0, (struct sockaddr *)&sockAddress,
              sizeof(struct sockaddr)) == -1)
     throw MIPBusUDPError("Datagram send system call");
 }
 
-void IPbusUDP::execute() {
+void IPbusUDP::execute()
+{
   std::lock_guard<std::recursive_mutex> lock(mutex);
 
-  if (txSize == 0)
-    return;
+  if (txSize == 0) return;
 
   for (int i = 0; i < 3; i++) {
     try {

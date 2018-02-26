@@ -31,13 +31,13 @@
 #ifndef IPBUSUDP_H
 #define IPBUSUDP_H
 
-#include <stdint.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include "ipbus.h"
 #include <arpa/inet.h>
 #include <mutex>
+#include <netinet/in.h>
+#include <stdint.h>
 #include <string>
-#include "ipbus.h"
+#include <sys/socket.h>
 
 #define DEFAULT_PACKET_SIZE 1400
 #define DEFAULT_PORT 2000
@@ -50,7 +50,7 @@ public:
   IPbusUDP(const char *brdName, int port = DEFAULT_PORT, int pktsize = DEFAULT_PACKET_SIZE);
   ~IPbusUDP();
   void setIPaddress(const char *brdName, int port = DEFAULT_PORT);
-  void execute();
+  void              execute();
   const std::string name() { return "IPbusUDP"; }
 
 private:
@@ -60,9 +60,9 @@ private:
 
 private:
   // int port;
-  int sockfd;
+  int                sockfd;
   struct sockaddr_in sockAddress;
-  int rcvTimoutTime;
+  int                rcvTimoutTime;
 };
 
 #endif // IPBUSUDP_H

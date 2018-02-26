@@ -83,15 +83,17 @@
 
 class TRuTransceiverModule : public TRuWishboneModule {
 public:
-  static const uint8_t DRP_ADDRESS = 0;
-  static const uint8_t DRP_DATA = 1;
+  static const uint8_t DRP_ADDRESS          = 0;
+  static const uint8_t DRP_DATA             = 1;
   static const uint8_t TRANSCEIVER_SETTINGS = 2;
-  static const uint8_t RUN_SETTINGS = 4;
-  static const uint8_t RUN_STATUS = 5;
-  static const uint8_t COUNTER_RESET = 6;
+  static const uint8_t RUN_SETTINGS         = 4;
+  static const uint8_t RUN_STATUS           = 5;
+  static const uint8_t COUNTER_RESET        = 6;
 
   TRuTransceiverModule(TReadoutBoardRU &board, uint16_t moduleId, bool logging)
-      : TRuWishboneModule(board, moduleId, logging) {}
+      : TRuWishboneModule(board, moduleId, logging)
+  {
+  }
   int Initialize(TBoardConfigRU::ReadoutSpeed RoSpeed, bool InvertPolarity);
   void DeactivateReadout();
   void ResetReceiver();

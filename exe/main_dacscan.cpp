@@ -14,27 +14,28 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-#include <unistd.h>
-#include "TAlpide.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "BoardDecoder.h"
-#include "SetupHelpers.h"
+#include <unistd.h>
 
-TConfig *config;
+TConfig *                    config;
 std::vector<TReadoutBoard *> fBoards;
-TBoardType boardType;
-std::vector<TAlpide *> fChips;
+TBoardType                   boardType;
+std::vector<TAlpide *>       fChips;
 
-unsigned int mySampleDist = 1;
+unsigned int mySampleDist       = 1;
 unsigned int mySampleRepetition = 1;
 
-int configureChip(TAlpide *chip) {
+int configureChip(TAlpide *chip)
+{
   // put all chip configurations before the start of the test here
   chip->WriteRegister(Alpide::REG_MODECONTROL, 0x20);
   chip->WriteRegister(Alpide::REG_CMUDMU_CONFIG, 0x60);
@@ -44,8 +45,9 @@ int configureChip(TAlpide *chip) {
 
 // this is ugly, but there is no simple relation between the DAC addresses and the
 // corresponding value in the monitoring register -> TODO: define map
-void SetDACMon(TAlpide *chip, Alpide::TRegister ADac, int IRef = 2) {
-  int VDAC, IDAC;
+void SetDACMon(TAlpide *chip, Alpide::TRegister ADac, int IRef = 2)
+{
+  int      VDAC, IDAC;
   uint16_t Value;
   switch (ADac) {
   case Alpide::REG_VRESETP:
@@ -123,9 +125,10 @@ void SetDACMon(TAlpide *chip, Alpide::TRegister ADac, int IRef = 2) {
 
 void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name,
                     unsigned int sampleDist = 1, unsigned int sampleRepetition = 1,
-                    string suffix = "") {
-  char fName[50];
-  float Current;
+                    string suffix = "")
+{
+  char     fName[50];
+  float    Current;
   uint16_t old;
 
   sprintf(fName, "Data/IDAC_%s_Chip%d_%d_%s.dat", Name, chip->GetConfig()->GetChipId(),
@@ -146,7 +149,8 @@ void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name,
         fprintf(fp, "%d %.3f\n", value, Current);
       }
     }
-  } else { // DAQ board : external ADC read
+  }
+  else { // DAQ board : external ADC read
     SetDACMon(chip, ADac);
     usleep(100000);
     for (unsigned int value = 0; value < 256; value += sampleDist) {
@@ -163,9 +167,10 @@ void scanCurrentDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name,
 
 void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name,
                     unsigned int sampleDist = 1, unsigned int sampleRepetition = 1,
-                    string suffix = "") {
-  char fName[50];
-  float Voltage;
+                    string suffix = "")
+{
+  char     fName[50];
+  float    Voltage;
   uint16_t old;
   sprintf(fName, "Data/VDAC_%s_Chip%d_%d_%s.dat", Name, chip->GetConfig()->GetChipId(),
           chip->GetConfig()->GetCtrInt(), suffix.c_str());
@@ -185,7 +190,8 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name,
         fprintf(fp, "%d %.3f\n", value, Voltage);
       }
     }
-  } else { // DAQ board : external ADC read
+  }
+  else { // DAQ board : external ADC read
     SetDACMon(chip, ADac);
     usleep(100000);
     for (unsigned int value = 0; value < 256; value += sampleDist) {
@@ -201,11 +207,12 @@ void scanVoltageDac(TAlpide *chip, Alpide::TRegister ADac, const char *Name,
 }
 
 void scanADCDac(TAlpide *chip, unsigned int sampleDist = 1, unsigned int sampleRepetition = 1,
-                string suffix = "") {
+                string suffix = "")
+{
   Alpide::TRegister ADac = Alpide::REG_ADC_DAC_INPUT;
-  char fName[50];
-  float Voltage;
-  uint16_t old;
+  char              fName[50];
+  float             Voltage;
+  uint16_t          old;
   sprintf(fName, "Data/ADC_DAC_Chip%d_%d_%s.dat", chip->GetConfig()->GetChipId(),
           chip->GetConfig()->GetCtrInt(), suffix.c_str());
   FILE *fp = fopen(fName, "w");
@@ -218,7 +225,8 @@ void scanADCDac(TAlpide *chip, unsigned int sampleDist = 1, unsigned int sampleR
   if (!myDAQBoard) { // MOSAIC board internal ADC read
     std::cerr << "The ADC DAC can only be measured using the DAQ Board!" << std::endl;
     fputs("# The ADC DAC can only be measured using the DAQ Board!", fp);
-  } else { // DAQ board : external ADC read
+  }
+  else { // DAQ board : external ADC read
     SetDACMon(chip, ADac);
     chip->SetTheADCCtrlRegister(Alpide::MODE_SUPERMANUAL, Alpide::INP_AVSS, Alpide::COMP_296uA,
                                 Alpide::RAMP_1us);
@@ -236,10 +244,11 @@ void scanADCDac(TAlpide *chip, unsigned int sampleDist = 1, unsigned int sampleR
   fclose(fp);
 }
 
-int main(int argc, char **argv) {
-  time_t t = time(0); // get time now
+int main(int argc, char **argv)
+{
+  time_t     t   = time(0); // get time now
   struct tm *now = localtime(&t);
-  char Suffix[14];
+  char       Suffix[14];
   snprintf(Suffix, 14, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1,
            now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
@@ -254,8 +263,7 @@ int main(int argc, char **argv) {
     }
 
     for (const auto &rChip : fChips) {
-      if (!rChip->GetConfig()->IsEnabled())
-        continue;
+      if (!rChip->GetConfig()->IsEnabled()) continue;
       configureChip(rChip);
     }
 
@@ -264,8 +272,7 @@ int main(int argc, char **argv) {
     }
 
     for (unsigned int i = 0; i < fChips.size(); i++) {
-      if (!fChips.at(i)->GetConfig()->IsEnabled())
-        continue;
+      if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
       scanVoltageDac(fChips.at(i), Alpide::REG_VRESETP, "VRESETP", mySampleDist, mySampleRepetition,
                      Suffix);
       scanVoltageDac(fChips.at(i), Alpide::REG_VRESETD, "VRESETD", mySampleDist, mySampleRepetition,
@@ -304,7 +311,7 @@ int main(int argc, char **argv) {
       FILE *fp = fopen(fName, "w");
 
       uint16_t theResult = 0;
-      float theValue = 0.;
+      float    theValue  = 0.;
       fChips.at(i)->SetTheDacMonitor(Alpide::REG_ANALOGMON);
       usleep(5000);
       fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA,
@@ -327,7 +334,7 @@ int main(int argc, char **argv) {
       fp = fopen(fName, "w");
 
       theResult = 0;
-      theValue = 0.;
+      theValue  = 0.;
       fChips.at(i)->SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature,
                                           Alpide::COMP_296uA, Alpide::RAMP_1us);
 

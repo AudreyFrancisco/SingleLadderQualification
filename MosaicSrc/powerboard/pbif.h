@@ -31,11 +31,11 @@
 #ifndef PBIF_H
 #define PBIF_H
 
-#include <stdint.h>
-#include "ipbusudp.h"
 #include "i2cbus.h"
+#include "ipbusudp.h"
 #include "mwbb.h"
 #include "powerboard.h"
+#include <stdint.h>
 
 #define DEFAULT_PACKET_SIZE 1400
 #define DEFAULT_UDP_PORT 2000
@@ -52,15 +52,12 @@ private:
 
 private:
   // extend WBB address definitions in mwbb.h
-  enum baseAddress_e {
-    add_i2cMaster = (5 << 24),
-    add_i2cAux = (29 << 24)
-  };
+  enum baseAddress_e { add_i2cMaster = (5 << 24), add_i2cAux = (29 << 24) };
 
   std::string IPaddress;
-  IPbusUDP *mIPbus;
-  I2Cbus *i2cBus;
-  I2Cbus *i2cBusAux;
+  IPbusUDP *  mIPbus;
+  I2Cbus *    i2cBus;
+  I2Cbus *    i2cBusAux;
 
 public:
   powerboard *pb;

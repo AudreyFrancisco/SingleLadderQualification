@@ -28,15 +28,16 @@
  *
  */
 
-#include <QVBoxLayout>
+#include "optionsDialog.h"
 #include <QDialogButtonBox>
 #include <QLabel>
 #include <QLineEdit>
-#include "optionsDialog.h"
+#include <QVBoxLayout>
 
 static const char *WINDOW_TITLE = "Option editor";
 
-optionsDialog::optionsDialog(QWidget *parent, Qt::WindowFlags fl) : QDialog(parent, fl) {
+optionsDialog::optionsDialog(QWidget *parent, Qt::WindowFlags fl) : QDialog(parent, fl)
+{
   setWindowTitle(WINDOW_TITLE);
   setModal(true);
 

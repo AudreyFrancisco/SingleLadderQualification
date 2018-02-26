@@ -13,6 +13,8 @@ class DBnotice : public QDialog {
 public:
   explicit DBnotice(QWidget *parent = 0);
   ~DBnotice();
+public slots:
+  virtual void adjustingtemplate();
 
 private:
   Ui::DBnotice *ui;

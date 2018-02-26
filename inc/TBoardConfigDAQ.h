@@ -14,30 +14,30 @@ const int LIMIT_ANALOGUE = 300;
 
 //---- READOUT module
 const bool DATA_SAMPLING_EDGE = 1;
-const bool DATA_PKTBASED_EN = 0; // packet based readout default now!
-const bool DATA_DDR_EN = 0;
-const int DATA_PORT = 2;
+const bool DATA_PKTBASED_EN   = 0; // packet based readout default now!
+const bool DATA_DDR_EN        = 0;
+const int  DATA_PORT          = 2;
 const bool HEADER_TYPE = 1;  // as of firmware version 247e0611 the header type can be defined; 0 ->
                              // full header (default); 1 -> short header
 const int BOARD_VERSION = 1; // as of firmware version 247e0611 the DAQboard version (v2 or v3) must
                              // be defined; 0 -> v2; 1 -> v3;
 
 //---- TRIGGER module
-const int TRIGGER_MODE = 2;       // 2: external, 1:internal
+const int      TRIGGER_MODE = 2;  // 2: external, 1:internal
 const uint32_t STROBE_DELAY = 10; // delay between external trigger and trigger sent to chip; when
                                   // cofiguring the feature with a train of N triggers, this will be
                                   // the delay between subsequent triggers
-const bool BUSY_CONFIG = 0;       // as of firmware version 247e0611
+const bool BUSY_CONFIG   = 0;     // as of firmware version 247e0611
 const bool BUSY_OVERRIDE = 1;
 
 //---- RESET module
-const int AUTOSHTDWN_TIME = 10;    // time until enabling of auto shutdown
-const int CLOCK_ENABLE_TIME = 12;  // time until clock is enabled
+const int AUTOSHTDWN_TIME    = 10; // time until enabling of auto shutdown
+const int CLOCK_ENABLE_TIME  = 12; // time until clock is enabled
 const int SIGNAL_ENABLE_TIME = 12; // time until signals are enabled
-const int DRST_TIME = 13;          // time until drst is deasserted
+const int DRST_TIME          = 13; // time until drst is deasserted
 
 const int PULSE_STROBE_DELAY = 10;
-const int STROBE_PULSE_SEQ = 2; // 3: just send pulse after external trigger..
+const int STROBE_PULSE_SEQ   = 2; // 3: just send pulse after external trigger..
 
 //************************************************************
 // TBoardConfigDAQ: config for Cagliari DAQboard
@@ -51,26 +51,26 @@ private:
   ////---- ADC module
 
   // ADC config reg 0
-  int fCurrentLimitDigital; // 11: 0; threshold current for digital supply
-  int fCurrentLimitIo;      // 23:12; threshold current for digital io supply
-  bool fAutoShutdownEnable; //    24; 0: disable, 1: enable
-  bool
-  fLDOEnable; //    25; 0: disable, 1: enable; LDOAutoShutOff has no effect if this it is not set
+  int  fCurrentLimitDigital; // 11: 0; threshold current for digital supply
+  int  fCurrentLimitIo;      // 23:12; threshold current for digital io supply
+  bool fAutoShutdownEnable;  //    24; 0: disable, 1: enable
+  bool fLDOEnable;   //    25; 0: disable, 1: enable; LDOAutoShutOff has no effect if this it is not
+                     //    set
   bool fADCEnable;   //    26; 0: disable, 1: enable; enables current/voltage sampling
   bool fADCSelfStop; //    27; samples (pre-samples + post-samples) are sent to the user only if a
                      // latch-up event occurs
-  bool fDisableTstmpReset; //    28; if set, disables the reset of the timestamp counter with the
-                           // strobe; default is 0
-  bool
-  fPktBasedROEnableADC; //    29; enables/disables packet based readout for the ADCs; default is 0.
+  bool fDisableTstmpReset;   //    28; if set, disables the reset of the timestamp counter with the
+                             // strobe; default is 0
+  bool fPktBasedROEnableADC; //    29; enables/disables packet based readout for the ADCs; default
+                             //    is 0.
 
   // ADC config reg 1
   int fCurrentLimitAnalogue; // 11: 0; threshold current for analogue supply
 
   // ADC config reg 2
-  uint32_t fAutoShutOffDelay; // 19: 0; delay with a granularity of 12.5ns
-  int fADCDownSamplingFact;   // 31:20; factor for downscaling ADC sampling rate:
-                              // 1.194MHz/(fADCDownSamplingFact+1)
+  uint32_t fAutoShutOffDelay;    // 19: 0; delay with a granularity of 12.5ns
+  int      fADCDownSamplingFact; // 31:20; factor for downscaling ADC sampling rate:
+                                 // 1.194MHz/(fADCDownSamplingFact+1)
 
   ////---- READOUT module
 
@@ -83,9 +83,9 @@ private:
                             // inverted..)
   bool fPktBasedROEnable;   //     5; 0: disable, 1: enable
   bool fDDREnable;          //     6; 0: disable, 1: enable
-  int fDataPortSelect;      //  8: 7; 01: serial port, 10: parallel port
-  int
-  fFPGAEmulationMode; // 10: 9; 00: FPGA is bus master, chip is in IB or OB master mode (default)
+  int  fDataPortSelect;     //  8: 7; 01: serial port, 10: parallel port
+  int  fFPGAEmulationMode;  // 10: 9; 00: FPGA is bus master, chip is in IB or OB master mode
+                            // (default)
   //        01: the FPGA emulates an OB master, chip is slave;    !! not working with pA3 and later
   // versions
   //        10: the FPGA emulates an OB slave, chip is OB master; !! not working with pA3 and later
@@ -183,202 +183,94 @@ public:
   //// getters for module config parameters
 
   // ADC Module
-  int GetCurrentLimitDigital() {
-    return fCurrentLimitDigital;
-  };
-  int GetCurrentLimitIo() {
-    return fCurrentLimitIo;
-  };
-  int GetCurrentLimitAnalogue() {
-    return fCurrentLimitDigital;
-  };
-  bool GetAutoShutdownEnable() {
-    return fAutoShutdownEnable;
-  };
-  bool GetLDOEnable() {
-    return fLDOEnable;
-  };
-  bool GetADCEnable() {
-    return fADCEnable;
-  };
-  bool GetADCSelfStop() {
-    return fADCSelfStop;
-  };
-  bool GetDisableTstmpReset() {
-    return fDisableTstmpReset;
-  };
-  bool GetPktBasedROEnableADC() {
-    return fPktBasedROEnableADC;
-  };
-  uint32_t GetAutoShutOffDelay() {
-    return fAutoShutOffDelay;
-  };
-  int GetADCDownSamplingFact() {
-    return fADCDownSamplingFact;
-  };
+  int      GetCurrentLimitDigital() { return fCurrentLimitDigital; };
+  int      GetCurrentLimitIo() { return fCurrentLimitIo; };
+  int      GetCurrentLimitAnalogue() { return fCurrentLimitDigital; };
+  bool     GetAutoShutdownEnable() { return fAutoShutdownEnable; };
+  bool     GetLDOEnable() { return fLDOEnable; };
+  bool     GetADCEnable() { return fADCEnable; };
+  bool     GetADCSelfStop() { return fADCSelfStop; };
+  bool     GetDisableTstmpReset() { return fDisableTstmpReset; };
+  bool     GetPktBasedROEnableADC() { return fPktBasedROEnableADC; };
+  uint32_t GetAutoShutOffDelay() { return fAutoShutOffDelay; };
+  int      GetADCDownSamplingFact() { return fADCDownSamplingFact; };
 
   // READOUT Module
-  int GetMaxDiffTriggers() {
-    return fMaxDiffTriggers;
-  };
-  bool GetSamplingEdgeSelect() {
-    return fSamplingEdgeSelect;
-  };
-  bool GetPktBasedROEnable() {
-    return fPktBasedROEnable;
-  };
-  bool GetDDREnable() {
-    return fDDREnable;
-  };
-  int GetDataPortSelect() {
-    return fDataPortSelect;
-  };
-  int GetFPGAEmulationMode() {
-    return fFPGAEmulationMode;
-  };
-  bool GetHeaderType() {
-    return fHeaderType;
-  };
+  int  GetMaxDiffTriggers() { return fMaxDiffTriggers; };
+  bool GetSamplingEdgeSelect() { return fSamplingEdgeSelect; };
+  bool GetPktBasedROEnable() { return fPktBasedROEnable; };
+  bool GetDDREnable() { return fDDREnable; };
+  int  GetDataPortSelect() { return fDataPortSelect; };
+  int  GetFPGAEmulationMode() { return fFPGAEmulationMode; };
+  bool GetHeaderType() { return fHeaderType; };
 
   // TRIGGER Module
-  uint32_t GetBusyDuration() {
-    return fBusyDuration;
-  };
+  uint32_t GetBusyDuration() { return fBusyDuration; };
   // int GetNTriggers()            {return fNTriggers;}; defined in base class TBoardConfig
-  int GetTriggerMode() {
-    return fTriggerMode;
-  };
-  int GetStrobeDuration() {
-    return fStrobeDuration;
-  };
-  uint32_t GetStrobeDelay() {
-    return fStrobeDelay;
-  };
-  int GetBusyConfig() {
-    return fBusyConfig;
-  };
-  bool GetBusyOverride() {
-    return fBusyOverride;
-  };
+  int      GetTriggerMode() { return fTriggerMode; };
+  int      GetStrobeDuration() { return fStrobeDuration; };
+  uint32_t GetStrobeDelay() { return fStrobeDelay; };
+  int      GetBusyConfig() { return fBusyConfig; };
+  bool     GetBusyOverride() { return fBusyOverride; };
 
   // CMU Module
-  bool GetManchesterDisable() {
-    return fManchesterDisable;
-  };
-  bool GetSamplingEdgeSelectCMU() {
-    return fSamplingEdgeSelectCMU;
-  };
-  bool GetInvertCMUBus() {
-    return fInvertCMUBus;
-  };
-  bool GetChipMaster() {
-    return fChipMaster;
-  };
+  bool GetManchesterDisable() { return fManchesterDisable; };
+  bool GetSamplingEdgeSelectCMU() { return fSamplingEdgeSelectCMU; };
+  bool GetInvertCMUBus() { return fInvertCMUBus; };
+  bool GetChipMaster() { return fChipMaster; };
 
   // RESET Module
-  int GetPRSTDuration() {
-    return fPRSTDuration;
-  };
-  int GetDRSTDuration() {
-    return fDRSTDuration;
-  };
-  int GetPULSEDuration() {
-    return fPULSEDuration;
-  };
+  int GetPRSTDuration() { return fPRSTDuration; };
+  int GetDRSTDuration() { return fDRSTDuration; };
+  int GetPULSEDuration() { return fPULSEDuration; };
 
   // int GetPulseDelay()           {return fPulseDelay;}; defined in base class TBoardConfig
-  int GetStrobePulseSeq() {
-    return fStrobePulseSeq;
-  };
-  int GetPORDisable() {
-    return fPORDisable;
-  };
+  int GetStrobePulseSeq() { return fStrobePulseSeq; };
+  int GetPORDisable() { return fPORDisable; };
 
-  int GetAutoShutdownTime() {
-    return fAutoShutdownTime;
-  };
-  int GetClockEnableTime() {
-    return fClockEnableTime;
-  };
-  int GetSignalEnableTime() {
-    return fSignalEnableTime;
-  };
-  int GetDrstTime() {
-    return fDrstTime;
-  };
+  int GetAutoShutdownTime() { return fAutoShutdownTime; };
+  int GetClockEnableTime() { return fClockEnableTime; };
+  int GetSignalEnableTime() { return fSignalEnableTime; };
+  int GetDrstTime() { return fDrstTime; };
 
-  int GetBoardAddress() {
-    return fBoardAddress;
-  };
+  int GetBoardAddress() { return fBoardAddress; };
 
   // SOFTRESET Module
-  int GetSoftResetDuration() {
-    return fSoftResetDuration;
-  };
+  int GetSoftResetDuration() { return fSoftResetDuration; };
 
   //// setters for module config parameters
 
   // ADC Module
-  void SetAutoShutdownEnable(bool enable) {
-    fAutoShutdownEnable = enable;
-  };
-  void SetLDOEnable(bool enable) {
-    fLDOEnable = enable;
-  };
+  void SetAutoShutdownEnable(bool enable) { fAutoShutdownEnable = enable; };
+  void SetLDOEnable(bool enable) { fLDOEnable = enable; };
 
   // READOUT Module
-  void SetDataPortSelect(int dataPort) {
-    fDataPortSelect = dataPort;
-  };
-  void SetPktBasedROEnable(bool enable) {
-    fPktBasedROEnable = enable;
-  };
+  void SetDataPortSelect(int dataPort) { fDataPortSelect = dataPort; };
+  void SetPktBasedROEnable(bool enable) { fPktBasedROEnable = enable; };
 
   // TRIGGER Module
   // void SetNTriggers   (int nTriggers)      {fNTriggers          = nTriggers;}; // defined in base
   // class TBoardConfig
-  void SetTriggerMode(int triggerMode) {
-    fTriggerMode = triggerMode;
-  };
-  void SetStrobeDelay(uint32_t delay) {
-    fStrobeDelay = delay;
-  };
-  void SetBusyOverride(bool busyOverride) {
-    fBusyOverride = busyOverride;
-  };
+  void SetTriggerMode(int triggerMode) { fTriggerMode = triggerMode; };
+  void SetStrobeDelay(uint32_t delay) { fStrobeDelay = delay; };
+  void SetBusyOverride(bool busyOverride) { fBusyOverride = busyOverride; };
 
   // CMU Module
 
   // RESET Module
-  void SetDrstTime(int duration) {
-    fDrstTime = duration;
-  };
-  void SetClockEnableTime(int duration) {
-    fClockEnableTime = duration;
-  };
-  void SetSignalEnableTime(int duration) {
-    fSignalEnableTime = duration;
-  };
-  void SetAutoShutdownTime(int duration) {
-    fAutoShutdownTime = duration;
-  };
-  void SetPORDisable(bool disable) {
-    fPORDisable = disable;
-  };
+  void SetDrstTime(int duration) { fDrstTime = duration; };
+  void SetClockEnableTime(int duration) { fClockEnableTime = duration; };
+  void SetSignalEnableTime(int duration) { fSignalEnableTime = duration; };
+  void SetAutoShutdownTime(int duration) { fAutoShutdownTime = duration; };
+  void SetPORDisable(bool disable) { fPORDisable = disable; };
 
-  void SetStrobePulseSeq(int strobePulseSeq) {
-    fStrobePulseSeq = strobePulseSeq;
-  };
+  void SetStrobePulseSeq(int strobePulseSeq) { fStrobePulseSeq = strobePulseSeq; };
 
   // ID Module
-  void SetBoardAddress(int addr) {
-    fBoardAddress = (addr >= 0 && addr <= 15) ? addr : -1;
-  };
+  void SetBoardAddress(int addr) { fBoardAddress = (addr >= 0 && addr <= 15) ? addr : -1; };
 
   // SOFTRESET Module
-  void SetSoftResetDuration(int duration) {
-    fSoftResetDuration = duration;
-  };
+  void SetSoftResetDuration(int duration) { fSoftResetDuration = duration; };
 };
 
 //************************************************************

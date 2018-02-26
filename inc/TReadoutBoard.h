@@ -2,21 +2,21 @@
 #define READOUTBOARD_H
 
 #include <iostream>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <vector>
 
-#include "TBoardConfig.h"
 #include "TAlpide.h"
+#include "TBoardConfig.h"
 
 class TBoardConfig;
 
 typedef struct {
-  int chipId;
-  int controlInterface;
-  int receiver;
-  bool enabled;
+  int      chipId;
+  int      controlInterface;
+  int      receiver;
+  bool     enabled;
   TAlpide *alpidePtr;
 } TChipPos;
 
@@ -30,7 +30,7 @@ private:
 
 protected:
   std::vector<TChipPos>
-  fChipPositions; // Antonio : change in protected to access from derived class
+                fChipPositions; // Antonio : change in protected to access from derived class
   TBoardConfig *fBoardConfig;
 
   virtual int WriteChipRegister(uint16_t Address, uint16_t Value, TAlpide *chipPtr) = 0;
@@ -46,7 +46,7 @@ protected:
 public:
   // TReadoutBoard  (TBoardConfig *config) {};
   TReadoutBoard(TBoardConfig *config);
-  ~TReadoutBoard() {};
+  ~TReadoutBoard(){};
 
   int AddChip(uint8_t chipId, int controlInterface, int receiver, TAlpide *chipPtr = 0);
 
@@ -60,9 +60,7 @@ public:
   void SetReceiver(uint8_t chipId, int receiver);
   void SetReceiver(TAlpide *chipPtr, int receiver);
 
-  TBoardConfig *GetConfig() {
-    return fBoardConfig;
-  };
+  TBoardConfig *GetConfig() { return fBoardConfig; };
 
   virtual int ReadRegister(uint16_t Address, uint32_t &Value) = 0;
   virtual int WriteRegister(uint16_t Address, uint32_t Value) = 0;
@@ -78,11 +76,11 @@ public:
   virtual int SendCommand(Alpide::TCommand Command, TAlpide *chipPtr) = 0;
 
   virtual int SetTriggerConfig(bool enablePulse, bool enableTrigger, int triggerDelay,
-                               int pulseDelay) = 0;
+                               int pulseDelay)                = 0;
   virtual void SetTriggerSource(TTriggerSource triggerSource) = 0;
-  virtual void StartRun() = 0;
-  virtual int Trigger(int nTriggers) = 0;
-  virtual int ReadEventData(int &NBytes,
+  virtual void StartRun()                                     = 0;
+  virtual int Trigger(int nTriggers)                          = 0;
+  virtual int ReadEventData(int &          NBytes,
                             unsigned char *Buffer) = 0; // TODO: max buffer size not needed??
 };
 

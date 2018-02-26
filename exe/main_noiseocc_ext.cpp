@@ -14,17 +14,17 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-#include <unistd.h>
-#include "TAlpide.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "BoardDecoder.h"
-#include "SetupHelpers.h"
+#include <unistd.h>
 
 //== GLOBAL VARIABLES == TO BE REMOVED ===
 
@@ -36,14 +36,15 @@ int myPulseDelay = 50;
 int myNTriggers = 100000;
 // int myNTriggers    = 100;
 
-TConfig *fConfig;
+TConfig *                    fConfig;
 std::vector<TReadoutBoard *> fBoards;
-TBoardType fBoardType;
-std::vector<TAlpide *> fChips;
+TBoardType                   fBoardType;
+std::vector<TAlpide *>       fChips;
 
 int HitData[512][1024];
 
-void ClearHitData() {
+void ClearHitData()
+{
   for (int icol = 0; icol < 512; icol++) {
     for (int iaddr = 0; iaddr < 1024; iaddr++) {
       HitData[icol][iaddr] = 0;
@@ -51,14 +52,16 @@ void ClearHitData() {
   }
 }
 
-void CopyHitData(std::vector<TPixHit> *Hits) {
+void CopyHitData(std::vector<TPixHit> *Hits)
+{
   for (unsigned int ihit = 0; ihit < Hits->size(); ihit++) {
     HitData[Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address]++;
   }
   Hits->clear();
 }
 
-void WriteDataToFile(const char *fName, bool Recreate) {
+void WriteDataToFile(const char *fName, bool Recreate)
+{
   FILE *fp;
   if (Recreate)
     fp = fopen(fName, "w");
@@ -76,7 +79,8 @@ void WriteDataToFile(const char *fName, bool Recreate) {
 }
 
 // initialisation of Fromu
-int configureFromu(TAlpide *chip) {
+int configureFromu(TAlpide *chip)
+{
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,
                       0x0); // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,
@@ -91,14 +95,16 @@ int configureFromu(TAlpide *chip) {
 }
 
 // initialisation of fixed mask
-int configureMask(TAlpide *chip) {
+int configureMask(TAlpide *chip)
+{
   AlpideConfig::WritePixRegAll(chip, Alpide::PIXREG_MASK, false);
   AlpideConfig::WritePixRegAll(chip, Alpide::PIXREG_SELECT, false);
 
   return 0;
 }
 
-int configureChip(TAlpide *chip) {
+int configureChip(TAlpide *chip)
+{
   AlpideConfig::BaseConfig(chip);
 
   configureFromu(chip);
@@ -111,15 +117,15 @@ int configureChip(TAlpide *chip) {
   return 0;
 }
 
-void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {
-  char Config[1000];
+void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard)
+{
+  char  Config[1000];
   FILE *fp = fopen(fName, "w");
 
   chip->DumpConfig("", false, Config);
   // std::cout << Config << std::endl;
   fprintf(fp, "%s\n", Config);
-  if (daqBoard)
-    daqBoard->DumpConfig("", false, Config);
+  if (daqBoard) daqBoard->DumpConfig("", false, Config);
   fprintf(fp, "%s\n", Config);
   // std::cout << Config << std::endl;
 
@@ -130,25 +136,26 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fclose(fp);
 }
 
-void scan() {
-  unsigned char buffer[1024 * 4000];
-  int n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int prioErrors = 0;
-  TBoardHeader boardInfo;
+void scan()
+{
+  unsigned char         buffer[1024 * 4000];
+  int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
+  int                   prioErrors = 0;
+  TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
   int nTrains, nRest, nTrigsThisTrain, nTrigsPerTrain = 1000;
 
   nTrains = myNTriggers / nTrigsPerTrain;
-  nRest = myNTriggers % nTrigsPerTrain;
+  nRest   = myNTriggers % nTrigsPerTrain;
 
   std::cout << "NTriggers: " << myNTriggers << std::endl;
   std::cout << "NTriggersPerTrain: " << nTrigsPerTrain << std::endl;
   std::cout << "NTrains: " << nTrains << std::endl;
   std::cout << "NRest: " << nRest << std::endl;
 
-  TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(fBoards.at(0));
-  TReadoutBoardDAQ *myDAQboard = dynamic_cast<TReadoutBoardDAQ *>(fBoards.at(0));
+  TReadoutBoardMOSAIC *myMOSAIC   = dynamic_cast<TReadoutBoardMOSAIC *>(fBoards.at(0));
+  TReadoutBoardDAQ *   myDAQboard = dynamic_cast<TReadoutBoardDAQ *>(fBoards.at(0));
 
   int nEventsDecoded = 0;
 
@@ -162,7 +169,8 @@ void scan() {
     std::cout << "Train: " << itrain << std::endl;
     if (itrain == nTrains) {
       nTrigsThisTrain = nRest;
-    } else {
+    }
+    else {
       nTrigsThisTrain = nTrigsPerTrain;
     }
 
@@ -174,7 +182,8 @@ void scan() {
           -1) { // no event available in buffer yet, wait a bit
         std::cout << "No event in buffer but triggers where issued!" << std::endl;
         usleep(10);
-      } else {
+      }
+      else {
         // decode DAQboard event
         BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data,
                                   n_bytes_header, n_bytes_trailer, boardInfo);
@@ -203,7 +212,8 @@ void scan() {
   std::cout << nEventsDecoded << " events were decoded " << std::endl;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
@@ -211,7 +221,7 @@ int main(int argc, char **argv) {
   char Suffix[20], fName[100];
 
   ClearHitData();
-  time_t t = time(0); // get time now
+  time_t     t   = time(0); // get time now
   struct tm *now = localtime(&t);
   sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday,
           now->tm_hour, now->tm_min, now->tm_sec);
@@ -232,7 +242,8 @@ int main(int argc, char **argv) {
     // put your test here...
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardMOSAIC) {
       return -1;
-    } else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
+    }
+    else if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
       fBoards.at(0)->SetTriggerConfig(true, false, myStrobeDelay, myPulseDelay);
       fBoards.at(0)->SetTriggerSource(trigExt);
       TBoardConfigDAQ *cnf = (TBoardConfigDAQ *)(fBoards.at(0)->GetConfig());

@@ -1,11 +1,12 @@
 #include "calibrationpb.h"
-#include "ui_calibrationpb.h"
 #include "mainwindow.h"
+#include "ui_calibrationpb.h"
 #include <QtCore/QCoreApplication>
 #include <QtCore>
 #include <iomanip>
 
-Calibrationpb::Calibrationpb(QWidget *parent) : QDialog(parent), ui(new Ui::Calibrationpb) {
+Calibrationpb::Calibrationpb(QWidget *parent) : QDialog(parent), ui(new Ui::Calibrationpb)
+{
   ui->setupUi(this);
   connect(ui->cancel, SIGNAL(clicked()), this, SLOT(close()));
   connect(ui->ok, SIGNAL(clicked()), this->parent(), SLOT(writecalibrationfile()));
@@ -14,7 +15,8 @@ Calibrationpb::Calibrationpb(QWidget *parent) : QDialog(parent), ui(new Ui::Cali
 
 Calibrationpb::~Calibrationpb() { delete ui; }
 
-void Calibrationpb::setresistances(float &analog, float &digital, float &bb) {
+void Calibrationpb::setresistances(float &analog, float &digital, float &bb)
+{
   std::cout << "seting resistances" << std::endl;
   if (!ui->acal->toPlainText().isEmpty()) {
     analog = ui->acal->toPlainText().toFloat();
@@ -28,7 +30,8 @@ void Calibrationpb::setresistances(float &analog, float &digital, float &bb) {
 }
 
 void Calibrationpb::getcalibration(float savdd, float iavdd, float sdvdd, float idvdd,
-                                   float offsetia, float offsetid) {
+                                   float offsetia, float offsetid)
+{
 
   ui->savdd->setText(QString::number(savdd));
   ui->iavdd->setText(QString::number(iavdd));

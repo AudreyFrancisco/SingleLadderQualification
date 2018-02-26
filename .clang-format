@@ -1,10 +1,12 @@
 ---
 BasedOnStyle:  LLVM
 AccessModifierOffset: -2
+AlignConsecutiveDeclarations: true
+AlignConsecutiveAssignments: true
 AlignEscapedNewlinesLeft: false
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: true
-AllowShortIfStatementsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: true
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakTemplateDeclarations: false
 AlwaysBreakBeforeMultilineStrings: false
@@ -18,7 +20,7 @@ ConstructorInitializerIndentWidth: 4
 ExperimentalAutoDetectBinPacking: false
 IndentCaseLabels: false
 IndentFunctionDeclarationAfterType: false
-MaxEmptyLinesToKeep: 1
+MaxEmptyLinesToKeep: 2
 NamespaceIndentation: All
 PenaltyBreakBeforeFirstCallParameter: 19
 PenaltyBreakComment: 300
@@ -27,11 +29,12 @@ PenaltyBreakFirstLessLess: 120
 PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 60
 Cpp11BracedListStyle: true
+Language: Cpp
 Standard:        Cpp11
 IndentWidth:     2
 TabWidth:        8
 UseTab:          Never
-BreakBeforeBraces: Attach
+BreakBeforeBraces: Stroustrup
 SpacesInParentheses: false
 SpacesInAngles:  false
 SpaceInEmptyParentheses: false

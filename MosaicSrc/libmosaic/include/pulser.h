@@ -31,9 +31,9 @@
 #ifndef PULSER_H
 #define PULSER_H
 
+#include "mwbbslave.h"
 #include <stdint.h>
 #include <string>
-#include "mwbbslave.h"
 
 class Pulser : public MWbbSlave {
 public:
@@ -50,17 +50,17 @@ public:
 
 private: // WBB Slave registers map
   enum regAddress_e {
-    regOpMode = 0,
+    regOpMode       = 0,
     regTriggerDelay = 1,
-    regPulseDelay = 2,
-    regNumPulses = 3,
-    regStatus = 7
+    regPulseDelay   = 2,
+    regNumPulses    = 3,
+    regStatus       = 7
   };
 
 public:
   enum readFlagsBits_e {
-    OPMODE_ENPLS_BIT = (1 << 0),
-    OPMODE_ENTRG_BIT = (1 << 1),
+    OPMODE_ENPLS_BIT    = (1 << 0),
+    OPMODE_ENTRG_BIT    = (1 << 1),
     OPMODE_ENEXTTRG_BIT = (1 << 2)
   };
 };
