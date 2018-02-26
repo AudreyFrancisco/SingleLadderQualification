@@ -450,7 +450,10 @@ int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
 int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                 std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
 {
-  int RCVMAP[] = {3, 5, 7, 8, 6, 4, 2, 1, 0};
+  //int RCVMAP[] = {3, 5, 7, 8, 6, 4, 2, 1, 0};
+  //for MFT HICs :
+  int RCVMAP[] = {0, 1, 2, 4, 6, 8, 7, 5, 3};
+
 
   (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);

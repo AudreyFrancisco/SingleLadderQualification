@@ -306,7 +306,7 @@ void scan()
               }
               fclose(fDebug);
             }
-            // std::cout << "total number of hits found: " << Hits->size() << std::endl;
+            std::cout << "total number of hits found: " << Hits->size() << std::endl;
             itrg += nClosedEvents;
           }
         }

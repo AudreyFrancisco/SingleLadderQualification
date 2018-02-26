@@ -97,7 +97,10 @@ long TrgRecorderParser::parse(int numClosed)
     trgNum  = buf2uint32(p);
     trgTime = buf2uint64(p + 4);
 
-    if (verbose) printf("Trigger %d @ %ld\n", trgNum, trgTime);
+    //type error : ld changed to llu
+    //if (verbose) printf("Trigger %d @ %ld\n", trgNum, trgTime);
+    if (verbose) printf("Trigger %d @ %llu\n", trgNum, trgTime);
+
 
     p += evSize;
     numClosed--;
