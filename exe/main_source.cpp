@@ -53,11 +53,12 @@ int myNTriggers = 5;
 
 char fNameRaw[1024];
 
-int HitData[10][16][512][1024];
+int HitData[7][16][512][1024];
+
 
 void ClearHitData()
 {
-  for (int imod = 0; imod < 10; imod++) {
+  for (int imod = 0; imod < 7; imod++) {
     for (int ichip = 0; ichip < 16; ichip++) {
       for (int icol = 0; icol < 512; icol++) {
         for (int iaddr = 0; iaddr < 1024; iaddr++) {
@@ -83,7 +84,7 @@ void CopyHitData(std::vector<TPixHit> *Hits)
 
 bool HasDataChip(int chipId)
 {
-  for (int imod = 0; imod < 10; imod++) {
+  for (int imod = 0; imod < 7; imod++) {
     for (int icol = 0; icol < 512; icol++) {
       for (int iaddr = 0; iaddr < 1024; iaddr++) {
         if (HitData[imod][chipId][icol][iaddr] > 0) return true;
@@ -120,7 +121,7 @@ void WriteDataToFile(const char *fName, bool Recreate)
 
   sprintf(fNameTemp, "%s", fName);
   strtok(fNameTemp, ".");
-  for (unsigned int imod = 0; imod < 10; imod++) {
+  for (unsigned int imod = 0; imod < 7; imod++) {
     for (unsigned int ichip = 0; ichip < fChips.size(); ichip++) {
       int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
       int modId  = ((fChips.at(ichip)->GetConfig()->GetChipId()) >> 4) & 0x7;
@@ -304,7 +305,7 @@ int main(int argc, char **argv)
   decodeCommandParameters(argc, argv);
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
-  char Suffix[30], fName[1000];
+  char Suffix[30], fName[100];
 
   ClearHitData();
   time_t     t   = time(0); // get time now
@@ -357,6 +358,7 @@ int main(int argc, char **argv)
       }
     }
   }
+
 
   sprintf(fNameRaw, "Data/SourceRaw_%s.dat", Suffix);
   scan();
