@@ -4,79 +4,67 @@
 #include <iostream>
 #include <sstream>
 
-
 using namespace Alpide;
 
-TAlpide::TAlpide (TChipConfig *config)
-  : fConfig(config)
-  , fChipId(config->GetChipId())
-  , fReadoutBoard(0x0)
-  , fADCOffset(-1)
-  , fADCHalfLSB(false)
-  , fADCSign(false)
-{
+TAlpide::TAlpide(TChipConfig *config)
+    : fConfig(config), fChipId(config->GetChipId()), fReadoutBoard(0x0), fADCOffset(-1),
+      fADCHalfLSB(false), fADCSign(false) {}
 
+void TAlpide::SetEnable(bool Enable) {
+  fReadoutBoard->SetChipEnable(this, Enable);
+  fConfig->SetEnable(Enable);
 }
 
-
-void TAlpide::SetEnable (bool Enable) {
-  fReadoutBoard->SetChipEnable (this, Enable);
-  fConfig      ->SetEnable     (Enable);
+int TAlpide::ReadRegister(TRegister address, uint16_t &value) {
+  return ReadRegister((uint16_t)address, value);
 }
 
-
-int TAlpide::ReadRegister (TRegister address, uint16_t &value) {
-  return ReadRegister ((uint16_t) address, value);
-}
-
-
-int TAlpide::ReadRegister (uint16_t address, uint16_t &value) {
+int TAlpide::ReadRegister(uint16_t address, uint16_t &value) {
   int err = fReadoutBoard->ReadChipRegister(address, value, this);
-  if (err < 0) return err;  // readout board should have thrown an exception before
+  if (err < 0)
+    return err; // readout board should have thrown an exception before
 
   return err;
-
 }
 
-
-int TAlpide::WriteRegister (TRegister address, uint16_t value, bool verify) {
-  return WriteRegister ((uint16_t) address, value, verify);
+int TAlpide::WriteRegister(TRegister address, uint16_t value, bool verify) {
+  return WriteRegister((uint16_t)address, value, verify);
 }
 
-
-int TAlpide::WriteRegister (uint16_t address, uint16_t value, bool verify) {
+int TAlpide::WriteRegister(uint16_t address, uint16_t value, bool verify) {
   int result = fReadoutBoard->WriteChipRegister(address, value, this);
-  if ((!verify) || (result < 0)) return result;
+  if ((!verify) || (result < 0))
+    return result;
 
   uint16_t check;
-  result = ReadRegister (address, check);
-  if (result < 0) return result;
-  if (check != value) return -1;      // raise exception (warning) readback != write value;
+  result = ReadRegister(address, check);
+  if (result < 0)
+    return result;
+  if (check != value)
+    return -1; // raise exception (warning) readback != write value;
   return 0;
 }
 
-
-int TAlpide::ModifyRegisterBits (TRegister address, uint8_t lowBit, uint8_t nBits, uint16_t value, bool verify) {
+int TAlpide::ModifyRegisterBits(TRegister address, uint8_t lowBit, uint8_t nBits, uint16_t value,
+                                bool verify) {
   if ((lowBit < 0) || (lowBit > 15) || (lowBit + nBits > 15)) {
-    return -1;    // raise exception illegal limits
+    return -1; // raise exception illegal limits
   }
   uint16_t registerValue, mask = 0xffff;
   ReadRegister(address, registerValue);
-  //std::cout << "Value before modify:0x " << std::hex << registerValue << std::dec << std::endl;
+  // std::cout << "Value before modify:0x " << std::hex << registerValue << std::dec << std::endl;
   for (int i = lowBit; i < lowBit + nBits; i++) {
     mask -= (1 << i);
   }
 
-  registerValue &= mask;                  // set all bits that are to be overwritten to 0
-  value         &= (1 << nBits) -1;       // make sure value fits into nBits
-  registerValue |= value << lowBit;        // or value into the foreseen spot
+  registerValue &= mask;            // set all bits that are to be overwritten to 0
+  value &= (1 << nBits) - 1;        // make sure value fits into nBits
+  registerValue |= value << lowBit; // or value into the foreseen spot
 
-  return WriteRegister (address, registerValue, verify);
-
+  return WriteRegister(address, registerValue, verify);
 }
 
-
-void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
+void TAlpide::DumpConfig(const char *fName, bool writeFile, char *config) {
   uint16_t value;
 
   if (writeFile) {
@@ -124,7 +112,8 @@ void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
     ReadRegister(0x5, value);
     fprintf(fp, "FROMU_CONFIG2  %i\n", value);
 
-    // FROMU pulsing reg 1: delay between pulse and strobe if the feature of automatic strobing is enabled
+    // FROMU pulsing reg 1: delay between pulse and strobe if the feature of automatic strobing is
+    // enabled
     ReadRegister(0x7, value);
     fprintf(fp, "FROMU_PULSING1  %i\n", value);
 
@@ -136,7 +125,7 @@ void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
     ReadRegister(0x10, value);
     fprintf(fp, "CMUDMU_CONFIG  %i\n", value);
 
-    fclose (fp);
+    fclose(fp);
   }
 
   config[0] = '\0';
@@ -183,7 +172,8 @@ void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
   ReadRegister(0x5, value);
   sprintf(config, "%sFROMU_CONFIG2  %i\n", config, value);
 
-  // FROMU pulsing reg 1: delay between pulse and strobe if the feature of automatic strobing is enabled
+  // FROMU pulsing reg 1: delay between pulse and strobe if the feature of automatic strobing is
+  // enabled
   ReadRegister(0x7, value);
   sprintf(config, "%sFROMU_PULSING1  %i\n", config, value);
 
@@ -196,15 +186,15 @@ void TAlpide::DumpConfig (const char *fName, bool writeFile, char *config) {
   sprintf(config, "%sCMUDMU_CONFIG  %i\n", config, value);
 }
 
-std::string TAlpide::DumpRegisters()
-{
+std::string TAlpide::DumpRegisters() {
   std::stringstream dump;
 
   int chipId = fConfig->GetChipId();
 
   // Periphery config
   dump << "# Chip ID\tAddress\tValue" << std::endl;
-  for (unsigned int reg = (unsigned int)Alpide::REG_MODECONTROL; reg <= (unsigned int)Alpide::REG_BUSY_MINWIDTH; ++reg) {
+  for (unsigned int reg = (unsigned int)Alpide::REG_MODECONTROL;
+       reg <= (unsigned int)Alpide::REG_BUSY_MINWIDTH; ++reg) {
     uint16_t value = 0xDEAD;
     this->ReadRegister((Alpide::TRegister)reg, value);
     dump << chipId << "\t0x" << std::hex << reg << "\t0x" << value << std::dec << std::endl;
@@ -213,14 +203,16 @@ std::string TAlpide::DumpRegisters()
   // Pixel config: read-only do nothing
 
   // DAC and monitoring
-  for (unsigned int reg = (unsigned int)Alpide::REG_ANALOGMON; reg <= (unsigned int)Alpide::REG_ADC_T2V; ++reg) {
+  for (unsigned int reg = (unsigned int)Alpide::REG_ANALOGMON;
+       reg <= (unsigned int)Alpide::REG_ADC_T2V; ++reg) {
     uint16_t value = 0xDEAD;
     this->ReadRegister((Alpide::TRegister)reg, value);
-    dump << chipId << "\t0x" << std::hex << reg << "\t0x" << value << std::dec <<  std::endl;
+    dump << chipId << "\t0x" << std::hex << reg << "\t0x" << value << std::dec << std::endl;
   }
 
   // Test and debug control
-  for (unsigned int reg = (unsigned int)Alpide::REG_SEU_ERROR_COUNT; reg <= (unsigned int)Alpide::REG_ADC_DEBUG; ++reg) {
+  for (unsigned int reg = (unsigned int)Alpide::REG_SEU_ERROR_COUNT;
+       reg <= (unsigned int)Alpide::REG_ADC_DEBUG; ++reg) {
     uint16_t value = 0xDEAD;
     this->ReadRegister((Alpide::TRegister)reg, value);
     dump << chipId << "\t0x" << std::hex << reg << "\t0x" << value << std::dec << std::endl;
@@ -228,7 +220,6 @@ std::string TAlpide::DumpRegisters()
 
   return dump.str();
 }
-
 
 // ---------- DAC / ADC section -----------------------
 
@@ -243,15 +234,14 @@ std::string TAlpide::DumpRegisters()
  *              RampSpeed          [0:500ms 1:1us 2:2us 3:4us]
  *
  */
-uint16_t TAlpide::SetTheADCCtrlRegister(Alpide::TADCMode Mode,
-                                        Alpide::TADCInput SelectInput,
+uint16_t TAlpide::SetTheADCCtrlRegister(Alpide::TADCMode Mode, Alpide::TADCInput SelectInput,
                                         Alpide::TADCComparator ComparatorCurrent,
-                                        Alpide::TADCRampSpeed RampSpeed)
-{
+                                        Alpide::TADCRampSpeed RampSpeed) {
   uint16_t Data;
-  Data = Mode | (SelectInput<<2) | (ComparatorCurrent<<6) | (fADCSign<<8) | (RampSpeed<<9) | (fADCHalfLSB<<11);
-  WriteRegister( Alpide::REG_ADC_CONTROL, Data);
-  return(Data);
+  Data = Mode | (SelectInput << 2) | (ComparatorCurrent << 6) | (fADCSign << 8) | (RampSpeed << 9) |
+         (fADCHalfLSB << 11);
+  WriteRegister(Alpide::REG_ADC_CONTROL, Data);
+  return (Data);
 }
 
 /* ------------------------------------------------------
@@ -263,8 +253,7 @@ uint16_t TAlpide::SetTheADCCtrlRegister(Alpide::TADCMode Mode,
  * Note  : Iref =  0:0.25ua 1:0.75uA 2:1.00uA 3:1.25uA
  *
  */
-void TAlpide::SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef)
-{
+void TAlpide::SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef) {
   int VDAC, IDAC;
   uint16_t Value;
   switch (ADac) {
@@ -334,10 +323,9 @@ void TAlpide::SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef)
   Value |= (IDAC & 0x7) << 4;
   Value |= (IRef & 0x3) << 9;
 
-  WriteRegister (Alpide::REG_ANALOGMON, Value);
+  WriteRegister(Alpide::REG_ANALOGMON, Value);
   return;
 }
-
 
 /* ------------------------------------------------------
  * Calibrate the internal ADC
@@ -348,49 +336,54 @@ void TAlpide::SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef)
  *         devoted class members.
  *
  */
-int TAlpide::CalibrateADC()
-{
-  uint16_t theVal2,theVal1;
+int TAlpide::CalibrateADC() {
+  uint16_t theVal2, theVal1;
 
   // Calibration Phase 1
   fADCHalfLSB = false;
   fADCSign = false;
-  SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
-  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE, this);
+  SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE, Alpide::INP_AVSS, Alpide::COMP_296uA,
+                        Alpide::RAMP_1us);
+  fReadoutBoard->SendCommand(Alpide::COMMAND_ADCMEASURE, this);
   usleep(4000); // > of 5 milli sec
-  ReadRegister( Alpide::REG_ADC_CALIB, theVal1);
+  ReadRegister(Alpide::REG_ADC_CALIB, theVal1);
   fADCSign = true;
-  SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
-  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE, this);
+  SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE, Alpide::INP_AVSS, Alpide::COMP_296uA,
+                        Alpide::RAMP_1us);
+  fReadoutBoard->SendCommand(Alpide::COMMAND_ADCMEASURE, this);
   usleep(4000); // > of 5 milli sec
-  ReadRegister( Alpide::REG_ADC_CALIB, theVal2);
-  fADCSign =  (theVal1 > theVal2) ? false : true;
+  ReadRegister(Alpide::REG_ADC_CALIB, theVal2);
+  fADCSign = (theVal1 > theVal2) ? false : true;
 
   // Calibration Phase 2
   fADCHalfLSB = false;
-  SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
-  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE, this);
+  SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE, Alpide::INP_AVSS, Alpide::COMP_296uA,
+                        Alpide::RAMP_1us);
+  fReadoutBoard->SendCommand(Alpide::COMMAND_ADCMEASURE, this);
   usleep(4000); // > of 5 milli sec
-  ReadRegister( Alpide::REG_ADC_CALIB, theVal1);
+  ReadRegister(Alpide::REG_ADC_CALIB, theVal1);
   fADCHalfLSB = true;
-  SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
-  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE, this);
+  SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE, Alpide::INP_AVSS, Alpide::COMP_296uA,
+                        Alpide::RAMP_1us);
+  fReadoutBoard->SendCommand(Alpide::COMMAND_ADCMEASURE, this);
   usleep(4000); // > of 5 milli sec
-  ReadRegister( Alpide::REG_ADC_CALIB, theVal2);
-  fADCHalfLSB =  (theVal1 > theVal2) ? false : true;
+  ReadRegister(Alpide::REG_ADC_CALIB, theVal2);
+  fADCHalfLSB = (theVal1 > theVal2) ? false : true;
 
   // Offset Measurement
   fADCOffset = 0;
   unsigned int n_samples = 20;
-  for (unsigned int i = 0; i<n_samples; ++i) {
-    SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE , Alpide::INP_AVSS, Alpide::COMP_296uA, Alpide::RAMP_1us);
-    fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE, this);
+  for (unsigned int i = 0; i < n_samples; ++i) {
+    SetTheADCCtrlRegister(Alpide::MODE_CALIBRATE, Alpide::INP_AVSS, Alpide::COMP_296uA,
+                          Alpide::RAMP_1us);
+    fReadoutBoard->SendCommand(Alpide::COMMAND_ADCMEASURE, this);
     usleep(4000); // > of 5 milli sec
-    ReadRegister( Alpide::REG_ADC_CALIB,theVal1);
+    ReadRegister(Alpide::REG_ADC_CALIB, theVal1);
     fADCOffset += theVal1;
   }
-  fADCOffset = static_cast<int>(static_cast<double>(fADCOffset)/static_cast<double>(n_samples)+0.5);
-  return(fADCOffset);
+  fADCOffset =
+      static_cast<int>(static_cast<double>(fADCOffset) / static_cast<double>(n_samples) + 0.5);
+  return (fADCOffset);
 }
 
 /* ------------------------------------------------------
@@ -407,18 +400,20 @@ float TAlpide::ReadTemperature() {
 
   uint16_t theResult = 0;
   float theValue;
-  if(fADCOffset == -1) { // needs calibration
+  if (fADCOffset == -1) { // needs calibration
     CalibrateADC();
   }
 
-  SetTheDacMonitor(Alpide::REG_ANALOGMON); // uses the RE_ANALOGMON, in order to disable the monitoring !
+  SetTheDacMonitor(
+      Alpide::REG_ANALOGMON); // uses the RE_ANALOGMON, in order to disable the monitoring !
   usleep(5000);
-  SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature, Alpide::COMP_296uA, Alpide::RAMP_1us);
-  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE,  this);
+  SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_Temperature, Alpide::COMP_296uA,
+                        Alpide::RAMP_1us);
+  fReadoutBoard->SendCommand(Alpide::COMMAND_ADCMEASURE, this);
   usleep(5000); // Wait for the measurement > of 5 milli sec
-  ReadRegister( Alpide::REG_ADC_AVSS, theResult);
-  theResult -=  (uint16_t)fADCOffset;
-  theValue =  ( ((float)theResult) * 0.1281) + 6.8; // first approximation
+  ReadRegister(Alpide::REG_ADC_AVSS, theResult);
+  theResult -= (uint16_t)fADCOffset;
+  theValue = (((float)theResult) * 0.1281) + 6.8; // first approximation
   return theValue;
 }
 
@@ -434,12 +429,12 @@ float TAlpide::ReadTemperature() {
  */
 float TAlpide::ReadAnalogueVoltage() {
 
-  if(fADCOffset == -1) { // needs calibration
+  if (fADCOffset == -1) { // needs calibration
     CalibrateADC();
   }
 
   float AVDD_direct = 0.;
-  float AVDD_VTEMP  = 0.;
+  float AVDD_VTEMP = 0.;
 
   bool AVDD_saturated = false;
 
@@ -449,18 +444,21 @@ float TAlpide::ReadAnalogueVoltage() {
   // AVDD direct
   for (unsigned int repetition = 0; repetition < nSamples; ++repetition) {
     SetTheDacMonitor(Alpide::REG_ANALOGMON);
-    SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA, Alpide::RAMP_1us);
+    SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA,
+                          Alpide::RAMP_1us);
     usleep(5000);
-    GetReadoutBoard()->SendCommand (Alpide::COMMAND_ADCMEASURE, this);
+    GetReadoutBoard()->SendCommand(Alpide::COMMAND_ADCMEASURE, this);
     usleep(5000);
     ReadRegister(Alpide::REG_ADC_AVSS, theResult);
-    if (theResult == 1055) AVDD_saturated = true;
-    AVDD_direct += 2. * ((float)theResult - (float)(GetADCOffset())) * 0.823e-3; // first approximation
+    if (theResult == 1055)
+      AVDD_saturated = true;
+    AVDD_direct +=
+        2. * ((float)theResult - (float)(GetADCOffset())) * 0.823e-3; // first approximation
   }
   AVDD_direct /= nSamples;
 
   // AVDD via VTEMP @ 200
-  WriteRegister (Alpide::REG_VTEMP, 200);
+  WriteRegister(Alpide::REG_VTEMP, 200);
   usleep(5000);
 
   for (unsigned int repetition = 0; repetition < nSamples; ++repetition) {
@@ -494,19 +492,20 @@ float TAlpide::ReadDACVoltage(Alpide::TRegister ADac) {
   uint16_t theRowValue = 0;
   int theResult = 0;
   float theValue = 0.0;
-  if(fADCOffset == -1) { // needs calibration
+  if (fADCOffset == -1) { // needs calibration
     CalibrateADC();
   }
 
   SetTheDacMonitor(ADac);
   usleep(5000);
-  SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_DACMONV, Alpide::COMP_296uA, Alpide::RAMP_1us);
-  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE,  this);
+  SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_DACMONV, Alpide::COMP_296uA,
+                        Alpide::RAMP_1us);
+  fReadoutBoard->SendCommand(Alpide::COMMAND_ADCMEASURE, this);
   usleep(5000); // Wait for the measurement > of 5 milli sec
-  ReadRegister( Alpide::REG_ADC_AVSS, theRowValue);
+  ReadRegister(Alpide::REG_ADC_AVSS, theRowValue);
   theResult = ((int)theRowValue) - fADCOffset;
-  theValue =  ( ((float)theResult) * 0.001644); // V scale first approximation
-  return(theValue);
+  theValue = (((float)theResult) * 0.001644); // V scale first approximation
+  return (theValue);
 }
 
 /* ------------------------------------------------------
@@ -528,18 +527,19 @@ float TAlpide::ReadDACCurrent(Alpide::TRegister ADac) {
   uint16_t theRowValue = 0;
   int theResult = 0;
   float theValue = 0.0;
-  if(fADCOffset == -1) { // needs calibration
+  if (fADCOffset == -1) { // needs calibration
     CalibrateADC();
   }
 
   SetTheDacMonitor(ADac);
   usleep(5000);
-  SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_DACMONI, Alpide::COMP_296uA, Alpide::RAMP_1us);
+  SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_DACMONI, Alpide::COMP_296uA,
+                        Alpide::RAMP_1us);
 
-  fReadoutBoard->SendCommand ( Alpide::COMMAND_ADCMEASURE,  this);
+  fReadoutBoard->SendCommand(Alpide::COMMAND_ADCMEASURE, this);
   usleep(5000); // Wait for the measurement > of 5 milli sec
-  ReadRegister( Alpide::REG_ADC_AVSS, theRowValue);
+  ReadRegister(Alpide::REG_ADC_AVSS, theRowValue);
   theResult = ((int)theRowValue) - fADCOffset;
-  theValue = ( ((float)theResult) * 0.164); // uA scale   first approximation
-  return(theValue);
+  theValue = (((float)theResult) * 0.164); // uA scale   first approximation
+  return (theValue);
 }

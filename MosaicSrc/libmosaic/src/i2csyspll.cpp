@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -33,73 +33,62 @@
 #include "mexception.h"
 #include "i2csyspll.h"
 
-#define CDCM6208_ADDRESS	0x54
+#define CDCM6208_ADDRESS 0x54
 
-I2CSysPll::I2CSysPll(WishboneBus *wbbPtr, uint32_t baseAdd) : 
-			I2Cbus(wbbPtr, baseAdd)
-{
+I2CSysPll::I2CSysPll(WishboneBus *wbbPtr, uint32_t baseAdd) : I2Cbus(wbbPtr, baseAdd) {}
+
+void I2CSysPll::writeReg(uint8_t add, uint16_t d) {
+  addAddress(CDCM6208_ADDRESS, I2Cbus::I2C_Write);
+  addWriteData(0x00);
+  addWriteData(add);
+  addWriteData(d >> 8);
+  addWriteData(d & 0xff, I2Cbus::RWF_stop);
+  execute();
 }
 
-void I2CSysPll::writeReg(uint8_t add, uint16_t d)
-{
-	addAddress(CDCM6208_ADDRESS, I2Cbus::I2C_Write);
-	addWriteData(0x00);
-	addWriteData(add);
-	addWriteData(d>>8);
-	addWriteData(d&0xff, I2Cbus::RWF_stop);
-	execute();
+void I2CSysPll::readReg(uint8_t add, uint16_t *d) {
+  uint32_t *r = new uint32_t[2];
+
+  addAddress(CDCM6208_ADDRESS, I2Cbus::I2C_Write);
+  addWriteData(0x00);
+  addWriteData(add, I2Cbus::RWF_stop);
+
+  addAddress(CDCM6208_ADDRESS, I2Cbus::I2C_Read);
+  addRead(r);
+  addRead(r + 1, I2Cbus::RWF_dontAck | I2Cbus::RWF_stop);
+  execute();
+
+  *d = ((r[0] & 0xff) << 8) | (r[1] & 0xff);
 }
 
-void I2CSysPll::readReg (uint8_t add, uint16_t *d)
-{
-	uint32_t *r = new uint32_t[2];
+void I2CSysPll::setup(pllRegisters_t regs) {
+  uint16_t r;
+  int lookTry;
 
-	addAddress(CDCM6208_ADDRESS, I2Cbus::I2C_Write);
-	addWriteData(0x00);
-	addWriteData(add, I2Cbus::RWF_stop);
+  // Write
+  for (int i = 0; i < 20; i++) {
+    writeReg(i, regs.reg[i]);
+  }
 
-	addAddress(CDCM6208_ADDRESS, I2Cbus::I2C_Read);
-	addRead(r);
-	addRead(r+1, I2Cbus::RWF_dontAck | I2Cbus::RWF_stop);
-	execute();
+  // Verify
+  for (int i = 0; i < 20; i++) {
+    readReg(i, &r);
+    if (r != regs.reg[i])
+      throw MBoardInitError("System PLL verify error");
+  }
 
-	*d = ((r[0]&0xff) << 8) | (r[1]&0xff);
+  // Cycle the reset
+  writeReg(3, regs.reg[3] & ~(1 << 6));
+  writeReg(3, regs.reg[3]);
+
+  // wait for PLL to lock
+  lookTry = 500;
+  while (--lookTry) {
+    readReg(21, &r);
+    if ((r & 0x0004) == 0)
+      break;
+  }
+
+  if (lookTry == 0)
+    throw MBoardInitError("System PLL NOT locked!");
 }
-
-
-void I2CSysPll::setup(pllRegisters_t regs)
-{
-	uint16_t r;
-	int lookTry;
-	
-	// Write
-	for (int i=0; i<20; i++){
-		writeReg(i, regs.reg[i]);
-	}
-
-	// Verify
-	for (int i=0; i<20; i++){
-		readReg(i, &r);
-		if (r != regs.reg[i])
-			throw MBoardInitError("System PLL verify error");
-	}
-
-	// Cycle the reset 
-	writeReg(3, regs.reg[3] & ~(1<<6));
-	writeReg(3, regs.reg[3]);
-
-	// wait for PLL to lock
-	lookTry = 500;
-	while (--lookTry){
-		readReg(21, &r);
-		if ((r&0x0004) == 0)
-			break;
-	}
-
-	if (lookTry==0)
-			throw MBoardInitError("System PLL NOT locked!");
-		
-}
-
-
-

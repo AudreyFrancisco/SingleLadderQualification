@@ -11,16 +11,15 @@ unsigned int Bitmask(int width) {
   return tmp;
 }
 
-void ParseXML(TAlpide* dut, TiXmlNode* node, int base, int rgn, bool readwrite)
-{
+void ParseXML(TAlpide *dut, TiXmlNode *node, int base, int rgn, bool readwrite) {
   // readwrite (from Chip): true = read; false = write
-  for (TiXmlNode* pChild = node->FirstChild("address"); pChild != 0;
+  for (TiXmlNode *pChild = node->FirstChild("address"); pChild != 0;
        pChild = pChild->NextSibling("address")) {
     if (pChild->Type() != TiXmlNode::TINYXML_ELEMENT)
       continue;
-//         printf( "Element %d [%s] %d %d\n", pChild->Type(), pChild->Value(),
-//         base, rgn);
-    TiXmlElement* elem = pChild->ToElement();
+    //         printf( "Element %d [%s] %d %d\n", pChild->Type(), pChild->Value(),
+    //         base, rgn);
+    TiXmlElement *elem = pChild->ToElement();
     if (base == -1) {
       if (!elem->Attribute("base")) {
         std::cout << "Base attribute not found!" << std::endl;
@@ -41,7 +40,7 @@ void ParseXML(TAlpide* dut, TiXmlNode* node, int base, int rgn, bool readwrite)
       int sub = atoi(elem->Attribute("sub"));
       uint16_t address = ((rgn << 11) + (base << 8) + sub);
       uint16_t value = 0;
-      //std::cout << "region" << rgn << " " << base << " " << sub << std::endl;
+      // std::cout << "region" << rgn << " " << base << " " << sub << std::endl;
 
       if (readwrite) {
         if (dut->ReadRegister(address, value) != 1) {
@@ -50,7 +49,7 @@ void ParseXML(TAlpide* dut, TiXmlNode* node, int base, int rgn, bool readwrite)
         }
       }
 
-      for (TiXmlNode* valueChild = pChild->FirstChild("value"); valueChild != 0;
+      for (TiXmlNode *valueChild = pChild->FirstChild("value"); valueChild != 0;
            valueChild = valueChild->NextSibling("value")) {
         if (!valueChild->ToElement()->Attribute("begin")) {
           std::cout << "begin attribute not found!" << std::endl;
@@ -65,9 +64,9 @@ void ParseXML(TAlpide* dut, TiXmlNode* node, int base, int rgn, bool readwrite)
 
         if (!valueChild || !valueChild->FirstChild("content") ||
             !valueChild->FirstChild("content")->FirstChild()) {
-          std::cout << "Content tag not found! Base: " << base << ", region: " << rgn << ", sub: " << sub << std::endl;
-          printf( "Element %d [%s] %d %d\n", pChild->Type(), pChild->Value(),
-                  base, rgn);
+          std::cout << "Content tag not found! Base: " << base << ", region: " << rgn
+                    << ", sub: " << sub << std::endl;
+          printf("Element %d [%s] %d %d\n", pChild->Type(), pChild->Value(), base, rgn);
           break;
         }
         if (readwrite) {
@@ -76,16 +75,12 @@ void ParseXML(TAlpide* dut, TiXmlNode* node, int base, int rgn, bool readwrite)
           sprintf(tmp, "0x%X", subvalue);
           valueChild->FirstChild("content")->FirstChild()->SetValue(tmp);
         } else {
-          int content = (int)strtol(
-            valueChild->FirstChild("content")->FirstChild()->Value(), 0, 16);
-
-
+          int content =
+              (int)strtol(valueChild->FirstChild("content")->FirstChild()->Value(), 0, 16);
 
           if (content >= (1 << width)) {
-            std::cout << "value too large: " << begin << " " << width << " "
-                      << content << " "
-                      << valueChild->FirstChild("content")->Value()
-                      << std::endl;
+            std::cout << "value too large: " << begin << " " << width << " " << content << " "
+                      << valueChild->FirstChild("content")->Value() << std::endl;
             std::cout << "Base: " << base << ", region: " << rgn << ", sub: " << sub << std::endl;
             break;
           }
@@ -93,15 +88,17 @@ void ParseXML(TAlpide* dut, TiXmlNode* node, int base, int rgn, bool readwrite)
         }
       }
       if (!readwrite) {
-        //printf("%d %d %d: %d %d\n", base, rgn, sub, address, value);
+        // printf("%d %d %d: %d %d\n", base, rgn, sub, address, value);
         if (dut->WriteRegister(address, value) != 1)
           std::cout << "Failure to write chip address " << address << std::endl;
         uint16_t valuecompare = -1;
         if (dut->ReadRegister(address, valuecompare) != 1)
-          std::cout << "Failure to read chip address after writing chip address " << address << std::endl;
+          std::cout << "Failure to read chip address after writing chip address " << address
+                    << std::endl;
         if (address != 14 && value != valuecompare)
-          std::cout << "Register 0x" << std::hex << address << std::dec << "read back error : write value is : " << value << " and read value is : "<< valuecompare << std::endl;
-
+          std::cout << "Register 0x" << std::hex << address << std::dec
+                    << "read back error : write value is : " << value
+                    << " and read value is : " << valuecompare << std::endl;
       }
     }
   }

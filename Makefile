@@ -78,7 +78,7 @@ EXE += $(TEST_EXE_ROOT)
 
 
 #### TARGETS ####
-all: $(EXE) Config.cfg
+all: $(EXE) Config.cfg githooks
 
 ### Config.cfg
 Config.cfg: ConfigTemplate.cfg
@@ -149,4 +149,9 @@ format:
 format-check:
 	/bin/bash -c './.format-check.sh'
 
-.PHONY:	all clean clean-all $(STATIC_LIBS) lib lib_analysis format format-check
+### Config.cfg
+githooks:
+	/bin/bash -c 'if [[ "$(lsb_release -d | grep "CentOS Linux release 7" | wc -l)" -eq 1 ]]; then cp -v .pre-commit-clang-format .git/hooks/pre-commit ; else echo "automatic formatting only available on CentOS CERN 7"; fi'
+
+
+.PHONY:	all clean clean-all $(STATIC_LIBS) lib lib_analysis format format-check githooks

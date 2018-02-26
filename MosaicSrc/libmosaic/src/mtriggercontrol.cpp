@@ -34,36 +34,29 @@
 #include "mtriggercontrol.h"
 #include "mexception.h"
 
+MTriggerControl::MTriggerControl(WishboneBus *wbbPtr, uint32_t baseAdd)
+    : MWbbSlave(wbbPtr, baseAdd) {}
 
-MTriggerControl::MTriggerControl(WishboneBus *wbbPtr, uint32_t baseAdd):
-			MWbbSlave(wbbPtr, baseAdd)
-{
+void MTriggerControl::addEnableExtTrigger(bool en, bool levelSensitive) {
+  uint32_t tmp;
+
+  tmp = en ? EN_EXT_TRIGGER : 0;
+  tmp |= levelSensitive ? EXT_TRG_LEVEL : 0;
+
+  wbb->addWrite(baseAddress + regCfg, tmp);
 }
 
-
-void MTriggerControl::addEnableExtTrigger(bool en, bool levelSensitive)
-{
-	uint32_t tmp;
-
-	tmp = en ? EN_EXT_TRIGGER : 0;
-	tmp |= levelSensitive ? EXT_TRG_LEVEL : 0;
-
-	wbb->addWrite(baseAddress+regCfg, tmp);
+void MTriggerControl::getTriggerCounter(uint32_t *counter) {
+  wbb->addRead(baseAddress + regTriggerCounter, counter);
+  wbb->execute();
 }
 
-void MTriggerControl::getTriggerCounter(uint32_t *counter)
-{
-	wbb->addRead(baseAddress+regTriggerCounter, counter);
-	wbb->execute();
-}
-
-std::string MTriggerControl::dumpRegisters()
-{
+std::string MTriggerControl::dumpRegisters() {
   if (!wbb)
     throw MIPBusUDPError("No IPBus configured");
 
-  regAddress_e addrs[] = { regCfg, regTriggerCounter, regTimeL, regTimeH };
-  uint32_t nAddrs = sizeof(addrs)/sizeof(regAddress_e);
+  regAddress_e addrs[] = {regCfg, regTriggerCounter, regTimeL, regTimeH};
+  uint32_t nAddrs = sizeof(addrs) / sizeof(regAddress_e);
 
   std::stringstream ss;
   ss << std::hex;
@@ -71,12 +64,13 @@ std::string MTriggerControl::dumpRegisters()
   for (uint32_t iAddr = 0; iAddr < nAddrs; ++iAddr) {
     uint32_t result = 0xDEADBEEF;
     try {
-      wbb->addRead(baseAddress+addrs[iAddr], &result);
+      wbb->addRead(baseAddress + addrs[iAddr], &result);
       execute();
     }
-    catch(...) {
-      std::cerr << "MTriggerControl read error: address 0x" << std::hex << baseAddress+addrs[iAddr]
-                << " (0x" << addrs[iAddr] << ")!" << std::dec << std::endl;
+    catch (...) {
+      std::cerr << "MTriggerControl read error: address 0x" << std::hex
+                << baseAddress + addrs[iAddr] << " (0x" << addrs[iAddr] << ")!" << std::dec
+                << std::endl;
     };
 
     ss << "0x" << addrs[iAddr] << "\t0x" << result << std::endl;

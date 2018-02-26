@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -31,48 +31,29 @@
 #include <stdlib.h>
 #include "mdatagenerator.h"
 
+MDataGenerator::MDataGenerator() {}
 
-MDataGenerator::MDataGenerator()
-{
+MDataGenerator::MDataGenerator(WishboneBus *wbbPtr, uint32_t baseAdd)
+    : MWbbSlave(wbbPtr, baseAdd) {}
+
+void MDataGenerator::setup(uint32_t evSize, uint32_t evDelay, bool on) {
+  wbb->addWrite(baseAddress + regModeOn, on ? MODEON_ON : 0);
+  wbb->addWrite(baseAddress + regEventSize, evSize);
+  wbb->addWrite(baseAddress + regEventDelay, evDelay);
+  wbb->execute();
 }
 
-MDataGenerator::MDataGenerator(WishboneBus *wbbPtr, uint32_t baseAdd) : 
-			MWbbSlave(wbbPtr, baseAdd)
-{
+void MDataGenerator::getSetup(uint32_t *evSize, uint32_t *evDelay, bool *on) {
+  uint32_t onOff;
+
+  wbb->addRead(baseAddress + regModeOn, &onOff);
+  wbb->addRead(baseAddress + regEventSize, evSize);
+  wbb->addRead(baseAddress + regEventDelay, evDelay);
+  wbb->execute();
+  *on = onOff & MODEON_ON;
 }
 
-void MDataGenerator::setup(uint32_t evSize, uint32_t evDelay, bool on)
-{
-	wbb->addWrite(baseAddress+regModeOn, on ? MODEON_ON : 0);
-	wbb->addWrite(baseAddress+regEventSize, evSize);
-	wbb->addWrite(baseAddress+regEventDelay, evDelay);
-	wbb->execute();
+void MDataGenerator::setOnOff(bool on) {
+  wbb->addWrite(baseAddress + regModeOn, on ? MODEON_ON : 0);
+  wbb->execute();
 }
-
-void MDataGenerator::getSetup(uint32_t *evSize, uint32_t *evDelay, bool *on)
-{
-	uint32_t onOff;
-
-	wbb->addRead(baseAddress+regModeOn, &onOff);
-	wbb->addRead(baseAddress+regEventSize, evSize);
-	wbb->addRead(baseAddress+regEventDelay, evDelay);
-	wbb->execute();
-	*on = onOff & MODEON_ON;
-}
-
-
-void MDataGenerator::setOnOff(bool on)
-{
-	wbb->addWrite(baseAddress+regModeOn, on ? MODEON_ON : 0);
-	wbb->execute();
-}
-
-
-
-
-
-
-
-
-
-

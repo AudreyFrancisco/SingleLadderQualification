@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
@@ -35,94 +35,85 @@
 #include "mexception.h"
 #include "TAlpideDataParser.h"
 
-TAlpideDataParser::TAlpideDataParser()
-{
-}
-
+TAlpideDataParser::TAlpideDataParser() {}
 
 // fast parse of input frame
-// return the size of the data for the event pointed by dBuffer. 
-long TAlpideDataParser::checkEvent(unsigned char *dBuffer, unsigned char *evFlagsPtr)
-{
-	unsigned char *p = dBuffer;
-	unsigned char h;
-	int  d;
+// return the size of the data for the event pointed by dBuffer.
+long TAlpideDataParser::checkEvent(unsigned char *dBuffer, unsigned char *evFlagsPtr) {
+  unsigned char *p = dBuffer;
+  unsigned char h;
+  int d;
 
-	for (int closed=0;!closed;){
-		if (p-dBuffer > dataBufferUsed)
-			throw MDataParserError("Try to parse more bytes than received size");
-			
-		h = *p++;
-		if ( (h>>DSHIFT_CHIP_EMPTY) == DCODE_CHIP_EMPTY ) {
-			p++;
-			closed=1;
-		} else if ( (h>>DSHIFT_CHIP_HEADER) == DCODE_CHIP_HEADER ) {
-			p++;
-		} else if ((h>>DSHIFT_CHIP_TRAILER) == DCODE_CHIP_TRAILER ) {			 
-			closed=1;
-			// additional trailer
-			*evFlagsPtr = *p++;
-		} else if ((h>>DSHIFT_REGION_HEADER) == DCODE_REGION_HEADER ) {
-		} else if ((h>>DSHIFT_DATA_SHORT) == DCODE_DATA_SHORT ) {
-			p++;	
-		} else if ((h>>DSHIFT_DATA_LONG) == DCODE_DATA_LONG ) {
-			p+=2;
-		} else {
-			d = h;
-			cout << " Unknow data header: " << std::hex << d << endl;
-		}
-	}	
-	
-	return(p-dBuffer);
+  for (int closed = 0; !closed;) {
+    if (p - dBuffer > dataBufferUsed)
+      throw MDataParserError("Try to parse more bytes than received size");
+
+    h = *p++;
+    if ((h >> DSHIFT_CHIP_EMPTY) == DCODE_CHIP_EMPTY) {
+      p++;
+      closed = 1;
+    } else if ((h >> DSHIFT_CHIP_HEADER) == DCODE_CHIP_HEADER) {
+      p++;
+    } else if ((h >> DSHIFT_CHIP_TRAILER) == DCODE_CHIP_TRAILER) {
+      closed = 1;
+      // additional trailer
+      *evFlagsPtr = *p++;
+    } else if ((h >> DSHIFT_REGION_HEADER) == DCODE_REGION_HEADER) {
+    } else if ((h >> DSHIFT_DATA_SHORT) == DCODE_DATA_SHORT) {
+      p++;
+    } else if ((h >> DSHIFT_DATA_LONG) == DCODE_DATA_LONG) {
+      p += 2;
+    } else {
+      d = h;
+      cout << " Unknow data header: " << std::hex << d << endl;
+    }
+  }
+
+  return (p - dBuffer);
 }
 
 // parse all data starting from begin of buffer
-long TAlpideDataParser::parse(int numClosed)
-{
-	unsigned char *dBuffer = (unsigned char*) &dataBuffer[0];
-	unsigned char *p = dBuffer;
-	long evSize;
-	unsigned char evFlags;
+long TAlpideDataParser::parse(int numClosed) {
+  unsigned char *dBuffer = (unsigned char *)&dataBuffer[0];
+  unsigned char *p = dBuffer;
+  long evSize;
+  unsigned char evFlags;
 
-	while (numClosed) {
-		evSize = checkEvent(p, &evFlags);
-		p += evSize;
-		numClosed--;
-	}
+  while (numClosed) {
+    evSize = checkEvent(p, &evFlags);
+    p += evSize;
+    numClosed--;
+  }
 
-	return(p-dBuffer);
+  return (p - dBuffer);
 }
 
 //
-// Read only one frame of data 
+// Read only one frame of data
 // return the size of data frame
-int  TAlpideDataParser::ReadEventData(int &nBytes, unsigned char *buffer)
-{
-	unsigned char *dBuffer = (unsigned char*) &dataBuffer[0];
-	unsigned char *p = dBuffer;
-	long evSize;
-	unsigned char evFlags;
+int TAlpideDataParser::ReadEventData(int &nBytes, unsigned char *buffer) {
+  unsigned char *dBuffer = (unsigned char *)&dataBuffer[0];
+  unsigned char *p = dBuffer;
+  long evSize;
+  unsigned char evFlags;
 
-	if (numClosedData==0)	
-		return 0;
+  if (numClosedData == 0)
+    return 0;
 
-	evSize = checkEvent(p, &evFlags);
-	
-	// copy the block header to the user buffer
-	memcpy(buffer, blockHeader, MOSAIC_HEADER_SIZE);
+  evSize = checkEvent(p, &evFlags);
 
-	// copy data to user buffer
-	memcpy(buffer+MOSAIC_HEADER_SIZE, dBuffer, evSize);
-	nBytes = MOSAIC_HEADER_SIZE + evSize;
+  // copy the block header to the user buffer
+  memcpy(buffer, blockHeader, MOSAIC_HEADER_SIZE);
 
-	// move unused bytes to the begin of buffer
-	size_t bytesToMove = dataBufferUsed - evSize;
-	if (bytesToMove>0)
-		memmove(&dataBuffer[0], &dataBuffer[evSize], bytesToMove);
-	dataBufferUsed -= evSize;
-	numClosedData--;
-	return evSize;
+  // copy data to user buffer
+  memcpy(buffer + MOSAIC_HEADER_SIZE, dBuffer, evSize);
+  nBytes = MOSAIC_HEADER_SIZE + evSize;
+
+  // move unused bytes to the begin of buffer
+  size_t bytesToMove = dataBufferUsed - evSize;
+  if (bytesToMove > 0)
+    memmove(&dataBuffer[0], &dataBuffer[evSize], bytesToMove);
+  dataBufferUsed -= evSize;
+  numClosedData--;
+  return evSize;
 }
-
-
-

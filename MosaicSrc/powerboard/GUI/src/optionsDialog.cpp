@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
@@ -36,34 +36,27 @@
 
 static const char *WINDOW_TITLE = "Option editor";
 
+optionsDialog::optionsDialog(QWidget *parent, Qt::WindowFlags fl) : QDialog(parent, fl) {
+  setWindowTitle(WINDOW_TITLE);
+  setModal(true);
 
-optionsDialog::optionsDialog( QWidget* parent, Qt::WindowFlags fl )
-    : QDialog( parent, fl )
-{
-	setWindowTitle(WINDOW_TITLE);
-	setModal(true);
+  QVBoxLayout *verticalLayout = new QVBoxLayout(this);
 
-    QVBoxLayout* verticalLayout = new QVBoxLayout(this); 
+  QLabel *l = new QLabel("MOSAIC board address", this);
+  verticalLayout->addWidget(l);
 
-	QLabel *l = new QLabel("MOSAIC board address", this);
-	verticalLayout->addWidget(l);
+  addressText = new QLineEdit(this);
+  addressText->setText("0.0.0.0");
+  verticalLayout->addWidget(addressText);
 
-	addressText = new QLineEdit(this);
-	addressText->setText("0.0.0.0");
-	verticalLayout->addWidget(addressText);	
+  //	verticalLayout->setContentsMargins(0,0,0,0);
 
+  QDialogButtonBox *buttonBox =
+      new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+  verticalLayout->addWidget(buttonBox);
 
-//	verticalLayout->setContentsMargins(0,0,0,0);
-	
-	QDialogButtonBox *buttonBox = new QDialogButtonBox( QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-	verticalLayout->addWidget(buttonBox);
-	
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
-	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+  connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+  connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
-
-optionsDialog::~optionsDialog()
-{
-}
-
+optionsDialog::~optionsDialog() {}

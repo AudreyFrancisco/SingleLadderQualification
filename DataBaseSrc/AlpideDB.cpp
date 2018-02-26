@@ -36,22 +36,18 @@
  */
 #include "AlpideDB.h"
 
-
-AlpideDB::AlpideDB(bool isTestDB)
-{
-  if(isTestDB) {
-    Init( "https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx", "https://test-alucmsapi.web.cern.ch");
+AlpideDB::AlpideDB(bool isTestDB) {
+  if (isTestDB) {
+    Init("https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx",
+         "https://test-alucmsapi.web.cern.ch");
     m_projectId = PROJECT_ID_TEST;
-  }
-  else {
-    Init( "https://alucmsapi.web.cern.ch/AlucmswebAPI.asmx", "https://alucmsapi.web.cern.ch");
+  } else {
+    Init("https://alucmsapi.web.cern.ch/AlucmswebAPI.asmx", "https://alucmsapi.web.cern.ch");
     m_projectId = PROJECT_ID_PROD;
   }
 }
 
-
-void AlpideDB::Init(string aQueryDomain, string aJarUrl)
-{
+void AlpideDB::Init(string aQueryDomain, string aJarUrl) {
   theQueryDomain = aQueryDomain;
   theJarUrl = aJarUrl;
 
@@ -62,23 +58,15 @@ void AlpideDB::Init(string aQueryDomain, string aJarUrl)
 #endif
 
 #ifdef AUTH_X509
-  if(theDBmanager->isLibCurlCompiled()){
-    isConnected = theDBmanager->Init(theJarUrl,
-    		                     "FrancoAntonio",
-		                     ".",
-		                     "alpide4me");
+  if (theDBmanager->isLibCurlCompiled()) {
+    isConnected = theDBmanager->Init(theJarUrl, "FrancoAntonio", ".", "alpide4me");
   } else {
-    isConnected = theDBmanager->Init(theJarUrl,
-        	    		     "/home/fap/.globus/usercert.pem",
-        	    		     "/home/fap/.globus/userkey.pem",
-        			     "/etc/ssl/certs");
+    isConnected = theDBmanager->Init(theJarUrl, "/home/fap/.globus/usercert.pem",
+                                     "/home/fap/.globus/userkey.pem", "/etc/ssl/certs");
   }
 #endif
 }
 
-
-AlpideDB::~AlpideDB()
-{
-}
+AlpideDB::~AlpideDB() {}
 
 // ---------------- eof ------------------------
