@@ -242,15 +242,72 @@ void scope_control::set_timescale(double time)
 
 void scope_control::set_trigger_ext()
 {
-  scope_control::write_cmd("TRIG:A:MODE NORM\n");     // Normal trigger mode
-  scope_control::write_cmd("TRIG:A:SOUR EXT\n");      // External trigger
-  scope_control::write_cmd("TRIG:A:EDGE:SLOP POS\n"); // Rising edge
-  scope_control::write_cmd("TRIG:A:LEV5 0.1\n");      // Trigger level
+  scope_control::write_cmd("TRIG:A:MODE NORM\n"); // Normal trigger mode
+  scope_control::write_cmd("TRIG:A:SOUR EXT\n");  // External trigger
+}
+
+void scope_control::set_trigger_slope_pos(bool positive)
+{
+  if (positive) {
+    scope_control::write_cmd("TRIG:A:EDGE:SLOP POS\n"); // Rising edge
+  }
+  else {
+    scope_control::write_cmd("TRIG:A:EDGE:SLOP NEG\n"); // Falling edge
+  }
+}
+
+void scope_control::set_ext_trigger_level(double level)
+{
+  char cmd[30];
+  snprintf(cmd, sizeof(cmd), "TRIG:A:LEV5 %e\n", level); // Trigger level
+  scope_control::write_cmd(cmd);
 }
 
 void scope_control::single_capture()
 {
   scope_control::write("SING\n"); // Single capture
+}
+
+void scope_control::set_math_diff(uint8_t ch_p, uint8_t ch_n)
+{
+  char cmd[30];
+  scope_control::write_cmd("CALC:QMATH:STAT ON\n");           // Enable math
+  snprintf(cmd, sizeof(cmd), "CALC:QMAT:SOUR1 CH%d\n", ch_p); // Set ch1 source
+  scope_control::write_cmd(cmd);
+  snprintf(cmd, sizeof(cmd), "CALC:QMAT:SOUR1 CH%d\n", ch_n); // Set ch2 source
+  scope_control::write_cmd(cmd);
+  scope_control::write_cmd("CALC:QMAT:OPER SUB\n"); // Sub ch2 from ch1
+}
+
+void scope_control::set_math_measure()
+{
+  scope_control::write_cmd("MEAS1:MAIN PEAK\n"); // Peak to peak
+  scope_control::write_cmd("MEAS2:MAIN AMPL\n"); // Amplitude
+  scope_control::write_cmd("MEAS2:MAIN RTIM\n"); // Risetime
+  scope_control::write_cmd("MEAS2:MAIN FTIM\n"); // Falltime
+
+  scope_control::write_cmd("MEAS1:SOUR MA1\n"); // Set math as source
+  scope_control::write_cmd("MEAS2:SOUR MA1\n"); // Set math as source
+  scope_control::write_cmd("MEAS3:SOUR MA1\n"); // Set math as source
+  scope_control::write_cmd("MEAS4:SOUR MA1\n"); // Set math as source
+
+  scope_control::write_cmd("MEAS1:ENAB ON\n");
+  scope_control::write_cmd("MEAS2:ENAB ON\n");
+  scope_control::write_cmd("MEAS3:ENAB ON\n");
+  scope_control::write_cmd("MEAS4:ENAB ON\n");
+}
+
+void scope_control::get_meas()
+{
+  std::string value;
+  value = scope_control::write_query("MEAS1:RES?\n");
+  peak  = std::stod(value);
+  value = scope_control::write_query("MEAS2:RES?\n");
+  amp   = std::stod(value);
+  value = scope_control::write_query("MEAS3:RES?\n");
+  rtim  = std::stod(value);
+  value = scope_control::write_query("MEAS4:RES?\n");
+  ftim  = std::stod(value);
 }
 
 void scope_control::start_quick_meas() { scope_control::write_cmd("MEAS:AON\n"); }

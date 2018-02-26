@@ -26,12 +26,18 @@ public:
   void stop_quick_meas();
   void get_quick_meas();
   void set_trigger_ext();
+  void set_trigger_slope_pos(bool positive);
+  void set_ext_trigger_level(double level);
+  void set_math_diff(uint8_t ch_p, uint8_t ch_n);
+  void set_math_measure();
+  void get_meas();
   void single_capture();
   void wait_for_trigger();
   void get_errors();
   bool debug_en = false;
   // Returned by get quick measurments
   double peak; // Peak to peak
+  double amp;  // Amplitude
   double upe;  // Vp+
   double lpe;  // Vp-
   double cycr; // RMS cycl

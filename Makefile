@@ -8,7 +8,7 @@ LIBALUCMS_DIR=./DataBaseSrc
 LIBSCOPECONTROL_DIR=./ScopeControlSrc
 STATIC_LIBS=$(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR) $(LIBSCOPECONTROL_DIR)
 
-INCLUDE=-I. -Iinc -isystem/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I$(LIBSCOPECONTROL_DIR) -isystem/opt/local/include -isystem/usr/include/libxml2 -isystem/opt/local/include/libxml2
+INCLUDE=-I. -Iinc -isystem/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I$(LIBSCOPECONTROL_DIR) -I$(LIBSCOPECONTROL_DIR)/serial/include -isystem/opt/local/include -isystem/usr/include/libxml2 -isystem/opt/local/include/libxml2
 LIB=-L/usr/local/lib -L/opt/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic -L$(LIBALUCMS_DIR) -lalucms -lscopecontrol -L$(LIBSCOPECONTROL_DIR) -lxml2 -lcurl
 CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -Wall -Werror -pedantic $(INCLUDE) -DVERSION=\"$(GIT_VERSION)\"
 
@@ -68,7 +68,7 @@ EXE = startclk stopclk
 # test_* executables without ROOT
 TEST_EXE = test_mosaic test_noiseocc test_threshold test_digitalscan test_fifo test_dacscan \
   test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit \
-  test_localbus test_chip_count test_alucms test_dacscan_voltage test_supply_voltage test_GRST
+  test_localbus test_chip_count test_alucms test_dacscan_voltage test_supply_voltage test_GRST test_scope
 EXE += $(TEST_EXE)
 
 # test_* executables with ROOT

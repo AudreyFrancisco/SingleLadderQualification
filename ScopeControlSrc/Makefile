@@ -37,7 +37,7 @@ clean:
 	$(RM) test_scope_control
 
 clean-all: clean
-	rm -rf $(LIBRARY)
+	$(RM) $(LIBRARY)
 
 .PHONY: all lib clean clean-all
 
