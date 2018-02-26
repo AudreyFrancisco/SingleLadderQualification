@@ -11,12 +11,27 @@
 
 #define NSEC 1
 
-Float_t n_trg=1e6;
-
 char fNameCfg [1024];
 char fNameOut [1024];
 char fPathOut [1024];
 char fSuffix  [1024]; // date_time suffix
+
+//For MFT Users, tune the following parameters and number of triggers :
+
+Float_t n_trg=1e6;
+
+Float_t VBB = 0.0;
+const int ITHR = 51;
+const int VCASN = 50;
+const int VCASN2 = 62;
+const int VCLIP = 0;
+const int IRESET = 0; //To be checked
+const int VRESETP = 0; //To be checked
+const int VRESETD = 117;
+const int IDB = 29;
+const int IBIAS = 64;
+const int VCASP = 86;
+
 
 //----------------------------------------------------------
 void dblcol_adr_to_col_row(UShort_t doublecol, UShort_t address, UShort_t &col, UShort_t &row) {
@@ -36,13 +51,13 @@ void PrepareOutputFile (TString fName) {
     string buff2=buff1.substr(0,pos);
     pos=buff2.find_last_of("_");
     sprintf(fSuffix, "%s", buff1.substr(pos, 14).c_str());
-    
+
     // fNameOut
     sprintf(fNameOut, "NoiseOccupancy%s.root", fSuffix);
 
     printf("Output file: %s\n", fNameOut);
     pos=buff1.find_last_of("/");
-    
+
     // fPathOut
     sprintf(fPathOut, "%s", buff1.substr(0, pos+1).c_str());
     printf("Output path: %s\n", fPathOut);
@@ -77,10 +92,10 @@ Bool_t NoiseOccupancyRawToHisto(TString file_path) {
     //    cout << "Config file not found!" << endl;
     //    return kFALSE;
     //}
- 
+
     // get info
-    MeasConfig_t conf; //= read_config_file(Form("%s%s", fPathOut, fNameCfg));
-    print_meas_config(conf);
+    //MeasConfig_t conf; //= read_config_file(Form("%s%s", fPathOut, fNameCfg));
+    //print_meas_config(conf);
 
 
     //Float_t n_trg=conf.NTRIGGERS;
@@ -88,17 +103,17 @@ Bool_t NoiseOccupancyRawToHisto(TString file_path) {
 
     // read in noise file and fill hit map
     TH2F *h2_hitmap;
-    h2_hitmap = new TH2F(Form("h2_hitmap_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i", 
-        conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
-        conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
-        conf.IDB, conf.IBIAS, conf.VCASP),
-      Form("Noise Hit Map, VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i; Column; Row", 
-        conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
-        conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
-        conf.IDB, conf.IBIAS, conf.VCASP),
+    h2_hitmap = new TH2F(Form("h2_hitmap_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i",
+        VBB, ITHR, VCASN, VCASN2,
+        VCLIP, IRESET, VRESETP, VRESETD,
+        IDB, IBIAS, VCASP),
+      Form("Noise Hit Map, VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i; Column; Row",
+        VBB, ITHR, VCASN, VCASN2,
+        VCLIP, IRESET, VRESETP, VRESETD,
+        IDB, IBIAS, VCASP),
       1024, -0.5, 1024.-0.5, 512, -0.5, 512.-0.5);
     h2_hitmap->SetStats(0);
-  
+
     UShort_t dblcol, adr, col, row;
     UInt_t nhits;
 
@@ -113,29 +128,29 @@ Bool_t NoiseOccupancyRawToHisto(TString file_path) {
     c1->cd();
     h2_hitmap->DrawCopy("COLZ");
 
-    // noise occupancy sector by sector, excluding hottest pixels 
+    // noise occupancy sector by sector, excluding hottest pixels
     TH1F *h_noise_occ[NSEC];
-    Int_t x_max, y_max, z_max; 
+    Int_t x_max, y_max, z_max;
     Float_t int_hits = 0;
     Float_t noise_occ = 0;
     for (Int_t i_sec=0; i_sec<NSEC; i_sec++) {
-        h_noise_occ[i_sec] = new TH1F(Form("h_noiseocc_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i_sec%i", 
-            conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
-            conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
-            conf.IDB, conf.IBIAS, conf.VCASP, i_sec),
-          Form("Noise Occupancy, Sector %i, VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i; # excluded pixels; noise occupancy [/event/pixel]", 
-            i_sec, 
-            conf.VBB, conf.ITHR, conf.VCASN, conf.VCASN2, 
-            conf.VCLIP, conf.IRESET, conf.VRESETP, conf.VRESETD, 
-            conf.IDB, conf.IBIAS, conf.VCASP),
+        h_noise_occ[i_sec] = new TH1F(Form("h_noiseocc_VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i_sec%i",
+        VBB, ITHR, VCASN, VCASN2,
+        VCLIP, IRESET, VRESETP, VRESETD,
+        IDB, IBIAS, VCASP, i_sec),
+          Form("Noise Occupancy, Sector %i, VBB%2.1f_ITHR%i_VCASN%i_VCASN2%i_VCLIP%i_IRESET%i_VRESETP%i_VRESETD%i_IDB%i_IBIAS%i_VCASP%i; # excluded pixels; noise occupancy [/event/pixel]",
+            i_sec,
+            VBB, ITHR, VCASN, VCASN2,
+            VCLIP, IRESET, VRESETP, VRESETD,
+            IDB, IBIAS, VCASP),
           1000, 0, 1000);
 
         h_noise_occ[i_sec]->SetLineColor(i_sec+1);
         h_noise_occ[i_sec]->SetStats(0);
-        
-        // exclude hottest pixels        
+
+        // exclude hottest pixels
         cout << "----------------" << endl;
-        cout << "sector " << i_sec << endl; 
+        cout << "sector " << i_sec << endl;
         h2_hitmap->GetXaxis()->SetRange(i_sec*(1024/NSEC)+1, (i_sec+1)*(1024/NSEC)+1);
         int_hits = h2_hitmap->Integral();
         for (Int_t i_pix=0; i_pix<1000; i_pix++) {
@@ -144,16 +159,16 @@ Bool_t NoiseOccupancyRawToHisto(TString file_path) {
             if (i_pix == 5) std::cout << "occ (5 masked) = " << noise_occ << std::endl;
             if (i_pix == 50) std::cout << "occ (50 masked) = " << noise_occ << std::endl;
             h_noise_occ[i_sec]->SetBinContent(i_pix+1, noise_occ);
-    
+
             h2_hitmap->GetMaximumBin(x_max, y_max, z_max);
             int_hits-=h2_hitmap->GetBinContent(x_max, y_max);
-            
+
             //cout << i_pix << "\t" << x_max << "\t" << y_max << "\t" << h2_hitmap->GetBinContent(x_max, y_max) << endl;
             h2_hitmap->SetBinContent(x_max, y_max, 0);
         }
         h_noise_occ[i_sec]->Write();
     }
- 
+
     // plotting
     TCanvas *c2 = new TCanvas("c2", "Canvas 2", 0, 0, 1024, 512);
     c2->cd();
