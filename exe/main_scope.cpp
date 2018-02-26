@@ -17,7 +17,6 @@
 #include "AlpideConfig.h"
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
-#include "scope_control.h"
 #include "SetupHelpers.h"
 #include "TAlpide.h"
 #include "TConfig.h"
@@ -25,6 +24,7 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
+#include "scope_control.h"
 #include <unistd.h>
 
 TBoardType                   fBoardType;
