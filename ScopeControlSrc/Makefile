@@ -30,7 +30,7 @@ $(LIBRARY): $(OBJS)
 	$(CXX) $(CPPFLAGS) -c -o $@ $<
 
 test_scope_control: ./test/tester.cpp $(LIBRARY)
-	$(CXX) $(CPPFLAGS) -lscopecontrol -L. -o test_scope_control ./test/tester.cpp $(LIBRARY)
+	$(CXX) -o test_scope_control ./test/tester.cpp $(CPPFLAGS) -lscopecontrol -lrt -L. $(LIBRARY)
 
 clean:
 	$(RM) $(OBJS)

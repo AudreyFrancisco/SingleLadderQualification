@@ -18,14 +18,14 @@ int main()
   scope.single_capture();
   scope.wait_for_trigger();
   scope.set_math_measure();
-  set_math_diff(1, 2);
-  get_meas();
-  printf("CH1 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n", peak, amp,
-         rtim, ftim);
-  set_math_diff(3, 4);
-  get_meas();
-  printf("CH2 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n", peak, amp,
-         rtim, ftim);
+  scope.set_math_diff(1, 2);
+  scope.get_meas();
+  printf("CH1 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n", scope.peak,
+         scope.amp, scope.rtim, scope.ftim);
+  scope.set_math_diff(3, 4);
+  scope.get_meas();
+  printf("CH2 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n", scope.peak,
+         scope.amp, scope.rtim, scope.ftim);
   // scope.start_quick_meas();
   // scope.get_quick_meas();
   // scope.stop_quick_meas();
