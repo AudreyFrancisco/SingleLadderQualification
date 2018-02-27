@@ -15,10 +15,20 @@ sleep 1
 for ch in $(seq 1 2 13)
 do
     # digital - first step
-	${PBCTRL} -Vout $ch 1.497 ${IP}
+	${PBCTRL} -Vout $ch 1.700 ${IP}
     ${PBCTRL} -Ith $ch 3.0 ${IP}
     ${PBCTRL} -onch $ch ${IP}
-    ${PBCTRL} -Ith $ch 1.5 ${IP}
+    usleep 250000
+
+    #echo "first step done"
+    #${PBCTRL} -state ${IP}
+
+    ## digital - second step
+	#${PBCTRL} -Vout $ch 1.700 ${IP}
+    #usleep 50000
+
+    #echo "second step done"
+    #${PBCTRL} -state ${IP}
 
     # analogue
     ch_analogue=$(expr $ch - 1)
@@ -28,8 +38,14 @@ do
     ${PBCTRL} -onch ${ch_analogue} ${IP}
     ${PBCTRL} -Ith  ${ch_analogue} 0.5 ${IP}
 
-    # digital - second step
+
+    # digital - third step
 	${PBCTRL} -Vout $ch ${VOLTAGES[ch]} ${IP}
+    usleep 50000
+    ${PBCTRL} -Ith $ch 1.5 ${IP}
+
+    #echo "third step done"
+    #${PBCTRL} -state ${IP}
 done
 
 sleep 1 # wait
