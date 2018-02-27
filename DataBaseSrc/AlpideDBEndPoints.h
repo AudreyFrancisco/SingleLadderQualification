@@ -35,6 +35,8 @@
  *
  *  7/9/2017	-	Refine the XML parsing/reading
  *  9/11/2017   - Add ParameterID field to the parameter type struct
+ *  21/02/2018  -   Add the Scientific Notation in the Activity Parameter rappresentation
+ *
  *
  */
 #ifndef ALPIDEDBENDPOINTS_H_
@@ -71,6 +73,7 @@ protected:
   AlpideDB *theParentDB;
   response  theResponse;
   string    theGeneralBuffer;
+  bool      isScienNotation;
 
 public:
   explicit AlpideTable(AlpideDB *DBhandle);
@@ -78,6 +81,9 @@ public:
   response *DecodeResponse(char *returnedString, int Session = 0);
   void SetResponse(AlpideTable::ErrorCode, int ID = 0, int Session = 0);
   const char *DumpResponse();
+
+  bool isParameterScientificNotation() { return (isScienNotation); }
+  void setParameterScientificNotation(bool isSet = true) { isScienNotation = isSet; }
 
 protected:
   bool _getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod);
