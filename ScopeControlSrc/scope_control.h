@@ -31,8 +31,8 @@ public:
   void set_trigger_position(double time);
   void set_ext_trigger_level(double level);
   void set_math_diff(uint8_t ch_p, uint8_t ch_n);
-  void set_measure_math();
-  void set_measure_ch(uint8_t ch);
+  void en_measure_math();
+  void en_measure_ch(uint8_t ch);
   void get_meas();
   void single_capture();
   void wait_for_trigger();
@@ -56,11 +56,11 @@ public:
     double rtim; // Risetime
     double ftim; // Falltime
   };
-  measures ch1;
-  measures   ch2;
-  measures   ch3;
-  measures   ch4;
-  measures   math;
+  measures       ch1;
+  measures       ch2;
+  measures       ch3;
+  measures       ch4;
+  measures       math;
   quick_measures quick_measures;
 
 private:
@@ -71,6 +71,6 @@ private:
   void            debug_print(const char *);
   bool            check_model();
   bool eval_ch(uint8_t ch);
-  void set_measure(uint8_t ch);
+  void en_measure(uint8_t ch);
   uint8_t measure_ch = 0;
 };

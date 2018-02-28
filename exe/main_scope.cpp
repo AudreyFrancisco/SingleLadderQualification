@@ -170,9 +170,9 @@ int main(int argc, char **argv)
     scope.single_capture();
     MemTest(fChips[0], 0, 0);
     scope.wait_for_trigger();
-    scope.set_measure(1);
+    scope.en_measure_ch(1);
     scope.get_meas();
-    scope.set_measure(2);
+    scope.en_measure_ch(2);
     scope.get_meas();
 
     std::cout << std::endl
@@ -182,9 +182,9 @@ int main(int argc, char **argv)
     scope.single_capture();
     MemTest(fChips[1], 0, 0);
     scope.wait_for_trigger();
-    scope.set_measure(3);
+    scope.en_measure_ch(3);
     scope.get_meas();
-    scope.set_measure(4);
+    scope.en_measure_ch(4);
     scope.get_meas();
 
     printf("CH1 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n",

@@ -299,15 +299,17 @@ void scope_control::set_math_diff(uint8_t ch_p, uint8_t ch_n)
   scope_control::write_cmd("CALC:QMAT:OPER SUB\n"); // Sub ch2 from ch1
 }
 
-void scope_control::set_measure_math() { scope_control::set_measure(5) }
+void scope_control::en_measure_math() { scope_control::en_measure(5); }
 
-void scope_control::set_measure_ch(uint8_t ch)
+void scope_control::en_measure_ch(uint8_t ch)
 {
-  if (!eval_ch(ch)) return;
-  else scope_control::set_measure(ch);
+  if (!eval_ch(ch))
+    return;
+  else
+    scope_control::en_measure(ch);
 }
 
-void scope_control::set_measure(uint8_t ch)
+void scope_control::en_measure(uint8_t ch)
 {
   scope_control::write_cmd("MEAS1:MAIN PEAK\n"); // Peak to peak
   scope_control::write_cmd("MEAS2:MAIN AMPL\n"); // Amplitude
@@ -335,21 +337,26 @@ void scope_control::set_measure(uint8_t ch)
 void scope_control::get_meas()
 {
   scope_control::measures result;
-  std::string value;
-  value = scope_control::write_query("MEAS1:RES?\n");
-  result.peak  = std::stod(value);
-  value = scope_control::write_query("MEAS2:RES?\n");
-  result.amp   = std::stod(value);
-  value = scope_control::write_query("MEAS3:RES?\n");
-  result.rtim  = std::stod(value);
-  value = scope_control::write_query("MEAS4:RES?\n");
-  result.ftim  = std::stod(value);
+  std::string             value;
+  value       = scope_control::write_query("MEAS1:RES?\n");
+  result.peak = std::stod(value);
+  value       = scope_control::write_query("MEAS2:RES?\n");
+  result.amp  = std::stod(value);
+  value       = scope_control::write_query("MEAS3:RES?\n");
+  result.rtim = std::stod(value);
+  value       = scope_control::write_query("MEAS4:RES?\n");
+  result.ftim = std::stod(value);
   switch (measure_ch) {
-    case 1 : ch1 = result;
-    case 2 : ch2 = result;
-    case 3 : ch3 = result;
-    case 4 : ch4 = result;
-    case 5 : math = result;
+  case 1:
+    ch1 = result;
+  case 2:
+    ch2 = result;
+  case 3:
+    ch3 = result;
+  case 4:
+    ch4 = result;
+  case 5:
+    math = result;
   }
 }
 
@@ -370,25 +377,25 @@ void scope_control::wait_for_trigger()
 void scope_control::get_quick_meas()
 {
   std::string value;
-  value   = scope_control::write_query("MEAS:ARES?\n");
-  int pos = value.find(',', 0);
-  quick_measures.peak    = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  quick_measures.upe     = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  quick_measures.lpe     = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  quick_measures.cycr    = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  quick_measures.cycm    = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  quick_measures.per     = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  quick_measures.freq    = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  quick_measures.rtim    = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  quick_measures.ftim    = std::stod(value.substr(0, pos));
+  value               = scope_control::write_query("MEAS:ARES?\n");
+  int pos             = value.find(',', 0);
+  quick_measures.peak = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.upe  = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.lpe  = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.cycr = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.cycm = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.per  = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.freq = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.rtim = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.ftim = std::stod(value.substr(0, pos));
 }
 
 void scope_control::throw_ex(const char *text)

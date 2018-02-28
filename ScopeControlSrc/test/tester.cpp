@@ -20,7 +20,7 @@ int main()
   scope.single_capture();
   scope.wait_for_trigger();
   for (int i = 1; i <= 4; i++) {
-    scope.set_measure(i);
+    scope.en_measure(i);
     scope.get_meas();
     printf("CH1 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n",
            scope.ch1.peak, scope.ch1.amp, scope.ch1.rtim, scope.ch1.ftim);
