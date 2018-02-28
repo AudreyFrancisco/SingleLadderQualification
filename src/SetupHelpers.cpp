@@ -341,10 +341,10 @@ void MakeDaisyChain(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
     int modId  = (chipId & 0x70) >> 4;
 
     if ((chipId & 0x8) && (chipId < firstHigh[modId])) firstHigh[modId] = chipId;
-    if (!(chipId & 0x8) && (chipId < firstLow[modId])) firstLow[modId] = chipId;
+    if (!(chipId & 0x8) && (chipId < firstLow[modId])) firstLow[modId]  = chipId;
 
     if ((chipId & 0x8) && (chipId > lastHigh[modId])) lastHigh[modId] = chipId;
-    if (!(chipId & 0x8) && (chipId > lastLow[modId])) lastLow[modId] = chipId;
+    if (!(chipId & 0x8) && (chipId > lastLow[modId])) lastLow[modId]  = chipId;
   }
 
   for (int i = startChipIndex; i < endChipIndex; i++) {
@@ -784,9 +784,9 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   TPowerBoardConfig * pbConfig[2];
   TPowerBoard *       pb[2] = {0, 0};
 
-  int  CtrIntMap[10][2]   = {{3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10},
+  int  CtrIntMap[10][2] = {{3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10},
                           {3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10}};
-  int  DataRcvMap[10][2]  = {{9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0},
+  int  DataRcvMap[10][2] = {{9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0},
                            {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0}};
   bool InverRcvMap[10][2] = {{true, false}, {true, false}, {true, false}, {true, false},
                              {true, false}, {true, false}, {true, false}, {true, false},
