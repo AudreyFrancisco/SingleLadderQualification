@@ -31,13 +31,14 @@
  *
  *  Description : Alpide DB  Classes for access tables
  *
- *  Ver 1.0 -
+ *  Ver 1.1 -
  *
  *  HISTORY
  *
  *  7/9/2017	-	Refine the XML parsing/reading function
  *  9/11/2017   -   Modify the GetParameterList method
  *  11/1/2018   -   Add Assign URIs method
+ *  21/02/2018  -   Add the Scientific Notation in the Activity Parameter rappresentation
  *
  */
 
@@ -60,7 +61,11 @@
  *    Constructor
  *    set the pointer to the linked DB
  *---------------- */
-AlpideTable::AlpideTable(AlpideDB *DBhandle) { theParentDB = DBhandle; }
+AlpideTable::AlpideTable(AlpideDB *DBhandle)
+{
+  theParentDB     = DBhandle;
+  isScienNotation = false;
+}
 
 /* -----------------
  *    Destructor
@@ -1024,7 +1029,7 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     }
     else {
       DecodeResponse(stringresult);
-      if (VERBOSITYLEVEL == 1) cout << "Activity Member creation :" << DumpResponse() << endl;
+      if (VERBOSITYLEVEL == 1) cout << "Activity Member creation  :" << DumpResponse() << endl;
       aActivity->Members.at(i).ID = theResponse.ID;
     }
   }
@@ -1034,7 +1039,16 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     theQuery = "activityID=" + std::to_string(aActivity->ID);
     theQuery +=
         "&activityParameterID=" + std::to_string(aActivity->Parameters.at(i).ActivityParameter);
-    theQuery += "&value=" + float2str(aActivity->Parameters.at(i).Value);
+    theQuery += "&value=";
+    if (isScienNotation) {
+      char   expo[30];
+      double ap = (double)(aActivity->Parameters.at(i).Value);
+      sprintf(expo, "%e", ap);
+      theQuery += expo;
+    }
+    else {
+      theQuery += float2str(aActivity->Parameters.at(i).Value);
+    }
     theQuery += "&userID=" + std::to_string(aActivity->Parameters.at(i).User);
 
     if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) ==
