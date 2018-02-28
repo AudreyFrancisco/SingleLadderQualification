@@ -151,64 +151,50 @@ int main(int argc, char **argv)
     scope.debug_en = true;
     scope.open_auto();
     scope.get_errors();
+
     for (int i = 1; i <= 4; i++) {
       scope.enable_ch(i);
-      scope.set_vscale_ch(i, 100e-3);
+      scope.set_vscale_ch(i, 200e-3);
     }
-    scope.set_timescale(1e-3);
+    scope.set_timescale(5e-9);
+
     scope.set_trigger_ext();
-    scope.set_trigger_slope_pos(true);
-    scope.set_ext_trigger_level(-2.0);
-    scope.single_capture();
-
-    for (const auto &rChip : fChips) {
-      if (!rChip->GetConfig()->IsEnabled()) continue;
-
-      fEnabled++;
-
-      std::cout << std::endl
-                << "Doing FIFO test on ControlInterface " << rChip->GetConfig()->GetCtrInt()
-                << "  chip ID " << rChip->GetConfig()->GetChipId() << std::endl;
-      // Reset error counters
-      fErrCount0 = 0;
-      fErrCount5 = 0;
-      fErrCountf = 0;
-
-      // Do the loop over all memories
-      for (int ireg = 0; ireg < 32; ireg++) {
-        std::cout << "FIFO scan: region " << ireg << std::endl;
-        for (int iadd = 0; iadd < 128; iadd++) {
-          MemTest(rChip, ireg, iadd);
-        }
-      }
-
-      // Output result
-      std::cout << "Test finished: error counters: " << std::endl;
-      std::cout << "  pattern 0x0:      " << fErrCount0 << std::endl;
-      std::cout << "  pattern 0x555555: " << fErrCount5 << std::endl;
-      std::cout << "  pattern 0xffffff: " << fErrCountf << std::endl;
-      std::cout << "(total number of tested memories: 32 * 128 = 4096)" << std::endl;
-
-      if (fErrCount0 + fErrCount5 + fErrCountf > 0)
-        std::cout << "Set <Verbose> in source code to get single errors" << std::endl;
-      fTotalErr += fErrCount0 + fErrCount5 + fErrCountf;
-    }
-
-    scope.wait_for_trigger();
-    scope.set_math_diff(1, 2);
-    scope.get_meas();
-    std::cout << "CH1 Peak-to-peak : " << scope.peak << " Amplitude : " << scope.amp
-              << " Risetime : " << scope.rtim << " Falltime : " << scope.ftim << std::endl;
-    scope.set_math_diff(3, 4);
-    scope.get_meas();
-    std::cout << "CH1 Peak-to-peak : " << scope.peak << " Amplitude : " << scope.amp
-              << " Risetime : " << scope.rtim << " Falltime : " << scope.ftim << std::endl;
+    scope.set_trigger_slope_rising(false);
+    scope.set_trigger_position(1.1e-6);
+    scope.set_ext_trigger_level(-0.5);
 
     std::cout << std::endl
-              << "Total error count (all chips): " << fTotalErr << std::endl
-              << std::endl;
+              << "Doing scope test on ControlInterface " << fChips[0]->GetConfig()->GetCtrInt()
+              << "  chip ID " << fChips[0]->GetConfig()->GetChipId() << std::endl;
 
-    std::cout << fEnabled << " chips were enabled for scan." << std::endl << std::endl << std::endl;
+    scope.single_capture();
+    MemTest(fChips[0], 0, 0);
+    scope.wait_for_trigger();
+    scope.set_measure(1);
+    scope.get_meas();
+    scope.set_measure(2);
+    scope.get_meas();
+
+    std::cout << std::endl
+              << "Doing scope test on ControlInterface " << fChips[1]->GetConfig()->GetCtrInt()
+              << "  chip ID " << fChips[1]->GetConfig()->GetChipId() << std::endl;
+
+    scope.single_capture();
+    MemTest(fChips[1], 0, 0);
+    scope.wait_for_trigger();
+    scope.set_measure(3);
+    scope.get_meas();
+    scope.set_measure(4);
+    scope.get_meas();
+
+    printf("CH1 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n",
+           scope.ch1.peak, scope.ch1.amp, scope.ch1.rtim, scope.ch1.ftim);
+    printf("CH2 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n",
+           scope.ch2.peak, scope.ch2.amp, scope.ch2.rtim, scope.ch2.ftim);
+    printf("CH3 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n",
+           scope.ch3.peak, scope.ch3.amp, scope.ch3.rtim, scope.ch3.ftim);
+    printf("CH4 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n",
+           scope.ch4.peak, scope.ch4.amp, scope.ch4.rtim, scope.ch4.ftim);
 
     for (const auto &rBoard : fBoards) {
       TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(rBoard);
