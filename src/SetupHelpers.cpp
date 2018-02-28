@@ -795,9 +795,9 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   TPowerBoardConfig * pbConfig[2];
   TPowerBoard *       pb[2] = {0, 0};
 
-  int  CtrIntMap[10][2] = {{3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10},
+  int CtrIntMap[10][2] = {{3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10},
                           {3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10}};
-  int  DataRcvMap[10][2] = {{9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0},
+  int DataRcvMap[10][2] = {{9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0},
                            {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0}};
   bool InverRcvMap[10][2] = {{true, false}, {true, false}, {true, false}, {true, false},
                              {true, false}, {true, false}, {true, false}, {true, false},
