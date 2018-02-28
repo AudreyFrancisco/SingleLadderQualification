@@ -309,29 +309,40 @@ void scope_control::en_measure_ch(uint8_t ch)
     scope_control::en_measure(ch);
 }
 
-void scope_control::en_measure(uint8_t ch)
+void scope_control::setup_measure()
 {
   scope_control::write_cmd("MEAS1:MAIN PEAK\n"); // Peak to peak
   scope_control::write_cmd("MEAS2:MAIN AMPL\n"); // Amplitude
-  scope_control::write_cmd("MEAS2:MAIN RTIM\n"); // Risetime
-  scope_control::write_cmd("MEAS2:MAIN FTIM\n"); // Falltime
-
-  if (ch == 5) { // Set math as source
-    scope_control::write_cmd("MEAS1:SOUR MA1\n");
-    scope_control::write_cmd("MEAS2:SOUR MA1\n");
-    scope_control::write_cmd("MEAS3:SOUR MA1\n");
-    scope_control::write_cmd("MEAS4:SOUR MA1\n");
-  }
-  else {
-    char cmd[30];
-    snprintf(cmd, sizeof(cmd), "MEAS1:SOUR CH%d\n", ch);
-    scope_control::write_cmd(cmd);
-  }
+  scope_control::write_cmd("MEAS3:MAIN RTIM\n"); // Risetime
+  scope_control::write_cmd("MEAS4:MAIN FTIM\n"); // Falltime
 
   scope_control::write_cmd("MEAS1:ENAB ON\n");
   scope_control::write_cmd("MEAS2:ENAB ON\n");
   scope_control::write_cmd("MEAS3:ENAB ON\n");
   scope_control::write_cmd("MEAS4:ENAB ON\n");
+}
+
+void scope_control::en_measure(uint8_t ch)
+{
+  if (ch == 5) { // Set math as source
+    scope_control::write_cmd("MEAS1:SOUR MA1\n");
+    scope_control::write_cmd("MEAS2:SOUR MA1\n");
+    scope_control::write_cmd("MEAS3:SOUR MA1\n");
+    scope_control::write_cmd("MEAS4:SOUR MA1\n");
+    measure_ch = 5;
+  }
+  else {
+    char cmd[30];
+    snprintf(cmd, sizeof(cmd), "MEAS1:SOUR CH%d\n", ch);
+    scope_control::write_cmd(cmd);
+    snprintf(cmd, sizeof(cmd), "MEAS2:SOUR CH%d\n", ch);
+    scope_control::write_cmd(cmd);
+    snprintf(cmd, sizeof(cmd), "MEAS3:SOUR CH%d\n", ch);
+    scope_control::write_cmd(cmd);
+    snprintf(cmd, sizeof(cmd), "MEAS4:SOUR CH%d\n", ch);
+    scope_control::write_cmd(cmd);
+    measure_ch = ch;
+  }
 }
 
 void scope_control::get_meas()
@@ -349,14 +360,19 @@ void scope_control::get_meas()
   switch (measure_ch) {
   case 1:
     ch1 = result;
+    break;
   case 2:
     ch2 = result;
+    break;
   case 3:
     ch3 = result;
+    break;
   case 4:
     ch4 = result;
+    break;
   case 5:
     math = result;
+    break;
   }
 }
 

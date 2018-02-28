@@ -148,13 +148,17 @@ int main(int argc, char **argv)
     fTotalErr = 0;
 
     scope_control scope;
-    scope.debug_en = true;
-    scope.open_auto();
+    // scope.debug_en = true;
+    if (!scope.open_auto()) {
+      std::cout << "Scope not detected" << std::endl;
+      return 1;
+    }
     scope.get_errors();
 
     for (int i = 1; i <= 4; i++) {
       scope.enable_ch(i);
       scope.set_vscale_ch(i, 200e-3);
+      scope.set_dc_coupling_ch(i, false);
     }
     scope.set_timescale(5e-9);
 
@@ -162,39 +166,52 @@ int main(int argc, char **argv)
     scope.set_trigger_slope_rising(false);
     scope.set_trigger_position(1.1e-6);
     scope.set_ext_trigger_level(-0.5);
+    scope.setup_measure();
 
-    std::cout << std::endl
-              << "Doing scope test on ControlInterface " << fChips[0]->GetConfig()->GetCtrInt()
-              << "  chip ID " << fChips[0]->GetConfig()->GetChipId() << std::endl;
+    for (const auto &rChip : fChips) {
+      if (!rChip->GetConfig()->IsEnabled()) continue;
+      if (rChip->GetConfig()->GetCtrInt() != 1) continue;
+      std::cout << std::endl
+                << "Doing scope test on ControlInterface " << rChip->GetConfig()->GetCtrInt()
+                << "  chip ID " << rChip->GetConfig()->GetChipId() << std::endl;
 
-    scope.single_capture();
-    MemTest(fChips[0], 0, 0);
-    scope.wait_for_trigger();
-    scope.en_measure_ch(1);
-    scope.get_meas();
-    scope.en_measure_ch(2);
-    scope.get_meas();
+      scope.single_capture();
+      usleep(100000);
+      MemTest(rChip, 0, 0);
+      scope.wait_for_trigger();
+      scope.en_measure_ch(1);
+      scope.get_meas();
+      scope.en_measure_ch(2);
+      scope.get_meas();
+      break;
+    }
 
-    std::cout << std::endl
-              << "Doing scope test on ControlInterface " << fChips[1]->GetConfig()->GetCtrInt()
-              << "  chip ID " << fChips[1]->GetConfig()->GetChipId() << std::endl;
+    for (const auto &rChip : fChips) {
+      if (!rChip->GetConfig()->IsEnabled()) continue;
+      if (rChip->GetConfig()->GetCtrInt() != 0) continue;
+      std::cout << std::endl
+                << "Doing scope test on ControlInterface " << rChip->GetConfig()->GetCtrInt()
+                << "  chip ID " << rChip->GetConfig()->GetChipId() << std::endl;
 
-    scope.single_capture();
-    MemTest(fChips[1], 0, 0);
-    scope.wait_for_trigger();
-    scope.en_measure_ch(3);
-    scope.get_meas();
-    scope.en_measure_ch(4);
-    scope.get_meas();
+      scope.single_capture();
+      usleep(100000);
+      MemTest(rChip, 0, 0);
+      scope.wait_for_trigger();
+      scope.en_measure_ch(3);
+      scope.get_meas();
+      scope.en_measure_ch(4);
+      scope.get_meas();
+      break;
+    }
 
-    printf("CH1 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n",
-           scope.ch1.peak, scope.ch1.amp, scope.ch1.rtim, scope.ch1.ftim);
-    printf("CH2 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n",
-           scope.ch2.peak, scope.ch2.amp, scope.ch2.rtim, scope.ch2.ftim);
-    printf("CH3 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n",
-           scope.ch3.peak, scope.ch3.amp, scope.ch3.rtim, scope.ch3.ftim);
-    printf("CH4 Peak-to-peak : %.6f Amplitude : %.6f Risetime : %.6f Falltime : %.6f\n",
-           scope.ch4.peak, scope.ch4.amp, scope.ch4.rtim, scope.ch4.ftim);
+    printf("CH1 Peak-to-peak : %e Amplitude : %e Risetime : %e Falltime : %e\n", scope.ch1.peak,
+           scope.ch1.amp, scope.ch1.rtim, scope.ch1.ftim);
+    printf("CH2 Peak-to-peak : %e Amplitude : %e Risetime : %e Falltime : %e\n", scope.ch2.peak,
+           scope.ch2.amp, scope.ch2.rtim, scope.ch2.ftim);
+    printf("CH3 Peak-to-peak : %e Amplitude : %e Risetime : %e Falltime : %e\n", scope.ch3.peak,
+           scope.ch3.amp, scope.ch3.rtim, scope.ch3.ftim);
+    printf("CH4 Peak-to-peak : %e Amplitude : %e Risetime : %e Falltime : %e\n", scope.ch4.peak,
+           scope.ch4.amp, scope.ch4.rtim, scope.ch4.ftim);
 
     for (const auto &rBoard : fBoards) {
       TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(rBoard);

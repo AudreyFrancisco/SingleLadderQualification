@@ -31,6 +31,7 @@ public:
   void set_trigger_position(double time);
   void set_ext_trigger_level(double level);
   void set_math_diff(uint8_t ch_p, uint8_t ch_n);
+  void setup_measure();
   void en_measure_math();
   void en_measure_ch(uint8_t ch);
   void get_meas();
