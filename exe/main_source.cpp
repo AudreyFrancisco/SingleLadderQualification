@@ -71,8 +71,8 @@ void ClearHitData()
 void CopyHitData(std::vector<TPixHit> *Hits)
 {
   for (unsigned int ihit = 0; ihit < Hits->size(); ihit++) {
-    int chipId  = Hits->at(ihit).chipId;
-//    int modId   = ((Hits->at(ihit).chipId) >> 4) & 0x7;
+    int chipId = Hits->at(ihit).chipId;
+    //    int modId   = ((Hits->at(ihit).chipId) >> 4) & 0x7;
     int dcol    = Hits->at(ihit).dcol;
     int region  = Hits->at(ihit).region;
     int address = Hits->at(ihit).address;
@@ -139,8 +139,7 @@ void WriteDataToFile(const char *fName, bool Recreate)
     for (int icol = 0; icol < 512; icol++) {
       for (int iaddr = 0; iaddr < 1024; iaddr++) {
         if (HitData[ichip][icol][iaddr] > 0) {
-          fprintf(fp, "%d %d %d %d %d\n", modId, chipId, icol, iaddr,
-                  HitData[ichip][icol][iaddr]);
+          fprintf(fp, "%d %d %d %d %d\n", modId, chipId, icol, iaddr, HitData[ichip][icol][iaddr]);
         }
       }
     }
