@@ -147,8 +147,16 @@ const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
     return "Unknown";
 }
 
-THicClassification TScanAnalysis::DoCut(THicClassification oldClass, THicClassification failClass,
-                                        int value, string cutName, bool minCut)
+
+// DoCut checks a variable against a cut and sets the classification accordingly
+// in case of failure an output is printed to the terminal
+// hicClass: has to contain the current hic classification, is modified in case of failure
+// failClass: the classification that is assigned in case of failure
+// value: the value of the variable to be tested
+// cutName: the name of the cut, as defined in TScanConfig
+// minCut: if true, value is required to be >= the cut value, otherwise <=
+void TScanAnalysis::DoCut(THicClassification &hicClass, THicClassification failClass, int value,
+                          string cutName, bool minCut)
 {
   bool failed = false;
   int  cut    = m_config->GetParamValue(cutName);
@@ -164,9 +172,8 @@ THicClassification TScanAnalysis::DoCut(THicClassification oldClass, THicClassif
   if (failed) {
     std::cout << "Hic failed " << WriteHicClassification(failClass) << " cut " << cutName
               << ": cut = " << cut << ", value = " << value << std::endl;
-    if (failClass > oldClass) return failClass;
+    if (failClass > hicClass) hicClass = failClass;
   }
-  return oldClass;
 }
 
 

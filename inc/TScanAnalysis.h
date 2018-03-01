@@ -139,11 +139,11 @@ protected:
   virtual void             CreateResult() = 0;
   int                      ReadChipList();
   virtual void AnalyseHisto(TScanHisto *histo) = 0;
-  virtual void       InitCounters()            = 0;
-  int                GetPreviousActivityType();
-  virtual string     GetPreviousTestType() = 0;
-  THicClassification DoCut(THicClassification oldClass, THicClassification failClass, int value,
-                           string cutName, bool minCut = false);
+  virtual void   InitCounters()                = 0;
+  int            GetPreviousActivityType();
+  virtual string GetPreviousTestType() = 0;
+  void DoCut(THicClassification &hicClass, THicClassification failClass, int value, string cutName,
+             bool minCut = false);
 
 public:
   TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
