@@ -615,6 +615,7 @@ int initSetupSingle(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
   TReadoutBoardDAQ *myDAQBoard = 0;
   TChipConfig *     chipConfig = config->GetChipConfig(0);
   chipConfig->SetParamValue("LINKSPEED", "-1");
+  chipConfig->SetParamValue("RECEIVER", "0"); // has to match the value set in the BoardDecoder.cpp
   (*boardType) = boardDAQ;
   // values for control interface and receiver currently ignored for DAQ board
   // int               control     = chipConfig->GetParamValue("CONTROLINTERFACE");
