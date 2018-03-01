@@ -53,12 +53,12 @@ int myNTriggers = 5;
 
 char fNameRaw[1024];
 
-int HitData[100][512][1024];
+int HitData[256][512][1024];
 
 
 void ClearHitData()
 {
-  for (int ichip = 0; ichip < 100; ichip++) {
+  for (int ichip = 0; ichip < 256; ichip++) {
     for (int icol = 0; icol < 512; icol++) {
       for (int iaddr = 0; iaddr < 1024; iaddr++) {
         HitData[ichip][icol][iaddr] = 0;
@@ -93,10 +93,9 @@ bool HasDataChip(int chipId)
 
 void WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits, TBoardHeader boardInfo)
 {
-  int ModId, ChipId, dcol, address, event;
+  int ChipId, dcol, address, event;
   for (unsigned int ihit = oldHits; ihit < Hits->size(); ihit++) {
-    ChipId  = Hits->at(ihit).chipId & 0xf;
-    ModId   = (Hits->at(ihit).chipId >> 4) & 0x7;
+    ChipId  = Hits->at(ihit).chipId;
     dcol    = Hits->at(ihit).dcol + Hits->at(ihit).region * 16;
     address = Hits->at(ihit).address;
 
@@ -106,7 +105,7 @@ void WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits, TBoardHeade
     else {
       event = boardInfo.eoeCount;
     }
-    fprintf(fp, "%d %d %d %d %d\n", event, ModId, ChipId, dcol, address);
+    fprintf(fp, "%d %d %d %d\n", event, ChipId, dcol, address);
   }
 }
 
@@ -122,6 +121,7 @@ void WriteDataToFile(const char *fName, bool Recreate)
   for (unsigned int ichip = 0; ichip < fChips.size(); ichip++) {
     int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
     int modId  = ((fChips.at(ichip)->GetConfig()->GetChipId()) >> 4) & 0x7;
+    //    std::cout << "Writing data from chip " << chipId << std::endl;
     if (!HasDataChip(chipId)) continue; // write files only for chips with data
     if (fChips.size() > 1) {
       sprintf(fNameChip, "%s_Chip%d_%d.dat", fNameTemp, modId, chipId);
@@ -140,6 +140,8 @@ void WriteDataToFile(const char *fName, bool Recreate)
       for (int iaddr = 0; iaddr < 1024; iaddr++) {
         if (HitData[ichip][icol][iaddr] > 0) {
           fprintf(fp, "%d %d %d %d %d\n", modId, chipId, icol, iaddr, HitData[ichip][icol][iaddr]);
+          std::cout << "writing data " << modId << "  " << chipId << "  "
+                    << HitData[ichip][icol][iaddr] << std::endl;
         }
       }
     }

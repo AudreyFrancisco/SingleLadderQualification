@@ -1,4 +1,5 @@
 #include "AlpideDecoder.h"
+#include <bitset>
 #include <iostream>
 #include <stdint.h>
 
@@ -50,6 +51,14 @@ void AlpideDecoder::DecodeChipHeader(unsigned char *data, int &chipId, unsigned 
   bunchCounter = data_field & 0xff;
   chipId       = (data_field >> 8) & 0xf;
   newEvent     = true;
+  /*
+  std::cout << "data[0] " << std::bitset<8>(data[0])        << std::endl
+            << "data[1] " << std::bitset<8>(data[1])        << std::endl
+            << "datafld " << std::bitset<16>(data_field)    << std::endl
+            << "datafl8 " << std::bitset<16>(data_field>>8) << std::endl
+            << "chipId  " << std::bitset<32>(chipId)        << std::endl
+            << std::endl << std::endl << std::endl;
+  */
 }
 
 void AlpideDecoder::DecodeChipTrailer(unsigned char *data, int &flags) { flags = data[0] & 0xf; }

@@ -306,6 +306,8 @@ void scan()
               }
               fclose(fDebug);
             }
+            // std::cout << "Does chipId contains modId??? " << Hits->back().chipId << " " <<
+            // ((Hits->back().chipId >> 4) & 0x7) << std::endl;
             // std::cout << "total number of hits found: " << Hits->size() << std::endl;
             itrg += nClosedEvents;
           }
