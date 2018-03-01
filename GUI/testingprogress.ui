@@ -16,14 +16,14 @@
   <widget class="QLabel" name="testingprogress1">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>70</x>
      <y>50</y>
-     <width>231</width>
-     <height>41</height>
+     <width>301</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>The following scan is marked RED</string>
+    <string>The following scan has thrown an exception</string>
    </property>
   </widget>
   <widget class="QPushButton" name="continuetest">

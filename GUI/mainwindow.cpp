@@ -182,48 +182,52 @@ void MainWindow::open()
   try {
 
     fHicnames.push_back(fHicidnumber);
-    QByteArray  conv = fHicidnumber.toLatin1();
+    QByteArray  conv1 = fHicidnumber.toLatin1();
     QByteArray  conv2, conv3, conv4, conv5, conv6, conv7, conv8, conv9, conv10;
     const char *ar[10];
-    ar[0] = {conv.data()};
+    ar[0] = {conv1.data()};
     if (fNumberofscan == OBEndurance) {
-      conv2  = fToptwo.toLatin1();
+      fHicnames.clear();
+      conv1  = fTopfive.toLatin1();
+      ar[0]  = {conv1.data()};
+      conv2  = fTopfour.toLatin1();
       ar[1]  = {conv2.data()};
       conv3  = fTopthree.toLatin1();
       ar[2]  = {conv3.data()};
-      conv4  = fTopfour.toLatin1();
+      conv4  = fToptwo.toLatin1();
       ar[3]  = {conv4.data()};
-      conv5  = fTopfive.toLatin1();
+      conv5  = fHicidnumber.toLatin1();
       ar[4]  = {conv5.data()};
-      conv6  = fBottomone.toLatin1();
+      conv6  = fBottomfive.toLatin1();
       ar[5]  = {conv6.data()};
-      conv7  = fBottomtwo.toLatin1();
+      conv7  = fBottomfour.toLatin1();
       ar[6]  = {conv7.data()};
       conv8  = fBottomthree.toLatin1();
       ar[7]  = {conv8.data()};
-      conv9  = fBottomfour.toLatin1();
+      conv9  = fBottomtwo.toLatin1();
       ar[8]  = {conv9.data()};
-      conv10 = fBottomfive.toLatin1();
+      conv10 = fBottomone.toLatin1();
       ar[9]  = {conv10.data()};
-      fHicnames.push_back(fToptwo);
-      fHicnames.push_back(fTopthree);
-      fHicnames.push_back(fTopfour);
       fHicnames.push_back(fTopfive);
-      fHicnames.push_back(fBottomone);
-      fHicnames.push_back(fBottomtwo);
-      fHicnames.push_back(fBottomthree);
-      fHicnames.push_back(fBottomfour);
+      fHicnames.push_back(fTopfour);
+      fHicnames.push_back(fTopthree);
+      fHicnames.push_back(fToptwo);
+      fHicnames.push_back(fHicidnumber);
       fHicnames.push_back(fBottomfive);
-      fEndurancemodules.push_back(ui->top1);
-      fEndurancemodules.push_back(ui->top2);
-      fEndurancemodules.push_back(ui->top3);
-      fEndurancemodules.push_back(ui->top4);
+      fHicnames.push_back(fBottomfour);
+      fHicnames.push_back(fBottomthree);
+      fHicnames.push_back(fBottomtwo);
+      fHicnames.push_back(fBottomone);
       fEndurancemodules.push_back(ui->top5);
-      fEndurancemodules.push_back(ui->down1);
-      fEndurancemodules.push_back(ui->down2);
-      fEndurancemodules.push_back(ui->down3);
-      fEndurancemodules.push_back(ui->down4);
+      fEndurancemodules.push_back(ui->top4);
+      fEndurancemodules.push_back(ui->top3);
+      fEndurancemodules.push_back(ui->top2);
+      fEndurancemodules.push_back(ui->top1);
       fEndurancemodules.push_back(ui->down5);
+      fEndurancemodules.push_back(ui->down4);
+      fEndurancemodules.push_back(ui->down3);
+      fEndurancemodules.push_back(ui->down2);
+      fEndurancemodules.push_back(ui->down1);
     }
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
     fConfig->GetScanConfig()->SetUseDataPath(true);
@@ -650,30 +654,42 @@ void MainWindow::test()
 
 void MainWindow::scanLoop(TScan *myScan)
 {
-  myScan->Init();
-  myScan->LoopStart(2);
+  try {
+    myScan->Init();
+    myScan->LoopStart(2);
 
-  while (myScan->Loop(2)) {
-    myScan->PrepareStep(2);
-    myScan->LoopStart(1);
+    while (myScan->Loop(2)) {
+      myScan->PrepareStep(2);
+      myScan->LoopStart(1);
 
-    while (myScan->Loop(1)) {
-      myScan->PrepareStep(1);
-      myScan->LoopStart(0);
+      while (myScan->Loop(1)) {
+        myScan->PrepareStep(1);
+        myScan->LoopStart(0);
 
-      while (myScan->Loop(0)) {
-        myScan->PrepareStep(0);
-        myScan->Execute();
-        myScan->Next(0);
+        while (myScan->Loop(0)) {
+          myScan->PrepareStep(0);
+          myScan->Execute();
+          myScan->Next(0);
+        }
+        myScan->LoopEnd(0);
+        myScan->Next(1);
       }
-      myScan->LoopEnd(0);
-      myScan->Next(1);
+      myScan->LoopEnd(1);
+      myScan->Next(2);
     }
-    myScan->LoopEnd(1);
-    myScan->Next(2);
+    myScan->LoopEnd(2);
+    myScan->Terminate();
+    // throw string("SDFdsfsdfsdfsdfsfsdf");
   }
-  myScan->LoopEnd(2);
-  myScan->Terminate();
+  catch (exception &ex) {
+    std::cout << ex.what() << "is the thrown exception" << std::endl;
+    fExceptionthrown = true;
+  }
+
+  /* catch (string x) {
+     std::cout << "DGFDGDFGD>>" << x << std::endl;
+     fExceptionthrown = true;
+   }*/
 }
 
 void MainWindow::popup(QString message)
@@ -1536,8 +1552,6 @@ void MainWindow::colorsinglescan(int i)
       }
       if (fColour == CLASS_RED) {
         fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
-
-        notifyuser(i);
       }
       if (fColour == CLASS_UNTESTED) {
         fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
@@ -1555,7 +1569,6 @@ void MainWindow::colorsinglescan(int i)
       }
       if (fColour == CLASS_RED) {
         fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
-        notifyuser(i);
       }
       if (fColour == CLASS_UNTESTED) {
         fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
@@ -2274,37 +2287,49 @@ void MainWindow::executescans(std::vector<TScan *> s, std::vector<TScanAnalysis 
 {
 
   try {
-    fTestAgain = false;
+    fExceptionthrown = false;
+    fTestAgain       = false;
     if (s.at(i) == 0) {
       a.at(i)->Initialize();
       std::thread analysisThread(&TScanAnalysis::Run, a[i]);
       analysisThread.join();
       a.at(i)->Finalize();
+      colorsinglescan(i);
     }
     else {
       std::thread scanThread(&MainWindow::scanLoop, this, s[i]);
-      a.at(i)->Initialize();
-      std::thread analysisThread(&TScanAnalysis::Run, a[i]);
       scanThread.join();
+
+
       if (fScanstatuslabels.at(i) != 0) {
         fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
         fScanstatuslabels[i]->update();
         qApp->processEvents();
       }
-      analysisThread.join();
-      a.at(i)->Finalize();
-      if (fScanstatuslabels.at(i) != 0) {
-        fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
-        qApp->processEvents();
+      if (fExceptionthrown) {
+        notifyuser(i);
+        if (fTestAgain) {
+          // GetConfigExtraScans(i);
+          fNewScans.push_back(GetScanType(i));
+          fExtraScans++;
+        }
+      }
+
+      else {
+        a.at(i)->Initialize();
+        std::thread analysisThread(&TScanAnalysis::Run, a[i]);
+        analysisThread.join();
+        a.at(i)->Finalize();
+        if (fScanstatuslabels.at(i) != 0) {
+          fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
+          qApp->processEvents();
+        }
+        colorsinglescan(i);
       }
     }
-    colorsinglescan(i);
+
     if (fExecution == false) return;
-    if (fTestAgain) {
-      // GetConfigExtraScans();
-      fNewScans.push_back(GetScanType(i));
-      fExtraScans++;
-    }
+
     qApp->processEvents();
   }
   catch (exception &ex) {
@@ -2332,14 +2357,19 @@ void MainWindow::notifyuser(unsigned int position)
   fProgresswindow->setnotification(fScanVector.at(position)->GetName());
   fProgresswindow->exec();
 }
-/*
-void MainWindow::GetConfigExtraScans(){
-  std::cout<<" I get ..."<<std ::endl;
-  fVoltageScale.push_back(fConfig->GetScanConfig()->GetVoltageScale());
+
+void MainWindow::GetConfigExtraScans(unsigned int i)
+{
+  std::cout << i << std::endl;
+  // std::cout << " I get ..." << std::endl;
+  // TScanParameters *scanparameters;
+  // scanparameters = fScanVector.at(i)->GetParameters();
+  // fVoltageScale.push_back(scanparameters->voltageScale);
+  // std::cout << " I get ..." <<scanparameters->voltageScale<< std::endl;
   fBackBias.push_back(fConfig->GetScanConfig()->GetBackBias());
   fMlvdStr.push_back(fConfig->GetScanConfig()->GetMlvdsStrength());
 }
-
+/*
 void MainWindow::SetConfigExtraScans(unsigned int i){
   std::cout<< "I set"<< fVoltageScale.at(i)<<std::endl;
    fConfig->GetScanConfig()->SetVoltageScale(fVoltageScale.at(i));
@@ -2348,3 +2378,9 @@ void MainWindow::SetConfigExtraScans(unsigned int i){
 
 }
 */
+void MainWindow::stopscans()
+{
+  fExecution = false;
+  fProgresswindow->close();
+  delete fProgresswindow;
+}

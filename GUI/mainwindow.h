@@ -116,12 +116,8 @@ public slots:
     fProgresswindow->close();
     delete fProgresswindow;
   }
-  void stopscans()
-  {
-    fExecution = false;
-    fProgresswindow->close();
-    delete fProgresswindow;
-  }
+  void stopscans();
+
   void ConnectTestCombo(int value);
   void      ContinueWithoutWriting();
   void      finalwrite();
@@ -228,11 +224,12 @@ private:
   unsigned int           fInitialScans;
   void PerformExtraScans(std::vector<TScan *> s, std::vector<TScanAnalysis *> a);
   bool fAddingScans;
-  /*void SetConfigExtraScans(unsigned int i);
-  void GetConfigExtraScans();
+  bool fExceptionthrown;
+  void GetConfigExtraScans(unsigned int i);
+  void SetConfigExtraScans(unsigned int i);
   std::vector<float> fVoltageScale;
   std::vector<float> fBackBias;
-  std::vector <float> fMlvdStr;*/
+  std::vector<float> fMlvdStr;
 
 private slots:
   void button_obm1_clicked();
