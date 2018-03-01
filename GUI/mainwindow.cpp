@@ -229,6 +229,13 @@ void MainWindow::open()
       fEndurancemodules.push_back(ui->down2);
       fEndurancemodules.push_back(ui->down1);
     }
+    if (fNumberofscan == OBHalfStaveOL) {
+      fHicnames.clear();
+      for (unsigned int i = 0; i < 7; i++) {
+        fHicnames.push_back('\0');
+        ar[i] = {'\0'};
+      }
+    }
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
     fConfig->GetScanConfig()->SetUseDataPath(true);
     fPb               = fHICs.at(0)->GetPowerBoard();
