@@ -53,42 +53,39 @@ int myNTriggers = 5;
 
 char fNameRaw[1024];
 
-int HitData[7][16][512][1024];
+int HitData[100][512][1024];
 
 
 void ClearHitData()
 {
-  for (int imod = 0; imod < 7; imod++) {
-    for (int ichip = 0; ichip < 16; ichip++) {
-      for (int icol = 0; icol < 512; icol++) {
-        for (int iaddr = 0; iaddr < 1024; iaddr++) {
-          HitData[imod][ichip][icol][iaddr] = 0;
-        }
+  for (int ichip = 0; ichip < 100; ichip++) {
+    for (int icol = 0; icol < 512; icol++) {
+      for (int iaddr = 0; iaddr < 1024; iaddr++) {
+        HitData[ichip][icol][iaddr] = 0;
       }
     }
   }
 }
 
+
 void CopyHitData(std::vector<TPixHit> *Hits)
 {
   for (unsigned int ihit = 0; ihit < Hits->size(); ihit++) {
-    int chipId  = Hits->at(ihit).chipId & 0xf;
-    int modId   = ((Hits->at(ihit).chipId) >> 4) & 0x7;
+    int chipId  = Hits->at(ihit).chipId;
+//    int modId   = ((Hits->at(ihit).chipId) >> 4) & 0x7;
     int dcol    = Hits->at(ihit).dcol;
     int region  = Hits->at(ihit).region;
     int address = Hits->at(ihit).address;
-    HitData[modId][chipId][dcol + region * 16][address]++;
+    HitData[chipId][dcol + region * 16][address]++;
   }
   Hits->clear();
 }
 
 bool HasDataChip(int chipId)
 {
-  for (int imod = 0; imod < 7; imod++) {
-    for (int icol = 0; icol < 512; icol++) {
-      for (int iaddr = 0; iaddr < 1024; iaddr++) {
-        if (HitData[imod][chipId][icol][iaddr] > 0) return true;
-      }
+  for (int icol = 0; icol < 512; icol++) {
+    for (int iaddr = 0; iaddr < 1024; iaddr++) {
+      if (HitData[chipId][icol][iaddr] > 0) return true;
     }
   }
   return false;
@@ -96,9 +93,10 @@ bool HasDataChip(int chipId)
 
 void WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits, TBoardHeader boardInfo)
 {
-  int ChipId, dcol, address, event;
+  int ModId, ChipId, dcol, address, event;
   for (unsigned int ihit = oldHits; ihit < Hits->size(); ihit++) {
-    ChipId  = Hits->at(ihit).chipId;
+    ChipId  = Hits->at(ihit).chipId & 0xf;
+    ModId   = (Hits->at(ihit).chipId >> 4) & 0x7;
     dcol    = Hits->at(ihit).dcol + Hits->at(ihit).region * 16;
     address = Hits->at(ihit).address;
 
@@ -108,7 +106,7 @@ void WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits, TBoardHeade
     else {
       event = boardInfo.eoeCount;
     }
-    fprintf(fp, "%d %d %d %d\n", event, ChipId, dcol, address);
+    fprintf(fp, "%d %d %d %d %d\n", event, ModId, ChipId, dcol, address);
   }
 }
 
@@ -121,34 +119,32 @@ void WriteDataToFile(const char *fName, bool Recreate)
 
   sprintf(fNameTemp, "%s", fName);
   strtok(fNameTemp, ".");
-  for (unsigned int imod = 0; imod < 7; imod++) {
-    for (unsigned int ichip = 0; ichip < fChips.size(); ichip++) {
-      int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
-      int modId  = ((fChips.at(ichip)->GetConfig()->GetChipId()) >> 4) & 0x7;
-      if (!HasDataChip(chipId)) continue; // write files only for chips with data
-      if (fChips.size() > 1) {
-        sprintf(fNameChip, "%s_Chip%d_%d.dat", fNameTemp, modId, chipId);
-      }
-      else {
-        sprintf(fNameChip, "%s.dat", fNameTemp);
-      }
-      std::cout << "Writing data to file " << fNameChip << std::endl;
-      if (Recreate) {
-        fp       = fopen(fNameChip, "w");
-        Recreate = false;
-      }
-      else
-        fp = fopen(fNameChip, "a");
-      for (int icol = 0; icol < 512; icol++) {
-        for (int iaddr = 0; iaddr < 1024; iaddr++) {
-          if (HitData[imod][ichip][icol][iaddr] > 0) {
-            fprintf(fp, "%d %d %d %d %d\n", modId, chipId, icol, iaddr,
-                    HitData[imod][ichip][icol][iaddr]);
-          }
+  for (unsigned int ichip = 0; ichip < fChips.size(); ichip++) {
+    int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
+    int modId  = ((fChips.at(ichip)->GetConfig()->GetChipId()) >> 4) & 0x7;
+    if (!HasDataChip(chipId)) continue; // write files only for chips with data
+    if (fChips.size() > 1) {
+      sprintf(fNameChip, "%s_Chip%d_%d.dat", fNameTemp, modId, chipId);
+    }
+    else {
+      sprintf(fNameChip, "%s.dat", fNameTemp);
+    }
+    std::cout << "Writing data to file " << fNameChip << std::endl;
+    if (Recreate) {
+      fp       = fopen(fNameChip, "w");
+      Recreate = false;
+    }
+    else
+      fp = fopen(fNameChip, "a");
+    for (int icol = 0; icol < 512; icol++) {
+      for (int iaddr = 0; iaddr < 1024; iaddr++) {
+        if (HitData[ichip][icol][iaddr] > 0) {
+          fprintf(fp, "%d %d %d %d %d\n", modId, chipId, icol, iaddr,
+                  HitData[ichip][icol][iaddr]);
         }
       }
-      if (fp) fclose(fp);
     }
+    if (fp) fclose(fp);
   }
 }
 
