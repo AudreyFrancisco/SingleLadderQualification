@@ -225,6 +225,19 @@ void scope_control::set_vscale_ch(uint8_t ch, double scale)
   scope_control::write_cmd(cmd);
 }
 
+void scope_control::set_dc_coupling_ch(uint8_t ch, bool dc_coupling)
+{
+  char cmd[30];
+  if (!eval_ch(ch)) return;
+  if (dc_coupling) {
+    snprintf(cmd, sizeof(cmd), "CHAN%d:COUP DCL\n", ch);
+  }
+  else {
+    snprintf(cmd, sizeof(cmd), "CHAN%d:COUP ACL\n", ch);
+  }
+  scope_control::write_cmd(cmd);
+}
+
 void scope_control::set_timescale(double time)
 {
   char cmd[30];
@@ -242,15 +255,125 @@ void scope_control::set_timescale(double time)
 
 void scope_control::set_trigger_ext()
 {
-  scope_control::write_cmd("TRIG:A:MODE NORM\n");     // Normal trigger mode
-  scope_control::write_cmd("TRIG:A:SOUR EXT\n");      // External trigger
-  scope_control::write_cmd("TRIG:A:EDGE:SLOP POS\n"); // Rising edge
-  scope_control::write_cmd("TRIG:A:LEV5 0.1\n");      // Trigger level
+  scope_control::write_cmd("TRIG:A:MODE NORM\n"); // Normal trigger mode
+  scope_control::write_cmd("TRIG:A:SOUR EXT\n");  // External trigger
+}
+
+void scope_control::set_trigger_slope_rising(bool rising)
+{
+  if (rising) {
+    scope_control::write_cmd("TRIG:A:EDGE:SLOP POS\n"); // Rising edge
+  }
+  else {
+    scope_control::write_cmd("TRIG:A:EDGE:SLOP NEG\n"); // Falling edge
+  }
+}
+
+void scope_control::set_trigger_position(double time)
+{
+  char cmd[30];
+  snprintf(cmd, sizeof(cmd), "TIM:POS %e\n", time);
+  scope_control::write_cmd(cmd);
+}
+
+void scope_control::set_ext_trigger_level(double level)
+{
+  char cmd[30];
+  snprintf(cmd, sizeof(cmd), "TRIG:A:LEV5 %e\n", level); // Trigger level
+  scope_control::write_cmd(cmd);
 }
 
 void scope_control::single_capture()
 {
   scope_control::write("SING\n"); // Single capture
+}
+
+void scope_control::set_math_diff(uint8_t ch_p, uint8_t ch_n)
+{
+  char cmd[30];
+  scope_control::write_cmd("CALC:QMATH:STAT ON\n");           // Enable math
+  snprintf(cmd, sizeof(cmd), "CALC:QMAT:SOUR1 CH%d\n", ch_p); // Set ch1 source
+  scope_control::write_cmd(cmd);
+  snprintf(cmd, sizeof(cmd), "CALC:QMAT:SOUR1 CH%d\n", ch_n); // Set ch2 source
+  scope_control::write_cmd(cmd);
+  scope_control::write_cmd("CALC:QMAT:OPER SUB\n"); // Sub ch2 from ch1
+}
+
+void scope_control::en_measure_math() { scope_control::en_measure(5); }
+
+void scope_control::en_measure_ch(uint8_t ch)
+{
+  if (!eval_ch(ch))
+    return;
+  else
+    scope_control::en_measure(ch);
+}
+
+void scope_control::setup_measure()
+{
+  scope_control::write_cmd("MEAS1:MAIN PEAK\n"); // Peak to peak
+  scope_control::write_cmd("MEAS2:MAIN AMPL\n"); // Amplitude
+  scope_control::write_cmd("MEAS3:MAIN RTIM\n"); // Risetime
+  scope_control::write_cmd("MEAS4:MAIN FTIM\n"); // Falltime
+
+  scope_control::write_cmd("MEAS1:ENAB ON\n");
+  scope_control::write_cmd("MEAS2:ENAB ON\n");
+  scope_control::write_cmd("MEAS3:ENAB ON\n");
+  scope_control::write_cmd("MEAS4:ENAB ON\n");
+}
+
+void scope_control::en_measure(uint8_t ch)
+{
+  if (ch == 5) { // Set math as source
+    scope_control::write_cmd("MEAS1:SOUR MA1\n");
+    scope_control::write_cmd("MEAS2:SOUR MA1\n");
+    scope_control::write_cmd("MEAS3:SOUR MA1\n");
+    scope_control::write_cmd("MEAS4:SOUR MA1\n");
+    measure_ch = 5;
+  }
+  else {
+    char cmd[30];
+    snprintf(cmd, sizeof(cmd), "MEAS1:SOUR CH%d\n", ch);
+    scope_control::write_cmd(cmd);
+    snprintf(cmd, sizeof(cmd), "MEAS2:SOUR CH%d\n", ch);
+    scope_control::write_cmd(cmd);
+    snprintf(cmd, sizeof(cmd), "MEAS3:SOUR CH%d\n", ch);
+    scope_control::write_cmd(cmd);
+    snprintf(cmd, sizeof(cmd), "MEAS4:SOUR CH%d\n", ch);
+    scope_control::write_cmd(cmd);
+    measure_ch = ch;
+  }
+}
+
+void scope_control::get_meas()
+{
+  scope_control::measures result;
+  std::string             value;
+  value       = scope_control::write_query("MEAS1:RES?\n");
+  result.peak = std::stod(value);
+  value       = scope_control::write_query("MEAS2:RES?\n");
+  result.amp  = std::stod(value);
+  value       = scope_control::write_query("MEAS3:RES?\n");
+  result.rtim = std::stod(value);
+  value       = scope_control::write_query("MEAS4:RES?\n");
+  result.ftim = std::stod(value);
+  switch (measure_ch) {
+  case 1:
+    ch1 = result;
+    break;
+  case 2:
+    ch2 = result;
+    break;
+  case 3:
+    ch3 = result;
+    break;
+  case 4:
+    ch4 = result;
+    break;
+  case 5:
+    math = result;
+    break;
+  }
 }
 
 void scope_control::start_quick_meas() { scope_control::write_cmd("MEAS:AON\n"); }
@@ -270,25 +393,25 @@ void scope_control::wait_for_trigger()
 void scope_control::get_quick_meas()
 {
   std::string value;
-  value   = scope_control::write_query("MEAS:ARES?\n");
-  int pos = value.find(',', 0);
-  peak    = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  upe     = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  lpe     = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  cycr    = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  cycm    = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  per     = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  freq    = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  rtim    = std::stod(value.substr(0, pos));
-  pos     = value.find(',', pos);
-  ftim    = std::stod(value.substr(0, pos));
+  value               = scope_control::write_query("MEAS:ARES?\n");
+  int pos             = value.find(',', 0);
+  quick_measures.peak = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.upe  = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.lpe  = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.cycr = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.cycm = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.per  = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.freq = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.rtim = std::stod(value.substr(0, pos));
+  pos                 = value.find(',', pos);
+  quick_measures.ftim = std::stod(value.substr(0, pos));
 }
 
 void scope_control::throw_ex(const char *text)
