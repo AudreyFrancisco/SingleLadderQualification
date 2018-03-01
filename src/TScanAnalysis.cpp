@@ -28,11 +28,36 @@ int TScanAnalysis::GetPreviousActivityType()
   return DbGetActivityTypeId(m_config->GetDatabase(), GetPreviousTestType());
 }
 
+
+bool TScanAnalysis::GetPreviousActivity(string compName, ActivityDB::activityLong &act)
+{
+  return DbGetLatestActivity(m_config->GetDatabase(), GetPreviousActivityType(), compName, act);
+}
+
+
 int TScanAnalysis::ReadChipList()
 {
   m_chipList = m_scan->GetChipList();
   return m_chipList.size();
 }
+
+
+// Create prediction as hic results
+// TODO: do we need chip results? (probably not)
+// TODO: validity flag? this would require a new structure
+void TScanAnalysis::CreatePrediction()
+{
+  if (m_hics.size() == 0) {
+    std::cout << "Warning (TScanAnalysis::CreateResult): hic list is empty, doing nothing"
+              << std::endl;
+    return;
+  }
+  for (unsigned int i = 0; i < m_hics.size(); i++) {
+    TScanResultHic *hicResult = GetHicResult();
+    m_result->AddHicResult(m_hics.at(i)->GetDbId(), hicResult);
+  }
+}
+
 
 void TScanAnalysis::CreateHicResults()
 {
@@ -41,11 +66,6 @@ void TScanAnalysis::CreateHicResults()
               << std::endl;
     return;
   }
-  // if (m_chipList.size() == 0) {
-  //  std::cout  << "Warning (TScanAnalysis::CreateResult): chip list is empty, doing nothing" <<
-  // std::endl;
-  //  return;
-  //}
 
   for (unsigned int i = 0; i < m_chipList.size(); i++) {
     TScanResultChip *  chipResult = GetChipResult();

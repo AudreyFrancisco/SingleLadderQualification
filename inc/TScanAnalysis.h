@@ -130,17 +130,20 @@ protected:
   TScan *                  m_scan;
   TScanConfig *            m_config;
   TScanResult *            m_result;
+  TScanResult *            m_prediction;
   bool                     m_first;
   bool                     m_started;
   bool                     m_finished;
   virtual TScanResultChip *GetChipResult() = 0;
   virtual TScanResultHic * GetHicResult()  = 0;
   void                     CreateHicResults();
+  void                     CreatePrediction();
   virtual void             CreateResult() = 0;
   int                      ReadChipList();
   virtual void AnalyseHisto(TScanHisto *histo) = 0;
-  virtual void   InitCounters()                = 0;
-  int            GetPreviousActivityType();
+  virtual void InitCounters()                  = 0;
+  int          GetPreviousActivityType();
+  bool GetPreviousActivity(string compName, ActivityDB::activityLong &act);
   virtual string GetPreviousTestType() = 0;
   void DoCut(THicClassification &hicClass, THicClassification failClass, int value, string cutName,
              bool minCut = false);
