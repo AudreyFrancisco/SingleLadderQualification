@@ -231,10 +231,21 @@ void MainWindow::open()
     }
     if (fNumberofscan == OBHalfStaveOL) {
       fHicnames.clear();
-      for (unsigned int i = 0; i < 7; i++) {
-        fHicnames.push_back('\0');
-        ar[i] = {'\0'};
-      }
+      //  for (unsigned int i = 0; i < 7; i++) {
+      fHicnames.push_back("Module1");
+      fHicnames.push_back("Module2");
+      fHicnames.push_back("Module3");
+      fHicnames.push_back("Module4");
+      fHicnames.push_back("Module5");
+      fHicnames.push_back("Module6");
+      fHicnames.push_back("Module7");
+      ar[0] = {"Module1"};
+      ar[1] = {"Module2"};
+      ar[2] = {"Module3"};
+      ar[3] = {"Module4"};
+      ar[4] = {"Module5"};
+      ar[5] = {"Module6"};
+      ar[6] = {"Module7"};
     }
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
     fConfig->GetScanConfig()->SetUseDataPath(true);
