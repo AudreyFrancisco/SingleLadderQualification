@@ -107,6 +107,7 @@ TScanConfig::TScanConfig()
   m_threshMaxNoiseOB            = THRESH_MAXNOISE_OB;
   m_threshMaxNoiseIB            = THRESH_MAXNOISE_IB;
 
+  m_enduranceSlices            = ENDURANCE_SLICES;
   m_enduranceCycles            = ENDURANCE_CYCLES;
   m_enduranceTriggers          = ENDURANCE_TRIGGERS;
   m_enduranceUptime            = ENDURANCE_UPTIME;
@@ -211,6 +212,7 @@ void TScanConfig::InitParamMap()
   fSettings["TARGETTHRESH"] = &m_targetThresh;
   fSettings["NOMINAL"]      = &m_nominal;
 
+  fSettings["ENDURANCESLICES"]    = &m_enduranceSlices;
   fSettings["ENDURANCECYCLES"]    = &m_enduranceCycles;
   fSettings["ENDURANCETRIGGERS"]  = &m_enduranceTriggers;
   fSettings["ENDURANCEUPTIME"]    = &m_enduranceUptime;

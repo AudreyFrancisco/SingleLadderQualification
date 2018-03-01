@@ -133,11 +133,12 @@ namespace ScanConfig {
   const float VOLTAGE_SCALE = 1.0;
   const float BACKBIAS      = 0;
   const int   NOMINAL       = 0;
-  const int   ENDURANCE_CYCLES             = 3000; // total number of cycles
-  const int   ENDURANCE_UPTIME             = 60;   // up and down wait time in seconds
+  const int   ENDURANCE_SLICES             = 21;  // number of cycle slices
+  const int   ENDURANCE_CYCLES             = 150; // total number of cycles per slice
+  const int   ENDURANCE_UPTIME             = 60;  // up and down wait time in seconds per cycle
   const int   ENDURANCE_DOWNTIME           = 120;
   const int   ENDURANCE_TRIGGERS           = 10000;
-  const int   ENDURANCE_LIMIT              = 168; // time limit in hours
+  const int   ENDURANCE_LIMIT              = 8; // time limit in hours per slice
   const int   ENDURANCE_MAXTRIPS_GREEN     = 0;
   const int   ENDURANCE_MAXTRIPS_ORANGE    = 3; // approx. 1 per 1000 cycles
   const int   ENDURANCE_MINCHIPS_GREEN     = 14;
@@ -237,6 +238,7 @@ private:
   int       m_mlvdsStrength;
   float     m_backBias;
   bool      m_useDataPath; // for compatibility with standalone scans, set true for GUI
+  int       m_enduranceSlices;
   int       m_enduranceCycles;
   int       m_enduranceUptime;
   int       m_enduranceDowntime;

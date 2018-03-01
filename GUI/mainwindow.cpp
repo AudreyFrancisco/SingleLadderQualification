@@ -2289,10 +2289,14 @@ void MainWindow::fillingibvectors()
 
 void MainWindow::fillingendurancevectors()
 {
+  int nSlices = fConfig->GetScanConfig()->GetParamValue("ENDURANCESLICES");
   ClearVectors();
 
   AddScan(STFifo);
-  AddScan(STEndurance);
+
+  for (int i = 0; i < nSlices; i++) {
+    AddScan(STEndurance);
+  }
 }
 
 void MainWindow::ConnectTestCombo(int value)
