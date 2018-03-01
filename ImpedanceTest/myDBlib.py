@@ -23,7 +23,7 @@ import copy
 from Common import *
 from pty import CHILD
 
-#    Version 2.0 - 22/02/2018 - A.franco - INFN BARI ITALY
+#    Version 2.1 - 01/03/2018 - A.franco - INFN BARI ITALY
 
 
 # ---------------------------------------------
@@ -452,6 +452,32 @@ class DB:
             ls.append(s)   
         self.lg.debug("Find activities : %d" % (len(ls)) )
         return(ls)
+
+    # -- Get all the Activities related to a Component
+    #
+    #   compId     :=  A string that contains the Component ID
+    #
+    #   Return    :=  a list of descriptors (strings) := "<start_date> <activity_name> <activity_result> <activity_state>"
+    #  
+    #    
+    def GetComponentActivityList(self,compId):
+        self.lg.debug("Read the activity list of component  %s" % (compId) )
+        
+        compo = self.DB.service.ComponentReadOne(ID=-999, componentID = compId) 
+        if compo is None:
+            return([])
+        cID = compo.ID
+        history = self.DB.service.ComponentActivityHistoryRead(ID = cID)
+        if history is None:
+            return([])
+        history.sort(key = lambda c: dateToInt(c.ActivityStartDate))
+        ls = []
+        for act in history:
+            ls.append(act)   
+        self.lg.debug("Find activities : %d" % (len(ls)) )
+        return(ls)
+
+
 
     # -- Get the (Physical, Functional) state of a component
     #
