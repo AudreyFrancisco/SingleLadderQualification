@@ -132,6 +132,7 @@ bool BoardDecoder::DecodeEventDAQ(unsigned char *data, int nBytes, int &nBytesHe
   boardInfo.trigCountChipBusy = TrigCountChipBusy;
   boardInfo.trigCountDAQBusy  = TrigCountDAQbusy;
   boardInfo.extTrigCount      = ExtTrigCounter;
+  boardInfo.channel           = 0;
 
   // TRAILER
 
