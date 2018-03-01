@@ -1877,8 +1877,8 @@ void MainWindow::setandgetcalibration()
     }
     powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(fHICs.at(ihic)->GetPbMod(),
                                                                         ares, dres, gres);
-    fPb->CalibrateVoltage(fHICs.at(ihic)->GetPbMod());
-    fPb->CalibrateCurrent(fHICs.at(ihic)->GetPbMod());
+    powerBoard->CalibrateVoltage(fHICs.at(ihic)->GetPbMod());
+    powerBoard->CalibrateCurrent(fHICs.at(ihic)->GetPbMod());
   }
 
   powerBoard0->CalibrateBiasVoltage();
