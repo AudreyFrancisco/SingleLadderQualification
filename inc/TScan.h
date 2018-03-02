@@ -27,6 +27,7 @@ typedef struct {
 } TErrorCounter;
 
 typedef struct TScanParameters__ {
+  virtual ~TScanParameters__(){};
 } TScanParameters;
 
 class TScanConditionsHic {
@@ -117,6 +118,7 @@ public:
   const char *     GetState() { return m_state; };
   TScanConditions *GetConditions() { return &m_conditions; };
   TScanParameters *GetParameters() { return m_parameters; };
+  virtual bool SetParameters(TScanParameters *pars) { return false; };
   TErrorCounter GetErrorCount(std::string hicId);
   void CreateHicConditions();
   void WriteConditions(const char *fName, THic *aHic);

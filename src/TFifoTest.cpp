@@ -17,6 +17,29 @@ TFifoTest::TFifoTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vec
 
   ((TFifoParameters *)m_parameters)->voltageScale  = voltageScale;
   ((TFifoParameters *)m_parameters)->mlvdsStrength = mlvdsStrength;
+
+  SetName();
+
+  m_start[2] = 0;
+  m_step[2]  = 1;
+  m_stop[2]  = m_chips.size();
+
+  m_start[1] = 0;
+  m_step[1]  = 1;
+  m_stop[1]  = 32;
+
+  m_start[0] = 0;
+  m_step[0]  = 1;
+  m_stop[0]  = 128;
+
+  CreateScanHisto();
+}
+
+
+void TFifoTest::SetName()
+{
+  float voltageScale  = ((TFifoParameters *)m_parameters)->voltageScale;
+  int   mlvdsStrength = ((TFifoParameters *)m_parameters)->mlvdsStrength;
   if (voltageScale > 0.9 && voltageScale < 1.1) {
     if (mlvdsStrength == ChipConfig::DCTRL_DRIVER) {
       strcpy(m_name, "Fifo Scan");
@@ -36,21 +59,25 @@ TFifoTest::TFifoTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vec
     voltageScale = 1.0;
     strcpy(m_name, "Fifo Scan");
   }
-
-  m_start[2] = 0;
-  m_step[2]  = 1;
-  m_stop[2]  = m_chips.size();
-
-  m_start[1] = 0;
-  m_step[1]  = 1;
-  m_stop[1]  = 32;
-
-  m_start[0] = 0;
-  m_step[0]  = 1;
-  m_stop[0]  = 128;
-
-  CreateScanHisto();
 }
+
+
+bool TFifoTest::SetParameters(TScanParameters *pars)
+{
+  TFifoParameters *fPars = dynamic_cast<TFifoParameters *>(pars);
+  if (fPars) {
+    std::cout << "TFifoScan: Updating parameters" << std::endl;
+    ((TFifoParameters *)m_parameters)->voltageScale  = fPars->voltageScale;
+    ((TFifoParameters *)m_parameters)->mlvdsStrength = fPars->mlvdsStrength;
+    SetName();
+    return true;
+  }
+  else {
+    std::cout << "TFifoTest::SetParameters: Error, bad parameter type, doing nothing" << std::endl;
+    return false;
+  }
+}
+
 
 THisto TFifoTest::CreateHisto()
 {

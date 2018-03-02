@@ -18,6 +18,7 @@ class TDigitalScan : public TMaskScan {
 private:
   void ConfigureFromu(TAlpide *chip);
   void FillHistos(std::vector<TPixHit> *Hits, int board);
+  void SetName();
 
 protected:
   void ConfigureChip(TAlpide *chip);
@@ -42,6 +43,7 @@ public:
     return ((((TDigitalParameters *)m_parameters)->voltageScale > 0.99) &&
             (((TDigitalParameters *)m_parameters)->voltageScale < 1.01));
   };
+  bool SetParameters(TScanParameters *pars);
   bool IsLower() { return (((TDigitalParameters *)m_parameters)->voltageScale < 0.9); };
   bool IsUpper() { return (((TDigitalParameters *)m_parameters)->voltageScale > 1.1); };
 };
