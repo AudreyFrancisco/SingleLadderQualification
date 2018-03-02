@@ -927,6 +927,9 @@ void MainWindow::applytests()
       std::cout << "the number of old tests is " << oldtests << std::endl;
       fConfig->GetScanConfig()->SetRetestNumber(oldtests);
       makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
+      if (oldtests > 0) {
+        fConfig->GetScanConfig()->SetUseDataPath(true);
+      }
     }
   }
 
@@ -2269,6 +2272,7 @@ void MainWindow::fillingHSscans()
   ClearVectors();
 
   AddScan(STFifo);
+  AddScan(STDigital);
 }
 
 void MainWindow::attachConfigFile(ActivityDB::activity &activity)
