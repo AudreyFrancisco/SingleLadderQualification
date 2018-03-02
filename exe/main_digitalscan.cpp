@@ -405,14 +405,15 @@ int main(int argc, char **argv)
     }
 
     scan();
-
-    if (myDAQBoard) {
-      myDAQBoard->PowerOff();
-      delete myDAQBoard;
-    }
   }
 
   sprintf(fName, "Data/DigitalScan_%s.dat", Suffix);
   WriteDataToFile(fName, true);
+
+  if (myDAQBoard) {
+    myDAQBoard->PowerOff();
+    delete myDAQBoard;
+  }
+
   return 0;
 }
