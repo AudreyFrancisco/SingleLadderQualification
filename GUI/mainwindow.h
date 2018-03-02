@@ -226,10 +226,8 @@ private:
   bool fAddingScans;
   bool fExceptionthrown;
   void GetConfigExtraScans(unsigned int i);
-  void SetConfigExtraScans(unsigned int i);
-  std::vector<float> fVoltageScale;
-  std::vector<float> fBackBias;
-  std::vector<float> fMlvdStr;
+  std::vector<TScanParameters *> fpGetter;
+
 
 private slots:
   void button_obm1_clicked();

@@ -888,9 +888,7 @@ void MainWindow::fillingOBvectors()
 
 void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis *> a)
 {
-  // fVoltageScale.clear();
-  // fBackBias.clear();
-  // fMlvdStr.clear();
+  fpGetter.clear();
   fAddingScans = true;
   fExtraScans  = 0;
   ui->statuslabel->setVisible(true);
@@ -905,8 +903,9 @@ void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis 
 
   if (fExtraScans > 0) {
     for (unsigned int j = 0; j < fExtraScans; j++) {
-      // SetConfigExtraScans(j);
+
       AddScan(fNewScans.at(j));
+      fScanVector.at(fInitialScans + j)->SetParameters(fpGetter.at(j));
     }
   }
 
@@ -1407,7 +1406,6 @@ void MainWindow::fillingreceptionscans()
   ClearVectors();
 
   AddScan(STPower);
-  return;
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetMlvdsStrength(5);
   AddScan(STFifo);
@@ -2332,7 +2330,7 @@ void MainWindow::executescans(std::vector<TScan *> s, std::vector<TScanAnalysis 
       if (fExceptionthrown) {
         notifyuser(i);
         if (fTestAgain) {
-          // GetConfigExtraScans(i);
+          GetConfigExtraScans(i);
           fNewScans.push_back(GetScanType(i));
           fExtraScans++;
         }
@@ -2384,23 +2382,10 @@ void MainWindow::notifyuser(unsigned int position)
 void MainWindow::GetConfigExtraScans(unsigned int i)
 {
   std::cout << i << std::endl;
-  // std::cout << " I get ..." << std::endl;
-  // TScanParameters *scanparameters;
-  // scanparameters = fScanVector.at(i)->GetParameters();
-  // fVoltageScale.push_back(scanparameters->voltageScale);
-  // std::cout << " I get ..." <<scanparameters->voltageScale<< std::endl;
-  fBackBias.push_back(fConfig->GetScanConfig()->GetBackBias());
-  fMlvdStr.push_back(fConfig->GetScanConfig()->GetMlvdsStrength());
+  fpGetter.push_back(fScanVector.at(i)->GetParameters());
 }
-/*
-void MainWindow::SetConfigExtraScans(unsigned int i){
-  std::cout<< "I set"<< fVoltageScale.at(i)<<std::endl;
-   fConfig->GetScanConfig()->SetVoltageScale(fVoltageScale.at(i));
-   fConfig->GetScanConfig()->SetBackBias(fBackBias.at(i));
-   fConfig->GetScanConfig()->SetMlvdsStrength(fMlvdStr.at(i));
 
-}
-*/
+
 void MainWindow::stopscans()
 {
   fExecution = false;
