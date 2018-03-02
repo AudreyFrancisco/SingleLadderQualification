@@ -927,9 +927,6 @@ void MainWindow::applytests()
       std::cout << "the number of old tests is " << oldtests << std::endl;
       fConfig->GetScanConfig()->SetRetestNumber(oldtests);
       makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
-      if (oldtests > 0) {
-        fConfig->GetScanConfig()->SetUseDataPath(true);
-      }
     }
   }
 
@@ -1573,6 +1570,7 @@ void MainWindow::colorsinglescan(int i)
       }
       if (fColour == CLASS_RED) {
         fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
+        return;
       }
       if (fColour == CLASS_UNTESTED) {
         fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
@@ -1587,9 +1585,11 @@ void MainWindow::colorsinglescan(int i)
       }
       if (fColour == CLASS_GREEN) {
         fScanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
+        return;
       }
       if (fColour == CLASS_RED) {
         fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
+        return;
       }
       if (fColour == CLASS_UNTESTED) {
         fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
@@ -2272,6 +2272,7 @@ void MainWindow::fillingHSscans()
   ClearVectors();
 
   AddScan(STFifo);
+  return;
   AddScan(STDigital);
 }
 
