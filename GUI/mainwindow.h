@@ -1,5 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include "../DataBaseSrc/DBHelpers.h"
 #include "THisto.h"
 #include "TReadoutBoard.h"
 #include "TScanAnalysis.h"
@@ -91,7 +92,7 @@ public slots:
   void locationcombo();
   void savesettings();
   void speedycheck(bool checked);
-
+  void attachConfigFile(ActivityDB::activity &activity);
   void loaddefaultconfig();
 
   void loadeditedconfig();
@@ -106,7 +107,7 @@ public slots:
 
   void fillingendurancevectors();
   void fillingfastpower();
-
+  void fillingHSscans();
   void ibscansforageing();
 
   void continuescans()
@@ -115,17 +116,16 @@ public slots:
     fProgresswindow->close();
     delete fProgresswindow;
   }
-  void stopscans()
-  {
-    fExecution = false;
-    fProgresswindow->close();
-    delete fProgresswindow;
-  }
+  void stopscans();
+
   void ConnectTestCombo(int value);
   void      ContinueWithoutWriting();
   void      finalwrite();
   void      quittest();
   AlpideDB *GetDB();
+  void      retryfailedscan();
+  void executescans(std::vector<TScan *> s, std::vector<TScanAnalysis *> a, unsigned int i);
+  void notifyuser(unsigned int position);
 
 signals:
   void stopTimer();
@@ -216,6 +216,18 @@ private:
   bool             fstop;
   int              fComponentTypeID;
   std::vector<int> fActivityResults;
+  TScanType GetScanType(int scannumber);
+  std::vector<TScanType> fScanTypes;
+  bool                   fTestAgain;
+  std::vector<TScanType> fNewScans;
+  unsigned int           fExtraScans = 0;
+  unsigned int           fInitialScans;
+  void PerformExtraScans(std::vector<TScan *> s, std::vector<TScanAnalysis *> a);
+  bool fAddingScans;
+  bool fExceptionthrown;
+  void GetConfigExtraScans(unsigned int i);
+  std::vector<TScanParameters *> fpGetter;
+
 
 private slots:
   void button_obm1_clicked();

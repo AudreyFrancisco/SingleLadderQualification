@@ -174,8 +174,13 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
 
   // TODO: Define power board mapping for half stave
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
-    hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic + 1)).c_str(),
-                               config->GetHicConfig(ihic)->GetModId(), pb, 0));
+    if (hicIds) {
+      hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb, ihic));
+    }
+    else {
+      hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic + 1)).c_str(),
+                                 config->GetHicConfig(ihic)->GetModId(), pb, ihic));
+    }
     ((THicOB *)(hics->at(ihic)))->ConfigureMaster(0, 0, ihic, 0);
     ((THicOB *)(hics->at(ihic)))->ConfigureMaster(8, 1, ihic, 0);
   }
@@ -241,6 +246,11 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
       }
       boards->at(mosaic)->AddChip(chipId, control, receiver, chips->at(i));
     }
+  }
+
+  for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
+
+    hics->at(ihic)->PowerOn();
   }
 
   CheckControlInterface(config, boards, boardType, chips); // returns nWorking : int

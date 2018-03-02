@@ -28,6 +28,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("IB HIC Endurance Test", IBEndurance);
   ui->typetest->addItem("OB HIC Reception Test", OBReception);
   ui->typetest->addItem("OB HIC Fast Power Test", OBPower);
+  ui->typetest->addItem("OL-HS-Upper assembly", OBHalfStaveOL);
   // ui->typetest->addItem("OB Powering Test", OBPowering);
   // ui->typetest->addItem("OB Half-Stave Test", OBHalfStaveML);
   // ui->typetest->addItem("OB Stave Test", OBStave);
@@ -38,12 +39,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   m_testDatabase = testDatabase;
 
   connect(ui->settings, SIGNAL(clicked()), this->parent(), SLOT(savesettings()));
-
-  connect(ui->typeoftest, SIGNAL(currentIndexChanged(int)), this->parent(),
-          SLOT(connectcombo(int)));
   connect(ui->close, SIGNAL(clicked()), this, SLOT(close()));
-  connect(ui->databaselocation, SIGNAL(currentIndexChanged(int)), this->parent(),
-          SLOT(connectlocationcombo(int)));
   connect(ui->databaselocation, SIGNAL(currentIndexChanged(int)), this,
           SLOT(getlocationcombo(int)));
   connect(ui->typetest, SIGNAL(currentIndexChanged(int)), this->parent(),

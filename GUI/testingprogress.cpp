@@ -10,6 +10,7 @@ Testingprogress::Testingprogress(QWidget *parent) : QDialog(parent), ui(new Ui::
   ui->setupUi(this);
   connect(ui->continuetest, SIGNAL(clicked()), this->parent(), SLOT(continuescans()));
   connect(ui->stoptest, SIGNAL(clicked()), this->parent(), SLOT(stopscans()));
+  connect(ui->retryscan, SIGNAL(clicked()), this->parent(), SLOT(retryfailedscan()));
   //   connect(ui->testingprogress,)
 }
 
@@ -19,3 +20,5 @@ void Testingprogress::setnotification(QString notification)
 {
   ui->testingprogress2->setText(notification);
 }
+
+void Testingprogress::stopaddingscans() { ui->retryscan->hide(); }
