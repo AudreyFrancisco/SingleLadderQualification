@@ -124,7 +124,6 @@ public slots:
   void      quittest();
   AlpideDB *GetDB();
   void      retryfailedscan();
-  void executescans(std::vector<TScan *> s, std::vector<TScanAnalysis *> a, unsigned int i);
   void notifyuser(unsigned int position);
 
 signals:
@@ -222,11 +221,8 @@ private:
   std::vector<TScanType> fNewScans;
   unsigned int           fExtraScans = 0;
   unsigned int           fInitialScans;
-  void PerformExtraScans(std::vector<TScan *> s, std::vector<TScanAnalysis *> a);
-  bool fAddingScans;
-  bool fExceptionthrown;
-  void GetConfigExtraScans(unsigned int i);
-  std::vector<TScanParameters *> fpGetter;
+  bool                   fAddingScans;
+  bool                   fExceptionthrown;
 
 
 private slots:
@@ -238,7 +234,7 @@ private slots:
   void button_obm6_clicked();
   void button_obm7_clicked();
   void applytests();
-  void performtests(std::vector<TScan *>, std::vector<TScanAnalysis *>);
+  void performtests();
   void test();
   void detailscombo(int dnumber);
   void start_test();
