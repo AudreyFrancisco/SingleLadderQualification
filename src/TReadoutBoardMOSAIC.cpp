@@ -89,7 +89,9 @@ I2CSysPll::pllRegisters_t TReadoutBoardMOSAIC::sysPLLregContent(new uint16_t[22]
 
 // ---- Constructor
 TReadoutBoardMOSAIC::TReadoutBoardMOSAIC(TConfig *config, TBoardConfigMOSAIC *boardConfig)
-    : TReadoutBoard(boardConfig), fBoardConfig(boardConfig)
+    : TReadoutBoard(boardConfig), fBoardConfig(boardConfig), i2cBus(0x0), i2cBusAux(0x0), pb(0x0),
+      pulser(0x0), dr(0x0), theVersionMaj(-1), theVersionMin(-1), trgRecorder(0x0),
+      trgDataParser(0x0), coordinator(0x0), readTriggerInfo(false)
 //, fConfig(config) YCM: FIXME fConfig not used
 {
   init();
@@ -102,6 +104,8 @@ TReadoutBoardMOSAIC::~TReadoutBoardMOSAIC()
   delete pulser;
   for (int i = 0; i < MAX_MOSAICTRANRECV; i++)
     delete alpideDataParser[i];
+
+  delete trgDataParser;
 
   for (int i = 0; i < MAX_MOSAICCTRLINT; i++)
     delete controlInterface[i];
@@ -212,6 +216,17 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 {
   TAlpideDataParser *dr;
   long               readDataSize;
+
+
+  if (readTriggerInfo) {
+    if (trgDataParser->hasData()) {
+      uint32_t num  = -1U;
+      uint64_t time = -1U;
+      trgDataParser->ReadTriggerInfo(num, time);
+      triggerNum.push_back(num);
+      triggerTime.push_back(time);
+    }
+  }
 
   // check for data in the receivers buffer
   for (int i = 0; i < MAX_MOSAICTRANRECV; i++) {

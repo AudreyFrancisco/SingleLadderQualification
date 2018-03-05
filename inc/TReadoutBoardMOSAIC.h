@@ -112,6 +112,8 @@ public:
                                 uint16_t value, bool execute = true);
   void ReadTransceiverDRP(size_t Aindex, uint16_t address, uint32_t *value, bool execute = true);
 
+  void setReadTriggerInfo(bool readTriggerInfo = true) { this->readTriggerInfo = readTriggerInfo; };
+
 private:
   void init();
   void enableDefinedReceivers();
@@ -147,6 +149,10 @@ private:
   TrgRecorder *      trgRecorder;
   TrgRecorderParser *trgDataParser;
   MCoordinator *     coordinator;
+
+  bool                  readTriggerInfo;
+  std::vector<uint32_t> triggerNum;
+  std::vector<uint64_t> triggerTime;
 
 private:
   // extend WBB address definitions in mwbb.h
