@@ -333,6 +333,7 @@ void MainWindow::button_obm1_clicked()
     uint8_t module, side, pos;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
     DecodeId(chipid, module, side, pos);
+    module = fConfig->GetChipConfigById(chipid)->GetModuleId();
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 1) {
       color_green(side, pos);
     }
@@ -705,9 +706,9 @@ void MainWindow::scanLoop(TScan *myScan)
   }
 
   /* catch (string x) {
-     std::cout << "DGFDGDFGD>>" << x << std::endl;
-     fExceptionthrown = true;
-   }*/
+      std::cout << "DGFDGDFGD>>" << x << std::endl;
+      fExceptionthrown = true;
+    }*/
 }
 
 void MainWindow::popup(QString message)
@@ -886,9 +887,8 @@ void MainWindow::fillingOBvectors()
   return;
 }
 
-void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis *> a)
+void MainWindow::performtests()
 {
-  fpGetter.clear();
   fAddingScans = true;
   fExtraScans  = 0;
   ui->statuslabel->setVisible(true);
@@ -897,24 +897,59 @@ void MainWindow::performtests(std::vector<TScan *> s, std::vector<TScanAnalysis 
   fInitialScans = fScanVector.size();
 
   for (unsigned int i = 0; i < fScanVector.size(); i++) {
-    // doing default scans
-    executescans(s, a, i);
-  }
+    try {
+      fExceptionthrown = false;
+      fTestAgain       = false;
+      if (fScanVector.at(i) == 0) {
+        fAnalysisVector.at(i)->Initialize();
+        std::thread analysisThread(&TScanAnalysis::Run, fAnalysisVector[i]);
+        analysisThread.join();
+        fAnalysisVector.at(i)->Finalize();
+        colorsinglescan(i);
+      }
+      else {
+        std::thread scanThread(&MainWindow::scanLoop, this, fScanVector[i]);
+        scanThread.join();
 
-  if (fExtraScans > 0) {
-    for (unsigned int j = 0; j < fExtraScans; j++) {
 
-      AddScan(fNewScans.at(j));
-      fScanVector.at(fInitialScans + j)->SetParameters(fpGetter.at(j));
+        if (fScanstatuslabels.at(i) != 0) {
+          fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
+          fScanstatuslabels[i]->update();
+          qApp->processEvents();
+        }
+        if (fExceptionthrown) {
+          notifyuser(i);
+          if (fTestAgain) {
+            TScanParameters *par;
+            par = fScanVector.at(i)->GetParameters();
+            AddScan(GetScanType(i));
+            fScanVector.back()->SetParameters(par);
+            fExtraScans++;
+          }
+        }
+
+        else {
+          fAnalysisVector.at(i)->Initialize();
+          std::thread analysisThread(&TScanAnalysis::Run, fAnalysisVector[i]);
+          analysisThread.join();
+          fAnalysisVector.at(i)->Finalize();
+          if (fScanstatuslabels.at(i) != 0) {
+            fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
+            qApp->processEvents();
+          }
+          colorsinglescan(i);
+        }
+      }
+
+      if (fExecution == false) return;
+
+      qApp->processEvents();
+    }
+    catch (exception &ex) {
+      std::cout << ex.what() << " is the thrown exception" << std::endl;
     }
   }
-
-
-  qApp->processEvents();
-
-  qApp->processEvents();
 }
-
 
 void MainWindow::applytests()
 {
@@ -955,10 +990,7 @@ void MainWindow::applytests()
   qApp->processEvents();
   std::cout << "the size of the scan vector is: " << fScanVector.size() << std::endl;
 
-  performtests(fScanVector, fAnalysisVector);
-  if (fExtraScans > 0) {
-    PerformExtraScans(fScanVector, fAnalysisVector);
-  }
+  performtests();
 
   connect(fSignalMapper, SIGNAL(mapped(int)), this, SLOT(getresultdetails(int)));
   fResultwindow = new resultstorage(this);
@@ -2303,72 +2335,6 @@ void MainWindow::retryfailedscan()
 }
 
 
-void MainWindow::executescans(std::vector<TScan *> s, std::vector<TScanAnalysis *> a,
-                              unsigned int i)
-{
-
-  try {
-    fExceptionthrown = false;
-    fTestAgain       = false;
-    if (s.at(i) == 0) {
-      a.at(i)->Initialize();
-      std::thread analysisThread(&TScanAnalysis::Run, a[i]);
-      analysisThread.join();
-      a.at(i)->Finalize();
-      colorsinglescan(i);
-    }
-    else {
-      std::thread scanThread(&MainWindow::scanLoop, this, s[i]);
-      scanThread.join();
-
-
-      if (fScanstatuslabels.at(i) != 0) {
-        fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
-        fScanstatuslabels[i]->update();
-        qApp->processEvents();
-      }
-      if (fExceptionthrown) {
-        notifyuser(i);
-        if (fTestAgain) {
-          GetConfigExtraScans(i);
-          fNewScans.push_back(GetScanType(i));
-          fExtraScans++;
-        }
-      }
-
-      else {
-        a.at(i)->Initialize();
-        std::thread analysisThread(&TScanAnalysis::Run, a[i]);
-        analysisThread.join();
-        a.at(i)->Finalize();
-        if (fScanstatuslabels.at(i) != 0) {
-          fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
-          qApp->processEvents();
-        }
-        colorsinglescan(i);
-      }
-    }
-
-    if (fExecution == false) return;
-
-    qApp->processEvents();
-  }
-  catch (exception &ex) {
-    std::cout << ex.what() << " is the thrown exception" << std::endl;
-  }
-}
-
-void MainWindow::PerformExtraScans(std::vector<TScan *> s, std::vector<TScanAnalysis *> a)
-{
-  fAddingScans = false;
-  unsigned int totalscans;
-  totalscans = fInitialScans + fExtraScans;
-  for (unsigned int i = fInitialScans; i < totalscans; i++) {
-
-    executescans(s, a, i);
-  }
-}
-
 void MainWindow::notifyuser(unsigned int position)
 {
   fProgresswindow = new Testingprogress(this);
@@ -2377,12 +2343,6 @@ void MainWindow::notifyuser(unsigned int position)
   }
   fProgresswindow->setnotification(fScanVector.at(position)->GetName());
   fProgresswindow->exec();
-}
-
-void MainWindow::GetConfigExtraScans(unsigned int i)
-{
-  std::cout << i << std::endl;
-  fpGetter.push_back(fScanVector.at(i)->GetParameters());
 }
 
 
