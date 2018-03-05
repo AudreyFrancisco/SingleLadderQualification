@@ -1208,6 +1208,8 @@ string MainWindow::GetTestFolder()
     return string("IBEndurance");
   case OBReception:
     return string("OBReception");
+  case OBPower:
+    return string("OBFastPower");
   default:
     return string("Unknown");
   }
