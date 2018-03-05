@@ -177,7 +177,7 @@ void MainWindow::open()
     fileName = "ConfigPower.cfg";
   }
   else if (fNumberofscan == OBHalfStaveOL) {
-    fileName = "Config_HS_OL.cfg";
+    fileName = "Config_HS.cfg";
   }
   try {
 
