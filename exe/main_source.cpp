@@ -25,6 +25,7 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
+#include <bitset>
 #include <string.h>
 #include <unistd.h>
 
@@ -34,6 +35,8 @@ std::vector<TAlpide *>       fChips;
 TConfig *                    fConfig;
 
 std::vector<int> fEnPerBoard;
+
+std::map<int, int> map_ch_rec;
 
 int myVCASN   = 57;
 int myITHR    = 51;
@@ -46,15 +49,11 @@ int myStrobeDelay  = 10;
 int myPulseLength  = 4000;
 
 int myPulseDelay = 40;
-// int myNTriggers  = 1000000;
-int myNTriggers = 5;
-// int myNTriggers    = 100;
-
-
-char fNameRaw[1024];
+int myNTriggers  = 1;
 
 int HitData[256][512][1024];
 
+char fNameRaw[1024];
 
 void ClearHitData()
 {
@@ -68,18 +67,40 @@ void ClearHitData()
 }
 
 
+void initModIdMap() // make map of the values from config and make the key for modid
+{
+  for (unsigned int iboard = 0; iboard < fBoards.size(); iboard++) {
+    for (unsigned int ich = 0; ich < fChips.size(); ich++) {
+      int chipid      = fChips.at(ich)->GetConfig()->GetChipId() & 0xf;
+      int modid       = (fChips.at(ich)->GetConfig()->GetChipId() >> 4) & 0x7;
+      int receiver    = fChips.at(ich)->GetConfig()->GetParamValue("RECEIVER");
+      int key         = (int)iboard + 2 * (chipid + 16 * receiver);
+      map_ch_rec[key] = modid;
+      //      std::cout << "Modid " << modid << " stored under the key " << key << " " <<
+      //      map_ch_rec[key]
+      //                << std::endl;
+    }
+  }
+}
+
 void CopyHitData(std::vector<TPixHit> *Hits)
 {
   for (unsigned int ihit = 0; ihit < Hits->size(); ihit++) {
-    int chipId = Hits->at(ihit).chipId;
-    //    int modId   = ((Hits->at(ihit).chipId) >> 4) & 0x7;
-    int dcol    = Hits->at(ihit).dcol;
-    int region  = Hits->at(ihit).region;
-    int address = Hits->at(ihit).address;
+    int modid;
+    int iboard   = Hits->at(ihit).boardIndex;
+    int receiver = Hits->at(ihit).channel;
+    int chipid   = Hits->at(ihit).chipId;
+    int key      = (int)iboard + 2 * (chipid + 16 * receiver);
+    modid        = map_ch_rec[key];
+    int chipId   = chipid + 16 * modid;
+    int dcol     = Hits->at(ihit).dcol;
+    int region   = Hits->at(ihit).region;
+    int address  = Hits->at(ihit).address;
     HitData[chipId][dcol + region * 16][address]++;
   }
   Hits->clear();
 }
+
 
 bool HasDataChip(int chipId)
 {
@@ -91,13 +112,22 @@ bool HasDataChip(int chipId)
   return false;
 }
 
+
 void WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits, TBoardHeader boardInfo)
 {
-  int ChipId, dcol, address, event;
+  int dcol, address, event;
   for (unsigned int ihit = oldHits; ihit < Hits->size(); ihit++) {
-    ChipId  = Hits->at(ihit).chipId;
-    dcol    = Hits->at(ihit).dcol + Hits->at(ihit).region * 16;
-    address = Hits->at(ihit).address;
+    int modid;
+    int iboard   = Hits->at(ihit).boardIndex;
+    int receiver = Hits->at(ihit).channel;
+    int chipid   = Hits->at(ihit).chipId;
+    int key      = (int)iboard + 2 * (chipid + 16 * receiver);
+    modid        = map_ch_rec[key];
+    //      std::cout << "Reading modid from the map : " << modid << " With the key " << key <<
+    //      std::endl;
+    int chipId = chipid + 16 * modid;
+    dcol       = Hits->at(ihit).dcol + Hits->at(ihit).region * 16;
+    address    = Hits->at(ihit).address;
 
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
       event = boardInfo.eventId;
@@ -105,7 +135,7 @@ void WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits, TBoardHeade
     else {
       event = boardInfo.eoeCount;
     }
-    fprintf(fp, "%d %d %d %d\n", event, ChipId, dcol, address);
+    fprintf(fp, "%d %d %d %d\n", event, chipId, dcol, address);
   }
 }
 
@@ -121,27 +151,23 @@ void WriteDataToFile(const char *fName, bool Recreate)
   for (unsigned int ichip = 0; ichip < fChips.size(); ichip++) {
     int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
     int modId  = ((fChips.at(ichip)->GetConfig()->GetChipId()) >> 4) & 0x7;
-    //    std::cout << "Writing data from chip " << chipId << std::endl;
-    if (!HasDataChip(chipId)) continue; // write files only for chips with data
+    if (!HasDataChip(chipId + 16 * modId)) continue; // write files only for chips with data
     if (fChips.size() > 1) {
       sprintf(fNameChip, "%s_Chip%d_%d.dat", fNameTemp, modId, chipId);
     }
     else {
       sprintf(fNameChip, "%s.dat", fNameTemp);
     }
-    std::cout << "Writing data to file " << fNameChip << std::endl;
     if (Recreate) {
-      fp       = fopen(fNameChip, "w");
-      Recreate = false;
+      fp = fopen(fNameChip, "w");
     }
     else
       fp = fopen(fNameChip, "a");
     for (int icol = 0; icol < 512; icol++) {
       for (int iaddr = 0; iaddr < 1024; iaddr++) {
-        if (HitData[ichip][icol][iaddr] > 0) {
-          fprintf(fp, "%d %d %d %d %d\n", modId, chipId, icol, iaddr, HitData[ichip][icol][iaddr]);
-          std::cout << "writing data " << modId << "  " << chipId << "  "
-                    << HitData[ichip][icol][iaddr] << std::endl;
+        if (HitData[chipId + 16 * modId][icol][iaddr] > 0) {
+          fprintf(fp, "%d %d %d %d %d\n", modId, chipId, icol, iaddr,
+                  HitData[chipId + 16 * modId][icol][iaddr]);
         }
       }
     }
@@ -280,6 +306,8 @@ void scan()
         }
       }
     }
+    /*
+    */
     // std::cout << "Number of hits: " << Hits->size() << std::endl;
     CopyHitData(Hits);
   }
@@ -301,6 +329,7 @@ int main(int argc, char **argv)
 
   decodeCommandParameters(argc, argv);
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
+  initModIdMap();
 
   char Suffix[30], fName[100];
 
