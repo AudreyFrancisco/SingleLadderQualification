@@ -34,6 +34,28 @@ TEnduranceCycle::TEnduranceCycle(TScanConfig *config, std::vector<TAlpide *> chi
   m_histo = 0;
 }
 
+
+bool TEnduranceCycle::SetParameters(TScanParameters *pars)
+{
+  TCycleParameters *cPars = dynamic_cast<TCycleParameters *>(pars);
+  if (cPars) {
+    std::cout << "TEnduranceCycle: Updating parameters" << std::endl;
+    ((TCycleParameters *)m_parameters)->upTime    = cPars->upTime;
+    ((TCycleParameters *)m_parameters)->downTime  = cPars->downTime;
+    ((TCycleParameters *)m_parameters)->nTriggers = cPars->nTriggers;
+    ((TCycleParameters *)m_parameters)->nCycles   = cPars->nCycles;
+    ((TCycleParameters *)m_parameters)->timeLimit = cPars->timeLimit;
+    m_stop[0]                                     = ((TCycleParameters *)m_parameters)->nCycles;
+    return true;
+  }
+  else {
+    std::cout << "TEnduranceCycle::SetParameters: Error, bad parameter type, doing nothing"
+              << std::endl;
+    return false;
+  }
+}
+
+
 void TEnduranceCycle::CreateMeasurements()
 {
   // create map with measurement structure for each HIC

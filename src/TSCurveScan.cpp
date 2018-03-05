@@ -16,6 +16,28 @@ TSCurveScan::TSCurveScan(TScanConfig *config, std::vector<TAlpide *> chips,
   ((TSCurveParameters *)m_parameters)->nominal  = (m_config->GetParamValue("NOMINAL") == 1);
 }
 
+
+bool TSCurveScan::SetParameters(TScanParameters *pars)
+{
+  TSCurveParameters *sPars = dynamic_cast<TSCurveParameters *>(pars);
+  if (sPars) {
+    std::cout << "TSCurveScan: Updating parameters" << std::endl;
+    ((TSCurveParameters *)m_parameters)->nominal  = sPars->nominal;
+    ((TSCurveParameters *)m_parameters)->VPULSEH  = sPars->VPULSEH;
+    ((TSCurveParameters *)m_parameters)->VPULSEL  = sPars->VPULSEL;
+    ((TSCurveParameters *)m_parameters)->TARGET   = sPars->TARGET;
+    ((TSCurveParameters *)m_parameters)->backBias = sPars->backBias;
+    SetName();
+    return true;
+  }
+  else {
+    std::cout << "TSCurveScan::SetParameters: Error, bad parameter type, doing nothing"
+              << std::endl;
+    return false;
+  }
+}
+
+
 TThresholdScan::TThresholdScan(TScanConfig *config, std::vector<TAlpide *> chips,
                                std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                                std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
@@ -36,17 +58,23 @@ TThresholdScan::TThresholdScan(TScanConfig *config, std::vector<TAlpide *> chips
   ((TSCurveParameters *)m_parameters)->VPULSEH = 170;
   m_nTriggers                                  = m_config->GetParamValue("NINJ");
 
-  sprintf(m_name, "Threshold Scan %.1f V", ((TSCurveParameters *)m_parameters)->backBias);
+  SetName();
 
   CreateScanHisto();
 }
+
+
+void TThresholdScan::SetName()
+{
+  sprintf(m_name, "Threshold Scan %.1f V", ((TSCurveParameters *)m_parameters)->backBias);
+}
+
 
 TtuneVCASNScan::TtuneVCASNScan(TScanConfig *config, std::vector<TAlpide *> chips,
                                std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                                std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TSCurveScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  strcpy(m_name, "Tune VCASN Scan");
   m_start[0] = m_config->GetVcasnStart();
   m_stop[0]  = m_config->GetVcasnStop();
   m_step[0]  = m_config->GetVcasnStep();
@@ -71,15 +99,23 @@ TtuneVCASNScan::TtuneVCASNScan(TScanConfig *config, std::vector<TAlpide *> chips
   ((TSCurveParameters *)m_parameters)->VPULSEL = ((TSCurveParameters *)m_parameters)->VPULSEH -
                                                  ((TSCurveParameters *)m_parameters)->TARGET / 10;
   m_nTriggers = m_config->GetParamValue("NINJ");
+
+  SetName();
   CreateScanHisto();
 }
+
+
+void TtuneVCASNScan::SetName()
+{
+  sprintf(m_name, "Tune VCASN Scan %.1f V", ((TSCurveParameters *)m_parameters)->backBias);
+}
+
 
 TtuneITHRScan::TtuneITHRScan(TScanConfig *config, std::vector<TAlpide *> chips,
                              std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                              std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TSCurveScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  strcpy(m_name, "Tune ITHR Scan");
   m_start[0] = m_config->GetIthrStart();
   m_stop[0]  = m_config->GetIthrStop();
   m_step[0]  = m_config->GetIthrStep();
@@ -104,8 +140,16 @@ TtuneITHRScan::TtuneITHRScan(TScanConfig *config, std::vector<TAlpide *> chips,
   ((TSCurveParameters *)m_parameters)->VPULSEL = ((TSCurveParameters *)m_parameters)->VPULSEH -
                                                  ((TSCurveParameters *)m_parameters)->TARGET / 10;
   m_nTriggers = m_config->GetParamValue("NINJ");
+  SetName();
   CreateScanHisto();
 }
+
+
+void TtuneITHRScan::SetName()
+{
+  sprintf(m_name, "Tune ITHR Scan %.1f V", ((TSCurveParameters *)m_parameters)->backBias);
+}
+
 
 void TSCurveScan::RestoreNominalSettings()
 {

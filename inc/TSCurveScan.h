@@ -28,6 +28,8 @@ protected:
   void RestoreNominalSettings();
   void FillHistos(std::vector<TPixHit> *Hits, int board);
   // THisto CreateHisto    ();
+  virtual void SetName() = 0;
+
 public:
   TSCurveScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
               std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
@@ -43,17 +45,18 @@ public:
   void               Terminate();
   float              GetBackbias() { return ((TSCurveParameters *)m_parameters)->backBias; };
   bool               GetNominal() { return ((TSCurveParameters *)m_parameters)->nominal; };
+  bool SetParameters(TScanParameters *pars);
 };
 
 class TThresholdScan : public TSCurveScan {
   // Conducts a regular threshold scan
+protected:
+  void SetName();
+
 public:
   TThresholdScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                  std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
                  std::mutex *aMutex); //:
-  // TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
-  //  m_step[1] = 1;
-  //}
   void ConfigureChip(TAlpide *chip);
   void PrepareStep(int loopIndex);
   ~TThresholdScan(){};
@@ -63,16 +66,12 @@ class TtuneVCASNScan : public TSCurveScan {
   // NOTE:  may need new destructor?
   // Conducts a threshold scan changing VCASN
 protected:
-  // int m_TARGET;
-  // int m_VPULSEL;
+  void SetName();
 
 public:
   TtuneVCASNScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                  std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
                  std::mutex *aMutex); //:
-  // TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
-  //  m_step[1] = 16; //this will probably never change
-  //}
   void ConfigureChip(TAlpide *chip);
   void PrepareStep(int loopIndex);
   ~TtuneVCASNScan(){};
@@ -81,16 +80,12 @@ public:
 class TtuneITHRScan : public TSCurveScan {
   // Conducts a threshold scan changing ITHR (note:  needs data from VCASNscan first)
 protected:
-  // int m_TARGET;
-  // int m_VPULSEL;
+  void SetName();
 
 public:
   TtuneITHRScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                 std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
                 std::mutex *aMutex); //:
-  // TSCurveScan  (config, chips, hics, boards, histoque, aMutex) {
-  //  m_step[1] = 16;
-  // }
   void ConfigureChip(TAlpide *chip);
   void PrepareStep(int loopIndex);
   ~TtuneITHRScan(){};

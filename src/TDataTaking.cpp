@@ -17,18 +17,10 @@ TDataTaking::TDataTaking(TScanConfig *config, std::vector<TAlpide *> chips,
   m_backBias  = m_config->GetBackBias();
   m_nTriggers = m_config->GetParamValue("NTRIG");
 
-  if (m_nTriggers % kTrigPerTrain == 0) {
-    m_nLast   = kTrigPerTrain;
-    m_nTrains = m_nTriggers / kTrigPerTrain;
-  }
-  else {
-    m_nLast   = m_nTriggers % kTrigPerTrain;
-    m_nTrains = m_nTriggers / kTrigPerTrain + 1;
-  }
   // divide triggers in trains
+  CalculateTrains();
   m_start[0] = 0;
   m_step[0]  = 1;
-  m_stop[0]  = m_nTrains;
 
   m_start[1] = 0;
   m_step[1]  = 1;
@@ -40,6 +32,21 @@ TDataTaking::TDataTaking(TScanConfig *config, std::vector<TAlpide *> chips,
 
   CreateScanHisto();
 }
+
+
+void TDataTaking::CalculateTrains()
+{
+  if (m_nTriggers % kTrigPerTrain == 0) {
+    m_nLast   = kTrigPerTrain;
+    m_nTrains = m_nTriggers / kTrigPerTrain;
+  }
+  else {
+    m_nLast   = m_nTriggers % kTrigPerTrain;
+    m_nTrains = m_nTriggers / kTrigPerTrain + 1;
+  }
+  m_stop[0] = m_nTrains;
+}
+
 
 void TDataTaking::ConfigureFromu(TAlpide *chip)
 {

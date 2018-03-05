@@ -21,6 +21,7 @@ class TNoiseOccupancy : public TDataTaking {
 private:
   void ConfigureChip(TAlpide *chip);
   void ConfigureMask(TAlpide *chip, std::vector<TPixHit> *MaskedPixels);
+  void SetName();
 
 protected:
   THisto CreateHisto();
@@ -32,6 +33,7 @@ public:
   ~TNoiseOccupancy(){};
   void Init();
   void PrepareStep(int loopIndex) { (void)(&loopIndex); };
+  bool SetParameters(TScanParameters *pars);
   void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
 };
 

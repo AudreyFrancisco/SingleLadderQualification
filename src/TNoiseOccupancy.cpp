@@ -14,14 +14,46 @@ TNoiseOccupancy::TNoiseOccupancy(TScanConfig *config, std::vector<TAlpide *> chi
                                  std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TDataTaking(config, chips, hics, boards, histoQue, aMutex)
 {
-  sprintf(m_name, "Noise Occupancy %.1f V", m_backBias);
   m_pulse                                       = false;
   m_pulseLength                                 = 0;
   m_parameters                                  = new TNoiseParameters;
   ((TNoiseParameters *)m_parameters)->nTriggers = config->GetParamValue("NTRIG");
   ;
   ((TNoiseParameters *)m_parameters)->isMasked = config->GetIsMasked();
+  SetName();
 }
+
+
+void TNoiseOccupancy::SetName()
+{
+  if (((TNoiseParameters *)m_parameters)->isMasked) {
+    sprintf(m_name, "Noise Occupancy %.1f V, masked", m_backBias);
+  }
+  else {
+    sprintf(m_name, "Noise Occupancy %.1f V", m_backBias);
+  }
+}
+
+
+bool TNoiseOccupancy::SetParameters(TScanParameters *pars)
+{
+  TNoiseParameters *nPars = dynamic_cast<TNoiseParameters *>(pars);
+  if (nPars) {
+    std::cout << "TNoiseOccupancy: Updating parameters" << std::endl;
+    ((TNoiseParameters *)m_parameters)->backBias  = nPars->backBias;
+    ((TNoiseParameters *)m_parameters)->nTriggers = nPars->nTriggers;
+    ((TNoiseParameters *)m_parameters)->isMasked  = nPars->isMasked;
+    CalculateTrains();
+    SetName();
+    return true;
+  }
+  else {
+    std::cout << "TNoiseOccupancy::SetParameters: Error, bad parameter type, doing nothing"
+              << std::endl;
+    return false;
+  }
+}
+
 
 // TODO: save number of masked pixels (return value of ApplyMask)
 void TNoiseOccupancy::ConfigureChip(TAlpide *chip)
