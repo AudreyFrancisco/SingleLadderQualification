@@ -114,6 +114,9 @@ public:
 
   void setReadTriggerInfo(bool readTriggerInfo = true) { this->readTriggerInfo = readTriggerInfo; };
 
+  std::vector<uint32_t> *getTriggerNums() { return &triggerNum; };
+  std::vector<uint64_t> *getTriggerTimes() { return &triggerTime; };
+
 private:
   void init();
   void enableDefinedReceivers();
