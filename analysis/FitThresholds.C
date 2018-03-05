@@ -174,7 +174,12 @@ int FitThresholds(const char *fName, bool WriteToFile, int ITH, int VCASN, bool 
 
   int GoodPixels = NPixels - NNostart - NChisq;
   //  hThresh->Draw();
+  hThresh->GetXaxis()->SetTitle("Threshold [e]");
+  hThresh->GetYaxis()->SetTitle("Number of pixels");
   hThresh->SetLineColor(1);
+
+  hNoise->GetXaxis()->SetTitle("Noise [e]");
+  hNoise->GetYaxis()->SetTitle("Number of pixels");
   hNoise ->SetLineColor(1);
 
   if (!WriteToFile) {

@@ -19,7 +19,7 @@ void set_plot_style()
 }
 
 
-
+/*
 int AddressToColumn(int ARegion, int ADoubleCol, int AAddress) {
   int Column    = ARegion * 32 + ADoubleCol * 2;    // Double columns before ADoubleCol (all chips)
   //int LeftRight = ((AAddress % 4) < 2 ? 1:0);       // pALPIDE-1/2: left or right column within the double column
@@ -37,7 +37,26 @@ int AddressToRow         (int ARegion, int ADoubleCol, int AAddress)
   //if ((AAddress % 4) == 0) Row += 1;   // pALPIDE-1/2: adjust the bottom-right pixel (not needed for pALPIDE-3/ALPIDE)
   return Row;
 }
+*/
 
+int AddressToColumn(int ARegion, int ADoubleCol, int AAddress) {
+    int Column    = ARegion * 32 + ADoubleCol * 2;    // Double columns before ADoubleCol
+    int LeftRight = ((AAddress % 4) < 2 ? 1:0);       // Left or right column within the double column
+
+    Column += LeftRight;
+
+    return Column;
+}
+
+
+int AddressToRow         (int ARegion, int ADoubleCol, int AAddress)
+{
+    // Ok, this will get ugly
+    int Row = AAddress / 2;                // This is OK for the top-right and the bottom-left pixel within a group of 4
+    if ((AAddress % 4) == 3) Row -= 1;      // adjust the top-left pixel
+    if ((AAddress % 4) == 0) Row += 1;      // adjust the bottom-right pixel
+    return Row;
+}
 
 int Hitmap(const char *fName, int nInj = -1) {
   int event, col, row, nhits;
@@ -75,6 +94,8 @@ int Hitmap(const char *fName, int nInj = -1) {
 
 
   gStyle->SetPalette(1);
+  hHitmap->GetXaxis()->SetTitle("Column");
+  hHitmap->GetYaxis()->SetTitle("Row");
   hHitmap->Draw("COLZ");
   //hCs->Draw();
   fclose(fp);
