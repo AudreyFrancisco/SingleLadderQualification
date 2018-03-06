@@ -84,47 +84,48 @@ THicClassification TPowerAnalysis::GetClassification(THicCurrents currents)
 
 THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents currents)
 {
-  if ((currents.iddaSwitchon * 1000 < m_config->GetParamValue("MINIDDA_IB")) ||
-      (currents.idddSwitchon * 1000 < m_config->GetParamValue("MINIDDD_IB")))
-    return CLASS_RED;
+  THicClassification returnValue = CLASS_GREEN;
 
-  if ((currents.iddaClocked * 1000 < m_config->GetParamValue("MINIDDA_CLOCKED_IB")) ||
-      (currents.iddaClocked * 1000 > m_config->GetParamValue("MAXIDDA_CLOCKED_IB")) ||
-      (currents.idddClocked * 1000 < m_config->GetParamValue("MINIDDD_CLOCKED_IB")) ||
-      (currents.idddClocked * 1000 > m_config->GetParamValue("MAXIDDD_CLOCKED_IB")))
-    return CLASS_ORANGE;
+  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_IB", true);
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_IB", true);
+
+  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MINIDDD_CLOCKED_IB", true);
+  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_IB", true);
+  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_IB");
+  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_IB");
 
   // check for absolute value at 3V and for margin from breakthrough
-  if ((currents.ibias[30] > m_config->GetParamValue("MAXBIAS_3V_IB")) ||
-      (currents.ibias[40] > m_config->GetParamValue("MAXFACTOR_4V_IB") * (currents.ibias[30] + 1)))
-    return CLASS_ORANGE;
-
-  return CLASS_GREEN;
-
-  // TODO: Add orange for back bias
+  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_IB");
+  // add 1 for the case where I(3V) = 0
+  float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
+  // add 0.9 to round up for everything >= .1
+  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_IB");
+  std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
+  return returnValue;
 }
 
 THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents currents)
 {
-  if ((currents.iddaSwitchon * 1000 < m_config->GetParamValue("MINIDDA_OB")) ||
-      (currents.idddSwitchon * 1000 < m_config->GetParamValue("MINIDDD_OB")))
-    return CLASS_RED;
+  THicClassification returnValue = CLASS_GREEN;
 
-  if ((currents.iddaClocked * 1000 < m_config->GetParamValue("MINIDDA_CLOCKED_OB")) ||
-      (currents.iddaClocked * 1000 > m_config->GetParamValue("MAXIDDA_CLOCKED_OB")) ||
-      (currents.idddClocked * 1000 < m_config->GetParamValue("MINIDDD_CLOCKED_OB")) ||
-      (currents.idddClocked * 1000 > m_config->GetParamValue("MAXIDDD_CLOCKED_OB")))
-    return CLASS_ORANGE;
+  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", true);
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", true);
+
+  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MINIDDD_CLOCKED_OB", true);
+  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_OB", true);
+  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_OB");
+  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_OB");
 
   // check for absolute value at 3V and for margin from breakthrough
-  if (currents.ibias[30] > m_config->GetParamValue("MAXBIAS_3V_IB")) return CLASS_ORANGE;
+  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_OB");
   // add 1 for the case where I(3V) = 0
-  if ((currents.ibias[40] > m_config->GetParamValue("MAXFACTOR_4V_IB") * (currents.ibias[30] + 1)))
-    return CLASS_ORANGE;
-
-  return CLASS_GREEN;
-
-  // TODO: Add orange for back bias
+  float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
+  // add 0.9 to round up for everything >= .1
+  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_OB");
+  std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
+  return returnValue;
 }
 
 void TPowerAnalysis::WriteIVCurve(THic *hic)
