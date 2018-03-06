@@ -37,7 +37,19 @@ void TFastPowerTest::CreateMeasurements()
   }
 }
 
-void TFastPowerTest::Init() {}
+void TFastPowerTest::Init()
+{
+  strcpy(m_state, "Running");
+  std::cout << std::endl
+            << std::endl
+            << ">>>>>>>> Starting scan " << GetName() << std::endl
+            << std::endl;
+  time_t     t   = time(0); // get time now
+  struct tm *now = localtime(&t);
+
+  sprintf(m_config->GetfNameSuffix(), "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100,
+          now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+}
 
 void TFastPowerTest::PrepareStep(int loopIndex)
 {
