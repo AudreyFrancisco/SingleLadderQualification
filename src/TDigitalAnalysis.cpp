@@ -290,10 +290,10 @@ THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic *resu
   // check on bad pixels (i.e. dead + noisy + inefficient) per HIC
   DoCut(returnValue, CLASS_ORANGE, result->m_nBad, "DIGITAL_MAXBAD_HIC_OB");
 
+  map<int, TScanResultChip *>::iterator it;
   // chip-wise check
-  for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip++) {
-    int                 chipId     = m_chipList.at(ichip).chipId & 0xf;
-    TDigitalResultChip *chipResult = (TDigitalResultChip *)result->m_chipResults.at(chipId);
+  for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
+    TDigitalResultChip *chipResult = (TDigitalResultChip *)it->second;
     DoCut(returnValue, CLASS_ORANGE, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_GREEN");
     DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_ORANGE");
     int nBad = chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff;
@@ -322,9 +322,10 @@ THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic *resu
   DoCut(returnValue, CLASS_ORANGE, result->m_nBad, "DIGITAL_MAXBAD_HIC_IB");
 
   // chip-wise check
-  for (unsigned int ichip = 0; ichip < result->m_chipResults.size(); ichip++) {
-    int                 chipId     = m_chipList.at(ichip).chipId & 0xf;
-    TDigitalResultChip *chipResult = (TDigitalResultChip *)result->m_chipResults.at(chipId);
+  map<int, TScanResultChip *>::iterator it;
+  // chip-wise check
+  for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
+    TDigitalResultChip *chipResult = (TDigitalResultChip *)it->second;
     DoCut(returnValue, CLASS_ORANGE, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_GREEN");
     DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_ORANGE");
     int nBad = chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff;
