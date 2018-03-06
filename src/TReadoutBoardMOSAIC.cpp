@@ -219,7 +219,9 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 
 
   if (readTriggerInfo) {
+    std::cout << "reading trigger info" << std::endl;
     if (trgDataParser->hasData()) {
+      std::cout << "found trigger data" << std::endl;
       uint32_t num  = -1U;
       uint64_t time = -1U;
       trgDataParser->ReadTriggerInfo(num, time);
@@ -423,6 +425,12 @@ void TReadoutBoardMOSAIC::setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex
     break;
   }
   mRunControl->rmwConfigReg(~CFG_RATE_MASK, regSet);
+}
+
+void TReadoutBoardMOSAIC::setReadTriggerInfo(bool readTriggerInfo /*= true*/)
+{
+  this->readTriggerInfo = readTriggerInfo;
+  trgRecorder->addEnable(readTriggerInfo);
 }
 
 void TReadoutBoardMOSAIC::enableControlInterfaces(bool en)

@@ -284,6 +284,8 @@ void TScan::CreateScanHisto()
 void TScan::ActivateTimestampLog()
 {
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+    TReadoutBoardMOSAIC *b = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(iboard));
+    if (b) b->setReadTriggerInfo(true);
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
       if ((m_chips.at(ichip)->GetConfig()->IsEnabled()) &&
           (m_chips.at(ichip)->GetReadoutBoard() == m_boards.at(iboard))) {
@@ -356,6 +358,19 @@ void TScan::WriteTimestampLog(const char *fName)
   for (unsigned int i = 0; i < 256; ++i) {
     output << i << "\t" << i * 200 << "\t" << histo[i] << "\t"
            << (double)histo[i] / (double)m_eventIds.size() << std::endl;
+  }
+
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+    output << " ## BOARD TIMESTAMPS ##" << std::endl;
+    TReadoutBoardMOSAIC *b = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(iboard));
+    if (b) {
+      std::vector<uint32_t> *triggerIDs = b->getTriggerNums();
+      std::vector<uint64_t> *timestamps = b->getTriggerTimes();
+      for (unsigned long i = 0; i < triggerIDs->size(); ++i) {
+        output << iboard << "\t" << i << "\t" << triggerIDs->at(i) << "\t" << timestamps->at(i)
+               << std::endl;
+      }
+    }
   }
   output << std::endl;
   output.close();

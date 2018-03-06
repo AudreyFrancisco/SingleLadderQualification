@@ -112,7 +112,7 @@ public:
                                 uint16_t value, bool execute = true);
   void ReadTransceiverDRP(size_t Aindex, uint16_t address, uint32_t *value, bool execute = true);
 
-  void setReadTriggerInfo(bool readTriggerInfo = true) { this->readTriggerInfo = readTriggerInfo; };
+  void setReadTriggerInfo(bool readTriggerInfo = true);
 
   std::vector<uint32_t> *getTriggerNums() { return &triggerNum; };
   std::vector<uint64_t> *getTriggerTimes() { return &triggerTime; };
