@@ -82,8 +82,10 @@ namespace ScanConfig {
   const int POWER_MAXFACTOR_4V_OB = 3;
 
   // cuts for fifo test
-  const int FIFO_CUT_MAXERR    = 128; // max number of errors per pattern and hic
-  const int FIFO_CUT_MAXFAULTY = 1;   // max number of chips with errors
+  const int FIFO_CUT_MAXEXCEPTION  = 0;   // max number of exceptions
+  const int FIFO_CUT_MAXERR_ORANGE = 128; // max number of errors per pattern and hic
+  const int FIFO_CUT_MAXERR_GREEN  = 0;   // max number of errors per pattern and hic
+  const int FIFO_CUT_MAXFAULTY     = 1;   // max number of chips with errors
 
   // cuts for digital scan
   const int DIGITAL_MAXTIMEOUT_GREEN      = 0;
@@ -196,7 +198,9 @@ private:
   int       m_powerCutMaxBias3V_OB;
   int       m_powerMaxFactor4V_IB;
   int       m_powerMaxFactor4V_OB;
-  int       m_fifoCutMaxErr;
+  int       m_fifoCutMaxException;
+  int       m_fifoCutMaxErrGreen;
+  int       m_fifoCutMaxErrOrange;
   int       m_fifoCutMaxFaulty;
   int       m_digitalMaxTimeoutOrange;
   int       m_digitalMaxTimeoutGreen;

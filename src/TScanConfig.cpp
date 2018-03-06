@@ -69,8 +69,10 @@ TScanConfig::TScanConfig()
   m_powerMaxFactor4V_IB       = POWER_MAXFACTOR_4V_IB;
   m_powerMaxFactor4V_OB       = POWER_MAXFACTOR_4V_OB;
 
-  m_fifoCutMaxErr    = FIFO_CUT_MAXERR;
-  m_fifoCutMaxFaulty = FIFO_CUT_MAXFAULTY;
+  m_fifoCutMaxErrGreen  = FIFO_CUT_MAXERR_GREEN;
+  m_fifoCutMaxErrOrange = FIFO_CUT_MAXERR_ORANGE;
+  m_fifoCutMaxFaulty    = FIFO_CUT_MAXFAULTY;
+  m_fifoCutMaxException = FIFO_CUT_MAXEXCEPTION;
 
   m_digitalMaxTimeoutGreen       = DIGITAL_MAXTIMEOUT_GREEN;
   m_digitalMaxTimeoutOrange      = DIGITAL_MAXTIMEOUT_ORANGE;
@@ -170,8 +172,10 @@ void TScanConfig::InitParamMap()
   fSettings["MAXFACTOR_4V_IB"]    = &m_powerMaxFactor4V_IB;
   fSettings["MAXFACTOR_4V_OB"]    = &m_powerMaxFactor4V_OB;
 
-  fSettings["FIFO_MAXERR"]    = &m_fifoCutMaxErr;
-  fSettings["FIFO_MAXFAULTY"] = &m_fifoCutMaxFaulty;
+  fSettings["FIFO_MAXERR_GREEN"]   = &m_fifoCutMaxErrGreen;
+  fSettings["FIFO_MAXERR_ORANGE"]  = &m_fifoCutMaxErrOrange;
+  fSettings["FIFO_MAXFAULTYCHIPS"] = &m_fifoCutMaxFaulty;
+  fSettings["FIFO_MAXEXCEPTION"]   = &m_fifoCutMaxException;
 
   fSettings["DIGITAL_MAXTIMEOUT_GREEN"]      = &m_digitalMaxTimeoutGreen;
   fSettings["DIGITAL_MAXTIMEOUT_ORANGE"]     = &m_digitalMaxTimeoutOrange;
