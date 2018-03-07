@@ -27,6 +27,7 @@
 #include "USBHelpers.h"
 #include <bitset>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 TBoardType                   fBoardType;
@@ -49,7 +50,7 @@ int myStrobeDelay  = 10;
 int myPulseLength  = 4000;
 
 int myPulseDelay = 40;
-int myNTriggers  = 1;
+int myNTriggers  = 10000;
 
 int HitData[256][512][1024];
 
@@ -258,7 +259,7 @@ void scan()
 
   FILE *rawFile = fopen(fNameRaw, "w");
 
-  int nTrains, nRest, nTrigsPerTrain = 1;
+  int nTrains, nRest, nTrigsPerTrain = 100;
 
   nTrains = myNTriggers / nTrigsPerTrain;
   nRest   = myNTriggers % nTrigsPerTrain;
@@ -385,20 +386,23 @@ int main(int argc, char **argv)
     }
   }
 
+  char pathtofile[30];
+  sprintf(pathtofile, "Data/Data_%s", Suffix);
+  mkdir(pathtofile, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-  sprintf(fNameRaw, "Data/SourceRaw_%s.dat", Suffix);
+  sprintf(fNameRaw, "%s/SourceRaw_%s.dat", pathtofile, Suffix);
   scan();
 
-  sprintf(fName, "Data/Source_%s.dat", Suffix);
+  sprintf(fName, "%s/Source.dat", pathtofile);
   WriteDataToFile(fName, true);
 
   for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
     TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(fBoards.at(ib));
-    sprintf(fName, "Data/ScanConfig_%s.cfg", Suffix);
+    sprintf(fName, "%s/ScanConfig_%s.cfg", pathtofile, Suffix);
     WriteScanConfig(fName, fChips.at(0), myMOSAIC);
   }
 
-  sprintf(fName, "Data/ChipList_%s.dat", Suffix);
+  sprintf(fName, "%s/ChipList_%s.dat", pathtofile, Suffix);
   WriteChipList(fName, true);
 
   if (myDAQBoard) {
