@@ -219,9 +219,7 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 
 
   if (readTriggerInfo) {
-    std::cout << "reading trigger info" << std::endl;
     if (trgDataParser->hasData()) {
-      std::cout << "found trigger data" << std::endl;
       uint32_t num  = -1U;
       uint64_t time = -1U;
       trgDataParser->ReadTriggerInfo(num, time);
