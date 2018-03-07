@@ -72,7 +72,11 @@ protected:
 public:
   TCycleAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                  std::vector<THic *> hics, std::mutex *aMutex, TCycleResult *aResult = 0);
-  void Initialize() { CreateHicResults(); };
+  void Initialize()
+  {
+    CreateHicResults();
+    InitCounters();
+  }; // initcounters normally executed in TScanAnalysis::Run
   void Run(){};
   void Finalize();
 };

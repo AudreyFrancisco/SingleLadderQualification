@@ -13,7 +13,6 @@ TCycleAnalysis::TCycleAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
     m_result = aResult;
   else
     m_result = new TCycleResult();
-  InitCounters();
 }
 
 void TCycleAnalysis::InitCounters()
