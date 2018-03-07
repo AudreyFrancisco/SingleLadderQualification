@@ -468,9 +468,9 @@ string CreateActivityName(string compName, TScanConfig *config)
     break;
   }
   result = testName + compName;
-  if (config->GetRetestNumber() > 0) {
+  if (config->GetRetestNumber(compName) > 0) {
     result.append(" Retest ");
-    result.append(std::to_string(config->GetRetestNumber()));
+    result.append(std::to_string(config->GetRetestNumber(compName)));
   }
   return result;
 }

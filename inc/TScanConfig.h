@@ -150,7 +150,7 @@ namespace ScanConfig {
 class TScanConfig {
 private:
   std::map<std::string, int *> fSettings;
-  int  m_retest;
+  std::map<std::string, int>   m_retest;
   int  m_nInj;
   int  m_nTrig;
   int  m_chargeStart;
@@ -273,7 +273,7 @@ public:
   std::string GetRemoteHicPath(std::string HicName);
   bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
 
-  int   GetRetestNumber() { return m_retest; };
+  int GetRetestNumber(std::string hicName);
   int   GetNInj() { return m_nInj; };
   int   GetChargeStart() { return m_chargeStart; };
   int   GetChargeStep() { return m_chargeStep; };
@@ -295,7 +295,7 @@ public:
   bool  GetIsMasked() { return m_isMasked; };
   float GetBackBias() { return m_backBias; };
   bool  GetUseDataPath() { return m_useDataPath; };
-  void SetRetestNumber(int aRetest) { m_retest = aRetest; };
+  void SetRetestNumber(std::string hicName, int aRetest);
   void SetfNameSuffix(const char *aSuffix) { strcpy(m_fNameSuffix, aSuffix); };
   void SetVoltageScale(float aScale) { m_voltageScale = aScale; };
   void SetMlvdsStrength(int aStrength) { m_mlvdsStrength = aStrength; };

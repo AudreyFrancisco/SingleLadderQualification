@@ -6,7 +6,7 @@ using namespace ScanConfig;
 
 TScanConfig::TScanConfig()
 {
-  m_retest = 0;
+  m_retest.clear();
   // dummy values for first tests
   m_nInj           = NINJ;
   m_nTrig          = NTRIG;
@@ -266,12 +266,32 @@ int TScanConfig::GetParamValue(std::string Name)
   return -1;
 }
 
+void TScanConfig::SetRetestNumber(std::string hicName, int aRetest)
+{
+  if (m_retest.find(hicName) != m_retest.end()) {
+    std::cout << "Warning (TScanConfig::SetRetestNumber): hic " << hicName
+              << " occurred more than once, ignored!" << std::endl;
+    return;
+  }
+  m_retest.insert(std::pair<std::string, int>(hicName, aRetest));
+}
+
+int TScanConfig::GetRetestNumber(std::string hicName)
+{
+  if (m_retest.find(hicName) != m_retest.end()) {
+    return m_retest.find(hicName)->second;
+  }
+  std::cout << "Warning (TScanConfig::GetRetestNumber): hic " << hicName
+            << " not found, returning 0" << std::endl;
+  return 0;
+}
+
 std::string TScanConfig::GetDataPath(std::string HicName)
 {
   std::string result = std::string("Data/") + HicName;
-  if (GetRetestNumber() > 0) {
+  if (GetRetestNumber(HicName) > 0) {
     result.append("_Retest_");
-    result.append(std::to_string(GetRetestNumber()));
+    result.append(std::to_string(GetRetestNumber(HicName)));
   }
   return result;
 }
@@ -279,9 +299,9 @@ std::string TScanConfig::GetDataPath(std::string HicName)
 std::string TScanConfig::GetRemoteHicPath(std::string HicName)
 {
   std::string result = HicName;
-  if (GetRetestNumber() > 0) {
+  if (GetRetestNumber(HicName) > 0) {
     result.append("_Retest_");
-    result.append(std::to_string(GetRetestNumber()));
+    result.append(std::to_string(GetRetestNumber(HicName)));
   }
   return result;
 }

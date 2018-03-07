@@ -959,7 +959,7 @@ void MainWindow::applytests()
       int oldtests;
       oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
       std::cout << "the number of old tests is " << oldtests << std::endl;
-      fConfig->GetScanConfig()->SetRetestNumber(oldtests);
+      fConfig->GetScanConfig()->SetRetestNumber(fHicnames.at(i).toStdString(), oldtests);
       makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
     }
   }
