@@ -2011,7 +2011,11 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetVoltageScale(0.9);
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(1.0);
-  fConfig->GetScanConfig()->SetMlvdsStrength(5);
+  for (int current = 2; current < 10; current++) {
+    fConfig->GetScanConfig()->SetMlvdsStrength(current);
+    AddScan(STFifo);
+  }
+  fConfig->GetScanConfig()->SetMlvdsStrength(15);
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
   AddScan(STDigital);
