@@ -214,8 +214,8 @@ void TReadoutBoardMOSAIC::StopRun()
 
 int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 {
-  TAlpideDataParser *dr;
-  long               readDataSize;
+  MDataReceiver *dr;
+  long           readDataSize;
 
 
   if (readTriggerInfo) {
@@ -238,7 +238,7 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
   // try to read from TCP connection
   for (;;) {
     try {
-      readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), (MDataReceiver **)&dr);
+      readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), &dr);
       if (readDataSize == 0) return -1;
     }
     catch (exception &e) {
@@ -262,7 +262,20 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
     }
 
     // get event data from the selected data receiver
-    if (dr->hasData()) return (dr->ReadEventData(nBytes, buffer));
+    TAlpideDataParser *data = dynamic_cast<TAlpideDataParser *>(dr);
+    TrgRecorderParser *trg  = dynamic_cast<TrgRecorderParser *>(dr);
+    if (data) {
+      if (data->hasData()) return (data->ReadEventData(nBytes, buffer));
+    }
+    if (trg) {
+      if (trg->hasData()) {
+        uint32_t num  = -1U;
+        uint64_t time = -1U;
+        trg->ReadTriggerInfo(num, time);
+        triggerNum.push_back(num);
+        triggerTime.push_back(time);
+      }
+    }
   }
   return -1;
 }
