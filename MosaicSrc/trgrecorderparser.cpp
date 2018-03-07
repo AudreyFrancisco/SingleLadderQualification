@@ -129,6 +129,12 @@ int TrgRecorderParser::ReadTriggerInfo(uint32_t &trgNum, uint64_t &trgTime)
   trgNum  = buf2uint32(p);
   trgTime = buf2uint64(p + 4);
 
+  // move unused bytes to the begin of buffer
+  size_t bytesToMove = dataBufferUsed - evSize;
+  if (bytesToMove > 0) memmove(&dataBuffer[0], &dataBuffer[evSize], bytesToMove);
+  dataBufferUsed -= evSize;
+  numClosedData--;
+
   if (verbose) printf("Trigger %d @ %llu\n", trgNum, static_cast<unsigned long long>(trgTime));
 
   return 1;
