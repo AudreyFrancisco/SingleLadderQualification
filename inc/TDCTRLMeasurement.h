@@ -6,6 +6,7 @@
 #include "Common.h"
 #include "THisto.h"
 #include "TScan.h"
+#include "scope_control.h"
 
 
 class TDctrlMeasurement : public TScan {
@@ -33,6 +34,15 @@ public:
   void LoopEnd(int loopIndex);
   void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
   void PrepareStep(int loopIndex);
+  scope_control scope;
+  const int     peak_p = 0;
+  const int     peak_n = 1;
+  const int     amp_p  = 2;
+  const int     amp_n  = 3;
+  const int     rtim_p = 4;
+  const int     rtim_n = 5;
+  const int     ftim_p = 6;
+  const int     ftim_n = 7;
 };
 
 #endif

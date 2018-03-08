@@ -25,7 +25,7 @@ std::string scope_control::enumerate_ports()
   std::vector<serial::PortInfo>           devices_found = serial::list_ports();
   std::vector<serial::PortInfo>::iterator iter          = devices_found.begin();
 
-  if (devices_found.size() == 0) throw_ex("No devices found.\n");
+  if (devices_found.size() == 0) throw_ex("No USB devices could be enumerated.\n");
   while (iter != devices_found.end()) {
     serial::PortInfo device = *iter++;
     if (((device.hardware_id.find("0AAD") != std::string::npos) &&
@@ -64,7 +64,7 @@ bool scope_control::open_auto(uint32_t timeoutms)
     if (link->isOpen()) link->close();
   std::string port = scope_control::enumerate_ports();
   if (port == "") {
-    throw_ex("No device found.\n");
+    throw_ex("Scope not detected.\n");
     return false;
   }
   else {
@@ -132,8 +132,12 @@ void scope_control::write_cmd(std::string data)
   scope_control::write("*OPC;*ESR?\n");
   for (int i = 0; i < 4; i++) {
     std::string val = scope_control::read();
-    if (std::stoi(val) == 1) return;
+    if (std::stoi(val) == 1)
+      return;
+    else
+      scope_control::msleep(100);
   }
+  throw_ex("Writen task did not complete in time.\n");
 }
 
 std::string scope_control::write_query(std::string data)
@@ -176,7 +180,14 @@ void scope_control::reset()
 {
   scope_control::write("*CLS;*RST;*OPC?\n");
   msleep(3000);
-  scope_control::read();
+  for (int i = 0; i < 4; i++) {
+    std::string val = scope_control::read();
+    if (std::stoi(val) == 1)
+      return;
+    else
+      scope_control::msleep(1000);
+  }
+  throw_ex("Reset task did not complete in time.\n");
 }
 
 void scope_control::cls() { scope_control::write("*CLS\n"); }
@@ -285,7 +296,7 @@ void scope_control::set_ext_trigger_level(double level)
 
 void scope_control::single_capture()
 {
-  scope_control::write("SING\n"); // Single capture
+  scope_control::write_cmd("SING\n"); // Single capture
 }
 
 void scope_control::set_math_diff(uint8_t ch_p, uint8_t ch_n)
@@ -382,11 +393,14 @@ void scope_control::stop_quick_meas() { scope_control::write_cmd("MEAS:AOFF\n");
 
 void scope_control::get_errors() { scope_control::write_query("SYST:ERR:ALL?\n"); }
 
-void scope_control::wait_for_trigger()
+void scope_control::wait_for_trigger(int timeout_sec)
 {
+  int count = 0;
   while (scope_control::write_query("ACQ:STAT?\n") != "COMP") // Wait until complete
   {
+    if (count == timeout_sec) throw_ex("Timeout reached while waiting for trigger");
     msleep(1000);
+    count++;
   }
 }
 

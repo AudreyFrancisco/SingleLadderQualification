@@ -34,14 +34,39 @@ THisto TDctrlMeasurement::CreateHisto()
   // save result in a 1-d histogram: x-axis 0..15 corresponds to dctrl setting
   // if second variable needed (rms?) expand to 2-d histo:
   // THisto histo("ErrorHisto", "ErrorHisto", 16, 0, 15, 2, 0, 1);
-  THisto histo("ErrorHisto", "ErrorHisto", 16, 0, 15);
+  THisto histo("ErrorHisto", "ErrorHisto", 16, 0, 15, 8, 0, 7);
   return histo;
 }
 
 
 void TDctrlMeasurement::InitScope()
 {
-  // put here the initial setup of the scope
+  // scope.debug_en = true; // Enable to print all scope transactions
+  if (!scope.open_auto()) { // Auto connects to scope
+    exit(1);
+  }
+  scope.get_errors(); // Check for scope errors
+
+  // Setup channel specific
+  for (int i = 1; i <= 4; i++) {
+    scope.enable_ch(i);             // Enable channel
+    scope.set_vscale_ch(i, 200e-3); // Set V/div
+    scope.set_dc_coupling_ch(
+        i, false); // Set AC coupling to avoid fiddling with reference level to get pulse on screen
+  }
+
+  // Timing
+  scope.set_timescale(5e-9); // Set timescale
+
+  // Trigger
+  scope.set_trigger_ext();               // Set externally triggered
+  scope.set_trigger_slope_rising(false); // Trigger on rising edge
+  scope.set_ext_trigger_level(
+      -0.5); // Set trigger level (negative as we are using a NIM signal with a terminator)
+  scope.set_trigger_position(1.1e-6); // Move center of screen to a known good position for pulse
+
+  // Measure
+  scope.setup_measure(); // Enable peak, amplitude, risetime and falltime measurements
 }
 
 
@@ -199,6 +224,7 @@ void TDctrlMeasurement::LoopEnd(int loopIndex)
 // results are saved into m_histo as described below
 void TDctrlMeasurement::Execute()
 {
+  bool               exception;
   common::TChipIndex idx;
   idx.boardIndex   = m_boardIndex;
   idx.chipId       = m_testChip->GetConfig()->GetChipId();
@@ -208,21 +234,58 @@ void TDctrlMeasurement::Execute()
   if ((m_testChip->GetConfig()->IsEnabled()) &&
       (m_testChip->GetConfig()->GetParamValue("LINKSPEED") != -1)) {
 
+    scope.single_capture();           // Stop on first trigger
+    TestPattern(0x555555, exception); // Generate data on bus
+    /*if (exception) { // Should these be ignored?
+      std::cout << "Fifo scan failed" << std::endl;
+      exit(1);
+    }*/
+    scope.wait_for_trigger(10); // Check and wait until triggered
+
     // Do the measurement here, value has to be saved in the histogram
     // with THisto::Set, idx indicates the chip, e.g.
     // m_histo->Set(idx, m_value[1], measured amplitude)
     // to enter the measured amplitude for the current chip and the current
     // driver setting
+    if (m_testChip->GetConfig()->GetCtrInt() == 0) {
+      scope.en_measure_ch(3); // Set measurement to read from scope channel 3
+      scope.get_meas();       // Retrieve measuremts
+      m_histo->Set(idx, m_value[1], peak_p, scope.ch3.peak); // Update plots
+      m_histo->Set(idx, m_value[1], amp_p, scope.ch3.amp);
+      m_histo->Set(idx, m_value[1], rtim_p, scope.ch3.rtim);
+      m_histo->Set(idx, m_value[1], ftim_p, scope.ch3.ftim);
+      scope.en_measure_ch(4);
+      scope.get_meas();
+      m_histo->Set(idx, m_value[1], peak_n, scope.ch4.peak);
+      m_histo->Set(idx, m_value[1], amp_n, scope.ch4.amp);
+      m_histo->Set(idx, m_value[1], rtim_n, scope.ch4.rtim);
+      m_histo->Set(idx, m_value[1], ftim_n, scope.ch4.ftim);
+    }
+    else if (m_testChip->GetConfig()->GetCtrInt() == 1) {
+      scope.en_measure_ch(1);
+      scope.get_meas();
+      m_histo->Set(idx, m_value[1], peak_p, scope.ch1.peak);
+      m_histo->Set(idx, m_value[1], amp_p, scope.ch1.amp);
+      m_histo->Set(idx, m_value[1], rtim_p, scope.ch1.rtim);
+      m_histo->Set(idx, m_value[1], ftim_p, scope.ch1.ftim);
+      scope.en_measure_ch(2);
+      scope.get_meas();
+      m_histo->Set(idx, m_value[1], peak_n, scope.ch2.peak);
+      m_histo->Set(idx, m_value[1], amp_n, scope.ch2.amp);
+      m_histo->Set(idx, m_value[1], rtim_n, scope.ch2.rtim);
+      m_histo->Set(idx, m_value[1], ftim_n, scope.ch2.ftim);
+    }
 
     // here only to avoid error "idx set but not used"
     // remove in implementation
-    m_histo->Set(idx, m_value[1], 0);
+    // m_histo->Set(idx, m_value[1], 0);
   }
 }
 
 void TDctrlMeasurement::Terminate()
 {
   TScan::Terminate();
+  scope.close();
 
   m_running = false;
 }
