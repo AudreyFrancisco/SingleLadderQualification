@@ -330,7 +330,7 @@ void TScan::WriteTimestampLog(const char *fName)
   uint32_t lastBC     = 0;
   uint32_t lastBC_ref = 0;
 
-  uint32_t histo[256] = {0};
+  uint32_t histo[257] = {0};
   for (unsigned int iEvent = 0; iEvent < m_eventIds.size() && iEvent < m_eventIds_ref.size();
        iEvent++) {
     unsigned int diff = (lastBC < m_bunchCounters[iEvent]) ? (m_bunchCounters[iEvent] - lastBC)
@@ -338,7 +338,7 @@ void TScan::WriteTimestampLog(const char *fName)
     unsigned int diff_ref = (lastBC_ref < m_bunchCounters_ref[iEvent])
                                 ? (m_bunchCounters_ref[iEvent] - lastBC_ref)
                                 : 256 - lastBC_ref + m_bunchCounters_ref[iEvent];
-    if (diff > 0 && diff < 256) {
+    if (diff > 0 && diff < 257) {
       ++histo[diff];
     }
     else {
@@ -355,7 +355,7 @@ void TScan::WriteTimestampLog(const char *fName)
 
   output << std::endl << std::endl;
   output << " ## Timestamp histogram" << std::endl;
-  for (unsigned int i = 0; i < 256; ++i) {
+  for (unsigned int i = 0; i < 257; ++i) {
     output << i << "\t" << i * 200 << "\t" << histo[i] << "\t"
            << (double)histo[i] / (double)m_eventIds.size() << std::endl;
   }
