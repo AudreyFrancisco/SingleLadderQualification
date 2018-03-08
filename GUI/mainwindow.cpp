@@ -2306,10 +2306,16 @@ void MainWindow::fillingHSscans()
 {
 
   ClearVectors();
-
+  AddScan(STPower);
   AddScan(STFifo);
-  return;
   AddScan(STDigital);
+  AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+  AddScan(STThreshold);
 }
 
 void MainWindow::attachConfigFile(ActivityDB::activity &activity)
