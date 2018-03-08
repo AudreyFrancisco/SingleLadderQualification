@@ -106,6 +106,43 @@ void TDigitalAnalysis::InitCounters()
   }
 }
 
+
+void TDigitalAnalysis::CalculatePrediction(std::string hicName)
+{
+  std::vector<ActivityDB::activityLong> activities;
+  std::vector<std::string>              childNames;
+  TDigitalResultHic *                   prediction;
+  try {
+    prediction = (TDigitalResultHic *)m_prediction->GetHicResult(hicName);
+  }
+  catch (...) {
+    std::cout << "Error: prediction not found for hic " << hicName << std::endl;
+    return;
+  }
+
+  int compType = GetComponentType();
+  int compId   = DbGetComponentId(m_config->GetDatabase(), m_config->GetDatabase()->GetProjectId(),
+                                compType, hicName);
+  GetChildList(compId, childNames);
+
+  for (unsigned int i = 0; i < childNames.size(); i++) {
+    ActivityDB::activityLong act;
+    if (GetPreviousActivity(hicName, act)) {
+      activities.push_back(act);
+    }
+  }
+
+  if (activities.size() == 0) {
+    prediction->m_valid = false;
+    return;
+  }
+
+  for (unsigned int i = 0; i < activities.size(); i++) {
+    // do the calculation here
+  }
+}
+
+
 void TDigitalAnalysis::WriteHitData(TScanHisto *histo, int row)
 {
   char fName[100];

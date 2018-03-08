@@ -78,9 +78,10 @@ protected:
   const char *       WriteHicClassification();
   string             m_outputPath;
   TScanParameters *  m_scanParameters;
+  bool               m_valid; // used for predictions only
 
 public:
-  TScanResultHic(){};
+  TScanResultHic() { m_valid         = true; };
   virtual void WriteToFile(FILE *fp) = 0;
   virtual void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
   int AddChipResult(int aChipId, TScanResultChip *aChipResult);
@@ -138,12 +139,16 @@ protected:
   virtual TScanResultHic * GetHicResult()  = 0;
   void                     CreateHicResults();
   void                     CreatePrediction();
-  virtual void             CreateResult() = 0;
-  int                      ReadChipList();
+  virtual void CalculatePrediction(std::string hicName){};
+  virtual void                                 CreateResult() = 0;
+  int                                          ReadChipList();
   virtual void AnalyseHisto(TScanHisto *histo) = 0;
   virtual void InitCounters()                  = 0;
   int          GetPreviousActivityType();
   bool GetPreviousActivity(string compName, ActivityDB::activityLong &act);
+  int GetChildList(int id, std::vector<std::string> &childrenNames);
+  int GetPreviousComponentType(std::string prevTestType);
+  int            GetComponentType();
   virtual string GetPreviousTestType() = 0;
   void DoCut(THicClassification &hicClass, THicClassification failClass, int value, string cutName,
              bool minCut = false);

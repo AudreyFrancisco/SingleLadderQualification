@@ -29,6 +29,55 @@ int TScanAnalysis::GetPreviousActivityType()
 }
 
 
+int TScanAnalysis::GetChildList(int id, std::vector<std::string> &childrenNames)
+{
+  std::vector<TChild> children;
+  childrenNames.clear();
+  int prevCompType = GetPreviousComponentType(GetPreviousTestType());
+  if (prevCompType < 0) return 0;
+  DbGetListOfChildren(m_config->GetDatabase(), id, children);
+
+  for (unsigned int i = 0; i < children.size(); i++) {
+    if (children.at(i).Type == prevCompType) childrenNames.push_back(children.at(i).Name);
+  }
+  return childrenNames.size();
+}
+
+// TODO: Include OB Half-Stave test, here and in all GetPreviousTestTypes
+int TScanAnalysis::GetPreviousComponentType(std::string prevTestType)
+{
+  if (prevTestType == "ALPIDEB Chip Testing Analysis") {
+    return DbGetComponentTypeId(m_config->GetDatabase(), "ALPIDEB Chip");
+  }
+  else if ((prevTestType == "OB HIC Qualification Test") ||
+           (prevTestType == "OB HIC Endurance Test") || (prevTestType == "OB HIC Reception Test")) {
+    return DbGetComponentTypeId(m_config->GetDatabase(), "Outer Barrel HIC Module");
+  }
+  else if ((prevTestType == "IB HIC Qualification Test")) {
+    return DbGetComponentTypeId(m_config->GetDatabase(), "Inner Barrel HIC Module");
+  }
+  return -1;
+}
+
+
+// component type of current test
+// check (IB Stave?)
+int TScanAnalysis::GetComponentType()
+{
+  if ((m_config->GetTestType() == OBQualification) || (m_config->GetTestType() == OBEndurance) ||
+      (m_config->GetTestType() == OBReception) || (m_config->GetTestType() == OBPower) ||
+      (m_config->GetTestType() == OBHalfStaveOL) || (m_config->GetTestType() == OBHalfStaveML)) {
+    return DbGetComponentTypeId(m_config->GetDatabase(), "Outer Barrel HIC Module");
+  }
+  else if ((m_config->GetTestType() == IBQualification) ||
+           (m_config->GetTestType() == IBEndurance)) {
+    return DbGetComponentTypeId(m_config->GetDatabase(), "Inner Barrel HIC Module");
+  }
+  else
+    return -1;
+}
+
+
 bool TScanAnalysis::GetPreviousActivity(string compName, ActivityDB::activityLong &act)
 {
   return DbGetLatestActivity(m_config->GetDatabase(), GetPreviousActivityType(), compName, act);
@@ -54,7 +103,7 @@ void TScanAnalysis::CreatePrediction()
   }
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     TScanResultHic *hicResult = GetHicResult();
-    m_result->AddHicResult(m_hics.at(i)->GetDbId(), hicResult);
+    m_prediction->AddHicResult(m_hics.at(i)->GetDbId(), hicResult);
   }
 }
 

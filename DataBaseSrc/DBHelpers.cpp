@@ -282,6 +282,13 @@ int DbGetComponentTypeId(AlpideDB *db, int projectId, string name)
   return -1;
 }
 
+
+int DbGetComponentTypeId(AlpideDB *db, string name)
+{
+  return DbGetComponentTypeId(db, db->GetProjectId(), name);
+}
+
+
 // method returns the activity component type ID
 // (i.e. the id of the component as in or out component of the given activity)
 // the general component id is written into the variable componentId
@@ -327,7 +334,7 @@ int DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name)
 }
 
 // TODO: check; need also position?
-int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<int> &children)
+int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children)
 {
   ComponentDB *              componentDB = new ComponentDB(db);
   ComponentDB::componentLong component;
@@ -336,8 +343,13 @@ int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<int> &children)
   componentDB->Read(Id, &component);
 
   for (unsigned int i = 0; i < component.Composition.size(); i++) {
-    ComponentDB::compComposition child = component.Composition.at(i);
-    children.push_back(child.Component.ID);
+    TChild                       child;
+    ComponentDB::compComposition childDB = component.Composition.at(i);
+    child.Id                             = childDB.Component.ID;
+    child.Type                           = childDB.Component.ComponentType.ID;
+    child.Position                       = childDB.Position;
+    child.Name                           = childDB.Component.ComponentID;
+    children.push_back(child);
   }
   return children.size();
 }
