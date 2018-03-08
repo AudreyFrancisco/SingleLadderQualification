@@ -139,7 +139,7 @@ protected:
   virtual TScanResultHic * GetHicResult()  = 0;
   void                     CreateHicResults();
   void                     CreatePrediction();
-  virtual void CalculatePrediction(std::string hicName){};
+  virtual void CalculatePrediction(std::string hicName) { (void)hicName; };
   virtual void                                 CreateResult() = 0;
   int                                          ReadChipList();
   virtual void AnalyseHisto(TScanHisto *histo) = 0;
