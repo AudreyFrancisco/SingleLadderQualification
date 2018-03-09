@@ -118,7 +118,7 @@ public:
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
   TScanResultChip *GetChipResult(common::TChipIndex idx);
   TScanResultHic *GetHicResult(std::string hic);
-  std::map<std::string, TScanResultHic *> GetHicResults() { return m_hicResults; };
+  std::map<std::string, TScanResultHic *> *GetHicResults() { return &m_hicResults; };
 };
 
 class TScanAnalysis {

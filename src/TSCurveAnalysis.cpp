@@ -188,7 +188,7 @@ void TSCurveAnalysis::InitCounters()
 
   std::map<std::string, TScanResultHic *>::iterator it;
 
-  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+  for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TSCurveResultHic *result = (TSCurveResultHic *)it->second;
     result->m_nDead          = 0;
     result->m_nNoThresh      = 0;
@@ -278,7 +278,7 @@ void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo)
           for (unsigned int iHic = 0; iHic < m_hics.size(); iHic++) {
             if (!(m_hics.at(iHic)->ContainsChip(m_chipList.at(iChip)))) continue;
             TSCurveResultHic *hicResult =
-                (TSCurveResultHic *)m_result->GetHicResults().at(m_hics.at(iHic)->GetDbId());
+                (TSCurveResultHic *)m_result->GetHicResults()->at(m_hics.at(iHic)->GetDbId());
             hicResult->m_noiseAv += fitResult.noise;
             hicResult->m_noiseSq += pow(fitResult.noise, 2);
             hicResult->m_nEntries++;
@@ -313,7 +313,7 @@ void TSCurveAnalysis::Finalize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TSCurveResultHic *hicResult =
-        (TSCurveResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TSCurveResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->CalculateAverages();
     for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
       if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;

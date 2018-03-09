@@ -18,7 +18,9 @@ TCycleAnalysis::TCycleAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
 void TCycleAnalysis::InitCounters()
 {
   std::map<std::string, TScanResultHic *>::iterator it;
-  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+  for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
+    std::cout << "found " << m_result->GetHicResults()->size() << "hic results, initialising "
+              << it->first << std::endl;
     TCycleResultHic *result   = (TCycleResultHic *)it->second;
     result->m_nTrips          = 0;
     result->m_minWorkingChips = 14;
@@ -46,7 +48,7 @@ void TCycleAnalysis::Finalize()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     TCycleResultHic *hicResult =
-        (TCycleResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TCycleResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
 
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/CycleFile_%s.dat", hicResult->GetOutputPath().c_str(),
@@ -96,7 +98,7 @@ void TCycleAnalysis::Finalize()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     TCycleResultHic *hicResult =
-        (TCycleResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TCycleResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
 
     hicResult->m_avDeltaT /= ((TCycleResult *)m_result)->m_nCycles;
     hicResult->m_avIdda /= ((TCycleResult *)m_result)->m_nCycles;

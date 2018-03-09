@@ -82,7 +82,7 @@ void TFifoAnalysis::InitCounters()
   std::map<std::string, TScanResultHic *>::iterator it;
   std::map<int, TScanResultChip *>::iterator        itChip;
 
-  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+  for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TFifoResultHic *result = (TFifoResultHic *)it->second;
     result->m_exc          = 0;
     result->m_nFaultyChips = 0;
@@ -162,7 +162,7 @@ void TFifoAnalysis::Finalize()
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
       if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TFifoResultHic *hicResult =
-          (TFifoResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+          (TFifoResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
       hicResult->m_err0 += chipResult->m_err0;
       hicResult->m_err5 += chipResult->m_err5;
       hicResult->m_erra += chipResult->m_erra;
@@ -176,7 +176,7 @@ void TFifoAnalysis::Finalize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TFifoResultHic *hicResult =
-        (TFifoResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TFifoResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->m_class = GetClassification(hicResult);
   }
 

@@ -30,7 +30,7 @@ void TReadoutAnalysis::InitCounters()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TReadoutResultHic *hicResult =
-        (TReadoutResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TReadoutResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->m_linkSpeed   = ((TReadoutTest *)m_scan)->GetLinkSpeed();
     hicResult->m_driver      = ((TReadoutTest *)m_scan)->GetDriver();
     hicResult->m_preemp      = ((TReadoutTest *)m_scan)->GetPreemp();
@@ -104,7 +104,7 @@ void TReadoutAnalysis::Finalize()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TReadoutResultHic *hicResult =
-        (TReadoutResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TReadoutResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     std::cout << "8b10b errors: " << hicResult->m_errorCounter.n8b10b << std::endl;
   }
@@ -115,7 +115,7 @@ void TReadoutAnalysis::Finalize()
       TReadoutResultChip *chipResult =
           (TReadoutResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
       TReadoutResultHic *hicResult =
-          (TReadoutResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+          (TReadoutResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
 
       hicResult->m_missingHits += chipResult->m_missingHits;
       hicResult->m_deadPixels += chipResult->m_deadPixels;
@@ -127,7 +127,7 @@ void TReadoutAnalysis::Finalize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TReadoutResultHic *hicResult =
-        (TReadoutResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TReadoutResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
     }

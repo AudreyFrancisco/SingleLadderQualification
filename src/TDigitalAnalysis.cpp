@@ -64,7 +64,7 @@ void TDigitalAnalysis::Initialize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TDigitalResultHic *hicResult =
-        (TDigitalResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TDigitalResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     std::cout << "Start of analysis, nTimeout = " << hicResult->m_errorCounter.nTimeout;
   }
@@ -94,7 +94,7 @@ void TDigitalAnalysis::InitCounters()
 
   std::map<std::string, TScanResultHic *>::iterator it;
 
-  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+  for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TDigitalResultHic *result = (TDigitalResultHic *)it->second;
     result->m_nDead           = 0;
     result->m_nBad            = 0;
@@ -283,7 +283,7 @@ void TDigitalAnalysis::Finalize()
       TDigitalResultChip *chipResult =
           (TDigitalResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
       TDigitalResultHic *hicResult =
-          (TDigitalResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+          (TDigitalResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
       hicResult->m_nDead += chipResult->m_nDead;
       hicResult->m_nBad += chipResult->m_nDead + chipResult->m_nIneff + chipResult->m_nNoisy;
       hicResult->m_nBadDcols += chipResult->m_nBadDcols;
@@ -293,7 +293,7 @@ void TDigitalAnalysis::Finalize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TDigitalResultHic *hicResult =
-        (TDigitalResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TDigitalResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
     }

@@ -57,7 +57,7 @@ void TDctrlAnalysis::InitCounters()
   std::map<std::string, TScanResultHic *>::iterator it;
   std::map<int, TScanResultChip *>::iterator        itChip;
 
-  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+  for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TDctrlResultHic *result = (TDctrlResultHic *)it->second;
     for (itChip = result->m_chipResults.begin(); itChip != result->m_chipResults.end(); ++itChip) {
       TDctrlResultChip *resultChip = (TDctrlResultChip *)itChip->second;
@@ -117,7 +117,7 @@ void TDctrlAnalysis::Finalize()
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
       if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TDctrlResultHic *hicResult =
-          (TDctrlResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+          (TDctrlResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
       (void)hicResult;
       // TODO: Set here the final variables in hic Result, determine hic classification
     }

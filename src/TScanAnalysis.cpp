@@ -182,9 +182,9 @@ float TScanAnalysis::GetVariable(std::string aHic, int chip, TResultVariable var
 THicClassification TScanAnalysis::GetClassification()
 {
   THicClassification result = CLASS_UNTESTED;
-  std::map<std::string, TScanResultHic *>           hicResults = m_result->GetHicResults();
+  std::map<std::string, TScanResultHic *> *         hicResults = m_result->GetHicResults();
   std::map<std::string, TScanResultHic *>::iterator it;
-  for (it = hicResults.begin(); it != hicResults.end(); it++) {
+  for (it = hicResults->begin(); it != hicResults->end(); it++) {
     switch (it->second->GetClassification()) {
     case CLASS_GREEN:
       if (result == CLASS_UNTESTED) result = CLASS_GREEN;

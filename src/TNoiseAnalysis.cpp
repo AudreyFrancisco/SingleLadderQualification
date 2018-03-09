@@ -101,7 +101,7 @@ void TNoiseAnalysis::Initialize()
 void TNoiseAnalysis::InitCounters()
 {
   std::map<std::string, TScanResultHic *>::iterator it;
-  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+  for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TNoiseResultHic *result = (TNoiseResultHic *)it->second;
     result->m_backBias      = ((TNoiseOccupancy *)m_scan)->GetBackbias();
     result->m_isMasked      = m_isMasked;
@@ -152,7 +152,7 @@ void TNoiseAnalysis::Finalize()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TNoiseResultHic *hicResult =
-        (TNoiseResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TNoiseResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->m_occ    = 0;
     hicResult->m_nNoisy = 0;
     if (m_hics.at(ihic)->GetNChips() == 0) continue;

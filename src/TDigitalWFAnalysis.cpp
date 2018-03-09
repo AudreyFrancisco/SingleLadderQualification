@@ -40,7 +40,7 @@ void TDigitalWFAnalysis::InitCounters()
 
   std::map<std::string, TScanResultHic *>::iterator it;
 
-  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+  for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TDigitalWFResultHic *result = (TDigitalWFResultHic *)it->second;
     result->m_nStuck            = 0;
     result->m_nUnmaskable       = 0;
@@ -108,7 +108,7 @@ void TDigitalWFAnalysis::Finalize()
       TDigitalWFResultChip *chipResult =
           (TDigitalWFResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
       TDigitalWFResultHic *hicResult =
-          (TDigitalWFResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+          (TDigitalWFResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
       hicResult->m_nStuck += chipResult->m_nStuck;
       hicResult->m_nUnmaskable += chipResult->m_nUnmaskable;
     }
@@ -116,7 +116,7 @@ void TDigitalWFAnalysis::Finalize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TDigitalWFResultHic *hicResult =
-        (TDigitalWFResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TDigitalWFResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
     }

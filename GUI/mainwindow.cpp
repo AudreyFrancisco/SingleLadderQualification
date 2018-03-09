@@ -1044,8 +1044,8 @@ void MainWindow::colorscans()
     if (fScanbuttons[i] != 0) {
       if (fresultVector[i] == 0) {
         for (std::map<std::string, TScanResultHic *>::iterator it =
-                 fresultVector.at(i + 1)->GetHicResults().begin();
-             it != fresultVector.at(i + 1)->GetHicResults().end(); ++it) {
+                 fresultVector.at(i + 1)->GetHicResults()->begin();
+             it != fresultVector.at(i + 1)->GetHicResults()->end(); ++it) {
           int colour;
           colour = it->second->GetClassification();
 
@@ -1069,8 +1069,8 @@ void MainWindow::colorscans()
       }
       else {
         for (std::map<std::string, TScanResultHic *>::iterator it =
-                 fresultVector.at(i)->GetHicResults().begin();
-             it != fresultVector.at(i)->GetHicResults().end(); ++it) {
+                 fresultVector.at(i)->GetHicResults()->begin();
+             it != fresultVector.at(i)->GetHicResults()->end(); ++it) {
           int colour;
           colour = it->second->GetClassification();
 
@@ -1364,8 +1364,8 @@ void MainWindow::attachtodatabase()
       // loop over results and write to DB
       for (unsigned int j = 0; j < fresultVector.size(); j++) {
         if (fresultVector[j] != 0) {
-          std::map<std::string, TScanResultHic *> mymap = fresultVector.at(j)->GetHicResults();
-          for (auto ihic = mymap.begin(); ihic != mymap.end(); ++ihic) {
+          std::map<std::string, TScanResultHic *> *mymap = fresultVector.at(j)->GetHicResults();
+          for (auto ihic = mymap->begin(); ihic != mymap->end(); ++ihic) {
             TScanResultHic *result = (TScanResultHic *)ihic->second;
             if (ihic->first.compare(fHicnames.at(i).toStdString()) == 0) {
               result->WriteToDB(fDB, activ);
@@ -2244,8 +2244,8 @@ void MainWindow::attachtodatabaseretry()
       // loop over results and write to DB
       for (unsigned int j = 0; j < fresultVector.size(); j++) {
         if (fresultVector[j] != 0) {
-          std::map<std::string, TScanResultHic *> mymap = fresultVector.at(j)->GetHicResults();
-          for (auto ihic = mymap.begin(); ihic != mymap.end(); ++ihic) {
+          std::map<std::string, TScanResultHic *> *mymap = fresultVector.at(j)->GetHicResults();
+          for (auto ihic = mymap->begin(); ihic != mymap->end(); ++ihic) {
             TScanResultHic *result = (TScanResultHic *)ihic->second;
             if (ihic->first.compare(fHicnames.at(i).toStdString()) == 0) {
               result->WriteToDB(fDB, activ);
