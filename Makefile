@@ -26,7 +26,11 @@ LIBRARY=libalpide.so
 ANALYSIS_LIBRARY=libalpide_analysis.so
 
 ### ROOT specific variables
-ROOTCONFIG   := $(shell which root-config)
+ifdef ROOTSYS
+  ROOTCONFIG   := $(ROOTSYS)/bin/root-config
+else
+  ROOTCONFIG   := $(shell which root-config)
+endif
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags | sed -e 's/-pthread//g')
 ROOTLDFLAGS  := $(shell $(ROOTCONFIG) --ldflags)
 ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs | sed -e 's/-lpthread//g')
@@ -78,7 +82,7 @@ EXE += $(TEST_EXE_ROOT)
 
 
 #### TARGETS ####
-all: $(EXE) Config.cfg githooks
+all: check-env $(EXE) Config.cfg githooks
 
 ### Config.cfg
 Config.cfg: ConfigTemplate.cfg
@@ -141,6 +145,10 @@ clean-all:	clean
 	$(MAKE) -C $(LIBALUCMS_DIR) clean-all
 	$(MAKE) -C $(LIBSCOPECONTROL_DIR) clean-all
 
+check-env:
+ifndef ROOTCONFIG
+	$(error ROOTSYS environment variable is undefined and ROOT not found in path. Update environment or run rootdir/bin/thisroot.sh)
+endif
 
 ## clang format (formatting + testing)
 format:

@@ -36,7 +36,7 @@ public:
   void en_measure_ch(uint8_t ch);
   void get_meas();
   void single_capture();
-  void wait_for_trigger();
+  void wait_for_trigger(int timeout_sec);
   void get_errors();
   bool debug_en = false;
   // Returned by get quick measurments

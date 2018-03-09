@@ -176,9 +176,8 @@ int main(int argc, char **argv)
                 << "  chip ID " << rChip->GetConfig()->GetChipId() << std::endl;
 
       scope.single_capture();
-      usleep(100000);
       MemTest(rChip, 0, 0);
-      scope.wait_for_trigger();
+      scope.wait_for_trigger(10);
       scope.en_measure_ch(1);
       scope.get_meas();
       scope.en_measure_ch(2);
@@ -194,9 +193,8 @@ int main(int argc, char **argv)
                 << "  chip ID " << rChip->GetConfig()->GetChipId() << std::endl;
 
       scope.single_capture();
-      usleep(100000);
       MemTest(rChip, 0, 0);
-      scope.wait_for_trigger();
+      scope.wait_for_trigger(10);
       scope.en_measure_ch(3);
       scope.get_meas();
       scope.en_measure_ch(4);
