@@ -27,8 +27,8 @@ private:
   float m_avIddd;
   float m_maxIddd;
   float m_minIddd;
-  char  m_cycleFile[200];
-  void SetCycleFile(const char *fName) { strcpy(m_cycleFile, fName); };
+  char  m_cycleFile[300];
+  void SetCycleFile(const char *fName) { strncpy(m_cycleFile, fName, sizeof(m_cycleFile)); };
 
 protected:
 public:

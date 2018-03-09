@@ -73,7 +73,7 @@ class TScanResultHic {
 
 protected:
   std::map<int, TScanResultChip *> m_chipResults;
-  char               m_resultFile[200];
+  char               m_resultFile[300];
   THicClassification m_class;
   const char *       WriteHicClassification();
   string             m_outputPath;
@@ -85,7 +85,7 @@ public:
   virtual void WriteToFile(FILE *fp) = 0;
   virtual void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
   int AddChipResult(int aChipId, TScanResultChip *aChipResult);
-  void SetResultFile(const char *fName) { strcpy(m_resultFile, fName); };
+  void SetResultFile(const char *fName) { strncpy(m_resultFile, fName, sizeof(m_resultFile)); };
   THicClassification             GetClassification() { return m_class; };
   std::map<int, TScanResultChip *> DeleteThisToo() { return m_chipResults; };
   float GetVariable(int chip, TResultVariable var);

@@ -16,7 +16,8 @@
 const int MAXLOOPLEVEL = 3;
 const int MAXBOARDS    = 2;
 
-extern bool fScanAbort;
+extern bool fScanAbort;    // fScanAbort stops current scan (set false in Init)
+extern bool fScanAbortAll; // fScanAbortAll stops all scans (set false in constructor)
 
 typedef struct {
   int nEnabled;
