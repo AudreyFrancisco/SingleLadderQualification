@@ -23,7 +23,7 @@ import copy
 from Common import *
 from pty import CHILD
 
-#    Version 2.1 - 01/03/2018 - A.franco - INFN BARI ITALY
+#    Version 2.2 - 08/03/2018 - A.franco - INFN BARI ITALY
 
 
 # ---------------------------------------------
@@ -1006,6 +1006,55 @@ class DB:
     # *************************************
     #   Paramaeters Methods 
     #
+   
+    # -- Write or Change one Activity Parameter
+    #
+    #  ActivityId    := the ID af the Activity
+    #  ParameterName := string, the name of the Parameter
+    #  ParameterValue:= float, the value to write
+    #
+    #  Return := True / False
+    #
+    def ParameterOverwrite(self, ActivityId = -999, ParameterName="", ParameterValue=0.0):
+        # Get the Activity spec.
+        if not self.AquireActivityTypeByActId(ActivityId):
+            self.lg.warning("Activity not enabled for the specified location : %d " % (ActivityId))
+            return(False)
+        # prepare the common data
+        Flag = False 
+        for ActTypeParam in self.ActivityType.Parameters.ActivityTypeParameter:
+            if ActTypeParam.Parameter.Name==ParameterName:
+                Flag = True
+                break
+        if not Flag:
+            self.lg.warning("Parameter :'%s' not found for activity %d !" % (ParameterName,ActivityId))
+            return(False) 
+
+        strParamValue = str(ParameterValue)   
+        
+        Param = self._GetParameterByName(ActivityId,ParameterName)
+        if Param is None:
+            activityParameterResult = self.DB.service.ActivityParameterCreate(
+                activityID = ActivityId,
+                activityParameterID = ActTypeParam.ID,
+                value = strParamValue, # ParameterValue,
+                userID = self.user.ID
+            )  
+            if activityParameterResult.ErrorCode != 0:
+                self.lg.warning("Create Parameter to Activity error : '%s' -> %s" % (ParameterName,activityParameterResult.ErrorMessage))
+                return(False) 
+            self.lg.debug("Create Parameter to the Activity: '%s'=%f" % (ParameterName, ParameterValue) )
+        else:
+            activityParameterResult = self.DB.service.ActivityParameterChange(
+                ID = Param.ID,
+                value = strParamValue, #ParameterValue,
+                userID = self.user.ID
+            )  
+            if activityParameterResult.ErrorCode != 0:
+                self.lg.warning("Change Parameter to Activity error : '%s' -> %s" % (ParameterName,activityParameterResult.ErrorMessage))
+                return(False) 
+            self.lg.debug("Change Parameter to the Activity: '%s'=%f" % (ParameterName, ParameterValue) )
+        return(True)
     
     # -- Write one Activity Parameter
     #
