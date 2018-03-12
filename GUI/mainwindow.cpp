@@ -44,6 +44,8 @@
 #include "TApplyTuning.h"
 #include "TConfig.h"
 #include "TCycleAnalysis.h"
+#include "TDCTRLAnalysis.h"
+#include "TDCTRLMeasurement.h"
 #include "TDigitalWFAnalysis.h"
 #include "TEnduranceCycle.h"
 #include "TFastPowerAnalysis.h"
@@ -1756,6 +1758,13 @@ bool MainWindow::CreateScanObjects(TScanType scanType, TScanConfig *config, TSca
     *result   = new TFifoResult();
     *analysis = new TFifoAnalysis(&fHistoQue, (TFifoTest *)*scan, config, fHICs, &fMutex,
                                   (TFifoResult *)*result);
+    hasButton = true;
+    return true;
+  case STDctrl:
+    *scan     = new TDctrlMeasurement(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TDctrlResult();
+    *analysis = new TDctrlAnalysis(&fHistoQue, (TDctrlMeasurement *)*scan, config, fHICs, &fMutex,
+                                   (TDctrlResult *)*result);
     hasButton = true;
     return true;
   case STLocalBus:

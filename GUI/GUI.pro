@@ -102,5 +102,11 @@ DEPENDPATH += $$PWD/../MosaicSrc/libpowerboard/include
 INCLUDEPATH += $$PWD/../ReadoutUnitSrc/
 DEPENDPATH += $$PWD/../ReadoutUnitSrc/
 
+INCLUDEPATH += $$PWD/../ScopeControlSrc
+DEPENDPATH += $$PWD/../ScopeControlSrc
+
+INCLUDEPATH += $$PWD/../ScopeControlSrc/serial/include
+DEPENDPATH += $$PWD/../ScopeControlSrc/serial/include
+
 INCLUDEPATH += /usr/include/libxml2
 DEPENDPATH += /usr/include/libxml2
