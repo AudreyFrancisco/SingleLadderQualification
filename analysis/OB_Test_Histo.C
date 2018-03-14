@@ -1,0 +1,1 @@
+//make hitmap from raw file
