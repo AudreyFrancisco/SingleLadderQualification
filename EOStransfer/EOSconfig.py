@@ -305,7 +305,7 @@ def generateTheEOStransferScript(ServiceAccount, LocalBasePath):
     file.write("while [ $SYNCATTEMPTS -ne 0 ]; do\n")
     file.write("     # - do the sync\n")
     file.write("     STOPDATE=`date`\n")
-    file.write("     rsync -LavuzeL ssh $DBATTACHBASEPATH $DBATTACHREMOTEPATH\n")
+    file.write("     rsync -Lavuze ssh $DBATTACHBASEPATH $DBATTACHREMOTEPATH\n")
     file.write("     # - evaluates the result\n")
     file.write("     if [[ $? -gt 0 ]] \n")
     file.write("     then\n")
