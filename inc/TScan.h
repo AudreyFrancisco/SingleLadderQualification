@@ -110,6 +110,7 @@ public:
   virtual void LoopEnd(int loopIndex)     = 0;
   virtual void PrepareStep(int loopIndex) = 0;
   virtual void Execute()                  = 0;
+  void         ClearHistoQue();
   bool Loop(int loopIndex);
   virtual void Next(int loopIndex);
   void CreateScanHisto();

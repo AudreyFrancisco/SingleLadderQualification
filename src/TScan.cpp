@@ -111,6 +111,15 @@ void TScan::Init()
   }
 }
 
+void TScan::ClearHistoQue()
+{
+  while (!(m_mutex->try_lock()))
+    ;
+  m_histoQue->clear();
+  m_mutex->unlock();
+}
+
+
 // seems the board index is not accessible anywhere.
 // for the time being do like this...
 int TScan::FindBoardIndex(TAlpide *chip)
