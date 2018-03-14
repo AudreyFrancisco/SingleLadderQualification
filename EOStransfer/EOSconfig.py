@@ -397,7 +397,9 @@ def main(argv):
             LocalBasePath = inputTheLocalPath("Specify the position of the sources path")
             RemoteBasePath = theMirrorBasePath + "/fpc"
             theFolder = "TRIESTE"
-            createTheSymLink(LocalBasePath, RemoteBasePath, theFolder)
+            if not createTheSymLink(LocalBasePath, RemoteBasePath, theFolder):
+                print "Bye Bye !\n"
+                return 1
             
     elif Activity == "HicTests":
         cho = -1
@@ -410,7 +412,9 @@ def main(argv):
                 isGood = True
                 RemoteBasePath = theMirrorBasePath + "/HicTests/" + Test
                 theFolder = Site
-                createTheSymLink(LocalBasePath, RemoteBasePath, theFolder)
+                if not createTheSymLink(LocalBasePath, RemoteBasePath, theFolder):
+                    print "Bye Bye !\n"
+                    return 1
                 
     elif Activity == "hic":
         isGood = False
@@ -419,8 +423,9 @@ def main(argv):
         print "Bye Bye !/n"
         return 1
  
-    #  ------  
-    generateTheEOStransferScript(Service, theMirrorBasePath)
+    #  ------ 
+    if isGood:
+        generateTheEOStransferScript(Service, theMirrorBasePath)
  
     print "EOS configuration program. Done !\n"
 
