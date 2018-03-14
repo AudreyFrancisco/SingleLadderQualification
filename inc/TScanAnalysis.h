@@ -81,7 +81,9 @@ protected:
   bool               m_valid; // used for predictions only
 
 public:
-  TScanResultHic() { m_valid         = true; };
+  TScanResultHic() { m_valid = false; };
+  void SetValidity(bool valid) { m_valid = valid; };
+  bool                  IsValid() { return m_valid; };
   virtual void WriteToFile(FILE *fp) = 0;
   virtual void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
   int AddChipResult(int aChipId, TScanResultChip *aChipResult);

@@ -40,6 +40,7 @@ void TNoiseAnalysis::WriteResult()
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
     WriteNoisyPixels(m_hics.at(ihic));
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/NoiseOccResult_%s.dat", hicResult->GetOutputPath().c_str(),
@@ -167,6 +168,7 @@ void TNoiseAnalysis::Finalize()
     }
     hicResult->m_occ /= m_hics.at(ihic)->GetNChips();
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
+    hicResult->SetValidity(true);
   }
 
   WriteResult();

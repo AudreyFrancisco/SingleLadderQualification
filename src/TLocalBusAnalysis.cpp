@@ -78,6 +78,7 @@ void TLocalBusAnalysis::WriteResult()
   char fName[200];
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->IsValid()) continue;
     sprintf(fName, "LocalBusScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
             m_config->GetfNameSuffix());
     m_scan->WriteConditions(fName, m_hics.at(ihic));
@@ -129,6 +130,7 @@ void TLocalBusAnalysis::Finalize()
       hicResult->m_class = CLASS_RED;
     else
       hicResult->m_class = CLASS_GREEN;
+    hicResult->SetValidity(true);
   }
 
   WriteResult();

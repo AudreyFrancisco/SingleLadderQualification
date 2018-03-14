@@ -178,6 +178,7 @@ void TFifoAnalysis::Finalize()
     TFifoResultHic *hicResult =
         (TFifoResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->m_class = GetClassification(hicResult);
+    hicResult->SetValidity(true);
   }
 
   WriteResult();

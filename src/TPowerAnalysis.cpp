@@ -68,6 +68,7 @@ void TPowerAnalysis::Finalize()
       hicResult->ibias[i] = hicCurrents.ibias[i];
     }
     hicResult->m_class = GetClassification(hicCurrents);
+    hicResult->SetValidity(true);
   }
   WriteResult();
   m_finished = true;

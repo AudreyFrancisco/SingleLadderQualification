@@ -185,6 +185,7 @@ THicClassification TScanAnalysis::GetClassification()
   std::map<std::string, TScanResultHic *> *         hicResults = m_result->GetHicResults();
   std::map<std::string, TScanResultHic *>::iterator it;
   for (it = hicResults->begin(); it != hicResults->end(); it++) {
+    if (!it->second->IsValid()) continue;
     switch (it->second->GetClassification()) {
     case CLASS_GREEN:
       if (result == CLASS_UNTESTED) result = CLASS_GREEN;
@@ -338,6 +339,7 @@ void TScanResult::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   std::map<std::string, TScanResultHic *>::iterator it;
   for (it = m_hicResults.begin(); it != m_hicResults.end(); it++) {
+    if (!it->second->IsValid()) continue;
     it->second->WriteToDB(db, activity);
   }
 }

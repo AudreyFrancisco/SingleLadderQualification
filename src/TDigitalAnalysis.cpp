@@ -177,6 +177,7 @@ void TDigitalAnalysis::WriteResult()
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
     WriteStuckPixels(m_hics.at(ihic));
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/DigitalScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
@@ -301,6 +302,7 @@ void TDigitalAnalysis::Finalize()
       hicResult->m_class = GetClassificationIB(hicResult);
     }
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
+    hicResult->SetValidity(true);
   }
   WriteResult();
 

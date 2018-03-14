@@ -48,6 +48,7 @@ void TFastPowerAnalysis::Finalize()
       hicResult->ibias[i] = hicCurrents.ibias[i];
     }
     hicResult->m_class = GetClassification(hicCurrents);
+    hicResult->SetValidity(true);
   }
   WriteResult();
   m_finished = true;
@@ -115,6 +116,7 @@ void TFastPowerAnalysis::WriteResult()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
     WriteIVCurve(m_hics.at(ihic));
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/PowerTestResult_%s.dat", hicResult->GetOutputPath().c_str(),

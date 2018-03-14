@@ -73,6 +73,7 @@ void TDctrlAnalysis::WriteResult()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
+    if (!m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->IsValid()) continue;
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/DctrlScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
@@ -118,7 +119,7 @@ void TDctrlAnalysis::Finalize()
       if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TDctrlResultHic *hicResult =
           (TDctrlResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
-      (void)hicResult;
+      hicResult->SetValidity(true);
       // TODO: Set here the final variables in hic Result, determine hic classification
     }
   }

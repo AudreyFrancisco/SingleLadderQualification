@@ -123,6 +123,7 @@ void TDigitalWFAnalysis::Finalize()
     else {
       hicResult->m_class = GetClassificationOB(hicResult);
     }
+    hicResult->SetValidity(true);
   }
   WriteResult();
 
@@ -159,6 +160,7 @@ void TDigitalWFAnalysis::WriteResult()
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
     WriteStuckPixels(m_hics.at(ihic));
     WriteUnmaskedPixels(m_hics.at(ihic));
 
