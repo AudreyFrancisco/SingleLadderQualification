@@ -53,7 +53,7 @@ int AddressToRow(int ARegion, int ADoubleCol, int AAddress)
 
 void ReadFile(const char *fNameChip, TH2F *hHitmap, TH2F *ChipHitMap, int Chip, int nInj)
 {
-  int event, col, row, nhits;
+  int mod, chip, col, row, nhits;
 
   FILE *fp = fopen(fNameChip, "r");
   if (!fp) {
@@ -63,7 +63,7 @@ void ReadFile(const char *fNameChip, TH2F *hHitmap, TH2F *ChipHitMap, int Chip, 
   std::cout << fNameChip << std::endl;
   int nLines = 0, nHot = 0, nIneff = 0;
 
-  while (fscanf(fp, "%d %d %d", &col, &row, &nhits) == 3) {
+  while (fscanf(fp, "%d %d %d %d %d", &mod, &chip, &col, &row, &nhits) == 5) {
     int Column = AddressToColumn(col / 16, col % 16, row);
     int Row    = AddressToRow(col / 16, col % 16, row);
     nLines++;
