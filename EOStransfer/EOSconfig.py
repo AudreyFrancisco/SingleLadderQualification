@@ -230,7 +230,7 @@ def createTheSymLink(theLocalBasePath, theRemoteBasePath, theFolder):
 
 def getTheSiteInfo():
     
-    bashCommand = "klist -l'" 
+    bashCommand = "klist -l" 
     try:
         return_code = subprocess.check_output(bashCommand, stderr=subprocess.STDOUT, shell=True)  
     except OSError:
