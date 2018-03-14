@@ -78,7 +78,7 @@ void ReadFile(const char *fNameChip, TH2F *hHitmap, TH2F *ChipHitMap, int Chip, 
       hHitmap->Fill(1024 * Chip + Column, Row, nhits);
     }
     else {
-      hHitmap->Fill(1024 * (14 - Chip) + Column, Row + 512, nhits);
+      hHitmap->Fill(1024 * (14 - Chip) + (1024 - Column), Row + 512, nhits);
     }
   }
 
