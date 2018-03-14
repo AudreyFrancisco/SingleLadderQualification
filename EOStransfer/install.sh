@@ -7,7 +7,9 @@ echo " "
 kinit 
 echo " Now we build the EOStransfer.sh script "
 echo " "
+klist -l >/tmp/krblist
 sudo ./EOSconfig.py
+rm /tmp/krblist
 echo " Finally setup the Cron Job task "
 echo " "
 ./EOScreateCron.sh
