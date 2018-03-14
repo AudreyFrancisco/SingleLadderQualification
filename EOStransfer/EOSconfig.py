@@ -14,6 +14,9 @@ from datetime import datetime
 import errno
 import getopt
 from collections import namedtuple
+import readline
+import glob
+
 
 # -    ------------------------ Configuration class
 class Configuration:
@@ -155,7 +158,6 @@ def inputTheLocalPath(theMessage, theDefault = ""):
         local = local[:-1]
                 
     return(local)
-
   
   
 def inputStringField(theDefault = ""):
@@ -334,23 +336,18 @@ def generateTheEOStransferScript(ServiceAccount, LocalBasePath):
 
 # Main Program
 
-import readline
-import glob
+# constant define
+Sites = ["CERN", "Bari", "Liverpool",  "Pusan",  "Strasbourg", "Wuhan", 
+             "Trieste", "Catania", "Torino", "Berkeley", "Daresbury", "Frascati", "Nikhef"]
+ServiceAccount = ["aliceitscern", "aliceitsbari", "aliceitsliverpool",  "aliceitspusan",  "aliceitsstrasbourg", "aliceitswuhan",
+                      "aliceitstrieste", "aliceitscatania", "aliceitstorino","aliceitsberkeley", "aliceitsdaresbury", "aliceitsfrascati", "aliceitsnikhef"]
+TestsName = ["HicTests", "fpc"] # , "hic"]
+HicTestsName = ["IBEndurance", "IBQualification", "OBEndurance", "OBFastPower","OBQualification","OBReception", "OBImpedance"]
+
 
 def main(argv):
-
-
-    # constant define
-    Sites = ["CERN", "Bari", "Liverpool",  "Pusan",  "Strasbourg", "Wuhan", 
-             "Trieste", "Catania", "Torino", "Berkeley", "Daresbury", "Frascati", "Nikhef"]
-    ServiceAccount = ["aliceitscern", "aliceitsbari", "aliceitsliverpool",  "aliceitspusan",  "aliceitsstrasbourg", "aliceitswuhan",
-                      "aliceitstrieste", "aliceitscatania", "aliceitstorino","aliceitsberkeley", "aliceitsdaresbury", "aliceitsfrascati", "aliceitsnikhef"]
-    TestsName = ["HicTests", "fpc"] # , "hic"]
-    HicTestsName = ["IBEndurance", "IBQualification", "OBEndurance", "OBFastPower","OBQualification","OBReception", "OBImpedance"]
-
     # read the Configuration
     myConf = Configuration("EOStransfer.cfg")
-
   
     # --- print the Header ...
     print " ******************************************************* "
