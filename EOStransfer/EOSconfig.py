@@ -208,8 +208,8 @@ def createTheSymLink(theLocalBasePath, theRemoteBasePath, theFolder):
         
     bashCommand = "mkdir -p '" + theRemoteBasePath + "'"
     try:
-        return_code = subprocess.call(bashCommand, stderr=subprocess.STDOUT, shell=True)  
-        print ">>-> Folder creation of %s result: %s " % (theRemoteBasePath, return_code)
+        return_code = subprocess.check_output(bashCommand, stderr=subprocess.STDOUT, shell=True)  
+        # print ">>-> Folder creation of %s result: %s " % (theRemoteBasePath, return_code)
     except OSError:
         print "ERROR : to create Destination dir: %s Abort operation !\n" % bashCommand
         return(False)
@@ -220,8 +220,8 @@ def createTheSymLink(theLocalBasePath, theRemoteBasePath, theFolder):
      
     bashCommand = "ln -sfn '" + theLocalPath + "' '" + theRemoteBasePath + "/" + theFolder +"'"
     try:
-        return_code = subprocess.call(bashCommand, stderr=subprocess.STDOUT, shell=True)  
-        print ">>-> Symlink creation of %s result: %s\n" % (theRemoteBasePath + "/" + theFolder, return_code)
+        return_code = subprocess.check_output(bashCommand, stderr=subprocess.STDOUT, shell=True)  
+        #print ">>-> Symlink creation of %s result: %s\n" % (theRemoteBasePath + "/" + theFolder, return_code)
     except OSError:
         print "ERROR : to create Remote mirror symlink: %s Abort operation!\n" % bashCommand
         return(False)
