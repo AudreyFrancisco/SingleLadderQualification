@@ -332,15 +332,13 @@ def generateTheEOStransferScript(ServiceAccount, LocalBasePath):
     return(True)
 
 
-
-
 # Main Program
 
 # constant define
-Sites = ["CERN", "Bari", "Liverpool",  "Pusan",  "Strasbourg", "Wuhan", 
+Sites = ["CERN", "Pusan",  "Bari", "Strasbourg", "Liverpool",  "Wuhan", 
              "Trieste", "Catania", "Torino", "Berkeley", "Daresbury", "Frascati", "Nikhef"]
-ServiceAccount = ["aliceitscern", "aliceitsbari", "aliceitsliverpool",  "aliceitspusan",  "aliceitsstrasbourg", "aliceitswuhan",
-                      "aliceitstrieste", "aliceitscatania", "aliceitstorino","aliceitsberkeley", "aliceitsdaresbury", "aliceitsfrascati", "aliceitsnikhef"]
+ServiceAccount = ["aliceits", "itspusan",  "aliceitsbari", "aliceitssbg", "aliceitslpool",   "aliceitswuhan",
+                      "aliceitstrieste", "aliceitscatania", "aliceitstorino","aliceitslbl", "aliceitsdl", "aliceitslnf", "itsnik"]
 TestsName = ["HicTests", "fpc"] # , "hic"]
 HicTestsName = ["IBEndurance", "IBQualification", "OBEndurance", "OBFastPower","OBQualification","OBReception", "OBImpedance"]
 
@@ -370,7 +368,7 @@ def main(argv):
 #    Service = ServiceAccount[cho -1] 
     myConf.SetItem("SITENAME", Site)
     myConf.SetItem("SERVICEACCOUNT", Service)
-    print ">>-> You select %s site. The related service account is  '%s' \n" % (Site, Service)
+    print ">>-> You are %s site. The related service account is  '%s' \n" % (Site, Service)
     
 #    theMirrorBasePath = myConf.GetItem("SYNCBASEPATH") 
 #    local = inputTheLocalPath("Specify the base path of sync", theMirrorBasePath)
