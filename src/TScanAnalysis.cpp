@@ -146,7 +146,7 @@ void TScanAnalysis::Run()
     sleep(1);
   }
 
-  while ((m_scan->IsRunning() || (m_histoQue->size() > 0))) {
+  while ((!fScanAbort) && (!fScanAbortAll) && ((m_scan->IsRunning() || (m_histoQue->size() > 0)))) {
     if (m_histoQue->size() > 0) {
       while (!(m_mutex->try_lock()))
         ;

@@ -102,6 +102,7 @@ void TReadoutAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TReadoutAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TReadoutResultHic *hicResult =
         (TReadoutResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());

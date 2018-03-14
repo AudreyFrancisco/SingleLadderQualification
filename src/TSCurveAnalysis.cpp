@@ -296,6 +296,7 @@ void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TSCurveAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   TErrorCounter  errCount = ((TMaskScan *)m_scan)->GetErrorCount();
   TSCurveResult *result   = (TSCurveResult *)m_result;
 

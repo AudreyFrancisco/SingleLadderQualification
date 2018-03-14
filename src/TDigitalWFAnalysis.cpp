@@ -81,6 +81,7 @@ void TDigitalWFAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TDigitalWFAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   TErrorCounter        errCount = ((TMaskScan *)m_scan)->GetErrorCount();
   TDigitalWFResult *   result   = (TDigitalWFResult *)m_result;
   std::vector<TPixHit> stuck    = ((TMaskScan *)m_scan)->GetStuckPixels();

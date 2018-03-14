@@ -40,6 +40,7 @@ void TCycleAnalysis::InitCounters()
 // Q: 1 file per HIC? -> yes, since attachment per activity, activity is per HIC
 void TCycleAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   char fName[200];
   std::vector<std::map<std::string, THicCounter>> counters =
       ((TEnduranceCycle *)m_scan)->GetCounters();

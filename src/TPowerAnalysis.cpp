@@ -43,6 +43,7 @@ string TPowerAnalysis::GetPreviousTestType()
 
 void TPowerAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   TPowerTest *powerTest = (TPowerTest *)m_scan;
 
   std::map<std::string, THicCurrents> currents = powerTest->GetCurrents();

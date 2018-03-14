@@ -97,6 +97,7 @@ void TLocalBusAnalysis::WriteResult()
 
 void TLocalBusAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     TLocalBusResultChip *chipResult =
         (TLocalBusResultChip *)m_result->GetChipResult(m_chipList.at(ichip));

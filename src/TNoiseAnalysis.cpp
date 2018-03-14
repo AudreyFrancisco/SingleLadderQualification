@@ -151,6 +151,7 @@ void TNoiseAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TNoiseAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TNoiseResultHic *hicResult =
         (TNoiseResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());

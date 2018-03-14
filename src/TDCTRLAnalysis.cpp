@@ -110,6 +110,7 @@ void TDctrlAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TDctrlAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     TDctrlResultChip *chipResult =
         (TDctrlResultChip *)m_result->GetChipResult(m_chipList.at(ichip));

@@ -27,6 +27,7 @@ string TFastPowerAnalysis::GetPreviousTestType()
 
 void TFastPowerAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   TFastPowerTest *powerTest = (TFastPowerTest *)m_scan;
 
   std::map<std::string, THicCurrents> currents = powerTest->GetCurrents();

@@ -149,6 +149,7 @@ void TFifoAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TFifoAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     TFifoResultChip *chipResult = (TFifoResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
     if (!chipResult) std::cout << "WARNING: chipResult = 0" << std::endl;
