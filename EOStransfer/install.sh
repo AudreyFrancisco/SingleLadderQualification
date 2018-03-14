@@ -12,7 +12,7 @@ sudo ./EOSconfig.py
 rm /tmp/krblist
 echo " Finally setup the Cron Job task "
 echo " "
-./EOScreateCron.sh
+./EOScreateCronJob.sh
 echo " "
 echo " Installation Done !"
 

@@ -311,7 +311,7 @@ def generateTheEOStransferScript(ServiceAccount, LocalBasePath):
     file.write("     then\n")
     file.write("            echo \"$STOPDATE : Error to sync the remote repository $DBATTACHREMOTEPATH\" >> $LOGFILENAME\n")
     file.write("            echo \"$STOPDATE : Error to sync the remote repository $DBATTACHREMOTEPATH\" \n")
-    file.write("            SYNCATTEMPTS--\n")
+    file.write("            let \"SYNCATTEMPTS=$SYNCATTEMPTS-1\" \n")
     file.write("            sleep 10\n")
     file.write("     else\n")
     file.write("           echo \"Remote repository sync done. ($STARTDATE -> $STOPDATE)\" >> $LOGFILENAME\n")
