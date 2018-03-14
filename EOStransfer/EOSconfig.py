@@ -368,7 +368,7 @@ def main(argv):
 #    Service = ServiceAccount[cho -1] 
     myConf.SetItem("SITENAME", Site)
     myConf.SetItem("SERVICEACCOUNT", Service)
-    print ">>-> You are %s site. The related service account is  '%s' \n" % (Site, Service)
+    print ">>-> You are at %s site. The related service account is  '%s' \n" % (Site, Service)
     
 #    theMirrorBasePath = myConf.GetItem("SYNCBASEPATH") 
 #    local = inputTheLocalPath("Specify the base path of sync", theMirrorBasePath)
@@ -379,6 +379,7 @@ def main(argv):
     theAttempts = myConf.GetItem("SYNCATTEMPTS") 
     num = inputNumericField("The number of attempts to rsync :", int(theAttempts))
     myConf.SetItem("SYNCATTEMPTS", str(num))
+    print "/n"
     
     cho = getMenuChoice("Select the Activity :", TestsName, "Quit")
     if cho == 0:
