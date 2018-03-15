@@ -705,12 +705,14 @@ void MainWindow::scanLoop(TScan *myScan)
   catch (exception &ex) {
     std::cout << ex.what() << "is the thrown exception" << std::endl;
     fExceptionthrown = true;
+    fScanAbort       = true;
   }
 
   /* catch (string x) {
-      std::cout << "DGFDGDFGD>>" << x << std::endl;
-      fExceptionthrown = true;
-    }*/
+       std::cout << "DGFDGDFGD>>" << x << std::endl;
+       fExceptionthrown = true;
+       fScanAbort=true;
+     }*/
 }
 
 void MainWindow::popup(QString message)
@@ -903,16 +905,33 @@ void MainWindow::performtests()
       fExceptionthrown = false;
       fTestAgain       = false;
       if (fScanVector.at(i) == 0) {
-        fAnalysisVector.at(i)->Initialize();
-        std::thread analysisThread(&TScanAnalysis::Run, fAnalysisVector[i]);
+        std::thread analysisThread(&MainWindow::analysis, this, fAnalysisVector[i]);
         analysisThread.join();
-        fAnalysisVector.at(i)->Finalize();
+        try {
+          fAnalysisVector.at(i)->Finalize();
+        }
+        catch (exception &ex) {
+          std::cout << ex.what() << " is the thrown exception" << std::endl;
+          fExceptionthrown = true;
+          fScanAbort       = true;
+        }
         colorsinglescan(i);
       }
       else {
         std::thread scanThread(&MainWindow::scanLoop, this, fScanVector[i]);
-        scanThread.join();
+        // sleep(10);
 
+        std::thread analysisThread(&MainWindow::analysis, this, fAnalysisVector[i]);
+        scanThread.join();
+        analysisThread.join();
+        try {
+          fAnalysisVector.at(i)->Finalize();
+        }
+        catch (exception &ex) {
+          std::cout << ex.what() << " is the thrown exception" << std::endl;
+          fExceptionthrown = true;
+          fScanAbort       = true;
+        }
 
         if (fScanstatuslabels.at(i) != 0) {
           fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
@@ -920,6 +939,7 @@ void MainWindow::performtests()
           qApp->processEvents();
         }
         if (fExceptionthrown) {
+          fScanVector.at(i)->ClearHistoQue();
           notifyuser(i);
           if (fTestAgain) {
             TScanParameters *par;
@@ -930,17 +950,12 @@ void MainWindow::performtests()
           }
         }
 
-        else {
-          fAnalysisVector.at(i)->Initialize();
-          std::thread analysisThread(&TScanAnalysis::Run, fAnalysisVector[i]);
-          analysisThread.join();
-          fAnalysisVector.at(i)->Finalize();
-          if (fScanstatuslabels.at(i) != 0) {
-            fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
-            qApp->processEvents();
-          }
-          colorsinglescan(i);
+
+        if (fScanstatuslabels.at(i) != 0) {
+          fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
+          qApp->processEvents();
         }
+        colorsinglescan(i);
       }
 
       if (fExecution == false) return;
@@ -2372,4 +2387,26 @@ void MainWindow::stopscans()
   fExecution = false;
   fProgresswindow->close();
   delete fProgresswindow;
+}
+
+
+void MainWindow::analysis(TScanAnalysis *myanalysis)
+{
+  try {
+    myanalysis->Initialize();
+    myanalysis->Run();
+    // myanalysis->Finalize();
+    // throw string("SDFdsfsdfsdfsdfsfsdf");
+  }
+  catch (exception &ex) {
+    std::cout << ex.what() << "is the thrown exception" << std::endl;
+    fExceptionthrown = true;
+    fScanAbort       = true;
+  }
+
+  /*catch (string x) {
+     std::cout << "DGFDGDFGD>>" << x << std::endl;
+     fExceptionthrown = true;
+     fScanAbort=true;
+   }*/
 }

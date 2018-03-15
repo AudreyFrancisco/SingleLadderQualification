@@ -160,6 +160,7 @@ private:
   resultstorage *    fResultwindow;
   Databasefailure *  fDatabasefailure;
   void scanLoop(TScan *myScan);
+  void analysis(TScanAnalysis *myAnalysis);
   std::vector<TScan *>         fScanVector;
   std::vector<TScanAnalysis *> fAnalysisVector;
   TPowerBoard *                fPb;
