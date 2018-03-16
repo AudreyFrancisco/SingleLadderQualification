@@ -150,7 +150,8 @@ protected:
   bool GetPreviousActivity(string compName, ActivityDB::activityLong &act);
   int GetChildList(int id, std::vector<std::string> &childrenNames);
   int GetPreviousComponentType(std::string prevTestType);
-  int            GetComponentType();
+  int             GetComponentType();
+  TScanResultHic *FindHicResultForChip(common::TChipIndex chip);
   virtual string GetPreviousTestType() = 0;
   void DoCut(THicClassification &hicClass, THicClassification failClass, int value, string cutName,
              bool minCut = false);

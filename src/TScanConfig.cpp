@@ -109,6 +109,11 @@ TScanConfig::TScanConfig()
   m_threshMaxNoiseOB            = THRESH_MAXNOISE_OB;
   m_threshMaxNoiseIB            = THRESH_MAXNOISE_IB;
 
+  m_dctrlMinAmpGreen   = DCTRL_MINAMP_GREEN;
+  m_dctrlMinSlopeGreen = DCTRL_MINSLOPE_GREEN;
+  m_dctrlMaxRiseGreen  = DCTRL_MAXRISE_GREEN;
+  m_dctrlMaxFallGreen  = DCTRL_MAXFALL_GREEN;
+
   m_enduranceSlices            = ENDURANCE_SLICES;
   m_enduranceCycles            = ENDURANCE_CYCLES;
   m_enduranceTriggers          = ENDURANCE_TRIGGERS;
@@ -211,6 +216,11 @@ void TScanConfig::InitParamMap()
   fSettings["THRESH_MAXDEAD_HIC_ORANGE_IB"] = &m_threshMaxDeadPerHicOrangeIB;
   fSettings["THRESH_MAXNOISE_OB"]           = &m_threshMaxNoiseOB;
   fSettings["THRESH_MAXNOISE_IB"]           = &m_threshMaxNoiseIB;
+
+  fSettings["DCTRLMINAMPGREEN"]   = &m_dctrlMinAmpGreen;
+  fSettings["DCTRLMINSLOPEGREEN"] = &m_dctrlMinSlopeGreen;
+  fSettings["DCTRLMAXRISEGREEN"]  = &m_dctrlMaxRiseGreen;
+  fSettings["DCTRLMAXFALLGREEN"]  = &m_dctrlMaxFallGreen;
 
   fSettings["CAL_VPULSEL"]  = &m_calVpulsel;
   fSettings["TARGETTHRESH"] = &m_targetThresh;

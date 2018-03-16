@@ -125,6 +125,11 @@ namespace ScanConfig {
   const int THRESH_MAXDEAD_HIC_ORANGE_OB = 71680;
   const int THRESH_MAXDEAD_HIC_ORANGE_IB = 46080;
 
+  const int DCTRL_MINAMP_GREEN   = 500; // in mV
+  const int DCTRL_MINSLOPE_GREEN = 25;  // in mV / DAC
+  const int DCTRL_MAXRISE_GREEN  = 10;  // in ns
+  const int DCTRL_MAXFALL_GREEN  = 10;
+
   const int   SPEEDY           = 1; // Use slow fit if 0, differentiate->mean if 1.
   const int   RAWDATA          = 0;
   const int   CAL_VPULSEL      = 160; // VPULSEH assumed 170.  Used for ITHR and VCASN scans.
@@ -234,6 +239,10 @@ private:
   int       m_threshMaxDeadPerHicOrangeIB;
   int       m_threshMaxNoiseIB;
   int       m_threshMaxNoiseOB;
+  int       m_dctrlMinAmpGreen;
+  int       m_dctrlMinSlopeGreen;
+  int       m_dctrlMaxRiseGreen;
+  int       m_dctrlMaxFallGreen;
   int       m_calVpulsel;
   int       m_targetThresh;
   int       m_nominal;

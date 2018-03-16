@@ -14,6 +14,22 @@ class TDctrlResultChip : public TScanResultChip {
   friend class TDctrlAnalysis;
 
 private:
+  bool  slave;
+  float m_pos;
+  float b_pos;
+  float chisq_pos;
+  float corr_pos;
+  float maxAmp_pos;
+  float maxRise_pos;
+  float maxFall_pos;
+  float m_neg;
+  float b_neg;
+  float chisq_neg;
+  float corr_neg;
+  float maxAmp_neg;
+  float maxRise_neg;
+  float maxFall_neg;
+
 public:
   TDctrlResultChip() : TScanResultChip(){};
   void WriteToFile(FILE *fp);
@@ -24,6 +40,13 @@ class TDctrlResultHic : public TScanResultHic {
   friend class TDctrlAnalysis;
 
 private:
+  float worst_slope;
+  float worst_maxAmp;
+  float worst_chisq;
+  float worst_corr;
+  float worst_rise;
+  float worst_fall;
+
 public:
   TDctrlResultHic() : TScanResultHic(){};
   void WriteToFile(FILE *fp);
@@ -43,6 +66,11 @@ private:
   void               WriteResult();
   void               FillVariableList();
   THicClassification GetClassification(TDctrlResultHic *result);
+  bool ChipIsSlave(common::TChipIndex idx);
+  float Max(float a, float b, float c);
+  float Min(float a, float b, float c);
+  void Fit(std::vector<float> x, std::vector<float> y, float &m, float &b, float &corr,
+           float &chisq);
 
 protected:
   TScanResultChip *GetChipResult()

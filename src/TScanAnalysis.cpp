@@ -138,6 +138,18 @@ void TScanAnalysis::CreateHicResults()
   }
 }
 
+
+TScanResultHic *TScanAnalysis::FindHicResultForChip(common::TChipIndex chip)
+{
+  for (unsigned int i = 0; i < m_hics.size(); i++) {
+    if (m_hics.at(i)->ContainsChip(chip)) {
+      return m_result->GetHicResult(m_hics.at(i)->GetDbId());
+    }
+  }
+  return 0;
+}
+
+
 void TScanAnalysis::Run()
 {
   m_started = true;
