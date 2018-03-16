@@ -46,9 +46,11 @@ private:
   float worst_corr;
   float worst_rise;
   float worst_fall;
+  char  m_scanFile[200];
 
 public:
   TDctrlResultHic() : TScanResultHic(){};
+  void SetScanFile(const char *fName) { strncpy(m_scanFile, fName, sizeof(m_scanFile)); };
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
 };

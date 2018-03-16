@@ -94,7 +94,6 @@ bool TDctrlAnalysis::ChipIsSlave(common::TChipIndex idx)
 
 void TDctrlAnalysis::WriteResult()
 {
-  std::cout << "In WriteResult" << std::endl;
   char fName[200];
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
@@ -185,6 +184,8 @@ void TDctrlAnalysis::AnalyseHisto(TScanHisto *histo)
     }
 
     FILE *fp = fopen(fName, "a");
+    hicResult->SetScanFile(fName);
+
     if (ChipIsSlave(m_chipList.at(ichip))) {
       if (chipResult) chipResult->slave = true;
       continue;
@@ -192,15 +193,14 @@ void TDctrlAnalysis::AnalyseHisto(TScanHisto *histo)
 
     // loop over all driver settings, read data from histogram
     for (int i = 0; i < 16; i++) {
-      float peak_p      = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::peak_p));
-      float peak_n      = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::peak_n));
-      float amp_p       = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::amp_p));
-      float amp_n       = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::amp_n));
-      float rtim_p      = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::rtim_p));
-      float rtim_n      = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::rtim_n));
-      float ftim_p      = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::ftim_p));
-      float ftim_n      = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::ftim_n));
-      if (i > 12) amp_p = amp_pos.back(); // test for bad chip
+      float peak_p = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::peak_p));
+      float peak_n = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::peak_n));
+      float amp_p  = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::amp_p));
+      float amp_n  = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::amp_n));
+      float rtim_p = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::rtim_p));
+      float rtim_n = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::rtim_n));
+      float ftim_p = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::ftim_p));
+      float ftim_n = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::ftim_n));
 
       fprintf(fp, "%d %d %f %f %f %f %e %e %e %e\n", m_chipList.at(ichip).chipId & 0xf, i, peak_p,
               peak_n, amp_p, amp_n, rtim_p, rtim_n, ftim_p, ftim_n);
@@ -277,9 +277,15 @@ void TDctrlAnalysis::Finalize()
           Max(hicResult->worst_rise, chipResult->maxRise_pos, chipResult->maxRise_neg);
       hicResult->worst_fall =
           Max(hicResult->worst_fall, chipResult->maxFall_pos, chipResult->maxFall_neg);
-      hicResult->SetValidity(true);
       // TODO: Set here the final variables in hic Result, determine hic classification
     }
+  }
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    TDctrlResultHic *hicResult =
+        (TDctrlResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
+    hicResult->m_class = GetClassification(hicResult);
+    hicResult->SetValidity(true);
   }
 
   WriteResult();
@@ -305,6 +311,15 @@ void TDctrlResultHic::WriteToFile(FILE *fp)
 
   fprintf(fp, "\nNumber of chips: %d\n\n", (int)m_chipResults.size());
 
+  fprintf(fp, "Worst maximum amplitude: %f\n", worst_maxAmp);
+  fprintf(fp, "Worst slope:             %f\n", worst_slope);
+  fprintf(fp, "Worst chi square:        %f\n", worst_chisq);
+  fprintf(fp, "Worst correlation:       %f\n", worst_corr);
+  fprintf(fp, "Worst rise time:         %e\n", worst_rise);
+  fprintf(fp, "Worst fall time:         %e\n", worst_fall);
+
+  fprintf(fp, "\nScan file: %s\n", m_scanFile);
+
   std::map<int, TScanResultChip *>::iterator it;
 
   for (it = m_chipResults.begin(); it != m_chipResults.end(); it++) {
@@ -315,16 +330,24 @@ void TDctrlResultHic::WriteToFile(FILE *fp)
 
 void TDctrlResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
-  std::string fileName, remoteName;
+  std::string fileName, scanName;
+  std::size_t slash;
 
   // to be updated, probably divide according to tested device (IB / OB HIC)
-  DbAddParameter(db, activity, string("Slope master 0"), (float)0);
+  DbAddParameter(db, activity, string("DCTRL worst max amplitude"), worst_maxAmp);
+  DbAddParameter(db, activity, string("DCTRL worst slope"), worst_slope);
+  DbAddParameter(db, activity, string("DCTRL worst chi square"), worst_chisq);
+  DbAddParameter(db, activity, string("DCTRL worst correlation"), worst_corr);
+  DbAddParameter(db, activity, string("DCTRL worst rise time"), worst_rise);
+  DbAddParameter(db, activity, string("DCTRL worst fall time"), worst_fall);
 
-  std::size_t slash = string(m_resultFile).find_last_of("/");
-  fileName          = string(m_resultFile).substr(slash + 1); // strip path
-  std::size_t point = fileName.find_last_of(".");
-  remoteName        = fileName.substr(0, point) + ".dat";
-  DbAddAttachment(db, activity, attachResult, string(m_resultFile), remoteName);
+  slash    = string(m_resultFile).find_last_of("/");
+  fileName = string(m_resultFile).substr(slash + 1); // strip path
+  slash    = string(m_scanFile).find_last_of("/");
+  scanName = string(m_scanFile).substr(slash + 1); // strip path
+
+  DbAddAttachment(db, activity, attachResult, string(m_resultFile), fileName);
+  DbAddAttachment(db, activity, attachResult, string(m_scanFile), scanName);
 }
 
 
