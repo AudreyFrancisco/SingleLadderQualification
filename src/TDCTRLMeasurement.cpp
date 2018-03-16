@@ -23,7 +23,7 @@ TDctrlMeasurement::TDctrlMeasurement(TScanConfig *config, std::vector<TAlpide *>
   // innermost loop: loop over all possible driver settings
   m_start[0] = 0;
   m_step[0]  = 1;
-  m_stop[0]  = 15;
+  m_stop[0]  = 16;
 
   CreateScanHisto();
 }
@@ -62,7 +62,7 @@ void TDctrlMeasurement::InitScope()
   scope.set_trigger_ext();               // Set externally triggered
   scope.set_trigger_slope_rising(false); // Trigger on rising edge
   scope.set_ext_trigger_level(
-      -0.5); // Set trigger level (negative as we are using a NIM signal with a terminator)
+      -0.3); // Set trigger level (negative as we are using a NIM signal with a terminator)
   scope.set_trigger_position(1.1e-6); // Move center of screen to a known good position for pulse
 
   // Measure
@@ -82,7 +82,8 @@ void TDctrlMeasurement::Init()
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+    TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
+    if (pb) pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 
   for (unsigned int i = 0; i < m_chips.size(); i++) {
@@ -90,7 +91,8 @@ void TDctrlMeasurement::Init()
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+    TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
+    if (pb) pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 }
 
@@ -250,30 +252,30 @@ void TDctrlMeasurement::Execute()
     if (m_testChip->GetConfig()->GetCtrInt() == 0) {
       scope.en_measure_ch(3); // Set measurement to read from scope channel 3
       scope.get_meas();       // Retrieve measuremts
-      m_histo->Set(idx, m_value[1], peak_p, scope.ch3.peak); // Update plots
-      m_histo->Set(idx, m_value[1], amp_p, scope.ch3.amp);
-      m_histo->Set(idx, m_value[1], rtim_p, scope.ch3.rtim);
-      m_histo->Set(idx, m_value[1], ftim_p, scope.ch3.ftim);
+      m_histo->Set(idx, m_value[0], peak_p, scope.ch3.peak); // Update plots
+      m_histo->Set(idx, m_value[0], amp_p, scope.ch3.amp);
+      m_histo->Set(idx, m_value[0], rtim_p, scope.ch3.rtim);
+      m_histo->Set(idx, m_value[0], ftim_p, scope.ch3.ftim);
       scope.en_measure_ch(4);
       scope.get_meas();
-      m_histo->Set(idx, m_value[1], peak_n, scope.ch4.peak);
-      m_histo->Set(idx, m_value[1], amp_n, scope.ch4.amp);
-      m_histo->Set(idx, m_value[1], rtim_n, scope.ch4.rtim);
-      m_histo->Set(idx, m_value[1], ftim_n, scope.ch4.ftim);
+      m_histo->Set(idx, m_value[0], peak_n, scope.ch4.peak);
+      m_histo->Set(idx, m_value[0], amp_n, scope.ch4.amp);
+      m_histo->Set(idx, m_value[0], rtim_n, scope.ch4.rtim);
+      m_histo->Set(idx, m_value[0], ftim_n, scope.ch4.ftim);
     }
     else if (m_testChip->GetConfig()->GetCtrInt() == 1) {
       scope.en_measure_ch(1);
       scope.get_meas();
-      m_histo->Set(idx, m_value[1], peak_p, scope.ch1.peak);
-      m_histo->Set(idx, m_value[1], amp_p, scope.ch1.amp);
-      m_histo->Set(idx, m_value[1], rtim_p, scope.ch1.rtim);
-      m_histo->Set(idx, m_value[1], ftim_p, scope.ch1.ftim);
+      m_histo->Set(idx, m_value[0], peak_p, scope.ch1.peak);
+      m_histo->Set(idx, m_value[0], amp_p, scope.ch1.amp);
+      m_histo->Set(idx, m_value[0], rtim_p, scope.ch1.rtim);
+      m_histo->Set(idx, m_value[0], ftim_p, scope.ch1.ftim);
       scope.en_measure_ch(2);
       scope.get_meas();
-      m_histo->Set(idx, m_value[1], peak_n, scope.ch2.peak);
-      m_histo->Set(idx, m_value[1], amp_n, scope.ch2.amp);
-      m_histo->Set(idx, m_value[1], rtim_n, scope.ch2.rtim);
-      m_histo->Set(idx, m_value[1], ftim_n, scope.ch2.ftim);
+      m_histo->Set(idx, m_value[0], peak_n, scope.ch2.peak);
+      m_histo->Set(idx, m_value[0], amp_n, scope.ch2.amp);
+      m_histo->Set(idx, m_value[0], rtim_n, scope.ch2.rtim);
+      m_histo->Set(idx, m_value[0], ftim_n, scope.ch2.ftim);
     }
 
     // here only to avoid error "idx set but not used"

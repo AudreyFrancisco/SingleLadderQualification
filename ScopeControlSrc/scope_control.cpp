@@ -127,10 +127,11 @@ void scope_control::write(std::string data)
 
 void scope_control::write_cmd(std::string data)
 {
+  debug_print("Write cmd");
   scope_control::write("*CLS;*ESE 1\n");
   scope_control::write(data);
-  scope_control::write("*OPC;*ESR?\n");
   for (int i = 0; i < 4; i++) {
+    scope_control::write("*OPC;*ESR?\n");
     std::string val = scope_control::read();
     if (std::stoi(val) == 1)
       return;
@@ -296,6 +297,7 @@ void scope_control::set_ext_trigger_level(double level)
 
 void scope_control::single_capture()
 {
+  debug_print("Single capture");
   scope_control::write_cmd("SING\n"); // Single capture
 }
 
@@ -322,6 +324,7 @@ void scope_control::en_measure_ch(uint8_t ch)
 
 void scope_control::setup_measure()
 {
+  scope_control::write_cmd("REFL:REL:MODE TWEN\n");
   scope_control::write_cmd("MEAS1:MAIN PEAK\n"); // Peak to peak
   scope_control::write_cmd("MEAS2:MAIN AMPL\n"); // Amplitude
   scope_control::write_cmd("MEAS3:MAIN RTIM\n"); // Risetime

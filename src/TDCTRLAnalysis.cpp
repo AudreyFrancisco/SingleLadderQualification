@@ -1,6 +1,7 @@
 #include "TDCTRLAnalysis.h"
 #include "AlpideConfig.h"
 #include "DBHelpers.h"
+#include "TDCTRLMeasurement.h"
 #include "TFifoTest.h"
 #include <iostream>
 #include <string>
@@ -99,13 +100,27 @@ void TDctrlAnalysis::WriteResult()
 
 void TDctrlAnalysis::AnalyseHisto(TScanHisto *histo)
 {
+  FILE *fp = fopen("DCtrlMeasurement.dat", "w");
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     // add here the analysis of the single histos
     // access values like:
 
-    float amplitude = ((*histo)(m_chipList.at(ichip), 10));
-    std::cout << "Amplitude at driver setting 10: " << amplitude << std::endl;
+
+    if (m_chipList.at(ichip).chipId & 0x7) continue;
+    for (int i = 0; i < 16; i++) {
+      float peak_p = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::peak_p));
+      float peak_n = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::peak_n));
+      float amp_p  = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::amp_p));
+      float amp_n  = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::amp_n));
+      float rtim_p = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::rtim_p));
+      float rtim_n = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::rtim_n));
+      float ftim_p = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::ftim_p));
+      float ftim_n = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::ftim_n));
+      fprintf(fp, "%d %d %f %f %f %f %e %e %e %e\n", m_chipList.at(ichip).chipId & 0xf, i, peak_p,
+              peak_n, amp_p, amp_n, rtim_p, rtim_n, ftim_p, ftim_n);
+    }
   }
+  fclose(fp);
 }
 
 void TDctrlAnalysis::Finalize()
