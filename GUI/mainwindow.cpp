@@ -251,16 +251,17 @@ void MainWindow::open()
     }
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
     fConfig->GetScanConfig()->SetUseDataPath(true);
-    fPb               = fHICs.at(0)->GetPowerBoard();
-    fPbconfig         = fPb->GetConfigurationHandler();
-    fPbnumberofmodule = fHICs.at(0)->GetPbMod();
+    fPb = fHICs.at(0)->GetPowerBoard();
+    if (fPb) {
+      fPbconfig         = fPb->GetConfigurationHandler();
+      fPbnumberofmodule = fHICs.at(0)->GetPbMod();
 
-    if (!fPb->IsCalibrated(fPbnumberofmodule)) {
-      std::cout << "its not calibrated" << std::endl;
-      fPbcfgcheck = new checkpbconfig(this);
-      fPbcfgcheck->exec();
+      if (!fPb->IsCalibrated(fPbnumberofmodule)) {
+        std::cout << "its not calibrated" << std::endl;
+        fPbcfgcheck = new checkpbconfig(this);
+        fPbcfgcheck->exec();
+      }
     }
-
     fProperconfig = true;
   }
   catch (exception &e) {
@@ -832,8 +833,8 @@ void MainWindow::fillingOBvectors()
 {
 
   ClearVectors();
-
   AddScan(STPower);
+  if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
@@ -1457,6 +1458,7 @@ void MainWindow::fillingreceptionscans()
   ClearVectors();
 
   AddScan(STPower);
+  if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetMlvdsStrength(5);
   AddScan(STFifo);
@@ -2026,6 +2028,7 @@ void MainWindow::fillingibvectors()
 {
   ClearVectors();
   AddScan(STPower);
+  // if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   // Do this scan immediately after power as it sometimes crashes
   // IBParameterScan();
   // FIFO and digital scan at three different supply voltages
