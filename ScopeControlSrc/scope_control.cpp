@@ -1,5 +1,6 @@
 #include "scope_control.h"
 #include <serial/serial.h>
+#include <stdexcept>
 #include <string>
 #ifdef _WIN32
 #include <windows.h>
@@ -96,8 +97,9 @@ bool scope_control::check_model()
   char text[100];
   scope_control::get_model();
   if (model.find("RTB2004") == std::string::npos) {
-    snprintf(text, sizeof(text), "Untested model %s.\n", model.c_str());
-    throw_ex(text);
+    snprintf(text, sizeof(text), "Untested model %s. power cycle scope before repeating test.\n",
+             model.c_str());
+    throw std::runtime_error(text);
     return false;
   }
   return true;

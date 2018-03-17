@@ -109,6 +109,7 @@ TScanConfig::TScanConfig()
   m_threshMaxNoiseOB            = THRESH_MAXNOISE_OB;
   m_threshMaxNoiseIB            = THRESH_MAXNOISE_IB;
 
+  m_testDctrl          = TEST_DCTRL;
   m_dctrlMinAmpGreen   = DCTRL_MINAMP_GREEN;
   m_dctrlMinSlopeGreen = DCTRL_MINSLOPE_GREEN;
   m_dctrlMaxRiseGreen  = DCTRL_MAXRISE_GREEN;
@@ -217,6 +218,7 @@ void TScanConfig::InitParamMap()
   fSettings["THRESH_MAXNOISE_OB"]           = &m_threshMaxNoiseOB;
   fSettings["THRESH_MAXNOISE_IB"]           = &m_threshMaxNoiseIB;
 
+  fSettings["TESTDCTRL"]          = &m_testDctrl;
   fSettings["DCTRLMINAMPGREEN"]   = &m_dctrlMinAmpGreen;
   fSettings["DCTRLMINSLOPEGREEN"] = &m_dctrlMinSlopeGreen;
   fSettings["DCTRLMAXRISEGREEN"]  = &m_dctrlMaxRiseGreen;
