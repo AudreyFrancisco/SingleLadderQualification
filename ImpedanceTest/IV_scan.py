@@ -198,16 +198,10 @@ def saveToDB(HIC_name, test_ok, resistances):
        elif channel==1:
         parameter_name = 'OB-HIC AVDD impedance'
        elif channel==2:
-        parameter_name = 'OB-HIC BIAS impedance'
+        parameter_name = 'OB-HIC BIAS impedance'   
+        
+       actResult = itsDB.ParameterOverwrite(actID, parameter_name, resistances[channel])
     
-       isGood, Value = itsDB.ParameterRead(actID, parameter_name)   
-    
-       if isGood:
-        # This is a change
-           actResult = itsDB.ParameterChange(actID,parameter_name, resistances[channel])
-       else: 
-        # this is a Creation
-           actResult = itsDB.ParameterWrite(actID,parameter_name, resistances[channel])
        if not actResult:
            lg.error("Error writing parameter %s!" % (parameter_name))
            return 1
