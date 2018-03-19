@@ -23,7 +23,7 @@ import copy
 from Common import *
 from pty import CHILD
 
-#    Version 2.2 - 08/03/2018 - A.franco - INFN BARI ITALY
+#    Version 2.4 - 19/03/2018 - A.franco - INFN BARI ITALY
 
 
 # ---------------------------------------------
@@ -191,6 +191,31 @@ class DB:
             for res in self.ActivityType.Result.ActivityTypeResultFull:
                 reslist.append(res.Name)
             return(reslist)
+
+
+    # --- Create one Component
+    # 
+    #   compId     :=  A string that contains the ComponentId
+    #   Return     :=   True or False
+    #
+    def CreateComponent(self, compTypeID, compID, suppID, description, lotid, package, user ):
+
+        compo = self.DB.service.ComponentCreate(
+                                    componentTypeID    = compTypeID,
+                                    componentID        = compID,
+                                    supplierComponentID= suppID, 
+                                    description        = description,
+                                    lotID              = lotid,
+                                    packageID          = package,
+                                    userID             = user
+                                    )
+
+        if compo.ErrorCode != 0:
+            self.lg.debug("Error to create Component: %s -> %s !" % (compID,compo.ErrorMessage) )
+            return(False)
+
+        self.lg.debug("Component: %s (%d) CREATED !" % (compID,compo.ID) )
+        return(True)
  
     # --- Read one Component
     # 
@@ -655,6 +680,32 @@ class DB:
         self.lg.debug("Activity of type %d changed !" % (ActTypeId) )
         return(activityCreateResult)
 
+    # -- Create one activity without Component Assignment
+    #
+    #   activity     :=  The name of the Activity Type
+    #   actName     :=  The distinguish name of the Activity
+    #   res     :=  The string containing the result
+    #
+    #   Return     :=  An Activity Result object
+    def CreateActivity(self, compId, activity, actName, res="OK" ):
+        
+        # Get the Activity spec.
+        if not self.AquireActivityType(activity):
+            return(ActResult(9,"Activity not enabled for the specified location"))
+       
+        # prepare the common data 
+        te=datetime.now().strftime(self.DATEMASK)
+        resultID = self._GetTheResultID(res)
+        actTypId = self.ActivityType.ID
+        
+        # Create the activity 
+        actCreRes, ts = self._CreateOrOpenAnActivity(compo.ComponentID, actTypId, 0, actName)
+        if actCreRes.ErrorCode != 0:
+            self.lg.warning("Error creating the activity: %s. (%s)" % (actName, actCreRes.ErrorMessage))
+            return actCreRes  
+      
+        self.lg.debug("Activity ID=%d created and manteined Open ! (%s)" % (actCreRes.ID, actName ))            
+        return actCreRes
 
     # -- Create one activity
     #
@@ -778,19 +829,41 @@ class DB:
                 return(False)
         return(True)    
         
- 
     # -- Assign a Component to an Activity
     #
-    #   ComponetID     :=  The ComponentID
-    #   ActivityType   :=  The Name of the Activity Type
-    #   Return     :=  Activity result object
+    #   compId     :=  A string that contains the Component key (Name)
+    #   activityID     :=  The ID of the Activity 
     #
-    def AssignComponentToActivity(self, compId, ActivityID, ActTypCompType=-999 ):
+    #   Return     :=  An Activity Result object
+    def AssignComponentToActivity(self,compId, activityID):
         # Read the component
         compo = self.DB.service.ComponentReadOne(ID=-999, componentID=compId)
         if compo is None:
             self.lg.warning("Component Not found ! (%s)" % compId ) 
             return(ActResult(-1,"Component not found"))
+    
+        InCompType, OutCompType = self._GetInOutComponentFromActivity(compo.ComponentType.ID)
+        self._AssignComponentToActivity(compo.ID, activityID, InCompType[0].ID )
+        self._AssignComponentToActivity(compo.ID, activityID, OutCompType[0].ID )
+
+        self.lg.debug("Component %s assigned to activity ID=%d !" % (compId,activityID) ) 
+        return(ActResult(0,"Component assigned",activityID))
+
+ 
+    # -- Assign a Component to an Activity
+    #
+    #   compID     :=  The ComponentID
+    #   activityID     :=  The ID of the Activity 
+    #   ActTypCompType   :=  The ID of the Activity Type Component Type
+    #   Return     :=  Activity result object
+    #
+    def AssignComponentToActivityByType(self, compId, ActivityID, ActTypCompType=-999 ):
+        # Read the component
+        compo = self.DB.service.ComponentReadOne(ID=-999, componentID=compId)
+        if compo is None:
+            self.lg.warning("Component Not found ! (%s)" % compId ) 
+            return(ActResult(-1,"Component not found"))
+        
         activity = self.GetActivity(ActivityID)
         if activity is None:
             self.lg.warning("Activity Not found ! (%d)" % ActivityID ) 
@@ -801,7 +874,6 @@ class DB:
         else:
             self.lg.warning("Failed to assign Componet  %s to Activity %d !" % (compId, ActivityID )  ) 
             return(ActResult(-1,"Failed to assign Componet to Activity !"))
-        
         
     # ********************
     #
