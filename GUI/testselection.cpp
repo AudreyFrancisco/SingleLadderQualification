@@ -29,7 +29,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("OB HIC Reception Test", OBReception);
   ui->typetest->addItem("OB HIC Fast Power Test", OBPower);
   ui->typetest->addItem("OL-HS-Upper assembly", OBHalfStaveOL);
-  ui->typetest->addItem("IB DCTRL Test", IBDctrl);
+  ui->typetest->addItem("IB HIC DCTRL Test", IBDctrl);
   // ui->typetest->addItem("OB Half-Stave Test", OBHalfStaveML);
   // ui->typetest->addItem("OB Stave Test", OBStave);
   // ui->typetest->addItem("IB Stave Test", IBStave);
