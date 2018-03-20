@@ -23,7 +23,7 @@ import copy
 from Common import *
 from pty import CHILD
 
-#    Version 2.4 - 19/03/2018 - A.franco - INFN BARI ITALY
+#    Version 2.5 - 20/03/2018 - A.franco - INFN BARI ITALY
 
 
 # ---------------------------------------------
@@ -231,10 +231,9 @@ class DB:
         
     # --- Remove one Component
     # 
-    #    *** DISABLED ***
     # 
     #   compId     :=  A string that contains the ComponentId
-    #   comptypeId     :=  the ID of athe component type
+    #   comptypeId     :=  the ID of the component type
     #   Return     :=   True/False
     #
     def RemoveComponent(self, compId, comptypeId = -999):
@@ -716,12 +715,15 @@ class DB:
     #   close     :=  The state afer the creation True ;= close the activity
     #
     #   Return     :=  An Activity Result object
-    def CreateCompActivity(self, compId, activity, actTag, res="OK", close=False ):
+    def CreateCompActivity(self, compId, activity, actTag, res="OK", close=False, withoutComponent=False ):
         # Read the component
         compo = self.DB.service.ComponentReadOne(ID=-999, componentID=compId)
         if compo is None:
-            self.lg.warning("Component Not found ! (%s)" % compId ) 
-            return(ActResult(-1,"Component not found"))
+            if withoutComponent :
+                return( self.CreateActivity(compId, activity, actTag, res) )
+            else:
+                self.lg.warning("Component Not found ! (%s)" % compId ) 
+                return(ActResult(-1,"Component not found"))
         
         # Get the Activity spec.
         if not self.AquireActivityType(activity):
