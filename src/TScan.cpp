@@ -12,6 +12,7 @@
 
 bool fScanAbort;
 bool fScanAbortAll;
+bool fTimeLimitReached;
 
 TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
              std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
@@ -39,7 +40,9 @@ TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic
 
 void TScan::Init()
 {
-  fScanAbort = false;
+  fScanAbort        = false;
+  fTimeLimitReached = false;
+
   strcpy(m_state, "Running");
   std::cout << std::endl
             << std::endl
@@ -202,6 +205,7 @@ bool TScan::Loop(int loopIndex)
 {
   if (fScanAbort) return false; // check for abort flags first
   if (fScanAbortAll) return false;
+  if (fTimeLimitReached) return false;
 
   if ((m_step[loopIndex] > 0) && (m_value[loopIndex] < m_stop[loopIndex]))
     return true; // limit check for positive steps

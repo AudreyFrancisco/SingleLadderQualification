@@ -16,8 +16,10 @@
 const int MAXLOOPLEVEL = 3;
 const int MAXBOARDS    = 2;
 
-extern bool fScanAbort;    // fScanAbort stops current scan (set false in Init)
-extern bool fScanAbortAll; // fScanAbortAll stops all scans (set false in constructor)
+extern bool fScanAbort;        // fScanAbort stops current scan (set false in Init)
+extern bool fScanAbortAll;     // fScanAbortAll stops all scans (set false in constructor)
+extern bool fTimeLimitReached; // stops current scan but still lets the analysis finish; used for
+                               // endurance test
 
 typedef struct {
   int nEnabled;

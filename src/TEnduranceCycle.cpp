@@ -250,7 +250,7 @@ void TEnduranceCycle::Next(int loopIndex)
 
     time(&timeNow);
     if (difftime(timeNow, m_startTime) > ((TCycleParameters *)m_parameters)->timeLimit * 3600) {
-      fScanAbort = true;
+      fTimeLimitReached = true;
     }
   }
   TScan::Next(loopIndex);
