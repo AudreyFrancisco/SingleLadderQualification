@@ -19,7 +19,8 @@ typedef enum {
   IBQualification,
   IBEndurance,
   IBStave,
-  IBStaveEndurance
+  IBStaveEndurance,
+  IBDctrl
 } TTestType;
 
 namespace ScanConfig {

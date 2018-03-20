@@ -172,7 +172,7 @@ void MainWindow::open()
       fNumberofscan == OBReception) {
     fileName = "Config.cfg";
   }
-  else if (fNumberofscan == IBQualification) {
+  else if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl) {
     fileName = "Configib.cfg";
   }
   else if (fNumberofscan == OBPower) {
@@ -1005,6 +1005,9 @@ void MainWindow::applytests()
   if (fNumberofscan == OBHalfStaveOL) {
     fillingHSscans();
   }
+  if (fNumberofscan == IBDctrl) {
+    fillingDctrl();
+  }
   qApp->processEvents();
   std::cout << "the size of the scan vector is: " << fScanVector.size() << std::endl;
 
@@ -1228,6 +1231,8 @@ string MainWindow::GetTestFolder()
     return string("OBReception");
   case OBPower:
     return string("OBFastPower");
+  case IBDctrl:
+    return string("IBDtcrl");
   default:
     return string("Unknown");
   }
@@ -1248,6 +1253,8 @@ TTestType MainWindow::GetTestType()
     return IBEndurance;
   case OBReception:
     return OBReception;
+  case IBDctrl:
+    return IBDctrl;
   default:
     return OBQualification;
   }
@@ -1503,7 +1510,8 @@ void MainWindow::locationcombo()
       fNumberofscan == OBReception || fNumberofscan == OBPower) {
     fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
   }
-  else if (fNumberofscan == IBQualification || fNumberofscan == IBEndurance) {
+  else if (fNumberofscan == IBQualification || fNumberofscan == IBEndurance ||
+           fNumberofscan == IBDctrl) {
     fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Inner Barrel HIC Module");
   }
   else if (fNumberofscan == OBHalfStaveOL) {
@@ -2352,7 +2360,7 @@ void MainWindow::attachConfigFile(ActivityDB::activity &activity)
       fNumberofscan == OBEndurance) {
     DbAddAttachment(fDB, activity, attachConfig, string("Config.cfg"), string("Config.cfg"));
   }
-  else if (fNumberofscan == IBQualification) {
+  else if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl) {
     DbAddAttachment(fDB, activity, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
   }
   else if (fNumberofscan == OBPower) {
@@ -2412,4 +2420,11 @@ void MainWindow::analysis(TScanAnalysis *myanalysis)
      fExceptionthrown = true;
      fScanAbort=true;
    }*/
+}
+
+
+void MainWindow::fillingDctrl()
+{
+  ClearVectors();
+  AddScan(STDctrl);
 }
