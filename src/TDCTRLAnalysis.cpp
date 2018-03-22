@@ -300,6 +300,8 @@ THicClassification TDctrlAnalysis::GetClassification(TDctrlResultHic *result)
   DoCut(returnValue, CLASS_ORANGE, result->worst_slope * 1000, "DCTRLMINSLOPEGREEN", true);
   DoCut(returnValue, CLASS_ORANGE, result->worst_rise * 1e9, "DCTRLMAXRISEGREEN");
   DoCut(returnValue, CLASS_ORANGE, result->worst_fall * 1e9, "DCTRLMAXFALLGREEN");
+  std::cout << "DCTRL Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
   return returnValue;
 }
 

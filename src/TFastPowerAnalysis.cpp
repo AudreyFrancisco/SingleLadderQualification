@@ -57,7 +57,10 @@ void TFastPowerAnalysis::Finalize()
 
 THicClassification TFastPowerAnalysis::GetClassification(THicCurrents currents)
 {
-  if (currents.trip) return CLASS_RED;
+  if (currents.trip) {
+    std::cout << "Fast power analysis: HIC classified red due to trip" << std::endl;
+    return CLASS_RED;
+  }
   if (currents.hicType == HIC_OB)
     return GetClassificationOB(currents);
   else {
@@ -68,23 +71,26 @@ THicClassification TFastPowerAnalysis::GetClassification(THicCurrents currents)
 
 THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents currents)
 {
-  if ((currents.iddaSwitchon * 1000 < m_config->GetParamValue("MINIDDA_OB")) ||
-      (currents.idddSwitchon * 1000 < m_config->GetParamValue("MINIDDD_OB")))
-    return CLASS_RED;
-  if ((currents.iddaSwitchon * 1000 > m_config->GetParamValue("MAXIDDA_OB")) ||
-      (currents.idddSwitchon * 1000 > m_config->GetParamValue("MAXIDDD_ORANGE_OB")))
-    return CLASS_RED;
-  if (currents.idddSwitchon * 1000 > m_config->GetParamValue("MAXIDDD_GREEN_OB"))
-    return CLASS_ORANGE;
+  THicClassification returnValue = CLASS_GREEN;
+
+  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", true);
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", true);
+
+  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MAXIDDA_OB");
+  DoCut(returnValue, CLASS_ORANGE, currents.idddSwitchon * 1000, "MAXIDDD_GREEN_OB");
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MAXIDDD_ORANGE_OB");
 
   // check for absolute value at 3V and for margin from breakthrough
-  if (currents.ibias[30] > m_config->GetParamValue("MAXBIAS_3V_IB")) return CLASS_ORANGE;
+  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_IB");
   // add 1 for the case where I(3V) = 0
-  if ((currents.ibias[40] > m_config->GetParamValue("MAXFACTOR_4V_IB") * (currents.ibias[30] + 1)))
-    return CLASS_ORANGE;
+  float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
+  // add 0.9 to round up for everything >= .1
+  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_IB");
 
-  return CLASS_GREEN;
+  std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
 
+  return returnValue;
   // TODO: Add orange for back bias
 }
 

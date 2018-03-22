@@ -135,21 +135,22 @@ void TDigitalWFAnalysis::Finalize()
 // TODO: Make two cuts (red and orange)?
 THicClassification TDigitalWFAnalysis::GetClassificationOB(TDigitalWFResultHic *result)
 {
-  if (result->m_nUnmaskable > m_config->GetParamValue("DIGITAL_MAXNOMASK_HIC_OB"))
-    return CLASS_ORANGE;
-  if (result->m_nStuck > m_config->GetParamValue("DIGITAL_MAXNOMASKSTUCK_HIC_OB"))
-    return CLASS_ORANGE;
-
-  return CLASS_GREEN;
+  THicClassification returnValue = CLASS_GREEN;
+  DoCut(returnValue, CLASS_ORANGE, result->m_nUnmaskable, "DIGITAL_MAXNOMASK_HIC_OB");
+  DoCut(returnValue, CLASS_ORANGE, result->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_HIC_OB");
+  std::cout << "Digital Whiteframe Analysis - Classification: "
+            << WriteHicClassification(returnValue) << std::endl;
+  return returnValue;
 }
 
 THicClassification TDigitalWFAnalysis::GetClassificationIB(TDigitalWFResultHic *result)
 {
-  if (result->m_nUnmaskable > m_config->GetParamValue("DIGITAL_MAXNOMASK_HIC_IB"))
-    return CLASS_ORANGE;
-  if (result->m_nStuck > m_config->GetParamValue("DIGITAL_MAXNOMASKSTUCK_HIC_IB"))
-    return CLASS_ORANGE;
-  return CLASS_GREEN;
+  THicClassification returnValue = CLASS_GREEN;
+  DoCut(returnValue, CLASS_ORANGE, result->m_nUnmaskable, "DIGITAL_MAXNOMASK_HIC_IB");
+  DoCut(returnValue, CLASS_ORANGE, result->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_HIC_IB");
+  std::cout << "Digital Whiteframe Analysis - Classification: "
+            << WriteHicClassification(returnValue) << std::endl;
+  return returnValue;
 }
 
 void TDigitalWFAnalysis::WriteResult()

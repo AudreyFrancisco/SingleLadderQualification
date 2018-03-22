@@ -77,7 +77,10 @@ void TPowerAnalysis::Finalize()
 
 THicClassification TPowerAnalysis::GetClassification(THicCurrents currents)
 {
-  if (currents.trip) return CLASS_RED;
+  if (currents.trip) {
+    std::cout << "Power analysis: HIC classified red due to trip" << std::endl;
+    return CLASS_RED;
+  }
   if (currents.hicType == HIC_IB)
     return GetClassificationIB(currents);
   else
