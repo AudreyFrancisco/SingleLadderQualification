@@ -82,6 +82,11 @@ namespace ScanConfig {
   const int POWER_MAXFACTOR_4V_IB = 3;
   const int POWER_MAXFACTOR_4V_OB = 3;
 
+  // cuts for readout test
+  const int READOUT_MAXTIMEOUT     = 0;
+  const int READOUT_MAXCORRUPT     = 0;
+  const int READOUT_MAX8b10b_GREEN = 0;
+
   // cuts for fifo test
   const int FIFO_CUT_MAXEXCEPTION  = 0;   // max number of exceptions
   const int FIFO_CUT_MAXERR_ORANGE = 128; // max number of errors per pattern and hic
@@ -205,6 +210,9 @@ private:
   int       m_powerCutMaxBias3V_OB;
   int       m_powerMaxFactor4V_IB;
   int       m_powerMaxFactor4V_OB;
+  int       m_readoutMaxTimeout;
+  int       m_readoutMaxCorrupt;
+  int       m_readoutMax8b10bGreen;
   int       m_fifoCutMaxException;
   int       m_fifoCutMaxErrGreen;
   int       m_fifoCutMaxErrOrange;
