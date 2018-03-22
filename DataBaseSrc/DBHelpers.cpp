@@ -292,7 +292,7 @@ int DbGetComponentTypeId(AlpideDB *db, string name)
 // method returns the activity component type ID
 // (i.e. the id of the component as in or out component of the given activity)
 // the general component id is written into the variable componentId
-int DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int &componentId, string Direction)
+int DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int componentId, string Direction)
 {
   ActivityDB *                                    activityDB = new ActivityDB(db);
   static int                                      myActTypeId;
@@ -304,8 +304,8 @@ int DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int &componentId, 
   }
 
   for (unsigned int i = 0; i < actCompTypeList.size(); i++) {
-    if (Direction == actCompTypeList.at(i).Direction) {
-      componentId = actCompTypeList.at(i).Type.ID;
+    if ((Direction == actCompTypeList.at(i).Direction) &&
+        (componentId == actCompTypeList.at(i).Type.ID)) {
       return actCompTypeList.at(i).ID;
     }
   }
