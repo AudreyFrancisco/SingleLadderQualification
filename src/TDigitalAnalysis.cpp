@@ -334,10 +334,13 @@ THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic *resu
   // chip-wise check
   for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
     TDigitalResultChip *chipResult = (TDigitalResultChip *)it->second;
-    DoCut(returnValue, CLASS_ORANGE, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_GREEN");
-    DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_ORANGE");
+    int                 chipId     = it->first;
+    DoCut(returnValue, CLASS_ORANGE, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_GREEN", false,
+          chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_ORANGE", false,
+          chipId);
     int nBad = chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff;
-    DoCut(returnValue, CLASS_ORANGE, nBad, "DIGITAL_MAXBAD_CHIP_OB");
+    DoCut(returnValue, CLASS_ORANGE, nBad, "DIGITAL_MAXBAD_CHIP_OB", false, chipId);
   }
   std::cout << "Digital Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
@@ -366,10 +369,13 @@ THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic *resu
   // chip-wise check
   for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
     TDigitalResultChip *chipResult = (TDigitalResultChip *)it->second;
-    DoCut(returnValue, CLASS_ORANGE, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_GREEN");
-    DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_ORANGE");
+    int                 chipId     = it->first;
+    DoCut(returnValue, CLASS_ORANGE, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_GREEN", false,
+          chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_ORANGE", false,
+          chipId);
     int nBad = chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff;
-    DoCut(returnValue, CLASS_ORANGE, nBad, "DIGITAL_MAXBAD_CHIP_IB");
+    DoCut(returnValue, CLASS_ORANGE, nBad, "DIGITAL_MAXBAD_CHIP_IB", false, chipId);
   }
   std::cout << "Digital Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;

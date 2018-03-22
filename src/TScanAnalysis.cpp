@@ -238,7 +238,7 @@ const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
 // cutName: the name of the cut, as defined in TScanConfig
 // minCut: if true, value is required to be >= the cut value, otherwise <=
 void TScanAnalysis::DoCut(THicClassification &hicClass, THicClassification failClass, int value,
-                          string cutName, bool minCut)
+                          string cutName, bool minCut, int chipId)
 {
   bool failed = false;
   int  cut    = m_config->GetParamValue(cutName);
@@ -252,8 +252,14 @@ void TScanAnalysis::DoCut(THicClassification &hicClass, THicClassification failC
   // however the classification is changed only if the new classification is worse than the previous
   // one
   if (failed) {
-    std::cout << "Hic failed " << WriteHicClassification(failClass) << " cut " << cutName
-              << ": cut = " << cut << ", value = " << value << std::endl;
+    if (chipId < 0) {
+      std::cout << "Hic failed " << WriteHicClassification(failClass) << " cut " << cutName
+                << ": cut = " << cut << ", value = " << value << std::endl;
+    }
+    else {
+      std::cout << "Chip Id " << chipId << " failed " << WriteHicClassification(failClass)
+                << " cut " << cutName << ": cut = " << cut << ", value = " << value << std::endl;
+    }
     if (failClass > hicClass) hicClass = failClass;
   }
 }

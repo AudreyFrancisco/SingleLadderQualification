@@ -154,7 +154,7 @@ protected:
   TScanResultHic *FindHicResultForChip(common::TChipIndex chip);
   virtual string GetPreviousTestType() = 0;
   void DoCut(THicClassification &hicClass, THicClassification failClass, int value, string cutName,
-             bool minCut = false);
+             bool minCut = false, int chipId = -1);
 
 public:
   TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
