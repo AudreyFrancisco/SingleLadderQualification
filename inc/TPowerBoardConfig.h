@@ -93,6 +93,15 @@ const float RAnalog[2][8] = {{0.035, 0.039, 0.047, 0.054, 0.033, 0.044, 0.051, 0
                              {0.033, 0.038, 0.044, 0.056, 0.033, 0.044, 0.059, 0.052}};
 const float RDigital[2][8] = {{0.034, 0.042, 0.043, 0.050, 0.036, 0.038, 0.044, 0.052},
                               {0.033, 0.040, 0.041, 0.049, 0.034, 0.037, 0.040, 0.056}};
+// resistances of wire power bus
+const float RWPBAnalog[7]  = {0, 0, 0, 0, 0, 0, 0};
+const float RWPBDigital[7] = {0, 0, 0, 0, 0, 0, 0};
+const float RWPBGround[7]  = {0, 0, 0, 0, 0, 0, 0};
+// resistances of real power bus
+const float RPBAnalog[7]  = {0, 0, 0, 0, 0, 0, 0};
+const float RPBDigital[7] = {0, 0, 0, 0, 0, 0, 0};
+const float RPBGround[7]  = {0, 0, 0, 0, 0, 0, 0};
+
 // Class definition
 class TPowerBoardConfig {
 
@@ -171,6 +180,8 @@ public:
   void GetIBiasCalibration(float &AOffset);
   void SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
   void EnterMeasuredLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
+  void GetWirePBResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, float &BBLineR);
+  void AddPowerBusResistances(int mod, bool real = false);
   void GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR);
   bool IsCalibrated(int mod);
   void WriteCalibrationFile();

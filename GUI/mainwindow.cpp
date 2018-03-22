@@ -1717,6 +1717,9 @@ void MainWindow::setandgetcalibration()
     }
     powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(fHICs.at(ihic)->GetPbMod(),
                                                                         ares, dres, gres);
+    if ((fNumberofscan == OBHalfStaveOL) || (fNumberofscan = OBHalfStaveML)) {
+      powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod());
+    }
     powerBoard->CalibrateVoltage(fHICs.at(ihic)->GetPbMod());
     powerBoard->CalibrateCurrent(fHICs.at(ihic)->GetPbMod());
   }
