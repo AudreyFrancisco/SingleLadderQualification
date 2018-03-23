@@ -281,14 +281,13 @@ void MainWindow::open()
         for (unsigned int i = 0; i < fHalfstavemodules.size(); i++) {
           if (fHalfstavemodules.at(i).Type !=
               DbGetComponentTypeId(fDB, fDB->GetProjectId(), "Outer Layer CP")) {
-
-            std::cout << "the hic names are: " << fHalfstavemodules.at(i).Name << std::endl;
-            // fHicnames.push_back(fHalfstavemodules.at(i).Name);
             QString namestr = QString::fromStdString(fHalfstavemodules.at(i).Name);
-            // std::cout << "the hic names are: " << namestr.toStdString() << st
-            fHicnames.push_back(namestr);
+            int     j       = fHalfstavemodules.at(i).Position - 1;
+            fHicnames.resize(fHalfstavemodules.size() - 1);
+            fHicnames[j] = namestr;
+
             QByteArray name = namestr.toLatin1();
-            ar[i]           = {name.data()};
+            ar[j]           = strdup(name.toStdString().c_str());
           }
         }
       }
@@ -2363,6 +2362,10 @@ void MainWindow::attachtodatabaseretry()
                                   fIdofoperator);
       myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second,
                                   fIdofoperator);
+      if (fNumberofscan == OBHalfStaveOL) {
+        myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstavein, fIdofoperator);
+        myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstaveout, fIdofoperator);
+      }
       if (fStatus == false) {
         activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
         std::cout << "the activ is closed" << std::endl;
@@ -2426,8 +2429,7 @@ void MainWindow::attachConfigFile(ActivityDB::activity &activity)
                     string("ConfigPower.cfg"));
   }
   else if (fNumberofscan == OBHalfStaveOL) {
-    DbAddAttachment(fDB, activity, attachConfig, string("Config_HS_OL.cfg"),
-                    string("Config_HS_OL.cfg"));
+    DbAddAttachment(fDB, activity, attachConfig, string("Config_HS.cfg"), string("Config_HS.cfg"));
   }
 }
 
