@@ -233,6 +233,32 @@ void MainWindow::open()
     }
     if (fNumberofscan == OBHalfStaveOL) {
       fHicnames.clear();
+      int halfstaveidupper = 0;
+      int halfstaveidlower = 0;
+      int projectid        = 0;
+      projectid            = fDB->GetProjectId();
+      halfstaveidupper =
+          DbGetComponentId(fDB, projectid, fComponentTypeID, fHalfstave.toStdString());
+      halfstaveidlower =
+          DbGetComponentId(fDB, projectid, fComponentTypeIDb, fHalfstave.toStdString());
+      if (halfstaveidlower == -1 && halfstaveidupper == -1) {
+        fComponentWindow = new Components(this);
+        fComponentWindow->WriteToLabel(fHalfstave);
+        fComponentWindow->exec();
+        if (fstop) {
+          return;
+        }
+      }
+      if (halfstaveidlower == -1) {
+        fhalfstaveid  = halfstaveidupper;
+        fhalfstavein  = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "in");
+        fhalfstaveout = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "out");
+      }
+      else if (halfstaveidupper == -1) {
+        fhalfstaveid  = halfstaveidlower;
+        fhalfstavein  = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDb, "in");
+        fhalfstaveout = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDb, "out");
+      }
       DbGetListOfChildren(fDB, fhalfstaveid, fHalfstavemodules);
       if (fHalfstavemodules.size() < 1) {
         fHicnames.push_back("Module1");
@@ -257,6 +283,12 @@ void MainWindow::open()
               DbGetComponentTypeId(fDB, fDB->GetProjectId(), "Outer Layer CP")) {
 
             std::cout << "the hic names are: " << fHalfstavemodules.at(i).Name << std::endl;
+            // fHicnames.push_back(fHalfstavemodules.at(i).Name);
+            QString namestr = QString::fromStdString(fHalfstavemodules.at(i).Name);
+            // std::cout << "the hic names are: " << namestr.toStdString() << st
+            fHicnames.push_back(namestr);
+            QByteArray name = namestr.toLatin1();
+            ar[i]           = {name.data()};
           }
         }
       }
@@ -1534,8 +1566,9 @@ void MainWindow::locationcombo()
     fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Inner Barrel HIC Module");
   }
   else if (fNumberofscan == OBHalfStaveOL) {
-    fComponentTypeID  = DbGetComponentTypeId(fDB, projectid, "Outer Layer Half-Stave Upper");
+    fComponentTypeIDa = DbGetComponentTypeId(fDB, projectid, "Outer Layer Half-Stave Upper");
     fComponentTypeIDb = DbGetComponentTypeId(fDB, projectid, "Outer Layer Half-Stave Lower");
+    fComponentTypeID  = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
   }
   delete myactivity;
 }
@@ -1574,34 +1607,8 @@ void MainWindow::savesettings()
       fActComponentTypeIDs.push_back(make_pair(in, out));
       fComponentIDs.push_back(comp);
     }
-    if (fNumberofscan == OBHalfStaveOL) {
-      int halfstaveidupper = 0;
-      int halfstaveidlower = 0;
-      int projectid        = 0;
-      projectid            = fDB->GetProjectId();
-      halfstaveidupper =
-          DbGetComponentId(fDB, projectid, fComponentTypeID, fHalfstave.toStdString());
-      halfstaveidlower =
-          DbGetComponentId(fDB, projectid, fComponentTypeIDb, fHalfstave.toStdString());
-      if (halfstaveidlower == -1 && halfstaveidupper == -1) {
-        fComponentWindow = new Components(this);
-        fComponentWindow->WriteToLabel(fHalfstave);
-        fComponentWindow->exec();
-        if (fstop) {
-          return;
-        }
-      }
-      if (halfstaveidlower == -1) {
-        fhalfstaveid  = halfstaveidupper;
-        fhalfstavein  = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "in");
-        fhalfstaveout = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "out");
-      }
-      else if (halfstaveidupper == -1) {
-        fhalfstaveid  = halfstaveidlower;
-        fhalfstavein  = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDb, "in");
-        fhalfstaveout = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDb, "out");
-      }
-    }
+
+
     fScanconfigwindow = new ScanConfiguration(this);
     fScanconfigwindow->show();
     setdefaultvalues(fScanfit, fNm);

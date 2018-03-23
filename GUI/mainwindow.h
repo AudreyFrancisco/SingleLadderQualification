@@ -218,6 +218,7 @@ private:
   bool                fstop;
   int                 fComponentTypeID;
   int                 fComponentTypeIDb;
+  int                 fComponentTypeIDa;
   int                 fhalfstaveid;
   int                 fhalfstavein;
   int                 fhalfstaveout;
