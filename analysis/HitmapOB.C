@@ -113,7 +113,7 @@ void AddLabels()
     TLatex *label2 = new TLatex(600 + i * 1024, 450 + 512, text);
     label2->Draw();
   }
-}
+*}
 */
 
 int HitmapOB(TString directory, int nInj = -1)
@@ -122,7 +122,7 @@ int HitmapOB(TString directory, int nInj = -1)
   Int_t   x_max, y_max, z_max;
   Float_t int_hits  = 0;
   Float_t noise_occ = 0;
-  Int_t   n_trg     = 10000;
+  Int_t   n_trg     = 40000000;
 
   set_plot_style();
   strncpy(filepath, directory, 32);
@@ -141,6 +141,7 @@ int HitmapOB(TString directory, int nInj = -1)
       if (ich != 7) {
         TH2F *ChipHitMap = new TH2F(Form("chip_%d_mod_%d", ich, imod), Form("chip hitmap %d", ich),
                                     1024, -0.5, 1024 - 0.5, 512, -0.5, 512 - 0.5);
+        ChipHitMap->SetOption("colz");
         hlist.push_back(ChipHitMap);
       }
       else
@@ -191,6 +192,7 @@ int HitmapOB(TString directory, int nInj = -1)
         delete ch_h;
       }
     }
+    hHitmap->SetOption("colz");
   }
   File->Write();
   delete File;

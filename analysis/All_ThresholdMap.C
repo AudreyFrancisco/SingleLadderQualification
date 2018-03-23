@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "TColor.h"
+#include "TFile.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TLatex.h"
@@ -61,11 +62,11 @@ void ReadFile(const char *fName, TH2F *hHitmap, int Chip, bool aNoise)
   float noiseSum = 0, threshSum = 0, threshSq = 0, noiseSq = 0;
 
   while (fscanf(fp, "%d %d %f %f %f", &col, &row, &thresh, &noise, &chisq) == 5) {
-    int Column =
-        AddressToColumn(col / 16, col % 16, row); // probably doesn't need position...(below)
-    int Row = AddressToRow(col / 16, col % 16, row);
-    nLines++;
-
+    /*    int Column =
+            AddressToColumn(col / 16, col % 16, row); // probably doesn't need position...(below)
+        int Row = AddressToRow(col / 16, col % 16, row);
+        nLines++;
+    */
     noiseSum += noise;
     threshSum += thresh;
     noiseSq += noise * noise;
@@ -73,18 +74,18 @@ void ReadFile(const char *fName, TH2F *hHitmap, int Chip, bool aNoise)
 
     if (aNoise) {     // correct for second row now
       if (Chip < 7) { // Need to rotate bottom pixels by 180*!
-        hHitmap->Fill(1024 * Chip + (1024 - Column), 512 - Row, noise);
+        hHitmap->Fill(1024 * Chip + (1024 - col), 512 - row, noise);
       }
       else { // shift up and reverse order of rows
-        hHitmap->Fill(1024 * (14 - Chip) + Column, Row + 512, noise);
+        hHitmap->Fill(1024 * (14 - Chip) + col, row + 512, noise);
       }
     }
     else {
       if (Chip < 7) {
-        hHitmap->Fill(1024 * Chip + (1024 - Column), 512 - Row, thresh);
+        hHitmap->Fill(1024 * Chip + (1024 - col), row, thresh);
       }
       else {
-        hHitmap->Fill(1024 * (14 - Chip) + Column, Row + 512, thresh);
+        hHitmap->Fill(1024 * (14 - Chip) + col, row + 512, thresh);
       }
     }
   }
@@ -106,7 +107,7 @@ void ReadFile(const char *fName, TH2F *hHitmap, int Chip, bool aNoise)
 }
 
 
-void AddLabels()
+/*void AddLabels()
 {
   for (int i = 1; i < 7; i++) {
     TLine *line = new TLine(-.5 + i * 1024, -.5, -.5 + i * 1024, 2 * 512 - .5); // lines now taller
@@ -127,39 +128,45 @@ void AddLabels()
     label2->Draw();
   }
 }
-
+*/
 
 int All_ThresholdMap(const char *fName, bool noise = false)
 {
   // Meant to run on FitValue files!!
 
   std::string Prefix = fName;
-  Prefix.erase(Prefix.rfind("Chip"));
+  Prefix.erase(Prefix.rfind("_Chip"));
   std::cout << "Prefix: " << Prefix << std::endl;
+  std::string directory = Prefix;
+  directory.erase(directory.rfind("Threshold_Fit"));
+  TFile *fl = new TFile(Form("%sThresholdHisto.root", directory.c_str()), "RECREATE");
+  std::cout << "open file" << Form("%sThresholdHisto.root", directory.c_str()) << std::endl;
 
   char fNameChip[100];
 
-  set_plot_style();
+  //  set_plot_style();
   // dimensions have been changed
   TH2F *hHitmap = new TH2F("hHitmap", "Threshold map", 1024 * 7, -.5, 1024 * 7 - .5, 512 * 2, -.5,
                            512 * 2 - .5);
 
   for (int ichip = 0; ichip < 7; ichip++) {
-    sprintf(fNameChip, "%s_Chip%d_%d.dat", Prefix.c_str(), ichip, 1); // first (lower) row
+    sprintf(fNameChip, "%s_Chip%d.dat", Prefix.c_str(), ichip); // first (lower) row
     ReadFile(fNameChip, hHitmap, ichip, noise);
-    sprintf(fNameChip, "%s_Chip%d_%d.dat", Prefix.c_str(), ichip + 8, 0); // second row
+    sprintf(fNameChip, "%s_Chip%d.dat", Prefix.c_str(), ichip + 8); // second row
     ReadFile(fNameChip, hHitmap, ichip + 8, noise);
   }
+  /*
+    gStyle->SetPalette(1);
+    gStyle->SetOptStat(kFALSE);
+    gStyle->SetOptTitle(kFALSE);
 
-  gStyle->SetPalette(1);
-  gStyle->SetOptStat(kFALSE);
-  gStyle->SetOptTitle(kFALSE);
+    hHitmap->GetXaxis()->SetTitle("Column");
+    hHitmap->GetYaxis()->SetTitle("Row");
+    if (noise) hHitmap->SetMaximum(20);*/
+  hHitmap->SetOption("colz");
 
-  hHitmap->GetXaxis()->SetTitle("Column");
-  hHitmap->GetYaxis()->SetTitle("Row");
-  if (noise) hHitmap->SetMaximum(20);
-  hHitmap->Draw("COLZ");
-
-  AddLabels();
+  //  AddLabels();
+  fl->Write();
+  delete fl;
   return 1;
 }

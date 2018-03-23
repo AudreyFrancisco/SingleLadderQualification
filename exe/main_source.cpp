@@ -50,7 +50,7 @@ int myStrobeDelay  = 10;
 int myPulseLength  = 4000;
 
 int myPulseDelay = 40;
-int myNTriggers  = 10000;
+int myNTriggers  = 40000000;
 
 int HitData[256][512][1024];
 
@@ -259,7 +259,7 @@ void scan()
 
   FILE *rawFile = fopen(fNameRaw, "w");
 
-  int nTrains, nRest, nTrigsPerTrain = 100;
+  int nTrains, nRest, nTrigsPerTrain = 5000;
 
   nTrains = myNTriggers / nTrigsPerTrain;
   nRest   = myNTriggers % nTrigsPerTrain;

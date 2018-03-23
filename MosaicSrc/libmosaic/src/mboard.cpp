@@ -30,6 +30,7 @@
 #include "mboard.h"
 #include "mdatareceiver.h"
 #include "mexception.h"
+#include <iostream>
 #include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +38,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-
 #define PLATFORM_IS_LITTLE_ENDIAN
 
 void MBoard::init()
@@ -150,8 +150,10 @@ ssize_t MBoard::recvTCP(void *rxBuffer, size_t count, int timeout)
 
   if (rv == -1) throw MDataReceiveError("Poll system call");
 
-  if (rv == 0) return 0; // timeout
-
+  if (rv == 0) {
+    return 0; // timeout
+    std::cout << "at tcp receiver timeout" << std::endl;
+  }
   // check for events on sockfd:
   rxSize = 0;
   if (ufds.revents & POLLIN) {
