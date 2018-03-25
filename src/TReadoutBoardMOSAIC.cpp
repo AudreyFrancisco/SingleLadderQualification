@@ -226,8 +226,12 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
     catch (exception &e) {
       cerr << e.what() << endl;
       StopRun();
-      decodeError();
-      exit(1);
+      int ErrNums = decodeError();
+      if (ErrNums & 0xFFF0 != 0) {
+    	  	  throw;
+      } else {
+    	  	  exit(1);
+      }
     }
 
     // get event data from the selected data receiver
