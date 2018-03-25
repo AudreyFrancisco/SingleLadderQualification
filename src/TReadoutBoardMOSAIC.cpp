@@ -227,7 +227,7 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
       cerr << e.what() << endl;
       StopRun();
       int ErrNums = decodeError();
-      if (ErrNums & 0xFFF0 != 0) {
+      if ((ErrNums & 0xFFF0) != 0) {
     	  	  throw;
       } else {
     	  	  exit(1);
