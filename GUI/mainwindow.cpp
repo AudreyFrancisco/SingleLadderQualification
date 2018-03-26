@@ -2154,6 +2154,18 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
   fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
   AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 3);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 3);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 4);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 4);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 5);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 5);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 7);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 7);
+  AddScan(STReadout);
 
   // reset previous values
   // (TODO: this is not exactly correct because it resets to the values defined in the header file
