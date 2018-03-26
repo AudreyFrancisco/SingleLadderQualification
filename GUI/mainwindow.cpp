@@ -1419,7 +1419,7 @@ void MainWindow::attachtodatabase()
       activ.StartDate = date.currentDateTime().toTime_t();
       activ.EndDate   = date.currentDateTime().toTime_t();
       activ.Lot       = " ";
-      if (fNumberofscan == OBHalfStaveOL) {
+      if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
         std::string HSname;
         HSname = "HS_" + fHalfstave.toStdString() + "_" + fHICs.at(i)->GetDbId();
         std::cout << "the activty name is " << HSname << std::endl;
@@ -1470,7 +1470,7 @@ void MainWindow::attachtodatabase()
                                   fIdofoperator);
       myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second,
                                   fIdofoperator);
-      if (fNumberofscan == OBHalfStaveOL) {
+      if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
         myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstavein, fIdofoperator);
         myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstaveout, fIdofoperator);
       }
@@ -2328,7 +2328,7 @@ void MainWindow::attachtodatabaseretry()
       activ.StartDate = date.currentDateTime().toTime_t();
       activ.EndDate   = date.currentDateTime().toTime_t();
       activ.Lot       = " ";
-      if (fNumberofscan == OBHalfStaveOL) {
+      if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
         std::string HSname;
         HSname = "HS_" + fHalfstave.toStdString() + "_" + fHICs.at(i)->GetDbId();
         std::cout << "the activty name is " << HSname << std::endl;
@@ -2378,7 +2378,7 @@ void MainWindow::attachtodatabaseretry()
                                   fIdofoperator);
       myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second,
                                   fIdofoperator);
-      if (fNumberofscan == OBHalfStaveOL) {
+      if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
         myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstavein, fIdofoperator);
         myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstaveout, fIdofoperator);
       }
