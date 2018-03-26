@@ -1419,8 +1419,16 @@ void MainWindow::attachtodatabase()
       activ.StartDate = date.currentDateTime().toTime_t();
       activ.EndDate   = date.currentDateTime().toTime_t();
       activ.Lot       = " ";
-      activ.Name      = CreateActivityName(fHICs.at(i)->GetDbId(), fConfig->GetScanConfig());
-      activ.Position  = " ";
+      if (fNumberofscan == OBHalfStaveOL) {
+        std::string HSname;
+        HSname = "HS_" + fHalfstave.toStdString() + "_" + fHICs.at(i)->GetDbId();
+        std::cout << "the activty name is " << HSname << std::endl;
+        activ.Name = CreateActivityName(HSname, fConfig->GetScanConfig());
+      }
+      else {
+        activ.Name = CreateActivityName(fHICs.at(i)->GetDbId(), fConfig->GetScanConfig());
+      }
+      activ.Position = " ";
       activ.Result =
           -999; // apparently has to stay open here, otherwise activity is considered closed
 
@@ -2320,8 +2328,16 @@ void MainWindow::attachtodatabaseretry()
       activ.StartDate = date.currentDateTime().toTime_t();
       activ.EndDate   = date.currentDateTime().toTime_t();
       activ.Lot       = " ";
-      activ.Name      = CreateActivityName(fHICs.at(i)->GetDbId(), fConfig->GetScanConfig());
-      activ.Position  = " ";
+      if (fNumberofscan == OBHalfStaveOL) {
+        std::string HSname;
+        HSname = "HS_" + fHalfstave.toStdString() + "_" + fHICs.at(i)->GetDbId();
+        std::cout << "the activty name is " << HSname << std::endl;
+        activ.Name = CreateActivityName(HSname, fConfig->GetScanConfig());
+      }
+      else {
+        activ.Name = CreateActivityName(fHICs.at(i)->GetDbId(), fConfig->GetScanConfig());
+      }
+      activ.Position = " ";
       activ.Result =
           -999; // apparently has to stay open here, otherwise activity is considered closed
 
