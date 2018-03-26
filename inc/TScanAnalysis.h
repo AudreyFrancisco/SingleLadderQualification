@@ -166,6 +166,7 @@ public:
   std::map<const char *, TResultVariable> GetVariableList() { return m_variableList; }
   float GetVariable(std::string aHic, int chip, TResultVariable var);
   static const char *WriteHicClassification(THicClassification hicClass);
+  void WriteHicClassToFile(std::string hicName);
   THicClassification GetClassification();
 };
 

@@ -208,6 +208,7 @@ private:
   string GetTestFolder();
   THic *FindHic(string hicName);
   void      SetHicClassifications();
+  void      printClasses();
   TTestType GetTestType();
   int       GetTime();
   QAction * fWritedb;

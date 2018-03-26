@@ -1059,6 +1059,8 @@ void MainWindow::applytests()
 
   performtests();
 
+  printClasses();
+
   connect(fSignalMapper, SIGNAL(mapped(int)), this, SLOT(getresultdetails(int)));
   fResultwindow = new resultstorage(this);
   fResultwindow->exec();
@@ -1099,6 +1101,18 @@ void MainWindow::getresultdetails(int i)
   qApp->processEvents();
   ui->displaydetails->show();
   qApp->processEvents();
+}
+
+
+void MainWindow::printClasses()
+{
+  for (unsigned int iHic = 0; iHic < fHICs.size(); iHic++) {
+    std::cout << std::endl
+              << "Classifications HIC " << fHICs.at(iHic)->GetDbId() << ":" << std::endl;
+    for (unsigned int iAnalysis = 0; iAnalysis < fAnalysisVector.size(); iAnalysis++) {
+      fAnalysisVector.at(iAnalysis)->WriteHicClassToFile(fHICs.at(iHic)->GetDbId());
+    }
+  }
 }
 
 

@@ -230,6 +230,22 @@ const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
 }
 
 
+void TScanAnalysis::WriteHicClassToFile(std::string hicName)
+{
+  char            fName[300];
+  TScanResultHic *hicResult = m_result->GetHicResult(hicName);
+
+  if (hicResult) {
+    std::string writeLine = std::string(m_scan->GetName()) + std::string(": ") +
+                            std::string(hicResult->WriteHicClassification());
+    sprintf(fName, "%s/Classification.dat", hicResult->GetOutputPath().c_str());
+    FILE *fp = fopen(fName, "a");
+    fprintf(fp, "%s\n", writeLine.c_str());
+    fclose(fp);
+    std::cout << writeLine << std::endl;
+  }
+}
+
 // DoCut checks a variable against a cut and sets the classification accordingly
 // in case of failure an output is printed to the terminal
 // hicClass: has to contain the current hic classification, is modified in case of failure
