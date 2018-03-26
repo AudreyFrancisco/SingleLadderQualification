@@ -141,9 +141,9 @@ protected:
   virtual TScanResultHic * GetHicResult()  = 0;
   void                     CreateHicResults();
   void                     CreatePrediction();
-  virtual void CalculatePrediction(std::string hicName) { (void)hicName; };
-  virtual void                                 CreateResult() = 0;
-  int                                          ReadChipList();
+  virtual void CalculatePrediction(std::string hicName) = 0; // { (void)hicName; };
+  virtual void CreateResult()                           = 0;
+  int          ReadChipList();
   virtual void AnalyseHisto(TScanHisto *histo) = 0;
   virtual void InitCounters()                  = 0;
   int          GetPreviousActivityType();

@@ -89,6 +89,7 @@ protected:
   void AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
   void   InitCounters();
+  void CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TDctrlAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

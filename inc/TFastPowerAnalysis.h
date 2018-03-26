@@ -71,6 +71,7 @@ protected:
   void WriteResult();
   void AnalyseHisto(TScanHisto *histo) { (void)&histo; };
   string                        GetPreviousTestType();
+  void CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TFastPowerAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

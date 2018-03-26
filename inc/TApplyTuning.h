@@ -22,6 +22,8 @@ protected:
   void                          InitCounters(){};
   virtual const char *          GetDACName() = 0;
   string                        GetPreviousTestType() { return string(""); }; // no analysis output
+  void CalculatePrediction(std::string hicName) { (void)hicName; };
+
 public:
   TApplyTuning(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                std::vector<THic *> hics, std::mutex *aMutex, TSCurveResult *aResult);

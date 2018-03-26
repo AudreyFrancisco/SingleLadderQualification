@@ -133,7 +133,7 @@ void TDigitalAnalysis::CalculatePrediction(std::string hicName)
   }
 
   if (activities.size() == 0) {
-    prediction->m_valid = false;
+    prediction->SetValidity(false);
     return;
   }
 

@@ -67,6 +67,7 @@ protected:
   void WriteResult();
   void AnalyseHisto(TScanHisto *histo) { (void)histo; };
   string                        GetPreviousTestType() { return string(""); }; // done only once
+  void CalculatePrediction(std::string hicName) { (void)hicName; };
   THicClassification GetClassificationOB(TCycleResultHic *result);
 
 public:

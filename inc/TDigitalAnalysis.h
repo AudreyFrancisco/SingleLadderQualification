@@ -99,11 +99,11 @@ protected:
   void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
+  void CalculatePrediction(std::string hicName);
 
 public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                    std::vector<THic *> hics, std::mutex *aMutex, TDigitalResult *aResult = 0);
-  void CalculatePrediction(std::string hicName);
   void Initialize();
   void Finalize();
 
