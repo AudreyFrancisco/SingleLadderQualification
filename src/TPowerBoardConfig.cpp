@@ -440,9 +440,9 @@ void TPowerBoardConfig::AddPowerBusResistances(int mod, bool real)
   else {
     float ALineR, DLineR, GNDLineR, BBLineR;
     GetWirePBResistances(mod, ALineR, DLineR, GNDLineR, BBLineR);
-    fPBConfig.Modul[mod].CalDLineR += RWPBDigital[mod];
-    fPBConfig.Modul[mod].CalALineR += RWPBAnalog[mod];
-    fPBConfig.Modul[mod].CalGNDLineR += RWPBGround[mod];
+    fPBConfig.Modul[mod].CalDLineR += DLineR;
+    fPBConfig.Modul[mod].CalALineR += ALineR;
+    fPBConfig.Modul[mod].CalGNDLineR += GNDLineR;
   }
 }
 
