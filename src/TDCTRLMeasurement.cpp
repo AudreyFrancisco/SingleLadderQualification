@@ -50,7 +50,7 @@ void TDctrlMeasurement::InitScope()
   // Setup channel specific
   for (int i = 1; i <= 4; i++) {
     scope.enable_ch(i);             // Enable channel
-    scope.set_vscale_ch(i, 200e-3); // Set V/div
+    scope.set_vscale_ch(i, 140e-3); // Set V/div
     scope.set_dc_coupling_ch(
         i, false); // Set AC coupling to avoid fiddling with reference level to get pulse on screen
   }
@@ -116,6 +116,19 @@ void TDctrlMeasurement::PrepareStep(int loopIndex)
   case 0: // innermost loop
     m_testChip->GetConfig()->SetParamValue("DCTRLDRIVER", m_value[0]);
     AlpideConfig::ConfigureBuffers(m_testChip, m_testChip->GetConfig());
+    switch (m_value[0]) {
+    case 0:
+      update_vscale(50e-3);
+      break;
+    case 3:
+      update_vscale(80e-3);
+      break;
+    case 7:
+      update_vscale(140e-3);
+      break;
+    default:
+      break;
+    }
     break;
   case 1: // 2nd loop
     m_testChip   = m_chips.at(m_value[1]);
@@ -126,6 +139,13 @@ void TDctrlMeasurement::PrepareStep(int loopIndex)
     break;
   default:
     break;
+  }
+}
+
+void TDctrlMeasurement::update_vscale(double vscale)
+{
+  for (int i = 1; i <= 4; i++) {
+    scope.set_vscale_ch(i, vscale); // Set V/div
   }
 }
 
@@ -246,7 +266,7 @@ void TDctrlMeasurement::Execute()
 
     // Do the measurement here, value has to be saved in the histogram
     // with THisto::Set, idx indicates the chip, e.g.
-    // m_histo->Set(idx, m_value[1], measured amplitude)
+    // m_histo->Set(idx, m_value[0], measured amplitude)
     // to enter the measured amplitude for the current chip and the current
     // driver setting
     if (m_testChip->GetConfig()->GetCtrInt() == 0) {
@@ -280,7 +300,7 @@ void TDctrlMeasurement::Execute()
 
     // here only to avoid error "idx set but not used"
     // remove in implementation
-    // m_histo->Set(idx, m_value[1], 0);
+    // m_histo->Set(idx, m_value[0], 0);
   }
 }
 

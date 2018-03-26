@@ -150,8 +150,7 @@ int main(int argc, char **argv)
     scope_control scope;
     // scope.debug_en = true;
     if (!scope.open_auto()) {
-      std::cout << "Scope not detected" << std::endl;
-      return 1;
+      exit(1);
     }
     scope.get_errors();
 
@@ -165,7 +164,7 @@ int main(int argc, char **argv)
     scope.set_trigger_ext();
     scope.set_trigger_slope_rising(false);
     scope.set_trigger_position(1.1e-6);
-    scope.set_ext_trigger_level(-0.5);
+    scope.set_ext_trigger_level(-0.3);
     scope.setup_measure();
 
     for (const auto &rChip : fChips) {

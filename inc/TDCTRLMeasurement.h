@@ -18,7 +18,9 @@ private:
   void ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bool &exception);
   void WriteMem(TAlpide *chip, int ARegion, int AOffset, int AValue);
   bool TestPattern(int pattern, bool &exception);
-  void InitScope();
+  void          InitScope();
+  scope_control scope;
+  void update_vscale(double vscale);
 
 protected:
   THisto CreateHisto();
@@ -34,7 +36,6 @@ public:
   void LoopEnd(int loopIndex);
   void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
   void PrepareStep(int loopIndex);
-  scope_control    scope;
   static const int peak_p = 0;
   static const int peak_n = 1;
   static const int amp_p  = 2;

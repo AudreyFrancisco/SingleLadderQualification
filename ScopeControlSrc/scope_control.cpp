@@ -29,11 +29,18 @@ std::string scope_control::enumerate_ports()
   if (devices_found.size() == 0) throw_ex("No USB devices could be enumerated.\n");
   while (iter != devices_found.end()) {
     serial::PortInfo device = *iter++;
-    if (((device.hardware_id.find("0AAD") != std::string::npos) &&
-         (device.hardware_id.find("013C") != std::string::npos)) ||
-        ((device.hardware_id.find("0aad") != std::string::npos) &&
-         (device.hardware_id.find("013c") != std::string::npos)))
-      port = device.port;
+    if ((device.hardware_id.find("0AAD:") != std::string::npos) ||
+        (device.hardware_id.find("0aad:") != std::string::npos)) {
+      if ((device.hardware_id.find(":013C") != std::string::npos) ||
+          (device.hardware_id.find(":013c") != std::string::npos))
+        port = device.port;
+      else if ((device.hardware_id.find(":01D6") != std::string::npos) ||
+               (device.hardware_id.find(":01d6") != std::string::npos))
+        port = "TMC";
+      else if ((device.hardware_id.find(":01D7") != std::string::npos) ||
+               (device.hardware_id.find(":01d7") != std::string::npos))
+        port = "MTP";
+    }
     snprintf(text, sizeof(text), "(%s, %s, %s)\n", device.port.c_str(), device.description.c_str(),
              device.hardware_id.c_str());
     debug_print(text);
@@ -60,12 +67,20 @@ bool scope_control::open(std::string port, uint32_t baud, uint32_t timeoutms)
 
 bool scope_control::open_auto(uint32_t timeoutms)
 {
-  char text[100];
+  char text[500];
   if (link_init)
     if (link->isOpen()) link->close();
   std::string port = scope_control::enumerate_ports();
   if (port == "") {
     throw_ex("Scope not detected.\n");
+    return false;
+  }
+  else if ((port == "TMC") || (port == "MTP")) {
+    snprintf(text, sizeof(text), "%s%s%s%s%s%s", "Scope is configured in wrong USB mode.\n",
+             "Press menu (lower right corner on the touch screen), select setup, last item.\n",
+             "Tap 'Interface'.\n", "Tap 'USB' to select USB connection.\n", "Tap 'Parameter'.\n",
+             "Select the USB mode 'USB VCP (Virtual Com Port)'\n");
+    throw_ex(text);
     return false;
   }
   else {
@@ -314,6 +329,17 @@ void scope_control::set_math_diff(uint8_t ch_p, uint8_t ch_n)
   scope_control::write_cmd("CALC:QMAT:OPER SUB\n"); // Sub ch2 from ch1
 }
 
+void scope_control::set_reflevel_rtime_ftime(uint8_t lower, uint8_t upper)
+{
+  if ((lower > 100) | (upper > 100))
+    throw_ex("Parameters for set_reflevel_rtime_ftime out of range");
+  char cmd[30];
+  scope_control::write_cmd("REFL:REL:MODE USER\n");       // Set user programmable levels
+  snprintf(cmd, sizeof(cmd), "REFL:REL:LOW %d\n", lower); // Set lower level
+  scope_control::write_cmd(cmd);
+  snprintf(cmd, sizeof(cmd), "REFL:REL:UPP %d\n", upper); // Set upper level
+  scope_control::write_cmd(cmd);
+}
 void scope_control::en_measure_math() { scope_control::en_measure(5); }
 
 void scope_control::en_measure_ch(uint8_t ch)
