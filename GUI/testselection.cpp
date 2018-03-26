@@ -28,7 +28,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("IB HIC Endurance Test", IBEndurance);
   ui->typetest->addItem("OB HIC Reception Test", OBReception);
   ui->typetest->addItem("OB HIC Fast Power Test", OBPower);
-  ui->typetest->addItem("OL-HS-Upper assembly", OBHalfStaveOL);
+  ui->typetest->addItem("OL HS Qualification Test", OBHalfStaveOL);
   ui->typetest->addItem("IB HIC DCTRL Test", IBDctrl);
   // ui->typetest->addItem("OB Half-Stave Test", OBHalfStaveML);
   // ui->typetest->addItem("OB Stave Test", OBStave);
@@ -51,7 +51,8 @@ TestSelection::~TestSelection() { delete ui; }
 void TestSelection::SaveSettings(QString &institute, QString &opname, QString &hicid, int &counter,
                                  int &lid, int &memberid, QString &ttwo, QString &tthree,
                                  QString &tfour, QString &tfive, QString &done, QString &dtwo,
-                                 QString &dthree, QString &dfour, QString &dfive)
+                                 QString &dthree, QString &dfour, QString &dfive,
+                                 QString &halfstave)
 {
   if (ui->operatorstring->toPlainText().isEmpty() ||
       /*ui->id->toPlainText().isEmpty() || */ locid == 0) {
@@ -122,8 +123,9 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
       dfive = '\0';
     }
 
-    opname   = ui->operatorstring->toPlainText();
-    hicid    = ui->id->toPlainText();
+    opname    = ui->operatorstring->toPlainText();
+    hicid     = ui->id->toPlainText();
+    halfstave = ui->id->toPlainText();
     fCounter = counter = 1;
     lid                = locid;
     institute          = location;

@@ -233,21 +233,64 @@ void MainWindow::open()
     }
     if (fNumberofscan == OBHalfStaveOL) {
       fHicnames.clear();
-      //  for (unsigned int i = 0; i < 7; i++) {
-      fHicnames.push_back("Module1");
-      fHicnames.push_back("Module2");
-      fHicnames.push_back("Module3");
-      fHicnames.push_back("Module4");
-      fHicnames.push_back("Module5");
-      fHicnames.push_back("Module6");
-      fHicnames.push_back("Module7");
-      ar[0] = {"Module1"};
-      ar[1] = {"Module2"};
-      ar[2] = {"Module3"};
-      ar[3] = {"Module4"};
-      ar[4] = {"Module5"};
-      ar[5] = {"Module6"};
-      ar[6] = {"Module7"};
+      int halfstaveidupper = 0;
+      int halfstaveidlower = 0;
+      int projectid        = 0;
+      projectid            = fDB->GetProjectId();
+      halfstaveidupper =
+          DbGetComponentId(fDB, projectid, fComponentTypeID, fHalfstave.toStdString());
+      halfstaveidlower =
+          DbGetComponentId(fDB, projectid, fComponentTypeIDb, fHalfstave.toStdString());
+      if (halfstaveidlower == -1 && halfstaveidupper == -1) {
+        fComponentWindow = new Components(this);
+        fComponentWindow->WriteToLabel(fHalfstave);
+        fComponentWindow->exec();
+        if (fstop) {
+          return;
+        }
+      }
+      if (halfstaveidlower == -1) {
+        fhalfstaveid  = halfstaveidupper;
+        fhalfstavein  = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "in");
+        fhalfstaveout = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "out");
+      }
+      else if (halfstaveidupper == -1) {
+        fhalfstaveid  = halfstaveidlower;
+        fhalfstavein  = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDb, "in");
+        fhalfstaveout = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDb, "out");
+      }
+      DbGetListOfChildren(fDB, fhalfstaveid, fHalfstavemodules);
+      if (fHalfstavemodules.size() < 1) {
+        fHicnames.push_back("Module1");
+        fHicnames.push_back("Module2");
+        fHicnames.push_back("Module3");
+        fHicnames.push_back("Module4");
+        fHicnames.push_back("Module5");
+        fHicnames.push_back("Module6");
+        fHicnames.push_back("Module7");
+        ar[0] = {"Module1"};
+        ar[1] = {"Module2"};
+        ar[2] = {"Module3"};
+        ar[3] = {"Module4"};
+        ar[4] = {"Module5"};
+        ar[5] = {"Module6"};
+        ar[6] = {"Module7"};
+      }
+      else {
+
+        for (unsigned int i = 0; i < fHalfstavemodules.size(); i++) {
+          if (fHalfstavemodules.at(i).Type !=
+              DbGetComponentTypeId(fDB, fDB->GetProjectId(), "Outer Layer CP")) {
+            QString namestr = QString::fromStdString(fHalfstavemodules.at(i).Name);
+            int     j       = fHalfstavemodules.at(i).Position - 1;
+            fHicnames.resize(fHalfstavemodules.size() - 1);
+            fHicnames[j] = namestr;
+
+            QByteArray name = namestr.toLatin1();
+            ar[j]           = strdup(name.toStdString().c_str());
+          }
+        }
+      }
     }
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
     fConfig->GetScanConfig()->SetUseDataPath(true);
@@ -763,6 +806,9 @@ void MainWindow::start_test()
         fScanbuttons.at(i)->hide();
       }
     }
+  }
+  if (fHalfstavemodules.size() > 0) {
+    fHalfstavemodules.clear();
   }
   if (fScanTypes.size() > 0) {
     fScanTypes.clear();
@@ -1416,6 +1462,10 @@ void MainWindow::attachtodatabase()
                                   fIdofoperator);
       myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second,
                                   fIdofoperator);
+      if (fNumberofscan == OBHalfStaveOL) {
+        myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstavein, fIdofoperator);
+        myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstaveout, fIdofoperator);
+      }
       if (fStatus == false) {
         activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
         std::cout << "the activ is closed" << std::endl;
@@ -1515,7 +1565,9 @@ void MainWindow::locationcombo()
     fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Inner Barrel HIC Module");
   }
   else if (fNumberofscan == OBHalfStaveOL) {
-    fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Outer Layer Half-Stave Upper");
+    fComponentTypeIDa = DbGetComponentTypeId(fDB, projectid, "Outer Layer Half-Stave Upper");
+    fComponentTypeIDb = DbGetComponentTypeId(fDB, projectid, "Outer Layer Half-Stave Lower");
+    fComponentTypeID  = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
   }
   delete myactivity;
 }
@@ -1526,7 +1578,7 @@ void MainWindow::savesettings()
   fSettingswindow->SaveSettings(fInstitute, fOperatorname, fHicidnumber, fCounter,
                                 fIdoflocationtype, fIdofoperator, fToptwo, fTopthree, fTopfour,
                                 fTopfive, fBottomone, fBottomtwo, fBottomthree, fBottomfour,
-                                fBottomfive);
+                                fBottomfive, fHalfstave);
   if (fCounter == 0) {
     return;
   }
@@ -1554,6 +1606,8 @@ void MainWindow::savesettings()
       fActComponentTypeIDs.push_back(make_pair(in, out));
       fComponentIDs.push_back(comp);
     }
+
+
     fScanconfigwindow = new ScanConfiguration(this);
     fScanconfigwindow->show();
     setdefaultvalues(fScanfit, fNm);
@@ -2308,6 +2362,10 @@ void MainWindow::attachtodatabaseretry()
                                   fIdofoperator);
       myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second,
                                   fIdofoperator);
+      if (fNumberofscan == OBHalfStaveOL) {
+        myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstavein, fIdofoperator);
+        myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstaveout, fIdofoperator);
+      }
       if (fStatus == false) {
         activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
         std::cout << "the activ is closed" << std::endl;
@@ -2371,8 +2429,7 @@ void MainWindow::attachConfigFile(ActivityDB::activity &activity)
                     string("ConfigPower.cfg"));
   }
   else if (fNumberofscan == OBHalfStaveOL) {
-    DbAddAttachment(fDB, activity, attachConfig, string("Config_HS_OL.cfg"),
-                    string("Config_HS_OL.cfg"));
+    DbAddAttachment(fDB, activity, attachConfig, string("Config_HS.cfg"), string("Config_HS.cfg"));
   }
 }
 
