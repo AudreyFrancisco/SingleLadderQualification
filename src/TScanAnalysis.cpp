@@ -84,6 +84,18 @@ bool TScanAnalysis::GetPreviousActivity(string compName, ActivityDB::activityLon
 }
 
 
+bool TScanAnalysis::GetPreviousParamValue(string hicTestName, string chipTestName,
+                                          ActivityDB::activityLong &act, float &value)
+{
+  if (GetPreviousTestType() == "ALPIDEB Chip Testing Analysis") {
+    return DbFindParamValue(act.Parameters, chipTestName, value);
+  }
+  else {
+    return DbFindParamValue(act.Parameters, chipTestName, value);
+  }
+}
+
+
 int TScanAnalysis::ReadChipList()
 {
   m_chipList = m_scan->GetChipList();
