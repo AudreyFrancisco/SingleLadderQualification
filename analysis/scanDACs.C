@@ -31,8 +31,10 @@ Bool_t scanDACs(const char *fName, Int_t n_bits = 256)
 
   TFile *fl = new TFile(Form("%sScanDAC_%s.root", directory.c_str(), time.c_str()), "RECREATE");
   std::vector<std::vector<TGraph *>> hlist(128);
+  std::vector<TGraph *>              vresetplot(128);
   for (int ich = 0; ich < 128; ich++) {
-    hlist[ich] = std::vector<TGraph *>(n_dacs);
+    vresetplot[ich] = new TGraph();
+    hlist[ich]      = std::vector<TGraph *>(n_dacs);
     for (int idac = 0; idac < n_dacs; idac++) {
       hlist[ich][idac] = new TGraph();
     }
@@ -62,6 +64,12 @@ Bool_t scanDACs(const char *fName, Int_t n_bits = 256)
         hlist[ChipId][i]->SetName("Chip " + std::to_string(ChipId) + " " + filename[i]);
         hlist[ChipId][i]->Write();
         TFitResultPtr r = hlist[ChipId][i]->Fit("f", "QSR");
+        if (filename[i] == "VRESETD") {
+          vresetplot[ChipId] = new TGraph(n_bits, dac, adc);
+          vresetplot[ChipId]->SetName("vreset_plot");
+          vresetplot[ChipId]->SetTitle("VRESETD");
+          vresetplot[ChipId]->Write();
+        }
         std::cout << filename[i] << '\t' << r->Value(0) << '\t' << r->Value(1) << std::endl;
       }
       else

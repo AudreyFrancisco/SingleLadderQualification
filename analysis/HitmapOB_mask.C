@@ -9,7 +9,8 @@
 #include "TStyle.h"
 #include "TTree.h"
 #include "sys/stat.h"
-
+#include <algorithm>
+#include <vector>
 
 //#include <string.h>
 //#include <stdio.h>
@@ -53,7 +54,8 @@ int AddressToRow(int ARegion, int ADoubleCol, int AAddress)
 
 void ReadFile(const char *fNameChip, TH2F *hHitmap, std::vector<TH2F *> &hlist, int Chip, int nInj)
 {
-  int mod, chip, col, row, nhits;
+  int mod, chip, col, row, nhits, hits;
+  int level = 30;
 
   FILE *fp = fopen(fNameChip, "r");
   if (!fp) {
@@ -63,6 +65,15 @@ void ReadFile(const char *fNameChip, TH2F *hHitmap, std::vector<TH2F *> &hlist, 
   std::cout << fNameChip << std::endl;
   int nLines = 0, nHot = 0, nIneff = 0;
 
+  std::vector<int> hitvector;
+
+  while (fscanf(fp, "%d %d %d %d %d", &mod, &chip, &col, &row, &hits) == 5) {
+    hitvector.push_back(hits);
+  }
+  rewind(fp);
+  std::sort(hitvector.begin(), hitvector.end());
+  int maxlevel = hitvector.size() - level;
+  std::cout << "mask value " << hitvector[maxlevel] << std::endl;
   while (fscanf(fp, "%d %d %d %d %d", &mod, &chip, &col, &row, &nhits) == 5) {
     int Column = AddressToColumn(col / 16, col % 16, row);
     int Row    = AddressToRow(col / 16, col % 16, row);
@@ -71,58 +82,28 @@ void ReadFile(const char *fNameChip, TH2F *hHitmap, std::vector<TH2F *> &hlist, 
       if (nhits < nInj) nIneff++;
       if (nhits > nInj) nHot++;
     }
-    hlist[chip]->Fill(Column, Row, nhits);
-    if (Chip < 7) {
-      hHitmap->Fill(1024 * Chip + Column, Row, nhits);
-    }
-    else {
-      hHitmap->Fill(1024 * (14 - Chip) + (1024 - Column), Row + 512, nhits);
+
+    if (nhits < hitvector[maxlevel]) {
+      hlist[chip]->Fill(Column, Row, nhits);
+      if (Chip < 7) {
+        hHitmap->Fill(1024 * Chip + Column, 512 - Row, nhits);
+      }
+      else {
+        hHitmap->Fill(1024 * (14 - Chip) + (1024 - Column), Row + 512, nhits);
+      }
+      //      ofstream outfile(F
     }
   }
-  /*
-    if (nInj > 0) {
-      int nNoHit = 1024 * 512 - nLines; // May be incorrect //524288 - nLines;
-      std::cout << std::endl;
-      std::cout << std::endl << "Chip " << Chip << ":" << std::endl;
-      std::cout << "  Pixels without hits: " << nNoHit << std::endl;
-      std::cout << "  Pixels with <" << nInj << " hits: " << nIneff << std::endl;
-      std::cout << "  Pixels with >" << nInj << " hits: " << nHot << std::endl;
-      std::cout << std::endl;
-    }*/
   fclose(fp);
 }
 
-/*
-void AddLabels()
-{
-  for (int i = 1; i < 7; i++) {
-    TLine *line = new TLine(-.5 + i * 1024, -.5, -.5 + i * 1024, 2 * 512 - .5);
-    line->Draw();
-  }
-
-  TLine *horiz = new TLine(-.5, 512 - .5, 7 * 1024 - .5, 512 - .5);
-  horiz->Draw();
-
-  for (int i = 1; i < 8; i++) {
-    char text[10];
-    sprintf(text, "#scale[0.50]{Chip %d}", i);
-    TLatex *label = new TLatex(600 + i * 1024, 900.0, text);
-    label->Draw();
-    // upper row
-    sprintf(text, "#scale[0.50]{Chip %d}", 15 - (i)); // order reversed for top
-    TLatex *label2 = new TLatex(600 + i * 1024, 450 + 512, text);
-    label2->Draw();
-  }
-*}
-*/
-
-int HitmapOB(TString directory, int nInj = -1)
+int HitmapOB_mask(TString directory, int nInj = -1)
 {
   char filepath[100], fNameChip[100], fileName[100], fhrdir[100], fhroutput[100], ChipHistName[100];
   Int_t   x_max, y_max, z_max;
   Float_t int_hits  = 0;
   Float_t noise_occ = 0;
-  Int_t   n_trg     = 1000000;
+  //  Int_t   n_trg     = 40000000;
 
   set_plot_style();
   strncpy(filepath, directory, 32);
@@ -130,7 +111,7 @@ int HitmapOB(TString directory, int nInj = -1)
   sprintf(fhrdir, "%s/Fhr", filepath);
   mkdir(fhrdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-  sprintf(fileName, "%s/Histos.root", filepath);
+  sprintf(fileName, "%s/Histos_mask.root", filepath);
   TFile *File = new TFile(fileName, "RECREATE");
 
 
@@ -150,7 +131,7 @@ int HitmapOB(TString directory, int nInj = -1)
     std::vector<TH1F *> fhrlist;
     for (int ich = 0; ich < 15; ich++) {
       if (ich != 7) {
-        TH1F *FHR_plot = new TH1F(Form("chip_%d_mod%d", ich, imod), Form("Noise occuoancy %d", ich),
+        TH1F *FHR_plot = new TH1F(Form("chip_%d_mod%d", ich, imod), Form("Noise occupancy %d", ich),
                                   600, -0.5, 599.5);
         fhrlist.push_back(FHR_plot);
       }
@@ -168,29 +149,6 @@ int HitmapOB(TString directory, int nInj = -1)
       ReadFile(fNameChip, hHitmap, hlist, ichip, nInj);
       sprintf(fNameChip, "%s/Source_Chip%d_%d.dat", filepath, imod, ichip + 8); // second row
       ReadFile(fNameChip, hHitmap, hlist, ichip + 8, nInj);
-    }
-    for (int ich = 0; ich < 15; ich++) {
-      if (ich != 7) {
-        TH2F *ch_h = (TH2F *)hlist[ich]->Clone();
-        int_hits   = ch_h->Integral();
-
-        for (Int_t i_pix = 0; i_pix < 600; i_pix++) {
-          noise_occ = int_hits / n_trg / (1024 * 512);
-          fhrlist[ich]->SetBinContent(i_pix + 1, noise_occ);
-          ch_h->GetMaximumBin(x_max, y_max, z_max);
-          int_hits -= ch_h->GetBinContent(x_max, y_max);
-          ch_h->SetBinContent(x_max, y_max, 0);
-        }
-
-        sprintf(fhroutput, "%s/Fhr_%d_%d", fhrdir, imod, ich);
-        ofstream outfile(fhroutput);
-
-        for (Int_t ibin = 0; ibin < 600; ibin++) {
-          Double_t bincont = fhrlist[ich]->GetBinContent(ibin + 1, ibin + 1);
-          outfile << ibin << "  " << bincont << endl;
-        }
-        delete ch_h;
-      }
     }
     hHitmap->SetOption("colz");
   }
