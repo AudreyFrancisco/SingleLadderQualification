@@ -166,7 +166,7 @@ void TScanAnalysis::Run()
 {
   m_started = true;
 
-  while (m_histoQue->size() == 0) {
+  while ((!fScanAbort) && (!fScanAbortAll) && (m_histoQue->size() == 0)) {
     sleep(1);
   }
 

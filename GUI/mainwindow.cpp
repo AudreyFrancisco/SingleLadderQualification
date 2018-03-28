@@ -747,7 +747,7 @@ void MainWindow::scanLoop(TScan *myScan)
     // throw string("SDFdsfsdfsdfsdfsfsdf");
   }
   catch (exception &ex) {
-    std::cout << ex.what() << "is the thrown exception" << std::endl;
+    std::cout << ex.what() << "is the thrown exception from the scan" << std::endl;
     fExceptionthrown = true;
     fScanAbort       = true;
   }
@@ -975,7 +975,7 @@ void MainWindow::performtests()
           fAnalysisVector.at(i)->Finalize();
         }
         catch (exception &ex) {
-          std::cout << ex.what() << " is the thrown exception" << std::endl;
+          std::cout << ex.what() << " is the thrown exception from th finalize" << std::endl;
           fExceptionthrown = true;
           fScanAbort       = true;
         }
@@ -2512,7 +2512,7 @@ void MainWindow::analysis(TScanAnalysis *myanalysis)
     // throw string("SDFdsfsdfsdfsdfsfsdf");
   }
   catch (exception &ex) {
-    std::cout << ex.what() << "is the thrown exception" << std::endl;
+    std::cout << ex.what() << "is the thrown exception from the analysis" << std::endl;
     fExceptionthrown = true;
     fScanAbort       = true;
   }
