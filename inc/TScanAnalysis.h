@@ -79,6 +79,7 @@ protected:
   string             m_outputPath;
   TScanParameters *  m_scanParameters;
   bool               m_valid; // used for predictions only
+  virtual void Compare(TScanResultHic *aPrediction) { (void)aPrediction; };
 
 public:
   TScanResultHic() { m_valid = false; };
@@ -141,6 +142,7 @@ protected:
   virtual TScanResultHic * GetHicResult()  = 0;
   void                     CreateHicResults();
   void                     CreatePrediction();
+  void ComparePrediction(std::string hicName);
   virtual void CalculatePrediction(std::string hicName) = 0; // { (void)hicName; };
   virtual void CreateResult()                           = 0;
   int          ReadChipList();

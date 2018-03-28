@@ -120,6 +120,29 @@ void TScanAnalysis::CreatePrediction()
 }
 
 
+void TScanAnalysis::ComparePrediction(std::string hicName)
+{
+  TScanResultHic *prediction;
+  TScanResultHic *result;
+
+  try {
+    prediction = m_prediction->GetHicResult(hicName);
+    result     = m_result->GetHicResult(hicName);
+  }
+  catch (...) {
+    std::cout << "Error: prediction or result not found for hic " << hicName << std::endl;
+    return;
+  }
+
+  if ((!prediction->IsValid()) || (!result->IsValid())) {
+    std::cout << "Error: prediction or result not valid for hic " << hicName << std::endl;
+    return;
+  }
+
+  result->Compare(prediction);
+}
+
+
 void TScanAnalysis::CreateHicResults()
 {
   if (m_hics.size() == 0) {

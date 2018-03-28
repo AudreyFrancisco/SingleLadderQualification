@@ -52,6 +52,9 @@ private:
   TErrorCounter m_errorCounter;
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
+protected:
+  void Compare(TScanResultHic *aPrediction);
+
 public:
   TDigitalResultHic() : TScanResultHic(){};
   void SetStuckFile(const char *fName) { strcpy(m_stuckFile, fName); };
