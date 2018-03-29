@@ -1110,7 +1110,9 @@ void MainWindow::printClasses()
     std::cout << std::endl
               << "Classifications HIC " << fHICs.at(iHic)->GetDbId() << ":" << std::endl;
     for (unsigned int iAnalysis = 0; iAnalysis < fAnalysisVector.size(); iAnalysis++) {
-      fAnalysisVector.at(iAnalysis)->WriteHicClassToFile(fHICs.at(iHic)->GetDbId());
+      if (fScanVector.at(iAnalysis) != 0) {
+        fAnalysisVector.at(iAnalysis)->WriteHicClassToFile(fHICs.at(iHic)->GetDbId());
+      }
     }
   }
 }
