@@ -82,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   fDatabasewindow   = 0;
   fNoticewindow     = 0;
   fPbnumberofmodule = 0;
+  fDatabasefailure  = 0;
   makeDir("Data");
   ui->setupUi(this);
   this->setWindowTitle(QString::fromUtf8("GUI"));
