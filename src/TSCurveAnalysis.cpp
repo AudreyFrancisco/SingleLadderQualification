@@ -330,13 +330,13 @@ void TSCurveAnalysis::Finalize()
       hicResult->m_nNoThresh += chipResult->m_nNoThresh;
       hicResult->m_nHot += chipResult->m_nHot;
     }
+    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult, m_hics.at(ihic));
     }
     else {
       hicResult->m_class = GetClassificationIB(hicResult, m_hics.at(ihic));
     }
-    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     hicResult->SetValidity(true);
   }
   WriteResult();

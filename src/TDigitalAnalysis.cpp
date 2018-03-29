@@ -66,10 +66,6 @@ void TDigitalAnalysis::Initialize()
   CreatePrediction();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    TDigitalResultHic *hicResult =
-        (TDigitalResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
-    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
-    std::cout << "Start of analysis, nTimeout = " << hicResult->m_errorCounter.nTimeout;
     // CalculatePrediction(m_hics.at(ihic)->GetDbId());
   }
 }
@@ -313,13 +309,13 @@ void TDigitalAnalysis::Finalize()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TDigitalResultHic *hicResult =
         (TDigitalResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
+    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
     }
     else {
       hicResult->m_class = GetClassificationIB(hicResult);
     }
-    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     hicResult->SetValidity(true);
     // ComparePrediction(m_hics.at(ihic)->GetDbId());
   }
