@@ -880,6 +880,8 @@ void MainWindow::fillingOBvectors()
 {
 
   ClearVectors();
+  AddScan(STDigital);
+  return;
   AddScan(STPower);
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   // FIFO and digital scan at three different supply voltages
@@ -1462,18 +1464,22 @@ void MainWindow::attachtodatabase()
         if (fresultVector[j] != 0) {
           std::map<std::string, TScanResultHic *> *mymap = fresultVector.at(j)->GetHicResults();
           for (auto ihic = mymap->begin(); ihic != mymap->end(); ++ihic) {
-            TScanResultHic *result = (TScanResultHic *)ihic->second;
             if (ihic->first.compare(fHicnames.at(i).toStdString()) == 0) {
+              TScanResultHic *result = (TScanResultHic *)ihic->second;
               result->WriteToDB(fDB, activ);
             }
           }
         }
       }
 
-      // attach config file
+      // attach config, comment and classification file
 
       attachConfigFile(activ);
       DbAddAttachment(fDB, activ, attachText, string(path), string("Comment.txt"));
+      path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
+             "/Classification.dat";
+      DbAddAttachment(fDB, activ, attachText, string(path), string("Classification.dat"));
+
       DbAddMember(fDB, activ, fIdofoperator);
 
       std::vector<ActivityDB::actUri> uris;
