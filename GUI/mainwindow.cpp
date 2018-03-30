@@ -880,8 +880,6 @@ void MainWindow::fillingOBvectors()
 {
 
   ClearVectors();
-  AddScan(STDigital);
-  return;
   AddScan(STPower);
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   // FIFO and digital scan at three different supply voltages
