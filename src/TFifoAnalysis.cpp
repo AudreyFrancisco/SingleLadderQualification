@@ -259,9 +259,11 @@ void TFifoResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   GetParameterSuffix(suffix, file_suffix);
 
   DbAddParameter(db, activity, string("FIFO errors") + suffix,
-                 (float)(m_err0 + m_err5 + m_erra + m_errf));
-  DbAddParameter(db, activity, string("FIFO exceptions") + suffix, (float)m_exc);
-  DbAddParameter(db, activity, string("Chips with FIFO errors") + suffix, (float)m_nFaultyChips);
+                 (float)(m_err0 + m_err5 + m_erra + m_errf), GetParameterFile());
+  DbAddParameter(db, activity, string("FIFO exceptions") + suffix, (float)m_exc,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Chips with FIFO errors") + suffix, (float)m_nFaultyChips,
+                 GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   fileName          = string(m_resultFile).substr(slash + 1); // strip path

@@ -152,10 +152,10 @@ void TFastPowerResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity
   string      fileName, ivName;
   std::size_t slash;
 
-  DbAddParameter(db, activity, string("IDDD"), idddSwitchon);
-  DbAddParameter(db, activity, string("IDDA"), iddaSwitchon);
-  DbAddParameter(db, activity, string("Back bias current 0V"), ibias0);
-  DbAddParameter(db, activity, string("Back bias current 3V"), ibias3);
+  DbAddParameter(db, activity, string("IDDD"), idddSwitchon, GetParameterFile());
+  DbAddParameter(db, activity, string("IDDA"), iddaSwitchon, GetParameterFile());
+  DbAddParameter(db, activity, string("Back bias current 0V"), ibias0, GetParameterFile());
+  DbAddParameter(db, activity, string("Back bias current 3V"), ibias3, GetParameterFile());
 
   slash    = string(m_resultFile).find_last_of("/");
   fileName = string(m_resultFile).substr(slash + 1); // strip path

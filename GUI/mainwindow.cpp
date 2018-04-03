@@ -1454,9 +1454,14 @@ void MainWindow::attachtodatabase()
 
 
       // add global parameters (not accessible from within results)
-      DbAddParameter(fDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips());
-      DbAddParameter(fDB, activ, "Time", GetTime());
-
+      if (fresultVector[0]) {
+        TScanResultHic *hicResult = fresultVector[0]->GetHicResult(fHICs.at(i)->GetDbId());
+        if (hicResult) {
+          DbAddParameter(fDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips(),
+                         hicResult->GetParameterFile());
+          DbAddParameter(fDB, activ, "Time", GetTime(), hicResult->GetParameterFile());
+        }
+      }
       // loop over results and write to DB
       for (unsigned int j = 0; j < fresultVector.size(); j++) {
         if (fresultVector[j] != 0) {
@@ -2379,8 +2384,14 @@ void MainWindow::attachtodatabaseretry()
 
 
       // add global parameters (not accessible from within results)
-      DbAddParameter(fDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips());
-      DbAddParameter(fDB, activ, "Time", GetTime());
+      if (fresultVector[0]) {
+        TScanResultHic *hicResult = fresultVector[0]->GetHicResult(fHICs.at(i)->GetDbId());
+        if (hicResult) {
+          DbAddParameter(fDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips(),
+                         hicResult->GetParameterFile());
+          DbAddParameter(fDB, activ, "Time", GetTime(), hicResult->GetParameterFile());
+        }
+      }
 
       // loop over results and write to DB
       for (unsigned int j = 0; j < fresultVector.size(); j++) {
@@ -2396,6 +2407,14 @@ void MainWindow::attachtodatabaseretry()
       }
 
       // attach config file
+      path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
+             "/Classification.dat";
+      DbAddAttachment(fDB, activ, attachText, string(path), string("Classification.dat"));
+
+      path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
+             "/DBParameters.dat";
+      DbAddAttachment(fDB, activ, attachText, string(path), string("DBParameters.dat"));
+
       attachConfigFile(activ);
       DbAddAttachment(fDB, activ, attachText, string(path), string("Comment.txt"));
       DbAddMember(fDB, activ, fIdofoperator);

@@ -160,6 +160,7 @@ void TScanAnalysis::CreateHicResults()
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     TScanResultHic *hicResult   = GetHicResult();
     hicResult->m_class          = CLASS_UNTESTED;
+    hicResult->m_hicName        = m_hics.at(i)->GetDbId();
     hicResult->m_outputPath     = m_config->GetDataPath(m_hics.at(i)->GetDbId());
     hicResult->m_scanParameters = m_scan->GetParameters();
     for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip++) {
@@ -366,6 +367,13 @@ void TScanResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   DbAddAttachment(db, activity, attachResult, string(m_resultFile), string(m_resultFile));
 }
+
+
+std::string TScanResultHic::GetParameterFile()
+{
+  return m_outputPath + std::string("/DBParameters.dat");
+}
+
 
 TScanResultChip *TScanResult::GetChipResult(common::TChipIndex idx)
 {

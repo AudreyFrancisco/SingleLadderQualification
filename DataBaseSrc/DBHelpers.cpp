@@ -370,7 +370,8 @@ int DbGetComponentActivity(AlpideDB *db, int compId, int activityTypeId)
   return -1;
 }
 
-bool DbAddParameter(AlpideDB *db, ActivityDB::activity &activity, string name, float value)
+bool DbAddParameter(AlpideDB *db, ActivityDB::activity &activity, string name, float value,
+                    std::string file)
 {
   ActivityDB::parameter parameter;
   int                   paramId = DbGetParameterId(db, activity.Type, name);
@@ -385,6 +386,12 @@ bool DbAddParameter(AlpideDB *db, ActivityDB::activity &activity, string name, f
   parameter.Value             = value;
 
   activity.Parameters.push_back(parameter);
+
+  FILE *fp = fopen(file.c_str(), "a");
+  if (fp) {
+    fprintf(fp, "Writing parameter %s (ID %d), value %f\n", name.c_str(), paramId, value);
+    fclose(fp);
+  }
   return true;
 }
 

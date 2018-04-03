@@ -73,6 +73,7 @@ class TScanResultHic {
 
 protected:
   std::map<int, TScanResultChip *> m_chipResults;
+  std::string        m_hicName;
   char               m_resultFile[300];
   THicClassification m_class;
   const char *       WriteHicClassification();
@@ -93,6 +94,7 @@ public:
   std::map<int, TScanResultChip *> DeleteThisToo() { return m_chipResults; };
   float GetVariable(int chip, TResultVariable var);
   string GetOutputPath() { return m_outputPath; };
+  string GetParameterFile();
 };
 
 // base class for classes containing complete results

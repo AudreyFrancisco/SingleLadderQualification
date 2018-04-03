@@ -336,12 +336,13 @@ void TDctrlResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   std::size_t slash;
 
   // to be updated, probably divide according to tested device (IB / OB HIC)
-  DbAddParameter(db, activity, string("DCTRL worst max amplitude"), worst_maxAmp);
-  DbAddParameter(db, activity, string("DCTRL worst slope"), worst_slope);
-  DbAddParameter(db, activity, string("DCTRL worst chi square"), worst_chisq);
-  DbAddParameter(db, activity, string("DCTRL worst correlation"), worst_corr);
-  DbAddParameter(db, activity, string("DCTRL worst rise time"), worst_rise);
-  DbAddParameter(db, activity, string("DCTRL worst fall time"), worst_fall);
+  DbAddParameter(db, activity, string("DCTRL worst max amplitude"), worst_maxAmp,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("DCTRL worst slope"), worst_slope, GetParameterFile());
+  DbAddParameter(db, activity, string("DCTRL worst chi square"), worst_chisq, GetParameterFile());
+  DbAddParameter(db, activity, string("DCTRL worst correlation"), worst_corr, GetParameterFile());
+  DbAddParameter(db, activity, string("DCTRL worst rise time"), worst_rise, GetParameterFile());
+  DbAddParameter(db, activity, string("DCTRL worst fall time"), worst_fall, GetParameterFile());
 
   slash    = string(m_resultFile).find_last_of("/");
   fileName = string(m_resultFile).substr(slash + 1); // strip path

@@ -423,15 +423,18 @@ void TDigitalResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   std::string suffix, file_suffix, fileName, remoteName;
   GetParameterSuffix(suffix, file_suffix);
-  DbAddParameter(db, activity, string("Timeouts digital") + suffix, (float)m_errorCounter.nTimeout);
+  DbAddParameter(db, activity, string("Timeouts digital") + suffix, (float)m_errorCounter.nTimeout,
+                 GetParameterFile());
   DbAddParameter(db, activity, string("8b10b errors digital") + suffix,
-                 (float)m_errorCounter.n8b10b);
+                 (float)m_errorCounter.n8b10b, GetParameterFile());
   DbAddParameter(db, activity, string("Corrupt events digital") + suffix,
-                 (float)m_errorCounter.nCorruptEvent);
+                 (float)m_errorCounter.nCorruptEvent, GetParameterFile());
   DbAddParameter(db, activity, string("Priority encoder errors digital") + suffix,
-                 (float)m_errorCounter.nPrioEncoder);
-  DbAddParameter(db, activity, string("Bad double columns digital") + suffix, (float)m_nBadDcols);
-  DbAddParameter(db, activity, string("Bad pixels digital") + suffix, (float)m_nBad);
+                 (float)m_errorCounter.nPrioEncoder, GetParameterFile());
+  DbAddParameter(db, activity, string("Bad double columns digital") + suffix, (float)m_nBadDcols,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Bad pixels digital") + suffix, (float)m_nBad,
+                 GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   fileName          = string(m_resultFile).substr(slash + 1); // strip path
