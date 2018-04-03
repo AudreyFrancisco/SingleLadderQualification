@@ -76,12 +76,16 @@ void TScan::Init()
     try {
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart =
           m_hics.at(ihic)->GetTemperature();
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaStart =
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipStart =
           m_hics.at(ihic)->GetAnalogueVoltage();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaStart =
           m_hics.at(ihic)->GetIdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddStart =
           m_hics.at(ihic)->GetIddd();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaStart =
+          m_hics.at(ihic)->GetVdda();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddStart =
+          m_hics.at(ihic)->GetVddd();
     }
     catch (std::exception &e) {
       std::cout << "Exception " << e.what() << " when reading temp / currents" << std::endl;
@@ -150,12 +154,16 @@ void TScan::Terminate()
     try {
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd =
           m_hics.at(ihic)->GetTemperature();
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaEnd =
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipEnd =
           m_hics.at(ihic)->GetAnalogueVoltage();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaEnd =
           m_hics.at(ihic)->GetIdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddEnd =
           m_hics.at(ihic)->GetIddd();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaEnd =
+          m_hics.at(ihic)->GetVdda();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddEnd =
+          m_hics.at(ihic)->GetVddd();
     }
     catch (std::exception &e) {
       std::cout << "Terminate: exception " << e.what() << " when reading temp / currents"
@@ -456,13 +464,13 @@ void TScan::WriteConditions(const char *fName, THic *aHic)
   fprintf(fp, "Firmware version: %s\n", m_conditions.m_fwVersion);
   fprintf(fp, "Software version: %s\n\n", m_conditions.m_swVersion);
 
-  fprintf(fp, "Temp (start): %.1f\n",
-          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempStart);
-  fprintf(fp, "Temp (end):   %.1f\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempEnd);
-
-  fprintf(fp, "Analogue Supply Voltage (start): %.3f\n",
+  fprintf(fp, "VDDD (start): %.3f A\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddStart);
+  fprintf(fp, "VDDD (end):   %.3f A\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddEnd);
+  fprintf(fp, "VDDA (start): %.3f A\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaStart);
-  fprintf(fp, "Analogue Supply Voltage (end):   %.3f\n",
+  fprintf(fp, "VDDA (end):   %.3f A\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaEnd);
 
   fprintf(fp, "IDDD (start): %.3f A\n",
@@ -473,6 +481,16 @@ void TScan::WriteConditions(const char *fName, THic *aHic)
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaStart);
   fprintf(fp, "IDDA (end):   %.3f A\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaEnd);
+
+  fprintf(fp, "Analogue Supply Voltage (on-chip, start): %.3f\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaChipStart);
+  fprintf(fp, "Analogue Supply Voltage (on-chip, end):   %.3f\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaChipEnd);
+  fprintf(fp, "Temp (on-chip, start): %.1f\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempStart);
+  fprintf(fp, "Temp (on-chip, end):   %.1f\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempEnd);
+
 
   fputs("\n", fp);
 

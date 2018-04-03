@@ -39,6 +39,9 @@ public:
   float        GetIddd();
   float        GetIdda();
   float        GetIBias();
+  float        GetVddd();
+  float        GetVdda();
+  float        GetVbias();
   float        GetTemperature();
   void ScaleVoltage(float aFactor);
   std::string  GetDbId() { return m_dbId; };
