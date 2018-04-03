@@ -148,7 +148,7 @@ def init4030(hameg, i_max):
     time.sleep(0.1);
     hameg.write("OUTP ON\n")      
     
-def saveToDB(HIC_name, test_ok, resistances):
+def saveToDB(HIC_name, test_ok, resistances, output_file_name):
     # read the Configuration
     myConf = Configuration("DBConfig.cfg")
 
@@ -206,7 +206,18 @@ def saveToDB(HIC_name, test_ok, resistances):
            lg.error("Error writing parameter %s!" % (parameter_name))
            return 1
        else:
-           lg.info(" Parameter %s = %f written." % (parameter_name, resistances[channel]))    
+           lg.info(" Parameter %s = %f written." % (parameter_name, resistances[channel]))       
+           
+    fileList = []
+    fileList.append(output_file_name)       
+    
+    actResult = itsDB.AttachDocumentsToActivity(fileList, actID, "GeneralInformation")  
+    
+    if actResult.ErrorCode != 0:
+        lg.error("Error attaching documents %s -> %s!" % (HIC_name+'.dat',actResult.ErrorMessage))
+        return 1
+    else:
+        lg.info(" File %s attached." % (HIC_name+'.dat'))
                
     actResult = itsDB.ActivityMemberAssign(actID)
     if actResult.ErrorCode != 0:
@@ -224,7 +235,8 @@ def saveToDB(HIC_name, test_ok, resistances):
 
 def main():
     # set up serial port
-    dev='/dev/ttyUSB0'
+    dev='/dev/ttyUSB0'   
+    data_dir = "Data"
     current_limit = 0.1
     current_limit_bias = 0.01
     max_voltage = 0.2
@@ -237,11 +249,14 @@ def main():
 
     sour=serial.Serial(dev, 9600, rtscts=True);
     
-    init4030(sour, (current_limit, current_limit, current_limit_bias))
+    init4030(sour, (current_limit, current_limit, current_limit_bias)) 
+    
+    if not os.path.isdir(data_dir):
+        os.makedirs(data_dir)
 
     HIC_name = raw_input("Enter HIC name: ")
     HIC_name = 'OBHIC-' + HIC_name
-    output_file_name = HIC_name + '.dat'
+    output_file_name = data_dir + '/' + time.strftime("%y%m%d_%H%M%S") + '_' + HIC_name + '.dat'
     output_file = open(output_file_name,'w')
     
     max_voltages = ([max_voltage, max_voltage, max_voltage_bias])
@@ -249,10 +264,10 @@ def main():
 
     for channel in range(3):    
         doIVcurve(sour, channel, max_voltages[channel], nstepss[channel], output_file, test_ok, resistances) 
-      
-    saveToDB(HIC_name, test_ok, resistances)  
-    
+
     output_file.close()
+      
+    saveToDB(HIC_name, test_ok, resistances, output_file_name)  
     
 ## execute the main
 if __name__ == "__main__":
