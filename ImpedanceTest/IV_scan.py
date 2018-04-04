@@ -173,6 +173,16 @@ def saveToDB(HIC_name, test_ok, resistances, output_file_name):
         lg.error("DB not open !")  
     else:
         lg.info("DB is open")    
+ 
+ 
+    # Set up the attachment mechanism 
+    # this is mandatory to attach files !
+    DBATTLimit = int(myConf.GetItem("DBATTACHLIMIT"))      # The limit to perform EOS transfer or BLOB
+    DBATTBasepath = myConf.GetItem("DBATTACHBASEPATH")     # The base path of the Local Repository (Es. /tmp/www/repo )
+    DBATTCommand = myConf.GetItem("DBATTACHCOMMAND")       # The bash command used to copy files into local repo
+    DBATTMkdir = myConf.GetItem("DBANEWDIRCOMMAND")        # The bash command used to create the subfolders into local repo
+    DBATTUripath = myConf.GetItem("DBATTACHURIBASEPATH")   # The URI base path to prefix the DB links to attached files
+    itsDB.SetUpAttachments(DBATTLimit,DBATTBasepath,DBATTUripath,DBATTCommand,DBATTMkdir)     
        
     activityResult = ''
                          
