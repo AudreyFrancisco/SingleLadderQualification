@@ -2129,6 +2129,7 @@ void MainWindow::fillingibvectors()
   AddScan(STPower);
   // if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   // Do this scan immediately after power as it sometimes crashes
+  if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   // IBParameterScan();
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
@@ -2137,12 +2138,6 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetVoltageScale(0.9);
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(1.0);
-  for (int current = 2; current < 10; current++) {
-    fConfig->GetScanConfig()->SetMlvdsStrength(current);
-    AddScan(STFifo);
-  }
-  fConfig->GetScanConfig()->SetMlvdsStrength(15);
-  AddScan(STFifo);
   fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
   AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
