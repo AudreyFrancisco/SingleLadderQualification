@@ -61,15 +61,21 @@ def measureCurr(sour):
         val[c] = float(sour.readline())
     print "%0.4fA\t%0.4fA\t%0.4fA" % ( val[0], val[1], val[2]) 
     
-def doIVcurve(sour, channel, max_volt, nsteps, output_file, test_ok, resistances):
+def doIVcurve(HIC_name, sour, channel, max_volt, nsteps, test_ok, resistances, path, fileList):
         
     if channel==0:
-        channel_name = "DVDD"
+        channel_name = "DVDD" 
+        output_file_name = path + '/' + time.strftime("%y%m%d_%H%M%S") + '_' + HIC_name + '_DVDD.dat'
     elif channel==1:
-        channel_name = "AVDD"
+        channel_name = "AVDD"      
+        output_file_name = path + '/' + time.strftime("%y%m%d_%H%M%S") + '_' + HIC_name + '_AVDD.dat'
     elif channel==2:
-        channel_name = "BIAS"
+        channel_name = "BIAS" 
+        output_file_name = path + '/' + time.strftime("%y%m%d_%H%M%S") + '_' + HIC_name + '_BIAS.dat'
     print("Scanning %s" % channel_name)
+    
+    fileList.append(output_file_name)   
+    output_file = open(output_file_name,'w')
     output_file.write("V,I(%s),R(%s)\n" % (channel_name, channel_name))
 
     resistance = 1000000
@@ -105,7 +111,9 @@ def doIVcurve(sour, channel, max_volt, nsteps, output_file, test_ok, resistances
     else:
         print("Test failed") 
         test_ok = test_ok*0
-    sour.write("SOUR:VOLT 0.0\n")
+    sour.write("SOUR:VOLT 0.0\n")       
+    
+    output_file.close()
 
 def init4030(hameg, i_max):
     hameg.write("*IDN?\n")
@@ -148,7 +156,7 @@ def init4030(hameg, i_max):
     time.sleep(0.1);
     hameg.write("OUTP ON\n")      
     
-def saveToDB(HIC_name, test_ok, resistances, output_file_name):
+def saveToDB(HIC_name, test_ok, resistances, fileList):
     # read the Configuration
     myConf = Configuration("DBConfig.cfg")
 
@@ -216,12 +224,9 @@ def saveToDB(HIC_name, test_ok, resistances, output_file_name):
            lg.error("Error writing parameter %s!" % (parameter_name))
            return 1
        else:
-           lg.info(" Parameter %s = %f written." % (parameter_name, resistances[channel]))       
-           
-    fileList = []
-    fileList.append(output_file_name)       
+           lg.info(" Parameter %s = %f written." % (parameter_name, resistances[channel]))           
     
-    actResult = itsDB.AttachDocumentsToActivity(fileList, actID, "GeneralInformation")  
+    actResult = itsDB.AttachDocumentsToActivity(fileList, actID, "GeneralInformation",HIC_name)  
     
     if actResult.ErrorCode != 0:
         lg.error("Error attaching documents %s -> %s!" % (HIC_name+'.dat',actResult.ErrorMessage))
@@ -265,19 +270,22 @@ def main():
         os.makedirs(data_dir)
 
     HIC_name = raw_input("Enter HIC name: ")
-    HIC_name = 'OBHIC-' + HIC_name
-    output_file_name = data_dir + '/' + time.strftime("%y%m%d_%H%M%S") + '_' + HIC_name + '.dat'
-    output_file = open(output_file_name,'w')
-    
+    HIC_name = 'OBHIC-' + HIC_name   
+
+    path = data_dir + '/' + HIC_name
+
+    if not os.path.isdir(path):
+        os.makedirs(path)
+ 
+    fileList = []
+        
     max_voltages = ([max_voltage, max_voltage, max_voltage_bias])
     nstepss = ([nsteps, nsteps, nsteps_bias])
 
     for channel in range(3):    
-        doIVcurve(sour, channel, max_voltages[channel], nstepss[channel], output_file, test_ok, resistances) 
-
-    output_file.close()
+        doIVcurve(HIC_name, sour, channel, max_voltages[channel], nstepss[channel], test_ok, resistances, path, fileList) 
       
-    saveToDB(HIC_name, test_ok, resistances, output_file_name)  
+    saveToDB(HIC_name, test_ok, resistances, fileList)  
     
 ## execute the main
 if __name__ == "__main__":
