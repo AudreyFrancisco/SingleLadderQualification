@@ -228,10 +228,17 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
       StopRun();
       int ErrNums = decodeError();
       if ((ErrNums & 0x03FF00) != 0) {
+        // This is an IDLE condition
         throw;
       }
       else {
-        exit(1);
+        if ((ErrNums & 0x000001) != 0) {
+          // The flush of memory is done by the StopRun()
+          throw;
+        }
+        else {
+          exit(1);
+        }
       }
     }
 
