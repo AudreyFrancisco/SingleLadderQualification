@@ -49,6 +49,7 @@ namespace ScanConfig {
   const int DAC_STEP    = 8;
   const int NDACSAMPLES = 10;
 
+  const int TEST_WITHOUT_COMP = 0;
   // settings for readout test
   const int READOUTSPEED     = 1200;
   const int READOUTOCC       = 32;
@@ -180,6 +181,7 @@ private:
   int  m_pixPerRegion;
   int  m_noiseCutInv;
   char m_fNameSuffix[20];
+  int  m_testWithoutComp;
   // NEW--added for additional scans
   int       m_ithrStart; // usually 30
   int       m_ithrStop;  // usually 100
