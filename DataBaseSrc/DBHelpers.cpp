@@ -1,5 +1,8 @@
 #include "DBHelpers.h"
 #include <fstream>
+#include <set>
+
+std::set<std::string> kTestTypes = {"OB HIC Qualification Test"};
 
 int DbGetActivityTypeId(AlpideDB *db, string name)
 {
@@ -157,6 +160,24 @@ std::vector<int> DbGetActivityIds(AlpideDB *db, int activityTypeId, string compN
 
   return result;
 }
+
+
+void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId)
+{
+  ComponentDB *                     componentDB = new ComponentDB(db);
+  vector<ComponentDB::compActivity> history;
+
+  componentDB->GetComponentActivities(compId, &history);
+
+  for (unsigned int i = 0; i < history.size(); i++) {
+    if (kTestTypes.find(history.at(i).Typename) == kTestTypes.end())
+      continue; // check that typename is in list of tests
+    if (history.at(i).Type == activityTypeId) continue;
+    std::cout << "found test of type " << history.at(i).Typename << std::endl;
+    // add to result, then find newest
+  }
+}
+
 
 bool DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, float &parValue)
 {

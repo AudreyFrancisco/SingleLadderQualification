@@ -30,6 +30,7 @@ int DbIsNewer(ActivityDB::activityLong act0, ActivityDB::activityLong act1);
 bool DbGetLatestActivity(AlpideDB *db, int activityTypeId, string compName,
                          ActivityDB::activityLong &activity);
 int DbGetActivityTypeId(AlpideDB *db, string name);
+void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId);
 bool DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, float &parValue);
 int DbGetPrevActivityTypeId(AlpideDB *db, string name, bool &onChildren);
 int DbGetAttachmentTypeId(AlpideDB *db, string name);

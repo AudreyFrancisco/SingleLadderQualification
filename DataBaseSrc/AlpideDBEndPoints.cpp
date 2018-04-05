@@ -888,6 +888,8 @@ void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actL
           while (n3 != NULL) {
             if (MATCHNODE(n3, "ID")) theAct.Type = atoi((const char *)n3->children->content);
             n3 = n3->next;
+            if (MATCHNODE(n3, "Name")) theAct.Typename.assign((const char *)n3->children->content);
+            n3 = n3->next;
           }
         }
         n2 = n2->next;
