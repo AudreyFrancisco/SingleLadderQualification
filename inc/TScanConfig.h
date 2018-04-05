@@ -133,11 +133,11 @@ namespace ScanConfig {
   const int THRESH_MAXDEAD_HIC_ORANGE_IB = 46080;
 
   const int TEST_DCTRL             = 1;
-  const int DCTRL_MINAMP_GREEN_IB  = 150; // in mV
+  const int DCTRL_MINAMP_IB        = 150; // in mV
   const int DCTRL_MINSLOPE_IB      = 10;  // in mV / DAC
   const int DCTRL_MAXRISE_GREEN_IB = 10;  // in ns
   const int DCTRL_MAXFALL_GREEN_IB = 10;
-  const int DCTRL_MINAMP_GREEN_OB  = 300; // in mV
+  const int DCTRL_MINAMP_OB        = 300; // in mV
   const int DCTRL_MINSLOPE_OB      = 20;  // in mV / DAC
   const int DCTRL_MAXRISE_GREEN_OB = 10;  // in ns
   const int DCTRL_MAXFALL_GREEN_OB = 10;
@@ -256,11 +256,11 @@ private:
   int       m_threshMaxNoiseIB;
   int       m_threshMaxNoiseOB;
   int       m_testDctrl;
-  int       m_dctrlMinAmpGreenOB;
+  int       m_dctrlMinAmpOB;
   int       m_dctrlMinSlopeOB;
   int       m_dctrlMaxRiseGreenOB;
   int       m_dctrlMaxFallGreenOB;
-  int       m_dctrlMinAmpGreenIB;
+  int       m_dctrlMinAmpIB;
   int       m_dctrlMinSlopeIB;
   int       m_dctrlMaxRiseGreenIB;
   int       m_dctrlMaxFallGreenIB;
