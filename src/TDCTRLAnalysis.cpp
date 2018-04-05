@@ -284,7 +284,12 @@ void TDctrlAnalysis::Finalize()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TDctrlResultHic *hicResult =
         (TDctrlResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
-    hicResult->m_class = GetClassification(hicResult);
+    if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
+      hicResult->m_class = GetClassificationOB(hicResult);
+    }
+    else {
+      hicResult->m_class = GetClassificationIB(hicResult);
+    }
     hicResult->SetValidity(true);
   }
 
@@ -293,13 +298,25 @@ void TDctrlAnalysis::Finalize()
   m_finished = true;
 }
 
-THicClassification TDctrlAnalysis::GetClassification(TDctrlResultHic *result)
+THicClassification TDctrlAnalysis::GetClassificationIB(TDctrlResultHic *result)
 {
   THicClassification returnValue = CLASS_GREEN;
-  DoCut(returnValue, CLASS_ORANGE, result->worst_maxAmp * 1000, "DCTRLMINAMPGREEN", true);
-  DoCut(returnValue, CLASS_ORANGE, result->worst_slope * 1000, "DCTRLMINSLOPEGREEN", true);
-  DoCut(returnValue, CLASS_ORANGE, result->worst_rise * 1e9, "DCTRLMAXRISEGREEN");
-  DoCut(returnValue, CLASS_ORANGE, result->worst_fall * 1e9, "DCTRLMAXFALLGREEN");
+  DoCut(returnValue, CLASS_ORANGE, result->worst_maxAmp * 1000, "DCTRLMINAMPGREENIB", true);
+  DoCut(returnValue, CLASS_RED, result->worst_slope * 1000, "DCTRLMINSLOPEIB", true);
+  DoCut(returnValue, CLASS_ORANGE, result->worst_rise * 1e9, "DCTRLMAXRISEGREENIB");
+  DoCut(returnValue, CLASS_ORANGE, result->worst_fall * 1e9, "DCTRLMAXFALLGREENIB");
+  std::cout << "DCTRL Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
+  return returnValue;
+}
+
+THicClassification TDctrlAnalysis::GetClassificationOB(TDctrlResultHic *result)
+{
+  THicClassification returnValue = CLASS_GREEN;
+  DoCut(returnValue, CLASS_ORANGE, result->worst_maxAmp * 1000, "DCTRLMINAMPGREENOB", true);
+  DoCut(returnValue, CLASS_RED, result->worst_slope * 1000, "DCTRLMINSLOPEOB", true);
+  DoCut(returnValue, CLASS_ORANGE, result->worst_rise * 1e9, "DCTRLMAXRISEGREENOB");
+  DoCut(returnValue, CLASS_ORANGE, result->worst_fall * 1e9, "DCTRLMAXFALLGREENOB");
   std::cout << "DCTRL Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
   return returnValue;

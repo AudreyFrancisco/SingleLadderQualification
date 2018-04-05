@@ -112,11 +112,16 @@ TScanConfig::TScanConfig()
   m_threshMaxNoiseOB            = THRESH_MAXNOISE_OB;
   m_threshMaxNoiseIB            = THRESH_MAXNOISE_IB;
 
-  m_testDctrl          = TEST_DCTRL;
-  m_dctrlMinAmpGreen   = DCTRL_MINAMP_GREEN;
-  m_dctrlMinSlopeGreen = DCTRL_MINSLOPE_GREEN;
-  m_dctrlMaxRiseGreen  = DCTRL_MAXRISE_GREEN;
-  m_dctrlMaxFallGreen  = DCTRL_MAXFALL_GREEN;
+  m_testDctrl           = TEST_DCTRL;
+  m_dctrlMinAmpGreenOB  = DCTRL_MINAMP_GREEN_OB;
+  m_dctrlMinSlopeOB     = DCTRL_MINSLOPE_OB;
+  m_dctrlMaxRiseGreenOB = DCTRL_MAXRISE_GREEN_OB;
+  m_dctrlMaxFallGreenOB = DCTRL_MAXFALL_GREEN_OB;
+  m_dctrlMinAmpGreenIB  = DCTRL_MINAMP_GREEN_IB;
+  m_dctrlMinSlopeIB     = DCTRL_MINSLOPE_IB;
+  m_dctrlMaxRiseGreenIB = DCTRL_MAXRISE_GREEN_IB;
+  m_dctrlMaxFallGreenIB = DCTRL_MAXFALL_GREEN_IB;
+
 
   m_enduranceSlices            = ENDURANCE_SLICES;
   m_enduranceCycles            = ENDURANCE_CYCLES;
@@ -224,11 +229,15 @@ void TScanConfig::InitParamMap()
   fSettings["THRESH_MAXNOISE_OB"]           = &m_threshMaxNoiseOB;
   fSettings["THRESH_MAXNOISE_IB"]           = &m_threshMaxNoiseIB;
 
-  fSettings["TESTDCTRL"]          = &m_testDctrl;
-  fSettings["DCTRLMINAMPGREEN"]   = &m_dctrlMinAmpGreen;
-  fSettings["DCTRLMINSLOPEGREEN"] = &m_dctrlMinSlopeGreen;
-  fSettings["DCTRLMAXRISEGREEN"]  = &m_dctrlMaxRiseGreen;
-  fSettings["DCTRLMAXFALLGREEN"]  = &m_dctrlMaxFallGreen;
+  fSettings["TESTDCTRL"]           = &m_testDctrl;
+  fSettings["DCTRLMINAMPGREENIB"]  = &m_dctrlMinAmpGreenIB;
+  fSettings["DCTRLMINSLOPEIB"]     = &m_dctrlMinSlopeIB;
+  fSettings["DCTRLMAXRISEGREENIB"] = &m_dctrlMaxRiseGreenIB;
+  fSettings["DCTRLMAXFALLGREENIB"] = &m_dctrlMaxFallGreenIB;
+  fSettings["DCTRLMINAMPGREENOB"]  = &m_dctrlMinAmpGreenOB;
+  fSettings["DCTRLMINSLOPEOB"]     = &m_dctrlMinSlopeOB;
+  fSettings["DCTRLMAXRISEGREENOB"] = &m_dctrlMaxRiseGreenOB;
+  fSettings["DCTRLMAXFALLGREENOB"] = &m_dctrlMaxFallGreenOB;
 
   fSettings["CAL_VPULSEL"]  = &m_calVpulsel;
   fSettings["TARGETTHRESH"] = &m_targetThresh;

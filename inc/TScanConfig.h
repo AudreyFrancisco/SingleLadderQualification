@@ -131,11 +131,15 @@ namespace ScanConfig {
   const int THRESH_MAXDEAD_HIC_ORANGE_OB = 71680;
   const int THRESH_MAXDEAD_HIC_ORANGE_IB = 46080;
 
-  const int TEST_DCTRL           = 1;
-  const int DCTRL_MINAMP_GREEN   = 500; // in mV
-  const int DCTRL_MINSLOPE_GREEN = 25;  // in mV / DAC
-  const int DCTRL_MAXRISE_GREEN  = 10;  // in ns
-  const int DCTRL_MAXFALL_GREEN  = 10;
+  const int TEST_DCTRL             = 1;
+  const int DCTRL_MINAMP_GREEN_IB  = 150; // in mV
+  const int DCTRL_MINSLOPE_IB      = 10;  // in mV / DAC
+  const int DCTRL_MAXRISE_GREEN_IB = 10;  // in ns
+  const int DCTRL_MAXFALL_GREEN_IB = 10;
+  const int DCTRL_MINAMP_GREEN_OB  = 300; // in mV
+  const int DCTRL_MINSLOPE_OB      = 20;  // in mV / DAC
+  const int DCTRL_MAXRISE_GREEN_OB = 10;  // in ns
+  const int DCTRL_MAXFALL_GREEN_OB = 10;
 
   const int   SPEEDY           = 1; // Use slow fit if 0, differentiate->mean if 1.
   const int   RAWDATA          = 0;
@@ -250,10 +254,14 @@ private:
   int       m_threshMaxNoiseIB;
   int       m_threshMaxNoiseOB;
   int       m_testDctrl;
-  int       m_dctrlMinAmpGreen;
-  int       m_dctrlMinSlopeGreen;
-  int       m_dctrlMaxRiseGreen;
-  int       m_dctrlMaxFallGreen;
+  int       m_dctrlMinAmpGreenOB;
+  int       m_dctrlMinSlopeOB;
+  int       m_dctrlMaxRiseGreenOB;
+  int       m_dctrlMaxFallGreenOB;
+  int       m_dctrlMinAmpGreenIB;
+  int       m_dctrlMinSlopeIB;
+  int       m_dctrlMaxRiseGreenIB;
+  int       m_dctrlMaxFallGreenIB;
   int       m_calVpulsel;
   int       m_targetThresh;
   int       m_nominal;

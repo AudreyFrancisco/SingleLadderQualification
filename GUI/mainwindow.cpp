@@ -889,8 +889,6 @@ void MainWindow::fillingOBvectors()
   fConfig->GetScanConfig()->SetVoltageScale(0.9);
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(1.0);
-  fConfig->GetScanConfig()->SetMlvdsStrength(5);
-  AddScan(STFifo);
   fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
   AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
