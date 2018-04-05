@@ -729,7 +729,7 @@ void TThresholdAnalysis::Finalize()
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
       if (!(m_hics.at(ihic)->ContainsChip(itr->first))) continue;
       TThresholdResultHic *hicResult =
-          (TThresholdResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+          (TThresholdResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
       std::string dimitra       = m_hics.at(ihic)->GetDbId();
       hicResult->m_resultFactor = m_resultFactor;
       hicResult->m_nPixelsNoThreshold += itr->second.GetCounterPixelsNoHits();
@@ -766,7 +766,7 @@ void TThresholdAnalysis::Finalize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TThresholdResultHic *hicResult =
-        (TThresholdResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TThresholdResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
     }

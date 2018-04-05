@@ -33,6 +33,7 @@ private:
 
 protected:
   THisto CreateHisto();
+  void   CalculateTrains();
   int    m_nTriggers;
   bool   m_pulse;
   int    m_pulseLength;

@@ -161,9 +161,10 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     boards->push_back(new TReadoutBoardMOSAIC(config, boardConfig));
   }
 
-  ((TReadoutBoardMOSAIC *)boards->at(0))->GetCoordinatorHandle()->setMode(MCoordinator::Master);
-  ((TReadoutBoardMOSAIC *)boards->at(1))->GetCoordinatorHandle()->setMode(MCoordinator::Slave);
-
+  if (((TBoardConfigMOSAIC *)config->GetBoardConfig(0))->GetMasterSlaveMode()) {
+    ((TReadoutBoardMOSAIC *)boards->at(0))->GetCoordinatorHandle()->setMode(MCoordinator::Master);
+    ((TReadoutBoardMOSAIC *)boards->at(1))->GetCoordinatorHandle()->setMode(MCoordinator::Slave);
+  }
   TPowerBoard *pb = 0;
   if (config->GetUsePowerBoard()) {
     pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0));
@@ -173,8 +174,13 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
 
   // TODO: Define power board mapping for half stave
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
-    hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic + 1)).c_str(),
-                               config->GetHicConfig(ihic)->GetModId(), pb, 0));
+    if (hicIds) {
+      hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb, ihic));
+    }
+    else {
+      hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic + 1)).c_str(),
+                                 config->GetHicConfig(ihic)->GetModId(), pb, ihic));
+    }
     ((THicOB *)(hics->at(ihic)))->ConfigureMaster(0, 0, ihic, 0);
     ((THicOB *)(hics->at(ihic)))->ConfigureMaster(8, 1, ihic, 0);
   }
@@ -240,6 +246,11 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
       }
       boards->at(mosaic)->AddChip(chipId, control, receiver, chips->at(i));
     }
+  }
+
+  for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
+
+    hics->at(ihic)->PowerOn();
   }
 
   CheckControlInterface(config, boards, boardType, chips); // returns nWorking : int
@@ -617,6 +628,7 @@ int initSetupSingle(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
   TReadoutBoardDAQ *myDAQBoard = 0;
   TChipConfig *     chipConfig = config->GetChipConfig(0);
   chipConfig->SetParamValue("LINKSPEED", "-1");
+  chipConfig->SetParamValue("RECEIVER", "0"); // has to match the value set in the BoardDecoder.cpp
   (*boardType) = boardDAQ;
   // values for control interface and receiver currently ignored for DAQ board
   // int               control     = chipConfig->GetParamValue("CONTROLINTERFACE");
@@ -679,7 +691,6 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
               std::vector<TAlpide *> *chips, const char *configFileName /*=""*/,
               std::vector<THic *> *hics /*=0*/, const char **hicIds /*=0*/)
 {
-
   if (strlen(configFileName) ==
       0) // if length is 0 => use the default name or the Command Parameter
     config = new TConfig(ConfigurationFileName);

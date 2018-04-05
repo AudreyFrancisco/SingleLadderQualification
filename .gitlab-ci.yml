@@ -1,21 +1,3 @@
-slc6:
-    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-slc6-dev
-    script:
-      - make clean
-      - make
-      - make lib
-      - make lib_analysis
-      - cd GUI
-      - qmake-qt5 -makefile
-      - make
-      - cd ../MosaicSrc/powerboard
-      - make clean
-      - make
-      - cd GUI
-      - qmake-qt5 -makefile
-      - make clean
-      - make
-
 cc7:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-cc7-dev
     script:

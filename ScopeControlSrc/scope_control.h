@@ -21,25 +21,49 @@ public:
   void enable_ch(uint8_t ch);
   void disable_ch(uint8_t ch);
   void set_vscale_ch(uint8_t ch, double scale);
+  void set_dc_coupling_ch(uint8_t ch, bool dc_coupling);
   void set_timescale(double time);
   void start_quick_meas();
   void stop_quick_meas();
   void get_quick_meas();
   void set_trigger_ext();
+  void set_trigger_slope_rising(bool rising);
+  void set_trigger_position(double time);
+  void set_ext_trigger_level(double level);
+  void set_math_diff(uint8_t ch_p, uint8_t ch_n);
+  void setup_measure();
+  void en_measure_math();
+  void en_measure_ch(uint8_t ch);
+  void get_meas();
   void single_capture();
-  void wait_for_trigger();
+  void wait_for_trigger(int timeout_sec);
   void get_errors();
   bool debug_en = false;
   // Returned by get quick measurments
-  double peak; // Peak to peak
-  double upe;  // Vp+
-  double lpe;  // Vp-
-  double cycr; // RMS cycl
-  double cycm; // Mean cycl
-  double per;  // Period
-  double freq; // Frequency
-  double rtim; // Risetime
-  double ftim; // Falltime
+  struct quick_measures {
+    double peak; // Peak to peak
+    double upe;  // Vp+
+    double lpe;  // Vp-
+    double cycr; // RMS cycl
+    double cycm; // Mean cycl
+    double per;  // Period
+    double freq; // Frequency
+    double rtim; // Risetime
+    double ftim; // Falltime
+  };
+  struct measures {
+    double peak; // Peak to peak
+    double amp;  // Amplitude
+    double rtim; // Risetime
+    double ftim; // Falltime
+  };
+  measures       ch1;
+  measures       ch2;
+  measures       ch3;
+  measures       ch4;
+  measures       math;
+  quick_measures quick_measures;
+
 private:
   void msleep(unsigned long milliseconds);
   serial::Serial *link;
@@ -48,4 +72,6 @@ private:
   void            debug_print(const char *);
   bool            check_model();
   bool eval_ch(uint8_t ch);
+  void en_measure(uint8_t ch);
+  uint8_t measure_ch = 0;
 };

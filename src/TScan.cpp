@@ -11,6 +11,8 @@
 #include "TScan.h"
 
 bool fScanAbort;
+bool fScanAbortAll;
+bool fTimeLimitReached;
 
 TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
              std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
@@ -28,8 +30,9 @@ TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic
   m_histoQue = histoQue;
   m_mutex    = aMutex;
 
-  m_running  = false;
-  fScanAbort = false;
+  m_running     = false;
+  fScanAbort    = false;
+  fScanAbortAll = false;
 
   strcpy(m_state, "Waiting");
   CreateHicConditions();
@@ -37,6 +40,9 @@ TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic
 
 void TScan::Init()
 {
+  fScanAbort        = false;
+  fTimeLimitReached = false;
+
   strcpy(m_state, "Running");
   std::cout << std::endl
             << std::endl
@@ -107,6 +113,15 @@ void TScan::Init()
     }
   }
 }
+
+void TScan::ClearHistoQue()
+{
+  while (!(m_mutex->try_lock()))
+    ;
+  m_histoQue->clear();
+  m_mutex->unlock();
+}
+
 
 // seems the board index is not accessible anywhere.
 // for the time being do like this...
@@ -188,7 +203,9 @@ void TScan::Terminate()
 
 bool TScan::Loop(int loopIndex)
 {
-  if (fScanAbort) return false; // check for abort flag first
+  if (fScanAbort) return false; // check for abort flags first
+  if (fScanAbortAll) return false;
+  if (fTimeLimitReached) return false;
 
   if ((m_step[loopIndex] > 0) && (m_value[loopIndex] < m_stop[loopIndex]))
     return true; // limit check for positive steps

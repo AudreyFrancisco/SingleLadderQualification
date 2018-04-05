@@ -28,21 +28,18 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("IB HIC Endurance Test", IBEndurance);
   ui->typetest->addItem("OB HIC Reception Test", OBReception);
   ui->typetest->addItem("OB HIC Fast Power Test", OBPower);
-  // ui->typetest->addItem("OB Powering Test", OBPowering);
+  ui->typetest->addItem("OL HS Qualification Test", OBHalfStaveOL);
+  ui->typetest->addItem("IB HIC DCTRL Test", IBDctrl);
   // ui->typetest->addItem("OB Half-Stave Test", OBHalfStaveML);
   // ui->typetest->addItem("OB Stave Test", OBStave);
   // ui->typetest->addItem("IB Stave Test", IBStave);
   ui->typeoftest->hide();
+  missingsettings = 0x0;
 
   m_testDatabase = testDatabase;
 
   connect(ui->settings, SIGNAL(clicked()), this->parent(), SLOT(savesettings()));
-
-  connect(ui->typeoftest, SIGNAL(currentIndexChanged(int)), this->parent(),
-          SLOT(connectcombo(int)));
   connect(ui->close, SIGNAL(clicked()), this, SLOT(close()));
-  connect(ui->databaselocation, SIGNAL(currentIndexChanged(int)), this->parent(),
-          SLOT(connectlocationcombo(int)));
   connect(ui->databaselocation, SIGNAL(currentIndexChanged(int)), this,
           SLOT(getlocationcombo(int)));
   connect(ui->typetest, SIGNAL(currentIndexChanged(int)), this->parent(),
@@ -54,13 +51,14 @@ TestSelection::~TestSelection() { delete ui; }
 void TestSelection::SaveSettings(QString &institute, QString &opname, QString &hicid, int &counter,
                                  int &lid, int &memberid, QString &ttwo, QString &tthree,
                                  QString &tfour, QString &tfive, QString &done, QString &dtwo,
-                                 QString &dthree, QString &dfour, QString &dfive)
+                                 QString &dthree, QString &dfour, QString &dfive,
+                                 QString &halfstave)
 {
   if (ui->operatorstring->toPlainText().isEmpty() ||
       /*ui->id->toPlainText().isEmpty() || */ locid == 0) {
     qDebug() << "Put your details" << endl;
+    fCounter = counter = 0;
     popupmessage("Info missing");
-    counter = 0;
   }
   else {
     if (!ui->t2->toPlainText().isEmpty()) {
@@ -127,10 +125,17 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
 
     opname    = ui->operatorstring->toPlainText();
     hicid     = ui->id->toPlainText();
-    counter   = 1;
-    lid       = locid;
-    institute = location;
-    memberid  = GetMemberID();
+    halfstave = ui->id->toPlainText();
+    fCounter = counter = 1;
+    lid                = locid;
+    institute          = location;
+    memberid           = GetMemberID();
+    if (memberid == -1) {
+      popupmessage("The operator you entered \nis not in the Database");
+      if (fCounter == 0) {
+        counter = 0;
+      }
+    }
 
     qDebug() << "The operator name is:" << opname << "and the hic id is: " << hicid << endl;
   }
@@ -141,9 +146,12 @@ void TestSelection::popupmessage(QString m)
   missingsettings = new Dialog(this);
   // need to check this Attribute
   // missingsettings->setAttribute(Qt::WA_DeleteOnClose);
-  this->setWindowFlags((windowFlags() & Qt::WindowStaysOnTopHint));
-  this->setWindowFlags((windowFlags() & ~Qt::WindowStaysOnTopHint));
+  // this->setWindowFlags((windowFlags() & Qt::WindowStaysOnTopHint));
+  // this->setWindowFlags((windowFlags() & ~Qt::WindowStaysOnTopHint));
   missingsettings->append(m);
+  if (fCounter == 0) {
+    missingsettings->hideignore();
+  }
   //  missingsettings->show();
   missingsettings->exec();
 
@@ -217,3 +225,25 @@ void TestSelection::GetTestTypeName(TTestType &typetest, QString &testname)
   std::cout << "the value is: " << value << " the test type is " << typetest
             << "and the string is: " << testname.toStdString().c_str() << std::endl;
 }
+
+void TestSelection::nextstep()
+{
+  if (missingsettings) {
+    missingsettings->close();
+    fCounter = 0;
+  }
+}
+
+void TestSelection::getwindow()
+{
+  if (!missingsettings) {
+    missingsettings = new Dialog(this);
+  }
+  missingsettings->append("The activity cannot be found \nin the Database \nCheck your database "
+                          "connection\nMaybe you need to renew \nyour ticket\nOr there is problem "
+                          "in the db.");
+  missingsettings->hideignore();
+  missingsettings->exec();
+}
+
+int TestSelection::getcounter() { return fCounter; }

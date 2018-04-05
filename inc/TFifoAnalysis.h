@@ -88,6 +88,7 @@ protected:
   void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
+  void CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

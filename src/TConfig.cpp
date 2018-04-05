@@ -178,6 +178,13 @@ TDeviceType TConfig::ReadDeviceType(std::string deviceName)
   else if (deviceName.compare("HALFSTAVERU") == 0) {
     type = TYPE_HALFSTAVERU;
   }
+  else if (deviceName.compare("MLHALFSTAVE") == 0) {
+    type = TYPE_MLHALFSTAVE;
+  }
+  else if (deviceName.compare("MLHALFSTAVE_PB") == 0) {
+    SetUsePowerBoard(true);
+    type = TYPE_MLHALFSTAVE;
+  }
   else if (deviceName.compare("ENDURANCETEST") == 0) {
     type = TYPE_ENDURANCE;
   }
@@ -246,7 +253,8 @@ void TConfig::SetDeviceType(TDeviceType AType, int NChips)
     }
     Init(1, chipIds, boardRU);
   }
-  else if (AType == TYPE_HALFSTAVE || AType == TYPE_HALFSTAVERU) {
+  else if ((AType == TYPE_HALFSTAVE) || (AType == TYPE_HALFSTAVERU) ||
+           (AType == TYPE_MLHALFSTAVE)) {
     // in case of half stave NChips contains number of modules
     for (int imod = 1; imod <= NChips; imod++) {
       int modId = (imod & 0x7);
@@ -258,6 +266,8 @@ void TConfig::SetDeviceType(TDeviceType AType, int NChips)
     }
     if (AType == TYPE_HALFSTAVE)
       Init(2, chipIds, boardMOSAIC);
+    else if (AType == TYPE_MLHALFSTAVE)
+      Init(1, chipIds, boardMOSAIC);
     else
       Init(1, chipIds, boardRU);
   }
@@ -313,16 +323,11 @@ void TConfig::ReadConfigFile(const char *fName)
          (NModules > 0))) { // type and nchips has been found (nchips not needed for type chip)
       // SetDeviceType calls the appropriate init method, which in turn calls
       // the constructors for board and chip configs
-      if (type == TYPE_OBHIC) {
+      if ((type == TYPE_OBHIC) || (type == TYPE_ENDURANCE)) {
         SetDeviceType(type, ModuleId);
       }
-      else if (type == TYPE_ENDURANCE) {
-        SetDeviceType(type, ModuleId);
-      }
-      else if (type == TYPE_HALFSTAVE) {
-        SetDeviceType(type, NModules);
-      }
-      else if (type == TYPE_HALFSTAVERU) {
+      else if ((type == TYPE_HALFSTAVE) || (type == TYPE_HALFSTAVERU) ||
+               (type == TYPE_MLHALFSTAVE)) {
         SetDeviceType(type, NModules);
       }
       else {
@@ -406,12 +411,12 @@ void TConfig::DecodeLine(std::string Line)
   // currently only one is written
   // Note: having a config file with parameters for the mosaic board, but a setup with a DAQ board
   // (or vice versa) will issue unknown-parameter warnings...
-  if (ChipStart >= 0 && fChipConfigs.at(ChipStart)->IsParameter(Param)) {
+  if (ChipStart >= 0 && ChipStop > 0 && fChipConfigs.at(ChipStart)->IsParameter(Param)) {
     for (int i = ChipStart; i < ChipStop; i++) {
       fChipConfigs.at(i)->SetParamValue(Param, Value);
     }
   }
-  else if (BoardStart >= 0 && fBoardConfigs.at(BoardStart)->IsParameter(Param)) {
+  else if (BoardStart >= 0 && BoardStop > 0 && fBoardConfigs.at(BoardStart)->IsParameter(Param)) {
     for (int i = BoardStart; i < BoardStop; i++) {
       fBoardConfigs.at(i)->SetParamValue(Param, Value);
     }

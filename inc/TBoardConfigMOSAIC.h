@@ -36,6 +36,7 @@ private:
   const int    DEF_SPEEDMODE         = 0;
   static char *DEF_IP_ADDRESS;
   const int    DEF_MANCHESTERDISABLE = 0;
+  const int    DEF_MASTERSLAVE       = 0;
 
 protected:
   void InitParamMap();
@@ -50,6 +51,7 @@ protected:
   int Inverted;
   int SpeedMode;
   int ManchesterDisable; //     0; 0: enable manchester encoding; 1: disable
+  int MasterSlave;       //     0: off, 1; activated
 
   char IPAddress[30];
   //	Mosaic::TReceiverSpeed  SpeedMode;
@@ -69,6 +71,7 @@ public:
   uint32_t               GetCtrlTimeout() { return ((uint32_t)RunCtrlTimeout); }
   uint32_t               GetPollingDataTimeout() { return ((uint32_t)pollDataTimeout); }
   uint32_t               GetManchesterDisable() { return ((uint32_t)ManchesterDisable); }
+  uint32_t               GetMasterSlaveMode() { return ((uint32_t)MasterSlave); }
   bool                   IsInverted() { return ((bool)Inverted); }
   Mosaic::TReceiverSpeed GetSpeedMode();
 

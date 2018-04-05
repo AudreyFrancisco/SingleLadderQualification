@@ -1,5 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include "../DataBaseSrc/DBHelpers.h"
 #include "THisto.h"
 #include "TReadoutBoard.h"
 #include "TScanAnalysis.h"
@@ -7,6 +8,7 @@
 #include "calibrationpb.h"
 #include "checkpbconfig.h"
 #include "components.h"
+#include "databasefailure.h"
 #include "databaseselection.h"
 #include "dbnotice.h"
 #include "dialog.h"
@@ -62,7 +64,8 @@ typedef enum {
   STNoise,
   STReadout,
   STEndurance,
-  STFastPowerTest
+  STFastPowerTest,
+  STDctrl
 } TScanType;
 
 class MainWindow : public QMainWindow {
@@ -84,13 +87,13 @@ public slots:
 
   void setandgetcalibration();
   void setTopBottom(int unit);
-
+  void attachtodatabaseretry();
   void attachtodatabase();
   void findidoftheactivitytype(std::string activitytypename, int &id);
   void locationcombo();
   void savesettings();
   void speedycheck(bool checked);
-
+  void attachConfigFile(ActivityDB::activity &activity);
   void loaddefaultconfig();
 
   void loadeditedconfig();
@@ -105,7 +108,7 @@ public slots:
 
   void fillingendurancevectors();
   void fillingfastpower();
-
+  void fillingHSscans();
   void ibscansforageing();
 
   void continuescans()
@@ -114,17 +117,15 @@ public slots:
     fProgresswindow->close();
     delete fProgresswindow;
   }
-  void stopscans()
-  {
-    fExecution = false;
-    fProgresswindow->close();
-    delete fProgresswindow;
-  }
+  void stopscans();
+
   void ConnectTestCombo(int value);
   void      ContinueWithoutWriting();
   void      finalwrite();
   void      quittest();
   AlpideDB *GetDB();
+  void      retryfailedscan();
+  void notifyuser(unsigned int position);
 
 signals:
   void stopTimer();
@@ -157,7 +158,9 @@ private:
   Testingprogress *  fProgresswindow;
   DatabaseSelection *fDatabasewindow;
   resultstorage *    fResultwindow;
+  Databasefailure *  fDatabasefailure;
   void scanLoop(TScan *myScan);
+  void analysis(TScanAnalysis *myAnalysis);
   std::vector<TScan *>         fScanVector;
   std::vector<TScanAnalysis *> fAnalysisVector;
   TPowerBoard *                fPb;
@@ -189,29 +192,48 @@ private:
   int                        fColour;
   int                        fPbnumberofmodule;
   std::vector<QString>       fHicnames;
+  QString                    fHalfstave;
   std::vector<QPushButton *> fEndurancemodules;
   bool                       fDatabasetype;
   bool                       fScanfit;
+  bool                       fStatus;
   void makeDir(const char *aDir);
   bool CreateScanObjects(TScanType scanType, TScanConfig *config, TScan **scan,
                          TScanAnalysis **analysis, TScanResult **result, bool &hasButton);
   void AddScan(TScanType scanType, TScanResult *aResult = 0);
   void ClearVectors();
   int  GetNButtons();
-  void WriteToEos(string hicName, ActivityDB::actUri &uri);
+  void WriteToEos(string hicName, ActivityDB::actUri &uri, bool write);
   string GetServiceAccount(string Institute, string &folder);
   string GetTestFolder();
   THic *FindHic(string hicName);
   void      SetHicClassifications();
+  void      printClasses();
   TTestType GetTestType();
   int       GetTime();
   QAction * fWritedb;
   QFile *   fMfile;
   std::vector<pair<int, int>> fActComponentTypeIDs;
-  std::vector<int> fComponentIDs;
-  Components *     fComponentWindow;
-  bool             fstop;
-  int              fComponentTypeID;
+  std::vector<int>    fComponentIDs;
+  Components *        fComponentWindow;
+  bool                fstop;
+  int                 fComponentTypeID;
+  int                 fComponentTypeIDb;
+  int                 fComponentTypeIDa;
+  int                 fhalfstaveid;
+  int                 fhalfstavein;
+  int                 fhalfstaveout;
+  std::vector<TChild> fHalfstavemodules;
+  std::vector<int>    fActivityResults;
+  TScanType GetScanType(int scannumber);
+  std::vector<TScanType> fScanTypes;
+  bool                   fTestAgain;
+  std::vector<TScanType> fNewScans;
+  unsigned int           fExtraScans = 0;
+  unsigned int           fInitialScans;
+  bool                   fAddingScans;
+  bool                   fExceptionthrown;
+
 
 private slots:
   void button_obm1_clicked();
@@ -222,7 +244,7 @@ private slots:
   void button_obm6_clicked();
   void button_obm7_clicked();
   void applytests();
-  void performtests(std::vector<TScan *>, std::vector<TScanAnalysis *>);
+  void performtests();
   void test();
   void detailscombo(int dnumber);
   void start_test();
@@ -230,6 +252,7 @@ private slots:
   void fillingreceptionscans();
   void poweringscan();
   void fillingOBvectors();
+  void fillingDctrl();
   void StopScan();
 
   // void setVI(float * vcasn, float * ithr);

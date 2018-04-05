@@ -16,7 +16,10 @@
 const int MAXLOOPLEVEL = 3;
 const int MAXBOARDS    = 2;
 
-extern bool fScanAbort;
+extern bool fScanAbort;        // fScanAbort stops current scan (set false in Init)
+extern bool fScanAbortAll;     // fScanAbortAll stops all scans (set false in constructor)
+extern bool fTimeLimitReached; // stops current scan but still lets the analysis finish; used for
+                               // endurance test
 
 typedef struct {
   int nEnabled;
@@ -27,6 +30,7 @@ typedef struct {
 } TErrorCounter;
 
 typedef struct TScanParameters__ {
+  virtual ~TScanParameters__(){};
 } TScanParameters;
 
 class TScanConditionsHic {
@@ -108,6 +112,7 @@ public:
   virtual void LoopEnd(int loopIndex)     = 0;
   virtual void PrepareStep(int loopIndex) = 0;
   virtual void Execute()                  = 0;
+  void         ClearHistoQue();
   bool Loop(int loopIndex);
   virtual void Next(int loopIndex);
   void CreateScanHisto();
@@ -117,6 +122,11 @@ public:
   const char *     GetState() { return m_state; };
   TScanConditions *GetConditions() { return &m_conditions; };
   TScanParameters *GetParameters() { return m_parameters; };
+  virtual bool SetParameters(TScanParameters *pars)
+  {
+    (void)pars;
+    return false;
+  };
   TErrorCounter GetErrorCount(std::string hicId);
   void CreateHicConditions();
   void WriteConditions(const char *fName, THic *aHic);

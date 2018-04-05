@@ -19,7 +19,8 @@ typedef enum {
   IBQualification,
   IBEndurance,
   IBStave,
-  IBStaveEndurance
+  IBStaveEndurance,
+  IBDctrl
 } TTestType;
 
 namespace ScanConfig {
@@ -57,12 +58,13 @@ namespace ScanConfig {
   const int READOUTPLLSTAGES = -1; // -1 meaning using the standard setting from the chip config
 
   // current limits for powering test in mA
-  const int POWER_CUT_MINIDDA_OB = 20;
-  const int POWER_CUT_MINIDDD_OB = 50;
-  const int POWER_CUT_MAXIDDA_OB = 200; // for fast power test
-  const int POWER_CUT_MAXIDDD_OB = 200; // for fast power test
-  const int POWER_CUT_MINIDDD_IB = 50;
-  const int POWER_CUT_MINIDDA_IB = 20;
+  const int POWER_CUT_MINIDDA_OB        = 20;
+  const int POWER_CUT_MINIDDD_OB        = 50;
+  const int POWER_CUT_MAXIDDA_OB        = 200; // for fast power test
+  const int POWER_CUT_MAXIDDD_GREEN_OB  = 200; // for fast power test
+  const int POWER_CUT_MAXIDDD_ORANGE_OB = 800; // for fast power test
+  const int POWER_CUT_MINIDDD_IB        = 50;
+  const int POWER_CUT_MINIDDA_IB        = 20;
 
   const int POWER_CUT_MINIDDA_CLOCKED_OB = 150;
   const int POWER_CUT_MINIDDD_CLOCKED_OB = 600;
@@ -80,9 +82,16 @@ namespace ScanConfig {
   const int POWER_MAXFACTOR_4V_IB = 3;
   const int POWER_MAXFACTOR_4V_OB = 3;
 
+  // cuts for readout test
+  const int READOUT_MAXTIMEOUT     = 0;
+  const int READOUT_MAXCORRUPT     = 0;
+  const int READOUT_MAX8b10b_GREEN = 0;
+
   // cuts for fifo test
-  const int FIFO_CUT_MAXERR    = 128; // max number of errors per pattern and hic
-  const int FIFO_CUT_MAXFAULTY = 1;   // max number of chips with errors
+  const int FIFO_CUT_MAXEXCEPTION  = 0;   // max number of exceptions
+  const int FIFO_CUT_MAXERR_ORANGE = 128; // max number of errors per pattern and hic
+  const int FIFO_CUT_MAXERR_GREEN  = 0;   // max number of errors per pattern and hic
+  const int FIFO_CUT_MAXFAULTY     = 1;   // max number of chips with errors
 
   // cuts for digital scan
   const int DIGITAL_MAXTIMEOUT_GREEN      = 0;
@@ -122,6 +131,12 @@ namespace ScanConfig {
   const int THRESH_MAXDEAD_HIC_ORANGE_OB = 71680;
   const int THRESH_MAXDEAD_HIC_ORANGE_IB = 46080;
 
+  const int TEST_DCTRL           = 1;
+  const int DCTRL_MINAMP_GREEN   = 500; // in mV
+  const int DCTRL_MINSLOPE_GREEN = 25;  // in mV / DAC
+  const int DCTRL_MAXRISE_GREEN  = 10;  // in ns
+  const int DCTRL_MAXFALL_GREEN  = 10;
+
   const int   SPEEDY           = 1; // Use slow fit if 0, differentiate->mean if 1.
   const int   RAWDATA          = 0;
   const int   CAL_VPULSEL      = 160; // VPULSEH assumed 170.  Used for ITHR and VCASN scans.
@@ -132,21 +147,22 @@ namespace ScanConfig {
   const float VOLTAGE_SCALE = 1.0;
   const float BACKBIAS      = 0;
   const int   NOMINAL       = 0;
-  const int   ENDURANCE_CYCLES             = 5;  // total number of cycles
-  const int   ENDURANCE_UPTIME             = 60; // up and down wait time in seconds
+  const int   ENDURANCE_SLICES             = 21;  // number of cycle slices
+  const int   ENDURANCE_CYCLES             = 150; // total number of cycles per slice
+  const int   ENDURANCE_UPTIME             = 60;  // up and down wait time in seconds per cycle
   const int   ENDURANCE_DOWNTIME           = 120;
   const int   ENDURANCE_TRIGGERS           = 10000;
-  const int   ENDURANCE_LIMIT              = 168; // time limit in hours
+  const int   ENDURANCE_LIMIT              = 8; // time limit in hours per slice
   const int   ENDURANCE_MAXTRIPS_GREEN     = 0;
-  const int   ENDURANCE_MAXTRIPS_ORANGE    = 1;
+  const int   ENDURANCE_MAXTRIPS_ORANGE    = 3; // approx. 1 per 1000 cycles
   const int   ENDURANCE_MINCHIPS_GREEN     = 14;
-  const int   ENDURANCE_MAXFAILURES_ORANGE = 1;
+  const int   ENDURANCE_MAXFAILURES_ORANGE = 30; // approx. 1 per 100 cycles
 }
 
 class TScanConfig {
 private:
   std::map<std::string, int *> fSettings;
-  int  m_retest;
+  std::map<std::string, int>   m_retest;
   int  m_nInj;
   int  m_nTrig;
   int  m_chargeStart;
@@ -178,7 +194,8 @@ private:
   int       m_powerCutMinIdda_OB;
   int       m_powerCutMinIddd_OB;
   int       m_powerCutMaxIdda_OB;
-  int       m_powerCutMaxIddd_OB;
+  int       m_powerCutMaxIddd_Green_OB;
+  int       m_powerCutMaxIddd_Orange_OB;
   int       m_powerCutMinIddaClocked_OB;
   int       m_powerCutMinIdddClocked_OB;
   int       m_powerCutMaxIddaClocked_OB;
@@ -193,7 +210,12 @@ private:
   int       m_powerCutMaxBias3V_OB;
   int       m_powerMaxFactor4V_IB;
   int       m_powerMaxFactor4V_OB;
-  int       m_fifoCutMaxErr;
+  int       m_readoutMaxTimeout;
+  int       m_readoutMaxCorrupt;
+  int       m_readoutMax8b10bGreen;
+  int       m_fifoCutMaxException;
+  int       m_fifoCutMaxErrGreen;
+  int       m_fifoCutMaxErrOrange;
   int       m_fifoCutMaxFaulty;
   int       m_digitalMaxTimeoutOrange;
   int       m_digitalMaxTimeoutGreen;
@@ -227,6 +249,11 @@ private:
   int       m_threshMaxDeadPerHicOrangeIB;
   int       m_threshMaxNoiseIB;
   int       m_threshMaxNoiseOB;
+  int       m_testDctrl;
+  int       m_dctrlMinAmpGreen;
+  int       m_dctrlMinSlopeGreen;
+  int       m_dctrlMaxRiseGreen;
+  int       m_dctrlMaxFallGreen;
   int       m_calVpulsel;
   int       m_targetThresh;
   int       m_nominal;
@@ -235,6 +262,7 @@ private:
   int       m_mlvdsStrength;
   float     m_backBias;
   bool      m_useDataPath; // for compatibility with standalone scans, set true for GUI
+  int       m_enduranceSlices;
   int       m_enduranceCycles;
   int       m_enduranceUptime;
   int       m_enduranceDowntime;
@@ -265,7 +293,7 @@ public:
   std::string GetRemoteHicPath(std::string HicName);
   bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
 
-  int   GetRetestNumber() { return m_retest; };
+  int GetRetestNumber(std::string hicName);
   int   GetNInj() { return m_nInj; };
   int   GetChargeStart() { return m_chargeStart; };
   int   GetChargeStep() { return m_chargeStep; };
@@ -287,7 +315,7 @@ public:
   bool  GetIsMasked() { return m_isMasked; };
   float GetBackBias() { return m_backBias; };
   bool  GetUseDataPath() { return m_useDataPath; };
-  void SetRetestNumber(int aRetest) { m_retest = aRetest; };
+  void SetRetestNumber(std::string hicName, int aRetest);
   void SetfNameSuffix(const char *aSuffix) { strcpy(m_fNameSuffix, aSuffix); };
   void SetVoltageScale(float aScale) { m_voltageScale = aScale; };
   void SetMlvdsStrength(int aStrength) { m_mlvdsStrength = aStrength; };

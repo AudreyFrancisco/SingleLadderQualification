@@ -17,21 +17,7 @@ TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
 
   ((TDigitalParameters *)m_parameters)->voltageScale = voltageScale;
 
-  std::cout << "voltageScale = " << voltageScale << std::endl;
-  if (IsNominal()) {
-    strcpy(m_name, "Digital Scan");
-  }
-  else if (IsUpper() && (((TDigitalParameters *)m_parameters)->voltageScale < 1.2)) {
-    strcpy(m_name, "Digital Scan, V +10%");
-  }
-  else if (((TDigitalParameters *)m_parameters)->voltageScale > 0.8 && IsLower()) {
-    strcpy(m_name, "Digital Scan, V -10%");
-  }
-  else {
-    std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
-    ((TDigitalParameters *)m_parameters)->voltageScale = 1.0;
-    strcpy(m_name, "Digital Scan");
-  }
+  SetName();
 
   m_start[0] = 0;
   m_step[0]  = 1;
@@ -49,6 +35,44 @@ TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
 
   CreateScanHisto();
 }
+
+
+void TDigitalScan::SetName()
+{
+  std::cout << "voltageScale = " << ((TDigitalParameters *)m_parameters)->voltageScale << std::endl;
+  if (IsNominal()) {
+    strcpy(m_name, "Digital Scan");
+  }
+  else if (IsUpper() && (((TDigitalParameters *)m_parameters)->voltageScale < 1.2)) {
+    strcpy(m_name, "Digital Scan, V +10%");
+  }
+  else if (((TDigitalParameters *)m_parameters)->voltageScale > 0.8 && IsLower()) {
+    strcpy(m_name, "Digital Scan, V -10%");
+  }
+  else {
+    std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
+    ((TDigitalParameters *)m_parameters)->voltageScale = 1.0;
+    strcpy(m_name, "Digital Scan");
+  }
+}
+
+
+bool TDigitalScan::SetParameters(TScanParameters *pars)
+{
+  TDigitalParameters *dPars = dynamic_cast<TDigitalParameters *>(pars);
+  if (dPars) {
+    std::cout << "TDigitalScan: Updating parameters" << std::endl;
+    ((TDigitalParameters *)m_parameters)->voltageScale = dPars->voltageScale;
+    SetName();
+    return true;
+  }
+  else {
+    std::cout << "TDigitalScan::SetParameters: Error, bad parameter type, doing nothing"
+              << std::endl;
+    return false;
+  }
+}
+
 
 void TDigitalScan::ConfigureFromu(TAlpide *chip)
 {

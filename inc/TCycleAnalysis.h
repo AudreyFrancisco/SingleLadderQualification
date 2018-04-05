@@ -27,8 +27,8 @@ private:
   float m_avIddd;
   float m_maxIddd;
   float m_minIddd;
-  char  m_cycleFile[200];
-  void SetCycleFile(const char *fName) { strcpy(m_cycleFile, fName); };
+  char  m_cycleFile[300];
+  void SetCycleFile(const char *fName) { strncpy(m_cycleFile, fName, sizeof(m_cycleFile)); };
 
 protected:
 public:
@@ -67,12 +67,17 @@ protected:
   void WriteResult();
   void AnalyseHisto(TScanHisto *histo) { (void)histo; };
   string                        GetPreviousTestType() { return string(""); }; // done only once
+  void CalculatePrediction(std::string hicName) { (void)hicName; };
   THicClassification GetClassificationOB(TCycleResultHic *result);
 
 public:
   TCycleAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                  std::vector<THic *> hics, std::mutex *aMutex, TCycleResult *aResult = 0);
-  void Initialize() { CreateHicResults(); };
+  void Initialize()
+  {
+    CreateHicResults();
+    InitCounters();
+  }; // initcounters normally executed in TScanAnalysis::Run
   void Run(){};
   void Finalize();
 };

@@ -6,7 +6,7 @@ using namespace ScanConfig;
 
 TScanConfig::TScanConfig()
 {
-  m_retest = 0;
+  m_retest.clear();
   // dummy values for first tests
   m_nInj           = NINJ;
   m_nTrig          = NTRIG;
@@ -52,7 +52,8 @@ TScanConfig::TScanConfig()
   m_powerCutMinIdda_OB        = POWER_CUT_MINIDDA_OB;
   m_powerCutMinIddd_OB        = POWER_CUT_MINIDDD_OB;
   m_powerCutMaxIdda_OB        = POWER_CUT_MAXIDDA_OB;
-  m_powerCutMaxIddd_OB        = POWER_CUT_MAXIDDD_OB;
+  m_powerCutMaxIddd_Green_OB  = POWER_CUT_MAXIDDD_GREEN_OB;
+  m_powerCutMaxIddd_Orange_OB = POWER_CUT_MAXIDDD_ORANGE_OB;
   m_powerCutMinIddaClocked_OB = POWER_CUT_MINIDDA_CLOCKED_OB;
   m_powerCutMinIdddClocked_OB = POWER_CUT_MINIDDD_CLOCKED_OB;
   m_powerCutMaxIddaClocked_OB = POWER_CUT_MAXIDDA_CLOCKED_OB;
@@ -67,9 +68,14 @@ TScanConfig::TScanConfig()
   m_powerCutMaxBias3V_OB      = POWER_CUT_MAXBIAS_3V_OB;
   m_powerMaxFactor4V_IB       = POWER_MAXFACTOR_4V_IB;
   m_powerMaxFactor4V_OB       = POWER_MAXFACTOR_4V_OB;
+  m_readoutMaxTimeout         = READOUT_MAXTIMEOUT;
+  m_readoutMaxCorrupt         = READOUT_MAXCORRUPT;
+  m_readoutMax8b10bGreen      = READOUT_MAX8b10b_GREEN;
 
-  m_fifoCutMaxErr    = FIFO_CUT_MAXERR;
-  m_fifoCutMaxFaulty = FIFO_CUT_MAXFAULTY;
+  m_fifoCutMaxErrGreen  = FIFO_CUT_MAXERR_GREEN;
+  m_fifoCutMaxErrOrange = FIFO_CUT_MAXERR_ORANGE;
+  m_fifoCutMaxFaulty    = FIFO_CUT_MAXFAULTY;
+  m_fifoCutMaxException = FIFO_CUT_MAXEXCEPTION;
 
   m_digitalMaxTimeoutGreen       = DIGITAL_MAXTIMEOUT_GREEN;
   m_digitalMaxTimeoutOrange      = DIGITAL_MAXTIMEOUT_ORANGE;
@@ -106,6 +112,13 @@ TScanConfig::TScanConfig()
   m_threshMaxNoiseOB            = THRESH_MAXNOISE_OB;
   m_threshMaxNoiseIB            = THRESH_MAXNOISE_IB;
 
+  m_testDctrl          = TEST_DCTRL;
+  m_dctrlMinAmpGreen   = DCTRL_MINAMP_GREEN;
+  m_dctrlMinSlopeGreen = DCTRL_MINSLOPE_GREEN;
+  m_dctrlMaxRiseGreen  = DCTRL_MAXRISE_GREEN;
+  m_dctrlMaxFallGreen  = DCTRL_MAXFALL_GREEN;
+
+  m_enduranceSlices            = ENDURANCE_SLICES;
   m_enduranceCycles            = ENDURANCE_CYCLES;
   m_enduranceTriggers          = ENDURANCE_TRIGGERS;
   m_enduranceUptime            = ENDURANCE_UPTIME;
@@ -131,44 +144,50 @@ void TScanConfig::InitParamMap()
   fSettings["PIXPERREGION"] = &m_pixPerRegion;
   fSettings["NOISECUT_INV"] = &m_noiseCutInv;
 
-  fSettings["VCASN_START"]        = &m_vcasnStart;
-  fSettings["VCASN_STOP"]         = &m_vcasnStop;
-  fSettings["VCASN_STEP"]         = &m_vcasnStep;
-  fSettings["ITHR_START"]         = &m_ithrStart;
-  fSettings["ITHR_STOP"]          = &m_ithrStop;
-  fSettings["ITHR_STEP"]          = &m_ithrStep;
-  fSettings["DACSTART"]           = &m_ithrStart;
-  fSettings["DACSTOP"]            = &m_ithrStop;
-  fSettings["DACSTEP"]            = &m_ithrStep;
-  fSettings["NDACSAMPLES"]        = &m_nDacSamples;
-  fSettings["SCAN_STEP"]          = &m_scanStep;
-  fSettings["TUNINGMAXROW"]       = &m_tuningMaxrow;
-  fSettings["SPEEDY"]             = &m_speedy;
-  fSettings["RAWDATA"]            = &m_rawData;
-  fSettings["IVCURVE"]            = &m_ivCurve;
-  fSettings["IVPOINTS"]           = &m_ivPoints;
-  fSettings["MAXIBIAS"]           = &m_maxIbias;
-  fSettings["MINIDDA_OB"]         = &m_powerCutMinIdda_OB;
-  fSettings["MINIDDD_OB"]         = &m_powerCutMinIddd_OB;
-  fSettings["MAXIDDA_OB"]         = &m_powerCutMaxIdda_OB;
-  fSettings["MAXIDDD_OB"]         = &m_powerCutMaxIddd_OB;
-  fSettings["MINIDDA_CLOCKED_OB"] = &m_powerCutMinIddaClocked_OB;
-  fSettings["MINIDDD_CLOCKED_OB"] = &m_powerCutMinIdddClocked_OB;
-  fSettings["MAXIDDA_CLOCKED_OB"] = &m_powerCutMaxIddaClocked_OB;
-  fSettings["MAXIDDD_CLOCKED_OB"] = &m_powerCutMaxIdddClocked_OB;
-  fSettings["MINIDDA_IB"]         = &m_powerCutMinIdda_IB;
-  fSettings["MINIDDD_IB"]         = &m_powerCutMinIddd_IB;
-  fSettings["MINIDDA_CLOCKED_IB"] = &m_powerCutMinIddaClocked_IB;
-  fSettings["MINIDDD_CLOCKED_IB"] = &m_powerCutMinIdddClocked_IB;
-  fSettings["MAXIDDA_CLOCKED_IB"] = &m_powerCutMaxIddaClocked_IB;
-  fSettings["MAXIDDD_CLOCKED_IB"] = &m_powerCutMaxIdddClocked_IB;
-  fSettings["MAXBIAS_3V_IB"]      = &m_powerCutMaxBias3V_IB;
-  fSettings["MAXBIAS_3V_OB"]      = &m_powerCutMaxBias3V_OB;
-  fSettings["MAXFACTOR_4V_IB"]    = &m_powerMaxFactor4V_IB;
-  fSettings["MAXFACTOR_4V_OB"]    = &m_powerMaxFactor4V_OB;
+  fSettings["VCASN_START"]            = &m_vcasnStart;
+  fSettings["VCASN_STOP"]             = &m_vcasnStop;
+  fSettings["VCASN_STEP"]             = &m_vcasnStep;
+  fSettings["ITHR_START"]             = &m_ithrStart;
+  fSettings["ITHR_STOP"]              = &m_ithrStop;
+  fSettings["ITHR_STEP"]              = &m_ithrStep;
+  fSettings["DACSTART"]               = &m_ithrStart;
+  fSettings["DACSTOP"]                = &m_ithrStop;
+  fSettings["DACSTEP"]                = &m_ithrStep;
+  fSettings["NDACSAMPLES"]            = &m_nDacSamples;
+  fSettings["SCAN_STEP"]              = &m_scanStep;
+  fSettings["TUNINGMAXROW"]           = &m_tuningMaxrow;
+  fSettings["SPEEDY"]                 = &m_speedy;
+  fSettings["RAWDATA"]                = &m_rawData;
+  fSettings["IVCURVE"]                = &m_ivCurve;
+  fSettings["IVPOINTS"]               = &m_ivPoints;
+  fSettings["MAXIBIAS"]               = &m_maxIbias;
+  fSettings["MINIDDA_OB"]             = &m_powerCutMinIdda_OB;
+  fSettings["MINIDDD_OB"]             = &m_powerCutMinIddd_OB;
+  fSettings["MAXIDDA_OB"]             = &m_powerCutMaxIdda_OB;
+  fSettings["MAXIDDD_GREEN_OB"]       = &m_powerCutMaxIddd_Green_OB;
+  fSettings["MAXIDDD_ORANGE_OB"]      = &m_powerCutMaxIddd_Orange_OB;
+  fSettings["MINIDDA_CLOCKED_OB"]     = &m_powerCutMinIddaClocked_OB;
+  fSettings["MINIDDD_CLOCKED_OB"]     = &m_powerCutMinIdddClocked_OB;
+  fSettings["MAXIDDA_CLOCKED_OB"]     = &m_powerCutMaxIddaClocked_OB;
+  fSettings["MAXIDDD_CLOCKED_OB"]     = &m_powerCutMaxIdddClocked_OB;
+  fSettings["MINIDDA_IB"]             = &m_powerCutMinIdda_IB;
+  fSettings["MINIDDD_IB"]             = &m_powerCutMinIddd_IB;
+  fSettings["MINIDDA_CLOCKED_IB"]     = &m_powerCutMinIddaClocked_IB;
+  fSettings["MINIDDD_CLOCKED_IB"]     = &m_powerCutMinIdddClocked_IB;
+  fSettings["MAXIDDA_CLOCKED_IB"]     = &m_powerCutMaxIddaClocked_IB;
+  fSettings["MAXIDDD_CLOCKED_IB"]     = &m_powerCutMaxIdddClocked_IB;
+  fSettings["MAXBIAS_3V_IB"]          = &m_powerCutMaxBias3V_IB;
+  fSettings["MAXBIAS_3V_OB"]          = &m_powerCutMaxBias3V_OB;
+  fSettings["MAXFACTOR_4V_IB"]        = &m_powerMaxFactor4V_IB;
+  fSettings["MAXFACTOR_4V_OB"]        = &m_powerMaxFactor4V_OB;
+  fSettings["READOUT_MAXTIMEOUT"]     = &m_readoutMaxTimeout;
+  fSettings["READOUT_MAXCORRUPT"]     = &m_readoutMaxCorrupt;
+  fSettings["READOUT_MAX8b10b_GREEN"] = &m_readoutMax8b10bGreen;
 
-  fSettings["FIFO_MAXERR"]    = &m_fifoCutMaxErr;
-  fSettings["FIFO_MAXFAULTY"] = &m_fifoCutMaxFaulty;
+  fSettings["FIFO_MAXERR_GREEN"]   = &m_fifoCutMaxErrGreen;
+  fSettings["FIFO_MAXERR_ORANGE"]  = &m_fifoCutMaxErrOrange;
+  fSettings["FIFO_MAXFAULTYCHIPS"] = &m_fifoCutMaxFaulty;
+  fSettings["FIFO_MAXEXCEPTION"]   = &m_fifoCutMaxException;
 
   fSettings["DIGITAL_MAXTIMEOUT_GREEN"]      = &m_digitalMaxTimeoutGreen;
   fSettings["DIGITAL_MAXTIMEOUT_ORANGE"]     = &m_digitalMaxTimeoutOrange;
@@ -205,10 +224,17 @@ void TScanConfig::InitParamMap()
   fSettings["THRESH_MAXNOISE_OB"]           = &m_threshMaxNoiseOB;
   fSettings["THRESH_MAXNOISE_IB"]           = &m_threshMaxNoiseIB;
 
+  fSettings["TESTDCTRL"]          = &m_testDctrl;
+  fSettings["DCTRLMINAMPGREEN"]   = &m_dctrlMinAmpGreen;
+  fSettings["DCTRLMINSLOPEGREEN"] = &m_dctrlMinSlopeGreen;
+  fSettings["DCTRLMAXRISEGREEN"]  = &m_dctrlMaxRiseGreen;
+  fSettings["DCTRLMAXFALLGREEN"]  = &m_dctrlMaxFallGreen;
+
   fSettings["CAL_VPULSEL"]  = &m_calVpulsel;
   fSettings["TARGETTHRESH"] = &m_targetThresh;
   fSettings["NOMINAL"]      = &m_nominal;
 
+  fSettings["ENDURANCESLICES"]    = &m_enduranceSlices;
   fSettings["ENDURANCECYCLES"]    = &m_enduranceCycles;
   fSettings["ENDURANCETRIGGERS"]  = &m_enduranceTriggers;
   fSettings["ENDURANCEUPTIME"]    = &m_enduranceUptime;
@@ -258,12 +284,32 @@ int TScanConfig::GetParamValue(std::string Name)
   return -1;
 }
 
+void TScanConfig::SetRetestNumber(std::string hicName, int aRetest)
+{
+  if (m_retest.find(hicName) != m_retest.end()) {
+    std::cout << "Warning (TScanConfig::SetRetestNumber): hic " << hicName
+              << " occurred more than once, ignored!" << std::endl;
+    return;
+  }
+  m_retest.insert(std::pair<std::string, int>(hicName, aRetest));
+}
+
+int TScanConfig::GetRetestNumber(std::string hicName)
+{
+  if (m_retest.find(hicName) != m_retest.end()) {
+    return m_retest.find(hicName)->second;
+  }
+  std::cout << "Warning (TScanConfig::GetRetestNumber): hic " << hicName
+            << " not found, returning 0" << std::endl;
+  return 0;
+}
+
 std::string TScanConfig::GetDataPath(std::string HicName)
 {
   std::string result = std::string("Data/") + HicName;
-  if (GetRetestNumber() > 0) {
+  if (GetRetestNumber(HicName) > 0) {
     result.append("_Retest_");
-    result.append(std::to_string(GetRetestNumber()));
+    result.append(std::to_string(GetRetestNumber(HicName)));
   }
   return result;
 }
@@ -271,9 +317,9 @@ std::string TScanConfig::GetDataPath(std::string HicName)
 std::string TScanConfig::GetRemoteHicPath(std::string HicName)
 {
   std::string result = HicName;
-  if (GetRetestNumber() > 0) {
+  if (GetRetestNumber(HicName) > 0) {
     result.append("_Retest_");
-    result.append(std::to_string(GetRetestNumber()));
+    result.append(std::to_string(GetRetestNumber(HicName)));
   }
   return result;
 }

@@ -8,8 +8,8 @@ LIBALUCMS_DIR=./DataBaseSrc
 LIBSCOPECONTROL_DIR=./ScopeControlSrc
 STATIC_LIBS=$(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR) $(LIBSCOPECONTROL_DIR)
 
-INCLUDE=-I. -Iinc -isystem/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I$(LIBSCOPECONTROL_DIR) -isystem/opt/local/include -isystem/usr/include/libxml2 -isystem/opt/local/include/libxml2
-LIB=-L/usr/local/lib -L/opt/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic -L$(LIBALUCMS_DIR) -lalucms -lscopecontrol -L$(LIBSCOPECONTROL_DIR) -lxml2 -lcurl
+INCLUDE=-I. -Iinc -isystem/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I$(LIBSCOPECONTROL_DIR) -I$(LIBSCOPECONTROL_DIR)/serial/include -isystem/opt/local/include -isystem/usr/include/libxml2 -isystem/opt/local/include/libxml2
+LIB=-L/usr/local/lib -L/opt/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic -L$(LIBALUCMS_DIR) -lalucms -lscopecontrol -L$(LIBSCOPECONTROL_DIR) -lrt -lxml2 -lcurl
 CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -Wall -Werror -pedantic $(INCLUDE) -DVERSION=\"$(GIT_VERSION)\"
 
 LINUX_LINKFLAGS=
@@ -26,7 +26,11 @@ LIBRARY=libalpide.so
 ANALYSIS_LIBRARY=libalpide_analysis.so
 
 ### ROOT specific variables
-ROOTCONFIG   := $(shell which root-config)
+ifdef ROOTSYS
+  ROOTCONFIG   := $(ROOTSYS)/bin/root-config
+else
+  ROOTCONFIG   := $(shell which root-config)
+endif
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags | sed -e 's/-pthread//g')
 ROOTLDFLAGS  := $(shell $(ROOTCONFIG) --ldflags)
 ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs | sed -e 's/-lpthread//g')
@@ -41,7 +45,7 @@ BASE_CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp A
   TDACScan.cpp TDataTaking.cpp TReadoutTest.cpp TEnduranceCycle.cpp TCycleAnalysis.cpp TReadoutAnalysis.cpp \
   TNoiseAnalysis.cpp TScan.cpp TFifoTest.cpp TPowerTest.cpp TFastPowerTest.cpp TSCurveScan.cpp TDigitalScan.cpp \
   TNoiseOccupancy.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp Common.cpp \
-  TReadoutBoardRU.cpp TBoardConfigRU.cpp TApplyMask.cpp THicConfig.cpp
+  TReadoutBoardRU.cpp TBoardConfigRU.cpp TApplyMask.cpp THicConfig.cpp TDCTRLMeasurement.cpp TDCTRLAnalysis.cpp
 BASE_OBJS = $(BASE_CLASSES:.cpp=.o)
 
 RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp \
@@ -68,7 +72,7 @@ EXE = startclk stopclk
 # test_* executables without ROOT
 TEST_EXE = test_mosaic test_noiseocc test_threshold test_digitalscan test_fifo test_dacscan \
   test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit \
-  test_localbus test_chip_count test_alucms test_dacscan_voltage test_supply_voltage test_GRST
+  test_localbus test_chip_count test_alucms test_dacscan_voltage test_supply_voltage test_GRST test_scope
 EXE += $(TEST_EXE)
 
 # test_* executables with ROOT
@@ -78,7 +82,7 @@ EXE += $(TEST_EXE_ROOT)
 
 
 #### TARGETS ####
-all: $(EXE) Config.cfg githooks
+all: check-env $(EXE) Config.cfg githooks
 
 ### Config.cfg
 Config.cfg: ConfigTemplate.cfg
@@ -141,6 +145,10 @@ clean-all:	clean
 	$(MAKE) -C $(LIBALUCMS_DIR) clean-all
 	$(MAKE) -C $(LIBSCOPECONTROL_DIR) clean-all
 
+check-env:
+ifndef ROOTCONFIG
+	$(error ROOTSYS environment variable is undefined and ROOT not found in path. Update environment or run rootdir/bin/thisroot.sh)
+endif
 
 ## clang format (formatting + testing)
 format:

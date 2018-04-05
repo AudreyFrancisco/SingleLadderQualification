@@ -28,11 +28,85 @@ int TScanAnalysis::GetPreviousActivityType()
   return DbGetActivityTypeId(m_config->GetDatabase(), GetPreviousTestType());
 }
 
+
+int TScanAnalysis::GetChildList(int id, std::vector<std::string> &childrenNames)
+{
+  std::vector<TChild> children;
+  childrenNames.clear();
+  int prevCompType = GetPreviousComponentType(GetPreviousTestType());
+  if (prevCompType < 0) return 0;
+  DbGetListOfChildren(m_config->GetDatabase(), id, children);
+
+  for (unsigned int i = 0; i < children.size(); i++) {
+    if (children.at(i).Type == prevCompType) childrenNames.push_back(children.at(i).Name);
+  }
+  return childrenNames.size();
+}
+
+// TODO: Include OB Half-Stave test, here and in all GetPreviousTestTypes
+int TScanAnalysis::GetPreviousComponentType(std::string prevTestType)
+{
+  if (prevTestType == "ALPIDEB Chip Testing Analysis") {
+    return DbGetComponentTypeId(m_config->GetDatabase(), "ALPIDEB Chip");
+  }
+  else if ((prevTestType == "OB HIC Qualification Test") ||
+           (prevTestType == "OB HIC Endurance Test") || (prevTestType == "OB HIC Reception Test")) {
+    return DbGetComponentTypeId(m_config->GetDatabase(), "Outer Barrel HIC Module");
+  }
+  else if ((prevTestType == "IB HIC Qualification Test")) {
+    return DbGetComponentTypeId(m_config->GetDatabase(), "Inner Barrel HIC Module");
+  }
+  return -1;
+}
+
+
+// component type of current test
+// check (IB Stave?)
+int TScanAnalysis::GetComponentType()
+{
+  if ((m_config->GetTestType() == OBQualification) || (m_config->GetTestType() == OBEndurance) ||
+      (m_config->GetTestType() == OBReception) || (m_config->GetTestType() == OBPower) ||
+      (m_config->GetTestType() == OBHalfStaveOL) || (m_config->GetTestType() == OBHalfStaveML)) {
+    return DbGetComponentTypeId(m_config->GetDatabase(), "Outer Barrel HIC Module");
+  }
+  else if ((m_config->GetTestType() == IBQualification) ||
+           (m_config->GetTestType() == IBEndurance)) {
+    return DbGetComponentTypeId(m_config->GetDatabase(), "Inner Barrel HIC Module");
+  }
+  else
+    return -1;
+}
+
+
+bool TScanAnalysis::GetPreviousActivity(string compName, ActivityDB::activityLong &act)
+{
+  return DbGetLatestActivity(m_config->GetDatabase(), GetPreviousActivityType(), compName, act);
+}
+
+
 int TScanAnalysis::ReadChipList()
 {
   m_chipList = m_scan->GetChipList();
   return m_chipList.size();
 }
+
+
+// Create prediction as hic results
+// TODO: do we need chip results? (probably not)
+// TODO: validity flag? this would require a new structure
+void TScanAnalysis::CreatePrediction()
+{
+  if (m_hics.size() == 0) {
+    std::cout << "Warning (TScanAnalysis::CreateResult): hic list is empty, doing nothing"
+              << std::endl;
+    return;
+  }
+  for (unsigned int i = 0; i < m_hics.size(); i++) {
+    TScanResultHic *hicResult = GetHicResult();
+    m_prediction->AddHicResult(m_hics.at(i)->GetDbId(), hicResult);
+  }
+}
+
 
 void TScanAnalysis::CreateHicResults()
 {
@@ -41,11 +115,6 @@ void TScanAnalysis::CreateHicResults()
               << std::endl;
     return;
   }
-  // if (m_chipList.size() == 0) {
-  //  std::cout  << "Warning (TScanAnalysis::CreateResult): chip list is empty, doing nothing" <<
-  // std::endl;
-  //  return;
-  //}
 
   for (unsigned int i = 0; i < m_chipList.size(); i++) {
     TScanResultChip *  chipResult = GetChipResult();
@@ -69,6 +138,18 @@ void TScanAnalysis::CreateHicResults()
   }
 }
 
+
+TScanResultHic *TScanAnalysis::FindHicResultForChip(common::TChipIndex chip)
+{
+  for (unsigned int i = 0; i < m_hics.size(); i++) {
+    if (m_hics.at(i)->ContainsChip(chip)) {
+      return m_result->GetHicResult(m_hics.at(i)->GetDbId());
+    }
+  }
+  return 0;
+}
+
+
 void TScanAnalysis::Run()
 {
   m_started = true;
@@ -77,7 +158,7 @@ void TScanAnalysis::Run()
     sleep(1);
   }
 
-  while ((m_scan->IsRunning() || (m_histoQue->size() > 0))) {
+  while ((!fScanAbort) && (!fScanAbortAll) && ((m_scan->IsRunning() || (m_histoQue->size() > 0)))) {
     if (m_histoQue->size() > 0) {
       while (!(m_mutex->try_lock()))
         ;
@@ -113,9 +194,10 @@ float TScanAnalysis::GetVariable(std::string aHic, int chip, TResultVariable var
 THicClassification TScanAnalysis::GetClassification()
 {
   THicClassification result = CLASS_UNTESTED;
-  std::map<std::string, TScanResultHic *>           hicResults = m_result->GetHicResults();
+  std::map<std::string, TScanResultHic *> *         hicResults = m_result->GetHicResults();
   std::map<std::string, TScanResultHic *>::iterator it;
-  for (it = hicResults.begin(); it != hicResults.end(); it++) {
+  for (it = hicResults->begin(); it != hicResults->end(); it++) {
+    if (!it->second->IsValid()) continue;
     switch (it->second->GetClassification()) {
     case CLASS_GREEN:
       if (result == CLASS_UNTESTED) result = CLASS_GREEN;
@@ -147,8 +229,32 @@ const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
     return "Unknown";
 }
 
-THicClassification TScanAnalysis::DoCut(THicClassification oldClass, THicClassification failClass,
-                                        int value, string cutName, bool minCut)
+
+void TScanAnalysis::WriteHicClassToFile(std::string hicName)
+{
+  char            fName[300];
+  TScanResultHic *hicResult = m_result->GetHicResult(hicName);
+
+  if (hicResult) {
+    std::string writeLine = std::string(m_scan->GetName()) + std::string(": ") +
+                            std::string(hicResult->WriteHicClassification());
+    sprintf(fName, "%s/Classification.dat", hicResult->GetOutputPath().c_str());
+    FILE *fp = fopen(fName, "a");
+    fprintf(fp, "%s\n", writeLine.c_str());
+    fclose(fp);
+    std::cout << writeLine << std::endl;
+  }
+}
+
+// DoCut checks a variable against a cut and sets the classification accordingly
+// in case of failure an output is printed to the terminal
+// hicClass: has to contain the current hic classification, is modified in case of failure
+// failClass: the classification that is assigned in case of failure
+// value: the value of the variable to be tested
+// cutName: the name of the cut, as defined in TScanConfig
+// minCut: if true, value is required to be >= the cut value, otherwise <=
+void TScanAnalysis::DoCut(THicClassification &hicClass, THicClassification failClass, int value,
+                          string cutName, bool minCut, int chipId)
 {
   bool failed = false;
   int  cut    = m_config->GetParamValue(cutName);
@@ -162,11 +268,16 @@ THicClassification TScanAnalysis::DoCut(THicClassification oldClass, THicClassif
   // however the classification is changed only if the new classification is worse than the previous
   // one
   if (failed) {
-    std::cout << "Hic failed " << WriteHicClassification(failClass) << " cut " << cutName
-              << ": cut = " << cut << ", value = " << value << std::endl;
-    if (failClass > oldClass) return failClass;
+    if (chipId < 0) {
+      std::cout << "Hic failed " << WriteHicClassification(failClass) << " cut " << cutName
+                << ": cut = " << cut << ", value = " << value << std::endl;
+    }
+    else {
+      std::cout << "Chip Id " << chipId << " failed " << WriteHicClassification(failClass)
+                << " cut " << cutName << ": cut = " << cut << ", value = " << value << std::endl;
+    }
+    if (failClass > hicClass) hicClass = failClass;
   }
-  return oldClass;
 }
 
 
@@ -262,6 +373,7 @@ void TScanResult::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   std::map<std::string, TScanResultHic *>::iterator it;
   for (it = m_hicResults.begin(); it != m_hicResults.end(); it++) {
+    if (!it->second->IsValid()) continue;
     it->second->WriteToDB(db, activity);
   }
 }

@@ -17,7 +17,7 @@ void TLocalBusAnalysis::InitCounters()
 {
   std::map<std::string, TScanResultHic *>::iterator it;
 
-  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+  for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TLocalBusResultHic *result = (TLocalBusResultHic *)it->second;
     result->m_err0             = 0;
     result->m_err5             = 0;
@@ -78,6 +78,7 @@ void TLocalBusAnalysis::WriteResult()
   char fName[200];
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->IsValid()) continue;
     sprintf(fName, "LocalBusScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
             m_config->GetfNameSuffix());
     m_scan->WriteConditions(fName, m_hics.at(ihic));
@@ -96,6 +97,7 @@ void TLocalBusAnalysis::WriteResult()
 
 void TLocalBusAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     TLocalBusResultChip *chipResult =
         (TLocalBusResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
@@ -103,7 +105,7 @@ void TLocalBusAnalysis::Finalize()
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
       if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TLocalBusResultHic *hicResult =
-          (TLocalBusResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+          (TLocalBusResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
       hicResult->m_err0 += chipResult->m_err0;
       hicResult->m_err5 += chipResult->m_err5;
       hicResult->m_erra += chipResult->m_erra;
@@ -116,7 +118,7 @@ void TLocalBusAnalysis::Finalize()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     int                 Total = 0;
     TLocalBusResultHic *hicResult =
-        (TLocalBusResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TLocalBusResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
 
     Total += hicResult->m_err0;
     Total += hicResult->m_err5;
@@ -129,6 +131,7 @@ void TLocalBusAnalysis::Finalize()
       hicResult->m_class = CLASS_RED;
     else
       hicResult->m_class = CLASS_GREEN;
+    hicResult->SetValidity(true);
   }
 
   WriteResult();

@@ -355,22 +355,26 @@ int THicOB::GetReceiver(int boardIndex, int chipId)
 
 void THicOB::PowerOn()
 {
-  TReadoutBoardMOSAIC *mosaic, *mosaic2 = 0;
+  TReadoutBoardMOSAIC *mosaic = 0, *mosaic2 = 0;
+  bool                 chips = (m_chips.size() > 0); // consider 0 chips in case of fast power test
 
   if (IsPowered()) return;
-  mosaic = (TReadoutBoardMOSAIC *)m_chips.at(0)->GetReadoutBoard();
+  if (chips) {
+    mosaic = (TReadoutBoardMOSAIC *)m_chips.at(0)->GetReadoutBoard();
 
-  // OB-HS -> 2 different MOSAICs
-  // all other HIC types (IB and OB HIC alone) have the same MOSAIC on chip 0 and 7
-  if (m_chips.at(7)->GetReadoutBoard() != m_chips.at(0)->GetReadoutBoard()) {
-    mosaic2 = (TReadoutBoardMOSAIC *)m_chips.at(7)->GetReadoutBoard();
+    // OB-HS -> 2 different MOSAICs
+    // all other HIC types (IB and OB HIC alone) have the same MOSAIC on chip 0 and 7
+    if (m_chips.at(7)->GetReadoutBoard() != m_chips.at(0)->GetReadoutBoard()) {
+      mosaic2 = (TReadoutBoardMOSAIC *)m_chips.at(7)->GetReadoutBoard();
+    }
+
+    mosaic->enableClockOutput(m_ctrl0, false);
+    if (mosaic2)
+      mosaic2->enableClockOutput(m_ctrl8, false);
+    else
+      mosaic->enableClockOutput(m_ctrl8, false);
   }
 
-  mosaic->enableClockOutput(m_ctrl0, false);
-  if (mosaic2)
-    mosaic2->enableClockOutput(m_ctrl8, false);
-  else
-    mosaic->enableClockOutput(m_ctrl8, false);
   sleep(1);
   if (m_powerBoard) {
     m_powerBoard->SwitchAnalogOn(m_pbMod);
@@ -379,9 +383,11 @@ void THicOB::PowerOn()
   }
   // if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
   sleep(1);
-  mosaic->enableClockOutput(m_ctrl0, true);
-  if (mosaic2)
-    mosaic2->enableClockOutput(m_ctrl8, true);
-  else
-    mosaic->enableClockOutput(m_ctrl8, true);
+  if (chips) {
+    mosaic->enableClockOutput(m_ctrl0, true);
+    if (mosaic2)
+      mosaic2->enableClockOutput(m_ctrl8, true);
+    else
+      mosaic->enableClockOutput(m_ctrl8, true);
+  }
 }

@@ -18,8 +18,7 @@ public:
   virtual void SaveSettings(QString &institute, QString &opname, QString &hicid, int &counter,
                             int &lid, int &memberid, QString &ttwo, QString &tthree, QString &tfour,
                             QString &tfive, QString &done, QString &dtwo, QString &dthree,
-                            QString &dfour, QString &dfive);
-  virtual void connectlocationcombo(std::vector<std::pair<std::string, int>> floc);
+                            QString &dfour, QString &dfive, QString &halfstave);
   virtual int  GetLocationID() { return locid; }
   virtual void ClearLocations();
 
@@ -33,6 +32,7 @@ private:
   QString            toptwo, topthree, topfour, topfive;
   QString            downone, downtwo, downthree, downfour, downfive;
   MainWindow *       fmainwindow;
+  int                fCounter;
 
 public slots:
   virtual void getlocationcombo(int value);
@@ -40,6 +40,11 @@ public slots:
   virtual void adjustendurance();
   virtual void hideendurance();
   virtual void GetTestTypeName(TTestType &typetest, QString &testname);
+  virtual void nextstep();
+  virtual void getwindow();
+  virtual int  getcounter();
+  virtual void connectlocationcombo(std::vector<std::pair<std::string, int>> floc);
+
 
 private slots:
   void popupmessage(QString m);

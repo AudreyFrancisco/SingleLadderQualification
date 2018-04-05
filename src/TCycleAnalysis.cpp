@@ -13,13 +13,14 @@ TCycleAnalysis::TCycleAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
     m_result = aResult;
   else
     m_result = new TCycleResult();
-  InitCounters();
 }
 
 void TCycleAnalysis::InitCounters()
 {
   std::map<std::string, TScanResultHic *>::iterator it;
-  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+  for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
+    std::cout << "found " << m_result->GetHicResults()->size() << "hic results, initialising "
+              << it->first << std::endl;
     TCycleResultHic *result   = (TCycleResultHic *)it->second;
     result->m_nTrips          = 0;
     result->m_minWorkingChips = 14;
@@ -39,14 +40,16 @@ void TCycleAnalysis::InitCounters()
 // Q: 1 file per HIC? -> yes, since attachment per activity, activity is per HIC
 void TCycleAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   char fName[200];
   std::vector<std::map<std::string, THicCounter>> counters =
       ((TEnduranceCycle *)m_scan)->GetCounters();
   ((TCycleResult *)m_result)->m_nCycles = counters.size();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
     TCycleResultHic *hicResult =
-        (TCycleResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TCycleResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
 
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/CycleFile_%s.dat", hicResult->GetOutputPath().c_str(),
@@ -89,13 +92,15 @@ void TCycleAnalysis::Finalize()
       hicResult->m_avDeltaT += hicCounter.m_tempEnd - hicCounter.m_tempStart;
       hicResult->m_avIdda += hicCounter.m_iddaClocked;
       hicResult->m_avIddd += hicCounter.m_idddClocked;
+      hicResult->SetValidity(true);
     }
     fclose(fp);
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
     TCycleResultHic *hicResult =
-        (TCycleResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TCycleResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
 
     hicResult->m_avDeltaT /= ((TCycleResult *)m_result)->m_nCycles;
     hicResult->m_avIdda /= ((TCycleResult *)m_result)->m_nCycles;
@@ -118,13 +123,12 @@ THicClassification TCycleAnalysis::GetClassificationOB(TCycleResultHic *result)
 {
   THicClassification returnValue = CLASS_GREEN;
 
-  returnValue = DoCut(returnValue, CLASS_ORANGE, result->m_nTrips, "ENDURANCEMAXTRIPSGREEN");
-  returnValue = DoCut(returnValue, CLASS_RED, result->m_nTrips, "ENDURANCEMAXTRIPSORANGE");
-  returnValue =
-      DoCut(returnValue, CLASS_ORANGE, result->m_minWorkingChips, "ENDURANCEMINCHIPSGREEN", true);
-  returnValue =
-      DoCut(returnValue, CLASS_RED, result->m_nChipFailures, "ENDURANCEMAXFAILURESORANGE");
-
+  DoCut(returnValue, CLASS_ORANGE, result->m_nTrips, "ENDURANCEMAXTRIPSGREEN");
+  DoCut(returnValue, CLASS_RED, result->m_nTrips, "ENDURANCEMAXTRIPSORANGE");
+  DoCut(returnValue, CLASS_ORANGE, result->m_minWorkingChips, "ENDURANCEMINCHIPSGREEN", true);
+  DoCut(returnValue, CLASS_RED, result->m_nChipFailures, "ENDURANCEMAXFAILURESORANGE");
+  std::cout << "Cycle Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
   return returnValue;
 }
 
@@ -135,6 +139,7 @@ void TCycleAnalysis::WriteResult()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/CycleResult_%s.dat", hicResult->GetOutputPath().c_str(),
               m_config->GetfNameSuffix());

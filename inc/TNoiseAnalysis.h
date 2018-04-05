@@ -86,6 +86,7 @@ protected:
   void AnalyseHisto(TScanHisto *histo);
   void   InitCounters();
   string GetPreviousTestType();
+  void CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TNoiseAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

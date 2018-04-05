@@ -40,6 +40,7 @@ void TNoiseAnalysis::WriteResult()
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
     WriteNoisyPixels(m_hics.at(ihic));
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/NoiseOccResult_%s.dat", hicResult->GetOutputPath().c_str(),
@@ -101,7 +102,7 @@ void TNoiseAnalysis::Initialize()
 void TNoiseAnalysis::InitCounters()
 {
   std::map<std::string, TScanResultHic *>::iterator it;
-  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+  for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TNoiseResultHic *result = (TNoiseResultHic *)it->second;
     result->m_backBias      = ((TNoiseOccupancy *)m_scan)->GetBackbias();
     result->m_isMasked      = m_isMasked;
@@ -150,9 +151,10 @@ void TNoiseAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TNoiseAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TNoiseResultHic *hicResult =
-        (TNoiseResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TNoiseResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->m_occ    = 0;
     hicResult->m_nNoisy = 0;
     if (m_hics.at(ihic)->GetNChips() == 0) continue;
@@ -167,6 +169,7 @@ void TNoiseAnalysis::Finalize()
     }
     hicResult->m_occ /= m_hics.at(ihic)->GetNChips();
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
+    hicResult->SetValidity(true);
   }
 
   WriteResult();

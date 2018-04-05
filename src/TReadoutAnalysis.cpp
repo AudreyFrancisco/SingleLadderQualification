@@ -30,7 +30,7 @@ void TReadoutAnalysis::InitCounters()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TReadoutResultHic *hicResult =
-        (TReadoutResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TReadoutResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->m_linkSpeed   = ((TReadoutTest *)m_scan)->GetLinkSpeed();
     hicResult->m_driver      = ((TReadoutTest *)m_scan)->GetDriver();
     hicResult->m_preemp      = ((TReadoutTest *)m_scan)->GetPreemp();
@@ -102,9 +102,10 @@ void TReadoutAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TReadoutAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TReadoutResultHic *hicResult =
-        (TReadoutResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TReadoutResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     std::cout << "8b10b errors: " << hicResult->m_errorCounter.n8b10b << std::endl;
   }
@@ -115,7 +116,7 @@ void TReadoutAnalysis::Finalize()
       TReadoutResultChip *chipResult =
           (TReadoutResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
       TReadoutResultHic *hicResult =
-          (TReadoutResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+          (TReadoutResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
 
       hicResult->m_missingHits += chipResult->m_missingHits;
       hicResult->m_deadPixels += chipResult->m_deadPixels;
@@ -127,13 +128,14 @@ void TReadoutAnalysis::Finalize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TReadoutResultHic *hicResult =
-        (TReadoutResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TReadoutResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
     }
     else {
       hicResult->m_class = GetClassificationIB(hicResult);
     }
+    hicResult->SetValidity(true);
   }
   WriteResult();
 
@@ -145,6 +147,7 @@ void TReadoutAnalysis::WriteResult()
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/ReadoutScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
               m_config->GetfNameSuffix());
@@ -172,18 +175,28 @@ void TReadoutAnalysis::WriteResult()
 
 THicClassification TReadoutAnalysis::GetClassificationOB(TReadoutResultHic *result)
 {
-  if (result->m_errorCounter.nCorruptEvent > 0) return CLASS_RED;
-  if (result->m_errorCounter.nTimeout > 0) return CLASS_RED;
-  if (result->m_errorCounter.n8b10b > 0) return CLASS_ORANGE;
-  return CLASS_GREEN;
+  THicClassification returnValue = CLASS_GREEN;
+
+  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nCorruptEvent, "READOUT_MAXCORRUPT");
+  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "READOUT_MAXTIMEOUT");
+  DoCut(returnValue, CLASS_ORANGE, result->m_errorCounter.n8b10b, "READOUT_MAX8b10b_GREEN");
+
+  std::cout << "Readout Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
+  return returnValue;
 }
 
 THicClassification TReadoutAnalysis::GetClassificationIB(TReadoutResultHic *result)
 {
-  if (result->m_errorCounter.nCorruptEvent > 0) return CLASS_RED;
-  if (result->m_errorCounter.nTimeout > 0) return CLASS_RED;
-  if (result->m_errorCounter.n8b10b > 0) return CLASS_ORANGE;
-  return CLASS_GREEN;
+  THicClassification returnValue = CLASS_GREEN;
+
+  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nCorruptEvent, "READOUT_MAXCORRUPT");
+  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "READOUT_MAXTIMEOUT");
+  DoCut(returnValue, CLASS_ORANGE, result->m_errorCounter.n8b10b, "READOUT_MAX8b10b_GREEN");
+
+  std::cout << "Readout Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
+  return returnValue;
 }
 
 void TReadoutResultHic::WriteToFile(FILE *fp)

@@ -82,7 +82,7 @@ void TFifoAnalysis::InitCounters()
   std::map<std::string, TScanResultHic *>::iterator it;
   std::map<int, TScanResultChip *>::iterator        itChip;
 
-  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+  for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TFifoResultHic *result = (TFifoResultHic *)it->second;
     result->m_exc          = 0;
     result->m_nFaultyChips = 0;
@@ -149,6 +149,7 @@ void TFifoAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TFifoAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     TFifoResultChip *chipResult = (TFifoResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
     if (!chipResult) std::cout << "WARNING: chipResult = 0" << std::endl;
@@ -162,7 +163,7 @@ void TFifoAnalysis::Finalize()
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
       if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TFifoResultHic *hicResult =
-          (TFifoResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+          (TFifoResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
       hicResult->m_err0 += chipResult->m_err0;
       hicResult->m_err5 += chipResult->m_err5;
       hicResult->m_erra += chipResult->m_erra;
@@ -176,8 +177,9 @@ void TFifoAnalysis::Finalize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TFifoResultHic *hicResult =
-        (TFifoResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TFifoResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->m_class = GetClassification(hicResult);
+    hicResult->SetValidity(true);
   }
 
   WriteResult();
@@ -187,17 +189,23 @@ void TFifoAnalysis::Finalize()
 
 THicClassification TFifoAnalysis::GetClassification(TFifoResultHic *result)
 {
-  if (result->m_exc > 0) return CLASS_RED;
-  if (result->m_err0 + result->m_err5 + result->m_erra + result->m_errf == 0) return CLASS_GREEN;
+  THicClassification returnValue = CLASS_GREEN;
 
-  if ((result->m_err0 < m_config->GetParamValue("FIFO_MAXERR")) &&
-      (result->m_err5 < m_config->GetParamValue("FIFO_MAXERR")) &&
-      (result->m_erra < m_config->GetParamValue("FIFO_MAXERR")) &&
-      (result->m_errf < m_config->GetParamValue("FIFO_MAXERR")) &&
-      (result->m_nFaultyChips < m_config->GetParamValue("FIFO_MAXFAULTY")))
-    return CLASS_ORANGE;
+  DoCut(returnValue, CLASS_RED, result->m_exc, "FIFO_MAXEXCEPTION");
 
-  return CLASS_RED;
+  DoCut(returnValue, CLASS_ORANGE, result->m_err0, "FIFO_MAXERR_GREEN");
+  DoCut(returnValue, CLASS_ORANGE, result->m_err5, "FIFO_MAXERR_GREEN");
+  DoCut(returnValue, CLASS_ORANGE, result->m_erra, "FIFO_MAXERR_GREEN");
+  DoCut(returnValue, CLASS_ORANGE, result->m_errf, "FIFO_MAXERR_GREEN");
+  DoCut(returnValue, CLASS_RED, result->m_err0, "FIFO_MAXERR_ORANGE");
+  DoCut(returnValue, CLASS_RED, result->m_err5, "FIFO_MAXERR_ORANGE");
+  DoCut(returnValue, CLASS_RED, result->m_erra, "FIFO_MAXERR_ORANGE");
+  DoCut(returnValue, CLASS_RED, result->m_errf, "FIFO_MAXERR_ORANGE");
+
+  DoCut(returnValue, CLASS_RED, result->m_errf, "FIFO_MAXFAULTYCHIPS");
+  std::cout << "Fifo Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
+  return returnValue;
 }
 
 void TFifoResultHic::WriteToFile(FILE *fp)

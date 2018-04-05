@@ -73,18 +73,21 @@ class TScanResultHic {
 
 protected:
   std::map<int, TScanResultChip *> m_chipResults;
-  char               m_resultFile[200];
+  char               m_resultFile[300];
   THicClassification m_class;
   const char *       WriteHicClassification();
   string             m_outputPath;
   TScanParameters *  m_scanParameters;
+  bool               m_valid; // used for predictions only
 
 public:
-  TScanResultHic(){};
+  TScanResultHic() { m_valid = false; };
+  void SetValidity(bool valid) { m_valid = valid; };
+  bool                  IsValid() { return m_valid; };
   virtual void WriteToFile(FILE *fp) = 0;
   virtual void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
   int AddChipResult(int aChipId, TScanResultChip *aChipResult);
-  void SetResultFile(const char *fName) { strcpy(m_resultFile, fName); };
+  void SetResultFile(const char *fName) { strncpy(m_resultFile, fName, sizeof(m_resultFile)); };
   THicClassification             GetClassification() { return m_class; };
   std::map<int, TScanResultChip *> DeleteThisToo() { return m_chipResults; };
   float GetVariable(int chip, TResultVariable var);
@@ -117,7 +120,7 @@ public:
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
   TScanResultChip *GetChipResult(common::TChipIndex idx);
   TScanResultHic *GetHicResult(std::string hic);
-  std::map<std::string, TScanResultHic *> GetHicResults() { return m_hicResults; };
+  std::map<std::string, TScanResultHic *> *GetHicResults() { return &m_hicResults; };
 };
 
 class TScanAnalysis {
@@ -130,20 +133,28 @@ protected:
   TScan *                  m_scan;
   TScanConfig *            m_config;
   TScanResult *            m_result;
+  TScanResult *            m_prediction;
   bool                     m_first;
   bool                     m_started;
   bool                     m_finished;
   virtual TScanResultChip *GetChipResult() = 0;
   virtual TScanResultHic * GetHicResult()  = 0;
   void                     CreateHicResults();
-  virtual void             CreateResult() = 0;
-  int                      ReadChipList();
+  void                     CreatePrediction();
+  virtual void CalculatePrediction(std::string hicName) = 0; // { (void)hicName; };
+  virtual void CreateResult()                           = 0;
+  int          ReadChipList();
   virtual void AnalyseHisto(TScanHisto *histo) = 0;
-  virtual void       InitCounters()            = 0;
-  int                GetPreviousActivityType();
-  virtual string     GetPreviousTestType() = 0;
-  THicClassification DoCut(THicClassification oldClass, THicClassification failClass, int value,
-                           string cutName, bool minCut = false);
+  virtual void InitCounters()                  = 0;
+  int          GetPreviousActivityType();
+  bool GetPreviousActivity(string compName, ActivityDB::activityLong &act);
+  int GetChildList(int id, std::vector<std::string> &childrenNames);
+  int GetPreviousComponentType(std::string prevTestType);
+  int             GetComponentType();
+  TScanResultHic *FindHicResultForChip(common::TChipIndex chip);
+  virtual string GetPreviousTestType() = 0;
+  void DoCut(THicClassification &hicClass, THicClassification failClass, int value, string cutName,
+             bool minCut = false, int chipId = -1);
 
 public:
   TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
@@ -155,6 +166,7 @@ public:
   std::map<const char *, TResultVariable> GetVariableList() { return m_variableList; }
   float GetVariable(std::string aHic, int chip, TResultVariable var);
   static const char *WriteHicClassification(THicClassification hicClass);
+  void WriteHicClassToFile(std::string hicName);
   THicClassification GetClassification();
 };
 

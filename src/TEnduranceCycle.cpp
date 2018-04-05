@@ -34,6 +34,28 @@ TEnduranceCycle::TEnduranceCycle(TScanConfig *config, std::vector<TAlpide *> chi
   m_histo = 0;
 }
 
+
+bool TEnduranceCycle::SetParameters(TScanParameters *pars)
+{
+  TCycleParameters *cPars = dynamic_cast<TCycleParameters *>(pars);
+  if (cPars) {
+    std::cout << "TEnduranceCycle: Updating parameters" << std::endl;
+    ((TCycleParameters *)m_parameters)->upTime    = cPars->upTime;
+    ((TCycleParameters *)m_parameters)->downTime  = cPars->downTime;
+    ((TCycleParameters *)m_parameters)->nTriggers = cPars->nTriggers;
+    ((TCycleParameters *)m_parameters)->nCycles   = cPars->nCycles;
+    ((TCycleParameters *)m_parameters)->timeLimit = cPars->timeLimit;
+    m_stop[0]                                     = ((TCycleParameters *)m_parameters)->nCycles;
+    return true;
+  }
+  else {
+    std::cout << "TEnduranceCycle::SetParameters: Error, bad parameter type, doing nothing"
+              << std::endl;
+    return false;
+  }
+}
+
+
 void TEnduranceCycle::CreateMeasurements()
 {
   // create map with measurement structure for each HIC
@@ -48,6 +70,7 @@ void TEnduranceCycle::ClearCounters()
 {
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_nWorkingChips = 0;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_trip          = false;
   }
 }
 
@@ -160,7 +183,7 @@ void TEnduranceCycle::ConfigureMask(TAlpide *chip)
 void TEnduranceCycle::Execute()
 {
   // 1) Power on all HICs, check for trips, measure currents
-  std::cout << "  Powering on";
+  std::cout << "  Powering on" << std::endl;
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     m_hics.at(ihic)->PowerOn();
@@ -227,7 +250,7 @@ void TEnduranceCycle::Next(int loopIndex)
 
     time(&timeNow);
     if (difftime(timeNow, m_startTime) > ((TCycleParameters *)m_parameters)->timeLimit * 3600) {
-      fScanAbort = true;
+      fTimeLimitReached = true;
     }
   }
   TScan::Next(loopIndex);

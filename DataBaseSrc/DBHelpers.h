@@ -10,6 +10,13 @@
 
 typedef enum { attachResult, attachLog, attachErrors, attachConfig, attachText } TAttachmentType;
 
+typedef struct {
+  int    Id;
+  int    Type;
+  string Name;
+  int    Position;
+} TChild;
+
 int DbGetMemberId(AlpideDB *db, string name);
 // int  DbGetProjectId        (AlpideDB *db, string Name);
 int DbGetParameterId(AlpideDB *db, int activityTypeId, string name);
@@ -27,9 +34,10 @@ bool DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, flo
 int DbGetPrevActivityTypeId(AlpideDB *db, string name, bool &onChildren);
 int DbGetAttachmentTypeId(AlpideDB *db, string name);
 int DbGetComponentTypeId(AlpideDB *db, int projectId, string name);
-int DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int &componentId, string Direction);
+int DbGetComponentTypeId(AlpideDB *db, string name);
+int DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int componentId, string Direction);
 int DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name);
-int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<int> &children);
+int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children);
 int DbGetComponentActivity(AlpideDB *db, int compId, int activityTypeId);
 bool DbAddParameter(AlpideDB *db, ActivityDB::activity &activity, string name, float value);
 void DbAddAttachment(AlpideDB *db, ActivityDB::activity &activity, TAttachmentType attType,

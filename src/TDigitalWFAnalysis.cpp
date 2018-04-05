@@ -40,7 +40,7 @@ void TDigitalWFAnalysis::InitCounters()
 
   std::map<std::string, TScanResultHic *>::iterator it;
 
-  for (it = m_result->GetHicResults().begin(); it != m_result->GetHicResults().end(); ++it) {
+  for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TDigitalWFResultHic *result = (TDigitalWFResultHic *)it->second;
     result->m_nStuck            = 0;
     result->m_nUnmaskable       = 0;
@@ -81,6 +81,7 @@ void TDigitalWFAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TDigitalWFAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   TErrorCounter        errCount = ((TMaskScan *)m_scan)->GetErrorCount();
   TDigitalWFResult *   result   = (TDigitalWFResult *)m_result;
   std::vector<TPixHit> stuck    = ((TMaskScan *)m_scan)->GetStuckPixels();
@@ -108,7 +109,7 @@ void TDigitalWFAnalysis::Finalize()
       TDigitalWFResultChip *chipResult =
           (TDigitalWFResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
       TDigitalWFResultHic *hicResult =
-          (TDigitalWFResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+          (TDigitalWFResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
       hicResult->m_nStuck += chipResult->m_nStuck;
       hicResult->m_nUnmaskable += chipResult->m_nUnmaskable;
     }
@@ -116,13 +117,14 @@ void TDigitalWFAnalysis::Finalize()
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TDigitalWFResultHic *hicResult =
-        (TDigitalWFResultHic *)m_result->GetHicResults().at(m_hics.at(ihic)->GetDbId());
+        (TDigitalWFResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
     }
     else {
       hicResult->m_class = GetClassificationOB(hicResult);
     }
+    hicResult->SetValidity(true);
   }
   WriteResult();
 
@@ -133,21 +135,22 @@ void TDigitalWFAnalysis::Finalize()
 // TODO: Make two cuts (red and orange)?
 THicClassification TDigitalWFAnalysis::GetClassificationOB(TDigitalWFResultHic *result)
 {
-  if (result->m_nUnmaskable > m_config->GetParamValue("DIGITAL_MAXNOMASK_HIC_OB"))
-    return CLASS_ORANGE;
-  if (result->m_nStuck > m_config->GetParamValue("DIGITAL_MAXNOMASKSTUCK_HIC_OB"))
-    return CLASS_ORANGE;
-
-  return CLASS_GREEN;
+  THicClassification returnValue = CLASS_GREEN;
+  DoCut(returnValue, CLASS_ORANGE, result->m_nUnmaskable, "DIGITAL_MAXNOMASK_HIC_OB");
+  DoCut(returnValue, CLASS_ORANGE, result->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_HIC_OB");
+  std::cout << "Digital Whiteframe Analysis - Classification: "
+            << WriteHicClassification(returnValue) << std::endl;
+  return returnValue;
 }
 
 THicClassification TDigitalWFAnalysis::GetClassificationIB(TDigitalWFResultHic *result)
 {
-  if (result->m_nUnmaskable > m_config->GetParamValue("DIGITAL_MAXNOMASK_HIC_IB"))
-    return CLASS_ORANGE;
-  if (result->m_nStuck > m_config->GetParamValue("DIGITAL_MAXNOMASKSTUCK_HIC_IB"))
-    return CLASS_ORANGE;
-  return CLASS_GREEN;
+  THicClassification returnValue = CLASS_GREEN;
+  DoCut(returnValue, CLASS_ORANGE, result->m_nUnmaskable, "DIGITAL_MAXNOMASK_HIC_IB");
+  DoCut(returnValue, CLASS_ORANGE, result->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_HIC_IB");
+  std::cout << "Digital Whiteframe Analysis - Classification: "
+            << WriteHicClassification(returnValue) << std::endl;
+  return returnValue;
 }
 
 void TDigitalWFAnalysis::WriteResult()
@@ -159,6 +162,7 @@ void TDigitalWFAnalysis::WriteResult()
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
     WriteStuckPixels(m_hics.at(ihic));
     WriteUnmaskedPixels(m_hics.at(ihic));
 

@@ -414,6 +414,38 @@ void TPowerBoardConfig::EnterMeasuredLineResistances(int mod, float ALineR, floa
   fPBConfig.Modul[mod].CalGNDLineR = GNDLineR;
 }
 
+void TPowerBoardConfig::GetWirePBResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR,
+                                             float &BBLineR)
+{
+  float x = mod + 1.;
+
+  ALineR   = 7.9286 * x + 51.571;
+  DLineR   = 8.25 * x + 45.714;
+  GNDLineR = 4.5714 * x + 31.143;
+  BBLineR  = 17.929 * x + 184.43;
+
+  ALineR /= 1000.;
+  DLineR /= 1000.;
+  GNDLineR /= 1000.;
+  BBLineR /= 1000.;
+}
+
+void TPowerBoardConfig::AddPowerBusResistances(int mod, bool real)
+{
+  if (real) {
+    fPBConfig.Modul[mod].CalDLineR += RPBDigital[mod];
+    fPBConfig.Modul[mod].CalALineR += RPBAnalog[mod];
+    fPBConfig.Modul[mod].CalGNDLineR += RPBGround[mod];
+  }
+  else {
+    float ALineR, DLineR, GNDLineR, BBLineR;
+    GetWirePBResistances(mod, ALineR, DLineR, GNDLineR, BBLineR);
+    fPBConfig.Modul[mod].CalDLineR += DLineR;
+    fPBConfig.Modul[mod].CalALineR += ALineR;
+    fPBConfig.Modul[mod].CalGNDLineR += GNDLineR;
+  }
+}
+
 // sets the line resistances in the calibration part of the configuration
 // WITHOUT adding the internal resistances (used when read from file)
 void TPowerBoardConfig::SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR)
