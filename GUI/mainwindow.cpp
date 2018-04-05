@@ -1060,6 +1060,12 @@ void MainWindow::applytests()
 
   performtests();
 
+  if (fNumberofscan == OBEndurance) {
+    std::cout << "Combining endurance test results" << std::endl;
+    CombineEnduranceResults();
+    std::cout << "Done" << std::endl;
+  }
+
   printClasses();
 
   connect(fSignalMapper, SIGNAL(mapped(int)), this, SLOT(getresultdetails(int)));
@@ -1207,6 +1213,41 @@ void MainWindow::SetHicClassifications()
     }
   }
 }
+
+
+// method to combine all results of the different endurance test slices.
+// method searches for result of last slice (lastResult)
+// all results are summed up in this lastResult
+// all results except the last one are set to UNTESTED, this means:
+//   - they do not influence the total classification
+//   - they do not attempt to write the parameters to the DB
+// the last result is reclassified after the summing procedure
+void MainWindow::CombineEnduranceResults()
+{
+  int              lastEndurance = 0;
+  TCycleResultHic *lastResult    = 0;
+  for (unsigned int i = fresultVector.size() - 1; i <= fresultVector.size(); i--) {
+    TCycleResult *scanResult = dynamic_cast<TCycleResult *>(fresultVector.at(i));
+    if (!scanResult) continue;
+    if (lastEndurance == 0) { // first endurance test result from vector end
+      lastEndurance = i;
+      lastResult    = (TCycleResultHic *)scanResult->GetHicResult(fHICs.at(i)->GetDbId());
+      continue; // do not add the last result to itself
+    }
+
+    for (unsigned int ihic = 0; ihic < fHICs.size(); ihic++) {
+      TCycleResultHic *hicResult =
+          (TCycleResultHic *)scanResult->GetHicResult(fHICs.at(i)->GetDbId());
+      if ((!hicResult) || (!lastResult)) continue;
+      lastResult->Add(*hicResult);
+      hicResult->SetClassification(CLASS_UNTESTED);
+    }
+
+    TCycleAnalysis *lastAnalysis = (TCycleAnalysis *)fAnalysisVector.at(lastEndurance);
+    lastAnalysis->ReClassify(lastResult);
+  }
+}
+
 
 // TODO: check that correct; probably dnumber not needed at all, since duplicate of
 // ui->details->currentIndex()

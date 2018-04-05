@@ -91,6 +91,7 @@ public:
   int AddChipResult(int aChipId, TScanResultChip *aChipResult);
   void SetResultFile(const char *fName) { strncpy(m_resultFile, fName, sizeof(m_resultFile)); };
   THicClassification             GetClassification() { return m_class; };
+  void SetClassification(THicClassification aClass) { m_class = aClass; };
   std::map<int, TScanResultChip *> DeleteThisToo() { return m_chipResults; };
   float GetVariable(int chip, TResultVariable var);
   string GetOutputPath() { return m_outputPath; };

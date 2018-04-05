@@ -181,20 +181,21 @@ void TCycleResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   std::string fileName, cycleName;
   std::size_t slash;
-  DbAddParameter(db, activity, string("Number of trips"), (float)m_nTrips, GetParameterFile());
-  DbAddParameter(db, activity, string("Min. number of working chips"), (float)m_minWorkingChips,
-                 GetParameterFile());
-  DbAddParameter(db, activity, string("Number of chip failures"), (float)m_nChipFailures,
-                 GetParameterFile());
-  DbAddParameter(db, activity, string("Av. delta T"), (float)m_avDeltaT, GetParameterFile());
-  DbAddParameter(db, activity, string("Max. delta T"), (float)m_maxDeltaT, GetParameterFile());
-  DbAddParameter(db, activity, string("Av. IDDA"), (float)m_avIdda, GetParameterFile());
-  DbAddParameter(db, activity, string("Min. IDDA"), (float)m_minIdda, GetParameterFile());
-  DbAddParameter(db, activity, string("Max. IDDA"), (float)m_maxIdda, GetParameterFile());
-  DbAddParameter(db, activity, string("Av. IDDD"), (float)m_avIddd, GetParameterFile());
-  DbAddParameter(db, activity, string("Min. IDDD"), (float)m_minIddd, GetParameterFile());
-  DbAddParameter(db, activity, string("Max. IDDD"), (float)m_maxIddd, GetParameterFile());
-
+  if (m_class != CLASS_UNTESTED) { // adhoc modification to avoid writing pars of all slices
+    DbAddParameter(db, activity, string("Number of trips"), (float)m_nTrips, GetParameterFile());
+    DbAddParameter(db, activity, string("Min. number of working chips"), (float)m_minWorkingChips,
+                   GetParameterFile());
+    DbAddParameter(db, activity, string("Number of chip failures"), (float)m_nChipFailures,
+                   GetParameterFile());
+    DbAddParameter(db, activity, string("Av. delta T"), (float)m_avDeltaT, GetParameterFile());
+    DbAddParameter(db, activity, string("Max. delta T"), (float)m_maxDeltaT, GetParameterFile());
+    DbAddParameter(db, activity, string("Av. IDDA"), (float)m_avIdda, GetParameterFile());
+    DbAddParameter(db, activity, string("Min. IDDA"), (float)m_minIdda, GetParameterFile());
+    DbAddParameter(db, activity, string("Max. IDDA"), (float)m_maxIdda, GetParameterFile());
+    DbAddParameter(db, activity, string("Av. IDDD"), (float)m_avIddd, GetParameterFile());
+    DbAddParameter(db, activity, string("Min. IDDD"), (float)m_minIddd, GetParameterFile());
+    DbAddParameter(db, activity, string("Max. IDDD"), (float)m_maxIddd, GetParameterFile());
+  }
   slash    = string(m_resultFile).find_last_of("/");
   fileName = string(m_resultFile).substr(slash + 1); // strip path
 
