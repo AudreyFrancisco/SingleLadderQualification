@@ -22,6 +22,7 @@ void TCycleAnalysis::InitCounters()
     std::cout << "found " << m_result->GetHicResults()->size() << "hic results, initialising "
               << it->first << std::endl;
     TCycleResultHic *result   = (TCycleResultHic *)it->second;
+    result->m_weight          = 1;
     result->m_nTrips          = 0;
     result->m_minWorkingChips = 14;
     result->m_nChipFailures   = 0;
@@ -133,6 +134,15 @@ THicClassification TCycleAnalysis::GetClassificationOB(TCycleResultHic *result)
 }
 
 
+// public helper method to reclassify HIC after combination of results.
+THicClassification TCycleAnalysis::ReClassify(TCycleResultHic *result)
+{
+  THicClassification returnValue = GetClassificationOB(result);
+  result->m_class                = returnValue;
+  return returnValue;
+}
+
+
 void TCycleAnalysis::WriteResult()
 {
   char fName[200];
@@ -213,6 +223,30 @@ void TCycleResultHic::WriteToFile(FILE *fp)
   fprintf(fp, "Maximum Iddd:            %.3f\n", m_maxIddd);
   fprintf(fp, "Minimum Iddd:            %.3f\n", m_minIddd);
 }
+
+
+// method to combine the results of different slices into one
+// has to be called after WriteToFile(Finalize), before WriteToDB
+// TODO: reclassify after
+void TCycleResultHic::Add(TCycleResultHic &aResult)
+{
+  m_nTrips += aResult.m_nTrips;
+  m_nChipFailures += aResult.m_nChipFailures;
+
+  m_avDeltaT = (m_weight * m_avDeltaT + aResult.m_avDeltaT) / (m_weight + 1);
+  m_avIdda   = (m_weight * m_avIdda + aResult.m_avIdda) / (m_weight + 1);
+  m_avIddd   = (m_weight * m_avIddd + aResult.m_avIddd) / (m_weight + 1);
+
+  if (aResult.m_maxDeltaT > m_maxDeltaT) m_maxDeltaT = aResult.m_maxDeltaT;
+  if (aResult.m_maxIdda > m_maxIdda) m_maxIdda       = aResult.m_maxIdda;
+  if (aResult.m_maxIddd > m_maxIddd) m_maxIddd       = aResult.m_maxIddd;
+
+  if (aResult.m_minIdda < m_minIdda) m_minIdda = aResult.m_minIdda;
+  if (aResult.m_minIddd < m_minIddd) m_minIddd = aResult.m_minIddd;
+
+  m_weight++;
+}
+
 
 float TCycleResultChip::GetVariable(TResultVariable var)
 {

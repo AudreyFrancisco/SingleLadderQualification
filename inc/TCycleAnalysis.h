@@ -16,6 +16,7 @@ class TCycleResultHic : public TScanResultHic {
   friend class TCycleAnalysis;
 
 private:
+  float m_weight;
   int   m_nTrips;
   int   m_minWorkingChips;
   int   m_nChipFailures;
@@ -35,6 +36,7 @@ public:
   TCycleResultHic() : TScanResultHic(){};
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
+  void Add(TCycleResultHic &aResult);
 };
 
 class TCycleResult : public TScanResult {
@@ -78,8 +80,9 @@ public:
     CreateHicResults();
     InitCounters();
   }; // initcounters normally executed in TScanAnalysis::Run
-  void Run(){};
-  void Finalize();
+  void               Run(){};
+  void               Finalize();
+  THicClassification ReClassify(TCycleResultHic *result);
 };
 
 #endif
