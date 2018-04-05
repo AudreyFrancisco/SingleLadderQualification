@@ -1222,27 +1222,34 @@ void MainWindow::SetHicClassifications()
 // the last result is reclassified after the summing procedure
 void MainWindow::CombineEnduranceResults()
 {
-  int              lastEndurance = 0;
-  TCycleResultHic *lastResult    = 0;
+  int           lastEndurance = 0;
+  TCycleResult *lastResult    = 0;
   for (unsigned int i = fresultVector.size() - 1; i <= fresultVector.size(); i--) {
     TCycleResult *scanResult = dynamic_cast<TCycleResult *>(fresultVector.at(i));
     if (!scanResult) continue;
     if (lastEndurance == 0) { // first endurance test result from vector end
       lastEndurance = i;
-      lastResult    = (TCycleResultHic *)scanResult->GetHicResult(fHICs.at(i)->GetDbId());
+      lastResult    = scanResult;
       continue; // do not add the last result to itself
     }
 
     for (unsigned int ihic = 0; ihic < fHICs.size(); ihic++) {
       TCycleResultHic *hicResult =
           (TCycleResultHic *)scanResult->GetHicResult(fHICs.at(i)->GetDbId());
-      if ((!hicResult) || (!lastResult)) continue;
-      lastResult->Add(*hicResult);
+      TCycleResultHic *lastHicResult =
+          (TCycleResultHic *)lastResult->GetHicResult(fHICs.at(ihic)->GetDbId());
+
+      if ((!hicResult) || (!lastHicResult)) continue;
+      lastHicResult->Add(*hicResult);
       hicResult->SetClassification(CLASS_UNTESTED);
     }
+  }
 
+  for (unsigned int ihic = 0; ihic < fHICs.size(); ihic++) {
+    TCycleResultHic *lastHicResult =
+        (TCycleResultHic *)lastResult->GetHicResult(fHICs.at(ihic)->GetDbId());
     TCycleAnalysis *lastAnalysis = (TCycleAnalysis *)fAnalysisVector.at(lastEndurance);
-    lastAnalysis->ReClassify(lastResult);
+    lastAnalysis->ReClassify(lastHicResult);
   }
 }
 
