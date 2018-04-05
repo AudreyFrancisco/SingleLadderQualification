@@ -242,8 +242,9 @@ void TCycleResultHic::Add(TCycleResultHic &aResult)
   if (aResult.m_maxIdda > m_maxIdda) m_maxIdda       = aResult.m_maxIdda;
   if (aResult.m_maxIddd > m_maxIddd) m_maxIddd       = aResult.m_maxIddd;
 
-  if (aResult.m_minIdda < m_minIdda) m_minIdda = aResult.m_minIdda;
-  if (aResult.m_minIddd < m_minIddd) m_minIddd = aResult.m_minIddd;
+  if (aResult.m_minWorkingChips < m_minWorkingChips) m_minWorkingChips = aResult.m_minWorkingChips;
+  if (aResult.m_minIdda < m_minIdda) m_minIdda                         = aResult.m_minIdda;
+  if (aResult.m_minIddd < m_minIddd) m_minIddd                         = aResult.m_minIddd;
 
   m_weight++;
 }
