@@ -494,10 +494,10 @@ string CreateActivityName(string compName, TScanConfig *config)
     testName = string("OB Reception Test ");
     break;
   case OBHalfStaveOL:
-    testName = string("OL Half-Stave Test ");
+    testName = string("OL HS Test ");
     break;
   case OBHalfStaveML:
-    testName = string("ML Half-Stave Test ");
+    testName = string("ML HS Test ");
     break;
   case IBQualification:
     testName = string("IB Qualification Test ");
