@@ -1528,6 +1528,9 @@ void MainWindow::attachtodatabase()
       path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
              "/Classification.dat";
       DbAddAttachment(fDB, activ, attachText, string(path), string("Classification.dat"));
+      path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
+             "/DBParameters.dat";
+      DbAddAttachment(fDB, activ, attachText, string(path), string("DBParameters.dat"));
 
       DbAddMember(fDB, activ, fIdofoperator);
 
