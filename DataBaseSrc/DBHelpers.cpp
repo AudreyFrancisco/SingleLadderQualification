@@ -2,7 +2,10 @@
 #include <fstream>
 #include <set>
 
-std::set<std::string> kTestTypes = {"OB HIC Qualification Test"};
+static const std::set<std::string> kTestTypes = {
+    "OB HIC Qualification Test", "IB HIC Qualification Test", "OB HIC Endurance Test",
+    "OB HIC Fast Power Test",    "OB HIC Reception Test",     "OL HS Qualification Test",
+    "ML HS Qualification Test"};
 
 int DbGetActivityTypeId(AlpideDB *db, string name)
 {
@@ -170,9 +173,14 @@ void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId)
   componentDB->GetComponentActivities(compId, &history);
 
   for (unsigned int i = 0; i < history.size(); i++) {
-    if (kTestTypes.find(history.at(i).Typename) == kTestTypes.end())
+    if (kTestTypes.find(history.at(i).Typename) == kTestTypes.end()) {
+      std::cout << "found non-test activity of type " << history.at(i).Typename << std::endl;
       continue; // check that typename is in list of tests
-    if (history.at(i).Type == activityTypeId) continue;
+    }
+    if (history.at(i).Type == activityTypeId) {
+      std::cout << "found same test-type " << history.at(i).Typename << std::endl;
+      continue;
+    }
     std::cout << "found test of type " << history.at(i).Typename << std::endl;
     // add to result, then find newest
   }
