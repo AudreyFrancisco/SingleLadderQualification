@@ -848,6 +848,7 @@ void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actL
   xmlNode *n1, *n2, *n3;
   n1 = ns;
   compActivity theAct;
+
   while (n1 != NULL) {
     if (MATCHNODE(n1, "ComponentActivityHistory")) {
       n2 = n1->children;
@@ -886,7 +887,10 @@ void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actL
         if (MATCHNODE(n2, "ActivityType")) {
           n3 = n2->children;
           while (n3 != NULL) {
-            if (MATCHNODE(n3, "ID")) theAct.Type = atoi((const char *)n3->children->content);
+            if (MATCHNODE(n3, "ID"))
+              theAct.Type = atoi((const char *)n3->children->content);
+            else if (MATCHNODE(n3, "Name"))
+              theAct.Typename.assign((const char *)n3->children->content);
             n3 = n3->next;
           }
         }
@@ -894,6 +898,7 @@ void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actL
       }
       actList->push_back(theAct);
     }
+    n1 = n1->next;
   }
 }
 
