@@ -50,7 +50,7 @@ int myStrobeDelay  = 10;
 int myPulseLength  = 4000;
 
 int myPulseDelay = 40;
-int myNTriggers  = 1000000;
+int myNTriggers  = 10000;
 
 int HitData[256][512][1024];
 

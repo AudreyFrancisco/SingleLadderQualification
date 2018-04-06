@@ -24,6 +24,8 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
+#include <fstream>
+#include <iostream>
 #include <string.h>
 #include <unistd.h>
 
@@ -34,7 +36,7 @@ std::vector<TAlpide *>       fChips;
 
 int fEnabled = 0; // variable to count number of enabled chips; leave at 0
 
-void readTemp()
+void readTemp(char *TimeStamp)
 {
   // Allocate the memory for host the results
   uint16_t *theResult = (uint16_t *)malloc(sizeof(uint16_t) * (fChips.size() + 1)); //
@@ -42,21 +44,25 @@ void readTemp()
     std::cerr << "Test_temperature : Error to allocate memory" << std::endl;
     return;
   }
-  float    theValue;
+  float    theValue, theVoltage;
   uint16_t theChipId;
-
+  char     filename[100];
+  sprintf(filename, "Data/temp_test_%s.dat", TimeStamp);
+  FILE *fp = fopen(filename, "a");
   std::cout << "\tChipId\tBias\tTemp." << std::endl;
   // Set all chips for Temperature Measurement
   for (unsigned int i = 0; i < fChips.size(); i++) {
     if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
-    theChipId = fChips.at(i)->GetConfig()->GetChipId();
-    theValue  = fChips.at(i)->ReadTemperature();
+    theChipId  = fChips.at(i)->GetConfig()->GetChipId();
+    theValue   = fChips.at(i)->ReadTemperature();
+    theVoltage = fChips.at(i)->ReadAnalogueVoltage();
+    fprintf(fp, "%d %f %f\n", theChipId, theValue, theVoltage);
     std::cout << i << ")\t" << theChipId << "\t" << fChips.at(i)->GetADCOffset() << "\t" << theValue
               << "\t" << fChips.at(i)->ReadAnalogueVoltage() << std::endl;
   }
   // Deallocate memory
   free(theResult);
-
+  fclose(fp);
   std::cout << std::endl << "Test_temperature : Test finished !" << std::endl;
   return;
 }
@@ -99,7 +105,7 @@ int main(int argc, char **argv)
 
     makeTimeStamp(TimeStamp);
     std::cout << "Temperature test : " << TimeStamp << std::endl;
-    readTemp();
+    readTemp(TimeStamp);
   }
   return 0;
 }
