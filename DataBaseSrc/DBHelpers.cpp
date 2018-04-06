@@ -165,11 +165,13 @@ std::vector<int> DbGetActivityIds(AlpideDB *db, int activityTypeId, string compN
 }
 
 
-void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId)
+void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
+                        vector<ComponentDB::compActivity> &tests)
 {
   ComponentDB *                     componentDB = new ComponentDB(db);
   vector<ComponentDB::compActivity> history;
 
+  tests.clear();
   componentDB->GetComponentActivities(compId, &history);
 
   for (unsigned int i = 0; i < history.size(); i++) {
@@ -182,8 +184,30 @@ void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId)
       continue;
     }
     std::cout << "found test of type " << history.at(i).Typename << std::endl;
-    // add to result, then find newest
+    tests.push_back(history.at(i));
   }
+}
+
+THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityTypeId)
+{
+  vector<ComponentDB::compActivity> tests;
+  DbGetPreviousTests(db, compId, activityTypeId, tests);
+
+  int latestIdx = 0;
+
+  if (tests.size() == 0) return CLASS_UNTESTED;
+  for (unsigned int i = 0; i < tests.size(); i++) {
+    if (DbIsNewer(tests.at(latestIdx), tests.at(i)) == 1) {
+      latestIdx = i;
+    }
+  }
+
+  string category = tests.at(latestIdx).Result.Name;
+
+  // TODO: complete
+  if (category.find("GOLD") != string::npos) return CLASS_GREEN;
+
+  return CLASS_UNTESTED;
 }
 
 
@@ -196,6 +220,21 @@ bool DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, flo
     }
   }
   return false;
+}
+
+
+int DbIsNewer(ComponentDB::compActivity act0, ComponentDB::compActivity act1)
+{
+  // first check the start dates;
+  // not sure about the precision of the member StartDate, but it should be either equal
+  // or have a difference of at least 1 day = 86400 sec
+  if (difftime(act0.StartDate, act1.StartDate) < -86000)
+    return 1; // date of act0 before date of act1
+  if (difftime(act0.StartDate, act1.StartDate) > 86000) return 0;
+
+  // no time parameter here, so if same date, use the activity ids
+  if (act0.ID < act1.ID) return 1;
+  return 0;
 }
 
 int DbIsNewer(ActivityDB::activityLong act0, ActivityDB::activityLong act1)

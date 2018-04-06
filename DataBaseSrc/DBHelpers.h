@@ -27,10 +27,13 @@ int DbCountActivities(AlpideDB *db, int activityTypeId, string compName);
 std::vector<int> DbGetActivityIds(AlpideDB *db, int activityTypeId, string compName);
 std::vector<ActivityDB::activityLong> DbGetActivities(AlpideDB *db, std::vector<int> activityIds);
 int DbIsNewer(ActivityDB::activityLong act0, ActivityDB::activityLong act1);
+int DbIsNewer(ComponentDB::compActivity act0, ComponentDB::compActivity act1);
 bool DbGetLatestActivity(AlpideDB *db, int activityTypeId, string compName,
                          ActivityDB::activityLong &activity);
 int DbGetActivityTypeId(AlpideDB *db, string name);
-void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId);
+void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
+                        vector<ComponentDB::compActivity> &tests);
+THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityTypeId);
 bool DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, float &parValue);
 int DbGetPrevActivityTypeId(AlpideDB *db, string name, bool &onChildren);
 int DbGetAttachmentTypeId(AlpideDB *db, string name);
