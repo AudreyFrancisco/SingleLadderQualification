@@ -1600,9 +1600,6 @@ void MainWindow::fillingreceptionscans()
   AddScan(STPower);
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   AddScan(STFifo);
-  fConfig->GetScanConfig()->SetMlvdsStrength(5);
-  AddScan(STFifo);
-  fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
   AddScan(STDigital);
 }
 
@@ -1678,6 +1675,7 @@ void MainWindow::savesettings()
       in            = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "in");
       out           = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "out");
       comp = DbGetComponentId(fDB, projectid, fComponentTypeID, fHicnames.at(i).toStdString());
+
       if (comp == -1) {
         fComponentWindow = new Components(this);
         fComponentWindow->WriteToLabel(fHicnames.at(i));
@@ -1686,6 +1684,9 @@ void MainWindow::savesettings()
           return;
         }
       }
+      // MK: Test
+      // DbGetPreviousTests(fDB, comp, fIdofactivitytype);
+
       fActComponentTypeIDs.push_back(make_pair(in, out));
       fComponentIDs.push_back(comp);
     }
