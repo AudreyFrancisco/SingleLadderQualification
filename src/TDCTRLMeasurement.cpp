@@ -262,7 +262,7 @@ void TDctrlMeasurement::Execute()
       std::cout << "Fifo scan failed" << std::endl;
       exit(1);
     }*/
-    scope.wait_for_trigger(10); // Check and wait until triggered
+    scope.wait_for_trigger(4); // Check and wait until triggered
 
     // Do the measurement here, value has to be saved in the histogram
     // with THisto::Set, idx indicates the chip, e.g.
