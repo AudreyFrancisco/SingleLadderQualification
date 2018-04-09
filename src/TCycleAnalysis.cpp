@@ -124,10 +124,11 @@ THicClassification TCycleAnalysis::GetClassificationOB(TCycleResultHic *result)
 {
   THicClassification returnValue = CLASS_GREEN;
 
-  DoCut(returnValue, CLASS_ORANGE, result->m_nTrips, "ENDURANCEMAXTRIPSGREEN");
-  DoCut(returnValue, CLASS_RED, result->m_nTrips, "ENDURANCEMAXTRIPSORANGE");
-  DoCut(returnValue, CLASS_ORANGE, result->m_minWorkingChips, "ENDURANCEMINCHIPSGREEN", true);
-  DoCut(returnValue, CLASS_RED, result->m_nChipFailures, "ENDURANCEMAXFAILURESORANGE");
+  DoCut(returnValue, CLASS_ORANGE, result->m_nTrips, "ENDURANCEMAXTRIPSGREEN", result);
+  DoCut(returnValue, CLASS_RED, result->m_nTrips, "ENDURANCEMAXTRIPSORANGE", result);
+  DoCut(returnValue, CLASS_ORANGE, result->m_minWorkingChips, "ENDURANCEMINCHIPSGREEN", result,
+        true);
+  DoCut(returnValue, CLASS_RED, result->m_nChipFailures, "ENDURANCEMAXFAILURESORANGE", result);
   std::cout << "Cycle Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
   return returnValue;

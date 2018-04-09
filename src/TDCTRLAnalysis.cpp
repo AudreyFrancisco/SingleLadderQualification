@@ -301,10 +301,10 @@ void TDctrlAnalysis::Finalize()
 THicClassification TDctrlAnalysis::GetClassificationIB(TDctrlResultHic *result)
 {
   THicClassification returnValue = CLASS_GREEN;
-  DoCut(returnValue, CLASS_RED, result->worst_maxAmp * 1000, "DCTRLMINAMPIB", true);
-  DoCut(returnValue, CLASS_RED, result->worst_slope * 1000, "DCTRLMINSLOPEIB", true);
-  DoCut(returnValue, CLASS_ORANGE, result->worst_rise * 1e9, "DCTRLMAXRISEGREENIB");
-  DoCut(returnValue, CLASS_ORANGE, result->worst_fall * 1e9, "DCTRLMAXFALLGREENIB");
+  DoCut(returnValue, CLASS_RED, result->worst_maxAmp * 1000, "DCTRLMINAMPIB", result, true);
+  DoCut(returnValue, CLASS_RED, result->worst_slope * 1000, "DCTRLMINSLOPEIB", result, true);
+  DoCut(returnValue, CLASS_ORANGE, result->worst_rise * 1e9, "DCTRLMAXRISEGREENIB", result);
+  DoCut(returnValue, CLASS_ORANGE, result->worst_fall * 1e9, "DCTRLMAXFALLGREENIB", result);
   std::cout << "DCTRL Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
   return returnValue;
@@ -313,10 +313,10 @@ THicClassification TDctrlAnalysis::GetClassificationIB(TDctrlResultHic *result)
 THicClassification TDctrlAnalysis::GetClassificationOB(TDctrlResultHic *result)
 {
   THicClassification returnValue = CLASS_GREEN;
-  DoCut(returnValue, CLASS_RED, result->worst_maxAmp * 1000, "DCTRLMINAMPOB", true);
-  DoCut(returnValue, CLASS_RED, result->worst_slope * 1000, "DCTRLMINSLOPEOB", true);
-  DoCut(returnValue, CLASS_ORANGE, result->worst_rise * 1e9, "DCTRLMAXRISEGREENOB");
-  DoCut(returnValue, CLASS_ORANGE, result->worst_fall * 1e9, "DCTRLMAXFALLGREENOB");
+  DoCut(returnValue, CLASS_RED, result->worst_maxAmp * 1000, "DCTRLMINAMPOB", result, true);
+  DoCut(returnValue, CLASS_RED, result->worst_slope * 1000, "DCTRLMINSLOPEOB", result, true);
+  DoCut(returnValue, CLASS_ORANGE, result->worst_rise * 1e9, "DCTRLMAXRISEGREENOB", result);
+  DoCut(returnValue, CLASS_ORANGE, result->worst_fall * 1e9, "DCTRLMAXFALLGREENOB", result);
   std::cout << "DCTRL Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
   return returnValue;

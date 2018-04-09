@@ -81,9 +81,16 @@ protected:
   TScanParameters *  m_scanParameters;
   bool               m_valid; // used for predictions only
   virtual void Compare(TScanResultHic *aPrediction) { (void)aPrediction; };
+  std::vector<std::string>             m_cuts;
+  void                                 ClearCuts() { m_cuts.clear(); };
+  void AddCut(std::string aCut) { m_cuts.push_back(aCut); };
 
 public:
-  TScanResultHic() { m_valid = false; };
+  TScanResultHic()
+  {
+    m_valid = false;
+    ClearCuts();
+  };
   void SetValidity(bool valid) { m_valid = valid; };
   bool                  IsValid() { return m_valid; };
   virtual void WriteToFile(FILE *fp) = 0;
@@ -94,8 +101,9 @@ public:
   void SetClassification(THicClassification aClass) { m_class = aClass; };
   std::map<int, TScanResultChip *> DeleteThisToo() { return m_chipResults; };
   float GetVariable(int chip, TResultVariable var);
-  string GetOutputPath() { return m_outputPath; };
-  string GetParameterFile();
+  string                   GetOutputPath() { return m_outputPath; };
+  string                   GetParameterFile();
+  std::vector<std::string> GetCuts() { return m_cuts; };
 };
 
 // base class for classes containing complete results
@@ -161,7 +169,7 @@ protected:
   TScanResultHic *FindHicResultForChip(common::TChipIndex chip);
   virtual string GetPreviousTestType() = 0;
   void DoCut(THicClassification &hicClass, THicClassification failClass, int value, string cutName,
-             bool minCut = false, int chipId = -1);
+             TScanResultHic *result, bool minCut = false, int chipId = -1);
 
 public:
   TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
