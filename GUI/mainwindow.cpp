@@ -1684,8 +1684,8 @@ void MainWindow::savesettings()
           return;
         }
       }
-      // MK: Test
-      // DbGetPreviousTests(fDB, comp, fIdofactivitytype);
+
+      fHICs.at(i)->SetOldClassification(DbGetPreviousCategory(fDB, comp, fIdofactivitytype));
 
       fActComponentTypeIDs.push_back(make_pair(in, out));
       fComponentIDs.push_back(comp);
