@@ -11,6 +11,7 @@ THic::THic(const char *id, int modId, TPowerBoard *pb, int pbMod)
   m_pbMod      = pbMod;
   m_moduleId   = modId;
   m_class      = CLASS_UNTESTED;
+  m_oldClass   = CLASS_UNTESTED;
   m_chips.clear();
 }
 
