@@ -84,6 +84,8 @@ protected:
   void AnalyseHisto(TScanHisto *histo);
   void   InitCounters();
   string GetPreviousTestType() { return string(""); }; // done only once ?
+  void CalculatePrediction(std::string hicName) { (void)hicName; };
+
 public:
   TReadoutAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                    std::vector<THic *> hics, std::mutex *aMutex, TReadoutResult *aResult = 0);

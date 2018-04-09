@@ -330,13 +330,13 @@ void TSCurveAnalysis::Finalize()
       hicResult->m_nNoThresh += chipResult->m_nNoThresh;
       hicResult->m_nHot += chipResult->m_nHot;
     }
+    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult, m_hics.at(ihic));
     }
     else {
       hicResult->m_class = GetClassificationIB(hicResult, m_hics.at(ihic));
     }
-    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     hicResult->SetValidity(true);
   }
   WriteResult();
@@ -756,13 +756,19 @@ void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   GetParameterSuffix(suffix, file_suffix);
 
   if (m_thresholdScan) {
-    DbAddParameter(db, activity, string("Dead pixels") + suffix, (float)m_nDead);
-    DbAddParameter(db, activity, string("Pixels without") + suffix, (float)m_nNoThresh);
-    DbAddParameter(db, activity, string("Average noise") + suffix, (float)m_noiseAv);
-    DbAddParameter(db, activity, string("Maximum chip noise") + suffix, (float)m_maxChipNoise);
+    DbAddParameter(db, activity, string("Dead pixels") + suffix, (float)m_nDead,
+                   GetParameterFile());
+    DbAddParameter(db, activity, string("Pixels without") + suffix, (float)m_nNoThresh,
+                   GetParameterFile());
+    DbAddParameter(db, activity, string("Average noise") + suffix, (float)m_noiseAv,
+                   GetParameterFile());
+    DbAddParameter(db, activity, string("Maximum chip noise") + suffix, (float)m_maxChipNoise,
+                   GetParameterFile());
   }
-  DbAddParameter(db, activity, string("Minimum chip avg") + suffix, (float)m_minChipAv);
-  DbAddParameter(db, activity, string("Maximum chip avg") + suffix, (float)m_maxChipAv);
+  DbAddParameter(db, activity, string("Minimum chip avg") + suffix, (float)m_minChipAv,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Maximum chip avg") + suffix, (float)m_maxChipAv,
+                 GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   fileName          = string(m_resultFile).substr(slash + 1); // strip path

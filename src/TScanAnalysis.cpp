@@ -84,6 +84,18 @@ bool TScanAnalysis::GetPreviousActivity(string compName, ActivityDB::activityLon
 }
 
 
+bool TScanAnalysis::GetPreviousParamValue(string hicTestName, string chipTestName,
+                                          ActivityDB::activityLong &act, float &value)
+{
+  if (GetPreviousTestType() == "ALPIDEB Chip Testing Analysis") {
+    return DbFindParamValue(act.Parameters, chipTestName, value);
+  }
+  else {
+    return DbFindParamValue(act.Parameters, chipTestName, value);
+  }
+}
+
+
 int TScanAnalysis::ReadChipList()
 {
   m_chipList = m_scan->GetChipList();
@@ -108,6 +120,29 @@ void TScanAnalysis::CreatePrediction()
 }
 
 
+void TScanAnalysis::ComparePrediction(std::string hicName)
+{
+  TScanResultHic *prediction;
+  TScanResultHic *result;
+
+  try {
+    prediction = m_prediction->GetHicResult(hicName);
+    result     = m_result->GetHicResult(hicName);
+  }
+  catch (...) {
+    std::cout << "Error: prediction or result not found for hic " << hicName << std::endl;
+    return;
+  }
+
+  if ((!prediction->IsValid()) || (!result->IsValid())) {
+    std::cout << "Error: prediction or result not valid for hic " << hicName << std::endl;
+    return;
+  }
+
+  result->Compare(prediction);
+}
+
+
 void TScanAnalysis::CreateHicResults()
 {
   if (m_hics.size() == 0) {
@@ -125,6 +160,7 @@ void TScanAnalysis::CreateHicResults()
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     TScanResultHic *hicResult   = GetHicResult();
     hicResult->m_class          = CLASS_UNTESTED;
+    hicResult->m_hicName        = m_hics.at(i)->GetDbId();
     hicResult->m_outputPath     = m_config->GetDataPath(m_hics.at(i)->GetDbId());
     hicResult->m_scanParameters = m_scan->GetParameters();
     for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip++) {
@@ -154,7 +190,7 @@ void TScanAnalysis::Run()
 {
   m_started = true;
 
-  while (m_histoQue->size() == 0) {
+  while ((!fScanAbort) && (!fScanAbortAll) && (m_histoQue->size() == 0)) {
     sleep(1);
   }
 
@@ -229,6 +265,22 @@ const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
     return "Unknown";
 }
 
+
+void TScanAnalysis::WriteHicClassToFile(std::string hicName)
+{
+  char            fName[300];
+  TScanResultHic *hicResult = m_result->GetHicResult(hicName);
+
+  if (hicResult) {
+    std::string writeLine = std::string(m_scan->GetName()) + std::string(": ") +
+                            std::string(hicResult->WriteHicClassification());
+    sprintf(fName, "%s/Classification.dat", hicResult->GetOutputPath().c_str());
+    FILE *fp = fopen(fName, "a");
+    fprintf(fp, "%s\n", writeLine.c_str());
+    fclose(fp);
+    std::cout << writeLine << std::endl;
+  }
+}
 
 // DoCut checks a variable against a cut and sets the classification accordingly
 // in case of failure an output is printed to the terminal
@@ -315,6 +367,13 @@ void TScanResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   DbAddAttachment(db, activity, attachResult, string(m_resultFile), string(m_resultFile));
 }
+
+
+std::string TScanResultHic::GetParameterFile()
+{
+  return m_outputPath + std::string("/DBParameters.dat");
+}
+
 
 TScanResultChip *TScanResult::GetChipResult(common::TChipIndex idx)
 {

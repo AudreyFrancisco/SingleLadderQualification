@@ -1,5 +1,11 @@
 #include "DBHelpers.h"
 #include <fstream>
+#include <set>
+
+static const std::set<std::string> kTestTypes = {
+    "OB HIC Qualification Test", "IB HIC Qualification Test", "OB HIC Endurance Test",
+    "OB HIC Fast Power Test",    "OB HIC Reception Test",     "OL HS Qualification Test",
+    "ML HS Qualification Test"};
 
 int DbGetActivityTypeId(AlpideDB *db, string name)
 {
@@ -158,6 +164,53 @@ std::vector<int> DbGetActivityIds(AlpideDB *db, int activityTypeId, string compN
   return result;
 }
 
+
+void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
+                        vector<ComponentDB::compActivity> &tests)
+{
+  ComponentDB *                     componentDB = new ComponentDB(db);
+  vector<ComponentDB::compActivity> history;
+
+  tests.clear();
+  componentDB->GetComponentActivities(compId, &history);
+
+  for (unsigned int i = 0; i < history.size(); i++) {
+    if (kTestTypes.find(history.at(i).Typename) == kTestTypes.end()) {
+      std::cout << "found non-test activity of type " << history.at(i).Typename << std::endl;
+      continue; // check that typename is in list of tests
+    }
+    if (history.at(i).Type == activityTypeId) {
+      std::cout << "found same test-type " << history.at(i).Typename << std::endl;
+      continue;
+    }
+    std::cout << "found test of type " << history.at(i).Typename << std::endl;
+    tests.push_back(history.at(i));
+  }
+}
+
+THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityTypeId)
+{
+  vector<ComponentDB::compActivity> tests;
+  DbGetPreviousTests(db, compId, activityTypeId, tests);
+
+  int latestIdx = 0;
+
+  if (tests.size() == 0) return CLASS_UNTESTED;
+  for (unsigned int i = 0; i < tests.size(); i++) {
+    if (DbIsNewer(tests.at(latestIdx), tests.at(i)) == 1) {
+      latestIdx = i;
+    }
+  }
+
+  string category = tests.at(latestIdx).Result.Name;
+
+  // TODO: complete
+  if (category.find("GOLD") != string::npos) return CLASS_GREEN;
+
+  return CLASS_UNTESTED;
+}
+
+
 bool DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, float &parValue)
 {
   for (unsigned int i = 0; i < pars.size(); i++) {
@@ -167,6 +220,21 @@ bool DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, flo
     }
   }
   return false;
+}
+
+
+int DbIsNewer(ComponentDB::compActivity act0, ComponentDB::compActivity act1)
+{
+  // first check the start dates;
+  // not sure about the precision of the member StartDate, but it should be either equal
+  // or have a difference of at least 1 day = 86400 sec
+  if (difftime(act0.StartDate, act1.StartDate) < -86000)
+    return 1; // date of act0 before date of act1
+  if (difftime(act0.StartDate, act1.StartDate) > 86000) return 0;
+
+  // no time parameter here, so if same date, use the activity ids
+  if (act0.ID < act1.ID) return 1;
+  return 0;
 }
 
 int DbIsNewer(ActivityDB::activityLong act0, ActivityDB::activityLong act1)
@@ -370,7 +438,8 @@ int DbGetComponentActivity(AlpideDB *db, int compId, int activityTypeId)
   return -1;
 }
 
-bool DbAddParameter(AlpideDB *db, ActivityDB::activity &activity, string name, float value)
+bool DbAddParameter(AlpideDB *db, ActivityDB::activity &activity, string name, float value,
+                    std::string file)
 {
   ActivityDB::parameter parameter;
   int                   paramId = DbGetParameterId(db, activity.Type, name);
@@ -385,6 +454,12 @@ bool DbAddParameter(AlpideDB *db, ActivityDB::activity &activity, string name, f
   parameter.Value             = value;
 
   activity.Parameters.push_back(parameter);
+
+  FILE *fp = fopen(file.c_str(), "a");
+  if (fp) {
+    fprintf(fp, "Writing parameter %s (ID %d), value %f\n", name.c_str(), paramId, value);
+    fclose(fp);
+  }
   return true;
 }
 
@@ -458,10 +533,10 @@ string CreateActivityName(string compName, TScanConfig *config)
     testName = string("OB Reception Test ");
     break;
   case OBHalfStaveOL:
-    testName = string("OL Half-Stave Test ");
+    testName = string("OL HS Test ");
     break;
   case OBHalfStaveML:
-    testName = string("ML Half-Stave Test ");
+    testName = string("ML HS Test ");
     break;
   case IBQualification:
     testName = string("IB Qualification Test ");

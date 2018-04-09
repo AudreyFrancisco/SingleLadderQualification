@@ -151,6 +151,7 @@ protected:
   void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
   virtual string GetPreviousTestType();
+  void CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   // constructor: result factor determines type of analysis

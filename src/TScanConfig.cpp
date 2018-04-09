@@ -8,39 +8,40 @@ TScanConfig::TScanConfig()
 {
   m_retest.clear();
   // dummy values for first tests
-  m_nInj           = NINJ;
-  m_nTrig          = NTRIG;
-  m_chargeStart    = CHARGE_START;
-  m_chargeStop     = CHARGE_STOP;
-  m_chargeStep     = CHARGE_STEP;
-  m_nMaskStages    = N_MASK_STAGES;
-  m_pixPerRegion   = PIX_PER_REGION;
-  m_noiseCutInv    = NOISECUT_INV;
-  m_vcasnStart     = VCASN_START;
-  m_vcasnStop      = VCASN_STOP;
-  m_vcasnStep      = VCASN_STEP;
-  m_ithrStart      = ITHR_START;
-  m_ithrStop       = ITHR_STOP;
-  m_ithrStep       = ITHR_STEP;
-  m_dacStart       = DAC_START;
-  m_dacStop        = DAC_STOP;
-  m_dacStep        = DAC_STEP;
-  m_nDacSamples    = NDACSAMPLES;
-  m_scanStep       = SCAN_STEP;
-  m_tuningMaxrow   = TUNING_MAXROW;
-  m_speedy         = SPEEDY;
-  m_rawData        = RAWDATA;
-  m_ivCurve        = IVCURVE;
-  m_ivPoints       = IVPOINTS;
-  m_maxIbias       = MAXIBIAS;
-  m_localBusCutRed = LOCALBUSCUTRED;
-  m_calVpulsel     = CAL_VPULSEL;
-  m_targetThresh   = TARGET_THRESHOLD;
-  m_voltageScale   = VOLTAGE_SCALE;
-  m_backBias       = BACKBIAS;
-  m_nominal        = NOMINAL;
-  m_isMasked       = false;
-  m_mlvdsStrength  = ChipConfig::DCTRL_DRIVER;
+  m_nInj            = NINJ;
+  m_nTrig           = NTRIG;
+  m_chargeStart     = CHARGE_START;
+  m_chargeStop      = CHARGE_STOP;
+  m_chargeStep      = CHARGE_STEP;
+  m_nMaskStages     = N_MASK_STAGES;
+  m_pixPerRegion    = PIX_PER_REGION;
+  m_noiseCutInv     = NOISECUT_INV;
+  m_vcasnStart      = VCASN_START;
+  m_vcasnStop       = VCASN_STOP;
+  m_vcasnStep       = VCASN_STEP;
+  m_ithrStart       = ITHR_START;
+  m_ithrStop        = ITHR_STOP;
+  m_ithrStep        = ITHR_STEP;
+  m_dacStart        = DAC_START;
+  m_dacStop         = DAC_STOP;
+  m_dacStep         = DAC_STEP;
+  m_nDacSamples     = NDACSAMPLES;
+  m_scanStep        = SCAN_STEP;
+  m_tuningMaxrow    = TUNING_MAXROW;
+  m_speedy          = SPEEDY;
+  m_rawData         = RAWDATA;
+  m_ivCurve         = IVCURVE;
+  m_ivPoints        = IVPOINTS;
+  m_maxIbias        = MAXIBIAS;
+  m_localBusCutRed  = LOCALBUSCUTRED;
+  m_calVpulsel      = CAL_VPULSEL;
+  m_targetThresh    = TARGET_THRESHOLD;
+  m_voltageScale    = VOLTAGE_SCALE;
+  m_backBias        = BACKBIAS;
+  m_nominal         = NOMINAL;
+  m_isMasked        = false;
+  m_mlvdsStrength   = ChipConfig::DCTRL_DRIVER;
+  m_testWithoutComp = TEST_WITHOUT_COMP;
 
   m_readoutSpeed     = READOUTSPEED;
   m_readoutOcc       = READOUTOCC;
@@ -112,11 +113,16 @@ TScanConfig::TScanConfig()
   m_threshMaxNoiseOB            = THRESH_MAXNOISE_OB;
   m_threshMaxNoiseIB            = THRESH_MAXNOISE_IB;
 
-  m_testDctrl          = TEST_DCTRL;
-  m_dctrlMinAmpGreen   = DCTRL_MINAMP_GREEN;
-  m_dctrlMinSlopeGreen = DCTRL_MINSLOPE_GREEN;
-  m_dctrlMaxRiseGreen  = DCTRL_MAXRISE_GREEN;
-  m_dctrlMaxFallGreen  = DCTRL_MAXFALL_GREEN;
+  m_testDctrl           = TEST_DCTRL;
+  m_dctrlMinAmpOB       = DCTRL_MINAMP_OB;
+  m_dctrlMinSlopeOB     = DCTRL_MINSLOPE_OB;
+  m_dctrlMaxRiseGreenOB = DCTRL_MAXRISE_GREEN_OB;
+  m_dctrlMaxFallGreenOB = DCTRL_MAXFALL_GREEN_OB;
+  m_dctrlMinAmpIB       = DCTRL_MINAMP_IB;
+  m_dctrlMinSlopeIB     = DCTRL_MINSLOPE_IB;
+  m_dctrlMaxRiseGreenIB = DCTRL_MAXRISE_GREEN_IB;
+  m_dctrlMaxFallGreenIB = DCTRL_MAXFALL_GREEN_IB;
+
 
   m_enduranceSlices            = ENDURANCE_SLICES;
   m_enduranceCycles            = ENDURANCE_CYCLES;
@@ -144,6 +150,7 @@ void TScanConfig::InitParamMap()
   fSettings["PIXPERREGION"] = &m_pixPerRegion;
   fSettings["NOISECUT_INV"] = &m_noiseCutInv;
 
+  fSettings["TESTWITHOUTCOMP"]        = &m_testWithoutComp;
   fSettings["VCASN_START"]            = &m_vcasnStart;
   fSettings["VCASN_STOP"]             = &m_vcasnStop;
   fSettings["VCASN_STEP"]             = &m_vcasnStep;
@@ -224,11 +231,15 @@ void TScanConfig::InitParamMap()
   fSettings["THRESH_MAXNOISE_OB"]           = &m_threshMaxNoiseOB;
   fSettings["THRESH_MAXNOISE_IB"]           = &m_threshMaxNoiseIB;
 
-  fSettings["TESTDCTRL"]          = &m_testDctrl;
-  fSettings["DCTRLMINAMPGREEN"]   = &m_dctrlMinAmpGreen;
-  fSettings["DCTRLMINSLOPEGREEN"] = &m_dctrlMinSlopeGreen;
-  fSettings["DCTRLMAXRISEGREEN"]  = &m_dctrlMaxRiseGreen;
-  fSettings["DCTRLMAXFALLGREEN"]  = &m_dctrlMaxFallGreen;
+  fSettings["TESTDCTRL"]           = &m_testDctrl;
+  fSettings["DCTRLMINAMPIB"]       = &m_dctrlMinAmpIB;
+  fSettings["DCTRLMINSLOPEIB"]     = &m_dctrlMinSlopeIB;
+  fSettings["DCTRLMAXRISEGREENIB"] = &m_dctrlMaxRiseGreenIB;
+  fSettings["DCTRLMAXFALLGREENIB"] = &m_dctrlMaxFallGreenIB;
+  fSettings["DCTRLMINAMPOB"]       = &m_dctrlMinAmpOB;
+  fSettings["DCTRLMINSLOPEOB"]     = &m_dctrlMinSlopeOB;
+  fSettings["DCTRLMAXRISEGREENOB"] = &m_dctrlMaxRiseGreenOB;
+  fSettings["DCTRLMAXFALLGREENOB"] = &m_dctrlMaxFallGreenOB;
 
   fSettings["CAL_VPULSEL"]  = &m_calVpulsel;
   fSettings["TARGETTHRESH"] = &m_targetThresh;

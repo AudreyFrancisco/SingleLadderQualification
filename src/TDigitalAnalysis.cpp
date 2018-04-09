@@ -15,6 +15,8 @@ TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aSca
     m_result = aResult;
   else
     m_result = new TDigitalResult();
+
+  m_prediction = new TDigitalResult();
   FillVariableList();
 }
 
@@ -61,12 +63,10 @@ void TDigitalAnalysis::Initialize()
 {
   ReadChipList();
   CreateHicResults();
+  CreatePrediction();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    TDigitalResultHic *hicResult =
-        (TDigitalResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
-    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
-    std::cout << "Start of analysis, nTimeout = " << hicResult->m_errorCounter.nTimeout;
+    // CalculatePrediction(m_hics.at(ihic)->GetDbId());
   }
 }
 
@@ -125,21 +125,34 @@ void TDigitalAnalysis::CalculatePrediction(std::string hicName)
                                 compType, hicName);
   GetChildList(compId, childNames);
 
+  std::cout << "Number of children = " << childNames.size() << std::endl;
   for (unsigned int i = 0; i < childNames.size(); i++) {
     ActivityDB::activityLong act;
-    if (GetPreviousActivity(hicName, act)) {
+    if (GetPreviousActivity(childNames.at(i), act)) {
       activities.push_back(act);
     }
   }
 
   if (activities.size() == 0) {
-    prediction->m_valid = false;
+    std::cout << "No previous activities found " << std::endl;
+    prediction->SetValidity(false);
     return;
   }
 
+  // do the calculation here
   for (unsigned int i = 0; i < activities.size(); i++) {
-    // do the calculation here
+    float value;
+    if (GetPreviousParamValue("Bad pixels digital (nominal)", "Dead Pixels", activities.at(i),
+                              value)) {
+      prediction->m_nDead += value;
+      std::cout << "Found value " << value << std::endl;
+    }
+    else {
+      std::cout << "Did not find value" << std::endl;
+    }
   }
+  prediction->SetValidity(true);
+  std::cout << "Expecting " << prediction->m_nDead << " dead pixels" << std::endl;
 }
 
 
@@ -296,14 +309,15 @@ void TDigitalAnalysis::Finalize()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TDigitalResultHic *hicResult =
         (TDigitalResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
+    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
     }
     else {
       hicResult->m_class = GetClassificationIB(hicResult);
     }
-    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     hicResult->SetValidity(true);
+    // ComparePrediction(m_hics.at(ihic)->GetDbId());
   }
   WriteResult();
 
@@ -409,15 +423,18 @@ void TDigitalResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   std::string suffix, file_suffix, fileName, remoteName;
   GetParameterSuffix(suffix, file_suffix);
-  DbAddParameter(db, activity, string("Timeouts digital") + suffix, (float)m_errorCounter.nTimeout);
+  DbAddParameter(db, activity, string("Timeouts digital") + suffix, (float)m_errorCounter.nTimeout,
+                 GetParameterFile());
   DbAddParameter(db, activity, string("8b10b errors digital") + suffix,
-                 (float)m_errorCounter.n8b10b);
+                 (float)m_errorCounter.n8b10b, GetParameterFile());
   DbAddParameter(db, activity, string("Corrupt events digital") + suffix,
-                 (float)m_errorCounter.nCorruptEvent);
+                 (float)m_errorCounter.nCorruptEvent, GetParameterFile());
   DbAddParameter(db, activity, string("Priority encoder errors digital") + suffix,
-                 (float)m_errorCounter.nPrioEncoder);
-  DbAddParameter(db, activity, string("Bad double columns digital") + suffix, (float)m_nBadDcols);
-  DbAddParameter(db, activity, string("Bad pixels digital") + suffix, (float)m_nBad);
+                 (float)m_errorCounter.nPrioEncoder, GetParameterFile());
+  DbAddParameter(db, activity, string("Bad double columns digital") + suffix, (float)m_nBadDcols,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Bad pixels digital") + suffix, (float)m_nBad,
+                 GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   fileName          = string(m_resultFile).substr(slash + 1); // strip path
@@ -452,6 +469,13 @@ void TDigitalResultHic::WriteToFile(FILE *fp)
   std::cout << "corrupt events " << m_errorCounter.nCorruptEvent << std::endl;
   std::cout << "timeouts:      " << m_errorCounter.nTimeout << std::endl;
 }
+
+void TDigitalResultHic::Compare(TScanResultHic *aPrediction)
+{
+  TDigitalResultHic *prediction = (TDigitalResultHic *)aPrediction;
+  std::cout << "expected " << prediction->m_nDead << " dead pixels, found " << m_nDead << std::endl;
+}
+
 
 void TDigitalResultChip::WriteToFile(FILE *fp)
 {

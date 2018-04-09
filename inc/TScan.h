@@ -39,12 +39,16 @@ class TScanConditionsHic {
 private:
   float m_tempStart;
   float m_tempEnd;
-  float m_vddaStart;
-  float m_vddaEnd;
+  float m_vddaChipStart;
+  float m_vddaChipEnd;
   float m_iddaStart;
   float m_iddaEnd;
   float m_idddStart;
   float m_idddEnd;
+  float m_vddaStart;
+  float m_vddaEnd;
+  float m_vdddStart;
+  float m_vdddEnd;
 
 public:
   TScanConditionsHic(){};

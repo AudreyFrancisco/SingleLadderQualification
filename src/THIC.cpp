@@ -107,6 +107,31 @@ float THic::GetIBias()
   return 0;
 }
 
+float THic::GetVddd()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetDigitalVoltage(m_pbMod);
+  }
+  return 0;
+}
+
+float THic::GetVdda()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetAnalogVoltage(m_pbMod);
+  }
+  return 0;
+}
+
+float THic::GetVbias()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetBiasVoltage();
+  }
+  return 0;
+}
+
+
 // scales all voltages and current limits of the HIC by a given factor
 // e.g. aFactor = 1.1 -> +10%
 // method takes the value from the config and writes the scaled value to the board

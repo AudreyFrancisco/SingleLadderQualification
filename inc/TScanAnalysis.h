@@ -73,12 +73,14 @@ class TScanResultHic {
 
 protected:
   std::map<int, TScanResultChip *> m_chipResults;
+  std::string        m_hicName;
   char               m_resultFile[300];
   THicClassification m_class;
   const char *       WriteHicClassification();
   string             m_outputPath;
   TScanParameters *  m_scanParameters;
   bool               m_valid; // used for predictions only
+  virtual void Compare(TScanResultHic *aPrediction) { (void)aPrediction; };
 
 public:
   TScanResultHic() { m_valid = false; };
@@ -89,9 +91,11 @@ public:
   int AddChipResult(int aChipId, TScanResultChip *aChipResult);
   void SetResultFile(const char *fName) { strncpy(m_resultFile, fName, sizeof(m_resultFile)); };
   THicClassification             GetClassification() { return m_class; };
+  void SetClassification(THicClassification aClass) { m_class = aClass; };
   std::map<int, TScanResultChip *> DeleteThisToo() { return m_chipResults; };
   float GetVariable(int chip, TResultVariable var);
   string GetOutputPath() { return m_outputPath; };
+  string GetParameterFile();
 };
 
 // base class for classes containing complete results
@@ -141,13 +145,16 @@ protected:
   virtual TScanResultHic * GetHicResult()  = 0;
   void                     CreateHicResults();
   void                     CreatePrediction();
-  virtual void CalculatePrediction(std::string hicName) { (void)hicName; };
-  virtual void                                 CreateResult() = 0;
-  int                                          ReadChipList();
+  void ComparePrediction(std::string hicName);
+  virtual void CalculatePrediction(std::string hicName) = 0; // { (void)hicName; };
+  virtual void CreateResult()                           = 0;
+  int          ReadChipList();
   virtual void AnalyseHisto(TScanHisto *histo) = 0;
   virtual void InitCounters()                  = 0;
   int          GetPreviousActivityType();
   bool GetPreviousActivity(string compName, ActivityDB::activityLong &act);
+  bool GetPreviousParamValue(string hicTestName, string chipTestName, ActivityDB::activityLong &act,
+                             float &value);
   int GetChildList(int id, std::vector<std::string> &childrenNames);
   int GetPreviousComponentType(std::string prevTestType);
   int             GetComponentType();
@@ -166,6 +173,7 @@ public:
   std::map<const char *, TResultVariable> GetVariableList() { return m_variableList; }
   float GetVariable(std::string aHic, int chip, TResultVariable var);
   static const char *WriteHicClassification(THicClassification hicClass);
+  void WriteHicClassToFile(std::string hicName);
   THicClassification GetClassification();
 };
 

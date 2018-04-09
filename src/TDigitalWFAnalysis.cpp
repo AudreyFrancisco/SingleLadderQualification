@@ -256,8 +256,10 @@ void TDigitalWFResult::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 void TDigitalWFResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   string remoteName;
-  DbAddParameter(db, activity, string("Unmaskable pixels"), (float)m_nUnmaskable);
-  DbAddParameter(db, activity, string("Unmaskable stuck pixels"), (float)m_nStuck);
+  DbAddParameter(db, activity, string("Unmaskable pixels"), (float)m_nUnmaskable,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Unmaskable stuck pixels"), (float)m_nStuck,
+                 GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   remoteName        = string(m_resultFile).substr(slash + 1); // strip path

@@ -67,7 +67,8 @@ class TDctrlAnalysis : public TScanAnalysis {
 private:
   void               WriteResult();
   void               FillVariableList();
-  THicClassification GetClassification(TDctrlResultHic *result);
+  THicClassification GetClassificationIB(TDctrlResultHic *result);
+  THicClassification GetClassificationOB(TDctrlResultHic *result);
   bool ChipIsSlave(common::TChipIndex idx);
   float Max(float a, float b, float c);
   float Min(float a, float b, float c);
@@ -89,6 +90,7 @@ protected:
   void AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
   void   InitCounters();
+  void CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TDctrlAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

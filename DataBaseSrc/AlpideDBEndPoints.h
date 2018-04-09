@@ -289,6 +289,7 @@ public:
     compActResult Result;
     compActStatus Status;
     int           Type;
+    string        Typename;
   };
 #define zCOMPACTIVITY(a)                                                                           \
   a.ID   = 0;                                                                                      \

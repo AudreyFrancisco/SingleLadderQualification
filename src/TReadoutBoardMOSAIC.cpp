@@ -226,8 +226,20 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
     catch (exception &e) {
       cerr << e.what() << endl;
       StopRun();
-      decodeError();
-      exit(1);
+      int ErrNums = decodeError();
+      if ((ErrNums & 0x03FF00) != 0) {
+        // This is an IDLE condition
+        throw;
+      }
+      else {
+        if ((ErrNums & 0x000001) != 0) {
+          // The flush of memory is done by the StopRun()
+          throw;
+        }
+        else {
+          exit(1);
+        }
+      }
     }
 
     // get event data from the selected data receiver
