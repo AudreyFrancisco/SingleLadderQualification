@@ -315,7 +315,7 @@ void scope_control::set_ext_trigger_level(double level)
 void scope_control::single_capture()
 {
   debug_print("Single capture");
-  scope_control::write_cmd("SING\n"); // Single capture
+  scope_control::write("SING\n"); // Single capture
 }
 
 void scope_control::set_math_diff(uint8_t ch_p, uint8_t ch_n)
@@ -426,12 +426,29 @@ void scope_control::get_errors() { scope_control::write_query("SYST:ERR:ALL?\n")
 
 void scope_control::wait_for_trigger(int timeout_sec)
 {
-  int count = 0;
-  while (scope_control::write_query("ACQ:STAT?\n") != "COMP") // Wait until complete
+  int         count = 0;
+  std::string value;
+  while (timeout_sec != count++) // Wait until complete or timeout
   {
-    if (count == timeout_sec) throw_ex("Timeout reached while waiting for trigger");
-    msleep(1000);
-    count++;
+    value = scope_control::write_query("ACQ:STAT?\n");
+    if (value == "COMP") { // Complete
+      return;
+    }
+    else if (value == "RUN") { // Running
+      if (count == timeout_sec)
+        throw_ex("Timeout reached while waiting for trigger.");
+      else
+        msleep(1000);
+    }
+    else if (value == "STOP") { // Stopped
+      throw_ex("STOP received while waiting for trigger.");
+    }
+    else if (value == "BRE") { // Break, acquisition finished, but interrupted
+      throw_ex("BREAK received while waiting for trigger.");
+    }
+    else {
+      throw_ex("Unkown response received while waiting for trigger.");
+    }
   }
 }
 
