@@ -4,7 +4,9 @@ int main()
 {
   scope_control scope;
   scope.debug_en = true;
-  scope.open_auto();
+  if (!scope.open_auto()) {
+    exit(1);
+  }
   scope.get_errors();
   // scope.open("/dev/pts/9");
   for (int i = 1; i <= 4; i++) {

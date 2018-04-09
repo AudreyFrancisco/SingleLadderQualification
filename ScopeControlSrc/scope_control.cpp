@@ -29,18 +29,11 @@ std::string scope_control::enumerate_ports()
   if (devices_found.size() == 0) throw_ex("No USB devices could be enumerated.\n");
   while (iter != devices_found.end()) {
     serial::PortInfo device = *iter++;
-    if ((device.hardware_id.find("0AAD:") != std::string::npos) ||
-        (device.hardware_id.find("0aad:") != std::string::npos)) {
-      if ((device.hardware_id.find(":013C") != std::string::npos) ||
-          (device.hardware_id.find(":013c") != std::string::npos))
-        port = device.port;
-      else if ((device.hardware_id.find(":01D6") != std::string::npos) ||
-               (device.hardware_id.find(":01d6") != std::string::npos))
-        port = "TMC";
-      else if ((device.hardware_id.find(":01D7") != std::string::npos) ||
-               (device.hardware_id.find(":01d7") != std::string::npos))
-        port = "MTP";
-    }
+    if (((device.hardware_id.find("0AAD") != std::string::npos) &&
+         (device.hardware_id.find("013C") != std::string::npos)) ||
+        ((device.hardware_id.find("0aad") != std::string::npos) &&
+         (device.hardware_id.find("013c") != std::string::npos)))
+      port = device.port;
     snprintf(text, sizeof(text), "(%s, %s, %s)\n", device.port.c_str(), device.description.c_str(),
              device.hardware_id.c_str());
     debug_print(text);
@@ -72,14 +65,11 @@ bool scope_control::open_auto(uint32_t timeoutms)
     if (link->isOpen()) link->close();
   std::string port = scope_control::enumerate_ports();
   if (port == "") {
-    throw_ex("Scope not detected.\n");
-    return false;
-  }
-  else if ((port == "TMC") || (port == "MTP")) {
-    snprintf(text, sizeof(text), "%s%s%s%s%s%s", "Scope is configured in wrong USB mode.\n",
+    snprintf(text, sizeof(text), "%s%s%s%s%s%s%s", "Scope not detected.\n",
+             "If scope is on and connected, check that scope is configured in correct USB mode.\n",
              "Press menu (lower right corner on the touch screen), select setup, last item.\n",
              "Tap 'Interface'.\n", "Tap 'USB' to select USB connection.\n", "Tap 'Parameter'.\n",
-             "Select the USB mode 'USB VCP (Virtual Com Port)'\n");
+             "Select the USB mode 'USB VCP (Virtual Com Port).'\n");
     throw_ex(text);
     return false;
   }
