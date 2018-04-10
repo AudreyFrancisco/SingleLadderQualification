@@ -211,8 +211,9 @@ void THic::AddClassification(THicClassification aClass)
 
 THicClassification THic::GetClassification()
 {
-  if (GetNEnabledChips() == 0)
-    return CLASS_RED;
+  if (GetNEnabledChips() == 0) return CLASS_RED;
+  //  else if (m_oldClass > m_class)
+  //  return m_oldClass;
   else
     return m_class;
 }
