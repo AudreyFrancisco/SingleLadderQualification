@@ -1442,7 +1442,7 @@ void MainWindow::attachtodatabase()
   if (fResultwindow->isVisible()) {
     fResultwindow->close();
   }
-  if (fDatabasefailure->isVisible()) {
+  if (fDatabasefailure && fDatabasefailure->isVisible()) {
     fDatabasefailure->close();
   }
   if (fDB) delete fDB;
@@ -1472,6 +1472,7 @@ void MainWindow::attachtodatabase()
         if (fMfile) {
           fMfile->close();
         }
+        delete fMfile;
       }
       ActivityDB *myactivity = new ActivityDB(fDB);
 
@@ -1562,7 +1563,6 @@ void MainWindow::attachtodatabase()
       std::cout << "the activity result is: " << activ.Result << std::endl;
       fActivityResults.push_back(activ.Result);
       delete myactivity;
-      delete fMfile;
     }
   }
   delete fDB;
