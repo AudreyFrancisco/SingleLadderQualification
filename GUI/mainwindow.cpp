@@ -1471,8 +1471,8 @@ void MainWindow::attachtodatabase()
         }
         if (fMfile) {
           fMfile->close();
+          delete fMfile;
         }
-        delete fMfile;
       }
       ActivityDB *myactivity = new ActivityDB(fDB);
 
