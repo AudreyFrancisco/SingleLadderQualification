@@ -380,6 +380,16 @@ std::string TScanResultHic::GetParameterFile()
 }
 
 
+void TScanResult::ForceClassification(THicClassification aClass)
+{
+  std::cout << "Warning: forcing all Hic results to "
+            << TScanAnalysis::WriteHicClassification(aClass) << std::endl;
+  for (std::map<std::string, TScanResultHic *>::iterator it = m_hicResults.begin();
+       it != m_hicResults.end(); ++it) {
+    it->second->SetClassification(aClass);
+  }
+}
+
 TScanResultChip *TScanResult::GetChipResult(common::TChipIndex idx)
 {
   for (std::map<int, TScanResultChip *>::iterator it = m_chipResults.begin();

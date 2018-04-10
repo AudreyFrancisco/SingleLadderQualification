@@ -128,6 +128,7 @@ public:
   int  GetNChips() { return (int)m_chipResults.size(); };
   int  GetNHics() { return (int)m_hicResults.size(); };
   void WriteToFile(const char *fName);
+  void ForceClassification(THicClassification aClass);
   virtual void WriteToFileGlobal(FILE *fp) = 0;
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
   TScanResultChip *GetChipResult(common::TChipIndex idx);
