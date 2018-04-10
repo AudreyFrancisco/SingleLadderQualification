@@ -34,6 +34,7 @@
  *  5/8/16  - adapt the read event to new definition
  *  18/01/17 - Review of ReadEventData. Added inheritance from class MBoard
  *  22/05/17 - Review for Auxiliary COntrol Interfaces facility
+ *  09/04/18 - Add the flushDataReceiver() to the Memory Overflow error
  *
  */
 #include "TReadoutBoardMOSAIC.h"
@@ -226,6 +227,7 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
     catch (exception &e) {
       cerr << e.what() << endl;
       StopRun();
+      flushDataReceivers();
       int ErrNums = decodeError();
       if ((ErrNums & 0x03FF00) != 0) {
         // This is an IDLE condition
