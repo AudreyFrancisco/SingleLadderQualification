@@ -1236,7 +1236,7 @@ void MainWindow::CombineEnduranceResults()
 
     for (unsigned int ihic = 0; ihic < fHICs.size(); ihic++) {
       TCycleResultHic *hicResult =
-          (TCycleResultHic *)scanResult->GetHicResult(fHICs.at(i)->GetDbId());
+          (TCycleResultHic *)scanResult->GetHicResult(fHICs.at(ihic)->GetDbId());
       TCycleResultHic *lastHicResult =
           (TCycleResultHic *)lastResult->GetHicResult(fHICs.at(ihic)->GetDbId());
 
