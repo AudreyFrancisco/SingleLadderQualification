@@ -1442,7 +1442,9 @@ void MainWindow::attachtodatabase()
   if (fResultwindow->isVisible()) {
     fResultwindow->close();
   }
-
+  if (fDatabasefailure->isVisible()) {
+    fDatabasefailure->close();
+  }
   if (fDB) delete fDB;
   fDB = new AlpideDB(fDatabasetype);
   SetHicClassifications();
