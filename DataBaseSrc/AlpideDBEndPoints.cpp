@@ -1016,6 +1016,7 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
   }
   else {
     DecodeResponse(stringresult);
+    if (theResponse.ErrorCode != 0) cerr << "Activity creation Error :" << DumpResponse() << endl;
     if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
     aActivity->ID = theResponse.ID;
   }
@@ -1034,6 +1035,7 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     }
     else {
       DecodeResponse(stringresult);
+      if (theResponse.ErrorCode != 0) cerr << "Activity Member Error :" << DumpResponse() << endl;
       if (VERBOSITYLEVEL == 1) cout << "Activity Member creation  :" << DumpResponse() << endl;
       aActivity->Members.at(i).ID = theResponse.ID;
     }
@@ -1063,6 +1065,8 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     }
     else {
       DecodeResponse(stringresult);
+      if (theResponse.ErrorCode != 0)
+        cerr << "Activity Parameter Error :" << DumpResponse() << endl;
       if (VERBOSITYLEVEL == 1) cout << "Activity Parameter creation :" << DumpResponse() << endl;
       aActivity->Parameters.at(i).ID = theResponse.ID;
     }
@@ -1116,6 +1120,8 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     }
     else {
       DecodeResponse(stringresult);
+      if (theResponse.ErrorCode != 0)
+        cerr << "Activity Attachment Error :" << DumpResponse() << endl;
       if (VERBOSITYLEVEL == 1) cout << "Activity Attachment creation :" << DumpResponse() << endl;
       aActivity->Attachments.at(i).ID = theResponse.ID;
     }

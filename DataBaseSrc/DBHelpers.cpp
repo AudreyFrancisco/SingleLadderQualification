@@ -204,9 +204,15 @@ THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityT
 
   string category = tests.at(latestIdx).Result.Name;
 
-  // TODO: complete
-  if (category.find("GOLD") != string::npos) return CLASS_GREEN;
-
+  // TODO: change to gold/silver/bronze
+  if (category.find("GOLD") != string::npos)
+    return CLASS_GREEN;
+  else if (category.find("SILVER") != string::npos)
+    return CLASS_ORANGE;
+  else if (category.find("not") != string::npos)
+    return CLASS_RED;
+  else if (category.find("part") != string::npos)
+    return CLASS_PARTIAL;
   return CLASS_UNTESTED;
 }
 

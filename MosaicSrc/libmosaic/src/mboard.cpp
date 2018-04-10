@@ -97,6 +97,7 @@ void MBoard::flushDataReceivers()
 {
   for (int i = 0; i < numReceivers; i++)
     if (receivers[i] != NULL) {
+      receivers[i]->numClosedData  = 0;
       receivers[i]->dataBufferUsed = 0;
       receivers[i]->flush();
     }

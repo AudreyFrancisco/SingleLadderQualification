@@ -51,9 +51,9 @@ public:
 class TFastPowerAnalysis : public TScanAnalysis {
 private:
   void WriteIVCurve(THic *hic);
-  THicClassification GetClassification(THicCurrents currents);
+  THicClassification GetClassification(THicCurrents currents, TFastPowerResultHic *result);
   //  THicClassification GetClassificationIB(THicCurrents currents);
-  THicClassification GetClassificationOB(THicCurrents currents);
+  THicClassification GetClassificationOB(THicCurrents currents, TFastPowerResultHic *result);
 
 protected:
   TScanResultChip *GetChipResult()

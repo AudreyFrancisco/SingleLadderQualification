@@ -48,44 +48,46 @@ void TFastPowerAnalysis::Finalize()
     for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
       hicResult->ibias[i] = hicCurrents.ibias[i];
     }
-    hicResult->m_class = GetClassification(hicCurrents);
+    hicResult->m_class = GetClassification(hicCurrents, hicResult);
     hicResult->SetValidity(true);
   }
   WriteResult();
   m_finished = true;
 }
 
-THicClassification TFastPowerAnalysis::GetClassification(THicCurrents currents)
+THicClassification TFastPowerAnalysis::GetClassification(THicCurrents         currents,
+                                                         TFastPowerResultHic *result)
 {
   if (currents.trip) {
     std::cout << "Fast power analysis: HIC classified red due to trip" << std::endl;
     return CLASS_RED;
   }
   if (currents.hicType == HIC_OB)
-    return GetClassificationOB(currents);
+    return GetClassificationOB(currents, result);
   else {
     std::cout << "Error: test not foreseen for IB HICs" << std::endl;
     return CLASS_UNTESTED;
   }
 }
 
-THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents currents)
+THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents         currents,
+                                                           TFastPowerResultHic *result)
 {
   THicClassification returnValue = CLASS_GREEN;
 
-  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", true);
-  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", true);
+  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", result, true);
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", result, true);
 
-  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MAXIDDA_OB");
-  DoCut(returnValue, CLASS_ORANGE, currents.idddSwitchon * 1000, "MAXIDDD_GREEN_OB");
-  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MAXIDDD_ORANGE_OB");
+  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MAXIDDA_OB", result);
+  DoCut(returnValue, CLASS_ORANGE, currents.idddSwitchon * 1000, "MAXIDDD_GREEN_OB", result);
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MAXIDDD_ORANGE_OB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_IB");
+  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_IB", result);
   // add 1 for the case where I(3V) = 0
   float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
   // add 0.9 to round up for everything >= .1
-  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_IB");
+  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_IB", result);
 
   std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;

@@ -136,8 +136,8 @@ void TDigitalWFAnalysis::Finalize()
 THicClassification TDigitalWFAnalysis::GetClassificationOB(TDigitalWFResultHic *result)
 {
   THicClassification returnValue = CLASS_GREEN;
-  DoCut(returnValue, CLASS_ORANGE, result->m_nUnmaskable, "DIGITAL_MAXNOMASK_HIC_OB");
-  DoCut(returnValue, CLASS_ORANGE, result->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_HIC_OB");
+  DoCut(returnValue, CLASS_ORANGE, result->m_nUnmaskable, "DIGITAL_MAXNOMASK_HIC_OB", result);
+  DoCut(returnValue, CLASS_ORANGE, result->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_HIC_OB", result);
   std::cout << "Digital Whiteframe Analysis - Classification: "
             << WriteHicClassification(returnValue) << std::endl;
   return returnValue;
@@ -146,8 +146,8 @@ THicClassification TDigitalWFAnalysis::GetClassificationOB(TDigitalWFResultHic *
 THicClassification TDigitalWFAnalysis::GetClassificationIB(TDigitalWFResultHic *result)
 {
   THicClassification returnValue = CLASS_GREEN;
-  DoCut(returnValue, CLASS_ORANGE, result->m_nUnmaskable, "DIGITAL_MAXNOMASK_HIC_IB");
-  DoCut(returnValue, CLASS_ORANGE, result->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_HIC_IB");
+  DoCut(returnValue, CLASS_ORANGE, result->m_nUnmaskable, "DIGITAL_MAXNOMASK_HIC_IB", result);
+  DoCut(returnValue, CLASS_ORANGE, result->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_HIC_IB", result);
   std::cout << "Digital Whiteframe Analysis - Classification: "
             << WriteHicClassification(returnValue) << std::endl;
   return returnValue;

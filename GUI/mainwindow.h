@@ -87,7 +87,6 @@ public slots:
 
   void setandgetcalibration();
   void setTopBottom(int unit);
-  void attachtodatabaseretry();
   void attachtodatabase();
   void findidoftheactivitytype(std::string activitytypename, int &id);
   void locationcombo();
@@ -234,6 +233,7 @@ private:
   unsigned int           fInitialScans;
   bool                   fAddingScans;
   bool                   fExceptionthrown;
+  bool                   fWrite;
 
 
 private slots:
