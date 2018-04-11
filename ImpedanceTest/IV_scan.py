@@ -61,7 +61,7 @@ def measureCurr(sour):
         val[c] = float(sour.readline())
     print "%0.4fA\t%0.4fA\t%0.4fA" % ( val[0], val[1], val[2]) 
     
-def doIVcurve(HIC_name, sour, channel, max_volt, nsteps, test_ok, resistances, path, fileList):
+def doIVcurve(HIC_name, sour, channel, max_volt, nsteps, resistances, path, fileList):
         
     if channel==0:
         channel_name = "DVDD" 
@@ -79,7 +79,9 @@ def doIVcurve(HIC_name, sour, channel, max_volt, nsteps, test_ok, resistances, p
     output_file.write("V,I(%s),R(%s)\n" % (channel_name, channel_name))
 
     resistance = 1000000
-    resistance_average = 0
+    resistance_average = 0  
+    
+    channel_tripped = 0
 
     for step in range(0, nsteps):
         voltage = (max_volt/nsteps)*(step+1)
@@ -99,6 +101,7 @@ def doIVcurve(HIC_name, sour, channel, max_volt, nsteps, test_ok, resistances, p
             output_file.write("%f,%f,%f\n" % (voltage, current, resistance));
         else:
             #print("Channel #%d tripped. Scan is stopped" % (channel+1))
+            channel_tripped = 1
             init4030(sour,(0.1,0.1,0.01))
             break;
 
@@ -110,18 +113,22 @@ def doIVcurve(HIC_name, sour, channel, max_volt, nsteps, test_ok, resistances, p
     print("Impedance of %s is %f" %(channel_name, resistance_average)) 
     resistances[channel] = resistance_average 
     
-    if resistance_average==1000000: 
-        print("Warning: Impedance is too high. Check the connection to the HIC or use the multimeter to measure the impedance.")   
-        test_ok = test_ok*(-1)
-    elif resistance_average>100:
-        print("Test OK")  
-        test_ok = test_ok*1
-    else:
-        print("Test failed") 
-        test_ok = test_ok*0
     sour.write("SOUR:VOLT 0.0\n")       
     
     output_file.close()
+    
+    if channel_tripped:
+        print("Channel tripped. Test failed") 
+        return 0
+    elif resistance_average==1000000: 
+        print("Warning: Impedance is too high. Check the connection to the HIC or use the multimeter to measure the impedance.")   
+        return -1
+    elif resistance_average>100:
+        print("Test OK")  
+        return 1
+    else:
+        print("Low impedance. Test failed") 
+        return 0
 
 def init4030(hameg, i_max):
     hameg.write("*IDN?\n")
@@ -200,6 +207,9 @@ def saveToDB(HIC_name, test_ok, resistances, fileList):
         activityResult='OK'
     elif test_ok==0:
         activityResult='NOK'
+
+    print(test_ok)
+    print(activityResult)
     
     actResult = itsDB.CreateCompActivity(HIC_name, "OB-HIC Impedance Test", 
                                   "Impedance test of ", activityResult, False )
@@ -266,6 +276,7 @@ def main():
     nsteps_bias = 50    
     
     resistances = ([0., 0., 0.])  
+    
     test_ok = 1
 
     sour=serial.Serial(dev, 9600, rtscts=True);
@@ -289,8 +300,10 @@ def main():
     nstepss = ([nsteps, nsteps, nsteps_bias])
 
     for channel in range(3):    
-        doIVcurve(HIC_name, sour, channel, max_voltages[channel], nstepss[channel], test_ok, resistances, path, fileList) 
-      
+        test_ok = test_ok * doIVcurve(HIC_name, sour, channel, max_voltages[channel], nstepss[channel], resistances, path, fileList) 
+    
+    print(test_ok)
+  
     saveToDB(HIC_name, test_ok, resistances, fileList)  
     
 ## execute the main
