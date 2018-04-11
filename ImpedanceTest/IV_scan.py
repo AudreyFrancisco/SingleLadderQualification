@@ -102,10 +102,18 @@ def doIVcurve(HIC_name, sour, channel, max_volt, nsteps, test_ok, resistances, p
             init4030(sour,(0.1,0.1,0.01))
             break;
 
-    resistance_average/=nsteps
+    if resistance_average>0:
+        resistance_average/=nsteps
+    else:
+        resistance_average=resistance
+        
     print("Impedance of %s is %f" %(channel_name, resistance_average)) 
-    resistances[channel] = resistance_average
-    if resistance_average>100:
+    resistances[channel] = resistance_average 
+    
+    if resistance_average==1000000: 
+        print("Warning: Impedance is too high. Check the connection to the HIC or use the multimeter to measure the impedance.")   
+        test_ok = test_ok*(-1)
+    elif resistance_average>100:
         print("Test OK")  
         test_ok = test_ok*1
     else:
@@ -164,12 +172,6 @@ def saveToDB(HIC_name, test_ok, resistances, fileList):
     lg = setUpTheLogger(myConf)
     lg.info("Start to save results in DB")
 
-    #read the command line
-    #inpPar = ManageCommandLineArguments(argv)
-    #inpPar = ValidateInputParameters(inpPar)
-
-    #theActTag = inpPar.activity + " " + inpPar.component  # this is an extra info to create the activity : the name of an activity contains the ComponentId field
-    
     # Read from the Configuration file 
     DBUser = myConf.GetItem("DBUSER")           # The User name used to open the DB connection 
     DBProject = myConf.GetItem('DBNAME')        # The DB Name used to open the DB connection 
@@ -192,11 +194,11 @@ def saveToDB(HIC_name, test_ok, resistances, fileList):
     DBATTUripath = myConf.GetItem("DBATTACHURIBASEPATH")   # The URI base path to prefix the DB links to attached files
     itsDB.SetUpAttachments(DBATTLimit,DBATTBasepath,DBATTUripath,DBATTCommand,DBATTMkdir)     
        
-    activityResult = ''
+    activityResult = '' 
                          
-    if test_ok:
+    if test_ok==1:
         activityResult='OK'
-    else:
+    elif test_ok==0:
         activityResult='NOK'
     
     actResult = itsDB.CreateCompActivity(HIC_name, "OB-HIC Impedance Test", 
@@ -239,13 +241,17 @@ def saveToDB(HIC_name, test_ok, resistances, fileList):
         lg.error("Error assigning member %s: %s!" % (itsDB.selectedMembers,actResult.ErrorMessage))
         return 1
         
-    # Finally close the activity
-    actResult = itsDB.CloseActivity(actID, activityResult)
-    if actResult.ErrorCode != 0:
-        lg.error("Error closing the activity: %s!" % (actResult.ErrorMessage))
-        return 1
+    # Finally close the activity 
+    if not test_ok==-1:
+        actResult = itsDB.CloseActivity(actID, activityResult) 
+        if actResult.ErrorCode != 0:
+            lg.error("Error closing the activity: %s!" % (actResult.ErrorMessage))
+            return 1
+    else:
+        print("Activity not closed as one of the impedances is too high. After the measurement with the multimeter you can modify the value in the database and then close the activity.")
     
     lg.info("Finished to save results in DB")
+       
     return 0
 
 def main():
