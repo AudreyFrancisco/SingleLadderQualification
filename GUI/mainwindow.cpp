@@ -745,19 +745,21 @@ void MainWindow::scanLoop(TScan *myScan)
     }
     myScan->LoopEnd(2);
     myScan->Terminate();
-    // throw string("SDFdsfsdfsdfsdfsfsdf");
+    //    throw string("SDFdsfsdfsdfsdfsfsdf");
   }
   catch (exception &ex) {
     std::cout << ex.what() << "is the thrown exception from the scan" << std::endl;
     fExceptionthrown = true;
     fScanAbort       = true;
+    fExceptiontext   = ex.what();
   }
 
   /* catch (string x) {
-       std::cout << "DGFDGDFGD>>" << x << std::endl;
-       fExceptionthrown = true;
-       fScanAbort=true;
-     }*/
+        std::cout << "DGFDGDFGD>>" << x << std::endl;
+        fExceptionthrown = true;
+        fScanAbort=true;
+        fExceptiontext=x.c_str();
+      }*/
 }
 
 void MainWindow::popup(QString message)
@@ -961,6 +963,7 @@ void MainWindow::performtests()
           std::cout << ex.what() << " is the thrown exception" << std::endl;
           fExceptionthrown = true;
           fScanAbort       = true;
+          fExceptiontext   = ex.what();
         }
         colorsinglescan(i);
       }
@@ -978,6 +981,7 @@ void MainWindow::performtests()
           std::cout << ex.what() << " is the thrown exception from th finalize" << std::endl;
           fExceptionthrown = true;
           fScanAbort       = true;
+          fExceptiontext   = ex.what();
         }
 
         if (fScanstatuslabels.at(i) != 0) {
@@ -2437,7 +2441,7 @@ void MainWindow::notifyuser(unsigned int position)
   if (!fAddingScans) {
     fProgresswindow->stopaddingscans();
   }
-  fProgresswindow->setnotification(fScanVector.at(position)->GetName());
+  fProgresswindow->setnotification(fScanVector.at(position)->GetName(), fExceptiontext);
   fProgresswindow->exec();
 }
 
@@ -2462,6 +2466,7 @@ void MainWindow::analysis(TScanAnalysis *myanalysis)
     std::cout << ex.what() << "is the thrown exception from the analysis" << std::endl;
     fExceptionthrown = true;
     fScanAbort       = true;
+    fExceptiontext   = ex.what();
   }
 
   /*catch (string x) {

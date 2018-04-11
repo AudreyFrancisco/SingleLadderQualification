@@ -16,9 +16,10 @@ Testingprogress::Testingprogress(QWidget *parent) : QDialog(parent), ui(new Ui::
 
 Testingprogress::~Testingprogress() { delete ui; }
 
-void Testingprogress::setnotification(QString notification)
+void Testingprogress::setnotification(QString notification, QString exceptiondescription)
 {
   ui->testingprogress2->setText(notification);
+  ui->exceptiontype->setText(exceptiondescription);
 }
 
 void Testingprogress::stopaddingscans() { ui->retryscan->hide(); }

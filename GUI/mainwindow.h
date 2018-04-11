@@ -234,6 +234,7 @@ private:
   bool                   fAddingScans;
   bool                   fExceptionthrown;
   bool                   fWrite;
+  QString                fExceptiontext;
 
 
 private slots:
