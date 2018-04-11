@@ -207,9 +207,6 @@ def saveToDB(HIC_name, test_ok, resistances, fileList):
         activityResult='OK'
     elif test_ok==0:
         activityResult='NOK'
-
-    print(test_ok)
-    print(activityResult)
     
     actResult = itsDB.CreateCompActivity(HIC_name, "OB-HIC Impedance Test", 
                                   "Impedance test of ", activityResult, False )
@@ -301,8 +298,6 @@ def main():
 
     for channel in range(3):    
         test_ok = test_ok * doIVcurve(HIC_name, sour, channel, max_voltages[channel], nstepss[channel], resistances, path, fileList) 
-    
-    print(test_ok)
   
     saveToDB(HIC_name, test_ok, resistances, fileList)  
     
