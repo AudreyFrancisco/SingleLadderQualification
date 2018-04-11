@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>431</width>
-    <height>368</height>
+    <width>636</width>
+    <height>433</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,21 +16,21 @@
   <widget class="QLabel" name="testingprogress1">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>50</y>
-     <width>301</width>
+     <x>130</x>
+     <y>40</y>
+     <width>361</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>The following scan has thrown an exception</string>
+    <string>The following scan has thrown the below exception</string>
    </property>
   </widget>
   <widget class="QPushButton" name="continuetest">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>270</y>
+     <x>400</x>
+     <y>330</y>
      <width>211</width>
      <height>31</height>
     </rect>
@@ -43,7 +43,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>270</y>
+     <y>330</y>
      <width>181</width>
      <height>31</height>
     </rect>
@@ -55,8 +55,8 @@
   <widget class="QLabel" name="testingprogress3">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>160</y>
+     <x>140</x>
+     <y>250</y>
      <width>301</width>
      <height>51</height>
     </rect>
@@ -68,10 +68,10 @@
   <widget class="QLabel" name="testingprogress2">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>120</y>
-     <width>111</width>
-     <height>21</height>
+     <x>40</x>
+     <y>90</y>
+     <width>501</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -81,14 +81,27 @@
   <widget class="QPushButton" name="retryscan">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>320</y>
+     <x>80</x>
+     <y>380</y>
      <width>401</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
     <string>Continue with the rest and retry the scan in the end </string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="exceptiontype">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>180</y>
+     <width>551</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>
