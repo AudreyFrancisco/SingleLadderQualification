@@ -394,7 +394,11 @@ int DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name)
   static std::vector<ComponentDB::componentShort> componentList;
 
   if ((componentList.size() == 0) || (typeId != myTypeId)) {
+    if (componentList.size() != 0) {
+      componentList.clear();
+    }
     myTypeId = typeId;
+
     componentDB->GetListByType(projectId, myTypeId, &componentList);
   }
 

@@ -239,9 +239,11 @@ void MainWindow::open()
       int projectid        = 0;
       projectid            = fDB->GetProjectId();
       halfstaveidupper =
-          DbGetComponentId(fDB, projectid, fComponentTypeID, fHalfstave.toStdString());
+          DbGetComponentId(fDB, projectid, fComponentTypeIDa, fHalfstave.toStdString());
+
       halfstaveidlower =
           DbGetComponentId(fDB, projectid, fComponentTypeIDb, fHalfstave.toStdString());
+
       if (halfstaveidlower == -1 && halfstaveidupper == -1) {
         fComponentWindow = new Components(this);
         fComponentWindow->WriteToLabel(fHalfstave);
@@ -250,10 +252,10 @@ void MainWindow::open()
           return;
         }
       }
-      if (halfstaveidlower == -1) {
+      else if (halfstaveidlower == -1) {
         fhalfstaveid  = halfstaveidupper;
-        fhalfstavein  = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "in");
-        fhalfstaveout = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "out");
+        fhalfstavein  = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDa, "in");
+        fhalfstaveout = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDa, "out");
       }
       else if (halfstaveidupper == -1) {
         fhalfstaveid  = halfstaveidlower;
