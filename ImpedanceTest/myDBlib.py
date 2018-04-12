@@ -23,7 +23,7 @@ import copy
 from Common import *
 from pty import CHILD
 
-#    Version 2.5 - 20/03/2018 - A.franco - INFN BARI ITALY
+#    Version 2.7 - 12/04/2018 - A.franco - INFN BARI ITALY
 
 
 # ---------------------------------------------
@@ -698,7 +698,7 @@ class DB:
         actTypId = self.ActivityType.ID
         
         # Create the activity 
-        actCreRes, ts = self._CreateOrOpenAnActivity(compo.ComponentID, actTypId, 0, actName)
+        actCreRes, ts = self._CreateOrOpenAnActivity(compIdD, actTypId, 0, actName)
         if actCreRes.ErrorCode != 0:
             self.lg.warning("Error creating the activity: %s. (%s)" % (actName, actCreRes.ErrorMessage))
             return actCreRes  
@@ -1139,6 +1139,18 @@ class DB:
     #  Return := True / False
     #
     def ParameterWrite(self, ActivityId = -999, ParameterName="", ParameterValue=0.0):
+        strParamValue = str(ParameterValue)   
+        return( self.ParameterWriteString(ActivityId, ParameterName, strParamValue) )
+
+# -- Write one Activity Parameter String
+    #
+    #  ActivityId    := the ID af the Activity
+    #  ParameterName := string, the name of the Parameter
+    #  ParameterValue:= string, the value to write
+    #
+    #  Return := True / False
+    #
+    def ParameterWriteString(self, ActivityId = -999, ParameterName="", strParameterValue=""):
         # Get the Activity spec.
         if not self.AquireActivityTypeByActId(ActivityId):
             self.lg.warning("Activity not enabled for the specified location : %d " % (ActivityId))
@@ -1153,18 +1165,18 @@ class DB:
             self.lg.warning("Parameter :'%s' not found for activity %d !" % (ParameterName,ActivityId))
             return(False) 
          
-        strParamValue = str(ParameterValue)   
         activityParameterResult = self.DB.service.ActivityParameterCreate(
             activityID = ActivityId,
             activityParameterID = ActTypeParam.ID,
-            value = strParamValue, # ParameterValue,
+            value = strParameterValue, # ParameterValue,
             userID = self.user.ID
         )  
         if activityParameterResult.ErrorCode != 0:
             self.lg.warning("Create Parameter to Activity error : '%s' -> %s" % (ParameterName,activityParameterResult.ErrorMessage))
             return(False) 
-        self.lg.debug("Create Parameter to the Activity: '%s'=%f" % (ParameterName, ParameterValue) )
+        self.lg.debug("Create Parameter to the Activity: '%s'=%s" % (ParameterName, strParameterValue) )
         return(True)
+
 
     # -- Change one Activity Parameter
     #
@@ -1175,21 +1187,32 @@ class DB:
     #  Return := True / False
     #
     def ParameterChange(self, ActivityId = -999, ParameterName="", ParameterValue=0.0):
+        strParamValue = str(ParameterValue)
+        return( self.ParameterChangeString(ActivityId, ParameterName, strParamValue) )
+
+    # -- Change one Activity Parameter String
+    #
+    #  ActivityId    := the ID af the Activity
+    #  ParameterName := string, the name of the Parameter
+    #  ParameterValue:= string, the value to write
+    #
+    #  Return := True / False
+    #
+    def ParameterChangeString(self, ActivityId = -999, ParameterName="", strParameterValue=""):
         ParamId = self._GetParameterIdByName(ActivityId,ParameterName)
         if ParamId < 0:
             self.lg.warning("Parameter not found : '%s'" % (ParameterName))
             return(False)
         # change the param
-        strParamValue = str(ParameterValue)
         activityParameterResult = self.DB.service.ActivityParameterChange(
             ID = ParamId,
-            value = strParamValue, #ParameterValue,
+            value = strParameterValue, #ParameterValue,
             userID = self.user.ID
         )  
         if activityParameterResult.ErrorCode != 0:
             self.lg.warning("Change Parameter to Activity error : '%s' -> %s" % (ParameterName,activityParameterResult.ErrorMessage))
             return(False) 
-        self.lg.debug("Change Parameter to the Activity: '%s'=%f" % (ParameterName, ParameterValue) )
+        self.lg.debug("Change Parameter to the Activity: '%s'=%s" % (ParameterName, strParameterValue) )
         return(True)
 
     # -- Read one Activity Parameter
@@ -1200,13 +1223,25 @@ class DB:
     #  Return := a couple := [ True / False, Value (float) ]
     #
     def ParameterRead(self, ActivityId = -999, ParameterName=""):
+        flag, strVal = self.ParameterReadString(ActivityId, ParameterName)
+        return(flag, float(strVal))
+
+    # -- Read one Activity Parameter String
+    #
+    #  ActivityId    := the ID af the Activity
+    #  ParameterName := string, the name of the Parameter
+    #
+    #  Return := a couple := [ True / False, Value (string) ]
+    #
+    def ParameterReadString(self, ActivityId = -999, ParameterName=""):
         Param = self._GetParameterByName(ActivityId,ParameterName)
         if Param is None:
             return(False, 0.0)
             
         self.lg.debug("Parameter '%s' = %f " % (ParameterName, float(Param.Value)) )
-        return(True, float(Param.Value))
-
+        return(True, Param.Value)
+    
+    
     # -- Delete one Activity Parameter
     #
     #  ActivityId    := the ID af the Activity
