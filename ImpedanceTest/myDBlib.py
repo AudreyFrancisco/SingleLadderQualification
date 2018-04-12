@@ -698,7 +698,7 @@ class DB:
         actTypId = self.ActivityType.ID
         
         # Create the activity 
-        actCreRes, ts = self._CreateOrOpenAnActivity(compIdD, actTypId, 0, actName)
+        actCreRes, ts = self._CreateOrOpenAnActivity(compId, actTypId, 0, actName)
         if actCreRes.ErrorCode != 0:
             self.lg.warning("Error creating the activity: %s. (%s)" % (actName, actCreRes.ErrorMessage))
             return actCreRes  
