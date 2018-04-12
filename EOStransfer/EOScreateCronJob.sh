@@ -11,7 +11,7 @@ echo " The Cron command is = $CRONCOMMAND"
 crontab -l > /tmp/actualCron
 if [[ $? -gt 0 ]] 
 then
-	echo "Warning, some thing goes wrong into the cron job installation... [1]"
+	echo "Warning, is the first installation or some thing goes wrong into the cron job installation. Go ahead... [1]"
 fi
 
 if grep -F "$CRONCOMMAND" /tmp/actualCron
