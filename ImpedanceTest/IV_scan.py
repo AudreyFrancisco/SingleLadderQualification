@@ -61,19 +61,27 @@ def measureCurr(sour):
         val[c] = float(sour.readline())
     print "%0.4fA\t%0.4fA\t%0.4fA" % ( val[0], val[1], val[2]) 
     
-def doIVcurve(sour, channel, max_volt, nsteps, output_file, test_ok, resistances):
+def doIVcurve(HIC_name, sour, channel, max_volt, nsteps, resistances, path, fileList):
         
     if channel==0:
-        channel_name = "DVDD"
+        channel_name = "DVDD" 
+        output_file_name = path + '/' + time.strftime("%y%m%d_%H%M%S") + '_' + HIC_name + '_DVDD.dat'
     elif channel==1:
-        channel_name = "AVDD"
+        channel_name = "AVDD"      
+        output_file_name = path + '/' + time.strftime("%y%m%d_%H%M%S") + '_' + HIC_name + '_AVDD.dat'
     elif channel==2:
-        channel_name = "BIAS"
+        channel_name = "BIAS" 
+        output_file_name = path + '/' + time.strftime("%y%m%d_%H%M%S") + '_' + HIC_name + '_BIAS.dat'
     print("Scanning %s" % channel_name)
+    
+    fileList.append(output_file_name)   
+    output_file = open(output_file_name,'w')
     output_file.write("V,I(%s),R(%s)\n" % (channel_name, channel_name))
 
     resistance = 1000000
-    resistance_average = 0
+    resistance_average = 0  
+    
+    channel_tripped = 0
 
     for step in range(0, nsteps):
         voltage = (max_volt/nsteps)*(step+1)
@@ -93,19 +101,34 @@ def doIVcurve(sour, channel, max_volt, nsteps, output_file, test_ok, resistances
             output_file.write("%f,%f,%f\n" % (voltage, current, resistance));
         else:
             #print("Channel #%d tripped. Scan is stopped" % (channel+1))
+            channel_tripped = 1
             init4030(sour,(0.1,0.1,0.01))
             break;
 
-    resistance_average/=nsteps
-    print("Impedance of %s is %f" %(channel_name, resistance_average)) 
-    resistances[channel] = resistance_average
-    if resistance_average>100:
-        print("Test OK")  
-        test_ok = test_ok*1
+    if resistance_average>0:
+        resistance_average/=nsteps
     else:
-        print("Test failed") 
-        test_ok = test_ok*0
-    sour.write("SOUR:VOLT 0.0\n")
+        resistance_average=resistance
+        
+    print("Impedance of %s is %f" %(channel_name, resistance_average)) 
+    resistances[channel] = resistance_average 
+    
+    sour.write("SOUR:VOLT 0.0\n")       
+    
+    output_file.close()
+    
+    if channel_tripped:
+        print("Channel tripped. Test failed") 
+        return 0
+    elif resistance_average==1000000: 
+        print("Warning: Impedance is too high. Check the connection to the HIC or use the multimeter to measure the impedance.")   
+        return -1
+    elif resistance_average>100:
+        print("Test OK")  
+        return 1
+    else:
+        print("Low impedance. Test failed") 
+        return 0
 
 def init4030(hameg, i_max):
     hameg.write("*IDN?\n")
@@ -148,7 +171,7 @@ def init4030(hameg, i_max):
     time.sleep(0.1);
     hameg.write("OUTP ON\n")      
     
-def saveToDB(HIC_name, test_ok, resistances, output_file_name):
+def saveToDB(HIC_name, test_ok, resistances, fileList):
     # read the Configuration
     myConf = Configuration("DBConfig.cfg")
 
@@ -156,12 +179,6 @@ def saveToDB(HIC_name, test_ok, resistances, output_file_name):
     lg = setUpTheLogger(myConf)
     lg.info("Start to save results in DB")
 
-    #read the command line
-    #inpPar = ManageCommandLineArguments(argv)
-    #inpPar = ValidateInputParameters(inpPar)
-
-    #theActTag = inpPar.activity + " " + inpPar.component  # this is an extra info to create the activity : the name of an activity contains the ComponentId field
-    
     # Read from the Configuration file 
     DBUser = myConf.GetItem("DBUSER")           # The User name used to open the DB connection 
     DBProject = myConf.GetItem('DBNAME')        # The DB Name used to open the DB connection 
@@ -184,11 +201,11 @@ def saveToDB(HIC_name, test_ok, resistances, output_file_name):
     DBATTUripath = myConf.GetItem("DBATTACHURIBASEPATH")   # The URI base path to prefix the DB links to attached files
     itsDB.SetUpAttachments(DBATTLimit,DBATTBasepath,DBATTUripath,DBATTCommand,DBATTMkdir)     
        
-    activityResult = ''
+    activityResult = '' 
                          
-    if test_ok:
+    if test_ok==1:
         activityResult='OK'
-    else:
+    elif test_ok==0:
         activityResult='NOK'
     
     actResult = itsDB.CreateCompActivity(HIC_name, "OB-HIC Impedance Test", 
@@ -216,12 +233,9 @@ def saveToDB(HIC_name, test_ok, resistances, output_file_name):
            lg.error("Error writing parameter %s!" % (parameter_name))
            return 1
        else:
-           lg.info(" Parameter %s = %f written." % (parameter_name, resistances[channel]))       
-           
-    fileList = []
-    fileList.append(output_file_name)       
+           lg.info(" Parameter %s = %f written." % (parameter_name, resistances[channel]))           
     
-    actResult = itsDB.AttachDocumentsToActivity(fileList, actID, "GeneralInformation")  
+    actResult = itsDB.AttachDocumentsToActivity(fileList, actID, "GeneralInformation",HIC_name)  
     
     if actResult.ErrorCode != 0:
         lg.error("Error attaching documents %s -> %s!" % (HIC_name+'.dat',actResult.ErrorMessage))
@@ -234,13 +248,17 @@ def saveToDB(HIC_name, test_ok, resistances, output_file_name):
         lg.error("Error assigning member %s: %s!" % (itsDB.selectedMembers,actResult.ErrorMessage))
         return 1
         
-    # Finally close the activity
-    actResult = itsDB.CloseActivity(actID, activityResult)
-    if actResult.ErrorCode != 0:
-        lg.error("Error closing the activity: %s!" % (actResult.ErrorMessage))
-        return 1
+    # Finally close the activity 
+    if not test_ok==-1:
+        actResult = itsDB.CloseActivity(actID, activityResult) 
+        if actResult.ErrorCode != 0:
+            lg.error("Error closing the activity: %s!" % (actResult.ErrorMessage))
+            return 1
+    else:
+        print("Activity not closed as one of the impedances is too high. After the measurement with the multimeter you can modify the value in the database and then close the activity.")
     
     lg.info("Finished to save results in DB")
+       
     return 0
 
 def main():
@@ -255,6 +273,7 @@ def main():
     nsteps_bias = 50    
     
     resistances = ([0., 0., 0.])  
+    
     test_ok = 1
 
     sour=serial.Serial(dev, 9600, rtscts=True);
@@ -265,19 +284,22 @@ def main():
         os.makedirs(data_dir)
 
     HIC_name = raw_input("Enter HIC name: ")
-    HIC_name = 'OBHIC-' + HIC_name
-    output_file_name = data_dir + '/' + time.strftime("%y%m%d_%H%M%S") + '_' + HIC_name + '.dat'
-    output_file = open(output_file_name,'w')
-    
+    HIC_name = 'OBHIC-' + HIC_name   
+
+    path = data_dir + '/' + HIC_name
+
+    if not os.path.isdir(path):
+        os.makedirs(path)
+ 
+    fileList = []
+        
     max_voltages = ([max_voltage, max_voltage, max_voltage_bias])
     nstepss = ([nsteps, nsteps, nsteps_bias])
 
     for channel in range(3):    
-        doIVcurve(sour, channel, max_voltages[channel], nstepss[channel], output_file, test_ok, resistances) 
-
-    output_file.close()
-      
-    saveToDB(HIC_name, test_ok, resistances, output_file_name)  
+        test_ok = test_ok * doIVcurve(HIC_name, sour, channel, max_voltages[channel], nstepss[channel], resistances, path, fileList) 
+  
+    saveToDB(HIC_name, test_ok, resistances, fileList)  
     
 ## execute the main
 if __name__ == "__main__":
