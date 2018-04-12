@@ -206,10 +206,28 @@ def saveToDB(HIC_name, test_ok, resistances, fileList):
     if test_ok==1:
         activityResult='OK'
     elif test_ok==0:
-        activityResult='NOK'
+        activityResult='NOK'         
+        
+    #check if component exist
+    HICcomponent = itsDB.ReadComponent(HIC_name)     
+    saveWithoutComponent = False
+    
+    if HICcomponent is None:
+        print("HIC is not present in the Database")    
+        continueWithoutComponent = raw_input("Continue without component? (y/n): ")
+        if continueWithoutComponent == 'y':
+            saveWithoutComponent = True     
+            print("Result will be saved in the database, but activity will be kept open")
+        else:
+            print("Result will not be saved in the database")
+            return 1      
+        
+    else:
+        print("HIC is present in the Database")   
+        saveWithoutComponent = False 
     
     actResult = itsDB.CreateCompActivity(HIC_name, "OB-HIC Impedance Test", 
-                                  "Impedance test of ", activityResult, False )
+                                  "Impedance test of ", activityResult, False, saveWithoutComponent)
     if actResult.ErrorCode != 0:
         lg.error("Error create the activity %s -> %s!" % ("OB-HIC Impedance Test",actResult.ErrorMessage))
         return 1
@@ -248,14 +266,17 @@ def saveToDB(HIC_name, test_ok, resistances, fileList):
         lg.error("Error assigning member %s: %s!" % (itsDB.selectedMembers,actResult.ErrorMessage))
         return 1
         
-    # Finally close the activity 
-    if not test_ok==-1:
-        actResult = itsDB.CloseActivity(actID, activityResult) 
-        if actResult.ErrorCode != 0:
-            lg.error("Error closing the activity: %s!" % (actResult.ErrorMessage))
-            return 1
+    # Finally close the activity    
+    if saveWithoutComponent == False:
+        if not test_ok==-1:
+            actResult = itsDB.CloseActivity(actID, activityResult) 
+            if actResult.ErrorCode != 0:
+                lg.error("Error closing the activity: %s!" % (actResult.ErrorMessage))
+                return 1
+        else:
+            print("Activity wasn't closed as one of the impedances is too high. After the measurement with the multimeter you can modify the value in the database and then close the activity.")
     else:
-        print("Activity not closed as one of the impedances is too high. After the measurement with the multimeter you can modify the value in the database and then close the activity.")
+        print("Activity wasn't closed as HIC component wasn't found")
     
     lg.info("Finished to save results in DB")
        
