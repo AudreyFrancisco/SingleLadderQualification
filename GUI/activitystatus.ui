@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>411</width>
-    <height>351</height>
+    <width>791</width>
+    <height>598</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>110</x>
-     <y>0</y>
+     <x>20</x>
+     <y>390</y>
      <width>241</width>
      <height>41</height>
     </rect>
@@ -29,8 +29,8 @@
   <widget class="QRadioButton" name="openactiv">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>60</y>
+     <x>100</x>
+     <y>470</y>
      <width>71</width>
      <height>31</height>
     </rect>
@@ -42,8 +42,8 @@
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>30</y>
+     <x>20</x>
+     <y>420</y>
      <width>281</width>
      <height>31</height>
     </rect>
@@ -55,8 +55,8 @@
   <widget class="QRadioButton" name="closeactiv">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>100</y>
+     <x>100</x>
+     <y>510</y>
      <width>109</width>
      <height>25</height>
     </rect>
@@ -68,8 +68,8 @@
   <widget class="QPushButton" name="save">
    <property name="geometry">
     <rect>
-     <x>330</x>
-     <y>310</y>
+     <x>690</x>
+     <y>540</y>
      <width>71</width>
      <height>31</height>
     </rect>
@@ -81,8 +81,8 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>110</x>
-     <y>130</y>
+     <x>380</x>
+     <y>400</y>
      <width>221</width>
      <height>41</height>
     </rect>
@@ -94,10 +94,108 @@
   <widget class="QTextEdit" name="com">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>180</y>
+     <x>320</x>
+     <y>450</y>
      <width>301</width>
      <height>121</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>30</y>
+     <width>91</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>HIC Name </string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="nameofhic">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>30</y>
+     <width>321</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>60</y>
+     <width>131</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Old Classification </string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="oldclassification">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>60</y>
+     <width>351</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>350</y>
+     <width>131</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Final Classification</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="finalclassificaton">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>350</y>
+     <width>291</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="scanclassification">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>120</y>
+     <width>301</width>
+     <height>201</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="cutdisplay">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>120</y>
+     <width>311</width>
+     <height>201</height>
     </rect>
    </property>
   </widget>

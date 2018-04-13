@@ -1,8 +1,8 @@
 #ifndef ACTIVITYSTATUS_H
 #define ACTIVITYSTATUS_H
 
+#include "TScanAnalysis.h"
 #include <QDialog>
-
 namespace Ui {
   class ActivityStatus;
 }
@@ -17,6 +17,11 @@ public:
 public slots:
   virtual void getactivitystatus(bool &status);
   virtual void GetComment(QString &comment);
+  virtual void ClearWindow();
+  // virtual void PopulateWindow(QString nameoftheobject, QString oldclass, QString finalclass,
+  // std::vector <QString> nameing , std::vector <TScanResultHic *> cuts);
+  virtual void PopulateWindow(QString nameoftheobject, QString oldclass, QString finalclass,
+                              std::vector<QString> nameing);
 
 private:
   Ui::ActivityStatus *ui;

@@ -1460,11 +1460,31 @@ void MainWindow::attachtodatabase()
       QDateTime          date;
       ActivityDB::actUri uri;
       std::string        path;
+
       path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) + "/Comment.txt";
       if (!fWrite) {
+        QString currenthic;
+        currenthic = fHicnames.at(i);
+        QString oldclassific;
+        oldclassific = fHICs.at(i)->GetOldClassification();
+        QString finalclassific;
+        finalclassific = fHICs.at(i)->GetClassification();
+        std::vector<QString> scansclassificationnames;
+        for (unsigned int d = 0; d < fScanVector.size(); d++) {
+          if (fAnalysisVector.at(d) != 0) {
+            QString         scanclasname;
+            TScanResultHic *hicRe = fresultVector.at(d)->GetHicResult(currenthic.toStdString());
+            scanclasname          = fScanVector.at(d)->GetName();
+            scanclasname.append(" = ");
+            scanclasname.append(hicRe->WriteHicClassification());
+            scansclassificationnames.push_back(scanclasname);
+          }
+        }
         fWrite = true;
         WriteToEos(fHICs.at(i)->GetDbId(), uri, fWrite);
         fActivitywindow = new ActivityStatus(this);
+        fActivitywindow->PopulateWindow(currenthic, oldclassific, finalclassific,
+                                        scansclassificationnames);
         fActivitywindow->exec();
         fActivitywindow->getactivitystatus(fStatus);
         fActivitywindow->GetComment(comment);
@@ -1607,8 +1627,9 @@ void MainWindow::fillingreceptionscans()
   ClearVectors();
 
   AddScan(STPower);
-  if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
+  // if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   AddScan(STFifo);
+  return;
   AddScan(STDigital);
 }
 

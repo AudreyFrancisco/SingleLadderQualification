@@ -76,10 +76,10 @@ protected:
   std::string        m_hicName;
   char               m_resultFile[300];
   THicClassification m_class;
-  const char *       WriteHicClassification();
-  string             m_outputPath;
-  TScanParameters *  m_scanParameters;
-  bool               m_valid; // used for predictions only
+
+  string           m_outputPath;
+  TScanParameters *m_scanParameters;
+  bool             m_valid; // used for predictions only
   virtual void Compare(TScanResultHic *aPrediction) { (void)aPrediction; };
   std::vector<std::string>             m_cuts;
   void                                 ClearCuts() { m_cuts.clear(); };
@@ -91,6 +91,7 @@ public:
     m_valid = false;
     ClearCuts();
   };
+  const char *WriteHicClassification();
   void SetValidity(bool valid) { m_valid = valid; };
   bool                  IsValid() { return m_valid; };
   virtual void WriteToFile(FILE *fp) = 0;
