@@ -1,0 +1,21 @@
+# Configuration file for the EOS file management 
+#
+#    NOTE : in order to stop the EOS syncronization
+#           crete a file with name :'StopTransfer' 
+#           into the folder that is the base path of
+#           the local repository
+#
+# Name and location of the log file.
+LOGFILENAME="/tmp/EOStransfer.log"
+
+# Service Account Name
+DBATTACHSERVICEACCOUNT="aliceitsbari"
+
+# The location of the local file repository that will be synched on EOS
+DBATTACHBASEPATH="/tmp/www/fpc"
+
+# Number af subsequent attempts will be done in case of fault of rsync
+DBATTACHATTEMPTS=3
+
+# -----  EOF  ------
+
