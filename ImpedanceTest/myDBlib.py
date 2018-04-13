@@ -23,7 +23,7 @@ import copy
 from Common import *
 from pty import CHILD
 
-#    Version 2.7 - 12/04/2018 - A.franco - INFN BARI ITALY
+#    Version 2.7a - 13/04/2018 - A.franco - INFN BARI ITALY
 
 
 # ---------------------------------------------
@@ -716,24 +716,25 @@ class DB:
     #
     #   Return     :=  An Activity Result object
     def CreateCompActivity(self, compId, activity, actTag, res="OK", close=False, withoutComponent=False ):
-        # Read the component
+        # Create the Activity Name By the CompId
+        actName = actTag + " " + compId
+        
+        # If is without component create the Activity 
+        if withoutComponent :
+            return( self.CreateActivity(compId, activity, actName, res) )
+        
+        # Else Read the component
         compo = self.DB.service.ComponentReadOne(ID=-999, componentID=compId)
         if compo is None:
-            if withoutComponent :
-                return( self.CreateActivity(compId, activity, actTag, res) )
-            else:
-                self.lg.warning("Component Not found ! (%s)" % compId ) 
-                return(ActResult(-1,"Component not found"))
-        
+            self.lg.warning("Component Not found ! (%s)" % compId ) 
+            return(ActResult(-1,"Component not found"))
         # Get the Activity spec.
         if not self.AquireActivityType(activity):
             return(ActResult(9,"Activity not enabled for the specified location"))
-       
         # prepare the common data 
         te=datetime.now().strftime(self.DATEMASK)
         resultID = self._GetTheResultID(res)
         actTypId = self.ActivityType.ID
-        actName = actTag + " " + compo.ComponentID
         
         # Create the activity 
         actCreRes, ts = self._CreateOrOpenAnActivity(compo.ComponentID, actTypId, 0, actName)
