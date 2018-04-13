@@ -379,7 +379,7 @@ def main(argv):
     theAttempts = myConf.GetItem("SYNCATTEMPTS") 
     num = inputNumericField("The number of attempts to rsync :", int(theAttempts))
     myConf.SetItem("SYNCATTEMPTS", str(num))
-    print "/n"
+    print "\n"
     
     cho = getMenuChoice("Select the Activity :", TestsName, "Quit")
     if cho == 0:
