@@ -14,7 +14,7 @@ Database set-up
     b) LOCATION = 'Exact name of your institute as in the database'
     c) DBUSER = 'SURNAME NAME' of the user mostly doing the tests
     d) DBATTACHLIMIT=1   
-    e) DBATTACHBASEPATH="/tmp/IVscan/"
+    e) DBATTACHBASEPATH="/tmp/"
     f) DBATTACHCOMMAND="echo %1 %2 %3"
     g) DBANEWDIRCOMMAND="echo %1"
     h) DBATTACHURIBASEPATH="https://cern.ch/hicTests/OBImpedance/SITE_NAME". Contact Serhiy Senyukov to know your SITE_NAME.
