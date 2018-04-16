@@ -43,6 +43,7 @@ class ScanConfiguration;
 class TDigitalWFanalysis;
 class TFastPowerTest;
 
+
 namespace Ui {
   class MainWindow;
 }
@@ -71,8 +72,12 @@ typedef enum {
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
+  friend class TScanResultHic;
+
 public:
   explicit MainWindow(QWidget *parent = 0);
+
+  void output(TScanResultHic &foo) { foo.WriteHicClassification(); }
   ~MainWindow();
 
 public slots:
@@ -205,6 +210,7 @@ private:
   void WriteToEos(string hicName, ActivityDB::actUri &uri, bool write);
   string GetServiceAccount(string Institute, string &folder);
   string GetTestFolder();
+  string GetResultType(int i);
   THic *FindHic(string hicName);
   void      SetHicClassifications();
   void      CombineEnduranceResults();
