@@ -9,6 +9,8 @@ ActivityStatus::ActivityStatus(QWidget *parent) : QDialog(parent), ui(new Ui::Ac
 {
   ui->setupUi(this);
   connect(ui->save, SIGNAL(clicked()), this, SLOT(close()));
+  connect(ui->scanclassification, SIGNAL(itemClicked(QListWidgetItem *)), this,
+          SLOT(on_scanclassification_itemClicked(QListWidgetItem * item)));
 }
 
 Q_DECLARE_METATYPE(TScanResultHic *)
@@ -50,19 +52,32 @@ void ActivityStatus::ClearWindow()
 }
 
 void ActivityStatus::PopulateWindow(QString nameoftheobject, QString oldclass, QString finalclass,
-                                    std::vector<QString> nameing)
+                                    std::vector<QString>          nameing,
+                                    std::vector<TScanResultHic *> cuts)
 {
-
-
   ui->nameofhic->setText(nameoftheobject);
   ui->oldclassification->setText(oldclass);
   ui->finalclassificaton->setText(finalclass);
+
   for (unsigned int i = 0; i < nameing.size(); i++) {
     QListWidgetItem *newItem = new QListWidgetItem;
     newItem->setText(nameing.at(i));
-    // QVariant v;
-    // v.setValue(cuts.at(i));
-    // newItem->setData(Qt::UserRole,v);
+    QVariant v;
+    v.setValue(cuts.at(i));
+    newItem->setData(Qt::UserRole, v);
     ui->scanclassification->addItem(newItem);
+  }
+}
+
+
+void ActivityStatus::on_scanclassification_itemClicked(QListWidgetItem *item)
+{
+
+  ui->cutdisplay->clear();
+  TScanResultHic *hicresult = item->data(Qt::UserRole).value<TScanResultHic *>();
+  for (unsigned int i = 0; i < hicresult->GetCuts().size(); i++) {
+    QListWidgetItem *newItem = new QListWidgetItem;
+    newItem->setText(hicresult->GetCuts().at(i).c_str());
+    ui->cutdisplay->addItem(newItem);
   }
 }

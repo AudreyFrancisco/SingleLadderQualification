@@ -1469,7 +1469,8 @@ void MainWindow::attachtodatabase()
         oldclassific = fHICs.at(i)->GetOldClassification();
         QString finalclassific;
         finalclassific = fHICs.at(i)->GetClassification();
-        std::vector<QString> scansclassificationnames;
+        std::vector<QString>          scansclassificationnames;
+        std::vector<TScanResultHic *> hicresultsvector;
         for (unsigned int d = 0; d < fScanVector.size(); d++) {
           if (fAnalysisVector.at(d) != 0) {
             QString         scanclasname;
@@ -1478,13 +1479,14 @@ void MainWindow::attachtodatabase()
             scanclasname.append(" = ");
             scanclasname.append(hicRe->WriteHicClassification());
             scansclassificationnames.push_back(scanclasname);
+            hicresultsvector.push_back(fresultVector.at(d)->GetHicResult(currenthic.toStdString()));
           }
         }
         fWrite = true;
         WriteToEos(fHICs.at(i)->GetDbId(), uri, fWrite);
         fActivitywindow = new ActivityStatus(this);
         fActivitywindow->PopulateWindow(currenthic, oldclassific, finalclassific,
-                                        scansclassificationnames);
+                                        scansclassificationnames, hicresultsvector);
         fActivitywindow->exec();
         fActivitywindow->getactivitystatus(fStatus);
         fActivitywindow->GetComment(comment);
@@ -1628,8 +1630,8 @@ void MainWindow::fillingreceptionscans()
 
   AddScan(STPower);
   // if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
-  AddScan(STFifo);
-  return;
+  // AddScan(STFifo);
+  // return;
   AddScan(STDigital);
 }
 
