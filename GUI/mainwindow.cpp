@@ -1466,9 +1466,9 @@ void MainWindow::attachtodatabase()
         QString currenthic;
         currenthic = fHicnames.at(i);
         QString oldclassific;
-        oldclassific = fHICs.at(i)->GetOldClassification();
+        oldclassific = GetResultType(fHICs.at(i)->GetOldClassification()).c_str();
         QString finalclassific;
-        finalclassific = fHICs.at(i)->GetClassification();
+        finalclassific = GetResultType(fHICs.at(i)->GetClassification()).c_str();
         std::vector<QString>          scansclassificationnames;
         std::vector<TScanResultHic *> hicresultsvector;
         for (unsigned int d = 0; d < fScanVector.size(); d++) {
@@ -1629,9 +1629,8 @@ void MainWindow::fillingreceptionscans()
   ClearVectors();
 
   AddScan(STPower);
-  // if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
-  // AddScan(STFifo);
-  // return;
+  if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
+  AddScan(STFifo);
   AddScan(STDigital);
 }
 
@@ -2506,4 +2505,23 @@ void MainWindow::fillingDctrl()
 {
   ClearVectors();
   AddScan(STDctrl);
+}
+
+
+string MainWindow::GetResultType(int i)
+{
+  switch (i) {
+  case CLASS_UNTESTED:
+    return string("UNTESTED");
+  case CLASS_GREEN:
+    return string("GREEN");
+  case CLASS_ORANGE:
+    return string("ORANGE");
+  case CLASS_PARTIAL:
+    return string("PARTIAL");
+  case CLASS_RED:
+    return string("RED");
+  default:
+    return string("UNTESTED");
+  }
 }

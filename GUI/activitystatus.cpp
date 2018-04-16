@@ -1,12 +1,15 @@
 #include "activitystatus.h"
 #include "QListWidgetItem"
 #include "QMetaType"
+#include "QTextCodec"
+#include "THIC.h"
 #include "TScanAnalysis.h"
 #include "iostream"
 #include "ui_activitystatus.h"
 
 ActivityStatus::ActivityStatus(QWidget *parent) : QDialog(parent), ui(new Ui::ActivityStatus)
 {
+
   ui->setupUi(this);
   connect(ui->save, SIGNAL(clicked()), this, SLOT(close()));
   connect(ui->scanclassification, SIGNAL(itemClicked(QListWidgetItem *)), this,
@@ -58,7 +61,6 @@ void ActivityStatus::PopulateWindow(QString nameoftheobject, QString oldclass, Q
   ui->nameofhic->setText(nameoftheobject);
   ui->oldclassification->setText(oldclass);
   ui->finalclassificaton->setText(finalclass);
-
   for (unsigned int i = 0; i < nameing.size(); i++) {
     QListWidgetItem *newItem = new QListWidgetItem;
     newItem->setText(nameing.at(i));
