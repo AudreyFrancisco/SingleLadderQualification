@@ -20,7 +20,8 @@ void Temp_test(const char *fileName)
   FILE *fp = fopen(fileName, "r");
 
   // creating vecors for data
-
+  std::vector<float> chipid1;
+  std::vector<float> chipid2;
   std::vector<float> nchip;  // list of chips in the first cooling contour (FCC)
   std::vector<float> nchip2; // list of chips in the second cooling contour (SCC)
   std::vector<float> Tchip;  // temperatures for the FCC
@@ -60,11 +61,13 @@ void Temp_test(const char *fileName)
       Tchip.push_back(temp);
       volt.push_back(voltage);
       corr.push_back(temp / voltage);
+      chipid1.push_back(chipid);
     }
     else {
       float id = 15 - ichip + 7 * (imod - 1);
       int   it = std::upper_bound(nchip2.cbegin(), nchip2.cend(), id) - nchip2.begin();
       nchip2.insert(nchip2.begin() + it, id);
+      chipid2.insert(chipid2.begin() + it, chipid);
       Tchip2.insert(Tchip2.begin() + it, temp);
       volt2.insert(volt2.begin() + it, voltage);
       corr2.insert(corr2.begin() + it, temp / voltage);
@@ -74,7 +77,7 @@ void Temp_test(const char *fileName)
   // convert vectors to arrays for covinient plotting of TGraphs
 
   Float_t Nchip[100], Nchip2[100], tchip[100], tchip2[100], ChipVolt[100], ChipVolt2[100],
-      Corr[100], Corr2[100];
+      Corr[100], Corr2[100], Chipid1[100], Chipid2[100];
   for (int i = 0; i < 100; i++) {
     Nchip[i]     = 0;
     Nchip2[i]    = 0;
@@ -84,12 +87,15 @@ void Temp_test(const char *fileName)
     ChipVolt2[i] = 0;
     Corr[i]      = 0;
     Corr2[i]     = 0;
+    Chipid1[i]   = 0;
+    Chipid2[i]   = 0;
   }
   for (int i = 0; i < nchip.size(); i++) {
     Nchip[i]    = nchip[i];
     tchip[i]    = Tchip[i];
     ChipVolt[i] = volt[i];
     Corr[i]     = corr[i];
+    Chipid1[i]  = chipid1[i];
   }
 
   for (int j = 0; j < nchip2.size(); j++) {
@@ -97,6 +103,7 @@ void Temp_test(const char *fileName)
     tchip2[j]    = Tchip2[j];
     ChipVolt2[j] = volt2[j];
     Corr2[j]     = corr2[j];
+    Chipid2[j]   = chipid2[j];
   }
 
 
@@ -418,9 +425,11 @@ void Temp_test(const char *fileName)
   for (int j = 0; j < nmod - 1; j++) {
     corrplot[j] = new TH2F(Form("corrplot_%d", j), Form("Correlations T(V) module %d", j + 1), 200,
                            1.57, 1.78, 200, 15, 46);
-    for (int i = 0; i < nchip.size(); i++) {
+    for (int i = 0; i < 7; i++) {
       int n = j * 7 + i;
-      corrplot[j]->Fill(volt[n], Tchip[n], nchip[n]);
+      corrplot[j]->Fill(volt[n], Tchip[n], chipid1[n]);
+      std::cout << " n " << n << " j " << j << " i " << i << " chipid1[n] " << chipid1[n]
+                << std::endl;
     }
 
     int col;
@@ -440,27 +449,48 @@ void Temp_test(const char *fileName)
 
   cp2->cd(2);
   TH2F *corrplot2[7];
+  TH2F *corrplot2dot[7];
   for (int j = 0; j < nmod; j++) {
     corrplot2[j] = new TH2F(Form("corrplot2_%d", j), Form("Correlations T(V) module %d", j + 1),
-                            200, 1.57, 1.78, 200, 15, 46);
-    for (int i = 0; i < nchip2.size(); i++) {
+                            1024, 1.57, 1.78, 512, 15, 46);
+    corrplot2dot[j] =
+        new TH2F(Form("corrplot2_dot_%d", j), Form("Correlations T(V) module %d", j + 1), 1024,
+                 1.57, 1.78, 512, 15, 46);
+    for (int i = 0; i < 7; i++) {
       int n = j * 7 + i;
-      corrplot2[j]->Fill(volt2[n], Tchip2[n], Nchip2[n]);
-      std::cout << Nchip2[n] << " nchip2 " << n << std::endl;
+      std::cout << " n " << n << " j " << j << " i " << i << " chipid2[n] " << chipid2[n]
+                << std::endl;
+      corrplot2[j]->Fill(volt2[n], Tchip2[n], chipid2[n]);
+      corrplot2dot[j]->Fill(volt2[n], Tchip2[n], chipid2[n]);
     }
 
-    int col;
-    if (j == 0) col = 12;
-    if (j == 1) col = 40;
-    if (j == 2) col = 9;
-    if (j == 3) col = 41;
-    if (j == 4) col = 8;
-    if (j == 5) col = 46;
-    if (j == 6) col = 28;
-    corrplot2[j]->SetMarkerStyle(21);
-    corrplot2[j]->SetMarkerColor(col);
-    corrplot2[j]->SetMarkerSize(1.8);
-    corrplot2[j]->Draw("SAME TEXT0");
+    int col, mark;
+    if (j == 0) {
+      col = 12, mark = 25;
+    }
+    if (j == 1) {
+      col = 40, mark = 21;
+    }
+    if (j == 2) {
+      col = 9, mark = 24;
+    }
+    if (j == 3) {
+      col = 41, mark = 20;
+    }
+    if (j == 4) {
+      col = 8, mark = 22;
+    }
+    if (j == 5) {
+      col = 46, mark = 27;
+    }
+    if (j == 6) {
+      col = 28, mark = 26;
+    }
+    corrplot2dot[j]->SetMarkerStyle(mark);
+    corrplot2dot[j]->SetMarkerColor(col);
+    corrplot2dot[j]->SetMarkerSize(3);
+    corrplot2dot[j]->Draw("SAME PM");
+    corrplot2[j]->Draw("SAME TEXT");
   }
   gPad->BuildLegend();
   fclose(fp);

@@ -2,21 +2,22 @@
 
 #include "TBrowser.h"
 #include "TColor.h"
+#include "TDirectory.h"
 #include "TFile.h"
+#include "TGraph.h"
 #include "TH2F.h"
 #include "TLatex.h"
 #include "TLine.h"
+#include "TString.h"
 #include "TStyle.h"
 #include "TTree.h"
 #include "sys/stat.h"
-#include <algorithm>
-#include <vector>
+
 
 //#include <string.h>
 //#include <stdio.h>
 
-/*Hitmap plotting for data without hottest pixels + file of hottest pixels + hits/pixel histo for
- * masked data*/
+/*Hitmap plotting for outer barrel + FHR analysis + hits/pixel histo for unmasked data*/
 
 
 void set_plot_style()
@@ -53,12 +54,26 @@ int AddressToRow(int ARegion, int ADoubleCol, int AAddress)
   return Row;
 }
 
-void ReadFile(const char *filepath, const char *fNameChip, TH2F *hHitmap,
-              std::vector<TH2F *> &hlist, int Chip, int nInj, TDirectory *m_hist)
+void ReadFile(const char *maskdir, const char *fNameChip, TH2F *hHitmap, std::vector<TH2F *> &hlist,
+              int Chip, int nInj, std::vector<std::vector<std::vector<double>>> &moduleHitsVector)
 {
-  int  mod, chip, col, row, nhits, hits;
-  int  level = 20;
-  char NameOfMask[100], fnamemask[100];
+  int mod, chip, col, row, nhits;
+
+  for (int imod = 1; imod < 8; imod++) {
+    FILE *fp = fopen(maskdir, "r");
+    if (!fp) {
+      std::cout << "Unable to open mask file! " << maskdir << std::endl;
+      return kFALSE;
+    }
+    while (fscanf(fp, "%d %d %d %d", &nhits, &chip, &col, &row) == 4) {
+      moduleHitsVector[imod - 1].push_back(std::vector<double>(4));
+      moduleHitsVector[imod - 1].back()[0] = nhits;
+      moduleHitsVector[imod - 1].back()[1] = chip;
+      moduleHitsVector[imod - 1].back()[2] = col;
+      moduleHitsVector[imod - 1].back()[3] = row;
+    }
+    fclose(fp);
+  }
 
   FILE *fp = fopen(fNameChip, "r");
   if (!fp) {
@@ -66,109 +81,192 @@ void ReadFile(const char *filepath, const char *fNameChip, TH2F *hHitmap,
     return kFALSE;
   }
   std::cout << fNameChip << std::endl;
-
+  /*
+    std::string histoname = fNameChip;
+    histoname.erase(0, histoname.rfind("Chip"));
+    histoname.erase(histoname.rfind(".dat"));
+    std::vector<double> nhits_vect;
+  */
   int nLines = 0, nHot = 0, nIneff = 0;
 
-  std::string histoname = fNameChip;
-  histoname.erase(0, histoname.rfind("Chip"));
-  histoname.erase(histoname.rfind(".dat"));
-
-  std::vector<int> hitvector;
-
-  std::vector<double> nhits_vect;
-
-  while (fscanf(fp, "%d %d %d %d %d", &mod, &chip, &col, &row, &hits) == 5) {
-    hitvector.push_back(hits);
-  }
-  rewind(fp);
-  std::sort(hitvector.begin(), hitvector.end());
-  std::cout << hitvector.size() << std::endl;
-  if (hitvector.size() > level) {
-    int maxlevel = hitvector.size() - level;
-    std::cout << "mask value " << hitvector[maxlevel] << std::endl;
-    sprintf(fnamemask, "%s/mask", filepath);
-    mkdir(fnamemask, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    while (fscanf(fp, "%d %d %d %d %d", &mod, &chip, &col, &row, &nhits) == 5) {
-      FILE *fp     = fopen(Form("%s/mask/Max_noise_%d_%d.dat", filepath, mod, chip), "a");
-      int   Column = AddressToColumn(col / 16, col % 16, row);
-      int   Row    = AddressToRow(col / 16, col % 16, row);
-      nLines++;
-      if (nInj > 0) {
-        if (nhits < nInj) nIneff++;
-        if (nhits > nInj) nHot++;
-      }
-      if (nhits > hitvector[maxlevel]) {
-        fprintf(fp, "%d %d %d\n", nhits, Column, Row);
-        std::cout << "bonne" << std::endl;
-      }
-      if (nhits <= hitvector[maxlevel]) {
-        std::cout << "pas bonne" << std::endl;
-        nhits_vect.push_back(nhits);
-        hlist[chip]->Fill(Column, Row, nhits);
-        if (Chip < 7) {
-          hHitmap->Fill(1024 * Chip + Column, 512 - Row, nhits);
+  while (fscanf(fp, "%d %d %d %d %d", &mod, &chip, &col, &row, &nhits) == 5) {
+    for (auto &d1 : moduleHitsVector) {
+      for (auto &d2 : d1) {
+        if ((chip == d2[1]) && (col == d2[2]) && (row == d2[3])) {
+          break;
         }
         else {
-          hHitmap->Fill(1024 * (14 - Chip) + (1024 - Column), Row + 512, nhits);
+          int Column = AddressToColumn(col / 16, col % 16, row);
+          int Row    = AddressToRow(col / 16, col % 16, row);
+          nLines++;
+          if (nInj > 0) {
+            if (nhits < nInj) nIneff++;
+            if (nhits > nInj) nHot++;
+          }
+          hlist[chip]->Fill(Column, Row, nhits);
+
+          //    nhits_vect.push_back(nhits);
+
+          if (Chip < 7) {
+            hHitmap->Fill(1024 * Chip + Column, Row, nhits);
+          }
+          else {
+            hHitmap->Fill(1024 * (14 - Chip) + (1024 - Column), Row + 512, nhits);
+          }
         }
       }
-      fclose(fp);
-    }
-
-    int size = *std::max_element(nhits_vect.begin(), nhits_vect.end()) + 5;
-    std::cout << size << std::endl;
-    TH1D *h_histo =
-        new TH1D(Form("%s_hits_histo", histoname.c_str()), "Hits histo", size, -1, size);
-    for (int i = 0; i < nhits_vect.size(); i++) {
-      h_histo->Fill(nhits_vect[i]);
     }
   }
+  /*
+      int size =*std::max_element(nhits_vect.begin(), nhits_vect.end());
+      std::cout << size << std::endl;
+      TH1D *h_histo= new TH1D(Form("%s_hits_histo", histoname.c_str()), "Hits histo",size, -1,
+     size);
+      for (int i=0; i<nhits_vect.size(); i++) {
+        h_histo->Fill(nhits_vect[i]);
+      }
+  */
+  /*
+    if (nInj > 0) {
+      int nNoHit = 1024 * 512 - nLines; // May be incorrect //524288 - nLines;
+      std::cout << std::endl;
+      std::cout << std::endl << "Chip " << Chip << ":" << std::endl;
+      std::cout << "  Pixels without hits: " << nNoHit << std::endl;
+      std::cout << "  Pixels with <" << nInj << " hits: " << nIneff << std::endl;
+      std::cout << "  Pixels with >" << nInj << " hits: " << nHot << std::endl;
+      std::cout << std::endl;
+    }*/
   fclose(fp);
 }
 
 int HitmapOB_mask(TString directory, int nInj = -1)
 {
-  char filepath[100], fNameChip[100], fileName[100], fhrdir[100], fhroutput[100], ChipHistName[100];
-  Int_t   x_max, y_max, z_max;
+  char filepath[100], fNameChip[100], fileName[100], fhrdir[100], fhroutput[100], fhroutput2[100],
+      ChipHistName[100];
+
+  Int_t   x_max, y_max, z_max, x_max2, y_max2, z_max2;
   Float_t int_hits  = 0;
   Float_t noise_occ = 0;
+  Int_t   n_trg     = 1000000;
 
   set_plot_style();
   strncpy(filepath, directory, 32);
+  /*
+    sprintf(fhrdir, "%s/Fhr", filepath);
+    mkdir(fhrdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+  */
+  sprintf(fileName, "%s/Histos_masked.root", filepath);
+  TFile *File = new TFile(fileName, "RECREATE");
 
-  sprintf(fileName, "%s/Histos_mask.root", filepath);
-  TFile *     File   = new TFile(fileName, "RECREATE");
-  TDirectory *m_hist = File->mkdir("masked histos");
-  m_hist->cd();
-  TDirectory *modhist[7];
+  std::vector<std::vector<std::vector<double>>> modHitsVect(7);
+
+  char DirMask[100];
+  std::cout << "Enter mask directory:" << std::endl;
+  std::cin >> DirMask;
+
+  TDirectory *h_dir = File->mkdir("histos");
+  h_dir->cd();
+
+  TDirectory *moddir[7];
   for (int imod = 1; imod < 8; imod++) {
-    modhist[imod] = m_hist->mkdir(Form("histos for module %d", imod));
-    modhist[imod]->cd();
+    char *maskdir = Form("%smask_mod_%d.dat", DirMask, imod);
+    moddir[imod]  = h_dir->mkdir(Form("masked histos for module_%d", imod));
+    moddir[imod]->cd();
     std::vector<TH2F *> hlist;
     for (int ich = 0; ich < 15; ich++) {
       if (ich != 7) {
-        TH2F *ChipHitMap = new TH2F(Form("chip_%d_mod_%d", ich, imod), Form("chip hitmap %d", ich),
-                                    1024, -0.5, 1024 - 0.5, 512, -0.5, 512 - 0.5);
+        TH2F *ChipHitMap =
+            new TH2F(Form("chip_%d_mod_%d", ich, imod), Form("chip hitmap_masked %d", ich), 1024,
+                     -0.5, 1024 - 0.5, 512, -0.5, 512 - 0.5);
         ChipHitMap->SetOption("colz");
         hlist.push_back(ChipHitMap);
       }
-      else
+      else {
         hlist.push_back(0);
+      }
     }
 
-    auto  ModHistoName = "Module" + std::to_string(imod);
+
+    // making histos for fhr analysis
+
+    /*    TDirectory *fhr_dir = moddir[imod]->mkdir("fhr");
+        fhr_dir->cd();
+        std::vector<TH1F *> fhrlist;
+        for (int ich = 0; ich < 15; ich++) {
+          if (ich != 7) {
+            TH1F *FHR_plot = new TH1F(Form("masked_chip_%d_mod%d", ich, imod), Form("Noise
+       occupancy_masked %d", ich),
+                                      600, -0.5, 599.5);
+            fhrlist.push_back(FHR_plot);
+          }
+          else
+            fhrlist.push_back(0);
+        }
+        moddir[imod]->cd();
+    */
+
+    auto  ModHistoName = "Module" + std::to_string(imod) + "+mask";
     TH2F *hHitmap = new TH2F(ModHistoName.c_str(), "Hit map", 7 * 1024, -.5, 7 * 1024 - .5, 512 * 2,
                              -.5, 512 * 2 - .5);
 
     for (int ichip = 0; ichip < 7; ichip++) {
       sprintf(fNameChip, "%s/Source_Chip%d_%d.dat", filepath, imod, ichip);
-      ReadFile(filepath, fNameChip, hHitmap, hlist, ichip, nInj, m_hist);
+      ReadFile(maskdir, fNameChip, hHitmap, hlist, ichip, nInj, modHitsVect);
       sprintf(fNameChip, "%s/Source_Chip%d_%d.dat", filepath, imod, ichip + 8); // second row
-      ReadFile(filepath, fNameChip, hHitmap, hlist, ichip + 8, nInj, m_hist);
+      ReadFile(maskdir, fNameChip, hHitmap, hlist, ichip + 8, nInj, modHitsVect);
     }
+
+
+    // filling histos for fhr analysis
+    /*
+        for (int ich = 0; ich < 15; ich++) {
+          if (ich != 7) {
+            TH2F *ch_h = (TH2F *)hlist[ich]->Clone();
+            int_hits   = ch_h->Integral();
+
+            for (Int_t i_pix = 0; i_pix < 600; i_pix++) {
+              noise_occ = int_hits / n_trg / (1024 * 512);
+              fhrlist[ich]->SetBinContent(i_pix + 1, noise_occ);
+              ch_h->GetMaximumBin(x_max, y_max, z_max);
+              int_hits -= ch_h->GetBinContent(x_max, y_max);
+              ch_h->SetBinContent(x_max, y_max, 0);
+            }
+
+            sprintf(fhroutput, "%s/Fhr_%d_%d", fhrdir, imod, ich);
+            ofstream outfile(fhroutput);
+
+            for (Int_t ibin = 0; ibin < 600; ibin++) {
+              Double_t bincont = fhrlist[ich]->GetBinContent(ibin + 1, ibin + 1);
+              outfile << ibin << "  " << bincont << endl;
+            }
+            delete ch_h;
+          }
+        }
+
+        TH2F * mod_h      = (TH2F *)hHitmap->Clone();
+        auto   fhrmodname = ModHistoName + "_fhr";
+        TH1F * FHR_mod    = new TH1F(fhrmodname.c_str(), "Fhr_module", 600, -0.5, 599.5);
+        double int2_hits  = mod_h->Integral();
+        for (Int_t i_pix = 0; i_pix < 600; i_pix++) {
+          double noise_occ2 = int2_hits / n_trg / (7 * 1024 * 512 * 2);
+          FHR_mod->SetBinContent(i_pix + 1, noise_occ2);
+          mod_h->GetMaximumBin(x_max2, y_max2, z_max2);
+          int2_hits -= mod_h->GetBinContent(x_max2, y_max2);
+          mod_h->SetBinContent(x_max2, y_max2, 0);
+        }
+
+        sprintf(fhroutput2, "%s/Fhr_mod_%d", fhrdir, imod);
+        ofstream outfile(fhroutput2);
+
+        for (Int_t ibin = 0; ibin < 600; ibin++) {
+          Double_t bincont2 = FHR_mod->GetBinContent(ibin + 1, ibin + 1);
+          outfile << ibin << "  " << bincont2 << endl;
+        }
+        delete mod_h;
+        */
     hHitmap->SetOption("colz");
   }
-  m_hist->cd();
+  h_dir->cd();
   File->Write();
   delete File;
   return 1;

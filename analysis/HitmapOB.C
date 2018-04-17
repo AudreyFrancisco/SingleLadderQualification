@@ -54,7 +54,9 @@ int AddressToRow(int ARegion, int ADoubleCol, int AAddress)
   return Row;
 }
 
-void ReadFile(const char *fNameChip, TH2F *hHitmap, std::vector<TH2F *> &hlist, int Chip, int nInj)
+void ReadFile(const char *fNameChip, TH2F *hHitmap, TH1F *modprox, TH1F *modproy,
+              std::vector<TH2F *> &hlist, std::vector<TH1F *> &chipprox,
+              std::vector<TH1F *> &chipproy, int Chip, int nInj)
 {
   int mod, chip, col, row, nhits;
 
@@ -81,14 +83,20 @@ void ReadFile(const char *fNameChip, TH2F *hHitmap, std::vector<TH2F *> &hlist, 
       if (nhits > nInj) nHot++;
     }
     hlist[chip]->Fill(Column, Row, nhits);
+    chipprox[chip]->Fill(Column);
+    chipproy[chip]->Fill(Row);
 
     //    nhits_vect.push_back(nhits);
 
     if (Chip < 7) {
       hHitmap->Fill(1024 * Chip + Column, Row, nhits);
+      modprox->Fill(1024 * Chip + Column);
+      modproy->Fill(Row);
     }
     else {
       hHitmap->Fill(1024 * (14 - Chip) + (1024 - Column), Row + 512, nhits);
+      modprox->Fill(1024 * (14 - Chip) + (1024 - Column));
+      modproy->Fill(Row + 512);
     }
   }
   /*
@@ -115,18 +123,19 @@ void ReadFile(const char *fNameChip, TH2F *hHitmap, std::vector<TH2F *> &hlist, 
 
 int HitmapOB(TString directory, int nInj = -1)
 {
-  char filepath[100], fNameChip[100], fileName[100], fhrdir[100], fhroutput[100], ChipHistName[100];
-  Int_t   x_max, y_max, z_max;
+  char filepath[100], fNameChip[100], fileName[100], fhrdir[100], fhroutput[100], fhroutput2[100],
+      ChipHistName[100];
+  Int_t   x_max, y_max, z_max, x_max2, y_max2, z_max2;
   Float_t int_hits  = 0;
   Float_t noise_occ = 0;
   Int_t   n_trg     = 1000000;
 
   set_plot_style();
   strncpy(filepath, directory, 32);
-
-  sprintf(fhrdir, "%s/Fhr", filepath);
-  mkdir(fhrdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-
+  /*
+    sprintf(fhrdir, "%s/Fhr", filepath);
+    mkdir(fhrdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+  */
   sprintf(fileName, "%s/Histos.root", filepath);
   TFile *File = new TFile(fileName, "RECREATE");
 
@@ -139,15 +148,25 @@ int HitmapOB(TString directory, int nInj = -1)
     moddir[imod] = h_dir->mkdir(Form("histos for module_%d", imod));
     moddir[imod]->cd();
     std::vector<TH2F *> hlist;
+    std::vector<TH1F *> chipprox;
+    std::vector<TH1F *> chipproy;
     for (int ich = 0; ich < 15; ich++) {
       if (ich != 7) {
         TH2F *ChipHitMap = new TH2F(Form("chip_%d_mod_%d", ich, imod), Form("chip hitmap %d", ich),
                                     1024, -0.5, 1024 - 0.5, 512, -0.5, 512 - 0.5);
         ChipHitMap->SetOption("colz");
+        TH1F *pro_plot_x = new TH1F(Form("x_projection_chip_%d_mod%d", ich, imod),
+                                    Form("X projection %d", ich), 1026, -1, 1025);
+        chipprox.push_back(pro_plot_x);
+        TH1F *pro_plot_y = new TH1F(Form("y_projection_chip_%d_mod%d", ich, imod),
+                                    Form("Y projection %d", ich), 514, -1, 513);
+        chipproy.push_back(pro_plot_y);
         hlist.push_back(ChipHitMap);
       }
       else {
         hlist.push_back(0);
+        chipprox.push_back(0);
+        chipproy.push_back(0);
       }
     }
 
@@ -159,26 +178,31 @@ int HitmapOB(TString directory, int nInj = -1)
         std::vector<TH1F *> fhrlist;
         for (int ich = 0; ich < 15; ich++) {
           if (ich != 7) {
-            TH1F *FHR_plot = new TH1F(Form("chip_%d_mod%d", ich, imod), Form("Noise occuoancy %d",
+            TH1F *FHR_plot = new TH1F(Form("chip_%d_mod%d", ich, imod), Form("Noise occupancy %d",
        ich),
-                                            600, -0.5, 599.5);
+                                      600, -0.5, 599.5);
             fhrlist.push_back(FHR_plot);
           }
           else
-          fhrlist.push_back(0);
+            fhrlist.push_back(0);
         }
         moddir[imod]->cd();
     */
 
-    auto  ModHistoName = "Module" + std::to_string(imod);
+    auto ModHistoName  = "Module" + std::to_string(imod);
+    auto ModHistoNameX = "X_projection_mod_" + std::to_string(imod);
+    auto ModHistoNameY = "Y_projection_mod_" + std::to_string(imod);
+
     TH2F *hHitmap = new TH2F(ModHistoName.c_str(), "Hit map", 7 * 1024, -.5, 7 * 1024 - .5, 512 * 2,
                              -.5, 512 * 2 - .5);
+    TH1F *modprox = new TH1F(ModHistoNameX.c_str(), "Projection X", 7 * 1024, -.5, 7 * 1024);
+    TH1F *modproy = new TH1F(ModHistoNameY.c_str(), "Projection Y", 512 * 2, -.5, 512 * 2);
 
     for (int ichip = 0; ichip < 7; ichip++) {
       sprintf(fNameChip, "%s/Source_Chip%d_%d.dat", filepath, imod, ichip);
-      ReadFile(fNameChip, hHitmap, hlist, ichip, nInj);
+      ReadFile(fNameChip, hHitmap, modprox, modproy, hlist, chipprox, chipproy, ichip, nInj);
       sprintf(fNameChip, "%s/Source_Chip%d_%d.dat", filepath, imod, ichip + 8); // second row
-      ReadFile(fNameChip, hHitmap, hlist, ichip + 8, nInj);
+      ReadFile(fNameChip, hHitmap, modprox, modproy, hlist, chipprox, chipproy, ichip + 8, nInj);
     }
 
 
@@ -207,8 +231,28 @@ int HitmapOB(TString directory, int nInj = -1)
             delete ch_h;
           }
         }
-    */
 
+        TH2F * mod_h      = (TH2F *)hHitmap->Clone();
+        auto   fhrmodname = ModHistoName + "_fhr";
+        TH1F * FHR_mod    = new TH1F(fhrmodname.c_str(), "Fhr_module", 600, -0.5, 599.5);
+        double int2_hits  = mod_h->Integral();
+        for (Int_t i_pix = 0; i_pix < 600; i_pix++) {
+          double noise_occ2 = int2_hits / n_trg / (7 * 1024 * 512 * 2);
+          FHR_mod->SetBinContent(i_pix + 1, noise_occ2);
+          mod_h->GetMaximumBin(x_max2, y_max2, z_max2);
+          int2_hits -= mod_h->GetBinContent(x_max2, y_max2);
+          mod_h->SetBinContent(x_max2, y_max2, 0);
+        }
+
+        sprintf(fhroutput2, "%s/Fhr_mod_%d", fhrdir, imod);
+        ofstream outfile(fhroutput2);
+
+        for (Int_t ibin = 0; ibin < 600; ibin++) {
+          Double_t bincont2 = FHR_mod->GetBinContent(ibin + 1, ibin + 1);
+          outfile << ibin << "  " << bincont2 << endl;
+        }
+        delete mod_h;
+    */
     hHitmap->SetOption("colz");
   }
   h_dir->cd();

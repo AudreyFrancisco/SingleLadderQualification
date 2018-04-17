@@ -52,7 +52,8 @@ int AddressToRow(int ARegion, int ADoubleCol, int AAddress)
   return Row;
 }
 
-void ReadFile(const char *filepath, const char *fNameChip, int Chip, int nInj)
+void ReadFile(const char *filepath, const char *fNameChip, std::vector<double> &hit_mod, int Chip,
+              int nInj)
 {
   int  mod, chip, col, row, nhits, hits;
   char NameOfMask[100];
@@ -72,6 +73,7 @@ void ReadFile(const char *filepath, const char *fNameChip, int Chip, int nInj)
 
   while (fscanf(fp, "%d %d %d %d %d", &mod, &chip, &col, &row, &hits) == 5) {
     hitvector.push_back(hits);
+    hit_mod.push_back(hits);
   }
   int   size    = *std::max_element(hitvector.begin(), hitvector.end()) + 5;
   TH1D *h_histo = new TH1D(Form("%s_hits_histo", histoname.c_str()), "Hits histo", size, -1, size);
@@ -117,6 +119,7 @@ int HitmapOB_gaus(TString directory, int nInj = -1)
   Float_t int_hits  = 0;
   Float_t noise_occ = 0;
 
+
   set_plot_style();
   strncpy(filepath, directory, 32);
 
@@ -132,12 +135,25 @@ int HitmapOB_gaus(TString directory, int nInj = -1)
   for (int imod = 1; imod < 8; imod++) {
     moddir[imod] = gausfits->mkdir(Form("histos for module_%d", imod));
     moddir[imod]->cd();
+    std::vector<double> hit_mod;
     for (int ichip = 0; ichip < 7; ichip++) {
       sprintf(fNameChip, "%s/Source_Chip%d_%d.dat", filepath, imod, ichip);
-      ReadFile(filepath, fNameChip, ichip, nInj);
+      ReadFile(filepath, fNameChip, hit_mod, ichip, nInj);
       sprintf(fNameChip, "%s/Source_Chip%d_%d.dat", filepath, imod, ichip + 8); // second row
-      ReadFile(filepath, fNameChip, ichip + 8, nInj);
+      ReadFile(filepath, fNameChip, hit_mod, ichip + 8, nInj);
     }
+    int   size    = *std::max_element(hit_mod.begin(), hit_mod.end()) + 5;
+    TH1D *h_histo = new TH1D(Form("module_%d_hits_histo", imod), "Hits histo", size, -1, size);
+    for (int i = 0; i < hit_mod.size(); i++) {
+      h_histo->Fill(hit_mod[i]);
+    }
+    h_histo->Fit("gaus");
+    TF1 *  fit   = (TF1 *)h_histo->GetFunction("gaus");
+    double max   = fit->GetParameter(1);
+    double sigma = fit->GetParameter(2);
+    sigma        = sigma * 3 / 2;
+    double left  = (int)(max - sigma);
+    double right = (int)(max + sigma);
   }
   gausfits->cd();
   File->Write();
