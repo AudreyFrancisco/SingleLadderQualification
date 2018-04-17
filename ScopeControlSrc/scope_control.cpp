@@ -132,15 +132,16 @@ void scope_control::write_cmd(std::string data)
   debug_print("Write cmd");
   scope_control::write("*CLS;*ESE 1\n");
   scope_control::write(data);
-  for (int i = 0; i < 4; i++) {
-    scope_control::write("*OPC;*ESR?\n");
+  scope_control::write("*OPC\n");
+  for (int i = 0; i < 5; i++) {
+    scope_control::write("*ESR?\n");
     std::string val = scope_control::read();
     if (std::stoi(val) == 1)
       return;
     else
       scope_control::msleep(100);
   }
-  throw_ex("Writen task did not complete in time.\n");
+  throw_ex("Requested task did not complete in time.\n");
 }
 
 std::string scope_control::write_query(std::string data)
