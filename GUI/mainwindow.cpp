@@ -248,7 +248,7 @@ void MainWindow::open()
         fComponentWindow = new Components(this);
         fComponentWindow->WriteToLabel(fHalfstave);
         fComponentWindow->exec();
-        if (fstop) {
+        if (fstop && fHiddenComponent == false) {
           return;
         }
       }
@@ -296,6 +296,7 @@ void MainWindow::open()
       }
     }
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
+    fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
     fConfig->GetScanConfig()->SetUseDataPath(true);
     fPb = fHICs.at(0)->GetPowerBoard();
     if (fPb) {
@@ -819,7 +820,8 @@ void MainWindow::start_test()
     fScanTypes.clear();
   }
   fWritedb->setVisible(false);
-  fWrite = false;
+  fHiddenComponent = false;
+  fWrite           = false;
   disconnect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
   fEndurancemodules.clear();
   fIdofactivitytype = 0;
@@ -1711,7 +1713,7 @@ void MainWindow::savesettings()
         fComponentWindow = new Components(this);
         fComponentWindow->WriteToLabel(fHicnames.at(i));
         fComponentWindow->exec();
-        if (fstop) {
+        if (fstop && fHiddenComponent == false) {
           return;
         }
       }

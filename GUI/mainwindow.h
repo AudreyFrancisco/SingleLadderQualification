@@ -241,6 +241,7 @@ private:
   bool                   fExceptionthrown;
   bool                   fWrite;
   QString                fExceptiontext;
+  bool                   fHiddenComponent;
 
 
 private slots:
