@@ -748,7 +748,7 @@ void MainWindow::scanLoop(TScan *myScan)
     }
     myScan->LoopEnd(2);
     myScan->Terminate();
-    //    throw string("SDFdsfsdfsdfsdfsfsdf");
+    // throw string("SDFdsfsdfsdfsdfsfsdf");
   }
   catch (exception &ex) {
     std::cout << ex.what() << "is the thrown exception from the scan" << std::endl;
@@ -757,7 +757,7 @@ void MainWindow::scanLoop(TScan *myScan)
     fExceptiontext   = ex.what();
   }
 
-  /* catch (string x) {
+  /*catch (string x) {
         std::cout << "DGFDGDFGD>>" << x << std::endl;
         fExceptionthrown = true;
         fScanAbort=true;
@@ -1013,7 +1013,21 @@ void MainWindow::performtests()
         colorsinglescan(i);
       }
 
-      if (fExecution == false) return;
+
+      if (fExecution == false) {
+        if (fresultVector.at(i) != 0) {
+          for (unsigned int ihic = 0; ihic < fHICs.size(); ihic++) {
+
+            TScanResultHic *hicResult;
+            hicResult = fresultVector.at(i)->GetHicResult(fHICs.at(ihic)->GetDbId());
+            if (hicResult != 0) {
+              hicResult->SetClassification(CLASS_RED);
+              // std::cout<<"auto pou pairnw einai"<<hicResult->GetClassification()<<std::endl;
+            }
+          }
+        }
+        return;
+      }
 
       qApp->processEvents();
     }
@@ -1474,7 +1488,7 @@ void MainWindow::attachtodatabase()
         std::vector<QString>          scansclassificationnames;
         std::vector<TScanResultHic *> hicresultsvector;
         for (unsigned int d = 0; d < fScanVector.size(); d++) {
-          if (fAnalysisVector.at(d) != 0) {
+          if (fAnalysisVector.at(d) != 0 && fresultVector.at(d) != 0) {
             QString         scanclasname;
             TScanResultHic *hicRe = fresultVector.at(d)->GetHicResult(currenthic.toStdString());
             scanclasname          = fScanVector.at(d)->GetName();
@@ -1631,6 +1645,7 @@ void MainWindow::fillingreceptionscans()
   ClearVectors();
 
   AddScan(STPower);
+  return;
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   AddScan(STFifo);
   AddScan(STDigital);
