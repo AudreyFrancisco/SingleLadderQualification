@@ -1645,7 +1645,6 @@ void MainWindow::fillingreceptionscans()
   ClearVectors();
 
   AddScan(STPower);
-  return;
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   AddScan(STFifo);
   AddScan(STDigital);
