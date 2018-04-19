@@ -23,6 +23,8 @@ else
 	mkdir -pv Data/hic${NB}/ladder_func/digitalscan/allchips/
 	mkdir -pv Data/hic${NB}/ladder_func/thresholdscan/allchips/bb0/
 	mkdir -pv Data/hic${NB}/ladder_func/thresholdscan/allchips/bb3/
+	mkdir -pv Data/hic${NB}/ladder_func/noiseoccupancy/allchips/bb0/
+	mkdir -pv Data/hic${NB}/ladder_func/noiseoccupancy/allchips/bb3/
 	echo "Done"
 fi 
 
