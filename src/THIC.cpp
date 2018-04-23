@@ -211,9 +211,10 @@ void THic::AddClassification(THicClassification aClass)
 
 THicClassification THic::GetClassification()
 {
-  if (GetNEnabledChips() == 0) return CLASS_RED;
-  //  else if (m_oldClass > m_class)
-  //  return m_oldClass;
+  // if no HIC is working, return RED
+  // before: check that HIC contains chips to avoid RED for fast power test
+  if ((m_chips.size() > 0) && (GetNEnabledChips() == 0))
+    return CLASS_RED;
   else
     return m_class;
 }
