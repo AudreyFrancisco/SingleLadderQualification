@@ -281,16 +281,33 @@ void MainWindow::open()
       }
       else {
 
+        fHicnames.resize(fHalfstavemodules.size() - 1, "empty");
         for (unsigned int i = 0; i < fHalfstavemodules.size(); i++) {
           if (fHalfstavemodules.at(i).Type !=
               DbGetComponentTypeId(fDB, fDB->GetProjectId(), "Outer Layer CP")) {
-            QString namestr = QString::fromStdString(fHalfstavemodules.at(i).Name);
-            int     j       = fHalfstavemodules.at(i).Position - 1;
-            fHicnames.resize(fHalfstavemodules.size() - 1);
-            fHicnames[j] = namestr;
-
-            QByteArray name = namestr.toLatin1();
-            ar[j]           = strdup(name.toStdString().c_str());
+            if (fHalfstavemodules.at(i).Position) {
+              int j    = fHalfstavemodules.at(i).Position - 1;
+              int size = 0;
+              size     = fHicnames.size();
+              for (int d = 0; d < size; d++) {
+                if (fHicnames[j] == "empty" && j == d) {
+                  QString namestr = QString::fromStdString(fHalfstavemodules.at(i).Name);
+                  fHicnames[j]    = namestr;
+                  QByteArray name = namestr.toLatin1();
+                  ar[j]           = strdup(name.toStdString().c_str());
+                }
+              }
+            }
+          }
+        }
+        for (unsigned int k = 0; k < fHicnames.size(); k++) {
+          if (fHicnames.at(k) == "empty") {
+            fComponentWindow = new Components(this);
+            fComponentWindow->WrongPositions();
+            fComponentWindow->exec();
+            if (fstop && fHiddenComponent == false) {
+              return;
+            }
           }
         }
       }

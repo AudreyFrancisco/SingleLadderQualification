@@ -15,6 +15,7 @@ public:
   ~Components();
 public slots:
   void WriteToLabel(QString name);
+  void WrongPositions();
 
 private:
   Ui::Components *ui;
