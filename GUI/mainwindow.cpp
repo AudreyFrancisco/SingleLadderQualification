@@ -297,21 +297,23 @@ void MainWindow::open()
     }
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
-    if (fhalfstaveid == -1) {
-      fComponentWindow = new Components(this);
-      fComponentWindow->WriteToLabel(fHalfstave);
-      fComponentWindow->exec();
-      if (fstop && fHiddenComponent == false) {
-        return;
-      }
-    }
-    for (unsigned int k = 0; k < fHicnames.size(); k++) {
-      if (fHicnames.at(k) == "empty") {
+    if (fNumberofscan == OBHalfStaveOL) {
+      if (fhalfstaveid == -1) {
         fComponentWindow = new Components(this);
-        fComponentWindow->WrongPositions();
+        fComponentWindow->WriteToLabel(fHalfstave);
         fComponentWindow->exec();
         if (fstop && fHiddenComponent == false) {
           return;
+        }
+      }
+      for (unsigned int k = 0; k < fHicnames.size(); k++) {
+        if (fHicnames.at(k) == "empty") {
+          fComponentWindow = new Components(this);
+          fComponentWindow->WrongPositions();
+          fComponentWindow->exec();
+          if (fstop && fHiddenComponent == false) {
+            return;
+          }
         }
       }
     }
