@@ -1731,7 +1731,9 @@ void MainWindow::savesettings()
   }
   else {
     open();
-
+    if (fstop && fHiddenComponent == false) {
+      return;
+    }
     for (unsigned int i = 0; i < fHICs.size(); i++) {
       fstop         = false;
       int in        = 0;
