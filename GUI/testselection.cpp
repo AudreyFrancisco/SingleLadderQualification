@@ -30,7 +30,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("OB HIC Fast Power Test", OBPower);
   ui->typetest->addItem("OL HS Qualification Test", OBHalfStaveOL);
   ui->typetest->addItem("IB HIC DCTRL Test", IBDctrl);
-  // ui->typetest->addItem("OB Half-Stave Test", OBHalfStaveML);
+  ui->typetest->addItem("ML HS Qualification Test", OBHalfStaveML);
   // ui->typetest->addItem("OB Stave Test", OBStave);
   // ui->typetest->addItem("IB Stave Test", IBStave);
   ui->typeoftest->hide();

@@ -179,7 +179,7 @@ void MainWindow::open()
   else if (fNumberofscan == OBPower) {
     fileName = "ConfigPower.cfg";
   }
-  else if (fNumberofscan == OBHalfStaveOL) {
+  else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
     fileName = "Config_HS.cfg";
   }
   try {
@@ -232,7 +232,7 @@ void MainWindow::open()
       fEndurancemodules.push_back(ui->down2);
       fEndurancemodules.push_back(ui->down1);
     }
-    if (fNumberofscan == OBHalfStaveOL) {
+    if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
       fHicnames.clear();
       int halfstaveidupper = 0;
       int halfstaveidlower = 0;
@@ -261,16 +261,18 @@ void MainWindow::open()
         fHicnames.push_back("Module2");
         fHicnames.push_back("Module3");
         fHicnames.push_back("Module4");
-        fHicnames.push_back("Module5");
-        fHicnames.push_back("Module6");
-        fHicnames.push_back("Module7");
         ar[0] = {"Module1"};
         ar[1] = {"Module2"};
         ar[2] = {"Module3"};
         ar[3] = {"Module4"};
-        ar[4] = {"Module5"};
-        ar[5] = {"Module6"};
-        ar[6] = {"Module7"};
+        if (fNumberofscan == OBHalfStaveOL) {
+          fHicnames.push_back("Module5");
+          fHicnames.push_back("Module6");
+          fHicnames.push_back("Module7");
+          ar[4] = {"Module5"};
+          ar[5] = {"Module6"};
+          ar[6] = {"Module7"};
+        }
       }
       else {
 
@@ -297,7 +299,7 @@ void MainWindow::open()
     }
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
-    if (fNumberofscan == OBHalfStaveOL) {
+    if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
       if (fhalfstaveid == -1) {
         fComponentWindow = new Components(this);
         fComponentWindow->WriteToLabel(fHalfstave);
@@ -375,7 +377,7 @@ void MainWindow::open()
         }
       }
     }
-    if (device == TYPE_HALFSTAVE) {
+    if (device == TYPE_HALFSTAVE || device == TYPE_MLHALFSTAVE) {
       ui->OBHALFSTAVE->show();
       for (unsigned int i = 0; i < fChips.size(); i++) {
         int chipid;
@@ -1090,7 +1092,7 @@ void MainWindow::applytests()
   if (fNumberofscan == OBPower) {
     fillingfastpower();
   }
-  if (fNumberofscan == OBHalfStaveOL) {
+  if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
     fillingHSscans();
   }
   if (fNumberofscan == IBDctrl) {
@@ -1719,6 +1721,11 @@ void MainWindow::locationcombo()
   else if (fNumberofscan == OBHalfStaveOL) {
     fComponentTypeIDa = DbGetComponentTypeId(fDB, projectid, "Outer Layer Half-Stave Upper");
     fComponentTypeIDb = DbGetComponentTypeId(fDB, projectid, "Outer Layer Half-Stave Lower");
+    fComponentTypeID  = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
+  }
+  else if (fNumberofscan == OBHalfStaveML) {
+    fComponentTypeIDa = DbGetComponentTypeId(fDB, projectid, "Middle Layer Half-Stave Upper");
+    fComponentTypeIDb = DbGetComponentTypeId(fDB, projectid, "Middle Layer Half-Stave Lower");
     fComponentTypeID  = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
   }
   delete myactivity;
@@ -2488,7 +2495,7 @@ void MainWindow::attachConfigFile(ActivityDB::activity &activity)
     DbAddAttachment(fDB, activity, attachConfig, string("ConfigPower.cfg"),
                     string("ConfigPower.cfg"));
   }
-  else if (fNumberofscan == OBHalfStaveOL) {
+  else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
     DbAddAttachment(fDB, activity, attachConfig, string("Config_HS.cfg"), string("Config_HS.cfg"));
   }
 }
