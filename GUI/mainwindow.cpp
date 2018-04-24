@@ -1498,46 +1498,50 @@ void MainWindow::attachtodatabase()
       std::string        path;
 
       path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) + "/Comment.txt";
-      if (!fWrite) {
-        QString currenthic;
-        currenthic = fHicnames.at(i);
-        QString oldclassific;
-        oldclassific = GetResultType(fHICs.at(i)->GetOldClassification()).c_str();
-        QString finalclassific;
-        finalclassific = GetResultType(fHICs.at(i)->GetClassification()).c_str();
-        std::vector<QString>          scansclassificationnames;
-        std::vector<TScanResultHic *> hicresultsvector;
-        for (unsigned int d = 0; d < fScanVector.size(); d++) {
-          if (fAnalysisVector.at(d) != 0 && fresultVector.at(d) != 0) {
-            QString         scanclasname;
-            TScanResultHic *hicRe = fresultVector.at(d)->GetHicResult(currenthic.toStdString());
-            scanclasname          = fScanVector.at(d)->GetName();
-            scanclasname.append(" = ");
-            scanclasname.append(hicRe->WriteHicClassification());
-            scansclassificationnames.push_back(scanclasname);
-            hicresultsvector.push_back(fresultVector.at(d)->GetHicResult(currenthic.toStdString()));
-          }
-        }
-        fWrite = true;
-        WriteToEos(fHICs.at(i)->GetDbId(), uri, fWrite);
-        fActivitywindow = new ActivityStatus(this);
-        fActivitywindow->PopulateWindow(currenthic, oldclassific, finalclassific,
-                                        scansclassificationnames, hicresultsvector);
-        fActivitywindow->exec();
-        fActivitywindow->getactivitystatus(fStatus);
-        fActivitywindow->GetComment(comment);
-        fMfile = new QFile(QString::fromStdString(path));
-        fMfile->open(QIODevice::ReadWrite);
-        if (fMfile->isOpen()) {
-          QByteArray buffer;
-          buffer = buffer.append(comment);
-          fMfile->write(buffer); // Writes a QByteArray to the file.
-        }
-        if (fMfile) {
-          fMfile->close();
-          delete fMfile;
+
+      QString currenthic;
+      currenthic = fHicnames.at(i);
+      QString oldclassific;
+      oldclassific = GetResultType(fHICs.at(i)->GetOldClassification()).c_str();
+      QString finalclassific;
+      finalclassific = GetResultType(fHICs.at(i)->GetClassification()).c_str();
+      std::vector<QString>          scansclassificationnames;
+      std::vector<TScanResultHic *> hicresultsvector;
+      for (unsigned int d = 0; d < fScanVector.size(); d++) {
+        if (fAnalysisVector.at(d) != 0 && fresultVector.at(d) != 0) {
+          QString         scanclasname;
+          TScanResultHic *hicRe = fresultVector.at(d)->GetHicResult(currenthic.toStdString());
+          scanclasname          = fScanVector.at(d)->GetName();
+          scanclasname.append(" = ");
+          scanclasname.append(hicRe->WriteHicClassification());
+          scansclassificationnames.push_back(scanclasname);
+          hicresultsvector.push_back(fresultVector.at(d)->GetHicResult(currenthic.toStdString()));
         }
       }
+      if (!fWrite) {
+        WriteToEos(fHICs.at(i)->GetDbId(), uri, true);
+      }
+      else {
+        WriteToEos(fHICs.at(i)->GetDbId(), uri, false);
+      }
+      fActivitywindow = new ActivityStatus(this);
+      fActivitywindow->PopulateWindow(currenthic, oldclassific, finalclassific,
+                                      scansclassificationnames, hicresultsvector);
+      fActivitywindow->exec();
+      fActivitywindow->getactivitystatus(fStatus);
+      fActivitywindow->GetComment(comment);
+      fMfile = new QFile(QString::fromStdString(path));
+      fMfile->open(QIODevice::ReadWrite);
+      if (fMfile->isOpen()) {
+        QByteArray buffer;
+        buffer = buffer.append(comment);
+        fMfile->write(buffer); // Writes a QByteArray to the file.
+      }
+      if (fMfile) {
+        fMfile->close();
+        delete fMfile;
+      }
+
       ActivityDB *myactivity = new ActivityDB(fDB);
 
       ActivityDB::activity activ;
@@ -1648,6 +1652,7 @@ void MainWindow::attachtodatabase()
     }
     fDatabasefailure->exec();
   }
+  fWrite = true;
 }
 
 void MainWindow::ClearVectors()
