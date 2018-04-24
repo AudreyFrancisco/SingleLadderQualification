@@ -264,10 +264,8 @@ void TConfig::SetDeviceType(TDeviceType AType, int NChips)
         chipIds.push_back(i + (modId << 4));
       }
     }
-    if (AType == TYPE_HALFSTAVE)
+    if ((AType == TYPE_HALFSTAVE) || (AType == TYPE_MLHALFSTAVE))
       Init(2, chipIds, boardMOSAIC);
-    else if (AType == TYPE_MLHALFSTAVE)
-      Init(1, chipIds, boardMOSAIC);
     else
       Init(1, chipIds, boardRU);
   }
