@@ -179,7 +179,7 @@ void MainWindow::open()
   else if (fNumberofscan == OBPower) {
     fileName = "ConfigPower.cfg";
   }
-  else if (fNumberofscan == OBHalfStaveOL) {
+  else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
     fileName = "Config_HS.cfg";
   }
   try {
@@ -232,7 +232,7 @@ void MainWindow::open()
       fEndurancemodules.push_back(ui->down2);
       fEndurancemodules.push_back(ui->down1);
     }
-    if (fNumberofscan == OBHalfStaveOL) {
+    if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
       fHicnames.clear();
       int halfstaveidupper = 0;
       int halfstaveidlower = 0;
@@ -244,15 +244,8 @@ void MainWindow::open()
       halfstaveidlower =
           DbGetComponentId(fDB, projectid, fComponentTypeIDb, fHalfstave.toStdString());
 
-      if (halfstaveidlower == -1 && halfstaveidupper == -1) {
-        fComponentWindow = new Components(this);
-        fComponentWindow->WriteToLabel(fHalfstave);
-        fComponentWindow->exec();
-        if (fstop && fHiddenComponent == false) {
-          return;
-        }
-      }
-      else if (halfstaveidlower == -1) {
+
+      if (halfstaveidlower == -1) {
         fhalfstaveid  = halfstaveidupper;
         fhalfstavein  = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDa, "in");
         fhalfstaveout = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDa, "out");
@@ -268,35 +261,64 @@ void MainWindow::open()
         fHicnames.push_back("Module2");
         fHicnames.push_back("Module3");
         fHicnames.push_back("Module4");
-        fHicnames.push_back("Module5");
-        fHicnames.push_back("Module6");
-        fHicnames.push_back("Module7");
         ar[0] = {"Module1"};
         ar[1] = {"Module2"};
         ar[2] = {"Module3"};
         ar[3] = {"Module4"};
-        ar[4] = {"Module5"};
-        ar[5] = {"Module6"};
-        ar[6] = {"Module7"};
+        if (fNumberofscan == OBHalfStaveOL) {
+          fHicnames.push_back("Module5");
+          fHicnames.push_back("Module6");
+          fHicnames.push_back("Module7");
+          ar[4] = {"Module5"};
+          ar[5] = {"Module6"};
+          ar[6] = {"Module7"};
+        }
       }
       else {
 
+        fHicnames.resize(fHalfstavemodules.size() - 1, "empty");
         for (unsigned int i = 0; i < fHalfstavemodules.size(); i++) {
           if (fHalfstavemodules.at(i).Type !=
               DbGetComponentTypeId(fDB, fDB->GetProjectId(), "Outer Layer CP")) {
-            QString namestr = QString::fromStdString(fHalfstavemodules.at(i).Name);
-            int     j       = fHalfstavemodules.at(i).Position - 1;
-            fHicnames.resize(fHalfstavemodules.size() - 1);
-            fHicnames[j] = namestr;
-
-            QByteArray name = namestr.toLatin1();
-            ar[j]           = strdup(name.toStdString().c_str());
+            if (fHalfstavemodules.at(i).Position) {
+              int j    = fHalfstavemodules.at(i).Position - 1;
+              int size = 0;
+              size     = fHicnames.size();
+              for (int d = 0; d < size; d++) {
+                if (fHicnames[j] == "empty" && j == d) {
+                  QString namestr = QString::fromStdString(fHalfstavemodules.at(i).Name);
+                  fHicnames[j]    = namestr;
+                  QByteArray name = namestr.toLatin1();
+                  ar[j]           = strdup(name.toStdString().c_str());
+                }
+              }
+            }
           }
         }
       }
     }
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
+    if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
+      if (fhalfstaveid == -1) {
+        fComponentWindow = new Components(this);
+        fComponentWindow->WriteToLabel(fHalfstave);
+        fComponentWindow->exec();
+        if (fstop && fHiddenComponent == false) {
+          return;
+        }
+      }
+      for (unsigned int k = 0; k < fHicnames.size(); k++) {
+        if (fHicnames.at(k) == "empty") {
+          fComponentWindow = new Components(this);
+          fComponentWindow->WrongPositions();
+          fComponentWindow->exec();
+          if (fstop && fHiddenComponent == false) {
+            return;
+          }
+        }
+      }
+    }
     fConfig->GetScanConfig()->SetUseDataPath(true);
     fPb = fHICs.at(0)->GetPowerBoard();
     if (fPb) {
@@ -355,7 +377,7 @@ void MainWindow::open()
         }
       }
     }
-    if (device == TYPE_HALFSTAVE) {
+    if (device == TYPE_HALFSTAVE || device == TYPE_MLHALFSTAVE) {
       ui->OBHALFSTAVE->show();
       for (unsigned int i = 0; i < fChips.size(); i++) {
         int chipid;
@@ -1070,7 +1092,7 @@ void MainWindow::applytests()
   if (fNumberofscan == OBPower) {
     fillingfastpower();
   }
-  if (fNumberofscan == OBHalfStaveOL) {
+  if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
     fillingHSscans();
   }
   if (fNumberofscan == IBDctrl) {
@@ -1478,46 +1500,50 @@ void MainWindow::attachtodatabase()
       std::string        path;
 
       path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) + "/Comment.txt";
-      if (!fWrite) {
-        QString currenthic;
-        currenthic = fHicnames.at(i);
-        QString oldclassific;
-        oldclassific = GetResultType(fHICs.at(i)->GetOldClassification()).c_str();
-        QString finalclassific;
-        finalclassific = GetResultType(fHICs.at(i)->GetClassification()).c_str();
-        std::vector<QString>          scansclassificationnames;
-        std::vector<TScanResultHic *> hicresultsvector;
-        for (unsigned int d = 0; d < fScanVector.size(); d++) {
-          if (fAnalysisVector.at(d) != 0 && fresultVector.at(d) != 0) {
-            QString         scanclasname;
-            TScanResultHic *hicRe = fresultVector.at(d)->GetHicResult(currenthic.toStdString());
-            scanclasname          = fScanVector.at(d)->GetName();
-            scanclasname.append(" = ");
-            scanclasname.append(hicRe->WriteHicClassification());
-            scansclassificationnames.push_back(scanclasname);
-            hicresultsvector.push_back(fresultVector.at(d)->GetHicResult(currenthic.toStdString()));
-          }
-        }
-        fWrite = true;
-        WriteToEos(fHICs.at(i)->GetDbId(), uri, fWrite);
-        fActivitywindow = new ActivityStatus(this);
-        fActivitywindow->PopulateWindow(currenthic, oldclassific, finalclassific,
-                                        scansclassificationnames, hicresultsvector);
-        fActivitywindow->exec();
-        fActivitywindow->getactivitystatus(fStatus);
-        fActivitywindow->GetComment(comment);
-        fMfile = new QFile(QString::fromStdString(path));
-        fMfile->open(QIODevice::ReadWrite);
-        if (fMfile->isOpen()) {
-          QByteArray buffer;
-          buffer = buffer.append(comment);
-          fMfile->write(buffer); // Writes a QByteArray to the file.
-        }
-        if (fMfile) {
-          fMfile->close();
-          delete fMfile;
+
+      QString currenthic;
+      currenthic = fHicnames.at(i);
+      QString oldclassific;
+      oldclassific = GetResultType(fHICs.at(i)->GetOldClassification()).c_str();
+      QString finalclassific;
+      finalclassific = GetResultType(fHICs.at(i)->GetClassification()).c_str();
+      std::vector<QString>          scansclassificationnames;
+      std::vector<TScanResultHic *> hicresultsvector;
+      for (unsigned int d = 0; d < fScanVector.size(); d++) {
+        if (fAnalysisVector.at(d) != 0 && fresultVector.at(d) != 0) {
+          QString         scanclasname;
+          TScanResultHic *hicRe = fresultVector.at(d)->GetHicResult(currenthic.toStdString());
+          scanclasname          = fScanVector.at(d)->GetName();
+          scanclasname.append(" = ");
+          scanclasname.append(hicRe->WriteHicClassification());
+          scansclassificationnames.push_back(scanclasname);
+          hicresultsvector.push_back(fresultVector.at(d)->GetHicResult(currenthic.toStdString()));
         }
       }
+      if (!fWrite) {
+        WriteToEos(fHICs.at(i)->GetDbId(), uri, true);
+      }
+      else {
+        WriteToEos(fHICs.at(i)->GetDbId(), uri, false);
+      }
+      fActivitywindow = new ActivityStatus(this);
+      fActivitywindow->PopulateWindow(currenthic, oldclassific, finalclassific,
+                                      scansclassificationnames, hicresultsvector);
+      fActivitywindow->exec();
+      fActivitywindow->getactivitystatus(fStatus);
+      fActivitywindow->GetComment(comment);
+      fMfile = new QFile(QString::fromStdString(path));
+      fMfile->open(QIODevice::ReadWrite);
+      if (fMfile->isOpen()) {
+        QByteArray buffer;
+        buffer = buffer.append(comment);
+        fMfile->write(buffer); // Writes a QByteArray to the file.
+      }
+      if (fMfile) {
+        fMfile->close();
+        delete fMfile;
+      }
+
       ActivityDB *myactivity = new ActivityDB(fDB);
 
       ActivityDB::activity activ;
@@ -1628,6 +1654,7 @@ void MainWindow::attachtodatabase()
     }
     fDatabasefailure->exec();
   }
+  fWrite = true;
 }
 
 void MainWindow::ClearVectors()
@@ -1696,6 +1723,11 @@ void MainWindow::locationcombo()
     fComponentTypeIDb = DbGetComponentTypeId(fDB, projectid, "Outer Layer Half-Stave Lower");
     fComponentTypeID  = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
   }
+  else if (fNumberofscan == OBHalfStaveML) {
+    fComponentTypeIDa = DbGetComponentTypeId(fDB, projectid, "Middle Layer Half-Stave Upper");
+    fComponentTypeIDb = DbGetComponentTypeId(fDB, projectid, "Middle Layer Half-Stave Lower");
+    fComponentTypeID  = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
+  }
   delete myactivity;
 }
 
@@ -1711,7 +1743,9 @@ void MainWindow::savesettings()
   }
   else {
     open();
-
+    if (fstop && fHiddenComponent == false) {
+      return;
+    }
     for (unsigned int i = 0; i < fHICs.size(); i++) {
       fstop         = false;
       int in        = 0;
@@ -2461,7 +2495,7 @@ void MainWindow::attachConfigFile(ActivityDB::activity &activity)
     DbAddAttachment(fDB, activity, attachConfig, string("ConfigPower.cfg"),
                     string("ConfigPower.cfg"));
   }
-  else if (fNumberofscan == OBHalfStaveOL) {
+  else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
     DbAddAttachment(fDB, activity, attachConfig, string("Config_HS.cfg"), string("Config_HS.cfg"));
   }
 }

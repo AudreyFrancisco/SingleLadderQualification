@@ -18,3 +18,10 @@ void Components::WriteToLabel(QString name)
                                          "test with \n a valid component name.";
   ui->compstatus->setText(comment);
 }
+
+
+void Components::WrongPositions()
+{
+
+  ui->compstatus->setText("Check the positions \nof the hics in the database");
+}
