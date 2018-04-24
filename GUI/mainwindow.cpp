@@ -244,15 +244,8 @@ void MainWindow::open()
       halfstaveidlower =
           DbGetComponentId(fDB, projectid, fComponentTypeIDb, fHalfstave.toStdString());
 
-      if (halfstaveidlower == -1 && halfstaveidupper == -1) {
-        fComponentWindow = new Components(this);
-        fComponentWindow->WriteToLabel(fHalfstave);
-        fComponentWindow->exec();
-        if (fstop && fHiddenComponent == false) {
-          return;
-        }
-      }
-      else if (halfstaveidlower == -1) {
+
+      if (halfstaveidlower == -1) {
         fhalfstaveid  = halfstaveidupper;
         fhalfstavein  = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDa, "in");
         fhalfstaveout = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDa, "out");
@@ -300,20 +293,28 @@ void MainWindow::open()
             }
           }
         }
-        for (unsigned int k = 0; k < fHicnames.size(); k++) {
-          if (fHicnames.at(k) == "empty") {
-            fComponentWindow = new Components(this);
-            fComponentWindow->WrongPositions();
-            fComponentWindow->exec();
-            if (fstop && fHiddenComponent == false) {
-              return;
-            }
-          }
-        }
       }
     }
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
+    if (fhalfstaveid == -1) {
+      fComponentWindow = new Components(this);
+      fComponentWindow->WriteToLabel(fHalfstave);
+      fComponentWindow->exec();
+      if (fstop && fHiddenComponent == false) {
+        return;
+      }
+    }
+    for (unsigned int k = 0; k < fHicnames.size(); k++) {
+      if (fHicnames.at(k) == "empty") {
+        fComponentWindow = new Components(this);
+        fComponentWindow->WrongPositions();
+        fComponentWindow->exec();
+        if (fstop && fHiddenComponent == false) {
+          return;
+        }
+      }
+    }
     fConfig->GetScanConfig()->SetUseDataPath(true);
     fPb = fHICs.at(0)->GetPowerBoard();
     if (fPb) {
