@@ -746,6 +746,9 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
   case TYPE_HALFSTAVE: // Yasser (Add half stave configuration on init setup)
     initSetupHalfStave(config, boards, boardType, chips, hics, hicIds);
     break;
+  case TYPE_MLHALFSTAVE:
+    initSetupHalfStave(config, boards, boardType, chips, hics, hicIds);
+    break;
   case TYPE_HALFSTAVERU:
     initSetupHalfStaveRU(config, boards, boardType, chips);
     break;
