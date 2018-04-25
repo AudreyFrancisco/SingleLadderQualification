@@ -279,7 +279,9 @@ void MainWindow::open()
         fHicnames.resize(fHalfstavemodules.size() - 1, "empty");
         for (unsigned int i = 0; i < fHalfstavemodules.size(); i++) {
           if (fHalfstavemodules.at(i).Type !=
-              DbGetComponentTypeId(fDB, fDB->GetProjectId(), "Outer Layer CP")) {
+                  DbGetComponentTypeId(fDB, fDB->GetProjectId(), "Outer Layer CP") ||
+              fHalfstavemodules.at(i).Type !=
+                  DbGetComponentTypeId(fDB, fDB->GetProjectId(), "Middle Layer CP")) {
             if (fHalfstavemodules.at(i).Position) {
               int j    = fHalfstavemodules.at(i).Position - 1;
               int size = 0;
