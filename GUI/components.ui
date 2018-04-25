@@ -49,7 +49,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Quit Test</string>
+    <string>Ok</string>
    </property>
   </widget>
  </widget>

@@ -14,8 +14,9 @@ Components::~Components() { delete ui; }
 void Components::WriteToLabel(QString name)
 {
   QString comment;
-  comment = "The component: \n" + name + "\nis not a member of the database. \n Please start a new "
-                                         "test with \n a valid component name.";
+  comment =
+      "The component: \n" + name +
+      "\nis not a member of the database. \nYou will not be able to write \n to the database.";
   ui->compstatus->setText(comment);
 }
 
