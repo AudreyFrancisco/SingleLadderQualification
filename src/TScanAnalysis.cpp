@@ -53,6 +53,10 @@ int TScanAnalysis::GetPreviousComponentType(std::string prevTestType)
            (prevTestType == "OB HIC Endurance Test") || (prevTestType == "OB HIC Reception Test")) {
     return DbGetComponentTypeId(m_config->GetDatabase(), "Outer Barrel HIC Module");
   }
+
+  else if ((prevTestType == "IB Stave Qualification Test")) {
+    return DbGetComponentTypeId(m_config->GetDatabase(), "IB Stave");
+  }
   else if ((prevTestType == "IB HIC Qualification Test")) {
     return DbGetComponentTypeId(m_config->GetDatabase(), "Inner Barrel HIC Module");
   }
@@ -72,6 +76,9 @@ int TScanAnalysis::GetComponentType()
   else if ((m_config->GetTestType() == IBQualification) ||
            (m_config->GetTestType() == IBEndurance)) {
     return DbGetComponentTypeId(m_config->GetDatabase(), "Inner Barrel HIC Module");
+  }
+  else if ((m_config->GetTestType() == IBStave)) {
+    return DbGetComponentTypeId(m_config->GetDatabase(), "IB Stave");
   }
   else
     return -1;

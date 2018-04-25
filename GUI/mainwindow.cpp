@@ -173,7 +173,8 @@ void MainWindow::open()
       fNumberofscan == OBReception) {
     fileName = "Config.cfg";
   }
-  else if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl) {
+  else if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl ||
+           fNumberofscan == IBStave) {
     fileName = "Configib.cfg";
   }
   else if (fNumberofscan == OBPower) {
@@ -1082,7 +1083,7 @@ void MainWindow::applytests()
   if (fNumberofscan == OBQualification) {
     fillingOBvectors();
   }
-  if (fNumberofscan == IBQualification) {
+  if (fNumberofscan == IBQualification || fNumberofscan == IBStave) {
     fillingibvectors();
   }
   if (fNumberofscan == OBReception) {
@@ -1719,6 +1720,9 @@ void MainWindow::locationcombo()
   else if (fNumberofscan == IBQualification || fNumberofscan == IBEndurance ||
            fNumberofscan == IBDctrl) {
     fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Inner Barrel HIC Module");
+  }
+  else if (fNumberofscan == IBStave) {
+    fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "IB Stave");
   }
   else if (fNumberofscan == OBHalfStaveOL) {
     fComponentTypeIDa = DbGetComponentTypeId(fDB, projectid, "Outer Layer Half-Stave Upper");
@@ -2490,7 +2494,8 @@ void MainWindow::attachConfigFile(ActivityDB::activity &activity)
       fNumberofscan == OBEndurance) {
     DbAddAttachment(fDB, activity, attachConfig, string("Config.cfg"), string("Config.cfg"));
   }
-  else if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl) {
+  else if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl ||
+           fNumberofscan == IBStave) {
     DbAddAttachment(fDB, activity, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
   }
   else if (fNumberofscan == OBPower) {
