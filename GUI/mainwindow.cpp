@@ -1496,148 +1496,153 @@ void MainWindow::attachtodatabase()
   fDB = new AlpideDB(fDatabasetype);
   SetHicClassifications();
   for (unsigned int i = 0; i < fHICs.size(); i++) {
-    if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
-      QString            comment;
-      QDateTime          date;
-      ActivityDB::actUri uri;
-      std::string        path;
+    if (fHicnames.at(i) != '\0') {
+      if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
+        QString            comment;
+        QDateTime          date;
+        ActivityDB::actUri uri;
+        std::string        path;
 
-      path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) + "/Comment.txt";
+        path =
+            fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) + "/Comment.txt";
 
-      QString currenthic;
-      currenthic = fHicnames.at(i);
-      QString oldclassific;
-      oldclassific = GetResultType(fHICs.at(i)->GetOldClassification()).c_str();
-      QString finalclassific;
-      finalclassific = GetResultType(fHICs.at(i)->GetClassification()).c_str();
-      std::vector<QString>          scansclassificationnames;
-      std::vector<TScanResultHic *> hicresultsvector;
-      for (unsigned int d = 0; d < fScanVector.size(); d++) {
-        if (fAnalysisVector.at(d) != 0 && fresultVector.at(d) != 0) {
-          QString         scanclasname;
-          TScanResultHic *hicRe = fresultVector.at(d)->GetHicResult(currenthic.toStdString());
-          scanclasname          = fScanVector.at(d)->GetName();
-          scanclasname.append(" = ");
-          scanclasname.append(hicRe->WriteHicClassification());
-          scansclassificationnames.push_back(scanclasname);
-          hicresultsvector.push_back(fresultVector.at(d)->GetHicResult(currenthic.toStdString()));
+        QString currenthic;
+        currenthic = fHicnames.at(i);
+        QString oldclassific;
+        oldclassific = GetResultType(fHICs.at(i)->GetOldClassification()).c_str();
+        QString finalclassific;
+        finalclassific = GetResultType(fHICs.at(i)->GetClassification()).c_str();
+        std::vector<QString>          scansclassificationnames;
+        std::vector<TScanResultHic *> hicresultsvector;
+        for (unsigned int d = 0; d < fScanVector.size(); d++) {
+          if (fAnalysisVector.at(d) != 0 && fresultVector.at(d) != 0) {
+            QString         scanclasname;
+            TScanResultHic *hicRe = fresultVector.at(d)->GetHicResult(currenthic.toStdString());
+            scanclasname          = fScanVector.at(d)->GetName();
+            scanclasname.append(" = ");
+            scanclasname.append(hicRe->WriteHicClassification());
+            scansclassificationnames.push_back(scanclasname);
+            hicresultsvector.push_back(fresultVector.at(d)->GetHicResult(currenthic.toStdString()));
+          }
         }
-      }
-      if (!fWrite) {
-        WriteToEos(fHICs.at(i)->GetDbId(), uri, true);
-      }
-      else {
-        WriteToEos(fHICs.at(i)->GetDbId(), uri, false);
-      }
-      fActivitywindow = new ActivityStatus(this);
-      fActivitywindow->PopulateWindow(currenthic, oldclassific, finalclassific,
-                                      scansclassificationnames, hicresultsvector);
-      fActivitywindow->exec();
-      fActivitywindow->getactivitystatus(fStatus);
-      fActivitywindow->GetComment(comment);
-      fMfile = new QFile(QString::fromStdString(path));
-      fMfile->open(QIODevice::ReadWrite);
-      if (fMfile->isOpen()) {
-        QByteArray buffer;
-        buffer = buffer.append(comment);
-        fMfile->write(buffer); // Writes a QByteArray to the file.
-      }
-      if (fMfile) {
-        fMfile->close();
-        delete fMfile;
-      }
-
-      ActivityDB *myactivity = new ActivityDB(fDB);
-
-      ActivityDB::activity activ;
-
-      // TODO: check that the idof... are filled in the correct place
-      // set activity parameters
-      activ.Type      = fIdofactivitytype;
-      activ.Location  = fIdoflocationtype;
-      activ.User      = fIdofoperator;
-      activ.StartDate = date.currentDateTime().toTime_t();
-      activ.EndDate   = date.currentDateTime().toTime_t();
-      activ.Lot       = " ";
-      if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
-        std::string HSname;
-        HSname = "HS_" + fHalfstave.toStdString() + "_" + fHICs.at(i)->GetDbId();
-        std::cout << "the activty name is " << HSname << std::endl;
-        activ.Name = CreateActivityName(HSname, fConfig->GetScanConfig());
-      }
-      else {
-        activ.Name = CreateActivityName(fHICs.at(i)->GetDbId(), fConfig->GetScanConfig());
-      }
-      activ.Position = " ";
-      activ.Result =
-          -999; // apparently has to stay open here, otherwise activity is considered closed
-
-      activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "OPEN");
-      std::cout << "the activ is open" << std::endl;
-
-
-      // add global parameters (not accessible from within results)
-      if (fresultVector[0]) {
-        TScanResultHic *hicResult = fresultVector[0]->GetHicResult(fHICs.at(i)->GetDbId());
-        if (hicResult) {
-          DbAddParameter(fDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips(),
-                         hicResult->GetParameterFile());
-          DbAddParameter(fDB, activ, "Time", GetTime(), hicResult->GetParameterFile());
+        if (!fWrite) {
+          WriteToEos(fHICs.at(i)->GetDbId(), uri, true);
         }
-      }
-      // loop over results and write to DB
-      for (unsigned int j = 0; j < fresultVector.size(); j++) {
-        if (fresultVector[j] != 0) {
-          std::map<std::string, TScanResultHic *> *mymap = fresultVector.at(j)->GetHicResults();
-          for (auto ihic = mymap->begin(); ihic != mymap->end(); ++ihic) {
-            if (ihic->first.compare(fHicnames.at(i).toStdString()) == 0) {
-              TScanResultHic *result = (TScanResultHic *)ihic->second;
-              result->WriteToDB(fDB, activ);
+        else {
+          WriteToEos(fHICs.at(i)->GetDbId(), uri, false);
+        }
+        fActivitywindow = new ActivityStatus(this);
+        fActivitywindow->PopulateWindow(currenthic, oldclassific, finalclassific,
+                                        scansclassificationnames, hicresultsvector);
+        fActivitywindow->exec();
+        fActivitywindow->getactivitystatus(fStatus);
+        fActivitywindow->GetComment(comment);
+        fMfile = new QFile(QString::fromStdString(path));
+        fMfile->open(QIODevice::ReadWrite);
+        if (fMfile->isOpen()) {
+          QByteArray buffer;
+          buffer = buffer.append(comment);
+          fMfile->write(buffer); // Writes a QByteArray to the file.
+        }
+        if (fMfile) {
+          fMfile->close();
+          delete fMfile;
+        }
+
+        ActivityDB *myactivity = new ActivityDB(fDB);
+
+        ActivityDB::activity activ;
+
+        // TODO: check that the idof... are filled in the correct place
+        // set activity parameters
+        activ.Type      = fIdofactivitytype;
+        activ.Location  = fIdoflocationtype;
+        activ.User      = fIdofoperator;
+        activ.StartDate = date.currentDateTime().toTime_t();
+        activ.EndDate   = date.currentDateTime().toTime_t();
+        activ.Lot       = " ";
+        if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
+          std::string HSname;
+          HSname = "HS_" + fHalfstave.toStdString() + "_" + fHICs.at(i)->GetDbId();
+          std::cout << "the activty name is " << HSname << std::endl;
+          activ.Name = CreateActivityName(HSname, fConfig->GetScanConfig());
+        }
+        else {
+          activ.Name = CreateActivityName(fHICs.at(i)->GetDbId(), fConfig->GetScanConfig());
+        }
+        activ.Position = " ";
+        activ.Result =
+            -999; // apparently has to stay open here, otherwise activity is considered closed
+
+        activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "OPEN");
+        std::cout << "the activ is open" << std::endl;
+
+
+        // add global parameters (not accessible from within results)
+        if (fresultVector[0]) {
+          TScanResultHic *hicResult = fresultVector[0]->GetHicResult(fHICs.at(i)->GetDbId());
+          if (hicResult) {
+            DbAddParameter(fDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips(),
+                           hicResult->GetParameterFile());
+            DbAddParameter(fDB, activ, "Time", GetTime(), hicResult->GetParameterFile());
+          }
+        }
+        // loop over results and write to DB
+        for (unsigned int j = 0; j < fresultVector.size(); j++) {
+          if (fresultVector[j] != 0) {
+            std::map<std::string, TScanResultHic *> *mymap = fresultVector.at(j)->GetHicResults();
+            for (auto ihic = mymap->begin(); ihic != mymap->end(); ++ihic) {
+              if (ihic->first.compare(fHicnames.at(i).toStdString()) == 0) {
+                TScanResultHic *result = (TScanResultHic *)ihic->second;
+                result->WriteToDB(fDB, activ);
+              }
             }
           }
         }
+
+        // attach config, comment and classification file
+
+        attachConfigFile(activ);
+        DbAddAttachment(fDB, activ, attachText, string(path), string("Comment.txt"));
+        path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
+               "/Classification.dat";
+        DbAddAttachment(fDB, activ, attachText, string(path), string("Classification.dat"));
+        path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
+               "/DBParameters.dat";
+        DbAddAttachment(fDB, activ, attachText, string(path), string("DBParameters.dat"));
+
+        DbAddMember(fDB, activ, fIdofoperator);
+
+        std::vector<ActivityDB::actUri> uris;
+
+        uris.push_back(uri);
+
+        myactivity->Create(&activ);
+        cout << myactivity->DumpResponse() << endl;
+        myactivity->AssignUris(activ.ID, fIdofoperator, (&uris));
+        myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).first,
+                                    fIdofoperator);
+        myactivity->AssignComponent(activ.ID, fComponentIDs.at(i),
+                                    fActComponentTypeIDs.at(i).second, fIdofoperator);
+        if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
+          myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstavein, fIdofoperator);
+          myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstaveout, fIdofoperator);
+        }
+        if (fStatus == false) {
+          activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
+          std::cout << "the activ is closed" << std::endl;
+        }
+
+        activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
+        myactivity->Change(&activ);
+        std::cout << "the activity result is: " << activ.Result << std::endl;
+        fActivityResults.push_back(activ.Result);
+        delete myactivity;
       }
-
-      // attach config, comment and classification file
-
-      attachConfigFile(activ);
-      DbAddAttachment(fDB, activ, attachText, string(path), string("Comment.txt"));
-      path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
-             "/Classification.dat";
-      DbAddAttachment(fDB, activ, attachText, string(path), string("Classification.dat"));
-      path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
-             "/DBParameters.dat";
-      DbAddAttachment(fDB, activ, attachText, string(path), string("DBParameters.dat"));
-
-      DbAddMember(fDB, activ, fIdofoperator);
-
-      std::vector<ActivityDB::actUri> uris;
-
-      uris.push_back(uri);
-
-      myactivity->Create(&activ);
-      cout << myactivity->DumpResponse() << endl;
-      myactivity->AssignUris(activ.ID, fIdofoperator, (&uris));
-      myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).first,
-                                  fIdofoperator);
-      myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second,
-                                  fIdofoperator);
-      if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
-        myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstavein, fIdofoperator);
-        myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstaveout, fIdofoperator);
-      }
-      if (fStatus == false) {
-        activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
-        std::cout << "the activ is closed" << std::endl;
-      }
-
-      activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
-      myactivity->Change(&activ);
-      std::cout << "the activity result is: " << activ.Result << std::endl;
-      fActivityResults.push_back(activ.Result);
-      delete myactivity;
     }
-  }
+
+
+  } // for loops for hics
   delete fDB;
   fDB = 0x0;
   for (unsigned int i = 0; i < fActivityResults.size(); i++) {
@@ -1753,29 +1758,37 @@ void MainWindow::savesettings()
       return;
     }
     for (unsigned int i = 0; i < fHICs.size(); i++) {
-      fstop         = false;
-      int in        = 0;
-      int out       = 0;
-      int projectid = 0;
-      int comp      = 0;
-      projectid     = fDB->GetProjectId();
-      in            = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "in");
-      out           = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "out");
-      comp = DbGetComponentId(fDB, projectid, fComponentTypeID, fHicnames.at(i).toStdString());
+      if (fHicnames.at(i) != '\0') {
+        fstop         = false;
+        int in        = 0;
+        int out       = 0;
+        int projectid = 0;
+        int comp      = 0;
+        projectid     = fDB->GetProjectId();
+        in            = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "in");
+        out           = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "out");
+        comp = DbGetComponentId(fDB, projectid, fComponentTypeID, fHicnames.at(i).toStdString());
 
-      if (comp == -1) {
-        fComponentWindow = new Components(this);
-        fComponentWindow->WriteToLabel(fHicnames.at(i));
-        fComponentWindow->exec();
-        if (fstop && fHiddenComponent == false) {
-          return;
+        if (comp == -1) {
+          fComponentWindow = new Components(this);
+          fComponentWindow->WriteToLabel(fHicnames.at(i));
+          fComponentWindow->exec();
+          if (fstop && fHiddenComponent == false) {
+            return;
+          }
         }
+
+        fHICs.at(i)->SetOldClassification(DbGetPreviousCategory(fDB, comp, fIdofactivitytype));
+
+        fActComponentTypeIDs.push_back(make_pair(in, out));
+        fComponentIDs.push_back(comp);
       }
 
-      fHICs.at(i)->SetOldClassification(DbGetPreviousCategory(fDB, comp, fIdofactivitytype));
 
-      fActComponentTypeIDs.push_back(make_pair(in, out));
-      fComponentIDs.push_back(comp);
+      else {
+        fActComponentTypeIDs.push_back(make_pair(0, 0));
+        fComponentIDs.push_back(0);
+      }
     }
 
 
