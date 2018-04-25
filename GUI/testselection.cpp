@@ -32,7 +32,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("IB HIC DCTRL Test", IBDctrl);
   ui->typetest->addItem("ML HS Qualification Test", OBHalfStaveML);
   // ui->typetest->addItem("OB Stave Test", OBStave);
-  // ui->typetest->addItem("IB Stave Test", IBStave);
+  ui->typetest->addItem("IB Stave Qualification Test", IBStave);
   ui->typeoftest->hide();
   missingsettings = 0x0;
 
