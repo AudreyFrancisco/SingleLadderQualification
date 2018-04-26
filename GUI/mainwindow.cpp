@@ -307,18 +307,12 @@ void MainWindow::open()
         fComponentWindow = new Components(this);
         fComponentWindow->WriteToLabel(fHalfstave);
         fComponentWindow->exec();
-        if (fstop && fHiddenComponent == false) {
-          return;
-        }
       }
       for (unsigned int k = 0; k < fHicnames.size(); k++) {
         if (fHicnames.at(k) == "empty") {
           fComponentWindow = new Components(this);
           fComponentWindow->WrongPositions();
           fComponentWindow->exec();
-          if (fstop && fHiddenComponent == false) {
-            return;
-          }
         }
       }
     }
@@ -801,7 +795,7 @@ void MainWindow::popup(QString message)
 
 void MainWindow::start_test()
 {
-  if (writingdb == false) {
+  if (writingdb == false && fstop == false) {
     fNoticewindow = new DBnotice(this);
     fNoticewindow->exec();
   }
@@ -1115,6 +1109,10 @@ void MainWindow::applytests()
   printClasses();
 
   connect(fSignalMapper, SIGNAL(mapped(int)), this, SLOT(getresultdetails(int)));
+
+  if (fstop) {
+    return;
+  }
   fResultwindow = new resultstorage(this);
   fResultwindow->exec();
 }
@@ -1332,7 +1330,7 @@ void MainWindow::poweroff()
 
 void MainWindow::quitall()
 {
-  if (writingdb == false) {
+  if (writingdb == false && fstop == false) {
     fNoticewindow = new DBnotice(this);
     fNoticewindow->adjustingtemplate();
     fNoticewindow->exec();
@@ -1754,9 +1752,7 @@ void MainWindow::savesettings()
   }
   else {
     open();
-    if (fstop && fHiddenComponent == false) {
-      return;
-    }
+
     for (unsigned int i = 0; i < fHICs.size(); i++) {
       if (fHicnames.at(i) != '\0') {
         fstop         = false;
@@ -1773,9 +1769,6 @@ void MainWindow::savesettings()
           fComponentWindow = new Components(this);
           fComponentWindow->WriteToLabel(fHicnames.at(i));
           fComponentWindow->exec();
-          if (fstop && fHiddenComponent == false) {
-            return;
-          }
         }
 
         fHICs.at(i)->SetOldClassification(DbGetPreviousCategory(fDB, comp, fIdofactivitytype));
@@ -1791,6 +1784,9 @@ void MainWindow::savesettings()
       }
     }
 
+    if (fHiddenComponent) {
+      fstop = false;
+    }
 
     fScanconfigwindow = new ScanConfiguration(this);
     fScanconfigwindow->show();
