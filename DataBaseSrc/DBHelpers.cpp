@@ -3,9 +3,9 @@
 #include <set>
 
 static const std::set<std::string> kTestTypes = {
-    "OB HIC Qualification Test", "IB HIC Qualification Test", "OB HIC Endurance Test",
-    "OB HIC Fast Power Test",    "OB HIC Reception Test",     "OL HS Qualification Test",
-    "ML HS Qualification Test"};
+    "OB-HIC Impedance Test",       "OB HIC Qualification Test", "IB HIC Qualification Test",
+    "IB Stave Qualification Test", "OB HIC Endurance Test",     "OB HIC Fast Power Test",
+    "OB HIC Reception Test",       "OL HS Qualification Test",  "ML HS Qualification Test"};
 
 int DbGetActivityTypeId(AlpideDB *db, string name)
 {
@@ -209,7 +209,7 @@ THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityT
     return CLASS_GREEN;
   else if (category.find("SILVER") != string::npos)
     return CLASS_ORANGE;
-  else if (category.find("not") != string::npos)
+  else if ((category.find("not") != string::npos) || (category.find("NOK") != string::npos))
     return CLASS_RED;
   else if (category.find("part") != string::npos)
     return CLASS_PARTIAL;
