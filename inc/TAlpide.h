@@ -1,10 +1,10 @@
 #ifndef ALPIDE_H
 #define ALPIDE_H
 
-#include <unistd.h>
- // #include "TReadoutBoard.h"
 #include "TConfig.h"
 #include "THIC.h"
+#include <string>
+#include <unistd.h>
 
 namespace Alpide {
   typedef enum {
@@ -88,8 +88,8 @@ namespace Alpide {
     // region register base addresses (addres for region 0),
     // to be ORed with 0x0800 - 0xf800 for regions 1 - 31 or
     // with 0x80 for region broadcast
-    REG_RRU_MEB_LSB_BASE   = 0x100,    // to be ORed with 0x00 - 0x7f for the different RAM words
-    REG_RRU_MEB_MSB_BASE   = 0x200,    // same here
+    REG_RRU_MEB_LSB_BASE   = 0x100, // to be ORed with 0x00 - 0x7f for the different RAM words
+    REG_RRU_MEB_MSB_BASE   = 0x200, // same here
     REG_DCOL_DISABLE_BASE  = 0x300,
     REG_REGION_STATUS_BASE = 0x301,
     REG_COLSEL1_BASE       = 0x401,
@@ -99,136 +99,112 @@ namespace Alpide {
   } TRegister;
 
   typedef enum {
-    OPCODE_TRIGGER1     = 0xb1,
-    OPCODE_TRIGGER2     = 0x55,
-    OPCODE_TRIGGER3     = 0xc9,
-    OPCODE_TRIGGER4     = 0x2d,
-    OPCODE_GRST         = 0xd2,
-    OPCODE_PRST         = 0xe4,
-    OPCODE_PULSE        = 0x78,
-    OPCODE_BCRST        = 0x36,
-    OPCODE_DEBUG        = 0xaa,
-    OPCODE_RORST        = 0x63,
-    OPCODE_WROP         = 0x9c,
-    OPCODE_RDOP         = 0x4e,
-    OPCODE_CMU_CLEARERR = 0xff00,
-    OPCODE_FIFOTEST     = 0xff01,
-    OPCODE_LOADOBDEFCFG = 0xff02,
-    OPCODE_XOFF         = 0xff10,
-    OPCODE_XON          = 0xff11,
-    OPCODE_ADCMEASURE   = 0xff20
+    OPCODE_TRIGGER1 = 0xb1,
+    OPCODE_TRIGGER2 = 0x55,
+    OPCODE_TRIGGER3 = 0xc9,
+    OPCODE_TRIGGER4 = 0x2d,
+    OPCODE_GRST     = 0xd2,
+    OPCODE_PRST     = 0xe4,
+    OPCODE_PULSE    = 0x78,
+    OPCODE_BCRST    = 0x36,
+    OPCODE_DEBUG    = 0xaa,
+    OPCODE_RORST    = 0x63,
+    OPCODE_WROP     = 0x9c,
+    OPCODE_RDOP     = 0x4e,
   } TOpCode;
 
   typedef enum {
-    PIXREG_MASK   = 0x0,
-    PIXREG_SELECT = 0x1
-  } TPixReg;
+    COMMAND_CMU_CLEARERR = 0xff00,
+    COMMAND_FIFOTEST     = 0xff01,
+    COMMAND_LOADOBDEFCFG = 0xff02,
+    COMMAND_XOFF         = 0xff10,
+    COMMAND_XON          = 0xff11,
+    COMMAND_ADCMEASURE   = 0xff20
+  } TCommand;
+
+  typedef enum { PIXREG_MASK = 0x0, PIXREG_SELECT = 0x1 } TPixReg;
+
+  typedef enum { PT_DIGITAL = 0, PT_ANALOGUE = 1 } TPulseType;
+
+  typedef enum { MODE_CONFIG = 0, MODE_TRIGGERED = 1, MODE_CONTINUOUS = 2 } TChipMode;
+
+  typedef enum { IREF_025uA = 0, IREF_075uA = 1, IREF_100uA = 2, IREF_125uA = 3 } TDACMonIref;
 
   typedef enum {
-    PT_DIGITAL  = 0,
-    PT_ANALOGUE = 1
-  } TPulseType;
-
-  typedef enum {
-    MODE_CONFIG = 0,
-    MODE_TRIGGERED = 1,
-    MODE_CONTINUOUS = 2
-  } TChipMode;
-
-  typedef enum {
-	IREF_025uA = 0,
-	IREF_075uA = 1,
-	IREF_100uA = 2,
-	IREF_125uA = 3
-  } TDACMonIref;
-
-  typedef enum {
-	MODE_MANUAL = 0,
-	MODE_CALIBRATE = 1,
-	MODO_AUTO = 2,
-	MODE_SUPERMANUAL = 3
+    MODE_MANUAL      = 0,
+    MODE_CALIBRATE   = 1,
+    MODO_AUTO        = 2,
+    MODE_SUPERMANUAL = 3
   } TADCMode;
 
   typedef enum {
-	INP_AVSS = 0,
-	INP_DVSS = 1,
-	INP_AVDD = 2,
-	INP_DVDD = 3,
-	INP_VBGthVolScal = 4,
-	INP_DACMONV = 5,
-	INP_DACMONI = 6,
-	INP_Bandgap = 7,
-	INP_Temperature = 8
+    INP_AVSS         = 0,
+    INP_DVSS         = 1,
+    INP_AVDD         = 2,
+    INP_DVDD         = 3,
+    INP_VBGthVolScal = 4,
+    INP_DACMONV      = 5,
+    INP_DACMONI      = 6,
+    INP_Bandgap      = 7,
+    INP_Temperature  = 8
   } TADCInput;
 
-  typedef enum {
-  	COMP_180uA = 0,
- 	COMP_190uA = 1,
- 	COMP_296uA = 2,
- 	COMP_410uA = 3
-  } TADCComparator;
+  typedef enum { COMP_180uA = 0, COMP_190uA = 1, COMP_296uA = 2, COMP_410uA = 3 } TADCComparator;
 
-  typedef enum {
-  	RAMP_500ms = 0,
-  	RAMP_1us = 1,
-  	RAMP_2us = 2,
-  	RAMP_4us = 3
-  } TADCRampSpeed;
-
+  typedef enum { RAMP_500ms = 0, RAMP_1us = 1, RAMP_2us = 2, RAMP_4us = 3 } TADCRampSpeed;
 }
 
 class TReadoutBoard;
 class THic;
 
 class TAlpide {
- private:
-  TChipConfig   *fConfig;
+private:
+  TChipConfig *  fConfig;
   int            fChipId;
   TReadoutBoard *fReadoutBoard;
-  THic          *fHic;
+  THic *         fHic;
 
   // ADC calibration parameters
-  int		fADCBias;
-  bool		fADCHalfLSB;
-  bool		fADCSign;
+  int  fADCOffset;
+  bool fADCHalfLSB;
+  bool fADCSign;
 
-
- protected:
- public:
-  TAlpide (TChipConfig *config);
-  TAlpide (TChipConfig *config, TReadoutBoard *readoutBoard);
-  TChipConfig   *GetConfig ()                {return fConfig;};
-  void           SetReadoutBoard (TReadoutBoard *readoutBoard) {fReadoutBoard = readoutBoard;};
-  TReadoutBoard *GetReadoutBoard ()          {return fReadoutBoard;};
-  THic          *GetHic          ()          {return fHic;};
-  void           SetHic          (THic *hic) {fHic = hic;};
-
-  int  ReadRegister       (Alpide::TRegister address, uint16_t &value);
-  int  WriteRegister      (Alpide::TRegister address, uint16_t value, bool verify = false);
-  int  ReadRegister       (uint16_t address, uint16_t &value);
-  int  WriteRegister      (uint16_t address, uint16_t value, bool verify = false);
-  int  ModifyRegisterBits (Alpide::TRegister address, uint8_t lowBit, uint8_t nBits, uint16_t value, bool verify = false);
-
-  void SetEnable          (bool Enable);
-  //int SendOpCode         (Alpide::TOpCode opcode);
-
-  //int SendCommandSequence (vector <> sequence);
-
-  void DumpConfig(const char *fName, bool writeFile=true, char *Config=0);
-
-
-
+protected:
 public:
-  int GetADCBias() { return(fADCBias); };
-  int CalibrateADC();
+  TAlpide(TChipConfig *config);
+  TAlpide(TChipConfig *config, TReadoutBoard *readoutBoard);
+  TChipConfig *GetConfig() { return fConfig; };
+  void SetReadoutBoard(TReadoutBoard *readoutBoard) { fReadoutBoard = readoutBoard; };
+  TReadoutBoard *                     GetReadoutBoard() { return fReadoutBoard; };
+  THic *                              GetHic() { return fHic; };
+  void SetHic(THic *hic) { fHic = hic; };
+
+  int ReadRegister(Alpide::TRegister address, uint16_t &value);
+  int WriteRegister(Alpide::TRegister address, uint16_t value, bool verify = false);
+  int ReadRegister(uint16_t address, uint16_t &value);
+  int WriteRegister(uint16_t address, uint16_t value, bool verify = false);
+  int ModifyRegisterBits(Alpide::TRegister address, uint8_t lowBit, uint8_t nBits, uint16_t value,
+                         bool verify = false);
+
+  void SetEnable(bool Enable);
+  // int SendOpCode         (Alpide::TOpCode opcode);
+
+  // int SendCommandSequence (vector <> sequence);
+
+  void DumpConfig(const char *fName, bool writeFile = true, char *Config = 0);
+
+  std::string DumpRegisters();
+
+  int  GetADCOffset() { return (fADCOffset); };
+  int  CalibrateADC();
   void SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef = Alpide::IREF_100uA);
-  uint16_t SetTheADCCtrlRegister(Alpide::TADCMode Mode, Alpide::TADCInput SelectInput, Alpide::TADCComparator ComparatorCurrent, Alpide::TADCRampSpeed RampSpeed);
+  uint16_t SetTheADCCtrlRegister(Alpide::TADCMode Mode, Alpide::TADCInput SelectInput,
+                                 Alpide::TADCComparator ComparatorCurrent,
+                                 Alpide::TADCRampSpeed  RampSpeed);
   float ReadTemperature();
+  float ReadAnalogueVoltage();
   float ReadDACVoltage(Alpide::TRegister ADac);
   float ReadDACCurrent(Alpide::TRegister ADac);
-
-
 };
 
-
-#endif  /* ALPIDE_H */
+#endif /* ALPIDE_H */

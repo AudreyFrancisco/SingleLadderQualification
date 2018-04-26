@@ -33,6 +33,8 @@ cc7:
       - qmake-qt5 -makefile
       - make clean
       - make
+      - cd ../../../
+      - make format-check
 
 ubuntu1604:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu16.04-dev
@@ -51,6 +53,8 @@ ubuntu1604:
       - qmake -makefile
       - make clean
       - make
+      - cd ../../../
+      - make format-check
 
 ubuntu1604clang:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu16.04-clang-dev
@@ -70,3 +74,5 @@ ubuntu1604clang:
       - qmake -makefile
       - make clean
       - make
+      - cd ../../../
+      - make format-check

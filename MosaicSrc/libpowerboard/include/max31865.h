@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
@@ -31,46 +31,34 @@
 #ifndef MAX31865_H
 #define MAX31865_H
 
-#include <stdint.h>
 #include "sc18is602.h"
+#include <stdint.h>
 
-class MAX31865
-{
+class MAX31865 {
 private:
-	// Register list
-	enum {
-		REG_Configuration	= 0x00,
-		REG_RTD_MSB			= 0x01,
-		REG_RTD_LSB			= 0x02,
+  // Register list
+  enum { REG_Configuration = 0x00, REG_RTD_MSB = 0x01, REG_RTD_LSB = 0x02, REG_WRITE = 0x80 };
 
-		REG_WRITE			= 0x80
-	};
-
-
-	// Configuration register bits
-	enum {
-		CFG_FREQ_50Hz		= 0x01,
-		CFG_FAULT_CLEAR		= 0x02,
-		CFG_3WIRE			= 0x10,
-		CFG_1SHORT			= 0x20,
-		CFG_CONV_AUTO		= 0x40,
-		CFG_Vbias_ON		= 0x80
-	};	
+  // Configuration register bits
+  enum {
+    CFG_FREQ_50Hz   = 0x01,
+    CFG_FAULT_CLEAR = 0x02,
+    CFG_3WIRE       = 0x10,
+    CFG_1SHORT      = 0x20,
+    CFG_CONV_AUTO   = 0x40,
+    CFG_Vbias_ON    = 0x80
+  };
 
 public:
-	MAX31865(SC18IS602 *spi, uint8_t slave);
-	void writeRegister(uint8_t reg, uint8_t data);
-	uint8_t readRegister(uint8_t reg);
-	void configure(uint8_t cfg = CFG_Vbias_ON | CFG_CONV_AUTO | CFG_FAULT_CLEAR | CFG_FREQ_50Hz);
-	uint16_t getRTD();
+  MAX31865(SC18IS602 *spi, uint8_t slave);
+  void writeRegister(uint8_t reg, uint8_t data);
+  uint8_t readRegister(uint8_t reg);
+  void configure(uint8_t cfg = CFG_Vbias_ON | CFG_CONV_AUTO | CFG_FAULT_CLEAR | CFG_FREQ_50Hz);
+  uint16_t getRTD();
 
 private:
-	SC18IS602 *spiBus;
-	uint8_t spiSlave;
-
-
+  SC18IS602 *spiBus;
+  uint8_t    spiSlave;
 };
-
-
 
 #endif // MAX31865_H

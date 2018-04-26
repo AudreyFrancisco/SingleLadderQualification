@@ -1,7 +1,7 @@
 CC=g++
 AR = ar rcs
 RM = rm -f
-INCLUDE=-I/usr/include/libxml2
+INCLUDE=-I/usr/include/libxml2 -isystem/opt/local/include/libxml2 -I. -I../inc
 LIBPATH=
 CFLAGS= -O2 -pipe -fPIC -g  -Wall -Werror -pedantic -std=c++11 $(INCLUDE)
 LINKFLAGS=-lxml2 -lcurl $(LIBPATH)

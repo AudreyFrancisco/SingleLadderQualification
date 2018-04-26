@@ -21,37 +21,32 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "ltc2635.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "ltc2635.h"
 
-LTC2635::LTC2635(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address)
-{
-}
-
+LTC2635::LTC2635(I2Cbus *busPtr, uint8_t address) : I2Cslave(busPtr, address) {}
 
 void LTC2635::write(uint8_t cmd, uint8_t add, uint16_t data)
 {
-	add &= 0x0f;
+  add &= 0x0f;
 
-	uint16_t d = data<<4;				// data alignment for LTC2635-12
-//	uint16_t d = data<<6;				// data alignment for LTC2635-10
-//	uint16_t d = data<<8;				// data alignment for LTC2635-8
+  uint16_t d = data << 4; // data alignment for LTC2635-12
+                          //	uint16_t d = data<<6;				// data alignment for LTC2635-10
+                          //	uint16_t d = data<<8;				// data alignment for LTC2635-8
 
-	// Write command and data
-	i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Write);
-	i2cBus->addWriteData(cmd|add);		
-	i2cBus->addWriteData(d>>8);		
-	i2cBus->addWriteData(d&0xff, I2Cbus::RWF_stop);		
+  // Write command and data
+  i2cBus->addAddress(i2c_deviceAddress, I2Cbus::I2C_Write);
+  i2cBus->addWriteData(cmd | add);
+  i2cBus->addWriteData(d >> 8);
+  i2cBus->addWriteData(d & 0xff, I2Cbus::RWF_stop);
 
-	// send commands packet
-	i2cBus->execute();
+  // send commands packet
+  i2cBus->execute();
 }
-
-

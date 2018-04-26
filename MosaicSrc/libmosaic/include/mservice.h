@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -31,55 +31,49 @@
 #ifndef MSERVICE_H
 #define MSERVICE_H
 
+#include "mexception.h"
+#include <arpa/inet.h>
+#include <netinet/in.h>
 #include <stdint.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include "mexception.h"
 
-#define FIRMWARE_PORT				65000
-#define RCV_LONG_TIMEOUT			2000	// timeout in ms for the first rx datagrams
-#define RCV_SHORT_TIMEOUT			100		// timeout in ms for rx datagrams
+#define FIRMWARE_PORT 65000
+#define RCV_LONG_TIMEOUT 2000 // timeout in ms for the first rx datagrams
+#define RCV_SHORT_TIMEOUT 100 // timeout in ms for rx datagrams
 
-class MService
-{
+class MService {
 public:
-	typedef struct fw_info {
-		int ver_maj;
-		int ver_min;
-		unsigned char flash_id[3];
-		unsigned char flash_status_register;
-		char sw_identity[33];
-		char fw_identity[33];
-	} fw_info_t;
+  typedef struct fw_info {
+    int           ver_maj;
+    int           ver_min;
+    unsigned char flash_id[3];
+    unsigned char flash_status_register;
+    char          sw_identity[33];
+    char          fw_identity[33];
+  } fw_info_t;
 
 public:
-	MService();
-    MService(const char *brdName, int port=FIRMWARE_PORT);
-    ~MService();
-	void setIPaddress(const char *brdName, int port=FIRMWARE_PORT);
-	void readFWinfo(fw_info_t *info);
+  MService();
+  MService(const char *brdName, int port = FIRMWARE_PORT);
+  ~MService();
+  void setIPaddress(const char *brdName, int port = FIRMWARE_PORT);
+  void readFWinfo(fw_info_t *info);
 
 private:
-	int sockRead(unsigned char *rxBuffer, int bufSize);
-	void sockWrite(unsigned char *txBuffer, int txSize);
+  int sockRead(unsigned char *rxBuffer, int bufSize);
+  void sockWrite(unsigned char *txBuffer, int txSize);
 
 private:
-	//int port;
-	int sockfd;
-	struct sockaddr_in sockAddress;
-	int rcvTimoutTime;
-	uint8_t seqNumber;
-
+  // int port;
+  int                sockfd;
+  struct sockaddr_in sockAddress;
+  int                rcvTimoutTime;
+  uint8_t            seqNumber;
 };
 
-
-class MSrvcError : public MException 
-{
+class MSrvcError : public MException {
 public:
-	explicit MSrvcError(const string& __arg);
+  explicit MSrvcError(const string &__arg);
 };
-
-
 
 #endif // MSERVICE_H

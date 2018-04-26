@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -31,19 +31,17 @@
 #define MWBB_H
 
 /*
-	Definition of Base address for WishboneBus slaves
+        Definition of Base address for WishboneBus slaves
 */
-class WbbBaseAddress
-{
+class WbbBaseAddress {
 public:
-	enum baseAddress_e {
-		i2cSysPLL				= (0 << 24),
-		runControl 				= (1 << 24),
-		triggerControl			= (2 << 24),
-		dataGenerator 			= (3 << 24),
-		pulser					= (4 << 24)
-		};
+  enum baseAddress_e {
+    i2cSysPLL      = (0 << 24),
+    runControl     = (1 << 24),
+    triggerControl = (2 << 24),
+    dataGenerator  = (3 << 24),
+    pulser         = (4 << 24)
+  };
 };
-
 
 #endif // MWBB_H

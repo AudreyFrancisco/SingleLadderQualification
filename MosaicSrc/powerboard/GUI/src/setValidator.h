@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2015.
@@ -33,16 +33,14 @@
 
 #include <QDoubleValidator>
 
-
-class setValidator : public QDoubleValidator
-{
-    Q_OBJECT
+class setValidator : public QDoubleValidator {
+  Q_OBJECT
 
 public:
-    setValidator(QObject *parent=0);
-    setValidator(double bottom, double top, int decimals, QObject *parent=0);
-    ~setValidator();
-	void fixup(QString &input) const;
+  setValidator(QObject *parent = 0);
+  setValidator(double bottom, double top, int decimals, QObject *parent = 0);
+  ~setValidator();
+  void fixup(QString &input) const;
 };
 
 #endif // SETVALIDATOR_H

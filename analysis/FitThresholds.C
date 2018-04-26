@@ -13,7 +13,6 @@
 
 using namespace std;
 
-#define NSEC 1
 
 int nInj       = 50;
 
@@ -32,18 +31,13 @@ int NPixels;
 int NNostart;
 int NChisq;
 
-TH1F *hThresh[NSEC]={0};
-TH1F *hNoise [NSEC]={0};
+TH1F *hThresh=0;
+TH1F *hNoise =0;
 TH1F *hChi2=0;
 
 void PrepareHistos() {
-  for (int isec=0;isec<NSEC;++isec) {
-    delete hThresh[isec];
-    hThresh[isec]=new TH1F(Form("hThresh%d",isec),Form("Threshold, sector %d",isec),125,0.,500.);
-    delete hNoise[isec];
-    hNoise [isec]=new TH1F(Form("hNoise%d" ,isec),Form("Noise, sector %d"    ,isec),60,0., 30.);
-  }
-  delete hChi2;hChi2=0;
+  hThresh=new TH1F("hThresh","Threshold",125,0.,500.);
+  hNoise =new TH1F("hNoise" ,"Noise"    ,60, 0., 30.);
   hChi2=new TH1F("hChi2","Chi square distribution",1000,0.,100.);
 }
 
@@ -82,41 +76,40 @@ float FindStart () {
 
 
 bool GetThreshold(double *thresh,double *noise,double *chi2) {
-   TGraph *g      = new TGraph(NPoints, x, data);
-   TF1    *fitfcn = new TF1("fitfcn", erf,0,1500,2);
-   double Start  = FindStart();
+  TGraph *g      = new TGraph(NPoints, x, data);
+  TF1    *fitfcn = new TF1("fitfcn", erf,0,1500,2);
+  double Start  = FindStart();
 
-   if (Start < 0) {
-     NNostart ++;
-     return false;
-   }
+  if (Start < 0) {
+    NNostart ++;
+    return false;
+  }
 
-   fitfcn->SetParameter(0,Start);
+  fitfcn->SetParameter(0,Start);
 
-   fitfcn->SetParameter(1,8);
+  fitfcn->SetParameter(1,8);
 
-   fitfcn->SetParName(0, "Threshold");
-   fitfcn->SetParName(1, "Noise");
+  fitfcn->SetParName(0, "Threshold");
+  fitfcn->SetParName(1, "Noise");
 
-   //g->SetMarkerStyle(20);
-   //g->Draw("AP");
-   g->Fit("fitfcn","Q");
+  //g->SetMarkerStyle(20);
+  //g->Draw("AP");
+  g->Fit("fitfcn","Q");
 
-   *noise =fitfcn->GetParameter(1);
-   *thresh=fitfcn->GetParameter(0);
-   *chi2  =fitfcn->GetChisquare()/fitfcn->GetNDF();
+  *noise =fitfcn->GetParameter(1);
+  *thresh=fitfcn->GetParameter(0);
+  *chi2  =fitfcn->GetChisquare()/fitfcn->GetNDF();
 
-   hChi2->Fill(*chi2);
+  hChi2->Fill(*chi2);
 
-   g->Delete();
-   fitfcn->Delete();
-   return true;
+  g->Delete();
+  fitfcn->Delete();
+  return true;
 }
 
 
 void ProcessPixel (int col, int row) {
   double thresh,noise,chi2;
-  int isec= 0;
 
   if (!GetThreshold(&thresh,&noise,&chi2)) return;
 
@@ -124,8 +117,8 @@ void ProcessPixel (int col, int row) {
     fprintf(fpOut, "%d %d %.1f %.1f %.2f\n", col, row, thresh, noise, chi2);
 
   if(chi2<maxchi2){
-    hThresh[isec]->Fill(thresh);
-    hNoise [isec]->Fill(noise );
+    hThresh->Fill(thresh);
+    hNoise ->Fill(noise );
   }
 }
 
@@ -181,44 +174,31 @@ int FitThresholds(const char *fName, bool WriteToFile, int ITH, int VCASN, bool 
 
   int GoodPixels = NPixels - NNostart - NChisq;
   //  hThresh->Draw();
-  for (int isec=0;isec<NSEC;++isec) {
-    hThresh[isec]->SetLineColor(1+isec);
-    hNoise [isec]->SetLineColor(1+isec);
-  }
+  hThresh->SetLineColor(1);
+  hNoise ->SetLineColor(1);
 
-//  hThresh1->SetMaximum(150);
-//  hNoise1->SetMaximum(500);
   if (!WriteToFile) {
     TCanvas* c = new TCanvas;
-    hThresh[0]->Draw();
-    for (int isec=1;isec<NSEC;++isec) {
-      hThresh[isec]->Draw("SAME");
-    }
-
+    hThresh->Draw();
     TCanvas* c2 = new TCanvas;
-    hNoise [0]->Draw();
-    for (int isec=1;isec<NSEC;++isec) {
-      hNoise [isec]->Draw("SAME");
-    }
+    hNoise->Draw();
 
     if (saveCanvas)
       c->SaveAs("threshold_scan.png");
   }
-  for (int isec=0;isec<NSEC;++isec)
-    std::cout << "Threshold sector "<<isec<<": " << hThresh[isec]->GetMean() << " +- " << hThresh[isec]->GetRMS() << " ( " << hThresh[isec]->GetEntries() << " entries)" << std::endl;
+  std::cout << "Threshold: " << hThresh->GetMean() << " +- " << hThresh->GetRMS() << " ( " << hThresh->GetEntries() << " entries)" << std::endl;
 
-  for (int isec=0;isec<NSEC;++isec)
-    std::cout << "Noise sector "<<isec<<":     " << hNoise [isec]->GetMean() << " +- " << hNoise [isec]->GetRMS() << std::endl;
+  std::cout << "Noise:     " << hNoise ->GetMean() << " +- " << hNoise ->GetRMS() << std::endl;
 
   if (true) { //if WriteToFile
-      std::string fSummary = fName;
-      fSummary.insert(fSummary.rfind("ThresholdScan_"), "ThresholdSummary_");
-      fSummary.erase(fSummary.rfind("ThresholdScan_"), 14);
-      std::cout << "Summary file " << fSummary << std::endl;
-      FILE *fp = fopen(fSummary.c_str(), "a");
-      fprintf(fp, "%d %d %d %.1f %.1f %.1f %.1f\n", ITH, VCASN, GoodPixels, hThresh[0]->GetMean(), hThresh[0]->GetRMS(),
-	  hNoise[0]->GetMean(), hNoise[0]->GetRMS());
-      fclose(fp);
+    std::string fSummary = fName;
+    fSummary.insert(fSummary.rfind("ThresholdScan_"), "ThresholdSummary_");
+    fSummary.erase(fSummary.rfind("ThresholdScan_"), 14);
+    std::cout << "Summary file " << fSummary << std::endl;
+    FILE *fp = fopen(fSummary.c_str(), "a");
+    fprintf(fp, "%d %d %d %.1f %.1f %.1f %.1f\n", ITH, VCASN, GoodPixels, hThresh->GetMean(), hThresh->GetRMS(),
+            hNoise->GetMean(), hNoise->GetRMS());
+    fclose(fp);
   }
 
 

@@ -1,11 +1,12 @@
 #include "TChipConfig.h"
-#include <string.h>
-#include <stdio.h>
 #include <iostream>
+#include <stdio.h>
+#include <string.h>
 
 using namespace ChipConfig;
 
-TChipConfig::TChipConfig (TConfig *config, int chipId, const char *fName) {
+TChipConfig::TChipConfig(TConfig *config, int chipId, const char *fName)
+{
   fConfig           = config;
   fChipId           = chipId;
   fEnabled          = true;
@@ -28,30 +29,30 @@ TChipConfig::TChipConfig (TConfig *config, int chipId, const char *fName) {
   fEnableSkewingGlobal = ENABLE_SKEWING_GLOBAL;
   fEnableClockGating   = ENABLE_CLOCK_GATING;
   fEnableCMUReadout    = ENABLE_CMU_READOUT;
-  
-  fStrobeDuration      = STROBE_DURATION;
-  fStrobeGap           = STROBE_GAP;
-  fStrobeDelay         = STROBE_DELAY;
-  fTriggerDelay        = TRIGGER_DELAY;
-  fPulseDuration       = PULSE_DURATION;
-  
-  fDclkReceiver        = DCLK_RECEIVER;
-  fDclkDriver          = DCLK_DRIVER;
-  fMclkReceiver        = MCLK_RECEIVER;
-  fDctrlReceiver       = DCTRL_RECEIVER;
-  fDctrlDriver         = DCTRL_DRIVER;
-  
-  fPreviousId          = PREVIOUS_ID;
-  fInitialToken        = INITIAL_TOKEN;
-  fDisableManchester   = DISABLE_MANCHESTER;
-  fEnableDdr           = ENABLE_DDR;
-  
-  fPllPhase            = PLL_PHASE;
-  fPllStages           = PLL_STAGES;
-  fChargePump          = CHARGE_PUMP;
-  fDtuDriver           = DTU_DRIVER;
-  fDtuPreemp           = DTU_PREEMP;
- 
+
+  fStrobeDuration = STROBE_DURATION;
+  fStrobeGap      = STROBE_GAP;
+  fStrobeDelay    = STROBE_DELAY;
+  fTriggerDelay   = TRIGGER_DELAY;
+  fPulseDuration  = PULSE_DURATION;
+
+  fDclkReceiver  = DCLK_RECEIVER;
+  fDclkDriver    = DCLK_DRIVER;
+  fMclkReceiver  = MCLK_RECEIVER;
+  fDctrlReceiver = DCTRL_RECEIVER;
+  fDctrlDriver   = DCTRL_DRIVER;
+
+  fPreviousId        = PREVIOUS_ID;
+  fInitialToken      = INITIAL_TOKEN;
+  fDisableManchester = DISABLE_MANCHESTER;
+  fEnableDdr         = ENABLE_DDR;
+
+  fPllPhase   = PLL_PHASE;
+  fPllStages  = PLL_STAGES;
+  fChargePump = CHARGE_PUMP;
+  fDtuDriver  = DTU_DRIVER;
+  fDtuPreemp  = DTU_PREEMP;
+
   if (fName) {
     // read information from file
   }
@@ -59,8 +60,7 @@ TChipConfig::TChipConfig (TConfig *config, int chipId, const char *fName) {
   InitParamMap();
 }
 
-
-void TChipConfig::InitParamMap () 
+void TChipConfig::InitParamMap()
 {
   fSettings["CHIPID"]           = &fChipId;
   fSettings["RECEIVER"]         = &fReceiver;
@@ -73,7 +73,7 @@ void TChipConfig::InitParamMap ()
   fSettings["VCLIP"]            = &fVCLIP;
   fSettings["VRESETD"]          = &fVRESETD;
   fSettings["IBIAS"]            = &fIBIAS;
-  fSettings["VCASP"]            =  &fVCASP;
+  fSettings["VCASP"]            = &fVCASP;
   fSettings["VPULSEL"]          = &fVPULSEL;
   fSettings["VPULSEH"]          = &fVPULSEH;
   fSettings["VRESETP"]          = &fVRESETP;
@@ -83,19 +83,19 @@ void TChipConfig::InitParamMap ()
   fSettings["STROBEDURATION"]   = &fStrobeDuration;
   fSettings["PULSEDURATION"]    = &fPulseDuration;
   fSettings["STROBEDELAYCHIP"]  = &fStrobeDelay;
-  fSettings["READOUTMODE"]      = (int*)&fReadoutMode;
-  fSettings["LINKSPEED"]        = &fSerialLinkSpeed; 
+  fSettings["READOUTMODE"]      = (int *)&fReadoutMode;
+  fSettings["LINKSPEED"]        = &fSerialLinkSpeed;
   fSettings["PLLPHASE"]         = &fPllPhase;
   fSettings["PLLSTAGES"]        = &fPllStages;
   fSettings["CHARGEPUMP"]       = &fChargePump;
   fSettings["DTUDRIVER"]        = &fDtuDriver;
   fSettings["DTUPREEMP"]        = &fDtuPreemp;
+  fSettings["DCTRLDRIVER"]      = &fDctrlDriver;
 }
 
-
-bool TChipConfig::SetParamValue (std::string Name, std::string Value)
+bool TChipConfig::SetParamValue(std::string Name, std::string Value)
 {
-  if (fSettings.find (Name) != fSettings.end()) {
+  if (fSettings.find(Name) != fSettings.end()) {
     *(fSettings.find(Name)->second) = std::stoi(Value);
     return true;
   }
@@ -103,10 +103,9 @@ bool TChipConfig::SetParamValue (std::string Name, std::string Value)
   return false;
 }
 
-
-bool TChipConfig::SetParamValue (std::string Name, int Value)
+bool TChipConfig::SetParamValue(std::string Name, int Value)
 {
-  if (fSettings.find (Name) != fSettings.end()) {
+  if (fSettings.find(Name) != fSettings.end()) {
     *(fSettings.find(Name)->second) = Value;
     return true;
   }
@@ -114,16 +113,16 @@ bool TChipConfig::SetParamValue (std::string Name, int Value)
   return false;
 }
 
-int TChipConfig::GetParamValue (std::string Name)
+int TChipConfig::GetParamValue(std::string Name)
 {
-  if (fSettings.find (Name) != fSettings.end()) {
+  if (fSettings.find(Name) != fSettings.end()) {
     return *(fSettings.find(Name)->second);
   }
   return -1;
 }
 
-
-bool TChipConfig::HasEnabledSlave() {
+bool TChipConfig::HasEnabledSlave()
+{
   if (!IsOBMaster()) return false;
   for (unsigned int i = (unsigned int)fChipId + 1; i <= (unsigned int)fChipId + 6; i++) {
     if (fConfig->GetChipConfigById(i)->IsEnabled()) return true;

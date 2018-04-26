@@ -119,6 +119,7 @@ def main():
         # change channel
         if ch<0 or voltage<0 or current<0:
             print "Did not correctly specify <mode> <channel> <voltage> <current>"
+            return 1
         else:
             h.changeCh(0, ch, voltage, current)
     elif mode==3:
@@ -130,6 +131,7 @@ def main():
         return h.trip()
     else:
         h.powerOff()
+    return 0
 
 ## execute the main
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = GUI
 TEMPLATE = app
 
-CONFIG += c++11 -Wall -pedantic
+CONFIG += c++11
 
 DEFINES += VERSION="\\\"$(shell git describe --dirty --always)\\\""
 
@@ -19,26 +19,53 @@ QMAKE_CXXFLAGS *= $(shell root-config --cflags)
 QMAKE_CFLAGS   *= $(shell root-config --cflags)
 QMAKE_LDFLAGS  *= $(shell root-config --ldflags)
 
+QMAKE_CXXFLAGS   *= -Wall -pedantic -Werror
+QMAKE_CFLAGS   *= -Wall -pedantic -Werror
+
 SOURCES += main.cpp\
            mainwindow.cpp\
            dialog.cpp \
            testselection.cpp \
            scanthread.cpp \
-    scanconfiguration.cpp \
-    testingprogress.cpp
+           scanconfiguration.cpp \
+           testingprogress.cpp \
+           checkpbconfig.cpp \
+           calibrationpb.cpp \
+           databaseselection.cpp \
+           resultstorage.cpp \
+           activitystatus.cpp \
+           dbnotice.cpp \
+           components.cpp \
+    databasefailure.cpp
 
 HEADERS  += mainwindow.h \
             dialog.h \
             testselection.h \
             scanthread.h \
-    scanconfiguration.h \
-    testingprogress.h
+            scanconfiguration.h \
+            testingprogress.h \
+            checkpbconfig.h \
+            calibrationpb.h \
+            databaseselection.h \
+            resultstorage.h \
+            activitystatus.h \
+            dbnotice.h \
+            components.h \
+    databasefailure.h
 
 FORMS    += mainwindow.ui \
             dialog.ui \
             testselection.ui \
-    scanconfiguration.ui \
-    testingprogress.ui
+            scanconfiguration.ui \
+            testingprogress.ui \
+            checkpbconfig.ui \
+            calibrationpb.ui \
+            databaseselection.ui \
+            resultstorage.ui \
+            activitystatus.ui \
+            dbnotice.ui \
+            components.ui \
+    databasefailure.ui
 
 INCLUDEPATH += $(ROOTSYS)/include /usr/local/include
 
@@ -74,6 +101,12 @@ DEPENDPATH += $$PWD/../MosaicSrc/libpowerboard/include
 
 INCLUDEPATH += $$PWD/../ReadoutUnitSrc/
 DEPENDPATH += $$PWD/../ReadoutUnitSrc/
+
+INCLUDEPATH += $$PWD/../ScopeControlSrc
+DEPENDPATH += $$PWD/../ScopeControlSrc
+
+INCLUDEPATH += $$PWD/../ScopeControlSrc/serial/include
+DEPENDPATH += $$PWD/../ScopeControlSrc/serial/include
 
 INCLUDEPATH += /usr/include/libxml2
 DEPENDPATH += /usr/include/libxml2

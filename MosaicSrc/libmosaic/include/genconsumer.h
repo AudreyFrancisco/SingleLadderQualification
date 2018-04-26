@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -31,29 +31,23 @@
 #ifndef GENCONSUMER_H
 #define GENCONSUMER_H
 
-#include <stdint.h>
 #include "mdatareceiver.h"
+#include <stdint.h>
 
-class GenConsumer : public MDataReceiver
-{
+class GenConsumer : public MDataReceiver {
 public:
-	GenConsumer();
-	void setEventSize(long evSize) { eventSize = evSize; }
-	void flush();
-	
+  GenConsumer();
+  void setEventSize(long evSize) { eventSize = evSize; }
+  void                   flush();
+
 protected:
-	long parse(int numClosed);
+  long parse(int numClosed);
 
 private:
-	long eventSize;
+  long eventSize;
+
 public:
-	uint32_t expectedData;
-
+  uint32_t expectedData;
 };
-
-
-
-
-
 
 #endif // GENCONSUMER_H

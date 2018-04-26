@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2015.
@@ -31,27 +31,19 @@
 #ifndef MAX5419_H
 #define MAX5419_H
 
-#include <stdint.h>
 #include "i2cslave.h"
+#include <stdint.h>
 
-
-class MAX5419 : public I2Cslave
-{
+class MAX5419 : public I2Cslave {
 public:
-	MAX5419(I2Cbus *bus, uint8_t address);
-	void setRDAC(uint8_t b);
-	void setNVREG(uint8_t b);
-	void restoreRDAC();
-	void storeRDAC();
+  MAX5419(I2Cbus *bus, uint8_t address);
+  void setRDAC(uint8_t b);
+  void setNVREG(uint8_t b);
+  void restoreRDAC();
+  void storeRDAC();
 
 private:
-	enum {
-		CMD_VREG 		= 0x11,
-		CMD_NVREG 		= 0x21,
-		CMD_NVREGxVREG	= 0x61,
-		CMD_VREGxNVREG	= 0x51
-	};
-
+  enum { CMD_VREG = 0x11, CMD_NVREG = 0x21, CMD_NVREGxVREG = 0x61, CMD_VREGxNVREG = 0x51 };
 };
 
 #endif // MAX5419_H

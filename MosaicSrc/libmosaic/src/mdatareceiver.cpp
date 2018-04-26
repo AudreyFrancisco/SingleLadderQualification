@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -29,20 +29,14 @@
  */
 #include "mdatareceiver.h"
 
-
 MDataReceiver::MDataReceiver()
 {
-	dataBufferUsed = 0;
-	numClosedData = 0;
-	blockFlags = 0;
-	blockSrc = 0;
+  dataBufferUsed = 0;
+  numClosedData  = 0;
+  blockFlags     = 0;
+  blockSrc       = 0;
 }
 
-MDataReceiver::~MDataReceiver()
-{
-}
+MDataReceiver::~MDataReceiver() {}
 
-void MDataReceiver::flush()
-{
-}
-
+void MDataReceiver::flush() {}

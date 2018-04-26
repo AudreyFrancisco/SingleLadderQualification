@@ -172,7 +172,7 @@ private:
 
       for (ssize_t idx = 0; idx < nrDevices && !deviceFound; ++idx) {
         libusb_device *device = list[idx];
-        libusb_device_descriptor desc = { 0 };
+        libusb_device_descriptor desc = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         libusb_device_handle *dev_handle;
 
         checkError(libusb_get_device_descriptor(device, &desc));

@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -31,19 +31,16 @@
 #ifndef PEXCEPTION_H
 #define PEXCEPTION_H
 
-#include <string>
 #include "mexception.h"
+#include <string>
 
-//class string;
+// class string;
 using namespace std;
 
 // Control interface errors
-class PControlInterfaceError : public MException 
-{
+class PControlInterfaceError : public MException {
 public:
-	explicit PControlInterfaceError(const string& __arg);
+  explicit PControlInterfaceError(const string &__arg);
 };
-
-
 
 #endif // PEXCEPTION

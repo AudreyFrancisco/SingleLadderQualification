@@ -21,137 +21,124 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  * 21/12/2015	Added mutex for multithread operation
  */
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <string.h>
-#include <poll.h>
-#include <iostream>
 #include "ipbusudp.h"
 #include "mexception.h"
+#include <arpa/inet.h>
+#include <iostream>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <poll.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <sys/socket.h>
 
-IPbusUDP::IPbusUDP(int pktSize) 
-		: IPbus(pktSize)
-{
-	sockfd = -1;
-}
+IPbusUDP::IPbusUDP(int pktSize) : IPbus(pktSize) { sockfd = -1; }
 
-IPbusUDP::IPbusUDP(const char *IPaddr, int port, int pktSize) 
-		: IPbus(pktSize)
+IPbusUDP::IPbusUDP(const char *IPaddr, int port, int pktSize) : IPbus(pktSize)
 {
-	sockfd = -1;
-	setIPaddress(IPaddr, port);
+  sockfd = -1;
+  setIPaddress(IPaddr, port);
 }
 
 void IPbusUDP::setIPaddress(const char *IPaddr, int port)
 {
-	struct hostent *he;
+  struct hostent *he;
 
-	if ((he=gethostbyname(IPaddr)) == NULL)   // get the host address
-		throw MIPBusUDPError("Can not resolve board IP address");
+  if ((he = gethostbyname(IPaddr)) == NULL) // get the host address
+    throw MIPBusUDPError("Can not resolve board IP address");
 
-	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-		throw MIPBusUDPError("Can not create socket");
+  if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+    throw MIPBusUDPError("Can not create socket");
 
-	sockAddress.sin_family = AF_INET;	 	// host byte order
-	sockAddress.sin_port = htons(port); 	// short, network byte order
-	sockAddress.sin_addr = *((struct in_addr *)he->h_addr);
-	memset(sockAddress.sin_zero, '\0', sizeof sockAddress.sin_zero);
-	
-	// Check the connection
-	testConnection();
+  sockAddress.sin_family = AF_INET;     // host byte order
+  sockAddress.sin_port   = htons(port); // short, network byte order
+  sockAddress.sin_addr   = *((struct in_addr *)he->h_addr);
+  memset(sockAddress.sin_zero, '\0', sizeof sockAddress.sin_zero);
+
+  // Check the connection
+  testConnection();
 }
 
-
-IPbusUDP::~IPbusUDP()
-{
-}
+IPbusUDP::~IPbusUDP() {}
 
 void IPbusUDP::testConnection()
 {
-	try {
-		rcvTimoutTime = RCV_LONG_TIMEOUT;
-		addIdle();
-		execute();
-		rcvTimoutTime = RCV_SHORT_TIMEOUT;
-	} catch (MIPBusUDPError) {
-		throw MIPBusUDPError("Board connection error in IPbusUDP::testConnection");
-	}
-	
+  try {
+    rcvTimoutTime = RCV_LONG_TIMEOUT;
+    addIdle();
+    execute();
+    rcvTimoutTime = RCV_SHORT_TIMEOUT;
+  }
+  catch (MIPBusUDPError) {
+    throw MIPBusUDPError("Board connection error in IPbusUDP::testConnection");
+  }
 }
 
 void IPbusUDP::sockRead()
 {
-	struct sockaddr_in peer_addr;
-	socklen_t peer_addr_len;
-	struct pollfd ufds;
-	int rv;
+  struct sockaddr_in peer_addr;
+  socklen_t          peer_addr_len;
+  struct pollfd      ufds;
+  int                rv;
 
-	ufds.fd = sockfd;
-	ufds.events = POLLIN; // check for normal
-	rv = poll(&ufds, 1, rcvTimoutTime);	
+  ufds.fd     = sockfd;
+  ufds.events = POLLIN; // check for normal
+  rv          = poll(&ufds, 1, rcvTimoutTime);
 
-	if (rv == -1)
-		throw MIPBusUDPError("poll system call");
+  if (rv == -1) throw MIPBusUDPError("poll system call");
 
-	if (rv == 0)
-		throw MIPBusUDPTimeout();
+  if (rv == 0) throw MIPBusUDPTimeout();
 
-	// check for events on sockfd:
-	if (ufds.revents & POLLIN) {
-		peer_addr_len=sizeof(struct sockaddr);
-		rxSize = recvfrom(sockfd, rxBuffer, getBufferSize(), 0,
-			(struct sockaddr *)&peer_addr, (socklen_t *) &peer_addr_len);
-	}
-	
-	if (rxSize<0)
-		throw MIPBusUDPError("Datagram receive system call");
+  // check for events on sockfd:
+  if (ufds.revents & POLLIN) {
+    peer_addr_len = sizeof(struct sockaddr);
+    rxSize        = recvfrom(sockfd, rxBuffer, getBufferSize(), 0, (struct sockaddr *)&peer_addr,
+                      (socklen_t *)&peer_addr_len);
+  }
+
+  if (rxSize < 0) throw MIPBusUDPError("Datagram receive system call");
 }
 
 void IPbusUDP::sockWrite()
 {
-	if (sendto(sockfd, txBuffer, txSize, 0, (struct sockaddr *)&sockAddress, sizeof (struct sockaddr)) == -1)
-		throw MIPBusUDPError("Datagram send system call");
+  if (sendto(sockfd, txBuffer, txSize, 0, (struct sockaddr *)&sockAddress,
+             sizeof(struct sockaddr)) == -1)
+    throw MIPBusUDPError("Datagram send system call");
 }
 
 void IPbusUDP::execute()
 {
-	std::lock_guard<std::recursive_mutex> lock(mutex);
+  std::lock_guard<std::recursive_mutex> lock(mutex);
 
-	if (txSize==0)
-		return;
+  if (txSize == 0) return;
 
-	for (int i=0; i<3; i++){
-		try {
-			// Send the UDP datagram
-			sockWrite();	
+  for (int i = 0; i < 3; i++) {
+    try {
+      // Send the UDP datagram
+      sockWrite();
 
-			// Wait for the answer
-			do {
-				sockRead();
-			} while (duplicatedRxPkt());
+      // Wait for the answer
+      do {
+        sockRead();
+      } while (duplicatedRxPkt());
 
-			// check the answer packet content
-			processAnswer();
-			return;
-
-		} catch (MIPBusUDPTimeout) {
-			// shoult increase the timeout
-			// cout << "Timeout from sockRead" << endl;			
-		}
-	}
-	throw MIPBusUDPError("Board comunication error in IPbusUDP::execute");	
+      // check the answer packet content
+      processAnswer();
+      return;
+    }
+    catch (MIPBusUDPTimeout) {
+      // shoult increase the timeout
+      // cout << "Timeout from sockRead" << endl;
+    }
+  }
+  throw MIPBusUDPError("Board comunication error in IPbusUDP::execute");
 }
-
-

@@ -4,7 +4,9 @@
 
 // TODO: decode remaining debug streams
 
-bool AlpideDebug::ReadStream (TAlpide *chip, TRegister reg, uint16_t *stream, int len, uint16_t Header) {
+bool AlpideDebug::ReadStream(TAlpide *chip, TRegister reg, uint16_t *stream, int len,
+                             uint16_t Header)
+{
   for (int i = 0; i < len; i++) {
     chip->ReadRegister(reg, stream[i]);
   }
@@ -12,14 +14,14 @@ bool AlpideDebug::ReadStream (TAlpide *chip, TRegister reg, uint16_t *stream, in
     std::cout << "Wrong header value 0x" << std::hex << stream[0] << std::dec << std::endl;
     return false;
   }
-  return true;  
+  return true;
 }
 
-
-bool AlpideDebug::GetBMUDebugStream (TAlpide *chip, TBMUDebugStream &stream) {
+bool AlpideDebug::GetBMUDebugStream(TAlpide *chip, TBMUDebugStream &stream)
+{
   uint16_t streamData[2];
 
-  if (! ReadStream (chip, REG_BMU_DEBUG, streamData, 2, 0xDEBB)) return false;
+  if (!ReadStream(chip, REG_BMU_DEBUG, streamData, 2, 0xDEBB)) return false;
 
   stream.BusyRequestSM   = (streamData[1] >> 14) & 0x3;
   stream.BusyGeneratorSM = (streamData[1] >> 13) & 0x1;
@@ -28,15 +30,15 @@ bool AlpideDebug::GetBMUDebugStream (TAlpide *chip, TBMUDebugStream &stream) {
   return true;
 }
 
-
-bool AlpideDebug::GetDMUDebugStream (TAlpide *chip, TDMUDebugStream &stream) {
+bool AlpideDebug::GetDMUDebugStream(TAlpide *chip, TDMUDebugStream &stream)
+{
   uint16_t streamData[4];
 
-  if (! ReadStream (chip, REG_DMU_DEBUG, streamData, 4, 0xDEBD)) return false;
+  if (!ReadStream(chip, REG_DMU_DEBUG, streamData, 4, 0xDEBD)) return false;
 
   for (int i = 0; i < 2; i++) {
-    stream.DataFIFOReadPointer [i] = (streamData[1] >> (6+(i*4))) & 0x3;
-    stream.DataFIFOWritePointer[i] = (streamData[1] >> (4+(i*4))) & 0x3;
+    stream.DataFIFOReadPointer[i]  = (streamData[1] >> (6 + (i * 4))) & 0x3;
+    stream.DataFIFOWritePointer[i] = (streamData[1] >> (4 + (i * 4))) & 0x3;
   }
   stream.BusyFIFOReadPointer       = (streamData[1] >> 2) & 0x3;
   stream.BusyFIFOWritePointer      = (streamData[1]) & 0x3;
@@ -50,40 +52,40 @@ bool AlpideDebug::GetDMUDebugStream (TAlpide *chip, TDMUDebugStream &stream) {
   stream.SEUErrorOR                = ((streamData[3] & 0x400) != 0);
   stream.BusyMismatchError         = ((streamData[3] & 0x200) != 0);
   stream.BusyFIFOError             = ((streamData[3] & 0x100) != 0);
-  stream.DataFIFOError             = ((streamData[3] & 0x80)  != 0);
+  stream.DataFIFOError             = ((streamData[3] & 0x80) != 0);
 
   return true;
 }
 
-
-bool AlpideDebug::GetTRUDebugStream (TAlpide *chip, TTRUDebugStream &stream) {
+bool AlpideDebug::GetTRUDebugStream(TAlpide *chip, TTRUDebugStream &stream)
+{
   uint16_t streamData[5];
 
-  if (! ReadStream (chip, REG_TRU_DEBUG, streamData, 5, 0xDEB7)) return false;
+  if (!ReadStream(chip, REG_TRU_DEBUG, streamData, 5, 0xDEB7)) return false;
 
   return true;
 }
 
-
-bool AlpideDebug::GetRRUDebugSteam (TAlpide *chip, TRRUDebugStream &stream) {
+bool AlpideDebug::GetRRUDebugSteam(TAlpide *chip, TRRUDebugStream &stream)
+{
   uint16_t streamData[65];
 
-  if (! ReadStream (chip, REG_RRU_DEBUG, streamData, 65, 0xDEB8)) return false;
+  if (!ReadStream(chip, REG_RRU_DEBUG, streamData, 65, 0xDEB8)) return false;
 
   return true;
 }
 
-
-bool AlpideDebug::GetFromuDebugStream (TAlpide *chip, TFromuDebugStream &stream) {
+bool AlpideDebug::GetFromuDebugStream(TAlpide *chip, TFromuDebugStream &stream)
+{
   uint16_t streamData[8];
 
-  if (! ReadStream (chip, REG_FROMU_DEBUG, streamData, 8, 0xDEBF)) return false;
+  if (!ReadStream(chip, REG_FROMU_DEBUG, streamData, 8, 0xDEBF)) return false;
 
-  stream.TriggerCounter = streamData[1];
-  stream.StrobeCounter  = streamData[2];
-  stream.FrameCounter   = streamData[3];
-  stream.ReadoutCounter = streamData[4];
-  stream.BunchCounter   = (streamData[5] >> 4) & 0xfff;
+  stream.TriggerCounter  = streamData[1];
+  stream.StrobeCounter   = streamData[2];
+  stream.FrameCounter    = streamData[3];
+  stream.ReadoutCounter  = streamData[4];
+  stream.BunchCounter    = (streamData[5] >> 4) & 0xfff;
   stream.StrobeManagerSM = (streamData[5] >> 1) & 0x7;
   stream.FlushValue      = streamData[5] & 0x1;
   stream.WriterSM        = (streamData[6] >> 11) & 0x1f;
@@ -96,11 +98,11 @@ bool AlpideDebug::GetFromuDebugStream (TAlpide *chip, TFromuDebugStream &stream)
   return true;
 }
 
-
-bool AlpideDebug::GetADCDebugStream (TAlpide *chip, TADCDebugStream &stream) {
+bool AlpideDebug::GetADCDebugStream(TAlpide *chip, TADCDebugStream &stream)
+{
   uint16_t streamData[4];
 
-  if (! ReadStream (chip, REG_BMU_DEBUG, streamData, 4, 0xDEBA)) return false;
+  if (!ReadStream(chip, REG_BMU_DEBUG, streamData, 4, 0xDEBA)) return false;
 
   return true;
 }

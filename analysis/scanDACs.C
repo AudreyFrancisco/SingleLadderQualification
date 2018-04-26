@@ -11,7 +11,7 @@
 #include <TFitResultPtr.h>
 #include <TF1.h>
 
-Bool_t scanDACs(TString directory = "../pALPIDEfs-software/Data/", Int_t n_bits = 256) {
+Bool_t scanDACs(TString directory = "../pALPIDEfs-software/Data/", TString suffix = "", Int_t n_bits = 256) {
 
     if (directory[directory.Length()-1] != '/') {
         directory += '/';
@@ -31,7 +31,7 @@ Bool_t scanDACs(TString directory = "../pALPIDEfs-software/Data/", Int_t n_bits 
 
     for(Int_t i=0; i<n_dacs; ++i) {
     TString filepath(directory);
-        filepath += (filename[i].BeginsWith("V") ? "VDAC_" : "IDAC_") + filename[i] + ".dat";
+        filepath += (filename[i].BeginsWith("V") ? "VDAC_" : "IDAC_") + filename[i] + suffix + ".dat";
         TF1* f = new TF1("f", "pol1", 2., 150.); //filename[i].BeginsWith("V") ? 150. : 14.);
         ifstream dacfile(filepath.Data());
         if(!dacfile.good()) { cout << "Cannot find " << filename[i] << "(" << filepath << ")" << endl; return kFALSE; }

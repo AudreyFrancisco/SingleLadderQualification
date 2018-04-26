@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
@@ -31,26 +31,22 @@
 #ifndef TRGRECORDER_H
 #define TRGRECORDER_H
 
-#include <stdint.h>
 #include "mwbbslave.h"
+#include <stdint.h>
+#include <string>
 
-class TrgRecorder : public MWbbSlave
-{
+class TrgRecorder : public MWbbSlave {
 public:
-    TrgRecorder(WishboneBus *wbbPtr, uint32_t baseAddress);
-	void addEnable(bool en);
+  TrgRecorder(WishboneBus *wbbPtr, uint32_t baseAddress);
+  void addEnable(bool en);
+  std::string dumpRegisters();
 
-private:					// WBB Slave registers map 
-	enum regAddress_e {
-		regControl					= 0			// Control register
-	};
+private: // WBB Slave registers map
+  enum regAddress_e {
+    regControl = 0 // Control register
+  };
 
-	enum controlBits_e {
-		CONTROL_ENABLE			= (1<<0)
-	};
-
+  enum controlBits_e { CONTROL_ENABLE = (1 << 0) };
 };
-
-
 
 #endif // TRGRECORDER_H

@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -30,75 +30,39 @@
 
 #include "mexception.h"
 
-MException::MException()
-{
-}
+MException::MException() {}
 
-MException::MException(const string& arg)
-{
-	msg = arg;
-}
+MException::MException(const string &arg) { msg = arg; }
 
-MException::~MException() throw()
-{
-}
+MException::~MException() throw() {}
 
-MIPBusUDPError::MIPBusUDPError(const string& arg)
-{
-	 msg = "IPBusUDP Error: " + arg;
-}
+MIPBusUDPError::MIPBusUDPError(const string &arg) { msg = "IPBusUDP Error: " + arg; }
 
 // IPBus over UDP Timeout
-MIPBusUDPTimeout::MIPBusUDPTimeout()
-{
-}
+MIPBusUDPTimeout::MIPBusUDPTimeout() {}
 
 // IPBus error
-MIPBusError::MIPBusError(const string& arg)
-{
-	 msg = "IPBus Error: " + arg;
-}
+MIPBusError::MIPBusError(const string &arg) { msg = "IPBus Error: " + arg; }
 
 // IPBus error - Remote Bus Write error
-MIPBusErrorWrite::MIPBusErrorWrite(const string& arg)
-{
-	 msg = "IPBus Error: " + arg;
-}
+MIPBusErrorWrite::MIPBusErrorWrite(const string &arg) { msg = "IPBus Error: " + arg; }
 
 // IPBus error - Remote Bus Read error
-MIPBusErrorReadTimeout::MIPBusErrorReadTimeout(const string& arg)
-{
-	 msg = "IPBus Error: " + arg;
-}
+MIPBusErrorReadTimeout::MIPBusErrorReadTimeout(const string &arg) { msg = "IPBus Error: " + arg; }
 
 // Data connection over TCP error
-MDataConnectError::MDataConnectError(const string& arg)
+MDataConnectError::MDataConnectError(const string &arg)
 {
-	 msg = "TCP Data connection Error: " + arg;
+  msg = "TCP Data connection Error: " + arg;
 }
 
 // Data receive over TCP
-MDataReceiveError::MDataReceiveError(const string& arg)
-{
-	 msg = "TCP Data receive Error: " + arg;
-}
+MDataReceiveError::MDataReceiveError(const string &arg) { msg = "TCP Data receive Error: " + arg; }
 
 // Data parser
-MDataParserError::MDataParserError(const string& arg)
-{
-	 msg = "TCP Data parser Error: " + arg;
-}
+MDataParserError::MDataParserError(const string &arg) { msg = "TCP Data parser Error: " + arg; }
 
 // Board initialization
-MBoardInitError::MBoardInitError(const string& arg)
-{
-	 msg = "Board initialization Error: " + arg;
-}
+MBoardInitError::MBoardInitError(const string &arg) { msg = "Board initialization Error: " + arg; }
 
-
-const char* MException::what() const throw()
-{
-	return msg.c_str();
-}
-
-
+const char *MException::what() const throw() { return msg.c_str(); }

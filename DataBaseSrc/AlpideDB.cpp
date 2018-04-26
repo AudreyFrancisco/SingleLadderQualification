@@ -36,35 +36,45 @@
  */
 #include "AlpideDB.h"
 
-AlpideDB::AlpideDB()
+AlpideDB::AlpideDB(bool isTestDB)
 {
+  if (isTestDB) {
+    Init("https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx",
+         "https://test-alucmsapi.web.cern.ch");
+    m_projectId = PROJECT_ID_TEST;
+  }
+  else {
+    Init("https://alucmsapi.web.cern.ch/AlucmswebAPI.asmx", "https://alucmsapi.web.cern.ch");
+    m_projectId = PROJECT_ID_PROD;
+  }
+}
 
-	theQueryDomain = "https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx";
-    theDBmanager = new AlpideDBManager();
+void AlpideDB::Init(string aQueryDomain, string aJarUrl)
+{
+  theQueryDomain = aQueryDomain;
+  theJarUrl      = aJarUrl;
+
+  theDBmanager = new AlpideDBManager();
 
 #ifdef AUTH_KERBEROS
-    isConnected = theDBmanager->Init("https://test-alucmsapi.web.cern.ch");
+  isConnected = theDBmanager->Init(theJarUrl);
 #endif
 
 #ifdef AUTH_X509
-    if(theDBmanager->isLibCurlCompiled()){
-    	isConnected = theDBmanager->Init("https://test-alucmsapi.web.cern.ch",
-    			"FrancoAntonio",
-				".",
-				"alpide4me");
-    } else {
-    	isConnected = theDBmanager->Init("https://test-alucmsapi.web.cern.ch",
-        	    		"/home/fap/.globus/usercert.pem",
-        	    		"/home/fap/.globus/userkey.pem",
-        				"/etc/ssl/certs");
-    }
+  if (theDBmanager->isLibCurlCompiled()) {
+    isConnected = theDBmanager->Init(theJarUrl, "FrancoAntonio", ".", "alpide4me");
+  }
+  else {
+    isConnected = theDBmanager->Init(theJarUrl, "/home/fap/.globus/usercert.pem",
+                                     "/home/fap/.globus/userkey.pem", "/etc/ssl/certs");
+  }
 #endif
-
 }
-
 
 AlpideDB::~AlpideDB()
 {
+  delete theDBmanager;
+  theDBmanager = 0x0;
 }
 
 // ---------------- eof ------------------------

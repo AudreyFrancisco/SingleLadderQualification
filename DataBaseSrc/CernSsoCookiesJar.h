@@ -40,6 +40,7 @@
 #ifndef CERNSSOCOOKIEJAR_H
 #define CERNSSOCOOKIEJAR_H
 
+#include "utilities.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -48,52 +49,48 @@
 
 using namespace std;
 
-class CernSsoCookieJar
-{
-struct Cookie {
-	string domain;
-	bool tailmatch;
-	string path;
-	bool secure;
-	unsigned long int expires;
-	string name;
-	string value;
-};
+class CernSsoCookieJar {
+  struct Cookie {
+    string            domain;
+    bool              tailmatch;
+    string            path;
+    bool              secure;
+    unsigned long int expires;
+    string            name;
+    string            value;
+  };
 
-
-// Members
+  // Members
 private:
-	string theSslUrl;
-	string theCookiePackFile;
-	vector<Cookie> theJar;
+  string         theSslUrl;
+  string         theCookiePackFile;
+  vector<Cookie> theJar;
 
 #ifdef AUTH_X509
-	string theCliCert;
-	string theCliKey;
+  string theCliCert;
+  string theCliKey;
 #endif
 
-// Methods
+  // Methods
 public:
-	CernSsoCookieJar(string aCookiePackFileName);
-    ~CernSsoCookieJar();
+  CernSsoCookieJar(string aCookiePackFileName);
+  ~CernSsoCookieJar();
 
-    bool isJarValid();
+  bool isJarValid();
 
 public:
-
 #ifdef AUTH_X509
-    bool fillTheJar(string aCliCert, string aCliKey, string aSslUrl);
+  bool fillTheJar(string aCliCert, string aCliKey, string aSslUrl);
 #endif
 #ifdef AUTH_KERBEROS
-    bool fillTheJar(string aSslUrl);
+  bool fillTheJar(string aSslUrl);
 #endif
 
-    bool fillTheJar();
+  bool fillTheJar();
 
 private:
-    bool testTheCERNSSO();
-    int parseTheJar(string aCookieJarFile);
-
+  bool testTheCERNSSO();
+  int parseTheJar(string aCookieJarFile);
 };
 
 #endif // CERNSSOCOOKIEJAR_H

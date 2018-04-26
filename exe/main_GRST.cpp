@@ -2,7 +2,8 @@
 // ==========================================
 //
 // After successful call to initSetup() the elements of the setup are accessible in the two vectors
-//   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
+//   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e.
+// fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
 //
 // In order to have a generic scan, which works for single chips as well as for staves and modules,
@@ -13,40 +14,38 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-
-#include <unistd.h>
-#include "TAlpide.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "BoardDecoder.h"
-#include "SetupHelpers.h"
+#include <unistd.h>
 
+TBoardType                   fBoardType;
+std::vector<TReadoutBoard *> fBoards;
+std::vector<TAlpide *>       fChips;
+TConfig *                    fConfig;
 
-
-TBoardType fBoardType;
-std::vector <TReadoutBoard *> fBoards;
-std::vector <TAlpide *>       fChips;
-TConfig *fConfig;
-
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
 
   decodeCommandParameters(argc, argv);
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
-  if (fBoards.size()) { //Yasser (change to use more than one board)
+  if (fBoards.size()) { // Yasser (change to use more than one board)
 
-    for (const auto& rBoard : fBoards) {
-      rBoard->SendOpCode (Alpide::OPCODE_GRST);
-      rBoard->SendOpCode (Alpide::OPCODE_PRST);
-      rBoard->SendOpCode (Alpide::OPCODE_RORST);      
-      
-      TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (rBoard);
+    for (const auto &rBoard : fBoards) {
+      rBoard->SendOpCode(Alpide::OPCODE_GRST);
+      rBoard->SendOpCode(Alpide::OPCODE_PRST);
+      rBoard->SendOpCode(Alpide::OPCODE_RORST);
+
+      TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(rBoard);
       if (myDAQBoard) {
         myDAQBoard->PowerOff();
         delete myDAQBoard;

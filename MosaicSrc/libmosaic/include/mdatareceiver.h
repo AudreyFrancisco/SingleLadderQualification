@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -31,45 +31,41 @@
 #ifndef MDATARECEIVER_H
 #define MDATARECEIVER_H
 
-#include <vector>
-#include <stdlib.h>
 #include "mboard.h"
+#include <stdlib.h>
+#include <vector>
 
 typedef std::vector<char> dataBuffer_t;
 
-class MDataReceiver
-{
-friend class MBoard;
+class MDataReceiver {
+  friend class MBoard;
 
 public:
-	MDataReceiver();
-	virtual ~MDataReceiver();
+  MDataReceiver();
+  virtual ~MDataReceiver();
 
 protected:
-	virtual long parse(int numClosed) = 0;		// Pure virtual
-	virtual void flush();
+  virtual long parse(int numClosed) = 0; // Pure virtual
+  virtual void flush();
 
 protected:
-	long dataBufferUsed;
-	long numClosedData;
-	long blockFlags;
-	long blockSrc;
-	dataBuffer_t dataBuffer;
-	unsigned char blockHeader[MOSAIC_HEADER_SIZE];
+  long          dataBufferUsed;
+  long          numClosedData;
+  long          blockFlags;
+  long          blockSrc;
+  dataBuffer_t  dataBuffer;
+  unsigned char blockHeader[MOSAIC_HEADER_SIZE];
 
 protected:
-	void *getWritePtr(size_t size) 
-		{
-			// resize the buffer if needed
-			if (dataBufferUsed+size > dataBuffer.size()){
-				dataBuffer.resize(dataBufferUsed+size);
-			}  
-			// return a pointer to the free area
-			return (void*) &dataBuffer[dataBufferUsed];
-		};
+  void *getWritePtr(size_t size)
+  {
+    // resize the buffer if needed
+    if (dataBufferUsed + size > dataBuffer.size()) {
+      dataBuffer.resize(dataBufferUsed + size);
+    }
+    // return a pointer to the free area
+    return (void *)&dataBuffer[dataBufferUsed];
+  };
 };
-
-
-
 
 #endif // MDATARECEIVER_H

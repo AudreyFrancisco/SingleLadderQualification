@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -31,28 +31,22 @@
 #ifndef I2CSYSPLL_H
 #define I2CSYSPLL_H
 
+#include "i2cbus.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include "i2cbus.h"
 
-class I2CSysPll: public I2Cbus
-{
+class I2CSysPll : public I2Cbus {
 public:
-	typedef struct pllRegisters_s {
-		uint16_t reg[22];
-		pllRegisters_s(uint16_t* r) {
-			memcpy(reg, r, sizeof(uint16_t)*22);
-		}
-	} pllRegisters_t;
+  typedef struct pllRegisters_s {
+    uint16_t reg[22];
+    pllRegisters_s(uint16_t *r) { memcpy(reg, r, sizeof(uint16_t) * 22); }
+  } pllRegisters_t;
 
-    I2CSysPll(WishboneBus *wbbPtr, uint32_t baseAddress);
-	void writeReg(uint8_t add, uint16_t d);
-	void readReg (uint8_t add, uint16_t *d);
-	void setup(pllRegisters_t regs);
-
+  I2CSysPll(WishboneBus *wbbPtr, uint32_t baseAddress);
+  void writeReg(uint8_t add, uint16_t d);
+  void readReg(uint8_t add, uint16_t *d);
+  void setup(pllRegisters_t regs);
 };
-
-
 
 #endif // I2CBUS_H

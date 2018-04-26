@@ -83,26 +83,28 @@
 
 class TRuTransceiverModule : public TRuWishboneModule {
 public:
-    static const uint8_t DRP_ADDRESS = 0;
-    static const uint8_t DRP_DATA = 1;
-    static const uint8_t TRANSCEIVER_SETTINGS = 2;
-    static const uint8_t RUN_SETTINGS = 4;
-    static const uint8_t RUN_STATUS = 5;
-    static const uint8_t COUNTER_RESET = 6;
-
+  static const uint8_t DRP_ADDRESS          = 0;
+  static const uint8_t DRP_DATA             = 1;
+  static const uint8_t TRANSCEIVER_SETTINGS = 2;
+  static const uint8_t RUN_SETTINGS         = 4;
+  static const uint8_t RUN_STATUS           = 5;
+  static const uint8_t COUNTER_RESET        = 6;
 
   TRuTransceiverModule(TReadoutBoardRU &board, uint16_t moduleId, bool logging)
-      : TRuWishboneModule(board, moduleId, logging) {}
+      : TRuWishboneModule(board, moduleId, logging)
+  {
+  }
   int Initialize(TBoardConfigRU::ReadoutSpeed RoSpeed, bool InvertPolarity);
   void DeactivateReadout();
   void ResetReceiver();
-  void SetupPrbsChecker(uint8_t pattern=1);
+  void SetupPrbsChecker(uint8_t pattern = 1);
   void ActivateReadout(bool Activate = true);
-  void AllowAlignment(bool Allow=true);
+  void AllowAlignment(bool Allow = true);
   bool IsAligned();
 
   void ResetCounters();
   std::map<std::string, uint16_t> ReadCounters();
+
 private:
   void WriteDrp(uint16_t Address, uint16_t Data);
   uint16_t ReadDrp(uint16_t Address);

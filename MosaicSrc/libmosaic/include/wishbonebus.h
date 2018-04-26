@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -33,20 +33,19 @@
 
 #include <stdint.h>
 
-class WishboneBus
-{
+class WishboneBus {
 public:
-	virtual ~WishboneBus() {}
-	virtual void addWrite(uint32_t address, uint32_t data) = 0;
-	virtual void addWrite(int size, uint32_t address, uint32_t *data) = 0;
-	virtual void addNIWrite(int size, uint32_t address, uint32_t *data) = 0;
-	virtual void addRead(int size, uint32_t address, uint32_t *data) = 0;
-	void addRead(uint32_t address, uint32_t *data) { addRead(1, address, data); }
-	virtual void addNIRead(int size, uint32_t address, uint32_t *data) = 0;
-	virtual void addRMWbits(uint32_t address, uint32_t mask, uint32_t data, uint32_t *rData=0) = 0;
-	virtual void addRMWsum(uint32_t address, uint32_t data, uint32_t *rData=0) = 0;
-	virtual int  getBufferSize() = 0;
-	virtual void execute() = 0;
+  virtual ~WishboneBus() {}
+  virtual void addWrite(uint32_t address, uint32_t data) = 0;
+  virtual void addWrite(int size, uint32_t address, uint32_t *data)   = 0;
+  virtual void addNIWrite(int size, uint32_t address, uint32_t *data) = 0;
+  virtual void addRead(int size, uint32_t address, uint32_t *data)    = 0;
+  void addRead(uint32_t address, uint32_t *data) { addRead(1, address, data); }
+  virtual void addNIRead(int size, uint32_t address, uint32_t *data) = 0;
+  virtual void addRMWbits(uint32_t address, uint32_t mask, uint32_t data, uint32_t *rData = 0) = 0;
+  virtual void addRMWsum(uint32_t address, uint32_t data, uint32_t *rData = 0) = 0;
+  virtual int  getBufferSize() = 0;
+  virtual void execute()       = 0;
 };
 
 #endif // WISHBONEBUS_H

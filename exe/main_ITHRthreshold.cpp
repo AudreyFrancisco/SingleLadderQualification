@@ -2,7 +2,8 @@
 // ==========================================
 //
 // After successful call to initSetup() the elements of the setup are accessible in the two vectors
-//   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e. fBoards.at(0)
+//   - fBoards: vector of readout boards (setups implemented here have only 1 readout board, i.e.
+// fBoards.at(0)
 //   - fChips:  vector of chips, depending on setup type 1, 9 or 14 elements
 //
 // In order to have a generic scan, which works for single chips as well as for staves and modules,
@@ -13,34 +14,33 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
-
-#include <unistd.h>
-#include <string.h>
-#include <iostream>
-#include <cstdlib>
-#include "TAlpide.h"
 #include "AlpideConfig.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "TConfig.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include "TConfig.h"
-#include "AlpideDecoder.h"
-#include "BoardDecoder.h"
-#include "SetupHelpers.h"
-
+#include <cstdlib>
+#include <iostream>
+#include <string.h>
+#include <unistd.h>
 
 // !!! NOTE: Scan parameters are now set via Config file
 
 // This routine reads ThresholdSummary files for a chip (produced by tuning scan +
 // routines), sets the ITHR appropriates, and then begins a threshold scan.
 // This program MUST be given a ThresholdSummary...dat filename as a command line argument.
-// The name must have the format ThresholdSummary_XXXXXX_XXXXXX_Chip#..., where # is the chip number; stuff past the chip name doesn't matter.
+// The name must have the format ThresholdSummary_XXXXXX_XXXXXX_Chip#..., where # is the chip
+// number; stuff past the chip name doesn't matter.
 
-TBoardType fBoardType;
-std::vector <TReadoutBoard *> fBoards;
-std::vector <TAlpide *>       fChips;
-TConfig *fConfig;
+TBoardType                   fBoardType;
+std::vector<TReadoutBoard *> fBoards;
+std::vector<TAlpide *>       fChips;
+TConfig *                    fConfig;
 
 int myNTriggers;
 int myMaskStages;
@@ -48,37 +48,38 @@ int myPixPerRegion;
 
 int myChargeStart;
 int myChargeStop;
-int myChargeStep;  // currently unused
+int myChargeStep; // currently unused
 
-int fEnabled = 0;  // variable to count number of enabled chips; leave at 0
+int fEnabled = 0; // variable to count number of enabled chips; leave at 0
 
-int**** HitData;
-int ChargePoints[100];
-int ievt = 0;
+int ****HitData;
+int     ChargePoints[100];
+int     ievt = 0;
 
-std::string summaryName; //for reading ThresholdSummary files in fillIthr
+std::string summaryName; // for reading ThresholdSummary files in fillIthr
 
-void InitHitData() {
-  HitData = new int***[16];
-  for (int i=0; i<16; ++i) {
-    HitData[i] = new int**[100];
-    for (int j=0; j<100; ++j) {
-      HitData[i][j] = new int*[512];
-      for (int k=0; k<512; ++k) {
+void InitHitData()
+{
+  HitData = new int ***[16];
+  for (int i = 0; i < 16; ++i) {
+    HitData[i] = new int **[100];
+    for (int j = 0; j < 100; ++j) {
+      HitData[i][j] = new int *[512];
+      for (int k = 0; k < 512; ++k) {
         HitData[i][j][k] = new int[1024];
       }
     }
   }
 }
 
-
-void DeleteHitData() {
+void DeleteHitData()
+{
   if (HitData) {
-    for (int i=0; i<16; ++i) {
+    for (int i = 0; i < 16; ++i) {
       if (HitData[i]) {
-        for (int j=0; j<100; ++j) {
+        for (int j = 0; j < 100; ++j) {
           if (HitData[i][j]) {
-            for (int k=0; k<512; ++k) {
+            for (int k = 0; k < 512; ++k) {
               delete[] HitData[i][j][k];
               HitData[i][j][k] = 0x0;
             }
@@ -95,8 +96,8 @@ void DeleteHitData() {
   }
 }
 
-
-void InitScanParameters() {
+void InitScanParameters()
+{
   myMaskStages   = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
   myPixPerRegion = fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
   myNTriggers    = fConfig->GetScanConfig()->GetParamValue("NINJ");
@@ -105,99 +106,113 @@ void InitScanParameters() {
   myChargeStep   = fConfig->GetScanConfig()->GetParamValue("CHARGESTEP");
 }
 
-
-void ClearHitData() {
-  for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
-    ChargePoints[icharge-myChargeStart] = icharge;
-    for (int ichip = 0; ichip < 16; ichip ++) {
-      for (int icol = 0; icol < 512; icol ++) {
-        for (int iaddr = 0; iaddr < 1024; iaddr ++) {
-          HitData[ichip][icharge-myChargeStart][icol][iaddr] = 0;
+void ClearHitData()
+{
+  for (int icharge = myChargeStart; icharge < myChargeStop; icharge++) {
+    ChargePoints[icharge - myChargeStart] = icharge;
+    for (int ichip = 0; ichip < 16; ichip++) {
+      for (int icol = 0; icol < 512; icol++) {
+        for (int iaddr = 0; iaddr < 1024; iaddr++) {
+          HitData[ichip][icharge - myChargeStart][icol][iaddr] = 0;
         }
       }
     }
   }
 }
 
-
-void CopyHitData(std::vector <TPixHit> *Hits, int charge) {
-  for (unsigned int ihit = 0; ihit < Hits->size(); ihit ++) {
-    HitData[Hits->at(ihit).chipId][charge-myChargeStart][Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address] ++;
+void CopyHitData(std::vector<TPixHit> *Hits, int charge)
+{
+  for (unsigned int ihit = 0; ihit < Hits->size(); ihit++) {
+    HitData[Hits->at(ihit).chipId][charge - myChargeStart]
+           [Hits->at(ihit).dcol + Hits->at(ihit).region * 16][Hits->at(ihit).address]++;
   }
   Hits->clear();
 }
 
-
-void WriteDataToFile (const char *fName, bool Recreate) {
+void WriteDataToFile(const char *fName, bool Recreate)
+{
   char  fNameChip[100];
   FILE *fp;
 
   char fNameTemp[100];
-  sprintf(fNameTemp,"%s", fName);
+  sprintf(fNameTemp, "%s", fName);
   std::cout << "WriteData:  fNameTemp = " << fNameTemp << std::endl;
-  strtok (fNameTemp, ".");
-  bool  HasData;
+  strtok(fNameTemp, ".");
+  bool HasData;
 
-  for (unsigned int ichip = 0; ichip < fChips.size(); ichip ++) {
+  for (unsigned int ichip = 0; ichip < fChips.size(); ichip++) {
     int chipId = fChips.at(ichip)->GetConfig()->GetChipId() & 0xf;
     int ctrInt = fChips.at(ichip)->GetConfig()->GetCtrInt();
-    if (!fChips.at(ichip)->GetConfig()->IsEnabled()) continue;  // write files only for enabled chips
+    if (!fChips.at(ichip)->GetConfig()->IsEnabled()) continue; // write files only for enabled chips
     if (fChips.size() > 1) {
       sprintf(fNameChip, "%s_Chip%d_%d.dat", fNameTemp, chipId, ctrInt);
     }
     else {
       sprintf(fNameChip, "%s.dat", fNameTemp);
     }
-    if (Recreate) fp = fopen(fNameChip, "w");
-    else          fp = fopen(fNameChip, "a");
+    if (Recreate)
+      fp = fopen(fNameChip, "w");
+    else
+      fp = fopen(fNameChip, "a");
 
-    for (unsigned int icol = 0; icol < 512; icol ++) {
-      for (unsigned int iaddr = 0; iaddr < 1024; iaddr ++) {
+    for (unsigned int icol = 0; icol < 512; icol++) {
+      for (unsigned int iaddr = 0; iaddr < 1024; iaddr++) {
         HasData = false;
-        for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
+        for (int icharge = myChargeStart; icharge < myChargeStop; icharge++) {
           if (HitData[chipId][icharge - myChargeStart][icol][iaddr] > 0) HasData = true;
         }
 
         if (HasData) {
-          for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
-            fprintf(fp, "%d %d %d %d\n", icol, iaddr, icharge, HitData[chipId][icharge - myChargeStart][icol][iaddr]);
-	  }
+          for (int icharge = myChargeStart; icharge < myChargeStop; icharge++) {
+            fprintf(fp, "%d %d %d %d\n", icol, iaddr, icharge,
+                    HitData[chipId][icharge - myChargeStart][icol][iaddr]);
+          }
         }
       }
     }
-    fclose (fp);
+    fclose(fp);
   }
 }
 
-
-void configureFromu(TAlpide *chip) {
-  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,  0x20);            // fromu config 1: digital pulsing (put to 0x20 for analogue)
-  chip->WriteRegister(Alpide::REG_FROMU_CONFIG2,  chip->GetConfig()->GetParamValue("STROBEDURATION"));  // fromu config 2: strobe length
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING1, chip->GetConfig()->GetParamValue("STROBEDELAYCHIP"));   // fromu pulsing 1: delay pulse - strobe (not used here, since using external strobe)
-  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, chip->GetConfig()->GetParamValue("PULSEDURATION"));   // fromu pulsing 2: pulse length
-  //return 0;
+void configureFromu(TAlpide *chip)
+{
+  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,
+                      0x20); // fromu config 1: digital pulsing (put to 0x20 for analogue)
+  chip->WriteRegister(
+      Alpide::REG_FROMU_CONFIG2,
+      chip->GetConfig()->GetParamValue("STROBEDURATION")); // fromu config 2: strobe length
+  chip->WriteRegister(Alpide::REG_FROMU_PULSING1,
+                      chip->GetConfig()->GetParamValue("STROBEDELAYCHIP")); // fromu pulsing 1:
+                                                                            // delay pulse - strobe
+                                                                            // (not used here, since
+                                                                            // using external
+                                                                            // strobe)
+  chip->WriteRegister(
+      Alpide::REG_FROMU_PULSING2,
+      chip->GetConfig()->GetParamValue("PULSEDURATION")); // fromu pulsing 2: pulse length
+                                                          // return 0;
 }
 
-
-void configureChip(TAlpide *chip) {
+void configureChip(TAlpide *chip)
+{
   AlpideConfig::BaseConfig(chip);
 
   configureFromu(chip);
 
-  AlpideConfig::ConfigureCMU (chip);
+  AlpideConfig::ConfigureCMU(chip);
 
-  //return 0;
+  // return 0;
 }
 
-
-void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard) {
-  char Config[1000];
+void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoard)
+{
+  char  Config[1000];
   FILE *fp = fopen(fName, "w");
 
-  chip     -> DumpConfig("", false, Config);
+  chip->DumpConfig("", false, Config);
   std::cout << Config << std::endl;
   fprintf(fp, "%s\n", Config);
-  if(daqBoard) daqBoard -> DumpConfig("", false, Config);
+  if (daqBoard) daqBoard->DumpConfig("", false, Config);
   fprintf(fp, "%s\n", Config);
   std::cout << Config << std::endl;
 
@@ -209,155 +224,160 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
   fprintf(fp, "CHARGESTART %i\n", myChargeStart);
   fprintf(fp, "CHARGESTOP %i\n", myChargeStop);
 
-
   fclose(fp);
 }
 
-
-void fillIthr(float *ithr) { //WIP
-  int old_vcas; //only current is used for now; the rest may be used later
-  int old_ith;
-  int goodPixels;
+void fillIthr(float *ithr)
+{                 // WIP
+  int   old_vcas; // only current is used for now; the rest may be used later
+  int   old_ith;
+  int   goodPixels;
   float current;
   float currentRMS;
   float noise;
   float noiseRMS;
-  char name[100];
+  char  name[100];
 
   std::cout << "Filling Ithr" << std::endl;
-  for(unsigned int i = 0; i < fChips.size(); i++) {
-    //get file; name of one of them is in summaryName.
-    //Only use first 34 chars of summaryName; insert chip # right after.
+  for (unsigned int i = 0; i < fChips.size(); i++) {
+    // get file; name of one of them is in summaryName.
+    // Only use first 34 chars of summaryName; insert chip # right after.
 
     sprintf(name, "%s%i_0.dat", summaryName.c_str(), i);
     FILE *fp = fopen(name, "r");
-    //load file into array
-    if(fp) {
+    // load file into array
+    if (fp) {
       int result = fscanf(fp, "%i %i %i %f %f %f %f", &old_vcas, &old_ith, &goodPixels, &current,
-          &currentRMS, &noise, &noiseRMS);
-      if (result!=7) {
-          std::cout << "Did not read all 7 values" << std::endl;
+                          &currentRMS, &noise, &noiseRMS);
+      if (result != 7) {
+        std::cout << "Did not read all 7 values" << std::endl;
       }
-      //current=60;  //TESTING
-      ithr[i]=current;
-      //std::cout << "Found ITHR = " << current << " in " << name << std::endl;
+      // current=60;  //TESTING
+      ithr[i] = current;
+      // std::cout << "Found ITHR = " << current << " in " << name << std::endl;
       fclose(fp);
-    } else {
+    }
+    else {
       std::cout << "Unable to open file " << name << std::endl;
-      ithr[i]=-1;
+      ithr[i] = -1;
     }
   }
 }
 
-
-
-void scan(int VCASN_mean, bool automated) {
-  unsigned char         buffer[1024*4000];
+void scan(int VCASN_mean, bool automated)
+{
+  unsigned char         buffer[1024 * 4000];
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int                   nBad = 0, nSkipped = 0, prioErrors =0, errors8b10b = 0;
-  float *ithr = new float[14]; //shouldn't have >14 chips //[fChips.size()]??
+  int                   nBad = 0, nSkipped = 0, prioErrors = 0, errors8b10b = 0;
+  float *               ithr = new float[14]; // shouldn't have >14 chips //[fChips.size()]??
   TBoardHeader          boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
-  std::vector<int> myVPULSEH;
+  std::vector<int>      myVPULSEH;
 
-  TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC*> (fBoards.at(0));
+  TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(fBoards.at(0));
 
   Hits->clear();
   if (myMOSAIC) {
     myMOSAIC->StartRun();
   }
 
-  fillIthr(ithr); //NEW--fill ithr with calibrated values for each chip
+  fillIthr(ithr); // NEW--fill ithr with calibrated values for each chip
 
-  for (unsigned int i = 0; i < fChips.size(); i++) { //Read VPULSEH from Config and save it at vector temporarily
+  for (unsigned int i = 0; i < fChips.size();
+       i++) { // Read VPULSEH from Config and save it at vector temporarily
     myVPULSEH.push_back(fChips.at(i)->GetConfig()->GetParamValue("VPULSEH"));
-    //NEW:  set ITHR for each chip here!
+    // NEW:  set ITHR for each chip here!
   }
 
-  if(automated) {
-    for (int i = (int)fChips.size()-1; i>-1; i--) { //write VCASN_mean to all chips
-      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+  if (automated) {
+    for (int i = (int)fChips.size() - 1; i > -1; i--) { // write VCASN_mean to all chips
+      if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
       fChips.at(i)->WriteRegister(Alpide::REG_VCASN, VCASN_mean);
-      fChips.at(i)->WriteRegister(Alpide::REG_VCASN2, VCASN_mean+12); //added recently
+      fChips.at(i)->WriteRegister(Alpide::REG_VCASN2, VCASN_mean + 12); // added recently
     }
   }
 
   std::cout << "Initializing Ithr array" << std::endl;
 
-  for (int i = (int)fChips.size()-1; i>-1; i--) {
-    if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-    std::cout << "Setting REG_ITHR to " << (int)(ithr[i]+.5) << std::endl;
-    fChips.at(i)->WriteRegister(Alpide::REG_ITHR, (int)(ithr[i]+.5));
+  for (int i = (int)fChips.size() - 1; i > -1; i--) {
+    if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
+    std::cout << "Setting REG_ITHR to " << (int)(ithr[i] + .5) << std::endl;
+    fChips.at(i)->WriteRegister(Alpide::REG_ITHR, (int)(ithr[i] + .5));
   }
   std::cout << "Confirm successful register write:" << std::endl;
   for (unsigned int i = 0; i < fChips.size(); i++) {
     uint16_t readVal;
-    if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+    if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
     fChips.at(i)->ReadRegister(Alpide::REG_ITHR, readVal);
     std::cout << "Chip " << i << ": " << (int)readVal << std::endl;
   }
 
-  for (int istage = 0; istage < myMaskStages; istage ++) {
+  for (int istage = 0; istage < myMaskStages; istage++) {
     std::cout << "Mask stage " << istage << std::endl;
-    for (unsigned int i = 0; i < fChips.size(); i ++) {
-      if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
+    for (unsigned int i = 0; i < fChips.size(); i++) {
+      if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
       AlpideConfig::ConfigureMaskStage(fChips.at(i), myPixPerRegion, istage);
     }
 
-    for (int icharge = myChargeStart; icharge < myChargeStop; icharge ++) {
-      //std::cout << "Charge = " << icharge << std::endl;
-      for (unsigned int i = 0; i < fChips.size(); i ++) {
-        if (! fChips.at(i)->GetConfig()->IsEnabled()) continue;
-        if (ithr[i] == -1) continue;  //Summary file does not exist
+    for (int icharge = myChargeStart; icharge < myChargeStop; icharge++) {
+      // std::cout << "Charge = " << icharge << std::endl;
+      for (unsigned int i = 0; i < fChips.size(); i++) {
+        if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
+        if (ithr[i] == -1) continue; // Summary file does not exist
 
-        fChips.at(i)->WriteRegister (Alpide::REG_VPULSEL, myVPULSEH[i] - icharge);  //Automatically matches max pulse = VPULSEH in config
+        fChips.at(i)->WriteRegister(
+            Alpide::REG_VPULSEL,
+            myVPULSEH[i] - icharge); // Automatically matches max pulse = VPULSEH in config
       }
       fBoards.at(0)->Trigger(myNTriggers);
 
-//std::cout << " >>>>" << myMOSAIC->GetConfig()->GetPollingDataTimeout() << endl;
+      // std::cout << " >>>>" << myMOSAIC->GetConfig()->GetPollingDataTimeout() << endl;
 
-      int itrg = 0;
+      int itrg   = 0;
       int trials = 0;
-      while(itrg < myNTriggers * fEnabled) {
-        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) == -1) { // no event available in buffer yet, wait a bit
+      while (itrg < myNTriggers * fEnabled) {
+        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) ==
+            -1) {       // no event available in buffer yet, wait a bit
           usleep(1000); // Increment from 100us
-          trials ++;
+          trials++;
           if (trials == 10) {
-        	std::cout << "Reached 10 timeouts, giving up on this event" << std::endl;
+            std::cout << "Reached 10 timeouts, giving up on this event" << std::endl;
             itrg = myNTriggers * fEnabled;
-            nSkipped ++;
+            nSkipped++;
             trials = 0;
           }
           continue;
         }
         else {
-          BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer, n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+          BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer,
+                                    n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
           if (boardInfo.decoder10b8bError) errors8b10b++;
           // decode Chip event
-          int n_bytes_chipevent=n_bytes_data-n_bytes_header;//-n_bytes_trailer;
+          int n_bytes_chipevent = n_bytes_data - n_bytes_header; //-n_bytes_trailer;
           if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
-          if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0, boardInfo.channel, prioErrors)) {
-   	    	std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
-	    	nBad ++;
+          if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
+                                          boardInfo.channel, prioErrors)) {
+            std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
+            nBad++;
             if (nBad > 10) continue;
-	    	FILE *fDebug = fopen ("DebugData.dat", "a");
+            FILE *fDebug = fopen("DebugData.dat", "a");
             fprintf(fDebug, "Bad event:\n");
-            for (int iByte=0; iByte<n_bytes_data + 1; ++iByte) {
-              fprintf (fDebug, "%02x ", (int) buffer[iByte]);
+            for (int iByte = 0; iByte < n_bytes_data + 1; ++iByte) {
+              fprintf(fDebug, "%02x ", (int)buffer[iByte]);
             }
             fprintf(fDebug, "\nFull Event:\n");
-            for (unsigned int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte ++) {
-              fprintf (fDebug, "%02x ", (int) fDebugBuffer.at(ibyte));
+            for (unsigned int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte++) {
+              fprintf(fDebug, "%02x ", (int)fDebugBuffer.at(ibyte));
             }
             fprintf(fDebug, "\n\n");
-            fclose (fDebug);
-	  	  }
+            fclose(fDebug);
+          }
           itrg++;
         }
       }
-	  //usleep(100);
+      // usleep(100);
 
-      //std::cout << "Number of hits: " << Hits->size() << std::endl;
+      // std::cout << "Number of hits: " << Hits->size() << std::endl;
       CopyHitData(Hits, icharge);
     }
   }
@@ -366,105 +386,106 @@ void scan(int VCASN_mean, bool automated) {
     myMOSAIC->StopRun();
   }
 
-
   std::cout << std::endl;
   if (myMOSAIC) {
     myMOSAIC->StopRun();
     std::cout << "Total number of 8b10b decoder errors: " << errors8b10b << std::endl;
   }
-  std::cout << "Number of corrupt events:             " << nBad       << std::endl;
-  std::cout << "Number of skipped points:             " << nSkipped   << std::endl;
+  std::cout << "Number of corrupt events:             " << nBad << std::endl;
+  std::cout << "Number of skipped points:             " << nSkipped << std::endl;
   std::cout << "Priority encoder errors:              " << prioErrors << std::endl;
   std::cout << std::endl;
   std::cout << fEnabled << " chips were enabled for scan." << std::endl << std::endl;
 }
 
-
-int main(int argc, char** argv) {
-  //first arg MUST be the summary file name.  second arg (optional) is VCASN_mean.
-  if(!argv[1]) {
+int main(int argc, char **argv)
+{
+  // first arg MUST be the summary file name.  second arg (optional) is VCASN_mean.
+  if (!argv[1]) {
     std::cout << "ERROR:  No Summary file provided by the command line!" << std::endl;
     return 1;
   }
-  summaryName = argv[1]; //use the first 35 characters ONLY--see above
-  summaryName = summaryName.substr(0,35);
+  summaryName = argv[1]; // use the first 35 characters ONLY--see above
+  summaryName = summaryName.substr(0, 35);
   std::cout << "Summary " << summaryName << std::endl;
-  //extract VCASN_mean
-  int VCASN_mean = 0;
+  // extract VCASN_mean
+  int  VCASN_mean = 0;
   bool automated;
-  if(argc==3) {
-    automated = true;
-    VCASN_mean = (int)(strtol(argv[2], NULL, 10)+.5);
-    //std::cout << "VCANS_mean=" << VCASN_mean << std::endl;
-  } else if(argc!=2) {
+  if (argc == 3) {
+    automated  = true;
+    VCASN_mean = (int)(strtol(argv[2], NULL, 10) + .5);
+    // std::cout << "VCANS_mean=" << VCASN_mean << std::endl;
+  }
+  else if (argc != 2) {
     std::cout << "ERROR: wrong number of arguments!  argc=" << argc << std::endl;
   }
 
   decodeCommandParameters(argc, argv);
   InitHitData();
-  initSetup(fConfig,  &fBoards,  &fBoardType, &fChips);
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
   InitScanParameters();
   char Suffix[20], fName[100]; //, Config[1000];
 
   ClearHitData();
-  time_t       t = time(0);   // get time now
-  struct tm *now = localtime( & t );
-  sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+  time_t     t   = time(0); // get time now
+  struct tm *now = localtime(&t);
+  sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday,
+          now->tm_hour, now->tm_min, now->tm_sec);
 
-  TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ*> (fBoards.at(0));
+  TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(fBoards.at(0));
 
   if (fBoards.size() == 1) {
 
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_GRST);
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_PRST);
+    fBoards.at(0)->SendOpCode(Alpide::OPCODE_GRST);
+    fBoards.at(0)->SendOpCode(Alpide::OPCODE_PRST);
 
-    for (unsigned int i = 0; i < fChips.size(); i ++) {
+    for (unsigned int i = 0; i < fChips.size(); i++) {
       if (fChips.at(i)->GetConfig()->IsEnabled()) {
-        fEnabled ++;
-        configureChip (fChips.at(i));
+        fEnabled++;
+        configureChip(fChips.at(i));
       }
       else if (fChips.at(i)->GetConfig()->HasEnabledSlave()) {
-	AlpideConfig::BaseConfigPLL(fChips.at(i));
+        AlpideConfig::BaseConfigPLL(fChips.at(i));
       }
     }
 
     std::cout << "Found " << fEnabled << " enabled chips." << std::endl;
-    fBoards.at(0)->SendOpCode (Alpide::OPCODE_RORST);
+    fBoards.at(0)->SendOpCode(Alpide::OPCODE_RORST);
 
     // put your test here...
     if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
-      // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns * strobe delay
+      // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns *
+      // strobe delay
       // pulse delay cannot be 0, therefore set strobe delay to 0 and use only pulse delay
-      fBoards.at(0)->SetTriggerConfig (true, false,
-                                       0,
-                                       2 * fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
-      fBoards.at(0)->SetTriggerSource (trigExt);
+      fBoards.at(0)->SetTriggerConfig(
+          true, false, 0, 2 * fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
+      fBoards.at(0)->SetTriggerSource(trigExt);
     }
     else {
-      fBoards.at(0)->SetTriggerConfig (true, true,
-                                       fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
-                                       fBoards.at(0)->GetConfig()->GetParamValue("PULSEDELAY"));
-      fBoards.at(0)->SetTriggerSource (trigInt);
+      fBoards.at(0)->SetTriggerConfig(true, true,
+                                      fBoards.at(0)->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
+                                      fBoards.at(0)->GetConfig()->GetParamValue("PULSEDELAY"));
+      fBoards.at(0)->SetTriggerSource(trigInt);
     }
 
     scan(VCASN_mean, automated);
 
     std::cout << "SUFFIX: " << Suffix << std::endl;
     sprintf(fName, "Data/ThresholdScan_%s.dat", Suffix);
-    WriteDataToFile (fName, true);
+    WriteDataToFile(fName, true);
     sprintf(fName, "Data/ScanConfig_%s_0.cfg", Suffix);
 
     if (myDAQBoard) {
-      WriteScanConfig (fName, fChips.at(0), myDAQBoard);
+      WriteScanConfig(fName, fChips.at(0), myDAQBoard);
       myDAQBoard->PowerOff();
       delete myDAQBoard;
     }
   }
 
-  if(true) {
+  if (true) {
     std::cout << "Passing file prefix " << Suffix << std::endl;
     FILE *id;
-    id=fopen("filename.txt", "w");
+    id = fopen("filename.txt", "w");
     fprintf(id, "%s", Suffix);
     fclose(id);
   }

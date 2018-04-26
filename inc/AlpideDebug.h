@@ -13,7 +13,7 @@ namespace Alpide {
   } TBMUDebugStream;
 
   typedef struct {
-    int  DataFIFOReadPointer [3];
+    int  DataFIFOReadPointer[3];
     int  DataFIFOWritePointer[3];
     int  BusyFIFOReadPointer;
     int  BusyFIFOWritePointer;
@@ -31,7 +31,7 @@ namespace Alpide {
   } TDMUDebugStream;
 
   typedef struct {
-    int  FrameStartFIFOReadPointer [3];
+    int  FrameStartFIFOReadPointer[3];
     int  FrameStartFIFOWritePointer[3];
     int  FrameEndFIFOReadPointer;
     int  FrameEndFIFOWritePointer;
@@ -43,18 +43,18 @@ namespace Alpide {
   } TTRUDebugStream;
 
   typedef struct {
-    int  MEBFIFOReadPointer [32];
+    int  MEBFIFOReadPointer[32];
     int  MEBFIFOWritePointer[32];
-    int  MEBFIFOSM          [32];
-    bool SEUErrorOR         [32];
-    int  RegionReadoutSM    [32];
-    int  RegionValidDM      [32];
-    int  GenRgnSM           [32];
-    int  FIFOSelfTestSM     [32];
-    int  RoClockEnableSM    [32];
-    int  TruClockEnableSM   [32];
-    int  CfgClockEnableSM   [32];
-    int  FtClockEnableSM    [32];
+    int  MEBFIFOSM[32];
+    bool SEUErrorOR[32];
+    int  RegionReadoutSM[32];
+    int  RegionValidDM[32];
+    int  GenRgnSM[32];
+    int  FIFOSelfTestSM[32];
+    int  RoClockEnableSM[32];
+    int  TruClockEnableSM[32];
+    int  CfgClockEnableSM[32];
+    int  FtClockEnableSM[32];
   } TRRUDebugStream;
 
   typedef struct {
@@ -64,16 +64,16 @@ namespace Alpide {
     int  StrobeCounter;
     int  FrameCounter;
     int  ReadoutCounter;
-    //int  BunchCounter;
-    int  StrobeManagerSM;
-    int  FlushValue;
-    int  WriterSM;
-    int  ReaderSM;
-    int  PRSTSM;
-    int  StrobeValue;
-    int  MemselValue;
-    int  BusyManagerSM;
-    int  EventInMEB;
+    // int  BunchCounter;
+    int StrobeManagerSM;
+    int FlushValue;
+    int WriterSM;
+    int ReaderSM;
+    int PRSTSM;
+    int StrobeValue;
+    int MemselValue;
+    int BusyManagerSM;
+    int EventInMEB;
   } TFromuDebugStream;
 
   typedef struct {
@@ -90,13 +90,13 @@ namespace Alpide {
 using namespace Alpide;
 
 namespace AlpideDebug {
-  bool ReadStream          (TAlpide *chip, TRegister reg, uint16_t *stream, int len, uint16_t Header);
-  bool GetBMUDebugStream   (TAlpide *chip, TBMUDebugStream &stream);
-  bool GetDMUDebugStream   (TAlpide *chip, TDMUDebugStream &stream);
-  bool GetTRUDebugStream   (TAlpide *chip, TTRUDebugStream &stream);
-  bool GetRRUDebugSteam    (TAlpide *chip, TRRUDebugStream &stream);
-  bool GetFromuDebugStream (TAlpide *chip, TFromuDebugStream &stream);
-  bool GetADCDebugStream   (TAlpide *chip, TADCDebugStream &stream);
+  bool ReadStream(TAlpide *chip, TRegister reg, uint16_t *stream, int len, uint16_t Header);
+  bool GetBMUDebugStream(TAlpide *chip, TBMUDebugStream &stream);
+  bool GetDMUDebugStream(TAlpide *chip, TDMUDebugStream &stream);
+  bool GetTRUDebugStream(TAlpide *chip, TTRUDebugStream &stream);
+  bool GetRRUDebugSteam(TAlpide *chip, TRRUDebugStream &stream);
+  bool GetFromuDebugStream(TAlpide *chip, TFromuDebugStream &stream);
+  bool GetADCDebugStream(TAlpide *chip, TADCDebugStream &stream);
 }
 
 #endif

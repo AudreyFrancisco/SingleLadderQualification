@@ -5,10 +5,11 @@ GIT_VERSION:=$(shell git describe --dirty --always)
 LIBMOSAIC_DIR=./MosaicSrc/libmosaic
 LIBPOWERBOARD_DIR=./MosaicSrc/libpowerboard
 LIBALUCMS_DIR=./DataBaseSrc
-STATIC_LIBS=$(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR)
+LIBSCOPECONTROL_DIR=./ScopeControlSrc
+STATIC_LIBS=$(LIBMOSAIC_DIR) $(LIBPOWERBOARD_DIR) $(LIBALUCMS_DIR) $(LIBSCOPECONTROL_DIR)
 
-INCLUDE=-I. -Iinc -I/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I/usr/include/libxml2
-LIB=-L/usr/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic -L$(LIBALUCMS_DIR) -lalucms -lxml2 -lcurl
+INCLUDE=-I. -Iinc -isystem/usr/local/include -I./MosaicSrc -I$(LIBMOSAIC_DIR)/include -I$(LIBPOWERBOARD_DIR)/include -I$(LIBALUCMS_DIR) -I$(LIBSCOPECONTROL_DIR) -I$(LIBSCOPECONTROL_DIR)/serial/include -isystem/opt/local/include -isystem/usr/include/libxml2 -isystem/opt/local/include/libxml2
+LIB=-L/usr/local/lib -L/opt/local/lib -L$(LIBPOWERBOARD_DIR) -lpowerboard -L$(LIBMOSAIC_DIR) -lmosaic -L$(LIBALUCMS_DIR) -lalucms -lscopecontrol -L$(LIBSCOPECONTROL_DIR) -lrt -lxml2 -lcurl
 CFLAGS= -O2 -pipe -fPIC -g -std=c++11 -Wall -Werror -pedantic $(INCLUDE) -DVERSION=\"$(GIT_VERSION)\"
 
 LINUX_LINKFLAGS=
@@ -25,7 +26,11 @@ LIBRARY=libalpide.so
 ANALYSIS_LIBRARY=libalpide_analysis.so
 
 ### ROOT specific variables
-ROOTCONFIG   := $(shell which root-config)
+ifdef ROOTSYS
+  ROOTCONFIG   := $(ROOTSYS)/bin/root-config
+else
+  ROOTCONFIG   := $(shell which root-config)
+endif
 ROOTCFLAGS   := $(shell $(ROOTCONFIG) --cflags | sed -e 's/-pthread//g')
 ROOTLDFLAGS  := $(shell $(ROOTCONFIG) --ldflags)
 ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs | sed -e 's/-lpthread//g')
@@ -35,12 +40,13 @@ ROOTLIBS     := $(shell $(ROOTCONFIG) --glibs | sed -e 's/-lpthread//g')
 BASE_CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp AlpideDebug.cpp THIC.cpp \
   USB.cpp USBHelpers.cpp TReadoutBoardDAQ.cpp TReadoutBoardMOSAIC.cpp TChipConfig.cpp \
   TBoardConfig.cpp TBoardConfigDAQ.cpp TBoardConfigMOSAIC.cpp TConfig.cpp TPowerBoard.cpp \
-  TPowerBoardConfig.cpp BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp \
+  TPowerBoardConfig.cpp BoardDecoder.cpp SetupHelpers.cpp THisto.cpp TScanAnalysis.cpp TFastPowerAnalysis.cpp\
   TPowerAnalysis.cpp TDigitalAnalysis.cpp TDigitalWFAnalysis.cpp TFifoAnalysis.cpp TLocalBusAnalysis.cpp \
-  TDACScan.cpp \
-  TNoiseAnalysis.cpp TScan.cpp TFifoTest.cpp TPowerTest.cpp TSCurveScan.cpp TDigitalScan.cpp \
+  TDACScan.cpp TDataTaking.cpp TReadoutTest.cpp TEnduranceCycle.cpp TCycleAnalysis.cpp TReadoutAnalysis.cpp \
+  TNoiseAnalysis.cpp TScan.cpp TFifoTest.cpp TPowerTest.cpp TFastPowerTest.cpp TSCurveScan.cpp TDigitalScan.cpp \
   TNoiseOccupancy.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp Common.cpp \
-  TReadoutBoardRU.cpp TBoardConfigRU.cpp TApplyMask.cpp THicConfig.cpp
+  TReadoutBoardRU.cpp TBoardConfigRU.cpp TApplyMask.cpp THicConfig.cpp TDCTRLMeasurement.cpp TDCTRLAnalysis.cpp \
+  TEyeMeasurement.cpp
 BASE_OBJS = $(BASE_CLASSES:.cpp=.o)
 
 RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp \
@@ -48,13 +54,13 @@ RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverM
 RU_OBJS = $(RU_SOURCES:.cpp=.o)
 
 MOSAIC_SOURCES = MosaicSrc/alpidercv.cpp MosaicSrc/controlinterface.cpp MosaicSrc/pexception.cpp \
-  MosaicSrc/TAlpideDataParser.cpp
+  MosaicSrc/TAlpideDataParser.cpp MosaicSrc/trgrecorderparser.cpp
 MOSAIC_OBJS = $(MOSAIC_SOURCES:.cpp=.o)
 
 OBJS=$(BASE_OBJS) $(RU_OBJS) $(MOSAIC_OBJS)
 
 ### Source files using ROOT classes
-ROOT_CLASSES= TThresholdAnalysis.cpp TApplyTuning.cpp
+ROOT_CLASSES= TSCurveAnalysis.cpp TApplyTuning.cpp
 ROOT_OBJS  = $(ROOT_CLASSES:.cpp=.o)
 
 ### Dependencies
@@ -67,21 +73,17 @@ EXE = startclk stopclk
 # test_* executables without ROOT
 TEST_EXE = test_mosaic test_noiseocc test_threshold test_digitalscan test_fifo test_dacscan \
   test_pulselength test_source test_poweron test_noiseocc_ext test_temperature test_readoutunit \
-  test_localbus test_chip_count test_alucms test_eyescan
+  test_localbus test_chip_count test_alucms test_dacscan_voltage test_supply_voltage test_GRST test_scope test_eyescan
 EXE += $(TEST_EXE)
-
-#
-TEST_HS = test_GRST test_scantest_digital
-EXE += $(TEST_HS)
 
 # test_* executables with ROOT
 TEST_EXE_ROOT =  test_roottest test_scantest test_threshold_v1 test_tuneITHR test_ITHRthreshold \
-  test_tuneVCASN test_VCASNthreshold
+  test_tuneVCASN test_VCASNthreshold test_scantest_digital
 EXE += $(TEST_EXE_ROOT)
 
 
 #### TARGETS ####
-all: $(EXE) Config.cfg
+all: check-env $(EXE) Config.cfg githooks
 
 ### Config.cfg
 Config.cfg: ConfigTemplate.cfg
@@ -102,10 +104,6 @@ stopclk: exe/main_stopclk.cpp $(DEPS)
 
 startclk: exe/main_startclk.cpp $(DEPS)
 	$(CC) -o startclk $(OBJS) $(CFLAGS) $< $(LINKFLAGS)
-
-#
-$(TEST_HS): test_% : exe/main_%.cpp $(DEPS)
-	$(CC) -o $@ $(OBJS) $(CFLAGS) $< $(LINKFLAGS)
 
 ### DYNAMIC LIBRARIES
 lib: $(DEPS)
@@ -136,6 +134,7 @@ clean:
 	rm -rf MosaicSrc/*.o
 	rm -rf ReadoutUnitSrc/*.o
 	$(MAKE) -C $(LIBALUCMS_DIR) clean
+	$(MAKE) -C $(LIBSCOPECONTROL_DIR) clean
 
 clean-all:	clean
 	rm -rf test_*
@@ -145,5 +144,22 @@ clean-all:	clean
 	$(MAKE) -C $(LIBMOSAIC_DIR) cleanall
 	$(MAKE) -C $(LIBPOWERBOARD_DIR) cleanall
 	$(MAKE) -C $(LIBALUCMS_DIR) clean-all
+	$(MAKE) -C $(LIBSCOPECONTROL_DIR) clean-all
 
-.PHONY:	all clean clean-all $(STATIC_LIBS) lib lib_analysis
+check-env:
+ifndef ROOTCONFIG
+	$(error ROOTSYS environment variable is undefined and ROOT not found in path. Update environment or run rootdir/bin/thisroot.sh)
+endif
+
+## clang format (formatting + testing)
+format:
+	/bin/bash -c './.format.sh'
+
+format-check:
+	/bin/bash -c './.format-check.sh'
+
+### Config.cfg
+githooks:
+	/bin/bash -c 'if [[ -d .git/hooks ]]; then cp -v .pre-commit-clang-format .git/hooks/pre-commit ; else echo "could not install pre-commit hook for the format checking"; fi'
+
+.PHONY:	all clean clean-all $(STATIC_LIBS) lib lib_analysis format format-check githooks

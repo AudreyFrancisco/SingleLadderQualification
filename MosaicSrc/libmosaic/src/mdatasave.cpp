@@ -21,60 +21,55 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
-#include <stdio.h>
-#include <sstream>
+#include "mdatasave.h"
 #include "mboard.h"
 #include "mexception.h"
-#include "mdatasave.h"
-
+#include <sstream>
+#include <stdio.h>
 
 MDataSave::MDataSave()
 {
-	eventSize = 0;
-	saveFunction = NULL;
+  eventSize    = 0;
+  saveFunction = NULL;
 }
 
-void MDataSave::flush()
-{
-}
-
+void MDataSave::flush() {}
 
 // parse the data starting from begin of buffer
 long MDataSave::parse(int numClosed)
 {
-	unsigned char *p = (unsigned char*) &dataBuffer[0];
+  unsigned char *p = (unsigned char *)&dataBuffer[0];
 
-	// check avalaible data size
-	if (dataBufferUsed < numClosed*eventSize){
-		std::stringstream sstm;
-		sstm << "Parser called with " << numClosed << " closed events of " <<
-							eventSize << " bytes but datasize is only " << 
-							dataBufferUsed << " bytes";
-		throw MDataParserError(sstm.str());
-	}
+  // check avalaible data size
+  if (dataBufferUsed < numClosed * eventSize) {
+    std::stringstream sstm;
+    sstm << "Parser called with " << numClosed << " closed events of " << eventSize
+         << " bytes but datasize is only " << dataBufferUsed << " bytes";
+    throw MDataParserError(sstm.str());
+  }
 
+  // save the data
+  for (int i = 0; i < numClosed; i++) {
+    if (saveFunction != NULL) {
+      saveFunction(NULL, 0, (char *)p, eventSize);
+    }
+    p += eventSize;
+  }
 
-	// save the data
-	for (int i=0; i<numClosed; i++){
-		if (saveFunction!=NULL){
-			saveFunction(NULL, 0, (char *) p, eventSize);
-		}
-		p+=eventSize;
-	}
-
-	if ((dataBufferUsed - numClosed*eventSize) > eventSize){
-		std::stringstream sstm;
-		sstm << "after parsing buffer content lenght (" << (dataBufferUsed - numClosed*eventSize) << 
-				") is greater then eventSize(" << eventSize << ")";
-		throw MDataParserError(sstm.str());
-		// printf("ERROR: GenConsumer::parse after parsing buffer content lenght (%ld) is greater then eventSize(%ld)\n", 
-		//					dataBufferUsed - numClosed*eventSize, eventSize);
-	}
-	return 	numClosed*eventSize;
+  if ((dataBufferUsed - numClosed * eventSize) > eventSize) {
+    std::stringstream sstm;
+    sstm << "after parsing buffer content lenght (" << (dataBufferUsed - numClosed * eventSize)
+         << ") is greater then eventSize(" << eventSize << ")";
+    throw MDataParserError(sstm.str());
+    // printf("ERROR: GenConsumer::parse after parsing buffer content lenght (%ld) is greater then
+    // eventSize(%ld)\n",
+    //					dataBufferUsed - numClosed*eventSize, eventSize);
+  }
+  return numClosed * eventSize;
 }

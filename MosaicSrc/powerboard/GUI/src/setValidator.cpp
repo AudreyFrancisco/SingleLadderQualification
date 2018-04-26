@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2015.
@@ -29,29 +29,20 @@
  */
 #include "setValidator.h"
 
-setValidator::setValidator(QObject *parent) 
-	: QDoubleValidator( parent )
-{
-}
+setValidator::setValidator(QObject *parent) : QDoubleValidator(parent) {}
 
 setValidator::setValidator(double bottom, double top, int decimals, QObject *parent)
-	: QDoubleValidator( bottom, top, decimals, parent )
+    : QDoubleValidator(bottom, top, decimals, parent)
 {
 }
 
-setValidator::~setValidator()
-{
-}
+setValidator::~setValidator() {}
 
 void setValidator::fixup(QString &input) const
 {
-	double value = input.toFloat();
-	if (value < bottom())
-		value = bottom();
-	if (value > top())
-		value = top();
+  double value                = input.toFloat();
+  if (value < bottom()) value = bottom();
+  if (value > top()) value    = top();
 
-	input.setNum(value, 'f', decimals());
+  input.setNum(value, 'f', decimals());
 }
-
-

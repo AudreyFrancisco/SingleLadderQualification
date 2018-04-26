@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -31,30 +31,26 @@
 #ifndef MTRIGGERCONTROL_H
 #define MTRIGGERCONTROL_H
 
-#include <stdint.h>
 #include "mwbbslave.h"
+#include <stdint.h>
+#include <string>
 
-class MTriggerControl : public MWbbSlave
-{
+class MTriggerControl : public MWbbSlave {
 public:
-    MTriggerControl(WishboneBus *wbbPtr, uint32_t baseAddress);
-	void addEnableExtTrigger(bool en, bool levelSensitive=0);
-	void getTriggerCounter(uint32_t *counter);
+  MTriggerControl(WishboneBus *wbbPtr, uint32_t baseAddress);
+  void addEnableExtTrigger(bool en, bool levelSensitive = 0);
+  void getTriggerCounter(uint32_t *counter);
+  std::string dumpRegisters();
 
-private:					// WBB Slave registers map 
-	enum regAddress_e {
-		regCfg						= 0,			// enable external trigger
-		regTriggerCounter			= 1,			// Trigger counter - Read only. Reset by RUN signal
-		regTimeL					= 2,			// TIMER from first trigger bits 31:0 - Read only. Reset by RUN signal
-		regTimeH					= 3,			// TIMER from first trigger bits 63:32 - Read only. Reset by RUN signal
-	};
+private: // WBB Slave registers map
+  enum regAddress_e {
+    regCfg            = 0, // enable external trigger
+    regTriggerCounter = 1, // Trigger counter - Read only. Reset by RUN signal
+    regTimeL          = 2, // TIMER from first trigger bits 31:0 - Read only. Reset by RUN signal
+    regTimeH          = 3, // TIMER from first trigger bits 63:32 - Read only. Reset by RUN signal
+  };
 
-	enum cfgBits_e {
-		EN_EXT_TRIGGER			= (1<<0),
-		EXT_TRG_LEVEL			= (1<<1)
-	};
+  enum cfgBits_e { EN_EXT_TRIGGER = (1 << 0), EXT_TRG_LEVEL = (1 << 1) };
 };
-
-
 
 #endif // MTRIGGERCONTROL_H

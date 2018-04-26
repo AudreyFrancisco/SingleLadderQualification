@@ -22,7 +22,8 @@ LIB_SRC = 		src/genconsumer.cpp \
 				src/mtriggercontrol.cpp \
 				src/mwbbslave.cpp \
 				src/pulser.cpp \
-				src/trgrecorder.cpp
+				src/trgrecorder.cpp \
+				src/mcoordinator.cpp
 
 
 LIB_OBJS = $(LIB_SRC:.cpp=.o)

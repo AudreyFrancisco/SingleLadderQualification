@@ -2,21 +2,18 @@
 #define SCANTHREAD_H
 #include <QThread>
 #include <QtCore>
-class ScanThread:public QObject
-{
-    Q_OBJECT
-
-
+class ScanThread : public QObject {
+  Q_OBJECT
 
 signals:
-    void resultReady();
+  void resultReady();
 
 public slots:
-    void process();
-public:
-    ScanThread();
-    //void run();
+  void process();
 
+public:
+  ScanThread();
+  // void run();
 };
 
 #endif // SCANTHREAD_H

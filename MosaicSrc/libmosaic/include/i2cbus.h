@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
@@ -31,49 +31,34 @@
 #ifndef I2CBUS_H
 #define I2CBUS_H
 
-#include <stdint.h>
 #include "mwbbslave.h"
+#include <stdint.h>
 
-class I2Cbus: public MWbbSlave
-{
+class I2Cbus : public MWbbSlave {
 public:
-	enum readWriteN_e {
-		I2C_Write 				= 0,
-		I2C_Read 				= 1
-		};
-	typedef readWriteN_e readWriteN_t;
+  enum readWriteN_e { I2C_Write = 0, I2C_Read = 1 };
+  typedef readWriteN_e readWriteN_t;
 
-	enum readWriteFlags_e {
-		RWF_start			= 0x01,
-		RWF_stop			= 0x02,
-		RWF_dontAck			= 0x04
-	};
-	typedef readWriteFlags_e readWriteFlags_t;
+  enum readWriteFlags_e { RWF_start = 0x01, RWF_stop = 0x02, RWF_dontAck = 0x04 };
+  typedef readWriteFlags_e readWriteFlags_t;
 
 public:
-    I2Cbus(WishboneBus *wbbPtr, uint32_t baseAddress);
-	void addAddress(uint8_t address, readWriteN_t rw);
-	void addWriteData(uint8_t d, uint32_t flags=0);
-	void addRead(uint32_t *d, uint32_t flags=0);
-	void addReadParIn(uint32_t *d);
-	void execute();
+  I2Cbus(WishboneBus *wbbPtr, uint32_t baseAddress);
+  void addAddress(uint8_t address, readWriteN_t rw);
+  void addWriteData(uint8_t d, uint32_t flags = 0);
+  void addRead(uint32_t *d, uint32_t flags = 0);
+  void addReadParIn(uint32_t *d);
+  void execute();
 
-private:					// WBB Slave registers map 
-	enum regAddress_e {
-		regWriteAdd				= 0,
-		regReadAdd 				= 1,
-		regParInAdd				= 2
-		};
+private: // WBB Slave registers map
+  enum regAddress_e { regWriteAdd = 0, regReadAdd = 1, regParInAdd = 2 };
 
-	enum writeRegBits_e {
-		I2C_STOP_BIT		= (1<<31),
-		I2C_START_BIT		= (1<<30),
-		I2C_MASTER_ACK_BIT	= (1<<29),
-		I2C_IGNORE_ACK_BIT	= (1<<28)
-	};
-
+  enum writeRegBits_e {
+    I2C_STOP_BIT       = (1 << 31),
+    I2C_START_BIT      = (1 << 30),
+    I2C_MASTER_ACK_BIT = (1 << 29),
+    I2C_IGNORE_ACK_BIT = (1 << 28)
+  };
 };
-
-
 
 #endif // I2CBUS_H

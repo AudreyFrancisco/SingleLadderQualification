@@ -21,50 +21,46 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "pbMainWindow.h"
 #include <QApplication>
 #include <QMessageBox>
 #include <string.h>
-#include "pbMainWindow.h"
 
 pbMainWindow *theMainWindow;
 
 #define PROGRAM_VERSION "Ver. 1.1.0"
 
-int main( int argc, char **argv )
+int main(int argc, char **argv)
 {
-	char cfgFileName[2000];
+  char cfgFileName[2000];
 
-    QApplication *a;
-	a = new QApplication( argc, argv );
+  QApplication *a;
+  a = new QApplication(argc, argv);
 
-	cfgFileName[0] ='\0';
-	for (int i=1; i<argc; i++){
-		if (strcmp(argv[i], "-cfg")==0){
-			if ((i+1)>=argc)
-				goto invokeError;
-			else
-				strncpy(cfgFileName, argv[++i], 2000);
-		}
-	}
+  cfgFileName[0] = '\0';
+  for (int i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "-cfg") == 0) {
+      if ((i + 1) >= argc)
+        goto invokeError;
+      else
+        strncpy(cfgFileName, argv[++i], 2000);
+    }
+  }
 
-	theMainWindow = new pbMainWindow();
-	theMainWindow->show();
-	if (cfgFileName[0])
-		theMainWindow->fileOpen(cfgFileName);
-    return a->exec();
+  theMainWindow = new pbMainWindow();
+  theMainWindow->show();
+  if (cfgFileName[0]) theMainWindow->fileOpen(cfgFileName);
+  return a->exec();
 
 invokeError:
-	QMessageBox::critical ( 0, "pbGUI", 
-				"Parameters parsing Error", 
-				"Exit");
-	qDebug("Parameters reading error");
-	qDebug("use:pbGUI -cfg file.cfg");
-	return 1;
+  QMessageBox::critical(0, "pbGUI", "Parameters parsing Error", "Exit");
+  qDebug("Parameters reading error");
+  qDebug("use:pbGUI -cfg file.cfg");
+  return 1;
 }
-

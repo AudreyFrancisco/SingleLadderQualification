@@ -21,41 +21,37 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
-#include <stdio.h>
-#include <stdlib.h>
 #include "mwbbslave.h"
 #include "mexception.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 MWbbSlave::MWbbSlave()
 {
-	wbb = NULL;
-	baseAddress = 0;
+  wbb         = NULL;
+  baseAddress = 0;
 }
 
 MWbbSlave::MWbbSlave(WishboneBus *wbbPtr, uint32_t baseAdd)
 {
-	wbb = wbbPtr;
-	baseAddress = baseAdd;
+  wbb         = wbbPtr;
+  baseAddress = baseAdd;
 }
 
 void MWbbSlave::setBusAddress(WishboneBus *wbbPtr, uint32_t baseAdd)
 {
-	wbb = wbbPtr;
-	baseAddress = baseAdd;
+  wbb         = wbbPtr;
+  baseAddress = baseAdd;
 }
 
 void MWbbSlave::execute()
 {
-	if (!wbb)
-		throw MException("IPBus is not configured");
-	wbb->execute();
+  if (!wbb) throw MException("IPBus is not configured");
+  wbb->execute();
 }
-
-
-

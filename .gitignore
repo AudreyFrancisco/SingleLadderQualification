@@ -20,3 +20,4 @@ git_status.txt
 # ECLIPSE local projects
 .project
 .cproject
+.settings

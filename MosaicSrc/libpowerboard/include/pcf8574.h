@@ -21,7 +21,7 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2015.
@@ -31,18 +31,14 @@
 #ifndef PCF8574_H
 #define PCF8574_H
 
-#include <stdint.h>
 #include "i2cslave.h"
+#include <stdint.h>
 
-
-class PCF8574 : public I2Cslave
-{
+class PCF8574 : public I2Cslave {
 public:
-	PCF8574(I2Cbus *bus, uint8_t address);
-	void write(uint8_t b);
-	uint8_t read();
+  PCF8574(I2Cbus *bus, uint8_t address);
+  void write(uint8_t b);
+  uint8_t read();
 };
-
-
 
 #endif // PCF8574_H

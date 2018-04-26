@@ -24,9 +24,9 @@ The software is currently supported to run only on the three following operating
 \item \textbf{Ubuntu 16.04 LTS:}
   \begin{lstlisting}
     apt-get update -y && \
-    apt-get install -qq -y man git subversion dpkg-dev make cmake \
+    apt-get install -qq -y man git subversion dpkg-dev make cmake clang-format \
                            wget binutils python python-dev libxml2-dev \
-                           software-properties-common gcc g++ \
+                           software-properties-common gcc g++ krb5-user \
                            libusb-1.0-0-dev libtinyxml-dev qt5-default qt5-qmake && \
     apt-get update -y
     wget -O /opt/root.tar.gz \
@@ -40,23 +40,31 @@ The software is currently supported to run only on the three following operating
   \newpage
 \item \textbf{CentOS CERN 7:}
   \begin{lstlisting}
-    yum install -y gcc gcc-c++ make cmake tar zlib wget subversion \
-      git libusb1-devel tinyxml-devel qt5-qtbase-devel
-      wget -O /opt/root.tar.gz \
-        https://root.cern.ch/download/root_v6.08.06.Linux-centos7-x86_64-gcc4.8.tar.gz
-      cd /opt/ ; tar xzfv root.tar.bz
+    yum install -y gcc gcc-c++ make cmake tar zlib wget subversion clang \
+      git libusb1-devel tinyxml-devel qt5-qtbase-devel krb5-workstation cern-get-sso-cookie
+    yum install -y centos-release-scl
+    yum update -y
+    yum install -y llvm-toolset-7
+    wget -O /opt/root.tar.gz \
+      https://root.cern.ch/download/root_v6.08.06.Linux-centos7-x86_64-gcc4.8.tar.gz
+    cd /opt/ ; tar xzfv root.tar.bz
   \end{lstlisting}
   ROOT has to be loaded using
   \begin{lstlisting}
     source /opt/root/bin/thisroot.sh .
   \end{lstlisting}
+  Activate the \texttt{llvm-toolset-7}
+  \begin{lstlisting}
+    source scl_source enable llvm-toolset-7
+  \end{lstlisting}
 \item \textbf{Scientific Linux CERN 6 *DEPRECATED*:}
   \begin{lstlisting}
     yum install -y sl-release-scl
-    yum install -y git cmake binutils which \
+    yum install -y git cmake binutils which clang \
       libX11-devel libXpm-devel libXft-devel libXext-devel \
       gsl-static curl tar devtoolset-4-gcc-c++  \
       python27 libusb1-devel tinyxml-devel qt5-qtbase-devel \
+      krb5-workstation cern-get-sso-cookie
     yum clean all
 
     source scl_source enable python27 devtoolset-4
@@ -115,6 +123,20 @@ and can be run by invoking
 source ./env.sh
 ./GUI
 \end{lstlisting}
+In order to establish connection with the database Kerberos needs to be configured. In CC7 the configuration can be done as below
+\begin{lstlisting}
+sudo cp new-alpide-alpide-software/Doc/etc/krb5.conf /etc/krb5.conf
+\end{lstlisting}
+After the configuration the user needs to create a ticket. This is done by using
+the credentials as following
+\begin{lstlisting}
+kinit <service account>
+\end{lstlisting}
+The user can check whether a ticket was created or not and until when it is valid, with the command
+\begin{lstlisting}
+klist
+\end{lstlisting}
+Once the ticket expires (after 3 days e.g.) the user needs to create a new one as before by using knit
 
 \paragraph{Executing Tests}\hfill \\
 After compiling the software package you will find a certain number of standard tests, described below, in the form of individual executables. Each executable performs a specific test once and, if applicable, writes the output data in a text file in the subdirectory \texttt{Data}. The settings of the chip(s), readout board(s) and the scan itself can be modified in the config file \texttt{Config.cfg}. Some of the available parameters are described below, for a more detailed description of the syntax and the available parameters please refer to the comments in the config file itself.

@@ -39,8 +39,6 @@
 #ifndef ALPIDEDB_H_
 #define ALPIDEDB_H_
 
-
-
 #include <iostream>
 #include <string>
 
@@ -48,44 +46,46 @@
 
 #include "AlpideDBManager.h"
 
+#define PROJECT_ID_PROD 383
+#define PROJECT_ID_TEST 21
+
 using namespace std;
 
-
-class AlpideDB
-{
+class AlpideDB {
 
 public:
-enum FieldFormat : int {
+  enum FieldFormat : int {
     IntFormat,
-	FloatFormat,
-	CharFormat,
-	StringFormat,
-	BoolFormat,
-	ArrayFormat
-    };
+    FloatFormat,
+    CharFormat,
+    StringFormat,
+    BoolFormat,
+    ArrayFormat
+  };
 
-// Members
+  // Members
 public:
-
 protected:
-	AlpideDBManager  *theDBmanager;
-	string theQueryDomain;
-	bool isConnected;
-
-// Methods
+  AlpideDBManager *theDBmanager;
+  string           theQueryDomain;
+  string           theJarUrl;
+  bool             isConnected;
+  int              m_projectId;
+  // Methods
 public:
-	AlpideDB();
-    ~AlpideDB();
+  AlpideDB(bool isTestDB = true);
 
-    string GetQueryDomain() { return(theQueryDomain); };
-    void SetQueryDomain(string aQueryDomain) { theQueryDomain = aQueryDomain; };
+  ~AlpideDB();
 
-	AlpideDBManager  * GetManagerHandle() { return(theDBmanager); };
-	bool isDBConnected() { return(isConnected); };
+  string GetQueryDomain() { return (theQueryDomain); };
+  void SetQueryDomain(string aQueryDomain) { theQueryDomain = aQueryDomain; };
+
+  AlpideDBManager *GetManagerHandle() { return (theDBmanager); };
+  bool             isDBConnected() { return (isConnected); };
+  int              GetProjectId() { return m_projectId; };
 
 private:
-
+  void Init(string aQueryDomain, string aJarUrl);
 };
-
 
 #endif /* ALPIDEDB_H_ */

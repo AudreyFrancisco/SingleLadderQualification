@@ -21,25 +21,51 @@
  *    / / /  | / / / ___/ /  | / / SEZIONE di BARI
  *   / / / | |/ / / /_   / | |/ /
  *  / / / /| / / / __/  / /| / /
- * /_/ /_/ |__/ /_/    /_/ |__/  	 
+ * /_/ /_/ |__/ /_/    /_/ |__/
  *
  * ====================================================
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2017.
  *
  */
+#include "trgrecorder.h"
+#include "mexception.h"
+#include <iostream>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include "trgrecorder.h"
 
-
-TrgRecorder::TrgRecorder(WishboneBus *wbbPtr, uint32_t baseAdd): 
-			MWbbSlave(wbbPtr, baseAdd)
-{
-}
-
+TrgRecorder::TrgRecorder(WishboneBus *wbbPtr, uint32_t baseAdd) : MWbbSlave(wbbPtr, baseAdd) {}
 
 void TrgRecorder::addEnable(bool en)
 {
-	wbb->addWrite(baseAddress+regControl, en ? CONTROL_ENABLE : 0);
+  wbb->addWrite(baseAddress + regControl, en ? CONTROL_ENABLE : 0);
 }
 
+std::string TrgRecorder::dumpRegisters()
+{
+  if (!wbb) throw MIPBusUDPError("No IPBus configured");
+
+  regAddress_e addrs[] = {regControl};
+  uint32_t     nAddrs  = sizeof(addrs) / sizeof(regAddress_e);
+
+  std::stringstream ss;
+  ss << std::hex;
+
+  for (uint32_t iAddr = 0; iAddr < nAddrs; ++iAddr) {
+    uint32_t result = 0xDEADBEEF;
+    try {
+      wbb->addRead(baseAddress + addrs[iAddr], &result);
+      execute();
+    }
+    catch (...) {
+      std::cerr << "Pulser read error: address 0x" << std::hex << baseAddress + addrs[iAddr]
+                << " (0x" << addrs[iAddr] << ")!" << std::dec << std::endl;
+    };
+
+    ss << "0x" << addrs[iAddr] << "\t0x" << result << std::endl;
+  }
+
+  ss << std::endl;
+
+  return ss.str();
+}
