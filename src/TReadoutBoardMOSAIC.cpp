@@ -116,8 +116,8 @@ TReadoutBoardMOSAIC::~TReadoutBoardMOSAIC()
 // Read/Write registers
 int TReadoutBoardMOSAIC::WriteChipRegister(uint16_t address, uint16_t value, TAlpide *chipPtr)
 {
-  uint_fast16_t Cii    = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
-  uint8_t       chipId = chipPtr->GetConfig()->GetChipId();
+  uint_fast16_t Cii = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
+  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   controlInterface[Cii]->addWriteReg(chipId, address, value);
   controlInterface[Cii]->execute();
   return (0);
@@ -125,8 +125,8 @@ int TReadoutBoardMOSAIC::WriteChipRegister(uint16_t address, uint16_t value, TAl
 
 int TReadoutBoardMOSAIC::ReadChipRegister(uint16_t address, uint16_t &value, TAlpide *chipPtr)
 {
-  uint_fast16_t Cii    = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
-  uint8_t       chipId = chipPtr->GetConfig()->GetChipId();
+  uint_fast16_t Cii = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
+  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   controlInterface[Cii]->addReadReg(chipId, address, &value);
   controlInterface[Cii]->execute();
   return (0);
@@ -134,8 +134,8 @@ int TReadoutBoardMOSAIC::ReadChipRegister(uint16_t address, uint16_t &value, TAl
 
 int TReadoutBoardMOSAIC::SendOpCode(Alpide::TOpCode OpCode, TAlpide *chipPtr)
 {
-  uint_fast16_t Cii    = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
-  uint8_t       chipId = chipPtr->GetConfig()->GetChipId();
+  uint_fast16_t Cii = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
+  uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   controlInterface[Cii]->addWriteReg(chipId, Alpide::REG_COMMAND, OpCode);
   controlInterface[Cii]->execute();
   return (0);
@@ -172,8 +172,7 @@ void TReadoutBoardMOSAIC::SetTriggerSource(TTriggerSource triggerSource)
   if (triggerSource == trigInt) {
     // Internal Trigger
     mTriggerControl->addEnableExtTrigger(false, 0);
-  }
-  else {
+  } else {
     // external trigger
     mTriggerControl->addEnableExtTrigger(true, 0);
   }
@@ -211,7 +210,7 @@ void TReadoutBoardMOSAIC::StopRun()
 int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 {
   TAlpideDataParser *dr;
-  long               readDataSize;
+  long readDataSize;
 
   // check for data in the receivers buffer
   for (int i = 0; i < MAX_MOSAICTRANRECV; i++) {
@@ -220,11 +219,13 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 
   // try to read from TCP connection
   for (;;) {
-    try {
+    try
+    {
       readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), (MDataReceiver **)&dr);
       if (readDataSize == 0) return -1;
     }
-    catch (exception &e) {
+    catch (exception &e)
+    {
       cerr << e.what() << endl;
       StopRun();
       flushDataReceivers();
@@ -232,13 +233,11 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
       if ((ErrNums & 0x03FF00) != 0) {
         // This is an IDLE condition
         throw;
-      }
-      else {
+      } else {
         if ((ErrNums & 0x000001) != 0) {
           // The flush of memory is done by the StopRun()
           throw;
-        }
-        else {
+        } else {
           exit(1);
         }
       }
@@ -260,7 +259,7 @@ void TReadoutBoardMOSAIC::init()
 
   std::cout << "MOSAIC firmware version: " << getFirmwareVersion() << std::endl;
   // I2C master (WBB slave) and connected peripherals
-  i2cBus    = new I2Cbus(mIPbus, add_i2cMaster);
+  i2cBus = new I2Cbus(mIPbus, add_i2cMaster);
   i2cBusAux = new I2Cbus(mIPbus, add_i2cAux);
 
   // Master Powerboard
@@ -269,7 +268,7 @@ void TReadoutBoardMOSAIC::init()
   // CMU Control interface
   controlInterface[0] = new ControlInterface(mIPbus, add_controlInterface);
   controlInterface[1] = new ControlInterface(mIPbus, add_controlInterfaceB);
-  int addDisp         = 0;
+  int addDisp = 0;
   for (int i = 2; i < MAX_MOSAICCTRLINT; i++) {
     controlInterface[i] = new ControlInterface(mIPbus, add_controlInterface_0 + (addDisp << 24));
     addDisp++;
@@ -303,12 +302,14 @@ void TReadoutBoardMOSAIC::init()
   trgDataParser = new TrgRecorderParser();
   addDataReceiver(11, trgDataParser); // ID 11;
 
-  try {
+  try
+  {
     // Master/Slave coordinator
     coordinator = new MCoordinator(mIPbus, add_coordinator);
     coordinator->setMode(MCoordinator::Alone);
   }
-  catch (...) {
+  catch (...)
+  {
     std::cerr
         << "Could not communicate with the Master/Slave coordinator, please update your firmware!"
         << std::endl;
@@ -380,8 +381,7 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
         alpideRcv[dataLink]->addEnable(true);
         Used[dataLink] = true;
         // alpideRcv[dataLink]->execute();
-      }
-      else if (!Used[dataLink]) {
+      } else if (!Used[dataLink]) {
         //        std::cout << "DISabling receiver " << dataLink << std::endl;
         alpideRcv[dataLink]->addEnable(false);
       }
@@ -423,8 +423,8 @@ void TReadoutBoardMOSAIC::enableControlInterface(int interface, bool en)
 {
   if (interface < MAX_MOSAICCTRLINT) {
     controlInterface[interface]->addEnable(en);
-    controlInterface[interface]->addDisableME(fBoardConfig->GetManchesterDisable() == 1 ? true
-                                                                                        : false);
+    controlInterface[interface]
+        ->addDisableME(fBoardConfig->GetManchesterDisable() == 1 ? true : false);
     controlInterface[interface]->execute();
   }
 }
@@ -471,7 +471,7 @@ char *TReadoutBoardMOSAIC::getFirmwareVersion()
   theIPAddr = fBoardConfig->GetIPaddress();
 
   MService::fw_info_t MOSAICinfo;
-  MService *          endPoint = new MService();
+  MService *endPoint = new MService();
   endPoint->setIPaddress(theIPAddr);
   endPoint->readFWinfo(&MOSAICinfo);
 
@@ -542,14 +542,15 @@ std::string TReadoutBoardMOSAIC::GetRegisterDump()
               value - DRP data to write
               execute - execute transaction
  */
-void TReadoutBoardMOSAIC::WriteTransceiverDRP(size_t Aindex, uint16_t address, uint16_t val, bool execute) {
-  if(Aindex >= MAX_MOSAICTRANRECV) {
+void TReadoutBoardMOSAIC::WriteTransceiverDRP(size_t Aindex, uint16_t address, uint16_t val,
+                                              bool execute)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
     std::cout << "Invalid Transceiver index " << Aindex << "\n";
     return;
   }
-  alpideRcv[Aindex]->addSetRDPReg(address,val);
-  if(execute)
-    alpideRcv[Aindex]->execute();
+  alpideRcv[Aindex]->addSetRDPReg(address, val);
+  if (execute) alpideRcv[Aindex]->execute();
 }
 
 
@@ -563,15 +564,15 @@ void TReadoutBoardMOSAIC::WriteTransceiverDRP(size_t Aindex, uint16_t address, u
               value - DRP data to write
               execute - execute transaction
 */
-void TReadoutBoardMOSAIC::WriteTransceiverDRPField(size_t Aindex, uint16_t address,
-                                                   uint16_t size, uint16_t offset, uint16_t value, bool execute) {
-  if(Aindex >= MAX_MOSAICTRANRECV) {
+void TReadoutBoardMOSAIC::WriteTransceiverDRPField(size_t Aindex, uint16_t address, uint16_t size,
+                                                   uint16_t offset, uint16_t value, bool execute)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
     std::cout << "Invalid Transceiver index " << Aindex << "\n";
     return;
   }
-  alpideRcv[Aindex]->addSetRDPRegField(address,size,offset,value);
-  if(execute)
-    alpideRcv[Aindex]->execute();
+  alpideRcv[Aindex]->addSetRDPRegField(address, size, offset, value);
+  if (execute) alpideRcv[Aindex]->execute();
 }
 
 /*
@@ -582,14 +583,15 @@ void TReadoutBoardMOSAIC::WriteTransceiverDRPField(size_t Aindex, uint16_t addre
                value   - The result of the Read transaction
                execute - execute transaction
 */
-void TReadoutBoardMOSAIC::ReadTransceiverDRP(size_t Aindex, uint16_t address, uint32_t *value, bool execute) {
-  if(Aindex >= MAX_MOSAICTRANRECV) {
+void TReadoutBoardMOSAIC::ReadTransceiverDRP(size_t Aindex, uint16_t address, uint32_t *value,
+                                             bool execute)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
     std::cout << "Invalid Transceiver index " << Aindex << "\n";
     return;
   }
-  alpideRcv[Aindex]->addGetRDPReg(address,value);
-  if(execute)
-    alpideRcv[Aindex]->execute();
+  alpideRcv[Aindex]->addGetRDPReg(address, value);
+  if (execute) alpideRcv[Aindex]->execute();
 }
 
 // ================================== EOF ========================================
