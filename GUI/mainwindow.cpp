@@ -151,8 +151,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   connect(ui->testib, SIGNAL(clicked()), this, SLOT(IBBasicTest()));
   ui->testib->hide();
-  writingdb = true;
-  fstop     = false;
+  writingdb    = true;
+  fstopwriting = false;
+  fstop        = false;
 }
 
 MainWindow::~MainWindow()
@@ -307,12 +308,18 @@ void MainWindow::open()
         fComponentWindow = new Components(this);
         fComponentWindow->WriteToLabel(fHalfstave);
         fComponentWindow->exec();
+        if (fstop && fHiddenComponent == false) {
+          return;
+        }
       }
       for (unsigned int k = 0; k < fHicnames.size(); k++) {
         if (fHicnames.at(k) == "empty") {
           fComponentWindow = new Components(this);
           fComponentWindow->WrongPositions();
           fComponentWindow->exec();
+          if (fstop && fHiddenComponent == false) {
+            return;
+          }
         }
       }
     }
@@ -795,7 +802,7 @@ void MainWindow::popup(QString message)
 
 void MainWindow::start_test()
 {
-  if (writingdb == false && fstop == false) {
+  if (writingdb == false && fstopwriting == false) {
     fNoticewindow = new DBnotice(this);
     fNoticewindow->exec();
   }
@@ -841,6 +848,8 @@ void MainWindow::start_test()
   fWritedb->setVisible(false);
   fHiddenComponent = false;
   fWrite           = false;
+  fstop            = false;
+  fstopwriting     = false;
   disconnect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
   fEndurancemodules.clear();
   fIdofactivitytype = 0;
@@ -1110,7 +1119,7 @@ void MainWindow::applytests()
 
   connect(fSignalMapper, SIGNAL(mapped(int)), this, SLOT(getresultdetails(int)));
 
-  if (fstop) {
+  if (fstopwriting) {
     return;
   }
   fResultwindow = new resultstorage(this);
@@ -1330,7 +1339,7 @@ void MainWindow::poweroff()
 
 void MainWindow::quitall()
 {
-  if (writingdb == false && fstop == false) {
+  if (writingdb == false && fstopwriting == false) {
     fNoticewindow = new DBnotice(this);
     fNoticewindow->adjustingtemplate();
     fNoticewindow->exec();
@@ -1752,10 +1761,13 @@ void MainWindow::savesettings()
   }
   else {
     open();
+    if (fstop && fHiddenComponent == false) {
+      return;
+    }
 
     for (unsigned int i = 0; i < fHICs.size(); i++) {
       if (fHicnames.at(i) != '\0') {
-        fstop         = false;
+        fstopwriting  = false;
         int in        = 0;
         int out       = 0;
         int projectid = 0;
@@ -1769,6 +1781,9 @@ void MainWindow::savesettings()
           fComponentWindow = new Components(this);
           fComponentWindow->WriteToLabel(fHicnames.at(i));
           fComponentWindow->exec();
+          if (fstop && fHiddenComponent == false) {
+            return;
+          }
         }
 
         fHICs.at(i)->SetOldClassification(DbGetPreviousCategory(fDB, comp, fIdofactivitytype));
@@ -1785,7 +1800,7 @@ void MainWindow::savesettings()
     }
 
     if (fHiddenComponent) {
-      fstop = false;
+      fstopwriting = false;
     }
 
     fScanconfigwindow = new ScanConfiguration(this);
@@ -2465,8 +2480,15 @@ void MainWindow::ibscansforageing()
   AddScan(STThreshold);
 }
 
+void MainWindow::continuetest()
+{
+  fComponentWindow->close();
+  fstopwriting = true;
+}
+
 void MainWindow::quittest()
 {
+
   fComponentWindow->close();
   fstop = true;
 }
