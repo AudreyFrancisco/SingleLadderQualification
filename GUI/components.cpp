@@ -4,9 +4,8 @@
 Components::Components(QWidget *parent) : QDialog(parent), ui(new Ui::Components)
 {
   ui->setupUi(this);
-  connect(ui->continue_2, SIGNAL(clicked()), this, SLOT(close()));
   connect(ui->quit, SIGNAL(clicked()), this->parent(), SLOT(quittest()));
-  ui->continue_2->hide();
+  connect(ui->continuetest, SIGNAL(clicked()), this->parent(), SLOT(continuetest()));
 }
 
 Components::~Components() { delete ui; }

@@ -127,6 +127,7 @@ public slots:
   void      ContinueWithoutWriting();
   void      finalwrite();
   void      quittest();
+  void      continuetest();
   AlpideDB *GetDB();
   void      retryfailedscan();
   void notifyuser(unsigned int position);
@@ -222,6 +223,7 @@ private:
   std::vector<pair<int, int>> fActComponentTypeIDs;
   std::vector<int>    fComponentIDs;
   Components *        fComponentWindow;
+  bool                fstopwriting;
   bool                fstop;
   int                 fComponentTypeID;
   int                 fComponentTypeIDb;
