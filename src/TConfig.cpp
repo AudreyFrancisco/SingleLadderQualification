@@ -394,7 +394,7 @@ void TConfig::DecodeLine(std::string Line)
     BoardStart = 0;
     BoardStop  = fBoardConfigs.size();
     HicStart   = 0;
-    HicStop    = 0;
+    HicStop    = fHicConfigs.size();
   }
   else {
     ChipStart  = (Index < (int)fChipConfigs.size()) ? Index : -1;
