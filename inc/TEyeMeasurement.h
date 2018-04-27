@@ -12,7 +12,7 @@ class TReadoutBoardMosaic;
 class TEyeMeasurement : public TScan {
 private:
   TAlpide *m_testChip;
-  int m_boardIndex;
+  int      m_boardIndex;
 
   // parameters
   int m_max_prescale;
@@ -20,7 +20,7 @@ private:
   int m_max_zero_results;
 
   // internal
-  int m_current_prescale;
+  int                  m_current_prescale;
   TReadoutBoardMOSAIC *m_board;
 
 protected:
@@ -30,16 +30,13 @@ public:
   TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                   std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
                   std::mutex *aMutex);
-  ~TEyeMeasurement() {};
+  ~TEyeMeasurement(){};
 
   void Init();
   void Execute();
   void Terminate();
   void LoopEnd(int loopIndex);
-  void LoopStart(int loopIndex)
-  {
-    m_value[loopIndex] = m_start[loopIndex];
-  };
+  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
   void PrepareStep(int loopIndex);
 };
 

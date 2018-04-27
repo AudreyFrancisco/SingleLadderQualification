@@ -12,59 +12,59 @@ constexpr int MAX_HORZ_OFFSET = 128;
 constexpr int MIN_HORZ_OFFSET = -128;
 constexpr int MAX_VERT_OFFSET = 127;
 constexpr int MIN_VERT_OFFSET = -127;
-constexpr int BUS_WIDTH = 20;
+constexpr int BUS_WIDTH       = 20;
 
-constexpr int ES_QUALIFIER_0 = 0x2c;
-constexpr int ES_QUALIFIER_1 = 0x2d;
-constexpr int ES_QUALIFIER_2 = 0x2e;
-constexpr int ES_QUALIFIER_3 = 0x2f;
-constexpr int ES_QUALIFIER_4 = 0x30;
-constexpr int ES_QUAL_MASK_0 = 0x31;
-constexpr int ES_QUAL_MASK_1 = 0x32;
-constexpr int ES_QUAL_MASK_2 = 0x33;
-constexpr int ES_QUAL_MASK_3 = 0x34;
-constexpr int ES_QUAL_MASK_4 = 0x35;
-constexpr int ES_SDATA_MASK_0 = 0x36;
-constexpr int ES_SDATA_MASK_1 = 0x37;
-constexpr int ES_SDATA_MASK_2 = 0x38;
-constexpr int ES_SDATA_MASK_3 = 0x39;
-constexpr int ES_SDATA_MASK_4 = 0x3a;
-constexpr int ES_PRESCALE = 0x3b; // bits [15:11]
-constexpr int ES_PRESCALE_SIZE = 5;
-constexpr int ES_PRESCALE_OFFSET = 11;
-constexpr int ES_VERT_OFFSET = 0x3b; // bits [7:0]
-constexpr int ES_VERT_OFFSET_SIZE = 8;
-constexpr int ES_VERT_OFFSET_OFFSET = 0;
-constexpr int ES_HORZ_OFFSET = 0x3c; // bits [11:0]
-constexpr int ES_ERRDET_EN = 0x3d;   // bit 9
-constexpr int ES_ERRDET_EN_SIZE = 1;
-constexpr int ES_ERRDET_EN_OFFSET = 9;
-constexpr int ES_EYE_SCAN_EN = 0x3d; // bit 8
-constexpr int ES_EYE_SCAN_EN_SIZE = 1;
-constexpr int ES_EYE_SCAN_EN_OFFSET = 8;
-constexpr int ES_CONTROL = 0x3d; // bits [5:0]
-constexpr int ES_CONTROL_SIZE = 6;
-constexpr int ES_CONTROL_OFFSET = 0;
-constexpr int USE_PCS_CLK_PHASE_SEL = 0x91;
-constexpr int USE_PCS_CLK_PHASE_SEL_SIZE = 1;
+constexpr int ES_QUALIFIER_0               = 0x2c;
+constexpr int ES_QUALIFIER_1               = 0x2d;
+constexpr int ES_QUALIFIER_2               = 0x2e;
+constexpr int ES_QUALIFIER_3               = 0x2f;
+constexpr int ES_QUALIFIER_4               = 0x30;
+constexpr int ES_QUAL_MASK_0               = 0x31;
+constexpr int ES_QUAL_MASK_1               = 0x32;
+constexpr int ES_QUAL_MASK_2               = 0x33;
+constexpr int ES_QUAL_MASK_3               = 0x34;
+constexpr int ES_QUAL_MASK_4               = 0x35;
+constexpr int ES_SDATA_MASK_0              = 0x36;
+constexpr int ES_SDATA_MASK_1              = 0x37;
+constexpr int ES_SDATA_MASK_2              = 0x38;
+constexpr int ES_SDATA_MASK_3              = 0x39;
+constexpr int ES_SDATA_MASK_4              = 0x3a;
+constexpr int ES_PRESCALE                  = 0x3b; // bits [15:11]
+constexpr int ES_PRESCALE_SIZE             = 5;
+constexpr int ES_PRESCALE_OFFSET           = 11;
+constexpr int ES_VERT_OFFSET               = 0x3b; // bits [7:0]
+constexpr int ES_VERT_OFFSET_SIZE          = 8;
+constexpr int ES_VERT_OFFSET_OFFSET        = 0;
+constexpr int ES_HORZ_OFFSET               = 0x3c; // bits [11:0]
+constexpr int ES_ERRDET_EN                 = 0x3d; // bit 9
+constexpr int ES_ERRDET_EN_SIZE            = 1;
+constexpr int ES_ERRDET_EN_OFFSET          = 9;
+constexpr int ES_EYE_SCAN_EN               = 0x3d; // bit 8
+constexpr int ES_EYE_SCAN_EN_SIZE          = 1;
+constexpr int ES_EYE_SCAN_EN_OFFSET        = 8;
+constexpr int ES_CONTROL                   = 0x3d; // bits [5:0]
+constexpr int ES_CONTROL_SIZE              = 6;
+constexpr int ES_CONTROL_OFFSET            = 0;
+constexpr int USE_PCS_CLK_PHASE_SEL        = 0x91;
+constexpr int USE_PCS_CLK_PHASE_SEL_SIZE   = 1;
 constexpr int USE_PCS_CLK_PHASE_SEL_OFFSET = 14;
 
 // Read only registers
-constexpr int ES_ERROR_COUNT = 0x151;
-constexpr int ES_SAMPLE_COUNT = 0x152;
-constexpr int ES_CONTROL_STATUS = 0x153;
+constexpr int ES_ERROR_COUNT         = 0x151;
+constexpr int ES_SAMPLE_COUNT        = 0x152;
+constexpr int ES_CONTROL_STATUS      = 0x153;
 constexpr int ES_CONTROL_STATUS_DONE = 0x0001;
-constexpr int ES_CONTROL_STATUS_FSM = 0x000e;
-constexpr int ES_RDATA_4 = 0x154;
-constexpr int ES_RDATA_3 = 0x155;
-constexpr int ES_RDATA_2 = 0x156;
-constexpr int ES_RDATA_1 = 0x157;
-constexpr int ES_RDATA_0 = 0x158;
-constexpr int ES_SDATA_4 = 0x159;
-constexpr int ES_SDATA_3 = 0x15a;
-constexpr int ES_SDATA_2 = 0x15b;
-constexpr int ES_SDATA_1 = 0x15c;
-constexpr int ES_SDATA_0 = 0x15d;
+constexpr int ES_CONTROL_STATUS_FSM  = 0x000e;
+constexpr int ES_RDATA_4             = 0x154;
+constexpr int ES_RDATA_3             = 0x155;
+constexpr int ES_RDATA_2             = 0x156;
+constexpr int ES_RDATA_1             = 0x157;
+constexpr int ES_RDATA_0             = 0x158;
+constexpr int ES_SDATA_4             = 0x159;
+constexpr int ES_SDATA_3             = 0x15a;
+constexpr int ES_SDATA_2             = 0x15b;
+constexpr int ES_SDATA_1             = 0x15c;
+constexpr int ES_SDATA_0             = 0x15d;
 
 
 TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chips,
@@ -72,26 +72,26 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
                                  std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  strcpy(m_name, "Dctrl Measurement"); // Display name
+  strcpy(m_name, "Eye Measurement"); // Display name
 
   // TODO: Assign proper Mosaic
 
   // outer loop: loop over all chips
   // TODO: can this be done in parallel on all chips?
   m_start[2] = 0;
-  m_step[2] = 1;
-  m_stop[2] = m_chips.size();
+  m_step[2]  = 1;
+  m_stop[2]  = m_chips.size();
 
   // loops over phase and amplitude
   // TODO: define step sizes and intervals
-  m_start[1] = MIN_VERT_OFFSET;
-  m_step[1] = 1; // TODO:
-  m_stop[1] = MAX_VERT_OFFSET;
+  m_start[1] = -124; // MIN_VERT_OFFSET;
+  m_step[1]  = 4;    // TODO:
+  m_stop[1]  = 125;  // MAX_VERT_OFFSET;
 
   // innermost loop
-  m_start[0] = MIN_HORZ_OFFSET;
-  m_step[0] = 1; // TODO:
-  m_stop[0] = MAX_HORZ_OFFSET;
+  m_start[0] = -124; // MIN_HORZ_OFFSET;
+  m_step[0]  = 4;    // TODO:
+  m_stop[0]  = 125;  // MAX_HORZ_OFFSET;
 
   // Other Parameters TODO:
   m_min_prescale = 0;
@@ -116,6 +116,19 @@ void TEyeMeasurement::Init()
 {
   TScan::Init();
 
+  for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
+    if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+    AlpideConfig::Init(m_chips.at(ichip));
+    AlpideConfig::BaseConfig(m_chips.at(ichip));
+
+    // Enable PRBS (1.2 Gbps)
+    uint16_t value = 0;
+    value |= 1;      // Test En = 1
+    value |= 1 << 1; // Interal Pattern = 1 (Prbs Mode)
+    value |= 1 << 5; // Bypass8b10b
+    m_chips.at(ichip)->WriteRegister(Alpide::TRegister::REG_DTU_TEST1, value);
+  }
+
   // initialisations of chips and MOSAIC
 
   // Parameters to set up
@@ -136,14 +149,14 @@ void TEyeMeasurement::PrepareStep(int loopIndex)
   case 0: // innermost loop
     // Reset the FSM
     // stop run resetting ES_CONTROL[0]
+    break;
+  case 1: // 2nd loop
+    m_current_prescale = m_min_prescale;
     m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_CONTROL,
                                       ES_CONTROL_SIZE, ES_CONTROL_OFFSET, 0x0, true);
     break;
-  case 1: // 2nd loop
-
-    break;
   case 2:
-    m_testChip = m_chips.at(m_value[2]);
+    m_testChip   = m_chips.at(m_value[2]);
     m_boardIndex = FindBoardIndex(m_testChip);
     sprintf(m_state, "Running %d", m_value[2]);
 
@@ -181,6 +194,7 @@ void TEyeMeasurement::Execute()
   int hOffset = m_value[0];
   int vOffset = m_value[1];
 
+  std::cout << "In execute, x = " << hOffset << ", y = " << vOffset << std::endl;
   uint32_t errorCountReg;
   uint32_t sampleCountReg;
   uint16_t vertOffsetReg;
@@ -203,6 +217,7 @@ void TEyeMeasurement::Execute()
                                false);
 
   for (bool goodMeasure = false; !goodMeasure;) {
+    std::cout << "in measuring loop " << std::endl;
     // setup ES_PRESCALE	[15:11]. Prescale = 2**(1+reg_value)
     m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_PRESCALE,
                                       ES_PRESCALE_SIZE, ES_PRESCALE_OFFSET, m_current_prescale,
@@ -235,26 +250,37 @@ void TEyeMeasurement::Execute()
 
     if (errorCountReg == 0xffff && m_current_prescale == 0) {
       goodMeasure = true;
-    } else if (sampleCountReg == 0xffff && errorCountReg > 0x7fff) {
+    }
+    else if (sampleCountReg == 0xffff && errorCountReg > 0x7fff) {
       goodMeasure = true;
-    } else if (sampleCountReg == 0xffff && m_current_prescale == m_max_prescale) {
+    }
+    else if (sampleCountReg == 0xffff && m_current_prescale == m_max_prescale) {
       goodMeasure = true;
-    } else if (errorCountReg == 0xffff && m_current_prescale > 0) {
+    }
+    else if (errorCountReg == 0xffff && m_current_prescale > 0) {
       m_current_prescale--;
-    } else if (errorCountReg <= 0x7fff) { // measure time too short
+    }
+    else if (errorCountReg <= 0x7fff) { // measure time too short
       if (m_current_prescale < m_max_prescale) {
         m_current_prescale++;
       }
-    } else {
+    }
+    else {
       goodMeasure = true;
     }
+    std::cout << "end of loop, current prescale " << m_current_prescale << std::endl;
   }
 
   double scanValue = ((double)errorCountReg / ((double)BUS_WIDTH * (double)sampleCountReg *
                                                (1UL << (m_current_prescale + 1))));
 
-  // TODO: write scanValue to histogram
   std::cout << "X " << hOffset << ", Y " << vOffset << ", value: " << scanValue << "\n";
+  common::TChipIndex idx;
+  idx.boardIndex   = m_boardIndex;
+  idx.chipId       = m_testChip->GetConfig()->GetChipId();
+  idx.dataReceiver = m_testChip->GetConfig()->GetParamValue("RECEIVER");
+  // TODO: take into account step width (if != 1)
+  m_histo->Set(idx, hOffset - m_start[0], vOffset - m_start[1], scanValue);
 }
 
 

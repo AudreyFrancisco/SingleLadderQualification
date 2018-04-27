@@ -66,7 +66,8 @@ typedef enum {
   STReadout,
   STEndurance,
   STFastPowerTest,
-  STDctrl
+  STDctrl,
+  STEyeScan
 } TScanType;
 
 class MainWindow : public QMainWindow {
