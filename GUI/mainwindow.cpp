@@ -1397,6 +1397,12 @@ string MainWindow::GetTestFolder()
     return string("OBFastPower");
   case IBDctrl:
     return string("IBDtcrl");
+  case IBStave:
+    return string("IBStave");
+  case OBHalfStaveOL:
+    return string("OBHalfStaveOL");
+  case OBHalfStaveML:
+    return string("OBHalfStaveML");
   default:
     return string("Unknown");
   }
@@ -2318,12 +2324,6 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 10);
   fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 3);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 3);
   AddScan(STReadout);
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 4);
   fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 4);
