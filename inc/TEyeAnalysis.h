@@ -65,16 +65,16 @@ protected:
     return Result;
   };
   void CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo) { (void)histo; };                      // TODO
-  string                        GetPreviousTestType() { return string(""); }; // TODO
-  void                          InitCounters(){};                             // TODO
+  void AnalyseHisto(TScanHisto *histo);                // TODO
+  string GetPreviousTestType() { return string(""); }; // TODO
+  void   InitCounters(){};                             // TODO
   void CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TEyeAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                std::vector<THic *> hics, std::mutex *aMutex, TEyeResult *aResult = 0);
-  void Initialize(){}; // TODO
-  void Finalize(){};   // TODO
+  void Initialize(); // TODO
+  void Finalize(){}; // TODO
 };
 
 
