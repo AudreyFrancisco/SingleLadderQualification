@@ -83,15 +83,14 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
   m_stop[2]  = 1; // m_chips.size();
 
   // loops over phase and amplitude
-  // TODO: define step sizes and intervals
-  m_start[1] = -128; // MIN_VERT_OFFSET;
-  m_step[1]  = 4;    // TODO:
-  m_stop[1]  = 128;  // MAX_VERT_OFFSET;
+  m_start[1] = m_config->GetParamValue("EYEMINY");
+  m_step[1]  = m_config->GetParamValue("EYESTEPY");
+  m_stop[1]  = m_config->GetParamValue("EYEMAXY");
 
   // innermost loop
-  m_start[0] = -128; // MIN_HORZ_OFFSET;
-  m_step[0]  = 4;    // TODO:
-  m_stop[0]  = -128; // MAX_HORZ_OFFSET;
+  m_start[0] = m_config->GetParamValue("EYEMINX");
+  m_step[0]  = m_config->GetParamValue("EYESTEPX");
+  m_stop[0]  = m_config->GetParamValue("EYEMAXX");
 
   // Other Parameters TODO:
   m_min_prescale = 0;

@@ -162,6 +162,15 @@ namespace ScanConfig {
   const int   ENDURANCE_MAXTRIPS_ORANGE    = 3; // approx. 1 per 1000 cycles
   const int   ENDURANCE_MINCHIPS_GREEN     = 14;
   const int   ENDURANCE_MAXFAILURES_ORANGE = 30; // approx. 1 per 100 cycles
+
+  // MAX - MIN should be divisible by STEP
+  // last point should be <= 128 for y and 127 for x (upper limit is excluded)
+  const int EYE_MIN_X  = -128;
+  const int EYE_MAX_X  = 132;
+  const int EYE_STEP_X = 4;
+  const int EYE_MIN_Y  = -127;
+  const int EYE_MAX_Y  = 129;
+  const int EYE_STEP_Y = 4;
 }
 
 class TScanConfig {
@@ -288,6 +297,12 @@ private:
   int       m_readoutPreemp;
   int       m_readoutRow;
   int       m_readoutPllStages;
+  int       m_eyeMaxX;
+  int       m_eyeMinX;
+  int       m_eyeStepX;
+  int       m_eyeMaxY;
+  int       m_eyeMinY;
+  int       m_eyeStepY;
   TTestType m_testType;
   AlpideDB *m_db;
 
