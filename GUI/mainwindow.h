@@ -138,8 +138,8 @@ signals:
 private:
   Ui::MainWindow *ui;
   bool fChkBtnObm1, fChkBtnObm2, fChkBtnObm3, fChkBtnObm4, fChkBtnObm5, fChkBtnObm6, fChkBtnObm7;
-  void explore_halfstave(uint8_t chipid, uint8_t &m1, uint8_t &m2, uint8_t &m3, uint8_t &m4,
-                         uint8_t &m5, uint8_t &m6, uint8_t &m7);
+  void explore_halfstave(uint8_t chipid, int &m1, int &m2, int &m3, int &m4, int &m5, int &m6,
+                         int &m7);
   void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);
   AlpideDB *                   fDB;
   TBoardType                   fBoardType;

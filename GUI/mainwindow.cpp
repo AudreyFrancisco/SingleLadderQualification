@@ -383,12 +383,13 @@ void MainWindow::open()
     }
     if (device == TYPE_HALFSTAVE || device == TYPE_MLHALFSTAVE) {
       ui->OBHALFSTAVE->show();
-      uint8_t m1, m2, m3, m4, m5, m6, m7 = 0;
+      int m1, m2, m3, m4, m5, m6, m7;
+      m1 = m2 = m3 = m4 = m5 = m6 = m7 = 0;
       for (unsigned int i = 0; i < fChips.size(); i++) {
         int chipid;
         chipid = fChips.at(i)->GetConfig()->GetChipId();
         if (fChips.at(i)->GetConfig()->IsEnabled()) {
-          explore_halfstave(chipid, m1, m2, m3, m5, m4, m6, m7);
+          explore_halfstave(chipid, m1, m2, m3, m4, m5, m6, m7);
         }
       }
     }
@@ -411,9 +412,7 @@ void MainWindow::button_obm1_clicked()
     chipid = fChips.at(i)->GetConfig()->GetChipId();
     DecodeId(chipid, module, side, pos);
     module = fConfig->GetChipConfigById(chipid)->GetModuleId();
-    std::cout << "the module number is" << module << std::endl;
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 1) {
-      std::cout << "the side _ position " << side << "_" << pos << std::endl;
       color_green(side, pos);
     }
     else
@@ -431,9 +430,7 @@ void MainWindow::button_obm2_clicked()
     chipid = fChips.at(i)->GetConfig()->GetChipId();
     uint8_t module, side, pos;
     DecodeId(chipid, module, side, pos);
-    std::cout << "the module number is" << module << std::endl;
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 2) {
-      std::cout << "the side _ position " << side << "_" << pos << std::endl;
       color_green(side, pos);
     }
     else
@@ -531,8 +528,8 @@ void MainWindow::button_obm7_clicked()
   }
 }
 
-void MainWindow::explore_halfstave(uint8_t chipid, uint8_t &m1, uint8_t &m2, uint8_t &m3,
-                                   uint8_t &m4, uint8_t &m5, uint8_t &m6, uint8_t &m7)
+void MainWindow::explore_halfstave(uint8_t chipid, int &m1, int &m2, int &m3, int &m4, int &m5,
+                                   int &m6, int &m7)
 {
 
   uint8_t module, side, position;
