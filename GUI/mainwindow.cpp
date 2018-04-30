@@ -406,6 +406,13 @@ void MainWindow::button_obm1_clicked()
   fChkBtnObm1 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("1");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 1) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int     chipid;
     uint8_t module, side, pos;
@@ -426,6 +433,13 @@ void MainWindow::button_obm2_clicked()
   fChkBtnObm2 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("2");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 2) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int chipid;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
@@ -445,6 +459,13 @@ void MainWindow::button_obm3_clicked()
   fChkBtnObm3 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("3");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 3) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int chipid;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
@@ -463,6 +484,13 @@ void MainWindow::button_obm4_clicked()
   fChkBtnObm4 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("4");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 4) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int chipid;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
@@ -481,6 +509,13 @@ void MainWindow::button_obm5_clicked()
   fChkBtnObm5 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("5");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 5) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int chipid;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
@@ -500,6 +535,13 @@ void MainWindow::button_obm6_clicked()
   fChkBtnObm6 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("6");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 6) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int chipid;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
@@ -519,6 +561,13 @@ void MainWindow::button_obm7_clicked()
   fChkBtnObm7 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("7");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 7) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int chipid;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
