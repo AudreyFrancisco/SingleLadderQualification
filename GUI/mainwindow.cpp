@@ -415,8 +415,9 @@ void MainWindow::button_obm1_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 1) {
       color_green(side, pos);
     }
-    else
+    else if (module == 1) {
       color_red(side, pos);
+    }
   }
 }
 
@@ -433,8 +434,9 @@ void MainWindow::button_obm2_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 2) {
       color_green(side, pos);
     }
-    else
+    else if (module == 2) {
       color_red(side, pos);
+    }
   }
 }
 
@@ -451,11 +453,11 @@ void MainWindow::button_obm3_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 3) {
       color_green(side, pos);
     }
-    else
+    else if (module == 3) {
       color_red(side, pos);
+    }
   }
 }
-
 void MainWindow::button_obm4_clicked()
 {
   fChkBtnObm4 = true;
@@ -469,11 +471,11 @@ void MainWindow::button_obm4_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 4) {
       color_green(side, pos);
     }
-    else
+    else if (module == 4) {
       color_red(side, pos);
+    }
   }
 }
-
 void MainWindow::button_obm5_clicked()
 {
   fChkBtnObm5 = true;
@@ -487,8 +489,9 @@ void MainWindow::button_obm5_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 5) {
       color_green(side, pos);
     }
-    else
+    else if (module == 5) {
       color_red(side, pos);
+    }
   }
 }
 
@@ -505,8 +508,9 @@ void MainWindow::button_obm6_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 6) {
       color_green(side, pos);
     }
-    else
+    else if (module == 6) {
       color_red(side, pos);
+    }
   }
 }
 
@@ -523,8 +527,9 @@ void MainWindow::button_obm7_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 7) {
       color_green(side, pos);
     }
-    else
+    else if (module == 7) {
       color_red(side, pos);
+    }
   }
 }
 
