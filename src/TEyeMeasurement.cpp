@@ -80,18 +80,18 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
   // TODO: can this be done in parallel on all chips?
   m_start[2] = 0;
   m_step[2]  = 1;
-  m_stop[2]  = m_chips.size();
+  m_stop[2]  = 1; // m_chips.size();
 
   // loops over phase and amplitude
   // TODO: define step sizes and intervals
-  m_start[1] = -124; // MIN_VERT_OFFSET;
+  m_start[1] = -128; // MIN_VERT_OFFSET;
   m_step[1]  = 4;    // TODO:
-  m_stop[1]  = 125;  // MAX_VERT_OFFSET;
+  m_stop[1]  = 128;  // MAX_VERT_OFFSET;
 
   // innermost loop
-  m_start[0] = -124; // MIN_HORZ_OFFSET;
+  m_start[0] = -128; // MIN_HORZ_OFFSET;
   m_step[0]  = 4;    // TODO:
-  m_stop[0]  = 125;  // MAX_HORZ_OFFSET;
+  m_stop[0]  = -128; // MAX_HORZ_OFFSET;
 
   // Other Parameters TODO:
   m_min_prescale = 0;
@@ -280,7 +280,8 @@ void TEyeMeasurement::Execute()
   idx.chipId       = m_testChip->GetConfig()->GetChipId();
   idx.dataReceiver = m_testChip->GetConfig()->GetParamValue("RECEIVER");
   // TODO: take into account step width (if != 1)
-  m_histo->Set(idx, hOffset - m_start[0], vOffset - m_start[1], scanValue);
+  m_histo->Set(idx, (hOffset - m_start[0]) / m_step[0], (vOffset - m_start[1]) / m_step[1],
+               scanValue);
 }
 
 

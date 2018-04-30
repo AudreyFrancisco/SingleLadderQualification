@@ -24,15 +24,23 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
   FILE *fp = fopen("EyeDiagram.dat", "w");
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     // TODO: ad hoc loop, fix later
+    double step_x = histo->GetStep(m_chipList.at(ichip), 0);
+    double step_y = histo->GetStep(m_chipList.at(ichip), 1);
+
+    double min_x = histo->GetMin(m_chipList.at(ichip), 0);
+    double min_y = histo->GetMin(m_chipList.at(ichip), 1);
+
     for (int xbin = 0; xbin < 255; xbin++) {
-      for (int ybin = 0; ybin < 255; ybin++) {
+      for (int ybin = 0; ybin < 64; ybin++) {
         double value = ((*histo)(m_chipList.at(ichip), xbin, ybin));
-        int    x     = -124 + xbin;
-        int    y     = -124 + ybin;
-        fprintf(fp, "%d %d %d %e\n", ichip, x, y, value);
-        if (value != 0)
+
+        int x = min_x + xbin * step_x;
+        int y = min_y + ybin * step_y;
+        if (value != 0) {
           std::cout << "ichip = " << ichip << ", x = " << x << ", y = " << y
                     << ", value = " << value << std::endl;
+          fprintf(fp, "%d %d %d %e\n", ichip, x, y, value);
+        }
       }
     }
   }
