@@ -383,11 +383,13 @@ void MainWindow::open()
     }
     if (device == TYPE_HALFSTAVE || device == TYPE_MLHALFSTAVE) {
       ui->OBHALFSTAVE->show();
+      int m1, m2, m3, m4, m5, m6, m7;
+      m1 = m2 = m3 = m4 = m5 = m6 = m7 = 0;
       for (unsigned int i = 0; i < fChips.size(); i++) {
         int chipid;
         chipid = fChips.at(i)->GetConfig()->GetChipId();
         if (fChips.at(i)->GetConfig()->IsEnabled()) {
-          explore_halfstave(chipid);
+          explore_halfstave(chipid, m1, m2, m3, m4, m5, m6, m7);
         }
       }
     }
@@ -404,6 +406,13 @@ void MainWindow::button_obm1_clicked()
   fChkBtnObm1 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("1");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 1) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int     chipid;
     uint8_t module, side, pos;
@@ -413,8 +422,9 @@ void MainWindow::button_obm1_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 1) {
       color_green(side, pos);
     }
-    else
+    else if (module == 1) {
       color_red(side, pos);
+    }
   }
 }
 
@@ -423,6 +433,13 @@ void MainWindow::button_obm2_clicked()
   fChkBtnObm2 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("2");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 2) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int chipid;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
@@ -431,8 +448,9 @@ void MainWindow::button_obm2_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 2) {
       color_green(side, pos);
     }
-    else
+    else if (module == 2) {
       color_red(side, pos);
+    }
   }
 }
 
@@ -441,6 +459,13 @@ void MainWindow::button_obm3_clicked()
   fChkBtnObm3 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("3");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 3) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int chipid;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
@@ -449,16 +474,23 @@ void MainWindow::button_obm3_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 3) {
       color_green(side, pos);
     }
-    else
+    else if (module == 3) {
       color_red(side, pos);
+    }
   }
 }
-
 void MainWindow::button_obm4_clicked()
 {
   fChkBtnObm4 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("4");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 4) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int chipid;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
@@ -467,16 +499,23 @@ void MainWindow::button_obm4_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 4) {
       color_green(side, pos);
     }
-    else
+    else if (module == 4) {
       color_red(side, pos);
+    }
   }
 }
-
 void MainWindow::button_obm5_clicked()
 {
   fChkBtnObm5 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("5");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 5) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int chipid;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
@@ -485,8 +524,9 @@ void MainWindow::button_obm5_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 5) {
       color_green(side, pos);
     }
-    else
+    else if (module == 5) {
       color_red(side, pos);
+    }
   }
 }
 
@@ -495,6 +535,13 @@ void MainWindow::button_obm6_clicked()
   fChkBtnObm6 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("6");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 6) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int chipid;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
@@ -503,8 +550,9 @@ void MainWindow::button_obm6_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 6) {
       color_green(side, pos);
     }
-    else
+    else if (module == 6) {
       color_red(side, pos);
+    }
   }
 }
 
@@ -513,6 +561,13 @@ void MainWindow::button_obm7_clicked()
   fChkBtnObm7 = true;
   ui->OBModule->show();
   ui->modulenumber->setText("7");
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 7) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color_red(i, j);
+      }
+    }
+  }
   for (unsigned int i = 0; i < fChips.size(); i++) {
     int chipid;
     chipid = fChips.at(i)->GetConfig()->GetChipId();
@@ -521,12 +576,14 @@ void MainWindow::button_obm7_clicked()
     if (fChips.at(i)->GetConfig()->IsEnabled() && module == 7) {
       color_green(side, pos);
     }
-    else
+    else if (module == 7) {
       color_red(side, pos);
+    }
   }
 }
 
-void MainWindow::explore_halfstave(uint8_t chipid)
+void MainWindow::explore_halfstave(uint8_t chipid, int &m1, int &m2, int &m3, int &m4, int &m5,
+                                   int &m6, int &m7)
 {
 
   uint8_t module, side, position;
@@ -534,38 +591,94 @@ void MainWindow::explore_halfstave(uint8_t chipid)
   DecodeId(chipid, module, side, position);
 
   if (module == 1) {
-
-    ui->obm1->setStyleSheet("background-color:green;");
+    m1++;
+    if (m1 > 0 && m1 < 14) {
+      ui->obm1->setStyleSheet("background-color:orange;");
+    }
+    else if (m1 == 14) {
+      ui->obm1->setStyleSheet("background-color:green;");
+    }
+    else if (m1 == 0) {
+      ui->obm1->setStyleSheet("background-color:red;");
+    }
   }
 
   if (module == 2) {
-
-    ui->obm2->setStyleSheet("background-color:green;");
+    m2++;
+    if (m2 > 0 && m2 < 14) {
+      ui->obm2->setStyleSheet("background-color:orange;");
+    }
+    else if (m2 == 14) {
+      ui->obm2->setStyleSheet("background-color:green;");
+    }
+    else if (m2 == 0) {
+      ui->obm2->setStyleSheet("background-color:red;");
+    }
   }
 
   if (module == 3) {
-
-    ui->obm3->setStyleSheet("background-color:green;");
+    m3++;
+    if (m3 > 0 && m3 < 14) {
+      ui->obm3->setStyleSheet("background-color:orange;");
+    }
+    else if (m3 == 14) {
+      ui->obm3->setStyleSheet("background-color:green;");
+    }
+    else if (m3 == 0) {
+      ui->obm3->setStyleSheet("background-color:red;");
+    }
   }
 
   if (module == 4) {
-
-    ui->obm4->setStyleSheet("background-color:green;");
+    m4++;
+    if (m4 > 0 && m4 < 14) {
+      ui->obm4->setStyleSheet("background-color:orange;");
+    }
+    else if (m4 == 14) {
+      ui->obm4->setStyleSheet("background-color:green;");
+    }
+    else if (m4 == 0) {
+      ui->obm4->setStyleSheet("background-color:red;");
+    }
   }
 
   if (module == 5) {
-
-    ui->obm5->setStyleSheet("background-color:green;");
+    m5++;
+    if (m5 > 0 && m5 < 14) {
+      ui->obm5->setStyleSheet("background-color:orange;");
+    }
+    else if (m5 == 14) {
+      ui->obm5->setStyleSheet("background-color:green;");
+    }
+    else if (m5 == 0) {
+      ui->obm5->setStyleSheet("background-color:red;");
+    }
   }
 
   if (module == 6) {
-
-    ui->obm6->setStyleSheet("background-color:green;");
+    m6++;
+    if (m6 > 0 && m6 < 14) {
+      ui->obm6->setStyleSheet("background-color:orange;");
+    }
+    else if (m6 == 14) {
+      ui->obm6->setStyleSheet("background-color:green;");
+    }
+    else if (m6 == 0) {
+      ui->obm6->setStyleSheet("background-color:red;");
+    }
   }
 
   if (module == 7) {
-
-    ui->obm7->setStyleSheet("background-color:green;");
+    m7++;
+    if (m7 > 0 && m7 < 14) {
+      ui->obm7->setStyleSheet("background-color:orange;");
+    }
+    else if (m7 == 14) {
+      ui->obm7->setStyleSheet("background-color:green;");
+    }
+    else if (m7 == 0) {
+      ui->obm7->setStyleSheet("background-color:red;");
+    }
   }
 }
 
