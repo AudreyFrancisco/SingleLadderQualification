@@ -1289,7 +1289,7 @@ ActivityDB::response *ActivityDB::AssignComponent(int aActivityID, int aComponen
   else {
     DecodeResponse(stringresult);
     if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
-    SetResponse(AlpideTable::NoError);
+    //   SetResponse(AlpideTable::NoError);
   }
   return (&theResponse);
 }

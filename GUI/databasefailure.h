@@ -13,6 +13,7 @@ class Databasefailure : public QDialog {
 public:
   explicit Databasefailure(QWidget *parent = 0);
   ~Databasefailure();
+  virtual void assigningproblem(QString error);
 
 private:
   Ui::Databasefailure *ui;
