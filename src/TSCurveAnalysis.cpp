@@ -347,26 +347,31 @@ void TSCurveAnalysis::Finalize()
 // TODO: Make two cuts (red and orange)?
 THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic *result, THic *hic)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
   if (!IsThresholdScan()) return CLASS_UNTESTED; // for the time being exclude class for tuning
   if (((TSCurveScan *)m_scan)->GetNominal())
     return CLASS_UNTESTED; // classify only tuned thresholds
-
-
-  // check on dead pixels per HIC
-  DoCut(returnValue, CLASS_ORANGE, result->m_nDead, "THRESH_MAXDEAD_HIC_GREEN_OB", result);
-  DoCut(returnValue, CLASS_RED, result->m_nDead, "THRESH_MAXDEAD_HIC_ORANGE_OB", result);
-
-  // check on no threshold pixels per HIC
-  DoCut(returnValue, CLASS_ORANGE, result->m_nNoThresh, "THRESH_MAXBAD_HIC_OB", result);
 
   for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
     if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled()) continue;
     int                chipId     = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
     TSCurveResultChip *chipResult = (TSCurveResultChip *)result->m_chipResults.at(chipId);
-    DoCut(returnValue, CLASS_ORANGE, chipResult->m_nDead + chipResult->m_nNoThresh,
-          "THRESH_MAXBAD_CHIP_OB", result, false, chipId);
-    DoCut(returnValue, CLASS_ORANGE, chipResult->m_noiseAv + 0.9, "THRESH_MAXNOISE_OB", result,
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_GOLD",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_SILVER",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_BRONZE", result,
+          false, chipId);
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nDead, "THRESH_MAXDEAD_CHIP_GOLD", result, false,
+          chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nDead, "THRESH_MAXDEAD_CHIP_SILVER", result,
+          false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "THRESH_MAXDEAD_CHIP_BRONZE", result, false,
+          chipId);
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_noiseAv + 0.9, "THRESH_MAXNOISE_OB", result,
           false, chipId);
   }
   std::cout << "Threshold Analysis - Classification: " << WriteHicClassification(returnValue)
@@ -376,25 +381,31 @@ THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic *result
 
 THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic *result, THic *hic)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
   if (!IsThresholdScan()) return CLASS_UNTESTED; // for the time being exclude class for tuning
   if (((TSCurveScan *)m_scan)->GetNominal())
     return CLASS_UNTESTED; // classify only tuned thresholds
-
-  // check on dead pixels per HIC
-  DoCut(returnValue, CLASS_ORANGE, result->m_nDead, "THRESH_MAXDEAD_HIC_GREEN_IB", result);
-  DoCut(returnValue, CLASS_RED, result->m_nDead, "THRESH_MAXDEAD_HIC_ORANGE_IB", result);
-
-  // check on no threshold pixels per HIC
-  DoCut(returnValue, CLASS_ORANGE, result->m_nNoThresh, "THRESH_MAXBAD_HIC_IB", result);
 
   for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
     if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled()) continue;
     int                chipId     = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
     TSCurveResultChip *chipResult = (TSCurveResultChip *)result->m_chipResults.at(chipId);
-    DoCut(returnValue, CLASS_ORANGE, chipResult->m_nDead + chipResult->m_nNoThresh,
-          "THRESH_MAXBAD_CHIP_IB", result, false, chipId);
-    DoCut(returnValue, CLASS_ORANGE, chipResult->m_noiseAv + 0.9, "THRESH_MAXNOISE_IB", result,
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_GOLD",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_SILVER",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_BRONZE", result,
+          false, chipId);
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nDead, "THRESH_MAXDEAD_CHIP_GOLD", result, false,
+          chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nDead, "THRESH_MAXDEAD_CHIP_SILVER", result,
+          false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "THRESH_MAXDEAD_CHIP_BRONZE", result, false,
+          chipId);
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_noiseAv + 0.9, "THRESH_MAXNOISE_IB", result,
           false, chipId);
   }
   std::cout << "Threshold Analysis - Classification: " << WriteHicClassification(returnValue)

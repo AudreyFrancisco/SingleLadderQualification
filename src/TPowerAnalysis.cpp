@@ -90,22 +90,22 @@ THicClassification TPowerAnalysis::GetClassification(THicCurrents currents, TPow
 THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents     currents,
                                                        TPowerResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
 
   DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_IB", result, true);
   DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_IB", result, true);
 
-  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MINIDDD_CLOCKED_IB", result, true);
-  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_IB", result, true);
-  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_IB", result);
-  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_IB", result);
+  DoCut(returnValue, CLASS_SILVER, currents.idddClocked * 1000, "MINIDDD_CLOCKED_IB", result, true);
+  DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_IB", result, true);
+  DoCut(returnValue, CLASS_SILVER, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_IB", result);
+  DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_IB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_IB", result);
+  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
   // add 1 for the case where I(3V) = 0
   float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
   // add 0.9 to round up for everything >= .1
-  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_IB", result);
+  DoCut(returnValue, CLASS_SILVER, (int)(ratio + 0.9), "MAXFACTOR_4V_IB", result);
   std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
   return returnValue;
@@ -114,22 +114,22 @@ THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents     currents
 THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents     currents,
                                                        TPowerResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
 
   DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", result, true);
   DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", result, true);
 
-  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MINIDDD_CLOCKED_OB", result, true);
-  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_OB", result, true);
-  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_OB", result);
-  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_OB", result);
+  DoCut(returnValue, CLASS_SILVER, currents.idddClocked * 1000, "MINIDDD_CLOCKED_OB", result, true);
+  DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_OB", result, true);
+  DoCut(returnValue, CLASS_SILVER, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_OB", result);
+  DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_OB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_OB", result);
+  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_OB", result);
   // add 1 for the case where I(3V) = 0
   float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
   // add 0.9 to round up for everything >= .1
-  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_OB", result);
+  DoCut(returnValue, CLASS_SILVER, (int)(ratio + 0.9), "MAXFACTOR_4V_OB", result);
   std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
   return returnValue;

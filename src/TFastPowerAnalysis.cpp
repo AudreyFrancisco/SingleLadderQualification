@@ -73,21 +73,16 @@ THicClassification TFastPowerAnalysis::GetClassification(THicCurrents         cu
 THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents         currents,
                                                            TFastPowerResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
 
   DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", result, true);
   DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", result, true);
 
   DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MAXIDDA_OB", result);
-  DoCut(returnValue, CLASS_ORANGE, currents.idddSwitchon * 1000, "MAXIDDD_GREEN_OB", result);
-  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MAXIDDD_ORANGE_OB", result);
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MAXIDDD_OB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_IB", result);
-  // add 1 for the case where I(3V) = 0
-  float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
-  // add 0.9 to round up for everything >= .1
-  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_IB", result);
+  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
 
   std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;

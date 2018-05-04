@@ -130,7 +130,7 @@ void TLocalBusAnalysis::Finalize()
     if (Total >= m_config->GetLocalBusCutRed())
       hicResult->m_class = CLASS_RED;
     else
-      hicResult->m_class = CLASS_GREEN;
+      hicResult->m_class = CLASS_GOLD;
     hicResult->SetValidity(true);
   }
 

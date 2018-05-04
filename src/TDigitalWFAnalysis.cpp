@@ -135,9 +135,20 @@ void TDigitalWFAnalysis::Finalize()
 // TODO: Make two cuts (red and orange)?
 THicClassification TDigitalWFAnalysis::GetClassificationOB(TDigitalWFResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
-  DoCut(returnValue, CLASS_ORANGE, result->m_nUnmaskable, "DIGITAL_MAXNOMASK_HIC_OB", result);
-  DoCut(returnValue, CLASS_ORANGE, result->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_HIC_OB", result);
+  THicClassification returnValue = CLASS_GOLD;
+
+  // chip-wise check
+  map<int, TScanResultChip *>::iterator it;
+  for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
+    TDigitalWFResultChip *chipResult = (TDigitalWFResultChip *)it->second;
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_CHIP_GOLD",
+          result);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_CHIP_SILVER",
+          result);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE",
+          result);
+  }
   std::cout << "Digital Whiteframe Analysis - Classification: "
             << WriteHicClassification(returnValue) << std::endl;
   return returnValue;
@@ -145,9 +156,20 @@ THicClassification TDigitalWFAnalysis::GetClassificationOB(TDigitalWFResultHic *
 
 THicClassification TDigitalWFAnalysis::GetClassificationIB(TDigitalWFResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
-  DoCut(returnValue, CLASS_ORANGE, result->m_nUnmaskable, "DIGITAL_MAXNOMASK_HIC_IB", result);
-  DoCut(returnValue, CLASS_ORANGE, result->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_HIC_IB", result);
+  THicClassification returnValue = CLASS_GOLD;
+
+  // chip-wise check
+  map<int, TScanResultChip *>::iterator it;
+  for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
+    TDigitalWFResultChip *chipResult = (TDigitalWFResultChip *)it->second;
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_CHIP_GOLD",
+          result);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_CHIP_SILVER",
+          result);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE",
+          result);
+  }
   std::cout << "Digital Whiteframe Analysis - Classification: "
             << WriteHicClassification(returnValue) << std::endl;
   return returnValue;

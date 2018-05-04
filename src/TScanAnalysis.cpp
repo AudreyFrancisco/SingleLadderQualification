@@ -241,19 +241,7 @@ THicClassification TScanAnalysis::GetClassification()
   std::map<std::string, TScanResultHic *>::iterator it;
   for (it = hicResults->begin(); it != hicResults->end(); it++) {
     if (!it->second->IsValid()) continue;
-    switch (it->second->GetClassification()) {
-    case CLASS_GREEN:
-      if (result == CLASS_UNTESTED) result = CLASS_GREEN;
-      break;
-    case CLASS_ORANGE:
-      if (result != CLASS_RED) result = CLASS_ORANGE;
-      break;
-    case CLASS_RED:
-      return CLASS_RED;
-      break;
-    default:
-      break;
-    }
+    if (it->second->GetClassification() > result) result = it->second->GetClassification();
   }
   return result;
 }
@@ -262,12 +250,14 @@ const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
 {
   if (hicClass == CLASS_UNTESTED)
     return "Untested";
-  else if (hicClass == CLASS_GREEN)
-    return "Green";
+  else if (hicClass == CLASS_GOLD)
+    return "Gold";
+  else if (hicClass == CLASS_SILVER)
+    return "Silver";
+  else if (hicClass == CLASS_BRONZE)
+    return "Bronze";
   else if (hicClass == CLASS_RED)
-    return "Red";
-  else if (hicClass == CLASS_ORANGE)
-    return "Orange";
+    return "Not working";
   else
     return "Unknown";
 }

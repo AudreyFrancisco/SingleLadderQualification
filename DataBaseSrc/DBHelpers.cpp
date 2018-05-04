@@ -103,11 +103,14 @@ int DbGetResultId(AlpideDB *db, int activityTypeId, THicClassification classific
   for (unsigned int i = 0; i < resultTypeList.size(); i++) {
     string Name = resultTypeList.at(i).Name;
     switch (classification) {
-    case CLASS_GREEN:
+    case CLASS_GOLD:
       if (Name.find("GOLD") != string::npos) return resultTypeList.at(i).ID;
       break;
-    case CLASS_ORANGE:
+    case CLASS_SILVER:
       if (Name.find("SILVER") != string::npos) return resultTypeList.at(i).ID;
+      break;
+    case CLASS_BRONZE:
+      if (Name.find("BRONZE") != string::npos) return resultTypeList.at(i).ID;
       break;
     case CLASS_PARTIAL:
       if (Name.find("partially") != string::npos) return resultTypeList.at(i).ID;
@@ -206,9 +209,11 @@ THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityT
 
   // TODO: change to gold/silver/bronze
   if (category.find("GOLD") != string::npos)
-    return CLASS_GREEN;
+    return CLASS_GOLD;
   else if (category.find("SILVER") != string::npos)
-    return CLASS_ORANGE;
+    return CLASS_SILVER;
+  else if (category.find("BRONZE") != string::npos)
+    return CLASS_BRONZE;
   else if ((category.find("not") != string::npos) || (category.find("NOK") != string::npos))
     return CLASS_RED;
   else if (category.find("part") != string::npos)
