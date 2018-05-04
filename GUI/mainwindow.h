@@ -198,6 +198,7 @@ private:
   int                        fColour;
   int                        fPbnumberofmodule;
   std::vector<QString>       fHicnames;
+  std::vector<QString>       fErrorMessages;
   QString                    fHalfstave;
   std::vector<QPushButton *> fEndurancemodules;
   bool                       fDatabasetype;

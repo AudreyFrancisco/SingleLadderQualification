@@ -78,11 +78,11 @@ protected:
 public:
   explicit AlpideTable(AlpideDB *DBhandle);
   virtual ~AlpideTable();
+  response  GetResponse() { return theResponse; }
   response *DecodeResponse(char *returnedString, int Session = 0);
   void SetResponse(AlpideTable::ErrorCode, int ID = 0, int Session = 0);
   const char *DumpResponse();
-
-  bool isParameterScientificNotation() { return (isScienNotation); }
+  bool        isParameterScientificNotation() { return (isScienNotation); }
   void setParameterScientificNotation(bool isSet = true) { isScienNotation = isSet; }
 
 protected:

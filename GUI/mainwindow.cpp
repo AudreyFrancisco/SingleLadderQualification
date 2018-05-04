@@ -1612,6 +1612,7 @@ int MainWindow::GetTime()
 void MainWindow::attachtodatabase()
 {
   fActivityResults.clear();
+  fErrorMessages.clear();
   if (fResultwindow->isVisible()) {
     fResultwindow->close();
   }
@@ -1746,13 +1747,52 @@ void MainWindow::attachtodatabase()
         myactivity->Create(&activ);
         cout << myactivity->DumpResponse() << endl;
         myactivity->AssignUris(activ.ID, fIdofoperator, (&uris));
+        if (myactivity->GetResponse().ErrorCode == -1) {
+          QString errormessage;
+          errormessage = "Uri: ";
+          errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
+          fActivityResults.push_back(-1);
+          fErrorMessages.push_back(errormessage);
+        }
         myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).first,
                                     fIdofoperator);
+
+
+        if (myactivity->GetResponse().ErrorCode == -1) {
+          QString errormessage;
+          errormessage = "Input component: ";
+          errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
+          fActivityResults.push_back(-1);
+          fErrorMessages.push_back(errormessage);
+        }
+
+
         myactivity->AssignComponent(activ.ID, fComponentIDs.at(i),
                                     fActComponentTypeIDs.at(i).second, fIdofoperator);
+        if (myactivity->GetResponse().ErrorCode == -1) {
+          QString errormessage;
+          errormessage = "Output comp: ";
+          errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
+          fActivityResults.push_back(-1);
+          fErrorMessages.push_back(errormessage);
+        }
         if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
           myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstavein, fIdofoperator);
+          if (myactivity->GetResponse().ErrorCode == -1) {
+            QString errormessage;
+            errormessage = "Input HS: ";
+            errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
+            fActivityResults.push_back(-1);
+            fErrorMessages.push_back(errormessage);
+          }
           myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstaveout, fIdofoperator);
+          if (myactivity->GetResponse().ErrorCode == -1) {
+            QString errormessage;
+            errormessage = "Output HS: ";
+            errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
+            fActivityResults.push_back(-1);
+            fErrorMessages.push_back(errormessage);
+          }
         }
         if (fStatus == false) {
           activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
@@ -1761,6 +1801,7 @@ void MainWindow::attachtodatabase()
 
         activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
         myactivity->Change(&activ);
+
         std::cout << "the activity result is: " << activ.Result << std::endl;
         fActivityResults.push_back(activ.Result);
         delete myactivity;
@@ -1786,6 +1827,13 @@ void MainWindow::attachtodatabase()
     if (!fDatabasefailure) {
       fDatabasefailure = new Databasefailure(this);
     }
+    QString dbmessages;
+
+    for (unsigned int i = 0; i < fErrorMessages.size(); i++) {
+      dbmessages.append(fErrorMessages.at(i));
+      dbmessages.append("\n");
+    }
+    fDatabasefailure->assigningproblem(dbmessages);
     fDatabasefailure->exec();
   }
   fWrite = true;
