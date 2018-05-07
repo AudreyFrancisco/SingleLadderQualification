@@ -80,7 +80,8 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
   // TODO: can this be done in parallel on all chips?
   m_start[2] = 0;
   m_step[2]  = 1;
-  m_stop[2]  = 1; // m_chips.size();
+  // m_stop[2]  = m_chips.size();
+  m_stop[2] = 1;
 
   // loops over phase and amplitude
   m_start[1] = m_config->GetParamValue("EYEMINY");
@@ -193,7 +194,7 @@ void TEyeMeasurement::Execute()
   int hOffset = m_value[0];
   int vOffset = m_value[1];
 
-  std::cout << "In execute, x = " << hOffset << ", y = " << vOffset << std::endl;
+  // std::cout << "In execute, x = " << hOffset << ", y = " << vOffset << std::endl;
   uint32_t errorCountReg;
   uint32_t sampleCountReg;
   uint16_t vertOffsetReg;
@@ -216,7 +217,7 @@ void TEyeMeasurement::Execute()
                                false);
 
   for (bool goodMeasure = false; !goodMeasure;) {
-    std::cout << "in measuring loop " << std::endl;
+    // std::cout << "in measuring loop " << std::endl;
     // setup ES_PRESCALE	[15:11]. Prescale = 2**(1+reg_value)
     m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_PRESCALE,
                                       ES_PRESCALE_SIZE, ES_PRESCALE_OFFSET, m_current_prescale,
@@ -267,7 +268,7 @@ void TEyeMeasurement::Execute()
     else {
       goodMeasure = true;
     }
-    std::cout << "end of loop, current prescale " << m_current_prescale << std::endl;
+    // std::cout << "end of loop, current prescale " << m_current_prescale << std::endl;
   }
 
   double scanValue = ((double)errorCountReg / ((double)BUS_WIDTH * (double)sampleCountReg *
