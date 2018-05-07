@@ -30,6 +30,7 @@ set(BASE_OBJS
   src/TDigitalScan.cpp
   src/TDigitalWFAnalysis.cpp
   src/TEnduranceCycle.cpp
+  src/TEyeAnalysis.cpp
   src/TEyeMeasurement.cpp
   src/TFastPowerAnalysis.cpp
   src/TFastPowerTest.cpp
