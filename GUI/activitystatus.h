@@ -25,6 +25,7 @@ public slots:
   // virtual void PopulateWindow(QString nameoftheobject, QString oldclass, QString finalclass,
   // std::vector<QString> nameing);
   void on_scanclassification_itemClicked(QListWidgetItem *item);
+  virtual void DisplayStatusOptions();
 
 private:
   Ui::ActivityStatus *ui;
