@@ -303,6 +303,7 @@ void MainWindow::open()
     }
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
+    fStatus          = fConfig->GetScanConfig()->GetParamValue("STATUS");
     if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
       if (fhalfstaveid == -1) {
         fComponentWindow = new Components(this);
@@ -1659,10 +1660,15 @@ void MainWindow::attachtodatabase()
           WriteToEos(fHICs.at(i)->GetDbId(), uri, false);
         }
         fActivitywindow = new ActivityStatus(this);
+        if (fStatus) {
+          fActivitywindow->DisplayStatusOptions();
+        }
         fActivitywindow->PopulateWindow(currenthic, oldclassific, finalclassific,
                                         scansclassificationnames, hicresultsvector);
         fActivitywindow->exec();
-        fActivitywindow->getactivitystatus(fStatus);
+        if (fStatus) {
+          fActivitywindow->getactivitystatus(fStatus);
+        }
         fActivitywindow->GetComment(comment);
         fMfile = new QFile(QString::fromStdString(path));
         fMfile->open(QIODevice::ReadWrite);

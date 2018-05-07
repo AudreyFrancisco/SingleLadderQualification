@@ -14,6 +14,10 @@ ActivityStatus::ActivityStatus(QWidget *parent) : QDialog(parent), ui(new Ui::Ac
   connect(ui->save, SIGNAL(clicked()), this, SLOT(close()));
   connect(ui->scanclassification, SIGNAL(itemClicked(QListWidgetItem *)), this,
           SLOT(on_scanclassification_itemClicked(QListWidgetItem * item)));
+  ui->label->hide();
+  ui->label_2->hide();
+  ui->openactiv->hide();
+  ui->closeactiv->hide();
 }
 
 Q_DECLARE_METATYPE(TScanResultHic *)
@@ -82,4 +86,12 @@ void ActivityStatus::on_scanclassification_itemClicked(QListWidgetItem *item)
     newItem->setText(hicresult->GetCuts().at(i).c_str());
     ui->cutdisplay->addItem(newItem);
   }
+}
+
+void ActivityStatus::DisplayStatusOptions()
+{
+  ui->label->show();
+  ui->label_2->show();
+  ui->openactiv->show();
+  ui->closeactiv->show();
 }

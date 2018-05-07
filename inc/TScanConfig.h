@@ -44,11 +44,11 @@ namespace ScanConfig {
   const int TUNING_MAXROW  = 512;
   const int LOCALBUSCUTRED = 1;
 
-  const int DAC_START   = 0;
-  const int DAC_STOP    = 255;
-  const int DAC_STEP    = 8;
-  const int NDACSAMPLES = 10;
-
+  const int DAC_START         = 0;
+  const int DAC_STOP          = 255;
+  const int DAC_STEP          = 8;
+  const int NDACSAMPLES       = 10;
+  const int STATUS            = 1;
   const int TEST_WITHOUT_COMP = 0;
   // settings for readout test
   const int READOUTSPEED     = 1200;
@@ -182,6 +182,7 @@ private:
   int  m_noiseCutInv;
   char m_fNameSuffix[20];
   int  m_testWithoutComp;
+  int  m_status;
   // NEW--added for additional scans
   int       m_ithrStart; // usually 30
   int       m_ithrStop;  // usually 100
