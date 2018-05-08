@@ -2617,13 +2617,13 @@ void MainWindow::ibscansforageing()
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
   fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
   AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 10);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
-  AddScan(STReadout);
+  // fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
+  // fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 10);
+  // fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
+  // AddScan(STReadout);
+  // fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
+  // fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
+  // AddScan(STReadout);
 
   // reset previous values
   // (TODO: this is not exactly correct because it resets to the values defined in the header file
