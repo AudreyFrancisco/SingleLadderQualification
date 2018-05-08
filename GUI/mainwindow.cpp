@@ -1206,10 +1206,12 @@ void MainWindow::applytests()
   writingdb = false;
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
-      int oldtests;
-      oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
-      std::cout << "the number of old tests is " << oldtests << std::endl;
-      fConfig->GetScanConfig()->SetRetestNumber(fHicnames.at(i).toStdString(), oldtests);
+      if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST) {
+        int oldtests;
+        oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
+        std::cout << "the number of old tests is " << oldtests << std::endl;
+        fConfig->GetScanConfig()->SetRetestNumber(fHicnames.at(i).toStdString(), oldtests);
+      }
       makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
     }
   }
