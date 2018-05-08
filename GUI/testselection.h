@@ -25,7 +25,7 @@ public:
 private:
   Ui::TestSelection *ui;
   Dialog *           missingsettings;
-  int                locid;
+  int                locid = 0;
   int                memid;
   bool               m_testDatabase;
   QString            location;
