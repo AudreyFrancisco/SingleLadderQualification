@@ -305,21 +305,21 @@ void MainWindow::open()
 
     if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
       fHicnames.clear();
-      fHicnames.push_back(fHicidnumber + "/Module1");
-      fHicnames.push_back(fHicidnumber + "/Module2");
-      fHicnames.push_back(fHicidnumber + "/Module3");
-      fHicnames.push_back(fHicidnumber + "/Module4");
-      ar[0] = strdup(fHicidnumber.toLatin1() + "/Module1");
-      ar[1] = strdup(fHicidnumber.toLatin1() + "/Module2");
-      ar[2] = strdup(fHicidnumber.toLatin1() + "/Module3");
-      ar[3] = strdup(fHicidnumber.toLatin1() + "/Module4");
+      fHicnames.push_back("Module1");
+      fHicnames.push_back("Module2");
+      fHicnames.push_back("Module3");
+      fHicnames.push_back("Module4");
+      ar[0] = strdup("Module1");
+      ar[1] = strdup("Module2");
+      ar[2] = strdup("Module3");
+      ar[3] = strdup("Module4");
       if (fNumberofscan == OBHalfStaveOLFAST) {
-        fHicnames.push_back(fHicidnumber + "/Module5");
-        fHicnames.push_back(fHicidnumber + "/Module6");
-        fHicnames.push_back(fHicidnumber + "/Module7");
-        ar[4] = strdup(fHicidnumber.toLatin1() + "/Module5");
-        ar[5] = strdup(fHicidnumber.toLatin1() + "/Module6");
-        ar[6] = strdup(fHicidnumber.toLatin1() + "/Module7");
+        fHicnames.push_back("Module5");
+        fHicnames.push_back("Module6");
+        fHicnames.push_back("Module7");
+        ar[4] = strdup("Module5");
+        ar[5] = strdup("Module6");
+        ar[6] = strdup("Module7");
       }
     }
 
@@ -1207,12 +1207,15 @@ void MainWindow::applytests()
   writingdb = false;
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
-      if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST) {
-        int oldtests;
-        oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
-        std::cout << "the number of old tests is " << oldtests << std::endl;
-        fConfig->GetScanConfig()->SetRetestNumber(fHicnames.at(i).toStdString(), oldtests);
+      int oldtests;
+      if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan != OBHalfStaveMLFAST) {
+        oldtests = 0;
       }
+      else {
+        oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
+      }
+      std::cout << "the number of old tests is " << oldtests << std::endl;
+      fConfig->GetScanConfig()->SetRetestNumber(fHicnames.at(i).toStdString(), oldtests);
       makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
     }
   }
