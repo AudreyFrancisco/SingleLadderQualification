@@ -109,6 +109,7 @@ public:
   string                   GetOutputPath() { return m_outputPath; };
   string                   GetParameterFile();
   std::vector<std::string> GetCuts() { return m_cuts; };
+  std::string              GetName() { return m_hicName; };
 };
 
 // base class for classes containing complete results

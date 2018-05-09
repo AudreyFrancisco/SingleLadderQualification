@@ -1,5 +1,6 @@
 #include "TEyeAnalysis.h"
 #include "TCanvas.h"
+#include "TFile.h"
 #include "TH2.h"
 #include "TLatex.h"
 #include <fstream>
@@ -25,17 +26,20 @@ void TEyeAnalysis::Initialize()
 void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
 {
   std::cout << "in analyse histo, chipList.size = " << m_chipList.size() << std::endl;
-  FILE *        fp = fopen("EyeDiagram.dat", "w");
+  FILE *fp = fopen("EyeDiagram.dat", "w");
+
   std::ofstream outfile_l("edge_l.dat");
   std::ofstream outfile_r("edge_r.dat");
 
-  // TODO: use proper output path
-  // std::string filename_eye = GetHicResult()->GetOutputPath() + "/eye.pdf";
-  std::string filename_eye = "eye.pdf";
+  std::string filename_eye = FindHicResultForChip(m_chipList.at(0))->GetOutputPath() + "/eye.pdf";
+  std::string filename_eye_root =
+      FindHicResultForChip(m_chipList.at(0))->GetOutputPath() + "/eye.root";
 
   TCanvas c;
   c.cd();
   c.Print((filename_eye + "[").c_str());
+
+  TFile *rootfile_eye = TFile::Open(filename_eye_root.c_str(), "RECREATE");
 
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     double step_x = histo->GetStep(m_chipList.at(ichip), 0);
@@ -51,8 +55,12 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
     const int nbin_y_half = nbin_y / 2;
     const int yband       = 2;
 
-    TH2F h_eye("h_eye", TString::Format("Eye Diagram chip %i", m_chipList.at(ichip).chipId), nbin_x,
-               min_x, min_x + nbin_x * step_x, nbin_y, min_y, min_y + nbin_y * step_y);
+    const std::string hname = TString::Format("h_eye_%i", m_chipList.at(ichip).chipId).Data();
+    TH2F              h_eye(hname.c_str(),
+               TString::Format("Eye Diagram chip %i (%s)", m_chipList.at(ichip).chipId,
+                               FindHicResultForChip(m_chipList.at(ichip))->GetName().c_str()),
+               nbin_x, min_x, min_x + nbin_x * step_x, nbin_y, min_y, min_y + nbin_y * step_y);
+    h_eye.SetDirectory(0);
 
     for (int xbin = 0; xbin < nbin_x; xbin++) {
       for (int ybin = 0; ybin < nbin_y; ybin++) {
@@ -107,7 +115,15 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
     l.SetNDC(kTRUE);
     l.DrawLatex(.5, .02, TString::Format("opening: %3d - %3d", x_l, x_r));
 
-    // write result to pdf
+    // write result to files
+    std::string dirname   = FindHicResultForChip(m_chipList.at(ichip))->GetName();
+    TDirectory *rootdir   = rootfile_eye->GetDirectory(dirname.c_str());
+    if (!rootdir) rootdir = rootfile_eye->mkdir(dirname.c_str());
+    if (rootdir) rootdir->WriteTObject(&h_eye);
+    c.SetLogz(kFALSE);
+    c.Print(filename_eye.c_str());
+    c.SetLogz(kTRUE);
+    h_eye.SetMinimum(1.e-7);
     c.Print(filename_eye.c_str());
 
     delete[] x_left;
