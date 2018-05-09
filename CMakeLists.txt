@@ -140,13 +140,13 @@ endforeach()
 foreach(exe ${TEST_EXE})
   string(REPLACE "test_" "" test ${exe})
   add_executable(${exe} exe/main_${test}.cpp)
-  target_link_libraries(${exe} alpide alpide_analysis alucms curl xml2 mosaic powerboard)
+  target_link_libraries(${exe} alucms curl xml2 mosaic powerboard alpide alpide_analysis)
 endforeach()
 
 foreach(exe ${TEST_EXE_ROOT})
   string(REGEX REPLACE "^test_" "" test ${exe})
   add_executable(${exe} exe/main_${test}.cpp)
-  target_link_libraries(${exe} alpide alpide_analysis alucms curl xml2 mosaic powerboard ${ROOTLIBS})
+  target_link_libraries(${exe} alucms curl xml2 mosaic powerboard alpide alpide_analysis ${ROOTLIBS})
 endforeach()
 
 install(TARGETS 

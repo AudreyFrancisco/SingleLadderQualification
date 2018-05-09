@@ -1659,7 +1659,7 @@ void MainWindow::attachtodatabase()
   fDB = new AlpideDB(fDatabasetype);
   SetHicClassifications();
   for (unsigned int i = 0; i < fHICs.size(); i++) {
-    if (fHicnames.at(i) != '\0') {
+    if (!fHicnames.at(i).isEmpty()) {
       if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
         QString            comment;
         QDateTime          date;
