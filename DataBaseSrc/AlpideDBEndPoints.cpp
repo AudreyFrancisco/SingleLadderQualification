@@ -92,14 +92,18 @@ AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Ses
   doc =
       xmlReadMemory(ReturnedString, strlen(ReturnedString), "noname.xml", NULL, 0); // parse the XML
   if (doc == NULL) {
-    cerr << "Failed to parse document" << endl;
+    cerr << "Failed to parse document. Dump the response :" << endl;
+    cerr << ReturnedString << endl;
+    cerr << "------- EOF -------" << endl;
     SetResponse(AlpideTable::BadXML, 0, Session);
     return (&theResponse);
   }
   xmlNode *root_element = NULL;
   root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
-    cerr << "Failed to parse document: No root element" << endl;
+    cerr << "Failed to parse document: No root element. Dump the response:" << endl;
+    cerr << ReturnedString << endl;
+    cerr << "------- EOF -------" << endl;
     SetResponse(AlpideTable::BadXML, 0, Session);
     return (&theResponse);
   }
