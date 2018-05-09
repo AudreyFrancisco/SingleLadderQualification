@@ -83,7 +83,7 @@ EXE += $(TEST_EXE_ROOT)
 
 
 #### TARGETS ####
-all: check-env $(EXE) Config.cfg githooks
+all: check-env clean $(EXE) Config.cfg githooks lib lib_analysis
 
 ### Config.cfg
 Config.cfg: ConfigTemplate.cfg
