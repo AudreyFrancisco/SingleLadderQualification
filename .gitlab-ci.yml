@@ -17,7 +17,7 @@ slc6:
       - make
       - cd ../
       - mkdir build && cd build
-      - cmake ../ && make
+      - cmake3 ../ && make
 
 cc7:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-cc7-dev
@@ -39,7 +39,7 @@ cc7:
       - cd ../../../
       - make format-check
       - mkdir build && cd build
-      - cmake ../ && make
+      - cmake3 ../ && make
 
 ubuntu1604:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu16.04-dev
