@@ -1,5 +1,9 @@
 set(SRCS
-AlpideDB.cpp AlpideDBEndPoints.cpp AlpideDBManager.cpp CernSsoCookiesJar.cpp utilities.cpp DBHelpers.cpp
+  AlpideDB.cpp
+  AlpideDBEndPoints.cpp
+  AlpideDBManager.cpp
+  CernSsoCookiesJar.cpp
+  utilities.cpp
 )
 
 add_library(alucms SHARED ${SRCS})
