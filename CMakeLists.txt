@@ -140,7 +140,7 @@ endforeach()
 foreach(exe ${TEST_EXE})
   string(REPLACE "test_" "" test ${exe})
   add_executable(${exe} exe/main_${test}.cpp)
-  target_link_libraries(${exe} alucms curl xml2 mosaic powerboard alpide alpide_analysis)
+  target_link_libraries(${exe} alucms curl xml2 mosaic powerboard alpide alpide_analysis alucms)
 endforeach()
 
 foreach(exe ${TEST_EXE_ROOT})
