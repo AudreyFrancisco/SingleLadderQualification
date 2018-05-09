@@ -266,6 +266,7 @@ private slots:
   void poweringscan();
   void fillingOBvectors();
   void fillingDctrl();
+  void fillingfastHS();
   void StopScan();
 
   // void setVI(float * vcasn, float * ithr);

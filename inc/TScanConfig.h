@@ -20,7 +20,9 @@ typedef enum {
   IBEndurance,
   IBStave,
   IBStaveEndurance,
-  IBDctrl
+  IBDctrl,
+  OBHalfStaveOLFAST,
+  OBHalfStaveMLFAST
 } TTestType;
 
 namespace ScanConfig {

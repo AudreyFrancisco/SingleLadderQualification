@@ -33,6 +33,8 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("ML HS Qualification Test", OBHalfStaveML);
   // ui->typetest->addItem("OB Stave Test", OBStave);
   ui->typetest->addItem("IB Stave Qualification Test", IBStave);
+  ui->typetest->addItem("OL HS Check (NO DB)", OBHalfStaveOLFAST);
+  ui->typetest->addItem("ML HS Check (NO DB)", OBHalfStaveMLFAST);
   ui->typeoftest->hide();
   missingsettings = 0x0;
 
@@ -54,8 +56,8 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
                                  QString &dthree, QString &dfour, QString &dfive,
                                  QString &halfstave)
 {
-  if (ui->operatorstring->toPlainText().isEmpty() ||
-      /*ui->id->toPlainText().isEmpty() || */ locid == 0) {
+  if (ui->operatorstring->toPlainText().isEmpty()) {
+    //  || /*ui->id->toPlainText().isEmpty() || */ locid == 0) {
     qDebug() << "Put your details" << endl;
     fCounter = counter = 0;
     popupmessage("Info missing");
@@ -129,7 +131,9 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
     fCounter = counter = 1;
     lid                = locid;
     institute          = location;
-    memberid           = GetMemberID();
+    if (lid != 0) {
+      memberid = GetMemberID();
+    }
     if (memberid == -1) {
       popupmessage("The operator you entered \nis not in the Database");
       if (fCounter == 0) {

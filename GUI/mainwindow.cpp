@@ -181,7 +181,8 @@ void MainWindow::open()
   else if (fNumberofscan == OBPower) {
     fileName = "ConfigPower.cfg";
   }
-  else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
+  else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
+           fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
     fileName = "Config_HS.cfg";
   }
   try {
@@ -301,6 +302,27 @@ void MainWindow::open()
         }
       }
     }
+
+    if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+      fHicnames.clear();
+      fHicnames.push_back("Module1");
+      fHicnames.push_back("Module2");
+      fHicnames.push_back("Module3");
+      fHicnames.push_back("Module4");
+      ar[0] = strdup("Module1");
+      ar[1] = strdup("Module2");
+      ar[2] = strdup("Module3");
+      ar[3] = strdup("Module4");
+      if (fNumberofscan == OBHalfStaveOLFAST) {
+        fHicnames.push_back("Module5");
+        fHicnames.push_back("Module6");
+        fHicnames.push_back("Module7");
+        ar[4] = strdup("Module5");
+        ar[5] = strdup("Module6");
+        ar[6] = strdup("Module7");
+      }
+    }
+
     initSetup(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(), &fHICs, ar);
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
     fStatus          = fConfig->GetScanConfig()->GetParamValue("STATUS");
@@ -324,6 +346,7 @@ void MainWindow::open()
         }
       }
     }
+
     fConfig->GetScanConfig()->SetUseDataPath(true);
     fPb = fHICs.at(0)->GetPowerBoard();
     if (fPb) {
@@ -1185,7 +1208,12 @@ void MainWindow::applytests()
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
       int oldtests;
-      oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
+      if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+        oldtests = 0;
+      }
+      else {
+        oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
+      }
       std::cout << "the number of old tests is " << oldtests << std::endl;
       fConfig->GetScanConfig()->SetRetestNumber(fHicnames.at(i).toStdString(), oldtests);
       makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
@@ -1215,6 +1243,9 @@ void MainWindow::applytests()
   if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
     fillingHSscans();
   }
+  if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+    fillingfastHS();
+  }
   if (fNumberofscan == IBDctrl) {
     fillingDctrl();
   }
@@ -1232,6 +1263,10 @@ void MainWindow::applytests()
   printClasses();
 
   connect(fSignalMapper, SIGNAL(mapped(int)), this, SLOT(getresultdetails(int)));
+
+  if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+    fstopwriting = true;
+  }
 
   if (fstopwriting) {
     return;
@@ -1937,41 +1972,41 @@ void MainWindow::savesettings()
     if (fstop && fHiddenComponent == false) {
       return;
     }
+    if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST) {
+      for (unsigned int i = 0; i < fHICs.size(); i++) {
+        if (fHicnames.at(i) != '\0') {
+          fstopwriting  = false;
+          int in        = 0;
+          int out       = 0;
+          int projectid = 0;
+          int comp      = 0;
+          projectid     = fDB->GetProjectId();
+          in            = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "in");
+          out           = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "out");
+          comp = DbGetComponentId(fDB, projectid, fComponentTypeID, fHicnames.at(i).toStdString());
 
-    for (unsigned int i = 0; i < fHICs.size(); i++) {
-      if (fHicnames.at(i) != '\0') {
-        fstopwriting  = false;
-        int in        = 0;
-        int out       = 0;
-        int projectid = 0;
-        int comp      = 0;
-        projectid     = fDB->GetProjectId();
-        in            = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "in");
-        out           = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "out");
-        comp = DbGetComponentId(fDB, projectid, fComponentTypeID, fHicnames.at(i).toStdString());
-
-        if (comp == -1) {
-          fComponentWindow = new Components(this);
-          fComponentWindow->WriteToLabel(fHicnames.at(i));
-          fComponentWindow->exec();
-          if (fstop && fHiddenComponent == false) {
-            return;
+          if (comp == -1) {
+            fComponentWindow = new Components(this);
+            fComponentWindow->WriteToLabel(fHicnames.at(i));
+            fComponentWindow->exec();
+            if (fstop && fHiddenComponent == false) {
+              return;
+            }
           }
+
+          fHICs.at(i)->SetOldClassification(DbGetPreviousCategory(fDB, comp, fIdofactivitytype));
+
+          fActComponentTypeIDs.push_back(make_pair(in, out));
+          fComponentIDs.push_back(comp);
         }
 
-        fHICs.at(i)->SetOldClassification(DbGetPreviousCategory(fDB, comp, fIdofactivitytype));
 
-        fActComponentTypeIDs.push_back(make_pair(in, out));
-        fComponentIDs.push_back(comp);
-      }
-
-
-      else {
-        fActComponentTypeIDs.push_back(make_pair(0, 0));
-        fComponentIDs.push_back(0);
+        else {
+          fActComponentTypeIDs.push_back(make_pair(0, 0));
+          fComponentIDs.push_back(0);
+        }
       }
     }
-
     if (fHiddenComponent) {
       fstopwriting = false;
     }
@@ -2570,7 +2605,9 @@ void MainWindow::ConnectTestCombo(int value)
   ui->testtypeselected->setText(fTestname);
   std::string name;
   name.append(fTestname.toStdString());
-  findidoftheactivitytype(name, fIdofactivitytype);
+  if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST) {
+    findidoftheactivitytype(name, fIdofactivitytype);
+  }
   // fIdofactivitytype=-1;
   if (fIdofactivitytype == -1) {
     fSettingswindow->getwindow();
@@ -2581,8 +2618,10 @@ void MainWindow::ConnectTestCombo(int value)
     return;
   }
   std::cout << "the id of the selected test: " << fIdofactivitytype << std::endl;
-  locationcombo();
-  fSettingswindow->connectlocationcombo(fLocdetails);
+  if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST) {
+    locationcombo();
+    fSettingswindow->connectlocationcombo(fLocdetails);
+  }
   if (fNumberofscan == OBEndurance) {
     fSettingswindow->adjustendurance();
   }
@@ -2617,13 +2656,13 @@ void MainWindow::ibscansforageing()
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
   fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
   AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 10);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
-  AddScan(STReadout);
+  // fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
+  // fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 10);
+  // fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
+  // AddScan(STReadout);
+  // fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
+  // fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
+  // AddScan(STReadout);
 
   // reset previous values
   // (TODO: this is not exactly correct because it resets to the values defined in the header file
@@ -2779,4 +2818,12 @@ string MainWindow::GetResultType(int i)
   default:
     return string("UNTESTED");
   }
+}
+
+
+void MainWindow::fillingfastHS()
+{
+  ClearVectors();
+  AddScan(STFifo);
+  AddScan(STDigital);
 }
