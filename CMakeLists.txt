@@ -5,6 +5,7 @@ set (CMAKE_CXX_STANDARD 11)
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 set(BASE_OBJS 
+  DataBaseSrc/DBHelpers.cpp
   src/AlpideConfig.cpp
   src/AlpideDebug.cpp
   src/AlpideDecoder.cpp
