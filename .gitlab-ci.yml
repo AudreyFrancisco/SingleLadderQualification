@@ -1,6 +1,8 @@
 slc6:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-slc6-dev
     script:
+      - mkdir build
+      - (cd build && cmake3 ../ && make)
       - make clean
       - make
       - make lib
@@ -15,13 +17,12 @@ slc6:
       - qmake-qt5 -makefile
       - make clean
       - make
-      - cd ../
-      - mkdir build && cd build
-      - cmake3 ../ && make
 
 cc7:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-cc7-dev
     script:
+      - mkdir build
+      - (cd build && cmake3 ../ && make)
       - make clean
       - make
       - make lib
@@ -38,12 +39,12 @@ cc7:
       - make
       - cd ../../../
       - make format-check
-      - mkdir build && cd build
-      - cmake3 ../ && make
 
 ubuntu1604:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu16.04-dev
     script:
+      - mkdir build
+      - (cd build && cmake ../ && make)
       - make clean
       - make
       - make lib
@@ -60,12 +61,12 @@ ubuntu1604:
       - make
       - cd ../../../
       - make format-check
-      - mkdir build && cd build
-      - cmake ../ && make
 
 ubuntu1604clang:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu16.04-clang-dev
     script:
+      - mkdir build
+      - (cd build && CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake ../ && make)
       - find -name Makefile -exec sed -i 's/g++/clang++/g' {} \;
       - make clean
       - make
@@ -83,5 +84,3 @@ ubuntu1604clang:
       - make
       - cd ../../../
       - make format-check
-      - mkdir build && cd build
-      - export CC=/usr/bin/clang ; export CXX=/usr/bin/clang++ ; cmake ../ && make
