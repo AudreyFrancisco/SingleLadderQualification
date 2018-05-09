@@ -1208,7 +1208,7 @@ void MainWindow::applytests()
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
       int oldtests;
-      if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan != OBHalfStaveMLFAST) {
+      if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
         oldtests = 0;
       }
       else {
