@@ -304,21 +304,22 @@ void MainWindow::open()
     }
 
     if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+      fHicnames.clear();
       fHicnames.push_back(fHicidnumber + "/Module1");
       fHicnames.push_back(fHicidnumber + "/Module2");
       fHicnames.push_back(fHicidnumber + "/Module3");
       fHicnames.push_back(fHicidnumber + "/Module4");
-      ar[0] = {fHicidnumber.toLatin1() + "/Module1"};
-      ar[1] = {fHicidnumber.toLatin1() + "/Module2"};
-      ar[2] = {fHicidnumber.toLatin1() + "/Module3"};
-      ar[3] = {fHicidnumber.toLatin1() + "/Module4"};
+      ar[0] = strdup(fHicidnumber.toLatin1() + "/Module1");
+      ar[1] = strdup(fHicidnumber.toLatin1() + "/Module2");
+      ar[2] = strdup(fHicidnumber.toLatin1() + "/Module3");
+      ar[3] = strdup(fHicidnumber.toLatin1() + "/Module4");
       if (fNumberofscan == OBHalfStaveOLFAST) {
         fHicnames.push_back(fHicidnumber + "/Module5");
         fHicnames.push_back(fHicidnumber + "/Module6");
         fHicnames.push_back(fHicidnumber + "/Module7");
-        ar[4] = {fHicidnumber.toLatin1() + "/Module5"};
-        ar[5] = {fHicidnumber.toLatin1() + "/Module6"};
-        ar[6] = {fHicidnumber.toLatin1() + "/Module7"};
+        ar[4] = strdup(fHicidnumber.toLatin1() + "/Module5");
+        ar[5] = strdup(fHicidnumber.toLatin1() + "/Module6");
+        ar[6] = strdup(fHicidnumber.toLatin1() + "/Module7");
       }
     }
 
