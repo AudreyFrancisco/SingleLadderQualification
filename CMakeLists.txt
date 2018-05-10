@@ -161,6 +161,11 @@ install(TARGETS
   LIBRARY DESTINATION lib
 )
 
+add_custom_target(format-check
+  COMMAND ./.format-check.sh
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
 subdirs(DataBaseSrc)
 subdirs(GUI)
 subdirs(MosaicSrc/libmosaic)
