@@ -162,7 +162,6 @@ install(TARGETS
 )
 
 add_custom_target(format-check
-  ALL
   COMMAND ./.format-check.sh
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
