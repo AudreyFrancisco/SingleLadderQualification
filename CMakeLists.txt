@@ -168,6 +168,7 @@ add_custom_target(format-check
 
 subdirs(DataBaseSrc)
 subdirs(GUI)
+subdirs(MosaicSrc/powerboard)
 subdirs(MosaicSrc/libmosaic)
 subdirs(MosaicSrc/libpowerboard)
 subdirs(ScopeControlSrc)
