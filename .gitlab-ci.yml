@@ -2,7 +2,7 @@ slc6:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-slc6-dev
     script:
       - mkdir build
-      - (cd build && cmake3 ../ && make all format-check)
+      - (cd build && cmake3 ../ && make all)
       - make clean
       - make
       - make lib
