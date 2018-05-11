@@ -886,39 +886,38 @@ void MainWindow::test()
 
 void MainWindow::scanLoop(TScan *myScan)
 {
-  try {
-    myScan->Init();
-    myScan->LoopStart(2);
+  if (!fScanAbort) try {
+      myScan->LoopStart(2);
 
-    while (myScan->Loop(2)) {
-      myScan->PrepareStep(2);
-      myScan->LoopStart(1);
+      while (myScan->Loop(2)) {
+        myScan->PrepareStep(2);
+        myScan->LoopStart(1);
 
-      while (myScan->Loop(1)) {
-        myScan->PrepareStep(1);
-        myScan->LoopStart(0);
+        while (myScan->Loop(1)) {
+          myScan->PrepareStep(1);
+          myScan->LoopStart(0);
 
-        while (myScan->Loop(0)) {
-          myScan->PrepareStep(0);
-          myScan->Execute();
-          myScan->Next(0);
+          while (myScan->Loop(0)) {
+            myScan->PrepareStep(0);
+            myScan->Execute();
+            myScan->Next(0);
+          }
+          myScan->LoopEnd(0);
+          myScan->Next(1);
         }
-        myScan->LoopEnd(0);
-        myScan->Next(1);
+        myScan->LoopEnd(1);
+        myScan->Next(2);
       }
-      myScan->LoopEnd(1);
-      myScan->Next(2);
+      myScan->LoopEnd(2);
+      myScan->Terminate();
+      // throw string("SDFdsfsdfsdfsdfsfsdf");
     }
-    myScan->LoopEnd(2);
-    myScan->Terminate();
-    // throw string("SDFdsfsdfsdfsdfsfsdf");
-  }
-  catch (exception &ex) {
-    std::cout << ex.what() << "is the thrown exception from the scan" << std::endl;
-    fExceptionthrown = true;
-    fScanAbort       = true;
-    fExceptiontext   = ex.what();
-  }
+    catch (exception &ex) {
+      std::cout << ex.what() << "is the thrown exception from the scan" << std::endl;
+      fExceptionthrown = true;
+      fScanAbort       = true;
+      fExceptiontext   = ex.what();
+    }
 
   /*catch (string x) {
         std::cout << "DGFDGDFGD>>" << x << std::endl;
@@ -1137,7 +1136,17 @@ void MainWindow::performtests()
         colorsinglescan(i);
       }
       else {
+        try {
+          fScanVector[i]->Init();
+        }
+        catch (exception &ex) {
+          std::cout << ex.what() << "is the thrown exception from the scaninit" << std::endl;
+          fExceptionthrown = true;
+          fScanAbort       = true;
+          fExceptiontext   = ex.what();
+        }
         std::thread scanThread(&MainWindow::scanLoop, this, fScanVector[i]);
+
         // sleep(10);
 
         std::thread analysisThread(&MainWindow::analysis, this, fAnalysisVector[i]);
@@ -2449,7 +2458,7 @@ void MainWindow::IBBasicTest()
         fAnalysisVector.at(i)->Finalize();
       }
       else {
-
+        fScanVector[i]->Init();
         std::thread scanThread(&MainWindow::scanLoop, this, fScanVector[i]);
 
         fAnalysisVector.at(i)->Initialize();
