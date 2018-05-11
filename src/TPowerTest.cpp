@@ -59,7 +59,7 @@ void TPowerTest::PrepareStep(int loopIndex)
 void TPowerTest::DoIVCurve(THicCurrents &result)
 {
   for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
-    float voltage = -i / 10;
+    float voltage = -((float)i) / 10.;
     m_testHic->GetPowerBoard()->SetBiasVoltage(voltage);
     sleep(1);
     result.ibias[i] = m_testHic->GetIBias() * 1000; // convert in mA
