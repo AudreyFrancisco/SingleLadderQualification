@@ -23,9 +23,13 @@ typedef TScanParameters__ TScanParameters;
 // Warning: has to stay ordered such, that worse test result = higher entry
 typedef enum hicClassification {
   CLASS_UNTESTED,
-  CLASS_GREEN,
-  CLASS_ORANGE,
+  //  CLASS_GREEN,
+  //  CLASS_ORANGE,
+  CLASS_GOLD,
+  CLASS_SILVER,
+  CLASS_BRONZE,
   CLASS_PARTIAL,
+  CLASS_PARTIALB,
   CLASS_RED
 } THicClassification;
 

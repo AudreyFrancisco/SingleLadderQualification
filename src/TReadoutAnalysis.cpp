@@ -175,11 +175,11 @@ void TReadoutAnalysis::WriteResult()
 
 THicClassification TReadoutAnalysis::GetClassificationOB(TReadoutResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
 
   DoCut(returnValue, CLASS_RED, result->m_errorCounter.nCorruptEvent, "READOUT_MAXCORRUPT", result);
   DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "READOUT_MAXTIMEOUT", result);
-  DoCut(returnValue, CLASS_ORANGE, result->m_errorCounter.n8b10b, "READOUT_MAX8b10b_GREEN", result);
+  DoCut(returnValue, CLASS_SILVER, result->m_errorCounter.n8b10b, "READOUT_MAX8b10b_GREEN", result);
 
   std::cout << "Readout Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
@@ -188,11 +188,11 @@ THicClassification TReadoutAnalysis::GetClassificationOB(TReadoutResultHic *resu
 
 THicClassification TReadoutAnalysis::GetClassificationIB(TReadoutResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
 
   DoCut(returnValue, CLASS_RED, result->m_errorCounter.nCorruptEvent, "READOUT_MAXCORRUPT", result);
   DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "READOUT_MAXTIMEOUT", result);
-  DoCut(returnValue, CLASS_ORANGE, result->m_errorCounter.n8b10b, "READOUT_MAX8b10b_GREEN", result);
+  DoCut(returnValue, CLASS_SILVER, result->m_errorCounter.n8b10b, "READOUT_MAX8b10b_GREEN", result);
 
   std::cout << "Readout Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;

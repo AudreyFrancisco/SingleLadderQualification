@@ -1349,22 +1349,25 @@ void MainWindow::colorscans()
              it != fresultVector.at(i + 1)->GetHicResults()->end(); ++it) {
           int colour;
           colour = it->second->GetClassification();
-
-          if (colour == CLASS_ORANGE) {
-            fScanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
-            break;
+          if (colour == CLASS_GOLD) {
+            fScanbuttons[i]->setStyleSheet("color:gold;Text-align:left;border:none;");
+            return;
           }
-          if (colour == CLASS_GREEN) {
-            fScanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
-            break;
+          if (colour == CLASS_SILVER) {
+            fScanbuttons[i]->setStyleSheet("color:silver;Text-align:left;border:none;");
+            return;
           }
           if (colour == CLASS_RED) {
             fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
-            break;
+            return;
           }
           if (colour == CLASS_UNTESTED) {
             fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
-            break;
+            return;
+          }
+          if (colour == CLASS_BRONZE) {
+            fScanbuttons[i]->setStyleSheet("color:rgb(160,198,96);Text-align:left;border:none;");
+            return;
           }
         }
       }
@@ -1374,22 +1377,25 @@ void MainWindow::colorscans()
              it != fresultVector.at(i)->GetHicResults()->end(); ++it) {
           int colour;
           colour = it->second->GetClassification();
-
-          if (colour == CLASS_ORANGE) {
-            fScanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
-            break;
+          if (colour == CLASS_GOLD) {
+            fScanbuttons[i]->setStyleSheet("color:gold;Text-align:left;border:none;");
+            return;
           }
-          if (colour == CLASS_GREEN) {
-            fScanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
-            break;
+          if (colour == CLASS_SILVER) {
+            fScanbuttons[i]->setStyleSheet("color:silver;Text-align:left;border:none;");
+            return;
           }
           if (colour == CLASS_RED) {
             fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
-            break;
+            return;
           }
           if (colour == CLASS_UNTESTED) {
             fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
-            break;
+            return;
+          }
+          if (colour == CLASS_BRONZE) {
+            fScanbuttons[i]->setStyleSheet("color:rgb(160,198,96);Text-align:left;border:none;");
+            return;
           }
         }
       }
@@ -2085,12 +2091,12 @@ void MainWindow::colorsinglescan(int i)
   if (fScanbuttons[i] != 0) {
     if (fresultVector[i] == 0) {
       fColour = fAnalysisVector.at(i + 1)->GetClassification();
-      if (fColour == CLASS_ORANGE) {
-        fScanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
+      if (fColour == CLASS_GOLD) {
+        fScanbuttons[i]->setStyleSheet("color:gold;Text-align:left;border:none;");
         return;
       }
-      if (fColour == CLASS_GREEN) {
-        fScanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
+      if (fColour == CLASS_SILVER) {
+        fScanbuttons[i]->setStyleSheet("color:silver;Text-align:left;border:none;");
         return;
       }
       if (fColour == CLASS_RED) {
@@ -2099,17 +2105,21 @@ void MainWindow::colorsinglescan(int i)
       }
       if (fColour == CLASS_UNTESTED) {
         fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
+        return;
+      }
+      if (fColour == CLASS_BRONZE) {
+        fScanbuttons[i]->setStyleSheet("color:rgb(160,198,96);Text-align:left;border:none;");
         return;
       }
     }
     else {
       fColour = fAnalysisVector.at(i)->GetClassification();
-      if (fColour == CLASS_ORANGE) {
-        fScanbuttons[i]->setStyleSheet("color:orange;Text-align:left;border:none;");
+      if (fColour == CLASS_GOLD) {
+        fScanbuttons[i]->setStyleSheet("color:gold;Text-align:left;border:none;");
         return;
       }
-      if (fColour == CLASS_GREEN) {
-        fScanbuttons[i]->setStyleSheet("color:green;Text-align:left;border:none;");
+      if (fColour == CLASS_SILVER) {
+        fScanbuttons[i]->setStyleSheet("color:silver;Text-align:left;border:none;");
         return;
       }
       if (fColour == CLASS_RED) {
@@ -2118,6 +2128,10 @@ void MainWindow::colorsinglescan(int i)
       }
       if (fColour == CLASS_UNTESTED) {
         fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
+        return;
+      }
+      if (fColour == CLASS_BRONZE) {
+        fScanbuttons[i]->setStyleSheet("color:rgb(160,198,96);Text-align:left;border:none;");
         return;
       }
     }
@@ -2816,12 +2830,12 @@ string MainWindow::GetResultType(int i)
   switch (i) {
   case CLASS_UNTESTED:
     return string("UNTESTED");
-  case CLASS_GREEN:
-    return string("GREEN");
-  case CLASS_ORANGE:
-    return string("ORANGE");
-  case CLASS_PARTIAL:
-    return string("PARTIAL");
+  case CLASS_GOLD:
+    return string("GOLD");
+  case CLASS_BRONZE:
+    return string("BRONZE");
+  case CLASS_SILVER:
+    return string("SILVER");
   case CLASS_RED:
     return string("RED");
   default:
