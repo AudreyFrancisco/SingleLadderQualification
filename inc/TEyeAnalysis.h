@@ -31,6 +31,9 @@ class TEyeResultHic : public TScanResultHic {
 private:
 public:
   TEyeResultHic() : TScanResultHic(){};
+  TScanParameters *GetScanParameters() const {
+    return m_scanParameters;
+  }
   void WriteToFile(FILE *fp) { (void)fp; }; // TODO
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   {
