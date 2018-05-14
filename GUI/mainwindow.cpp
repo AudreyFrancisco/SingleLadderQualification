@@ -48,6 +48,8 @@
 #include "TDCTRLMeasurement.h"
 #include "TDigitalWFAnalysis.h"
 #include "TEnduranceCycle.h"
+#include "TEyeAnalysis.h"
+#include "TEyeMeasurement.h"
 #include "TFastPowerAnalysis.h"
 #include "TFastPowerTest.h"
 #include "TFifoAnalysis.h"
@@ -2275,6 +2277,13 @@ bool MainWindow::CreateScanObjects(TScanType scanType, TScanConfig *config, TSca
                                    (TDctrlResult *)*result);
     hasButton = true;
     return true;
+  case STEyeScan:
+    *scan     = new TEyeMeasurement(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
+    *result   = new TEyeResult();
+    *analysis = new TEyeAnalysis(&fHistoQue, (TEyeMeasurement *)*scan, config, fHICs, &fMutex,
+                                 (TEyeResult *)*result);
+    hasButton = true;
+    return true;
   case STLocalBus:
     *scan     = new TLocalBusTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
     *result   = new TLocalBusResult();
@@ -2518,6 +2527,8 @@ void MainWindow::IBParameterScan()
 void MainWindow::fillingibvectors()
 {
   ClearVectors();
+  AddScan(STEyeScan);
+  return;
   AddScan(STPower);
   // if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   // Do this scan immediately after power as it sometimes crashes

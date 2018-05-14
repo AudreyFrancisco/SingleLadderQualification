@@ -534,4 +534,64 @@ std::string TReadoutBoardMOSAIC::GetRegisterDump()
   return result;
 }
 
+/*
+  Write to the DRP address of Transceiver with given id
+
+  parameters: Aindex - Transceiver id
+              address - DRP address
+              value - DRP data to write
+              execute - execute transaction
+ */
+void TReadoutBoardMOSAIC::WriteTransceiverDRP(size_t Aindex, uint16_t address, uint16_t val,
+                                              bool execute)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cout << "Invalid Transceiver index " << Aindex << "\n";
+    return;
+  }
+  alpideRcv[Aindex]->addSetRDPReg(address, val);
+  if (execute) alpideRcv[Aindex]->execute();
+}
+
+
+/*
+  Write to a Subset of the DRP address of Transceiver with given id
+
+  parameters: Aindex - Transceiver id
+              address - DRP address
+              size - Number of bits to write
+              offset - Bit offset to write
+              value - DRP data to write
+              execute - execute transaction
+*/
+void TReadoutBoardMOSAIC::WriteTransceiverDRPField(size_t Aindex, uint16_t address, uint16_t size,
+                                                   uint16_t offset, uint16_t value, bool execute)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cout << "Invalid Transceiver index " << Aindex << "\n";
+    return;
+  }
+  alpideRcv[Aindex]->addSetRDPRegField(address, size, offset, value);
+  if (execute) alpideRcv[Aindex]->execute();
+}
+
+/*
+   Read from the DRP address of Transceiver with given idatain
+
+   parameters: Aindex  - Transceiver id
+               address - DRP address
+               value   - The result of the Read transaction
+               execute - execute transaction
+*/
+void TReadoutBoardMOSAIC::ReadTransceiverDRP(size_t Aindex, uint16_t address, uint32_t *value,
+                                             bool execute)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cout << "Invalid Transceiver index " << Aindex << "\n";
+    return;
+  }
+  alpideRcv[Aindex]->addGetRDPReg(address, value);
+  if (execute) alpideRcv[Aindex]->execute();
+}
+
 // ================================== EOF ========================================

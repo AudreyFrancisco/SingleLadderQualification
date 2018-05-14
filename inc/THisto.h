@@ -70,6 +70,13 @@ public:
     else
       return 0;
   };
+  double GetStep(int d) const
+  {
+    if (GetNBin(d) > 1)
+      return (GetMax(d) - GetMin(d)) / ((double)GetNBin(d) - 1.);
+    else
+      return 0;
+  }
 };
 
 class TScanHisto {
@@ -96,6 +103,10 @@ public:
   void Incr(common::TChipIndex index, unsigned int i, unsigned int j);
   void Incr(common::TChipIndex index, unsigned int i);
   std::map<int, THisto> GetHistoMap() { return m_histos; }
+  int GetNBin(common::TChipIndex index, int d);
+  double GetMin(common::TChipIndex index, int d);
+  double GetMax(common::TChipIndex index, int d);
+  double GetStep(common::TChipIndex index, int d);
 };
 
 #endif
