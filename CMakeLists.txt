@@ -1,7 +1,18 @@
 cmake_minimum_required (VERSION 3.1)
 project (new_alpide_software)
 
-set (CMAKE_CXX_STANDARD 11)
+find_package(ROOT)
+
+if (${ROOT_cxx17_FOUND})
+  MESSAGE("using C++17")
+  set (CMAKE_CXX_STANDARD 17)
+elseif(${ROOT_cxx14_FOUND})
+  MESSAGE("using C++14")
+  set (CMAKE_CXX_STANDARD 17)
+else()
+  MESSAGE("using C++11")
+endif()
+
 #SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 #SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
 
@@ -30,7 +41,6 @@ set(BASE_OBJS
   src/TDigitalScan.cpp
   src/TDigitalWFAnalysis.cpp
   src/TEnduranceCycle.cpp
-  src/TEyeAnalysis.cpp
   src/TEyeMeasurement.cpp
   src/TFastPowerAnalysis.cpp
   src/TFastPowerTest.cpp
@@ -79,6 +89,7 @@ set(MOSAIC_OBJS
 set(OBJS_ANA
   src/TSCurveAnalysis.cpp
   src/TApplyTuning.cpp
+  src/TEyeAnalysis.cpp
 )
 
 set(EXE
@@ -123,41 +134,42 @@ execute_process(COMMAND git describe --dirty --always WORKING_DIRECTORY ${CMAKE_
 MESSAGE("GIT_VERSION: ${GIT_VERSION}")
 add_definitions(-DVERSION="${GIT_VERSION}")
 
-execute_process(COMMAND root-config --cflags OUTPUT_VARIABLE ROOTFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOTFLAGS}")
-execute_process(COMMAND root-config --libs OUTPUT_VARIABLE ROOTLIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}")
 
-include_directories(. inc DataBaseSrc MosaicSrc MosaicSrc/libpowerboard/include MosaicSrc/libmosaic/include /usr/include/libxml2 ScopeControlSrc ScopeControlSrc/serial/include)
+include_directories(. inc DataBaseSrc MosaicSrc MosaicSrc/libpowerboard/include MosaicSrc/libmosaic/include /usr/include/libxml2 ScopeControlSrc ScopeControlSrc/serial/include ${ROOT_INCLUDE_DIRS})
 
 add_library(alpide SHARED ${BASE_OBJS} ${RU_OBJS} ${MOSAIC_OBJS})
 target_link_libraries(alpide alucms mosaic powerboard scopecontrol curl xml2 usb-1.0 tinyxml)
+list(APPEND ALP_LIBRARIES alpide)
 
-add_library(alpide_analysis SHARED ${OBJS_ANA})
-target_link_libraries(alpide_analysis alucms mosaic powerboard scopecontrol curl xml2 usb-1.0 tinyxml ${ROOTLIBS})
+if (${ROOT_FOUND})
+  add_library(alpide_analysis SHARED ${OBJS_ANA})
+  target_link_libraries(alpide_analysis alucms mosaic powerboard scopecontrol curl xml2 usb-1.0 tinyxml ${ROOT_LIBRARIES})
+  list(APPEND ALP_LIBRARIES alpide_analysis)
+endif()
 
 foreach(exe ${EXE})
   add_executable(${exe} exe/main_${exe}.cpp)
-  target_link_libraries(${exe} alpide alpide_analysis alucms mosaic powerboard curl xml2 usb-1.0 tinyxml)
+  target_link_libraries(${exe} alpide alucms mosaic powerboard curl xml2 usb-1.0 tinyxml)
 endforeach()
 
 foreach(exe ${TEST_EXE})
   string(REPLACE "test_" "" test ${exe})
   add_executable(${exe} exe/main_${test}.cpp)
-  target_link_libraries(${exe} alpide alpide_analysis alucms mosaic powerboard curl xml2 usb-1.0 tinyxml)
+  target_link_libraries(${exe} alpide alucms mosaic powerboard curl xml2 usb-1.0 tinyxml)
 endforeach()
 
 foreach(exe ${TEST_EXE_ROOT})
   string(REGEX REPLACE "^test_" "" test ${exe})
   add_executable(${exe} exe/main_${test}.cpp)
-  target_link_libraries(${exe} alpide alpide_analysis alucms mosaic powerboard curl xml2 usb-1.0 tinyxml ${ROOTLIBS})
+  target_link_libraries(${exe} alpide alpide_analysis alucms mosaic powerboard curl xml2 usb-1.0 tinyxml ${ROOT_LIBRARIES})
 endforeach()
 
 install(TARGETS 
   ${EXE}
   ${TEST_EXE}
   ${TEST_EXE_ROOT}
-  alpide
-  alpide_analysis
+  ${ALP_LIBRARIES}
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
 )
