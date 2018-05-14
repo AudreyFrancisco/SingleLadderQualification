@@ -1,0 +1,16 @@
+if(NOT "${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
+  add_custom_command(OUTPUT analysis
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR})
+  add_custom_target(ana ALL DEPENDS analysis)
+endif()
+
+install(DIRECTORY .
+  DESTINATION analysis
+  USE_SOURCE_PERMISSIONS
+  FILES_MATCHING
+  PATTERN *.C
+  PATTERN *.h
+  PATTERN *.sh
+)
+

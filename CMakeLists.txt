@@ -28,6 +28,7 @@ add_custom_target(format-check
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
+add_subdirectory(analysis)
 add_subdirectory(DataBaseSrc)
 add_subdirectory(exe)
 add_subdirectory(libalpide)
