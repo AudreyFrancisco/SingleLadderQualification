@@ -28,6 +28,7 @@ private:
   float ibias0;
   float ibias3;
   float ibias[50];
+  float maxBias;
   char  m_ivFile[200];
 
 protected:

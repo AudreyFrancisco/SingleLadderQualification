@@ -32,6 +32,7 @@ void TFastPowerTest::CreateMeasurements()
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     THicCurrents hicCurrents;
     hicCurrents.hicType = m_hics.at(i)->GetHicType();
+    hicCurrents.maxBias = ((float)(m_config->GetParamValue("IVPOINTS")) - 1) / 10;
     m_hicCurrents.insert(
         std::pair<std::string, THicCurrents>(m_hics.at(i)->GetDbId(), hicCurrents));
   }
@@ -73,6 +74,7 @@ void TFastPowerTest::DoIVCurve(THicCurrents &result)
     result.ibias[i] = m_testHic->GetIBias() * 1000; // convert in mA
     // overcurrent protection; will be counted as trip
     if (result.ibias[i] > m_config->GetParamValue("MAXIBIAS")) {
+      m_hicCurrents.find(m_testHic->GetDbId())->second.maxBias = voltage - .1;
       m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
       sleep(1);
       break;

@@ -64,6 +64,7 @@ void TPowerAnalysis::Finalize()
     hicResult->idddConfigured = hicCurrents.idddConfigured;
     hicResult->ibias0         = hicCurrents.ibias0;
     hicResult->ibias3         = hicCurrents.ibias3;
+    hicResult->maxBias        = hicCurrents.maxBias;
 
     for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
       hicResult->ibias[i] = hicCurrents.ibias[i];
@@ -198,6 +199,7 @@ void TPowerResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   DbAddParameter(db, activity, string("IDDA clocked"), iddaClocked, GetParameterFile());
   DbAddParameter(db, activity, string("Back bias current 0V"), ibias0, GetParameterFile());
   DbAddParameter(db, activity, string("Back bias current 3V"), ibias3, GetParameterFile());
+  DbAddParameter(db, activity, string("Maximum bias voltage"), maxBias, GetParameterFile());
 
   slash    = string(m_resultFile).find_last_of("/");
   fileName = string(m_resultFile).substr(slash + 1); // strip path
