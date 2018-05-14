@@ -3,6 +3,7 @@
 #include "TBoardConfigMOSAIC.h"
 #include "TBoardConfigRU.h"
 #include "TPowerBoardConfig.h"
+#include "version.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>

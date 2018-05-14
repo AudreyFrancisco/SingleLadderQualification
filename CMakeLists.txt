@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.2)
 project(new_alpide_software)
 
 find_package(ROOT)
 
-if(NOT ${ROOT_FOUND})
+if(NOT ROOT_FOUND)
   message(WARNING "Compilation without ROOT results in limited functionality!")
 endif()
 
@@ -23,10 +23,6 @@ separate_arguments(ROOTOPTS)
 
 link_libraries("-Wl,--no-undefined")
 
-execute_process(COMMAND git describe --dirty --always WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE GIT_VERSION)
-message(STATUS "GIT_VERSION: ${GIT_VERSION}")
-add_definitions(-DVERSION="${GIT_VERSION}")
-
 add_custom_target(format-check
   COMMAND ./.format-check.sh
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -39,9 +35,7 @@ add_subdirectory(MosaicSrc/powerboard)
 add_subdirectory(MosaicSrc/libmosaic)
 add_subdirectory(MosaicSrc/libpowerboard)
 add_subdirectory(ScopeControlSrc)
-if(${ROOT_FOUND})
-  add_subdirectory(GUI)
-endif()
+add_subdirectory(GUI)
 
 set(CPACK_PACKAGE_VERSION ${GIT_VERSION})
 set(CPACK_GENERATOR "RPM")

@@ -10,6 +10,7 @@
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
 #include "TScan.h"
+#include "version.h"
 
 bool fScanAbort;
 bool fScanAbortAll;

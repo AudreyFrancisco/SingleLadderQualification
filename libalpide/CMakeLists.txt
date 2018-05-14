@@ -74,8 +74,20 @@ set(OBJS_ANA
   ../src/TEyeAnalysis.cpp
 )
 
-add_library(alpide SHARED ${BASE_OBJS} ${RU_OBJS} ${MOSAIC_OBJS})
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.h
+  COMMAND ${CMAKE_COMMAND}
+    -D SRC=${CMAKE_SOURCE_DIR}/inc/version.h
+    -D DST=${CMAKE_CURRENT_BINARY_DIR}/version.h
+    -P ${CMAKE_SOURCE_DIR}/cmake/version.cmake
+  DEPENDS ${CMAKE_SOURCE_DIR}/inc/version.h
+  DEPENDS ${CMAKE_SOURCE_DIR}/cmake/version.cmake
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+add_library(alpide SHARED ${BASE_OBJS} ${RU_OBJS} ${MOSAIC_OBJS} ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 target_include_directories(alpide
+	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 	PUBLIC ../inc ../MosaicSrc .. # .. is for ReadoutUnitSrc
 )
 target_link_libraries(alpide alucms mosaic powerboard scopecontrol usb-1.0 tinyxml pthread)
@@ -83,6 +95,7 @@ list(APPEND ALP_LIBRARIES alpide)
 
 if (${ROOT_FOUND})
   add_library(alpide_analysis SHARED ${OBJS_ANA})
+  add_library(Alptest::alpide_analysis ALIAS alpide_analysis)
   target_compile_options(alpide_analysis PUBLIC ${ROOTOPTS})
   target_include_directories(alpide_analysis PUBLIC ${ROOT_INCLUDE_DIRS})
   target_link_libraries(alpide_analysis alpide ${ROOT_LIBRARIES} pthread)
