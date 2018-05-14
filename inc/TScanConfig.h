@@ -166,7 +166,7 @@ namespace ScanConfig {
   const int   MAXIBIAS      = 50;   // current limit for I-V-curve in mA;
   const float VOLTAGE_SCALE = 1.0;
   const float BACKBIAS      = 0;
-  const int   NOMINAL       = 0;
+  const int   NOMINAL       = 1;
   const int   ENDURANCE_SLICES             = 21;  // number of cycle slices
   const int   ENDURANCE_CYCLES             = 150; // total number of cycles per slice
   const int   ENDURANCE_UPTIME             = 60;  // up and down wait time in seconds per cycle
