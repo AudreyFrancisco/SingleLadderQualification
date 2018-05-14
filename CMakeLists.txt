@@ -21,6 +21,8 @@ endif()
 set(ROOTOPTS ${ROOT_CXX_FLAGS})
 separate_arguments(ROOTOPTS)
 
+link_libraries("-Wl,--no-undefined")
+
 execute_process(COMMAND git describe --dirty --always WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE GIT_VERSION)
 message(STATUS "GIT_VERSION: ${GIT_VERSION}")
 add_definitions(-DVERSION="${GIT_VERSION}")

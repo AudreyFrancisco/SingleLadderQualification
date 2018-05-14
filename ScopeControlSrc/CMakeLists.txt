@@ -7,5 +7,6 @@ set(SRCS
 
 add_library(scopecontrol SHARED ${SRCS})
 target_include_directories(scopecontrol PUBLIC . serial/include)
+target_link_libraries(scopecontrol rt)
 install(TARGETS scopecontrol
   LIBRARY DESTINATION lib)

@@ -78,7 +78,7 @@ add_library(alpide SHARED ${BASE_OBJS} ${RU_OBJS} ${MOSAIC_OBJS})
 target_include_directories(alpide
 	PUBLIC ../inc ../MosaicSrc .. # .. is for ReadoutUnitSrc
 )
-target_link_libraries(alpide alucms mosaic powerboard scopecontrol curl usb-1.0 tinyxml)
+target_link_libraries(alpide alucms mosaic powerboard scopecontrol usb-1.0 tinyxml pthread)
 list(APPEND ALP_LIBRARIES alpide)
 
 if (${ROOT_FOUND})
