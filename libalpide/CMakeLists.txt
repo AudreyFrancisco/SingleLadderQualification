@@ -77,10 +77,10 @@ set(OBJS_ANA
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.h
   COMMAND ${CMAKE_COMMAND}
-    -D SRC=${CMAKE_SOURCE_DIR}/inc/version.h
+    -D SRC=${CMAKE_SOURCE_DIR}/inc/version.h.in
     -D DST=${CMAKE_CURRENT_BINARY_DIR}/version.h
     -P ${CMAKE_SOURCE_DIR}/cmake/version.cmake
-  DEPENDS ${CMAKE_SOURCE_DIR}/inc/version.h
+  DEPENDS ${CMAKE_SOURCE_DIR}/inc/version.h.in
   DEPENDS ${CMAKE_SOURCE_DIR}/cmake/version.cmake
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )

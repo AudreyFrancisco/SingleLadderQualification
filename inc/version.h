@@ -1,1 +1,1 @@
-#cmakedefine VERSION "@VERSION@"
+// dummy file for non-cmake builds
