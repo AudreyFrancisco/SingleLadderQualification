@@ -7,5 +7,7 @@ set(SRCS
 )
 
 add_library(alucms SHARED ${SRCS})
+target_include_directories(alucms PUBLIC . /usr/include/libxml2)
+target_link_libraries(alucms xml2)
 install(TARGETS alucms
   LIBRARY DESTINATION lib)

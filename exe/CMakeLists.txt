@@ -38,32 +38,31 @@ set(TEST_EXE_ROOT
 
 foreach(exe ${EXE})
   add_executable(${exe} main_${exe}.cpp)
-  target_link_libraries(${exe} alpide alucms mosaic powerboard curl xml2 usb-1.0 tinyxml)
+  target_link_libraries(${exe} alpide)
 endforeach()
 
 foreach(exe ${TEST_EXE})
   string(REPLACE "test_" "" test ${exe})
   add_executable(${exe} main_${test}.cpp)
-  target_link_libraries(${exe} alpide alucms mosaic powerboard curl xml2 usb-1.0 tinyxml)
+  target_link_libraries(${exe} alpide)
 endforeach()
 
 if (${ROOT_FOUND})
   foreach(exe ${TEST_EXE_ROOT})
     string(REGEX REPLACE "^test_" "" test ${exe})
     add_executable(${exe} main_${test}.cpp)
-    target_link_libraries(${exe} alpide alpide_analysis alucms mosaic powerboard curl xml2 usb-1.0 tinyxml ${ROOT_LIBRARIES})
+    target_include_directories(${exe} PRIVATE ${ROOT_INCLUDE_DIRS})
+    target_compile_options(${exe} PRIVATE ${ROOTOPTS})
+    target_link_libraries(${exe} alpide_analysis)
   endforeach()
 endif()
 
+set(ALL_EXE ${EXE} ${TEST_EXE})
+if (${ROOT_FOUND})
+  list(APPEND ALL_EXE ${TEST_EXE_ROOT})
+endif()
+
 install(TARGETS 
-  ${EXE}
-  ${TEST_EXE}
+  ${ALL_EXE}
   RUNTIME DESTINATION bin
 )
-
-if (${ROOT_FOUND})
-  install(TARGETS 
-    ${TEST_EXE_ROOT}
-    RUNTIME DESTINATION bin
-  )
-endif()

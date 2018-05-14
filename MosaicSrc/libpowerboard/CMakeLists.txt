@@ -11,5 +11,6 @@ set(SRCS
 )
 
 add_library(powerboard SHARED ${SRCS})
+target_include_directories(powerboard PUBLIC include ../libmosaic/include)
 install(TARGETS powerboard
   LIBRARY DESTINATION lib)
