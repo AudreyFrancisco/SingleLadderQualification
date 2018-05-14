@@ -39,6 +39,10 @@ add_subdirectory(ScopeControlSrc)
 add_subdirectory(scripts)
 add_subdirectory(GUI)
 
+if(NOT "${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Data)
+endif()
+
 set(CPACK_PACKAGE_VERSION ${GIT_VERSION})
 set(CPACK_GENERATOR "RPM")
 set(CPACK_PACKAGE_NAME "alptest")
