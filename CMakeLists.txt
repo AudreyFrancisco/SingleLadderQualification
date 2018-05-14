@@ -35,6 +35,7 @@ add_subdirectory(MosaicSrc/powerboard)
 add_subdirectory(MosaicSrc/libmosaic)
 add_subdirectory(MosaicSrc/libpowerboard)
 add_subdirectory(ScopeControlSrc)
+add_subdirectory(scripts)
 add_subdirectory(GUI)
 
 set(CPACK_PACKAGE_VERSION ${GIT_VERSION})

@@ -22,7 +22,7 @@ set(SRCS
   testselection.cpp
 )
 
-if(TARGET Alptest::rootlib)
+if(TARGET Alptest::alpide_analysis)
   add_executable(GUI ${SRCS})
   target_link_libraries(GUI Qt5::Gui Qt5::Core Qt5::Widgets Alptest::alpide_analysis)
   install(TARGETS GUI RUNTIME DESTINATION bin)

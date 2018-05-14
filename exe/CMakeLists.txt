@@ -36,6 +36,10 @@ set(TEST_EXE_ROOT
   test_tuneVCASN
 )
 
+# for now put the executables in the build root
+# for compatibility with existing scripts
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 foreach(exe ${EXE})
   add_executable(${exe} main_${exe}.cpp)
   target_link_libraries(${exe} alpide)
