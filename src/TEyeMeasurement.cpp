@@ -13,7 +13,11 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
                                  std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  strcpy(m_name, "Eye Measurement"); // Display name
+  m_parameters                                     = new TEyeParameters();
+  ((TEyeParameters *)m_parameters)->driverStrength = config->GetParamValue("EYEDRIVER");
+  ((TEyeParameters *)m_parameters)->preemphasis    = config->GetParamValue("EYEPREEMP");
+
+  SetName(); // Display name
 
   // TODO: Assign proper Mosaic
 
@@ -42,6 +46,31 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
   m_max_zero_results = 0; // Max number of consecutive zero results
 
   CreateScanHisto();
+}
+
+
+void TEyeMeasurement::SetName()
+{
+  sprintf(m_name, "EyeMeasurement D%d P%d", ((TEyeParameters *)m_parameters)->driverStrength,
+          ((TEyeParameters *)m_parameters)->preemphasis);
+}
+
+
+bool TEyeMeasurement::SetParameters(TScanParameters *pars)
+{
+  TEyeParameters *ePars = dynamic_cast<TEyeParameters *>(pars);
+  if (ePars) {
+    std::cout << "TEyeMeasurement: Updating parameters" << std::endl;
+    ((TEyeParameters *)m_parameters)->driverStrength = ePars->driverStrength;
+    ((TEyeParameters *)m_parameters)->preemphasis    = ePars->preemphasis;
+    SetName();
+    return true;
+  }
+  else {
+    std::cout << "TEyeMeasurement::SetParameters: Error, bad parameter type, doing nothing"
+              << std::endl;
+    return false;
+  }
 }
 
 

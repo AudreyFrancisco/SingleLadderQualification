@@ -9,6 +9,11 @@
 
 class TReadoutBoardMosaic;
 
+typedef struct __TEyeParameters : TScanParameters {
+  int driverStrength;
+  int preemphasis;
+} TEyeParameters;
+
 class TEyeMeasurement : public TScan {
 private:
   TAlpide *m_testChip;
@@ -22,6 +27,7 @@ private:
   // internal
   int                  m_current_prescale;
   TReadoutBoardMOSAIC *m_board;
+  void                 SetName();
 
 protected:
   static constexpr int MAX_HORZ_OFFSET = 128;
@@ -96,6 +102,7 @@ public:
   void LoopEnd(int loopIndex);
   void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
   void PrepareStep(int loopIndex);
+  bool SetParameters(TScanParameters *pars);
 };
 
 
