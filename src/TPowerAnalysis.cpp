@@ -194,6 +194,8 @@ void TPowerResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 
   DbAddParameter(db, activity, string("IDDD"), idddConfigured, GetParameterFile());
   DbAddParameter(db, activity, string("IDDA"), iddaConfigured, GetParameterFile());
+  DbAddParameter(db, activity, string("IDDD clocked"), idddClocked, GetParameterFile());
+  DbAddParameter(db, activity, string("IDDA clocked"), iddaClocked, GetParameterFile());
   DbAddParameter(db, activity, string("Back bias current 0V"), ibias0, GetParameterFile());
   DbAddParameter(db, activity, string("Back bias current 3V"), ibias3, GetParameterFile());
 
