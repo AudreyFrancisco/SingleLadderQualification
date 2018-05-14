@@ -53,14 +53,16 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
     const int nbin_y_half = nbin_y / 2;
     const int yband       = 2;
 
-    TEyeResultHic *hicResult = (TEyeResultHic*) FindHicResultForChip(chip);
-    Int_t driverStrength = ((TEyeParameters*) hicResult->GetScanParameters())->driverStrength;
-    Int_t preemphasis    = ((TEyeParameters*) hicResult->GetScanParameters())->driverStrength;
+    TEyeResultHic *hicResult = (TEyeResultHic *)FindHicResultForChip(chip);
+    Int_t driverStrength     = ((TEyeParameters *)hicResult->GetScanParameters())->driverStrength;
+    Int_t preemphasis        = ((TEyeParameters *)hicResult->GetScanParameters())->driverStrength;
 
-    const std::string hname  = TString::Format("h_eye_%i_d%i_p%i", chip.chipId, driverStrength, preemphasis).Data();
-    const std::string htitle = TString::Format("Eye Diagram chip %i (%s - D: %i, P: %i)", chip.chipId,
-                                               hicResult->GetName().c_str(), driverStrength, preemphasis)
-                                   .Data();
+    const std::string hname =
+        TString::Format("h_eye_%i_d%i_p%i", chip.chipId, driverStrength, preemphasis).Data();
+    const std::string htitle =
+        TString::Format("Eye Diagram chip %i (%s - D: %i, P: %i)", chip.chipId,
+                        hicResult->GetName().c_str(), driverStrength, preemphasis)
+            .Data();
 
     TH2F h_eye(hname.c_str(), htitle.c_str(), nbin_x, min_x, min_x + nbin_x * step_x, nbin_y, min_y,
                min_y + nbin_y * step_y);
