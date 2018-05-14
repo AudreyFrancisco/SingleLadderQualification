@@ -85,9 +85,15 @@ THisto TEyeMeasurement::CreateHisto()
 void TEyeMeasurement::Init()
 {
   TScan::Init();
+  TEyeParameters *params = (TEyeParameters *)m_parameters;
 
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
     if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+    int backupDriver = m_chips.at(ichip)->GetConfig()->GetParamValue("DTUDRIVER");
+    int backupPreemp = m_chips.at(ichip)->GetConfig()->GetParamValue("DTUPREEMP");
+    m_chips.at(ichip)->GetConfig()->SetParamValue("DTUDRIVER", params->driverStrength);
+    m_chips.at(ichip)->GetConfig()->SetParamValue("DTUPREEMP", params->preemphasis);
+
     AlpideConfig::Init(m_chips.at(ichip));
     AlpideConfig::BaseConfig(m_chips.at(ichip));
 
@@ -97,11 +103,11 @@ void TEyeMeasurement::Init()
     value |= 1 << 1; // Interal Pattern = 1 (Prbs Mode)
     value |= 1 << 5; // Bypass8b10b
     m_chips.at(ichip)->WriteRegister(Alpide::TRegister::REG_DTU_TEST1, value);
+
+    // restore previous settings
+    m_chips.at(ichip)->GetConfig()->SetParamValue("DTUDRIVER", backupDriver);
+    m_chips.at(ichip)->GetConfig()->SetParamValue("DTUPREEMP", backupPreemp);
   }
-
-  // initialisations of chips and MOSAIC
-
-  // Parameters to set up
 
   // Maximum prescale factor (Time spend per point)
   // 10 ~= log2(1.2Gbps)/(65536*20)
