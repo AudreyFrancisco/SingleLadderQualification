@@ -29,9 +29,15 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
   std::cout << "in analyse histo, chipList.size = " << m_chipList.size() << std::endl;
   FILE *fp = fopen("EyeDiagram.dat", "w");
 
-  std::string filename_eye = FindHicResultForChip(m_chipList.at(0))->GetOutputPath() + "/eye.pdf";
-  std::string filename_eye_root =
-      FindHicResultForChip(m_chipList.at(0))->GetOutputPath() + "/eye.root";
+  // assume values from first chip for all
+  // TODO: check if assumption valid ???
+  TEyeResultHic *hicResult_0 = (TEyeResultHic *)FindHicResultForChip(m_chipList.at(0));
+  Int_t driverStrength_0     = ((TEyeParameters *)hicResult_0->GetScanParameters())->driverStrength;
+  Int_t preemphasis_0        = ((TEyeParameters *)hicResult_0->GetScanParameters())->preemphasis;
+
+  std::string basename     = TString::Format("eye_D%i_P%i", driverStrength_0, preemphasis_0).Data();
+  std::string filename_eye = hicResult_0->GetOutputPath() + "/" + basename + ".pdf";
+  std::string filename_eye_root = hicResult_0->GetOutputPath() + "/" + basename + ".root";
 
   TCanvas c;
   c.cd();
@@ -55,7 +61,7 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
 
     TEyeResultHic *hicResult = (TEyeResultHic *)FindHicResultForChip(chip);
     Int_t driverStrength     = ((TEyeParameters *)hicResult->GetScanParameters())->driverStrength;
-    Int_t preemphasis        = ((TEyeParameters *)hicResult->GetScanParameters())->driverStrength;
+    Int_t preemphasis        = ((TEyeParameters *)hicResult->GetScanParameters())->preemphasis;
 
     const std::string hname =
         TString::Format("h_eye_%i_d%i_p%i", chip.chipId, driverStrength, preemphasis).Data();
