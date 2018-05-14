@@ -8,65 +8,6 @@
 #include <string>
 
 
-constexpr int MAX_HORZ_OFFSET = 128;
-constexpr int MIN_HORZ_OFFSET = -128;
-constexpr int MAX_VERT_OFFSET = 127;
-constexpr int MIN_VERT_OFFSET = -127;
-constexpr int BUS_WIDTH       = 20;
-
-constexpr int ES_QUALIFIER_0               = 0x2c;
-constexpr int ES_QUALIFIER_1               = 0x2d;
-constexpr int ES_QUALIFIER_2               = 0x2e;
-constexpr int ES_QUALIFIER_3               = 0x2f;
-constexpr int ES_QUALIFIER_4               = 0x30;
-constexpr int ES_QUAL_MASK_0               = 0x31;
-constexpr int ES_QUAL_MASK_1               = 0x32;
-constexpr int ES_QUAL_MASK_2               = 0x33;
-constexpr int ES_QUAL_MASK_3               = 0x34;
-constexpr int ES_QUAL_MASK_4               = 0x35;
-constexpr int ES_SDATA_MASK_0              = 0x36;
-constexpr int ES_SDATA_MASK_1              = 0x37;
-constexpr int ES_SDATA_MASK_2              = 0x38;
-constexpr int ES_SDATA_MASK_3              = 0x39;
-constexpr int ES_SDATA_MASK_4              = 0x3a;
-constexpr int ES_PRESCALE                  = 0x3b; // bits [15:11]
-constexpr int ES_PRESCALE_SIZE             = 5;
-constexpr int ES_PRESCALE_OFFSET           = 11;
-constexpr int ES_VERT_OFFSET               = 0x3b; // bits [7:0]
-constexpr int ES_VERT_OFFSET_SIZE          = 8;
-constexpr int ES_VERT_OFFSET_OFFSET        = 0;
-constexpr int ES_HORZ_OFFSET               = 0x3c; // bits [11:0]
-constexpr int ES_ERRDET_EN                 = 0x3d; // bit 9
-constexpr int ES_ERRDET_EN_SIZE            = 1;
-constexpr int ES_ERRDET_EN_OFFSET          = 9;
-constexpr int ES_EYE_SCAN_EN               = 0x3d; // bit 8
-constexpr int ES_EYE_SCAN_EN_SIZE          = 1;
-constexpr int ES_EYE_SCAN_EN_OFFSET        = 8;
-constexpr int ES_CONTROL                   = 0x3d; // bits [5:0]
-constexpr int ES_CONTROL_SIZE              = 6;
-constexpr int ES_CONTROL_OFFSET            = 0;
-constexpr int USE_PCS_CLK_PHASE_SEL        = 0x91;
-constexpr int USE_PCS_CLK_PHASE_SEL_SIZE   = 1;
-constexpr int USE_PCS_CLK_PHASE_SEL_OFFSET = 14;
-
-// Read only registers
-constexpr int ES_ERROR_COUNT         = 0x151;
-constexpr int ES_SAMPLE_COUNT        = 0x152;
-constexpr int ES_CONTROL_STATUS      = 0x153;
-constexpr int ES_CONTROL_STATUS_DONE = 0x0001;
-constexpr int ES_CONTROL_STATUS_FSM  = 0x000e;
-constexpr int ES_RDATA_4             = 0x154;
-constexpr int ES_RDATA_3             = 0x155;
-constexpr int ES_RDATA_2             = 0x156;
-constexpr int ES_RDATA_1             = 0x157;
-constexpr int ES_RDATA_0             = 0x158;
-constexpr int ES_SDATA_4             = 0x159;
-constexpr int ES_SDATA_3             = 0x15a;
-constexpr int ES_SDATA_2             = 0x15b;
-constexpr int ES_SDATA_1             = 0x15c;
-constexpr int ES_SDATA_0             = 0x15d;
-
-
 TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chips,
                                  std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                                  std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
