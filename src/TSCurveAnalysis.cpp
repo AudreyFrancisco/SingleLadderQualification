@@ -777,9 +777,9 @@ void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
                    GetParameterFile());
     DbAddParameter(db, activity, string("Pixels without") + suffix, (float)m_nNoThresh,
                    GetParameterFile());
-    DbAddParameter(db, activity, string("Dead pixels, worst chip, ") + suffix,
+    DbAddParameter(db, activity, string("Dead pixels, worst chip,") + suffix,
                    (float)m_nDeadWorstChip, GetParameterFile());
-    DbAddParameter(db, activity, string("Pixels without threshold, worst chip, ") + suffix,
+    DbAddParameter(db, activity, string("Pixels without threshold, worst chip,") + suffix,
                    (float)m_nNoThreshWorstChip, GetParameterFile());
     DbAddParameter(db, activity, string("Average noise") + suffix, (float)m_noiseAv,
                    GetParameterFile());
