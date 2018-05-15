@@ -303,6 +303,7 @@ THicClassification TDctrlAnalysis::GetClassificationIB(TDctrlResultHic *result)
   THicClassification returnValue = CLASS_GOLD;
   DoCut(returnValue, CLASS_RED, result->worst_maxAmp * 1000, "DCTRLMINAMPIB", result, true);
   DoCut(returnValue, CLASS_RED, result->worst_slope * 1000, "DCTRLMINSLOPEIB", result, true);
+  DoCut(returnValue, CLASS_BRONZE, result->worst_chisq * 100, "DCTRLMAXCHISQSILVER", result);
   DoCut(returnValue, CLASS_SILVER, result->worst_rise * 1e9, "DCTRLMAXRISEGREENIB", result);
   DoCut(returnValue, CLASS_SILVER, result->worst_fall * 1e9, "DCTRLMAXFALLGREENIB", result);
   std::cout << "DCTRL Analysis - Classification: " << WriteHicClassification(returnValue)
@@ -315,6 +316,7 @@ THicClassification TDctrlAnalysis::GetClassificationOB(TDctrlResultHic *result)
   THicClassification returnValue = CLASS_GOLD;
   DoCut(returnValue, CLASS_RED, result->worst_maxAmp * 1000, "DCTRLMINAMPOB", result, true);
   DoCut(returnValue, CLASS_RED, result->worst_slope * 1000, "DCTRLMINSLOPEOB", result, true);
+  DoCut(returnValue, CLASS_BRONZE, result->worst_chisq * 100, "DCTRLMAXCHISQSILVER", result);
   DoCut(returnValue, CLASS_SILVER, result->worst_rise * 1e9, "DCTRLMAXRISEGREENOB", result);
   DoCut(returnValue, CLASS_SILVER, result->worst_fall * 1e9, "DCTRLMAXFALLGREENOB", result);
   std::cout << "DCTRL Analysis - Classification: " << WriteHicClassification(returnValue)

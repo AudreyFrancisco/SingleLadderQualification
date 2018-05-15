@@ -133,7 +133,7 @@ TScanConfig::TScanConfig()
   m_dctrlMinSlopeIB     = DCTRL_MINSLOPE_IB;
   m_dctrlMaxRiseGreenIB = DCTRL_MAXRISE_GREEN_IB;
   m_dctrlMaxFallGreenIB = DCTRL_MAXFALL_GREEN_IB;
-
+  m_dctrlMaxChisqSilver = DCTRL_MAXCHISQ_SILVER;
 
   m_enduranceSlices            = ENDURANCE_SLICES;
   m_enduranceCycles            = ENDURANCE_CYCLES;
@@ -272,10 +272,10 @@ void TScanConfig::InitParamMap()
   fSettings["DCTRLMINSLOPEOB"]     = &m_dctrlMinSlopeOB;
   fSettings["DCTRLMAXRISEGREENOB"] = &m_dctrlMaxRiseGreenOB;
   fSettings["DCTRLMAXFALLGREENOB"] = &m_dctrlMaxFallGreenOB;
-
-  fSettings["CAL_VPULSEL"]  = &m_calVpulsel;
-  fSettings["TARGETTHRESH"] = &m_targetThresh;
-  fSettings["NOMINAL"]      = &m_nominal;
+  fSettings["DCTRLMAXCHISQSILVER"] = &m_dctrlMaxChisqSilver;
+  fSettings["CAL_VPULSEL"]         = &m_calVpulsel;
+  fSettings["TARGETTHRESH"]        = &m_targetThresh;
+  fSettings["NOMINAL"]             = &m_nominal;
 
   fSettings["ENDURANCESLICES"]    = &m_enduranceSlices;
   fSettings["ENDURANCECYCLES"]    = &m_enduranceCycles;

@@ -156,6 +156,7 @@ namespace ScanConfig {
   const int DCTRL_MINSLOPE_OB      = 20;  // in mV / DAC
   const int DCTRL_MAXRISE_GREEN_OB = 10;  // in ns
   const int DCTRL_MAXFALL_GREEN_OB = 10;
+  const int DCTRL_MAXCHISQ_SILVER  = 5; // 100 * max. chisq 5 -> 0.05
 
   const int   SPEEDY           = 1; // Use slow fit if 0, differentiate->mean if 1.
   const int   RAWDATA          = 0;
@@ -302,6 +303,7 @@ private:
   int       m_dctrlMinSlopeIB;
   int       m_dctrlMaxRiseGreenIB;
   int       m_dctrlMaxFallGreenIB;
+  int       m_dctrlMaxChisqSilver;
   int       m_calVpulsel;
   int       m_targetThresh;
   int       m_nominal;
