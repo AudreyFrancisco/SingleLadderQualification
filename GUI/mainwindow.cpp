@@ -781,7 +781,7 @@ void MainWindow::scanLoop(TScan *myScan)
       // throw string("SDFdsfsdfsdfsdfsfsdf");
     }
     catch (exception &ex) {
-      std::cout << ex.what() << "is the thrown exception from the scan" << std::endl;
+      std::cout << ex.what() << " is the thrown exception from the scan" << std::endl;
       fExceptionthrown = true;
       fScanAbort       = true;
       fExceptiontext   = ex.what();
@@ -910,7 +910,7 @@ void MainWindow::start_test()
     fDatabasewindow->exec();
     fDatabasewindow->setdatabase(fDatabasetype);
   }
-  std::cout << fDatabasetype << "the selected database" << std::endl;
+  std::cout << fDatabasetype << " the selected database" << std::endl;
   fSettingswindow = new TestSelection(this, fDatabasetype);
   fSettingswindow->exec();
 }
@@ -1008,7 +1008,7 @@ void MainWindow::performtests()
           fScanVector[i]->Init();
         }
         catch (exception &ex) {
-          std::cout << ex.what() << "is the thrown exception from the scaninit" << std::endl;
+          std::cout << ex.what() << " is the thrown exception from the scaninit" << std::endl;
           fExceptionthrown = true;
           fScanAbort       = true;
           fExceptiontext   = ex.what();
@@ -1604,7 +1604,7 @@ void MainWindow::attachtodatabase()
             -999; // apparently has to stay open here, otherwise activity is considered closed
 
         activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "OPEN");
-        std::cout << "the activ is open" << std::endl;
+        std::cout << "the activity is open" << std::endl;
 
 
         // add global parameters (not accessible from within results)
@@ -1698,7 +1698,7 @@ void MainWindow::attachtodatabase()
         }
         if (fStatus == false) {
           activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
-          std::cout << "the activ is closed" << std::endl;
+          std::cout << "the activity is closed" << std::endl;
         }
 
         activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
@@ -1908,8 +1908,8 @@ void MainWindow::loadeditedconfig()
   final = convert.str();
   fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", final.c_str());
   connect(ui->start_test, SIGNAL(clicked()), this, SLOT(applytests()));
-  std::cout << fOperatorname.toStdString() << fHicidnumber.toStdString() << fIdoflocationtype
-            << fIdofoperator << std::endl;
+  std::cout << fOperatorname.toStdString() << ", " << fHicidnumber.toStdString() << ", "
+            << fIdoflocationtype << ", " << fIdofoperator << std::endl;
   std::cout << "the speed is set to " << fConfig->GetScanConfig()->GetSpeedy() << std::endl;
   std::cout << "the number of mask stages is " << fConfig->GetScanConfig()->GetNMaskStages()
             << std::endl;
@@ -1926,8 +1926,8 @@ void MainWindow::loaddefaultconfig()
     return;
   }
   connect(ui->start_test, SIGNAL(clicked()), this, SLOT(applytests()));
-  std::cout << fOperatorname.toStdString() << fHicidnumber.toStdString() << fIdoflocationtype
-            << fIdofoperator << std::endl;
+  std::cout << fOperatorname.toStdString() << ", " << fHicidnumber.toStdString() << ", "
+            << fIdoflocationtype << ", " << fIdofoperator << std::endl;
   fScanconfigwindow->close();
 }
 
@@ -2031,7 +2031,7 @@ void MainWindow::setandgetcalibration()
 
   fCalwindow->setresistances(ares, dres, gres);
 
-  std::cout << ares << " input values" << dres << std::endl;
+  std::cout << ares << " input values " << dres << std::endl;
   // calwindow->setpowerunit(unit);
   // std::cout<<unit<<"number of the unit"<<std::endl;
   // setTopBottom (unit);
@@ -2340,7 +2340,7 @@ void MainWindow::IBBasicTest()
       }
     }
     catch (exception &ex) {
-      std::cout << ex.what() << "is the thrown exception" << std::endl;
+      std::cout << ex.what() << " is the thrown exception" << std::endl;
     }
   }
   std::cout << "Test complete :D" << std::endl;
@@ -2664,7 +2664,7 @@ void MainWindow::analysis(TScanAnalysis *myanalysis)
     // throw string("SDFdsfsdfsdfsdfsfsdf");
   }
   catch (exception &ex) {
-    std::cout << ex.what() << "is the thrown exception from the analysis" << std::endl;
+    std::cout << ex.what() << " is the thrown exception from the analysis" << std::endl;
     fExceptionthrown = true;
     fScanAbort       = true;
     fExceptiontext   = ex.what();

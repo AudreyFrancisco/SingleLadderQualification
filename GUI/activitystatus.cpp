@@ -11,9 +11,9 @@ ActivityStatus::ActivityStatus(QWidget *parent) : QDialog(parent), ui(new Ui::Ac
 {
 
   ui->setupUi(this);
-  connect(ui->save, SIGNAL(clicked()), this, SLOT(close()));
-  connect(ui->scanclassification, SIGNAL(itemClicked(QListWidgetItem *)), this,
-          SLOT(on_scanclassification_itemClicked(QListWidgetItem * item)));
+  connect(ui->save, &QPushButton::clicked, this, &::close);
+  connect(ui->scanclassification, &QListWidget::itemClicked, this,
+          &ActivityStatus::on_scanclassification_itemClicked);
   ui->label->hide();
   ui->label_2->hide();
   ui->openactiv->hide();

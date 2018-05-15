@@ -141,7 +141,7 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
       }
     }
 
-    qDebug() << "The operator name is:" << opname << "and the hic id is: " << hicid << endl;
+    qDebug() << "The operator name is: " << opname << "and the hic id is: " << hicid << endl;
   }
 }
 
