@@ -1,3 +1,10 @@
+cmake_minimum_required(VERSION 3.2)
+project(libalpide)
+
+if(CMAKE_PROJECT_DIR STREQUAL CMAKE_SOURCE_DIR)
+  set(BUILD_STANDALONE)
+endif()
+
 set(BASE_OBJS 
   ../DataBaseSrc/DBHelpers.cpp
   ../src/AlpideConfig.cpp
@@ -77,11 +84,11 @@ set(OBJS_ANA
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.h
   COMMAND ${CMAKE_COMMAND}
-    -D SRC=${CMAKE_SOURCE_DIR}/inc/version.h.in
+    -D SRC=${CMAKE_CURRENT_SOURCE_DIR}/../inc/version.h.in
     -D DST=${CMAKE_CURRENT_BINARY_DIR}/version.h
-    -P ${CMAKE_SOURCE_DIR}/cmake/version.cmake
-  DEPENDS ${CMAKE_SOURCE_DIR}/inc/version.h.in
-  DEPENDS ${CMAKE_SOURCE_DIR}/cmake/version.cmake
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/version.cmake
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../inc/version.h.in
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/version.cmake
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
@@ -96,7 +103,6 @@ list(APPEND ALP_LIBRARIES alpide)
 if (${ROOT_FOUND})
   add_library(alpide_analysis SHARED ${OBJS_ANA})
   add_library(Alptest::alpide_analysis ALIAS alpide_analysis)
-  target_compile_options(alpide_analysis PUBLIC ${ROOTOPTS})
   target_include_directories(alpide_analysis PUBLIC ${ROOT_INCLUDE_DIRS})
   target_link_libraries(alpide_analysis alpide ${ROOT_LIBRARIES} pthread)
   list(APPEND ALP_LIBRARIES alpide_analysis)

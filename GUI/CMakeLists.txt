@@ -1,4 +1,6 @@
-find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+if(NOT Qt5_FOUND)
+  return()
+endif()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)

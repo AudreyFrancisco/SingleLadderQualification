@@ -1,33 +1,59 @@
 cmake_minimum_required(VERSION 3.2)
 project(new_alpide_software)
 
-find_package(ROOT)
+# user options
+option(DISABLE_ROOT "Disable ROOT")
+option(DISABLE_GUI "Disable GUI")
 
-if(NOT ROOT_FOUND)
+if(DISABLE_GUI STREQUAL "OFF")
+  message(STATUS "Looking for Qt5")
+  find_package(Qt5 COMPONENTS Core Gui Widgets Xml REQUIRED)
+elseif()
+  message(STATUS "GUI disabled")
+endif()
+
+# by default build optimized code with debug symbols
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE RELWITHDEBUGINFO)
+endif()
+
+# look for ROOT and warn if unavailable
+if(DISABLE_ROOT STREQUAL "OFF")
+  message(STATUS "Looking for ROOT")
+  find_package(ROOT)
+else()
+  message(STATUS "ROOT disabled")
+endif()
+if(ROOT_FOUND)
+  message(STATUS "Using ROOT ${ROOT_VERSION}")
+else()
   message(WARNING "Compilation without ROOT results in limited functionality!")
 endif()
 
-if(${ROOT_cxx17_FOUND})
-  message(STATUS "using C++17")
-  set (CMAKE_CXX_STANDARD 17)
-elseif(${ROOT_cxx14_FOUND})
-  message(STATUS "using C++14")
-  set (CMAKE_CXX_STANDARD 14)
-else()
-  message(STATUS "using C++11")
-  set (CMAKE_CXX_STANDARD 11)
+# set C++ standard ensuring compatibility with ROOT
+set(CMAKE_CXX_STANDARD 11)
+if(ROOT_cxx17_FOUND)
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+elseif(ROOT_cxx14_FOUND)
+  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+elseif(ROOT_cxx11_FOUND)
+  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
+message(STATUS "Using C++${CMAKE_CXX_STANDARD}")
 
-set(ROOTOPTS ${ROOT_CXX_FLAGS})
-separate_arguments(ROOTOPTS)
-
+# warn about undefined symbols already for libraries
 link_libraries("-Wl,--no-undefined")
 
-add_custom_target(format-check
-  COMMAND ./.format-check.sh
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
+# check for build in the source tree
+if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+  message(STATUS "Building in source tree")
+  set(BUILDINSOURCE true)
+endif()
 
+# add subdirectories for the actual work
 add_subdirectory(analysis)
 add_subdirectory(DataBaseSrc)
 add_subdirectory(exe)
@@ -39,10 +65,18 @@ add_subdirectory(ScopeControlSrc)
 add_subdirectory(scripts)
 add_subdirectory(GUI)
 
-if(NOT "${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
+# for out-of-source builds create Data/ directory
+if(NOT BUILDINSOURCE)
   file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Data)
 endif()
 
+# add target for format checking
+add_custom_target(format-check
+  COMMAND ./.format-check.sh
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+# setup rpm packaging
 set(CPACK_PACKAGE_VERSION ${GIT_VERSION})
 set(CPACK_GENERATOR "RPM")
 set(CPACK_PACKAGE_NAME "alptest")
