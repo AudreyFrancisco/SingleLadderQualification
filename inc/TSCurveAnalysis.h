@@ -25,8 +25,10 @@ private:
   TSCurveAnalysis *m_analysis;
   float            m_thresholdAv;
   float            m_thresholdRms;
+  float            m_threshRelativeRms;
   float            m_noiseAv;
   float            m_noiseRms;
+  float            m_deviation;
   int              m_nEntries;
   float            m_noiseSq;
   float            m_threshSq;
@@ -60,6 +62,8 @@ private:
   float         m_minChipAv;
   float         m_maxChipAv;
   float         m_maxChipNoise;
+  float         m_maxRelativeRms;
+  float         m_maxDeviation;
   int           m_nDead;
   int           m_nNoThresh;
   int           m_nNoThreshWorstChip;
@@ -101,6 +105,7 @@ class TSCurveAnalysis : public TScanAnalysis {
 private:
   static constexpr float m_electronPerDac = 10;
   float                  m_resultFactor;
+  float                  m_targetThreshold;
   int                    m_nPulseInj;
   int                    m_startPulseAmplitude;
   int                    m_stopPulseAmplitude;
@@ -113,6 +118,7 @@ private:
   bool m_writeNoThreshPixels;
   bool m_writeStuckPixels;
   bool m_writeFitResults;
+  bool m_nominal;
 
   void InitCounters();
   void FillVariableList();

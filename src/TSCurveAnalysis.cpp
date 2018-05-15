@@ -26,6 +26,8 @@ TSCurveAnalysis::TSCurveAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
   m_writeStuckPixels    = false;
   m_writeFitResults     = true;
   m_fDoFit              = true;
+  m_targetThreshold     = m_config->GetParamValue("TARGETTHRESH");
+  m_nominal             = ((TSCurveScan *)m_scan)->GetNominal();
 
   m_speedy = (m_config->GetParamValue("SPEEDY") != 0);
   if (IsThresholdScan()) {
@@ -174,16 +176,18 @@ void TSCurveAnalysis::InitCounters()
   for (unsigned int i = 0; i < m_chipList.size(); i++) {
     TSCurveResultChip *result = (TSCurveResultChip *)m_result->GetChipResult(m_chipList.at(i));
 
-    result->m_thresholdAv  = 0;
-    result->m_thresholdRms = 0;
-    result->m_noiseAv      = 0;
-    result->m_noiseRms     = 0;
-    result->m_nEntries     = 0;
-    result->m_noiseSq      = 0;
-    result->m_threshSq     = 0;
-    result->m_nNoThresh    = 0;
-    result->m_nDead        = 0;
-    result->m_nHot         = 0;
+    result->m_thresholdAv       = 0;
+    result->m_thresholdRms      = 0;
+    result->m_threshRelativeRms = 0;
+    result->m_noiseAv           = 0;
+    result->m_noiseRms          = 0;
+    result->m_nEntries          = 0;
+    result->m_noiseSq           = 0;
+    result->m_threshSq          = 0;
+    result->m_nNoThresh         = 0;
+    result->m_nDead             = 0;
+    result->m_nHot              = 0;
+    result->m_deviation         = 0;
   }
 
   std::map<std::string, TScanResultHic *>::iterator it;
@@ -198,6 +202,8 @@ void TSCurveAnalysis::InitCounters()
     result->m_minChipAv          = 999;
     result->m_maxChipAv          = -1;
     result->m_maxChipNoise       = -1;
+    result->m_maxDeviation       = 0;
+    result->m_maxRelativeRms     = 0;
     result->m_noiseAv            = 0;
     result->m_noiseRms           = 0;
     result->m_nEntries           = 0;
@@ -310,6 +316,10 @@ void TSCurveAnalysis::Finalize()
     TSCurveResultChip *chipResult =
         (TSCurveResultChip *)m_result->GetChipResult(m_chipList.at(iChip));
     chipResult->CalculateAverages();
+    if (!m_nominal) {
+      chipResult->m_deviation = (chipResult->m_thresholdAv - m_targetThreshold) / m_targetThreshold;
+      chipResult->m_deviation *= 100; // value in %
+    }
     if (m_writeRawData) fclose(chipResult->m_rawFP);
     if (m_writeFitResults) fclose(chipResult->m_fitFP);
   }
@@ -334,6 +344,10 @@ void TSCurveAnalysis::Finalize()
         hicResult->m_nDeadWorstChip = chipResult->m_nDead;
       if (chipResult->m_nNoThresh > hicResult->m_nNoThreshWorstChip)
         hicResult->m_nNoThreshWorstChip = chipResult->m_nNoThresh;
+      if (chipResult->m_threshRelativeRms > hicResult->m_maxRelativeRms)
+        hicResult->m_maxRelativeRms = chipResult->m_threshRelativeRms;
+      if ((!m_nominal) && (fabs(chipResult->m_deviation) > fabs(hicResult->m_maxDeviation)))
+        hicResult->m_maxDeviation = chipResult->m_deviation;
       hicResult->m_nHot += chipResult->m_nHot;
     }
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
@@ -689,6 +703,7 @@ void TSCurveResultChip::CalculateAverages()
     m_noiseAv /= m_nEntries;
     m_thresholdRms = sqrt(m_threshSq / m_nEntries - pow(m_thresholdAv, 2));
     m_noiseRms     = sqrt(m_noiseSq / m_nEntries - pow(m_noiseAv, 2));
+    if (m_thresholdAv > 0) m_threshRelativeRms = m_thresholdRms / m_thresholdAv;
   }
 }
 
@@ -701,6 +716,7 @@ void TSCurveResultChip::WriteToFile(FILE *fp)
 
     fprintf(fp, "Av. Threshold: %.1f\n", m_thresholdAv);
     fprintf(fp, "Threshold RMS: %.1f\n", m_thresholdRms);
+    fprintf(fp, "Deviation:     %.2f\n", m_deviation);
 
     fprintf(fp, "Av. Noise:     %.1f\n", m_noiseAv);
     fprintf(fp, "Noise RMS:     %.1f\n", m_noiseRms);
@@ -785,6 +801,12 @@ void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
                    GetParameterFile());
     DbAddParameter(db, activity, string("Maximum chip noise") + suffix, (float)m_maxChipNoise,
                    GetParameterFile());
+    DbAddParameter(db, activity, string("Maximum relative RMS") + suffix, (float)m_maxRelativeRms,
+                   GetParameterFile());
+    if (!m_nominal) {
+      DbAddParameter(db, activity, string("Maximum threshold deviation, ") + suffix,
+                     (float)m_maxDeviation, GetParameterFile());
+    }
   }
   DbAddParameter(db, activity, string("Minimum chip avg") + suffix, (float)m_minChipAv,
                  GetParameterFile());
@@ -817,6 +839,11 @@ void TSCurveResultHic::WriteToFile(FILE *fp)
   std::cout << "8b10b errors:  " << m_errorCounter.n8b10b << std::endl;
   std::cout << "corrupt events " << m_errorCounter.nCorruptEvent << std::endl;
   std::cout << "timeouts:      " << m_errorCounter.nTimeout << std::endl;
+
+  if (!m_nominal) {
+    std::cout << std::endl << "Maximum deviation from target: " << m_maxDeviation << std::endl;
+  }
+  std::cout << std::endl << "Maximum relative rms:          " << m_maxRelativeRms << std::endl;
 }
 
 void TSCurveResult::WriteToFileGlobal(FILE *fp)
