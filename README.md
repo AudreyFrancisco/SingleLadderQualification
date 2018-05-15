@@ -16,7 +16,8 @@ to be a sub-directory of the project source directory):
 mkdir build
 cd build
 ```
-Prepare the build by running cmake in the build directory:
+Prepare the build by running cmake (at least version 3.2, i.e. you
+need to install the package cmake3 on CC7) in the build directory:
 ```
 cmake <source directory>
 ```
