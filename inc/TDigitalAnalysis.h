@@ -43,6 +43,7 @@ class TDigitalResultHic : public TScanResultHic {
 private:
   int           m_nDead;
   int           m_nBad;
+  int           m_nBadWorstChip;
   int           m_nStuck;
   int           m_nBadDcols;
   char          m_stuckFile[200];

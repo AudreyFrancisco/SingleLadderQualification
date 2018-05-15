@@ -189,22 +189,24 @@ void TSCurveAnalysis::InitCounters()
   std::map<std::string, TScanResultHic *>::iterator it;
 
   for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
-    TSCurveResultHic *result = (TSCurveResultHic *)it->second;
-    result->m_nDead          = 0;
-    result->m_nNoThresh      = 0;
-    result->m_nHot           = 0;
-    result->m_minChipAv      = 999;
-    result->m_maxChipAv      = -1;
-    result->m_maxChipNoise   = -1;
-    result->m_noiseAv        = 0;
-    result->m_noiseRms       = 0;
-    result->m_nEntries       = 0;
-    result->m_noiseSq        = 0;
-    result->m_backBias       = ((TSCurveScan *)m_scan)->GetBackbias();
-    result->m_nominal        = ((TSCurveScan *)m_scan)->GetNominal();
-    result->m_VCASNTuning    = IsVCASNTuning();
-    result->m_ITHRTuning     = IsITHRTuning();
-    result->m_thresholdScan  = IsThresholdScan();
+    TSCurveResultHic *result     = (TSCurveResultHic *)it->second;
+    result->m_nDead              = 0;
+    result->m_nNoThresh          = 0;
+    result->m_nDeadWorstChip     = 0;
+    result->m_nNoThreshWorstChip = 0;
+    result->m_nHot               = 0;
+    result->m_minChipAv          = 999;
+    result->m_maxChipAv          = -1;
+    result->m_maxChipNoise       = -1;
+    result->m_noiseAv            = 0;
+    result->m_noiseRms           = 0;
+    result->m_nEntries           = 0;
+    result->m_noiseSq            = 0;
+    result->m_backBias           = ((TSCurveScan *)m_scan)->GetBackbias();
+    result->m_nominal            = ((TSCurveScan *)m_scan)->GetNominal();
+    result->m_VCASNTuning        = IsVCASNTuning();
+    result->m_ITHRTuning         = IsITHRTuning();
+    result->m_thresholdScan      = IsThresholdScan();
   }
 }
 
@@ -328,6 +330,10 @@ void TSCurveAnalysis::Finalize()
         hicResult->m_maxChipNoise = chipResult->m_noiseAv;
       hicResult->m_nDead += chipResult->m_nDead;
       hicResult->m_nNoThresh += chipResult->m_nNoThresh;
+      if (chipResult->m_nDead > hicResult->m_nDeadWorstChip)
+        hicResult->m_nDeadWorstChip = chipResult->m_nDead;
+      if (chipResult->m_nNoThresh > hicResult->m_nNoThreshWorstChip)
+        hicResult->m_nNoThreshWorstChip = chipResult->m_nNoThresh;
       hicResult->m_nHot += chipResult->m_nHot;
     }
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
@@ -771,6 +777,10 @@ void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
                    GetParameterFile());
     DbAddParameter(db, activity, string("Pixels without") + suffix, (float)m_nNoThresh,
                    GetParameterFile());
+    DbAddParameter(db, activity, string("Dead pixels, worst chip, ") + suffix,
+                   (float)m_nDeadWorstChip, GetParameterFile());
+    DbAddParameter(db, activity, string("Pixels without threshold, worst chip, ") + suffix,
+                   (float)m_nNoThreshWorstChip, GetParameterFile());
     DbAddParameter(db, activity, string("Average noise") + suffix, (float)m_noiseAv,
                    GetParameterFile());
     DbAddParameter(db, activity, string("Maximum chip noise") + suffix, (float)m_maxChipNoise,

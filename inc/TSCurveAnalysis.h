@@ -62,6 +62,8 @@ private:
   float         m_maxChipNoise;
   int           m_nDead;
   int           m_nNoThresh;
+  int           m_nNoThreshWorstChip;
+  int           m_nDeadWorstChip;
   int           m_nHot;
   float         m_backBias;
   bool          m_nominal;

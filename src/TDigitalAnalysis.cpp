@@ -98,6 +98,7 @@ void TDigitalAnalysis::InitCounters()
     TDigitalResultHic *result = (TDigitalResultHic *)it->second;
     result->m_nDead           = 0;
     result->m_nBad            = 0;
+    result->m_nBadWorstChip   = 0;
     result->m_nStuck          = 0;
     result->m_nBadDcols       = 0;
     result->m_lower           = ((TDigitalScan *)m_scan)->IsLower();
@@ -299,8 +300,10 @@ void TDigitalAnalysis::Finalize()
           (TDigitalResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
       TDigitalResultHic *hicResult =
           (TDigitalResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
+      int nBadChip = chipResult->m_nDead + chipResult->m_nIneff + chipResult->m_nNoisy;
       hicResult->m_nDead += chipResult->m_nDead;
-      hicResult->m_nBad += chipResult->m_nDead + chipResult->m_nIneff + chipResult->m_nNoisy;
+      hicResult->m_nBad += nBadChip;
+      if (nBadChip > hicResult->m_nBadWorstChip) hicResult->m_nBadWorstChip = nBadChip;
       hicResult->m_nBadDcols += chipResult->m_nBadDcols;
       hicResult->m_nStuck += chipResult->m_nStuck;
     }
@@ -415,6 +418,8 @@ void TDigitalResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
                  GetParameterFile());
   DbAddParameter(db, activity, string("Bad pixels digital") + suffix, (float)m_nBad,
                  GetParameterFile());
+  DbAddParameter(db, activity, string("Bad pixels digital, worst chip") + suffix,
+                 (float)m_nBadWorstChip, GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   fileName          = string(m_resultFile).substr(slash + 1); // strip path
