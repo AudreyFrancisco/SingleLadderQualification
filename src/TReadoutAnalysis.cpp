@@ -102,6 +102,7 @@ void TReadoutAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TReadoutAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TReadoutResultHic *hicResult =
         (TReadoutResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
@@ -134,6 +135,7 @@ void TReadoutAnalysis::Finalize()
     else {
       hicResult->m_class = GetClassificationIB(hicResult);
     }
+    hicResult->SetValidity(true);
   }
   WriteResult();
 
@@ -145,6 +147,7 @@ void TReadoutAnalysis::WriteResult()
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/ReadoutScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
               m_config->GetfNameSuffix());
@@ -172,18 +175,28 @@ void TReadoutAnalysis::WriteResult()
 
 THicClassification TReadoutAnalysis::GetClassificationOB(TReadoutResultHic *result)
 {
-  if (result->m_errorCounter.nCorruptEvent > 0) return CLASS_RED;
-  if (result->m_errorCounter.nTimeout > 0) return CLASS_RED;
-  if (result->m_errorCounter.n8b10b > 0) return CLASS_ORANGE;
-  return CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
+
+  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nCorruptEvent, "READOUT_MAXCORRUPT", result);
+  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "READOUT_MAXTIMEOUT", result);
+  DoCut(returnValue, CLASS_SILVER, result->m_errorCounter.n8b10b, "READOUT_MAX8b10b_GREEN", result);
+
+  std::cout << "Readout Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
+  return returnValue;
 }
 
 THicClassification TReadoutAnalysis::GetClassificationIB(TReadoutResultHic *result)
 {
-  if (result->m_errorCounter.nCorruptEvent > 0) return CLASS_RED;
-  if (result->m_errorCounter.nTimeout > 0) return CLASS_RED;
-  if (result->m_errorCounter.n8b10b > 0) return CLASS_ORANGE;
-  return CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
+
+  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nCorruptEvent, "READOUT_MAXCORRUPT", result);
+  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "READOUT_MAXTIMEOUT", result);
+  DoCut(returnValue, CLASS_SILVER, result->m_errorCounter.n8b10b, "READOUT_MAX8b10b_GREEN", result);
+
+  std::cout << "Readout Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
+  return returnValue;
 }
 
 void TReadoutResultHic::WriteToFile(FILE *fp)
@@ -253,13 +266,14 @@ void TReadoutResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   std::string suffix, file_suffix, fileName, remoteName;
   GetParameterSuffix(suffix, file_suffix);
 
-  DbAddParameter(db, activity, string("Timeouts readout") + suffix, (float)m_errorCounter.nTimeout);
+  DbAddParameter(db, activity, string("Timeouts readout") + suffix, (float)m_errorCounter.nTimeout,
+                 GetParameterFile());
   DbAddParameter(db, activity, string("8b10b errors readout") + suffix,
-                 (float)m_errorCounter.n8b10b);
+                 (float)m_errorCounter.n8b10b, GetParameterFile());
   DbAddParameter(db, activity, string("Corrupt events readout") + suffix,
-                 (float)m_errorCounter.nCorruptEvent);
+                 (float)m_errorCounter.nCorruptEvent, GetParameterFile());
   DbAddParameter(db, activity, string("Bad pixels readout") + suffix,
-                 (float)(m_deadPixels + m_ineffPixels + m_noisyPixels));
+                 (float)(m_deadPixels + m_ineffPixels + m_noisyPixels), GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   fileName          = string(m_resultFile).substr(slash + 1); // strip path

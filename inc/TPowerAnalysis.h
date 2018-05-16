@@ -31,6 +31,7 @@ private:
   float ibias0;
   float ibias3;
   float ibias[50];
+  float maxBias;
   char  m_ivFile[200];
 
 protected:
@@ -54,9 +55,9 @@ public:
 class TPowerAnalysis : public TScanAnalysis {
 private:
   void WriteIVCurve(THic *hic);
-  THicClassification GetClassification(THicCurrents currents);
-  THicClassification GetClassificationIB(THicCurrents currents);
-  THicClassification GetClassificationOB(THicCurrents currents);
+  THicClassification GetClassification(THicCurrents currents, TPowerResultHic *result);
+  THicClassification GetClassificationIB(THicCurrents currents, TPowerResultHic *result);
+  THicClassification GetClassificationOB(THicCurrents currents, TPowerResultHic *result);
 
 protected:
   TScanResultChip *GetChipResult()
@@ -74,6 +75,7 @@ protected:
   void WriteResult();
   void AnalyseHisto(TScanHisto *histo) { (void)&histo; };
   string                        GetPreviousTestType();
+  void CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TPowerAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

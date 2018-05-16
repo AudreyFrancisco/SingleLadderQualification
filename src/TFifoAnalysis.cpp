@@ -149,6 +149,7 @@ void TFifoAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TFifoAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     TFifoResultChip *chipResult = (TFifoResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
     if (!chipResult) std::cout << "WARNING: chipResult = 0" << std::endl;
@@ -178,6 +179,7 @@ void TFifoAnalysis::Finalize()
     TFifoResultHic *hicResult =
         (TFifoResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->m_class = GetClassification(hicResult);
+    hicResult->SetValidity(true);
   }
 
   WriteResult();
@@ -187,20 +189,20 @@ void TFifoAnalysis::Finalize()
 
 THicClassification TFifoAnalysis::GetClassification(TFifoResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
 
-  DoCut(returnValue, CLASS_RED, result->m_exc, "FIFO_MAXEXCEPTION");
+  DoCut(returnValue, CLASS_RED, result->m_exc, "FIFO_MAXEXCEPTION", result);
 
-  DoCut(returnValue, CLASS_ORANGE, result->m_err0, "FIFO_MAXERR_GREEN");
-  DoCut(returnValue, CLASS_ORANGE, result->m_err5, "FIFO_MAXERR_GREEN");
-  DoCut(returnValue, CLASS_ORANGE, result->m_erra, "FIFO_MAXERR_GREEN");
-  DoCut(returnValue, CLASS_ORANGE, result->m_errf, "FIFO_MAXERR_GREEN");
-  DoCut(returnValue, CLASS_RED, result->m_err0, "FIFO_MAXERR_ORANGE");
-  DoCut(returnValue, CLASS_RED, result->m_err5, "FIFO_MAXERR_ORANGE");
-  DoCut(returnValue, CLASS_RED, result->m_erra, "FIFO_MAXERR_ORANGE");
-  DoCut(returnValue, CLASS_RED, result->m_errf, "FIFO_MAXERR_ORANGE");
+  DoCut(returnValue, CLASS_SILVER, result->m_err0, "FIFO_MAXERR_GREEN", result);
+  DoCut(returnValue, CLASS_SILVER, result->m_err5, "FIFO_MAXERR_GREEN", result);
+  DoCut(returnValue, CLASS_SILVER, result->m_erra, "FIFO_MAXERR_GREEN", result);
+  DoCut(returnValue, CLASS_SILVER, result->m_errf, "FIFO_MAXERR_GREEN", result);
+  DoCut(returnValue, CLASS_RED, result->m_err0, "FIFO_MAXERR_ORANGE", result);
+  DoCut(returnValue, CLASS_RED, result->m_err5, "FIFO_MAXERR_ORANGE", result);
+  DoCut(returnValue, CLASS_RED, result->m_erra, "FIFO_MAXERR_ORANGE", result);
+  DoCut(returnValue, CLASS_RED, result->m_errf, "FIFO_MAXERR_ORANGE", result);
 
-  DoCut(returnValue, CLASS_RED, result->m_errf, "FIFO_MAXFAULTYCHIPS");
+  DoCut(returnValue, CLASS_RED, result->m_errf, "FIFO_MAXFAULTYCHIPS", result);
   std::cout << "Fifo Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
   return returnValue;
@@ -257,9 +259,11 @@ void TFifoResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   GetParameterSuffix(suffix, file_suffix);
 
   DbAddParameter(db, activity, string("FIFO errors") + suffix,
-                 (float)(m_err0 + m_err5 + m_erra + m_errf));
-  DbAddParameter(db, activity, string("FIFO exceptions") + suffix, (float)m_exc);
-  DbAddParameter(db, activity, string("Chips with FIFO errors") + suffix, (float)m_nFaultyChips);
+                 (float)(m_err0 + m_err5 + m_erra + m_errf), GetParameterFile());
+  DbAddParameter(db, activity, string("FIFO exceptions") + suffix, (float)m_exc,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Chips with FIFO errors") + suffix, (float)m_nFaultyChips,
+                 GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   fileName          = string(m_resultFile).substr(slash + 1); // strip path

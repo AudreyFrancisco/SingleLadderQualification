@@ -5,7 +5,10 @@ Databasefailure::Databasefailure(QWidget *parent) : QDialog(parent), ui(new Ui::
 {
   ui->setupUi(this);
   connect(ui->quit, SIGNAL(clicked()), this, SLOT(close()));
-  connect(ui->writeagain, SIGNAL(clicked()), this->parent(), SLOT(attachtodatabaseretry()));
+  connect(ui->writeagain, SIGNAL(clicked()), this->parent(), SLOT(attachtodatabase()));
 }
 
 Databasefailure::~Databasefailure() { delete ui; }
+
+
+void Databasefailure::assigningproblem(QString error) { ui->problem->setText(error); }

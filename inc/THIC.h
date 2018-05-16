@@ -22,7 +22,9 @@ protected:
   // unique identifiers
   int                m_hicNumber; // TODO: find out name and format ...
   std::string        m_dbId;      // ... in db: int? string?
+  THicClassification m_oldClass;
   THicClassification m_class;
+
 
 public:
   THic(const char *dbId, int modId, TPowerBoard *pb, int pbMod);
@@ -39,6 +41,9 @@ public:
   float        GetIddd();
   float        GetIdda();
   float        GetIBias();
+  float        GetVddd();
+  float        GetVdda();
+  float        GetVbias();
   float        GetTemperature();
   void ScaleVoltage(float aFactor);
   std::string  GetDbId() { return m_dbId; };
@@ -60,6 +65,8 @@ public:
   float GetAnalogueVoltage();
   void AddClassification(THicClassification aClass);
   THicClassification GetClassification();
+  THicClassification GetOldClassification() { return m_oldClass; };
+  void SetOldClassification(THicClassification aOldClass) { m_oldClass = aOldClass; };
 };
 
 class THicOB : public THic {

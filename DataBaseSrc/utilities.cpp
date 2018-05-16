@@ -140,6 +140,10 @@ void str2timeTime(const char *sDate, time_t *tDate)
 std::string float2str(float value)
 {
   char valueCharArray[100];
+  if (value == 0) {
+    return (std::string("0.0"));
+  }
+
   snprintf(valueCharArray, 100, "%f", value);
   char *pt = valueCharArray;
   while (*pt != '\0') {

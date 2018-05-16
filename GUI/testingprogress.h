@@ -15,7 +15,7 @@ public:
   ~Testingprogress();
 
 public slots:
-  virtual void setnotification(QString notification);
+  virtual void setnotification(QString notification, QString exceptiondescription);
   virtual void stopaddingscans();
 
 private:

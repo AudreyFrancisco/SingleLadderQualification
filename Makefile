@@ -45,7 +45,8 @@ BASE_CLASSES= TReadoutBoard.cpp TAlpide.cpp AlpideConfig.cpp AlpideDecoder.cpp A
   TDACScan.cpp TDataTaking.cpp TReadoutTest.cpp TEnduranceCycle.cpp TCycleAnalysis.cpp TReadoutAnalysis.cpp \
   TNoiseAnalysis.cpp TScan.cpp TFifoTest.cpp TPowerTest.cpp TFastPowerTest.cpp TSCurveScan.cpp TDigitalScan.cpp \
   TNoiseOccupancy.cpp TLocalBusTest.cpp TScanConfig.cpp TestBeamTools.cpp Common.cpp \
-  TReadoutBoardRU.cpp TBoardConfigRU.cpp TApplyMask.cpp THicConfig.cpp TDCTRLMeasurement.cpp TDCTRLAnalysis.cpp
+  TReadoutBoardRU.cpp TBoardConfigRU.cpp TApplyMask.cpp THicConfig.cpp TDCTRLMeasurement.cpp TDCTRLAnalysis.cpp \
+  TEyeMeasurement.cpp
 BASE_OBJS = $(BASE_CLASSES:.cpp=.o)
 
 RU_SOURCES = ReadoutUnitSrc/TRuWishboneModule.cpp ReadoutUnitSrc/TRuTransceiverModule.cpp \
@@ -59,7 +60,7 @@ MOSAIC_OBJS = $(MOSAIC_SOURCES:.cpp=.o)
 OBJS=$(BASE_OBJS) $(RU_OBJS) $(MOSAIC_OBJS)
 
 ### Source files using ROOT classes
-ROOT_CLASSES= TSCurveAnalysis.cpp TApplyTuning.cpp
+ROOT_CLASSES= TSCurveAnalysis.cpp TApplyTuning.cpp TEyeAnalysis.cpp
 ROOT_OBJS  = $(ROOT_CLASSES:.cpp=.o)
 
 ### Dependencies
@@ -82,7 +83,7 @@ EXE += $(TEST_EXE_ROOT)
 
 
 #### TARGETS ####
-all: check-env $(EXE) Config.cfg githooks
+all: check-env clean $(EXE) Config.cfg githooks lib lib_analysis
 
 ### Config.cfg
 Config.cfg: ConfigTemplate.cfg

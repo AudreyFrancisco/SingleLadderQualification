@@ -92,14 +92,18 @@ AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Ses
   doc =
       xmlReadMemory(ReturnedString, strlen(ReturnedString), "noname.xml", NULL, 0); // parse the XML
   if (doc == NULL) {
-    cerr << "Failed to parse document" << endl;
+    cerr << "Failed to parse document. Dump the response :" << endl;
+    cerr << ReturnedString << endl;
+    cerr << "------- EOF -------" << endl;
     SetResponse(AlpideTable::BadXML, 0, Session);
     return (&theResponse);
   }
   xmlNode *root_element = NULL;
   root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
-    cerr << "Failed to parse document: No root element" << endl;
+    cerr << "Failed to parse document: No root element. Dump the response:" << endl;
+    cerr << ReturnedString << endl;
+    cerr << "------- EOF -------" << endl;
     SetResponse(AlpideTable::BadXML, 0, Session);
     return (&theResponse);
   }
@@ -848,6 +852,7 @@ void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actL
   xmlNode *n1, *n2, *n3;
   n1 = ns;
   compActivity theAct;
+
   while (n1 != NULL) {
     if (MATCHNODE(n1, "ComponentActivityHistory")) {
       n2 = n1->children;
@@ -886,7 +891,10 @@ void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actL
         if (MATCHNODE(n2, "ActivityType")) {
           n3 = n2->children;
           while (n3 != NULL) {
-            if (MATCHNODE(n3, "ID")) theAct.Type = atoi((const char *)n3->children->content);
+            if (MATCHNODE(n3, "ID"))
+              theAct.Type = atoi((const char *)n3->children->content);
+            else if (MATCHNODE(n3, "Name"))
+              theAct.Typename.assign((const char *)n3->children->content);
             n3 = n3->next;
           }
         }
@@ -894,6 +902,7 @@ void ComponentDB::extractTheActivityList(xmlNode *ns, vector<compActivity> *actL
       }
       actList->push_back(theAct);
     }
+    n1 = n1->next;
   }
 }
 
@@ -1011,6 +1020,7 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
   }
   else {
     DecodeResponse(stringresult);
+    if (theResponse.ErrorCode != 0) cerr << "Activity creation Error :" << DumpResponse() << endl;
     if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
     aActivity->ID = theResponse.ID;
   }
@@ -1029,6 +1039,7 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     }
     else {
       DecodeResponse(stringresult);
+      if (theResponse.ErrorCode != 0) cerr << "Activity Member Error :" << DumpResponse() << endl;
       if (VERBOSITYLEVEL == 1) cout << "Activity Member creation  :" << DumpResponse() << endl;
       aActivity->Members.at(i).ID = theResponse.ID;
     }
@@ -1058,6 +1069,8 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     }
     else {
       DecodeResponse(stringresult);
+      if (theResponse.ErrorCode != 0)
+        cerr << "Activity Parameter Error :" << DumpResponse() << endl;
       if (VERBOSITYLEVEL == 1) cout << "Activity Parameter creation :" << DumpResponse() << endl;
       aActivity->Parameters.at(i).ID = theResponse.ID;
     }
@@ -1111,6 +1124,8 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     }
     else {
       DecodeResponse(stringresult);
+      if (theResponse.ErrorCode != 0)
+        cerr << "Activity Attachment Error :" << DumpResponse() << endl;
       if (VERBOSITYLEVEL == 1) cout << "Activity Attachment creation :" << DumpResponse() << endl;
       aActivity->Attachments.at(i).ID = theResponse.ID;
     }
@@ -1278,7 +1293,7 @@ ActivityDB::response *ActivityDB::AssignComponent(int aActivityID, int aComponen
   else {
     DecodeResponse(stringresult);
     if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
-    SetResponse(AlpideTable::NoError);
+    //   SetResponse(AlpideTable::NoError);
   }
   return (&theResponse);
 }

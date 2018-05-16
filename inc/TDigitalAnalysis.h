@@ -43,6 +43,7 @@ class TDigitalResultHic : public TScanResultHic {
 private:
   int           m_nDead;
   int           m_nBad;
+  int           m_nBadWorstChip;
   int           m_nStuck;
   int           m_nBadDcols;
   char          m_stuckFile[200];
@@ -51,6 +52,9 @@ private:
   bool          m_nominal;
   TErrorCounter m_errorCounter;
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
+
+protected:
+  void Compare(TScanResultHic *aPrediction);
 
 public:
   TDigitalResultHic() : TScanResultHic(){};
@@ -99,11 +103,11 @@ protected:
   void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
+  void CalculatePrediction(std::string hicName);
 
 public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                    std::vector<THic *> hics, std::mutex *aMutex, TDigitalResult *aResult = 0);
-  void CalculatePrediction(std::string hicName);
   void Initialize();
   void Finalize();
 

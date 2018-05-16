@@ -3,6 +3,7 @@
 #include "TBoardConfigMOSAIC.h"
 #include "TBoardConfigRU.h"
 #include "TPowerBoardConfig.h"
+#include "version.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -264,10 +265,8 @@ void TConfig::SetDeviceType(TDeviceType AType, int NChips)
         chipIds.push_back(i + (modId << 4));
       }
     }
-    if (AType == TYPE_HALFSTAVE)
+    if ((AType == TYPE_HALFSTAVE) || (AType == TYPE_MLHALFSTAVE))
       Init(2, chipIds, boardMOSAIC);
-    else if (AType == TYPE_MLHALFSTAVE)
-      Init(1, chipIds, boardMOSAIC);
     else
       Init(1, chipIds, boardRU);
   }
@@ -396,7 +395,7 @@ void TConfig::DecodeLine(std::string Line)
     BoardStart = 0;
     BoardStop  = fBoardConfigs.size();
     HicStart   = 0;
-    HicStop    = 0;
+    HicStop    = fHicConfigs.size();
   }
   else {
     ChipStart  = (Index < (int)fChipConfigs.size()) ? Index : -1;

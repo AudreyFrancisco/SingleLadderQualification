@@ -1,5 +1,11 @@
 #include "DBHelpers.h"
 #include <fstream>
+#include <set>
+
+static const std::set<std::string> kTestTypes = {
+    "OB-HIC Impedance Test",       "OB HIC Qualification Test", "IB HIC Qualification Test",
+    "IB Stave Qualification Test", "OB HIC Endurance Test",     "OB HIC Fast Power Test",
+    "OB HIC Reception Test",       "OL HS Qualification Test",  "ML HS Qualification Test"};
 
 int DbGetActivityTypeId(AlpideDB *db, string name)
 {
@@ -97,11 +103,14 @@ int DbGetResultId(AlpideDB *db, int activityTypeId, THicClassification classific
   for (unsigned int i = 0; i < resultTypeList.size(); i++) {
     string Name = resultTypeList.at(i).Name;
     switch (classification) {
-    case CLASS_GREEN:
+    case CLASS_GOLD:
       if (Name.find("GOLD") != string::npos) return resultTypeList.at(i).ID;
       break;
-    case CLASS_ORANGE:
+    case CLASS_SILVER:
       if (Name.find("SILVER") != string::npos) return resultTypeList.at(i).ID;
+      break;
+    case CLASS_BRONZE:
+      if (Name.find("BRONZE") != string::npos) return resultTypeList.at(i).ID;
       break;
     case CLASS_PARTIAL:
       if (Name.find("partially") != string::npos) return resultTypeList.at(i).ID;
@@ -158,6 +167,61 @@ std::vector<int> DbGetActivityIds(AlpideDB *db, int activityTypeId, string compN
   return result;
 }
 
+
+void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
+                        vector<ComponentDB::compActivity> &tests)
+{
+  ComponentDB *                     componentDB = new ComponentDB(db);
+  vector<ComponentDB::compActivity> history;
+
+  tests.clear();
+  componentDB->GetComponentActivities(compId, &history);
+
+  for (unsigned int i = 0; i < history.size(); i++) {
+    if (kTestTypes.find(history.at(i).Typename) == kTestTypes.end()) {
+      std::cout << "found non-test activity of type " << history.at(i).Typename << std::endl;
+      continue; // check that typename is in list of tests
+    }
+    if (history.at(i).Type == activityTypeId) {
+      std::cout << "found same test-type " << history.at(i).Typename << std::endl;
+      continue;
+    }
+    std::cout << "found test of type " << history.at(i).Typename << std::endl;
+    tests.push_back(history.at(i));
+  }
+}
+
+THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityTypeId)
+{
+  vector<ComponentDB::compActivity> tests;
+  DbGetPreviousTests(db, compId, activityTypeId, tests);
+
+  int latestIdx = 0;
+
+  if (tests.size() == 0) return CLASS_UNTESTED;
+  for (unsigned int i = 0; i < tests.size(); i++) {
+    if (DbIsNewer(tests.at(latestIdx), tests.at(i)) == 1) {
+      latestIdx = i;
+    }
+  }
+
+  string category = tests.at(latestIdx).Result.Name;
+
+  // TODO: change to gold/silver/bronze
+  if (category.find("GOLD") != string::npos)
+    return CLASS_GOLD;
+  else if (category.find("SILVER") != string::npos)
+    return CLASS_SILVER;
+  else if (category.find("BRONZE") != string::npos)
+    return CLASS_BRONZE;
+  else if ((category.find("not") != string::npos) || (category.find("NOK") != string::npos))
+    return CLASS_RED;
+  else if (category.find("part") != string::npos)
+    return CLASS_PARTIAL;
+  return CLASS_UNTESTED;
+}
+
+
 bool DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, float &parValue)
 {
   for (unsigned int i = 0; i < pars.size(); i++) {
@@ -167,6 +231,21 @@ bool DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, flo
     }
   }
   return false;
+}
+
+
+int DbIsNewer(ComponentDB::compActivity act0, ComponentDB::compActivity act1)
+{
+  // first check the start dates;
+  // not sure about the precision of the member StartDate, but it should be either equal
+  // or have a difference of at least 1 day = 86400 sec
+  if (difftime(act0.StartDate, act1.StartDate) < -86000)
+    return 1; // date of act0 before date of act1
+  if (difftime(act0.StartDate, act1.StartDate) > 86000) return 0;
+
+  // no time parameter here, so if same date, use the activity ids
+  if (act0.ID < act1.ID) return 1;
+  return 0;
 }
 
 int DbIsNewer(ActivityDB::activityLong act0, ActivityDB::activityLong act1)
@@ -292,7 +371,7 @@ int DbGetComponentTypeId(AlpideDB *db, string name)
 // method returns the activity component type ID
 // (i.e. the id of the component as in or out component of the given activity)
 // the general component id is written into the variable componentId
-int DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int &componentId, string Direction)
+int DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int componentId, string Direction)
 {
   ActivityDB *                                    activityDB = new ActivityDB(db);
   static int                                      myActTypeId;
@@ -304,8 +383,8 @@ int DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int &componentId, 
   }
 
   for (unsigned int i = 0; i < actCompTypeList.size(); i++) {
-    if (Direction == actCompTypeList.at(i).Direction) {
-      componentId = actCompTypeList.at(i).Type.ID;
+    if ((Direction == actCompTypeList.at(i).Direction) &&
+        (componentId == actCompTypeList.at(i).Type.ID)) {
       return actCompTypeList.at(i).ID;
     }
   }
@@ -320,7 +399,11 @@ int DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name)
   static std::vector<ComponentDB::componentShort> componentList;
 
   if ((componentList.size() == 0) || (typeId != myTypeId)) {
+    if (componentList.size() != 0) {
+      componentList.clear();
+    }
     myTypeId = typeId;
+
     componentDB->GetListByType(projectId, myTypeId, &componentList);
   }
 
@@ -370,7 +453,8 @@ int DbGetComponentActivity(AlpideDB *db, int compId, int activityTypeId)
   return -1;
 }
 
-bool DbAddParameter(AlpideDB *db, ActivityDB::activity &activity, string name, float value)
+bool DbAddParameter(AlpideDB *db, ActivityDB::activity &activity, string name, float value,
+                    std::string file)
 {
   ActivityDB::parameter parameter;
   int                   paramId = DbGetParameterId(db, activity.Type, name);
@@ -385,6 +469,12 @@ bool DbAddParameter(AlpideDB *db, ActivityDB::activity &activity, string name, f
   parameter.Value             = value;
 
   activity.Parameters.push_back(parameter);
+
+  FILE *fp = fopen(file.c_str(), "a");
+  if (fp) {
+    fprintf(fp, "Writing parameter %s (ID %d), value %f\n", name.c_str(), paramId, value);
+    fclose(fp);
+  }
   return true;
 }
 
@@ -458,10 +548,10 @@ string CreateActivityName(string compName, TScanConfig *config)
     testName = string("OB Reception Test ");
     break;
   case OBHalfStaveOL:
-    testName = string("OL Half-Stave Test ");
+    testName = string("OL HS Test ");
     break;
   case OBHalfStaveML:
-    testName = string("ML Half-Stave Test ");
+    testName = string("ML HS Test ");
     break;
   case IBQualification:
     testName = string("IB Qualification Test ");

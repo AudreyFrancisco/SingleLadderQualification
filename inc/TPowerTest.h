@@ -21,6 +21,7 @@ typedef struct {
   float    idddConfigured;
   float    ibias0;
   float    ibias3;
+  float    maxBias;
   float    ibias[61];
 } THicCurrents;
 

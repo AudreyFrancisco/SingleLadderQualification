@@ -43,6 +43,7 @@ string TPowerAnalysis::GetPreviousTestType()
 
 void TPowerAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   TPowerTest *powerTest = (TPowerTest *)m_scan;
 
   std::map<std::string, THicCurrents> currents = powerTest->GetCurrents();
@@ -63,66 +64,73 @@ void TPowerAnalysis::Finalize()
     hicResult->idddConfigured = hicCurrents.idddConfigured;
     hicResult->ibias0         = hicCurrents.ibias0;
     hicResult->ibias3         = hicCurrents.ibias3;
+    hicResult->maxBias        = hicCurrents.maxBias;
 
     for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
       hicResult->ibias[i] = hicCurrents.ibias[i];
     }
-    hicResult->m_class = GetClassification(hicCurrents);
+    hicResult->m_class = GetClassification(hicCurrents, hicResult);
+    hicResult->SetValidity(true);
   }
   WriteResult();
   m_finished = true;
 }
 
-THicClassification TPowerAnalysis::GetClassification(THicCurrents currents)
+THicClassification TPowerAnalysis::GetClassification(THicCurrents currents, TPowerResultHic *result)
 {
-  if (currents.trip) return CLASS_RED;
+  if (currents.trip) {
+    std::cout << "Power analysis: HIC classified red due to trip" << std::endl;
+    return CLASS_RED;
+  }
   if (currents.hicType == HIC_IB)
-    return GetClassificationIB(currents);
+    return GetClassificationIB(currents, result);
   else
-    return GetClassificationOB(currents);
+    return GetClassificationOB(currents, result);
 }
 
-THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents currents)
+THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents     currents,
+                                                       TPowerResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
 
-  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_IB", true);
-  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_IB", true);
+  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_IB", result, true);
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_IB", result, true);
 
-  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MINIDDD_CLOCKED_IB", true);
-  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_IB", true);
-  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_IB");
-  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_IB");
+  DoCut(returnValue, CLASS_SILVER, currents.idddClocked * 1000, "MINIDDD_CLOCKED_IB", result, true);
+  DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_IB", result, true);
+  DoCut(returnValue, CLASS_SILVER, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_IB", result);
+  DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_IB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_IB");
+  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
   // add 1 for the case where I(3V) = 0
   float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
   // add 0.9 to round up for everything >= .1
-  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_IB");
+  DoCut(returnValue, CLASS_SILVER, (int)(ratio + 0.9), "MAXFACTOR_4V_IB", result);
   std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
   return returnValue;
 }
 
-THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents currents)
+THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents     currents,
+                                                       TPowerResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
 
-  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", true);
-  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", true);
+  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", result, true);
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", result, true);
 
-  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MINIDDD_CLOCKED_OB", true);
-  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_OB", true);
-  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_OB");
-  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_OB");
+  DoCut(returnValue, CLASS_SILVER, currents.idddClocked * 1000, "MINIDDD_CLOCKED_OB", result, true);
+  DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_OB", result, true);
+  DoCut(returnValue, CLASS_SILVER, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_OB", result);
+  DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_OB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_OB");
+  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_OB", result);
   // add 1 for the case where I(3V) = 0
   float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
   // add 0.9 to round up for everything >= .1
-  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_OB");
+  DoCut(returnValue, CLASS_SILVER, (int)(ratio + 0.9), "MAXFACTOR_4V_OB", result);
   std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
   return returnValue;
@@ -185,10 +193,13 @@ void TPowerResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   string      fileName, ivName;
   std::size_t slash;
 
-  DbAddParameter(db, activity, string("IDDD"), idddConfigured);
-  DbAddParameter(db, activity, string("IDDA"), iddaConfigured);
-  DbAddParameter(db, activity, string("Back bias current 0V"), ibias0);
-  DbAddParameter(db, activity, string("Back bias current 3V"), ibias3);
+  DbAddParameter(db, activity, string("IDDD"), idddConfigured, GetParameterFile());
+  DbAddParameter(db, activity, string("IDDA"), iddaConfigured, GetParameterFile());
+  DbAddParameter(db, activity, string("IDDD clocked"), idddClocked, GetParameterFile());
+  DbAddParameter(db, activity, string("IDDA clocked"), iddaClocked, GetParameterFile());
+  DbAddParameter(db, activity, string("Back bias current 0V"), ibias0, GetParameterFile());
+  DbAddParameter(db, activity, string("Back bias current 3V"), ibias3, GetParameterFile());
+  DbAddParameter(db, activity, string("Maximum bias voltage"), maxBias, GetParameterFile());
 
   slash    = string(m_resultFile).find_last_of("/");
   fileName = string(m_resultFile).substr(slash + 1); // strip path

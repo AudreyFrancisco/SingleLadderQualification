@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <string.h>
 #include <string>
 
@@ -170,6 +171,9 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
         itrg = nTriggers * m_enabled[iboard];
         FindTimeoutHics(iboard, nTrigPerHic, nTriggers);
         m_errorCount.nTimeout++;
+        if (m_errorCount.nTimeout > m_config->GetParamValue("MAXTIMEOUT")) {
+          throw std::runtime_error("Maximum number of timouts reached. Aborting scan.");
+        }
         trials = 0;
       }
       continue;

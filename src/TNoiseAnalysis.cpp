@@ -40,6 +40,7 @@ void TNoiseAnalysis::WriteResult()
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
     WriteNoisyPixels(m_hics.at(ihic));
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/NoiseOccResult_%s.dat", hicResult->GetOutputPath().c_str(),
@@ -150,6 +151,7 @@ void TNoiseAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TNoiseAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TNoiseResultHic *hicResult =
         (TNoiseResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
@@ -167,6 +169,7 @@ void TNoiseAnalysis::Finalize()
     }
     hicResult->m_occ /= m_hics.at(ihic)->GetNChips();
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
+    hicResult->SetValidity(true);
   }
 
   WriteResult();
@@ -241,9 +244,12 @@ void TNoiseResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 
   GetParameterSuffix(suffix, file_suffix);
 
-  DbAddParameter(db, activity, string("Noisy pixels ") + suffix, (float)m_nNoisy);
-  DbAddParameter(db, activity, string("Noise occupancy ") + suffix, (float)m_occ);
-  DbAddParameter(db, activity, string("Maximum chip occupancy ") + suffix, (float)m_maxChipOcc);
+  DbAddParameter(db, activity, string("Noisy pixels ") + suffix, (float)m_nNoisy,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Noise occupancy ") + suffix, (float)m_occ,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Maximum chip occupancy ") + suffix, (float)m_maxChipOcc,
+                 GetParameterFile());
 
   slash      = string(m_resultFile).find_last_of("/");
   fileName   = string(m_resultFile).substr(slash + 1); // strip path

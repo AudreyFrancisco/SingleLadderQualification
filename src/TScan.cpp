@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <string.h>
 #include <string>
 
@@ -9,9 +10,11 @@
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
 #include "TScan.h"
+#include "version.h"
 
 bool fScanAbort;
 bool fScanAbortAll;
+bool fTimeLimitReached;
 
 TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
              std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
@@ -39,7 +42,9 @@ TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic
 
 void TScan::Init()
 {
-  fScanAbort = false;
+  fScanAbort        = false;
+  fTimeLimitReached = false;
+
   strcpy(m_state, "Running");
   std::cout << std::endl
             << std::endl
@@ -73,12 +78,16 @@ void TScan::Init()
     try {
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart =
           m_hics.at(ihic)->GetTemperature();
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaStart =
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipStart =
           m_hics.at(ihic)->GetAnalogueVoltage();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaStart =
           m_hics.at(ihic)->GetIdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddStart =
           m_hics.at(ihic)->GetIddd();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaStart =
+          m_hics.at(ihic)->GetVdda();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddStart =
+          m_hics.at(ihic)->GetVddd();
     }
     catch (std::exception &e) {
       std::cout << "Exception " << e.what() << " when reading temp / currents" << std::endl;
@@ -111,6 +120,15 @@ void TScan::Init()
   }
 }
 
+void TScan::ClearHistoQue()
+{
+  while (!(m_mutex->try_lock()))
+    ;
+  m_histoQue->clear();
+  m_mutex->unlock();
+}
+
+
 // seems the board index is not accessible anywhere.
 // for the time being do like this...
 int TScan::FindBoardIndex(TAlpide *chip)
@@ -138,12 +156,16 @@ void TScan::Terminate()
     try {
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd =
           m_hics.at(ihic)->GetTemperature();
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaEnd =
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipEnd =
           m_hics.at(ihic)->GetAnalogueVoltage();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaEnd =
           m_hics.at(ihic)->GetIdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddEnd =
           m_hics.at(ihic)->GetIddd();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaEnd =
+          m_hics.at(ihic)->GetVdda();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddEnd =
+          m_hics.at(ihic)->GetVddd();
     }
     catch (std::exception &e) {
       std::cout << "Terminate: exception " << e.what() << " when reading temp / currents"
@@ -193,6 +215,7 @@ bool TScan::Loop(int loopIndex)
 {
   if (fScanAbort) return false; // check for abort flags first
   if (fScanAbortAll) return false;
+  if (fTimeLimitReached) return false;
 
   if ((m_step[loopIndex] > 0) && (m_value[loopIndex] < m_stop[loopIndex]))
     return true; // limit check for positive steps
@@ -377,6 +400,9 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
         itrg = m_nTriggers * m_enabled[iboard];
         FindTimeoutHics(iboard, nTrigPerHic);
         m_errorCount.nTimeout++;
+        if (m_errorCount.nTimeout > m_config->GetParamValue("MAXTIMEOUT")) {
+          throw std::runtime_error("Maximum number of timouts reached. Aborting scan.");
+        }
         trials = 0;
       }
       continue;
@@ -443,13 +469,13 @@ void TScan::WriteConditions(const char *fName, THic *aHic)
   fprintf(fp, "Firmware version: %s\n", m_conditions.m_fwVersion);
   fprintf(fp, "Software version: %s\n\n", m_conditions.m_swVersion);
 
-  fprintf(fp, "Temp (start): %.1f\n",
-          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempStart);
-  fprintf(fp, "Temp (end):   %.1f\n", m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempEnd);
-
-  fprintf(fp, "Analogue Supply Voltage (start): %.3f\n",
+  fprintf(fp, "VDDD (start): %.3f A\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddStart);
+  fprintf(fp, "VDDD (end):   %.3f A\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddEnd);
+  fprintf(fp, "VDDA (start): %.3f A\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaStart);
-  fprintf(fp, "Analogue Supply Voltage (end):   %.3f\n",
+  fprintf(fp, "VDDA (end):   %.3f A\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaEnd);
 
   fprintf(fp, "IDDD (start): %.3f A\n",
@@ -460,6 +486,16 @@ void TScan::WriteConditions(const char *fName, THic *aHic)
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaStart);
   fprintf(fp, "IDDA (end):   %.3f A\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaEnd);
+
+  fprintf(fp, "Analogue Supply Voltage (on-chip, start): %.3f\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaChipStart);
+  fprintf(fp, "Analogue Supply Voltage (on-chip, end):   %.3f\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaChipEnd);
+  fprintf(fp, "Temp (on-chip, start): %.1f\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempStart);
+  fprintf(fp, "Temp (on-chip, end):   %.1f\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempEnd);
+
 
   fputs("\n", fp);
 

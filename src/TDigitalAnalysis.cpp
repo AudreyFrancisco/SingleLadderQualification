@@ -15,6 +15,8 @@ TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aSca
     m_result = aResult;
   else
     m_result = new TDigitalResult();
+
+  m_prediction = new TDigitalResult();
   FillVariableList();
 }
 
@@ -61,12 +63,10 @@ void TDigitalAnalysis::Initialize()
 {
   ReadChipList();
   CreateHicResults();
+  CreatePrediction();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    TDigitalResultHic *hicResult =
-        (TDigitalResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
-    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
-    std::cout << "Start of analysis, nTimeout = " << hicResult->m_errorCounter.nTimeout;
+    // CalculatePrediction(m_hics.at(ihic)->GetDbId());
   }
 }
 
@@ -98,6 +98,7 @@ void TDigitalAnalysis::InitCounters()
     TDigitalResultHic *result = (TDigitalResultHic *)it->second;
     result->m_nDead           = 0;
     result->m_nBad            = 0;
+    result->m_nBadWorstChip   = 0;
     result->m_nStuck          = 0;
     result->m_nBadDcols       = 0;
     result->m_lower           = ((TDigitalScan *)m_scan)->IsLower();
@@ -125,21 +126,34 @@ void TDigitalAnalysis::CalculatePrediction(std::string hicName)
                                 compType, hicName);
   GetChildList(compId, childNames);
 
+  std::cout << "Number of children = " << childNames.size() << std::endl;
   for (unsigned int i = 0; i < childNames.size(); i++) {
     ActivityDB::activityLong act;
-    if (GetPreviousActivity(hicName, act)) {
+    if (GetPreviousActivity(childNames.at(i), act)) {
       activities.push_back(act);
     }
   }
 
   if (activities.size() == 0) {
-    prediction->m_valid = false;
+    std::cout << "No previous activities found " << std::endl;
+    prediction->SetValidity(false);
     return;
   }
 
+  // do the calculation here
   for (unsigned int i = 0; i < activities.size(); i++) {
-    // do the calculation here
+    float value;
+    if (GetPreviousParamValue("Bad pixels digital (nominal)", "Dead Pixels", activities.at(i),
+                              value)) {
+      prediction->m_nDead += value;
+      std::cout << "Found value " << value << std::endl;
+    }
+    else {
+      std::cout << "Did not find value" << std::endl;
+    }
   }
+  prediction->SetValidity(true);
+  std::cout << "Expecting " << prediction->m_nDead << " dead pixels" << std::endl;
 }
 
 
@@ -177,6 +191,7 @@ void TDigitalAnalysis::WriteResult()
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
     WriteStuckPixels(m_hics.at(ihic));
     if (m_config->GetUseDataPath()) {
       sprintf(fName, "%s/DigitalScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
@@ -245,6 +260,7 @@ void TDigitalAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TDigitalAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   TErrorCounter        errCount = ((TMaskScan *)m_scan)->GetErrorCount();
   TDigitalResult *     result   = (TDigitalResult *)m_result;
   std::vector<TPixHit> stuck    = ((TMaskScan *)m_scan)->GetStuckPixels();
@@ -284,8 +300,10 @@ void TDigitalAnalysis::Finalize()
           (TDigitalResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
       TDigitalResultHic *hicResult =
           (TDigitalResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
+      int nBadChip = chipResult->m_nDead + chipResult->m_nIneff + chipResult->m_nNoisy;
       hicResult->m_nDead += chipResult->m_nDead;
-      hicResult->m_nBad += chipResult->m_nDead + chipResult->m_nIneff + chipResult->m_nNoisy;
+      hicResult->m_nBad += nBadChip;
+      if (nBadChip > hicResult->m_nBadWorstChip) hicResult->m_nBadWorstChip = nBadChip;
       hicResult->m_nBadDcols += chipResult->m_nBadDcols;
       hicResult->m_nStuck += chipResult->m_nStuck;
     }
@@ -294,13 +312,15 @@ void TDigitalAnalysis::Finalize()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TDigitalResultHic *hicResult =
         (TDigitalResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
+    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult);
     }
     else {
       hicResult->m_class = GetClassificationIB(hicResult);
     }
-    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
+    hicResult->SetValidity(true);
+    // ComparePrediction(m_hics.at(ihic)->GetDbId());
   }
   WriteResult();
 
@@ -311,30 +331,23 @@ void TDigitalAnalysis::Finalize()
 // TODO: Make two cuts (red and orange)?
 THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
 
   // check data taking variables
-  DoCut(returnValue, CLASS_ORANGE, result->m_errorCounter.nTimeout, "DIGITAL_MAXTIMEOUT_GREEN");
-  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "DIGITAL_MAXTIMEOUT_ORANGE");
-  DoCut(returnValue, CLASS_ORANGE, result->m_errorCounter.nCorruptEvent,
-        "DIGITAL_MAXCORRUPT_GREEN");
-  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nCorruptEvent, "DIGITAL_MAXCORRUPT_ORANGE");
+  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "DIGITAL_MAXTIMEOUT_ORANGE",
+        result);
+  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nCorruptEvent, "DIGITAL_MAXCORRUPT_ORANGE",
+        result);
 
-  // check on dead pixels per HIC
-  DoCut(returnValue, CLASS_ORANGE, result->m_nDead, "DIGITAL_MAXDEAD_HIC_GREEN_OB");
-  DoCut(returnValue, CLASS_RED, result->m_nDead, "DIGITAL_MAXDEAD_HIC_ORANGE_OB");
-
-  // check on bad pixels (i.e. dead + noisy + inefficient) per HIC
-  DoCut(returnValue, CLASS_ORANGE, result->m_nBad, "DIGITAL_MAXBAD_HIC_OB");
-
-  map<int, TScanResultChip *>::iterator it;
   // chip-wise check
+  map<int, TScanResultChip *>::iterator it;
   for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
     TDigitalResultChip *chipResult = (TDigitalResultChip *)it->second;
-    DoCut(returnValue, CLASS_ORANGE, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_GREEN");
-    DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_ORANGE");
-    int nBad = chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff;
-    DoCut(returnValue, CLASS_ORANGE, nBad, "DIGITAL_MAXBAD_CHIP_OB");
+    int                 chipId     = it->first;
+    int                 nBad = chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff;
+    DoCut(returnValue, CLASS_SILVER, nBad, "DIGITAL_MAXBAD_CHIP_GOLD", result, false, chipId);
+    DoCut(returnValue, CLASS_BRONZE, nBad, "DIGITAL_MAXBAD_CHIP_SILVER", result, false, chipId);
+    DoCut(returnValue, CLASS_RED, nBad, "DIGITAL_MAXBAD_CHIP_BRONZE", result, false, chipId);
   }
   std::cout << "Digital Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
@@ -343,30 +356,23 @@ THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic *resu
 
 THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
 
   // check data taking variables
-  DoCut(returnValue, CLASS_ORANGE, result->m_errorCounter.nTimeout, "DIGITAL_MAXTIMEOUT_GREEN");
-  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "DIGITAL_MAXTIMEOUT_ORANGE");
-  DoCut(returnValue, CLASS_ORANGE, result->m_errorCounter.nCorruptEvent,
-        "DIGITAL_MAXCORRUPT_GREEN");
-  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nCorruptEvent, "DIGITAL_MAXCORRUPT_ORANGE");
-  // check on dead pixels per HIC
-  DoCut(returnValue, CLASS_ORANGE, result->m_nDead, "DIGITAL_MAXDEAD_HIC_GREEN_IB");
-  DoCut(returnValue, CLASS_RED, result->m_nDead, "DIGITAL_MAXDEAD_HIC_ORANGE_IB");
-
-  // check on bad pixels (i.e. dead + noisy + inefficient) per HIC
-  DoCut(returnValue, CLASS_ORANGE, result->m_nBad, "DIGITAL_MAXBAD_HIC_IB");
+  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "DIGITAL_MAXTIMEOUT_ORANGE",
+        result);
+  DoCut(returnValue, CLASS_RED, result->m_errorCounter.nCorruptEvent, "DIGITAL_MAXCORRUPT_ORANGE",
+        result);
 
   // chip-wise check
   map<int, TScanResultChip *>::iterator it;
-  // chip-wise check
   for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
     TDigitalResultChip *chipResult = (TDigitalResultChip *)it->second;
-    DoCut(returnValue, CLASS_ORANGE, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_GREEN");
-    DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "DIGITAL_MAXDEAD_CHIP_ORANGE");
-    int nBad = chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff;
-    DoCut(returnValue, CLASS_ORANGE, nBad, "DIGITAL_MAXBAD_CHIP_IB");
+    int                 chipId     = it->first;
+    int                 nBad = chipResult->m_nDead + chipResult->m_nNoisy + chipResult->m_nIneff;
+    DoCut(returnValue, CLASS_SILVER, nBad, "DIGITAL_MAXBAD_CHIP_GOLD", result, false, chipId);
+    DoCut(returnValue, CLASS_BRONZE, nBad, "DIGITAL_MAXBAD_CHIP_SILVER", result, false, chipId);
+    DoCut(returnValue, CLASS_RED, nBad, "DIGITAL_MAXBAD_CHIP_BRONZE", result, false, chipId);
   }
   std::cout << "Digital Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
@@ -400,15 +406,20 @@ void TDigitalResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   std::string suffix, file_suffix, fileName, remoteName;
   GetParameterSuffix(suffix, file_suffix);
-  DbAddParameter(db, activity, string("Timeouts digital") + suffix, (float)m_errorCounter.nTimeout);
+  DbAddParameter(db, activity, string("Timeouts digital") + suffix, (float)m_errorCounter.nTimeout,
+                 GetParameterFile());
   DbAddParameter(db, activity, string("8b10b errors digital") + suffix,
-                 (float)m_errorCounter.n8b10b);
+                 (float)m_errorCounter.n8b10b, GetParameterFile());
   DbAddParameter(db, activity, string("Corrupt events digital") + suffix,
-                 (float)m_errorCounter.nCorruptEvent);
+                 (float)m_errorCounter.nCorruptEvent, GetParameterFile());
   DbAddParameter(db, activity, string("Priority encoder errors digital") + suffix,
-                 (float)m_errorCounter.nPrioEncoder);
-  DbAddParameter(db, activity, string("Bad double columns digital") + suffix, (float)m_nBadDcols);
-  DbAddParameter(db, activity, string("Bad pixels digital") + suffix, (float)m_nBad);
+                 (float)m_errorCounter.nPrioEncoder, GetParameterFile());
+  DbAddParameter(db, activity, string("Bad double columns digital") + suffix, (float)m_nBadDcols,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Bad pixels digital") + suffix, (float)m_nBad,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Bad pixels digital, worst chip") + suffix,
+                 (float)m_nBadWorstChip, GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   fileName          = string(m_resultFile).substr(slash + 1); // strip path
@@ -443,6 +454,13 @@ void TDigitalResultHic::WriteToFile(FILE *fp)
   std::cout << "corrupt events " << m_errorCounter.nCorruptEvent << std::endl;
   std::cout << "timeouts:      " << m_errorCounter.nTimeout << std::endl;
 }
+
+void TDigitalResultHic::Compare(TScanResultHic *aPrediction)
+{
+  TDigitalResultHic *prediction = (TDigitalResultHic *)aPrediction;
+  std::cout << "expected " << prediction->m_nDead << " dead pixels, found " << m_nDead << std::endl;
+}
+
 
 void TDigitalResultChip::WriteToFile(FILE *fp)
 {

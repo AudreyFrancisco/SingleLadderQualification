@@ -26,6 +26,8 @@ TSCurveAnalysis::TSCurveAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
   m_writeStuckPixels    = false;
   m_writeFitResults     = true;
   m_fDoFit              = true;
+  m_targetThreshold     = m_config->GetParamValue("TARGETTHRESH");
+  m_nominal             = ((TSCurveScan *)m_scan)->GetNominal();
 
   m_speedy = (m_config->GetParamValue("SPEEDY") != 0);
   if (IsThresholdScan()) {
@@ -174,37 +176,43 @@ void TSCurveAnalysis::InitCounters()
   for (unsigned int i = 0; i < m_chipList.size(); i++) {
     TSCurveResultChip *result = (TSCurveResultChip *)m_result->GetChipResult(m_chipList.at(i));
 
-    result->m_thresholdAv  = 0;
-    result->m_thresholdRms = 0;
-    result->m_noiseAv      = 0;
-    result->m_noiseRms     = 0;
-    result->m_nEntries     = 0;
-    result->m_noiseSq      = 0;
-    result->m_threshSq     = 0;
-    result->m_nNoThresh    = 0;
-    result->m_nDead        = 0;
-    result->m_nHot         = 0;
+    result->m_thresholdAv       = 0;
+    result->m_thresholdRms      = 0;
+    result->m_threshRelativeRms = 0;
+    result->m_noiseAv           = 0;
+    result->m_noiseRms          = 0;
+    result->m_nEntries          = 0;
+    result->m_noiseSq           = 0;
+    result->m_threshSq          = 0;
+    result->m_nNoThresh         = 0;
+    result->m_nDead             = 0;
+    result->m_nHot              = 0;
+    result->m_deviation         = 0;
   }
 
   std::map<std::string, TScanResultHic *>::iterator it;
 
   for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
-    TSCurveResultHic *result = (TSCurveResultHic *)it->second;
-    result->m_nDead          = 0;
-    result->m_nNoThresh      = 0;
-    result->m_nHot           = 0;
-    result->m_minChipAv      = 999;
-    result->m_maxChipAv      = -1;
-    result->m_maxChipNoise   = -1;
-    result->m_noiseAv        = 0;
-    result->m_noiseRms       = 0;
-    result->m_nEntries       = 0;
-    result->m_noiseSq        = 0;
-    result->m_backBias       = ((TSCurveScan *)m_scan)->GetBackbias();
-    result->m_nominal        = ((TSCurveScan *)m_scan)->GetNominal();
-    result->m_VCASNTuning    = IsVCASNTuning();
-    result->m_ITHRTuning     = IsITHRTuning();
-    result->m_thresholdScan  = IsThresholdScan();
+    TSCurveResultHic *result     = (TSCurveResultHic *)it->second;
+    result->m_nDead              = 0;
+    result->m_nNoThresh          = 0;
+    result->m_nDeadWorstChip     = 0;
+    result->m_nNoThreshWorstChip = 0;
+    result->m_nHot               = 0;
+    result->m_minChipAv          = 999;
+    result->m_maxChipAv          = -1;
+    result->m_maxChipNoise       = -1;
+    result->m_maxDeviation       = 0;
+    result->m_maxRelativeRms     = 0;
+    result->m_noiseAv            = 0;
+    result->m_noiseRms           = 0;
+    result->m_nEntries           = 0;
+    result->m_noiseSq            = 0;
+    result->m_backBias           = ((TSCurveScan *)m_scan)->GetBackbias();
+    result->m_nominal            = ((TSCurveScan *)m_scan)->GetNominal();
+    result->m_VCASNTuning        = IsVCASNTuning();
+    result->m_ITHRTuning         = IsITHRTuning();
+    result->m_thresholdScan      = IsThresholdScan();
   }
 }
 
@@ -296,6 +304,7 @@ void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo)
 
 void TSCurveAnalysis::Finalize()
 {
+  if (fScanAbort || fScanAbortAll) return;
   TErrorCounter  errCount = ((TMaskScan *)m_scan)->GetErrorCount();
   TSCurveResult *result   = (TSCurveResult *)m_result;
 
@@ -307,6 +316,10 @@ void TSCurveAnalysis::Finalize()
     TSCurveResultChip *chipResult =
         (TSCurveResultChip *)m_result->GetChipResult(m_chipList.at(iChip));
     chipResult->CalculateAverages();
+    if (!m_nominal) {
+      chipResult->m_deviation = (chipResult->m_thresholdAv - m_targetThreshold) / m_targetThreshold;
+      chipResult->m_deviation *= 100; // value in %
+    }
     if (m_writeRawData) fclose(chipResult->m_rawFP);
     if (m_writeFitResults) fclose(chipResult->m_fitFP);
   }
@@ -327,15 +340,24 @@ void TSCurveAnalysis::Finalize()
         hicResult->m_maxChipNoise = chipResult->m_noiseAv;
       hicResult->m_nDead += chipResult->m_nDead;
       hicResult->m_nNoThresh += chipResult->m_nNoThresh;
+      if (chipResult->m_nDead > hicResult->m_nDeadWorstChip)
+        hicResult->m_nDeadWorstChip = chipResult->m_nDead;
+      if (chipResult->m_nNoThresh > hicResult->m_nNoThreshWorstChip)
+        hicResult->m_nNoThreshWorstChip = chipResult->m_nNoThresh;
+      if (chipResult->m_threshRelativeRms > hicResult->m_maxRelativeRms)
+        hicResult->m_maxRelativeRms = chipResult->m_threshRelativeRms;
+      if ((!m_nominal) && (fabs(chipResult->m_deviation) > fabs(hicResult->m_maxDeviation)))
+        hicResult->m_maxDeviation = chipResult->m_deviation;
       hicResult->m_nHot += chipResult->m_nHot;
     }
+    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
       hicResult->m_class = GetClassificationOB(hicResult, m_hics.at(ihic));
     }
     else {
       hicResult->m_class = GetClassificationIB(hicResult, m_hics.at(ihic));
     }
-    hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
+    hicResult->SetValidity(true);
   }
   WriteResult();
   m_finished = true;
@@ -345,52 +367,70 @@ void TSCurveAnalysis::Finalize()
 // TODO: Make two cuts (red and orange)?
 THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic *result, THic *hic)
 {
-  THicClassification returnValue = CLASS_GREEN;
-  if (!IsThresholdScan()) return CLASS_GREEN; // for the time being exclude class for tuning
-  // check on dead pixels per HIC
-  if (result->m_nDead > m_config->GetParamValue("THRESH_MAXDEAD_HIC_ORANGE_OB"))
-    return CLASS_RED;
-  else if (result->m_nDead > m_config->GetParamValue("THRESH_MAXDEAD_HIC_GREEN_OB"))
-    returnValue = CLASS_ORANGE;
-  // check on no threshold pixels per HIC
-  if (result->m_nNoThresh > m_config->GetParamValue("THRESH_MAXBAD_HIC_OB"))
-    returnValue = CLASS_ORANGE;
-  // chipwise checks
+  THicClassification returnValue = CLASS_GOLD;
+  if (!IsThresholdScan()) return CLASS_UNTESTED; // for the time being exclude class for tuning
+  if (((TSCurveScan *)m_scan)->GetNominal())
+    return CLASS_UNTESTED; // classify only tuned thresholds
+
   for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
     if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled()) continue;
     int                chipId     = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
     TSCurveResultChip *chipResult = (TSCurveResultChip *)result->m_chipResults.at(chipId);
-    if (chipResult->m_nDead + chipResult->m_nNoThresh >
-        m_config->GetParamValue("THRESH_MAXBAD_CHIP_OB"))
-      returnValue = CLASS_ORANGE;
-    if (chipResult->m_noiseAv > (float)m_config->GetParamValue("THRESH_MAXNOISE_OB"))
-      returnValue = CLASS_ORANGE;
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_GOLD",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_SILVER",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_BRONZE", result,
+          false, chipId);
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nDead, "THRESH_MAXDEAD_CHIP_GOLD", result, false,
+          chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nDead, "THRESH_MAXDEAD_CHIP_SILVER", result,
+          false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "THRESH_MAXDEAD_CHIP_BRONZE", result, false,
+          chipId);
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_noiseAv + 0.9, "THRESH_MAXNOISE_OB", result,
+          false, chipId);
   }
+  std::cout << "Threshold Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
   return returnValue;
 }
 
 THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic *result, THic *hic)
 {
-  THicClassification returnValue = CLASS_GREEN;
-  if (!IsThresholdScan()) return CLASS_GREEN; // for the time being exclude class for tuning
-  // check on dead pixels per HIC
-  if (result->m_nDead > m_config->GetParamValue("THRESH_MAXDEAD_HIC_ORANGE_IB"))
-    return CLASS_RED;
-  else if (result->m_nDead > m_config->GetParamValue("THRESH_MAXDEAD_HIC_GREEN_IB"))
-    returnValue = CLASS_ORANGE;
-  // check on no threshold pixels per HIC
-  if (result->m_nNoThresh > m_config->GetParamValue("THRESH_MAXBAD_HIC_IB"))
-    returnValue = CLASS_ORANGE;
+  THicClassification returnValue = CLASS_GOLD;
+  if (!IsThresholdScan()) return CLASS_UNTESTED; // for the time being exclude class for tuning
+  if (((TSCurveScan *)m_scan)->GetNominal())
+    return CLASS_UNTESTED; // classify only tuned thresholds
+
   for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
     if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled()) continue;
     int                chipId     = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
     TSCurveResultChip *chipResult = (TSCurveResultChip *)result->m_chipResults.at(chipId);
-    if (chipResult->m_nDead + chipResult->m_nNoThresh >
-        m_config->GetParamValue("THRESH_MAXBAD_CHIP_IB"))
-      returnValue = CLASS_ORANGE;
-    if (chipResult->m_noiseAv > (float)m_config->GetParamValue("THRESH_MAXNOISE_IB"))
-      returnValue = CLASS_ORANGE;
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_GOLD",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_SILVER",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_BRONZE", result,
+          false, chipId);
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nDead, "THRESH_MAXDEAD_CHIP_GOLD", result, false,
+          chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nDead, "THRESH_MAXDEAD_CHIP_SILVER", result,
+          false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nDead, "THRESH_MAXDEAD_CHIP_BRONZE", result, false,
+          chipId);
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_noiseAv + 0.9, "THRESH_MAXNOISE_IB", result,
+          false, chipId);
   }
+  std::cout << "Threshold Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
+
   return returnValue;
 }
 
@@ -399,6 +439,7 @@ void TSCurveAnalysis::WriteResult()
   char fName[200];
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
     if (m_config->GetUseDataPath()) {
       if (IsThresholdScan())
         sprintf(fName, "%s/ThresholdScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
@@ -662,6 +703,7 @@ void TSCurveResultChip::CalculateAverages()
     m_noiseAv /= m_nEntries;
     m_thresholdRms = sqrt(m_threshSq / m_nEntries - pow(m_thresholdAv, 2));
     m_noiseRms     = sqrt(m_noiseSq / m_nEntries - pow(m_noiseAv, 2));
+    if (m_thresholdAv > 0) m_threshRelativeRms = m_thresholdRms / m_thresholdAv;
   }
 }
 
@@ -674,6 +716,7 @@ void TSCurveResultChip::WriteToFile(FILE *fp)
 
     fprintf(fp, "Av. Threshold: %.1f\n", m_thresholdAv);
     fprintf(fp, "Threshold RMS: %.1f\n", m_thresholdRms);
+    fprintf(fp, "Deviation:     %.2f\n", m_deviation);
 
     fprintf(fp, "Av. Noise:     %.1f\n", m_noiseAv);
     fprintf(fp, "Noise RMS:     %.1f\n", m_noiseRms);
@@ -746,13 +789,29 @@ void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   GetParameterSuffix(suffix, file_suffix);
 
   if (m_thresholdScan) {
-    DbAddParameter(db, activity, string("Dead pixels") + suffix, (float)m_nDead);
-    DbAddParameter(db, activity, string("Pixels without") + suffix, (float)m_nNoThresh);
-    DbAddParameter(db, activity, string("Average noise") + suffix, (float)m_noiseAv);
-    DbAddParameter(db, activity, string("Maximum chip noise") + suffix, (float)m_maxChipNoise);
+    DbAddParameter(db, activity, string("Dead pixels") + suffix, (float)m_nDead,
+                   GetParameterFile());
+    DbAddParameter(db, activity, string("Pixels without") + suffix, (float)m_nNoThresh,
+                   GetParameterFile());
+    DbAddParameter(db, activity, string("Dead pixels, worst chip,") + suffix,
+                   (float)m_nDeadWorstChip, GetParameterFile());
+    DbAddParameter(db, activity, string("Pixels without thresh, worst,") + suffix,
+                   (float)m_nNoThreshWorstChip, GetParameterFile());
+    DbAddParameter(db, activity, string("Average noise") + suffix, (float)m_noiseAv,
+                   GetParameterFile());
+    DbAddParameter(db, activity, string("Maximum chip noise") + suffix, (float)m_maxChipNoise,
+                   GetParameterFile());
+    DbAddParameter(db, activity, string("Maximum relative RMS") + suffix, (float)m_maxRelativeRms,
+                   GetParameterFile());
+    if (!m_nominal) {
+      DbAddParameter(db, activity, string("Maximum threshold deviation, ") + suffix,
+                     (float)m_maxDeviation, GetParameterFile());
+    }
   }
-  DbAddParameter(db, activity, string("Minimum chip avg") + suffix, (float)m_minChipAv);
-  DbAddParameter(db, activity, string("Maximum chip avg") + suffix, (float)m_maxChipAv);
+  DbAddParameter(db, activity, string("Minimum chip avg") + suffix, (float)m_minChipAv,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Maximum chip avg") + suffix, (float)m_maxChipAv,
+                 GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   fileName          = string(m_resultFile).substr(slash + 1); // strip path
@@ -780,6 +839,11 @@ void TSCurveResultHic::WriteToFile(FILE *fp)
   std::cout << "8b10b errors:  " << m_errorCounter.n8b10b << std::endl;
   std::cout << "corrupt events " << m_errorCounter.nCorruptEvent << std::endl;
   std::cout << "timeouts:      " << m_errorCounter.nTimeout << std::endl;
+
+  if (!m_nominal) {
+    std::cout << std::endl << "Maximum deviation from target: " << m_maxDeviation << std::endl;
+  }
+  std::cout << std::endl << "Maximum relative rms:          " << m_maxRelativeRms << std::endl;
 }
 
 void TSCurveResult::WriteToFileGlobal(FILE *fp)

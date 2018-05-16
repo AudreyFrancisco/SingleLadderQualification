@@ -11,6 +11,7 @@ THic::THic(const char *id, int modId, TPowerBoard *pb, int pbMod)
   m_pbMod      = pbMod;
   m_moduleId   = modId;
   m_class      = CLASS_UNTESTED;
+  m_oldClass   = CLASS_UNTESTED;
   m_chips.clear();
 }
 
@@ -107,6 +108,31 @@ float THic::GetIBias()
   return 0;
 }
 
+float THic::GetVddd()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetDigitalVoltage(m_pbMod);
+  }
+  return 0;
+}
+
+float THic::GetVdda()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetAnalogVoltage(m_pbMod);
+  }
+  return 0;
+}
+
+float THic::GetVbias()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetBiasVoltage();
+  }
+  return 0;
+}
+
+
 // scales all voltages and current limits of the HIC by a given factor
 // e.g. aFactor = 1.1 -> +10%
 // method takes the value from the config and writes the scaled value to the board
@@ -185,7 +211,9 @@ void THic::AddClassification(THicClassification aClass)
 
 THicClassification THic::GetClassification()
 {
-  if (GetNEnabledChips() == 0)
+  // if no HIC is working, return RED
+  // before: check that HIC contains chips to avoid RED for fast power test
+  if ((m_chips.size() > 0) && (GetNEnabledChips() == 0))
     return CLASS_RED;
   else
     return m_class;

@@ -19,7 +19,10 @@ typedef enum {
   IBQualification,
   IBEndurance,
   IBStave,
-  IBStaveEndurance
+  IBStaveEndurance,
+  IBDctrl,
+  OBHalfStaveOLFAST,
+  OBHalfStaveMLFAST
 } TTestType;
 
 namespace ScanConfig {
@@ -31,6 +34,7 @@ namespace ScanConfig {
   const int N_MASK_STAGES  = 3;
   const int PIX_PER_REGION = 32;
   const int NOISECUT_INV   = 100000; // inverse of pixel noise cut (e.g. 100000 = 1e-5)
+  const int MAXTIMEOUT     = 100;
 
   const int ITHR_START  = 30;
   const int ITHR_STOP   = 100;
@@ -43,11 +47,12 @@ namespace ScanConfig {
   const int TUNING_MAXROW  = 512;
   const int LOCALBUSCUTRED = 1;
 
-  const int DAC_START   = 0;
-  const int DAC_STOP    = 255;
-  const int DAC_STEP    = 8;
-  const int NDACSAMPLES = 10;
-
+  const int DAC_START         = 0;
+  const int DAC_STOP          = 255;
+  const int DAC_STEP          = 8;
+  const int NDACSAMPLES       = 10;
+  const int STATUS            = 1;
+  const int TEST_WITHOUT_COMP = 0;
   // settings for readout test
   const int READOUTSPEED     = 1200;
   const int READOUTOCC       = 32;
@@ -57,21 +62,20 @@ namespace ScanConfig {
   const int READOUTPLLSTAGES = -1; // -1 meaning using the standard setting from the chip config
 
   // current limits for powering test in mA
-  const int POWER_CUT_MINIDDA_OB        = 20;
-  const int POWER_CUT_MINIDDD_OB        = 50;
-  const int POWER_CUT_MAXIDDA_OB        = 200; // for fast power test
-  const int POWER_CUT_MAXIDDD_GREEN_OB  = 200; // for fast power test
-  const int POWER_CUT_MAXIDDD_ORANGE_OB = 800; // for fast power test
-  const int POWER_CUT_MINIDDD_IB        = 50;
-  const int POWER_CUT_MINIDDA_IB        = 20;
+  const int POWER_CUT_MINIDDA_OB = 20;
+  const int POWER_CUT_MINIDDD_OB = 50;
+  const int POWER_CUT_MAXIDDA_OB = 250;  // for fast power test
+  const int POWER_CUT_MAXIDDD_OB = 1000; // for fast power test
+  const int POWER_CUT_MINIDDD_IB = 50;
+  const int POWER_CUT_MINIDDA_IB = 20;
 
-  const int POWER_CUT_MINIDDA_CLOCKED_OB = 150;
-  const int POWER_CUT_MINIDDD_CLOCKED_OB = 600;
+  const int POWER_CUT_MINIDDA_CLOCKED_OB = 120;
+  const int POWER_CUT_MINIDDD_CLOCKED_OB = 500;
   const int POWER_CUT_MAXIDDA_CLOCKED_OB = 250;
   const int POWER_CUT_MAXIDDD_CLOCKED_OB = 850;
 
-  const int POWER_CUT_MINIDDA_CLOCKED_IB = 90;
-  const int POWER_CUT_MINIDDD_CLOCKED_IB = 400;
+  const int POWER_CUT_MINIDDA_CLOCKED_IB = 70;
+  const int POWER_CUT_MINIDDD_CLOCKED_IB = 300;
   const int POWER_CUT_MAXIDDA_CLOCKED_IB = 180;
   const int POWER_CUT_MAXIDDD_CLOCKED_IB = 550;
 
@@ -80,6 +84,11 @@ namespace ScanConfig {
 
   const int POWER_MAXFACTOR_4V_IB = 3;
   const int POWER_MAXFACTOR_4V_OB = 3;
+
+  // cuts for readout test
+  const int READOUT_MAXTIMEOUT     = 0;
+  const int READOUT_MAXCORRUPT     = 0;
+  const int READOUT_MAX8b10b_GREEN = 0;
 
   // cuts for fifo test
   const int FIFO_CUT_MAXEXCEPTION  = 0;   // max number of exceptions
@@ -90,8 +99,8 @@ namespace ScanConfig {
   // cuts for digital scan
   const int DIGITAL_MAXTIMEOUT_GREEN      = 0;
   const int DIGITAL_MAXCORRUPT_GREEN      = 0;
-  const int DIGITAL_MAXTIMEOUT_ORANGE     = 1;
-  const int DIGITAL_MAXCORRUPT_ORANGE     = 1;
+  const int DIGITAL_MAXTIMEOUT_ORANGE     = 0;
+  const int DIGITAL_MAXCORRUPT_ORANGE     = 0;
   const int DIGITAL_MAXBAD_CHIP_OB        = 1024; // max number of bad pixels: 1 dcol
   const int DIGITAL_MAXBAD_CHIP_IB        = 524;  // 1 per mille
   const int DIGITAL_MAXDEAD_CHIP_GREEN    = 10;
@@ -101,29 +110,54 @@ namespace ScanConfig {
   const int DIGITAL_MAXDEAD_HIC_ORANGE_OB = 71680;
   const int DIGITAL_MAXDEAD_HIC_ORANGE_IB = 46080;
 
+  const int DIGITAL_MAXBAD_CHIP_GOLD   = 50;
+  const int DIGITAL_MAXBAD_CHIP_SILVER = 2100;
+  const int DIGITAL_MAXBAD_CHIP_BRONZE = 5243;
+
   const int DIGITAL_MAXBAD_HIC_OB = 7340; // 1 per mille
   const int DIGITAL_MAXBAD_HIC_IB = 4700; // 1 per mille
 
-  const int DIGITAL_MAXNOMASK_HIC_OB      = 7340; // 1 per mille?
-  const int DIGITAL_MAXNOMASK_HIC_IB      = 4700; // 1 per mille?
-  const int DIGITAL_MAXNOMASKSTUCK_HIC_OB = 0;
-  const int DIGITAL_MAXNOMASKSTUCK_HIC_IB = 0;
+  const int DIGITAL_MAXNOMASK_HIC_OB           = 7340; // 1 per mille?
+  const int DIGITAL_MAXNOMASK_HIC_IB           = 4700; // 1 per mille?
+  const int DIGITAL_MAXNOMASKSTUCK_HIC_OB      = 0;
+  const int DIGITAL_MAXNOMASKSTUCK_HIC_IB      = 0;
+  const int DIGITAL_MAXNOMASKSTUCK_CHIP_GOLD   = 0;
+  const int DIGITAL_MAXNOMASKSTUCK_CHIP_SILVER = 2;
+  const int DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE = 5;
 
   // cuts for threshold scan
-  const int THRESH_MAXTIMEOUT_GREEN      = 0;
-  const int THRESH_MAXCORRUPT_GREEN      = 0;
-  const int THRESH_MAXTIMEOUT_ORANGE     = 1;
-  const int THRESH_MAXCORRUPT_ORANGE     = 1;
-  const int THRESH_MAXBAD_CHIP_OB        = 1024; // max number of bad pixels: 1 dcol
-  const int THRESH_MAXBAD_CHIP_IB        = 524;  // 1 per mille
-  const int THRESH_MAXBAD_HIC_OB         = 7340; // 1 per mille
-  const int THRESH_MAXBAD_HIC_IB         = 4700; // 1 per mille
-  const int THRESH_MAXNOISE_OB           = 10;   // max noise of a single chip
-  const int THRESH_MAXNOISE_IB           = 10;
-  const int THRESH_MAXDEAD_HIC_GREEN_OB  = 140;
-  const int THRESH_MAXDEAD_HIC_GREEN_IB  = 90;
-  const int THRESH_MAXDEAD_HIC_ORANGE_OB = 71680;
-  const int THRESH_MAXDEAD_HIC_ORANGE_IB = 46080;
+  const int THRESH_MAXTIMEOUT_GREEN        = 0;
+  const int THRESH_MAXCORRUPT_GREEN        = 0;
+  const int THRESH_MAXTIMEOUT_ORANGE       = 1;
+  const int THRESH_MAXCORRUPT_ORANGE       = 1;
+  const int THRESH_MAXBAD_CHIP_OB          = 1024; // max number of bad pixels: 1 dcol
+  const int THRESH_MAXBAD_CHIP_IB          = 524;  // 1 per mille
+  const int THRESH_MAXBAD_HIC_OB           = 7340; // 1 per mille
+  const int THRESH_MAXBAD_HIC_IB           = 4700; // 1 per mille
+  const int THRESH_MAXNOISE_OB             = 10;   // max noise of a single chip
+  const int THRESH_MAXNOISE_IB             = 10;
+  const int THRESH_MAXDEAD_HIC_GREEN_OB    = 140;
+  const int THRESH_MAXDEAD_HIC_GREEN_IB    = 90;
+  const int THRESH_MAXDEAD_HIC_ORANGE_OB   = 71680;
+  const int THRESH_MAXDEAD_HIC_ORANGE_IB   = 46080;
+  const int THRESH_MAXDEAD_CHIP_GOLD       = 50;
+  const int THRESH_MAXDEAD_CHIP_SILVER     = 2100;
+  const int THRESH_MAXDEAD_CHIP_BRONZE     = 5243;
+  const int THRESH_MAXNOTHRESH_CHIP_GOLD   = 5243;
+  const int THRESH_MAXNOTHRESH_CHIP_SILVER = 26214;
+  const int THRESH_MAXNOTHRESH_CHIP_BRONZE = 52429;
+
+
+  const int TEST_DCTRL             = 1;
+  const int DCTRL_MINAMP_IB        = 150; // in mV
+  const int DCTRL_MINSLOPE_IB      = 10;  // in mV / DAC
+  const int DCTRL_MAXRISE_GREEN_IB = 10;  // in ns
+  const int DCTRL_MAXFALL_GREEN_IB = 10;
+  const int DCTRL_MINAMP_OB        = 300; // in mV
+  const int DCTRL_MINSLOPE_OB      = 20;  // in mV / DAC
+  const int DCTRL_MAXRISE_GREEN_OB = 10;  // in ns
+  const int DCTRL_MAXFALL_GREEN_OB = 10;
+  const int DCTRL_MAXCHISQ_SILVER  = 5; // 100 * max. chisq 5 -> 0.05
 
   const int   SPEEDY           = 1; // Use slow fit if 0, differentiate->mean if 1.
   const int   RAWDATA          = 0;
@@ -134,7 +168,7 @@ namespace ScanConfig {
   const int   MAXIBIAS      = 50;   // current limit for I-V-curve in mA;
   const float VOLTAGE_SCALE = 1.0;
   const float BACKBIAS      = 0;
-  const int   NOMINAL       = 0;
+  const int   NOMINAL       = 1;
   const int   ENDURANCE_SLICES             = 21;  // number of cycle slices
   const int   ENDURANCE_CYCLES             = 150; // total number of cycles per slice
   const int   ENDURANCE_UPTIME             = 60;  // up and down wait time in seconds per cycle
@@ -145,6 +179,17 @@ namespace ScanConfig {
   const int   ENDURANCE_MAXTRIPS_ORANGE    = 3; // approx. 1 per 1000 cycles
   const int   ENDURANCE_MINCHIPS_GREEN     = 14;
   const int   ENDURANCE_MAXFAILURES_ORANGE = 30; // approx. 1 per 100 cycles
+
+  // MAX - MIN should be divisible by STEP
+  // last point should be <= 128 for y and 127 for x (upper limit is excluded)
+  const int EYE_DRIVER = 10;
+  const int EYE_PREEMP = 10;
+  const int EYE_MIN_X  = -128;
+  const int EYE_MAX_X  = 132;
+  const int EYE_STEP_X = 4;
+  const int EYE_MIN_Y  = -127;
+  const int EYE_MAX_Y  = 129;
+  const int EYE_STEP_Y = 4;
 }
 
 class TScanConfig {
@@ -153,6 +198,7 @@ private:
   std::map<std::string, int>   m_retest;
   int  m_nInj;
   int  m_nTrig;
+  int  m_maxTimeout;
   int  m_chargeStart;
   int  m_chargeStop;
   int  m_chargeStep;
@@ -164,6 +210,8 @@ private:
   int  m_pixPerRegion;
   int  m_noiseCutInv;
   char m_fNameSuffix[20];
+  int  m_testWithoutComp;
+  int  m_status;
   // NEW--added for additional scans
   int       m_ithrStart; // usually 30
   int       m_ithrStop;  // usually 100
@@ -182,8 +230,7 @@ private:
   int       m_powerCutMinIdda_OB;
   int       m_powerCutMinIddd_OB;
   int       m_powerCutMaxIdda_OB;
-  int       m_powerCutMaxIddd_Green_OB;
-  int       m_powerCutMaxIddd_Orange_OB;
+  int       m_powerCutMaxIddd_OB;
   int       m_powerCutMinIddaClocked_OB;
   int       m_powerCutMinIdddClocked_OB;
   int       m_powerCutMaxIddaClocked_OB;
@@ -198,6 +245,9 @@ private:
   int       m_powerCutMaxBias3V_OB;
   int       m_powerMaxFactor4V_IB;
   int       m_powerMaxFactor4V_OB;
+  int       m_readoutMaxTimeout;
+  int       m_readoutMaxCorrupt;
+  int       m_readoutMax8b10bGreen;
   int       m_fifoCutMaxException;
   int       m_fifoCutMaxErrGreen;
   int       m_fifoCutMaxErrOrange;
@@ -210,6 +260,9 @@ private:
   int       m_digitalMaxBadPerChipIB;
   int       m_digitalMaxBadPerHicOB;
   int       m_digitalMaxBadPerHicIB;
+  int       m_digitalMaxBadChipGold;
+  int       m_digitalMaxBadChipSilver;
+  int       m_digitalMaxBadChipBronze;
   int       m_digitalMaxDeadPerChipGreen;
   int       m_digitalMaxDeadPerChipOrange;
   int       m_digitalMaxDeadPerHicGreenOB;
@@ -220,6 +273,9 @@ private:
   int       m_digitalMaxNoMaskHicOB;
   int       m_digitalMaxNoMaskStuckHicIB;
   int       m_digitalMaxNoMaskStuckHicOB;
+  int       m_digitalMaxNoMaskStuckChipGold;
+  int       m_digitalMaxNoMaskStuckChipSilver;
+  int       m_digitalMaxNoMaskStuckChipBronze;
   int       m_threshMaxTimeoutOrange;
   int       m_threshMaxTimeoutGreen;
   int       m_threshMaxCorruptOrange;
@@ -232,8 +288,24 @@ private:
   int       m_threshMaxDeadPerHicGreenIB;
   int       m_threshMaxDeadPerHicOrangeOB;
   int       m_threshMaxDeadPerHicOrangeIB;
+  int       m_threshMaxDeadChipGold;
+  int       m_threshMaxDeadChipSilver;
+  int       m_threshMaxDeadChipBronze;
+  int       m_threshMaxNoThreshChipGold;
+  int       m_threshMaxNoThreshChipSilver;
+  int       m_threshMaxNoThreshChipBronze;
   int       m_threshMaxNoiseIB;
   int       m_threshMaxNoiseOB;
+  int       m_testDctrl;
+  int       m_dctrlMinAmpOB;
+  int       m_dctrlMinSlopeOB;
+  int       m_dctrlMaxRiseGreenOB;
+  int       m_dctrlMaxFallGreenOB;
+  int       m_dctrlMinAmpIB;
+  int       m_dctrlMinSlopeIB;
+  int       m_dctrlMaxRiseGreenIB;
+  int       m_dctrlMaxFallGreenIB;
+  int       m_dctrlMaxChisqSilver;
   int       m_calVpulsel;
   int       m_targetThresh;
   int       m_nominal;
@@ -258,6 +330,14 @@ private:
   int       m_readoutPreemp;
   int       m_readoutRow;
   int       m_readoutPllStages;
+  int       m_eyeDriver;
+  int       m_eyePreemp;
+  int       m_eyeMaxX;
+  int       m_eyeMinX;
+  int       m_eyeStepX;
+  int       m_eyeMaxY;
+  int       m_eyeMinY;
+  int       m_eyeStepY;
   TTestType m_testType;
   AlpideDB *m_db;
 
@@ -270,6 +350,7 @@ public:
   bool SetParamValue(std::string Name, int Value);
   int GetParamValue(std::string Name);
   std::string GetDataPath(std::string HicName);
+  std::string GetTestDir();
   std::string GetRemoteHicPath(std::string HicName);
   bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
 

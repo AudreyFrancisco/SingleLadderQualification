@@ -40,7 +40,7 @@ The software is currently supported to run only on the three following operating
   \newpage
 \item \textbf{CentOS CERN 7:}
   \begin{lstlisting}
-    yum install -y gcc gcc-c++ make cmake tar zlib wget subversion clang \
+    yum install -y gcc gcc-c++ make cmake cmake3 tar zlib wget subversion clang \
       git libusb1-devel tinyxml-devel qt5-qtbase-devel krb5-workstation cern-get-sso-cookie
     yum install -y centos-release-scl
     yum update -y
@@ -104,7 +104,10 @@ list of users in order to being able to access the repository.
 Versions are updated regularly, make sure you have checked out the
 latest version. After the clone you will find the software in a directory \texttt{new-alpide-software}, an additional subdirectory \texttt{analysis} contains standard macros to analyse the data.
 
-The standard software is compiled using
+Preferably, the software is compiled using a cmake-based build
+flow. For details see the README.md in the software repository.
+
+LEGACY build: The standard software is compiled using
 \begin{lstlisting}
 make
 \end{lstlisting}

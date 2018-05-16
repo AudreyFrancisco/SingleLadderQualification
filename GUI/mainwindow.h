@@ -43,6 +43,7 @@ class ScanConfiguration;
 class TDigitalWFanalysis;
 class TFastPowerTest;
 
+
 namespace Ui {
   class MainWindow;
 }
@@ -65,14 +66,19 @@ typedef enum {
   STReadout,
   STEndurance,
   STFastPowerTest,
-  STDctrl
+  STDctrl,
+  STEyeScan
 } TScanType;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
+  friend class TScanResultHic;
+
 public:
   explicit MainWindow(QWidget *parent = 0);
+
+  void output(TScanResultHic &foo) { foo.WriteHicClassification(); }
   ~MainWindow();
 
 public slots:
@@ -87,7 +93,6 @@ public slots:
 
   void setandgetcalibration();
   void setTopBottom(int unit);
-  void attachtodatabaseretry();
   void attachtodatabase();
   void findidoftheactivitytype(std::string activitytypename, int &id);
   void locationcombo();
@@ -123,6 +128,7 @@ public slots:
   void      ContinueWithoutWriting();
   void      finalwrite();
   void      quittest();
+  void      continuetest();
   AlpideDB *GetDB();
   void      retryfailedscan();
   void notifyuser(unsigned int position);
@@ -132,8 +138,9 @@ signals:
 
 private:
   Ui::MainWindow *ui;
-  bool fChkBtnObm1, fChkBtnObm2, fChkBtnObm3, fChkBtnObm4, fChkBtnObm5, fChkBtnObm6, fChkBtnObm7;
-  void explore_halfstave(uint8_t chipid);
+  bool            fChkBtnObm[7];
+  void explore_halfstave(uint8_t chipid, int &m1, int &m2, int &m3, int &m4, int &m5, int &m6,
+                         int &m7);
   void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);
   AlpideDB *                   fDB;
   TBoardType                   fBoardType;
@@ -160,6 +167,7 @@ private:
   resultstorage *    fResultwindow;
   Databasefailure *  fDatabasefailure;
   void scanLoop(TScan *myScan);
+  void analysis(TScanAnalysis *myAnalysis);
   std::vector<TScan *>         fScanVector;
   std::vector<TScanAnalysis *> fAnalysisVector;
   TPowerBoard *                fPb;
@@ -191,6 +199,8 @@ private:
   int                        fColour;
   int                        fPbnumberofmodule;
   std::vector<QString>       fHicnames;
+  std::vector<QString>       fErrorMessages;
+  QString                    fHalfstave;
   std::vector<QPushButton *> fEndurancemodules;
   bool                       fDatabasetype;
   bool                       fScanfit;
@@ -203,19 +213,29 @@ private:
   int  GetNButtons();
   void WriteToEos(string hicName, ActivityDB::actUri &uri, bool write);
   string GetServiceAccount(string Institute, string &folder);
-  string GetTestFolder();
+  string GetResultType(int i);
   THic *FindHic(string hicName);
   void      SetHicClassifications();
+  void      CombineEnduranceResults();
+  void      printClasses();
   TTestType GetTestType();
   int       GetTime();
-  QAction * fWritedb;
-  QFile *   fMfile;
+  void button_obm_clicked(int aModule);
+  QAction *fWritedb;
+  QFile *  fMfile;
   std::vector<pair<int, int>> fActComponentTypeIDs;
-  std::vector<int> fComponentIDs;
-  Components *     fComponentWindow;
-  bool             fstop;
-  int              fComponentTypeID;
-  std::vector<int> fActivityResults;
+  std::vector<int>    fComponentIDs;
+  Components *        fComponentWindow;
+  bool                fstopwriting;
+  bool                fstop;
+  int                 fComponentTypeID;
+  int                 fComponentTypeIDb;
+  int                 fComponentTypeIDa;
+  int                 fhalfstaveid;
+  int                 fhalfstavein;
+  int                 fhalfstaveout;
+  std::vector<TChild> fHalfstavemodules;
+  std::vector<int>    fActivityResults;
   TScanType GetScanType(int scannumber);
   std::vector<TScanType> fScanTypes;
   bool                   fTestAgain;
@@ -224,6 +244,9 @@ private:
   unsigned int           fInitialScans;
   bool                   fAddingScans;
   bool                   fExceptionthrown;
+  bool                   fWrite;
+  QString                fExceptiontext;
+  bool                   fHiddenComponent;
 
 
 private slots:
@@ -243,6 +266,8 @@ private slots:
   void fillingreceptionscans();
   void poweringscan();
   void fillingOBvectors();
+  void fillingDctrl();
+  void fillingfastHS();
   void StopScan();
 
   // void setVI(float * vcasn, float * ithr);

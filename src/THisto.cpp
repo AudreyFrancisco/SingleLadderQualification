@@ -389,6 +389,63 @@ double TScanHisto::operator()(common::TChipIndex index, unsigned int i) const
   return (m_histos.at(int_index))(i);
 }
 
+int TScanHisto::GetNBin(common::TChipIndex index, int d)
+{
+  int result    = -1;
+  int int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
+  try {
+    result = m_histos.at(int_index).GetNBin(d);
+  }
+  catch (const std::out_of_range &e) {
+    std::cerr << "Invalid index: board " << index.boardIndex << ", dataReceiver "
+              << index.dataReceiver << ", chipID " << index.chipId << "!" << std::endl;
+  }
+  return result;
+}
+
+double TScanHisto::GetMin(common::TChipIndex index, int d)
+{
+  double result    = -1;
+  int    int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
+  try {
+    result = m_histos.at(int_index).GetMin(d);
+  }
+  catch (const std::out_of_range &e) {
+    std::cerr << "Invalid index: board " << index.boardIndex << ", dataReceiver "
+              << index.dataReceiver << ", chipID " << index.chipId << "!" << std::endl;
+  }
+  return result;
+}
+
+double TScanHisto::GetMax(common::TChipIndex index, int d)
+{
+  double result    = -1;
+  int    int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
+  try {
+    result = m_histos.at(int_index).GetMax(d);
+  }
+  catch (const std::out_of_range &e) {
+    std::cerr << "Invalid index: board " << index.boardIndex << ", dataReceiver "
+              << index.dataReceiver << ", chipID " << index.chipId << "!" << std::endl;
+  }
+  return result;
+}
+
+double TScanHisto::GetStep(common::TChipIndex index, int d)
+{
+  double result    = -1;
+  int    int_index = (index.boardIndex << 8) | (index.dataReceiver << 4) | (index.chipId & 0xf);
+  try {
+    result = m_histos.at(int_index).GetStep(d);
+  }
+  catch (const std::out_of_range &e) {
+    std::cerr << "Invalid index: board " << index.boardIndex << ", dataReceiver "
+              << index.dataReceiver << ", chipID " << index.chipId << "!" << std::endl;
+  }
+  return result;
+}
+
+
 int TScanHisto::GetChipList(std::vector<common::TChipIndex> &chipList)
 {
   chipList.clear();
