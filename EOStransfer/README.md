@@ -34,15 +34,12 @@ ALICE - ITS - DB EOS transfer utility
 >    sudo yum install git  
 >    sudo yum install cronie  
 
-  - Clone the remote repository :
->    cd ~/  
->    git clone https://gitlab.cern.ch/fap/its-DB-EOStransfer.git  
 
 ----------------------------------------------------
 		
     ** RUN  **
 
-	Launch the configuration program, first it will ask for the Site Service Account Name,
+	Launch the configuration program: first it will ask for the Site Service Account Name,
 	then its password in order to make the Kerberos authentication; in addition the password
 	of the logged user (must be a sudoer) in order to create some directories under the '/var/'
 	filesystem node:
@@ -89,7 +86,7 @@ ALICE - ITS - DB EOS transfer utility
 >             Select the choice :7
 >     >>-> You select OBImpedance test 
 
-  The last information is the path of Source Data Directory, this represents
+  The next information is the path of Source Data Directory, this represents
   the base path node of the local files repository. All files and subfolders
   contained here will be syncronized on the EOS remote repositroy.
 >    
@@ -114,11 +111,6 @@ ALICE - ITS - DB EOS transfer utility
   The last step of installation is the setup of the cronjob task. The command to synchronize the
   repositories (EOStransfer.sh) will be executed periodically every 10 minutes, if you want 
   change this period you must edit the crontab entry (please refer on the crontab manual).  
-  Note : two log files are produced:  
-      1) the '/tmp/lastEOSCronExecution.log', it contains all the messages related to the last
-         synchronization event.  
-      2) the '/tmp/EOStransfer.log' that contains the list of all the executed syncronizations
-         done.  
 
 >     Finally setup the Cron Job task 
 >     ------ ALICE-ITS EOS transfer cron job istallation script - v.1.0 - A.Franco - INFN BARI Italy
@@ -129,7 +121,14 @@ ALICE - ITS - DB EOS transfer utility
 >     Installation Done !
 
   In order to verify that the setup is good, you can test manually the syncronization:..
-	
+
 >     [fap@localhost src]$./EOStransfer.sh	
+
+
+  Note : two log files are produced:  
+      1) the '/tmp/lastEOSCronExecution.log', it contains all the messages related to the last
+         synchronization event.  
+      2) the '/tmp/EOStransfer.log' that contains the list of all the executed syncronizations
+         done.  
 	
 	
