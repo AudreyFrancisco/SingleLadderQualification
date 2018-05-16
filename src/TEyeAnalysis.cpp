@@ -33,9 +33,12 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
   std::ofstream   outfile_l("edge_l.dat");
   std::ofstream   outfile_r("edge_r.dat");
 
-  std::string filename_eye = FindHicResultForChip(m_chipList.at(0))->GetOutputPath() + "/eye.pdf";
-  std::string filename_eye_root =
-      FindHicResultForChip(m_chipList.at(0))->GetOutputPath() + "/eye.root";
+  std::string filename_eye = FindHicResultForChip(m_chipList.at(0))->GetOutputPath() + "/eye_D" +
+                             std::to_string(ePar->driverStrength) + "_P" +
+                             std::to_string(ePar->preemphasis) + ".pdf";
+  std::string filename_eye_root = FindHicResultForChip(m_chipList.at(0))->GetOutputPath() +
+                                  "/eye_D" + std::to_string(ePar->driverStrength) + "_P" +
+                                  std::to_string(ePar->preemphasis) + ".root";
 
   TCanvas c;
   c.cd();
@@ -136,5 +139,6 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
   }
   c.Print((filename_eye + "]").c_str());
   fclose(fp);
+  rootfile_eye->Close();
   std::cout << "Done" << std::endl;
 }
