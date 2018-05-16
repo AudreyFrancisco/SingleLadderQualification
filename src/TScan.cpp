@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <string.h>
 #include <string>
 
@@ -398,6 +399,9 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
         itrg = m_nTriggers * m_enabled[iboard];
         FindTimeoutHics(iboard, nTrigPerHic);
         m_errorCount.nTimeout++;
+        if (m_errorCount.nTimeout > m_config->GetParamValue("MAXTIMEOUT")) {
+          throw std::runtime_error("Maximum number of timouts reached. Aborting scan.");
+        }
         trials = 0;
       }
       continue;
