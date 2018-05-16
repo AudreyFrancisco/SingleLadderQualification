@@ -1410,8 +1410,11 @@ void MainWindow::WriteToEos(string hicName, ActivityDB::actUri &uri, bool write)
   sprintf(path, "eos/project/a/alice-its/HicTests/%s/%s/%s", testFolder.c_str(), instFolder.c_str(),
           (fConfig->GetScanConfig()->GetRemoteHicPath(hicName)).c_str());
 
+  char uripath[256];
+  sprintf(uripath, "http://cern.ch/hictests/%s/%s/%s", testFolder.c_str(), instFolder.c_str(),
+          (fConfig->GetScanConfig()->GetRemoteHicPath(hicName)).c_str());
   uri.Description = "uri path";
-  uri.Path        = std::string(path);
+  uri.Path        = std::string(uripath);
 }
 
 
