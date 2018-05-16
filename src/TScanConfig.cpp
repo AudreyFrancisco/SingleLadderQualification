@@ -358,7 +358,7 @@ int TScanConfig::GetRetestNumber(std::string hicName)
 
 std::string TScanConfig::GetDataPath(std::string HicName)
 {
-  std::string result = std::string("Data/") + HicName;
+  std::string result = std::string("Data/") + GetTestDir() + HicName;
   if (GetRetestNumber(HicName) > 0) {
     result.append("_Retest_");
     result.append(std::to_string(GetRetestNumber(HicName)));
@@ -375,6 +375,34 @@ std::string TScanConfig::GetRemoteHicPath(std::string HicName)
   }
   return result;
 }
+
+
+std::string TScanConfig::GetTestDir()
+{
+  switch (GetTestType()) {
+  case OBQualification:
+    return "OBQualification/";
+  case OBEndurance:
+    return "OBEndurance/";
+  case OBReception:
+    return "OBReception/";
+  case OBPower:
+    return "OBFastPower/";
+  case OBHalfStaveOL:
+    return "OBHalfStaveOL/";
+  case OBHalfStaveML:
+    return "OBHalfStaveML/";
+  case IBQualification:
+    return "IBQualification/";
+  case IBEndurance:
+    return "IBEndurance/";
+  case IBStave:
+    return "IBStave/";
+  default:
+    return "./";
+  }
+}
+
 
 /*void TScanConfig::SetVcasnArr (int hics, float *vcasn) { //copy vcasn array to m_vcasn
   m_vcasn = new int[hics];

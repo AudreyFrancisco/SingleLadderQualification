@@ -1216,6 +1216,13 @@ void MainWindow::performtests()
 void MainWindow::applytests()
 {
   writingdb = false;
+
+  fConfig->GetScanConfig()->SetTestType(fNumberofscan);
+  fConfig->GetScanConfig()->SetDatabase(fDB);
+  char TestDir[100];
+  sprintf(TestDir, "Data/%s", fConfig->GetScanConfig()->GetTestDir().c_str());
+  makeDir(TestDir);
+
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
       int oldtests;
@@ -1231,8 +1238,6 @@ void MainWindow::applytests()
     }
   }
 
-  fConfig->GetScanConfig()->SetTestType(fNumberofscan);
-  fConfig->GetScanConfig()->SetDatabase(fDB);
   ui->start_test->hide();
   qApp->processEvents();
   fSignalMapper = new QSignalMapper(this);
@@ -1523,7 +1528,7 @@ void MainWindow::WriteToEos(string hicName, ActivityDB::actUri &uri, bool write)
 {
   string instFolder;
   string account    = GetServiceAccount(fInstitute.toStdString(), instFolder);
-  string testFolder = GetTestFolder();
+  string testFolder = fConfig->GetScanConfig()->GetTestDir();
   if (write) {
     char command[256];
     sprintf(
@@ -1545,34 +1550,6 @@ void MainWindow::WriteToEos(string hicName, ActivityDB::actUri &uri, bool write)
   uri.Path        = std::string(path);
 }
 
-// TODO: complete
-string MainWindow::GetTestFolder()
-{
-  switch (fNumberofscan) {
-  case OBQualification:
-    return string("OBQualification");
-  case IBQualification:
-    return string("IBQualification");
-  case OBEndurance:
-    return string("OBEndurance");
-  case IBEndurance:
-    return string("IBEndurance");
-  case OBReception:
-    return string("OBReception");
-  case OBPower:
-    return string("OBFastPower");
-  case IBDctrl:
-    return string("IBDtcrl");
-  case IBStave:
-    return string("IBStave");
-  case OBHalfStaveOL:
-    return string("OBHalfStaveOL");
-  case OBHalfStaveML:
-    return string("OBHalfStaveML");
-  default:
-    return string("Unknown");
-  }
-}
 
 // Temporary function
 // TODO: to be eliminated once number of scan has been converted to TTestType variable

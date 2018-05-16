@@ -348,6 +348,7 @@ public:
   bool SetParamValue(std::string Name, int Value);
   int GetParamValue(std::string Name);
   std::string GetDataPath(std::string HicName);
+  std::string GetTestDir();
   std::string GetRemoteHicPath(std::string HicName);
   bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
 
