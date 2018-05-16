@@ -138,7 +138,7 @@ signals:
 
 private:
   Ui::MainWindow *ui;
-  bool fChkBtnObm1, fChkBtnObm2, fChkBtnObm3, fChkBtnObm4, fChkBtnObm5, fChkBtnObm6, fChkBtnObm7;
+  bool            fChkBtnObm[7];
   void explore_halfstave(uint8_t chipid, int &m1, int &m2, int &m3, int &m4, int &m5, int &m6,
                          int &m7);
   void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);
@@ -220,8 +220,9 @@ private:
   void      printClasses();
   TTestType GetTestType();
   int       GetTime();
-  QAction * fWritedb;
-  QFile *   fMfile;
+  void button_obm_clicked(int aModule);
+  QAction *fWritedb;
+  QFile *  fMfile;
   std::vector<pair<int, int>> fActComponentTypeIDs;
   std::vector<int>    fComponentIDs;
   Components *        fComponentWindow;

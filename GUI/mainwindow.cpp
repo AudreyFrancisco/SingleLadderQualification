@@ -76,8 +76,9 @@ bool writingdb;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-  fChkBtnObm1 = fChkBtnObm2 = fChkBtnObm3 = fChkBtnObm4 = fChkBtnObm5 = fChkBtnObm6 = fChkBtnObm7 =
-      false;
+  for (int i = 0; i < 7; i++) {
+    fChkBtnObm[i] = false;
+  }
   fPbcfgcheck       = 0;
   fCalwindow        = 0;
   fActivitywindow   = 0;
@@ -427,12 +428,15 @@ void MainWindow::open()
   }
 }
 
-void MainWindow::button_obm1_clicked()
+
+// TODO: Add module number to button data and eliminate button_obm#_clicked
+// is the boolean fChkBtnObm needed at all?
+void MainWindow::button_obm_clicked(int aModule)
 {
-  fChkBtnObm1 = true;
+  fChkBtnObm[aModule - 1] = true;
   ui->OBModule->show();
-  ui->modulenumber->setText("1");
-  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 1) {
+  ui->modulenumber->setText(QVariant(aModule).toString());
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < aModule) {
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 7; j++) {
         color_red(i, j);
@@ -445,168 +449,30 @@ void MainWindow::button_obm1_clicked()
     chipid = fChips.at(i)->GetConfig()->GetChipId();
     DecodeId(chipid, module, side, pos);
     module = fConfig->GetChipConfigById(chipid)->GetModuleId();
-    if (fChips.at(i)->GetConfig()->IsEnabled() && module == 1) {
+    if (fChips.at(i)->GetConfig()->IsEnabled() && module == aModule) {
       color_green(side, pos);
     }
-    else if (module == 1) {
+    else if (module == aModule) {
       color_red(side, pos);
     }
   }
 }
 
-void MainWindow::button_obm2_clicked()
-{
-  fChkBtnObm2 = true;
-  ui->OBModule->show();
-  ui->modulenumber->setText("2");
-  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 2) {
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 7; j++) {
-        color_red(i, j);
-      }
-    }
-  }
-  for (unsigned int i = 0; i < fChips.size(); i++) {
-    int chipid;
-    chipid = fChips.at(i)->GetConfig()->GetChipId();
-    uint8_t module, side, pos;
-    DecodeId(chipid, module, side, pos);
-    if (fChips.at(i)->GetConfig()->IsEnabled() && module == 2) {
-      color_green(side, pos);
-    }
-    else if (module == 2) {
-      color_red(side, pos);
-    }
-  }
-}
 
-void MainWindow::button_obm3_clicked()
-{
-  fChkBtnObm3 = true;
-  ui->OBModule->show();
-  ui->modulenumber->setText("3");
-  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 3) {
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 7; j++) {
-        color_red(i, j);
-      }
-    }
-  }
-  for (unsigned int i = 0; i < fChips.size(); i++) {
-    int chipid;
-    chipid = fChips.at(i)->GetConfig()->GetChipId();
-    uint8_t module, side, pos;
-    DecodeId(chipid, module, side, pos);
-    if (fChips.at(i)->GetConfig()->IsEnabled() && module == 3) {
-      color_green(side, pos);
-    }
-    else if (module == 3) {
-      color_red(side, pos);
-    }
-  }
-}
-void MainWindow::button_obm4_clicked()
-{
-  fChkBtnObm4 = true;
-  ui->OBModule->show();
-  ui->modulenumber->setText("4");
-  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 4) {
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 7; j++) {
-        color_red(i, j);
-      }
-    }
-  }
-  for (unsigned int i = 0; i < fChips.size(); i++) {
-    int chipid;
-    chipid = fChips.at(i)->GetConfig()->GetChipId();
-    uint8_t module, side, pos;
-    DecodeId(chipid, module, side, pos);
-    if (fChips.at(i)->GetConfig()->IsEnabled() && module == 4) {
-      color_green(side, pos);
-    }
-    else if (module == 4) {
-      color_red(side, pos);
-    }
-  }
-}
-void MainWindow::button_obm5_clicked()
-{
-  fChkBtnObm5 = true;
-  ui->OBModule->show();
-  ui->modulenumber->setText("5");
-  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 5) {
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 7; j++) {
-        color_red(i, j);
-      }
-    }
-  }
-  for (unsigned int i = 0; i < fChips.size(); i++) {
-    int chipid;
-    chipid = fChips.at(i)->GetConfig()->GetChipId();
-    uint8_t module, side, pos;
-    DecodeId(chipid, module, side, pos);
-    if (fChips.at(i)->GetConfig()->IsEnabled() && module == 5) {
-      color_green(side, pos);
-    }
-    else if (module == 5) {
-      color_red(side, pos);
-    }
-  }
-}
+void MainWindow::button_obm1_clicked() { button_obm_clicked(1); }
 
-void MainWindow::button_obm6_clicked()
-{
-  fChkBtnObm6 = true;
-  ui->OBModule->show();
-  ui->modulenumber->setText("6");
-  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 6) {
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 7; j++) {
-        color_red(i, j);
-      }
-    }
-  }
-  for (unsigned int i = 0; i < fChips.size(); i++) {
-    int chipid;
-    chipid = fChips.at(i)->GetConfig()->GetChipId();
-    uint8_t module, side, pos;
-    DecodeId(chipid, module, side, pos);
-    if (fChips.at(i)->GetConfig()->IsEnabled() && module == 6) {
-      color_green(side, pos);
-    }
-    else if (module == 6) {
-      color_red(side, pos);
-    }
-  }
-}
+void MainWindow::button_obm2_clicked() { button_obm_clicked(2); }
 
-void MainWindow::button_obm7_clicked()
-{
-  fChkBtnObm7 = true;
-  ui->OBModule->show();
-  ui->modulenumber->setText("7");
-  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < 7) {
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 7; j++) {
-        color_red(i, j);
-      }
-    }
-  }
-  for (unsigned int i = 0; i < fChips.size(); i++) {
-    int chipid;
-    chipid = fChips.at(i)->GetConfig()->GetChipId();
-    uint8_t module, side, pos;
-    DecodeId(chipid, module, side, pos);
-    if (fChips.at(i)->GetConfig()->IsEnabled() && module == 7) {
-      color_green(side, pos);
-    }
-    else if (module == 7) {
-      color_red(side, pos);
-    }
-  }
-}
+void MainWindow::button_obm3_clicked() { button_obm_clicked(3); }
+
+void MainWindow::button_obm4_clicked() { button_obm_clicked(4); }
+
+void MainWindow::button_obm5_clicked() { button_obm_clicked(5); }
+
+void MainWindow::button_obm6_clicked() { button_obm_clicked(6); }
+
+void MainWindow::button_obm7_clicked() { button_obm_clicked(7); }
+
 
 void MainWindow::explore_halfstave(uint8_t chipid, int &m1, int &m2, int &m3, int &m4, int &m5,
                                    int &m6, int &m7)
@@ -1211,6 +1077,7 @@ void MainWindow::performtests()
       std::cout << ex.what() << " is the thrown exception" << std::endl;
     }
   }
+  poweroff();
 }
 
 void MainWindow::applytests()
@@ -1502,10 +1369,11 @@ void MainWindow::detailscombo(int dnumber)
 
 void MainWindow::poweroff()
 {
-
+  std::cout << "Powering off all HICs" << std::endl;
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     fHICs.at(i)->PowerOff();
   }
+  std::cout << "Done." << std::endl;
 }
 
 void MainWindow::quitall()
@@ -1515,13 +1383,9 @@ void MainWindow::quitall()
     fNoticewindow->adjustingtemplate();
     fNoticewindow->exec();
   }
-  if (fHICs.size() >= 1) {
-    poweroff();
-    close();
-  }
-  else {
-    close();
-  }
+
+  poweroff();
+  close();
 }
 
 void MainWindow::WriteToEos(string hicName, ActivityDB::actUri &uri, bool write)
