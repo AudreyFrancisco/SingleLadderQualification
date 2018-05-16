@@ -1,5 +1,6 @@
 #include "TEyeAnalysis.h"
 #include "TCanvas.h"
+#include "TEyeMeasurement.h"
 #include "TFile.h"
 #include "TH2.h"
 #include "TLatex.h"
@@ -28,8 +29,9 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
   std::cout << "in analyse histo, chipList.size = " << m_chipList.size() << std::endl;
   FILE *fp = fopen("EyeDiagram.dat", "w");
 
-  std::ofstream outfile_l("edge_l.dat");
-  std::ofstream outfile_r("edge_r.dat");
+  TEyeParameters *ePar = (TEyeParameters *)(m_scan->GetParameters());
+  std::ofstream   outfile_l("edge_l.dat");
+  std::ofstream   outfile_r("edge_r.dat");
 
   std::string filename_eye = FindHicResultForChip(m_chipList.at(0))->GetOutputPath() + "/eye.pdf";
   std::string filename_eye_root =
@@ -56,10 +58,13 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
     const int yband       = 2;
 
     const std::string hname = TString::Format("h_eye_%i", m_chipList.at(ichip).chipId).Data();
-    TH2F              h_eye(hname.c_str(),
-               TString::Format("Eye Diagram chip %i (%s)", m_chipList.at(ichip).chipId,
-                               FindHicResultForChip(m_chipList.at(ichip))->GetName().c_str()),
-               nbin_x, min_x, min_x + nbin_x * step_x, nbin_y, min_y, min_y + nbin_y * step_y);
+    const std::string htitle =
+        TString::Format("Eye Diagram chip %i (%s) D%i, P%i", m_chipList.at(ichip).chipId,
+                        FindHicResultForChip(m_chipList.at(ichip))->GetName().c_str(),
+                        ePar->driverStrength, ePar->preemphasis)
+            .Data();
+    TH2F h_eye(hname.c_str(), htitle.c_str(), nbin_x, min_x, min_x + nbin_x * step_x, nbin_y, min_y,
+               min_y + nbin_y * step_y);
     h_eye.SetDirectory(0);
 
     for (int xbin = 0; xbin < nbin_x; xbin++) {
