@@ -66,6 +66,8 @@ private:
   float         m_maxDeviation;
   int           m_nDead;
   int           m_nNoThresh;
+  int           m_nDeadIncrease;
+  int           m_nNoThreshIncrease;
   int           m_nNoThreshWorstChip;
   int           m_nDeadWorstChip;
   int           m_nHot;
@@ -77,6 +79,9 @@ private:
   char          m_stuckFile[200];
   TErrorCounter m_errorCounter;
   void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
+
+protected:
+  void Compare(TScanResultHic *aPrediction);
 
 public:
   TSCurveResultHic() : TScanResultHic(){};
@@ -159,7 +164,7 @@ protected:
   void CreateResult(){};
   void AnalyseHisto(TScanHisto *histo);
   virtual string GetPreviousTestType();
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  void CalculatePrediction(std::string hicName);
 
 public:
   // constructor: result factor determines type of analysis

@@ -77,17 +77,23 @@ string TSCurveAnalysis::GetPreviousTestType()
 {
   switch (m_config->GetTestType()) {
   case OBQualification:
-    return string("ALPIDEB Chip Testing Analysis");
+    if (((TSCurveParameters *)m_scan->GetParameters())->backBias == 0.)
+      return string("ALPIDEB Chip Testing Analysis");
+    else
+      return string("");
   case OBEndurance:
     return string("OB HIC Qualification Test");
   case OBReception:
-    return string("OB HIC Endurance Test");
+    return string("OB HIC Qualification Test");
   case OBHalfStaveOL:
-    return string("OB HIC Reception Test");
+    return string("OB HIC Qualification Test");
   case OBHalfStaveML:
-    return string("OB HIC Reception Test");
+    return string("OB HIC Qualification Test");
   case IBQualification:
-    return string("ALPIDEB Chip Testing Analysis");
+    if (((TSCurveParameters *)m_scan->GetParameters())->backBias == 0.)
+      return string("ALPIDEB Chip Testing Analysis");
+    else
+      return string("");
   case IBEndurance:
     return string("IB HIC Qualification Test");
   case IBStave:
@@ -168,6 +174,12 @@ void TSCurveAnalysis::Initialize()
   ReadChipList();
   CreateHicResults();
   PrepareFiles();
+
+  if (IsThresholdScan() && (!m_nominal)) { // do only for threshold scan after tuning
+    for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+      CalculatePrediction(m_hics.at(ihic)->GetDbId());
+    }
+  }
 }
 
 // TODO: set file names here???
@@ -196,6 +208,8 @@ void TSCurveAnalysis::InitCounters()
     TSCurveResultHic *result     = (TSCurveResultHic *)it->second;
     result->m_nDead              = 0;
     result->m_nNoThresh          = 0;
+    result->m_nDeadIncrease      = 0;
+    result->m_nNoThreshIncrease  = 0;
     result->m_nDeadWorstChip     = 0;
     result->m_nNoThreshWorstChip = 0;
     result->m_nHot               = 0;
@@ -213,6 +227,43 @@ void TSCurveAnalysis::InitCounters()
     result->m_VCASNTuning        = IsVCASNTuning();
     result->m_ITHRTuning         = IsITHRTuning();
     result->m_thresholdScan      = IsThresholdScan();
+  }
+}
+
+void TSCurveAnalysis::CalculatePrediction(std::string hicName)
+{
+  std::vector<ActivityDB::activityLong> activities;
+  TSCurveResultHic *                    prediction;
+  try {
+    prediction = (TSCurveResultHic *)m_prediction->GetHicResult(hicName);
+  }
+  catch (...) {
+    std::cout << "Error: prediction not found for hic " << hicName << std::endl;
+    return;
+  }
+
+  prediction->SetValidity(FillPreviousActivities(hicName, &activities));
+  if (!prediction->IsValid()) return;
+
+  char nameDeadPixels[50], nameNoThresh[50];
+  sprintf(nameDeadPixels, "Dead pixels threshold tuned %dV",
+          (int)(((TSCurveParameters *)m_scan->GetParameters())->backBias));
+  sprintf(nameNoThresh, "Pixels without threshold tuned %dV",
+          (int)(((TSCurveParameters *)m_scan->GetParameters())->backBias));
+  // do the calculation here
+  for (unsigned int i = 0; i < activities.size(); i++) {
+    float value;
+    if (GetPreviousParamValue(nameDeadPixels, "Dead Pixels", activities.at(i), value)) {
+      prediction->m_nDead += value;
+    }
+    if (GetPreviousParamValue(nameNoThresh, "Threshold Pixels", activities.at(i), value)) {
+      if (GetPreviousTestType() == "ALPIDEB Chip Testing Analysis") {
+        prediction->m_nNoThresh += (512 * 1024 - value);
+      }
+      else {
+        prediction->m_nNoThresh += value;
+      }
+    }
   }
 }
 
@@ -358,6 +409,9 @@ void TSCurveAnalysis::Finalize()
       hicResult->m_class = GetClassificationIB(hicResult, m_hics.at(ihic));
     }
     hicResult->SetValidity(true);
+    if (IsThresholdScan() && (!m_nominal)) { // do only for threshold scan after tuning
+      CalculatePrediction(m_hics.at(ihic)->GetDbId());
+    }
   }
   WriteResult();
   m_finished = true;
@@ -758,6 +812,14 @@ float TSCurveResultChip::GetVariable(TResultVariable var)
   }
 }
 
+void TSCurveResultHic::Compare(TScanResultHic *aPrediction)
+{
+  TSCurveResultHic *prediction = (TSCurveResultHic *)aPrediction;
+  m_nDeadIncrease              = m_nDead - prediction->m_nDead;
+  m_nNoThreshIncrease          = m_nNoThresh - prediction->m_nNoThresh;
+}
+
+
 void TSCurveResultHic::GetParameterSuffix(std::string &suffix, std::string &file_suffix)
 {
   if (m_thresholdScan) {
@@ -806,6 +868,10 @@ void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
     if (!m_nominal) {
       DbAddParameter(db, activity, string("Maximum threshold deviation, ") + suffix,
                      (float)m_maxDeviation, GetParameterFile());
+      DbAddParameter(db, activity, string("Dead pixels increase ") + suffix, (float)m_nDeadIncrease,
+                     GetParameterFile());
+      DbAddParameter(db, activity, string("Pixels without thresh increase ") + suffix,
+                     (float)m_nNoThreshIncrease, GetParameterFile());
     }
   }
   DbAddParameter(db, activity, string("Minimum chip avg") + suffix, (float)m_minChipAv,
@@ -844,6 +910,10 @@ void TSCurveResultHic::WriteToFile(FILE *fp)
     std::cout << std::endl << "Maximum deviation from target: " << m_maxDeviation << std::endl;
   }
   std::cout << std::endl << "Maximum relative rms:          " << m_maxRelativeRms << std::endl;
+  std::cout << std::endl << "Dead Pixels:         " << m_nDead << std::endl;
+  if (!m_nominal) std::cout << "   Increase:         " << m_nDeadIncrease << std::endl;
+  std::cout << "No Threshold Pixels: " << m_nNoThresh << std::endl;
+  if (!m_nominal) std::cout << "   Increase:         " << m_nNoThreshIncrease << std::endl;
 }
 
 void TSCurveResult::WriteToFileGlobal(FILE *fp)
