@@ -124,7 +124,7 @@ bool TScanAnalysis::GetPreviousParamValue(string hicTestName, string chipTestNam
     return DbFindParamValue(act.Parameters, chipTestName, value);
   }
   else {
-    return DbFindParamValue(act.Parameters, chipTestName, value);
+    return DbFindParamValue(act.Parameters, hicTestName, value);
   }
 }
 
