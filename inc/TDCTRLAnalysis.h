@@ -41,8 +41,10 @@ class TDctrlResultHic : public TScanResultHic {
 
 private:
   float worst_slope;
+  float worst_slopeRatio;
   float worst_maxAmp;
   float worst_chisq;
+  float worst_chisqRatio;
   float worst_corr;
   float worst_rise;
   float worst_fall;
@@ -50,6 +52,7 @@ private:
 
 public:
   TDctrlResultHic() : TScanResultHic(){};
+  void Compare(TScanResultHic *aPrediction);
   void SetScanFile(const char *fName) { strncpy(m_scanFile, fName, sizeof(m_scanFile)); };
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
@@ -90,7 +93,7 @@ protected:
   void AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
   void   InitCounters();
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  void CalculatePrediction(std::string hicName);
 
 public:
   TDctrlAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

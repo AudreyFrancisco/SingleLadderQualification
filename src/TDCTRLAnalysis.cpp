@@ -24,6 +24,10 @@ void TDctrlAnalysis::Initialize()
 {
   ReadChipList();
   CreateHicResults();
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    CalculatePrediction(m_hics.at(ihic)->GetDbId());
+  }
 }
 
 // variables to be displayed in the GUI
@@ -73,6 +77,35 @@ void TDctrlAnalysis::InitCounters()
     }
   }
 }
+
+
+void TDctrlAnalysis::CalculatePrediction(std::string hicName)
+{
+  std::vector<ActivityDB::activityLong> activities;
+  TDctrlResultHic *                     prediction;
+  try {
+    prediction = (TDctrlResultHic *)m_prediction->GetHicResult(hicName);
+  }
+  catch (...) {
+    std::cout << "Error: prediction not found for hic " << hicName << std::endl;
+    return;
+  }
+
+  prediction->SetValidity(FillPreviousActivities(hicName, &activities));
+  if (!prediction->IsValid()) return;
+
+  // do the calculation here
+  for (unsigned int i = 0; i < activities.size(); i++) {
+    float value;
+    if (GetPreviousParamValue("DCTRL worst slope", "", activities.at(i), value)) {
+      prediction->worst_slope = value;
+    }
+    if (GetPreviousParamValue("DCTRL worst chi square", "", activities.at(i), value)) {
+      prediction->worst_chisq = value;
+    }
+  }
+}
+
 
 bool TDctrlAnalysis::ChipIsSlave(common::TChipIndex idx)
 {
@@ -291,6 +324,7 @@ void TDctrlAnalysis::Finalize()
       hicResult->m_class = GetClassificationIB(hicResult);
     }
     hicResult->SetValidity(true);
+    ComparePrediction(m_hics.at(ihic)->GetDbId());
   }
 
   WriteResult();
@@ -334,7 +368,9 @@ void TDctrlResultHic::WriteToFile(FILE *fp)
 
   fprintf(fp, "Worst maximum amplitude: %f\n", worst_maxAmp);
   fprintf(fp, "Worst slope:             %f\n", worst_slope);
+  fprintf(fp, "    ratio to previous:   %f\n", worst_slopeRatio);
   fprintf(fp, "Worst chi square:        %f\n", worst_chisq);
+  fprintf(fp, "    ratio to previous:   %f\n", worst_chisqRatio);
   fprintf(fp, "Worst correlation:       %f\n", worst_corr);
   fprintf(fp, "Worst rise time:         %e\n", worst_rise);
   fprintf(fp, "Worst fall time:         %e\n", worst_fall);
@@ -362,6 +398,10 @@ void TDctrlResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   DbAddParameter(db, activity, string("DCTRL worst correlation"), worst_corr, GetParameterFile());
   DbAddParameter(db, activity, string("DCTRL worst rise time"), worst_rise, GetParameterFile());
   DbAddParameter(db, activity, string("DCTRL worst fall time"), worst_fall, GetParameterFile());
+  DbAddParameter(db, activity, string("DCTRL worst chi square ratio"), worst_chisqRatio,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("DCTRL worst slope ratio"), worst_slopeRatio,
+                 GetParameterFile());
 
   slash    = string(m_resultFile).find_last_of("/");
   fileName = string(m_resultFile).substr(slash + 1); // strip path
@@ -370,6 +410,14 @@ void TDctrlResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 
   DbAddAttachment(db, activity, attachResult, string(m_resultFile), fileName);
   DbAddAttachment(db, activity, attachResult, string(m_scanFile), scanName);
+}
+
+
+void TDctrlResultHic::Compare(TScanResultHic *aPrediction)
+{
+  TDctrlResultHic *prediction                       = (TDctrlResultHic *)aPrediction;
+  if (prediction->worst_slope > 0) worst_slopeRatio = worst_slope / prediction->worst_slope;
+  if (prediction->worst_chisq > 0) worst_chisqRatio = worst_chisq / prediction->worst_chisq;
 }
 
 

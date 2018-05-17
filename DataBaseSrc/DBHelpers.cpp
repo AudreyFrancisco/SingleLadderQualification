@@ -230,6 +230,7 @@ bool DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, flo
       return true;
     }
   }
+  std::cout << "DbFindParamValue: did not find value for parameter " << parName << std::endl;
   return false;
 }
 

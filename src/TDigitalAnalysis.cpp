@@ -129,14 +129,8 @@ void TDigitalAnalysis::CalculatePrediction(std::string hicName)
     if (GetPreviousParamValue("Bad pixels digital (nominal)", "Dead Pixels", activities.at(i),
                               value)) {
       prediction->m_nDead += value;
-      std::cout << "Found value " << value << std::endl;
-    }
-    else {
-      std::cout << "Did not find value" << std::endl;
     }
   }
-  prediction->SetValidity(true);
-  std::cout << "Expecting " << prediction->m_nDead << " dead pixels" << std::endl;
 }
 
 
