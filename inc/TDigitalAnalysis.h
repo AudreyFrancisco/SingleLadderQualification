@@ -46,6 +46,7 @@ private:
   int           m_nBadWorstChip;
   int           m_nStuck;
   int           m_nBadDcols;
+  int           m_nDeadIncrease;
   char          m_stuckFile[200];
   bool          m_lower;
   bool          m_upper;

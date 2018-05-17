@@ -91,6 +91,32 @@ bool TScanAnalysis::GetPreviousActivity(string compName, ActivityDB::activityLon
 }
 
 
+bool TScanAnalysis::FillPreviousActivities(string                                 hicName,
+                                           std::vector<ActivityDB::activityLong> *activities)
+{
+  std::vector<std::string> childNames;
+  int                      compType = GetComponentType();
+  int compId = DbGetComponentId(m_config->GetDatabase(), m_config->GetDatabase()->GetProjectId(),
+                                compType, hicName);
+  GetChildList(compId, childNames);
+
+  std::cout << "Number of children = " << childNames.size() << std::endl;
+  for (unsigned int i = 0; i < childNames.size(); i++) {
+    ActivityDB::activityLong act;
+    if (GetPreviousActivity(childNames.at(i), act)) {
+      activities->push_back(act);
+    }
+  }
+
+  if (activities->size() == 0) {
+    std::cout << "No previous activities found " << std::endl;
+    //    prediction->SetValidity(false);
+    return false;
+  }
+  return true;
+}
+
+
 bool TScanAnalysis::GetPreviousParamValue(string hicTestName, string chipTestName,
                                           ActivityDB::activityLong &act, float &value)
 {

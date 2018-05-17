@@ -168,6 +168,7 @@ protected:
   virtual void InitCounters()                  = 0;
   int          GetPreviousActivityType();
   bool GetPreviousActivity(string compName, ActivityDB::activityLong &act);
+  bool FillPreviousActivities(string hicName, std::vector<ActivityDB::activityLong> *activities);
   bool GetPreviousParamValue(string hicTestName, string chipTestName, ActivityDB::activityLong &act,
                              float &value);
   int GetChildList(int id, std::vector<std::string> &childrenNames);

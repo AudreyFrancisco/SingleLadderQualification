@@ -41,7 +41,7 @@ string TDigitalAnalysis::GetPreviousTestType()
   case OBEndurance:
     return string("OB HIC Qualification Test");
   case OBReception:
-    return string("OB HIC Endurance Test");
+    return string("OB HIC Qualification Test");
   case OBHalfStaveOL:
     return string("OB HIC Reception Test");
   case OBHalfStaveML:
@@ -66,7 +66,7 @@ void TDigitalAnalysis::Initialize()
   CreatePrediction();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    // CalculatePrediction(m_hics.at(ihic)->GetDbId());
+    CalculatePrediction(m_hics.at(ihic)->GetDbId());
   }
 }
 
@@ -111,7 +111,6 @@ void TDigitalAnalysis::InitCounters()
 void TDigitalAnalysis::CalculatePrediction(std::string hicName)
 {
   std::vector<ActivityDB::activityLong> activities;
-  std::vector<std::string>              childNames;
   TDigitalResultHic *                   prediction;
   try {
     prediction = (TDigitalResultHic *)m_prediction->GetHicResult(hicName);
@@ -121,24 +120,8 @@ void TDigitalAnalysis::CalculatePrediction(std::string hicName)
     return;
   }
 
-  int compType = GetComponentType();
-  int compId   = DbGetComponentId(m_config->GetDatabase(), m_config->GetDatabase()->GetProjectId(),
-                                compType, hicName);
-  GetChildList(compId, childNames);
-
-  std::cout << "Number of children = " << childNames.size() << std::endl;
-  for (unsigned int i = 0; i < childNames.size(); i++) {
-    ActivityDB::activityLong act;
-    if (GetPreviousActivity(childNames.at(i), act)) {
-      activities.push_back(act);
-    }
-  }
-
-  if (activities.size() == 0) {
-    std::cout << "No previous activities found " << std::endl;
-    prediction->SetValidity(false);
-    return;
-  }
+  prediction->SetValidity(FillPreviousActivities(hicName, &activities));
+  if (!prediction->IsValid()) return;
 
   // do the calculation here
   for (unsigned int i = 0; i < activities.size(); i++) {
@@ -320,7 +303,7 @@ void TDigitalAnalysis::Finalize()
       hicResult->m_class = GetClassificationIB(hicResult);
     }
     hicResult->SetValidity(true);
-    // ComparePrediction(m_hics.at(ihic)->GetDbId());
+    ComparePrediction(m_hics.at(ihic)->GetDbId());
   }
   WriteResult();
 
@@ -420,6 +403,8 @@ void TDigitalResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
                  GetParameterFile());
   DbAddParameter(db, activity, string("Bad pixels digital, worst chip") + suffix,
                  (float)m_nBadWorstChip, GetParameterFile());
+  DbAddParameter(db, activity, string("Increase in dead pixels digital") + suffix,
+                 (float)m_nDeadIncrease, GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
   fileName          = string(m_resultFile).substr(slash + 1); // strip path
@@ -437,6 +422,9 @@ void TDigitalResultHic::WriteToFile(FILE *fp)
   fprintf(fp, "Bad pixels:      %d\n", m_nBad);
   fprintf(fp, "Bad double cols: %d\n", m_nBadDcols);
   fprintf(fp, "Stuck pixels:    %d\n", m_nStuck);
+
+  fprintf(fp, "Dead pixels:     %d\n", m_nDead);
+  fprintf(fp, "   Increase:     %d\n", m_nDeadIncrease);
 
   fprintf(fp, "\nStuck pixel file: %s\n", m_stuckFile);
 
@@ -458,6 +446,7 @@ void TDigitalResultHic::WriteToFile(FILE *fp)
 void TDigitalResultHic::Compare(TScanResultHic *aPrediction)
 {
   TDigitalResultHic *prediction = (TDigitalResultHic *)aPrediction;
+  m_nDeadIncrease               = m_nDead - prediction->m_nDead;
   std::cout << "expected " << prediction->m_nDead << " dead pixels, found " << m_nDead << std::endl;
 }
 
