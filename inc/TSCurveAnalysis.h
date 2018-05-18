@@ -41,7 +41,13 @@ private:
   FILE *           m_fitFP;
 
 public:
-  TSCurveResultChip(TSCurveAnalysis *aAnalysis) : TScanResultChip() { m_analysis = aAnalysis; };
+  TSCurveResultChip(TSCurveAnalysis *aAnalysis)
+      : TScanResultChip(), m_thresholdAv(0), m_thresholdRms(0), m_threshRelativeRms(0),
+        m_noiseAv(0), m_noiseRms(0), m_deviation(0), m_nEntries(0), m_noiseSq(0), m_threshSq(0),
+        m_nNoThresh(0), m_nDead(0), m_nHot(0)
+  {
+    m_analysis = aAnalysis;
+  };
   void SetRawFile(const char *fName) { strcpy(m_rawFile, fName); };
   void SetFitFile(const char *fName) { strcpy(m_fitFile, fName); };
   void WriteToFile(FILE *fp);
@@ -84,7 +90,11 @@ protected:
   void Compare(TScanResultHic *aPrediction);
 
 public:
-  TSCurveResultHic() : TScanResultHic(){};
+  TSCurveResultHic()
+      : TScanResultHic(), m_noiseAv(0), m_noiseRms(0), m_nEntries(0), m_noiseSq(0),
+        m_minChipAv(999), m_maxChipAv(-1), m_maxChipNoise(-1), m_maxRelativeRms(0),
+        m_maxDeviation(0), m_nDead(0), m_nNoThresh(0), m_nDeadIncrease(0), m_nNoThreshIncrease(0),
+        m_nNoThreshWorstChip(0), m_nDeadWorstChip(0), m_nHot(0){};
   void CalculateAverages();
   void SetStuckFile(const char *fName) { strcpy(m_stuckFile, fName); };
   void WriteToFile(FILE *fp);

@@ -51,7 +51,9 @@ private:
   char  m_scanFile[200];
 
 public:
-  TDctrlResultHic() : TScanResultHic(){};
+  TDctrlResultHic()
+      : TScanResultHic(), worst_slope(1), worst_maxAmp(10), worst_chisq(0), worst_corr(1),
+        worst_rise(0), worst_fall(0){};
   void Compare(TScanResultHic *aPrediction);
   void SetScanFile(const char *fName) { strncpy(m_scanFile, fName, sizeof(m_scanFile)); };
   void WriteToFile(FILE *fp);

@@ -63,12 +63,6 @@ void TDctrlAnalysis::InitCounters()
 
   for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TDctrlResultHic *result = (TDctrlResultHic *)it->second;
-    result->worst_slope     = 1;
-    result->worst_maxAmp    = 10;
-    result->worst_chisq     = 0;
-    result->worst_corr      = 1;
-    result->worst_rise      = 0;
-    result->worst_fall      = 0;
     for (itChip = result->m_chipResults.begin(); itChip != result->m_chipResults.end(); ++itChip) {
       TDctrlResultChip *resultChip = (TDctrlResultChip *)itChip->second;
       (void)resultChip; // TODO: Set here the initialisations in the chip (and hic) result if

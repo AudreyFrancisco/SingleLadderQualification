@@ -82,25 +82,12 @@ void TDigitalAnalysis::InitCounters()
     counter.nIneff     = 0;
     counter.nNoisy     = 0;
     m_counters.push_back(counter);
-
-    TDigitalResultChip *result = (TDigitalResultChip *)m_result->GetChipResult(m_chipList.at(i));
-
-    result->m_nStuck    = 0;
-    result->m_nDead     = 0;
-    result->m_nNoisy    = 0;
-    result->m_nIneff    = 0;
-    result->m_nBadDcols = 0;
   }
 
   std::map<std::string, TScanResultHic *>::iterator it;
 
   for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TDigitalResultHic *result = (TDigitalResultHic *)it->second;
-    result->m_nDead           = 0;
-    result->m_nBad            = 0;
-    result->m_nBadWorstChip   = 0;
-    result->m_nStuck          = 0;
-    result->m_nBadDcols       = 0;
     result->m_lower           = ((TDigitalScan *)m_scan)->IsLower();
     result->m_upper           = ((TDigitalScan *)m_scan)->IsUpper();
     result->m_nominal         = ((TDigitalScan *)m_scan)->IsNominal();

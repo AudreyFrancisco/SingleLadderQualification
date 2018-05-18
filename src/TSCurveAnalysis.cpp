@@ -185,48 +185,15 @@ void TSCurveAnalysis::Initialize()
 // TODO: set file names here???
 void TSCurveAnalysis::InitCounters()
 {
-  for (unsigned int i = 0; i < m_chipList.size(); i++) {
-    TSCurveResultChip *result = (TSCurveResultChip *)m_result->GetChipResult(m_chipList.at(i));
-
-    result->m_thresholdAv       = 0;
-    result->m_thresholdRms      = 0;
-    result->m_threshRelativeRms = 0;
-    result->m_noiseAv           = 0;
-    result->m_noiseRms          = 0;
-    result->m_nEntries          = 0;
-    result->m_noiseSq           = 0;
-    result->m_threshSq          = 0;
-    result->m_nNoThresh         = 0;
-    result->m_nDead             = 0;
-    result->m_nHot              = 0;
-    result->m_deviation         = 0;
-  }
-
   std::map<std::string, TScanResultHic *>::iterator it;
 
   for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
-    TSCurveResultHic *result     = (TSCurveResultHic *)it->second;
-    result->m_nDead              = 0;
-    result->m_nNoThresh          = 0;
-    result->m_nDeadIncrease      = 0;
-    result->m_nNoThreshIncrease  = 0;
-    result->m_nDeadWorstChip     = 0;
-    result->m_nNoThreshWorstChip = 0;
-    result->m_nHot               = 0;
-    result->m_minChipAv          = 999;
-    result->m_maxChipAv          = -1;
-    result->m_maxChipNoise       = -1;
-    result->m_maxDeviation       = 0;
-    result->m_maxRelativeRms     = 0;
-    result->m_noiseAv            = 0;
-    result->m_noiseRms           = 0;
-    result->m_nEntries           = 0;
-    result->m_noiseSq            = 0;
-    result->m_backBias           = ((TSCurveScan *)m_scan)->GetBackbias();
-    result->m_nominal            = ((TSCurveScan *)m_scan)->GetNominal();
-    result->m_VCASNTuning        = IsVCASNTuning();
-    result->m_ITHRTuning         = IsITHRTuning();
-    result->m_thresholdScan      = IsThresholdScan();
+    TSCurveResultHic *result = (TSCurveResultHic *)it->second;
+    result->m_backBias       = ((TSCurveScan *)m_scan)->GetBackbias();
+    result->m_nominal        = ((TSCurveScan *)m_scan)->GetNominal();
+    result->m_VCASNTuning    = IsVCASNTuning();
+    result->m_ITHRTuning     = IsITHRTuning();
+    result->m_thresholdScan  = IsThresholdScan();
   }
 }
 

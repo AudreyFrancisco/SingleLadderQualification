@@ -32,7 +32,8 @@ private:
   std::vector<TPixHit> m_stuck;
 
 public:
-  TDigitalResultChip() : TScanResultChip(){};
+  TDigitalResultChip()
+      : TScanResultChip(), m_nDead(0), m_nNoisy(0), m_nIneff(0), m_nStuck(0), m_nBadDcols(0){};
   void WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
 };
@@ -58,7 +59,9 @@ protected:
   void Compare(TScanResultHic *aPrediction);
 
 public:
-  TDigitalResultHic() : TScanResultHic(){};
+  TDigitalResultHic()
+      : TScanResultHic(), m_nDead(0), m_nBad(0), m_nBadWorstChip(0), m_nStuck(0), m_nBadDcols(0),
+        m_nDeadIncrease(0){};
   void SetStuckFile(const char *fName) { strcpy(m_stuckFile, fName); };
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
