@@ -25,6 +25,7 @@ void TDctrlAnalysis::Initialize()
 {
   ReadChipList();
   CreateHicResults();
+  CreatePrediction();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     CalculatePrediction(m_hics.at(ihic)->GetDbId());

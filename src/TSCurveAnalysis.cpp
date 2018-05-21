@@ -174,6 +174,7 @@ void TSCurveAnalysis::Initialize()
 {
   ReadChipList();
   CreateHicResults();
+  CreatePrediction();
   PrepareFiles();
 
   if (IsThresholdScan() && (!m_nominal)) { // do only for threshold scan after tuning
