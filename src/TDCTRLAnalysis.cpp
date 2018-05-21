@@ -18,6 +18,7 @@ TDctrlAnalysis::TDctrlAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
   else
     m_result = new TDctrlResult();
   FillVariableList();
+  m_prediction = new TDctrlResult();
 }
 
 void TDctrlAnalysis::Initialize()
