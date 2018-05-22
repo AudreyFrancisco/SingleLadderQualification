@@ -3,9 +3,9 @@ project(new_alpide_software)
 
 # user options
 option(DISABLE_ROOT "Disable ROOT")
-option(DISABLE_GUI "Disable GUI")
+option(DISABLE_QT "Disable QT")
 
-if(DISABLE_GUI STREQUAL "OFF")
+if(DISABLE_QT STREQUAL "OFF")
   message(STATUS "Looking for Qt5")
   find_package(Qt5 COMPONENTS Core Gui Widgets Xml REQUIRED)
 elseif()

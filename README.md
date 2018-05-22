@@ -24,6 +24,12 @@ In order to build the software the following requirements must be installed
 - krb5-workstation
 - cern-get-sso-cookie
 
+In addition you should have a working installation of
+- ROOT (for ROOT-based analyses)
+- Qt5 (for GUIs)
+While the software can be built without these components, this results in
+limited functionality and is discouraged.
+
 ### Initial build
 
 First, clone the project:
@@ -78,7 +84,7 @@ on the respective option using cmake, i.e.:
 cmake -D<option>="ON"
 ```
 The available options are:
-- DISABLE_GUI: Do not build GUIs (no Qt dependency).
+- DISABLE_QT: Do not build Qt-based components (i.e. no GUI).
 - DISABLE_ROOT: Do not build ROOT-based analyses.
 
 ### Installation
