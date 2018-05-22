@@ -982,6 +982,7 @@ void MainWindow::performtests()
   fExtraScans  = 0;
   ui->statuslabel->setVisible(true);
   ui->statuslabel->update();
+  qApp->processEvents();
   fNewScans.clear();
   fInitialScans = fScanVector.size();
 
