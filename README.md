@@ -24,9 +24,10 @@ In order to build the software the following requirements must be installed
 - krb5-workstation
 - cern-get-sso-cookie
 
-In addition you should have a working installation of
+In addition you should have working installations of
 - ROOT (for ROOT-based analyses)
 - Qt5 (for GUIs)
+
 While the software can be built without these components, this results in
 limited functionality and is discouraged.
 
