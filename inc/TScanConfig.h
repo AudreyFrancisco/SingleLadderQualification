@@ -26,6 +26,8 @@ typedef enum {
 } TTestType;
 
 namespace ScanConfig {
+  const float CLASSIFICATION_VERSION = 0.1;
+
   const int NINJ           = 50;     // number of injections in digital/threshold scans
   const int NTRIG          = 100000; // number of triggers for noise occupancy scans
   const int CHARGE_START   = 0;
@@ -196,22 +198,23 @@ class TScanConfig {
 private:
   std::map<std::string, int *> fSettings;
   std::map<std::string, int>   m_retest;
-  int  m_nInj;
-  int  m_nTrig;
-  int  m_maxTimeout;
-  int  m_chargeStart;
-  int  m_chargeStop;
-  int  m_chargeStep;
-  int  m_dacStart;
-  int  m_dacStop;
-  int  m_dacStep;
-  int  m_nDacSamples;
-  int  m_nMaskStages;
-  int  m_pixPerRegion;
-  int  m_noiseCutInv;
-  char m_fNameSuffix[20];
-  int  m_testWithoutComp;
-  int  m_status;
+  float m_classVersion;
+  int   m_nInj;
+  int   m_nTrig;
+  int   m_maxTimeout;
+  int   m_chargeStart;
+  int   m_chargeStop;
+  int   m_chargeStep;
+  int   m_dacStart;
+  int   m_dacStop;
+  int   m_dacStep;
+  int   m_nDacSamples;
+  int   m_nMaskStages;
+  int   m_pixPerRegion;
+  int   m_noiseCutInv;
+  char  m_fNameSuffix[20];
+  int   m_testWithoutComp;
+  int   m_status;
   // NEW--added for additional scans
   int       m_ithrStart; // usually 30
   int       m_ithrStop;  // usually 100
@@ -353,6 +356,8 @@ public:
   std::string GetTestDir();
   std::string GetRemoteHicPath(std::string HicName);
   bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
+
+  float GetClassificationVersion() { return m_classVersion; };
 
   int GetRetestNumber(std::string hicName);
   int   GetNInj() { return m_nInj; };

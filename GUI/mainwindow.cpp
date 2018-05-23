@@ -1615,6 +1615,9 @@ void MainWindow::attachtodatabase()
             DbAddParameter(fDB, activ, "Number of Working Chips", fHICs.at(i)->GetNEnabledChips(),
                            hicResult->GetParameterFile());
             DbAddParameter(fDB, activ, "Time", GetTime(), hicResult->GetParameterFile());
+            DbAddParameter(fDB, activ, "Classification Version",
+                           fConfig->GetScanConfig()->GetClassificationVersion(),
+                           hicResult->GetParameterFile());
           }
         }
         // loop over results and write to DB

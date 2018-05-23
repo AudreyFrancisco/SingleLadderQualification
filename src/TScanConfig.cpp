@@ -8,6 +8,8 @@ TScanConfig::TScanConfig()
 {
   m_retest.clear();
   // dummy values for first tests
+  m_classVersion = CLASSIFICATION_VERSION;
+
   m_nInj             = NINJ;
   m_nTrig            = NTRIG;
   m_maxTimeout       = MAXTIMEOUT;
