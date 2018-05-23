@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
-project(new_alpide_software)
+project(alptest)
 
 # user options
 option(DISABLE_ROOT "Disable ROOT")

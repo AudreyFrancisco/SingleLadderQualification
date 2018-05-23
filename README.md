@@ -5,7 +5,7 @@
 ## Build instructions
 
 ### Prerequisites
-In order to build the software the following requirements must be installed 
+In order to build the software the following requirements must be installed
 (CC7 packages names):
 - cmake3
 - gcc
@@ -74,19 +74,26 @@ directory. You do not need to set any environment variables (NB: no more
 files in the current working directory and will also write the output to Data/
 in this directory.
 
-TODO: add environment variables for config files and data output
+### Environment variables (not yet working!!!)
+You can configure the software by setting the following environment variables:
+- ALPTEST\_CONFIG: If set config files will be looked for in this directory. If
+unset config files will be searched for in the current working directory (i.e.
+the directory from which the executable is started).
+- ALPTEST\_DATA: If set the data files will be written to this directory. If
+unset data files will be written to Data/ in the current working directory
+instead.
 
-## Advanced build options
+## Advanced build options (not for general use)
 
 ### Configure the build
-Even though not recommended, you can disable parts of the software. To do switch 
-on the respective option using cmake, i.e.:
+Even though not recommended, you can disable parts of the software. To do so
+switch on the respective option using cmake, i.e.:
 ```
 cmake -D<option>="ON"
 ```
 The available options are:
-- DISABLE_QT: Do not build Qt-based components (i.e. no GUI).
-- DISABLE_ROOT: Do not build ROOT-based analyses.
+- DISABLE\_QT: Do not build Qt-based components (i.e. no GUI).
+- DISABLE\_ROOT: Do not build ROOT-based analyses.
 
 ### Installation
 
