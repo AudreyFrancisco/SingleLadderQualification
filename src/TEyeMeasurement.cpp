@@ -24,8 +24,8 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
   // outer loop: loop over all chips
   // TODO: can this be done in parallel on all chips?
   m_start[2] = 0;
+  m_step[2]  = 1;
   m_stop[2]  = m_chips.size();
-  m_stop[2]  = 1;
 
   // loops over phase and amplitude
   m_start[1] = m_config->GetParamValue("EYEMINY");

@@ -30,6 +30,12 @@ TReadoutTest::TReadoutTest(TScanConfig *config, std::vector<TAlpide *> chips,
   ((TReadoutParameters *)m_parameters)->pllStages      = config->GetParamValue("READOUTPLLSTAGES");
   ((TReadoutParameters *)m_parameters)->voltageScale   = config->GetVoltageScale();
 
+  SetName();
+}
+
+
+void TReadoutTest::SetName()
+{
   if (((TReadoutParameters *)m_parameters)->pllStages != -1) {
     sprintf(m_name, "ReadoutTest %.1f %d", ((TReadoutParameters *)m_parameters)->voltageScale,
             ((TReadoutParameters *)m_parameters)->pllStages);
@@ -40,6 +46,32 @@ TReadoutTest::TReadoutTest(TScanConfig *config, std::vector<TAlpide *> chips,
             ((TReadoutParameters *)m_parameters)->preemp);
   }
 }
+
+
+bool TReadoutTest::SetParameters(TScanParameters *pars)
+{
+  TReadoutParameters *rPars = dynamic_cast<TReadoutParameters *>(pars);
+  if (rPars) {
+    std::cout << "TReadoutTest: Updating parameters" << std::endl;
+
+    ((TReadoutParameters *)m_parameters)->nTriggers    = rPars->nTriggers;
+    ((TReadoutParameters *)m_parameters)->row          = rPars->row;
+    ((TReadoutParameters *)m_parameters)->linkSpeed    = rPars->linkSpeed;
+    ((TReadoutParameters *)m_parameters)->occupancy    = rPars->occupancy;
+    ((TReadoutParameters *)m_parameters)->preemp       = rPars->preemp;
+    ((TReadoutParameters *)m_parameters)->pllStages    = rPars->pllStages;
+    ((TReadoutParameters *)m_parameters)->voltageScale = rPars->voltageScale;
+
+    SetName();
+    return true;
+  }
+  else {
+    std::cout << "TReadoutTest::SetParameters: Error, bad parameter type, doing nothing"
+              << std::endl;
+    return false;
+  }
+}
+
 
 // TODO: save number of masked pixels (return value of ApplyMask)
 void TReadoutTest::ConfigureChip(TAlpide *chip)

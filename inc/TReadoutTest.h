@@ -15,7 +15,6 @@
 
 typedef struct __TReadoutParameters : TDataTakingParameters {
   int   row;
-  int   triggers;
   int   linkSpeed;
   int   occupancy;
   int   driverStrength;
@@ -28,6 +27,7 @@ class TReadoutTest : public TDataTaking {
 private:
   void ConfigureChip(TAlpide *chip);
   void ConfigureMask(TAlpide *chip, std::vector<TPixHit> *MaskedPixels);
+  void SetName();
 
 protected:
   THisto CreateHisto();
@@ -45,6 +45,7 @@ public:
   void PrepareStep(int loopIndex) { (void)(&loopIndex); };
   void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
   void               Terminate();
+  bool SetParameters(TScanParameters *pars);
 };
 
 #endif
