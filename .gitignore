@@ -21,3 +21,19 @@ git_status.txt
 .project
 .cproject
 .settings
+
+# additional build files for cmake builds
+CMakeFiles
+CMakeCache.txt
+*.cmake
+*.make
+*_autogen
+Makefile
+libalpide/version.h
+**/libalpide/version.h
+**/Data
+**/GUI/GUI
+**/MosaicSrc/powerboard/GUI/pbGUI
+**/MosaicSrc/powerboard/pbctrl
+**/scripts
+**/analysis
