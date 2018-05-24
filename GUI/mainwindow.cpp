@@ -1580,7 +1580,7 @@ void MainWindow::attachtodatabase()
           delete fMfile;
         }
 
-        ActivityDB *myactivity = new ActivityDB(fDB);
+        ActivityDB *         myactivity = new ActivityDB(fDB);
         ActivityDB::activity activ;
 
         // TODO: check that the idof... are filled in the correct place
