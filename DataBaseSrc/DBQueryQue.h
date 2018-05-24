@@ -45,83 +45,80 @@
 #include "utilities.h"
 
 //#include "AlpideDBManager.h"
-#include "AlpideDBEndPoints.h"
 #include "AlpideDB.h"
+#include "AlpideDBEndPoints.h"
 
 using namespace std;
 
-
 /* -------------------------------------
 
-    Class DBQueryQueue
-    
-   ---------------------------------- */
+ Class DBQueryQueue
+
+ ---------------------------------- */
 #define PROJECT_ID_PROD 383
 #define PROJECT_ID_TEST 21
 
 class DBQueryQueue {
 
-//public:
-//  enum FieldFormat : int {
-//    IntFormat,
-//  };
+  // public:
+  //  enum FieldFormat : int {
+  //    IntFormat,
+  //  };
 
-// Members
+  // Members
 public:
 protected:
-
 private:
-    string theBaseRepoPath;
-    string theSpecificQueuePath;
-    string theExtension;
-    string theLocalCopyRepoPath;
+  string theBaseRepoPath;
+  string theSpecificQueuePath;
+  string theExtension;
+  string theLocalCopyRepoPath;
 
-    bool isTheLocalCopyEnabled;
+  bool isTheLocalCopyEnabled;
 
-// Methods
+  // Methods
 public:
-    DBQueryQueue();
-    ~DBQueryQueue();
+  DBQueryQueue();
+  ~DBQueryQueue();
 
-    bool Push(const string QueryType, ActivityDB::activity *activity);
-    bool Pop(string *QueryType, ActivityDB::activity *activity);
-    bool Read(string FileName, string *QueryType, ActivityDB::activity *activity, bool IsLocal = false);
-    bool Write(string FileName, string QueryType, ActivityDB::activity *activity, bool IsLocal = false);
-    string GetTheFirstFileName();
-    vector<string> GetTheQueue();
+  bool           Push(const string QueryType, ActivityDB::activity *activity);
+  bool           Pop(string *QueryType, ActivityDB::activity *activity);
+  bool           Read(string FileName, string *QueryType, ActivityDB::activity *activity,
+                      bool IsLocal = false);
+  bool           Write(string FileName, string QueryType, ActivityDB::activity *activity,
+                       bool IsLocal = false);
+  string         GetTheFirstFileName();
+  vector<string> GetTheQueue();
 
-    bool Serialize(string QueryType, ActivityDB::activity *activity, string *Output);
-    bool DeSerialize(string Input, string *QueryType, ActivityDB::activity *activity);
+  bool Serialize(string QueryType, ActivityDB::activity *activity, string *Output);
+  bool DeSerialize(string Input, string *QueryType, ActivityDB::activity *activity);
 
-    // getter setter
-    string GetQueueBasePath() { return(theBaseRepoPath);};
-    string GetSpecificPath() { return(theSpecificQueuePath);};
-    string GetEstension() { return(theExtension);};
-    string GetLocalCopyPath() { return(theLocalCopyRepoPath);};
-    bool IsLocalCopyEnabled() { return(isTheLocalCopyEnabled);};
+  // getter setter
+  string GetQueueBasePath() { return (theBaseRepoPath); };
+  string GetSpecificPath() { return (theSpecificQueuePath); };
+  string GetEstension() { return (theExtension); };
+  string GetLocalCopyPath() { return (theLocalCopyRepoPath); };
+  bool   IsLocalCopyEnabled() { return (isTheLocalCopyEnabled); };
 
-    void SetQueueBasePath(string s) {theBaseRepoPath = s;};
-    void SetSpecificPath(string s) { theSpecificQueuePath = s;};
-    void SetEstension(string s) { theExtension = s;};
-    void SetLocalCopyPath(string s) { theLocalCopyRepoPath = s;};
-    void SetLocalCopyEnabled(bool b) { isTheLocalCopyEnabled = b;};
-
+  void SetQueueBasePath(string s) { theBaseRepoPath = s; };
+  void SetSpecificPath(string s) { theSpecificQueuePath = s; };
+  void SetEstension(string s) { theExtension = s; };
+  void SetLocalCopyPath(string s) { theLocalCopyRepoPath = s; };
+  void SetLocalCopyEnabled(bool b) { isTheLocalCopyEnabled = b; };
 
 private:
-    void Init();
-    bool __makeTheFileName(const string Name, string *QueryFileName, bool IsLocal = false);
-    string __addThePathToFileName(const string FileName, bool IsLocal = false);
-    bool __write(const string FileName, const string Query);
-    vector<string> __getTheQueuqeFileList();
-
+  void           Init();
+  bool           __makeTheFileName(const string Name, string *QueryFileName, bool IsLocal = false);
+  string         __addThePathToFileName(const string FileName, bool IsLocal = false);
+  bool           __write(const string FileName, const string Query);
+  vector<string> __getTheQueuqeFileList();
 };
 
 /* -------------------------------------
 
-    Class DBQueueConsumer
-    
-   ---------------------------------- */
+ Class DBQueueConsumer
 
+ ---------------------------------- */
 
 // Definitions
 #define CFG_QUEUEFILEEXETENSION ".dbq"
@@ -148,53 +145,51 @@ private:
 
 class DBQueueConsumer {
 
-// Members
+  // Members
 private:
-    time_t theLastSetStatusTS;
-    bool isTimeOutFired;
-    bool s;
-    
-    ActivityDB::activity *activ;
-    ActivityDB::response *respo;
+  time_t theLastSetStatusTS;
+  bool   isTimeOutFired;
+  bool   s;
 
-    AlpideDB *fDB;
-    ActivityDB *act;
+  ActivityDB::activity *activ;
+  ActivityDB::response *respo;
+
+  AlpideDB *  fDB;
+  ActivityDB *act;
 
 public:
-    string theFileName;
-    int theState;
-    int theSubState;
-    string theQueryType;
-    int theResultId;
+  string theFileName;
+  int    theState;
+  int    theSubState;
+  string theQueryType;
+  int    theResultId;
 
-    bool bDatabasetype;
+  bool bDatabasetype;
 
-    int cfgMaxReconAtt;
-    string cfgStatusFile = "";
-    string cfgExtension = "";
-    string cfgBasePath = "";
-    string cfgSpecificPath = "";
+  int    cfgMaxReconAtt;
+  string cfgStatusFile   = "";
+  string cfgExtension    = "";
+  string cfgBasePath     = "";
+  string cfgSpecificPath = "";
 
-    bool executeTheRun;
+  bool executeTheRun;
 
-
-// Methods
+  // Methods
 private:
-    bool __ReconectDB(bool bDatabasetype);
-    void __getTheRunStatus();
-    void __setTheRunStatus(int State);
-    bool __readTheQueue();
-    bool __consumeTheQueue();
-    void __checkTimeOut();
+  bool __ReconectDB(bool bDatabasetype);
+  void __getTheRunStatus();
+  void __setTheRunStatus(int State);
+  bool __readTheQueue();
+  bool __consumeTheQueue();
+  void __checkTimeOut();
 
 public:
-    DBQueueConsumer(bool DataBaseType);
-    ~DBQueueConsumer();
-    int GetQueueLenght();
-    vector<string> GetQueue();
-    void Run();
-    int GetProjectId() { return( fDB->GetProjectId() );};
+  DBQueueConsumer(bool DataBaseType);
+  ~DBQueueConsumer();
+  int            GetQueueLenght();
+  vector<string> GetQueue();
+  void           Run();
+  int            GetProjectId() { return (fDB->GetProjectId()); };
 };
-
 
 #endif /* DBQUERYQUE_H_ */

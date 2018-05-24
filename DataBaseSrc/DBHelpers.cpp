@@ -80,7 +80,8 @@ int DbGetAttachmentTypeId(AlpideDB *db, string name)
 
   //  std::cout << "TypeListSize: " << attTypeList.size() << std::endl;
   for (unsigned int i = 0; i < attTypeList.size(); i++) {
-     //  std::cout << "  Searching " << name << ", found " << attTypeList.at(i).Category << std::endl;
+    //  std::cout << "  Searching " << name << ", found " << attTypeList.at(i).Category <<
+    //  std::endl;
     if (name == attTypeList.at(i).Category) {
       return attTypeList.at(i).ID;
     }
@@ -533,30 +534,28 @@ void DbAddAttachment(AlpideDB *db, ActivityDB::activity &activity, TAttachmentTy
 
   activity.Attachments.push_back(attachment);
 }
-void DbAddUri(AlpideDB *db, ActivityDB::activity &activity, string description,
-              string path)
+void DbAddUri(AlpideDB *db, ActivityDB::activity &activity, string description, string path)
 {
   ActivityDB::uri uri;
 
-  uri.ID = activity.ID;
+  uri.ID          = activity.ID;
   uri.Description = description;
-  uri.Path = path;
-  uri.User = activity.User;
+  uri.Path        = path;
+  uri.User        = activity.User;
 
   std::cout << "Attaching URI " << description << " with  " << path << std::endl;
 
   activity.Uris.push_back(uri);
 }
 
-void DbAddInComp(AlpideDB *db, ActivityDB::activity &activity, int componentId,
-              int componentTypeId)
+void DbAddInComp(AlpideDB *db, ActivityDB::activity &activity, int componentId, int componentTypeId)
 {
   ActivityDB::incomp com;
 
-  com.ID = activity.ID;
-  com.CompID = componentId;
+  com.ID         = activity.ID;
+  com.CompID     = componentId;
   com.CompTypeID = componentTypeId;
-  com.User = activity.User;
+  com.User       = activity.User;
 
   std::cout << "Assign Component In " << componentId << " type  " << componentTypeId << std::endl;
 
@@ -564,14 +563,14 @@ void DbAddInComp(AlpideDB *db, ActivityDB::activity &activity, int componentId,
 }
 
 void DbAddOutComp(AlpideDB *db, ActivityDB::activity &activity, int componentId,
-              int componentTypeId)
+                  int componentTypeId)
 {
   ActivityDB::outcomp com;
 
-  com.ID = activity.ID;
-  com.CompID = componentId;
+  com.ID         = activity.ID;
+  com.CompID     = componentId;
   com.CompTypeID = componentTypeId;
-  com.User = activity.User;
+  com.User       = activity.User;
 
   std::cout << "Assign Component Out " << componentId << " type  " << componentTypeId << std::endl;
 
