@@ -1669,7 +1669,7 @@ void MainWindow::attachtodatabase()
         myactivity->theAsyncronuosQueue->SetEstension(".dbq");
         myactivity->theAsyncronuosQueue->SetLocalCopyPath("/tmp");
         myactivity->theAsyncronuosQueue->SetSpecificPath("GUIlocalQueryBackup");
-        myactivity->theAsyncronuosQueue->Write(FileName, "CreateActivity", activ, false);
+        myactivity->theAsyncronuosQueue->Write(FileName, "CreateActivity", activ, true);
 
         // And create the activity
         myactivity->Create(&activ);

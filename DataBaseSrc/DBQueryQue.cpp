@@ -77,9 +77,9 @@ DBQueryQueue::~DBQueryQueue()
  *        returns : a string
  *
  *---------------- */
-string DBQueryQueue::__addThePathToFileName(const string FileName)
+string DBQueryQueue::__addThePathToFileName(const string FileName, bool isLocal)
 {
-    return( theBaseRepoPath + "/" + theSpecificQueuePath + "/" + FileName);
+    return( (IsLocal ? theLocalCopyRepoPath : theBaseRepoPath) + "/" + theSpecificQueuePath + "/" + FileName);
 }
 
 /* -----------------
@@ -260,9 +260,9 @@ bool DBQueryQueue::Pop(string *QueryType, ActivityDB::activity *activity)
  *        returns : True if is OK
  *
  *---------------- */
-bool DBQueryQueue::Read(string FileName, string *QueryType, ActivityDB::activity *activity)
+bool DBQueryQueue::Read(string FileName, string *QueryType, ActivityDB::activity *activity, bool IsLocal)
 {
-    string FileWithPath = __addThePathToFileName(FileName);
+    string FileWithPath = __addThePathToFileName(FileName,IsLocal);
     if(!fileExists(FileWithPath)) {
         cerr << "DBQueue Error the file :"<< FileWithPath << " not exists !" << endl;
         return(false);
@@ -295,9 +295,9 @@ bool DBQueryQueue::Read(string FileName, string *QueryType, ActivityDB::activity
  *        returns : True if is OK
  *
  *---------------- */
-bool DBQueryQueue::Write(string FileName, string QueryType, ActivityDB::activity *activity)
+bool DBQueryQueue::Write(string FileName, string QueryType, ActivityDB::activity *activity, bool IsLocal)
 {
-    string FileWithPath = __addThePathToFileName(FileName);
+    string FileWithPath = __addThePathToFileName(FileName,IsLocal);
     string OutBuffer;
     if(!Serialize(QueryType, activity, &OutBuffer)) {
         cerr << "DBQueue Error in Serialization !" << endl;

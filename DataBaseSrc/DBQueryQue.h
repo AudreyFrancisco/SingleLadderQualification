@@ -85,8 +85,8 @@ public:
 
     bool Push(const string QueryType, ActivityDB::activity *activity);
     bool Pop(string *QueryType, ActivityDB::activity *activity);
-    bool Read(string FileName, string *QueryType, ActivityDB::activity *activity);
-    bool Write(string FileName, string QueryType, ActivityDB::activity *activity);
+    bool Read(string FileName, string *QueryType, ActivityDB::activity *activity, bool IsLocal = false);
+    bool Write(string FileName, string QueryType, ActivityDB::activity *activity, bool IsLocal = false);
     string GetTheFirstFileName();
     vector<string> GetTheQueue();
 
@@ -110,7 +110,7 @@ public:
 private:
     void Init();
     bool __makeTheFileName(const string Name, string *QueryFileName, bool IsLocal = false);
-    string __addThePathToFileName(const string FileName);
+    string __addThePathToFileName(const string FileName, bool IsLocal = false);
     bool __write(const string FileName, const string Query);
     vector<string> __getTheQueuqeFileList();
 
