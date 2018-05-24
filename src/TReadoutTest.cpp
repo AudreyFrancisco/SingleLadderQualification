@@ -54,13 +54,14 @@ bool TReadoutTest::SetParameters(TScanParameters *pars)
   if (rPars) {
     std::cout << "TReadoutTest: Updating parameters" << std::endl;
 
-    ((TReadoutParameters *)m_parameters)->nTriggers    = rPars->nTriggers;
-    ((TReadoutParameters *)m_parameters)->row          = rPars->row;
-    ((TReadoutParameters *)m_parameters)->linkSpeed    = rPars->linkSpeed;
-    ((TReadoutParameters *)m_parameters)->occupancy    = rPars->occupancy;
-    ((TReadoutParameters *)m_parameters)->preemp       = rPars->preemp;
-    ((TReadoutParameters *)m_parameters)->pllStages    = rPars->pllStages;
-    ((TReadoutParameters *)m_parameters)->voltageScale = rPars->voltageScale;
+    ((TReadoutParameters *)m_parameters)->nTriggers      = rPars->nTriggers;
+    ((TReadoutParameters *)m_parameters)->row            = rPars->row;
+    ((TReadoutParameters *)m_parameters)->linkSpeed      = rPars->linkSpeed;
+    ((TReadoutParameters *)m_parameters)->occupancy      = rPars->occupancy;
+    ((TReadoutParameters *)m_parameters)->driverStrength = rPars->driverStrength;
+    ((TReadoutParameters *)m_parameters)->preemp         = rPars->preemp;
+    ((TReadoutParameters *)m_parameters)->pllStages      = rPars->pllStages;
+    ((TReadoutParameters *)m_parameters)->voltageScale   = rPars->voltageScale;
 
     SetName();
     return true;
