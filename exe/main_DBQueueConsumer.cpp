@@ -99,7 +99,7 @@ int main()
     }
     while(ch!='e');
 
-    theQueue->executeTheRun = false
+    theQueue->executeTheRun = false;
     engine.join();
 
     cout <<  "Bye bye !" << endl;
