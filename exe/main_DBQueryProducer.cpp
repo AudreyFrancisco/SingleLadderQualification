@@ -55,7 +55,7 @@ int main()
     myactivity->theAsyncronuosQueue->SetLocalCopyEnabled(true);
     myactivity->theAsyncronuosQueue->SetEstension(".dbq");
     myactivity->theAsyncronuosQueue->SetLocalCopyPath("/tmp/loc");
-    myactivity->theAsyncronuosQueue->SetBasePath("/tmp");
+    myactivity->theAsyncronuosQueue->SetQueueBasePath("/tmp");
     myactivity->theAsyncronuosQueue->SetSpecificPath("GUIlocalQueryBackup");
 
     activ.Type      = 881; //fIdofactivitytype;
