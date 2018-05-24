@@ -128,7 +128,7 @@ bool HasData(const common::TChipIndex &idx)
 
 void WriteDataToFile(const char *fName, bool Recreate)
 {
-  char  fNameChip[100];
+  char  fNameChip[200];
   FILE *fp;
 
   char fNameTemp[100];
@@ -344,7 +344,7 @@ int main(int argc, char **argv)
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   sleep(1);
-  char Suffix[20], fName[100];
+  char Suffix[80], fName[200];
 
   InitScanParameters();
   CreateScanHisto();

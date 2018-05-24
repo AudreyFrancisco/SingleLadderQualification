@@ -821,9 +821,8 @@ void TReadoutBoardDAQ::DumpConfig(const char *fName, bool writeFile, char *confi
     fclose(fp);
   }
 
-  sprintf(config, "FIRMWARE  0x%x\n", ReadFirmwareVersion());
-  sprintf(config, "%sTRIGGERDELAY  %i\n", config, GetBoardConfig()->GetTriggerDelay());
-  sprintf(config, "%sPULSEDELAY  %i\n", config, GetBoardConfig()->GetPulseDelay());
+  sprintf(config, "FIRMWARE  0x%x\nTRIGGERDELAY  %i\nPULSEDELAY  %i\n", ReadFirmwareVersion(),
+          GetBoardConfig()->GetTriggerDelay(), GetBoardConfig()->GetPulseDelay());
 }
 
 //---------------------------------------------------------

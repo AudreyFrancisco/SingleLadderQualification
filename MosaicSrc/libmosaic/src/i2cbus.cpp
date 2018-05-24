@@ -82,7 +82,7 @@ void I2Cbus::execute()
   try {
     MWbbSlave::execute();
   }
-  catch (MIPBusErrorWrite) {
+  catch (MIPBusErrorWrite &) {
     throw MIPBusErrorWrite("Remote bus error in write - No acknowledge from I2C slave?");
   }
 }

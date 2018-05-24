@@ -123,7 +123,7 @@ void TDigitalAnalysis::CalculatePrediction(std::string hicName)
 
 void TDigitalAnalysis::WriteHitData(TScanHisto *histo, int row)
 {
-  char fName[100];
+  char fName[140];
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     TScanResultChip *chipResult = m_result->GetChipResult(m_chipList.at(ichip));
     if (m_config->GetUseDataPath()) {

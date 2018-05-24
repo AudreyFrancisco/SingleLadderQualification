@@ -94,7 +94,7 @@ void AD5254::ackPolling()
       i2cBus->execute();
       break;
     }
-    catch (MIPBusErrorWrite) {
+    catch (MIPBusErrorWrite &) {
       // wait and retry
       usleep(200);
     }

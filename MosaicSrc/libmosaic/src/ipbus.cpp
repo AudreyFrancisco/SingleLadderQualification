@@ -38,14 +38,14 @@
 // #define TRACE_IPBUS
 
 #ifdef TRACE_IPBUS
-#define TRACE(format, args...)                                                                     \
+#define TRACE(format, ...)                                                                         \
   {                                                                                                \
     fprintf(stderr, "%s ", name().c_str());                                                        \
-    fprintf(stderr, format, ##args);                                                               \
+    fprintf(stderr, format, ##__VA_ARGS__);                                                        \
     fflush(stderr);                                                                                \
   }
 #else
-#define TRACE(format, args...)
+#define TRACE(format, ...)
 #endif
 
 IPbus::IPbus(int pktSize)
@@ -152,7 +152,7 @@ void IPbus::addIdle()
 {
   std::lock_guard<std::recursive_mutex> lock(mutex);
 
-  TRACE("IPbus::addIdle\n");
+  TRACE("IPbus::addIdle%s\n", "");
   chkBuffers(4, 4);
   addHeader(0, typeIdIdle, NULL);
   expectedRxSize += 4;
@@ -354,7 +354,7 @@ void IPbus::addBadIdle(bool sendWrongVersion, bool sendWrongInfoCode)
 {
   std::lock_guard<std::recursive_mutex> lock(mutex);
 
-  TRACE("IPbus::addBadIdle\n");
+  TRACE("IPbus::addBadIdle%s\n", "");
   chkBuffers(4, 4);
 
   // modified copy of addHeader function

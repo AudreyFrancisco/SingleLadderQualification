@@ -212,7 +212,7 @@ private:
   int   m_nMaskStages;
   int   m_pixPerRegion;
   int   m_noiseCutInv;
-  char  m_fNameSuffix[20];
+  char  m_fNameSuffix[80];
   int   m_testWithoutComp;
   int   m_status;
   // NEW--added for additional scans

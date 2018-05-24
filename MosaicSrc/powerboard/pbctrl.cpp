@@ -145,7 +145,7 @@ int readopt(int argc, char *argv[])
   }
   if (pc >= argc || argv[pc][0] == '-') return -1;
 
-  strncpy(OPTIONS.board, argv[pc], BOARD_NAME_LEN);
+  strncpy(OPTIONS.board, argv[pc], BOARD_NAME_LEN - 1);
 
   return 0;
 }

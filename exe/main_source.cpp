@@ -228,7 +228,7 @@ int main(int argc, char **argv)
   decodeCommandParameters(argc, argv);
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
-  char Suffix[20], fName[100];
+  char Suffix[80], fName[200];
 
   ClearHitData();
   time_t     t   = time(0); // get time now

@@ -55,6 +55,9 @@ message(STATUS "Using C++${CMAKE_CXX_STANDARD}")
 
 # warn about undefined symbols already for libraries
 link_libraries("-Wl,--no-undefined")
+add_compile_options("-Wall")
+add_compile_options("-Werror")
+add_compile_options("-Wpedantic")
 
 # check for build in the source tree
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)

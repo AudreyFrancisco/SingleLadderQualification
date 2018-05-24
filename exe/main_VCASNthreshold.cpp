@@ -130,7 +130,7 @@ void CopyHitData(std::vector<TPixHit> *Hits, int charge)
 
 void WriteDataToFile(const char *fName, bool Recreate)
 {
-  char  fNameChip[100];
+  char  fNameChip[200];
   FILE *fp;
 
   char fNameTemp[100];
@@ -394,7 +394,7 @@ int main(int argc, char **argv)
   InitHitData();
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
   InitScanParameters();
-  char Suffix[20], fName[100]; //, Config[1000];
+  char Suffix[80], fName[200]; //, Config[1000];
 
   ClearHitData();
   time_t     t   = time(0); // get time now
