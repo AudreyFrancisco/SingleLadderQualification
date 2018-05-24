@@ -1580,7 +1580,6 @@ void MainWindow::attachtodatabase()
         }
 
         ActivityDB *myactivity = new ActivityDB(fDB);
-
         ActivityDB::activity activ;
 
         // TODO: check that the idof... are filled in the correct place
@@ -1646,70 +1645,45 @@ void MainWindow::attachtodatabase()
 
         DbAddMember(fDB, activ, fIdofoperator);
 
-        std::vector<ActivityDB::actUri> uris;
+        DbAddUri(fDB, activ, uri.Description, uri.Path);
 
-        uris.push_back(uri);
-
-        myactivity->Create(&activ);
-        cout << myactivity->DumpResponse() << endl;
-        myactivity->AssignUris(activ.ID, fIdofoperator, (&uris));
-        if (myactivity->GetResponse().ErrorCode == -1) {
-          QString errormessage;
-          errormessage = "Uri: ";
-          errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
-          fActivityResults.push_back(-1);
-          fErrorMessages.push_back(errormessage);
-        }
-        myactivity->AssignComponent(activ.ID, fComponentIDs.at(i), fActComponentTypeIDs.at(i).first,
-                                    fIdofoperator);
-
-
-        if (myactivity->GetResponse().ErrorCode == -1) {
-          QString errormessage;
-          errormessage = "Input component: ";
-          errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
-          fActivityResults.push_back(-1);
-          fErrorMessages.push_back(errormessage);
-        }
-
-
-        myactivity->AssignComponent(activ.ID, fComponentIDs.at(i),
-                                    fActComponentTypeIDs.at(i).second, fIdofoperator);
-        if (myactivity->GetResponse().ErrorCode == -1) {
-          QString errormessage;
-          errormessage = "Output comp: ";
-          errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
-          fActivityResults.push_back(-1);
-          fErrorMessages.push_back(errormessage);
-        }
+        DbAddInComp(fDB, activ, fComponentIDs.at(i), fActComponentTypeIDs.at(i).first);
+        DbAddOutComp(fDB, activ, fComponentIDs.at(i), fActComponentTypeIDs.at(i).second);
         if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
-          myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstavein, fIdofoperator);
-          if (myactivity->GetResponse().ErrorCode == -1) {
-            QString errormessage;
-            errormessage = "Input HS: ";
-            errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
-            fActivityResults.push_back(-1);
-            fErrorMessages.push_back(errormessage);
-          }
-          myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstaveout, fIdofoperator);
-          if (myactivity->GetResponse().ErrorCode == -1) {
-            QString errormessage;
-            errormessage = "Output HS: ";
-            errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
-            fActivityResults.push_back(-1);
-            fErrorMessages.push_back(errormessage);
-          }
+          DbAddInComp(fDB, activ, fhalfstaveid, fhalfstavein);
+          DbAddOutComp(fDB, activ, fhalfstaveid, fhalfstaveout);
         }
+
         if (fStatus == false) {
           activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
           std::cout << "the activity is closed" << std::endl;
         }
-
         activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
-        myactivity->Change(&activ);
-
         std::cout << "the activity result is: " << activ.Result << std::endl;
         fActivityResults.push_back(activ.Result);
+#define SYNCCREATE
+#ifdef SYNCCREATE
+        // Now we dump the activity into the local backup repository
+        string FileName = activ->Name;
+        myactivity->theAsyncronuosQueue->SetEstension(".dbq");
+        myactivity->theAsyncronuosQueue->SetLocalCopyPath("/tmp");
+        myactivity->theAsyncronuosQueue->SetSpecificPath("GUIlocalQueryBackup");
+        myactivity->theAsyncronuosQueue->Write(FileName, "CreateActivity", aActivity, false);
+
+        // And create the activity
+        myactivity->Create(&activ);
+        cout << myactivity->DumpResponse() << endl;
+#else
+        // The asyncronous
+        myactivity->theAsyncronuosQueue->SetEstension(".dbq");
+        myactivity->theAsyncronuosQueue->SetLocalCopyPath("/tmp/loc");
+        myactivity->theAsyncronuosQueue->SetBasePath("/tmp");
+        myactivity->theAsyncronuosQueue->SetLocalCopyEnabled(true);
+        myactivity->theAsyncronuosQueue->SetSpecificPath("GUIlocalQueryBackup");
+        myactivity->CreateAsyncronous(&activ);
+#endif
+
+
         delete myactivity;
       }
     }

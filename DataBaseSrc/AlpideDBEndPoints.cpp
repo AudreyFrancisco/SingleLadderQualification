@@ -82,10 +82,6 @@ AlpideTable::~AlpideTable() {}
  *
  *
  *---------------- */
-
-// TODO: Need to make two routines to decode the response in order to be compliant with SOAP/POST
-// versions.
-
 AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Session)
 {
   bool      bGoChildren = false;
@@ -1094,7 +1090,6 @@ ActivityDB::response *ActivityDB::CreateMember_2(activity *aActivity)
 *        In Param : the activity struct
 *        returns : a char pointer to a string buffer
 *---------------- */
-// TODO: evaluate the error conditions return policy ??
 
 ActivityDB::response *ActivityDB::CreateParameter_3(activity *aActivity)
 {
@@ -1214,15 +1209,15 @@ ActivityDB::response *ActivityDB::CreateAttachments_4(activity *aActivity)
 
 
 /* -----------------
-*    Create := Create a new activity record  TODO: complete the activity with all the info
+*    Create := Create a new activity record
 *
 *        In Param : the activity struct
 *        returns : a char pointer to a string buffer
 *---------------- */
-// TODO: evaluate the error conditions return policy ??
 ActivityDB::response *ActivityDB::Create(activity *aActivity)
 {
 
+  // For each subset of activity elements executes the query
   ActivityDB::response *response;
 
   response = CreateActivity_1(aActivity);
@@ -1236,6 +1231,31 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
 
   response = CreateAttachments_4(aActivity);
   if(response->ErrorCode != 0) return (&theResponse);
+
+  response = AssignUris(aActivity->ID, aActivity->User, &(aActivity->Uris));
+  if(response->ErrorCode != 0) return (&theResponse);
+
+  for(int i=0;i< aActivity->InComps.size();i++){
+    response = AssignComponent(aActivity->ID, aActivity->InComps.at(i).CompID,
+               aActivity->InComps.at(i).CompTypeID, aActivity->InComps.at(i).User);
+    if(response->ErrorCode != 0) {
+      cerr << "Assign Input Components Error :" << DumpResponse()  << endl;
+    }
+    else {
+      aActivity->InComps.at(i).ID = response->ID;
+    }
+  }
+
+  for(int i=0;i< aActivity->OutComps.size();i++){
+    response = AssignComponent(aActivity->ID, aActivity->OutComps.at(i).CompID,
+               aActivity->OutComps.at(i).CompTypeID, aActivity->OutComps.at(i).User);
+    if(response->ErrorCode != 0) {
+      cerr << "Assign Output Components Error :" << DumpResponse()  << endl;
+    }
+    else {
+      aActivity->OutComps.at(i).ID = response->ID;
+    }
+  }
 
   return (&theResponse);
 }
