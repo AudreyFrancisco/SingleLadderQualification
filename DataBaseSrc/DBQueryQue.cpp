@@ -49,6 +49,13 @@
 #include "DBQueryQue.h"
 #include "cJSON.h"
 
+/* ------------ DBQueueConsumer Class ------------- */
+
+/* -----------------
+ *    DBQueryQueue := Constructor
+ *
+ *
+ *---------------- */
 DBQueryQueue::DBQueryQueue()
 {
     theBaseRepoPath = "/tmp";
@@ -60,14 +67,30 @@ DBQueryQueue::DBQueryQueue()
 
 DBQueryQueue::~DBQueryQueue()
 {
-
 }
 
-string DBQueryQueue::__addThePathToFileName(const string FileName, bool isQueue)
+/* -----------------
+ *    __addThePathToFileName := returns a string that contains the filename
+ *                              with the Queue path
+ *        Params :  FileName := the file name
+ *
+ *        returns : a string
+ *
+ *---------------- */
+string DBQueryQueue::__addThePathToFileName(const string FileName)
 {
-    return( (!isQueue ? theLocalCopyRepoPath : theBaseRepoPath)  + "/" + theSpecificQueuePath + "/" + FileName);
+    return( theBaseRepoPath + "/" + theSpecificQueuePath + "/" + FileName);
 }
 
+/* -----------------
+ *    __makeTheFileName := build the file name for the with the format
+ *                         Path/YYYYMMDD-HHMMSS_ActivityName.Extension
+ *        Params :  Name := the name of the activity
+ *                  QueryFileName := the pointer to a string that receive the file name
+ *                  IsLocal := True if is a Local Copy or False if a Queue file
+ *        returns : True if is OK
+ *
+ *---------------- */
 bool DBQueryQueue::__makeTheFileName(const string Name, string *QueryFileName, bool IsLocal)
 {
     string CompletePath;
@@ -86,6 +109,14 @@ bool DBQueryQueue::__makeTheFileName(const string Name, string *QueryFileName, b
     return(true);
 }
 
+/* -----------------
+ *    __getTheQueuqeFileList := returns the ordered list of files
+ *                              contained into the queue
+ *
+ *        Params :
+ *        returns : a vector of strings
+ *
+ *---------------- */
 vector<string> DBQueryQueue::__getTheQueuqeFileList()
 {
     vector<string> fileList;
@@ -111,6 +142,14 @@ vector<string> DBQueryQueue::__getTheQueuqeFileList()
     return(fileList);
 }
 
+/* -----------------
+ *    __write := write on the file the query string in JSON format
+ *
+ *        Params :  FileName := the destination File Name
+ *                  Query := the string that contains the query in JSON
+ *        returns : True if is OK
+ *
+ *---------------- */
 bool DBQueryQueue::__write(const string FileName, const string Query)
 {
     ofstream newFile;
@@ -126,6 +165,15 @@ bool DBQueryQueue::__write(const string FileName, const string Query)
     return(true);
 }
 
+/* -----------------
+ *    Push := Inserts an Activity into the Queue and also write a
+ *            backup copy if the LocalCopy is enabled
+ *
+ *        Params :  QueryType := the string that describe the query
+ *                  activity := the structure that contains all elements
+ *        returns : True if is OK
+ *
+ *---------------- */
 bool DBQueryQueue::Push(const string QueryType, ActivityDB::activity *activity)
 {
     string OutBuffer;
@@ -149,12 +197,24 @@ bool DBQueryQueue::Push(const string QueryType, ActivityDB::activity *activity)
     return(res);
 }
 
+/* -----------------
+ *    GetTheQueue := Returns the list of files in the queue
+ *
+ *        returns : a vector of strings
+ *
+ *---------------- */
 vector<string> DBQueryQueue::GetTheQueue()
 {
     vector<string> Files = __getTheQueuqeFileList();
     return(Files);
 }
 
+/* -----------------
+ *    GetTheFirstFileName := Returns the first file into the queue
+ *
+ *        returns : a string, empty string if the queue is empty
+ *
+ *---------------- */
 string DBQueryQueue::GetTheFirstFileName()
 {
     vector<string> Files = __getTheQueuqeFileList();
@@ -164,6 +224,15 @@ string DBQueryQueue::GetTheFirstFileName()
     return("");
 }
 
+/* -----------------
+ *    Pop := Get the oldest activity from the queue, fills the structure
+ *           and remove the file from the queue
+ *
+ *        Params :  QueryType := the pointer to the string that describe the query
+ *                  activity := the pointer to the structure that contains all elements
+ *        returns : True if is OK
+ *
+ *---------------- */
 bool DBQueryQueue::Pop(string *QueryType, ActivityDB::activity *activity)
 {
     vector<string> Files = __getTheQueuqeFileList();
@@ -183,10 +252,17 @@ bool DBQueryQueue::Pop(string *QueryType, ActivityDB::activity *activity)
     return(true);
 }
 
-
-bool DBQueryQueue::Read(string FileName, string *QueryType, ActivityDB::activity *activity, bool isQueue)
+/* -----------------
+ *    Read := Get the an activity from the queue, fills the structure
+ *
+ *        Params :  QueryType := the pointer to the string that describe the query
+ *                  activity := the pointer to the structure that contains all elements
+ *        returns : True if is OK
+ *
+ *---------------- */
+bool DBQueryQueue::Read(string FileName, string *QueryType, ActivityDB::activity *activity)
 {
-    string FileWithPath = __addThePathToFileName(FileName, isQueue);
+    string FileWithPath = __addThePathToFileName(FileName);
     if(!fileExists(FileWithPath)) {
         cerr << "DBQueue Error the file :"<< FileWithPath << " not exists !" << endl;
         return(false);
@@ -210,9 +286,18 @@ bool DBQueryQueue::Read(string FileName, string *QueryType, ActivityDB::activity
     return(false);
 }
 
-bool DBQueryQueue::Write(string FileName, string QueryType, ActivityDB::activity *activity, bool isQueue)
+/* -----------------
+ *    Write := write in the file the activity
+ *
+ *        Params :  FileName := the name of the file, without the path
+ *                  QueryType := the string that describe the query
+ *                  activity := the structure that contains all elements
+ *        returns : True if is OK
+ *
+ *---------------- */
+bool DBQueryQueue::Write(string FileName, string QueryType, ActivityDB::activity *activity)
 {
-    string FileWithPath = __addThePathToFileName(FileName, isQueue);
+    string FileWithPath = __addThePathToFileName(FileName);
     string OutBuffer;
     if(!Serialize(QueryType, activity, &OutBuffer)) {
         cerr << "DBQueue Error in Serialization !" << endl;
@@ -222,7 +307,15 @@ bool DBQueryQueue::Write(string FileName, string QueryType, ActivityDB::activity
     return(res);
 }
 
-
+/* -----------------
+ *    Serialize := converts the activity structure into a JSON string
+ *
+ *        Params :  QueryType := the string that describe the query
+ *                  activity := the structure that contains all elements
+ *                  Output := the pointer to the string that contains the JSON
+ *        returns : True if is OK
+ *
+ *---------------- */
 bool DBQueryQueue::Serialize(string QueryType, ActivityDB::activity *activity, string *Output)
 {
     cJSON *root = NULL;
@@ -310,6 +403,16 @@ bool DBQueryQueue::Serialize(string QueryType, ActivityDB::activity *activity, s
     return(true);
 }
 
+/* -----------------
+ *    DeSerialize := converts the JSOPN string into an activity structure
+ *
+ *        Params :  Input := the string that contains the JSON
+ *                  QueryType := the pointer to the string that describe the query
+ *                  activity := the pointer to the structure that contains all elements
+ *
+ *        returns : True if is OK
+ *
+ *---------------- */
 bool DBQueryQueue::DeSerialize(string Input, string *QueryType, ActivityDB::activity *activity)
 {
     cJSON *root = cJSON_Parse(Input.c_str());
@@ -533,6 +636,15 @@ bool DBQueryQueue::DeSerialize(string Input, string *QueryType, ActivityDB::acti
 }
 
 /* ------------ DBQueueConsumer Class ------------- */
+
+
+/* -----------------
+ *    DBQueueConsumer := constructor
+ *
+ *        Params :  DataBaseType := TRUE if is the TEST DB, FALSE if the PRODUCTION
+ *
+ *
+ *---------------- */
 DBQueueConsumer::DBQueueConsumer(bool DataBaseType)
 {
     bDatabasetype = DataBaseType;
@@ -553,6 +665,19 @@ DBQueueConsumer::~DBQueueConsumer()
 }
 
 
+/* -----------------
+ *    __ReconectDB := make the connection to the DB and also create the Activity
+ *                    structures.
+ *                    It performs a certain number of attempts before abort the operation
+ *
+ *        Params :  bDatabasetype := TRUE if is the TEST DB, FALSE if the PRODUCTION
+ *
+ *        returns : True if is OK
+ *
+ *        CFG_RECONNECTDELAY_MSEC := #define  the milliseconds between attempts
+ *        cfgMaxReconAtt := #public member  the maximum number of attempts
+ *
+ *---------------- */
 bool DBQueueConsumer::__ReconectDB(bool bDatabasetype)
 {
     if(fDB == NULL) {
@@ -588,7 +713,14 @@ bool DBQueueConsumer::__ReconectDB(bool bDatabasetype)
     return(bDone);
 }
 
-
+/* -----------------
+ *    __getTheRunStatus := reads the content of the StatusFile and update class members
+ *
+ *     Format ASCII : lines:
+ *                       <State> : integer number
+ *                       <FileName> : string, the actual managed queue file
+ *
+ *---------------- */
 void DBQueueConsumer::__getTheRunStatus()
 {
     char buf[999];
@@ -607,6 +739,18 @@ void DBQueueConsumer::__getTheRunStatus()
     }
     return;
 }
+
+/* -----------------
+ *    __setTheRunStatus := writes into the Status File the actual state
+ *
+ *        Params :  State := the State of actual process
+ *
+ *     Format ASCII : lines:
+ *                       <State> : integer number
+ *                       <FileName> : string, the actual managed queue file
+ *                       <LastTimeStamp> : string, the time stamp
+ *
+ *---------------- */
 void DBQueueConsumer::__setTheRunStatus(int State)
 {
     char buf[999];
@@ -631,6 +775,14 @@ void DBQueueConsumer::__setTheRunStatus(int State)
     return;
 }
 
+/* -----------------
+ *    __checkTimeOut := checks the duration of one activity creation step
+ *                      if this take more than one hour an error message
+ *                      is print on the standard error
+ *
+ *     CFG_CONSUMERDELAY_MSEC := #define  the milliseconds between activity steps
+ *
+ *---------------- */
 void DBQueueConsumer::__checkTimeOut()
 {
     time_t now = time(0);
@@ -646,6 +798,12 @@ void DBQueueConsumer::__checkTimeOut()
     usleep(CFG_CONSUMERDELAY_MSEC * 1000);
 }
 
+/* -----------------
+ *    __readTheQueue := gets the oldest filename in the queue
+ *
+ *        returns : True if is OK
+ *
+ *---------------- */
 bool DBQueueConsumer::__readTheQueue()
 {
     bool bRes = true;
@@ -655,6 +813,17 @@ bool DBQueueConsumer::__readTheQueue()
     return(bRes);
 }
 
+/* -----------------
+ *    __consumeTheQueue := executes all the steps necessary to perform
+ *                         an activity creation
+ *                         The function is stateless, it is able to restart
+ *                         from the last not performed step.
+ *
+ *        returns : True everytime
+ *
+ *        TODO: Add a mechanism that manage the CheckTimeOut in order to avoid blocks
+ *
+ *---------------- */
 bool DBQueueConsumer::__consumeTheQueue()
 {
     int s;
@@ -800,28 +969,50 @@ bool DBQueueConsumer::__consumeTheQueue()
     return(true);
 }
 
+/* -----------------
+ *    Run := executes the loop of DB connection/consuming of the queue
+ *
+ *
+ *     CFG_CREATIONDELAY_MSEC := #define  the milliseconds between activities
+ *     executeTheRun := public member  FALSE stops the cycle
+ *
+ *
+ *---------------- */
 void DBQueueConsumer::Run()
 {
-    bool bExit = false;
-    while(!bExit) {
+	executeTheRun = true;
+    while(executeTheRun) {
         if (!__ReconectDB(bDatabasetype)) {
             cerr << "DBQueueConsumer : We loose the DB connection..." << endl;
-            bExit = true;
+            executeTheRun = false;
         } else {
-            __consumeTheQueue(); // manage one queue element
+            executeTheRun = __consumeTheQueue(); // manage one queue element
             usleep(CFG_CREATIONDELAY_MSEC * 1000);
         }
     }
 }
 
+/* -----------------
+ *    GetQueueLenght := returns the number of activities in the queue
+ *
+ *        returns : integer, the length
+ *
+ *---------------- */
 int DBQueueConsumer::GetQueueLenght()
 {
     vector<string> list = act->theAsyncronuosQueue->GetTheQueue();
     return(list.size());
 }
 
+/* -----------------
+ *    GetQueue := returns the list of files of activities in the queue
+ *
+ *        returns : vector of strings
+ *
+ *---------------- */
 vector<string> DBQueueConsumer::GetQueue()
 {
     return( act->theAsyncronuosQueue->GetTheQueue() );
 }
 
+// ---------------------------   EOF  -------------------------------
