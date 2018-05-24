@@ -37,6 +37,7 @@
 #include "AlpideConfig.h"
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
+#include "DBQueryQue.h"
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
