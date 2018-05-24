@@ -3,6 +3,8 @@ set(SRCS
   AlpideDBEndPoints.cpp
   AlpideDBManager.cpp
   CernSsoCookiesJar.cpp
+  DBQueryQue.cpp
+  cJSON.c
   utilities.cpp
 )
 

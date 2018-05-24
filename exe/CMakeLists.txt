@@ -6,6 +6,8 @@ set(EXE
 set(TEST_EXE
   test_GRST
   test_alucms
+  test_DBQueryProducer
+  test_DBQueueConsumer
   test_chip_count
   test_dacscan
   test_dacscan_voltage

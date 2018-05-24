@@ -47,6 +47,12 @@ bool DbAddParameter(AlpideDB *db, ActivityDB::activity &activity, string name, f
                     std::string file);
 void DbAddAttachment(AlpideDB *db, ActivityDB::activity &activity, TAttachmentType attType,
                      string localName, string remoteName);
+void DbAddUri(AlpideDB *db, ActivityDB::activity &activity, string description,
+              string path);
+void DbAddInComp(AlpideDB *db, ActivityDB::activity &activity, int componentId,
+              int componentTypeId);
+void DbAddOutComp(AlpideDB *db, ActivityDB::activity &activity, int componentId,
+              int componentTypeId);
 void DbAddMember(AlpideDB *db, ActivityDB::activity &activity, int memberId);
 bool FileExists(string fileName);
 string CreateActivityName(string compName, TScanConfig *config);

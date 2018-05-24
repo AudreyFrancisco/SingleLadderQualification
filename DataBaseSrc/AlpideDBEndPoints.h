@@ -51,6 +51,8 @@
 
 #include "utilities.h"
 
+
+
 using namespace std;
 
 #define MATCHNODE(nod, tag) (nod->children && strcmp((const char *)nod->name, tag) == 0)
@@ -329,6 +331,8 @@ private:
   void extractTheActivityList(xmlNode *ns, vector<compActivity> *actList);
 };
 
+class DBQueryQueue;
+
 // --------------------
 class ActivityDB : public AlpideTable {
 
@@ -357,6 +361,18 @@ public:
   a.ID                = 0;                                                                         \
   a.ActivityParameter = 0;                                                                         \
   a.Value             = 0.0;                                                                       \
+  a.User              = 0
+
+  struct uri {
+    int    ID;
+    string Path;
+    string Description;
+    int    User;
+  };
+#define zURI(a)                                                                                    \
+  a.ID                = 0;                                                                         \
+  a.Path              = "";                                                                        \
+  a.Desription        = "";                                                                        \
   a.User              = 0
 
   struct attach {
@@ -467,6 +483,31 @@ public:
   a.ID   = 0;                                                                                      \
   a.Name = ""
 
+  struct incomp {
+    int   ID;
+    int   CompID;
+    int   CompTypeID;
+    int   User;
+  };
+#define zINCOMP(a)                                                                                 \
+  a.ID         = 0;                                                                                \
+  a.CompID     = 0;                                                                                \
+  a.CompTypeID = 0;                                                                                \
+  a.User       = 0
+
+  struct outcomp {
+    int   ID;
+    int   CompID;
+    int   CompTypeID;
+    int   User;
+  };
+#define zOUTCOMP(a)                                                                                \
+  a.ID         = 0;                                                                                \
+  a.CompID     = 0;                                                                                \
+  a.CompTypeID = 0;                                                                                \
+  a.User       = 0
+
+
   struct activity {
     int               ID;
     int               Type;
@@ -482,6 +523,9 @@ public:
     vector<member>    Members;
     vector<parameter> Parameters;
     vector<attach>    Attachments;
+    vector<uri>       Uris;
+    vector<incomp>    InComps;
+    vector<outcomp>   OutComps;
   };
 
   // ---------------
@@ -633,16 +677,24 @@ public:
   Members.clear();                                                                                 \
   Uris.clear()
 
+  DBQueryQueue *theAsyncronuosQueue;
+
   // Methods
 public:
   ActivityDB(AlpideDB *DBhandle);
   ~ActivityDB();
 
+  ActivityDB::response *CreateAsyncronous(ActivityDB::activity *aActivity);
   AlpideTable::response *Create(activity *aActivity);
   AlpideTable::response *Change(activity *aActivity);
+  ActivityDB::response *CreateActivity_1(activity *aActivity);
+  ActivityDB::response *CreateMember_2(activity *aActivity);
+  ActivityDB::response *CreateParameter_3(activity *aActivity);
+  ActivityDB::response *CreateAttachments_4(activity *aActivity);
   AlpideTable::response *AssignComponent(int aActivityID, int aComponentID, int aComponentTypeID,
                                          int aUserID);
 
+  AlpideTable::response *AssignUris(int aActivityID, int aUserId, vector<uri> *aUris);
   AlpideTable::response *AssignUris(int aActivityID, int aUserId, vector<actUri> *aUris);
 
   vector<parameterType> *GetParameterTypeList(int aActivityTypeID);

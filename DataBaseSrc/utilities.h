@@ -62,6 +62,11 @@ bool pathExists(string path);
 void str2timeDate(const char *sDate, time_t *tDate);
 void str2timeTime(const char *sDate, time_t *tDate);
 std::string float2str(float value);
+std::string time2str(time_t tDateTime);
+void str2time(const char *sDate, time_t *tDate);
+std::string time2name(time_t tDateTime);
+
+
 
 class Uri {
 private:

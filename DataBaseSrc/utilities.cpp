@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
+#include <locale.h>
 
 bool fileExists(string filewithpath)
 {
@@ -118,9 +120,10 @@ void str2timeDate(const char *sDate, time_t *tDate)
   int       dd, mm, yy;
   struct tm date = {0};
   sscanf(sDate, "%d.%d.%d", &dd, &mm, &yy);
-  date.tm_year = yy;
-  date.tm_mon  = mm;
+  date.tm_year = yy - 1900;
+  date.tm_mon  = mm -1;
   date.tm_mday = dd;
+  date.tm_isdst = -1;
   *tDate       = mktime(&date);
   return;
 }
@@ -133,9 +136,44 @@ void str2timeTime(const char *sDate, time_t *tDate)
   date.tm_hour = hh;
   date.tm_min  = mm;
   date.tm_sec  = ss;
+  date.tm_isdst = 0;
   *tDate       = mktime(&date);
   return;
 }
+
+std::string time2str(time_t tDateTime)
+{
+	char valueCharArray[100];
+	tm *tp = gmtime(&tDateTime);
+	strftime(valueCharArray, 48, "%Y-%m-%d %H:%M:%S", tp);
+	return std::string(valueCharArray);
+}
+
+std::string time2name(time_t tDateTime)
+{
+	char valueCharArray[100];
+	tm *tp = gmtime(&tDateTime);
+	strftime(valueCharArray, 48, "%Y%m%d_%H%M%S", tp);
+	return std::string(valueCharArray);
+}
+
+void str2time(const char *sDate, time_t *tDate)
+{
+  int       dd, mo, yy;
+  int       hh, mm, ss;
+  struct tm date = {0};
+  sscanf(sDate, "%d-%d-%d %d:%d:%d", &yy, &mo, &dd, &hh, &mm, &ss);
+  date.tm_year = yy - 1900;
+  date.tm_mon  = mo -1 ;
+  date.tm_mday = dd;
+  date.tm_hour = hh;
+  date.tm_min  = mm;
+  date.tm_sec  = ss;
+  date.tm_isdst = -1;
+  *tDate = mktime(&date);
+   return;
+}
+
 
 std::string float2str(float value)
 {

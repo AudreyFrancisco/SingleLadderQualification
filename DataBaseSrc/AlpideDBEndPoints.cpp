@@ -35,7 +35,7 @@
  *
  *  HISTORY
  *
- *  7/9/2017	-	Refine the XML parsing/reading function
+ *  7/9/2017    -    Refine the XML parsing/reading function
  *  9/11/2017   -   Modify the GetParameterList method
  *  11/1/2018   -   Add Assign URIs method
  *  21/02/2018  -   Add the Scientific Notation in the Activity Parameter rappresentation
@@ -48,6 +48,7 @@
 
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
+#include "DBQueryQue.h"
 
 /* --------------------------------------------------------
  *    AlpideDB Table Base class
@@ -75,9 +76,9 @@ AlpideTable::~AlpideTable() {}
 /* -----------------
  *    DecodeResponse := analyze the returned XML and fills the
  *                      response structure with the returned errors info
- *		Params :  ReturnedString := the XML sgtring received from the WebDB server
- *				  Session := a Session Index Value (reserved for future use)
- *		returns : a response struct that contains the error code
+ *        Params :  ReturnedString := the XML sgtring received from the WebDB server
+ *                  Session := a Session Index Value (reserved for future use)
+ *        returns : a response struct that contains the error code
  *
  *
  *---------------- */
@@ -138,11 +139,11 @@ AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Ses
 
 /* -----------------
  *    SetResponse := preset the response struct with a certain number
- *    				 of standard errors
+ *                     of standard errors
  *
- *		Params :  ErrorCode := the standard error code
- *				  ID := the ID ...
- *				  Session := a Session Index Value (reserved for future use)
+ *        Params :  ErrorCode := the standard error code
+ *                  ID := the ID ...
+ *                  Session := a Session Index Value (reserved for future use)
  *
  *---------------- */
 void AlpideTable::SetResponse(AlpideTable::ErrorCode ErrNum, int ID, int Session)
@@ -225,9 +226,9 @@ ProjectDB::~ProjectDB() {}
 /* -----------------
  *    GetList := get the complete list of projects
  *
- *		Out Param : a Reference to a vector of Project struct that will contain all the
+ *        Out Param : a Reference to a vector of Project struct that will contain all the
  *projects
- *		returns : a response struct that contains the error code
+ *        returns : a response struct that contains the error code
  *---------------- */
 AlpideTable::response *ProjectDB::GetList(vector<project> *Result)
 {
@@ -298,9 +299,9 @@ MemberDB::~MemberDB() {}
 /* -----------------
  *    GetList := get the complete list of members
  *
- *		Out Param : a Reference to a vector of Member struct that will contain all the
+ *        Out Param : a Reference to a vector of Member struct that will contain all the
  *member
- *		returns : a response struct that contains the error code
+ *        returns : a response struct that contains the error code
  *---------------- */
 AlpideTable::response *MemberDB::GetList(int projectID, vector<member> *Result)
 {
@@ -372,11 +373,11 @@ ComponentDB::~ComponentDB() {}
 /* -----------------
 *    GetTypeList := get the complete list of all the component types defined
 *
-*		In Param : the ID of the Project
-*		Out Param : a Reference to a vector of ComponentType struct that will contain all
+*        In Param : the ID of the Project
+*        Out Param : a Reference to a vector of ComponentType struct that will contain all
 *the
 *component types
-*		returns : a response struct that contains the error code
+*        returns : a response struct that contains the error code
 *---------------- */
 AlpideTable::response *ComponentDB::GetTypeList(int ProjectID, vector<componentType> *Result)
 {
@@ -427,11 +428,11 @@ AlpideTable::response *ComponentDB::GetTypeList(int ProjectID, vector<componentT
 }
 
 /* -----------------
- * 	PRIVATE
+ *     PRIVATE
  *    extractTheComponentType := get the component types definition
  *
- *		In Param : the XML node that contains the Type definition
- *		Out Param : a Reference to a ComponentType struct that will contains the values
+ *        In Param : the XML node that contains the Type definition
+ *        Out Param : a Reference to a ComponentType struct that will contains the values
  *parsed
  *
  * ---------------- */
@@ -518,10 +519,10 @@ void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro)
 /* -----------------
 *    GetType := get the complete definition of the requested component
 *
-*		In Param : the ID of the Component Type
-*		Out Param : a Reference to a ComponentType struct that will contain the component
+*        In Param : the ID of the Component Type
+*        Out Param : a Reference to a ComponentType struct that will contain the component
 *type definition
-*		returns : a response struct that contains the error code
+*        returns : a response struct that contains the error code
 *---------------- */
 AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *Result)
 {
@@ -560,8 +561,8 @@ AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *
 /* -----------------
 *    Create := A component type ... TODO: need a better interface (with the struct parameter)
 *
-*		In Param : ... all the items describing ...
-*		returns : a response struct that contains the error code
+*        In Param : ... all the items describing ...
+*        returns : a response struct that contains the error code
 *---------------- */
 AlpideTable::response *ComponentDB::Create(string ComponentTypeID, string ComponentID,
                                            string SupplyCompID, string Description, string LotID,
@@ -583,11 +584,11 @@ AlpideTable::response *ComponentDB::Create(string ComponentTypeID, string Compon
 }
 
 /* -----------------
- * 	PRIVATE
+ *     PRIVATE
  *    extractTheComponent := get the component definition
  *
- *		In Param : the XML node that contains the Component definition
- *		Out Param : a Reference to a Component struct that will contains the values parsed
+ *        In Param : the XML node that contains the Component definition
+ *        Out Param : a Reference to a Component struct that will contains the values parsed
  *
  * ---------------- */
 void ComponentDB::extractTheComponent(xmlNode *ns, componentLong *pro)
@@ -684,8 +685,8 @@ void ComponentDB::extractTheComponent(xmlNode *ns, componentLong *pro)
 /* -----------------
 *    Read := Get a component
 *
-*		In Param : ... all the items describing ...
-*		returns : a response struct that contains the error code
+*        In Param : ... all the items describing ...
+*        returns : a response struct that contains the error code
 *---------------- */
 AlpideTable::response *ComponentDB::Read(int ID, componentLong *Result)
 {
@@ -736,8 +737,8 @@ AlpideTable::response *ComponentDB::readComponent(string ID, string ComponentID,
 /* -----------------
 *    Read := Get a List of components
 *
-*		In Param : ...the componet type id...
-*		returns : a response struct that contains the error code
+*        In Param : ...the componet type id...
+*        returns : a response struct that contains the error code
 *---------------- */
 AlpideTable::response *ComponentDB::readComponents(std::string             ProjectId,
                                                    std::string             ComponentTypeID,
@@ -830,7 +831,7 @@ AlpideTable::response *ComponentDB::GetListByType(int ProjectID, int ComponentTy
 /* -----------------
 *    Read := Get the activity list for a component activity
 *
-*		In Param : ...
+*        In Param : ...
 *---------------- */
 AlpideTable::response *ComponentDB::GetComponentActivities(string                ComponentID,
                                                            vector<compActivity> *Result)
@@ -943,8 +944,8 @@ AlpideTable::response *ComponentDB::readComponentActivities(int ID, vector<compA
 /* -----------------
 *    Print := Dumps a human readable form of the Component Type definition
 *
-*		In Param : the component type struct
-*		returns : a char pointer to a string buffer
+*        In Param : the component type struct
+*        returns : a char pointer to a string buffer
 *---------------- */
 string ComponentDB::Print(componentType *co)
 {
@@ -978,19 +979,37 @@ string ComponentDB::Print(componentType *co)
 /* -----------------
  *    Constructor
  *---------------- */
-ActivityDB::ActivityDB(AlpideDB *DBhandle) : AlpideTable(DBhandle) {}
+ActivityDB::ActivityDB(AlpideDB *DBhandle) : AlpideTable(DBhandle) {
+
+    theAsyncronuosQueue = new DBQueryQueue();
+
+}
 
 ActivityDB::~ActivityDB() {}
 
 /* -----------------
-*    Create := Create a new activity record  TODO: complete the activity with all the info
+*    CreateAsyncronous := Create a new activity record
 *
-*		In Param : the activity struct
-*		returns : a char pointer to a string buffer
+*        In Param : the activity struct
+*        returns : a char pointer to a string buffer
 *---------------- */
-// TODO: evaluate the error conditions return policy ??
+ActivityDB::response *ActivityDB::CreateAsyncronous(ActivityDB::activity *aActivity)
+{
+    if(!theAsyncronuosQueue->Push("CreateActivity", aActivity) )  {
+        SetResponse(AlpideTable::SyncQuery);
+    } else {
+        SetResponse(AlpideTable::NoError);
+    }
+    return (&theResponse);
+}
 
-ActivityDB::response *ActivityDB::Create(activity *aActivity)
+/* -----------------
+*    Create := Create a new activity record Step1
+*
+*        In Param : the activity struct
+*        returns : a char pointer to a string buffer
+*---------------- */
+ActivityDB::response *ActivityDB::CreateActivity_1(activity *aActivity)
 {
   char   DateBuffer[40];
   char   DateMask[40] = "%d/%m/%Y";
@@ -1024,6 +1043,22 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
     aActivity->ID = theResponse.ID;
   }
+return(&theResponse);
+}
+
+/* -----------------
+*    Create := Create a new activity record  Step2
+*
+*        In Param : the activity struct
+*        returns : a char pointer to a string buffer
+*---------------- */
+ActivityDB::response *ActivityDB::CreateMember_2(activity *aActivity)
+{
+ // char   DateBuffer[40];
+ // char   DateMask[40] = "%d/%m/%Y";
+  char * stringresult;
+  string theUrl;
+  string theQuery;
 
   theUrl = theParentDB->GetQueryDomain() + "/ActivityMemberAssign";
   for (unsigned int i = 0; i < aActivity->Members.size(); i++) {
@@ -1039,11 +1074,35 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     }
     else {
       DecodeResponse(stringresult);
-      if (theResponse.ErrorCode != 0) cerr << "Activity Member Error :" << DumpResponse() << endl;
-      if (VERBOSITYLEVEL == 1) cout << "Activity Member creation  :" << DumpResponse() << endl;
-      aActivity->Members.at(i).ID = theResponse.ID;
+      if (theResponse.ErrorCode != 0) { 
+        cerr << "Activity Member Error :" << DumpResponse() << endl;
+        return(&theResponse);
+      }
+      else {
+          if (VERBOSITYLEVEL == 1) cout << "Activity Member creation  :" << DumpResponse() << endl;
+          aActivity->Members.at(i).ID = theResponse.ID;
+      }
     }
   }
+  return(&theResponse);
+}
+
+
+/* -----------------
+*    Create := Create a new activity record  Step 3
+*
+*        In Param : the activity struct
+*        returns : a char pointer to a string buffer
+*---------------- */
+// TODO: evaluate the error conditions return policy ??
+
+ActivityDB::response *ActivityDB::CreateParameter_3(activity *aActivity)
+{
+//  char   DateBuffer[40];
+//  char   DateMask[40] = "%d/%m/%Y";
+  char * stringresult;
+  string theUrl;
+  string theQuery;
 
   theUrl = theParentDB->GetQueryDomain() + "/ActivityParameterCreate";
   for (unsigned int i = 0; i < aActivity->Parameters.size(); i++) {
@@ -1069,12 +1128,31 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     }
     else {
       DecodeResponse(stringresult);
-      if (theResponse.ErrorCode != 0)
-        cerr << "Activity Parameter Error :" << DumpResponse() << endl;
-      if (VERBOSITYLEVEL == 1) cout << "Activity Parameter creation :" << DumpResponse() << endl;
-      aActivity->Parameters.at(i).ID = theResponse.ID;
+      if (theResponse.ErrorCode != 0) {
+         cerr << "Activity Parameter Error :" << DumpResponse() << endl;
+         return(&theResponse);
+      }
+      else {
+        if (VERBOSITYLEVEL == 1) cout << "Activity Parameter creation :" << DumpResponse() << endl;
+        aActivity->Parameters.at(i).ID = theResponse.ID;
+      }
     }
   }
+  return(&theResponse);
+}
+
+/* -----------------
+*    Create := Create a new activity record  Step 4
+*        In Param : the activity struct
+*        returns : a char pointer to a string buffer
+*---------------- */
+ActivityDB::response *ActivityDB::CreateAttachments_4(activity *aActivity)
+{
+ // char   DateBuffer[40];
+//  char   DateMask[40] = "%d/%m/%Y";
+  char * stringresult;
+  string theUrl;
+  string theQuery;
 
   theUrl = theParentDB->GetQueryDomain(); //+ "/ActivityAttachmentCreate";
   unsigned long theBase64Result;
@@ -1134,15 +1212,64 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
   return (&theResponse);
 }
 
+
+/* -----------------
+*    Create := Create a new activity record  TODO: complete the activity with all the info
+*
+*        In Param : the activity struct
+*        returns : a char pointer to a string buffer
+*---------------- */
+// TODO: evaluate the error conditions return policy ??
+ActivityDB::response *ActivityDB::Create(activity *aActivity)
+{
+
+  ActivityDB::response *response;
+
+  response = CreateActivity_1(aActivity);
+  if(response->ErrorCode != 0) return (&theResponse);
+
+  response = CreateMember_2(aActivity);
+  if(response->ErrorCode != 0) return (&theResponse);
+
+  response = CreateParameter_3(aActivity);
+  if(response->ErrorCode != 0) return (&theResponse);
+
+  response = CreateAttachments_4(aActivity);
+  if(response->ErrorCode != 0) return (&theResponse);
+
+  return (&theResponse);
+}
+
 /* -----------------
 *    AssignUris := Create/Remove change Uris list
 *
-*		In Param : the activity ID
-*				   the update list of URIs
-*		returns : a char pointer to a string buffer
+*        In Param : the activity ID
+*                   the update list of URIs
+*        returns : a char pointer to a string buffer
 *---------------- */
 AlpideTable::response *ActivityDB::AssignUris(int aActivityID, int aUserId,
                                               vector<ActivityDB::actUri> *aUris)
+{
+    vector<ActivityDB::uri> modUris;
+    ActivityDB::uri  modUri;
+    for(int i=0;i<aUris->size();i++) {
+        modUri.ID = aUris->at(i).ID;
+        modUri.Description = aUris->at(i).Description;
+        modUri.Path = aUris->at(i).Path;
+        modUri.User = aUserId;
+        modUris.push_back(modUri);
+    }
+    return(AssignUris(aActivityID, aUserId, aUris));
+}
+/* -----------------
+*    AssignUris := Create/Remove change Uris list
+*
+*        In Param : the activity ID
+*                   the update list of URIs
+*        returns : a char pointer to a string buffer
+*---------------- */
+AlpideTable::response *ActivityDB::AssignUris(int aActivityID, int aUserId,
+                                              vector<ActivityDB::uri> *aUris)
 {
   char * stringresult;
   string theUrl;
@@ -1221,6 +1348,11 @@ AlpideTable::response *ActivityDB::AssignUris(int aActivityID, int aUserId,
                << DumpResponse() << endl;
         return (&theResponse);
       }
+      DecodeResponse(stringresult);
+      if (theResponse.ErrorCode != 0)
+        cerr << "Activity URI Create :" << DumpResponse() << endl;
+      if (VERBOSITYLEVEL == 1) cout << "Activity URI creation :" << DumpResponse() << endl;
+      aUris->at(j).ID = theResponse.ID;    
     }
   }
   SetResponse(AlpideTable::NoError, aActivityID);
@@ -1260,18 +1392,18 @@ ActivityDB::response *ActivityDB::Change(activity *aActivity)
   else {
     DecodeResponse(stringresult);
     if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
-    aActivity->ID = theResponse.ID;
+    //aActivity->ID = theResponse.ID;
   }
   return (&theResponse);
 }
 /* -----------------
 *    AssignComponent := Add a new component to a defined activity
 *
-*		In Param : the activity ID
-*					the Component ID
-*					the Key for the COmponent Type
-*					The ID of the USER
-*		returns : a char pointer to a response type
+*        In Param : the activity ID
+*                    the Component ID
+*                    the Key for the COmponent Type
+*                    The ID of the USER
+*        returns : a char pointer to a response type
 *---------------- */
 ActivityDB::response *ActivityDB::AssignComponent(int aActivityID, int aComponentID,
                                                   int aComponentTypeID, int aUserID)
@@ -1293,6 +1425,8 @@ ActivityDB::response *ActivityDB::AssignComponent(int aActivityID, int aComponen
   else {
     DecodeResponse(stringresult);
     if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
+    if (theResponse.ErrorCode != 0)
+        cerr << "Activity URI Create :" << DumpResponse() << endl;
     //   SetResponse(AlpideTable::NoError);
   }
   return (&theResponse);
@@ -1775,8 +1909,8 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
 /* -----------------
 *    Read := Get an activity
 *
-*		In Param : ...
-*		returns : a response struct that contains the error code
+*        In Param : ...
+*        returns : a response struct that contains the error code
 *---------------- */
 void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act)
 {
