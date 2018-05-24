@@ -331,7 +331,7 @@ private:
   void extractTheActivityList(xmlNode *ns, vector<compActivity> *actList);
 };
 
-class DBQueryQueue;
+//class DBQueryQueue;
 
 // --------------------
 class ActivityDB : public AlpideTable {
