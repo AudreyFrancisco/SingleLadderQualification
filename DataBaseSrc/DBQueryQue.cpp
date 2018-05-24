@@ -79,7 +79,7 @@ DBQueryQueue::~DBQueryQueue()
  *---------------- */
 string DBQueryQueue::__addThePathToFileName(const string FileName, bool isLocal)
 {
-    return( (IsLocal ? theLocalCopyRepoPath : theBaseRepoPath) + "/" + theSpecificQueuePath + "/" + FileName);
+    return( (isLocal ? theLocalCopyRepoPath : theBaseRepoPath) + "/" + theSpecificQueuePath + "/" + FileName);
 }
 
 /* -----------------
