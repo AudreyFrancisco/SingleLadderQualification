@@ -5,17 +5,19 @@ project(new_alpide_software)
 option(DISABLE_ROOT "Disable ROOT")
 option(DISABLE_QT "Disable QT")
 
+# by default build optimized code with debug symbols
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE RELWITHDEBINFO)
+endif()
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+# look for Qt, required unless disabled explicitly
 if(DISABLE_QT STREQUAL "OFF")
   message(STATUS "Looking for Qt5")
   find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Xml)
   message(STATUS "Using Qt ${Qt5_VERSION}")
 elseif()
   message(STATUS "GUI disabled")
-endif()
-
-# by default build optimized code with debug symbols
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_BUILD_TYPE RELWITHDEBUGINFO)
 endif()
 
 # look for ROOT and warn if unavailable
