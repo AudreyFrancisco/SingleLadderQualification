@@ -2397,40 +2397,6 @@ void MainWindow::fillingibvectors()
 
   // digital white frame
   AddScan(STDigitalWF);
-  // readout tests
-  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 4);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
-  AddScan(STReadout);
-
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 8);
-  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 0);
-  AddScan(STEyeScan);
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 4);
-  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 0);
-  AddScan(STEyeScan);
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 8);
-  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
-  AddScan(STEyeScan);
-
-  // reset previous values
-  // (TODO: this is not exactly correct because it resets to the values defined in the header file
-  // and
-  // ignores the settings in the config file)
-  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", ChipConfig::DTU_DRIVER);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", ChipConfig::DTU_PREEMP);
 
   // threshold scan, no tuning for the time being, 0V back bias
   fConfig->GetScanConfig()->SetBackBias(0.0);
@@ -2468,6 +2434,42 @@ void MainWindow::fillingibvectors()
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
   AddScan(STClearMask);
+
+  // eye diagram
+  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 8);
+  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 0);
+  AddScan(STEyeScan);
+  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 4);
+  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 0);
+  AddScan(STEyeScan);
+  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 8);
+  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
+  AddScan(STEyeScan);
+
+  // readout tests
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 4);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
+  AddScan(STReadout);
+
+  // reset previous values
+  // (TODO: this is not exactly correct because it resets to the values defined in the header file
+  // and
+  // ignores the settings in the config file)
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", ChipConfig::DTU_DRIVER);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", ChipConfig::DTU_PREEMP);
 }
 
 void MainWindow::fillingendurancevectors()
