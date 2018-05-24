@@ -1665,21 +1665,21 @@ void MainWindow::attachtodatabase()
 #ifdef SYNCCREATE
         // Now we dump the activity into the local backup repository
         string FileName = activ.Name;
-        myactivity->theAsyncronuosQueue.SetEstension(".dbq");
-        myactivity->theAsyncronuosQueue.SetLocalCopyPath("/tmp");
-        myactivity->theAsyncronuosQueue.SetSpecificPath("GUIlocalQueryBackup");
-        myactivity->theAsyncronuosQueue.Write(FileName, "CreateActivity", activ, false);
+        myactivity->theAsyncronuosQueue->SetEstension(".dbq");
+        myactivity->theAsyncronuosQueue->SetLocalCopyPath("/tmp");
+        myactivity->theAsyncronuosQueue->SetSpecificPath("GUIlocalQueryBackup");
+        myactivity->theAsyncronuosQueue->Write(FileName, "CreateActivity", activ, false);
 
         // And create the activity
         myactivity->Create(&activ);
         cout << myactivity->DumpResponse() << endl;
 #else
         // The asyncronous
-        myactivity->theAsyncronuosQueue.SetEstension(".dbq");
-        myactivity->theAsyncronuosQueue.SetLocalCopyPath("/tmp/loc");
-        myactivity->theAsyncronuosQueue.SetBasePath("/tmp");
-        myactivity->theAsyncronuosQueue.SetLocalCopyEnabled(true);
-        myactivity->theAsyncronuosQueue.SetSpecificPath("GUIlocalQueryBackup");
+        myactivity->theAsyncronuosQueue->SetEstension(".dbq");
+        myactivity->theAsyncronuosQueue->SetLocalCopyPath("/tmp/loc");
+        myactivity->theAsyncronuosQueue->SetBasePath("/tmp");
+        myactivity->theAsyncronuosQueue->SetLocalCopyEnabled(true);
+        myactivity->theAsyncronuosQueue->SetSpecificPath("GUIlocalQueryBackup");
         myactivity->CreateAsyncronous(&activ);
 #endif
 
