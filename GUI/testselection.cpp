@@ -36,6 +36,13 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("OL HS Check (NO DB)", OBHalfStaveOLFAST);
   ui->typetest->addItem("ML HS Check (NO DB)", OBHalfStaveMLFAST);
   ui->typeoftest->hide();
+  ui->operatorstring->setTabChangesFocus(true);
+  ui->id->setTabChangesFocus(true);
+  setTabOrder(ui->typetest, ui->databaselocation);
+  setTabOrder(ui->databaselocation, ui->operatorstring);
+  setTabOrder(ui->operatorstring, ui->id);
+  setTabOrder(ui->id, ui->settings);
+  setTabOrder(ui->settings, ui->close);
   missingsettings = 0x0;
 
   m_testDatabase = testDatabase;
