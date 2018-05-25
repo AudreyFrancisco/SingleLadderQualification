@@ -33,6 +33,7 @@ libalpide/version.h
 **/libalpide/version.h
 **/Data
 **/GUI/GUI
+**/ImpedanceTest
 **/MosaicSrc/powerboard/GUI/pbGUI
 **/MosaicSrc/powerboard/pbctrl
 **/scripts

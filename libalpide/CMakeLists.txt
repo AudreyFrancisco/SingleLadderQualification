@@ -81,8 +81,8 @@ set(OBJS_ANA
   ../src/TEyeAnalysis.cpp
 )
 
-add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.h
+add_custom_target(version
+  BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/version.h
   COMMAND ${CMAKE_COMMAND}
     -D SRC=${CMAKE_CURRENT_SOURCE_DIR}/../inc/version.h.in
     -D DST=${CMAKE_CURRENT_BINARY_DIR}/version.h
@@ -93,9 +93,10 @@ add_custom_command(
 )
 
 add_library(alpide SHARED ${BASE_OBJS} ${RU_OBJS} ${MOSAIC_OBJS} ${CMAKE_CURRENT_BINARY_DIR}/version.h)
+add_dependencies(alpide version)
 target_include_directories(alpide
-	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
-	PUBLIC ../inc ../MosaicSrc .. # .. is for ReadoutUnitSrc
+  PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+  PUBLIC ../inc ../MosaicSrc .. # .. is for ReadoutUnitSrc
 )
 target_link_libraries(alpide alucms mosaic powerboard scopecontrol usb-1.0 tinyxml pthread)
 list(APPEND ALP_LIBRARIES alpide)

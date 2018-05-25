@@ -1,6 +1,6 @@
 if(NOT BUILDINSOURCE)
-  set(FILES_REGEX ".*\.(C|h|sh)$$")
-  add_custom_target(analysis ALL
+  set(FILES_REGEX ".*\.(py)$$")
+  add_custom_target(impedance ALL
     COMMAND ${CMAKE_COMMAND}
     -D SRC="${CMAKE_CURRENT_SOURCE_DIR}"
     -D DST="${CMAKE_CURRENT_BINARY_DIR}"
@@ -11,11 +11,9 @@ if(NOT BUILDINSOURCE)
 endif()
 
 install(DIRECTORY .
-  DESTINATION analysis
+  DESTINATION ImpedanceTest
   USE_SOURCE_PERMISSIONS
   FILES_MATCHING
-  PATTERN *.C
-  PATTERN *.h
-  PATTERN *.sh
+  PATTERN *.py
 )
 
