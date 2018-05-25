@@ -815,8 +815,8 @@ void DBQueueConsumer::__checkTimeOut()
  *---------------- */
 bool DBQueueConsumer::__readTheQueue()
 {
-  bool   bRes     = true;
-  string fileName = act->theAsyncronuosQueue->GetTheFirstFileName();
+  bool   bRes              = true;
+  string fileName          = act->theAsyncronuosQueue->GetTheFirstFileName();
   if (fileName == "") bRes = false;
   theFileName = fileName;
   return (bRes);

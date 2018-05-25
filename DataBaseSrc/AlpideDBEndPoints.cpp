@@ -465,7 +465,7 @@ void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro)
             }
             else if (MATCHNODE(n3, "Quantity") == 0)
               ap1.Quantity = atoi((const char *)n3->children->content);
-            n3 = n3->next;
+            n3             = n3->next;
           }
           pro->Composition.push_back(ap1);
         }
@@ -1495,7 +1495,7 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aAc
                       param.Name = (const char *)(n3->children->content);
                     else if (MATCHNODE(n3, "Description"))
                       param.Description = (const char *)(n3->children->content);
-                    n3 = n3->next;
+                    n3                  = n3->next;
                   }
                   theParamList->push_back(param);
                 }
@@ -1551,7 +1551,7 @@ std::vector<ActivityDB::activityType> *ActivityDB::GetActivityTypeList(int aProj
               act.Name = (const char *)(n1->children->content);
             else if (MATCHNODE(n1, "Description"))
               act.Description = (const char *)(n1->children->content);
-            n1 = n1->next;
+            n1                = n1->next;
           }
           theTypeList->push_back(act);
         }
@@ -1602,7 +1602,7 @@ std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActi
                   loc.ID = atoi((const char *)(n2->children->content));
                 else if (MATCHNODE(n2, "Name"))
                   loc.Name = (const char *)(n2->children->content);
-                n2 = n2->next;
+                n2         = n2->next;
               }
               theLocationList->push_back(loc);
             }
@@ -1654,7 +1654,7 @@ std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList()
               att.Category = (const char *)(n1->children->content);
             else if (MATCHNODE(n1, "Description"))
               att.Description = (const char *)(n1->children->content);
-            n1 = n1->next;
+            n1                = n1->next;
           }
           theAttachmentList->push_back(att);
         }
@@ -1715,7 +1715,7 @@ std::vector<ActivityDB::actTypeCompType> *ActivityDB::GetComponentTypeList(int a
                       comp.Type.ID = atoi((const char *)(n3->children->content));
                     else if (MATCHNODE(n3, "Name"))
                       comp.Type.Name = (const char *)(n3->children->content);
-                    n3 = n3->next;
+                    n3               = n3->next;
                   }
                 }
                 n2 = n2->next;
@@ -1773,7 +1773,7 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityType
                   resu.ID = atoi((const char *)(n2->children->content));
                 else if (MATCHNODE(n2, "Name"))
                   resu.Name = (const char *)(n2->children->content);
-                n2 = n2->next;
+                n2          = n2->next;
               }
               theResultList->push_back(resu);
             }
@@ -1830,7 +1830,7 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityType
                   stat.Code = (const char *)(n2->children->content);
                 else if (MATCHNODE(n2, "Description"))
                   stat.Description = (const char *)(n2->children->content);
-                n2 = n2->next;
+                n2                 = n2->next;
               }
               theStatusList->push_back(stat);
             }
@@ -1896,7 +1896,7 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
                   act.Type.Name = (const char *)(n2->children->content);
                 else if (MATCHNODE(n2, "Description"))
                   act.Type.Description = (const char *)(n2->children->content);
-                n2 = n2->next;
+                n2                     = n2->next;
               }
             }
             if (MATCHNODE(n1, "ActivityStatus")) {
@@ -1908,7 +1908,7 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
                   act.Status.Code = (const char *)(n2->children->content);
                 else if (MATCHNODE(n2, "Description"))
                   act.Status.Description = (const char *)(n2->children->content);
-                n2 = n2->next;
+                n2                       = n2->next;
               }
             }
             n1 = n1->next;
@@ -2301,10 +2301,10 @@ unsigned long ActivityDB::buildBase64Binary(string aLocalFileName, string *Buffe
   if (i) {
     for (j = i; j < 3; j++)
       cBufferIn[j] = '\0';
-    cBufferOut[0] = (cBufferIn[0] & 0xfc) >> 2;
-    cBufferOut[1] = ((cBufferIn[0] & 0x03) << 4) + ((cBufferIn[1] & 0xf0) >> 4);
-    cBufferOut[2] = ((cBufferIn[1] & 0x0f) << 2) + ((cBufferIn[2] & 0xc0) >> 6);
-    cBufferOut[3] = cBufferIn[2] & 0x3f;
+    cBufferOut[0]  = (cBufferIn[0] & 0xfc) >> 2;
+    cBufferOut[1]  = ((cBufferIn[0] & 0x03) << 4) + ((cBufferIn[1] & 0xf0) >> 4);
+    cBufferOut[2]  = ((cBufferIn[1] & 0x0f) << 2) + ((cBufferIn[2] & 0xc0) >> 6);
+    cBufferOut[3]  = cBufferIn[2] & 0x3f;
     for (j = 0; (j < i + 1); j++)
       *Buffer += base64chars[cBufferOut[j]];
     while ((i++ < 3))

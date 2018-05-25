@@ -62,13 +62,13 @@ int main()
   activ.Location  = 161;     // fIdoflocationtype;
   activ.User      = 1126;    // fIdofoperator;
   activ.StartDate = time(0); // date.currentDateTime().toTime_t();
-  activ.EndDate = time(0);   // date.currentDateTime().toTime_t();
-  activ.Lot     = " ";
-  activ.Name    = "Test of asyncronous act creation"; // CreateActivityName(fHICs.at(i)->GetDbId(),
+  activ.EndDate   = time(0);   // date.currentDateTime().toTime_t();
+  activ.Lot       = " ";
+  activ.Name      = "Test of asyncronous act creation"; // CreateActivityName(fHICs.at(i)->GetDbId(),
                                                    // fConfig->GetScanConfig());
-  activ.Position = " ";
-  activ.Result = -999; // apparently has to stay open here, otherwise activity is considered closed
-  activ.Status = 83;   // DbGetStatusId(fDB, fIdofactivitytype, "OPEN");
+  activ.Position  = " ";
+  activ.Result    = -999; // apparently has to stay open here, otherwise activity is considered closed
+  activ.Status    = 83;   // DbGetStatusId(fDB, fIdofactivitytype, "OPEN");
   DbAddParameter(fDB, activ, "Number of Working Chips", 10.0, "");
   DbAddParameter(fDB, activ, "IDDD", 10.1, "");
   DbAddAttachment(fDB, activ, attachLog, string("/tmp/Comment.txt"), string("Peppo"));

@@ -81,13 +81,13 @@ public:
   DBQueryQueue();
   ~DBQueryQueue();
 
-  bool           Push(const string QueryType, ActivityDB::activity *activity);
-  bool           Pop(string *QueryType, ActivityDB::activity *activity);
-  bool           Read(string FileName, string *QueryType, ActivityDB::activity *activity,
+  bool Push(const string QueryType, ActivityDB::activity *activity);
+  bool Pop(string *QueryType, ActivityDB::activity *activity);
+  bool Read(string FileName, string *QueryType, ActivityDB::activity *activity,
                       bool IsLocal = false);
-  bool           Write(string FileName, string QueryType, ActivityDB::activity *activity,
+  bool Write(string FileName, string QueryType, ActivityDB::activity *activity,
                        bool IsLocal = false);
-  string         GetTheFirstFileName();
+  string GetTheFirstFileName();
   vector<string> GetTheQueue();
 
   bool Serialize(string QueryType, ActivityDB::activity *activity, string *Output);
@@ -98,7 +98,7 @@ public:
   string GetSpecificPath() { return (theSpecificQueuePath); };
   string GetEstension() { return (theExtension); };
   string GetLocalCopyPath() { return (theLocalCopyRepoPath); };
-  bool   IsLocalCopyEnabled() { return (isTheLocalCopyEnabled); };
+  bool IsLocalCopyEnabled() { return (isTheLocalCopyEnabled); };
 
   void SetQueueBasePath(string s) { theBaseRepoPath = s; };
   void SetSpecificPath(string s) { theSpecificQueuePath = s; };
@@ -107,10 +107,10 @@ public:
   void SetLocalCopyEnabled(bool b) { isTheLocalCopyEnabled = b; };
 
 private:
-  void           Init();
-  bool           __makeTheFileName(const string Name, string *QueryFileName, bool IsLocal = false);
-  string         __addThePathToFileName(const string FileName, bool IsLocal = false);
-  bool           __write(const string FileName, const string Query);
+  void Init();
+  bool __makeTheFileName(const string Name, string *QueryFileName, bool IsLocal = false);
+  string __addThePathToFileName(const string FileName, bool IsLocal = false);
+  bool __write(const string FileName, const string Query);
   vector<string> __getTheQueuqeFileList();
 };
 
