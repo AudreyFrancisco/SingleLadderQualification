@@ -145,7 +145,7 @@ void str2timeTime(const char *sDate, time_t *tDate)
 std::string time2str(time_t tDateTime)
 {
   char valueCharArray[100];
-  tm *tp = gmtime(&tDateTime);
+  tm * tp = gmtime(&tDateTime);
   strftime(valueCharArray, 48, "%Y-%m-%d %H:%M:%S", tp);
   return std::string(valueCharArray);
 }
@@ -153,7 +153,7 @@ std::string time2str(time_t tDateTime)
 std::string time2name(time_t tDateTime)
 {
   char valueCharArray[100];
-  tm *tp = gmtime(&tDateTime);
+  tm * tp = gmtime(&tDateTime);
   strftime(valueCharArray, 48, "%Y%m%d_%H%M%S", tp);
   return std::string(valueCharArray);
 }
@@ -165,7 +165,7 @@ void str2time(const char *sDate, time_t *tDate)
   struct tm date = {0};
   sscanf(sDate, "%d-%d-%d %d:%d:%d", &yy, &mo, &dd, &hh, &mm, &ss);
   date.tm_year  = yy - 1900;
-  date.tm_mon   = mo - 1 ;
+  date.tm_mon   = mo - 1;
   date.tm_mday  = dd;
   date.tm_hour  = hh;
   date.tm_min   = mm;
