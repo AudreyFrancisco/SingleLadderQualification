@@ -134,7 +134,7 @@ public:
   ~MemberDB();
 
   AlpideTable::response *GetList(int projectID, vector<member> *Result);
-  string                 Print(member *me)
+  string Print(member *me)
   {
     return ("Member : ID=" + std::to_string(me->ID) +
             " Personal ID=" + std::to_string(me->PersonalID) + " Name=" + me->FullName);

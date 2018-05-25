@@ -2299,7 +2299,7 @@ unsigned long ActivityDB::buildBase64Binary(string aLocalFileName, string *Buffe
     ch = (unsigned char)fgetc(fh);
   }
   if (i) {
-    for (j = i; j < 3; j++)
+    for (j         = i; j < 3; j++)
       cBufferIn[j] = '\0';
     cBufferOut[0]  = (cBufferIn[0] & 0xfc) >> 2;
     cBufferOut[1]  = ((cBufferIn[0] & 0x03) << 4) + ((cBufferIn[1] & 0xf0) >> 4);

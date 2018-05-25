@@ -84,9 +84,9 @@ public:
   bool Push(const string QueryType, ActivityDB::activity *activity);
   bool Pop(string *QueryType, ActivityDB::activity *activity);
   bool Read(string FileName, string *QueryType, ActivityDB::activity *activity,
-                      bool IsLocal = false);
+            bool IsLocal = false);
   bool Write(string FileName, string QueryType, ActivityDB::activity *activity,
-                       bool IsLocal = false);
+             bool IsLocal = false);
   string GetTheFirstFileName();
   vector<string> GetTheQueue();
 
