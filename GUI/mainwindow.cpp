@@ -1541,13 +1541,16 @@ void MainWindow::attachtodatabase()
         std::vector<TScanResultHic *> hicresultsvector;
         for (unsigned int d = 0; d < fScanVector.size(); d++) {
           if (fAnalysisVector.at(d) != 0 && fresultVector.at(d) != 0) {
-            QString         scanclasname;
-            TScanResultHic *hicRe = fresultVector.at(d)->GetHicResult(currenthic.toStdString());
-            scanclasname          = fScanVector.at(d)->GetName();
-            scanclasname.append(" = ");
-            scanclasname.append(hicRe->WriteHicClassification());
-            scansclassificationnames.push_back(scanclasname);
-            hicresultsvector.push_back(fresultVector.at(d)->GetHicResult(currenthic.toStdString()));
+            if (fresultVector.at(d)->GetHicResult(currenthic.toStdString())) {
+              QString         scanclasname;
+              TScanResultHic *hicRe = fresultVector.at(d)->GetHicResult(currenthic.toStdString());
+              scanclasname          = fScanVector.at(d)->GetName();
+              scanclasname.append(" = ");
+              scanclasname.append(hicRe->WriteHicClassification());
+              scansclassificationnames.push_back(scanclasname);
+              hicresultsvector.push_back(
+                  fresultVector.at(d)->GetHicResult(currenthic.toStdString()));
+            }
           }
         }
         if (!fWrite) {
