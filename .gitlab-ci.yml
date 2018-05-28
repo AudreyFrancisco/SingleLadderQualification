@@ -15,9 +15,15 @@ ubuntu1604:
     script:
       - mkdir build
       - (cd build && cmake ../ && make -j $(nproc) all format-check)
+      
+ubuntu1804:
+    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu18.04-dev
+    script:
+      - mkdir build
+      - (cd build && cmake ../ && make -j $(nproc) all format-check)
 
-ubuntu1604clang:
-    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu16.04-clang-dev
+ubuntu1804clang:
+    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu18.04-clang-dev
     script:
       - mkdir build
       - (cd build && CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake ../ && make -j $(nproc) all format-check)
