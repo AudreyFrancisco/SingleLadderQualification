@@ -761,6 +761,7 @@ void MainWindow::scanLoop(TScan *myScan)
 
       while (myScan->Loop(2)) {
         myScan->PrepareStep(2);
+        qApp->processEvents();
         myScan->LoopStart(1);
 
         while (myScan->Loop(1)) {

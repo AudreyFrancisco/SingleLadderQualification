@@ -6,6 +6,8 @@
 #include "TH2.h"
 #include "TLatex.h"
 #include <fstream>
+#include <iomanip>
+#include <sstream>
 
 TEyeAnalysis::TEyeAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
                            std::vector<THic *> hics, std::mutex *aMutex, TEyeResult *aResult)
@@ -31,13 +33,17 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
   FILE *fp = fopen("EyeDiagram.dat", "w");
 
   // assume values from first chip for all
-  // TODO: check if assumption valid ???
   TEyeResultHic *hicResult_0 = (TEyeResultHic *)FindHicResultForChip(m_chipList.at(0));
   Int_t driverStrength_0     = ((TEyeParameters *)hicResult_0->GetScanParameters())->driverStrength;
   Int_t preemphasis_0        = ((TEyeParameters *)hicResult_0->GetScanParameters())->preemphasis;
 
-  std::string basename     = TString::Format("eye_D%i_P%i", driverStrength_0, preemphasis_0).Data();
-  std::string filename_eye = hicResult_0->GetOutputPath() + "/" + basename + ".pdf";
+  const std::time_t t = time(nullptr);
+  char              time_suffix[50];
+  strftime(time_suffix, sizeof(time_suffix), "_%y%m%d_%H%M%S", std::localtime(&t));
+
+  std::string basename =
+      TString::Format("eye_D%i_P%i_%s", driverStrength_0, preemphasis_0, time_suffix).Data();
+  std::string filename_eye      = hicResult_0->GetOutputPath() + "/" + basename + ".pdf";
   std::string filename_eye_root = hicResult_0->GetOutputPath() + "/" + basename + ".root";
 
   TCanvas c;
@@ -69,8 +75,9 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
     const std::string hname =
         TString::Format("h_eye_%i_d%i_p%i", chip.chipId, driverStrength, preemphasis).Data();
     const std::string htitle =
-        TString::Format("Eye Diagram chip %i (%s - D: %i, P: %i)", chip.chipId,
-                        hicResult->GetName().c_str(), driverStrength, preemphasis)
+        TString::Format("Eye Diagram chip %i (%s - D: %i, P: %i);%s;%s", chip.chipId,
+                        hicResult->GetName().c_str(), driverStrength, preemphasis, "offset_{hor}",
+                        "offset_{ver}")
             .Data();
 
     TH2F h_eye(hname.c_str(), htitle.c_str(), nbin_x, min_x - .5 * step_x,

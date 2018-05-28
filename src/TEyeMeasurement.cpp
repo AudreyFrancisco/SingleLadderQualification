@@ -137,6 +137,7 @@ void TEyeMeasurement::PrepareStep(int loopIndex)
     m_boardIndex = FindBoardIndex(m_testChip);
     sprintf(m_state, "Running %d", m_value[2]);
 
+    std::cout << "Testing chip : " << m_testChip->GetConfig()->GetChipId() << std::endl;
     m_board = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(m_boardIndex));
     if (!m_board) {
       std::cout << "Error: Wrong board";
