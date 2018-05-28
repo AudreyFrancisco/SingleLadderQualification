@@ -13,6 +13,7 @@
 typedef struct {
   THicType hicType;
   bool     trip;
+  bool     tripBB;
   float    iddaSwitchon;
   float    idddSwitchon;
   float    iddaClocked;

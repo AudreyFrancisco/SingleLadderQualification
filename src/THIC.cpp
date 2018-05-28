@@ -201,6 +201,12 @@ float THic::GetAnalogueVoltage()
 
 void THic::AddClassification(THicClassification aClass)
 {
+  // temporary until full classification with no back bias class implemented
+  if ((aClass == CLASS_GOLD_NOBB) || (aClass == CLASS_SILVER_NOBB) ||
+      (aClass == CLASS_BRONZE_NOBB)) {
+    aClass = CLASS_RED;
+  }
+  // end temporary
   if (aClass == CLASS_RED)
     m_class = CLASS_RED;
   else if (GetNEnabledChips() < m_chips.size())

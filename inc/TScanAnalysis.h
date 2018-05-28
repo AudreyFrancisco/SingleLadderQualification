@@ -28,8 +28,13 @@ typedef enum hicClassification {
   CLASS_GOLD,
   CLASS_SILVER,
   CLASS_BRONZE,
+  CLASS_GOLD_NOBB,   // used only for power test
+  CLASS_SILVER_NOBB, // used only for power test
+  CLASS_BRONZE_NOBB, // used only for power test
   CLASS_PARTIAL,
   CLASS_PARTIALB,
+  CLASS_NOBB,
+  CLASS_NOBBB,
   CLASS_RED
 } THicClassification;
 

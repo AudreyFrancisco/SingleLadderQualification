@@ -56,6 +56,7 @@ void TPowerAnalysis::Finalize()
 
     // Copy currents from currents to result, apply cuts, write to file
     hicResult->trip           = hicCurrents.trip;
+    hicResult->tripBB         = hicCurrents.tripBB;
     hicResult->iddaSwitchon   = hicCurrents.iddaSwitchon;
     hicResult->idddSwitchon   = hicCurrents.idddSwitchon;
     hicResult->iddaClocked    = hicCurrents.iddaClocked;
@@ -78,14 +79,24 @@ void TPowerAnalysis::Finalize()
 
 THicClassification TPowerAnalysis::GetClassification(THicCurrents currents, TPowerResultHic *result)
 {
+  THicClassification returnValue;
   if (currents.trip) {
     std::cout << "Power analysis: HIC classified red due to trip" << std::endl;
     return CLASS_RED;
   }
   if (currents.hicType == HIC_IB)
-    return GetClassificationIB(currents, result);
+    returnValue = GetClassificationIB(currents, result);
   else
-    return GetClassificationOB(currents, result);
+    returnValue = GetClassificationOB(currents, result);
+
+  // modify class in case of back-bias trip;
+  if (currents.tripBB) {
+    if (returnValue == CLASS_GOLD) returnValue   = CLASS_GOLD_NOBB;
+    if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
+    if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
+  }
+
+  return returnValue;
 }
 
 THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents     currents,
@@ -217,16 +228,20 @@ void TPowerResultHic::WriteToFile(FILE *fp)
 
   fprintf(fp, "HIC Classification: %s\n\n", WriteHicClassification());
 
-  fprintf(fp, "trip:             %d\n\n", trip ? 1 : 0);
-  fprintf(fp, "IDDD at switchon: %.3f\n", idddSwitchon);
-  fprintf(fp, "IDDA at switchon: %.3f\n", iddaSwitchon);
-  fprintf(fp, "IDDD with clock:  %.3f\n", idddClocked);
-  fprintf(fp, "IDDA with clock:  %.3f\n", iddaClocked);
-  fprintf(fp, "IDDD configured:  %.3f\n", idddConfigured);
-  fprintf(fp, "IDDA configured:  %.3f\n\n", iddaConfigured);
+  fprintf(fp, "Supply trip:       %d\n", trip ? 1 : 0);
+  fprintf(fp, "Back bias trip:    %d\n\n", tripBB ? 1 : 0);
+  if (tripBB) {
+    fprintf(fp, "   max. back bias: %.1f\n\n", maxBias);
+  }
+  fprintf(fp, "IDDD at switchon:  %.3f\n", idddSwitchon);
+  fprintf(fp, "IDDA at switchon:  %.3f\n", iddaSwitchon);
+  fprintf(fp, "IDDD with clock:   %.3f\n", idddClocked);
+  fprintf(fp, "IDDA with clock:   %.3f\n", iddaClocked);
+  fprintf(fp, "IDDD configured:   %.3f\n", idddConfigured);
+  fprintf(fp, "IDDA configured:   %.3f\n\n", iddaConfigured);
 
-  fprintf(fp, "IBias at 0V:      %.3f\n", ibias0);
-  fprintf(fp, "IBias at 3V:      %.3f\n", ibias3);
+  fprintf(fp, "IBias at 0V:       %.3f\n", ibias0);
+  fprintf(fp, "IBias at 3V:       %.3f\n", ibias3);
 
   fprintf(fp, "\nI-V-curve file:   %s\n", m_ivFile);
 }

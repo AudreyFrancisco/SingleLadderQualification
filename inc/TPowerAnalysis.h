@@ -22,6 +22,7 @@ class TPowerResultHic : public TScanResultHic {
 
 private:
   bool  trip;
+  bool  tripBB;
   float iddaSwitchon;
   float idddSwitchon;
   float iddaClocked;
