@@ -990,12 +990,16 @@ void MainWindow::performtests()
   fInitialScans = fScanVector.size();
 
   for (unsigned int i = 0; i < fScanVector.size(); i++) {
+    std::chrono::milliseconds delay(200);
     try {
       fExceptionthrown = false;
       fTestAgain       = false;
       if (fScanVector.at(i) == 0) {
-        std::thread analysisThread(&MainWindow::analysis, this, fAnalysisVector[i]);
-        analysisThread.join();
+        auto future_analysis =
+            std::async(std::launch::async, &MainWindow::analysis, this, fAnalysisVector[i]);
+        while (future_analysis.wait_for(delay) != std::future_status::ready)
+          qApp->processEvents();
+
         try {
           fAnalysisVector.at(i)->Finalize();
         }
@@ -1009,7 +1013,9 @@ void MainWindow::performtests()
       }
       else {
         try {
-          fScanVector[i]->Init();
+          auto future_init = std::async(std::launch::async, &TScan::Init, fScanVector[i]);
+          while (future_init.wait_for(delay) != std::future_status::ready)
+            qApp->processEvents();
         }
         catch (exception &ex) {
           std::cout << ex.what() << " is the thrown exception from the scaninit" << std::endl;
@@ -1017,13 +1023,14 @@ void MainWindow::performtests()
           fScanAbort       = true;
           fExceptiontext   = ex.what();
         }
-        auto future = std::async(std::launch::async, &MainWindow::scanLoop, this, fScanVector[i]);
-        std::thread analysisThread(&MainWindow::analysis, this, fAnalysisVector[i]);
+        auto future_scan =
+            std::async(std::launch::async, &MainWindow::scanLoop, this, fScanVector[i]);
+        auto future_analysis =
+            std::async(std::launch::async, &MainWindow::analysis, this, fAnalysisVector[i]);
 
-        // non-blocking wait for scan
-        // use to update status in the GUI
-        std::chrono::milliseconds delay(500);
-        while (future.wait_for(delay) != std::future_status::ready) {
+        // non-blocking wait for scan and analysis
+        // use to update status in the GUI and keep it responsive
+        while (future_scan.wait_for(delay) != std::future_status::ready) {
           if (fScanstatuslabels.at(i) != 0) {
             fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
             fScanstatuslabels[i]->update();
@@ -1033,8 +1040,9 @@ void MainWindow::performtests()
           qApp->processEvents();
         }
 
-        // (still) blocking wait for analysis
-        analysisThread.join();
+        while (future_analysis.wait_for(delay) != std::future_status::ready)
+          qApp->processEvents();
+
         try {
           fAnalysisVector.at(i)->Finalize();
         }
