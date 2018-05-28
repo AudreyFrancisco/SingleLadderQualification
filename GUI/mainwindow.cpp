@@ -9,9 +9,11 @@
 #include <QtDebug>
 #include <QtWidgets>
 //#include <QtCore>
+#include <chrono>
 #include <cstdlib>
 #include <ctime>
 #include <deque>
+#include <future>
 #include <iostream>
 #include <map>
 #include <mutex>
@@ -759,6 +761,7 @@ void MainWindow::scanLoop(TScan *myScan)
 
       while (myScan->Loop(2)) {
         myScan->PrepareStep(2);
+        qApp->processEvents();
         myScan->LoopStart(1);
 
         while (myScan->Loop(1)) {
@@ -1014,12 +1017,21 @@ void MainWindow::performtests()
           fScanAbort       = true;
           fExceptiontext   = ex.what();
         }
-        std::thread scanThread(&MainWindow::scanLoop, this, fScanVector[i]);
-
-        // sleep(10);
-
+        auto future = std::async(std::launch::async, &MainWindow::scanLoop, this, fScanVector[i]);
         std::thread analysisThread(&MainWindow::analysis, this, fAnalysisVector[i]);
-        scanThread.join();
+
+        // non-blocking wait for scan
+        // use to update status in the GUI
+        std::chrono::milliseconds delay(500);
+        while (future.wait_for(delay) != std::future_status::ready) {
+          if (fScanstatuslabels.at(i) != 0) {
+            fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
+            fScanstatuslabels[i]->update();
+          }
+          qApp->processEvents();
+        }
+
+        // (still) blocking wait for analysis
         analysisThread.join();
         try {
           fAnalysisVector.at(i)->Finalize();
