@@ -7,6 +7,9 @@ TDACScan::TDACScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vecto
                    std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
+  m_parameters           = new TScanParameters();
+  m_parameters->backBias = 0;
+
   strcpy(m_name, "DAC Scan");
 
   m_start[0] = m_config->GetParamValue("DACSTART");

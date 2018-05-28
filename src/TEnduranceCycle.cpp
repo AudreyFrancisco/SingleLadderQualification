@@ -11,7 +11,9 @@ TEnduranceCycle::TEnduranceCycle(TScanConfig *config, std::vector<TAlpide *> chi
 {
   strcpy(m_name, "Endurance Cycle");
 
-  m_parameters                                  = new TCycleParameters;
+  m_parameters           = new TCycleParameters;
+  m_parameters->backBias = 0;
+
   ((TCycleParameters *)m_parameters)->nTriggers = config->GetParamValue("ENDURANCETRIGGERS");
   ((TCycleParameters *)m_parameters)->upTime    = config->GetParamValue("ENDURANCEUPTIME");
   ((TCycleParameters *)m_parameters)->downTime  = config->GetParamValue("ENDURANCEDOWNTIME");

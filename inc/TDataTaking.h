@@ -15,8 +15,7 @@
 const int kTrigPerTrain = 100;
 
 typedef struct __TDataTakingParameters : TScanParameters {
-  int   nTriggers;
-  float backBias;
+  int nTriggers;
 } TDataTakingParameters;
 
 class TDataTaking : public TScan {

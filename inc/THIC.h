@@ -63,7 +63,7 @@ public:
   int          GetPbMod() { return m_pbMod; };
   void SwitchBias(bool on);
   float GetAnalogueVoltage();
-  void AddClassification(THicClassification aClass);
+  void AddClassification(THicClassification aClass, bool backBias);
   THicClassification GetClassification();
   THicClassification GetOldClassification() { return m_oldClass; };
   void SetOldClassification(THicClassification aOldClass) { m_oldClass = aOldClass; };

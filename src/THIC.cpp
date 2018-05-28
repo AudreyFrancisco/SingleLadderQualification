@@ -199,12 +199,13 @@ float THic::GetAnalogueVoltage()
     return 0.;
 }
 
-void THic::AddClassification(THicClassification aClass)
+void THic::AddClassification(THicClassification aClass, bool backBias)
 {
   // temporary until full classification with no back bias class implemented
   if ((aClass == CLASS_GOLD_NOBB) || (aClass == CLASS_SILVER_NOBB) ||
       (aClass == CLASS_BRONZE_NOBB)) {
     aClass = CLASS_RED;
+    (void)backBias;
   }
   // end temporary
   if (aClass == CLASS_RED)

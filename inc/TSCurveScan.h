@@ -10,11 +10,10 @@
 #include "TScan.h"
 
 typedef struct __TSCurveParameters : TScanParameters {
-  bool  nominal;
-  int   VPULSEH;
-  int   VPULSEL;
-  int   TARGET;
-  float backBias;
+  bool nominal;
+  int  VPULSEH;
+  int  VPULSEL;
+  int  TARGET;
 } TSCurveParameters;
 
 class TSCurveScan : public TMaskScan {

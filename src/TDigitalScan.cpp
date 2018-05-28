@@ -12,8 +12,9 @@ TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
                            std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TMaskScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  float voltageScale = config->GetVoltageScale();
-  m_parameters       = new TDigitalParameters;
+  float voltageScale     = config->GetVoltageScale();
+  m_parameters           = new TDigitalParameters;
+  m_parameters->backBias = 0;
 
   ((TDigitalParameters *)m_parameters)->voltageScale = voltageScale;
 

@@ -13,7 +13,9 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
                                  std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  m_parameters                                     = new TEyeParameters();
+  m_parameters           = new TEyeParameters();
+  m_parameters->backBias = 0;
+
   ((TEyeParameters *)m_parameters)->driverStrength = config->GetParamValue("EYEDRIVER");
   ((TEyeParameters *)m_parameters)->preemphasis    = config->GetParamValue("EYEPREEMP");
 

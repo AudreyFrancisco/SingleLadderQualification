@@ -20,6 +20,7 @@ TNoiseOccupancy::TNoiseOccupancy(TScanConfig *config, std::vector<TAlpide *> chi
   ((TNoiseParameters *)m_parameters)->nTriggers = config->GetParamValue("NTRIG");
   ;
   ((TNoiseParameters *)m_parameters)->isMasked = config->GetIsMasked();
+
   SetName();
 }
 

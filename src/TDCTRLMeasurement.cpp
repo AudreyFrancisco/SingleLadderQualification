@@ -10,6 +10,9 @@ TDctrlMeasurement::TDctrlMeasurement(TScanConfig *config, std::vector<TAlpide *>
                                      std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
+  m_parameters           = new TScanParameters();
+  m_parameters->backBias = 0;
+
   strcpy(m_name, "Dctrl Measurement"); // Display name
   m_start[2] = 0;
   m_step[2]  = 1;

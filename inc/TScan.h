@@ -30,6 +30,8 @@ typedef struct {
 } TErrorCounter;
 
 typedef struct TScanParameters__ {
+public:
+  float backBias;
   virtual ~TScanParameters__(){};
 } TScanParameters;
 
@@ -138,6 +140,7 @@ public:
   void WriteBoardRegisters(const char *fName);
   void ActivateTimestampLog();
   void WriteTimestampLog(const char *fName);
+  bool                            HasBackBias() { return (m_parameters->backBias > 0.1); };
   std::vector<common::TChipIndex> GetChipList() { return m_chipList; };
 };
 

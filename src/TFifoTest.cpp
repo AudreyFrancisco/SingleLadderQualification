@@ -10,7 +10,8 @@ TFifoTest::TFifoTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vec
                      std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  m_parameters = new TFifoParameters;
+  m_parameters           = new TFifoParameters;
+  m_parameters->backBias = 0;
 
   float voltageScale  = config->GetVoltageScale();
   int   mlvdsStrength = config->GetMlvdsStrength();

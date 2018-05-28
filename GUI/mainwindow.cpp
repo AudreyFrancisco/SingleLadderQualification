@@ -1299,7 +1299,8 @@ void MainWindow::SetHicClassifications()
       for (unsigned int ihic = 0; ihic < fHICs.size(); ihic++) {
         TScanResultHic *hicResult = scanResult->GetHicResult(fHICs.at(ihic)->GetDbId());
         if (hicResult != 0) {
-          fHICs.at(ihic)->AddClassification(hicResult->GetClassification());
+          fHICs.at(ihic)->AddClassification(hicResult->GetClassification(),
+                                            fScanVector.at(i)->HasBackBias());
         }
       }
     }
