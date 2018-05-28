@@ -30,6 +30,7 @@ TReadoutTest::TReadoutTest(TScanConfig *config, std::vector<TAlpide *> chips,
   ((TReadoutParameters *)m_parameters)->pllStages      = config->GetParamValue("READOUTPLLSTAGES");
   ((TReadoutParameters *)m_parameters)->voltageScale   = config->GetVoltageScale();
 
+  m_parameters->backBias = m_backBias;
   SetName();
 }
 
