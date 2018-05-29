@@ -154,7 +154,7 @@ private:
   void color_green_IB(int position);
   void color_red_IB(int position);
   int                fCounter;
-  Dialog *           fWindowex;
+  Dialog *           fWindowex     = 0;
   bool               fProperconfig = false;
   checkpbconfig *    fPbcfgcheck;
   Calibrationpb *    fCalwindow;

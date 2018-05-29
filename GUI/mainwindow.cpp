@@ -1522,6 +1522,9 @@ int MainWindow::GetTime()
 
 void MainWindow::attachtodatabase()
 {
+  if (fWindowex != 0) {
+    fWindowex->close();
+  }
   fActivityResults.clear();
   fErrorMessages.clear();
   if (fResultwindow->isVisible()) {
@@ -1653,21 +1656,32 @@ void MainWindow::attachtodatabase()
 
         attachConfigFile(activ);
         DbAddAttachment(fDB, activ, attachText, string(path), string("Comment.txt"));
+
         path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
                "/Classification.dat";
         DbAddAttachment(fDB, activ, attachText, string(path), string("Classification.dat"));
+
         path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
                "/DBParameters.dat";
         DbAddAttachment(fDB, activ, attachText, string(path), string("DBParameters.dat"));
 
+
         DbAddMember(fDB, activ, fIdofoperator);
+
 
         std::vector<ActivityDB::actUri> uris;
 
         uris.push_back(uri);
 
         myactivity->Create(&activ);
-        cout << myactivity->DumpResponse() << endl;
+        // cout << myactivity->DumpResponse() <<"is the response which should be -1"<<std::endl;
+        if (myactivity->GetResponse().ErrorCode == -1) {
+          QString errormessage;
+          errormessage = "Activity Creation ";
+          errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
+          fActivityResults.push_back(-1);
+          fErrorMessages.push_back(errormessage);
+        }
         myactivity->AssignUris(activ.ID, fIdofoperator, (&uris));
         if (myactivity->GetResponse().ErrorCode == -1) {
           QString errormessage;
@@ -1716,6 +1730,16 @@ void MainWindow::attachtodatabase()
             fErrorMessages.push_back(errormessage);
           }
         }
+
+        for (unsigned int i = 0; i < fActivityResults.size(); i++) {
+          if (fActivityResults.at(i) == -1) {
+            fStatus = true;
+
+            popup("The activity will remain open \n because of a problem during \n writing to db");
+
+            break;
+          }
+        }
         if (fStatus == false) {
           activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
           std::cout << "the activity is closed" << std::endl;
@@ -1724,6 +1748,13 @@ void MainWindow::attachtodatabase()
         activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
         myactivity->Change(&activ);
 
+        if (myactivity->GetResponse().ErrorCode == -1) {
+          QString errormessage;
+          errormessage = "Error while changing activity";
+          fErrorMessages.push_back(errormessage);
+          fActivityResults.push_back(-1);
+          popup("A problem occured!\nThe activity couldn't be changed.");
+        }
         std::cout << "the activity result is: " << activ.Result << std::endl;
         fActivityResults.push_back(activ.Result);
         delete myactivity;
@@ -1774,7 +1805,6 @@ void MainWindow::ClearVectors()
 void MainWindow::fillingreceptionscans()
 {
   ClearVectors();
-
   AddScan(STPower);
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   AddScan(STFifo);
