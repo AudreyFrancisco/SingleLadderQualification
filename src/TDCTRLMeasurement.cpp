@@ -13,6 +13,10 @@ TDctrlMeasurement::TDctrlMeasurement(TScanConfig *config, std::vector<TAlpide *>
   m_parameters           = new TScanParameters();
   m_parameters->backBias = 0;
 
+  // FIFO cell that is used for readback operation
+  m_region = 13;
+  m_offset = 5;
+
   strcpy(m_name, "Dctrl Measurement"); // Display name
   m_start[2] = 0;
   m_step[2]  = 1;
@@ -204,8 +208,8 @@ void TDctrlMeasurement::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AV
 bool TDctrlMeasurement::TestPattern(int pattern, bool &exception)
 {
   int readBack;
-  WriteMem(m_testChip, m_value[1], m_value[0], pattern);
-  ReadMem(m_testChip, m_value[1], m_value[0], readBack, exception);
+  WriteMem(m_testChip, m_region, m_offset, pattern);
+  ReadMem(m_testChip, m_region, m_offset, readBack, exception);
   if (exception) return false;
   if (readBack != pattern) return false;
   return true;
