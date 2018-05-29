@@ -548,6 +548,9 @@ string CreateActivityName(string compName, TScanConfig *config)
   case OBReception:
     testName = string("OB Reception Test ");
     break;
+  case OBPower:
+    testName = string("OB Fast Power Test ");
+    break;
   case OBHalfStaveOL:
     testName = string("OL HS Test ");
     break;
