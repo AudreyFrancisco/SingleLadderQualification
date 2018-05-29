@@ -101,6 +101,7 @@ protected:
   int m_step[MAXLOOPLEVEL];
   int m_value[MAXLOOPLEVEL];
   int m_enabled[MAXBOARDS]; // number of enabled chips per readout board
+  std::chrono::time_point<std::chrono::system_clock> time_start, time_end;
 
   void CountEnabledChips();
   int FindBoardIndex(TAlpide *chip);

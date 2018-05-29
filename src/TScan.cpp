@@ -19,6 +19,7 @@ bool fTimeLimitReached;
 TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
              std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
              std::mutex *aMutex)
+    : time_start(), time_end()
 {
   m_config = config;
   m_chips  = chips;
@@ -54,6 +55,7 @@ void TScan::Init()
             << std::endl;
   time_t     t   = time(0); // get time now
   struct tm *now = localtime(&t);
+  time_start     = std::chrono::system_clock::now();
 
   sprintf(m_config->GetfNameSuffix(), "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100,
           now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
@@ -174,7 +176,9 @@ void TScan::Terminate()
                 << std::endl;
     }
   }
-  strcpy(m_state, "Done");
+  time_end      = std::chrono::system_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::minutes>(time_end - time_start);
+  snprintf(m_state, sizeof(m_state), "Done (in %3d min)", int(duration.count()));
 
   // reset voltage drop correction, reset chips, apply voltage drop correction to reset state
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
