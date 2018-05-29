@@ -24,7 +24,8 @@ protected:
   std::string        m_dbId;      // ... in db: int? string?
   THicClassification m_oldClass;
   THicClassification m_class;
-
+  THicClassification m_worstScanBB;
+  THicClassification m_worstScanNoBB;
 
 public:
   THic(const char *dbId, int modId, TPowerBoard *pb, int pbMod);

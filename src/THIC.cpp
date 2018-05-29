@@ -7,11 +7,14 @@ THic::THic(const char *id, int modId, TPowerBoard *pb, int pbMod)
 {
   m_dbId.assign(id);
 
-  m_powerBoard = pb;
-  m_pbMod      = pbMod;
-  m_moduleId   = modId;
-  m_class      = CLASS_UNTESTED;
-  m_oldClass   = CLASS_UNTESTED;
+  m_powerBoard    = pb;
+  m_pbMod         = pbMod;
+  m_moduleId      = modId;
+  m_class         = CLASS_UNTESTED;
+  m_oldClass      = CLASS_UNTESTED;
+  m_worstScanBB   = CLASS_UNTESTED;
+  m_worstScanNoBB = CLASS_UNTESTED;
+
   m_chips.clear();
 }
 
@@ -204,8 +207,20 @@ void THic::AddClassification(THicClassification aClass, bool backBias)
   // temporary until full classification with no back bias class implemented
   if ((aClass == CLASS_GOLD_NOBB) || (aClass == CLASS_SILVER_NOBB) ||
       (aClass == CLASS_BRONZE_NOBB)) {
-    aClass = CLASS_RED;
+    aClass = CLASS_RED; // TODO: remove this in final classification
+    if ((aClass == CLASS_GOLD_NOBB) && (m_worstScanNoBB < CLASS_GOLD)) m_worstScanNoBB = CLASS_GOLD;
+    if ((aClass == CLASS_SILVER_NOBB) && (m_worstScanNoBB < CLASS_SILVER))
+      m_worstScanNoBB = CLASS_SILVER;
+    if ((aClass == CLASS_BRONZE_NOBB) && (m_worstScanNoBB < CLASS_BRONZE))
+      m_worstScanNoBB = CLASS_BRONZE;
+    m_worstScanBB     = CLASS_RED;
     (void)backBias;
+  }
+  else if (backBias && (aClass > m_worstScanBB)) {
+    m_worstScanBB = aClass;
+  }
+  else if (!backBias && (aClass > m_worstScanNoBB)) {
+    m_worstScanNoBB = aClass;
   }
   // end temporary
   if (aClass == CLASS_RED)
