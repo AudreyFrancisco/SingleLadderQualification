@@ -232,15 +232,15 @@ void TScanAnalysis::Run()
       while (!(m_mutex->try_lock()))
         ;
 
-      TScanHisto histo = m_histoQue->front();
+      TScanHisto histo = std::move(m_histoQue->front());
+      m_histoQue->pop_front();
+      m_mutex->unlock();
+
       if (m_first) {
         // histo.GetChipList(m_chipList);
         InitCounters();
         m_first = false;
       }
-
-      m_histoQue->pop_front();
-      m_mutex->unlock();
 
       AnalyseHisto(&histo);
     }
