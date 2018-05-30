@@ -2503,6 +2503,9 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 8);
   fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
   AddScan(STEyeScan);
+  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 12);
+  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 0);
+  AddScan(STEyeScan);
 
   // readout tests
   fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
@@ -2514,11 +2517,20 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
   fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
   AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 4);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
-  AddScan(STReadout);
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
   fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 12);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 12);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 6);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 4);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
   AddScan(STReadout);
 
   // reset previous values
