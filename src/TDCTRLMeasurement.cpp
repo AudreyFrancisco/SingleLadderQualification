@@ -256,7 +256,7 @@ void TDctrlMeasurement::Execute()
     // m_histo->Set(idx, m_value[1], measured amplitude)
     // to enter the measured amplitude for the current chip and the current
     // driver setting
-    if (m_testChip->GetConfig()->GetCtrInt() == 0) {
+    if ((m_testChip->GetConfig()->GetCtrInt() == 0) && (FindBoardIndex(m_testChip) == 0)) {
       scope.en_measure_ch(3); // Set measurement to read from scope channel 3
       scope.get_meas();       // Retrieve measuremts
       m_histo->Set(idx, m_value[0], peak_p, scope.ch3.peak); // Update plots
@@ -270,7 +270,7 @@ void TDctrlMeasurement::Execute()
       m_histo->Set(idx, m_value[0], rtim_n, scope.ch4.rtim);
       m_histo->Set(idx, m_value[0], ftim_n, scope.ch4.ftim);
     }
-    else if (m_testChip->GetConfig()->GetCtrInt() == 1) {
+    else {
       scope.en_measure_ch(1);
       scope.get_meas();
       m_histo->Set(idx, m_value[0], peak_p, scope.ch1.peak);
