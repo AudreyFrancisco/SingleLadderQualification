@@ -110,7 +110,10 @@ void TEyeMeasurement::Init()
     m_chips.at(ichip)->GetConfig()->SetParamValue("DTUPREEMP", backupPreemp);
   }
 
-  m_board->setSpeedMode(Mosaic::RCV_RATE_1200);
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    TReadoutBoardMOSAIC *mosaic = (TReadoutBoardMOSAIC *)m_boards.at(i);
+    mosaic->setSpeedMode(Mosaic::RCV_RATE_1200);
+  }
   // Maximum prescale factor (Time spend per point)
   // 10 ~= log2(1.2Gbps)/(65536*20)
 
@@ -268,6 +271,9 @@ void TEyeMeasurement::Terminate()
 {
   TScan::Terminate();
 
-  m_board->setSpeedMode(((TBoardConfigMOSAIC *)m_board->GetConfig())->GetSpeedMode());
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    TReadoutBoardMOSAIC *mosaic = (TReadoutBoardMOSAIC *)m_boards.at(i);
+    mosaic->setSpeedMode(((TBoardConfigMOSAIC *)m_board->GetConfig())->GetSpeedMode());
+  }
   m_running = false;
 }

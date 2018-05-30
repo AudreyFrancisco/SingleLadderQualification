@@ -1027,6 +1027,8 @@ void MainWindow::performtests()
           if (fScanstatuslabels.at(i) != 0) {
             fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
             fScanstatuslabels[i]->update();
+            if (fHistoQue.size() > 0)
+              printf("%lu histogram(s) queued for analysis\n", fHistoQue.size());
           }
           qApp->processEvents();
         }
@@ -1794,10 +1796,20 @@ void MainWindow::attachtodatabase()
 
 void MainWindow::ClearVectors()
 {
+  for (auto scan : fScanVector)
+    delete scan;
   fScanVector.clear();
+  for (auto ana : fAnalysisVector)
+    delete ana;
   fAnalysisVector.clear();
+  for (auto res : fresultVector)
+    delete res;
   fresultVector.clear();
+  for (auto but : fScanbuttons)
+    delete but;
   fScanbuttons.clear();
+  for (auto lab : fScanstatuslabels)
+    delete lab;
   fScanstatuslabels.clear();
   fScanTypes.clear();
 }
