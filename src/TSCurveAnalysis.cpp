@@ -191,7 +191,7 @@ void TSCurveAnalysis::InitCounters()
 
   for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TSCurveResultHic *result = (TSCurveResultHic *)it->second;
-    result->m_backBias       = ((TSCurveScan *)m_scan)->GetBackbias();
+    result->m_backBias       = m_scan->GetBackBias();
     result->m_nominal        = ((TSCurveScan *)m_scan)->GetNominal();
     result->m_VCASNTuning    = IsVCASNTuning();
     result->m_ITHRTuning     = IsITHRTuning();

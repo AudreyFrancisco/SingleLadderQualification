@@ -104,7 +104,7 @@ void TNoiseAnalysis::InitCounters()
   std::map<std::string, TScanResultHic *>::iterator it;
   for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TNoiseResultHic *result = (TNoiseResultHic *)it->second;
-    result->m_backBias      = ((TNoiseOccupancy *)m_scan)->GetBackbias();
+    result->m_backBias      = m_scan->GetBackBias();
     result->m_isMasked      = m_isMasked;
     result->m_maxChipOcc    = 0;
   }

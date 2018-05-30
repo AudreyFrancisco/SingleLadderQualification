@@ -46,7 +46,7 @@ void TScan::Init()
   fScanAbort        = false;
   fTimeLimitReached = false;
 
-  m_parameters->backBias = 0;
+  m_parameters->backBias = m_config->GetBackBias();
 
   strcpy(m_state, "Running");
   std::cout << std::endl
