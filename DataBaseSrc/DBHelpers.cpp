@@ -113,7 +113,9 @@ int DbGetResultId(AlpideDB *db, int activityTypeId, THicClassification classific
       if (Name.find("BRONZE") != string::npos) return resultTypeList.at(i).ID;
       break;
     case CLASS_PARTIAL:
-      if (Name.find("partially") != string::npos) return resultTypeList.at(i).ID;
+      if ((Name.find("partially") != string::npos) || (Name.find("PARTIAL") != string::npos)) {
+        if (Name.find("CATB") == string::npos) return resultTypeList.at(i).ID;
+      }
       break;
     case CLASS_RED:
       if (Name.find("not") != string::npos) return resultTypeList.at(i).ID;
