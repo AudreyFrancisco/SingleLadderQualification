@@ -36,7 +36,6 @@ protected:
   int    m_nTriggers;
   bool   m_pulse;
   int    m_pulseLength;
-  float  m_backBias;
   void ConfigureFromu(TAlpide *chip);
 
 public:

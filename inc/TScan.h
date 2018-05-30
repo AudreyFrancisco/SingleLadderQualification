@@ -95,6 +95,7 @@ protected:
   std::mutex *                    m_mutex;
   bool                            m_running;
   TScanConditions                 m_conditions;
+  float                           m_backBias;
   std::map<std::string, TErrorCounter> m_errorCounts;
   int m_start[MAXLOOPLEVEL];
   int m_stop[MAXLOOPLEVEL];

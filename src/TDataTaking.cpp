@@ -15,8 +15,6 @@ TDataTaking::TDataTaking(TScanConfig *config, std::vector<TAlpide *> chips,
                          std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
-
-  m_backBias  = m_config->GetBackBias();
   m_nTriggers = m_config->GetParamValue("NTRIG");
 
   // divide triggers in trains
