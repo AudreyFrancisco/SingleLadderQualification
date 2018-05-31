@@ -278,6 +278,8 @@ void TDigitalWhiteFrame::ConfigureMaskStage(TAlpide *chip, int istage)
 
 void TDigitalWhiteFrame::Init()
 {
+  CreateScanHisto();
+
   TScan::Init();
   m_running = true;
   CountEnabledChips();
