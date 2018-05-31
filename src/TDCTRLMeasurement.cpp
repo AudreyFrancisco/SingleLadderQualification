@@ -31,8 +31,6 @@ TDctrlMeasurement::TDctrlMeasurement(TScanConfig *config, std::vector<TAlpide *>
   m_start[0] = 0;
   m_step[0]  = 1;
   m_stop[0]  = 16;
-
-  CreateScanHisto();
 }
 
 
@@ -79,6 +77,8 @@ void TDctrlMeasurement::InitScope()
 
 void TDctrlMeasurement::Init()
 {
+  CreateScanHisto();
+
   TScan::Init();
 
   InitScope();

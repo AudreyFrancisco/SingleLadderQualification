@@ -33,8 +33,6 @@ TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
   m_stop[2]  = 1;
 
   m_nTriggers = m_config->GetParamValue("NINJ");
-
-  CreateScanHisto();
 }
 
 
@@ -143,6 +141,8 @@ THisto TDigitalScan::CreateHisto()
 
 void TDigitalScan::Init()
 {
+  CreateScanHisto();
+
   TScan::Init();
   m_running = true;
   CountEnabledChips();

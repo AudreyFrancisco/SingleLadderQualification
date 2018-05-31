@@ -45,8 +45,6 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
 
   // NOT supported for now (needs to change looping behaviour)
   m_max_zero_results = 0; // Max number of consecutive zero results
-
-  CreateScanHisto();
 }
 
 
@@ -85,6 +83,8 @@ THisto TEyeMeasurement::CreateHisto()
 
 void TEyeMeasurement::Init()
 {
+  CreateScanHisto();
+
   TScan::Init();
   TEyeParameters *params = (TEyeParameters *)m_parameters;
 

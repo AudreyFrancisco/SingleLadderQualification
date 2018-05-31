@@ -59,8 +59,6 @@ TThresholdScan::TThresholdScan(TScanConfig *config, std::vector<TAlpide *> chips
   m_nTriggers                                  = m_config->GetParamValue("NINJ");
 
   SetName();
-
-  CreateScanHisto();
 }
 
 
@@ -101,7 +99,6 @@ TtuneVCASNScan::TtuneVCASNScan(TScanConfig *config, std::vector<TAlpide *> chips
   m_nTriggers = m_config->GetParamValue("NINJ");
 
   SetName();
-  CreateScanHisto();
 }
 
 
@@ -141,7 +138,6 @@ TtuneITHRScan::TtuneITHRScan(TScanConfig *config, std::vector<TAlpide *> chips,
                                                  ((TSCurveParameters *)m_parameters)->TARGET / 10;
   m_nTriggers = m_config->GetParamValue("NINJ");
   SetName();
-  CreateScanHisto();
 }
 
 
@@ -248,6 +244,8 @@ THisto TSCurveScan::CreateHisto()
 
 void TSCurveScan::Init()
 {
+  CreateScanHisto();
+
   TScan::Init();
 
   if (((TSCurveParameters *)m_parameters)->nominal) RestoreNominalSettings();

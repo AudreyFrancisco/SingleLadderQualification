@@ -24,8 +24,6 @@ TLocalBusTest::TLocalBusTest(TScanConfig *config, std::vector<TAlpide *> chips,
 
   m_start[0] = 0;
   m_step[0]  = 1;
-
-  CreateScanHisto();
 }
 
 THisto TLocalBusTest::CreateHisto()
@@ -42,6 +40,8 @@ THisto TLocalBusTest::CreateHisto()
 
 void TLocalBusTest::Init()
 {
+  CreateScanHisto();
+
   TScan::Init();
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
