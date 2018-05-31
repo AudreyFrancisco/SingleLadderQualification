@@ -77,6 +77,7 @@ namespace common {
   bool HitBelongsToChip(TChipIndex aChipIndex, TPixHit aHit);
   bool HitBelongsToHic(THic *aHic, TPixHit aHit);
   int FindIndexForHit(std::vector<TChipIndex> aChipList, TPixHit aHit);
+  bool PixelAlreadyHit(std::vector<TPixHit> *pixels, TPixHit aHit);
 }
 
 #endif
