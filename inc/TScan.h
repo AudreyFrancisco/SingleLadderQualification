@@ -112,7 +112,7 @@ protected:
 public:
   TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
         std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex);
-  virtual ~TScan(){};
+  virtual ~TScan() { delete m_histo; }
 
   virtual void Init();
   virtual void Terminate();

@@ -29,8 +29,6 @@ TDataTaking::TDataTaking(TScanConfig *config, std::vector<TAlpide *> chips,
   m_start[2] = 0;
   m_step[2]  = 1;
   m_stop[2]  = 1;
-
-  CreateScanHisto();
 }
 
 
@@ -88,6 +86,8 @@ THisto TDataTaking::CreateHisto()
 
 void TDataTaking::Init()
 {
+  CreateScanHisto();
+
   TScan::Init();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {

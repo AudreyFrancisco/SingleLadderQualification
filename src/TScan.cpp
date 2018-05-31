@@ -216,7 +216,8 @@ void TScan::Terminate()
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), false);
   }
 
-  if (m_histo) delete m_histo;
+  delete m_histo;
+  m_histo = nullptr;
 }
 
 bool TScan::Loop(int loopIndex)

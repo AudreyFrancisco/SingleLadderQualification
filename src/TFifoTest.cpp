@@ -32,8 +32,6 @@ TFifoTest::TFifoTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vec
   m_start[0] = 0;
   m_step[0]  = 1;
   m_stop[0]  = 128;
-
-  CreateScanHisto();
 }
 
 
@@ -91,6 +89,8 @@ THisto TFifoTest::CreateHisto()
 
 void TFifoTest::Init()
 {
+  CreateScanHisto();
+
   TScan::Init();
   float voltageScale  = ((TFifoParameters *)m_parameters)->voltageScale;
   int   mlvdsStrength = ((TFifoParameters *)m_parameters)->mlvdsStrength;

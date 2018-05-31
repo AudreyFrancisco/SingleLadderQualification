@@ -148,6 +148,30 @@ THisto::THisto(const THisto &h)
   m_trash = 0;
 }
 
+THisto::THisto(THisto &&h)
+    : m_ndim(h.m_ndim), m_name(h.m_name), m_title(h.m_title), m_dim(h.m_dim), m_lim(h.m_lim),
+      m_histo(h.m_histo), m_size(h.m_size), m_trash(0)
+{
+  h.m_dim   = {0, 0};
+  h.m_lim   = {{{0, 0}, {0, 0}}};
+  h.m_histo = nullptr;
+}
+
+THisto &THisto::operator=(THisto &&h)
+{
+  if (&h != this) {
+    std::swap(m_ndim, h.m_ndim);
+    std::swap(m_name, h.m_name);
+    std::swap(m_title, h.m_title);
+    std::swap(m_dim, h.m_dim);
+    std::swap(m_lim, h.m_lim);
+    std::swap(m_histo, h.m_histo);
+    std::swap(m_size, h.m_size);
+    std::swap(m_trash, h.m_trash);
+  }
+  return *this;
+}
+
 THisto::~THisto()
 {
   for (unsigned int j = 0; j < m_dim[1]; j++) {
