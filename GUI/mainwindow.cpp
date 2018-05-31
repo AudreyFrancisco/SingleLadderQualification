@@ -2514,6 +2514,9 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 12);
   fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 0);
   AddScan(STEyeScan);
+  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 12);
+  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
+  AddScan(STEyeScan);
 
   // readout tests
   fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
