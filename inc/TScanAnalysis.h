@@ -176,7 +176,7 @@ protected:
   bool FillPreviousActivities(string hicName, std::vector<ActivityDB::activityLong> *activities);
   bool GetPreviousParamValue(string hicTestName, string chipTestName, ActivityDB::activityLong &act,
                              float &value);
-  int GetChildList(int id, std::vector<std::string> &childrenNames);
+  int GetChildList(int id, std::string hicName, std::vector<std::string> &childrenNames);
   int GetPreviousComponentType(std::string prevTestType);
   int             GetComponentType();
   TScanResultHic *FindHicResultForChip(common::TChipIndex chip);

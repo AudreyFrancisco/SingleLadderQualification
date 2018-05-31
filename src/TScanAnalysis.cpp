@@ -29,12 +29,17 @@ int TScanAnalysis::GetPreviousActivityType()
 }
 
 
-int TScanAnalysis::GetChildList(int id, std::vector<std::string> &childrenNames)
+int TScanAnalysis::GetChildList(int id, string hicName, std::vector<std::string> &childrenNames)
 {
   std::vector<TChild> children;
   childrenNames.clear();
   int prevCompType = GetPreviousComponentType(GetPreviousTestType());
+  int compType     = GetComponentType();
   if (prevCompType < 0) return 0;
+  if (prevCompType == compType) { // look at component itself, not at children
+    childrenNames.push_back(hicName);
+    return 1;
+  }
   DbGetListOfChildren(m_config->GetDatabase(), id, children);
 
   for (unsigned int i = 0; i < children.size(); i++) {
@@ -98,7 +103,7 @@ bool TScanAnalysis::FillPreviousActivities(string                               
   int                      compType = GetComponentType();
   int compId = DbGetComponentId(m_config->GetDatabase(), m_config->GetDatabase()->GetProjectId(),
                                 compType, hicName);
-  GetChildList(compId, childNames);
+  GetChildList(compId, hicName, childNames);
 
   std::cout << "Number of children = " << childNames.size() << std::endl;
   for (unsigned int i = 0; i < childNames.size(); i++) {
