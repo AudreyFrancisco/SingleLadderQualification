@@ -362,13 +362,13 @@ void TtuneITHRScan::PrepareStep(int loopIndex)
 
 void TSCurveScan::Execute()
 {
-  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++)
     m_boards.at(iboard)->Trigger(m_nTriggers);
-  }
+
+  usleep(1000);
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
     m_hits->clear();
-    usleep(1000);
     ReadEventData(m_hits, iboard);
     FillHistos(m_hits, iboard);
   }
@@ -377,18 +377,18 @@ void TSCurveScan::Execute()
 void TSCurveScan::FillHistos(std::vector<TPixHit> *Hits, int board)
 {
   common::TChipIndex idx;
-  idx.boardIndex = board;
-  for (unsigned int i = 0; i < Hits->size(); i++) {
-    if (Hits->at(i).address / 2 != m_row)
+  idx.boardIndex          = board;
+  const unsigned int size = Hits->size();
+  for (unsigned int i = 0; i < size; i++) {
+    const TPixHit &hit = (*Hits)[i];
+    if (hit.address / 2 != m_row)
       continue; // todo: keep track of spurious hits, i.e. hits in non-injected rows
     // !! This will not work when allowing several chips with the same Id
-    idx.dataReceiver = Hits->at(i).channel;
-    idx.chipId       = Hits->at(i).chipId;
+    idx.dataReceiver = hit.channel;
+    idx.chipId       = hit.chipId;
 
-    int col = Hits->at(i).region * 32 + Hits->at(i).dcol * 2;
-    int leftRight =
-        ((((Hits->at(i).address % 4) == 1) || ((Hits->at(i).address % 4) == 2)) ? 1 : 0);
-    col += leftRight;
+    int col = hit.region * 32 + hit.dcol * 2;
+    col += ((hit.address + 1) >> 1) & 1;
     // TODO: Catch this case earlier (do not fill hit vector for corrupt events
     try {
       m_histo->Incr(idx, col, m_value[0] - m_start[0]); // m_value is too large (>20) often!!
