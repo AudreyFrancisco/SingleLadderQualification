@@ -26,9 +26,12 @@ void TDctrlAnalysis::Initialize()
   ReadChipList();
   CreateHicResults();
   CreatePrediction();
-
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    CalculatePrediction(m_hics.at(ihic)->GetDbId());
+  TTestType testType;
+  testType = m_config->GetTestType();
+  if (testType != OBHalfStaveOLFAST && testType != OBHalfStaveMLFAST) {
+    for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+      CalculatePrediction(m_hics.at(ihic)->GetDbId());
+    }
   }
 }
 

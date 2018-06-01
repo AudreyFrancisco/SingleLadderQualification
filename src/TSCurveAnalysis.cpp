@@ -176,10 +176,13 @@ void TSCurveAnalysis::Initialize()
   CreateHicResults();
   CreatePrediction();
   PrepareFiles();
-
-  if (IsThresholdScan() && (!m_nominal)) { // do only for threshold scan after tuning
-    for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-      CalculatePrediction(m_hics.at(ihic)->GetDbId());
+  TTestType testType;
+  testType = m_config->GetTestType();
+  if (testType != OBHalfStaveOLFAST && testType != OBHalfStaveMLFAST) {
+    if (IsThresholdScan() && (!m_nominal)) { // do only for threshold scan after tuning
+      for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+        CalculatePrediction(m_hics.at(ihic)->GetDbId());
+      }
     }
   }
 }
