@@ -246,6 +246,8 @@ void TSCurveScan::Init()
 {
   CreateScanHisto();
 
+  m_hits = new std::vector<TPixHit>(512);
+
   TScan::Init();
 
   if (((TSCurveParameters *)m_parameters)->nominal) RestoreNominalSettings();
@@ -360,19 +362,16 @@ void TtuneITHRScan::PrepareStep(int loopIndex)
 
 void TSCurveScan::Execute()
 {
-  std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
-
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
     m_boards.at(iboard)->Trigger(m_nTriggers);
   }
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
-    Hits->clear();
+    m_hits->clear();
     usleep(1000);
-    ReadEventData(Hits, iboard);
-    FillHistos(Hits, iboard);
+    ReadEventData(m_hits, iboard);
+    FillHistos(m_hits, iboard);
   }
-  delete Hits;
 }
 
 void TSCurveScan::FillHistos(std::vector<TPixHit> *Hits, int board)
@@ -445,4 +444,7 @@ void TSCurveScan::Terminate()
   std::cout << "Number of skipped points:             " << m_errorCount.nTimeout << std::endl;
   std::cout << "Priority encoder errors:              " << m_errorCount.nPrioEncoder << std::endl;
   std::cout << std::endl;
+
+  delete m_hits;
+  m_hits = nullptr;
 }

@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <mutex>
+#include <vector>
 
 #include "AlpideDecoder.h"
 #include "Common.h"
@@ -28,6 +29,8 @@ protected:
   void FillHistos(std::vector<TPixHit> *Hits, int board);
   // THisto CreateHisto    ();
   virtual void SetName() = 0;
+
+  std::vector<TPixHit> *m_hits;
 
 public:
   TSCurveScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
