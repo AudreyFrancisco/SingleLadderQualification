@@ -246,7 +246,7 @@ void TSCurveScan::Init()
 {
   CreateScanHisto();
 
-  m_hits = new std::vector<TPixHit>(512);
+  m_hitsets = new TRingBuffer<THitSet>;
 
   TScan::Init();
 
@@ -293,6 +293,8 @@ void TSCurveScan::Init()
     if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+
+  m_thread = new std::thread(&TSCurveScan::Histo, this);
 }
 
 void TThresholdScan::PrepareStep(int loopIndex)
@@ -368,19 +370,35 @@ void TSCurveScan::Execute()
   usleep(1000);
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
-    m_hits->clear();
-    ReadEventData(m_hits, iboard);
-    FillHistos(m_hits, iboard);
+    THitSet &hs = m_hitsets->Write();
+    hs.board    = iboard;
+    hs.val      = m_value[0] - m_start[0]; // m_value is too large (>20) often!!
+    hs.hits.clear();
+    ReadEventData(&hs.hits, iboard);
+    m_hitsets->Push();
   }
 }
 
-void TSCurveScan::FillHistos(std::vector<TPixHit> *Hits, int board)
+void TSCurveScan::Histo()
+{
+  while (!m_stopped) {
+    if (m_hitsets->IsEmpty()) {
+      usleep(100);
+      continue;
+    }
+    // printf("processing input\n");
+    FillHistos(m_hitsets->Read());
+    m_hitsets->Pop();
+  }
+}
+
+void TSCurveScan::FillHistos(const THitSet &hs)
 {
   common::TChipIndex idx;
-  idx.boardIndex          = board;
-  const unsigned int size = Hits->size();
+  idx.boardIndex          = hs.board;
+  const unsigned int size = hs.hits.size();
   for (unsigned int i = 0; i < size; i++) {
-    const TPixHit &hit = (*Hits)[i];
+    const TPixHit &hit = hs.hits[i];
     if (hit.address / 2 != m_row)
       continue; // todo: keep track of spurious hits, i.e. hits in non-injected rows
     // !! This will not work when allowing several chips with the same Id
@@ -391,7 +409,7 @@ void TSCurveScan::FillHistos(std::vector<TPixHit> *Hits, int board)
     col += ((hit.address + 1) >> 1) & 1;
     // TODO: Catch this case earlier (do not fill hit vector for corrupt events
     try {
-      m_histo->Incr(idx, col, m_value[0] - m_start[0]); // m_value is too large (>20) often!!
+      m_histo->Incr(idx, col, hs.val);
     }
     catch (...) {
       std::cout << "Caught exception in TSCurveScan::FillHistos, trying to fill histo for chipID "
@@ -402,11 +420,17 @@ void TSCurveScan::FillHistos(std::vector<TPixHit> *Hits, int board)
 
 void TSCurveScan::LoopEnd(int loopIndex)
 {
+
   if (loopIndex == 0) {
-    while (!(m_mutex->try_lock()))
-      ;
+    while (!m_hitsets->IsEmpty())
+      usleep(10);
     m_histo->SetIndex(m_row);
     // std::cout << "SCAN: Writing histo with row " << m_histo->GetIndex() << std::endl;
+
+    // wait for FillHisto to finish
+    // (i.e. empty queue, reading is finished when we reach this point)
+
+    m_mutex->lock();
     m_histoQue->push_back(*m_histo);
     m_mutex->unlock();
     m_histo->Clear();
@@ -415,6 +439,9 @@ void TSCurveScan::LoopEnd(int loopIndex)
 
 void TSCurveScan::Terminate()
 {
+  m_stopped = true;
+  m_thread->join();
+
   TScan::Terminate();
   // write Data;
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
@@ -445,6 +472,6 @@ void TSCurveScan::Terminate()
   std::cout << "Priority encoder errors:              " << m_errorCount.nPrioEncoder << std::endl;
   std::cout << std::endl;
 
-  delete m_hits;
-  m_hits = nullptr;
+  delete m_hitsets;
+  m_hitsets = nullptr;
 }
