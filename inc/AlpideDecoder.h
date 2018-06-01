@@ -1,6 +1,7 @@
 #ifndef ALPIDEDECODER_H
 #define ALPIDEDECODER_H
 
+#include <array>
 #include <cstdint>
 #include <vector>
 
@@ -38,7 +39,19 @@ private:
 
 protected:
 public:
-  static TAlpideDataType GetDataType(unsigned char dataWord);
+  static TAlpideDataType GetDataTypeSlow(unsigned char dataWord);
+  static TAlpideDataType GetDataType(unsigned char dataWord)
+  {
+    static std::array<TAlpideDataType, 256> dataTypeLut = GenerateDataTypeLUT();
+    return dataTypeLut[dataWord];
+  }
+  static std::array<TAlpideDataType, 256> GenerateDataTypeLUT()
+  {
+    std::array<TAlpideDataType, 256> lut;
+    for (unsigned int c = 0; c < 256; ++c)
+      lut[c]            = GetDataTypeSlow(c);
+    return lut;
+  }
   static int GetWordLength(TAlpideDataType dataType);
   static bool DecodeEvent(unsigned char *data, int nBytes, std::vector<TPixHit> *hits,
                           int boardIndex, int channel, int &prioErrors,

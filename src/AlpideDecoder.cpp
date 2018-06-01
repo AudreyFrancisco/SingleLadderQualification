@@ -7,7 +7,7 @@
 
 bool newEvent;
 
-TAlpideDataType AlpideDecoder::GetDataType(unsigned char dataWord)
+TAlpideDataType AlpideDecoder::GetDataTypeSlow(unsigned char dataWord)
 {
   if (dataWord == 0xff)
     return DT_IDLE;
