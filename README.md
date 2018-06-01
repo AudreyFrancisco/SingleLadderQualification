@@ -16,13 +16,21 @@ In order to build the software the following requirements must be installed
 - zlib
 - wget
 - subversion
-- clang
 - git
 - libusb1-devel
 - tinyxml-devel
 - qt5-qtbase-devel
 - krb5-workstation
 - cern-get-sso-cookie
+
+In order to use clang-format, please install the llvm-toolset-7:
+```
+yum install -y centos-release-scl && yum update -y && yum install -y llvm-toolset-7
+```
+Add the following line to the ``.bashrc``:
+```
+source scl_source enable llvm-toolset-7
+```
 
 In addition you should have working installations of
 - ROOT (for ROOT-based analyses)
