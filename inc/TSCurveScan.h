@@ -1,8 +1,10 @@
 #ifndef TSCURVESCAN_H
 #define TSCURVESCAN_H
 
+#include <atomic>
 #include <deque>
 #include <mutex>
+#include <thread>
 #include <vector>
 
 #include "AlpideDecoder.h"
@@ -19,6 +21,43 @@ typedef struct __TSCurveParameters : TScanParameters {
 
 class TSCurveScan : public TMaskScan {
 protected:
+  class THitSet {
+  public:
+    std::vector<TPixHit> hits{512};
+    int                  board;
+    int                  val;
+  };
+
+  template <typename T, int depth = 8> class TRingBuffer {
+  private:
+    T                data[depth];
+    std::atomic<int> pos_read;
+    std::atomic<int> pos_write;
+
+  public:
+    TRingBuffer() : pos_read(0), pos_write(0) {}
+    TRingBuffer(const TRingBuffer &) = delete;
+
+    const bool IsEmpty() { return ((pos_read - pos_write) % depth) == 0; }
+
+    T &      Write() { return data[pos_write % depth]; }
+    const T &Read() const { return data[pos_read % depth]; }
+
+    void Pop()
+    {
+      if (((pos_read - pos_write) % depth) != 0) pos_read = ++pos_read % depth;
+    }
+
+    void Push()
+    {
+      while (((pos_write - pos_read + 1) % depth) == 0) {
+        usleep(10);
+      }
+      // std::this_thread::sleep_for(std::chrono::microseconds(10));
+      pos_write = ++pos_write % depth;
+    }
+  };
+
   //  bool m_nominal;
   // int m_VPULSEH;
   // float m_backBias;
@@ -26,17 +65,21 @@ protected:
   virtual void ConfigureChip(TAlpide *chip) = 0;
   void ConfigureBoard(TReadoutBoard *board);
   void RestoreNominalSettings();
-  void FillHistos(std::vector<TPixHit> *Hits, int board);
+  void FillHistos(const THitSet &hs);
   // THisto CreateHisto    ();
   virtual void SetName() = 0;
 
-  std::vector<TPixHit> *m_hits;
+  void         Histo();
+  bool         m_stopped = false;
+  std::thread *m_thread;
+
+  TRingBuffer<THitSet> *m_hitsets;
 
 public:
   TSCurveScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
               std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
               std::mutex *aMutex);
-  virtual ~TSCurveScan(){};
+  virtual ~TSCurveScan() { delete m_hitsets; };
 
   THisto       CreateHisto(); // public in TScan, so...
   void         Init();
