@@ -38,7 +38,7 @@ protected:
     TRingBuffer() : pos_read(0), pos_write(0) {}
     TRingBuffer(const TRingBuffer &) = delete;
 
-    const bool IsEmpty() { return ((pos_read - pos_write) % depth) == 0; }
+    bool IsEmpty() { return ((pos_read - pos_write) % depth) == 0; }
 
     T &      Write() { return data[pos_write % depth]; }
     const T &Read() const { return data[pos_read % depth]; }
