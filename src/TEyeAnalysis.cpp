@@ -39,10 +39,10 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
 
   const std::time_t t = time(nullptr);
   char              time_suffix[50];
-  strftime(time_suffix, sizeof(time_suffix), "_%y%m%d_%H%M%S", std::localtime(&t));
+  strftime(time_suffix, sizeof(time_suffix), "%y%m%d_%H%M%S", std::localtime(&t));
 
   std::string basename =
-      TString::Format("eye_D%i_P%i_%s", driverStrength_0, preemphasis_0, time_suffix).Data();
+      TString::Format("eye_D%02i_P%02i_%s", driverStrength_0, preemphasis_0, time_suffix).Data();
   std::string filename_eye      = hicResult_0->GetOutputPath() + "/" + basename + ".pdf";
   std::string filename_eye_root = hicResult_0->GetOutputPath() + "/" + basename + ".root";
 
@@ -73,7 +73,7 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
     Int_t preemphasis        = ((TEyeParameters *)hicResult->GetScanParameters())->preemphasis;
 
     const std::string hname =
-        TString::Format("h_eye_%i_d%i_p%i", chip.chipId, driverStrength, preemphasis).Data();
+        TString::Format("h_eye_%i_d%02i_p%02i", chip.chipId, driverStrength, preemphasis).Data();
     const std::string htitle =
         TString::Format("Eye Diagram chip %i (%s - D: %i, P: %i);%s;%s", chip.chipId,
                         hicResult->GetName().c_str(), driverStrength, preemphasis, "offset_{hor}",
@@ -177,4 +177,85 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
   fclose(fp);
   rootfile_eye->Close();
   std::cout << "Done" << std::endl;
+}
+
+void TEyeAnalysis::PlotHisto(TVirtualPad &p, TH2 &h, const std::string &filename)
+{
+  TVirtualPad *cPad = TVirtualPad::Pad();
+  p.cd();
+
+  // calculate cumulative function along x (within [-yband, yband])
+  const int   nbin_x      = h.GetNbinsX();
+  const int   nbin_x_half = nbin_x / 2;
+  const int   nbin_y      = h.GetNbinsY();
+  const int   nbin_y_half = nbin_y / 2;
+  const int   xband       = 2;
+  const int   yband       = 2;
+  const float percent     = 0.95;
+
+  std::vector<double> x_l, x_r;
+  for (int xbin = 0; xbin < nbin_x_half; ++xbin) {
+    x_l.push_back((xbin != 0) ? x_l[xbin - 1] : 0.);
+    x_r.push_back((xbin != 0) ? x_r[xbin - 1] : 0.);
+    for (int ybin = nbin_y_half - yband; ybin < nbin_y_half + yband; ++ybin) {
+      x_l.back() += h.GetBinContent(1 + xbin, 1 + ybin);
+      x_r.back() += h.GetBinContent(1 + nbin_x - 1 - xbin, 1 + ybin);
+    }
+  }
+
+  // calculate cumulative function along y (within [-xband, xband])
+  std::vector<double> y_l, y_r;
+  for (int ybin = 0; ybin < nbin_y_half; ++ybin) {
+    y_l.push_back((ybin != 0) ? y_l[ybin - 1] : 0.);
+    y_r.push_back((ybin != 0) ? y_r[ybin - 1] : 0.);
+    for (int xbin = nbin_x_half - xband; xbin < nbin_x_half + xband; ++xbin) {
+      y_l.back() += h.GetBinContent(1 + xbin, 1 + ybin);
+      y_r.back() += h.GetBinContent(1 + xbin, 1 + nbin_y - 1 - ybin);
+    }
+  }
+
+  // calculate opening as 85 % per-centile
+  int open_l = -1;
+  int open_r = -1;
+  for (int xbin = 0; xbin < nbin_x_half; ++xbin) {
+    if ((open_l == -1) && ((x_l[xbin] / x_l.back()) > percent)) open_l = xbin;
+    if ((open_r == -1) && ((x_r[xbin] / x_r.back()) > percent)) open_r = xbin;
+  }
+
+  int open_u = -1;
+  int open_b = -1;
+  for (int ybin = 0; ybin < nbin_y_half; ++ybin) {
+    if ((open_b == -1) && ((y_l[ybin] / y_l.back()) > percent)) open_b = ybin;
+    if ((open_u == -1) && ((y_r[ybin] / y_r.back()) > percent)) open_u = ybin;
+  }
+
+  // draw histogram
+  h.SetStats(kFALSE);
+  h.Draw("colz");
+  h.SetMinimum(1.e-7);
+  p.SetLogz();
+  p.Update();
+  TLatex l;
+  l.SetTextAlign(21);
+  l.SetTextFont(43);
+  l.SetTextSize(16);
+  l.SetNDC(kTRUE);
+  double open_x_l = h.GetXaxis()->GetBinCenter(1 + open_l);
+  double open_x_u = h.GetXaxis()->GetBinCenter(1 + nbin_x - 1 - open_r);
+  double x_center = h.GetXaxis()->GetBinCenter(1 + nbin_x_half);
+  double open_y_l = h.GetYaxis()->GetBinCenter(1 + open_b);
+  double open_y_u = h.GetYaxis()->GetBinCenter(1 + nbin_x - 1 - open_u);
+  double y_center = h.GetYaxis()->GetBinCenter(1 + nbin_y_half);
+  TArrow arrow_x(open_x_l, y_center, open_x_u, y_center, 0.05, "<->");
+  TArrow arrow_y(x_center, open_y_l, x_center, open_y_u, 0.05, "<->");
+  if ((open_l != -1) || (open_r != -1) || (open_b != -1) || (open_u != -1)) {
+    l.DrawLatex(.5, .02, TString::Format("openings (%g) in x [%g, %g], in y [%g, %g]", percent,
+                                         open_x_l, open_x_u, open_y_l, open_y_u));
+    arrow_x.Draw();
+    arrow_y.Draw();
+  }
+
+  if (!filename.empty()) p.Print(filename.c_str());
+
+  if (cPad) cPad->cd();
 }

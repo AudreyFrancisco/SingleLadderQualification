@@ -256,7 +256,7 @@ void TEyeMeasurement::Execute()
   double scanValue = ((double)errorCountReg / ((double)BUS_WIDTH * (double)sampleCountReg *
                                                (1UL << (m_current_prescale + 1))));
 
-  std::cout << "X " << hOffset << ", Y " << vOffset << ", value: " << scanValue << "\n";
+  // std::cout << "X " << hOffset << ", Y " << vOffset << ", value: " << scanValue << "\n";
   common::TChipIndex idx;
   idx.boardIndex   = m_boardIndex;
   idx.chipId       = m_testChip->GetConfig()->GetChipId();

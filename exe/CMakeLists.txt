@@ -3,6 +3,13 @@ set(EXE
   stopclk
 )
 
+set(EXE_ROOT
+  plot_eyes
+)
+if (OLD_CXX)
+  list(REMOVE_ITEM EXE_ROOT plot_eyes)
+endif()
+
 set(TEST_EXE
   test_GRST
   test_alucms
@@ -52,6 +59,11 @@ foreach(exe ${TEST_EXE})
 endforeach()
 
 if (${ROOT_FOUND})
+  foreach(exe ${EXE_ROOT})
+    add_executable(${exe} main_${exe}.cpp)
+    target_link_libraries(${exe} alpide_analysis)
+  endforeach()
+
   foreach(exe ${TEST_EXE_ROOT})
     string(REGEX REPLACE "^test_" "" test ${exe})
     add_executable(${exe} main_${test}.cpp)

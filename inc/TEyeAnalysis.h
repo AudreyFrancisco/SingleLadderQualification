@@ -9,6 +9,8 @@
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
 
+class TVirtualPad;
+class TH2;
 
 class TEyeResultChip : public TScanResultChip {
   friend class TEyeAnalysis;
@@ -76,6 +78,8 @@ public:
                std::vector<THic *> hics, std::mutex *aMutex, TEyeResult *aResult = 0);
   void Initialize(); // TODO
   void Finalize(){}; // TODO
+
+  static void PlotHisto(TVirtualPad &p, TH2 &h, const std::string &filename = "");
 };
 
 
