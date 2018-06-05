@@ -94,7 +94,7 @@ void TScan::Init()
     errCount.nPrioEncoder  = 0;
     errCount.nTimeout      = 0;
     m_errorCounts.insert(
-     std::pair<std::string, TErrorCounter>(m_hics.at(ihic)->GetDbId(), errCount));
+        std::pair<std::string, TErrorCounter>(m_hics.at(ihic)->GetDbId(), errCount));
   }
 
   for (const auto &rChip : m_chips) {
