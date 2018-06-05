@@ -1,5 +1,6 @@
 #include "databaseselection.h"
 #include "ui_databaseselection.h"
+#include "dialog.h"
 
 DatabaseSelection::DatabaseSelection(QWidget *parent)
     : QDialog(parent), ui(new Ui::DatabaseSelection)
@@ -13,13 +14,21 @@ DatabaseSelection::~DatabaseSelection() { delete ui; }
 void DatabaseSelection::setdatabase(bool &database)
 {
 
-  if (ui->testdb->isChecked()) {
-    ui->productiondb->setChecked(false);
+  if (ui->localtest->isChecked()) {
+    ui->constructiondb->setChecked(false);
     database = 1;
   }
-  if (ui->productiondb->isChecked()) {
-
-    ui->testdb->setChecked(false);
+  if (ui->constructiondb->isChecked()) {
+    popup("Construction database not yet available");
+    ui->localtest->setChecked(false);
     database = 0;
   }
+}
+
+void DatabaseSelection::popup(QString message)
+{
+  fWindowerr = new Dialog(this);
+  fWindowerr->append(message);
+  fWindowerr->hidequit();
+  fWindowerr->show();
 }

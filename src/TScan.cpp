@@ -58,8 +58,9 @@ void TScan::Init()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     m_hics.at(ihic)->PowerOn();
-    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+
+    //if (!m_hics.at(ihic)->GetPowerBoard()) continue;
+    //m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 
   // char dummy[10];
@@ -73,7 +74,7 @@ void TScan::Init()
   strcpy(m_conditions.m_swVersion, VERSION);
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
-    try {
+    /*try {
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart =
           m_hics.at(ihic)->GetTemperature();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaStart =
@@ -85,15 +86,15 @@ void TScan::Init()
     }
     catch (std::exception &e) {
       std::cout << "Exception " << e.what() << " when reading temp / currents" << std::endl;
-    }
+    }*/
     TErrorCounter errCount;
     errCount.nEnabled      = m_hics.at(ihic)->GetNEnabledChips();
     errCount.n8b10b        = 0;
     errCount.nCorruptEvent = 0;
     errCount.nPrioEncoder  = 0;
     errCount.nTimeout      = 0;
-    m_errorCounts.insert(
-        std::pair<std::string, TErrorCounter>(m_hics.at(ihic)->GetDbId(), errCount));
+    //m_errorCounts.insert(
+        //std::pair<std::string, TErrorCounter>(m_hics.at(ihic)->GetDbId(), errCount));
   }
 
   for (const auto &rChip : m_chips) {
@@ -375,6 +376,8 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
   TBoardHeader  boardInfo;
   int           nTrigPerHic[MAX_MOSAICTRANRECV];
 
+  printf("TMaskScan::ReadEventData, iBoard = %d\n", iboard);
+
   for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
     nTrigPerHic[i] = 0;
   }
@@ -383,6 +386,7 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
     if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) ==
         -1) { // no event available in buffer yet, wait a bit
       usleep(1000);
+      printf("No event available in buffer yet, wait a bit...\n");
       trials++;
       if (trials == 3) {
         std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event"
