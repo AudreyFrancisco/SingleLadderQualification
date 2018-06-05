@@ -107,7 +107,7 @@ public slots:
   void IBParameterScan();
   void fillingibvectors();
 
-  //MFT Test (based on fillingibvectors())
+  // MFT Test (based on fillingibvectors())
   void MFTFifoScan();
   void MFTDigitalScan();
   void MFTThresholdScan();

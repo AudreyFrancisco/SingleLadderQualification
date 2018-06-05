@@ -224,7 +224,6 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
     printf("nBytes = %d et buffer = %s !\n", nBytes, buffer);
 
     printf("Breaks here 102\n");
-
   }
 
   // try to read from TCP connection
@@ -233,7 +232,10 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
       printf("Breaks here 103\n");
       readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), (MDataReceiver **)&dr);
       printf("Breaks here 104\n");
-      if (readDataSize == 0) { return -1; printf("readDataSize == 0...\n");}
+      if (readDataSize == 0) {
+        return -1;
+        printf("readDataSize == 0...\n");
+      }
     }
     catch (exception &e) {
       cerr << e.what() << endl;

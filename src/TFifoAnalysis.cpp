@@ -120,7 +120,7 @@ void TFifoAnalysis::WriteResult()
       sprintf(fName, "FifoScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
               m_config->GetfNameSuffix());
     }
-    //m_scan->WriteConditions(fName, m_hics.at(ihic));
+    // m_scan->WriteConditions(fName, m_hics.at(ihic));
 
     FILE *fp = fopen(fName, "a");
 

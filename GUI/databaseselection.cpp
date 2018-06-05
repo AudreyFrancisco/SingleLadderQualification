@@ -1,6 +1,6 @@
 #include "databaseselection.h"
-#include "ui_databaseselection.h"
 #include "dialog.h"
+#include "ui_databaseselection.h"
 
 DatabaseSelection::DatabaseSelection(QWidget *parent)
     : QDialog(parent), ui(new Ui::DatabaseSelection)

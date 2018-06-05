@@ -87,7 +87,7 @@ public:
   virtual void WriteToFile(FILE *fp) = 0;
   virtual void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
   int AddChipResult(int aChipId, TScanResultChip *aChipResult);
-  void SetResultFile(const char *fName) { strncpy(m_resultFile, fName, sizeof(m_resultFile));};
+  void SetResultFile(const char *fName) { strncpy(m_resultFile, fName, sizeof(m_resultFile)); };
   THicClassification             GetClassification() { return m_class; };
   std::map<int, TScanResultChip *> DeleteThisToo() { return m_chipResults; };
   float GetVariable(int chip, TResultVariable var);

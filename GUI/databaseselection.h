@@ -21,7 +21,7 @@ public slots:
 
 private:
   Ui::DatabaseSelection *ui;
-  Dialog *              fWindowerr;
+  Dialog *               fWindowerr;
 };
 
 #endif // DATABASESELECTION_H

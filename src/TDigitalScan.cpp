@@ -270,7 +270,6 @@ void TDigitalScan::Execute()
 
     FillHistos(Hits, iboard);
     printf("Breaks here 21.7\n");
-
   }
   delete Hits;
   printf("Breaks here 22\n");

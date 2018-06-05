@@ -12,13 +12,13 @@
 #include <cstdlib>
 #include <ctime>
 #include <deque>
+#include <exception>
 #include <iostream>
 #include <map>
 #include <mutex>
 #include <qapplication.h>
 #include <string>
 #include <thread>
-#include <exception>
 #include <unistd.h>
 #include <vector>
 //#include "TQtWidgets.h"
@@ -27,12 +27,12 @@
 //#include "scanthread.h"
 #include "AlpideConfig.h"
 #include "TAlpide.h"
+#include "TBoardConfigMOSAIC.h"
 #include "TDigitalAnalysis.h"
 #include "TDigitalScan.h"
 #include "TReadoutBoard.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
-#include "TBoardConfigMOSAIC.h"
 #include "dialog.h"
 #include "scanconfiguration.h"
 #include "testingprogress.h"
@@ -843,13 +843,17 @@ void MainWindow::popup(QString message)
   fWindowex->show();
 }
 
-void MainWindow::start_clock(){
-  int commandstart = system("cd ../ && ./startclk -c Config//Config_MFTLadder_FIFOTest.cfg && cd GUI/");
+void MainWindow::start_clock()
+{
+  int commandstart =
+      system("cd ../ && ./startclk -c Config//Config_MFTLadder_FIFOTest.cfg && cd GUI/");
   printf("commandstart = %d \n", commandstart);
 }
 
-void MainWindow::stop_clock(){
-  int commandstop = system("cd ../ && ./stopclk -c Config//Config_MFTLadder_FIFOTest.cfg && cd GUI/");
+void MainWindow::stop_clock()
+{
+  int commandstop =
+      system("cd ../ && ./stopclk -c Config//Config_MFTLadder_FIFOTest.cfg && cd GUI/");
   printf("commandstop = %d \n", commandstop);
 }
 
@@ -1050,13 +1054,13 @@ void MainWindow::performtests()
         colorsinglescan(i);
       }
       else {
-        //std::thread scanThread(&MainWindow::scanLoop, this, fScanVector[i]);
+        // std::thread scanThread(&MainWindow::scanLoop, this, fScanVector[i]);
         scanLoop(fScanVector[i]);
-        //sleep(10);
-        //std::thread analysisThread(&MainWindow::analysis, this, fAnalysisVector[i]);
+        // sleep(10);
+        // std::thread analysisThread(&MainWindow::analysis, this, fAnalysisVector[i]);
         analysis(fAnalysisVector[i]);
-        //scanThread.join();
-        //analysisThread.join();
+        // scanThread.join();
+        // analysisThread.join();
         try {
           printf("Trying to finalize the analysis\n");
           fAnalysisVector.at(i)->Finalize();
@@ -1114,7 +1118,7 @@ void MainWindow::applytests()
   }
 
   fConfig->GetScanConfig()->SetTestType(fNumberofscan);
-  //fConfig->GetScanConfig()->SetDatabase(fDB);
+  // fConfig->GetScanConfig()->SetDatabase(fDB);
   ui->start_test->hide();
   qApp->processEvents();
   fSignalMapper = new QSignalMapper(this);
@@ -2237,7 +2241,7 @@ void MainWindow::IBParameterScan()
 void MainWindow::fillingibvectors()
 {
   ClearVectors();
-  //AddScan(STPower);
+  // AddScan(STPower);
   // if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   // Do this scan immediately after power as it sometimes crashes
   // IBParameterScan();
@@ -2257,7 +2261,7 @@ void MainWindow::fillingibvectors()
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
 
-  //AddScan(STDigital);
+  // AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
   AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(0.9);
@@ -2357,18 +2361,18 @@ void MainWindow::MFTThresholdScan()
   ConfigThresholdScan();
   printf("Threshold Scan for MFT HICs in progress...\n");
 
-  //ClearVectors();
+  // ClearVectors();
 
-  //AddScan(STThreshold);
+  // AddScan(STThreshold);
 }
 
 void MainWindow::MFTNoiseOccupancyScan()
 {
   printf("Noise Occupancy Scan for MFT HIC in progress...\n");
 
-  //ClearVectors();
+  // ClearVectors();
 
-  //AddScan(STNoise);
+  // AddScan(STNoise);
 }
 
 // TODO: Only one MFT_Config_file for all scans
@@ -2382,7 +2386,6 @@ void MainWindow::MFTHICQualification()
   AddScan(STThreshold);
   AddScan(STNoise);*/
 }
-
 
 
 void MainWindow::fillingendurancevectors()
