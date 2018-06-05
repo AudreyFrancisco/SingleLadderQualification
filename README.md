@@ -5,11 +5,8 @@
 ## Build instructions
 
 ### Prerequisites
-In order to build the software the following requirements must be installed
+In order to build and use the software the following requirements must be installed
 (CC7 packages names):
-- cmake3
-- gcc
-- gcc-c++
 - make
 - cmake3
 - tar
@@ -23,13 +20,14 @@ In order to build the software the following requirements must be installed
 - krb5-workstation
 - cern-get-sso-cookie
 
-In order to use clang-format, please install the llvm-toolset-7:
+In order to use clang-format and a modern gcc compiler, please also install:
 ```
-yum install -y centos-release-scl && yum update -y && yum install -y llvm-toolset-7
+yum install -y centos-release-scl && yum update -y && yum install -y llvm-toolset-7 devtoolset-7
 ```
-Add the following line to the ``.bashrc``:
+Add the following lines to the ``.bashrc``:
 ```
 source scl_source enable llvm-toolset-7
+source scl_source enable devtoolset-7
 ```
 
 In addition you should have working installations of

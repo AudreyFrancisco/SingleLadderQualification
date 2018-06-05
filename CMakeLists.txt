@@ -39,6 +39,14 @@ else()
   message(WARNING "Compilation without ROOT results in limited functionality!")
 endif()
 
+# require C++11-capable compiler
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
+    message(WARNING "Compiler with incomplete C++11 support detected: functionality limited")
+    set(OLD_CXX true)
+  endif()
+endif()
+
 # set C++ standard ensuring compatibility with ROOT
 set(CMAKE_CXX_STANDARD 11)
 if(ROOT_cxx17_FOUND)
