@@ -188,7 +188,9 @@ uint32_t TReadoutBoardMOSAIC::GetTriggerCount()
 
 int TReadoutBoardMOSAIC::Trigger(int nTriggers)
 {
+  printf("Sending %d triggers (from TReadoutBoardMOSAIC::Trigger)\n", nTriggers);
   pulser->run(nTriggers);
+
   return (nTriggers);
 }
 
@@ -209,23 +211,37 @@ void TReadoutBoardMOSAIC::StopRun()
 
 int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 {
+  printf("Breaks here 100\n");
+
   TAlpideDataParser *dr;
   long               readDataSize;
 
   // check for data in the receivers buffer
   for (int i = 0; i < MAX_MOSAICTRANRECV; i++) {
+    printf("Breaks here 101\n");
+
     if (alpideDataParser[i]->hasData()) return (alpideDataParser[i]->ReadEventData(nBytes, buffer));
+    printf("nBytes = %d et buffer = %s !\n", nBytes, buffer);
+
+    printf("Breaks here 102\n");
   }
 
   // try to read from TCP connection
   for (;;) {
     try {
+      printf("Breaks here 103\n");
       readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), (MDataReceiver **)&dr);
-      if (readDataSize == 0) return -1;
+      printf("Breaks here 104\n");
+      if (readDataSize == 0) {
+        return -1;
+        printf("readDataSize == 0...\n");
+      }
     }
     catch (exception &e) {
       cerr << e.what() << endl;
+      printf("Breaks here 105\n");
       StopRun();
+      printf("Breaks here 106\n");
       int ErrNums = decodeError();
       if ((ErrNums & 0x03FF00) != 0) {
         throw;
@@ -236,7 +252,10 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
     }
 
     // get event data from the selected data receiver
+    printf("Breaks here 107\n");
+    printf("nBytes = %d et buffer = %s !\n", nBytes, buffer);
     if (dr->hasData()) return (dr->ReadEventData(nBytes, buffer));
+    printf("Breaks here 108\n");
   }
   return -1;
 }

@@ -110,6 +110,7 @@ void TScanAnalysis::CreatePrediction()
 
 void TScanAnalysis::CreateHicResults()
 {
+  printf("Breaks here 120\n");
   if (m_hics.size() == 0) {
     std::cout << "Warning (TScanAnalysis::CreateResult): hic list is empty, doing nothing"
               << std::endl;
@@ -123,9 +124,11 @@ void TScanAnalysis::CreateHicResults()
   }
 
   for (unsigned int i = 0; i < m_hics.size(); i++) {
-    TScanResultHic *hicResult   = GetHicResult();
-    hicResult->m_class          = CLASS_UNTESTED;
-    hicResult->m_outputPath     = m_config->GetDataPath(m_hics.at(i)->GetDbId());
+    TScanResultHic *hicResult = GetHicResult();
+    hicResult->m_class        = CLASS_UNTESTED;
+    hicResult->m_outputPath   = m_config->GetDataPath(m_hics.at(i)->GetDbId());
+    printf("TScanAnalysis::CreateHicResults(), Hic number is :  %s \n",
+           m_hics.at(i)->GetDbId().c_str());
     hicResult->m_scanParameters = m_scan->GetParameters();
     for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip++) {
       if (m_hics.at(i)->ContainsChip(m_chipList.at(iChip))) {
@@ -136,6 +139,7 @@ void TScanAnalysis::CreateHicResults()
     }
     m_result->AddHicResult(m_hics.at(i)->GetDbId(), hicResult);
   }
+  printf("Breaks here 121\n");
 }
 
 

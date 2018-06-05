@@ -12,6 +12,7 @@ TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
                            std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TMaskScan(config, chips, hics, boards, histoQue, aMutex)
 {
+  printf("Breaks here 1\n");
   float voltageScale = config->GetVoltageScale();
   m_parameters       = new TDigitalParameters;
 
@@ -32,13 +33,17 @@ TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
   m_stop[2]  = 1;
 
   m_nTriggers = m_config->GetParamValue("NINJ");
+  printf("Number of triggers sent per pixel = %d \n", m_nTriggers);
 
   CreateScanHisto();
+  printf("Breaks here 2\n");
 }
 
 
 void TDigitalScan::SetName()
 {
+  printf("Breaks here 3\n");
+
   std::cout << "voltageScale = " << ((TDigitalParameters *)m_parameters)->voltageScale << std::endl;
   if (IsNominal()) {
     strcpy(m_name, "Digital Scan");
@@ -54,11 +59,13 @@ void TDigitalScan::SetName()
     ((TDigitalParameters *)m_parameters)->voltageScale = 1.0;
     strcpy(m_name, "Digital Scan");
   }
+  printf("Breaks here 4\n");
 }
 
 
 bool TDigitalScan::SetParameters(TScanParameters *pars)
 {
+  printf("Breaks here 5\n");
   TDigitalParameters *dPars = dynamic_cast<TDigitalParameters *>(pars);
   if (dPars) {
     std::cout << "TDigitalScan: Updating parameters" << std::endl;
@@ -71,11 +78,13 @@ bool TDigitalScan::SetParameters(TScanParameters *pars)
               << std::endl;
     return false;
   }
+  printf("Breaks here 6\n");
 }
 
 
 void TDigitalScan::ConfigureFromu(TAlpide *chip)
 {
+  printf("Breaks here 7\n");
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1, 0x0); // digital pulsing
   chip->WriteRegister(
       Alpide::REG_FROMU_CONFIG2,
@@ -89,17 +98,23 @@ void TDigitalScan::ConfigureFromu(TAlpide *chip)
   chip->WriteRegister(
       Alpide::REG_FROMU_PULSING2,
       chip->GetConfig()->GetParamValue("PULSEDURATION")); // fromu pulsing 2: pulse length
+  printf("Breaks here 8\n");
 }
 
 void TDigitalScan::ConfigureChip(TAlpide *chip)
 {
+  printf("Breaks here 9\n");
+
   AlpideConfig::BaseConfig(chip);
   ConfigureFromu(chip);
   AlpideConfig::ConfigureCMU(chip);
+
+  printf("Breaks here 10\n");
 }
 
 void TDigitalScan::ConfigureBoard(TReadoutBoard *board)
 {
+  printf("Breaks here 11\n");
   if (board->GetConfig()->GetBoardType() == boardDAQ) {
     // for the DAQ board the delay between pulse and strobe is 12.5ns * pulse delay + 25 ns * strobe
     // delay
@@ -113,10 +128,12 @@ void TDigitalScan::ConfigureBoard(TReadoutBoard *board)
                             board->GetConfig()->GetParamValue("PULSEDELAY"));
     board->SetTriggerSource(trigInt);
   }
+  printf("Breaks here 12\n");
 }
 
 void TDigitalScan::FillHistos(std::vector<TPixHit> *Hits, int board)
 {
+  printf("Breaks here 13\n");
   common::TChipIndex idx;
   idx.boardIndex = board;
 
@@ -132,6 +149,7 @@ void TDigitalScan::FillHistos(std::vector<TPixHit> *Hits, int board)
     col += leftRight;
     m_histo->Incr(idx, col);
   }
+  printf("Breaks here 14\n");
 }
 
 THisto TDigitalScan::CreateHisto()
@@ -142,6 +160,7 @@ THisto TDigitalScan::CreateHisto()
 
 void TDigitalScan::Init()
 {
+  printf("Breaks here 15\n");
   TScan::Init();
   m_running = true;
   CountEnabledChips();
@@ -160,9 +179,9 @@ void TDigitalScan::Init()
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_PRST);
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+  /*for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  }*/
 
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (!(m_chips.at(i)->GetConfig()->IsEnabled())) continue;
@@ -182,18 +201,24 @@ void TDigitalScan::Init()
     m_boards.at(i)->StartRun();
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+  /*for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  }*/
+  printf("Breaks here 16\n");
 }
 
 void TDigitalScan::PrepareStep(int loopIndex)
 {
+  printf("Breaks here 17\n");
   switch (loopIndex) {
+    printf("Breakpoint 17.1\n");
   case 0: // innermost loop: mask staging
     std::cout << "mask stage " << m_value[0] << std::endl;
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
+      printf("Breakpoint 17.2\n");
+      printf("Trying to apply mask on CHIP %u\n", ichip);
       if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      printf("Breakpoint 17.3\n");
       ConfigureMaskStage(m_chips.at(ichip), m_value[0]);
     }
     sprintf(m_state, "Running %d", m_value[0]);
@@ -201,12 +226,14 @@ void TDigitalScan::PrepareStep(int loopIndex)
   default:
     break;
   }
+  printf("Breaks here 18\n");
 }
 
 void TDigitalScan::LoopEnd(int loopIndex) {}
 
 void TDigitalScan::Next(int loopIndex)
 {
+  printf("Breaks here 19\n");
   if (loopIndex == 0) {
     while (!(m_mutex->try_lock()))
       ;
@@ -217,26 +244,40 @@ void TDigitalScan::Next(int loopIndex)
     m_histo->Clear();
   }
   TScan::Next(loopIndex);
+  printf("Breaks here 20\n");
 }
 
 void TDigitalScan::Execute()
 {
+  printf("Breaks here 21\n");
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
+  printf("Breaks here 21.1\n");
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+    printf("Breaks here 21.2\n");
     m_boards.at(iboard)->Trigger(m_nTriggers);
   }
+  printf("Breaks here 21.3\n");
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+    printf("Breaks here 21.4\n");
+
     Hits->clear();
+    printf("Breaks here 21.5\n");
+
     ReadEventData(Hits, iboard);
+    printf("Breaks here 21.6\n");
+
     FillHistos(Hits, iboard);
+    printf("Breaks here 21.7\n");
   }
   delete Hits;
+  printf("Breaks here 22\n");
 }
 
 void TDigitalScan::Terminate()
 {
+  printf("Breaks here 23\n");
   TScan::Terminate();
 
   // restore old voltage
@@ -259,6 +300,7 @@ void TDigitalScan::Terminate()
     }
   }
   m_running = false;
+  printf("Breaks here 24\n");
 }
 
 TDigitalWhiteFrame::TDigitalWhiteFrame(TScanConfig *config, std::vector<TAlpide *> chips,
@@ -268,15 +310,19 @@ TDigitalWhiteFrame::TDigitalWhiteFrame(TScanConfig *config, std::vector<TAlpide 
     : TDigitalScan(config, chips, hics, boards, histoQue, aMutex)
 {
   strcpy(m_name, "Digital White Frame");
+  printf("Breaks here 25\n");
 }
 
 void TDigitalWhiteFrame::ConfigureMaskStage(TAlpide *chip, int istage)
 {
+  printf("Breaks here 26\n");
+
   m_row = AlpideConfig::ConfigureMaskStage(chip, m_pixPerStage, istage, false, true);
 }
 
 void TDigitalWhiteFrame::Init()
 {
+  printf("Breaks here 27\n");
   TScan::Init();
   m_running = true;
   CountEnabledChips();
@@ -298,8 +344,8 @@ void TDigitalWhiteFrame::Init()
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
     m_boards.at(i)->StartRun();
   }
-
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+  printf("Breaks here 28\n");
+  /*for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  }*/
 }

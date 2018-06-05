@@ -95,6 +95,7 @@ public slots:
   void speedycheck(bool checked);
   void attachConfigFile(ActivityDB::activity &activity);
   void loaddefaultconfig();
+  void ConfigThresholdScan(int nMaskStages, int pixPerRegion);
 
   void loadeditedconfig();
 
@@ -105,6 +106,13 @@ public slots:
   void IBBasicTest();
   void IBParameterScan();
   void fillingibvectors();
+
+  // MFT Test (based on fillingibvectors())
+  void MFTFifoScan();
+  void MFTDigitalScan();
+  void MFTThresholdScan();
+  void MFTNoiseOccupancyScan();
+  void MFTHICQualification();
 
   void fillingendurancevectors();
   void fillingfastpower();
@@ -146,6 +154,8 @@ private:
   void color_green(int side, int pos);
   void color_green_IB(int position);
   void color_red_IB(int position);
+  void color_grey_MFT(int position);
+  void color_blue_MFT(int position);
   int                fCounter;
   Dialog *           fWindowex;
   bool               fProperconfig = false;
@@ -166,7 +176,7 @@ private:
   TPowerBoard *                fPb;
   TPowerBoardConfig *          fPbconfig;
   DBnotice *                   fNoticewindow;
-  std::vector<TScanResult *>   fresultVector;
+  std::vector<TScanResult *>   fResultVector;
   std::vector<THic *>          fHICs;
   //  void fillingvectors();
   std::vector<std::string> fMapdetails;
@@ -248,6 +258,8 @@ private slots:
   void test();
   void detailscombo(int dnumber);
   void start_test();
+  void start_clock();
+  void stop_clock();
   void open();
   void fillingreceptionscans();
   void poweringscan();

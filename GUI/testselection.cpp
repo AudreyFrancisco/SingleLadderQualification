@@ -12,6 +12,11 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->setupUi(this);
   fmainwindow = qobject_cast<MainWindow *>(parent);
   //  ui->settings->hide();
+  ui->twochips->setChecked(false);
+  ui->threechips->setChecked(false);
+  ui->fourchips->setChecked(false);
+  ui->fivechips->setChecked(false);
+
   ui->t2->hide();
   ui->t3->hide();
   ui->t4->hide();
@@ -22,14 +27,19 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->d4->hide();
   ui->d5->hide();
   ui->typetest->addItem(" ", 0);
-  ui->typetest->addItem("OB HIC Qualification Test", OBQualification);
-  ui->typetest->addItem("IB HIC Qualification Test", IBQualification);
-  ui->typetest->addItem("OB HIC Endurance Test", OBEndurance);
-  ui->typetest->addItem("IB HIC Endurance Test", IBEndurance);
-  ui->typetest->addItem("OB HIC Reception Test", OBReception);
-  ui->typetest->addItem("OB HIC Fast Power Test", OBPower);
-  ui->typetest->addItem("OL HS Qualification Test", OBHalfStaveOL);
-  ui->typetest->addItem("IB HIC DCTRL Test", IBDctrl);
+  // ui->typetest->addItem("OB HIC Qualification Test", OBQualification);
+  // ui->typetest->addItem("IB HIC Qualification Test", IBQualification);
+  ui->typetest->addItem("MFT HIC FIFO Scan", MFTFifo);
+  ui->typetest->addItem("MFT HIC Digital Scan", MFTDigital);
+  ui->typetest->addItem("MFT HIC Threshold Scan", MFTThreshold);
+  ui->typetest->addItem("MFT HIC Noise Occupancy Scan", MFTNoise);
+  ui->typetest->addItem("MFT HIC Qualification", MFTQualification);
+  // ui->typetest->addItem("OB HIC Endurance Test", OBEndurance);
+  // ui->typetest->addItem("IB HIC Endurance Test", IBEndurance);
+  // ui->typetest->addItem("OB HIC Reception Test", OBReception);
+  // ui->typetest->addItem("OB HIC Fast Power Test", OBPower);
+  // ui->typetest->addItem("OL HS Qualification Test", OBHalfStaveOL);
+  // ui->typetest->addItem("IB HIC DCTRL Test", IBDctrl);
   // ui->typetest->addItem("OB Half-Stave Test", OBHalfStaveML);
   // ui->typetest->addItem("OB Stave Test", OBStave);
   // ui->typetest->addItem("IB Stave Test", IBStave);
@@ -44,6 +54,11 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
           SLOT(getlocationcombo(int)));
   connect(ui->typetest, SIGNAL(currentIndexChanged(int)), this->parent(),
           SLOT(ConnectTestCombo(int)));
+
+  connect(ui->twochips, SIGNAL(clicked(bool)), this->parent(), SLOT(twochips(bool)));
+  connect(ui->threechips, SIGNAL(clicked(bool)), this->parent(), SLOT(threechips(bool)));
+  connect(ui->fourchips, SIGNAL(clicked(bool)), this->parent(), SLOT(fourchips(bool)));
+  connect(ui->fivechips, SIGNAL(clicked(bool)), this->parent(), SLOT(fivechips(bool)));
 }
 
 TestSelection::~TestSelection() { delete ui; }
@@ -54,6 +69,8 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
                                  QString &dthree, QString &dfour, QString &dfive,
                                  QString &halfstave)
 {
+  // Default value for locid, TODO:Associate a location to a default configuration setup.
+  locid = 1000;
   if (ui->operatorstring->toPlainText().isEmpty() ||
       /*ui->id->toPlainText().isEmpty() || */ locid == 0) {
     qDebug() << "Put your details" << endl;
@@ -178,11 +195,12 @@ void TestSelection::getlocationcombo(int value)
 
 int TestSelection::GetMemberID()
 {
-  AlpideDB *DB;
+  return 1000;
+  /*AlpideDB *DB;
   DB = fmainwindow->GetDB();
   int result;
   result = DbGetMemberId(DB, ui->operatorstring->toPlainText().toStdString());
-  return result;
+  return result;*/
 }
 
 void TestSelection::ClearLocations() { ui->databaselocation->clear(); }

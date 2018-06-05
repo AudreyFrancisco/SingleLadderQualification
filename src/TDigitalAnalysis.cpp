@@ -10,12 +10,14 @@ TDigitalAnalysis::TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aSca
                                    std::mutex *aMutex, TDigitalResult *aResult)
     : TScanAnalysis(histoQue, aScan, aScanConfig, hics, aMutex)
 {
+  printf("Breaks here 40\n");
   m_ninj = m_config->GetParamValue("NINJ");
   if (aResult)
     m_result = aResult;
   else
     m_result = new TDigitalResult();
   FillVariableList();
+  printf("Breaks here 41\n");
 }
 
 // TODO: Implement HasData
@@ -33,6 +35,7 @@ void TDigitalAnalysis::FillVariableList()
 
 string TDigitalAnalysis::GetPreviousTestType()
 {
+  printf("Breaks here 42\n");
   switch (m_config->GetTestType()) {
   case OBQualification:
     return string("ALPIDEB Chip Testing Analysis");
@@ -46,6 +49,8 @@ string TDigitalAnalysis::GetPreviousTestType()
     return string("OB HIC Reception Test");
   case IBQualification:
     return string("ALPIDEB Chip Testing Analysis");
+  case MFTDigital:
+    return string("MFT Digital Scan");
   case IBEndurance:
     return string("IB HIC Qualification Test");
   case IBStave:
@@ -55,10 +60,12 @@ string TDigitalAnalysis::GetPreviousTestType()
   default:
     return string("");
   }
+  printf("Breaks here 43\n");
 }
 
 void TDigitalAnalysis::Initialize()
 {
+  printf("Breaks here 44\n");
   ReadChipList();
   CreateHicResults();
 
@@ -68,10 +75,12 @@ void TDigitalAnalysis::Initialize()
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     std::cout << "Start of analysis, nTimeout = " << hicResult->m_errorCounter.nTimeout;
   }
+  printf("Breaks here 45\n");
 }
 
 void TDigitalAnalysis::InitCounters()
 {
+  printf("Breaks here 46\n");
   m_counters.clear();
   for (unsigned int i = 0; i < m_chipList.size(); i++) {
     TDigitalCounter counter;
@@ -104,12 +113,14 @@ void TDigitalAnalysis::InitCounters()
     result->m_upper           = ((TDigitalScan *)m_scan)->IsUpper();
     result->m_nominal         = ((TDigitalScan *)m_scan)->IsNominal();
   }
+  printf("Breaks here 47\n");
 }
 
 
 void TDigitalAnalysis::CalculatePrediction(std::string hicName)
 {
-  std::vector<ActivityDB::activityLong> activities;
+  printf("call for TDigitalAnalysis::CalculatePrediction()\n");
+  /*std::vector<ActivityDB::activityLong> activities;
   std::vector<std::string>              childNames;
   TDigitalResultHic *                   prediction;
   try {
@@ -139,12 +150,13 @@ void TDigitalAnalysis::CalculatePrediction(std::string hicName)
 
   for (unsigned int i = 0; i < activities.size(); i++) {
     // do the calculation here
-  }
+  }*/
 }
 
 
 void TDigitalAnalysis::WriteHitData(TScanHisto *histo, int row)
 {
+  printf("Breaks here 48\n");
   char fName[100];
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     TScanResultChip *chipResult = m_result->GetChipResult(m_chipList.at(ichip));
@@ -165,11 +177,12 @@ void TDigitalAnalysis::WriteHitData(TScanHisto *histo, int row)
     }
     fclose(fp);
   }
+  printf("Breaks here 49\n");
 }
 
 void TDigitalAnalysis::WriteResult()
 {
-
+  printf("Breaks here 50\n");
   // should write to file: Conditions, global, results
   // separate files: stuck pixels (how to separate by HIC?)
   // hitmap file?
@@ -199,10 +212,12 @@ void TDigitalAnalysis::WriteResult()
     m_scan->WriteBoardRegisters(fName);
     m_scan->WriteTimestampLog(fName);
   }
+  printf("Breaks here 51\n");
 }
 
 void TDigitalAnalysis::WriteStuckPixels(THic *hic)
 {
+  printf("Breaks here 52\n");
   char               fName[100];
   TDigitalResultHic *hicResult = (TDigitalResultHic *)m_result->GetHicResult(hic->GetDbId());
   if (m_config->GetUseDataPath()) {
@@ -223,10 +238,12 @@ void TDigitalAnalysis::WriteStuckPixels(THic *hic)
             pixels.at(i).address);
   }
   fclose(fp);
+  printf("Breaks here 53\n");
 }
 
 void TDigitalAnalysis::AnalyseHisto(TScanHisto *histo)
 {
+  printf("Breaks here 54\n");
   int row = histo->GetIndex();
   // std::cout << "ANALYSIS: Found histo for row " << row << ", size = " << m_histoQue->size()
   //          << std::endl;
@@ -242,10 +259,12 @@ void TDigitalAnalysis::AnalyseHisto(TScanHisto *histo)
         m_counters.at(ichip).nIneff++;
     }
   }
+  printf("Breaks here 55\n");
 }
 
 void TDigitalAnalysis::Finalize()
 {
+  printf("Breaks here 56\n");
   if (fScanAbort || fScanAbortAll) return;
   TErrorCounter        errCount = ((TMaskScan *)m_scan)->GetErrorCount();
   TDigitalResult *     result   = (TDigitalResult *)m_result;
@@ -308,6 +327,7 @@ void TDigitalAnalysis::Finalize()
   WriteResult();
 
   m_finished = true;
+  printf("Breaks here 57\n");
 }
 
 // TODO: Add readout errors, requires dividing readout errors by hic (receiver)
@@ -349,6 +369,7 @@ THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic *resu
 
 THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic *result)
 {
+  printf("Breaks here 58\n");
   THicClassification returnValue = CLASS_GREEN;
 
   // check data taking variables
@@ -380,17 +401,21 @@ THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic *resu
   std::cout << "Digital Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
   return returnValue;
+  printf("Breaks here 59\n");
 }
 
 void TDigitalResult::WriteToFileGlobal(FILE *fp)
 {
+  printf("Breaks here 60\n");
   fprintf(fp, "8b10b errors:\t%d\n", m_n8b10b);
   fprintf(fp, "Corrupt events:\t%d\n", m_nCorrupt);
   fprintf(fp, "Timeouts:\t%d\n", m_nTimeout);
+  printf("Breaks here 61\n");
 }
 
 void TDigitalResultHic::GetParameterSuffix(std::string &suffix, std::string &file_suffix)
 {
+  printf("Breaks here 62\n");
   if (m_nominal) {
     suffix      = string(" (nominal)");
     file_suffix = string("_nominal");
@@ -403,10 +428,12 @@ void TDigitalResultHic::GetParameterSuffix(std::string &suffix, std::string &fil
     suffix      = string(" (upper)");
     file_suffix = string("_upper");
   }
+  printf("Breaks here 63\n");
 }
 
 void TDigitalResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
+  printf("Breaks here 64\n");
   std::string suffix, file_suffix, fileName, remoteName;
   GetParameterSuffix(suffix, file_suffix);
   DbAddParameter(db, activity, string("Timeouts digital") + suffix, (float)m_errorCounter.nTimeout);
@@ -424,10 +451,12 @@ void TDigitalResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   std::size_t point = fileName.find_last_of(".");
   remoteName        = fileName.substr(0, point) + file_suffix + ".dat";
   DbAddAttachment(db, activity, attachResult, string(m_resultFile), remoteName);
+  printf("Breaks here 65\n");
 }
 
 void TDigitalResultHic::WriteToFile(FILE *fp)
 {
+  printf("Breaks here 66\n");
   fprintf(fp, "HIC Result:\n\n");
 
   fprintf(fp, "HIC Classification: %s\n\n", WriteHicClassification());
@@ -451,19 +480,23 @@ void TDigitalResultHic::WriteToFile(FILE *fp)
   std::cout << "8b10b errors:  " << m_errorCounter.n8b10b << std::endl;
   std::cout << "corrupt events " << m_errorCounter.nCorruptEvent << std::endl;
   std::cout << "timeouts:      " << m_errorCounter.nTimeout << std::endl;
+  printf("Breaks here 69\n");
 }
 
 void TDigitalResultChip::WriteToFile(FILE *fp)
 {
+  printf("Breaks here 69\n");
   fprintf(fp, "Dead pixels:        %d\n", m_nDead);
   fprintf(fp, "Inefficient pixels: %d\n", m_nIneff);
   fprintf(fp, "Noisy pixels:       %d\n", m_nNoisy);
   fprintf(fp, "Bad double cols:    %d\n", m_nBadDcols);
   fprintf(fp, "Stuck pixels:       %d\n", m_nStuck);
+  printf("Breaks here 70\n");
 }
 
 float TDigitalResultChip::GetVariable(TResultVariable var)
 {
+  printf("Breaks here 71\n");
   switch (var) {
   case deadPix:
     return (float)m_nDead;
@@ -475,4 +508,5 @@ float TDigitalResultChip::GetVariable(TResultVariable var)
     std::cout << "Warning, bad result type for this analysis" << std::endl;
     return 0;
   }
+  printf("Breaks here 72\n");
 }
