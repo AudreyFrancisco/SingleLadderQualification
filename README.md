@@ -75,19 +75,22 @@ make -j $(nproc)
 
 ## Using the software
 It is recommended (at least for now) to run the software from the main build
-directory. You do not need to set any environment variables (NB: no more
-`source env.sh` for the GUI). The executables expect to find the configuration
-files in the current working directory and will also write the output to Data/
+directory. You do not need to source any environment script (i.e. no more
+`source env.sh` for the GUI). Unless configured differently by environment
+variables (see below), the executables expect to find the configuration
+files in the current working directory and will write the output to Data/
 in this directory.
 
-### Environment variables (not yet working!!!)
+### Environment variables (experimental)
 You can configure the software by setting the following environment variables:
-- ALPTEST\_CONFIG: If set config files will be looked for in this directory. If
+- `ALPIDE_TEST_CONFIG`: If set config files will be looked for in this directory. If
 unset config files will be searched for in the current working directory (i.e.
 the directory from which the executable is started).
-- ALPTEST\_DATA: If set the data files will be written to this directory. If
+- `ALPIDE_TEST_DATA`: If set the data files will be written to this directory. If
 unset data files will be written to Data/ in the current working directory
 instead.
+
+This might not yet work for all tools, please report unintended behaviour.
 
 ## Advanced build options (not for general use)
 

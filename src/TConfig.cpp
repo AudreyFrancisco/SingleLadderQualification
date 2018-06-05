@@ -286,10 +286,15 @@ void TConfig::ReadConfigFile(const char *fName)
   int         Chip;
   TDeviceType type = TYPE_UNKNOWN;
 
+  std::string filename = fName;
+  if (const char *configDir = std::getenv("ALPIDE_TEST_CONFIG"))
+    filename.insert(0, std::string(configDir) + "/");
+
+  std::cout << "looking for config file:" << filename << std::endl;
   std::ifstream infile(fName);
 
   if (!infile.good()) {
-    std::cout << "WARNING: Config file " << fName << " not found, using default configuration."
+    std::cout << "WARNING: Config file " << filename << " not found, using default configuration."
               << std::endl;
     return;
   }

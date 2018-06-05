@@ -363,6 +363,8 @@ int TScanConfig::GetRetestNumber(std::string hicName)
 std::string TScanConfig::GetDataPath(std::string HicName)
 {
   std::string result = std::string("Data/") + GetTestDir() + HicName;
+  if (const char *dataDir = std::getenv("ALPIDE_TEST_DATA"))
+    result.insert(0, std::string(dataDir) + "/");
   if (GetRetestNumber(HicName) > 0) {
     result.append("_Retest_");
     result.append(std::to_string(GetRetestNumber(HicName)));
