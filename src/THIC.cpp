@@ -237,6 +237,8 @@ THicClassification THic::GetClassification()
   // before: check that HIC contains chips to avoid RED for fast power test
   if ((m_chips.size() > 0) && (GetNEnabledChips() == 0))
     return CLASS_RED;
+  else if (m_oldClass > m_class)
+    return m_oldClass;
   else
     return m_class;
 }
