@@ -30,6 +30,10 @@ TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic
   m_firstEnabledBoard   = -1U;
   m_firstEnabledChannel = -1U;
 
+  m_firstEnabledChipId_ref  = -1;
+  m_firstEnabledBoard_ref   = -1U;
+  m_firstEnabledChannel_ref = -1U;
+
   m_histoQue = histoQue;
   m_mutex    = aMutex;
 
@@ -280,17 +284,36 @@ void TScan::CreateScanHisto()
 void TScan::ActivateTimestampLog()
 {
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+    TReadoutBoardMOSAIC *b = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(iboard));
+    if (b) b->setReadTriggerInfo(true);
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
       if ((m_chips.at(ichip)->GetConfig()->IsEnabled()) &&
           (m_chips.at(ichip)->GetReadoutBoard() == m_boards.at(iboard))) {
-        m_firstEnabledChipId = m_chips.at(ichip)->GetConfig()->GetChipId() & 0xf;
-        m_firstEnabledBoard  = iboard;
-        m_firstEnabledChannel =
-            m_chips.at(ichip)->GetHic()->GetReceiver(iboard, m_firstEnabledChipId);
-        std::cout << "Chip ID used for timestamp logging: " << m_firstEnabledChipId << std::endl;
-        std::cout << m_firstEnabledChipId << '\t' << m_firstEnabledBoard << '\t'
-                  << m_firstEnabledChannel << std::endl;
-        return;
+        if (iboard == 0) {
+          if (m_firstEnabledChipId < 0) {
+            m_firstEnabledChipId = m_chips.at(ichip)->GetConfig()->GetChipId() & 0xf;
+            m_firstEnabledBoard  = iboard;
+            m_firstEnabledChannel =
+                m_chips.at(ichip)->GetHic()->GetReceiver(iboard, m_firstEnabledChipId);
+            std::cout << "Chip ID used for timestamp logging: "
+                      << m_chips.at(ichip)->GetConfig()->GetChipId() << " (" << m_firstEnabledChipId
+                      << ")" << std::endl;
+            std::cout << m_firstEnabledChipId << '\t' << m_firstEnabledBoard << '\t'
+                      << m_firstEnabledChannel << std::endl;
+          }
+        }
+        else if (m_firstEnabledChipId_ref < 0) {
+          m_firstEnabledChipId_ref = m_chips.at(ichip)->GetConfig()->GetChipId() & 0xf;
+          m_firstEnabledBoard_ref  = iboard;
+          m_firstEnabledChannel_ref =
+              m_chips.at(ichip)->GetHic()->GetReceiver(iboard, m_firstEnabledChipId_ref);
+          std::cout << "Chip ID used as timestamp logging reference: "
+                    << m_chips.at(ichip)->GetConfig()->GetChipId() << " ("
+                    << m_firstEnabledChipId_ref << ")" << std::endl;
+          std::cout << m_firstEnabledChipId_ref << '\t' << m_firstEnabledBoard_ref << '\t'
+                    << m_firstEnabledChannel_ref << std::endl;
+        }
+        if (m_firstEnabledChipId > 0 && m_firstEnabledChipId_ref > 0) return;
       }
     }
   }
@@ -299,33 +322,55 @@ void TScan::ActivateTimestampLog()
 void TScan::WriteTimestampLog(const char *fName)
 {
   if (m_eventIds.size() == 0) return;
+  if (m_eventIds_ref.size() == 0) return;
 
   std::ofstream output(fName, std::fstream::out | std::fstream::app);
 
   output << "### Timestamp Log" << std::endl;
-  uint32_t lastBC = 0;
+  uint32_t lastBC     = 0;
+  uint32_t lastBC_ref = 0;
 
-  uint32_t histo[256] = {0};
-  for (unsigned int iEvent = 0; iEvent < m_eventIds.size(); iEvent++) {
+  uint32_t histo[257] = {0};
+  for (unsigned int iEvent = 0; iEvent < m_eventIds.size() && iEvent < m_eventIds_ref.size();
+       iEvent++) {
     unsigned int diff = (lastBC < m_bunchCounters[iEvent]) ? (m_bunchCounters[iEvent] - lastBC)
                                                            : 256 - lastBC + m_bunchCounters[iEvent];
-    if (diff > 0 && diff < 256) {
+    unsigned int diff_ref = (lastBC_ref < m_bunchCounters_ref[iEvent])
+                                ? (m_bunchCounters_ref[iEvent] - lastBC_ref)
+                                : 256 - lastBC_ref + m_bunchCounters_ref[iEvent];
+    if (diff > 0 && diff < 257) {
       ++histo[diff];
     }
     else {
-      std::cerr << "WriteTimestampLog: Index out of range" << std::endl;
+      std::cerr << "WriteTimestampLog: Index out of range: " << diff << std::endl;
     }
     output << iEvent << '\t' << m_eventIds[iEvent] << '\t' << m_timestamps[iEvent] << '\t'
            << m_bunchCounters[iEvent] << '\t' << m_bunchCounters[iEvent] * 200 << '\t' << diff * 200
-           << '\t' << std::endl;
-    lastBC = m_bunchCounters[iEvent];
+           << '\t' << m_eventIds_ref[iEvent] << '\t' << m_timestamps_ref[iEvent] << '\t'
+           << m_bunchCounters_ref[iEvent] << '\t' << m_bunchCounters_ref[iEvent] * 200 << '\t'
+           << diff_ref * 200 << '\t' << (diff - diff_ref) * 200 << std::endl;
+    lastBC     = m_bunchCounters[iEvent];
+    lastBC_ref = m_bunchCounters_ref[iEvent];
   }
 
   output << std::endl << std::endl;
   output << " ## Timestamp histogram" << std::endl;
-  for (unsigned int i = 0; i < 256; ++i) {
+  for (unsigned int i = 0; i < 257; ++i) {
     output << i << "\t" << i * 200 << "\t" << histo[i] << "\t"
            << (double)histo[i] / (double)m_eventIds.size() << std::endl;
+  }
+
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+    output << " ## BOARD TIMESTAMPS ##" << std::endl;
+    TReadoutBoardMOSAIC *b = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(iboard));
+    if (b) {
+      std::vector<uint32_t> *triggerIDs = b->getTriggerNums();
+      std::vector<uint64_t> *timestamps = b->getTriggerTimes();
+      for (unsigned long i = 0; i < triggerIDs->size(); ++i) {
+        output << iboard << "\t" << i << "\t" << triggerIDs->at(i) << "\t" << timestamps->at(i)
+               << std::endl;
+      }
+    }
   }
   output << std::endl;
   output.close();
@@ -457,6 +502,12 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
         m_eventIds.push_back(boardInfo.eventId);
         m_timestamps.push_back(boardInfo.timestamp);
         m_bunchCounters.push_back(bunchCounter);
+      }
+      if (((chipId & 0xf) == m_firstEnabledChipId_ref) &&
+          (boardInfo.channel == m_firstEnabledChannel_ref) && (iboard == m_firstEnabledBoard_ref)) {
+        m_eventIds_ref.push_back(boardInfo.eventId);
+        m_timestamps_ref.push_back(boardInfo.timestamp);
+        m_bunchCounters_ref.push_back(bunchCounter);
       }
       nTrigPerHic[boardInfo.channel]++;
       itrg++;

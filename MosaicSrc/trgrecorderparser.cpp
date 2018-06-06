@@ -105,3 +105,37 @@ long TrgRecorderParser::parse(int numClosed)
 
   return (p - dBuffer);
 }
+
+
+//
+// Read only one trigger time stamp
+// return the size of data frame
+int TrgRecorderParser::ReadTriggerInfo(uint32_t &trgNum, uint64_t &trgTime)
+{
+  unsigned char *dBuffer = (unsigned char *)&dataBuffer[0];
+  unsigned char *p       = dBuffer;
+  long           evSize  = TRIGGERDATA_SIZE;
+
+  if (numClosedData == 0) return 0;
+
+  // check avalaible data size
+  if (dataBufferUsed < numClosedData * evSize) {
+    std::stringstream sstm;
+    sstm << "Parser called with " << numClosedData << " closed events of " << evSize
+         << " bytes but datasize is only " << dataBufferUsed << " bytes";
+    throw MDataParserError(sstm.str());
+  }
+
+  trgNum  = buf2uint32(p);
+  trgTime = buf2uint64(p + 4);
+
+  // move unused bytes to the begin of buffer
+  size_t bytesToMove = dataBufferUsed - evSize;
+  if (bytesToMove > 0) memmove(&dataBuffer[0], &dataBuffer[evSize], bytesToMove);
+  dataBufferUsed -= evSize;
+  numClosedData--;
+
+  if (verbose) printf("Trigger %d @ %llu\n", trgNum, static_cast<unsigned long long>(trgTime));
+
+  return 1;
+}
