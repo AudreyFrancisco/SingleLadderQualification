@@ -142,12 +142,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   ui->pbstatus->hide();
 
-  QPixmap alice("alicethreshold.png");
+  QPixmap alice(":alicethreshold.png");
   int     w = ui->alicepic->width();
   int     h = ui->alicepic->height();
   ui->alicepic->setPixmap(alice.scaled(w, h, Qt::KeepAspectRatio));
 
-  QPixmap alicelog("logo.png");
+  QPixmap alicelog(":logo.png");
   int     width  = ui->alicelogo->width();
   int     height = ui->alicelogo->height();
   ui->alicelogo->setPixmap(alicelog.scaled(width, height, Qt::KeepAspectRatio));
