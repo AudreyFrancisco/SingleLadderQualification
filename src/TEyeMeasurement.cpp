@@ -41,7 +41,7 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
 
   // Other Parameters TODO:
   m_min_prescale = 0;
-  m_max_prescale = 6; // max 0.1s at 1.2 Gbps
+  m_max_prescale = m_config->GetParamValue("EYEDEPTH"); // max 0.1s at 1.2 Gbps
 
   // NOT supported for now (needs to change looping behaviour)
   m_max_zero_results = 0; // Max number of consecutive zero results

@@ -192,6 +192,7 @@ namespace ScanConfig {
   const int EYE_MIN_Y  = -127;
   const int EYE_MAX_Y  = 129;
   const int EYE_STEP_Y = 4;
+  const int EYE_DEPTH  = 6;
 }
 
 class TScanConfig {
@@ -341,6 +342,7 @@ private:
   int       m_eyeMaxY;
   int       m_eyeMinY;
   int       m_eyeStepY;
+  int       m_eyeDepth;
   TTestType m_testType;
   AlpideDB *m_db;
 

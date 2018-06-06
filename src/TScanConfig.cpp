@@ -157,6 +157,7 @@ TScanConfig::TScanConfig()
   m_eyeMaxY   = EYE_MAX_Y;
   m_eyeMinY   = EYE_MIN_Y;
   m_eyeStepY  = EYE_STEP_Y;
+  m_eyeDepth  = EYE_DEPTH;
 
   m_useDataPath = false;
 
@@ -309,6 +310,7 @@ void TScanConfig::InitParamMap()
   fSettings["EYEMINY"]   = &m_eyeMinY;
   fSettings["EYEMAXY"]   = &m_eyeMaxY;
   fSettings["EYESTEPY"]  = &m_eyeStepY;
+  fSettings["EYEDEPTH"]  = &m_eyeDepth;
 }
 
 bool TScanConfig::SetParamValue(std::string Name, std::string Value)
