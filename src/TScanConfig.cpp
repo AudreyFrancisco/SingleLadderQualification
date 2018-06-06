@@ -149,15 +149,16 @@ TScanConfig::TScanConfig()
   m_enduranceMinchipsGreen     = ENDURANCE_MINCHIPS_GREEN;
   m_enduranceMaxfailuresOrange = ENDURANCE_MAXFAILURES_ORANGE;
 
-  m_eyeDriver = EYE_DRIVER;
-  m_eyePreemp = EYE_PREEMP;
-  m_eyeMaxX   = EYE_MAX_X;
-  m_eyeMinX   = EYE_MIN_X;
-  m_eyeStepX  = EYE_STEP_X;
-  m_eyeMaxY   = EYE_MAX_Y;
-  m_eyeMinY   = EYE_MIN_Y;
-  m_eyeStepY  = EYE_STEP_Y;
-  m_eyeDepth  = EYE_DEPTH;
+  m_eyeDriver   = EYE_DRIVER;
+  m_eyePreemp   = EYE_PREEMP;
+  m_eyeMaxX     = EYE_MAX_X;
+  m_eyeMinX     = EYE_MIN_X;
+  m_eyeStepX    = EYE_STEP_X;
+  m_eyeMaxY     = EYE_MAX_Y;
+  m_eyeMinY     = EYE_MIN_Y;
+  m_eyeStepY    = EYE_STEP_Y;
+  m_eyeDepthMin = EYE_DEPTH_MIN;
+  m_eyeDepthMax = EYE_DEPTH_MAX;
 
   m_useDataPath = false;
 
@@ -302,15 +303,16 @@ void TScanConfig::InitParamMap()
   fSettings["READOUTROW"]       = &m_readoutRow;
   fSettings["READOUTPLLSTAGES"] = &m_readoutPllStages;
 
-  fSettings["EYEDRIVER"] = &m_eyeDriver;
-  fSettings["EYEPREEMP"] = &m_eyePreemp;
-  fSettings["EYEMINX"]   = &m_eyeMinX;
-  fSettings["EYEMAXX"]   = &m_eyeMaxX;
-  fSettings["EYESTEPX"]  = &m_eyeStepX;
-  fSettings["EYEMINY"]   = &m_eyeMinY;
-  fSettings["EYEMAXY"]   = &m_eyeMaxY;
-  fSettings["EYESTEPY"]  = &m_eyeStepY;
-  fSettings["EYEDEPTH"]  = &m_eyeDepth;
+  fSettings["EYEDRIVER"]   = &m_eyeDriver;
+  fSettings["EYEPREEMP"]   = &m_eyePreemp;
+  fSettings["EYEMINX"]     = &m_eyeMinX;
+  fSettings["EYEMAXX"]     = &m_eyeMaxX;
+  fSettings["EYESTEPX"]    = &m_eyeStepX;
+  fSettings["EYEMINY"]     = &m_eyeMinY;
+  fSettings["EYEMAXY"]     = &m_eyeMaxY;
+  fSettings["EYESTEPY"]    = &m_eyeStepY;
+  fSettings["EYEDEPTHMIN"] = &m_eyeDepthMin;
+  fSettings["EYEDEPTHMAX"] = &m_eyeDepthMax;
 }
 
 bool TScanConfig::SetParamValue(std::string Name, std::string Value)

@@ -16,25 +16,30 @@ typedef struct __TEyeParameters : TScanParameters {
 
 class TEyeMeasurement : public TScan {
 private:
-  TAlpide *m_testChip;
-  int      m_boardIndex;
-
-  // parameters
-  int m_max_prescale;
-  int m_min_prescale;
-  int m_max_zero_results;
-
-  // internal
-  int                  m_current_prescale;
+  TAlpide *            m_testChip;
+  int                  m_boardIndex;
+  int                  m_chipId;
   TReadoutBoardMOSAIC *m_board;
-  void                 SetName();
+  int                  m_hMin, m_hMax, m_hStep;
+  int                  m_vMin, m_vMax, m_vStep;
+  int                  minPrescale, maxPrescale;
+  bool                 m_verbose;
+
+  void addValue(int vOffset, int hOffset, double scanValue);
+  double BERmeasure(int hOffset, int vOffset);
+  void runHScan(int vOffset);
+  void runFullScan();
+  void SetName();
 
 protected:
-  static constexpr int MAX_HORZ_OFFSET = 128;
-  static constexpr int MIN_HORZ_OFFSET = -128;
-  static constexpr int MAX_VERT_OFFSET = 127;
-  static constexpr int MIN_VERT_OFFSET = -127;
-  static constexpr int BUS_WIDTH       = 20;
+  static constexpr int MAX_HORZ_OFFSET  = 128;
+  static constexpr int MIN_HORZ_OFFSET  = -128;
+  static constexpr int MAX_VERT_OFFSET  = 127;
+  static constexpr int MIN_VERT_OFFSET  = -127;
+  static constexpr int MIN_PRESCALE     = 0;
+  static constexpr int MAX_PRESCALE     = 16;
+  static constexpr int MAX_ZERO_RESULTS = 4;
+  static constexpr int BUS_WIDTH        = 20;
 
   static constexpr int ES_QUALIFIER_0               = 0x2c;
   static constexpr int ES_QUALIFIER_1               = 0x2d;

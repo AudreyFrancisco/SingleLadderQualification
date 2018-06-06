@@ -7,7 +7,6 @@
 #include <string.h>
 #include <string>
 
-
 TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chips,
                                  std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                                  std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
@@ -30,21 +29,23 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
   m_stop[2]  = m_chips.size();
 
   // loops over phase and amplitude
-  m_start[1] = m_config->GetParamValue("EYEMINY");
-  m_step[1]  = m_config->GetParamValue("EYESTEPY");
-  m_stop[1]  = m_config->GetParamValue("EYEMAXY");
+  m_start[1] = 0;
+  m_step[1]  = 1;
+  m_stop[1]  = 1;
 
   // innermost loop
-  m_start[0] = m_config->GetParamValue("EYEMINX");
-  m_step[0]  = m_config->GetParamValue("EYESTEPX");
-  m_stop[0]  = m_config->GetParamValue("EYEMAXX");
+  m_start[0] = 0;
+  m_step[0]  = 1;
+  m_stop[0]  = 1;
 
-  // Other Parameters TODO:
-  m_min_prescale = 0;
-  m_max_prescale = m_config->GetParamValue("EYEDEPTH"); // max 0.1s at 1.2 Gbps
-
-  // NOT supported for now (needs to change looping behaviour)
-  m_max_zero_results = 0; // Max number of consecutive zero results
+  m_hMin      = m_config->GetParamValue("EYEMINX");
+  m_hMax      = m_config->GetParamValue("EYEMAXX");
+  m_hStep     = m_config->GetParamValue("EYESTEPX");
+  m_vMin      = m_config->GetParamValue("EYEMINY");
+  m_vMax      = m_config->GetParamValue("EYEMAXY");
+  m_vStep     = m_config->GetParamValue("EYESTEPY");
+  minPrescale = m_config->GetParamValue("EYEDEPTHMIN");
+  maxPrescale = m_config->GetParamValue("EYEDEPTHMIN");
 }
 
 
@@ -128,16 +129,12 @@ void TEyeMeasurement::PrepareStep(int loopIndex)
 {
   switch (loopIndex) {
   case 0: // innermost loop
-    // Reset the FSM
-    // stop run resetting ES_CONTROL[0]
     break;
   case 1: // 2nd loop
-    m_current_prescale = m_min_prescale;
-    m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_CONTROL,
-                                      ES_CONTROL_SIZE, ES_CONTROL_OFFSET, 0x0, true);
     break;
   case 2:
     m_testChip   = m_chips.at(m_value[2]);
+    m_chipId     = m_testChip->GetConfig()->GetChipId();
     m_boardIndex = FindBoardIndex(m_testChip);
     sprintf(m_state, "Running %d", m_value[2]);
 
@@ -171,100 +168,7 @@ void TEyeMeasurement::LoopEnd(int loopIndex)
 // Execute does the actual measurement
 // in this case the measureemnt for one point of the eye diagram
 // results are saved into m_histo as described below
-void TEyeMeasurement::Execute()
-{
-  int hOffset = m_value[0];
-  int vOffset = m_value[1];
-
-  // std::cout << "In execute, x = " << hOffset << ", y = " << vOffset << std::endl;
-  uint32_t errorCountReg;
-  uint32_t sampleCountReg;
-  uint16_t vertOffsetReg;
-
-  // set ES_VERT_OFFSET	bit 7:sign. bits 6-0:offset
-  if (vOffset < 0)
-    vertOffsetReg = ((-vOffset) & 0x7f) | 0x80;
-  else
-    vertOffsetReg = vOffset & 0x7f;
-  m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_VERT_OFFSET,
-                                    ES_VERT_OFFSET_SIZE, ES_VERT_OFFSET_OFFSET, vertOffsetReg,
-                                    false);
-
-  // set ES_HORZ_OFFSET   [11:0]  bits10-0: Phase offset (2's complement)
-  uint16_t horzOffsetReg = hOffset & 0x7ff;
-
-  // bit 11:Phase unification(0:positive 1:negative)
-  if (hOffset < 0) horzOffsetReg |= 0x800;
-  m_board->WriteTransceiverDRP(m_testChip->GetConfig()->GetChipId(), ES_HORZ_OFFSET, horzOffsetReg,
-                               false);
-
-  for (bool goodMeasure = false; !goodMeasure;) {
-    // std::cout << "in measuring loop " << std::endl;
-    // setup ES_PRESCALE	[15:11]. Prescale = 2**(1+reg_value)
-    m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_PRESCALE,
-                                      ES_PRESCALE_SIZE, ES_PRESCALE_OFFSET, m_current_prescale,
-                                      false);
-
-    // set ES_CONTROL[0] to start the measure run
-    // Configure and run measure
-    m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_CONTROL,
-                                      ES_CONTROL_SIZE, ES_CONTROL_OFFSET, 0x1, true);
-
-    // poll the es_control_status[0] for max 10s
-    int i;
-    for (i = 10000; i > 0; i--) {
-      uint32_t val;
-      usleep(1000);
-      m_board->ReadTransceiverDRP(m_testChip->GetConfig()->GetChipId(), ES_CONTROL_STATUS, &val);
-      if (val & ES_CONTROL_STATUS_DONE) break;
-    }
-    if (i == 0) throw std::runtime_error("Timeout reading es_control_status");
-
-    // stop run resetting ES_CONTROL[0]
-    m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_CONTROL,
-                                      ES_CONTROL_SIZE, ES_CONTROL_OFFSET, 0x0);
-
-    // read es_error_count and es_sample_count
-    m_board->ReadTransceiverDRP(m_testChip->GetConfig()->GetChipId(), ES_ERROR_COUNT,
-                                &errorCountReg, false);
-    m_board->ReadTransceiverDRP(m_testChip->GetConfig()->GetChipId(), ES_SAMPLE_COUNT,
-                                &sampleCountReg, true);
-
-    if (errorCountReg == 0xffff && m_current_prescale == 0) {
-      goodMeasure = true;
-    }
-    else if (sampleCountReg == 0xffff && errorCountReg > 0x7fff) {
-      goodMeasure = true;
-    }
-    else if (sampleCountReg == 0xffff && m_current_prescale == m_max_prescale) {
-      goodMeasure = true;
-    }
-    else if (errorCountReg == 0xffff && m_current_prescale > 0) {
-      m_current_prescale--;
-    }
-    else if (errorCountReg <= 0x7fff) { // measure time too short
-      if (m_current_prescale < m_max_prescale) {
-        m_current_prescale++;
-      }
-    }
-    else {
-      goodMeasure = true;
-    }
-    // std::cout << "end of loop, current prescale " << m_current_prescale << std::endl;
-  }
-
-  double scanValue = ((double)errorCountReg / ((double)BUS_WIDTH * (double)sampleCountReg *
-                                               (1UL << (m_current_prescale + 1))));
-
-  // std::cout << "X " << hOffset << ", Y " << vOffset << ", value: " << scanValue << "\n";
-  common::TChipIndex idx;
-  idx.boardIndex   = m_boardIndex;
-  idx.chipId       = m_testChip->GetConfig()->GetChipId();
-  idx.dataReceiver = m_testChip->GetConfig()->GetParamValue("RECEIVER");
-  // TODO: take into account step width (if != 1)
-  m_histo->Set(idx, (hOffset - m_start[0]) / m_step[0], (vOffset - m_start[1]) / m_step[1],
-               scanValue);
-}
+void TEyeMeasurement::Execute() { runFullScan(); }
 
 
 void TEyeMeasurement::Terminate()
@@ -276,4 +180,141 @@ void TEyeMeasurement::Terminate()
     mosaic->setSpeedMode(((TBoardConfigMOSAIC *)m_board->GetConfig())->GetSpeedMode());
   }
   m_running = false;
+}
+
+void TEyeMeasurement::addValue(int vOffset, int hOffset, double scanValue)
+{
+  common::TChipIndex idx;
+  idx.boardIndex   = m_boardIndex;
+  idx.chipId       = m_chipId;
+  idx.dataReceiver = m_testChip->GetConfig()->GetParamValue("RECEIVER");
+  // TODO: take into account step width (if != 1)
+  m_histo->Set(idx, (hOffset - m_hMin) / m_hStep, (vOffset - m_vMin) / m_vStep, scanValue);
+}
+
+
+double TEyeMeasurement::BERmeasure(int hOffset, int vOffset)
+{
+  static int currPrescale = minPrescale;
+  uint32_t   errorCountReg;
+  uint32_t   sampleCountReg;
+  uint16_t   vertOffsetReg;
+
+  // set ES_VERT_OFFSET	bit 7:sign. bits 6-0:offset
+  if (vOffset < 0)
+    vertOffsetReg = ((-vOffset) & 0x7f) | 0x80;
+  else
+    vertOffsetReg = vOffset & 0x7f;
+  m_board->WriteTransceiverDRPField(m_chipId, ES_VERT_OFFSET, ES_VERT_OFFSET_SIZE,
+                                    ES_VERT_OFFSET_OFFSET, vertOffsetReg, false);
+
+  // set ES_HORZ_OFFSET   [11:0]  bits10-0: Phase offset (2's complement)
+  uint16_t horzOffsetReg = hOffset & 0x7ff;
+
+  // bit 11:Phase unification(0:positive 1:negative)
+  if (hOffset < 0) horzOffsetReg |= 0x800;
+  m_board->WriteTransceiverDRP(m_chipId, ES_HORZ_OFFSET, horzOffsetReg, false);
+
+  for (bool goodMeasure = false; !goodMeasure;) {
+    // setup ES_PRESCALE	[15:11]. Prescale = 2**(1+reg_value)
+    m_board->WriteTransceiverDRPField(m_chipId, ES_PRESCALE, ES_PRESCALE_SIZE, ES_PRESCALE_OFFSET,
+                                      currPrescale, false);
+
+    // set ES_CONTROL[0] to start the measure run
+    // Configure and run measure
+    m_board->WriteTransceiverDRPField(m_chipId, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET, 0x1,
+                                      true);
+
+    // poll the es_control_status[0] for max 10s
+    int i;
+    for (i = 10000; i > 0; i--) {
+      uint32_t val;
+      usleep(1000);
+      m_board->ReadTransceiverDRP(m_chipId, ES_CONTROL_STATUS, &val);
+      if (val & ES_CONTROL_STATUS_DONE) break;
+    }
+    if (i == 0) throw std::runtime_error("Timeout reading es_control_status");
+
+    // stop run resetting ES_CONTROL[0]
+    m_board->WriteTransceiverDRPField(m_chipId, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET,
+                                      0x0);
+
+    // read es_error_count and es_sample_count
+    m_board->ReadTransceiverDRP(m_chipId, ES_ERROR_COUNT, &errorCountReg, false);
+    m_board->ReadTransceiverDRP(m_chipId, ES_SAMPLE_COUNT, &sampleCountReg, true);
+    if (m_verbose) {
+      printf("Ch: %d ", static_cast<int>(m_chipId));
+      printf("vOffset: %d ", vOffset);
+      printf("hOffset: %d ", hOffset);
+      printf("errorCount: %u ", (unsigned int)errorCountReg);
+      printf("sampleCount: %u ", (unsigned int)sampleCountReg);
+      printf("currPrescale: %u \n", (unsigned int)currPrescale);
+    }
+
+    if (errorCountReg == 0xffff && currPrescale == 0) {
+      goodMeasure = true;
+    }
+    else if (sampleCountReg == 0xffff && errorCountReg > 0x7fff) {
+      goodMeasure = true;
+    }
+    else if (sampleCountReg == 0xffff && currPrescale == maxPrescale) {
+      goodMeasure = true;
+    }
+    else if (errorCountReg == 0xffff && currPrescale > 0) {
+      currPrescale--;
+    }
+    else if (errorCountReg <= 0x7fff) { // measure time too short
+      if (currPrescale < maxPrescale) {
+        currPrescale++;
+      }
+    }
+    else {
+      goodMeasure = true;
+    }
+  }
+
+  return ((double)errorCountReg /
+          ((double)BUS_WIDTH * (double)sampleCountReg * (1UL << (currPrescale + 1))));
+}
+
+void TEyeMeasurement::runHScan(int vOffset)
+{
+  int zeroCount = 0;
+  // Reset the FSM
+  // stop run resetting ES_CONTROL[0]
+  m_board->WriteTransceiverDRPField(m_chipId, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET, 0x0,
+                                    true);
+
+  int hMin = m_vMin + std::abs(m_vMin) % m_hStep;
+  int hMax = m_hMax - m_hMax % m_hStep;
+
+  for (int hOffset = hMin; hOffset < 0; hOffset += m_hStep) {
+    double b = BERmeasure(hOffset, vOffset);
+    addValue(vOffset, hOffset, b);
+    if (b == 0.0)
+      zeroCount++;
+    else
+      zeroCount = 0;
+    if (zeroCount == MAX_ZERO_RESULTS) break;
+  }
+
+  zeroCount = 0;
+  for (int hOffset = hMax; hOffset >= 0; hOffset -= m_hStep) {
+    double b = BERmeasure(hOffset, vOffset);
+    addValue(vOffset, hOffset, b);
+    if (b == 0.0)
+      zeroCount++;
+    else
+      zeroCount = 0;
+    if (zeroCount == MAX_ZERO_RESULTS) break;
+  }
+}
+void TEyeMeasurement::runFullScan()
+{
+  int vMin = m_vMin + std::abs(m_vMin) % m_vStep;
+  int vMax = m_vMax - m_vMax % m_vStep;
+
+  for (int vOffset = vMin; vOffset <= vMax; vOffset += m_vStep) {
+    runHScan(vOffset);
+  }
 }

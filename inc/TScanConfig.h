@@ -184,15 +184,16 @@ namespace ScanConfig {
 
   // MAX - MIN should be divisible by STEP
   // last point should be <= 128 for y and 127 for x (upper limit is excluded)
-  const int EYE_DRIVER = 10;
-  const int EYE_PREEMP = 10;
-  const int EYE_MIN_X  = -128;
-  const int EYE_MAX_X  = 132;
-  const int EYE_STEP_X = 4;
-  const int EYE_MIN_Y  = -127;
-  const int EYE_MAX_Y  = 129;
-  const int EYE_STEP_Y = 4;
-  const int EYE_DEPTH  = 6;
+  const int EYE_DRIVER    = 10;
+  const int EYE_PREEMP    = 10;
+  const int EYE_MIN_X     = -128;
+  const int EYE_MAX_X     = 128;
+  const int EYE_STEP_X    = 4;
+  const int EYE_MIN_Y     = -127;
+  const int EYE_MAX_Y     = 127;
+  const int EYE_STEP_Y    = 4;
+  const int EYE_DEPTH_MIN = 0;
+  const int EYE_DEPTH_MAX = 16;
 }
 
 class TScanConfig {
@@ -342,7 +343,8 @@ private:
   int       m_eyeMaxY;
   int       m_eyeMinY;
   int       m_eyeStepY;
-  int       m_eyeDepth;
+  int       m_eyeDepthMin;
+  int       m_eyeDepthMax;
   TTestType m_testType;
   AlpideDB *m_db;
 
