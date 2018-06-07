@@ -2102,6 +2102,7 @@ int ActivityDB::buildUrlEncoded(string aLocalFileName, string *Buffer)
     }
     ch = (unsigned char)fgetc(fh);
   }
+  fclose(fh);
   return (Buffer->size());
 }
 
@@ -2157,5 +2158,6 @@ unsigned long ActivityDB::buildBase64Binary(string aLocalFileName, string *Buffe
       *Buffer += '=';
   }
   theBufferLength = Buffer->size() - theBufferLength;
+  fclose(fh);
   return (theBufferLength);
 }
