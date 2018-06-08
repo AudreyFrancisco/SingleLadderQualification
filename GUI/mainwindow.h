@@ -128,6 +128,7 @@ public slots:
   void stopscans();
 
   void ConnectTestCombo(int value);
+  void ConnectHICSizeCombo(int value);
   void      ContinueWithoutWriting();
   void      finalwrite();
   void      quittest();
@@ -147,6 +148,7 @@ private:
   TBoardType                   fBoardType;
   std::vector<TReadoutBoard *> fBoards;
   std::vector<TAlpide *>       fChips;
+  int                          fHICSize;
   std::mutex                   fMutex;
   TConfig *                    fConfig;
   std::deque<TScanHisto>       fHistoQue;

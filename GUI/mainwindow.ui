@@ -44,7 +44,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -169,7 +169,7 @@
       <widget class="QPushButton" name="chip8">
        <property name="geometry">
         <rect>
-         <x>680</x>
+         <x>670</x>
          <y>100</y>
          <width>71</width>
          <height>31</height>
@@ -177,123 +177,6 @@
        </property>
        <property name="text">
         <string>Chip8</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QGroupBox" name="OBHALFSTAVE">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>20</y>
-        <width>811</width>
-        <height>121</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string/>
-      </property>
-      <widget class="QLabel" name="OBHFS">
-       <property name="geometry">
-        <rect>
-         <x>310</x>
-         <y>20</y>
-         <width>201</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>OUTER BARREL HALFSTAVE</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="obm1">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>60</y>
-         <width>95</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Module 1</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="obm2">
-       <property name="geometry">
-        <rect>
-         <x>160</x>
-         <y>60</y>
-         <width>95</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Module 2</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="obm3">
-       <property name="geometry">
-        <rect>
-         <x>270</x>
-         <y>60</y>
-         <width>95</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Module 3</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="obm4">
-       <property name="geometry">
-        <rect>
-         <x>380</x>
-         <y>60</y>
-         <width>95</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Module 4</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="obm5">
-       <property name="geometry">
-        <rect>
-         <x>490</x>
-         <y>60</y>
-         <width>95</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Module 5</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="obm6">
-       <property name="geometry">
-        <rect>
-         <x>590</x>
-         <y>60</y>
-         <width>95</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Module 6</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="obm7">
-       <property name="geometry">
-        <rect>
-         <x>700</x>
-         <y>60</y>
-         <width>95</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Module 7</string>
        </property>
       </widget>
      </widget>
@@ -935,6 +818,123 @@
         <string/>
        </property>
       </widget>
+      <widget class="QGroupBox" name="OBHALFSTAVE">
+       <property name="geometry">
+        <rect>
+         <x>-50</x>
+         <y>20</y>
+         <width>811</width>
+         <height>120</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string/>
+       </property>
+       <widget class="QLabel" name="OBHFS">
+        <property name="geometry">
+         <rect>
+          <x>310</x>
+          <y>20</y>
+          <width>201</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>OUTER BARREL HALFSTAVE</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="obm1">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>60</y>
+          <width>95</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Module 1</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="obm2">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>60</y>
+          <width>95</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Module 2</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="obm3">
+        <property name="geometry">
+         <rect>
+          <x>270</x>
+          <y>60</y>
+          <width>95</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Module 3</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="obm4">
+        <property name="geometry">
+         <rect>
+          <x>380</x>
+          <y>60</y>
+          <width>95</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Module 4</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="obm5">
+        <property name="geometry">
+         <rect>
+          <x>490</x>
+          <y>60</y>
+          <width>95</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Module 5</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="obm6">
+        <property name="geometry">
+         <rect>
+          <x>590</x>
+          <y>60</y>
+          <width>95</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Module 6</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="obm7">
+        <property name="geometry">
+         <rect>
+          <x>700</x>
+          <y>60</y>
+          <width>95</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Module 7</string>
+        </property>
+       </widget>
+      </widget>
      </widget>
      <widget class="QLabel" name="displaydetails">
       <property name="geometry">
@@ -1447,6 +1447,169 @@ Digital scan                     Waiting . .
      <attribute name="title">
       <string>Scan Configuration</string>
      </attribute>
+    </widget>
+    <widget class="QWidget" name="tab_MFT">
+     <attribute name="title">
+      <string>MFT</string>
+     </attribute>
+     <widget class="QGroupBox" name="HIC_MFT">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>411</width>
+        <height>101</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string/>
+      </property>
+      <widget class="QPushButton" name="chip4_HIC_MFT">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>71</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Chip4</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="chip5_HIC_MFT">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>50</y>
+         <width>71</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Chip5</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="chip6_HIC_MFT">
+       <property name="geometry">
+        <rect>
+         <x>170</x>
+         <y>50</y>
+         <width>71</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Chip6</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="chip7_HIC_MFT">
+       <property name="geometry">
+        <rect>
+         <x>250</x>
+         <y>50</y>
+         <width>71</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Chip7</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="chip8_HIC_MFT">
+       <property name="geometry">
+        <rect>
+         <x>330</x>
+         <y>50</y>
+         <width>71</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Chip8</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_7">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>30</y>
+         <width>64</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>MFT HIC</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="startclk_MFT">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>10</y>
+        <width>100</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start Clock</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="newtestfront_MFT">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>100</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>New test</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="displaydetails_MFT">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>184</y>
+        <width>131</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Details:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="stopclk_MFT">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>40</y>
+        <width>100</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Stop Clock</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="details_MFT">
+      <property name="geometry">
+       <rect>
+        <x>80</x>
+        <y>180</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QLabel" name="testtypeselected">

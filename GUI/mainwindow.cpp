@@ -100,10 +100,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->obm6->setStyleSheet("background-color:red;");
   ui->obm7->setStyleSheet("background-color:red;");
   ui->OBModule->hide();
-  ui->IBModule->hide();
+//  ui->IBModule->hide();
+  ui->HIC_MFT->hide();
   ui->OBHALFSTAVE->hide();
-  ui->details->hide();
-  ui->displaydetails->hide();
+  ui->details_MFT->hide();
+  ui->displaydetails_MFT->hide();
   ui->endurancebox->hide();
   ui->statusbar->hide();
   ui->tab_2->setVisible(false);
@@ -113,6 +114,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->label_3->hide();
   ui->testselection->hide();
   ui->ledtext->hide();
+  ui->tab_MFT->setVisible(true);
   QMenuBar *menu = new QMenuBar(this);
   QMenu *   menu1;
   menu1                  = menu->addMenu("&Options");
@@ -124,12 +126,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   fWritedb->setVisible(false);
   ui->tabWidget->removeTab(2);
   ui->tabWidget->removeTab(1);
+  ui->tabWidget->removeTab(0);
   connect(ui->abortall, SIGNAL(clicked()), this, SLOT(StopScan()), Qt::DirectConnection);
   connect(newtestaction, SIGNAL(triggered()), this, SLOT(start_test()));
   connect(ui->newtest, SIGNAL(clicked()), SLOT(start_test()));
-  connect(ui->newtestfront, SIGNAL(clicked()), SLOT(start_test()));
-  connect(ui->startclk, SIGNAL(clicked()), SLOT(start_clock()));
-  connect(ui->stopclk, SIGNAL(clicked()), SLOT(stop_clock()));
+  connect(ui->newtestfront_MFT, SIGNAL(clicked()), SLOT(start_test()));
+  connect(ui->startclk_MFT, SIGNAL(clicked()), SLOT(start_clock()));
+  connect(ui->stopclk_MFT, SIGNAL(clicked()), SLOT(stop_clock()));
   connect(ui->cfg, SIGNAL(clicked()), this, SLOT(open()));
   connect(ui->quit, SIGNAL(clicked()), this, SLOT(quitall()));
   connect(ui->obm1, SIGNAL(clicked()), this, SLOT(button_obm1_clicked()));
@@ -139,7 +142,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->obm5, SIGNAL(clicked()), this, SLOT(button_obm5_clicked()));
   connect(ui->obm6, SIGNAL(clicked()), this, SLOT(button_obm6_clicked()));
   connect(ui->obm7, SIGNAL(clicked()), this, SLOT(button_obm7_clicked()));
-  connect(ui->details, SIGNAL(currentIndexChanged(int)), this, SLOT(detailscombo(int)));
+  connect(ui->details_MFT, SIGNAL(currentIndexChanged(int)), this, SLOT(detailscombo(int)));
   //  connect(ui->poweroff, SIGNAL(clicked(bool)), this, SLOT(poweroff()));
 
   ui->pbstatus->hide();
@@ -380,7 +383,8 @@ void MainWindow::open()
         ui->tob->setText("MFT HIC - ?? chips");
       }*/
       ui->tob->setText("MFT HIC");
-      ui->IBModule->show();
+//      ui->IBModule->show();
+      ui->HIC_MFT->show();
       for (unsigned int i = 0; i < fChips.size(); i++) {
         int     chipid;
         uint8_t module, side, pos;
@@ -708,19 +712,19 @@ void MainWindow::color_green_IB(int position)
     ui->chip3->setStyleSheet("background-color:green;");
   }*/
   if (position == 4) {
-    ui->chip4->setStyleSheet("background-color:green;");
+    ui->chip4_HIC_MFT->setStyleSheet("background-color:green;");
   }
   if (position == 5) {
-    ui->chip5->setStyleSheet("background-color:green;");
+    ui->chip5_HIC_MFT->setStyleSheet("background-color:green;");
   }
   if (position == 6) {
-    ui->chip6->setStyleSheet("background-color:green;");
+    ui->chip6_HIC_MFT->setStyleSheet("background-color:green;");
   }
   if (position == 7) {
-    ui->chip7->setStyleSheet("background-color:green;");
+    ui->chip7_HIC_MFT->setStyleSheet("background-color:green;");
   }
   if (position == 8) {
-    ui->chip8->setStyleSheet("background-color:green;");
+    ui->chip8_HIC_MFT->setStyleSheet("background-color:green;");
   }
 }
 
@@ -740,51 +744,51 @@ void MainWindow::color_red_IB(int position)
     ui->chip3->setStyleSheet("background-color:red;");
   }*/
   if (position == 4) {
-    ui->chip4->setStyleSheet("background-color:red;");
+    ui->chip4_HIC_MFT->setStyleSheet("background-color:red;");
   }
   if (position == 5) {
-    ui->chip5->setStyleSheet("background-color:red;");
+    ui->chip5_HIC_MFT->setStyleSheet("background-color:red;");
   }
   if (position == 6) {
-    ui->chip6->setStyleSheet("background-color:red;");
+    ui->chip6_HIC_MFT->setStyleSheet("background-color:red;");
   }
   if (position == 7) {
-    ui->chip7->setStyleSheet("background-color:red;");
+    ui->chip7_HIC_MFT->setStyleSheet("background-color:red;");
   }
   if (position == 8) {
-    ui->chip8->setStyleSheet("background-color:red;");
+    ui->chip8_HIC_MFT->setStyleSheet("background-color:red;");
   }
 }
 
 void MainWindow::color_grey_MFT(int position)
 {
   if (position == 4) {
-    ui->chip4->setStyleSheet("background-color:grey;");
+    ui->chip4_HIC_MFT->setStyleSheet("background-color:grey;");
   }
   if (position == 5) {
-    ui->chip5->setStyleSheet("background-color:grey;");
+    ui->chip5_HIC_MFT->setStyleSheet("background-color:grey;");
   }
   if (position == 6) {
-    ui->chip6->setStyleSheet("background-color:grey;");
+    ui->chip6_HIC_MFT->setStyleSheet("background-color:grey;");
   }
 }
 
 void MainWindow::color_blue_MFT(int position)
 {
   if (position == 4) {
-    ui->chip4->setStyleSheet("background-color:blue");
+    ui->chip4_HIC_MFT->setStyleSheet("background-color:blue");
   }
   if (position == 5) {
-    ui->chip5->setStyleSheet("background-color:blue;");
+    ui->chip5_HIC_MFT->setStyleSheet("background-color:blue;");
   }
   if (position == 6) {
-    ui->chip6->setStyleSheet("background-color:blue;");
+    ui->chip6_HIC_MFT->setStyleSheet("background-color:blue;");
   }
   if (position == 7) {
-    ui->chip7->setStyleSheet("background-color:blue;");
+    ui->chip7_HIC_MFT->setStyleSheet("background-color:blue;");
   }
   if (position == 8) {
-    ui->chip8->setStyleSheet("background-color:blue;");
+    ui->chip8_HIC_MFT->setStyleSheet("background-color:blue;");
   }
 }
 
@@ -936,10 +940,11 @@ void MainWindow::start_test()
   fScanstatuslabels.clear();
   ui->OBModule->hide();
   ui->OBHALFSTAVE->hide();
-  ui->IBModule->hide();
+//  ui->IBModule->hide();
+  ui->HIC_MFT->hide();
   ui->tob->clear();
-  ui->details->hide();
-  ui->displaydetails->hide();
+  ui->details_MFT->hide();
+  ui->displaydetails_MFT->hide();
 
   disconnect(ui->start_test, SIGNAL(clicked()), this, SLOT(applytests()));
   ui->testtypeselected->clear();
@@ -1183,7 +1188,7 @@ void MainWindow::getresultdetails(int i)
 {
   fMapdetails.clear();
   fMapd.clear();
-  ui->details->clear();
+  ui->details_MFT->clear();
   fScanposition = i;
 
   std::map<const char *, TResultVariable> myvariables;
@@ -1199,11 +1204,11 @@ void MainWindow::getresultdetails(int i)
   }
   for (auto const &v : fMapd) {
 
-    ui->details->addItem(v.first.c_str(), v.second);
+    ui->details_MFT->addItem(v.first.c_str(), v.second);
   }
-  ui->details->show();
+  ui->details_MFT->show();
   qApp->processEvents();
-  ui->displaydetails->show();
+  ui->displaydetails_MFT->show();
   qApp->processEvents();
 }
 
@@ -1315,7 +1320,7 @@ void MainWindow::SetHicClassifications()
 void MainWindow::detailscombo(int dnumber)
 {
   (void)dnumber;
-  int             var  = ui->details->itemData(ui->details->currentIndex()).toInt();
+  int             var  = ui->details_MFT->itemData(ui->details_MFT->currentIndex()).toInt();
   TResultVariable rvar = static_cast<TResultVariable>(var);
 
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -2398,6 +2403,12 @@ void MainWindow::fillingendurancevectors()
   for (int i = 0; i < nSlices; i++) {
     AddScan(STEndurance);
   }
+}
+
+void MainWindow::ConnectHICSizeCombo(int value)
+{
+  fHICSize = value+1;
+  printf("HIC Size = %d\n",fHICSize);
 }
 
 void MainWindow::ConnectTestCombo(int value)

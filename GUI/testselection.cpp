@@ -12,20 +12,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->setupUi(this);
   fmainwindow = qobject_cast<MainWindow *>(parent);
   //  ui->settings->hide();
-  ui->twochips->setChecked(false);
-  ui->threechips->setChecked(false);
-  ui->fourchips->setChecked(false);
-  ui->fivechips->setChecked(false);
 
-  ui->t2->hide();
-  ui->t3->hide();
-  ui->t4->hide();
-  ui->t5->hide();
-  ui->d1->hide();
-  ui->d2->hide();
-  ui->d3->hide();
-  ui->d4->hide();
-  ui->d5->hide();
   ui->typetest->addItem(" ", 0);
   // ui->typetest->addItem("OB HIC Qualification Test", OBQualification);
   // ui->typetest->addItem("IB HIC Qualification Test", IBQualification);
@@ -43,7 +30,11 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   // ui->typetest->addItem("OB Half-Stave Test", OBHalfStaveML);
   // ui->typetest->addItem("OB Stave Test", OBStave);
   // ui->typetest->addItem("IB Stave Test", IBStave);
-  ui->typeoftest->hide();
+  ui->Chip_Nb->addItem(" ",0);
+  ui->Chip_Nb->addItem("2",2);
+  ui->Chip_Nb->addItem("3",3);
+  ui->Chip_Nb->addItem("4",4);
+  ui->Chip_Nb->addItem("5",5);
   missingsettings = 0x0;
 
   m_testDatabase = testDatabase;
@@ -54,11 +45,8 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
           SLOT(getlocationcombo(int)));
   connect(ui->typetest, SIGNAL(currentIndexChanged(int)), this->parent(),
           SLOT(ConnectTestCombo(int)));
-
-  connect(ui->twochips, SIGNAL(clicked(bool)), this->parent(), SLOT(twochips(bool)));
-  connect(ui->threechips, SIGNAL(clicked(bool)), this->parent(), SLOT(threechips(bool)));
-  connect(ui->fourchips, SIGNAL(clicked(bool)), this->parent(), SLOT(fourchips(bool)));
-  connect(ui->fivechips, SIGNAL(clicked(bool)), this->parent(), SLOT(fivechips(bool)));
+  connect(ui->Chip_Nb, SIGNAL(currentIndexChanged(int)), this->parent(),
+          SLOT(ConnectHICSizeCombo(int)));
 }
 
 TestSelection::~TestSelection() { delete ui; }
@@ -72,73 +60,86 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
   // Default value for locid, TODO:Associate a location to a default configuration setup.
   locid = 1000;
   if (ui->operatorstring->toPlainText().isEmpty() ||
-      /*ui->id->toPlainText().isEmpty() || */ locid == 0) {
+      /*ui->id->toPlainText().isEmpty() || */ locid == 0
+      || ui->id->toPlainText().isEmpty()
+      || ui->Chip_Nb->currentIndex() == 0) {
     qDebug() << "Put your details" << endl;
     fCounter = counter = 0;
-    popupmessage("Info missing");
+    QString inf_mess = "Missing information:\n\n";
+    if (ui->operatorstring->toPlainText().isEmpty()) {
+      inf_mess.append("\t Operator name\n\n");
+    }
+    if (ui->id->toPlainText().isEmpty()) {
+      inf_mess.append("\t HIC ID Number\n\n");
+    }
+    if (ui->Chip_Nb->currentIndex() == 0) {
+      inf_mess.append("\t Number of chips\n\n");
+    }
+    popupmessage(inf_mess);
   }
   else {
-    if (!ui->t2->toPlainText().isEmpty()) {
+/*   if (!ui->t2->toPlainText().isEmpty()) {
       ttwo = ui->t2->toPlainText();
     }
     else {
-      ttwo = '\0';
-    }
+*/
+    ttwo = '\0';
+//    }
 
-    if (!ui->t3->toPlainText().isEmpty()) {
+/*    if (!ui->t3->toPlainText().isEmpty()) {
       tthree = ui->t3->toPlainText();
     }
-    else {
+    else {*/
       tthree = '\0';
-    }
+//    }
 
-    if (!ui->t4->toPlainText().isEmpty()) {
+/*    if (!ui->t4->toPlainText().isEmpty()) {
       tfour = ui->t4->toPlainText();
     }
-    else {
+    else {*/
       tfour = '\0';
-    }
+//    }
 
-    if (!ui->t5->toPlainText().isEmpty()) {
+/*    if (!ui->t5->toPlainText().isEmpty()) {
       tfive = ui->t5->toPlainText();
     }
-    else {
+    else {*/
       tfive = '\0';
-    }
+//    }
 
-    if (!ui->d1->toPlainText().isEmpty()) {
+/*    if (!ui->d1->toPlainText().isEmpty()) {
       done = ui->d1->toPlainText();
     }
-    else {
+    else {*/
       done = '\0';
-    }
+//    }
 
-    if (!ui->d2->toPlainText().isEmpty()) {
+/*    if (!ui->d2->toPlainText().isEmpty()) {
       dtwo = ui->d2->toPlainText();
     }
-    else {
+    else {*/
       dtwo = '\0';
-    }
-    if (!ui->d3->toPlainText().isEmpty()) {
+//    }
+/*    if (!ui->d3->toPlainText().isEmpty()) {
       dthree = ui->d3->toPlainText();
     }
-    else {
+    else {*/
       dthree = '\0';
-    }
+//    }
 
-    if (!ui->d4->toPlainText().isEmpty()) {
+/*    if (!ui->d4->toPlainText().isEmpty()) {
       dfour = ui->d4->toPlainText();
     }
-    else {
+    else {*/
       dfour = '\0';
-    }
+//    }
 
-    if (!ui->d5->toPlainText().isEmpty()) {
+/*    if (!ui->d5->toPlainText().isEmpty()) {
       dfive = ui->d5->toPlainText();
     }
-    else {
+    else {*/
       dfive = '\0';
-    }
+//    }
 
     opname    = ui->operatorstring->toPlainText();
     hicid     = ui->id->toPlainText();
@@ -208,30 +209,19 @@ void TestSelection::ClearLocations() { ui->databaselocation->clear(); }
 void TestSelection::adjustendurance()
 {
 
-  ui->t2->show();
+/*  ui->t2->show();
   ui->t3->show();
   ui->t4->show();
-  ui->t5->show();
-  ui->d1->show();
-  ui->d2->show();
-  ui->d3->show();
-  ui->d4->show();
-
-  ui->d5->show();
+  ui->t5->show();*/
 }
 
 void TestSelection::hideendurance()
 {
 
-  ui->t2->hide();
+/*  ui->t2->hide();
   ui->t3->hide();
   ui->t4->hide();
-  ui->t5->hide();
-  ui->d1->hide();
-  ui->d2->hide();
-  ui->d3->hide();
-  ui->d4->hide();
-  ui->d5->hide();
+  ui->t5->hide();*/
 }
 
 void TestSelection::GetTestTypeName(TTestType &typetest, QString &testname)
