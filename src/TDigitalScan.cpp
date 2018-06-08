@@ -211,7 +211,6 @@ void TDigitalScan::PrepareStep(int loopIndex)
 {
   printf("Breaks here 17\n");
   switch (loopIndex) {
-    printf("Breakpoint 17.1\n");
   case 0: // innermost loop: mask staging
     std::cout << "mask stage " << m_value[0] << std::endl;
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {

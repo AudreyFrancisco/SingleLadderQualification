@@ -100,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->obm6->setStyleSheet("background-color:red;");
   ui->obm7->setStyleSheet("background-color:red;");
   ui->OBModule->hide();
-//  ui->IBModule->hide();
+  //  ui->IBModule->hide();
   ui->HIC_MFT->hide();
   ui->OBHALFSTAVE->hide();
   ui->details_MFT->hide();
@@ -383,7 +383,7 @@ void MainWindow::open()
         ui->tob->setText("MFT HIC - ?? chips");
       }*/
       ui->tob->setText("MFT HIC");
-//      ui->IBModule->show();
+      //      ui->IBModule->show();
       ui->HIC_MFT->show();
       for (unsigned int i = 0; i < fChips.size(); i++) {
         int     chipid;
@@ -940,7 +940,7 @@ void MainWindow::start_test()
   fScanstatuslabels.clear();
   ui->OBModule->hide();
   ui->OBHALFSTAVE->hide();
-//  ui->IBModule->hide();
+  //  ui->IBModule->hide();
   ui->HIC_MFT->hide();
   ui->tob->clear();
   ui->details_MFT->hide();
@@ -2407,8 +2407,8 @@ void MainWindow::fillingendurancevectors()
 
 void MainWindow::ConnectHICSizeCombo(int value)
 {
-  fHICSize = value+1;
-  printf("HIC Size = %d\n",fHICSize);
+  fHICSize = value + 1;
+  printf("HIC Size = %d\n", fHICSize);
 }
 
 void MainWindow::ConnectTestCombo(int value)
