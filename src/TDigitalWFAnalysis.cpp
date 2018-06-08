@@ -35,6 +35,7 @@ void TDigitalWFAnalysis::InitCounters()
     TDigitalWFResultChip *result =
         (TDigitalWFResultChip *)m_result->GetChipResult(m_chipList.at(i));
     result->m_nStuck      = 0;
+    result->m_nBadDCol    = 0;
     result->m_nUnmaskable = 0;
   }
 
@@ -43,6 +44,7 @@ void TDigitalWFAnalysis::InitCounters()
   for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TDigitalWFResultHic *result = (TDigitalWFResultHic *)it->second;
     result->m_nStuck            = 0;
+    result->m_nBadDCol          = 0;
     result->m_nUnmaskable       = 0;
   }
 }
@@ -100,6 +102,10 @@ void TDigitalWFAnalysis::Finalize()
           (TDigitalWFResultChip *)m_result->GetChipResult(m_chipList.at(entry));
       chipResult->m_stuck.push_back(stuck.at(istuck));
       chipResult->m_nStuck++;
+      if (!common::DColAlreadyHit(&(chipResult->m_stuckOnePerDCol), stuck.at(istuck))) {
+        chipResult->m_stuckOnePerDCol.push_back(stuck.at(istuck));
+        chipResult->m_nBadDCol++;
+      }
     }
   }
 
@@ -112,6 +118,7 @@ void TDigitalWFAnalysis::Finalize()
           (TDigitalWFResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
       hicResult->m_nStuck += chipResult->m_nStuck;
       hicResult->m_nUnmaskable += chipResult->m_nUnmaskable;
+      hicResult->m_nBadDCol += chipResult->m_nBadDCol;
     }
   }
 
@@ -141,13 +148,13 @@ THicClassification TDigitalWFAnalysis::GetClassificationOB(TDigitalWFResultHic *
   map<int, TScanResultChip *>::iterator it;
   for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
     TDigitalWFResultChip *chipResult = (TDigitalWFResultChip *)it->second;
-
-    DoCut(returnValue, CLASS_SILVER, chipResult->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_CHIP_GOLD",
-          result);
-    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_CHIP_SILVER",
-          result);
-    DoCut(returnValue, CLASS_RED, chipResult->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE",
-          result);
+    int                   chipId     = it->first;
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_GOLD",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_SILVER",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE",
+          result, false, chipId);
   }
   std::cout << "Digital Whiteframe Analysis - Classification: "
             << WriteHicClassification(returnValue) << std::endl;
@@ -162,13 +169,14 @@ THicClassification TDigitalWFAnalysis::GetClassificationIB(TDigitalWFResultHic *
   map<int, TScanResultChip *>::iterator it;
   for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
     TDigitalWFResultChip *chipResult = (TDigitalWFResultChip *)it->second;
+    int                   chipId     = it->first;
 
-    DoCut(returnValue, CLASS_SILVER, chipResult->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_CHIP_GOLD",
-          result);
-    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_CHIP_SILVER",
-          result);
-    DoCut(returnValue, CLASS_RED, chipResult->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE",
-          result);
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_GOLD",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_SILVER",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE",
+          result, false, chipId);
   }
   std::cout << "Digital Whiteframe Analysis - Classification: "
             << WriteHicClassification(returnValue) << std::endl;
@@ -280,7 +288,7 @@ void TDigitalWFResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity
   string remoteName;
   DbAddParameter(db, activity, string("Unmaskable pixels"), (float)m_nUnmaskable,
                  GetParameterFile());
-  DbAddParameter(db, activity, string("Unmaskable stuck pixels"), (float)m_nStuck,
+  DbAddParameter(db, activity, string("Unmaskable stuck pixels"), (float)m_nBadDCol,
                  GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
@@ -294,8 +302,9 @@ void TDigitalWFResultHic::WriteToFile(FILE *fp)
 
   fprintf(fp, "HIC Classification: %s\n\n", WriteHicClassification());
 
-  fprintf(fp, "Unmaskable pixels:      %d\n", m_nUnmaskable);
-  fprintf(fp, "of which stuck:         %d\n", m_nStuck);
+  fprintf(fp, "Unmaskable pixels:             %d\n", m_nUnmaskable);
+  fprintf(fp, "of which stuck:                %d\n", m_nStuck);
+  fprintf(fp, "- counting only one per dcol:  %d\n", m_nBadDCol);
 
   fprintf(fp, "\nStuck pixel file: %s\n", m_stuckFile);
   fprintf(fp, "\nUnmaskable pixel file: %s\n", m_unmaskedFile);
@@ -312,8 +321,9 @@ void TDigitalWFResultHic::WriteToFile(FILE *fp)
 
 void TDigitalWFResultChip::WriteToFile(FILE *fp)
 {
-  fprintf(fp, "Unmaskable pixels: %d\n", m_nUnmaskable);
-  fprintf(fp, "stuck pixels:      %d\n", m_nStuck);
+  fprintf(fp, "Unmaskable pixels:             %d\n", m_nUnmaskable);
+  fprintf(fp, "stuck pixels:                  %d\n", m_nStuck);
+  fprintf(fp, "- counting only one per dcol:  %d\n", m_nBadDCol);
 }
 
 float TDigitalWFResultChip::GetVariable(TResultVariable var)

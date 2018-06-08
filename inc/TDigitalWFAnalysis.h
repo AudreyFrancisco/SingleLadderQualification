@@ -16,8 +16,10 @@ class TDigitalWFResultChip : public TScanResultChip {
 
 private:
   int                  m_nStuck;
+  int                  m_nBadDCol;
   int                  m_nUnmaskable;
   std::vector<TPixHit> m_stuck;
+  std::vector<TPixHit> m_stuckOnePerDCol;
 
 public:
   TDigitalWFResultChip() : TScanResultChip(){};
@@ -30,6 +32,7 @@ class TDigitalWFResultHic : public TScanResultHic {
 
 private:
   int  m_nStuck;
+  int  m_nBadDCol;
   int  m_nUnmaskable;
   char m_stuckFile[200];
   char m_unmaskedFile[200];

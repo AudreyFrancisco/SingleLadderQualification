@@ -15,7 +15,13 @@
 ##################################################################
 # SETTINGS
 # set path to clang-format binary
-CLANG_FORMAT="$(which clang-format)"
+if [[ $(which clang-format > /dev/null 2>&1; echo $?) -eq 0 ]]
+then
+    CLANG_FORMAT=$(which clang-format)
+elif [[ $(which clang-format-4.0 > /dev/null 2>&1; echo $?) -eq 0 ]]
+then
+    CLANG_FORMAT=$(which clang-format-4.0)
+fi
 
 # remove any older patches from previous commits. Set to true or false.
 # DELETE_OLD_PATCHES=false

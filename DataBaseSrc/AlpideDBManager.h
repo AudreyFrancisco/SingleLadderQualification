@@ -45,7 +45,6 @@
 #include <locale>
 
 // --- Definition of constants for auth methods
-#define COOKIEPACK "/tmp/cerncookie.txt"
 #define SSOURL "https://test-alucmsapi.web.cern.ch"
 
 #ifdef AUTH_X509

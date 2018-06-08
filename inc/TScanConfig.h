@@ -26,7 +26,9 @@ typedef enum {
 } TTestType;
 
 namespace ScanConfig {
-  const float CLASSIFICATION_VERSION = 0.1;
+  // 0.1: first, initial version of "new classification"
+  // 0.2: lowered back bias limit to 15 mA, removed cut on 4 V current
+  const float CLASSIFICATION_VERSION = 0.2;
 
   const int NINJ           = 50;     // number of injections in digital/threshold scans
   const int NTRIG          = 100000; // number of triggers for noise occupancy scans
@@ -167,7 +169,7 @@ namespace ScanConfig {
   const int   TARGET_THRESHOLD = 100;
   const int   IVCURVE          = 1; // Do I-V-curve on back bias
   const int   IVPOINTS      = 41;   // number of 100 mV-points for back bias IV curve (max. 50 = 5V)
-  const int   MAXIBIAS      = 50;   // current limit for I-V-curve in mA;
+  const int   MAXIBIAS      = 15;   // current limit for I-V-curve in mA;
   const float VOLTAGE_SCALE = 1.0;
   const float BACKBIAS      = 0;
   const int   NOMINAL       = 1;

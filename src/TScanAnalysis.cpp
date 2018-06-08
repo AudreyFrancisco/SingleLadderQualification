@@ -287,6 +287,12 @@ const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
     return "Silver";
   else if (hicClass == CLASS_BRONZE)
     return "Bronze";
+  else if (hicClass == CLASS_GOLD_NOBB)
+    return "Gold, no back bias";
+  else if (hicClass == CLASS_SILVER_NOBB)
+    return "Silver, no back bias";
+  else if (hicClass == CLASS_BRONZE_NOBB)
+    return "Bronze, no back bias";
   else if (hicClass == CLASS_RED)
     return "Not working";
   else
