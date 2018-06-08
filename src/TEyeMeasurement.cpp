@@ -133,8 +133,9 @@ void TEyeMeasurement::PrepareStep(int loopIndex)
     break;
   case 1: // 2nd loop
     m_current_prescale = m_min_prescale;
-    m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_CONTROL,
-                                      ES_CONTROL_SIZE, ES_CONTROL_OFFSET, 0x0, true);
+    int receiverID     = m_board->GetReceiver(m_testChip->GetConfig()->GetChipId());
+    m_board->WriteTransceiverDRPField(receiverID, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET,
+                                      0x0, true);
     break;
   case 2:
     m_testChip   = m_chips.at(m_value[2]);
@@ -186,49 +187,45 @@ void TEyeMeasurement::Execute()
     vertOffsetReg = ((-vOffset) & 0x7f) | 0x80;
   else
     vertOffsetReg = vOffset & 0x7f;
-  m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_VERT_OFFSET,
-                                    ES_VERT_OFFSET_SIZE, ES_VERT_OFFSET_OFFSET, vertOffsetReg,
-                                    false);
+  int receiverID  = m_board->GetReceiver(m_testChip->GetConfig()->GetChipId());
+  m_board->WriteTransceiverDRPField(receiverID, ES_VERT_OFFSET, ES_VERT_OFFSET_SIZE,
+                                    ES_VERT_OFFSET_OFFSET, vertOffsetReg, false);
 
   // set ES_HORZ_OFFSET   [11:0]  bits10-0: Phase offset (2's complement)
   uint16_t horzOffsetReg = hOffset & 0x7ff;
 
   // bit 11:Phase unification(0:positive 1:negative)
   if (hOffset < 0) horzOffsetReg |= 0x800;
-  m_board->WriteTransceiverDRP(m_testChip->GetConfig()->GetChipId(), ES_HORZ_OFFSET, horzOffsetReg,
-                               false);
+  m_board->WriteTransceiverDRP(receiverID, ES_HORZ_OFFSET, horzOffsetReg, false);
 
   for (bool goodMeasure = false; !goodMeasure;) {
     // std::cout << "in measuring loop " << std::endl;
     // setup ES_PRESCALE	[15:11]. Prescale = 2**(1+reg_value)
-    m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_PRESCALE,
-                                      ES_PRESCALE_SIZE, ES_PRESCALE_OFFSET, m_current_prescale,
-                                      false);
+    m_board->WriteTransceiverDRPField(receiverID, ES_PRESCALE, ES_PRESCALE_SIZE, ES_PRESCALE_OFFSET,
+                                      m_current_prescale, false);
 
     // set ES_CONTROL[0] to start the measure run
     // Configure and run measure
-    m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_CONTROL,
-                                      ES_CONTROL_SIZE, ES_CONTROL_OFFSET, 0x1, true);
+    m_board->WriteTransceiverDRPField(receiverID, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET,
+                                      0x1, true);
 
     // poll the es_control_status[0] for max 10s
     int i;
     for (i = 10000; i > 0; i--) {
       uint32_t val;
       usleep(1000);
-      m_board->ReadTransceiverDRP(m_testChip->GetConfig()->GetChipId(), ES_CONTROL_STATUS, &val);
+      m_board->ReadTransceiverDRP(receiverID, ES_CONTROL_STATUS, &val);
       if (val & ES_CONTROL_STATUS_DONE) break;
     }
     if (i == 0) throw std::runtime_error("Timeout reading es_control_status");
 
     // stop run resetting ES_CONTROL[0]
-    m_board->WriteTransceiverDRPField(m_testChip->GetConfig()->GetChipId(), ES_CONTROL,
-                                      ES_CONTROL_SIZE, ES_CONTROL_OFFSET, 0x0);
+    m_board->WriteTransceiverDRPField(receiverID, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET,
+                                      0x0);
 
     // read es_error_count and es_sample_count
-    m_board->ReadTransceiverDRP(m_testChip->GetConfig()->GetChipId(), ES_ERROR_COUNT,
-                                &errorCountReg, false);
-    m_board->ReadTransceiverDRP(m_testChip->GetConfig()->GetChipId(), ES_SAMPLE_COUNT,
-                                &sampleCountReg, true);
+    m_board->ReadTransceiverDRP(receiverID, ES_ERROR_COUNT, &errorCountReg, false);
+    m_board->ReadTransceiverDRP(receiverID, ES_SAMPLE_COUNT, &sampleCountReg, true);
 
     if (errorCountReg == 0xffff && m_current_prescale == 0) {
       goodMeasure = true;
