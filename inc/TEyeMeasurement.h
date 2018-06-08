@@ -19,6 +19,7 @@ private:
   TAlpide *            m_testChip;
   int                  m_boardIndex;
   int                  m_chipId;
+  int                  m_receiverId;
   TReadoutBoardMOSAIC *m_board;
   int                  m_hMin, m_hMax, m_hStep;
   int                  m_vMin, m_vMax, m_vStep;

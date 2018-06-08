@@ -21,6 +21,8 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
   SetName(); // Display name
 
   // TODO: Assign proper Mosaic
+  m_chipId     = 0;
+  m_receiverId = 0;
 
   // outer loop: loop over all chips
   // TODO: can this be done in parallel on all chips?
@@ -144,6 +146,7 @@ void TEyeMeasurement::PrepareStep(int loopIndex)
       std::cout << "Error: Wrong board";
       // TODO: Exit with error
     }
+    m_receiverId = m_board->GetReceiver(m_chipId);
     break;
   default:
     break;
@@ -205,7 +208,7 @@ double TEyeMeasurement::BERmeasure(int hOffset, int vOffset)
     vertOffsetReg = ((-vOffset) & 0x7f) | 0x80;
   else
     vertOffsetReg = vOffset & 0x7f;
-  m_board->WriteTransceiverDRPField(m_chipId, ES_VERT_OFFSET, ES_VERT_OFFSET_SIZE,
+  m_board->WriteTransceiverDRPField(m_receiverId, ES_VERT_OFFSET, ES_VERT_OFFSET_SIZE,
                                     ES_VERT_OFFSET_OFFSET, vertOffsetReg, false);
 
   // set ES_HORZ_OFFSET   [11:0]  bits10-0: Phase offset (2's complement)
@@ -213,35 +216,35 @@ double TEyeMeasurement::BERmeasure(int hOffset, int vOffset)
 
   // bit 11:Phase unification(0:positive 1:negative)
   if (hOffset < 0) horzOffsetReg |= 0x800;
-  m_board->WriteTransceiverDRP(m_chipId, ES_HORZ_OFFSET, horzOffsetReg, false);
+  m_board->WriteTransceiverDRP(m_receiverId, ES_HORZ_OFFSET, horzOffsetReg, false);
 
   for (bool goodMeasure = false; !goodMeasure;) {
     // setup ES_PRESCALE	[15:11]. Prescale = 2**(1+reg_value)
-    m_board->WriteTransceiverDRPField(m_chipId, ES_PRESCALE, ES_PRESCALE_SIZE, ES_PRESCALE_OFFSET,
-                                      currPrescale, false);
+    m_board->WriteTransceiverDRPField(m_receiverId, ES_PRESCALE, ES_PRESCALE_SIZE,
+                                      ES_PRESCALE_OFFSET, currPrescale, false);
 
     // set ES_CONTROL[0] to start the measure run
     // Configure and run measure
-    m_board->WriteTransceiverDRPField(m_chipId, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET, 0x1,
-                                      true);
+    m_board->WriteTransceiverDRPField(m_receiverId, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET,
+                                      0x1, true);
 
     // poll the es_control_status[0] for max 10s
     int i;
     for (i = 10000; i > 0; i--) {
       uint32_t val;
       usleep(1000);
-      m_board->ReadTransceiverDRP(m_chipId, ES_CONTROL_STATUS, &val);
+      m_board->ReadTransceiverDRP(m_receiverId, ES_CONTROL_STATUS, &val);
       if (val & ES_CONTROL_STATUS_DONE) break;
     }
     if (i == 0) throw std::runtime_error("Timeout reading es_control_status");
 
     // stop run resetting ES_CONTROL[0]
-    m_board->WriteTransceiverDRPField(m_chipId, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET,
+    m_board->WriteTransceiverDRPField(m_receiverId, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET,
                                       0x0);
 
     // read es_error_count and es_sample_count
-    m_board->ReadTransceiverDRP(m_chipId, ES_ERROR_COUNT, &errorCountReg, false);
-    m_board->ReadTransceiverDRP(m_chipId, ES_SAMPLE_COUNT, &sampleCountReg, true);
+    m_board->ReadTransceiverDRP(m_receiverId, ES_ERROR_COUNT, &errorCountReg, false);
+    m_board->ReadTransceiverDRP(m_receiverId, ES_SAMPLE_COUNT, &sampleCountReg, true);
     if (m_verbose) {
       printf("Ch: %d ", static_cast<int>(m_chipId));
       printf("vOffset: %d ", vOffset);
@@ -282,8 +285,8 @@ void TEyeMeasurement::runHScan(int vOffset)
   int zeroCount = 0;
   // Reset the FSM
   // stop run resetting ES_CONTROL[0]
-  m_board->WriteTransceiverDRPField(m_chipId, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET, 0x0,
-                                    true);
+  m_board->WriteTransceiverDRPField(m_receiverId, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET,
+                                    0x0, true);
 
   int hMin = m_vMin + std::abs(m_vMin) % m_hStep;
   int hMax = m_hMax - m_hMax % m_hStep;
