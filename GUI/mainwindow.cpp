@@ -2006,7 +2006,7 @@ void MainWindow::colorsinglescan(int i)
 
   if (fScanbuttons[i] != 0) {
     if (fresultVector[i] == 0) {
-      fColour = fAnalysisVector.at(i + 1)->GetClassification();
+      fColour = fAnalysisVector.at(i + 1)->GetScanClassification();
       if (fColour == CLASS_GOLD) {
         fScanbuttons[i]->setStyleSheet("color:gold;Text-align:left;border:none;");
         return;
@@ -2029,7 +2029,7 @@ void MainWindow::colorsinglescan(int i)
       }
     }
     else {
-      fColour = fAnalysisVector.at(i)->GetClassification();
+      fColour = fAnalysisVector.at(i)->GetScanClassification();
       if (fColour == CLASS_GOLD) {
         fScanbuttons[i]->setStyleSheet("color:gold;Text-align:left;border:none;");
         return;

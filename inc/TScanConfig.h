@@ -28,7 +28,8 @@ typedef enum {
 namespace ScanConfig {
   // 0.1: first, initial version of "new classification"
   // 0.2: lowered back bias limit to 15 mA, removed cut on 4 V current
-  const float CLASSIFICATION_VERSION = 0.2;
+  // 0.3: introduced cut on noisy pixels, set cut in FIFO errors to 0
+  const float CLASSIFICATION_VERSION = 0.3;
 
   const int NINJ           = 50;     // number of injections in digital/threshold scans
   const int NTRIG          = 100000; // number of triggers for noise occupancy scans
@@ -95,10 +96,10 @@ namespace ScanConfig {
   const int READOUT_MAX8b10b_GREEN = 0;
 
   // cuts for fifo test
-  const int FIFO_CUT_MAXEXCEPTION  = 0;   // max number of exceptions
-  const int FIFO_CUT_MAXERR_ORANGE = 128; // max number of errors per pattern and hic
-  const int FIFO_CUT_MAXERR_GREEN  = 0;   // max number of errors per pattern and hic
-  const int FIFO_CUT_MAXFAULTY     = 1;   // max number of chips with errors
+  const int FIFO_CUT_MAXEXCEPTION  = 0; // max number of exceptions
+  const int FIFO_CUT_MAXERR_ORANGE = 0; // max number of errors per pattern and hic
+  const int FIFO_CUT_MAXERR_GREEN  = 0; // max number of errors per pattern and hic
+  const int FIFO_CUT_MAXFAULTY     = 1; // max number of chips with errors
 
   // cuts for digital scan
   const int DIGITAL_MAXTIMEOUT_GREEN      = 0;
@@ -151,6 +152,9 @@ namespace ScanConfig {
   const int THRESH_MAXNOTHRESH_CHIP_SILVER = 26214;
   const int THRESH_MAXNOTHRESH_CHIP_BRONZE = 52429;
 
+  const int MAXNOISY_CHIP_GOLD   = 50;
+  const int MAXNOISY_CHIP_SILVER = 2100;
+  const int MAXNOISY_CHIP_BRONZE = 5243;
 
   const int TEST_DCTRL             = 1;
   const int DCTRL_MINAMP_IB        = 150; // in mV
@@ -301,6 +305,9 @@ private:
   int       m_threshMaxNoThreshChipBronze;
   int       m_threshMaxNoiseIB;
   int       m_threshMaxNoiseOB;
+  int       m_maxNoisyChipGold;
+  int       m_maxNoisyChipSilver;
+  int       m_maxNoisyChipBronze;
   int       m_testDctrl;
   int       m_dctrlMinAmpOB;
   int       m_dctrlMinSlopeOB;

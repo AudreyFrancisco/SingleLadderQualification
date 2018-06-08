@@ -87,6 +87,7 @@ protected:
   void   InitCounters();
   string GetPreviousTestType();
   void CalculatePrediction(std::string hicName) { (void)hicName; };
+  THicClassification GetClassification(TNoiseResultHic *result, THic *hic);
 
 public:
   TNoiseAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

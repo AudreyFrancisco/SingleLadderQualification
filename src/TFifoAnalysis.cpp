@@ -193,16 +193,16 @@ THicClassification TFifoAnalysis::GetClassification(TFifoResultHic *result)
 
   DoCut(returnValue, CLASS_RED, result->m_exc, "FIFO_MAXEXCEPTION", result);
 
-  DoCut(returnValue, CLASS_SILVER, result->m_err0, "FIFO_MAXERR_GREEN", result);
-  DoCut(returnValue, CLASS_SILVER, result->m_err5, "FIFO_MAXERR_GREEN", result);
-  DoCut(returnValue, CLASS_SILVER, result->m_erra, "FIFO_MAXERR_GREEN", result);
-  DoCut(returnValue, CLASS_SILVER, result->m_errf, "FIFO_MAXERR_GREEN", result);
+  // DoCut(returnValue, CLASS_SILVER, result->m_err0, "FIFO_MAXERR_GREEN", result);
+  // DoCut(returnValue, CLASS_SILVER, result->m_err5, "FIFO_MAXERR_GREEN", result);
+  // DoCut(returnValue, CLASS_SILVER, result->m_erra, "FIFO_MAXERR_GREEN", result);
+  // DoCut(returnValue, CLASS_SILVER, result->m_errf, "FIFO_MAXERR_GREEN", result);
   DoCut(returnValue, CLASS_RED, result->m_err0, "FIFO_MAXERR_ORANGE", result);
   DoCut(returnValue, CLASS_RED, result->m_err5, "FIFO_MAXERR_ORANGE", result);
   DoCut(returnValue, CLASS_RED, result->m_erra, "FIFO_MAXERR_ORANGE", result);
   DoCut(returnValue, CLASS_RED, result->m_errf, "FIFO_MAXERR_ORANGE", result);
 
-  DoCut(returnValue, CLASS_RED, result->m_errf, "FIFO_MAXFAULTYCHIPS", result);
+  // DoCut(returnValue, CLASS_RED, result->m_errf, "FIFO_MAXFAULTYCHIPS", result);
   std::cout << "Fifo Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
   return returnValue;

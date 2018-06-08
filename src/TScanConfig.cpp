@@ -127,6 +127,10 @@ TScanConfig::TScanConfig()
   m_threshMaxNoiseOB            = THRESH_MAXNOISE_OB;
   m_threshMaxNoiseIB            = THRESH_MAXNOISE_IB;
 
+  m_maxNoisyChipGold   = MAXNOISY_CHIP_GOLD;
+  m_maxNoisyChipSilver = MAXNOISY_CHIP_SILVER;
+  m_maxNoisyChipBronze = MAXNOISY_CHIP_BRONZE;
+
   m_testDctrl           = TEST_DCTRL;
   m_dctrlMinAmpOB       = DCTRL_MINAMP_OB;
   m_dctrlMinSlopeOB     = DCTRL_MINSLOPE_OB;
@@ -266,6 +270,9 @@ void TScanConfig::InitParamMap()
   fSettings["THRESH_MAXNOTHRESH_CHIP_BRONZE"] = &m_threshMaxNoThreshChipBronze;
   fSettings["THRESH_MAXNOISE_OB"]             = &m_threshMaxNoiseOB;
   fSettings["THRESH_MAXNOISE_IB"]             = &m_threshMaxNoiseIB;
+  fSettings["MAXNOISY_CHIP_GOLD"]             = &m_maxNoisyChipGold;
+  fSettings["MAXNOISY_CHIP_SILVER"]           = &m_maxNoisyChipSilver;
+  fSettings["MAXNOISY_CHIP_BRONZE"]           = &m_maxNoisyChipBronze;
 
   fSettings["TESTDCTRL"]           = &m_testDctrl;
   fSettings["DCTRLMINAMPIB"]       = &m_dctrlMinAmpIB;

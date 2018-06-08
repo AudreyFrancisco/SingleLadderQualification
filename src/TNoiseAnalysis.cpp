@@ -169,6 +169,7 @@ void TNoiseAnalysis::Finalize()
     }
     hicResult->m_occ /= m_hics.at(ihic)->GetNChips();
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
+    hicResult->m_class        = GetClassification(hicResult, m_hics.at(ihic));
     hicResult->SetValidity(true);
   }
 
@@ -176,6 +177,29 @@ void TNoiseAnalysis::Finalize()
 
   m_finished = true;
 }
+
+
+THicClassification TNoiseAnalysis::GetClassification(TNoiseResultHic *result, THic *hic)
+{
+  THicClassification returnValue = CLASS_GOLD;
+
+  for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
+    if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled()) continue;
+    int               chipId     = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
+    TNoiseResultChip *chipResult = (TNoiseResultChip *)result->m_chipResults.at(chipId);
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_noisyPixels.size(), "MAXNOISY_CHIP_GOLD", result,
+          false, chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_noisyPixels.size(), "MAXNOISY_CHIP_SILVER",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_noisyPixels.size(), "MAXNOISY_CHIP_BRONZE", result,
+          false, chipId);
+  }
+  std::cout << "Noise Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
+  return returnValue;
+}
+
 
 void TNoiseResultChip::WriteToFile(FILE *fp)
 {

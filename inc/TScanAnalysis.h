@@ -195,7 +195,7 @@ public:
   float GetVariable(std::string aHic, int chip, TResultVariable var);
   static const char *WriteHicClassification(THicClassification hicClass);
   void WriteHicClassToFile(std::string hicName);
-  THicClassification GetClassification();
+  THicClassification GetScanClassification();
 };
 
 #endif
