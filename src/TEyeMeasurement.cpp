@@ -2,6 +2,7 @@
 #include "AlpideConfig.h"
 #include "TReadoutBoardMOSAIC.h"
 
+#include <chrono>
 #include <exception>
 #include <iostream>
 #include <string.h>
@@ -47,7 +48,20 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
   m_vMax      = m_config->GetParamValue("EYEMAXY");
   m_vStep     = m_config->GetParamValue("EYESTEPY");
   minPrescale = m_config->GetParamValue("EYEDEPTHMIN");
-  maxPrescale = m_config->GetParamValue("EYEDEPTHMIN");
+  maxPrescale = m_config->GetParamValue("EYEDEPTHMAX");
+  m_verbose   = m_config->GetParamValue("EYEVERBOSE") > 0;
+
+  if (m_verbose) {
+    std::cout << "Parameters: \n"
+              << "  hMin:        " << m_hMin << "\n"
+              << "  hMax:        " << m_hMax << "\n"
+              << "  hStep:       " << m_hStep << "\n"
+              << "  vMin:        " << m_vMin << "\n"
+              << "  vMax:        " << m_vMax << "\n"
+              << "  vStep:       " << m_vStep << "\n"
+              << "  minPrescale: " << minPrescale << "\n"
+              << "  maxPrescale: " << maxPrescale << "\n";
+  }
 }
 
 
@@ -78,8 +92,9 @@ bool TEyeMeasurement::SetParameters(TScanParameters *pars)
 
 THisto TEyeMeasurement::CreateHisto()
 {
-  THisto histo("EyeDiagram", "EyeDiagram", 1 + (m_stop[0] - m_start[0]) / m_step[0], m_start[0],
-               m_stop[0], 1 + (m_stop[1] - m_start[1]) / m_step[1], m_start[1], m_stop[1]);
+
+  THisto histo("EyeDiagram", "EyeDiagram", 1 + (m_hMax - m_hMin) / m_hStep, m_hMin, m_hMax,
+               1 + (m_vMax - m_vMin) / m_vStep, m_vMin, m_vMax);
   return histo;
 }
 
@@ -135,10 +150,10 @@ void TEyeMeasurement::PrepareStep(int loopIndex)
   case 1: // 2nd loop
     break;
   case 2:
+    sprintf(m_state, "Running %d", m_value[2]);
     m_testChip   = m_chips.at(m_value[2]);
     m_chipId     = m_testChip->GetConfig()->GetChipId();
     m_boardIndex = FindBoardIndex(m_testChip);
-    sprintf(m_state, "Running %d", m_value[2]);
 
     std::cout << "Testing chip : " << m_testChip->GetConfig()->GetChipId() << std::endl;
     m_board = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(m_boardIndex));
@@ -171,7 +186,14 @@ void TEyeMeasurement::LoopEnd(int loopIndex)
 // Execute does the actual measurement
 // in this case the measureemnt for one point of the eye diagram
 // results are saved into m_histo as described below
-void TEyeMeasurement::Execute() { runFullScan(); }
+void TEyeMeasurement::Execute()
+{
+  auto start = std::chrono::high_resolution_clock::now();
+  runFullScan();
+  auto diff = std::chrono::high_resolution_clock::now() - start;
+  auto t1   = std::chrono::duration_cast<std::chrono::seconds>(diff);
+  std::cout << "Eye Scan Chip " << m_chipId << ": Took" << t1.count() << " seconds" << std::endl;
+}
 
 
 void TEyeMeasurement::Terminate()
@@ -192,7 +214,9 @@ void TEyeMeasurement::addValue(int vOffset, int hOffset, double scanValue)
   idx.chipId       = m_chipId;
   idx.dataReceiver = m_testChip->GetConfig()->GetParamValue("RECEIVER");
   // TODO: take into account step width (if != 1)
-  m_histo->Set(idx, (hOffset - m_hMin) / m_hStep, (vOffset - m_vMin) / m_vStep, scanValue);
+  auto hist_x = (hOffset - m_hMin) / m_hStep;
+  auto hist_y = (vOffset - m_vMin) / m_vStep;
+  m_histo->Set(idx, hist_x, hist_y, scanValue);
 }
 
 
@@ -228,9 +252,9 @@ double TEyeMeasurement::BERmeasure(int hOffset, int vOffset)
     m_board->WriteTransceiverDRPField(m_receiverId, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET,
                                       0x1, true);
 
-    // poll the es_control_status[0] for max 10s
+    // poll the es_control_status[0] for max 5 min
     int i;
-    for (i = 10000; i > 0; i--) {
+    for (i = 5 * 60 * 1000; i > 0; i--) {
       uint32_t val;
       usleep(1000);
       m_board->ReadTransceiverDRP(m_receiverId, ES_CONTROL_STATUS, &val);
@@ -254,16 +278,16 @@ double TEyeMeasurement::BERmeasure(int hOffset, int vOffset)
       printf("currPrescale: %u \n", (unsigned int)currPrescale);
     }
 
-    if (errorCountReg == 0xffff && currPrescale == 0) {
+    if (errorCountReg == 0xffff && currPrescale == minPrescale) {
       goodMeasure = true;
     }
-    else if (sampleCountReg == 0xffff && errorCountReg > 0x7fff) {
+    else if (sampleCountReg == 0xffff && errorCountReg > 100) {
       goodMeasure = true;
     }
     else if (sampleCountReg == 0xffff && currPrescale == maxPrescale) {
       goodMeasure = true;
     }
-    else if (errorCountReg == 0xffff && currPrescale > 0) {
+    else if (errorCountReg == 0xffff && currPrescale > minPrescale) {
       currPrescale--;
     }
     else if (errorCountReg <= 0x7fff) { // measure time too short
@@ -280,7 +304,7 @@ double TEyeMeasurement::BERmeasure(int hOffset, int vOffset)
           ((double)BUS_WIDTH * (double)sampleCountReg * (1UL << (currPrescale + 1))));
 }
 
-void TEyeMeasurement::runHScan(int vOffset)
+double TEyeMeasurement::runVScan(int hOffset)
 {
   int zeroCount = 0;
   // Reset the FSM
@@ -288,11 +312,14 @@ void TEyeMeasurement::runHScan(int vOffset)
   m_board->WriteTransceiverDRPField(m_receiverId, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET,
                                     0x0, true);
 
-  int hMin = m_vMin + std::abs(m_vMin) % m_hStep;
-  int hMax = m_hMax - m_hMax % m_hStep;
+  int vMin = m_vMin + std::abs(m_vMin) % m_vStep;
+  int vMax = m_vMax - m_vMax % m_vStep;
 
-  for (int hOffset = hMin; hOffset < 0; hOffset += m_hStep) {
+  double maxB = 0;
+
+  for (int vOffset = vMin; vOffset < std::min(0, vMax); vOffset += m_vStep) {
     double b = BERmeasure(hOffset, vOffset);
+    maxB     = std::max(maxB, b);
     addValue(vOffset, hOffset, b);
     if (b == 0.0)
       zeroCount++;
@@ -302,8 +329,9 @@ void TEyeMeasurement::runHScan(int vOffset)
   }
 
   zeroCount = 0;
-  for (int hOffset = hMax; hOffset >= 0; hOffset -= m_hStep) {
+  for (int vOffset = vMax; vOffset >= std::max(0, vMin); vOffset -= m_vStep) {
     double b = BERmeasure(hOffset, vOffset);
+    maxB     = std::max(maxB, b);
     addValue(vOffset, hOffset, b);
     if (b == 0.0)
       zeroCount++;
@@ -311,13 +339,32 @@ void TEyeMeasurement::runHScan(int vOffset)
       zeroCount = 0;
     if (zeroCount == MAX_ZERO_RESULTS) break;
   }
+  return maxB;
 }
+
+
 void TEyeMeasurement::runFullScan()
 {
-  int vMin = m_vMin + std::abs(m_vMin) % m_vStep;
-  int vMax = m_vMax - m_vMax % m_vStep;
+  int hMin = m_hMin + std::abs(m_hMin) % m_hStep;
+  int hMax = m_hMax - m_hMax % m_hStep;
 
-  for (int vOffset = vMin; vOffset <= vMax; vOffset += m_vStep) {
-    runHScan(vOffset);
+  int zeroCount = 0;
+  for (int hOffset = hMin; hOffset < std::min(0, hMax); hOffset += m_hStep) {
+    double maxB = runVScan(hOffset);
+    if (maxB == 0.0)
+      zeroCount++;
+    else
+      zeroCount = 0;
+    if (zeroCount == MAX_ZERO_RESULTS) break;
+  }
+
+  zeroCount = 0;
+  for (int hOffset = hMax; hOffset >= std::max(0, hMin); hOffset -= m_hStep) {
+    double maxB = runVScan(hOffset);
+    if (maxB == 0.0)
+      zeroCount++;
+    else
+      zeroCount = 0;
+    if (zeroCount == MAX_ZERO_RESULTS) break;
   }
 }

@@ -28,7 +28,7 @@ private:
 
   void addValue(int vOffset, int hOffset, double scanValue);
   double BERmeasure(int hOffset, int vOffset);
-  void runHScan(int vOffset);
+  double runVScan(int hOffset);
   void runFullScan();
   void SetName();
 

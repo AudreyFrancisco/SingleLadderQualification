@@ -2441,116 +2441,152 @@ void MainWindow::IBParameterScan()
 void MainWindow::fillingibvectors()
 {
   ClearVectors();
-  AddScan(STPower);
-  // if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
-  // Do this scan immediately after power as it sometimes crashes
-  if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
-  // IBParameterScan();
-  // FIFO and digital scan at three different supply voltages
-  AddScan(STFifo);
-  fConfig->GetScanConfig()->SetVoltageScale(1.1);
-  AddScan(STFifo);
-  fConfig->GetScanConfig()->SetVoltageScale(0.9);
-  AddScan(STFifo);
-  fConfig->GetScanConfig()->SetVoltageScale(1.0);
-  fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
-  AddScan(STDigital);
-  fConfig->GetScanConfig()->SetVoltageScale(1.1);
-  AddScan(STDigital);
-  fConfig->GetScanConfig()->SetVoltageScale(0.9);
-  AddScan(STDigital);
-  fConfig->GetScanConfig()->SetVoltageScale(1.0);
+  //  AddScan(STPower);
+  //  // if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
+  //  // Do this scan immediately after power as it sometimes crashes
+  //  if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
+  //  // IBParameterScan();
+  //  // FIFO and digital scan at three different supply voltages
+  //  AddScan(STFifo);
+  //  fConfig->GetScanConfig()->SetVoltageScale(1.1);
+  //  AddScan(STFifo);
+  //  fConfig->GetScanConfig()->SetVoltageScale(0.9);
+  //  AddScan(STFifo);
+  //  fConfig->GetScanConfig()->SetVoltageScale(1.0);
+  //  fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
+  //  AddScan(STDigital);
+  //  fConfig->GetScanConfig()->SetVoltageScale(1.1);
+  //  AddScan(STDigital);
+  //  fConfig->GetScanConfig()->SetVoltageScale(0.9);
+  //  AddScan(STDigital);
+  //  fConfig->GetScanConfig()->SetVoltageScale(1.0);
+  //
+  //  // digital white frame
+  //  AddScan(STDigitalWF);
+  //
+  //  // threshold scan, no tuning for the time being, 0V back bias
+  //  fConfig->GetScanConfig()->SetBackBias(0.0);
+  //  fConfig->GetScanConfig()->SetVcasnRange(30, 70);
+  //
+  //  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  //  AddScan(STThreshold);
+  //  AddScan(STVCASN);
+  //  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  //  AddScan(STApplyVCASN, fresultVector.back());
+  //  AddScan(STITHR);
+  //  AddScan(STApplyITHR, fresultVector.back());
+  //  AddScan(STThreshold);
+  //
+  //  // noise occupancy with and without mask at 0V back bias
+  //  AddScan(STNoise);
+  //  AddScan(STApplyMask, fresultVector.back());
+  //  AddScan(STNoise);
+  //  AddScan(STClearMask);
+  //  // return;
+  //  // threshold scan at 3V back bias, also here no tuning for the time being
+  //  fConfig->GetScanConfig()->SetBackBias(3.0);
+  //  fConfig->GetScanConfig()->SetVcasnRange(75, 160);
+  //  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  //  AddScan(STThreshold);
+  //  AddScan(STVCASN);
+  //  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  //  AddScan(STApplyVCASN, fresultVector.back());
+  //  AddScan(STITHR);
+  //  AddScan(STApplyITHR, fresultVector.back());
+  //  AddScan(STThreshold);
+  //
+  //  // noise occupancy with and without mask at 3V back bias
+  //  AddScan(STNoise);
+  //  AddScan(STApplyMask, fresultVector.back());
+  //  AddScan(STNoise);
+  //  AddScan(STClearMask);
 
-  // digital white frame
-  AddScan(STDigitalWF);
-
-  // threshold scan, no tuning for the time being, 0V back bias
-  fConfig->GetScanConfig()->SetBackBias(0.0);
-  fConfig->GetScanConfig()->SetVcasnRange(30, 70);
-
-  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
-  AddScan(STThreshold);
-  AddScan(STVCASN);
-  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
-  AddScan(STApplyVCASN, fresultVector.back());
-  AddScan(STITHR);
-  AddScan(STApplyITHR, fresultVector.back());
-  AddScan(STThreshold);
-
-  // noise occupancy with and without mask at 0V back bias
-  AddScan(STNoise);
-  AddScan(STApplyMask, fresultVector.back());
-  AddScan(STNoise);
-  AddScan(STClearMask);
-  // return;
-  // threshold scan at 3V back bias, also here no tuning for the time being
-  fConfig->GetScanConfig()->SetBackBias(3.0);
-  fConfig->GetScanConfig()->SetVcasnRange(75, 160);
-  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
-  AddScan(STThreshold);
-  AddScan(STVCASN);
-  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
-  AddScan(STApplyVCASN, fresultVector.back());
-  AddScan(STITHR);
-  AddScan(STApplyITHR, fresultVector.back());
-  AddScan(STThreshold);
-
-  // noise occupancy with and without mask at 3V back bias
-  AddScan(STNoise);
-  AddScan(STApplyMask, fresultVector.back());
-  AddScan(STNoise);
-  AddScan(STClearMask);
-
+  fConfig->GetScanConfig()->SetParamValue("EYEVERBOSE", 0);
   // eye diagram
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 8);
-  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 0);
-  AddScan(STEyeScan);
+  fConfig->GetScanConfig()->SetParamValue("EYEDEPTHMIN", 3);
+  fConfig->GetScanConfig()->SetParamValue("EYEDEPTHMAX", 3);
+  fConfig->GetScanConfig()->SetParamValue("EYESTEPX", 4);
+  fConfig->GetScanConfig()->SetParamValue("EYESTEPY", 4);
+
   fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 4);
-  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 0);
-  AddScan(STEyeScan);
+  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 4);
+  // AddScan(STEyeScan);
+
   fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 8);
-  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
-  AddScan(STEyeScan);
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 12);
   fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 0);
-  AddScan(STEyeScan);
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 12);
-  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
+  // AddScan(STEyeScan);
+  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 8);
+  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 8);
+  // AddScan(STEyeScan);
+
+  // Bathtub X at 0 + +- 33%, with BER=
+  // Todo: At which driver strength?
+
+  // Default Max width for X and Y
+  fConfig->GetScanConfig()->SetParamValue("EYEMINY", -127);
+  fConfig->GetScanConfig()->SetParamValue("EYEMAXY", 127);
+  fConfig->GetScanConfig()->SetParamValue("EYEMINX", -126);
+  fConfig->GetScanConfig()->SetParamValue("EYEMAXX", 126);
+
+
+  fConfig->GetScanConfig()->SetParamValue("EYEDEPTHMIN", 3);
+  fConfig->GetScanConfig()->SetParamValue("EYEDEPTHMAX", 10);
+
+  fConfig->GetScanConfig()->SetParamValue("EYEMINY", -42);
+  fConfig->GetScanConfig()->SetParamValue("EYEMAXY", 42);
+  fConfig->GetScanConfig()->SetParamValue("EYESTEPY", 42);
+
+  fConfig->GetScanConfig()->SetParamValue("EYESTEPX", 2);
   AddScan(STEyeScan);
 
-  // readout tests
-  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 12);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 12);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 6);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 4);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
-  AddScan(STReadout);
+  // Default Max width for X and Y
+  fConfig->GetScanConfig()->SetParamValue("EYEMINY", -127);
+  fConfig->GetScanConfig()->SetParamValue("EYEMAXY", 127);
+  fConfig->GetScanConfig()->SetParamValue("EYEMINX", -126);
+  fConfig->GetScanConfig()->SetParamValue("EYEMAXX", 126);
+  // Bathtub Y at 0 + +- 33%
 
-  // reset previous values
-  // (TODO: this is not exactly correct because it resets to the values defined in the header file
-  // and
-  // ignores the settings in the config file)
-  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", ChipConfig::DTU_DRIVER);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", ChipConfig::DTU_PREEMP);
+  fConfig->GetScanConfig()->SetParamValue("EYEMINX", -42);
+  fConfig->GetScanConfig()->SetParamValue("EYEMAXX", 42);
+  fConfig->GetScanConfig()->SetParamValue("EYESTEPX", 42);
+
+  fConfig->GetScanConfig()->SetParamValue("EYESTEPY", 2);
+  fConfig->GetScanConfig()->SetParamValue("EYEMINY", -126);
+  fConfig->GetScanConfig()->SetParamValue("EYEMAXY", 126);
+  AddScan(STEyeScan);
+
+  //  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 4);
+  //  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 0);
+  //  AddScan(STEyeScan);
+  //  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 8);
+  //  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
+  //  AddScan(STEyeScan);
+
+  //  // readout tests
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
+  //  AddScan(STReadout);
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
+  //  AddScan(STReadout);
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
+  //  AddScan(STReadout);
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 4);
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
+  //  AddScan(STReadout);
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
+  //  AddScan(STReadout);
+  //
+  //  // reset previous values
+  //  // (TODO: this is not exactly correct because it resets to the values defined in the header
+  //  file
+  //  // and
+  //  // ignores the settings in the config file)
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", ChipConfig::DTU_DRIVER);
+  //  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", ChipConfig::DTU_PREEMP);
 }
 
 void MainWindow::fillingendurancevectors()
