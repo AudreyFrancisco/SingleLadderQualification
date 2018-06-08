@@ -95,6 +95,8 @@ THicClassification TPowerAnalysis::GetClassification(THicCurrents currents, TPow
     if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
     if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
   }
+  std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
 
   return returnValue;
 }
@@ -114,12 +116,7 @@ THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents     currents
 
   // check for absolute value at 3V and for margin from breakthrough
   DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
-  // add 1 for the case where I(3V) = 0
-  float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
-  // add 0.9 to round up for everything >= .1
-  DoCut(returnValue, CLASS_SILVER, (int)(ratio + 0.9), "MAXFACTOR_4V_IB", result);
-  std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
+
   return returnValue;
 }
 
@@ -138,12 +135,7 @@ THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents     currents
 
   // check for absolute value at 3V and for margin from breakthrough
   DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_OB", result);
-  // add 1 for the case where I(3V) = 0
-  float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
-  // add 0.9 to round up for everything >= .1
-  DoCut(returnValue, CLASS_SILVER, (int)(ratio + 0.9), "MAXFACTOR_4V_OB", result);
-  std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
+
   return returnValue;
 }
 

@@ -42,17 +42,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <cstdio>
 #include <fstream>
 #include <iostream>
-// / #include <string>
 
-CernSsoCookieJar::CernSsoCookieJar(string aCookiePackFileName)
+CernSsoCookieJar::CernSsoCookieJar()
 {
   if (!testTheCERNSSO()) {
     exit(1);
   }
   theSslUrl         = "";
-  theCookiePackFile = aCookiePackFileName;
+  theCookiePackFile = std::tmpnam(nullptr);
 
 #ifdef AUTH_X509
   theCliCert = "";
@@ -60,11 +60,7 @@ CernSsoCookieJar::CernSsoCookieJar(string aCookiePackFileName)
 #endif
 }
 
-CernSsoCookieJar::~CernSsoCookieJar()
-{
-  remove("/tmp/exitus.txt");
-  remove(theCookiePackFile.c_str());
-}
+CernSsoCookieJar::~CernSsoCookieJar() { remove(theCookiePackFile.c_str()); }
 
 /* -----------------------------------
  * Examine if the Jar is valid
@@ -163,7 +159,10 @@ int CernSsoCookieJar::parseTheJar(string aCookieJarFile)
   Cookie rigolo;
   char   Buffer[THECOOKIELENGTH];
 
-  if (!fgets(Buffer, THECOOKIELENGTH, fh)) return 0;
+  if (!fgets(Buffer, THECOOKIELENGTH, fh)) {
+    fclose(fh);
+    return 0;
+  }
   while (!feof(fh)) {
     if (Buffer[0] != '#' && Buffer[0] != 0 && Buffer[0] != '\n' && Buffer[0] != '\r') {
 
@@ -204,9 +203,9 @@ int CernSsoCookieJar::parseTheJar(string aCookieJarFile)
 bool CernSsoCookieJar::testTheCERNSSO()
 {
 
-  remove("/tmp/exitus.txt");
+  string tmp_filename = std::tmpnam(nullptr);
 
-  string Command = "type cern-get-sso-cookie > /tmp/exitus.txt";
+  string Command = "type cern-get-sso-cookie > " + tmp_filename;
   if (system(Command.c_str()) != 0) {
     cout << "Failed to execute the command: " << Command << endl;
   }
@@ -215,9 +214,10 @@ bool CernSsoCookieJar::testTheCERNSSO()
   }
 
   FILE *result;
-  result = fopen("/tmp/exitus.txt", "r");
+  result = fopen(tmp_filename.c_str(), "r");
   if (result == NULL) {
     cerr << "Error to access /tmp folder ! Abort" << endl;
+    remove(tmp_filename.c_str());
     return (false);
   }
 
@@ -227,11 +227,13 @@ bool CernSsoCookieJar::testTheCERNSSO()
       cout << "The CERN-SSO package is installed !" << endl;
     }
     fclose(result);
+    remove(tmp_filename.c_str());
     return (true);
   }
   else {
     cerr << "CERN-SSO package not Found ! Abort" << endl;
     fclose(result);
+    remove(tmp_filename.c_str());
     return (false);
   }
   return (false);

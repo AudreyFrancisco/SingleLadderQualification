@@ -98,6 +98,12 @@ add_custom_target(format-check
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
+# add target for formatting
+add_custom_target(format
+  COMMAND ./.format.sh
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
 # install pre-commit hook for format checking
 configure_file(.pre-commit-clang-format ${CMAKE_CURRENT_SOURCE_DIR}/.git/hooks/pre-commit COPYONLY)
 
