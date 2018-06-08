@@ -126,6 +126,7 @@ void TEyeMeasurement::Init()
 // loopIndex 2: change the chip under test
 void TEyeMeasurement::PrepareStep(int loopIndex)
 {
+  int receiverID = 0;
   switch (loopIndex) {
   case 0: // innermost loop
     // Reset the FSM
@@ -133,7 +134,7 @@ void TEyeMeasurement::PrepareStep(int loopIndex)
     break;
   case 1: // 2nd loop
     m_current_prescale = m_min_prescale;
-    int receiverID     = m_board->GetReceiver(m_testChip->GetConfig()->GetChipId());
+    receiverID         = m_board->GetReceiver(m_testChip->GetConfig()->GetChipId());
     m_board->WriteTransceiverDRPField(receiverID, ES_CONTROL, ES_CONTROL_SIZE, ES_CONTROL_OFFSET,
                                       0x0, true);
     break;
