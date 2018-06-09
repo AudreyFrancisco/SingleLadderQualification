@@ -849,9 +849,14 @@ void MainWindow::popup(QString message)
 
 void MainWindow::start_clock()
 {
+  int sleep_time = 500000; // sleep time in microseconds
+  stop_clock(); // by safety, the clock is stopped first. This procedure can be removed if there is a way to test if the clock is on or not.
+  usleep(sleep_time);
   int commandstart =
       system("cd ../ && ./startclk -c Config//Config_MFTLadder_FIFOTest.cfg && cd GUI/");
   printf("commandstart = %d \n", commandstart);
+  ui->stopclk_MFT->setEnabled(true);
+  ui->startclk_MFT->setEnabled(false);
 }
 
 void MainWindow::stop_clock()
@@ -859,6 +864,8 @@ void MainWindow::stop_clock()
   int commandstop =
       system("cd ../ && ./stopclk -c Config//Config_MFTLadder_FIFOTest.cfg && cd GUI/");
   printf("commandstop = %d \n", commandstop);
+  ui->startclk_MFT->setEnabled(true);
+  ui->stopclk_MFT->setEnabled(false);
 }
 
 void MainWindow::start_test()
