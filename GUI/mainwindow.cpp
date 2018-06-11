@@ -391,11 +391,17 @@ void MainWindow::open()
         chipid = fChips.at(i)->GetConfig()->GetChipId();
         if (fChips.at(i)->GetConfig()->IsEnabled()) {
           DecodeId(chipid, module, side, pos);
-          color_green_IB(pos);
+          color_green_MFT(pos);
         }
         else {
           DecodeId(chipid, module, side, pos);
-          color_red_IB(pos);
+          if (pos > 8 - fHICSize) { // Position starts from 8 in MFT HICs and decreases towards the
+                                    // connector. For a 2 chips HIC, the positions are 7 and 8
+            color_red_MFT(pos);
+          }
+          else {
+            color_grey_MFT(pos);
+          }
         }
       }
     }
@@ -712,6 +718,25 @@ void MainWindow::color_green_IB(int position)
     ui->chip3->setStyleSheet("background-color:green;");
   }*/
   if (position == 4) {
+    ui->chip4->setStyleSheet("background-color:green;");
+  }
+  if (position == 5) {
+    ui->chip5->setStyleSheet("background-color:green;");
+  }
+  if (position == 6) {
+    ui->chip6->setStyleSheet("background-color:green;");
+  }
+  if (position == 7) {
+    ui->chip7->setStyleSheet("background-color:green;");
+  }
+  if (position == 8) {
+    ui->chip8->setStyleSheet("background-color:green;");
+  }
+}
+
+void MainWindow::color_green_MFT(int position)
+{
+  if (position == 4) {
     ui->chip4_HIC_MFT->setStyleSheet("background-color:green;");
   }
   if (position == 5) {
@@ -728,21 +753,8 @@ void MainWindow::color_green_IB(int position)
   }
 }
 
-void MainWindow::color_red_IB(int position)
+void MainWindow::color_red_MFT(int position)
 {
-
-  /*if (position == 0) {
-    ui->chip0->setStyleSheet("background-color:red;");
-  }
-  if (position == 1) {
-    ui->chip1->setStyleSheet("background-color:red;");
-  }
-  if (position == 2) {
-    ui->chip2->setStyleSheet("background-color:red;");
-  }
-  if (position == 3) {
-    ui->chip3->setStyleSheet("background-color:red;");
-  }*/
   if (position == 4) {
     ui->chip4_HIC_MFT->setStyleSheet("background-color:red;");
   }
@@ -770,6 +782,12 @@ void MainWindow::color_grey_MFT(int position)
   }
   if (position == 6) {
     ui->chip6_HIC_MFT->setStyleSheet("background-color:grey;");
+  }
+  if (position == 7) {
+    ui->chip7_HIC_MFT->setStyleSheet("background-color:grey;");
+  }
+  if (position == 8) {
+    ui->chip8_HIC_MFT->setStyleSheet("background-color:grey;");
   }
 }
 
@@ -850,7 +868,8 @@ void MainWindow::popup(QString message)
 void MainWindow::start_clock()
 {
   int sleep_time = 500000; // sleep time in microseconds
-  stop_clock(); // by safety, the clock is stopped first. This procedure can be removed if there is a way to test if the clock is on or not.
+  stop_clock(); // by safety, the clock is stopped first. This procedure can be removed if there is
+                // a way to test if the clock is on or not.
   usleep(sleep_time);
   int commandstart =
       system("cd ../ && ./startclk -c Config//Config_MFTLadder_FIFOTest.cfg && cd GUI/");
@@ -2373,18 +2392,18 @@ void MainWindow::MFTThresholdScan()
   ConfigThresholdScan();
   printf("Threshold Scan for MFT HICs in progress...\n");
 
-  // ClearVectors();
+  ClearVectors();
 
-  // AddScan(STThreshold);
+  AddScan(STThreshold);
 }
 
 void MainWindow::MFTNoiseOccupancyScan()
 {
   printf("Noise Occupancy Scan for MFT HIC in progress...\n");
 
-  // ClearVectors();
+  ClearVectors();
 
-  // AddScan(STNoise);
+  AddScan(STNoise);
 }
 
 // TODO: Only one MFT_Config_file for all scans

@@ -156,6 +156,8 @@ private:
   void color_green(int side, int pos);
   void color_green_IB(int position);
   void color_red_IB(int position);
+  void color_green_MFT(int position);
+  void color_red_MFT(int position);
   void color_grey_MFT(int position);
   void color_blue_MFT(int position);
   int                fCounter;
