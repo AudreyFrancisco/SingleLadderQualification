@@ -1114,18 +1114,18 @@ void MainWindow::applytests()
   makeDir(TestDir);
 
   for (unsigned int i = 0; i < fHICs.size(); i++) {
-    //if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
-      int oldtests;
-      if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
-        oldtests = 0;
-      }
-      else {
-        oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
-      }
-      std::cout << "the number of old tests is " << oldtests << std::endl;
-      fConfig->GetScanConfig()->SetRetestNumber(fHicnames.at(i).toStdString(), oldtests);
-      makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
-      //}
+    // if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
+    int oldtests;
+    if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+      oldtests = 0;
+    }
+    else {
+      oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
+    }
+    std::cout << "the number of old tests is " << oldtests << std::endl;
+    fConfig->GetScanConfig()->SetRetestNumber(fHicnames.at(i).toStdString(), oldtests);
+    makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
+    //}
   }
 
   ui->start_test->hide();
