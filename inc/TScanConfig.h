@@ -56,7 +56,7 @@ namespace ScanConfig {
   const int DAC_STOP          = 255;
   const int DAC_STEP          = 8;
   const int NDACSAMPLES       = 10;
-  const int STATUS            = 1;
+  const int STATUS            = 0;
   const int TEST_WITHOUT_COMP = 0;
   // settings for readout test
   const int READOUTSPEED     = 1200;
