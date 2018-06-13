@@ -163,6 +163,14 @@ void TScan::Terminate()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
+    if (m_config->GetTestType() != OBEndurance) {
+      if (m_hics.at(ihic)->IsPowered()) {
+        throw std::runtime_error("TScan terminate: HIC powered off (Retry suggested)");
+      }
+      else if ((m_hics.at(ihic)->GetVddd() < 0.1) || (m_hics.at(ihic)->GetVdda() < 0.1)) {
+        throw std::runtime_error("TScan terminate: voltage appears to be off (Retry suggested)");
+      }
+    }
     try {
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd =
           m_hics.at(ihic)->GetTemperature();
