@@ -2151,8 +2151,19 @@ void MainWindow::exploreendurancebox()
   for (unsigned int i = 0; i < fHICs.size(); i++) {
 
     if (fHICs[i]->IsEnabled()) {
+      int nchips;
+      nchips = 0;
       fEndurancemodules[i]->setText(fHicnames[i]);
-      fEndurancemodules[i]->setStyleSheet("background-color:green;");
+      nchips = fHICs[i]->GetNEnabledChips();
+      if (nchips > 0 && nchips < 14) {
+        fEndurancemodules[i]->setStyleSheet("background-color:orange;");
+      }
+      else if (nchips == 14) {
+        fEndurancemodules[i]->setStyleSheet("background-color:green;");
+      }
+      else {
+        fEndurancemodules[i]->setStyleSheet("background-color:red;");
+      }
     }
     else {
       fEndurancemodules[i]->setStyleSheet("background-color:black;");
