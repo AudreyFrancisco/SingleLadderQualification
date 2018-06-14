@@ -88,7 +88,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   fNoticewindow     = 0;
   fPbnumberofmodule = 0;
   fDatabasefailure  = 0;
-  makeDir("Data");
+
+  std::string dataDir = "Data";
+  if (const char *dataDirPrefix = std::getenv("ALPIDE_TEST_DATA")) dataDir = dataDirPrefix;
+  makeDir(dataDir.c_str());
+
   ui->setupUi(this);
   this->setWindowTitle(QString::fromUtf8("GUI"));
   ui->tab_2->setEnabled(false);
@@ -1109,9 +1113,12 @@ void MainWindow::applytests()
 
   fConfig->GetScanConfig()->SetTestType(fNumberofscan);
   fConfig->GetScanConfig()->SetDatabase(fDB);
-  char TestDir[100];
-  sprintf(TestDir, "Data/%s", fConfig->GetScanConfig()->GetTestDir().c_str());
-  makeDir(TestDir);
+  std::string TestDir = fConfig->GetScanConfig()->GetTestDir();
+  if (const char *dataDir = std::getenv("ALPIDE_TEST_DATA"))
+    TestDir.insert(0, std::string(dataDir) + "/");
+  else
+    TestDir.insert(0, "Data/");
+  makeDir(TestDir.c_str());
 
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     // if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
