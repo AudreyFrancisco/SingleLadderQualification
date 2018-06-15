@@ -9,6 +9,14 @@
 #include "TScan.h"
 #include "TScanConfig.h"
 
+THicClassification Worst(THicClassification a, THicClassification b)
+{
+  if (a > b)
+    return a;
+  else
+    return b;
+}
+
 TScanAnalysis::TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aConfig,
                              std::vector<THic *> hics, std::mutex *aMutex)
 {

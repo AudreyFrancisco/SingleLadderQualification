@@ -63,6 +63,8 @@ typedef enum {
   ErrBusyOff
 } TResultVariable;
 
+THicClassification Worst(THicClassification a, THicClassification b);
+
 // base class for classes that contain chip results
 // derive class for each analysis
 class TScanResultChip {

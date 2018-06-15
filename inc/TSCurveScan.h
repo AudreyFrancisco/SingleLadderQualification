@@ -58,9 +58,6 @@ protected:
     }
   };
 
-  //  bool m_nominal;
-  // int m_VPULSEH;
-  // float m_backBias;
   void ConfigureFromu(TAlpide *chip);
   virtual void ConfigureChip(TAlpide *chip) = 0;
   void ConfigureBoard(TReadoutBoard *board);
@@ -88,10 +85,7 @@ public:
   void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
   void               Execute();
   void               Terminate();
-  //  float              GetBackbias() { std::cout << "Get Backbias, back bias = " <<
-  //  ((TSCurveParameters *)m_parameters)->backBias<< std::endl; return ((TSCurveParameters
-  //  *)m_parameters)->backBias; };
-  bool GetNominal() { return ((TSCurveParameters *)m_parameters)->nominal; };
+  bool               GetNominal() { return ((TSCurveParameters *)m_parameters)->nominal; };
   bool SetParameters(TScanParameters *pars);
 };
 

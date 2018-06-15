@@ -204,43 +204,58 @@ float THic::GetAnalogueVoltage()
 
 void THic::AddClassification(THicClassification aClass, bool backBias)
 {
-  // temporary until full classification with no back bias class implemented
+  // Power test results
   if ((aClass == CLASS_GOLD_NOBB) || (aClass == CLASS_SILVER_NOBB) ||
       (aClass == CLASS_BRONZE_NOBB)) {
-    aClass = CLASS_RED; // TODO: remove this in final classification
+    m_worstScanBB                                                                      = CLASS_RED;
     if ((aClass == CLASS_GOLD_NOBB) && (m_worstScanNoBB < CLASS_GOLD)) m_worstScanNoBB = CLASS_GOLD;
     if ((aClass == CLASS_SILVER_NOBB) && (m_worstScanNoBB < CLASS_SILVER))
       m_worstScanNoBB = CLASS_SILVER;
     if ((aClass == CLASS_BRONZE_NOBB) && (m_worstScanNoBB < CLASS_BRONZE))
       m_worstScanNoBB = CLASS_BRONZE;
-    m_worstScanBB     = CLASS_RED;
-    (void)backBias;
   }
+  // Result of all other tests
   else if (backBias && (aClass > m_worstScanBB)) {
     m_worstScanBB = aClass;
   }
   else if (!backBias && (aClass > m_worstScanNoBB)) {
     m_worstScanNoBB = aClass;
   }
-  // end temporary
-  if (aClass == CLASS_RED)
-    m_class = CLASS_RED;
-  else if (GetNEnabledChips() < m_chips.size())
-    m_class = CLASS_PARTIAL;
-  else if ((int)aClass > (int)m_class)
-    m_class = aClass;
 }
 
 THicClassification THic::GetClassification()
 {
-  // if no HIC is working, return RED
-  // before: check that HIC contains chips to avoid RED for fast power test
-  if ((m_chips.size() > 0) && (GetNEnabledChips() == 0))
-    return CLASS_RED;
-  else if (m_oldClass > m_class)
-    return m_oldClass;
-  else
-    return m_class;
+  // Class RED: either more than 2 dead chips or RED no-back-bias scan
+  if (m_chips.size() - GetNEnabledChips() > 2) return CLASS_RED;
+
+  if (m_worstScanNoBB == CLASS_RED) return CLASS_RED;
+
+  // Class No back bias and No back bias, cat B
+  if (m_worstScanBB == CLASS_RED) {
+    if (m_worstScanNoBB > CLASS_SILVER) return Worst(m_oldClass, CLASS_NOBBB);
+    if (m_chips.size() > GetNEnabledChips()) return Worst(m_oldClass, CLASS_NOBBB);
+    return Worst(m_oldClass, CLASS_NOBB);
+  }
+
+  // class Partial and Partial, cat B
+  if (m_chips.size() - GetNEnabledChips() == 2) {
+    if (Worst(m_worstScanBB, m_worstScanNoBB) <= CLASS_BRONZE)
+      return Worst(m_oldClass, CLASS_PARTIALB);
+    else {
+      std::cout << "Warning: unconsidered case 1 in HIC classification" << std::endl;
+      return CLASS_UNTESTED;
+    }
+  }
+
+  if (m_chips.size() - GetNEnabledChips() == 1) {
+    if (Worst(m_worstScanBB, m_worstScanNoBB) < CLASS_BRONZE)
+      return Worst(m_oldClass, CLASS_PARTIAL);
+    else
+      return Worst(m_oldClass, CLASS_PARTIALB);
+  }
+
+  // "trivial" classes
+  return Worst(m_oldClass, Worst(m_worstScanBB, m_worstScanNoBB));
 }
 
 THicIB::THicIB(const char *dbId, int modId, TPowerBoard *pb, int pbMod)
