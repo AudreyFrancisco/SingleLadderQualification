@@ -117,6 +117,18 @@ int DbGetResultId(AlpideDB *db, int activityTypeId, THicClassification classific
         if (Name.find("CATB") == string::npos) return resultTypeList.at(i).ID;
       }
       break;
+    case CLASS_PARTIALB:
+      if ((Name.find("PARTIAL") != string::npos) && (Name.find("CATB") != string::npos))
+        return resultTypeList.at(i).ID;
+      break;
+    case CLASS_NOBB:
+      if ((Name.find("NOBB") != string::npos) && (Name.find("CATB") == string::npos))
+        return resultTypeList.at(i).ID;
+      break;
+    case CLASS_NOBBB:
+      if ((Name.find("NOBB") != string::npos) && (Name.find("CATB") != string::npos))
+        return resultTypeList.at(i).ID;
+      break;
     case CLASS_RED:
       if (Name.find("not") != string::npos) return resultTypeList.at(i).ID;
       break;
@@ -218,8 +230,18 @@ THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityT
     return CLASS_BRONZE;
   else if ((category.find("not") != string::npos) || (category.find("NOK") != string::npos))
     return CLASS_RED;
-  else if (category.find("part") != string::npos)
-    return CLASS_PARTIAL;
+  else if ((category.find("part") != string::npos) || (category.find("PARTIAL") != string::npos)) {
+    if (category.find("CATB") != string::npos)
+      return CLASS_PARTIALB;
+    else
+      return CLASS_PARTIAL;
+  }
+  else if (category.find("NOBB") != string::npos) {
+    if (category.find("CATB") != string::npos)
+      return CLASS_NOBBB;
+    else
+      return CLASS_NOBB;
+  }
   return CLASS_UNTESTED;
 }
 
