@@ -291,7 +291,7 @@ void TConfig::ReadConfigFile(const char *fName)
     filename.insert(0, std::string(configDir) + "/");
 
   std::cout << "looking for config file:" << filename << std::endl;
-  std::ifstream infile(fName);
+  std::ifstream infile(filename);
 
   if (!infile.good()) {
     std::cout << "WARNING: Config file " << filename << " not found, using default configuration."
