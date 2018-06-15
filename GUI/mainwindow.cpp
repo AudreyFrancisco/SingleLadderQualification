@@ -2845,6 +2845,14 @@ string MainWindow::GetResultType(int i)
     return string("SILVER");
   case CLASS_RED:
     return string("RED");
+  case CLASS_PARTIAL:
+    return string("PARTIAL");
+  case CLASS_PARTIALB:
+    return string("PARTIAL-CATB");
+  case CLASS_NOBB:
+    return string("NOBB");
+  case CLASS_NOBBB:
+    return string("NOBB-CATB");
   default:
     return string("UNTESTED");
   }
