@@ -162,8 +162,8 @@ TScanConfig::TScanConfig()
   m_eyeMinY   = EYE_MIN_Y;
   m_eyeStepY  = EYE_STEP_Y;
 
-  m_useDataPath = false;
-
+  m_useDataPath   = false;
+  m_halfstavecomp = HALFSTAVE_COMPONENT;
   InitParamMap();
 }
 
@@ -287,6 +287,7 @@ void TScanConfig::InitParamMap()
   fSettings["CAL_VPULSEL"]         = &m_calVpulsel;
   fSettings["TARGETTHRESH"]        = &m_targetThresh;
   fSettings["NOMINAL"]             = &m_nominal;
+  fSettings["HALFSTAVECOMP"]       = &m_halfstavecomp;
 
   fSettings["ENDURANCESLICES"]    = &m_enduranceSlices;
   fSettings["ENDURANCECYCLES"]    = &m_enduranceCycles;
@@ -413,6 +414,10 @@ std::string TScanConfig::GetTestDir()
     return "IBEndurance/";
   case IBStave:
     return "IBStave/";
+  case OBStaveOL:
+    return "OBStaveOL/";
+  case OBStaveML:
+    return "OBStaveML/";
   default:
     return "./";
   }

@@ -21,6 +21,9 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->d3->hide();
   ui->d4->hide();
   ui->d5->hide();
+  ui->hsname->hide();
+  ui->stavename->hide();
+  ui->stavenamefield->hide();
   ui->typetest->addItem(" ", 0);
   ui->typetest->addItem("IB HIC Qualification Test", IBQualification);
   //  ui->typetest->addItem("IB HIC Endurance Test", IBEndurance);
@@ -32,7 +35,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("OB HIC Fast Power Test", OBPower);
   ui->typetest->addItem("OL HS Qualification Test", OBHalfStaveOL);
   ui->typetest->addItem("ML HS Qualification Test", OBHalfStaveML);
-  // ui->typetest->addItem("OB Stave Test", OBStave);
+  ui->typetest->addItem("OL Stave Qualification Test", OBStaveOL);
   ui->typetest->addItem("OL HS Check (NO DB)", OBHalfStaveOLFAST);
   ui->typetest->addItem("ML HS Check (NO DB)", OBHalfStaveMLFAST);
   ui->typeoftest->hide();
@@ -61,7 +64,7 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
                                  int &lid, int &memberid, QString &ttwo, QString &tthree,
                                  QString &tfour, QString &tfive, QString &done, QString &dtwo,
                                  QString &dthree, QString &dfour, QString &dfive,
-                                 QString &halfstave)
+                                 QString &halfstave, QString &stave)
 {
   if (ui->operatorstring->toPlainText().isEmpty()) {
     //  || /*ui->id->toPlainText().isEmpty() || */ locid == 0) {
@@ -130,6 +133,13 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
     }
     else {
       dfive = '\0';
+    }
+
+    if (!ui->stavenamefield->toPlainText().isEmpty()) {
+      stave = ui->stavenamefield->toPlainText();
+    }
+    else {
+      stave = '\0';
     }
 
     opname    = ui->operatorstring->toPlainText();
@@ -258,3 +268,11 @@ void TestSelection::getwindow()
 }
 
 int TestSelection::getcounter() { return fCounter; }
+
+void TestSelection::adjuststave()
+{
+
+  ui->stavename->show();
+  ui->stavenamefield->show();
+  ui->hsname->show();
+}

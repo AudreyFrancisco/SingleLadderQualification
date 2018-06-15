@@ -22,7 +22,9 @@ typedef enum {
   IBStaveEndurance,
   IBDctrl,
   OBHalfStaveOLFAST,
-  OBHalfStaveMLFAST
+  OBHalfStaveMLFAST,
+  OBStaveOL,
+  OBStaveML
 } TTestType;
 
 namespace ScanConfig {
@@ -160,24 +162,24 @@ namespace ScanConfig {
   const int MAXNOISY_CHIP_SILVER = 2100;
   const int MAXNOISY_CHIP_BRONZE = 5243;
 
-  const int TEST_DCTRL             = 1;
-  const int DCTRL_MINAMP_IB        = 150; // in mV
-  const int DCTRL_MINSLOPE_IB      = 10;  // in mV / DAC
-  const int DCTRL_MAXRISE_GREEN_IB = 10;  // in ns
-  const int DCTRL_MAXFALL_GREEN_IB = 10;
-  const int DCTRL_MINAMP_OB        = 300; // in mV
-  const int DCTRL_MINSLOPE_OB      = 20;  // in mV / DAC
-  const int DCTRL_MAXRISE_GREEN_OB = 10;  // in ns
-  const int DCTRL_MAXFALL_GREEN_OB = 10;
-  const int DCTRL_MAXCHISQ_SILVER  = 5; // 100 * max. chisq 5 -> 0.05
-
-  const int   SPEEDY           = 1; // Use slow fit if 0, differentiate->mean if 1.
-  const int   RAWDATA          = 0;
-  const int   CAL_VPULSEL      = 160; // VPULSEH assumed 170.  Used for ITHR and VCASN scans.
-  const int   TARGET_THRESHOLD = 100;
-  const int   IVCURVE          = 1; // Do I-V-curve on back bias
-  const int   IVPOINTS      = 41;   // number of 100 mV-points for back bias IV curve (max. 50 = 5V)
-  const int   MAXIBIAS      = 15;   // current limit for I-V-curve in mA;
+  const int   TEST_DCTRL             = 1;
+  const int   DCTRL_MINAMP_IB        = 150; // in mV
+  const int   DCTRL_MINSLOPE_IB      = 10;  // in mV / DAC
+  const int   DCTRL_MAXRISE_GREEN_IB = 10;  // in ns
+  const int   DCTRL_MAXFALL_GREEN_IB = 10;
+  const int   DCTRL_MINAMP_OB        = 300; // in mV
+  const int   DCTRL_MINSLOPE_OB      = 20;  // in mV / DAC
+  const int   DCTRL_MAXRISE_GREEN_OB = 10;  // in ns
+  const int   DCTRL_MAXFALL_GREEN_OB = 10;
+  const int   DCTRL_MAXCHISQ_SILVER  = 5; // 100 * max. chisq 5 -> 0.05
+  const int   HALFSTAVE_COMPONENT    = 0;
+  const int   SPEEDY                 = 1; // Use slow fit if 0, differentiate->mean if 1.
+  const int   RAWDATA                = 0;
+  const int   CAL_VPULSEL            = 160; // VPULSEH assumed 170.  Used for ITHR and VCASN scans.
+  const int   TARGET_THRESHOLD       = 100;
+  const int   IVCURVE                = 1; // Do I-V-curve on back bias
+  const int   IVPOINTS      = 41; // number of 100 mV-points for back bias IV curve (max. 50 = 5V)
+  const int   MAXIBIAS      = 15; // current limit for I-V-curve in mA;
   const float VOLTAGE_SCALE = 1.0;
   const float BACKBIAS      = 0;
   const int   NOMINAL       = 1;
@@ -225,6 +227,7 @@ private:
   char  m_fNameSuffix[80];
   int   m_testWithoutComp;
   int   m_status;
+  int   m_halfstavecomp;
   // NEW--added for additional scans
   int       m_ithrStart; // usually 30
   int       m_ithrStop;  // usually 100
