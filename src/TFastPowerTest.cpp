@@ -122,14 +122,22 @@ void TFastPowerTest::Execute()
     currentIt->second.ibias3 = m_testHic->GetIBias() * 1000;
   }
 
-  // check if tripped
-  if ((m_testHic->GetPowerBoard()->GetBiasVoltage() > -1.0) || (!(m_testHic->IsPowered()))) {
-    std::cout << "reading bias voltage of " << m_testHic->GetPowerBoard()->GetBiasVoltage()
-              << std::endl;
+  // check if supply tripped
+  if (!m_testHic->IsPowered()) {
     currentIt->second.trip = true;
   }
   else {
     currentIt->second.trip = false;
+  }
+
+  // check if back bias tripped
+  if (m_testHic->GetPowerBoard()->GetBiasVoltage() > -1.0) {
+    std::cout << "reading bias voltage of " << m_testHic->GetPowerBoard()->GetBiasVoltage()
+              << std::endl;
+    currentIt->second.tripBB = true;
+  }
+  else {
+    currentIt->second.tripBB = false;
   }
   m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
   m_testHic->PowerOff();

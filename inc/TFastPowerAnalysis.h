@@ -23,6 +23,7 @@ class TFastPowerResultHic : public TScanResultHic {
 
 private:
   bool  trip;
+  bool  tripBB;
   float iddaSwitchon;
   float idddSwitchon;
   float ibias0;
