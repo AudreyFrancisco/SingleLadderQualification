@@ -61,7 +61,11 @@ symlink to the previous Data directory, i.e. in the build directory:
 ```
 ln -s ../Data .
 ```
-and execute all the binaries from the build directory, e.g. for the
+Also, copy all the Config and Calib files to the build directory:
+```
+cp ../*.cfg .
+```
+Then, execute all the binaries from the build directory, e.g. for the
 GUI:
 ```
 GUI/GUI
