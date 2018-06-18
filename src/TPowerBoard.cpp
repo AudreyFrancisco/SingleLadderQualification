@@ -395,13 +395,17 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     dVDigital *= DVScale;
   }
 
-  if ((fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) ||
-      (fPBoard.Modules[module].DVset + dVDigital > SAFE_OUTPUT)) {
-    std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage above safe limit; using "
-                 "uncorrected values."
-              << std::endl;
-    dVAnalog  = 0;
-    dVDigital = 0;
+  if (fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) {
+    std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage AVDD above safe limit; using "
+                 "safe max value, difference = "
+              << fPBoard.Modules[module].AVset + dVAnalog - SAFE_OUTPUT << " V." << std::endl;
+    dVAnalog = SAFE_OUTPUT - fPBoard.Modules[module].AVset;
+  }
+  if (fPBoard.Modules[module].DVset + dVDigital > SAFE_OUTPUT) {
+    std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage DVDD above safe limit; using "
+                 "safe max value, difference = "
+              << fPBoard.Modules[module].DVset + dVDigital - SAFE_OUTPUT << " V." << std::endl;
+    dVDigital = SAFE_OUTPUT - fPBoard.Modules[module].DVset;
   }
 
   // fPBoard contains the voltages corrected with the channel calibration
