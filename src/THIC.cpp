@@ -127,6 +127,22 @@ float THic::GetVdda()
   return 0;
 }
 
+float THic::GetVddaSet()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetAnalogSetVoltage(m_pbMod);
+  }
+  return 0;
+}
+
+float THic::GetVdddSet()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetDigitalSetVoltage(m_pbMod);
+  }
+  return 0;
+}
+
 float THic::GetVbias()
 {
   if (m_powerBoard) {

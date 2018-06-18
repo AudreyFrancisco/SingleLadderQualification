@@ -44,6 +44,8 @@ public:
   float        GetIBias();
   float        GetVddd();
   float        GetVdda();
+  float        GetVdddSet();
+  float        GetVddaSet();
   float        GetVbias();
   float        GetTemperature();
   void ScaleVoltage(float aFactor);

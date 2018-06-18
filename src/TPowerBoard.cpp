@@ -198,13 +198,15 @@ bool TPowerBoard::readMonitor()
   fPBoard.Temp  = thePowerBoardState->T;
 
   for (i = 0; i < MAX_MOULESPERMOSAIC; i++) { // for each module
-    fPBoard.Modules[i].AVmon  = thePowerBoardState->Vmon[i * 2];
-    fPBoard.Modules[i].DVmon  = thePowerBoardState->Vmon[i * 2 + 1];
-    fPBoard.Modules[i].AImon  = thePowerBoardState->Imon[i * 2];
-    fPBoard.Modules[i].DImon  = thePowerBoardState->Imon[i * 2 + 1];
-    fPBoard.Modules[i].BiasOn = thePowerBoardState->biasOn & (0x01 << i);
-    fPBoard.Modules[i].AchOn  = thePowerBoardState->chOn & (0x0001 << (i * 2));
-    fPBoard.Modules[i].DchOn  = thePowerBoardState->chOn & (0x0001 << (i * 2 + 1));
+    fPBoard.Modules[i].AVmon         = thePowerBoardState->Vmon[i * 2];
+    fPBoard.Modules[i].DVmon         = thePowerBoardState->Vmon[i * 2 + 1];
+    fPBoard.Modules[i].AVsetReadback = thePowerBoardState->Vout[i * 2];
+    fPBoard.Modules[i].DVsetReadback = thePowerBoardState->Vout[i * 2 + 1];
+    fPBoard.Modules[i].AImon         = thePowerBoardState->Imon[i * 2];
+    fPBoard.Modules[i].DImon         = thePowerBoardState->Imon[i * 2 + 1];
+    fPBoard.Modules[i].BiasOn        = thePowerBoardState->biasOn & (0x01 << i);
+    fPBoard.Modules[i].AchOn         = thePowerBoardState->chOn & (0x0001 << (i * 2));
+    fPBoard.Modules[i].DchOn         = thePowerBoardState->chOn & (0x0001 << (i * 2 + 1));
   }
 
   return (true);

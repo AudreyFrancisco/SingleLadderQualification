@@ -51,6 +51,10 @@ private:
   float m_vddaEnd;
   float m_vdddStart;
   float m_vdddEnd;
+  float m_vddaSetStart;
+  float m_vddaSetEnd;
+  float m_vdddSetStart;
+  float m_vdddSetEnd;
 
 public:
   TScanConditionsHic(){};

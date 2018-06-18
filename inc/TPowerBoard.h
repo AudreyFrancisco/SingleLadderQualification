@@ -81,6 +81,8 @@ public:
     float AIset;
     float DVset;
     float DIset;
+    float DVsetReadback;
+    float AVsetReadback;
   };
 
   struct pbBoard {
@@ -140,6 +142,16 @@ public:
     return (fPBoard.Modules[module].DVmon);
   };
   float GetDigitalCurrent(int module);
+  float GetDigitalSetVoltage(int module)
+  {
+    readMonitor();
+    return (fPBoard.Modules[module].DVsetReadback);
+  };
+  float GetAnalogSetVoltage(int module)
+  {
+    readMonitor();
+    return (fPBoard.Modules[module].AVsetReadback);
+  };
   bool IsAnalogChOn(int module)
   {
     readMonitor();

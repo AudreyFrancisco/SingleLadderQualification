@@ -98,6 +98,10 @@ void TScan::Init()
           m_hics.at(ihic)->GetVdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddStart =
           m_hics.at(ihic)->GetVddd();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaSetStart =
+          m_hics.at(ihic)->GetVddaSet();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddSetStart =
+          m_hics.at(ihic)->GetVdddSet();
     }
     catch (std::exception &e) {
       std::cout << "Exception " << e.what() << " when reading temp / currents" << std::endl;
@@ -184,6 +188,10 @@ void TScan::Terminate()
           m_hics.at(ihic)->GetVdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddEnd =
           m_hics.at(ihic)->GetVddd();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaSetEnd =
+          m_hics.at(ihic)->GetVddaSet();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddSetEnd =
+          m_hics.at(ihic)->GetVdddSet();
     }
     catch (std::exception &e) {
       std::cout << "Terminate: exception " << e.what() << " when reading temp / currents"
@@ -545,6 +553,15 @@ void TScan::WriteConditions(const char *fName, THic *aHic)
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaStart);
   fprintf(fp, "VDDA (end):   %.3f A\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaEnd);
+
+  fprintf(fp, "VDDD set (start): %.3f A\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddSetStart);
+  fprintf(fp, "VDDD set (end):   %.3f A\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddSetEnd);
+  fprintf(fp, "VDDA set (start): %.3f A\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaSetStart);
+  fprintf(fp, "VDDA set (end):   %.3f A\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaSetEnd);
 
   fprintf(fp, "IDDD (start): %.3f A\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_idddStart);
