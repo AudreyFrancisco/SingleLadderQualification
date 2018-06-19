@@ -1020,6 +1020,7 @@ void MainWindow::performtests()
           auto future_init = std::async(std::launch::async, &TScan::Init, fScanVector[i]);
           while (future_init.wait_for(delay) != std::future_status::ready)
             qApp->processEvents();
+          future_init.get();
         }
         catch (exception &ex) {
           std::cout << ex.what() << " is the thrown exception from the scaninit" << std::endl;
