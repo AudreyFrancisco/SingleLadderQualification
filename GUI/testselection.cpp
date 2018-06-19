@@ -36,6 +36,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("OL HS Qualification Test", OBHalfStaveOL);
   ui->typetest->addItem("ML HS Qualification Test", OBHalfStaveML);
   ui->typetest->addItem("OL Stave Qualification Test", OBStaveOL);
+  ui->typetest->addItem("ML Stave Qualification Test", OBStaveML);
   ui->typetest->addItem("OL HS Check (NO DB)", OBHalfStaveOLFAST);
   ui->typetest->addItem("ML HS Check (NO DB)", OBHalfStaveMLFAST);
   ui->typeoftest->hide();

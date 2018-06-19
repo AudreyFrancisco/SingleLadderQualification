@@ -32,6 +32,8 @@ string TNoiseAnalysis::GetPreviousTestType()
     return string("IB HIC Qualification Test");
   case OBStaveOL:
     return string("OL HS Qualification Test");
+  case OBStaveML:
+    return string("ML HS Qualification Test");
   default:
     return string("");
   }

@@ -192,7 +192,7 @@ void MainWindow::open()
   }
   else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
            fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
-           fNumberofscan == OBStaveOL) {
+           fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML) {
     fileName = "Config_HS.cfg";
   }
   try {
@@ -246,7 +246,7 @@ void MainWindow::open()
       fEndurancemodules.push_back(ui->down1);
     }
     if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
-        fNumberofscan == OBStaveOL) {
+        fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML) {
       fHicnames.clear();
       int halfstaveidupper = 0;
       int halfstaveidlower = 0;
@@ -314,7 +314,7 @@ void MainWindow::open()
           }
         }
       }
-      if (fNumberofscan == OBStaveOL) {
+      if (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML) {
 
         fStaveid  = DbGetComponentId(fDB, projectid, fComponentTypeIDStave, fStave.toStdString());
         fStaveIn  = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeIDStave, "in");
@@ -348,7 +348,7 @@ void MainWindow::open()
     fConfig->GetScanConfig()->SetParamValue("HALFSTAVECOMP", fHalfstavepart);
 
     if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
-        fNumberofscan == OBStaveOL) {
+        fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML) {
 
       if (fhalfstaveid == -1) {
         fComponentWindow = new Components(this);
@@ -1184,7 +1184,7 @@ void MainWindow::applytests()
   if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML) {
     fillingHSscans();
   }
-  if (fNumberofscan == OBStaveOL) {
+  if (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML) {
     int dctrl;
     dctrl = fConfig->GetScanConfig()->GetParamValue("TESTDCTRL");
     fConfig->GetScanConfig()->SetParamValue("TESTDCTRL", 0);
@@ -1668,7 +1668,7 @@ void MainWindow::attachtodatabase()
           std::cout << "the activty name is " << HSname << std::endl;
           activ.Name = CreateActivityName(HSname, fConfig->GetScanConfig());
         }
-        else if (fNumberofscan == OBStaveOL) {
+        else if (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML) {
           std::string Sname;
           Sname =
               fStave.toStdString() + " " + fHalfstave.toStdString() + " " + fHICs.at(i)->GetDbId();
@@ -1772,7 +1772,7 @@ void MainWindow::attachtodatabase()
           fErrorMessages.push_back(errormessage);
         }
         if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
-            fNumberofscan == OBStaveOL) {
+            fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML) {
           myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstavein, fIdofoperator);
           if (myactivity->GetResponse().ErrorCode == -1) {
             QString errormessage;
@@ -1789,7 +1789,7 @@ void MainWindow::attachtodatabase()
             fActivityResults.push_back(-1);
             fErrorMessages.push_back(errormessage);
           }
-          if (fNumberofscan == OBStaveOL) {
+          if (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML) {
             myactivity->AssignComponent(activ.ID, fStaveid, fStaveIn, fIdofoperator);
             if (myactivity->GetResponse().ErrorCode == -1) {
               QString errormessage;
@@ -1949,10 +1949,11 @@ void MainWindow::locationcombo()
     fComponentTypeID      = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
     fComponentTypeIDStave = DbGetComponentTypeId(fDB, projectid, "Outer Layer Stave");
   }
-  else if (fNumberofscan == OBHalfStaveML) {
-    fComponentTypeIDa = DbGetComponentTypeId(fDB, projectid, "Middle Layer Half-Stave Upper");
-    fComponentTypeIDb = DbGetComponentTypeId(fDB, projectid, "Middle Layer Half-Stave Lower");
-    fComponentTypeID  = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
+  else if (fNumberofscan == OBHalfStaveML || fNumberofscan == OBStaveML) {
+    fComponentTypeIDa     = DbGetComponentTypeId(fDB, projectid, "Middle Layer Half-Stave Upper");
+    fComponentTypeIDb     = DbGetComponentTypeId(fDB, projectid, "Middle Layer Half-Stave Lower");
+    fComponentTypeID      = DbGetComponentTypeId(fDB, projectid, "Outer Barrel HIC Module");
+    fComponentTypeIDStave = DbGetComponentTypeId(fDB, projectid, "Middle Layer Stave");
   }
   delete myactivity;
 }
@@ -2183,7 +2184,7 @@ void MainWindow::setandgetcalibration()
     powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(fHICs.at(ihic)->GetPbMod(),
                                                                         ares, dres, gres);
     if ((fNumberofscan == OBHalfStaveOL) || (fNumberofscan == OBHalfStaveML) ||
-        (fNumberofscan == OBStaveOL)) {
+        (fNumberofscan == OBStaveOL) || (fNumberofscan == OBStaveML)) {
       powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod());
     }
     powerBoard->CalibrateVoltage(fHICs.at(ihic)->GetPbMod());
@@ -2676,7 +2677,7 @@ void MainWindow::ConnectTestCombo(int value)
   if (fNumberofscan == OBEndurance) {
     fSettingswindow->adjustendurance();
   }
-  if (fNumberofscan == OBStaveOL) {
+  if (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML) {
     fSettingswindow->adjuststave();
   }
   std::cout << "the numbeofscan is: " << fNumberofscan << "and the value is: " << value
@@ -2836,7 +2837,7 @@ void MainWindow::attachConfigFile(ActivityDB::activity &activity)
                     string("ConfigPower.cfg"));
   }
   else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
-           fNumberofscan == OBStaveOL) {
+           fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML) {
     DbAddAttachment(fDB, activity, attachConfig, string("Config_HS.cfg"), string("Config_HS.cfg"));
   }
 }
