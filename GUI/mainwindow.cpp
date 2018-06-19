@@ -281,7 +281,7 @@ void MainWindow::open()
         ar[1] = {"Module2"};
         ar[2] = {"Module3"};
         ar[3] = {"Module4"};
-        if (fNumberofscan == OBHalfStaveOL) {
+        if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBStaveOL) {
           fHicnames.push_back("Module5");
           fHicnames.push_back("Module6");
           fHicnames.push_back("Module7");
