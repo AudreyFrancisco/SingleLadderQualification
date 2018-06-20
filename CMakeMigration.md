@@ -45,6 +45,8 @@ mkdir build
 cd build
 cmake ..
 ```
+On CC7 you might have to use `cmake3` instead of `cmake` if you get an
+error message saying that your cmake version is lower than major version 3.
 
 For the actual build (and all subsequent rebuilds upon updates) it
 suffices to run make in the build directory:
