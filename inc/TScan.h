@@ -105,7 +105,6 @@ protected:
   std::mutex *                    m_mutex;
   bool                            m_running;
   TScanConditions                 m_conditions;
-  float                           m_backBias;
   std::map<std::string, TErrorCounter> m_errorCounts;
   int m_start[MAXLOOPLEVEL];
   int m_stop[MAXLOOPLEVEL];
@@ -114,6 +113,8 @@ protected:
   int m_enabled[MAXBOARDS]; // number of enabled chips per readout board
   std::chrono::time_point<std::chrono::system_clock> time_start, time_end;
 
+  void SetBackBias();
+  void SwitchOffBackbias();
   void CountEnabledChips();
   int FindBoardIndex(TAlpide *chip);
   std::string FindHIC(int boardIndex, int rcv);
@@ -140,6 +141,7 @@ public:
   const char *     GetState() { return m_state; };
   TScanConditions *GetConditions() { return &m_conditions; };
   TScanParameters *GetParameters() { return m_parameters; };
+  float            GetBackbias() { return m_parameters->backBias; };
   virtual bool SetParameters(TScanParameters *pars)
   {
     (void)pars;

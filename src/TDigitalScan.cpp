@@ -12,9 +12,8 @@ TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
                            std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TMaskScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  float voltageScale     = config->GetVoltageScale();
-  m_parameters           = new TDigitalParameters;
-  m_parameters->backBias = 0;
+  float voltageScale = config->GetVoltageScale();
+  m_parameters       = new TDigitalParameters;
 
   ((TDigitalParameters *)m_parameters)->voltageScale = voltageScale;
 
@@ -40,18 +39,20 @@ void TDigitalScan::SetName()
 {
   std::cout << "voltageScale = " << ((TDigitalParameters *)m_parameters)->voltageScale << std::endl;
   if (IsNominal()) {
-    strcpy(m_name, "Digital Scan");
+    sprintf(m_name, "Digital Scan BB %d", (int)((TDigitalParameters *)m_parameters)->backBias);
   }
   else if (IsUpper() && (((TDigitalParameters *)m_parameters)->voltageScale < 1.2)) {
-    strcpy(m_name, "Digital Scan, V +10%");
+    sprintf(m_name, "Digital Scan BB %d, V +10%%",
+            (int)((TDigitalParameters *)m_parameters)->backBias);
   }
   else if (((TDigitalParameters *)m_parameters)->voltageScale > 0.8 && IsLower()) {
-    strcpy(m_name, "Digital Scan, V -10%");
+    sprintf(m_name, "Digital Scan BB %d, V -10%%",
+            (int)((TDigitalParameters *)m_parameters)->backBias);
   }
   else {
     std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
     ((TDigitalParameters *)m_parameters)->voltageScale = 1.0;
-    strcpy(m_name, "Digital Scan");
+    sprintf(m_name, "Digital Scan BB %d", (int)((TDigitalParameters *)m_parameters)->backBias);
   }
 }
 
@@ -62,6 +63,7 @@ bool TDigitalScan::SetParameters(TScanParameters *pars)
   if (dPars) {
     std::cout << "TDigitalScan: Updating parameters" << std::endl;
     ((TDigitalParameters *)m_parameters)->voltageScale = dPars->voltageScale;
+    ((TDigitalParameters *)m_parameters)->backBias     = dPars->backBias;
     SetName();
     return true;
   }
@@ -145,6 +147,7 @@ void TDigitalScan::Init()
 
   TScan::Init();
   m_running = true;
+  SetBackBias();
   CountEnabledChips();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
@@ -258,6 +261,9 @@ void TDigitalScan::Terminate()
       // delete myDAQBoard;
     }
   }
+
+  SwitchOffBackbias();
+
   m_running = false;
 }
 

@@ -14,7 +14,6 @@ TSCurveScan::TSCurveScan(TScanConfig *config, std::vector<TAlpide *> chips,
     : TMaskScan(config, chips, hics, boards, histoQue, aMutex)
 {
   m_parameters                                 = new TSCurveParameters;
-  m_parameters->backBias                       = m_config->GetBackBias();
   ((TSCurveParameters *)m_parameters)->nominal = (m_config->GetParamValue("NOMINAL") == 1);
 }
 
@@ -256,19 +255,7 @@ void TSCurveScan::Init()
 
   m_running = true;
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
-    if (!pb) continue;
-    if (((TSCurveParameters *)m_parameters)->backBias == 0) {
-      m_hics.at(ihic)->SwitchBias(false);
-      pb->SetBiasVoltage(0);
-    }
-    else {
-      m_hics.at(ihic)->SwitchBias(true);
-      pb->SetBiasVoltage((-1.) * ((TSCurveParameters *)m_parameters)->backBias);
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-  }
+  SetBackBias();
 
   CountEnabledChips();
   for (unsigned int i = 0; i < m_boards.size(); i++) {
@@ -459,12 +446,7 @@ void TSCurveScan::Terminate()
     }
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (((TSCurveParameters *)m_parameters)->backBias != 0) {
-      m_hics.at(ihic)->SwitchBias(false);
-      m_hics.at(ihic)->GetPowerBoard()->SetBiasVoltage(0);
-    }
-  }
+  SwitchOffBackbias();
 
   m_running = false;
   // YCM: Print error summary

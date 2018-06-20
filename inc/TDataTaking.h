@@ -52,7 +52,6 @@ public:
   void LoopEnd(int loopIndex);
   void         Execute();
   virtual void Terminate();
-  float        GetBackbias() { return m_backBias; };
 };
 
 #endif

@@ -92,19 +92,7 @@ void TDataTaking::Init()
 
   TScan::Init();
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
-    if (!pb) continue;
-    if (m_backBias == 0) {
-      m_hics.at(ihic)->SwitchBias(false);
-      pb->SetBiasVoltage(0);
-    }
-    else {
-      m_hics.at(ihic)->SwitchBias(true);
-      pb->SetBiasVoltage((-1.) * m_backBias);
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-  }
+  SetBackBias();
 
   CountEnabledChips();
   for (unsigned int i = 0; i < m_boards.size(); i++) {
@@ -268,14 +256,7 @@ void TDataTaking::Terminate()
     }
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (m_backBias != 0) {
-      TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
-      if (!pb) continue;
-      m_hics.at(ihic)->SwitchBias(false);
-      pb->SetBiasVoltage(0);
-    }
-  }
+  SwitchOffBackbias();
 
   m_running = false;
 }

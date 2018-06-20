@@ -41,7 +41,7 @@ TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic
   fScanAbort    = false;
   fScanAbortAll = false;
 
-  m_backBias = m_config->GetBackBias();
+  m_parameters->backBias = m_config->GetBackBias();
 
   strcpy(m_state, "Waiting");
   CreateHicConditions();
@@ -51,8 +51,6 @@ void TScan::Init()
 {
   fScanAbort        = false;
   fTimeLimitReached = false;
-
-  m_parameters->backBias = m_backBias;
 
   strcpy(m_state, "Running");
   std::cout << std::endl
@@ -142,6 +140,38 @@ void TScan::Init()
     }
   }
 }
+
+
+void TScan::SetBackBias()
+{
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
+    if (!pb) continue;
+    if (m_parameters->backBias == 0) {
+      m_hics.at(ihic)->SwitchBias(false);
+      pb->SetBiasVoltage(0);
+    }
+    else {
+      m_hics.at(ihic)->SwitchBias(true);
+      pb->SetBiasVoltage((-1.) * m_parameters->backBias);
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+  }
+}
+
+
+void TScan::SwitchOffBackbias()
+{
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (m_parameters->backBias != 0) {
+      TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
+      if (!pb) continue;
+      m_hics.at(ihic)->SwitchBias(false);
+      pb->SetBiasVoltage(0);
+    }
+  }
+}
+
 
 void TScan::ClearHistoQue()
 {
