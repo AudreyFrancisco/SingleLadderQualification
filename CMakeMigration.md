@@ -63,12 +63,14 @@ symlink to the previous Data directory, i.e. in the build directory:
 ```
 ln -s ../Data .
 ```
-Also, copy all the Config and Calib files to the build directory:
+The configuration and calibration files are taken from the current
+directory from where you start the executable. Therefore, you should
+copy all the Config and Calib files to the build directory:
 ```
 cp ../*.cfg .
 ```
-Then, execute all the binaries from the build directory, e.g. for the
-GUI:
+Then, you can execute all the binaries from the build directory,
+e.g. for the GUI:
 ```
 GUI/GUI
 ```
