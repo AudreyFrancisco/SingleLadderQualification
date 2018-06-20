@@ -37,6 +37,8 @@
  */
 #include "TPowerBoard.h"
 #include "TReadoutBoardMOSAIC.h"
+#include <chrono>
+#include <thread>
 #include <unistd.h>
 
 /* -------------------------
@@ -276,7 +278,7 @@ void TPowerBoard::CalibrateVoltage(int module)
   SetDigitalVoltage(module, set1);
   SwitchModule(module, true);
 
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   analog1  = GetAnalogVoltage(module);
   digital1 = GetDigitalVoltage(module);
@@ -285,7 +287,7 @@ void TPowerBoard::CalibrateVoltage(int module)
   SetAnalogVoltage(module, set2);
   SetDigitalVoltage(module, set2);
 
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   analog2  = GetAnalogVoltage(module);
   digital2 = GetDigitalVoltage(module);
@@ -312,7 +314,7 @@ void TPowerBoard::CalibrateCurrent(int module)
 
   SwitchModule(module, false);
 
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   aOffset = GetAnalogCurrent(module);
   dOffset = GetDigitalCurrent(module);
@@ -350,12 +352,12 @@ void TPowerBoard::CalibrateBiasVoltage()
 
   // set and measure first point
   SetBiasVoltage(set1);
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   measured1 = GetBiasVoltage();
 
   // set and measure second point
   SetBiasVoltage(set2);
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   measured2 = GetBiasVoltage();
 
   // calculate slope and intercept for calibration Vout -> Vset
@@ -383,7 +385,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     dVDigital = 0;
   }
   else {
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     float IDDA = GetAnalogCurrent(module);
     float IDDD = GetDigitalCurrent(module);
 
@@ -414,7 +416,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
   fMOSAICPowerBoard->setVout((unsigned char)(module * 2), fPBoard.Modules[module].AVset + dVAnalog);
   fMOSAICPowerBoard->setVout((unsigned char)(module * 2 + 1),
                              fPBoard.Modules[module].DVset + dVDigital);
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 /* -------------------------
