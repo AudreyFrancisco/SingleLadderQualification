@@ -14,9 +14,12 @@ TNoiseOccupancy::TNoiseOccupancy(TScanConfig *config, std::vector<TAlpide *> chi
                                  std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TDataTaking(config, chips, hics, boards, histoQue, aMutex)
 {
-  m_pulse                                       = false;
-  m_pulseLength                                 = 0;
-  m_parameters                                  = new TNoiseParameters;
+  CreateScanParameters();
+
+  m_parameters->backBias = m_config->GetBackBias();
+  m_pulse                = false;
+  m_pulseLength          = 0;
+
   ((TNoiseParameters *)m_parameters)->nTriggers = config->GetParamValue("NTRIG");
   ;
   ((TNoiseParameters *)m_parameters)->isMasked = config->GetIsMasked();

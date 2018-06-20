@@ -41,8 +41,6 @@ TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic
   fScanAbort    = false;
   fScanAbortAll = false;
 
-  m_parameters->backBias = m_config->GetBackBias();
-
   strcpy(m_state, "Waiting");
   CreateHicConditions();
 }

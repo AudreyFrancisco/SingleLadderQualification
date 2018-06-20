@@ -24,6 +24,7 @@ protected:
   void ConfigureChip(TAlpide *chip);
   void ConfigureBoard(TReadoutBoard *board);
   THisto CreateHisto();
+  void   CreateScanParameters() { m_parameters = new TDigitalParameters; };
 
 public:
   TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,

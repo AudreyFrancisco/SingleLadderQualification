@@ -1,0 +1,302 @@
+src/AlpideConfig.cpp:  fromuconfig |= (config->GetTriggerDelay() & 0x7) << 8;
+src/AlpideConfig.cpp:  chip->WriteRegister(Alpide::REG_FROMU_CONFIG2, config->GetStrobeDuration());
+src/AlpideConfig.cpp:  chip->WriteRegister(Alpide::REG_FROMU_PULSING1, config->GetStrobeDelay());
+src/AlpideConfig.cpp:  chip->WriteRegister(Alpide::REG_FROMU_PULSING2, config->GetPulseDuration());
+src/AlpideConfig.cpp:  clocks |= (config->GetDclkReceiver() & 0xf);
+src/AlpideConfig.cpp:  clocks |= (config->GetDclkDriver() & 0xf) << 4;
+src/AlpideConfig.cpp:  clocks |= (config->GetMclkReceiver() & 0xf) << 8;
+src/AlpideConfig.cpp:  ctrl |= (config->GetDctrlReceiver() & 0xf);
+src/AlpideConfig.cpp:  ctrl |= (config->GetDctrlDriver() & 0xf) << 4;
+src/AlpideConfig.cpp:  cmuconfig |= (config->GetPreviousId() & 0xf);
+src/AlpideConfig.cpp:  cmuconfig |= (config->GetInitialToken() ? 1 : 0) << 4;
+src/AlpideConfig.cpp:  cmuconfig |= (config->GetDisableManchester() ? 1 : 0) << 5;
+src/AlpideConfig.cpp:  cmuconfig |= (config->GetEnableDdr() ? 1 : 0) << 6;
+src/AlpideConfig.cpp:  controlreg |= (config->GetEnableClustering() ? 1 : 0) << 2;
+src/AlpideConfig.cpp:  controlreg |= (config->GetMatrixReadoutSpeed() & 0x1) << 3;
+src/AlpideConfig.cpp:  controlreg |= (config->GetEnableSkewingGlobal() ? 1 : 0) << 6;
+src/AlpideConfig.cpp:  controlreg |= (config->GetEnableSkewingStartRO() ? 1 : 0) << 7;
+src/AlpideConfig.cpp:  controlreg |= (config->GetEnableClockGating() ? 1 : 0) << 8;
+src/AlpideConfig.cpp:  controlreg |= (config->GetEnableCMUReadout() ? 1 : 0) << 9;
+src/AlpideConfig.cpp:  if (config->GetParamValue("LINKSPEED") == -1) return; // high-speed link deactivated
+src/AlpideConfig.cpp:  uint16_t Phase  = config->GetParamValue("PLLPHASE");  // 4bit Value, default 8
+src/AlpideConfig.cpp:  uint16_t Stages = config->GetParamValue("PLLSTAGES"); // 0 = 3 stages, 1 = 4,  3 = 5 (typical 4)
+src/AlpideConfig.cpp:  uint16_t ChargePump = config->GetParamValue("CHARGEPUMP");
+src/AlpideConfig.cpp:  uint16_t Driver     = config->GetParamValue("DTUDRIVER");
+src/AlpideConfig.cpp:  uint16_t Preemp     = config->GetParamValue("DTUPREEMP");
+src/SetupHelpers.cpp:  TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
+src/SetupHelpers.cpp:  if (config->GetUsePowerBoard()) {
+src/SetupHelpers.cpp:    TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
+src/SetupHelpers.cpp:    TChipConfig *chipConfig = config->GetChipConfig(0);
+src/SetupHelpers.cpp:  for (unsigned int i = 0; i < config->GetNChips(); i++) {
+src/SetupHelpers.cpp:    TChipConfig *chipConfig = config->GetChipConfig(i);
+src/SetupHelpers.cpp:  TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
+src/SetupHelpers.cpp:  if (config->GetUsePowerBoard()) {
+src/SetupHelpers.cpp:    TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
+src/SetupHelpers.cpp:  for (unsigned int i = 0; i < config->GetNBoards(); i++) {
+src/SetupHelpers.cpp:    TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(i);
+src/SetupHelpers.cpp:  if (((TBoardConfigMOSAIC *)config->GetBoardConfig(0))->GetMasterSlaveMode()) {
+src/SetupHelpers.cpp:  if (config->GetUsePowerBoard()) {
+src/SetupHelpers.cpp:  for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
+src/SetupHelpers.cpp:    THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(ihic);
+src/SetupHelpers.cpp:    positionMap[ihic]         = hicOBconfig->GetParamValue("HSPOSBYID");
+src/SetupHelpers.cpp:      hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb,
+src/SetupHelpers.cpp:                                 config->GetHicConfig(ihic)->GetModId(), pb,
+src/SetupHelpers.cpp:  for (unsigned int i = 0; i < config->GetNChips(); i++) {
+src/SetupHelpers.cpp:    TChipConfig *chipConfig = config->GetChipConfig(i);
+src/SetupHelpers.cpp:  for (unsigned int i = 0; i < config->GetNChips(); i++) {
+src/SetupHelpers.cpp:    TChipConfig * chipConfig  = config->GetChipConfig(i);
+src/SetupHelpers.cpp:    THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(hic);
+src/SetupHelpers.cpp:        (mosaic == 1 && hicOBconfig->IsEnabledA8()) || (mosaic == 0 && hicOBconfig->IsEnabledB0());
+src/SetupHelpers.cpp:  for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
+src/SetupHelpers.cpp:  for (unsigned int i = 0; i < config->GetNBoards(); i++) {
+src/SetupHelpers.cpp:    TBoardConfigRU *boardConfig = (TBoardConfigRU *)config->GetBoardConfig(i);
+src/SetupHelpers.cpp:  /*  for (int i = 0; i < config->GetNChips(); i++) {
+src/SetupHelpers.cpp:      int          modPos     = config->GetModPosById(modId);
+src/SetupHelpers.cpp:      bool isSideEnable = (LowHigh && config->IsEnableSideA8()) || (!LowHigh &&
+src/SetupHelpers.cpp:     config->IsEnableSideB0());
+src/SetupHelpers.cpp:  TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
+src/SetupHelpers.cpp:  switch (config->GetChipConfig(0)->GetParamValue("LINKSPEED")) {
+src/SetupHelpers.cpp:  if (config->GetUsePowerBoard()) {
+src/SetupHelpers.cpp:    TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
+src/SetupHelpers.cpp:  for (unsigned int i = 0; i < config->GetNChips(); i++) {
+src/SetupHelpers.cpp:    TChipConfig *chipConfig = config->GetChipConfig(i);
+src/SetupHelpers.cpp:  TBoardConfigRU *boardConfig = (TBoardConfigRU *)config->GetBoardConfig(0);
+src/SetupHelpers.cpp:  switch (config->GetChipConfig(0)->GetParamValue("LINKSPEED")) {
+src/SetupHelpers.cpp:  for (unsigned int i = 0; i < config->GetNChips(); i++) {
+src/SetupHelpers.cpp:    TChipConfig *chipConfig = config->GetChipConfig(i);
+src/SetupHelpers.cpp:  TChipConfig *chipConfig         = config->GetChipConfig(0);
+src/SetupHelpers.cpp:  TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
+src/SetupHelpers.cpp:  TChipConfig *     chipConfig = config->GetChipConfig(0);
+src/SetupHelpers.cpp:  switch (config->GetDeviceType()) {
+src/SetupHelpers.cpp:    boardConfig[i] = (TBoardConfigMOSAIC *)config->GetBoardConfig(i);
+src/SetupHelpers.cpp:  if (config->GetUsePowerBoard()) {
+src/SetupHelpers.cpp:      pbConfig[i] = config->GetPBConfig(i);
+src/SetupHelpers.cpp:          config->GetChipConfig(arrayIndex);   // Get the Pointer to the Chip Configuration
+src/TAlpide.cpp:    : fConfig(config), fChipId(config->GetChipId()), fReadoutBoard(0x0), fADCOffset(-1),
+src/TApplyMask.cpp:    m_config->SetIsMasked(true);
+src/TApplyMask.cpp:    m_config->SetIsMasked(false);
+src/TCycleAnalysis.cpp:    if (m_config->GetUseDataPath()) {
+src/TCycleAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TCycleAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TCycleAnalysis.cpp:    if (m_config->GetUseDataPath()) {
+src/TCycleAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TCycleAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TDACScan.cpp:  m_start[0] = m_config->GetParamValue("DACSTART");
+src/TDACScan.cpp:  m_stop[0]  = m_config->GetParamValue("DACSTOP");
+src/TDACScan.cpp:  m_step[0]  = m_config->GetParamValue("DACSTEP");
+src/TDACScan.cpp:  int                N       = m_config->GetParamValue("NDACSAMPLES");
+src/TDataTaking.cpp:  m_backBias  = m_config->GetBackBias();
+src/TDataTaking.cpp:  m_nTriggers = m_config->GetParamValue("NTRIG");
+src/TDataTaking.cpp:        if (m_errorCount.nTimeout > m_config->GetParamValue("MAXTIMEOUT")) {
+src/TDCTRLAnalysis.cpp:  switch (m_config->GetTestType()) {
+src/TDCTRLAnalysis.cpp:    if (m_config->GetUseDataPath()) {
+src/TDCTRLAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TDCTRLAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TDCTRLAnalysis.cpp:    if (m_config->GetUseDataPath() && hicResult) {
+src/TDCTRLAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TDCTRLAnalysis.cpp:      sprintf(fName, "DCtrlMeasurement_%s.dat", m_config->GetfNameSuffix());
+src/TDigitalAnalysis.cpp:  m_ninj = m_config->GetParamValue("NINJ");
+src/TDigitalAnalysis.cpp:  switch (m_config->GetTestType()) {
+src/TDigitalAnalysis.cpp:    if (m_config->GetUseDataPath()) {
+src/TDigitalAnalysis.cpp:              m_config->GetfNameSuffix(), m_chipList.at(ichip).chipId);
+src/TDigitalAnalysis.cpp:      sprintf(fName, "Digital_%s_B%d_Rcv%d_Ch%d.dat", m_config->GetfNameSuffix(),
+src/TDigitalAnalysis.cpp:    if (m_config->GetUseDataPath()) {
+src/TDigitalAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TDigitalAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TDigitalAnalysis.cpp:  if (m_config->GetUseDataPath()) {
+src/TDigitalAnalysis.cpp:            m_config->GetfNameSuffix());
+src/TDigitalAnalysis.cpp:    sprintf(fName, "StuckPixels_%s_%s.dat", hic->GetDbId().c_str(), m_config->GetfNameSuffix());
+src/TDigitalScan.cpp:  float voltageScale     = config->GetVoltageScale();
+src/TDigitalScan.cpp:  m_stop[0]  = m_config->GetNMaskStages();
+src/TDigitalScan.cpp:  m_nTriggers = m_config->GetParamValue("NINJ");
+src/TDigitalWFAnalysis.cpp:  m_ninj = m_config->GetParamValue("NINJ");
+src/TDigitalWFAnalysis.cpp:    if (m_config->GetUseDataPath()) {
+src/TDigitalWFAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TDigitalWFAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TDigitalWFAnalysis.cpp:  if (m_config->GetUseDataPath()) {
+src/TDigitalWFAnalysis.cpp:            m_config->GetfNameSuffix());
+src/TDigitalWFAnalysis.cpp:    sprintf(fName, "StuckPixels_%s_%s.dat", hic->GetDbId().c_str(), m_config->GetfNameSuffix());
+src/TDigitalWFAnalysis.cpp:  if (m_config->GetUseDataPath()) {
+src/TDigitalWFAnalysis.cpp:            m_config->GetfNameSuffix());
+src/TDigitalWFAnalysis.cpp:    sprintf(fName, "UnmaskedPixels_%s_%s.dat", hic->GetDbId().c_str(), m_config->GetfNameSuffix());
+src/TEnduranceCycle.cpp:  ((TCycleParameters *)m_parameters)->nTriggers = config->GetParamValue("ENDURANCETRIGGERS");
+src/TEnduranceCycle.cpp:  ((TCycleParameters *)m_parameters)->upTime    = config->GetParamValue("ENDURANCEUPTIME");
+src/TEnduranceCycle.cpp:  ((TCycleParameters *)m_parameters)->downTime  = config->GetParamValue("ENDURANCEDOWNTIME");
+src/TEnduranceCycle.cpp:  ((TCycleParameters *)m_parameters)->nCycles   = config->GetParamValue("ENDURANCECYCLES");
+src/TEnduranceCycle.cpp:  ((TCycleParameters *)m_parameters)->timeLimit = config->GetParamValue("ENDURANCETIMELIMIT");
+src/TEyeMeasurement.cpp:  ((TEyeParameters *)m_parameters)->driverStrength = config->GetParamValue("EYEDRIVER");
+src/TEyeMeasurement.cpp:  ((TEyeParameters *)m_parameters)->preemphasis    = config->GetParamValue("EYEPREEMP");
+src/TEyeMeasurement.cpp:  m_start[1] = m_config->GetParamValue("EYEMINY");
+src/TEyeMeasurement.cpp:  m_step[1]  = m_config->GetParamValue("EYESTEPY");
+src/TEyeMeasurement.cpp:  m_stop[1]  = m_config->GetParamValue("EYEMAXY");
+src/TEyeMeasurement.cpp:  m_start[0] = m_config->GetParamValue("EYEMINX");
+src/TEyeMeasurement.cpp:  m_step[0]  = m_config->GetParamValue("EYESTEPX");
+src/TEyeMeasurement.cpp:  m_stop[0]  = m_config->GetParamValue("EYEMAXX");
+src/TFastPowerAnalysis.cpp:  switch (m_config->GetTestType()) {
+src/TFastPowerAnalysis.cpp:    for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
+src/TFastPowerAnalysis.cpp:  if (m_config->GetUseDataPath()) {
+src/TFastPowerAnalysis.cpp:            m_config->GetfNameSuffix());
+src/TFastPowerAnalysis.cpp:    sprintf(fName, "IVCurve_%s_%s.dat", hic->GetDbId().c_str(), m_config->GetfNameSuffix());
+src/TFastPowerAnalysis.cpp:  for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
+src/TFastPowerAnalysis.cpp:    if (m_config->GetUseDataPath()) {
+src/TFastPowerAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TFastPowerAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TFastPowerTest.cpp:    hicCurrents.maxBias = ((float)(m_config->GetParamValue("IVPOINTS")) - 1) / 10;
+src/TFastPowerTest.cpp:  sprintf(m_config->GetfNameSuffix(), "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100,
+src/TFastPowerTest.cpp:  for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
+src/TFastPowerTest.cpp:    if (result.ibias[i] > m_config->GetParamValue("MAXIBIAS")) {
+src/TFastPowerTest.cpp:  if (m_config->GetParamValue("IVCURVE")) {
+src/TFifoAnalysis.cpp:  switch (m_config->GetTestType()) {
+src/TFifoAnalysis.cpp:    if (m_config->GetUseDataPath()) {
+src/TFifoAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TFifoAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TFifoTest.cpp:  float voltageScale  = config->GetVoltageScale();
+src/TFifoTest.cpp:  int   mlvdsStrength = config->GetMlvdsStrength();
+src/TLocalBusAnalysis.cpp:            m_config->GetfNameSuffix());
+src/TLocalBusAnalysis.cpp:    if (Total >= m_config->GetLocalBusCutRed())
+src/TNoiseAnalysis.cpp:  m_nTrig    = m_config->GetParamValue("NTRIG");
+src/TNoiseAnalysis.cpp:  m_noiseCut = m_nTrig / m_config->GetParamValue("NOISECUT_INV");
+src/TNoiseAnalysis.cpp:  switch (m_config->GetTestType()) {
+src/TNoiseAnalysis.cpp:    if (m_config->GetUseDataPath()) {
+src/TNoiseAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TNoiseAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TNoiseAnalysis.cpp:  if (m_config->GetUseDataPath()) {
+src/TNoiseAnalysis.cpp:            m_config->GetfNameSuffix());
+src/TNoiseAnalysis.cpp:    sprintf(fName, "NoisyPixels_%s_%s.dat", hic->GetDbId().c_str(), m_config->GetfNameSuffix());
+src/TNoiseAnalysis.cpp:  m_isMasked = m_config->GetIsMasked();
+src/TNoiseOccupancy.cpp:  ((TNoiseParameters *)m_parameters)->nTriggers = config->GetParamValue("NTRIG");
+src/TNoiseOccupancy.cpp:  ((TNoiseParameters *)m_parameters)->isMasked = config->GetIsMasked();
+src/TPowerAnalysis.cpp:  switch (m_config->GetTestType()) {
+src/TPowerAnalysis.cpp:    for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
+src/TPowerAnalysis.cpp:  if (m_config->GetUseDataPath()) {
+src/TPowerAnalysis.cpp:            m_config->GetfNameSuffix());
+src/TPowerAnalysis.cpp:    sprintf(fName, "IVCurve_%s_%s.dat", hic->GetDbId().c_str(), m_config->GetfNameSuffix());
+src/TPowerAnalysis.cpp:  for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
+src/TPowerAnalysis.cpp:    if (m_config->GetUseDataPath()) {
+src/TPowerAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TPowerAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TPowerTest.cpp:    hicCurrents.maxBias = ((float)(m_config->GetParamValue("IVPOINTS")) - 1) / 10;
+src/TPowerTest.cpp:  for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
+src/TPowerTest.cpp:    if (result.ibias[i] > m_config->GetParamValue("MAXIBIAS")) {
+src/TPowerTest.cpp:  if (m_config->GetParamValue("IVCURVE")) {
+src/TReadoutAnalysis.cpp:  m_nTrig = m_config->GetParamValue("NTRIG");
+src/TReadoutAnalysis.cpp:  m_occ   = m_config->GetParamValue("READOUTOCC");
+src/TReadoutAnalysis.cpp:    if (m_config->GetUseDataPath()) {
+src/TReadoutAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TReadoutAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TReadoutBoardRU.cpp:    : TReadoutBoard(config), m_buffer(), m_readBytes(0), m_logging(config->enableLogging()),
+src/TReadoutBoardRU.cpp:        uint8_t chip   = m_config->getTransceiverChip(port, index);
+src/TReadoutBoardRU.cpp:  dctrl->SetConnector(m_config->getConnector());
+src/TReadoutBoardRU.cpp:    transceiver.second->Initialize(m_config->getReadoutSpeed(), m_config->getInvertPolarity());
+src/TReadoutBoardRU.cpp:    tr->Initialize(config->getReadoutSpeed(), config->getInvertPolarity());
+src/TReadoutTest.cpp:  ((TReadoutParameters *)m_parameters)->nTriggers = config->GetParamValue("NTRIG");
+src/TReadoutTest.cpp:  ((TReadoutParameters *)m_parameters)->row            = config->GetParamValue("READOUTROW");
+src/TReadoutTest.cpp:  ((TReadoutParameters *)m_parameters)->linkSpeed      = config->GetParamValue("READOUTSPEED");
+src/TReadoutTest.cpp:  ((TReadoutParameters *)m_parameters)->occupancy      = config->GetParamValue("READOUTOCC");
+src/TReadoutTest.cpp:  ((TReadoutParameters *)m_parameters)->driverStrength = config->GetParamValue("READOUTDRIVER");
+src/TReadoutTest.cpp:  ((TReadoutParameters *)m_parameters)->preemp         = config->GetParamValue("READOUTPREEMP");
+src/TReadoutTest.cpp:  ((TReadoutParameters *)m_parameters)->pllStages      = config->GetParamValue("READOUTPLLSTAGES");
+src/TReadoutTest.cpp:  ((TReadoutParameters *)m_parameters)->voltageScale   = config->GetVoltageScale();
+src/TScanAnalysis.cpp:  return DbGetActivityTypeId(m_config->GetDatabase(), GetPreviousTestType());
+src/TScanAnalysis.cpp:  DbGetListOfChildren(m_config->GetDatabase(), id, children);
+src/TScanAnalysis.cpp:    return DbGetComponentTypeId(m_config->GetDatabase(), "ALPIDEB Chip");
+src/TScanAnalysis.cpp:    return DbGetComponentTypeId(m_config->GetDatabase(), "Outer Barrel HIC Module");
+src/TScanAnalysis.cpp:    return DbGetComponentTypeId(m_config->GetDatabase(), "IB Stave");
+src/TScanAnalysis.cpp:    return DbGetComponentTypeId(m_config->GetDatabase(), "Inner Barrel HIC Module");
+src/TScanAnalysis.cpp:  if ((m_config->GetTestType() == OBQualification) || (m_config->GetTestType() == OBEndurance) ||
+src/TScanAnalysis.cpp:      (m_config->GetTestType() == OBReception) || (m_config->GetTestType() == OBPower) ||
+src/TScanAnalysis.cpp:      (m_config->GetTestType() == OBHalfStaveOL) || (m_config->GetTestType() == OBHalfStaveML)) {
+src/TScanAnalysis.cpp:    return DbGetComponentTypeId(m_config->GetDatabase(), "Outer Barrel HIC Module");
+src/TScanAnalysis.cpp:  else if ((m_config->GetTestType() == IBQualification) ||
+src/TScanAnalysis.cpp:           (m_config->GetTestType() == IBEndurance)) {
+src/TScanAnalysis.cpp:    return DbGetComponentTypeId(m_config->GetDatabase(), "Inner Barrel HIC Module");
+src/TScanAnalysis.cpp:  else if ((m_config->GetTestType() == IBStave)) {
+src/TScanAnalysis.cpp:    return DbGetComponentTypeId(m_config->GetDatabase(), "IB Stave");
+src/TScanAnalysis.cpp:  return DbGetLatestActivity(m_config->GetDatabase(), GetPreviousActivityType(), compName, act);
+src/TScanAnalysis.cpp:  int compId = DbGetComponentId(m_config->GetDatabase(), m_config->GetDatabase()->GetProjectId(),
+src/TScanAnalysis.cpp:    hicResult->m_outputPath     = m_config->GetDataPath(m_hics.at(i)->GetDbId());
+src/TScanAnalysis.cpp:  int  cut    = m_config->GetParamValue(cutName);
+src/TScan.cpp:  m_backBias = m_config->GetBackBias();
+src/TScan.cpp:  sprintf(m_config->GetfNameSuffix(), "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100,
+src/TScan.cpp:  m_pixPerStage = m_config->GetParamValue("PIXPERREGION");
+src/TScan.cpp:        if (m_errorCount.nTimeout > m_config->GetParamValue("MAXTIMEOUT")) {
+src/TSCurveAnalysis.cpp:  m_nPulseInj           = m_config->GetNInj();
+src/TSCurveAnalysis.cpp:  m_writeRawData        = m_config->GetParamValue("RAWDATA");
+src/TSCurveAnalysis.cpp:  m_targetThreshold     = m_config->GetParamValue("TARGETTHRESH");
+src/TSCurveAnalysis.cpp:  m_speedy = (m_config->GetParamValue("SPEEDY") != 0);
+src/TSCurveAnalysis.cpp:    m_startPulseAmplitude = m_config->GetChargeStart();
+src/TSCurveAnalysis.cpp:    m_stopPulseAmplitude  = m_config->GetChargeStop();
+src/TSCurveAnalysis.cpp:    m_stepPulseAmplitude  = m_config->GetChargeStep();
+src/TSCurveAnalysis.cpp:    m_startPulseAmplitude = m_config->GetVcasnStart();
+src/TSCurveAnalysis.cpp:    m_stopPulseAmplitude  = m_config->GetVcasnStop();
+src/TSCurveAnalysis.cpp:    m_stepPulseAmplitude  = m_config->GetVcasnStep();
+src/TSCurveAnalysis.cpp:    m_startPulseAmplitude = m_config->GetIthrStart();
+src/TSCurveAnalysis.cpp:    m_stopPulseAmplitude  = m_config->GetIthrStop();
+src/TSCurveAnalysis.cpp:    m_stepPulseAmplitude  = m_config->GetIthrStep();
+src/TSCurveAnalysis.cpp:  switch (m_config->GetTestType()) {
+src/TSCurveAnalysis.cpp:      if (m_config->GetUseDataPath()) {
+src/TSCurveAnalysis.cpp:                m_config->GetfNameSuffix(), m_chipList.at(i).chipId);
+src/TSCurveAnalysis.cpp:        sprintf(fName, "Threshold_RawData_%s_B%d_Rcv%d_Ch%d.dat", m_config->GetfNameSuffix(),
+src/TSCurveAnalysis.cpp:      if (m_config->GetUseDataPath()) {
+src/TSCurveAnalysis.cpp:                m_config->GetfNameSuffix(), m_chipList.at(i).chipId);
+src/TSCurveAnalysis.cpp:        sprintf(fName, "Threshold_FitResults__%s_B%d_Rcv%d_Ch%d.dat", m_config->GetfNameSuffix(),
+src/TSCurveAnalysis.cpp:    if (m_config->GetUseDataPath()) {
+src/TSCurveAnalysis.cpp:                m_config->GetfNameSuffix());
+src/TSCurveAnalysis.cpp:                m_config->GetfNameSuffix());
+src/TSCurveAnalysis.cpp:                m_config->GetfNameSuffix());
+src/TSCurveAnalysis.cpp:                m_config->GetfNameSuffix());
+src/TSCurveAnalysis.cpp:                m_config->GetfNameSuffix());
+src/TSCurveAnalysis.cpp:                m_config->GetfNameSuffix());
+src/TSCurveScan.cpp:  m_parameters->backBias                       = m_config->GetBackBias();
+src/TSCurveScan.cpp:  ((TSCurveParameters *)m_parameters)->nominal = (m_config->GetParamValue("NOMINAL") == 1);
+src/TSCurveScan.cpp:  m_start[0] = m_config->GetChargeStart();
+src/TSCurveScan.cpp:  m_stop[0]  = m_config->GetChargeStop();
+src/TSCurveScan.cpp:  m_step[0]  = m_config->GetChargeStep();
+src/TSCurveScan.cpp:  m_stop[1]  = m_config->GetNMaskStages();
+src/TSCurveScan.cpp:  m_nTriggers                                  = m_config->GetParamValue("NINJ");
+src/TSCurveScan.cpp:  m_start[0] = m_config->GetVcasnStart();
+src/TSCurveScan.cpp:  m_stop[0]  = m_config->GetVcasnStop();
+src/TSCurveScan.cpp:  m_step[0]  = m_config->GetVcasnStep();
+src/TSCurveScan.cpp:  m_step[1]  = m_config->GetScanStep();
+src/TSCurveScan.cpp:  m_stop[1]  = m_config->GetParamValue("TUNINGMAXROW");
+src/TSCurveScan.cpp:  ((TSCurveParameters *)m_parameters)->TARGET  = m_config->GetParamValue("TARGETTHRESH");
+src/TSCurveScan.cpp:  m_nTriggers = m_config->GetParamValue("NINJ");
+src/TSCurveScan.cpp:  m_start[0] = m_config->GetIthrStart();
+src/TSCurveScan.cpp:  m_stop[0]  = m_config->GetIthrStop();
+src/TSCurveScan.cpp:  m_step[0]  = m_config->GetIthrStep();
+src/TSCurveScan.cpp:  m_step[1]  = m_config->GetScanStep();
+src/TSCurveScan.cpp:  m_stop[1]  = m_config->GetParamValue("TUNINGMAXROW");
+src/TSCurveScan.cpp:  ((TSCurveParameters *)m_parameters)->TARGET  = m_config->GetParamValue("TARGETTHRESH");
+src/TSCurveScan.cpp:  m_nTriggers = m_config->GetParamValue("NINJ");
+src/TThresholdAnalysis.cpp:  m_startPulseAmplitude = m_config->GetChargeStart();
+src/TThresholdAnalysis.cpp:  m_stopPulseAmplitude  = m_config->GetChargeStop();
+src/TThresholdAnalysis.cpp:  m_stepPulseAmplitude  = m_config->GetChargeStep();
+src/TThresholdAnalysis.cpp:  m_nPulseInj           = m_config->GetNInj();
+src/TThresholdAnalysis.cpp:  m_writeRawData        = m_config->GetParamValue("RAW_DATA");
+src/TThresholdAnalysis.cpp:    fileNameDummy += m_config->GetfNameSuffix();
+src/TThresholdAnalysis.cpp:      fileNameDummy += m_config->GetfNameSuffix();
+src/TThresholdAnalysis.cpp:      fileNameDummy += m_config->GetfNameSuffix();
+src/TThresholdAnalysis.cpp:      fileNameDummy += m_config->GetfNameSuffix();
+src/TThresholdAnalysis.cpp:      fileNameDummy += m_config->GetfNameSuffix();
+src/TThresholdAnalysis.cpp:      fileNameDummy += m_config->GetfNameSuffix();
+src/TThresholdAnalysis.cpp:        iPulseStart = m_config->GetParamValue("VCASN_START"); // range of vcasn values scanned over.
+src/TThresholdAnalysis.cpp:        iPulseStop  = m_config->GetParamValue(
+src/TThresholdAnalysis.cpp:        iPulseStart = m_config->GetParamValue("ITHR_START");
+src/TThresholdAnalysis.cpp:        iPulseStop  = m_config->GetParamValue("ITHR_STOP");
+src/TThresholdAnalysis.cpp:        fitResult = DoFit(gDummy, m_config->GetParamValue("SPEEDY"));
+src/TThresholdAnalysis.cpp:    if (m_fDoFit && m_config->GetParamValue("SPEEDY") == 1) {
+src/TThresholdAnalysis.cpp:  if (result->m_nPixelsNoThreshold > m_config->GetParamValue("THRESH_MAXBAD_HIC_OB"))
+src/TThresholdAnalysis.cpp:        m_config->GetParamValue("THRESH_MAXBAD_CHIP_OB"))
+src/TThresholdAnalysis.cpp:    if (chipResult->GetNoiseMean() > (float)m_config->GetParamValue("THRESH_MAXNOISE_OB"))
+src/TThresholdAnalysis.cpp:  if (result->m_nPixelsNoThreshold > m_config->GetParamValue("THRESH_MAXBAD_HIC_IB"))
+src/TThresholdAnalysis.cpp:        m_config->GetParamValue("THRESH_MAXBAD_CHIP_IB"))
+src/TThresholdAnalysis.cpp:    if (chipResult->GetNoiseMean() > (float)m_config->GetParamValue("THRESH_MAXNOISE_IB"))
+src/TThresholdAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TThresholdAnalysis.cpp:              m_config->GetfNameSuffix());
+src/TThresholdAnalysis.cpp:              m_config->GetfNameSuffix());
+src/USB.cpp:  fNumInterface = (int)config->bNumInterfaces;
+src/USB.cpp:  inter         = &config->interface[0];
+src/USBHelpers.cpp:  for (unsigned int iBoard = 0; iBoard < config->GetNBoards(); ++iBoard) {
+src/USBHelpers.cpp:    TBoardConfigDAQ *boardConfig = dynamic_cast<TBoardConfigDAQ *>(config->GetBoardConfig(iBoard));
+src/USBHelpers.cpp:  std::cout << "boards.size = " << boards->size() << ",\t expected: " << config->GetNBoards()
+src/USBHelpers.cpp:  return (boards->size() == config->GetNBoards()) ? 0 : -3;

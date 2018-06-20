@@ -31,6 +31,7 @@ private:
 
 protected:
   THisto CreateHisto();
+  void   CreateScanParameters() { m_parameters = new TReadoutParameters; };
 
 public:
   TReadoutTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,

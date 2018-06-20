@@ -51,6 +51,8 @@ private:
   std::vector<std::map<std::string, THicCounter>> m_counterVector;
 
 protected:
+  void CreateScanParameters() { m_parameters = new TCycleParameters; };
+
 public:
   TEnduranceCycle(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                   std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,

@@ -89,6 +89,7 @@ protected:
   static constexpr int ES_SDATA_0             = 0x15d;
 
   THisto CreateHisto();
+  void   CreateScanParameters() { m_parameters = new TEyeParameters; };
 
 public:
   TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,

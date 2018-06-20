@@ -10,7 +10,8 @@ TDctrlMeasurement::TDctrlMeasurement(TScanConfig *config, std::vector<TAlpide *>
                                      std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  m_parameters           = new TScanParameters();
+  CreateScanParameters();
+
   m_parameters->backBias = 0;
 
   // FIFO cell that is used for readback operation

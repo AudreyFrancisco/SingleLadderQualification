@@ -25,6 +25,7 @@ private:
 
 protected:
   THisto CreateHisto();
+  void   CreateScanParameters() { m_parameters = new TNoiseParameters; };
 
 public:
   TNoiseOccupancy(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,

@@ -9,9 +9,10 @@ TEnduranceCycle::TEnduranceCycle(TScanConfig *config, std::vector<TAlpide *> chi
                                  std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
+  CreateScanParameters();
+
   strcpy(m_name, "Endurance Cycle");
 
-  m_parameters           = new TCycleParameters;
   m_parameters->backBias = 0;
 
   ((TCycleParameters *)m_parameters)->nTriggers = config->GetParamValue("ENDURANCETRIGGERS");

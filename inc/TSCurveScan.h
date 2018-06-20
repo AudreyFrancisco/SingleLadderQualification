@@ -21,6 +21,7 @@ typedef struct __TSCurveParameters : TScanParameters {
 
 class TSCurveScan : public TMaskScan {
 protected:
+  void CreateScanParameters() { m_parameters = new TSCurveParameters; };
   class THitSet {
   public:
     std::vector<TPixHit> hits{512};

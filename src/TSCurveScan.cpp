@@ -13,7 +13,9 @@ TSCurveScan::TSCurveScan(TScanConfig *config, std::vector<TAlpide *> chips,
                          std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TMaskScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  m_parameters                                 = new TSCurveParameters;
+  CreateScanParameters();
+
+  m_parameters->backBias                       = m_config->GetBackBias();
   ((TSCurveParameters *)m_parameters)->nominal = (m_config->GetParamValue("NOMINAL") == 1);
 }
 

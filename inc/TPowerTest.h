@@ -39,6 +39,8 @@ private:
   std::map<std::string, THicCurrents> m_hicCurrents;
 
 protected:
+  void CreateScanParameters() { m_parameters = new TScanParameters; };
+
 public:
   TPowerTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
              std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,

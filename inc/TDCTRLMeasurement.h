@@ -24,6 +24,7 @@ private:
 
 protected:
   THisto CreateHisto();
+  void   CreateScanParameters() { m_parameters = new TScanParameters; };
 
 public:
   TDctrlMeasurement(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,

@@ -14,12 +14,14 @@ TReadoutTest::TReadoutTest(TScanConfig *config, std::vector<TAlpide *> chips,
                            std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TDataTaking(config, chips, hics, boards, histoQue, aMutex)
 {
+  CreateScanParameters();
+
+  m_parameters->backBias = 0;
   // trigger frequency, number of triggers have to be set in scan config
   // before creating readout test object
   m_pulse       = true;
   m_pulseLength = chips.at(0)->GetConfig()->GetParamValue("PULSEDURATION");
 
-  m_parameters                                    = new TReadoutParameters;
   ((TReadoutParameters *)m_parameters)->nTriggers = config->GetParamValue("NTRIG");
   ;
   ((TReadoutParameters *)m_parameters)->row            = config->GetParamValue("READOUTROW");
