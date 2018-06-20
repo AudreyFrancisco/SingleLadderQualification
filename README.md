@@ -37,6 +37,16 @@ In addition you should have working installations of
 While the software can be built without these components, this results in
 limited functionality and is discouraged.
 
+Please do not install ROOT using the package manager (``yum``), but rather
+download the binaries from https://root.cern.ch/ eg. like
+```
+wget -O /opt/root.tar.gz \
+  https://root.cern.ch/download/root_v6.14.00.Linux-centos7-x86_64-gcc4.8.tar.gz
+cd /opt/ ; tar xzfv root.tar.bz
+```
+Please make sure that you pick the binaries which match your operating system.
+ROOT has to be loaded using ``source /opt/root/bin/thisroot.sh``.
+
 ### Initial build
 
 First, clone the project:
