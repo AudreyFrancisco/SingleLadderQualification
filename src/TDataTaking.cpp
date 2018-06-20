@@ -1,6 +1,8 @@
+#include <chrono>
 #include <stdexcept>
 #include <string.h>
 #include <string>
+#include <thread>
 
 #include "AlpideConfig.h"
 #include "AlpideDecoder.h"
@@ -100,6 +102,7 @@ void TDataTaking::Init()
     else {
       m_hics.at(ihic)->SwitchBias(true);
       pb->SetBiasVoltage((-1.) * m_backBias);
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
   }
 
