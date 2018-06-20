@@ -2,8 +2,10 @@
 #include "AlpideConfig.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
+#include <chrono>
 #include <string.h>
 #include <string>
+#include <thread>
 #include <unistd.h>
 
 TSCurveScan::TSCurveScan(TScanConfig *config, std::vector<TAlpide *> chips,
@@ -264,6 +266,7 @@ void TSCurveScan::Init()
     else {
       m_hics.at(ihic)->SwitchBias(true);
       pb->SetBiasVoltage((-1.) * ((TSCurveParameters *)m_parameters)->backBias);
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
   }
 
