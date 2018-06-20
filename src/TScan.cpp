@@ -86,10 +86,6 @@ void TScan::Init()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     try {
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart =
-          m_hics.at(ihic)->GetTemperature();
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipStart =
-          m_hics.at(ihic)->GetAnalogueVoltage();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaStart =
           m_hics.at(ihic)->GetIdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddStart =
@@ -104,8 +100,21 @@ void TScan::Init()
           m_hics.at(ihic)->GetVdddSet();
     }
     catch (std::exception &e) {
-      std::cout << "Exception " << e.what() << " when reading temp / currents" << std::endl;
+      std::cout << "Init: Exception " << e.what() << " when reading power board voltages / currents"
+                << std::endl;
     }
+
+    try {
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart =
+          m_hics.at(ihic)->GetTemperature();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipStart =
+          m_hics.at(ihic)->GetAnalogueVoltage();
+    }
+    catch (std::exception &e) {
+      std::cout << "Init: Exception " << e.what() << " when reading chip temp / currents"
+                << std::endl;
+    }
+
     TErrorCounter errCount;
     errCount.nEnabled      = m_hics.at(ihic)->GetNEnabledChips();
     errCount.n8b10b        = 0;
@@ -122,7 +131,7 @@ void TScan::Init()
         m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
       }
       catch (std::exception &e) {
-        std::cout << "Terminate: exception " << e.what() << " when reading registers" << std::endl;
+        std::cout << "Init: exception " << e.what() << " when reading registers" << std::endl;
       }
     }
   }
@@ -176,10 +185,6 @@ void TScan::Terminate()
       }
     }
     try {
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd =
-          m_hics.at(ihic)->GetTemperature();
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipEnd =
-          m_hics.at(ihic)->GetAnalogueVoltage();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaEnd =
           m_hics.at(ihic)->GetIdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddEnd =
@@ -194,7 +199,18 @@ void TScan::Terminate()
           m_hics.at(ihic)->GetVdddSet();
     }
     catch (std::exception &e) {
-      std::cout << "Terminate: exception " << e.what() << " when reading temp / currents"
+      std::cout << "Terminate: exception " << e.what()
+                << " when reading power board voltages / currents" << std::endl;
+    }
+
+    try {
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd =
+          m_hics.at(ihic)->GetTemperature();
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipEnd =
+          m_hics.at(ihic)->GetAnalogueVoltage();
+    }
+    catch (std::exception &e) {
+      std::cout << "Terminate: exception " << e.what() << " when reading chip temp / currents"
                 << std::endl;
     }
   }
