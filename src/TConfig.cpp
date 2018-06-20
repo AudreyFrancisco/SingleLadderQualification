@@ -186,6 +186,13 @@ TDeviceType TConfig::ReadDeviceType(std::string deviceName)
     SetUsePowerBoard(true);
     type = TYPE_MLHALFSTAVE;
   }
+  else if (deviceName.compare("MLSTAVE") == 0) {
+    type = TYPE_MLSTAVE;
+  }
+  else if (deviceName.compare("MLSTAVE_PB") == 0) {
+    SetUsePowerBoard(true);
+    type = TYPE_MLSTAVE;
+  }
   else if (deviceName.compare("ENDURANCETEST") == 0) {
     type = TYPE_ENDURANCE;
   }
@@ -255,7 +262,7 @@ void TConfig::SetDeviceType(TDeviceType AType, int NChips)
     Init(1, chipIds, boardRU);
   }
   else if ((AType == TYPE_HALFSTAVE) || (AType == TYPE_HALFSTAVERU) ||
-           (AType == TYPE_MLHALFSTAVE)) {
+           (AType == TYPE_MLHALFSTAVE) || (AType == TYPE_MLSTAVE)) {
     // in case of half stave NChips contains number of modules
     for (int imod = 1; imod <= NChips; imod++) {
       int modId = (imod & 0x7);
@@ -267,6 +274,8 @@ void TConfig::SetDeviceType(TDeviceType AType, int NChips)
     }
     if ((AType == TYPE_HALFSTAVE) || (AType == TYPE_MLHALFSTAVE))
       Init(2, chipIds, boardMOSAIC);
+    else if (AType == TYPE_MLSTAVE)
+      Init(1, chipIds, boardMOSAIC);
     else
       Init(1, chipIds, boardRU);
   }
@@ -322,8 +331,8 @@ void TConfig::ReadConfigFile(const char *fName)
       type = ReadDeviceType(value);
     }
     if ((type != TYPE_UNKNOWN) && ((type != TYPE_TELESCOPE) || (NChips > 0)) &&
-        ((type != TYPE_HALFSTAVE) || (NModules > 0)) &&
-        ((type != TYPE_HALFSTAVERU) ||
+        (((type != TYPE_HALFSTAVE) && (type != TYPE_HALFSTAVERU) && (type != TYPE_MLHALFSTAVE) &&
+          (type != TYPE_MLSTAVE)) ||
          (NModules > 0))) { // type and nchips has been found (nchips not needed for type chip)
       // SetDeviceType calls the appropriate init method, which in turn calls
       // the constructors for board and chip configs
@@ -331,7 +340,7 @@ void TConfig::ReadConfigFile(const char *fName)
         SetDeviceType(type, ModuleId);
       }
       else if ((type == TYPE_HALFSTAVE) || (type == TYPE_HALFSTAVERU) ||
-               (type == TYPE_MLHALFSTAVE)) {
+               (type == TYPE_MLHALFSTAVE) || (type == TYPE_MLSTAVE)) {
         SetDeviceType(type, NModules);
       }
       else {
