@@ -3,6 +3,7 @@ project(alptest)
 
 # user options
 option(DISABLE_ROOT "Disable ROOT")
+option(DISABLE_ROOT_CONFIG "Disable usage of ROOTConfig.cmake")
 option(DISABLE_QT "Disable QT")
 
 # by default build optimized code with debug symbols
@@ -25,7 +26,9 @@ if(DISABLE_ROOT STREQUAL "OFF")
   message(STATUS "Looking for ROOT")
   # try first with ROOTConfig.cmake,
   # then fallback to FindROOT.cmake (non-cmake installation of ROOT)
-  find_package(ROOT CONFIG QUIET)
+  if(DISABLE_ROOT_CONFIG STREQUAL "OFF")
+    find_package(ROOT CONFIG QUIET)
+  endif()
   if(NOT ROOT_FOUND)
     list(APPEND CMAKE_MODULE_PATH $ENV{ROOTSYS}/etc/cmake)
     find_package(ROOT QUIET REQUIRED)
