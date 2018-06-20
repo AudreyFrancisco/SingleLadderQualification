@@ -30,7 +30,10 @@ namespace ScanConfig {
   // 0.2: lowered back bias limit to 15 mA, removed cut on 4 V current
   // 0.3: introduced cut on noisy pixels, set cut in FIFO errors to 0
   // 1.0: first version of new classification
-  const float CLASSIFICATION_VERSION = 1.0;
+  // 1.1: new classification, but treat bronze equal to gold, silver
+  //      (no longer in partial b, no back bias b)
+  //      allow more than two bad chips for partial cat B
+  const float CLASSIFICATION_VERSION = 1.1;
 
   const int NINJ           = 50;     // number of injections in digital/threshold scans
   const int NTRIG          = 100000; // number of triggers for noise occupancy scans

@@ -241,33 +241,41 @@ void THic::AddClassification(THicClassification aClass, bool backBias)
 
 THicClassification THic::GetClassification()
 {
-  // Class RED: either more than 2 dead chips or RED no-back-bias scan
-  if (m_chips.size() - GetNEnabledChips() > 2) return CLASS_RED;
+  // Class RED: no working chips or worst no BB scan RED
+  // check on chips.size to exclude fast power test
+  if ((m_chips.size() > 0) && (GetNEnabledChips() == 0)) return CLASS_RED;
 
   if (m_worstScanNoBB == CLASS_RED) return CLASS_RED;
 
   // Class No back bias and No back bias, cat B
   if (m_worstScanBB == CLASS_RED) {
-    if (m_worstScanNoBB > CLASS_SILVER) return Worst(m_oldClass, CLASS_NOBBB);
-    if (m_chips.size() > GetNEnabledChips()) return Worst(m_oldClass, CLASS_NOBBB);
-    return Worst(m_oldClass, CLASS_NOBB);
-  }
-
-  // class Partial and Partial, cat B
-  if (m_chips.size() - GetNEnabledChips() == 2) {
-    if (Worst(m_worstScanBB, m_worstScanNoBB) <= CLASS_BRONZE)
-      return Worst(m_oldClass, CLASS_PARTIALB);
+    if (m_chips.size() > GetNEnabledChips())
+      return Worst(m_oldClass, CLASS_NOBBB);
+    else if (m_worstScanNoBB <= CLASS_BRONZE)
+      return Worst(m_oldClass, CLASS_NOBB);
     else {
       std::cout << "Warning: unconsidered case 1 in HIC classification" << std::endl;
       return CLASS_UNTESTED;
     }
   }
 
-  if (m_chips.size() - GetNEnabledChips() == 1) {
-    if (Worst(m_worstScanBB, m_worstScanNoBB) < CLASS_BRONZE)
-      return Worst(m_oldClass, CLASS_PARTIAL);
-    else
+  // class Partial and Partial, cat B
+  if (m_chips.size() - GetNEnabledChips() > 1) {
+    if (Worst(m_worstScanBB, m_worstScanNoBB) <= CLASS_BRONZE)
       return Worst(m_oldClass, CLASS_PARTIALB);
+    else {
+      std::cout << "Warning: unconsidered case 2 in HIC classification" << std::endl;
+      return CLASS_UNTESTED;
+    }
+  }
+
+  if (m_chips.size() - GetNEnabledChips() == 1) {
+    if (Worst(m_worstScanBB, m_worstScanNoBB) <= CLASS_BRONZE)
+      return Worst(m_oldClass, CLASS_PARTIAL);
+    else {
+      std::cout << "Warning: unconsidered case 3 in HIC classification" << std::endl;
+      return CLASS_UNTESTED;
+    }
   }
 
   // "trivial" classes
