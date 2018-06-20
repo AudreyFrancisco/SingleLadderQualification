@@ -1003,6 +1003,7 @@ void MainWindow::performtests()
             std::async(std::launch::async, &MainWindow::analysis, this, fAnalysisVector[i]);
         while (future_analysis.wait_for(delay) != std::future_status::ready)
           qApp->processEvents();
+        future_analysis.get();
 
         try {
           fAnalysisVector.at(i)->Finalize();
@@ -1044,9 +1045,11 @@ void MainWindow::performtests()
           }
           qApp->processEvents();
         }
+        future_scan.get();
 
         while (future_analysis.wait_for(delay) != std::future_status::ready)
           qApp->processEvents();
+        future_analysis.get();
 
         try {
           fAnalysisVector.at(i)->Finalize();
