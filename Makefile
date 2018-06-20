@@ -145,6 +145,7 @@ clean-all:	clean
 	$(MAKE) -C $(LIBPOWERBOARD_DIR) cleanall
 	$(MAKE) -C $(LIBALUCMS_DIR) clean-all
 	$(MAKE) -C $(LIBSCOPECONTROL_DIR) clean-all
+	$(MAKE) -C GUI distclean
 
 check-env:
 ifndef ROOTCONFIG
