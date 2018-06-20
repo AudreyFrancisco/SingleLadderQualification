@@ -5,6 +5,7 @@ basicstyle=\small\ttfamily,
 columns=flexible,
 breaklines=true
 }
+\usepackage{hyperref}
 \begin{document}
 \title{ALPIDE Software - User manual}
 \date{rev. 3, \today}
@@ -19,72 +20,33 @@ command line interface. For a description on the software structure and how to i
 
 \section {Installation and First Steps}
 \subsection{Prerequisites}
-The software is currently supported to run only on the three following operating systems installing the listed packages. This reference installations are used to test software after every commit to the repository.
+The software is currently supported to run only on CentOS CERN 7. This reference installations are used to test software after every commit to the repository.
 \begin{itemize}
-\item \textbf{Ubuntu 16.04 LTS:}
-  \begin{lstlisting}
-    apt-get update -y && \
-    apt-get install -qq -y man git subversion dpkg-dev make cmake clang-format \
-                           wget binutils python python-dev libxml2-dev \
-                           software-properties-common gcc g++ krb5-user \
-                           libusb-1.0-0-dev libtinyxml-dev qt5-default qt5-qmake && \
-    apt-get update -y
-    wget -O /opt/root.tar.gz \
-      https://root.cern.ch/download/root_v6.08.06.Linux-ubuntu16-x86_64-gcc5.4.tar.gz
-    cd /opt/ ; tar xzfv root.tar.gz
-  \end{lstlisting}
-  ROOT has to be loaded using
-  \begin{lstlisting}
-    source /opt/root/bin/thisroot.sh .
-  \end{lstlisting}
-  \newpage
 \item \textbf{CentOS CERN 7:}
   \begin{lstlisting}
     yum install -y gcc gcc-c++ make cmake cmake3 tar zlib wget subversion clang \
       git libusb1-devel tinyxml-devel qt5-qtbase-devel krb5-workstation cern-get-sso-cookie
     yum install -y centos-release-scl
     yum update -y
-    yum install -y llvm-toolset-7
+    yum install -y llvm-toolset-7 devtoolset-7
     wget -O /opt/root.tar.gz \
-      https://root.cern.ch/download/root_v6.08.06.Linux-centos7-x86_64-gcc4.8.tar.gz
+      https://root.cern.ch/download/root_v6.14.00.Linux-centos7-x86_64-gcc4.8.tar.gz
     cd /opt/ ; tar xzfv root.tar.bz
   \end{lstlisting}
   ROOT has to be loaded using
   \begin{lstlisting}
     source /opt/root/bin/thisroot.sh .
   \end{lstlisting}
-  Activate the \texttt{llvm-toolset-7}
+  Do not install ROOT using \texttt{yum} as the packages are broken!
+
+  Activate the \texttt{llvm-toolset-7} and \texttt{devtoolset-7}:
   \begin{lstlisting}
     source scl_source enable llvm-toolset-7
+    source scl_source enable devtoolset-7
   \end{lstlisting}
-\item \textbf{Scientific Linux CERN 6 *DEPRECATED*:}
-  \begin{lstlisting}
-    yum install -y sl-release-scl
-    yum install -y git cmake binutils which clang \
-      libX11-devel libXpm-devel libXft-devel libXext-devel \
-      gsl-static curl tar devtoolset-4-gcc-c++  \
-      python27 libusb1-devel tinyxml-devel qt5-qtbase-devel \
-      krb5-workstation cern-get-sso-cookie
-    yum clean all
-
-    source scl_source enable python27 devtoolset-4
-    curl https://root.cern.ch/download/root_v6.06.08.source.tar.gz \
-      | tar -xzC /tmp/
-    cd /tmp/root-* / && mkdir _build && cd _build
-    cmake .. -Dmathmore=on -Dhttp=on \
-      -DCMAKE_INSTALL_PREFIX=/opt/root
-    mkdir -p /opt/root
-    make
-    make install
-    rm -rf /tmp/root-*'
-  \end{lstlisting}
-  The \texttt{devtoolset-4} and \texttt{python27} is necessary on SLC6 and ROOT has to be activated using the following commands:
-  \begin{lstlisting}
-    source scl_source enable python27 devtoolset-4
-    source /opt/root/bin/thisroot.sh
-  \end{lstlisting}
-  These commands can either be executed before compiling or running the software or added to the \texttt{.bashrc}.
 \end{itemize}
+
+For other operation systems, please see \url{https://gitlab.cern.ch/alice-its-alpide-software/alice-its-docker-containers}. Please note that we cannot support other operating systems that CentOS CERN 7.
 
 \subsection{Installation}
 The software is available in a gitlab repository:
