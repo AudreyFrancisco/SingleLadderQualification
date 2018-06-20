@@ -37,7 +37,10 @@ string TDigitalAnalysis::GetPreviousTestType()
 {
   switch (m_config->GetTestType()) {
   case OBQualification:
-    return string("ALPIDEB Chip Testing Analysis");
+    if ((m_scan->GetParameters())->backBias == 0)
+      return string("ALPIDEB Chip Testing Analysis");
+    else
+      return ("");
   case OBEndurance:
     return string("OB HIC Qualification Test");
   case OBReception:
@@ -47,7 +50,10 @@ string TDigitalAnalysis::GetPreviousTestType()
   case OBHalfStaveML:
     return string("OB HIC Reception Test");
   case IBQualification:
-    return string("ALPIDEB Chip Testing Analysis");
+    if ((m_scan->GetParameters())->backBias == 0)
+      return string("ALPIDEB Chip Testing Analysis");
+    else
+      return ("");
   case IBEndurance:
     return string("IB HIC Qualification Test");
   case IBStave:
@@ -91,6 +97,7 @@ void TDigitalAnalysis::InitCounters()
 
   for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TDigitalResultHic *result = (TDigitalResultHic *)it->second;
+    result->m_backBias        = m_scan->GetBackBias();
     result->m_lower           = ((TDigitalScan *)m_scan)->IsLower();
     result->m_upper           = ((TDigitalScan *)m_scan)->IsUpper();
     result->m_nominal         = ((TDigitalScan *)m_scan)->IsNominal();
@@ -116,10 +123,30 @@ void TDigitalAnalysis::CalculatePrediction(std::string hicName)
   // do the calculation here
   for (unsigned int i = 0; i < activities.size(); i++) {
     float value;
-    if (GetPreviousParamValue("Bad pixels digital (nominal)", "Dead Pixels", activities.at(i),
-                              value)) {
-      prediction->m_nDead += value;
+    bool  found = false;
+    if (m_scan->GetBackBias() == 0) {
+      if (((TDigitalScan *)m_scan)->IsNominal())
+        found = GetPreviousParamValue("Bad pixels digital (nominal)", "Dead Pixels",
+                                      activities.at(i), value);
+      else if (((TDigitalScan *)m_scan)->IsLower())
+        found = GetPreviousParamValue("Bad pixels digital (lower)", "Dead Pixels", activities.at(i),
+                                      value);
+      else if (((TDigitalScan *)m_scan)->IsUpper())
+        found = GetPreviousParamValue("Bad pixels digital (upper)", "Dead Pixels", activities.at(i),
+                                      value);
     }
+    else if (fabs(m_scan->GetBackBias() - 3) < 0.01) {
+      if (((TDigitalScan *)m_scan)->IsNominal())
+        found = GetPreviousParamValue("Bad pixels digital (nominal) BB 3V", "Dead Pixels",
+                                      activities.at(i), value);
+      else if (((TDigitalScan *)m_scan)->IsLower())
+        found = GetPreviousParamValue("Bad pixels digital (lower) BB 3V", "Dead Pixels",
+                                      activities.at(i), value);
+      else if (((TDigitalScan *)m_scan)->IsUpper())
+        found = GetPreviousParamValue("Bad pixels digital (upper) BB 3V", "Dead Pixels",
+                                      activities.at(i), value);
+    }
+    if (found) prediction->m_nDead += value;
   }
 }
 
@@ -355,17 +382,33 @@ void TDigitalResult::WriteToFileGlobal(FILE *fp)
 
 void TDigitalResultHic::GetParameterSuffix(std::string &suffix, std::string &file_suffix)
 {
-  if (m_nominal) {
-    suffix      = string(" (nominal)");
-    file_suffix = string("_nominal");
+  if (m_backBias == 0) {
+    if (m_nominal) {
+      suffix      = string(" (nominal)");
+      file_suffix = string("_nominal");
+    }
+    else if (m_lower) {
+      suffix      = string(" (lower)");
+      file_suffix = string("_lower");
+    }
+    else if (m_upper) {
+      suffix      = string(" (upper)");
+      file_suffix = string("_upper");
+    }
   }
-  else if (m_lower) {
-    suffix      = string(" (lower)");
-    file_suffix = string("_lower");
-  }
-  else if (m_upper) {
-    suffix      = string(" (upper)");
-    file_suffix = string("_upper");
+  else if (fabs(m_backBias - 3) < 0.01) {
+    if (m_nominal) {
+      suffix      = string(" (nominal) BB 3V");
+      file_suffix = string("_nominal_BB3V");
+    }
+    else if (m_lower) {
+      suffix      = string(" (lower) BB 3V");
+      file_suffix = string("_lower_BB3V");
+    }
+    else if (m_upper) {
+      suffix      = string(" (upper) BB 3V");
+      file_suffix = string("_upper_BB3V");
+    }
   }
 }
 

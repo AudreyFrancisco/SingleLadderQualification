@@ -42,6 +42,7 @@ class TDigitalResultHic : public TScanResultHic {
   friend class TDigitalAnalysis;
 
 private:
+  float         m_backBias;
   int           m_nDead;
   int           m_nBad;
   int           m_nBadWorstChip;
