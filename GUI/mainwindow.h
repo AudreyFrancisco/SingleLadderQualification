@@ -201,6 +201,7 @@ private:
   std::vector<QString>       fHicnames;
   std::vector<QString>       fErrorMessages;
   QString                    fHalfstave;
+  QString                    fStave;
   std::vector<QPushButton *> fEndurancemodules;
   bool                       fDatabasetype;
   bool                       fScanfit;
@@ -231,6 +232,10 @@ private:
   int                 fComponentTypeID;
   int                 fComponentTypeIDb;
   int                 fComponentTypeIDa;
+  int                 fStaveid;
+  int                 fStaveIn;
+  int                 fStaveOut;
+  int                 fComponentTypeIDStave;
   int                 fhalfstaveid;
   int                 fhalfstavein;
   int                 fhalfstaveout;
@@ -247,6 +252,7 @@ private:
   bool                   fWrite;
   QString                fExceptiontext;
   bool                   fHiddenComponent;
+  int                    fHalfstavepart;
 
 
 private slots:

@@ -73,6 +73,23 @@ int TScanAnalysis::GetPreviousComponentType(std::string prevTestType)
   else if ((prevTestType == "IB HIC Qualification Test")) {
     return DbGetComponentTypeId(m_config->GetDatabase(), "Inner Barrel HIC Module");
   }
+  else if ((prevTestType == "OL HS Qualification Test")) {
+    if (m_config->GetParamValue("HALFSTAVECOMP") == 1) {
+      return DbGetComponentTypeId(m_config->GetDatabase(), "Outer Layer Half-Stave Upper");
+    }
+    else if (m_config->GetParamValue("HALFSTAVECOMP") == 0) {
+      return DbGetComponentTypeId(m_config->GetDatabase(), "Outer Layer Half-Stave Lower");
+    }
+  }
+  else if ((prevTestType == "ML HS Qualification Test")) {
+    if (m_config->GetParamValue("HALFSTAVECOMP") == 1) {
+      return DbGetComponentTypeId(m_config->GetDatabase(), "Middle Layer Half-Stave Upper");
+    }
+    else if (m_config->GetParamValue("HALFSTAVECOMP") == 0) {
+      return DbGetComponentTypeId(m_config->GetDatabase(), "Middle Layer Half-Stave Lower");
+    }
+  }
+
   return -1;
 }
 
@@ -83,7 +100,8 @@ int TScanAnalysis::GetComponentType()
 {
   if ((m_config->GetTestType() == OBQualification) || (m_config->GetTestType() == OBEndurance) ||
       (m_config->GetTestType() == OBReception) || (m_config->GetTestType() == OBPower) ||
-      (m_config->GetTestType() == OBHalfStaveOL) || (m_config->GetTestType() == OBHalfStaveML)) {
+      (m_config->GetTestType() == OBHalfStaveOL) || (m_config->GetTestType() == OBHalfStaveML) ||
+      (m_config->GetTestType() == OBStaveOL) || (m_config->GetTestType() == OBStaveML)) {
     return DbGetComponentTypeId(m_config->GetDatabase(), "Outer Barrel HIC Module");
   }
   else if ((m_config->GetTestType() == IBQualification) ||

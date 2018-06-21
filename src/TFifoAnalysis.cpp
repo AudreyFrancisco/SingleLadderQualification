@@ -57,6 +57,10 @@ string TFifoAnalysis::GetPreviousTestType()
     return string("IB HIC Qualification Test");
   case IBStaveEndurance:
     return string("IB Stave Qualification Test");
+  case OBStaveOL:
+    return string("OL HS Qualification Test");
+  case OBStaveML:
+    return string("ML HS Qualification Test");
   default:
     return string("");
   }
