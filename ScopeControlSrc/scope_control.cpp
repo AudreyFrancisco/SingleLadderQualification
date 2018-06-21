@@ -132,15 +132,19 @@ void scope_control::write_cmd(std::string data)
   debug_print("Write cmd");
   scope_control::write("*CLS;*ESE 1\n");
   scope_control::write(data);
+  std::string val;
   for (int i = 0; i < 4; i++) {
     scope_control::write("*OPC;*ESR?\n");
-    std::string val = scope_control::read();
+    val = scope_control::read();
+    if ((std::stoi(val) & 1) && (std::stoi(val) != 1))
+      printf("ESR bit 0 set but ESR = %i != 1", std::stoi(val));
     if (std::stoi(val) == 1)
       return;
     else
       scope_control::msleep(100);
   }
-  throw_ex("Writen task did not complete in time.\n");
+  throw_ex(
+      ("Written task <" + data + "> did not complete in time; last read: <" + val + ">\n").c_str());
 }
 
 std::string scope_control::write_query(std::string data)

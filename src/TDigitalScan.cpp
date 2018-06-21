@@ -37,7 +37,6 @@ TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
 
 void TDigitalScan::SetName()
 {
-  std::cout << "voltageScale = " << ((TDigitalParameters *)m_parameters)->voltageScale << std::endl;
   if (IsNominal()) {
     sprintf(m_name, "Digital Scan BB %d", (int)((TDigitalParameters *)m_parameters)->backBias);
   }

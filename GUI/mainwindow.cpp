@@ -1040,7 +1040,7 @@ void MainWindow::performtests()
           if (fScanstatuslabels.at(i) != 0) {
             fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
             fScanstatuslabels[i]->update();
-            if (fHistoQue.size() > 0)
+            if (fHistoQue.size() > 5)
               printf("%lu histogram(s) queued for analysis\n", fHistoQue.size());
           }
           qApp->processEvents();
