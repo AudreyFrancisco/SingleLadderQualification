@@ -11,7 +11,7 @@ public:
   void        close();
   std::string enumerate_ports();
   void write(std::string data);
-  void write_cmd(std::string data);
+  void write_cmd(std::string data, bool wait = true);
   std::string write_query(std::string data);
   std::string read();
   std::string get_model();

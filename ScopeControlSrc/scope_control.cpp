@@ -127,15 +127,14 @@ void scope_control::write(std::string data)
   }
 }
 
-void scope_control::write_cmd(std::string data)
+void scope_control::write_cmd(std::string data, bool wait)
 {
   debug_print("Write cmd");
   scope_control::write("*CLS;*ESE 1\n");
   scope_control::write(data);
-  std::string val;
   for (int i = 0; i < 4; i++) {
     scope_control::write("*OPC;*ESR?\n");
-    val = scope_control::read();
+    std::string val = scope_control::read();
     if ((std::stoi(val) & 1) && (std::stoi(val) != 1))
       printf("ESR bit 0 set but ESR = %i != 1", std::stoi(val));
     if (std::stoi(val) == 1)
@@ -143,8 +142,9 @@ void scope_control::write_cmd(std::string data)
     else
       scope_control::msleep(100);
   }
-  throw_ex(
-      ("Written task <" + data + "> did not complete in time; last read: <" + val + ">\n").c_str());
+  if (!wait) return;
+  data.resize(data.size() - 1); // remove line feed
+  throw_ex(("Written task <" + data + "> did not complete in time.\n").c_str());
 }
 
 std::string scope_control::write_query(std::string data)
@@ -304,7 +304,7 @@ void scope_control::set_ext_trigger_level(double level)
 void scope_control::single_capture()
 {
   debug_print("Single capture");
-  scope_control::write_cmd("SING\n"); // Single capture
+  scope_control::write_cmd("SING\n", false); // Single capture
 }
 
 void scope_control::set_math_diff(uint8_t ch_p, uint8_t ch_n)
@@ -407,8 +407,8 @@ void scope_control::wait_for_trigger(int timeout_sec)
   int count = 0;
   while (scope_control::write_query("ACQ:STAT?\n") != "COMP") // Wait until complete
   {
-    if (count == timeout_sec) throw_ex("Timeout reached while waiting for trigger");
-    msleep(1000);
+    if (count == timeout_sec * 100) throw_ex("Timeout reached while waiting for trigger");
+    msleep(10);
     count++;
   }
 }
