@@ -1699,6 +1699,12 @@ void MainWindow::attachtodatabase()
             DbAddParameter(fDB, activ, "Classification Version",
                            fConfig->GetScanConfig()->GetClassificationVersion(),
                            hicResult->GetParameterFile());
+            if (fNumberofscan == OBStaveML || fNumberofscan == OBStaveOL ||
+                fNumberofscan == OBHalfStaveML || fNumberofscan == OBHalfStaveOL) {
+              THicOB *currecthic = (THicOB *)(fHICs.at(i));
+              DbAddParameter(fDB, activ, "HIC Position", currecthic->GetPosition(),
+                             hicResult->GetParameterFile());
+            }
           }
         }
         // loop over results and write to DB
