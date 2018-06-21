@@ -961,6 +961,7 @@ void MainWindow::fillingOBvectors()
   fConfig->GetScanConfig()->SetVoltageScale(1.0);
   fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
   AddScan(STDigital);
+
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
   AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(0.9);
@@ -992,7 +993,9 @@ void MainWindow::fillingOBvectors()
   fConfig->GetScanConfig()->SetBackBias(3.0);
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STDigital);
   AddScan(STThreshold);
+
   AddScan(STVCASN);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
   AddScan(STApplyVCASN, fresultVector.back());
@@ -2569,6 +2572,7 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetBackBias(3.0);
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STDigital);
   AddScan(STThreshold);
   AddScan(STVCASN);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
@@ -2803,10 +2807,11 @@ void MainWindow::fillingHSscans()
   AddScan(STNoise);
   AddScan(STClearMask);
 
-  // threshold scans and tuning at 0V back bias
+  // threshold scans and tuning at 3V back bias
   fConfig->GetScanConfig()->SetBackBias(3.0);
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STDigital);
   AddScan(STVCASN);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
   AddScan(STApplyVCASN, fresultVector.back());
