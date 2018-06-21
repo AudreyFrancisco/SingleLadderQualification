@@ -80,6 +80,7 @@ private:
   int m_rcv8;      // receiver for master 8
   int m_ctrl0;     // control interface for master 0
   int m_ctrl8;     // control interface for master 8
+  int m_position;  // position on half-stave
 protected:
 public:
   THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod);
@@ -90,6 +91,8 @@ public:
   bool ContainsChip(common::TChipIndex idx);
   bool ContainsReceiver(int boardIndex, int rcv);
   virtual int GetReceiver(int boardIndex, int chipId);
+  void SetPosition(int aPos) { m_position = aPos; };
+  int                  GetPosition() { return m_position; };
   void ConfigureMaster(int Master, int board, int rcv, int ctrl);
   void PowerOn();
 };

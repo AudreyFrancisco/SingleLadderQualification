@@ -210,6 +210,7 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
                                  config->GetHicConfig(ihic)->GetModId(), pb,
                                  positionMap[ihic] - 1));
     }
+    ((THicOB *)hics->back())->SetPosition(positionMap[ihic]);
   }
 
 
@@ -337,6 +338,7 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
                                  config->GetHicConfig(ihic)->GetModId(), pb,
                                  positionMap[ihic] - 1));
     }
+    ((THicOB *)hics->back())->SetPosition(positionMap[ihic]);
   }
 
   // read possible config modifications

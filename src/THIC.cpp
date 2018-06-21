@@ -365,6 +365,7 @@ void THicIB::PowerOn()
 THicOB::THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod)
     : THic(dbId, modId, pb, pbMod)
 {
+  m_position = 0;
 }
 
 common::TChipIndex THicOB::GetChipIndex(int i)
