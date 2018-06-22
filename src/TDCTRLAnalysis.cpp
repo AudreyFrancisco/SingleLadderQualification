@@ -309,20 +309,18 @@ void TDctrlAnalysis::Finalize()
           Max(hicResult->worst_rise, chipResult->maxRise_pos, chipResult->maxRise_neg);
       hicResult->worst_fall =
           Max(hicResult->worst_fall, chipResult->maxFall_pos, chipResult->maxFall_neg);
-      // TODO: Set here the final variables in hic Result, determine hic classification
+
+      if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
+        hicResult->m_class = GetClassificationOB(hicResult);
+      }
+      else {
+        hicResult->m_class = GetClassificationIB(hicResult);
+      }
+      hicResult->SetValidity(true);
     }
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    TDctrlResultHic *hicResult =
-        (TDctrlResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
-    if (m_hics.at(ihic)->GetHicType() == HIC_OB) {
-      hicResult->m_class = GetClassificationOB(hicResult);
-    }
-    else {
-      hicResult->m_class = GetClassificationIB(hicResult);
-    }
-    hicResult->SetValidity(true);
     ComparePrediction(m_hics.at(ihic)->GetDbId());
   }
 
