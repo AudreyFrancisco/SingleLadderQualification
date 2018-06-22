@@ -454,6 +454,12 @@ TErrorCounter TScan::GetErrorCount(std::string hicId)
   }
 }
 
+void TScan::DumpHitInformation(std::vector<TPixHit> *Hits)
+{
+  std::cout << "Writing of hit information, to be implemented" << std::endl;
+}
+
+
 TMaskScan::TMaskScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                      std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
                      std::mutex *aMutex)
@@ -536,12 +542,23 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
       }
       int n_bytes_chipevent = n_bytes_data - n_bytes_header; //-n_bytes_trailer;
       if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
-      unsigned int bunchCounter = -1U;
-      int          chipId       = -1U;
-      if (!AlpideDecoder::DecodeEvent(
-              buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel,
-              m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder,
-              m_config->GetParamValue("MAXHITS"), &m_stuck, &chipId, &bunchCounter)) {
+      unsigned int bunchCounter  = -1U;
+      int          chipId        = -1U;
+      bool         dataIntegrity = false;
+      try {
+        dataIntegrity = AlpideDecoder::DecodeEvent(
+            buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel,
+            m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder,
+            m_config->GetParamValue("MAXHITS"), &m_stuck, &chipId, &bunchCounter);
+      }
+      catch (const std::runtime_error &e) {
+        std::cout << "Exception " << e.what() << " after " << itrg << " Triggers (this point)"
+                  << std::endl;
+        DumpHitInformation(Hits);
+        throw e;
+      }
+
+      if (!dataIntegrity) {
         std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
         m_errorCount.nCorruptEvent++;
         if (FindHIC(iboard, boardInfo.channel).compare("None") != 0) {

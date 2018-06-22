@@ -76,6 +76,12 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
   TPixHit hit;
   int     address, hitmap_length;
 
+  if (hits->size() >= (unsigned int)hitLimit) {
+    char Text[200];
+    sprintf(Text, "ERROR: number of hits exceeding limit of %d", hitLimit);
+    throw std::runtime_error(Text);
+  }
+
   int16_t data_field = (((int16_t)data[0]) << 8) + data[1];
 
   if (chip == -1) {

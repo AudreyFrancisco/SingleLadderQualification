@@ -120,6 +120,8 @@ protected:
   std::string FindHIC(int boardIndex, int rcv);
   virtual THisto CreateHisto() = 0;
   //  virtual void CreateScanParameters() = 0;
+  void DumpHitInformation(std::vector<TPixHit> *Hits);
+
 public:
   TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
         std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex);
