@@ -125,10 +125,7 @@ int TChipConfig::GetParamValue(std::string Name)
 
 bool TChipConfig::IsEnabled() const
 {
-  if (fConfig->GetScanConfig()->IsBackBiasActive())
-    return IsEnabledNoBB() && IsEnabledWithBB();
-  else
-    return IsEnabledNoBB();
+  return fConfig->GetScanConfig()->IsBackBiasActive() ? IsEnabledWithBB() : IsEnabledNoBB();
 }
 
 bool TChipConfig::HasEnabledSlave()

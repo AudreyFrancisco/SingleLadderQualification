@@ -126,7 +126,7 @@ public:
   int                          GetDataLink() { return fReceiver; };
   bool                         IsEnabled() const;
   bool                         IsEnabledNoBB() const { return fEnabled != 0; }
-  bool                         IsEnabledWithBB() const { return fEnabledWithBB != 0; }
+  bool IsEnabledWithBB() const { return (fEnabled != 0) && (fEnabledWithBB != 0); }
   void SetEnable(bool Enabled) { fEnabled = Enabled ? 1 : 0; };
   void SetEnableWithBB(bool Enabled) { fEnabledWithBB = Enabled ? 1 : 0; };
   int                       GetModuleId() { return (fChipId & 0x70) >> 4; };
