@@ -54,6 +54,24 @@ unsigned int THic::GetNEnabledChips()
   return n;
 }
 
+unsigned int THic::GetNEnabledChipsNoBB()
+{
+  unsigned int n = 0;
+  for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
+    if (m_chips.at(ichip)->GetConfig()->IsEnabledNoBB()) n++;
+  }
+  return n;
+}
+
+unsigned int THic::GetNEnabledChipsWithBB()
+{
+  unsigned int n = 0;
+  for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
+    if (m_chips.at(ichip)->GetConfig()->IsEnabledWithBB()) n++;
+  }
+  return n;
+}
+
 void THic::Disable()
 {
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
@@ -248,7 +266,7 @@ THicClassification THic::GetClassification()
   if (m_worstScanNoBB == CLASS_RED) return CLASS_RED;
 
   // Class No back bias and No back bias, cat B
-  if (m_worstScanBB == CLASS_RED) {
+  if ((m_worstScanBB == CLASS_RED) || (GetNEnabledChipsWithBB() < GetNEnabledChipsNoBB())) {
     if (m_chips.size() > GetNEnabledChips())
       return Worst(m_oldClass, CLASS_NOBBB);
     else if (m_worstScanNoBB <= CLASS_BRONZE)

@@ -37,6 +37,8 @@ public:
   bool         IsEnabled();
   void         Disable();
   unsigned int GetNEnabledChips();
+  unsigned int GetNEnabledChipsNoBB();
+  unsigned int GetNEnabledChipsWithBB();
   virtual void PowerOn() = 0;
   void         PowerOff();
   float        GetIddd();
