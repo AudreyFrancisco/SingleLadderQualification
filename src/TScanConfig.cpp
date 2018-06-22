@@ -41,6 +41,7 @@ TScanConfig::TScanConfig()
   m_targetThresh     = TARGET_THRESHOLD;
   m_voltageScale     = VOLTAGE_SCALE;
   m_backBias         = BACKBIAS;
+  m_backBias_active  = false;
   m_nominal          = NOMINAL;
   m_isMasked         = false;
   m_mlvdsStrength    = ChipConfig::DCTRL_DRIVER;

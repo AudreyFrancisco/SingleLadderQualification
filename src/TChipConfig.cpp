@@ -10,6 +10,7 @@ TChipConfig::TChipConfig(TConfig *config, int chipId, const char *fName)
   fConfig           = config;
   fChipId           = chipId;
   fEnabled          = true;
+  fEnabledWithBB    = true;
   fReceiver         = -1;
   fControlInterface = -1;
 
@@ -66,6 +67,7 @@ void TChipConfig::InitParamMap()
   fSettings["RECEIVER"]         = &fReceiver;
   fSettings["CONTROLINTERFACE"] = &fControlInterface;
   fSettings["ENABLED"]          = &fEnabled;
+  fSettings["ENABLEDBB"]        = &fEnabledWithBB;
   fSettings["ITHR"]             = &fITHR;
   fSettings["IDB"]              = &fIDB;
   fSettings["VCASN"]            = &fVCASN;
@@ -119,6 +121,14 @@ int TChipConfig::GetParamValue(std::string Name)
     return *(fSettings.find(Name)->second);
   }
   return -1;
+}
+
+bool TChipConfig::IsEnabled() const
+{
+  if (fConfig->GetScanConfig()->IsBackBiasActive())
+    return IsEnabledNoBB() && IsEnabledWithBB();
+  else
+    return IsEnabledNoBB();
 }
 
 bool TChipConfig::HasEnabledSlave()

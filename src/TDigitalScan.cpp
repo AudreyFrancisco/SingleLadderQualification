@@ -142,11 +142,10 @@ THisto TDigitalScan::CreateHisto()
 
 void TDigitalScan::Init()
 {
-  CreateScanHisto();
-
   TScan::Init();
   m_running = true;
   SetBackBias();
+  CreateScanHisto();
   CountEnabledChips();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {

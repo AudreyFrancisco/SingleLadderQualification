@@ -332,6 +332,7 @@ private:
   float     m_voltageScale;
   int       m_mlvdsStrength;
   float     m_backBias;
+  bool      m_backBias_active;
   bool      m_useDataPath; // for compatibility with standalone scans, set true for GUI
   int       m_enduranceSlices;
   int       m_enduranceCycles;
@@ -402,6 +403,8 @@ public:
   void SetVoltageScale(float aScale) { m_voltageScale = aScale; };
   void SetMlvdsStrength(int aStrength) { m_mlvdsStrength = aStrength; };
   void SetBackBias(float aVoltage) { m_backBias = fabs(aVoltage); };
+  void SetBackBiasActive(bool act = true) { m_backBias_active = act; }
+  bool                        IsBackBiasActive() const { return m_backBias_active; }
   void SetVcasnRange(int start, int stop)
   {
     m_vcasnStart = start;

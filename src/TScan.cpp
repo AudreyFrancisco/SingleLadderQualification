@@ -148,11 +148,13 @@ void TScan::SetBackBias()
     if (m_parameters->backBias == 0) {
       m_hics.at(ihic)->SwitchBias(false);
       pb->SetBiasVoltage(0);
+      m_config->SetBackBiasActive(false);
     }
     else {
       m_hics.at(ihic)->SwitchBias(true);
       pb->SetBiasVoltage((-1.) * m_parameters->backBias);
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      m_config->SetBackBiasActive(true);
     }
   }
 }
@@ -168,6 +170,7 @@ void TScan::SwitchOffBackbias()
       pb->SetBiasVoltage(0);
     }
   }
+  m_config->SetBackBiasActive(false);
 }
 
 

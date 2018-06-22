@@ -88,11 +88,11 @@ THisto TDataTaking::CreateHisto()
 
 void TDataTaking::Init()
 {
-  CreateScanHisto();
-
   TScan::Init();
 
   SetBackBias();
+
+  CreateScanHisto();
 
   CountEnabledChips();
   for (unsigned int i = 0; i < m_boards.size(); i++) {

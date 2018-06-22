@@ -247,8 +247,6 @@ THisto TSCurveScan::CreateHisto()
 
 void TSCurveScan::Init()
 {
-  CreateScanHisto();
-
   m_hitsets = new TRingBuffer<THitSet>;
 
   TScan::Init();
@@ -258,6 +256,8 @@ void TSCurveScan::Init()
   m_running = true;
 
   SetBackBias();
+
+  CreateScanHisto();
 
   CountEnabledChips();
   for (unsigned int i = 0; i < m_boards.size(); i++) {

@@ -57,7 +57,8 @@ private:
   std::map<std::string, int *> fSettings;
   TConfig *fConfig;
   int      fChipId;
-  int      fEnabled; // variable to exclude (non-working) chip from tests, default true
+  int      fEnabled;       // variable to exclude (non-working) chip from tests, default true
+  int      fEnabledWithBB; // variable to exclude chips from tests when BB on, default true
   int      fReceiver;
   int      fControlInterface;
   // DACs used
@@ -123,11 +124,14 @@ public:
   int                          GetChipId() { return fChipId; };
   int                          GetCtrInt() { return fControlInterface; };
   int                          GetDataLink() { return fReceiver; };
-  bool                         IsEnabled() { return (fEnabled != 0); };
+  bool                         IsEnabled() const;
+  bool                         IsEnabledNoBB() const { return fEnabled != 0; }
+  bool                         IsEnabledWithBB() const { return fEnabledWithBB != 0; }
   void SetEnable(bool Enabled) { fEnabled = Enabled ? 1 : 0; };
-  int                 GetModuleId() { return (fChipId & 0x70) >> 4; };
-  bool                IsOBMaster() { return ((fChipId % 8 == 0) && (GetModuleId() > 0)); };
-  bool                HasEnabledSlave();
+  void SetEnableWithBB(bool Enabled) { fEnabledWithBB = Enabled ? 1 : 0; };
+  int                       GetModuleId() { return (fChipId & 0x70) >> 4; };
+  bool                      IsOBMaster() { return ((fChipId % 8 == 0) && (GetModuleId() > 0)); };
+  bool                      HasEnabledSlave();
 
   bool GetReadoutMode() { return fReadoutMode; };
   bool GetEnableClustering() { return fEnableClustering; };
