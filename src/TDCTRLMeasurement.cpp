@@ -95,6 +95,7 @@ void TDctrlMeasurement::Init()
   }
 
   for (unsigned int i = 0; i < m_chips.size(); i++) {
+    if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
     AlpideConfig::ConfigureCMU(m_chips.at(i));
   }
 
@@ -122,8 +123,10 @@ void TDctrlMeasurement::PrepareStep(int loopIndex)
 {
   switch (loopIndex) {
   case 0: // innermost loop
-    m_testChip->GetConfig()->SetParamValue("DCTRLDRIVER", m_value[0]);
-    AlpideConfig::ConfigureBuffers(m_testChip, m_testChip->GetConfig());
+    if (m_testChip->GetConfig()->IsEnabled()) {
+      m_testChip->GetConfig()->SetParamValue("DCTRLDRIVER", m_value[0]);
+      AlpideConfig::ConfigureBuffers(m_testChip, m_testChip->GetConfig());
+    }
     break;
   case 1: // 2nd loop
     m_testChip   = m_chips.at(m_value[1]);
