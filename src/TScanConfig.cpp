@@ -10,9 +10,11 @@ TScanConfig::TScanConfig()
   // dummy values for first tests
   m_classVersion = CLASSIFICATION_VERSION;
 
-  m_nInj             = NINJ;
-  m_nTrig            = NTRIG;
-  m_maxTimeout       = MAXTIMEOUT;
+  m_nInj       = NINJ;
+  m_nTrig      = NTRIG;
+  m_maxTimeout = MAXTIMEOUT;
+  m_maxHits    = MAXHITS;
+
   m_chargeStart      = CHARGE_START;
   m_chargeStop       = CHARGE_STOP;
   m_chargeStep       = CHARGE_STEP;
@@ -173,6 +175,7 @@ void TScanConfig::InitParamMap()
   fSettings["NINJ"]         = &m_nInj;
   fSettings["NTRIG"]        = &m_nTrig;
   fSettings["MAXTIMEOUT"]   = &m_maxTimeout;
+  fSettings["MAXHITS"]      = &m_maxHits;
   fSettings["CHARGESTART"]  = &m_chargeStart;
   fSettings["CHARGESTOP"]   = &m_chargeStop;
   fSettings["CHARGESTEP"]   = &m_chargeStep;

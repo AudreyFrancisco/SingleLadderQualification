@@ -70,7 +70,8 @@ void AlpideDecoder::DecodeEmptyFrame(unsigned char *data, int &chipId, unsigned 
 
 bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
                                    std::vector<TPixHit> *hits, bool datalong, int boardIndex,
-                                   int channel, int &prioErrors, std::vector<TPixHit> *stuck)
+                                   int channel, int &prioErrors, int hitLimit,
+                                   std::vector<TPixHit> *stuck)
 {
   TPixHit hit;
   int     address, hitmap_length;
@@ -226,7 +227,7 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
 }
 
 bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPixHit> *hits,
-                                int boardIndex, int channel, int &prioErrors,
+                                int boardIndex, int channel, int &prioErrors, int hitLimit,
                                 std::vector<TPixHit> *stuck, int *chipID,
                                 unsigned int *bunchCounter)
 {
@@ -313,7 +314,7 @@ bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPi
           printf("\n");
         }
         bool corrupted = DecodeDataWord(data + byte, chip, region, hits, false, boardIndex, channel,
-                                        prioErrors, stuck);
+                                        prioErrors, hitLimit, stuck);
         if (corrupted) {
           corrupt = true;
         }
@@ -338,7 +339,7 @@ bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPi
           printf("\n");
         }
         DecodeDataWord(data + byte, chip, region, hits, true, boardIndex, channel, prioErrors,
-                       stuck);
+                       hitLimit, stuck);
       }
       byte += 3;
       break;

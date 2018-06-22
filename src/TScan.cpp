@@ -540,8 +540,8 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
       int          chipId       = -1U;
       if (!AlpideDecoder::DecodeEvent(
               buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel,
-              m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder, &m_stuck, &chipId,
-              &bunchCounter)) {
+              m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder,
+              m_config->GetParamValue("MAXHITS"), &m_stuck, &chipId, &bunchCounter)) {
         std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
         m_errorCount.nCorruptEvent++;
         if (FindHIC(iboard, boardInfo.channel).compare("None") != 0) {

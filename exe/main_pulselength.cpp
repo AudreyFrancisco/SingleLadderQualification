@@ -218,7 +218,8 @@ void scan(const char *fName)
           // decode Chip event
           int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
           AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
-                                     boardInfo.channel, prioErrors);
+                                     boardInfo.channel, prioErrors,
+                                     fConfig->GetScanConfig()->GetParamValue("MAXHITS"));
 
           itrg++;
         }
