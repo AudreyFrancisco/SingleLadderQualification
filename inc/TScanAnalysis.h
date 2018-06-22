@@ -193,6 +193,7 @@ public:
   virtual void Initialize() = 0;
   virtual void Run();
   virtual void Finalize() = 0;
+  bool         IsFinished() const { return m_finished; }
   std::map<const char *, TResultVariable> GetVariableList() { return m_variableList; }
   float GetVariable(std::string aHic, int chip, TResultVariable var);
   static const char *WriteHicClassification(THicClassification hicClass);

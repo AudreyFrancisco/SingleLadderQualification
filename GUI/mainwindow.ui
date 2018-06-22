@@ -14,12 +14,76 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QTreeWidget" name="treeWidget">
+  <layout class="QGridLayout" name="centralLayout">
+    <item row="0" column="0">
+   <widget class="QLabel" name="testtypeselected">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+      <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+ </item>
+    <item row="0" column="1" colspan="1">
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>10</y>
+      <width>481</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+      <weight>75</weight>
+      <italic>true</italic>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="alignment">
+      <set>Qt::AlignCenter</set>
+    </property>
+    <property name="text">
+     <string>ITS Upgrade HIC and Stave Characterisation Software</string>
+    </property>
+   </widget>
+ </item>
+ <item row="0" column="2">
+   <widget class="QLabel" name="alicelogo">
     <property name="geometry">
      <rect>
       <x>0</x>
+      <y>0</y>
+      <width>151</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="text">
+      <string>test</string>
+    </property>
+    <property name="alignment">
+      <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+ </item>
+    <item row="1" column="0">
+   <widget class="QTableWidget" name="testTable">
+    <property name="geometry">
+     <rect>
+      <x>11</x>
       <y>60</y>
-      <width>351</width>
+      <width>341</width>
       <height>751</height>
      </rect>
     </property>
@@ -34,6 +98,8 @@
      </property>
     </column>
    </widget>
+ </item>
+ <item row="1" column="1" colspan="2">
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
@@ -1462,19 +1528,58 @@ Digital scan                     Waiting . .
      </attribute>
     </widget>
    </widget>
-   <widget class="QLabel" name="testtypeselected">
+ </item>
+ <item row="2" column="0" colspan="1">
+   <layout class="QHBoxLayout" name="buttonLayout">
+     <item>
+   <widget class="QPushButton" name="start_test">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>20</y>
-      <width>211</width>
-      <height>21</height>
+      <y>820</y>
+      <width>101</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string/>
+     <string>Start Test</string>
     </property>
    </widget>
+ </item>
+ <item>
+   <widget class="QPushButton" name="poweroff">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>820</y>
+      <width>95</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Power Off</string>
+    </property>
+   </widget>
+ </item>
+ </layout>
+ </item>
+ <item row="2" column="2">
+   <widget class="QPushButton" name="quit">
+    <property name="geometry">
+     <rect>
+      <x>1210</x>
+      <y>820</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Quit</string>
+    </property>
+   </widget>
+ </item>
+
+ </layout>
    <widget class="QLabel" name="tob">
     <property name="geometry">
      <rect>
@@ -1551,69 +1656,6 @@ Digital scan                     Waiting . .
     </property>
     <property name="text">
      <string/>
-    </property>
-   </widget>
-   <widget class="QLabel" name="statuslabel">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>127</x>
-      <y>83</y>
-      <width>161</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>11</pointsize>
-      <weight>75</weight>
-      <italic>true</italic>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Testing progress</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="start_test">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>760</y>
-      <width>101</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Start Test</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="quit">
-    <property name="geometry">
-     <rect>
-      <x>1210</x>
-      <y>820</y>
-      <width>111</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Quit</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="poweroff">
-    <property name="geometry">
-     <rect>
-      <x>120</x>
-      <y>760</y>
-      <width>95</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Power Off</string>
     </property>
    </widget>
    <widget class="QLabel" name="digitals">
@@ -1824,19 +1866,6 @@ Digital scan                     Waiting . .
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="alicelogo">
-    <property name="geometry">
-     <rect>
-      <x>1250</x>
-      <y>0</y>
-      <width>151</width>
-      <height>81</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QPushButton" name="testib">
     <property name="geometry">
      <rect>
@@ -1848,27 +1877,6 @@ Digital scan                     Waiting . .
     </property>
     <property name="text">
      <string>TEST_IB</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="geometry">
-     <rect>
-      <x>570</x>
-      <y>10</y>
-      <width>481</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>15</pointsize>
-      <weight>75</weight>
-      <italic>true</italic>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>ITS Upgrade HIC and Stave Characterisation Software</string>
     </property>
    </widget>
   </widget>

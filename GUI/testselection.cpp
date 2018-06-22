@@ -61,6 +61,16 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
 
 TestSelection::~TestSelection() { delete ui; }
 
+void TestSelection::Init()
+{
+  QSettings settings;
+  ui->operatorstring->setText(settings.value("operator", "").toString());
+  int idx = ui->typetest->findText(settings.value("testname", "n/a").toString());
+  if (idx >= 0) ui->typetest->setCurrentIndex(idx);
+  idx = ui->databaselocation->findText(settings.value("testsite", "n/a").toString());
+  if (idx >= 0) ui->databaselocation->setCurrentIndex(idx);
+}
+
 void TestSelection::SaveSettings(QString &institute, QString &opname, QString &hicid, int &counter,
                                  int &lid, int &memberid, QString &ttwo, QString &tthree,
                                  QString &tfour, QString &tfive, QString &done, QString &dtwo,
@@ -159,6 +169,11 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
       }
     }
 
+    QSettings settings;
+    settings.setValue("operator", opname);
+    settings.setValue("testname", ui->typetest->currentText());
+    settings.setValue("testsite", ui->databaselocation->currentText());
+
     qDebug() << "The operator name is: " << opname << "and the hic id is: " << hicid << endl;
   }
 }
@@ -183,7 +198,7 @@ void TestSelection::popupmessage(QString m)
 
 void TestSelection::connectlocationcombo(std::vector<pair<std::string, int>> floc)
 {
-
+  ui->databaselocation->clear();
   for (auto const &v : floc) {
     ui->databaselocation->addItem(v.first.c_str(), v.second);
   }

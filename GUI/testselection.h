@@ -21,6 +21,7 @@ public:
                             QString &dfour, QString &dfive, QString &halfstave, QString &stave);
   virtual int  GetLocationID() { return locid; }
   virtual void ClearLocations();
+  virtual void Init();
 
 private:
   Ui::TestSelection *ui;

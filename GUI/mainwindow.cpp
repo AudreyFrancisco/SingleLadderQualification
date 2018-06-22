@@ -85,6 +85,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   fCalwindow        = 0;
   fActivitywindow   = 0;
   fDatabasewindow   = 0;
+  fDatabaseSelected = false;
   fNoticewindow     = 0;
   fPbnumberofmodule = 0;
   fDatabasefailure  = 0;
@@ -94,7 +95,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   makeDir(dataDir.c_str());
 
   ui->setupUi(this);
-  this->setWindowTitle(QString::fromUtf8("GUI"));
+  this->setWindowTitle(QString::fromUtf8("Alpide Testing"));
+  this->setWindowIcon(QApplication::style()->standardIcon(QStyle::SP_ComputerIcon));
   ui->tab_2->setEnabled(false);
   ui->example1->hide();
   ui->tab_3->setEnabled(true);
@@ -113,24 +115,60 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->endurancebox->hide();
   ui->statusbar->hide();
   ui->tab_2->setVisible(false);
-  ui->statuslabel->setVisible(false);
-  ui->testtypeselected->setText("Type of test");
+  ui->testtypeselected->setText("-- no test selected --");
   ui->cfg->hide();
   ui->label_3->hide();
   ui->testselection->hide();
   ui->ledtext->hide();
-  QMenuBar *menu = new QMenuBar(this);
-  QMenu *   menu1;
-  menu1                  = menu->addMenu("&Options");
-  QAction *newtestaction = new QAction("&New test", menu);
-  fWritedb               = new QAction("&Write to database", menu);
-  menu1->addAction(newtestaction);
-  menu1->addAction(fWritedb);
+
+  QAction *newtestaction = new QAction("&New test", this);
+  connect(newtestaction, SIGNAL(triggered()), this, SLOT(start_test()));
+  QAction *newtestprod =
+      new QAction(QApplication::style()->standardIcon(QStyle::SP_DialogOpenButton),
+                  "&New test (Prod DB)", this);
+  connect(newtestprod, &QAction::triggered, [=]() {
+    fDatabaseSelected = true;
+    fDatabasetype     = 0;
+    start_test();
+  });
+  QAction *newtesttest = new QAction("&New test (Test DB)", this);
+  connect(newtesttest, &QAction::triggered, [=]() {
+    fDatabaseSelected = true;
+    fDatabasetype     = 1;
+    start_test();
+  });
+  fWritedb          = new QAction("&Write to database", this);
+  QAction *poweroff = new QAction(
+      QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton), "Power Off", this);
+  connect(poweroff, &QAction::triggered, this, &MainWindow::poweroff);
+  QAction *quit = new QAction("&Quit", this);
+  connect(quit, &QAction::triggered, this, &MainWindow::quitall);
+
+  // build menu (based on actions)
+  QMenu *menu = menuBar()->addMenu("&Actions");
+  menu->addAction(newtestaction);
+  menu->addAction(newtestprod);
+  menu->addAction(newtesttest);
+  menu->addAction(fWritedb);
+  menu->addAction(poweroff);
+  menu->addAction(quit);
   fWritedb->setVisible(false);
+
+  // build toolbar (based on actions)
+  addToolBar(Qt::LeftToolBarArea, ui->mainToolBar);
+  ui->mainToolBar->addAction(newtestprod);
+  ui->mainToolBar->addAction(poweroff);
+
+  // no status bar for now
+  setStatusBar(nullptr);
+
+  ui->centralLayout->setColumnMinimumWidth(0, 400);
+  ui->centralLayout->setColumnStretch(0, 0.);
+  ui->centralLayout->setColumnStretch(1, 1.);
+
   ui->tabWidget->removeTab(2);
   ui->tabWidget->removeTab(1);
   connect(ui->abortall, SIGNAL(clicked()), this, SLOT(StopScan()), Qt::DirectConnection);
-  connect(newtestaction, SIGNAL(triggered()), this, SLOT(start_test()));
   connect(ui->newtest, SIGNAL(clicked()), SLOT(start_test()));
   connect(ui->cfg, SIGNAL(clicked()), this, SLOT(open()));
   connect(ui->quit, SIGNAL(clicked()), this, SLOT(quitall()));
@@ -146,15 +184,28 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   ui->pbstatus->hide();
 
+  ui->testTable->show();
+  ui->testTable->setShowGrid(true);
+  ui->testTable->setRowCount(0);
+  // ui->testTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+  ui->testTable->setColumnWidth(0, 240);
+  ui->testTable->horizontalHeader()->setStretchLastSection(true);
+  ui->testTable->setColumnCount(2);
+  QTableWidgetItem *titleScan = new QTableWidgetItem("scan");
+  ui->testTable->setHorizontalHeaderItem(0, titleScan);
+  QTableWidgetItem *titleStatus = new QTableWidgetItem("status");
+  ui->testTable->setHorizontalHeaderItem(1, titleStatus);
+  connect(ui->testTable, &QTableWidget::cellClicked, [=](int r, int c) {
+    if (fRowToScanMap.count(r) > 0) getresultdetails(fRowToScanMap[r]);
+  });
+
   QPixmap alice(":alicethreshold.png");
   int     w = ui->alicepic->width();
   int     h = ui->alicepic->height();
   ui->alicepic->setPixmap(alice.scaled(w, h, Qt::KeepAspectRatio));
 
   QPixmap alicelog(":logo.png");
-  int     width  = ui->alicelogo->width();
-  int     height = ui->alicelogo->height();
-  ui->alicelogo->setPixmap(alicelog.scaled(width, height, Qt::KeepAspectRatio));
+  ui->alicelogo->setPixmap(alicelog.scaled(50, 50, Qt::KeepAspectRatio));
 
   ui->start_test->hide();
 
@@ -163,12 +214,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   writingdb    = true;
   fstopwriting = false;
   fstop        = false;
+
+  readSettings();
 }
 
 MainWindow::~MainWindow()
 {
   delete ui;
   ui = 0x0;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+  writeSettings();
+  event->accept();
 }
 
 // TODO: try to substitute numberofscan by TScanType (defined in TScanConfig.h)
@@ -867,13 +926,6 @@ void MainWindow::start_test()
   if (fComponentIDs.size() > 0) {
     fComponentIDs.clear();
   }
-  if (fScanbuttons.size() > 0) {
-    for (unsigned int i = 0; i < fScanbuttons.size(); i++) {
-      if (fScanbuttons.at(i)) {
-        fScanbuttons.at(i)->hide();
-      }
-    }
-  }
   if (fHalfstavemodules.size() > 0) {
     fHalfstavemodules.clear();
   }
@@ -897,7 +949,6 @@ void MainWindow::start_test()
   fresultVector.clear();
   fChips.clear();
   fBoards.clear();
-  fScanbuttons.clear();
   fHicnames.clear();
   fExecution = true;
   if (fPbcfgcheck != 0) {
@@ -907,15 +958,6 @@ void MainWindow::start_test()
     delete fCalwindow;
   }
 
-  if (fScanstatuslabels.size() >= 1) {
-    for (unsigned int i = 0; i < fScanstatuslabels.size(); i++) {
-      if (fScanstatuslabels.at(i) != 0) {
-        fScanstatuslabels.at(i)->setText(" ");
-      }
-    }
-  }
-
-  fScanstatuslabels.clear();
   ui->OBModule->hide();
   ui->OBHALFSTAVE->hide();
   ui->IBModule->hide();
@@ -936,13 +978,14 @@ void MainWindow::start_test()
   fBottomfive  = '\0';
   fBottomfour  = '\0';
 
-  if (fDatabasewindow == 0) {
+  if ((fDatabasewindow == 0) && !fDatabaseSelected) {
     fDatabasewindow = new DatabaseSelection(this);
     fDatabasewindow->exec();
     fDatabasewindow->setdatabase(fDatabasetype);
   }
   std::cout << fDatabasetype << " the selected database" << std::endl;
   fSettingswindow = new TestSelection(this, fDatabasetype);
+  fSettingswindow->Init();
   fSettingswindow->exec();
 }
 
@@ -1014,8 +1057,6 @@ void MainWindow::performtests()
 {
   fAddingScans = true;
   fExtraScans  = 0;
-  ui->statuslabel->setVisible(true);
-  ui->statuslabel->update();
   qApp->processEvents();
   fNewScans.clear();
   fInitialScans = fScanVector.size();
@@ -1064,12 +1105,10 @@ void MainWindow::performtests()
         // non-blocking wait for scan and analysis
         // use to update status in the GUI and keep it responsive
         while (future_scan.wait_for(delay) != std::future_status::ready) {
-          if (fScanstatuslabels.at(i) != 0) {
-            fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
-            fScanstatuslabels[i]->update();
-            if (fHistoQue.size() > 5)
-              printf("%lu histogram(s) queued for analysis\n", fHistoQue.size());
-          }
+          if (fScanToRowMap.count(i) > 0)
+            ui->testTable->item(fScanToRowMap[i], 1)->setText(fScanVector.at(i)->GetState());
+          if (fHistoQue.size() > 5)
+            printf("%lu histogram(s) queued for analysis\n", fHistoQue.size());
           qApp->processEvents();
         }
         future_scan.get();
@@ -1088,11 +1127,9 @@ void MainWindow::performtests()
           fExceptiontext   = ex.what();
         }
 
-        if (fScanstatuslabels.at(i) != 0) {
-          fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
-          fScanstatuslabels[i]->update();
-          qApp->processEvents();
-        }
+        if (fScanToRowMap.count(i) > 0)
+          ui->testTable->item(fScanToRowMap[i], 1)->setText(fScanVector.at(i)->GetState());
+        qApp->processEvents();
         if (fExceptionthrown) {
           fScanVector.at(i)->ClearHistoQue();
           notifyuser(i);
@@ -1105,12 +1142,10 @@ void MainWindow::performtests()
           }
         }
 
-
-        if (fScanstatuslabels.at(i) != 0) {
-          fScanstatuslabels[i]->setText(fScanVector.at(i)->GetState());
-          qApp->processEvents();
-        }
+        if (fScanToRowMap.count(i) > 0)
+          ui->testTable->item(fScanToRowMap[i], 1)->setText(fScanVector.at(i)->GetState());
         colorsinglescan(i);
+        qApp->processEvents();
       }
 
 
@@ -1168,7 +1203,6 @@ void MainWindow::applytests()
 
   ui->start_test->hide();
   qApp->processEvents();
-  fSignalMapper = new QSignalMapper(this);
   if (fNumberofscan == OBQualification) {
     fillingOBvectors();
   }
@@ -1212,8 +1246,6 @@ void MainWindow::applytests()
   }
 
   printClasses();
-
-  connect(fSignalMapper, SIGNAL(mapped(int)), this, SLOT(getresultdetails(int)));
 
   if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
     fstopwriting = true;
@@ -1272,74 +1304,6 @@ void MainWindow::printClasses()
     for (unsigned int iAnalysis = 0; iAnalysis < fAnalysisVector.size(); iAnalysis++) {
       if (fScanVector.at(iAnalysis) != 0) {
         fAnalysisVector.at(iAnalysis)->WriteHicClassToFile(fHICs.at(iHic)->GetDbId());
-      }
-    }
-  }
-}
-
-
-// TODO: check (i+1)-logic for case of fresultVector[i]==0)
-// TODO: correct colour logic to *worst* HIC result, not last HIC result
-void MainWindow::colorscans()
-{
-
-  for (unsigned int i = 0; i < fScanVector.size(); i++) {
-    if (fScanbuttons[i] != 0) {
-      if (fresultVector[i] == 0) {
-        for (std::map<std::string, TScanResultHic *>::iterator it =
-                 fresultVector.at(i + 1)->GetHicResults()->begin();
-             it != fresultVector.at(i + 1)->GetHicResults()->end(); ++it) {
-          int colour;
-          colour = it->second->GetClassification();
-          if (colour == CLASS_GOLD) {
-            fScanbuttons[i]->setStyleSheet("color:gold;Text-align:left;border:none;");
-            return;
-          }
-          if (colour == CLASS_SILVER) {
-            fScanbuttons[i]->setStyleSheet("color:silver;Text-align:left;border:none;");
-            return;
-          }
-          if (colour == CLASS_RED) {
-            fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
-            return;
-          }
-          if (colour == CLASS_UNTESTED) {
-            fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
-            return;
-          }
-          if (colour == CLASS_BRONZE) {
-            fScanbuttons[i]->setStyleSheet("color:rgb(160,198,96);Text-align:left;border:none;");
-            return;
-          }
-        }
-      }
-      else {
-        for (std::map<std::string, TScanResultHic *>::iterator it =
-                 fresultVector.at(i)->GetHicResults()->begin();
-             it != fresultVector.at(i)->GetHicResults()->end(); ++it) {
-          int colour;
-          colour = it->second->GetClassification();
-          if (colour == CLASS_GOLD) {
-            fScanbuttons[i]->setStyleSheet("color:gold;Text-align:left;border:none;");
-            return;
-          }
-          if (colour == CLASS_SILVER) {
-            fScanbuttons[i]->setStyleSheet("color:silver;Text-align:left;border:none;");
-            return;
-          }
-          if (colour == CLASS_RED) {
-            fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
-            return;
-          }
-          if (colour == CLASS_UNTESTED) {
-            fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
-            return;
-          }
-          if (colour == CLASS_BRONZE) {
-            fScanbuttons[i]->setStyleSheet("color:rgb(160,198,96);Text-align:left;border:none;");
-            return;
-          }
-        }
       }
     }
   }
@@ -1424,6 +1388,8 @@ void MainWindow::detailscombo(int dnumber)
   (void)dnumber;
   int             var  = ui->details->itemData(ui->details->currentIndex()).toInt();
   TResultVariable rvar = static_cast<TResultVariable>(var);
+
+  if (!fAnalysisVector.at(fScanposition)->IsFinished()) return;
 
   for (unsigned int i = 0; i < fChips.size(); i++) {
     if (fChips[i]->GetConfig()->IsEnabled()) {
@@ -1881,6 +1847,10 @@ void MainWindow::attachtodatabase()
 
 void MainWindow::ClearVectors()
 {
+  ui->testTable->clearContents();
+  ui->testTable->setRowCount(0);
+  fScanToRowMap.clear();
+  fRowToScanMap.clear();
   for (auto scan : fScanVector)
     delete scan;
   fScanVector.clear();
@@ -1890,12 +1860,6 @@ void MainWindow::ClearVectors()
   for (auto res : fresultVector)
     delete res;
   fresultVector.clear();
-  for (auto but : fScanbuttons)
-    delete but;
-  fScanbuttons.clear();
-  for (auto lab : fScanstatuslabels)
-    delete lab;
-  fScanstatuslabels.clear();
   fScanTypes.clear();
 }
 
@@ -2082,55 +2046,26 @@ void MainWindow::loaddefaultconfig()
 
 void MainWindow::colorsinglescan(int i)
 {
+  if (fresultVector[i] == 0)
+    fColour = fAnalysisVector.at(i + 1)->GetScanClassification();
+  else
+    fColour = fAnalysisVector.at(i)->GetScanClassification();
 
-  if (fScanbuttons[i] != 0) {
-    if (fresultVector[i] == 0) {
-      fColour = fAnalysisVector.at(i + 1)->GetScanClassification();
-      if (fColour == CLASS_GOLD) {
-        fScanbuttons[i]->setStyleSheet("color:gold;Text-align:left;border:none;");
-        return;
-      }
-      if (fColour == CLASS_SILVER) {
-        fScanbuttons[i]->setStyleSheet("color:silver;Text-align:left;border:none;");
-        return;
-      }
-      if (fColour == CLASS_RED) {
-        fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
-        return;
-      }
-      if (fColour == CLASS_UNTESTED) {
-        fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
-        return;
-      }
-      if (fColour == CLASS_BRONZE) {
-        fScanbuttons[i]->setStyleSheet("color:rgb(160,198,96);Text-align:left;border:none;");
-        return;
-      }
-    }
-    else {
-      fColour = fAnalysisVector.at(i)->GetScanClassification();
-      if (fColour == CLASS_GOLD) {
-        fScanbuttons[i]->setStyleSheet("color:gold;Text-align:left;border:none;");
-        return;
-      }
-      if (fColour == CLASS_SILVER) {
-        fScanbuttons[i]->setStyleSheet("color:silver;Text-align:left;border:none;");
-        return;
-      }
-      if (fColour == CLASS_RED) {
-        fScanbuttons[i]->setStyleSheet("color:red;Text-align:left;border:none;");
-        return;
-      }
-      if (fColour == CLASS_UNTESTED) {
-        fScanbuttons[i]->setStyleSheet("color:blue;Text-align:left;border:none;");
-        return;
-      }
-      if (fColour == CLASS_BRONZE) {
-        fScanbuttons[i]->setStyleSheet("color:rgb(160,198,96);Text-align:left;border:none;");
-        return;
-      }
-    }
-  }
+  QColor color(Qt::magenta);
+  if (fColour == CLASS_GOLD)
+    color = QColor(255, 215, 0);
+  else if (fColour == CLASS_SILVER)
+    color = QColor(192, 192, 192);
+  else if (fColour == CLASS_RED)
+    color = Qt::red;
+  else if (fColour == CLASS_UNTESTED)
+    color = Qt::cyan;
+  else if (fColour == CLASS_BRONZE)
+    color = QColor(205, 127, 50);
+
+  if (fScanToRowMap.count(i) > 0)
+    for (int icol = 0; icol < ui->testTable->columnCount(); ++icol)
+      ui->testTable->item(fScanToRowMap[i], icol)->setBackground(color);
 }
 
 void MainWindow::writecalibrationfile()
@@ -2389,15 +2324,6 @@ bool MainWindow::CreateScanObjects(TScanType scanType, TScanConfig *config, TSca
   }
 }
 
-int MainWindow::GetNButtons()
-{
-  int result = 0;
-  for (unsigned int i = 0; i < fScanbuttons.size(); i++) {
-    if (fScanbuttons.at(i) != 0) result++;
-  }
-  return result;
-}
-
 void MainWindow::AddScan(TScanType scanType, TScanResult *aResult)
 {
   TScan *        scan;
@@ -2405,8 +2331,6 @@ void MainWindow::AddScan(TScanType scanType, TScanResult *aResult)
   TScanResult *  result = 0;
   TScanConfig *  config = fConfig->GetScanConfig();
   bool           hasButton;
-  QPushButton *  button;
-  QLabel *       label;
 
   if (aResult == 0) { // standard version
     if (CreateScanObjects(scanType, config, &scan, &analysis, &result, hasButton)) {
@@ -2427,24 +2351,17 @@ void MainWindow::AddScan(TScanType scanType, TScanResult *aResult)
   }
 
   if (hasButton) {
-    button = new QPushButton(scan->GetName(), ui->centralWidget);
-    button->setGeometry(QRect(0, 110 + 30 * GetNButtons(), 151, 31));
-    button->setStyleSheet("border:none;");
-    button->show();
-    fSignalMapper->setMapping(button, fAnalysisVector.size() - 1);
-    connect(button, SIGNAL(clicked()), fSignalMapper, SLOT(map()));
-    fScanbuttons.push_back(button);
+    ui->testTable->insertRow(ui->testTable->rowCount());
+    fScanToRowMap[fScanVector.size() - 1]        = ui->testTable->rowCount() - 1;
+    fRowToScanMap[ui->testTable->rowCount() - 1] = fScanVector.size() - 1;
 
-    label = new QLabel(ui->centralWidget);
-    label->setObjectName(QStringLiteral());
-    label->setGeometry(QRect(160, 110 + 30 * (GetNButtons() - 1), 181, 31));
-    label->setText(scan->GetState());
-    label->show();
-    fScanstatuslabels.push_back(label);
-  }
-  else {
-    fScanbuttons.push_back(0);
-    fScanstatuslabels.push_back(0);
+    QTableWidgetItem *scanItem = new QTableWidgetItem(scan->GetName());
+    scanItem->setFlags(scanItem->flags() & ~Qt::ItemIsEditable);
+    ui->testTable->setItem(ui->testTable->rowCount() - 1, 0, scanItem);
+
+    QTableWidgetItem *statusItem = new QTableWidgetItem(scan->GetState());
+    statusItem->setFlags(statusItem->flags() & ~Qt::ItemIsEditable);
+    ui->testTable->setItem(ui->testTable->rowCount() - 1, 1, statusItem);
   }
 }
 
@@ -2940,7 +2857,28 @@ string MainWindow::GetResultType(int i)
 
 void MainWindow::fillingfastHS()
 {
+  printf("fillingfastHS()\n");
   ClearVectors();
   AddScan(STFifo);
   AddScan(STDigital);
+}
+
+void MainWindow::writeSettings()
+{
+  QSettings settings;
+
+  settings.beginGroup("MainWindow");
+  settings.setValue("size", size());
+  settings.setValue("pos", pos());
+  settings.endGroup();
+}
+
+void MainWindow::readSettings()
+{
+  QSettings settings;
+
+  settings.beginGroup("MainWindow");
+  resize(settings.value("size", QSize(1373, 890)).toSize());
+  move(settings.value("pos", QPoint(200, 200)).toPoint());
+  settings.endGroup();
 }

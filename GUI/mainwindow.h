@@ -84,7 +84,6 @@ public:
 public slots:
   void createbtn();
   void popup(QString message);
-  void colorscans();
   void poweroff();
   void quitall();
   void getresultdetails(int i);
@@ -164,6 +163,7 @@ private:
   ScanConfiguration *fScanconfigwindow;
   Testingprogress *  fProgresswindow;
   DatabaseSelection *fDatabasewindow;
+  bool               fDatabaseSelected;
   resultstorage *    fResultwindow;
   Databasefailure *  fDatabasefailure;
   void scanLoop(TScan *myScan);
@@ -178,20 +178,17 @@ private:
   //  void fillingvectors();
   std::vector<std::string> fMapdetails;
   std::vector<pair<std::string, const TResultVariable>> fMapd;
-  std::vector<QPushButton *> fScanbuttons;
-  std::vector<QLabel *>      fScanstatuslabels;
-  QSignalMapper *            fSignalMapper;
-  TTestType                  fNumberofscan;
-  QString                    fTestname;
-  int                        fScanposition;
-  QString                    fOperatorname;
-  QString                    fInstitute;
-  QString                    fHicidnumber;
-  QString                    fToptwo, fTopthree, fTopfour, fTopfive;
-  QString                    fBottomone, fBottomtwo, fBottomthree, fBottomfive, fBottomfour;
-  int                        fIdofactivitytype;
-  int                        fIdoflocationtype;
-  int                        fIdofoperator;
+  TTestType fNumberofscan;
+  QString   fTestname;
+  int       fScanposition;
+  QString   fOperatorname;
+  QString   fInstitute;
+  QString   fHicidnumber;
+  QString   fToptwo, fTopthree, fTopfour, fTopfive;
+  QString   fBottomone, fBottomtwo, fBottomthree, fBottomfive, fBottomfour;
+  int       fIdofactivitytype;
+  int       fIdoflocationtype;
+  int       fIdofoperator;
   std::vector<ActivityDB::locationType> *fLocationtypelist;
   std::vector<pair<std::string, int>> fLocdetails;
   int                        fNm;
@@ -211,7 +208,6 @@ private:
                          TScanAnalysis **analysis, TScanResult **result, bool &hasButton);
   void AddScan(TScanType scanType, TScanResult *aResult = 0);
   void ClearVectors();
-  int  GetNButtons();
   void WriteToEos(string hicName, ActivityDB::actUri &uri, bool write);
   string GetServiceAccount(string Institute, string &folder);
   string GetResultType(int i);
@@ -254,6 +250,13 @@ private:
   bool                   fHiddenComponent;
   int                    fHalfstavepart;
 
+  std::map<int, int> fScanToRowMap;
+  std::map<int, int> fRowToScanMap;
+
+  void writeSettings();
+  void readSettings();
+
+  virtual void closeEvent(QCloseEvent *event);
 
 private slots:
   void button_obm1_clicked();
