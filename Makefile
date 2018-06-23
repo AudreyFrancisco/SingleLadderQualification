@@ -83,7 +83,20 @@ EXE += $(TEST_EXE_ROOT)
 
 
 #### TARGETS ####
-all: check-env clean $(EXE) Config.cfg githooks lib lib_analysis
+deprec:
+	@echo "WARNING: Makefiles are deprecated and will soon be removed!!!"
+	@echo "-------------------------------------------------------------"
+	@echo "Please switch to the cmake build, for instructions see:"
+	@echo "https://gitlab.cern.ch/alice-its-alpide-software/new-alpide-software/blob/master/CMakeMigration.md"
+	@echo
+	@echo "If you don't manage to switch to cmake or you encounter any problems,"
+	@echo "report as soon as possible to:"
+	@echo "alice-its-qa-software-bugreport@cern.ch"
+	@echo
+	@echo "You need to specify an explicit target to make to continue using this Makefile."
+	@sleep 5
+
+all: deprec check-env clean $(EXE) Config.cfg githooks lib lib_analysis
 
 ### Config.cfg
 Config.cfg: ConfigTemplate.cfg
