@@ -187,9 +187,9 @@ THicClassification TNoiseAnalysis::GetClassification(TNoiseResultHic *result, TH
 {
   THicClassification returnValue = CLASS_GOLD;
 
-  for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
-    if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled()) continue;
-    int               chipId     = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
+  for (auto chip : m_chipList) {
+    if (!hic->ContainsChip(chip)) continue;
+    int               chipId     = chip.chipId & 0xf;
     TNoiseResultChip *chipResult = (TNoiseResultChip *)result->m_chipResults.at(chipId);
 
     DoCut(returnValue, CLASS_SILVER, chipResult->m_noisyPixels.size(), "MAXNOISY_CHIP_GOLD", result,

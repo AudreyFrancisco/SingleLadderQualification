@@ -402,9 +402,9 @@ THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic *result
   if (((TSCurveScan *)m_scan)->GetNominal())
     return CLASS_UNTESTED; // classify only tuned thresholds
 
-  for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
-    if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled()) continue;
-    int                chipId     = hic->GetChips().at(ichip)->GetConfig()->GetChipId() & 0xf;
+  for (auto chip : m_chipList) {
+    if (!hic->ContainsChip(chip)) continue;
+    int                chipId     = chip.chipId;
     TSCurveResultChip *chipResult = (TSCurveResultChip *)result->m_chipResults.at(chipId);
 
     DoCut(returnValue, CLASS_SILVER, chipResult->m_nNoThresh, "THRESH_MAXNOTHRESH_CHIP_GOLD",
