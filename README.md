@@ -1,6 +1,8 @@
 # Framework for ALPIDE testing
 
-[![pipeline status](https://gitlab.cern.ch/alice-its-alpide-software/new-alpide-software/badges/master/pipeline.svg)](https://gitlab.cern.ch/alice-its-alpide-software/new-alpide-software/commits/master)
+Here, you find the general instructions for building and using the
+software. For instructions on the migration to cmake refer to
+[CMakeMigration.md](CMakeMigration.md), instead.
 
 ## Build instructions
 
