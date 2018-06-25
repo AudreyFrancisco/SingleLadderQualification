@@ -295,6 +295,8 @@ void TConfig::ReadConfigFile(const char *fName)
   int         Chip;
   TDeviceType type = TYPE_UNKNOWN;
 
+  fScanConfig = new TScanConfig();
+
   std::string filename = fName;
   if (const char *configDir = std::getenv("ALPIDE_TEST_CONFIG"))
     filename.insert(0, std::string(configDir) + "/");
@@ -349,8 +351,6 @@ void TConfig::ReadConfigFile(const char *fName)
       Initialised = true;
     }
   }
-
-  fScanConfig = new TScanConfig();
 
   // now read the rest
   while (std::getline(infile, line)) {
