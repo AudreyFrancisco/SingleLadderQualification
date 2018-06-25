@@ -103,6 +103,8 @@ unset data files will be written to Data/ in the current working directory
 instead.
 - `ALPIDE_TEST_LOG`: If defined (to anything) write terminal output from GUI
 also to a log file (`gui_<date>_<time>.log`).
+- `ALPIDE_TEST_CORE`: If defined core dumps are enabled (to the maximum size
+allowed by the OS).
 
 This might not yet work for all tools, please report unintended behaviour.
 

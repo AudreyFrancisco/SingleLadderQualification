@@ -1,5 +1,6 @@
 #include <fcntl.h>
 #include <poll.h>
+#include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -9,6 +10,13 @@
 
 int main(int argc, char *argv[])
 {
+  if (getenv("ALPIDE_TEST_CORE")) {
+    struct rlimit core_limit;
+    getrlimit(RLIMIT_CORE, &core_limit);
+    core_limit.rlim_cur = core_limit.rlim_max;
+    setrlimit(RLIMIT_CORE, &core_limit);
+  }
+
   bool log_fork = getenv("ALPIDE_TEST_LOG");
 
   int pipefd_out[2], pipefd_err[2];
