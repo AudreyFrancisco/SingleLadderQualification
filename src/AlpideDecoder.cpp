@@ -78,7 +78,8 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
 
   if (hits->size() >= (unsigned int)hitLimit) {
     char Text[200];
-    sprintf(Text, "ERROR: number of hits exceeding limit of %d", hitLimit);
+    sprintf(Text, "ERROR: number of hits exceeding limit of %d, please check console output",
+            hitLimit);
     throw std::runtime_error(Text);
   }
 

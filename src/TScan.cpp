@@ -6,6 +6,7 @@
 
 #include "AlpideConfig.h"
 #include "Common.h"
+#include "TBoardConfigMOSAIC.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
@@ -456,7 +457,32 @@ TErrorCounter TScan::GetErrorCount(std::string hicId)
 
 void TScan::DumpHitInformation(std::vector<TPixHit> *Hits)
 {
-  std::cout << "Writing of hit information, to be implemented" << std::endl;
+  unsigned int linkInfo[MAXBOARDS][MAX_MOSAICTRANRECV];
+
+  for (unsigned int iboard = 0; iboard < MAXBOARDS; iboard++) {
+    for (unsigned int ich = 0; ich < MAX_MOSAICTRANRECV; ich++) {
+      linkInfo[iboard][ich] = 0;
+    }
+  }
+
+  std::cout << "Dumping hit data to file EventData.dat" << std::endl;
+  FILE *fp = fopen("EventData.dat", "w");
+
+  for (unsigned int i = 0; i < Hits->size(); i++) {
+    fprintf(fp, "%d %d %d %d %d %d\n", Hits->at(i).boardIndex, Hits->at(i).channel,
+            Hits->at(i).chipId, Hits->at(i).region, Hits->at(i).dcol, Hits->at(i).address);
+    linkInfo[Hits->at(i).boardIndex][Hits->at(i).channel]++;
+  }
+  fclose(fp);
+
+  std::cout << std::endl << "Link statistics:" << std::endl;
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+    for (unsigned int ich = 0; ich < MAX_MOSAICTRANRECV; ich++) {
+      std::cout << "  Board " << iboard << ", channel " << ich
+                << ", hits: " << linkInfo[iboard][ich] << std::endl;
+    }
+  }
+  std::cout << std::endl;
 }
 
 
