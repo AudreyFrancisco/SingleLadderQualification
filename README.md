@@ -101,6 +101,8 @@ the directory from which the executable is started).
 - `ALPIDE_TEST_DATA`: If set the data files will be written to this directory. If
 unset data files will be written to Data/ in the current working directory
 instead.
+- `ALPIDE_TEST_LOG`: If defined (to anything) write terminal output from GUI
+also to a log file (`gui_<date>_<time>.log`).
 
 This might not yet work for all tools, please report unintended behaviour.
 
