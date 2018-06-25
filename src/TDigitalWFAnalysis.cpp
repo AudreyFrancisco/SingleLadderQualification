@@ -43,6 +43,7 @@ void TDigitalWFAnalysis::InitCounters()
 
   for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TDigitalWFResultHic *result = (TDigitalWFResultHic *)it->second;
+    result->m_backBias          = m_scan->GetBackbias();
     result->m_nStuck            = 0;
     result->m_nBadDCol          = 0;
     result->m_nUnmaskable       = 0;
@@ -283,16 +284,32 @@ void TDigitalWFResult::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   }
 }
 
+
+void TDigitalWFResultHic::GetParameterSuffix(std::string &suffix, std::string &file_suffix)
+{
+  if (m_backBias == 0) {
+    suffix      = string("");
+    file_suffix = string("");
+  }
+  else if (fabs(m_backBias - 3) < 0.01) {
+    suffix      = string(" BB 3V");
+    file_suffix = string("_BB_3V");
+  }
+}
+
+
 void TDigitalWFResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
-  string remoteName;
-  DbAddParameter(db, activity, string("Unmaskable pixels"), (float)m_nUnmaskable,
+  string remoteName, fileName, suffix, file_suffix;
+  DbAddParameter(db, activity, string("Unmaskable pixels") + suffix, (float)m_nUnmaskable,
                  GetParameterFile());
-  DbAddParameter(db, activity, string("Unmaskable stuck pixels"), (float)m_nBadDCol,
+  DbAddParameter(db, activity, string("Unmaskable stuck pixels") + suffix, (float)m_nBadDCol,
                  GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
-  remoteName        = string(m_resultFile).substr(slash + 1); // strip path
+  fileName          = string(m_resultFile).substr(slash + 1); // strip path
+  std::size_t point = fileName.find_last_of(".");
+  remoteName        = fileName.substr(0, point) + file_suffix + ".dat";
   DbAddAttachment(db, activity, attachResult, string(m_resultFile), remoteName);
 }
 

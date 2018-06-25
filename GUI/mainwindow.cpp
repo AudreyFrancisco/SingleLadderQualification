@@ -1037,6 +1037,7 @@ void MainWindow::fillingOBvectors()
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STDigital);
+  AddScan(STDigitalWF);
   AddScan(STThreshold);
 
   AddScan(STVCASN);
@@ -2496,6 +2497,7 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STDigital);
+  AddScan(STDigitalWF);
   AddScan(STThreshold);
   AddScan(STVCASN);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
@@ -2735,6 +2737,7 @@ void MainWindow::fillingHSscans()
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STDigital);
+  AddScan(STDigitalWF);
   AddScan(STVCASN);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
   AddScan(STApplyVCASN, fresultVector.back());

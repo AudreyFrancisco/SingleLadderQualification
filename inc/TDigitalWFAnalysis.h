@@ -31,11 +31,13 @@ class TDigitalWFResultHic : public TScanResultHic {
   friend class TDigitalWFAnalysis;
 
 private:
-  int  m_nStuck;
-  int  m_nBadDCol;
-  int  m_nUnmaskable;
-  char m_stuckFile[200];
-  char m_unmaskedFile[200];
+  float m_backBias;
+  int   m_nStuck;
+  int   m_nBadDCol;
+  int   m_nUnmaskable;
+  char  m_stuckFile[200];
+  char  m_unmaskedFile[200];
+  void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 public:
   TDigitalWFResultHic() : TScanResultHic(){};

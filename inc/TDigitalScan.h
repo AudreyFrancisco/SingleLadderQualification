@@ -18,13 +18,13 @@ class TDigitalScan : public TMaskScan {
 private:
   void ConfigureFromu(TAlpide *chip);
   void FillHistos(std::vector<TPixHit> *Hits, int board);
-  void SetName();
 
 protected:
   void ConfigureChip(TAlpide *chip);
   void ConfigureBoard(TReadoutBoard *board);
-  THisto CreateHisto();
-  void   CreateScanParameters() { m_parameters = new TDigitalParameters; };
+  THisto       CreateHisto();
+  void         CreateScanParameters() { m_parameters = new TDigitalParameters; };
+  virtual void SetName();
 
 public:
   TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
@@ -50,6 +50,9 @@ public:
 };
 
 class TDigitalWhiteFrame : public TDigitalScan {
+protected:
+  void SetName();
+
 public:
   TDigitalWhiteFrame(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                      std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,

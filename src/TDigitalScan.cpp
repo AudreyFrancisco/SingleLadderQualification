@@ -271,7 +271,7 @@ TDigitalWhiteFrame::TDigitalWhiteFrame(TScanConfig *config, std::vector<TAlpide 
                                        std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TDigitalScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  strcpy(m_name, "Digital White Frame");
+  SetName();
 }
 
 void TDigitalWhiteFrame::ConfigureMaskStage(TAlpide *chip, int istage)
@@ -281,9 +281,10 @@ void TDigitalWhiteFrame::ConfigureMaskStage(TAlpide *chip, int istage)
 
 void TDigitalWhiteFrame::Init()
 {
-  CreateScanHisto();
-
   TScan::Init();
+
+  SetBackBias();
+  CreateScanHisto();
   m_running = true;
   CountEnabledChips();
 
@@ -308,4 +309,10 @@ void TDigitalWhiteFrame::Init()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+}
+
+
+void TDigitalWhiteFrame::SetName()
+{
+  sprintf(m_name, "Digital White Frame BB %d", (int)((TDigitalParameters *)m_parameters)->backBias);
 }
