@@ -1174,7 +1174,7 @@ void MainWindow::performtests()
   poweroff();
 }
 
-void MainWindow::applytests()
+void MainWindow::initscanlist()
 {
   writingdb = false;
 
@@ -1237,7 +1237,10 @@ void MainWindow::applytests()
   }
   qApp->processEvents();
   std::cout << "the size of the scan vector is: " << fScanVector.size() << std::endl;
+}
 
+void MainWindow::applytests()
+{
   performtests();
 
   if (fNumberofscan == OBEndurance) {
@@ -2028,6 +2031,7 @@ void MainWindow::loadeditedconfig()
   std::cout << "the number of mask stages is " << fConfig->GetScanConfig()->GetNMaskStages()
             << std::endl;
   fScanconfigwindow->close();
+  initscanlist();
   ui->start_test->show();
 }
 
@@ -2043,6 +2047,8 @@ void MainWindow::loaddefaultconfig()
   std::cout << fOperatorname.toStdString() << ", " << fHicidnumber.toStdString() << ", "
             << fIdoflocationtype << ", " << fIdofoperator << std::endl;
   fScanconfigwindow->close();
+  initscanlist();
+  ui->start_test->show();
 }
 
 void MainWindow::colorsinglescan(int i)

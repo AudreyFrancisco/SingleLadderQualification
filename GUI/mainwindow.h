@@ -267,6 +267,7 @@ private slots:
   void button_obm6_clicked();
   void button_obm7_clicked();
   void applytests();
+  void initscanlist();
   void performtests();
   void test();
   void detailscombo(int dnumber);
