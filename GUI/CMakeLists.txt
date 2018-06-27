@@ -14,6 +14,7 @@ set(SRCS
   databasefailure.cpp
   databaseselection.cpp
   dbnotice.cpp
+  debugwindow.cpp
   dialog.cpp
   main.cpp
   mainwindow.cpp

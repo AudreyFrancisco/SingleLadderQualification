@@ -16,6 +16,7 @@
 #include "TScanConfig.h"
 #include "TScanFactory.h"
 #include "calibrationpb.h"
+#include "debugwindow.h"
 #include "dialog.h"
 #include "scanconfiguration.h"
 #include "testingprogress.h"
@@ -40,7 +41,6 @@
 #include <string>
 #include <thread>
 #include <typeinfo>
-
 #include "TCycleAnalysis.h"
 #include "TEnduranceCycle.h"
 
@@ -107,10 +107,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(poweroff, &QAction::triggered, this, &MainWindow::poweroff);
   QAction *quit = new QAction("&Quit", this);
   connect(quit, &QAction::triggered, this, &MainWindow::close);
+  QAction *newdebug = new QAction("&Debug mode", this);
+  connect(newdebug, SIGNAL(triggered()), this, SLOT(start_debug()));
 
   // build menu (based on actions)
   QMenu *menu = menuBar()->addMenu("&Actions");
   menu->addAction(newtestaction);
+  menu->addAction(newdebug);
   menu->addAction(newtestprod);
   menu->addAction(newtesttest);
   menu->addAction(run_test);
@@ -604,6 +607,21 @@ void MainWindow::start_test()
   fSettingswindow = new TestSelection(this, fDatabasetype);
   fSettingswindow->Init();
   fSettingswindow->exec();
+}
+
+void MainWindow::start_debug()
+{
+  fDebugWindow = new DebugWindow(this);
+  fDebugWindow->exec();
+}
+
+void MainWindow::doDebugScan(TScanType scanType)
+{
+  fDebugWindow->close();
+  ClearVectors();
+  AddScan(scanType);
+  fstopwriting = true;
+  performtests();
 }
 
 void MainWindow::fillingOBvectors()
