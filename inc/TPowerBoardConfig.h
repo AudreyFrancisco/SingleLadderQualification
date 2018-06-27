@@ -97,10 +97,14 @@ const float RDigital[2][8] = {{0.034, 0.042, 0.043, 0.050, 0.036, 0.038, 0.044, 
 const float RWPBAnalog[7]  = {0, 0, 0, 0, 0, 0, 0};
 const float RWPBDigital[7] = {0, 0, 0, 0, 0, 0, 0};
 const float RWPBGround[7]  = {0, 0, 0, 0, 0, 0, 0};
-// resistances of real power bus
-const float RPBAnalog[7]  = {0, 0, 0, 0, 0, 0, 0};
-const float RPBDigital[7] = {0, 0, 0, 0, 0, 0, 0};
-const float RPBGround[7]  = {0, 0, 0, 0, 0, 0, 0};
+// resistances of real power bus, outer layer and middle layer
+// OL: values measured in Torino
+const float RPBAnalog[7]    = {0.179, 0.383, 0.458, 0.476, 0.490, 0.512, 0.507};
+const float RPBDigital[7]   = {0.074, 0.098, 0.107, 0.113, 0.123, 0.118, 0.121};
+const float RPBGround[7]    = {0.007, 0.008, 0.010, 0.012, 0.014, 0.016, 0.018};
+const float RPBAnalogML[4]  = {0, 0, 0, 0};
+const float RPBDigitalML[4] = {0, 0, 0, 0};
+const float RPBGroundML[4]  = {0, 0, 0, 0};
 
 // Class definition
 class TPowerBoardConfig {
@@ -181,7 +185,7 @@ public:
   void SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
   void EnterMeasuredLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
   void GetWirePBResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, float &BBLineR);
-  void AddPowerBusResistances(int mod, bool real = false);
+  void AddPowerBusResistances(int mod, bool real = false, bool middle = false);
   void GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR);
   bool IsCalibrated(int mod);
   void WriteCalibrationFile();
