@@ -20,7 +20,7 @@ bool fTimeLimitReached;
 TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
              std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
              std::mutex *aMutex)
-    : time_start(), time_end()
+    : m_histo(nullptr), time_start(), time_end()
 {
   m_config = config;
   m_chips  = chips;

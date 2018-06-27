@@ -11,7 +11,7 @@
 TSCurveScan::TSCurveScan(TScanConfig *config, std::vector<TAlpide *> chips,
                          std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                          std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
-    : TMaskScan(config, chips, hics, boards, histoQue, aMutex)
+    : TMaskScan(config, chips, hics, boards, histoQue, aMutex), m_hitsets(nullptr)
 {
   CreateScanParameters();
 
