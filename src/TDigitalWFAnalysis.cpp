@@ -301,6 +301,7 @@ void TDigitalWFResultHic::GetParameterSuffix(std::string &suffix, std::string &f
 void TDigitalWFResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   string remoteName, fileName, suffix, file_suffix;
+  GetParameterSuffix(suffix, file_suffix);
   DbAddParameter(db, activity, string("Unmaskable pixels") + suffix, (float)m_nUnmaskable,
                  GetParameterFile());
   DbAddParameter(db, activity, string("Unmaskable stuck pixels") + suffix, (float)m_nBadDCol,
