@@ -2140,11 +2140,11 @@ void MainWindow::setandgetcalibration()
     if ((fNumberofscan == OBHalfStaveOL) || (fNumberofscan == OBHalfStaveML)) {
       powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod());
     }
-    if ((fNumberofscan == OBStaveOL)) {
+    if (fNumberofscan == OBStaveOL) {
       powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod(),
                                                                     true, false);
     }
-    if ((fNumberofscan == OBStaveML)) {
+    if (fNumberofscan == OBStaveML) {
       powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod(),
                                                                     true, true);
     }
