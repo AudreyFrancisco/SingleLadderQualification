@@ -26,6 +26,7 @@ protected:
   THicClassification m_class;
   THicClassification m_worstScanBB;
   THicClassification m_worstScanNoBB;
+  virtual bool IsOnBoard(int boardIdx, int chipId) = 0;
 
 public:
   THic(const char *dbId, int modId, TPowerBoard *pb, int pbMod);
@@ -36,10 +37,10 @@ public:
   bool         IsPoweredDigital();
   bool         IsEnabled();
   void         Disable();
-  unsigned int GetNEnabledChips();
-  unsigned int GetNEnabledChipsNoBB();
-  unsigned int GetNEnabledChipsWithBB();
-  virtual void PowerOn() = 0;
+  unsigned int GetNEnabledChips(int boardIdx = -1);
+  unsigned int GetNEnabledChipsNoBB(int boardIdx = -1);
+  unsigned int GetNEnabledChipsWithBB(int boardIdx = -1);
+  virtual void PowerOn()                           = 0;
   void         PowerOff();
   float        GetIddd();
   float        GetIdda();
@@ -84,6 +85,8 @@ private:
   int m_ctrl8;     // control interface for master 8
   int m_position;  // position on half-stave
 protected:
+  bool IsOnBoard(int boardIdx, int chipId);
+
 public:
   THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod);
   virtual ~THicOB(){};
@@ -105,6 +108,8 @@ private:
   int m_rcv[9];
   int m_ctrl; // control interface
 protected:
+  bool IsOnBoard(int boardIdx, int chipId);
+
 public:
   THicIB(const char *dbId, int modId, TPowerBoard *pb, int pbMod);
   virtual ~THicIB(){};

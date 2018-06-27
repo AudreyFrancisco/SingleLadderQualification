@@ -45,29 +45,35 @@ TAlpide *THic::GetChipById(int chipId)
 // IsEnabled: returns true if at least one chip on the HIC is enabled, false otherwise
 bool THic::IsEnabled() { return (GetNEnabledChips() > 0); }
 
-unsigned int THic::GetNEnabledChips()
+unsigned int THic::GetNEnabledChips(int boardIdx)
 {
   unsigned int n = 0;
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-    if (m_chips.at(ichip)->GetConfig()->IsEnabled()) n++;
+    if ((boardIdx == -1) || IsOnBoard(boardIdx, m_chips.at(ichip)->GetConfig()->GetChipId())) {
+      if (m_chips.at(ichip)->GetConfig()->IsEnabled()) n++;
+    }
   }
   return n;
 }
 
-unsigned int THic::GetNEnabledChipsNoBB()
+unsigned int THic::GetNEnabledChipsNoBB(int boardIdx)
 {
   unsigned int n = 0;
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-    if (m_chips.at(ichip)->GetConfig()->IsEnabledNoBB()) n++;
+    if ((boardIdx == -1) || IsOnBoard(boardIdx, m_chips.at(ichip)->GetConfig()->GetChipId())) {
+      if (m_chips.at(ichip)->GetConfig()->IsEnabledNoBB()) n++;
+    }
   }
   return n;
 }
 
-unsigned int THic::GetNEnabledChipsWithBB()
+unsigned int THic::GetNEnabledChipsWithBB(int boardIdx)
 {
   unsigned int n = 0;
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-    if (m_chips.at(ichip)->GetConfig()->IsEnabledWithBB()) n++;
+    if ((boardIdx == -1) || IsOnBoard(boardIdx, m_chips.at(ichip)->GetConfig()->GetChipId())) {
+      if (m_chips.at(ichip)->GetConfig()->IsEnabledWithBB()) n++;
+    }
   }
   return n;
 }
@@ -346,6 +352,13 @@ bool THicIB::ContainsChip(common::TChipIndex idx)
   return false;
 }
 
+bool THicIB::IsOnBoard(int boardIdx, int chipId)
+{
+  if (boardIdx == m_boardidx) return true;
+  return false;
+}
+
+
 bool THicIB::ContainsReceiver(int boardIndex, int rcv)
 {
   if (boardIndex != m_boardidx) return false;
@@ -446,6 +459,14 @@ bool THicOB::ContainsChip(common::TChipIndex idx)
 
   return false;
 }
+
+bool THicOB::IsOnBoard(int boardIdx, int chipId)
+{
+  if ((chipId & 0x8) && (boardIdx == m_boardidx8)) return true;
+  if (((chipId & 0x8) == 0) && (boardIdx == m_boardidx0)) return true;
+  return true;
+}
+
 
 bool THicOB::ContainsReceiver(int boardIndex, int rcv)
 {
