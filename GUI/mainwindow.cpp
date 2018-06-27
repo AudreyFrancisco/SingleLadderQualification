@@ -1088,8 +1088,11 @@ void MainWindow::performtests()
       else {
         try {
           auto future_init = std::async(std::launch::async, &TScan::Init, fScanVector[i]);
-          while (future_init.wait_for(delay) != std::future_status::ready)
+          while (future_init.wait_for(delay) != std::future_status::ready) {
+            if (fScanToRowMap.count(i) > 0)
+              ui->testTable->item(fScanToRowMap[i], 1)->setText(fScanVector.at(i)->GetState());
             qApp->processEvents();
+          }
           future_init.get();
         }
         catch (exception &ex) {
