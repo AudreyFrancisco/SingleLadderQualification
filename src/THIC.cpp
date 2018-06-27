@@ -464,7 +464,7 @@ bool THicOB::IsOnBoard(int boardIdx, int chipId)
 {
   if ((chipId & 0x8) && (boardIdx == m_boardidx8)) return true;
   if (((chipId & 0x8) == 0) && (boardIdx == m_boardidx0)) return true;
-  return true;
+  return false;
 }
 
 
