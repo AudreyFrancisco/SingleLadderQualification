@@ -842,11 +842,11 @@ void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
     DbAddParameter(db, activity, string("Maximum relative RMS") + suffix, (float)m_maxRelativeRms,
                    GetParameterFile());
     if (!m_nominal) {
-      DbAddParameter(db, activity, string("Maximum threshold deviation, ") + suffix,
+      DbAddParameter(db, activity, string("Maximum threshold deviation,") + suffix,
                      (float)m_maxDeviation, GetParameterFile());
-      DbAddParameter(db, activity, string("Dead pixels increase ") + suffix, (float)m_nDeadIncrease,
+      DbAddParameter(db, activity, string("Dead pixels increase") + suffix, (float)m_nDeadIncrease,
                      GetParameterFile());
-      DbAddParameter(db, activity, string("Pixels without thresh increase ") + suffix,
+      DbAddParameter(db, activity, string("Pixels without thresh increase") + suffix,
                      (float)m_nNoThreshIncrease, GetParameterFile());
     }
   }
