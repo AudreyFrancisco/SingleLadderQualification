@@ -1532,7 +1532,7 @@ Digital scan                     Waiting . .
  <item row="2" column="0" colspan="1">
    <layout class="QHBoxLayout" name="buttonLayout">
      <item>
-   <widget class="QPushButton" name="start_test">
+   <widget class="QToolButton" name="start_test">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -1547,7 +1547,7 @@ Digital scan                     Waiting . .
    </widget>
  </item>
  <item>
-   <widget class="QPushButton" name="poweroff">
+   <widget class="QToolButton" name="poweroff">
     <property name="geometry">
      <rect>
       <x>120</x>
@@ -1564,7 +1564,7 @@ Digital scan                     Waiting . .
  </layout>
  </item>
  <item row="2" column="2">
-   <widget class="QPushButton" name="quit">
+   <widget class="QToolButton" name="quit">
     <property name="geometry">
      <rect>
       <x>1210</x>

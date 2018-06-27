@@ -137,18 +137,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     fDatabasetype     = 1;
     start_test();
   });
-  fWritedb          = new QAction("&Write to database", this);
+  fWritedb = new QAction("&Write to database", this);
+  QAction *run_test =
+      new QAction(QApplication::style()->standardIcon(QStyle::SP_MediaPlay), "Start test", this);
+  connect(run_test, &QAction::triggered, this, &MainWindow::applytests);
+  run_test->setEnabled(false);
   QAction *poweroff = new QAction(
       QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton), "Power Off", this);
   connect(poweroff, &QAction::triggered, this, &MainWindow::poweroff);
   QAction *quit = new QAction("&Quit", this);
-  connect(quit, &QAction::triggered, this, &MainWindow::quitall);
+  connect(quit, &QAction::triggered, this, &MainWindow::close);
 
   // build menu (based on actions)
   QMenu *menu = menuBar()->addMenu("&Actions");
   menu->addAction(newtestaction);
   menu->addAction(newtestprod);
   menu->addAction(newtesttest);
+  menu->addAction(run_test);
   menu->addAction(fWritedb);
   menu->addAction(poweroff);
   menu->addAction(quit);
@@ -157,6 +162,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   // build toolbar (based on actions)
   addToolBar(Qt::LeftToolBarArea, ui->mainToolBar);
   ui->mainToolBar->addAction(newtestprod);
+  ui->mainToolBar->addSeparator();
+  ui->mainToolBar->addAction(run_test);
   ui->mainToolBar->addAction(poweroff);
 
   // no status bar for now
@@ -171,7 +178,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->abortall, SIGNAL(clicked()), this, SLOT(StopScan()), Qt::DirectConnection);
   connect(ui->newtest, SIGNAL(clicked()), SLOT(start_test()));
   connect(ui->cfg, SIGNAL(clicked()), this, SLOT(open()));
-  connect(ui->quit, SIGNAL(clicked()), this, SLOT(quitall()));
   connect(ui->obm1, SIGNAL(clicked()), this, SLOT(button_obm1_clicked()));
   connect(ui->obm2, SIGNAL(clicked()), this, SLOT(button_obm2_clicked()));
   connect(ui->obm3, SIGNAL(clicked()), this, SLOT(button_obm3_clicked()));
@@ -207,7 +213,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QPixmap alicelog(":logo.png");
   ui->alicelogo->setPixmap(alicelog.scaled(50, 50, Qt::KeepAspectRatio));
 
-  ui->start_test->hide();
+  ui->start_test->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+  ui->start_test->setDefaultAction(run_test);
+  ui->start_test->setToolButtonStyle(Qt::ToolButtonTextOnly);
+
+  ui->poweroff->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+  ui->poweroff->setDefaultAction(poweroff);
+  ui->poweroff->setToolButtonStyle(Qt::ToolButtonTextOnly);
+
+  ui->quit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+  ui->quit->setDefaultAction(quit);
+  ui->quit->setToolButtonStyle(Qt::ToolButtonTextOnly);
 
   connect(ui->testib, SIGNAL(clicked()), this, SLOT(IBBasicTest()));
   ui->testib->hide();
@@ -226,7 +242,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+  if (writingdb == false && fstopwriting == false) {
+    fNoticewindow = new DBnotice(this);
+    fNoticewindow->adjustingtemplate();
+    fNoticewindow->exec();
+  }
+
   writeSettings();
+  poweroff();
+
   event->accept();
 }
 
@@ -965,7 +989,7 @@ void MainWindow::start_test()
   ui->details->hide();
   ui->displaydetails->hide();
 
-  disconnect(ui->start_test, SIGNAL(clicked()), this, SLOT(applytests()));
+  ui->start_test->defaultAction()->setEnabled(false);
   ui->testtypeselected->clear();
   fHicidnumber = '\0';
   fToptwo      = '\0';
@@ -1205,8 +1229,6 @@ void MainWindow::initscanlist()
     //}
   }
 
-  ui->start_test->hide();
-  qApp->processEvents();
   if (fNumberofscan == OBQualification) {
     fillingOBvectors();
   }
@@ -1240,10 +1262,15 @@ void MainWindow::initscanlist()
   }
   qApp->processEvents();
   std::cout << "the size of the scan vector is: " << fScanVector.size() << std::endl;
+
+  ui->start_test->defaultAction()->setEnabled(true);
 }
 
 void MainWindow::applytests()
 {
+  ui->start_test->defaultAction()->setEnabled(false);
+  qApp->processEvents();
+
   performtests();
 
   if (fNumberofscan == OBEndurance) {
@@ -1416,18 +1443,6 @@ void MainWindow::poweroff()
     fHICs.at(i)->PowerOff();
   }
   std::cout << "Done." << std::endl;
-}
-
-void MainWindow::quitall()
-{
-  if (writingdb == false && fstopwriting == false) {
-    fNoticewindow = new DBnotice(this);
-    fNoticewindow->adjustingtemplate();
-    fNoticewindow->exec();
-  }
-
-  poweroff();
-  close();
 }
 
 void MainWindow::WriteToEos(string hicName, ActivityDB::actUri &uri, bool write)
@@ -2027,7 +2042,6 @@ void MainWindow::loadeditedconfig()
   convert << fNm;
   final = convert.str();
   fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", final.c_str());
-  connect(ui->start_test, SIGNAL(clicked()), this, SLOT(applytests()));
   std::cout << fOperatorname.toStdString() << ", " << fHicidnumber.toStdString() << ", "
             << fIdoflocationtype << ", " << fIdofoperator << std::endl;
   std::cout << "the speed is set to " << fConfig->GetScanConfig()->GetSpeedy() << std::endl;
@@ -2035,7 +2049,6 @@ void MainWindow::loadeditedconfig()
             << std::endl;
   fScanconfigwindow->close();
   initscanlist();
-  ui->start_test->show();
 }
 
 void MainWindow::loaddefaultconfig()
@@ -2046,12 +2059,10 @@ void MainWindow::loaddefaultconfig()
   if (fCounter == 0) {
     return;
   }
-  connect(ui->start_test, SIGNAL(clicked()), this, SLOT(applytests()));
   std::cout << fOperatorname.toStdString() << ", " << fHicidnumber.toStdString() << ", "
             << fIdoflocationtype << ", " << fIdofoperator << std::endl;
   fScanconfigwindow->close();
   initscanlist();
-  ui->start_test->show();
 }
 
 void MainWindow::colorsinglescan(int i)

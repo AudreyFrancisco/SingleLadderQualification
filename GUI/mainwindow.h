@@ -85,7 +85,6 @@ public slots:
   void createbtn();
   void popup(QString message);
   void poweroff();
-  void quitall();
   void getresultdetails(int i);
   void writecalibrationfile();
   void opencalibration();
