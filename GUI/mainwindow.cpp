@@ -429,6 +429,13 @@ void MainWindow::open()
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
     fStatus          = fConfig->GetScanConfig()->GetParamValue("STATUS");
     fConfig->GetScanConfig()->SetParamValue("HALFSTAVECOMP", fHalfstavepart);
+    if (fNumberofscan == OBPower) {
+      if (fConfig->GetDeviceType() != TYPE_POWER) {
+        popup("You are doing a \nFAST POWER TEST \nwith a wrong \ndevice name");
+        return;
+      }
+    }
+
 
     if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
         fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML) {
@@ -915,7 +922,7 @@ void MainWindow::popup(QString message)
   fWindowex = new Dialog(this);
   fWindowex->append(message);
   fWindowex->hidequit();
-  fWindowex->show();
+  fWindowex->exec();
 }
 
 void MainWindow::start_test()
@@ -1965,6 +1972,9 @@ void MainWindow::savesettings()
   }
   else {
     open();
+    if (!fProperconfig) {
+      return;
+    }
     if (fstop && fHiddenComponent == false) {
       return;
     }
