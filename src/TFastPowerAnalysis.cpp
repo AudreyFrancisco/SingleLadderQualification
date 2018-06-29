@@ -77,6 +77,8 @@ THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents         
 {
   THicClassification returnValue = CLASS_GOLD;
 
+  if (currents.trip) returnValue = CLASS_RED;
+
   DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", result, true);
   DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", result, true);
 
