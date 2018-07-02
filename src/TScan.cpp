@@ -103,9 +103,11 @@ void TScan::Init()
 
     try {
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart =
-          m_hics.at(ihic)->GetTemperature();
+          m_hics.at(ihic)->GetTemperature(
+              &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipTempsStart));
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipStart =
-          m_hics.at(ihic)->GetAnalogueVoltage();
+          m_hics.at(ihic)->GetAnalogueVoltage(
+              &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipVoltagesStart));
     }
     catch (std::exception &e) {
       std::cout << "Init: Exception " << e.what() << " when reading chip temp / currents"
@@ -237,9 +239,11 @@ void TScan::Terminate()
 
     try {
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd =
-          m_hics.at(ihic)->GetTemperature();
+          m_hics.at(ihic)->GetTemperature(
+              &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipTempsEnd));
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipEnd =
-          m_hics.at(ihic)->GetAnalogueVoltage();
+          m_hics.at(ihic)->GetAnalogueVoltage(
+              &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipVoltagesEnd));
     }
     catch (std::exception &e) {
       std::cout << "Terminate: exception " << e.what() << " when reading chip temp / currents"
@@ -672,6 +676,35 @@ void TScan::WriteConditions(const char *fName, THic *aHic)
   fprintf(fp, "Temp (on-chip, end):   %.1f\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempEnd);
 
+  fprintf(fp, "\nSingle chip values:\n\n");
+
+  std::map<int, float>::iterator it;
+
+  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipVoltagesStart.begin();
+       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipVoltagesStart.end(); it++) {
+    fprintf(fp, "  Analogue voltage (start) on chip %d: %.3f\n", it->first, it->second);
+  }
+
+  fputs("\n", fp);
+
+  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipVoltagesEnd.begin();
+       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipVoltagesEnd.end(); it++) {
+    fprintf(fp, "  Analogue voltage (end) on chip %d: %.3f\n", it->first, it->second);
+  }
+
+  fputs("\n", fp);
+
+  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipTempsStart.begin();
+       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipTempsStart.end(); it++) {
+    fprintf(fp, "  Temperature (start) on chip %d: %.3f\n", it->first, it->second);
+  }
+
+  fputs("\n", fp);
+
+  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipTempsEnd.begin();
+       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipTempsEnd.end(); it++) {
+    fprintf(fp, "  Temperature (end) on chip %d: %.3f\n", it->first, it->second);
+  }
 
   fputs("\n", fp);
 

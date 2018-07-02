@@ -55,6 +55,10 @@ private:
   float m_vddaSetEnd;
   float m_vdddSetStart;
   float m_vdddSetEnd;
+  std::map<int, float> m_chipVoltagesStart;
+  std::map<int, float> m_chipVoltagesEnd;
+  std::map<int, float> m_chipTempsStart;
+  std::map<int, float> m_chipTempsEnd;
 
 public:
   TScanConditionsHic(){};
