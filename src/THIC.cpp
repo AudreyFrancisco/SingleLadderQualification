@@ -208,15 +208,21 @@ void THic::SwitchBias(bool on)
   }
 }
 
-float THic::GetTemperature()
+float THic::GetTemperature(std::map<int, float> *chipValues)
 {
   float result = 0;
   int   nChips = 0;
 
+  if (chipValues) chipValues->clear();
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
-    result += m_chips.at(i)->ReadTemperature();
+    float temp = m_chips.at(i)->ReadTemperature();
+    result += temp;
     nChips++;
+    if (chipValues) {
+      chipValues->insert(
+          std::pair<int, float>(m_chips.at(i)->GetConfig()->GetChipId() & 0xf, temp));
+    }
   }
 
   if (nChips > 0)

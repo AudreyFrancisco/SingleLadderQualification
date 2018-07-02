@@ -50,7 +50,7 @@ public:
   float        GetVdddSet();
   float        GetVddaSet();
   float        GetVbias();
-  float        GetTemperature();
+  float GetTemperature(std::map<int, float> *chipValues = 0);
   void ScaleVoltage(float aFactor);
   std::string  GetDbId() { return m_dbId; };
   int          GetModId() { return m_moduleId; };
