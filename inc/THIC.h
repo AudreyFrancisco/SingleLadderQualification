@@ -68,7 +68,7 @@ public:
   TPowerBoard *GetPowerBoard() { return m_powerBoard; };
   int          GetPbMod() { return m_pbMod; };
   void SwitchBias(bool on);
-  float GetAnalogueVoltage();
+  float GetAnalogueVoltage(std::map<int, float> *chipValues = 0);
   void AddClassification(THicClassification aClass, bool backBias);
   THicClassification GetClassification();
   THicClassification GetOldClassification() { return m_oldClass; };
