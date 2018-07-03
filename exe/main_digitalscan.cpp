@@ -262,8 +262,8 @@ void scan()
 
         int fEnabled = fEnPerBoard.at(ib);
         while (itrg < nTrigsPerTrain * fEnabled) {
-          if (fBoards.at(ib)->ReadEventData(n_bytes_data, buffer) ==
-              -1) { // no event available in buffer yet, wait a bit
+          if (fBoards.at(ib)->ReadEventData(n_bytes_data, buffer) <=
+              0) { // no event available in buffer yet, wait a bit
             usleep(100);
             nTrials++;
             if (nTrials == MAXTRIALS) {

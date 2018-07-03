@@ -275,8 +275,8 @@ void scan(int maskStepSize, int VCASN_mean, bool automated)
       int itrg   = 0;
       int trials = 0;
       while (itrg < myNTriggers * fEnabled) {
-        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) ==
-            -1) { // no event available in buffer yet, wait a bit
+        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) <=
+            0) { // no event available in buffer yet, wait a bit
           usleep(100);
           trials++;
           if (trials == 10) {

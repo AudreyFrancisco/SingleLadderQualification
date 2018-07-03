@@ -151,8 +151,8 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
   }
 
   while (itrg < nTriggers * m_enabled[iboard]) {
-    if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) ==
-        -1) { // no event available in buffer yet, wait a bit
+    if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) <=
+        0) { // no event available in buffer yet, wait a bit
       usleep(100);
       trials++;
       if (trials == 3) {

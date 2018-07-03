@@ -237,7 +237,7 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
   for (;;) {
     try {
       readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), &dr);
-      if (readDataSize == 0) return -1;
+      if (readDataSize == 0) return 0; // Zero means no data
     }
     catch (exception &e) {
       cerr << e.what() << endl;

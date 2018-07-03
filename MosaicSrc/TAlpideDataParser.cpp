@@ -99,28 +99,38 @@ long TAlpideDataParser::parse(int numClosed)
 //
 // Read only one frame of data
 // return the size of data frame
+//        0 := No data
+//       -1 := Event discharged
+//
 int TAlpideDataParser::ReadEventData(int &nBytes, unsigned char *buffer)
 {
   unsigned char *dBuffer = (unsigned char *)&dataBuffer[0];
   unsigned char *p       = dBuffer;
   long           evSize;
+  long           retValue;
   unsigned char  evFlags;
 
   if (numClosedData == 0) return 0;
 
   evSize = checkEvent(p, &evFlags);
 
-  // copy the block header to the user buffer
-  memcpy(buffer, blockHeader, MOSAIC_HEADER_SIZE);
-
-  // copy data to user buffer
-  memcpy(buffer + MOSAIC_HEADER_SIZE, dBuffer, evSize);
-  nBytes = MOSAIC_HEADER_SIZE + evSize;
+  if(evSize + MOSAIC_HEADER_SIZE < MAX_EVENT_SIZE) {
+    // copy the block header to the user buffer
+    memcpy(buffer, blockHeader, MOSAIC_HEADER_SIZE);
+    // copy data to user buffer
+    memcpy(buffer + MOSAIC_HEADER_SIZE, dBuffer, evSize);
+    nBytes = MOSAIC_HEADER_SIZE + evSize;
+    retValue = evSize;
+  } else {
+    cerr << "One event exceeds the maximum buffer dimension (" << (MOSAIC_HEADER_SIZE + evSize) << " > " << MAX_EVENT_SIZE << ") Event discharged !" << endl;
+    nBytes = 0;
+    retValue = -1;
+  }
 
   // move unused bytes to the begin of buffer
   size_t bytesToMove = dataBufferUsed - evSize;
   if (bytesToMove > 0) memmove(&dataBuffer[0], &dataBuffer[evSize], bytesToMove);
   dataBufferUsed -= evSize;
   numClosedData--;
-  return evSize;
+  return retValue;
 }

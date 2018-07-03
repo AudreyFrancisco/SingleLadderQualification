@@ -126,11 +126,13 @@ int main(int argc, char **argv)
   for (int i = 0; i < NR_TRIGGERS; ++i) {
     int bytesRead = 0;
 
-    theBoard->ReadEventData(bytesRead, buffer.data());
-    std::cout << "Pass " << i << ", Bytes Read: " << bytesRead << "\n";
-    std::string   filename = std::string("event_") + std::to_string(i) + ".dat";
-    std::ofstream of(filename, ios::binary);
-    of.write((char *)buffer.data(), bytesRead);
+    if(theBoard->ReadEventData(bytesRead, buffer.data()) >
+      0){
+      std::cout << "Pass " << i << ", Bytes Read: " << bytesRead << "\n";
+      std::string   filename = std::string("event_") + std::to_string(i) + ".dat";
+      std::ofstream of(filename, ios::binary);
+      of.write((char *)buffer.data(), bytesRead);
+    }
   }
 
   return 0;
