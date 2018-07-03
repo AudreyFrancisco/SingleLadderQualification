@@ -211,7 +211,7 @@ int configureChip(TAlpide *chip)
 
 void scan()
 {
-  unsigned char buffer[1024 * 4000];
+  unsigned char buffer[MAX_EVENT_SIZE];
   int           n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b = 0, nClosedEvents = 0;
   int           nBad       = 0;
   int           nSkipped   = 0;

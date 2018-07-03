@@ -34,7 +34,6 @@
 
 #define DATA_INPUT_BUFFER_SIZE 64 * 1024
 
-#define MAX_EVENT_SIZE (1024 * 4096)
 
 // class string;
 using namespace std;

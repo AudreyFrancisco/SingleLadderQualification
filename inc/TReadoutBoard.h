@@ -10,6 +10,8 @@
 #include "TAlpide.h"
 #include "TBoardConfig.h"
 
+#define MAX_EVENT_SIZE 4096000
+
 class TBoardConfig;
 
 typedef struct {

@@ -263,7 +263,7 @@ void fillVcasn(float *vcasn)
 
 void scan()
 {
-  unsigned char         buffer[1024 * 4000];
+  unsigned char         buffer[MAX_EVENT_SIZE];
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nBad = 0, nSkipped = 0, prioErrors = 0, errors8b10b = 0;
   float *               vcasn = new float[14]; // shouldn't have >14 chips

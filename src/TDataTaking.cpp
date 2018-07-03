@@ -140,7 +140,7 @@ void TDataTaking::FindTimeoutHics(int iboard, int *triggerCounts, int nTriggers)
 
 void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTriggers)
 {
-  unsigned char buffer[1024 * 4000];
+  unsigned char buffer[MAX_EVENT_SIZE];
   int           n_bytes_data, n_bytes_header, n_bytes_trailer;
   int           itrg = 0, trials = 0;
   TBoardHeader  boardInfo;

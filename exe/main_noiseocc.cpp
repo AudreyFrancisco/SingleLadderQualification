@@ -184,7 +184,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 
 void scan()
 {
-  unsigned char buffer[1024 * 4000];
+  unsigned char buffer[MAX_EVENT_SIZE];
   int           n_bytes_data, n_bytes_header, n_bytes_trailer, nClosedEvents = 0;
   int           nBad = 0, nSkipped = 0, prioErrors = 0, errors8b10b = 0, errorsRecvChipID = 0;
   TBoardHeader  boardInfo;

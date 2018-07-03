@@ -179,7 +179,7 @@ int configureChip(TAlpide *chip)
 
 void scan(const char *fName)
 {
-  unsigned char         buffer[1024 * 4000];
+  unsigned char         buffer[MAX_EVENT_SIZE];
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nSkipped = 0, prioErrors = 0;
   TBoardHeader          boardInfo;
