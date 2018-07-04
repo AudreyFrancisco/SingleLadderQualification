@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>738</width>
-    <height>457</height>
+    <height>493</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,22 +16,29 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>200</x>
+     <x>30</x>
      <y>10</y>
-     <width>341</width>
-     <height>71</height>
+     <width>671</width>
+     <height>201</height>
     </rect>
    </property>
    <property name="text">
-    <string>A problem occured during writing to the database 
-How do you want to proceed?</string>
+    <string>A problem occured during writing to the database (see list below) 
+How do you want to proceed? 
+
+Suggested procedure is: 
+1) If the problem regards the creation of the activity:
+    Check in the DB web interface that the activity does not exist and *only in this case* try writing again
+2) in all other cases: Close and try to adjust the activity manually (or inform an expert)
+
+In all cases: please report the exact list of problems shown below</string>
    </property>
   </widget>
   <widget class="QPushButton" name="quit">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>410</y>
+     <y>430</y>
      <width>91</width>
      <height>28</height>
     </rect>
@@ -44,7 +51,7 @@ How do you want to proceed?</string>
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>410</y>
+     <y>430</y>
      <width>161</width>
      <height>31</height>
     </rect>
@@ -53,17 +60,14 @@ How do you want to proceed?</string>
     <string>Try writing again to db</string>
    </property>
   </widget>
-  <widget class="QLabel" name="problem">
+  <widget class="QListWidget" name="listDBErrors">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>110</y>
-     <width>711</width>
-     <height>231</height>
+     <x>20</x>
+     <y>241</y>
+     <width>681</width>
+     <height>161</height>
     </rect>
-   </property>
-   <property name="text">
-    <string/>
    </property>
   </widget>
  </widget>

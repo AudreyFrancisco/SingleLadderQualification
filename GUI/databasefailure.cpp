@@ -11,4 +11,9 @@ Databasefailure::Databasefailure(QWidget *parent) : QDialog(parent), ui(new Ui::
 Databasefailure::~Databasefailure() { delete ui; }
 
 
-void Databasefailure::assigningproblem(QString error) { ui->problem->setText(error); }
+void Databasefailure::assigningproblem(std::vector<QString> errorMessages)
+{
+  for (unsigned int i = 0; i < errorMessages.size(); i++) {
+    ui->listDBErrors->addItem(errorMessages.at(i));
+  }
+}

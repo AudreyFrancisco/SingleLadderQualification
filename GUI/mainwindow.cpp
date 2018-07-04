@@ -1862,13 +1862,8 @@ void MainWindow::attachtodatabase()
     if (!fDatabasefailure) {
       fDatabasefailure = new Databasefailure(this);
     }
-    QString dbmessages;
 
-    for (unsigned int i = 0; i < fErrorMessages.size(); i++) {
-      dbmessages.append(fErrorMessages.at(i));
-      dbmessages.append("\n");
-    }
-    fDatabasefailure->assigningproblem(dbmessages);
+    fDatabasefailure->assigningproblem(fErrorMessages);
     fDatabasefailure->exec();
   }
   fWrite = true;
