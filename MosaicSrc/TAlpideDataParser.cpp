@@ -125,7 +125,7 @@ int TAlpideDataParser::ReadEventData(int &nBytes, unsigned char *buffer)
   else {
     cerr << "One event exceeds the maximum buffer dimension (" << (MOSAIC_HEADER_SIZE + evSize)
          << " > " << MAX_EVENT_SIZE << ") Event discharged !" << endl;
-    nBytes = 0;
+    nBytes   = 0;
     retValue = -1;
   }
 
