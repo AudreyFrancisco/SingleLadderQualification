@@ -26,10 +26,11 @@
     <string>A problem occured during writing to the database (see list below) 
 How do you want to proceed? 
 
-Suggested procedure is: 
-1) If the problem regards the creation of the activity:
+Recommended procedure is: 
+1) If the problem occured during the creation of the activity:
     Check in the DB web interface that the activity does not exist and *only in this case* try writing again
 2) in all other cases: Close and try to adjust the activity manually (or inform an expert)
+    -&gt; DO NOT close activities WITHOUT input and output components!
 
 In all cases: please report the exact list of problems shown below</string>
    </property>
