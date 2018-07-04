@@ -104,10 +104,12 @@ public slots:
   AlpideDB *GetDB();
   void      retryfailedscan();
   void notifyuser(unsigned int position);
+  void loadConfigFile(QByteArray configFilename);
   void doDebugScan(TScanType scanType);
 
 signals:
   void stopTimer();
+  void deviceLoaded(TDeviceType);
 
 private:
   Ui::MainWindow *ui;

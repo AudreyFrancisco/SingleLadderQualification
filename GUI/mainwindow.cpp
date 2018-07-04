@@ -615,6 +615,12 @@ void MainWindow::start_debug()
   fDebugWindow->exec();
 }
 
+void MainWindow::loadConfigFile(QByteArray configFilename)
+{
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips, configFilename, &fHICs);
+  emit deviceLoaded(fConfig->GetDeviceType());
+}
+
 void MainWindow::doDebugScan(TScanType scanType)
 {
   fDebugWindow->close();
