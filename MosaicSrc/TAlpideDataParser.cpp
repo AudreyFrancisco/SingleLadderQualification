@@ -114,15 +114,17 @@ int TAlpideDataParser::ReadEventData(int &nBytes, unsigned char *buffer)
 
   evSize = checkEvent(p, &evFlags);
 
-  if(evSize + MOSAIC_HEADER_SIZE < MAX_EVENT_SIZE) {
+  if (evSize + MOSAIC_HEADER_SIZE < MAX_EVENT_SIZE) {
     // copy the block header to the user buffer
     memcpy(buffer, blockHeader, MOSAIC_HEADER_SIZE);
     // copy data to user buffer
     memcpy(buffer + MOSAIC_HEADER_SIZE, dBuffer, evSize);
-    nBytes = MOSAIC_HEADER_SIZE + evSize;
+    nBytes   = MOSAIC_HEADER_SIZE + evSize;
     retValue = evSize;
-  } else {
-    cerr << "One event exceeds the maximum buffer dimension (" << (MOSAIC_HEADER_SIZE + evSize) << " > " << MAX_EVENT_SIZE << ") Event discharged !" << endl;
+  }
+  else {
+    cerr << "One event exceeds the maximum buffer dimension (" << (MOSAIC_HEADER_SIZE + evSize)
+         << " > " << MAX_EVENT_SIZE << ") Event discharged !" << endl;
     nBytes = 0;
     retValue = -1;
   }
