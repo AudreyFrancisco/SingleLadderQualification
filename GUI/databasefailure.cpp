@@ -13,6 +13,7 @@ Databasefailure::~Databasefailure() { delete ui; }
 
 void Databasefailure::assigningproblem(std::vector<QString> errorMessages)
 {
+  ui->listDBErrors->clear();
   for (unsigned int i = 0; i < errorMessages.size(); i++) {
     ui->listDBErrors->addItem(errorMessages.at(i));
   }
