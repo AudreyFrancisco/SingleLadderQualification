@@ -154,7 +154,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 
 void scan()
 {
-  unsigned char         buffer[1024 * 4000];
+  unsigned char         buffer[MAX_EVENT_SIZE];
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer, oldHits;
   int                   prioErrors;
   TBoardHeader          boardInfo;
@@ -193,8 +193,8 @@ void scan()
     int itrg = 0;
     count    = 0;
     while (itrg < nTrigsThisTrain) {
-      if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) ==
-          -1) { // no event available in buffer yet, wait a bit
+      if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) <=
+          0) { // no event available in buffer yet, wait a bit
         usleep(100);
         if (count > 50) break;
         count++;

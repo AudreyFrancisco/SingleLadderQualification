@@ -219,7 +219,7 @@ void WriteScanConfig(const char *fName, TAlpide *chip, TReadoutBoardDAQ *daqBoar
 
 void scan()
 {
-  unsigned char         buffer[1024 * 4000];
+  unsigned char         buffer[MAX_EVENT_SIZE];
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nBad = 0, nSkipped = 0, prioErrors = 0, errors8b10b = 0;
   TBoardHeader          boardInfo;
@@ -260,8 +260,8 @@ void scan()
       int itrg   = 0;
       int trials = 0;
       while (itrg < myNTriggers * fEnabled) {
-        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) ==
-            -1) {       // no event available in buffer yet, wait a bit
+        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) <=
+            0) {        // no event available in buffer yet, wait a bit
           usleep(1000); // Increment from 100us
           trials++;
           if (trials == 10) {
