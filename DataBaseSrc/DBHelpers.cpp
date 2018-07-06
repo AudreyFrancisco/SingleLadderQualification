@@ -184,15 +184,19 @@ std::vector<int> DbGetActivityIds(AlpideDB *db, int activityTypeId, string compN
 
 
 void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
-                        vector<ComponentDB::compActivity> &tests)
+                        vector<ComponentDB::compActivity> &tests, bool &openAct, bool &impedance)
 {
   ComponentDB *                     componentDB = new ComponentDB(db);
   vector<ComponentDB::compActivity> history;
+
+  impedance = false;
+  openAct   = false;
 
   tests.clear();
   componentDB->GetComponentActivities(compId, &history);
 
   for (unsigned int i = 0; i < history.size(); i++) {
+    if (history.at(i).Status.Code.compare("OPEN") == 0) openAct = true;
     if (kTestTypes.find(history.at(i).Typename) == kTestTypes.end()) {
       std::cout << "found non-test activity of type " << history.at(i).Typename << std::endl;
       continue; // check that typename is in list of tests
@@ -201,15 +205,17 @@ void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
       std::cout << "found same test-type " << history.at(i).Typename << std::endl;
       continue;
     }
+    if (history.at(i).Typename.find("Impedance") != string::npos) impedance = true;
     std::cout << "found test of type " << history.at(i).Typename << std::endl;
     tests.push_back(history.at(i));
   }
 }
 
-THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityTypeId)
+THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityTypeId,
+                                         bool &openAct, bool &impedance)
 {
   vector<ComponentDB::compActivity> tests;
-  DbGetPreviousTests(db, compId, activityTypeId, tests);
+  DbGetPreviousTests(db, compId, activityTypeId, tests, openAct, impedance);
 
   int latestIdx = 0;
 

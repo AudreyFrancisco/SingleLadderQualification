@@ -32,8 +32,9 @@ bool DbGetLatestActivity(AlpideDB *db, int activityTypeId, string compName,
                          ActivityDB::activityLong &activity);
 int DbGetActivityTypeId(AlpideDB *db, string name);
 void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
-                        vector<ComponentDB::compActivity> &tests);
-THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityTypeId);
+                        vector<ComponentDB::compActivity> &tests, bool &openAct, bool &impedance);
+THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityTypeId,
+                                         bool &openAct, bool &impedance);
 bool DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, float &parValue);
 int DbGetPrevActivityTypeId(AlpideDB *db, string name, bool &onChildren);
 int DbGetAttachmentTypeId(AlpideDB *db, string name);

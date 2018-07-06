@@ -1994,8 +1994,9 @@ void MainWindow::savesettings()
               return;
             }
           }
-
-          fHICs.at(i)->SetOldClassification(DbGetPreviousCategory(fDB, comp, fIdofactivitytype));
+          bool openActivities, impendanceDone;
+          fHICs.at(i)->SetOldClassification(
+              DbGetPreviousCategory(fDB, comp, fIdofactivitytype, openActivities, impendanceDone));
 
           fActComponentTypeIDs.push_back(make_pair(in, out));
           fComponentIDs.push_back(comp);
