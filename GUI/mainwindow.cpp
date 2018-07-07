@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   fNoticewindow     = 0;
   fPbnumberofmodule = 0;
   fDatabasefailure  = 0;
+  fDebugWindow      = 0;
 
   std::string dataDir = "Data";
   if (const char *dataDirPrefix = std::getenv("ALPIDE_TEST_DATA")) dataDir = dataDirPrefix;
@@ -611,8 +612,13 @@ void MainWindow::start_test()
 
 void MainWindow::start_debug()
 {
-  fDebugWindow = new DebugWindow(this);
-  fDebugWindow->exec();
+  if (fDebugWindow == 0) {
+    fDebugWindow = new DebugWindow(this);
+    fDebugWindow->exec();
+  }
+  else {
+    fDebugWindow->show();
+  }
 }
 
 void MainWindow::loadConfigFile(QByteArray configFilename)
@@ -623,7 +629,7 @@ void MainWindow::loadConfigFile(QByteArray configFilename)
 
 void MainWindow::doDebugScan(TScanType scanType)
 {
-  fDebugWindow->close();
+  fDebugWindow->hide();
   ClearVectors();
   AddScan(scanType);
   fstopwriting = true;
