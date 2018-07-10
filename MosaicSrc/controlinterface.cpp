@@ -163,25 +163,28 @@ void ControlInterface::execute()
 
       // check the flags
       if ((rxFlags & FLAG_SYNC_BIT) == 0) {
-        errMsg = "Sync error reading data, rxChipID: " + static_cast<int>(rxChipID);
+        errMsg = "Sync error reading data, rxChipID: " + std::to_string(static_cast<int>(rxChipID));
         throw PControlInterfaceError(errMsg);
       }
       if ((rxFlags & FLAG_CHIPID_BIT) == 0) {
-        errMsg = "No ChipID reading data, rxChipID: " + static_cast<int>(rxChipID);
+        errMsg = "No ChipID reading data, rxChipID: " + std::to_string(static_cast<int>(rxChipID));
         throw PControlInterfaceError(errMsg);
       }
       if ((rxFlags & FLAG_DATAL_BIT) == 0) {
-        errMsg = "No Data Low byte reading data, rxChipID: " + static_cast<int>(rxChipID);
+        errMsg = "No Data Low byte reading data, rxChipID: " +
+                 std::to_string(static_cast<int>(rxChipID));
         throw PControlInterfaceError(errMsg);
       }
       if ((rxFlags & FLAG_DATAH_BIT) == 0) {
-        errMsg = "No Data High byte reading data, rxChipID: " + static_cast<int>(rxChipID);
+        errMsg = "No Data High byte reading data, rxChipID: " +
+                 std::to_string(static_cast<int>(rxChipID));
         throw PControlInterfaceError(errMsg);
       }
       // check the sender
       if (rxChipID != readReqest[i].chipID) {
-        errMsg = "ChipID mismatch, rxChipID: " + static_cast<int>(rxChipID);
-        errMsg += ", is not equal to replied chip ID: " + static_cast<int>(readReqest[i].chipID);
+        errMsg = "ChipID mismatch, rxChipID: " + std::to_string(static_cast<int>(rxChipID)) +
+                 ", is not equal to replied chip ID: " +
+                 std::to_string(static_cast<int>(readReqest[i].chipID));
         throw PControlInterfaceError(errMsg);
       }
 
