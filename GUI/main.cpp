@@ -10,14 +10,16 @@
 
 int main(int argc, char *argv[])
 {
-  if (getenv("ALPIDE_TEST_CORE")) {
+  const auto env_core = getenv("ALPIDE_TEST_CORE");
+  if ((env_core == nullptr) || (strcmp(env_core, "0") != 0)) {
     struct rlimit core_limit;
     getrlimit(RLIMIT_CORE, &core_limit);
     core_limit.rlim_cur = core_limit.rlim_max;
     setrlimit(RLIMIT_CORE, &core_limit);
   }
 
-  bool log_fork = getenv("ALPIDE_TEST_LOG");
+  const auto env_log  = getenv("ALPIDE_TEST_LOG");
+  bool       log_fork = (env_log == nullptr) || (strcmp(env_log, "0") != 0);
 
   int pipefd_out[2], pipefd_err[2];
   if (pipe(pipefd_out) != 0) log_fork = false;
