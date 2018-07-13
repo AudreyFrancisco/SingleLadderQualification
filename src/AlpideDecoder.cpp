@@ -309,8 +309,8 @@ bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPi
         return false;
       }
       if (region == -1) {
-        std::cout << "Warning: data word without region, skipping (Chip " << chip << ")"
-                  << std::endl;
+        std::cout << "Warning: data word without region, skipping (Chip " << chip << " channel "
+                  << channel << ")" << std::endl;
         corrupt = true;
       }
       else if (hits) {
@@ -334,8 +334,8 @@ bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPi
         return false;
       }
       if (region == -1) {
-        std::cout << "Warning: data word without region, skipping (Chip " << chip << ")"
-                  << std::endl;
+        std::cout << "Warning: data word without region, skipping (Chip " << chip << " channel "
+                  << channel << ")" << std::endl;
         corrupt = true;
       }
       else if (hits) {

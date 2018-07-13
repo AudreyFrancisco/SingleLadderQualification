@@ -97,8 +97,8 @@ void TScan::Init()
           m_hics.at(ihic)->GetVdddSet();
     }
     catch (std::exception &e) {
-      std::cout << "Init: Exception " << e.what() << " when reading power board voltages / currents"
-                << std::endl;
+      std::cout << "Init: Exception " << e.what()
+                << " when reading power board voltages / currents for HIC " << ihic << std::endl;
     }
 
     try {
@@ -110,8 +110,8 @@ void TScan::Init()
               &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipVoltagesStart));
     }
     catch (std::exception &e) {
-      std::cout << "Init: Exception " << e.what() << " when reading chip temp / currents"
-                << std::endl;
+      std::cout << "Init: Exception " << e.what() << " when reading chip temp / currents for HIC "
+                << ihic << std::endl;
     }
 
     TErrorCounter errCount;
@@ -130,7 +130,8 @@ void TScan::Init()
         m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
       }
       catch (std::exception &e) {
-        std::cout << "Init: exception " << e.what() << " when reading registers" << std::endl;
+        std::cout << "Init: exception " << e.what() << " when reading registers for chip "
+                  << rChip->GetConfig()->GetChipId() << std::endl;
       }
     }
   }
@@ -234,7 +235,7 @@ void TScan::Terminate()
     }
     catch (std::exception &e) {
       std::cout << "Terminate: exception " << e.what()
-                << " when reading power board voltages / currents" << std::endl;
+                << " when reading power board voltages / currents for HIC " << ihic << std::endl;
     }
 
     try {
@@ -246,8 +247,8 @@ void TScan::Terminate()
               &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipVoltagesEnd));
     }
     catch (std::exception &e) {
-      std::cout << "Terminate: exception " << e.what() << " when reading chip temp / currents"
-                << std::endl;
+      std::cout << "Terminate: exception " << e.what()
+                << " when reading chip temp / currents for HIC " << ihic << std::endl;
     }
   }
   time_end      = std::chrono::system_clock::now();
@@ -267,7 +268,8 @@ void TScan::Terminate()
         m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
       }
       catch (std::exception &e) {
-        std::cout << "Terminate: exception " << e.what() << " when reading registers" << std::endl;
+        std::cout << "Terminate: exception " << e.what() << " when reading registers for chip "
+                  << rChip->GetConfig()->GetChipId() << std::endl;
       }
     }
   }
