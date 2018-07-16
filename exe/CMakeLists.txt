@@ -23,6 +23,7 @@ set(TEST_EXE
   test_noiseocc
   test_noiseocc_ext
   test_poweron
+  test_powerdown_analogue
   test_pulselength
   test_readoutunit
   test_scope
@@ -77,7 +78,7 @@ if (${ROOT_FOUND})
   list(APPEND ALL_EXE ${TEST_EXE_ROOT})
 endif()
 
-install(TARGETS 
+install(TARGETS
   ${ALL_EXE}
   RUNTIME DESTINATION bin
 )
