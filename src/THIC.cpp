@@ -2,6 +2,7 @@
 #include "TReadoutBoardMOSAIC.h"
 
 #include <cstring>
+#include <thread>
 
 THic::THic(const char *id, int modId, TPowerBoard *pb, int pbMod)
 {
@@ -394,14 +395,14 @@ void THicIB::PowerOn()
   mosaic = (TReadoutBoardMOSAIC *)m_chips.at(0)->GetReadoutBoard();
 
   mosaic->enableClockOutput(m_ctrl, false);
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   if (m_powerBoard) {
     m_powerBoard->SwitchAnalogOn(m_pbMod);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     m_powerBoard->SwitchDigitalOn(m_pbMod);
   }
   // if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   mosaic->enableClockOutput(m_ctrl, true);
 }
 
@@ -518,14 +519,14 @@ void THicOB::PowerOn()
       mosaic->enableClockOutput(m_ctrl8, false);
   }
 
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   if (m_powerBoard) {
     m_powerBoard->SwitchAnalogOn(m_pbMod);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     m_powerBoard->SwitchDigitalOn(m_pbMod);
   }
   // if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   if (chips) {
     mosaic->enableClockOutput(m_ctrl0, true);
     if (mosaic2)
