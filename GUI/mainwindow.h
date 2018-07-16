@@ -20,6 +20,7 @@
 #include <QLabel>
 #include <QMainWindow>
 #include <QPixmap>
+#include <QTreeWidgetItem>
 #include <QtCore>
 #include <QtGui>
 #include <deque>
@@ -240,6 +241,8 @@ private:
 
   void writeSettings();
   void readSettings();
+  void setupChipTree();
+  void addChipInfoToTree(QTreeWidgetItem *chip, int iChip, int iChipInConfig);
 
   virtual void closeEvent(QCloseEvent *event);
 

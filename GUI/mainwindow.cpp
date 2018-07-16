@@ -326,6 +326,7 @@ void MainWindow::open()
       hicNames.push_back(name.toStdString());
     initSetupWithNames(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(),
                        &fHICs, &hicNames);
+    setupChipTree();
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
     fStatus          = fConfig->GetScanConfig()->GetParamValue("STATUS");
     fAutoRepeat      = fConfig->GetScanConfig()->GetParamValue("AUTOREPEAT");
@@ -441,6 +442,51 @@ void MainWindow::open()
       ui->endurancebox->show();
       exploreendurancebox();
     }
+  }
+}
+
+void MainWindow::setupChipTree()
+{
+  // only build this if it hasn't been built before
+  if (ui->chipTree->topLevelItemCount() == 0) {
+    int nHics  = fConfig->GetNHics();
+    int nChips = fConfig->GetNChips();
+
+    if (nHics > 0) {
+      // assume that there are the same number of chips in each HIC
+      int nChipsPerHic = static_cast<int>(nChips / nHics);
+
+      // add the HIC and then the chips under the HIC
+      for (int iHic = 0; iHic < nHics; iHic++) {
+        QTreeWidgetItem *hic = new QTreeWidgetItem(ui->chipTree);
+        hic->setText(0, QString("HIC"));
+
+        for (int iChip = 0; iChip < nChipsPerHic; iChip++) {
+          int              iChipInConfig = (iHic * nChipsPerHic) + iChip;
+          QTreeWidgetItem *chip          = new QTreeWidgetItem(hic);
+          addChipInfoToTree(chip, iChip, iChipInConfig);
+        }
+      }
+    }
+    else {
+      // add the chips directly to the tree
+      for (int iChip = 0; iChip < nChips; iChip++) {
+        QTreeWidgetItem *chip = new QTreeWidgetItem(ui->chipTree);
+        addChipInfoToTree(chip, iChip, iChip);
+      }
+    }
+  }
+}
+
+void MainWindow::addChipInfoToTree(QTreeWidgetItem *chip, int iChip, int iChipInConfig)
+{
+  chip->setText(0, QString("Chip %1").arg(iChip));
+  bool isEnabled = fConfig->GetChipConfig(iChipInConfig)->IsEnabled();
+  if (isEnabled) {
+    chip->setText(1, QString("ENABLED"));
+  }
+  else {
+    chip->setText(1, QString("DISABLED"));
   }
 }
 
