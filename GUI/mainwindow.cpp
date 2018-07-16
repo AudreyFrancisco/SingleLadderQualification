@@ -2728,8 +2728,9 @@ void MainWindow::fillingfastpower()
 void MainWindow::fillingHSscans()
 {
   ClearVectors();
-  AddScan(STPower);
+  // AddScan(STPower);
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
+  return;
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);
   fConfig->GetScanConfig()->SetVoltageScale(1.1);

@@ -123,10 +123,10 @@ void TDctrlMeasurement::PrepareStep(int loopIndex)
 {
   switch (loopIndex) {
   case 0: // innermost loop
-    if (m_testChip->GetConfig()->IsEnabled()) {
-      m_testChip->GetConfig()->SetParamValue("DCTRLDRIVER", m_value[0]);
-      AlpideConfig::ConfigureBuffers(m_testChip, m_testChip->GetConfig());
-    }
+          // if (m_testChip->GetConfig()->IsEnabled()) {
+    m_testChip->GetConfig()->SetParamValue("DCTRLDRIVER", m_value[0]);
+    AlpideConfig::ConfigureBuffers(m_testChip, m_testChip->GetConfig());
+    //}
     break;
   case 1: // 2nd loop
     m_testChip   = m_chips.at(m_value[1]);
@@ -179,7 +179,7 @@ void TDctrlMeasurement::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AV
   }
   catch (std::exception &e) {
     exception = true;
-    // std::cout << "Exception " << e.what() << " when reading low value" << std::endl;
+    std::cout << "Exception " << e.what() << " when reading low value" << std::endl;
     return;
   }
   exception = false;
@@ -188,7 +188,7 @@ void TDctrlMeasurement::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AV
       err = chip->ReadRegister(HighAdd, HighVal);
     }
     catch (std::exception &e) {
-      // std::cout << "Exception " << e.what() << " when reading high value" << std::endl;
+      std::cout << "Exception " << e.what() << " when reading high value" << std::endl;
       exception = true;
       return;
     }
@@ -244,8 +244,7 @@ void TDctrlMeasurement::Execute()
   idx.dataReceiver = m_testChip->GetConfig()->GetParamValue("RECEIVER");
 
   // skip disabled chips and OB slaves
-  if ((m_testChip->GetConfig()->IsEnabled()) &&
-      (m_testChip->GetConfig()->GetParamValue("LINKSPEED") != -1)) {
+  if ((m_testChip->GetConfig()->GetParamValue("LINKSPEED") != -1)) {
 
     scope.single_capture();           // Stop on first trigger
     TestPattern(0x555555, exception); // Generate data on bus

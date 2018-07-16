@@ -129,7 +129,7 @@ void TDctrlAnalysis::WriteResult()
   char fName[200];
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (!m_hics.at(ihic)->IsEnabled()) continue;
+    // if (!m_hics.at(ihic)->IsEnabled()) continue;
     if (!m_result->GetHicResult(m_hics.at(ihic)->GetDbId())->IsValid()) continue;
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     if (m_config->GetUseDataPath()) {

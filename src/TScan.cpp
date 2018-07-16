@@ -337,8 +337,8 @@ void TScan::CreateScanHisto()
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-      if ((m_chips.at(ichip)->GetConfig()->IsEnabled()) &&
-          (m_chips.at(ichip)->GetReadoutBoard() == m_boards.at(iboard))) {
+      // if ((m_chips.at(ichip)->GetConfig()->IsEnabled()) &&
+      if ((m_chips.at(ichip)->GetReadoutBoard() == m_boards.at(iboard))) {
         id.boardIndex   = iboard;
         id.dataReceiver = m_chips.at(ichip)->GetConfig()->GetParamValue("RECEIVER");
         id.chipId       = m_chips.at(ichip)->GetConfig()->GetChipId();
