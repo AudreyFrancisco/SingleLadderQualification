@@ -459,7 +459,9 @@ void MainWindow::setupChipTree()
       // add the HIC and then the chips under the HIC
       for (int iHic = 0; iHic < nHics; iHic++) {
         QTreeWidgetItem *hic = new QTreeWidgetItem(ui->chipTree);
-        hic->setText(0, QString("HIC"));
+        hic->setText(0, QString("HIC %1").arg(iHic + 1));
+        bool isEnabled = fConfig->GetHicConfig(iHic)->IsEnabled();
+        showEnableStatusInTree(hic, isEnabled);
 
         for (int iChip = 0; iChip < nChipsPerHic; iChip++) {
           int              iChipInConfig = (iHic * nChipsPerHic) + iChip;
@@ -476,17 +478,42 @@ void MainWindow::setupChipTree()
       }
     }
   }
+  ui->chipTree->setColumnHidden(3, true);
+  ui->chipTree->expandAll();
+  connect(ui->chipTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
+          SLOT(toggleEnableStatus(QTreeWidgetItem *, int)));
 }
 
 void MainWindow::addChipInfoToTree(QTreeWidgetItem *chip, int iChip, int iChipInConfig)
 {
   chip->setText(0, QString("Chip %1").arg(iChip));
+  chip->setText(3, QString::number(iChipInConfig));
   bool isEnabled = fConfig->GetChipConfig(iChipInConfig)->IsEnabled();
+  showEnableStatusInTree(chip, isEnabled);
+}
+
+void MainWindow::showEnableStatusInTree(QTreeWidgetItem *item, bool isEnabled)
+{
   if (isEnabled) {
-    chip->setText(1, QString("ENABLED"));
+    item->setText(1, QString("ENABLED"));
   }
   else {
-    chip->setText(1, QString("DISABLED"));
+    item->setText(1, QString("DISABLED"));
+  }
+}
+
+void MainWindow::toggleEnableStatus(QTreeWidgetItem *item, int column)
+{
+  bool isHic         = item->text(0).startsWith("HIC");
+  bool isEnabled     = (item->text(1) == QString("ENABLED"));
+  int  iChipInConfig = item->text(3).toInt();
+
+  if (isHic) {
+    ;
+  }
+  else {
+    fConfig->GetChipConfig(iChipInConfig)->SetEnable(!isEnabled);
+    showEnableStatusInTree(item, fConfig->GetChipConfig(iChipInConfig)->IsEnabled());
   }
 }
 

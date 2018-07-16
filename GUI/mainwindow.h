@@ -243,6 +243,7 @@ private:
   void readSettings();
   void setupChipTree();
   void addChipInfoToTree(QTreeWidgetItem *chip, int iChip, int iChipInConfig);
+  void showEnableStatusInTree(QTreeWidgetItem *item, bool isEnabled);
 
   virtual void closeEvent(QCloseEvent *event);
 
@@ -260,6 +261,7 @@ private slots:
   void fillingDctrl();
   void fillingfastHS();
   void StopScan();
+  void toggleEnableStatus(QTreeWidgetItem *item, int column);
 
   // void setVI(float * vcasn, float * ithr);
 };
