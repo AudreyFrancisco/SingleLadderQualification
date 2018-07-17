@@ -1725,6 +1725,10 @@ void MainWindow::attachtodatabase()
         DbAddAttachment(fDB, activ, attachText, string(path), string("Classification.dat"));
 
         path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
+               "/FailedCuts.txt";
+        DbAddAttachment(fDB, activ, attachText, string(path), string("FailedCuts.txt"));
+
+        path = fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) +
                "/DBParameters.dat";
         DbAddAttachment(fDB, activ, attachText, string(path), string("DBParameters.dat"));
 

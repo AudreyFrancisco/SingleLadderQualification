@@ -342,6 +342,18 @@ void TScanAnalysis::WriteHicClassToFile(std::string hicName)
   }
 }
 
+
+void TScanAnalysis::WriteCut(string cutText, TScanResultHic *result)
+{
+  char fName[300];
+  sprintf(fName, "%s/FailedCuts.txt", result->GetOutputPath().c_str());
+  FILE * fp   = fopen(fName, "a");
+  string text = string(m_scan->GetName()) + ": " + cutText;
+  fprintf(fp, "%s\n", text.c_str());
+  fclose(fp);
+}
+
+
 // DoCut checks a variable against a cut and sets the classification accordingly
 // in case of failure an output is printed to the terminal
 // hicClass: has to contain the current hic classification, is modified in case of failure
@@ -377,6 +389,7 @@ void TScanAnalysis::DoCut(THicClassification &hicClass, THicClassification failC
     }
     std::cout << cutText << std::endl;
     result->AddCut(cutText);
+    WriteCut(cutText, result);
     if (failClass > hicClass) hicClass = failClass;
   }
 }

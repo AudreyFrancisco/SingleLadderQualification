@@ -186,6 +186,7 @@ protected:
   virtual string GetPreviousTestType() = 0;
   void DoCut(THicClassification &hicClass, THicClassification failClass, int value, string cutName,
              TScanResultHic *result, bool minCut = false, int chipId = -1);
+  void WriteCut(string cutText, TScanResultHic *result);
 
 public:
   TScanAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,
