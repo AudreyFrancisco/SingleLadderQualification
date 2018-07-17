@@ -388,6 +388,7 @@ void TDctrlResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   std::size_t slash;
 
   // to be updated, probably divide according to tested device (IB / OB HIC)
+  WriteClassToDB(db, activity, string("DCTRL measurement"));
   DbAddParameter(db, activity, string("DCTRL worst max amplitude"), worst_maxAmp,
                  GetParameterFile());
   DbAddParameter(db, activity, string("DCTRL worst slope"), worst_slope, GetParameterFile());

@@ -302,6 +302,7 @@ void TDigitalWFResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity
 {
   string remoteName, fileName, suffix, file_suffix;
   GetParameterSuffix(suffix, file_suffix);
+  WriteClassToDB(db, activity, string("digital white frame") + suffix);
   DbAddParameter(db, activity, string("Unmaskable pixels") + suffix, (float)m_nUnmaskable,
                  GetParameterFile());
   DbAddParameter(db, activity, string("Unmaskable stuck pixels") + suffix, (float)m_nBadDCol,

@@ -262,6 +262,7 @@ void TFifoResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   std::string suffix, file_suffix, fileName, remoteName;
   GetParameterSuffix(suffix, file_suffix);
 
+  WriteClassToDB(db, activity, string("FIFO test") + suffix);
   DbAddParameter(db, activity, string("FIFO errors") + suffix,
                  (float)(m_err0 + m_err5 + m_erra + m_errf), GetParameterFile());
   DbAddParameter(db, activity, string("FIFO exceptions") + suffix, (float)m_exc,

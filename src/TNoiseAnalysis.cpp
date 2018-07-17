@@ -272,6 +272,7 @@ void TNoiseResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 
   GetParameterSuffix(suffix, file_suffix);
 
+  WriteClassToDB(db, activity, string("noise occupancy") + suffix);
   DbAddParameter(db, activity, string("Noisy pixels ") + suffix, (float)m_nNoisy,
                  GetParameterFile());
   DbAddParameter(db, activity, string("Noise occupancy ") + suffix, (float)m_occ,
