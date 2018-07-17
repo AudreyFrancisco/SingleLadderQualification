@@ -171,7 +171,7 @@ void TDctrlMeasurement::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AV
   uint16_t LowAdd  = Alpide::REG_RRU_MEB_LSB_BASE | (ARegion << 11) | AOffset;
   uint16_t HighAdd = Alpide::REG_RRU_MEB_MSB_BASE | (ARegion << 11) | AOffset;
 
-  uint16_t LowVal, HighVal;
+  uint16_t LowVal = 0, HighVal = 0;
   int      err = 0;
 
   exception = false;
