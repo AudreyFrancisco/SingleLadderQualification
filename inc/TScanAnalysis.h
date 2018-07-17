@@ -95,6 +95,7 @@ protected:
   std::vector<std::string>             m_cuts;
   void                                 ClearCuts() { m_cuts.clear(); };
   void AddCut(std::string aCut) { m_cuts.push_back(aCut); };
+  void WriteClassToDB(AlpideDB *db, ActivityDB::activity &activity, std::string name_suffix);
 
 public:
   TScanResultHic()
