@@ -266,12 +266,24 @@ void TDctrlMeasurement::Execute()
       m_histo->Set(idx, m_value[0], amp_p, scope.ch3.amp);
       m_histo->Set(idx, m_value[0], rtim_p, scope.ch3.rtim);
       m_histo->Set(idx, m_value[0], ftim_p, scope.ch3.ftim);
+      std::cout << "Chip: " << m_testChip->GetConfig()->GetChipId() << ", scope channel: 3/p"
+                << std::endl;
+      std::cout << m_value[0] << '\t' << peak_p << '\t' << scope.ch3.peak << std::endl;
+      std::cout << m_value[0] << '\t' << amp_p << '\t' << scope.ch3.amp << std::endl;
+      std::cout << m_value[0] << '\t' << rtim_p << '\t' << scope.ch3.rtim << std::endl;
+      std::cout << m_value[0] << '\t' << ftim_p << '\t' << scope.ch3.ftim << std::endl;
       scope.en_measure_ch(4);
       scope.get_meas();
       m_histo->Set(idx, m_value[0], peak_n, scope.ch4.peak);
       m_histo->Set(idx, m_value[0], amp_n, scope.ch4.amp);
       m_histo->Set(idx, m_value[0], rtim_n, scope.ch4.rtim);
       m_histo->Set(idx, m_value[0], ftim_n, scope.ch4.ftim);
+      std::cout << "Chip: " << m_testChip->GetConfig()->GetChipId() << ", scope channel: 4/n"
+                << std::endl;
+      std::cout << m_value[0] << '\t' << peak_n << '\t' << scope.ch4.peak << std::endl;
+      std::cout << m_value[0] << '\t' << amp_n << '\t' << scope.ch4.amp << std::endl;
+      std::cout << m_value[0] << '\t' << rtim_n << '\t' << scope.ch4.rtim << std::endl;
+      std::cout << m_value[0] << '\t' << ftim_n << '\t' << scope.ch4.ftim << std::endl;
     }
     else {
       scope.en_measure_ch(1);
@@ -280,12 +292,24 @@ void TDctrlMeasurement::Execute()
       m_histo->Set(idx, m_value[0], amp_p, scope.ch1.amp);
       m_histo->Set(idx, m_value[0], rtim_p, scope.ch1.rtim);
       m_histo->Set(idx, m_value[0], ftim_p, scope.ch1.ftim);
+      std::cout << "Chip: " << m_testChip->GetConfig()->GetChipId() << ", scope channel: 1/p"
+                << std::endl;
+      std::cout << m_value[0] << '\t' << peak_p << '\t' << scope.ch1.peak << std::endl;
+      std::cout << m_value[0] << '\t' << amp_p << '\t' << scope.ch1.amp << std::endl;
+      std::cout << m_value[0] << '\t' << rtim_p << '\t' << scope.ch1.rtim << std::endl;
+      std::cout << m_value[0] << '\t' << ftim_p << '\t' << scope.ch1.ftim << std::endl;
       scope.en_measure_ch(2);
       scope.get_meas();
       m_histo->Set(idx, m_value[0], peak_n, scope.ch2.peak);
       m_histo->Set(idx, m_value[0], amp_n, scope.ch2.amp);
       m_histo->Set(idx, m_value[0], rtim_n, scope.ch2.rtim);
       m_histo->Set(idx, m_value[0], ftim_n, scope.ch2.ftim);
+      std::cout << "Chip: " << m_testChip->GetConfig()->GetChipId() << ", scope channel: 2/n"
+                << std::endl;
+      std::cout << m_value[0] << '\t' << peak_n << '\t' << scope.ch2.peak << std::endl;
+      std::cout << m_value[0] << '\t' << amp_n << '\t' << scope.ch2.amp << std::endl;
+      std::cout << m_value[0] << '\t' << rtim_n << '\t' << scope.ch2.rtim << std::endl;
+      std::cout << m_value[0] << '\t' << ftim_n << '\t' << scope.ch2.ftim << std::endl;
     }
 
     // here only to avoid error "idx set but not used"
