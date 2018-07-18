@@ -440,7 +440,9 @@ void MainWindow::open()
     if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
         fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML) {
 
-      if (fhalfstaveid == -1) {
+      if (fHalfstave == "test") fstopwriting = true;
+
+      if (fhalfstaveid == -1 && fHalfstave != "test") {
         fComponentWindow = new Components(this);
         fComponentWindow->WriteToLabel(fHalfstave);
         fComponentWindow->exec();
@@ -448,7 +450,7 @@ void MainWindow::open()
           return;
         }
       }
-      if (fStaveid == -1) {
+      if (fStaveid == -1 && fHalfstave != "test") {
         fComponentWindow = new Components(this);
         fComponentWindow->WriteToLabel(fStave);
         fComponentWindow->exec();
@@ -457,14 +459,15 @@ void MainWindow::open()
         }
       }
 
-
-      for (unsigned int k = 0; k < fHicnames.size(); k++) {
-        if (fHicnames.at(k) == "empty") {
-          fComponentWindow = new Components(this);
-          fComponentWindow->WrongPositions();
-          fComponentWindow->exec();
-          if (fstop && fHiddenComponent == false) {
-            return;
+      if (fHalfstave != "test") {
+        for (unsigned int k = 0; k < fHicnames.size(); k++) {
+          if (fHicnames.at(k) == "empty") {
+            fComponentWindow = new Components(this);
+            fComponentWindow->WrongPositions();
+            fComponentWindow->exec();
+            if (fstop && fHiddenComponent == false) {
+              return;
+            }
           }
         }
       }
@@ -1990,7 +1993,8 @@ void MainWindow::savesettings()
           out           = DbGetActComponentTypeId(fDB, fIdofactivitytype, fComponentTypeID, "out");
           comp = DbGetComponentId(fDB, projectid, fComponentTypeID, fHicnames.at(i).toStdString());
 
-          if (comp == -1) {
+          if (fHalfstave == "test") fstopwriting = true;
+          if (comp == -1 && fHalfstave != "test") {
             fComponentWindow = new Components(this);
             fComponentWindow->WriteToLabel(fHicnames.at(i));
             fComponentWindow->exec();
