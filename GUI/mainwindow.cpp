@@ -8,8 +8,6 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 #include "TAlpide.h"
-#include "TApplyMask.h"
-#include "TApplyTuning.h"
 #include "TConfig.h"
 #include "THIC.h"
 #include "THisto.h"

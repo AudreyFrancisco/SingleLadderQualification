@@ -56,6 +56,7 @@ set(BASE_OBJS
   ../src/TScan.cpp
   ../src/TScanAnalysis.cpp
   ../src/TScanConfig.cpp
+  ../src/TScanFactory.cpp
   ../src/TestBeamTools.cpp
   ../src/USB.cpp
   ../src/USBHelpers.cpp
@@ -75,11 +76,10 @@ set(MOSAIC_OBJS
   ../MosaicSrc/trgrecorderparser.cpp
 )
 
-set(OBJS_ANA
+set(OBJS_ROOT
   ../src/TSCurveAnalysis.cpp
   ../src/TApplyTuning.cpp
   ../src/TEyeAnalysis.cpp
-  ../src/TScanFactory.cpp
 )
 
 add_custom_target(version
@@ -100,18 +100,16 @@ target_include_directories(alpide
   PUBLIC ../inc ../MosaicSrc .. # .. is for ReadoutUnitSrc
 )
 target_link_libraries(alpide alucms mosaic powerboard scopecontrol usb-1.0 tinyxml pthread)
-list(APPEND ALP_LIBRARIES alpide)
 
 if (${ROOT_FOUND})
-  add_library(alpide_analysis SHARED ${OBJS_ANA})
-  add_library(Alptest::alpide_analysis ALIAS alpide_analysis)
-  target_include_directories(alpide_analysis PUBLIC ${ROOT_INCLUDE_DIRS})
-  target_link_libraries(alpide_analysis alpide ${ROOT_LIBRARIES} pthread)
-  list(APPEND ALP_LIBRARIES alpide_analysis)
+  target_compile_definitions(alpide PUBLIC "-DHAS_ROOT")
+  target_sources(alpide PRIVATE ${OBJS_ROOT})
+  target_include_directories(alpide PUBLIC ${ROOT_INCLUDE_DIRS})
+  target_link_libraries(alpide ${ROOT_LIBRARIES} pthread)
 endif()
 
 install(TARGETS
-  ${ALP_LIBRARIES}
+  alpide
   LIBRARY DESTINATION lib
 )
 

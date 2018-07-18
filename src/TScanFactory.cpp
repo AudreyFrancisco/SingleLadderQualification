@@ -5,7 +5,6 @@
 #include "TAlpide.h"
 
 #include "TApplyMask.h"
-#include "TApplyTuning.h"
 #include "TConfig.h"
 #include "TCycleAnalysis.h"
 #include "TDCTRLAnalysis.h"
@@ -30,12 +29,16 @@
 #include "TPowerTest.h"
 #include "TReadoutAnalysis.h"
 #include "TReadoutTest.h"
-#include "TSCurveAnalysis.h"
-#include "TSCurveScan.h"
 #include "TScan.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
 #include "TThresholdAnalysis.h"
+
+#ifdef HAS_ROOT
+#include "TApplyTuning.h"
+#include "TSCurveAnalysis.h"
+#include "TSCurveScan.h"
+#endif
 
 TScanFactory::TScanObjects TScanFactory::CreateScanObjects(TScanType scanType, TScanConfig *config,
                                                            std::vector<TAlpide *>       chips,
@@ -68,13 +71,6 @@ TScanFactory::TScanObjects TScanFactory::CreateScanObjects(TScanType scanType, T
                                       (TDctrlResult *)obj.result);
     break;
 
-  case STEyeScan:
-    obj.scan     = new TEyeMeasurement(config, chips, hics, boards, histoQue, mutex);
-    obj.result   = new TEyeResult();
-    obj.analysis = new TEyeAnalysis(histoQue, (TEyeMeasurement *)obj.scan, config, hics, mutex,
-                                    (TEyeResult *)obj.result);
-    break;
-
   case STLocalBus:
     obj.scan     = new TLocalBusTest(config, chips, hics, boards, histoQue, mutex);
     obj.result   = new TLocalBusResult();
@@ -96,11 +92,48 @@ TScanFactory::TScanObjects TScanFactory::CreateScanObjects(TScanType scanType, T
                                           mutex, (TDigitalWFResult *)obj.result);
     break;
 
+  case STNoise:
+    obj.scan     = new TNoiseOccupancy(config, chips, hics, boards, histoQue, mutex);
+    obj.result   = new TNoiseResult();
+    obj.analysis = new TNoiseAnalysis(histoQue, (TNoiseOccupancy *)obj.scan, config, hics, mutex,
+                                      (TNoiseResult *)obj.result);
+    break;
+
+  case STReadout:
+    obj.scan     = new TReadoutTest(config, chips, hics, boards, histoQue, mutex);
+    obj.result   = new TReadoutResult();
+    obj.analysis = new TReadoutAnalysis(histoQue, (TReadoutTest *)obj.scan, config, hics, mutex,
+                                        (TReadoutResult *)obj.result);
+    break;
+
+  case STEndurance:
+    obj.scan     = new TEnduranceCycle(config, chips, hics, boards, histoQue, mutex);
+    obj.result   = new TCycleResult();
+    obj.analysis = new TCycleAnalysis(histoQue, (TEnduranceCycle *)obj.scan, config, hics, mutex,
+                                      (TCycleResult *)obj.result);
+    break;
+
+  case STFastPowerTest:
+    obj.scan     = new TFastPowerTest(config, chips, hics, boards, histoQue, mutex);
+    obj.result   = new TFastPowerResult();
+    obj.analysis = new TFastPowerAnalysis(histoQue, (TFifoTest *)obj.scan, config, hics, mutex,
+                                          (TFastPowerResult *)obj.result);
+    break;
+
+#ifdef HAS_ROOT
+
   case STThreshold:
     obj.scan     = new TThresholdScan(config, chips, hics, boards, histoQue, mutex);
     obj.result   = new TSCurveResult();
     obj.analysis = new TSCurveAnalysis(histoQue, (TThresholdScan *)obj.scan, config, hics, mutex,
                                        (TSCurveResult *)obj.result);
+    break;
+
+  case STEyeScan:
+    obj.scan     = new TEyeMeasurement(config, chips, hics, boards, histoQue, mutex);
+    obj.result   = new TEyeResult();
+    obj.analysis = new TEyeAnalysis(histoQue, (TEyeMeasurement *)obj.scan, config, hics, mutex,
+                                    (TEyeResult *)obj.result);
     break;
 
   case STVCASN:
@@ -129,13 +162,6 @@ TScanFactory::TScanObjects TScanFactory::CreateScanObjects(TScanType scanType, T
     obj.hasButton = false;
     break;
 
-  case STNoise:
-    obj.scan     = new TNoiseOccupancy(config, chips, hics, boards, histoQue, mutex);
-    obj.result   = new TNoiseResult();
-    obj.analysis = new TNoiseAnalysis(histoQue, (TNoiseOccupancy *)obj.scan, config, hics, mutex,
-                                      (TNoiseResult *)obj.result);
-    break;
-
   case STApplyMask:
     obj.analysis  = new TApplyMask(histoQue, 0, config, hics, mutex, (TNoiseResult *)result);
     obj.hasButton = false;
@@ -146,28 +172,10 @@ TScanFactory::TScanObjects TScanFactory::CreateScanObjects(TScanType scanType, T
     obj.hasButton = false;
     break;
 
-  case STReadout:
-    obj.scan     = new TReadoutTest(config, chips, hics, boards, histoQue, mutex);
-    obj.result   = new TReadoutResult();
-    obj.analysis = new TReadoutAnalysis(histoQue, (TReadoutTest *)obj.scan, config, hics, mutex,
-                                        (TReadoutResult *)obj.result);
-    break;
-
-  case STEndurance:
-    obj.scan     = new TEnduranceCycle(config, chips, hics, boards, histoQue, mutex);
-    obj.result   = new TCycleResult();
-    obj.analysis = new TCycleAnalysis(histoQue, (TEnduranceCycle *)obj.scan, config, hics, mutex,
-                                      (TCycleResult *)obj.result);
-    break;
-
-  case STFastPowerTest:
-    obj.scan     = new TFastPowerTest(config, chips, hics, boards, histoQue, mutex);
-    obj.result   = new TFastPowerResult();
-    obj.analysis = new TFastPowerAnalysis(histoQue, (TFifoTest *)obj.scan, config, hics, mutex,
-                                          (TFastPowerResult *)obj.result);
-    break;
+#endif
 
   default:
+    obj.hasButton = false;
     std::cout << "Warning: unknown scantype " << (int)scanType << ", ignoring" << std::endl;
   }
 
