@@ -1071,7 +1071,7 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
       DecodeResponse(stringresult);
       if (theResponse.ErrorCode != 0)
         cerr << "Activity Parameter Error (id " << aActivity->Parameters.at(i).ActivityParameter
-             << ") :" << DumpResponse() << endl;
+             << "=" << aActivity->Parameters.at(i).Value << ")  : " << DumpResponse() << endl;
       if (VERBOSITYLEVEL == 1) cout << "Activity Parameter creation :" << DumpResponse() << endl;
       aActivity->Parameters.at(i).ID = theResponse.ID;
     }

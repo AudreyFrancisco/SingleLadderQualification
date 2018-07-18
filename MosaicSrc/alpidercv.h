@@ -44,15 +44,28 @@ public:
   void addGetReg(uint16_t address, uint32_t *val);
   void addEnable(bool d);
   void addInvertInput(bool d);
+
+  // Access to transceiver RDP registers
   void addSetRDPReg(uint16_t address, uint16_t val);
   void addGetRDPReg(uint16_t address, uint32_t *val);
   void addSetRDPRegField(uint16_t address, uint16_t size, uint16_t offset, uint16_t val);
 
+  // RX pattern check related functions
+  void addPRBSsetSel(uint8_t s);
+  void addPRBSreset();
+  void addGetPRBScounter(uint32_t *ctr);
+
 private: // WBB Slave registers map
-  enum regAddress_e { regOpMode = 0, rdpBase = 0x00800000 };
+  enum regAddress_e { regOpMode = 0, regPrbs = 1, rdpBase = 0x00800000 };
 
 private:
   enum opModeBits_e { OPMODE_RCVENABLE = (1 << 0), OPMODE_INVERT_POLARITY = (1 << 1) };
+
+  enum prbsBits_e { PRBS_RESET = (1<<3), PRBS_SEL_MASK = 0x07, PRBS_SEL_SHIFT = 0 };
+
+public:
+  enum prbsSel_e { PRBS_NONE = 0, PRBS_7 = 1, PRBS_15 = 2, PRBS_23 = 3, PRBS_31 = 4 };
+
 };
 
 #endif // ALPIDERCV_H

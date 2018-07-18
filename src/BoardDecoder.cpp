@@ -248,6 +248,7 @@ bool BoardDecoder::DecodeEventMOSAIC(unsigned char *data, int nBytes, int &nByte
   uint8_t MOSAICtransmissionFlag = data[nBytes - 1]; // last byte is the trailer
   boardInfo.headerError          = MOSAICtransmissionFlag & TAlpideDataParser::flagHeaderError;
   boardInfo.decoder10b8bError = MOSAICtransmissionFlag & TAlpideDataParser::flagDecoder10b8bError;
+  boardInfo.eventOverSizeError = MOSAICtransmissionFlag & TAlpideDataParser::flagOverSizeError;
   if (MOSAICtransmissionFlag) return false;
 
   return true;
