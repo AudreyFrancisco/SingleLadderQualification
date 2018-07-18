@@ -275,7 +275,8 @@ void TSCurveAnalysis::FillGraph(TGraph *aGraph)
 // TODO: Write Raw Data, write fit data
 void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo)
 {
-  int row = histo->GetIndex();
+  int row                   = histo->GetIndex();
+  int vcasnTuningOutOfRange = 0;
   for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip++) {
     TSCurveResultChip *chipResult =
         (TSCurveResultChip *)m_result->GetChipResult(m_chipList.at(iChip));
@@ -304,6 +305,11 @@ void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo)
         if (fitResult.threshold == 0) {
           chipResult->m_nNoThresh++;
         }
+        else if (IsVCASNTuning() && fitResult.noise < 0) {
+          ++vcasnTuningOutOfRange;
+          std::cout << "Vcasn tuning out-of-range in pixel " << iCol << "/" << row << "."
+                    << std::endl;
+        }
         else {
           chipResult->m_thresholdAv += fitResult.threshold;
           chipResult->m_noiseAv += fitResult.noise;
@@ -326,6 +332,9 @@ void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo)
       }
       delete gPixel;
     }
+  }
+  if (IsVCASNTuning()) {
+    std::cout << vcasnTuningOutOfRange << " pixels out-of-range in the Vcasn tuning." << std::endl;
   }
 }
 
