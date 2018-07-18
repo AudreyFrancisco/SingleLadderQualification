@@ -30,6 +30,8 @@
 #include <unistd.h>
 #include <vector>
 
+#include "TScanFactory.h"
+
 class TConfig;
 class TScan;
 class TScanAnalysis;
@@ -37,38 +39,11 @@ class TScanConfig;
 class TScanResult;
 class TestSelection;
 class THic;
-class TApplyMask;
-class TPowerTest;
 class ScanConfiguration;
-class TDigitalWFanalysis;
-class TFastPowerTest;
-
 
 namespace Ui {
   class MainWindow;
 }
-
-// TODO: decide whether leave here or move to e.g. TScanConfig
-typedef enum {
-  STPower,
-  STFifo,
-  STLocalBus,
-  STDigital,
-  STDigitalWF,
-  STThreshold,
-  STVCASN,
-  STITHR,
-  STApplyITHR,
-  STApplyVCASN,
-  STApplyMask,
-  STClearMask,
-  STNoise,
-  STReadout,
-  STEndurance,
-  STFastPowerTest,
-  STDctrl,
-  STEyeScan
-} TScanType;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -82,7 +57,6 @@ public:
   ~MainWindow();
 
 public slots:
-  void createbtn();
   void popup(QString message);
   void poweroff();
   void getresultdetails(int i);
@@ -268,7 +242,6 @@ private slots:
   void applytests();
   void initscanlist();
   void performtests();
-  void test();
   void detailscombo(int dnumber);
   void start_test();
   void open();

@@ -1,6 +1,30 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "AlpideConfig.h"
+#include "AlpideDB.h"
+#include "AlpideDBEndPoints.h"
+#include "AlpideDecoder.h"
+#include "BoardDecoder.h"
+#include "SetupHelpers.h"
+#include "TAlpide.h"
+#include "TApplyMask.h"
+#include "TApplyTuning.h"
+#include "TConfig.h"
+#include "THIC.h"
+#include "THisto.h"
+#include "TReadoutBoard.h"
+#include "TReadoutBoardDAQ.h"
+#include "TReadoutBoardMOSAIC.h"
+#include "TScan.h"
+#include "TScanAnalysis.h"
+#include "TScanConfig.h"
+#include "TScanFactory.h"
+#include "calibrationpb.h"
+#include "dialog.h"
+#include "scanconfiguration.h"
+#include "testingprogress.h"
+#include "testselection.h"
 #include <QCoreApplication>
 #include <QFile>
 #include <QFileDialog>
@@ -8,7 +32,6 @@
 #include <QPixmap>
 #include <QtDebug>
 #include <QtWidgets>
-//#include <QtCore>
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
@@ -18,61 +41,13 @@
 #include <map>
 #include <mutex>
 #include <qapplication.h>
+#include <qpushbutton.h>
 #include <string>
 #include <thread>
-//#include "TQtWidgets.h"
-#include <qpushbutton.h>
 #include <typeinfo>
-//#include "scanthread.h"
-#include "AlpideConfig.h"
-#include "TAlpide.h"
-#include "TDigitalAnalysis.h"
-#include "TDigitalScan.h"
-#include "TReadoutBoard.h"
-#include "TReadoutBoardDAQ.h"
-#include "TReadoutBoardMOSAIC.h"
-#include "dialog.h"
-#include "scanconfiguration.h"
-#include "testingprogress.h"
-#include "testselection.h"
-//#include "USBHelpers.h"
-#include "AlpideConfig.h"
-#include "AlpideDB.h"
-#include "AlpideDBEndPoints.h"
-#include "AlpideDecoder.h"
-#include "BoardDecoder.h"
-#include "SetupHelpers.h"
-#include "TApplyMask.h"
-#include "TApplyTuning.h"
-#include "TConfig.h"
+
 #include "TCycleAnalysis.h"
-#include "TDCTRLAnalysis.h"
-#include "TDCTRLMeasurement.h"
-#include "TDigitalWFAnalysis.h"
 #include "TEnduranceCycle.h"
-#include "TEyeAnalysis.h"
-#include "TEyeMeasurement.h"
-#include "TFastPowerAnalysis.h"
-#include "TFastPowerTest.h"
-#include "TFifoAnalysis.h"
-#include "TFifoTest.h"
-#include "THIC.h"
-#include "THisto.h"
-#include "TLocalBusAnalysis.h"
-#include "TLocalBusTest.h"
-#include "TNoiseAnalysis.h"
-#include "TNoiseOccupancy.h"
-#include "TPowerAnalysis.h"
-#include "TPowerTest.h"
-#include "TReadoutAnalysis.h"
-#include "TReadoutTest.h"
-#include "TSCurveAnalysis.h"
-#include "TSCurveScan.h"
-#include "TScan.h"
-#include "TScanAnalysis.h"
-#include "TScanConfig.h"
-#include "TThresholdAnalysis.h"
-#include "calibrationpb.h"
 
 bool writingdb;
 
@@ -234,11 +209,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   readSettings();
 }
 
-MainWindow::~MainWindow()
-{
-  delete ui;
-  ui = 0x0;
-}
+MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -870,11 +841,6 @@ void MainWindow::color_red_IB(int position)
   }
 }
 
-void MainWindow::test()
-{
-  //  qDebug()<< "Testing ...";
-}
-
 void MainWindow::scanLoop(TScan *myScan)
 {
   if (!fScanAbort) try {
@@ -1303,13 +1269,6 @@ void MainWindow::applytests()
 }
 
 void MainWindow::StopScan() { fScanAbort = true; }
-
-void MainWindow::createbtn()
-{
-
-  QPushButton *dimitra = new QPushButton("dsxfvgdvg", this);
-  connect(dimitra, SIGNAL(clicked()), this, SLOT(StopScan()));
-}
 
 void MainWindow::getresultdetails(int i)
 {
@@ -2234,174 +2193,29 @@ void MainWindow::setdefaultvalues(bool &fit, int &numberofstages)
   numberofstages = fConfig->GetScanConfig()->GetNMaskStages();
 }
 
-bool MainWindow::CreateScanObjects(TScanType scanType, TScanConfig *config, TScan **scan,
-                                   TScanAnalysis **analysis, TScanResult **result, bool &hasButton)
-{
-  switch (scanType) {
-  case STPower:
-    *scan     = new TPowerTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TPowerResult();
-    *analysis = new TPowerAnalysis(&fHistoQue, (TPowerTest *)*scan, config, fHICs, &fMutex,
-                                   (TPowerResult *)*result);
-    hasButton = true;
-    return true;
-  case STFifo:
-    *scan     = new TFifoTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TFifoResult();
-    *analysis = new TFifoAnalysis(&fHistoQue, (TFifoTest *)*scan, config, fHICs, &fMutex,
-                                  (TFifoResult *)*result);
-    hasButton = true;
-    return true;
-  case STDctrl:
-    *scan     = new TDctrlMeasurement(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TDctrlResult();
-    *analysis = new TDctrlAnalysis(&fHistoQue, (TDctrlMeasurement *)*scan, config, fHICs, &fMutex,
-                                   (TDctrlResult *)*result);
-    hasButton = true;
-    return true;
-  case STEyeScan:
-    *scan     = new TEyeMeasurement(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TEyeResult();
-    *analysis = new TEyeAnalysis(&fHistoQue, (TEyeMeasurement *)*scan, config, fHICs, &fMutex,
-                                 (TEyeResult *)*result);
-    hasButton = true;
-    return true;
-  case STLocalBus:
-    *scan     = new TLocalBusTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TLocalBusResult();
-    *analysis = new TLocalBusAnalysis(&fHistoQue, (TLocalBusTest *)*scan, config, fHICs, &fMutex,
-                                      (TLocalBusResult *)*result);
-    hasButton = true;
-    return true;
-  case STDigital:
-    *scan     = new TDigitalScan(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TDigitalResult();
-    *analysis = new TDigitalAnalysis(&fHistoQue, (TDigitalScan *)*scan, config, fHICs, &fMutex,
-                                     (TDigitalResult *)*result);
-    hasButton = true;
-    return true;
-  case STDigitalWF:
-    *scan     = new TDigitalWhiteFrame(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TDigitalWFResult();
-    *analysis = new TDigitalWFAnalysis(&fHistoQue, (TDigitalWhiteFrame *)*scan, config, fHICs,
-                                       &fMutex, (TDigitalWFResult *)*result);
-    hasButton = true;
-    return true;
-  case STThreshold:
-    *scan     = new TThresholdScan(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TSCurveResult();
-    *analysis = new TSCurveAnalysis(&fHistoQue, (TThresholdScan *)*scan, config, fHICs, &fMutex,
-                                    (TSCurveResult *)*result);
-    hasButton = true;
-    return true;
-  case STVCASN:
-    *scan     = new TtuneVCASNScan(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TSCurveResult();
-    *analysis = new TSCurveAnalysis(&fHistoQue, (TtuneVCASNScan *)*scan, config, fHICs, &fMutex,
-                                    (TSCurveResult *)*result, 1);
-    hasButton = true;
-    return true;
-  case STITHR:
-    *scan     = new TtuneITHRScan(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TSCurveResult();
-    *analysis = new TSCurveAnalysis(&fHistoQue, (TtuneITHRScan *)*scan, config, fHICs, &fMutex,
-                                    (TSCurveResult *)*result, -1);
-    hasButton = true;
-    return true;
-  // apply tuning masks: scan = 0, analysis gets previous result as input
-  // result value has to stay unchanged here; however AddScan will push back 0 into result vector
-  case STApplyITHR:
-    *scan = 0;
-    *analysis =
-        new TApplyITHRTuning(&fHistoQue, 0, config, fHICs, &fMutex, (TSCurveResult *)*result);
-    hasButton = false;
-    return true;
-  case STApplyVCASN:
-    *scan = 0;
-    *analysis =
-        new TApplyVCASNTuning(&fHistoQue, 0, config, fHICs, &fMutex, (TSCurveResult *)*result);
-    hasButton = false;
-    return true;
-  case STNoise:
-    *scan     = new TNoiseOccupancy(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TNoiseResult();
-    *analysis = new TNoiseAnalysis(&fHistoQue, (TNoiseOccupancy *)*scan, config, fHICs, &fMutex,
-                                   (TNoiseResult *)*result);
-    hasButton = true;
-    return true;
-  case STApplyMask:
-    *scan     = 0;
-    *analysis = new TApplyMask(&fHistoQue, 0, config, fHICs, &fMutex, (TNoiseResult *)*result);
-    hasButton = false;
-    return true;
-  case STClearMask:
-    *scan     = 0;
-    *analysis = new TApplyMask(&fHistoQue, 0, config, fHICs, &fMutex, 0);
-    hasButton = false;
-    return true;
-  case STReadout:
-    *scan     = new TReadoutTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TReadoutResult();
-    *analysis = new TReadoutAnalysis(&fHistoQue, (TReadoutTest *)*scan, config, fHICs, &fMutex,
-                                     (TReadoutResult *)*result);
-    hasButton = true;
-    return true;
-  case STEndurance:
-    *scan     = new TEnduranceCycle(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TCycleResult();
-    *analysis = new TCycleAnalysis(&fHistoQue, (TEnduranceCycle *)*scan, config, fHICs, &fMutex,
-                                   (TCycleResult *)*result);
-    hasButton = true;
-    return true;
-  case STFastPowerTest:
-    *scan     = new TFastPowerTest(config, fChips, fHICs, fBoards, &fHistoQue, &fMutex);
-    *result   = new TFastPowerResult();
-    *analysis = new TFastPowerAnalysis(&fHistoQue, (TFifoTest *)*scan, config, fHICs, &fMutex,
-                                       (TFastPowerResult *)*result);
-    hasButton = true;
-    return true;
-  default:
-    std::cout << "Warning: unknown scantype " << (int)scanType << ", ignoring" << std::endl;
-    return false;
-  }
-}
-
 void MainWindow::AddScan(TScanType scanType, TScanResult *aResult)
 {
-  TScan *        scan;
-  TScanAnalysis *analysis;
-  TScanResult *  result = 0;
-  TScanConfig *  config = fConfig->GetScanConfig();
-  bool           hasButton;
+  TScanConfig *config = fConfig->GetScanConfig();
 
-  if (aResult == 0) { // standard version
-    if (CreateScanObjects(scanType, config, &scan, &analysis, &result, hasButton)) {
-      fScanVector.push_back(scan);
-      fAnalysisVector.push_back(analysis);
-      fresultVector.push_back(result);
-      fScanTypes.push_back(scanType);
-    }
-  }
-  else { // apply tuning etc: receive result from previous scan (tuning) and push 0 into result
-         // vector
-    if (CreateScanObjects(scanType, config, &scan, &analysis, &aResult, hasButton)) {
-      fScanVector.push_back(scan);
-      fAnalysisVector.push_back(analysis);
-      fresultVector.push_back(0);
-      fScanTypes.push_back(scanType);
-    }
+  auto scanObjects = TScanFactory::CreateScanObjects(scanType, config, fChips, fHICs, fBoards,
+                                                     &fHistoQue, &fMutex, aResult);
+  if (scanObjects.analysis) {
+    fScanVector.push_back(scanObjects.scan);
+    fAnalysisVector.push_back(scanObjects.analysis);
+    fresultVector.push_back(scanObjects.result);
+    fScanTypes.push_back(scanType);
   }
 
-  if (hasButton) {
+  if (scanObjects.hasButton) {
     ui->testTable->insertRow(ui->testTable->rowCount());
     fScanToRowMap[fScanVector.size() - 1]        = ui->testTable->rowCount() - 1;
     fRowToScanMap[ui->testTable->rowCount() - 1] = fScanVector.size() - 1;
 
-    QTableWidgetItem *scanItem = new QTableWidgetItem(scan->GetName());
+    QTableWidgetItem *scanItem = new QTableWidgetItem(scanObjects.scan->GetName());
     scanItem->setFlags(scanItem->flags() & ~Qt::ItemIsEditable);
     ui->testTable->setItem(ui->testTable->rowCount() - 1, 0, scanItem);
 
-    QTableWidgetItem *statusItem = new QTableWidgetItem(scan->GetState());
+    QTableWidgetItem *statusItem = new QTableWidgetItem(scanObjects.scan->GetState());
     statusItem->setFlags(statusItem->flags() & ~Qt::ItemIsEditable);
     ui->testTable->setItem(ui->testTable->rowCount() - 1, 1, statusItem);
   }
@@ -2736,7 +2550,7 @@ void MainWindow::fillingfastpower()
 void MainWindow::fillingHSscans()
 {
   ClearVectors();
-  AddScan(STPower);
+  // AddScan(STPower);
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   // FIFO and digital scan at three different supply voltages
   AddScan(STFifo);

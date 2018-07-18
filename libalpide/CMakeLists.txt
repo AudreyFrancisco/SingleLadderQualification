@@ -79,6 +79,7 @@ set(OBJS_ANA
   ../src/TSCurveAnalysis.cpp
   ../src/TApplyTuning.cpp
   ../src/TEyeAnalysis.cpp
+  ../src/TScanFactory.cpp
 )
 
 add_custom_target(version
