@@ -113,7 +113,7 @@ void ALPIDErcv::addSetRDPRegField(uint16_t address, uint16_t size, uint16_t offs
 
 void ALPIDErcv::addPRBSsetSel(uint8_t s)
 {
-..if (!wbb) throw PControlInterfaceError("No IPBus configured");
+  if (!wbb) throw PControlInterfaceError("No IPBus configured");
 
   wbb->addRMWbits(baseAddress+regPrbs, ~PRBS_SEL_MASK, (s<<PRBS_SEL_SHIFT));
 }
