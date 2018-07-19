@@ -636,8 +636,9 @@ void TReadoutBoardMOSAIC::ReadTransceiverDRP(size_t Aindex, uint16_t address, ui
 */
 void TReadoutBoardMOSAIC::SetReceiverPatternCheck(size_t Aindex)
 {
-  if(Aindex >= MAX_MOSAICTRANRECV) {
-    std::cerr << "MOSAIC SetReceiverPatternCeck : Invalid Transceiver index ! (" << Aindex << ")" << std::endl;
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cerr << "MOSAIC SetReceiverPatternCeck : Invalid Transceiver index ! (" << Aindex << ")"
+              << std::endl;
     return;
   }
   alpideRcv[Aindex]->addPRBSsetSel(ALPIDErcv::PRBS_7);
@@ -654,8 +655,9 @@ void TReadoutBoardMOSAIC::SetReceiverPatternCheck(size_t Aindex)
 */
 void TReadoutBoardMOSAIC::ResetReceiverPatternCheck(size_t Aindex)
 {
-  if(Aindex >= MAX_MOSAICTRANRECV) {
-    std::cerr << "MOSAIC ResetReceiverPatternCeck : Invalid Transceiver index ! (" << Aindex << ")" << std::endl;
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cerr << "MOSAIC ResetReceiverPatternCeck : Invalid Transceiver index ! (" << Aindex << ")"
+              << std::endl;
     return;
   }
   alpideRcv[Aindex]->addPRBSsetSel(ALPIDErcv::PRBS_NONE);
@@ -671,14 +673,15 @@ void TReadoutBoardMOSAIC::ResetReceiverPatternCheck(size_t Aindex)
 */
 uint32_t TReadoutBoardMOSAIC::GetErrorCounter(size_t Aindex)
 {
-  if(Aindex >= MAX_MOSAICTRANRECV) {
-    std::cerr << "MOSAIC GetErrorCounter : Invalid Transceiver index ! (" << Aindex << ")" << std::endl;
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cerr << "MOSAIC GetErrorCounter : Invalid Transceiver index ! (" << Aindex << ")"
+              << std::endl;
     return( 0 );
   }
   uint32_t errRegValue;
   alpideRcv[Aindex]->addGetPRBScounter(&errRegValue);
   alpideRcv[Aindex]->execute();
-  return( errRegValue );
+  return(errRegValue);
 }
 
 // ================================== EOF ========================================

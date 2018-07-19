@@ -115,15 +115,15 @@ void ALPIDErcv::addPRBSsetSel(uint8_t s)
 {
   if (!wbb) throw PControlInterfaceError("No IPBus configured");
 
-  wbb->addRMWbits(baseAddress+regPrbs, ~PRBS_SEL_MASK, (s<<PRBS_SEL_SHIFT));
+  wbb->addRMWbits(baseAddress + regPrbs, ~PRBS_SEL_MASK, (s << PRBS_SEL_SHIFT));
 }
 
 void ALPIDErcv::addPRBSreset()
 {
   if (!wbb) throw PControlInterfaceError("No IPBus configured");
 
-  wbb->addRMWbits(baseAddress+regPrbs, ~PRBS_RESET, PRBS_RESET);
-  wbb->addRMWbits(baseAddress+regPrbs, ~PRBS_RESET, 0);
+  wbb->addRMWbits(baseAddress + regPrbs, ~PRBS_RESET, PRBS_RESET);
+  wbb->addRMWbits(baseAddress + regPrbs, ~PRBS_RESET, 0);
 }
 
 void ALPIDErcv::addGetPRBScounter(uint32_t *ctr)

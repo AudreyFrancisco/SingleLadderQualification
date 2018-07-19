@@ -61,7 +61,7 @@ private: // WBB Slave registers map
 private:
   enum opModeBits_e { OPMODE_RCVENABLE = (1 << 0), OPMODE_INVERT_POLARITY = (1 << 1) };
 
-  enum prbsBits_e { PRBS_RESET = (1<<3), PRBS_SEL_MASK = 0x07, PRBS_SEL_SHIFT = 0 };
+  enum prbsBits_e { PRBS_RESET = (1 << 3), PRBS_SEL_MASK = 0x07, PRBS_SEL_SHIFT = 0 };
 
 public:
   enum prbsSel_e { PRBS_NONE = 0, PRBS_7 = 1, PRBS_15 = 2, PRBS_23 = 3, PRBS_31 = 4 };
