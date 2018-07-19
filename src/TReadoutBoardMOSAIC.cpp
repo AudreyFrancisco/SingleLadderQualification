@@ -676,12 +676,12 @@ uint32_t TReadoutBoardMOSAIC::GetErrorCounter(size_t Aindex)
   if (Aindex >= MAX_MOSAICTRANRECV) {
     std::cerr << "MOSAIC GetErrorCounter : Invalid Transceiver index ! (" << Aindex << ")"
               << std::endl;
-    return( 0 );
+    return (0);
   }
   uint32_t errRegValue;
   alpideRcv[Aindex]->addGetPRBScounter(&errRegValue);
   alpideRcv[Aindex]->execute();
-  return(errRegValue);
+  return (errRegValue);
 }
 
 // ================================== EOF ========================================

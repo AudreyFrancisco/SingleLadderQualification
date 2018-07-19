@@ -126,8 +126,5 @@ void ALPIDErcv::addPRBSreset()
   wbb->addRMWbits(baseAddress + regPrbs, ~PRBS_RESET, 0);
 }
 
-void ALPIDErcv::addGetPRBScounter(uint32_t *ctr)
-{
-  addGetRDPReg(RX_PRBS_ERR_CNT, ctr);
-}
+void ALPIDErcv::addGetPRBScounter(uint32_t *ctr) { addGetRDPReg(RX_PRBS_ERR_CNT, ctr); }
 

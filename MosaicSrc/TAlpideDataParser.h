@@ -67,9 +67,9 @@ private:
 
 public:
   enum eventFlag_e {
-    flagHeaderError = (1 << 0),
+    flagHeaderError       = (1 << 0),
     flagDecoder10b8bError = (1 << 1),
-    flagOverSizeError = (1 << 2)
+    flagOverSizeError     = (1 << 2)
   };
 };
 

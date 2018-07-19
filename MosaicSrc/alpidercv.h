@@ -65,7 +65,6 @@ private:
 
 public:
   enum prbsSel_e { PRBS_NONE = 0, PRBS_7 = 1, PRBS_15 = 2, PRBS_23 = 3, PRBS_31 = 4 };
-
 };
 
 #endif // ALPIDERCV_H
