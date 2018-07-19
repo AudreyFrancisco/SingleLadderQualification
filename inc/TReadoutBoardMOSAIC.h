@@ -8,6 +8,7 @@
  *  		HISTORY
  *
  *  23/05/17 - 	Add the support for the endurance Test Board
+ *	18/07/18 - 	Add the Receiver Pattern Check
  *
  */
 #ifndef READOUTBOARDMOSAIC_H
@@ -117,6 +118,10 @@ public:
 
   std::vector<uint32_t> *getTriggerNums() { return &triggerNum; };
   std::vector<uint64_t> *getTriggerTimes() { return &triggerTime; };
+
+  void SetReceiverPatternCheck(size_t Aindex);
+  void ResetReceiverPatternCheck(size_t Aindex);
+  uint32_t GetErrorCounter(size_t Aindex);
 
 private:
   void init();

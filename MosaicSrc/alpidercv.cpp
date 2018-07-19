@@ -105,3 +105,25 @@ void ALPIDErcv::addSetRDPRegField(uint16_t address, uint16_t size, uint16_t offs
 
   wbb->addRMWbits(baseAddress + rdpBase + address, ~mask, val);
 }
+
+//
+//  PRBS related functions
+//
+#define RX_PRBS_ERR_CNT 0x015e // Address int transceiver DRP of RX error counter
+
+void ALPIDErcv::addPRBSsetSel(uint8_t s)
+{
+  if (!wbb) throw PControlInterfaceError("No IPBus configured");
+
+  wbb->addRMWbits(baseAddress + regPrbs, ~PRBS_SEL_MASK, (s << PRBS_SEL_SHIFT));
+}
+
+void ALPIDErcv::addPRBSreset()
+{
+  if (!wbb) throw PControlInterfaceError("No IPBus configured");
+
+  wbb->addRMWbits(baseAddress + regPrbs, ~PRBS_RESET, PRBS_RESET);
+  wbb->addRMWbits(baseAddress + regPrbs, ~PRBS_RESET, 0);
+}
+
+void ALPIDErcv::addGetPRBScounter(uint32_t *ctr) { addGetRDPReg(RX_PRBS_ERR_CNT, ctr); }

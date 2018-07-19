@@ -35,6 +35,7 @@
  *  18/01/17 - Review of ReadEventData. Added inheritance from class MBoard
  *  22/05/17 - Review for Auxiliary COntrol Interfaces facility
  *  09/04/18 - Add the flushDataReceiver() to the Memory Overflow error
+ *  18/07/18 - Add the Receiver Pattern Check Wrappers
  *
  */
 #include "TReadoutBoardMOSAIC.h"
@@ -626,6 +627,61 @@ void TReadoutBoardMOSAIC::ReadTransceiverDRP(size_t Aindex, uint16_t address, ui
   }
   alpideRcv[Aindex]->addGetRDPReg(address, value);
   if (execute) alpideRcv[Aindex]->execute();
+}
+
+/*
+   Set the Check mode for one Receiver
+
+   parameters: receiver  - Transceiver id
+*/
+void TReadoutBoardMOSAIC::SetReceiverPatternCheck(size_t Aindex)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cerr << "MOSAIC SetReceiverPatternCeck : Invalid Transceiver index ! (" << Aindex << ")"
+              << std::endl;
+    return;
+  }
+  alpideRcv[Aindex]->addPRBSsetSel(ALPIDErcv::PRBS_7);
+  alpideRcv[Aindex]->addPRBSreset();
+  alpideRcv[Aindex]->execute();
+  std::cout << "MOSAIC Setup the 'Check Receiver Mode' on receiver=" << Aindex << std::endl;
+  return;
+}
+
+/*
+   Reset the Check mode for one Receiver
+
+   parameters: receiver  - Transceiver id
+*/
+void TReadoutBoardMOSAIC::ResetReceiverPatternCheck(size_t Aindex)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cerr << "MOSAIC ResetReceiverPatternCeck : Invalid Transceiver index ! (" << Aindex << ")"
+              << std::endl;
+    return;
+  }
+  alpideRcv[Aindex]->addPRBSsetSel(ALPIDErcv::PRBS_NONE);
+  alpideRcv[Aindex]->execute();
+  std::cout << "MOSAIC Reset the 'Check Receiver Mode' on receiver=" << Aindex << std::endl;
+  return;
+}
+
+/*
+   Read the value of the Error Counter for one Receiver
+
+   parameters: receiver  - Transceiver id
+*/
+uint32_t TReadoutBoardMOSAIC::GetErrorCounter(size_t Aindex)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cerr << "MOSAIC GetErrorCounter : Invalid Transceiver index ! (" << Aindex << ")"
+              << std::endl;
+    return (0);
+  }
+  uint32_t errRegValue;
+  alpideRcv[Aindex]->addGetPRBScounter(&errRegValue);
+  alpideRcv[Aindex]->execute();
+  return (errRegValue);
 }
 
 // ================================== EOF ========================================

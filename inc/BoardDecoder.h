@@ -16,8 +16,9 @@ typedef struct {
   bool timeout;
   bool endOfRun;
   bool overflow;
-  bool headerError;       // the received Frame contains error in the transmission
-  bool decoder10b8bError; // the MOSAIC board reports a 10b8b conversion error
+  bool headerError;        // the received Frame contains error in the transmission
+  bool decoder10b8bError;  // the MOSAIC board reports a 10b8b conversion error
+  bool eventOverSizeError; // the MOSAIC board reports an Event Over Size Error
 
   // DAQ board
   bool     almostFull;
