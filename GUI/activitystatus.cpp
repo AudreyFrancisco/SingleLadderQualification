@@ -65,6 +65,7 @@ void ActivityStatus::PopulateWindow(QString nameoftheobject, QString oldclass, Q
   ui->nameofhic->setText(nameoftheobject);
   ui->oldclassification->setText(oldclass);
   ui->finalclassificaton->setText(finalclass);
+  if (finalclass == "RED") ui->finalclassificaton->setStyleSheet("background-color:red;");
   for (unsigned int i = 0; i < nameing.size(); i++) {
     QListWidgetItem *newItem = new QListWidgetItem;
     newItem->setText(nameing.at(i));
