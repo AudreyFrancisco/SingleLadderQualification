@@ -841,6 +841,21 @@ int powerOn(TReadoutBoardDAQ *aDAQBoard)
   return 0;
 }
 
+int initSetupWithNames(TConfig *&config, std::vector<TReadoutBoard *> *boards,
+                       TBoardType *boardType, std::vector<TAlpide *> *chips,
+                       const char *configFileName /*=""*/, std::vector<THic *> *hics /*=0*/,
+                       std::vector<std::string> *hicNames /*=0*/)
+{
+  const char **hicIds = nullptr;
+  if (hicNames) {
+    hicIds = new const char *[hicNames->size()];
+    for (uint ihic = 0; ihic < hicNames->size(); ++ihic)
+      hicIds[ihic] = hicNames->at(ihic).c_str();
+  }
+  int ret = initSetup(config, boards, boardType, chips, configFileName, hics, hicIds);
+  delete[] hicIds;
+  return ret;
+}
 /*
  * Add the InitSetUpEndurance call  - 25/5/17
  *

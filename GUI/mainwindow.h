@@ -79,7 +79,6 @@ public slots:
 
   void setdefaultvalues(bool &fit, int &numberofstages);
 
-  void IBBasicTest();
   void IBParameterScan();
   void fillingibvectors();
 
@@ -111,8 +110,7 @@ signals:
 private:
   Ui::MainWindow *ui;
   bool            fChkBtnObm[7];
-  void explore_halfstave(uint8_t chipid, int &m1, int &m2, int &m3, int &m4, int &m5, int &m6,
-                         int &m7);
+  void explore_halfstave(uint8_t chipid, int m[]);
   void DecodeId(const uint8_t chipId, uint8_t &module, uint8_t &side, uint8_t &position);
   AlpideDB *                   fDB;
   TBoardType                   fBoardType;
@@ -121,10 +119,8 @@ private:
   std::mutex                   fMutex;
   TConfig *                    fConfig;
   std::deque<TScanHisto>       fHistoQue;
-  void color_red(int side, int pos);
-  void color_green(int side, int pos);
-  void color_green_IB(int position);
-  void color_red_IB(int position);
+  void color(int side, int pos, bool ok);
+  void color_IB(int position, bool ok);
   int                fCounter;
   Dialog *           fWindowex     = 0;
   bool               fProperconfig = false;
@@ -185,17 +181,17 @@ private:
   string GetServiceAccount(string Institute, string &folder);
   string GetResultType(int i);
   THic *FindHic(string hicName);
-  void      SetHicClassifications();
-  void      CombineEnduranceResults();
-  void      printClasses();
-  TTestType GetTestType();
-  int       GetTime();
+  void SetHicClassifications();
+  void CombineEnduranceResults();
+  void printClasses();
+  int  GetTime();
   void button_obm_clicked(int aModule);
   QAction *fWritedb;
   QFile *  fMfile;
   std::vector<pair<int, int>> fActComponentTypeIDs;
   std::vector<int>    fComponentIDs;
   Components *        fComponentWindow;
+  bool                fwritingdb;
   bool                fstopwriting;
   bool                fstop;
   int                 fComponentTypeID;
@@ -232,13 +228,6 @@ private:
   virtual void closeEvent(QCloseEvent *event);
 
 private slots:
-  void button_obm1_clicked();
-  void button_obm2_clicked();
-  void button_obm3_clicked();
-  void button_obm4_clicked();
-  void button_obm5_clicked();
-  void button_obm6_clicked();
-  void button_obm7_clicked();
   void applytests();
   void initscanlist();
   void performtests();

@@ -260,7 +260,7 @@ void TestSelection::GetTestTypeName(TTestType &typetest, QString &testname)
   testname = ui->typetest->currentText();
   typetest = (TTestType)value;
   std::cout << "the value is: " << value << " the test type is " << typetest
-            << "and the string is: " << testname.toStdString().c_str() << std::endl;
+            << " and the string is: " << testname.toStdString().c_str() << std::endl;
 }
 
 void TestSelection::nextstep()
