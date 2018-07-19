@@ -127,4 +127,3 @@ void ALPIDErcv::addPRBSreset()
 }
 
 void ALPIDErcv::addGetPRBScounter(uint32_t *ctr) { addGetRDPReg(RX_PRBS_ERR_CNT, ctr); }
-
