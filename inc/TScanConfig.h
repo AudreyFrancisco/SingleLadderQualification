@@ -35,7 +35,8 @@ namespace ScanConfig {
   // 1.1: new classification, but treat bronze equal to gold, silver
   //      (no longer in partial b, no back bias b)
   //      allow more than two bad chips for partial cat B
-  const float CLASSIFICATION_VERSION = 1.1;
+  // 1.2: using Vclip=60DAC for all -3V scans
+  const float CLASSIFICATION_VERSION = 1.2;
 
   const int NINJ           = 50;     // number of injections in digital/threshold scans
   const int NTRIG          = 100000; // number of triggers for noise occupancy scans

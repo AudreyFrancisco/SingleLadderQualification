@@ -641,10 +641,14 @@ void MainWindow::fillingOBvectors()
   AddScan(STNoise);
   AddScan(STClearMask);
 
-  // threshold scans and tuning at 0V back bias
+  // threshold scans and tuning at -3V back bias
   fConfig->GetScanConfig()->SetBackBias(3.0);
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
+    fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 60);
+    fConfig->GetChipConfig(i)->SetParamValue("VRESETD", 147);
+  }
   AddScan(STDigital);
   AddScan(STDigitalWF);
   AddScan(STThreshold);
@@ -660,6 +664,11 @@ void MainWindow::fillingOBvectors()
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
   AddScan(STClearMask);
+
+
+  for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
+    fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 0);
+  }
   return;
 }
 
@@ -1880,6 +1889,10 @@ void MainWindow::fillingibvectors()
   AddScan(STClearMask);
   // return;
   // threshold scan at 3V back bias, also here no tuning for the time being
+  for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
+    fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 60);
+    fConfig->GetChipConfig(i)->SetParamValue("VRESETD", 147);
+  }
   fConfig->GetScanConfig()->SetBackBias(3.0);
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
@@ -1898,6 +1911,10 @@ void MainWindow::fillingibvectors()
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
   AddScan(STClearMask);
+
+  for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
+    fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 0);
+  }
 
   // eye diagram
   fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 8);
@@ -2119,6 +2136,10 @@ void MainWindow::fillingHSscans()
   AddScan(STClearMask);
 
   // threshold scans and tuning at 3V back bias
+  for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
+    fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 60);
+    fConfig->GetChipConfig(i)->SetParamValue("VRESETD", 147);
+  }
   fConfig->GetScanConfig()->SetBackBias(3.0);
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
@@ -2135,6 +2156,10 @@ void MainWindow::fillingHSscans()
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
   AddScan(STClearMask);
+
+  for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
+    fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 0);
+  }
   return;
 }
 
