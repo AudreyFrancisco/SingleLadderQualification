@@ -114,7 +114,6 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
   }
 
   CheckControlInterface(config, boards, boardType, chips);
-  // sleep(5);
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
 }
@@ -285,7 +284,6 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   }
 
   CheckControlInterface(config, boards, boardType, chips); // returns nWorking : int
-  sleep(5);
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
 }
@@ -415,7 +413,6 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
   }
 
   CheckControlInterface(config, boards, boardType, chips); // returns nWorking : int
-  sleep(5);
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
 }
@@ -1085,7 +1082,6 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     }
   }
   CheckControlInterface(config, boards, boardType, chips);
-  sleep(1);
   for (int mod = 0; mod < NModules; mod++) {
     MakeDaisyChain(config, boards, boardType, chips, mod * 14);
   }

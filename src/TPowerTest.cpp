@@ -3,6 +3,7 @@
 #include "TReadoutBoardMOSAIC.h"
 #include <string.h>
 #include <string>
+#include <thread>
 
 TPowerTest::TPowerTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
                        std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
@@ -66,14 +67,14 @@ void TPowerTest::DoIVCurve(THicCurrents &result)
   for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
     float voltage = -((float)i) / 10.;
     m_testHic->GetPowerBoard()->SetBiasVoltage(voltage);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     result.ibias[i] = m_testHic->GetIBias() * 1000; // convert in mA
     // overcurrent protection; will be counted as trip; last voltage is saved as max back bias
     // voltage
     if (result.ibias[i] > m_config->GetParamValue("MAXIBIAS")) {
       m_hicCurrents.find(m_testHic->GetDbId())->second.maxBias = voltage - .1;
       m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
-      sleep(1);
+      std::this_thread::sleep_for(std::chrono::milliseconds(300));
       break;
     }
   }
@@ -88,13 +89,13 @@ void TPowerTest::Execute()
       m_hicCurrents.find(m_testHic->GetDbId());
   m_testHic->PowerOff();
 
+  m_testHic->PowerOn();
   for (unsigned int i = 0; i < boardIndices.size(); i++) {
     TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC *)m_boards.at(boardIndices.at(i));
     board->enableControlInterfaces(false);
   }
-
-  m_testHic->PowerOn();
   m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
+  std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
   // measure -> switchon, no clock
   currentIt->second.idddSwitchon = m_testHic->GetIddd();
@@ -107,6 +108,7 @@ void TPowerTest::Execute()
   }
 
   m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
+  std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
   // measure -> Clocked
   currentIt->second.idddClocked = m_testHic->GetIddd();
@@ -123,6 +125,7 @@ void TPowerTest::Execute()
   }
 
   m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
+  std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
   // measure -> Configured
   currentIt->second.idddConfigured = m_testHic->GetIddd();
