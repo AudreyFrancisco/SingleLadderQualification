@@ -98,6 +98,7 @@ int TScanAnalysis::GetPreviousComponentType(std::string prevTestType)
 // check (IB Stave?)
 int TScanAnalysis::GetComponentType()
 {
+  if (!(m_config->GetDatabase())) return -1;
   if ((m_config->GetTestType() == OBQualification) || (m_config->GetTestType() == OBEndurance) ||
       (m_config->GetTestType() == OBReception) || (m_config->GetTestType() == OBPower) ||
       (m_config->GetTestType() == OBHalfStaveOL) || (m_config->GetTestType() == OBHalfStaveML) ||
@@ -129,6 +130,7 @@ bool TScanAnalysis::FillPreviousActivities(string                               
 {
   std::vector<std::string> childNames;
   int                      compType = GetComponentType();
+  if (!(m_config->GetDatabase())) return false;
   int compId = DbGetComponentId(m_config->GetDatabase(), m_config->GetDatabase()->GetProjectId(),
                                 compType, hicName);
   GetChildList(compId, hicName, childNames);

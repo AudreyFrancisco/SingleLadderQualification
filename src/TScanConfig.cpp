@@ -10,6 +10,8 @@ TScanConfig::TScanConfig()
   // dummy values for first tests
   m_classVersion = CLASSIFICATION_VERSION;
 
+  m_db = 0;
+
   m_nInj       = NINJ;
   m_nTrig      = NTRIG;
   m_maxTimeout = MAXTIMEOUT;
