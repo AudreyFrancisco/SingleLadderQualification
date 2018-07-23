@@ -1557,6 +1557,15 @@ void MainWindow::savesettings()
           bool openActivities, impendanceDone;
           fHICs.at(i)->SetOldClassification(
               DbGetPreviousCategory(fDB, comp, fIdofactivitytype, openActivities, impendanceDone));
+          if (openActivities)
+            popup("Warning: HIC \n" + fHicnames.at(i) +
+                  "\nhas previous activities \nthat are still open. \nYou can still run the test, "
+                  "\nbut if possible please close \nthese activities *before* \nwriting to the "
+                  "database.");
+          if (!impendanceDone)
+            popup("Warning: HIC \n" + fHicnames.at(i) +
+                  "\ndoes not have an impedance\n test activity yet. \nYou should consider "
+                  "aborting \nthe scan and running \nthe impedance test first.");
 
           fActComponentTypeIDs.push_back(make_pair(in, out));
           fComponentIDs.push_back(comp);
