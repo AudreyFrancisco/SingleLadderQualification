@@ -589,7 +589,10 @@ int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
   }
 
   for (unsigned int i = 0; i < chips->size(); i++) {
-    if (!chips->at(i)->GetConfig()->IsEnabled()) continue;
+    if (!chips->at(i)->GetConfig()->IsEnabled()) {
+      chips->at(i)->GetConfig()->SetDisableSource(DISABLE_CONFIG);
+      continue;
+    }
     // std::cout << "Writing chip " << i << std::endl;
     chips->at(i)->WriteRegister(0x60d, WriteValue);
     try {
@@ -604,12 +607,14 @@ int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
                   << ", wrong readback value (" << Value << " instead of " << WriteValue
                   << "), disabling." << std::endl;
         chips->at(i)->SetEnable(false); // GetConfig()->SetEnable(false);
+        chips->at(i)->GetConfig()->SetDisableSource(DISABLE_AUTO);
       }
     }
     catch (exception &e) {
       std::cout << "Pos:" << i << "  Chip ID " << chips->at(i)->GetConfig()->GetChipId()
                 << ", not answering, disabling." << std::endl;
       chips->at(i)->SetEnable(false); // GetConfig()->SetEnable(false);
+      chips->at(i)->GetConfig()->SetDisableSource(DISABLE_AUTO);
     }
   }
   std::cout << "Found " << nWorking << " working chips." << std::endl << std::endl;

@@ -27,6 +27,8 @@ enum TDeviceType {
   TYPE_UNKNOWN
 };
 
+enum TDisableSource { DISABLE_AUTO, DISABLE_CONFIG, DISABLE_MANUAL };
+
 class TChipConfig;
 
 class TConfig {
