@@ -278,9 +278,8 @@ void THic::AddClassification(THicClassification aClass, bool backBias)
 
 THicClassification THic::GetClassification()
 {
-  // Class RED: no working chips or worst no BB scan RED
-  // check on chips.size to exclude fast power test
-  if ((m_chips.size() > 0) && (GetNEnabledChips() == 0)) return CLASS_RED;
+  // Class RED: more than 2 non-working chips or worst no BB scan RED
+  if (m_chips.size() - GetNEnabledChips() > 2) return CLASS_RED;
 
   if (m_worstScanNoBB == CLASS_RED) return CLASS_RED;
 
