@@ -551,6 +551,7 @@ void MainWindow::start_test()
   fWrite           = false;
   fstop            = false;
   fstopwriting     = false;
+  fEnduranceCheck  = 0;
   disconnect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
   fIdofactivitytype = 0;
   fIdoflocationtype = 0;
@@ -2085,7 +2086,12 @@ void MainWindow::ibscansforageing()
 void MainWindow::continuetest()
 {
   fComponentWindow->close();
-  fstopwriting = true;
+  if (fNumberofscan == OBEndurance) {
+    fEnduranceCheck++;
+  }
+  if (fNumberofscan != OBEndurance || fEnduranceCheck == 10) {
+    fstopwriting = true;
+  }
 }
 
 void MainWindow::quittest()

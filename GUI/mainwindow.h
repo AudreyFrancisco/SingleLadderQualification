@@ -218,6 +218,7 @@ private:
   QString                fExceptiontext;
   bool                   fHiddenComponent;
   int                    fHalfstavepart;
+  int                    fEnduranceCheck;
 
   std::map<int, int> fScanToRowMap;
   std::map<int, int> fRowToScanMap;
