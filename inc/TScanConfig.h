@@ -37,8 +37,8 @@ namespace ScanConfig {
   //      allow more than two bad chips for partial cat B
   // 1.2: using Vclip=60DAC for all -3V scans
   // 1.3: move back to max. 2 bad chips for partial cat B (cf. plenary June 18, 2018)
-
-  const float CLASSIFICATION_VERSION = 1.3;
+  // 1.4: increased gravity of failed chi square cut in DCTRL Test (bronze -> red)
+  const float CLASSIFICATION_VERSION = 1.4;
 
   const int NINJ           = 50;     // number of injections in digital/threshold scans
   const int NTRIG          = 100000; // number of triggers for noise occupancy scans
