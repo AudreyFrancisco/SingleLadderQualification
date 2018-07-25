@@ -472,7 +472,8 @@ void MainWindow::setupChipTree()
         addChipInfoToTree(chip, iChip, (iHic * nChipsPerHic) + iChip);
       }
     }
-  } else {
+  }
+  else {
     // add the chips directly to the tree
     for (int iChip = 0; iChip < nChips; iChip++) {
       QTreeWidgetItem *chip = new QTreeWidgetItem(ui->chipTree);
