@@ -27,3 +27,15 @@ ubuntu1804clang:
     script:
       - mkdir build
       - (cd build && CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake ../ && make -j $(nproc) all format-check)
+
+cc7_noroot:
+    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-cc7-dev
+    script:
+      - mkdir build
+      - (cd build && cmake3 -DDISABLE_ROOT=ON ../ && make -j $(nproc) all format-check)
+
+ubuntu1804clang_noroot:
+    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu18.04-clang-dev
+    script:
+      - mkdir build
+      - (cd build && CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake -DDISABLE_ROOT=ON ../ && make -j $(nproc) all format-check)
