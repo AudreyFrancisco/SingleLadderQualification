@@ -87,35 +87,44 @@ void TPowerTest::Execute()
 
   std::map<std::string, THicCurrents>::iterator currentIt =
       m_hicCurrents.find(m_testHic->GetDbId());
-  m_testHic->PowerOff();
 
-  m_testHic->PowerOn();
+  // power off and disable control interface
+  m_testHic->PowerOff();
   for (unsigned int i = 0; i < boardIndices.size(); i++) {
     TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC *)m_boards.at(boardIndices.at(i));
     board->enableControlInterfaces(false);
   }
-  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
+
+  // power on and correct voltage drop
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
+  m_testHic->GetPowerBoard()->SwitchAnalogOn(m_testHic->GetPbMod());
+  m_testHic->GetPowerBoard()->SwitchDigitalOn(m_testHic->GetPbMod());
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(300));
+  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
 
   // measure -> switchon, no clock
   currentIt->second.idddSwitchon = m_testHic->GetIddd();
   currentIt->second.iddaSwitchon = m_testHic->GetIdda();
 
+  // enable control interface and send GRST
   for (unsigned int i = 0; i < boardIndices.size(); i++) {
     TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC *)m_boards.at(boardIndices.at(i));
     board->enableControlInterfaces(true);
     board->SendOpCode(Alpide::OPCODE_GRST);
   }
 
-  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
+  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
 
   // measure -> Clocked
   currentIt->second.idddClocked = m_testHic->GetIddd();
   currentIt->second.iddaClocked = m_testHic->GetIdda();
 
+  // configure chips
   for (unsigned int i = 0; i < chips.size(); i++) {
     if (!(chips.at(i)->GetConfig()->IsEnabled())) continue;
+    if (!m_testHic->ContainsChip(chips.at(i)->GetConfig()->GetChipId())) continue;
     AlpideConfig::BaseConfig(chips.at(i));
     AlpideConfig::ConfigureCMU(chips.at(i));
   }
@@ -124,8 +133,8 @@ void TPowerTest::Execute()
     board->SendOpCode(Alpide::OPCODE_RORST);
   }
 
-  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
+  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
 
   // measure -> Configured
   currentIt->second.idddConfigured = m_testHic->GetIddd();
