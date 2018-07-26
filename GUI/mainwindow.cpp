@@ -867,6 +867,8 @@ void MainWindow::applytests()
     std::cout << "Done" << std::endl;
   }
 
+  SetHicClassifications();
+
   printClasses();
 
   if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
@@ -1141,7 +1143,6 @@ void MainWindow::attachtodatabase()
   }
   delete fDB;
   fDB = new AlpideDB(fDatabasetype);
-  SetHicClassifications();
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     if (!fHicnames.at(i).isEmpty()) {
       if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
