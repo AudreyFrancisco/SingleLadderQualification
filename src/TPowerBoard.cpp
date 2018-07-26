@@ -93,6 +93,8 @@ void TPowerBoard::Init()
     fPBoard.Modules[i].DVset  = fPowerBoardConfig->GetDigitalVoltage(i);
     fPBoard.Modules[i].BiasOn = fPowerBoardConfig->GetBiasOn(i);
   }
+
+  std::lock_guard<std::mutex> lock(mutex_pb);
   // first of all test the presence of the power board
   try {
     fMOSAICPowerBoard->isReady();
@@ -191,6 +193,7 @@ bool TPowerBoard::readMonitor()
   }
 
   // Read the board
+  std::lock_guard<std::mutex> lock(mutex_pb);
   fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::GetMonitor);
 
   // Set the data members
@@ -212,6 +215,13 @@ bool TPowerBoard::readMonitor()
   }
 
   return (true);
+}
+
+void TPowerBoard::GetPowerBoardState(powerboard::pbstate *state)
+{
+  // Read the board
+  std::lock_guard<std::mutex> lock(mutex_pb);
+  fMOSAICPowerBoard->getState(state, powerboard::getFlags::GetMonitor);
 }
 
 float TPowerBoard::GetAnalogCurrent(int module)
@@ -413,6 +423,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
   }
 
   // fPBoard contains the voltages corrected with the channel calibration
+  std::lock_guard<std::mutex> lock(mutex_pb);
   fMOSAICPowerBoard->setVout((unsigned char)(module * 2), fPBoard.Modules[module].AVset + dVAnalog);
   fMOSAICPowerBoard->setVout((unsigned char)(module * 2 + 1),
                              fPBoard.Modules[module].DVset + dVDigital);
@@ -440,6 +451,7 @@ void TPowerBoard::SetModule(int module, float AV, float AI, float DV, float DI, 
   fPBoard.Modules[module].DIset  = DI;
   fPBoard.Modules[module].BiasOn = BiasOn;
 
+  std::lock_guard<std::mutex> lock(mutex_pb);
   fMOSAICPowerBoard->setVout((unsigned char)(module * 2), AV);
   fMOSAICPowerBoard->setVout((unsigned char)(module * 2 + 1), DV);
   fMOSAICPowerBoard->setIth((unsigned char)(module * 2), AI);
@@ -464,6 +476,7 @@ void TPowerBoard::SwitchModule(int module, bool value)
 {
   fPBoard.Modules[module].AchOn = value;
   fPBoard.Modules[module].DchOn = value;
+  std::lock_guard<std::mutex> lock(mutex_pb);
   if (value) {
     fMOSAICPowerBoard->onVout(module * 2);
     fMOSAICPowerBoard->onVout(module * 2 + 1);
@@ -516,6 +529,7 @@ void TPowerBoard::GetModule(int module, float *AV, float *AI, float *DV, float *
   -------------------------- */
 bool TPowerBoard::IsOK()
 {
+  std::lock_guard<std::mutex> lock(mutex_pb);
   // first of all test the presence of the power board
   try {
     fMOSAICPowerBoard->isReady();
