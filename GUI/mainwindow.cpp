@@ -996,7 +996,8 @@ void MainWindow::CombineEnduranceResults()
     TCycleResultHic *lastHicResult =
         (TCycleResultHic *)lastResult->GetHicResult(fHICs.at(ihic)->GetDbId());
     TCycleAnalysis *lastAnalysis = (TCycleAnalysis *)fAnalysisVector.at(lastEndurance);
-    lastAnalysis->ReClassify(lastHicResult);
+    if (lastHicResult == 0x0) popup("A problem was detected\nPlease check \nthe cable connections");
+    if (lastHicResult) lastAnalysis->ReClassify(lastHicResult);
   }
 }
 
