@@ -248,6 +248,18 @@ std::string TAlpide::DumpRegisters()
     dump << chipId << "\t0x" << std::hex << reg << "\t0x" << value << std::dec << std::endl;
   }
 
+  // matrix
+  for (int ireg = 0; ireg < 32; ++ireg) {
+    uint16_t addr  = (ireg << 11) | 0x400 | 1;
+    uint16_t value = 0xDEAD;
+    ReadRegister(addr, value);
+    dump << chipId << "\t0x" << std::hex << addr << "\t0x" << value << std::dec << std::endl;
+
+    addr = (ireg << 11) | 0x400 | 2;
+    ReadRegister(addr, value);
+    dump << chipId << "\t0x" << std::hex << addr << "\t0x" << value << std::dec << std::endl;
+  }
+
   return dump.str();
 }
 
