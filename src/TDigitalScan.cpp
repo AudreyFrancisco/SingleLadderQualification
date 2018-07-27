@@ -19,9 +19,9 @@ TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
 
   SetName();
 
-  m_start[0] = 0;
+  m_start[0] = 380;
   m_step[0]  = 1;
-  m_stop[0]  = m_config->GetNMaskStages();
+  m_stop[0]  = 390;
 
   m_start[1] = 0;
   m_step[1]  = 1;
@@ -193,7 +193,6 @@ void TDigitalScan::PrepareStep(int loopIndex)
 {
   switch (loopIndex) {
   case 0: // innermost loop: mask staging
-    if (m_value[0] == 384) break;
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
       if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[0]);
@@ -224,8 +223,6 @@ void TDigitalScan::Next(int loopIndex)
 void TDigitalScan::Execute()
 {
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
-
-  if (m_value[0] == 384) return;
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
     m_boards.at(iboard)->Trigger(m_nTriggers);

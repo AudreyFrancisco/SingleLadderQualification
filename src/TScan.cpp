@@ -519,6 +519,18 @@ void TMaskScan::FindTimeoutHics(int iboard, int *triggerCounts)
       }
     }
 
+    for (const auto &rChip : m_chips) {
+      if (rChip->GetConfig()->IsEnabled()) {
+        try {
+          std::cout << "chip ID: " << rChip->GetConfig()->GetChipId() << std::endl;
+          std::cout << rChip->DumpRegisters() << std::endl;
+        }
+        catch (std::exception &e) {
+          std::cout << "exception " << e.what() << " when reading registers for chip "
+                    << rChip->GetConfig()->GetChipId() << std::endl;
+        }
+      }
+    }
     // HIC is connected to this readout board AND did not send enough events
     if ((isOnBoard) && (nTrigs < m_nTriggers * (int)(m_hics.at(iHic)->GetNEnabledChips(iboard)))) {
       std::cout << "identified timeout on HIC " << m_hics.at(iHic)->GetDbId() << std::endl;
@@ -555,6 +567,7 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
                   << std::endl;
         itrg = m_nTriggers * m_enabled[iboard];
         FindTimeoutHics(iboard, nTrigPerHic);
+
         m_errorCount.nTimeout++;
         if (m_errorCount.nTimeout > m_config->GetParamValue("MAXTIMEOUT")) {
           throw std::runtime_error("Maximum number of timouts reached. Aborting scan.");
