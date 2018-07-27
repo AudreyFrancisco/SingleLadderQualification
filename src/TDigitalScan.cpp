@@ -195,7 +195,7 @@ void TDigitalScan::PrepareStep(int loopIndex)
   case 0: // innermost loop: mask staging
     std::cout << "register dump before stage " << m_value[0] << std::endl;
     for (const auto &rChip : m_chips) {
-      if (rChip->GetConfig()->IsEnabled()) {
+      if ((rChip->GetConfig()->GetChipId() >= 48) && (rChip->GetConfig()->GetChipId() < 64)) {
         try {
           std::cout << "chip ID: " << rChip->GetConfig()->GetChipId() << std::endl;
           std::cout << rChip->DumpRegisters() << std::endl;
