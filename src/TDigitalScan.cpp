@@ -193,6 +193,19 @@ void TDigitalScan::PrepareStep(int loopIndex)
 {
   switch (loopIndex) {
   case 0: // innermost loop: mask staging
+    std::cout << "register dump before stage " << m_value[0] << std::endl;
+    for (const auto &rChip : m_chips) {
+      if (rChip->GetConfig()->IsEnabled()) {
+        try {
+          std::cout << "chip ID: " << rChip->GetConfig()->GetChipId() << std::endl;
+          std::cout << rChip->DumpRegisters() << std::endl;
+        }
+        catch (std::exception &e) {
+          std::cout << "exception " << e.what() << " when reading registers for chip "
+                    << rChip->GetConfig()->GetChipId() << std::endl;
+        }
+      }
+    }
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
       if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[0]);
