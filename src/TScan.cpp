@@ -520,7 +520,8 @@ void TMaskScan::FindTimeoutHics(int iboard, int *triggerCounts)
     }
 
     for (const auto &rChip : m_chips) {
-      if ((rChip->GetConfig()->GetChipId() >= 48) && (rChip->GetConfig()->GetChipId() < 64)) {
+      if ((rChip->GetConfig()->GetChipId() % 16 == 0) ||
+          ((rChip->GetConfig()->GetChipId() >= 48) && (rChip->GetConfig()->GetChipId() < 64))) {
         try {
           std::cout << "chip ID: " << rChip->GetConfig()->GetChipId() << std::endl;
           std::cout << rChip->DumpRegisters() << std::endl;
