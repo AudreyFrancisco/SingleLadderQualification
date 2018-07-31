@@ -2124,7 +2124,8 @@ void MainWindow::fillingHSscans()
   // AddScan(STFifo);
   // fConfig->GetScanConfig()->SetVoltageScale(1.0);
 
-  AddScan(STDigital);
+  AddScan(STLocalBus);
+  // AddScan(STDigital);
   // fConfig->GetScanConfig()->SetVoltageScale(1.1);
   // AddScan(STDigital);
   // fConfig->GetScanConfig()->SetVoltageScale(0.9);
