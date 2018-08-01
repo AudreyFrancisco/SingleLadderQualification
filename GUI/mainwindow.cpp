@@ -1270,7 +1270,9 @@ void MainWindow::attachtodatabase()
             for (auto ihic = mymap->begin(); ihic != mymap->end(); ++ihic) {
               if (ihic->first.compare(fHicnames.at(i).toStdString()) == 0) {
                 TScanResultHic *result = (TScanResultHic *)ihic->second;
-                result->WriteToDB(fDB, activ);
+                if (fScanVector.at(j) != 0)
+                  result->WriteClassToDB(fDB, activ, string(fScanVector[j]->GetName()));
+                if (result->IsValid()) result->WriteToDB(fDB, activ);
               }
             }
           }
