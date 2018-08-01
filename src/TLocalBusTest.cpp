@@ -127,7 +127,8 @@ void TLocalBusTest::PrepareStep(int loopIndex)
     // give token to write chip, take away in loop end
 
     m_writeChip->ModifyRegisterBits(Alpide::REG_CMUDMU_CONFIG, 4, 1, 1);
-    m_boards[0]->SendOpCode(Alpide::OPCODE_RORST);
+    for (const auto &rBoard : m_boards)
+      rBoard->SendOpCode(Alpide::OPCODE_RORST);
     break;
   case 2: // outermost loop: change daisy chain
     m_stop[0] = m_daisyChains.at(m_value[2]).size();
