@@ -29,6 +29,7 @@ typedef struct {
   int nCorruptEvent;
   int nPrioEncoder;
   int nTimeout;
+  int nOversizeEvent;
 } TErrorCounter;
 
 typedef struct TScanParameters__ {

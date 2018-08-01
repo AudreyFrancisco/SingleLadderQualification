@@ -115,11 +115,12 @@ void TScan::Init()
     }
 
     TErrorCounter errCount;
-    errCount.nEnabled      = m_hics.at(ihic)->GetNEnabledChips();
-    errCount.n8b10b        = 0;
-    errCount.nCorruptEvent = 0;
-    errCount.nPrioEncoder  = 0;
-    errCount.nTimeout      = 0;
+    errCount.nEnabled       = m_hics.at(ihic)->GetNEnabledChips();
+    errCount.n8b10b         = 0;
+    errCount.nCorruptEvent  = 0;
+    errCount.nPrioEncoder   = 0;
+    errCount.nTimeout       = 0;
+    errCount.nOversizeEvent = 0;
     m_errorCounts.insert(
         std::pair<std::string, TErrorCounter>(m_hics.at(ihic)->GetDbId(), errCount));
   }
@@ -572,6 +573,10 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
         if (FindHIC(iboard, boardInfo.channel).compare("None") != 0) {
           m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).n8b10b++;
         }
+      }
+      if (boardInfo.eventOverSizeError) {
+        std::cout << "Found oversized event, truncated in MOSAIC" << std::endl;
+        m_errorCount.nOversizeEvent++;
       }
       int n_bytes_chipevent = n_bytes_data - n_bytes_header; //-n_bytes_trailer;
       if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;

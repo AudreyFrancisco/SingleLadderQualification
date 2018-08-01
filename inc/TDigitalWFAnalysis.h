@@ -53,6 +53,7 @@ class TDigitalWFResult : public TScanResult {
 private:
   int m_nTimeout;
   int m_n8b10b;
+  int m_nOversize;
   int m_nCorrupt;
 
 public:

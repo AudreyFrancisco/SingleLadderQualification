@@ -89,9 +89,10 @@ void TDigitalWFAnalysis::Finalize()
   TDigitalWFResult *   result   = (TDigitalWFResult *)m_result;
   std::vector<TPixHit> stuck    = ((TMaskScan *)m_scan)->GetStuckPixels();
 
-  result->m_nTimeout = errCount.nTimeout;
-  result->m_n8b10b   = errCount.n8b10b;
-  result->m_nCorrupt = errCount.nCorruptEvent;
+  result->m_nTimeout  = errCount.nTimeout;
+  result->m_n8b10b    = errCount.n8b10b;
+  result->m_nOversize = errCount.nOversizeEvent;
+  result->m_nCorrupt  = errCount.nCorruptEvent;
 
   // for the time being divide stuck pixels on different chips here
   // later: change AlpideDecoder?
@@ -272,6 +273,7 @@ void TDigitalWFResult::WriteToFileGlobal(FILE *fp)
 {
   fprintf(fp, "8b10b errors:\t%d\n", m_n8b10b);
   fprintf(fp, "Corrupt events:\t%d\n", m_nCorrupt);
+  fprintf(fp, "Oversized events:\t%d\n", m_nOversize);
   fprintf(fp, "Timeouts:\t%d\n", m_nTimeout);
 }
 

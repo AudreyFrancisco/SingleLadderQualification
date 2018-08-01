@@ -344,9 +344,10 @@ void TSCurveAnalysis::Finalize()
   TErrorCounter  errCount = ((TMaskScan *)m_scan)->GetErrorCount();
   TSCurveResult *result   = (TSCurveResult *)m_result;
 
-  result->m_nTimeout = errCount.nTimeout;
-  result->m_n8b10b   = errCount.n8b10b;
-  result->m_nCorrupt = errCount.nCorruptEvent;
+  result->m_nTimeout  = errCount.nTimeout;
+  result->m_n8b10b    = errCount.n8b10b;
+  result->m_nOversize = errCount.nOversizeEvent;
+  result->m_nCorrupt  = errCount.nCorruptEvent;
 
   for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip++) {
     TSCurveResultChip *chipResult =
@@ -905,6 +906,7 @@ void TSCurveResult::WriteToFileGlobal(FILE *fp)
 {
   fprintf(fp, "8b10b errors:\t%d\n", m_n8b10b);
   fprintf(fp, "Corrupt events:\t%d\n", m_nCorrupt);
+  fprintf(fp, "Oversized events:\t%d\n", m_nOversize);
   fprintf(fp, "Timeouts:\t%d\n", m_nTimeout);
 }
 

@@ -178,6 +178,10 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
           m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).n8b10b++;
         }
       }
+      if (boardInfo.eventOverSizeError) {
+        std::cout << "Found oversized event, truncated in MOSAIC" << std::endl;
+        m_errorCount.nOversizeEvent++;
+      }
       int n_bytes_chipevent = n_bytes_data - n_bytes_header; //-n_bytes_trailer;
       if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
       bool dataIntegrity = false;
