@@ -1,6 +1,12 @@
 #include "TPowerAnalysis.h"
 #include "DBHelpers.h"
 #include "TPowerTest.h"
+#ifdef HAS_ROOT
+#include "TFile.h"
+#include "TCanvas.h"
+#include "TString.h"
+#include "TH1F.h"
+#endif
 
 #include <string>
 
@@ -45,6 +51,59 @@ string TPowerAnalysis::GetPreviousTestType()
   }
 }
 
+void TPowerAnalysis::CreateIVHisto(TPowerResultHic *hicResult)
+{
+  m_hasPDF = false;
+
+#ifdef HAS_ROOT
+  const std::string basename =
+    TString::Format("IVcurveBB_%s_%s", hicResult->GetName().c_str(),
+                    m_config->GetfNameSuffix()).Data();
+
+  std::string rootfilename, pdffilename;
+  if (m_config->GetUseDataPath()) {
+    rootfilename = hicResult->GetOutputPath() + "/" + basename + ".root";
+     pdffilename = hicResult->GetOutputPath() + "/" + basename + ".pdf";
+  }
+  else {
+    rootfilename = basename + ".root";
+     pdffilename = basename + ".pdf";
+  }
+
+  TCanvas c;
+  c.cd();
+  c.Print((pdffilename + "[").c_str()); // Just open the file
+
+  TFile *rootfile = TFile::Open(rootfilename.c_str(), "RECREATE");
+
+  const std::string hname =
+    TString::Format("iv_%s",hicResult->GetName().c_str()).Data();
+  const std::string htitle =
+    TString::Format("Back Bias IV for %s",hicResult->GetName().c_str()).Data();
+
+  const int iMax = m_config->GetParamValue("IVPOINTS");
+
+  TH1F *ivbb  = new TH1F(hname.c_str(), htitle.c_str(), iMax, 0., iMax*100.);
+
+  for (int i = 0; i < iMax; i++)
+    ivbb->Fill(i*100+50,hicResult->ibias[i]);  // Fill at bin mid point
+
+  ivbb->SetStats(kFALSE);
+  ivbb->GetXaxis()->SetTitle("V (mV)");
+  ivbb->GetYaxis()->SetTitle("I (mA)");
+  ivbb->Draw();
+  c.Update();
+  c.Print(pdffilename.c_str());
+
+  c.Print((pdffilename + "]").c_str()); // Just close the file
+
+  ivbb->Write();
+  rootfile->Close();
+
+  m_hasPDF = true;
+#endif // HAS_ROOT
+}
+
 void TPowerAnalysis::Finalize()
 {
   if (fScanAbort || fScanAbortAll) return;
@@ -76,6 +135,8 @@ void TPowerAnalysis::Finalize()
     }
     hicResult->m_class = GetClassification(hicCurrents, hicResult);
     hicResult->SetValidity(true);
+
+    CreateIVHisto(hicResult);
   }
   WriteResult();
   m_finished = true;

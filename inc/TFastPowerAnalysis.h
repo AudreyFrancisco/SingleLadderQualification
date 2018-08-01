@@ -52,10 +52,13 @@ public:
 
 class TFastPowerAnalysis : public TScanAnalysis {
 private:
+  void CreateIVHisto(TFastPowerResultHic *hicResult);
   void WriteIVCurve(THic *hic);
   THicClassification GetClassification(THicCurrents currents, TFastPowerResultHic *result);
   //  THicClassification GetClassificationIB(THicCurrents currents);
   THicClassification GetClassificationOB(THicCurrents currents, TFastPowerResultHic *result);
+
+  bool m_hasPDF;
 
 protected:
   TScanResultChip *GetChipResult()
@@ -81,6 +84,7 @@ public:
   void Initialize() { CreateHicResults(); };
   void Run(){};
   void Finalize();
+  bool HasPDF() { return m_hasPDF; };
 };
 
 #endif
