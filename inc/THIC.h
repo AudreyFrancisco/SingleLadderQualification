@@ -8,8 +8,6 @@
 #include <string>
 #include <vector>
 
-class TAlpide;
-
 typedef enum { HIC_IB, HIC_OB } THicType;
 
 class THic {
@@ -51,6 +49,7 @@ public:
   float        GetVddaSet();
   float        GetVbias();
   float GetTemperature(std::map<int, float> *chipValues = 0);
+  void ReadChipRegister(Alpide::TRegister reg, std::map<int, uint16_t> &values);
   void ScaleVoltage(float aFactor);
   std::string  GetDbId() { return m_dbId; };
   int          GetModId() { return m_moduleId; };

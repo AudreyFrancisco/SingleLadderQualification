@@ -2,7 +2,6 @@
 #define ALPIDE_H
 
 #include "TConfig.h"
-#include "THIC.h"
 #include <string>
 #include <unistd.h>
 

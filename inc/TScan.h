@@ -21,6 +21,8 @@ extern bool fScanAbortAll;     // fScanAbortAll stops all scans (set false in co
 extern bool fTimeLimitReached; // stops current scan but still lets the analysis finish; used for
                                // endurance test
 
+class TReadoutTest;
+
 typedef struct {
   int nEnabled;
   int n8b10b;
@@ -37,6 +39,7 @@ public:
 
 class TScanConditionsHic {
   friend class TScan;
+  friend class TReadoutTest;
 
 private:
   float m_tempStart;
@@ -55,10 +58,12 @@ private:
   float m_vddaSetEnd;
   float m_vdddSetStart;
   float m_vdddSetEnd;
-  std::map<int, float> m_chipVoltagesStart;
-  std::map<int, float> m_chipVoltagesEnd;
-  std::map<int, float> m_chipTempsStart;
-  std::map<int, float> m_chipTempsEnd;
+  std::map<int, float>    m_chipVoltagesStart;
+  std::map<int, float>    m_chipVoltagesEnd;
+  std::map<int, float>    m_chipTempsStart;
+  std::map<int, float>    m_chipTempsEnd;
+  std::map<int, uint16_t> m_pllLockStart;
+  std::map<int, uint16_t> m_pllLockEnd;
 
 public:
   TScanConditionsHic(){};
@@ -66,15 +71,16 @@ public:
 
 class TScanConditions {
   friend class TScan;
+  friend class TReadoutTest;
 
 private:
-  char m_fwVersion[50];
-  char m_swVersion[50];
-  std::map<std::string, TScanConditionsHic *> m_hicConditions;
+  char                     m_fwVersion[50];
+  char                     m_swVersion[50];
   std::vector<std::string> m_chipConfigStart;
   std::vector<std::string> m_chipConfigEnd;
   std::vector<std::string> m_boardConfigStart;
   std::vector<std::string> m_boardConfigEnd;
+  std::map<std::string, TScanConditionsHic *> m_hicConditions;
 
 public:
   TScanConditions(){};

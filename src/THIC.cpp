@@ -209,6 +209,19 @@ void THic::SwitchBias(bool on)
   }
 }
 
+
+void THic::ReadChipRegister(Alpide::TRegister reg, std::map<int, uint16_t> &values)
+{
+  uint16_t value;
+  values.clear();
+  for (unsigned int i = 0; i < m_chips.size(); i++) {
+    if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
+    m_chips.at(i)->ReadRegister(reg, value);
+    values.insert(std::pair<int, uint16_t>(m_chips.at(i)->GetConfig()->GetChipId() & 0xf, value));
+  }
+}
+
+
 float THic::GetTemperature(std::map<int, float> *chipValues)
 {
   float result = 0;

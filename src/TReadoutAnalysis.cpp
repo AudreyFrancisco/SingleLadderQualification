@@ -157,6 +157,7 @@ void TReadoutAnalysis::WriteResult()
               m_config->GetfNameSuffix());
     }
     m_scan->WriteConditions(fName, m_hics.at(ihic));
+    ((TReadoutTest *)m_scan)->WritePLLReg(fName, m_hics.at(ihic));
 
     FILE *fp = fopen(fName, "a");
     m_result->WriteToFileGlobal(fp);

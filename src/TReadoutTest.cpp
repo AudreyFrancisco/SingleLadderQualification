@@ -142,11 +142,45 @@ void TReadoutTest::Init()
   }
 
   TDataTaking::Init();
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hics.at(ihic)->ReadChipRegister(
+        Alpide::REG_PLL_LOCK1,
+        m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_pllLockStart);
+  }
+
   m_running = true;
 }
 
+
+void TReadoutTest::WritePLLReg(const char *fName, THic *aHic)
+{
+  FILE *fp = fopen(fName, "a");
+
+  std::map<int, uint16_t>::iterator it;
+
+  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_pllLockStart.begin();
+       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_pllLockStart.end(); it++) {
+    fprintf(fp, "  PLL Lock Register (start) on chip %d: 0x%x\n", it->first, it->second);
+  }
+  fputs("\n", fp);
+  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_pllLockEnd.begin();
+       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_pllLockEnd.end(); it++) {
+    fprintf(fp, "  PLL Lock Register (end) on chip %d: 0x%x\n", it->first, it->second);
+  }
+  fputs("\n", fp);
+  fclose(fp);
+}
+
+
 void TReadoutTest::Terminate()
 {
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hics.at(ihic)->ReadChipRegister(
+        Alpide::REG_PLL_LOCK1,
+        m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_pllLockEnd);
+  }
+
   TDataTaking::Terminate();
 
   // restore old voltage
