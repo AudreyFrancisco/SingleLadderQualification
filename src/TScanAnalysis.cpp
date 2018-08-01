@@ -442,9 +442,9 @@ float TScanResultHic::GetVariable(int chip, TResultVariable var)
 }
 
 void TScanResultHic::WriteClassToDB(AlpideDB *db, ActivityDB::activity &activity,
-                                    std::string name_suffix)
+                                    std::string scanName)
 {
-  DbAddParameter(db, activity, string("Classification ") + name_suffix, (float)m_class,
+  DbAddParameter(db, activity, string("Classification ") + scanName, (float)m_class,
                  GetParameterFile());
 }
 

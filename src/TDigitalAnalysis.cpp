@@ -420,7 +420,6 @@ void TDigitalResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   std::string suffix, file_suffix, fileName, remoteName;
   GetParameterSuffix(suffix, file_suffix);
-  WriteClassToDB(db, activity, string("digital scan") + suffix);
   DbAddParameter(db, activity, string("Timeouts digital") + suffix, (float)m_errorCounter.nTimeout,
                  GetParameterFile());
   DbAddParameter(db, activity, string("8b10b errors digital") + suffix,

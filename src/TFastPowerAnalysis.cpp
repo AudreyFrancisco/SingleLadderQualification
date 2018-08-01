@@ -158,7 +158,6 @@ void TFastPowerResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity
 {
   string      fileName, ivName;
   std::size_t slash;
-  WriteClassToDB(db, activity, string("fast power test"));
   DbAddParameter(db, activity, string("IDDD"), idddSwitchon, GetParameterFile());
   DbAddParameter(db, activity, string("IDDA"), iddaSwitchon, GetParameterFile());
   DbAddParameter(db, activity, string("Back bias current 0V"), ibias0, GetParameterFile());

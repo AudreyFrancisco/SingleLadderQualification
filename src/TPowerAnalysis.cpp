@@ -200,7 +200,6 @@ void TPowerResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   string      fileName, ivName;
   std::size_t slash;
 
-  WriteClassToDB(db, activity, string("power test"));
   DbAddParameter(db, activity, string("IDDD"), idddConfigured, GetParameterFile());
   DbAddParameter(db, activity, string("IDDA"), iddaConfigured, GetParameterFile());
   DbAddParameter(db, activity, string("IDDD clocked"), idddClocked, GetParameterFile());

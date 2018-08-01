@@ -266,7 +266,6 @@ void TReadoutResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   std::string suffix, file_suffix, fileName, remoteName;
   GetParameterSuffix(suffix, file_suffix);
-  WriteClassToDB(db, activity, string("readout test") + suffix);
   DbAddParameter(db, activity, string("Timeouts readout") + suffix, (float)m_errorCounter.nTimeout,
                  GetParameterFile());
   DbAddParameter(db, activity, string("8b10b errors readout") + suffix,
