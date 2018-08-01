@@ -2,10 +2,10 @@
 #include "DBHelpers.h"
 #include "TPowerTest.h"
 #ifdef HAS_ROOT
-#include "TFile.h"
 #include "TCanvas.h"
-#include "TString.h"
+#include "TFile.h"
 #include "TH1F.h"
+#include "TString.h"
 #endif
 
 #include <string>
@@ -57,17 +57,16 @@ void TPowerAnalysis::CreateIVHisto(TPowerResultHic *hicResult)
 
 #ifdef HAS_ROOT
   const std::string basename =
-    TString::Format("IVcurveBB_%s_%s", hicResult->GetName().c_str(),
-                    m_config->GetfNameSuffix()).Data();
+      TString::Format("IVcurveBB_%s_%s", hicResult->GetName().c_str(), m_config->GetfNameSuffix()).Data();
 
   std::string rootfilename, pdffilename;
   if (m_config->GetUseDataPath()) {
     rootfilename = hicResult->GetOutputPath() + "/" + basename + ".root";
-     pdffilename = hicResult->GetOutputPath() + "/" + basename + ".pdf";
+    pdffilename  = hicResult->GetOutputPath() + "/" + basename + ".pdf";
   }
   else {
     rootfilename = basename + ".root";
-     pdffilename = basename + ".pdf";
+    pdffilename  = basename + ".pdf";
   }
 
   TCanvas c;
@@ -76,17 +75,16 @@ void TPowerAnalysis::CreateIVHisto(TPowerResultHic *hicResult)
 
   TFile *rootfile = TFile::Open(rootfilename.c_str(), "RECREATE");
 
-  const std::string hname =
-    TString::Format("iv_%s",hicResult->GetName().c_str()).Data();
+  const std::string hname = TString::Format("iv_%s",hicResult->GetName().c_str()).Data();
   const std::string htitle =
-    TString::Format("Back Bias IV for %s",hicResult->GetName().c_str()).Data();
+      TString::Format("Back Bias IV for %s",hicResult->GetName().c_str()).Data();
 
   const int iMax = m_config->GetParamValue("IVPOINTS");
 
-  TH1F *ivbb  = new TH1F(hname.c_str(), htitle.c_str(), iMax, 0., iMax*100.);
+  TH1F *ivbb = new TH1F(hname.c_str(), htitle.c_str(), iMax, 0., iMax*100.);
 
   for (int i = 0; i < iMax; i++)
-    ivbb->Fill(i*100+50,hicResult->ibias[i]);  // Fill at bin mid point
+    ivbb->Fill(i * 100 + 50,hicResult->ibias[i]);  // Fill at bin mid point
 
   ivbb->SetStats(kFALSE);
   ivbb->GetXaxis()->SetTitle("V (mV)");
