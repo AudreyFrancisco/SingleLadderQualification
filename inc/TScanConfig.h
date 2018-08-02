@@ -38,7 +38,8 @@ namespace ScanConfig {
   // 1.2: using Vclip=60DAC for all -3V scans
   // 1.3: move back to max. 2 bad chips for partial cat B (cf. plenary June 18, 2018)
   // 1.4: increased gravity of failed chi square cut in DCTRL Test (bronze -> red)
-  const float CLASSIFICATION_VERSION = 1.4;
+  // 1.5: reduced cycles in endurance test /10, reduced cut on failures 30 -> 3
+  const float CLASSIFICATION_VERSION = 1.5;
 
   const int NINJ           = 50;     // number of injections in digital/threshold scans
   const int NTRIG          = 100000; // number of triggers for noise occupancy scans
@@ -187,16 +188,17 @@ namespace ScanConfig {
   const float VOLTAGE_SCALE = 1.0;
   const float BACKBIAS      = 0;
   const int   NOMINAL       = 1;
-  const int   ENDURANCE_SLICES             = 20;  // number of cycle slices
-  const int   ENDURANCE_CYCLES             = 150; // total number of cycles per slice
-  const int   ENDURANCE_UPTIME             = 60;  // up and down wait time in seconds per cycle
-  const int   ENDURANCE_DOWNTIME           = 120;
-  const int   ENDURANCE_TRIGGERS           = 10000;
-  const int   ENDURANCE_LIMIT              = 8; // time limit in hours per slice
-  const int   ENDURANCE_MAXTRIPS_GREEN     = 0;
-  const int   ENDURANCE_MAXTRIPS_ORANGE    = 3; // approx. 1 per 1000 cycles
-  const int   ENDURANCE_MINCHIPS_GREEN     = 14;
-  const int   ENDURANCE_MAXFAILURES_ORANGE = 30; // approx. 1 per 100 cycles
+  const int   ENDURANCE_SLICES = 20; // number of cycle slices
+  const int   ENDURANCE_CYCLES = 15; // total number of cycles per slice
+  const int   ENDURANCE_UPTIME =
+      1600; // up and down wait time in seconds per cycle (originally: 60 +120)
+  const int ENDURANCE_DOWNTIME           = 200;
+  const int ENDURANCE_TRIGGERS           = 100000;
+  const int ENDURANCE_LIMIT              = 8; // time limit in hours per slice
+  const int ENDURANCE_MAXTRIPS_GREEN     = 0;
+  const int ENDURANCE_MAXTRIPS_ORANGE    = 3; // approx. 1 per 1000 cycles
+  const int ENDURANCE_MINCHIPS_GREEN     = 14;
+  const int ENDURANCE_MAXFAILURES_ORANGE = 3; // approx. 1 per 100 cycles
 
   // MAX - MIN should be divisible by STEP
   // last point should be <= 128 for y and 127 for x (upper limit is excluded)
