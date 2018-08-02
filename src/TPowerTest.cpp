@@ -98,6 +98,7 @@ void TPowerTest::Execute()
   // power on and correct voltage drop
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
   m_testHic->GetPowerBoard()->SwitchAnalogOn(m_testHic->GetPbMod());
+  std::this_thread::sleep_for(std::chrono::milliseconds(300));
   m_testHic->GetPowerBoard()->SwitchDigitalOn(m_testHic->GetPbMod());
 
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
