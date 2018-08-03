@@ -102,7 +102,7 @@ void TFastPowerTest::Execute()
 
   // switch on back bias only for module under test
   for (int i = 0; i < 8; i++) {
-    if (i == m_testHic->GetPbMod()) {
+    if (i == m_testHic->GetBbChannel()) {
       m_testHic->GetPowerBoard()->SetBiasOn(i);
     }
     else {
