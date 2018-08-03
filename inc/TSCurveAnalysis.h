@@ -98,6 +98,7 @@ public:
   void CalculateAverages();
   void SetStuckFile(const char *fName) { strcpy(m_stuckFile, fName); };
   void WriteToFile(FILE *fp);
+  void WriteClassToDB(AlpideDB *db, ActivityDB::activity &activity, std::string scanName);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
 };
 

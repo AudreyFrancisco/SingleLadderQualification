@@ -265,6 +265,7 @@ void TNoiseResultHic::GetParameterSuffix(std::string &suffix, std::string &file_
   file_suffix += (string("_") + std::to_string((int)m_backBias) + std::string("V"));
 }
 
+
 void TNoiseResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   std::string suffix, file_suffix, fileName, remoteName;

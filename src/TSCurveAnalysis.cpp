@@ -830,6 +830,17 @@ void TSCurveResultHic::GetParameterSuffix(std::string &suffix, std::string &file
   file_suffix += (string("_") + std::to_string((int)m_backBias) + std::string("V"));
 }
 
+
+void TSCurveResultHic::WriteClassToDB(AlpideDB *db, ActivityDB::activity &activity,
+                                      std::string scanName)
+{
+  // for the time being only write class of threshold scan after tuning
+  if (!m_thresholdScan) return;
+  if (m_nominal) return;
+  TScanResultHic::WriteClassToDB(db, activity, scanName);
+}
+
+
 void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   std::string suffix, file_suffix, fileName, remoteName;

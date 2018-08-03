@@ -107,7 +107,7 @@ public:
   bool                  IsValid() { return m_valid; };
   virtual void WriteToFile(FILE *fp) = 0;
   virtual void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
-  void WriteClassToDB(AlpideDB *db, ActivityDB::activity &activity, std::string scanName);
+  virtual void WriteClassToDB(AlpideDB *db, ActivityDB::activity &activity, std::string scanName);
   int AddChipResult(int aChipId, TScanResultChip *aChipResult);
   void SetResultFile(const char *fName) { strncpy(m_resultFile, fName, sizeof(m_resultFile)); };
   THicClassification             GetClassification() { return m_class; };

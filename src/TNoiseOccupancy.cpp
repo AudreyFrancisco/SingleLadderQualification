@@ -83,6 +83,10 @@ THisto TNoiseOccupancy::CreateHisto()
 
 void TNoiseOccupancy::Init()
 {
+  // update mask information
+  ((TNoiseParameters *)m_parameters)->isMasked = m_config->GetIsMasked();
+  SetName();
+
   TDataTaking::Init();
   m_running = true;
 }
