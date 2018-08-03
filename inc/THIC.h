@@ -15,8 +15,9 @@ private:
 protected:
   std::vector<TAlpide *> m_chips;
   TPowerBoard *          m_powerBoard;
-  int                    m_moduleId; // module ID as used in chip IDs
-  int                    m_pbMod;    // module number inside power board
+  int                    m_moduleId;  // module ID as used in chip IDs
+  int                    m_pbMod;     // module number inside power board
+  int                    m_bbChannel; // channel for back bias (for stave != pbMod)
   // unique identifiers
   int                m_hicNumber; // TODO: find out name and format ...
   std::string        m_dbId;      // ... in db: int? string?
@@ -27,7 +28,7 @@ protected:
   virtual bool IsOnBoard(int boardIdx, int chipId) = 0;
 
 public:
-  THic(const char *dbId, int modId, TPowerBoard *pb, int pbMod);
+  THic(const char *dbId, int modId, TPowerBoard *pb, int pbMod, int bbChannel = -1);
   virtual ~THic(){};
   int          GetNumber() { return m_hicNumber; };
   bool         IsPowered();
@@ -66,6 +67,7 @@ public:
   TAlpide *GetChipById(int chipId);
   TPowerBoard *GetPowerBoard() { return m_powerBoard; };
   int          GetPbMod() { return m_pbMod; };
+  int          GetBbChannel() { return m_bbChannel; };
   void SwitchBias(bool on);
   float GetAnalogueVoltage(std::map<int, float> *chipValues = 0);
   void AddClassification(THicClassification aClass, bool backBias);
@@ -87,7 +89,7 @@ protected:
   bool IsOnBoard(int boardIdx, int chipId);
 
 public:
-  THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod);
+  THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod, int bbChannel = -1);
   virtual ~THicOB(){};
   common::TChipIndex GetChipIndex(int i);
   THicType         GetHicType() { return HIC_OB; };
@@ -110,7 +112,7 @@ protected:
   bool IsOnBoard(int boardIdx, int chipId);
 
 public:
-  THicIB(const char *dbId, int modId, TPowerBoard *pb, int pbMod);
+  THicIB(const char *dbId, int modId, TPowerBoard *pb, int pbMod, int bbChannel = -1);
   virtual ~THicIB(){};
   common::TChipIndex GetChipIndex(int i);
   THicType         GetHicType() { return HIC_IB; };

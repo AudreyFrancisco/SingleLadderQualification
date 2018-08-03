@@ -4,12 +4,16 @@
 #include <cstring>
 #include <thread>
 
-THic::THic(const char *id, int modId, TPowerBoard *pb, int pbMod)
+THic::THic(const char *id, int modId, TPowerBoard *pb, int pbMod, int bbChannel)
 {
   m_dbId.assign(id);
 
-  m_powerBoard    = pb;
-  m_pbMod         = pbMod;
+  m_powerBoard = pb;
+  m_pbMod      = pbMod;
+  if (bbChannel == -1)
+    m_bbChannel = pbMod;
+  else
+    m_bbChannel   = bbChannel;
   m_moduleId      = modId;
   m_class         = CLASS_UNTESTED;
   m_oldClass      = CLASS_UNTESTED;
@@ -202,10 +206,10 @@ void THic::SwitchBias(bool on)
 {
   if (!m_powerBoard) return;
   if (on) {
-    m_powerBoard->SetBiasOn(m_pbMod);
+    m_powerBoard->SetBiasOn(m_bbChannel);
   }
   else {
-    m_powerBoard->SetBiasOff(m_pbMod);
+    m_powerBoard->SetBiasOff(m_bbChannel);
   }
 }
 
@@ -331,8 +335,8 @@ THicClassification THic::GetClassification()
   return Worst(m_oldClass, Worst(m_worstScanBB, m_worstScanNoBB));
 }
 
-THicIB::THicIB(const char *dbId, int modId, TPowerBoard *pb, int pbMod)
-    : THic(dbId, modId, pb, pbMod)
+THicIB::THicIB(const char *dbId, int modId, TPowerBoard *pb, int pbMod, int bbChannel)
+    : THic(dbId, modId, pb, pbMod, bbChannel)
 {
   m_ctrl = -1; // FIXME: init m_ctrl to avoid not used warning/error (clang)
 }
@@ -418,8 +422,8 @@ void THicIB::PowerOn()
   mosaic->enableClockOutput(m_ctrl, true);
 }
 
-THicOB::THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod)
-    : THic(dbId, modId, pb, pbMod)
+THicOB::THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod, int bbChannel)
+    : THic(dbId, modId, pb, pbMod, bbChannel)
 {
   m_position = 0;
 }
