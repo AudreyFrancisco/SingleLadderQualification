@@ -29,19 +29,15 @@ signals:
 private:
   Ui::DebugWindow *ui;
   void             addStandardScans();
-  void             addPowerScans();
-  void displayScans(std::vector<TScanType> scansForSetup);
+  void             addFastPowerScan();
+  void             addLocalBusScan();
 
   const std::map<TScanType, QString> ScanNameMap = {
-      {STPower, "Power"},         {STFifo, "Fifo"},
-      {STLocalBus, "LocalBus"},   {STDigital, "Digital"},
-      {STDigitalWF, "DigitalWF"}, {STThreshold, "Threshold"},
-      {STVCASN, "VCASN"},         {STITHR, "ITHR"},
-      {STApplyITHR, "ApplyITHR"}, {STApplyVCASN, "ApplyVCASN"},
-      {STApplyMask, "ApplyMask"}, {STClearMask, "ClearMask"},
-      {STNoise, "Noise"},         {STReadout, "Readout"},
-      {STEndurance, "Endurance"}, {STFastPowerTest, "FastPowerTest"},
-      {STDctrl, "Dctrl"},         {STEyeScan, "EyeScan"}};
+      {STPower, "Power"},     {STFifo, "Fifo"},           {STLocalBus, "LocalBusTest"},
+      {STDigital, "Digital"}, {STDigitalWF, "DigitalWF"}, {STThreshold, "Threshold"},
+      {STVCASN, "VCASN"},     {STITHR, "ITHR"},           {STNoise, "Noise"},
+      {STReadout, "Readout"}, {STEndurance, "Endurance"}, {STFastPowerTest, "FastPowerTest"},
+      {STDctrl, "Dctrl"},     {STEyeScan, "EyeScan"}};
 
   const std::map<TDeviceType, QString> DeviceNameMap = {{TYPE_CHIP, "CHIP"},
                                                         {TYPE_TELESCOPE, "TELESCOPE"},

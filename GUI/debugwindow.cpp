@@ -38,8 +38,15 @@ void DebugWindow::displayDeviceAndScans(TDeviceType deviceType)
   ui->scanSelector->clear();
   switch (deviceType) {
   case TYPE_POWER:
-    addPowerScans();
+    addFastPowerScan();
     break;
+  case TYPE_OBHIC:
+  case TYPE_HALFSTAVE:
+  case TYPE_MLHALFSTAVE:
+  case TYPE_MLSTAVE:
+  case TYPE_HALFSTAVERU:
+    addStandardScans();
+    addLocalBusScan();
   default:
     addStandardScans();
     break;
@@ -49,23 +56,23 @@ void DebugWindow::displayDeviceAndScans(TDeviceType deviceType)
 void DebugWindow::addStandardScans()
 {
   for (std::pair<TScanType, QString> scanIterator : ScanNameMap) {
-    ui->scanSelector->addItem(scanIterator.second, scanIterator.first);
+    if (scanIterator.first == STLocalBus) {
+      continue;
+    }
+    else {
+      ui->scanSelector->addItem(scanIterator.second, scanIterator.first);
+    }
   }
 }
 
-void DebugWindow::addPowerScans()
+void DebugWindow::addFastPowerScan()
 {
-  std::vector<TScanType> scansForSetup;
-  scansForSetup.push_back(STFastPowerTest);
-
-  displayScans(scansForSetup);
+  ui->scanSelector->addItem(ScanNameMap.at(STFastPowerTest), STFastPowerTest);
 }
 
-void DebugWindow::displayScans(const std::vector<TScanType> scansForSetup)
+void DebugWindow::addLocalBusScan()
 {
-  for (TScanType scanType : scansForSetup) {
-    ui->scanSelector->addItem(ScanNameMap.at(scanType), scanType);
-  }
+  ui->scanSelector->addItem(ScanNameMap.at(STLocalBus), STLocalBus);
 }
 
 void DebugWindow::passSelectedScan()
