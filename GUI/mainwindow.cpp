@@ -9,6 +9,8 @@
 #include "SetupHelpers.h"
 #include "TAlpide.h"
 #include "TConfig.h"
+#include "TCycleAnalysis.h"
+#include "TEnduranceCycle.h"
 #include "THIC.h"
 #include "THisto.h"
 #include "TScan.h"
@@ -41,8 +43,6 @@
 #include <string>
 #include <thread>
 #include <typeinfo>
-#include "TCycleAnalysis.h"
-#include "TEnduranceCycle.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
