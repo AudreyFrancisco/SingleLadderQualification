@@ -47,6 +47,7 @@ void DebugWindow::displayDeviceAndScans(TDeviceType deviceType)
   case TYPE_HALFSTAVERU:
     addStandardScans();
     addLocalBusScan();
+    break;
   default:
     addStandardScans();
     break;
