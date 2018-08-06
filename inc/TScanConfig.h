@@ -24,7 +24,9 @@ typedef enum {
   OBHalfStaveOLFAST,
   OBHalfStaveMLFAST,
   OBStaveOL,
-  OBStaveML
+  OBStaveML,
+  StaveReceptionOL,
+  StaveReceptionML
 } TTestType;
 
 namespace ScanConfig {

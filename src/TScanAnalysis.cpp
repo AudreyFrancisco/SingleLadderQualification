@@ -101,7 +101,9 @@ int TScanAnalysis::GetComponentType()
   if ((m_config->GetTestType() == OBQualification) || (m_config->GetTestType() == OBEndurance) ||
       (m_config->GetTestType() == OBReception) || (m_config->GetTestType() == OBPower) ||
       (m_config->GetTestType() == OBHalfStaveOL) || (m_config->GetTestType() == OBHalfStaveML) ||
-      (m_config->GetTestType() == OBStaveOL) || (m_config->GetTestType() == OBStaveML)) {
+      (m_config->GetTestType() == OBStaveOL) || (m_config->GetTestType() == OBStaveML) ||
+      (m_config->GetTestType() == StaveReceptionOL) ||
+      (m_config->GetTestType() == StaveReceptionML)) {
     return DbGetComponentTypeId(m_config->GetDatabase(), "Outer Barrel HIC Module");
   }
   else if ((m_config->GetTestType() == IBQualification) ||

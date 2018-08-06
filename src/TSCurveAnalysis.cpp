@@ -105,6 +105,10 @@ string TSCurveAnalysis::GetPreviousTestType()
     return string("OL HS Qualification Test");
   case OBStaveML:
     return string("ML HS Qualification Test");
+  case StaveReceptionOL:
+    return string("OL Stave Qualification Test");
+  case StaveReceptionML:
+    return string("ML Stave Qualification Test");
   default:
     return string("");
   }

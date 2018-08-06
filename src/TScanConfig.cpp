@@ -422,6 +422,10 @@ std::string TScanConfig::GetTestDir()
     return "OBStaveOL/";
   case OBStaveML:
     return "OBStaveML/";
+  case StaveReceptionOL:
+    return "StaveReceptionOL/";
+  case StaveReceptionML:
+    return "StaveReceptionML/";
   default:
     return "./";
   }

@@ -3,10 +3,11 @@
 #include <set>
 
 static const std::set<std::string> kTestTypes = {
-    "OB-HIC Impedance Test",       "OB HIC Qualification Test",  "IB HIC Qualification Test",
-    "IB Stave Qualification Test", "OB HIC Endurance Test",      "OB HIC Fast Power Test",
-    "OB HIC Reception Test",       "OL HS Qualification Test",   "ML HS Qualification Test",
-    "OL Stave Qualification Test", "ML Stave Qualification Test"};
+    "OB-HIC Impedance Test",       "OB HIC Qualification Test",   "IB HIC Qualification Test",
+    "IB Stave Qualification Test", "OB HIC Endurance Test",       "OB HIC Fast Power Test",
+    "OB HIC Reception Test",       "OL HS Qualification Test",    "ML HS Qualification Test",
+    "OL Stave Qualification Test", "ML Stave Qualification Test", "OL Stave Reception Test",
+    "ML Stave Reception Test"};
 
 int DbGetActivityTypeId(AlpideDB *db, string name)
 {
@@ -605,6 +606,12 @@ string CreateActivityName(string compName, TScanConfig *config)
     break;
   case OBStaveML:
     testName = string("ML Stave Test ");
+    break;
+  case StaveReceptionOL:
+    testName = string("OL Stave Reception Test");
+    break;
+  case StaveReceptionML:
+    testName = string("ML Stave Reception Test");
     break;
   default:
     testName = string("");
