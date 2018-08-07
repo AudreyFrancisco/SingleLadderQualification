@@ -234,6 +234,7 @@ void TScanAnalysis::CreateHicResults()
                                  m_result->GetChipResult(m_chipList.at(iChip)));
       }
     }
+    hicResult->m_hasIVPDF       = false;
     m_result->AddHicResult(m_hics.at(i)->GetDbId(), hicResult);
   }
 }

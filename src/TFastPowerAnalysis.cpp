@@ -33,8 +33,6 @@ string TFastPowerAnalysis::GetPreviousTestType()
 
 void TFastPowerAnalysis::CreateIVHisto(TFastPowerResultHic *hicResult)
 {
-  m_hasPDF = false;
-
 #ifdef HAS_ROOT
   const std::string basename =
       TString::Format("IVcurveBB_%s_%s", hicResult->GetName().c_str(), m_config->GetfNameSuffix())
@@ -79,7 +77,8 @@ void TFastPowerAnalysis::CreateIVHisto(TFastPowerResultHic *hicResult)
   ivbb->Write();
   rootfile->Close();
 
-  m_hasPDF = true;
+  hicResult->SetHasIVPDF(true);
+  hicResult->SetIVPDFPath(pdffilename);
 #endif // HAS_ROOT
 }
 

@@ -89,8 +89,10 @@ protected:
   THicClassification m_class;
 
   string           m_outputPath;
+  string           m_ivPDFPath;
   TScanParameters *m_scanParameters;
   bool             m_valid; // used for predictions only
+  bool             m_hasIVPDF; // true if PDF was created for I-V plot
   virtual void Compare(TScanResultHic *aPrediction) { (void)aPrediction; };
   std::vector<std::string>             m_cuts;
   void                                 ClearCuts() { m_cuts.clear(); };
@@ -118,6 +120,10 @@ public:
   string                   GetParameterFile();
   std::vector<std::string> GetCuts() { return m_cuts; };
   std::string              GetName() { return m_hicName; };
+  void                     SetHasIVPDF(const bool pdf) { m_hasIVPDF = pdf; };
+  void                     SetIVPDFPath(const string path) { m_ivPDFPath = path; };
+  bool                     HasIVPDF() { return m_hasIVPDF; };
+  string                   GetIVPDFPath() { return m_hasIVPDF ? m_ivPDFPath : 0; };
 };
 
 // base class for classes containing complete results

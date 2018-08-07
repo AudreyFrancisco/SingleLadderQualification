@@ -61,8 +61,6 @@ private:
   THicClassification GetClassificationIB(THicCurrents currents, TPowerResultHic *result);
   THicClassification GetClassificationOB(THicCurrents currents, TPowerResultHic *result);
 
-  bool m_hasPDF;
-
 protected:
   TScanResultChip *GetChipResult()
   {
@@ -87,7 +85,6 @@ public:
   void Initialize() { CreateHicResults(); };
   void Run(){};
   void Finalize();
-  bool HasPDF() { return m_hasPDF; };
 };
 
 #endif
