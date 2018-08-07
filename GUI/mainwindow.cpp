@@ -816,7 +816,7 @@ void MainWindow::performtests()
             TScanResultHic *hicResult;
             hicResult = fresultVector.at(i)->GetHicResult(fHICs.at(ihic)->GetDbId());
             if (hicResult != 0) {
-              hicResult->SetClassification(CLASS_RED);
+              hicResult->SetClassification(CLASS_ABORTED);
             }
           }
         }
@@ -1312,7 +1312,8 @@ void MainWindow::attachtodatabase()
                 TScanResultHic *result = (TScanResultHic *)ihic->second;
                 if (fScanVector.at(j) != 0)
                   result->WriteClassToDB(fDB, activ, string(fScanVector[j]->GetName()));
-                if (result->IsValid()) result->WriteToDB(fDB, activ);
+                if (result->IsValid() || result->GetClassification() == CLASS_ABORTED)
+                  result->WriteToDB(fDB, activ);
               }
             }
           }
@@ -2348,6 +2349,8 @@ string MainWindow::GetResultType(int i)
     return string("NOBB");
   case CLASS_NOBBB:
     return string("NOBB-CATB");
+  case CLASS_ABORTED:
+    return string("ABORTED");
   default:
     return string("UNTESTED");
   }
