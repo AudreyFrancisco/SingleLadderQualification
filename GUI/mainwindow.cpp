@@ -1310,10 +1310,11 @@ void MainWindow::attachtodatabase()
             for (auto ihic = mymap->begin(); ihic != mymap->end(); ++ihic) {
               if (ihic->first.compare(fHicnames.at(i).toStdString()) == 0) {
                 TScanResultHic *result = (TScanResultHic *)ihic->second;
-                if (fScanVector.at(j) != 0)
-                  result->WriteClassToDB(fDB, activ, string(fScanVector[j]->GetName()));
-                if (result->IsValid() || result->GetClassification() == CLASS_ABORTED)
-                  result->WriteToDB(fDB, activ);
+                if (fScanVector.at(j) != 0) {
+                  if (result->IsValid() || result->GetClassification() == CLASS_ABORTED)
+                    result->WriteClassToDB(fDB, activ, string(fScanVector[j]->GetName()));
+                }
+                if (result->IsValid()) result->WriteToDB(fDB, activ);
               }
             }
           }
