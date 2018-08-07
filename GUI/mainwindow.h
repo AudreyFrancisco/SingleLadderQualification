@@ -39,6 +39,7 @@ class TScanConfig;
 class TScanResult;
 class TestSelection;
 class THic;
+class DebugWindow;
 class ScanConfiguration;
 
 namespace Ui {
@@ -103,9 +104,12 @@ public slots:
   AlpideDB *GetDB();
   void      retryfailedscan();
   void notifyuser(unsigned int position);
+  void loadConfigFile(QByteArray configFilename);
+  void doDebugScan(TScanType scanType);
 
 signals:
   void stopTimer();
+  void deviceLoaded(TDeviceType);
 
 private:
   Ui::MainWindow *ui;
@@ -128,6 +132,7 @@ private:
   Calibrationpb *    fCalwindow;
   ActivityStatus *   fActivitywindow;
   void               exploreendurancebox();
+  DebugWindow *      fDebugWindow;
   TestSelection *    fSettingswindow;
   ScanConfiguration *fScanconfigwindow;
   Testingprogress *  fProgresswindow;
@@ -233,6 +238,7 @@ private slots:
   void initscanlist();
   void performtests();
   void detailscombo(int dnumber);
+  void start_debug();
   void start_test();
   void open();
   void fillingreceptionscans();

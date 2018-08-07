@@ -9,6 +9,8 @@
 #include "SetupHelpers.h"
 #include "TAlpide.h"
 #include "TConfig.h"
+#include "TCycleAnalysis.h"
+#include "TEnduranceCycle.h"
 #include "THIC.h"
 #include "THisto.h"
 #include "TScan.h"
@@ -16,6 +18,7 @@
 #include "TScanConfig.h"
 #include "TScanFactory.h"
 #include "calibrationpb.h"
+#include "debugwindow.h"
 #include "dialog.h"
 #include "scanconfiguration.h"
 #include "testingprogress.h"
@@ -41,9 +44,6 @@
 #include <thread>
 #include <typeinfo>
 
-#include "TCycleAnalysis.h"
-#include "TEnduranceCycle.h"
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
   for (int i = 0; i < 7; i++) {
@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   fNoticewindow     = 0;
   fPbnumberofmodule = 0;
   fDatabasefailure  = 0;
+  fDebugWindow      = 0;
 
   std::string dataDir = "Data";
   if (const char *dataDirPrefix = std::getenv("ALPIDE_TEST_DATA")) dataDir = dataDirPrefix;
@@ -107,10 +108,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(poweroff, &QAction::triggered, this, &MainWindow::poweroff);
   QAction *quit = new QAction("&Quit", this);
   connect(quit, &QAction::triggered, this, &MainWindow::close);
+  QAction *newdebug = new QAction("&Debug mode", this);
+  connect(newdebug, SIGNAL(triggered()), this, SLOT(start_debug()));
 
   // build menu (based on actions)
   QMenu *menu = menuBar()->addMenu("&Actions");
   menu->addAction(newtestaction);
+  menu->addAction(newdebug);
   menu->addAction(newtestprod);
   menu->addAction(newtesttest);
   menu->addAction(run_test);
@@ -604,6 +608,32 @@ void MainWindow::start_test()
   fSettingswindow = new TestSelection(this, fDatabasetype);
   fSettingswindow->Init();
   fSettingswindow->exec();
+}
+
+void MainWindow::start_debug()
+{
+  if (fDebugWindow == 0) {
+    fDebugWindow = new DebugWindow(this);
+    fDebugWindow->exec();
+  }
+  else {
+    fDebugWindow->show();
+  }
+}
+
+void MainWindow::loadConfigFile(QByteArray configFilename)
+{
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips, configFilename, &fHICs);
+  emit deviceLoaded(fConfig->GetDeviceType());
+}
+
+void MainWindow::doDebugScan(TScanType scanType)
+{
+  fDebugWindow->hide();
+  ClearVectors();
+  AddScan(scanType);
+  fstopwriting = true;
+  performtests();
 }
 
 void MainWindow::fillingOBvectors()
