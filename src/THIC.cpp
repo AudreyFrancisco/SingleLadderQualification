@@ -295,6 +295,10 @@ void THic::AddClassification(THicClassification aClass, bool backBias)
 
 THicClassification THic::GetClassification()
 {
+  // set ABORTED to RED
+  if (m_worstScanNoBB == CLASS_ABORTED) m_worstScanNoBB = CLASS_RED;
+  if (m_worstScanBB == CLASS_ABORTED) m_worstScanBB     = CLASS_RED;
+
   // Class RED: more than 2 non-working chips or worst no BB scan RED
   if (m_chips.size() - GetNEnabledChips() > 2) return CLASS_RED;
 

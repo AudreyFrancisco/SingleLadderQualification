@@ -35,7 +35,8 @@ typedef enum hicClassification {
   CLASS_PARTIALB,
   CLASS_NOBB,
   CLASS_NOBBB,
-  CLASS_RED
+  CLASS_RED,
+  CLASS_ABORTED
 } THicClassification;
 
 typedef enum {

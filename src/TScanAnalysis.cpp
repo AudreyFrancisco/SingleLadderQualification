@@ -314,6 +314,8 @@ const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
     return "Bronze, no back bias";
   else if (hicClass == CLASS_RED)
     return "Not working";
+  else if (hicClass == CLASS_ABORTED)
+    return "Scan aborted";
   else
     return "Unknown";
 }
