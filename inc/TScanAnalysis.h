@@ -122,8 +122,8 @@ public:
   std::string              GetName() { return m_hicName; };
   void SetHasPDF(const bool pdf) { m_hasPDF = pdf; };
   void SetPDFPath(const string path) { m_pdfPath = path; };
-  bool                           HasPDF() { return m_hasPDF; };
-  string                         GetPDFPath() { return m_hasPDF ? m_pdfPath : 0; };
+  bool                         HasPDF() { return m_hasPDF; };
+  string                       GetPDFPath() { return m_hasPDF ? m_pdfPath : 0; };
 };
 
 // base class for classes containing complete results
