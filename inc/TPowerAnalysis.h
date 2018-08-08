@@ -55,6 +55,7 @@ public:
 
 class TPowerAnalysis : public TScanAnalysis {
 private:
+  void CreateIVHisto(TPowerResultHic *hicResult);
   void WriteIVCurve(THic *hic);
   THicClassification GetClassification(THicCurrents currents, TPowerResultHic *result);
   THicClassification GetClassificationIB(THicCurrents currents, TPowerResultHic *result);

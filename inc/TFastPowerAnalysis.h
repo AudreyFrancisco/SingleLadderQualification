@@ -52,6 +52,7 @@ public:
 
 class TFastPowerAnalysis : public TScanAnalysis {
 private:
+  void CreateIVHisto(TFastPowerResultHic *hicResult);
   void WriteIVCurve(THic *hic);
   THicClassification GetClassification(THicCurrents currents, TFastPowerResultHic *result);
   //  THicClassification GetClassificationIB(THicCurrents currents);
