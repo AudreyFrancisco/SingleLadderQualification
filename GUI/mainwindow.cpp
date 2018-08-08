@@ -59,6 +59,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   fDatabasefailure  = 0;
   fDebugWindow      = 0;
 
+  std::cout << std::endl << std::endl;
+  std::cout << "DEBUGGING INFORMATION: " << std::endl;
+  std::cout << "\tattach GDB to PID " << ::getpid() << std::endl;
+  std::cout << "\t(parent: " << ::getppid() << ")" << std::endl;
+  std::cout << std::endl << std::endl;
+
   std::string dataDir = "Data";
   if (const char *dataDirPrefix = std::getenv("ALPIDE_TEST_DATA")) dataDir = dataDirPrefix;
   makeDir(dataDir.c_str());
