@@ -97,8 +97,8 @@ void TPowerAnalysis::CreateIVHisto(TPowerResultHic *hicResult)
   ivbb->Write();
   rootfile->Close();
 
-  hicResult->SetHasIVPDF(true);
-  hicResult->SetIVPDFPath(pdffilename);
+  hicResult->SetHasPDF(true);
+  hicResult->SetPDFPath(pdffilename);
 #endif // HAS_ROOT
 }
 
