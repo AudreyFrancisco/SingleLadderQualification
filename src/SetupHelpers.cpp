@@ -175,6 +175,7 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   int mosaicMap[2]      = {0, 1};
   int receiverMap[7][2] = {{0, 1}, {1, 0}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}};
   int controlMap[2]     = {0, 0};
+  int biasbusMap[7]     = {0, 0, 1, 1, 1, 2, 2};
   int positionMap[7];
 
   // create board objects (MOSAIC and power board)
@@ -200,14 +201,16 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
     THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(ihic);
     positionMap[ihic]         = hicOBconfig->GetParamValue("HSPOSBYID");
+    int bbChannel =
+        hicOBconfig->GetParamValue("POWERCOMBO") ? biasbusMap[positionMap[ihic] - 1] : -1;
     if (hicIds) {
       hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb,
-                                 positionMap[ihic] - 1));
+                                 positionMap[ihic] - 1, bbChannel));
     }
     else {
       hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic + 1)).c_str(),
-                                 config->GetHicConfig(ihic)->GetModId(), pb,
-                                 positionMap[ihic] - 1));
+                                 config->GetHicConfig(ihic)->GetModId(), pb, positionMap[ihic] - 1,
+                                 bbChannel));
     }
     ((THicOB *)hics->back())->SetPosition(positionMap[ihic]);
   }
