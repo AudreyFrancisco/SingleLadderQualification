@@ -87,6 +87,7 @@ public slots:
   void fillingfastpower();
   void fillingHSscans();
   void ibscansforageing();
+  void uploadpdf();
 
   void continuescans()
   {
@@ -123,25 +124,26 @@ private:
   std::mutex                   fMutex;
   TConfig *                    fConfig;
   std::deque<TScanHisto>       fHistoQue;
-  void                         color(int side, int pos, bool ok);
-  void                         color_IB(int position, bool ok);
-  int                          fCounter;
-  Dialog *                     fWindowex     = 0;
-  bool                         fProperconfig = false;
-  checkpbconfig *              fPbcfgcheck;
-  Calibrationpb *              fCalwindow;
-  ActivityStatus *             fActivitywindow;
-  void                         exploreendurancebox();
-  DebugWindow *                fDebugWindow;
-  TestSelection *              fSettingswindow;
-  ScanConfiguration *          fScanconfigwindow;
-  Testingprogress *            fProgresswindow;
-  DatabaseSelection *          fDatabasewindow;
-  bool                         fDatabaseSelected;
-  resultstorage *              fResultwindow;
-  Databasefailure *            fDatabasefailure;
-  void                         scanLoop(TScan *myScan);
-  void                         analysis(TScanAnalysis *myAnalysis);
+  THic *fSelectedHic;
+  void color(int side, int pos, bool ok);
+  void color_IB(int position, bool ok);
+  int                fCounter;
+  Dialog *           fWindowex     = 0;
+  bool               fProperconfig = false;
+  checkpbconfig *    fPbcfgcheck;
+  Calibrationpb *    fCalwindow;
+  ActivityStatus *   fActivitywindow;
+  void               exploreendurancebox();
+  DebugWindow *      fDebugWindow;
+  TestSelection *    fSettingswindow;
+  ScanConfiguration *fScanconfigwindow;
+  Testingprogress *  fProgresswindow;
+  DatabaseSelection *fDatabasewindow;
+  bool               fDatabaseSelected;
+  resultstorage *    fResultwindow;
+  Databasefailure *  fDatabasefailure;
+  void scanLoop(TScan *myScan);
+  void analysis(TScanAnalysis *myAnalysis);
   std::vector<TScan *>         fScanVector;
   std::vector<TScanAnalysis *> fAnalysisVector;
   TPowerBoard *                fPb;
@@ -150,7 +152,9 @@ private:
   std::vector<TScanResult *>   fresultVector;
   std::vector<THic *>          fHICs;
   //  void fillingvectors();
-  std::vector<std::string>                              fMapdetails;
+  int fSelectedHicIndex;
+  std::string fPdf;
+  std::vector<std::string> fMapdetails;
   std::vector<pair<std::string, const TResultVariable>> fMapd;
   TTestType                                             fNumberofscan;
   QString                                               fTestname;
