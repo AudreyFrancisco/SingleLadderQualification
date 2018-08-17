@@ -82,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     obm.at(idx)->setStyleSheet("background-color:red;");
     connect(obm.at(idx), &QPushButton::clicked, [=] { button_obm_clicked(idx + 1); });
   }
+
   ui->upload->hide();
   ui->selectedhicname->hide();
   ui->selectedscan_name->hide();
@@ -240,6 +241,11 @@ void MainWindow::open()
                         fBottomfour, fBottomthree, fBottomtwo, fBottomone});
       fEndurancemodules.assign({ui->top5, ui->top4, ui->top3, ui->top2, ui->top1, ui->down5,
                                 ui->down4, ui->down3, ui->down2, ui->down1});
+
+      for (uint c = 0; c < fEndurancemodules.size(); ++c) {
+        connect(fEndurancemodules.at(c), &QPushButton::clicked, [=] { button_fEndurancemodules_clicked(c); });
+      }
+
     }
     if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
         fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
@@ -439,7 +445,6 @@ void MainWindow::open()
 void MainWindow::button_obm_clicked(int aModule)
 {
   fChkBtnObm[aModule - 1] = true;
-  ui->selectedhicnametext->setText(fHicnames[aModule-1]);
   fSelectedHic=fHICs.at(aModule-1);
   fSelectedHicIndex=aModule-1;
   ui->OBModule->show();
@@ -953,21 +958,27 @@ void MainWindow::getresultdetails(int i)
   ui->details->clear();
   fScanposition = i;
 
+  ui->upload->hide();
+
+
   TScanResultHic *selectedhicresult= fresultVector.at(fScanposition)->GetHicResult(fHicnames.at(fSelectedHicIndex).toStdString());
   ui->selectedscan_nametext->setText(fScanVector.at(fScanposition)->GetName());
+  ui->selectedhicnametext->setText(fHicnames[fSelectedHicIndex]);
 
+  if(fSelectedHic){
   if (selectedhicresult->HasPDF()){
 
           fPdf=selectedhicresult->GetPDFPath();
           ui->upload->show();
-
-
    }
+  }
 
   ui->selectedhicname->show();
   ui->selectedhicnametext->show();
   ui->selectedscan_name->show();
   ui->selectedscan_nametext->show();
+
+
 
   std::map<const char *, TResultVariable> myvariables;
   myvariables = fAnalysisVector.at(fScanposition)->GetVariableList();
@@ -2436,4 +2447,26 @@ void MainWindow::uploadpdf(){
 
     QDesktopServices::openUrl(QUrl(qstr, QUrl::TolerantMode));
 
+}
+
+
+void MainWindow::button_fEndurancemodules_clicked(int index)
+{
+  fSelectedHic=fHICs.at(index);
+  fSelectedHicIndex=index;
+  ui->OBModule->show();
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < index+1) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color(i, j, false);
+      }
+    }
+  }
+  for (unsigned int i = 0; i < fChips.size(); i++) {
+    int     chipid;
+    uint8_t module, side, pos;
+    chipid = fChips.at(i)->GetConfig()->GetChipId();
+    DecodeId(chipid, module, side, pos);
+    if (fChips.at(i)->GetHic()==fSelectedHic) color(side, pos, fChips.at(i)->GetConfig()->IsEnabled());
+  }
 }
