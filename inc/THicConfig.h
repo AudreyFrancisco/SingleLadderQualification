@@ -32,13 +32,14 @@ private:
   int fEnabledA8;
   int fEnabledB0;
   int fHSPosById;
+  int fPoweredCombo;
 
 protected:
 public:
   THicConfigOB(TConfig *config, int modId);
   void InitParamMap();
-  bool IsEnabledA8() { return (IsEnabled() && (fEnabledA8 != 0)); };
-  bool IsEnabledB0() { return (IsEnabled() && (fEnabledB0 != 0)); };
+  bool IsEnabledA8() { return (IsEnabled() && fEnabledA8); };
+  bool IsEnabledB0() { return (IsEnabled() && fEnabledB0); };
 };
 
 class THicConfigIB : public THicConfig {
