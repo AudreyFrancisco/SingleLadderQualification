@@ -301,7 +301,7 @@ def generateTheEOStransferScript(ServiceAccount, LocalBasePath):
     file.write("# The remote EOS Path, with the service account name specification\n")
     file.write("DBATTACHREMOTEPATH="+ServiceAccount+"@lxplus.cern.ch:/eos/project/a/alice-its/www\n")
 
-    file.write("echo \" ------ ALICE-ITS EOS Repo sync program - v.2.0 - A.Franco - INFN BARI Italy\" \n")
+    file.write("echo \" ------ ALICE-ITS EOS Repo sync program - v.3.0 - A.Franco - INFN BARI Italy\" \n")
     file.write("echo \"Start execution : $STARTDATE\" \n")
     file.write("echo \"Local path = $DBATTACHBASEPATH\" \n")
     file.write("echo \"Remote path = $DBATTACHREMOTEPATH\" \n")
@@ -384,7 +384,6 @@ def generateTheEOSAllSyncScript(ServiceAccount, LocalBasePath):
     
     file.write("#!/bin/bash\n")
     file.write("# --- Get all the variables ---\n")
-
     file.write("SCRIPTSPATH=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" && pwd )\"\n") 
     file.write(". $SCRIPTSPATH/EOStransfer.cfg\n") 
     file.write("DBATTACHBASEPATH=/var/aliceits/www\n") 
