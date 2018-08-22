@@ -10,12 +10,6 @@ cc7:
       - mkdir build
       - (cd build && cmake3 ../ && make -j $(nproc) all format-check)
 
-ubuntu1604:
-    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu16.04-dev
-    script:
-      - mkdir build
-      - (cd build && cmake ../ && make -j $(nproc) all format-check)
-      
 ubuntu1804:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu18.04-dev
     script:
