@@ -24,10 +24,12 @@
 #include "testingprogress.h"
 #include "testselection.h"
 #include <QCoreApplication>
+#include <QDesktopServices>
 #include <QFile>
 #include <QFileDialog>
 #include <QMenuBar>
 #include <QPixmap>
+#include <QUrl>
 #include <QtDebug>
 #include <QtWidgets>
 #include <chrono>
@@ -80,6 +82,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     obm.at(idx)->setStyleSheet("background-color:red;");
     connect(obm.at(idx), &QPushButton::clicked, [=] { button_obm_clicked(idx + 1); });
   }
+
+  ui->upload->hide();
+  ui->selectedhicname->hide();
+  ui->selectedscan_name->hide();
+  ui->selectedhicnametext->hide();
+  ui->selectedscan_nametext->hide();
   ui->OBModule->hide();
   ui->IBModule->hide();
   ui->OBHALFSTAVE->hide();
@@ -116,6 +124,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(quit, &QAction::triggered, this, &MainWindow::close);
   QAction *newdebug = new QAction("&Debug mode", this);
   connect(newdebug, SIGNAL(triggered()), this, SLOT(start_debug()));
+  connect(ui->upload, SIGNAL(clicked()), this, SLOT(uploadpdf()));
 
   // build menu (based on actions)
   QMenu *menu = menuBar()->addMenu("&Actions");
@@ -232,6 +241,11 @@ void MainWindow::open()
                         fBottomfour, fBottomthree, fBottomtwo, fBottomone});
       fEndurancemodules.assign({ui->top5, ui->top4, ui->top3, ui->top2, ui->top1, ui->down5,
                                 ui->down4, ui->down3, ui->down2, ui->down1});
+
+      for (uint c = 0; c < fEndurancemodules.size(); ++c) {
+        connect(fEndurancemodules.at(c), &QPushButton::clicked,
+                [=] { button_fEndurancemodules_clicked(c); });
+      }
     }
     if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
         fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
@@ -358,7 +372,9 @@ void MainWindow::open()
         }
       }
     }
-
+    ui->selectedhicnametext->setText(fHicnames[0]);
+    fSelectedHicIndex = 0;
+    fSelectedHic      = fHICs.at(0);
     fConfig->GetScanConfig()->SetUseDataPath(true);
     fPb = fHICs.at(0)->GetPowerBoard();
     if (fPb) {
@@ -429,6 +445,8 @@ void MainWindow::open()
 void MainWindow::button_obm_clicked(int aModule)
 {
   fChkBtnObm[aModule - 1] = true;
+  fSelectedHic            = fHICs.at(aModule - 1);
+  fSelectedHicIndex       = aModule - 1;
   ui->OBModule->show();
   ui->modulenumber->setText(QVariant(aModule).toString());
   if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < aModule) {
@@ -584,7 +602,11 @@ void MainWindow::start_test()
   fPbcfgcheck = nullptr;
   delete fCalwindow;
   fCalwindow = nullptr;
-
+  ui->upload->hide();
+  ui->selectedhicname->hide();
+  ui->selectedscan_name->hide();
+  ui->selectedhicnametext->hide();
+  ui->selectedscan_nametext->hide();
   ui->OBModule->hide();
   ui->OBHALFSTAVE->hide();
   ui->IBModule->hide();
@@ -930,10 +952,33 @@ void MainWindow::StopScan() { fScanAbort = true; }
 
 void MainWindow::getresultdetails(int i)
 {
+
   fMapdetails.clear();
   fMapd.clear();
   ui->details->clear();
   fScanposition = i;
+
+  ui->upload->hide();
+
+
+  TScanResultHic *selectedhicresult =
+      fresultVector.at(fScanposition)->GetHicResult(fHicnames.at(fSelectedHicIndex).toStdString());
+  ui->selectedscan_nametext->setText(fScanVector.at(fScanposition)->GetName());
+  ui->selectedhicnametext->setText(fHicnames[fSelectedHicIndex]);
+
+  if (fSelectedHic) {
+    if (selectedhicresult->HasPDF()) {
+
+      fPdf = selectedhicresult->GetPDFPath();
+      ui->upload->show();
+    }
+  }
+
+  ui->selectedhicname->show();
+  ui->selectedhicnametext->show();
+  ui->selectedscan_name->show();
+  ui->selectedscan_nametext->show();
+
 
   std::map<const char *, TResultVariable> myvariables;
   myvariables = fAnalysisVector.at(fScanposition)->GetVariableList();
@@ -1061,11 +1106,13 @@ void MainWindow::detailscombo(int dnumber)
 
   for (unsigned int i = 0; i < fChips.size(); i++) {
     if (fChips[i]->GetConfig()->IsEnabled()) {
-      int             tautotita = fChips[i]->GetConfig()->GetChipId() & 0xf;
-      THic *          hic       = fChips.at(i)->GetHic();
-      TScanResultHic *result    = fresultVector.at(fScanposition)->GetHicResult(hic->GetDbId());
-      std::cout << "The variable value of chip with ID " << tautotita
-                << " is: " << result->GetVariable(tautotita, rvar) << std::endl;
+      int   tautotita = fChips[i]->GetConfig()->GetChipId() & 0xf;
+      THic *hic       = fChips.at(i)->GetHic();
+      if (hic == fSelectedHic) {
+        TScanResultHic *result = fresultVector.at(fScanposition)->GetHicResult(hic->GetDbId());
+        std::cout << "The variable value of chip with ID " << tautotita
+                  << " is: " << result->GetVariable(tautotita, rvar) << std::endl;
+      }
     }
   }
 }
@@ -2390,4 +2437,37 @@ void MainWindow::readSettings()
   resize(settings.value("size", QSize(1373, 890)).toSize());
   move(settings.value("pos", QPoint(200, 200)).toPoint());
   settings.endGroup();
+}
+
+
+void MainWindow::uploadpdf()
+{
+
+
+  QString qstr = QString::fromStdString(fPdf);
+
+  QDesktopServices::openUrl(QUrl(qstr, QUrl::TolerantMode));
+}
+
+
+void MainWindow::button_fEndurancemodules_clicked(int index)
+{
+  fSelectedHic      = fHICs.at(index);
+  fSelectedHicIndex = index;
+  ui->OBModule->show();
+  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < index + 1) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 7; j++) {
+        color(i, j, false);
+      }
+    }
+  }
+  for (unsigned int i = 0; i < fChips.size(); i++) {
+    int     chipid;
+    uint8_t module, side, pos;
+    chipid = fChips.at(i)->GetConfig()->GetChipId();
+    DecodeId(chipid, module, side, pos);
+    if (fChips.at(i)->GetHic() == fSelectedHic)
+      color(side, pos, fChips.at(i)->GetConfig()->IsEnabled());
+  }
 }
