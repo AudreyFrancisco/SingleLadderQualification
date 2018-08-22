@@ -20,8 +20,8 @@ private:
   void FillHistos(std::vector<TPixHit> *Hits, int board);
 
 protected:
-  void ConfigureChip(TAlpide *chip);
-  void ConfigureBoard(TReadoutBoard *board);
+  void         ConfigureChip(TAlpide *chip);
+  void         ConfigureBoard(TReadoutBoard *board);
   THisto       CreateHisto();
   void         CreateScanParameters() { m_parameters = new TDigitalParameters; };
   virtual void SetName();
@@ -33,13 +33,13 @@ public:
   virtual ~TDigitalScan(){};
 
   virtual void Init();
-  void PrepareStep(int loopIndex);
-  void LoopEnd(int loopIndex);
-  void Next(int loopIndex);
-  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
-  void               Execute();
-  void               Terminate();
-  bool               IsNominal()
+  void         PrepareStep(int loopIndex);
+  void         LoopEnd(int loopIndex);
+  void         Next(int loopIndex);
+  void         LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
+  void         Execute();
+  void         Terminate();
+  bool         IsNominal()
   {
     return ((((TDigitalParameters *)m_parameters)->voltageScale > 0.99) &&
             (((TDigitalParameters *)m_parameters)->voltageScale < 1.01));

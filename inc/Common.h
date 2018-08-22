@@ -68,17 +68,17 @@ namespace common {
 
   } TStatVar;
 
-  extern std::string GetFileName(TChipIndex aChipIndex, std::string suffix);
-  extern int GetFileName();
-  extern int GetChipIntIndex(TChipIndex aChipIndex);
-  extern TChipIndex GetChipIndex(int aIntIndex);
+  extern std::string             GetFileName(TChipIndex aChipIndex, std::string suffix);
+  extern int                     GetFileName();
+  extern int                     GetChipIntIndex(TChipIndex aChipIndex);
+  extern TChipIndex              GetChipIndex(int aIntIndex);
   extern std::vector<TChipIndex> GetChipList(TScanHisto *aScanHisto);
 
   bool HitBelongsToChip(TChipIndex aChipIndex, TPixHit aHit);
   bool HitBelongsToHic(THic *aHic, TPixHit aHit);
-  int FindIndexForHit(std::vector<TChipIndex> aChipList, TPixHit aHit);
+  int  FindIndexForHit(std::vector<TChipIndex> aChipList, TPixHit aHit);
   bool PixelAlreadyHit(std::vector<TPixHit> *pixels, TPixHit aHit);
   bool DColAlreadyHit(std::vector<TPixHit> *pixels, TPixHit aHit);
-}
+} // namespace common
 
 #endif

@@ -24,7 +24,7 @@ public slots:
                               std::vector<QString> nameing, std::vector<TScanResultHic *> cuts);
   // virtual void PopulateWindow(QString nameoftheobject, QString oldclass, QString finalclass,
   // std::vector<QString> nameing);
-  void on_scanclassification_itemClicked(QListWidgetItem *item);
+  void         on_scanclassification_itemClicked(QListWidgetItem *item);
   virtual void DisplayStatusOptions();
 
 private:

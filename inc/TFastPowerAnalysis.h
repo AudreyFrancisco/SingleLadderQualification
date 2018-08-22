@@ -10,7 +10,7 @@
 class TFastPowerResultChip : public TScanResultChip {
 public:
   TFastPowerResultChip() : TScanResultChip(){};
-  void WriteToFile(FILE *fp) { (void)fp; };
+  void  WriteToFile(FILE *fp) { (void)fp; };
   float GetVariable(TResultVariable var)
   {
     (void)(&var);
@@ -52,8 +52,8 @@ public:
 
 class TFastPowerAnalysis : public TScanAnalysis {
 private:
-  void CreateIVHisto(TFastPowerResultHic *hicResult);
-  void WriteIVCurve(THic *hic);
+  void               CreateIVHisto(TFastPowerResultHic *hicResult);
+  void               WriteIVCurve(THic *hic);
   THicClassification GetClassification(THicCurrents currents, TFastPowerResultHic *result);
   //  THicClassification GetClassificationIB(THicCurrents currents);
   THicClassification GetClassificationOB(THicCurrents currents, TFastPowerResultHic *result);
@@ -69,12 +69,12 @@ protected:
     TFastPowerResultHic *result = new TFastPowerResultHic();
     return result;
   };
-  void CreateResult(){};
-  void InitCounters(){};
-  void WriteResult();
-  void AnalyseHisto(TScanHisto *histo) { (void)&histo; };
-  string                        GetPreviousTestType();
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  void   CreateResult(){};
+  void   InitCounters(){};
+  void   WriteResult();
+  void   AnalyseHisto(TScanHisto *histo) { (void)&histo; };
+  string GetPreviousTestType();
+  void   CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TFastPowerAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

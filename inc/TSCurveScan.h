@@ -59,11 +59,11 @@ protected:
     }
   };
 
-  void ConfigureFromu(TAlpide *chip);
+  void         ConfigureFromu(TAlpide *chip);
   virtual void ConfigureChip(TAlpide *chip) = 0;
-  void ConfigureBoard(TReadoutBoard *board);
-  void RestoreNominalSettings();
-  void FillHistos(const THitSet &hs);
+  void         ConfigureBoard(TReadoutBoard *board);
+  void         RestoreNominalSettings();
+  void         FillHistos(const THitSet &hs);
   // THisto CreateHisto    ();
   virtual void SetName() = 0;
 
@@ -82,12 +82,12 @@ public:
   THisto       CreateHisto(); // public in TScan, so...
   void         Init();
   virtual void PrepareStep(int loopIndex) = 0;
-  void LoopEnd(int loopIndex);
-  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
-  void               Execute();
-  void               Terminate();
-  bool               GetNominal() { return ((TSCurveParameters *)m_parameters)->nominal; };
-  bool SetParameters(TScanParameters *pars);
+  void         LoopEnd(int loopIndex);
+  void         LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
+  void         Execute();
+  void         Terminate();
+  bool         GetNominal() { return ((TSCurveParameters *)m_parameters)->nominal; };
+  bool         SetParameters(TScanParameters *pars);
 };
 
 class TThresholdScan : public TSCurveScan {

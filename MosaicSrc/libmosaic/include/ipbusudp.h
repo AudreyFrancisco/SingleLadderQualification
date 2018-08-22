@@ -49,7 +49,7 @@ public:
   IPbusUDP(int pktSize = DEFAULT_PACKET_SIZE);
   IPbusUDP(const char *brdName, int port = DEFAULT_PORT, int pktsize = DEFAULT_PACKET_SIZE);
   ~IPbusUDP();
-  void setIPaddress(const char *brdName, int port = DEFAULT_PORT);
+  void              setIPaddress(const char *brdName, int port = DEFAULT_PORT);
   void              execute();
   const std::string name() { return "IPbusUDP"; }
 

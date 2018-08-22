@@ -268,16 +268,16 @@ bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPi
       started = true;
       DecodeEmptyFrame(data + byte, chip, BunchCounterTmp);
       byte += 2;
-      if (chipID) *chipID             = chip;
+      if (chipID) *chipID = chip;
       if (bunchCounter) *bunchCounter = BunchCounterTmp;
-      finished                        = true;
+      finished = true;
       break;
     case DT_CHIPHEADER:
       started  = true;
       finished = false;
       DecodeChipHeader(data + byte, chip, BunchCounterTmp);
       byte += 2;
-      if (chipID) *chipID             = chip;
+      if (chipID) *chipID = chip;
       if (bunchCounter) *bunchCounter = BunchCounterTmp;
       break;
     case DT_CHIPTRAILER:

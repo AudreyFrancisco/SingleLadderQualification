@@ -60,7 +60,7 @@ public:
   void readFWinfo(fw_info_t *info);
 
 private:
-  int sockRead(unsigned char *rxBuffer, int bufSize);
+  int  sockRead(unsigned char *rxBuffer, int bufSize);
   void sockWrite(unsigned char *txBuffer, int txSize);
 
 private:

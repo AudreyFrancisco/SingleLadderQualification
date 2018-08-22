@@ -18,7 +18,7 @@ class TEyeResultChip : public TScanResultChip {
 private:
 public:
   TEyeResultChip() : TScanResultChip(){};
-  void WriteToFile(FILE *fp) { (void)fp; }; // TODO
+  void  WriteToFile(FILE *fp) { (void)fp; }; // TODO
   float GetVariable(TResultVariable var)
   {
     (void)var;
@@ -34,8 +34,8 @@ private:
 public:
   TEyeResultHic() : TScanResultHic(){};
   TScanParameters *GetScanParameters() const { return m_scanParameters; }
-  void WriteToFile(FILE *fp) { (void)fp; }; // TODO
-  void WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
+  void             WriteToFile(FILE *fp) { (void)fp; }; // TODO
+  void             WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   {
     (void)db;
     (void)activity;
@@ -67,11 +67,11 @@ protected:
     TEyeResultHic *Result = new TEyeResultHic();
     return Result;
   };
-  void CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo);                // TODO
+  void   CreateResult(){};
+  void   AnalyseHisto(TScanHisto *histo);              // TODO
   string GetPreviousTestType() { return string(""); }; // TODO
   void   InitCounters(){};                             // TODO
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  void   CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TEyeAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

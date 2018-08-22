@@ -244,10 +244,10 @@ void TDctrlAnalysis::AnalyseHisto(TScanHisto *histo)
       driver.push_back((float)i);
       amp_pos.push_back(amp_p);
       amp_neg.push_back(amp_n);
-      if (amp_p > maxAmp_p) maxAmp_p    = amp_p;
+      if (amp_p > maxAmp_p) maxAmp_p = amp_p;
       if (rtim_p > maxRise_p) maxRise_p = rtim_p;
       if (ftim_p > maxFall_p) maxFall_p = ftim_p;
-      if (amp_n > maxAmp_n) maxAmp_n    = amp_n;
+      if (amp_n > maxAmp_n) maxAmp_n = amp_n;
       if (rtim_n > maxRise_n) maxRise_n = rtim_n;
       if (ftim_n > maxFall_n) maxFall_n = ftim_n;
     }
@@ -416,7 +416,7 @@ void TDctrlResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 
 void TDctrlResultHic::Compare(TScanResultHic *aPrediction)
 {
-  TDctrlResultHic *prediction                       = (TDctrlResultHic *)aPrediction;
+  TDctrlResultHic *prediction = (TDctrlResultHic *)aPrediction;
   if (prediction->worst_slope > 0) worst_slopeRatio = worst_slope / prediction->worst_slope;
   if (prediction->worst_chisq > 0) worst_chisqRatio = worst_chisq / prediction->worst_chisq;
 }

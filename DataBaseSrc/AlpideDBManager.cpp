@@ -205,9 +205,10 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   string appo;
 
   curl_easy_setopt(myHandle, CURLOPT_URL, theUrl.URI.c_str());
-  curl_easy_setopt(myHandle, CURLOPT_USERAGENT, "curl/7.19.7 (x86_64-redhat-linux-gnu) "
-                                                "libcurl/7.19.7 NSS/3.21 Basic ECC zlib/1.2.3 "
-                                                "libidn/1.18 libssh2/1.4.2");
+  curl_easy_setopt(myHandle, CURLOPT_USERAGENT,
+                   "curl/7.19.7 (x86_64-redhat-linux-gnu) "
+                   "libcurl/7.19.7 NSS/3.21 Basic ECC zlib/1.2.3 "
+                   "libidn/1.18 libssh2/1.4.2");
 
   // Compose the heasder
   struct curl_slist *headers = NULL;

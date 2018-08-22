@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
   if (pipe(pipefd_out) != 0) log_fork = false;
   if (pipe(pipefd_err) != 0) log_fork = false;
 
-  int pid           = -1;
+  int pid = -1;
   if (log_fork) pid = fork();
 
   if (pid == 0) {

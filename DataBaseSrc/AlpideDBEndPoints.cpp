@@ -396,14 +396,14 @@ ComponentDB::ComponentDB(AlpideDB *DBhandle) : AlpideTable(DBhandle) {}
 ComponentDB::~ComponentDB() {}
 
 /* -----------------
-*    GetTypeList := get the complete list of all the component types defined
-*
-*		In Param : the ID of the Project
-*		Out Param : a Reference to a vector of ComponentType struct that will contain all
-*the
-*component types
-*		returns : a response struct that contains the error code
-*---------------- */
+ *    GetTypeList := get the complete list of all the component types defined
+ *
+ *		In Param : the ID of the Project
+ *		Out Param : a Reference to a vector of ComponentType struct that will contain all
+ *the
+ *component types
+ *		returns : a response struct that contains the error code
+ *---------------- */
 AlpideTable::response *ComponentDB::GetTypeList(int ProjectID, vector<componentType> *Result)
 {
   string        theUrl   = theParentDB->GetQueryDomain() + "/ComponentTypeRead";
@@ -495,7 +495,7 @@ void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro)
             }
             else if (MATCHNODE(n3, "Quantity") == 0)
               ap1.Quantity = atoi((const char *)n3->children->content);
-            n3             = n3->next;
+            n3 = n3->next;
           }
           pro->Composition.push_back(ap1);
         }
@@ -543,13 +543,13 @@ void ComponentDB::extractTheComponentType(xmlNode *ns, componentType *pro)
 }
 
 /* -----------------
-*    GetType := get the complete definition of the requested component
-*
-*		In Param : the ID of the Component Type
-*		Out Param : a Reference to a ComponentType struct that will contain the component
-*type definition
-*		returns : a response struct that contains the error code
-*---------------- */
+ *    GetType := get the complete definition of the requested component
+ *
+ *		In Param : the ID of the Component Type
+ *		Out Param : a Reference to a ComponentType struct that will contain the component
+ *type definition
+ *		returns : a response struct that contains the error code
+ *---------------- */
 AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *Result)
 {
   string        theUrl   = theParentDB->GetQueryDomain() + "/ComponentTypeReadAll";
@@ -589,11 +589,11 @@ AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *
 }
 
 /* -----------------
-*    Create := A component type ... TODO: need a better interface (with the struct parameter)
-*
-*		In Param : ... all the items describing ...
-*		returns : a response struct that contains the error code
-*---------------- */
+ *    Create := A component type ... TODO: need a better interface (with the struct parameter)
+ *
+ *		In Param : ... all the items describing ...
+ *		returns : a response struct that contains the error code
+ *---------------- */
 AlpideTable::response *ComponentDB::Create(string ComponentTypeID, string ComponentID,
                                            string SupplyCompID, string Description, string LotID,
                                            string PackageID, string UserID)
@@ -713,11 +713,11 @@ void ComponentDB::extractTheComponent(xmlNode *ns, componentLong *pro)
 }
 
 /* -----------------
-*    Read := Get a component
-*
-*		In Param : ... all the items describing ...
-*		returns : a response struct that contains the error code
-*---------------- */
+ *    Read := Get a component
+ *
+ *		In Param : ... all the items describing ...
+ *		returns : a response struct that contains the error code
+ *---------------- */
 AlpideTable::response *ComponentDB::Read(int ID, componentLong *Result)
 {
   std::string sID = std::to_string(ID);
@@ -769,11 +769,11 @@ AlpideTable::response *ComponentDB::readComponent(string ID, string ComponentID,
 }
 
 /* -----------------
-*    Read := Get a List of components
-*
-*		In Param : ...the componet type id...
-*		returns : a response struct that contains the error code
-*---------------- */
+ *    Read := Get a List of components
+ *
+ *		In Param : ...the componet type id...
+ *		returns : a response struct that contains the error code
+ *---------------- */
 AlpideTable::response *ComponentDB::readComponents(std::string             ProjectId,
                                                    std::string             ComponentTypeID,
                                                    vector<componentShort> *compoList)
@@ -867,10 +867,10 @@ AlpideTable::response *ComponentDB::GetListByType(int ProjectID, int ComponentTy
 }
 
 /* -----------------
-*    Read := Get the activity list for a component activity
-*
-*		In Param : ...
-*---------------- */
+ *    Read := Get the activity list for a component activity
+ *
+ *		In Param : ...
+ *---------------- */
 AlpideTable::response *ComponentDB::GetComponentActivities(string                ComponentID,
                                                            vector<compActivity> *Result)
 {
@@ -984,11 +984,11 @@ AlpideTable::response *ComponentDB::readComponentActivities(int ID, vector<compA
 }
 
 /* -----------------
-*    Print := Dumps a human readable form of the Component Type definition
-*
-*		In Param : the component type struct
-*		returns : a char pointer to a string buffer
-*---------------- */
+ *    Print := Dumps a human readable form of the Component Type definition
+ *
+ *		In Param : the component type struct
+ *		returns : a char pointer to a string buffer
+ *---------------- */
 string ComponentDB::Print(componentType *co)
 {
   ap = "Component : ID=" + std::to_string(co->ID) + " Name=" + co->Name + " Code=" + co->Code +
@@ -1026,11 +1026,11 @@ ActivityDB::ActivityDB(AlpideDB *DBhandle) : AlpideTable(DBhandle) {}
 ActivityDB::~ActivityDB() {}
 
 /* -----------------
-*    Create := Create a new activity record  TODO: complete the activity with all the info
-*
-*		In Param : the activity struct
-*		returns : a char pointer to a string buffer
-*---------------- */
+ *    Create := Create a new activity record  TODO: complete the activity with all the info
+ *
+ *		In Param : the activity struct
+ *		returns : a char pointer to a string buffer
+ *---------------- */
 // TODO: evaluate the error conditions return policy ??
 
 ActivityDB::response *ActivityDB::Create(activity *aActivity)
@@ -1179,12 +1179,12 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
 }
 
 /* -----------------
-*    AssignUris := Create/Remove change Uris list
-*
-*		In Param : the activity ID
-*				   the update list of URIs
-*		returns : a char pointer to a string buffer
-*---------------- */
+ *    AssignUris := Create/Remove change Uris list
+ *
+ *		In Param : the activity ID
+ *				   the update list of URIs
+ *		returns : a char pointer to a string buffer
+ *---------------- */
 AlpideTable::response *ActivityDB::AssignUris(int aActivityID, int aUserId,
                                               vector<ActivityDB::actUri> *aUris)
 {
@@ -1309,14 +1309,14 @@ ActivityDB::response *ActivityDB::Change(activity *aActivity)
   return (&theResponse);
 }
 /* -----------------
-*    AssignComponent := Add a new component to a defined activity
-*
-*		In Param : the activity ID
-*					the Component ID
-*					the Key for the COmponent Type
-*					The ID of the USER
-*		returns : a char pointer to a response type
-*---------------- */
+ *    AssignComponent := Add a new component to a defined activity
+ *
+ *		In Param : the activity ID
+ *					the Component ID
+ *					the Key for the COmponent Type
+ *					The ID of the USER
+ *		returns : a char pointer to a response type
+ *---------------- */
 ActivityDB::response *ActivityDB::AssignComponent(int aActivityID, int aComponentID,
                                                   int aComponentTypeID, int aUserID)
 {
@@ -1385,7 +1385,7 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aAc
                       param.Name = (const char *)(n3->children->content);
                     else if (MATCHNODE(n3, "Description"))
                       param.Description = (const char *)(n3->children->content);
-                    n3                  = n3->next;
+                    n3 = n3->next;
                   }
                   theParamList->push_back(param);
                 }
@@ -1440,7 +1440,7 @@ std::vector<ActivityDB::activityType> *ActivityDB::GetActivityTypeList(int aProj
               act.Name = (const char *)(n1->children->content);
             else if (MATCHNODE(n1, "Description"))
               act.Description = (const char *)(n1->children->content);
-            n1                = n1->next;
+            n1 = n1->next;
           }
           theTypeList->push_back(act);
         }
@@ -1490,7 +1490,7 @@ std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActi
                   loc.ID = atoi((const char *)(n2->children->content));
                 else if (MATCHNODE(n2, "Name"))
                   loc.Name = (const char *)(n2->children->content);
-                n2         = n2->next;
+                n2 = n2->next;
               }
               theLocationList->push_back(loc);
             }
@@ -1541,7 +1541,7 @@ std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList()
               att.Category = (const char *)(n1->children->content);
             else if (MATCHNODE(n1, "Description"))
               att.Description = (const char *)(n1->children->content);
-            n1                = n1->next;
+            n1 = n1->next;
           }
           theAttachmentList->push_back(att);
         }
@@ -1601,7 +1601,7 @@ std::vector<ActivityDB::actTypeCompType> *ActivityDB::GetComponentTypeList(int a
                       comp.Type.ID = atoi((const char *)(n3->children->content));
                     else if (MATCHNODE(n3, "Name"))
                       comp.Type.Name = (const char *)(n3->children->content);
-                    n3               = n3->next;
+                    n3 = n3->next;
                   }
                 }
                 n2 = n2->next;
@@ -1658,7 +1658,7 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityType
                   resu.ID = atoi((const char *)(n2->children->content));
                 else if (MATCHNODE(n2, "Name"))
                   resu.Name = (const char *)(n2->children->content);
-                n2          = n2->next;
+                n2 = n2->next;
               }
               theResultList->push_back(resu);
             }
@@ -1714,7 +1714,7 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityType
                   stat.Code = (const char *)(n2->children->content);
                 else if (MATCHNODE(n2, "Description"))
                   stat.Description = (const char *)(n2->children->content);
-                n2                 = n2->next;
+                n2 = n2->next;
               }
               theStatusList->push_back(stat);
             }
@@ -1779,7 +1779,7 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
                   act.Type.Name = (const char *)(n2->children->content);
                 else if (MATCHNODE(n2, "Description"))
                   act.Type.Description = (const char *)(n2->children->content);
-                n2                     = n2->next;
+                n2 = n2->next;
               }
             }
             if (MATCHNODE(n1, "ActivityStatus")) {
@@ -1791,7 +1791,7 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
                   act.Status.Code = (const char *)(n2->children->content);
                 else if (MATCHNODE(n2, "Description"))
                   act.Status.Description = (const char *)(n2->children->content);
-                n2                       = n2->next;
+                n2 = n2->next;
               }
             }
             n1 = n1->next;
@@ -1809,11 +1809,11 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
 }
 
 /* -----------------
-*    Read := Get an activity
-*
-*		In Param : ...
-*		returns : a response struct that contains the error code
-*---------------- */
+ *    Read := Get an activity
+ *
+ *		In Param : ...
+ *		returns : a response struct that contains the error code
+ *---------------- */
 void ActivityDB::extractTheActivity(xmlNode *ns, activityLong *act)
 {
   xmlNode *n1, *n2, *n3, *n4, *n5;
@@ -2186,12 +2186,12 @@ unsigned long ActivityDB::buildBase64Binary(string aLocalFileName, string *Buffe
     ch = (unsigned char)fgetc(fh);
   }
   if (i) {
-    for (j         = i; j < 3; j++)
+    for (j = i; j < 3; j++)
       cBufferIn[j] = '\0';
-    cBufferOut[0]  = (cBufferIn[0] & 0xfc) >> 2;
-    cBufferOut[1]  = ((cBufferIn[0] & 0x03) << 4) + ((cBufferIn[1] & 0xf0) >> 4);
-    cBufferOut[2]  = ((cBufferIn[1] & 0x0f) << 2) + ((cBufferIn[2] & 0xc0) >> 6);
-    cBufferOut[3]  = cBufferIn[2] & 0x3f;
+    cBufferOut[0] = (cBufferIn[0] & 0xfc) >> 2;
+    cBufferOut[1] = ((cBufferIn[0] & 0x03) << 4) + ((cBufferIn[1] & 0xf0) >> 4);
+    cBufferOut[2] = ((cBufferIn[1] & 0x0f) << 2) + ((cBufferIn[2] & 0xc0) >> 6);
+    cBufferOut[3] = cBufferIn[2] & 0x3f;
     for (j = 0; (j < i + 1); j++)
       *Buffer += base64chars[cBufferOut[j]];
     while ((i++ < 3))

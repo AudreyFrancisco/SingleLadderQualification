@@ -45,7 +45,7 @@ public:
   void Init();
   void PrepareStep(int loopIndex) { (void)(&loopIndex); };
   void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
-  void               Terminate();
+  void Terminate();
   bool SetParameters(TScanParameters *pars);
   void WritePLLReg(const char *fName, THic *aHic);
 };

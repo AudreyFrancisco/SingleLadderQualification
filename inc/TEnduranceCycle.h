@@ -42,11 +42,11 @@ private:
     THisto histo;
     return histo;
   };
-  void ConfigureBoard(TReadoutBoard *board);
-  void ConfigureFromu(TAlpide *chip);
-  void ConfigureChip(TAlpide *chip);
-  void ConfigureMask(TAlpide *chip);
-  void CountWorkingChips();
+  void                                            ConfigureBoard(TReadoutBoard *board);
+  void                                            ConfigureFromu(TAlpide *chip);
+  void                                            ConfigureChip(TAlpide *chip);
+  void                                            ConfigureMask(TAlpide *chip);
+  void                                            CountWorkingChips();
   std::map<std::string, THicCounter>              m_hicCounters;
   std::vector<std::map<std::string, THicCounter>> m_counterVector;
 

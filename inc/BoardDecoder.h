@@ -57,8 +57,8 @@ public:
   static bool DecodeEvent(TBoardType boardType, unsigned char *data, int nBytes, int &nBytesHeader,
                           int &nBytesTrailer, TBoardHeader &boardInfo,
                           uint32_t firmwareVersion = 0x247E0611, int headerType = 0x1);
-  static int GetDAQEventHeaderLength(uint32_t firmwareVersion = 0x247E0611, int headerType = 1);
-  static int GetDAQEventTrailerLength() { return 8; };
+  static int  GetDAQEventHeaderLength(uint32_t firmwareVersion = 0x247E0611, int headerType = 1);
+  static int  GetDAQEventTrailerLength() { return 8; };
 };
 
 #endif

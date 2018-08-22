@@ -34,7 +34,7 @@ private:
 public:
   TDigitalResultChip()
       : TScanResultChip(), m_nDead(0), m_nNoisy(0), m_nIneff(0), m_nStuck(0), m_nBadDcols(0){};
-  void WriteToFile(FILE *fp);
+  void  WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
 };
 
@@ -54,7 +54,7 @@ private:
   bool          m_upper;
   bool          m_nominal;
   TErrorCounter m_errorCounter;
-  void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
+  void          GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 protected:
   void Compare(TScanResultHic *aPrediction);
@@ -86,14 +86,14 @@ class TDigitalAnalysis : public TScanAnalysis {
 private:
   std::vector<TDigitalCounter> m_counters;
   int                          m_ninj;
-  bool HasData(TScanHisto &histo, common::TChipIndex idx, int col);
-  void InitCounters();
-  void FillVariableList();
-  void WriteHitData(TScanHisto *histo, int row);
-  void WriteResult();
-  void WriteStuckPixels(THic *hic);
-  THicClassification GetClassificationOB(TDigitalResultHic *result);
-  THicClassification GetClassificationIB(TDigitalResultHic *result);
+  bool                         HasData(TScanHisto &histo, common::TChipIndex idx, int col);
+  void                         InitCounters();
+  void                         FillVariableList();
+  void                         WriteHitData(TScanHisto *histo, int row);
+  void                         WriteResult();
+  void                         WriteStuckPixels(THic *hic);
+  THicClassification           GetClassificationOB(TDigitalResultHic *result);
+  THicClassification           GetClassificationIB(TDigitalResultHic *result);
 
 protected:
   TScanResultChip *GetChipResult()
@@ -106,10 +106,10 @@ protected:
     TDigitalResultHic *Result = new TDigitalResultHic();
     return Result;
   };
-  void CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo);
+  void   CreateResult(){};
+  void   AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
-  void CalculatePrediction(std::string hicName);
+  void   CalculatePrediction(std::string hicName);
 
 public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

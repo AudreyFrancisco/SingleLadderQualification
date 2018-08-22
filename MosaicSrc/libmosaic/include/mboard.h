@@ -67,7 +67,7 @@ public:
   long pollTCP(int timeout, MDataReceiver **dr);
   long pollData(int timeout);
   void addDataReceiver(int id, MDataReceiver *dc);
-  void                flushDataReceivers();
+  void flushDataReceivers();
   static unsigned int buf2ui(unsigned char *buf);
 
 public:

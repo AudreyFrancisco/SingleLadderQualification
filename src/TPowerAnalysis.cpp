@@ -158,7 +158,7 @@ THicClassification TPowerAnalysis::GetClassification(THicCurrents currents, TPow
 
   // modify class in case of back-bias trip;
   if (currents.tripBB) {
-    if (returnValue == CLASS_GOLD) returnValue   = CLASS_GOLD_NOBB;
+    if (returnValue == CLASS_GOLD) returnValue = CLASS_GOLD_NOBB;
     if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
     if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
   }

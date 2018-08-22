@@ -49,7 +49,7 @@ TSCurveAnalysis::TSCurveAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
   if (aResult)
     m_result = aResult;
   else
-    m_result   = new TSCurveResult();
+    m_result = new TSCurveResult();
   m_prediction = new TSCurveResult();
   FillVariableList();
 }

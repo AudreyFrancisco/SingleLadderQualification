@@ -43,15 +43,15 @@ public:
   TRuDctrlModule(TReadoutBoardRU &board, uint8_t moduleId, bool logging = false);
 
   void WriteChipRegister(uint16_t Address, uint16_t Value, uint8_t chipId, bool commit = true);
-  int ReadChipRegister(uint16_t Address, uint16_t &Value, uint8_t chipId);
+  int  ReadChipRegister(uint16_t Address, uint16_t &Value, uint8_t chipId);
   void SendOpCode(uint16_t OpCode, bool commit = true);
 
-  int SetConnector(uint8_t connector, bool commit = true);
+  int  SetConnector(uint8_t connector, bool commit = true);
   void Wait(uint16_t waittime, bool commit = true);
 
   // YCM: some function from Python code
-  void SetManchesterEn(bool en = true);
-  void ForcePhase(uint16_t phase);
+  void     SetManchesterEn(bool en = true);
+  void     ForcePhase(uint16_t phase);
   void     ReleasePhaseForce();
   bool     PhaseIsForce();
   uint16_t GetPhase();

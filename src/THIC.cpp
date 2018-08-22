@@ -13,7 +13,7 @@ THic::THic(const char *id, int modId, TPowerBoard *pb, int pbMod, int bbChannel)
   if (bbChannel == -1)
     m_bbChannel = pbMod;
   else
-    m_bbChannel   = bbChannel;
+    m_bbChannel = bbChannel;
   m_moduleId      = modId;
   m_class         = CLASS_UNTESTED;
   m_oldClass      = CLASS_UNTESTED;
@@ -277,7 +277,7 @@ void THic::AddClassification(THicClassification aClass, bool backBias)
   // Power test results
   if ((aClass == CLASS_GOLD_NOBB) || (aClass == CLASS_SILVER_NOBB) ||
       (aClass == CLASS_BRONZE_NOBB)) {
-    m_worstScanBB                                                                      = CLASS_RED;
+    m_worstScanBB = CLASS_RED;
     if ((aClass == CLASS_GOLD_NOBB) && (m_worstScanNoBB < CLASS_GOLD)) m_worstScanNoBB = CLASS_GOLD;
     if ((aClass == CLASS_SILVER_NOBB) && (m_worstScanNoBB < CLASS_SILVER))
       m_worstScanNoBB = CLASS_SILVER;
@@ -297,7 +297,7 @@ THicClassification THic::GetClassification()
 {
   // set ABORTED to RED
   if (m_worstScanNoBB == CLASS_ABORTED) m_worstScanNoBB = CLASS_RED;
-  if (m_worstScanBB == CLASS_ABORTED) m_worstScanBB     = CLASS_RED;
+  if (m_worstScanBB == CLASS_ABORTED) m_worstScanBB = CLASS_RED;
 
   // Class RED: more than 2 non-working chips or worst no BB scan RED
   if (m_chips.size() - GetNEnabledChips() > 2) return CLASS_RED;

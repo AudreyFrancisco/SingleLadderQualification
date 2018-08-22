@@ -78,7 +78,7 @@ public:
   ~AlpideDB();
 
   string GetQueryDomain() { return (theQueryDomain); };
-  void SetQueryDomain(string aQueryDomain) { theQueryDomain = aQueryDomain; };
+  void   SetQueryDomain(string aQueryDomain) { theQueryDomain = aQueryDomain; };
 
   AlpideDBManager *GetManagerHandle() { return (theDBmanager); };
   bool             isDBConnected() { return (isConnected); };

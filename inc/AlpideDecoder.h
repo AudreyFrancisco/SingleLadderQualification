@@ -49,10 +49,10 @@ public:
   {
     std::array<TAlpideDataType, 256> lut;
     for (unsigned int c = 0; c < 256; ++c)
-      lut[c]            = GetDataTypeSlow(c);
+      lut[c] = GetDataTypeSlow(c);
     return lut;
   }
-  static int GetWordLength(TAlpideDataType dataType);
+  static int  GetWordLength(TAlpideDataType dataType);
   static bool DecodeEvent(unsigned char *data, int nBytes, std::vector<TPixHit> *hits,
                           int boardIndex, int channel, int &prioErrors, int hitLimit,
                           std::vector<TPixHit> *stuck = 0, int *chipID = 0,

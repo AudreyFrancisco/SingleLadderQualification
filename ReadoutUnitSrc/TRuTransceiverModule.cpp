@@ -102,7 +102,7 @@ std::map<std::string, uint16_t> TRuTransceiverModule::ReadCounters()
                                                "Events Double Busy Off",
                                                "Events Empty Regions",
                                                "Prbs Errors"};
-  static std::vector<uint8_t> counterAddr{7,   8,    9,    10,   11,   0xD, 0xE,
+  static std::vector<uint8_t>     counterAddr{7,   8,    9,    10,   11,   0xD, 0xE,
                                           0xF, 0x10, 0x11, 0x12, 0x13, 0x14};
 
   for (auto addr : counterAddr)

@@ -20,7 +20,7 @@ private:
     THisto histo;
     return histo;
   };
-  void DoIVCurve(THicCurrents &result);
+  void                                DoIVCurve(THicCurrents &result);
   std::map<std::string, THicCurrents> m_hicCurrents;
 
 protected:

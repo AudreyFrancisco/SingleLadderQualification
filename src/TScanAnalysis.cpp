@@ -287,7 +287,7 @@ float TScanAnalysis::GetVariable(std::string aHic, int chip, TResultVariable var
 // this is defined as the classification of the worst HIC
 THicClassification TScanAnalysis::GetScanClassification()
 {
-  THicClassification result = CLASS_UNTESTED;
+  THicClassification                                result     = CLASS_UNTESTED;
   std::map<std::string, TScanResultHic *> *         hicResults = m_result->GetHicResults();
   std::map<std::string, TScanResultHic *>::iterator it;
   for (it = hicResults->begin(); it != hicResults->end(); it++) {

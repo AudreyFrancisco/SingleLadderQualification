@@ -109,17 +109,17 @@ private slots:
   void configure();
 
 private:
-  QWidget *topStatusBar();
-  QWidget *channel(int ch, QString chName);
+  QWidget *   topStatusBar();
+  QWidget *   channel(int ch, QString chName);
   QLCDNumber *newLargeLCD();
   QLCDNumber *newSmallLCD();
-  bool XMLreadChannel(QDomElement &root, int n);
-  bool XMLreadBias(QDomElement &root);
-  bool XMLreadMOSAIC(QDomElement &root);
+  bool        XMLreadChannel(QDomElement &root, int n);
+  bool        XMLreadBias(QDomElement &root);
+  bool        XMLreadMOSAIC(QDomElement &root);
   QDomElement XMLgetTag(QDomElement &e, QString tagName);
-  void comErrorExit(std::exception &e);
-  void setIPaddress(QString add);
-  void setOnline(bool online);
+  void        comErrorExit(std::exception &e);
+  void        setIPaddress(QString add);
+  void        setOnline(bool online);
 };
 
 #endif // PBMAINWINDOW

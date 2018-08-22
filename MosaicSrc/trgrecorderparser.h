@@ -40,7 +40,7 @@ class TrgRecorderParser : public MDataReceiver {
 public:
   TrgRecorderParser();
   void flush();
-  int ReadTriggerInfo(uint32_t &trgNum, uint64_t &trgTime);
+  int  ReadTriggerInfo(uint32_t &trgNum, uint64_t &trgTime);
   bool hasData() { return (numClosedData != 0); }
 
 protected:

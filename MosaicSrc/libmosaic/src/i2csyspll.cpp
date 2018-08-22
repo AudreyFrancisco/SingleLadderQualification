@@ -84,7 +84,7 @@ void I2CSysPll::setup(pllRegisters_t regs)
   writeReg(3, regs.reg[3]);
 
 #if 0 // lock check is done at upper level
-	// wait for PLL to lock
+      // wait for PLL to lock
 	lookTry = 500;
 	while (--lookTry){
 		readReg(21, &r);

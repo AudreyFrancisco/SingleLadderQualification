@@ -317,7 +317,7 @@ void IPbus::processAnswer()
         if ((rxSize - rxPtr) < (tr.words * 4)) throw MIPBusError("Wrong answer size");
 
         if (transactionList[i].readDataPtr != NULL)
-          for (int j                          = 0; j < tr.words; j++)
+          for (int j = 0; j < tr.words; j++)
             transactionList[i].readDataPtr[j] = getWord();
         else
           for (int j = 0; j < tr.words; j++)

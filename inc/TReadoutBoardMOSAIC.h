@@ -68,13 +68,13 @@ public:
   int SendOpCode(Alpide::TOpCode OpCode);
   int SendCommand(Alpide::TCommand Command, TAlpide *chipPtr);
   // Markus: changed trigger delay type from uint32_t to int, since changed upstream
-  int SetTriggerConfig(bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
-  void SetTriggerSource(TTriggerSource triggerSource);
+  int      SetTriggerConfig(bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
+  void     SetTriggerSource(TTriggerSource triggerSource);
   uint32_t GetTriggerCount();
-  int Trigger(int nTriggers);
+  int      Trigger(int nTriggers);
   // Markus: changed data type from char to unsigned char; check that no problem
   // (should be OK at least for memcpy)
-  int ReadEventData(int &nBytes, unsigned char *buffer);
+  int  ReadEventData(int &nBytes, unsigned char *buffer);
   void StartRun();
   void StopRun();
 
@@ -108,7 +108,7 @@ public:
   powerboard *  GetPowerBoardHandle() { return (pb); };
   MCoordinator *GetCoordinatorHandle() { return (coordinator); };
   std::string   GetRegisterDump();
-  void setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex = -1);
+  void          setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex = -1);
   void WriteTransceiverDRP(size_t Aindex, uint16_t address, uint16_t value, bool execute = true);
   void WriteTransceiverDRPField(size_t Aindex, uint16_t address, uint16_t size, uint16_t offset,
                                 uint16_t value, bool execute = true);
@@ -119,8 +119,8 @@ public:
   std::vector<uint32_t> *getTriggerNums() { return &triggerNum; };
   std::vector<uint64_t> *getTriggerTimes() { return &triggerTime; };
 
-  void SetReceiverPatternCheck(size_t Aindex);
-  void ResetReceiverPatternCheck(size_t Aindex);
+  void     SetReceiverPatternCheck(size_t Aindex);
+  void     ResetReceiverPatternCheck(size_t Aindex);
   uint32_t GetErrorCounter(size_t Aindex);
 
 private:

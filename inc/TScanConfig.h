@@ -212,31 +212,31 @@ namespace ScanConfig {
   const int EYE_MIN_Y  = -127;
   const int EYE_MAX_Y  = 129;
   const int EYE_STEP_Y = 4;
-}
+} // namespace ScanConfig
 
 class TScanConfig {
 private:
   std::map<std::string, int *> fSettings;
   std::map<std::string, int>   m_retest;
-  float m_classVersion;
-  int   m_nInj;
-  int   m_nTrig;
-  int   m_maxTimeout;
-  int   m_maxHits;
-  int   m_chargeStart;
-  int   m_chargeStop;
-  int   m_chargeStep;
-  int   m_dacStart;
-  int   m_dacStop;
-  int   m_dacStep;
-  int   m_nDacSamples;
-  int   m_nMaskStages;
-  int   m_pixPerRegion;
-  int   m_noiseCutInv;
-  char  m_fNameSuffix[80];
-  int   m_testWithoutComp;
-  int   m_status;
-  int   m_halfstavecomp;
+  float                        m_classVersion;
+  int                          m_nInj;
+  int                          m_nTrig;
+  int                          m_maxTimeout;
+  int                          m_maxHits;
+  int                          m_chargeStart;
+  int                          m_chargeStop;
+  int                          m_chargeStep;
+  int                          m_dacStart;
+  int                          m_dacStop;
+  int                          m_dacStep;
+  int                          m_nDacSamples;
+  int                          m_nMaskStages;
+  int                          m_pixPerRegion;
+  int                          m_noiseCutInv;
+  char                         m_fNameSuffix[80];
+  int                          m_testWithoutComp;
+  int                          m_status;
+  int                          m_halfstavecomp;
   // NEW--added for additional scans
   int       m_ithrStart; // usually 30
   int       m_ithrStop;  // usually 100
@@ -374,18 +374,18 @@ protected:
 public:
   TScanConfig();
   ~TScanConfig(){};
-  void InitParamMap();
-  bool SetParamValue(std::string Name, std::string Value);
-  bool SetParamValue(std::string Name, int Value);
-  int GetParamValue(std::string Name);
+  void        InitParamMap();
+  bool        SetParamValue(std::string Name, std::string Value);
+  bool        SetParamValue(std::string Name, int Value);
+  int         GetParamValue(std::string Name);
   std::string GetDataPath(std::string HicName);
   std::string GetTestDir();
   std::string GetRemoteHicPath(std::string HicName);
-  bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
+  bool        IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
 
   float GetClassificationVersion() { return m_classVersion; };
 
-  int GetRetestNumber(std::string hicName);
+  int   GetRetestNumber(std::string hicName);
   int   GetNInj() { return m_nInj; };
   int   GetChargeStart() { return m_chargeStart; };
   int   GetChargeStep() { return m_chargeStep; };
@@ -407,24 +407,24 @@ public:
   bool  GetIsMasked() { return m_isMasked; };
   float GetBackBias() { return m_backBias; };
   bool  GetUseDataPath() { return m_useDataPath; };
-  void SetRetestNumber(std::string hicName, int aRetest);
-  void SetfNameSuffix(const char *aSuffix) { strcpy(m_fNameSuffix, aSuffix); };
-  void SetVoltageScale(float aScale) { m_voltageScale = aScale; };
-  void SetMlvdsStrength(int aStrength) { m_mlvdsStrength = aStrength; };
-  void SetBackBias(float aVoltage) { m_backBias = fabs(aVoltage); };
-  void SetBackBiasActive(bool act = true) { m_backBias_active = act; }
-  bool                        IsBackBiasActive() const { return m_backBias_active; }
-  void SetVcasnRange(int start, int stop)
+  void  SetRetestNumber(std::string hicName, int aRetest);
+  void  SetfNameSuffix(const char *aSuffix) { strcpy(m_fNameSuffix, aSuffix); };
+  void  SetVoltageScale(float aScale) { m_voltageScale = aScale; };
+  void  SetMlvdsStrength(int aStrength) { m_mlvdsStrength = aStrength; };
+  void  SetBackBias(float aVoltage) { m_backBias = fabs(aVoltage); };
+  void  SetBackBiasActive(bool act = true) { m_backBias_active = act; }
+  bool  IsBackBiasActive() const { return m_backBias_active; }
+  void  SetVcasnRange(int start, int stop)
   {
     m_vcasnStart = start;
     m_vcasnStop  = stop;
   };
-  void SetIsMasked(bool masked) { m_isMasked = masked; };
-  void SetUseDataPath(bool usePath) { m_useDataPath = usePath; };
-  void SetTestType(TTestType type) { m_testType = type; };
-  TTestType                  GetTestType() { return m_testType; };
-  void SetDatabase(AlpideDB *db) { m_db = db; };
-  AlpideDB *                 GetDatabase() { return m_db; };
+  void      SetIsMasked(bool masked) { m_isMasked = masked; };
+  void      SetUseDataPath(bool usePath) { m_useDataPath = usePath; };
+  void      SetTestType(TTestType type) { m_testType = type; };
+  TTestType GetTestType() { return m_testType; };
+  void      SetDatabase(AlpideDB *db) { m_db = db; };
+  AlpideDB *GetDatabase() { return m_db; };
 };
 
 #endif

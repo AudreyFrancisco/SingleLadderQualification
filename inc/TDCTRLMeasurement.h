@@ -16,7 +16,7 @@ private:
   int      m_region;
   int      m_offset;
 
-  int GetChipById(std::vector<TAlpide *> chips, int previousId);
+  int  GetChipById(std::vector<TAlpide *> chips, int previousId);
   void ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bool &exception);
   void WriteMem(TAlpide *chip, int ARegion, int AOffset, int AValue);
   bool TestPattern(int pattern, bool &exception);
@@ -31,12 +31,12 @@ public:
                     std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
                     std::mutex *aMutex);
   ~TDctrlMeasurement(){};
-  void Init();
-  void Execute();
-  void Terminate();
-  void LoopEnd(int loopIndex);
-  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
-  void PrepareStep(int loopIndex);
+  void             Init();
+  void             Execute();
+  void             Terminate();
+  void             LoopEnd(int loopIndex);
+  void             LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
+  void             PrepareStep(int loopIndex);
   scope_control    scope;
   static const int peak_p = 0;
   static const int peak_n = 1;

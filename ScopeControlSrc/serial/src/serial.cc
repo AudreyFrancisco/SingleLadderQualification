@@ -6,17 +6,17 @@
 using std::invalid_argument;
 using std::min;
 using std::numeric_limits;
-using std::vector;
 using std::size_t;
 using std::string;
+using std::vector;
 
+using serial::IOException;
 using serial::Serial;
 using serial::SerialException;
-using serial::IOException;
 using serial::bytesize_t;
+using serial::flowcontrol_t;
 using serial::parity_t;
 using serial::stopbits_t;
-using serial::flowcontrol_t;
 
 class Serial::ScopedReadLock {
 public:
@@ -40,7 +40,7 @@ private:
   // Disable copy constructors
   ScopedWriteLock(const ScopedWriteLock &);
   const ScopedWriteLock &operator=(ScopedWriteLock);
-  SerialImpl *pimpl_;
+  SerialImpl *           pimpl_;
 };
 
 Serial::Serial(const string &port, uint32_t baudrate, serial::Timeout timeout, bytesize_t bytesize,

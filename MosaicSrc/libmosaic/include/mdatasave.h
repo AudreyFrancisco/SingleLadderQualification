@@ -41,7 +41,7 @@ class MDataSave : public MDataReceiver {
 public:
   MDataSave();
   void setEventSize(long evSize) { eventSize = evSize; }
-  void                   flush();
+  void flush();
   void setSaveFunction(saveFunction_t s) { saveFunction = s; }
 
 protected:

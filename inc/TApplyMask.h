@@ -18,10 +18,10 @@ protected:
   TScanResultChip *GetChipResult() { return 0; };
   TScanResultHic * GetHicResult() { return 0; };
   void             CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo) { (void)histo; };
-  void                          InitCounters(){};
-  string                        GetPreviousTestType() { return string(""); }; // no analysis result
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  void             AnalyseHisto(TScanHisto *histo) { (void)histo; };
+  void             InitCounters(){};
+  string           GetPreviousTestType() { return string(""); }; // no analysis result
+  void             CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TApplyMask(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

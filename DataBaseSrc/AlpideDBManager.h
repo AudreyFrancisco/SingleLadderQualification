@@ -83,8 +83,8 @@ class AlpideDBManager {
 private:
 #ifdef COMPILE_LIBCURL
   CURL *myHandle;
-// CURLcode result; // We’ll store the result of CURL’s webpage retrieval, for simple error
-// checking. YCM:FIXME, not used
+  // CURLcode result; // We’ll store the result of CURL’s webpage retrieval, for simple error
+  // checking. YCM:FIXME, not used
 
 #ifdef AUTH_X509
   string theNSSNickName;
@@ -119,27 +119,27 @@ public:
 #endif
 #ifdef AUTH_X509
 #ifdef COMPILE_LIBCURL
-  bool Init(string aSslUrl, string aNickName, string aNSSDBPath, string aNSSDBPassFile);
+  bool   Init(string aSslUrl, string aNickName, string aNSSDBPath, string aNSSDBPassFile);
   string getNSSDBNickName() { return (theNSSNickName); };
   string getNSSDBPath() { return (theNSSDBPath); };
   string getNSSDBPass() { return (theNSSDBPassword); };
-  void setNSSDBNickName(string aNickName) { theNSSNickName = aNickName; };
-  void setNSSDBPath(string aNSSDBPath) { theNSSDBPath = aNSSDBPath; };
-  void setNSSDBPass(string aNSSDBPass) { theNSSDBPassword = aNSSDBPass; };
+  void   setNSSDBNickName(string aNickName) { theNSSNickName = aNickName; };
+  void   setNSSDBPath(string aNSSDBPath) { theNSSDBPath = aNSSDBPath; };
+  void   setNSSDBPass(string aNSSDBPass) { theNSSDBPassword = aNSSDBPass; };
 #else
-  bool Init(string aSslUrl, string aCliCer, string aCliKey, string aCAPath);
+  bool   Init(string aSslUrl, string aCliCer, string aCliKey, string aCAPath);
   string getClientCertFile() { return (theCliCer); };
   string getClientKeyFile() { return (theCliKey); };
-  void setClientCertFile(string aCliCer) { theCliCer = aCliCer; };
-  void setClientKeyFile(string aCliKey) { theCliKey = aCliKey; };
-  string                       getCAPath() { return (theCertificationAuthorityPath); };
-  void setCAPath(string aCAPath) { theCertificationAuthorityPath = aCAPath; };
+  void   setClientCertFile(string aCliCer) { theCliCer = aCliCer; };
+  void   setClientKeyFile(string aCliKey) { theCliKey = aCliKey; };
+  string getCAPath() { return (theCertificationAuthorityPath); };
+  void   setCAPath(string aCAPath) { theCertificationAuthorityPath = aCAPath; };
 #endif
 #endif
 
   bool   Init();
   string getSSOCookieUrl() { return (theJarUrl); };
-  void setSSOCookieUrl(string aJarUrl) { theJarUrl = aJarUrl; };
+  void   setSSOCookieUrl(string aJarUrl) { theJarUrl = aJarUrl; };
 
 public:
   int makeDBQuery(const string Url, const char *Payload, char **Result, bool isSOAPrequest = false,

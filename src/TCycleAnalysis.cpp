@@ -42,7 +42,7 @@ void TCycleAnalysis::InitCounters()
 void TCycleAnalysis::Finalize()
 {
   if (fScanAbort || fScanAbortAll) return;
-  char fName[200];
+  char                                            fName[200];
   std::vector<std::map<std::string, THicCounter>> counters =
       ((TEnduranceCycle *)m_scan)->GetCounters();
   ((TCycleResult *)m_result)->m_nCycles = counters.size();
@@ -65,7 +65,7 @@ void TCycleAnalysis::Finalize()
 
     for (unsigned int icycle = 0; icycle < counters.size(); icycle++) {
       std::map<std::string, THicCounter> hicCounters = counters.at(icycle);
-      THicCounter hicCounter = hicCounters.at(m_hics.at(ihic)->GetDbId());
+      THicCounter                        hicCounter  = hicCounters.at(m_hics.at(ihic)->GetDbId());
 
       fprintf(fp, "%d %d %d %.3f %.3f %.3f %.3f %.1f %.1f\n", icycle, hicCounter.m_trip ? 1 : 0,
               hicCounter.m_nWorkingChips, hicCounter.m_iddaClocked, hicCounter.m_idddClocked,
@@ -240,12 +240,12 @@ void TCycleResultHic::Add(TCycleResultHic &aResult)
   m_avIddd   = (m_weight * m_avIddd + aResult.m_avIddd) / (m_weight + 1);
 
   if (aResult.m_maxDeltaT > m_maxDeltaT) m_maxDeltaT = aResult.m_maxDeltaT;
-  if (aResult.m_maxIdda > m_maxIdda) m_maxIdda       = aResult.m_maxIdda;
-  if (aResult.m_maxIddd > m_maxIddd) m_maxIddd       = aResult.m_maxIddd;
+  if (aResult.m_maxIdda > m_maxIdda) m_maxIdda = aResult.m_maxIdda;
+  if (aResult.m_maxIddd > m_maxIddd) m_maxIddd = aResult.m_maxIddd;
 
   if (aResult.m_minWorkingChips < m_minWorkingChips) m_minWorkingChips = aResult.m_minWorkingChips;
-  if (aResult.m_minIdda < m_minIdda) m_minIdda                         = aResult.m_minIdda;
-  if (aResult.m_minIddd < m_minIddd) m_minIddd                         = aResult.m_minIddd;
+  if (aResult.m_minIdda < m_minIdda) m_minIdda = aResult.m_minIdda;
+  if (aResult.m_minIddd < m_minIddd) m_minIddd = aResult.m_minIddd;
 
   m_weight++;
 }

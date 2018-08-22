@@ -39,7 +39,7 @@ class TAlpideDataParser : public MDataReceiver {
 public:
   TAlpideDataParser();
   void flush(){};
-  int ReadEventData(int &nBytes, unsigned char *buffer);
+  int  ReadEventData(int &nBytes, unsigned char *buffer);
   bool hasData() { return (numClosedData != 0); }
 
 protected:

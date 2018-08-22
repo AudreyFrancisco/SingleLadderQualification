@@ -404,7 +404,7 @@ void pbMainWindow::channelVset(int ch)
   QString s;
   float   V = VsetText[ch]->text().toFloat();
 
-  if (V < 0) V   = 0;
+  if (V < 0) V = 0;
   if (V > 2.5) V = 2.5;
   s.setNum(V, 'F', 3);
 
@@ -433,7 +433,7 @@ void pbMainWindow::channelIset(int ch)
   QString s;
   float   I = IsetText[ch]->text().toFloat();
 
-  if (I < 0) I   = 0;
+  if (I < 0) I = 0;
   if (I > 3.0) I = 3.0;
   s.setNum(I, 'F', 3);
   IsetText[ch]->setText(s);

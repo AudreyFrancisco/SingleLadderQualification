@@ -148,7 +148,7 @@ THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents         
   DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
 
   if (currents.tripBB) {
-    if (returnValue == CLASS_GOLD) returnValue   = CLASS_GOLD_NOBB;
+    if (returnValue == CLASS_GOLD) returnValue = CLASS_GOLD_NOBB;
     if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
     if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
   }
