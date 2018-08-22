@@ -1214,6 +1214,9 @@
         <property name="horizontalScrollBarPolicy">
          <enum>Qt::ScrollBarAlwaysOff</enum>
         </property>
+        <property name="expandsOnDoubleClick">
+         <bool>false</bool>
+        </property>
         <attribute name="headerDefaultSectionSize">
          <number>150</number>
         </attribute>
@@ -1234,7 +1237,7 @@
         </column>
         <column>
          <property name="text">
-          <string>Chip config number</string>
+          <string>This column should be hidden</string>
          </property>
         </column>
        </widget>

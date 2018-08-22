@@ -244,6 +244,9 @@ private:
   void setupChipTree();
   void addChipInfoToTree(QTreeWidgetItem *chip, int iChip, int iChipInConfig);
   void showEnableStatusInTree(QTreeWidgetItem *item, bool isEnabled, int disableSource);
+  void showEnableStatusInTree(QTreeWidgetItem *item, TChipConfig *chipConfig);
+  void showEnableStatusInTree(QTreeWidgetItem *item, THicConfig *hicConfig);
+  void updateEnableStatuses();
 
   virtual void closeEvent(QCloseEvent *event);
 

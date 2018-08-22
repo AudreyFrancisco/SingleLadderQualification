@@ -463,10 +463,6 @@ void MainWindow::setupChipTree()
       hic->setText(0, QString("HIC %1").arg(iHic + 1));
       hic->setText(3, QString::number(iHic));
 
-      bool isEnabled     = fConfig->GetHicConfig(iHic)->IsEnabled();
-      int  disableSource = fConfig->GetHicConfig(iHic)->GetDisableSource();
-      showEnableStatusInTree(hic, isEnabled, disableSource);
-
       for (int iChip = 0; iChip < nChipsPerHic; iChip++) {
         QTreeWidgetItem *chip = new QTreeWidgetItem(hic);
         addChipInfoToTree(chip, iChip, (iHic * nChipsPerHic) + iChip);
@@ -484,17 +480,13 @@ void MainWindow::setupChipTree()
   ui->chipTree->expandAll();
   connect(ui->chipTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
           SLOT(toggleEnableStatus(QTreeWidgetItem *, int)));
-  ui->chipTree->hideColumn(3); // not working; no idea why
+  updateEnableStatuses();
 }
 
 void MainWindow::addChipInfoToTree(QTreeWidgetItem *chip, int iChip, int iChipInConfig)
 {
   chip->setText(0, QString("Chip %1").arg(iChip));
   chip->setText(3, QString::number(iChipInConfig));
-
-  bool isEnabled     = fConfig->GetChipConfig(iChipInConfig)->IsEnabled();
-  int  disableSource = fConfig->GetChipConfig(iChipInConfig)->GetDisableSource();
-  showEnableStatusInTree(chip, isEnabled, disableSource);
 }
 
 void MainWindow::showEnableStatusInTree(QTreeWidgetItem *item, bool isEnabled, int disableSource)
@@ -523,6 +515,49 @@ void MainWindow::showEnableStatusInTree(QTreeWidgetItem *item, bool isEnabled, i
   }
 }
 
+void MainWindow::showEnableStatusInTree(QTreeWidgetItem *item, TChipConfig *chipConfig)
+{
+  bool isEnabled     = chipConfig->IsEnabled();
+  int  disableSource = chipConfig->GetDisableSource();
+  showEnableStatusInTree(item, isEnabled, disableSource);
+}
+
+void MainWindow::showEnableStatusInTree(QTreeWidgetItem *item, THicConfig *hicConfig)
+{
+  bool isEnabled     = hicConfig->IsEnabled();
+  int  disableSource = hicConfig->GetDisableSource();
+  showEnableStatusInTree(item, isEnabled, disableSource);
+}
+
+// loops through the chip tree and updates the status column according to the corresponding configs
+void MainWindow::updateEnableStatuses()
+{
+  int nHics  = fConfig->GetNHics();
+  int nChips = fConfig->GetNChips();
+
+  if (nHics > 0) {
+    int nChipsPerHic = static_cast<int>(nChips / nHics);
+
+    for (int iHic = 0; iHic < nHics; iHic++) {
+      QTreeWidgetItem *hic = ui->chipTree->invisibleRootItem()->child(iHic);
+      showEnableStatusInTree(hic, fConfig->GetHicConfig(iHic));
+
+      for (int iChipInHic = 0; iChipInHic < nChipsPerHic; iChipInHic++) {
+        int iChipInConfig = hic->child(iChipInHic)->text(3).toInt();
+        showEnableStatusInTree(hic->child(iChipInHic), fConfig->GetChipConfig(iChipInConfig));
+      }
+    }
+  }
+  else {
+    for (int iChip = 0; iChip < nChips; iChip++) {
+      showEnableStatusInTree(ui->chipTree->invisibleRootItem()->child(iChip),
+                             fConfig->GetChipConfig(iChip));
+    }
+  }
+
+  ui->chipTree->hideColumn(0); // doesn't work; don't know why
+}
+
 void MainWindow::toggleEnableStatus(QTreeWidgetItem *item, int column)
 {
   bool isHic     = item->text(0).startsWith("HIC");
@@ -536,22 +571,22 @@ void MainWindow::toggleEnableStatus(QTreeWidgetItem *item, int column)
       if (item->child(iChipInHic)->isDisabled()) continue;
 
       fChips.at(iChipInConfig)->SetEnable(!isEnabled);
-      showEnableStatusInTree(item->child(iChipInHic),
-                             fConfig->GetChipConfig(iChipInConfig)->IsEnabled(), DISABLE_MANUAL);
+      fConfig->GetChipConfig(iChipInConfig)->SetDisableSource(DISABLE_MANUAL);
     }
 
     int iHic = item->text(3).toInt();
-    showEnableStatusInTree(item, fConfig->GetHicConfig(iHic)->IsEnabled(), DISABLE_MANUAL);
+    fConfig->GetHicConfig(iHic)->SetDisableSource(DISABLE_MANUAL);
   }
   else {
     int iChipInConfig = item->text(3).toInt();
     // don't do anything if it was automatically disabled
     if (!item->isDisabled()) {
       fChips.at(iChipInConfig)->SetEnable(!isEnabled);
-      showEnableStatusInTree(item, fConfig->GetChipConfig(iChipInConfig)->IsEnabled(),
-                             DISABLE_MANUAL);
+      fConfig->GetChipConfig(iChipInConfig)->SetDisableSource(DISABLE_MANUAL);
     }
   }
+
+  updateEnableStatuses();
 }
 
 

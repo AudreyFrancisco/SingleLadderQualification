@@ -1,10 +1,12 @@
 #include "THicConfig.h"
+#include "TConfig.h"
 
 THicConfig::THicConfig(TConfig *config, int modId)
 {
-  fConfig  = config;
-  fModId   = (modId & 0x7);
-  fEnabled = true;
+  fConfig        = config;
+  fModId         = (modId & 0x7);
+  fEnabled       = true;
+  fDisableSource = DISABLE_AUTO;
   InitParamMap();
 }
 

@@ -427,6 +427,9 @@ void TConfig::DecodeLine(std::string Line)
   if (ChipStart >= 0 && ChipStop > 0 && fChipConfigs.at(ChipStart)->IsParameter(Param)) {
     for (int i = ChipStart; i < ChipStop; i++) {
       fChipConfigs.at(i)->SetParamValue(Param, Value);
+      if (Param == "ENABLED" && Value == "0") {
+        fChipConfigs.at(i)->SetDisableSource(DISABLE_CONFIG);
+      }
     }
   }
   else if (BoardStart >= 0 && BoardStop > 0 && fBoardConfigs.at(BoardStart)->IsParameter(Param)) {
@@ -437,6 +440,9 @@ void TConfig::DecodeLine(std::string Line)
   else if ((fHicConfigs.size() > 0) && (fHicConfigs.at(0)->IsParameter(Param))) {
     for (int i = HicStart; i < HicStop; i++) {
       fHicConfigs.at(i)->SetParamValue(Param, Value);
+      if (Param == "ENABLED" && Value == "0") {
+        fHicConfigs.at(i)->SetDisableSource(DISABLE_CONFIG);
+      }
     }
   }
   else if (fScanConfig->IsParameter(Param)) {
