@@ -11,13 +11,13 @@ ALICE - ITS - DB EOS transfer utility
 	Author : Antonio Franco 
 			 antonio.franco@ba.infn.it
 	
-	ver. 1.0.r1
+	ver. 2.0.r1
 ----------------------------------------------------
 
 	** HISTORY **
 	
 	09/07/2018 - Release v1.0.r1
-	
+	22/07/2018 - Release v2.0.r1 - Redesign of the sync with the DBParameters.dat semaphore file
   
 ----------------------------------------------------
 	
@@ -122,9 +122,11 @@ ALICE - ITS - DB EOS transfer utility
 >      ------ ALICE-ITS FPC bench cron job istallation script: Terminate
 >     Installation Done !
 
-  In order to verify that the setup is good, you can test manually the syncronization:..
+  At the end of installation in this folder will be created: 
+    1) the script 'syncAll.sh' : this command make a COMPLETE synchronization of the local
+       repository, also .....
 
->     [fap@localhost src]$./EOStransfer.sh	
+
 
 
   Note : two log files are produced:  

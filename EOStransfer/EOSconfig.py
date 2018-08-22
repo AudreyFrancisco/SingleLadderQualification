@@ -288,7 +288,7 @@ def generateTheEOStransferScript(ServiceAccount, LocalBasePath):
     file.write("# The remote EOS Path, with the service account name specification\n")
     file.write("DBATTACHREMOTEPATH="+ServiceAccount+"@lxplus.cern.ch:/eos/project/a/alice-its/\n")
 
-    file.write("echo \" ------ ALICE-ITS EOS Repo sync program - v.2.0 - A.Franco - INFN BARI Italy\" \n")
+    file.write("echo \" ------ ALICE-ITS EOS Repo sync program - v.3.0 - A.Franco - INFN BARI Italy\" \n")
     file.write("echo \"Start execution : $STARTDATE\" \n")
     file.write("echo \"Local path = $DBATTACHBASEPATH\" \n")
     file.write("echo \"Remote path = $DBATTACHREMOTEPATH\" \n")
@@ -301,11 +301,20 @@ def generateTheEOStransferScript(ServiceAccount, LocalBasePath):
     file.write("     exit 0\n")
     file.write("fi\n")
     file.write(" \n")
+    
+    file.write("# --- create the inclusion list ---\n")
+    file.write("ENABLEFILENAME=DBParameters.dat")
+    file.write("INCLUDEFILE=/tmp/includedir.txt")
+    file.write("CLEANPATH=$(echo $DBATTACHBASEPATH | sed \"s/\//\\\\\//g\")")
+    file.write("find $DBATTACHBASEPATH -name $ENABLEFILENAME >$INCLUDEFILE")
+    file.write("sed -i -e \"s/${CLEANPATH}//g\"  $INCLUDEFILE")
+    file.write("sed -i -e \"s/${BLOCKFILENAME}//g\" $INCLUDEFILE")
+    
     file.write("# --- performs the rsync, loop for more attempts ---\n")
     file.write("while [ $SYNCATTEMPTS -ne 0 ]; do\n")
     file.write("     # - do the sync\n")
     file.write("     STOPDATE=`date`\n")
-    file.write("     rsync -Lavuze ssh $DBATTACHBASEPATH $DBATTACHREMOTEPATH\n")
+    file.write("     rsync --files-from=$INCLUDEFILE -Lravuze ssh $DBATTACHBASEPATH $DBATTACHREMOTEPATH\n")
     file.write("     # - evaluates the result\n")
     file.write("     if [[ $? -gt 0 ]] \n")
     file.write("     then\n")
@@ -331,6 +340,157 @@ def generateTheEOStransferScript(ServiceAccount, LocalBasePath):
     print ">>-> Script file %s was created !" % theScriptFileName
     return(True)
 
+def generateTheEOSAllSyncScript(ServiceAccount, LocalBasePath):
+
+    theScriptFileName = os.path.dirname(os.path.realpath(__file__)) + "/syncAll.sh"
+    if os.path.isfile(theScriptFileName):  # first verify the existence
+        print "WARNING : File %s already exists. Overwrite !" % theScriptFileName
+        try:
+            os.remove( theScriptFileName +"_old")
+        except:
+            # skip
+            i = 0
+        os.rename( theScriptFileName, theScriptFileName +"_old")
+        
+    try:
+        file = open(theScriptFileName, "w") 
+    except:
+        print "ERROR : to create the script file %s. Abort !" % theScriptFileName
+        retrun(False)
+        
+    
+    file.write("#!/bin/bash\n")
+    file.write("# --- Get all the variables ---\n")
+    file.write("SCRIPTSPATH=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" && pwd )\" \n")
+    file.write(". $SCRIPTSPATH/EOStransfer.cfg\n")
+    file.write("DBATTACHBASEPATH="+LocalBasePath+"\n")
+    file.write("HINIBITFILE=$DBATTACHBASEPATH/StopTransfer\n")
+    file.write("STARTDATE=`date`\n")
+    file.write("# The remote EOS Path, with the service account name specification\n")
+    file.write("DBATTACHREMOTEPATH="+ServiceAccount+"@lxplus.cern.ch:/eos/project/a/alice-its/\n")
+
+    file.write("echo \" ------ ALICE-ITS EOS Repo sync program - v.2.0 - A.Franco - INFN BARI Italy\" \n")
+    file.write("echo \"Start execution : $STARTDATE\" \n")
+    file.write("echo \"Local path = $DBATTACHBASEPATH\" \n")
+    file.write("echo \"Remote path = $DBATTACHREMOTEPATH\" \n")
+    file.write("echo \"Number of attempts = $SYNCATTEMPTS\" \n")
+    file.write("\n")
+    
+    file.write("# --- performs the rsync, loop for more attempts ---\n")
+    file.write("while [ $SYNCATTEMPTS -ne 0 ]; do\n")
+    file.write("     # - do the sync\n")
+    file.write("     STOPDATE=`date`\n")
+    file.write("     rsync -Lravuze ssh $DBATTACHBASEPATH $DBATTACHREMOTEPATH\n")
+    file.write("     # - evaluates the result\n")
+    file.write("     if [[ $? -gt 0 ]] \n")
+    file.write("     then\n")
+    file.write("            echo \"$STOPDATE : Error to sync the remote repository $DBATTACHREMOTEPATH\" >> $LOGFILENAME\n")
+    file.write("            echo \"$STOPDATE : Error to sync the remote repository $DBATTACHREMOTEPATH\" \n")
+    file.write("            let \"SYNCATTEMPTS=$SYNCATTEMPTS-1\" \n")
+    file.write("            sleep 10\n")
+    file.write("     else\n")
+    file.write("           echo \"Remote repository sync done. ($STARTDATE -> $STOPDATE)\" >> $LOGFILENAME\n")
+    file.write("           echo \"Remote repository sync done at $STOPDATE !\"\n")
+    file.write("           echo \" --------- \"\n")
+    file.write("           exit 0\n") 
+    file.write("     fi\n")
+    file.write("done\n")
+    file.write("STOPDATE=`date`\n")
+    file.write("echo \"$STOPDATE : Exit for error. Abort !\"\n")
+    file.write("echo \" --------- \"\n")
+    file.write("exit 1\n")
+
+    file.close()
+    os.chmod(theScriptFileName, 0777)
+    
+    print ">>-> Script file %s was created !" % theScriptFileName
+    return(True)
+
+def generateTheCronJobControlScript(ServiceAccount, LocalBasePath):
+
+    theScriptFileName = os.path.dirname(os.path.realpath(__file__)) + "/autosyncOn.sh"
+    if os.path.isfile(theScriptFileName):  # first verify the existence
+        print "WARNING : File %s already exists. Overwrite !" % theScriptFileName
+        try:
+            os.remove( theScriptFileName +"_old")
+        except:
+            # skip
+            i = 0
+        os.rename( theScriptFileName, theScriptFileName +"_old")
+        
+    try:
+        file = open(theScriptFileName, "w") 
+    except:
+        print "ERROR : to create the script file %s. Abort !" % theScriptFileName
+        retrun(False)
+        
+    
+    file.write("#!/bin/bash\n")
+    file.write("# --- Get all the variables ---\n")
+    file.write("SCRIPTSPATH=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" && pwd )\" \n")
+    file.write(". $SCRIPTSPATH/EOStransfer.cfg\n")
+    file.write("DBATTACHBASEPATH="+LocalBasePath+"\n")
+    file.write("HINIBITFILE=$DBATTACHBASEPATH/StopTransfer\n")
+    file.write("STARTDATE=`date`\n")
+    file.write("echo \" ------ ALICE-ITS EOS Repo sync CronJob control - v.1.0 - A.Franco - INFN BARI Italy\" \n")
+    file.write("\n")
+    file.write("rm $HINIBITFILE\n")
+    file.write("exit 0\n")
+    file.write(" \n")
+    file.close()
+    os.chmod(theScriptFileName, 0777)
+    
+    print ">>-> Script file %s was created !" % theScriptFileName
+    
+    theScriptFileName = os.path.dirname(os.path.realpath(__file__)) + "/autosyncOff.sh"
+    if os.path.isfile(theScriptFileName):  # first verify the existence
+        print "WARNING : File %s already exists. Overwrite !" % theScriptFileName
+        try:
+            os.remove( theScriptFileName +"_old")
+        except:
+            # skip
+            i = 0
+        os.rename( theScriptFileName, theScriptFileName +"_old")
+        
+    try:
+        file = open(theScriptFileName, "w") 
+    except:
+        print "ERROR : to create the script file %s. Abort !" % theScriptFileName
+        retrun(False)
+        
+    
+    file.write("#!/bin/bash\n")
+    file.write("# --- Get all the variables ---\n")
+    file.write("SCRIPTSPATH=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" && pwd )\" \n")
+    file.write(". $SCRIPTSPATH/EOStransfer.cfg\n")
+    file.write("DBATTACHBASEPATH="+LocalBasePath+"\n")
+    file.write("HINIBITFILE=$DBATTACHBASEPATH/StopTransfer\n")
+    file.write("STARTDATE=`date`\n")
+    file.write("echo \" ------ ALICE-ITS EOS Repo sync CronJob control - v.1.0 - A.Franco - INFN BARI Italy\" \n")
+    file.write("\n")
+    file.write("touch $HINIBITFILE\n")
+    file.write("exit 0\n")
+    file.write(" \n")
+    file.close()
+    os.chmod(theScriptFileName, 0777)
+    
+    print ">>-> Script file %s was created !" % theScriptFileName
+
+    return(True)
+
+def generateTheCronJobLockFile(ServiceAccount, LocalBasePath):
+
+    theFileName = LocalBasePath + "/StopTransfer"
+    try:
+        file = open(theFileName, "w") 
+    except:
+        print "ERROR : to create the  file %s. Abort !" % theFileName
+        retrun(False)
+    
+    file.write("AF\n")
+    file.close()
+    print ">>-> The file %s was created !" % theFileName
+    return(True)
 
 # Main Program
 
@@ -425,7 +585,10 @@ def main(argv):
     #  ------ 
     if isGood:
         generateTheEOStransferScript(Service, theMirrorBasePath)
- 
+        generateTheCronJobControlScript(Service, theMirrorBasePath)
+        generateTheEOSAllSyncScript(Service, theMirrorBasePath)
+        generateTheCronJobLockFile(Service, theMirrorBasePath)
+        
     print "EOS configuration program. Done !\n"
 
     return 0
