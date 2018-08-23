@@ -390,7 +390,7 @@ def generateTheEOSAllSyncScript(ServiceAccount, LocalBasePath):
     file.write("HINIBITFILE=$DBATTACHBASEPATH/StopTransfer\n") 
     file.write("STARTDATE=`date`\n") 
     file.write("# The remote EOS Path, with the service account name specification\n") 
-    file.write("DBATTACHREMOTEPATH=aliceitsbari@lxplus.cern.ch:/eos/project/a/alice-its\n") 
+    file.write("DBATTACHREMOTEPATH="+ServiceAccount+"@lxplus.cern.ch:/eos/project/a/alice-its\n") 
     file.write("\n") 
     file.write("echo \" ------ ALICE-ITS EOS Repo sync program - v.2.0 - A.Franco - INFN BARI Italy\" \n") 
     file.write("echo \"Start execution : $STARTDATE\" \n") 
