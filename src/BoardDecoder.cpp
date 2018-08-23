@@ -1,5 +1,8 @@
 #include <iostream>
 
+#include <iomanip>
+
+
 #include "BoardDecoder.h"
 #include "TAlpideDataParser.h"
 
@@ -13,7 +16,7 @@ bool BoardDecoder::DecodeEvent(TBoardType boardType, unsigned char *data, int nB
   else if (boardType == boardMOSAIC) {
     return DecodeEventMOSAIC(data, nBytes, nBytesHeader, nBytesTrailer, boardInfo);
   }
-  else if (boardType == boardRU) {
+  else if ((boardType == boardRU) || (boardType == boardRUv1)) {
     return DecodeEventRU(data, nBytes, nBytesHeader, nBytesTrailer, boardInfo);
   }
   else {
@@ -45,8 +48,8 @@ bool BoardDecoder::DecodeEventDAQ(unsigned char *data, int nBytes, int &nBytesHe
   }
 
   // return DecodeEventHeader(Header, length, AHeader);
-
   // bool  TDAQBoard::DecodeEventHeader  (int *Header, int length, TEventHeader *AHeader){
+
   // all header words are supposed to have a zero MSB
   for (int i = 0; i < header_length; ++i) {
     if (0x80000000 & Header[i]) {
@@ -218,7 +221,7 @@ uint32_t BoardDecoder::GetIntFromBinaryStringReversed(int numByte, unsigned char
   return number;
 }
 
-bool BoardDecoder::DecodeEventRU(unsigned char *data, int nBytes, int &nBytesHeader,
+bool BoardDecoder::DecodeEventRU(unsigned char *&data, int nBytes, int &nBytesHeader,
                                  int &nBytesTrailer, TBoardHeader &boardInfo)
 {
   nBytesHeader  = 0;
@@ -227,6 +230,33 @@ bool BoardDecoder::DecodeEventRU(unsigned char *data, int nBytes, int &nBytesHea
   unsigned char chipId = data[nBytes - 1]; // last byte is the transiver number
   boardInfo.channel    = (int)chipId;
   return true;
+}
+
+void BoardDecoder::DecodeGbtFrame(unsigned char *data, int nBytes, TBoardHeader &boardInfo,
+                                  bool verbose)
+{
+  for (int i = 0; i < nBytes; i += 10) {
+    if (data[i] == 0x20) boardInfo.endOfPacket = true;
+    if (data[i] == 0x10) boardInfo.startOfPacket = true;
+    if ((data[i] == 0xf0) && (data[i + 1] != 0x01)) boardInfo.timeout = true;
+    if (i == 10) boardInfo.boardID = ((data[i + 4] << 8) | data[i + 5]) & 0xffff;
+    if (i == 20)
+      boardInfo.HBOrbit =
+          (((data[i + 2] << 8) | data[i + 3]) << 16) | ((data[i + 4] << 8) | data[i + 5]);
+    if (i == 20)
+      boardInfo.TrigOrbit =
+          (((data[i + 6] << 8) | data[i + 7]) << 16) | ((data[i + 8] << 8) | data[i + 9]);
+    if (i == 30)
+      boardInfo.triggerType =
+          (((data[i + 2] << 8) | data[i + 3]) << 16) | ((data[i + 4] << 8) | data[i + 5]);
+    if (!verbose) {
+      for (int j = 0; j < 10; j++) {
+        std::cout << std::setfill('0') << std::setw(2) << std::hex << (int)data[j + i] << " ";
+      }
+      std::cout << "\n";
+    }
+  }
+  std::cout << std::dec;
 }
 
 // Decodes the Event Header and fill the structure.

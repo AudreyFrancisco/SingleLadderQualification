@@ -5,7 +5,7 @@ if(CMAKE_PROJECT_DIR STREQUAL CMAKE_SOURCE_DIR)
   set(BUILD_STANDALONE)
 endif()
 
-set(BASE_OBJS 
+set(BASE_OBJS
   ../DataBaseSrc/DBHelpers.cpp
   ../src/AlpideConfig.cpp
   ../src/AlpideDebug.cpp
@@ -19,6 +19,7 @@ set(BASE_OBJS
   ../src/TBoardConfigDAQ.cpp
   ../src/TBoardConfigMOSAIC.cpp
   ../src/TBoardConfigRU.cpp
+  ../src/TBoardConfigRUv1.cpp
   ../src/TChipConfig.cpp
   ../src/TConfig.cpp
   ../src/TCycleAnalysis.cpp
@@ -51,6 +52,7 @@ set(BASE_OBJS
   ../src/TReadoutBoardDAQ.cpp
   ../src/TReadoutBoardMOSAIC.cpp
   ../src/TReadoutBoardRU.cpp
+  ../src/TReadoutBoardRUv1.cpp
   ../src/TReadoutTest.cpp
   ../src/TSCurveScan.cpp
   ../src/TScan.cpp
@@ -66,6 +68,32 @@ set(RU_OBJS
   ../ReadoutUnitSrc/TRuDctrlModule.cpp
   ../ReadoutUnitSrc/TRuTransceiverModule.cpp
   ../ReadoutUnitSrc/TRuWishboneModule.cpp
+)
+
+set(RUV1_OBJS
+  ../RUv1Src/TRUv1DctrlModule.cpp
+  ../RUv1Src/TRUv1WishboneModule.cpp
+  ../RUv1Src/TRUv1GbtxCont.cpp
+  ../RUv1Src/TRUv1WsWait.cpp
+  ../RUv1Src/TRUv1WsMaster.cpp
+  ../RUv1Src/TRUv1GbtxFlowMon.cpp
+  ../RUv1Src/TRUv1MmcmMon.cpp
+  ../RUv1Src/TRUv1Sysmon.cpp
+  ../RUv1Src/TRUv1WsI2cGbtx.cpp
+  ../RUv1Src/TRUv1WsRadMon.cpp
+  ../RUv1Src/TRUv1WsStatus.cpp
+  ../RUv1Src/TRUv1WsUsbIf.cpp
+  ../RUv1Src/TRUv1DatapathMon.cpp
+  ../RUv1Src/TRUv1GpioFrontend.cpp
+  ../RUv1Src/TRUv1GthFrontend.cpp
+  ../RUv1Src/TRUv1GbtPacker.cpp
+  ../RUv1Src/TRUv1TriggerHandler.cpp
+  ../RUv1Src/TRUv1TriggerHandlerMonitor.cpp
+  ../RUv1Src/TRUv1GBTXInject.cpp  	 
+  ../RUv1Src/tinyxml2.cpp
+  ../RUv1Src/TRUv1GbtPackerMonitor.cpp
+  ../RUv1Src/TRUv1DrpBridge.cpp
+  ../RUv1Src/TRUv1PowerBoard.cpp
 )
 
 set(MOSAIC_OBJS
@@ -93,7 +121,7 @@ add_custom_target(version
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
-add_library(alpide SHARED ${BASE_OBJS} ${RU_OBJS} ${MOSAIC_OBJS} ${CMAKE_CURRENT_BINARY_DIR}/version.h)
+add_library(alpide SHARED ${BASE_OBJS} ${RU_OBJS} ${RUV1_OBJS} ${MOSAIC_OBJS} ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 add_dependencies(alpide version)
 target_include_directories(alpide
   PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
@@ -112,4 +140,3 @@ install(TARGETS
   alpide
   LIBRARY DESTINATION lib
 )
-

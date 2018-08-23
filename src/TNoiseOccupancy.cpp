@@ -8,6 +8,7 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
+#include "TReadoutBoardRUv1.h"
 
 TNoiseOccupancy::TNoiseOccupancy(TScanConfig *config, std::vector<TAlpide *> chips,
                                  std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
@@ -86,6 +87,11 @@ void TNoiseOccupancy::Init()
   // update mask information
   ((TNoiseParameters *)m_parameters)->isMasked = m_config->GetIsMasked();
   SetName();
+
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    TReadoutBoardRUv1 *boardy = dynamic_cast<TReadoutBoardRUv1 *>(m_boards.at(i));
+    if (boardy) boardy->Initialize(m_chips.at(0)->GetConfig()->GetParamValue("LINKSPEED"));
+  }
 
   TDataTaking::Init();
   m_running = true;

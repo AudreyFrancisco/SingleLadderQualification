@@ -75,11 +75,14 @@ string TDigitalAnalysis::GetPreviousTestType()
 
 void TDigitalAnalysis::Initialize()
 {
+  // added this to make ./test_scantest work, you can remove if it's too slow for you
+  usleep(1000000);
   ReadChipList();
   CreateHicResults();
   CreatePrediction();
   TTestType testType;
   testType = m_config->GetTestType();
+  std::cout << testType << std::endl;
   if (testType != OBHalfStaveOLFAST && testType != OBHalfStaveMLFAST) {
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
       CalculatePrediction(m_hics.at(ihic)->GetDbId());

@@ -1,0 +1,6 @@
+GITHASH_LSB       = 0x00
+    GITHASH_MSB       = 0x01
+    DATE_LSB          = 0x02
+    DATE_CSB          = 0x03
+    DATE_MSB          = 0x04
+    OS_LSB            = 0x05

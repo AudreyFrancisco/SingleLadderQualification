@@ -31,6 +31,10 @@ set(TEST_EXE
   test_supply_voltage
   test_temperature
   test_threshold
+  test_gbtdebug
+  test_datatofile
+  test_threadedreadout
+  test_slowscan
 )
 
 set(TEST_EXE_ROOT

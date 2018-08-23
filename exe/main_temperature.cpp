@@ -34,7 +34,7 @@ std::vector<TAlpide *>       fChips;
 
 int fEnabled = 0; // variable to count number of enabled chips; leave at 0
 
-void readTemp()
+void readAlpideTemp()
 {
   // Allocate the memory for host the results
   uint16_t *theResult = (uint16_t *)malloc(sizeof(uint16_t) * (fChips.size() + 1)); //
@@ -57,9 +57,22 @@ void readTemp()
   // Deallocate memory
   free(theResult);
 
-  std::cout << std::endl << "Test_temperature : Test finished !" << std::endl;
+  std::cout << std::endl << "Test_temperature : Alpide temp test finished !" << std::endl;
   return;
 }
+
+void readBoardTemp()
+{
+  TReadoutBoardRUv1 *theBoard = (TReadoutBoardRUv1 *)fBoards.at(0);
+
+  theBoard->sysmon->Write(1, 0, false); // sets sysmon address to be written to (0-> temperature)
+  uint16_t rawtemp = theBoard->sysmon->Read(2);
+  std::cout << "The temperature of the FBGA chip is: "
+            << (rawtemp * 501.3743) / (1 << 16) - 273.6777 << " degrees C \n";
+  std::cout << "\n";
+  std::cout << "Test_temperature: Board temp test finished ! \n";
+}
+
 
 char *makeTimeStamp(char *ABuffer)
 {
@@ -99,7 +112,8 @@ int main(int argc, char **argv)
 
     makeTimeStamp(TimeStamp);
     std::cout << "Temperature test : " << TimeStamp << std::endl;
-    readTemp();
+    readAlpideTemp();
+    readBoardTemp();
   }
   return 0;
 }

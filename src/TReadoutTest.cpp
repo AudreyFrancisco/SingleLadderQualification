@@ -7,6 +7,7 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
+#include "TReadoutBoardRUv1.h"
 #include "TReadoutTest.h"
 
 TReadoutTest::TReadoutTest(TScanConfig *config, std::vector<TAlpide *> chips,
@@ -80,6 +81,8 @@ bool TReadoutTest::SetParameters(TScanParameters *pars)
 void TReadoutTest::ConfigureChip(TAlpide *chip)
 {
   TReadoutParameters *params = (TReadoutParameters *)m_parameters;
+  // std::cout <<  params->pllStages << std::endl;
+
   // store driver settings and set temporary ones, used in this scan
   // (used by BaseConfig -> BaseConfigPLL
   int backupDriver = chip->GetConfig()->GetParamValue("DTUDRIVER");
@@ -89,14 +92,17 @@ void TReadoutTest::ConfigureChip(TAlpide *chip)
   chip->GetConfig()->SetParamValue("DTUDRIVER", params->driverStrength);
   chip->GetConfig()->SetParamValue("DTUPREEMP", params->preemp);
   chip->GetConfig()->SetParamValue("LINKSPEED", params->linkSpeed);
+  // chip->GetConfig()->SetParamValue("DTUDRIVER", 8);
+  // chip->GetConfig()->SetParamValue("DTUPREEMP", 0);
+  chip->GetConfig()->SetParamValue("LINKSPEED", params->linkSpeed);
   if (params->pllStages >= 0) {
     chip->GetConfig()->SetParamValue("PLLSTAGES", params->pllStages);
   }
   AlpideConfig::BaseConfig(chip);
   ConfigureFromu(chip);
-  ConfigureMask(chip, 0);
   AlpideConfig::ApplyMask(chip, false);
   AlpideConfig::ConfigureCMU(chip);
+  ConfigureMask(chip, 0);
   // restore previous settings
   chip->GetConfig()->SetParamValue("DTUDRIVER", backupDriver);
   chip->GetConfig()->SetParamValue("DTUPREEMP", backupPreemp);
@@ -121,10 +127,11 @@ THisto TReadoutTest::CreateHisto()
 
 void TReadoutTest::Init()
 {
+
   int   linkSpeed    = ((TReadoutParameters *)m_parameters)->linkSpeed;
   float voltageScale = ((TReadoutParameters *)m_parameters)->voltageScale;
   for (unsigned int i = 0; i < m_boards.size(); i++) {
-    TReadoutBoardMOSAIC *mosaic = (TReadoutBoardMOSAIC *)m_boards.at(i);
+    TReadoutBoardMOSAIC *mosaic = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(i));
     if (mosaic) {
       if (linkSpeed == 400)
         mosaic->setSpeedMode(Mosaic::RCV_RATE_400);
@@ -133,15 +140,32 @@ void TReadoutTest::Init()
       else if (linkSpeed == 1200)
         mosaic->setSpeedMode(Mosaic::RCV_RATE_1200);
     }
+    TReadoutBoardRUv1 *boardy = dynamic_cast<TReadoutBoardRUv1 *>(m_boards.at(i));
+    if (boardy) {
+      switch (linkSpeed) {
+      case 1200:
+        boardy->Initialize(1200);
+        break;
+      case 600:
+        boardy->Initialize(600);
+        break;
+      default:
+        std::cout << "INVALID BOARD LINKSPEED, USING 600! \n";
+        boardy->Initialize(600);
+        break;
+      }
+    }
+    TDataTaking::Init();
   }
 
+
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     if (voltageScale != 1.) {
       m_hics.at(ihic)->ScaleVoltage(voltageScale);
     }
   }
 
-  TDataTaking::Init();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->ReadChipRegister(
@@ -193,7 +217,7 @@ void TReadoutTest::Terminate()
 
   // reset link speed in mosaic; chip configs have been reset already in ConfigureChip()
   for (unsigned int i = 0; i < m_boards.size(); i++) {
-    TReadoutBoardMOSAIC *mosaic = (TReadoutBoardMOSAIC *)m_boards.at(i);
+    TReadoutBoardMOSAIC *mosaic = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(i));
     if (mosaic) {
       int linkSpeed = m_chips.at(0)->GetConfig()->GetParamValue("LINKSPEED");
       if (linkSpeed == 400)

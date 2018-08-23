@@ -16,15 +16,19 @@ namespace AlpideConfig {
   void ConfigureBuffers(TAlpide *chip, TChipConfig *config = 0);
   void ConfigureCMU(TAlpide *chip, TChipConfig *config = 0);
   int ConfigureMaskStage(TAlpide *chip, int nPix, int iStage, bool Mask = true, bool Select = true);
+  int ConfigureMemeStage(TAlpide *chip, int iStage,
+                         std::vector<std::vector<int>> scaledBinaryVector, bool Mask = true,
+                         bool Select = true);
+  std::vector<std::vector<int>>
+       GetScaledBinaryMatrix(const char *filename = "../exe/qr_binary.txt");
   void WriteControlReg(TAlpide *chip, Alpide::TChipMode chipMode, TChipConfig *config = 0);
   void EnableDoubleColumns(TAlpide *chip);
   void BaseConfigPLL(TAlpide *chip);
   void BaseConfigMask(TAlpide *chip);
   void BaseConfigFromu(TAlpide *chip);
   void BaseConfigDACs(TAlpide *chip);
-  void BaseConfig(TAlpide *chip);
+  void BaseConfig(TAlpide *chip, bool bugFix = false);
   void PrintDebugStream(TAlpide *chip);
   int  ApplyMask(TAlpide *chip, bool Clear);
 } // namespace AlpideConfig
-
 #endif

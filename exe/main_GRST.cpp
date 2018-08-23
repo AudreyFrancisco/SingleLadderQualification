@@ -30,13 +30,13 @@ TBoardType                   fBoardType;
 std::vector<TReadoutBoard *> fBoards;
 std::vector<TAlpide *>       fChips;
 TConfig *                    fConfig;
-std::vector<THic *>          fHICs;
-int                          main(int argc, char **argv)
+
+int main(int argc, char **argv)
 {
 
   decodeCommandParameters(argc, argv);
 
-  initSetup(fConfig, &fBoards, &fBoardType, &fChips, "", &fHICs);
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   if (fBoards.size()) { // Yasser (change to use more than one board)
 

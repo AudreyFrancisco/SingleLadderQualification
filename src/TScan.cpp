@@ -10,6 +10,7 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
+#include "TReadoutBoardRUv1.h"
 #include "TScan.h"
 #include "version.h"
 
@@ -66,8 +67,9 @@ void TScan::Init()
   // Power on HIC if not yet done (PowerOn() checks if already powered)
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
-    m_hics.at(ihic)->PowerOn();
     if (!m_hics.at(ihic)->GetPowerBoard()) continue;
+    m_hics.at(ihic)->PowerOn();
+
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 
@@ -79,6 +81,7 @@ void TScan::Init()
   if (mosaic) {
     strcpy(m_conditions.m_fwVersion, mosaic->GetFwIdString());
   }
+
   strcpy(m_conditions.m_swVersion, VERSION);
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
@@ -220,6 +223,7 @@ void TScan::Terminate()
         throw std::runtime_error("TScan terminate: voltage appears to be off (Retry suggested)");
       }
     }
+
     try {
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaEnd =
           m_hics.at(ihic)->GetIdda();
@@ -262,6 +266,7 @@ void TScan::Terminate()
     if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), true);
   }
+
 
   for (const auto &rChip : m_chips) {
     if (rChip->GetConfig()->IsEnabled()) {
@@ -314,8 +319,6 @@ void TScan::Next(int loopIndex) { m_value[loopIndex] += m_step[loopIndex]; }
 void TScan::CountEnabledChips()
 {
 
-  // std::cout << "in count enabled chips, boards_size = " << m_boards.size() << ", chips_size = "
-  // << m_chips.size() << std::endl;
   for (int i = 0; i < MAXBOARDS; i++) {
     m_enabled[i] = 0;
   }
@@ -531,13 +534,16 @@ void TMaskScan::FindTimeoutHics(int iboard, int *triggerCounts)
 void TMaskScan::ConfigureMaskStage(TAlpide *chip, int istage)
 {
   m_row = AlpideConfig::ConfigureMaskStage(chip, m_pixPerStage, istage);
+  // AlpideConfig::BaseConfigMask(chip);
+  /*AlpideConfig::WritePixRegAll(chip, Alpide::PIXREG_MASK, false);
+    AlpideConfig::WritePixRegAll(chip, Alpide::PIXREG_SELECT, true);*/
 }
 
 void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
 {
   unsigned char buffer[MAX_EVENT_SIZE];
   int           n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int           itrg = 0, trials = 0;
+  int           itrg = 0; // trials = 0;
   int           nBad = 0;
   TBoardHeader  boardInfo;
   int           nTrigPerHic[MAX_MOSAICTRANRECV];
@@ -545,26 +551,28 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
   for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
     nTrigPerHic[i] = 0;
   }
-
   while (itrg < m_nTriggers * m_enabled[iboard]) {
-    if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) <=
-        0) { // no event available in buffer yet, wait a bit
-      usleep(1000);
-      trials++;
-      if (trials == 3) {
-        std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event"
-                  << std::endl;
-        itrg = m_nTriggers * m_enabled[iboard];
-        FindTimeoutHics(iboard, nTrigPerHic);
-        m_errorCount.nTimeout++;
-        if (m_errorCount.nTimeout > m_config->GetParamValue("MAXTIMEOUT")) {
-          throw std::runtime_error("Maximum number of timouts reached. Aborting scan.");
-        }
-        trials = 0;
+    int nRetries   = 0;
+    int maxRetries = 1000;
+    while ((m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) == 0) &&
+           (nRetries != maxRetries)) {
+      usleep(100);
+      nRetries++;
+    }
+
+    if (nRetries == maxRetries) {
+      std::cout << "Board " << iboard << ": reached max timeouts, giving up on this event"
+                << std::endl;
+      m_errorCount.nTimeout++;
+      if (m_errorCount.nTimeout > m_config->GetParamValue("MAXTIMEOUT")) {
+        throw std::runtime_error("Maximum number of timouts reached. Aborting scan.");
       }
+      itrg = m_nTriggers * m_enabled[iboard];
       continue;
     }
+
     else {
+
       BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer,
                                 n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
       // decode Chip event
@@ -578,7 +586,7 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
         std::cout << "Found oversized event, truncated in MOSAIC" << std::endl;
         m_errorCount.nOversizeEvent++;
       }
-      int n_bytes_chipevent = n_bytes_data - n_bytes_header; //-n_bytes_trailer;
+      int n_bytes_chipevent = n_bytes_data - n_bytes_header; // n_bytes_trailer;
       if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
       unsigned int bunchCounter  = -1U;
       int          chipId        = -1U;

@@ -616,6 +616,52 @@ int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
   return nWorking;
 }
 
+// Just trying to communicate with a single chip (implemented for the single RUv0 + single chip
+// setup)
+int CheckControlInterfaceSingle(TConfig *config, TReadoutBoard *board, TBoardType *boardType,
+                                TAlpide *chip)
+{
+  uint16_t WriteValue = 10;
+  uint16_t Value;
+  int      nWorking = 0;
+
+  std::cout
+      << std::endl
+      << "Before starting actual test:" << std::endl
+      << "Checking the control interfaces of the chip by doing a single register readback test"
+      << std::endl;
+
+
+  board->SendOpCode(Alpide::OPCODE_GRST);
+
+
+  chip->WriteRegister(0x60d, WriteValue);
+  try {
+    chip->ReadRegister(0x60d, Value);
+    if (WriteValue == Value) {
+      std::cout << "The one and only chip in this setup passed the readback test. CHIP ID: "
+                << chip->GetConfig()->GetChipId() << std::endl;
+      nWorking++;
+    }
+    else {
+      std::cout << "The ONLY chip in this setup failed the readback test. I'm going to disable it, "
+                   "but you won't have any chips left. CHIP ID: "
+                << chip->GetConfig()->GetChipId() << std::endl;
+      chip->SetEnable(false); // GetConfig()->SetEnable(false);
+    }
+  }
+  catch (exception &e) {
+    std::cout << "The ONLY chip in this setup won't answer. I'm gonna disable it. CHIP ID "
+              << chip->GetConfig()->GetChipId() << std::endl;
+    chip->SetEnable(false); // GetConfig()->SetEnable(false);
+  }
+
+
+  std::cout << "Found " << nWorking << " working chips. If this number is not 1, we have a problem."
+            << std::endl;
+  return nWorking;
+}
+
 // Setup definition for inner barrel stave with MOSAIC
 //    - all chips connected to same control interface
 //    - each chip has its own receiver, mapping defined in RCVMAP
@@ -703,6 +749,121 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
   return 0;
 }
 
+
+int initSetupSingleRU(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
+                      std::vector<TAlpide *> *chips)
+{
+  (*boardType)                = boardRU;
+  TBoardConfigRU *boardConfig = (TBoardConfigRU *)config->GetBoardConfig(0);
+
+
+  switch (config->GetChipConfig(0)->GetParamValue("LINKSPEED")) {
+  case 1200:
+    break;
+  default:
+    std::cout << "Warning: invalid link speed, using 1200" << std::endl;
+    break;
+  }
+  boards->push_back(new TReadoutBoardRU(boardConfig));
+
+  TChipConfig *chipConfig = config->GetChipConfig(0);
+
+  int control  = chipConfig->GetParamValue("CONTROLINTERFACE");
+  int receiver = chipConfig->GetParamValue("RECEIVER");
+
+  if (control < 0) {
+    chipConfig->SetParamValue("CONTROLINTERFACE", "0");
+    control = 0;
+  }
+  if (receiver < 0) {
+    // connected to port 0 -> receiver number = chip Id
+    chipConfig->SetParamValue("RECEIVER", chipConfig->GetChipId());
+    receiver = chipConfig->GetChipId();
+  }
+
+  chips->push_back(new TAlpide(chipConfig));
+  chips->at(0)->SetReadoutBoard(boards->at(0));
+  boards->at(0)->AddChip(chipConfig->GetChipId(), control, receiver, chips->at(0));
+
+  // If CheckControlInterface works for RU, then this should also work.
+  CheckControlInterfaceSingle(config, boards->at(0), boardType, chips->at(0));
+
+  return 0;
+}
+
+int initSetupSingleRUv1(TConfig *config, std::vector<TReadoutBoard *> *boards,
+                        TBoardType *boardType, std::vector<TAlpide *> *chips,
+                        std::vector<THic *> *hics, const char **hicIds)
+{
+  int RCVMAP[] = {3, 5, 7, 8, 6, 4, 2, 1, 0};
+
+  (*boardType)                  = boardRUv1;
+  TBoardConfigRUv1 *boardConfig = (TBoardConfigRUv1 *)config->GetBoardConfig(0);
+
+
+  switch (config->GetChipConfig(0)->GetParamValue("LINKSPEED")) {
+  case 1200:
+    break;
+  case 600:
+    break;
+  case 400:
+    break;
+  default:
+    std::cout << "Warning: invalid link speed, using 1200" << std::endl;
+    config->GetChipConfig(0)->SetParamValue("LINKSPEED", 1200);
+    break;
+  }
+  boards->push_back(new TReadoutBoardRUv1(boardConfig));
+
+  if (boardConfig->GetParamValue("READOUTCRUEMULATOR") == 1) {
+    TReadoutBoardRUv1 *theBoard = dynamic_cast<TReadoutBoardRUv1 *>(boards->at(0));
+    theBoard->EmulateCRU();
+  }
+
+  TPowerBoard *pb = 0;
+
+  if (hics) {
+    if (hicIds) {
+      hics->push_back(new THicIB(hicIds[0], 0, pb, 0));
+    }
+    else {
+      hics->push_back(new THicIB("Dummy_ID", 0, pb, 0));
+    }
+    ((THicIB *)(hics->at(0)))->ConfigureInterface(0, RCVMAP, 0);
+  }
+
+  for (unsigned int i = 0; i < config->GetNChips(); i++) {
+    TChipConfig *chipConfig = config->GetChipConfig(i);
+    int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
+    int          receiver   = chipConfig->GetParamValue("RECEIVER");
+
+    if (control < 0) {
+      chipConfig->SetParamValue("CONTROLINTERFACE", "0");
+      control = 0;
+    }
+    if (receiver < 0) {
+      // connected to port 0 -> receiver number = chip Id
+      chipConfig->SetParamValue("RECEIVER", chipConfig->GetChipId());
+      receiver = chipConfig->GetChipId();
+    }
+
+    TAlpide *chip = new TAlpide(chipConfig);
+    chips->push_back(chip);
+    if (hics) {
+      chip->SetHic(hics->at(0));
+      hics->at(0)->AddChip(chip);
+    }
+    chips->at(i)->SetReadoutBoard(boards->at(0));
+
+    boards->at(0)->AddChip(chipConfig->GetChipId(), control, receiver, chips->at(i));
+  }
+
+
+  // TODO: check whether CheckControlInterface works for readout unit
+  // CheckControlInterface(config, boards, boardType, chips);
+
+  return 0;
+}
 // Setup definition for inner barrel stave with readout unit
 //    - all chips connected to same control interface
 //    - each chip has its own receiver, assume connector 0 -> transceiver number = chip id
@@ -864,9 +1025,17 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
               std::vector<TAlpide *> *chips, const char *configFileName /*=""*/,
               std::vector<THic *> *hics /*=0*/, const char **hicIds /*=0*/)
 {
-  if (strlen(configFileName) ==
-      0) // if length is 0 => use the default name or the Command Parameter
-    config = new TConfig(ConfigurationFileName);
+  if (strlen(configFileName) == 0) {
+    if (strcmp(ConfigurationFileName, "RUv0single") == 0) {
+      config = new TConfig(0, boardRU);
+    }
+    else if (strcmp(ConfigurationFileName, "RUv1single") == 0) {
+      config = new TConfig(0, boardRUv1);
+    }
+    else {
+      config = new TConfig(ConfigurationFileName);
+    } // if length is 0 => use the default name or the Command Parameter
+  }
   else // Assume that the config name if defined in the code !
     config = new TConfig(configFileName);
 
@@ -900,6 +1069,12 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
     break;
   case TYPE_HALFSTAVERU:
     initSetupHalfStaveRU(config, boards, boardType, chips);
+    break;
+  case TYPE_SINGLE_RU:
+    initSetupSingleRU(config, boards, boardType, chips);
+    break;
+  case TYPE_SINGLE_RUv1:
+    initSetupSingleRUv1(config, boards, boardType, chips, hics, hicIds);
     break;
   case TYPE_POWER:
     initSetupPower(config, boards, boardType, chips, hics, hicIds);

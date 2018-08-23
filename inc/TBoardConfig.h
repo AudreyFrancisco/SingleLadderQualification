@@ -6,12 +6,15 @@
 #include <string>
 
 namespace BoardConfig {
-  const int PULSEDELAY  = 10000;
-  const int STROBEDELAY = 20;
+  const int PULSEDELAY         = 10000;
+  const int STROBEDELAY        = 20;
+  const int NCHIPS             = 9;
+  const int DIPSWITCH          = 0;
+  const int READOUTCRUEMULATOR = 0;
 } // namespace BoardConfig
 
 typedef enum { trigInt, trigExt } TTriggerSource;
-typedef enum { boardDAQ, boardMOSAIC, boardRU } TBoardType;
+typedef enum { boardDAQ, boardMOSAIC, boardRU, boardRUv1 } TBoardType;
 
 class TBoardConfig {
 private:
@@ -22,8 +25,11 @@ protected:
   int                          fNTriggers;
   int                          fTriggerDelay;
   int                          fPulseDelay;
+  int                          fNChips;
+  int                          fDipswitch;
   TTriggerSource               fTriggerSource;
   TBoardType                   fBoardType;
+  int                          fReadoutCRUEmulator;
 
 public:
   TBoardConfig(const char *fName = 0, int boardIndex = 0);

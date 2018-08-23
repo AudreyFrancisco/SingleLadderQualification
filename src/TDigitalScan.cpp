@@ -3,6 +3,7 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
+#include "TReadoutBoardRUv1.h"
 #include <string.h>
 #include <string>
 #include <unistd.h>
@@ -76,7 +77,8 @@ bool TDigitalScan::SetParameters(TScanParameters *pars)
 
 void TDigitalScan::ConfigureFromu(TAlpide *chip)
 {
-  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1, 0x0); // digital pulsing
+  uint16_t data = (1 << 4) | (1 << 6);
+  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1, data); // digital pulsing
   chip->WriteRegister(
       Alpide::REG_FROMU_CONFIG2,
       chip->GetConfig()->GetParamValue("STROBEDURATION")); // fromu config 2: strobe length
@@ -95,6 +97,8 @@ void TDigitalScan::ConfigureChip(TAlpide *chip)
 {
   AlpideConfig::BaseConfig(chip);
   ConfigureFromu(chip);
+
+
   AlpideConfig::ConfigureCMU(chip);
 }
 
@@ -111,7 +115,7 @@ void TDigitalScan::ConfigureBoard(TReadoutBoard *board)
   else {
     board->SetTriggerConfig(true, true, board->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
                             board->GetConfig()->GetParamValue("PULSEDELAY"));
-    board->SetTriggerSource(trigInt);
+    // board->SetTriggerSource(trigInt);
   }
 }
 
@@ -149,20 +153,22 @@ void TDigitalScan::Init()
   CountEnabledChips();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     if (((TDigitalParameters *)m_parameters)->voltageScale != 1.) {
       m_hics.at(ihic)->ScaleVoltage(((TDigitalParameters *)m_parameters)->voltageScale);
     }
   }
 
+
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     std::cout << "Board " << i << ", found " << m_enabled[i] << " enabled chips" << std::endl;
     ConfigureBoard(m_boards.at(i));
-
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_PRST);
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 
@@ -171,20 +177,24 @@ void TDigitalScan::Init()
     ConfigureChip(m_chips.at(i));
   }
 
-  //  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-  //  m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  //}
-
   // char dummy[10];
   // std::cout << "after configure chip, press enter to proceed" << std::endl;
   // std::cin >> dummy;
+
+
+  for (size_t i = 0; i < m_boards.size(); i++) {
+    TReadoutBoardRUv1 *boardy = dynamic_cast<TReadoutBoardRUv1 *>(m_boards.at(i));
+    if (boardy) boardy->Initialize(m_chips.at(0)->GetConfig()->GetParamValue("LINKSPEED"));
+  }
 
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
     m_boards.at(i)->StartRun();
   }
 
+
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 }
@@ -225,7 +235,10 @@ void TDigitalScan::Execute()
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+    TReadoutBoardRUv1 *boardy = dynamic_cast<TReadoutBoardRUv1 *>(m_boards.at(iboard));
+    if (boardy) boardy->SendStartOfTriggered();
     m_boards.at(iboard)->Trigger(m_nTriggers);
+    if (boardy) boardy->SendEndOfTriggered();
   }
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
@@ -238,10 +251,13 @@ void TDigitalScan::Execute()
 
 void TDigitalScan::Terminate()
 {
+
+
   TScan::Terminate();
 
   // restore old voltage
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     if (((TDigitalParameters *)m_parameters)->voltageScale != 1.) {
       m_hics.at(ihic)->ScaleVoltage(1.);
     }
@@ -256,6 +272,9 @@ void TDigitalScan::Terminate()
     TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(m_boards.at(iboard));
     if (myDAQBoard) {
       myDAQBoard->PowerOff();
+
+      TReadoutBoardRUv1 *boardy = dynamic_cast<TReadoutBoardRUv1 *>(m_boards.at(iboard));
+      if (boardy) boardy->CleanUp();
       // delete myDAQBoard;
     }
   }
@@ -301,12 +320,17 @@ void TDigitalWhiteFrame::Init()
     ConfigureChip(m_chips.at(i));
     AlpideConfig::WritePixRegAll(m_chips.at(i), Alpide::PIXREG_MASK, true);
   }
+
+  TReadoutBoardRUv1 *boardy = dynamic_cast<TReadoutBoardRUv1 *>(m_boards.at(0));
+  if (boardy) boardy->Initialize(m_chips.at(0)->GetConfig()->GetParamValue("LINKSPEED"));
+
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
     m_boards.at(i)->StartRun();
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 }

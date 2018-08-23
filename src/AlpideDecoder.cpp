@@ -76,12 +76,15 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
   TPixHit hit;
   int     address, hitmap_length;
 
+  // WHAT THE HECK IS THIS??????
+
   if (hits->size() >= (unsigned int)hitLimit) {
     char Text[200];
     sprintf(Text, "ERROR: number of hits exceeding limit of %d, please check console output",
             hitLimit);
     throw std::runtime_error(Text);
   }
+
 
   int16_t data_field = (((int16_t)data[0]) << 8) + data[1];
 
@@ -150,6 +153,7 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
   bool            finished = false; // event trailer found
   TAlpideDataType type;
 
+
   eventStart = 0;
 
   isError = false;
@@ -208,7 +212,12 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
       byte += 2;
       break;
     case DT_DATALONG:
-      if (!started) {
+      if (!started && (data[byte] == 0x0)) {
+        byte += 1;
+
+        break;
+      }
+      else if (!started) {
         if (logging)
           std::cout << "Error, hit data found before chip header or after chip trailer"
                     << std::endl;

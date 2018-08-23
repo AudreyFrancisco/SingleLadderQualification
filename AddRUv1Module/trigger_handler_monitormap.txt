@@ -1,0 +1,11 @@
+CNTR_RST                        = 0x00
+    CNTR_LATCH                      = 0x01
+    CNTR_TRIGGER_SENT_LSB           = 0x02
+    CNTR_TRIGGER_SENT_MSB           = 0x03
+    CNTR_TRIGGER_NOT_SENT           = 0x04
+    CNTR_TRG_FIFO_GTH_FULL          = 0x05
+    CNTR_TRG_FIFO_GTH_OVFL          = 0x06
+    CNTR_TRG_FIFO_GPIO_FULL         = 0x07
+    CNTR_TRG_FIFO_GPIO_OVFL         = 0x08
+    CNTR_RX_FIFO_DATA_AVAILABLE_LSB = 0x09
+    CNTR_RX_FIFO_DATA_AVAILABLE_MSB = 0x0A

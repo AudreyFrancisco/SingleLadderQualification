@@ -1,0 +1,10 @@
+ADD_FEE_ID              = 0
+    ADD_GBT_PRIORITY        = 1
+    ADD_MAX_WORD_COUNT      = 2
+    ADD_MAX_PACKET_COUNT    = 3
+    ADD_WAIT_DATA_TIMEOUT   = 4
+    ADD_SEND_DATA_TIMEOUT   = 5
+    ADD_LANE_TIMEOUT        = 6
+    ADD_MASK_DATALANE_L     = 7
+    ADD_MASK_DATALANE_H     = 8
+    ADD_GBT_PACKER_SETTINGS = 9

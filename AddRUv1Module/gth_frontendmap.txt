@@ -1,0 +1,9 @@
+ENABLE_ALIGNMENT = 0
+    ALIGNMENT_STATUS = 1
+    ENABLE_DATA      = 2
+    DRP_ADDRESS = 3
+    DRP_DATA    = 4
+    GTH_RESET          = 5
+    GTH_STATUS         = 6
+    ENABLE_PRBS_CHECK  = 7
+    PRBS_COUNTER_RESET = 8

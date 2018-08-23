@@ -6,6 +6,7 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
+#include "TReadoutBoardRUv1.h"
 #include <unistd.h>
 
 // definition of standard setup types:
@@ -22,6 +23,11 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
                 std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds);
 int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                 std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds);
+int initSetupSingleRU(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
+                      std::vector<TAlpide *> *chips);
+int initSetupSingleRUv1(TConfig *config, std::vector<TReadoutBoard *> *boards,
+                        TBoardType *boardType, std::vector<TAlpide *> *chips,
+                        std::vector<THic *> *hics, const char **hicIds);
 int initSetupIBRU(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                   std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds);
 int initSetupSingle(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
@@ -46,6 +52,8 @@ int findHic(std::vector<THic *> *hics, int modId);
 int powerOn(TReadoutBoardDAQ *aDAQBoard);
 int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
                           TBoardType *boardType, std::vector<TAlpide *> *chips);
+int CheckControlInterfaceSingle(TConfig *config, TReadoutBoard *board, TBoardType *boardType,
+                                TAlpide *chip);
 void MakeDaisyChain(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                     std::vector<TAlpide *> *chips, int startPtr = -1);
 int  decodeCommandParameters(int argc, char **argv);

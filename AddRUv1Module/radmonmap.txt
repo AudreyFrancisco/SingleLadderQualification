@@ -1,0 +1,16 @@
+MODULE_0_FIRST       = 0
+   MODULE_0_LAST        = 10
+   MODULE_1_FIRST       = 11
+   MODULE_1_LAST        = 15
+   MODULE_2_FIRST       = 16
+   MODULE_2_LAST        = 20
+   MODULE_3_FIRST       = 21
+   MODULE_3_LAST        = 27
+   MODULE_4_FIRST       = 28
+   MODULE_4_LAST        = 31
+   MODULE_5_FIRST       = 32
+   MODULE_5_LAST        = 32
+   MODULE_6_FIRST       = 33
+   MODULE_6_LAST        = 34
+   MODULE_DUMMY_FIRST   = 35
+   MODULE_DUMMY_LAST    = 35

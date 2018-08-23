@@ -1,0 +1,6 @@
+ENABLE                          = 0x00
+    TRIGGER_PERIOD                  = 0x01
+    PULSE_nTRIGGER                  = 0x02
+    TRIGGER_MIN_DISTANCE            = 0x03
+    MODE                            = 0x04
+    MISMATCH_WB                     = 0x05

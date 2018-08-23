@@ -24,7 +24,9 @@ enum TDeviceType {
   TYPE_IBHICRU,
   TYPE_ENDURANCE,
   TYPE_POWER,
-  TYPE_UNKNOWN
+  TYPE_UNKNOWN,
+  TYPE_SINGLE_RU,
+  TYPE_SINGLE_RUv1
 };
 
 class TChipConfig;

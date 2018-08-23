@@ -48,6 +48,17 @@
 
 #include <ctime>
 
+TBoardType                   fBoardType;
+std::vector<TReadoutBoard *> fBoards;
+std::vector<THic *>          fHics;
+std::vector<TAlpide *>       fChips;
+TConfig *                    fConfig;
+TDigitalResult *             fResult = new TDigitalResult();
+
+std::deque<TScanHisto> fHistoQue;
+std::mutex             fMutex;
+
+
 void scanLoop(TScan *myScan)
 {
   std::cout << "In scan loop function" << std::endl;
@@ -90,16 +101,6 @@ int main(int argc, char **argv)
 
   decodeCommandParameters(argc, argv);
 
-  TBoardType                   fBoardType;
-  std::vector<TReadoutBoard *> fBoards;
-  std::vector<THic *>          fHics;
-  std::vector<TAlpide *>       fChips;
-  TConfig *                    fConfig;
-  TReadoutResult *             fResult = new TReadoutResult();
-
-  std::deque<TScanHisto> fHistoQue;
-  std::mutex             fMutex;
-
   initSetup(fConfig, &fBoards, &fBoardType, &fChips, "Config.cfg", &fHics);
 
 
@@ -124,19 +125,21 @@ int main(int argc, char **argv)
 
 
   TScan *myScan =
-      new TReadoutTest(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
+      new TDigitalScan(fConfig->GetScanConfig(), fChips, fHics, fBoards, &fHistoQue, &fMutex);
   TScanAnalysis *myAnalysis =
-      new TReadoutAnalysis(&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex, fResult);
+      new TDigitalAnalysis(&fHistoQue, myScan, fConfig->GetScanConfig(), fHics, &fMutex, fResult);
   // TtuneVCASNScan *myScan_V = new TtuneVCASNScan(fConfig->GetScanConfig(), fChips, fHics, fBoards,
   // &fHistoQue, &fMutex);
   // TSCurveAnalysis *analysis_V = new TSCurveAnalysis(&fHistoQue, myScan_V,
   // fConfig->GetScanConfig(), fHics, &fMutex, fResult, 1);
 
-  std::thread scanThread(scanLoop, myScan);
+  // std::thread scanThread(scanLoop, myScan);
+  scanLoop(myScan);
   myAnalysis->Initialize();
-  std::thread analysisThread(&TScanAnalysis::Run, myAnalysis);
-  scanThread.join();
-  analysisThread.join();
+  // std::thread analysisThread(&TScanAnalysis::Run, myAnalysis);
+  // scanThread.join();
+  // analysisThread.join();
+  myAnalysis->Run();
   myAnalysis->Finalize();
 
   // elapsed=(std::clock()-start)/(double)CLOCKS_PER_SEC;

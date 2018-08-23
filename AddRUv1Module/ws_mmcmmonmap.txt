@@ -1,0 +1,13 @@
+GET_LOCK_COUNTER        = 0
+    MISMATCH_LSB            = 1
+    MISMATCH_MSB            = 2
+    MISMATCH_2ND_LSB        = 3
+    MISMATCH_2ND_MSB        = 4
+    MISMATCH_COUNTER        = 5
+    MISMATCH_2ND_COUNTER    = 6
+    LATCH_COUNTERS          = 7
+    RESET_COUNTERS          = 8
+    GET_COUNTER_CLK_0_FIRST =  9
+    GET_COUNTER_CLK_0_LAST  =  12
+    GET_COUNTER_CLK_N_FIRST = 27
+    GET_COUNTER_CLK_N_LAST  = 29

@@ -32,7 +32,6 @@
 TBoardType                   fBoardType;
 std::vector<TReadoutBoard *> fBoards;
 std::vector<TAlpide *>       fChips;
-std::vector<THic *>          fHICs;
 TConfig *                    fConfig;
 
 int myNTriggers;
@@ -328,7 +327,7 @@ int main(int argc, char **argv)
 
   InitHitData();
   decodeCommandParameters(argc, argv);
-  initSetup(fConfig, &fBoards, &fBoardType, &fChips, "", &fHICs);
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
   InitScanParameters();
   char Suffix[80], fName[200];
 

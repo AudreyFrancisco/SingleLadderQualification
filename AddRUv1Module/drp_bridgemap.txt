@@ -1,0 +1,2 @@
+DRP_ADDRESS = 1
+DRP_DATA    = 2

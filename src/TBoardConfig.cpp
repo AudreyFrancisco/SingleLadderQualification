@@ -7,12 +7,17 @@ TBoardConfig::TBoardConfig(const char *fName, int boardIndex)
 {
   fTriggerDelay = STROBEDELAY;
   fPulseDelay   = PULSEDELAY;
+  fNChips       = NCHIPS;
+  fDipswitch    = DIPSWITCH;
 }
 
 void TBoardConfig::InitParamMap()
 {
-  fSettings["STROBEDELAYBOARD"] = &fTriggerDelay;
-  fSettings["PULSEDELAY"]       = &fPulseDelay;
+  fSettings["STROBEDELAYBOARD"]   = &fTriggerDelay;
+  fSettings["PULSEDELAY"]         = &fPulseDelay;
+  fSettings["NCHIPS"]             = &fNChips;
+  fSettings["READOUTCRUEMULATOR"] = &fReadoutCRUEmulator;
+  fSettings["DIPSWITCH"]          = &fDipswitch;
 }
 
 bool TBoardConfig::SetParamValue(std::string Name, std::string Value)

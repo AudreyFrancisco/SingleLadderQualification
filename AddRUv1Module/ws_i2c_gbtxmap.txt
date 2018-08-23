@@ -1,0 +1,4 @@
+ADDRESS_GBTX0 = 0
+    ADDRESS_GBTX1 = 1
+    ADDRESS_GBTX2 = 2
+    DATA          = 3

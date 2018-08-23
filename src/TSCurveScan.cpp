@@ -2,6 +2,7 @@
 #include "AlpideConfig.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
+#include "TReadoutBoardRUv1.h"
 #include <chrono>
 #include <string.h>
 #include <string>
@@ -190,7 +191,10 @@ void TSCurveScan::ConfigureBoard(TReadoutBoard *board)
 
 void TSCurveScan::ConfigureFromu(TAlpide *chip)
 {
-  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1, 0x20); // analogue pulsing
+  // chip->WriteRegister(Alpide::REG_FROMU_CONFIG1, 0x20); // analogue pulsing
+  uint16_t data =
+      ((1 << 4) | (1 << 6)) | (1 << 5); // NOTE: TRIGGER HANDLER ON RUV1 IS SENDING PULSES
+  chip->WriteRegister(Alpide::REG_FROMU_CONFIG1, data);
   chip->WriteRegister(
       Alpide::REG_FROMU_CONFIG2,
       chip->GetConfig()->GetParamValue("STROBEDURATION")); // fromu config 2: strobe length
@@ -273,12 +277,20 @@ void TSCurveScan::Init()
     ConfigureChip(m_chips.at(i));
   }
 
-  for (unsigned int i = 0; i < m_boards.size(); i++) {
-    m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
-    TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(i));
 
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    TReadoutBoardRUv1 *boardy = dynamic_cast<TReadoutBoardRUv1 *>(m_boards.at(i));
+    if (boardy) boardy->Initialize(m_chips.at(0)->GetConfig()->GetParamValue("LINKSPEED"));
+    usleep(1000);
+    m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
+
+    TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(i));
     if (myMOSAIC) {
       myMOSAIC->StartRun();
+    }
+
+    if (boardy) {
+      boardy->StartRun();
     }
   }
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
@@ -355,9 +367,13 @@ void TtuneITHRScan::PrepareStep(int loopIndex)
 
 void TSCurveScan::Execute()
 {
-  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++)
-    m_boards.at(iboard)->Trigger(m_nTriggers);
 
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+    TReadoutBoardRUv1 *boardy = dynamic_cast<TReadoutBoardRUv1 *>(m_boards.at(0));
+    if (boardy) boardy->SendStartOfTriggered();
+    m_boards.at(iboard)->Trigger(m_nTriggers);
+    if (boardy) boardy->SendEndOfTriggered();
+  }
   usleep(1000);
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
@@ -446,6 +462,8 @@ void TSCurveScan::Terminate()
       myDAQBoard->PowerOff();
       // delete myDAQBoard;
     }
+    TReadoutBoardRUv1 *boardy = dynamic_cast<TReadoutBoardRUv1 *>(m_boards.at(iboard));
+    if (boardy) boardy->CleanUp();
   }
 
   SwitchOffBackbias();

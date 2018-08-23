@@ -14,6 +14,7 @@
 //
 // The functions that should be modified for the specific test are configureChip() and main()
 
+
 #include "AlpideConfig.h"
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
@@ -25,7 +26,9 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
+#include <iomanip>
 #include <string.h>
+#include <thread>
 #include <unistd.h>
 
 // !!! NOTE: Scan parameters are now set via Config file
@@ -33,7 +36,6 @@
 TBoardType                   fBoardType;
 std::vector<TReadoutBoard *> fBoards;
 std::vector<TAlpide *>       fChips;
-std::vector<THic *>          fHICs;
 TConfig *                    fConfig;
 
 int myNTriggers;
@@ -72,7 +74,8 @@ void CreateScanHisto()
           (fChips.at(ichip)->GetReadoutBoard() == fBoards.at(iboard))) {
         id.boardIndex   = iboard;
         id.dataReceiver = fChips.at(ichip)->GetConfig()->GetParamValue("RECEIVER");
-        id.chipId       = fChips.at(ichip)->GetConfig()->GetChipId();
+
+        id.chipId = fChips.at(ichip)->GetConfig()->GetChipId();
 
         fScanHisto->AddHisto(id, histo);
       }
@@ -85,10 +88,12 @@ void CreateScanHisto()
 
 void InitScanParameters()
 {
-  myMaskStages     = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
-  myPixPerRegion   = fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
-  myNTriggers      = fConfig->GetScanConfig()->GetParamValue("NINJ");
-  maxTrigsPerTrain = fConfig->GetScanConfig()->GetParamValue("MAXNTRIGTRAIN");
+
+
+  myMaskStages     = 512; // fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
+  myPixPerRegion   = 32;  // fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
+  myNTriggers      = 15;  // fConfig->GetScanConfig()->GetParamValue("NINJ");
+  maxTrigsPerTrain = 5;   // fConfig->GetScanConfig()->GetParamValue("MAXNTRIGTRAIN");
 }
 
 void FillHisto(int board, std::vector<TPixHit> *Hits)
@@ -106,7 +111,7 @@ void FillHisto(int board, std::vector<TPixHit> *Hits)
         (addr < 0) || (addr > 1023)) {
       printf("%d %d %d %d %d \n", idx.dataReceiver, idx.chipId, dcol, hit.region, addr);
       std::cout << "Bad pixel coordinates ( <0), skipping hit" << std::endl;
-      abort();
+      // abort();
     }
     else {
       fScanHisto->Incr(idx, dcol, addr);
@@ -150,7 +155,10 @@ void WriteDataToFile(const char *fName, bool Recreate)
       idx.dataReceiver = channel;
       idx.chipId       = chipId;
 
-      if (!HasData(idx)) continue; // write files only for chips with data
+      if (!HasData(idx)) {
+        std::cout << "NO DATA ON CHIP IDX " << (int)chipId << std::endl;
+        continue; // write files only for chips with data
+      }
 
       if (fChips.size() > 1) {
         sprintf(fNameChip, "%s_Mod%d-Chip%d.dat", fNameTemp, (chipId & 0x70) >> 4, chipId & 0xF);
@@ -181,8 +189,9 @@ void WriteDataToFile(const char *fName, bool Recreate)
 // initialisation of Fromu
 int configureFromu(TAlpide *chip)
 {
+  uint16_t data = (1 << 4) | (1 << 6);
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,
-                      0x0); // fromu config 1: digital pulsing (put to 0x20 for analogue)
+                      data); // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(
       Alpide::REG_FROMU_CONFIG2,
       chip->GetConfig()->GetParamValue("STROBEDURATION")); // fromu config 2: strobe length
@@ -201,6 +210,7 @@ int configureFromu(TAlpide *chip)
 int configureChip(TAlpide *chip)
 {
   AlpideConfig::BaseConfig(chip);
+  AlpideConfig::Init(chip);
 
   configureFromu(chip);
 
@@ -211,102 +221,104 @@ int configureChip(TAlpide *chip)
 
 void scan()
 {
-  unsigned char buffer[MAX_EVENT_SIZE];
-  int           n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b = 0, nClosedEvents = 0;
-  int           nBad       = 0;
-  int           nSkipped   = 0;
-  int           prioErrors = 0;
-  TBoardHeader  boardInfo;
-  std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
+  std::vector<uint8_t> buffer(1 * 1024 * 1024);
+  int          n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b = 0, nClosedEvents = 0;
+  int          nBad       = 0;
+  int          nSkipped   = 0;
+  int          prioErrors = 0;
+  TBoardHeader boardInfo;
+  std::vector<TPixHit> *Hits  = new std::vector<TPixHit>;
+  std::vector<TPixHit> *Stuck = new std::vector<TPixHit>;
+
 
   int nTrigsPerTrain = (maxTrigsPerTrain > 0) ? maxTrigsPerTrain : myNTriggers;
   while ((myNTriggers % nTrigsPerTrain) != 0)
     nTrigsPerTrain--;
-  int nTrains = myNTriggers / nTrigsPerTrain;
+  int                           nTrains = myNTriggers / nTrigsPerTrain;
+  std::vector<std::vector<int>> binMatrix =
+      AlpideConfig::GetScaledBinaryMatrix("../exe/ut_logo.txt");
+
 
   std::cout << "Doing " << nTrains << " with " << nTrigsPerTrain << " triggers each." << std::endl;
 
   for (const auto &rBoard : fBoards)
     rBoard->StartRun();
 
+
   for (int istage = 0; istage < myMaskStages; istage++) {
     std::cout << std::endl << "Mask stage " << istage << std::endl;
     for (unsigned int i = 0; i < fChips.size(); i++) {
       if (!fChips.at(i)->GetConfig()->IsEnabled()) continue;
-      AlpideConfig::ConfigureMaskStage(fChips.at(i), myPixPerRegion, istage);
+      AlpideConfig::ConfigureMaskStage(fChips.at(i), 32, istage);
     }
 
     for (int itrain = 0; itrain < nTrains; itrain++) {
-      std::cout << "Trigger train " << itrain << std::endl;
+      std::cout << "Trigger train " << itrain << "\n";
 
-      // Send triggers for all boards
-      for (const auto &rBoard : fBoards) {
-        // uint16_t Value;
-        // fChips.at(0)->ReadRegister(Alpide::REG_CMUDMU_CONFIG, Value);
-        // std::cout << "CMU DMU Config: 0x" << std::hex << Value << std::dec << std::endl;
-        // fChips.at(0)->ReadRegister(Alpide::REG_FROMU_STATUS1, Value);
-        // std::cout << "Trigger counter before: " << Value << std::endl;
-        rBoard->Trigger(nTrigsPerTrain);
-        // fChips.at(0)->ReadRegister(Alpide::REG_FROMU_STATUS1, Value);
-        // std::cout << "Trigger counter after: " << Value << std::endl;
-
-        // rBoard->SendOpCode(Alpide::OPCODE_DEBUG);
-        // AlpideConfig::PrintDebugStream(fChips.at(0));
-      }
 
       // Read data for all boards
       for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
-        int itrg      = 0;
-        int nTrials   = 0;
-        int MAXTRIALS = 3;
+        int                itrg      = 0;
+        TReadoutBoardRUv1 *boardaroo = dynamic_cast<TReadoutBoardRUv1 *>(fBoards.at(ib));
+        boardaroo->ResetAllCounters();
+        fBoards.at(ib)->Trigger(nTrigsPerTrain);
+
 
         int fEnabled = fEnPerBoard.at(ib);
         while (itrg < nTrigsPerTrain * fEnabled) {
-          if (fBoards.at(ib)->ReadEventData(n_bytes_data, buffer) <=
-              0) { // no event available in buffer yet, wait a bit
+
+
+          int nRetries   = 0;
+          int maxRetries = 100;
+          while ((fBoards.at(ib)->ReadEventData(n_bytes_data, buffer.data()) == 0) &&
+                 (nRetries != maxRetries)) {
             usleep(100);
-            nTrials++;
-            if (nTrials == MAXTRIALS) {
-              std::cout << "Reached " << nTrials
-                        << " timeouts, giving up on this point (board = " << ib
-                        << ", itrg = " << itrg << ")." << std::endl;
-              itrg = nTrigsPerTrain * fEnabled;
-              nSkipped++;
-              nTrials = 0;
-            }
+            nRetries++;
+          }
+
+          if (nRetries == maxRetries) {
+            std::cout << "NO DATA, I GIVE UP!\n";
+            nSkipped++;
+            itrg = nTrigsPerTrain * fEnabled;
             continue;
           }
           else {
-            // std::cout << "received Event" << itrg << " with length " << n_bytes_data <<
+            // std::cout << "received Event" << itrg << " with length " << n_bytes_data << " \n";
             // std::endl;
             // for (int iByte=0; iByte<n_bytes_data; ++iByte) {
-            //  printf ("%02x ", (int) buffer[iByte]);
+            // printf ("%02x ", (int) buffer[iByte]);
             //}
             // std::cout << std::endl;
             // decode board event
-            BoardDecoder::DecodeEvent(fBoards.at(ib)->GetConfig()->GetBoardType(), buffer,
+            BoardDecoder::DecodeEvent(fBoards.at(ib)->GetConfig()->GetBoardType(), buffer.data(),
                                       n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+
             // std::cout << "Closed data counter: " <<  boardInfo.eoeCount << std::endl;
             if (boardInfo.eoeCount) {
-              nClosedEvents = boardInfo.eoeCount;
+              nClosedEvents = 1; // THE ONLY PLACE THIS IS BROUGHT UP IS FOR THE MOSAIC DECODER, AND
+                                 // IT'S SET TO 1 ANYWAYS...................................
             }
             else {
               nClosedEvents = 1;
             }
             if (boardInfo.decoder10b8bError) errors8b10b++;
             // decode Chip event
-            int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
-            if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
-                                            boardInfo.channel, prioErrors,
-                                            fConfig->GetScanConfig()->GetParamValue("MAXHITS"))) {
+            int           n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
+            int *         chipId            = 0;
+            unsigned int *bc                = 0;
+            int           hitLimit          = 1000;
+
+            if (!AlpideDecoder::DecodeEvent(buffer.data() + n_bytes_header, n_bytes_chipevent, Hits,
+                                            0, boardInfo.channel, prioErrors, hitLimit, Stuck,
+                                            chipId, bc)) {
               std::cout << "Found bad event " << std::endl;
               nBad++;
               if (nBad > 10) continue;
-              FILE *fDebug = fopen("DebugData.dat", "a");
+              /*FILE *fDebug = fopen("DebugData.dat", "a");
               for (int iByte = 0; iByte < n_bytes_data; ++iByte) {
                 fprintf(fDebug, "%02x ", (int)buffer[iByte]);
               }
-              fclose(fDebug);
+              fclose(fDebug);*/
             }
             // std::cout << "total number of hits found: " << Hits->size() << std::endl;
             itrg += nClosedEvents;
@@ -321,6 +333,7 @@ void scan()
       }
     }
   }
+
 
   std::cout << std::endl;
   for (const auto &rBoard : fBoards) {
@@ -343,7 +356,7 @@ int main(int argc, char **argv)
 {
 
   decodeCommandParameters(argc, argv);
-  initSetup(fConfig, &fBoards, &fBoardType, &fChips, "", &fHICs);
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
   sleep(1);
   char Suffix[80], fName[200];
@@ -355,15 +368,18 @@ int main(int argc, char **argv)
   sprintf(Suffix, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1, now->tm_mday,
           now->tm_hour, now->tm_min, now->tm_sec);
 
-  TReadoutBoardDAQ *myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(fBoards.at(0));
+  TReadoutBoardDAQ * myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(fBoards.at(0));
+  TReadoutBoardRUv1 *theBoard   = dynamic_cast<TReadoutBoardRUv1 *>(fBoards.at(0));
+  theBoard->Initialize(600);
+
 
   if (fBoards.size()) {
 
     fEnPerBoard.resize(fBoards.size());
     for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
 
-      fBoards.at(ib)->SendOpCode(Alpide::OPCODE_GRST);
-      fBoards.at(ib)->SendOpCode(Alpide::OPCODE_PRST);
+      // fBoards.at(ib)->SendOpCode(Alpide::OPCODE_GRST);
+      // fBoards.at(ib)->SendOpCode(Alpide::OPCODE_PRST);
 
       for (unsigned int i = 0; i < fChips.size(); i++) {
         if (fChips.at(i)->GetConfig()->IsEnabled() &&
@@ -371,6 +387,7 @@ int main(int argc, char **argv)
           fEnPerBoard.at(ib)++;
       }
     }
+
     for (unsigned int i = 0; i < fChips.size(); i++) {
       if (fChips.at(i)->GetConfig()->IsEnabled()) {
         std::cout << "Configuring chip " << i
@@ -383,12 +400,15 @@ int main(int argc, char **argv)
         AlpideConfig::BaseConfigPLL(fChips.at(i));
       }
     }
+
     int sum_of_en = Sum(fEnPerBoard, fEnPerBoard.size());
     std::cout << "Found " << sum_of_en << " enabled chips" << std::endl;
+
 
     for (const auto &rBoard : fBoards) {
 
       rBoard->SendOpCode(Alpide::OPCODE_RORST);
+
 
       // put your test here...
       if (rBoard->GetConfig()->GetBoardType() == boardDAQ) {
@@ -399,14 +419,17 @@ int main(int argc, char **argv)
                                  2 * rBoard->GetConfig()->GetParamValue("STROBEDELAYBOARD"));
         rBoard->SetTriggerSource(trigExt);
       }
+      // else if(rBoard->GetConfig()->GetBoardType() == boardRU) {
+      // rBoard->SetTriggerConfig(true true, 10000, 0);
+      //}
       else {
-        rBoard->SetTriggerConfig(true, true, rBoard->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
-                                 rBoard->GetConfig()->GetParamValue("PULSEDELAY"));
+        rBoard->SetTriggerConfig(true, true, 100, 100);
         rBoard->SetTriggerSource(trigInt);
       }
     }
-
+    theBoard->SendStartOfTriggered();
     scan();
+    theBoard->SendEndOfTriggered();
   }
 
   sprintf(fName, "Data/DigitalScan_%s.dat", Suffix);
@@ -416,6 +439,7 @@ int main(int argc, char **argv)
     myDAQBoard->PowerOff();
     delete myDAQBoard;
   }
+  theBoard->CleanUp();
 
   return 0;
 }

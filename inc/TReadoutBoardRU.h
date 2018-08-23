@@ -93,6 +93,7 @@ public:
   // RU specific functions
 
   void setDataportSource(uint8_t DP2Source = 255, uint8_t DP3Source = 255);
+  void CleanUp();
 
   // Initialize Readout Unit to start readout with given configuration
   int Initialize();

@@ -2,6 +2,7 @@
 #include "TBoardConfigDAQ.h"
 #include "TBoardConfigMOSAIC.h"
 #include "TBoardConfigRU.h"
+#include "TBoardConfigRUv1.h"
 #include "TPowerBoardConfig.h"
 #include "version.h"
 #include <algorithm>
@@ -50,6 +51,9 @@ void TConfig::Init(int nBoards, std::vector<int> chipIds, TBoardType boardType)
     else if (boardType == boardRU) {
       fBoardConfigs.push_back(new TBoardConfigRU());
     }
+    else if (boardType == boardRUv1) {
+      fBoardConfigs.push_back(new TBoardConfigRUv1());
+    }
     else {
       std::cout << "TConfig: Unknown board type" << std::endl;
     }
@@ -69,6 +73,14 @@ void TConfig::Init(int chipId, TBoardType boardType)
     fDeviceType = TYPE_CHIP_MOSAIC;
     fBoardConfigs.push_back(new TBoardConfigMOSAIC());
     if (fUsePowerBoard) fPBConfigs.push_back(new TPowerBoardConfig(NULL));
+  }
+  else if (boardType == boardRU) {
+    fDeviceType = TYPE_SINGLE_RU;
+    fBoardConfigs.push_back(new TBoardConfigRU());
+  }
+  else if (boardType == boardRUv1) {
+    fDeviceType = TYPE_SINGLE_RUv1;
+    fBoardConfigs.push_back(new TBoardConfigRUv1());
   }
   else {
     fDeviceType = TYPE_UNKNOWN;
@@ -203,6 +215,12 @@ TDeviceType TConfig::ReadDeviceType(std::string deviceName)
   else if (deviceName.compare("IBHICRU") == 0) {
     type = TYPE_IBHICRU;
   }
+  else if (deviceName.compare("SINGLE_RU") == 0) {
+    type = TYPE_SINGLE_RU;
+  }
+  else if (deviceName.compare("SINGLE_RUv1") == 0) {
+    type = TYPE_SINGLE_RUv1;
+  }
   else if (deviceName.compare("POWER") == 0) {
     SetUsePowerBoard(true);
     type = TYPE_POWER;
@@ -224,6 +242,15 @@ void TConfig::SetDeviceType(TDeviceType AType, int NChips)
   }
   else if (AType == TYPE_CHIP_MOSAIC) {
     Init(0, boardMOSAIC);
+  }
+  else if (AType == TYPE_SINGLE_RU) {
+    Init(0, boardRU);
+  }
+  else if (AType == TYPE_SINGLE_RUv1) {
+    for (int i = 0; i < NChips; i++) {
+      chipIds.push_back(i);
+    }
+    Init(1, chipIds, boardRUv1);
   }
   else if (AType == TYPE_TELESCOPE) {
     for (int i = 0; i < NChips; i++) {
@@ -347,6 +374,7 @@ void TConfig::ReadConfigFile(const char *fName)
       }
       else {
         SetDeviceType(type, NChips);
+        std::cout << NChips << " NUMBER OF CHIPS FROM CONFIG" << std::endl;
       }
       Initialised = true;
     }

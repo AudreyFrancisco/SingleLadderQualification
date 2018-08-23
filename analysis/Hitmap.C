@@ -23,7 +23,7 @@ void set_plot_style()
 int AddressToColumn(int ARegion, int ADoubleCol, int AAddress) {
   int Column    = ARegion * 32 + ADoubleCol * 2;    // Double columns before ADoubleCol (all chips)
   //int LeftRight = ((AAddress % 4) < 2 ? 1:0);       // pALPIDE-1/2: left or right column within the double column
-  int LeftRight = (((AAddress%4)==1) || ((Address%4)==2)) ? 1 : 0; // pALPIDE-3 / ALPIDE: left or right column within the double column
+  int LeftRight = (((AAddress%4)==1) || ((AAddress%4)==2)) ? 1 : 0; // pALPIDE-3 / ALPIDE: left or right column within the double column
   Column += LeftRight;
 
   return Column;
@@ -42,7 +42,9 @@ int AddressToRow         (int ARegion, int ADoubleCol, int AAddress)
 int Hitmap(const char *fName, int nInj = -1) {
   int event, col, row, nhits;
   set_plot_style();
-  TH2F *hHitmap = new TH2F("hHitmap", "Hit map", 1024, -.5, 1023.5, 512, -.5, 511.5);
+  int endofString = (int)strlen(fName);
+  uint8_t chipId =(uint8_t)fName[endofString - 5];
+  TH2F *hHitmap = new TH2F("hHitmap", Form("Hitmap for ChipID %i", chipId), 1024, -.5, 1023.5, 512, -.5, 511.5);
   FILE *fp = fopen(fName, "r");
   if (!fp) {
     std::cout << "Unable to open file " << fName <<std::endl;
@@ -74,7 +76,7 @@ int Hitmap(const char *fName, int nInj = -1) {
   }
 
 
-  gStyle->SetPalette(1);
+  
   hHitmap->Draw("COLZ");
   //hCs->Draw();
   fclose(fp);

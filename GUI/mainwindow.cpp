@@ -10,6 +10,7 @@
 #include "TAlpide.h"
 #include "TConfig.h"
 #include "TCycleAnalysis.h"
+#include "TDigitalScan.h"
 #include "TEnduranceCycle.h"
 #include "THIC.h"
 #include "THisto.h"
@@ -409,7 +410,7 @@ void MainWindow::open()
         color(side, pos, fChips.at(i)->GetConfig()->IsEnabled());
       }
     }
-    if (device == TYPE_IBHIC) {
+    if ((device == TYPE_IBHIC) || (device == TYPE_SINGLE_RUv1)) {
       ui->tob->setText("Inner Barrel module");
       ui->IBModule->show();
       for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -809,7 +810,7 @@ void MainWindow::performtests()
           fAnalysisVector.at(i)->Finalize();
         }
         catch (exception &ex) {
-          std::cout << ex.what() << " is the thrown exception from th finalize" << std::endl;
+          std::cout << ex.what() << " is the thrown exception from the finalize" << std::endl;
           fExceptionthrown = true;
           fScanAbort       = true;
           fExceptiontext   = ex.what();
@@ -2101,8 +2102,7 @@ void MainWindow::fillingibvectors()
 
   // reset previous values
   // (TODO: this is not exactly correct because it resets to the values defined in the header file
-  // and
-  // ignores the settings in the config file)
+  // and ignores the settings in the config file)
   fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", ChipConfig::DTU_DRIVER);
   fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", ChipConfig::DTU_PREEMP);

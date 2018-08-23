@@ -30,7 +30,7 @@ std::vector<TBoardConfigRU::TransceiverMapping> TBoardConfigRU::getTransceiverMa
   return mapping;
 }
 
-uint8_t TBoardConfigRU::getConnector() const { return 0; }
+uint8_t TBoardConfigRU::getConnector() const { return 1; }
 
 TBoardConfigRU::ReadoutSpeed TBoardConfigRU::getReadoutSpeed() const
 {

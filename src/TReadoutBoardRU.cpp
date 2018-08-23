@@ -51,17 +51,13 @@ TReadoutBoardRU::TReadoutBoardRU(TBoardConfigRU *config)
 void TReadoutBoardRU::InitReceivers()
 {
   std::cout << "....Setup Chip positions....\n";
-
   for (auto &chippos : fChipPositions) {
-    bool hasTranceiver = (chippos.chipId % 8 == 0) && (chippos.enabled);
-    std::cout << "chippos " << chippos.chipId << " " << hasTranceiver << std::endl;
-    if (chippos.receiver >= 0 && hasTranceiver) {
-      uint8_t moduleId = TReadoutBoardRU::MODULE_DATA0 + chippos.receiver;
-      std::cout << "Module " << (int)moduleId << " set to chip " << chippos.chipId << "\n";
-      transceiver_array[chippos.chipId] =
-          std::make_shared<TRuTransceiverModule>(*this, moduleId, m_logging);
-      transceiver_array[chippos.chipId]->DeactivateReadout();
-    }
+    uint8_t receiverNum = GetReceiver(chippos.chipId);
+    uint8_t moduleId    = TReadoutBoardRU::MODULE_DATA0 + receiverNum;
+    auto    trans       = std::make_shared<TRuTransceiverModule>(*this, moduleId, m_logging);
+    std::cout << "Module " << (int)moduleId << " set to chip " << chippos.chipId << "\n";
+    transceiver_array[chippos.chipId] = trans;
+    transceiver_array[chippos.chipId]->DeactivateReadout();
   }
 }
 
@@ -161,8 +157,10 @@ std::vector<TReadoutBoardRU::ReadResult> TReadoutBoardRU::readResults()
 
 int TReadoutBoardRU::ReadRegister(uint16_t Address, uint32_t &Value)
 {
-  uint16_t module      = Address >> 8 & 0xFF;
+  uint16_t module = Address >> 8 & 0xFF;
+  // std::cout << module << " is the module" << std::endl;
   uint16_t sub_address = Address & 0xFF;
+  // std::cout << sub_address << " is the sub address" << std::endl;
   registeredRead(module, sub_address);
   flush();
   auto results = readResults();
@@ -198,7 +196,9 @@ int TReadoutBoardRU::ReadChipRegister(uint16_t Address, uint16_t &Value, TAlpide
 {
   uint8_t chipId = chipPtr->GetConfig()->GetChipId();
   // set control
+
   dctrl->SetConnector(GetControlInterface(chipId), false);
+  // dctrl->SetConnector(1, false); // TODO: set connector properly
 
   return dctrl->ReadChipRegister(Address, Value, chipId);
 }
@@ -237,6 +237,7 @@ int TReadoutBoardRU::Trigger(int nTriggers)
     if (m_triggerDelay > 0) dctrl->Wait(4 * m_triggerDelay, false);
     if (m_enableTrigger) dctrl->SendOpCode(Alpide::OPCODE_TRIGGER1, false);
     if (m_pulseDelay > 0) dctrl->Wait(4 * m_pulseDelay, false);
+    // if((i%100 == 0) && (i != 0)) flush();
   }
   flush();
   return 0;
@@ -244,24 +245,26 @@ int TReadoutBoardRU::Trigger(int nTriggers)
 
 void TReadoutBoardRU::fetchEventData()
 {
+
   static UsbDev::DataBuffer buffer;
   std::map<uint8_t, size_t> chipByteCounters;
-  for (int i = 0; i < 6; ++i) {
-    this->setDataportSource(i, i);
+
+  for (int k = 0; k < 6; k++) {
+    this->setDataportSource(k, k);
     for (auto port : {EP_DATA0_IN, EP_DATA1_IN}) {
       // read chunk from USB
       readFromPort(port, TReadoutBoardRU::EVENT_DATA_READ_CHUNK, buffer);
       if (!buffer.empty()) {
-        // std::cout << "===== HS Data ======\n";
-        // std::cout << std::hex;
-        // for (int i = 0; i < buffer.size(); ++i) {
-        //     std::cout << std::setfill('0') << std::setw(2)
-        //               << (int)buffer[i] << " ";
-        //     if (i % 40 == 39)
-        //         std::cout << "\n";
-        // }
-        // std::cout << std::dec;
-        // std::cout << "\n========== /HS Data ==========\n";
+        /* std::cout << "===== HS Data ======\n";
+         std::cout << std::hex;
+         for (uint32_t i = 0; i < bufxfer.size(); ++i) {
+             std::cout << std::setfill('0') << std::setw(2)
+                       << (int)buffer[i] << " ";
+             if (i % 40 == 39)
+                 std::cout << "\n";
+         }
+         std::cout << std::dec;
+         std::cout << "\n========== /HS Data ==========\n";*/
       }
 
       // Filter, remove status, remove padded bytes, split to dataport
@@ -281,6 +284,7 @@ void TReadoutBoardRU::fetchEventData()
     }
   }
 
+
   // Read out events
   for (auto &buffer : m_readoutBuffers) {
     auto  chipId     = buffer.first;
@@ -295,16 +299,16 @@ void TReadoutBoardRU::fetchEventData()
                 << ". Event size: " << std::dec << eventEnd << "\n";
     }
     if (hasEvent) {
-      // std::cout << "===== Event Data ======\n";
-      // std::cout << std::hex;
-      // for (int i = eventStart; i < eventEnd; ++i) {
-      //     std::cout << std::setfill('0') << std::setw(2)
-      //               << (int)data[i] << " ";
-      //     if (i % 20 == 19)
-      //         std::cout << "\n";
-      // }
-      // std::cout << std::dec;
-      // std::cout << "\n========== /Event Data ==========\n";
+      /* std::cout << "===== Event Data ======\n";
+       std::cout << std::hex;
+       for (int i = eventStart; i < eventEnd; ++i) {
+           std::cout << std::setfill('0') << std::setw(2)
+                     << (int)data[i] << " ";
+           if (i % 20 == 19)
+               std::cout << "\n";
+       }
+       std::cout << std::dec;
+       std::cout << "\n========== /Event Data ==========\n";*/
 
       // Extract event bytes and store in event list
       std::vector<uint8_t> eventData(begin(data) + eventStart, begin(data) + eventEnd);
@@ -320,6 +324,7 @@ void TReadoutBoardRU::fetchEventData()
 int TReadoutBoardRU::ReadEventData(int &NBytes, unsigned char *Buffer)
 {
 
+
   if (m_events.empty()) fetchEventData();
 
   if (!m_events.empty()) {
@@ -333,13 +338,13 @@ int TReadoutBoardRU::ReadEventData(int &NBytes, unsigned char *Buffer)
     return -1;
   }
 
-  return 0;
+  return NBytes;
 }
 
 int TReadoutBoardRU::Initialize()
 {
   dctrl->SetConnector(m_config->getConnector());
-
+  std::cout << m_config->getConnector() << " connector " << std::endl;
   for (auto &transceiver : transceiver_array) {
     transceiver.second->Initialize(m_config->getReadoutSpeed(), m_config->getInvertPolarity());
   }
@@ -348,6 +353,8 @@ int TReadoutBoardRU::Initialize()
 
 void TReadoutBoardRU::StartRun()
 {
+  InitReceivers();
+
   for (size_t i = 0; i < fChipPositions.size(); ++i) {
 
     if (fChipPositions.at(i).chipId & 0x7) continue;
@@ -356,8 +363,7 @@ void TReadoutBoardRU::StartRun()
     std::cout << "initialising transceiver for chip id " << std::dec << fChipPositions.at(i).chipId
               << std::endl;
     TBoardConfigRU *config = (TBoardConfigRU *)GetConfig();
-    auto tr = transceiver_array[fChipPositions.at(i).chipId]; // TODO: Mapping between transceiver
-                                                              // and chipid
+    auto            tr     = transceiver_array[fChipPositions.at(i).chipId];
     tr->Initialize(config->getReadoutSpeed(), config->getInvertPolarity());
     std::cout << "Done" << std::endl;
     bool alignedBefore = tr->IsAligned();
@@ -380,6 +386,7 @@ void TReadoutBoardRU::StartRun()
   readFromPort(TReadoutBoardRU::EP_DATA0_IN, 1024 * 10000, buf);
   readFromPort(TReadoutBoardRU::EP_DATA1_IN, 1024 * 10000, buf);
   std::cout << "Clean ports done\n";
+  ;
 }
 
 void TReadoutBoardRU::checkGitHash()
@@ -400,6 +407,22 @@ void TReadoutBoardRU::checkGitHash()
   }
 }
 
+void TReadoutBoardRU::CleanUp()
+{
+  for (size_t i = 0; i < fChipPositions.size(); ++i) {
+
+    auto tr = transceiver_array[fChipPositions.at(i).chipId];
+
+    tr->DeactivateReadout();
+  }
+  std::cout << "Clean ports\n";
+  UsbDev::DataBuffer buf;
+  setDataportSource(0, 0);
+  readFromPort(TReadoutBoardRU::EP_DATA0_IN, 1024 * 10000, buf);
+  readFromPort(TReadoutBoardRU::EP_DATA1_IN, 1024 * 10000, buf);
+  std::cout << "Clean ports done\n";
+  ;
+}
 void TReadoutBoardRU::setDataportSource(uint8_t DP2Source, uint8_t DP3Source)
 {
   uint16_t setting = ((DP3Source & 0xF) << 8) | (DP2Source & 0xF);

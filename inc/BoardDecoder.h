@@ -6,13 +6,20 @@
 const uint32_t DAQ_TRAILER_WORD = 0xbfbfbfbf; //
 
 // put all header and trailer information here
-// (both for mosaic and DAQ board)
+// (both for mosaic and DAQ board and RUv1 and RUv2)
 typedef struct {
   // common
   //  int  size;
-  // MOSAIC
-  int  channel;
-  int  eoeCount;
+  // MOSAIC and RU
+  int      channel;
+  int      eoeCount;
+  bool     startOfPacket;
+  bool     endOfPacket;
+  uint16_t boardID;
+  uint32_t triggerType;
+  uint32_t HBOrbit;
+  uint32_t TrigOrbit;
+
   bool timeout;
   bool endOfRun;
   bool overflow;
@@ -43,7 +50,7 @@ class BoardDecoder {
 private:
   static bool DecodeEventMOSAIC(unsigned char *data, int nBytes, int &nBytesHeader,
                                 int &nBytesTrailer, TBoardHeader &boardInfo);
-  static bool DecodeEventRU(unsigned char *data, int nBytes, int &nBytesHeader, int &nBytesTrailer,
+  static bool DecodeEventRU(unsigned char *&data, int nBytes, int &nBytesHeader, int &nBytesTrailer,
                             TBoardHeader &boardInfo);
   static uint32_t endianAdjust(unsigned char *buf);
 
@@ -59,6 +66,8 @@ public:
                           uint32_t firmwareVersion = 0x247E0611, int headerType = 0x1);
   static int  GetDAQEventHeaderLength(uint32_t firmwareVersion = 0x247E0611, int headerType = 1);
   static int  GetDAQEventTrailerLength() { return 8; };
+  static void DecodeGbtFrame(unsigned char *data, int nBytes, TBoardHeader &boardInfo,
+                             bool verbose = false);
 };
 
 #endif

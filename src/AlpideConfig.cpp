@@ -1,5 +1,6 @@
 #include "AlpideConfig.h"
 #include "SetupHelpers.h"
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -222,13 +223,97 @@ int AlpideConfig::ConfigureMaskStage(TAlpide *chip, int nPix, int iStage, bool M
   }
 }
 
+int AlpideConfig::ConfigureMemeStage(TAlpide *chip, int iStage,
+                                     std::vector<std::vector<int>> scaledBinaryVector, bool Mask,
+                                     bool Select)
+{
+  if (Mask) WritePixRegAll(chip, Alpide::PIXREG_MASK, true);
+  if (Select) WritePixRegAll(chip, Alpide::PIXREG_SELECT, false);
+
+  for (int i = 0; i < 512; i++) {
+
+    if ((scaledBinaryVector[iStage][i]) == 1) {
+
+      if (Mask)
+        WritePixRegSingle(chip, Alpide::PIXREG_MASK, false, (iStage % 512), i + iStage / 512);
+      if (Select)
+        WritePixRegSingle(chip, Alpide::PIXREG_SELECT, true, (iStage % 512), i + iStage / 512);
+    }
+  }
+  return (iStage % 512);
+}
+
+
+std::vector<std::vector<int>> AlpideConfig::GetScaledBinaryMatrix(const char *filename)
+{
+  std::vector<std::vector<int>> scaledBinaryVector;
+
+  for (int i = 0; i < 512; i++) {
+    scaledBinaryVector.push_back(std::vector<int>());
+  }
+  for (int i = 0; i < 512; i++) {
+    for (int j = 0; j < 512; j++) {
+      scaledBinaryVector[i].push_back(0);
+    }
+  }
+
+  int   scaledBinaryMatrix[512][512] = {};
+  FILE *myFile;
+  myFile = fopen(filename, "r");
+
+
+  int              pixel;
+  std::vector<int> binaryArray;
+  int              pixnum = 0;
+  while (fscanf(myFile, "%1d", &pixel) == 1) {
+    binaryArray.push_back(pixel);
+    pixnum++;
+  }
+
+  // if((sqrt(pixnum) % 1) != 0) std::cout << "WARNING: NOT A SQUARE IMAGE" << std::endl;
+  int pixLength = (int)sqrt(pixnum);
+
+  int **unscaledBinaryMatrix = (int **)malloc(pixLength * sizeof(int *));
+  for (int i = 0; i < pixLength; i++) {
+    unscaledBinaryMatrix[i] = (int *)malloc(pixLength * sizeof(int));
+  }
+  for (int k = 0; k < pixLength; k++) {
+    for (int m = 0; m < pixLength; m++) {
+      unscaledBinaryMatrix[m][pixLength - k - 1] =
+          binaryArray[(pixLength - 1 - m) * pixLength + (pixLength - 1 - k)];
+    }
+  }
+
+  int scaleFactor = (int)floor(512 / pixLength);
+
+
+  for (int j = 0; j < pixLength; j++) {
+    for (int p = 0; p < scaleFactor; p++) {
+      for (int k = 0; k < pixLength; k++) {
+        for (int s = 0; s < scaleFactor; s++) {
+          scaledBinaryMatrix[(j * scaleFactor) + p][(k * scaleFactor) + s] =
+              unscaledBinaryMatrix[j][k];
+        }
+      }
+    }
+  }
+
+  for (int k = 0; k < pixLength * scaleFactor; k++) {
+    for (int j = 0; j < pixLength * scaleFactor; j++) {
+
+      scaledBinaryVector[k][j] = scaledBinaryMatrix[k][j];
+    }
+  }
+
+  return scaledBinaryVector;
+}
+
 void AlpideConfig::WriteControlReg(TAlpide *chip, Alpide::TChipMode chipMode, TChipConfig *config)
 {
   if (!config) config = chip->GetConfig();
 
   uint16_t controlreg = 0;
   uint16_t speedvalue;
-
   switch (chip->GetConfig()->GetParamValue("LINKSPEED")) {
   case -1: // DTU not activated
     speedvalue = 0x2;
@@ -319,7 +404,7 @@ void AlpideConfig::BaseConfigDACs(TAlpide *chip)
   chip->WriteRegister(Alpide::REG_IAUX2, chip->GetConfig()->GetParamValue("IAUX2"));
 }
 
-void AlpideConfig::BaseConfig(TAlpide *chip)
+void AlpideConfig::BaseConfig(TAlpide *chip, bool bugFix)
 {
   // put all chip configurations before the start of the test here
 
@@ -327,12 +412,12 @@ void AlpideConfig::BaseConfig(TAlpide *chip)
 
   // CMU/DMU config: turn manchester encoding off or on etc, initial token=1, disable DDR
   // int cmudmu_config = 0x10 | ((chip->GetConfig()->GetDisableManchester()) ? 0x20 : 0x00);
-
-  BaseConfigFromu(chip);
-  BaseConfigDACs(chip);
-  BaseConfigMask(chip);
+  if (!bugFix) {
+    BaseConfigFromu(chip);
+    BaseConfigDACs(chip);
+    BaseConfigMask(chip);
+  }
   BaseConfigPLL(chip);
-
   WriteControlReg(chip, Alpide::MODE_TRIGGERED, chip->GetConfig());
 }
 

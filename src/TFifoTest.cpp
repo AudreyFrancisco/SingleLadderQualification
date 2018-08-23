@@ -98,6 +98,7 @@ void TFifoTest::Init()
   int   mlvdsStrength = ((TFifoParameters *)m_parameters)->mlvdsStrength;
   // scale voltage, send GRST, correct drop, configure chips, correct drop
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     if (voltageScale != 1.) {
       m_hics.at(ihic)->ScaleVoltage(voltageScale);
     }
@@ -115,6 +116,7 @@ void TFifoTest::Init()
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 
@@ -124,12 +126,12 @@ void TFifoTest::Init()
   }
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-    if (m_hics.at(ihic)->IsEnabled() && !m_hics.at(ihic)->IsPowered()) {
+    if (!m_hics.at(ihic)->IsPowered()) {
       throw std::runtime_error("FIFO scan init: HIC powered off (Retry suggested)");
     }
-    else if (m_hics.at(ihic)->IsEnabled() &&
-             ((m_hics.at(ihic)->GetVddd() < 0.1) || (m_hics.at(ihic)->GetVdda() < 0.1))) {
+    else if ((m_hics.at(ihic)->GetVddd() < 0.1) || (m_hics.at(ihic)->GetVdda() < 0.1)) {
       throw std::runtime_error("FIFO scan init: voltage appears to be off (Retry suggested)");
     }
   }
@@ -295,11 +297,11 @@ void TFifoTest::Terminate()
 
   // restore old voltage
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (m_hics.at(ihic)->IsEnabled() && !m_hics.at(ihic)->IsPowered()) {
+    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
+    if (!m_hics.at(ihic)->IsPowered()) {
       throw std::runtime_error("FIFO scan terminate: HIC powered off (Retry suggested)");
     }
-    else if (m_hics.at(ihic)->IsEnabled() &&
-             ((m_hics.at(ihic)->GetVddd() < 0.1) || (m_hics.at(ihic)->GetVdda() < 0.1))) {
+    else if ((m_hics.at(ihic)->GetVddd() < 0.1) || (m_hics.at(ihic)->GetVdda() < 0.1)) {
       throw std::runtime_error("FIFO scan terminate: voltage appears to be off (Retry suggested)");
     }
 
