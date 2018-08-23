@@ -316,12 +316,12 @@ def generateTheEOStransferScript(ServiceAccount, LocalBasePath):
     file.write(" \n")
     
     file.write("# --- create the inclusion list ---\n")
-    file.write("ENABLEFILENAME=DBParameters.dat")
-    file.write("INCLUDEFILE=/tmp/includedir.txt")
-    file.write("CLEANPATH=$(echo $DBATTACHBASEPATH | sed \"s/\//\\\\\//g\")")
-    file.write("find $DBATTACHBASEPATH -name $ENABLEFILENAME >$INCLUDEFILE")
-    file.write("sed -i -e \"s/${CLEANPATH}//g\"  $INCLUDEFILE")
-    file.write("sed -i -e \"s/${BLOCKFILENAME}//g\" $INCLUDEFILE")
+    file.write("ENABLEFILENAME=DBParameters.dat\n")
+    file.write("INCLUDEFILE=/tmp/includedir.txt\n")
+    file.write("CLEANPATH=$(echo $DBATTACHBASEPATH | sed \"s/\//\\\\\//g\")\n")
+    file.write("find $DBATTACHBASEPATH -name $ENABLEFILENAME >$INCLUDEFILE\n")
+    file.write("sed -i -e \"s/${CLEANPATH}//g\"  $INCLUDEFILE\n")
+    file.write("sed -i -e \"s/${BLOCKFILENAME}//g\" $INCLUDEFILE\n")
     
     file.write("# --- performs the rsync, loop for more attempts ---\n")
     file.write("while [ $SYNCATTEMPTS -ne 0 ]; do\n")
