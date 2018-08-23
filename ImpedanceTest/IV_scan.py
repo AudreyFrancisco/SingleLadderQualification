@@ -209,7 +209,7 @@ def checkDB(itsDB, lg, HIC_name):
     else:
         HIC_activities = itsDB.GetComponentActivitHistory(HIC_name)
         for HIC_activity in HIC_activities:
-            if not HIC_activity.find("OPEN") == -1:
+            if HIC_activity.find("OPEN") >= 0:
                 print("HIC has open activity listed below. Close it before doing the test. Test is interrupted.")
                 print(HIC_activity)
                 return 0
@@ -228,12 +228,37 @@ def saveToDB(myConf, itsDB, lg, HIC_name, test_ok, resistances, fileList):
     DBATTUripath = myConf.GetItem("DBATTACHURIBASEPATH")   # The URI base path to prefix the DB links to attached files
     itsDB.SetUpAttachments(DBATTLimit,DBATTBasepath,DBATTUripath,DBATTCommand,DBATTMkdir)     
        
+    #Check previous impedance test result
+    I_test_activities = []
+    previous_I_test_activity_result_NOK = 0
+    
+    HIC_activities = itsDB.GetComponentActivitHistory(HIC_name)
+    for HIC_activity in HIC_activities:
+        if HIC_activity.find("Impedance")>=0:
+            I_test_activities.append(HIC_activity)
+    
+    if not len(I_test_activities):
+        previous_I_test_activities_present = 0
+    else:
+        previous_I_test_activities_present = 1   
+        for I_test_activity in I_test_activities:
+            if I_test_activity.find("NOK")>=0:
+                previous_I_test_activity_result_NOK = 1
+                break
+    
     activityResult = '' 
                          
-    if test_ok==1:
-        activityResult='OK'
-    elif test_ok==0:
-        activityResult='NOK'         
+    if test_ok==0:
+        activityResult = 'NOK'
+    elif test_ok==1:
+        if not previous_I_test_activities_present:
+            activityResult = 'OK'
+        else:
+            if previous_I_test_activity_result_NOK:
+                print("HIC has previous NOK tests. Result is set to Cured_short")
+                activityResult = 'Cured_short'
+            else:
+                activityResult = 'OK'
     
     actResult = itsDB.CreateCompActivity(HIC_name, "OB-HIC Impedance Test", 
                                   "Impedance test of ", activityResult, False)
