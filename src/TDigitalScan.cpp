@@ -77,7 +77,13 @@ bool TDigitalScan::SetParameters(TScanParameters *pars)
 
 void TDigitalScan::ConfigureFromu(TAlpide *chip)
 {
-  uint16_t data = (1 << 4) | (1 << 6);
+  uint16_t data;
+  // RUv1 needs to have the "generate strobe upon pulse" flag enabled for now
+  if (m_boards.at(0)->GetConfig()->GetBoardType() == boardRUv1) {
+    data = (1 << 4) | (1 << 6);
+  }
+  else
+    data = 0x0;
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1, data); // digital pulsing
   chip->WriteRegister(
       Alpide::REG_FROMU_CONFIG2,
@@ -115,7 +121,7 @@ void TDigitalScan::ConfigureBoard(TReadoutBoard *board)
   else {
     board->SetTriggerConfig(true, true, board->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
                             board->GetConfig()->GetParamValue("PULSEDELAY"));
-    // board->SetTriggerSource(trigInt);
+    board->SetTriggerSource(trigInt);
   }
 }
 

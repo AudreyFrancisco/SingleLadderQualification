@@ -76,8 +76,6 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
   TPixHit hit;
   int     address, hitmap_length;
 
-  // WHAT THE HECK IS THIS??????
-
   if (hits->size() >= (unsigned int)hitLimit) {
     char Text[200];
     sprintf(Text, "ERROR: number of hits exceeding limit of %d, please check console output",

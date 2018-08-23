@@ -100,9 +100,9 @@ void TReadoutTest::ConfigureChip(TAlpide *chip)
   }
   AlpideConfig::BaseConfig(chip);
   ConfigureFromu(chip);
+  ConfigureMask(chip, 0);
   AlpideConfig::ApplyMask(chip, false);
   AlpideConfig::ConfigureCMU(chip);
-  ConfigureMask(chip, 0);
   // restore previous settings
   chip->GetConfig()->SetParamValue("DTUDRIVER", backupDriver);
   chip->GetConfig()->SetParamValue("DTUPREEMP", backupPreemp);

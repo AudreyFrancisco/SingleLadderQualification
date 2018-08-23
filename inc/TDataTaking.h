@@ -12,7 +12,7 @@
 #include "THisto.h"
 #include "TScan.h"
 
-const int kTrigPerTrain = 5;
+const int kTrigPerTrain = 100;
 
 typedef struct __TDataTakingParameters : TScanParameters {
   int nTriggers;

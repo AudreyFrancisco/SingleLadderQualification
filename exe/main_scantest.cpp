@@ -48,16 +48,6 @@
 
 #include <ctime>
 
-TBoardType                   fBoardType;
-std::vector<TReadoutBoard *> fBoards;
-std::vector<THic *>          fHics;
-std::vector<TAlpide *>       fChips;
-TConfig *                    fConfig;
-TDigitalResult *             fResult = new TDigitalResult();
-
-std::deque<TScanHisto> fHistoQue;
-std::mutex             fMutex;
-
 
 void scanLoop(TScan *myScan)
 {
@@ -100,6 +90,17 @@ int main(int argc, char **argv)
 {
 
   decodeCommandParameters(argc, argv);
+
+  TBoardType                   fBoardType;
+  std::vector<TReadoutBoard *> fBoards;
+  std::vector<THic *>          fHics;
+  std::vector<TAlpide *>       fChips;
+  TConfig *                    fConfig;
+  TDigitalResult *             fResult = new TDigitalResult();
+
+  std::deque<TScanHisto> fHistoQue;
+  std::mutex             fMutex;
+
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips, "Config.cfg", &fHics);
 

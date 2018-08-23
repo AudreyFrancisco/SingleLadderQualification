@@ -192,8 +192,12 @@ void TSCurveScan::ConfigureBoard(TReadoutBoard *board)
 void TSCurveScan::ConfigureFromu(TAlpide *chip)
 {
   // chip->WriteRegister(Alpide::REG_FROMU_CONFIG1, 0x20); // analogue pulsing
-  uint16_t data =
-      ((1 << 4) | (1 << 6)) | (1 << 5); // NOTE: TRIGGER HANDLER ON RUV1 IS SENDING PULSES
+  uint16_t data;
+  if (m_boards.at(0)->GetConfig()->GetBoardType() == boardRUv1) {
+    data = ((1 << 4) | (1 << 6)) | (1 << 5); // NOTE: TRIGGER HANDLER ON RUV1 IS SENDING PULSES
+  }
+  else
+    data = 0x20;
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1, data);
   chip->WriteRegister(
       Alpide::REG_FROMU_CONFIG2,

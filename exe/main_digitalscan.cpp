@@ -90,10 +90,10 @@ void InitScanParameters()
 {
 
 
-  myMaskStages     = 512; // fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
-  myPixPerRegion   = 32;  // fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
-  myNTriggers      = 15;  // fConfig->GetScanConfig()->GetParamValue("NINJ");
-  maxTrigsPerTrain = 5;   // fConfig->GetScanConfig()->GetParamValue("MAXNTRIGTRAIN");
+  myMaskStages     = fConfig->GetScanConfig()->GetParamValue("NMASKSTAGES");
+  myPixPerRegion   = fConfig->GetScanConfig()->GetParamValue("PIXPERREGION");
+  myNTriggers      = fConfig->GetScanConfig()->GetParamValue("NINJ");
+  maxTrigsPerTrain = fConfig->GetScanConfig()->GetParamValue("MAXNTRIGTRAIN");
 }
 
 void FillHisto(int board, std::vector<TPixHit> *Hits)
@@ -189,7 +189,14 @@ void WriteDataToFile(const char *fName, bool Recreate)
 // initialisation of Fromu
 int configureFromu(TAlpide *chip)
 {
-  uint16_t data = (1 << 4) | (1 << 6);
+
+
+  uint16_t data;
+  if (fBoards.at(0)->GetConfig()->GetBoardType() == boardRUv1) {
+    data = (1 << 4) | (1 << 6);
+  }
+  else
+    data = 0;
   chip->WriteRegister(Alpide::REG_FROMU_CONFIG1,
                       data); // fromu config 1: digital pulsing (put to 0x20 for analogue)
   chip->WriteRegister(
@@ -260,9 +267,12 @@ void scan()
       for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
         int                itrg      = 0;
         TReadoutBoardRUv1 *boardaroo = dynamic_cast<TReadoutBoardRUv1 *>(fBoards.at(ib));
-        boardaroo->ResetAllCounters();
+        if (boardaroo) {
+          boardaroo->ResetAllCounters();
+          boardaroo->SendStartOfTriggered();
+        }
         fBoards.at(ib)->Trigger(nTrigsPerTrain);
-
+        if (boardaroo) boardaroo->SendEndOfTriggered();
 
         int fEnabled = fEnPerBoard.at(ib);
         while (itrg < nTrigsPerTrain * fEnabled) {
@@ -370,7 +380,6 @@ int main(int argc, char **argv)
 
   TReadoutBoardDAQ * myDAQBoard = dynamic_cast<TReadoutBoardDAQ *>(fBoards.at(0));
   TReadoutBoardRUv1 *theBoard   = dynamic_cast<TReadoutBoardRUv1 *>(fBoards.at(0));
-  theBoard->Initialize(600);
 
 
   if (fBoards.size()) {
@@ -378,8 +387,11 @@ int main(int argc, char **argv)
     fEnPerBoard.resize(fBoards.size());
     for (unsigned int ib = 0; ib < fBoards.size(); ++ib) {
 
-      // fBoards.at(ib)->SendOpCode(Alpide::OPCODE_GRST);
-      // fBoards.at(ib)->SendOpCode(Alpide::OPCODE_PRST);
+      TReadoutBoardRUv1 *theBoard = dynamic_cast<TReadoutBoardRUv1 *>(fBoards.at(ib));
+      if (theBoard) theBoard->Initialize(fChips.at(0)->GetConfig()->GetParamValue("LINKSPEED"));
+
+      fBoards.at(ib)->SendOpCode(Alpide::OPCODE_GRST);
+      fBoards.at(ib)->SendOpCode(Alpide::OPCODE_PRST);
 
       for (unsigned int i = 0; i < fChips.size(); i++) {
         if (fChips.at(i)->GetConfig()->IsEnabled() &&
@@ -423,13 +435,15 @@ int main(int argc, char **argv)
       // rBoard->SetTriggerConfig(true true, 10000, 0);
       //}
       else {
-        rBoard->SetTriggerConfig(true, true, 100, 100);
+        rBoard->SetTriggerConfig(true, true, rBoard->GetConfig()->GetParamValue("STROBEDELAYBOARD"),
+                                 rBoard->GetConfig()->GetParamValue("PULSEDELAY"));
+
         rBoard->SetTriggerSource(trigInt);
       }
     }
-    theBoard->SendStartOfTriggered();
+
+
     scan();
-    theBoard->SendEndOfTriggered();
   }
 
   sprintf(fName, "Data/DigitalScan_%s.dat", Suffix);
@@ -439,7 +453,7 @@ int main(int argc, char **argv)
     myDAQBoard->PowerOff();
     delete myDAQBoard;
   }
-  theBoard->CleanUp();
+  if (theBoard) theBoard->CleanUp();
 
   return 0;
 }

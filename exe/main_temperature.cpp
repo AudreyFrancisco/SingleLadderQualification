@@ -65,12 +65,17 @@ void readBoardTemp()
 {
   TReadoutBoardRUv1 *theBoard = (TReadoutBoardRUv1 *)fBoards.at(0);
 
-  theBoard->sysmon->Write(1, 0, false); // sets sysmon address to be written to (0-> temperature)
-  uint16_t rawtemp = theBoard->sysmon->Read(2);
-  std::cout << "The temperature of the FBGA chip is: "
-            << (rawtemp * 501.3743) / (1 << 16) - 273.6777 << " degrees C \n";
-  std::cout << "\n";
-  std::cout << "Test_temperature: Board temp test finished ! \n";
+  if (theBoard) {
+    theBoard->sysmon->Write(1, 0, false); // sets sysmon address to be written to (0-> temperature)
+    uint16_t rawtemp = theBoard->sysmon->Read(2);
+    std::cout << "The temperature of the FBGA chip is: "
+              << (rawtemp * 501.3743) / (1 << 16) - 273.6777 << " degrees C \n";
+    std::cout << "\n";
+    std::cout << "Test_temperature: Board temp test finished ! \n";
+  }
+
+  else
+    std::cout << "Board temp readout only possible with RUv1!\n";
 }
 
 

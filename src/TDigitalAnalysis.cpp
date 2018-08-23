@@ -75,8 +75,6 @@ string TDigitalAnalysis::GetPreviousTestType()
 
 void TDigitalAnalysis::Initialize()
 {
-  // added this to make ./test_scantest work, you can remove if it's too slow for you
-  usleep(1000000);
   ReadChipList();
   CreateHicResults();
   CreatePrediction();
