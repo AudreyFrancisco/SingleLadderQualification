@@ -358,7 +358,9 @@ def main():
     for channel in range(3):    
         test_ok = test_ok * doIVcurve(HIC_name, sour, channel, max_voltages[channel], nstepss[channel], resistances, path, fileList) 
   
-    saveToDB(myConf, itsDB, lg, HIC_name, test_ok, resistances, fileList)  
+    saveToDB(myConf, itsDB, lg, HIC_name, test_ok, resistances, fileList) 
+
+    open(path+'/DBParameters.dat', 'w').close()    
     
 ## execute the main
 if __name__ == "__main__":
