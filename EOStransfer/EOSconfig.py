@@ -112,7 +112,20 @@ def buildTheDefaultBasePath(Test):
         return(theNewAlpidePath+"/ImpedanceTest/Data")
     elif Test == "OBReception":
         return("")
-
+    elif Test == "IBStave":
+        return(theNewAlpidePath+"/IBStave/Data")
+    elif Test == "OBHalfStaveOL":
+        return(theNewAlpidePath+"/OBHalfStaveOL/Data")
+    elif Test == "OBHalfStaveML":
+        return(theNewAlpidePath+"/OBHalfStaveML/Data")
+    elif Test == "OBStaveOL":
+        return(theNewAlpidePath+"/OBStaveOL/Data")
+    elif Test == "OBStaveML":
+        return(theNewAlpidePath+"/OBStaveML/Data")
+    elif Test == "StaveReceptionOL":
+        return(theNewAlpidePath+"/StaveReceptionOL/Data")
+    elif Test == "StaveReceptionML":
+        return(theNewAlpidePath+"/StaveReceptionML/Data")
     return("")
 
 def _listFolder(path):
@@ -500,8 +513,7 @@ Sites = ["CERN", "Pusan",  "Bari", "Strasbourg", "Liverpool",  "Wuhan",
 ServiceAccount = ["aliceits", "itspusan",  "aliceitsbari", "aliceitssbg", "aliceitslpool",   "aliceitswuhan",
                       "aliceitstrieste", "aliceitscatania", "aliceitstorino","aliceitslbl", "aliceitsdl", "aliceitslnf", "itsnik"]
 TestsName = ["HicTests", "fpc"] # , "hic"]
-HicTestsName = ["IBEndurance", "IBQualification", "OBEndurance", "OBFastPower","OBQualification","OBReception", "OBImpedance"]
-
+HicTestsName = ["IBEndurance", "IBQualification", "OBEndurance", "OBFastPower","OBQualification","OBReception", "OBImpedance","IBStave","OBHalfStaveOL","OBHalfStaveML","OBStaveOL","OBStaveML","StaveReceptionOL","StaveReceptionML"]
 
 def main(argv):
     # read the Configuration
