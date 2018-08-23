@@ -315,6 +315,15 @@ def generateTheEOStransferScript(ServiceAccount, LocalBasePath):
     file.write("fi\n")
     file.write(" \n")
     
+    file.write("# --- Log Rotate ---\n")
+    file.write("FILE_SIZE=`du -b $LOGFILENAME | tr -s '\t' ' ' | cut -d' ' -f1`\n")
+    file.write("if [ $FILE_SIZE -gt 10240000 ];then\n")
+    file.write("  rm ${LOGFILENAME}_bak\n")
+    file.write("  mv $LOGFILENAME ${LOGFILENAME}_bak\n")
+    file.write("  touch $LOGFILENAME\n")
+    file.write("  echo \"Execute Log Rotate !\" \n")
+    file.write("fi\n")
+    
     file.write("# --- create the inclusion list ---\n")
     file.write("ENABLEFILENAME=DBParameters.dat\n")
     file.write("INCLUDEFILE=/tmp/includedir.txt\n")
@@ -322,6 +331,7 @@ def generateTheEOStransferScript(ServiceAccount, LocalBasePath):
     file.write("find $DBATTACHBASEPATH -name $ENABLEFILENAME >$INCLUDEFILE\n")
     file.write("sed -i -e \"s/${CLEANPATH}//g\"  $INCLUDEFILE\n")
     file.write("sed -i -e \"s/${BLOCKFILENAME}//g\" $INCLUDEFILE\n")
+    file.write(" \n")
     
     file.write("# --- performs the rsync, loop for more attempts ---\n")
     file.write("while [ $SYNCATTEMPTS -ne 0 ]; do\n")
