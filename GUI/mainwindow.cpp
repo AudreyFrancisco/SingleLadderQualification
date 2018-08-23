@@ -1237,6 +1237,16 @@ void MainWindow::attachtodatabase()
   }
   delete fDB;
   fDB = new AlpideDB(fDatabasetype);
+  if (!fDB->isDBConnected()) {
+    popup("The activity cannot be found \nin the Database \nCheck your database "
+          "connection\nMaybe you need to renew \nyour ticket\nOr there is problem "
+          "in the db.");
+    fWritedb->setVisible(true);
+    connect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
+
+    return;
+  }
+
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     if (!fHicnames.at(i).isEmpty()) {
       if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {

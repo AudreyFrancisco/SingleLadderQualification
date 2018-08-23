@@ -1207,7 +1207,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>Upload pdf</string>
+         <string>Open pdf</string>
         </property>
        </widget>
        <widget class="QLabel" name="selectedhicname">
