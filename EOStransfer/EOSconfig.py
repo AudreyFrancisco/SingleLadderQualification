@@ -330,7 +330,7 @@ def generateTheEOStransferScript(ServiceAccount, LocalBasePath):
     file.write("CLEANPATH=$(echo $DBATTACHBASEPATH | sed 's/\//\\\\\//g')\n")
     file.write("find -L $DBATTACHBASEPATH -name $ENABLEFILENAME >$INCLUDEFILE\n")
     file.write("sed -i -e 's/${CLEANPATH}//g'  $INCLUDEFILE\n")
-    file.write("sed -i -e 's/${BLOCKFILENAME}//g' $INCLUDEFILE\n")
+    file.write("sed -i -e 's/${ENABLEFILENAME}//g' $INCLUDEFILE\n")
     file.write(" \n")
     
     file.write("# --- performs the rsync, loop for more attempts ---\n")
