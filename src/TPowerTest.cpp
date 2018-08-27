@@ -182,6 +182,11 @@ void TPowerTest::Execute()
     currentIt->second.tripBB = false;
   }
   m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
+  m_testHic->GetPowerBoard()->SetBiasOff(m_testHic->GetBbChannel());
+  THicOB *obHic = dynamic_cast<THicOB *>(m_testHic);
+  if (obHic && obHic->IsPowerCombo()) {
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+  }
 }
 
 void TPowerTest::Terminate()
