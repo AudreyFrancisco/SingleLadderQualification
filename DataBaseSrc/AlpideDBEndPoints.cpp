@@ -39,8 +39,6 @@
  *  9/11/2017   -   Modify the GetParameterList method
  *  11/1/2018   -   Add Assign URIs method
  *  21/02/2018  -   Add the Scientific Notation in the Activity Parameter rappresentation
- *  20/08/2018  -   Free the XML Doc allocation, prevents memory leak (Paul suggestion)
- *  20/08/2018  -   Dump the parser Error in to a Debug File
  *
  */
 
@@ -87,25 +85,26 @@ AlpideTable::~AlpideTable() {}
 // TODO: Need to make two routines to decode the response in order to be compliant with SOAP/POST
 // versions.
 
-AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, const char *aQuery,
-                                                   int Session)
+AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, int Session)
 {
   bool      bGoChildren = false;
   xmlDocPtr doc;
   doc =
-      xmlReadMemory(ReturnedString, strlen(ReturnedString), "noname.xml", NULL,
-                    XML_PARSE_NOERROR + XML_PARSE_NOWARNING + XML_PARSE_PEDANTIC); // parse the XML
+      xmlReadMemory(ReturnedString, strlen(ReturnedString), "noname.xml", NULL, 0); // parse the XML
   if (doc == NULL) {
-    DumpXMLError("Failed to parse document", aQuery, ReturnedString);
+    cerr << "Failed to parse document. Dump the response :" << endl;
+    cerr << ReturnedString << endl;
+    cerr << "------- EOF -------" << endl;
     SetResponse(AlpideTable::BadXML, 0, Session);
     return (&theResponse);
   }
   xmlNode *root_element = NULL;
   root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
-    DumpXMLError("Invalid XML format, no root node", aQuery, ReturnedString);
+    cerr << "Failed to parse document: No root element. Dump the response:" << endl;
+    cerr << ReturnedString << endl;
+    cerr << "------- EOF -------" << endl;
     SetResponse(AlpideTable::BadXML, 0, Session);
-    xmlFreeDoc(doc);
     return (&theResponse);
   }
   xmlNode *n1 = root_element->children;
@@ -134,7 +133,6 @@ AlpideTable::response *AlpideTable::DecodeResponse(char *ReturnedString, const c
     }
   }
   theResponse.Session = Session;
-  xmlFreeDoc(doc);
   return (&theResponse);
 }
 
@@ -181,40 +179,18 @@ const char *AlpideTable::DumpResponse()
   return (theGeneralBuffer.c_str());
 }
 
-void AlpideTable::DumpXMLError(const char *aDescription, const char *aQuery, const char *aResponse)
-{
-  char theErrorFileName[FILENAME_MAX];
-  sprintf(theErrorFileName, "Data/DBXMLError_%s.dat", getTimeStamp().c_str());
-  FILE *fh;
-  fh = fopen(theErrorFileName, "w");
-  if (fh == NULL) {
-    cerr << "Failed to open the file " << theErrorFileName << endl;
-    return;
-  }
-  fprintf(fh, "XML Error : %s\n", aDescription);
-  fprintf(fh, "The DB Query : '%s'\n", aQuery);
-  fprintf(fh, "The Returned string :\n");
-  fprintf(fh, "%s\n", aResponse);
-  fprintf(fh, "------ EOF -----\n");
-  fclose(fh);
-  return;
-}
-
-
 /* --------------------
  *
  *    Parse the XML file and returns the first Child Node
  *
  *
   -------------------- */
-bool AlpideTable::_getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod,
-                                             const char *aQuery)
+bool AlpideTable::_getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod)
 {
   // parse the XML
-  *doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL,
-                       XML_PARSE_NOERROR + XML_PARSE_NOWARNING + XML_PARSE_PEDANTIC);
+  *doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0);
   if (*doc == NULL) {
-    DumpXMLError("Failed to parse document", aQuery, stringresult);
+    cerr << "Failed to parse document" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
     *nod = NULL;
     return (false);
@@ -224,10 +200,9 @@ bool AlpideTable::_getTheRootElementChildren(char *stringresult, xmlDocPtr *doc,
   xmlNode *root_element = NULL;
   root_element          = xmlDocGetRootElement(*doc);
   if (root_element == NULL) {
-    DumpXMLError("Invalid XML format, no root node", aQuery, stringresult);
+    cerr << "Failed Bad XML format no root element" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
     *nod = NULL;
-    xmlFreeDoc(*doc);
     return (false);
   }
   *nod = root_element->children;
@@ -267,10 +242,9 @@ AlpideTable::response *ProjectDB::GetList(vector<project> *Result)
     return (&theResponse);
   }
   xmlDocPtr doc;
-  doc = xmlReadMemory(result, strlen(result), "noname.xml", NULL,
-                      XML_PARSE_NOERROR + XML_PARSE_NOWARNING + XML_PARSE_PEDANTIC);
+  doc = xmlReadMemory(result, strlen(result), "noname.xml", NULL, 0); // parse the XML
   if (doc == NULL) {
-    DumpXMLError("Failed to parse document", theQuery.c_str(), result);
+    cerr << "Failed to parse document" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
   }
@@ -279,9 +253,7 @@ AlpideTable::response *ProjectDB::GetList(vector<project> *Result)
   xmlNode *root_element = NULL;
   root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
-    DumpXMLError("Invalid XML format, no root node", theQuery.c_str(), result);
     SetResponse(AlpideTable::BadXML, 0, 0);
-    xmlFreeDoc(doc);
     return (&theResponse);
   }
 
@@ -303,8 +275,10 @@ AlpideTable::response *ProjectDB::GetList(vector<project> *Result)
   }
 
   free(result);
-  SetResponse(AlpideTable::NoError, 0, 0);
   xmlFreeDoc(doc); // free document
+  xmlCleanupParser();
+
+  SetResponse(AlpideTable::NoError, 0, 0);
   return (&theResponse);
 }
 
@@ -341,10 +315,9 @@ AlpideTable::response *MemberDB::GetList(int projectID, vector<member> *Result)
     return (&theResponse);
   }
   xmlDocPtr doc;
-  doc = xmlReadMemory(result, strlen(result), "noname.xml", NULL,
-                      XML_PARSE_NOERROR + XML_PARSE_NOWARNING + XML_PARSE_PEDANTIC);
+  doc = xmlReadMemory(result, strlen(result), "noname.xml", NULL, 0); // parse the XML
   if (doc == NULL) {
-    DumpXMLError("Failed to parse document", theQuery.c_str(), result);
+    cerr << "Failed to parse document" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
   }
@@ -353,9 +326,8 @@ AlpideTable::response *MemberDB::GetList(int projectID, vector<member> *Result)
   xmlNode *root_element = NULL;
   root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
-    DumpXMLError("Invalid XML format, no root node", theQuery.c_str(), result);
+    cerr << "Failed Bad XML format no root element" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
-    xmlFreeDoc(doc);
     return (&theResponse);
   }
   xmlNode *nod = root_element->children;
@@ -377,8 +349,10 @@ AlpideTable::response *MemberDB::GetList(int projectID, vector<member> *Result)
   }
 
   free(result);
-  SetResponse(AlpideTable::NoError, 0, 0);
   xmlFreeDoc(doc); // free document
+  xmlCleanupParser();
+
+  SetResponse(AlpideTable::NoError, 0, 0);
   return (&theResponse);
 }
 
@@ -418,10 +392,9 @@ AlpideTable::response *ComponentDB::GetTypeList(int ProjectID, vector<componentT
   }
 
   xmlDocPtr doc;
-  doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL,
-                      XML_PARSE_NOERROR + XML_PARSE_NOWARNING + XML_PARSE_PEDANTIC);
+  doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
   if (doc == NULL) {
-    DumpXMLError("Failed to parse document", theQuery.c_str(), stringresult);
+    cerr << "Failed to parse document" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
   }
@@ -430,9 +403,7 @@ AlpideTable::response *ComponentDB::GetTypeList(int ProjectID, vector<componentT
   xmlNode *root_element = NULL;
   root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
-    DumpXMLError("Invalid XML format, no root node", theQuery.c_str(), stringresult);
     SetResponse(AlpideTable::BadXML, 0, 0);
-    xmlFreeDoc(doc);
     return (&theResponse);
   }
 
@@ -448,8 +419,10 @@ AlpideTable::response *ComponentDB::GetTypeList(int ProjectID, vector<componentT
   }
 
   free(stringresult);
-  SetResponse(AlpideTable::NoError, 0, 0);
   xmlFreeDoc(doc); // free document
+  xmlCleanupParser();
+
+  SetResponse(AlpideTable::NoError, 0, 0);
   return (&theResponse);
 }
 
@@ -563,10 +536,9 @@ AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *
     return (&theResponse);
   }
   xmlDocPtr doc;
-  doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL,
-                      XML_PARSE_NOERROR + XML_PARSE_NOWARNING + XML_PARSE_PEDANTIC);
+  doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
   if (doc == NULL) {
-    DumpXMLError("Failed to parse document", theQuery.c_str(), stringresult);
+    cerr << "Failed to parse document" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
   }
@@ -574,9 +546,7 @@ AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *
   xmlNode *root_element = NULL;
   root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
-    DumpXMLError("Invalid XML format, no root node", theQuery.c_str(), stringresult);
     SetResponse(AlpideTable::BadXML, 0, 0);
-    xmlFreeDoc(doc);
     return (&theResponse);
   }
 
@@ -584,7 +554,6 @@ AlpideTable::response *ComponentDB::GetType(int ComponentTypeID, componentType *
   extractTheComponentType(n1, Result);
 
   SetResponse(AlpideTable::NoError, 0, 0);
-  xmlFreeDoc(doc);
   return (&theResponse);
 }
 
@@ -608,7 +577,7 @@ AlpideTable::response *ComponentDB::Create(string ComponentTypeID, string Compon
     SetResponse(AlpideTable::SyncQuery);
   }
   else {
-    DecodeResponse(stringresult, theQuery.c_str());
+    DecodeResponse(stringresult);
   }
   return (&theResponse);
 }
@@ -743,10 +712,9 @@ AlpideTable::response *ComponentDB::readComponent(string ID, string ComponentID,
     return (&theResponse);
   }
   xmlDocPtr doc;
-  doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL,
-                      XML_PARSE_NOERROR + XML_PARSE_NOWARNING + XML_PARSE_PEDANTIC);
+  doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
   if (doc == NULL) {
-    DumpXMLError("Failed to parse document", theQuery.c_str(), stringresult);
+    cerr << "Failed to parse document" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
   }
@@ -754,9 +722,7 @@ AlpideTable::response *ComponentDB::readComponent(string ID, string ComponentID,
   xmlNode *root_element = NULL;
   root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
-    DumpXMLError("Invalid XML format, no root node", theQuery.c_str(), stringresult);
     SetResponse(AlpideTable::BadXML, 0, 0);
-    xmlFreeDoc(doc);
     return (&theResponse);
   }
 
@@ -764,7 +730,6 @@ AlpideTable::response *ComponentDB::readComponent(string ID, string ComponentID,
   extractTheComponent(n1, Result);
 
   SetResponse(AlpideTable::NoError, 0, 0);
-  xmlFreeDoc(doc);
   return (&theResponse);
 }
 
@@ -788,10 +753,9 @@ AlpideTable::response *ComponentDB::readComponents(std::string             Proje
     return (&theResponse);
   }
   xmlDocPtr doc;
-  doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL,
-                      XML_PARSE_NOERROR + XML_PARSE_NOWARNING + XML_PARSE_PEDANTIC);
+  doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
   if (doc == NULL) {
-    DumpXMLError("Failed to parse document", theQuery.c_str(), stringresult);
+    cerr << "Failed to parse document" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
   }
@@ -799,9 +763,7 @@ AlpideTable::response *ComponentDB::readComponents(std::string             Proje
   xmlNode *root_element = NULL;
   root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
-    DumpXMLError("Invalid XML format, no root node", theQuery.c_str(), stringresult);
     SetResponse(AlpideTable::BadXML, 0, 0);
-    xmlFreeDoc(doc);
     return (&theResponse);
   }
 
@@ -854,7 +816,6 @@ AlpideTable::response *ComponentDB::readComponents(std::string             Proje
     n1 = n1->next;
   }
   SetResponse(AlpideTable::NoError, 0, 0);
-  xmlFreeDoc(doc);
   return (&theResponse);
 }
 
@@ -958,10 +919,9 @@ AlpideTable::response *ComponentDB::readComponentActivities(int ID, vector<compA
     return (&theResponse);
   }
   xmlDocPtr doc;
-  doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL,
-                      XML_PARSE_NOERROR + XML_PARSE_NOWARNING + XML_PARSE_PEDANTIC);
+  doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
   if (doc == NULL) {
-    DumpXMLError("Failed to parse document", theQuery.c_str(), stringresult);
+    cerr << "Failed to parse document" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
   }
@@ -969,9 +929,7 @@ AlpideTable::response *ComponentDB::readComponentActivities(int ID, vector<compA
   xmlNode *root_element = NULL;
   root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
-    DumpXMLError("Invalid XML format, no root node", theQuery.c_str(), stringresult);
     SetResponse(AlpideTable::BadXML, 0, 0);
-    xmlFreeDoc(doc);
     return (&theResponse);
   }
 
@@ -979,7 +937,6 @@ AlpideTable::response *ComponentDB::readComponentActivities(int ID, vector<compA
   extractTheActivityList(n1, Result);
 
   SetResponse(AlpideTable::NoError, 0, 0);
-  xmlFreeDoc(doc);
   return (&theResponse);
 }
 
@@ -1062,7 +1019,7 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     return (&theResponse);
   }
   else {
-    DecodeResponse(stringresult, theQuery.c_str());
+    DecodeResponse(stringresult);
     if (theResponse.ErrorCode != 0) cerr << "Activity creation Error :" << DumpResponse() << endl;
     if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
     aActivity->ID = theResponse.ID;
@@ -1081,7 +1038,7 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
       return (&theResponse);
     }
     else {
-      DecodeResponse(stringresult, theQuery.c_str());
+      DecodeResponse(stringresult);
       if (theResponse.ErrorCode != 0) cerr << "Activity Member Error :" << DumpResponse() << endl;
       if (VERBOSITYLEVEL == 1) cout << "Activity Member creation  :" << DumpResponse() << endl;
       aActivity->Members.at(i).ID = theResponse.ID;
@@ -1111,7 +1068,7 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
       return (&theResponse);
     }
     else {
-      DecodeResponse(stringresult, theQuery.c_str());
+      DecodeResponse(stringresult);
       if (theResponse.ErrorCode != 0)
         cerr << "Activity Parameter Error (id " << aActivity->Parameters.at(i).ActivityParameter
              << "=" << aActivity->Parameters.at(i).Value << ")  : " << DumpResponse() << endl;
@@ -1167,7 +1124,7 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
       return (&theResponse);
     }
     else {
-      DecodeResponse(stringresult, theQuery.c_str());
+      DecodeResponse(stringresult);
       if (theResponse.ErrorCode != 0)
         cerr << "Activity Attachment Error :" << DumpResponse() << endl;
       if (VERBOSITYLEVEL == 1) cout << "Activity Attachment creation :" << DumpResponse() << endl;
@@ -1302,7 +1259,7 @@ ActivityDB::response *ActivityDB::Change(activity *aActivity)
     return (&theResponse);
   }
   else {
-    DecodeResponse(stringresult, theQuery.c_str());
+    DecodeResponse(stringresult);
     if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
     aActivity->ID = theResponse.ID;
   }
@@ -1335,7 +1292,7 @@ ActivityDB::response *ActivityDB::AssignComponent(int aActivityID, int aComponen
     return (&theResponse);
   }
   else {
-    DecodeResponse(stringresult, theQuery.c_str());
+    DecodeResponse(stringresult);
     if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
     //   SetResponse(AlpideTable::NoError);
   }
@@ -1365,7 +1322,7 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aAc
   else {
     xmlDocPtr doc;
     xmlNode * nod;
-    if (_getTheRootElementChildren(stringresult, &doc, &nod, theQuery.c_str())) {
+    if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "Parameters")) {
           xmlNode *n1 = nod->children;
@@ -1401,6 +1358,7 @@ std::vector<ActivityDB::parameterType> *ActivityDB::GetParameterTypeList(int aAc
     }
     free(stringresult);
     xmlFreeDoc(doc); // free document
+    xmlCleanupParser();
   }
   return (theParamList);
 }
@@ -1428,7 +1386,7 @@ std::vector<ActivityDB::activityType> *ActivityDB::GetActivityTypeList(int aProj
   else {
     xmlDocPtr doc;
     xmlNode * nod;
-    if (_getTheRootElementChildren(stringresult, &doc, &nod, theQuery.c_str())) {
+    if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "ActivityType")) {
           xmlNode *n1 = nod->children;
@@ -1450,6 +1408,7 @@ std::vector<ActivityDB::activityType> *ActivityDB::GetActivityTypeList(int aProj
     }
     free(stringresult);
     xmlFreeDoc(doc); // free document
+    xmlCleanupParser();
   }
   return (theTypeList);
 }
@@ -1477,7 +1436,7 @@ std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActi
   else {
     xmlDocPtr doc;
     xmlNode * nod;
-    if (_getTheRootElementChildren(stringresult, &doc, &nod, theQuery.c_str())) {
+    if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "Location")) {
           xmlNode *n1 = nod->children;
@@ -1503,6 +1462,7 @@ std::vector<ActivityDB::locationType> *ActivityDB::GetLocationTypeList(int aActi
     }
     free(stringresult);
     xmlFreeDoc(doc); // free document
+    xmlCleanupParser();
   }
   return (theLocationList);
 }
@@ -1530,7 +1490,7 @@ std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList()
   else {
     xmlDocPtr doc;
     xmlNode * nod;
-    if (_getTheRootElementChildren(stringresult, &doc, &nod, theQuery.c_str())) {
+    if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "AttachmentCatagory")) {
           xmlNode *n1 = nod->children;
@@ -1551,6 +1511,7 @@ std::vector<ActivityDB::attachmentType> *ActivityDB::GetAttachmentTypeList()
     }
     free(stringresult);
     xmlFreeDoc(doc); // free document
+    xmlCleanupParser();
   }
   return (theAttachmentList);
 }
@@ -1579,7 +1540,7 @@ std::vector<ActivityDB::actTypeCompType> *ActivityDB::GetComponentTypeList(int a
   else {
     xmlDocPtr doc;
     xmlNode * nod;
-    if (_getTheRootElementChildren(stringresult, &doc, &nod, theQuery.c_str())) {
+    if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "ActivityTypeComponentType")) {
           xmlNode *n1 = nod->children;
@@ -1617,6 +1578,7 @@ std::vector<ActivityDB::actTypeCompType> *ActivityDB::GetComponentTypeList(int a
     }
     free(stringresult);
     xmlFreeDoc(doc); // free document
+    xmlCleanupParser();
   }
   return (theCompoList);
 }
@@ -1645,7 +1607,7 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityType
   else {
     xmlDocPtr doc;
     xmlNode * nod;
-    if (_getTheRootElementChildren(stringresult, &doc, &nod, theQuery.c_str())) {
+    if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "Result")) {
           xmlNode *n1 = nod->children;
@@ -1671,6 +1633,7 @@ std::vector<ActivityDB::resultType> *ActivityDB::GetResultList(int aActivityType
     }
     free(stringresult);
     xmlFreeDoc(doc); // free document
+    xmlCleanupParser();
   }
   return (theResultList);
 }
@@ -1699,7 +1662,7 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityType
   else {
     xmlDocPtr doc;
     xmlNode * nod;
-    if (_getTheRootElementChildren(stringresult, &doc, &nod, theQuery.c_str())) {
+    if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "Status")) {
           xmlNode *n1 = nod->children;
@@ -1727,6 +1690,7 @@ std::vector<ActivityDB::statusType> *ActivityDB::GetStatusList(int aActivityType
     }
     free(stringresult);
     xmlFreeDoc(doc); // free document
+    xmlCleanupParser();
   }
   return (theStatusList);
 }
@@ -1756,7 +1720,7 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
   else {
     xmlDocPtr doc;
     xmlNode * nod;
-    if (_getTheRootElementChildren(stringresult, &doc, &nod, theQuery.c_str())) {
+    if (_getTheRootElementChildren(stringresult, &doc, &nod)) {
       while (nod != NULL) {
         if (MATCHNODE(nod, "Activity")) {
           xmlNode *n1 = nod->children;
@@ -1804,6 +1768,7 @@ std::vector<ActivityDB::activityShort> *ActivityDB::GetActivityList(int aProject
     }
     free(stringresult);
     xmlFreeDoc(doc); // free document
+    xmlCleanupParser();
   }
   return (theActList);
 }
@@ -2089,10 +2054,9 @@ AlpideTable::response *ActivityDB::readActivity(string ID, activityLong *Result)
     return (&theResponse);
   }
   xmlDocPtr doc;
-  doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL,
-                      XML_PARSE_NOERROR + XML_PARSE_NOWARNING + XML_PARSE_PEDANTIC);
+  doc = xmlReadMemory(stringresult, strlen(stringresult), "noname.xml", NULL, 0); // parse the XML
   if (doc == NULL) {
-    DumpXMLError("Failed to parse document", theQuery.c_str(), stringresult);
+    cerr << "Failed to parse document" << endl;
     SetResponse(AlpideTable::BadXML, 0, 0);
     return (&theResponse);
   }
@@ -2100,9 +2064,7 @@ AlpideTable::response *ActivityDB::readActivity(string ID, activityLong *Result)
   xmlNode *root_element = NULL;
   root_element          = xmlDocGetRootElement(doc);
   if (root_element == NULL) {
-    DumpXMLError("Invalid XML format, no root node", theQuery.c_str(), stringresult);
     SetResponse(AlpideTable::BadXML, 0, 0);
-    xmlFreeDoc(doc);
     return (&theResponse);
   }
 
@@ -2110,7 +2072,6 @@ AlpideTable::response *ActivityDB::readActivity(string ID, activityLong *Result)
   extractTheActivity(n1, Result);
 
   SetResponse(AlpideTable::NoError, 0, 0);
-  xmlFreeDoc(doc);
   return (&theResponse);
 }
 

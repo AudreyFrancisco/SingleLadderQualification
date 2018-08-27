@@ -6,11 +6,8 @@
  */
 #include "utilities.h"
 #include <algorithm>
-#include <iostream>
 #include <stdio.h>
-#include <string>
 #include <sys/stat.h>
-#include <time.h>
 #include <unistd.h>
 
 bool fileExists(string filewithpath)
@@ -154,14 +151,4 @@ std::string float2str(float value)
     pt++;
   }
   return std::string(valueCharArray);
-}
-
-std::string getTimeStamp()
-{
-  time_t    now = time(0);
-  struct tm tstruct;
-  char      buf[80];
-  tstruct = *localtime(&now);
-  strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", &tstruct);
-  return std::string(buf);
 }

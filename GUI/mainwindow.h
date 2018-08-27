@@ -87,7 +87,6 @@ public slots:
   void fillingfastpower();
   void fillingHSscans();
   void ibscansforageing();
-  void uploadpdf();
 
   void continuescans()
   {
@@ -124,7 +123,6 @@ private:
   std::mutex                   fMutex;
   TConfig *                    fConfig;
   std::deque<TScanHisto>       fHistoQue;
-  THic *                       fSelectedHic;
   void                         color(int side, int pos, bool ok);
   void                         color_IB(int position, bool ok);
   int                          fCounter;
@@ -152,8 +150,6 @@ private:
   std::vector<TScanResult *>   fresultVector;
   std::vector<THic *>          fHICs;
   //  void fillingvectors();
-  int                                                   fSelectedHicIndex;
-  std::string                                           fPdf;
   std::vector<std::string>                              fMapdetails;
   std::vector<pair<std::string, const TResultVariable>> fMapd;
   TTestType                                             fNumberofscan;
@@ -195,7 +191,6 @@ private:
   void     printClasses();
   int      GetTime();
   void     button_obm_clicked(int aModule);
-  void     button_fEndurancemodules_clicked(int index);
   QAction *fWritedb;
   QFile *  fMfile;
   std::vector<pair<int, int>> fActComponentTypeIDs;

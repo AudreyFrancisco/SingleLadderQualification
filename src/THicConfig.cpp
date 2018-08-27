@@ -44,20 +44,18 @@ int THicConfig::GetParamValue(std::string Name)
 
 THicConfigOB::THicConfigOB(TConfig *config, int modId) : THicConfig(config, modId)
 {
-  fEnabledA8    = true;
-  fEnabledB0    = true;
-  fHSPosById    = GetModId();
-  fPoweredCombo = false;
+  fEnabledA8 = true;
+  fEnabledB0 = true;
+  fHSPosById = GetModId();
 
   InitParamMap();
 }
 
 void THicConfigOB::InitParamMap()
 {
-  fSettings["ENSIDEA8"]   = &fEnabledA8;
-  fSettings["ENSIDEB0"]   = &fEnabledB0;
-  fSettings["HSPOSBYID"]  = &fModId; // Use modId as position in HS by default
-  fSettings["POWERCOMBO"] = &fPoweredCombo;
+  fSettings["ENSIDEA8"]  = &fEnabledA8;
+  fSettings["ENSIDEB0"]  = &fEnabledB0;
+  fSettings["HSPOSBYID"] = &fModId; // Use modId as position in HS by default
 
   THicConfig::InitParamMap();
 }

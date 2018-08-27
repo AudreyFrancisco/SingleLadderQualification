@@ -25,12 +25,10 @@
 #include "testingprogress.h"
 #include "testselection.h"
 #include <QCoreApplication>
-#include <QDesktopServices>
 #include <QFile>
 #include <QFileDialog>
 #include <QMenuBar>
 #include <QPixmap>
-#include <QUrl>
 #include <QtDebug>
 #include <QtWidgets>
 #include <chrono>
@@ -83,12 +81,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     obm.at(idx)->setStyleSheet("background-color:red;");
     connect(obm.at(idx), &QPushButton::clicked, [=] { button_obm_clicked(idx + 1); });
   }
-
-  ui->upload->hide();
-  ui->selectedhicname->hide();
-  ui->selectedscan_name->hide();
-  ui->selectedhicnametext->hide();
-  ui->selectedscan_nametext->hide();
   ui->OBModule->hide();
   ui->IBModule->hide();
   ui->OBHALFSTAVE->hide();
@@ -125,7 +117,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(quit, &QAction::triggered, this, &MainWindow::close);
   QAction *newdebug = new QAction("&Debug mode", this);
   connect(newdebug, SIGNAL(triggered()), this, SLOT(start_debug()));
-  connect(ui->upload, SIGNAL(clicked()), this, SLOT(uploadpdf()));
 
   // build menu (based on actions)
   QMenu *menu = menuBar()->addMenu("&Actions");
@@ -242,11 +233,6 @@ void MainWindow::open()
                         fBottomfour, fBottomthree, fBottomtwo, fBottomone});
       fEndurancemodules.assign({ui->top5, ui->top4, ui->top3, ui->top2, ui->top1, ui->down5,
                                 ui->down4, ui->down3, ui->down2, ui->down1});
-
-      for (uint c = 0; c < fEndurancemodules.size(); ++c) {
-        connect(fEndurancemodules.at(c), &QPushButton::clicked,
-                [=] { button_fEndurancemodules_clicked(c); });
-      }
     }
     if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
         fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
@@ -373,9 +359,7 @@ void MainWindow::open()
         }
       }
     }
-    ui->selectedhicnametext->setText(fHicnames[0]);
-    fSelectedHicIndex = 0;
-    fSelectedHic      = fHICs.at(0);
+
     fConfig->GetScanConfig()->SetUseDataPath(true);
     fPb = fHICs.at(0)->GetPowerBoard();
     if (fPb) {
@@ -446,8 +430,6 @@ void MainWindow::open()
 void MainWindow::button_obm_clicked(int aModule)
 {
   fChkBtnObm[aModule - 1] = true;
-  fSelectedHic            = fHICs.at(aModule - 1);
-  fSelectedHicIndex       = aModule - 1;
   ui->OBModule->show();
   ui->modulenumber->setText(QVariant(aModule).toString());
   if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < aModule) {
@@ -541,6 +523,8 @@ void MainWindow::scanLoop(TScan *myScan)
           myScan->PrepareStep(1);
           myScan->LoopStart(0);
 
+          // YOU DIDNT SEE ANYTHING
+
           while (myScan->Loop(0)) {
             myScan->PrepareStep(0);
             myScan->Execute();
@@ -603,11 +587,7 @@ void MainWindow::start_test()
   fPbcfgcheck = nullptr;
   delete fCalwindow;
   fCalwindow = nullptr;
-  ui->upload->hide();
-  ui->selectedhicname->hide();
-  ui->selectedscan_name->hide();
-  ui->selectedhicnametext->hide();
-  ui->selectedscan_nametext->hide();
+
   ui->OBModule->hide();
   ui->OBHALFSTAVE->hide();
   ui->IBModule->hide();
@@ -953,33 +933,10 @@ void MainWindow::StopScan() { fScanAbort = true; }
 
 void MainWindow::getresultdetails(int i)
 {
-
   fMapdetails.clear();
   fMapd.clear();
   ui->details->clear();
   fScanposition = i;
-
-  ui->upload->hide();
-
-
-  TScanResultHic *selectedhicresult =
-      fresultVector.at(fScanposition)->GetHicResult(fHicnames.at(fSelectedHicIndex).toStdString());
-  ui->selectedscan_nametext->setText(fScanVector.at(fScanposition)->GetName());
-  ui->selectedhicnametext->setText(fHicnames[fSelectedHicIndex]);
-
-  if (fSelectedHic) {
-    if (selectedhicresult->HasPDF()) {
-
-      fPdf = selectedhicresult->GetPDFPath();
-      ui->upload->show();
-    }
-  }
-
-  ui->selectedhicname->show();
-  ui->selectedhicnametext->show();
-  ui->selectedscan_name->show();
-  ui->selectedscan_nametext->show();
-
 
   std::map<const char *, TResultVariable> myvariables;
   myvariables = fAnalysisVector.at(fScanposition)->GetVariableList();
@@ -1107,13 +1064,11 @@ void MainWindow::detailscombo(int dnumber)
 
   for (unsigned int i = 0; i < fChips.size(); i++) {
     if (fChips[i]->GetConfig()->IsEnabled()) {
-      int   tautotita = fChips[i]->GetConfig()->GetChipId() & 0xf;
-      THic *hic       = fChips.at(i)->GetHic();
-      if (hic == fSelectedHic) {
-        TScanResultHic *result = fresultVector.at(fScanposition)->GetHicResult(hic->GetDbId());
-        std::cout << "The variable value of chip with ID " << tautotita
-                  << " is: " << result->GetVariable(tautotita, rvar) << std::endl;
-      }
+      int             tautotita = fChips[i]->GetConfig()->GetChipId() & 0xf;
+      THic *          hic       = fChips.at(i)->GetHic();
+      TScanResultHic *result    = fresultVector.at(fScanposition)->GetHicResult(hic->GetDbId());
+      std::cout << "The variable value of chip with ID " << tautotita
+                << " is: " << result->GetVariable(tautotita, rvar) << std::endl;
     }
   }
 }
@@ -1963,7 +1918,7 @@ void MainWindow::fillingibvectors()
 {
   ClearVectors();
   AddScan(STPower);
-  // if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
+  if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   // Do this scan immediately after power as it sometimes crashes
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   // IBParameterScan();
@@ -1976,6 +1931,7 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetVoltageScale(1.0);
   fConfig->GetScanConfig()->SetMlvdsStrength(ChipConfig::DCTRL_DRIVER);
   AddScan(STDigital);
+
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
   AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(0.9);
@@ -2022,7 +1978,7 @@ void MainWindow::fillingibvectors()
   AddScan(STApplyITHR, fresultVector.back());
   AddScan(STThreshold);
 
-  // noise occupancy with and without mask at 3V back bias
+  // noise occupancy with and without mask at 3V back biasx
   AddScan(STNoise);
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
@@ -2051,35 +2007,31 @@ void MainWindow::fillingibvectors()
   fConfig->GetScanConfig()->SetBackBias(0.0);
   fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 3);
   fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 15);
-  AddScan(STEyeScan);
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 2);
+  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 12);
   fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
-  AddScan(STEyeScan);
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 2);
-  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 8);
-  AddScan(STEyeScan);
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 1);
-  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 5);
   AddScan(STEyeScan);
 
   // readout tests
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 8);
   fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
   AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 2);
-  AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 3);
+
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
   fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 15);
   AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 10);
+  fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 1200);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 15);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 15);
   AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 2);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 8);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 12);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 15);
   AddScan(STReadout);
-  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 1);
-  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 5);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 6);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 15);
+  AddScan(STReadout);
+  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 4);
+  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 15);
   AddScan(STReadout);
   //  fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", 8);
   //  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
@@ -2100,9 +2052,10 @@ void MainWindow::fillingibvectors()
   //  fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", 0);
   //  AddScan(STReadout);
 
-  // reset previous values
-  // (TODO: this is not exactly correct because it resets to the values defined in the header file
-  // and ignores the settings in the config file)
+  // reset previous values  // (TODO: this is not exactly correct because it resets to the values
+  // defined in the header file
+  // and
+  // ignores the settings in the config file)
   fConfig->GetScanConfig()->SetParamValue("READOUTSPEED", 600);
   fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", ChipConfig::DTU_DRIVER);
   fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", ChipConfig::DTU_PREEMP);
@@ -2437,37 +2390,4 @@ void MainWindow::readSettings()
   resize(settings.value("size", QSize(1373, 890)).toSize());
   move(settings.value("pos", QPoint(200, 200)).toPoint());
   settings.endGroup();
-}
-
-
-void MainWindow::uploadpdf()
-{
-
-
-  QString qstr = QString::fromStdString(fPdf);
-
-  QDesktopServices::openUrl(QUrl(qstr, QUrl::TolerantMode));
-}
-
-
-void MainWindow::button_fEndurancemodules_clicked(int index)
-{
-  fSelectedHic      = fHICs.at(index);
-  fSelectedHicIndex = index;
-  ui->OBModule->show();
-  if (fConfig->GetScanConfig()->GetParamValue("NMODULES") < index + 1) {
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 7; j++) {
-        color(i, j, false);
-      }
-    }
-  }
-  for (unsigned int i = 0; i < fChips.size(); i++) {
-    int     chipid;
-    uint8_t module, side, pos;
-    chipid = fChips.at(i)->GetConfig()->GetChipId();
-    DecodeId(chipid, module, side, pos);
-    if (fChips.at(i)->GetHic() == fSelectedHic)
-      color(side, pos, fChips.at(i)->GetConfig()->IsEnabled());
-  }
 }

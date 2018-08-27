@@ -79,16 +79,14 @@ public:
   explicit AlpideTable(AlpideDB *DBhandle);
   virtual ~AlpideTable();
   response    GetResponse() { return theResponse; }
-  response *  DecodeResponse(char *returnedString, const char *query, int Session = 0);
+  response *  DecodeResponse(char *returnedString, int Session = 0);
   void        SetResponse(AlpideTable::ErrorCode, int ID = 0, int Session = 0);
   const char *DumpResponse();
-  void        DumpXMLError(const char *aDescription, const char *aQuery, const char *aResponse);
   bool        isParameterScientificNotation() { return (isScienNotation); }
   void        setParameterScientificNotation(bool isSet = true) { isScienNotation = isSet; }
 
 protected:
-  bool _getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod,
-                                  const char *aQuery);
+  bool _getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod);
 };
 
 class ProjectDB : public AlpideTable {

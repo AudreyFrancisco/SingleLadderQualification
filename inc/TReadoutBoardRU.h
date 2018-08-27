@@ -98,7 +98,8 @@ public:
   // Initialize Readout Unit to start readout with given configuration
   int Initialize();
 
-  void                    registeredWrite(uint16_t module, uint16_t address, uint16_t data);
+  void registeredWrite(uint16_t module, uint16_t address, uint16_t data);
+
   void                    registeredRead(uint16_t module, uint16_t address);
   bool                    flush();
   void                    readFromPort(uint8_t port, size_t size, UsbDev::DataBuffer &buffer);

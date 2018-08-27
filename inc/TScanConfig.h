@@ -51,7 +51,7 @@ namespace ScanConfig {
   const int N_MASK_STAGES  = 3;
   const int PIX_PER_REGION = 32;
   const int NOISECUT_INV   = 100000; // inverse of pixel noise cut (e.g. 100000 = 1e-5)
-  const int MAXTIMEOUT     = 100;
+  const int MAXTIMEOUT     = 5;
   const int MAXHITS        = 40000000; // max number of hits in hit vector; 40 Mio ~ 1GB
 
   const int ITHR_START  = 30;
