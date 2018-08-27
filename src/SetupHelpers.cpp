@@ -201,11 +201,11 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
     THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(ihic);
     positionMap[ihic]         = hicOBconfig->GetParamValue("HSPOSBYID");
-    int bbChannel =
-        hicOBconfig->GetParamValue("POWERCOMBO") ? biasbusMap[positionMap[ihic] - 1] : -1;
+    bool useCombo             = hicOBconfig->GetParamValue("POWERCOMBO");
+    int  bbChannel            = useCombo ? biasbusMap[positionMap[ihic] - 1] : -1;
     if (hicIds) {
       hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb,
-                                 positionMap[ihic] - 1, bbChannel));
+                                 positionMap[ihic] - 1, bbChannel, useCombo));
     }
     else {
       hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic + 1)).c_str(),

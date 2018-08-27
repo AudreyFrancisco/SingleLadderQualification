@@ -426,10 +426,12 @@ void THicIB::PowerOn()
   mosaic->enableClockOutput(m_ctrl, true);
 }
 
-THicOB::THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod, int bbChannel)
+THicOB::THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod, int bbChannel,
+               bool useCombo)
     : THic(dbId, modId, pb, pbMod, bbChannel)
 {
-  m_position = 0;
+  m_position   = 0;
+  m_powercombo = useCombo;
 }
 
 common::TChipIndex THicOB::GetChipIndex(int i)

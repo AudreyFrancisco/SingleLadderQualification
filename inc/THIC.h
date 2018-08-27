@@ -78,24 +78,27 @@ public:
 
 class THicOB : public THic {
 private:
-  int m_boardidx0; // readout board index for master 0
-  int m_boardidx8; // readout board index for master 0
-  int m_rcv0;      // receiver for master 0
-  int m_rcv8;      // receiver for master 8
-  int m_ctrl0;     // control interface for master 0
-  int m_ctrl8;     // control interface for master 8
-  int m_position;  // position on half-stave
+  int  m_boardidx0;  // readout board index for master 0
+  int  m_boardidx8;  // readout board index for master 8
+  int  m_rcv0;       // receiver for master 0
+  int  m_rcv8;       // receiver for master 8
+  int  m_ctrl0;      // control interface for master 0
+  int  m_ctrl8;      // control interface for master 8
+  int  m_position;   // position on half-stave
+  bool m_powercombo; // powering with FB+PB+BB combo
 protected:
   bool IsOnBoard(int boardIdx, int chipId);
 
 public:
-  THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod, int bbChannel = -1);
+  THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod, int bbChannel = -1,
+         bool useCombo = 1);
   virtual ~THicOB(){};
   common::TChipIndex GetChipIndex(int i);
   THicType           GetHicType() { return HIC_OB; };
   std::vector<int>   GetBoardIndices();
   bool               ContainsChip(common::TChipIndex idx);
   bool               ContainsReceiver(int boardIndex, int rcv);
+  bool               IsPowerCombo() { return m_powercombo; }
   virtual int        GetReceiver(int boardIndex, int chipId);
   void               SetPosition(int aPos) { m_position = aPos; };
   int                GetPosition() { return m_position; };
