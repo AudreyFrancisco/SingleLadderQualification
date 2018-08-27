@@ -329,6 +329,7 @@ void MainWindow::open()
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
     fStatus          = fConfig->GetScanConfig()->GetParamValue("STATUS");
     fConfig->GetScanConfig()->SetParamValue("HALFSTAVECOMP", fHalfstavepart);
+    fActivityCreation = true;
     if (fNumberofscan == OBPower) {
       if (fConfig->GetDeviceType() != TYPE_POWER) {
         popup("You are doing a \nFAST POWER TEST \nwith a wrong \ndevice name");
@@ -1416,6 +1417,7 @@ void MainWindow::attachtodatabase()
           errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
           fActivityResults.push_back(-1);
           fErrorMessages.push_back(errormessage);
+          fActivityCreation = false;
         }
         myactivity->AssignUris(activ.ID, fIdofoperator, (&uris));
         if (myactivity->GetResponse().ErrorCode == -1) {
@@ -1489,11 +1491,19 @@ void MainWindow::attachtodatabase()
 
         for (unsigned int i = 0; i < fActivityResults.size(); i++) {
           if (fActivityResults.at(i) == -1) {
-            fStatus = true;
 
-            popup("The activity will remain open \n because of a problem during \n writing to db");
+            if (fActivityCreation == false && i == 0) {
+              fStatus = true;
+              popup("A problem occured during the creation of the activity");
+              break;
+            }
 
-            break;
+            else {
+              fStatus = true;
+              popup(
+                  "The activity will remain open \n because of a problem during \n writing to db");
+              break;
+            }
           }
         }
         if (fStatus == false) {

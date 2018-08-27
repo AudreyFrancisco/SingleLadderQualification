@@ -229,6 +229,7 @@ private:
   bool                        fHiddenComponent;
   int                         fHalfstavepart;
   int                         fEnduranceCheck;
+  bool                        fActivityCreation;
 
   std::map<int, int> fScanToRowMap;
   std::map<int, int> fRowToScanMap;
