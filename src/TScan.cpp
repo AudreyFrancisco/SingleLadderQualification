@@ -543,7 +543,7 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
 {
   unsigned char buffer[MAX_EVENT_SIZE];
   int           n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int           itrg = 0; // trials = 0;
+  int           itrg = 0, trials = 0;
   int           nBad = 0;
   TBoardHeader  boardInfo;
   int           nTrigPerHic[MAX_MOSAICTRANRECV];
@@ -551,23 +551,23 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
   for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
     nTrigPerHic[i] = 0;
   }
-  while (itrg < m_nTriggers * m_enabled[iboard]) {
-    int nRetries   = 0;
-    int maxRetries = 1000;
-    while ((m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) == 0) &&
-           (nRetries != maxRetries)) {
-      usleep(100);
-      nRetries++;
-    }
 
-    if (nRetries == maxRetries) {
-      std::cout << "Board " << iboard << ": reached max timeouts, giving up on this event"
-                << std::endl;
-      m_errorCount.nTimeout++;
-      if (m_errorCount.nTimeout > m_config->GetParamValue("MAXTIMEOUT")) {
-        throw std::runtime_error("Maximum number of timouts reached. Aborting scan.");
+  while (itrg < m_nTriggers * m_enabled[iboard]) {
+    if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) <=
+        0) { // no event available in buffer yet, wait a bit
+      usleep(1000);
+      trials++;
+      if (trials == 10) {
+        std::cout << "Board " << iboard << ": reached 10 timeouts, giving up on this event"
+                  << std::endl;
+        itrg = m_nTriggers * m_enabled[iboard];
+        FindTimeoutHics(iboard, nTrigPerHic);
+        m_errorCount.nTimeout++;
+        if (m_errorCount.nTimeout > m_config->GetParamValue("MAXTIMEOUT")) {
+          throw std::runtime_error("Maximum number of timouts reached. Aborting scan.");
+        }
+        trials = 0;
       }
-      itrg = m_nTriggers * m_enabled[iboard];
       continue;
     }
 

@@ -153,38 +153,33 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
 {
   unsigned char buffer[MAX_EVENT_SIZE];
   int           n_bytes_data, n_bytes_header, n_bytes_trailer;
-  int           itrg = 0; // trials = 0;
-  int           nBad = 0;
+  int           itrg = 0, trials = 0;
   TBoardHeader  boardInfo;
   int           nTrigPerHic[MAX_MOSAICTRANRECV];
 
   for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
     nTrigPerHic[i] = 0;
   }
-  while (itrg < nTriggers * m_enabled[iboard]) {
-    int nRetries   = 0;
-    int maxRetries = 1000;
-    while ((m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) == 0) &&
-           (nRetries != maxRetries)) {
-      usleep(100);
-      nRetries++;
-    }
 
-    if (nRetries == maxRetries) {
-      std::cout << "Board " << iboard << ": reached max timeouts, giving up on this event"
-                << std::endl;
-      m_errorCount.nTimeout++;
-      if (m_errorCount.nTimeout > 10000) {
-        TReadoutBoardRUv1 *boardy = dynamic_cast<TReadoutBoardRUv1 *>(m_boards.at(iboard));
-        if (boardy) boardy->CleanUp();
-        throw std::runtime_error("Maximum number of timouts reached. Aborting scan.");
+  while (itrg < nTriggers * m_enabled[iboard]) {
+    if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) <=
+        0) { // no event available in buffer yet, wait a bit
+      usleep(100);
+      trials++;
+      if (trials == 3) {
+        std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event"
+                  << std::endl;
+        itrg = nTriggers * m_enabled[iboard];
+        FindTimeoutHics(iboard, nTrigPerHic, nTriggers);
+        m_errorCount.nTimeout++;
+        if (m_errorCount.nTimeout > m_config->GetParamValue("MAXTIMEOUT")) {
+          throw std::runtime_error("Maximum number of timouts reached. Aborting scan.");
+        }
+        trials = 0;
       }
-      itrg = nTriggers * m_enabled[iboard];
       continue;
     }
-
     else {
-
       BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer,
                                 n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
       // decode Chip event
@@ -198,16 +193,13 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
         std::cout << "Found oversized event, truncated in MOSAIC" << std::endl;
         m_errorCount.nOversizeEvent++;
       }
-      int n_bytes_chipevent = n_bytes_data - n_bytes_header; // n_bytes_trailer;
+      int n_bytes_chipevent = n_bytes_data - n_bytes_header; //-n_bytes_trailer;
       if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
-      unsigned int bunchCounter  = -1U;
-      int          chipId        = -1U;
-      bool         dataIntegrity = false;
+      bool dataIntegrity = false;
       try {
         dataIntegrity = AlpideDecoder::DecodeEvent(
             buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel,
-            m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder,
-            m_config->GetParamValue("MAXHITS"), &m_stuck, &chipId, &bunchCounter);
+            m_errorCount.nPrioEncoder, m_config->GetParamValue("MAXHITS"), &m_stuck);
       }
       catch (const std::runtime_error &e) {
         std::cout << "Exception " << e.what() << " after " << itrg << " Triggers (this point)"
@@ -222,36 +214,12 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
         if (FindHIC(iboard, boardInfo.channel).compare("None") != 0) {
           m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nCorruptEvent++;
         }
-        if (nBad > 10) continue;
-        FILE *fDebug = fopen("DebugData.dat", "a");
-        fprintf(fDebug, "Bad event:\n");
-        for (int iByte = 0; iByte < n_bytes_data + 1; ++iByte) {
-          fprintf(fDebug, "%02x ", (int)buffer[iByte]);
-        }
-        fprintf(fDebug, "\nFull Event:\n");
-        for (unsigned int ibyte = 0; ibyte < fDebugBuffer.size(); ibyte++) {
-          fprintf(fDebug, "%02x ", (int)fDebugBuffer.at(ibyte));
-        }
-        fprintf(fDebug, "\n\n");
-        fclose(fDebug);
       }
-      if (((chipId & 0xf) == m_firstEnabledChipId) &&
-          (boardInfo.channel == m_firstEnabledChannel) && (iboard == m_firstEnabledBoard)) {
-        m_eventIds.push_back(boardInfo.eventId);
-        m_timestamps.push_back(boardInfo.timestamp);
-        m_bunchCounters.push_back(bunchCounter);
-      }
-      if (((chipId & 0xf) == m_firstEnabledChipId_ref) &&
-          (boardInfo.channel == m_firstEnabledChannel_ref) && (iboard == m_firstEnabledBoard_ref)) {
-        m_eventIds_ref.push_back(boardInfo.eventId);
-        m_timestamps_ref.push_back(boardInfo.timestamp);
-        m_bunchCounters_ref.push_back(bunchCounter);
-      }
-      nTrigPerHic[boardInfo.channel]++;
       itrg++;
     }
   }
 }
+
 
 void TDataTaking::FillHistos(std::vector<TPixHit> *Hits, int board)
 {
