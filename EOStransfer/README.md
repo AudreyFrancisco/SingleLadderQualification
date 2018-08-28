@@ -62,7 +62,7 @@ ALICE - ITS - DB EOS transfer utility
 
 >     ******************************************************* 
 >     *  ALICE ITS : EOS transfer configuration program     * 
->     *  ver. 1.0 - 15/03/2018    Auth : A.Franco INFN Bari * 
+>     *  ver. 2.0 - 28/08/2018    Auth : A.Franco INFN Bari * 
 >     *                                                     * 
 >     ******************************************************* 
 >     
@@ -124,9 +124,12 @@ ALICE - ITS - DB EOS transfer utility
 
   At the end of installation in this folder will be created: 
     1) the script 'syncAll.sh' : this command make a COMPLETE synchronization of the local
-       repository, also .....
-
-
+       repository;
+    2) the script 'autosyncOff.sh' : this command STOPs the automatic synchronization of the local
+       repository, the command must be runned as superuser;
+    3) the script 'autosyncOn.sh' : this command STARTs the automatic synchronization of the local
+       repository, the command must be runned as superuser;
+    4) the script 'EOStransfer.sh' : this command is launched by the cron daemon every 10 minutes;
 
 
   Note : two log files are produced:  

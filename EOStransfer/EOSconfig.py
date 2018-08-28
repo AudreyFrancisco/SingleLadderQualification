@@ -532,7 +532,7 @@ def main(argv):
     # --- print the Header ...
     print " ******************************************************* "
     print " *  ALICE ITS : EOS transfer configuration program     * "
-    print " *  ver. 1.0 - 15/03/2018    Auth : A.Franco INFN Bari * "
+    print " *  ver. 2.0 - 28/08/2018    Auth : A.Franco INFN Bari * "
     print " *                                                     * "
     print " ******************************************************* "
     print " "
