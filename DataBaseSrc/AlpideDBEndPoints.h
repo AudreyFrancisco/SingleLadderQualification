@@ -60,7 +60,7 @@ class AlpideDB;
 // The base class
 class AlpideTable {
 public:
-  enum ErrorCode { NoError = 0, SyncQuery = 20, BadXML = 21 };
+  enum ErrorCode { NoError = 0, SyncQuery = 20, BadXML = 21, BadCreation = 23 };
 
   struct response {
     int    Session;
