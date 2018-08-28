@@ -99,13 +99,13 @@ def buildTheDefaultBasePath(Test):
         return("")
         
     if Test == "IBEndurance":
-        return("")
+        return(theNewAlpidePath+"/IBEndurance/Data")
     elif Test == "IBQualification":
-        return("")
+        return(theNewAlpidePath+"/IBQualification/Data")
     elif Test == "OBEndurance":
-        return("")
+        return(theNewAlpidePath+"/OBEndurance/Data")
     elif Test == "OBFastPower":
-        return("")
+        return(theNewAlpidePath+"/OBFastPower/Data")
     elif Test == "OBQualification":
         return(theNewAlpidePath+"/GUI/Data")
     elif Test == "OBImpedance":
