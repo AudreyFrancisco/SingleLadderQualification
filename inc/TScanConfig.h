@@ -43,6 +43,9 @@ namespace ScanConfig {
   // 1.5: reduced cycles in endurance test /10, reduced cut on failures 30 -> 3
   const float CLASSIFICATION_VERSION = 1.5;
 
+  const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
+  const int MAXREPEAT  = 5; // max number of automatic repetitions
+
   const int NINJ           = 50;     // number of injections in digital/threshold scans
   const int NTRIG          = 100000; // number of triggers for noise occupancy scans
   const int CHARGE_START   = 0;
@@ -238,6 +241,8 @@ private:
   int                          m_status;
   int                          m_halfstavecomp;
   // NEW--added for additional scans
+  int       m_autorepeat;
+  int       m_maxrepeat;
   int       m_ithrStart; // usually 30
   int       m_ithrStop;  // usually 100
   int       m_ithrStep;

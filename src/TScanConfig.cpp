@@ -12,6 +12,9 @@ TScanConfig::TScanConfig()
 
   m_db = 0;
 
+  m_autorepeat = AUTOREPEAT;
+  m_maxrepeat  = MAXREPEAT;
+
   m_nInj       = NINJ;
   m_nTrig      = NTRIG;
   m_maxTimeout = MAXTIMEOUT;
@@ -174,6 +177,9 @@ TScanConfig::TScanConfig()
 
 void TScanConfig::InitParamMap()
 {
+  fSettings["AUTOREPEAT"] = &m_autorepeat;
+  fSettings["MAXREPEAT"]  = &m_maxrepeat;
+
   fSettings["NINJ"]         = &m_nInj;
   fSettings["NTRIG"]        = &m_nTrig;
   fSettings["MAXTIMEOUT"]   = &m_maxTimeout;
