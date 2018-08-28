@@ -23,7 +23,7 @@ import copy
 from Common import *
 from pty import CHILD
 
-#    Version 2.7a - 13/04/2018 - A.franco - INFN BARI ITALY
+#    Version 2.8 - 28/08/2018 - A.franco - INFN BARI ITALY
 
 
 # ---------------------------------------------
@@ -742,8 +742,10 @@ class DB:
             return actCreRes  
         
         InCompType, OutCompType = self._GetInOutComponentFromActivity(compo.ComponentType.ID)
-        self._AssignComponentToActivity(compo.ID, actCreRes.ID, InCompType[0].ID )
-        self._AssignComponentToActivity(compo.ID, actCreRes.ID, OutCompType[0].ID )
+        if self._AssignComponentToActivity(compo.ID, actCreRes.ID, InCompType[0].ID ) == False:
+            close = False #avoids the closure of the activity
+        if self._AssignComponentToActivity(compo.ID, actCreRes.ID, OutCompType[0].ID ) == False:
+            close = False #avoids the closure of the activity
 
         if close :
             actCreRes = self._ChangeAnActivity(DB.CLOSED,actCreRes.ID,actTypId,0,actName,ts,te,resultID)
