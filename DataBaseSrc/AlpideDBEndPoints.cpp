@@ -1040,6 +1040,8 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
   char * stringresult;
   string theUrl;
   string theQuery;
+  theResponses.clear();
+  isCreated = true;
 
   theUrl   = theParentDB->GetQueryDomain() + "/ActivityCreate";
   theQuery = "activityTypeID=" + std::to_string(aActivity->Type);
@@ -1063,7 +1065,12 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
   }
   else {
     DecodeResponse(stringresult, theQuery.c_str());
-    if (theResponse.ErrorCode != 0) cerr << "Activity creation Error :" << DumpResponse() << endl;
+    if (theResponse.ErrorCode != 0) {
+      cerr << "Activity creation Error :" << DumpResponse() << endl;
+      isCreated = false;
+      theResponses.push_back(theResponse);
+    }
+
     if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
     aActivity->ID = theResponse.ID;
   }
@@ -1082,7 +1089,10 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     }
     else {
       DecodeResponse(stringresult, theQuery.c_str());
-      if (theResponse.ErrorCode != 0) cerr << "Activity Member Error :" << DumpResponse() << endl;
+      if (theResponse.ErrorCode != 0) {
+        cerr << "Activity Member Error :" << DumpResponse() << endl;
+        theResponses.push_back(theResponse);
+      }
       if (VERBOSITYLEVEL == 1) cout << "Activity Member creation  :" << DumpResponse() << endl;
       aActivity->Members.at(i).ID = theResponse.ID;
     }
@@ -1112,9 +1122,11 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     }
     else {
       DecodeResponse(stringresult, theQuery.c_str());
-      if (theResponse.ErrorCode != 0)
+      if (theResponse.ErrorCode != 0) {
         cerr << "Activity Parameter Error (id " << aActivity->Parameters.at(i).ActivityParameter
              << "=" << aActivity->Parameters.at(i).Value << ")  : " << DumpResponse() << endl;
+        theResponses.push_back(theResponse);
+      }
       if (VERBOSITYLEVEL == 1) cout << "Activity Parameter creation :" << DumpResponse() << endl;
       aActivity->Parameters.at(i).ID = theResponse.ID;
     }
@@ -1168,8 +1180,10 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     }
     else {
       DecodeResponse(stringresult, theQuery.c_str());
-      if (theResponse.ErrorCode != 0)
+      if (theResponse.ErrorCode != 0) {
         cerr << "Activity Attachment Error :" << DumpResponse() << endl;
+        theResponses.push_back(theResponse);
+      }
       if (VERBOSITYLEVEL == 1) cout << "Activity Attachment creation :" << DumpResponse() << endl;
       aActivity->Attachments.at(i).ID = theResponse.ID;
     }

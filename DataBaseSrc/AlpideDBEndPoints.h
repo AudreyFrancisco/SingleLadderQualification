@@ -69,11 +69,14 @@ public:
     int    ID;
   };
 
+
 protected:
-  AlpideDB *theParentDB;
-  response  theResponse;
-  string    theGeneralBuffer;
-  bool      isScienNotation;
+  AlpideDB *       theParentDB;
+  response         theResponse;
+  string           theGeneralBuffer;
+  bool             isScienNotation;
+  vector<response> theResponses;
+  bool             isCreated;
 
 public:
   explicit AlpideTable(AlpideDB *DBhandle);
@@ -85,6 +88,8 @@ public:
   void        DumpXMLError(const char *aDescription, const char *aQuery, const char *aResponse);
   bool        isParameterScientificNotation() { return (isScienNotation); }
   void        setParameterScientificNotation(bool isSet = true) { isScienNotation = isSet; }
+  vector<response> GetResponses() { return theResponses; }
+  bool             GetStatus() { return isCreated; }
 
 protected:
   bool _getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod,
