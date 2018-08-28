@@ -1410,15 +1410,19 @@ void MainWindow::attachtodatabase()
         uris.push_back(uri);
 
         myactivity->Create(&activ);
-        // cout << myactivity->DumpResponse() <<"is the response which should be -1"<<std::endl;
-        if (myactivity->GetResponse().ErrorCode == -1) {
-          QString errormessage;
-          errormessage = "Activity Creation ";
-          errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
-          fActivityResults.push_back(-1);
-          fErrorMessages.push_back(errormessage);
-          fActivityCreation = false;
+        std::vector<ActivityDB::response> creationresponses;
+        creationresponses = myactivity->GetResponses();
+        for (unsigned int s = 0; s < creationresponses.size(); s++) {
+          if (creationresponses.at(s).ErrorCode == -1) {
+            QString errormessage;
+            errormessage = "Activity Creation ";
+            errormessage.append(QString::fromStdString(creationresponses.at(s).ErrorMessage));
+            fActivityResults.push_back(-1);
+            fErrorMessages.push_back(errormessage);
+          }
         }
+        fActivityCreation = myactivity->GetStatus();
+
         myactivity->AssignUris(activ.ID, fIdofoperator, (&uris));
         if (myactivity->GetResponse().ErrorCode == -1) {
           QString errormessage;
@@ -1492,9 +1496,8 @@ void MainWindow::attachtodatabase()
         for (unsigned int i = 0; i < fActivityResults.size(); i++) {
           if (fActivityResults.at(i) == -1) {
 
-            if (fActivityCreation == false && i == 0) {
-              fStatus = true;
-              popup("A problem occured during the creation of the activity");
+            if (fActivityCreation == false) {
+              popup("The activity was not created");
               break;
             }
 
