@@ -160,6 +160,9 @@ void AlpideTable::SetResponse(AlpideTable::ErrorCode ErrNum, int ID, int Session
   case AlpideTable::SyncQuery:
     theResponse.ErrorMessage = "The Sync DB Query returns error";
     break;
+  case AlpideTable::BadCreation:
+    theResponse.ErrorMessage = "Wrong Activity Creation, it is incomplete";
+    break;
   case AlpideTable::NoError:
     theResponse.ErrorMessage = "No error !";
     break;
@@ -1038,13 +1041,13 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
   char   DateBuffer[40];
   char   DateMask[40] = "%d/%m/%Y";
   char * stringresult;
+  bool   hasFailed = false;
   string theUrl;
   string theQuery;
   theResponses.clear();
   isCreated = true;
-
-  theUrl   = theParentDB->GetQueryDomain() + "/ActivityCreate";
-  theQuery = "activityTypeID=" + std::to_string(aActivity->Type);
+  theUrl    = theParentDB->GetQueryDomain() + "/ActivityCreate";
+  theQuery  = "activityTypeID=" + std::to_string(aActivity->Type);
   theQuery += "&locationID=" + std::to_string(aActivity->Location);
   theQuery += "&lotID=" + aActivity->Lot;
   theQuery += "&activityName=" + aActivity->Name;
@@ -1061,6 +1064,8 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
 
   if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) == 0) {
     SetResponse(AlpideTable::SyncQuery);
+    isCreated = false;
+    theResponses.push_back(theResponse);
     return (&theResponse);
   }
   else {
@@ -1069,6 +1074,7 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
       cerr << "Activity creation Error :" << DumpResponse() << endl;
       isCreated = false;
       theResponses.push_back(theResponse);
+      return (&theResponse);
     }
 
     if (VERBOSITYLEVEL == 1) cout << "Activity creation :" << DumpResponse() << endl;
@@ -1085,13 +1091,15 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) ==
         0) {
       SetResponse(AlpideTable::SyncQuery);
-      return (&theResponse);
+      theResponses.push_back(theResponse);
+      hasFailed = true;
     }
     else {
       DecodeResponse(stringresult, theQuery.c_str());
       if (theResponse.ErrorCode != 0) {
         cerr << "Activity Member Error :" << DumpResponse() << endl;
         theResponses.push_back(theResponse);
+        hasFailed = true;
       }
       if (VERBOSITYLEVEL == 1) cout << "Activity Member creation  :" << DumpResponse() << endl;
       aActivity->Members.at(i).ID = theResponse.ID;
@@ -1118,7 +1126,8 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
     if (theParentDB->GetManagerHandle()->makeDBQuery(theUrl, theQuery.c_str(), &stringresult) ==
         0) {
       SetResponse(AlpideTable::SyncQuery);
-      return (&theResponse);
+      theResponses.push_back(theResponse);
+      hasFailed = true;
     }
     else {
       DecodeResponse(stringresult, theQuery.c_str());
@@ -1126,6 +1135,7 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
         cerr << "Activity Parameter Error (id " << aActivity->Parameters.at(i).ActivityParameter
              << "=" << aActivity->Parameters.at(i).Value << ")  : " << DumpResponse() << endl;
         theResponses.push_back(theResponse);
+        hasFailed = true;
       }
       if (VERBOSITYLEVEL == 1) cout << "Activity Parameter creation :" << DumpResponse() << endl;
       aActivity->Parameters.at(i).ID = theResponse.ID;
@@ -1176,19 +1186,27 @@ ActivityDB::response *ActivityDB::Create(activity *aActivity)
             theUrl, theQuery.c_str(), &stringresult, true,
             "http://tempuri.org/ActivityAttachmentCreate") == 0) {
       SetResponse(AlpideTable::SyncQuery);
-      return (&theResponse);
+      theResponses.push_back(theResponse);
+      hasFailed = true;
     }
     else {
       DecodeResponse(stringresult, theQuery.c_str());
       if (theResponse.ErrorCode != 0) {
         cerr << "Activity Attachment Error :" << DumpResponse() << endl;
         theResponses.push_back(theResponse);
+        hasFailed = true;
       }
       if (VERBOSITYLEVEL == 1) cout << "Activity Attachment creation :" << DumpResponse() << endl;
       aActivity->Attachments.at(i).ID = theResponse.ID;
     }
   }
 
+  if (hasFailed) {
+    SetResponse(AlpideTable::BadCreation, aActivity->ID, 0);
+  }
+  else {
+    SetResponse(AlpideTable::NoError, aActivity->ID, 0);
+  }
   return (&theResponse);
 }
 
