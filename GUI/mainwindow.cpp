@@ -774,7 +774,6 @@ void MainWindow::performtests()
       }
       else {
         try {
-
           auto future_init = std::async(std::launch::async, &TScan::Init, fScanVector[i]);
           while (future_init.wait_for(delay) != std::future_status::ready) {
             if (fScanToRowMap.count(i) > 0)
@@ -783,7 +782,6 @@ void MainWindow::performtests()
           }
           future_init.get();
         }
-
         catch (exception &ex) {
           std::cout << ex.what() << " is the thrown exception from the scaninit" << std::endl;
           fExceptionthrown = true;
@@ -828,7 +826,15 @@ void MainWindow::performtests()
           fScanVector.at(i)->ClearHistoQue();
 
           if (fAutoRepeat && i < fScanVector.size() - 1 && fExtraScans < fMaxRepeat) {
-
+            QDialog *       win   = new QDialog(this);
+            Qt::WindowFlags flags = win->windowFlags();
+            win->setWindowFlags(flags | Qt::Tool);
+            win->setFixedSize(250, 200);
+            win->move(fExtraScans * 100, 0);
+            QTextEdit *exept = new QTextEdit(win);
+            exept->append("The " + (QString)fScanVector.at(i)->GetName() +
+                          " has thrown the exception " + fExceptiontext);
+            win->show();
             TScanParameters *par;
             par = fScanVector.at(i)->GetParameters();
             AddScan(GetScanType(i));
