@@ -328,6 +328,8 @@ void MainWindow::open()
                        &fHICs, &hicNames);
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
     fStatus          = fConfig->GetScanConfig()->GetParamValue("STATUS");
+    fAutoRepeat      = fConfig->GetScanConfig()->GetParamValue("AUTOREPEAT");
+    fMaxRepeat       = fConfig->GetScanConfig()->GetParamValue("MAXREPEAT");
     fConfig->GetScanConfig()->SetParamValue("HALFSTAVECOMP", fHalfstavepart);
     fActivityCreation = true;
     if (fNumberofscan == OBPower) {
@@ -745,7 +747,7 @@ void MainWindow::performtests()
   fExtraScans  = 0;
   qApp->processEvents();
   fNewScans.clear();
-  fInitialScans = fScanVector.size();
+  fInitialScans = fScanVector.size() - 1;
 
   for (unsigned int i = 0; i < fScanVector.size(); i++) {
     std::chrono::milliseconds delay(200);
@@ -772,6 +774,7 @@ void MainWindow::performtests()
       }
       else {
         try {
+
           auto future_init = std::async(std::launch::async, &TScan::Init, fScanVector[i]);
           while (future_init.wait_for(delay) != std::future_status::ready) {
             if (fScanToRowMap.count(i) > 0)
@@ -780,6 +783,7 @@ void MainWindow::performtests()
           }
           future_init.get();
         }
+
         catch (exception &ex) {
           std::cout << ex.what() << " is the thrown exception from the scaninit" << std::endl;
           fExceptionthrown = true;
@@ -819,15 +823,30 @@ void MainWindow::performtests()
         if (fScanToRowMap.count(i) > 0)
           ui->testTable->item(fScanToRowMap[i], 1)->setText(fScanVector.at(i)->GetState());
         qApp->processEvents();
+
         if (fExceptionthrown) {
           fScanVector.at(i)->ClearHistoQue();
-          notifyuser(i);
-          if (fTestAgain) {
-            TScanParameters *par;
-            par = fScanVector.at(i)->GetParameters();
-            AddScan(GetScanType(i));
-            fScanVector.back()->SetParameters(par);
-            fExtraScans++;
+
+          if (fAutoRepeat && i < fInitialScans + fExtraScans) {
+
+            if (fExtraScans < fMaxRepeat) {
+              TScanParameters *par;
+              par = fScanVector.at(i)->GetParameters();
+              AddScan(GetScanType(i));
+              fScanVector.back()->SetParameters(par);
+              fExtraScans++;
+            }
+          }
+
+          else {
+            notifyuser(i);
+            if (fTestAgain) {
+              TScanParameters *par;
+              par = fScanVector.at(i)->GetParameters();
+              AddScan(GetScanType(i));
+              fScanVector.back()->SetParameters(par);
+              fExtraScans++;
+            }
           }
         }
 
