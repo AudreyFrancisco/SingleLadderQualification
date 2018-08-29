@@ -747,7 +747,7 @@ void MainWindow::performtests()
   fExtraScans  = 0;
   qApp->processEvents();
   fNewScans.clear();
-  fInitialScans = fScanVector.size() - 1;
+  fInitialScans = fScanVector.size();
 
   for (unsigned int i = 0; i < fScanVector.size(); i++) {
     std::chrono::milliseconds delay(200);
@@ -827,15 +827,13 @@ void MainWindow::performtests()
         if (fExceptionthrown) {
           fScanVector.at(i)->ClearHistoQue();
 
-          if (fAutoRepeat && i < fInitialScans + fExtraScans) {
+          if (fAutoRepeat && i < fScanVector.size() - 1 && fExtraScans < fMaxRepeat) {
 
-            if (fExtraScans < fMaxRepeat) {
-              TScanParameters *par;
-              par = fScanVector.at(i)->GetParameters();
-              AddScan(GetScanType(i));
-              fScanVector.back()->SetParameters(par);
-              fExtraScans++;
-            }
+            TScanParameters *par;
+            par = fScanVector.at(i)->GetParameters();
+            AddScan(GetScanType(i));
+            fScanVector.back()->SetParameters(par);
+            fExtraScans++;
           }
 
           else {
