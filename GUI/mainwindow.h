@@ -94,6 +94,7 @@ public slots:
     fExecution = true;
     fProgresswindow->close();
     delete fProgresswindow;
+    fProgresswindow = nullptr;
   }
   void stopscans();
 
@@ -181,6 +182,8 @@ private:
   bool                                   fDatabasetype;
   bool                                   fScanfit;
   bool                                   fStatus;
+  bool                                   fAutoRepeat;
+  int                                    fMaxRepeat;
   void                                   makeDir(const char *aDir);
   bool     CreateScanObjects(TScanType scanType, TScanConfig *config, TScan **scan,
                              TScanAnalysis **analysis, TScanResult **result, bool &hasButton);
@@ -220,7 +223,7 @@ private:
   std::vector<TScanType>      fScanTypes;
   bool                        fTestAgain;
   std::vector<TScanType>      fNewScans;
-  unsigned int                fExtraScans = 0;
+  int                         fExtraScans = 0;
   unsigned int                fInitialScans;
   bool                        fAddingScans;
   bool                        fExceptionthrown;
