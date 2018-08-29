@@ -125,10 +125,12 @@ void TEnduranceCycle::CountWorkingChips()
       }
       else {
         m_chips.at(i)->SetEnable(false);
+        m_chips.at(i)->GetConfig()->fEnduranceDisabled = true;
       }
     }
     catch (exception &e) {
       m_chips.at(i)->SetEnable(false);
+      m_chips.at(i)->GetConfig()->fEnduranceDisabled = true;
     }
   }
 }
@@ -276,6 +278,13 @@ void TEnduranceCycle::Next(int loopIndex)
     time(&timeNow);
     if (difftime(timeNow, m_startTime) > ((TCycleParameters *)m_parameters)->timeLimit * 3600) {
       fTimeLimitReached = true;
+    }
+    // temporary fix: re-enable chips that were disabled in endurance test
+    for (unsigned int i = 0; i < m_chips.size(); i++) {
+      if (m_chips.at(i)->GetConfig()->fEnduranceDisabled) {
+        m_chips.at(i)->SetEnable(true);
+        m_chips.at(i)->GetConfig()->fEnduranceDisabled = false;
+      }
     }
   }
   TScan::Next(loopIndex);

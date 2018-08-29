@@ -116,6 +116,7 @@ private:
 protected:
 public:
   TChipConfig(TConfig *config, int chipId, const char *fName = 0);
+  int  fEnduranceDisabled; // temporary fix to re-enabled chips that were disabled in end. test
   void InitParamMap();
   bool SetParamValue(std::string Name, std::string Value);
   bool SetParamValue(std::string Name, int Value);
