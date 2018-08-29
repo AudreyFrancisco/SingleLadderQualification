@@ -318,7 +318,7 @@ def main():
     dev='/dev/ttyUSB0'   
     data_dir = "Data"
     current_limit = 0.1
-    current_limit_bias = 0.01
+    current_limit_bias = 0.015
     max_voltage = 0.2
     max_voltage_bias = 4.
     nsteps = 20 
