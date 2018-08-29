@@ -237,6 +237,7 @@ private:
   int                          m_pixPerRegion;
   int                          m_noiseCutInv;
   char                         m_fNameSuffix[80];
+  char                         m_startTime[80];
   int                          m_testWithoutComp;
   int                          m_status;
   int                          m_halfstavecomp;
@@ -397,6 +398,7 @@ public:
   int   GetChargeStop() { return m_chargeStop; };
   int   GetNMaskStages() { return m_nMaskStages; };
   char *GetfNameSuffix() { return m_fNameSuffix; };
+  char *GetStartTime() { return m_startTime; };
   int   GetIthrStart() { return m_ithrStart; };
   int   GetIthrStop() { return m_ithrStop; };
   int   GetIthrStep() { return m_ithrStep; };

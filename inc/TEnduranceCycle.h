@@ -47,6 +47,7 @@ private:
   void                                            ConfigureChip(TAlpide *chip);
   void                                            ConfigureMask(TAlpide *chip);
   void                                            CountWorkingChips();
+  void                                            WriteRecoveryFile();
   std::map<std::string, THicCounter>              m_hicCounters;
   std::vector<std::map<std::string, THicCounter>> m_counterVector;
 
