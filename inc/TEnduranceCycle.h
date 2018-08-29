@@ -32,6 +32,9 @@ typedef struct __TCycleParameters : TScanParameters {
   int timeLimit;
 } TCycleParameters;
 
+int OpenEnduranceRecoveryFile(const char *fName, std::vector<std::string> hicNames,
+                              std::vector<std::map<std::string, THicCounter>> &counterVector);
+
 class TEnduranceCycle : public TScan {
 private:
   time_t m_startTime;

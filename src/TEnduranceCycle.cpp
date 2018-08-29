@@ -1,8 +1,48 @@
 #include "TEnduranceCycle.h"
 #include "AlpideConfig.h"
 #include "TReadoutBoardMOSAIC.h"
+#include <algorithm>
 #include <string.h>
 #include <string>
+
+int OpenEnduranceRecoveryFile(const char *fName, std::vector<std::string> hicNames,
+                              std::vector<std::map<std::string, THicCounter>> &counterVector)
+{
+  FILE *                             fp = fopen(fName, "r");
+  char                               hicName[50];
+  THicCounter                        counter;
+  int                                trip;
+  std::vector<std::string>::iterator stringIter;
+  std::map<std::string, THicCounter> counterMap;
+
+  if (!fp) {
+    std::cout << "Error, file " << fName << " not found." << std::endl;
+    return 0;
+  }
+
+  while (fscanf(fp, "%s %d %d %f %f %f %f %f %f", hicName, &trip, &counter.m_nWorkingChips,
+                &counter.m_iddaClocked, &counter.m_idddClocked, &counter.m_iddaConfigured,
+                &counter.m_idddConfigured, &counter.m_tempStart, &counter.m_tempEnd) == 9) {
+    // check that hic name found is contained in hicNames
+    stringIter = find(hicNames.begin(), hicNames.end(), string(hicName));
+    if (stringIter == hicNames.end()) {
+      std::cout << "Warning, found unknown HIC " << hicName << " in file, ignored" << std::endl;
+      continue;
+    }
+    // check hic name already in map -> push map into vector and clear map
+    if (counterMap.find(string(hicName)) != counterMap.end()) {
+      counterVector.push_back(counterMap);
+      counterMap.clear();
+    }
+    // add counter to map
+    counterMap.insert(std::pair<std::string, THicCounter>(string(hicName), counter));
+  }
+  // eof-> push last map into vector
+  if (counterMap.size() > 0) counterVector.push_back(counterMap);
+  fclose(fp);
+  return counterVector.size();
+}
+
 
 TEnduranceCycle::TEnduranceCycle(TScanConfig *config, std::vector<TAlpide *> chips,
                                  std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
