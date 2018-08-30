@@ -3,6 +3,7 @@
 #include "TPowerTest.h"
 #ifdef HAS_ROOT
 #include "TCanvas.h"
+#include "TError.h"
 #include "TFile.h"
 #include "TH1F.h"
 #include "TString.h"
@@ -34,6 +35,7 @@ string TFastPowerAnalysis::GetPreviousTestType()
 void TFastPowerAnalysis::CreateIVHisto(TFastPowerResultHic *hicResult)
 {
 #ifdef HAS_ROOT
+  gErrorIgnoreLevel = kWarning; // remove TCanvas::Print info messages
   const std::string basename =
       TString::Format("IVcurveBB_%s_%s", hicResult->GetName().c_str(), m_config->GetfNameSuffix())
           .Data();
