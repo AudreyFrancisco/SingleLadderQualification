@@ -45,6 +45,7 @@ namespace ScanConfig {
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions
+  const int RECOVERY   = 0; // read recovery file for endurance test
 
   const int NINJ           = 50;     // number of injections in digital/threshold scans
   const int NTRIG          = 100000; // number of triggers for noise occupancy scans
@@ -244,6 +245,7 @@ private:
   // NEW--added for additional scans
   int       m_autorepeat;
   int       m_maxrepeat;
+  int       m_recovery;
   int       m_ithrStart; // usually 30
   int       m_ithrStop;  // usually 100
   int       m_ithrStep;

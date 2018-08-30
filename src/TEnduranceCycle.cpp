@@ -6,7 +6,7 @@
 #include <string>
 
 int OpenEnduranceRecoveryFile(const char *fName, std::vector<std::string> hicNames,
-                              std::vector<std::map<std::string, THicCounter>> &counterVector)
+                              std::deque<std::map<std::string, THicCounter>> &counterVector)
 {
   FILE *                             fp = fopen(fName, "r");
   char                               hicName[50];
@@ -23,13 +23,14 @@ int OpenEnduranceRecoveryFile(const char *fName, std::vector<std::string> hicNam
   while (fscanf(fp, "%s %d %d %f %f %f %f %f %f", hicName, &trip, &counter.m_nWorkingChips,
                 &counter.m_iddaClocked, &counter.m_idddClocked, &counter.m_iddaConfigured,
                 &counter.m_idddConfigured, &counter.m_tempStart, &counter.m_tempEnd) == 9) {
-    // check that hic name found is contained in hicNames
+    // check that hic name found is contained in hicNames, otherwise ignore entry
     stringIter = find(hicNames.begin(), hicNames.end(), string(hicName));
     if (stringIter == hicNames.end()) {
       std::cout << "Warning, found unknown HIC " << hicName << " in file, ignored" << std::endl;
       continue;
     }
     // check hic name already in map -> push map into vector and clear map
+    // (assume only one entry per HIC and cycle)
     if (counterMap.find(string(hicName)) != counterMap.end()) {
       counterVector.push_back(counterMap);
       counterMap.clear();
@@ -117,6 +118,41 @@ void TEnduranceCycle::ClearCounters()
   }
 }
 
+
+void TEnduranceCycle::ReadRecoveredCounters(
+    std::deque<std::map<std::string, THicCounter>> &counterVector)
+{
+  // loop over cycles; stop if none left in deque or max cycles for this slice reached
+  while ((counterVector.size() > 0) && (m_start[0] < m_stop[0])) {
+    std::map<std::string, THicCounter>           hicCounters = counterVector.front();
+    std::map<std::string, THicCounter>::iterator hicIt;
+    // loop over HICs for this cycle
+    for (hicIt = hicCounters.begin(); hicIt != hicCounters.end(); hicIt++) {
+      try {
+        m_hicCounters.at(hicIt->first).m_trip           = hicIt->second.m_trip;
+        m_hicCounters.at(hicIt->first).m_iddaClocked    = hicIt->second.m_iddaClocked;
+        m_hicCounters.at(hicIt->first).m_idddClocked    = hicIt->second.m_idddClocked;
+        m_hicCounters.at(hicIt->first).m_iddaConfigured = hicIt->second.m_iddaConfigured;
+        m_hicCounters.at(hicIt->first).m_idddConfigured = hicIt->second.m_idddConfigured;
+        m_hicCounters.at(hicIt->first).m_tempStart      = hicIt->second.m_tempStart;
+        m_hicCounters.at(hicIt->first).m_tempEnd        = hicIt->second.m_tempEnd;
+        m_hicCounters.at(hicIt->first).m_nWorkingChips  = hicIt->second.m_nWorkingChips;
+      }
+      catch (...) {
+        std::cout << "Warning, found unknown HIC " << hicIt->first << " in deque, ignored"
+                  << std::endl;
+        continue;
+      }
+    }
+    // push this cycle to vector and increment start point for "real" cycles
+    m_counterVector.push_back(m_hicCounters);
+    m_start[0]++;
+    // remove first entry from deque
+    counterVector.pop_front();
+  }
+}
+
+
 void TEnduranceCycle::Init()
 {
   TScan::Init();
@@ -131,6 +167,7 @@ void TEnduranceCycle::Init()
     m_chips.at(i)->GetReadoutBoard()->SetChipEnable(m_chips.at(i), false);
   }
 }
+
 
 void TEnduranceCycle::PrepareStep(int loopIndex)
 {

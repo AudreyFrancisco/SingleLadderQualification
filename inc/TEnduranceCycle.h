@@ -33,7 +33,7 @@ typedef struct __TCycleParameters : TScanParameters {
 } TCycleParameters;
 
 int OpenEnduranceRecoveryFile(const char *fName, std::vector<std::string> hicNames,
-                              std::vector<std::map<std::string, THicCounter>> &counterVector);
+                              std::deque<std::map<std::string, THicCounter>> &counterVector);
 
 class TEnduranceCycle : public TScan {
 private:
@@ -71,6 +71,7 @@ public:
   void LoopEnd(int loopIndex) { (void)loopIndex; };
   void PrepareStep(int loopIndex);
   bool SetParameters(TScanParameters *pars);
+  void ReadRecoveredCounters(std::deque<std::map<std::string, THicCounter>> &counterVector);
   std::vector<std::map<std::string, THicCounter>> GetCounters() { return m_counterVector; };
 };
 
