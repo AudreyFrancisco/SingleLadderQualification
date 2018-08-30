@@ -233,6 +233,7 @@ private:
   int                         fHalfstavepart;
   int                         fEnduranceCheck;
   bool                        fActivityCreation;
+  bool                        fRecovery;
 
   std::map<int, int> fScanToRowMap;
   std::map<int, int> fRowToScanMap;

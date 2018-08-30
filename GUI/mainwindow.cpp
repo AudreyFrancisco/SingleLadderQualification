@@ -330,6 +330,8 @@ void MainWindow::open()
     fStatus          = fConfig->GetScanConfig()->GetParamValue("STATUS");
     fAutoRepeat      = fConfig->GetScanConfig()->GetParamValue("AUTOREPEAT");
     fMaxRepeat       = fConfig->GetScanConfig()->GetParamValue("MAXREPEAT");
+    fRecovery        = fConfig->GetScanConfig()->GetParamValue("RECOVERY");
+
     fConfig->GetScanConfig()->SetParamValue("HALFSTAVECOMP", fHalfstavepart);
     fActivityCreation = true;
     if (fNumberofscan == OBPower) {
@@ -1776,6 +1778,26 @@ void MainWindow::loadeditedconfig()
             << std::endl;
   fScanconfigwindow->close();
   initscanlist();
+
+  if (fNumberofscan == OBEndurance && fRecovery) {
+    QString filename =
+        QFileDialog::getOpenFileName(this, tr("Select File"), "C://", "Dat files (*.dat)");
+    std::deque<std::map<std::string, THicCounter>> counterVector;
+    std::vector<std::string>                       names;
+    for (unsigned int i = 0; i < fHicnames.size(); i++) {
+      names.push_back(fHicnames.at(i).toStdString());
+    }
+    int ncycles = 0;
+    ncycles     = OpenEnduranceRecoveryFile(filename.toStdString().c_str(), names, counterVector);
+
+    if (ncycles != 0) std::cout << ncycles << " cycles found in file." << std::endl;
+
+    for (unsigned int d = 1; d < fScanVector.size(); d++) {
+      TEnduranceCycle *scan;
+      scan = (TEnduranceCycle *)fScanVector.at(d);
+      if (counterVector.size() > 0) scan->ReadRecoveredCounters(counterVector);
+    }
+  }
 }
 
 void MainWindow::loaddefaultconfig()
