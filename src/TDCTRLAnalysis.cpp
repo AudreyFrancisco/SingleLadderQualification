@@ -417,8 +417,14 @@ void TDctrlResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 void TDctrlResultHic::Compare(TScanResultHic *aPrediction)
 {
   TDctrlResultHic *prediction = (TDctrlResultHic *)aPrediction;
-  if (prediction->worst_slope > 0) worst_slopeRatio = worst_slope / prediction->worst_slope;
-  if (prediction->worst_chisq > 0) worst_chisqRatio = worst_chisq / prediction->worst_chisq;
+  if (prediction->worst_slope > 0)
+    worst_slopeRatio = worst_slope / prediction->worst_slope;
+  else
+    worst_slopeRatio = 0;
+  if (prediction->worst_chisq > 0)
+    worst_chisqRatio = worst_chisq / prediction->worst_chisq;
+  else
+    worst_chisqRatio = 0;
 }
 
 
