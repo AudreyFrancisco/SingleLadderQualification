@@ -595,8 +595,10 @@ void pbMainWindow::refreshSettings()
 void pbMainWindow::allON()
 {
   try {
-    pb->onAllVout();
-    pb->onAllVbias();
+    for (int i = 0; i < NUM_CHANNELS; i++) {
+      pb->onVout(ch);
+      sleep(1);
+    }
   }
   catch (std::exception &e) {
     comErrorExit(e);
