@@ -32,6 +32,7 @@
 #include "ledRed.xpm"
 #include "mexception.h"
 #include "optionsDialog.h"
+#include "unistd.h"
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
@@ -595,7 +596,7 @@ void pbMainWindow::refreshSettings()
 void pbMainWindow::allON()
 {
   try {
-    for (int i = 0; i < NUM_CHANNELS; i++) {
+    for (int ch = 0; ch < NUM_CHANNELS; ch++) {
       pb->onVout(ch);
       sleep(1);
     }
