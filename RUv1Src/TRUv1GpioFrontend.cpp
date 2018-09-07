@@ -36,7 +36,7 @@ void TRUv1GpioFrontend::EnableAlignmentSingle(int trnum, bool enable, bool commi
 void TRUv1GpioFrontend::EnableDataSingle(int trnum, bool enable, bool commit)
 {
   WriteMaskedRegSingle(trnum, TRUv1GpioFrontend::ENABLE_DATA_H,
-                       TRUv1GpioFrontend::ENABLE_ALIGNMENT_L, enable, commit);
+                       TRUv1GpioFrontend::ENABLE_DATA_L, enable, commit);
 }
 
 void TRUv1GpioFrontend::WriteMaskedReg(uint16_t address_h, uint16_t address_l, bool flag,
