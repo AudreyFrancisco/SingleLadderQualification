@@ -387,6 +387,8 @@ void TSCurveAnalysis::Finalize()
         hicResult->m_nNoThreshWorstChip = chipResult->m_nNoThresh;
       if (chipResult->m_threshRelativeRms > hicResult->m_maxRelativeRms)
         hicResult->m_maxRelativeRms = chipResult->m_threshRelativeRms;
+      if (chipResult->m_thresholdRms > hicResult->m_maxRms)
+        hicResult->m_maxRms = chipResult->m_thresholdRms;
       if ((!m_nominal) && (fabs(chipResult->m_deviation) > fabs(hicResult->m_maxDeviation)))
         hicResult->m_maxDeviation = chipResult->m_deviation;
       hicResult->m_nHot += chipResult->m_nHot;
@@ -866,6 +868,8 @@ void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
                    GetParameterFile());
     DbAddParameter(db, activity, string("Maximum relative RMS") + suffix, (float)m_maxRelativeRms,
                    GetParameterFile());
+    DbAddParameter(db, activity, string("Maximum RMS") + suffix, (float)m_maxRms,
+                   GetParameterFile());
     if (!m_nominal) {
       DbAddParameter(db, activity, string("Maximum threshold deviation,") + suffix,
                      (float)m_maxDeviation, GetParameterFile());
@@ -911,6 +915,7 @@ void TSCurveResultHic::WriteToFile(FILE *fp)
     std::cout << std::endl << "Maximum deviation from target: " << m_maxDeviation << std::endl;
   }
   std::cout << std::endl << "Maximum relative rms:          " << m_maxRelativeRms << std::endl;
+  std::cout << std::endl << "Maximum rms:          " << m_maxRms << std::endl;
   std::cout << std::endl << "Dead Pixels:         " << m_nDead << std::endl;
   if (!m_nominal) std::cout << "   Increase:         " << m_nDeadIncrease << std::endl;
   std::cout << "No Threshold Pixels: " << m_nNoThresh << std::endl;

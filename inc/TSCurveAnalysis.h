@@ -69,6 +69,7 @@ private:
   float         m_maxChipAv;
   float         m_maxChipNoise;
   float         m_maxRelativeRms;
+  float         m_maxRms;
   float         m_maxDeviation;
   int           m_nDead;
   int           m_nNoThresh;
@@ -92,7 +93,7 @@ protected:
 public:
   TSCurveResultHic()
       : TScanResultHic(), m_noiseAv(0), m_noiseRms(0), m_nEntries(0), m_noiseSq(0),
-        m_minChipAv(999), m_maxChipAv(-1), m_maxChipNoise(-1), m_maxRelativeRms(0),
+        m_minChipAv(999), m_maxChipAv(-1), m_maxChipNoise(-1), m_maxRelativeRms(0), m_maxRms(0),
         m_maxDeviation(0), m_nDead(0), m_nNoThresh(0), m_nDeadIncrease(0), m_nNoThreshIncrease(0),
         m_nNoThreshWorstChip(0), m_nDeadWorstChip(0), m_nHot(0){};
   void CalculateAverages();
