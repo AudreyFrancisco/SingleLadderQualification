@@ -1438,7 +1438,7 @@ void MainWindow::attachtodatabase()
         std::vector<ActivityDB::response> creationresponses;
         creationresponses = myactivity->GetResponses();
         for (unsigned int s = 0; s < creationresponses.size(); s++) {
-          if (creationresponses.at(s).ErrorCode == -1) {
+          if (creationresponses.at(s).ErrorCode != 0) {
             QString errormessage;
             errormessage = "Activity Creation ";
             errormessage.append(QString::fromStdString(creationresponses.at(s).ErrorMessage));
@@ -1449,7 +1449,7 @@ void MainWindow::attachtodatabase()
         fActivityCreation = myactivity->GetStatus();
 
         myactivity->AssignUris(activ.ID, fIdofoperator, (&uris));
-        if (myactivity->GetResponse().ErrorCode == -1) {
+        if (myactivity->GetResponse().ErrorCode != 0) {
           QString errormessage;
           errormessage = "Uri: ";
           errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
@@ -1460,7 +1460,7 @@ void MainWindow::attachtodatabase()
                                     fIdofoperator);
 
 
-        if (myactivity->GetResponse().ErrorCode == -1) {
+        if (myactivity->GetResponse().ErrorCode != 0) {
           QString errormessage;
           errormessage = "Input component: ";
           errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
@@ -1471,7 +1471,7 @@ void MainWindow::attachtodatabase()
 
         myactivity->AssignComponent(activ.ID, fComponentIDs.at(i),
                                     fActComponentTypeIDs.at(i).second, fIdofoperator);
-        if (myactivity->GetResponse().ErrorCode == -1) {
+        if (myactivity->GetResponse().ErrorCode != 0) {
           QString errormessage;
           errormessage = "Output comp: ";
           errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
@@ -1482,7 +1482,7 @@ void MainWindow::attachtodatabase()
             fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
             fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML) {
           myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstavein, fIdofoperator);
-          if (myactivity->GetResponse().ErrorCode == -1) {
+          if (myactivity->GetResponse().ErrorCode != 0) {
             QString errormessage;
             errormessage = "Input HS: ";
             errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
@@ -1490,7 +1490,7 @@ void MainWindow::attachtodatabase()
             fErrorMessages.push_back(errormessage);
           }
           myactivity->AssignComponent(activ.ID, fhalfstaveid, fhalfstaveout, fIdofoperator);
-          if (myactivity->GetResponse().ErrorCode == -1) {
+          if (myactivity->GetResponse().ErrorCode != 0) {
             QString errormessage;
             errormessage = "Output HS: ";
             errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
@@ -1500,7 +1500,7 @@ void MainWindow::attachtodatabase()
           if (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
               fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML) {
             myactivity->AssignComponent(activ.ID, fStaveid, fStaveIn, fIdofoperator);
-            if (myactivity->GetResponse().ErrorCode == -1) {
+            if (myactivity->GetResponse().ErrorCode != 0) {
               QString errormessage;
               errormessage = "Input Stave: ";
               errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
@@ -1508,7 +1508,7 @@ void MainWindow::attachtodatabase()
               fErrorMessages.push_back(errormessage);
             }
             myactivity->AssignComponent(activ.ID, fStaveid, fStaveOut, fIdofoperator);
-            if (myactivity->GetResponse().ErrorCode == -1) {
+            if (myactivity->GetResponse().ErrorCode != 0) {
               QString errormessage;
               errormessage = "Output Stave: ";
               errormessage.append(QString::fromStdString(myactivity->GetResponse().ErrorMessage));
@@ -1542,7 +1542,7 @@ void MainWindow::attachtodatabase()
         activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
         myactivity->Change(&activ);
 
-        if (myactivity->GetResponse().ErrorCode == -1) {
+        if (myactivity->GetResponse().ErrorCode != 0) {
           QString errormessage;
           errormessage = "Error while changing activity";
           fErrorMessages.push_back(errormessage);
