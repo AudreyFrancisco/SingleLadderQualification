@@ -568,7 +568,15 @@ void MainWindow::updateEnableStatuses()
     break;
   case TYPE_HALFSTAVE:
   case TYPE_MLHALFSTAVE:
-    printf("half stave\n");
+    // TODO: clean this up
+    int m[8] = {0};
+    for (unsigned int i = 0; i < fChips.size(); i++) {
+      int chipid;
+      chipid = fChips.at(i)->GetConfig()->GetChipId();
+      if (fChips.at(i)->GetConfig()->IsEnabled()) {
+        explore_halfstave(chipid, m);
+      }
+    }
     break;
   case TYPE_IBHIC:
     for (unsigned int i = 0; i < fChips.size(); i++) {
