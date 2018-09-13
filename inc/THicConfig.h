@@ -27,8 +27,8 @@ public:
   int          GetModId() { return fModId; };
   bool         IsEnabled() { return (fEnabled != 0); };
   void         SetEnable(bool Enabled) { fEnabled = Enabled ? 1 : 0; };
-  int                 GetDisableSource() { return fDisableSource; };
-  void SetDisableSource(int disableSource) { fDisableSource = disableSource; };
+  int          GetDisableSource() { return fDisableSource; };
+  void         SetDisableSource(int disableSource) { fDisableSource = disableSource; };
 };
 
 class THicConfigOB : public THicConfig {

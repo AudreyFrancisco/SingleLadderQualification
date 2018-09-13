@@ -15,7 +15,7 @@ TChipConfig::TChipConfig(TConfig *config, int chipId, const char *fName)
   fEnduranceDisabled = false;
   fReceiver          = -1;
   fControlInterface  = -1;
-  fDisableSource    = DISABLE_AUTO;
+  fDisableSource     = DISABLE_AUTO;
 
   ClearNoisyPixels();
   // fill default values from header file

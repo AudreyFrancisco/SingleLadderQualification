@@ -15,19 +15,40 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="centralLayout">
-    <item row="1" column="0">
-     <widget class="QTableWidget" name="testTable">
-      <column>
-       <property name="text">
-        <string>Testing object</string>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </column>
+    <item row="0" column="0">
+     <widget class="QLabel" name="testtypeselected">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
      </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QToolButton" name="quit">
+      <property name="text">
+       <string>Quit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <layout class="QHBoxLayout" name="buttonLayout">
+      <item>
+       <widget class="QToolButton" name="start_test">
+        <property name="text">
+         <string>Start Test</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="poweroff">
+        <property name="text">
+         <string>Power Off</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item row="0" column="1">
      <widget class="QLabel" name="label_5">
@@ -57,39 +78,18 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="testtypeselected">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <layout class="QHBoxLayout" name="buttonLayout">
-      <item>
-       <widget class="QToolButton" name="start_test">
-        <property name="text">
-         <string>Start Test</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="poweroff">
-        <property name="text">
-         <string>Power Off</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="2" column="2">
-     <widget class="QToolButton" name="quit">
-      <property name="text">
-       <string>Quit</string>
-      </property>
+    <item row="1" column="0">
+     <widget class="QTableWidget" name="testTable">
+      <column>
+       <property name="text">
+        <string>Testing object</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </column>
      </widget>
     </item>
     <item row="1" column="1" colspan="2">
@@ -104,8 +104,8 @@
        <widget class="QGroupBox" name="IBModule">
         <property name="geometry">
          <rect>
-          <x>110</x>
-          <y>350</y>
+          <x>100</x>
+          <y>380</y>
           <width>781</width>
           <height>141</height>
          </rect>
@@ -1197,18 +1197,90 @@
          </property>
         </widget>
        </widget>
+       <widget class="QPushButton" name="upload">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>400</y>
+          <width>81</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Open pdf</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="selectedhicname">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>320</y>
+          <width>91</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>HIC Name :</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="selectedscan_name">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>350</y>
+          <width>101</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Scan Name :</string>
+        </property>
+       </widget>
+       <widget class="QTextEdit" name="selectedhicnametext">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>320</y>
+          <width>171</width>
+          <height>31</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QTextEdit" name="selectedscan_nametext">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>360</y>
+          <width>171</width>
+          <height>31</height>
+         </rect>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tab">
        <attribute name="title">
         <string>Chip Configuration</string>
        </attribute>
+       <widget class="QLabel" name="label_3">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>521</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Double click to enable/disable chips and HICs</string>
+        </property>
+       </widget>
        <widget class="QTreeWidget" name="chipTree">
         <property name="geometry">
          <rect>
           <x>10</x>
           <y>30</y>
           <width>450</width>
-          <height>711</height>
+          <height>701</height>
          </rect>
         </property>
         <property name="horizontalScrollBarPolicy">
@@ -1218,6 +1290,9 @@
          <bool>false</bool>
         </property>
         <attribute name="headerDefaultSectionSize">
+         <number>150</number>
+        </attribute>
+        <attribute name="headerMinimumSectionSize">
          <number>150</number>
         </attribute>
         <column>
@@ -1237,22 +1312,9 @@
         </column>
         <column>
          <property name="text">
-          <string>This column should be hidden</string>
+          <string>Should be hidden</string>
          </property>
         </column>
-       </widget>
-       <widget class="QLabel" name="label_3">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>-1</y>
-          <width>341</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Double-click to enable/disable chips and HICs</string>
-        </property>
        </widget>
       </widget>
      </widget>

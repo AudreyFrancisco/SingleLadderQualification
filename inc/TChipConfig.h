@@ -61,7 +61,7 @@ private:
   int fEnabledWithBB; // variable to exclude chips from tests when BB on, default true
   int fReceiver;
   int fControlInterface;
-  int      fDisableSource; // variable to track why chip is disabled
+  int fDisableSource; // variable to track why chip is disabled
   // DACs used
   int fITHR;
   int fIDB;
@@ -132,7 +132,7 @@ public:
   void SetEnable(bool Enabled) { fEnabled = Enabled ? 1 : 0; };
   void SetEnableWithBB(bool Enabled) { fEnabledWithBB = Enabled ? 1 : 0; };
   void SetDisableSource(int disableSource) { fDisableSource = disableSource; };
-  int                       GetDisableSource() { return fDisableSource; };
+  int  GetDisableSource() { return fDisableSource; };
   int  GetModuleId() { return (fChipId & 0x70) >> 4; };
   bool IsOBMaster() { return ((fChipId % 8 == 0) && (GetModuleId() > 0)); };
   bool HasEnabledSlave();

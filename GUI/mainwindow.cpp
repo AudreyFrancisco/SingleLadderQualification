@@ -556,8 +556,9 @@ void MainWindow::updateEnableStatuses()
   }
 
   // paint some setups
-  switch (fConfig->GetDeviceType()) {
-  case TYPE_OBHIC:
+  int deviceType = fConfig->GetDeviceType();
+  switch (deviceType) {
+  case TYPE_OBHIC: {
     for (unsigned int i = 0; i < fChips.size(); i++) {
       int     chipid;
       uint8_t module, side, pos;
@@ -566,9 +567,19 @@ void MainWindow::updateEnableStatuses()
       color(side, pos, fChips.at(i)->GetConfig()->IsEnabled());
     }
     break;
+  }
+  case TYPE_IBHIC: {
+    for (unsigned int i = 0; i < fChips.size(); i++) {
+      int     chipid;
+      uint8_t module, side, pos;
+      chipid = fChips.at(i)->GetConfig()->GetChipId();
+      DecodeId(chipid, module, side, pos);
+      color_IB(pos, fChips.at(i)->GetConfig()->IsEnabled());
+    }
+    break;
+  }
   case TYPE_HALFSTAVE:
-  case TYPE_MLHALFSTAVE:
-    // TODO: clean this up
+  case TYPE_MLHALFSTAVE: { // TODO: clean this up
     int m[8] = {0};
     for (unsigned int i = 0; i < fChips.size(); i++) {
       int chipid;
@@ -578,21 +589,15 @@ void MainWindow::updateEnableStatuses()
       }
     }
     break;
-  case TYPE_IBHIC:
-    for (unsigned int i = 0; i < fChips.size(); i++) {
-      int     chipid;
-      uint8_t module, side, pos;
-      chipid = fChips.at(i)->GetConfig()->GetChipId();
-      DecodeId(chipid, module, side, pos);
-      color_IB(pos, fChips.at(i)->GetConfig()->IsEnabled());
-    }
-    break;
-  case TYPE_ENDURANCE:
+  }
+  case TYPE_ENDURANCE: {
     exploreendurancebox();
     break;
-  default:
+  }
+  default: {
     printf("nothing to paint\n");
     break;
+  }
   }
 
   ui->chipTree->hideColumn(3); // doesn't work; don't know why
