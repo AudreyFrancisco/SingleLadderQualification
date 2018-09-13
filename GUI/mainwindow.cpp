@@ -579,7 +579,7 @@ void MainWindow::updateEnableStatuses()
     break;
   }
   case TYPE_HALFSTAVE:
-  case TYPE_MLHALFSTAVE: { // TODO: clean this up
+  case TYPE_MLHALFSTAVE: { // TODO: clean this up?
     int m[8] = {0};
     for (unsigned int i = 0; i < fChips.size(); i++) {
       int chipid;
@@ -588,6 +588,19 @@ void MainWindow::updateEnableStatuses()
         explore_halfstave(chipid, m);
       }
     }
+
+    // TODO: might be off by 1
+    // TODO: clean this up?
+    int shownModule = ui->modulenumber->text().toInt();
+    for (unsigned int i = 0; i < fChips.size(); i++) {
+      int     chipid;
+      uint8_t module, side, pos;
+      chipid = fChips.at(i)->GetConfig()->GetChipId();
+      DecodeId(chipid, module, side, pos);
+      module = fConfig->GetChipConfigById(chipid)->GetModuleId();
+      if (module == shownModule) color(side, pos, fChips.at(i)->GetConfig()->IsEnabled());
+    }
+
     break;
   }
   case TYPE_ENDURANCE: {
