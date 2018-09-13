@@ -486,7 +486,7 @@ void MainWindow::setupChipTree()
 void MainWindow::addChipInfoToTree(QTreeWidgetItem *chip, int iChip, int iChipInConfig)
 {
   chip->setText(0, QString("Chip %1").arg(iChip));
-  chip->setText(3, QString::number(iChipInConfig));
+  chip->setText(3, QString::number(iChipInConfig)); // a hacky way to keep track of this number
 }
 
 void MainWindow::showEnableStatusInTree(QTreeWidgetItem *item, bool isEnabled, int disableSource)
@@ -555,7 +555,39 @@ void MainWindow::updateEnableStatuses()
     }
   }
 
-  ui->chipTree->hideColumn(0); // doesn't work; don't know why
+  // paint some setups
+  switch (fConfig->GetDeviceType()) {
+  case TYPE_OBHIC:
+    for (unsigned int i = 0; i < fChips.size(); i++) {
+      int     chipid;
+      uint8_t module, side, pos;
+      chipid = fChips.at(i)->GetConfig()->GetChipId();
+      DecodeId(chipid, module, side, pos);
+      color(side, pos, fChips.at(i)->GetConfig()->IsEnabled());
+    }
+    break;
+  case TYPE_HALFSTAVE:
+  case TYPE_MLHALFSTAVE:
+    printf("half stave\n");
+    break;
+  case TYPE_IBHIC:
+    for (unsigned int i = 0; i < fChips.size(); i++) {
+      int     chipid;
+      uint8_t module, side, pos;
+      chipid = fChips.at(i)->GetConfig()->GetChipId();
+      DecodeId(chipid, module, side, pos);
+      color_IB(pos, fChips.at(i)->GetConfig()->IsEnabled());
+    }
+    break;
+  case TYPE_ENDURANCE:
+    exploreendurancebox();
+    break;
+  default:
+    printf("nothing to paint\n");
+    break;
+  }
+
+  ui->chipTree->hideColumn(3); // doesn't work; don't know why
 }
 
 void MainWindow::toggleEnableStatus(QTreeWidgetItem *item, int column)
