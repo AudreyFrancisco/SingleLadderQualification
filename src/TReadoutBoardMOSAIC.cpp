@@ -45,6 +45,7 @@
 #include "TAlpide.h"
 #include "mexception.h"
 #include "mservice.h"
+#include "pexception.h"
 #include <algorithm>
 #include <iostream>
 #include <math.h>
@@ -124,7 +125,13 @@ int TReadoutBoardMOSAIC::WriteChipRegister(uint16_t address, uint16_t value, TAl
   uint_fast16_t Cii    = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
   uint8_t       chipId = chipPtr->GetConfig()->GetChipId();
   controlInterface[Cii]->addWriteReg(chipId, address, value);
-  controlInterface[Cii]->execute();
+  try {
+    controlInterface[Cii]->execute();
+  }
+  catch (PControlInterfaceError &e) {
+    e.SetControlInterface(Cii);
+    throw;
+  }
   return (0);
 }
 
@@ -133,7 +140,13 @@ int TReadoutBoardMOSAIC::ReadChipRegister(uint16_t address, uint16_t &value, TAl
   uint_fast16_t Cii    = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
   uint8_t       chipId = chipPtr->GetConfig()->GetChipId();
   controlInterface[Cii]->addReadReg(chipId, address, &value);
-  controlInterface[Cii]->execute();
+  try {
+    controlInterface[Cii]->execute();
+  }
+  catch (PControlInterfaceError &e) {
+    e.SetControlInterface(Cii);
+    throw;
+  }
   return (0);
 }
 
