@@ -21,6 +21,8 @@ typedef struct {
   float    m_idddConfigured;
   float    m_tempStart;
   float    m_tempEnd;
+  int      m_fifoErrors;
+  int      m_fifoExceptions;
   int      m_nWorkingChips;
 } THicCounter;
 
@@ -45,12 +47,15 @@ private:
     THisto histo;
     return histo;
   };
-  void                                            ConfigureBoard(TReadoutBoard *board);
-  void                                            ConfigureFromu(TAlpide *chip);
-  void                                            ConfigureChip(TAlpide *chip);
-  void                                            ConfigureMask(TAlpide *chip);
-  void                                            CountWorkingChips();
-  void                                            WriteRecoveryFile();
+  void ConfigureBoard(TReadoutBoard *board);
+  void ConfigureFromu(TAlpide *chip);
+  void ConfigureChip(TAlpide *chip);
+  void ConfigureMask(TAlpide *chip);
+  void CountWorkingChips();
+  void WriteRecoveryFile();
+  bool TestPattern(TAlpide *chip, int pattern, int region, int offset, THicCounter &hicCounter);
+  void ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue);
+  void WriteMem(TAlpide *chip, int ARegion, int AOffset, int AValue);
   std::map<std::string, THicCounter>              m_hicCounters;
   std::vector<std::map<std::string, THicCounter>> m_counterVector;
 

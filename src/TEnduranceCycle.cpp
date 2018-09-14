@@ -113,8 +113,10 @@ void TEnduranceCycle::CreateMeasurements()
 void TEnduranceCycle::ClearCounters()
 {
   for (unsigned int i = 0; i < m_hics.size(); i++) {
-    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_nWorkingChips = 0;
-    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_trip          = false;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_nWorkingChips  = 0;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoErrors     = 0;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoExceptions = 0;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_trip           = false;
   }
 }
 
@@ -311,8 +313,29 @@ void TEnduranceCycle::Execute()
   }
 
   // 5) wait, measure final temperature & power off, sleep again
-  std::cout << "  Waiting" << std::endl;
-  sleep(((TCycleParameters *)m_parameters)->upTime);
+  //    while waiting: perform Fifo scan
+  std::cout << "  Waiting and scanning FIFOs" << std::endl;
+  time_t start;
+
+  time(&start);
+  int upTime = ((TCycleParameters *)m_parameters)->upTime;
+
+  for (int ioffset = 0; (ioffset < 128) && (difftime(time(NULL), start) < upTime); ioffset++) {
+    for (int ireg = 0; ireg < 32; ireg++) {
+      for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
+        THic *hic = m_chips.at(ichip)->GetHic();
+        TestPattern(m_chips.at(ichip), 0x0000, ireg, ioffset, m_hicCounters.at(hic->GetDbId()));
+        TestPattern(m_chips.at(ichip), 0x5555, ireg, ioffset, m_hicCounters.at(hic->GetDbId()));
+        TestPattern(m_chips.at(ichip), 0xaaaa, ireg, ioffset, m_hicCounters.at(hic->GetDbId()));
+        TestPattern(m_chips.at(ichip), 0xffff, ireg, ioffset, m_hicCounters.at(hic->GetDbId()));
+      }
+    }
+  }
+  std::cout << "FIFO scan done after " << difftime(time(NULL), start) << " s." << std::endl;
+
+  while (difftime(time(NULL), start) < upTime)
+    sleep(1);
+
   std::cout << "  Powering off" << std::endl;
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
@@ -376,4 +399,77 @@ void TEnduranceCycle::Terminate()
     m_chips.at(i)->GetReadoutBoard()->SetChipEnable(m_chips.at(i),
                                                     m_chips.at(i)->GetConfig()->IsEnabled());
   }
+}
+
+
+void TEnduranceCycle::WriteMem(TAlpide *chip, int ARegion, int AOffset, int AValue)
+{
+  if ((ARegion > 31) || (AOffset > 127)) {
+    std::cout << "WriteMem: invalid parameters" << std::endl;
+    return;
+  }
+  uint16_t LowAdd  = Alpide::REG_RRU_MEB_LSB_BASE | (ARegion << 11) | AOffset;
+  uint16_t HighAdd = Alpide::REG_RRU_MEB_MSB_BASE | (ARegion << 11) | AOffset;
+
+  uint16_t LowVal  = AValue & 0xffff;
+  uint16_t HighVal = (AValue >> 16) & 0xff;
+
+  int err = chip->WriteRegister(LowAdd, LowVal);
+  if (err >= 0) err = chip->WriteRegister(HighAdd, HighVal);
+
+  if (err < 0) {
+    std::cout << "Cannot write chip register. Exiting ... " << std::endl;
+    exit(1);
+  }
+}
+
+
+void TEnduranceCycle::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue)
+{
+  if ((ARegion > 31) || (AOffset > 127)) {
+    std::cout << "ReadMem: invalid parameters" << std::endl;
+    return;
+  }
+  uint16_t LowAdd  = Alpide::REG_RRU_MEB_LSB_BASE | (ARegion << 11) | AOffset;
+  uint16_t HighAdd = Alpide::REG_RRU_MEB_MSB_BASE | (ARegion << 11) | AOffset;
+
+  uint16_t LowVal, HighVal;
+  int      err;
+
+  err = chip->ReadRegister(LowAdd, LowVal);
+  if (err >= 0) {
+    err = chip->ReadRegister(HighAdd, HighVal);
+  }
+
+  if (err < 0) {
+    std::cout << "Cannot read chip register. Exiting ... " << std::endl;
+    exit(1);
+  }
+
+  // Note to self: if you want to shorten the following lines,
+  // remember that HighVal is 16 bit and (HighVal << 16) will yield 0
+  // :-)
+  AValue = (HighVal & 0xff);
+  AValue <<= 16;
+  AValue |= LowVal;
+}
+
+
+bool TEnduranceCycle::TestPattern(TAlpide *chip, int pattern, int region, int offset,
+                                  THicCounter &hicCounter)
+{
+  int readBack;
+  try {
+    WriteMem(chip, region, offset, pattern);
+    ReadMem(chip, region, offset, readBack);
+  }
+  catch (...) {
+    hicCounter.m_fifoExceptions++;
+    return false;
+  }
+  if (readBack != pattern) {
+    hicCounter.m_fifoErrors++;
+    return false;
+  }
+  return true;
 }
