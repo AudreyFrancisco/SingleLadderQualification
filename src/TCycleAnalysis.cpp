@@ -4,6 +4,13 @@
 
 #include <string>
 
+
+// TODO: write FIFO errors and exceptions to file (cycle file and recovery file)
+// add cut on FIFO errors and exceptions
+// increase classification number
+// treat reading of recovery file correctly (with or without FIFO), according to classification
+// number check adding of slices
+
 TCycleAnalysis::TCycleAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
                                TScanConfig *aScanConfig, std::vector<THic *> hics,
                                std::mutex *aMutex, TCycleResult *aResult)
@@ -26,6 +33,8 @@ void TCycleAnalysis::InitCounters()
     result->m_nTrips          = 0;
     result->m_minWorkingChips = 14;
     result->m_nChipFailures   = 0;
+    result->m_nFifoExceptions = 0;
+    result->m_nFifoErrors     = 0;
     result->m_avDeltaT        = 0;
     result->m_maxDeltaT       = 0;
     result->m_avIdda          = 0;
@@ -93,6 +102,8 @@ void TCycleAnalysis::Finalize()
       hicResult->m_avDeltaT += hicCounter.m_tempEnd - hicCounter.m_tempStart;
       hicResult->m_avIdda += hicCounter.m_iddaClocked;
       hicResult->m_avIddd += hicCounter.m_idddClocked;
+      hicResult->m_nFifoExceptions += hicCounter.m_fifoExceptions;
+      hicResult->m_nFifoErrors += hicCounter.m_fifoErrors;
       hicResult->SetValidity(true);
     }
     fclose(fp);
@@ -196,6 +207,10 @@ void TCycleResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
     DbAddParameter(db, activity, string("Av. IDDD"), (float)m_avIddd, GetParameterFile());
     DbAddParameter(db, activity, string("Min. IDDD"), (float)m_minIddd, GetParameterFile());
     DbAddParameter(db, activity, string("Max. IDDD"), (float)m_maxIddd, GetParameterFile());
+    DbAddParameter(db, activity, string("FIFO errors (nominal)"), (float)m_nFifoErrors,
+                   GetParameterFile());
+    DbAddParameter(db, activity, string("FIFO exceptions (nominal)"), (float)m_nFifoExceptions,
+                   GetParameterFile());
   }
   slash    = string(m_resultFile).find_last_of("/");
   fileName = string(m_resultFile).substr(slash + 1); // strip path
@@ -213,17 +228,19 @@ void TCycleResultHic::WriteToFile(FILE *fp)
 
   fprintf(fp, "HIC Classification: %s\n\n", WriteHicClassification());
 
-  fprintf(fp, "Trips:                   %d\n", m_nTrips);
-  fprintf(fp, "Min. number of chips:    %d\n", m_minWorkingChips);
-  fprintf(fp, "Number of chip failures: %d\n", m_nChipFailures);
-  fprintf(fp, "Average delta T:         %.1f\n", m_avDeltaT);
-  fprintf(fp, "Maximum delta T:         %.1f\n", m_maxDeltaT);
-  fprintf(fp, "Average Idda:            %.3f\n", m_avIdda);
-  fprintf(fp, "Maximum Idda:            %.3f\n", m_maxIdda);
-  fprintf(fp, "Minimum Idda:            %.3f\n", m_minIdda);
-  fprintf(fp, "Average Iddd:            %.3f\n", m_avIddd);
-  fprintf(fp, "Maximum Iddd:            %.3f\n", m_maxIddd);
-  fprintf(fp, "Minimum Iddd:            %.3f\n", m_minIddd);
+  fprintf(fp, "Trips:                     %d\n", m_nTrips);
+  fprintf(fp, "Min. number of chips:      %d\n", m_minWorkingChips);
+  fprintf(fp, "Number of chip failures:   %d\n", m_nChipFailures);
+  fprintf(fp, "Number of FIFO errors:     %d\n", m_nFifoErrors);
+  fprintf(fp, "Number of FIFO exceptions: %d\n", m_nFifoExceptions);
+  fprintf(fp, "Average delta T:           %.1f\n", m_avDeltaT);
+  fprintf(fp, "Maximum delta T:           %.1f\n", m_maxDeltaT);
+  fprintf(fp, "Average Idda:              %.3f\n", m_avIdda);
+  fprintf(fp, "Maximum Idda:              %.3f\n", m_maxIdda);
+  fprintf(fp, "Minimum Idda:              %.3f\n", m_minIdda);
+  fprintf(fp, "Average Iddd:              %.3f\n", m_avIddd);
+  fprintf(fp, "Maximum Iddd:              %.3f\n", m_maxIddd);
+  fprintf(fp, "Minimum Iddd:              %.3f\n", m_minIddd);
 }
 
 
@@ -234,6 +251,8 @@ void TCycleResultHic::Add(TCycleResultHic &aResult)
 {
   m_nTrips += aResult.m_nTrips;
   m_nChipFailures += aResult.m_nChipFailures;
+  m_nFifoErrors += aResult.m_nFifoErrors;
+  m_nFifoExceptions += aResult.m_nFifoExceptions;
 
   m_avDeltaT = (m_weight * m_avDeltaT + aResult.m_avDeltaT) / (m_weight + 1);
   m_avIdda   = (m_weight * m_avIdda + aResult.m_avIdda) / (m_weight + 1);

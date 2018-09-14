@@ -20,6 +20,8 @@ private:
   int   m_nTrips;
   int   m_minWorkingChips;
   int   m_nChipFailures;
+  int   m_nFifoExceptions;
+  int   m_nFifoErrors;
   float m_avDeltaT;
   float m_maxDeltaT;
   float m_avIdda;
