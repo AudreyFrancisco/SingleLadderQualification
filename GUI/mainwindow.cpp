@@ -860,6 +860,7 @@ void MainWindow::start_debug()
 void MainWindow::loadConfigFile(QByteArray configFilename)
 {
   initSetup(fConfig, &fBoards, &fBoardType, &fChips, configFilename, &fHICs);
+  setupChipTree();
   emit deviceLoaded(fConfig->GetDeviceType());
 }
 
