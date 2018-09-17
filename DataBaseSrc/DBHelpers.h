@@ -42,7 +42,8 @@ int    DbGetComponentTypeId(AlpideDB *db, int projectId, string name);
 int    DbGetComponentTypeId(AlpideDB *db, string name);
 int    DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int componentId, string Direction);
 int    DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name);
-int    DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children);
+int    DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children,
+                           bool chipsOnly = false);
 int    DbGetComponentActivity(AlpideDB *db, int compId, int activityTypeId);
 bool   DbAddParameter(AlpideDB *db, ActivityDB::activity &activity, string name, float value,
                       std::string file);

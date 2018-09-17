@@ -450,7 +450,7 @@ int DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name)
 }
 
 // TODO: check; need also position?
-int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children)
+int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children, bool chipsOnly)
 {
   ComponentDB *              componentDB = new ComponentDB(db);
   ComponentDB::componentLong component;
@@ -465,6 +465,7 @@ int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children)
     child.Type                           = childDB.Component.ComponentType.ID;
     child.Position                       = childDB.Position;
     child.Name                           = childDB.Component.ComponentID;
+    if (chipsOnly && (child.Type != DbGetComponentTypeId(db, "ALPIDEB Chip"))) continue;
     children.push_back(child);
   }
   return children.size();
