@@ -114,6 +114,7 @@ void TEnduranceCycle::ClearCounters()
 {
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_nWorkingChips  = 0;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoTests      = 0;
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoErrors     = 0;
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoExceptions = 0;
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_trip           = false;
@@ -328,6 +329,7 @@ void TEnduranceCycle::Execute()
         TestPattern(m_chips.at(ichip), 0x5555, ireg, ioffset, m_hicCounters.at(hic->GetDbId()));
         TestPattern(m_chips.at(ichip), 0xaaaa, ireg, ioffset, m_hicCounters.at(hic->GetDbId()));
         TestPattern(m_chips.at(ichip), 0xffff, ireg, ioffset, m_hicCounters.at(hic->GetDbId()));
+        m_hicCounters.at(hic->GetDbId()).m_fifoTests++;
       }
     }
   }

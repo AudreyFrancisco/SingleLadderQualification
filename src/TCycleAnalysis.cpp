@@ -33,6 +33,7 @@ void TCycleAnalysis::InitCounters()
     result->m_nTrips          = 0;
     result->m_minWorkingChips = 14;
     result->m_nChipFailures   = 0;
+    result->m_nFifoTests      = 0;
     result->m_nFifoExceptions = 0;
     result->m_nFifoErrors     = 0;
     result->m_avDeltaT        = 0;
@@ -104,6 +105,7 @@ void TCycleAnalysis::Finalize()
       hicResult->m_avIddd += hicCounter.m_idddClocked;
       hicResult->m_nFifoExceptions += hicCounter.m_fifoExceptions;
       hicResult->m_nFifoErrors += hicCounter.m_fifoErrors;
+      hicResult->m_nFifoTests += hicCounter.m_fifoTests;
       hicResult->SetValidity(true);
     }
     fclose(fp);
