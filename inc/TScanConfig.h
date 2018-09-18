@@ -41,7 +41,8 @@ namespace ScanConfig {
   // 1.3: move back to max. 2 bad chips for partial cat B (cf. plenary June 18, 2018)
   // 1.4: increased gravity of failed chi square cut in DCTRL Test (bronze -> red)
   // 1.5: reduced cycles in endurance test /10, reduced cut on failures 30 -> 3
-  const float CLASSIFICATION_VERSION = 1.5;
+  // 1.51: introduced FIFO test in endurance cycle (no cut yet)
+  const float CLASSIFICATION_VERSION = 1.51;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions

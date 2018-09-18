@@ -77,8 +77,9 @@ void TCycleAnalysis::Finalize()
       std::map<std::string, THicCounter> hicCounters = counters.at(icycle);
       THicCounter                        hicCounter  = hicCounters.at(m_hics.at(ihic)->GetDbId());
 
-      fprintf(fp, "%d %d %d %.3f %.3f %.3f %.3f %.1f %.1f\n", icycle, hicCounter.m_trip ? 1 : 0,
-              hicCounter.m_nWorkingChips, hicCounter.m_iddaClocked, hicCounter.m_idddClocked,
+      fprintf(fp, "%d %d %d %d %d %.3f %.3f %.3f %.3f %.1f %.1f\n", icycle,
+              hicCounter.m_trip ? 1 : 0, hicCounter.m_nWorkingChips, hicCounter.m_fifoErrors,
+              hicCounter.m_fifoExceptions, hicCounter.m_iddaClocked, hicCounter.m_idddClocked,
               hicCounter.m_iddaConfigured, hicCounter.m_idddConfigured, hicCounter.m_tempStart,
               hicCounter.m_tempEnd);
 
@@ -106,8 +107,8 @@ void TCycleAnalysis::Finalize()
       hicResult->m_nFifoExceptions += hicCounter.m_fifoExceptions;
       hicResult->m_nFifoErrors += hicCounter.m_fifoErrors;
       hicResult->m_nFifoTests += hicCounter.m_fifoTests;
-      hicResult->SetValidity(true);
     }
+    hicResult->SetValidity(true);
     fclose(fp);
   }
 

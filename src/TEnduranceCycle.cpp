@@ -20,9 +20,10 @@ int OpenEnduranceRecoveryFile(const char *fName, std::vector<std::string> hicNam
     return 0;
   }
 
-  while (fscanf(fp, "%s %d %d %f %f %f %f %f %f", hicName, &trip, &counter.m_nWorkingChips,
-                &counter.m_iddaClocked, &counter.m_idddClocked, &counter.m_iddaConfigured,
-                &counter.m_idddConfigured, &counter.m_tempStart, &counter.m_tempEnd) == 9) {
+  while (fscanf(fp, "%s %d %d %d %d %f %f %f %f %f %f", hicName, &trip, &counter.m_nWorkingChips,
+                &counter.m_fifoErrors, &counter.m_fifoExceptions, &counter.m_iddaClocked,
+                &counter.m_idddClocked, &counter.m_iddaConfigured, &counter.m_idddConfigured,
+                &counter.m_tempStart, &counter.m_tempEnd) == 11) {
     // check that hic name found is contained in hicNames, otherwise ignore entry
     stringIter = find(hicNames.begin(), hicNames.end(), string(hicName));
     if (stringIter == hicNames.end()) {
@@ -353,15 +354,16 @@ void TEnduranceCycle::Execute()
 void TEnduranceCycle::WriteRecoveryFile()
 {
   char fName[200];
-  sprintf(fName, "CycleFile_%s.dat", m_config->GetStartTime());
+  sprintf(fName, "CycleRecoveryFile_%s.dat", m_config->GetStartTime());
 
   FILE *fp = fopen(fName, "a");
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     THicCounter counter = m_hicCounters.at(m_hics.at(ihic)->GetDbId());
-    fprintf(fp, "%s %d %d %.3f %.3f %.3f %.3f %.1f %.1f\n", m_hics.at(ihic)->GetDbId().c_str(),
-            counter.m_trip ? 1 : 0, counter.m_nWorkingChips, counter.m_iddaClocked,
+    fprintf(fp, "%s %d %d %d %d %.3f %.3f %.3f %.3f %.1f %.1f\n",
+            m_hics.at(ihic)->GetDbId().c_str(), counter.m_trip ? 1 : 0, counter.m_nWorkingChips,
+            counter.m_fifoErrors, counter.m_fifoExceptions, counter.m_iddaClocked,
             counter.m_idddClocked, counter.m_iddaConfigured, counter.m_idddConfigured,
             counter.m_tempStart, counter.m_tempEnd);
   }
