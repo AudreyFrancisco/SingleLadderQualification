@@ -449,6 +449,12 @@ int DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name)
   return -1;
 }
 
+int DbGetComponentId(AlpideDB *db, int typeId, string name)
+{
+  return DbGetComponentId(db, db->GetProjectId(), name);
+}
+
+
 // TODO: check; need also position?
 int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children, bool chipsOnly)
 {
