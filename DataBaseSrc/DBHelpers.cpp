@@ -216,6 +216,30 @@ void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
 }
 
 
+// Eliminates all activities for which a newer activity of same type is found.
+void DbEliminateDoubles(vector<ComponentDB::compActivity> &tests)
+{
+  std::vector<bool> keep;
+
+  for (unsigned int i = 0; i < tests.size(); i++) {
+    bool newer = false;
+    // search for second, newer activity of same type
+    for (unsigned ii = 0; ii < tests.size(); ii++) {
+      if (ii == i) continue;
+      if ((tests.at(ii).Type == tests.at(i).Type) && (DbIsNewer(tests.at(ii), tests.at(i)) == 0))
+        newer = true;
+    }
+    if (newer)
+      keep.push_back(false);
+    else
+      keep.push_back(true);
+  }
+  for (unsigned int i = tests.size() - 1; i >= 0; i--) {
+    if (!keep.at(i)) tests.erase(tests.begin() + i);
+  }
+}
+
+
 void DbGetAllTests(AlpideDB *db, int compId, vector<ComponentDB::compActivity> &tests,
                    TScanType scanType, bool lastOnly)
 {
@@ -238,6 +262,7 @@ void DbGetAllTests(AlpideDB *db, int compId, vector<ComponentDB::compActivity> &
       continue;
     tests.push_back(history.at(i));
   }
+  if (lastOnly) DbEliminateDoubles(tests);
 }
 
 
