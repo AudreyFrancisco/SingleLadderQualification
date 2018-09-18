@@ -221,6 +221,10 @@ void DbEliminateDoubles(vector<ComponentDB::compActivity> &tests)
 {
   std::vector<bool> keep;
 
+  if (tests.size() == 0) {
+    std::cout << "Warning (DbEliminateDoubles): test vector is empty, doing nothing" << std::endl;
+    return;
+  }
   for (unsigned int i = 0; i < tests.size(); i++) {
     bool newer = false;
     // search for second, newer activity of same type
