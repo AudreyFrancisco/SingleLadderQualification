@@ -3,12 +3,20 @@
 
 #include <deque>
 #include <mutex>
+#include <set>
 #include <vector>
 
 #include "AlpideDecoder.h"
 #include "Common.h"
 #include "THisto.h"
 #include "TScan.h"
+
+// Test types containing digital scan
+static const std::set<std::string> kDigitalTestTypes = {
+    "OB HIC Qualification Test",   "IB HIC Qualification Test",   "IB Stave Qualification Test",
+    "OB HIC Reception Test",       "OL HS Qualification Test",    "ML HS Qualification Test",
+    "OL Stave Qualification Test", "ML Stave Qualification Test", "OL Stave Reception Test",
+    "ML Stave Reception Test"};
 
 typedef struct __TDigitalParameters : TScanParameters {
   float voltageScale;
@@ -44,9 +52,13 @@ public:
     return ((((TDigitalParameters *)m_parameters)->voltageScale > 0.99) &&
             (((TDigitalParameters *)m_parameters)->voltageScale < 1.01));
   };
-  bool SetParameters(TScanParameters *pars);
-  bool IsLower() { return (((TDigitalParameters *)m_parameters)->voltageScale < 0.9); };
-  bool IsUpper() { return (((TDigitalParameters *)m_parameters)->voltageScale > 1.1); };
+  bool        SetParameters(TScanParameters *pars);
+  bool        IsLower() { return (((TDigitalParameters *)m_parameters)->voltageScale < 0.9); };
+  bool        IsUpper() { return (((TDigitalParameters *)m_parameters)->voltageScale > 1.1); };
+  static bool isPerformedDuring(string testType)
+  {
+    return kDigitalTestTypes.find(testType) != kDigitalTestTypes.end();
+  };
 };
 
 class TDigitalWhiteFrame : public TDigitalScan {

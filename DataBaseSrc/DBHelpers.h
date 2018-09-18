@@ -5,6 +5,7 @@
 #include "AlpideDBEndPoints.h"
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
+#include "TScanFactory.h"
 #include <string>
 #include <vector>
 

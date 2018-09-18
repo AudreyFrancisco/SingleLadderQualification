@@ -4,6 +4,7 @@
 #include <atomic>
 #include <deque>
 #include <mutex>
+#include <set>
 #include <thread>
 #include <vector>
 
@@ -11,6 +12,13 @@
 #include "Common.h"
 #include "THisto.h"
 #include "TScan.h"
+
+// Test types containing threshold scan
+static const std::set<std::string> kThresholdTestTypes = {
+    "OB HIC Qualification Test",   "IB HIC Qualification Test", "IB Stave Qualification Test",
+    "OL HS Qualification Test",    "ML HS Qualification Test",  "OL Stave Qualification Test",
+    "ML Stave Qualification Test", "OL Stave Reception Test",   "ML Stave Reception Test"};
+
 
 typedef struct __TSCurveParameters : TScanParameters {
   bool nominal;
@@ -102,6 +110,10 @@ public:
   void ConfigureChip(TAlpide *chip);
   void PrepareStep(int loopIndex);
   ~TThresholdScan(){};
+  static bool isPerformedDuring(string testType)
+  {
+    return kThresholdTestTypes.find(testType) != kThresholdTestTypes.end();
+  };
 };
 
 class TtuneVCASNScan : public TSCurveScan {
