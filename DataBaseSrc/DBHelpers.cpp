@@ -451,7 +451,7 @@ int DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name)
 
 int DbGetComponentId(AlpideDB *db, int typeId, string name)
 {
-  return DbGetComponentId(db, db->GetProjectId(), name);
+  return DbGetComponentId(db, db->GetProjectId(), typeId, name);
 }
 
 
