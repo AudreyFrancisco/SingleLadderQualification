@@ -34,6 +34,8 @@ bool               DbGetLatestActivity(AlpideDB *db, int activityTypeId, string 
 int                DbGetActivityTypeId(AlpideDB *db, string name);
 void               DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
                                       vector<ComponentDB::compActivity> &tests, bool &openAct, bool &impedance);
+void               DbGetAllTests(AlpideDB *db, int compId, vector<ComponentDB::compActivity> &tests,
+                                 TScanType scanType, bool lastOnly);
 THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityTypeId,
                                          bool &openAct, bool &impedance);
 bool   DbFindParamValue(vector<ActivityDB::actParameter> pars, string parName, float &parValue);

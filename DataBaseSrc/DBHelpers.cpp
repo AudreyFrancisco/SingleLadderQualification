@@ -216,8 +216,8 @@ void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
 }
 
 
-void DbGetAllTests(AlpideDB *db, int compId, int activityTypeId,
-                   vector<ComponentDB::compActivity> &tests, TScanType scanType, bool lastOnly)
+void DbGetAllTests(AlpideDB *db, int compId, vector<ComponentDB::compActivity> &tests,
+                   TScanType scanType, bool lastOnly)
 {
   ComponentDB *                     componentDB = new ComponentDB(db);
   vector<ComponentDB::compActivity> history;
