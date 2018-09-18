@@ -266,6 +266,40 @@ void DbGetAllTests(AlpideDB *db, int compId, vector<ComponentDB::compActivity> &
 }
 
 
+// static const std::set<std::string> kTestTypes = {
+//     "OB-HIC Impedance Test",       "OB HIC Qualification Test",   "IB HIC Qualification Test",
+//     "IB Stave Qualification Test", "OB HIC Endurance Test",       "OB HIC Fast Power Test",
+//     "OB HIC Reception Test",       "OL HS Qualification Test",    "ML HS Qualification Test",
+//     "OL Stave Qualification Test", "ML Stave Qualification Test", "OL Stave Reception Test",
+//     "ML Stave Reception Test"};
+
+bool DbCheckCompleteness(AlpideDB *db, int compId)
+{
+  vector<ComponentDB::compActivity> tests;
+  // first fill vector with all found tests (one instance for each type only)
+  // Scan type has to be one not treated in DbGetAllTests
+  DbGetAllTests(db, compId, tests, STPower, true);
+
+  // now find index of last test
+  unsigned int last = 0;
+  for (unsigned int i = 0; i < tests.size(); i++) {
+    int index = distance(kTestTypes.begin(), kTestTypes.find(tests.at(i).Typename));
+    if ((unsigned int)index > last) last = index;
+  }
+  // now check if the number of different tests performed is consistent with the last test type;
+  // note: this depends on a specific order of kTestTypes, as shown in the comment above
+
+  if (last == 1) return true; // OB HIC Qualification
+  if ((last < 8) && (last == tests.size() + 2)) return true;
+  if ((last == 8) && (tests.size() == 5)) return true;  // ML HS
+  if ((last == 9) && (tests.size() == 6)) return true;  // OL Stave
+  if ((last == 10) && (tests.size() == 6)) return true; // ML Stave
+  if ((last == 11) && (tests.size() == 7)) return true; // OL Stave reception
+  if ((last == 12) && (tests.size() == 7)) return true; // ML Stave reception
+  return false;
+}
+
+
 THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityTypeId,
                                          bool &openAct, bool &impedance)
 {
