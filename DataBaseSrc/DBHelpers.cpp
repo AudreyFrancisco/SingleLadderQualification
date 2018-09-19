@@ -2,6 +2,7 @@
 #include "TDigitalScan.h"
 #include "TNoiseOccupancy.h"
 #include "TSCurveScan.h"
+#include <algorithm>
 #include <fstream>
 #include <set>
 
@@ -26,6 +27,7 @@ int DbGetActivityTypeId(AlpideDB *db, string name)
 
   return -1;
 }
+
 
 // returns the ID of the previous activity
 // parameter name is the name of the current activity
@@ -726,6 +728,28 @@ string CreateActivityName(string compName, TScanConfig *config)
 }
 
 
+string GetEosPath(ActivityDB::activityLong activity, THicType hicType, bool doubleComp)
+{
+  string path, location, test, component;
+  string basePath("/eos/project/a/alice-its/HicTests");
+
+  GetServiceAccount(activity.Location.Name, location);
+  test = GetTestDirName(GetTestType(activity.Type.Name));
+
+  if (hicType == HIC_IB) {
+    component = activity.Name.substr(activity.Name.find("IBHIC"));
+  }
+  else {
+    component = activity.Name.substr(activity.Name.find("OBHIC"));
+  }
+  replace(component.begin(), component.end(), ' ', '_');
+
+  path = basePath + "/" + test + "/" + location + "/" + component;
+  if (doubleComp) path += "/" + component;
+  return path;
+}
+
+
 // TODO: use a map or sth more intelligent than this?
 string GetServiceAccount(string institute, string &folder)
 {
@@ -776,5 +800,74 @@ string GetServiceAccount(string institute, string &folder)
   else {
     folder = string("unknown");
     return string("unknown");
+  }
+}
+
+
+TTestType GetTestType(string activityName)
+{
+  if (activityName.find("OB Qualification") != string::npos)
+    return OBQualification;
+  else if (activityName.find("OB Endurance") != string::npos)
+    return OBEndurance;
+  else if (activityName.find("OB Reception") != string::npos)
+    return OBReception;
+  else if (activityName.find("OB Fast Power") != string::npos)
+    return OBPower;
+  else if (activityName.find("OL HS") != string::npos)
+    return OBHalfStaveOL;
+  else if (activityName.find("ML HS") != string::npos)
+    return OBHalfStaveML;
+  else if (activityName.find("IB Quali") != string::npos)
+    return IBQualification;
+  else if (activityName.find("IB End") != string::npos)
+    return IBEndurance;
+  else if (activityName.find("IB Stave T") != string::npos)
+    return IBStave;
+  else if (activityName.find("IB Stave E") != string::npos)
+    return IBStaveEndurance;
+  else if (activityName.find("OL Stave T") != string::npos)
+    return OBStaveOL;
+  else if (activityName.find("ML Stave T") != string::npos)
+    return OBStaveML;
+  else if (activityName.find("OL Stave R") != string::npos)
+    return StaveReceptionOL;
+  else if (activityName.find("ML Stave R") != string::npos)
+    return StaveReceptionML;
+  return Unknown;
+}
+
+
+string GetTestDirName(TTestType TestType)
+{
+  switch (TestType) {
+  case OBQualification:
+    return "OBQualification/";
+  case OBEndurance:
+    return "OBEndurance/";
+  case OBReception:
+    return "OBReception/";
+  case OBPower:
+    return "OBFastPower/";
+  case OBHalfStaveOL:
+    return "OBHalfStaveOL/";
+  case OBHalfStaveML:
+    return "OBHalfStaveML/";
+  case IBQualification:
+    return "IBQualification/";
+  case IBEndurance:
+    return "IBEndurance/";
+  case IBStave:
+    return "IBStave/";
+  case OBStaveOL:
+    return "OBStaveOL/";
+  case OBStaveML:
+    return "OBStaveML/";
+  case StaveReceptionOL:
+    return "StaveReceptionOL/";
+  case StaveReceptionML:
+    return "StaveReceptionML/";
+  default:
+    return "./";
   }
 }

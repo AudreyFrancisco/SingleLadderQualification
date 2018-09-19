@@ -1,4 +1,5 @@
 #include "TScanConfig.h"
+#include "DBHelpers.h"
 #include "TChipConfig.h"
 #include <string>
 
@@ -413,39 +414,7 @@ std::string TScanConfig::GetRemoteHicPath(std::string HicName)
 }
 
 
-std::string TScanConfig::GetTestDir()
-{
-  switch (GetTestType()) {
-  case OBQualification:
-    return "OBQualification/";
-  case OBEndurance:
-    return "OBEndurance/";
-  case OBReception:
-    return "OBReception/";
-  case OBPower:
-    return "OBFastPower/";
-  case OBHalfStaveOL:
-    return "OBHalfStaveOL/";
-  case OBHalfStaveML:
-    return "OBHalfStaveML/";
-  case IBQualification:
-    return "IBQualification/";
-  case IBEndurance:
-    return "IBEndurance/";
-  case IBStave:
-    return "IBStave/";
-  case OBStaveOL:
-    return "OBStaveOL/";
-  case OBStaveML:
-    return "OBStaveML/";
-  case StaveReceptionOL:
-    return "StaveReceptionOL/";
-  case StaveReceptionML:
-    return "StaveReceptionML/";
-  default:
-    return "./";
-  }
-}
+std::string TScanConfig::GetTestDir() { return GetTestDirName(GetTestType()); }
 
 
 /*void TScanConfig::SetVcasnArr (int hics, float *vcasn) { //copy vcasn array to m_vcasn

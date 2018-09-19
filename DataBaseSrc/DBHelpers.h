@@ -59,4 +59,7 @@ void   DbAddMember(AlpideDB *db, ActivityDB::activity &activity, int memberId);
 bool   FileExists(string fileName);
 string CreateActivityName(string compName, TScanConfig *config);
 string GetServiceAccount(string institute, string &folder);
+string GetEosPath(ActivityDB::activityLong activity);
+string GetTestDirName(TTestType TestType);
+TTestType GetTestType(string activityName);
 #endif
