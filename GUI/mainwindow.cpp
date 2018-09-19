@@ -448,6 +448,7 @@ void MainWindow::open()
 void MainWindow::setupChipTree()
 {
   // reset each time
+  disconnect(ui->chipTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), 0, 0);
   ui->chipTree->clear();
 
   int nHics  = fConfig->GetNHics();
