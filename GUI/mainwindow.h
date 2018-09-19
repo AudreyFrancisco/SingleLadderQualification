@@ -190,7 +190,6 @@ private:
   void     AddScan(TScanType scanType, TScanResult *aResult = 0);
   void     ClearVectors();
   void     WriteToEos(string hicName, ActivityDB::actUri &uri, bool write);
-  string   GetServiceAccount(string Institute, string &folder);
   string   GetResultType(int i);
   THic *   FindHic(string hicName);
   void     SetHicClassifications();

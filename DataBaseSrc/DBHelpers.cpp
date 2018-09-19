@@ -724,3 +724,57 @@ string CreateActivityName(string compName, TScanConfig *config)
   }
   return result;
 }
+
+
+// TODO: use a map or sth more intelligent than this?
+string GetServiceAccount(string institute, string &folder)
+{
+  if (institute.find("CERN") != string::npos) {
+    folder = string("CERN");
+    return string("aliceits");
+  }
+  else if (institute.find("Wuhan") != string::npos) {
+    folder = string("Wuhan");
+    return string("aliceitswuhan");
+  }
+  else if (institute.find("Pusan") != string::npos) {
+    folder = string("Pusan");
+    return string("itspusan");
+  }
+  else if (institute.find("Bari") != string::npos) {
+    folder = string("Bari");
+    return string("aliceitsbari");
+  }
+  else if (institute.find("Strasbourg") != string::npos) {
+    folder = string("Strasbourg");
+    return string("aliceitssbg");
+  }
+  else if (institute.find("Liverpool") != string::npos) {
+    folder = string("Liverpool");
+    return string("aliceitslpool");
+  }
+  else if (institute.find("Frascati") != string::npos) {
+    folder = string("Frascati");
+    return string("aliceitslnf");
+  }
+  else if (institute.find("Berkeley") != string::npos) {
+    folder = string("Berkeley");
+    return string("aliceitslbl");
+  }
+  else if (institute.find("Nikhef") != string::npos) {
+    folder = string("Nikhef");
+    return string("itsnik");
+  }
+  else if (institute.find("Daresbury") != string::npos) {
+    folder = string("Daresbury");
+    return string("aliceitsdl");
+  }
+  else if (institute.find("Turin") != string::npos) {
+    folder = string("Torino");
+    return string("aliceitstorino");
+  }
+  else {
+    folder = string("unknown");
+    return string("unknown");
+  }
+}
