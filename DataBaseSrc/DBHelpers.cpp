@@ -238,7 +238,8 @@ void DbEliminateDoubles(vector<ComponentDB::compActivity> &tests)
     else
       keep.push_back(true);
   }
-  for (unsigned int i = tests.size() - 1; i >= 0; i--) {
+
+  for (int i = (int)tests.size() - 1; i >= 0; i--) {
     if (!keep.at(i)) tests.erase(tests.begin() + i);
   }
 }
