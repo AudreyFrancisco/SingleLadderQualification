@@ -59,6 +59,10 @@ TChipConfig::TChipConfig(TConfig *config, int chipId, const char *fName)
     // read information from file
   }
 
+  for (unsigned int ireg = 0; ireg < 32; ++ireg) {
+    fDoubleColumnMask[ireg] = 0x0;
+  }
+
   InitParamMap();
 }
 
@@ -136,4 +140,17 @@ bool TChipConfig::HasEnabledSlave()
     if (fConfig->GetChipConfigById(i)->IsEnabled()) return true;
   }
   return false;
+}
+
+void TChipConfig::SetDoubleColumnMask(unsigned int dcol, bool mask /* = true*/)
+{
+  unsigned int reg = (dcol >> 5) & 0x1f;
+  unsigned int bit = (dcol & 0x1f);
+  fDoubleColumnMask[reg] &= ~(unsigned int)(0x1 << bit);
+  if (mask) fDoubleColumnMask[reg] |= (0x1 << bit);
+}
+
+unsigned int TChipConfig::GetDoubleColumnMask(unsigned int region)
+{
+  return (region < 32) ? fDoubleColumnMask[region] : 0x0;
 }

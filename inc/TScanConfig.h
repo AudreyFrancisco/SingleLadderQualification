@@ -436,6 +436,8 @@ public:
   TTestType GetTestType() { return m_testType; };
   void      SetDatabase(AlpideDB *db) { m_db = db; };
   AlpideDB *GetDatabase() { return m_db; };
+
+  std::vector<std::pair<int, int>> GetDColMaskList();
 };
 
 #endif

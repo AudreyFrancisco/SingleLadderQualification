@@ -51,6 +51,12 @@ int TAlpide::WriteRegister(uint16_t address, uint16_t value, bool verify)
 int TAlpide::ModifyRegisterBits(TRegister address, uint8_t lowBit, uint8_t nBits, uint16_t value,
                                 bool verify)
 {
+  return ModifyRegisterBits((uint16_t)address, lowBit, nBits, value, verify);
+}
+
+int TAlpide::ModifyRegisterBits(uint16_t address, uint8_t lowBit, uint8_t nBits, uint16_t value,
+                                bool verify)
+{
   if ((lowBit < 0) || (lowBit > 15) || (lowBit + nBits > 15)) {
     return -1; // raise exception illegal limits
   }
@@ -231,6 +237,23 @@ std::string TAlpide::DumpRegisters()
   }
 
   // Pixel config: read-only do nothing
+
+  // Region double column disable registers
+  for (uint16_t region = 0; region < 32; ++region) {
+    uint16_t value = 0xDEAD;
+    uint16_t reg   = (uint16_t)Alpide::REG_DCOL_DISABLE_BASE | (region << 11);
+    this->ReadRegister(reg, value);
+    dump << chipId << "\t0x" << std::hex << reg << "\t0x" << value << std::dec << std::endl;
+  }
+
+  // Region status
+  for (uint16_t region = 0; region < 32; ++region) {
+    uint16_t value = 0xDEAD;
+    uint16_t reg   = (uint16_t)Alpide::REG_REGION_STATUS_BASE | (region << 11);
+    this->ReadRegister(reg, value);
+    dump << chipId << "\t0x" << std::hex << reg << "\t0x" << value << std::dec << std::endl;
+  }
+
 
   // DAC and monitoring
   for (unsigned int reg = (unsigned int)Alpide::REG_ANALOGMON;

@@ -187,7 +187,7 @@ void AlpideConfig::EnableDoubleColumns(TAlpide *chip)
 {
   for (int ireg = 0; ireg < 32; ireg++) {
     uint16_t Register = Alpide::REG_DCOL_DISABLE_BASE | (ireg < 11);
-    chip->WriteRegister(Register, 0x0);
+    chip->WriteRegister(Register, chip->GetConfig()->GetDoubleColumnMask(ireg));
   }
 }
 
