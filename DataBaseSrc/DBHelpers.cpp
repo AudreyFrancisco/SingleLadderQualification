@@ -871,3 +871,42 @@ string GetTestDirName(TTestType TestType)
     return "./";
   }
 }
+
+
+bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPercent, int backBias,
+                        string &dataName, string &resultName)
+{
+  bool   found = false;
+  string attName;
+  // find the correct attachment for the given digital scan
+  for (unsigned int i = 0; (i < activity.Attachments.size()) && (!found); i++) {
+    attName = activity.Attachments.at(i).FileName;
+    if ((attName.find("DigitalScanResult") != string::npos)) {
+      if ((voltPercent) && (backBias == 0) && (attName.find("nominal.") != string::npos)) {
+        found = true;
+      }
+      else if ((voltPercent == 100) && (backBias == 3) &&
+               (attName.find("nominal_BB3") != string::npos)) {
+        found = true;
+      }
+      else if ((voltPercent == 90) && (backBias == 0) && (attName.find("lower.") != string::npos)) {
+        found = true;
+      }
+      else if ((voltPercent == 110) && (backBias == 0) &&
+               (attName.find("upper.") != string::npos)) {
+        found = true;
+      }
+    }
+  }
+
+  if (!found) return found;
+  // find the date and time within the attachment name
+  string temp = attName.substr(attName.find("_") + 1);
+
+  string date = temp.substr(0, temp.find("_", 10));
+
+  dataName   = "Digital_" + date + "_Chip" + to_string(chip) + ".dat";
+  resultName = "DigitalScanResult_" + date + ".dat";
+  // create file name for raw data files
+  return found;
+}
