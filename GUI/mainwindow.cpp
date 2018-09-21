@@ -318,7 +318,7 @@ void MainWindow::open()
       fHicnames.clear();
       const int nModules = (fNumberofscan == OBHalfStaveOLFAST) ? 7 : 4;
       for (int i = 0; i < nModules; ++i)
-        fHicnames.push_back(QString("Module%i").arg(i));
+        fHicnames.push_back(QString("Module%1").arg(i));
     }
 
     std::vector<std::string> hicNames;
