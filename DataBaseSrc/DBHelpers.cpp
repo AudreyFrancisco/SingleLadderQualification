@@ -734,7 +734,7 @@ string GetEosPath(ActivityDB::activityLong activity, THicType hicType, bool doub
   string basePath("/eos/project/a/alice-its/HicTests");
 
   GetServiceAccount(activity.Location.Name, location);
-  test = GetTestDirName(GetTestType(activity.Type.Name));
+  test = GetTestDirName(GetTestType(activity.Name));
 
   if (hicType == HIC_IB) {
     component = activity.Name.substr(activity.Name.find("IBHIC"));
@@ -744,7 +744,7 @@ string GetEosPath(ActivityDB::activityLong activity, THicType hicType, bool doub
   }
   replace(component.begin(), component.end(), ' ', '_');
 
-  path = basePath + "/" + test + "/" + location + "/" + component;
+  path = basePath + "/" + test + location + "/" + component;
   if (doubleComp) path += "/" + component;
   return path;
 }
