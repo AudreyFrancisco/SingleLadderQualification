@@ -61,7 +61,7 @@ string CreateActivityName(string compName, TScanConfig *config);
 string GetServiceAccount(string institute, string &folder);
 string GetEosPath(ActivityDB::activityLong activity, THicType hicType, bool doubleComp);
 string GetTestDirName(TTestType TestType);
-TTestType GetTestType(string activityName);
+TTestType GetTestType(string activityTypeName);
 bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPercent, int backBias,
                         string &dataName, string &resultName);
 #endif
