@@ -923,6 +923,8 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
               << " not found, not masking any couble columns." << std::endl;
   }
   else {
+    std::cout << "Masking the following double columns" << std::endl;
+    std::cout << "ChipID\tDouble Column" << std::endl;
     std::string line;
     while (std::getline(infile, line)) {
       std::stringstream   ss;
@@ -935,6 +937,7 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
       ss << line;
       ss >> chipId >> dCol;
       if (chipId > -1 && dCol < -1U) {
+        std::cout << chipId << "\t" << dCol << std::endl;
         for (const auto &rChip : *chips) {
           if (rChip->GetConfig()->GetChipId() == chipId) {
             rChip->GetConfig()->SetDoubleColumnMask(dCol);
@@ -942,6 +945,7 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
         }
       }
     }
+    std::cout << std::endl;
   }
 
   return 0;

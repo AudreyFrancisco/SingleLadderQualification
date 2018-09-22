@@ -125,20 +125,6 @@ void TScan::Init()
         std::pair<std::string, TErrorCounter>(m_hics.at(ihic)->GetDbId(), errCount));
   }
 
-  std::vector<std::pair<int, int>> dcol_mask_list = m_config->GetDColMaskList();
-  for (const auto &rDcol : dcol_mask_list) {
-    for (const auto &rChip : m_chips) {
-      if (rChip->GetConfig()->GetChipId() == rDcol.first) {
-        uint16_t reg  = (rDcol.second >> 5) & 0x1f;
-        int      dcol = rDcol.second & 0x1f;
-        rChip->ModifyRegisterBits((uint16_t)Alpide::REG_DCOL_DISABLE_BASE | (reg << 11), dcol, 1, 1,
-                                  false);
-        break;
-      }
-    }
-  }
-
-
   for (const auto &rChip : m_chips) {
     if (rChip->GetConfig()->IsEnabled()) {
       try {
@@ -545,18 +531,6 @@ void TMaskScan::FindTimeoutHics(int iboard, int *triggerCounts)
 void TMaskScan::ConfigureMaskStage(TAlpide *chip, int istage)
 {
   m_row = AlpideConfig::ConfigureMaskStage(chip, m_pixPerStage, istage);
-  std::vector<std::pair<int, int>> dcol_mask_list = m_config->GetDColMaskList();
-  for (const auto &rDcol : dcol_mask_list) {
-    for (const auto &rChip : m_chips) {
-      if (rChip->GetConfig()->GetChipId() == rDcol.first) {
-        uint16_t reg  = (rDcol.second >> 5) & 0x1f;
-        int      dcol = rDcol.second & 0x1f;
-        rChip->ModifyRegisterBits((uint16_t)Alpide::REG_DCOL_DISABLE_BASE | (reg << 11), dcol, 1, 1,
-                                  false);
-        break;
-      }
-    }
-  }
 }
 
 void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
