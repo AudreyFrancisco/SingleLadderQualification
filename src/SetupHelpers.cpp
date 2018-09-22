@@ -927,10 +927,9 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
     std::cout << "ChipID\tDouble Column" << std::endl;
     std::string line;
     while (std::getline(infile, line)) {
-      std::stringstream   ss;
-      std::pair<int, int> entry;
-      int                 chipId = -1;
-      unsigned int        dCol   = -1U;
+      std::stringstream ss;
+      int               chipId = -1;
+      unsigned int      dCol   = -1U;
       // remove leading tabs or blanks
       size_t p = line.find_first_not_of(" \t");
       line.erase(0, p);

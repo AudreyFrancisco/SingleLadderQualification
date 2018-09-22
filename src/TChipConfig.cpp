@@ -144,8 +144,8 @@ bool TChipConfig::HasEnabledSlave()
 
 void TChipConfig::SetDoubleColumnMask(unsigned int dcol, bool mask /* = true*/)
 {
-  unsigned int reg = (dcol >> 5) & 0x1f;
-  unsigned int bit = (dcol & 0x1f);
+  unsigned int reg = (dcol >> 4) & 0x1f;
+  unsigned int bit = (dcol & 0xf);
   fDoubleColumnMask[reg] &= ~(unsigned int)(0x1 << bit);
   if (mask) fDoubleColumnMask[reg] |= (0x1 << bit);
 }
