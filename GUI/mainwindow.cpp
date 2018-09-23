@@ -842,8 +842,8 @@ void MainWindow::performtests()
             par = fScanVector.at(i)->GetParameters();
             AddScan(GetScanType(i));
             fScanVector.back()->SetParameters(par);
-            std::map<int, int>::reverse_iterator iter = fScanToRowMap.rbegin();
-            ui->testTable->item(iter->first, 0)->setText(fScanVector.back()->GetName());
+            // std::map<int, int>::reverse_iterator iter = fScanToRowMap.rbegin();
+            // ui->testTable->item(iter->first, 0)->setText(fScanVector.back()->GetName());
             fExtraScans++;
           }
 
@@ -854,8 +854,8 @@ void MainWindow::performtests()
               par = fScanVector.at(i)->GetParameters();
               AddScan(GetScanType(i));
               fScanVector.back()->SetParameters(par);
-              std::map<int, int>::reverse_iterator iter = fScanToRowMap.rbegin();
-              ui->testTable->item(iter->first, 0)->setText(fScanVector.back()->GetName());
+              // std::map<int, int>::reverse_iterator iter = fScanToRowMap.rbegin();
+              // ui->testTable->item(iter->first, 0)->setText(fScanVector.back()->GetName());
               fExtraScans++;
             }
           }
