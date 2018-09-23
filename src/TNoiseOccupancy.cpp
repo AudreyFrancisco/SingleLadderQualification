@@ -73,6 +73,7 @@ void TNoiseOccupancy::ConfigureMask(TAlpide *chip, std::vector<TPixHit> *MaskedP
 {
   AlpideConfig::WritePixRegAll(chip, Alpide::PIXREG_MASK, false);
   AlpideConfig::WritePixRegAll(chip, Alpide::PIXREG_SELECT, false);
+  AlpideConfig::EnableDoubleColumns(chip);
 }
 
 THisto TNoiseOccupancy::CreateHisto()
