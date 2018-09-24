@@ -1,7 +1,9 @@
 #include "SetupHelpers.h"
 #include "TPowerBoard.h"
 #include "USBHelpers.h"
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string.h>
 #include <string>
 
@@ -908,6 +910,43 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
     std::cout << "Unknown setup type, doing nothing" << std::endl;
     return -1;
   }
+
+  // read double-column masking file
+  std::string filename = "dcol_mask.cfg";
+  if (const char *configDir = std::getenv("ALPIDE_TEST_CONFIG"))
+    filename.insert(0, std::string(configDir) + "/");
+
+  std::ifstream infile(filename);
+
+  if (!infile.good()) {
+    std::cout << "WARNING: Config file " << filename
+              << " not found, not masking any couble columns." << std::endl;
+  }
+  else {
+    std::cout << "Masking the following double columns" << std::endl;
+    std::cout << "ChipID\tDouble Column" << std::endl;
+    std::string line;
+    while (std::getline(infile, line)) {
+      std::stringstream ss;
+      int               chipId = -1;
+      unsigned int      dCol   = -1U;
+      // remove leading tabs or blanks
+      size_t p = line.find_first_not_of(" \t");
+      line.erase(0, p);
+      ss << line;
+      ss >> chipId >> dCol;
+      if (chipId > -1 && dCol < -1U) {
+        std::cout << chipId << "\t" << dCol << std::endl;
+        for (const auto &rChip : *chips) {
+          if (rChip->GetConfig()->GetChipId() == chipId) {
+            rChip->GetConfig()->SetDoubleColumnMask(dCol);
+          }
+        }
+      }
+    }
+    std::cout << std::endl;
+  }
+
   return 0;
 }
 

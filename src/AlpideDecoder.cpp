@@ -101,17 +101,18 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
   if ((hits->size() > 0) && (!newEvent)) {
     if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) &&
         (address == hits->back().address)) {
-      std::cout << "Warning (chip " << chip << "/ channel " << channel << "), received pixel "
-                << hit.region << "/" << hit.dcol << "/" << address << " twice." << std::endl;
+      std::cout << "Warning (chip " << chip << "/ channel " << channel << "/ board " << boardIndex
+                << "), received pixel reg_" << hit.region << "/dcol_" << hit.dcol << "/addr_"
+                << address << " twice." << std::endl;
       prioErrors++;
       hit.address = address;
       if (stuck && !(common::PixelAlreadyHit(stuck, hit))) stuck->push_back(hit);
     }
     else if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) &&
              (address < hits->back().address)) {
-      std::cout << "Warning (chip " << chip << "/ channel " << channel << "), address of pixel "
-                << hit.region << "/" << hit.dcol << "/" << address
-                << " is lower than previous one (" << hits->back().address
+      std::cout << "Warning (chip " << chip << "/ channel " << channel << "/ board " << boardIndex
+                << "), address of pixel reg_" << hit.region << "/dcol_" << hit.dcol << "/addr_"
+                << address << " is lower than previous one (" << hits->back().address
                 << ") in same double column." << std::endl;
       prioErrors++;
       hit.address = address;

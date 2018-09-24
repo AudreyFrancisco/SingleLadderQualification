@@ -186,8 +186,8 @@ void AlpideConfig::ConfigureCMU(TAlpide *chip, TChipConfig *config)
 void AlpideConfig::EnableDoubleColumns(TAlpide *chip)
 {
   for (int ireg = 0; ireg < 32; ireg++) {
-    uint16_t Register = Alpide::REG_DCOL_DISABLE_BASE | (ireg < 11);
-    chip->WriteRegister(Register, 0x0);
+    uint16_t reg = (uint16_t)Alpide::REG_DCOL_DISABLE_BASE | ireg << 11;
+    chip->WriteRegister(reg, chip->GetConfig()->GetDoubleColumnMask(ireg));
   }
 }
 

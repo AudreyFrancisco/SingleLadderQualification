@@ -1,6 +1,8 @@
 #include "TScanConfig.h"
 #include "DBHelpers.h"
 #include "TChipConfig.h"
+#include <fstream>
+#include <sstream>
 #include <string>
 
 using namespace ScanConfig;

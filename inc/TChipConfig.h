@@ -112,6 +112,7 @@ private:
   // Mask file
   char                 fMaskFile[200];
   std::vector<TPixHit> m_noisyPixels;
+  unsigned int         fDoubleColumnMask[32];
 
 protected:
 public:
@@ -168,6 +169,9 @@ public:
   void                 SetNoisyPixels(std::vector<TPixHit> noisy) { m_noisyPixels = noisy; };
   void                 ClearNoisyPixels() { m_noisyPixels.clear(); };
   std::vector<TPixHit> GetNoisyPixels() { return m_noisyPixels; };
+
+  void         SetDoubleColumnMask(unsigned int dcol, bool mask = true);
+  unsigned int GetDoubleColumnMask(unsigned int region);
 };
 
 #endif /* CHIPCONFIG_H */

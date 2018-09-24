@@ -311,8 +311,10 @@ void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo)
         }
         else if (IsVCASNTuning() && fitResult.noise < 0) {
           ++vcasnTuningOutOfRange;
-          std::cout << "Vcasn tuning out-of-range in pixel " << iCol << "/" << row << "."
-                    << std::endl;
+          std::cout << "Vcasn tuning out-of-range in pixel " << iCol << "/" << row << " of chip ID "
+                    << m_chipList.at(iChip).chipId << ", receiver "
+                    << m_chipList.at(iChip).dataReceiver << ", board "
+                    << m_chipList.at(iChip).boardIndex << "." << std::endl;
         }
         else {
           chipResult->m_thresholdAv += fitResult.threshold;
