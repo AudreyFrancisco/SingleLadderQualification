@@ -43,7 +43,8 @@ namespace ScanConfig {
   // 1.4: increased gravity of failed chi square cut in DCTRL Test (bronze -> red)
   // 1.5: reduced cycles in endurance test /10, reduced cut on failures 30 -> 3
   // 1.51: introduced FIFO test in endurance cycle (no cut yet)
-  const float CLASSIFICATION_VERSION = 1.51;
+  // 1.6: bug fix in the double column masking code
+  const float CLASSIFICATION_VERSION = 1.6;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions
