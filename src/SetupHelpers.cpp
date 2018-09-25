@@ -933,6 +933,7 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
       // remove leading tabs or blanks
       size_t p = line.find_first_not_of(" \t");
       line.erase(0, p);
+      if (line.at(0) == '#') continue;
       ss << line;
       ss >> chipId >> dCol;
       if (chipId > -1 && dCol < -1U) {
