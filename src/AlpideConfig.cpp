@@ -194,7 +194,7 @@ void AlpideConfig::EnableDoubleColumns(TAlpide *chip)
 // return value: active row (needed for threshold scan histogramming)
 int AlpideConfig::ConfigureMaskStage(TAlpide *chip, int nPix, int iStage, bool Mask, bool Select)
 {
-  EnableDoubleColumns(chip);
+  if (iStage == 0) EnableDoubleColumns(chip);
   // check that nPix is one of (1, 2, 4, 8, 16, 32)
   if ((nPix <= 0) || (nPix & (nPix - 1)) || (nPix > 32)) {
     std::cout << "Warning: bad number of pixels for mask stage (" << nPix << ", using 1 instead"

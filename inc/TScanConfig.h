@@ -44,7 +44,9 @@ namespace ScanConfig {
   // 1.5: reduced cycles in endurance test /10, reduced cut on failures 30 -> 3
   // 1.51: introduced FIFO test in endurance cycle (no cut yet)
   // 1.6: bug fix in the double column masking code
-  const float CLASSIFICATION_VERSION = 1.6;
+  // 1.7: only unmasking the double columns at the beginning of the mask scan (caused by MOSAIC
+  // issues)
+  const float CLASSIFICATION_VERSION = 1.7;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions
