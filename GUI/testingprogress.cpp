@@ -10,6 +10,7 @@ Testingprogress::Testingprogress(QWidget *parent) : QDialog(parent), ui(new Ui::
   ui->setupUi(this);
   connect(ui->stoptest, SIGNAL(clicked()), this->parent(), SLOT(stopscans()));
   connect(ui->retryscan, SIGNAL(clicked()), this->parent(), SLOT(retryfailedscan()));
+  connect(ui->abortcurrentscan, SIGNAL(clicked()), this->parent(), SLOT(abortscan()));
   //   connect(ui->testingprogress,)
 }
 
