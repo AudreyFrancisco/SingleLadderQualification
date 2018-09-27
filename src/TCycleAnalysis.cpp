@@ -210,9 +210,9 @@ void TCycleResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
     DbAddParameter(db, activity, string("Av. IDDD"), (float)m_avIddd, GetParameterFile());
     DbAddParameter(db, activity, string("Min. IDDD"), (float)m_minIddd, GetParameterFile());
     DbAddParameter(db, activity, string("Max. IDDD"), (float)m_maxIddd, GetParameterFile());
-    DbAddParameter(db, activity, string("FIFO errors (nominal)"), (float)m_nFifoErrors,
+    DbAddParameter(db, activity, string("FIFO errors (endurance)"), (float)m_nFifoErrors,
                    GetParameterFile());
-    DbAddParameter(db, activity, string("FIFO exceptions (nominal)"), (float)m_nFifoExceptions,
+    DbAddParameter(db, activity, string("FIFO exceptions (endurance)"), (float)m_nFifoExceptions,
                    GetParameterFile());
   }
   slash    = string(m_resultFile).find_last_of("/");
