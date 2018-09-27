@@ -42,13 +42,37 @@ MIPBusUDPError::MIPBusUDPError(const string &arg) { msg = "IPBusUDP Error: " + a
 MIPBusUDPTimeout::MIPBusUDPTimeout() {}
 
 // IPBus error
-MIPBusError::MIPBusError(const string &arg) { msg = "IPBus Error: " + arg; }
+MIPBusError::MIPBusError(const string &arg, const string &address)
+{
+  if (address.length() > 0) {
+    msg = "IPBus Error (address " + address + "): " + arg;
+  }
+  else {
+    msg = "IPBus Error: " + arg;
+  }
+}
 
 // IPBus error - Remote Bus Write error
-MIPBusErrorWrite::MIPBusErrorWrite(const string &arg) { msg = "IPBus Error: " + arg; }
+MIPBusErrorWrite::MIPBusErrorWrite(const string &arg, const string &address)
+{
+  if (address.length() > 0) {
+    msg = "IPBus Error (address " + address + "): " + arg;
+  }
+  else {
+    msg = "IPBus Error: " + arg;
+  }
+}
 
 // IPBus error - Remote Bus Read error
-MIPBusErrorReadTimeout::MIPBusErrorReadTimeout(const string &arg) { msg = "IPBus Error: " + arg; }
+MIPBusErrorReadTimeout::MIPBusErrorReadTimeout(const string &arg, const string &address)
+{
+  if (address.length() > 0) {
+    msg = "IPBus Error (address " + address + "): " + arg;
+  }
+  else {
+    msg = "IPBus Error: " + arg;
+  }
+}
 
 // Data connection over TCP error
 MDataConnectError::MDataConnectError(const string &arg)

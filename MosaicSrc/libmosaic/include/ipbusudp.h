@@ -50,13 +50,15 @@ public:
   IPbusUDP(const char *brdName, int port = DEFAULT_PORT, int pktsize = DEFAULT_PACKET_SIZE);
   ~IPbusUDP();
   void              setIPaddress(const char *brdName, int port = DEFAULT_PORT);
+  std::string       getIPaddress() { return m_address; };
   void              execute();
   const std::string name() { return "IPbusUDP"; }
 
 private:
-  void testConnection();
-  void sockRead();
-  void sockWrite();
+  std::string m_address;
+  void        testConnection();
+  void        sockRead();
+  void        sockWrite();
 
 private:
   // int port;
