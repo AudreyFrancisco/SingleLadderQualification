@@ -33,6 +33,7 @@ void TCycleAnalysis::InitCounters()
     result->m_nTrips          = 0;
     result->m_minWorkingChips = 14;
     result->m_nChipFailures   = 0;
+    result->m_nExceptions     = 0;
     result->m_nFifoTests      = 0;
     result->m_nFifoExceptions = 0;
     result->m_nFifoErrors     = 0;
@@ -104,6 +105,7 @@ void TCycleAnalysis::Finalize()
       hicResult->m_avDeltaT += hicCounter.m_tempEnd - hicCounter.m_tempStart;
       hicResult->m_avIdda += hicCounter.m_iddaClocked;
       hicResult->m_avIddd += hicCounter.m_idddClocked;
+      hicResult->m_nExceptions += hicCounter.m_exceptions;
       hicResult->m_nFifoExceptions += hicCounter.m_fifoExceptions;
       hicResult->m_nFifoErrors += hicCounter.m_fifoErrors;
       hicResult->m_nFifoTests += hicCounter.m_fifoTests;
@@ -214,6 +216,7 @@ void TCycleResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
                    GetParameterFile());
     DbAddParameter(db, activity, string("FIFO exceptions (endurance)"), (float)m_nFifoExceptions,
                    GetParameterFile());
+    DbAddParameter(db, activity, string("Exceptions"), (float)m_nExceptions, GetParameterFile());
   }
   slash    = string(m_resultFile).find_last_of("/");
   fileName = string(m_resultFile).substr(slash + 1); // strip path
@@ -234,6 +237,7 @@ void TCycleResultHic::WriteToFile(FILE *fp)
   fprintf(fp, "Trips:                     %d\n", m_nTrips);
   fprintf(fp, "Min. number of chips:      %d\n", m_minWorkingChips);
   fprintf(fp, "Number of chip failures:   %d\n", m_nChipFailures);
+  fprintf(fp, "Number of exceptions:      %d\n", m_nExceptions);
   fprintf(fp, "Number of FIFO errors:     %d\n", m_nFifoErrors);
   fprintf(fp, "Number of FIFO exceptions: %d\n", m_nFifoExceptions);
   fprintf(fp, "Average delta T:           %.1f\n", m_avDeltaT);
@@ -256,6 +260,7 @@ void TCycleResultHic::Add(TCycleResultHic &aResult)
   m_nChipFailures += aResult.m_nChipFailures;
   m_nFifoErrors += aResult.m_nFifoErrors;
   m_nFifoExceptions += aResult.m_nFifoExceptions;
+  m_nExceptions += aResult.m_nExceptions;
 
   m_avDeltaT = (m_weight * m_avDeltaT + aResult.m_avDeltaT) / (m_weight + 1);
   m_avIdda   = (m_weight * m_avIdda + aResult.m_avIdda) / (m_weight + 1);

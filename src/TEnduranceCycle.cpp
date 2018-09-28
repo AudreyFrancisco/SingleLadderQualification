@@ -118,6 +118,7 @@ void TEnduranceCycle::ClearCounters()
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoTests      = 0;
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoErrors     = 0;
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoExceptions = 0;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_exceptions     = 0;
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_trip           = false;
   }
 }
@@ -141,6 +142,10 @@ void TEnduranceCycle::ReadRecoveredCounters(
         m_hicCounters.at(hicIt->first).m_tempStart      = hicIt->second.m_tempStart;
         m_hicCounters.at(hicIt->first).m_tempEnd        = hicIt->second.m_tempEnd;
         m_hicCounters.at(hicIt->first).m_nWorkingChips  = hicIt->second.m_nWorkingChips;
+        m_hicCounters.at(hicIt->first).m_exceptions     = hicIt->second.m_exceptions;
+        m_hicCounters.at(hicIt->first).m_fifoErrors     = hicIt->second.m_fifoErrors;
+        m_hicCounters.at(hicIt->first).m_fifoExceptions = hicIt->second.m_fifoExceptions;
+        m_hicCounters.at(hicIt->first).m_fifoTests      = hicIt->second.m_fifoTests;
       }
       catch (...) {
         std::cout << "Warning, found unknown HIC " << hicIt->first << " in deque, ignored"
@@ -284,7 +289,15 @@ void TEnduranceCycle::Execute()
   CountWorkingChips();
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
-    m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_tempStart = m_hics.at(ihic)->GetTemperature();
+    try {
+      m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_tempStart = m_hics.at(ihic)->GetTemperature();
+    }
+    catch (...) {
+      m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_tempStart = 0;
+      m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_exceptions++;
+      std::cout << "Exception in HIC " << m_hics.at(ihic)->GetDbId() << " while reading temp"
+                << std::endl;
+    }
   }
 
   // 3) configure chips, measure currents
@@ -342,7 +355,15 @@ void TEnduranceCycle::Execute()
   std::cout << "  Powering off" << std::endl;
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
-    m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_tempEnd = m_hics.at(ihic)->GetTemperature();
+    try {
+      m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_tempEnd = m_hics.at(ihic)->GetTemperature();
+    }
+    catch (...) {
+      m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_tempEnd = 0;
+      m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_exceptions++;
+      std::cout << "Exception in HIC " << m_hics.at(ihic)->GetDbId() << " while reading temp"
+                << std::endl;
+    }
     m_hics.at(ihic)->PowerOff();
   }
   WriteRecoveryFile();
@@ -361,11 +382,11 @@ void TEnduranceCycle::WriteRecoveryFile()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     THicCounter counter = m_hicCounters.at(m_hics.at(ihic)->GetDbId());
-    fprintf(fp, "%s %d %d %d %d %.3f %.3f %.3f %.3f %.1f %.1f\n",
+    fprintf(fp, "%s %d %d %d %d %d %.3f %.3f %.3f %.3f %.1f %.1f\n",
             m_hics.at(ihic)->GetDbId().c_str(), counter.m_trip ? 1 : 0, counter.m_nWorkingChips,
-            counter.m_fifoErrors, counter.m_fifoExceptions, counter.m_iddaClocked,
-            counter.m_idddClocked, counter.m_iddaConfigured, counter.m_idddConfigured,
-            counter.m_tempStart, counter.m_tempEnd);
+            counter.m_exceptions, counter.m_fifoErrors, counter.m_fifoExceptions,
+            counter.m_iddaClocked, counter.m_idddClocked, counter.m_iddaConfigured,
+            counter.m_idddConfigured, counter.m_tempStart, counter.m_tempEnd);
   }
 
   fclose(fp);
