@@ -1,13 +1,28 @@
 #include "DBHelpers.h"
+#include "TDigitalScan.h"
+#include "TNoiseOccupancy.h"
+#include "TSCurveScan.h"
+#include <algorithm>
 #include <fstream>
+#include <list>
 #include <set>
 
-static const std::set<std::string> kTestTypes = {
+static const std::list<std::string> kTestTypes = {
     "OB-HIC Impedance Test",       "OB HIC Qualification Test",   "IB HIC Qualification Test",
     "IB Stave Qualification Test", "OB HIC Endurance Test",       "OB HIC Fast Power Test",
     "OB HIC Reception Test",       "OL HS Qualification Test",    "ML HS Qualification Test",
     "OL Stave Qualification Test", "ML Stave Qualification Test", "OL Stave Reception Test",
     "ML Stave Reception Test"};
+
+bool IsTestType(std::string activity)
+{
+  return (std::find(kTestTypes.begin(), kTestTypes.end(), activity) != kTestTypes.end());
+}
+
+int TestTypeIndex(std::string activity)
+{
+  return distance(kTestTypes.begin(), std::find(kTestTypes.begin(), kTestTypes.end(), activity));
+}
 
 int DbGetActivityTypeId(AlpideDB *db, string name)
 {
@@ -23,6 +38,7 @@ int DbGetActivityTypeId(AlpideDB *db, string name)
 
   return -1;
 }
+
 
 // returns the ID of the previous activity
 // parameter name is the name of the current activity
@@ -198,7 +214,7 @@ void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
 
   for (unsigned int i = 0; i < history.size(); i++) {
     if (history.at(i).Status.Code.compare("OPEN") == 0) openAct = true;
-    if (kTestTypes.find(history.at(i).Typename) == kTestTypes.end()) {
+    if (!IsTestType(history.at(i).Typename)) {
       std::cout << "found non-test activity of type " << history.at(i).Typename << std::endl;
       continue; // check that typename is in list of tests
     }
@@ -211,6 +227,98 @@ void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
     tests.push_back(history.at(i));
   }
 }
+
+
+// Eliminates all activities for which a newer activity of same type is found.
+void DbEliminateDoubles(vector<ComponentDB::compActivity> &tests)
+{
+  std::vector<bool> keep;
+
+  if (tests.size() == 0) {
+    std::cout << "Warning (DbEliminateDoubles): test vector is empty, doing nothing" << std::endl;
+    return;
+  }
+  for (unsigned int i = 0; i < tests.size(); i++) {
+    bool newer = false;
+    // search for second, newer activity of same type
+    for (unsigned ii = 0; ii < tests.size(); ii++) {
+      if (ii == i) continue;
+      if ((tests.at(ii).Type == tests.at(i).Type) && (DbIsNewer(tests.at(ii), tests.at(i)) == 0))
+        newer = true;
+    }
+    if (newer)
+      keep.push_back(false);
+    else
+      keep.push_back(true);
+  }
+
+  for (int i = (int)tests.size() - 1; i >= 0; i--) {
+    if (!keep.at(i)) tests.erase(tests.begin() + i);
+  }
+}
+
+
+void DbGetAllTests(AlpideDB *db, int compId, vector<ComponentDB::compActivity> &tests,
+                   TScanType scanType, bool lastOnly)
+{
+  ComponentDB *                     componentDB = new ComponentDB(db);
+  vector<ComponentDB::compActivity> history;
+
+  tests.clear();
+  componentDB->GetComponentActivities(compId, &history);
+  for (unsigned int i = 0; i < history.size(); i++) {
+    if (!IsTestType(history.at(i).Typename)) {
+      // std::cout << "found non-test activity of type " << history.at(i).Typename << std::endl;
+      continue; // check that typename is in list of tests
+    }
+    if (history.at(i).Typename.find("Impedance") != string::npos) continue;
+    if ((scanType == STThreshold) && (!TThresholdScan::isPerformedDuring(history.at(i).Typename)))
+      continue;
+    if ((scanType == STDigital) && (!TDigitalScan::isPerformedDuring(history.at(i).Typename)))
+      continue;
+    if ((scanType == STNoise) && (!TNoiseOccupancy::isPerformedDuring(history.at(i).Typename)))
+      continue;
+    tests.push_back(history.at(i));
+  }
+  if (lastOnly) DbEliminateDoubles(tests);
+}
+
+
+// static const std::set<std::string> kTestTypes = {
+//     "OB-HIC Impedance Test",       "OB HIC Qualification Test",   "IB HIC Qualification Test",
+//     "IB Stave Qualification Test", "OB HIC Endurance Test",       "OB HIC Fast Power Test",
+//     "OB HIC Reception Test",       "OL HS Qualification Test",    "ML HS Qualification Test",
+//     "OL Stave Qualification Test", "ML Stave Qualification Test", "OL Stave Reception Test",
+//     "ML Stave Reception Test"};
+
+bool DbCheckCompleteness(AlpideDB *db, int compId)
+{
+  vector<ComponentDB::compActivity> tests;
+  // first fill vector with all found tests (one instance for each type only)
+  // Scan type has to be one not treated in DbGetAllTests
+  DbGetAllTests(db, compId, tests, STPower, true);
+
+  // now find index of last test
+  unsigned int last = 0;
+  for (unsigned int i = 0; i < tests.size(); i++) {
+    int index = TestTypeIndex(tests.at(i).Typename);
+    if ((unsigned int)index > last) last = index;
+  }
+
+  // now check if the number of different tests performed is consistent with the last test type;
+  // note: this depends on a specific order of kTestTypes, as shown in the comment above
+
+  if (last == 0) return true;
+  if (last == 1) return true; // OB HIC Qualification
+  if ((last < 8) && (last == tests.size() + 2)) return true;
+  if ((last == 8) && (tests.size() == 5)) return true;  // ML HS
+  if ((last == 9) && (tests.size() == 6)) return true;  // OL Stave
+  if ((last == 10) && (tests.size() == 6)) return true; // ML Stave
+  if ((last == 11) && (tests.size() == 7)) return true; // OL Stave reception
+  if ((last == 12) && (tests.size() == 7)) return true; // ML Stave reception
+  return false;
+}
+
 
 THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityTypeId,
                                          bool &openAct, bool &impedance)
@@ -449,8 +557,14 @@ int DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name)
   return -1;
 }
 
+int DbGetComponentId(AlpideDB *db, int typeId, string name)
+{
+  return DbGetComponentId(db, db->GetProjectId(), typeId, name);
+}
+
+
 // TODO: check; need also position?
-int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children)
+int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children, bool chipsOnly)
 {
   ComponentDB *              componentDB = new ComponentDB(db);
   ComponentDB::componentLong component;
@@ -465,6 +579,7 @@ int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children)
     child.Type                           = childDB.Component.ComponentType.ID;
     child.Position                       = childDB.Position;
     child.Name                           = childDB.Component.ComponentID;
+    if (chipsOnly && (child.Type != DbGetComponentTypeId(db, "ALPIDEB Chip"))) continue;
     children.push_back(child);
   }
   return children.size();
@@ -623,4 +738,188 @@ string CreateActivityName(string compName, TScanConfig *config)
     result.append(std::to_string(config->GetRetestNumber(compName)));
   }
   return result;
+}
+
+
+string GetEosPath(ActivityDB::activityLong activity, THicType hicType, bool doubleComp)
+{
+  string path, location, test, component;
+  string basePath("/eos/project/a/alice-its/HicTests");
+
+  GetServiceAccount(activity.Location.Name, location);
+  test = GetTestDirName(GetTestType(activity.Type.Name));
+
+  if (hicType == HIC_IB) {
+    component = activity.Name.substr(activity.Name.find("IBHIC"));
+  }
+  else {
+    component = activity.Name.substr(activity.Name.find("OBHIC"));
+  }
+  replace(component.begin(), component.end(), ' ', '_');
+
+  path = basePath + "/" + test + location + "/" + component;
+  if (doubleComp) path += "/" + component;
+  return path;
+}
+
+
+// TODO: use a map or sth more intelligent than this?
+string GetServiceAccount(string institute, string &folder)
+{
+  if (institute.find("CERN") != string::npos) {
+    folder = string("CERN");
+    return string("aliceits");
+  }
+  else if (institute.find("Wuhan") != string::npos) {
+    folder = string("Wuhan");
+    return string("aliceitswuhan");
+  }
+  else if (institute.find("Pusan") != string::npos) {
+    folder = string("Pusan");
+    return string("itspusan");
+  }
+  else if (institute.find("Bari") != string::npos) {
+    folder = string("Bari");
+    return string("aliceitsbari");
+  }
+  else if (institute.find("Strasbourg") != string::npos) {
+    folder = string("Strasbourg");
+    return string("aliceitssbg");
+  }
+  else if (institute.find("Liverpool") != string::npos) {
+    folder = string("Liverpool");
+    return string("aliceitslpool");
+  }
+  else if (institute.find("Frascati") != string::npos) {
+    folder = string("Frascati");
+    return string("aliceitslnf");
+  }
+  else if (institute.find("Berkeley") != string::npos) {
+    folder = string("Berkeley");
+    return string("aliceitslbl");
+  }
+  else if (institute.find("Nikhef") != string::npos) {
+    folder = string("Nikhef");
+    return string("itsnik");
+  }
+  else if (institute.find("Daresbury") != string::npos) {
+    folder = string("Daresbury");
+    return string("aliceitsdl");
+  }
+  else if (institute.find("Turin") != string::npos) {
+    folder = string("Torino");
+    return string("aliceitstorino");
+  }
+  else {
+    folder = string("unknown");
+    return string("unknown");
+  }
+}
+
+
+TTestType GetTestType(string activityTypeName)
+{
+  if (activityTypeName.find("OB HIC Qualification") != string::npos)
+    return OBQualification;
+  else if (activityTypeName.find("OB HIC Endurance") != string::npos)
+    return OBEndurance;
+  else if (activityTypeName.find("OB HIC Reception Test") != string::npos)
+    return OBReception;
+  else if (activityTypeName.find("OB HIC Fast Power") != string::npos)
+    return OBPower;
+  else if (activityTypeName.find("OL HS Quali") != string::npos)
+    return OBHalfStaveOL;
+  else if (activityTypeName.find("ML HS Quali") != string::npos)
+    return OBHalfStaveML;
+  else if (activityTypeName.find("IB HIC Quali") != string::npos)
+    return IBQualification;
+  else if (activityTypeName.find("IB HIC End") != string::npos)
+    return IBEndurance;
+  else if (activityTypeName.find("IB Stave Quali") != string::npos)
+    return IBStave;
+  else if (activityTypeName.find("IB Stave End") != string::npos)
+    return IBStaveEndurance;
+  else if (activityTypeName.find("OL Stave Quali") != string::npos)
+    return OBStaveOL;
+  else if (activityTypeName.find("ML Stave Quali") != string::npos)
+    return OBStaveML;
+  else if (activityTypeName.find("OL Stave Reception Test") != string::npos)
+    return StaveReceptionOL;
+  else if (activityTypeName.find("ML Stave Reception Test") != string::npos)
+    return StaveReceptionML;
+  return Unknown;
+}
+
+
+string GetTestDirName(TTestType TestType)
+{
+  switch (TestType) {
+  case OBQualification:
+    return "OBQualification/";
+  case OBEndurance:
+    return "OBEndurance/";
+  case OBReception:
+    return "OBReception/";
+  case OBPower:
+    return "OBFastPower/";
+  case OBHalfStaveOL:
+    return "OBHalfStaveOL/";
+  case OBHalfStaveML:
+    return "OBHalfStaveML/";
+  case IBQualification:
+    return "IBQualification/";
+  case IBEndurance:
+    return "IBEndurance/";
+  case IBStave:
+    return "IBStave/";
+  case OBStaveOL:
+    return "OBStaveOL/";
+  case OBStaveML:
+    return "OBStaveML/";
+  case StaveReceptionOL:
+    return "StaveReceptionOL/";
+  case StaveReceptionML:
+    return "StaveReceptionML/";
+  default:
+    return "./";
+  }
+}
+
+
+bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPercent, int backBias,
+                        string &dataName, string &resultName)
+{
+  bool   found = false;
+  string attName;
+  // find the correct attachment for the given digital scan
+  for (unsigned int i = 0; (i < activity.Attachments.size()) && (!found); i++) {
+    attName = activity.Attachments.at(i).FileName;
+    if ((attName.find("DigitalScanResult") != string::npos)) {
+      if ((voltPercent) && (backBias == 0) && (attName.find("nominal.") != string::npos)) {
+        found = true;
+      }
+      else if ((voltPercent == 100) && (backBias == 3) &&
+               (attName.find("nominal_BB3") != string::npos)) {
+        found = true;
+      }
+      else if ((voltPercent == 90) && (backBias == 0) && (attName.find("lower.") != string::npos)) {
+        found = true;
+      }
+      else if ((voltPercent == 110) && (backBias == 0) &&
+               (attName.find("upper.") != string::npos)) {
+        found = true;
+      }
+    }
+  }
+
+  if (!found) return found;
+  // find the date and time within the attachment name
+  string temp = attName.substr(attName.find("_") + 1);
+
+  string date = temp.substr(0, temp.find("_", 10));
+
+  dataName   = "Digital_" + date + "_Chip" + to_string(chip) + ".dat";
+  resultName = "DigitalScanResult_" + date + ".dat";
+  // create file name for raw data files
+  return found;
 }

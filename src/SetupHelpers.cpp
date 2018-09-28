@@ -1,7 +1,9 @@
 #include "SetupHelpers.h"
 #include "TPowerBoard.h"
 #include "USBHelpers.h"
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string.h>
 #include <string>
 
@@ -201,11 +203,11 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
     THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(ihic);
     positionMap[ihic]         = hicOBconfig->GetParamValue("HSPOSBYID");
-    int bbChannel =
-        hicOBconfig->GetParamValue("POWERCOMBO") ? biasbusMap[positionMap[ihic] - 1] : -1;
+    bool useCombo             = hicOBconfig->GetParamValue("POWERCOMBO");
+    int  bbChannel            = useCombo ? biasbusMap[positionMap[ihic] - 1] : -1;
     if (hicIds) {
       hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb,
-                                 positionMap[ihic] - 1, bbChannel));
+                                 positionMap[ihic] - 1, bbChannel, useCombo));
     }
     else {
       hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic + 1)).c_str(),
@@ -513,10 +515,10 @@ void MakeDaisyChain(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
     int modId  = (chipId & 0x70) >> 4;
 
     if ((chipId & 0x8) && (chipId < firstHigh[modId])) firstHigh[modId] = chipId;
-    if (!(chipId & 0x8) && (chipId < firstLow[modId])) firstLow[modId]  = chipId;
+    if (!(chipId & 0x8) && (chipId < firstLow[modId])) firstLow[modId] = chipId;
 
     if ((chipId & 0x8) && (chipId > lastHigh[modId])) lastHigh[modId] = chipId;
-    if (!(chipId & 0x8) && (chipId > lastLow[modId])) lastLow[modId]  = chipId;
+    if (!(chipId & 0x8) && (chipId > lastLow[modId])) lastLow[modId] = chipId;
   }
 
   for (int i = startChipIndex; i < endChipIndex; i++) {
@@ -908,6 +910,44 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
     std::cout << "Unknown setup type, doing nothing" << std::endl;
     return -1;
   }
+
+  // read double-column masking file
+  std::string filename = "dcol_mask.cfg";
+  if (const char *configDir = std::getenv("ALPIDE_TEST_CONFIG"))
+    filename.insert(0, std::string(configDir) + "/");
+
+  std::ifstream infile(filename);
+
+  if (!infile.good()) {
+    std::cout << "WARNING: Config file " << filename
+              << " not found, not masking any couble columns." << std::endl;
+  }
+  else {
+    std::cout << "Masking the following double columns" << std::endl;
+    std::cout << "ChipID\tDouble Column" << std::endl;
+    std::string line;
+    while (std::getline(infile, line)) {
+      std::stringstream ss;
+      int               chipId = -1;
+      unsigned int      dCol   = -1U;
+      // remove leading tabs or blanks
+      size_t p = line.find_first_not_of(" \t");
+      line.erase(0, p);
+      if (line.at(0) == '#') continue;
+      ss << line;
+      ss >> chipId >> dCol;
+      if (chipId > -1 && dCol < -1U) {
+        std::cout << chipId << "\t" << dCol << std::endl;
+        for (const auto &rChip : *chips) {
+          if (rChip->GetConfig()->GetChipId() == chipId) {
+            rChip->GetConfig()->SetDoubleColumnMask(dCol);
+          }
+        }
+      }
+    }
+    std::cout << std::endl;
+  }
+
   return 0;
 }
 
@@ -974,9 +1014,9 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   TPowerBoardConfig * pbConfig[2];
   TPowerBoard *       pb[2] = {0, 0};
 
-  int CtrIntMap[10][2] = {{3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10},
+  int  CtrIntMap[10][2]   = {{3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10},
                           {3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10}};
-  int DataRcvMap[10][2] = {{9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0},
+  int  DataRcvMap[10][2]  = {{9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0},
                            {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0}};
   bool InverRcvMap[10][2] = {{true, false}, {true, false}, {true, false}, {true, false},
                              {true, false}, {true, false}, {true, false}, {true, false},

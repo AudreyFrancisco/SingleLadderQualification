@@ -1,5 +1,8 @@
 #include "TScanConfig.h"
+#include "DBHelpers.h"
 #include "TChipConfig.h"
+#include <fstream>
+#include <sstream>
 #include <string>
 
 using namespace ScanConfig;
@@ -11,6 +14,10 @@ TScanConfig::TScanConfig()
   m_classVersion = CLASSIFICATION_VERSION;
 
   m_db = 0;
+
+  m_autorepeat = AUTOREPEAT;
+  m_maxrepeat  = MAXREPEAT;
+  m_recovery   = RECOVERY;
 
   m_nInj       = NINJ;
   m_nTrig      = NTRIG;
@@ -170,10 +177,20 @@ TScanConfig::TScanConfig()
   m_useDataPath   = false;
   m_halfstavecomp = HALFSTAVE_COMPONENT;
   InitParamMap();
+
+  time_t     t   = time(0); // get time now
+  struct tm *now = localtime(&t);
+
+  sprintf(m_startTime, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1,
+          now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 }
 
 void TScanConfig::InitParamMap()
 {
+  fSettings["AUTOREPEAT"] = &m_autorepeat;
+  fSettings["MAXREPEAT"]  = &m_maxrepeat;
+  fSettings["RECOVERY"]   = &m_recovery;
+
   fSettings["NINJ"]         = &m_nInj;
   fSettings["NTRIG"]        = &m_nTrig;
   fSettings["MAXTIMEOUT"]   = &m_maxTimeout;
@@ -399,39 +416,7 @@ std::string TScanConfig::GetRemoteHicPath(std::string HicName)
 }
 
 
-std::string TScanConfig::GetTestDir()
-{
-  switch (GetTestType()) {
-  case OBQualification:
-    return "OBQualification/";
-  case OBEndurance:
-    return "OBEndurance/";
-  case OBReception:
-    return "OBReception/";
-  case OBPower:
-    return "OBFastPower/";
-  case OBHalfStaveOL:
-    return "OBHalfStaveOL/";
-  case OBHalfStaveML:
-    return "OBHalfStaveML/";
-  case IBQualification:
-    return "IBQualification/";
-  case IBEndurance:
-    return "IBEndurance/";
-  case IBStave:
-    return "IBStave/";
-  case OBStaveOL:
-    return "OBStaveOL/";
-  case OBStaveML:
-    return "OBStaveML/";
-  case StaveReceptionOL:
-    return "StaveReceptionOL/";
-  case StaveReceptionML:
-    return "StaveReceptionML/";
-  default:
-    return "./";
-  }
-}
+std::string TScanConfig::GetTestDir() { return GetTestDirName(GetTestType()); }
 
 
 /*void TScanConfig::SetVcasnArr (int hics, float *vcasn) { //copy vcasn array to m_vcasn

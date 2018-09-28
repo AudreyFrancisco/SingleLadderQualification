@@ -41,9 +41,9 @@ public:
 
 public:
   MCoordinator(WishboneBus *wbbPtr, uint32_t baseAddress);
-  void addEnableExtClock(bool en);
-  void addSetMode(mode_t mode);
-  void setMode(mode_t mode);
+  void        addEnableExtClock(bool en);
+  void        addSetMode(mode_t mode);
+  void        setMode(mode_t mode);
   std::string dumpRegisters();
 
 private: // WBB Slave registers map

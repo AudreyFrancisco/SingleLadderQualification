@@ -126,7 +126,7 @@ std::string MRunControl::dumpRegisters()
                           regLatency,
                           /* regTemperature, */ regStatus,
                           /* regReserved0, regReserved1,*/ regConfig};
-  uint32_t nAddrs = sizeof(addrs) / sizeof(regAddress_e);
+  uint32_t     nAddrs  = sizeof(addrs) / sizeof(regAddress_e);
 
   std::stringstream ss;
   ss << std::hex;

@@ -189,10 +189,10 @@ public:
 
   int SendCommand(Alpide::TCommand Command, TAlpide *chipPtr);
 
-  int SetTriggerConfig(bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
+  int  SetTriggerConfig(bool enablePulse, bool enableTrigger, int triggerDelay, int pulseDelay);
   void SetTriggerSource(TTriggerSource triggerSource);
-  int Trigger(int nTriggers);
-  int ReadEventData(int &nBytes, unsigned char *buffer);
+  int  Trigger(int nTriggers);
+  int  ReadEventData(int &nBytes, unsigned char *buffer);
 
   //// methods only for Cagliari DAQ board
   //---------------------------------------------------------
@@ -203,7 +203,7 @@ public:
 
   void ReadAllRegisters();
 
-  int CurrentToADC(int current);
+  int   CurrentToADC(int current);
   float ADCToSupplyCurrent(int value);
   float ADCToDacmonCurrent(int value);
   float ADCToTemperature(int value);

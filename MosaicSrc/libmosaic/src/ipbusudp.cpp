@@ -52,6 +52,7 @@ IPbusUDP::IPbusUDP(const char *IPaddr, int port, int pktSize) : IPbus(pktSize)
 void IPbusUDP::setIPaddress(const char *IPaddr, int port)
 {
   struct hostent *he;
+  m_address = string(IPaddr);
 
   if ((he = gethostbyname(IPaddr)) == NULL) // get the host address
     throw MIPBusUDPError("Can not resolve board IP address");

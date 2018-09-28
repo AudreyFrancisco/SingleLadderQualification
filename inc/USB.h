@@ -32,14 +32,14 @@ protected:
   unsigned int              fMaxPacketSize;   // Maximum Packet Size
   unsigned int              fTimeout;
 
-  int SetEndpointInfo(const libusb_endpoint_descriptor *desc);
+  int         SetEndpointInfo(const libusb_endpoint_descriptor *desc);
   void        Init();
   virtual int TransferData(unsigned char *data_buf, int packetSize, int *error = 0x0);
 
 public:
   TUSBEndpoint(TUSBBoard *ABoard, const libusb_endpoint_descriptor *desc);
-  int SendData(unsigned char *data_buf, int packetSize, int *error = 0x0);
-  int ReceiveData(unsigned char *data_buf, int packetSize, int *error = 0x0);
+  int                       SendData(unsigned char *data_buf, int packetSize, int *error = 0x0);
+  int                       ReceiveData(unsigned char *data_buf, int packetSize, int *error = 0x0);
   void                      DumpEndpointInfo();
   libusb_transfer_type      GetType() { return fType; };           // Return Type of endpoint.
   libusb_endpoint_direction GetDirection() { return fDirection; }; // Return Direction of endpoint.
@@ -93,8 +93,8 @@ public:
   TUSBBoard(libusb_device *ADevice);
   ~TUSBBoard();
   libusb_device_handle *GetHandle() { return fHandle; };
-  TUSBEndpoint *GetEndpoint(int i) { return fEndpoints.at(i); };
-  void                          DumpDeviceInfo() const;
+  TUSBEndpoint *        GetEndpoint(int i) { return fEndpoints.at(i); };
+  void                  DumpDeviceInfo() const;
   // int                   TransferData        (int idEndpoint, unsigned char * data_buf, int
   // packetSize, int* error=0x0);
   int SendData(int idEndpoint, unsigned char *data_buf, int packetSize, int *error = 0x0) const;

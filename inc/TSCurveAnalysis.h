@@ -48,9 +48,9 @@ public:
   {
     m_analysis = aAnalysis;
   };
-  void SetRawFile(const char *fName) { strcpy(m_rawFile, fName); };
-  void SetFitFile(const char *fName) { strcpy(m_fitFile, fName); };
-  void WriteToFile(FILE *fp);
+  void  SetRawFile(const char *fName) { strcpy(m_rawFile, fName); };
+  void  SetFitFile(const char *fName) { strcpy(m_fitFile, fName); };
+  void  WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
   void  CalculateAverages();
   float GetThresholdMean() { return m_thresholdAv; };
@@ -69,6 +69,7 @@ private:
   float         m_maxChipAv;
   float         m_maxChipNoise;
   float         m_maxRelativeRms;
+  float         m_maxRms;
   float         m_maxDeviation;
   int           m_nDead;
   int           m_nNoThresh;
@@ -84,7 +85,7 @@ private:
   bool          m_thresholdScan;
   char          m_stuckFile[200];
   TErrorCounter m_errorCounter;
-  void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
+  void          GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 protected:
   void Compare(TScanResultHic *aPrediction);
@@ -92,7 +93,7 @@ protected:
 public:
   TSCurveResultHic()
       : TScanResultHic(), m_noiseAv(0), m_noiseRms(0), m_nEntries(0), m_noiseSq(0),
-        m_minChipAv(999), m_maxChipAv(-1), m_maxChipNoise(-1), m_maxRelativeRms(0),
+        m_minChipAv(999), m_maxChipAv(-1), m_maxChipNoise(-1), m_maxRelativeRms(0), m_maxRms(0),
         m_maxDeviation(0), m_nDead(0), m_nNoThresh(0), m_nDeadIncrease(0), m_nNoThreshIncrease(0),
         m_nNoThreshWorstChip(0), m_nDeadWorstChip(0), m_nHot(0){};
   void CalculateAverages();
@@ -137,30 +138,30 @@ private:
   bool m_writeFitResults;
   bool m_nominal;
 
-  void InitCounters();
-  void FillVariableList();
-  void WriteResult();
-  void PrepareFiles();
-  void CloseFiles();
-  bool IsVCASNTuning() { return (fabs(m_resultFactor - 1) < 0.01); };
-  bool IsThresholdScan() { return (m_resultFactor > 1); };
-  bool IsITHRTuning() { return (m_resultFactor < 0); };
-  bool CheckPixelNoHits(TGraph *aGraph);
-  bool CheckPixelHot(TGraph *aGraph);
+  void   InitCounters();
+  void   FillVariableList();
+  void   WriteResult();
+  void   PrepareFiles();
+  void   CloseFiles();
+  bool   IsVCASNTuning() { return (fabs(m_resultFactor - 1) < 0.01); };
+  bool   IsThresholdScan() { return (m_resultFactor > 1); };
+  bool   IsITHRTuning() { return (m_resultFactor < 0); };
+  bool   CheckPixelNoHits(TGraph *aGraph);
+  bool   CheckPixelHot(TGraph *aGraph);
   double meanGraph(TGraph *resultGraph);
   double rmsGraph(TGraph *resultGraph);
-  void ddxGraph(TGraph *aGraph, TGraph *resultGraph);
+  void   ddxGraph(TGraph *aGraph, TGraph *resultGraph);
   //  double ErrorFunc                 (double* x, double* par);
   float FindStartStandard(TGraph *aGraph, int nInj);
   float FindStartInverse(TGraph *aGraph, int nInj);
   float FindStart(TGraph *aGraph, int resultFactor, int nInj);
 
-  void FillGraph(TGraph *aGraph);
+  void                      FillGraph(TGraph *aGraph);
   common::TErrFuncFitResult DoFit(TGraph *aGraph, bool speedy = false);
   common::TErrFuncFitResult DoSpeedyFit(TGraph *aGraph);
   common::TErrFuncFitResult DoRootFit(TGraph *aGraph);
-  THicClassification GetClassificationOB(TSCurveResultHic *result, THic *hic);
-  THicClassification GetClassificationIB(TSCurveResultHic *result, THic *hic);
+  THicClassification        GetClassificationOB(TSCurveResultHic *result, THic *hic);
+  THicClassification        GetClassificationIB(TSCurveResultHic *result, THic *hic);
 
 protected:
   TScanResultChip *GetChipResult()
@@ -173,10 +174,10 @@ protected:
     TSCurveResultHic *Result = new TSCurveResultHic();
     return Result;
   };
-  void CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo);
+  void           CreateResult(){};
+  void           AnalyseHisto(TScanHisto *histo);
   virtual string GetPreviousTestType();
-  void CalculatePrediction(std::string hicName);
+  void           CalculatePrediction(std::string hicName);
 
 public:
   // constructor: result factor determines type of analysis

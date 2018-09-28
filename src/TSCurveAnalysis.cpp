@@ -49,7 +49,7 @@ TSCurveAnalysis::TSCurveAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan,
   if (aResult)
     m_result = aResult;
   else
-    m_result   = new TSCurveResult();
+    m_result = new TSCurveResult();
   m_prediction = new TSCurveResult();
   FillVariableList();
 }
@@ -311,8 +311,10 @@ void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo)
         }
         else if (IsVCASNTuning() && fitResult.noise < 0) {
           ++vcasnTuningOutOfRange;
-          std::cout << "Vcasn tuning out-of-range in pixel " << iCol << "/" << row << "."
-                    << std::endl;
+          std::cout << "Vcasn tuning out-of-range in pixel " << iCol << "/" << row << " of chip ID "
+                    << m_chipList.at(iChip).chipId << ", receiver "
+                    << m_chipList.at(iChip).dataReceiver << ", board "
+                    << m_chipList.at(iChip).boardIndex << "." << std::endl;
         }
         else {
           chipResult->m_thresholdAv += fitResult.threshold;
@@ -387,6 +389,8 @@ void TSCurveAnalysis::Finalize()
         hicResult->m_nNoThreshWorstChip = chipResult->m_nNoThresh;
       if (chipResult->m_threshRelativeRms > hicResult->m_maxRelativeRms)
         hicResult->m_maxRelativeRms = chipResult->m_threshRelativeRms;
+      if (chipResult->m_thresholdRms > hicResult->m_maxRms)
+        hicResult->m_maxRms = chipResult->m_thresholdRms;
       if ((!m_nominal) && (fabs(chipResult->m_deviation) > fabs(hicResult->m_maxDeviation)))
         hicResult->m_maxDeviation = chipResult->m_deviation;
       hicResult->m_nHot += chipResult->m_nHot;
@@ -866,6 +870,8 @@ void TSCurveResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
                    GetParameterFile());
     DbAddParameter(db, activity, string("Maximum relative RMS") + suffix, (float)m_maxRelativeRms,
                    GetParameterFile());
+    DbAddParameter(db, activity, string("Maximum RMS") + suffix, (float)m_maxRms,
+                   GetParameterFile());
     if (!m_nominal) {
       DbAddParameter(db, activity, string("Maximum threshold deviation,") + suffix,
                      (float)m_maxDeviation, GetParameterFile());
@@ -911,6 +917,7 @@ void TSCurveResultHic::WriteToFile(FILE *fp)
     std::cout << std::endl << "Maximum deviation from target: " << m_maxDeviation << std::endl;
   }
   std::cout << std::endl << "Maximum relative rms:          " << m_maxRelativeRms << std::endl;
+  std::cout << std::endl << "Maximum rms:          " << m_maxRms << std::endl;
   std::cout << std::endl << "Dead Pixels:         " << m_nDead << std::endl;
   if (!m_nominal) std::cout << "   Increase:         " << m_nDeadIncrease << std::endl;
   std::cout << "No Threshold Pixels: " << m_nNoThresh << std::endl;

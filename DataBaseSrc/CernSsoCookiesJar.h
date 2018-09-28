@@ -91,7 +91,7 @@ public:
 
 private:
   bool testTheCERNSSO();
-  int parseTheJar(string aCookieJarFile);
+  int  parseTheJar(string aCookieJarFile);
 };
 
 #endif // CERNSSOCOOKIEJAR_H

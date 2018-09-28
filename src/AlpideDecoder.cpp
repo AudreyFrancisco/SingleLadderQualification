@@ -101,17 +101,18 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
   if ((hits->size() > 0) && (!newEvent)) {
     if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) &&
         (address == hits->back().address)) {
-      std::cout << "Warning (chip " << chip << "/ channel " << channel << "), received pixel "
-                << hit.region << "/" << hit.dcol << "/" << address << " twice." << std::endl;
+      std::cout << "Warning (chip " << chip << "/ channel " << channel << "/ board " << boardIndex
+                << "), received pixel reg_" << hit.region << "/dcol_" << hit.dcol << "/addr_"
+                << address << " twice." << std::endl;
       prioErrors++;
       hit.address = address;
       if (stuck && !(common::PixelAlreadyHit(stuck, hit))) stuck->push_back(hit);
     }
     else if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) &&
              (address < hits->back().address)) {
-      std::cout << "Warning (chip " << chip << "/ channel " << channel << "), address of pixel "
-                << hit.region << "/" << hit.dcol << "/" << address
-                << " is lower than previous one (" << hits->back().address
+      std::cout << "Warning (chip " << chip << "/ channel " << channel << "/ board " << boardIndex
+                << "), address of pixel reg_" << hit.region << "/dcol_" << hit.dcol << "/addr_"
+                << address << " is lower than previous one (" << hits->back().address
                 << ") in same double column." << std::endl;
       prioErrors++;
       hit.address = address;
@@ -268,16 +269,16 @@ bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPi
       started = true;
       DecodeEmptyFrame(data + byte, chip, BunchCounterTmp);
       byte += 2;
-      if (chipID) *chipID             = chip;
+      if (chipID) *chipID = chip;
       if (bunchCounter) *bunchCounter = BunchCounterTmp;
-      finished                        = true;
+      finished = true;
       break;
     case DT_CHIPHEADER:
       started  = true;
       finished = false;
       DecodeChipHeader(data + byte, chip, BunchCounterTmp);
       byte += 2;
-      if (chipID) *chipID             = chip;
+      if (chipID) *chipID = chip;
       if (bunchCounter) *bunchCounter = BunchCounterTmp;
       break;
     case DT_CHIPTRAILER:

@@ -121,7 +121,7 @@ public:
   TPowerBoardConfig *GetConfigurationHandler() { return (fPowerBoardConfig); };
 
   // Getters
-  void GetPowerBoardState(powerboard::pbstate *state);
+  void  GetPowerBoardState(powerboard::pbstate *state);
   float GetTemperature()
   {
     readMonitor();

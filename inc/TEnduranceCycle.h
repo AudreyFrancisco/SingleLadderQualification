@@ -21,6 +21,9 @@ typedef struct {
   float    m_idddConfigured;
   float    m_tempStart;
   float    m_tempEnd;
+  int      m_fifoErrors;
+  int      m_fifoExceptions;
+  int      m_fifoTests;
   int      m_nWorkingChips;
 } THicCounter;
 
@@ -31,6 +34,9 @@ typedef struct __TCycleParameters : TScanParameters {
   int nCycles;
   int timeLimit;
 } TCycleParameters;
+
+int OpenEnduranceRecoveryFile(const char *fName, std::vector<std::string> hicNames,
+                              std::deque<std::map<std::string, THicCounter>> &counterVector);
 
 class TEnduranceCycle : public TScan {
 private:
@@ -47,6 +53,10 @@ private:
   void ConfigureChip(TAlpide *chip);
   void ConfigureMask(TAlpide *chip);
   void CountWorkingChips();
+  void WriteRecoveryFile();
+  bool TestPattern(TAlpide *chip, int pattern, int region, int offset, THicCounter &hicCounter);
+  void ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue);
+  void WriteMem(TAlpide *chip, int ARegion, int AOffset, int AValue);
   std::map<std::string, THicCounter>              m_hicCounters;
   std::vector<std::map<std::string, THicCounter>> m_counterVector;
 
@@ -67,6 +77,7 @@ public:
   void LoopEnd(int loopIndex) { (void)loopIndex; };
   void PrepareStep(int loopIndex);
   bool SetParameters(TScanParameters *pars);
+  void ReadRecoveredCounters(std::deque<std::map<std::string, THicCounter>> &counterVector);
   std::vector<std::map<std::string, THicCounter>> GetCounters() { return m_counterVector; };
 };
 

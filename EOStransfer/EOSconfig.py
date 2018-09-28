@@ -384,6 +384,7 @@ def generateTheEOSAllSyncScript(ServiceAccount, LocalBasePath):
     
     file.write("#!/bin/bash\n")
     file.write("# --- Get all the variables ---\n")
+
     file.write("SCRIPTSPATH=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" && pwd )\"\n") 
     file.write(". $SCRIPTSPATH/EOStransfer.cfg\n") 
     file.write("DBATTACHBASEPATH=/var/aliceits/www\n") 

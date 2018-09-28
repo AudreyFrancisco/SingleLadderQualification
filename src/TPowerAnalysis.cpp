@@ -3,6 +3,7 @@
 #include "TPowerTest.h"
 #ifdef HAS_ROOT
 #include "TCanvas.h"
+#include "TError.h"
 #include "TFile.h"
 #include "TH1F.h"
 #include "TString.h"
@@ -58,6 +59,7 @@ string TPowerAnalysis::GetPreviousTestType()
 void TPowerAnalysis::CreateIVHisto(TPowerResultHic *hicResult)
 {
 #ifdef HAS_ROOT
+  gErrorIgnoreLevel = kWarning; // remove TCanvas::Print info messages
   const std::string basename =
       TString::Format("IVcurveBB_%s_%s", hicResult->GetName().c_str(), m_config->GetfNameSuffix())
           .Data();
@@ -158,7 +160,7 @@ THicClassification TPowerAnalysis::GetClassification(THicCurrents currents, TPow
 
   // modify class in case of back-bias trip;
   if (currents.tripBB) {
-    if (returnValue == CLASS_GOLD) returnValue   = CLASS_GOLD_NOBB;
+    if (returnValue == CLASS_GOLD) returnValue = CLASS_GOLD_NOBB;
     if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
     if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
   }

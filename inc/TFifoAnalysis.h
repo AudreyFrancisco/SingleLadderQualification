@@ -32,7 +32,7 @@ private:
 
 public:
   TFifoResultChip() : TScanResultChip(){};
-  void WriteToFile(FILE *fp);
+  void  WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
 };
 
@@ -72,7 +72,7 @@ private:
   void                      InitCounters();
   void                      WriteResult();
   void                      FillVariableList();
-  THicClassification GetClassification(TFifoResultHic *result);
+  THicClassification        GetClassification(TFifoResultHic *result);
 
 protected:
   TScanResultChip *GetChipResult()
@@ -85,10 +85,10 @@ protected:
     TFifoResultHic *Result = new TFifoResultHic();
     return Result;
   };
-  void CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo);
+  void   CreateResult(){};
+  void   AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  void   CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TFifoAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

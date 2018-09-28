@@ -46,14 +46,14 @@
 #include <IOKit/serial/ioss.h>
 #endif
 
-using std::string;
-using std::stringstream;
-using std::invalid_argument;
+using serial::IOException;
 using serial::MillisecondTimer;
+using serial::PortNotOpenedException;
 using serial::Serial;
 using serial::SerialException;
-using serial::PortNotOpenedException;
-using serial::IOException;
+using std::invalid_argument;
+using std::string;
+using std::stringstream;
 
 MillisecondTimer::MillisecondTimer(const uint32_t millis) : expiry(timespec_now())
 {

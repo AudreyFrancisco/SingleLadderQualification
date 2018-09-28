@@ -37,7 +37,7 @@
 class PCF8574 : public I2Cslave {
 public:
   PCF8574(I2Cbus *bus, uint8_t address);
-  void write(uint8_t b);
+  void    write(uint8_t b);
   uint8_t read();
 };
 

@@ -268,9 +268,9 @@ namespace eyescan {
 
       for (int vOffset = vMin; vOffset <= vMax; vOffset += vStep) {
         for (int i = 0; i < resSize; i++)
-          ber[i]   = 0.0;
+          ber[i] = 0.0;
         runHScan(ber.data(), vOffset);
-        for (int i                  = 0; i < resSize; i++)
+        for (int i = 0; i < resSize; i++)
           if (ber[i] == 0.0) ber[i] = minMeasure;
 
         for (int i = 0; i < resSize; i++)
@@ -293,9 +293,9 @@ namespace eyescan {
       */
 
       for (int i = 0; i < resSize; i++)
-        ber[i]   = 0.0;
+        ber[i] = 0.0;
       runHScan(ber, 0);
-      for (int i                  = 0; i < resSize; i++)
+      for (int i = 0; i < resSize; i++)
         if (ber[i] == 0.0) ber[i] = minMeasure;
 
       for (int i = 0; i < resSize; i++)
@@ -311,7 +311,7 @@ namespace eyescan {
     int                  vStep;
     bool                 m_verbose;
   };
-}
+} // namespace eyescan
 
 TBoardType                   fBoardType;
 std::vector<TReadoutBoard *> fBoards;

@@ -4,6 +4,7 @@
 #include <atomic>
 #include <deque>
 #include <mutex>
+#include <set>
 #include <thread>
 #include <vector>
 
@@ -11,6 +12,13 @@
 #include "Common.h"
 #include "THisto.h"
 #include "TScan.h"
+
+// Test types containing threshold scan
+static const std::set<std::string> kThresholdTestTypes = {
+    "OB HIC Qualification Test",   "IB HIC Qualification Test", "IB Stave Qualification Test",
+    "OL HS Qualification Test",    "ML HS Qualification Test",  "OL Stave Qualification Test",
+    "ML Stave Qualification Test", "OL Stave Reception Test",   "ML Stave Reception Test"};
+
 
 typedef struct __TSCurveParameters : TScanParameters {
   bool nominal;
@@ -59,11 +67,11 @@ protected:
     }
   };
 
-  void ConfigureFromu(TAlpide *chip);
+  void         ConfigureFromu(TAlpide *chip);
   virtual void ConfigureChip(TAlpide *chip) = 0;
-  void ConfigureBoard(TReadoutBoard *board);
-  void RestoreNominalSettings();
-  void FillHistos(const THitSet &hs);
+  void         ConfigureBoard(TReadoutBoard *board);
+  void         RestoreNominalSettings();
+  void         FillHistos(const THitSet &hs);
   // THisto CreateHisto    ();
   virtual void SetName() = 0;
 
@@ -82,12 +90,12 @@ public:
   THisto       CreateHisto(); // public in TScan, so...
   void         Init();
   virtual void PrepareStep(int loopIndex) = 0;
-  void LoopEnd(int loopIndex);
-  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
-  void               Execute();
-  void               Terminate();
-  bool               GetNominal() { return ((TSCurveParameters *)m_parameters)->nominal; };
-  bool SetParameters(TScanParameters *pars);
+  void         LoopEnd(int loopIndex);
+  void         LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
+  void         Execute();
+  void         Terminate();
+  bool         GetNominal() { return ((TSCurveParameters *)m_parameters)->nominal; };
+  bool         SetParameters(TScanParameters *pars);
 };
 
 class TThresholdScan : public TSCurveScan {
@@ -102,6 +110,10 @@ public:
   void ConfigureChip(TAlpide *chip);
   void PrepareStep(int loopIndex);
   ~TThresholdScan(){};
+  static bool isPerformedDuring(string testType)
+  {
+    return kThresholdTestTypes.find(testType) != kThresholdTestTypes.end();
+  };
 };
 
 class TtuneVCASNScan : public TSCurveScan {

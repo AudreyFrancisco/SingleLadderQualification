@@ -59,8 +59,8 @@ using namespace std;
 bool fileExists(string path);
 bool pathExists(string path);
 
-void str2timeDate(const char *sDate, time_t *tDate);
-void str2timeTime(const char *sDate, time_t *tDate);
+void        str2timeDate(const char *sDate, time_t *tDate);
+void        str2timeTime(const char *sDate, time_t *tDate);
 std::string float2str(float value);
 std::string getTimeStamp();
 
@@ -70,7 +70,7 @@ public:
   std::string URI;
   std::string QueryString, Path;
   std::string Protocol, Host, Port, User;
-  static Uri Parse(const std::string &uri);
+  static Uri  Parse(const std::string &uri);
 };
 
 #endif // UTILITIES_H

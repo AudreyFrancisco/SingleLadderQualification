@@ -189,7 +189,7 @@ void TEyeMeasurement::Execute()
     vertOffsetReg = ((-vOffset) & 0x7f) | 0x80;
   else
     vertOffsetReg = vOffset & 0x7f;
-  int receiverID  = m_board->GetReceiver(m_testChip->GetConfig()->GetChipId());
+  int receiverID = m_board->GetReceiver(m_testChip->GetConfig()->GetChipId());
   m_board->WriteTransceiverDRPField(receiverID, ES_VERT_OFFSET, ES_VERT_OFFSET_SIZE,
                                     ES_VERT_OFFSET_OFFSET, vertOffsetReg, false);
 

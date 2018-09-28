@@ -40,9 +40,9 @@ setValidator::~setValidator() {}
 
 void setValidator::fixup(QString &input) const
 {
-  double value                = input.toFloat();
+  double value = input.toFloat();
   if (value < bottom()) value = bottom();
-  if (value > top()) value    = top();
+  if (value > top()) value = top();
 
   input.setNum(value, 'f', decimals());
 }

@@ -23,7 +23,7 @@ private:
 
 public:
   TDigitalWFResultChip() : TScanResultChip(){};
-  void WriteToFile(FILE *fp);
+  void  WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
 };
 
@@ -37,7 +37,7 @@ private:
   int   m_nUnmaskable;
   char  m_stuckFile[200];
   char  m_unmaskedFile[200];
-  void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
+  void  GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 public:
   TDigitalWFResultHic() : TScanResultHic(){};
@@ -68,12 +68,12 @@ private:
   void InitCounters();
   void FillVariableList();
   //  void WriteHitData     (TScanHisto *histo, int row);
-  void WriteResult();
-  void WriteStuckPixels(THic *hic);
-  void WriteUnmaskedPixels(THic *hic);
-  void WritePixels(THic *hic, std::vector<TPixHit> pixels, const char *fName);
-  THicClassification GetClassificationOB(TDigitalWFResultHic *result);
-  THicClassification GetClassificationIB(TDigitalWFResultHic *result);
+  void                 WriteResult();
+  void                 WriteStuckPixels(THic *hic);
+  void                 WriteUnmaskedPixels(THic *hic);
+  void                 WritePixels(THic *hic, std::vector<TPixHit> pixels, const char *fName);
+  THicClassification   GetClassificationOB(TDigitalWFResultHic *result);
+  THicClassification   GetClassificationIB(TDigitalWFResultHic *result);
   std::vector<TPixHit> m_unmaskable;
 
 protected:
@@ -87,10 +87,10 @@ protected:
     TDigitalWFResultHic *Result = new TDigitalWFResultHic();
     return Result;
   };
-  void CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo);
+  void   CreateResult(){};
+  void   AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType() { return string(""); }; // done only once
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  void   CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TDigitalWFAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

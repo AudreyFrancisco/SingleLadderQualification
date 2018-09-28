@@ -138,7 +138,7 @@ void TPowerBoardConfig::readConfiguration()
         if (strcasecmp(sName, "ANALOGVOLTAGE") == 0) {
           p   = 0;
           ptr = sParam;
-          while ((tok                  = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].AVset = atof(tok);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].AVset = fPBConfig.Modul[p - 1].AVset;
@@ -148,7 +148,7 @@ void TPowerBoardConfig::readConfiguration()
         if (strcasecmp(sName, "ANALOGCURRENT") == 0) {
           p   = 0;
           ptr = sParam;
-          while ((tok                  = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].AIset = atof(tok);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].AIset = fPBConfig.Modul[p - 1].AIset;
@@ -158,7 +158,7 @@ void TPowerBoardConfig::readConfiguration()
         if (strcasecmp(sName, "DIGITALVOLTAGE") == 0) {
           p   = 0;
           ptr = sParam;
-          while ((tok                  = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].DVset = atof(tok);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].DVset = fPBConfig.Modul[p - 1].DVset;
@@ -168,7 +168,7 @@ void TPowerBoardConfig::readConfiguration()
         if (strcasecmp(sName, "DIGITALCURRENT") == 0) {
           p   = 0;
           ptr = sParam;
-          while ((tok                  = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].DIset = atof(tok);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].DIset = fPBConfig.Modul[p - 1].DIset;
@@ -178,7 +178,7 @@ void TPowerBoardConfig::readConfiguration()
         if (strcasecmp(sName, "BIASON") == 0) {
           p   = 0;
           ptr = sParam;
-          while ((tok                   = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].BiasOn = (strcasecmp(tok, "TRUE") == 0 ? true : false);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].BiasOn = fPBConfig.Modul[p - 1].BiasOn;

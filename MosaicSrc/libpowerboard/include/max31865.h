@@ -51,9 +51,9 @@ private:
 
 public:
   MAX31865(SC18IS602 *spi, uint8_t slave);
-  void writeRegister(uint8_t reg, uint8_t data);
-  uint8_t readRegister(uint8_t reg);
-  void configure(uint8_t cfg = CFG_Vbias_ON | CFG_CONV_AUTO | CFG_FAULT_CLEAR | CFG_FREQ_50Hz);
+  void     writeRegister(uint8_t reg, uint8_t data);
+  uint8_t  readRegister(uint8_t reg);
+  void     configure(uint8_t cfg = CFG_Vbias_ON | CFG_CONV_AUTO | CFG_FAULT_CLEAR | CFG_FREQ_50Hz);
   uint16_t getRTD();
 
 private:

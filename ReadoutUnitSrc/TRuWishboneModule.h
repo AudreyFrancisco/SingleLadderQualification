@@ -16,7 +16,7 @@ public:
       : m_board(board), m_moduleId(moduleId), m_logging(logging)
   {
   }
-  void Write(uint8_t address, uint16_t data, bool commit = true);
+  void     Write(uint8_t address, uint16_t data, bool commit = true);
   uint16_t Read(uint8_t address, bool commit = true);
 };
 

@@ -277,7 +277,7 @@ void TDigitalAnalysis::Finalize()
         (TDigitalResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
 
     if (!chipResult) std::cout << "WARNING: chipResult = 0" << std::endl;
-    chipResult->m_nDead = 512 * 1024 - (m_counters.at(ichip).nCorrect +
+    chipResult->m_nDead  = 512 * 1024 - (m_counters.at(ichip).nCorrect +
                                         m_counters.at(ichip).nNoisy + m_counters.at(ichip).nIneff);
     chipResult->m_nNoisy = m_counters.at(ichip).nNoisy;
     chipResult->m_nIneff = m_counters.at(ichip).nIneff;

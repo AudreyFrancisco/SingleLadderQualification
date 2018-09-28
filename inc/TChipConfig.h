@@ -50,17 +50,17 @@ namespace ChipConfig { // to avoid clashes with other configs (e.g. for STROBE_D
   const bool INITIAL_TOKEN      = true;
   const bool DISABLE_MANCHESTER = false;
   const bool ENABLE_DDR         = true;
-}
+} // namespace ChipConfig
 
 class TChipConfig {
 private:
   std::map<std::string, int *> fSettings;
-  TConfig *fConfig;
-  int      fChipId;
-  int      fEnabled;       // variable to exclude (non-working) chip from tests, default true
-  int      fEnabledWithBB; // variable to exclude chips from tests when BB on, default true
-  int      fReceiver;
-  int      fControlInterface;
+  TConfig *                    fConfig;
+  int                          fChipId;
+  int fEnabled;       // variable to exclude (non-working) chip from tests, default true
+  int fEnabledWithBB; // variable to exclude chips from tests when BB on, default true
+  int fReceiver;
+  int fControlInterface;
   // DACs used
   int fITHR;
   int fIDB;
@@ -112,26 +112,28 @@ private:
   // Mask file
   char                 fMaskFile[200];
   std::vector<TPixHit> m_noisyPixels;
+  unsigned int         fDoubleColumnMask[32];
 
 protected:
 public:
   TChipConfig(TConfig *config, int chipId, const char *fName = 0);
+  int  fEnduranceDisabled; // temporary fix to re-enabled chips that were disabled in end. test
   void InitParamMap();
   bool SetParamValue(std::string Name, std::string Value);
   bool SetParamValue(std::string Name, int Value);
-  int GetParamValue(std::string Name);
+  int  GetParamValue(std::string Name);
   bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
-  int                          GetChipId() { return fChipId; };
-  int                          GetCtrInt() { return fControlInterface; };
-  int                          GetDataLink() { return fReceiver; };
-  bool                         IsEnabled() const;
-  bool                         IsEnabledNoBB() const { return fEnabled != 0; }
+  int  GetChipId() { return fChipId; };
+  int  GetCtrInt() { return fControlInterface; };
+  int  GetDataLink() { return fReceiver; };
+  bool IsEnabled() const;
+  bool IsEnabledNoBB() const { return fEnabled != 0; }
   bool IsEnabledWithBB() const { return (fEnabled != 0) && (fEnabledWithBB != 0); }
   void SetEnable(bool Enabled) { fEnabled = Enabled ? 1 : 0; };
   void SetEnableWithBB(bool Enabled) { fEnabledWithBB = Enabled ? 1 : 0; };
-  int                       GetModuleId() { return (fChipId & 0x70) >> 4; };
-  bool                      IsOBMaster() { return ((fChipId % 8 == 0) && (GetModuleId() > 0)); };
-  bool                      HasEnabledSlave();
+  int  GetModuleId() { return (fChipId & 0x70) >> 4; };
+  bool IsOBMaster() { return ((fChipId % 8 == 0) && (GetModuleId() > 0)); };
+  bool HasEnabledSlave();
 
   bool GetReadoutMode() { return fReadoutMode; };
   bool GetEnableClustering() { return fEnableClustering; };
@@ -163,10 +165,13 @@ public:
   void SetEnableDdr(bool AEnableDdr) { fEnableDdr = AEnableDdr; };
   void SetDisableManchester(bool ADisableManchester) { fDisableManchester = ADisableManchester; };
 
-  void SetMaskFile(const char *fName) { strcpy(fMaskFile, fName); };
-  void SetNoisyPixels(std::vector<TPixHit> noisy) { m_noisyPixels = noisy; };
-  void                                     ClearNoisyPixels() { m_noisyPixels.clear(); };
-  std::vector<TPixHit>                     GetNoisyPixels() { return m_noisyPixels; };
+  void                 SetMaskFile(const char *fName) { strcpy(fMaskFile, fName); };
+  void                 SetNoisyPixels(std::vector<TPixHit> noisy) { m_noisyPixels = noisy; };
+  void                 ClearNoisyPixels() { m_noisyPixels.clear(); };
+  std::vector<TPixHit> GetNoisyPixels() { return m_noisyPixels; };
+
+  void         SetDoubleColumnMask(unsigned int dcol, bool mask = true);
+  unsigned int GetDoubleColumnMask(unsigned int region);
 };
 
 #endif /* CHIPCONFIG_H */

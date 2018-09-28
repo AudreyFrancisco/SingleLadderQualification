@@ -77,13 +77,13 @@ public:
   // sends command code to control interface belonging to chip chipId
   virtual int SendCommand(Alpide::TCommand Command, TAlpide *chipPtr) = 0;
 
-  virtual int SetTriggerConfig(bool enablePulse, bool enableTrigger, int triggerDelay,
-                               int pulseDelay)                = 0;
+  virtual int  SetTriggerConfig(bool enablePulse, bool enableTrigger, int triggerDelay,
+                                int pulseDelay)               = 0;
   virtual void SetTriggerSource(TTriggerSource triggerSource) = 0;
   virtual void StartRun()                                     = 0;
-  virtual int Trigger(int nTriggers)                          = 0;
-  virtual int ReadEventData(int &          NBytes,
-                            unsigned char *Buffer) = 0; // TODO: max buffer size not needed??
+  virtual int  Trigger(int nTriggers)                         = 0;
+  virtual int  ReadEventData(int &          NBytes,
+                             unsigned char *Buffer) = 0; // TODO: max buffer size not needed??
 };
 
 #endif /* READOUTBOARD_H */

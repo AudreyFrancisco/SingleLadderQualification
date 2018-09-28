@@ -68,33 +68,33 @@ int TReadoutBoard::GetReceiver(TAlpide *chipPtr)
 
 void TReadoutBoard::SetControlInterface(uint8_t chipId, int controlInterface)
 {
-  int chip                                                = GetChipById(chipId);
+  int chip = GetChipById(chipId);
   if (chip > -1) fChipPositions.at(chip).controlInterface = controlInterface;
 }
 void TReadoutBoard::SetControlInterface(TAlpide *chipPtr, int controlInterface)
 {
-  int chip                                                = GetChipById(chipPtr);
+  int chip = GetChipById(chipPtr);
   if (chip > -1) fChipPositions.at(chip).controlInterface = controlInterface;
 }
 
 void TReadoutBoard::SetReceiver(uint8_t chipId, int receiver)
 {
-  int chip                                        = GetChipById(chipId);
+  int chip = GetChipById(chipId);
   if (chip > -1) fChipPositions.at(chip).receiver = receiver;
 }
 void TReadoutBoard::SetReceiver(TAlpide *chipPtr, int receiver)
 {
-  int chip                                        = GetChipById(chipPtr);
+  int chip = GetChipById(chipPtr);
   if (chip > -1) fChipPositions.at(chip).receiver = receiver;
 }
 
 void TReadoutBoard::SetChipEnable(uint8_t chipId, bool Enable)
 {
-  int chip                                       = GetChipById(chipId);
+  int chip = GetChipById(chipId);
   if (chip > -1) fChipPositions.at(chip).enabled = Enable;
 }
 void TReadoutBoard::SetChipEnable(TAlpide *chipPtr, bool Enable)
 {
-  int chip                                       = GetChipById(chipPtr);
+  int chip = GetChipById(chipPtr);
   if (chip > -1) fChipPositions.at(chip).enabled = Enable;
 }

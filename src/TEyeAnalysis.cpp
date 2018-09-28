@@ -154,15 +154,16 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
     TArrow arrow_x(open_x_l, y_center, open_x_u, y_center, 0.05, "<->");
     TArrow arrow_y(x_center, open_y_l, x_center, open_y_u, 0.05, "<->");
     if ((open_l != -1) || (open_r != -1) || (open_b != -1) || (open_u != -1)) {
-      l.DrawLatex(.5, .02, TString::Format("openings (%g) in x [%g, %g], in y [%g, %g]", percent,
-                                           open_x_l, open_x_u, open_y_l, open_y_u));
+      l.DrawLatex(.5, .02,
+                  TString::Format("openings (%g) in x [%g, %g], in y [%g, %g]", percent, open_x_l,
+                                  open_x_u, open_y_l, open_y_u));
       arrow_x.Draw();
       arrow_y.Draw();
     }
 
     // write result to files
-    std::string dirname   = FindHicResultForChip(chip)->GetName();
-    TDirectory *rootdir   = rootfile_eye->GetDirectory(dirname.c_str());
+    std::string dirname = FindHicResultForChip(chip)->GetName();
+    TDirectory *rootdir = rootfile_eye->GetDirectory(dirname.c_str());
     if (!rootdir) rootdir = rootfile_eye->mkdir(dirname.c_str());
     if (rootdir) rootdir->WriteTObject(&h_eye);
     if (h_eye.GetEntries() > 0) {
@@ -249,8 +250,9 @@ void TEyeAnalysis::PlotHisto(TVirtualPad &p, TH2 &h, const std::string &filename
   TArrow arrow_x(open_x_l, y_center, open_x_u, y_center, 0.05, "<->");
   TArrow arrow_y(x_center, open_y_l, x_center, open_y_u, 0.05, "<->");
   if ((open_l != -1) || (open_r != -1) || (open_b != -1) || (open_u != -1)) {
-    l.DrawLatex(.5, .02, TString::Format("openings (%g) in x [%g, %g], in y [%g, %g]", percent,
-                                         open_x_l, open_x_u, open_y_l, open_y_u));
+    l.DrawLatex(.5, .02,
+                TString::Format("openings (%g) in x [%g, %g], in y [%g, %g]", percent, open_x_l,
+                                open_x_u, open_y_l, open_y_u));
     arrow_x.Draw();
     arrow_y.Draw();
   }

@@ -7,12 +7,13 @@ using namespace ChipConfig;
 
 TChipConfig::TChipConfig(TConfig *config, int chipId, const char *fName)
 {
-  fConfig           = config;
-  fChipId           = chipId;
-  fEnabled          = true;
-  fEnabledWithBB    = true;
-  fReceiver         = -1;
-  fControlInterface = -1;
+  fConfig            = config;
+  fChipId            = chipId;
+  fEnabled           = true;
+  fEnabledWithBB     = true;
+  fEnduranceDisabled = false;
+  fReceiver          = -1;
+  fControlInterface  = -1;
 
   ClearNoisyPixels();
   // fill default values from header file
@@ -56,6 +57,10 @@ TChipConfig::TChipConfig(TConfig *config, int chipId, const char *fName)
 
   if (fName) {
     // read information from file
+  }
+
+  for (unsigned int ireg = 0; ireg < 32; ++ireg) {
+    fDoubleColumnMask[ireg] = 0x0;
   }
 
   InitParamMap();
@@ -135,4 +140,17 @@ bool TChipConfig::HasEnabledSlave()
     if (fConfig->GetChipConfigById(i)->IsEnabled()) return true;
   }
   return false;
+}
+
+void TChipConfig::SetDoubleColumnMask(unsigned int dcol, bool mask /* = true*/)
+{
+  unsigned int reg = (dcol >> 4) & 0x1f;
+  unsigned int bit = (dcol & 0xf);
+  fDoubleColumnMask[reg] &= ~(unsigned int)(0x1 << bit);
+  if (mask) fDoubleColumnMask[reg] |= (0x1 << bit);
+}
+
+unsigned int TChipConfig::GetDoubleColumnMask(unsigned int region)
+{
+  return (region < 32) ? fDoubleColumnMask[region] : 0x0;
 }

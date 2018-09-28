@@ -153,8 +153,8 @@ void powerboard::setVout(uint8_t ch, float value)
   // select the RDAC
   rdac = rdacVadj[ch / 4];
 
-  data                 = (value / 0.00486) - 306;
-  if (data < 0) data   = 0;
+  data = (value / 0.00486) - 306;
+  if (data < 0) data = 0;
   if (data > 255) data = 255;
 
   rdac->setRDAC(ch & 0x03, data);
@@ -278,8 +278,8 @@ void powerboard::getState(pbstate_t *state, getFlags flags)
       data           = ((*dataPtr++) >> 4) & 0xfff;
       state->Vmon[i] = data * (2.56 / 4096.0);
       // Current
-      data                                   = ((*dataPtr++) >> 4) & 0xfff;
-      state->Imon[i]                         = ((data * (2.56 / 4096.0) - 0.25) * 1.337) + 0.013;
+      data           = ((*dataPtr++) >> 4) & 0xfff;
+      state->Imon[i] = ((data * (2.56 / 4096.0) - 0.25) * 1.337) + 0.013;
       if (state->Imon[i] < 0) state->Imon[i] = 0;
     }
 

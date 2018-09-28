@@ -22,10 +22,10 @@ private:
 
 public:
   TNoiseResultChip() : TScanResultChip(){};
-  void AddNoisyPixel(TPixHit pixel) { m_noisyPixels.push_back(pixel); };
-  void SetOccupancy(double occ) { m_occ = occ; };
-  void WriteToFile(FILE *fp);
-  float GetVariable(TResultVariable var);
+  void                 AddNoisyPixel(TPixHit pixel) { m_noisyPixels.push_back(pixel); };
+  void                 SetOccupancy(double occ) { m_occ = occ; };
+  void                 WriteToFile(FILE *fp);
+  float                GetVariable(TResultVariable var);
   std::vector<TPixHit> GetNoisyPixels() { return m_noisyPixels; };
 };
 
@@ -41,7 +41,7 @@ private:
   float         m_backBias;
   char          m_noisyFile[200];
   TErrorCounter m_errorCounter;
-  void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
+  void          GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 public:
   TNoiseResultHic() : TScanResultHic(){};
@@ -69,7 +69,7 @@ private:
   bool  m_isMasked;
   void  WriteResult();
   void  FillVariableList();
-  void WriteNoisyPixels(THic *hic);
+  void  WriteNoisyPixels(THic *hic);
 
 protected:
   TScanResultChip *GetChipResult()
@@ -82,11 +82,11 @@ protected:
     TNoiseResultHic *Result = new TNoiseResultHic();
     return Result;
   };
-  void CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo);
-  void   InitCounters();
-  string GetPreviousTestType();
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  void               CreateResult(){};
+  void               AnalyseHisto(TScanHisto *histo);
+  void               InitCounters();
+  string             GetPreviousTestType();
+  void               CalculatePrediction(std::string hicName) { (void)hicName; };
   THicClassification GetClassification(TNoiseResultHic *result, THic *hic);
 
 public:

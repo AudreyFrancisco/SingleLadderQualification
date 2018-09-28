@@ -94,7 +94,7 @@ public:
       : TRuWishboneModule(board, moduleId, logging)
   {
   }
-  int Initialize(TBoardConfigRU::ReadoutSpeed RoSpeed, bool InvertPolarity);
+  int  Initialize(TBoardConfigRU::ReadoutSpeed RoSpeed, bool InvertPolarity);
   void DeactivateReadout();
   void ResetReceiver();
   void SetupPrbsChecker(uint8_t pattern = 1);
@@ -102,13 +102,13 @@ public:
   void AllowAlignment(bool Allow = true);
   bool IsAligned();
 
-  void ResetCounters();
+  void                            ResetCounters();
   std::map<std::string, uint16_t> ReadCounters();
 
 private:
-  void WriteDrp(uint16_t Address, uint16_t Data);
+  void     WriteDrp(uint16_t Address, uint16_t Data);
   uint16_t ReadDrp(uint16_t Address);
-  void SetRxOutDiv(uint8_t div);
+  void     SetRxOutDiv(uint8_t div);
 };
 
 #endif // TRUTRANSCEIVERMODULE_H

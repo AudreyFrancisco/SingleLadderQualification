@@ -32,7 +32,7 @@ private:
 
 public:
   TDctrlResultChip() : TScanResultChip(){};
-  void WriteToFile(FILE *fp);
+  void  WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
 };
 
@@ -74,9 +74,9 @@ private:
   void               FillVariableList();
   THicClassification GetClassificationIB(TDctrlResultHic *result);
   THicClassification GetClassificationOB(TDctrlResultHic *result);
-  bool ChipIsSlave(common::TChipIndex idx);
-  float Max(float a, float b, float c);
-  float Min(float a, float b, float c);
+  bool               ChipIsSlave(common::TChipIndex idx);
+  float              Max(float a, float b, float c);
+  float              Min(float a, float b, float c);
   void Fit(std::vector<float> x, std::vector<float> y, float &m, float &b, float &corr,
            float &chisq);
 
@@ -91,11 +91,11 @@ protected:
     TDctrlResultHic *Result = new TDctrlResultHic();
     return Result;
   };
-  void CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo);
+  void   CreateResult(){};
+  void   AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
   void   InitCounters();
-  void CalculatePrediction(std::string hicName);
+  void   CalculatePrediction(std::string hicName);
 
 public:
   TDctrlAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

@@ -158,6 +158,11 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
       if (trials == 3) {
         std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event"
                   << std::endl;
+        std::cout << "  Events per receiver: ";
+        for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
+          std::cout << nTrigPerHic[i] << " ";
+        }
+        std::cout << std::endl;
         itrg = nTriggers * m_enabled[iboard];
         FindTimeoutHics(iboard, nTrigPerHic, nTriggers);
         m_errorCount.nTimeout++;

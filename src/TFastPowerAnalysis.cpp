@@ -3,6 +3,7 @@
 #include "TPowerTest.h"
 #ifdef HAS_ROOT
 #include "TCanvas.h"
+#include "TError.h"
 #include "TFile.h"
 #include "TH1F.h"
 #include "TString.h"
@@ -34,6 +35,7 @@ string TFastPowerAnalysis::GetPreviousTestType()
 void TFastPowerAnalysis::CreateIVHisto(TFastPowerResultHic *hicResult)
 {
 #ifdef HAS_ROOT
+  gErrorIgnoreLevel = kWarning; // remove TCanvas::Print info messages
   const std::string basename =
       TString::Format("IVcurveBB_%s_%s", hicResult->GetName().c_str(), m_config->GetfNameSuffix())
           .Data();
@@ -148,7 +150,7 @@ THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents         
   DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
 
   if (currents.tripBB) {
-    if (returnValue == CLASS_GOLD) returnValue   = CLASS_GOLD_NOBB;
+    if (returnValue == CLASS_GOLD) returnValue = CLASS_GOLD_NOBB;
     if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
     if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
   }
