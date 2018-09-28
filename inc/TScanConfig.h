@@ -46,7 +46,8 @@ namespace ScanConfig {
   // 1.6: bug fix in the double column masking code
   // 1.7: only unmasking the double columns at the beginning of the mask scan (caused by MOSAIC
   // issues)
-  const float CLASSIFICATION_VERSION = 1.7;
+  // 1.8: shortened endurance test, added parameter for counting of exceptions
+  const float CLASSIFICATION_VERSION = 1.8;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions
@@ -199,7 +200,7 @@ namespace ScanConfig {
   const float VOLTAGE_SCALE = 1.0;
   const float BACKBIAS      = 0;
   const int   NOMINAL       = 1;
-  const int   ENDURANCE_SLICES = 20; // number of cycle slices
+  const int   ENDURANCE_SLICES = 10; // number of cycle slices
   const int   ENDURANCE_CYCLES = 15; // total number of cycles per slice
   const int   ENDURANCE_UPTIME =
       1600; // up and down wait time in seconds per cycle (originally: 60 +120)
