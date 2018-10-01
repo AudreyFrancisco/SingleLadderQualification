@@ -240,7 +240,7 @@ void TDctrlAnalysis::AnalyseHisto(TScanHisto *histo)
 
       fprintf(fp, "%d %d %f %f %f %f %e %e %e %e\n", m_chipList.at(ichip).chipId & 0xf, i, peak_p,
               peak_n, amp_p, amp_n, rtim_p, rtim_n, ftim_p, ftim_n);
-      if (i == 0) continue;
+      if (i == 0 || amp_p > 10 || amp_n > 10) continue;
       driver.push_back((float)i);
       amp_pos.push_back(amp_p);
       amp_neg.push_back(amp_n);
