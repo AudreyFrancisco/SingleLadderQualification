@@ -244,12 +244,13 @@ void TDctrlAnalysis::AnalyseHisto(TScanHisto *histo)
       driver.push_back((float)i);
       amp_pos.push_back(amp_p);
       amp_neg.push_back(amp_n);
-      if (amp_p > maxAmp_p) maxAmp_p = amp_p;
-      if (rtim_p > maxRise_p) maxRise_p = rtim_p;
-      if (ftim_p > maxFall_p) maxFall_p = ftim_p;
-      if (amp_n > maxAmp_n) maxAmp_n = amp_n;
-      if (rtim_n > maxRise_n) maxRise_n = rtim_n;
-      if (ftim_n > maxFall_n) maxFall_n = ftim_n;
+
+      if (amp_p < 10 && amp_p > maxAmp_p) maxAmp_p = amp_p;
+      if (rtim_p < 10 && rtim_p > maxRise_p) maxRise_p = rtim_p;
+      if (ftim_p < 10 && ftim_p > maxFall_p) maxFall_p = ftim_p;
+      if (amp_n < 10 && amp_n > maxAmp_n) maxAmp_n = amp_n;
+      if (rtim_n < 10 && rtim_n > maxRise_n) maxRise_n = rtim_n;
+      if (ftim_n < 100 && ftim_n > maxFall_n) maxFall_n = ftim_n;
     }
 
     // do the fit for positive and negative polarity

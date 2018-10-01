@@ -47,7 +47,8 @@ namespace ScanConfig {
   // 1.7: only unmasking the double columns at the beginning of the mask scan (caused by MOSAIC
   // issues)
   // 1.8: shortened endurance test, added parameter for counting of exceptions
-  const float CLASSIFICATION_VERSION = 1.8;
+  // 1.9: checking DCTRL measurement values for plausibility and excluding them if necessary.
+  const float CLASSIFICATION_VERSION = 1.9;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions
