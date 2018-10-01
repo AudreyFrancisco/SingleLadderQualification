@@ -250,7 +250,7 @@ void TDctrlAnalysis::AnalyseHisto(TScanHisto *histo)
       if (ftim_p < 10 && ftim_p > maxFall_p) maxFall_p = ftim_p;
       if (amp_n < 10 && amp_n > maxAmp_n) maxAmp_n = amp_n;
       if (rtim_n < 10 && rtim_n > maxRise_n) maxRise_n = rtim_n;
-      if (ftim_n < 100 && ftim_n > maxFall_n) maxFall_n = ftim_n;
+      if (ftim_n < 10 && ftim_n > maxFall_n) maxFall_n = ftim_n;
     }
 
     // do the fit for positive and negative polarity
