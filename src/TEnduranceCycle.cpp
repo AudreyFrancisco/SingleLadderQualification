@@ -20,10 +20,12 @@ int OpenEnduranceRecoveryFile(const char *fName, std::vector<std::string> hicNam
     return 0;
   }
 
-  while (fscanf(fp, "%s %d %d %d %d %f %f %f %f %f %f", hicName, &trip, &counter.m_nWorkingChips,
-                &counter.m_fifoErrors, &counter.m_fifoExceptions, &counter.m_iddaClocked,
-                &counter.m_idddClocked, &counter.m_iddaConfigured, &counter.m_idddConfigured,
-                &counter.m_tempStart, &counter.m_tempEnd) == 11) {
+  while (fscanf(fp, "%s %d %d %d %d %d %d %d %d %f %f %f %f %f %f", hicName, &trip,
+                &counter.m_nWorkingChips, &counter.m_fifoErrors, &counter.m_fifoErrors0,
+                &counter.m_fifoErrors5, &counter.m_fifoErrorsa, &counter.m_fifoErrorsf,
+                &counter.m_fifoExceptions, &counter.m_iddaClocked, &counter.m_idddClocked,
+                &counter.m_iddaConfigured, &counter.m_idddConfigured, &counter.m_tempStart,
+                &counter.m_tempEnd) == 11) {
     // check that hic name found is contained in hicNames, otherwise ignore entry
     stringIter = find(hicNames.begin(), hicNames.end(), string(hicName));
     if (stringIter == hicNames.end()) {
@@ -117,6 +119,10 @@ void TEnduranceCycle::ClearCounters()
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_nWorkingChips  = 0;
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoTests      = 0;
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoErrors     = 0;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoErrors0    = 0;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoErrors5    = 0;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoErrorsa    = 0;
+    m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoErrorsf    = 0;
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_fifoExceptions = 0;
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_exceptions     = 0;
     m_hicCounters.at(m_hics.at(i)->GetDbId()).m_trip           = false;
@@ -144,6 +150,10 @@ void TEnduranceCycle::ReadRecoveredCounters(
         m_hicCounters.at(hicIt->first).m_nWorkingChips  = hicIt->second.m_nWorkingChips;
         m_hicCounters.at(hicIt->first).m_exceptions     = hicIt->second.m_exceptions;
         m_hicCounters.at(hicIt->first).m_fifoErrors     = hicIt->second.m_fifoErrors;
+        m_hicCounters.at(hicIt->first).m_fifoErrors0    = hicIt->second.m_fifoErrors0;
+        m_hicCounters.at(hicIt->first).m_fifoErrors5    = hicIt->second.m_fifoErrors5;
+        m_hicCounters.at(hicIt->first).m_fifoErrorsa    = hicIt->second.m_fifoErrorsa;
+        m_hicCounters.at(hicIt->first).m_fifoErrorsf    = hicIt->second.m_fifoErrorsf;
         m_hicCounters.at(hicIt->first).m_fifoExceptions = hicIt->second.m_fifoExceptions;
         m_hicCounters.at(hicIt->first).m_fifoTests      = hicIt->second.m_fifoTests;
       }
@@ -382,11 +392,13 @@ void TEnduranceCycle::WriteRecoveryFile()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     THicCounter counter = m_hicCounters.at(m_hics.at(ihic)->GetDbId());
-    fprintf(fp, "%s %d %d %d %d %d %.3f %.3f %.3f %.3f %.1f %.1f\n",
+    fprintf(fp, "%s %d %d %d %d %d %d %d %d %d %.3f %.3f %.3f %.3f %.1f %.1f\n",
             m_hics.at(ihic)->GetDbId().c_str(), counter.m_trip ? 1 : 0, counter.m_nWorkingChips,
-            counter.m_exceptions, counter.m_fifoErrors, counter.m_fifoExceptions,
-            counter.m_iddaClocked, counter.m_idddClocked, counter.m_iddaConfigured,
-            counter.m_idddConfigured, counter.m_tempStart, counter.m_tempEnd);
+            counter.m_exceptions, counter.m_fifoErrors, counter.m_fifoErrors0,
+            counter.m_fifoErrors5, counter.m_fifoErrorsa, counter.m_fifoErrorsf,
+            counter.m_fifoExceptions, counter.m_iddaClocked, counter.m_idddClocked,
+            counter.m_iddaConfigured, counter.m_idddConfigured, counter.m_tempStart,
+            counter.m_tempEnd);
   }
 
   fclose(fp);
@@ -494,6 +506,14 @@ bool TEnduranceCycle::TestPattern(TAlpide *chip, int pattern, int region, int of
   }
   if (readBack != pattern) {
     hicCounter.m_fifoErrors++;
+    if (pattern == 0x0)
+      hicCounter.m_fifoErrors0++;
+    else if (pattern == 0x5555)
+      hicCounter.m_fifoErrors5++;
+    else if (pattern == 0xaaaa)
+      hicCounter.m_fifoErrorsa++;
+    else if (pattern == 0xffff)
+      hicCounter.m_fifoErrorsf++;
     return false;
   }
   return true;
