@@ -99,33 +99,33 @@ def buildTheDefaultBasePath(Test):
         return("")
         
     if Test == "IBEndurance":
-        return(theNewAlpidePath+"/IBEndurance/Data")
+        return(theNewAlpidePath+"/build/GUI/Data/IBEndurance")
     elif Test == "IBQualification":
-        return(theNewAlpidePath+"/IBQualification/Data")
+        return(theNewAlpidePath+"/build/GUI/Data/IBQualification")
     elif Test == "OBEndurance":
-        return(theNewAlpidePath+"/OBEndurance/Data")
+        return(theNewAlpidePath+"/build/GUI/Data/OBEndurance")
     elif Test == "OBFastPower":
-        return(theNewAlpidePath+"/OBFastPower/Data")
+        return(theNewAlpidePath+"/build/GUI/Data/OBFastPower")
     elif Test == "OBQualification":
-        return(theNewAlpidePath+"/GUI/Data")
+        return(theNewAlpidePath+"/build/GUI/Data/OBQualification")
     elif Test == "OBImpedance":
         return(theNewAlpidePath+"/ImpedanceTest/Data")
     elif Test == "OBReception":
         return("")
     elif Test == "IBStave":
-        return(theNewAlpidePath+"/IBStave/Data")
+        return(theNewAlpidePath+"/build/GUI/Data/IBStave")
     elif Test == "OBHalfStaveOL":
-        return(theNewAlpidePath+"/OBHalfStaveOL/Data")
+        return(theNewAlpidePath+"/build/GUI/Data/OBHalfStaveOL")
     elif Test == "OBHalfStaveML":
-        return(theNewAlpidePath+"/OBHalfStaveML/Data")
+        return(theNewAlpidePath+"/build/GUI/Data/OBHalfStaveML")
     elif Test == "OBStaveOL":
-        return(theNewAlpidePath+"/OBStaveOL/Data")
+        return(theNewAlpidePath+"/build/GUI/Data/OBStaveOL")
     elif Test == "OBStaveML":
-        return(theNewAlpidePath+"/OBStaveML/Data")
+        return(theNewAlpidePath+"/build/GUI/Data/OBStaveML")
     elif Test == "StaveReceptionOL":
-        return(theNewAlpidePath+"/StaveReceptionOL/Data")
+        return(theNewAlpidePath+"/build/GUI/Data/StaveReceptionOL")
     elif Test == "StaveReceptionML":
-        return(theNewAlpidePath+"/StaveReceptionML/Data")
+        return(theNewAlpidePath+"/build/GUI/Data/StaveReceptionML")
     return("")
 
 def _listFolder(path):
