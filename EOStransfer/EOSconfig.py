@@ -482,7 +482,7 @@ def generateTheCronJobControlScript(ServiceAccount, LocalBasePath):
     file.write("STARTDATE=`date`\n")
     file.write("echo \" ------ ALICE-ITS EOS Repo sync CronJob control - v.1.0 - A.Franco - INFN BARI Italy\" \n")
     file.write("\n")
-    file.write("rm $HINIBITFILE\n")
+    file.write("rm -f $HINIBITFILE\n")
     file.write("exit 0\n")
     file.write(" \n")
     file.close()
