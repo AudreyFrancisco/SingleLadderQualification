@@ -404,7 +404,7 @@ void TSCurveAnalysis::Finalize()
     }
     hicResult->SetValidity(true);
     if (IsThresholdScan() && (!m_nominal)) { // do only for threshold scan after tuning
-      CalculatePrediction(m_hics.at(ihic)->GetDbId());
+      ComparePrediction(m_hics.at(ihic)->GetDbId());
     }
   }
   WriteResult();
