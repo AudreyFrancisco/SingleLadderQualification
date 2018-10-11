@@ -20,12 +20,12 @@ int OpenEnduranceRecoveryFile(const char *fName, std::vector<std::string> hicNam
     return 0;
   }
 
-  while (fscanf(fp, "%s %d %d %d %d %d %d %d %d %f %f %f %f %f %f", hicName, &trip,
-                &counter.m_nWorkingChips, &counter.m_fifoErrors, &counter.m_fifoErrors0,
-                &counter.m_fifoErrors5, &counter.m_fifoErrorsa, &counter.m_fifoErrorsf,
-                &counter.m_fifoExceptions, &counter.m_iddaClocked, &counter.m_idddClocked,
-                &counter.m_iddaConfigured, &counter.m_idddConfigured, &counter.m_tempStart,
-                &counter.m_tempEnd) == 11) {
+  while (fscanf(fp, "%s %d %d %d %d %d %d %d %d %d %f %f %f %f %f %f", hicName, &trip,
+                &counter.m_nWorkingChips, &counter.m_exceptions, &counter.m_fifoErrors,
+                &counter.m_fifoErrors0, &counter.m_fifoErrors5, &counter.m_fifoErrorsa,
+                &counter.m_fifoErrorsf, &counter.m_fifoExceptions, &counter.m_iddaClocked,
+                &counter.m_idddClocked, &counter.m_iddaConfigured, &counter.m_idddConfigured,
+                &counter.m_tempStart, &counter.m_tempEnd) == 16) {
     // check that hic name found is contained in hicNames, otherwise ignore entry
     stringIter = find(hicNames.begin(), hicNames.end(), string(hicName));
     if (stringIter == hicNames.end()) {
