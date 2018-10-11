@@ -749,12 +749,24 @@ string GetEosPath(ActivityDB::activityLong activity, THicType hicType, bool doub
   GetServiceAccount(activity.Location.Name, location);
   test = GetTestDirName(GetTestType(activity.Type.Name));
 
+  size_t pos;
   if (hicType == HIC_IB) {
-    component = activity.Name.substr(activity.Name.find("IBHIC"));
+    pos = activity.Name.find("IBHIC");
   }
   else {
-    component = activity.Name.substr(activity.Name.find("OBHIC"));
+    pos = activity.Name.find("OBHIC");
   }
+
+  if (pos == string::npos) {
+    std::cout << "Unable to deduce component name. Please enter name in format OBHIC-AA123456 or "
+                 "IBHIC-123456"
+              << std::endl;
+    getline(std::cin, component);
+  }
+  else {
+    component = activity.Name.substr(pos);
+  }
+
   replace(component.begin(), component.end(), ' ', '_');
 
   path = basePath + "/" + test + location + "/" + component;
