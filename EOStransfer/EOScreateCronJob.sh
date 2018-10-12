@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo " ------ ALICE-ITS EOS transfer cron job istallation script - v.1.0 - A.Franco - INFN BARI Italy" 
+echo " ------ ALICE-ITS EOS transfer cron job istallation script - v.1.1 - A.Franco - INFN BARI Italy" 
 
 # Builds the command line
 SCRIPTSPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -20,7 +20,7 @@ then
 	RESULT=0
 else
 	echo " Insert new cron into cron file..."
-	echo "*/10 * * * * $CRONCOMMAND &>/tmp/lastEOSCronExecution.log" >> /tmp/actualCron
+	echo "10 * * * * $CRONCOMMAND &>/tmp/lastEOSCronExecution.log" >> /tmp/actualCron
 
 	# Now installs the new cron file
 	crontab /tmp/actualCron
