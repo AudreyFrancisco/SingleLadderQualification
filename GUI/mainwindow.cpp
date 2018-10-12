@@ -231,7 +231,7 @@ void MainWindow::open()
   else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
            fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
            fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
-           fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML) {
+           fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML || fNumberofscan == OLDriverTune) {//JI
     fileName = "Config_HS.cfg";
   }
   try {
@@ -276,8 +276,7 @@ void MainWindow::open()
       }
       DbGetListOfChildren(fDB, fhalfstaveid, fHalfstavemodules);
       if (fHalfstavemodules.size() < 1) {
-        const int nModules = (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBStaveOL ||
-                              fNumberofscan == StaveReceptionOL)
+        const int nModules = (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBStaveOL || fNumberofscan == StaveReceptionOL  || fNumberofscan == OLDriverTune) //JI
                                  ? 7
                                  : 4;
         for (int i = 1; i <= nModules; ++i)
@@ -681,6 +680,73 @@ void MainWindow::doDebugScan(TScanType scanType)
   fstopwriting = true;
   performtests();
 }
+
+void MainWindow::fillingDriverTune() //JI
+{
+  ClearVectors();
+  int driverMin = 3;  // 3,7,11,15 max 15  steps of 4. no 0
+  int driverMax = 15;
+  //  int preEmpMin = 0;  //steps of 3 inc 0: 0,3,6,9,12,15
+  //int preEmpMax = 15;
+  int driverOptimum;//, preEmpOptimum;
+  double n8b10bOptimum, n8b10bCurrent;
+  n8b10bOptimum = 999999999;
+  int counter = 0;
+
+  for (int i = driverMin; i <= driverMax; i+=4)
+    {
+      fConfig->GetScanConfig()->SetParamValue("DTUDRIVER", i);
+      AddScan(STDigital);
+      n8b10bCurrent = fAnalysisVector[counter]->DriverPreEmpFunc();//fAnalysisVector is the analysis object created by AddScan
+      counter += 1;
+      if (i == driverMin)
+	{
+	  n8b10bOptimum = n8b10bCurrent;
+	  driverOptimum = i;
+	}
+      else if (n8b10bCurrent < n8b10bOptimum)
+	{
+	  n8b10bOptimum = n8b10bCurrent;
+	  driverOptimum = i;
+	}
+    }
+  fConfig->GetScanConfig()->SetParamValue("DTUDRIVER", driverOptimum); 
+  std::cout << "Optimum driver = " << driverOptimum << ". Gives " << n8b10bOptimum << " n8b10b errors." << std::endl;
+
+  /* for (int j = preEmpMin; j <= preEmpMax; j+=3)
+ {
+      fConfig->GetScanConfig()->SetParamValue("DTUPREEMP", j);
+      AddScan(STDigital);
+      n8b10bCurrent = fAnalysisVector[counter]->TScanAnalysis::DriverPreEmpFunc();//fAnalysisVector is the analysis object created by AddScan
+      counter += 1;
+      if (j == preEmpMin)
+	{
+	  n8b10bOptimum = n8b10bCurrent;
+	  preEmpOptimum = j;
+	}
+      else if (n8b10bCurrent < n8b10bOptimum)
+	{
+	  n8b10bOptimum = n8b10bCurrent;
+	  preEmpOptimum = j;
+	}
+    }
+  fConfig->GetScanConfig()->SetParamValue("DTUPREEMP", preEmpOptimum);
+  std::cout << "Optimum pre-emphasis = " << preEmpOptimum << ". Gives " << n8b10bOptimum << " n8b10b errors." << std::endl;*/
+  return;
+}
+
+ /*
+    int max_iter = 6;
+
+    int bits = std::numeric_limits<int>::max();
+    
+  std::pair<double ,double> r = boost::math::tools::brent_find_minima(driverFunc(), driverMin, driverMax, bits);//, max_iter);
+  std::cout << "Minimum 8b10b errors when DTUDRIVER = " << r.first << ". Number of 8b010 errors at this driver strength = " << r.second << std::endl;
+
+  std::pair<double, double> rp = boost::math::tools::brent_find_minima(preEmpFunc(), preEmpMin, preEmpMax, bits);//, max_iter);
+  std::cout << "Minimum 8b10b errors when DTUPREEMP = " << rp.first << ". Number of 8b010 errors at this driver strength = " << rp.second << std::endl;*/
+
+
 
 void MainWindow::fillingOBvectors()
 {
@@ -1098,6 +1164,9 @@ void MainWindow::initscanlist()
   }
   if (fNumberofscan == IBDctrl) {
     fillingDctrl();
+  }
+  if (fNumberofscan == OLDriverTune) { //JI
+    fillingDriverTune();
   }
   qApp->processEvents();
   std::cout << "the size of the scan vector is: " << fScanVector.size() << std::endl;
@@ -2005,7 +2074,7 @@ void MainWindow::setandgetcalibration()
     if ((fNumberofscan == OBHalfStaveOL) || (fNumberofscan == OBHalfStaveML)) {
       powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod());
     }
-    if (fNumberofscan == OBStaveOL || fNumberofscan == StaveReceptionOL) {
+    if (fNumberofscan == OBStaveOL || fNumberofscan == StaveReceptionOL || fNumberofscan == OLDriverTune) {//JI
       powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod(),
                                                                     true, false);
     }
@@ -2334,7 +2403,7 @@ void MainWindow::ConnectTestCombo(int value)
     fSettingswindow->adjustendurance();
   }
   if (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
-      fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML) {
+      fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML || fNumberofscan == OLDriverTune) { //JI
     fSettingswindow->adjuststave();
   }
   std::cout << "the numbeofscan is: " << fNumberofscan << " and the value is: " << value

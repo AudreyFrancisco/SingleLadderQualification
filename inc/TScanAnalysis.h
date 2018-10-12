@@ -208,6 +208,9 @@ public:
   static const char *WriteHicClassification(THicClassification hicClass);
   void               WriteHicClassToFile(std::string hicName);
   THicClassification GetScanClassification();
+
+  double DriverPreEmpFunc();//JI
+
 };
 
 #endif
