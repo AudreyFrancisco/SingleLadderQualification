@@ -48,7 +48,8 @@ namespace ScanConfig {
   // issues)
   // 1.8: shortened endurance test, added parameter for counting of exceptions
   // 1.9: checking DCTRL measurement values for plausibility and excluding them if necessary.
-  const float CLASSIFICATION_VERSION = 1.9;
+  // 2.0: introduced separate DCTRL cut for (half-)staves (lower slope and amplitude)
+  const float CLASSIFICATION_VERSION = 2.0;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions
@@ -180,13 +181,18 @@ namespace ScanConfig {
   const int MAXNOISY_CHIP_SILVER = 2100;
   const int MAXNOISY_CHIP_BRONZE = 5243;
 
-  const int   TEST_DCTRL             = 1;
+  const int TEST_DCTRL = 1;
+  // slope and amplitude cut values take into account losses on
+  //  - FPCs and long firefly cable for OB HICs
+  //  - long firefly cable for OB Staves
   const int   DCTRL_MINAMP_IB        = 150; // in mV
   const int   DCTRL_MINSLOPE_IB      = 10;  // in mV / DAC
   const int   DCTRL_MAXRISE_GREEN_IB = 10;  // in ns
   const int   DCTRL_MAXFALL_GREEN_IB = 10;
   const int   DCTRL_MINAMP_OB        = 300; // in mV
+  const int   DCTRL_MINAMP_OBSTAVE   = 225; // in mV
   const int   DCTRL_MINSLOPE_OB      = 20;  // in mV / DAC
+  const int   DCTRL_MINSLOPE_OBSTAVE = 15;  // in mV / DAC
   const int   DCTRL_MAXRISE_GREEN_OB = 10;  // in ns
   const int   DCTRL_MAXFALL_GREEN_OB = 10;
   const int   DCTRL_MAXCHISQ_SILVER  = 5; // 100 * max. chisq 5 -> 0.05
@@ -342,6 +348,8 @@ private:
   int       m_testDctrl;
   int       m_dctrlMinAmpOB;
   int       m_dctrlMinSlopeOB;
+  int       m_dctrlMinAmpOBStave;
+  int       m_dctrlMinSlopeOBStave;
   int       m_dctrlMaxRiseGreenOB;
   int       m_dctrlMaxFallGreenOB;
   int       m_dctrlMinAmpIB;
@@ -430,6 +438,7 @@ public:
   void  SetBackBias(float aVoltage) { m_backBias = fabs(aVoltage); };
   void  SetBackBiasActive(bool act = true) { m_backBias_active = act; }
   bool  IsBackBiasActive() const { return m_backBias_active; }
+  bool  IsHalfStave();
   void  SetVcasnRange(int start, int stop)
   {
     m_vcasnStart = start;
