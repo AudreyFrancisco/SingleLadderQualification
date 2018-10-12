@@ -17,7 +17,9 @@ echo " Finally setup the Cron Job task "
 echo " "
 ./EOScreateCronJob.sh
 echo " "
+if [ ! -f /tmp/EOStransfer.log ] ; then 
+  touch /tmp/EOStransfer.log
+fi
+rm -f /tmp/EOStransferlock.loc
 echo " Installation Done !"
-
-
 
