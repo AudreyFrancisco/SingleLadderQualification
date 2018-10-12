@@ -390,7 +390,7 @@ void TScanAnalysis::DoCut(THicClassification &hicClass, THicClassification failC
   }
 }
 
-double TScanAnalysis::DriverPreEmpFunc()//JI
+double TScanAnalysis::DriverPreEmpFunc() // JI
 {
   TErrorCounter errCount = ((TMaskScan *)m_scan)->GetErrorCount();
   return errCount.n8b10b;
