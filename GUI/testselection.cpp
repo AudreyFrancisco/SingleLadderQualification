@@ -41,7 +41,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("ML HS Check (NO DB)", OBHalfStaveMLFAST);
   ui->typetest->addItem("OL Stave Reception Test", StaveReceptionOL);
   ui->typetest->addItem("ML Stave Reception Test", StaveReceptionML);
-  ui->typetest->addItem("OL Stave Driver and Pre-emphasis Tune", OLDriverTune);//JI
+  ui->typetest->addItem("OL Stave Driver and Pre-emphasis Tune", OLDriverTune); // JI
   ui->typeoftest->hide();
   ui->operatorstring->setTabChangesFocus(true);
   ui->id->setTabChangesFocus(true);
