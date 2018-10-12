@@ -154,7 +154,7 @@ bool AlpideDBManager::Init()
 
 #ifdef COMPILE_LIBCURL
   myHandle = curl_easy_init();
-  curl_easy_setopt(myHandle, CURLOPT_VERBOSE, CURLVERBOSITYLEVEL);
+  curl_easy_setopt(myHandle, CURLOPT_VERBOSE, VERBOSITYLEVEL);
 #ifdef AUTH_X509
   curl_easy_setopt(myHandle, CURLOPT_CAINFO, CAFILE);
   curl_easy_setopt(myHandle, CURLOPT_CAPATH, CAPATH);
@@ -196,7 +196,7 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
 
 #ifdef COMPILE_LIBCURL
   CURLcode res;
-  curl_easy_setopt(myHandle, CURLOPT_VERBOSE, CURLVERBOSITYLEVEL);
+  curl_easy_setopt(myHandle, CURLOPT_VERBOSE, VERBOSITYLEVEL);
 
   // parse  the Url ....
   Uri theUrl = Uri::Parse(Url);

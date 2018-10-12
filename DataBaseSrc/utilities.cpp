@@ -7,13 +7,11 @@
 #include "utilities.h"
 #include <algorithm>
 #include <iostream>
-#include <stdarg.h>
 #include <stdio.h>
-#include <string.h>
+#include <string>
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
-
 
 bool fileExists(string filewithpath)
 {
@@ -35,31 +33,6 @@ bool pathExists(string pathname)
   }
   return false;
 }
-
-unsigned long getFileSize(const char *AFileName) // path to file
-{
-  FILE *fh = NULL;
-  fh       = fopen(AFileName, "rb");
-  if (fh != NULL) {
-    fseek(fh, 0, SEEK_END);
-    unsigned long size = ftell(fh);
-    fclose(fh);
-    return size;
-  }
-  else {
-    return (0);
-  }
-}
-
-int fileRotate(const char *fileName)
-{
-  char buffer[2048];
-  sprintf(buffer, "%s_%s", fileName, "bak");
-  remove(buffer);
-  int ret = rename(fileName, buffer);
-  return (ret);
-}
-
 
 Uri Uri::Parse(const std::string &uri)
 {
@@ -191,48 +164,4 @@ std::string getTimeStamp()
   tstruct = *localtime(&now);
   strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", &tstruct);
   return std::string(buf);
-}
-
-// ------ Log subsystem -----
-
-static logLevel_ty gLogLevel = LOG_CRITICAL;
-
-void dbLogSetLevel(logLevel_ty newLogLevel)
-{
-  gLogLevel = newLogLevel;
-  DEBUG("atpLogSetLevel :: Log level set to %d\n", gLogLevel);
-  return;
-}
-
-logLevel_ty dbLogGetLevel(void) { return (gLogLevel); }
-
-void dbLog(logLevel_ty logLevel, const char *file, int line, const char *fmt, ...)
-{
-  va_list     args;
-  const char *llstr[] = {
-      "CRITICAL", "ERROR   ", "WARNING ", "INFO    ", "DEBUG   ", "TRACE   ",
-  };
-  const char *ptr;
-  ptr = strstr(file, "BaseSrc") + 8;
-  char   timestamp[TIMESTAMP_MAX];
-  time_t now;
-  FILE * fh;
-  if (logLevel > gLogLevel) return; // mute
-
-  if (getFileSize(LOG_FILENAME) > LOG_MAXFILEDIMENSION) {
-    fileRotate(LOG_FILENAME);
-  }
-  fh = fopen(LOG_FILENAME, "a");
-  if (fh != NULL) {
-    now = time(NULL);
-    strftime(timestamp, TIMESTAMP_MAX, TIMESTAMP_FORMAT, localtime(&now));
-    fprintf(fh, "%s[%s]%s(%d):", timestamp, llstr[(int)logLevel], ptr, line);
-    va_start(args, fmt);
-    vfprintf(fh, fmt, args);
-    va_end(args);
-    fprintf(fh, "\n");
-    fflush(fh);
-  }
-  fclose(fh);
-  return;
 }
