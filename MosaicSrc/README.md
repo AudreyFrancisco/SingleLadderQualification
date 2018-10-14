@@ -6,6 +6,7 @@ net.ipv4.ipfrag_high_thresh = 1000000
 net.core.rmem_max = 16777216
 net.ipv4.tcp_rmem = 4096 87380 16777216
 ```
+This settings can be activated by a reboot or invocation of `sysctl -p`.
 
 After every reboot, furthermore, the following lines should be executed as root:
 ```sh
