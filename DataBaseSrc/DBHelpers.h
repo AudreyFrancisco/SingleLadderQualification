@@ -15,7 +15,7 @@ typedef struct {
   int    Id;
   int    Type;
   string Name;
-  int    Position;
+  string Position;
 } TChild;
 
 int DbGetMemberId(AlpideDB *db, string name);
