@@ -216,6 +216,7 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
           m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nCorruptEvent++;
         }
       }
+      nTrigPerHic[boardInfo.channel]++;
       itrg++;
     }
   }
