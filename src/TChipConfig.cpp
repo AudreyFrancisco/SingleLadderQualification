@@ -68,36 +68,37 @@ TChipConfig::TChipConfig(TConfig *config, int chipId, const char *fName)
 
 void TChipConfig::InitParamMap()
 {
-  fSettings["CHIPID"]           = &fChipId;
-  fSettings["RECEIVER"]         = &fReceiver;
-  fSettings["CONTROLINTERFACE"] = &fControlInterface;
-  fSettings["ENABLED"]          = &fEnabled;
-  fSettings["ENABLEDBB"]        = &fEnabledWithBB;
-  fSettings["ITHR"]             = &fITHR;
-  fSettings["IDB"]              = &fIDB;
-  fSettings["VCASN"]            = &fVCASN;
-  fSettings["VCASN2"]           = &fVCASN2;
-  fSettings["VCLIP"]            = &fVCLIP;
-  fSettings["VRESETD"]          = &fVRESETD;
-  fSettings["IBIAS"]            = &fIBIAS;
-  fSettings["VCASP"]            = &fVCASP;
-  fSettings["VPULSEL"]          = &fVPULSEL;
-  fSettings["VPULSEH"]          = &fVPULSEH;
-  fSettings["VRESETP"]          = &fVRESETP;
-  fSettings["VTEMP"]            = &fVTEMP;
-  fSettings["IAUX2"]            = &fIAUX2;
-  fSettings["IRESET"]           = &fIRESET;
-  fSettings["STROBEDURATION"]   = &fStrobeDuration;
-  fSettings["PULSEDURATION"]    = &fPulseDuration;
-  fSettings["STROBEDELAYCHIP"]  = &fStrobeDelay;
-  fSettings["READOUTMODE"]      = (int *)&fReadoutMode;
-  fSettings["LINKSPEED"]        = &fSerialLinkSpeed;
-  fSettings["PLLPHASE"]         = &fPllPhase;
-  fSettings["PLLSTAGES"]        = &fPllStages;
-  fSettings["CHARGEPUMP"]       = &fChargePump;
-  fSettings["DTUDRIVER"]        = &fDtuDriver;
-  fSettings["DTUPREEMP"]        = &fDtuPreemp;
-  fSettings["DCTRLDRIVER"]      = &fDctrlDriver;
+  fSettings["CHIPID"]             = &fChipId;
+  fSettings["RECEIVER"]           = &fReceiver;
+  fSettings["CONTROLINTERFACE"]   = &fControlInterface;
+  fSettings["ENABLED"]            = &fEnabled;
+  fSettings["ENABLEDBB"]          = &fEnabledWithBB;
+  fSettings["ITHR"]               = &fITHR;
+  fSettings["IDB"]                = &fIDB;
+  fSettings["VCASN"]              = &fVCASN;
+  fSettings["VCASN2"]             = &fVCASN2;
+  fSettings["VCLIP"]              = &fVCLIP;
+  fSettings["VRESETD"]            = &fVRESETD;
+  fSettings["IBIAS"]              = &fIBIAS;
+  fSettings["VCASP"]              = &fVCASP;
+  fSettings["VPULSEL"]            = &fVPULSEL;
+  fSettings["VPULSEH"]            = &fVPULSEH;
+  fSettings["VRESETP"]            = &fVRESETP;
+  fSettings["VTEMP"]              = &fVTEMP;
+  fSettings["IAUX2"]              = &fIAUX2;
+  fSettings["IRESET"]             = &fIRESET;
+  fSettings["STROBEDURATION"]     = &fStrobeDuration;
+  fSettings["PULSEDURATION"]      = &fPulseDuration;
+  fSettings["STROBEDELAYCHIP"]    = &fStrobeDelay;
+  fSettings["READOUTMODE"]        = &fReadoutMode;
+  fSettings["LINKSPEED"]          = &fSerialLinkSpeed;
+  fSettings["PLLPHASE"]           = &fPllPhase;
+  fSettings["PLLSTAGES"]          = &fPllStages;
+  fSettings["CHARGEPUMP"]         = &fChargePump;
+  fSettings["DTUDRIVER"]          = &fDtuDriver;
+  fSettings["DTUPREEMP"]          = &fDtuPreemp;
+  fSettings["DCTRLDRIVER"]        = &fDctrlDriver;
+  fSettings["MANCHESTERDISABLED"] = &fDisableManchester;
 }
 
 bool TChipConfig::SetParamValue(std::string Name, std::string Value)
