@@ -170,14 +170,20 @@ def init4030(hameg, i_max):
     hameg.write("SOUR:CURR %f\n" % i_max[2])
     time.sleep(0.1);
     hameg.write("OUTP ON\n")      
-    
-def saveToDB(HIC_name, test_ok, resistances, fileList):
-    # read the Configuration
-    myConf = Configuration("DBConfig.cfg")
 
-    #logging setup    
+def	readConf():
+    
+	# read the Configuration
+    myConf = Configuration("DBConfig.cfg")
+    return myConf
+	
+def setLogger(myConf):
+    
+	#logging setup    
     lg = setUpTheLogger(myConf)
-    lg.info("Start to save results in DB")
+    return lg
+	
+def initDB(myConf, lg):
 
     # Read from the Configuration file 
     DBUser = myConf.GetItem("DBUSER")           # The User name used to open the DB connection 
@@ -190,8 +196,29 @@ def saveToDB(HIC_name, test_ok, resistances, fileList):
         lg.error("DB not open !")  
     else:
         lg.info("DB is open")    
- 
- 
+    return itsDB
+    
+def checkDB(itsDB, lg, HIC_name):
+	#check if component exist
+    HICcomponent = itsDB.ReadComponent(HIC_name)
+
+    if HICcomponent is None:
+        print("HIC is not present in the Database. Test is interrupted.")
+        return 0
+	#check if component has open activities	
+    else:
+        HIC_activities = itsDB.GetComponentActivitHistory(HIC_name)
+        for HIC_activity in HIC_activities:
+            if HIC_activity.find("OPEN") >= 0:
+                print("HIC has open activity listed below. Close it before doing the test. Test is interrupted.")
+                print(HIC_activity)
+                return 0
+    return 1
+	
+def saveToDB(myConf, itsDB, lg, HIC_name, test_ok, resistances, fileList):
+    
+    lg.info("Start to save results in DB")
+	
     # Set up the attachment mechanism 
     # this is mandatory to attach files !
     DBATTLimit = int(myConf.GetItem("DBATTACHLIMIT"))      # The limit to perform EOS transfer or BLOB
@@ -201,33 +228,40 @@ def saveToDB(HIC_name, test_ok, resistances, fileList):
     DBATTUripath = myConf.GetItem("DBATTACHURIBASEPATH")   # The URI base path to prefix the DB links to attached files
     itsDB.SetUpAttachments(DBATTLimit,DBATTBasepath,DBATTUripath,DBATTCommand,DBATTMkdir)     
        
+    #Check previous impedance test result
+    I_test_activities = []
+    previous_I_test_activity_result_NOK = 0
+    
+    HIC_activities = itsDB.GetComponentActivitHistory(HIC_name)
+    for HIC_activity in HIC_activities:
+        if HIC_activity.find("Impedance")>=0:
+            I_test_activities.append(HIC_activity)
+    
+    if not len(I_test_activities):
+        previous_I_test_activities_present = 0
+    else:
+        previous_I_test_activities_present = 1   
+        for I_test_activity in I_test_activities:
+            if I_test_activity.find("NOK")>=0:
+                previous_I_test_activity_result_NOK = 1
+                break
+    
     activityResult = '' 
                          
-    if test_ok==1:
-        activityResult='OK'
-    elif test_ok==0:
-        activityResult='NOK'         
-        
-    #check if component exist
-    HICcomponent = itsDB.ReadComponent(HIC_name)     
-    saveWithoutComponent = False
-    
-    if HICcomponent is None:
-        print("HIC is not present in the Database")    
-        continueWithoutComponent = raw_input("Continue without component? (y/n): ")
-        if continueWithoutComponent == 'y':
-            saveWithoutComponent = True     
-            print("Result will be saved in the database, but activity will be kept open")
+    if test_ok==0:
+        activityResult = 'NOK'
+    elif test_ok==1:
+        if not previous_I_test_activities_present:
+            activityResult = 'OK'
         else:
-            print("Result will not be saved in the database")
-            return 1      
-        
-    else:
-        print("HIC is present in the Database")   
-        saveWithoutComponent = False 
+            if previous_I_test_activity_result_NOK:
+                print("HIC has previous NOK tests. Result is set to Cured_short")
+                activityResult = 'Cured_short'
+            else:
+                activityResult = 'OK'
     
     actResult = itsDB.CreateCompActivity(HIC_name, "OB-HIC Impedance Test", 
-                                  "Impedance test of ", activityResult, False, saveWithoutComponent)
+                                  "Impedance test of ", activityResult, False)
     if actResult.ErrorCode != 0:
         lg.error("Error create the activity %s -> %s!" % ("OB-HIC Impedance Test",actResult.ErrorMessage))
         return 1
@@ -267,16 +301,13 @@ def saveToDB(HIC_name, test_ok, resistances, fileList):
         return 1
         
     # Finally close the activity    
-    if saveWithoutComponent == False:
-        if not test_ok==-1:
-            actResult = itsDB.CloseActivity(actID, activityResult) 
-            if actResult.ErrorCode != 0:
-                lg.error("Error closing the activity: %s!" % (actResult.ErrorMessage))
-                return 1
-        else:
-            print("Activity wasn't closed as one of the impedances is too high. After the measurement with the multimeter you can modify the value in the database and then close the activity.")
+    if not test_ok==-1:
+        actResult = itsDB.CloseActivity(actID, activityResult) 
+        if actResult.ErrorCode != 0:
+            lg.error("Error closing the activity: %s!" % (actResult.ErrorMessage))
+            return 1
     else:
-        print("Activity wasn't closed as HIC component wasn't found")
+        print("Activity wasn't closed as one of the impedances is too high. After the measurement with the multimeter you can modify the value in the database and then close the activity.")
     
     lg.info("Finished to save results in DB")
        
@@ -287,7 +318,7 @@ def main():
     dev='/dev/ttyUSB0'   
     data_dir = "Data"
     current_limit = 0.1
-    current_limit_bias = 0.01
+    current_limit_bias = 0.015
     max_voltage = 0.2
     max_voltage_bias = 4.
     nsteps = 20 
@@ -300,12 +331,19 @@ def main():
     sour=serial.Serial(dev, 9600, rtscts=True);
     
     init4030(sour, (current_limit, current_limit, current_limit_bias)) 
+	
+    myConf = readConf()
+    lg = setLogger(myConf)
+    itsDB = initDB(myConf, lg)
     
     if not os.path.isdir(data_dir):
         os.makedirs(data_dir)
 
     HIC_name = raw_input("Enter HIC name: ")
     HIC_name = 'OBHIC-' + HIC_name   
+	
+    if not checkDB(itsDB, lg, HIC_name):
+        return
 
     path = data_dir + '/' + HIC_name
 
@@ -320,7 +358,9 @@ def main():
     for channel in range(3):    
         test_ok = test_ok * doIVcurve(HIC_name, sour, channel, max_voltages[channel], nstepss[channel], resistances, path, fileList) 
   
-    saveToDB(HIC_name, test_ok, resistances, fileList)  
+    saveToDB(myConf, itsDB, lg, HIC_name, test_ok, resistances, fileList) 
+
+    open(path+'/DBParameters.dat', 'w').close()    
     
 ## execute the main
 if __name__ == "__main__":
