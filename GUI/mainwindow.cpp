@@ -786,7 +786,7 @@ void MainWindow::performtests()
       }
       else {
         try {
-          // if (i == 3||i==0) throw std::invalid_argument("Invalid syntax.");
+          // if (i ==14) throw std::invalid_argument("Invalid syntax.");
           auto future_init = std::async(std::launch::async, &TScan::Init, fScanVector[i]);
           while (future_init.wait_for(delay) != std::future_status::ready) {
             if (fScanToRowMap.count(i) > 0)
@@ -854,7 +854,14 @@ void MainWindow::performtests()
             fresultVector.erase(fresultVector.begin() + i + 1, fresultVector.end());
             fScanParameters.erase(fScanParameters.begin() + i + 1, fScanParameters.end());
             fScanTypes.erase(fScanTypes.begin() + i + 1, fScanTypes.end());
-            ui->testTable->setRowCount(i + 1);
+            int indexintable = 0;
+            for (unsigned int e = 0; e < fScanVector.size(); e++) {
+              if (fScanVector.at(e) != 0) {
+                indexintable++;
+              }
+            }
+            ui->testTable->setRowCount(indexintable);
+
             for (std::map<int, int>::iterator it = fScanToRowMap.begin(); it != fScanToRowMap.end();
                  it++) {
               if (it->first > (int)i) fScanToRowMap.erase(it);
@@ -919,7 +926,13 @@ void MainWindow::performtests()
               fresultVector.erase(fresultVector.begin() + i + 1, fresultVector.end());
               fScanParameters.erase(fScanParameters.begin() + i + 1, fScanParameters.end());
               fScanTypes.erase(fScanTypes.begin() + i + 1, fScanTypes.end());
-              ui->testTable->setRowCount(i + 1);
+              int indexintable = 0;
+              for (unsigned int e = 0; e < fScanVector.size(); e++) {
+                if (fScanVector.at(e) != 0) {
+                  indexintable++;
+                }
+              }
+              ui->testTable->setRowCount(indexintable);
               for (std::map<int, int>::iterator it = fScanToRowMap.begin();
                    it != fScanToRowMap.end(); it++) {
                 if (it->first > (int)i) fScanToRowMap.erase(it);
