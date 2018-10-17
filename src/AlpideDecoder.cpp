@@ -1,4 +1,5 @@
 #include "AlpideDecoder.h"
+#include "Common.h"
 #include <iostream>
 #include <stdint.h>
 
@@ -6,7 +7,7 @@
 
 bool newEvent;
 
-TAlpideDataType AlpideDecoder::GetDataType(unsigned char dataWord)
+TAlpideDataType AlpideDecoder::GetDataTypeSlow(unsigned char dataWord)
 {
   if (dataWord == 0xff)
     return DT_IDLE;
@@ -69,10 +70,18 @@ void AlpideDecoder::DecodeEmptyFrame(unsigned char *data, int &chipId, unsigned 
 
 bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
                                    std::vector<TPixHit> *hits, bool datalong, int boardIndex,
-                                   int channel, int &prioErrors, std::vector<TPixHit> *stuck)
+                                   int channel, int &prioErrors, int hitLimit,
+                                   std::vector<TPixHit> *stuck)
 {
   TPixHit hit;
   int     address, hitmap_length;
+
+  if (hits->size() >= (unsigned int)hitLimit) {
+    char Text[200];
+    sprintf(Text, "ERROR: number of hits exceeding limit of %d, please check console output",
+            hitLimit);
+    throw std::runtime_error(Text);
+  }
 
   int16_t data_field = (((int16_t)data[0]) << 8) + data[1];
 
@@ -95,7 +104,8 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
       std::cout << "Warning (chip " << chip << "/ channel " << channel << "), received pixel "
                 << hit.region << "/" << hit.dcol << "/" << address << " twice." << std::endl;
       prioErrors++;
-      if (stuck) stuck->push_back(hit);
+      hit.address = address;
+      if (stuck && !(common::PixelAlreadyHit(stuck, hit))) stuck->push_back(hit);
     }
     else if ((hit.region == hits->back().region) && (hit.dcol == hits->back().dcol) &&
              (address < hits->back().address)) {
@@ -104,7 +114,8 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
                 << " is lower than previous one (" << hits->back().address
                 << ") in same double column." << std::endl;
       prioErrors++;
-      if (stuck) stuck->push_back(hit);
+      hit.address = address;
+      if (stuck && !(common::PixelAlreadyHit(stuck, hit))) stuck->push_back(hit);
     }
   }
 
@@ -223,7 +234,7 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
 }
 
 bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPixHit> *hits,
-                                int boardIndex, int channel, int &prioErrors,
+                                int boardIndex, int channel, int &prioErrors, int hitLimit,
                                 std::vector<TPixHit> *stuck, int *chipID,
                                 unsigned int *bunchCounter)
 {
@@ -257,16 +268,16 @@ bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPi
       started = true;
       DecodeEmptyFrame(data + byte, chip, BunchCounterTmp);
       byte += 2;
-      if (chipID) *chipID             = chip;
+      if (chipID) *chipID = chip;
       if (bunchCounter) *bunchCounter = BunchCounterTmp;
-      finished                        = true;
+      finished = true;
       break;
     case DT_CHIPHEADER:
       started  = true;
       finished = false;
       DecodeChipHeader(data + byte, chip, BunchCounterTmp);
       byte += 2;
-      if (chipID) *chipID             = chip;
+      if (chipID) *chipID = chip;
       if (bunchCounter) *bunchCounter = BunchCounterTmp;
       break;
     case DT_CHIPTRAILER:
@@ -298,8 +309,8 @@ bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPi
         return false;
       }
       if (region == -1) {
-        std::cout << "Warning: data word without region, skipping (Chip " << chip << ")"
-                  << std::endl;
+        std::cout << "Warning: data word without region, skipping (Chip " << chip << " channel "
+                  << channel << ")" << std::endl;
         corrupt = true;
       }
       else if (hits) {
@@ -310,7 +321,7 @@ bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPi
           printf("\n");
         }
         bool corrupted = DecodeDataWord(data + byte, chip, region, hits, false, boardIndex, channel,
-                                        prioErrors, stuck);
+                                        prioErrors, hitLimit, stuck);
         if (corrupted) {
           corrupt = true;
         }
@@ -323,8 +334,8 @@ bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPi
         return false;
       }
       if (region == -1) {
-        std::cout << "Warning: data word without region, skipping (Chip " << chip << ")"
-                  << std::endl;
+        std::cout << "Warning: data word without region, skipping (Chip " << chip << " channel "
+                  << channel << ")" << std::endl;
         corrupt = true;
       }
       else if (hits) {
@@ -335,7 +346,7 @@ bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPi
           printf("\n");
         }
         DecodeDataWord(data + byte, chip, region, hits, true, boardIndex, channel, prioErrors,
-                       stuck);
+                       hitLimit, stuck);
       }
       byte += 3;
       break;

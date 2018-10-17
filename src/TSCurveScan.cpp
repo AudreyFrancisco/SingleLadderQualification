@@ -2,18 +2,21 @@
 #include "AlpideConfig.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
+#include <chrono>
 #include <string.h>
 #include <string>
+#include <thread>
 #include <unistd.h>
 
 TSCurveScan::TSCurveScan(TScanConfig *config, std::vector<TAlpide *> chips,
                          std::vector<THic *> hics, std::vector<TReadoutBoard *> boards,
                          std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
-    : TMaskScan(config, chips, hics, boards, histoQue, aMutex)
+    : TMaskScan(config, chips, hics, boards, histoQue, aMutex), m_hitsets(nullptr)
 {
-  m_parameters                                  = new TSCurveParameters;
-  ((TSCurveParameters *)m_parameters)->backBias = m_config->GetBackBias();
-  ((TSCurveParameters *)m_parameters)->nominal  = (m_config->GetParamValue("NOMINAL") == 1);
+  CreateScanParameters();
+
+  m_parameters->backBias                       = m_config->GetBackBias();
+  ((TSCurveParameters *)m_parameters)->nominal = (m_config->GetParamValue("NOMINAL") == 1);
 }
 
 
@@ -59,8 +62,6 @@ TThresholdScan::TThresholdScan(TScanConfig *config, std::vector<TAlpide *> chips
   m_nTriggers                                  = m_config->GetParamValue("NINJ");
 
   SetName();
-
-  CreateScanHisto();
 }
 
 
@@ -101,7 +102,6 @@ TtuneVCASNScan::TtuneVCASNScan(TScanConfig *config, std::vector<TAlpide *> chips
   m_nTriggers = m_config->GetParamValue("NINJ");
 
   SetName();
-  CreateScanHisto();
 }
 
 
@@ -141,7 +141,6 @@ TtuneITHRScan::TtuneITHRScan(TScanConfig *config, std::vector<TAlpide *> chips,
                                                  ((TSCurveParameters *)m_parameters)->TARGET / 10;
   m_nTriggers = m_config->GetParamValue("NINJ");
   SetName();
-  CreateScanHisto();
 }
 
 
@@ -248,24 +247,17 @@ THisto TSCurveScan::CreateHisto()
 
 void TSCurveScan::Init()
 {
+  m_hitsets = new TRingBuffer<THitSet>;
+
   TScan::Init();
 
   if (((TSCurveParameters *)m_parameters)->nominal) RestoreNominalSettings();
 
   m_running = true;
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
-    if (!pb) continue;
-    if (((TSCurveParameters *)m_parameters)->backBias == 0) {
-      m_hics.at(ihic)->SwitchBias(false);
-      pb->SetBiasVoltage(0);
-    }
-    else {
-      m_hics.at(ihic)->SwitchBias(true);
-      pb->SetBiasVoltage((-1.) * ((TSCurveParameters *)m_parameters)->backBias);
-    }
-  }
+  SetBackBias();
+
+  CreateScanHisto();
 
   CountEnabledChips();
   for (unsigned int i = 0; i < m_boards.size(); i++) {
@@ -293,6 +285,8 @@ void TSCurveScan::Init()
     if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+
+  m_thread = new std::thread(&TSCurveScan::Histo, this);
 }
 
 void TThresholdScan::PrepareStep(int loopIndex)
@@ -306,7 +300,6 @@ void TThresholdScan::PrepareStep(int loopIndex)
     }
     break;
   case 1: // 2nd loop: mask staging
-    std::cout << "mask stage " << m_value[1] << std::endl;
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
       if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[1]);
@@ -362,39 +355,52 @@ void TtuneITHRScan::PrepareStep(int loopIndex)
 
 void TSCurveScan::Execute()
 {
-  std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
-
-  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++)
     m_boards.at(iboard)->Trigger(m_nTriggers);
-  }
+
+  usleep(1000);
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
-    Hits->clear();
-    usleep(1000);
-    ReadEventData(Hits, iboard);
-    FillHistos(Hits, iboard);
+    THitSet &hs = m_hitsets->Write();
+    hs.board    = iboard;
+    hs.val      = m_value[0] - m_start[0]; // m_value is too large (>20) often!!
+    hs.hits.clear();
+    ReadEventData(&hs.hits, iboard);
+    m_hitsets->Push();
   }
-  delete Hits;
 }
 
-void TSCurveScan::FillHistos(std::vector<TPixHit> *Hits, int board)
+void TSCurveScan::Histo()
+{
+  while (!m_stopped) {
+    if (m_hitsets->IsEmpty()) {
+      usleep(100);
+      continue;
+    }
+    // printf("processing input\n");
+    FillHistos(m_hitsets->Read());
+    m_hitsets->Pop();
+  }
+}
+
+void TSCurveScan::FillHistos(const THitSet &hs)
 {
   common::TChipIndex idx;
-  idx.boardIndex = board;
-  for (unsigned int i = 0; i < Hits->size(); i++) {
-    if (Hits->at(i).address / 2 != m_row)
+  idx.boardIndex          = hs.board;
+  const unsigned int size = hs.hits.size();
+  for (unsigned int i = 0; i < size; i++) {
+    const TPixHit &hit = hs.hits[i];
+    if (hit.address / 2 != m_row)
       continue; // todo: keep track of spurious hits, i.e. hits in non-injected rows
     // !! This will not work when allowing several chips with the same Id
-    idx.dataReceiver = Hits->at(i).channel;
-    idx.chipId       = Hits->at(i).chipId;
+    idx.dataReceiver = hit.channel;
+    idx.chipId       = hit.chipId;
 
-    int col = Hits->at(i).region * 32 + Hits->at(i).dcol * 2;
-    int leftRight =
-        ((((Hits->at(i).address % 4) == 1) || ((Hits->at(i).address % 4) == 2)) ? 1 : 0);
-    col += leftRight;
+    int col = hit.region * 32 + hit.dcol * 2;
+    col += ((hit.address + 1) >> 1) & 1;
     // TODO: Catch this case earlier (do not fill hit vector for corrupt events
     try {
-      m_histo->Incr(idx, col, m_value[0] - m_start[0]); // m_value is too large (>20) often!!
+      m_histo->Incr(idx, col, hs.val);
     }
     catch (...) {
       std::cout << "Caught exception in TSCurveScan::FillHistos, trying to fill histo for chipID "
@@ -405,11 +411,17 @@ void TSCurveScan::FillHistos(std::vector<TPixHit> *Hits, int board)
 
 void TSCurveScan::LoopEnd(int loopIndex)
 {
+
   if (loopIndex == 0) {
-    while (!(m_mutex->try_lock()))
-      ;
+    while (!m_hitsets->IsEmpty())
+      usleep(10);
     m_histo->SetIndex(m_row);
     // std::cout << "SCAN: Writing histo with row " << m_histo->GetIndex() << std::endl;
+
+    // wait for FillHisto to finish
+    // (i.e. empty queue, reading is finished when we reach this point)
+
+    m_mutex->lock();
     m_histoQue->push_back(*m_histo);
     m_mutex->unlock();
     m_histo->Clear();
@@ -418,6 +430,9 @@ void TSCurveScan::LoopEnd(int loopIndex)
 
 void TSCurveScan::Terminate()
 {
+  m_stopped = true;
+  m_thread->join();
+
   TScan::Terminate();
   // write Data;
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
@@ -433,12 +448,7 @@ void TSCurveScan::Terminate()
     }
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (((TSCurveParameters *)m_parameters)->backBias != 0) {
-      m_hics.at(ihic)->SwitchBias(false);
-      m_hics.at(ihic)->GetPowerBoard()->SetBiasVoltage(0);
-    }
-  }
+  SwitchOffBackbias();
 
   m_running = false;
   // YCM: Print error summary
@@ -447,4 +457,7 @@ void TSCurveScan::Terminate()
   std::cout << "Number of skipped points:             " << m_errorCount.nTimeout << std::endl;
   std::cout << "Priority encoder errors:              " << m_errorCount.nPrioEncoder << std::endl;
   std::cout << std::endl;
+
+  delete m_hitsets;
+  m_hitsets = nullptr;
 }

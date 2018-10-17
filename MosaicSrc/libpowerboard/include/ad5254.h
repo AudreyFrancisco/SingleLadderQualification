@@ -37,10 +37,10 @@
 class AD5254 : public I2Cslave {
 public:
   AD5254(I2Cbus *bus, uint8_t address);
-  void write(uint8_t cmd, uint8_t ch, uint8_t data);
-  void write(uint8_t cmd, uint8_t ch);
+  void    write(uint8_t cmd, uint8_t ch, uint8_t data);
+  void    write(uint8_t cmd, uint8_t ch);
   uint8_t read(uint8_t cmd, uint8_t add);
-  void ackPolling();
+  void    ackPolling();
 
 private:
   enum {

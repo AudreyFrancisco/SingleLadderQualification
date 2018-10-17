@@ -2,6 +2,7 @@
 #include "AlpideConfig.h"
 #include <exception>
 #include <iostream>
+#include <stdexcept>
 #include <string.h>
 #include <string>
 
@@ -10,7 +11,9 @@ TFifoTest::TFifoTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vec
                      std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  m_parameters = new TFifoParameters;
+  CreateScanParameters();
+
+  m_parameters->backBias = 0;
 
   float voltageScale  = config->GetVoltageScale();
   int   mlvdsStrength = config->GetMlvdsStrength();
@@ -31,8 +34,6 @@ TFifoTest::TFifoTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vec
   m_start[0] = 0;
   m_step[0]  = 1;
   m_stop[0]  = 128;
-
-  CreateScanHisto();
 }
 
 
@@ -90,6 +91,8 @@ THisto TFifoTest::CreateHisto()
 
 void TFifoTest::Init()
 {
+  CreateScanHisto();
+
   TScan::Init();
   float voltageScale  = ((TFifoParameters *)m_parameters)->voltageScale;
   int   mlvdsStrength = ((TFifoParameters *)m_parameters)->mlvdsStrength;
@@ -112,10 +115,18 @@ void TFifoTest::Init()
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }*/
   for (unsigned int i = 0; i < m_chips.size(); i++) {
+    if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
     AlpideConfig::ConfigureCMU(m_chips.at(i));
   }
   /*for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+    if (m_hics.at(ihic)->IsEnabled() && !m_hics.at(ihic)->IsPowered()) {
+      throw std::runtime_error("FIFO scan init: HIC powered off (Retry suggested)");
+    }
+    else if (m_hics.at(ihic)->IsEnabled() &&
+             ((m_hics.at(ihic)->GetVddd() < 0.1) || (m_hics.at(ihic)->GetVdda() < 0.1))) {
+      throw std::runtime_error("FIFO scan init: voltage appears to be off (Retry suggested)");
+    }
   }*/
 }
 int TFifoTest::GetChipById(std::vector<TAlpide *> chips, int id)
@@ -157,7 +168,7 @@ void TFifoTest::WriteMem(TAlpide *chip, int ARegion, int AOffset, int AValue)
   uint16_t LowVal  = AValue & 0xffff;
   uint16_t HighVal = (AValue >> 16) & 0xff;
 
-  int err           = chip->WriteRegister(LowAdd, LowVal);
+  int err = chip->WriteRegister(LowAdd, LowVal);
   if (err >= 0) err = chip->WriteRegister(HighAdd, HighVal);
 
   if (err < 0) {
@@ -183,7 +194,8 @@ void TFifoTest::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bo
   }
   catch (std::exception &e) {
     exception = true;
-    // std::cout << "Exception " << e.what() << " when reading low value" << std::endl;
+    std::cout << "Exception " << e.what() << " when reading low value for chip ID "
+              << chip->GetConfig()->GetChipId() << std::endl;
     return;
   }
   exception = false;
@@ -192,7 +204,8 @@ void TFifoTest::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bo
       err = chip->ReadRegister(HighAdd, HighVal);
     }
     catch (std::exception &e) {
-      // std::cout << "Exception " << e.what() << " when reading high value" << std::endl;
+      std::cout << "Exception " << e.what() << " when reading high value for chip ID "
+                << chip->GetConfig()->GetChipId() << std::endl;
       exception = true;
       return;
     }
@@ -270,14 +283,25 @@ void TFifoTest::Execute()
 void TFifoTest::Terminate()
 {
   TScan::Terminate();
-  float voltageScale  = ((TFifoParameters *)m_parameters)->voltageScale;
-  int   mlvdsStrength = ((TFifoParameters *)m_parameters)->mlvdsStrength;
+  // float voltageScale  = ((TFifoParameters *)m_parameters)->voltageScale;
+  int mlvdsStrength = ((TFifoParameters *)m_parameters)->mlvdsStrength;
+
+
   // restore old voltage
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (voltageScale != 1.) {
-      m_hics.at(ihic)->ScaleVoltage(1.);
-    }
-  }
+  // for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+  //   if (m_hics.at(ihic)->IsEnabled() && !m_hics.at(ihic)->IsPowered()) {
+  //     throw std::runtime_error("FIFO scan terminate: HIC powered off (Retry suggested)");
+  //   }
+  //   else if (m_hics.at(ihic)->IsEnabled() &&
+  //            ((m_hics.at(ihic)->GetVddd() < 0.1) || (m_hics.at(ihic)->GetVdda() < 0.1))) {
+  //     throw std::runtime_error("FIFO scan terminate: voltage appears to be off (Retry
+  //     suggested)");
+  //   }
+  //
+  //   if (voltageScale != 1.) {
+  //     m_hics.at(ihic)->ScaleVoltage(1.);
+  //   }
+  // }
   // restore old driver setting
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
     if (mlvdsStrength != ChipConfig::DCTRL_DRIVER) {

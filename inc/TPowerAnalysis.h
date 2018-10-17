@@ -9,7 +9,7 @@
 class TPowerResultChip : public TScanResultChip {
 public:
   TPowerResultChip() : TScanResultChip(){};
-  void WriteToFile(FILE *fp) { (void)fp; };
+  void  WriteToFile(FILE *fp) { (void)fp; };
   float GetVariable(TResultVariable var)
   {
     (void)(&var);
@@ -22,6 +22,7 @@ class TPowerResultHic : public TScanResultHic {
 
 private:
   bool  trip;
+  bool  tripBB;
   float iddaSwitchon;
   float idddSwitchon;
   float iddaClocked;
@@ -31,6 +32,7 @@ private:
   float ibias0;
   float ibias3;
   float ibias[50];
+  float maxBias;
   char  m_ivFile[200];
 
 protected:
@@ -53,10 +55,11 @@ public:
 
 class TPowerAnalysis : public TScanAnalysis {
 private:
-  void WriteIVCurve(THic *hic);
-  THicClassification GetClassification(THicCurrents currents);
-  THicClassification GetClassificationIB(THicCurrents currents);
-  THicClassification GetClassificationOB(THicCurrents currents);
+  void               CreateIVHisto(TPowerResultHic *hicResult);
+  void               WriteIVCurve(THic *hic);
+  THicClassification GetClassification(THicCurrents currents, TPowerResultHic *result);
+  THicClassification GetClassificationIB(THicCurrents currents, TPowerResultHic *result);
+  THicClassification GetClassificationOB(THicCurrents currents, TPowerResultHic *result);
 
 protected:
   TScanResultChip *GetChipResult()
@@ -69,12 +72,12 @@ protected:
     TPowerResultHic *result = new TPowerResultHic();
     return result;
   };
-  void CreateResult(){};
-  void InitCounters(){};
-  void WriteResult();
-  void AnalyseHisto(TScanHisto *histo) { (void)&histo; };
-  string                        GetPreviousTestType();
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  void   CreateResult(){};
+  void   InitCounters(){};
+  void   WriteResult();
+  void   AnalyseHisto(TScanHisto *histo) { (void)&histo; };
+  string GetPreviousTestType();
+  void   CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TPowerAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

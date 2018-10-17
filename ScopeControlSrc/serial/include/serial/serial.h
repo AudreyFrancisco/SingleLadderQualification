@@ -668,7 +668,7 @@ namespace serial {
   class PortNotOpenedException : public std::exception {
     // Disable copy constructors
     const PortNotOpenedException &operator=(PortNotOpenedException);
-    std::string e_what_;
+    std::string                   e_what_;
 
   public:
     PortNotOpenedException(const char *description)

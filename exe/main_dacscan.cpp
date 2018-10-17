@@ -248,8 +248,8 @@ int main(int argc, char **argv)
 {
   time_t     t   = time(0); // get time now
   struct tm *now = localtime(&t);
-  char       Suffix[14];
-  snprintf(Suffix, 14, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1,
+  char       Suffix[80];
+  snprintf(Suffix, 80, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1,
            now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
   decodeCommandParameters(argc, argv);
@@ -305,8 +305,8 @@ int main(int argc, char **argv)
 
       scanADCDac(fChips.at(i), mySampleDist, mySampleRepetition, Suffix);
 
-      char fName[50];
-      snprintf(fName, 50, "Data/AVDD_Chip%d_%d_%s.dat", fChips.at(i)->GetConfig()->GetChipId(),
+      char fName[200];
+      snprintf(fName, 200, "Data/AVDD_Chip%d_%d_%s.dat", fChips.at(i)->GetConfig()->GetChipId(),
                fChips.at(i)->GetConfig()->GetCtrInt(), Suffix);
       FILE *fp = fopen(fName, "w");
 
@@ -329,7 +329,7 @@ int main(int argc, char **argv)
       fclose(fp);
 
       // Temperature
-      snprintf(fName, 50, "Data/TEMP_Chip%d_%d_%s.dat", fChips.at(i)->GetConfig()->GetChipId(),
+      snprintf(fName, 200, "Data/TEMP_Chip%d_%d_%s.dat", fChips.at(i)->GetConfig()->GetChipId(),
                fChips.at(i)->GetConfig()->GetCtrInt(), Suffix);
       fp = fopen(fName, "w");
 

@@ -14,12 +14,16 @@ TNoiseOccupancy::TNoiseOccupancy(TScanConfig *config, std::vector<TAlpide *> chi
                                  std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TDataTaking(config, chips, hics, boards, histoQue, aMutex)
 {
-  m_pulse                                       = false;
-  m_pulseLength                                 = 0;
-  m_parameters                                  = new TNoiseParameters;
+  CreateScanParameters();
+
+  m_parameters->backBias = m_config->GetBackBias();
+  m_pulse                = false;
+  m_pulseLength          = 0;
+
   ((TNoiseParameters *)m_parameters)->nTriggers = config->GetParamValue("NTRIG");
   ;
   ((TNoiseParameters *)m_parameters)->isMasked = config->GetIsMasked();
+
   SetName();
 }
 
@@ -27,10 +31,10 @@ TNoiseOccupancy::TNoiseOccupancy(TScanConfig *config, std::vector<TAlpide *> chi
 void TNoiseOccupancy::SetName()
 {
   if (((TNoiseParameters *)m_parameters)->isMasked) {
-    sprintf(m_name, "Noise Occupancy %.1f V, masked", m_backBias);
+    sprintf(m_name, "Noise Occupancy %.1f V, masked", m_parameters->backBias);
   }
   else {
-    sprintf(m_name, "Noise Occupancy %.1f V", m_backBias);
+    sprintf(m_name, "Noise Occupancy %.1f V", m_parameters->backBias);
   }
 }
 
@@ -79,6 +83,10 @@ THisto TNoiseOccupancy::CreateHisto()
 
 void TNoiseOccupancy::Init()
 {
+  // update mask information
+  ((TNoiseParameters *)m_parameters)->isMasked = m_config->GetIsMasked();
+  SetName();
+
   TDataTaking::Init();
   m_running = true;
 }

@@ -40,13 +40,13 @@
 
 #include <fstream>
 
-#include <stdio.h>
+#include <cstdio>
 #include <string.h>
 
 AlpideDBManager::AlpideDBManager()
 {
   theJarUrl    = SSOURL;
-  theCookieJar = new CernSsoCookieJar(COOKIEPACK);
+  theCookieJar = new CernSsoCookieJar();
 #ifdef AUTH_X509
 #ifdef COMPILE_LIBCURL
   theNSSNickName                = NSSCERTNICKNAME;
@@ -68,8 +68,6 @@ AlpideDBManager::~AlpideDBManager()
 {
   delete theCookieJar;
   theCookieJar = 0x0;
-  remove("/tmp/tempappo.xml");
-  remove("/tmp/Queryresult.xml");
 }
 
 #ifdef AUTH_KERBEROS
@@ -176,8 +174,8 @@ bool AlpideDBManager::Init()
 int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **Result,
                                  bool isSOAPrequest, const char *SOAPAction)
 {
-
-  remove("/tmp/Queryresult.xml");
+  string result_filename = std::tmpnam(nullptr);
+  string tmp_filename    = std::tmpnam(nullptr);
 
   // in order to maintain the connection over the 24hours
   if (!theCookieJar->isJarValid()) {
@@ -207,9 +205,10 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   string appo;
 
   curl_easy_setopt(myHandle, CURLOPT_URL, theUrl.URI.c_str());
-  curl_easy_setopt(myHandle, CURLOPT_USERAGENT, "curl/7.19.7 (x86_64-redhat-linux-gnu) "
-                                                "libcurl/7.19.7 NSS/3.21 Basic ECC zlib/1.2.3 "
-                                                "libidn/1.18 libssh2/1.4.2");
+  curl_easy_setopt(myHandle, CURLOPT_USERAGENT,
+                   "curl/7.19.7 (x86_64-redhat-linux-gnu) "
+                   "libcurl/7.19.7 NSS/3.21 Basic ECC zlib/1.2.3 "
+                   "libidn/1.18 libssh2/1.4.2");
 
   // Compose the heasder
   struct curl_slist *headers = NULL;
@@ -257,7 +256,7 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   curl_easy_setopt(myHandle, CURLOPT_SSL_VERIFYHOST, true);
 
   curl_easy_setopt(myHandle, CURLOPT_FOLLOWLOCATION, true);
-  curl_easy_setopt(myHandle, CURLOPT_COOKIEFILE, COOKIEPACK);
+  curl_easy_setopt(myHandle, CURLOPT_COOKIEFILE, theCookieJar->getCookiePackFileName().c_str());
 
   // Perform the request, res will get the return code
   res = curl_easy_perform(myHandle);
@@ -284,17 +283,17 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   Command += " --negotiate -u :";
 #endif
   Command += " -b";
-  Command += COOKIEPACK;
+  Command += theCookieJar->getCookiePackFileName();
   Command += " -c ";
-  Command += COOKIEPACK;
+  Command += theCookieJar->getCookiePackFileName();
   if (isSOAPrequest) {
-    remove("/tmp/tempappo.xml");
-    std::ofstream out("/tmp/tempappo.xml");
+    remove(tmp_filename);
+    std::ofstream out(tmp_filename);
     out << Payload;
     out.close();
     Command += " -H 'SOAPACTION: \"";
     Command += SOAPAction;
-    Command += "\"' -X POST -H 'Content-type: text/xml' -d @/tmp/tempappo.xml \"";
+    Command += "\"' -X POST -H 'Content-type: text/xml' -d @" + tmp_filename + " \"";
     Command += Url;
     Command += "\"";
   }
@@ -305,7 +304,7 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
     Command += Payload;
     Command += "\"";
   }
-  Command += " > /tmp/Queryresult.xml";
+  Command += " > " + result_filename;
 
   system(Command.c_str());
 
@@ -313,13 +312,13 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
     cout << "Execute the bash :" << Command << endl;
   }
 
-  if (!fileExists("/tmp/Queryresult.xml")) { // the file doesn't exists. ACH !
+  if (!fileExists(result_filename)) { // the file doesn't exists. ACH !
     cerr << "Error to Execute the query. Abort !";
     return (false);
   }
 
   // get the response file size
-  FILE *res = fopen("/tmp/Queryresult.xml", "r");
+  FILE *res = fopen(result_filename, "r");
   if (res == NULL) {
     cerr << "Error to Access the File buffer of Query. Abort !" << endl;
     return (false);

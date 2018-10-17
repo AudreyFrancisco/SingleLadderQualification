@@ -3,6 +3,7 @@
 #include "TBoardConfigMOSAIC.h"
 #include "TBoardConfigRU.h"
 #include "TPowerBoardConfig.h"
+#include "version.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -185,6 +186,13 @@ TDeviceType TConfig::ReadDeviceType(std::string deviceName)
     SetUsePowerBoard(true);
     type = TYPE_MLHALFSTAVE;
   }
+  else if (deviceName.compare("MLSTAVE") == 0) {
+    type = TYPE_MLSTAVE;
+  }
+  else if (deviceName.compare("MLSTAVE_PB") == 0) {
+    SetUsePowerBoard(true);
+    type = TYPE_MLSTAVE;
+  }
   else if (deviceName.compare("ENDURANCETEST") == 0) {
     type = TYPE_ENDURANCE;
   }
@@ -254,7 +262,7 @@ void TConfig::SetDeviceType(TDeviceType AType, int NChips)
     Init(1, chipIds, boardRU);
   }
   else if ((AType == TYPE_HALFSTAVE) || (AType == TYPE_HALFSTAVERU) ||
-           (AType == TYPE_MLHALFSTAVE)) {
+           (AType == TYPE_MLHALFSTAVE) || (AType == TYPE_MLSTAVE)) {
     // in case of half stave NChips contains number of modules
     for (int imod = 1; imod <= NChips; imod++) {
       int modId = (imod & 0x7);
@@ -264,9 +272,9 @@ void TConfig::SetDeviceType(TDeviceType AType, int NChips)
         chipIds.push_back(i + (modId << 4));
       }
     }
-    if (AType == TYPE_HALFSTAVE)
+    if ((AType == TYPE_HALFSTAVE) || (AType == TYPE_MLHALFSTAVE))
       Init(2, chipIds, boardMOSAIC);
-    else if (AType == TYPE_MLHALFSTAVE)
+    else if (AType == TYPE_MLSTAVE)
       Init(1, chipIds, boardMOSAIC);
     else
       Init(1, chipIds, boardRU);
@@ -287,10 +295,17 @@ void TConfig::ReadConfigFile(const char *fName)
   int         Chip;
   TDeviceType type = TYPE_UNKNOWN;
 
-  std::ifstream infile(fName);
+  fScanConfig = new TScanConfig();
+
+  std::string filename = fName;
+  if (const char *configDir = std::getenv("ALPIDE_TEST_CONFIG"))
+    filename.insert(0, std::string(configDir) + "/");
+
+  std::cout << "looking for config file:" << filename << std::endl;
+  std::ifstream infile(filename);
 
   if (!infile.good()) {
-    std::cout << "WARNING: Config file " << fName << " not found, using default configuration."
+    std::cout << "WARNING: Config file " << filename << " not found, using default configuration."
               << std::endl;
     return;
   }
@@ -318,8 +333,8 @@ void TConfig::ReadConfigFile(const char *fName)
       type = ReadDeviceType(value);
     }
     if ((type != TYPE_UNKNOWN) && ((type != TYPE_TELESCOPE) || (NChips > 0)) &&
-        ((type != TYPE_HALFSTAVE) || (NModules > 0)) &&
-        ((type != TYPE_HALFSTAVERU) ||
+        (((type != TYPE_HALFSTAVE) && (type != TYPE_HALFSTAVERU) && (type != TYPE_MLHALFSTAVE) &&
+          (type != TYPE_MLSTAVE)) ||
          (NModules > 0))) { // type and nchips has been found (nchips not needed for type chip)
       // SetDeviceType calls the appropriate init method, which in turn calls
       // the constructors for board and chip configs
@@ -327,7 +342,7 @@ void TConfig::ReadConfigFile(const char *fName)
         SetDeviceType(type, ModuleId);
       }
       else if ((type == TYPE_HALFSTAVE) || (type == TYPE_HALFSTAVERU) ||
-               (type == TYPE_MLHALFSTAVE)) {
+               (type == TYPE_MLHALFSTAVE) || (type == TYPE_MLSTAVE)) {
         SetDeviceType(type, NModules);
       }
       else {
@@ -336,8 +351,6 @@ void TConfig::ReadConfigFile(const char *fName)
       Initialised = true;
     }
   }
-
-  fScanConfig = new TScanConfig();
 
   // now read the rest
   while (std::getline(infile, line)) {
@@ -396,7 +409,7 @@ void TConfig::DecodeLine(std::string Line)
     BoardStart = 0;
     BoardStop  = fBoardConfigs.size();
     HicStart   = 0;
-    HicStop    = 0;
+    HicStop    = fHicConfigs.size();
   }
   else {
     ChipStart  = (Index < (int)fChipConfigs.size()) ? Index : -1;

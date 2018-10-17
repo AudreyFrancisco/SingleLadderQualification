@@ -54,17 +54,17 @@ class IPbus : public WishboneBus {
 public:
   IPbus(int pktSize = DEFAULT_PACKET_SIZE);
   ~IPbus();
-  void addIdle();
-  void addWrite(uint32_t address, uint32_t data);
-  void addWrite(int size, uint32_t address, uint32_t *data);
-  void addNIWrite(int size, uint32_t address, uint32_t *data);
-  void addRead(int size, uint32_t address, uint32_t *data);
-  void addRead(uint32_t address, uint32_t *data) { addRead(1, address, data); }
-  void addNIRead(int size, uint32_t address, uint32_t *data);
-  void addRMWbits(uint32_t address, uint32_t mask, uint32_t data, uint32_t *rData = NULL);
-  void addRMWsum(uint32_t address, uint32_t data, uint32_t *rData = NULL);
-  virtual void              execute() = 0;
-  int                       getBufferSize() { return bufferSize; }
+  void         addIdle();
+  void         addWrite(uint32_t address, uint32_t data);
+  void         addWrite(int size, uint32_t address, uint32_t *data);
+  void         addNIWrite(int size, uint32_t address, uint32_t *data);
+  void         addRead(int size, uint32_t address, uint32_t *data);
+  void         addRead(uint32_t address, uint32_t *data) { addRead(1, address, data); }
+  void         addNIRead(int size, uint32_t address, uint32_t *data);
+  void         addRMWbits(uint32_t address, uint32_t mask, uint32_t data, uint32_t *rData = NULL);
+  void         addRMWsum(uint32_t address, uint32_t data, uint32_t *rData = NULL);
+  virtual void execute() = 0;
+  int          getBufferSize() { return bufferSize; }
   virtual const std::string name() = 0;
 
   // test functions
@@ -73,13 +73,13 @@ public:
   void cutTX(int size) { txSize -= size; }
 
 private:
-  void chkBuffers(int txTransactionSize, int rxTransactionSize);
-  void addWord(uint32_t w);
+  void     chkBuffers(int txTransactionSize, int rxTransactionSize);
+  void     addWord(uint32_t w);
   uint32_t getWord();
-  void addHeader(uint16_t words, uint8_t typeId, uint32_t *readDataPtr);
-  void getHeader(IPbusTransaction *tr);
-  void clearList();
-  void dumpRxData();
+  void     addHeader(uint16_t words, uint8_t typeId, uint32_t *readDataPtr);
+  void     getHeader(IPbusTransaction *tr);
+  void     clearList();
+  void     dumpRxData();
 
 public:
   // IPBus info codes (errors)

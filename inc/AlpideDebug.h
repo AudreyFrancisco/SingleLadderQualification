@@ -85,7 +85,7 @@ namespace Alpide {
     int  ADCSequencerState;
     bool SEUErrorOR;
   } TADCDebugStream;
-}
+} // namespace Alpide
 
 using namespace Alpide;
 
@@ -97,6 +97,6 @@ namespace AlpideDebug {
   bool GetRRUDebugSteam(TAlpide *chip, TRRUDebugStream &stream);
   bool GetFromuDebugStream(TAlpide *chip, TFromuDebugStream &stream);
   bool GetADCDebugStream(TAlpide *chip, TADCDebugStream &stream);
-}
+} // namespace AlpideDebug
 
 #endif

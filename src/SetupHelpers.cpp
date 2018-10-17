@@ -114,7 +114,6 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
   }
 
   CheckControlInterface(config, boards, boardType, chips);
-  // sleep(5);
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
 }
@@ -148,12 +147,38 @@ int initSetupPower(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoard
   return 0;
 }
 
+int findHic(std::vector<THic *> *hics, int modId)
+{
+  int result = -1;
+  for (unsigned int ihic = 0; ihic < hics->size(); ihic++) {
+    if (hics->at(ihic)->GetModId() == modId) {
+      result = ihic;
+      break;
+    }
+  }
+  if (result < 0) {
+    std::cout << "Module Id " << modId << " from chip does not match any HIC" << std::endl;
+    abort();
+  }
+  return result;
+}
+
+
 // implicit assumptions on the setup in this method
 // - chips of master 0 of all modules are connected to 1st mosaic, chips of master 8 to 2nd MOSAIC
 int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                        std::vector<TAlpide *> *chips, std::vector<THic *> *hics,
                        const char **hicIds)
 {
+  // default mapping, the first index in receiverMap refers to the module position and not the id
+  // TODO: Define power board mapping for half stave; assuming channel = position
+  int mosaicMap[2]      = {0, 1};
+  int receiverMap[7][2] = {{0, 1}, {1, 0}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}};
+  int controlMap[2]     = {0, 0};
+  int biasbusMap[7]     = {0, 0, 1, 1, 1, 2, 2};
+  int positionMap[7];
+
+  // create board objects (MOSAIC and power board)
   (*boardType) = boardMOSAIC;
   for (unsigned int i = 0; i < config->GetNBoards(); i++) {
     TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(i);
@@ -170,44 +195,61 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0));
   }
 
+  // create HIC objects and fill positionMap
   if (!hics) hics = new std::vector<THic *>(); // create if not existent
 
-  // TODO: Define power board mapping for half stave
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
+    THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(ihic);
+    positionMap[ihic]         = hicOBconfig->GetParamValue("HSPOSBYID");
+    bool useCombo             = hicOBconfig->GetParamValue("POWERCOMBO");
+    int  bbChannel            = useCombo ? biasbusMap[positionMap[ihic] - 1] : -1;
     if (hicIds) {
-      hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb, ihic));
+      hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb,
+                                 positionMap[ihic] - 1, bbChannel, useCombo));
     }
     else {
       hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic + 1)).c_str(),
-                                 config->GetHicConfig(ihic)->GetModId(), pb, ihic));
+                                 config->GetHicConfig(ihic)->GetModId(), pb, positionMap[ihic] - 1,
+                                 bbChannel));
     }
-    ((THicOB *)(hics->at(ihic)))->ConfigureMaster(0, 0, ihic, 0);
-    ((THicOB *)(hics->at(ihic)))->ConfigureMaster(8, 1, ihic, 0);
+    ((THicOB *)hics->back())->SetPosition(positionMap[ihic]);
   }
 
+
+  // read possible config modifications
+  // only check for receiver for master chips (will then be applied to all connected slaves)
+  // ignore receiver settings for slaves and any control interface changes
   for (unsigned int i = 0; i < config->GetNChips(); i++) {
     TChipConfig *chipConfig = config->GetChipConfig(i);
     int          chipId     = chipConfig->GetChipId();
-    int          mosaic     = (chipId & 0x8) ? 1 : 0; // Side A8 = 1, side B0 = 0
-    int          control    = chipConfig->GetParamValue("CONTROLINTERFACE");
-    int          receiver   = chipConfig->GetParamValue("RECEIVER");
-    // int          modId      = chipConfig->GetModuleId();
+    int          side       = (chipId & 0x8) ? 1 : 0;
+    int          modId      = chipConfig->GetModuleId();
+    int          hic        = findHic(hics, modId);
+
+    if ((!(chipId & 0x7)) && (chipConfig->GetParamValue("RECEIVER") >= 0)) {
+      receiverMap[positionMap[hic] - 1][side] = chipConfig->GetParamValue("RECEIVER");
+    }
+  }
+
+  for (unsigned int i = 0; i < config->GetNChips(); i++) {
+    TChipConfig * chipConfig  = config->GetChipConfig(i);
+    int           chipId      = chipConfig->GetChipId();
+    int           side        = (chipId & 0x8) ? 1 : 0;
+    int           modId       = chipConfig->GetModuleId();
+    int           hic         = findHic(hics, modId);
+    int           modPos      = positionMap[hic];
+    THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(hic);
+
+    // now retrieve the (possibly) updated mapping from the arrays
+    int mosaic   = mosaicMap[side];
+    int control  = controlMap[side];
+    int receiver = receiverMap[modPos - 1][side];
 
     BaseConfigOBchip(chipConfig);
 
     TAlpide *chip = new TAlpide(chipConfig);
-    int      iHic = -1;
-    for (unsigned int ihic = 0; ihic < hics->size(); ihic++) {
-      if (hics->at(ihic)->GetModId() == chip->GetConfig()->GetModuleId()) {
-        iHic = ihic;
-        break;
-      }
-    }
-    if (iHic < 0) {
-      std::cout << "Module Id from chip " << chip->GetConfig()->GetModuleId() << " no match any HIC"
-                << std::endl;
-      abort();
-    }
+    int      iHic = findHic(hics, modId);
+
     hics->at(iHic)->AddChip(chip);
     chip->SetHic(hics->at(iHic));
 
@@ -217,12 +259,9 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     chips->push_back(chip);
     chips->at(i)->SetReadoutBoard(boards->at(mosaic));
 
-    THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(iHic);
-
-    // vector to define how modules were placed in HS
     bool isSideEnable =
         (mosaic == 1 && hicOBconfig->IsEnabledA8()) || (mosaic == 0 && hicOBconfig->IsEnabledB0());
-    int modPos = hicOBconfig->GetParamValue("HSPOSBYID");
+
     if ((modPos <= 0) ||
         !isSideEnable) { // Position for modId not found, disabling all chips for modId
       chipConfig->SetParamValue("RECEIVER", -1);
@@ -230,31 +269,153 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
       chips->at(i)->SetEnable(false);
     }
     else { // configure module
-      if (control < 0) {
-        control = 0;
-        chipConfig->SetParamValue("CONTROLINTERFACE", control);
-      }
-      if (receiver < 0) {
-        receiver = modPos - 1;
-        if (mosaic == 1) {
-          if (receiver == 0)
-            receiver = 1;
-          else if (receiver == 1)
-            receiver = 0;
-        }
-        chipConfig->SetParamValue("RECEIVER", receiver);
-      }
+      chipConfig->SetParamValue("CONTROLINTERFACE", control);
+      chipConfig->SetParamValue("RECEIVER", receiver);
       boards->at(mosaic)->AddChip(chipId, control, receiver, chips->at(i));
     }
   }
 
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
+    std::cout << "ihic = " << ihic << ", position = " << positionMap[ihic] << std::endl;
+
+    ((THicOB *)(hics->at(ihic)))
+        ->ConfigureMaster(0, mosaicMap[0], receiverMap[positionMap[ihic] - 1][0], controlMap[0]);
+    ((THicOB *)(hics->at(ihic)))
+        ->ConfigureMaster(8, mosaicMap[1], receiverMap[positionMap[ihic] - 1][1], controlMap[1]);
 
     hics->at(ihic)->PowerOn();
   }
 
   CheckControlInterface(config, boards, boardType, chips); // returns nWorking : int
-  sleep(5);
+  MakeDaisyChain(config, boards, boardType, chips);
+  return 0;
+}
+
+int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
+                     std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
+{
+  // default mapping, the first index in receiverMap refers to the module position and not the id
+  // TODO: Define power board mapping for half stave; assuming channel = position
+  int mosaicMap[1]      = {0}; // AC: width reduced width to 1 (only one MOSAIC used in this mode)
+  int receiverMap[4][2] = {{7, 0}, {6, 1}, {5, 2}, {4, 3}}; // AC: 4 HICs per half stave in the
+                                                            // middle layers, mapping is
+                                                            // {{right_side_0, left_side_0} ...}
+  int controlMap[2] = {1, 0}; // AC: different sides of a ML half stave are read by different MOSAIC
+                              // control interfaces, mapping is {right_side_0, left_side_0}
+  int positionMap[4];         // AC: only 4 HICs per half stave in the middle layers
+
+  // create board objects (MOSAIC and power board)
+  (*boardType) = boardMOSAIC;
+  for (unsigned int i = 0; i < config->GetNBoards(); i++) {
+    TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(i);
+    boardConfig->SetSpeedMode(Mosaic::RCV_RATE_400);
+    boards->push_back(new TReadoutBoardMOSAIC(config, boardConfig));
+  }
+
+  // AC: no master/slave mode, only one MOSAIC, commenting
+  if (((TBoardConfigMOSAIC *)config->GetBoardConfig(0))->GetMasterSlaveMode()) {
+    ((TReadoutBoardMOSAIC *)boards->at(0))->GetCoordinatorHandle()->setMode(MCoordinator::Master);
+    //  ((TReadoutBoardMOSAIC
+    //  *)boards->at(1))->GetCoordinatorHandle()->setMode(MCoordinator::Slave);
+  }
+
+  TPowerBoard *pb = 0;
+  if (config->GetUsePowerBoard()) {
+    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0));
+  }
+
+  // create HIC objects and fill positionMap
+  if (!hics) hics = new std::vector<THic *>(); // create if not existent
+
+  for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
+    THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(ihic);
+    positionMap[ihic]         = hicOBconfig->GetParamValue("HSPOSBYID");
+    if (hicIds) {
+      hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb,
+                                 positionMap[ihic] - 1));
+    }
+    else {
+      hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic + 1)).c_str(),
+                                 config->GetHicConfig(ihic)->GetModId(), pb,
+                                 positionMap[ihic] - 1));
+    }
+    ((THicOB *)hics->back())->SetPosition(positionMap[ihic]);
+  }
+
+  // read possible config modifications
+  // only check for receiver for master chips (will then be applied to all connected slaves)
+  // ignore receiver settings for slaves and any control interface changes
+  for (unsigned int i = 0; i < config->GetNChips(); i++) {
+    TChipConfig *chipConfig = config->GetChipConfig(i);
+    int          chipId     = chipConfig->GetChipId();
+    int          side       = (chipId & 0x8) ? 1 : 0;
+    int          modId      = chipConfig->GetModuleId();
+    int          hic        = findHic(hics, modId);
+
+    if ((!(chipId & 0x7)) && (chipConfig->GetParamValue("RECEIVER") >= 0)) {
+      receiverMap[positionMap[hic] - 1][side] = chipConfig->GetParamValue("RECEIVER");
+    }
+  }
+
+  for (unsigned int i = 0; i < config->GetNChips(); i++) {
+    TChipConfig * chipConfig  = config->GetChipConfig(i);
+    int           chipId      = chipConfig->GetChipId();
+    int           side        = (chipId & 0x8) ? 1 : 0;
+    int           modId       = chipConfig->GetModuleId();
+    int           hic         = findHic(hics, modId);
+    int           modPos      = positionMap[hic];
+    THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(hic);
+
+    // now retrieve the (possibly) updated mapping from the arrays
+    // AC: since both sides of the half stave are read by the same mosaic, index for mosaic is hard
+    // coded
+    int mosaic   = mosaicMap[0];
+    int control  = controlMap[side];
+    int receiver = receiverMap[modPos - 1][side];
+
+    BaseConfigOBchip(chipConfig);
+
+    TAlpide *chip = new TAlpide(chipConfig);
+    int      iHic = findHic(hics, modId);
+
+    hics->at(iHic)->AddChip(chip);
+    chip->SetHic(hics->at(iHic));
+
+    if (!hics->at(iHic)->IsEnabled())
+      chipConfig->SetParamValue("ENABLED", 0); // deactivate chip if the module is deactivated
+
+    chips->push_back(chip);
+    chips->at(i)->SetReadoutBoard(boards->at(mosaic));
+
+    // AC: only one mosaic, checking enabling of both hic sides
+    bool isHicEnable = (mosaic == 0 && hicOBconfig->IsEnabledA8() && hicOBconfig->IsEnabledB0());
+
+    if ((modPos <= 0) ||
+        !isHicEnable) { // Position for modId not found, disabling all chips for modId
+      chipConfig->SetParamValue("RECEIVER", -1);
+      boards->at(mosaic)->AddChip(chipId, 0, -1, chips->at(i));
+      chips->at(i)->SetEnable(false);
+    }
+    else { // configure module
+      chipConfig->SetParamValue("CONTROLINTERFACE", control);
+      chipConfig->SetParamValue("RECEIVER", receiver);
+      boards->at(mosaic)->AddChip(chipId, control, receiver, chips->at(i));
+    }
+  }
+
+  for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
+    std::cout << "ihic = " << ihic << ", position = " << positionMap[ihic] << std::endl;
+
+    // AC: only one mosaic board, using only mosaic id mosaicMap[0]
+    ((THicOB *)(hics->at(ihic)))
+        ->ConfigureMaster(0, mosaicMap[0], receiverMap[positionMap[ihic] - 1][0], controlMap[0]);
+    ((THicOB *)(hics->at(ihic)))
+        ->ConfigureMaster(8, mosaicMap[0], receiverMap[positionMap[ihic] - 1][1], controlMap[1]);
+
+    hics->at(ihic)->PowerOn();
+  }
+
+  CheckControlInterface(config, boards, boardType, chips); // returns nWorking : int
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
 }
@@ -352,10 +513,10 @@ void MakeDaisyChain(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
     int modId  = (chipId & 0x70) >> 4;
 
     if ((chipId & 0x8) && (chipId < firstHigh[modId])) firstHigh[modId] = chipId;
-    if (!(chipId & 0x8) && (chipId < firstLow[modId])) firstLow[modId]  = chipId;
+    if (!(chipId & 0x8) && (chipId < firstLow[modId])) firstLow[modId] = chipId;
 
     if ((chipId & 0x8) && (chipId > lastHigh[modId])) lastHigh[modId] = chipId;
-    if (!(chipId & 0x8) && (chipId > lastLow[modId])) lastLow[modId]  = chipId;
+    if (!(chipId & 0x8) && (chipId > lastLow[modId])) lastLow[modId] = chipId;
   }
 
   for (int i = startChipIndex; i < endChipIndex; i++) {
@@ -684,6 +845,21 @@ int powerOn(TReadoutBoardDAQ *aDAQBoard)
   return 0;
 }
 
+int initSetupWithNames(TConfig *&config, std::vector<TReadoutBoard *> *boards,
+                       TBoardType *boardType, std::vector<TAlpide *> *chips,
+                       const char *configFileName /*=""*/, std::vector<THic *> *hics /*=0*/,
+                       std::vector<std::string> *hicNames /*=0*/)
+{
+  const char **hicIds = nullptr;
+  if (hicNames) {
+    hicIds = new const char *[hicNames->size()];
+    for (uint ihic = 0; ihic < hicNames->size(); ++ihic)
+      hicIds[ihic] = hicNames->at(ihic).c_str();
+  }
+  int ret = initSetup(config, boards, boardType, chips, configFileName, hics, hicIds);
+  delete[] hicIds;
+  return ret;
+}
 /*
  * Add the InitSetUpEndurance call  - 25/5/17
  *
@@ -719,6 +895,12 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
     break;
   case TYPE_HALFSTAVE: // Yasser (Add half stave configuration on init setup)
     initSetupHalfStave(config, boards, boardType, chips, hics, hicIds);
+    break;
+  case TYPE_MLHALFSTAVE:
+    initSetupHalfStave(config, boards, boardType, chips, hics, hicIds);
+    break;
+  case TYPE_MLSTAVE:
+    initSetupMLStave(config, boards, boardType, chips, hics, hicIds);
     break;
   case TYPE_HALFSTAVERU:
     initSetupHalfStaveRU(config, boards, boardType, chips);
@@ -796,9 +978,9 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   TPowerBoardConfig * pbConfig[2];
   TPowerBoard *       pb[2] = {0, 0};
 
-  int CtrIntMap[10][2] = {{3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10},
+  int  CtrIntMap[10][2]   = {{3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10},
                           {3, 2}, {5, 4}, {7, 6}, {9, 8}, {11, 10}};
-  int DataRcvMap[10][2] = {{9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0},
+  int  DataRcvMap[10][2]  = {{9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0},
                            {9, 8}, {7, 6}, {5, 4}, {3, 2}, {1, 0}};
   bool InverRcvMap[10][2] = {{true, false}, {true, false}, {true, false}, {true, false},
                              {true, false}, {true, false}, {true, false}, {true, false},
@@ -907,7 +1089,6 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     }
   }
   CheckControlInterface(config, boards, boardType, chips);
-  sleep(1);
   for (int mod = 0; mod < NModules; mod++) {
     MakeDaisyChain(config, boards, boardType, chips, mod * 14);
   }

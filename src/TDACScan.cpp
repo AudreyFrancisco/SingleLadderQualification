@@ -7,6 +7,10 @@ TDACScan::TDACScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vecto
                    std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
+  CreateScanParameters();
+
+  m_parameters->backBias = 0;
+
   strcpy(m_name, "DAC Scan");
 
   m_start[0] = m_config->GetParamValue("DACSTART");
@@ -20,8 +24,6 @@ TDACScan::TDACScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vecto
   m_start[2] = 0;
   m_step[2]  = 1;
   m_stop[2]  = 1; // number of chips per hic?
-
-  CreateScanHisto();
 }
 
 THisto TDACScan::CreateHisto()
@@ -42,6 +44,8 @@ void TDACScan::ConfigureChip(TAlpide *chip)
 
 void TDACScan::Init()
 {
+  CreateScanHisto();
+
   TScan::Init();
   m_running = true;
   CountEnabledChips();

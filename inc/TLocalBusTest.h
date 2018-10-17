@@ -11,13 +11,14 @@ private:
   TAlpide *                           m_writeChip;
   int                                 m_boardIndex;
   std::vector<std::vector<TAlpide *>> m_daisyChains;
-  void FindDaisyChains(std::vector<TAlpide *> chips);
-  int GetChipById(std::vector<TAlpide *> chips, int previousId);
-  bool TestPattern(int pattern);
-  bool TestBusy(bool busy);
+  void                                FindDaisyChains(std::vector<TAlpide *> chips);
+  int                                 GetChipById(std::vector<TAlpide *> chips, int previousId);
+  bool                                TestPattern(int pattern);
+  bool                                TestBusy(bool busy);
 
 protected:
   THisto CreateHisto();
+  void   CreateScanParameters() { m_parameters = new TScanParameters; };
 
 public:
   TLocalBusTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,

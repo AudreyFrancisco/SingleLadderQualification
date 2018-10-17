@@ -39,6 +39,7 @@
 #define TPOWERBOARD_H
 
 #include <iostream>
+#include <mutex>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -81,6 +82,8 @@ public:
     float AIset;
     float DVset;
     float DIset;
+    float DVsetReadback;
+    float AVsetReadback;
   };
 
   struct pbBoard {
@@ -100,6 +103,8 @@ private:
   TPowerBoardConfig *  fPowerBoardConfig; // the configuration set
   powerboard::pbstate *thePowerBoardState;
 
+  std::mutex mutex_pb;
+
   // Methods
 public:
   TPowerBoard(TReadoutBoardMOSAIC *board);
@@ -116,6 +121,7 @@ public:
   TPowerBoardConfig *GetConfigurationHandler() { return (fPowerBoardConfig); };
 
   // Getters
+  void  GetPowerBoardState(powerboard::pbstate *state);
   float GetTemperature()
   {
     readMonitor();
@@ -140,6 +146,16 @@ public:
     return (fPBoard.Modules[module].DVmon);
   };
   float GetDigitalCurrent(int module);
+  float GetDigitalSetVoltage(int module)
+  {
+    readMonitor();
+    return (fPBoard.Modules[module].DVsetReadback);
+  };
+  float GetAnalogSetVoltage(int module)
+  {
+    readMonitor();
+    return (fPBoard.Modules[module].AVsetReadback);
+  };
   bool IsAnalogChOn(int module)
   {
     readMonitor();
@@ -169,70 +185,83 @@ public:
   // Setters
   void SetBiasVoltage(float aVal)
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fPBoard.VBset = aVal;
     fMOSAICPowerBoard->setVbias(aVal);
   };
 
   void SetAnalogVoltage(int mod, float val)
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fPBoard.Modules[mod].AVset = val;
     fMOSAICPowerBoard->setVout((unsigned char)(mod * 2), val);
   };
   void SetAnalogCurrent(int mod, float val)
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fPBoard.Modules[mod].AIset = val;
     fMOSAICPowerBoard->setIth((unsigned char)(mod * 2), val);
   };
   void SetDigitalVoltage(int mod, float val)
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fPBoard.Modules[mod].DVset = val;
     fMOSAICPowerBoard->setVout((unsigned char)(mod * 2 + 1), val);
   };
   void SetDigitalCurrent(int mod, float val)
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fPBoard.Modules[mod].DIset = val;
     fMOSAICPowerBoard->setIth((unsigned char)(mod * 2 + 1), val);
   };
   void SetModule(int module, float AV, float AI, float DV, float DI, bool BiasOn);
   void SetBiasOn(int mod)
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fPBoard.Modules[mod].BiasOn = true;
     fMOSAICPowerBoard->onVbias((unsigned char)mod);
   };
   void SetBiasOff(int mod)
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fPBoard.Modules[mod].BiasOn = false;
     fMOSAICPowerBoard->offVbias((unsigned char)mod);
   };
 
   void SwitchAnalogOn(int mod)
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fPBoard.Modules[mod].AchOn = true;
     fMOSAICPowerBoard->onVout((unsigned char)(mod * 2));
   };
   void SwitchAnalogOff(int mod)
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fPBoard.Modules[mod].AchOn = false;
     fMOSAICPowerBoard->offVout((unsigned char)(mod * 2));
   };
   void SwitchDigitalOn(int mod)
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fPBoard.Modules[mod].DchOn = true;
     fMOSAICPowerBoard->onVout((unsigned char)(mod * 2 + 1));
   };
   void SwitchDigitalOff(int mod)
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fPBoard.Modules[mod].DchOn = false;
     fMOSAICPowerBoard->offVout((unsigned char)(mod * 2 + 1));
   };
   void SwitchModule(int module, bool value);
   void SwitchON()
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fMOSAICPowerBoard->onAllVout();
     return;
   };
   void SwitchOFF()
   {
+    std::lock_guard<std::mutex> lock(mutex_pb);
     fMOSAICPowerBoard->offAllVout();
     return;
   };

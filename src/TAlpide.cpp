@@ -134,61 +134,85 @@ void TAlpide::DumpConfig(const char *fName, bool writeFile, char *config)
   }
 
   config[0] = '\0';
+  std::stringstream configString;
   // DACs
   ReadRegister(0x601, value);
   sprintf(config, "VRESETP %i\n", value);
+  configString << config;
   ReadRegister(0x602, value);
-  sprintf(config, "%sVRESETD %i\n", config, value);
+  sprintf(config, "VRESETD %i\n", value);
+  configString << config;
   ReadRegister(0x603, value);
-  sprintf(config, "%sVCASP   %i\n", config, value);
+  sprintf(config, "VCASP   %i\n", value);
+  configString << config;
   ReadRegister(0x604, value);
-  sprintf(config, "%sVCASN   %i\n", config, value);
+  sprintf(config, "VCASN   %i\n", value);
+  configString << config;
   ReadRegister(0x605, value);
-  sprintf(config, "%sVPULSEH %i\n", config, value);
+  sprintf(config, "VPULSEH %i\n", value);
+  configString << config;
   ReadRegister(0x606, value);
-  sprintf(config, "%sVPULSEL %i\n", config, value);
+  sprintf(config, "VPULSEL %i\n", value);
+  configString << config;
   ReadRegister(0x607, value);
-  sprintf(config, "%sVCASN2  %i\n", config, value);
+  sprintf(config, "VCASN2  %i\n", value);
+  configString << config;
   ReadRegister(0x608, value);
-  sprintf(config, "%sVCLIP   %i\n", config, value);
+  sprintf(config, "VCLIP   %i\n", value);
+  configString << config;
   ReadRegister(0x609, value);
-  sprintf(config, "%sVTEMP   %i\n", config, value);
+  sprintf(config, "VTEMP   %i\n", value);
+  configString << config;
   ReadRegister(0x60a, value);
-  sprintf(config, "%sIAUX2   %i\n", config, value);
+  sprintf(config, "IAUX2   %i\n", value);
+  configString << config;
   ReadRegister(0x60b, value);
-  sprintf(config, "%sIRESET  %i\n", config, value);
+  sprintf(config, "IRESET  %i\n", value);
+  configString << config;
   ReadRegister(0x60c, value);
-  sprintf(config, "%sIDB     %i\n", config, value);
+  sprintf(config, "IDB     %i\n", value);
+  configString << config;
   ReadRegister(0x60d, value);
-  sprintf(config, "%sIBIAS   %i\n", config, value);
+  sprintf(config, "IBIAS   %i\n", value);
+  configString << config;
   ReadRegister(0x60e, value);
-  sprintf(config, "%sITHR    %i\n", config, value);
+  sprintf(config, "ITHR    %i\n", value);
+  configString << config;
 
-  sprintf(config, "%s\n", config);
+  sprintf(config, "\n");
+  configString << config;
   // Mode control register
   ReadRegister(0x1, value);
-  sprintf(config, "%sMODECONTROL  %i\n", config, value);
+  sprintf(config, "MODECONTROL  %i\n", value);
+  configString << config;
 
   // FROMU config reg 1: [5]: test pulse mode; [6]: enable test strobe, etc.
   ReadRegister(0x4, value);
-  sprintf(config, "%sFROMU_CONFIG1  %i\n", config, value);
+  sprintf(config, "FROMU_CONFIG1  %i\n", value);
+  configString << config;
 
   // FROMU config reg 2: strobe duration
   ReadRegister(0x5, value);
-  sprintf(config, "%sFROMU_CONFIG2  %i\n", config, value);
+  sprintf(config, "FROMU_CONFIG2  %i\n", value);
+  configString << config;
 
   // FROMU pulsing reg 1: delay between pulse and strobe if the feature of automatic strobing is
   // enabled
   ReadRegister(0x7, value);
-  sprintf(config, "%sFROMU_PULSING1  %i\n", config, value);
+  sprintf(config, "FROMU_PULSING1  %i\n", value);
+  configString << config;
 
   // FROMU pulsing reg 2: pulse duration
   ReadRegister(0x8, value);
-  sprintf(config, "%sFROMU_PULSING2  %i\n", config, value);
+  sprintf(config, "FROMU_PULSING2  %i\n", value);
+  configString << config;
 
   // CMU DMU config reg
   ReadRegister(0x10, value);
-  sprintf(config, "%sCMUDMU_CONFIG  %i\n", config, value);
+  sprintf(config, "CMUDMU_CONFIG  %i\n", value);
+  configString << config;
+
+  sprintf(config, "%s", configString.str().c_str());
 }
 
 std::string TAlpide::DumpRegisters()

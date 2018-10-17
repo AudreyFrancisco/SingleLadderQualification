@@ -1,6 +1,13 @@
 #include "TPowerAnalysis.h"
 #include "DBHelpers.h"
 #include "TPowerTest.h"
+#ifdef HAS_ROOT
+#include "TCanvas.h"
+#include "TError.h"
+#include "TFile.h"
+#include "TH1F.h"
+#include "TString.h"
+#endif
 
 #include <string>
 
@@ -36,9 +43,69 @@ string TPowerAnalysis::GetPreviousTestType()
     return string("IB HIC Qualification Test");
   case IBStaveEndurance:
     return string("IB Stave Qualification Test");
+  case OBStaveOL:
+    return string("OL HS Qualification Test");
+  case OBStaveML:
+    return string("ML HS Qualification Test");
+  case StaveReceptionOL:
+    return string("OL Stave Qualification Test");
+  case StaveReceptionML:
+    return string("ML Stave Qualification Test");
   default:
     return string("");
   }
+}
+
+void TPowerAnalysis::CreateIVHisto(TPowerResultHic *hicResult)
+{
+#ifdef HAS_ROOT
+  gErrorIgnoreLevel = kWarning; // remove TCanvas::Print info messages
+  const std::string basename =
+      TString::Format("IVcurveBB_%s_%s", hicResult->GetName().c_str(), m_config->GetfNameSuffix())
+          .Data();
+
+  std::string rootfilename, pdffilename;
+  if (m_config->GetUseDataPath()) {
+    rootfilename = hicResult->GetOutputPath() + "/" + basename + ".root";
+    pdffilename  = hicResult->GetOutputPath() + "/" + basename + ".pdf";
+  }
+  else {
+    rootfilename = basename + ".root";
+    pdffilename  = basename + ".pdf";
+  }
+
+  TCanvas c;
+  c.cd();
+  c.Print((pdffilename + "[").c_str()); // Just open the file
+
+  TFile *rootfile = TFile::Open(rootfilename.c_str(), "RECREATE");
+
+  const std::string hname = TString::Format("iv_%s", hicResult->GetName().c_str()).Data();
+  const std::string htitle =
+      TString::Format("Back Bias IV for %s", hicResult->GetName().c_str()).Data();
+
+  const int iMax = m_config->GetParamValue("IVPOINTS");
+
+  TH1F *ivbb = new TH1F(hname.c_str(), htitle.c_str(), iMax, 0., iMax * 100.);
+
+  for (int i = 0; i < iMax; i++)
+    ivbb->Fill(i * 100 + 50, hicResult->ibias[i]); // Fill at bin mid point
+
+  ivbb->SetStats(kFALSE);
+  ivbb->GetXaxis()->SetTitle("V (mV)");
+  ivbb->GetYaxis()->SetTitle("I (mA)");
+  ivbb->Draw();
+  c.Update();
+  c.Print(pdffilename.c_str());
+
+  c.Print((pdffilename + "]").c_str()); // Just close the file
+
+  ivbb->Write();
+  rootfile->Close();
+
+  hicResult->SetHasPDF(true);
+  hicResult->SetPDFPath(pdffilename);
+#endif // HAS_ROOT
 }
 
 void TPowerAnalysis::Finalize()
@@ -56,6 +123,7 @@ void TPowerAnalysis::Finalize()
 
     // Copy currents from currents to result, apply cuts, write to file
     hicResult->trip           = hicCurrents.trip;
+    hicResult->tripBB         = hicCurrents.tripBB;
     hicResult->iddaSwitchon   = hicCurrents.iddaSwitchon;
     hicResult->idddSwitchon   = hicCurrents.idddSwitchon;
     hicResult->iddaClocked    = hicCurrents.iddaClocked;
@@ -64,72 +132,79 @@ void TPowerAnalysis::Finalize()
     hicResult->idddConfigured = hicCurrents.idddConfigured;
     hicResult->ibias0         = hicCurrents.ibias0;
     hicResult->ibias3         = hicCurrents.ibias3;
+    hicResult->maxBias        = hicCurrents.maxBias;
 
     for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
       hicResult->ibias[i] = hicCurrents.ibias[i];
     }
-    hicResult->m_class = GetClassification(hicCurrents);
+    hicResult->m_class = GetClassification(hicCurrents, hicResult);
     hicResult->SetValidity(true);
+
+    CreateIVHisto(hicResult);
   }
   WriteResult();
   m_finished = true;
 }
 
-THicClassification TPowerAnalysis::GetClassification(THicCurrents currents)
+THicClassification TPowerAnalysis::GetClassification(THicCurrents currents, TPowerResultHic *result)
 {
+  THicClassification returnValue;
   if (currents.trip) {
     std::cout << "Power analysis: HIC classified red due to trip" << std::endl;
     return CLASS_RED;
   }
   if (currents.hicType == HIC_IB)
-    return GetClassificationIB(currents);
+    returnValue = GetClassificationIB(currents, result);
   else
-    return GetClassificationOB(currents);
-}
+    returnValue = GetClassificationOB(currents, result);
 
-THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents currents)
-{
-  THicClassification returnValue = CLASS_GREEN;
-
-  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_IB", true);
-  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_IB", true);
-
-  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MINIDDD_CLOCKED_IB", true);
-  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_IB", true);
-  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_IB");
-  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_IB");
-
-  // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_IB");
-  // add 1 for the case where I(3V) = 0
-  float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
-  // add 0.9 to round up for everything >= .1
-  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_IB");
+  // modify class in case of back-bias trip;
+  if (currents.tripBB) {
+    if (returnValue == CLASS_GOLD) returnValue = CLASS_GOLD_NOBB;
+    if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
+    if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
+  }
   std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
+
   return returnValue;
 }
 
-THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents currents)
+THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents     currents,
+                                                       TPowerResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
 
-  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", true);
-  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", true);
+  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_IB", result, true);
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_IB", result, true);
 
-  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MINIDDD_CLOCKED_OB", true);
-  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_OB", true);
-  DoCut(returnValue, CLASS_ORANGE, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_OB");
-  DoCut(returnValue, CLASS_ORANGE, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_OB");
+  DoCut(returnValue, CLASS_SILVER, currents.idddClocked * 1000, "MINIDDD_CLOCKED_IB", result, true);
+  DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_IB", result, true);
+  DoCut(returnValue, CLASS_SILVER, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_IB", result);
+  DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_IB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_OB");
-  // add 1 for the case where I(3V) = 0
-  float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
-  // add 0.9 to round up for everything >= .1
-  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_OB");
-  std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
+  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
+
+  return returnValue;
+}
+
+THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents     currents,
+                                                       TPowerResultHic *result)
+{
+  THicClassification returnValue = CLASS_GOLD;
+
+  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", result, true);
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", result, true);
+
+  DoCut(returnValue, CLASS_SILVER, currents.idddClocked * 1000, "MINIDDD_CLOCKED_OB", result, true);
+  DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MINIDDA_CLOCKED_OB", result, true);
+  DoCut(returnValue, CLASS_SILVER, currents.idddClocked * 1000, "MAXIDDD_CLOCKED_OB", result);
+  DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_OB", result);
+
+  // check for absolute value at 3V and for margin from breakthrough
+  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_OB", result);
+
   return returnValue;
 }
 
@@ -190,10 +265,13 @@ void TPowerResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   string      fileName, ivName;
   std::size_t slash;
 
-  DbAddParameter(db, activity, string("IDDD"), idddConfigured);
-  DbAddParameter(db, activity, string("IDDA"), iddaConfigured);
-  DbAddParameter(db, activity, string("Back bias current 0V"), ibias0);
-  DbAddParameter(db, activity, string("Back bias current 3V"), ibias3);
+  DbAddParameter(db, activity, string("IDDD"), idddConfigured, GetParameterFile());
+  DbAddParameter(db, activity, string("IDDA"), iddaConfigured, GetParameterFile());
+  DbAddParameter(db, activity, string("IDDD clocked"), idddClocked, GetParameterFile());
+  DbAddParameter(db, activity, string("IDDA clocked"), iddaClocked, GetParameterFile());
+  DbAddParameter(db, activity, string("Back bias current 0V"), ibias0, GetParameterFile());
+  DbAddParameter(db, activity, string("Back bias current 3V"), ibias3, GetParameterFile());
+  DbAddParameter(db, activity, string("Maximum bias voltage"), maxBias, GetParameterFile());
 
   slash    = string(m_resultFile).find_last_of("/");
   fileName = string(m_resultFile).substr(slash + 1); // strip path
@@ -211,16 +289,20 @@ void TPowerResultHic::WriteToFile(FILE *fp)
 
   fprintf(fp, "HIC Classification: %s\n\n", WriteHicClassification());
 
-  fprintf(fp, "trip:             %d\n\n", trip ? 1 : 0);
-  fprintf(fp, "IDDD at switchon: %.3f\n", idddSwitchon);
-  fprintf(fp, "IDDA at switchon: %.3f\n", iddaSwitchon);
-  fprintf(fp, "IDDD with clock:  %.3f\n", idddClocked);
-  fprintf(fp, "IDDA with clock:  %.3f\n", iddaClocked);
-  fprintf(fp, "IDDD configured:  %.3f\n", idddConfigured);
-  fprintf(fp, "IDDA configured:  %.3f\n\n", iddaConfigured);
+  fprintf(fp, "Supply trip:       %d\n", trip ? 1 : 0);
+  fprintf(fp, "Back bias trip:    %d\n\n", tripBB ? 1 : 0);
+  if (tripBB) {
+    fprintf(fp, "   max. back bias: %.1f\n\n", maxBias);
+  }
+  fprintf(fp, "IDDD at switchon:  %.3f\n", idddSwitchon);
+  fprintf(fp, "IDDA at switchon:  %.3f\n", iddaSwitchon);
+  fprintf(fp, "IDDD with clock:   %.3f\n", idddClocked);
+  fprintf(fp, "IDDA with clock:   %.3f\n", iddaClocked);
+  fprintf(fp, "IDDD configured:   %.3f\n", idddConfigured);
+  fprintf(fp, "IDDA configured:   %.3f\n\n", iddaConfigured);
 
-  fprintf(fp, "IBias at 0V:      %.3f\n", ibias0);
-  fprintf(fp, "IBias at 3V:      %.3f\n", ibias3);
+  fprintf(fp, "IBias at 0V:       %.3f\n", ibias0);
+  fprintf(fp, "IBias at 3V:       %.3f\n", ibias3);
 
   fprintf(fp, "\nI-V-curve file:   %s\n", m_ivFile);
 }

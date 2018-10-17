@@ -25,24 +25,24 @@
 #include "serial/serial.h"
 
 using serial::PortInfo;
-using std::istringstream;
-using std::ifstream;
-using std::getline;
-using std::vector;
-using std::string;
 using std::cout;
 using std::endl;
+using std::getline;
+using std::ifstream;
+using std::istringstream;
+using std::string;
+using std::vector;
 
 static vector<string> glob(const vector<string> &patterns);
-static string basename(const string &path);
-static string dirname(const string &path);
-static bool path_exists(const string &path);
-static string realpath(const string &path);
-static string usb_sysfs_friendly_name(const string &sys_usb_path);
+static string         basename(const string &path);
+static string         dirname(const string &path);
+static bool           path_exists(const string &path);
+static string         realpath(const string &path);
+static string         usb_sysfs_friendly_name(const string &sys_usb_path);
 static vector<string> get_sysfs_info(const string &device_path);
-static string read_line(const string &file);
-static string usb_sysfs_hw_string(const string &sysfs_path);
-static string format(const char *format, ...);
+static string         read_line(const string &file);
+static string         usb_sysfs_hw_string(const string &sysfs_path);
+static string         format(const char *format, ...);
 
 vector<string> glob(const vector<string> &patterns)
 {

@@ -9,6 +9,10 @@ TLocalBusTest::TLocalBusTest(TScanConfig *config, std::vector<TAlpide *> chips,
                              std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
+  CreateScanParameters();
+
+  m_parameters->backBias = 0;
+
   strcpy(m_name, "Local Bus Test");
   FindDaisyChains(chips);
   m_start[2] = 0;
@@ -21,8 +25,6 @@ TLocalBusTest::TLocalBusTest(TScanConfig *config, std::vector<TAlpide *> chips,
 
   m_start[0] = 0;
   m_step[0]  = 1;
-
-  CreateScanHisto();
 }
 
 THisto TLocalBusTest::CreateHisto()
@@ -39,6 +41,8 @@ THisto TLocalBusTest::CreateHisto()
 
 void TLocalBusTest::Init()
 {
+  CreateScanHisto();
+
   TScan::Init();
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
@@ -123,7 +127,8 @@ void TLocalBusTest::PrepareStep(int loopIndex)
     // give token to write chip, take away in loop end
 
     m_writeChip->ModifyRegisterBits(Alpide::REG_CMUDMU_CONFIG, 4, 1, 1);
-    m_boards[0]->SendOpCode(Alpide::OPCODE_RORST);
+    for (const auto &rBoard : m_boards)
+      rBoard->SendOpCode(Alpide::OPCODE_RORST);
     break;
   case 2: // outermost loop: change daisy chain
     m_stop[0] = m_daisyChains.at(m_value[2]).size();

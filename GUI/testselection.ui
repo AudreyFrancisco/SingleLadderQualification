@@ -308,6 +308,42 @@
     </rect>
    </property>
   </widget>
+  <widget class="QLabel" name="hsname">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>290</y>
+     <width>91</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>HS name</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="stavename">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>430</y>
+     <width>91</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Stave name</string>
+   </property>
+  </widget>
+  <widget class="QTextEdit" name="stavenamefield">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>450</y>
+     <width>131</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

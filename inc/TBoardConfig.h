@@ -8,7 +8,7 @@
 namespace BoardConfig {
   const int PULSEDELAY  = 10000;
   const int STROBEDELAY = 20;
-}
+} // namespace BoardConfig
 
 typedef enum { trigInt, trigExt } TTriggerSource;
 typedef enum { boardDAQ, boardMOSAIC, boardRU } TBoardType;
@@ -17,20 +17,20 @@ class TBoardConfig {
 private:
 protected:
   std::map<std::string, int *> fSettings;
-  bool           fTriggerEnable;
-  bool           fPulseEnable;
-  int            fNTriggers;
-  int            fTriggerDelay;
-  int            fPulseDelay;
-  TTriggerSource fTriggerSource;
-  TBoardType     fBoardType;
+  bool                         fTriggerEnable;
+  bool                         fPulseEnable;
+  int                          fNTriggers;
+  int                          fTriggerDelay;
+  int                          fPulseDelay;
+  TTriggerSource               fTriggerSource;
+  TBoardType                   fBoardType;
 
 public:
   TBoardConfig(const char *fName = 0, int boardIndex = 0);
   virtual void InitParamMap();
-  bool SetParamValue(std::string Name, std::string Value);
-  int GetParamValue(std::string Name);
-  bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
+  bool         SetParamValue(std::string Name, std::string Value);
+  int          GetParamValue(std::string Name);
+  bool         IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
 
   virtual TBoardType GetBoardType() { return fBoardType; };
 

@@ -1,0 +1,47 @@
+# ----- Configuration File ---------
+
+# ----- Name of the Log file -------
+LOGFILENAME="/tmp/DBConfig.log"
+# ----- Level of Log [10=DEBUG, 20=INFO, 30=WARNING, 40=ERROR, 50=CRITICAL]
+LOGLEVEL=10
+
+# ----- ITS Data Base access Parameters  ---------
+
+# -- The Name of the project 
+DBNAME=ITS_TEST
+
+# -- The Location that will be used  for the activity : take this info from the Resurces DB Web Page
+LOCATION=Universita e INFN, Trieste, Trieste
+
+# -- The Name of the project Member that will be used for the activity
+DBUSER="MANZARI VITO"
+
+# ----- Setup for the Attachemnet File Transfer
+# -- Limit dimension of file (bytes) to trigger the 'EOS Tranfer' or the 'BLOB'  mechanism
+#          if File Dimension < DBATTACHLIMIT  Then 'BLOB' mechanism Else 'EOS Transfer'
+DBATTACHLIMIT=5000
+
+# -- The Path of the local repository that will be syncronized with the EOS remote repo.
+#  the www is mandatory.
+#
+DBATTACHBASEPATH="/tmp/www/fpc/"
+
+# -- The command used to copy the file to attach into the local repository
+#     %1 := the path of the source file
+#     %2 := the name of source file
+#     %3 := the path of local repository 
+#
+DBATTACHCOMMAND="cp '%1/%2' '%3'"
+
+# -- The command used to create the folder into the local repository
+#     %1 := the path of local repository
+#
+DBANEWDIRCOMMAND="mkdir -p '%1'"
+
+# -- The base part of the URI (to fill into the DB) that locates the attached file on EOS 
+#      This is the URI base path that points to the eos folder : /eos/project/a/alice-its/www/its-fpc
+#      Please contact the DB expert in order to setup this URI alias.
+#
+DBATTACHURIBASEPATH="https://cern.ch/its-fpc"
+
+# ----  EOF -------

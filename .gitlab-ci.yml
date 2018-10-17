@@ -1,60 +1,35 @@
+slc6:
+    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-slc6-dev
+    script:
+      - mkdir build
+      - (cd build && cmake3 ../ && make -j $(nproc) all)
+
 cc7:
     image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-cc7-dev
     script:
-      - make clean
-      - make
-      - make lib
-      - make lib_analysis
-      - cd GUI
-      - qmake-qt5 -makefile
-      - make
-      - cd ../MosaicSrc/powerboard
-      - make clean
-      - make
-      - cd GUI
-      - qmake-qt5 -makefile
-      - make clean
-      - make
-      - cd ../../../
-      - make format-check
+      - mkdir build
+      - (cd build && cmake3 ../ && make -j $(nproc) all format-check)
 
-ubuntu1604:
-    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu16.04-dev
+ubuntu1804:
+    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu18.04-dev
     script:
-      - make clean
-      - make
-      - make lib
-      - make lib_analysis
-      - cd GUI
-      - qmake -makefile
-      - make
-      - cd ../MosaicSrc/powerboard
-      - make clean
-      - make
-      - cd GUI
-      - qmake -makefile
-      - make clean
-      - make
-      - cd ../../../
-      - make format-check
+      - mkdir build
+      - (cd build && cmake ../ && make -j $(nproc) all format-check)
 
-ubuntu1604clang:
-    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu16.04-clang-dev
+ubuntu1804clang:
+    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu18.04-clang-dev
     script:
-      - find -name Makefile -exec sed -i 's/g++/clang++/g' {} \;
-      - make clean
-      - make
-      - make lib
-      - make lib_analysis
-      - cd GUI
-      - qmake -makefile
-      - make
-      - cd ../MosaicSrc/powerboard
-      - make clean
-      - make
-      - cd GUI
-      - qmake -makefile
-      - make clean
-      - make
-      - cd ../../../
-      - make format-check
+      - mkdir build
+      - (cd build && CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake ../ && make -j $(nproc) all format-check)
+
+cc7_noroot:
+    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-cc7-dev
+    script:
+      - mkdir build
+      - (cd build && cmake3 -DDISABLE_ROOT=ON ../ && make -j $(nproc) all format-check)
+
+ubuntu1804clang_noroot:
+    image: gitlab-registry.cern.ch/alice-its-alpide-software/new-alpide-software:alice-its-ubuntu18.04-clang-dev
+    script:
+      - mkdir build
+      - (cd build && CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake -DDISABLE_ROOT=ON ../ && make -j $(nproc) all format-check)

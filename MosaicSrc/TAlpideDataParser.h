@@ -39,7 +39,7 @@ class TAlpideDataParser : public MDataReceiver {
 public:
   TAlpideDataParser();
   void flush(){};
-  int ReadEventData(int &nBytes, unsigned char *buffer);
+  int  ReadEventData(int &nBytes, unsigned char *buffer);
   bool hasData() { return (numClosedData != 0); }
 
 protected:
@@ -66,7 +66,11 @@ private:
   long checkEvent(unsigned char *dBuffer, unsigned char *evFlagsPtr);
 
 public:
-  enum eventFlag_e { flagHeaderError = (1 << 0), flagDecoder10b8bError = (1 << 1) };
+  enum eventFlag_e {
+    flagHeaderError       = (1 << 0),
+    flagDecoder10b8bError = (1 << 1),
+    flagOverSizeError     = (1 << 2)
+  };
 };
 
 #endif // TALPIDEDATAPARSER_H

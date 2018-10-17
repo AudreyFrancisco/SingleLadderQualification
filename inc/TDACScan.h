@@ -8,11 +8,12 @@
 
 class TDACScan : public TScan {
 private:
-  void ConfigureChip(TAlpide *chip);
+  void     ConfigureChip(TAlpide *chip);
   uint16_t m_restoreValue;
 
 protected:
   THisto CreateHisto();
+  void   CreateScanParameters() { m_parameters = new TScanParameters; };
 
 public:
   TDACScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,

@@ -32,7 +32,7 @@ private:
 
 public:
   TDctrlResultChip() : TScanResultChip(){};
-  void WriteToFile(FILE *fp);
+  void  WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
 };
 
@@ -41,15 +41,20 @@ class TDctrlResultHic : public TScanResultHic {
 
 private:
   float worst_slope;
+  float worst_slopeRatio;
   float worst_maxAmp;
   float worst_chisq;
+  float worst_chisqRatio;
   float worst_corr;
   float worst_rise;
   float worst_fall;
   char  m_scanFile[200];
 
 public:
-  TDctrlResultHic() : TScanResultHic(){};
+  TDctrlResultHic()
+      : TScanResultHic(), worst_slope(1), worst_maxAmp(10), worst_chisq(0), worst_corr(1),
+        worst_rise(0), worst_fall(0){};
+  void Compare(TScanResultHic *aPrediction);
   void SetScanFile(const char *fName) { strncpy(m_scanFile, fName, sizeof(m_scanFile)); };
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
@@ -67,10 +72,11 @@ class TDctrlAnalysis : public TScanAnalysis {
 private:
   void               WriteResult();
   void               FillVariableList();
-  THicClassification GetClassification(TDctrlResultHic *result);
-  bool ChipIsSlave(common::TChipIndex idx);
-  float Max(float a, float b, float c);
-  float Min(float a, float b, float c);
+  THicClassification GetClassificationIB(TDctrlResultHic *result);
+  THicClassification GetClassificationOB(TDctrlResultHic *result);
+  bool               ChipIsSlave(common::TChipIndex idx);
+  float              Max(float a, float b, float c);
+  float              Min(float a, float b, float c);
   void Fit(std::vector<float> x, std::vector<float> y, float &m, float &b, float &corr,
            float &chisq);
 
@@ -85,11 +91,11 @@ protected:
     TDctrlResultHic *Result = new TDctrlResultHic();
     return Result;
   };
-  void CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo);
+  void   CreateResult(){};
+  void   AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
   void   InitCounters();
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  void   CalculatePrediction(std::string hicName);
 
 public:
   TDctrlAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

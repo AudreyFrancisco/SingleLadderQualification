@@ -7,11 +7,13 @@ using namespace ChipConfig;
 
 TChipConfig::TChipConfig(TConfig *config, int chipId, const char *fName)
 {
-  fConfig           = config;
-  fChipId           = chipId;
-  fEnabled          = true;
-  fReceiver         = -1;
-  fControlInterface = -1;
+  fConfig            = config;
+  fChipId            = chipId;
+  fEnabled           = true;
+  fEnabledWithBB     = true;
+  fEnduranceDisabled = false;
+  fReceiver          = -1;
+  fControlInterface  = -1;
 
   ClearNoisyPixels();
   // fill default values from header file
@@ -66,6 +68,7 @@ void TChipConfig::InitParamMap()
   fSettings["RECEIVER"]         = &fReceiver;
   fSettings["CONTROLINTERFACE"] = &fControlInterface;
   fSettings["ENABLED"]          = &fEnabled;
+  fSettings["ENABLEDBB"]        = &fEnabledWithBB;
   fSettings["ITHR"]             = &fITHR;
   fSettings["IDB"]              = &fIDB;
   fSettings["VCASN"]            = &fVCASN;
@@ -119,6 +122,11 @@ int TChipConfig::GetParamValue(std::string Name)
     return *(fSettings.find(Name)->second);
   }
   return -1;
+}
+
+bool TChipConfig::IsEnabled() const
+{
+  return fConfig->GetScanConfig()->IsBackBiasActive() ? IsEnabledWithBB() : IsEnabledNoBB();
 }
 
 bool TChipConfig::HasEnabledSlave()

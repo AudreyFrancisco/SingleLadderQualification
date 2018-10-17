@@ -29,6 +29,7 @@ typedef struct options_s {
   bool  restoreAllVout;
   bool  on;
   bool  off;
+  int   switchCh;
 } options_t;
 options_t OPTIONS;
 
@@ -59,6 +60,8 @@ void print_help()
          "\t -restoreall\n"
          "\t -on\n"
          "\t -off\n"
+         "\t -onch <channel>\n"
+         "\t -offch <channel>\n"
          "\n");
 }
 
@@ -83,6 +86,7 @@ int readopt(int argc, char *argv[])
   OPTIONS.restoreAllVout = false;
   OPTIONS.on             = false;
   OPTIONS.off            = false;
+  OPTIONS.switchCh       = -1;
 
   while (pc < argc) {
     if (strcmp(argv[pc], "-state") == 0) {
@@ -122,6 +126,18 @@ int readopt(int argc, char *argv[])
     else if (strcmp(argv[pc], "-off") == 0) {
       OPTIONS.off = true;
     }
+    else if (strcmp(argv[pc], "-onch") == 0) {
+      OPTIONS.on = true;
+      if (pc >= (argc - 1)) return -1;
+      OPTIONS.switchCh = strtol(argv[++pc], NULL, 10);
+      if (OPTIONS.switchCh < 0) return -1;
+    }
+    else if (strcmp(argv[pc], "-offch") == 0) {
+      OPTIONS.off = true;
+      if (pc >= (argc - 1)) return -1;
+      OPTIONS.switchCh = strtol(argv[++pc], NULL, 10);
+      if (OPTIONS.switchCh < 0) return -1;
+    }
     else {
       break;
     }
@@ -129,7 +145,8 @@ int readopt(int argc, char *argv[])
   }
   if (pc >= argc || argv[pc][0] == '-') return -1;
 
-  strncpy(OPTIONS.board, argv[pc], BOARD_NAME_LEN);
+  strncpy(OPTIONS.board, argv[pc], BOARD_NAME_LEN - 1);
+
   return 0;
 }
 
@@ -180,12 +197,22 @@ int main(int argc, char **argv)
     if (OPTIONS.storeAllVout) pb->storeAllVout();
     if (OPTIONS.restoreAllVout) pb->restoreAllVout();
     if (OPTIONS.on) {
-      pb->onAllVout();
-      pb->onAllVbias();
+      if (OPTIONS.switchCh == -1) {
+        pb->onAllVout();
+        pb->onAllVbias();
+      }
+      else {
+        pb->onVout(OPTIONS.switchCh);
+      }
     }
     if (OPTIONS.off) {
-      pb->offAllVout();
-      pb->offAllVbias();
+      if (OPTIONS.switchCh == -1) {
+        pb->offAllVout();
+        pb->offAllVbias();
+      }
+      else {
+        pb->offVout(OPTIONS.switchCh);
+      }
     }
     if (OPTIONS.readState) {
       pb->startADC();

@@ -1,6 +1,13 @@
 #include "TFastPowerAnalysis.h"
 #include "DBHelpers.h"
 #include "TPowerTest.h"
+#ifdef HAS_ROOT
+#include "TCanvas.h"
+#include "TError.h"
+#include "TFile.h"
+#include "TH1F.h"
+#include "TString.h"
+#endif
 
 #include <string>
 
@@ -25,6 +32,58 @@ string TFastPowerAnalysis::GetPreviousTestType()
   }
 }
 
+void TFastPowerAnalysis::CreateIVHisto(TFastPowerResultHic *hicResult)
+{
+#ifdef HAS_ROOT
+  gErrorIgnoreLevel = kWarning; // remove TCanvas::Print info messages
+  const std::string basename =
+      TString::Format("IVcurveBB_%s_%s", hicResult->GetName().c_str(), m_config->GetfNameSuffix())
+          .Data();
+
+  std::string rootfilename, pdffilename;
+  if (m_config->GetUseDataPath()) {
+    rootfilename = hicResult->GetOutputPath() + "/" + basename + ".root";
+    pdffilename  = hicResult->GetOutputPath() + "/" + basename + ".pdf";
+  }
+  else {
+    rootfilename = basename + ".root";
+    pdffilename  = basename + ".pdf";
+  }
+
+  TCanvas c;
+  c.cd();
+  c.Print((pdffilename + "[").c_str()); // Just open the file
+
+  TFile *rootfile = TFile::Open(rootfilename.c_str(), "RECREATE");
+
+  const std::string hname = TString::Format("iv_%s", hicResult->GetName().c_str()).Data();
+  const std::string htitle =
+      TString::Format("Back Bias IV for %s", hicResult->GetName().c_str()).Data();
+
+  const int iMax = m_config->GetParamValue("IVPOINTS");
+
+  TH1F *ivbb = new TH1F(hname.c_str(), htitle.c_str(), iMax, 0., iMax * 100.);
+
+  for (int i = 0; i < iMax; i++)
+    ivbb->Fill(i * 100 + 50, hicResult->ibias[i]); // Fill at bin mid point
+
+  ivbb->SetStats(kFALSE);
+  ivbb->GetXaxis()->SetTitle("V (mV)");
+  ivbb->GetYaxis()->SetTitle("I (mA)");
+  ivbb->Draw();
+  c.Update();
+  c.Print(pdffilename.c_str());
+
+  c.Print((pdffilename + "]").c_str()); // Just close the file
+
+  ivbb->Write();
+  rootfile->Close();
+
+  hicResult->SetHasPDF(true);
+  hicResult->SetPDFPath(pdffilename);
+#endif // HAS_ROOT
+}
+
 void TFastPowerAnalysis::Finalize()
 {
   if (fScanAbort || fScanAbortAll) return;
@@ -40,52 +99,61 @@ void TFastPowerAnalysis::Finalize()
 
     // Copy currents from currents to result, apply cuts, write to file
     hicResult->trip         = hicCurrents.trip;
+    hicResult->tripBB       = hicCurrents.tripBB;
     hicResult->iddaSwitchon = hicCurrents.iddaSwitchon;
     hicResult->idddSwitchon = hicCurrents.idddSwitchon;
     hicResult->ibias0       = hicCurrents.ibias0;
     hicResult->ibias3       = hicCurrents.ibias3;
+    hicResult->maxBias      = hicCurrents.maxBias;
 
     for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
       hicResult->ibias[i] = hicCurrents.ibias[i];
     }
-    hicResult->m_class = GetClassification(hicCurrents);
+    hicResult->m_class = GetClassification(hicCurrents, hicResult);
     hicResult->SetValidity(true);
+
+    CreateIVHisto(hicResult);
   }
   WriteResult();
   m_finished = true;
 }
 
-THicClassification TFastPowerAnalysis::GetClassification(THicCurrents currents)
+THicClassification TFastPowerAnalysis::GetClassification(THicCurrents         currents,
+                                                         TFastPowerResultHic *result)
 {
   if (currents.trip) {
     std::cout << "Fast power analysis: HIC classified red due to trip" << std::endl;
     return CLASS_RED;
   }
   if (currents.hicType == HIC_OB)
-    return GetClassificationOB(currents);
+    return GetClassificationOB(currents, result);
   else {
     std::cout << "Error: test not foreseen for IB HICs" << std::endl;
     return CLASS_UNTESTED;
   }
 }
 
-THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents currents)
+THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents         currents,
+                                                           TFastPowerResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
+  THicClassification returnValue = CLASS_GOLD;
 
-  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", true);
-  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", true);
+  if (currents.trip) returnValue = CLASS_RED;
 
-  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MAXIDDA_OB");
-  DoCut(returnValue, CLASS_ORANGE, currents.idddSwitchon * 1000, "MAXIDDD_GREEN_OB");
-  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MAXIDDD_ORANGE_OB");
+  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", result, true);
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", result, true);
+
+  DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MAXIDDA_OB", result);
+  DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MAXIDDD_OB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_ORANGE, currents.ibias[30], "MAXBIAS_3V_IB");
-  // add 1 for the case where I(3V) = 0
-  float ratio = currents.ibias[40] / (currents.ibias[30] + 1.);
-  // add 0.9 to round up for everything >= .1
-  DoCut(returnValue, CLASS_ORANGE, (int)(ratio + 0.9), "MAXFACTOR_4V_IB");
+  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
+
+  if (currents.tripBB) {
+    if (returnValue == CLASS_GOLD) returnValue = CLASS_GOLD_NOBB;
+    if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
+    if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
+  }
 
   std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
             << std::endl;
@@ -151,11 +219,11 @@ void TFastPowerResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity
 {
   string      fileName, ivName;
   std::size_t slash;
-
-  DbAddParameter(db, activity, string("IDDD"), idddSwitchon);
-  DbAddParameter(db, activity, string("IDDA"), iddaSwitchon);
-  DbAddParameter(db, activity, string("Back bias current 0V"), ibias0);
-  DbAddParameter(db, activity, string("Back bias current 3V"), ibias3);
+  DbAddParameter(db, activity, string("IDDD"), idddSwitchon, GetParameterFile());
+  DbAddParameter(db, activity, string("IDDA"), iddaSwitchon, GetParameterFile());
+  DbAddParameter(db, activity, string("Back bias current 0V"), ibias0, GetParameterFile());
+  DbAddParameter(db, activity, string("Back bias current 3V"), ibias3, GetParameterFile());
+  DbAddParameter(db, activity, string("Maximum bias voltage"), maxBias, GetParameterFile());
 
   slash    = string(m_resultFile).find_last_of("/");
   fileName = string(m_resultFile).substr(slash + 1); // strip path
@@ -174,6 +242,11 @@ void TFastPowerResultHic::WriteToFile(FILE *fp)
   fprintf(fp, "HIC Classification: %s\n\n", WriteHicClassification());
 
   fprintf(fp, "trip:             %d\n\n", trip ? 1 : 0);
+  fprintf(fp, "Back bias trip:    %d\n\n", tripBB ? 1 : 0);
+  if (tripBB) {
+    fprintf(fp, "   max. back bias: %.1f\n\n", maxBias);
+  }
+
   fprintf(fp, "IDDD at switchon: %.3f\n", idddSwitchon);
   fprintf(fp, "IDDA at switchon: %.3f\n", iddaSwitchon);
 

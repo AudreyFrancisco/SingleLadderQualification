@@ -73,7 +73,7 @@ private:
 
   // Methods
 public:
-  CernSsoCookieJar(string aCookiePackFileName);
+  CernSsoCookieJar();
   ~CernSsoCookieJar();
 
   bool isJarValid();
@@ -86,11 +86,12 @@ public:
   bool fillTheJar(string aSslUrl);
 #endif
 
-  bool fillTheJar();
+  bool   fillTheJar();
+  string getCookiePackFileName() { return theCookiePackFile; }
 
 private:
   bool testTheCERNSSO();
-  int parseTheJar(string aCookieJarFile);
+  int  parseTheJar(string aCookieJarFile);
 };
 
 #endif // CERNSSOCOOKIEJAR_H

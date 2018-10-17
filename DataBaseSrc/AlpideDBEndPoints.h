@@ -60,7 +60,7 @@ class AlpideDB;
 // The base class
 class AlpideTable {
 public:
-  enum ErrorCode { NoError = 0, SyncQuery = 20, BadXML = 21 };
+  enum ErrorCode { NoError = 0, SyncQuery = 20, BadXML = 21, BadCreation = 23 };
 
   struct response {
     int    Session;
@@ -69,24 +69,31 @@ public:
     int    ID;
   };
 
+
 protected:
-  AlpideDB *theParentDB;
-  response  theResponse;
-  string    theGeneralBuffer;
-  bool      isScienNotation;
+  AlpideDB *       theParentDB;
+  response         theResponse;
+  string           theGeneralBuffer;
+  bool             isScienNotation;
+  vector<response> theResponses;
+  bool             isCreated;
 
 public:
   explicit AlpideTable(AlpideDB *DBhandle);
   virtual ~AlpideTable();
-  response *DecodeResponse(char *returnedString, int Session = 0);
-  void SetResponse(AlpideTable::ErrorCode, int ID = 0, int Session = 0);
+  response    GetResponse() { return theResponse; }
+  response *  DecodeResponse(char *returnedString, const char *query, int Session = 0);
+  void        SetResponse(AlpideTable::ErrorCode, int ID = 0, int Session = 0);
   const char *DumpResponse();
-
-  bool isParameterScientificNotation() { return (isScienNotation); }
-  void setParameterScientificNotation(bool isSet = true) { isScienNotation = isSet; }
+  void        DumpXMLError(const char *aDescription, const char *aQuery, const char *aResponse);
+  bool        isParameterScientificNotation() { return (isScienNotation); }
+  void        setParameterScientificNotation(bool isSet = true) { isScienNotation = isSet; }
+  vector<response> GetResponses() { return theResponses; }
+  bool             GetStatus() { return isCreated; }
 
 protected:
-  bool _getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod);
+  bool _getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod,
+                                  const char *aQuery);
 };
 
 class ProjectDB : public AlpideTable {
@@ -108,7 +115,7 @@ public:
 
 public:
   AlpideTable::response *GetList(vector<ProjectDB::project> *Result);
-  string Print(ProjectDB::project *pr)
+  string                 Print(ProjectDB::project *pr)
   {
     return ("Project : ID=" + std::to_string(pr->ID) + " Name=" + pr->Name);
   };
@@ -133,7 +140,7 @@ public:
   ~MemberDB();
 
   AlpideTable::response *GetList(int projectID, vector<member> *Result);
-  string Print(member *me)
+  string                 Print(member *me)
   {
     return ("Member : ID=" + std::to_string(me->ID) +
             " Personal ID=" + std::to_string(me->PersonalID) + " Name=" + me->FullName);
@@ -289,6 +296,7 @@ public:
     compActResult Result;
     compActStatus Status;
     int           Type;
+    string        Typename;
   };
 #define zCOMPACTIVITY(a)                                                                           \
   a.ID   = 0;                                                                                      \
@@ -316,16 +324,16 @@ public:
 
   AlpideTable::response *GetListByType(int ProjectID, int ComponentTypeID,
                                        vector<componentShort> *Result);
-  string Print(componentType *co);
+  string                 Print(componentType *co);
 
 private:
-  void extractTheComponentType(xmlNode *n1, componentType *pro);
+  void                   extractTheComponentType(xmlNode *n1, componentType *pro);
   AlpideTable::response *readComponent(string ID, string ComponentID, componentLong *Result);
   AlpideTable::response *readComponents(std::string ProjectId, std::string ComponentTypeID,
                                         vector<componentShort> *compoList);
-  void extractTheComponent(xmlNode *ns, componentLong *pro);
+  void                   extractTheComponent(xmlNode *ns, componentLong *pro);
   AlpideTable::response *readComponentActivities(int ID, vector<compActivity> *Result);
-  void extractTheActivityList(xmlNode *ns, vector<compActivity> *actList);
+  void                   extractTheActivityList(xmlNode *ns, vector<compActivity> *actList);
 };
 
 // --------------------
@@ -644,21 +652,21 @@ public:
 
   AlpideTable::response *AssignUris(int aActivityID, int aUserId, vector<actUri> *aUris);
 
-  vector<parameterType> *GetParameterTypeList(int aActivityTypeID);
-  vector<activityType> *GetActivityTypeList(int aProjectID);
-  vector<locationType> *GetLocationTypeList(int aActivityTypeID);
+  vector<parameterType> *  GetParameterTypeList(int aActivityTypeID);
+  vector<activityType> *   GetActivityTypeList(int aProjectID);
+  vector<locationType> *   GetLocationTypeList(int aActivityTypeID);
   vector<actTypeCompType> *GetComponentTypeList(int aActivityTypeID);
-  vector<resultType> *GetResultList(int aActivityTypeID);
-  vector<statusType> *GetStatusList(int aActivityTypeID);
-  vector<attachmentType> *GetAttachmentTypeList();
-  vector<activityShort> *GetActivityList(int aProjectID, int aActivityTypeID);
-  AlpideTable::response *Read(int ActivityID, activityLong *Result);
+  vector<resultType> *     GetResultList(int aActivityTypeID);
+  vector<statusType> *     GetStatusList(int aActivityTypeID);
+  vector<attachmentType> * GetAttachmentTypeList();
+  vector<activityShort> *  GetActivityList(int aProjectID, int aActivityTypeID);
+  AlpideTable::response *  Read(int ActivityID, activityLong *Result);
 
 private:
-  unsigned long buildBase64Binary(string aLocalFileName, string *aBuffer);
-  int buildUrlEncoded(string aLocalFileName, string *Buffer);
+  unsigned long          buildBase64Binary(string aLocalFileName, string *aBuffer);
+  int                    buildUrlEncoded(string aLocalFileName, string *Buffer);
   AlpideTable::response *readActivity(string ID, activityLong *Result);
-  void extractTheActivity(xmlNode *ns, activityLong *pro);
+  void                   extractTheActivity(xmlNode *ns, activityLong *pro);
 };
 
 #endif /* ALPIDEDBENDPOINTS_H_ */

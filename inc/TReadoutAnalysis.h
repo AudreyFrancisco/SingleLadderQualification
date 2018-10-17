@@ -23,7 +23,7 @@ private:
   int m_noisyPixels;
 
 public:
-  void WriteToFile(FILE *fp);
+  void  WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
   TReadoutResultChip() : TScanResultChip(){};
 };
@@ -41,7 +41,7 @@ private:
   int           m_ineffPixels;
   int           m_extraHits;
   int           m_noisyPixels;
-  void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
+  void          GetParameterSuffix(std::string &suffix, std::string &file_suffix);
 
 public:
   TReadoutResultHic() : TScanResultHic(){};
@@ -60,11 +60,11 @@ public:
 
 class TReadoutAnalysis : public TScanAnalysis {
 private:
-  int  m_nTrig;
-  int  m_occ;
-  int  m_row;
-  void FillVariableList(){};
-  bool IsInjected(int col, int row);
+  int                m_nTrig;
+  int                m_occ;
+  int                m_row;
+  void               FillVariableList(){};
+  bool               IsInjected(int col, int row);
   void               WriteResult();
   THicClassification GetClassificationOB(TReadoutResultHic *result);
   THicClassification GetClassificationIB(TReadoutResultHic *result);
@@ -80,11 +80,11 @@ protected:
     TReadoutResultHic *Result = new TReadoutResultHic();
     return Result;
   };
-  void CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo);
+  void   CreateResult(){};
+  void   AnalyseHisto(TScanHisto *histo);
   void   InitCounters();
   string GetPreviousTestType() { return string(""); }; // done only once ?
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  void   CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TReadoutAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

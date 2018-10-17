@@ -17,7 +17,7 @@ public:
 
 public slots:
   virtual void setdatabase(bool &database);
-  void popup(QString message);
+  void         popup(QString message);
 
 private:
   Ui::DatabaseSelection *ui;

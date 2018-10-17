@@ -51,11 +51,21 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
 
 TestSelection::~TestSelection() { delete ui; }
 
+void TestSelection::Init()
+{
+  QSettings settings;
+  ui->operatorstring->setText(settings.value("operator", "").toString());
+  int idx = ui->typetest->findText(settings.value("testname", "n/a").toString());
+  if (idx >= 0) ui->typetest->setCurrentIndex(idx);
+  idx = ui->databaselocation->findText(settings.value("testsite", "n/a").toString());
+  if (idx >= 0) ui->databaselocation->setCurrentIndex(idx);
+}
+
 void TestSelection::SaveSettings(QString &institute, QString &opname, QString &hicid, int &counter,
                                  int &lid, int &memberid, QString &ttwo, QString &tthree,
                                  QString &tfour, QString &tfive, QString &done, QString &dtwo,
                                  QString &dthree, QString &dfour, QString &dfive,
-                                 QString &halfstave)
+                                 QString &halfstave, QString &stave)
 {
   // Default value for locid, TODO:Associate a location to a default configuration setup.
   locid = 1000;
@@ -140,13 +150,22 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
     dfive = '\0';
     //    }
 
+    if (!ui->stavenamefield->toPlainText().isEmpty()) {
+      stave = ui->stavenamefield->toPlainText();
+    }
+    else {
+      stave = '\0';
+    }
+
     opname    = ui->operatorstring->toPlainText();
     hicid     = ui->id->toPlainText();
     halfstave = ui->id->toPlainText();
     fCounter = counter = 1;
     lid                = locid;
     institute          = location;
-    memberid           = GetMemberID();
+    if (lid != 0) {
+      memberid = GetMemberID();
+    }
     if (memberid == -1) {
       popupmessage("The operator you entered \nis not in the Database");
       if (fCounter == 0) {
@@ -154,7 +173,12 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
       }
     }
 
-    qDebug() << "The operator name is:" << opname << "and the hic id is: " << hicid << endl;
+    QSettings settings;
+    settings.setValue("operator", opname);
+    settings.setValue("testname", ui->typetest->currentText());
+    settings.setValue("testsite", ui->databaselocation->currentText());
+
+    qDebug() << "The operator name is: " << opname << "and the hic id is: " << hicid << endl;
   }
 }
 
@@ -178,7 +202,7 @@ void TestSelection::popupmessage(QString m)
 
 void TestSelection::connectlocationcombo(std::vector<pair<std::string, int>> floc)
 {
-
+  ui->databaselocation->clear();
   for (auto const &v : floc) {
     ui->databaselocation->addItem(v.first.c_str(), v.second);
   }
@@ -230,7 +254,7 @@ void TestSelection::GetTestTypeName(TTestType &typetest, QString &testname)
   testname = ui->typetest->currentText();
   typetest = (TTestType)value;
   std::cout << "the value is: " << value << " the test type is " << typetest
-            << "and the string is: " << testname.toStdString().c_str() << std::endl;
+            << " and the string is: " << testname.toStdString().c_str() << std::endl;
 }
 
 void TestSelection::nextstep()
@@ -254,3 +278,11 @@ void TestSelection::getwindow()
 }
 
 int TestSelection::getcounter() { return fCounter; }
+
+void TestSelection::adjuststave()
+{
+
+  ui->stavename->show();
+  ui->stavenamefield->show();
+  ui->hsname->show();
+}

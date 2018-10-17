@@ -130,7 +130,7 @@ void CopyHitData(std::vector<TPixHit> *Hits, int charge)
 
 void WriteDataToFile(const char *fName, bool Recreate)
 {
-  char  fNameChip[100];
+  char  fNameChip[200];
   FILE *fp;
 
   char fNameTemp[100];
@@ -263,7 +263,7 @@ void fillVcasn(float *vcasn)
 
 void scan()
 {
-  unsigned char         buffer[1024 * 4000];
+  unsigned char         buffer[MAX_EVENT_SIZE];
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nBad = 0, nSkipped = 0, prioErrors = 0, errors8b10b = 0;
   float *               vcasn = new float[14]; // shouldn't have >14 chips
@@ -318,8 +318,8 @@ void scan()
       int itrg   = 0;
       int trials = 0;
       while (itrg < myNTriggers * fEnabled) {
-        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) ==
-            -1) {       // no event available in buffer yet, wait a bit
+        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) <=
+            0) {        // no event available in buffer yet, wait a bit
           usleep(1000); // Increment from 100us
           trials++;
           if (trials == 10) {
@@ -338,7 +338,8 @@ void scan()
           int n_bytes_chipevent = n_bytes_data - n_bytes_header; //-n_bytes_trailer;
           if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
           if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
-                                          boardInfo.channel, prioErrors)) {
+                                          boardInfo.channel, prioErrors,
+                                          fConfig->GetScanConfig()->GetParamValue("MAXHITS"))) {
             std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
             nBad++;
             if (nBad > 10) continue;
@@ -394,7 +395,7 @@ int main(int argc, char **argv)
   InitHitData();
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
   InitScanParameters();
-  char Suffix[20], fName[100]; //, Config[1000];
+  char Suffix[80], fName[200]; //, Config[1000];
 
   ClearHitData();
   time_t     t   = time(0); // get time now

@@ -34,6 +34,8 @@
  *  5/8/16  - adapt the read event to new definition
  *  18/01/17 - Review of ReadEventData. Added inheritance from class MBoard
  *  22/05/17 - Review for Auxiliary COntrol Interfaces facility
+ *  09/04/18 - Add the flushDataReceiver() to the Memory Overflow error
+ *  18/07/18 - Add the Receiver Pattern Check Wrappers
  *
  */
 #include "TReadoutBoardMOSAIC.h"
@@ -43,6 +45,7 @@
 #include "TAlpide.h"
 #include "mexception.h"
 #include "mservice.h"
+#include "pexception.h"
 #include <algorithm>
 #include <iostream>
 #include <math.h>
@@ -88,7 +91,9 @@ I2CSysPll::pllRegisters_t TReadoutBoardMOSAIC::sysPLLregContent(new uint16_t[22]
 
 // ---- Constructor
 TReadoutBoardMOSAIC::TReadoutBoardMOSAIC(TConfig *config, TBoardConfigMOSAIC *boardConfig)
-    : TReadoutBoard(boardConfig), fBoardConfig(boardConfig)
+    : TReadoutBoard(boardConfig), fBoardConfig(boardConfig), i2cBus(0x0), i2cBusAux(0x0), pb(0x0),
+      pulser(0x0), dr(0x0), theVersionMaj(-1), theVersionMin(-1), trgRecorder(0x0),
+      trgDataParser(0x0), coordinator(0x0), readTriggerInfo(false)
 //, fConfig(config) YCM: FIXME fConfig not used
 {
   init();
@@ -101,6 +106,8 @@ TReadoutBoardMOSAIC::~TReadoutBoardMOSAIC()
   delete pulser;
   for (int i = 0; i < MAX_MOSAICTRANRECV; i++)
     delete alpideDataParser[i];
+
+  delete trgDataParser;
 
   for (int i = 0; i < MAX_MOSAICCTRLINT; i++)
     delete controlInterface[i];
@@ -118,7 +125,13 @@ int TReadoutBoardMOSAIC::WriteChipRegister(uint16_t address, uint16_t value, TAl
   uint_fast16_t Cii    = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
   uint8_t       chipId = chipPtr->GetConfig()->GetChipId();
   controlInterface[Cii]->addWriteReg(chipId, address, value);
-  controlInterface[Cii]->execute();
+  try {
+    controlInterface[Cii]->execute();
+  }
+  catch (PControlInterfaceError &e) {
+    e.SetControlInterface(Cii);
+    throw;
+  }
   return (0);
 }
 
@@ -127,7 +140,13 @@ int TReadoutBoardMOSAIC::ReadChipRegister(uint16_t address, uint16_t &value, TAl
   uint_fast16_t Cii    = chipPtr->GetConfig()->GetParamValue("CONTROLINTERFACE");
   uint8_t       chipId = chipPtr->GetConfig()->GetChipId();
   controlInterface[Cii]->addReadReg(chipId, address, &value);
-  controlInterface[Cii]->execute();
+  try {
+    controlInterface[Cii]->execute();
+  }
+  catch (PControlInterfaceError &e) {
+    e.SetControlInterface(Cii);
+    throw;
+  }
   return (0);
 }
 
@@ -188,7 +207,6 @@ uint32_t TReadoutBoardMOSAIC::GetTriggerCount()
 
 int TReadoutBoardMOSAIC::Trigger(int nTriggers)
 {
-  printf("Sending %d triggers (from TReadoutBoardMOSAIC::Trigger)\n", nTriggers);
   pulser->run(nTriggers);
 
   return (nTriggers);
@@ -211,51 +229,68 @@ void TReadoutBoardMOSAIC::StopRun()
 
 int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
 {
-  printf("Breaks here 100\n");
+  MDataReceiver *dr;
+  long           readDataSize;
 
-  TAlpideDataParser *dr;
-  long               readDataSize;
+
+  if (readTriggerInfo) {
+    if (trgDataParser->hasData()) {
+      uint32_t num  = -1U;
+      uint64_t time = -1U;
+      trgDataParser->ReadTriggerInfo(num, time);
+      triggerNum.push_back(num);
+      triggerTime.push_back(time);
+    }
+  }
 
   // check for data in the receivers buffer
   for (int i = 0; i < MAX_MOSAICTRANRECV; i++) {
-    printf("Breaks here 101\n");
 
     if (alpideDataParser[i]->hasData()) return (alpideDataParser[i]->ReadEventData(nBytes, buffer));
-    printf("nBytes = %d et buffer = %s !\n", nBytes, buffer);
-
-    printf("Breaks here 102\n");
+    // printf("nBytes = %d et buffer = %s !\n", nBytes, buffer);
   }
 
   // try to read from TCP connection
   for (;;) {
     try {
-      printf("Breaks here 103\n");
-      readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), (MDataReceiver **)&dr);
-      printf("Breaks here 104\n");
-      if (readDataSize == 0) {
-        return -1;
-        printf("readDataSize == 0...\n");
-      }
+      readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), &dr);
+      if (readDataSize == 0) return 0; // Zero means no data
     }
     catch (exception &e) {
       cerr << e.what() << endl;
-      printf("Breaks here 105\n");
       StopRun();
-      printf("Breaks here 106\n");
+      flushDataReceivers();
       int ErrNums = decodeError();
       if ((ErrNums & 0x03FF00) != 0) {
+        // This is an IDLE condition
         throw;
       }
       else {
-        exit(1);
+        if ((ErrNums & 0x000001) != 0) {
+          // The flush of memory is done by the StopRun()
+          throw;
+        }
+        else {
+          exit(1);
+        }
       }
     }
 
     // get event data from the selected data receiver
-    printf("Breaks here 107\n");
-    printf("nBytes = %d et buffer = %s !\n", nBytes, buffer);
-    if (dr->hasData()) return (dr->ReadEventData(nBytes, buffer));
-    printf("Breaks here 108\n");
+    TAlpideDataParser *data = dynamic_cast<TAlpideDataParser *>(dr);
+    TrgRecorderParser *trg  = dynamic_cast<TrgRecorderParser *>(dr);
+    if (data) {
+      if (data->hasData()) return (data->ReadEventData(nBytes, buffer));
+    }
+    if (trg) {
+      if (trg->hasData()) {
+        uint32_t num  = -1U;
+        uint64_t time = -1U;
+        trg->ReadTriggerInfo(num, time);
+        triggerNum.push_back(num);
+        triggerTime.push_back(time);
+      }
+    }
   }
   return -1;
 }
@@ -420,6 +455,12 @@ void TReadoutBoardMOSAIC::setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex
   mRunControl->rmwConfigReg(~CFG_RATE_MASK, regSet);
 }
 
+void TReadoutBoardMOSAIC::setReadTriggerInfo(bool readTriggerInfo /*= true*/)
+{
+  this->readTriggerInfo = readTriggerInfo;
+  trgRecorder->addEnable(readTriggerInfo);
+}
+
 void TReadoutBoardMOSAIC::enableControlInterfaces(bool en)
 {
   for (int Cii = 0; Cii < MAX_MOSAICCTRLINT; Cii++) {
@@ -542,6 +583,121 @@ std::string TReadoutBoardMOSAIC::GetRegisterDump()
   result += "coordinator\n";
   result += coordinator->dumpRegisters();
   return result;
+}
+
+/*
+  Write to the DRP address of Transceiver with given id
+
+  parameters: Aindex - Transceiver id
+              address - DRP address
+              value - DRP data to write
+              execute - execute transaction
+ */
+void TReadoutBoardMOSAIC::WriteTransceiverDRP(size_t Aindex, uint16_t address, uint16_t val,
+                                              bool execute)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cout << "Invalid Transceiver index " << Aindex << "\n";
+    return;
+  }
+  alpideRcv[Aindex]->addSetRDPReg(address, val);
+  if (execute) alpideRcv[Aindex]->execute();
+}
+
+
+/*
+  Write to a Subset of the DRP address of Transceiver with given id
+
+  parameters: Aindex - Transceiver id
+              address - DRP address
+              size - Number of bits to write
+              offset - Bit offset to write
+              value - DRP data to write
+              execute - execute transaction
+*/
+void TReadoutBoardMOSAIC::WriteTransceiverDRPField(size_t Aindex, uint16_t address, uint16_t size,
+                                                   uint16_t offset, uint16_t value, bool execute)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cout << "Invalid Transceiver index " << Aindex << "\n";
+    return;
+  }
+  alpideRcv[Aindex]->addSetRDPRegField(address, size, offset, value);
+  if (execute) alpideRcv[Aindex]->execute();
+}
+
+/*
+   Read from the DRP address of Transceiver with given idatain
+
+   parameters: Aindex  - Transceiver id
+               address - DRP address
+               value   - The result of the Read transaction
+               execute - execute transaction
+*/
+void TReadoutBoardMOSAIC::ReadTransceiverDRP(size_t Aindex, uint16_t address, uint32_t *value,
+                                             bool execute)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cout << "Invalid Transceiver index " << Aindex << "\n";
+    return;
+  }
+  alpideRcv[Aindex]->addGetRDPReg(address, value);
+  if (execute) alpideRcv[Aindex]->execute();
+}
+
+/*
+   Set the Check mode for one Receiver
+
+   parameters: receiver  - Transceiver id
+*/
+void TReadoutBoardMOSAIC::SetReceiverPatternCheck(size_t Aindex)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cerr << "MOSAIC SetReceiverPatternCeck : Invalid Transceiver index ! (" << Aindex << ")"
+              << std::endl;
+    return;
+  }
+  alpideRcv[Aindex]->addPRBSsetSel(ALPIDErcv::PRBS_7);
+  alpideRcv[Aindex]->addPRBSreset();
+  alpideRcv[Aindex]->execute();
+  std::cout << "MOSAIC Setup the 'Check Receiver Mode' on receiver=" << Aindex << std::endl;
+  return;
+}
+
+/*
+   Reset the Check mode for one Receiver
+
+   parameters: receiver  - Transceiver id
+*/
+void TReadoutBoardMOSAIC::ResetReceiverPatternCheck(size_t Aindex)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cerr << "MOSAIC ResetReceiverPatternCeck : Invalid Transceiver index ! (" << Aindex << ")"
+              << std::endl;
+    return;
+  }
+  alpideRcv[Aindex]->addPRBSsetSel(ALPIDErcv::PRBS_NONE);
+  alpideRcv[Aindex]->execute();
+  std::cout << "MOSAIC Reset the 'Check Receiver Mode' on receiver=" << Aindex << std::endl;
+  return;
+}
+
+/*
+   Read the value of the Error Counter for one Receiver
+
+   parameters: receiver  - Transceiver id
+*/
+uint32_t TReadoutBoardMOSAIC::GetErrorCounter(size_t Aindex)
+{
+  if (Aindex >= MAX_MOSAICTRANRECV) {
+    std::cerr << "MOSAIC GetErrorCounter : Invalid Transceiver index ! (" << Aindex << ")"
+              << std::endl;
+    return (0);
+  }
+  uint32_t errRegValue;
+  alpideRcv[Aindex]->addGetPRBScounter(&errRegValue);
+  alpideRcv[Aindex]->execute();
+  return (errRegValue);
 }
 
 // ================================== EOF ========================================

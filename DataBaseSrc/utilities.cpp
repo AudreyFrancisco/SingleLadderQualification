@@ -6,8 +6,11 @@
  */
 #include "utilities.h"
 #include <algorithm>
+#include <iostream>
 #include <stdio.h>
+#include <string>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 
 bool fileExists(string filewithpath)
@@ -140,6 +143,10 @@ void str2timeTime(const char *sDate, time_t *tDate)
 std::string float2str(float value)
 {
   char valueCharArray[100];
+  if (value == 0) {
+    return (std::string("0.0"));
+  }
+
   snprintf(valueCharArray, 100, "%f", value);
   char *pt = valueCharArray;
   while (*pt != '\0') {
@@ -147,4 +154,14 @@ std::string float2str(float value)
     pt++;
   }
   return std::string(valueCharArray);
+}
+
+std::string getTimeStamp()
+{
+  time_t    now = time(0);
+  struct tm tstruct;
+  char      buf[80];
+  tstruct = *localtime(&now);
+  strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", &tstruct);
+  return std::string(buf);
 }

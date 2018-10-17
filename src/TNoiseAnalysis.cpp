@@ -30,6 +30,14 @@ string TNoiseAnalysis::GetPreviousTestType()
     return string("OB HIC Qualification Test");
   case IBStave:
     return string("IB HIC Qualification Test");
+  case OBStaveOL:
+    return string("OL HS Qualification Test");
+  case OBStaveML:
+    return string("ML HS Qualification Test");
+  case StaveReceptionOL:
+    return string("OL Stave Qualification Test");
+  case StaveReceptionML:
+    return string("ML Stave Qualification Test");
   default:
     return string("");
   }
@@ -104,7 +112,7 @@ void TNoiseAnalysis::InitCounters()
   std::map<std::string, TScanResultHic *>::iterator it;
   for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TNoiseResultHic *result = (TNoiseResultHic *)it->second;
-    result->m_backBias      = ((TNoiseOccupancy *)m_scan)->GetBackbias();
+    result->m_backBias      = m_scan->GetBackBias();
     result->m_isMasked      = m_isMasked;
     result->m_maxChipOcc    = 0;
   }
@@ -169,6 +177,7 @@ void TNoiseAnalysis::Finalize()
     }
     hicResult->m_occ /= m_hics.at(ihic)->GetNChips();
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
+    hicResult->m_class        = GetClassification(hicResult, m_hics.at(ihic));
     hicResult->SetValidity(true);
   }
 
@@ -176,6 +185,29 @@ void TNoiseAnalysis::Finalize()
 
   m_finished = true;
 }
+
+
+THicClassification TNoiseAnalysis::GetClassification(TNoiseResultHic *result, THic *hic)
+{
+  THicClassification returnValue = CLASS_GOLD;
+
+  for (auto chip : m_chipList) {
+    if (!hic->ContainsChip(chip)) continue;
+    int               chipId     = chip.chipId & 0xf;
+    TNoiseResultChip *chipResult = (TNoiseResultChip *)result->m_chipResults.at(chipId);
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_noisyPixels.size(), "MAXNOISY_CHIP_GOLD", result,
+          false, chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_noisyPixels.size(), "MAXNOISY_CHIP_SILVER",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_noisyPixels.size(), "MAXNOISY_CHIP_BRONZE", result,
+          false, chipId);
+  }
+  std::cout << "Noise Analysis - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
+  return returnValue;
+}
+
 
 void TNoiseResultChip::WriteToFile(FILE *fp)
 {
@@ -237,6 +269,7 @@ void TNoiseResultHic::GetParameterSuffix(std::string &suffix, std::string &file_
   file_suffix += (string("_") + std::to_string((int)m_backBias) + std::string("V"));
 }
 
+
 void TNoiseResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
   std::string suffix, file_suffix, fileName, remoteName;
@@ -244,9 +277,12 @@ void TNoiseResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 
   GetParameterSuffix(suffix, file_suffix);
 
-  DbAddParameter(db, activity, string("Noisy pixels ") + suffix, (float)m_nNoisy);
-  DbAddParameter(db, activity, string("Noise occupancy ") + suffix, (float)m_occ);
-  DbAddParameter(db, activity, string("Maximum chip occupancy ") + suffix, (float)m_maxChipOcc);
+  DbAddParameter(db, activity, string("Noisy pixels ") + suffix, (float)m_nNoisy,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Noise occupancy ") + suffix, (float)m_occ,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Maximum chip occupancy ") + suffix, (float)m_maxChipOcc,
+                 GetParameterFile());
 
   slash      = string(m_resultFile).find_last_of("/");
   fileName   = string(m_resultFile).substr(slash + 1); // strip path

@@ -108,7 +108,7 @@ public:
   FILE *GetFileRawData();
   // TODO!!!
   float GetVariable(TResultVariable var);
-  void WriteToFile(FILE *fp);
+  void  WriteToFile(FILE *fp);
 };
 
 class TThresholdResultHic : public TScanResultHic {
@@ -181,12 +181,12 @@ private:
   std::map<int, common::TStatVar>     m_threshold;
   std::map<int, common::TStatVar>     m_noise;
 
-  std::string GetFileName(common::TChipIndex aChipIndex, std::string fileType);
-  bool CheckPixelNoHits(TGraph *aGraph);
-  bool CheckPixelStuck(TGraph *aGraph);
+  std::string               GetFileName(common::TChipIndex aChipIndex, std::string fileType);
+  bool                      CheckPixelNoHits(TGraph *aGraph);
+  bool                      CheckPixelStuck(TGraph *aGraph);
   common::TErrFuncFitResult DoFit(TGraph *aGraph, bool speedy = false);
 
-  bool HasData(TScanHisto &scanHisto, common::TChipIndex idx, int col);
+  bool               HasData(TScanHisto &scanHisto, common::TChipIndex idx, int col);
   void               WriteResult();
   void               FillVariableList();
   THicClassification GetClassificationOB(TThresholdResultHic *result);

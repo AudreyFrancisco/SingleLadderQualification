@@ -13,6 +13,7 @@
 typedef struct {
   THicType hicType;
   bool     trip;
+  bool     tripBB;
   float    iddaSwitchon;
   float    idddSwitchon;
   float    iddaClocked;
@@ -21,6 +22,7 @@ typedef struct {
   float    idddConfigured;
   float    ibias0;
   float    ibias3;
+  float    maxBias;
   float    ibias[61];
 } THicCurrents;
 
@@ -33,10 +35,12 @@ private:
     THisto histo;
     return histo;
   };
-  void DoIVCurve(THicCurrents &result);
+  void                                DoIVCurve(THicCurrents &result);
   std::map<std::string, THicCurrents> m_hicCurrents;
 
 protected:
+  void CreateScanParameters() { m_parameters = new TScanParameters; };
+
 public:
   TPowerTest(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
              std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,

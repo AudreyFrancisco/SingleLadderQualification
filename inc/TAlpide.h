@@ -2,7 +2,6 @@
 #define ALPIDE_H
 
 #include "TConfig.h"
-#include "THIC.h"
 #include <string>
 #include <unistd.h>
 
@@ -152,7 +151,7 @@ namespace Alpide {
   typedef enum { COMP_180uA = 0, COMP_190uA = 1, COMP_296uA = 2, COMP_410uA = 3 } TADCComparator;
 
   typedef enum { RAMP_500ms = 0, RAMP_1us = 1, RAMP_2us = 2, RAMP_4us = 3 } TADCRampSpeed;
-}
+} // namespace Alpide
 
 class TReadoutBoard;
 class THic;
@@ -173,11 +172,11 @@ protected:
 public:
   TAlpide(TChipConfig *config);
   TAlpide(TChipConfig *config, TReadoutBoard *readoutBoard);
-  TChipConfig *GetConfig() { return fConfig; };
-  void SetReadoutBoard(TReadoutBoard *readoutBoard) { fReadoutBoard = readoutBoard; };
-  TReadoutBoard *                     GetReadoutBoard() { return fReadoutBoard; };
-  THic *                              GetHic() { return fHic; };
-  void SetHic(THic *hic) { fHic = hic; };
+  TChipConfig *  GetConfig() { return fConfig; };
+  void           SetReadoutBoard(TReadoutBoard *readoutBoard) { fReadoutBoard = readoutBoard; };
+  TReadoutBoard *GetReadoutBoard() { return fReadoutBoard; };
+  THic *         GetHic() { return fHic; };
+  void           SetHic(THic *hic) { fHic = hic; };
 
   int ReadRegister(Alpide::TRegister address, uint16_t &value);
   int WriteRegister(Alpide::TRegister address, uint16_t value, bool verify = false);
@@ -195,16 +194,16 @@ public:
 
   std::string DumpRegisters();
 
-  int  GetADCOffset() { return (fADCOffset); };
-  int  CalibrateADC();
-  void SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef = Alpide::IREF_100uA);
+  int      GetADCOffset() { return (fADCOffset); };
+  int      CalibrateADC();
+  void     SetTheDacMonitor(Alpide::TRegister ADac, Alpide::TDACMonIref IRef = Alpide::IREF_100uA);
   uint16_t SetTheADCCtrlRegister(Alpide::TADCMode Mode, Alpide::TADCInput SelectInput,
                                  Alpide::TADCComparator ComparatorCurrent,
                                  Alpide::TADCRampSpeed  RampSpeed);
-  float ReadTemperature();
-  float ReadAnalogueVoltage();
-  float ReadDACVoltage(Alpide::TRegister ADac);
-  float ReadDACCurrent(Alpide::TRegister ADac);
+  float    ReadTemperature();
+  float    ReadAnalogueVoltage();
+  float    ReadDACVoltage(Alpide::TRegister ADac);
+  float    ReadDACCurrent(Alpide::TRegister ADac);
 };
 
 #endif /* ALPIDE_H */

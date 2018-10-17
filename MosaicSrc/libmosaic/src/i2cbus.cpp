@@ -44,9 +44,9 @@ I2Cbus::I2Cbus(WishboneBus *wbbPtr, uint32_t baseAdd) : MWbbSlave(wbbPtr, baseAd
 void I2Cbus::addAddress(uint8_t address, readWriteN_t rw)
 {
   // add the slave address with Start condition
-  wbb->addWrite(baseAddress + regWriteAdd,
-                (address << 1) | ((rw == I2C_Write) ? I2C_WRITE_BIT : I2C_READ_BIT) |
-                    (I2C_START_BIT));
+  wbb->addWrite(baseAddress + regWriteAdd, (address << 1) |
+                                               ((rw == I2C_Write) ? I2C_WRITE_BIT : I2C_READ_BIT) |
+                                               (I2C_START_BIT));
 }
 
 //
@@ -64,10 +64,10 @@ void I2Cbus::addWriteData(uint8_t d, uint32_t flags)
 void I2Cbus::addRead(uint32_t *d, uint32_t flags)
 {
   // add the data to read
-  wbb->addWrite(baseAddress + regWriteAdd,
-                (0xff) | ((flags & RWF_start) ? I2C_START_BIT : 0) |
-                    ((flags & RWF_stop) ? I2C_STOP_BIT : 0) | (I2C_IGNORE_ACK_BIT) |
-                    ((flags & RWF_dontAck) ? 0 : I2C_MASTER_ACK_BIT));
+  wbb->addWrite(baseAddress + regWriteAdd, (0xff) | ((flags & RWF_start) ? I2C_START_BIT : 0) |
+                                               ((flags & RWF_stop) ? I2C_STOP_BIT : 0) |
+                                               (I2C_IGNORE_ACK_BIT) |
+                                               ((flags & RWF_dontAck) ? 0 : I2C_MASTER_ACK_BIT));
 
   wbb->addRead(baseAddress + regReadAdd, d);
 }
@@ -82,7 +82,7 @@ void I2Cbus::execute()
   try {
     MWbbSlave::execute();
   }
-  catch (MIPBusErrorWrite) {
+  catch (MIPBusErrorWrite &) {
     throw MIPBusErrorWrite("Remote bus error in write - No acknowledge from I2C slave?");
   }
 }

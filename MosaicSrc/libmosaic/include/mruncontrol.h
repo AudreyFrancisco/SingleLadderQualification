@@ -38,16 +38,16 @@
 class MRunControl : public MWbbSlave {
 public:
   MRunControl(WishboneBus *wbbPtr, uint32_t baseAddress);
-  void getErrors(uint32_t *errors, bool clear = true);
-  void clearErrors();
-  void setConfigReg(uint32_t d);
-  void getConfigReg(uint32_t *d);
-  void rmwConfigReg(uint32_t mask, uint32_t data);
-  void setAFThreshold(uint32_t d);
-  void getAFThreshold(uint32_t *d);
-  void setLatency(uint8_t mode, uint32_t d);
-  void getLatency(uint8_t *mode, uint32_t *d);
-  void getStatus(uint32_t *st);
+  void        getErrors(uint32_t *errors, bool clear = true);
+  void        clearErrors();
+  void        setConfigReg(uint32_t d);
+  void        getConfigReg(uint32_t *d);
+  void        rmwConfigReg(uint32_t mask, uint32_t data);
+  void        setAFThreshold(uint32_t d);
+  void        getAFThreshold(uint32_t *d);
+  void        setLatency(uint8_t mode, uint32_t d);
+  void        getLatency(uint8_t *mode, uint32_t *d);
+  void        getStatus(uint32_t *st);
   void        startRun();
   void        stopRun();
   std::string dumpRegisters();

@@ -35,6 +35,7 @@ void TDigitalWFAnalysis::InitCounters()
     TDigitalWFResultChip *result =
         (TDigitalWFResultChip *)m_result->GetChipResult(m_chipList.at(i));
     result->m_nStuck      = 0;
+    result->m_nBadDCol    = 0;
     result->m_nUnmaskable = 0;
   }
 
@@ -42,7 +43,9 @@ void TDigitalWFAnalysis::InitCounters()
 
   for (it = m_result->GetHicResults()->begin(); it != m_result->GetHicResults()->end(); ++it) {
     TDigitalWFResultHic *result = (TDigitalWFResultHic *)it->second;
+    result->m_backBias          = m_scan->GetBackbias();
     result->m_nStuck            = 0;
+    result->m_nBadDCol          = 0;
     result->m_nUnmaskable       = 0;
   }
 }
@@ -86,9 +89,10 @@ void TDigitalWFAnalysis::Finalize()
   TDigitalWFResult *   result   = (TDigitalWFResult *)m_result;
   std::vector<TPixHit> stuck    = ((TMaskScan *)m_scan)->GetStuckPixels();
 
-  result->m_nTimeout = errCount.nTimeout;
-  result->m_n8b10b   = errCount.n8b10b;
-  result->m_nCorrupt = errCount.nCorruptEvent;
+  result->m_nTimeout  = errCount.nTimeout;
+  result->m_n8b10b    = errCount.n8b10b;
+  result->m_nOversize = errCount.nOversizeEvent;
+  result->m_nCorrupt  = errCount.nCorruptEvent;
 
   // for the time being divide stuck pixels on different chips here
   // later: change AlpideDecoder?
@@ -100,6 +104,10 @@ void TDigitalWFAnalysis::Finalize()
           (TDigitalWFResultChip *)m_result->GetChipResult(m_chipList.at(entry));
       chipResult->m_stuck.push_back(stuck.at(istuck));
       chipResult->m_nStuck++;
+      if (!common::DColAlreadyHit(&(chipResult->m_stuckOnePerDCol), stuck.at(istuck))) {
+        chipResult->m_stuckOnePerDCol.push_back(stuck.at(istuck));
+        chipResult->m_nBadDCol++;
+      }
     }
   }
 
@@ -112,6 +120,7 @@ void TDigitalWFAnalysis::Finalize()
           (TDigitalWFResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
       hicResult->m_nStuck += chipResult->m_nStuck;
       hicResult->m_nUnmaskable += chipResult->m_nUnmaskable;
+      hicResult->m_nBadDCol += chipResult->m_nBadDCol;
     }
   }
 
@@ -135,9 +144,20 @@ void TDigitalWFAnalysis::Finalize()
 // TODO: Make two cuts (red and orange)?
 THicClassification TDigitalWFAnalysis::GetClassificationOB(TDigitalWFResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
-  DoCut(returnValue, CLASS_ORANGE, result->m_nUnmaskable, "DIGITAL_MAXNOMASK_HIC_OB");
-  DoCut(returnValue, CLASS_ORANGE, result->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_HIC_OB");
+  THicClassification returnValue = CLASS_GOLD;
+
+  // chip-wise check
+  map<int, TScanResultChip *>::iterator it;
+  for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
+    TDigitalWFResultChip *chipResult = (TDigitalWFResultChip *)it->second;
+    int                   chipId     = it->first;
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_GOLD",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_SILVER",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE",
+          result, false, chipId);
+  }
   std::cout << "Digital Whiteframe Analysis - Classification: "
             << WriteHicClassification(returnValue) << std::endl;
   return returnValue;
@@ -145,9 +165,21 @@ THicClassification TDigitalWFAnalysis::GetClassificationOB(TDigitalWFResultHic *
 
 THicClassification TDigitalWFAnalysis::GetClassificationIB(TDigitalWFResultHic *result)
 {
-  THicClassification returnValue = CLASS_GREEN;
-  DoCut(returnValue, CLASS_ORANGE, result->m_nUnmaskable, "DIGITAL_MAXNOMASK_HIC_IB");
-  DoCut(returnValue, CLASS_ORANGE, result->m_nStuck, "DIGITAL_MAXNOMASKSTUCK_HIC_IB");
+  THicClassification returnValue = CLASS_GOLD;
+
+  // chip-wise check
+  map<int, TScanResultChip *>::iterator it;
+  for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
+    TDigitalWFResultChip *chipResult = (TDigitalWFResultChip *)it->second;
+    int                   chipId     = it->first;
+
+    DoCut(returnValue, CLASS_SILVER, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_GOLD",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_BRONZE, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_SILVER",
+          result, false, chipId);
+    DoCut(returnValue, CLASS_RED, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE",
+          result, false, chipId);
+  }
   std::cout << "Digital Whiteframe Analysis - Classification: "
             << WriteHicClassification(returnValue) << std::endl;
   return returnValue;
@@ -241,6 +273,7 @@ void TDigitalWFResult::WriteToFileGlobal(FILE *fp)
 {
   fprintf(fp, "8b10b errors:\t%d\n", m_n8b10b);
   fprintf(fp, "Corrupt events:\t%d\n", m_nCorrupt);
+  fprintf(fp, "Oversized events:\t%d\n", m_nOversize);
   fprintf(fp, "Timeouts:\t%d\n", m_nTimeout);
 }
 
@@ -253,14 +286,33 @@ void TDigitalWFResult::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
   }
 }
 
+
+void TDigitalWFResultHic::GetParameterSuffix(std::string &suffix, std::string &file_suffix)
+{
+  if (m_backBias == 0) {
+    suffix      = string("");
+    file_suffix = string("");
+  }
+  else if (fabs(m_backBias - 3) < 0.01) {
+    suffix      = string(" BB 3V");
+    file_suffix = string("_BB_3V");
+  }
+}
+
+
 void TDigitalWFResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
 {
-  string remoteName;
-  DbAddParameter(db, activity, string("Unmaskable pixels"), (float)m_nUnmaskable);
-  DbAddParameter(db, activity, string("Unmaskable stuck pixels"), (float)m_nStuck);
+  string remoteName, fileName, suffix, file_suffix;
+  GetParameterSuffix(suffix, file_suffix);
+  DbAddParameter(db, activity, string("Unmaskable pixels") + suffix, (float)m_nUnmaskable,
+                 GetParameterFile());
+  DbAddParameter(db, activity, string("Unmaskable stuck pixels") + suffix, (float)m_nBadDCol,
+                 GetParameterFile());
 
   std::size_t slash = string(m_resultFile).find_last_of("/");
-  remoteName        = string(m_resultFile).substr(slash + 1); // strip path
+  fileName          = string(m_resultFile).substr(slash + 1); // strip path
+  std::size_t point = fileName.find_last_of(".");
+  remoteName        = fileName.substr(0, point) + file_suffix + ".dat";
   DbAddAttachment(db, activity, attachResult, string(m_resultFile), remoteName);
 }
 
@@ -270,8 +322,9 @@ void TDigitalWFResultHic::WriteToFile(FILE *fp)
 
   fprintf(fp, "HIC Classification: %s\n\n", WriteHicClassification());
 
-  fprintf(fp, "Unmaskable pixels:      %d\n", m_nUnmaskable);
-  fprintf(fp, "of which stuck:         %d\n", m_nStuck);
+  fprintf(fp, "Unmaskable pixels:             %d\n", m_nUnmaskable);
+  fprintf(fp, "of which stuck:                %d\n", m_nStuck);
+  fprintf(fp, "- counting only one per dcol:  %d\n", m_nBadDCol);
 
   fprintf(fp, "\nStuck pixel file: %s\n", m_stuckFile);
   fprintf(fp, "\nUnmaskable pixel file: %s\n", m_unmaskedFile);
@@ -288,8 +341,9 @@ void TDigitalWFResultHic::WriteToFile(FILE *fp)
 
 void TDigitalWFResultChip::WriteToFile(FILE *fp)
 {
-  fprintf(fp, "Unmaskable pixels: %d\n", m_nUnmaskable);
-  fprintf(fp, "stuck pixels:      %d\n", m_nStuck);
+  fprintf(fp, "Unmaskable pixels:             %d\n", m_nUnmaskable);
+  fprintf(fp, "stuck pixels:                  %d\n", m_nStuck);
+  fprintf(fp, "- counting only one per dcol:  %d\n", m_nBadDCol);
 }
 
 float TDigitalWFResultChip::GetVariable(TResultVariable var)

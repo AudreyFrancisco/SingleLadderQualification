@@ -40,7 +40,7 @@ public:
   optionsDialog(QWidget *parent = 0, Qt::WindowFlags fl = 0);
   ~optionsDialog();
   QString address() { return addressText->text(); }
-  void setAddress(QString s) { addressText->setText(s); }
+  void    setAddress(QString s) { addressText->setText(s); }
 
 private:
   QLineEdit *addressText;
