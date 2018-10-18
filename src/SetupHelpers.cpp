@@ -201,6 +201,7 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   if (!hics) hics = new std::vector<THic *>(); // create if not existent
 
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
+    ;
     THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(ihic);
     positionMap[ihic]         = hicOBconfig->GetParamValue("HSPOSBYID");
     bool useCombo             = hicOBconfig->GetParamValue("POWERCOMBO");

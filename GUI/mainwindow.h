@@ -259,6 +259,7 @@ private slots:
   void fillingfastHS();
   void StopScan();
   void fillingDriverTune(); // JI
+  void errorCounter();      // JI
 
   // void setVI(float * vcasn, float * ithr);
 };
