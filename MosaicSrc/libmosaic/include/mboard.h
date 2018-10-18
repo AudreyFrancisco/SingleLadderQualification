@@ -64,7 +64,7 @@ public:
   void initHardware();
   void connectTCP(int port = DEFAULT_TCP_PORT, int rcvBufferSize = DEFAULT_TCP_BUFFER_SIZE);
   void closeTCP();
-  long pollTCP(int timeout, MDataReceiver **dr);
+  long pollDataTime(int msec);
   long pollData(int timeout);
   void addDataReceiver(int id, MDataReceiver *dc);
   void flushDataReceivers();
@@ -79,10 +79,17 @@ public:
 
 private:
   void    init();
-  ssize_t recvTCP(void *buffer, size_t count, int timeout);
-  ssize_t readTCPData(void *buffer, size_t count, int timeout);
+  long    pollTCP(MDataReceiver **dr);
+  ssize_t recvTCP(void *buffer, size_t count);
+  ssize_t readTCPData(void *buffer, size_t count);
 
-  // private:
+private:
+  int       timer_fd;
+  bool      ignoreTimeouts;
+  int       TCPtimeout;            // timeout in msec per TCP data reading 
+  const int TCPhangTimeout = 2000; // Time in ms after we can consider the TCP connection broken 
+  bool      insideDataPacket;
+
 public:
   int                          tcp_sockfd;
   int                          numReceivers;
