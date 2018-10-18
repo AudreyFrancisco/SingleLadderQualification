@@ -196,7 +196,7 @@ ssize_t MBoard::recvTCP(void *rxBuffer, size_t count)
       }
     }
   }
-  
+
   // check for events on sockfd:
   rxSize = 0;
   if (ufds[0].revents & POLLIN) {
