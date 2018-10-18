@@ -432,7 +432,7 @@ long MBoard::pollDataTime(int msec)
     
     long res = pollData(-1);
     if (res == 0) break;
-    readDataSize += res;			
+    readDataSize += res;
   }
 
   // release kernel resources

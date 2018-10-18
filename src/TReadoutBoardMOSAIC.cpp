@@ -250,7 +250,8 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
   // try to read from TCP connection
   for (;;) {
     try {
-      readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), &dr);
+      TCPtimeout   = fBoardConfig->GetPollingDataTimeout();
+      readDataSize = pollTCP(&dr);
       if (readDataSize == 0) return 0; // Zero means no data
     }
     catch (exception &e) {

@@ -66,6 +66,7 @@ public:
   void closeTCP();
   long pollDataTime(int msec);
   long pollData(int timeout);
+  long pollTCP(MDataReceiver **dr);
   void addDataReceiver(int id, MDataReceiver *dc);
   void flushDataReceivers();
   static unsigned int buf2ui(unsigned char *buf);
@@ -79,7 +80,6 @@ public:
 
 private:
   void    init();
-  long    pollTCP(MDataReceiver **dr);
   ssize_t recvTCP(void *buffer, size_t count);
   ssize_t readTCPData(void *buffer, size_t count);
 
