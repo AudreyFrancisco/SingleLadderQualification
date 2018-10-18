@@ -66,10 +66,12 @@ public:
   void closeTCP();
   long pollDataTime(int msec);
   long pollData(int timeout);
-  long pollTCP(MDataReceiver **dr);
   void addDataReceiver(int id, MDataReceiver *dc);
   void flushDataReceivers();
   static unsigned int buf2ui(unsigned char *buf);
+
+protected:
+  long pollTCP(MDataReceiver **dr);
 
 public:
   MDataGenerator * mDataGenerator;
@@ -83,10 +85,12 @@ private:
   ssize_t recvTCP(void *buffer, size_t count);
   ssize_t readTCPData(void *buffer, size_t count);
 
+protected:
+  int TCPtimeout;            // timeout in msec per TCP data reading
+
 private:
   int       timer_fd;
   bool      ignoreTimeouts;
-  int       TCPtimeout;            // timeout in msec per TCP data reading 
   const int TCPhangTimeout = 2000; // Time in ms after we can consider the TCP connection broken 
   bool      insideDataPacket;
 
