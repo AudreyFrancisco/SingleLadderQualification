@@ -86,12 +86,12 @@ private:
   ssize_t readTCPData(void *buffer, size_t count);
 
 protected:
-  int TCPtimeout;            // timeout in msec per TCP data reading
+  int TCPtimeout; // timeout in msec per TCP data reading
 
 private:
   int       timer_fd;
   bool      ignoreTimeouts;
-  const int TCPhangTimeout = 2000; // Time in ms after we can consider the TCP connection broken 
+  const int TCPhangTimeout = 2000; // Time in ms after we can consider the TCP connection broken
   bool      insideDataPacket;
 
 public:

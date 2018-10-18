@@ -83,7 +83,7 @@ void MBoard::setIPaddress(const char *IPaddr, int port)
 
 MBoard::~MBoard()
 {
-  // avoid flushDataReceivers 
+  // avoid flushDataReceivers
   numReceivers = 0;
 
   // close the TCP connection
@@ -107,7 +107,7 @@ void MBoard::flushDataReceivers()
 {
   for (int i = 0; i < numReceivers; i++)
     if (receivers[i] != NULL) {
-      receivers[i]->dataBufferUsed=0;
+      receivers[i]->dataBufferUsed = 0;
       receivers[i]->numClosedData  = 0;
       receivers[i]->dataBufferUsed = 0;
       receivers[i]->flush();
@@ -163,19 +163,19 @@ ssize_t MBoard::recvTCP(void *rxBuffer, size_t count)
   nfds++;
   if (timer_fd != -1 && !ignoreTimeouts) {
     ufds[nfds].fd     = timer_fd;
-    ufds[nfds].events = POLLIN|POLLNVAL;
+    ufds[nfds].events = POLLIN | POLLNVAL;
     nfds++;
-  }    
+  }
 
   rv = poll(ufds, nfds, TCPtimeout);
   if (rv == -1) throw MDataReceiveError("Poll system call");
 
   if (rv == 0) {
-    if (insideDataPacket) {  // TCP connection broken
+    if (insideDataPacket) { // TCP connection broken
       throw MDataReceiveError("TCP hanged while reading data");
     }
     else {
-      return 0;			// normal timeout
+      return 0; // normal timeout
     }
   }
 
@@ -187,11 +187,10 @@ ssize_t MBoard::recvTCP(void *rxBuffer, size_t count)
     else {
       if (ufds[1].revents & POLLIN) {
         uint64_t expNum;
-        ssize_t ret = read(timer_fd, &expNum, sizeof(expNum));
-        if (ret==0 || ret == -1)
-          throw MDataReceiveError("MBoard::recvTCP - Error reading timer");
+        ssize_t  ret = read(timer_fd, &expNum, sizeof(expNum));
+        if (ret==0 || ret == -1) throw MDataReceiveError("MBoard::recvTCP - Error reading timer");
         if (expNum==0)
-          throw MDataReceiveError("MBoard::recvTCP - Timer expiration counter returned 0!");        
+          throw MDataReceiveError("MBoard::recvTCP - Timer expiration counter returned 0!");
         // timer expired. Return
         return 0;
       }
@@ -211,7 +210,7 @@ ssize_t MBoard::recvTCP(void *rxBuffer, size_t count)
       throw MDataReceiveError("Invalid file descriptor in poll system call");
     }
   }
-  
+
   return 0;
 }
 
@@ -228,7 +227,7 @@ ssize_t MBoard::readTCPData(void *buffer, size_t count)
     buffer = (char *)buffer + res;
     count -= res;
     ignoreTimeouts = true;
-    TCPtimeout = TCPhangTimeout;	// disable timeout for segments following the first
+    TCPtimeout     = TCPhangTimeout; // disable timeout for segments following the first
   }
 
   return p;
@@ -255,8 +254,8 @@ static void dump(unsigned char *buffer, int size)
 {
   int i, j;
 
-  for (i = 0; i < size;){
-    for (j = 0; j < 16; j++){
+  for (i = 0; i < size;) {
+    for (j = 0; j < 16; j++) {
       printf(" %02x", buffer[i]);
       i++;
     }
@@ -293,12 +292,12 @@ long MBoard::pollTCP(MDataReceiver **drPtr)
   // for all block data after header, disable timer and timeout
   ignoreTimeouts   = true;
   TCPtimeout       = TCPhangTimeout;
-  insideDataPacket = true;   
+  insideDataPacket = true;
 
-  #ifdef DEBUG_HEADERS
-    printf("Header:\n");
-    dump(header, headerSize);
-  #endif
+#ifdef DEBUG_HEADERS
+  printf("Header:\n");
+  dump(header, headerSize);
+#endif
 
   blockSize         = buf2ui(header);
   flags             = buf2ui(header + 4);
@@ -315,8 +314,8 @@ long MBoard::pollTCP(MDataReceiver **drPtr)
   if (blockSize == 0 && (flags & flagCloseRun) == 0)
     throw MDataReceiveError("Block size set to zero and not CLOSE_RUN");
 
-  //	if (flags & flagCloseRun)
-  //		printf("Received Data packet with CLOSE_RUN\n");
+  // if (flags & flagCloseRun)
+  // printf("Received Data packet with CLOSE_RUN\n");
 
   // skip data from unregistered source
   if (dataSrc > numReceivers || receivers[dataSrc] == NULL) {
@@ -367,26 +366,24 @@ long MBoard::pollData(int timeout)
   // If all receiver got flagCloseRun, return
   int rcv;
   for (rcv = 0; rcv < numReceivers; rcv++) {
-    if ((receivers[rcv]->blockFlags & flagCloseRun) == 0)
-      break;
+    if ((receivers[rcv]->blockFlags & flagCloseRun) == 0) break;
   }
-  if (rcv == numReceivers){
+  if (rcv == numReceivers) {
     // printf("INFO: MBoard::pollData - All receiver got flagCloseRun\n");
     return 0;
   }
 
   // get data from socket
-  TCPtimeout = timeout;
+  TCPtimeout   = timeout;
   readDataSize = pollTCP(&dr);
   if (dr != NULL) {
     closedDataCounter = dr->numClosedData;
-    if (closedDataCounter>0) {
+    if (closedDataCounter > 0) {
       long parsedBytes = dr->parse(closedDataCounter);
-      
+
       // move unused bytes to the begin of buffer
       size_t bytesToMove = dr->dataBufferUsed - parsedBytes;
-      if (bytesToMove > 0)
-        memmove(&dr->dataBuffer[0], &dr->dataBuffer[parsedBytes], bytesToMove);
+      if (bytesToMove > 0) memmove(&dr->dataBuffer[0], &dr->dataBuffer[parsedBytes], bytesToMove);
       dr->dataBufferUsed -= parsedBytes;
       dr->numClosedData = 0;
     }
@@ -404,7 +401,7 @@ long MBoard::pollData(int timeout)
 //
 //	Read data from the TCP socket and send it to the receivers
 //
-//  Use this function to poll data for specified time (msec) 
+//  Use this function to poll data for specified time (msec)
 //
 long MBoard::pollDataTime(int msec)
 {
@@ -412,8 +409,7 @@ long MBoard::pollDataTime(int msec)
 
   // create the timer
   timer_fd = timerfd_create(CLOCK_REALTIME, TFD_NONBLOCK);
-  if (timer_fd == -1)
-    throw MDataReceiveError("MBoard::pollDataTime - timerfd_create error");
+  if (timer_fd == -1) throw MDataReceiveError("MBoard::pollDataTime - timerfd_create error");
 
   // arm the timer
   struct itimerspec exp_time;
@@ -423,13 +419,12 @@ long MBoard::pollDataTime(int msec)
   exp_time.it_interval.tv_nsec = 0;
     
   int res = timerfd_settime(timer_fd, 0, &exp_time, NULL);
-  if (res == -1)
-    throw MDataReceiveError("MBoard::pollDataTime - timerfd_settime error");
+  if (res == -1) throw MDataReceiveError("MBoard::pollDataTime - timerfd_settime error");
 
   // call pollData until timer expires
   for (;;) {
     ignoreTimeouts = false;
-    
+
     long res = pollData(-1);
     if (res == 0) break;
     readDataSize += res;
@@ -441,6 +436,3 @@ long MBoard::pollDataTime(int msec)
 
   return readDataSize;
 }
-
-
-
