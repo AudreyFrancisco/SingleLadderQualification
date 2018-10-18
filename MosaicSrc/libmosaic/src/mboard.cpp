@@ -188,8 +188,8 @@ ssize_t MBoard::recvTCP(void *rxBuffer, size_t count)
       if (ufds[1].revents & POLLIN) {
         uint64_t expNum;
         ssize_t  ret = read(timer_fd, &expNum, sizeof(expNum));
-        if (ret==0 || ret == -1) throw MDataReceiveError("MBoard::recvTCP - Error reading timer");
-        if (expNum==0)
+        if (ret == 0 || ret == -1) throw MDataReceiveError("MBoard::recvTCP - Error reading timer");
+        if (expNum == 0)
           throw MDataReceiveError("MBoard::recvTCP - Timer expiration counter returned 0!");
         // timer expired. Return
         return 0;
@@ -417,7 +417,7 @@ long MBoard::pollDataTime(int msec)
   exp_time.it_value.tv_nsec    = (msec % 1000) * 1000;
   exp_time.it_interval.tv_sec  = 0;
   exp_time.it_interval.tv_nsec = 0;
-    
+
   int res = timerfd_settime(timer_fd, 0, &exp_time, NULL);
   if (res == -1) throw MDataReceiveError("MBoard::pollDataTime - timerfd_settime error");
 
