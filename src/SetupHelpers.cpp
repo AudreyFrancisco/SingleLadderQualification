@@ -765,16 +765,33 @@ int initSetupSingleMosaic(TConfig *config, std::vector<TReadoutBoard *> *boards,
   int                 receiver    = chipConfig->GetParamValue("RECEIVER");
 
   if (receiver < 0) {
-    chipConfig->SetParamValue("RECEIVER", 3);
-    receiver = 3; // HSData is connected to pins for first chip on a stave
+    chipConfig->SetParamValue("RECEIVER", 4);
+    receiver = 4; // HSData is connected to pins for first chip on a stave
   }
   if (control < 0) {
     chipConfig->SetParamValue("CONTROLINTERFACE", 0);
     control = 0;
   }
 
+  Mosaic::TReceiverSpeed speed;
+
+  switch (chipConfig->GetParamValue("LINKSPEED")) {
+  case 400:
+    speed = Mosaic::RCV_RATE_400;
+    break;
+  case 600:
+    speed = Mosaic::RCV_RATE_600;
+    break;
+  case 1200:
+    speed = Mosaic::RCV_RATE_1200;
+    break;
+  default:
+    std::cout << "Warning: invalid link speed, using 1200" << std::endl;
+    speed = Mosaic::RCV_RATE_1200;
+    break;
+  }
   boardConfig->SetInvertedData(false);
-  boardConfig->SetSpeedMode(Mosaic::RCV_RATE_400);
+  boardConfig->SetSpeedMode(speed);
 
   boards->push_back(new TReadoutBoardMOSAIC(config, boardConfig));
 
