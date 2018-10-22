@@ -36,6 +36,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <deque>
+#include <fstream>
 #include <future>
 #include <iostream>
 #include <map>
@@ -45,7 +46,6 @@
 #include <string>
 #include <thread>
 #include <typeinfo>
-#include <fstream>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -685,12 +685,12 @@ void MainWindow::doDebugScan(TScanType scanType)
 void MainWindow::fillingDriverTune() // JI
 {
   ClearVectors();
-  vector<int> drivers = {3,7,11,15};
-  vector<int> preEmps = {0,3,6,9,12,15};
+  vector<int> drivers = {3, 7, 11, 15};
+  vector<int> preEmps = {0, 3, 6, 9, 12, 15};
   vector<int> n8b10b;
 
   for (unsigned int i = 0; i < drivers.size(); i++) {
-    for (unsigned int j = 0; j < preEmps.size(); j++){
+    for (unsigned int j = 0; j < preEmps.size(); j++) {
       fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", drivers[i]);
       fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", preEmps[j]);
       AddScan(STDigital);
@@ -707,11 +707,11 @@ void MainWindow::fillingDriverTune() // JI
   file.open("driverTuning.dat");
   file << "Driver, Pre-Emphasis, n8b10b, \n";
   for (unsigned l = 0; l < fAnalysisVector.size(); l++) {
-    file << drivers[l] << ", "<< preEmps[l] << ", " << n8b10b[l] << ", \n";
+    file << drivers[l] << ", " << preEmps[l] << ", " << n8b10b[l] << ", \n";
   }
   file.close();
-  
-return;
+
+  return;
 }
 
 
