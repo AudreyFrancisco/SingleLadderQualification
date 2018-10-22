@@ -505,6 +505,10 @@ bool TEnduranceCycle::TestPattern(TAlpide *chip, int pattern, int region, int of
     return false;
   }
   if (readBack != pattern) {
+    if (hicCounter.m_fifoErrors < 12) {
+      std::cout << "Fifo test cycle " << m_value[0] << ", wrote pattern 0x" << std::hex << pattern
+                << ", read 0x" << readBack << std::dec << std::endl;
+    }
     hicCounter.m_fifoErrors++;
     if (pattern == 0x0)
       hicCounter.m_fifoErrors0++;
