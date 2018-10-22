@@ -177,7 +177,8 @@ void TDigitalAnalysis::WriteHitData(TScanHisto *histo, int row)
     FILE *fp = fopen(fName, "a");
     for (int icol = 0; icol < 1024; icol++) {
       if ((*histo)(m_chipList.at(ichip), icol) > 0) { // write only non-zero values
-        fprintf(fp, "%d %d %d\n", icol, row, (int)(*histo)(m_chipList.at(ichip), icol));
+	int test = (int)((*histo)(m_chipList.at(ichip), icol));
+        fprintf(fp, "%d %d %d\n", icol, row, test);
       }
     }
     fclose(fp);

@@ -45,6 +45,7 @@
 #include <string>
 #include <thread>
 #include <typeinfo>
+#include <fstream>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -684,34 +685,33 @@ void MainWindow::doDebugScan(TScanType scanType)
 void MainWindow::fillingDriverTune() // JI
 {
   ClearVectors();
-  int driverMin = 3; // 3,7,11,15 max 15  steps of 4. no 0
-  int driverMax = 15;
-  //  int preEmpMin = 0;  //steps of 3 inc 0: 0,3,6,9,12,15
-  // int preEmpMax = 15;
-  // int driverOptimum = fConfig->GetScanConfig()->GetParamValue("DTUDRIVER");
-  //, preEmpOptimum;
-  // double n8b10bCurrent ; //n8b10bOptimum, n8b10bCurrent;
-  // n8b10bOptimum = 999999999;
-  // int counter   = 0;
+  vector<int> drivers = {3,7,11,15};
+  vector<int> preEmps = {0,3,6,9,12,15};
+  vector<int> n8b10b;
 
-  for (int i = driverMin; i <= driverMax; i += 4) {
-    fConfig->GetScanConfig()->SetParamValue("DTUDRIVER", i);
-    std::cout << "DTUDRIVER = " << i << std::endl;
-    AddScan(STDigital);
+  for (unsigned int i = 0; i < drivers.size(); i++) {
+    for (unsigned int j = 0; j < preEmps.size(); j++){
+      fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", drivers[i]);
+      fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", preEmps[j]);
+      AddScan(STDigital);
+    }
   }
-
   applytests();
 
-  return;
-}
-
-void MainWindow::errorCounter()
-{
-  for (unsigned int i = 0; i < fAnalysisVector.size(); i++) {
-    double n8b10bCurrent = fAnalysisVector[i]->DriverPreEmpFunc();
-    std::cout << "n8b10bCurrent: " << n8b10bCurrent << std::endl;
+  for (unsigned int k = 0; k < fAnalysisVector.size(); k++) {
+    n8b10b.push_back(fAnalysisVector[k]->DriverPreEmpFunc());
   }
-  return;
+
+  std::ofstream file;
+  remove("driverTuning.dat");
+  file.open("driverTuning.dat");
+  file << "Driver, Pre-Emphasis, n8b10b, \n";
+  for (unsigned l = 0; l < fAnalysisVector.size(); l++) {
+    file << drivers[l] << ", "<< preEmps[l] << ", " << n8b10b[l] << ", \n";
+  }
+  file.close();
+  
+return;
 }
 
 
@@ -1126,7 +1126,6 @@ void MainWindow::initscanlist()
   }
   if (fNumberofscan == OLDriverTune) { // JI
     fillingDriverTune();
-    errorCounter();
   }
   qApp->processEvents();
   std::cout << "the size of the scan vector is: " << fScanVector.size() << std::endl;
@@ -2527,7 +2526,6 @@ void MainWindow::fillingHSscans()
 
 void MainWindow::attachConfigFile(ActivityDB::activity &activity)
 {
-
   if (fNumberofscan == OBQualification || fNumberofscan == OBReception ||
       fNumberofscan == OBEndurance) {
     DbAddAttachment(fDB, activity, attachConfig, string("Config.cfg"), string("Config.cfg"));
@@ -2585,6 +2583,7 @@ void MainWindow::analysis(TScanAnalysis *myanalysis)
     fScanAbort       = true;
     fExceptiontext   = ex.what();
   }
+  std::cout << "here Mainwindow::analysis end" << std::endl;
 }
 
 void MainWindow::fillingDctrl()
