@@ -1,6 +1,8 @@
 #include "TScanConfig.h"
 #include "DBHelpers.h"
 #include "TChipConfig.h"
+#include <fstream>
+#include <sstream>
 #include <string>
 
 using namespace ScanConfig;
@@ -141,16 +143,18 @@ TScanConfig::TScanConfig()
   m_maxNoisyChipSilver = MAXNOISY_CHIP_SILVER;
   m_maxNoisyChipBronze = MAXNOISY_CHIP_BRONZE;
 
-  m_testDctrl           = TEST_DCTRL;
-  m_dctrlMinAmpOB       = DCTRL_MINAMP_OB;
-  m_dctrlMinSlopeOB     = DCTRL_MINSLOPE_OB;
-  m_dctrlMaxRiseGreenOB = DCTRL_MAXRISE_GREEN_OB;
-  m_dctrlMaxFallGreenOB = DCTRL_MAXFALL_GREEN_OB;
-  m_dctrlMinAmpIB       = DCTRL_MINAMP_IB;
-  m_dctrlMinSlopeIB     = DCTRL_MINSLOPE_IB;
-  m_dctrlMaxRiseGreenIB = DCTRL_MAXRISE_GREEN_IB;
-  m_dctrlMaxFallGreenIB = DCTRL_MAXFALL_GREEN_IB;
-  m_dctrlMaxChisqSilver = DCTRL_MAXCHISQ_SILVER;
+  m_testDctrl            = TEST_DCTRL;
+  m_dctrlMinAmpOB        = DCTRL_MINAMP_OB;
+  m_dctrlMinSlopeOB      = DCTRL_MINSLOPE_OB;
+  m_dctrlMinAmpOBStave   = DCTRL_MINAMP_OBSTAVE;
+  m_dctrlMinSlopeOBStave = DCTRL_MINSLOPE_OBSTAVE;
+  m_dctrlMaxRiseGreenOB  = DCTRL_MAXRISE_GREEN_OB;
+  m_dctrlMaxFallGreenOB  = DCTRL_MAXFALL_GREEN_OB;
+  m_dctrlMinAmpIB        = DCTRL_MINAMP_IB;
+  m_dctrlMinSlopeIB      = DCTRL_MINSLOPE_IB;
+  m_dctrlMaxRiseGreenIB  = DCTRL_MAXRISE_GREEN_IB;
+  m_dctrlMaxFallGreenIB  = DCTRL_MAXFALL_GREEN_IB;
+  m_dctrlMaxChisqSilver  = DCTRL_MAXCHISQ_SILVER;
 
   m_enduranceSlices            = ENDURANCE_SLICES;
   m_enduranceCycles            = ENDURANCE_CYCLES;
@@ -295,20 +299,22 @@ void TScanConfig::InitParamMap()
   fSettings["MAXNOISY_CHIP_SILVER"]           = &m_maxNoisyChipSilver;
   fSettings["MAXNOISY_CHIP_BRONZE"]           = &m_maxNoisyChipBronze;
 
-  fSettings["TESTDCTRL"]           = &m_testDctrl;
-  fSettings["DCTRLMINAMPIB"]       = &m_dctrlMinAmpIB;
-  fSettings["DCTRLMINSLOPEIB"]     = &m_dctrlMinSlopeIB;
-  fSettings["DCTRLMAXRISEGREENIB"] = &m_dctrlMaxRiseGreenIB;
-  fSettings["DCTRLMAXFALLGREENIB"] = &m_dctrlMaxFallGreenIB;
-  fSettings["DCTRLMINAMPOB"]       = &m_dctrlMinAmpOB;
-  fSettings["DCTRLMINSLOPEOB"]     = &m_dctrlMinSlopeOB;
-  fSettings["DCTRLMAXRISEGREENOB"] = &m_dctrlMaxRiseGreenOB;
-  fSettings["DCTRLMAXFALLGREENOB"] = &m_dctrlMaxFallGreenOB;
-  fSettings["DCTRLMAXCHISQSILVER"] = &m_dctrlMaxChisqSilver;
-  fSettings["CAL_VPULSEL"]         = &m_calVpulsel;
-  fSettings["TARGETTHRESH"]        = &m_targetThresh;
-  fSettings["NOMINAL"]             = &m_nominal;
-  fSettings["HALFSTAVECOMP"]       = &m_halfstavecomp;
+  fSettings["TESTDCTRL"]            = &m_testDctrl;
+  fSettings["DCTRLMINAMPIB"]        = &m_dctrlMinAmpIB;
+  fSettings["DCTRLMINSLOPEIB"]      = &m_dctrlMinSlopeIB;
+  fSettings["DCTRLMAXRISEGREENIB"]  = &m_dctrlMaxRiseGreenIB;
+  fSettings["DCTRLMAXFALLGREENIB"]  = &m_dctrlMaxFallGreenIB;
+  fSettings["DCTRLMINAMPOB"]        = &m_dctrlMinAmpOB;
+  fSettings["DCTRLMINSLOPEOB"]      = &m_dctrlMinSlopeOB;
+  fSettings["DCTRLMINAMPOBSTAVE"]   = &m_dctrlMinAmpOBStave;
+  fSettings["DCTRLMINSLOPEOBSTAVE"] = &m_dctrlMinSlopeOBStave;
+  fSettings["DCTRLMAXRISEGREENOB"]  = &m_dctrlMaxRiseGreenOB;
+  fSettings["DCTRLMAXFALLGREENOB"]  = &m_dctrlMaxFallGreenOB;
+  fSettings["DCTRLMAXCHISQSILVER"]  = &m_dctrlMaxChisqSilver;
+  fSettings["CAL_VPULSEL"]          = &m_calVpulsel;
+  fSettings["TARGETTHRESH"]         = &m_targetThresh;
+  fSettings["NOMINAL"]              = &m_nominal;
+  fSettings["HALFSTAVECOMP"]        = &m_halfstavecomp;
 
   fSettings["ENDURANCESLICES"]    = &m_enduranceSlices;
   fSettings["ENDURANCECYCLES"]    = &m_enduranceCycles;
@@ -417,15 +423,10 @@ std::string TScanConfig::GetRemoteHicPath(std::string HicName)
 std::string TScanConfig::GetTestDir() { return GetTestDirName(GetTestType()); }
 
 
-/*void TScanConfig::SetVcasnArr (int hics, float *vcasn) { //copy vcasn array to m_vcasn
-  m_vcasn = new int[hics];
-  for(int i=0; i<hics; i++) {
-    m_vcasn[i] = (int)(vcasn[i]+.5); //rounding matters
-  }
+bool TScanConfig::IsHalfStave()
+{
+  return ((m_testType == OBHalfStaveOL) || (m_testType == OBHalfStaveML) ||
+          (m_testType == OBHalfStaveOLFAST) || (m_testType == OBHalfStaveMLFAST) ||
+          (m_testType == OBStaveOL) || (m_testType == OBStaveML) ||
+          (m_testType == StaveReceptionOL) || (m_testType == StaveReceptionML));
 }
-void TScanConfig::SetIthrArr (int hics, float *ithr) {
-  m_ithr = new int[hics];
-  for(int i=0; i<hics; i++) {
-    m_ithr[i] = (int)(ithr[i]+.5); //rounding matters
-  }
-}*/

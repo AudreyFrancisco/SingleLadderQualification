@@ -4,14 +4,25 @@
 #include "TSCurveScan.h"
 #include <algorithm>
 #include <fstream>
+#include <list>
 #include <set>
 
-static const std::set<std::string> kTestTypes = {
+static const std::list<std::string> kTestTypes = {
     "OB-HIC Impedance Test",       "OB HIC Qualification Test",   "IB HIC Qualification Test",
     "IB Stave Qualification Test", "OB HIC Endurance Test",       "OB HIC Fast Power Test",
     "OB HIC Reception Test",       "OL HS Qualification Test",    "ML HS Qualification Test",
     "OL Stave Qualification Test", "ML Stave Qualification Test", "OL Stave Reception Test",
     "ML Stave Reception Test"};
+
+bool IsTestType(std::string activity)
+{
+  return (std::find(kTestTypes.begin(), kTestTypes.end(), activity) != kTestTypes.end());
+}
+
+int TestTypeIndex(std::string activity)
+{
+  return distance(kTestTypes.begin(), std::find(kTestTypes.begin(), kTestTypes.end(), activity));
+}
 
 int DbGetActivityTypeId(AlpideDB *db, string name)
 {
@@ -203,7 +214,7 @@ void DbGetPreviousTests(AlpideDB *db, int compId, int activityTypeId,
 
   for (unsigned int i = 0; i < history.size(); i++) {
     if (history.at(i).Status.Code.compare("OPEN") == 0) openAct = true;
-    if (kTestTypes.find(history.at(i).Typename) == kTestTypes.end()) {
+    if (!IsTestType(history.at(i).Typename)) {
       std::cout << "found non-test activity of type " << history.at(i).Typename << std::endl;
       continue; // check that typename is in list of tests
     }
@@ -256,8 +267,8 @@ void DbGetAllTests(AlpideDB *db, int compId, vector<ComponentDB::compActivity> &
   tests.clear();
   componentDB->GetComponentActivities(compId, &history);
   for (unsigned int i = 0; i < history.size(); i++) {
-    if (kTestTypes.find(history.at(i).Typename) == kTestTypes.end()) {
-      std::cout << "found non-test activity of type " << history.at(i).Typename << std::endl;
+    if (!IsTestType(history.at(i).Typename)) {
+      // std::cout << "found non-test activity of type " << history.at(i).Typename << std::endl;
       continue; // check that typename is in list of tests
     }
     if (history.at(i).Typename.find("Impedance") != string::npos) continue;
@@ -290,12 +301,14 @@ bool DbCheckCompleteness(AlpideDB *db, int compId)
   // now find index of last test
   unsigned int last = 0;
   for (unsigned int i = 0; i < tests.size(); i++) {
-    int index = distance(kTestTypes.begin(), kTestTypes.find(tests.at(i).Typename));
+    int index = TestTypeIndex(tests.at(i).Typename);
     if ((unsigned int)index > last) last = index;
   }
+
   // now check if the number of different tests performed is consistent with the last test type;
   // note: this depends on a specific order of kTestTypes, as shown in the comment above
 
+  if (last == 0) return true;
   if (last == 1) return true; // OB HIC Qualification
   if ((last < 8) && (last == tests.size() + 2)) return true;
   if ((last == 8) && (tests.size() == 5)) return true;  // ML HS
@@ -736,15 +749,27 @@ string GetEosPath(ActivityDB::activityLong activity, THicType hicType, bool doub
   GetServiceAccount(activity.Location.Name, location);
   test = GetTestDirName(GetTestType(activity.Type.Name));
 
+  size_t pos;
   if (hicType == HIC_IB) {
-    component = activity.Name.substr(activity.Name.find("IBHIC"));
+    pos = activity.Name.find("IBHIC");
   }
   else {
-    component = activity.Name.substr(activity.Name.find("OBHIC"));
+    pos = activity.Name.find("OBHIC");
   }
+
+  if (pos == string::npos) {
+    std::cout << "Unable to deduce component name. Please enter name in format OBHIC-AA123456 or "
+                 "IBHIC-123456"
+              << std::endl;
+    getline(std::cin, component);
+  }
+  else {
+    component = activity.Name.substr(pos);
+  }
+
   replace(component.begin(), component.end(), ' ', '_');
 
-  path = basePath + "/" + test + "/" + location + "/" + component;
+  path = basePath + "/" + test + location + "/" + component;
   if (doubleComp) path += "/" + component;
   return path;
 }
@@ -804,35 +829,35 @@ string GetServiceAccount(string institute, string &folder)
 }
 
 
-TTestType GetTestType(string activityName)
+TTestType GetTestType(string activityTypeName)
 {
-  if (activityName.find("OB Qualification") != string::npos)
+  if (activityTypeName.find("OB HIC Qualification") != string::npos)
     return OBQualification;
-  else if (activityName.find("OB Endurance") != string::npos)
+  else if (activityTypeName.find("OB HIC Endurance") != string::npos)
     return OBEndurance;
-  else if (activityName.find("OB Reception") != string::npos)
+  else if (activityTypeName.find("OB HIC Reception Test") != string::npos)
     return OBReception;
-  else if (activityName.find("OB Fast Power") != string::npos)
+  else if (activityTypeName.find("OB HIC Fast Power") != string::npos)
     return OBPower;
-  else if (activityName.find("OL HS") != string::npos)
+  else if (activityTypeName.find("OL HS Quali") != string::npos)
     return OBHalfStaveOL;
-  else if (activityName.find("ML HS") != string::npos)
+  else if (activityTypeName.find("ML HS Quali") != string::npos)
     return OBHalfStaveML;
-  else if (activityName.find("IB Quali") != string::npos)
+  else if (activityTypeName.find("IB HIC Quali") != string::npos)
     return IBQualification;
-  else if (activityName.find("IB End") != string::npos)
+  else if (activityTypeName.find("IB HIC End") != string::npos)
     return IBEndurance;
-  else if (activityName.find("IB Stave T") != string::npos)
+  else if (activityTypeName.find("IB Stave Quali") != string::npos)
     return IBStave;
-  else if (activityName.find("IB Stave E") != string::npos)
+  else if (activityTypeName.find("IB Stave End") != string::npos)
     return IBStaveEndurance;
-  else if (activityName.find("OL Stave T") != string::npos)
+  else if (activityTypeName.find("OL Stave Quali") != string::npos)
     return OBStaveOL;
-  else if (activityName.find("ML Stave T") != string::npos)
+  else if (activityTypeName.find("ML Stave Quali") != string::npos)
     return OBStaveML;
-  else if (activityName.find("OL Stave R") != string::npos)
+  else if (activityTypeName.find("OL Stave Reception Test") != string::npos)
     return StaveReceptionOL;
-  else if (activityName.find("ML Stave R") != string::npos)
+  else if (activityTypeName.find("ML Stave Reception Test") != string::npos)
     return StaveReceptionML;
   return Unknown;
 }

@@ -55,19 +55,19 @@ protected:
 // IPBus  error
 class MIPBusError : public MException {
 public:
-  explicit MIPBusError(const string &__arg);
+  explicit MIPBusError(const string &__arg, const string &__address = "");
 };
 
 // IPBus error - Remote Bus Write error
 class MIPBusErrorWrite : public MException {
 public:
-  explicit MIPBusErrorWrite(const string &__arg);
+  explicit MIPBusErrorWrite(const string &__arg, const string &__address = "");
 };
 
 // IPBus error - Remote Bus Read error
 class MIPBusErrorReadTimeout : public MException {
 public:
-  explicit MIPBusErrorReadTimeout(const string &__arg);
+  explicit MIPBusErrorReadTimeout(const string &__arg, const string &__address = "");
 };
 
 // IPBus over UDP error

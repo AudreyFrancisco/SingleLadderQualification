@@ -59,41 +59,46 @@ TChipConfig::TChipConfig(TConfig *config, int chipId, const char *fName)
     // read information from file
   }
 
+  for (unsigned int ireg = 0; ireg < 32; ++ireg) {
+    fDoubleColumnMask[ireg] = 0x0;
+  }
+
   InitParamMap();
 }
 
 void TChipConfig::InitParamMap()
 {
-  fSettings["CHIPID"]           = &fChipId;
-  fSettings["RECEIVER"]         = &fReceiver;
-  fSettings["CONTROLINTERFACE"] = &fControlInterface;
-  fSettings["ENABLED"]          = &fEnabled;
-  fSettings["ENABLEDBB"]        = &fEnabledWithBB;
-  fSettings["ITHR"]             = &fITHR;
-  fSettings["IDB"]              = &fIDB;
-  fSettings["VCASN"]            = &fVCASN;
-  fSettings["VCASN2"]           = &fVCASN2;
-  fSettings["VCLIP"]            = &fVCLIP;
-  fSettings["VRESETD"]          = &fVRESETD;
-  fSettings["IBIAS"]            = &fIBIAS;
-  fSettings["VCASP"]            = &fVCASP;
-  fSettings["VPULSEL"]          = &fVPULSEL;
-  fSettings["VPULSEH"]          = &fVPULSEH;
-  fSettings["VRESETP"]          = &fVRESETP;
-  fSettings["VTEMP"]            = &fVTEMP;
-  fSettings["IAUX2"]            = &fIAUX2;
-  fSettings["IRESET"]           = &fIRESET;
-  fSettings["STROBEDURATION"]   = &fStrobeDuration;
-  fSettings["PULSEDURATION"]    = &fPulseDuration;
-  fSettings["STROBEDELAYCHIP"]  = &fStrobeDelay;
-  fSettings["READOUTMODE"]      = (int *)&fReadoutMode;
-  fSettings["LINKSPEED"]        = &fSerialLinkSpeed;
-  fSettings["PLLPHASE"]         = &fPllPhase;
-  fSettings["PLLSTAGES"]        = &fPllStages;
-  fSettings["CHARGEPUMP"]       = &fChargePump;
-  fSettings["DTUDRIVER"]        = &fDtuDriver;
-  fSettings["DTUPREEMP"]        = &fDtuPreemp;
-  fSettings["DCTRLDRIVER"]      = &fDctrlDriver;
+  fSettings["CHIPID"]             = &fChipId;
+  fSettings["RECEIVER"]           = &fReceiver;
+  fSettings["CONTROLINTERFACE"]   = &fControlInterface;
+  fSettings["ENABLED"]            = &fEnabled;
+  fSettings["ENABLEDBB"]          = &fEnabledWithBB;
+  fSettings["ITHR"]               = &fITHR;
+  fSettings["IDB"]                = &fIDB;
+  fSettings["VCASN"]              = &fVCASN;
+  fSettings["VCASN2"]             = &fVCASN2;
+  fSettings["VCLIP"]              = &fVCLIP;
+  fSettings["VRESETD"]            = &fVRESETD;
+  fSettings["IBIAS"]              = &fIBIAS;
+  fSettings["VCASP"]              = &fVCASP;
+  fSettings["VPULSEL"]            = &fVPULSEL;
+  fSettings["VPULSEH"]            = &fVPULSEH;
+  fSettings["VRESETP"]            = &fVRESETP;
+  fSettings["VTEMP"]              = &fVTEMP;
+  fSettings["IAUX2"]              = &fIAUX2;
+  fSettings["IRESET"]             = &fIRESET;
+  fSettings["STROBEDURATION"]     = &fStrobeDuration;
+  fSettings["PULSEDURATION"]      = &fPulseDuration;
+  fSettings["STROBEDELAYCHIP"]    = &fStrobeDelay;
+  fSettings["READOUTMODE"]        = &fReadoutMode;
+  fSettings["LINKSPEED"]          = &fSerialLinkSpeed;
+  fSettings["PLLPHASE"]           = &fPllPhase;
+  fSettings["PLLSTAGES"]          = &fPllStages;
+  fSettings["CHARGEPUMP"]         = &fChargePump;
+  fSettings["DTUDRIVER"]          = &fDtuDriver;
+  fSettings["DTUPREEMP"]          = &fDtuPreemp;
+  fSettings["DCTRLDRIVER"]        = &fDctrlDriver;
+  fSettings["MANCHESTERDISABLED"] = &fDisableManchester;
 }
 
 bool TChipConfig::SetParamValue(std::string Name, std::string Value)
@@ -136,4 +141,17 @@ bool TChipConfig::HasEnabledSlave()
     if (fConfig->GetChipConfigById(i)->IsEnabled()) return true;
   }
   return false;
+}
+
+void TChipConfig::SetDoubleColumnMask(unsigned int dcol, bool mask /* = true*/)
+{
+  unsigned int reg = (dcol >> 4) & 0x1f;
+  unsigned int bit = (dcol & 0xf);
+  fDoubleColumnMask[reg] &= ~(unsigned int)(0x1 << bit);
+  if (mask) fDoubleColumnMask[reg] |= (0x1 << bit);
+}
+
+unsigned int TChipConfig::GetDoubleColumnMask(unsigned int region)
+{
+  return (region < 32) ? fDoubleColumnMask[region] : 0x0;
 }

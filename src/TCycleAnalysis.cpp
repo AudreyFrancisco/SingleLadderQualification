@@ -33,9 +33,14 @@ void TCycleAnalysis::InitCounters()
     result->m_nTrips          = 0;
     result->m_minWorkingChips = 14;
     result->m_nChipFailures   = 0;
+    result->m_nExceptions     = 0;
     result->m_nFifoTests      = 0;
     result->m_nFifoExceptions = 0;
     result->m_nFifoErrors     = 0;
+    result->m_nFifoErrors0    = 0;
+    result->m_nFifoErrors5    = 0;
+    result->m_nFifoErrorsa    = 0;
+    result->m_nFifoErrorsf    = 0;
     result->m_avDeltaT        = 0;
     result->m_maxDeltaT       = 0;
     result->m_avIdda          = 0;
@@ -104,8 +109,13 @@ void TCycleAnalysis::Finalize()
       hicResult->m_avDeltaT += hicCounter.m_tempEnd - hicCounter.m_tempStart;
       hicResult->m_avIdda += hicCounter.m_iddaClocked;
       hicResult->m_avIddd += hicCounter.m_idddClocked;
+      hicResult->m_nExceptions += hicCounter.m_exceptions;
       hicResult->m_nFifoExceptions += hicCounter.m_fifoExceptions;
       hicResult->m_nFifoErrors += hicCounter.m_fifoErrors;
+      hicResult->m_nFifoErrors0 += hicCounter.m_fifoErrors0;
+      hicResult->m_nFifoErrors5 += hicCounter.m_fifoErrors5;
+      hicResult->m_nFifoErrorsa += hicCounter.m_fifoErrorsa;
+      hicResult->m_nFifoErrorsf += hicCounter.m_fifoErrorsf;
       hicResult->m_nFifoTests += hicCounter.m_fifoTests;
     }
     hicResult->SetValidity(true);
@@ -210,10 +220,11 @@ void TCycleResultHic::WriteToDB(AlpideDB *db, ActivityDB::activity &activity)
     DbAddParameter(db, activity, string("Av. IDDD"), (float)m_avIddd, GetParameterFile());
     DbAddParameter(db, activity, string("Min. IDDD"), (float)m_minIddd, GetParameterFile());
     DbAddParameter(db, activity, string("Max. IDDD"), (float)m_maxIddd, GetParameterFile());
-    DbAddParameter(db, activity, string("FIFO errors (nominal)"), (float)m_nFifoErrors,
+    DbAddParameter(db, activity, string("FIFO errors (endurance)"), (float)m_nFifoErrors,
                    GetParameterFile());
-    DbAddParameter(db, activity, string("FIFO exceptions (nominal)"), (float)m_nFifoExceptions,
+    DbAddParameter(db, activity, string("FIFO exceptions (endurance)"), (float)m_nFifoExceptions,
                    GetParameterFile());
+    DbAddParameter(db, activity, string("Exceptions"), (float)m_nExceptions, GetParameterFile());
   }
   slash    = string(m_resultFile).find_last_of("/");
   fileName = string(m_resultFile).substr(slash + 1); // strip path
@@ -234,7 +245,14 @@ void TCycleResultHic::WriteToFile(FILE *fp)
   fprintf(fp, "Trips:                     %d\n", m_nTrips);
   fprintf(fp, "Min. number of chips:      %d\n", m_minWorkingChips);
   fprintf(fp, "Number of chip failures:   %d\n", m_nChipFailures);
+  fprintf(fp, "Number of exceptions:      %d\n", m_nExceptions);
   fprintf(fp, "Number of FIFO errors:     %d\n", m_nFifoErrors);
+  if (m_nFifoErrors > 0) {
+    fprintf(fp, "  Pattern 0x0000:          %d\n", m_nFifoErrors0);
+    fprintf(fp, "  Pattern 0x5555:          %d\n", m_nFifoErrors5);
+    fprintf(fp, "  Pattern 0xaaaa:          %d\n", m_nFifoErrorsa);
+    fprintf(fp, "  Pattern 0xffff:          %d\n", m_nFifoErrorsf);
+  }
   fprintf(fp, "Number of FIFO exceptions: %d\n", m_nFifoExceptions);
   fprintf(fp, "Average delta T:           %.1f\n", m_avDeltaT);
   fprintf(fp, "Maximum delta T:           %.1f\n", m_maxDeltaT);
@@ -255,7 +273,12 @@ void TCycleResultHic::Add(TCycleResultHic &aResult)
   m_nTrips += aResult.m_nTrips;
   m_nChipFailures += aResult.m_nChipFailures;
   m_nFifoErrors += aResult.m_nFifoErrors;
+  m_nFifoErrors0 += aResult.m_nFifoErrors0;
+  m_nFifoErrors5 += aResult.m_nFifoErrors5;
+  m_nFifoErrorsa += aResult.m_nFifoErrorsa;
+  m_nFifoErrorsf += aResult.m_nFifoErrorsf;
   m_nFifoExceptions += aResult.m_nFifoExceptions;
+  m_nExceptions += aResult.m_nExceptions;
 
   m_avDeltaT = (m_weight * m_avDeltaT + aResult.m_avDeltaT) / (m_weight + 1);
   m_avIdda   = (m_weight * m_avIdda + aResult.m_avIdda) / (m_weight + 1);

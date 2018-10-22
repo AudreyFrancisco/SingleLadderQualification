@@ -358,8 +358,8 @@ void MainWindow::open()
                   DbGetComponentTypeId(fDB, fDB->GetProjectId(), "Outer Layer CP") ||
               fHalfstavemodules.at(i).Type !=
                   DbGetComponentTypeId(fDB, fDB->GetProjectId(), "Middle Layer CP")) {
-            if (fHalfstavemodules.at(i).Position) {
-              int j    = fHalfstavemodules.at(i).Position - 1;
+            if (atoi(fHalfstavemodules.at(i).Position.c_str())) {
+              int j    = atoi(fHalfstavemodules.at(i).Position.c_str()) - 1;
               int size = 0;
               size     = fHicnames.size();
               for (int d = 0; d < size; d++) {
@@ -385,7 +385,7 @@ void MainWindow::open()
       fHicnames.clear();
       const int nModules = (fNumberofscan == OBHalfStaveOLFAST) ? 7 : 4;
       for (int i = 0; i < nModules; ++i)
-        fHicnames.push_back(QString("Module%i").arg(i));
+        fHicnames.push_back(QString("Module%1").arg(i));
     }
 
     std::vector<std::string> hicNames;
@@ -989,6 +989,7 @@ void MainWindow::fillingOBvectors()
 
   fConfig->GetScanConfig()->SetVoltageScale(1.1);
   AddScan(STDigital);
+
   fConfig->GetScanConfig()->SetVoltageScale(0.9);
   AddScan(STDigital);
   fConfig->GetScanConfig()->SetVoltageScale(1.0);
@@ -1054,6 +1055,15 @@ void MainWindow::performtests()
   fInitialScans = fScanVector.size();
 
   for (unsigned int i = 0; i < fScanVector.size(); i++) {
+    // geting initial scan type and parameters
+    std::vector<TScanType>         scantypelist;
+    std::vector<TScanParameters *> parameterlist;
+    for (unsigned int d = 0; d < fScanTypes.size(); d++) {
+      scantypelist.push_back(fScanTypes.at(d));
+      parameterlist.push_back(fScanParameters.at(d));
+    }
+    fAbortSingleScan = false;
+
     std::chrono::milliseconds delay(200);
     try {
       fExceptionthrown = false;
@@ -1088,6 +1098,7 @@ void MainWindow::performtests()
         //   printf("Trying to finalize the analysis\n");
         //   fAnalysisVector.at(i)->Finalize();
         try {
+          // if (i ==14) throw std::invalid_argument("Invalid syntax.");
           auto future_init = std::async(std::launch::async, &TScan::Init, fScanVector[i]);
           while (future_init.wait_for(delay) != std::future_status::ready) {
             if (fScanToRowMap.count(i) > 0)
@@ -1149,21 +1160,154 @@ void MainWindow::performtests()
             exept->append("The " + (QString)fScanVector.at(i)->GetName() +
                           " has thrown the exception " + fExceptiontext);
             win->show();
-            TScanParameters *par;
-            par = fScanVector.at(i)->GetParameters();
-            AddScan(GetScanType(i));
-            fScanVector.back()->SetParameters(par);
+            // erase next scans from vectors and elements from maps
+            fScanVector.erase(fScanVector.begin() + i + 1, fScanVector.end());
+            fAnalysisVector.erase(fAnalysisVector.begin() + i + 1, fAnalysisVector.end());
+            fresultVector.erase(fresultVector.begin() + i + 1, fresultVector.end());
+            fScanParameters.erase(fScanParameters.begin() + i + 1, fScanParameters.end());
+            fScanTypes.erase(fScanTypes.begin() + i + 1, fScanTypes.end());
+            int indexintable = 0;
+            for (unsigned int e = 0; e < fScanVector.size(); e++) {
+              if (fScanVector.at(e) != 0) {
+                indexintable++;
+              }
+            }
+            ui->testTable->setRowCount(indexintable);
+
+            for (std::map<int, int>::iterator it = fScanToRowMap.begin(); it != fScanToRowMap.end();
+                 it++) {
+              if (it->first > (int)i) fScanToRowMap.erase(it);
+            }
+            for (std::map<int, int>::iterator it = fRowToScanMap.begin(); it != fRowToScanMap.end();
+                 it++) {
+              if (it->first > (int)i) fRowToScanMap.erase(it);
+            }
+            // Add same scan
+            if (fScanVector.at(i) == 0) {
+              if (GetScanType(i) == STClearMask) {
+                AddScan(GetScanType(i));
+              }
+              else {
+                fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+                AddScan(GetScanType(i), fresultVector.at(i - 1));
+              }
+            }
+            else {
+
+              TScanParameters *par;
+              par = fScanVector.at(i)->GetParameters();
+              AddScan(GetScanType(i));
+              fScanVector.back()->SetParameters(par);
+            }
+
+            // Add rest of the scans
+            for (unsigned int k = i + 1; k < scantypelist.size(); k++) {
+              if (scantypelist.at(k) == STApplyVCASN || scantypelist.at(k) == STApplyITHR ||
+                  scantypelist.at(k) == STApplyMask || scantypelist.at(k) == STClearMask) {
+                if (scantypelist.at(k) == STClearMask) {
+                  AddScan(scantypelist.at(k));
+                }
+                else {
+                  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+                  AddScan(scantypelist.at(k), fresultVector.back());
+                }
+              }
+              else {
+
+                AddScan(scantypelist.at(k));
+                fScanVector.back()->SetParameters(parameterlist.at(k));
+              }
+            }
+            // Change naming on table
+            std::map<int, int>::iterator iter;
+            int                          u = 0;
+            for (iter = fScanToRowMap.begin(); iter != fScanToRowMap.end(); iter++) {
+              ui->testTable->item(u, 0)->setText(fScanVector.at(iter->first)->GetName());
+              u++;
+            }
+
             fExtraScans++;
           }
 
           else {
             notifyuser(i);
             if (fTestAgain) {
-              TScanParameters *par;
-              par = fScanVector.at(i)->GetParameters();
-              AddScan(GetScanType(i));
-              fScanVector.back()->SetParameters(par);
+              // erase next scans from vectors and elements from maps
+              fScanVector.erase(fScanVector.begin() + i + 1, fScanVector.end());
+              fAnalysisVector.erase(fAnalysisVector.begin() + i + 1, fAnalysisVector.end());
+              fresultVector.erase(fresultVector.begin() + i + 1, fresultVector.end());
+              fScanParameters.erase(fScanParameters.begin() + i + 1, fScanParameters.end());
+              fScanTypes.erase(fScanTypes.begin() + i + 1, fScanTypes.end());
+              int indexintable = 0;
+              for (unsigned int e = 0; e < fScanVector.size(); e++) {
+                if (fScanVector.at(e) != 0) {
+                  indexintable++;
+                }
+              }
+              ui->testTable->setRowCount(indexintable);
+              for (std::map<int, int>::iterator it = fScanToRowMap.begin();
+                   it != fScanToRowMap.end(); it++) {
+                if (it->first > (int)i) fScanToRowMap.erase(it);
+              }
+              for (std::map<int, int>::iterator it = fRowToScanMap.begin();
+                   it != fRowToScanMap.end(); it++) {
+                if (it->first > (int)i) fRowToScanMap.erase(it);
+              }
+              // Add same scan
+              if (fScanVector.at(i) == 0) {
+                if (GetScanType(i) == STClearMask) {
+                  AddScan(GetScanType(i));
+                }
+                else {
+                  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+                  AddScan(GetScanType(i), fresultVector.at(i - 1));
+                }
+              }
+              else {
+                TScanParameters *par;
+                par = fScanVector.at(i)->GetParameters();
+                AddScan(GetScanType(i));
+                fScanVector.back()->SetParameters(par);
+              }
+
+              // Add rest of the scans
+              for (unsigned int k = i + 1; k < scantypelist.size(); k++) {
+                if (scantypelist.at(k) == STApplyVCASN || scantypelist.at(k) == STApplyITHR ||
+                    scantypelist.at(k) == STApplyMask || scantypelist.at(k) == STClearMask) {
+                  if (scantypelist.at(k) == STClearMask) {
+                    AddScan(scantypelist.at(k));
+                  }
+                  else {
+                    fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+                    AddScan(scantypelist.at(k), fresultVector.back());
+                  }
+                }
+                else {
+                  AddScan(scantypelist.at(k));
+                  fScanVector.back()->SetParameters(parameterlist.at(k));
+                }
+              }
+
+              // Change naming on table
+              std::map<int, int>::iterator iter;
+              int                          u = 0;
+              for (iter = fScanToRowMap.begin(); iter != fScanToRowMap.end(); iter++) {
+                ui->testTable->item(u, 0)->setText(fScanVector.at(iter->first)->GetName());
+                u++;
+              }
               fExtraScans++;
+            }
+            if (fAbortSingleScan) {
+              if (fresultVector.at(i) != 0) {
+                for (unsigned int ihic = 0; ihic < fHICs.size(); ihic++) {
+
+                  TScanResultHic *hicResult;
+                  hicResult = fresultVector.at(i)->GetHicResult(fHICs.at(ihic)->GetDbId());
+                  if (hicResult != 0) {
+                    hicResult->SetClassification(CLASS_ABORTED);
+                  }
+                }
+              }
             }
           }
         }
@@ -1985,6 +2129,7 @@ void MainWindow::ClearVectors()
   fAnalysisVector.clear();
   for (auto res : fresultVector)
     delete res;
+  fScanParameters.clear();
   fresultVector.clear();
   fScanTypes.clear();
 }
@@ -2605,6 +2750,12 @@ void MainWindow::AddScan(TScanType scanType, TScanResult *aResult)
     fAnalysisVector.push_back(scanObjects.analysis);
     fresultVector.push_back(scanObjects.result);
     fScanTypes.push_back(scanType);
+    if (fScanVector.back() == 0) {
+      fScanParameters.push_back(0);
+    }
+    else {
+      fScanParameters.push_back(fScanVector.back()->GetParameters());
+    }
   }
 
   if (scanObjects.hasButton) {
@@ -3084,7 +3235,6 @@ void MainWindow::fillingHSscans()
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
   AddScan(STClearMask);
-
   for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
     fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 0);
   }
@@ -3252,4 +3402,13 @@ void MainWindow::button_fEndurancemodules_clicked(int index)
     if (fChips.at(i)->GetHic() == fSelectedHic)
       color(side, pos, fChips.at(i)->GetConfig()->IsEnabled());
   }
+}
+
+void MainWindow::abortscan()
+{
+
+  fAbortSingleScan = true;
+  fProgresswindow->close();
+  delete fProgresswindow;
+  fProgresswindow = nullptr;
 }

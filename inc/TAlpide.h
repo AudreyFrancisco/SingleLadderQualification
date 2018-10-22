@@ -184,6 +184,8 @@ public:
   int WriteRegister(uint16_t address, uint16_t value, bool verify = false);
   int ModifyRegisterBits(Alpide::TRegister address, uint8_t lowBit, uint8_t nBits, uint16_t value,
                          bool verify = false);
+  int ModifyRegisterBits(uint16_t address, uint8_t lowBit, uint8_t nBits, uint16_t value,
+                         bool verify = false);
 
   void SetEnable(bool Enable);
   // int SendOpCode         (Alpide::TOpCode opcode);

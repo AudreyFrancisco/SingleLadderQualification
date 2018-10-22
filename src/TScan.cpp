@@ -579,6 +579,11 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
       if (boardInfo.eventOverSizeError) {
         std::cout << "Found oversized event, truncated in MOSAIC" << std::endl;
         m_errorCount.nOversizeEvent++;
+        FILE *fTruncated = fopen("TruncatedEvent.dat", "w");
+        for (int iByte = 0; iByte < n_bytes_data + 1; ++iByte) {
+          fprintf(fTruncated, "%02x ", (int)buffer[iByte]);
+        }
+        fclose(fTruncated);
       }
       int n_bytes_chipevent = n_bytes_data - n_bytes_header; //-n_bytes_trailer;
       if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
