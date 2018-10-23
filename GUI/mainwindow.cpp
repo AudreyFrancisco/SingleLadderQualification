@@ -291,8 +291,8 @@ void MainWindow::open()
                   DbGetComponentTypeId(fDB, fDB->GetProjectId(), "Outer Layer CP") ||
               fHalfstavemodules.at(i).Type !=
                   DbGetComponentTypeId(fDB, fDB->GetProjectId(), "Middle Layer CP")) {
-            if (fHalfstavemodules.at(i).Position) {
-              int j    = fHalfstavemodules.at(i).Position - 1;
+            if (atoi(fHalfstavemodules.at(i).Position.c_str())) {
+              int j    = atoi(fHalfstavemodules.at(i).Position.c_str()) - 1;
               int size = 0;
               size     = fHicnames.size();
               for (int d = 0; d < size; d++) {

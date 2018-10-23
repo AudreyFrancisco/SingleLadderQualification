@@ -48,7 +48,7 @@ CONFIGFILENAME = os.path.dirname(os.path.realpath(__file__)) +"/DBConfig.cfg"
 
 #  ***  TO CHANGE IN ORDER TO SWITCH FROM TEST TO PRODUCTION DB ***
 
-# WSDLDBAPIURL = 'https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx?WSDL'
+#WSDLDBAPIURL = 'https://test-alucmsapi.web.cern.ch/AlucmswebAPI.asmx?WSDL'
 WSDLDBAPIURL = 'https://alucmsapi.web.cern.ch/AlucmswebAPI.asmx?WSDL'
 
 DEFAULTPROJECT = "ITS_TEST"
