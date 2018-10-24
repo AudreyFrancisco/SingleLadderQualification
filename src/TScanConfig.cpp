@@ -18,6 +18,7 @@ TScanConfig::TScanConfig()
   m_autorepeat = AUTOREPEAT;
   m_maxrepeat  = MAXREPEAT;
   m_recovery   = RECOVERY;
+  m_rsync      = RSYNC;
 
   m_nInj       = NINJ;
   m_nTrig      = NTRIG;
@@ -192,6 +193,7 @@ void TScanConfig::InitParamMap()
   fSettings["AUTOREPEAT"] = &m_autorepeat;
   fSettings["MAXREPEAT"]  = &m_maxrepeat;
   fSettings["RECOVERY"]   = &m_recovery;
+  fSettings["RSYNC"]      = &m_rsync;
 
   fSettings["NINJ"]         = &m_nInj;
   fSettings["NTRIG"]        = &m_nTrig;

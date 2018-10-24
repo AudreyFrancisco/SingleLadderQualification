@@ -1398,7 +1398,8 @@ void MainWindow::attachtodatabase()
           }
         }
         if (!fWrite) {
-          WriteToEos(fHICs.at(i)->GetDbId(), uri, true);
+          WriteToEos(fHICs.at(i)->GetDbId(), uri,
+                     (fConfig->GetScanConfig()->GetParamValue("RSYNC") == 1));
         }
         else {
           WriteToEos(fHICs.at(i)->GetDbId(), uri, false);
