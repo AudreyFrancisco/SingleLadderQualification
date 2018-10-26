@@ -165,9 +165,14 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
         std::cout << std::endl;
         std::cout << "  Trigger counters per chip (chip order): ";
         for (unsigned int i = 0; i < m_chips.size(); i++) {
-          uint16_t value;
-          m_chips.at(i)->ReadRegister(Alpide::REG_FROMU_STATUS1, value);
-          std::cout << value << " ";
+          if (m_chips.at(i)->GetConfig()->IsEnabled()) {
+            uint16_t value;
+            m_chips.at(i)->ReadRegister(Alpide::REG_FROMU_STATUS1, value);
+            std::cout << m_chips.at(i)->GetConfig()->GetChipId() << ": " << value << " ";
+          }
+          else {
+            std::cout << m_chips.at(i)->GetConfig()->GetChipId() << ": disabled ";
+          }
         }
         std::cout << std::endl;
         itrg = nTriggers * m_enabled[iboard];
