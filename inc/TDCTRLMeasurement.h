@@ -15,6 +15,7 @@ private:
   int      m_boardIndex;
   int      m_region;
   int      m_offset;
+  int      m_disableManchesterEncoding;
 
   int  GetChipById(std::vector<TAlpide *> chips, int previousId);
   void ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue, bool &exception);
