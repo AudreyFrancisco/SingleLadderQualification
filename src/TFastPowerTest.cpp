@@ -54,6 +54,8 @@ void TFastPowerTest::Init()
 
   sprintf(m_config->GetfNameSuffix(), "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100,
           now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+
+  std::cout << "Output file time suffix: " << m_config->GetfNameSuffix() << std::endl;
 }
 
 void TFastPowerTest::PrepareStep(int loopIndex)

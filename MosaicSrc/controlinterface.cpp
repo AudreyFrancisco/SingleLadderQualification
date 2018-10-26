@@ -157,29 +157,26 @@ void ControlInterface::execute()
 
     // check the read results
     for (int i = 0; i < numReadRequest; i++) {
-      uint32_t d        = readReqest[i].IPBusReadData;
-      uint8_t  rxChipID = (d >> 16) & 0xff;
-      uint8_t  rxFlags  = (d >> 24) & 0x0f;
-
+      uint32_t          d        = readReqest[i].IPBusReadData;
+      uint8_t           rxChipID = (d >> 16) & 0xff;
+      uint8_t           rxFlags  = (d >> 24) & 0x0f;
+      std::stringstream ss;
+      ss << std::hex << readReqest[i].address;
 
       // check the flags
       if ((rxFlags & FLAG_SYNC_BIT) == 0) {
-        std::stringstream ss;
-        ss << std::hex << readReqest[i].address;
         errMsg = "Sync error reading data, rxChipID: " + std::to_string(static_cast<int>(rxChipID));
         errMsg += ". txChipID: " + std::to_string(static_cast<int>(readReqest[i].chipID));
         errMsg += ". Address: 0x" + ss.str();
         throw PControlInterfaceError(errMsg);
       }
       if ((rxFlags & FLAG_CHIPID_BIT) == 0) {
-        std::stringstream ss;
         errMsg = "No ChipID reading data, rxChipID: " + std::to_string(static_cast<int>(rxChipID));
         errMsg += ". txChipID: " + std::to_string(static_cast<int>(readReqest[i].chipID));
         errMsg += ". Address: 0x" + ss.str();
         throw PControlInterfaceError(errMsg);
       }
       if ((rxFlags & FLAG_DATAL_BIT) == 0) {
-        std::stringstream ss;
         errMsg = "No Data Low byte reading data, rxChipID: " +
                  std::to_string(static_cast<int>(rxChipID));
         errMsg += ". txChipID: " + std::to_string(static_cast<int>(readReqest[i].chipID));
@@ -187,7 +184,6 @@ void ControlInterface::execute()
         throw PControlInterfaceError(errMsg);
       }
       if ((rxFlags & FLAG_DATAH_BIT) == 0) {
-        std::stringstream ss;
         errMsg = "No Data High byte reading data, rxChipID: " +
                  std::to_string(static_cast<int>(rxChipID));
         errMsg += ". txChipID: " + std::to_string(static_cast<int>(readReqest[i].chipID));
@@ -196,7 +192,6 @@ void ControlInterface::execute()
       }
       // check the sender
       if (rxChipID != readReqest[i].chipID) {
-        std::stringstream ss;
         errMsg = "ChipID mismatch, rxChipID: " + std::to_string(static_cast<int>(rxChipID)) +
                  ", is not equal to replied chip ID: " +
                  std::to_string(static_cast<int>(readReqest[i].chipID));

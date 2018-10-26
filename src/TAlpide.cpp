@@ -1,4 +1,5 @@
 #include "TAlpide.h"
+#include "../MosaicSrc/pexception.h"
 #include "TReadoutBoard.h"
 
 #include <iostream>
@@ -496,38 +497,114 @@ float TAlpide::ReadAnalogueVoltage()
 
   bool AVDD_saturated = false;
 
-  uint16_t           theResult = 0;
-  const unsigned int nSamples  = 30;
+  uint16_t           theResult  = 0;
+  const unsigned int nSamples   = 20;
+  const unsigned int nAttempts  = 30;
+  unsigned int       repetition = 0;
+  unsigned int       attempts   = 0;
 
   // AVDD direct
-  for (unsigned int repetition = 0; repetition < nSamples; ++repetition) {
-    SetTheDacMonitor(Alpide::REG_ANALOGMON);
-    SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA,
-                          Alpide::RAMP_1us);
-    usleep(5000);
-    GetReadoutBoard()->SendCommand(Alpide::COMMAND_ADCMEASURE, this);
-    usleep(5000);
-    ReadRegister(Alpide::REG_ADC_AVSS, theResult);
-    if (theResult == 1055) AVDD_saturated = true;
-    AVDD_direct +=
-        2. * ((float)theResult - (float)(GetADCOffset())) * 0.823e-3; // first approximation
+  while (repetition < nSamples && !AVDD_saturated && attempts < nAttempts) {
+    try {
+      SetTheDacMonitor(Alpide::REG_ANALOGMON);
+      SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_AVDD, Alpide::COMP_296uA,
+                            Alpide::RAMP_1us);
+      usleep(5000);
+      GetReadoutBoard()->SendCommand(Alpide::COMMAND_ADCMEASURE, this);
+      usleep(5000);
+      ReadRegister(Alpide::REG_ADC_AVSS, theResult);
+      if (theResult == 1055) AVDD_saturated = true;
+      AVDD_direct +=
+          2. * ((float)theResult - (float)(GetADCOffset())) * 0.823e-3; // first approximation
+      ++repetition;
+    }
+    catch (exception &e) {
+      std::cerr << e.what() << std::endl;
+    }
+    ++attempts;
   }
-  AVDD_direct /= nSamples;
+  AVDD_direct = (repetition == 0) ? -1. : AVDD_direct / repetition;
+
+  if (attempts == nAttempts)
+    throw PControlInterfaceError("Repeated read error during analogue voltage readout");
+
+  if (AVDD_direct < 1.7 && !AVDD_saturated) return AVDD_direct;
 
   // AVDD via VTEMP @ 200
   WriteRegister(Alpide::REG_VTEMP, 200);
   usleep(5000);
 
-  for (unsigned int repetition = 0; repetition < nSamples; ++repetition) {
+  repetition = 0;
+  attempts   = 0;
+  while (repetition < nSamples && attempts < nAttempts) {
     // calculated AVDD based on VTEMP
-    AVDD_VTEMP += ReadDACVoltage(Alpide::REG_VTEMP) / 0.772 + 0.023;
+    try {
+      AVDD_VTEMP += ReadDACVoltage(Alpide::REG_VTEMP) / 0.772 + 0.023;
+      ++repetition;
+    }
+    catch (exception &e) {
+      std::cerr << e.what() << std::endl;
+    }
+    ++attempts;
   }
-  AVDD_VTEMP /= nSamples;
+  AVDD_VTEMP = (repetition == 0) ? -1. : AVDD_VTEMP / repetition;
 
-  if (AVDD_direct < 1.7 && !AVDD_saturated)
-    return AVDD_direct;
-  else
-    return AVDD_VTEMP;
+  if (attempts == nAttempts)
+    throw PControlInterfaceError("Repeated read error during indirect analogue voltage readout");
+
+  return AVDD_VTEMP;
+}
+
+/* ------------------------------------------------------
+ * Reads the digital supply voltage by means of internal ADC
+ *
+ * Returns  : the value in Volts.
+ *
+ * Note  : if this was the first measure after the chip
+ *         configuration phase, a calibration will be
+ *         automatically executed.
+ *
+ */
+float TAlpide::ReadDigitalVoltage()
+{
+
+  if (fADCOffset == -1) { // needs calibration
+    CalibrateADC();
+  }
+
+  float DVDD_direct = 0.;
+
+  uint16_t           theResult  = 0;
+  const unsigned int nSamples   = 20;
+  const unsigned int nAttempts  = 30;
+  unsigned int       repetition = 0;
+  unsigned int       attempts   = 0;
+
+  // DVDD direct
+  while (repetition < nSamples && attempts < nAttempts) {
+    try {
+      SetTheDacMonitor(Alpide::REG_ANALOGMON);
+      SetTheADCCtrlRegister(Alpide::MODE_MANUAL, Alpide::INP_DVDD, Alpide::COMP_296uA,
+                            Alpide::RAMP_1us);
+      usleep(5000);
+      GetReadoutBoard()->SendCommand(Alpide::COMMAND_ADCMEASURE, this);
+      usleep(5000);
+      ReadRegister(Alpide::REG_ADC_AVSS, theResult);
+      DVDD_direct +=
+          2. * ((float)theResult - (float)(GetADCOffset())) * 0.823e-3; // first approximation
+      ++repetition;
+    }
+    catch (exception &e) {
+      std::cerr << e.what() << std::endl;
+    }
+    ++attempts;
+  }
+  DVDD_direct = (repetition == 0) ? -1. : DVDD_direct / repetition;
+
+  if (attempts == nAttempts)
+    throw PControlInterfaceError("Repeated read error during indirect analogue voltage readout");
+
+  return DVDD_direct;
 }
 
 /* ------------------------------------------------------
