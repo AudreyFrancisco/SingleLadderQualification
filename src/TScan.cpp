@@ -63,6 +63,8 @@ void TScan::Init()
   sprintf(m_config->GetfNameSuffix(), "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100,
           now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 
+  std::cout << "Output file time suffix: " << m_config->GetfNameSuffix() << std::endl;
+
   // Power on HIC if not yet done (PowerOn() checks if already powered)
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
@@ -107,7 +109,25 @@ void TScan::Init()
               &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipTempsStart));
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipStart =
           m_hics.at(ihic)->GetAnalogueVoltage(
-              &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipVoltagesStart));
+              &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())
+                    ->m_chipAnalogueVoltagesStart));
+      if (m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipStart < 1.6) {
+        std::cerr << std::endl
+                  << "W A R N I N G :"
+                  << "Analogue voltage at HIC " << m_hics.at(ihic)->GetDbId()
+                  << " below 1.6V! Please check your setup" << std::endl
+                  << std::endl;
+      }
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())
+          ->m_vdddChipStart = m_hics.at(ihic)->GetDigitalVoltage(&(
+          m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipDigitalVoltagesStart));
+      if (m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddChipStart < 1.6) {
+        std::cerr << std::endl
+                  << "W A R N I N G :"
+                  << "Digital voltage at HIC " << m_hics.at(ihic)->GetDbId()
+                  << " below 1.6V! Please check your setup" << std::endl
+                  << std::endl;
+      }
     }
     catch (std::exception &e) {
       std::cout << "Init: Exception " << e.what() << " when reading chip temp / currents for HIC "
@@ -243,9 +263,26 @@ void TScan::Terminate()
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd =
           m_hics.at(ihic)->GetTemperature(
               &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipTempsEnd));
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipEnd =
-          m_hics.at(ihic)->GetAnalogueVoltage(
-              &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipVoltagesEnd));
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())
+          ->m_vddaChipEnd = m_hics.at(ihic)->GetAnalogueVoltage(&(
+          m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipAnalogueVoltagesEnd));
+      if (m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipEnd < 1.6) {
+        std::cerr << std::endl
+                  << "W A R N I N G :"
+                  << "Analogue voltage at HIC " << m_hics.at(ihic)->GetDbId()
+                  << " below 1.6V! Please check your setup" << std::endl
+                  << std::endl;
+      }
+      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())
+          ->m_vdddChipEnd = m_hics.at(ihic)->GetDigitalVoltage(
+          &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipDigitalVoltagesEnd));
+      if (m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddChipEnd < 1.6) {
+        std::cerr << std::endl
+                  << "W A R N I N G :"
+                  << "Digital voltage at HIC " << m_hics.at(ihic)->GetDbId()
+                  << " below 1.6V! Please check your setup" << std::endl
+                  << std::endl;
+      }
     }
     catch (std::exception &e) {
       std::cout << "Terminate: exception " << e.what()
@@ -652,22 +689,22 @@ void TScan::WriteConditions(const char *fName, THic *aHic)
   fprintf(fp, "Firmware version: %s\n", m_conditions.m_fwVersion);
   fprintf(fp, "Software version: %s\n\n", m_conditions.m_swVersion);
 
-  fprintf(fp, "VDDD (start): %.3f A\n",
+  fprintf(fp, "VDDD (start): %.3f V\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddStart);
-  fprintf(fp, "VDDD (end):   %.3f A\n",
+  fprintf(fp, "VDDD (end):   %.3f V\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddEnd);
-  fprintf(fp, "VDDA (start): %.3f A\n",
+  fprintf(fp, "VDDA (start): %.3f V\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaStart);
-  fprintf(fp, "VDDA (end):   %.3f A\n",
+  fprintf(fp, "VDDA (end):   %.3f V\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaEnd);
 
-  fprintf(fp, "VDDD set (start): %.3f A\n",
+  fprintf(fp, "VDDD set (start): %.3f V\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddSetStart);
-  fprintf(fp, "VDDD set (end):   %.3f A\n",
+  fprintf(fp, "VDDD set (end):   %.3f V\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddSetEnd);
-  fprintf(fp, "VDDA set (start): %.3f A\n",
+  fprintf(fp, "VDDA set (start): %.3f V\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaSetStart);
-  fprintf(fp, "VDDA set (end):   %.3f A\n",
+  fprintf(fp, "VDDA set (end):   %.3f V\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaSetEnd);
 
   fprintf(fp, "IDDD (start): %.3f A\n",
@@ -679,43 +716,65 @@ void TScan::WriteConditions(const char *fName, THic *aHic)
   fprintf(fp, "IDDA (end):   %.3f A\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_iddaEnd);
 
-  fprintf(fp, "Analogue Supply Voltage (on-chip, start): %.3f\n",
+  fprintf(fp, "Analogue Supply Voltage (on-chip, start): %.3f V\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaChipStart);
-  fprintf(fp, "Analogue Supply Voltage (on-chip, end):   %.3f\n",
+  fprintf(fp, "Analogue Supply Voltage (on-chip, end):   %.3f V\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vddaChipEnd);
-  fprintf(fp, "Temp (on-chip, start): %.1f\n",
+  fprintf(fp, "Digital Supply Voltage (on-chip, saturating at 1.72V, start): %.3f V\n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddChipStart);
+  fprintf(fp, "Digital Supply Voltage (on-chip, saturating at 1.72V, end):   %.3fV \n",
+          m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddChipEnd);
+  fprintf(fp, "Temp (on-chip, start): %.1f degrees Celsius\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempStart);
-  fprintf(fp, "Temp (on-chip, end):   %.1f\n",
+  fprintf(fp, "Temp (on-chip, end):   %.1f degrees Celsius\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_tempEnd);
 
   fprintf(fp, "\nSingle chip values:\n\n");
 
   std::map<int, float>::iterator it;
 
-  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipVoltagesStart.begin();
-       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipVoltagesStart.end(); it++) {
-    fprintf(fp, "  Analogue voltage (start) on chip %d: %.3f\n", it->first, it->second);
+  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipAnalogueVoltagesStart.begin();
+       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipAnalogueVoltagesStart.end();
+       it++) {
+    fprintf(fp, "  Analogue voltage (start) on chip %d: %.3f V\n", it->first, it->second);
   }
 
   fputs("\n", fp);
 
-  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipVoltagesEnd.begin();
-       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipVoltagesEnd.end(); it++) {
-    fprintf(fp, "  Analogue voltage (end) on chip %d: %.3f\n", it->first, it->second);
+  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipDigitalVoltagesStart.begin();
+       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipDigitalVoltagesStart.end();
+       it++) {
+    fprintf(fp, "  Digital voltage (start) on chip %d: %.3f V\n", it->first, it->second);
+  }
+
+  fputs("\n", fp);
+
+  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipAnalogueVoltagesEnd.begin();
+       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipAnalogueVoltagesEnd.end();
+       it++) {
+    fprintf(fp, "  Analogue voltage (end) on chip %d: %.3f V\n", it->first, it->second);
+  }
+
+  fputs("\n", fp);
+
+  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipDigitalVoltagesEnd.begin();
+       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipDigitalVoltagesEnd.end();
+       it++) {
+    fprintf(fp, "  Digital voltage (end) on chip %d: %.3f V\n", it->first, it->second);
   }
 
   fputs("\n", fp);
 
   for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipTempsStart.begin();
        it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipTempsStart.end(); it++) {
-    fprintf(fp, "  Temperature (start) on chip %d: %.3f\n", it->first, it->second);
+    fprintf(fp, "  Temperature (start) on chip %d: %.3f degrees Celsius\n", it->first, it->second);
   }
 
   fputs("\n", fp);
 
   for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipTempsEnd.begin();
        it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_chipTempsEnd.end(); it++) {
-    fprintf(fp, "  Temperature (end) on chip %d: %.3f\n", it->first, it->second);
+    fprintf(fp, "  Temperature (end) on chip %d: %.3f degrees Celsius\n", it->first, it->second);
   }
 
   fputs("\n", fp);

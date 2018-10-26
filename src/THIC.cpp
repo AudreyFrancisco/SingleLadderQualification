@@ -251,13 +251,24 @@ float THic::GetTemperature(std::map<int, float> *chipValues)
 
 float THic::GetAnalogueVoltage(std::map<int, float> *chipValues)
 {
+  return GetSupplyVoltage(true, chipValues);
+}
+
+float THic::GetDigitalVoltage(std::map<int, float> *chipValues)
+{
+  return GetSupplyVoltage(false, chipValues);
+}
+
+float THic::GetSupplyVoltage(bool analogueNotDigital /* = true */, std::map<int, float> *chipValues)
+{
   float result = 0;
   int   nChips = 0;
 
   if (chipValues) chipValues->clear();
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
-    float voltage = m_chips.at(i)->ReadAnalogueVoltage();
+    float voltage = (analogueNotDigital) ? m_chips.at(i)->ReadAnalogueVoltage()
+                                         : m_chips.at(i)->ReadDigitalVoltage();
     result += voltage;
     if (chipValues) {
       chipValues->insert(

@@ -70,10 +70,12 @@ public:
   int                        GetBbChannel() { return m_bbChannel; };
   void                       SwitchBias(bool on);
   float                      GetAnalogueVoltage(std::map<int, float> *chipValues = 0);
-  void                       AddClassification(THicClassification aClass, bool backBias);
-  THicClassification         GetClassification();
-  THicClassification         GetOldClassification() { return m_oldClass; };
-  void SetOldClassification(THicClassification aOldClass) { m_oldClass = aOldClass; };
+  float                      GetDigitalVoltage(std::map<int, float> *chipValues = 0);
+  float GetSupplyVoltage(bool analogueNotDigital = true, std::map<int, float> *chipValues = 0);
+  void  AddClassification(THicClassification aClass, bool backBias);
+  THicClassification GetClassification();
+  THicClassification GetOldClassification() { return m_oldClass; };
+  void               SetOldClassification(THicClassification aOldClass) { m_oldClass = aOldClass; };
 };
 
 class THicOB : public THic {

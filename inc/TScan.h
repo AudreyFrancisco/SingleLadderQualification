@@ -47,6 +47,8 @@ private:
   float                   m_tempEnd;
   float                   m_vddaChipStart;
   float                   m_vddaChipEnd;
+  float                   m_vdddChipStart;
+  float                   m_vdddChipEnd;
   float                   m_iddaStart;
   float                   m_iddaEnd;
   float                   m_idddStart;
@@ -59,8 +61,10 @@ private:
   float                   m_vddaSetEnd;
   float                   m_vdddSetStart;
   float                   m_vdddSetEnd;
-  std::map<int, float>    m_chipVoltagesStart;
-  std::map<int, float>    m_chipVoltagesEnd;
+  std::map<int, float>    m_chipAnalogueVoltagesStart;
+  std::map<int, float>    m_chipAnalogueVoltagesEnd;
+  std::map<int, float>    m_chipDigitalVoltagesStart;
+  std::map<int, float>    m_chipDigitalVoltagesEnd;
   std::map<int, float>    m_chipTempsStart;
   std::map<int, float>    m_chipTempsEnd;
   std::map<int, uint16_t> m_pllLockStart;

@@ -204,6 +204,7 @@ public:
                                  Alpide::TADCRampSpeed  RampSpeed);
   float    ReadTemperature();
   float    ReadAnalogueVoltage();
+  float    ReadDigitalVoltage();
   float    ReadDACVoltage(Alpide::TRegister ADac);
   float    ReadDACCurrent(Alpide::TRegister ADac);
 };

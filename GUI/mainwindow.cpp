@@ -663,6 +663,19 @@ void MainWindow::loadConfigFile(QByteArray configFilename)
 void MainWindow::doDebugScan(TScanType scanType)
 {
   fDebugWindow->hide();
+
+  std::string TestDir = fConfig->GetScanConfig()->GetTestDir();
+  if (const char *dataDir = std::getenv("ALPIDE_TEST_DATA"))
+    TestDir.insert(0, std::string(dataDir) + "/");
+  else
+    TestDir.insert(0, "Data/");
+  makeDir(TestDir.c_str());
+
+  for (unsigned int i = 0; i < fHICs.size(); i++) {
+    fHicnames.push_back(QString(fHICs.at(i)->GetDbId().c_str()));
+    makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
+  }
+
   ClearVectors();
   AddScan(scanType);
   fstopwriting = true;
