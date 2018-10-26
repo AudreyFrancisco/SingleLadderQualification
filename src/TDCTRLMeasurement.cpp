@@ -94,8 +94,13 @@ void TDctrlMeasurement::Init()
     if (pb) pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 
+  m_disableManchesterEncoding = -1;
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
+    if (m_disableManchesterEncoding == -1) {
+      m_disableManchesterEncoding = (m_chips.at(i)->GetConfig()->GetDisableManchester()) ? 1 : 0;
+    }
+    m_chips.at(i)->GetConfig()->SetDisableManchester(false);
     AlpideConfig::ConfigureCMU(m_chips.at(i));
   }
 
@@ -297,6 +302,14 @@ void TDctrlMeasurement::Execute()
 
 void TDctrlMeasurement::Terminate()
 {
+  if (m_disableManchesterEncoding == 1) {
+    for (unsigned int i = 0; i < m_chips.size(); i++) {
+      if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
+      m_chips.at(i)->GetConfig()->SetDisableManchester(true);
+      AlpideConfig::ConfigureCMU(m_chips.at(i));
+    }
+  }
+
   TScan::Terminate();
   scope.close();
 
