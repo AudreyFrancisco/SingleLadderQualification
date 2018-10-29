@@ -122,6 +122,8 @@ public:
   void     SetReceiverPatternCheck(size_t Aindex);
   void     ResetReceiverPatternCheck(size_t Aindex);
   uint32_t GetErrorCounter(size_t Aindex);
+  void     ResetReceiver(size_t Areceiver);
+  void     ResetAllReceivers();
 
 private:
   void init();
