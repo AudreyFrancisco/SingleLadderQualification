@@ -209,7 +209,7 @@ public:
   void               WriteHicClassToFile(std::string hicName);
   THicClassification GetScanClassification();
 
-  double DriverPreEmpFunc(); // JI
+  vector<double> DriverPreEmpFunc(); // JI
 };
 
 #endif

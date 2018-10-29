@@ -260,6 +260,7 @@ private slots:
   void StopScan();
   void fillingDriverTune(); // JI
 
+
   // void setVI(float * vcasn, float * ithr);
 };
 #endif // MAINWINDOW_H

@@ -390,10 +390,15 @@ void TScanAnalysis::DoCut(THicClassification &hicClass, THicClassification failC
   }
 }
 
-double TScanAnalysis::DriverPreEmpFunc() // JI
+vector<double> TScanAnalysis::DriverPreEmpFunc() // JI
 {
-  TErrorCounter errCount = ((TMaskScan *)m_scan)->GetErrorCount();
-  return errCount.n8b10b;
+  vector<double> errors;
+  TErrorCounter  errCount = ((TMaskScan *)m_scan)->GetErrorCount();
+  errors.push_back(errCount.n8b10b);
+  errors.push_back(errCount.nTimeout);
+  errors.push_back(errCount.nCorruptEvent);
+  errors.push_back(errCount.nOversizeEvent);
+  return errors;
 }
 
 int TScanResult::AddChipResult(common::TChipIndex idx, TScanResultChip *aChipResult)

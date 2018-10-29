@@ -685,29 +685,34 @@ void MainWindow::doDebugScan(TScanType scanType)
 void MainWindow::fillingDriverTune() // JI
 {
   ClearVectors();
-  vector<int> drivers = {3, 7, 11, 15};
-  vector<int> preEmps = {0, 3, 6, 9, 12, 15};
-  vector<int> n8b10b;
+  vector<int>            driverSettings = {1, 2, 3, 4, 5};  //, 11, 15};
+  vector<int>            preEmpSettings = {0, 3, 6, 9, 15}; //, 9, 12, 15};
+  vector<vector<double>> errors;
+  vector<int>            drivers, preEmps;
 
-  for (unsigned int i = 0; i < drivers.size(); i++) {
-    for (unsigned int j = 0; j < preEmps.size(); j++) {
-      fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", drivers[i]);
-      fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", preEmps[j]);
+  for (unsigned int i = 0; i < driverSettings.size(); i++) {
+    for (unsigned int j = 0; j < preEmpSettings.size(); j++) {
+      fConfig->GetScanConfig()->SetParamValue("READOUTDRIVER", driverSettings[i]);
+      fConfig->GetScanConfig()->SetParamValue("READOUTPREEMP", preEmpSettings[j]);
+      drivers.push_back(driverSettings[i]);
+      preEmps.push_back(preEmpSettings[j]);
       AddScan(STDigital);
     }
   }
   applytests();
 
   for (unsigned int k = 0; k < fAnalysisVector.size(); k++) {
-    n8b10b.push_back(fAnalysisVector[k]->DriverPreEmpFunc());
+    errors.push_back(fAnalysisVector[k]->DriverPreEmpFunc());
   }
 
   std::ofstream file;
   remove("driverTuning.dat");
   file.open("driverTuning.dat");
-  file << "Driver, Pre-Emphasis, n8b10b, \n";
+  file << "Driver, Pre-Emphasis, n8b10b, Timeouts, Corrupt events, Oversize events, \n";
   for (unsigned l = 0; l < fAnalysisVector.size(); l++) {
-    file << drivers[l] << ", " << preEmps[l] << ", " << n8b10b[l] << ", \n";
+    std::cout << "index l: " << l << std::endl;
+    file << drivers[l] << ", " << preEmps[l] << ", " << errors[l][0] << ", " << errors[l][1] << ", "
+         << errors[l][2] << ", " << errors[l][3] << ", \n";
   }
   file.close();
 
@@ -791,8 +796,7 @@ void MainWindow::fillingOBvectors()
 
 void MainWindow::performtests()
 {
-  fAddingScans = true;
-  fExtraScans  = 0;
+  fExtraScans = 0;
   qApp->processEvents();
   fNewScans.clear();
   fInitialScans = fScanVector.size();
@@ -882,6 +886,9 @@ void MainWindow::performtests()
 
         if (fExceptionthrown) {
           fScanVector.at(i)->ClearHistoQue();
+          if (fNumberofscan == OLDriverTune) { // JI
+            fAutoRepeat = false;
+          }
 
           if (fAutoRepeat && i < fScanVector.size() - 1 && fExtraScans < fMaxRepeat) {
             QDialog *       win   = new QDialog(this);
@@ -954,7 +961,7 @@ void MainWindow::performtests()
 
             fExtraScans++;
           }
-          else {
+          else if (fNumberofscan != OLDriverTune) {
             notifyuser(i);
             if (fTestAgain) {
               // erase next scans from vectors and elements from maps
@@ -1680,29 +1687,29 @@ void MainWindow::attachtodatabase()
         delete myactivity;
         myactivity = nullptr;
       }
-    }
 
-  } // for loops for hics
-  delete fDB;
-  fDB = 0x0;
-  for (unsigned int i = 0; i < fActivityResults.size(); i++) {
-    if (fActivityResults.at(i) != -1) {
-      fwritingdb = true;
+    } // for loops for hics
+    delete fDB;
+    fDB = 0x0;
+    for (unsigned int i = 0; i < fActivityResults.size(); i++) {
+      if (fActivityResults.at(i) != -1) {
+        fwritingdb = true;
+      }
+      else {
+        fwritingdb = false;
+        break;
+      }
     }
-    else {
-      fwritingdb = false;
-      break;
-    }
-  }
-  if (fwritingdb == false) {
-    if (!fDatabasefailure) {
-      fDatabasefailure = new Databasefailure(this);
-    }
+    if (fwritingdb == false) {
+      if (!fDatabasefailure) {
+        fDatabasefailure = new Databasefailure(this);
+      }
 
-    fDatabasefailure->assigningproblem(fErrorMessages);
-    fDatabasefailure->exec();
+      fDatabasefailure->assigningproblem(fErrorMessages);
+      fDatabasefailure->exec();
+    }
+    fWrite = true;
   }
-  fWrite = true;
 }
 
 void MainWindow::ClearVectors()
