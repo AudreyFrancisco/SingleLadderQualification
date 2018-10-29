@@ -123,9 +123,9 @@ void ALPIDErcv::reset()
             cout << "Reset reg:" << st << endl;
             getchar();
         #endif
-        if (!(st & RESET_GTP_DONE)
+        if (!(st & RESET_GTP_DONE) )
             throw PReceiverResetError("Timeout in transceiver reset");
-        if (!(st & RESET_ALIGNED)
+        if (!(st & RESET_ALIGNED) )
             throw PReceiverResetError("Timeout in bitstream synchonization");
     }
 }
