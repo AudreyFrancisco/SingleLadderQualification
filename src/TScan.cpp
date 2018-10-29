@@ -73,6 +73,8 @@ void TScan::Init()
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 
+  usleep(1000);
+
   // char dummy[10];
   // std::cout << "after power on, press enter to proceed" << std::endl;
   // std::cin >> dummy;
