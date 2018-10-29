@@ -31,40 +31,69 @@
 #ifndef ALPIDERCV_H
 #define ALPIDERCV_H
 
-#include "mwbbslave.h"
 #include <stdint.h>
+#include "mwbbslave.h"
 
-class ALPIDErcv : public MWbbSlave {
+
+
+class ALPIDErcv: public MWbbSlave
+{
 public:
-  ALPIDErcv();
-  ALPIDErcv(WishboneBus *wbbPtr, uint32_t baseAddress);
-  ~ALPIDErcv();
-  void setBusAddress(WishboneBus *wbbPtr, uint32_t baseAddress);
-  void addSetReg(uint16_t address, uint16_t val);
-  void addGetReg(uint16_t address, uint32_t *val);
-  void addEnable(bool d);
-  void addInvertInput(bool d);
+    ALPIDErcv();
+    ALPIDErcv(WishboneBus *wbbPtr, uint32_t baseAddress);
+	~ALPIDErcv();
+	void setBusAddress(WishboneBus *wbbPtr, uint32_t baseAddress);
+	void addSetReg(uint16_t address, uint16_t val);
+	void addGetReg(uint16_t address, uint32_t *val);
+	void addEnable(bool d);
+	void addInvertInput(bool d);
+	void reset();
 
-  // Access to transceiver RDP registers
-  void addSetRDPReg(uint16_t address, uint16_t val);
-  void addGetRDPReg(uint16_t address, uint32_t *val);
-  void addSetRDPRegField(uint16_t address, uint16_t size, uint16_t offset, uint16_t val);
+    // Access to transceiver RDP registers
+	void addSetRDPReg(uint16_t address, uint16_t val);
+	void addGetRDPReg(uint16_t address, uint32_t *val);
+	void addSetRDPRegField(uint16_t address, uint16_t size, uint16_t offset, uint16_t val);
 
-  // RX pattern check related functions
-  void addPRBSsetSel(uint8_t s);
-  void addPRBSreset();
-  void addGetPRBScounter(uint32_t *ctr);
+    // RX pattern check related functions
+    void addPRBSsetSel(uint8_t s);
+    void addPRBSreset();
+    void addGetPRBScounter(uint32_t *ctr);
 
-private: // WBB Slave registers map
-  enum regAddress_e { regOpMode = 0, regPrbs = 1, rdpBase = 0x00800000 };
+private:					// WBB Slave registers map
+	enum regAddress_e {
+		regOpMode		= 0,
+		regPrbs 		= 1,
+		regReset 		= 2,
+		rdpBase			= 0x00800000
+		};
 
-private:
-  enum opModeBits_e { OPMODE_RCVENABLE = (1 << 0), OPMODE_INVERT_POLARITY = (1 << 1) };
+	enum opModeBits_e {
+		OPMODE_RCVENABLE			= (1<<0),
+		OPMODE_INVERT_POLARITY		= (1<<1)
+	};
 
-  enum prbsBits_e { PRBS_RESET = (1 << 3), PRBS_SEL_MASK = 0x07, PRBS_SEL_SHIFT = 0 };
+	enum prbsBits_e {
+		PRBS_RESET      			= (1<<3),
+		PRBS_SEL_MASK          		= 0x07,
+		PRBS_SEL_SHIFT         		= 0
+	};
+
+	enum resetBits_e {
+		RESET_GTP_DONE     			= (1<<1),
+		RESET_ALIGNED      			= (1<<0),
+	};
 
 public:
-  enum prbsSel_e { PRBS_NONE = 0, PRBS_7 = 1, PRBS_15 = 2, PRBS_23 = 3, PRBS_31 = 4 };
+    enum prbsSel_e {
+        PRBS_NONE                   = 0,
+        PRBS_7                      = 1,
+        PRBS_15                     = 2,
+        PRBS_23                     = 3,
+        PRBS_31                     = 4
+    };
+
 };
+
+
 
 #endif // ALPIDERCV_H

@@ -595,7 +595,7 @@ void TReadoutBoardMOSAIC::WriteTransceiverDRP(size_t Aindex, uint16_t address, u
                                               bool execute)
 {
   if (Aindex >= MAX_MOSAICTRANRECV) {
-    std::cout << "Invalid Transceiver index " << Aindex << "\n";
+    std::cerr << "Invalid Transceiver index " << Aindex << "\n";
     return;
   }
   alpideRcv[Aindex]->addSetRDPReg(address, val);
@@ -617,7 +617,7 @@ void TReadoutBoardMOSAIC::WriteTransceiverDRPField(size_t Aindex, uint16_t addre
                                                    uint16_t offset, uint16_t value, bool execute)
 {
   if (Aindex >= MAX_MOSAICTRANRECV) {
-    std::cout << "Invalid Transceiver index " << Aindex << "\n";
+    std::cerr << "Invalid Transceiver index " << Aindex << "\n";
     return;
   }
   alpideRcv[Aindex]->addSetRDPRegField(address, size, offset, value);
@@ -636,7 +636,7 @@ void TReadoutBoardMOSAIC::ReadTransceiverDRP(size_t Aindex, uint16_t address, ui
                                              bool execute)
 {
   if (Aindex >= MAX_MOSAICTRANRECV) {
-    std::cout << "Invalid Transceiver index " << Aindex << "\n";
+    std::cerr << "Invalid Transceiver index " << Aindex << "\n";
     return;
   }
   alpideRcv[Aindex]->addGetRDPReg(address, value);
@@ -698,4 +698,33 @@ uint32_t TReadoutBoardMOSAIC::GetErrorCounter(size_t Aindex)
   return (errRegValue);
 }
 
+/*
+   Reset one Receiver
+
+   parameters: receiver  - Transceiver id
+*/
+void TReadoutBoardMOSAIC::ResetReceiver(size_t Areceiver)
+{
+  if (Areceiver >= MAX_MOSAICTRANRECV) {
+    std::cerr << "MOSAIC ResetReceiver : Invalid Transceiver index ! (" << Areceiver << ")"
+              << std::endl;
+    return;
+  }
+  std::cout << "MOSAIC ResetReceiver : reset the TranReceiver n." << Areceiver << std::endl;
+  alpideRcv[Areceiver]->reset();
+  return;
+}
+
+/*
+   Reset all the MOSAIC Receivers
+
+*/
+void TReadoutBoardMOSAIC::ResetAllReceivers()
+{
+  for(size_t i = 0; i < MAX_MOSAICTRANRECV; i++) {
+    std::cout << "MOSAIC ResetReceiver : reset the TranReceiver n." << i << std::endl;
+    alpideRcv[i]->reset();
+  }
+  return;
+}
 // ================================== EOF ========================================
