@@ -27,25 +27,37 @@
  * Written by Giuseppe De Robertis <Giuseppe.DeRobertis@ba.infn.it>, 2014.
  *
  */
-#include "alpidercv.h"
-#include "pexception.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <iostream>
+#include "pexception.h"
+#include "alpidercv.h"
 
-ALPIDErcv::ALPIDErcv() {}
 
-ALPIDErcv::ALPIDErcv(WishboneBus *wbbPtr, uint32_t baseAdd) : MWbbSlave(wbbPtr, baseAdd) {}
+ALPIDErcv::ALPIDErcv()
+{
+}
 
-ALPIDErcv::~ALPIDErcv() {}
+
+ALPIDErcv::ALPIDErcv(WishboneBus *wbbPtr, uint32_t baseAdd) :
+			MWbbSlave(wbbPtr, baseAdd)
+{
+}
+
+ALPIDErcv::~ALPIDErcv()
+{
+}
 
 //
 // set register
 //
 void ALPIDErcv::addSetReg(uint16_t address, uint16_t val)
 {
-  if (!wbb) throw PControlInterfaceError("No IPBus configured");
+	if (!wbb)
+		throw PControlInterfaceError("No IPBus configured");
 
-  wbb->addWrite(baseAddress + address, val);
+	wbb->addWrite(baseAddress+address, val);
 }
 
 //
@@ -53,9 +65,10 @@ void ALPIDErcv::addSetReg(uint16_t address, uint16_t val)
 //
 void ALPIDErcv::addGetReg(uint16_t address, uint32_t *val)
 {
-  if (!wbb) throw PControlInterfaceError("No IPBus configured");
+	if (!wbb)
+		throw PControlInterfaceError("No IPBus configured");
 
-  wbb->addRead(baseAddress + address, val);
+	wbb->addRead(baseAddress+address, val);
 }
 
 //
@@ -63,22 +76,70 @@ void ALPIDErcv::addGetReg(uint16_t address, uint32_t *val)
 //
 void ALPIDErcv::addEnable(bool d)
 {
-  wbb->addRMWbits(baseAddress + regOpMode, ~OPMODE_RCVENABLE, d ? OPMODE_RCVENABLE : 0);
+	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_RCVENABLE, d ? OPMODE_RCVENABLE : 0);
 }
 
 void ALPIDErcv::addInvertInput(bool d)
 {
-  wbb->addRMWbits(baseAddress + regOpMode, ~OPMODE_INVERT_POLARITY, d ? OPMODE_INVERT_POLARITY : 0);
+	wbb->addRMWbits(baseAddress+regOpMode, ~OPMODE_INVERT_POLARITY, d ? OPMODE_INVERT_POLARITY : 0);
 }
+
+// #define DEBUG_RESET
+void ALPIDErcv::reset()
+{
+    uint32_t mode;
+	uint32_t st;
+
+
+    #ifdef DEBUG_RESET
+	    addGetReg(regReset, &st);
+        wbb->execute();
+        if (st != (RESET_GTP_DONE | RESET_ALIGNED)){
+            cout << "Reset state is " << st << " before reset." << endl;
+        }
+    #endif
+
+    // Read mode register
+    addGetReg(regOpMode, &mode);
+    // Start reset process
+    addSetReg(regReset, 0);
+    wbb->execute();
+
+    if (!(mode & OPMODE_RCVENABLE)){
+        return;
+    }
+
+	// if receiver is anabled, wait up to 100 ms for transceiver reset done
+	long int init_try;
+	for (init_try=100; init_try>0; init_try--){
+		usleep(1000);
+		addGetReg(regReset, &st);
+        wbb->execute();
+		if (st == (RESET_GTP_DONE | RESET_ALIGNED))
+			break;
+	}
+	if (init_try==0){
+        #ifdef DEBUG_RESET
+            cout << "Reset reg:" << st << endl;
+            getchar();
+        #endif
+        if (!(st & RESET_GTP_DONE)
+            throw PReceiverResetError("Timeout in transceiver reset");
+        if (!(st & RESET_ALIGNED)
+            throw PReceiverResetError("Timeout in bitstream synchonization");
+    }
+}
+
 
 //
 // set RDP register
 //
 void ALPIDErcv::addSetRDPReg(uint16_t address, uint16_t val)
 {
-  if (!wbb) throw PControlInterfaceError("No IPBus configured");
+	if (!wbb)
+		throw PControlInterfaceError("No IPBus configured");
 
-  wbb->addWrite(baseAddress + rdpBase + address, val);
+	wbb->addWrite(baseAddress+rdpBase+address, val);
 }
 
 //
@@ -86,9 +147,10 @@ void ALPIDErcv::addSetRDPReg(uint16_t address, uint16_t val)
 //
 void ALPIDErcv::addGetRDPReg(uint16_t address, uint32_t *val)
 {
-  if (!wbb) throw PControlInterfaceError("No IPBus configured");
+	if (!wbb)
+		throw PControlInterfaceError("No IPBus configured");
 
-  wbb->addRead(baseAddress + rdpBase + address, val);
+	wbb->addRead(baseAddress+rdpBase+address, val);
 }
 
 //
@@ -96,34 +158,40 @@ void ALPIDErcv::addGetRDPReg(uint16_t address, uint32_t *val)
 //
 void ALPIDErcv::addSetRDPRegField(uint16_t address, uint16_t size, uint16_t offset, uint16_t val)
 {
-  uint16_t mask = ((1 << (size)) - 1) << offset;
+	uint16_t mask = ((1 << (size))-1) << offset;
 
-  val <<= offset;
-  val &= mask;
+	val <<= offset;
+	val &= mask;
 
-  if (!wbb) throw PControlInterfaceError("No IPBus configured");
+	if (!wbb)
+		throw PControlInterfaceError("No IPBus configured");
 
-  wbb->addRMWbits(baseAddress + rdpBase + address, ~mask, val);
+	wbb->addRMWbits(baseAddress+rdpBase+address, ~mask, val);
 }
 
 //
 //  PRBS related functions
 //
-#define RX_PRBS_ERR_CNT 0x015e // Address int transceiver DRP of RX error counter
+#define RX_PRBS_ERR_CNT			0x015e			// Address int transceiver DRP of RX error counter
 
 void ALPIDErcv::addPRBSsetSel(uint8_t s)
 {
-  if (!wbb) throw PControlInterfaceError("No IPBus configured");
+	if (!wbb)
+		throw PControlInterfaceError("No IPBus configured");
 
-  wbb->addRMWbits(baseAddress + regPrbs, ~PRBS_SEL_MASK, (s << PRBS_SEL_SHIFT));
+    wbb->addRMWbits(baseAddress+regPrbs, ~PRBS_SEL_MASK, (s<<PRBS_SEL_SHIFT));
 }
 
 void ALPIDErcv::addPRBSreset()
 {
-  if (!wbb) throw PControlInterfaceError("No IPBus configured");
+	if (!wbb)
+		throw PControlInterfaceError("No IPBus configured");
 
-  wbb->addRMWbits(baseAddress + regPrbs, ~PRBS_RESET, PRBS_RESET);
-  wbb->addRMWbits(baseAddress + regPrbs, ~PRBS_RESET, 0);
+    wbb->addRMWbits(baseAddress+regPrbs, ~PRBS_RESET, PRBS_RESET);
+    wbb->addRMWbits(baseAddress+regPrbs, ~PRBS_RESET, 0);
 }
 
-void ALPIDErcv::addGetPRBScounter(uint32_t *ctr) { addGetRDPReg(RX_PRBS_ERR_CNT, ctr); }
+void ALPIDErcv::addGetPRBScounter(uint32_t *ctr)
+{
+    addGetRDPReg(RX_PRBS_ERR_CNT, ctr);
+}
