@@ -36,7 +36,7 @@ PControlInterfaceError::PControlInterfaceError(const string &arg)
   m_controlInt = -1;
 }
 
-PReceiverResetError::PReceiverResetError(const string& arg)
+PReceiverResetError::PReceiverResetError(const string &arg)
 {
   msg = "Receiver reset Error: " + arg;
 }

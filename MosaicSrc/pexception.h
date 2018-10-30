@@ -49,8 +49,7 @@ public:
 };
 
 // Receiver reset errors
-class PReceiverResetError : public MException
-{
+class PReceiverResetError : public MException {
 public:
   explicit PReceiverResetError(const string& __arg);
 };
