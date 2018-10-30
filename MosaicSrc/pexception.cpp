@@ -40,4 +40,3 @@ PReceiverResetError::PReceiverResetError(const string &arg)
 {
   msg = "Receiver reset Error: " + arg;
 }
-
