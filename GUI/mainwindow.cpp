@@ -689,6 +689,7 @@ void MainWindow::fillingDriverTune() // JI
   vector<int>            preEmpSettings = {0, 3, 6, 9, 15}; //, 9, 12, 15};
   vector<vector<double>> errors;
   vector<int>            drivers, preEmps;
+  vector<double>         scanVoid = {4.04, 4.04, 4.04, 4.04}; // error 404 valid error not found
 
   for (unsigned int i = 0; i < driverSettings.size(); i++) {
     for (unsigned int j = 0; j < preEmpSettings.size(); j++) {
@@ -702,7 +703,12 @@ void MainWindow::fillingDriverTune() // JI
   applytests();
 
   for (unsigned int k = 0; k < fAnalysisVector.size(); k++) {
-    errors.push_back(fAnalysisVector[k]->DriverPreEmpFunc());
+    if (fScanVoid == false) {
+      errors.push_back(fAnalysisVector[k]->DriverPreEmpFunc());
+    }
+    else if (fScanVoid == true) {
+      errors.push_back(scanVoid);
+    }
   }
 
   std::ofstream file;
@@ -796,6 +802,7 @@ void MainWindow::fillingOBvectors()
 
 void MainWindow::performtests()
 {
+  fScanVoid   = false;
   fExtraScans = 0;
   qApp->processEvents();
   fNewScans.clear();
@@ -888,6 +895,7 @@ void MainWindow::performtests()
           fScanVector.at(i)->ClearHistoQue();
           if (fNumberofscan == OLDriverTune) { // JI
             fAutoRepeat = false;
+            fScanVoid   = true;
           }
 
           if (fAutoRepeat && i < fScanVector.size() - 1 && fExtraScans < fMaxRepeat) {
