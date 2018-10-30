@@ -81,7 +81,7 @@ void ALPIDErcv::reset()
 #ifdef DEBUG_RESET
   addGetReg(regReset, &st);
   wbb->execute();
-  if (st != (RESET_GTP_DONE | RESET_ALIGNED)){
+  if (st != (RESET_GTP_DONE | RESET_ALIGNED)) {
     cout << "Reset state is " << st << " before reset." << endl;
   }
 #endif
@@ -106,8 +106,8 @@ void ALPIDErcv::reset()
   }
   if (init_try == 0) {
 #ifdef DEBUG_RESET
-   cout << "Reset reg:" << st << endl;
-   getchar();
+    cout << "Reset reg:" << st << endl;
+    getchar();
 #endif
     if (!(st & RESET_GTP_DONE)) throw PReceiverResetError("Timeout in transceiver reset");
     if (!(st & RESET_ALIGNED)) throw PReceiverResetError("Timeout in bitstream synchonization");
