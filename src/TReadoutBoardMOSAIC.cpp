@@ -721,7 +721,7 @@ void TReadoutBoardMOSAIC::ResetReceiver(size_t Areceiver)
 */
 void TReadoutBoardMOSAIC::ResetAllReceivers()
 {
-  for(size_t i = 0; i < MAX_MOSAICTRANRECV; i++) {
+  for (size_t i = 0; i < MAX_MOSAICTRANRECV; i++) {
     std::cout << "MOSAIC ResetReceiver : reset the TranReceiver n." << i << std::endl;
     alpideRcv[i]->reset();
   }
