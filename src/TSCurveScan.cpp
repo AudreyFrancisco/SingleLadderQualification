@@ -273,8 +273,6 @@ void TSCurveScan::Init()
     ConfigureChip(m_chips.at(i));
   }
 
-  usleep(500);
-
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
@@ -282,8 +280,12 @@ void TSCurveScan::Init()
 
   for (const auto &rBoard : m_boards) {
     rBoard->SendOpCode(Alpide::OPCODE_RORST);
+    rBoard->StartRun();
+  }
+
+  for (const auto &rBoard : m_boards) {
     if (TReadoutBoardMOSAIC *rMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(rBoard)) {
-      rMOSAIC->StartRun();
+      rMOSAIC->ResetAllReceivers();
     }
   }
 
