@@ -107,14 +107,22 @@ void TDataTaking::Init()
     if (!(m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     ConfigureChip(m_chips.at(i));
   }
-  for (unsigned int i = 0; i < m_boards.size(); i++) {
-    m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
-    m_boards.at(i)->StartRun();
-  }
+
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
     if (!pb) continue;
     pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+  }
+
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
+    m_boards.at(i)->StartRun();
+  }
+
+  for (const auto &rBoard : m_boards) {
+    if (TReadoutBoardMOSAIC *rMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(rBoard)) {
+      rMOSAIC->ResetAllReceivers();
+    }
   }
 
   TScan::SaveStartConditions();
