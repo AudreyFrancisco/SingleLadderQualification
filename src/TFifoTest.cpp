@@ -93,7 +93,7 @@ void TFifoTest::Init()
 {
   CreateScanHisto();
 
-  TScan::Init();
+  InitBase(false);
   float voltageScale  = ((TFifoParameters *)m_parameters)->voltageScale;
   int   mlvdsStrength = ((TFifoParameters *)m_parameters)->mlvdsStrength;
   // scale voltage, send GRST, correct drop, configure chips, correct drop
@@ -133,6 +133,8 @@ void TFifoTest::Init()
       throw std::runtime_error("FIFO scan init: voltage appears to be off (Retry suggested)");
     }
   }
+
+  TScan::SaveStartConditions();
 }
 
 int TFifoTest::GetChipById(std::vector<TAlpide *> chips, int id)

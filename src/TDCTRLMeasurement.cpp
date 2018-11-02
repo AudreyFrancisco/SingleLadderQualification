@@ -80,7 +80,7 @@ void TDctrlMeasurement::Init()
 {
   CreateScanHisto();
 
-  TScan::Init();
+  InitBase(false);
 
   InitScope();
 
@@ -108,6 +108,8 @@ void TDctrlMeasurement::Init()
     TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
     if (pb) pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+
+  TScan::SaveStartConditions();
 }
 
 

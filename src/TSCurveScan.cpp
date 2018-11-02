@@ -249,7 +249,7 @@ void TSCurveScan::Init()
 {
   m_hitsets = new TRingBuffer<THitSet>;
 
-  TScan::Init();
+  InitBase(false);
 
   if (((TSCurveParameters *)m_parameters)->nominal) RestoreNominalSettings();
 
@@ -273,18 +273,21 @@ void TSCurveScan::Init()
     ConfigureChip(m_chips.at(i));
   }
 
-  for (unsigned int i = 0; i < m_boards.size(); i++) {
-    m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
-    TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(i));
+  usleep(500);
 
-    if (myMOSAIC) {
-      myMOSAIC->StartRun();
-    }
-  }
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+
+  for (const auto &rBoard : m_boards) {
+    rBoard->SendOpCode(Alpide::OPCODE_RORST);
+    if (TReadoutBoardMOSAIC *rMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(rBoard)) {
+      rMOSAIC->StartRun();
+    }
+  }
+
+  TScan::SaveStartConditions();
 
   m_thread = new std::thread(&TSCurveScan::Histo, this);
 }

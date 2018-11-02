@@ -45,7 +45,7 @@ void TPowerTest::CreateMeasurements()
 
 void TPowerTest::Init()
 {
-  TScan::Init();
+  InitBase(true);
   // switch power off here or hic-wise in execute?
 }
 

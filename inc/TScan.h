@@ -143,11 +143,13 @@ public:
   virtual ~TScan() { delete m_histo; }
 
   virtual void Init();
+  void         InitBase(bool saveStartConditions);
   virtual void Terminate();
   virtual void LoopStart(int loopIndex)   = 0;
   virtual void LoopEnd(int loopIndex)     = 0;
   virtual void PrepareStep(int loopIndex) = 0;
   virtual void Execute()                  = 0;
+  void         SaveStartConditions();
   void         ClearHistoQue();
   bool         Loop(int loopIndex);
   virtual void Next(int loopIndex);

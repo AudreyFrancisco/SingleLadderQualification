@@ -43,7 +43,7 @@ void TLocalBusTest::Init()
 {
   CreateScanHisto();
 
-  TScan::Init();
+  InitBase(false);
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
   }
@@ -56,6 +56,8 @@ void TLocalBusTest::Init()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+
+  TScan::SaveStartConditions();
 }
 
 int TLocalBusTest::GetChipById(std::vector<TAlpide *> chips, int id)
