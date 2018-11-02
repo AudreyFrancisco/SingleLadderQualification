@@ -174,7 +174,7 @@ void TEnduranceCycle::ReadRecoveredCounters(
 
 void TEnduranceCycle::Init()
 {
-  TScan::Init();
+  InitBase(false);
   time(&m_startTime);
   // configure readout boards
   for (unsigned int i = 0; i < m_boards.size(); i++) {
@@ -185,6 +185,7 @@ void TEnduranceCycle::Init()
     if (!(m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     m_chips.at(i)->GetReadoutBoard()->SetChipEnable(m_chips.at(i), false);
   }
+  TScan::SaveStartConditions();
 }
 
 

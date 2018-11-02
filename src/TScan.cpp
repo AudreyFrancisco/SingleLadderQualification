@@ -46,7 +46,9 @@ TScan::TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic
   CreateHicConditions();
 }
 
-void TScan::Init()
+void TScan::Init() { InitBase(true); }
+
+void TScan::InitBase(bool saveStartConditions)
 {
   fScanAbort        = false;
   fTimeLimitReached = false;
@@ -73,11 +75,14 @@ void TScan::Init()
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 
-  usleep(1000);
+  if (saveStartConditions) {
+    SaveStartConditions();
+  }
+}
 
-  // char dummy[10];
-  // std::cout << "after power on, press enter to proceed" << std::endl;
-  // std::cin >> dummy;
+void TScan::SaveStartConditions()
+{
+  usleep(1000); // let the system settle
 
   TReadoutBoardMOSAIC *mosaic = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(0));
   if (mosaic) {

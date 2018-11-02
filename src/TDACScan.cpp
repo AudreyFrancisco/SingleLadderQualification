@@ -46,7 +46,7 @@ void TDACScan::Init()
 {
   CreateScanHisto();
 
-  TScan::Init();
+  InitBase(false);
   m_running = true;
   CountEnabledChips();
 
@@ -61,6 +61,8 @@ void TDACScan::Init()
     if (!(m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     ConfigureChip(m_chips.at(i));
   }
+
+  TScan::SaveStartConditions();
 }
 
 void TDACScan::PrepareStep(int loopIndex)
