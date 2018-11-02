@@ -1016,6 +1016,7 @@ void MainWindow::performtests()
         if (fScanToRowMap.count(i) > 0)
           ui->testTable->item(fScanToRowMap[i], 1)->setText(fScanVector.at(i)->GetState());
         colorsinglescan(i);
+
         qApp->processEvents();
       }
 
@@ -1040,6 +1041,7 @@ void MainWindow::performtests()
       std::cout << ex.what() << " is the thrown exception" << std::endl;
     }
   }
+
   poweroff();
 }
 
@@ -1922,8 +1924,10 @@ void MainWindow::loaddefaultconfig()
 
 void MainWindow::colorsinglescan(int i)
 {
-  if (fresultVector[i] == 0)
-    fColour = fAnalysisVector.at(i + 1)->GetScanClassification();
+  if (fresultVector[i] == 0) {
+    if ((unsigned int)i + 1 < fAnalysisVector.size())
+      fColour = fAnalysisVector.at(i + 1)->GetScanClassification();
+  }
   else
     fColour = fAnalysisVector.at(i)->GetScanClassification();
 
