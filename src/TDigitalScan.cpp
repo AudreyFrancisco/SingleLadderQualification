@@ -187,8 +187,6 @@ void TDigitalScan::Init()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
-
-  TScan::SaveStartConditions();
 }
 
 void TDigitalScan::PrepareStep(int loopIndex)
@@ -283,7 +281,7 @@ void TDigitalWhiteFrame::ConfigureMaskStage(TAlpide *chip, int istage)
 
 void TDigitalWhiteFrame::Init()
 {
-  InitBase(false);
+  TScan::Init();
 
   SetBackBias();
   CreateScanHisto();
@@ -311,8 +309,6 @@ void TDigitalWhiteFrame::Init()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
-
-  TScan::SaveStartConditions();
 }
 
 
