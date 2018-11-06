@@ -88,7 +88,7 @@ THisto TDataTaking::CreateHisto()
 
 void TDataTaking::Init()
 {
-  TScan::Init();
+  InitBase(false);
 
   SetBackBias();
 
@@ -116,6 +116,8 @@ void TDataTaking::Init()
     if (!pb) continue;
     pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+
+  TScan::SaveStartConditions();
 }
 
 // check which HIC caused the timeout, i.e. did not send enough events
