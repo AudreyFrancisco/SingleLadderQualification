@@ -53,7 +53,7 @@ ROOT has to be loaded using ``source /opt/root/bin/thisroot.sh``.
 
 First, clone the project:
 ```
-git clone https://gitlab.cern.ch/alice-its-alpide-software/new-alpide-software
+git clone https://gitlab.cern.ch/alice-MFT-ladder-test/new-alpide-software.git
 ```
 Then, create and change to a build directory (it can but doesn't have
 to be a sub-directory of the project source directory):
