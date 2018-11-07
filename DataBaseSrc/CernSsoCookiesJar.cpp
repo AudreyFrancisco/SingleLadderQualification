@@ -49,7 +49,10 @@
 CernSsoCookieJar::CernSsoCookieJar()
 {
   if (!testTheCERNSSO()) {
-    exit(1);
+    std::cerr << "First attempt to obtain the cookie failed, trying once again..." << std::endl;
+    if (!testTheCERNSSO()) {
+      throw runtime_error("Failed to obtain the SSO cookie");
+    }
   }
   theSslUrl         = "";
   theCookiePackFile = std::tmpnam(nullptr);
