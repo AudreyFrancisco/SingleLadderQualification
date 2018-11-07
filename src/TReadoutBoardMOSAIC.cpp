@@ -368,7 +368,26 @@ void TReadoutBoardMOSAIC::init()
   // ----- Now do the initilization -------
   // Initialize the System PLL
   mSysPLL->setup(sysPLLregContent);
+  waitResetDone();
 
+  for (int i = 0; i < MAX_MOSAICCTRLINT; i++)
+    setPhase(fBoardConfig->GetCtrlInterfacePhase(), i); // set the Phase shift on the line
+
+  setSpeedMode(fBoardConfig->GetSpeedMode()); // set 400 MHz mode
+  setInverted(fBoardConfig->IsInverted(), -1);
+
+  pulser->run(0);
+  mRunControl->stopRun();
+  mRunControl->clearErrors();
+  mRunControl->setAFThreshold(fBoardConfig->GetCtrlAFThreshold());
+  mRunControl->setLatency(fBoardConfig->GetCtrlLatMode(), fBoardConfig->GetCtrlLatMode());
+  enableControlInterfaces(true);
+
+  return;
+}
+
+void TReadoutBoardMOSAIC::waitResetDone()
+{
 #ifdef ENABLE_EXTERNAL_CLOCK
   uint32_t boardStatusReady = (BOARD_STATUS_FEPLL_LOCK);
 #else
@@ -387,21 +406,6 @@ void TReadoutBoardMOSAIC::init()
     if ((st & boardStatusReady) == boardStatusReady) break;
   }
   if (init_try == 0) throw MBoardInitError("Timeout setting MOSAIC system PLL");
-
-  for (int i = 0; i < MAX_MOSAICCTRLINT; i++)
-    setPhase(fBoardConfig->GetCtrlInterfacePhase(), i); // set the Phase shift on the line
-
-  setSpeedMode(fBoardConfig->GetSpeedMode()); // set 400 MHz mode
-  setInverted(fBoardConfig->IsInverted(), -1);
-
-  pulser->run(0);
-  mRunControl->stopRun();
-  mRunControl->clearErrors();
-  mRunControl->setAFThreshold(fBoardConfig->GetCtrlAFThreshold());
-  mRunControl->setLatency(fBoardConfig->GetCtrlLatMode(), fBoardConfig->GetCtrlLatMode());
-  enableControlInterfaces(true);
-
-  return;
 }
 
 // ============================== DATA receivers private methods
@@ -451,6 +455,7 @@ void TReadoutBoardMOSAIC::setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex
     break;
   }
   mRunControl->rmwConfigReg(~CFG_RATE_MASK, regSet);
+  waitResetDone();
 }
 
 void TReadoutBoardMOSAIC::setReadTriggerInfo(bool readTriggerInfo /*= true*/)
