@@ -344,7 +344,7 @@ THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityT
     return CLASS_SILVER;
   else if (category.find("BRONZE") != string::npos)
     return CLASS_BRONZE;
-  else if ((category.find("not") != string::npos) || (category.find("NOK") != string::npos))
+  else if (category.find("not") != string::npos)
     return CLASS_RED;
   else if ((category.find("part") != string::npos) || (category.find("PARTIAL") != string::npos)) {
     if (category.find("CATB") != string::npos)
