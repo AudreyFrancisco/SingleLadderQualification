@@ -380,7 +380,7 @@ void AlpideDBManager::print_cookies(CURL *curl)
   res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
   if (res != CURLE_OK) {
     fprintf(stderr, "Curl curl_easy_getinfo failed: %s\n", curl_easy_strerror(res));
-    exit(1);
+    return;
   }
   nc = cookies;
   i  = 1;

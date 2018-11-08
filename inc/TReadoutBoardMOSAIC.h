@@ -127,6 +127,7 @@ public:
 
 private:
   void init();
+  void waitResetDone();
   void enableDefinedReceivers();
   void setPhase(int APhase, int ACii = 0)
   {

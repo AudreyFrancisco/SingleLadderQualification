@@ -120,12 +120,6 @@ void TEyeMeasurement::Init()
 
   m_running = true;
 
-  for (const auto &rBoard : m_boards) {
-    if (TReadoutBoardMOSAIC *rMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(rBoard)) {
-      rMOSAIC->ResetAllReceivers();
-    }
-  }
-
   TScan::SaveStartConditions();
 }
 

@@ -77,6 +77,7 @@ void ALPIDErcv::reset()
   uint32_t mode;
   uint32_t st;
 
+  uint32_t resetDone;
 
 #ifdef DEBUG_RESET
   addGetReg(regReset, &st);
@@ -93,16 +94,20 @@ void ALPIDErcv::reset()
   wbb->execute();
 
   if (!(mode & OPMODE_RCVENABLE)) {
-    return;
+    resetDone = RESET_GTP_DONE;
+  }
+  else {
+    resetDone = RESET_GTP_DONE | RESET_ALIGNED;
   }
 
-  // if receiver is anabled, wait up to 100 ms for transceiver reset done
+  // wait up to 100 ms for transceiver reset done
+
   long int init_try;
   for (init_try = 100; init_try > 0; init_try--) {
     usleep(1000);
     addGetReg(regReset, &st);
     wbb->execute();
-    if (st == (RESET_GTP_DONE | RESET_ALIGNED)) break;
+    if (st == resetDone) break;
   }
   if (init_try == 0) {
 #ifdef DEBUG_RESET
