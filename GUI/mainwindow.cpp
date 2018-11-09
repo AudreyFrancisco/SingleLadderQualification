@@ -65,6 +65,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   fDisableSix       = false;
   fDisableSeven     = false;
   fDisableEight     = false;
+  fBackBias0        = false;
+  fBackBias3        = false;
 
   std::cout << std::endl << std::endl;
   std::cout << "DEBUGGING INFORMATION: " << std::endl;
