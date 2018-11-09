@@ -37,7 +37,7 @@
     <rect>
      <x>10</x>
      <y>90</y>
-     <width>111</width>
+     <width>121</width>
      <height>21</height>
     </rect>
    </property>
@@ -47,15 +47,15 @@
     </font>
    </property>
    <property name="text">
-    <string>Type of test:</string>
+    <string>Type of test </string>
    </property>
   </widget>
   <widget class="QLabel" name="operatorlaber">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>180</y>
-     <width>81</width>
+     <y>240</y>
+     <width>181</width>
      <height>41</height>
     </rect>
    </property>
@@ -65,14 +65,14 @@
     </font>
    </property>
    <property name="text">
-    <string>Operator:</string>
+    <string>Operator CERN ID</string>
    </property>
   </widget>
   <widget class="QLabel" name="idnumber">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>240</y>
+     <y>290</y>
      <width>221</width>
      <height>41</height>
     </rect>
@@ -83,14 +83,14 @@
     </font>
    </property>
    <property name="text">
-    <string>HIC Identification No</string>
+    <string>HIC Identification No </string>
    </property>
   </widget>
   <widget class="QLabel" name="laddersize">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>290</y>
+     <y>340</y>
      <width>211</width>
      <height>41</height>
     </rect>
@@ -101,14 +101,14 @@
     </font>
    </property>
    <property name="text">
-    <string>Number of chips</string>
+    <string>Number of chips </string>
    </property>
   </widget>
   <widget class="QLabel" name="disablechips">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>380</y>
+     <y>390</y>
      <width>211</width>
      <height>41</height>
     </rect>
@@ -119,14 +119,14 @@
     </font>
    </property>
    <property name="text">
-    <string>Disable Chip ID</string>
+    <string>Disable Chip ID </string>
    </property>
   </widget>
   <widget class="QCheckBox" name="disablefour">
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>380</y>
+     <y>400</y>
      <width>111</width>
      <height>31</height>
     </rect>
@@ -144,7 +144,7 @@
    <property name="geometry">
     <rect>
      <x>300</x>
-     <y>380</y>
+     <y>400</y>
      <width>111</width>
      <height>31</height>
     </rect>
@@ -162,7 +162,7 @@
    <property name="geometry">
     <rect>
      <x>350</x>
-     <y>380</y>
+     <y>400</y>
      <width>111</width>
      <height>31</height>
     </rect>
@@ -180,7 +180,7 @@
    <property name="geometry">
     <rect>
      <x>400</x>
-     <y>380</y>
+     <y>400</y>
      <width>111</width>
      <height>31</height>
     </rect>
@@ -198,7 +198,7 @@
    <property name="geometry">
     <rect>
      <x>450</x>
-     <y>380</y>
+     <y>400</y>
      <width>111</width>
      <height>31</height>
     </rect>
@@ -229,7 +229,7 @@
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>190</y>
+     <y>240</y>
      <width>161</width>
      <height>31</height>
     </rect>
@@ -239,7 +239,7 @@
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>240</y>
+     <y>290</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -275,14 +275,14 @@
     </font>
    </property>
    <property name="text">
-    <string>Location:</string>
+    <string>Location </string>
    </property>
   </widget>
   <widget class="QComboBox" name="databaselocation">
    <property name="geometry">
     <rect>
-     <x>250</x>
-     <y>140</y>
+     <x>430</x>
+     <y>350</y>
      <width>221</width>
      <height>31</height>
     </rect>
@@ -302,44 +302,48 @@
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>290</y>
+     <y>350</y>
      <width>85</width>
      <height>31</height>
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="hsname">
+  <widget class="QLabel" name="iplabel">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>290</y>
-     <width>91</width>
-     <height>16</height>
+     <x>10</x>
+     <y>190</y>
+     <width>191</width>
+     <height>31</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
    <property name="text">
-    <string>HS name</string>
+    <string>IP Adress (MOSAIC)</string>
    </property>
   </widget>
-  <widget class="QLabel" name="stavename">
+  <widget class="QTextEdit" name="ipaddress">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>430</y>
-     <width>91</width>
-     <height>16</height>
+     <x>250</x>
+     <y>190</y>
+     <width>161</width>
+     <height>31</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Stave name</string>
-   </property>
   </widget>
-  <widget class="QTextEdit" name="stavenamefield">
+  <widget class="QComboBox" name="testbenchlocation">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>450</y>
-     <width>131</width>
+     <x>250</x>
+     <y>140</y>
+     <width>221</width>
      <height>31</height>
     </rect>
    </property>

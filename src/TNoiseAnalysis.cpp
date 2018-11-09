@@ -103,7 +103,7 @@ void TNoiseAnalysis::Initialize()
 {
   ReadChipList();
   CreateHicResults();
-  m_isMasked = m_config->GetIsMasked();
+  m_isMasked = ((TNoiseParameters *)m_scan->GetParameters())->isMasked;
   std::cout << "In noise analysis, number of hic results: " << m_result->GetNHics() << std::endl;
 }
 

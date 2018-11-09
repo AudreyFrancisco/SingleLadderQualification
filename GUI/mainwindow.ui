@@ -44,40 +44,10 @@
      </widget>
     </item>
     <item row="0" column="2">
-     <widget class="QLabel" name="alicelogo">
-      <property name="text">
-       <string>test</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
      <widget class="QLabel" name="mftlogo">
-      <property name="geometry">
-       <rect>
-        <x>1273</x>
-        <y>0</y>
-        <width>130</width>
-        <height>70</height>
-       </rect>
-      </property>
       <property name="text">
        <string/>
       </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QTableWidget" name="testTable">
-      <column>
-       <property name="text">
-        <string>Testing object</string>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </column>
      </widget>
     </item>
     <item row="2" column="0">
@@ -86,13 +56,6 @@
        <widget class="QToolButton" name="start_test">
         <property name="text">
          <string>Start Test</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="poweroff">
-        <property name="text">
-         <string>Power Off</string>
         </property>
        </widget>
       </item>
@@ -108,7 +71,7 @@
     <item row="1" column="1" colspan="2">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_1">
        <attribute name="title">
@@ -1378,19 +1341,6 @@
          <string>Start Clock</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="newtestfront_MFT">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>100</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>New test</string>
-        </property>
-       </widget>
        <widget class="QLabel" name="displaydetails_MFT">
         <property name="geometry">
          <rect>
@@ -1433,6 +1383,20 @@
         </property>
        </widget>
       </widget>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QTableWidget" name="testTable">
+      <column>
+       <property name="text">
+        <string>Testing object</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </column>
      </widget>
     </item>
    </layout>

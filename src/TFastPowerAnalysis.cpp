@@ -20,6 +20,7 @@ TFastPowerAnalysis::TFastPowerAnalysis(std::deque<TScanHisto> *histoQue, TScan *
     m_result = aResult;
   else
     m_result = new TFastPowerResult();
+  m_ivPoints = m_config->GetParamValue("IVPOINTS");
 }
 
 string TFastPowerAnalysis::GetPreviousTestType()
@@ -60,7 +61,7 @@ void TFastPowerAnalysis::CreateIVHisto(TFastPowerResultHic *hicResult)
   const std::string htitle =
       TString::Format("Back Bias IV for %s", hicResult->GetName().c_str()).Data();
 
-  const int iMax = m_config->GetParamValue("IVPOINTS");
+  const int iMax = m_ivPoints;
 
   TH1F *ivbb = new TH1F(hname.c_str(), htitle.c_str(), iMax, 0., iMax * 100.);
 
@@ -106,7 +107,7 @@ void TFastPowerAnalysis::Finalize()
     hicResult->ibias3       = hicCurrents.ibias3;
     hicResult->maxBias      = hicCurrents.maxBias;
 
-    for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
+    for (int i = 0; i < m_ivPoints; i++) {
       hicResult->ibias[i] = hicCurrents.ibias[i];
     }
     hicResult->m_class = GetClassification(hicCurrents, hicResult);
@@ -179,7 +180,7 @@ void TFastPowerAnalysis::WriteIVCurve(THic *hic)
 
   FILE *fp = fopen(fName, "w");
 
-  for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
+  for (int i = 0; i < m_ivPoints; i++) {
     fprintf(fp, "%.3f %.1f\n", (float)i / 10, result->ibias[i]);
   }
   fclose(fp);

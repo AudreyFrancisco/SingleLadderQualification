@@ -30,23 +30,39 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   // ui->typetest->addItem("OB Half-Stave Test", OBHalfStaveML);
   // ui->typetest->addItem("OB Stave Test", OBStave);
   // ui->typetest->addItem("IB Stave Test", IBStave);
+  ui->databaselocation->hide();
+
+  ui->testbenchlocation->addItem("", 0);
+  ui->testbenchlocation->addItem("CERN", cern);
+  ui->testbenchlocation->addItem("CEA Saclay", saclay);
+  ui->testbenchlocation->addItem("Subatech", subatech);
+  ui->testbenchlocation->addItem("IPNL", ipnl);
+
   ui->Chip_Nb->addItem(" ", 0);
   ui->Chip_Nb->addItem("2", 2);
   ui->Chip_Nb->addItem("3", 3);
   ui->Chip_Nb->addItem("4", 4);
   ui->Chip_Nb->addItem("5", 5);
+
   missingsettings = 0x0;
 
   m_testDatabase = testDatabase;
 
   connect(ui->settings, SIGNAL(clicked()), this->parent(), SLOT(savesettings()));
   connect(ui->close, SIGNAL(clicked()), this, SLOT(close()));
-  connect(ui->databaselocation, SIGNAL(currentIndexChanged(int)), this,
+  connect(ui->testbenchlocation, SIGNAL(currentIndexChanged(int)), this,
           SLOT(getlocationcombo(int)));
+  // connect(ui->databaselocation, SIGNAL(currentIndexChanged(int)), this,
+  //         SLOT(printlocation(QString)));
   connect(ui->typetest, SIGNAL(currentIndexChanged(int)), this->parent(),
           SLOT(ConnectTestCombo(int)));
   connect(ui->Chip_Nb, SIGNAL(currentIndexChanged(int)), this->parent(),
           SLOT(ConnectHICSizeCombo(int)));
+  connect(ui->disablefour, SIGNAL(toggled(bool)), this->parent(), SLOT(DisableFour(bool)));
+  connect(ui->disablefive, SIGNAL(toggled(bool)), this->parent(), SLOT(DisableFive(bool)));
+  connect(ui->disablesix, SIGNAL(toggled(bool)), this->parent(), SLOT(DisableSix(bool)));
+  connect(ui->disableseven, SIGNAL(toggled(bool)), this->parent(), SLOT(DisableSeven(bool)));
+  connect(ui->disableeight, SIGNAL(toggled(bool)), this->parent(), SLOT(DisableEight(bool)));
 }
 
 TestSelection::~TestSelection() { delete ui; }
@@ -57,8 +73,14 @@ void TestSelection::Init()
   ui->operatorstring->setText(settings.value("operator", "").toString());
   int idx = ui->typetest->findText(settings.value("testname", "n/a").toString());
   if (idx >= 0) ui->typetest->setCurrentIndex(idx);
-  idx = ui->databaselocation->findText(settings.value("testsite", "n/a").toString());
-  if (idx >= 0) ui->databaselocation->setCurrentIndex(idx);
+  idx = ui->testbenchlocation->findText(settings.value("testsite", "n/a").toString());
+  if (idx >= 0) ui->testbenchlocation->setCurrentIndex(idx);
+  ui->id->setText(settings.value("hicnumber", "").toString());
+  QString id      = settings.value("hicnumber", "").toString();
+  int     idofhic = id.toInt();
+  if ((idofhic / 1000) >= 2 && (idofhic / 1000) <= 5) {
+    ui->Chip_Nb->setCurrentIndex((idofhic / 1000) - 1);
+  }
 }
 
 void TestSelection::SaveSettings(QString &institute, QString &opname, QString &hicid, int &counter,
@@ -68,7 +90,7 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
                                  QString &halfstave, QString &stave)
 {
   // Default value for locid, TODO:Associate a location to a default configuration setup.
-  locid = 1000;
+  locid = 2;
   if (ui->operatorstring->toPlainText().isEmpty() ||
       /*ui->id->toPlainText().isEmpty() || */ locid == 0 || ui->id->toPlainText().isEmpty() ||
       ui->Chip_Nb->currentIndex() == 0) {
@@ -150,12 +172,12 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
     dfive = '\0';
     //    }
 
-    if (!ui->stavenamefield->toPlainText().isEmpty()) {
-      stave = ui->stavenamefield->toPlainText();
-    }
-    else {
-      stave = '\0';
-    }
+    // if (!ui->stavenamefield->toPlainText().isEmpty()) {
+    //   stave = ui->stavenamefield->toPlainText();
+    // }
+    // else {
+    //   stave = '\0';
+    // }
 
     opname    = ui->operatorstring->toPlainText();
     hicid     = ui->id->toPlainText();
@@ -164,7 +186,8 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
     lid                = locid;
     institute          = location;
     if (lid != 0) {
-      memberid = GetMemberID();
+      // memberid = GetMemberID();
+      memberid = opname.toInt();
     }
     if (memberid == -1) {
       popupmessage("The operator you entered \nis not in the Database");
@@ -175,8 +198,9 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
 
     QSettings settings;
     settings.setValue("operator", opname);
+    settings.setValue("hicnumber", hicid);
     settings.setValue("testname", ui->typetest->currentText());
-    settings.setValue("testsite", ui->databaselocation->currentText());
+    settings.setValue("testsite", ui->testbenchlocation->currentText());
 
     qDebug() << "The operator name is: " << opname << "and the hic id is: " << hicid << endl;
   }
@@ -212,9 +236,10 @@ void TestSelection::getlocationcombo(int value)
 {
   locid = 0;
   if (value > 0) { // first item is empty
-    locid    = ui->databaselocation->itemData(ui->databaselocation->currentIndex()).toInt();
-    location = ui->databaselocation->currentText();
+    locid    = ui->testbenchlocation->itemData(ui->testbenchlocation->currentIndex()).toInt();
+    location = ui->testbenchlocation->currentText();
   }
+  printf("locid = %d\n", locid);
 }
 
 int TestSelection::GetMemberID()
@@ -279,10 +304,10 @@ void TestSelection::getwindow()
 
 int TestSelection::getcounter() { return fCounter; }
 
-void TestSelection::adjuststave()
-{
-
-  ui->stavename->show();
-  ui->stavenamefield->show();
-  ui->hsname->show();
-}
+// void TestSelection::adjuststave()
+// {
+//
+//   ui->stavename->show();
+//   ui->stavenamefield->show();
+//   ui->hsname->show();
+// }

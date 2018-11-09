@@ -15,7 +15,7 @@ typedef struct {
   int    Id;
   int    Type;
   string Name;
-  int    Position;
+  string Position;
 } TChild;
 
 int DbGetMemberId(AlpideDB *db, string name);
@@ -59,9 +59,9 @@ void   DbAddMember(AlpideDB *db, ActivityDB::activity &activity, int memberId);
 bool   FileExists(string fileName);
 string CreateActivityName(string compName, TScanConfig *config);
 string GetServiceAccount(string institute, string &folder);
-string GetEosPath(ActivityDB::activityLong activity);
+string GetEosPath(ActivityDB::activityLong activity, THicType hicType, bool doubleComp);
 string GetTestDirName(TTestType TestType);
-TTestType GetTestType(string activityName);
+TTestType GetTestType(string activityTypeName);
 bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPercent, int backBias,
                         string &dataName, string &resultName);
 #endif

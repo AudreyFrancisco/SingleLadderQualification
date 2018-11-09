@@ -23,7 +23,7 @@ import copy
 from Common import *
 from pty import CHILD
 
-#    Version 2.8 - 28/08/2018 - A.franco - INFN BARI ITALY
+#    Version 3.1c - 28/09/2018 - A.franco - INFN BARI ITALY
 
 
 # ---------------------------------------------
@@ -44,6 +44,30 @@ class DB:
     CLOSED = 1
     
     DATEMASK = "%Y/%m/%d"
+
+    # Locations Code Tables
+    shipmentLocationTable = []
+    shipmentLocationTable.append("Central China Normal University, Wuhan")
+    shipmentLocationTable.append("Department of Physics, Pusan National University, Pusan")
+    shipmentLocationTable.append("European Organization for Nuclear Research (CERN), Geneva")
+    shipmentLocationTable.append("INFN e Laboratori Nazionali di Frascati, Frascati")
+    shipmentLocationTable.append("Institut Pluridisciplinaire Hubert Curien (IPHC), Universite de Strasbourg, CNRS-IN2P3, Strasbourg")
+    shipmentLocationTable.append("Lawrence Berkeley National Laboratory, Berkeley, California")
+    shipmentLocationTable.append("Nikhef, National institute for subatomic physics, Amsterdam")
+    shipmentLocationTable.append("Sezione INFN, Bari")
+    shipmentLocationTable.append("Sezione INFN, Turin")
+    shipmentLocationTable.append("STFC Daresbury Laboratory, Daresbury")
+    shipmentLocationTable.append("Universita e INFN, Trieste, Trieste")
+    shipmentLocationTable.append("Universita e INFN, Catania, Catania")
+    shipmentLocationTable.append("University of Liverpool, Liverpool")
+    shipmentLocationTable.append("Yonsei University, Seoul")
+    
+    # SitesNames
+    itsSitesName = ["Wuhan","Pusan","CERN","Frascati","Strasbourg","Berkeley","Nikhef","Bari","Torino","Daresbury","Trieste","Catania","Liverpool","Yonsei"]
+
+    # serviceAccount
+    itsServiceAccounts = ["aliceitswuhan","itspusan","aliceits","aliceitslnf","aliceitssbg","aliceitslbl","itsnik","aliceitsbari","aliceitstorino","aliceitsdl","aliceitstrieste","aliceitscatania","aliceitslpool","aliceitsyonsei"]
+
     
     # Constructor
     def __init__(self,\
@@ -163,19 +187,21 @@ class DB:
     #
     def _AcquireActivityTypeByActivityTypeId(self, activityTypeId):
         self.ActivityType =self.DB.service.ActivityTypeReadAll(activityTypeID=activityTypeId)
+        
+        # and the ID for the OPEN & CLOSED status
+        self.stOpen = next(status for status in self.ActivityType.Status.ActivityStatus if status.Code=="OPEN")
+        self.stClosed = next(status for status in self.ActivityType.Status.ActivityStatus if status.Code=="CLOSED")
+
         # Now that we have the activity type we can extract the location ID 
         # Get the Location ID
         try:
             location = next( loc for loc in self.ActivityType.Location.ActivityTypeLocation if loc.Name == self.locationName)
         except:
-            self.lg.critical("DB - Location NAME doesn't exists into DB. (correct it in CONFIGURATION file. Abort !")
+            self.lg.warning("DB - Location '%s' doesn't exists into DB for activity type ID=%d. (correct it in CONFIGURATION file)" % (self.locationName, activityTypeId) )
             return(False)
 
         self.locationID = location.ID
 
-        # and the ID for the OPEN & CLOSED status
-        self.stOpen = next(status for status in self.ActivityType.Status.ActivityStatus if status.Code=="OPEN")
-        self.stClosed = next(status for status in self.ActivityType.Status.ActivityStatus if status.Code=="CLOSED")
         return(True)
         
     # --- Get the list of possible results for the actual stored activity type
@@ -191,6 +217,19 @@ class DB:
             for res in self.ActivityType.Result.ActivityTypeResultFull:
                 reslist.append(res.Name)
             return(reslist)
+
+    def GetActResultIDByName(self, name):
+        return self._GetTheResultID(name)
+
+    def GetActLocationIDByName(self, name):
+        if self.ActivityType.Location is None:
+            return -999
+        else:
+            for loc in self.ActivityType.Location.ActivityTypeLocation:
+                if loc.Name == name:
+                    return loc.ID
+            return -999
+            
 
 
     # --- Create one Component
@@ -743,9 +782,11 @@ class DB:
         
         InCompType, OutCompType = self._GetInOutComponentFromActivity(compo.ComponentType.ID)
         if self._AssignComponentToActivity(compo.ID, actCreRes.ID, InCompType[0].ID ) == False:
-            close = False #avoids the closure of the activity
+            actCreRes = ActResult(2, "Error to Assign Component %s to activity type %s" % (compo.ComponentID,actName ))
+            return actCreRes
         if self._AssignComponentToActivity(compo.ID, actCreRes.ID, OutCompType[0].ID ) == False:
-            close = False #avoids the closure of the activity
+            actCreRes = ActResult(2, "Error to Assign Component %s to activity type %s" % (compo.ComponentID,actName ))
+            return actCreRes
 
         if close :
             actCreRes = self._ChangeAnActivity(DB.CLOSED,actCreRes.ID,actTypId,0,actName,ts,te,resultID)
@@ -1456,6 +1497,114 @@ class DB:
                 return(ActMember.ActivityMember.ID)
         return(-22)
 
+    # **********************************
+    #    Locations Management
+    #
+    
+    # -- Get the list of all shipment locations
+    #
+    #  Return := A List of Locations Names
+    #
+    def GetTheLocations(self):
+        lst = []
+        for loc in self.shipmentLocationTable:
+            lst.append(loc)
+        return(lst)  
+
+    # -- Get the list of all shipment locations
+    #
+    #  Return := A formatted List of Locations Code & Name
+    #
+    def DumpTheLocations(self):
+        code = 1
+        lst = []
+        for loc in self.shipmentLocationTable:
+            lst.append("%d)\t%s" % (code,loc) )
+            code = code + 1
+        return(lst)  
+
+    # -- Get the code of a shipment locations
+    #
+    #  Return := A numeric Code
+    #
+    def DecodeLocation(self, ALocation):
+        try:
+            code = self.shipmentLocationTable.index(ALocation)
+            code = code +1
+        except ValueError:
+            code = 0
+        return(code)
+
+    # -- Get the Name of a shipment locations
+    #
+    #  Return := A Location Name
+    #
+    def GetLocation(self, ALocationCode):
+        try:
+            ALocationCode = int(ALocationCode)
+            location = self.shipmentLocationTable[ALocationCode-1]
+        except:
+            location = ""
+        return(location)
+
+    # -- Get the Location by Service account
+    #
+    #  Return := A Location Name
+    #
+    def GetLocationByServiceAccount(self, AServiceAccount):
+        ind = 0
+        for sacc in self.itsServiceAccounts:
+            if sacc == AServiceAccount:
+                return(self.shipmentLocationTable[ind])
+            ind = ind +1
+        return("")
+    
+    # -- Get the Location by SiteName
+    #
+    #  Return := A Site Name
+    #
+    def GetLocationBySiteName(self, ASiteName):
+        ind = 0
+        for snam in self.itsSitesName:
+            if snam == ASiteName:
+                return(self.shipmentLocationTable[ind])
+            ind = ind +1
+        return("")
+
+    def GetTheServiceAccounts(self):
+        lst = []
+        for loc in self.itsServiceAccounts:
+            lst.append(loc)
+        return(lst)  
+
+    def GetTheSitesName(self):
+        lst = []
+        for loc in self. itsSitesName:
+            lst.append(loc)
+        return(lst)  
+
+    def GetSiteInfoByLocation(self, ALocationName):
+        ind = 0
+        for loc in self.shipmentLocationTable:
+            if loc == ALocationName:
+                return(ind+1, self.itsServiceAccounts[ind], self.itsSitesName[ind], self.shipmentLocationTable[ind])
+            ind = ind +1
+        return(0,"", "", "")
+    def GetSiteInfoBySiteName(self, ASiteName):
+        ind = 0
+        for loc in self.itsSitesName:
+            if loc == ASiteName:
+                return(ind+1, self.itsServiceAccounts[ind], self.itsSitesName[ind], self.shipmentLocationTable[ind])
+            ind = ind +1
+        return(0,"", "", "")
+    def GetSiteInfoByServiceAccount(self, AServiceAccount):
+        ind = 0
+        for loc in self.itsServiceAccounts:
+            if loc == AServiceAccount:
+                return(ind+1, self.itsServiceAccounts[ind], self.itsSitesName[ind], self.shipmentLocationTable[ind])
+            ind = ind +1
+        return(0,"", "", "")
+    
 
     # **********************************
     #    Project Management

@@ -227,6 +227,10 @@ void TDctrlAnalysis::AnalyseHisto(TScanHisto *histo)
       continue;
     }
 
+    // skip the first one (HIC) or two (HS) points of the measurement
+    // measurement values not reliable due to low amplitude
+    int skipPoints = m_config->IsHalfStave() ? 2 : 1;
+
     // loop over all driver settings, read data from histogram
     for (int i = 0; i < 16; i++) {
       float peak_p = ((*histo)(m_chipList.at(ichip), i, TDctrlMeasurement::peak_p));
@@ -240,16 +244,18 @@ void TDctrlAnalysis::AnalyseHisto(TScanHisto *histo)
 
       fprintf(fp, "%d %d %f %f %f %f %e %e %e %e\n", m_chipList.at(ichip).chipId & 0xf, i, peak_p,
               peak_n, amp_p, amp_n, rtim_p, rtim_n, ftim_p, ftim_n);
-      if (i == 0) continue;
+
+      if (i < skipPoints || amp_p > 10 || amp_n > 10) continue;
       driver.push_back((float)i);
       amp_pos.push_back(amp_p);
       amp_neg.push_back(amp_n);
-      if (amp_p > maxAmp_p) maxAmp_p = amp_p;
-      if (rtim_p > maxRise_p) maxRise_p = rtim_p;
-      if (ftim_p > maxFall_p) maxFall_p = ftim_p;
-      if (amp_n > maxAmp_n) maxAmp_n = amp_n;
-      if (rtim_n > maxRise_n) maxRise_n = rtim_n;
-      if (ftim_n > maxFall_n) maxFall_n = ftim_n;
+
+      if (amp_p < 10 && amp_p > maxAmp_p) maxAmp_p = amp_p;
+      if (rtim_p < 10 && rtim_p > maxRise_p) maxRise_p = rtim_p;
+      if (ftim_p < 10 && ftim_p > maxFall_p) maxFall_p = ftim_p;
+      if (amp_n < 10 && amp_n > maxAmp_n) maxAmp_n = amp_n;
+      if (rtim_n < 10 && rtim_n > maxRise_n) maxRise_n = rtim_n;
+      if (ftim_n < 10 && ftim_n > maxFall_n) maxFall_n = ftim_n;
     }
 
     // do the fit for positive and negative polarity
@@ -349,8 +355,14 @@ THicClassification TDctrlAnalysis::GetClassificationIB(TDctrlResultHic *result)
 THicClassification TDctrlAnalysis::GetClassificationOB(TDctrlResultHic *result)
 {
   THicClassification returnValue = CLASS_GOLD;
-  DoCut(returnValue, CLASS_RED, result->worst_maxAmp * 1000, "DCTRLMINAMPOB", result, true);
-  DoCut(returnValue, CLASS_RED, result->worst_slope * 1000, "DCTRLMINSLOPEOB", result, true);
+  if (m_config->IsHalfStave()) {
+    DoCut(returnValue, CLASS_RED, result->worst_maxAmp * 1000, "DCTRLMINAMPOBSTAVE", result, true);
+    DoCut(returnValue, CLASS_RED, result->worst_slope * 1000, "DCTRLMINSLOPEOBSTAVE", result, true);
+  }
+  else {
+    DoCut(returnValue, CLASS_RED, result->worst_maxAmp * 1000, "DCTRLMINAMPOB", result, true);
+    DoCut(returnValue, CLASS_RED, result->worst_slope * 1000, "DCTRLMINSLOPEOB", result, true);
+  }
   DoCut(returnValue, CLASS_RED, result->worst_chisq * 100, "DCTRLMAXCHISQSILVER", result);
   DoCut(returnValue, CLASS_SILVER, result->worst_rise * 1e9, "DCTRLMAXRISEGREENOB", result);
   DoCut(returnValue, CLASS_SILVER, result->worst_fall * 1e9, "DCTRLMAXFALLGREENOB", result);

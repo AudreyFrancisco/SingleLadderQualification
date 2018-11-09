@@ -22,8 +22,13 @@ typedef struct {
   float    m_tempStart;
   float    m_tempEnd;
   int      m_fifoErrors;
+  int      m_fifoErrors0;
+  int      m_fifoErrors5;
+  int      m_fifoErrorsa;
+  int      m_fifoErrorsf;
   int      m_fifoExceptions;
   int      m_fifoTests;
+  int      m_exceptions;
   int      m_nWorkingChips;
 } THicCounter;
 

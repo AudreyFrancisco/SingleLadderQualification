@@ -80,6 +80,8 @@ endif()
 
 # add subdirectories for the actual work
 add_subdirectory(analysis)
+add_subdirectory(Config)
+add_subdirectory(Img)
 add_subdirectory(DataBaseSrc)
 add_subdirectory(exe)
 add_subdirectory(ImpedanceTest)

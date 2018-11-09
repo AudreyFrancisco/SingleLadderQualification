@@ -158,9 +158,16 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
       if (trials == 3) {
         std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event"
                   << std::endl;
-        std::cout << "  Events per receiver: ";
+        std::cout << "  Events per receiver (receiver order): ";
         for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
           std::cout << nTrigPerHic[i] << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "  Trigger counters per chip (chip order): ";
+        for (unsigned int i = 0; i < m_chips.size(); i++) {
+          uint16_t value;
+          m_chips.at(i)->ReadRegister(Alpide::REG_FROMU_STATUS1, value);
+          std::cout << value << " ";
         }
         std::cout << std::endl;
         itrg = nTriggers * m_enabled[iboard];
@@ -209,6 +216,7 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
           m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nCorruptEvent++;
         }
       }
+      nTrigPerHic[boardInfo.channel]++;
       itrg++;
     }
   }
