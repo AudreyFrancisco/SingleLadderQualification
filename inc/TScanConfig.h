@@ -49,7 +49,8 @@ namespace ScanConfig {
   // 1.8: shortened endurance test, added parameter for counting of exceptions
   // 1.9: checking DCTRL measurement values for plausibility and excluding them if necessary.
   // 2.0: introduced separate DCTRL cut for (half-)staves (lower slope and amplitude)
-  const float CLASSIFICATION_VERSION = 2.0;
+  // 2.1: Do not consider impedance test result any longer
+  const float CLASSIFICATION_VERSION = 2.1;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions
