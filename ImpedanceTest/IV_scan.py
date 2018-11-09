@@ -117,7 +117,7 @@ def doIVcurve(HIC_name, sour, channel, max_volt, nsteps, resistances, path, file
     
     output_file.close()
     
-    if channel_tripped:
+    if channel!= 2 and channel_tripped:
         print("Channel tripped. Test failed") 
         return 0
     elif resistance_average==1000000: 
