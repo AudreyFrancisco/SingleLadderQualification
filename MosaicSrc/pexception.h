@@ -48,4 +48,10 @@ public:
   int  GetControlInterface() { return m_controlInt; };
 };
 
+// Receiver reset errors
+class PReceiverResetError : public MException {
+public:
+  explicit PReceiverResetError(const string &__arg);
+};
+
 #endif // PEXCEPTION
