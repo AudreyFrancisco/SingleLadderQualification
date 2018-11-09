@@ -27,7 +27,8 @@ int OpenEnduranceRecoveryFile(const char *fName, std::vector<std::string> hicNam
                 &counter.m_idddClocked, &counter.m_iddaConfigured, &counter.m_idddConfigured,
                 &counter.m_tempStart, &counter.m_tempEnd) == 16) {
     // check that hic name found is contained in hicNames, otherwise ignore entry
-    stringIter = find(hicNames.begin(), hicNames.end(), string(hicName));
+    counter.m_trip = (trip > 0);
+    stringIter     = find(hicNames.begin(), hicNames.end(), string(hicName));
     if (stringIter == hicNames.end()) {
       std::cout << "Warning, found unknown HIC " << hicName << " in file, ignored" << std::endl;
       continue;

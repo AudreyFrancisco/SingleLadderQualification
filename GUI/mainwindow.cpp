@@ -1898,7 +1898,7 @@ void MainWindow::loadeditedconfig()
     int ncycles = 0;
     ncycles     = OpenEnduranceRecoveryFile(filename.toStdString().c_str(), names, counterVector);
 
-    if (ncycles != 0) std::cout << ncycles << " cycles found in file." << std::endl;
+    std::cout << ncycles << " cycles found in file." << std::endl;
 
     for (unsigned int d = 1; d < fScanVector.size(); d++) {
       TEnduranceCycle *scan;
