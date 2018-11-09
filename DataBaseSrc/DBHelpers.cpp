@@ -907,7 +907,7 @@ bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPer
   for (unsigned int i = 0; (i < activity.Attachments.size()) && (!found); i++) {
     attName = activity.Attachments.at(i).FileName;
     if ((attName.find("DigitalScanResult") != string::npos)) {
-      if ((voltPercent) && (backBias == 0) && (attName.find("nominal.") != string::npos)) {
+      if ((voltPercent == 100) && (backBias == 0) && (attName.find("nominal.") != string::npos)) {
         found = true;
       }
       else if ((voltPercent == 100) && (backBias == 3) &&
