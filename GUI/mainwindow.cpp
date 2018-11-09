@@ -60,6 +60,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   fPbnumberofmodule = 0;
   fDatabasefailure  = 0;
   fDebugWindow      = 0;
+  fDisableFour      = false;
+  fDisableFive      = false;
+  fDisableSix       = false;
+  fDisableSeven     = false;
+  fDisableEight     = false;
 
   std::cout << std::endl << std::endl;
   std::cout << "DEBUGGING INFORMATION: " << std::endl;
@@ -125,7 +130,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->startclk_MFT, SIGNAL(clicked()), SLOT(start_clock()));
   connect(ui->stopclk_MFT, SIGNAL(clicked()), SLOT(stop_clock()));
   // connect(ui->cfg, SIGNAL(clicked()), this, SLOT(open()));
-  // connect(ui->quit, SIGNAL(clicked()), this, SLOT(quitall()));
+  connect(ui->quit, SIGNAL(clicked()), this, SLOT(close()));
   // connect(ui->obm1, SIGNAL(clicked()), this, SLOT(button_obm1_clicked()));
   // connect(ui->obm2, SIGNAL(clicked()), this, SLOT(button_obm2_clicked()));
   // connect(ui->obm3, SIGNAL(clicked()), this, SLOT(button_obm3_clicked()));
@@ -162,9 +167,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
       new QAction(QApplication::style()->standardIcon(QStyle::SP_MediaPlay), "Start test", this);
   connect(run_test, &QAction::triggered, this, &MainWindow::applytests);
   run_test->setEnabled(false);
-  QAction *poweroff = new QAction(
-      QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton), "Power Off", this);
-  connect(poweroff, &QAction::triggered, this, &MainWindow::poweroff);
+  // QAction *poweroff = new QAction(
+  //     QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton), "Power Off", this);
+  // connect(poweroff, &QAction::triggered, this, &MainWindow::poweroff);
   QAction *quit = new QAction("&Quit", this);
   connect(quit, &QAction::triggered, this, &MainWindow::close);
   QAction *newdebug = new QAction("&Debug mode", this);
@@ -179,7 +184,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   menu->addAction(newtesttest);
   menu->addAction(run_test);
   menu->addAction(fWritedb);
-  menu->addAction(poweroff);
+  // menu->addAction(poweroff);
   menu->addAction(quit);
   fWritedb->setVisible(false);
 
@@ -188,7 +193,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->mainToolBar->addAction(newtestprod);
   ui->mainToolBar->addSeparator();
   ui->mainToolBar->addAction(run_test);
-  ui->mainToolBar->addAction(poweroff);
+  // ui->mainToolBar->addAction(poweroff);
 
   // no status bar for now
   setStatusBar(nullptr);
@@ -198,7 +203,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->centralLayout->setColumnStretch(1, 1.);
 
   connect(ui->details, SIGNAL(currentIndexChanged(int)), this, SLOT(detailscombo(int)));
-  connect(ui->poweroff, SIGNAL(clicked(bool)), this, SLOT(poweroff()));
+  // connect(ui->poweroff, SIGNAL(clicked(bool)), this, SLOT(poweroff()));
 
   ui->testTable->show();
   ui->testTable->setShowGrid(true);
@@ -220,21 +225,26 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   int     h = ui->alicepic->height();
   ui->alicepic->setPixmap(alice.scaled(w, h, Qt::KeepAspectRatio));*/
 
-  // QPixmap alicelog(":logo.png");
-  // ui->alicelogo->setPixmap(alicelog.scaled(50, 50, Qt::KeepAspectRatio));
+  //  QPixmap alicelog("GUI/logo.png");
+  //  ui->alicelogo->setPixmap(alicelog.scaled(50, 50, Qt::KeepAspectRatio));
 
   ui->start_test->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
   ui->start_test->setDefaultAction(run_test);
   ui->start_test->setToolButtonStyle(Qt::ToolButtonTextOnly);
 
-  ui->poweroff->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  ui->poweroff->setDefaultAction(poweroff);
-  ui->poweroff->setToolButtonStyle(Qt::ToolButtonTextOnly);
+  // ui->poweroff->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+  // ui->poweroff->setDefaultAction(poweroff);
+  // ui->poweroff->setToolButtonStyle(Qt::ToolButtonTextOnly);
 
-  QPixmap mftlog("LogoMFT.png");
-  int     width2  = ui->mftlogo->width();
-  int     height2 = ui->mftlogo->height();
-  ui->mftlogo->setPixmap(mftlog.scaled(width2, height2, Qt::KeepAspectRatio));
+  QPixmap mftlog("Img/LogoMFT.png");
+  // int     width1  = ui->mftlogo->width();
+  // int     height1 = ui->mftlogo->height();
+  ui->mftlogo->setPixmap(mftlog.scaled(80, 80, Qt::KeepAspectRatio));
+
+  // QPixmap alicelog("Img/logo.png");
+  // int     width2  = ui->alicelogo->width();
+  // int     height2 = ui->alicelogo->height();
+  // ui->alicelogo->setPixmap(alicelog.scaled(width1, height1, Qt::KeepAspectRatio));
 
   ui->start_test->hide();
 
@@ -256,7 +266,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
   }
 
   writeSettings();
-  poweroff();
+  // poweroff();
 
   event->accept();
 }
@@ -275,22 +285,22 @@ void MainWindow::open()
   }
   // else if (fNumberofscan == MFTFifo || fNumberofscan == MFTDigital || fNumberofscan ==
   // MFTThreshold || fNumberofscan == MFTNoise || fNumberofscan == MFTQualification) {
-  //   fileName = "../Config/Config_MFTLadder.cfg";
+  //   fileName = "Config/Config_MFTLadder.cfg";
   // }
   else if (fNumberofscan == MFTFifo) {
-    fileName = "../Config/Config_MFTLadder_FIFOTest.cfg";
+    fileName = "Config/Config_MFTLadder_FIFOTest.cfg";
   }
   else if (fNumberofscan == MFTDigital) {
-    fileName = "../Config/Config_MFTLadder_DigitalScan.cfg";
+    fileName = "Config/Config_MFTLadder_DigitalScan.cfg";
   }
   else if (fNumberofscan == MFTThreshold) {
-    fileName = "../Config/Config_MFTLadder_ThresholdScan.cfg";
+    fileName = "Config/Config_MFTLadder_ThresholdScan.cfg";
   }
   else if (fNumberofscan == MFTNoise) {
-    fileName = "../Config/Config_MFTLadder_NoiseOccupancy.cfg";
+    fileName = "Config/Config_MFTLadder_NoiseOccupancy.cfg";
   }
   else if (fNumberofscan == MFTQualification) {
-    fileName = "../Config/Config_MFTLadder.cfg";
+    fileName = "Config/Config_MFTLadder.cfg";
   }
   else if (fNumberofscan == OBPower) {
     fileName = "ConfigPower.cfg";
@@ -388,11 +398,43 @@ void MainWindow::open()
         fHicnames.push_back(QString("Module%1").arg(i));
     }
 
+
     std::vector<std::string> hicNames;
     for (const auto &name : fHicnames)
       hicNames.push_back(name.toStdString());
+    if (fDisableFour) {
+      DisableChip(4);
+    }
+    if (fDisableFive) {
+      DisableChip(5);
+    }
+    if (fDisableSix) {
+      DisableChip(6);
+    }
+    if (fDisableSeven) {
+      DisableChip(7);
+    }
+    if (fDisableEight) {
+      DisableChip(8);
+    }
     initSetupWithNames(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(),
                        &fHICs, &hicNames);
+    if (fDisableFour) {
+      EnableChip(4);
+    }
+    if (fDisableFive) {
+      EnableChip(5);
+    }
+    if (fDisableSix) {
+      EnableChip(6);
+    }
+    if (fDisableSeven) {
+      EnableChip(7);
+    }
+    if (fDisableEight) {
+      EnableChip(8);
+    }
+    fDisableFour = fDisableFive = fDisableSix = fDisableSeven = fDisableEight = false;
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
     fStatus          = fConfig->GetScanConfig()->GetParamValue("STATUS");
     fAutoRepeat      = fConfig->GetScanConfig()->GetParamValue("AUTOREPEAT");
@@ -860,7 +902,7 @@ void MainWindow::start_clock()
   stop_clock(); // by safety, the clock is stopped first. This procedure can be removed if there is
                 // a way to test if the clock is on or not.
   usleep(sleep_time);
-  int commandstart = system("./startclk -c ../Config/Config_MFTLadder.cfg");
+  int commandstart = system("./startclk -c Config/Config_MFTLadder.cfg");
   printf("commandstart = %d \n", commandstart);
   ui->stopclk_MFT->setEnabled(true);
   ui->startclk_MFT->setEnabled(false);
@@ -868,7 +910,7 @@ void MainWindow::start_clock()
 
 void MainWindow::stop_clock()
 {
-  int commandstop = system("./stopclk -c ../Config/Config_MFTLadder.cfg");
+  int commandstop = system("./stopclk -c Config/Config_MFTLadder.cfg");
   printf("commandstop = %d \n", commandstop);
   ui->startclk_MFT->setEnabled(true);
   ui->stopclk_MFT->setEnabled(false);
@@ -1339,7 +1381,7 @@ void MainWindow::performtests()
       std::cout << ex.what() << " is the thrown exception" << std::endl;
     }
   }
-  poweroff();
+  // poweroff();
 }
 
 void MainWindow::initscanlist()
@@ -1448,14 +1490,13 @@ void MainWindow::StopScan() { fScanAbort = true; }
 
 void MainWindow::getresultdetails(int i)
 {
-
+  if (!fAnalysisVector.at(fScanposition)->IsFinished()) return;
   fMapdetails.clear();
   fMapd.clear();
   ui->details_MFT->clear();
   fScanposition = i;
 
   ui->upload->hide();
-
 
   TScanResultHic *selectedhicresult =
       fresultVector.at(fScanposition)->GetHicResult(fHicnames.at(fSelectedHicIndex).toStdString());
@@ -1474,7 +1515,6 @@ void MainWindow::getresultdetails(int i)
   ui->selectedhicnametext->show();
   ui->selectedscan_name->show();
   ui->selectedscan_nametext->show();
-
 
   std::map<const char *, TResultVariable> myvariables;
   myvariables = fAnalysisVector.at(fScanposition)->GetVariableList();
@@ -1657,7 +1697,6 @@ void MainWindow::detailscombo(int dnumber)
   (void)dnumber;
   int             var  = ui->details_MFT->itemData(ui->details_MFT->currentIndex()).toInt();
   TResultVariable rvar = static_cast<TResultVariable>(var);
-
   if (!fAnalysisVector.at(fScanposition)->IsFinished()) return;
 
   for (unsigned int i = 0; i < fChips.size(); i++) {
@@ -2280,10 +2319,21 @@ void MainWindow::savesettings()
     }*/
 
     fScanconfigwindow = new ScanConfiguration(this);
-    fScanconfigwindow->show();
-    setdefaultvalues(fScanfit, fNm);
-    fScanconfigwindow->setdefaultspeed(fScanfit);
-    fScanconfigwindow->setdeaulmaskstages(fNm);
+    if (fNumberofscan == MFTThreshold || fNumberofscan == MFTNoise ||
+        fNumberofscan == MFTQualification) {
+      fScanconfigwindow->show();
+      setdefaultvalues(fScanfit, fNm);
+      fScanconfigwindow->setdefaultspeed(fScanfit);
+      fScanconfigwindow->setdefaultbackbias(true);
+      fScanconfigwindow->setdeaulmaskstages(fNm);
+    }
+    else {
+      setdefaultvalues(fScanfit, fNm);
+      fScanconfigwindow->setdefaultspeed(fScanfit);
+      fScanconfigwindow->setdefaultbackbias(true);
+      fScanconfigwindow->setdeaulmaskstages(fNm);
+      loadeditedconfig();
+    }
   }
 }
 
@@ -2302,7 +2352,7 @@ void MainWindow::speedycheck(bool checked)
 
 void MainWindow::ConfigThresholdScan(int nMaskStages = 512, int pixPerRegion = 1)
 {
-  fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", nMaskStages);
+  // fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", nMaskStages);
   fConfig->GetScanConfig()->SetParamValue("PIXPERREGION", pixPerRegion);
 }
 
@@ -3003,10 +3053,20 @@ void MainWindow::MFTDigitalScan()
 
 void MainWindow::MFTThresholdScan()
 {
-  ConfigThresholdScan();
+  // ConfigThresholdScan();
 
   ClearVectors();
 
+  if (fBackBias3) {
+    printf("Setting -3V BB DAC params\n");
+    fConfig->GetScanConfig()->SetBackBias(3.0);
+    for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
+      fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 60);
+      fConfig->GetChipConfig(i)->SetParamValue("VRESETD", 147);
+      fConfig->GetChipConfig(i)->SetParamValue("VCASN", 105);
+      fConfig->GetChipConfig(i)->SetParamValue("VCASN2", 117);
+    }
+  }
   AddScan(STThreshold);
 }
 
@@ -3016,6 +3076,16 @@ void MainWindow::MFTNoiseOccupancyScan()
 
   ClearVectors();
 
+  if (fBackBias3) {
+    printf("Setting -3V BB DAC params\n");
+    fConfig->GetScanConfig()->SetBackBias(3.0);
+    for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
+      fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 60);
+      fConfig->GetChipConfig(i)->SetParamValue("VRESETD", 147);
+      fConfig->GetChipConfig(i)->SetParamValue("VCASN", 105);
+      fConfig->GetChipConfig(i)->SetParamValue("VCASN2", 117);
+    }
+  }
   AddScan(STNoise);
 }
 
@@ -3028,12 +3098,82 @@ void MainWindow::MFTHICQualification()
   AddScan(STDigital);
 
   ConfigThresholdScan();
+
+  if (fBackBias3) {
+    printf("Setting -3V BB DAC params\n");
+    fConfig->GetScanConfig()->SetBackBias(3.0);
+    for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
+      fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 60);
+      fConfig->GetChipConfig(i)->SetParamValue("VRESETD", 147);
+      fConfig->GetChipConfig(i)->SetParamValue("VCASN", 105);
+      fConfig->GetChipConfig(i)->SetParamValue("VCASN2", 117);
+    }
+  }
   AddScan(STThreshold);
 
   ConfigNoiseOccupancy();
   AddScan(STNoise);
 }
 
+void MainWindow::SetMFTBackBias0(bool backbias)
+{
+  fBackBias0 = true;
+  fBackBias3 = false;
+  fScanconfigwindow->setdefaultbackbias(true);
+}
+
+void MainWindow::SetMFTBackBias3(bool backbias)
+{
+  fBackBias3 = true;
+  fBackBias0 = false;
+  fScanconfigwindow->setdefaultbackbias(false);
+}
+
+void MainWindow::DisableChip(int chipID)
+{
+  std::string str = "./scripts/disable_chip.sh ";
+  str += std::to_string(chipID);
+  const char *command = str.c_str();
+  system(command);
+}
+
+void MainWindow::EnableChip(int chipID)
+{
+  std::string str = "./scripts/enable_chip.sh ";
+  str += std::to_string(chipID);
+  const char *command = str.c_str();
+  system(command);
+}
+
+void MainWindow::DisableFour(bool disable)
+{
+  printf("Disabling chip 4\n");
+  fDisableFour = true;
+}
+
+void MainWindow::DisableFive(bool disable)
+{
+  printf("Disabling chip 5\n");
+  fDisableFive = true;
+}
+
+void MainWindow::DisableSix(bool disable)
+{
+  printf("Disabling chip 6\n");
+  fDisableSix = true;
+}
+
+void MainWindow::DisableSeven(bool disable)
+{
+  printf("Disabling chip 7\n");
+  fDisableSeven = true;
+}
+
+void MainWindow::DisableEight(bool disable)
+{
+  printf("Disabling chip 8\n");
+  fDisableEight = true;
+}
 
 void MainWindow::fillingendurancevectors()
 {
@@ -3082,10 +3222,10 @@ void MainWindow::ConnectTestCombo(int value)
   if (fNumberofscan == OBEndurance) {
     fSettingswindow->adjustendurance();
   }
-  if (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
-      fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML) {
-    fSettingswindow->adjuststave();
-  }
+  // if (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
+  //     fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML) {
+  //   fSettingswindow->adjuststave();
+  // }
   std::cout << "the numbeofscan is: " << fNumberofscan << " and the value is: " << value
             << std::endl;
 }

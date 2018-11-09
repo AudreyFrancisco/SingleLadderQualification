@@ -21,6 +21,7 @@ public slots:
   // void speedycheck(bool checked);
   virtual void setdefaultspeed(bool fit);
   virtual void setdeaulmaskstages(int ms);
+  virtual void setdefaultbackbias(bool backbias);
 
 private:
   Ui::ScanConfiguration *ui;

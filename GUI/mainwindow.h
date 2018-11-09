@@ -107,8 +107,18 @@ public slots:
   }
   void stopscans();
 
-  void      ConnectTestCombo(int value);
-  void      ConnectHICSizeCombo(int value);
+  void ConnectTestCombo(int value);
+  void ConnectHICSizeCombo(int value);
+  void DisableFour(bool disable);
+  void DisableFive(bool disable);
+  void DisableSix(bool disable);
+  void DisableSeven(bool disable);
+  void DisableEight(bool disable);
+  void DisableChip(int chipID);
+  void EnableChip(int chipID);
+  void SetMFTBackBias0(bool backbias);
+  void SetMFTBackBias3(bool backbias);
+  // void      DisableSelectedChips();
   void      ContinueWithoutWriting();
   void      finalwrite();
   void      quittest();
@@ -133,6 +143,13 @@ private:
   std::vector<TReadoutBoard *>   fBoards;
   std::vector<TAlpide *>         fChips;
   int                            fHICSize;
+  bool                           fDisableFour;
+  bool                           fDisableFive;
+  bool                           fDisableSix;
+  bool                           fDisableSeven;
+  bool                           fDisableEight;
+  bool                           fBackBias0;
+  bool                           fBackBias3;
   std::mutex                     fMutex;
   TConfig *                      fConfig;
   std::deque<TScanHisto>         fHistoQue;

@@ -6,6 +6,8 @@ set(SRCS
   run_irrad_chip_test.sh
   run_pulseshape_scan_vcasn.sh
   test_power_up.sh
+  disable_chip.sh
+  enable_chip.sh
   common/functions.sh
   common/hameg2030.py
   common/hameg_module_test.py

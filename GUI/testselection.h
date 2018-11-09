@@ -34,6 +34,7 @@ private:
   QString            downone, downtwo, downthree, downfour, downfive;
   MainWindow *       fmainwindow;
   int                fCounter;
+  int                cern = 1, saclay = 2, subatech = 3, ipnl = 4;
 
 public slots:
   virtual void getlocationcombo(int value);
@@ -45,7 +46,7 @@ public slots:
   virtual void getwindow();
   virtual int  getcounter();
   virtual void connectlocationcombo(std::vector<std::pair<std::string, int>> floc);
-  virtual void adjuststave();
+  // virtual void adjuststave();
 
 
 private slots:
