@@ -19,6 +19,7 @@ THic::THic(const char *id, int modId, TPowerBoard *pb, int pbMod, int bbChannel)
   m_oldClass      = CLASS_UNTESTED;
   m_worstScanBB   = CLASS_UNTESTED;
   m_worstScanNoBB = CLASS_UNTESTED;
+  m_noBB          = false;
 
   m_chips.clear();
 }
@@ -88,6 +89,15 @@ void THic::Disable()
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
     m_chips.at(ichip)->SetEnable(false);
   }
+}
+
+void THic::SetNoBB()
+{
+  m_noBB = true;
+  for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
+    m_chips.at(ichip)->SetEnableWithBB(false);
+  }
+  // TODO: set power board bb channel to disabled
 }
 
 bool THic::IsPowered()

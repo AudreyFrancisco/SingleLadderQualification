@@ -19,6 +19,8 @@ void TAlpide::SetEnable(bool Enable)
   fConfig->SetEnable(Enable);
 }
 
+void TAlpide::SetEnableWithBB(bool Enable) { fConfig->SetEnableWithBB(Enable); }
+
 int TAlpide::ReadRegister(TRegister address, uint16_t &value)
 {
   return ReadRegister((uint16_t)address, value);

@@ -25,6 +25,7 @@ protected:
   THicClassification m_class;
   THicClassification m_worstScanBB;
   THicClassification m_worstScanNoBB;
+  bool               m_noBB;
   virtual bool       IsOnBoard(int boardIdx, int chipId) = 0;
 
 public:
@@ -76,6 +77,7 @@ public:
   THicClassification GetClassification();
   THicClassification GetOldClassification() { return m_oldClass; };
   void               SetOldClassification(THicClassification aOldClass) { m_oldClass = aOldClass; };
+  void               SetNoBB();
 };
 
 class THicOB : public THic {

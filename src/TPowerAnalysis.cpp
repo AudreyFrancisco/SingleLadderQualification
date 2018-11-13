@@ -141,6 +141,14 @@ void TPowerAnalysis::Finalize()
     hicResult->m_class = GetClassification(hicCurrents, hicResult);
     hicResult->SetValidity(true);
 
+    if (hicResult->tripBB) {
+      for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+        if (m_hics.at(ihic)->GetDbId() == it->first) {
+          m_hics.at(ihic)->SetNoBB();
+        }
+      }
+    }
+
     CreateIVHisto(hicResult);
   }
   WriteResult();

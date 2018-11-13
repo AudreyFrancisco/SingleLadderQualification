@@ -188,6 +188,7 @@ public:
                          bool verify = false);
 
   void SetEnable(bool Enable);
+  void SetEnableWithBB(bool Enable);
   // int SendOpCode         (Alpide::TOpCode opcode);
 
   // int SendCommandSequence (vector <> sequence);
