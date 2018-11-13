@@ -141,6 +141,14 @@ void TPowerTest::Execute()
   currentIt->second.idddConfigured = m_testHic->GetIddd();
   currentIt->second.iddaConfigured = m_testHic->GetIdda();
 
+  // check if supply tripped
+  if (!(m_testHic->IsPowered())) {
+    currentIt->second.trip = true;
+  }
+  else {
+    currentIt->second.trip = false;
+  }
+
   // switch on back bias only for module under test
   for (int i = 0; i < 8; i++) {
     if (i == m_testHic->GetBbChannel()) {
@@ -164,12 +172,13 @@ void TPowerTest::Execute()
     currentIt->second.ibias3 = m_testHic->GetIBias() * 1000;
   }
 
-  // check if supply tripped
-  if (!(m_testHic->IsPowered())) {
-    currentIt->second.trip = true;
+  // check if supply tripped during BB IV-curve
+  if ((!currentIt->second.trip) && (!m_testHic->IsPowered())) {
+    std::cout << "Back bias tripped low voltage" << std::endl;
+    currentIt->second.tripBB = true;
   }
   else {
-    currentIt->second.trip = false;
+    currentIt->second.tripBB = false;
   }
 
   // check if back bias tripped
@@ -178,9 +187,7 @@ void TPowerTest::Execute()
               << std::endl;
     currentIt->second.tripBB = true;
   }
-  else {
-    currentIt->second.tripBB = false;
-  }
+
   m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
   m_testHic->GetPowerBoard()->SetBiasOff(m_testHic->GetBbChannel());
   THicOB *obHic = dynamic_cast<THicOB *>(m_testHic);
