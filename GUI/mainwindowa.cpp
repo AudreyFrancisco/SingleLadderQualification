@@ -663,19 +663,6 @@ void MainWindow::loadConfigFile(QByteArray configFilename)
 void MainWindow::doDebugScan(TScanType scanType)
 {
   fDebugWindow->hide();
-
-  std::string TestDir = fConfig->GetScanConfig()->GetTestDir();
-  if (const char *dataDir = std::getenv("ALPIDE_TEST_DATA"))
-    TestDir.insert(0, std::string(dataDir) + "/");
-  else
-    TestDir.insert(0, "Data/");
-  makeDir(TestDir.c_str());
-
-  for (unsigned int i = 0; i < fHICs.size(); i++) {
-    fHicnames.push_back(QString(fHICs.at(i)->GetDbId().c_str()));
-    makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
-  }
-
   ClearVectors();
   AddScan(scanType);
   fstopwriting = true;
@@ -685,13 +672,11 @@ void MainWindow::doDebugScan(TScanType scanType)
 void MainWindow::fillingDriverTune() // JI
 {
   ClearVectors();
-  vector<int>            driverSettings = {5, 4, 3, 2};     //{2, 3, 4, 5};  //, 11, 15};
-  vector<int>            preEmpSettings = {15, 9, 6, 3, 0}; // {0, 3, 6, 9, 15}; //, 9, 12, 15};
+  vector<int>            driverSettings = {1, 2, 3, 4, 5};  //, 11, 15};
+  vector<int>            preEmpSettings = {0, 3, 6, 9, 15}; //, 9, 12, 15};
   vector<vector<double>> errors;
   vector<int>            drivers, preEmps;
   vector<double>         scanVoid = {4.04, 4.04, 4.04, 4.04}; // error 404 valid error not found
-  // std::vector<bool> fScanVoid;//(driverSettings.size()*preEmpSettings.size());
-  // ScanVoid fScanVoid;
 
   for (unsigned int i = 0; i < driverSettings.size(); i++) {
     for (unsigned int j = 0; j < preEmpSettings.size(); j++) {
@@ -704,30 +689,14 @@ void MainWindow::fillingDriverTune() // JI
   }
   applytests();
 
-  std::cout << "here" << std::endl;
-  // std::cout << fScanVoid.size() << std::endl;
-  std::cout << "past" << std::endl;
-
-
-  // fScanVoid.returnScanVoid();
   for (unsigned int k = 0; k < fAnalysisVector.size(); k++) {
-    std::cout << "in loop " << std::endl;
-    std::cout << fScanVoid[k] << std::endl;
-    if (fScanVoid[k] == false) {
-      std::cout << "here1" << std::endl;
+    if (fScanVoid == false) {
       errors.push_back(fAnalysisVector[k]->DriverPreEmpFunc());
     }
-    else if (fScanVoid[k] == true) {
-      std::cout << "here2" << std::endl;
+    else if (fScanVoid == true) {
       errors.push_back(scanVoid);
     }
-    else {
-      std::cout << "fScanVoid error" << std::endl;
-    }
   }
-
-  std::cout << "here" << std::endl;
-
 
   std::ofstream file;
   remove("driverTuning.dat");
@@ -820,20 +789,16 @@ void MainWindow::fillingOBvectors()
 
 void MainWindow::performtests()
 {
+  fScanVoid   = false;
   fExtraScans = 0;
   qApp->processEvents();
   fNewScans.clear();
   fInitialScans = fScanVector.size();
-  std::cout << "scan vector size" << fScanVector.size() << std::endl;
-  // std::vector<bool> fScanVoid(fScanVector.size());
-  // std::vector<bool> fScanVoidInstance = fScanVoid();
 
   for (unsigned int i = 0; i < fScanVector.size(); i++) {
     // geting initial scan type and parameters
     std::vector<TScanType>         scantypelist;
     std::vector<TScanParameters *> parameterlist;
-    // fScanVoid.addEntry(false, i);
-    fScanVoid.push_back(false);
     for (unsigned int d = 0; d < fScanTypes.size(); d++) {
       scantypelist.push_back(fScanTypes.at(d));
       parameterlist.push_back(fScanParameters.at(d));
@@ -917,8 +882,7 @@ void MainWindow::performtests()
           fScanVector.at(i)->ClearHistoQue();
           if (fNumberofscan == OLDriverTune) { // JI
             fAutoRepeat = false;
-            // fScanVoid.addEntry(true, i);
-            fScanVoid[i] = true;
+            fScanVoid   = true;
           }
 
           if (fAutoRepeat && i < fScanVector.size() - 1 && fExtraScans < fMaxRepeat) {
@@ -1001,13 +965,7 @@ void MainWindow::performtests()
               fresultVector.erase(fresultVector.begin() + i + 1, fresultVector.end());
               fScanParameters.erase(fScanParameters.begin() + i + 1, fScanParameters.end());
               fScanTypes.erase(fScanTypes.begin() + i + 1, fScanTypes.end());
-              int indexintable = 0;
-              for (unsigned int e = 0; e < fScanVector.size(); e++) {
-                if (fScanVector.at(e) != 0) {
-                  indexintable++;
-                }
-              }
-              ui->testTable->setRowCount(indexintable);
+              ui->testTable->setRowCount(i + 1);
               for (std::map<int, int>::iterator it = fScanToRowMap.begin();
                    it != fScanToRowMap.end(); it++) {
                 if (it->first > (int)i) fScanToRowMap.erase(it);
@@ -1078,7 +1036,6 @@ void MainWindow::performtests()
         if (fScanToRowMap.count(i) > 0)
           ui->testTable->item(fScanToRowMap[i], 1)->setText(fScanVector.at(i)->GetState());
         colorsinglescan(i);
-
         qApp->processEvents();
       }
 
@@ -1102,7 +1059,6 @@ void MainWindow::performtests()
       std::cout << ex.what() << " is the thrown exception" << std::endl;
     }
   }
-
   poweroff();
 }
 
@@ -1957,16 +1913,7 @@ void MainWindow::loadeditedconfig()
     int ncycles = 0;
     ncycles     = OpenEnduranceRecoveryFile(filename.toStdString().c_str(), names, counterVector);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    std::cout << ncycles << " cycles found in file." << std::endl;
-=======
-    if (ncycles != 0)
-      std::cout << ncycles << " cycles found in file." << std::endl;
->>>>>>> 2f4d3f7... fix uninitialized variable
-=======
     if (ncycles != 0) std::cout << ncycles << " cycles found in file." << std::endl;
->>>>>>> 257af4a... make format
 
     for (unsigned int d = 1; d < fScanVector.size(); d++) {
       TEnduranceCycle *scan;
@@ -2621,7 +2568,6 @@ void MainWindow::analysis(TScanAnalysis *myanalysis)
     fScanAbort       = true;
     fExceptiontext   = ex.what();
   }
-  std::cout << "here Mainwindow::analysis end" << std::endl;
 }
 
 void MainWindow::fillingDctrl()

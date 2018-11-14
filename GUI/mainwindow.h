@@ -57,6 +57,21 @@ public:
   void output(TScanResultHic &foo) { foo.WriteHicClassification(); }
   ~MainWindow();
 
+  /* class ScanVoid {
+  public:
+    std::vector<bool> returnScanVoid(void) {
+      return scanVoid;
+    }
+    int addEntry(bool entry, int index) {
+      scanVoid[index] = entry;
+      return 0;
+    }
+  private:
+    std::vector<bool>   scanVoid; // JI
+  };
+  ScanVoid  fScanVoid;*/
+  std::vector<bool> fScanVoid; // JI
+
 public slots:
   void popup(QString message);
   void poweroff();
@@ -235,7 +250,7 @@ private:
   bool                        fActivityCreation;
   bool                        fRecovery;
   bool                        fAbortSingleScan;
-  bool                        fScanVoid; // JI
+
 
   std::map<int, int> fScanToRowMap;
   std::map<int, int> fRowToScanMap;
