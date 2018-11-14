@@ -49,7 +49,7 @@ void TDctrlMeasurement::InitScope()
 {
   // scope.debug_en = true; // Enable to print all scope transactions
   if (!scope.open_auto()) { // Auto connects to scope
-    exit(1);
+    throw runtime_error("scope.open_auto() failed!");
   }
   scope.get_errors(); // Check for scope errors
 
@@ -163,8 +163,8 @@ void TDctrlMeasurement::WriteMem(TAlpide *chip, int ARegion, int AOffset, int AV
   if (err >= 0) err = chip->WriteRegister(HighAdd, HighVal);
 
   if (err < 0) {
-    std::cout << "Cannot write chip register. Exiting ... " << std::endl;
-    exit(1);
+    std::cout << "Cannot write chip register." << std::endl;
+    throw runtime_error("Cannot write chip register.");
   }
 }
 
@@ -202,8 +202,8 @@ void TDctrlMeasurement::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AV
   }
 
   if (err < 0) {
-    std::cout << "Cannot read chip register. Exiting ... " << std::endl;
-    exit(1);
+    std::cout << "Cannot read chip register." << std::endl;
+    throw runtime_error("Cannot read chip register.");
   }
 
   // Note to self: if you want to shorten the following lines,
@@ -258,7 +258,7 @@ void TDctrlMeasurement::Execute()
     TestPattern(0x555555, exception); // Generate data on bus
     /*if (exception) { // Should these be ignored?
       std::cout << "Fifo scan failed" << std::endl;
-      exit(1);
+      throw runtime_erro("Fifo scan failed");
     }*/
     scope.wait_for_trigger(10); // Check and wait until triggered
 
