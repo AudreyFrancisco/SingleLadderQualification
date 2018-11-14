@@ -96,8 +96,8 @@ void THic::SetNoBB()
   m_noBB = true;
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
     m_chips.at(ichip)->SetEnableWithBB(false);
+    if (m_powerBoard) m_powerBoard->DisableBias(m_bbChannel);
   }
-  // TODO: set power board bb channel to disabled
 }
 
 bool THic::IsPowered()
@@ -215,6 +215,11 @@ void THic::ScaleVoltage(float aFactor)
 void THic::SwitchBias(bool on)
 {
   if (!m_powerBoard) return;
+  if (on && m_noBB) {
+    std::cout << "Warning: HIC " << GetDbId()
+              << " classified as no back bias, back bias not switched on" << std::endl;
+    return;
+  }
   if (on) {
     m_powerBoard->SetBiasOn(m_bbChannel);
   }

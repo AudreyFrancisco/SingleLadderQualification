@@ -64,6 +64,7 @@ TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName)
     fPBConfig.Modul[i].DVset       = DEF_DIGITALVOLTAGE;
     fPBConfig.Modul[i].DIset       = DEF_DIGITALMAXCURRENT;
     fPBConfig.Modul[i].BiasOn      = DEF_BIASCHANNELON;
+    fPBConfig.Modul[i].BiasEnabled = true;
     fPBConfig.Modul[i].CalAVScale  = DEF_AVSCALE;
     fPBConfig.Modul[i].CalDVScale  = DEF_DVSCALE;
     fPBConfig.Modul[i].CalAVOffset = DEF_AVOFFSET;
