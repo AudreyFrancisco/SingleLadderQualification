@@ -255,7 +255,7 @@ void TDctrlMeasurement::Execute()
       (m_testChip->GetConfig()->GetParamValue("LINKSPEED") != -1)) {
 
     scope.single_capture();           // Stop on first trigger
-    TestPattern(0x555555, exception); // Generate data on bus
+    TestPattern(0xFFFFFF, exception); // Generate data on bus
     /*if (exception) { // Should these be ignored?
       std::cout << "Fifo scan failed" << std::endl;
       throw runtime_erro("Fifo scan failed");
