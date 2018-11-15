@@ -141,8 +141,6 @@ bool TChipConfig::IsEnabledWithBB() const
 {
   THic *hic = fChip->GetHic();
   if (hic && !hic->BiasChannelEnabled()) {
-    std::cout << "Warning: chip with ID " << fChipId << " disabled because back bias channel is off"
-              << std::endl;
     return false;
   }
   return (fEnabled != 0) && (fEnabledWithBB != 0);

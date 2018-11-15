@@ -1824,7 +1824,7 @@ void MainWindow::savesettings()
                   "\nhas previous activities \nthat are still open. \nYou can still run the test, "
                   "\nbut if possible please close \nthese activities *before* \nwriting to the "
                   "database.");
-          if (!impendanceDone)
+          if (!impendanceDone && (fHalfstave != "test"))
             popup("Warning: HIC \n" + fHicnames.at(i) +
                   "\ndoes not have an impedance\n test activity yet. \nYou should consider "
                   "aborting \nthe scan and running \nthe impedance test first.");
