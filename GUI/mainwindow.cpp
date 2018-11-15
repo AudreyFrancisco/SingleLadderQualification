@@ -232,7 +232,7 @@ void MainWindow::open()
            fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
            fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
            fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML ||
-           fNumberofscan == OLDriverTune) { // JI
+           fNumberofscan == OLDriverTune || fNumberofscan == MLDriverTune) { // JI
     fileName = "Config_HS.cfg";
   }
   try {
@@ -318,7 +318,7 @@ void MainWindow::open()
         fNumberofscan == OLDriverTune) { // JI
       fHicnames.clear();
       const int nModules =
-          (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OLDriverTune) ? 7 : 4;
+          (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == 7) ? OLDriverTune : 4;
       for (int i = 0; i < nModules; ++i)
         fHicnames.push_back(QString("Module%1").arg(i));
     }
@@ -915,7 +915,7 @@ void MainWindow::performtests()
 
         if (fExceptionthrown) {
           fScanVector.at(i)->ClearHistoQue();
-          if (fNumberofscan == OLDriverTune) { // JI
+          if (fNumberofscan == OLDriverTune || fNumberofscan == MLDriverTune) { // JI
             fAutoRepeat = false;
             // fScanVoid.addEntry(true, i);
             fScanVoid[i] = true;
@@ -992,7 +992,7 @@ void MainWindow::performtests()
 
             fExtraScans++;
           }
-          else if (fNumberofscan != OLDriverTune) {
+          else if (fNumberofscan != OLDriverTune && fNumberofscan != MLDriverTune) {
             notifyuser(i);
             if (fTestAgain) {
               // erase next scans from vectors and elements from maps
@@ -1122,7 +1122,7 @@ void MainWindow::initscanlist()
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     int oldtests = 0;
     if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST &&
-        fNumberofscan != OLDriverTune) { // JI
+        fNumberofscan != OLDriverTune && fNumberofscan != MLDriverTune) { // JI
       oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
       std::cout << "the number of old tests is " << oldtests << std::endl;
       fConfig->GetScanConfig()->SetRetestNumber(fHicnames.at(i).toStdString(), oldtests);
@@ -1162,7 +1162,7 @@ void MainWindow::initscanlist()
   if (fNumberofscan == IBDctrl) {
     fillingDctrl();
   }
-  if (fNumberofscan == OLDriverTune) { // JI
+  if (fNumberofscan == OLDriverTune || fNumberofscan == MLDriverTune) { // JI
     fillingDriverTune();
   }
   qApp->processEvents();
@@ -1189,7 +1189,7 @@ void MainWindow::applytests()
   printClasses();
 
   if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
-      fNumberofscan == OLDriverTune) { // JI
+      fNumberofscan == OLDriverTune || fNumberofscan == MLDriverTune) { // JI
     fstopwriting = true;
   }
 
@@ -1852,7 +1852,7 @@ void MainWindow::savesettings()
     }
     std::cout << "fNumberofscan: " << fNumberofscan << std::endl; // JI
     if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST &&
-        fNumberofscan != OLDriverTune) { // JI
+        fNumberofscan != OLDriverTune && fNumberofscan != MLDriverTune) { // JI
       for (unsigned int i = 0; i < fHICs.size(); i++) {
         if (!fHicnames.at(i).isEmpty()) {
           fstopwriting  = false;
@@ -2373,7 +2373,7 @@ void MainWindow::ConnectTestCombo(int value)
   std::string name;
   name.append(fTestname.toStdString());
   if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST &&
-      fNumberofscan != OLDriverTune) { // JI
+      fNumberofscan != OLDriverTune && fNumberofscan != MLDriverTune) { // JI
     findidoftheactivitytype(name, fIdofactivitytype);
   }
   if (fIdofactivitytype == -1) {
@@ -2386,7 +2386,7 @@ void MainWindow::ConnectTestCombo(int value)
   }
   std::cout << "the id of the selected test: " << fIdofactivitytype << std::endl;
   if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST &&
-      fNumberofscan != OLDriverTune) { // JI
+      fNumberofscan != OLDriverTune && fNumberofscan != MLDriverTune) { // JI
     locationcombo();
     fSettingswindow->connectlocationcombo(fLocdetails);
   }
