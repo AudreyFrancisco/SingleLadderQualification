@@ -315,10 +315,11 @@ void MainWindow::open()
     }
 
     if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
-        fNumberofscan == OLDriverTune) { // JI
+        fNumberofscan == OLDriverTune || fNumberofscan == MLDriverTune) { // JI
       fHicnames.clear();
-      const int nModules =
-          (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == 7) ? OLDriverTune : 4;
+      const int nModules = (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OLDriverTune)
+                               ? 7
+                               : 4; // 7) //? OLDriverTune : 4;
       for (int i = 0; i < nModules; ++i)
         fHicnames.push_back(QString("Module%1").arg(i));
     }
