@@ -617,6 +617,8 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
       if (boardInfo.decoder10b8bError) {
         m_errorCount.n8b10b++;
         if (FindHIC(iboard, boardInfo.channel).compare("None") != 0) {
+          std::cout << "WARNING: 8b10b error in board " << iboard << " channel "
+                    << boardInfo.channel << std::endl;
           m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).n8b10b++;
         }
       }
