@@ -11,6 +11,7 @@ TAlpide::TAlpide(TChipConfig *config)
     : fConfig(config), fChipId(config->GetChipId()), fReadoutBoard(0x0), fADCOffset(-1),
       fADCHalfLSB(false), fADCSign(false)
 {
+  fConfig->SetChip(this);
 }
 
 void TAlpide::SetEnable(bool Enable)
