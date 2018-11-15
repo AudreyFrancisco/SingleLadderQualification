@@ -1957,16 +1957,7 @@ void MainWindow::loadeditedconfig()
     int ncycles = 0;
     ncycles     = OpenEnduranceRecoveryFile(filename.toStdString().c_str(), names, counterVector);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    std::cout << ncycles << " cycles found in file." << std::endl;
-=======
-    if (ncycles != 0)
-      std::cout << ncycles << " cycles found in file." << std::endl;
->>>>>>> 2f4d3f7... fix uninitialized variable
-=======
     if (ncycles != 0) std::cout << ncycles << " cycles found in file." << std::endl;
->>>>>>> 257af4a... make format
 
     for (unsigned int d = 1; d < fScanVector.size(); d++) {
       TEnduranceCycle *scan;
