@@ -7,6 +7,7 @@
 #include "AlpideConfig.h"
 #include "Common.h"
 #include "TBoardConfigMOSAIC.h"
+#include "TPowerTest.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
@@ -237,9 +238,10 @@ std::string TScan::FindHIC(int boardIndex, int rcv)
 
 void TScan::Terminate()
 {
+  bool isPowerTest = (dynamic_cast<TPowerTest *>(this) != nullptr);
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
-    if (m_config->GetTestType() != OBEndurance) {
+    if ((m_config->GetTestType() != OBEndurance) && !isPowerTest) {
       if (!m_hics.at(ihic)->IsPowered()) {
         throw std::runtime_error("TScan terminate: HIC powered off (Retry suggested)");
       }
