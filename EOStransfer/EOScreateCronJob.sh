@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo " ------ ALICE-ITS EOS transfer cron job istallation script - v.1.1 - A.Franco - INFN BARI Italy" 
+echo " ------ ALICE-ITS EOS transfer cron job istallation script - v.1.2 - A.Franco - INFN BARI Italy" 
 
 # Builds the command line
 SCRIPTSPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
