@@ -2434,46 +2434,46 @@ void MainWindow::fillingfastpower()
 void MainWindow::fillingHSscans()
 {
   ClearVectors();
-  AddScan(STPower);
-  if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
-  // FIFO and digital scan at three different supply voltages
-  AddScan(STFifo);
-  fConfig->GetScanConfig()->SetVoltageScale(1.1);
-  AddScan(STFifo);
-  fConfig->GetScanConfig()->SetVoltageScale(0.9);
-  AddScan(STFifo);
-  fConfig->GetScanConfig()->SetVoltageScale(1.0);
+  //AddScan(STPower);
+  //if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
+  //// FIFO and digital scan at three different supply voltages
+  //AddScan(STFifo);
+  //fConfig->GetScanConfig()->SetVoltageScale(1.1);
+  //AddScan(STFifo);
+  //fConfig->GetScanConfig()->SetVoltageScale(0.9);
+  //AddScan(STFifo);
+  //fConfig->GetScanConfig()->SetVoltageScale(1.0);
 
-  AddScan(STDigital);
-  fConfig->GetScanConfig()->SetVoltageScale(1.1);
-  AddScan(STDigital);
-  fConfig->GetScanConfig()->SetVoltageScale(0.9);
-  AddScan(STDigital);
-  fConfig->GetScanConfig()->SetVoltageScale(1.0);
+  //AddScan(STDigital);
+  //fConfig->GetScanConfig()->SetVoltageScale(1.1);
+  //AddScan(STDigital);
+  //fConfig->GetScanConfig()->SetVoltageScale(0.9);
+  //AddScan(STDigital);
+  //fConfig->GetScanConfig()->SetVoltageScale(1.0);
 
-  // digital white frame
-  AddScan(STDigitalWF);
+  //// digital white frame
+  //AddScan(STDigitalWF);
 
-  // threshold scans and tuning at 0V back bias
-  fConfig->GetScanConfig()->SetBackBias(0.0);
-  fConfig->GetScanConfig()->SetVcasnRange(30, 70);
+  //// threshold scans and tuning at 0V back bias
+  //fConfig->GetScanConfig()->SetBackBias(0.0);
+  //fConfig->GetScanConfig()->SetVcasnRange(30, 70);
 
-  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
-  AddScan(STVCASN);
-  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
-  AddScan(STApplyVCASN, fresultVector.back());
-  AddScan(STITHR);
-  AddScan(STApplyITHR, fresultVector.back());
-  AddScan(STThreshold);
-  // noise occupancy with and without mask at 0V back bias
-  AddScan(STNoise);
-  AddScan(STApplyMask, fresultVector.back());
-  AddScan(STNoise);
-  AddScan(STClearMask);
+  //fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  //AddScan(STVCASN);
+  //fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  //AddScan(STApplyVCASN, fresultVector.back());
+  //AddScan(STITHR);
+  //AddScan(STApplyITHR, fresultVector.back());
+  //AddScan(STThreshold);
+  //// noise occupancy with and without mask at 0V back bias
+  //AddScan(STNoise);
+  //AddScan(STApplyMask, fresultVector.back());
+  //AddScan(STNoise);
+  //AddScan(STClearMask);
 
   // threshold scans and tuning at 3V back bias
-  fConfig->GetScanConfig()->SetBackBias(3.0);
-  fConfig->GetScanConfig()->SetVcasnRange(75, 160);
+  fConfig->GetScanConfig()->SetBackBias(1.0);
+  fConfig->GetScanConfig()->SetVcasnRange(50, 90);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STDigital);
   AddScan(STDigitalWF);
