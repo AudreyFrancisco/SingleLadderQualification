@@ -332,6 +332,10 @@ void MainWindow::open()
     fMaxRepeat       = fConfig->GetScanConfig()->GetParamValue("MAXREPEAT");
     fRecovery        = fConfig->GetScanConfig()->GetParamValue("RECOVERY");
 
+    std::cout << std::endl
+              << "Software version: " << fConfig->GetSoftwareVersion() << std::endl
+              << std::endl;
+
     fConfig->GetScanConfig()->SetParamValue("HALFSTAVECOMP", fHalfstavepart);
     fActivityCreation = true;
     if (fNumberofscan == OBPower) {
