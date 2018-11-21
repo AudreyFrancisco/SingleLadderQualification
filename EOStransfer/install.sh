@@ -15,9 +15,12 @@ sudo ./EOSconfig.py
 rm /tmp/krblist
 echo " Finally setup the Cron Job task "
 echo " "
+sudo ./EOSsetupSSHconfig.sh
 ./EOScreateCronJob.sh
 echo " "
+if [ ! -f /tmp/EOStransfer.log ] ; then 
+  touch /tmp/EOStransfer.log
+fi
+rm -f /tmp/EOStransferlock.loc
 echo " Installation Done !"
-
-
 
