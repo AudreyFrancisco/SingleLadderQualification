@@ -30,14 +30,15 @@ int initSetupSingleMosaic(TConfig *config, std::vector<TReadoutBoard *> *boards,
                           TBoardType *boardType, std::vector<TAlpide *> *chips);
 int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                        std::vector<TAlpide *> *chips, std::vector<THic *> *hics,
-                       const char **hicIds);
+                       const char **hicIds, bool powerCombo);
 int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
-                     std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds);
+                     std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds,
+                     bool powerCombo);
 int initSetupPower(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                    std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds);
 int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
               std::vector<TAlpide *> *chips, const char *configFileName = "",
-              std::vector<THic *> *hics = 0, const char **hicIds = 0);
+              std::vector<THic *> *hics = 0, const char **hicIds = 0, bool powerCombo = false);
 int initSetupWithNames(TConfig *&config, std::vector<TReadoutBoard *> *boards,
                        TBoardType *boardType, std::vector<TAlpide *> *chips,
                        const char *configFileName = "", std::vector<THic *> *hics = 0,

@@ -667,6 +667,7 @@ void MainWindow::loadConfigFile(QByteArray configFilename)
 void MainWindow::doDebugScan(TScanType scanType)
 {
   fDebugWindow->hide();
+  emit deviceLoaded(fConfig->GetDeviceType());
 
   std::string TestDir = fConfig->GetScanConfig()->GetTestDir();
   if (const char *dataDir = std::getenv("ALPIDE_TEST_DATA"))
