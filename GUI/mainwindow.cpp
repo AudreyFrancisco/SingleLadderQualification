@@ -324,6 +324,14 @@ void MainWindow::open()
     std::vector<std::string> hicNames;
     for (const auto &name : fHicnames)
       hicNames.push_back(name.toStdString());
+
+
+    bool powerCombo = (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
+                       fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
+                       fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML)
+                          ? true
+                          : false;
+
     initSetupWithNames(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(),
                        &fHICs, &hicNames);
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");

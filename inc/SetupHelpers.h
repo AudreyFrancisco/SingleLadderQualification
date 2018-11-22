@@ -42,7 +42,7 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
 int initSetupWithNames(TConfig *&config, std::vector<TReadoutBoard *> *boards,
                        TBoardType *boardType, std::vector<TAlpide *> *chips,
                        const char *configFileName = "", std::vector<THic *> *hics = 0,
-                       std::vector<std::string> *hicNames = 0);
+                       std::vector<std::string> *hicNames = 0, bool powerCombo = false);
 int findHic(std::vector<THic *> *hics, int modId);
 int powerOn(TReadoutBoardDAQ *aDAQBoard);
 int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
