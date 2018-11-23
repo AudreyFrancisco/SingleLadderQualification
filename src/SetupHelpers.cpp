@@ -338,13 +338,12 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
     int  bbChannel            = useCombo ? biasbusMap[positionMap[ihic] - 1] : -1;
     if (hicIds) {
       hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb,
-                                 positionMap[ihic] - 1),
-                      bbChannel, useCombo);
+                                 positionMap[ihic] - 1, bbChannel, useCombo));
     }
     else {
       hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic + 1)).c_str(),
-                                 config->GetHicConfig(ihic)->GetModId(), pb, positionMap[ihic] - 1),
-                      bbChannel, useCombo);
+                                 config->GetHicConfig(ihic)->GetModId(), pb, positionMap[ihic] - 1,
+                                 bbChannel, useCombo));
     }
     ((THicOB *)hics->back())->SetPosition(positionMap[ihic]);
   }
@@ -851,7 +850,7 @@ int powerOn(TReadoutBoardDAQ *aDAQBoard)
 int initSetupWithNames(TConfig *&config, std::vector<TReadoutBoard *> *boards,
                        TBoardType *boardType, std::vector<TAlpide *> *chips,
                        const char *configFileName /*=""*/, std::vector<THic *> *hics /*=0*/,
-                       std::vector<std::string> *hicNames /*=0*/)
+                       std::vector<std::string> *hicNames /*=0*/, bool powerCombo /*=false*/)
 {
   const char **hicIds = nullptr;
   if (hicNames) {
@@ -859,7 +858,7 @@ int initSetupWithNames(TConfig *&config, std::vector<TReadoutBoard *> *boards,
     for (uint ihic = 0; ihic < hicNames->size(); ++ihic)
       hicIds[ihic] = hicNames->at(ihic).c_str();
   }
-  int ret = initSetup(config, boards, boardType, chips, configFileName, hics, hicIds);
+  int ret = initSetup(config, boards, boardType, chips, configFileName, hics, hicIds, powerCombo);
   delete[] hicIds;
   return ret;
 }

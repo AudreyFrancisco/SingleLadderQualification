@@ -333,7 +333,7 @@ void MainWindow::open()
                           : false;
 
     initSetupWithNames(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(),
-                       &fHICs, &hicNames);
+                       &fHICs, &hicNames, powerCombo);
     fHiddenComponent = fConfig->GetScanConfig()->GetParamValue("TESTWITHOUTCOMP");
     fStatus          = fConfig->GetScanConfig()->GetParamValue("STATUS");
     fAutoRepeat      = fConfig->GetScanConfig()->GetParamValue("AUTOREPEAT");
