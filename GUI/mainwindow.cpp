@@ -326,11 +326,8 @@ void MainWindow::open()
       hicNames.push_back(name.toStdString());
 
 
-    bool powerCombo = (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
-                       fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
-                       fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML)
-                          ? true
-                          : false;
+    bool powerCombo = (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
+                       fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML);
 
     initSetupWithNames(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(),
                        &fHICs, &hicNames, powerCombo);

@@ -203,7 +203,7 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
     THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(ihic);
     positionMap[ihic]         = hicOBconfig->GetParamValue("HSPOSBYID");
-    bool useCombo             = (powerCombo) ? true : hicOBconfig->GetParamValue("POWERCOMBO");
+    bool useCombo             = powerCombo || hicOBconfig->GetParamValue("POWERCOMBO");
     int  bbChannel            = useCombo ? biasbusMap[positionMap[ihic] - 1] : -1;
     if (hicIds) {
       hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb,
@@ -334,7 +334,7 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
     THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(ihic);
     positionMap[ihic]         = hicOBconfig->GetParamValue("HSPOSBYID");
-    bool useCombo             = (powerCombo) ? true : hicOBconfig->GetParamValue("POWERCOMBO");
+    bool useCombo             = powerCombo || hicOBconfig->GetParamValue("POWERCOMBO");
     int  bbChannel            = useCombo ? biasbusMap[positionMap[ihic] - 1] : -1;
     if (hicIds) {
       hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb,
