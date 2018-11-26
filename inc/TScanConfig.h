@@ -27,6 +27,8 @@ typedef enum {
   OBStaveML,
   StaveReceptionOL,
   StaveReceptionML,
+  OBStaveOLFAST,
+  OBStaveMLFAST,
   Unknown
 } TTestType;
 

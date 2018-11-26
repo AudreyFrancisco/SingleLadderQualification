@@ -80,7 +80,8 @@ void TDigitalAnalysis::Initialize()
   CreatePrediction();
   TTestType testType;
   testType = m_config->GetTestType();
-  if (testType != OBHalfStaveOLFAST && testType != OBHalfStaveMLFAST) {
+  if (testType != OBHalfStaveOLFAST && testType != OBHalfStaveMLFAST && testType != OBStaveOLFAST &&
+      testType != OBStaveMLFAST) {
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
       CalculatePrediction(m_hics.at(ihic)->GetDbId());
     }

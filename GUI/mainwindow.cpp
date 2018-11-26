@@ -231,6 +231,7 @@ void MainWindow::open()
   else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
            fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
            fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
+           fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST ||
            fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML) {
     fileName = "Config_HS.cfg";
   }
@@ -314,9 +315,11 @@ void MainWindow::open()
       }
     }
 
-    if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+    if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
+        fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST) {
       fHicnames.clear();
-      const int nModules = (fNumberofscan == OBHalfStaveOLFAST) ? 7 : 4;
+      const int nModules =
+          (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBStaveOLFAST) ? 7 : 4;
       for (int i = 0; i < nModules; ++i)
         fHicnames.push_back(QString("Module%1").arg(i));
     }
@@ -327,7 +330,8 @@ void MainWindow::open()
 
 
     bool powerCombo = (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
-                       fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML);
+                       fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML ||
+                       fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST);
 
     initSetupWithNames(fConfig, &fBoards, &fBoardType, &fChips, fileName.toStdString().c_str(),
                        &fHICs, &hicNames, powerCombo);
@@ -1070,7 +1074,8 @@ void MainWindow::initscanlist()
 
   for (unsigned int i = 0; i < fHICs.size(); i++) {
     int oldtests = 0;
-    if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST)
+    if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST &&
+        fNumberofscan != OBStaveOLFAST && fNumberofscan != OBStaveMLFAST)
       oldtests = DbCountActivities(fDB, fIdofactivitytype, fHicnames.at(i).toStdString());
     std::cout << "the number of old tests is " << oldtests << std::endl;
     fConfig->GetScanConfig()->SetRetestNumber(fHicnames.at(i).toStdString(), oldtests);
@@ -1103,7 +1108,8 @@ void MainWindow::initscanlist()
     fillingHSscans();
     fConfig->GetScanConfig()->SetParamValue("TESTDCTRL", dctrl);
   }
-  if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+  if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
+      fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST) {
     fillingfastHS();
   }
   if (fNumberofscan == IBDctrl) {
@@ -1132,7 +1138,8 @@ void MainWindow::applytests()
 
   printClasses();
 
-  if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+  if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
+      fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST) {
     fstopwriting = true;
   }
 
@@ -1804,7 +1811,8 @@ void MainWindow::savesettings()
     if (fstop && fHiddenComponent == false) {
       return;
     }
-    if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST) {
+    if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST &&
+        fNumberofscan != OBStaveOLFAST && fNumberofscan != OBStaveMLFAST) {
       for (unsigned int i = 0; i < fHICs.size(); i++) {
         if (!fHicnames.at(i).isEmpty()) {
           fstopwriting  = false;
@@ -2324,7 +2332,8 @@ void MainWindow::ConnectTestCombo(int value)
   ui->testtypeselected->setText(fTestname);
   std::string name;
   name.append(fTestname.toStdString());
-  if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST) {
+  if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST &&
+      fNumberofscan != OBStaveOLFAST && fNumberofscan != OBStaveMLFAST) {
     findidoftheactivitytype(name, fIdofactivitytype);
   }
   if (fIdofactivitytype == -1) {
@@ -2336,7 +2345,8 @@ void MainWindow::ConnectTestCombo(int value)
     return;
   }
   std::cout << "the id of the selected test: " << fIdofactivitytype << std::endl;
-  if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST) {
+  if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST &&
+      fNumberofscan != OBStaveOLFAST && fNumberofscan != OBStaveMLFAST) {
     locationcombo();
     fSettingswindow->connectlocationcombo(fLocdetails);
   }
