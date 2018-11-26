@@ -101,6 +101,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QAction *newtestprod =
       new QAction(QApplication::style()->standardIcon(QStyle::SP_DialogOpenButton),
                   "&New test (Prod DB)", this);
+  newtestprod->setShortcut(Qt::Key_F5);
   connect(newtestprod, &QAction::triggered, [=]() {
     fDatabaseSelected = true;
     fDatabasetype     = 0;
@@ -113,16 +114,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     start_test();
   });
   fWritedb = new QAction("&Write to database", this);
+  connect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
   QAction *run_test =
       new QAction(QApplication::style()->standardIcon(QStyle::SP_MediaPlay), "Start test", this);
+  run_test->setShortcut(Qt::Key_F8);
   connect(run_test, &QAction::triggered, this, &MainWindow::applytests);
   run_test->setEnabled(false);
   QAction *poweroff = new QAction(
       QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton), "Power Off", this);
   connect(poweroff, &QAction::triggered, this, &MainWindow::poweroff);
   QAction *quit = new QAction("&Quit", this);
+  quit->setShortcut(Qt::CTRL + Qt::Key_Q);
   connect(quit, &QAction::triggered, this, &MainWindow::close);
   QAction *newdebug = new QAction("&Debug mode", this);
+  newdebug->setShortcut(Qt::Key_F4);
   connect(newdebug, SIGNAL(triggered()), this, SLOT(start_debug()));
   connect(ui->upload, SIGNAL(clicked()), this, SLOT(uploadpdf()));
 
@@ -136,7 +141,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   menu->addAction(fWritedb);
   menu->addAction(poweroff);
   menu->addAction(quit);
-  fWritedb->setVisible(false);
+  fWritedb->setEnabled(false);
 
   // build toolbar (based on actions)
   addToolBar(Qt::LeftToolBarArea, ui->mainToolBar);
@@ -590,13 +595,12 @@ void MainWindow::start_test()
   fActComponentTypeIDs.clear();
   fComponentIDs.clear();
   fHalfstavemodules.clear();
-  fWritedb->setVisible(false);
-  fHiddenComponent = false;
-  fWrite           = false;
-  fstop            = false;
-  fstopwriting     = false;
-  fEnduranceCheck  = 0;
-  disconnect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
+  fWritedb->setEnabled(false);
+  fHiddenComponent  = false;
+  fWrite            = false;
+  fstop             = false;
+  fstopwriting      = false;
+  fEnduranceCheck   = 0;
   fIdofactivitytype = 0;
   fIdoflocationtype = 0;
   fIdofoperator     = 0;
@@ -1377,8 +1381,7 @@ void MainWindow::attachtodatabase()
     popup("The activity cannot be found \nin the Database \nCheck your database "
           "connection\nMaybe you need to renew \nyour ticket\nOr there is problem "
           "in the db.");
-    fWritedb->setVisible(true);
-    connect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
+    fWritedb->setEnabled(true);
 
     return;
   }
@@ -2347,8 +2350,7 @@ void MainWindow::ConnectTestCombo(int value)
 
 void MainWindow::ContinueWithoutWriting()
 {
-  fWritedb->setVisible(true);
-  connect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
+  fWritedb->setEnabled(true);
   fResultwindow->close();
   popup("You still have the possibility \n to write to the database \n later through the menu :)");
 }
