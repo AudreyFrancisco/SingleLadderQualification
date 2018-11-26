@@ -143,6 +143,7 @@ private:
   void   WriteResult();
   void   PrepareFiles();
   void   CloseFiles();
+  void   DrawAndSaveToPDF(int hicid);
   bool   IsVCASNTuning() { return (fabs(m_resultFactor - 1) < 0.01); };
   bool   IsThresholdScan() { return (m_resultFactor > 1); };
   bool   IsITHRTuning() { return (m_resultFactor < 0); };

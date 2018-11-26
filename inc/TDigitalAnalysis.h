@@ -92,6 +92,7 @@ private:
   void                         WriteHitData(TScanHisto *histo, int row);
   void                         WriteResult();
   void                         WriteStuckPixels(THic *hic);
+  void                         DrawAndSaveToPDF(int hicid);
   THicClassification           GetClassificationOB(TDigitalResultHic *result);
   THicClassification           GetClassificationIB(TDigitalResultHic *result);
 

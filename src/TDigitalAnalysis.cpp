@@ -1,6 +1,7 @@
 #include "TDigitalAnalysis.h"
 #include "DBHelpers.h"
 #include "TDigitalScan.h"
+#include "TString.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -260,6 +261,19 @@ void TDigitalAnalysis::AnalyseHisto(TScanHisto *histo)
   }
 }
 
+void TDigitalAnalysis::DrawAndSaveToPDF(int hicid)
+{
+  TString command;
+  for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
+    command.Form(
+        "root -b -q 'analysis/HitmapGUI.C+(\"Data/%d/Digital_%s_Chip%d.dat\",%d,%d,%d,\"%s\")'",
+        hicid, m_config->GetfNameSuffix(), m_chipList.at(ichip).chipId, m_ninj, hicid,
+        m_chipList.at(ichip).chipId, m_config->GetfNameSuffix());
+    int status = system(command.Data());
+    std::cout << "Done, status code = " << status << std::endl;
+  }
+}
+
 void TDigitalAnalysis::Finalize()
 {
   if (fScanAbort || fScanAbortAll) return;
@@ -324,6 +338,7 @@ void TDigitalAnalysis::Finalize()
     }
     hicResult->SetValidity(true);
     ComparePrediction(m_hics.at(ihic)->GetDbId());
+    DrawAndSaveToPDF(std::stoi(m_hics.at(ihic)->GetDbId()));
   }
   WriteResult();
 
