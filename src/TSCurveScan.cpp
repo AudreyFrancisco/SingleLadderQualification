@@ -160,6 +160,15 @@ void TSCurveScan::RestoreNominalSettings()
       m_chips.at(i)->GetConfig()->SetParamValue("VCLIP", 0);
     }
   }
+  else if ((((TSCurveParameters *)m_parameters)->backBias > 0.99) &&
+           (((TSCurveParameters *)m_parameters)->backBias < 1.01)) {
+    for (unsigned int i = 0; i < m_chips.size(); i++) {
+      m_chips.at(i)->GetConfig()->SetParamValue("ITHR", 50);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCASN", 70);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCASN2", 82);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCLIP", 20);
+    }
+  }
   else if ((((TSCurveParameters *)m_parameters)->backBias > 2.99) &&
            (((TSCurveParameters *)m_parameters)->backBias < 3.01)) {
     for (unsigned int i = 0; i < m_chips.size(); i++) {
