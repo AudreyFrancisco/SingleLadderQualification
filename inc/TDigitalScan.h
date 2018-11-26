@@ -53,8 +53,8 @@ public:
             (((TDigitalParameters *)m_parameters)->voltageScale < 1.01));
   };
   bool        SetParameters(TScanParameters *pars);
-  bool        IsLower() { return (((TDigitalParameters *)m_parameters)->voltageScale < 0.9); };
-  bool        IsUpper() { return (((TDigitalParameters *)m_parameters)->voltageScale > 1.1); };
+  bool        IsLower() { return (((TDigitalParameters *)m_parameters)->voltageScale < 0.95); };
+  bool        IsUpper() { return (((TDigitalParameters *)m_parameters)->voltageScale > 1.05); };
   static bool isPerformedDuring(string testType)
   {
     return kDigitalTestTypes.find(testType) != kDigitalTestTypes.end();

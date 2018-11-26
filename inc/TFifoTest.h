@@ -44,8 +44,8 @@ public:
             (((TFifoParameters *)m_parameters)->voltageScale < 1.01));
   };
   bool SetParameters(TScanParameters *pars);
-  bool IsLower() { return (((TFifoParameters *)m_parameters)->voltageScale < 0.9); };
-  bool IsUpper() { return (((TFifoParameters *)m_parameters)->voltageScale > 1.1); };
+  bool IsLower() { return (((TFifoParameters *)m_parameters)->voltageScale < 0.95); };
+  bool IsUpper() { return (((TFifoParameters *)m_parameters)->voltageScale > 1.05); };
   int  GetDriver() { return ((TFifoParameters *)m_parameters)->mlvdsStrength; };
 };
 

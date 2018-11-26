@@ -41,7 +41,7 @@ void TFifoTest::SetName()
 {
   float voltageScale  = ((TFifoParameters *)m_parameters)->voltageScale;
   int   mlvdsStrength = ((TFifoParameters *)m_parameters)->mlvdsStrength;
-  if (voltageScale > 0.9 && voltageScale < 1.1) {
+  if (voltageScale > 0.95 && voltageScale < 1.05) {
     if (mlvdsStrength == ChipConfig::DCTRL_DRIVER) {
       strcpy(m_name, "Fifo Scan");
     }
