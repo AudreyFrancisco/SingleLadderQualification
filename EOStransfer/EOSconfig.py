@@ -422,7 +422,7 @@ def generateTheEOSAllSyncScript(ServiceAccount, LocalBasePath):
     file.write("      for LOC in ${TES}/*; do if [[ -d $LOC ]]; then\n") 
     file.write("        for DIR in ${LOC}/*; do if [[ -d $DIR ]]; then\n") 
     file.write("          # Now we have the source and destination paths\n") 
-    file.write("          SOURCE=$DIR\n") 
+    file.write("          SOURCE=${DIR}/\n") 
     file.write("          DESTINATION=${DIR/$DBATTACHBASEPATH/$DBATTACHREMOTEPATH}/\n") 
     file.write("          rsync -Lvrauze ssh $SOURCE $DESTINATION\n") 
     file.write("          # - evaluates the result\n") 
