@@ -170,7 +170,7 @@ int findHic(std::vector<THic *> *hics, int modId)
 // - chips of master 0 of all modules are connected to 1st mosaic, chips of master 8 to 2nd MOSAIC
 int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                        std::vector<TAlpide *> *chips, std::vector<THic *> *hics,
-                       const char **hicIds)
+                       const char **hicIds, bool powerCombo)
 {
   // default mapping, the first index in receiverMap refers to the module position and not the id
   // TODO: Define power board mapping for half stave; assuming channel = position
@@ -203,7 +203,7 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
     THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(ihic);
     positionMap[ihic]         = hicOBconfig->GetParamValue("HSPOSBYID");
-    bool useCombo             = hicOBconfig->GetParamValue("POWERCOMBO");
+    bool useCombo             = powerCombo || hicOBconfig->GetParamValue("POWERCOMBO");
     int  bbChannel            = useCombo ? biasbusMap[positionMap[ihic] - 1] : -1;
     if (hicIds) {
       hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb,
@@ -212,7 +212,7 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     else {
       hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic + 1)).c_str(),
                                  config->GetHicConfig(ihic)->GetModId(), pb, positionMap[ihic] - 1,
-                                 bbChannel));
+                                 bbChannel, useCombo));
     }
     ((THicOB *)hics->back())->SetPosition(positionMap[ihic]);
   }
@@ -294,7 +294,8 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
 }
 
 int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
-                     std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
+                     std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds,
+                     bool powerCombo)
 {
   // default mapping, the first index in receiverMap refers to the module position and not the id
   // TODO: Define power board mapping for half stave; assuming channel = position
@@ -305,6 +306,7 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
   int controlMap[2] = {1, 0}; // AC: different sides of a ML half stave are read by different MOSAIC
                               // control interfaces, mapping is {right_side_0, left_side_0}
   int positionMap[4];         // AC: only 4 HICs per half stave in the middle layers
+  int biasbusMap[4] = {0, 0, 1, 1};
 
   // create board objects (MOSAIC and power board)
   (*boardType) = boardMOSAIC;
@@ -332,14 +334,16 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
   for (unsigned int ihic = 0; ihic < config->GetNHics(); ihic++) {
     THicConfigOB *hicOBconfig = (THicConfigOB *)config->GetHicConfig(ihic);
     positionMap[ihic]         = hicOBconfig->GetParamValue("HSPOSBYID");
+    bool useCombo             = powerCombo || hicOBconfig->GetParamValue("POWERCOMBO");
+    int  bbChannel            = useCombo ? biasbusMap[positionMap[ihic] - 1] : -1;
     if (hicIds) {
       hics->push_back(new THicOB(hicIds[ihic], config->GetHicConfig(ihic)->GetModId(), pb,
-                                 positionMap[ihic] - 1));
+                                 positionMap[ihic] - 1, bbChannel, useCombo));
     }
     else {
       hics->push_back(new THicOB(std::string("Dummy_ID" + std::to_string(ihic + 1)).c_str(),
-                                 config->GetHicConfig(ihic)->GetModId(), pb,
-                                 positionMap[ihic] - 1));
+                                 config->GetHicConfig(ihic)->GetModId(), pb, positionMap[ihic] - 1,
+                                 bbChannel, useCombo));
     }
     ((THicOB *)hics->back())->SetPosition(positionMap[ihic]);
   }
@@ -846,7 +850,7 @@ int powerOn(TReadoutBoardDAQ *aDAQBoard)
 int initSetupWithNames(TConfig *&config, std::vector<TReadoutBoard *> *boards,
                        TBoardType *boardType, std::vector<TAlpide *> *chips,
                        const char *configFileName /*=""*/, std::vector<THic *> *hics /*=0*/,
-                       std::vector<std::string> *hicNames /*=0*/)
+                       std::vector<std::string> *hicNames /*=0*/, bool powerCombo /*=false*/)
 {
   const char **hicIds = nullptr;
   if (hicNames) {
@@ -854,7 +858,7 @@ int initSetupWithNames(TConfig *&config, std::vector<TReadoutBoard *> *boards,
     for (uint ihic = 0; ihic < hicNames->size(); ++ihic)
       hicIds[ihic] = hicNames->at(ihic).c_str();
   }
-  int ret = initSetup(config, boards, boardType, chips, configFileName, hics, hicIds);
+  int ret = initSetup(config, boards, boardType, chips, configFileName, hics, hicIds, powerCombo);
   delete[] hicIds;
   return ret;
 }
@@ -864,7 +868,8 @@ int initSetupWithNames(TConfig *&config, std::vector<TReadoutBoard *> *boards,
  */
 int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
               std::vector<TAlpide *> *chips, const char *configFileName /*=""*/,
-              std::vector<THic *> *hics /*=0*/, const char **hicIds /*=0*/)
+              std::vector<THic *> *hics /*=0*/, const char **hicIds /*=0*/,
+              bool powerCombo /*=false*/)
 {
   if (strlen(configFileName) ==
       0) // if length is 0 => use the default name or the Command Parameter
@@ -891,14 +896,14 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
   case TYPE_IBHICRU:
     initSetupIBRU(config, boards, boardType, chips, hics, hicIds);
     break;
-  case TYPE_HALFSTAVE: // Yasser (Add half stave configuration on init setup)
-    initSetupHalfStave(config, boards, boardType, chips, hics, hicIds);
+  case TYPE_HALFSTAVE:
+    initSetupHalfStave(config, boards, boardType, chips, hics, hicIds, powerCombo);
     break;
   case TYPE_MLHALFSTAVE:
-    initSetupHalfStave(config, boards, boardType, chips, hics, hicIds);
+    initSetupHalfStave(config, boards, boardType, chips, hics, hicIds, powerCombo);
     break;
   case TYPE_MLSTAVE:
-    initSetupMLStave(config, boards, boardType, chips, hics, hicIds);
+    initSetupMLStave(config, boards, boardType, chips, hics, hicIds, powerCombo);
     break;
   case TYPE_HALFSTAVERU:
     initSetupHalfStaveRU(config, boards, boardType, chips);

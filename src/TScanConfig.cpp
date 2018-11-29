@@ -429,6 +429,7 @@ bool TScanConfig::IsHalfStave()
 {
   return ((m_testType == OBHalfStaveOL) || (m_testType == OBHalfStaveML) ||
           (m_testType == OBHalfStaveOLFAST) || (m_testType == OBHalfStaveMLFAST) ||
-          (m_testType == OBStaveOL) || (m_testType == OBStaveML) ||
-          (m_testType == StaveReceptionOL) || (m_testType == StaveReceptionML));
+          (m_testType == OBStaveOL) || (m_testType == OBStaveML) || (m_testType == OBStaveOLFAST) ||
+          (m_testType == OBStaveMLFAST) || (m_testType == StaveReceptionOL) ||
+          (m_testType == StaveReceptionML));
 }
