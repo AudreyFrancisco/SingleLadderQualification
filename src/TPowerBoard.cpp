@@ -38,9 +38,10 @@
 #include "TPowerBoard.h"
 #include "TReadoutBoardMOSAIC.h"
 #include <chrono>
+#include <numeric>
 #include <thread>
 #include <unistd.h>
-#include <numeric>
+
 /* -------------------------
         Constructor
 
@@ -402,8 +403,8 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
       DCurr_vect.push_back(GetDigitalCurrent(i));
     }
     float IDDA_tot, IDDD_tot;
-    IDDA_tot = std::accumulate(ACurr_vect.begin(), ACurr_vect.begin()+module, 0.0);
-    IDDD_tot = std::accumulate(DCurr_vect.begin(), DCurr_vect.begin()+module, 0.0);
+    IDDA_tot = std::accumulate(ACurr_vect.begin(), ACurr_vect.begin() + module, 0.0);
+    IDDD_tot = std::accumulate(DCurr_vect.begin(), DCurr_vect.begin() + module, 0.0);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     float IDDA = GetAnalogCurrent(module);
