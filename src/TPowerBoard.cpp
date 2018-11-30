@@ -40,7 +40,7 @@
 #include <chrono>
 #include <thread>
 #include <unistd.h>
-
+#include <numeric>
 /* -------------------------
         Constructor
 
@@ -93,7 +93,6 @@ void TPowerBoard::Init()
     fPBoard.Modules[i].DVset  = fPowerBoardConfig->GetDigitalVoltage(i);
     fPBoard.Modules[i].BiasOn = fPowerBoardConfig->GetBiasOn(i);
   }
-
   std::lock_guard<std::mutex> lock(mutex_pb);
   // first of all test the presence of the power board
   try {
@@ -387,6 +386,9 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
   // Correct voltage drop for slope of voltage characteristics
   // add corrected voltage drop to channel set voltage
 
+  std::vector<float> ACurr_vect;
+  std::vector<float> DCurr_vect;
+
   float RAnalog, RDigital, RGround;
   float dVAnalog, dVDigital;
   float AVScale, DVScale, AVOffset, DVOffset;
@@ -395,6 +397,14 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     dVDigital = 0;
   }
   else {
+    for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
+      ACurr_vect.push_back(GetAnalogCurrent(i));
+      DCurr_vect.push_back(GetDigitalCurrent(i));
+    }
+    float IDDA_tot, IDDD_tot;
+    IDDA_tot = std::accumulate(ACurr_vect.begin(), ACurr_vect.begin()+module, 0.0);
+    IDDD_tot = std::accumulate(DCurr_vect.begin(), DCurr_vect.begin()+module, 0.0);
+
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     float IDDA = GetAnalogCurrent(module);
     float IDDD = GetDigitalCurrent(module);
@@ -402,8 +412,8 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     fPowerBoardConfig->GetLineResistances(module, RAnalog, RDigital, RGround);
     fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
 
-    dVAnalog  = IDDA * RAnalog + (IDDA + IDDD) * RGround;
-    dVDigital = IDDD * RDigital + (IDDA + IDDD) * RGround;
+    dVAnalog  = IDDA * RAnalog + (IDDA_tot + IDDD_tot) * RGround;
+    dVDigital = IDDD * RDigital + (IDDA_tot + IDDD_tot) * RGround;
 
     dVAnalog *= AVScale;
     dVDigital *= DVScale;

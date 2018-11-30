@@ -102,9 +102,9 @@ const float RWPBGround[7]  = {0, 0, 0, 0, 0, 0, 0};
 const float RPBAnalog[7]    = {0.179, 0.383, 0.458, 0.476, 0.490, 0.512, 0.507};
 const float RPBDigital[7]   = {0.074, 0.098, 0.107, 0.113, 0.123, 0.118, 0.121};
 const float RPBGround[7]    = {0.007, 0.008, 0.010, 0.012, 0.014, 0.016, 0.018};
-const float RPBAnalogML[4]  = {0, 0, 0, 0};
-const float RPBDigitalML[4] = {0, 0, 0, 0};
-const float RPBGroundML[4]  = {0, 0, 0, 0};
+const float RPBAnalogML[4]  = {0.193, 0.291, 0.356, 0.388};
+const float RPBDigitalML[4] = {0.094, 0.087, 0.092, 0.1};
+const float RPBGroundML[4]  = {0.007, 0.008, 0.010, 0.012};
 
 // Class definition
 class TPowerBoardConfig {
