@@ -535,6 +535,15 @@ void TScan::DumpHitInformation(std::vector<TPixHit> *Hits)
                 << ", hits: " << linkInfo[iboard][ich] << std::endl;
     }
   }
+
+  std::cout << std::endl << "Board configuration:" << std::endl;
+  for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+    if (TReadoutBoardMOSAIC *mosaic = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(0))) {
+      std::cout << mosaic->GetRegisterDump() << std::endl;
+    }
+  }
+
+
   std::cout << std::endl;
 }
 
