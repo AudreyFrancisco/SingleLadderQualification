@@ -33,6 +33,7 @@
 
 #include "mwbbslave.h"
 #include <stdint.h>
+#include <string>
 
 
 class ALPIDErcv : public MWbbSlave {
@@ -56,6 +57,8 @@ public:
   void addPRBSsetSel(uint8_t s);
   void addPRBSreset();
   void addGetPRBScounter(uint32_t *ctr);
+
+  std::string dumpRegisters();
 
 private: // WBB Slave registers map
   enum regAddress_e { regOpMode = 0, regPrbs = 1, regReset = 2, rdpBase = 0x00800000 };
