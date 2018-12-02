@@ -30,6 +30,7 @@
 #include "alpidercv.h"
 #include "pexception.h"
 #include <iostream>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -173,3 +174,32 @@ void ALPIDErcv::addPRBSreset()
 }
 
 void ALPIDErcv::addGetPRBScounter(uint32_t *ctr) { addGetRDPReg(RX_PRBS_ERR_CNT, ctr); }
+
+std::string ALPIDErcv::dumpRegisters()
+{
+  if (!wbb) throw MIPBusUDPError("No IPBus configured");
+
+  regAddress_e addrs[] = {regOpMode, regPrbs, regReset};
+  uint32_t     nAddrs  = sizeof(addrs) / sizeof(regAddress_e);
+
+  std::stringstream ss;
+  ss << std::hex;
+
+  for (uint32_t iAddr = 0; iAddr < nAddrs; ++iAddr) {
+    uint32_t result = 0xDEADBEEF;
+    try {
+      wbb->addRead(baseAddress + addrs[iAddr], &result);
+      execute();
+    }
+    catch (...) {
+      std::cerr << "Receiver read error: address 0x" << std::hex << baseAddress + addrs[iAddr]
+                << " (0x" << addrs[iAddr] << ")!" << std::dec << std::endl;
+    };
+
+    ss << "0x" << addrs[iAddr] << "\t0x" << result << std::endl;
+  }
+
+  ss << std::endl;
+
+  return ss.str();
+}

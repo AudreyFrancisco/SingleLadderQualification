@@ -585,6 +585,9 @@ std::string TReadoutBoardMOSAIC::GetRegisterDump()
   result += trgRecorder->dumpRegisters();
   result += "coordinator\n";
   result += coordinator->dumpRegisters();
+  for (int i = 0; i < MAX_MOSAICTRANRECV; i++)
+    result += alpideRcv[i]->dumpRegisters();
+
   return result;
 }
 

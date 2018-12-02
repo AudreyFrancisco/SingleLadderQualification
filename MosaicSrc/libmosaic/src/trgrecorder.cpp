@@ -58,8 +58,9 @@ std::string TrgRecorder::dumpRegisters()
       execute();
     }
     catch (...) {
-      std::cerr << "Pulser read error: address 0x" << std::hex << baseAddress + addrs[iAddr]
-                << " (0x" << addrs[iAddr] << ")!" << std::dec << std::endl;
+      std::cerr << "Trigger recorder read error: address 0x" << std::hex
+                << baseAddress + addrs[iAddr] << " (0x" << addrs[iAddr] << ")!" << std::dec
+                << std::endl;
     };
 
     ss << "0x" << addrs[iAddr] << "\t0x" << result << std::endl;
