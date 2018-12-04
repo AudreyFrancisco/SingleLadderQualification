@@ -389,7 +389,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
 
   std::vector<float> ACurr_vect;
   std::vector<float> DCurr_vect;
-  std::vector<float> RGnd_vect;
+
 
   float RAnalog, RDigital, RGround;
   float dVAnalog, dVDigital;
@@ -404,11 +404,11 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
       ACurr_vect.push_back(GetAnalogCurrent(i));
       DCurr_vect.push_back(GetDigitalCurrent(i));
     }
-    float IDDA_tot, IDDD_tot, RGnd_tot;
+    float IDDA_tot, IDDD_tot;
     // sum of currents from the last module to the current one (module)
-    IDDA_tot = std::accumulate(ACurr_vect.end() - module, ACurr_vect.end()
+    IDDA_tot = std::accumulate(ACurr_vect.end() - module, ACurr_vect.end(),
                                0.0); // question: module numeration from 0 or 1?
-    IDDD_tot = std::accumulate(DCurr_veсt.end() - module, DCurr_vect.end(), 0.0);
+    IDDD_tot = std::accumulate(DCurr_vect.end() - module, DCurr_vect.end(), 0.0);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     float IDDA = GetAnalogCurrent(module);
     float IDDD = GetDigitalCurrent(module);
