@@ -389,6 +389,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
 
   std::vector<float> ACurr_vect;
   std::vector<float> DCurr_vect;
+  std::vector<float> RGnd_vect;
 
   float RAnalog, RDigital, RGround;
   float dVAnalog, dVDigital;
@@ -401,10 +402,13 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
       ACurr_vect.push_back(GetAnalogCurrent(i));
       DCurr_vect.push_back(GetDigitalCurrent(i));
+      fPowerBoardConfig->GetLineResistances(i, RAnalog, RDigital, RGround);
+      RGnd_vect.push_back(RGround);
     }
-    float IDDA_tot, IDDD_tot;
-    IDDA_tot = std::accumulate(ACurr_vect.begin(), ACurr_vect.begin() + (7 - module), 0.0);
-    IDDD_tot = std::accumulate(DCurr_vect.begin(), DCurr_vect.begin() + (7 - module), 0.0);
+    float IDDA_tot, IDDD_tot, RGnd_tot;
+    IDDA_tot = std::accumulate(ACurr_vect.begin(), ACurr_vect.begin() + (MAX_MOULESPERMOSAIC - module), 0.0); //question: module numeration from 0 or 1?
+    IDDD_tot = std::accumulate(DCurr_vect.begin(), DCurr_vect.begin() + (MAX_MOULESPERMOSAIC - module), 0.0);
+    RGnd_tot = std::accumulate(RGnd_vect.begin(), RGnd_vect.begin() + module, 0.0);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     float IDDA = GetAnalogCurrent(module);
@@ -413,8 +417,8 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     fPowerBoardConfig->GetLineResistances(module, RAnalog, RDigital, RGround);
     fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
 
-    dVAnalog  = IDDA * RAnalog + (IDDA_tot + IDDD_tot) * RGround;
-    dVDigital = IDDD * RDigital + (IDDA_tot + IDDD_tot) * RGround;
+    dVAnalog  = IDDA * RAnalog + (IDDA_tot + IDDD_tot) * RGnd_tot;
+    dVDigital = IDDD * RDigital + (IDDA_tot + IDDD_tot) * RGnd_tot;
 
     dVAnalog *= AVScale;
     dVDigital *= DVScale;
