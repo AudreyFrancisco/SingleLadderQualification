@@ -399,26 +399,27 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     dVDigital = 0;
   }
   else {
+    // store all values of analog and digital currents to vectors
     for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
       ACurr_vect.push_back(GetAnalogCurrent(i));
       DCurr_vect.push_back(GetDigitalCurrent(i));
-      fPowerBoardConfig->GetLineResistances(i, RAnalog, RDigital, RGround);
-      RGnd_vect.push_back(RGround);
     }
     float IDDA_tot, IDDD_tot, RGnd_tot;
-    IDDA_tot = std::accumulate(ACurr_vect.begin(), ACurr_vect.begin() + (MAX_MOULESPERMOSAIC - module), 0.0); //question: module numeration from 0 or 1?
-    IDDD_tot = std::accumulate(DCurr_vect.begin(), DCurr_vect.begin() + (MAX_MOULESPERMOSAIC - module), 0.0);
-    RGnd_tot = std::accumulate(RGnd_vect.begin(), RGnd_vect.begin() + module, 0.0);
-
+    // sum of currents from the last module to the current one (module)
+    IDDA_tot = std::accumulate(ACurr_vect.end() - module, ACurr_vect.end()
+                               0.0); // question: module numeration from 0 or 1?
+    IDDD_tot = std::accumulate(DCurr_veсt.end() - module, DCurr_vect.end(), 0.0);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     float IDDA = GetAnalogCurrent(module);
     float IDDD = GetDigitalCurrent(module);
 
     fPowerBoardConfig->GetLineResistances(module, RAnalog, RDigital, RGround);
     fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
-
-    dVAnalog  = IDDA * RAnalog + (IDDA_tot + IDDD_tot) * RGnd_tot;
-    dVDigital = IDDD * RDigital + (IDDA_tot + IDDD_tot) * RGnd_tot;
+    // calculation of the voltage drops for current module
+    // since ground line is common, voltage drop on GND line contains all currents
+    // of modules from the last module to the current one
+    dVAnalog  = IDDA * RAnalog + (IDDA_tot + IDDD_tot) * RGround;
+    dVDigital = IDDD * RDigital + (IDDA_tot + IDDD_tot) * RGround;
 
     dVAnalog *= AVScale;
     dVDigital *= DVScale;
