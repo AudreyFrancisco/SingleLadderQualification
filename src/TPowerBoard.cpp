@@ -389,7 +389,8 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
 
   std::vector<float> ACurr_vect;
   std::vector<float> DCurr_vect;
-
+  std::vector<float> RGnd_vect;
+  std::vector<float> Vdrop_part;
 
   float RAnalog, RDigital, RGround;
   float dVAnalog, dVDigital;
@@ -403,12 +404,17 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
       ACurr_vect.push_back(GetAnalogCurrent(i));
       DCurr_vect.push_back(GetDigitalCurrent(i));
+      fPowerBoardConfig->GetLineResistances(i, RAnalog, RDigital, RGround);
+      RGnd_vect.push_back(RGround);
     }
-    float IDDA_tot, IDDD_tot;
-    // sum of currents from the last module to the current one (module)
-    IDDA_tot = std::accumulate(ACurr_vect.end() - module, ACurr_vect.end(),
-                               0.0); // question: module numeration from 0 or 1?
-    IDDD_tot = std::accumulate(DCurr_vect.end() - module, DCurr_vect.end(), 0.0);
+    
+    for (int mnum = 0; mnum < MAX_MOULESPERMOSAIC; mnum++) {
+      float IDDA_tot, IDDD_tot;
+      IDDA_tot = std::accumulate(ACurr_vect.begin() + mnum, ACurr_vect.end(), 0.0); 
+      IDDD_tot = std::accumulate(DCurr_vect.begin() + mnum, DCurr_vect.end(), 0.0);
+      Vdrop_part.push_back(RGnd_vect[mnum]*(IDDA_tot + IDDD_tot));
+    }
+ 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     float IDDA = GetAnalogCurrent(module);
     float IDDD = GetDigitalCurrent(module);
@@ -418,8 +424,8 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     // calculation of the voltage drops for current module
     // since ground line is common, voltage drop on GND line contains all currents
     // of modules from the last module to the current one
-    dVAnalog  = IDDA * RAnalog + (IDDA_tot + IDDD_tot) * RGround;
-    dVDigital = IDDD * RDigital + (IDDA_tot + IDDD_tot) * RGround;
+    dVAnalog  = IDDA * RAnalog + std::accumulate(Vdrop_part.begin(), Vdrop_part.begin() + module, 0.0);
+    dVDigital = IDDD * RDigital + std::accumulate(Vdrop_part.begin(), Vdrop_part.begin() + module, 0.0);
 
     dVAnalog *= AVScale;
     dVDigital *= DVScale;
