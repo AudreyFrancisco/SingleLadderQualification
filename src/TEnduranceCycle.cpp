@@ -165,6 +165,8 @@ void TEnduranceCycle::ReadRecoveredCounters(
       }
     }
     // push this cycle to vector and increment start point for "real" cycles
+
+    WriteRecoveryFile();
     m_counterVector.push_back(m_hicCounters);
     m_start[0]++;
     // remove first entry from deque
