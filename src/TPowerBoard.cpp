@@ -387,7 +387,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
   // Correct voltage drop for slope of voltage characteristics
   // add corrected voltage drop to channel set voltage
 
-  //solution with vectors
+  // solution with vectors
   /*
   std::vector<float> I_analog_vect;
   std::vector<float> I_digital_vect;
@@ -409,7 +409,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
       fPowerBoardConfig->GetLineResistances(i, RAnalog, RDigital, RGround);
       RGnd_vect.push_back(RGround);
     }
-    
+
     for (int n_mod = 0; n_mod < MAX_MOULESPERMOSAIC; n_mod++) {
       float IDDA_tot, IDDD_tot;
       IDDA_tot = std::accumulate(I_analog_vect.begin() + n_mod, I_analog_vect.end(), 0.0);
@@ -435,7 +435,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
   }
   */
 
-  //same with arrays
+  // same with arrays
   float RAnalog, RDigital, RGround;
   float dVAnalog, dVDigital;
   float AVScale, DVScale, AVOffset, DVOffset;
@@ -446,7 +446,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
   else {
     float V_drop_part[MAX_MOULESPERMOSAIC];
     for (int i_mod = 0; i_mod < MAX_MOULESPERMOSAIC; i_mod++) {
-      float I_analog_tot = 0;
+      float I_analog_tot  = 0;
       float I_digital_tot = 0;
       for (int n_mod = i_mod; n_mod < MAX_MOULESPERMOSAIC; n_mod++) {
         I_analog_tot += GetAnalogCurrent(n_mod);
@@ -458,8 +458,8 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    float IDDA = GetAnalogCurrent(module);
-    float IDDD = GetDigitalCurrent(module);
+    float IDDA       = GetAnalogCurrent(module);
+    float IDDD       = GetDigitalCurrent(module);
     float V_drop_gnd = 0;
 
     for (int i = 0; i < module; i++) {
@@ -469,7 +469,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     fPowerBoardConfig->GetLineResistances(module, RAnalog, RDigital, RGround);
     fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
 
-    dVAnalog = IDDA * RAnalog + V_drop_gnd;
+    dVAnalog  = IDDA * RAnalog + V_drop_gnd;
     dVDigital = IDDD * RDigital + V_drop_gnd;
     dVAnalog *= AVScale;
     dVDigital *= DVScale;
