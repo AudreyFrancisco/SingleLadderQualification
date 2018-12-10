@@ -103,6 +103,14 @@ void THic::SetNoBB()
 bool THic::IsPowered()
 {
   // TODO: what if partially powered? What about bias?
+  if (IsPoweredAnalog() && !IsPoweredDigital()) {
+    std::cout << "Warning: found module with only AVDD on -> powering off" << std::endl;
+    PowerOff();
+  }
+  else if (IsPoweredDigital() && !IsPoweredAnalog()) {
+    std::cout << "Warning: found module with only DVDD on -> powering off" << std::endl;
+    PowerOff();
+  }
   return ((IsPoweredAnalog()) && (IsPoweredDigital()));
 }
 
