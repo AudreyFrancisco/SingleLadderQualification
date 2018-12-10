@@ -47,6 +47,7 @@
 
 #include <powerboard.h>
 //#include "TReadoutBoardMOSAIC.h"
+#include "TConfig.h"
 #include "TPowerBoardConfig.h"
 
 // class TPowerBoardConfig;
@@ -102,11 +103,13 @@ private:
   bool                 realTimeRead;      // forces the access to Power Board hardware
   TPowerBoardConfig *  fPowerBoardConfig; // the configuration set
   powerboard::pbstate *thePowerBoardState;
+  TConfig *	       fConfig;
 
   std::mutex mutex_pb;
 
   // Methods
 public:
+  TPowerBoard(TConfig *cnf);
   TPowerBoard(TReadoutBoardMOSAIC *board);
   TPowerBoard(TReadoutBoardMOSAIC *board, TPowerBoardConfig *config);
   ~TPowerBoard(){};
