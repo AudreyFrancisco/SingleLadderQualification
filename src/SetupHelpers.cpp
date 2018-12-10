@@ -194,7 +194,10 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
   }
   TPowerBoard *pb = 0;
   if (config->GetUsePowerBoard()) {
-    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0));
+    TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
+    for (unsigned int i = 0; i < config->GetNHics(); ++i)
+      pbConfig->SetDefaultsOB(i);
+    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0), pbConfig);
   }
 
   // create HIC objects and fill positionMap
@@ -325,7 +328,10 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
 
   TPowerBoard *pb = 0;
   if (config->GetUsePowerBoard()) {
-    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0));
+    TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
+    for (unsigned int i = 0; i < config->GetNHics(); ++i)
+      pbConfig->SetDefaultsOB(0);
+    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0), pbConfig);
   }
 
   // create HIC objects and fill positionMap

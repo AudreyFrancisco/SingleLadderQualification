@@ -217,9 +217,9 @@ public:
     fMOSAICPowerBoard->setIth((unsigned char)(mod * 2 + 1), val);
   };
   void SetModule(int module, float AV, float AI, float DV, float DI, bool BiasOn);
-  void SetBiasOn(int mod)
+  void SetBiasOn(int mod, bool force = false)
   {
-    if (!BiasEnabled(mod)) {
+    if (!BiasEnabled(mod) && !force) {
       std::cout << "Warning: BB channel " << mod << " connected to noBB HIC, not switched on"
                 << std::endl;
       return;

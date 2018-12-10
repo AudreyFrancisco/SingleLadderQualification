@@ -138,16 +138,30 @@ void TPowerAnalysis::Finalize()
     for (int i = 0; i < m_ivPoints; i++) {
       hicResult->ibias[i] = hicCurrents.ibias[i];
     }
-    hicResult->m_class = GetClassification(hicCurrents, hicResult);
-    hicResult->SetValidity(true);
+
+    THic *currentHic = nullptr;
+    for (auto hic : m_hics)
+      if (hic->GetDbId() == it->first) currentHic = hic;
 
     if (hicResult->tripBB) {
-      for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-        if (m_hics.at(ihic)->GetDbId() == it->first) {
-          m_hics.at(ihic)->SetNoBB();
-        }
-      }
+      currentHic->SetNoBB();
+      for (auto hic : m_hics)
+        if (hic->GetBbChannel() == currentHic->GetBbChannel()) hic->SetNoBB();
     }
+  }
+
+  for (it = currents.begin(); it != currents.end(); ++it) {
+    TPowerResultHic *hicResult   = (TPowerResultHic *)m_result->GetHicResult(it->first);
+    THicCurrents     hicCurrents = it->second;
+
+    THic *currentHic = nullptr;
+    for (auto hic : m_hics)
+      if (hic->GetDbId() == it->first) currentHic = hic;
+
+    if (currentHic->GetNoBB()) hicResult->tripBB = true;
+
+    hicResult->m_class = GetClassification(hicCurrents, hicResult);
+    hicResult->SetValidity(true);
 
     CreateIVHisto(hicResult);
   }
@@ -193,7 +207,8 @@ THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents     currents
   DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_IB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
+  if (!currents.tripBB)
+    DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
 
   return returnValue;
 }
@@ -212,7 +227,8 @@ THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents     currents
   DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_OB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_OB", result);
+  if (!currents.tripBB)
+    DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_OB", result);
 
   return returnValue;
 }
