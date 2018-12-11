@@ -103,7 +103,7 @@ private:
   bool                 realTimeRead;      // forces the access to Power Board hardware
   TPowerBoardConfig *  fPowerBoardConfig; // the configuration set
   powerboard::pbstate *thePowerBoardState;
-  TConfig *	       fConfig;
+  TConfig *            fConfig;
 
   std::mutex mutex_pb;
 

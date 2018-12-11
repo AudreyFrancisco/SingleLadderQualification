@@ -35,9 +35,9 @@
  *
  *
  */
+#include "TPowerBoard.h"
 #include "TConfig.h"
 #include "THicConfig.h"
-#include "TPowerBoard.h"
 #include "TReadoutBoardMOSAIC.h"
 #include <chrono>
 #include <numeric>
@@ -439,18 +439,18 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
 
   // same with arraysi
 
-  int N_mod = fConfig->GetNHics();
+  int                N_mod = fConfig->GetNHics();
   std::map<int, int> map_i_modid;
-	for (int i = 0; i < N_mod; i++) {
-	  int key = (fConfig->GetHicConfig(i)->GetParamValue("HSPOSBYID")) - 1;
-	  map_i_modid[key] = i;
-	}
+  for (int i = 0; i < N_mod; i++) {
+    int key          = (fConfig->GetHicConfig(i)->GetParamValue("HSPOSBYID")) - 1;
+    map_i_modid[key] = i;
+  }
   float RAnalog, RDigital, RGround;
   // float * iAnalog       = new float[N_mod];
   // float *	iDigital      = new float[N_mod];
-  float *	dVAnalog_old  = new float[N_mod];
-  float * dVDigital_old = new float[N_mod];
-  float AVScale, DVScale, AVOffset, DVOffset, dVAnalog, dVDigital;
+  float *dVAnalog_old  = new float[N_mod];
+  float *dVDigital_old = new float[N_mod];
+  float  AVScale, DVScale, AVOffset, DVOffset, dVAnalog, dVDigital;
   if (reset) {
     dVAnalog  = 0;
     dVDigital = 0;
@@ -458,28 +458,27 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
   else {
     float dV  = 10.;
     float tol = .01;
-    while(dV > tol)
-    {
-      dV = 0.;
-      float * V_drop_part = new float[N_mod];
+    while (dV > tol) {
+      dV                 = 0.;
+      float *V_drop_part = new float[N_mod];
       for (int i_mod = 0; i_mod < N_mod; i_mod++) {
         float I_analog_tot  = 0;
         float I_digital_tot = 0;
         for (int n_mod = i_mod; n_mod < N_mod; n_mod++) {
-          I_analog_tot  += GetAnalogCurrent(n_mod);
+          I_analog_tot += GetAnalogCurrent(n_mod);
           I_digital_tot += GetDigitalCurrent(n_mod);
         }
         fPowerBoardConfig->GetLineResistances(i_mod, RAnalog, RDigital, RGround);
-        if(i_mod<1)
+        if (i_mod < 1)
           V_drop_part[i_mod] = (I_analog_tot + I_digital_tot) * RGround;
         else
-          V_drop_part[i_mod] = V_drop_part[i_mod-1] + (I_analog_tot + I_digital_tot) * RGround;
-        float IDDA       = GetAnalogCurrent(i_mod);
-        float IDDD       = GetDigitalCurrent(i_mod);
-        float dVA        = IDDA * RAnalog + V_drop_part[i_mod];
-        float dVD        = IDDD * RDigital + V_drop_part[i_mod];
-        dV = max(dV, fabs(dVA - dVAnalog_old[i_mod]));
-        dV = max(dV, fabs(dVD - dVDigital_old[i_mod]));
+          V_drop_part[i_mod] = V_drop_part[i_mod - 1] + (I_analog_tot + I_digital_tot) * RGround;
+        float IDDA           = GetAnalogCurrent(i_mod);
+        float IDDD           = GetDigitalCurrent(i_mod);
+        float dVA            = IDDA * RAnalog + V_drop_part[i_mod];
+        float dVD            = IDDD * RDigital + V_drop_part[i_mod];
+        dV                   = max(dV, fabs(dVA - dVAnalog_old[i_mod]));
+        dV                   = max(dV, fabs(dVD - dVDigital_old[i_mod]));
         dVAnalog_old[i_mod]  = dVA;
         dVDigital_old[i_mod] = dVD;
       }
@@ -496,152 +495,152 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     fPowerBoardConfig->GetLineResistances(module, RAnalog, RDigital, RGround);
     fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
 
-		int key = module;
-    dVAnalog  =  dVAnalog_old[map_i_modid[key]];
-    dVDigital =  dVDigital_old[map_i_modid[key]];
+    int key   = module;
+    dVAnalog  = dVAnalog_old[map_i_modid[key]];
+    dVDigital = dVDigital_old[map_i_modid[key]];
 
     dVAnalog *= AVScale;
     dVDigital *= DVScale;
-    }
-
-    if (fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) {
-      std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage AVDD above safe limit; using "
-        "safe max value, difference = "
-        << fPBoard.Modules[module].AVset + dVAnalog - SAFE_OUTPUT << " V." << std::endl;
-      dVAnalog = SAFE_OUTPUT - fPBoard.Modules[module].AVset;
-    }
-    if (fPBoard.Modules[module].DVset + dVDigital > SAFE_OUTPUT) {
-      std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage DVDD above safe limit; using "
-        "safe max value, difference = "
-        << fPBoard.Modules[module].DVset + dVDigital - SAFE_OUTPUT << " V." << std::endl;
-      dVDigital = SAFE_OUTPUT - fPBoard.Modules[module].DVset;
-    }
-
-    // fPBoard contains the voltages corrected with the channel calibration
-    std::lock_guard<std::mutex> lock(mutex_pb);
-    fMOSAICPowerBoard->setVout((unsigned char)(module * 2), fPBoard.Modules[module].AVset + dVAnalog);
-    fMOSAICPowerBoard->setVout((unsigned char)(module * 2 + 1),
-        fPBoard.Modules[module].DVset + dVDigital);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
-  /* -------------------------
-     SetModule()
-
-     Sets all the parameters for one module
-
-     Parameter Input : module, integer (0..7) the Number of the power board module
-     AV, float. Analogic channel voltage output
-     AI, float. Analogic channel current limit
-     DV, float. Digital channel voltage output
-     DI, float. Digital channel current limit
-     BiasOn bool. Set up of the Back Bias channel
-
-     -------------------------- */
-  void TPowerBoard::SetModule(int module, float AV, float AI, float DV, float DI, bool BiasOn)
-  {
-    fPBoard.Modules[module].AVset  = AV;
-    fPBoard.Modules[module].DVset  = DV;
-    fPBoard.Modules[module].AIset  = AI;
-    fPBoard.Modules[module].DIset  = DI;
-    fPBoard.Modules[module].BiasOn = BiasOn;
-
-    std::lock_guard<std::mutex> lock(mutex_pb);
-    fMOSAICPowerBoard->setVout((unsigned char)(module * 2), AV);
-    fMOSAICPowerBoard->setVout((unsigned char)(module * 2 + 1), DV);
-    fMOSAICPowerBoard->setIth((unsigned char)(module * 2), AI);
-    fMOSAICPowerBoard->setIth((unsigned char)(module * 2 + 1), DI);
-    if (BiasOn)
-      fMOSAICPowerBoard->onVbias(module);
-    else
-      fMOSAICPowerBoard->offVbias(module);
-    return;
+  if (fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) {
+    std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage AVDD above safe limit; using "
+                 "safe max value, difference = "
+              << fPBoard.Modules[module].AVset + dVAnalog - SAFE_OUTPUT << " V." << std::endl;
+    dVAnalog = SAFE_OUTPUT - fPBoard.Modules[module].AVset;
+  }
+  if (fPBoard.Modules[module].DVset + dVDigital > SAFE_OUTPUT) {
+    std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage DVDD above safe limit; using "
+                 "safe max value, difference = "
+              << fPBoard.Modules[module].DVset + dVDigital - SAFE_OUTPUT << " V." << std::endl;
+    dVDigital = SAFE_OUTPUT - fPBoard.Modules[module].DVset;
   }
 
-  /* -------------------------
-     SwitchModule()
+  // fPBoard contains the voltages corrected with the channel calibration
+  std::lock_guard<std::mutex> lock(mutex_pb);
+  fMOSAICPowerBoard->setVout((unsigned char)(module * 2), fPBoard.Modules[module].AVset + dVAnalog);
+  fMOSAICPowerBoard->setVout((unsigned char)(module * 2 + 1),
+                             fPBoard.Modules[module].DVset + dVDigital);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+}
 
-     Switch On/Off the Analogic and Digital channel of the specified module
+/* -------------------------
+   SetModule()
 
-     Parameter Input : module, integer (0..7) the Number of the power board module
-     value, bool. The switch value ON := true, OFF := false
+   Sets all the parameters for one module
 
-     -------------------------- */
-  void TPowerBoard::SwitchModule(int module, bool value)
-  {
-    fPBoard.Modules[module].AchOn = value;
-    fPBoard.Modules[module].DchOn = value;
-    std::lock_guard<std::mutex> lock(mutex_pb);
-    if (value) {
-      fMOSAICPowerBoard->onVout(module * 2);
-      fMOSAICPowerBoard->onVout(module * 2 + 1);
-    }
-    else {
-      fMOSAICPowerBoard->offVout(module * 2);
-      fMOSAICPowerBoard->offVout(module * 2 + 1);
-    }
+   Parameter Input : module, integer (0..7) the Number of the power board module
+   AV, float. Analogic channel voltage output
+   AI, float. Analogic channel current limit
+   DV, float. Digital channel voltage output
+   DI, float. Digital channel current limit
+   BiasOn bool. Set up of the Back Bias channel
 
-    return;
+   -------------------------- */
+void TPowerBoard::SetModule(int module, float AV, float AI, float DV, float DI, bool BiasOn)
+{
+  fPBoard.Modules[module].AVset  = AV;
+  fPBoard.Modules[module].DVset  = DV;
+  fPBoard.Modules[module].AIset  = AI;
+  fPBoard.Modules[module].DIset  = DI;
+  fPBoard.Modules[module].BiasOn = BiasOn;
+
+  std::lock_guard<std::mutex> lock(mutex_pb);
+  fMOSAICPowerBoard->setVout((unsigned char)(module * 2), AV);
+  fMOSAICPowerBoard->setVout((unsigned char)(module * 2 + 1), DV);
+  fMOSAICPowerBoard->setIth((unsigned char)(module * 2), AI);
+  fMOSAICPowerBoard->setIth((unsigned char)(module * 2 + 1), DI);
+  if (BiasOn)
+    fMOSAICPowerBoard->onVbias(module);
+  else
+    fMOSAICPowerBoard->offVbias(module);
+  return;
+}
+
+/* -------------------------
+   SwitchModule()
+
+   Switch On/Off the Analogic and Digital channel of the specified module
+
+   Parameter Input : module, integer (0..7) the Number of the power board module
+   value, bool. The switch value ON := true, OFF := false
+
+   -------------------------- */
+void TPowerBoard::SwitchModule(int module, bool value)
+{
+  fPBoard.Modules[module].AchOn = value;
+  fPBoard.Modules[module].DchOn = value;
+  std::lock_guard<std::mutex> lock(mutex_pb);
+  if (value) {
+    fMOSAICPowerBoard->onVout(module * 2);
+    fMOSAICPowerBoard->onVout(module * 2 + 1);
+  }
+  else {
+    fMOSAICPowerBoard->offVout(module * 2);
+    fMOSAICPowerBoard->offVout(module * 2 + 1);
   }
 
-  /* -------------------------
-     GetModule()
+  return;
+}
 
-     Gets all the parameters for one module
+/* -------------------------
+   GetModule()
 
-     Parameter Input : module, integer (0..7) the Number of the power board module
+   Gets all the parameters for one module
 
-     Parameter Output : AV, pointer to float. Analogic channel voltage output
-     AI, pointer to float. Analogic channel current limit
-     DV, pointer to float. Digital channel voltage output
-     DI, pointer to float. Digital channel current limit
-     BiasOn pointer to bool. Set up of the Back Bias channel
-     AChOn, pointer to bool. State of Analogic channel, true :=
-     ON, false := OFF
-     DChOn, pointer to bool. State of Digital channel, true :=
-     ON, false := OFF
-     -------------------------- */
-  void TPowerBoard::GetModule(int module, float *AV, float *AI, float *DV, float *DI, bool *BiasOn,
-      bool *AChOn, bool *DChOn)
-  {
-    readMonitor();
-    *AV     = fPBoard.Modules[module].AVmon;
-    *AI     = GetAnalogCurrent(module);
-    *DV     = fPBoard.Modules[module].DVmon;
-    *DI     = GetDigitalCurrent(module);
-    *BiasOn = fPBoard.Modules[module].BiasOn;
-    *AChOn  = fPBoard.Modules[module].AchOn;
-    *DChOn  = fPBoard.Modules[module].DchOn;
-    return;
-  }
+   Parameter Input : module, integer (0..7) the Number of the power board module
 
-  /* -------------------------
-     IsOk()
+   Parameter Output : AV, pointer to float. Analogic channel voltage output
+   AI, pointer to float. Analogic channel current limit
+   DV, pointer to float. Digital channel voltage output
+   DI, pointer to float. Digital channel current limit
+   BiasOn pointer to bool. Set up of the Back Bias channel
+   AChOn, pointer to bool. State of Analogic channel, true :=
+   ON, false := OFF
+   DChOn, pointer to bool. State of Digital channel, true :=
+   ON, false := OFF
+   -------------------------- */
+void TPowerBoard::GetModule(int module, float *AV, float *AI, float *DV, float *DI, bool *BiasOn,
+                            bool *AChOn, bool *DChOn)
+{
+  readMonitor();
+  *AV     = fPBoard.Modules[module].AVmon;
+  *AI     = GetAnalogCurrent(module);
+  *DV     = fPBoard.Modules[module].DVmon;
+  *DI     = GetDigitalCurrent(module);
+  *BiasOn = fPBoard.Modules[module].BiasOn;
+  *AChOn  = fPBoard.Modules[module].AchOn;
+  *DChOn  = fPBoard.Modules[module].DchOn;
+  return;
+}
 
-     Returns if the power board is connected and operable
+/* -------------------------
+   IsOk()
+
+   Returns if the power board is connected and operable
 
 Return : true if the power board is OK
 -------------------------- */
-  bool TPowerBoard::IsOK()
-  {
-    std::lock_guard<std::mutex> lock(mutex_pb);
-    // first of all test the presence of the power board
-    try {
-      fMOSAICPowerBoard->isReady();
-    }
-    catch (...) {
-      std::cerr << "No Power board found ! Abort." << std::endl;
-      return (false);
-    }
-    // Now read the state
-    try {
-      fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::GetMonitor);
-    }
-    catch (...) {
-      std::cerr << "Error accessing the Power board found ! Abort." << std::endl;
-      return (false);
-    }
-    return (true);
+bool TPowerBoard::IsOK()
+{
+  std::lock_guard<std::mutex> lock(mutex_pb);
+  // first of all test the presence of the power board
+  try {
+    fMOSAICPowerBoard->isReady();
   }
+  catch (...) {
+    std::cerr << "No Power board found ! Abort." << std::endl;
+    return (false);
+  }
+  // Now read the state
+  try {
+    fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::GetMonitor);
+  }
+  catch (...) {
+    std::cerr << "Error accessing the Power board found ! Abort." << std::endl;
+    return (false);
+  }
+  return (true);
+}
 
-  // ------------------ eof ---------------------------
+// ------------------ eof ---------------------------
