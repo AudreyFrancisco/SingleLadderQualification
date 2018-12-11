@@ -272,7 +272,7 @@ bool fillHalfStaveComposition(AlpideDB *db, TChild halfStave, std::vector<TChild
   }
 
   for (unsigned int i = 0; i < halfStaveChildren.size(); i++) {
-    if ((halfStaveChildren.at(i).Type == g_hicType)) {
+    if (halfStaveChildren.at(i).Type == g_hicType) {
       hics.push_back(halfStaveChildren.at(i));
     }
   }
