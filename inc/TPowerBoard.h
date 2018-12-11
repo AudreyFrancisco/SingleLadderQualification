@@ -85,6 +85,8 @@ public:
     float DIset;
     float DVsetReadback;
     float AVsetReadback;
+    float DVDrop;
+    float AVDrop;
   };
 
   struct pbBoard {
@@ -181,6 +183,7 @@ public:
   void CalibrateCurrent(int module);
   void CalibrateBiasCurrent();
   void CalibrateBiasVoltage();
+  void VDropAllMod();
   void CorrectVoltageDrop(int module, bool reset = false);
   bool IsCalibrated(int module) { return GetConfigurationHandler()->IsCalibrated(module); };
 

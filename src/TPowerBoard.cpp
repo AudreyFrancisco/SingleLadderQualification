@@ -382,148 +382,96 @@ void TPowerBoard::CalibrateBiasVoltage()
 
 // correct the output voltage for the (calculated) voltage drop
 // if reset is true, the correction is set to 0
+void TPowerBoard::VDropAllMod()
+{
+  int N_mod  = fConfig->GetNHics();
+  int n_iter = 7;
+
+  float  RAnalog, RDigital, RGround;
+  float *dVAnalog_iter  = new float[N_mod];
+  float *dVDigital_iter = new float[N_mod];
+
+
+  for (int i = 0; i < n_iter; i++) {
+    float *V_drop_part = new float[N_mod];
+    for (int i_mod = 0; i_mod < N_mod; i_mod++) {
+      float I_analog_tot  = 0;
+      float I_digital_tot = 0;
+      for (int n_mod = i_mod; n_mod < N_mod; n_mod++) {
+        I_analog_tot += GetAnalogCurrent(n_mod);
+        I_digital_tot += GetDigitalCurrent(n_mod);
+      }
+      fPowerBoardConfig->GetLineResistances(i_mod, RAnalog, RDigital, RGround);
+      if (i_mod < 1)
+        V_drop_part[i_mod] = (I_analog_tot + I_digital_tot) * RGround;
+      else
+        V_drop_part[i_mod] = V_drop_part[i_mod - 1] + (I_analog_tot + I_digital_tot) * RGround;
+      float IDDA            = GetAnalogCurrent(i_mod);
+      float IDDD            = GetDigitalCurrent(i_mod);
+      dVAnalog_iter[i_mod]  = IDDA * RAnalog + V_drop_part[i_mod];
+      dVDigital_iter[i_mod] = IDDD * RDigital + V_drop_part[i_mod];
+    }
+    for (int i_mod = 0; i_mod < N_mod; i_mod++) {
+      fPowerBoardConfig->GetLineResistances(i_mod, RAnalog, RDigital, RGround);
+      float I_a = GetAnalogCurrent(i_mod) - dVAnalog_iter[i_mod] / RAnalog;
+      float I_d = GetDigitalCurrent(i_mod) - dVDigital_iter[i_mod] / RDigital;
+      SetAnalogCurrent(i_mod, I_a);
+      SetDigitalCurrent(i_mod, I_d);
+    }
+  }
+  for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
+    if (i < N_mod) {
+      fPBoard.Modules[i].DVDrop = dVDigital_iter[i];
+      fPBoard.Modules[i].AVDrop = dVAnalog_iter[i];
+    }
+    else {
+      fPBoard.Modules[i].DVDrop = 0.0;
+      fPBoard.Modules[i].AVDrop = 0.0;
+    }
+  }
+}
 void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
 {
-  // Measure the channel currents
-  // Calculate voltage drop
-  // Correct voltage drop for slope of voltage characteristics
-  // add corrected voltage drop to channel set voltage
-
-  // solution with vectors
-  /*
-  std::vector<float> I_analog_vect;
-  std::vector<float> I_digital_vect;
-  std::vector<float> RGnd_vect;
-  std::vector<float> Vdrop_part;
-
-  float RAnalog, RDigital, RGround;
-  float dVAnalog, dVDigital;
-  float AVScale, DVScale, AVOffset, DVOffset;
+  float AVScale, DVScale, AVOffset, DVOffset, dVAnalog, dVDigital;
   if (reset) {
     dVAnalog  = 0;
     dVDigital = 0;
   }
   else {
-    // store all values of analog and digital currents to vectors
-    for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
-      I_analog_vect.push_back(GetAnalogCurrent(i));
-      I_digital_vect.push_back(GetDigitalCurrent(i));
-      fPowerBoardConfig->GetLineResistances(i, RAnalog, RDigital, RGround);
-      RGnd_vect.push_back(RGround);
-    }
-
-    for (int n_mod = 0; n_mod < MAX_MOULESPERMOSAIC; n_mod++) {
-      float IDDA_tot, IDDD_tot;
-      IDDA_tot = std::accumulate(I_analog_vect.begin() + n_mod, I_analog_vect.end(), 0.0);
-      IDDD_tot = std::accumulate(I_digital_vect.begin() + n_mod, I_digital_vect.end(), 0.0);
-      Vdrop_part.push_back(RGnd_vect[n_mod] * (IDDA_tot + IDDD_tot));
-    }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    float IDDA = GetAnalogCurrent(module);
-    float IDDD = GetDigitalCurrent(module);
-
-    fPowerBoardConfig->GetLineResistances(module, RAnalog, RDigital, RGround);
-    fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
-    // calculation of the voltage drops for current module
-    // since ground line is common, voltage drop on GND line contains all currents
-    // of modules from the last module to the current one
-    dVAnalog =
-        IDDA * RAnalog + std::accumulate(Vdrop_part.begin(), Vdrop_part.begin() + module, 0.0);
-    dVDigital =
-        IDDD * RDigital + std::accumulate(Vdrop_part.begin(), Vdrop_part.begin() + module, 0.0);
-    dVAnalog *= AVScale;
-    dVDigital *= DVScale;
-  }
-  */
-
-  // same with arraysi
-
-  int                N_mod = fConfig->GetNHics();
-  std::map<int, int> map_i_modid;
-  for (int i = 0; i < N_mod; i++) {
-    int key          = (fConfig->GetHicConfig(i)->GetParamValue("HSPOSBYID")) - 1;
-    map_i_modid[key] = i;
-  }
-  float RAnalog, RDigital, RGround;
-  // float * iAnalog       = new float[N_mod];
-  // float *	iDigital      = new float[N_mod];
-  float *dVAnalog_old  = new float[N_mod];
-  float *dVDigital_old = new float[N_mod];
-  float  AVScale, DVScale, AVOffset, DVOffset, dVAnalog, dVDigital;
-  if (reset) {
-    dVAnalog  = 0;
-    dVDigital = 0;
-  }
-  else {
-    float dV  = 10.;
-    float tol = .01;
-    while (dV > tol) {
-      dV                 = 0.;
-      float *V_drop_part = new float[N_mod];
-      for (int i_mod = 0; i_mod < N_mod; i_mod++) {
-        float I_analog_tot  = 0;
-        float I_digital_tot = 0;
-        for (int n_mod = i_mod; n_mod < N_mod; n_mod++) {
-          I_analog_tot += GetAnalogCurrent(n_mod);
-          I_digital_tot += GetDigitalCurrent(n_mod);
-        }
-        fPowerBoardConfig->GetLineResistances(i_mod, RAnalog, RDigital, RGround);
-        if (i_mod < 1)
-          V_drop_part[i_mod] = (I_analog_tot + I_digital_tot) * RGround;
-        else
-          V_drop_part[i_mod] = V_drop_part[i_mod - 1] + (I_analog_tot + I_digital_tot) * RGround;
-        float IDDA           = GetAnalogCurrent(i_mod);
-        float IDDD           = GetDigitalCurrent(i_mod);
-        float dVA            = IDDA * RAnalog + V_drop_part[i_mod];
-        float dVD            = IDDD * RDigital + V_drop_part[i_mod];
-        dV                   = max(dV, fabs(dVA - dVAnalog_old[i_mod]));
-        dV                   = max(dV, fabs(dVD - dVDigital_old[i_mod]));
-        dVAnalog_old[i_mod]  = dVA;
-        dVDigital_old[i_mod] = dVD;
-      }
-      for (int i_mod = 0; i_mod < N_mod; i_mod++) {
-        fPowerBoardConfig->GetLineResistances(i_mod, RAnalog, RDigital, RGround);
-        float I_a = GetAnalogCurrent(i_mod) - dVAnalog_old[i_mod] / RAnalog;
-        float I_d = GetDigitalCurrent(i_mod) - dVDigital_old[i_mod] / RDigital;
-        SetAnalogCurrent(i_mod, I_a);
-        SetDigitalCurrent(i_mod, I_d);
-      }
-    }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    fPowerBoardConfig->GetLineResistances(module, RAnalog, RDigital, RGround);
     fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
 
-    int key   = module;
-    dVAnalog  = dVAnalog_old[map_i_modid[key]];
-    dVDigital = dVDigital_old[map_i_modid[key]];
+    dVAnalog  = fPBoard.Modules[module].AVDrop;
+    dVDigital = fPBoard.Modules[module].DVDrop;
 
     dVAnalog *= AVScale;
     dVDigital *= DVScale;
-  }
 
-  if (fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) {
-    std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage AVDD above safe limit; using "
-                 "safe max value, difference = "
-              << fPBoard.Modules[module].AVset + dVAnalog - SAFE_OUTPUT << " V." << std::endl;
-    dVAnalog = SAFE_OUTPUT - fPBoard.Modules[module].AVset;
-  }
-  if (fPBoard.Modules[module].DVset + dVDigital > SAFE_OUTPUT) {
-    std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage DVDD above safe limit; using "
-                 "safe max value, difference = "
-              << fPBoard.Modules[module].DVset + dVDigital - SAFE_OUTPUT << " V." << std::endl;
-    dVDigital = SAFE_OUTPUT - fPBoard.Modules[module].DVset;
-  }
+    if (fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) {
+      std::cout
+          << "ERROR (CorrectVoltageDrop): Asking for set voltage AVDD above safe limit; using "
+             "safe max value, difference = "
+          << fPBoard.Modules[module].AVset + dVAnalog - SAFE_OUTPUT << " V." << std::endl;
+      dVAnalog = SAFE_OUTPUT - fPBoard.Modules[module].AVset;
+    }
+    if (fPBoard.Modules[module].DVset + dVDigital > SAFE_OUTPUT) {
+      std::cout
+          << "ERROR (CorrectVoltageDrop): Asking for set voltage DVDD above safe limit; using "
+             "safe max value, difference = "
+          << fPBoard.Modules[module].DVset + dVDigital - SAFE_OUTPUT << " V." << std::endl;
+      dVDigital = SAFE_OUTPUT - fPBoard.Modules[module].DVset;
+    }
 
-  // fPBoard contains the voltages corrected with the channel calibration
-  std::lock_guard<std::mutex> lock(mutex_pb);
-  fMOSAICPowerBoard->setVout((unsigned char)(module * 2), fPBoard.Modules[module].AVset + dVAnalog);
-  fMOSAICPowerBoard->setVout((unsigned char)(module * 2 + 1),
-                             fPBoard.Modules[module].DVset + dVDigital);
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    // fPBoard contains the voltages corrected with the channel calibration
+    std::lock_guard<std::mutex> lock(mutex_pb);
+    fMOSAICPowerBoard->setVout((unsigned char)(module * 2),
+                               fPBoard.Modules[module].AVset + dVAnalog);
+    fMOSAICPowerBoard->setVout((unsigned char)(module * 2 + 1),
+                               fPBoard.Modules[module].DVset + dVDigital);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
 }
-
 /* -------------------------
    SetModule()
 
