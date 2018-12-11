@@ -187,8 +187,8 @@ THicClassification TPowerAnalysis::GetClassification(THicCurrents currents, TPow
     if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
     if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
   }
-  std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
+  std::cout << "Power Analysis - Classification " << result->GetName() << ": "
+            << WriteHicClassification(returnValue) << std::endl;
 
   return returnValue;
 }

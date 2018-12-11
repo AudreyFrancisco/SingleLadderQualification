@@ -224,14 +224,16 @@ void THic::SwitchBias(bool on)
   if (!m_powerBoard) return;
   if (on && m_noBB) {
     std::cout << "Warning: HIC " << GetDbId()
-              << " classified as no back bias, back bias not switched on" << std::endl;
+              << " classified as no back bias, back bias not switched" << std::endl;
     return;
   }
   if (on) {
     m_powerBoard->SetBiasOn(m_bbChannel);
+    std::cout << "Switched on BB channel: " << m_bbChannel << std::endl;
   }
   else {
     m_powerBoard->SetBiasOff(m_bbChannel);
+    std::cout << "Switched off BB channel: " << m_bbChannel << std::endl;
   }
 }
 
