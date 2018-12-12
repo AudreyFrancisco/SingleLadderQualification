@@ -20,6 +20,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("MFT HIC Digital Scan", MFTDigital);
   ui->typetest->addItem("MFT HIC Threshold Scan", MFTThreshold);
   ui->typetest->addItem("MFT HIC Noise Occupancy Scan", MFTNoise);
+  ui->typetest->addItem("MFT Eye Measurement", MFTEyeMeasurement);
   ui->typetest->addItem("MFT HIC Qualification", MFTQualification);
   // ui->typetest->addItem("OB HIC Endurance Test", OBEndurance);
   // ui->typetest->addItem("IB HIC Endurance Test", IBEndurance);

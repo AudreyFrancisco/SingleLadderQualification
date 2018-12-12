@@ -304,6 +304,9 @@ void MainWindow::open()
   else if (fNumberofscan == MFTQualification) {
     fileName = "Config/Config_MFTLadder.cfg";
   }
+  else if (fNumberofscan == MFTEyeMeasurement) {
+    fileName = "Config/Config_MFTLadder.cfg";
+  }
   else if (fNumberofscan == OBPower) {
     fileName = "ConfigPower.cfg";
   }
@@ -1446,6 +1449,9 @@ void MainWindow::initscanlist()
   }
   if (fNumberofscan == MFTQualification) {
     MFTHICQualification();
+  }
+  if (fNumberofscan == MFTEyeMeasurement) {
+    MFTHICEyeMeasurement();
   }
   if (fNumberofscan == OBReception) {
     fillingreceptionscans();
@@ -3133,6 +3139,28 @@ void MainWindow::MFTHICQualification()
 
   ConfigNoiseOccupancy();
   AddScan(STNoise);
+}
+
+void MainWindow::MFTHICEyeMeasurement()
+{
+  ClearVectors();
+
+  // for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
+  //   fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 0);
+  // }
+  fConfig->GetScanConfig()->SetBackBias(0.0);
+  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 3);
+  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 15);
+  AddScan(STEyeScan);
+  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 2);
+  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
+  AddScan(STEyeScan);
+  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 2);
+  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 8);
+  AddScan(STEyeScan);
+  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 1);
+  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 5);
+  AddScan(STEyeScan);
 }
 
 void MainWindow::SetMFTBackBias0(bool backbias)

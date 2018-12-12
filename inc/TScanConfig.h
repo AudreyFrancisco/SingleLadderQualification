@@ -22,6 +22,7 @@ typedef enum {
   MFTThreshold,
   MFTNoise,
   MFTQualification,
+  MFTEyeMeasurement,
   IBEndurance,
   IBStave,
   IBStaveEndurance,

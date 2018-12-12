@@ -90,6 +90,7 @@ public slots:
   void MFTDigitalScan();
   void MFTThresholdScan();
   void MFTNoiseOccupancyScan();
+  void MFTHICEyeMeasurement();
   void MFTHICQualification();
 
   void fillingendurancevectors();
