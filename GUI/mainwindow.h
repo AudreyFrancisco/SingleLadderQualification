@@ -293,6 +293,7 @@ private slots:
   void start_clock();
   void stop_clock();
   void open();
+  void closeGUI();
   void fillingreceptionscans();
   void poweringscan();
   void fillingOBvectors();

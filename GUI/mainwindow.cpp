@@ -132,7 +132,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->startclk_MFT, SIGNAL(clicked()), SLOT(start_clock()));
   connect(ui->stopclk_MFT, SIGNAL(clicked()), SLOT(stop_clock()));
   // connect(ui->cfg, SIGNAL(clicked()), this, SLOT(open()));
-  connect(ui->quit, SIGNAL(clicked()), this, SLOT(close()));
+  connect(ui->quit, SIGNAL(clicked()), this, SLOT(closeGUI()));
   // connect(ui->obm1, SIGNAL(clicked()), this, SLOT(button_obm1_clicked()));
   // connect(ui->obm2, SIGNAL(clicked()), this, SLOT(button_obm2_clicked()));
   // connect(ui->obm3, SIGNAL(clicked()), this, SLOT(button_obm3_clicked()));
@@ -588,6 +588,12 @@ void MainWindow::open()
   }
 }
 
+void MainWindow::closeGUI()
+{
+  stop_clock();
+  close();
+}
+
 
 // TODO: Add module number to button data and eliminate button_obm#_clicked
 // is the boolean fChkBtnObm needed at all?
@@ -891,6 +897,14 @@ void MainWindow::scanLoop(TScan *myScan)
       fScanAbort       = true;
       fExceptiontext   = ex.what();
     }
+  if (fNumberofscan == MFTQualification) {
+    string currentScan = myScan->GetName();
+    string scanName    = currentScan.substr(0, 5);
+    if (scanName == "Noise") stop_clock();
+  }
+  else {
+    stop_clock();
+  }
 }
 
 void MainWindow::popup(QString message)
