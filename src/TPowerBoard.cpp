@@ -390,8 +390,18 @@ void TPowerBoard::VDropAllMod()
   float  RAnalog, RDigital, RGround;
   float *dVAnalog_iter  = new float[N_mod];
   float *dVDigital_iter = new float[N_mod];
-
-
+  float *RGnd_part      = new float[N_mod];
+  float *RGnd           = new float[N_mod];
+  for (int i = 0; i < N_mod; i++) {
+    fPowerBoardConfig->GetLineResistances(i, RAnalog, RDigital, RGround);
+    RGnd[i] = RGround;
+  }
+  for (int i = 0; i < N_mod; i++) {
+    if (i < 1)
+      RGnd_part[i] = RGnd[i];
+    else
+      RGnd_part[i] = RGnd[i] - RGnd[i - 1];
+  }
   for (int i = 0; i < n_iter; i++) {
     float *V_drop_part = new float[N_mod];
     for (int i_mod = 0; i_mod < N_mod; i_mod++) {
@@ -403,9 +413,10 @@ void TPowerBoard::VDropAllMod()
       }
       fPowerBoardConfig->GetLineResistances(i_mod, RAnalog, RDigital, RGround);
       if (i_mod < 1)
-        V_drop_part[i_mod] = (I_analog_tot + I_digital_tot) * RGround;
+        V_drop_part[i_mod] = (I_analog_tot + I_digital_tot) * RGnd_part[i_mod];
       else
-        V_drop_part[i_mod] = V_drop_part[i_mod - 1] + (I_analog_tot + I_digital_tot) * RGround;
+        V_drop_part[i_mod] =
+            V_drop_part[i_mod - 1] + (I_analog_tot + I_digital_tot) * RGnd_part[i_mod];
       float IDDA            = GetAnalogCurrent(i_mod);
       float IDDD            = GetDigitalCurrent(i_mod);
       dVAnalog_iter[i_mod]  = IDDA * RAnalog + V_drop_part[i_mod];
@@ -413,8 +424,8 @@ void TPowerBoard::VDropAllMod()
     }
     for (int i_mod = 0; i_mod < N_mod; i_mod++) {
       fPowerBoardConfig->GetLineResistances(i_mod, RAnalog, RDigital, RGround);
-      float I_a = GetAnalogCurrent(i_mod) - dVAnalog_iter[i_mod] / RAnalog;
-      float I_d = GetDigitalCurrent(i_mod) - dVDigital_iter[i_mod] / RDigital;
+      float I_a = dVAnalog_iter[i_mod] / (RAnalog + RGnd[i_mod]);
+      float I_d = dVDigital_iter[i_mod] / (RDigital + RGnd[i_mod]);
       SetAnalogCurrent(i_mod, I_a);
       SetDigitalCurrent(i_mod, I_d);
     }

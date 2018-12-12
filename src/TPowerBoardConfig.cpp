@@ -435,22 +435,22 @@ void TPowerBoardConfig::AddPowerBusResistances(int mod, bool real, bool middle)
 {
   if (real) {
     if (middle) {
-      fPBConfig.Modul[mod].CalDLineR   = RPBDigitalML[mod];
-      fPBConfig.Modul[mod].CalALineR   = RPBAnalogML[mod];
-      fPBConfig.Modul[mod].CalGNDLineR = RPBGroundML[mod];
+      fPBConfig.Modul[mod].CalDLineR += RPBDigitalML[mod];
+      fPBConfig.Modul[mod].CalALineR += RPBAnalogML[mod];
+      fPBConfig.Modul[mod].CalGNDLineR += RPBGroundML[mod];
     }
     else {
-      fPBConfig.Modul[mod].CalDLineR   = RPBDigital[mod];
-      fPBConfig.Modul[mod].CalALineR   = RPBAnalog[mod];
-      fPBConfig.Modul[mod].CalGNDLineR = RPBGround[mod];
+      fPBConfig.Modul[mod].CalDLineR += RPBDigital[mod];
+      fPBConfig.Modul[mod].CalALineR += RPBAnalog[mod];
+      fPBConfig.Modul[mod].CalGNDLineR += RPBGround[mod];
     }
   }
   else {
     float ALineR, DLineR, GNDLineR, BBLineR;
     GetWirePBResistances(mod, ALineR, DLineR, GNDLineR, BBLineR);
-    fPBConfig.Modul[mod].CalDLineR   = DLineR;
-    fPBConfig.Modul[mod].CalALineR   = ALineR;
-    fPBConfig.Modul[mod].CalGNDLineR = GNDLineR;
+    fPBConfig.Modul[mod].CalDLineR += DLineR;
+    fPBConfig.Modul[mod].CalALineR += ALineR;
+    fPBConfig.Modul[mod].CalGNDLineR += GNDLineR;
   }
 }
 
