@@ -8,6 +8,7 @@ set(SRCS
   test_power_up.sh
   disable_chip.sh
   enable_chip.sh
+  edit_ipaddress.sh
   common/functions.sh
   common/hameg2030.py
   common/hameg_module_test.py

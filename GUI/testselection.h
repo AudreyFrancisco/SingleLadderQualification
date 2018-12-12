@@ -18,7 +18,8 @@ public:
   virtual void SaveSettings(QString &institute, QString &opname, QString &hicid, int &counter,
                             int &lid, int &memberid, QString &ttwo, QString &tthree, QString &tfour,
                             QString &tfive, QString &done, QString &dtwo, QString &dthree,
-                            QString &dfour, QString &dfive, QString &halfstave, QString &stave);
+                            QString &dfour, QString &dfive, QString &halfstave, QString &stave,
+                            QString &address);
   virtual int  GetLocationID() { return locid; }
   virtual void ClearLocations();
   virtual void Init();

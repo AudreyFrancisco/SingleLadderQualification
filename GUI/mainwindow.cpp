@@ -404,6 +404,10 @@ void MainWindow::open()
     std::vector<std::string> hicNames;
     for (const auto &name : fHicnames)
       hicNames.push_back(name.toStdString());
+    if (fPreviousIPAddress != fIPAddress) {
+      EditIPAddress(fIPAddress.toStdString());
+      fPreviousIPAddress = fIPAddress;
+    }
     if (fDisableFour) {
       DisableChip(4);
     }
@@ -2257,7 +2261,7 @@ void MainWindow::savesettings()
   fSettingswindow->SaveSettings(fInstitute, fOperatorname, fHicidnumber, fCounter,
                                 fIdoflocationtype, fIdofoperator, fToptwo, fTopthree, fTopfour,
                                 fTopfive, fBottomone, fBottomtwo, fBottomthree, fBottomfour,
-                                fBottomfive, fHalfstave, fStave);
+                                fBottomfive, fHalfstave, fStave, fIPAddress);
   if (fCounter == 0) {
     return;
   }
@@ -2352,7 +2356,7 @@ void MainWindow::speedycheck(bool checked)
   }
 }
 
-void MainWindow::ConfigThresholdScan(int nMaskStages = 512, int pixPerRegion = 1)
+void MainWindow::ConfigThresholdScan(int nMaskStages = 512, int pixPerRegion = 32)
 {
   // fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", nMaskStages);
   fConfig->GetScanConfig()->SetParamValue("PIXPERREGION", pixPerRegion);
@@ -3175,6 +3179,14 @@ void MainWindow::DisableEight(bool disable)
 {
   printf("Disabling chip 8\n");
   fDisableEight = true;
+}
+
+void MainWindow::EditIPAddress(string address)
+{
+  std::string str = "./scripts/edit_ipaddress.sh ";
+  str += address;
+  const char *command = str.c_str();
+  system(command);
 }
 
 void MainWindow::fillingendurancevectors()

@@ -118,6 +118,7 @@ public slots:
   void EnableChip(int chipID);
   void SetMFTBackBias0(bool backbias);
   void SetMFTBackBias3(bool backbias);
+  void EditIPAddress(string address);
   // void      DisableSelectedChips();
   void      ContinueWithoutWriting();
   void      finalwrite();
@@ -200,6 +201,8 @@ private:
   QString                                               fOperatorname;
   QString                                               fInstitute;
   QString                                               fHicidnumber;
+  QString                                               fIPAddress;
+  QString                                               fPreviousIPAddress;
   QString                                               fToptwo, fTopthree, fTopfour, fTopfive;
   QString fBottomone, fBottomtwo, fBottomthree, fBottomfive, fBottomfour;
   int     fIdofactivitytype;

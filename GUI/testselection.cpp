@@ -71,6 +71,7 @@ void TestSelection::Init()
 {
   QSettings settings;
   ui->operatorstring->setText(settings.value("operator", "").toString());
+  ui->ipaddress->setText(settings.value("ipaddress", "").toString());
   int idx = ui->typetest->findText(settings.value("testname", "n/a").toString());
   if (idx >= 0) ui->typetest->setCurrentIndex(idx);
   idx = ui->testbenchlocation->findText(settings.value("testsite", "n/a").toString());
@@ -87,7 +88,7 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
                                  int &lid, int &memberid, QString &ttwo, QString &tthree,
                                  QString &tfour, QString &tfive, QString &done, QString &dtwo,
                                  QString &dthree, QString &dfour, QString &dfive,
-                                 QString &halfstave, QString &stave)
+                                 QString &halfstave, QString &stave, QString &address)
 {
   // Default value for locid, TODO:Associate a location to a default configuration setup.
   locid = 2;
@@ -99,6 +100,9 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
     QString inf_mess   = "Missing information:\n\n";
     if (ui->operatorstring->toPlainText().isEmpty()) {
       inf_mess.append("\t Operator name\n\n");
+    }
+    if (ui->ipaddress->toPlainText().isEmpty()) {
+      inf_mess.append("\t MOSAIC IP Address\n\n");
     }
     if (ui->id->toPlainText().isEmpty()) {
       inf_mess.append("\t HIC ID Number\n\n");
@@ -182,6 +186,7 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
     opname    = ui->operatorstring->toPlainText();
     hicid     = ui->id->toPlainText();
     halfstave = ui->id->toPlainText();
+    address   = ui->ipaddress->toPlainText();
     fCounter = counter = 1;
     lid                = locid;
     institute          = location;
@@ -199,6 +204,7 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
     QSettings settings;
     settings.setValue("operator", opname);
     settings.setValue("hicnumber", hicid);
+    settings.setValue("ipaddress", address);
     settings.setValue("testname", ui->typetest->currentText());
     settings.setValue("testsite", ui->testbenchlocation->currentText());
 
