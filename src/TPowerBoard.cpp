@@ -429,17 +429,27 @@ void TPowerBoard::VDropAllMod()
         V_drop_part[i_mod] = (IDDA_tot + IDDD_tot) * RGnd_part[i_mod];
       else
         V_drop_part[i_mod] = V_drop_part[i_mod - 1] + (IDDA_tot + IDDD_tot) * RGnd_part[i_mod];
-      dVAnalog_iter[i_mod]  = IDDA[i_mod] * RAnalog + V_drop_part[i_mod];
-      dVDigital_iter[i_mod] = IDDD[i_mod] * RDigital + V_drop_part[i_mod];
-      R_mod_a[i_mod]        = VDDA[i_mod] / IDDA[i_mod];
-      R_mod_d[i_mod]        = VDDD[i_mod] / IDDD[i_mod];
+      dVAnalog_iter[i_mod] =
+          IDDA[i_mod] * RAnalog + V_drop_part[i_mod] + IDDD[i_mod] * RGnd_part[i_mod];
+      dVDigital_iter[i_mod] =
+          IDDD[i_mod] * RDigital + V_drop_part[i_mod] + IDDA[i_mod] * RGnd_part[i_mod];
+      R_mod_a[i_mod] =
+          VDDA[i_mod] + V_drop_part[i_mod] + IDDD[i_mod] * RGnd_part[i_mod] / IDDA[i_mod];
+      R_mod_d[i_mod] =
+          VDDD[i_mod] + V_drop_part[i_mod] + IDDA[i_mod] * RGnd_part[i_mod] / IDDD[i_mod];
       VDDA[i_mod] += dVAnalog_iter[i_mod];
       VDDD[i_mod] += dVDigital_iter[i_mod];
     }
     for (int i_mod = 0; i_mod < N_mod; i_mod++) {
+      float IDDA_tot = 0;
+      float IDDD_tot = 0;
+      for (int i = i_mod; i < N_mod; i++) {
+        IDDA_tot += IDDA[i];
+        IDDD_tot += IDDD[i];
+      }
       fPowerBoardConfig->GetLineResistances(i_mod, RAnalog, RDigital, RGround);
-      IDDA[i_mod] = (VDDA[i_mod] - dVAnalog_iter[i_mod]) / R_mod_a[i_mod];
-      IDDD[i_mod] = (VDDD[i_mod] - dVDigital_iter[i_mod]) / R_mod_d[i_mod];
+      IDDA[i_mod] = (VDDA[i_mod] - RGround * (IDDA_tot + IDDD_tot + IDDD[i_mod])) / R_mod_a[i_mod];
+      IDDD[i_mod] = (VDDD[i_mod] - RGround * (IDDA_tot + IDDD_tot + IDDA[i_mod])) / R_mod_d[i_mod];
     }
   }
   for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
