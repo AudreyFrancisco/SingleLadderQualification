@@ -39,8 +39,8 @@
 #include "TConfig.h"
 #include "THicConfig.h"
 #include "TReadoutBoardMOSAIC.h"
+#include <boost/numeric/ublas/vector.hpp>
 #include <chrono>
-#include <gsl/gsl_math.h>
 #include <numeric>
 #include <thread>
 #include <unistd.h>
