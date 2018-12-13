@@ -5,6 +5,7 @@ project(alptest)
 option(DISABLE_ROOT "Disable ROOT")
 option(DISABLE_ROOT_CONFIG "Disable usage of ROOTConfig.cmake")
 option(DISABLE_QT "Disable QT")
+option(PB_NEW "Use new powerboard")
 
 # by default build optimized code with debug symbols
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)

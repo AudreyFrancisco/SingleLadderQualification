@@ -13,5 +13,8 @@ set(SRCS
 add_library(powerboard SHARED ${SRCS})
 target_include_directories(powerboard PUBLIC include ../libmosaic/include)
 target_link_libraries(powerboard mosaic)
+if (PB_NEW)
+	target_compile_definitions(powerboard PRIVATE "-DPB_NEW")
+endif()
 install(TARGETS powerboard
   LIBRARY DESTINATION lib)
