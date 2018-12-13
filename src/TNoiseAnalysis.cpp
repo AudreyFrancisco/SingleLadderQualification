@@ -51,12 +51,12 @@ void TNoiseAnalysis::WriteResult()
     if (!hicResult->IsValid()) continue;
     WriteNoisyPixels(m_hics.at(ihic));
     if (m_config->GetUseDataPath()) {
-      sprintf(fName, "%s/NoiseOccResult_%s.dat", hicResult->GetOutputPath().c_str(),
-              m_config->GetfNameSuffix());
+      sprintf(fName, "%s/NoiseOccResult_%s_BB%.0fV.dat", hicResult->GetOutputPath().c_str(),
+              m_config->GetfNameSuffix(), m_config->GetBackBias());
     }
     else {
-      sprintf(fName, "NoiseOccResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
-              m_config->GetfNameSuffix());
+      sprintf(fName, "NoiseOccResult_%s_%s_BB%.0fV.dat", m_hics.at(ihic)->GetDbId().c_str(),
+              m_config->GetfNameSuffix(), m_config->GetBackBias());
     }
     m_scan->WriteConditions(fName, m_hics.at(ihic));
 
@@ -79,11 +79,12 @@ void TNoiseAnalysis::WriteNoisyPixels(THic *hic)
   TNoiseResultHic *hicResult = (TNoiseResultHic *)m_result->GetHicResult(hic->GetDbId());
 
   if (m_config->GetUseDataPath()) {
-    sprintf(fName, "%s/NoisyPixels_%s.dat", hicResult->GetOutputPath().c_str(),
-            m_config->GetfNameSuffix());
+    sprintf(fName, "%s/NoisyPixels_%s_BB%.0fV.dat", hicResult->GetOutputPath().c_str(),
+            m_config->GetfNameSuffix(), m_config->GetBackBias());
   }
   else {
-    sprintf(fName, "NoisyPixels_%s_%s.dat", hic->GetDbId().c_str(), m_config->GetfNameSuffix());
+    sprintf(fName, "NoisyPixels_%s_%s_BB%.0fV.dat", hic->GetDbId().c_str(),
+            m_config->GetfNameSuffix(), m_config->GetBackBias());
   }
 
   hicResult->SetNoisyFile(fName);

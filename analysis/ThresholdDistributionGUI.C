@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdio.h>
 
 #include "TH2F.h"
 #include "TProfile.h"
@@ -9,7 +10,7 @@
 #include "TLegend.h"
 
 
-int ThresholdDistributionGUI(const char *fName, int hicid = 0, int chipid = 0, const char *datetime = "") {
+int ThresholdDistributionGUI(const char *fName, int hicid = 0, int chipid = 0, const char *datetime = "", float backbias = 0.0) {
   int col, row;
   float threshold, noise, smthg;
   TH1F *hThresh = new TH1F("hThresh", "hThresh", 125, 0., 500.);
@@ -66,12 +67,7 @@ int ThresholdDistributionGUI(const char *fName, int hicid = 0, int chipid = 0, c
   // hNoise->SetOptStat(111);
   hNoise->Draw();
 
-  // auto legend = new TLegend(0.901, 0.351, 0.998, 0.652);
-  // // legend->SetHeader("");
-  // legend->AddEntry(hDeadMap, "Dead pixels", "P");
-  // legend->AddEntry(hIneffMap, "Inefficient pixels", "P");
-  // legend->AddEntry(hHotMap, "Hot pixels", "P");
-  // legend->Draw();
+  int bbias = backbias;
 
   std::string filename = "Data/";
   filename += std::to_string( hicid );
@@ -81,6 +77,9 @@ int ThresholdDistributionGUI(const char *fName, int hicid = 0, int chipid = 0, c
   filename += datetime;
   filename += "_Chip";
   filename += std::to_string( chipid );
+  filename += "_BB";
+  filename += std::to_string( bbias );
+  filename += "V";
   filename += ".pdf";
   const char *finalname = filename.c_str();
 

@@ -164,13 +164,14 @@ void TSCurveAnalysis::PrepareFiles()
 
     if (m_writeFitResults) {
       if (m_config->GetUseDataPath()) {
-        sprintf(fName, "%s/Threshold_FitResults_%s_Chip%d.dat", chipResult->GetOutputPath().c_str(),
-                m_config->GetfNameSuffix(), m_chipList.at(i).chipId);
+        sprintf(fName, "%s/Threshold_FitResults_%s_Chip%d_BB%.0fV.dat",
+                chipResult->GetOutputPath().c_str(), m_config->GetfNameSuffix(),
+                m_chipList.at(i).chipId, m_config->GetBackBias());
       }
       else {
-        sprintf(fName, "Threshold_FitResults__%s_B%d_Rcv%d_Ch%d.dat", m_config->GetfNameSuffix(),
-                m_chipList.at(i).boardIndex, m_chipList.at(i).dataReceiver,
-                m_chipList.at(i).chipId);
+        sprintf(fName, "Threshold_FitResults__%s_B%d_Rcv%d_Ch%d_BB%.0fV.dat",
+                m_config->GetfNameSuffix(), m_chipList.at(i).boardIndex,
+                m_chipList.at(i).dataReceiver, m_chipList.at(i).chipId, m_config->GetBackBias());
       }
       chipResult->SetFitFile(fName);
       chipResult->m_fitFP = fopen(fName, "w");
@@ -350,9 +351,10 @@ void TSCurveAnalysis::DrawAndSaveToPDF(int hicid)
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     command.Form("root -b -q "
                  "'analysis/ThresholdDistributionGUI.C+(\"Data/%d/"
-                 "Threshold_FitResults_%s_Chip%d.dat\",%d,%d,\"%s\")'",
-                 hicid, m_config->GetfNameSuffix(), m_chipList.at(ichip).chipId, hicid,
-                 m_chipList.at(ichip).chipId, m_config->GetfNameSuffix());
+                 "Threshold_FitResults_%s_Chip%d_BB%.0fV.dat\",%d,%d,\"%s\", %f)'",
+                 hicid, m_config->GetfNameSuffix(), m_chipList.at(ichip).chipId,
+                 m_config->GetBackBias(), hicid, m_chipList.at(ichip).chipId,
+                 m_config->GetfNameSuffix(), m_config->GetBackBias());
     int status = system(command.Data());
     std::cout << "Done, status code = " << status << std::endl;
   }
@@ -505,28 +507,28 @@ void TSCurveAnalysis::WriteResult()
     if (!hicResult->IsValid()) continue;
     if (m_config->GetUseDataPath()) {
       if (IsThresholdScan())
-        sprintf(fName, "%s/ThresholdScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
-                m_config->GetfNameSuffix());
+        sprintf(fName, "%s/ThresholdScanResult_%s_BB%.0fV.dat", hicResult->GetOutputPath().c_str(),
+                m_config->GetfNameSuffix(), m_config->GetBackBias());
       else if (IsVCASNTuning()) {
-        sprintf(fName, "%s/VCASNTuneResult_%s.dat", hicResult->GetOutputPath().c_str(),
-                m_config->GetfNameSuffix());
+        sprintf(fName, "%s/VCASNTuneResult_%s_BB%.0fV.dat", hicResult->GetOutputPath().c_str(),
+                m_config->GetfNameSuffix(), m_config->GetBackBias());
       }
       else {
-        sprintf(fName, "%s/ITHRTuneResult_%s.dat", hicResult->GetOutputPath().c_str(),
-                m_config->GetfNameSuffix());
+        sprintf(fName, "%s/ITHRTuneResult_%s_BB%.0fV.dat", hicResult->GetOutputPath().c_str(),
+                m_config->GetfNameSuffix(), m_config->GetBackBias());
       }
     }
     else {
       if (IsThresholdScan())
-        sprintf(fName, "ThresholdScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
-                m_config->GetfNameSuffix());
+        sprintf(fName, "ThresholdScanResult_%s_%s_BB%.0fV.dat", m_hics.at(ihic)->GetDbId().c_str(),
+                m_config->GetfNameSuffix(), m_config->GetBackBias());
       else if (IsVCASNTuning()) {
-        sprintf(fName, "VCASNTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
-                m_config->GetfNameSuffix());
+        sprintf(fName, "VCASNTuneResult_%s_%s_BB%.0fV.dat", m_hics.at(ihic)->GetDbId().c_str(),
+                m_config->GetfNameSuffix(), m_config->GetBackBias());
       }
       else {
-        sprintf(fName, "ITHRTuneResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
-                m_config->GetfNameSuffix());
+        sprintf(fName, "ITHRTuneResult_%s_%s_BB%.0fV.dat", m_hics.at(ihic)->GetDbId().c_str(),
+                m_config->GetfNameSuffix(), m_config->GetBackBias());
       }
     }
     m_scan->WriteConditions(fName, m_hics.at(ihic));
