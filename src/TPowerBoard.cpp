@@ -39,7 +39,7 @@
 #include "TConfig.h"
 #include "THicConfig.h"
 #include "TReadoutBoardMOSAIC.h"
-#include <TMatrix.h>
+#include <boost/numeric/mtl/mtl.hpp>
 #include <chrono>
 #include <numeric>
 #include <thread>
