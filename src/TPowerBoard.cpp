@@ -39,11 +39,11 @@
 #include "TConfig.h"
 #include "THicConfig.h"
 #include "TReadoutBoardMOSAIC.h"
+#include <TMatrix.h>
 #include <chrono>
 #include <numeric>
 #include <thread>
 #include <unistd.h>
-
 /* -------------------------
         Constructor
 
