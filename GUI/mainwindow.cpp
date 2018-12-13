@@ -102,6 +102,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->details_MFT->hide();
   ui->displaydetails_MFT->hide();
   ui->endurancebox->hide();
+  // ui->eostransfer->hide();
   // ui->statusbar->hide();
   // ui->tab_2->setVisible(false);
   // ui->statuslabel->setVisible(false);
@@ -141,6 +142,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   // connect(ui->obm6, SIGNAL(clicked()), this, SLOT(button_obm6_clicked()));
   // connect(ui->obm7, SIGNAL(clicked()), this, SLOT(button_obm7_clicked()));
   connect(ui->details_MFT, SIGNAL(currentIndexChanged(int)), this, SLOT(detailscombo(int)));
+  connect(ui->sendtoeos, SIGNAL(clicked()), this, SLOT(SendToEOSMFT()));
+  ui->testmode->setChecked(false);
+  ui->forcecreate->setChecked(false);
+
   //  connect(ui->poweroff, SIGNAL(clicked(bool)), this, SLOT(poweroff()));
 
   // ui->pbstatus->hide();
@@ -3227,6 +3232,35 @@ void MainWindow::EditIPAddress(string address)
 {
   std::string str = "./scripts/edit_ipaddress.sh ";
   str += address;
+  const char *command = str.c_str();
+  system(command);
+}
+
+void MainWindow::SendToEOSMFT()
+{
+  bool    testmode    = false;
+  bool    forcecreate = false;
+  QString idofhic     = ui->hicid->toPlainText();
+  QString username    = ui->username->toPlainText();
+
+  if (ui->testmode->isChecked()) testmode = true;
+  if (ui->forcecreate->isChecked()) forcecreate = true;
+
+  MFTEOSTransfer(idofhic, username, testmode, forcecreate);
+}
+
+void MainWindow::MFTEOSTransfer(QString hicid, QString username, bool testmode, bool fcreate)
+{
+  std::string str = "./scripts/mft_data_transfer.sh ";
+  str += hicid.toStdString();
+  if (testmode) {
+    str += " --test-mode true ";
+  }
+  if (fcreate) {
+    str += "--force-create true ";
+  }
+  str += "--user ";
+  str += username.toStdString();
   const char *command = str.c_str();
   system(command);
 }

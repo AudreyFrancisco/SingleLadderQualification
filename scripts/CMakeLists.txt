@@ -9,6 +9,7 @@ set(SRCS
   disable_chip.sh
   enable_chip.sh
   edit_ipaddress.sh
+  mft_data_transfer.sh
   common/functions.sh
   common/hameg2030.py
   common/hameg_module_test.py

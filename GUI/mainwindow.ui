@@ -68,6 +68,20 @@
       </property>
      </widget>
     </item>
+    <item row="1" column="0">
+     <widget class="QTableWidget" name="testTable">
+      <column>
+       <property name="text">
+        <string>Testing object</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </column>
+     </widget>
+    </item>
     <item row="1" column="1" colspan="2">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
@@ -1382,21 +1396,135 @@
          </rect>
         </property>
        </widget>
+       <widget class="QGroupBox" name="eostransfer">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>270</y>
+          <width>481</width>
+          <height>161</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="title">
+         <string>EOS data transfer</string>
+        </property>
+        <widget class="QTextEdit" name="hicid">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>70</y>
+           <width>141</width>
+           <height>41</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="hicidlabel">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>40</y>
+           <width>131</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>HIC ID</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="usrnamelabel">
+         <property name="geometry">
+          <rect>
+           <x>180</x>
+           <y>40</y>
+           <width>131</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>CERN user name</string>
+         </property>
+        </widget>
+        <widget class="QTextEdit" name="username">
+         <property name="geometry">
+          <rect>
+           <x>180</x>
+           <y>70</y>
+           <width>141</width>
+           <height>41</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="sendtoeos">
+         <property name="geometry">
+          <rect>
+           <x>370</x>
+           <y>72</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Send</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="forcecreate">
+         <property name="geometry">
+          <rect>
+           <x>180</x>
+           <y>130</y>
+           <width>121</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>force create</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="testmode">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>130</y>
+           <width>101</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>test mode</string>
+         </property>
+        </widget>
+       </widget>
       </widget>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QTableWidget" name="testTable">
-      <column>
-       <property name="text">
-        <string>Testing object</string>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </column>
      </widget>
     </item>
    </layout>

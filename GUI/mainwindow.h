@@ -120,6 +120,8 @@ public slots:
   void SetMFTBackBias0(bool backbias);
   void SetMFTBackBias3(bool backbias);
   void EditIPAddress(string address);
+  void MFTEOSTransfer(QString hicid, QString username, bool testmode, bool fcreate);
+  void SendToEOSMFT();
   // void      DisableSelectedChips();
   void      ContinueWithoutWriting();
   void      finalwrite();
