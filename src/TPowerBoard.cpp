@@ -414,20 +414,19 @@ void TPowerBoard::CorrectVoltageDrop(int module, TPowerBoardConfig::pb_t pb, boo
       for (int ihic = MAX_MOULESPERMOSAIC; ihic >= 0; --ihic) {
         Itot += IDDD[ihic];
         Itot += IDDA[ihic];
-        float res = ihic > 0 ? RGnd[ihic] - RGnd[ihic - 1] : RGnd[ihic];
+        float res       = ihic > 0 ? RGnd[ihic] - RGnd[ihic - 1] : RGnd[ihic];
         VdropPart[ihic] = res * Itot;
-        VdropGnd = std::accumulate(VdropPart.begin(), VdropPart.begin() + module, 0.);
+        VdropGnd        = std::accumulate(VdropPart.begin(), VdropPart.begin() + module, 0.);
       }
     }
-    else
-    {
+    else {
       VdropGnd = (IDDA[module] + IDDD[module]) * RGnd[module];
     }
 
     fPowerBoardConfig->GetResistances(module, RAnalog, RDigital, RGround, pb);
     fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
 
-    dVAnalog = IDDA[module] * RAnalog + VdropGnd;
+    dVAnalog  = IDDA[module] * RAnalog + VdropGnd;
     dVDigital = IDDD[module] * RDigital + VdropGnd;
     dVAnalog *= AVScale;
     dVDigital *= DVScale;

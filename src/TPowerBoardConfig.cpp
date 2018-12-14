@@ -478,27 +478,27 @@ void TPowerBoardConfig::GetLineResistances(int mod, float &ALineR, float &DLineR
 }
 
 void TPowerBoardConfig::GetResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR,
-    pb_t pb)
+                                       pb_t pb)
 {
   DLineR   = fPBConfig.Modul[mod].CalDLineR;
   ALineR   = fPBConfig.Modul[mod].CalALineR;
   GNDLineR = fPBConfig.Modul[mod].CalGNDLineR;
 
   if (pb == TPowerBoardConfig::realML) {
-    DLineR   += RPBDigitalML[mod];
-    ALineR   += RPBAnalogML[mod];
+    DLineR += RPBDigitalML[mod];
+    ALineR += RPBAnalogML[mod];
     GNDLineR += RPBGroundML[mod];
   }
   else if (pb == TPowerBoardConfig::realOL) {
-    DLineR   += RPBDigital[mod];
-    ALineR   += RPBAnalog[mod];
+    DLineR += RPBDigital[mod];
+    ALineR += RPBAnalog[mod];
     GNDLineR += RPBGround[mod];
   }
   else if (pb == TPowerBoardConfig::mockup) {
     float ALineR, DLineR, GNDLineR, BBLineR;
     GetWirePBResistances(mod, ALineR, DLineR, GNDLineR, BBLineR);
-    DLineR   += DLineR;
-    ALineR   += ALineR;
+    DLineR += DLineR;
+    ALineR += ALineR;
     GNDLineR += GNDLineR;
   }
   else {

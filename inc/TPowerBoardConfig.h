@@ -141,12 +141,7 @@ public:
     float CalIBiasOffset;
   } PowBoard_t;
 
-  enum pb_t {
-    none = 0,
-    mockup,
-    realML,
-    realOL
-  };
+  enum pb_t { none = 0, mockup, realML, realOL };
 
   // members
 private:
