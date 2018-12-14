@@ -330,7 +330,7 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
   if (config->GetUsePowerBoard()) {
     TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
     for (unsigned int i = 0; i < config->GetNHics(); ++i)
-      pbConfig->SetDefaultsOB(0);
+      pbConfig->SetDefaultsOB(i);
     pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0), pbConfig);
   }
 
