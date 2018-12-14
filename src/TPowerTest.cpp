@@ -73,8 +73,8 @@ void TPowerTest::DoIVCurve(THicCurrents &result)
     // overcurrent protection; will be counted as trip; last voltage is saved as max back bias
     // voltage
     if (result.ibias[i] > m_config->GetParamValue("MAXIBIAS")) {
-      printf("MAXIBIAS exceeded at %g: %g > %d, switching off Vbias\n",
-          voltage, result.ibias[i], m_config->GetParamValue("MAXIBIAS"));
+      printf("MAXIBIAS exceeded at %g: %g > %d, switching off Vbias\n", voltage, result.ibias[i],
+             m_config->GetParamValue("MAXIBIAS"));
       m_hicCurrents.find(m_testHic->GetDbId())->second.maxBias = voltage - .1;
       m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
       std::this_thread::sleep_for(std::chrono::milliseconds(300));
