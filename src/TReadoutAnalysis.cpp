@@ -135,6 +135,7 @@ void TReadoutAnalysis::Finalize()
     else {
       hicResult->m_class = GetClassificationIB(hicResult);
     }
+    PrintHicClassification(hicResult);
     hicResult->SetValidity(true);
   }
   WriteResult();
@@ -182,8 +183,6 @@ THicClassification TReadoutAnalysis::GetClassificationOB(TReadoutResultHic *resu
   DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "READOUT_MAXTIMEOUT", result);
   DoCut(returnValue, CLASS_SILVER, result->m_errorCounter.n8b10b, "READOUT_MAX8b10b_GREEN", result);
 
-  std::cout << "Readout Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 
@@ -195,8 +194,6 @@ THicClassification TReadoutAnalysis::GetClassificationIB(TReadoutResultHic *resu
   DoCut(returnValue, CLASS_RED, result->m_errorCounter.nTimeout, "READOUT_MAXTIMEOUT", result);
   DoCut(returnValue, CLASS_SILVER, result->m_errorCounter.n8b10b, "READOUT_MAX8b10b_GREEN", result);
 
-  std::cout << "Readout Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 

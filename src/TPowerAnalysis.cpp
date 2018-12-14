@@ -161,6 +161,7 @@ void TPowerAnalysis::Finalize()
     if (currentHic->GetNoBB()) hicResult->tripBB = true;
 
     hicResult->m_class = GetClassification(hicCurrents, hicResult);
+    PrintHicClassification(hicResult);
     hicResult->SetValidity(true);
 
     CreateIVHisto(hicResult);
@@ -187,8 +188,6 @@ THicClassification TPowerAnalysis::GetClassification(THicCurrents currents, TPow
     if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
     if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
   }
-  std::cout << "Power Analysis - Classification " << result->GetName() << ": "
-            << WriteHicClassification(returnValue) << std::endl;
 
   return returnValue;
 }

@@ -91,6 +91,8 @@ public:
                    std::vector<THic *> hics, std::mutex *aMutex, TReadoutResult *aResult = 0);
   void Initialize();
   void Finalize();
+
+  std::string GetName() { return "Readout Analysis"; }
 };
 
 #endif

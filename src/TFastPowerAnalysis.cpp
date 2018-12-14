@@ -111,6 +111,7 @@ void TFastPowerAnalysis::Finalize()
       hicResult->ibias[i] = hicCurrents.ibias[i];
     }
     hicResult->m_class = GetClassification(hicCurrents, hicResult);
+    PrintHicClassification(hicResult);
     hicResult->SetValidity(true);
 
     CreateIVHisto(hicResult);
@@ -155,9 +156,6 @@ THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents         
     if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
     if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
   }
-
-  std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
 
   return returnValue;
   // TODO: Add orange for back bias

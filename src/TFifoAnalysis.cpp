@@ -187,6 +187,7 @@ void TFifoAnalysis::Finalize()
     TFifoResultHic *hicResult =
         (TFifoResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
     hicResult->m_class = GetClassification(hicResult);
+    PrintHicClassification(hicResult);
     hicResult->SetValidity(true);
   }
 
@@ -211,8 +212,6 @@ THicClassification TFifoAnalysis::GetClassification(TFifoResultHic *result)
   DoCut(returnValue, CLASS_RED, result->m_errf, "FIFO_MAXERR_ORANGE", result);
 
   // DoCut(returnValue, CLASS_RED, result->m_errf, "FIFO_MAXFAULTYCHIPS", result);
-  std::cout << "Fifo Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 

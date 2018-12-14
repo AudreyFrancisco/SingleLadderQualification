@@ -328,6 +328,7 @@ void TDctrlAnalysis::Finalize()
         hicResult->m_class = GetClassificationIB(hicResult);
       }
       hicResult->SetValidity(true);
+      PrintHicClassification(hicResult);
     }
   }
 
@@ -348,8 +349,6 @@ THicClassification TDctrlAnalysis::GetClassificationIB(TDctrlResultHic *result)
   DoCut(returnValue, CLASS_RED, result->worst_chisq * 100, "DCTRLMAXCHISQSILVER", result);
   DoCut(returnValue, CLASS_SILVER, result->worst_rise * 1e9, "DCTRLMAXRISEGREENIB", result);
   DoCut(returnValue, CLASS_SILVER, result->worst_fall * 1e9, "DCTRLMAXFALLGREENIB", result);
-  std::cout << "DCTRL Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 
@@ -367,8 +366,6 @@ THicClassification TDctrlAnalysis::GetClassificationOB(TDctrlResultHic *result)
   DoCut(returnValue, CLASS_RED, result->worst_chisq * 100, "DCTRLMAXCHISQSILVER", result);
   DoCut(returnValue, CLASS_SILVER, result->worst_rise * 1e9, "DCTRLMAXRISEGREENOB", result);
   DoCut(returnValue, CLASS_SILVER, result->worst_fall * 1e9, "DCTRLMAXFALLGREENOB", result);
-  std::cout << "DCTRL Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 

@@ -404,6 +404,7 @@ void TSCurveAnalysis::Finalize()
       hicResult->m_class = GetClassificationIB(hicResult, m_hics.at(ihic));
     }
     hicResult->SetValidity(true);
+    PrintHicClassification(hicResult);
     if (IsThresholdScan() && (!m_nominal)) { // do only for threshold scan after tuning
       ComparePrediction(m_hics.at(ihic)->GetDbId());
     }
@@ -443,8 +444,6 @@ THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic *result
     DoCut(returnValue, CLASS_SILVER, chipResult->m_noiseAv + 0.9, "THRESH_MAXNOISE_OB", result,
           false, chipId);
   }
-  std::cout << "Threshold Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 
@@ -477,8 +476,6 @@ THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic *result
     DoCut(returnValue, CLASS_SILVER, chipResult->m_noiseAv + 0.9, "THRESH_MAXNOISE_IB", result,
           false, chipId);
   }
-  std::cout << "Threshold Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
 
   return returnValue;
 }

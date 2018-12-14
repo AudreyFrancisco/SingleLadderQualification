@@ -324,6 +324,7 @@ void TDigitalAnalysis::Finalize()
       hicResult->m_class = GetClassificationIB(hicResult);
     }
     hicResult->SetValidity(true);
+    PrintHicClassification(hicResult);
     ComparePrediction(m_hics.at(ihic)->GetDbId());
   }
   WriteResult();
@@ -353,8 +354,6 @@ THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic *resu
     DoCut(returnValue, CLASS_BRONZE, nBad, "DIGITAL_MAXBAD_CHIP_SILVER", result, false, chipId);
     DoCut(returnValue, CLASS_RED, nBad, "DIGITAL_MAXBAD_CHIP_BRONZE", result, false, chipId);
   }
-  std::cout << "Digital Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 
@@ -378,8 +377,6 @@ THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic *resu
     DoCut(returnValue, CLASS_BRONZE, nBad, "DIGITAL_MAXBAD_CHIP_SILVER", result, false, chipId);
     DoCut(returnValue, CLASS_RED, nBad, "DIGITAL_MAXBAD_CHIP_BRONZE", result, false, chipId);
   }
-  std::cout << "Digital Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 

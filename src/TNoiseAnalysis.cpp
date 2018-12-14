@@ -194,6 +194,7 @@ void TNoiseAnalysis::Finalize()
     hicResult->m_occ /= m_hics.at(ihic)->GetNChips();
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     hicResult->m_class        = GetClassification(hicResult, m_hics.at(ihic));
+    PrintHicClassification(hicResult);
     hicResult->SetValidity(true);
   }
 
@@ -219,8 +220,6 @@ THicClassification TNoiseAnalysis::GetClassification(TNoiseResultHic *result, TH
     DoCut(returnValue, CLASS_RED, chipResult->m_noisyPixels.size(), "MAXNOISY_CHIP_BRONZE", result,
           false, chipId);
   }
-  std::cout << "Noise Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 

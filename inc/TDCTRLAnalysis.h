@@ -102,6 +102,8 @@ public:
                  std::vector<THic *> hics, std::mutex *aMutex, TDctrlResult *aResult = 0);
   void Initialize();
   void Finalize();
+
+  std::string GetName() { return "DCTRL Analysis"; }
 };
 
 #endif
