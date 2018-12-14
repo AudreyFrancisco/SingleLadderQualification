@@ -53,9 +53,7 @@ void TLocalBusTest::Init()
     AlpideConfig::ConfigureCMU(m_chips.at(i));
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  CorrectVoltageDrop();
 
   TScan::SaveStartConditions();
 }

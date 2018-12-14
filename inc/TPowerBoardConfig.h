@@ -141,8 +141,17 @@ public:
     float CalIBiasOffset;
   } PowBoard_t;
 
+  enum pb_t {
+    none = 0,
+    mockup,
+    realML,
+    realOL
+  };
+
   // members
 private:
+  void GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR);
+
   FILE *                       fhConfigFile; // the file handle of the Configuration File
   PowBoard_t                   fPBConfig;
   TBoardType                   fBoardType;
@@ -189,7 +198,7 @@ public:
   void EnterMeasuredLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
   void GetWirePBResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, float &BBLineR);
   void AddPowerBusResistances(int mod, bool real = false, bool middle = false);
-  void GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR);
+  void GetResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, pb_t pb);
   bool IsCalibrated(int mod);
   bool BiasEnabled(int mod) { return fPBConfig.Modul[mod].BiasEnabled; };
   void DisableBias(int mod) { fPBConfig.Modul[mod].BiasEnabled = false; };

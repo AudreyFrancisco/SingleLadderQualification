@@ -162,9 +162,7 @@ void TDigitalScan::Init()
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_PRST);
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  CorrectVoltageDrop();
 
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (!(m_chips.at(i)->GetConfig()->IsEnabled())) {
@@ -183,9 +181,7 @@ void TDigitalScan::Init()
     ConfigureChip(m_chips.at(i));
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  CorrectVoltageDrop();
 
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
@@ -333,9 +329,7 @@ void TDigitalWhiteFrame::Init()
     AlpideConfig::WritePixRegAll(m_chips.at(i), Alpide::PIXREG_MASK, true);
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  CorrectVoltageDrop();
 
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);

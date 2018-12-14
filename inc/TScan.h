@@ -137,6 +137,9 @@ protected:
   //  virtual void CreateScanParameters() = 0;
   void DumpHitInformation(std::vector<TPixHit> *Hits);
 
+  TPowerBoardConfig::pb_t GetPBtype(THic *hic) const;
+  void CorrectVoltageDrop(bool reset = false);
+
 public:
   TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
         std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue, std::mutex *aMutex);

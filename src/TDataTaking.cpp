@@ -120,11 +120,7 @@ void TDataTaking::Init()
     ConfigureChip(m_chips.at(i));
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
-    if (!pb) continue;
-    pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  CorrectVoltageDrop();
 
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);

@@ -2049,17 +2049,6 @@ void MainWindow::setandgetcalibration()
 
     powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(fHICs.at(ihic)->GetPbMod(),
                                                                         ares, dres, gres);
-    if ((fNumberofscan == OBHalfStaveOL) || (fNumberofscan == OBHalfStaveML)) {
-      powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod());
-    }
-    if (fNumberofscan == OBStaveOL || fNumberofscan == StaveReceptionOL) {
-      powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod(),
-                                                                    true, false);
-    }
-    if (fNumberofscan == OBStaveML || fNumberofscan == StaveReceptionML) {
-      powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod(),
-                                                                    true, true);
-    }
     powerBoard->CalibrateVoltage(fHICs.at(ihic)->GetPbMod());
     powerBoard->CalibrateCurrent(fHICs.at(ihic)->GetPbMod());
   }

@@ -380,19 +380,17 @@ void TPowerBoard::CalibrateBiasVoltage()
 
 // correct the output voltage for the (calculated) voltage drop
 // if reset is true, the correction is set to 0
-void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
+void TPowerBoard::CorrectVoltageDrop(int module, TPowerBoardConfig::pb_t pb, bool reset)
 {
   // Measure the channel currents
   // Calculate voltage drop
   // Correct voltage drop for slope of voltage characteristics
   // add corrected voltage drop to channel set voltage
 
-  // solution with vectors
-  /*
-  std::vector<float> I_analog_vect;
-  std::vector<float> I_digital_vect;
-  std::vector<float> RGnd_vect;
-  std::vector<float> Vdrop_part;
+  std::vector<float> IDDA(MAX_MOULESPERMOSAIC);
+  std::vector<float> IDDD(MAX_MOULESPERMOSAIC);
+  std::vector<float> RGnd(MAX_MOULESPERMOSAIC);
+  std::vector<float> VdropPart(MAX_MOULESPERMOSAIC);
 
   float RAnalog, RDigital, RGround;
   float dVAnalog, dVDigital;
@@ -404,73 +402,33 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
   else {
     // store all values of analog and digital currents to vectors
     for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
-      I_analog_vect.push_back(GetAnalogCurrent(i));
-      I_digital_vect.push_back(GetDigitalCurrent(i));
-      fPowerBoardConfig->GetLineResistances(i, RAnalog, RDigital, RGround);
-      RGnd_vect.push_back(RGround);
+      IDDA.push_back(GetAnalogCurrent(i));
+      IDDD.push_back(GetDigitalCurrent(i));
+      fPowerBoardConfig->GetResistances(i, RAnalog, RDigital, RGround, pb);
+      RGnd.push_back(RGround);
     }
 
-    for (int n_mod = 0; n_mod < MAX_MOULESPERMOSAIC; n_mod++) {
-      float IDDA_tot, IDDD_tot;
-      IDDA_tot = std::accumulate(I_analog_vect.begin() + n_mod, I_analog_vect.end(), 0.0);
-      IDDD_tot = std::accumulate(I_digital_vect.begin() + n_mod, I_digital_vect.end(), 0.0);
-      Vdrop_part.push_back(RGnd_vect[n_mod] * (IDDA_tot + IDDD_tot));
-    }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    float IDDA = GetAnalogCurrent(module);
-    float IDDD = GetDigitalCurrent(module);
-
-    fPowerBoardConfig->GetLineResistances(module, RAnalog, RDigital, RGround);
-    fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
-    // calculation of the voltage drops for current module
-    // since ground line is common, voltage drop on GND line contains all currents
-    // of modules from the last module to the current one
-    dVAnalog =
-        IDDA * RAnalog + std::accumulate(Vdrop_part.begin(), Vdrop_part.begin() + module, 0.0);
-    dVDigital =
-        IDDD * RDigital + std::accumulate(Vdrop_part.begin(), Vdrop_part.begin() + module, 0.0);
-    dVAnalog *= AVScale;
-    dVDigital *= DVScale;
-  }
-  */
-
-  // same with arrays
-  float RAnalog, RDigital, RGround;
-  float dVAnalog, dVDigital;
-  float AVScale, DVScale, AVOffset, DVOffset;
-  if (reset) {
-    dVAnalog  = 0;
-    dVDigital = 0;
-  }
-  else {
-    float V_drop_part[MAX_MOULESPERMOSAIC];
-    for (int i_mod = 0; i_mod < MAX_MOULESPERMOSAIC; i_mod++) {
-      float I_analog_tot  = 0;
-      float I_digital_tot = 0;
-      for (int n_mod = i_mod; n_mod < MAX_MOULESPERMOSAIC; n_mod++) {
-        I_analog_tot += GetAnalogCurrent(n_mod);
-        I_digital_tot += GetDigitalCurrent(n_mod);
+    float VdropGnd = 0.;
+    if ((pb == TPowerBoardConfig::realML) || (pb == TPowerBoardConfig::realOL)) {
+      float Itot = 0.;
+      for (int ihic = MAX_MOULESPERMOSAIC; ihic >= 0; --ihic) {
+        Itot += IDDD[ihic];
+        Itot += IDDA[ihic];
+        float res = ihic > 0 ? RGnd[ihic] - RGnd[ihic - 1] : RGnd[ihic];
+        VdropPart[ihic] = res * Itot;
+        VdropGnd = std::accumulate(VdropPart.begin(), VdropPart.begin() + module, 0.);
       }
-      fPowerBoardConfig->GetLineResistances(i_mod, RAnalog, RDigital, RGround);
-      V_drop_part[i_mod] = (I_analog_tot + I_digital_tot) * RGround;
+    }
+    else
+    {
+      VdropGnd = (IDDA[module] + IDDD[module]) * RGnd[module];
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-    float IDDA       = GetAnalogCurrent(module);
-    float IDDD       = GetDigitalCurrent(module);
-    float V_drop_gnd = 0;
-
-    for (int i = 0; i < module; i++) {
-      V_drop_gnd += V_drop_part[i];
-    }
-
-    fPowerBoardConfig->GetLineResistances(module, RAnalog, RDigital, RGround);
+    fPowerBoardConfig->GetResistances(module, RAnalog, RDigital, RGround, pb);
     fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
 
-    dVAnalog  = IDDA * RAnalog + V_drop_gnd;
-    dVDigital = IDDD * RDigital + V_drop_gnd;
+    dVAnalog = IDDA[module] * RAnalog + VdropGnd;
+    dVDigital = IDDD[module] * RDigital + VdropGnd;
     dVAnalog *= AVScale;
     dVDigital *= DVScale;
   }

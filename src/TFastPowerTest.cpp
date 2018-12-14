@@ -104,7 +104,7 @@ void TFastPowerTest::Execute()
   }
 
   m_testHic->PowerOn();
-  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
+  //m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
 
   // measure -> switchon, no clock
   currentIt->second.idddSwitchon = m_testHic->GetIddd();

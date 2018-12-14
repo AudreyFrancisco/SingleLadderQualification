@@ -74,8 +74,9 @@ void TScan::InitBase(bool saveStartConditions)
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     m_hics.at(ihic)->PowerOn();
     if (!m_hics.at(ihic)->GetPowerBoard()) continue;
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+
+  CorrectVoltageDrop();
 
   if (saveStartConditions) {
     SaveStartConditions();
@@ -315,11 +316,7 @@ void TScan::Terminate()
   snprintf(m_state, sizeof(m_state), "Done (in %3d min)", int(duration.count()));
 
   // reset voltage drop correction, reset chips, apply voltage drop correction to reset state
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (!m_hics.at(ihic)->IsEnabled()) continue;
-    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), true);
-  }
+  CorrectVoltageDrop(true);
 
   for (const auto &rChip : m_chips) {
     if (rChip->GetConfig()->IsEnabled() || (rChip->GetConfig()->GetParamValue("PREVID") != -1)) {
@@ -343,11 +340,7 @@ void TScan::Terminate()
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (!m_hics.at(ihic)->IsEnabled()) continue;
-    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), false);
-  }
+  CorrectVoltageDrop();
 
   delete m_histo;
   m_histo = nullptr;
@@ -846,6 +839,32 @@ void TScan::WriteBoardRegisters(const char *fName)
   fputs("==\n", fp);
 
   fclose(fp);
+}
+
+TPowerBoardConfig::pb_t TScan::GetPBtype(THic *hic) const
+{
+  TPowerBoardConfig::pb_t pb = TPowerBoardConfig::none;
+
+  if ((m_config->GetParamValue("NMODULES") == 7) ||
+      (m_config->GetParamValue("NMODULES") == 4)) {
+    THicOB *obhic = dynamic_cast<THicOB*>(hic);
+    if (!obhic->IsPowerCombo())
+      pb = TPowerBoardConfig::mockup;
+    else if (m_config->GetParamValue("NMODULES") == 4)
+      pb = TPowerBoardConfig::realML;
+    else
+      pb = TPowerBoardConfig::realOL;
+  }
+
+  return pb;
+}
+
+void TScan::CorrectVoltageDrop(bool reset)
+{
+  for (auto hic : m_hics) {
+    if (!hic->IsEnabled() || !hic->GetPowerBoard()) continue;
+    hic->GetPowerBoard()->CorrectVoltageDrop(hic->GetPbMod(), GetPBtype(hic), reset);
+  }
 }
 
 int TScanConditions::AddHicConditions(std::string hicId, TScanConditionsHic *hicCond)
