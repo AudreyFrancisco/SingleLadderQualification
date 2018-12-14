@@ -104,11 +104,11 @@ bool THic::IsPowered()
 {
   if (IsPoweredAnalog() && !IsPoweredDigital()) {
     std::cout << "Warning: found module with only AVDD on -> powering off" << std::endl;
-    PowerOff();
+    if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, false);
   }
   else if (IsPoweredDigital() && !IsPoweredAnalog()) {
     std::cout << "Warning: found module with only DVDD on -> powering off" << std::endl;
-    PowerOff();
+    if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, false);
   }
   return ((IsPoweredAnalog()) && (IsPoweredDigital()));
 }
