@@ -183,6 +183,7 @@ public:
   void CalibrateCurrent(int module);
   void CalibrateBiasCurrent();
   void CalibrateBiasVoltage();
+  void Solve(float **A, float *V, float *IDDA, float *IDDD, int N_mod);
   void VDropAllMod();
   void CorrectVoltageDrop(int module, bool reset = false);
   bool IsCalibrated(int module) { return GetConfigurationHandler()->IsCalibrated(module); };

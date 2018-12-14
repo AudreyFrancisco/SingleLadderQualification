@@ -39,7 +39,6 @@
 #include "TConfig.h"
 #include "THicConfig.h"
 #include "TReadoutBoardMOSAIC.h"
-#include <boost/numeric/ublas/matrix.hpp>
 #include <chrono>
 #include <numeric>
 #include <thread>
@@ -380,6 +379,39 @@ void TPowerBoard::CalibrateBiasVoltage()
   fPowerBoardConfig->SetVBiasCalibration(m, b);
 }
 
+// additional function to solve systems of linear equations (Gaussian elimination)
+void TPowerBoard::Solve(float **A, float *V, float *IDDA, float *IDDD, int N_mod)
+{
+  for (int iter = 0; iter < 2 * N_mod; iter++) {
+    for (int row = iter + 1; row < 2 * N_mod; row++) {
+      for (int col = 0; col < 2 * N_mod; col++) {
+        A[col][row] = A[col][row] - A[col][iter] * A[row][iter] / A[iter][iter];
+        V[row]      = V[row] - V[iter] * A[row][iter] / A[iter][iter];
+      }
+    }
+  }
+  float *I = new float[(2 * N_mod)];
+  for (int row = (2 * N_mod - 1); row > -1; row--) {
+    for (int col = row; col < 2 * N_mod; col++) {
+      if (row == (2 * N_mod - 1))
+        I[row] = V[row] / A[col][row];
+      else {
+        float rest = 0;
+        for (int iter = row + 1; iter < 2 * N_mod; iter++) {
+          rest = A[iter][row] * I[iter];
+        }
+        I[row] = (V[row] - rest) / A[row][row];
+      }
+    }
+    for (int i = 0; i < 2 * N_mod; i++) {
+      if (i % 2 == 0)
+        IDDA[i / 2] = I[i];
+      else
+        IDDD[(i - 1) / 2] = I[i];
+    }
+  }
+}
+
 // correct the output voltage for the (calculated) voltage drop
 // if reset is true, the correction is set to 0
 void TPowerBoard::VDropAllMod()
@@ -396,14 +428,16 @@ void TPowerBoard::VDropAllMod()
   float *dVDigital_iter = new float[N_mod];
   float *RGnd_part      = new float[N_mod];
   float *RGnd           = new float[N_mod];
-  float *R_mod_a        = new float[N_mod];
-  float *R_mod_d        = new float[N_mod];
+  float *R_mod_A        = new float[N_mod];
+  float *R_mod_D        = new float[N_mod];
+  float *VDDA_mod       = new float[N_mod];
+  float *VDDD_mod       = new float[N_mod];
 
   for (int i = 0; i < N_mod; i++) {
     fPowerBoardConfig->GetLineResistances(i, RAnalog, RDigital, RGround);
     RGnd[i]    = RGround;
-    R_mod_a[i] = 0;
-    R_mod_d[i] = 0;
+    R_mod_A[i] = 0;
+    R_mod_D[i] = 0;
     VDDA[i]    = GetAnalogVoltage(i);
     VDDD[i]    = GetDigitalVoltage(i);
     IDDA[i]    = GetAnalogCurrent(i);
@@ -433,23 +467,76 @@ void TPowerBoard::VDropAllMod()
           IDDA[i_mod] * RAnalog + V_drop_part[i_mod] + IDDD[i_mod] * RGnd_part[i_mod];
       dVDigital_iter[i_mod] =
           IDDD[i_mod] * RDigital + V_drop_part[i_mod] + IDDA[i_mod] * RGnd_part[i_mod];
-      R_mod_a[i_mod] =
-          VDDA[i_mod] + V_drop_part[i_mod] + IDDD[i_mod] * RGnd_part[i_mod] / IDDA[i_mod];
-      R_mod_d[i_mod] =
-          VDDD[i_mod] + V_drop_part[i_mod] + IDDA[i_mod] * RGnd_part[i_mod] / IDDD[i_mod];
-      VDDA[i_mod] += dVAnalog_iter[i_mod];
-      VDDD[i_mod] += dVDigital_iter[i_mod];
-    }
-    for (int i_mod = 0; i_mod < N_mod; i_mod++) {
-      float IDDA_tot = 0;
-      float IDDD_tot = 0;
-      for (int i = i_mod; i < N_mod; i++) {
-        IDDA_tot += IDDA[i];
-        IDDD_tot += IDDD[i];
+      // Current at module equal to the total applied minus the drop
+      VDDA_mod[i_mod] = (VDDA[i_mod] - dVAnalog_iter[i_mod]);
+      VDDD_mod[i_mod] = (VDDD[i_mod] - dVDigital_iter[i_mod]);
+
+      // Resistance of modules, only at first iteration
+      if (i == 0) {
+        R_mod_A[i_mod] = (VDDA_mod[i_mod]) / IDDA[i_mod];
+        R_mod_D[i_mod] = (VDDD_mod[i_mod]) / IDDD[i_mod];
       }
-      fPowerBoardConfig->GetLineResistances(i_mod, RAnalog, RDigital, RGround);
-      IDDA[i_mod] = (VDDA[i_mod] - RGround * (IDDA_tot + IDDD_tot + IDDD[i_mod])) / R_mod_a[i_mod];
-      IDDD[i_mod] = (VDDD[i_mod] - RGround * (IDDA_tot + IDDD_tot + IDDA[i_mod])) / R_mod_d[i_mod];
+
+
+      // Actualizing the voltages so that V_mod_=1.8
+      for (int i_mod = 0; i_mod < N_mod; i_mod++) {
+        VDDA[i_mod] += 1.8 - VDDA_mod[i_mod];
+        VDDD[i_mod] += 1.8 - VDDD_mod[i_mod];
+      }
+
+
+      // Now actualizing the currents because voltages changed
+      // Create matrix of coefficients for the currents and vector og voltages
+      float **A            = new float *[N_mod * 2];
+      float * RGnd_neg_tot = new float[N_mod];
+      float * Voltage      = new float[N_mod * 2];
+      for (int i = 0; i < N_mod; i++) {
+        RGnd_neg_tot[i] = 0;
+      }
+      for (int i = 0; i < N_mod; i++) {
+        for (int n = 0; n < i + 1; n++) {
+          fPowerBoardConfig->GetLineResistances(n, RAnalog, RDigital, RGround);
+          RGnd_neg_tot[i] += RGround;
+        }
+      }
+      for (int col = 0; col < 2 * N_mod; col++) {
+        A[col] = new float[N_mod * 2];
+        for (int row = 0; row < 2 * N_mod; row++) {
+          A[col][row] = 0;
+        }
+      }
+      for (int col = 0; col < 2 * N_mod; col++) {
+        for (int row = 0; row < 2 * N_mod; row++) {
+          if ((row % 2) == 0) {
+            int i_mod = row / 2;
+            fPowerBoardConfig->GetLineResistances(i_mod, RAnalog, RDigital, RGround);
+            if (col == row)
+              A[col][row] = RAnalog + R_mod_A[i_mod] + RGround;
+            else if (col > row) {
+              A[col][row] = RGround;
+            }
+            else if (col < row)
+              A[col][row] = RGnd_neg_tot[i_mod];
+            Voltage[row] = VDDA_mod[i_mod];
+          }
+          else {
+            int i_mod = (row - 1) / 2;
+            fPowerBoardConfig->GetLineResistances(i_mod, RAnalog, RDigital, RGround);
+            if (col == row)
+              A[col][row] = RDigital + R_mod_D[i_mod] + RGround;
+            else if (col > row)
+              A[col][row] = RGround;
+            else if (col < row)
+              A[col][row] = RGnd_neg_tot[i_mod];
+            Voltage[row] = VDDD_mod[i_mod];
+          }
+        }
+      }
+      Solve(A, Voltage, IDDA, IDDD, N_mod);
+      delete[] Voltage;
+      for (int i_mod = 0; i_mod < 2 * N_mod; i_mod++) {
+        delete[] A[i_mod];
+      }
     }
   }
   for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
