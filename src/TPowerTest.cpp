@@ -13,6 +13,7 @@ TPowerTest::TPowerTest(TScanConfig *config, std::vector<TAlpide *> chips, std::v
   CreateScanParameters();
 
   m_parameters->backBias = 0;
+  m_ivcurve              = (m_config->GetParamValue("IVCURVE") != 0);
 
   strcpy(m_name, "Power Test");
   m_start[2] = 0;
@@ -162,12 +163,12 @@ void TPowerTest::Execute()
   currentIt->second.ibias0 = m_testHic->GetIBias() * 1000;
 
   // measure IV curve or only bias current at 3 V
-  if (m_config->GetParamValue("IVCURVE")) {
+  if (m_ivcurve) {
     DoIVCurve(currentIt->second);
     currentIt->second.ibias3 = currentIt->second.ibias[30];
   }
   else {
-    m_testHic->GetPowerBoard()->SetBiasVoltage(3.0);
+    m_testHic->GetPowerBoard()->SetBiasVoltage(-3.0);
     sleep(1);
     currentIt->second.ibias3 = m_testHic->GetIBias() * 1000;
   }

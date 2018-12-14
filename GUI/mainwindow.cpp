@@ -2595,10 +2595,22 @@ string MainWindow::GetResultType(int i)
 
 void MainWindow::fillingfastHS()
 {
-  printf("fillingfastHS()\n");
   ClearVectors();
-  AddScan(STFifo);
+  int ivcurve;
+  ivcurve = fConfig->GetScanConfig()->GetParamValue("IVCURVE");
+  fConfig->GetScanConfig()->SetParamValue("IVCURVE", 0);
+  AddScan(STFastPowerTest);
+  fConfig->GetScanConfig()->SetParamValue("IVCURVE", ivcurve);
+
   AddScan(STDigital);
+
+  // tuning at 3V back bias
+  fConfig->GetScanConfig()->SetBackBias(3.0);
+  fConfig->GetScanConfig()->SetVcasnRange(75, 160);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  fConfig->GetScanConfig()->SetBackBias(0.);
 }
 
 void MainWindow::writeSettings()

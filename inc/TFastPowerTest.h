@@ -22,6 +22,7 @@ private:
   };
   void                                DoIVCurve(THicCurrents &result);
   std::map<std::string, THicCurrents> m_hicCurrents;
+  bool                                m_ivcurve;
 
 protected:
   void CreateScanParameters() { m_parameters = new TScanParameters; };
