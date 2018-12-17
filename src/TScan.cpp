@@ -855,6 +855,7 @@ TPowerBoardConfig::pb_t TScan::GetPBtype(THic *hic) const
       pb = TPowerBoardConfig::realOL;
   }
 
+  printf("pb set to %d\n", pb);
   return pb;
 }
 

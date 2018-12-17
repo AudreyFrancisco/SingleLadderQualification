@@ -484,6 +484,8 @@ void TPowerBoardConfig::GetResistances(int mod, float &ALineR, float &DLineR, fl
   ALineR   = fPBConfig.Modul[mod].CalALineR;
   GNDLineR = fPBConfig.Modul[mod].CalGNDLineR;
 
+  printf("Calculating resistances for pb %d\n", pb);
+
   if (pb == TPowerBoardConfig::realML) {
     DLineR += RPBDigitalML[mod];
     ALineR += RPBAnalogML[mod];
@@ -501,7 +503,7 @@ void TPowerBoardConfig::GetResistances(int mod, float &ALineR, float &DLineR, fl
     ALineR += ALineR;
     GNDLineR += GNDLineR;
   }
-  else {
+  else if (pb != TPowerBoardConfig::none) {
     std::cout << "WARNING: Unsupported power bus" << std::endl;
   }
 }
