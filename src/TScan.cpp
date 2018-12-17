@@ -845,19 +845,19 @@ TPowerBoardConfig::pb_t TScan::GetPBtype(THic *hic) const
 {
   TPowerBoardConfig::pb_t pb = TPowerBoardConfig::none;
 
-  const int nmod = m_config->GetParamValue("NMODULES");
-  if ((nmod == 7) || (nmod == 4)) {
+  const int nchips = m_chips.size();
+  if (nchips > 7) {
     THicOB *obhic = dynamic_cast<THicOB *>(hic);
     printf("power combo: %s\n", obhic->IsPowerCombo() ? "true" : "false");
     if (!obhic->IsPowerCombo())
       pb = TPowerBoardConfig::mockup;
-    else if (m_config->GetParamValue("NMODULES") == 4)
+    else if (nchips == 56)
       pb = TPowerBoardConfig::realML;
     else
       pb = TPowerBoardConfig::realOL;
   }
 
-  printf("pb set to %d, %d modules\n", pb, nmod);
+  printf("pb set to %d, %d modules\n", pb, nchips);
   return pb;
 }
 
