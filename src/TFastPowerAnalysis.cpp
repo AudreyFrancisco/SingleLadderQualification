@@ -149,7 +149,8 @@ THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents         
   DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MAXIDDD_OB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
+  if (!currents.tripBB)
+    DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
 
   if (currents.tripBB) {
     if (returnValue == CLASS_GOLD) returnValue = CLASS_GOLD_NOBB;

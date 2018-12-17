@@ -81,6 +81,8 @@ void TFastPowerTest::DoIVCurve(THicCurrents &result)
     result.ibias[i] = m_testHic->GetIBias() * 1000; // convert in mA
     // overcurrent protection; will be counted as trip
     if (result.ibias[i] > m_config->GetParamValue("MAXIBIAS")) {
+      printf("MAXIBIAS exceeded at %g: %g > %d, switching off Vbias\n", voltage, result.ibias[i],
+             m_config->GetParamValue("MAXIBIAS"));
       m_hicCurrents.find(m_testHic->GetDbId())->second.maxBias = voltage - .1;
       m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
       sleep(1);
