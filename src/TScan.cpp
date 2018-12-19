@@ -86,6 +86,10 @@ void TScan::InitBase(bool saveStartConditions)
 void TScan::SaveStartConditions()
 {
   usleep(1000); // let the system settle
+  // std::cout << "Waiting for the measurement" << std::endl;
+  // std::cout << "Waiting for the measurement" << std::endl;
+  // sleep(1000);
+
 
   TReadoutBoardMOSAIC *mosaic = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(0));
   if (mosaic) {
@@ -172,6 +176,7 @@ void TScan::SaveStartConditions()
       m_conditions.m_boardConfigStart.push_back(rMOSAIC->GetRegisterDump());
     }
   }
+  std::cout << "Saved the conditions" << std::endl;
 }
 
 

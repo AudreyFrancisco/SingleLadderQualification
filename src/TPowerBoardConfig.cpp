@@ -506,6 +506,8 @@ void TPowerBoardConfig::GetResistances(int mod, float &ALineR, float &DLineR, fl
   else if (pb != TPowerBoardConfig::none) {
     std::cout << "WARNING: Unsupported power bus" << std::endl;
   }
+
+  printf("Using resistances: %g, %g, %g\n", DLineR, ALineR, GNDLineR);
 }
 
 // TODO: change filename to PBCalibTop.cfg, PBCalibBottom.cfg

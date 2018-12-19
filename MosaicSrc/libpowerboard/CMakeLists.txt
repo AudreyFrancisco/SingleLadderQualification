@@ -16,5 +16,9 @@ target_link_libraries(powerboard mosaic)
 if (PB_NEW)
 	target_compile_definitions(powerboard PRIVATE "-DPB_NEW")
 endif()
+if (PB_MODIFIED)
+	target_compile_definitions(powerboard PRIVATE "-DPB_MODIFIED")
+endif()
+
 install(TARGETS powerboard
   LIBRARY DESTINATION lib)

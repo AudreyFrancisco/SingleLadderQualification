@@ -275,8 +275,13 @@ void powerboard::getState(pbstate_t *state, getFlags flags)
 
     for (int i = 0; i < 16; i++) {
       // Voltage
-      data           = ((*dataPtr++) >> 4) & 0xfff;
+      data = ((*dataPtr++) >> 4) & 0xfff;
+#ifdef PB_NEW
+      state->Vmon[i] = data * (3.072 / 4096.0);
+#else
       state->Vmon[i] = data * (2.56 / 4096.0);
+#endif
+
       // Current
       data           = ((*dataPtr++) >> 4) & 0xfff;
       state->Imon[i] = ((data * (2.56 / 4096.0) - 0.25) * 1.337) + 0.013;
@@ -288,10 +293,14 @@ void powerboard::getState(pbstate_t *state, getFlags flags)
 #ifdef PB_NEW
     state->Ibias *= 4. / 40.;
 #endif
+#ifdef PB_MODIFIED
+    state->Ibias *= 4. / 39.;
+
+#endif
     dataPtr++;
     data         = ((*dataPtr++) >> 4) & 0xfff;
     state->Vbias = data * (-5.12 / 4096.0);
-#ifdef PB_NEW
+#if defined(PB_NEW) || defined(PB_MODIFIED)
     state->Ibias = state->Ibias < -state->Vbias / 100. ? 0. : state->Vbias / 100.;
 #endif
 
