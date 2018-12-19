@@ -532,6 +532,30 @@ int DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int componentId, s
   return -1;
 }
 
+string DbGetComponentName(AlpideDB *db, int typeId, int compId)
+{
+  ComponentDB *                                   componentDB = new ComponentDB(db);
+  static int                                      myTypeId;
+  static std::vector<ComponentDB::componentShort> componentList;
+
+  if ((componentList.size() == 0) || (typeId != myTypeId)) {
+    if (componentList.size() != 0) {
+      componentList.clear();
+    }
+    myTypeId = typeId;
+
+    componentDB->GetListByType(db->GetProjectId(), myTypeId, &componentList);
+  }
+
+  for (unsigned int i = 0; i < componentList.size(); i++) {
+    if (compId == componentList.at(i).ID) {
+      return componentList.at(i).ComponentID;
+    }
+  }
+
+  return string("");
+}
+
 // TODO: complete list of tests
 int DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name)
 {

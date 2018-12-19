@@ -48,6 +48,7 @@ int    DbGetComponentTypeId(AlpideDB *db, string name);
 int    DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int componentId, string Direction);
 int    DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name);
 int    DbGetComponentId(AlpideDB *db, int typeId, string name);
+string DbGetComponentName(AlpideDB *db, int typeId, int compId);
 int    DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children,
                            bool chipsOnly = false);
 int    DbGetComponentActivity(AlpideDB *db, int compId, int activityTypeId);
