@@ -45,13 +45,16 @@
  *  30/09/2018  -   Add the Management of the XML files
  *  04/10/2018  - Version 2 : Recover errors + Improvements to error diagnosis
  *  13/10/2018  - Fix History Activity bug
+ *  20/12/2018  - Cut the log output for Query result
  *
  */
 
 #include <ctime>
+#include <iostream>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+
 
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
@@ -125,7 +128,7 @@ bool AlpideTable::ExecuteQuery(string theUrl, string theQuery, bool isSOAPreques
       ERROR("DB connection error, %s !", "Sync Error");
     }
     else {
-      DEBUG("Obtain response :%s", stringresult);
+      DEBUG("Obtains %d char of response :%.250s", strlen(stringresult), stringresult);
       errorType = DecodeResponse(stringresult, theQuery.c_str());
       switch (errorType) {
       case 2:
