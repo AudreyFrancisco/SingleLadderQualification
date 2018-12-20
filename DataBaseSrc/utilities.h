@@ -81,7 +81,7 @@ public:
 
 // ---- log ------
 #define LOG_FILENAME "/tmp/newAlpideDB.log"
-#define LOG_MAXFILEDIMENSION 50000000
+#define LOG_MAXFILEDIMENSION 250000000
 
 #define TIMESTAMP_MAX 20
 #define TIMESTAMP_FORMAT "%Y/%m/%d-%H:%M:%S"
