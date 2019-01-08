@@ -959,3 +959,28 @@ bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPer
   // create file name for raw data files
   return found;
 }
+
+
+bool GetPowerFileName(ActivityDB::activityLong activity, bool &ivFound, string &ivName,
+                      string &resultName)
+{
+  bool   found = false;
+  string attName;
+
+  ivFound = false;
+
+  // find the correct attachment and IVcurve for the given power test
+  for (unsigned int i = 0; (i < activity.Attachments.size()) && ((!found) || (!ivFound)); i++) {
+    attName = activity.Attachments.at(i).FileName;
+    if ((attName.find("PowerTestResult") != string::npos)) {
+      found      = true;
+      resultName = attName;
+    }
+    else if ((attName.find("IVCurve") != string::npos)) {
+      ivFound = true;
+      ivName  = attName;
+    }
+  }
+
+  return found;
+}
