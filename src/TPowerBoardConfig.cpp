@@ -330,7 +330,7 @@ void TPowerBoardConfig::GetAnalogCurrents(float *AISet)
 void TPowerBoardConfig::GetDigitalCurrents(float *DISet)
 {
   for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
-    *(DISet++) = fPBConfig.Modul[i].AVset;
+    *(DISet++) = fPBConfig.Modul[i].DIset;
   }
   return;
 }
