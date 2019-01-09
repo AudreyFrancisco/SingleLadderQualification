@@ -128,7 +128,7 @@ void TPowerTest::Execute()
   // configure chips
   for (unsigned int i = 0; i < chips.size(); i++) {
     if (!(chips.at(i)->GetConfig()->IsEnabled())) continue;
-    if (!m_testHic->ContainsChip(chips.at(i)->GetConfig()->GetChipId())) continue;
+    if (m_testHic != chips.at(i)->GetHic()) continue;
     AlpideConfig::BaseConfig(chips.at(i));
     AlpideConfig::ConfigureCMU(chips.at(i));
   }
