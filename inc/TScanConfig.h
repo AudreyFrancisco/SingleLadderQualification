@@ -53,7 +53,9 @@ namespace ScanConfig {
   // 2.0: introduced separate DCTRL cut for (half-)staves (lower slope and amplitude)
   // 2.1: Do not consider impedance test result any longer
   // 2.2: reduced number of endurance test cycles from 150 -> 130 to go from 3.5 to 3 days
-  // 2.3: bug fix in the TPowerTest.cpp, correction in chip configuration, IDDD configured
+  // 2.3: bug fix in the TPowerTest.cpp, correction in chip configuration
+  //      (leads to higher IDDD configured)
+  //      introduced silver cat. in fast power test for IDDD > 300 mA
 
   const float CLASSIFICATION_VERSION = 2.3;
 
@@ -99,12 +101,13 @@ namespace ScanConfig {
   const int READOUTPLLSTAGES = -1; // -1 meaning using the standard setting from the chip config
 
   // current limits for powering test in mA
-  const int POWER_CUT_MINIDDA_OB = 20;
-  const int POWER_CUT_MINIDDD_OB = 50;
-  const int POWER_CUT_MAXIDDA_OB = 250;  // for fast power test
-  const int POWER_CUT_MAXIDDD_OB = 1000; // for fast power test
-  const int POWER_CUT_MINIDDD_IB = 50;
-  const int POWER_CUT_MINIDDA_IB = 20;
+  const int POWER_CUT_MINIDDA_OB     = 20;
+  const int POWER_CUT_MINIDDD_OB     = 50;
+  const int POWER_CUT_MAXIDDA_OB     = 250;  // for fast power test
+  const int POWER_CUT_MAXIDDD_OB     = 1000; // for fast power test
+  const int POWER_CUT_MAXIDDD_SILVER = 300;  // for fast power test
+  const int POWER_CUT_MINIDDD_IB     = 50;
+  const int POWER_CUT_MINIDDA_IB     = 20;
 
   const int POWER_CUT_MINIDDA_CLOCKED_OB = 120;
   const int POWER_CUT_MINIDDD_CLOCKED_OB = 500;
@@ -285,6 +288,7 @@ private:
   int       m_powerCutMinIddd_OB;
   int       m_powerCutMaxIdda_OB;
   int       m_powerCutMaxIddd_OB;
+  int       m_powerCutMaxIdddSilver_OB;
   int       m_powerCutMinIddaClocked_OB;
   int       m_powerCutMinIdddClocked_OB;
   int       m_powerCutMaxIddaClocked_OB;

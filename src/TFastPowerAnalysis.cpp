@@ -145,6 +145,8 @@ THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents         
   DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", result, true);
   DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", result, true);
 
+  DoCut(returnValue, CLASS_SILVER, currents.idddSwitchon * 1000, "MAXIDDDSILVEROB", result);
+
   DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MAXIDDA_OB", result);
   DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MAXIDDD_OB", result);
 
