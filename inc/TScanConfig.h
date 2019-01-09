@@ -53,7 +53,9 @@ namespace ScanConfig {
   // 2.0: introduced separate DCTRL cut for (half-)staves (lower slope and amplitude)
   // 2.1: Do not consider impedance test result any longer
   // 2.2: reduced number of endurance test cycles from 150 -> 130 to go from 3.5 to 3 days
-  const float CLASSIFICATION_VERSION = 2.2;
+  // 2.3: bug fix in the TPowerTest.cpp, correction in chip configuration, IDDD configured
+
+  const float CLASSIFICATION_VERSION = 2.3;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions
