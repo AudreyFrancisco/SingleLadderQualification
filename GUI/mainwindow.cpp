@@ -1398,7 +1398,7 @@ void MainWindow::attachtodatabase()
         QDateTime          date;
         ActivityDB::actUri uri;
         std::string        path;
-
+        std::cout << "Starting writing activity to db @ " << GetTime() << std::endl;
         path =
             fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) + "/Comment.txt";
 
@@ -1554,6 +1554,17 @@ void MainWindow::attachtodatabase()
         uris.push_back(uri);
 
         myactivity->Create(&activ);
+
+        std::cout << "The id of the created activity is " << activ.ID << std::endl;
+
+        // attempt to read activity
+        if (!DbCheckActivityExists(fDB, activ.ID)) {
+          fWritedb->setEnabled(true);
+          popup("A problem occured! \nThe activity could not be found \nin the db while trying to "
+                "access it. \nCheck if it is created \nand if not rewrite in db");
+          break;
+        }
+
         std::vector<ActivityDB::response> creationresponses;
         creationresponses = myactivity->GetResponses();
         for (unsigned int s = 0; s < creationresponses.size(); s++) {
@@ -1657,10 +1668,8 @@ void MainWindow::attachtodatabase()
           activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
           std::cout << "the activity is closed" << std::endl;
         }
-
         activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
         myactivity->Change(&activ);
-
         if (myactivity->GetResponse().ErrorCode != 0) {
           QString errormessage;
           errormessage = "Error while changing activity";
@@ -1669,19 +1678,13 @@ void MainWindow::attachtodatabase()
           popup("A problem occured!\nThe activity couldn't be changed.");
         }
         std::cout << "The activity result is: " << activ.Result << std::endl;
-        std::cout << "The id of the created activity is " << activ.ID << std::endl;
-
-        // attempt to read activity
-
-        // popup("A problem occured! \nThe activity could not be found \nin the db while trying to
-        // access it. \nCheck if it is created and if not rewrite in db");
+        std::cout << "End of writing activity to db @ " << GetTime() << std::endl;
 
         fActivityResults.push_back(activ.Result);
         delete myactivity;
         myactivity = nullptr;
       }
     }
-
 
   } // for loops for hics
   delete fDB;
@@ -1695,6 +1698,7 @@ void MainWindow::attachtodatabase()
       break;
     }
   }
+
   if (fwritingdb == false) {
     if (!fDatabasefailure) {
       fDatabasefailure = new Databasefailure(this);
@@ -1728,9 +1732,9 @@ void MainWindow::ClearVectors()
 void MainWindow::fillingreceptionscans()
 {
   ClearVectors();
-  // AddScan(STPower);
+  AddScan(STPower);
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
-  // AddScan(STFifo);
+  AddScan(STFifo);
 
   AddScan(STDigital);
 }
