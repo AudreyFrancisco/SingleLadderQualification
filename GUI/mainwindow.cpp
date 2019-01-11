@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 #include "AlpideConfig.h"
@@ -1668,7 +1668,14 @@ void MainWindow::attachtodatabase()
           fActivityResults.push_back(-1);
           popup("A problem occured!\nThe activity couldn't be changed.");
         }
-        std::cout << "the activity result is: " << activ.Result << std::endl;
+        std::cout << "The activity result is: " << activ.Result << std::endl;
+        std::cout << "The id of the created activity is " << activ.ID << std::endl;
+
+        // attempt to read activity
+
+        // popup("A problem occured! \nThe activity could not be found \nin the db while trying to
+        // access it. \nCheck if it is created and if not rewrite in db");
+
         fActivityResults.push_back(activ.Result);
         delete myactivity;
         myactivity = nullptr;
@@ -1721,9 +1728,10 @@ void MainWindow::ClearVectors()
 void MainWindow::fillingreceptionscans()
 {
   ClearVectors();
-  AddScan(STPower);
+  // AddScan(STPower);
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
-  AddScan(STFifo);
+  // AddScan(STFifo);
+
   AddScan(STDigital);
 }
 
@@ -2673,4 +2681,76 @@ void MainWindow::abortscan()
   fProgresswindow->close();
   delete fProgresswindow;
   fProgresswindow = nullptr;
+}
+
+
+void MainWindow::fillingoccupances()
+{
+  fConfig->GetScanConfig()->SetParamValue("PULSEDELAY", 10000);
+  // threshold scans and tuning at 0V back bias
+  fConfig->GetScanConfig()->SetBackBias(0.0);
+  fConfig->GetScanConfig()->SetVcasnRange(30, 70);
+
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+  AddScan(STThreshold);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 20);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 520);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 1020);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 1520);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 2020);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 2520);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 3020);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 3520);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 4000);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
 }
