@@ -448,6 +448,18 @@ std::vector<ActivityDB::activityLong> DbGetActivities(AlpideDB *db, std::vector<
   return result;
 }
 
+bool DbCheckActivityExists(AlpideDB *db, int activityId)
+{
+  ActivityDB *             activityDB = new ActivityDB(db);
+  ActivityDB::activityLong activity;
+  AlpideTable::response *  response = activityDB->Read(activityId, &activity);
+
+  if ((response->ErrorCode == AlpideTable::NoError) && (activity.ID == activityId)) return true;
+
+  return false;
+}
+
+
 int DbGetResultId(AlpideDB *db, int activityTypeId, string resultName)
 {
   ActivityDB *                               activityDB = new ActivityDB(db);

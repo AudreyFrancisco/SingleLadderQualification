@@ -27,6 +27,7 @@ int              DbGetStatusId(AlpideDB *db, int activityTypeId, string statusCo
 int              DbCountActivities(AlpideDB *db, int activityTypeId, string compName);
 std::vector<int> DbGetActivityIds(AlpideDB *db, int activityTypeId, string compName);
 std::vector<ActivityDB::activityLong> DbGetActivities(AlpideDB *db, std::vector<int> activityIds);
+bool                                  DbCheckActivityExists(AlpideDB *db, int activityId);
 int                DbIsNewer(ActivityDB::activityLong act0, ActivityDB::activityLong act1);
 int                DbIsNewer(ComponentDB::compActivity act0, ComponentDB::compActivity act1);
 bool               DbGetLatestActivity(AlpideDB *db, int activityTypeId, string compName,
