@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 #include "AlpideConfig.h"
@@ -1398,7 +1398,7 @@ void MainWindow::attachtodatabase()
         QDateTime          date;
         ActivityDB::actUri uri;
         std::string        path;
-
+        std::cout << "Starting writing activity to db @ " << GetTime() << std::endl;
         path =
             fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) + "/Comment.txt";
 
@@ -1554,6 +1554,17 @@ void MainWindow::attachtodatabase()
         uris.push_back(uri);
 
         myactivity->Create(&activ);
+
+        std::cout << "The id of the created activity is " << activ.ID << std::endl;
+
+        // attempt to read activity
+        if (!DbCheckActivityExists(fDB, activ.ID)) {
+          fWritedb->setEnabled(true);
+          popup("A problem occured! \nThe activity could not be found \nin the db while trying to "
+                "access it. \nCheck if it is created \nand if not rewrite in db");
+          break;
+        }
+
         std::vector<ActivityDB::response> creationresponses;
         creationresponses = myactivity->GetResponses();
         for (unsigned int s = 0; s < creationresponses.size(); s++) {
@@ -1657,10 +1668,8 @@ void MainWindow::attachtodatabase()
           activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
           std::cout << "the activity is closed" << std::endl;
         }
-
         activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
         myactivity->Change(&activ);
-
         if (myactivity->GetResponse().ErrorCode != 0) {
           QString errormessage;
           errormessage = "Error while changing activity";
@@ -1668,13 +1677,14 @@ void MainWindow::attachtodatabase()
           fActivityResults.push_back(-1);
           popup("A problem occured!\nThe activity couldn't be changed.");
         }
-        std::cout << "the activity result is: " << activ.Result << std::endl;
+        std::cout << "The activity result is: " << activ.Result << std::endl;
+        std::cout << "End of writing activity to db @ " << GetTime() << std::endl;
+
         fActivityResults.push_back(activ.Result);
         delete myactivity;
         myactivity = nullptr;
       }
     }
-
 
   } // for loops for hics
   delete fDB;
@@ -1688,6 +1698,7 @@ void MainWindow::attachtodatabase()
       break;
     }
   }
+
   if (fwritingdb == false) {
     if (!fDatabasefailure) {
       fDatabasefailure = new Databasefailure(this);
@@ -1724,6 +1735,7 @@ void MainWindow::fillingreceptionscans()
   AddScan(STPower);
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   AddScan(STFifo);
+
   AddScan(STDigital);
 }
 
@@ -2673,4 +2685,76 @@ void MainWindow::abortscan()
   fProgresswindow->close();
   delete fProgresswindow;
   fProgresswindow = nullptr;
+}
+
+
+void MainWindow::fillingoccupances()
+{
+  fConfig->GetScanConfig()->SetParamValue("PULSEDELAY", 10000);
+  // threshold scans and tuning at 0V back bias
+  fConfig->GetScanConfig()->SetBackBias(0.0);
+  fConfig->GetScanConfig()->SetVcasnRange(30, 70);
+
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+  AddScan(STThreshold);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 20);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 520);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 1020);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 1520);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 2020);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 2520);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 3020);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 3520);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 4000);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
 }
