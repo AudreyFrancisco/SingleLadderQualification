@@ -250,13 +250,13 @@ void TConfig::SetDeviceType(TDeviceType AType, int NChips)
     Init(2, chipIds, boardMOSAIC);
   }
   else if (AType == TYPE_IBHIC) {
-    for (int i = 0; i < 9; i++) {
+    for (int i = 8; i >= 0; i--) {
       chipIds.push_back(i);
     }
     Init(1, chipIds, boardMOSAIC);
   }
   else if (AType == TYPE_IBHICRU) {
-    for (int i = 0; i < 9; i++) {
+    for (int i = 8; i >= 0; i--) {
       chipIds.push_back(i);
     }
     Init(1, chipIds, boardRU);
