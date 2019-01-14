@@ -699,8 +699,8 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
       control = 0;
     }
     if (receiver < 0) {
-      chipConfig->SetParamValue("RECEIVER", RCVMAP[chipConfig->GetChipID()]);
-      receiver = RCVMAP[chipConfig->GetChipID()];
+      chipConfig->SetParamValue("RECEIVER", RCVMAP[chipConfig->GetChipId()]);
+      receiver = RCVMAP[chipConfig->GetChipId()];
     }
 
     boards->at(0)->AddChip(chipConfig->GetChipId(), control, receiver, chips->at(i));
