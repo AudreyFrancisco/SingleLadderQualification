@@ -3257,7 +3257,7 @@ void MainWindow::MFTEOSTransfer(QString hicid, QString username, bool testmode, 
     str += " --test-mode true ";
   }
   if (fcreate) {
-    str += "--force-create true ";
+    str += " --force-create true ";
   }
   str += "--user ";
   str += username.toStdString();
