@@ -2479,7 +2479,7 @@ void MainWindow::fillingHSscans()
 
   // threshold scans and tuning at 0V back bias
   fConfig->GetScanConfig()->SetBackBias(0.0);
-  fConfig->GetScanConfig()->SetVcasnRange(30, 70);
+  fConfig->GetScanConfig()->SetVcasnRange(30, 90);
 
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STVCASN);
