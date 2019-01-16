@@ -62,11 +62,12 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
     const int nbin_x = histo->GetNBin(chip, 0) - 1;
     const int nbin_y = histo->GetNBin(chip, 1) - 1;
 
-    const int    nbin_x_half = nbin_x / 2;
-    const int    nbin_y_half = nbin_y / 2;
-    const int    xband       = 2;
-    const int    yband       = 2;
-    const double percent     = 0.98;
+    const int nbin_x_half = nbin_x / 2;
+    const int nbin_y_half = nbin_y / 2;
+    const int xband = 2;
+    const int yband = 2;
+    // const double percent     = 0.98;
+    const double ber = 1.e-6;
 
     TEyeResultHic *hicResult = (TEyeResultHic *)FindHicResultForChip(chip);
     Int_t driverStrength     = ((TEyeParameters *)hicResult->GetScanParameters())->driverStrength;
@@ -98,44 +99,93 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
         }
       }
     }
-
     // calculate cumulative function along x (within [-yband, yband])
     std::vector<double> x_l, x_r;
-    for (int xbin = 0; xbin < nbin_x_half; ++xbin) {
-      x_l.push_back((xbin != 0) ? x_l[xbin - 1] : 0.);
-      x_r.push_back((xbin != 0) ? x_r[xbin - 1] : 0.);
-      for (int ybin = nbin_y_half - yband; ybin < nbin_y_half + yband; ++ybin) {
+    for (int xbin = 1; xbin < nbin_x_half; ++xbin) {
+      x_l.push_back(0.);
+      x_r.push_back(0.);
+      for (int ybin = nbin_y_half - yband; ybin < nbin_y_half + yband + 1; ++ybin) {
         x_l.back() += (*histo)(chip, xbin, ybin);
         x_r.back() += (*histo)(chip, nbin_x - 1 - xbin, ybin);
       }
+      x_l.back() /= 2. * yband + 1;
+      x_r.back() /= 2. * yband + 1;
     }
-
     // calculate cumulative function along y (within [-xband, xband])
     std::vector<double> y_l, y_r;
     for (int ybin = 0; ybin < nbin_y_half; ++ybin) {
-      y_l.push_back((ybin != 0) ? y_l[ybin - 1] : 0.);
-      y_r.push_back((ybin != 0) ? y_r[ybin - 1] : 0.);
-      for (int xbin = nbin_x_half - xband; xbin < nbin_x_half + xband; ++xbin) {
+      y_l.push_back(0.);
+      y_r.push_back(0.);
+      for (int xbin = nbin_x_half - xband; xbin < nbin_x_half + xband + 1; ++xbin) {
         y_l.back() += (*histo)(chip, xbin, ybin);
         y_r.back() += (*histo)(chip, xbin, nbin_y - 1 - ybin);
       }
+      y_l.back() /= 2. * xband + 1;
+      y_r.back() /= 2. * xband + 1;
     }
-
-    // calculate opening as 85 % per-centile
+    // calculate opening Greater than a given BER
     int open_l = -1;
     int open_r = -1;
-    for (int xbin = 0; xbin < nbin_x_half; ++xbin) {
-      if ((open_l == -1) && ((x_l[xbin] / x_l.back()) > percent)) open_l = xbin;
-      if ((open_r == -1) && ((x_r[xbin] / x_r.back()) > percent)) open_r = xbin;
+    for (int xbin = 1; xbin < nbin_x_half; ++xbin) {
+      if ((open_l == -1) && ((x_l[xbin]) < ber)) open_l = xbin;
+      if ((open_r == -1) && ((x_r[xbin]) < ber)) open_r = xbin;
     }
 
     int open_u = -1;
     int open_b = -1;
-    for (int ybin = 0; ybin < nbin_y_half; ++ybin) {
-      if ((open_b == -1) && ((y_l[ybin] / y_l.back()) > percent)) open_b = ybin;
-      if ((open_u == -1) && ((y_r[ybin] / y_r.back()) > percent)) open_u = ybin;
+    for (int ybin = 1; ybin < nbin_y_half; ++ybin) {
+
+      if ((open_b == -1) && ((y_l[ybin]) < ber)) open_b = ybin;
+      if ((open_u == -1) && ((y_r[ybin]) < ber)) open_u = ybin;
     }
 
+
+    // // calculate cumulative function along x (within [-yband, yband])
+    // std::vector<double> x_l, x_r;
+    // for (int xbin = 0; xbin < nbin_x_half; ++xbin) {
+    //   x_l.push_back((xbin != 0) ? x_l[xbin - 1] : 0.);
+    //   x_r.push_back((xbin != 0) ? x_r[xbin - 1] : 0.);
+    //   for (int ybin = nbin_y_half - yband; ybin < nbin_y_half + yband; ++ybin) {
+    //     x_l.back() += (*histo)(chip, xbin, ybin);
+    //     x_r.back() += (*histo)(chip, nbin_x - 1 - xbin, ybin);
+    //   }
+    // }
+
+    // // calculate cumulative function along y (within [-xband, xband])
+    // std::vector<double> y_l, y_r;
+    // for (int ybin = 0; ybin < nbin_y_half; ++ybin) {
+    //   y_l.push_back((ybin != 0) ? y_l[ybin - 1] : 0.);
+    //   y_r.push_back((ybin != 0) ? y_r[ybin - 1] : 0.);
+    //   for (int xbin = nbin_x_half - xband; xbin < nbin_x_half + xband; ++xbin) {
+    //     y_l.back() += (*histo)(chip, xbin, ybin);
+    //     y_r.back() += (*histo)(chip, xbin, nbin_y - 1 - ybin);
+    //   }
+    // }
+
+    // // calculate opening as 85 % per-centile
+    // int open_l = -1;
+    // int open_r = -1;
+    // for (int xbin = 0; xbin < nbin_x_half; ++xbin) {
+    //   if ((open_l == -1) && ((x_l[xbin] / x_l.back()) > percent)) open_l = xbin;
+    //   if ((open_r == -1) && ((x_r[xbin] / x_r.back()) > percent)) open_r = xbin;
+    // }
+
+    // int open_u = -1;
+    // int open_b = -1;
+    // for (int ybin = 0; ybin < nbin_y_half; ++ybin) {
+    //   if ((open_b == -1) && ((y_l[ybin] / y_l.back()) > percent)) open_b = ybin;
+    //   if ((open_u == -1) && ((y_r[ybin] / y_r.back()) > percent)) open_u = ybin;
+    // }
+    // int open_u = -1;
+    // int open_b = -1;
+    // for (int ybin = 1; ybin < nbin_y_half; ++ybin) {
+    //   std::cout << "y_l[ybin] " << y_l[ybin] << ", y_r[ybin] " << y_r[ybin] << ", y_l.back() " <<
+    //   y_l.back() << ", y_r.back() " << y_r.back() <<"\n";
+    //
+    //   if ((open_b == -1) && ((y_l[ybin] / y_l.back()) > percent)) open_b = ybin;
+    //   if ((open_u == -1) && ((y_r[ybin] / y_r.back()) > percent)) open_u = ybin;
+    // }
+    //
     // draw histogram
     h_eye.SetStats(kFALSE);
     h_eye.Draw("colz");
@@ -155,7 +205,7 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
     TArrow arrow_y(x_center, open_y_l, x_center, open_y_u, 0.05, "<->");
     if ((open_l != -1) || (open_r != -1) || (open_b != -1) || (open_u != -1)) {
       l.DrawLatex(.5, .02,
-                  TString::Format("openings (%g) in x [%g, %g], in y [%g, %g]", percent, open_x_l,
+                  TString::Format("openings (%.1e) in x [%g, %g], in y [%g, %g]", ber, open_x_l,
                                   open_x_u, open_y_l, open_y_u));
       arrow_x.Draw();
       arrow_y.Draw();
