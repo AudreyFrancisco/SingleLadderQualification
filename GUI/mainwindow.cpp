@@ -3174,7 +3174,6 @@ void MainWindow::MFTHICEyeMeasurement()
   fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 4);
   fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
   AddScan(STEyeScan);
-
 }
 
 void MainWindow::SetMFTBackBias0(bool backbias)
