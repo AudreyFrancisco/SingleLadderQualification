@@ -3154,18 +3154,27 @@ void MainWindow::MFTHICEyeMeasurement()
   //   fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 0);
   // }
   fConfig->GetScanConfig()->SetBackBias(0.0);
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 3);
-  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 15);
-  AddScan(STEyeScan);
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 2);
+
+  // fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 3);
+  // fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 15);
+  // AddScan(STEyeScan);
+  // fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 2);
+  // fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
+  // AddScan(STEyeScan);
+  // fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 2);
+  // fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 8);
+  // AddScan(STEyeScan);
+  // fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 1);
+  // fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 5);
+  // AddScan(STEyeScan);
+  //
+  // fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 8);
+  // fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
+  // AddScan(STEyeScan);
+  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 4);
   fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 10);
   AddScan(STEyeScan);
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 2);
-  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 8);
-  AddScan(STEyeScan);
-  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 1);
-  fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 5);
-  AddScan(STEyeScan);
+
 }
 
 void MainWindow::SetMFTBackBias0(bool backbias)
