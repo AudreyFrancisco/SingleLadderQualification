@@ -468,8 +468,8 @@ THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic *result
 {
   THicClassification returnValue = CLASS_GOLD;
   if (!IsThresholdScan()) return CLASS_UNTESTED; // for the time being exclude class for tuning
-  if (((TSCurveScan *)m_scan)->GetNominal())
-    return CLASS_UNTESTED; // classify only tuned thresholds
+  // if (((TSCurveScan *)m_scan)->GetNominal())
+  //   return CLASS_UNTESTED; // classify only tuned thresholds
 
   for (unsigned int ichip = 0; ichip < hic->GetChips().size(); ichip++) {
     if (!hic->GetChips().at(ichip)->GetConfig()->IsEnabled()) continue;
