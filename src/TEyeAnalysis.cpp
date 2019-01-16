@@ -64,8 +64,8 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
 
     const int nbin_x_half = nbin_x / 2;
     const int nbin_y_half = nbin_y / 2;
-    const int xband = 2;
-    const int yband = 2;
+    const int xband       = 2;
+    const int yband       = 2;
     // const double percent     = 0.98;
     const double ber = 1.e-6;
 
