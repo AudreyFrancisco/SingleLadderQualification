@@ -48,7 +48,7 @@
 // Default values table
 
 #define DEF_BOTTOM 0 // default: top power unit
-#define DEF_CALIBALL 0
+#define DEF_BOARD 0  // default: PB connected to first MOSAIC
 
 // a) Default values used in constructor
 #define DEF_BIASVOLTAGE 0.0
@@ -151,7 +151,7 @@ private:
   PowBoard_t                   fPBConfig;
   TBoardType                   fBoardType;
   int                          m_bottom;
-  int                          m_calibrateAll;
+  int                          m_board;
   std::map<std::string, int *> fSettings;
 
   // methods
@@ -217,6 +217,8 @@ public:
   bool DumpConfig() { return false; }; // TODO: not yet implemented
   bool GetIsBottom() { return (m_bottom == 1); };
   void SetIsBottom(bool bottom) { m_bottom = bottom ? 1 : 0; };
+  int  GetBoard() { return m_board; }; // which MOSAIC is the PB attached to?
+  void SetBoard(int board) { m_board = board; };
   void InitParamMap();
   bool SetParamValue(std::string Name, std::string Value);
   int  GetParamValue(std::string Name);
