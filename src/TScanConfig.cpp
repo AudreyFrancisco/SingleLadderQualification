@@ -143,6 +143,13 @@ TScanConfig::TScanConfig()
   m_maxNoisyChipSilver = MAXNOISY_CHIP_SILVER;
   m_maxNoisyChipBronze = MAXNOISY_CHIP_BRONZE;
 
+  m_eyeMinVertChipGold   = EYE_MIN_VERT_CHIP_GOLD;
+  m_eyeMinVertChipSilver = EYE_MIN_VERT_CHIP_SILVER;
+  m_eyeMinVertChipBronze = EYE_MIN_VERT_CHIP_BRONZE;
+  m_eyeMinHorzChipGold   = EYE_MIN_HORZ_CHIP_GOLD;
+  m_eyeMinHorzChipSilver = EYE_MIN_HORZ_CHIP_SILVER;
+  m_eyeMinHorzChipBronze = EYE_MIN_HORZ_CHIP_BRONZE;
+
   m_testDctrl            = TEST_DCTRL;
   m_dctrlMinAmpOB        = DCTRL_MINAMP_OB;
   m_dctrlMinSlopeOB      = DCTRL_MINSLOPE_OB;
@@ -298,6 +305,12 @@ void TScanConfig::InitParamMap()
   fSettings["MAXNOISY_CHIP_GOLD"]             = &m_maxNoisyChipGold;
   fSettings["MAXNOISY_CHIP_SILVER"]           = &m_maxNoisyChipSilver;
   fSettings["MAXNOISY_CHIP_BRONZE"]           = &m_maxNoisyChipBronze;
+  fSettings["EYE_MIN_VERT_CHIP_GOLD"]         = &m_eyeMinVertChipGold;
+  fSettings["EYE_MIN_VERT_CHIP_SILVER"]       = &m_eyeMinVertChipSilver;
+  fSettings["EYE_MIN_VERT_CHIP_BRONZE"]       = &m_eyeMinVertChipBronze;
+  fSettings["EYE_MIN_HORZ_CHIP_GOLD"]         = &m_eyeMinHorzChipGold;
+  fSettings["EYE_MIN_HORZ_CHIP_SILVER"]       = &m_eyeMinHorzChipSilver;
+  fSettings["EYE_MIN_HORZ_CHIP_BRONZE"]       = &m_eyeMinHorzChipBronze;
 
   fSettings["TESTDCTRL"]            = &m_testDctrl;
   fSettings["DCTRLMINAMPIB"]        = &m_dctrlMinAmpIB;

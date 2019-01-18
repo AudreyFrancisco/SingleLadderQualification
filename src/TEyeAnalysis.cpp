@@ -26,11 +26,24 @@ void TEyeAnalysis::Initialize()
   CreateHicResults();
 }
 
+void TEyeAnalysis::InitCounters()
+{
+  m_counters.clear();
+  for (unsigned int i = 0; i < m_chipList.size(); i++) {
+    TEyeCounter counter;
+    counter.verLow  = 0;
+    counter.verHigh = 0;
+    counter.horLow  = 0;
+    counter.horHigh = 0;
+    m_counters.push_back(counter);
+  }
+}
 
 void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
 {
   std::cout << "in analyse histo, chipList.size = " << m_chipList.size() << std::endl;
-  FILE *fp = fopen("EyeDiagram.dat", "w");
+
+  InitCounters();
 
   // assume values from first chip for all
   TEyeResultHic *hicResult_0 = (TEyeResultHic *)FindHicResultForChip(m_chipList.at(0));
@@ -52,6 +65,7 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
 
   TFile *rootfile_eye = TFile::Open(filename_eye_root.c_str(), "RECREATE");
 
+  int ichip = 0;
   for (auto chip : m_chipList) {
     const double step_x = histo->GetStep(chip, 0);
     const double step_y = histo->GetStep(chip, 1);
@@ -89,12 +103,11 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
     // fill histogram
     for (int xbin = 0; xbin < nbin_x; xbin++) {
       for (int ybin = 0; ybin < nbin_y; ybin++) {
-        int    x     = min_x + xbin * step_x;
-        int    y     = min_y + ybin * step_y;
+        // int    x     = min_x + xbin * step_x;
+        // int    y     = min_y + ybin * step_y;
         double value = (*histo)(chip, xbin, ybin);
 
         if (value != 0) {
-          fprintf(fp, "%d %d->%d %d->%d %e\n", chip.chipId, xbin, x, ybin, y, value);
           h_eye.SetBinContent(xbin + 1, ybin + 1, value);
         }
       }
@@ -210,6 +223,10 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
       arrow_x.Draw();
       arrow_y.Draw();
     }
+    m_counters.at(ichip).verLow  = open_y_l;
+    m_counters.at(ichip).verHigh = open_y_u;
+    m_counters.at(ichip).horLow  = open_x_l;
+    m_counters.at(ichip).horHigh = open_x_u;
 
     // write result to files
     std::string dirname = FindHicResultForChip(chip)->GetName();
@@ -223,11 +240,10 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
       h_eye.SetMinimum(1.e-7);
       c.Print(filename_eye.c_str());
     }
+    ichip++;
   }
   c.Print((filename_eye + "]").c_str());
-  fclose(fp);
   rootfile_eye->Close();
-  std::cout << "Done" << std::endl;
 }
 
 void TEyeAnalysis::PlotHisto(TVirtualPad &p, TH2 &h, const std::string &filename)
@@ -310,4 +326,105 @@ void TEyeAnalysis::PlotHisto(TVirtualPad &p, TH2 &h, const std::string &filename
   if (!filename.empty()) p.Print(filename.c_str());
 
   if (cPad) cPad->cd();
+}
+
+
+void TEyeAnalysis::WriteResult()
+{
+  char fName[200];
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
+    if (!hicResult->IsValid()) continue;
+
+    if (m_config->GetUseDataPath()) {
+      sprintf(fName, "%s/EyeMeasurementResult_%s.dat", hicResult->GetOutputPath().c_str(),
+              m_config->GetfNameSuffix());
+    }
+    else {
+      sprintf(fName, "EyeMeasurementResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
+              m_config->GetfNameSuffix());
+    }
+
+    FILE *fp = fopen(fName, "a");
+    hicResult->SetResultFile(fName);
+    hicResult->WriteToFile(fp);
+    fclose(fp);
+  }
+}
+
+void TEyeAnalysis::Finalize()
+{
+
+  if (fScanAbort || fScanAbortAll) return;
+
+  FILE *fp = fopen("EyeDiagram.dat", "a+");
+
+  for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
+    TEyeResultChip *chipResult = (TEyeResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
+
+    if (!chipResult) std::cout << "WARNING: chipResult = 0" << std::endl;
+    chipResult->m_verLow  = m_counters.at(ichip).verLow;
+    chipResult->m_verHigh = m_counters.at(ichip).verHigh;
+    chipResult->m_horLow  = m_counters.at(ichip).horLow;
+    chipResult->m_horHigh = m_counters.at(ichip).horHigh;
+
+    chipResult->WriteToFile(fp);
+  }
+
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    TEyeResultHic *hicResult =
+        (TEyeResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
+    hicResult->m_class = GetClassification(hicResult);
+
+    hicResult->SetValidity(true);
+  }
+  WriteResult();
+  fclose(fp);
+
+  m_finished = true;
+}
+
+
+THicClassification TEyeAnalysis::GetClassification(TEyeResultHic *result)
+{
+  THicClassification returnValue = CLASS_GOLD;
+
+  // chip-wise check
+  map<int, TScanResultChip *>::iterator it;
+  for (it = result->m_chipResults.begin(); it != result->m_chipResults.end(); it++) {
+    TEyeResultChip *chipResult = (TEyeResultChip *)it->second;
+    int             chipId     = it->first;
+
+    int verOpening = chipResult->m_verHigh - chipResult->m_verLow;
+    int horOpening = chipResult->m_horHigh - chipResult->m_horLow;
+
+    DoCut(returnValue, CLASS_SILVER, verOpening, "EYE_MIN_VERT_CHIP_GOLD", result, true, chipId);
+    DoCut(returnValue, CLASS_BRONZE, verOpening, "EYE_MIN_VERT_CHIP_SILVER", result, true, chipId);
+    DoCut(returnValue, CLASS_RED, verOpening, "EYE_MIN_VERT_CHIP_BRONZE", result, true, chipId);
+
+    DoCut(returnValue, CLASS_SILVER, horOpening, "EYE_MIN_HORZ_CHIP_GOLD", result, true, chipId);
+    DoCut(returnValue, CLASS_BRONZE, horOpening, "EYE_MIN_HORZ_CHIP_SILVER", result, true, chipId);
+    DoCut(returnValue, CLASS_RED, horOpening, "EYE_MIN_HORZ_CHIP_BRONZE", result, true, chipId);
+  }
+
+  std::cout << "Eye Measurement - Classification: " << WriteHicClassification(returnValue)
+            << std::endl;
+
+
+  return returnValue;
+}
+
+void TEyeResultChip::WriteToFile(FILE *fp)
+{
+  fprintf(fp, "%+4d %+4d %+4d %+4d\n", m_horLow, m_horHigh, m_verLow, m_verHigh);
+}
+
+void TEyeResultHic::WriteToFile(FILE *fp)
+{
+  std::map<int, TScanResultChip *>::iterator it;
+
+  for (it = m_chipResults.begin(); it != m_chipResults.end(); it++) {
+    it->second->WriteToFile(fp);
+  }
 }
