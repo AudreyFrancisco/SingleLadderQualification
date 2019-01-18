@@ -344,7 +344,7 @@ THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityT
     return CLASS_SILVER;
   else if (category.find("BRONZE") != string::npos)
     return CLASS_BRONZE;
-  else if ((category.find("not") != string::npos) || (category.find("NOK") != string::npos))
+  else if (category.find("not") != string::npos)
     return CLASS_RED;
   else if ((category.find("part") != string::npos) || (category.find("PARTIAL") != string::npos)) {
     if (category.find("CATB") != string::npos)
@@ -448,6 +448,18 @@ std::vector<ActivityDB::activityLong> DbGetActivities(AlpideDB *db, std::vector<
   return result;
 }
 
+bool DbCheckActivityExists(AlpideDB *db, int activityId)
+{
+  ActivityDB *             activityDB = new ActivityDB(db);
+  ActivityDB::activityLong activity;
+  AlpideTable::response *  response = activityDB->Read(activityId, &activity);
+
+  if ((response->ErrorCode == AlpideTable::NoError) && (activity.ID == activityId)) return true;
+
+  return false;
+}
+
+
 int DbGetResultId(AlpideDB *db, int activityTypeId, string resultName)
 {
   ActivityDB *                               activityDB = new ActivityDB(db);
@@ -530,6 +542,30 @@ int DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int componentId, s
     }
   }
   return -1;
+}
+
+string DbGetComponentName(AlpideDB *db, int typeId, int compId)
+{
+  ComponentDB *                                   componentDB = new ComponentDB(db);
+  static int                                      myTypeId;
+  static std::vector<ComponentDB::componentShort> componentList;
+
+  if ((componentList.size() == 0) || (typeId != myTypeId)) {
+    if (componentList.size() != 0) {
+      componentList.clear();
+    }
+    myTypeId = typeId;
+
+    componentDB->GetListByType(db->GetProjectId(), myTypeId, &componentList);
+  }
+
+  for (unsigned int i = 0; i < componentList.size(); i++) {
+    if (compId == componentList.at(i).ID) {
+      return componentList.at(i).ComponentID;
+    }
+  }
+
+  return string("");
 }
 
 // TODO: complete list of tests
@@ -907,7 +943,7 @@ bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPer
   for (unsigned int i = 0; (i < activity.Attachments.size()) && (!found); i++) {
     attName = activity.Attachments.at(i).FileName;
     if ((attName.find("DigitalScanResult") != string::npos)) {
-      if ((voltPercent) && (backBias == 0) && (attName.find("nominal.") != string::npos)) {
+      if ((voltPercent == 100) && (backBias == 0) && (attName.find("nominal.") != string::npos)) {
         found = true;
       }
       else if ((voltPercent == 100) && (backBias == 3) &&
@@ -933,5 +969,30 @@ bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPer
   dataName   = "Digital_" + date + "_Chip" + to_string(chip) + ".dat";
   resultName = "DigitalScanResult_" + date + ".dat";
   // create file name for raw data files
+  return found;
+}
+
+
+bool GetPowerFileName(ActivityDB::activityLong activity, bool &ivFound, string &ivName,
+                      string &resultName)
+{
+  bool   found = false;
+  string attName;
+
+  ivFound = false;
+
+  // find the correct attachment and IVcurve for the given power test
+  for (unsigned int i = 0; (i < activity.Attachments.size()) && ((!found) || (!ivFound)); i++) {
+    attName = activity.Attachments.at(i).FileName;
+    if ((attName.find("PowerTestResult") != string::npos)) {
+      found      = true;
+      resultName = attName;
+    }
+    else if ((attName.find("IVCurve") != string::npos)) {
+      ivFound = true;
+      ivName  = attName;
+    }
+  }
+
   return found;
 }

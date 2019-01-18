@@ -127,6 +127,7 @@ void TNoiseAnalysis::FillVariableList()
 
 void TNoiseAnalysis::AnalyseHisto(TScanHisto *histo)
 {
+  char fName[200];
   // TODO: check that hits from different hics / boards are considered correctly
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
     TNoiseResultChip *chipResult =
@@ -141,20 +142,35 @@ void TNoiseAnalysis::AnalyseHisto(TScanHisto *histo)
       std::cout << "Warning (TNoiseAnalysis): Missing chip result" << std::endl;
       continue;
     }
+
+    if (m_config->GetUseDataPath()) {
+      sprintf(fName, "%s/NoiseHits_%s.dat", chipResult->GetOutputPath().c_str(),
+              m_config->GetfNameSuffix());
+    }
+    else {
+      sprintf(fName, "NoiseHits_%s_%s.dat",
+              FindHicResultForChip(m_chipList.at(ichip))->GetName().c_str(),
+              m_config->GetfNameSuffix());
+    }
+    FILE *fp = fopen(fName, "a");
+
     for (int icol = 0; icol < 1024; icol++) {
       for (int irow = 0; irow < 512; irow++) {
+        int nHits = (*histo)(m_chipList.at(ichip), icol, irow);
         // if entry > noise cut: add pixel to chipResult->AddNoisyPixel
-        if ((*histo)(m_chipList.at(ichip), icol, irow) > m_noiseCut) {
+        if (nHits > m_noiseCut) {
           TPixHit pixel = {boardIndex, channel, chipId, 0, icol, irow};
           chipResult->AddNoisyPixel(pixel); // is this still needed?
           ((TNoiseResult *)m_result)->m_noisyPixels.push_back(pixel);
         }
-        occ += (*histo)(m_chipList.at(ichip), icol, irow);
+        if (nHits > 0) fprintf(fp, "%d %d %d %d\n", chipId, icol, irow, nHits);
+        occ += nHits;
       }
     }
     // divide chipResult->m_occ by m_nTrig * 512 * 1024 and write to chipResult
     occ /= denom;
     chipResult->SetOccupancy(occ);
+    fclose(fp);
   }
 }
 
@@ -179,6 +195,7 @@ void TNoiseAnalysis::Finalize()
     hicResult->m_occ /= m_hics.at(ihic)->GetNChips();
     hicResult->m_errorCounter = m_scan->GetErrorCount(m_hics.at(ihic)->GetDbId());
     hicResult->m_class        = GetClassification(hicResult, m_hics.at(ihic));
+    PrintHicClassification(hicResult);
     hicResult->SetValidity(true);
   }
 
@@ -204,8 +221,6 @@ THicClassification TNoiseAnalysis::GetClassification(TNoiseResultHic *result, TH
     DoCut(returnValue, CLASS_RED, chipResult->m_noisyPixels.size(), "MAXNOISY_CHIP_BRONZE", result,
           false, chipId);
   }
-  std::cout << "Noise Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 

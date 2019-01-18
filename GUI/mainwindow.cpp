@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 #include "AlpideConfig.h"
@@ -157,6 +157,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QAction *newtestprod =
       new QAction(QApplication::style()->standardIcon(QStyle::SP_DialogOpenButton),
                   "&New test (Prod DB)", this);
+  newtestprod->setShortcut(Qt::Key_F5);
   connect(newtestprod, &QAction::triggered, [=]() {
     fDatabaseSelected = true;
     fDatabasetype     = 0;
@@ -170,16 +171,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     start_test();
   });
   fWritedb = new QAction("&Write to database", this);
+  connect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
   QAction *run_test =
       new QAction(QApplication::style()->standardIcon(QStyle::SP_MediaPlay), "Start test", this);
+  run_test->setShortcut(Qt::Key_F8);
   connect(run_test, &QAction::triggered, this, &MainWindow::applytests);
   run_test->setEnabled(false);
   // QAction *poweroff = new QAction(
   //     QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton), "Power Off", this);
   // connect(poweroff, &QAction::triggered, this, &MainWindow::poweroff);
   QAction *quit = new QAction("&Quit", this);
+  quit->setShortcut(Qt::CTRL + Qt::Key_Q);
   connect(quit, &QAction::triggered, this, &MainWindow::close);
   QAction *newdebug = new QAction("&Debug mode", this);
+  newdebug->setShortcut(Qt::Key_F4);
   connect(newdebug, SIGNAL(triggered()), this, SLOT(start_debug()));
   connect(ui->upload, SIGNAL(clicked()), this, SLOT(uploadpdf()));
 
@@ -193,7 +198,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   menu->addAction(fWritedb);
   // menu->addAction(poweroff);
   menu->addAction(quit);
-  fWritedb->setVisible(false);
+  fWritedb->setEnabled(false);
 
   // build toolbar (based on actions)
   addToolBar(Qt::LeftToolBarArea, ui->mainToolBar);
@@ -318,6 +323,7 @@ void MainWindow::open()
   else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBHalfStaveML ||
            fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
            fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
+           fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST ||
            fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML) {
     fileName = "Config_HS.cfg";
   }
@@ -401,9 +407,11 @@ void MainWindow::open()
       }
     }
 
-    if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+    if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
+        fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST) {
       fHicnames.clear();
-      const int nModules = (fNumberofscan == OBHalfStaveOLFAST) ? 7 : 4;
+      const int nModules =
+          (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBStaveOLFAST) ? 7 : 4;
       for (int i = 0; i < nModules; ++i)
         fHicnames.push_back(QString("Module%1").arg(i));
     }
@@ -454,6 +462,10 @@ void MainWindow::open()
     fAutoRepeat      = fConfig->GetScanConfig()->GetParamValue("AUTOREPEAT");
     fMaxRepeat       = fConfig->GetScanConfig()->GetParamValue("MAXREPEAT");
     fRecovery        = fConfig->GetScanConfig()->GetParamValue("RECOVERY");
+
+    std::cout << std::endl
+              << "Software version: " << fConfig->GetSoftwareVersion() << std::endl
+              << std::endl;
 
     fConfig->GetScanConfig()->SetParamValue("HALFSTAVECOMP", fHalfstavepart);
     fActivityCreation = true;
@@ -955,13 +967,12 @@ void MainWindow::start_test()
   fActComponentTypeIDs.clear();
   fComponentIDs.clear();
   fHalfstavemodules.clear();
-  fWritedb->setVisible(false);
-  fHiddenComponent = false;
-  fWrite           = false;
-  fstop            = false;
-  fstopwriting     = false;
-  fEnduranceCheck  = 0;
-  disconnect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
+  fWritedb->setEnabled(false);
+  fHiddenComponent  = false;
+  fWrite            = false;
+  fstop             = false;
+  fstopwriting      = false;
+  fEnduranceCheck   = 0;
   fIdofactivitytype = 0;
   fIdoflocationtype = 0;
   fIdofoperator     = 0;
@@ -1035,6 +1046,20 @@ void MainWindow::loadConfigFile(QByteArray configFilename)
 void MainWindow::doDebugScan(TScanType scanType)
 {
   fDebugWindow->hide();
+  emit deviceLoaded(fConfig->GetDeviceType());
+
+  std::string TestDir = fConfig->GetScanConfig()->GetTestDir();
+  if (const char *dataDir = std::getenv("ALPIDE_TEST_DATA"))
+    TestDir.insert(0, std::string(dataDir) + "/");
+  else
+    TestDir.insert(0, "Data/");
+  makeDir(TestDir.c_str());
+
+  for (unsigned int i = 0; i < fHICs.size(); i++) {
+    fHicnames.push_back(QString(fHICs.at(i)->GetDbId().c_str()));
+    makeDir((fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString())).c_str());
+  }
+
   ClearVectors();
   AddScan(scanType);
   fstopwriting = true;
@@ -1089,10 +1114,6 @@ void MainWindow::fillingOBvectors()
   fConfig->GetScanConfig()->SetBackBias(3.0);
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
-  for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
-    fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 60);
-    fConfig->GetChipConfig(i)->SetParamValue("VRESETD", 147);
-  }
   AddScan(STDigital);
   AddScan(STDigitalWF);
   AddScan(STThreshold);
@@ -1109,10 +1130,6 @@ void MainWindow::fillingOBvectors()
   AddScan(STNoise);
   AddScan(STClearMask);
 
-
-  for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
-    fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 0);
-  }
   return;
 }
 
@@ -1385,6 +1402,7 @@ void MainWindow::performtests()
         if (fScanToRowMap.count(i) > 0)
           ui->testTable->item(fScanToRowMap[i], 1)->setText(fScanVector.at(i)->GetState());
         colorsinglescan(i);
+
         qApp->processEvents();
       }
 
@@ -1478,7 +1496,8 @@ void MainWindow::initscanlist()
     fillingHSscans();
     fConfig->GetScanConfig()->SetParamValue("TESTDCTRL", dctrl);
   }
-  if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+  if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
+      fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST) {
     fillingfastHS();
   }
   if (fNumberofscan == IBDctrl) {
@@ -1506,7 +1525,8 @@ void MainWindow::applytests()
 
   printClasses();
 
-  if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+  if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
+      fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST) {
     fstopwriting = true;
   }
 
@@ -1761,7 +1781,7 @@ void MainWindow::WriteToEos(string hicName, ActivityDB::actUri &uri, bool write)
     char command[256];
     sprintf(
         command,
-        "rsync -rv -e \"ssh -K\" %s %s@lxplus.cern.ch:/eos/project/a/alice-its/HicTests/%s/%s/%s",
+        "rsync -rv -e \"ssh -K\" %s/ %s@lxplus.cern.ch:/eos/project/a/alice-its/HicTests/%s/%s/%s",
         (fConfig->GetScanConfig()->GetDataPath(hicName)).c_str(), account.c_str(),
         testFolder.c_str(), instFolder.c_str(),
         (fConfig->GetScanConfig()->GetRemoteHicPath(hicName)).c_str());
@@ -1871,8 +1891,7 @@ void MainWindow::attachtodatabase()
     popup("The activity cannot be found \nin the Database \nCheck your database "
           "connection\nMaybe you need to renew \nyour ticket\nOr there is problem "
           "in the db.");
-    fWritedb->setVisible(true);
-    connect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
+    fWritedb->setEnabled(true);
 
     return;
   }
@@ -1884,7 +1903,7 @@ void MainWindow::attachtodatabase()
         QDateTime          date;
         ActivityDB::actUri uri;
         std::string        path;
-
+        std::cout << "Starting writing activity to db @ " << GetTime() << std::endl;
         path =
             fConfig->GetScanConfig()->GetDataPath(fHicnames.at(i).toStdString()) + "/Comment.txt";
 
@@ -1911,7 +1930,8 @@ void MainWindow::attachtodatabase()
           }
         }
         if (!fWrite) {
-          WriteToEos(fHICs.at(i)->GetDbId(), uri, true);
+          WriteToEos(fHICs.at(i)->GetDbId(), uri,
+                     (fConfig->GetScanConfig()->GetParamValue("RSYNC") == 1));
         }
         else {
           WriteToEos(fHICs.at(i)->GetDbId(), uri, false);
@@ -2040,6 +2060,17 @@ void MainWindow::attachtodatabase()
         uris.push_back(uri);
 
         myactivity->Create(&activ);
+
+        std::cout << "The id of the created activity is " << activ.ID << std::endl;
+
+        // attempt to read activity
+        if (!DbCheckActivityExists(fDB, activ.ID)) {
+          fWritedb->setEnabled(true);
+          popup("A problem occured! \nThe activity could not be found \nin the db while trying to "
+                "access it. \nCheck if it is created \nand if not rewrite in db");
+          break;
+        }
+
         std::vector<ActivityDB::response> creationresponses;
         creationresponses = myactivity->GetResponses();
         for (unsigned int s = 0; s < creationresponses.size(); s++) {
@@ -2143,10 +2174,8 @@ e
           activ.Status = DbGetStatusId(fDB, fIdofactivitytype, "CLOSED");
           std::cout << "the activity is closed" << std::endl;
         }
-
         activ.Result = DbGetResultId(fDB, fIdofactivitytype, fHICs.at(i)->GetClassification());
         myactivity->Change(&activ);
-
         if (myactivity->GetResponse().ErrorCode != 0) {
           QString errormessage;
           errormessage = "Error while changing activity";
@@ -2154,13 +2183,14 @@ e
           fActivityResults.push_back(-1);
           popup("A problem occured!\nThe activity couldn't be changed.");
         }
-        std::cout << "the activity result is: " << activ.Result << std::endl;
+        std::cout << "The activity result is: " << activ.Result << std::endl;
+        std::cout << "End of writing activity to db @ " << GetTime() << std::endl;
+
         fActivityResults.push_back(activ.Result);
         delete myactivity;
         myactivity = nullptr;
       }
     }
-
 
   } // for loops for hics
   delete fDB;
@@ -2174,6 +2204,7 @@ e
       break;
     }
   }
+
   if (fwritingdb == false) {
     if (!fDatabasefailure) {
       fDatabasefailure = new Databasefailure(this);
@@ -2210,6 +2241,7 @@ void MainWindow::fillingreceptionscans()
   AddScan(STPower);
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   AddScan(STFifo);
+
   AddScan(STDigital);
 }
 
@@ -2299,7 +2331,8 @@ void MainWindow::savesettings()
     if (fstop && fHiddenComponent == false) {
       return;
     }
-    if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST) {
+    if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST &&
+        fNumberofscan != OBStaveOLFAST && fNumberofscan != OBStaveMLFAST) {
       for (unsigned int i = 0; i < fHICs.size(); i++) {
         if (!fHicnames.at(i).isEmpty()) {
           fstopwriting  = false;
@@ -2329,7 +2362,7 @@ void MainWindow::savesettings()
                   "\nhas previous activities \nthat are still open. \nYou can still run the test, "
                   "\nbut if possible please close \nthese activities *before* \nwriting to the "
                   "database.");
-          if (!impendanceDone)
+          if (!impendanceDone && (fHalfstave != "test"))
             popup("Warning: HIC \n" + fHicnames.at(i) +
                   "\ndoes not have an impedance\n test activity yet. \nYou should consider "
                   "aborting \nthe scan and running \nthe impedance test first.");
@@ -2425,7 +2458,7 @@ void MainWindow::loadeditedconfig()
     int ncycles = 0;
     ncycles     = OpenEnduranceRecoveryFile(filename.toStdString().c_str(), names, counterVector);
 
-    if (ncycles != 0) std::cout << ncycles << " cycles found in file." << std::endl;
+    std::cout << ncycles << " cycles found in file." << std::endl;
 
     for (unsigned int d = 1; d < fScanVector.size(); d++) {
       TEnduranceCycle *scan;
@@ -2451,8 +2484,10 @@ void MainWindow::loaddefaultconfig()
 
 void MainWindow::colorsinglescan(int i)
 {
-  if (fresultVector[i] == 0)
-    fColour = fAnalysisVector.at(i + 1)->GetScanClassification();
+  if (fresultVector[i] == 0) {
+    if ((unsigned int)i + 1 < fAnalysisVector.size())
+      fColour = fAnalysisVector.at(i + 1)->GetScanClassification();
+  }
   else
     fColour = fAnalysisVector.at(i)->GetScanClassification();
 
@@ -2964,10 +2999,6 @@ void MainWindow::fillingibvectors()
   AddScan(STClearMask);
   // return;
   // threshold scan at 3V back bias, also here no tuning for the time being
-  for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
-    fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 60);
-    fConfig->GetChipConfig(i)->SetParamValue("VRESETD", 147);
-  }
   fConfig->GetScanConfig()->SetBackBias(3.0);
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
@@ -2986,10 +3017,6 @@ void MainWindow::fillingibvectors()
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
   AddScan(STClearMask);
-
-  for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
-    fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 0);
-  }
 
   // eye diagram
   //  fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 8);
@@ -3267,7 +3294,7 @@ void MainWindow::MFTEOSTransfer(QString hicid, QString username, bool testmode, 
   if (fcreate) {
     str += " --force-create true ";
   }
-  str += "--user ";
+  str += " --user ";
   str += username.toStdString();
   const char *command = str.c_str();
   system(command);
@@ -3301,7 +3328,8 @@ void MainWindow::ConnectTestCombo(int value)
   ui->testtypeselected->setText(fTestname);
   std::string name;
   name.append(fTestname.toStdString());
-  if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST) {
+  if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST &&
+      fNumberofscan != OBStaveOLFAST && fNumberofscan != OBStaveMLFAST) {
     findidoftheactivitytype(name, fIdofactivitytype);
   }
   if (fIdofactivitytype == -1) {
@@ -3313,7 +3341,8 @@ void MainWindow::ConnectTestCombo(int value)
     return;
   }
   std::cout << "the id of the selected test: " << fIdofactivitytype << std::endl;
-  if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST) {
+  if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST &&
+      fNumberofscan != OBStaveOLFAST && fNumberofscan != OBStaveMLFAST) {
     locationcombo();
     fSettingswindow->connectlocationcombo(fLocdetails);
   }
@@ -3330,8 +3359,7 @@ void MainWindow::ConnectTestCombo(int value)
 
 void MainWindow::ContinueWithoutWriting()
 {
-  fWritedb->setVisible(true);
-  connect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
+  fWritedb->setEnabled(true);
   fResultwindow->close();
   popup("You still have the possibility \n to write to the database \n later through the menu :)");
 }
@@ -3453,10 +3481,6 @@ void MainWindow::fillingHSscans()
   AddScan(STClearMask);
 
   // threshold scans and tuning at 3V back bias
-  for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
-    fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 60);
-    fConfig->GetChipConfig(i)->SetParamValue("VRESETD", 147);
-  }
   fConfig->GetScanConfig()->SetBackBias(3.0);
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
@@ -3473,9 +3497,6 @@ void MainWindow::fillingHSscans()
   AddScan(STApplyMask, fresultVector.back());
   AddScan(STNoise);
   AddScan(STClearMask);
-  for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
-    fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 0);
-  }
   return;
 }
 
@@ -3583,10 +3604,22 @@ string MainWindow::GetResultType(int i)
 
 void MainWindow::fillingfastHS()
 {
-  printf("fillingfastHS()\n");
   ClearVectors();
-  AddScan(STFifo);
+  int ivcurve;
+  ivcurve = fConfig->GetScanConfig()->GetParamValue("IVCURVE");
+  fConfig->GetScanConfig()->SetParamValue("IVCURVE", 0);
+  AddScan(STFastPowerTest);
+  fConfig->GetScanConfig()->SetParamValue("IVCURVE", ivcurve);
+
   AddScan(STDigital);
+
+  // tuning at 3V back bias
+  fConfig->GetScanConfig()->SetBackBias(3.0);
+  fConfig->GetScanConfig()->SetVcasnRange(75, 160);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  fConfig->GetScanConfig()->SetBackBias(0.);
 }
 
 void MainWindow::writeSettings()
@@ -3649,4 +3682,76 @@ void MainWindow::abortscan()
   fProgresswindow->close();
   delete fProgresswindow;
   fProgresswindow = nullptr;
+}
+
+
+void MainWindow::fillingoccupances()
+{
+  fConfig->GetScanConfig()->SetParamValue("PULSEDELAY", 10000);
+  // threshold scans and tuning at 0V back bias
+  fConfig->GetScanConfig()->SetBackBias(0.0);
+  fConfig->GetScanConfig()->SetVcasnRange(30, 70);
+
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+  AddScan(STThreshold);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 20);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 520);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 1020);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 1520);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 2020);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 2520);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 3020);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 3520);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
+  // noise occupancy with and without mask at 0V back bias
+  fConfig->GetScanConfig()->SetParamValue("STROBEDURATION", 4000);
+  AddScan(STNoise);
+  AddScan(STApplyMask, fresultVector.back());
+  AddScan(STNoise);
+  AddScan(STClearMask);
 }

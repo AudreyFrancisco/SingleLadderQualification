@@ -61,7 +61,7 @@ def measureCurr(sour):
         val[c] = float(sour.readline())
     print "%0.4fA\t%0.4fA\t%0.4fA" % ( val[0], val[1], val[2]) 
     
-def doIVcurve(HIC_name, sour, channel, max_volt, nsteps, resistances, path, fileList):
+def doIVcurve(HIC_name, sour, channel, max_volt, nsteps, resistances, path, fileList, impedance_limit):
         
     if channel==0:
         channel_name = "DVDD" 
@@ -117,13 +117,13 @@ def doIVcurve(HIC_name, sour, channel, max_volt, nsteps, resistances, path, file
     
     output_file.close()
     
-    if channel_tripped:
+    if channel!= 2 and channel_tripped:
         print("Channel tripped. Test failed") 
         return 0
     elif resistance_average==1000000: 
         print("Warning: Impedance is too high. Check the connection to the HIC or use the multimeter to measure the impedance.")   
         return -1
-    elif resistance_average>100:
+    elif resistance_average>impedance_limit:
         print("Test OK")  
         return 1
     else:
@@ -323,6 +323,7 @@ def main():
     max_voltage_bias = 4.
     nsteps = 20 
     nsteps_bias = 50    
+    impedance_limit = 10
     
     resistances = ([0., 0., 0.])  
     
@@ -356,7 +357,7 @@ def main():
     nstepss = ([nsteps, nsteps, nsteps_bias])
 
     for channel in range(3):    
-        test_ok = test_ok * doIVcurve(HIC_name, sour, channel, max_voltages[channel], nstepss[channel], resistances, path, fileList) 
+        test_ok = test_ok * doIVcurve(HIC_name, sour, channel, max_voltages[channel], nstepss[channel], resistances, path, fileList, impedance_limit) 
   
     saveToDB(myConf, itsDB, lg, HIC_name, test_ok, resistances, fileList) 
 

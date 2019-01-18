@@ -285,9 +285,15 @@ void powerboard::getState(pbstate_t *state, getFlags flags)
 
     data         = ((*dataPtr++) >> 4) & 0xfff;
     state->Ibias = data * (2.56 / 4096.0);
+#ifdef PB_NEW
+    state->Ibias *= 4. / 40.;
+#endif
     dataPtr++;
     data         = ((*dataPtr++) >> 4) & 0xfff;
     state->Vbias = data * (-5.12 / 4096.0);
+#ifdef PB_NEW
+    state->Ibias = state->Ibias < -state->Vbias / 100. ? 0. : state->Vbias / 100.;
+#endif
 
     float rtd = (temperatureDetector->getRTD() >> 1) * (400.0 / 32768.0);
     state->T  = RTD2T(rtd);

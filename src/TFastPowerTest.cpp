@@ -12,6 +12,7 @@ TFastPowerTest::TFastPowerTest(TScanConfig *config, std::vector<TAlpide *> chips
   CreateScanParameters();
 
   m_parameters->backBias = 0;
+  m_ivcurve              = (m_config->GetParamValue("IVCURVE") != 0);
 
   strcpy(m_name, "Fast Power Test");
   m_start[2] = 0;
@@ -54,6 +55,8 @@ void TFastPowerTest::Init()
 
   sprintf(m_config->GetfNameSuffix(), "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100,
           now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
+
+  std::cout << "Output file time suffix: " << m_config->GetfNameSuffix() << std::endl;
 }
 
 void TFastPowerTest::PrepareStep(int loopIndex)
@@ -78,6 +81,8 @@ void TFastPowerTest::DoIVCurve(THicCurrents &result)
     result.ibias[i] = m_testHic->GetIBias() * 1000; // convert in mA
     // overcurrent protection; will be counted as trip
     if (result.ibias[i] > m_config->GetParamValue("MAXIBIAS")) {
+      printf("MAXIBIAS exceeded at %g: %g > %d, switching off Vbias\n", voltage, result.ibias[i],
+             m_config->GetParamValue("MAXIBIAS"));
       m_hicCurrents.find(m_testHic->GetDbId())->second.maxBias = voltage - .1;
       m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
       sleep(1);
@@ -113,12 +118,12 @@ void TFastPowerTest::Execute()
   currentIt->second.ibias0 = m_testHic->GetIBias() * 1000;
 
   // measure IV curve or only bias current at 3 V
-  if (m_config->GetParamValue("IVCURVE")) {
+  if (m_ivcurve) {
     DoIVCurve(currentIt->second);
     currentIt->second.ibias3 = currentIt->second.ibias[30];
   }
   else {
-    m_testHic->GetPowerBoard()->SetBiasVoltage(3.0);
+    m_testHic->GetPowerBoard()->SetBiasVoltage(-3.0);
     sleep(1);
     currentIt->second.ibias3 = m_testHic->GetIBias() * 1000;
   }

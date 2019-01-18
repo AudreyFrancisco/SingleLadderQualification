@@ -116,6 +116,7 @@ class TPowerBoardConfig {
 public:
   typedef struct Mod {
     bool  BiasOn;
+    bool  BiasEnabled;
     float AVset;
     float AIset;
     float DVset;
@@ -188,6 +189,8 @@ public:
   void AddPowerBusResistances(int mod, bool real = false, bool middle = false);
   void GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR);
   bool IsCalibrated(int mod);
+  bool BiasEnabled(int mod) { return fPBConfig.Modul[mod].BiasEnabled; };
+  void DisableBias(int mod) { fPBConfig.Modul[mod].BiasEnabled = false; };
   void WriteCalibrationFile();
   void ReadCalibrationFile();
   // Setters

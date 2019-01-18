@@ -83,6 +83,8 @@ public:
   void Initialize() { CreateHicResults(); };
   void Run(){};
   void Finalize();
+
+  std::string GetName() { return "Fast Power Analysis"; }
 };
 
 #endif

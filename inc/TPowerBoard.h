@@ -133,6 +133,8 @@ public:
     return (fPBoard.VBmon);
   };
   float GetBiasCurrent();
+  bool  BiasEnabled(int mod) { return GetConfigurationHandler()->BiasEnabled(mod); }
+  void  DisableBias(int mod) { GetConfigurationHandler()->DisableBias(mod); };
 
   float GetAnalogVoltage(int module)
   {
@@ -215,8 +217,13 @@ public:
     fMOSAICPowerBoard->setIth((unsigned char)(mod * 2 + 1), val);
   };
   void SetModule(int module, float AV, float AI, float DV, float DI, bool BiasOn);
-  void SetBiasOn(int mod)
+  void SetBiasOn(int mod, bool force = false)
   {
+    if (!BiasEnabled(mod) && !force) {
+      std::cout << "Warning: BB channel " << mod << " connected to noBB HIC, not switched on"
+                << std::endl;
+      return;
+    }
     std::lock_guard<std::mutex> lock(mutex_pb);
     fPBoard.Modules[mod].BiasOn = true;
     fMOSAICPowerBoard->onVbias((unsigned char)mod);

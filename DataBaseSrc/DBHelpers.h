@@ -27,6 +27,7 @@ int              DbGetStatusId(AlpideDB *db, int activityTypeId, string statusCo
 int              DbCountActivities(AlpideDB *db, int activityTypeId, string compName);
 std::vector<int> DbGetActivityIds(AlpideDB *db, int activityTypeId, string compName);
 std::vector<ActivityDB::activityLong> DbGetActivities(AlpideDB *db, std::vector<int> activityIds);
+bool                                  DbCheckActivityExists(AlpideDB *db, int activityId);
 int                DbIsNewer(ActivityDB::activityLong act0, ActivityDB::activityLong act1);
 int                DbIsNewer(ComponentDB::compActivity act0, ComponentDB::compActivity act1);
 bool               DbGetLatestActivity(AlpideDB *db, int activityTypeId, string compName,
@@ -48,6 +49,7 @@ int    DbGetComponentTypeId(AlpideDB *db, string name);
 int    DbGetActComponentTypeId(AlpideDB *db, int activityTypeId, int componentId, string Direction);
 int    DbGetComponentId(AlpideDB *db, int projectId, int typeId, string name);
 int    DbGetComponentId(AlpideDB *db, int typeId, string name);
+string DbGetComponentName(AlpideDB *db, int typeId, int compId);
 int    DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children,
                            bool chipsOnly = false);
 int    DbGetComponentActivity(AlpideDB *db, int compId, int activityTypeId);
@@ -64,4 +66,7 @@ string GetTestDirName(TTestType TestType);
 TTestType GetTestType(string activityTypeName);
 bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPercent, int backBias,
                         string &dataName, string &resultName);
+bool GetPowerFileName(ActivityDB::activityLong activity, bool &ivFound, string &ivName,
+                      string &resultName);
+
 #endif

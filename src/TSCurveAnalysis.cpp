@@ -187,7 +187,8 @@ void TSCurveAnalysis::Initialize()
   PrepareFiles();
   TTestType testType;
   testType = m_config->GetTestType();
-  if (testType != OBHalfStaveOLFAST && testType != OBHalfStaveMLFAST) {
+  if (testType != OBHalfStaveOLFAST && testType != OBHalfStaveMLFAST && testType != OBStaveOLFAST &&
+      testType != OBStaveMLFAST) {
     if (IsThresholdScan() && (!m_nominal)) { // do only for threshold scan after tuning
       for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
         CalculatePrediction(m_hics.at(ihic)->GetDbId());
@@ -419,6 +420,7 @@ void TSCurveAnalysis::Finalize()
       hicResult->m_class = GetClassificationIB(hicResult, m_hics.at(ihic));
     }
     hicResult->SetValidity(true);
+    PrintHicClassification(hicResult);
     if (IsThresholdScan() && (!m_nominal)) { // do only for threshold scan after tuning
       ComparePrediction(m_hics.at(ihic)->GetDbId());
     }
@@ -459,8 +461,6 @@ THicClassification TSCurveAnalysis::GetClassificationOB(TSCurveResultHic *result
     DoCut(returnValue, CLASS_SILVER, chipResult->m_noiseAv + 0.9, "THRESH_MAXNOISE_OB", result,
           false, chipId);
   }
-  std::cout << "Threshold Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 
@@ -493,8 +493,6 @@ THicClassification TSCurveAnalysis::GetClassificationIB(TSCurveResultHic *result
     DoCut(returnValue, CLASS_SILVER, chipResult->m_noiseAv + 0.9, "THRESH_MAXNOISE_IB", result,
           false, chipId);
   }
-  std::cout << "Threshold Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
 
   return returnValue;
 }

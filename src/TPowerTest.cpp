@@ -13,6 +13,7 @@ TPowerTest::TPowerTest(TScanConfig *config, std::vector<TAlpide *> chips, std::v
   CreateScanParameters();
 
   m_parameters->backBias = 0;
+  m_ivcurve              = (m_config->GetParamValue("IVCURVE") != 0);
 
   strcpy(m_name, "Power Test");
   m_start[2] = 0;
@@ -45,7 +46,7 @@ void TPowerTest::CreateMeasurements()
 
 void TPowerTest::Init()
 {
-  TScan::Init();
+  InitBase(true);
   // switch power off here or hic-wise in execute?
 }
 
@@ -72,6 +73,8 @@ void TPowerTest::DoIVCurve(THicCurrents &result)
     // overcurrent protection; will be counted as trip; last voltage is saved as max back bias
     // voltage
     if (result.ibias[i] > m_config->GetParamValue("MAXIBIAS")) {
+      printf("MAXIBIAS exceeded at %g: %g > %d, switching off Vbias\n", voltage, result.ibias[i],
+             m_config->GetParamValue("MAXIBIAS"));
       m_hicCurrents.find(m_testHic->GetDbId())->second.maxBias = voltage - .1;
       m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
       std::this_thread::sleep_for(std::chrono::milliseconds(300));
@@ -125,7 +128,7 @@ void TPowerTest::Execute()
   // configure chips
   for (unsigned int i = 0; i < chips.size(); i++) {
     if (!(chips.at(i)->GetConfig()->IsEnabled())) continue;
-    if (!m_testHic->ContainsChip(chips.at(i)->GetConfig()->GetChipId())) continue;
+    if (m_testHic != chips.at(i)->GetHic()) continue;
     AlpideConfig::BaseConfig(chips.at(i));
     AlpideConfig::ConfigureCMU(chips.at(i));
   }
@@ -141,10 +144,18 @@ void TPowerTest::Execute()
   currentIt->second.idddConfigured = m_testHic->GetIddd();
   currentIt->second.iddaConfigured = m_testHic->GetIdda();
 
+  // check if supply tripped
+  if (!(m_testHic->IsPowered())) {
+    currentIt->second.trip = true;
+  }
+  else {
+    currentIt->second.trip = false;
+  }
+
   // switch on back bias only for module under test
   for (int i = 0; i < 8; i++) {
     if (i == m_testHic->GetBbChannel()) {
-      m_testHic->GetPowerBoard()->SetBiasOn(i);
+      m_testHic->GetPowerBoard()->SetBiasOn(i, true);
     }
     else {
       m_testHic->GetPowerBoard()->SetBiasOff(i);
@@ -154,22 +165,23 @@ void TPowerTest::Execute()
   currentIt->second.ibias0 = m_testHic->GetIBias() * 1000;
 
   // measure IV curve or only bias current at 3 V
-  if (m_config->GetParamValue("IVCURVE")) {
+  if (m_ivcurve) {
     DoIVCurve(currentIt->second);
     currentIt->second.ibias3 = currentIt->second.ibias[30];
   }
   else {
-    m_testHic->GetPowerBoard()->SetBiasVoltage(3.0);
+    m_testHic->GetPowerBoard()->SetBiasVoltage(-3.0);
     sleep(1);
     currentIt->second.ibias3 = m_testHic->GetIBias() * 1000;
   }
 
-  // check if supply tripped
-  if (!(m_testHic->IsPowered())) {
-    currentIt->second.trip = true;
+  // check if supply tripped during BB IV-curve
+  if ((!currentIt->second.trip) && (!m_testHic->IsPowered())) {
+    std::cout << "Back bias tripped low voltage" << std::endl;
+    currentIt->second.tripBB = true;
   }
   else {
-    currentIt->second.trip = false;
+    currentIt->second.tripBB = false;
   }
 
   // check if back bias tripped
@@ -178,9 +190,7 @@ void TPowerTest::Execute()
               << std::endl;
     currentIt->second.tripBB = true;
   }
-  else {
-    currentIt->second.tripBB = false;
-  }
+
   m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
   m_testHic->GetPowerBoard()->SetBiasOff(m_testHic->GetBbChannel());
   THicOB *obHic = dynamic_cast<THicOB *>(m_testHic);

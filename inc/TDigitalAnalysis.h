@@ -118,6 +118,8 @@ public:
   void Initialize();
   void Finalize();
 
+  std::string GetName() { return "Digital Analysis"; }
+
   std::vector<TDigitalCounter> GetCounters() { return m_counters; };
 };
 

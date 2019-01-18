@@ -25,6 +25,7 @@ protected:
   THicClassification m_class;
   THicClassification m_worstScanBB;
   THicClassification m_worstScanNoBB;
+  bool               m_noBB;
   virtual bool       IsOnBoard(int boardIdx, int chipId) = 0;
 
 public:
@@ -70,10 +71,22 @@ public:
   int                        GetBbChannel() { return m_bbChannel; };
   void                       SwitchBias(bool on);
   float                      GetAnalogueVoltage(std::map<int, float> *chipValues = 0);
-  void                       AddClassification(THicClassification aClass, bool backBias);
-  THicClassification         GetClassification();
-  THicClassification         GetOldClassification() { return m_oldClass; };
-  void SetOldClassification(THicClassification aOldClass) { m_oldClass = aOldClass; };
+  float                      GetDigitalVoltage(std::map<int, float> *chipValues = 0);
+  float GetSupplyVoltage(bool analogueNotDigital = true, std::map<int, float> *chipValues = 0);
+  void  AddClassification(THicClassification aClass, bool backBias);
+  THicClassification GetClassification();
+  THicClassification GetOldClassification() { return m_oldClass; };
+  void               SetOldClassification(THicClassification aOldClass) { m_oldClass = aOldClass; };
+  void               SetNoBB();
+  bool               GetNoBB() { return m_noBB; }
+  // check if the back bias channel on the pb is enabled
+  // this can be different from ~noBB in cases where two ore more HICs are connected to one bb
+  // channel
+  bool BiasChannelEnabled()
+  {
+    if (m_powerBoard) return m_powerBoard->BiasEnabled(m_bbChannel);
+    return true;
+  }
 };
 
 class THicOB : public THic {

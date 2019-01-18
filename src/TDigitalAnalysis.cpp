@@ -80,7 +80,8 @@ void TDigitalAnalysis::Initialize()
   CreatePrediction();
   TTestType testType;
   testType = m_config->GetTestType();
-  if (testType != OBHalfStaveOLFAST && testType != OBHalfStaveMLFAST) {
+  if (testType != OBHalfStaveOLFAST && testType != OBHalfStaveMLFAST && testType != OBStaveOLFAST &&
+      testType != OBStaveMLFAST) {
     for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
       CalculatePrediction(m_hics.at(ihic)->GetDbId());
     }
@@ -337,6 +338,7 @@ void TDigitalAnalysis::Finalize()
       hicResult->m_class = GetClassificationIB(hicResult);
     }
     hicResult->SetValidity(true);
+    PrintHicClassification(hicResult);
     ComparePrediction(m_hics.at(ihic)->GetDbId());
     DrawAndSaveToPDF(std::stoi(m_hics.at(ihic)->GetDbId()));
   }
@@ -367,8 +369,6 @@ THicClassification TDigitalAnalysis::GetClassificationOB(TDigitalResultHic *resu
     DoCut(returnValue, CLASS_BRONZE, nBad, "DIGITAL_MAXBAD_CHIP_SILVER", result, false, chipId);
     DoCut(returnValue, CLASS_RED, nBad, "DIGITAL_MAXBAD_CHIP_BRONZE", result, false, chipId);
   }
-  std::cout << "Digital Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 
@@ -392,8 +392,6 @@ THicClassification TDigitalAnalysis::GetClassificationIB(TDigitalResultHic *resu
     DoCut(returnValue, CLASS_BRONZE, nBad, "DIGITAL_MAXBAD_CHIP_SILVER", result, false, chipId);
     DoCut(returnValue, CLASS_RED, nBad, "DIGITAL_MAXBAD_CHIP_BRONZE", result, false, chipId);
   }
-  std::cout << "Digital Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
   return returnValue;
 }
 

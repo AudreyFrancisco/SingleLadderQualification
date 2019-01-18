@@ -27,7 +27,8 @@ int OpenEnduranceRecoveryFile(const char *fName, std::vector<std::string> hicNam
                 &counter.m_idddClocked, &counter.m_iddaConfigured, &counter.m_idddConfigured,
                 &counter.m_tempStart, &counter.m_tempEnd) == 16) {
     // check that hic name found is contained in hicNames, otherwise ignore entry
-    stringIter = find(hicNames.begin(), hicNames.end(), string(hicName));
+    counter.m_trip = (trip > 0);
+    stringIter     = find(hicNames.begin(), hicNames.end(), string(hicName));
     if (stringIter == hicNames.end()) {
       std::cout << "Warning, found unknown HIC " << hicName << " in file, ignored" << std::endl;
       continue;
@@ -164,6 +165,8 @@ void TEnduranceCycle::ReadRecoveredCounters(
       }
     }
     // push this cycle to vector and increment start point for "real" cycles
+
+    WriteRecoveryFile();
     m_counterVector.push_back(m_hicCounters);
     m_start[0]++;
     // remove first entry from deque
@@ -174,7 +177,7 @@ void TEnduranceCycle::ReadRecoveredCounters(
 
 void TEnduranceCycle::Init()
 {
-  TScan::Init();
+  InitBase(false);
   time(&m_startTime);
   // configure readout boards
   for (unsigned int i = 0; i < m_boards.size(); i++) {
@@ -185,6 +188,7 @@ void TEnduranceCycle::Init()
     if (!(m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     m_chips.at(i)->GetReadoutBoard()->SetChipEnable(m_chips.at(i), false);
   }
+  TScan::SaveStartConditions();
 }
 
 
@@ -505,6 +509,10 @@ bool TEnduranceCycle::TestPattern(TAlpide *chip, int pattern, int region, int of
     return false;
   }
   if (readBack != pattern) {
+    if (hicCounter.m_fifoErrors < 12) {
+      std::cout << "Fifo test cycle " << m_value[0] << ", wrote pattern 0x" << std::hex << pattern
+                << ", read 0x" << readBack << std::dec << std::endl;
+    }
     hicCounter.m_fifoErrors++;
     if (pattern == 0x0)
       hicCounter.m_fifoErrors0++;

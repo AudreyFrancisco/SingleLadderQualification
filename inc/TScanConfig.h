@@ -33,6 +33,8 @@ typedef enum {
   OBStaveML,
   StaveReceptionOL,
   StaveReceptionML,
+  OBStaveOLFAST,
+  OBStaveMLFAST,
   Unknown
 } TTestType;
 
@@ -55,11 +57,18 @@ namespace ScanConfig {
   // 1.8: shortened endurance test, added parameter for counting of exceptions
   // 1.9: checking DCTRL measurement values for plausibility and excluding them if necessary.
   // 2.0: introduced separate DCTRL cut for (half-)staves (lower slope and amplitude)
-  const float CLASSIFICATION_VERSION = 2.0;
+  // 2.1: Do not consider impedance test result any longer
+  // 2.2: reduced number of endurance test cycles from 150 -> 130 to go from 3.5 to 3 days
+  // 2.3: bug fix in the TPowerTest.cpp, correction in chip configuration
+  //      (leads to higher IDDD configured)
+  //      introduced silver cat. in fast power test for IDDD > 300 mA
+
+  const float CLASSIFICATION_VERSION = 2.3;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions
   const int RECOVERY   = 0; // read recovery file for endurance test
+  const int RSYNC      = 1;
 
   const int NINJ           = 50;     // number of injections in digital/threshold scans
   const int NTRIG          = 100000; // number of triggers for noise occupancy scans
@@ -98,12 +107,13 @@ namespace ScanConfig {
   const int READOUTPLLSTAGES = -1; // -1 meaning using the standard setting from the chip config
 
   // current limits for powering test in mA
-  const int POWER_CUT_MINIDDA_OB = 20;
-  const int POWER_CUT_MINIDDD_OB = 50;
-  const int POWER_CUT_MAXIDDA_OB = 250;  // for fast power test
-  const int POWER_CUT_MAXIDDD_OB = 1000; // for fast power test
-  const int POWER_CUT_MINIDDD_IB = 50;
-  const int POWER_CUT_MINIDDA_IB = 20;
+  const int POWER_CUT_MINIDDA_OB     = 20;
+  const int POWER_CUT_MINIDDD_OB     = 50;
+  const int POWER_CUT_MAXIDDA_OB     = 250;  // for fast power test
+  const int POWER_CUT_MAXIDDD_OB     = 1000; // for fast power test
+  const int POWER_CUT_MAXIDDD_SILVER = 300;  // for fast power test
+  const int POWER_CUT_MINIDDD_IB     = 50;
+  const int POWER_CUT_MINIDDA_IB     = 20;
 
   const int POWER_CUT_MINIDDA_CLOCKED_OB = 120;
   const int POWER_CUT_MINIDDD_CLOCKED_OB = 500;
@@ -216,7 +226,7 @@ namespace ScanConfig {
   const float BACKBIAS      = 0;
   const int   NOMINAL       = 1;
   const int   ENDURANCE_SLICES = 10; // number of cycle slices
-  const int   ENDURANCE_CYCLES = 15; // total number of cycles per slice
+  const int   ENDURANCE_CYCLES = 13; // total number of cycles per slice
   const int   ENDURANCE_UPTIME =
       1600; // up and down wait time in seconds per cycle (originally: 60 +120)
   const int ENDURANCE_DOWNTIME           = 200;
@@ -267,6 +277,7 @@ private:
   int       m_autorepeat;
   int       m_maxrepeat;
   int       m_recovery;
+  int       m_rsync;
   int       m_ithrStart; // usually 30
   int       m_ithrStop;  // usually 100
   int       m_ithrStep;
@@ -285,6 +296,7 @@ private:
   int       m_powerCutMinIddd_OB;
   int       m_powerCutMaxIdda_OB;
   int       m_powerCutMaxIddd_OB;
+  int       m_powerCutMaxIdddSilver_OB;
   int       m_powerCutMinIddaClocked_OB;
   int       m_powerCutMinIdddClocked_OB;
   int       m_powerCutMaxIddaClocked_OB;

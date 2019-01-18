@@ -95,6 +95,8 @@ public:
                 std::vector<THic *> hics, std::mutex *aMutex, TFifoResult *aResult = 0);
   void Initialize();
   void Finalize();
+
+  std::string GetName() { return "FIFO analysis"; }
 };
 
 #endif

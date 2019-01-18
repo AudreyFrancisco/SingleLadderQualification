@@ -160,6 +160,15 @@ void TSCurveScan::RestoreNominalSettings()
       m_chips.at(i)->GetConfig()->SetParamValue("VCLIP", 0);
     }
   }
+  else if ((((TSCurveParameters *)m_parameters)->backBias > 0.99) &&
+           (((TSCurveParameters *)m_parameters)->backBias < 1.01)) {
+    for (unsigned int i = 0; i < m_chips.size(); i++) {
+      m_chips.at(i)->GetConfig()->SetParamValue("ITHR", 50);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCASN", 70);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCASN2", 82);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCLIP", 20);
+    }
+  }
   else if ((((TSCurveParameters *)m_parameters)->backBias > 2.99) &&
            (((TSCurveParameters *)m_parameters)->backBias < 3.01)) {
     for (unsigned int i = 0; i < m_chips.size(); i++) {
@@ -249,7 +258,7 @@ void TSCurveScan::Init()
 {
   m_hitsets = new TRingBuffer<THitSet>;
 
-  TScan::Init();
+  InitBase(false);
 
   if (((TSCurveParameters *)m_parameters)->nominal) RestoreNominalSettings();
 
@@ -273,18 +282,23 @@ void TSCurveScan::Init()
     ConfigureChip(m_chips.at(i));
   }
 
-  for (unsigned int i = 0; i < m_boards.size(); i++) {
-    m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
-    TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(i));
-
-    if (myMOSAIC) {
-      myMOSAIC->StartRun();
-    }
-  }
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->GetPowerBoard()) continue;
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+
+  for (const auto &rBoard : m_boards) {
+    rBoard->SendOpCode(Alpide::OPCODE_RORST);
+    rBoard->StartRun();
+  }
+
+  for (const auto &rBoard : m_boards) {
+    if (TReadoutBoardMOSAIC *rMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(rBoard)) {
+      rMOSAIC->ResetAllReceivers();
+    }
+  }
+
+  TScan::SaveStartConditions();
 
   m_thread = new std::thread(&TSCurveScan::Histo, this);
 }
@@ -448,7 +462,7 @@ void TSCurveScan::Terminate()
     }
   }
 
-  SwitchOffBackbias();
+  // SwitchOffBackbias();
 
   m_running = false;
   // YCM: Print error summary

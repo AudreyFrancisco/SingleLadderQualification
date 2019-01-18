@@ -191,6 +191,8 @@ public:
 
   void Initialize();
   void Finalize();
+
+  std::string GetName() { return "Threshold Analysis"; }
 };
 
 #endif

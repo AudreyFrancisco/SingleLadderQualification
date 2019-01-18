@@ -19,6 +19,7 @@ THic::THic(const char *id, int modId, TPowerBoard *pb, int pbMod, int bbChannel)
   m_oldClass      = CLASS_UNTESTED;
   m_worstScanBB   = CLASS_UNTESTED;
   m_worstScanNoBB = CLASS_UNTESTED;
+  m_noBB          = false;
 
   m_chips.clear();
 }
@@ -90,9 +91,25 @@ void THic::Disable()
   }
 }
 
+void THic::SetNoBB()
+{
+  m_noBB = true;
+  for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
+    m_chips.at(ichip)->SetEnableWithBB(false);
+    if (m_powerBoard) m_powerBoard->DisableBias(m_bbChannel);
+  }
+}
+
 bool THic::IsPowered()
 {
-  // TODO: what if partially powered? What about bias?
+  if (IsPoweredAnalog() && !IsPoweredDigital()) {
+    std::cout << "Warning: found module with only AVDD on -> powering off" << std::endl;
+    if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, false);
+  }
+  else if (IsPoweredDigital() && !IsPoweredAnalog()) {
+    std::cout << "Warning: found module with only DVDD on -> powering off" << std::endl;
+    if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, false);
+  }
   return ((IsPoweredAnalog()) && (IsPoweredDigital()));
 }
 
@@ -205,11 +222,18 @@ void THic::ScaleVoltage(float aFactor)
 void THic::SwitchBias(bool on)
 {
   if (!m_powerBoard) return;
+  if (on && m_noBB) {
+    std::cout << "Warning: HIC " << GetDbId()
+              << " classified as no back bias, back bias not switched" << std::endl;
+    return;
+  }
   if (on) {
     m_powerBoard->SetBiasOn(m_bbChannel);
+    std::cout << "Switched on BB channel: " << m_bbChannel << std::endl;
   }
   else {
     m_powerBoard->SetBiasOff(m_bbChannel);
+    std::cout << "Switched off BB channel: " << m_bbChannel << std::endl;
   }
 }
 
@@ -251,13 +275,24 @@ float THic::GetTemperature(std::map<int, float> *chipValues)
 
 float THic::GetAnalogueVoltage(std::map<int, float> *chipValues)
 {
+  return GetSupplyVoltage(true, chipValues);
+}
+
+float THic::GetDigitalVoltage(std::map<int, float> *chipValues)
+{
+  return GetSupplyVoltage(false, chipValues);
+}
+
+float THic::GetSupplyVoltage(bool analogueNotDigital /* = true */, std::map<int, float> *chipValues)
+{
   float result = 0;
   int   nChips = 0;
 
   if (chipValues) chipValues->clear();
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
-    float voltage = m_chips.at(i)->ReadAnalogueVoltage();
+    float voltage = (analogueNotDigital) ? m_chips.at(i)->ReadAnalogueVoltage()
+                                         : m_chips.at(i)->ReadDigitalVoltage();
     result += voltage;
     if (chipValues) {
       chipValues->insert(

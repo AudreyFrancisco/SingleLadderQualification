@@ -35,10 +35,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/timerfd.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 #define PLATFORM_IS_LITTLE_ENDIAN
+
+// #define DEBUG_HEADERS
 
 void MBoard::init()
 {
@@ -56,8 +59,12 @@ void MBoard::init()
   // System PLL on I2C bus
   mSysPLL = new I2CSysPll(mIPbus, WbbBaseAddress::i2cSysPLL);
 
-  tcp_sockfd   = -1;
-  numReceivers = 0;
+  tcp_sockfd       = -1;
+  numReceivers     = 0;
+  timer_fd         = -1;
+  TCPtimeout       = -1;
+  ignoreTimeouts   = true;
+  insideDataPacket = false;
 }
 
 MBoard::MBoard() { init(); }
@@ -76,6 +83,9 @@ void MBoard::setIPaddress(const char *IPaddr, int port)
 
 MBoard::~MBoard()
 {
+  // avoid flushDataReceivers
+  numReceivers = 0;
+
   // close the TCP connection
   closeTCP();
 
@@ -97,6 +107,7 @@ void MBoard::flushDataReceivers()
 {
   for (int i = 0; i < numReceivers; i++)
     if (receivers[i] != NULL) {
+      receivers[i]->dataBufferUsed = 0;
       receivers[i]->numClosedData  = 0;
       receivers[i]->dataBufferUsed = 0;
       receivers[i]->flush();
@@ -137,49 +148,86 @@ void MBoard::closeTCP()
 {
   if (tcp_sockfd != -1) ::close(tcp_sockfd);
   tcp_sockfd = -1;
+  flushDataReceivers();
 }
 
-ssize_t MBoard::recvTCP(void *rxBuffer, size_t count, int timeout)
+ssize_t MBoard::recvTCP(void *rxBuffer, size_t count)
 {
-  struct pollfd ufds;
+  struct pollfd ufds[2];
+  nfds_t        nfds = 0;
   int           rv;
   ssize_t       rxSize;
 
-  ufds.fd     = tcp_sockfd;
-  ufds.events = POLLIN | POLLNVAL; // check for normal read or error
-  rv          = poll(&ufds, 1, timeout);
+  ufds[0].fd     = tcp_sockfd;
+  ufds[0].events = POLLIN | POLLNVAL; // check for normal read or error
+  nfds++;
+  if (timer_fd != -1 && !ignoreTimeouts) {
+    ufds[nfds].fd     = timer_fd;
+    ufds[nfds].events = POLLIN | POLLNVAL;
+    nfds++;
+  }
 
+  rv = poll(ufds, nfds, TCPtimeout);
   if (rv == -1) throw MDataReceiveError("Poll system call");
 
-  if (rv == 0) return 0; // timeout
+  if (rv == 0) {
+    if (insideDataPacket) { // TCP connection broken
+      throw MDataReceiveError("TCP hanged while reading data");
+    }
+    else {
+      return 0; // normal timeout
+    }
+  }
+
+  if (!ignoreTimeouts) {
+    // check for events on sockfd:
+    if (ufds[1].revents & POLLIN) {
+      throw MDataReceiveError("Invalid file descriptor in poll system call");
+    }
+    else {
+      if (ufds[1].revents & POLLIN) {
+        uint64_t expNum;
+        ssize_t  ret = read(timer_fd, &expNum, sizeof(expNum));
+        if (ret == 0 || ret == -1) throw MDataReceiveError("MBoard::recvTCP - Error reading timer");
+        if (expNum == 0)
+          throw MDataReceiveError("MBoard::recvTCP - Timer expiration counter returned 0!");
+        // timer expired. Return
+        return 0;
+      }
+    }
+  }
 
   // check for events on sockfd:
   rxSize = 0;
-  if (ufds.revents & POLLIN) {
+  if (ufds[0].revents & POLLIN) {
     rxSize = recv(tcp_sockfd, rxBuffer, count, 0);
     if (rxSize == 0 || rxSize == -1)
       throw MDataReceiveError("Board connection closed. Fatal error!");
+    return rxSize;
   }
-  else if (ufds.revents & POLLNVAL) {
-    throw MDataReceiveError("Invalid file descriptor in poll system call");
+  else {
+    if (ufds[0].revents & POLLNVAL) {
+      throw MDataReceiveError("Invalid file descriptor in poll system call");
+    }
   }
 
-  return rxSize;
+  return 0;
 }
 
-ssize_t MBoard::readTCPData(void *buffer, size_t count, int timeout)
+ssize_t MBoard::readTCPData(void *buffer, size_t count)
 {
   ssize_t p = 0;
   ssize_t res;
 
   while (count) {
-    res = recvTCP(buffer, count, timeout);
+    res = recvTCP(buffer, count);
 
     if (res == 0) return p;
     p += res;
     buffer = (char *)buffer + res;
     count -= res;
-    timeout = -1; // disable timeout for segments following the first
+    ignoreTimeouts = true;
+    TCPtimeout     = TCPhangTimeout; // disable timeout for segments following the first
   }
 
   return p;
@@ -201,25 +249,25 @@ unsigned int MBoard::buf2ui(unsigned char *buf)
 #endif
 }
 
-/*
+#ifdef DEBUG_HEADERS
 static void dump(unsigned char *buffer, int size)
 {
-        int i, j;
+  int i, j;
 
-        for (i=0; i<size;){
-                for (j=0; j<16; j++){
-                        printf(" %02x", buffer[i]);
-                        i++;
-                }
-                printf("\n");
-        }
+  for (i = 0; i < size;) {
+    for (j = 0; j < 16; j++) {
+      printf(" %02x", buffer[i]);
+      i++;
+    }
+    printf("\n");
+  }
 }
-*/
+#endif // DEBUG_HEADERS
 
 //
 //	Read data from the TCP socket and dispatch them to the receivers
 //
-long MBoard::pollTCP(int timeout, MDataReceiver **drPtr)
+long MBoard::pollTCP(MDataReceiver **drPtr)
 {
   const unsigned int bufferSize = 64 * 1024;
   unsigned char      rcvbuffer[bufferSize];
@@ -232,11 +280,24 @@ long MBoard::pollTCP(int timeout, MDataReceiver **drPtr)
   int                dataSrc;
   ssize_t            n;
 
-  *drPtr = NULL;
-  n      = readTCPData(header, headerSize, timeout);
+  // Read the header
+  *drPtr           = NULL;
+  ignoreTimeouts   = false;
+  insideDataPacket = false;
+  n                = readTCPData(header, headerSize);
 
   if (n == 0) // timeout
     return 0;
+
+  // for all block data after header, disable timer and timeout
+  ignoreTimeouts   = true;
+  TCPtimeout       = TCPhangTimeout;
+  insideDataPacket = true;
+
+#ifdef DEBUG_HEADERS
+  printf("Header:\n");
+  dump(header, headerSize);
+#endif
 
   blockSize         = buf2ui(header);
   flags             = buf2ui(header + 4);
@@ -253,17 +314,17 @@ long MBoard::pollTCP(int timeout, MDataReceiver **drPtr)
   if (blockSize == 0 && (flags & flagCloseRun) == 0)
     throw MDataReceiveError("Block size set to zero and not CLOSE_RUN");
 
-  //	if (flags & flagCloseRun)
-  //		printf("Received Data packet with CLOSE_RUN\n");
+  // if (flags & flagCloseRun)
+  // printf("Received Data packet with CLOSE_RUN\n");
 
   // skip data from unregistered source
   if (dataSrc > numReceivers || receivers[dataSrc] == NULL) {
     printf("Skipping data block from unregistered source\n");
     while (readBlockSize) {
       if (readBlockSize > bufferSize)
-        n = readTCPData(rcvbuffer, bufferSize, -1);
+        n = readTCPData(rcvbuffer, bufferSize);
       else
-        n = readTCPData(rcvbuffer, readBlockSize, -1);
+        n = readTCPData(rcvbuffer, readBlockSize);
       readBlockSize -= n;
     }
     return readDataSize;
@@ -277,7 +338,7 @@ long MBoard::pollTCP(int timeout, MDataReceiver **drPtr)
   *drPtr = dr;
 
   if (readBlockSize != 0) {
-    n = readTCPData(dr->getWritePtr(readBlockSize), readBlockSize, -1);
+    n = readTCPData(dr->getWritePtr(readBlockSize), readBlockSize);
     if (n == 0) return 0;
 
     // update the size of data in the buffer
@@ -287,7 +348,6 @@ long MBoard::pollTCP(int timeout, MDataReceiver **drPtr)
       dr->dataBufferUsed += blockSize;
 
     // printf("dr->dataBufferUsed: %ld closedDataCounter:%ld flags:0x%04x\n", dr->dataBufferUsed,
-    // closedDataCounter, flags);
   }
   dr->numClosedData += closedDataCounter;
 
@@ -303,7 +363,19 @@ long MBoard::pollData(int timeout)
   long           closedDataCounter;
   MDataReceiver *dr;
 
-  readDataSize = pollTCP(timeout, &dr);
+  // If all receiver got flagCloseRun, return
+  int rcv;
+  for (rcv = 0; rcv < numReceivers; rcv++) {
+    if ((receivers[rcv]->blockFlags & flagCloseRun) == 0) break;
+  }
+  if (rcv == numReceivers) {
+    // printf("INFO: MBoard::pollData - All receiver got flagCloseRun\n");
+    return 0;
+  }
+
+  // get data from socket
+  TCPtimeout   = timeout;
+  readDataSize = pollTCP(&dr);
   if (dr != NULL) {
     closedDataCounter = dr->numClosedData;
     if (closedDataCounter > 0) {
@@ -320,8 +392,47 @@ long MBoard::pollData(int timeout)
       printf("WARNING: MBoard::pollData received data with flagCloseRun but after parsing the "
              "databuffer is not empty (%ld bytes)\n",
              dr->dataBufferUsed);
-      //	dump((unsigned char*) &dr->dataBuffer[0], dr->dataBufferUsed);
+      //  dump((unsigned char*) &dr->dataBuffer[0], dr->dataBufferUsed);
     }
   }
+  return readDataSize;
+}
+
+//
+//	Read data from the TCP socket and send it to the receivers
+//
+//  Use this function to poll data for specified time (msec)
+//
+long MBoard::pollDataTime(int msec)
+{
+  long readDataSize = 0;
+
+  // create the timer
+  timer_fd = timerfd_create(CLOCK_REALTIME, TFD_NONBLOCK);
+  if (timer_fd == -1) throw MDataReceiveError("MBoard::pollDataTime - timerfd_create error");
+
+  // arm the timer
+  struct itimerspec exp_time;
+  exp_time.it_value.tv_sec     = msec / 1000;
+  exp_time.it_value.tv_nsec    = (msec % 1000) * 1000;
+  exp_time.it_interval.tv_sec  = 0;
+  exp_time.it_interval.tv_nsec = 0;
+
+  int res = timerfd_settime(timer_fd, 0, &exp_time, NULL);
+  if (res == -1) throw MDataReceiveError("MBoard::pollDataTime - timerfd_settime error");
+
+  // call pollData until timer expires
+  for (;;) {
+    ignoreTimeouts = false;
+
+    long res = pollData(-1);
+    if (res == 0) break;
+    readDataSize += res;
+  }
+
+  // release kernel resources
+  close(timer_fd);
+  timer_fd = -1;
+
   return readDataSize;
 }

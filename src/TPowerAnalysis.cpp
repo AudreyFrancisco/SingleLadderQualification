@@ -138,7 +138,30 @@ void TPowerAnalysis::Finalize()
     for (int i = 0; i < m_ivPoints; i++) {
       hicResult->ibias[i] = hicCurrents.ibias[i];
     }
+
+    THic *currentHic = nullptr;
+    for (auto hic : m_hics)
+      if (hic->GetDbId() == it->first) currentHic = hic;
+
+    if (hicResult->tripBB) {
+      currentHic->SetNoBB();
+      for (auto hic : m_hics)
+        if (hic->GetBbChannel() == currentHic->GetBbChannel()) hic->SetNoBB();
+    }
+  }
+
+  for (it = currents.begin(); it != currents.end(); ++it) {
+    TPowerResultHic *hicResult   = (TPowerResultHic *)m_result->GetHicResult(it->first);
+    THicCurrents     hicCurrents = it->second;
+
+    THic *currentHic = nullptr;
+    for (auto hic : m_hics)
+      if (hic->GetDbId() == it->first) currentHic = hic;
+
+    if (currentHic->GetNoBB()) hicResult->tripBB = true;
+
     hicResult->m_class = GetClassification(hicCurrents, hicResult);
+    PrintHicClassification(hicResult);
     hicResult->SetValidity(true);
 
     CreateIVHisto(hicResult);
@@ -165,8 +188,6 @@ THicClassification TPowerAnalysis::GetClassification(THicCurrents currents, TPow
     if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
     if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
   }
-  std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
 
   return returnValue;
 }
@@ -185,7 +206,8 @@ THicClassification TPowerAnalysis::GetClassificationIB(THicCurrents     currents
   DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_IB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
+  if (!currents.tripBB)
+    DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
 
   return returnValue;
 }
@@ -204,7 +226,8 @@ THicClassification TPowerAnalysis::GetClassificationOB(THicCurrents     currents
   DoCut(returnValue, CLASS_SILVER, currents.iddaClocked * 1000, "MAXIDDA_CLOCKED_OB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_OB", result);
+  if (!currents.tripBB)
+    DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_OB", result);
 
   return returnValue;
 }

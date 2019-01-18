@@ -321,6 +321,11 @@ const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
     return "Unknown";
 }
 
+void TScanAnalysis::PrintHicClassification(TScanResultHic *res)
+{
+  std::cout << "==> " << GetName() << " - Classification " << res->GetName() << ": "
+            << WriteHicClassification(res->GetClassification()) << std::endl;
+}
 
 void TScanAnalysis::WriteHicClassToFile(std::string hicName)
 {

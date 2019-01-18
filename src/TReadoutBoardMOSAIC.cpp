@@ -253,7 +253,8 @@ int TReadoutBoardMOSAIC::ReadEventData(int &nBytes, unsigned char *buffer)
   // try to read from TCP connection
   for (;;) {
     try {
-      readDataSize = pollTCP(fBoardConfig->GetPollingDataTimeout(), &dr);
+      TCPtimeout   = fBoardConfig->GetPollingDataTimeout();
+      readDataSize = pollTCP(&dr);
       if (readDataSize == 0) return 0; // Zero means no data
     }
     catch (exception &e) {
@@ -370,7 +371,26 @@ void TReadoutBoardMOSAIC::init()
   // ----- Now do the initilization -------
   // Initialize the System PLL
   mSysPLL->setup(sysPLLregContent);
+  waitResetDone();
 
+  for (int i = 0; i < MAX_MOSAICCTRLINT; i++)
+    setPhase(fBoardConfig->GetCtrlInterfacePhase(), i); // set the Phase shift on the line
+
+  setSpeedMode(fBoardConfig->GetSpeedMode()); // set 400 MHz mode
+  setInverted(fBoardConfig->IsInverted(), -1);
+
+  pulser->run(0);
+  mRunControl->stopRun();
+  mRunControl->clearErrors();
+  mRunControl->setAFThreshold(fBoardConfig->GetCtrlAFThreshold());
+  mRunControl->setLatency(fBoardConfig->GetCtrlLatMode(), fBoardConfig->GetCtrlLatMode());
+  enableControlInterfaces(true);
+
+  return;
+}
+
+void TReadoutBoardMOSAIC::waitResetDone()
+{
 #ifdef ENABLE_EXTERNAL_CLOCK
   uint32_t boardStatusReady = (BOARD_STATUS_FEPLL_LOCK);
 #else
@@ -389,21 +409,6 @@ void TReadoutBoardMOSAIC::init()
     if ((st & boardStatusReady) == boardStatusReady) break;
   }
   if (init_try == 0) throw MBoardInitError("Timeout setting MOSAIC system PLL");
-
-  for (int i = 0; i < MAX_MOSAICCTRLINT; i++)
-    setPhase(fBoardConfig->GetCtrlInterfacePhase(), i); // set the Phase shift on the line
-
-  setSpeedMode(fBoardConfig->GetSpeedMode()); // set 400 MHz mode
-  setInverted(fBoardConfig->IsInverted(), -1);
-
-  pulser->run(0);
-  mRunControl->stopRun();
-  mRunControl->clearErrors();
-  mRunControl->setAFThreshold(fBoardConfig->GetCtrlAFThreshold());
-  mRunControl->setLatency(fBoardConfig->GetCtrlLatMode(), fBoardConfig->GetCtrlLatMode());
-  enableControlInterfaces(true);
-
-  return;
 }
 
 // ============================== DATA receivers private methods
@@ -420,7 +425,7 @@ void TReadoutBoardMOSAIC::enableDefinedReceivers()
   for (unsigned int i = 0; i < fChipPositions.size(); i++) { // for each defined chip
     dataLink = fChipPositions.at(i).receiver;
     if (dataLink >= 0) { // Enable the data receiver
-      if (fChipPositions.at(i).enabled && !Used[dataLink]) {
+      if (fChipPositions.at(i).alpidePtr->GetConfig()->IsEnabled() && !Used[dataLink]) {
         std::cout << "ENabling receiver " << dataLink << std::endl;
         alpideRcv[dataLink]->addEnable(true);
         Used[dataLink] = true;
@@ -453,6 +458,7 @@ void TReadoutBoardMOSAIC::setSpeedMode(Mosaic::TReceiverSpeed ASpeed, int Aindex
     break;
   }
   mRunControl->rmwConfigReg(~CFG_RATE_MASK, regSet);
+  waitResetDone();
 }
 
 void TReadoutBoardMOSAIC::setReadTriggerInfo(bool readTriggerInfo /*= true*/)
@@ -582,6 +588,9 @@ std::string TReadoutBoardMOSAIC::GetRegisterDump()
   result += trgRecorder->dumpRegisters();
   result += "coordinator\n";
   result += coordinator->dumpRegisters();
+  for (int i = 0; i < MAX_MOSAICTRANRECV; i++)
+    result += alpideRcv[i]->dumpRegisters();
+
   return result;
 }
 
@@ -597,7 +606,7 @@ void TReadoutBoardMOSAIC::WriteTransceiverDRP(size_t Aindex, uint16_t address, u
                                               bool execute)
 {
   if (Aindex >= MAX_MOSAICTRANRECV) {
-    std::cout << "Invalid Transceiver index " << Aindex << "\n";
+    std::cerr << "Invalid Transceiver index " << Aindex << "\n";
     return;
   }
   alpideRcv[Aindex]->addSetRDPReg(address, val);
@@ -619,7 +628,7 @@ void TReadoutBoardMOSAIC::WriteTransceiverDRPField(size_t Aindex, uint16_t addre
                                                    uint16_t offset, uint16_t value, bool execute)
 {
   if (Aindex >= MAX_MOSAICTRANRECV) {
-    std::cout << "Invalid Transceiver index " << Aindex << "\n";
+    std::cerr << "Invalid Transceiver index " << Aindex << "\n";
     return;
   }
   alpideRcv[Aindex]->addSetRDPRegField(address, size, offset, value);
@@ -638,7 +647,7 @@ void TReadoutBoardMOSAIC::ReadTransceiverDRP(size_t Aindex, uint16_t address, ui
                                              bool execute)
 {
   if (Aindex >= MAX_MOSAICTRANRECV) {
-    std::cout << "Invalid Transceiver index " << Aindex << "\n";
+    std::cerr << "Invalid Transceiver index " << Aindex << "\n";
     return;
   }
   alpideRcv[Aindex]->addGetRDPReg(address, value);
@@ -700,4 +709,33 @@ uint32_t TReadoutBoardMOSAIC::GetErrorCounter(size_t Aindex)
   return (errRegValue);
 }
 
+/*
+   Reset one Receiver
+
+   parameters: receiver  - Transceiver id
+*/
+void TReadoutBoardMOSAIC::ResetReceiver(size_t Areceiver)
+{
+  if (Areceiver >= MAX_MOSAICTRANRECV) {
+    std::cerr << "MOSAIC ResetReceiver : Invalid Transceiver index ! (" << Areceiver << ")"
+              << std::endl;
+    return;
+  }
+  std::cout << "MOSAIC ResetReceiver : reset the TranReceiver n." << Areceiver << std::endl;
+  alpideRcv[Areceiver]->reset();
+  return;
+}
+
+/*
+   Reset all the MOSAIC Receivers
+
+*/
+void TReadoutBoardMOSAIC::ResetAllReceivers()
+{
+  for (size_t i = 0; i < MAX_MOSAICTRANRECV; i++) {
+    std::cout << "MOSAIC ResetReceiver : reset the TranReceiver n." << i << std::endl;
+    alpideRcv[i]->reset();
+  }
+  return;
+}
 // ================================== EOF ========================================

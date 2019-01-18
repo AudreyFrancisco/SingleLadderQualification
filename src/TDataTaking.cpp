@@ -88,7 +88,7 @@ THisto TDataTaking::CreateHisto()
 
 void TDataTaking::Init()
 {
-  TScan::Init();
+  InitBase(false);
 
   SetBackBias();
 
@@ -107,15 +107,25 @@ void TDataTaking::Init()
     if (!(m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     ConfigureChip(m_chips.at(i));
   }
-  for (unsigned int i = 0; i < m_boards.size(); i++) {
-    m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
-    m_boards.at(i)->StartRun();
-  }
+
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
     if (!pb) continue;
     pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+
+  for (unsigned int i = 0; i < m_boards.size(); i++) {
+    m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
+    m_boards.at(i)->StartRun();
+  }
+
+  for (const auto &rBoard : m_boards) {
+    if (TReadoutBoardMOSAIC *rMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(rBoard)) {
+      rMOSAIC->ResetAllReceivers();
+    }
+  }
+
+  TScan::SaveStartConditions();
 }
 
 // check which HIC caused the timeout, i.e. did not send enough events
@@ -165,9 +175,14 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
         std::cout << std::endl;
         std::cout << "  Trigger counters per chip (chip order): ";
         for (unsigned int i = 0; i < m_chips.size(); i++) {
-          uint16_t value;
-          m_chips.at(i)->ReadRegister(Alpide::REG_FROMU_STATUS1, value);
-          std::cout << value << " ";
+          if (m_chips.at(i)->GetConfig()->IsEnabled()) {
+            uint16_t value;
+            m_chips.at(i)->ReadRegister(Alpide::REG_FROMU_STATUS1, value);
+            std::cout << m_chips.at(i)->GetConfig()->GetChipId() << ": " << value << " ";
+          }
+          else {
+            std::cout << m_chips.at(i)->GetConfig()->GetChipId() << ": disabled ";
+          }
         }
         std::cout << std::endl;
         itrg = nTriggers * m_enabled[iboard];

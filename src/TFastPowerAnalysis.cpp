@@ -111,6 +111,7 @@ void TFastPowerAnalysis::Finalize()
       hicResult->ibias[i] = hicCurrents.ibias[i];
     }
     hicResult->m_class = GetClassification(hicCurrents, hicResult);
+    PrintHicClassification(hicResult);
     hicResult->SetValidity(true);
 
     CreateIVHisto(hicResult);
@@ -144,20 +145,20 @@ THicClassification TFastPowerAnalysis::GetClassificationOB(THicCurrents         
   DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MINIDDA_OB", result, true);
   DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MINIDDD_OB", result, true);
 
+  DoCut(returnValue, CLASS_SILVER, currents.idddSwitchon * 1000, "MAXIDDDSILVEROB", result);
+
   DoCut(returnValue, CLASS_RED, currents.iddaSwitchon * 1000, "MAXIDDA_OB", result);
   DoCut(returnValue, CLASS_RED, currents.idddSwitchon * 1000, "MAXIDDD_OB", result);
 
   // check for absolute value at 3V and for margin from breakthrough
-  DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
+  if (!currents.tripBB)
+    DoCut(returnValue, CLASS_SILVER, currents.ibias[30], "MAXBIAS_3V_IB", result);
 
   if (currents.tripBB) {
     if (returnValue == CLASS_GOLD) returnValue = CLASS_GOLD_NOBB;
     if (returnValue == CLASS_SILVER) returnValue = CLASS_SILVER_NOBB;
     if (returnValue == CLASS_BRONZE) returnValue = CLASS_BRONZE_NOBB;
   }
-
-  std::cout << "Power Analysis - Classification: " << WriteHicClassification(returnValue)
-            << std::endl;
 
   return returnValue;
   // TODO: Add orange for back bias

@@ -18,6 +18,7 @@ TScanConfig::TScanConfig()
   m_autorepeat = AUTOREPEAT;
   m_maxrepeat  = MAXREPEAT;
   m_recovery   = RECOVERY;
+  m_rsync      = RSYNC;
 
   m_nInj       = NINJ;
   m_nTrig      = NTRIG;
@@ -69,6 +70,7 @@ TScanConfig::TScanConfig()
   m_powerCutMinIddd_OB        = POWER_CUT_MINIDDD_OB;
   m_powerCutMaxIdda_OB        = POWER_CUT_MAXIDDA_OB;
   m_powerCutMaxIddd_OB        = POWER_CUT_MAXIDDD_OB;
+  m_powerCutMaxIdddSilver_OB  = POWER_CUT_MAXIDDD_SILVER;
   m_powerCutMinIddaClocked_OB = POWER_CUT_MINIDDA_CLOCKED_OB;
   m_powerCutMinIdddClocked_OB = POWER_CUT_MINIDDD_CLOCKED_OB;
   m_powerCutMaxIddaClocked_OB = POWER_CUT_MAXIDDA_CLOCKED_OB;
@@ -192,6 +194,7 @@ void TScanConfig::InitParamMap()
   fSettings["AUTOREPEAT"] = &m_autorepeat;
   fSettings["MAXREPEAT"]  = &m_maxrepeat;
   fSettings["RECOVERY"]   = &m_recovery;
+  fSettings["RSYNC"]      = &m_rsync;
 
   fSettings["NINJ"]         = &m_nInj;
   fSettings["NTRIG"]        = &m_nTrig;
@@ -227,6 +230,7 @@ void TScanConfig::InitParamMap()
   fSettings["MINIDDD_OB"]             = &m_powerCutMinIddd_OB;
   fSettings["MAXIDDA_OB"]             = &m_powerCutMaxIdda_OB;
   fSettings["MAXIDDD_OB"]             = &m_powerCutMaxIddd_OB;
+  fSettings["MAXIDDDSILVEROB"]        = &m_powerCutMaxIdddSilver_OB;
   fSettings["MINIDDA_CLOCKED_OB"]     = &m_powerCutMinIddaClocked_OB;
   fSettings["MINIDDD_CLOCKED_OB"]     = &m_powerCutMinIdddClocked_OB;
   fSettings["MAXIDDA_CLOCKED_OB"]     = &m_powerCutMaxIddaClocked_OB;
@@ -427,6 +431,7 @@ bool TScanConfig::IsHalfStave()
 {
   return ((m_testType == OBHalfStaveOL) || (m_testType == OBHalfStaveML) ||
           (m_testType == OBHalfStaveOLFAST) || (m_testType == OBHalfStaveMLFAST) ||
-          (m_testType == OBStaveOL) || (m_testType == OBStaveML) ||
-          (m_testType == StaveReceptionOL) || (m_testType == StaveReceptionML));
+          (m_testType == OBStaveOL) || (m_testType == OBStaveML) || (m_testType == OBStaveOLFAST) ||
+          (m_testType == OBStaveMLFAST) || (m_testType == StaveReceptionOL) ||
+          (m_testType == StaveReceptionML));
 }

@@ -49,7 +49,7 @@ void TDctrlMeasurement::InitScope()
 {
   // scope.debug_en = true; // Enable to print all scope transactions
   if (!scope.open_auto()) { // Auto connects to scope
-    exit(1);
+    throw runtime_error("scope.open_auto() failed!");
   }
   scope.get_errors(); // Check for scope errors
 
@@ -80,7 +80,7 @@ void TDctrlMeasurement::Init()
 {
   CreateScanHisto();
 
-  TScan::Init();
+  InitBase(false);
 
   InitScope();
 
@@ -94,8 +94,13 @@ void TDctrlMeasurement::Init()
     if (pb) pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 
+  m_disableManchesterEncoding = -1;
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
+    if (m_disableManchesterEncoding == -1) {
+      m_disableManchesterEncoding = (m_chips.at(i)->GetConfig()->GetDisableManchester()) ? 1 : 0;
+    }
+    m_chips.at(i)->GetConfig()->SetDisableManchester(false);
     AlpideConfig::ConfigureCMU(m_chips.at(i));
   }
 
@@ -103,6 +108,8 @@ void TDctrlMeasurement::Init()
     TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
     if (pb) pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+
+  TScan::SaveStartConditions();
 }
 
 
@@ -156,8 +163,8 @@ void TDctrlMeasurement::WriteMem(TAlpide *chip, int ARegion, int AOffset, int AV
   if (err >= 0) err = chip->WriteRegister(HighAdd, HighVal);
 
   if (err < 0) {
-    std::cout << "Cannot write chip register. Exiting ... " << std::endl;
-    exit(1);
+    std::cout << "Cannot write chip register." << std::endl;
+    throw runtime_error("Cannot write chip register.");
   }
 }
 
@@ -195,8 +202,8 @@ void TDctrlMeasurement::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AV
   }
 
   if (err < 0) {
-    std::cout << "Cannot read chip register. Exiting ... " << std::endl;
-    exit(1);
+    std::cout << "Cannot read chip register." << std::endl;
+    throw runtime_error("Cannot read chip register.");
   }
 
   // Note to self: if you want to shorten the following lines,
@@ -248,10 +255,10 @@ void TDctrlMeasurement::Execute()
       (m_testChip->GetConfig()->GetParamValue("LINKSPEED") != -1)) {
 
     scope.single_capture();           // Stop on first trigger
-    TestPattern(0x555555, exception); // Generate data on bus
+    TestPattern(0xFFFFFF, exception); // Generate data on bus
     /*if (exception) { // Should these be ignored?
       std::cout << "Fifo scan failed" << std::endl;
-      exit(1);
+      throw runtime_erro("Fifo scan failed");
     }*/
     scope.wait_for_trigger(10); // Check and wait until triggered
 
@@ -297,6 +304,14 @@ void TDctrlMeasurement::Execute()
 
 void TDctrlMeasurement::Terminate()
 {
+  if (m_disableManchesterEncoding == 1) {
+    for (unsigned int i = 0; i < m_chips.size(); i++) {
+      if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
+      m_chips.at(i)->GetConfig()->SetDisableManchester(true);
+      AlpideConfig::ConfigureCMU(m_chips.at(i));
+    }
+  }
+
   TScan::Terminate();
   scope.close();
 

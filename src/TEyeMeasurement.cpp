@@ -86,7 +86,7 @@ void TEyeMeasurement::Init()
 {
   CreateScanHisto();
 
-  TScan::Init();
+  InitBase(false);
   TEyeParameters *params = (TEyeParameters *)m_parameters;
 
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
@@ -119,6 +119,8 @@ void TEyeMeasurement::Init()
   // 10 ~= log2(1.2Gbps)/(65536*20)
 
   m_running = true;
+
+  TScan::SaveStartConditions();
 }
 
 

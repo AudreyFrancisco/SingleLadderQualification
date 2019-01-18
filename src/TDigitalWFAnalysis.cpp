@@ -134,6 +134,7 @@ void TDigitalWFAnalysis::Finalize()
       hicResult->m_class = GetClassificationOB(hicResult);
     }
     hicResult->SetValidity(true);
+    PrintHicClassification(hicResult);
   }
   WriteResult();
 
@@ -158,8 +159,6 @@ THicClassification TDigitalWFAnalysis::GetClassificationOB(TDigitalWFResultHic *
     DoCut(returnValue, CLASS_RED, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE",
           result, false, chipId);
   }
-  std::cout << "Digital Whiteframe Analysis - Classification: "
-            << WriteHicClassification(returnValue) << std::endl;
   return returnValue;
 }
 
@@ -180,8 +179,6 @@ THicClassification TDigitalWFAnalysis::GetClassificationIB(TDigitalWFResultHic *
     DoCut(returnValue, CLASS_RED, chipResult->m_nBadDCol, "DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE",
           result, false, chipId);
   }
-  std::cout << "Digital Whiteframe Analysis - Classification: "
-            << WriteHicClassification(returnValue) << std::endl;
   return returnValue;
 }
 

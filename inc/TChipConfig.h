@@ -8,6 +8,7 @@
 #include <string>
 
 class TConfig;
+class TAlpide;
 
 namespace ChipConfig { // to avoid clashes with other configs (e.g. for STROBE_DELAY)
   const int VCASN   = 50;
@@ -56,6 +57,7 @@ class TChipConfig {
 private:
   std::map<std::string, int *> fSettings;
   TConfig *                    fConfig;
+  TAlpide *                    fChip;
   int                          fChipId;
   int fEnabled;       // variable to exclude (non-working) chip from tests, default true
   int fEnabledWithBB; // variable to exclude chips from tests when BB on, default true
@@ -119,6 +121,7 @@ public:
   TChipConfig(TConfig *config, int chipId, const char *fName = 0);
   int  fEnduranceDisabled; // temporary fix to re-enabled chips that were disabled in end. test
   void InitParamMap();
+  void SetChip(TAlpide *chip) { fChip = chip; };
   bool SetParamValue(std::string Name, std::string Value);
   bool SetParamValue(std::string Name, int Value);
   int  GetParamValue(std::string Name);
@@ -128,7 +131,7 @@ public:
   int  GetDataLink() { return fReceiver; };
   bool IsEnabled() const;
   bool IsEnabledNoBB() const { return fEnabled != 0; }
-  bool IsEnabledWithBB() const { return (fEnabled != 0) && (fEnabledWithBB != 0); }
+  bool IsEnabledWithBB() const;
   void SetEnable(bool Enabled) { fEnabled = Enabled ? 1 : 0; };
   void SetEnableWithBB(bool Enabled) { fEnabledWithBB = Enabled ? 1 : 0; };
   int  GetModuleId() { return (fChipId & 0x70) >> 4; };
