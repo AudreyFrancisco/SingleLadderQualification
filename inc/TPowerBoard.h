@@ -178,6 +178,7 @@ public:
   void CalibrateCurrent(int module);
   void CalibrateBiasCurrent();
   void CalibrateBiasVoltage();
+  void CorrectVoltageDrop(TPowerBoardConfig::pb_t pb, bool reset = false, int nch = 8);
   void CorrectVoltageDrop(int module, TPowerBoardConfig::pb_t pb, bool reset = false);
   bool IsCalibrated(int module) { return GetConfigurationHandler()->IsCalibrated(module); };
 
