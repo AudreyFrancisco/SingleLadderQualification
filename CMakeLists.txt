@@ -92,6 +92,7 @@ add_subdirectory(MosaicSrc/libpowerboard)
 add_subdirectory(ScopeControlSrc)
 add_subdirectory(scripts)
 add_subdirectory(GUI)
+add_subdirectory(TestDataExplorer)
 
 # create Data/ directory
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Data)
