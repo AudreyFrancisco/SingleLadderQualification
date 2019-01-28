@@ -1,3 +1,7 @@
+#include "QOpenGLWidget"
+#include "QSplitter"
+#include "QStandardItemModel"
+#include "QTreeView"
 #include "mainwindow.h"
 #include <QApplication>
 
