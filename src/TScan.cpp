@@ -166,7 +166,7 @@ void TScan::SaveStartConditions()
   }
 
   for (const auto &rChip : m_chips) {
-    if (rChip->GetConfig()->IsEnabled()) {
+    if (rChip->GetConfig()->IsEnabled() || (rChip->GetConfig()->GetParamValue("PREVID") != -1)) {
       try {
         m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
       }
@@ -321,7 +321,7 @@ void TScan::Terminate()
   }
 
   for (const auto &rChip : m_chips) {
-    if (rChip->GetConfig()->IsEnabled()) {
+    if (rChip->GetConfig()->IsEnabled() || (rChip->GetConfig()->GetParamValue("PREVID") != -1)) {
       try {
         m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
       }
