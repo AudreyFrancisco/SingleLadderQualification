@@ -167,14 +167,7 @@ void TDigitalScan::Init()
   }
 
   for (unsigned int i = 0; i < m_chips.size(); i++) {
-    if (!(m_chips.at(i)->GetConfig()->IsEnabled())) {
-      int previd = m_chips.at(i)->GetConfig()->GetParamValue("PREVID");
-      if (previd != -1) {
-        printf("setting non-default previd for disabled chip %i: %i\n", i, previd);
-        m_chips.at(i)->WriteRegister(Alpide::REG_CMUDMU_CONFIG, 0x4 | (previd & 0xf));
-      }
-      continue;
-    }
+    if (!(m_chips.at(i)->GetConfig()->IsEnabled())) continue;
     ConfigureChip(m_chips.at(i));
   }
 
