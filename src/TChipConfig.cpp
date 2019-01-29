@@ -101,6 +101,7 @@ void TChipConfig::InitParamMap()
   fSettings["DTUPREEMP"]          = &fDtuPreemp;
   fSettings["DCTRLDRIVER"]        = &fDctrlDriver;
   fSettings["MANCHESTERDISABLED"] = &fDisableManchester;
+  fSettings["PREVID"]             = &fPreviousId;
 }
 
 bool TChipConfig::SetParamValue(std::string Name, std::string Value)

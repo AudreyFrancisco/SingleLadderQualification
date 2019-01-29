@@ -77,6 +77,17 @@ void TScan::InitBase(bool saveStartConditions)
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
 
+  for (auto chip : m_chips) {
+    if (!chip->GetConfig()->IsEnabled()) {
+      int previd = chip->GetConfig()->GetParamValue("PREVID");
+      if (previd != -1) {
+        printf("setting non-default previd for disabled chip (ID %i): %i\n",
+               chip->GetConfig()->GetChipId(), previd);
+        chip->WriteRegister(Alpide::REG_CMUDMU_CONFIG, 0x4 | (previd & 0xf));
+      }
+    }
+  }
+
   if (saveStartConditions) {
     SaveStartConditions();
   }
@@ -155,7 +166,7 @@ void TScan::SaveStartConditions()
   }
 
   for (const auto &rChip : m_chips) {
-    if (rChip->GetConfig()->IsEnabled()) {
+    if (rChip->GetConfig()->IsEnabled() || (rChip->GetConfig()->GetParamValue("PREVID") != -1)) {
       try {
         m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
       }
@@ -316,7 +327,7 @@ void TScan::Terminate()
   }
 
   for (const auto &rChip : m_chips) {
-    if (rChip->GetConfig()->IsEnabled()) {
+    if (rChip->GetConfig()->IsEnabled() || (rChip->GetConfig()->GetParamValue("PREVID") != -1)) {
       try {
         m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
       }
