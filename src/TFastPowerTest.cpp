@@ -98,9 +98,9 @@ void TFastPowerTest::Execute()
   std::map<std::string, THicCurrents>::iterator currentIt =
       m_hicCurrents.find(m_testHic->GetDbId());
 
-  for (unsigned int i = 0; i < boardIndices.size(); i++) {
-    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC *)m_boards.at(boardIndices.at(i));
-    board->enableControlInterfaces(false);
+  for (auto board : m_boards) {
+    TReadoutBoardMOSAIC *mosaic = dynamic_cast<TReadoutBoardMOSAIC *>(board);
+    if (mosaic) mosaic->enableControlInterfaces(false);
   }
 
   m_testHic->PowerOn();
