@@ -974,7 +974,7 @@ bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPer
 
 
 bool GetNoiseFileName(ActivityDB::activityLong activity, bool masked, int backBias,
-                        string &dataName, string &hitsName, string &resultName)
+                      string &dataName, string &hitsName, string &resultName)
 {
   bool   found = false;
   string attName;
@@ -984,16 +984,16 @@ bool GetNoiseFileName(ActivityDB::activityLong activity, bool masked, int backBi
     attName = activity.Attachments.at(i).FileName;
     if ((attName.find("NoisyPixels") != string::npos)) {
       if (masked && (attName.find("masked") != string::npos) &&
-	  (backBias == 0) && (attName.find("_0V") != string::npos))
+          (backBias == 0) && (attName.find("_0V") != string::npos))
       found = true;
       if (masked && (attName.find("masked") != string::npos) &&
-	  (backBias == 3) && (attName.find("_3V") != string::npos))
+          (backBias == 3) && (attName.find("_3V") != string::npos))
       found = true;
       if (!masked && (attName.find("masked") == string::npos) &&
-	  (backBias == 0) && (attName.find("_0V") != string::npos))
+          (backBias == 0) && (attName.find("_0V") != string::npos))
       found = true;
       if (!masked && (attName.find("masked") == string::npos) &&
-	  (backBias == 3) && (attName.find("_3V") != string::npos))
+          (backBias == 3) && (attName.find("_3V") != string::npos))
       found = true;
     }
   }
@@ -1038,7 +1038,7 @@ bool GetPowerFileName(ActivityDB::activityLong activity, bool &ivFound, string &
 
 
 bool GetThresholdFileName(ActivityDB::activityLong activity, int chip, bool nominal, int backBias,
-                        string &dataName, string &resultName)
+                          string &dataName, string &resultName)
 {
   // nominal: true -> nominal, false -> tuned
   bool   found = false;
@@ -1048,16 +1048,16 @@ bool GetThresholdFileName(ActivityDB::activityLong activity, int chip, bool nomi
     attName = activity.Attachments.at(i).FileName;
     if ((attName.find("ThresholdScanResult") != string::npos)) {
       if (nominal && (attName.find("Nominal") != string::npos) &&
-	  (backBias == 0) && (attName.find("_0V") != string::npos))
+          (backBias == 0) && (attName.find("_0V") != string::npos))
       found = true;
       if (nominal && (attName.find("Nominal") != string::npos) &&
-	  (backBias == 3) && (attName.find("_3V") != string::npos))
+          (backBias == 3) && (attName.find("_3V") != string::npos))
       found = true;
       if (!nominal && (attName.find("Tuned") != string::npos) &&
-	  (backBias == 0) && (attName.find("_0V") != string::npos))
+          (backBias == 0) && (attName.find("_0V") != string::npos))
       found = true;
       if (!nominal && (attName.find("Tuned") != string::npos) &&
-	  (backBias == 3) && (attName.find("_3V") != string::npos))
+          (backBias == 3) && (attName.find("_3V") != string::npos))
       found = true;
     }
   }
@@ -1076,7 +1076,7 @@ bool GetThresholdFileName(ActivityDB::activityLong activity, int chip, bool nomi
 
 
 bool GetITHRTuneFileName(ActivityDB::activityLong activity, int chip, int backBias,
-			 string &dataName, string &resultName)
+                         string &dataName, string &resultName)
 {
   bool   found = false;
   string attName;
@@ -1084,10 +1084,10 @@ bool GetITHRTuneFileName(ActivityDB::activityLong activity, int chip, int backBi
   for (unsigned int i = 0; (i < activity.Attachments.size()) && (!found); i++) {
     attName = activity.Attachments.at(i).FileName;
     if ((attName.find("ITHRTuneResult") != string::npos) &&
-	(backBias == 0) && (attName.find("_0V") != string::npos))
+        (backBias == 0) && (attName.find("_0V") != string::npos))
       found = true;
     if ((attName.find("ITHRTuneResult") != string::npos) &&
-	(backBias == 3) && (attName.find("_3V") != string::npos))
+        (backBias == 3) && (attName.find("_3V") != string::npos))
       found = true;
   }
 
@@ -1105,7 +1105,7 @@ bool GetITHRTuneFileName(ActivityDB::activityLong activity, int chip, int backBi
 
 
 bool GetVCASNTuneFileName(ActivityDB::activityLong activity, int chip, int backBias,
-			  string &dataName, string &resultName)
+                          string &dataName, string &resultName)
 {
   bool   found = false;
   string attName;
@@ -1113,10 +1113,10 @@ bool GetVCASNTuneFileName(ActivityDB::activityLong activity, int chip, int backB
   for (unsigned int i = 0; (i < activity.Attachments.size()) && (!found); i++) {
     attName = activity.Attachments.at(i).FileName;
     if ((attName.find("VCASNTuneResult") != string::npos) &&
-	(backBias == 0) && (attName.find("_0V") != string::npos))
+        (backBias == 0) && (attName.find("_0V") != string::npos))
       found = true;
     if ((attName.find("VCASNTuneResult") != string::npos) &&
-	(backBias == 3) && (attName.find("_3V") != string::npos))
+        (backBias == 3) && (attName.find("_3V") != string::npos))
       found = true;
   }
 
