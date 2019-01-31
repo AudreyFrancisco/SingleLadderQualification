@@ -973,6 +973,45 @@ bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPer
 }
 
 
+bool GetNoiseFileName(ActivityDB::activityLong activity, bool masked, int backBias,
+                      string &dataName, string &hitsName, string &resultName)
+{
+  bool   found = false;
+  string attName;
+
+  // find the correct attachment for the given noise scan
+  for (unsigned int i = 0; (i < activity.Attachments.size()) && (!found); i++) {
+    attName = activity.Attachments.at(i).FileName;
+    if ((attName.find("NoisyPixels") != string::npos)) {
+      if (masked && (attName.find("masked") != string::npos) && (backBias == 0) &&
+          (attName.find("_0V") != string::npos))
+        found = true;
+      if (masked && (attName.find("masked") != string::npos) && (backBias == 3) &&
+          (attName.find("_3V") != string::npos))
+        found = true;
+      if (!masked && (attName.find("masked") == string::npos) && (backBias == 0) &&
+          (attName.find("_0V") != string::npos))
+        found = true;
+      if (!masked && (attName.find("masked") == string::npos) && (backBias == 3) &&
+          (attName.find("_3V") != string::npos))
+        found = true;
+    }
+  }
+
+  if (!found) return found;
+  // find the date and time within the attachment name
+  string temp = attName.substr(attName.find("_") + 1);
+
+  string date = temp.substr(0, temp.find("_", 10));
+
+  dataName   = "NoisyPixels_" + date + ".dat";
+  hitsName   = "NoiseHits_" + date + ".dat";
+  resultName = "NoiseOccResult_" + date + ".dat";
+  // create file name for raw data files
+  return found;
+}
+
+
 bool GetPowerFileName(ActivityDB::activityLong activity, bool &ivFound, string &ivName,
                       string &resultName)
 {
@@ -994,5 +1033,101 @@ bool GetPowerFileName(ActivityDB::activityLong activity, bool &ivFound, string &
     }
   }
 
+  return found;
+}
+
+
+bool GetThresholdFileName(ActivityDB::activityLong activity, int chip, bool nominal, int backBias,
+                          string &dataName, string &resultName)
+{
+  // nominal: true -> nominal, false -> tuned
+  bool   found = false;
+  string attName;
+  // find the correct attachment for the given threshold scan
+  for (unsigned int i = 0; (i < activity.Attachments.size()) && (!found); i++) {
+    attName = activity.Attachments.at(i).FileName;
+    if ((attName.find("ThresholdScanResult") != string::npos)) {
+      if (nominal && (attName.find("Nominal") != string::npos) && (backBias == 0) &&
+          (attName.find("_0V") != string::npos))
+        found = true;
+      if (nominal && (attName.find("Nominal") != string::npos) && (backBias == 3) &&
+          (attName.find("_3V") != string::npos))
+        found = true;
+      if (!nominal && (attName.find("Tuned") != string::npos) && (backBias == 0) &&
+          (attName.find("_0V") != string::npos))
+        found = true;
+      if (!nominal && (attName.find("Tuned") != string::npos) && (backBias == 3) &&
+          (attName.find("_3V") != string::npos))
+        found = true;
+    }
+  }
+
+  if (!found) return found;
+  // find the date and time within the attachment name
+  string temp = attName.substr(attName.find("_") + 1);
+
+  string date = temp.substr(0, temp.find("_", 10));
+
+  dataName   = "Threshold_FitResults_" + date + "_Chip" + to_string(chip) + ".dat";
+  resultName = "ThresholdScanResult_" + date + ".dat";
+  // create file name for raw data files
+  return found;
+}
+
+
+bool GetITHRTuneFileName(ActivityDB::activityLong activity, int chip, int backBias,
+                         string &dataName, string &resultName)
+{
+  bool   found = false;
+  string attName;
+  // find the correct attachment for the given threshold scan
+  for (unsigned int i = 0; (i < activity.Attachments.size()) && (!found); i++) {
+    attName = activity.Attachments.at(i).FileName;
+    if ((attName.find("ITHRTuneResult") != string::npos) && (backBias == 0) &&
+        (attName.find("_0V") != string::npos))
+      found = true;
+    if ((attName.find("ITHRTuneResult") != string::npos) && (backBias == 3) &&
+        (attName.find("_3V") != string::npos))
+      found = true;
+  }
+
+  if (!found) return found;
+  // find the date and time within the attachment name
+  string temp = attName.substr(attName.find("_") + 1);
+
+  string date = temp.substr(0, temp.find("_", 10));
+
+  dataName   = "Threshold_FitResults_" + date + "_Chip" + to_string(chip) + ".dat";
+  resultName = "ITHRTuneResult_" + date + ".dat";
+  // create file name for raw data files
+  return found;
+}
+
+
+bool GetVCASNTuneFileName(ActivityDB::activityLong activity, int chip, int backBias,
+                          string &dataName, string &resultName)
+{
+  bool   found = false;
+  string attName;
+  // find the correct attachment for the given threshold scan
+  for (unsigned int i = 0; (i < activity.Attachments.size()) && (!found); i++) {
+    attName = activity.Attachments.at(i).FileName;
+    if ((attName.find("VCASNTuneResult") != string::npos) && (backBias == 0) &&
+        (attName.find("_0V") != string::npos))
+      found = true;
+    if ((attName.find("VCASNTuneResult") != string::npos) && (backBias == 3) &&
+        (attName.find("_3V") != string::npos))
+      found = true;
+  }
+
+  if (!found) return found;
+  // find the date and time within the attachment name
+  string temp = attName.substr(attName.find("_") + 1);
+
+  string date = temp.substr(0, temp.find("_", 10));
+
+  dataName   = "Threshold_FitResults_" + date + "_Chip" + to_string(chip) + ".dat";
+  resultName = "VCASNTuneResult_" + date + ".dat";
+  // create file name for raw data files
   return found;
 }
