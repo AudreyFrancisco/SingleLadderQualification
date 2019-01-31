@@ -67,16 +67,16 @@ TTestType GetTestType(string activityTypeName);
 bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPercent, int backBias,
                         string &dataName, string &resultName);
 bool GetNoiseFileName(ActivityDB::activityLong activity, bool masked, int backBias,
-                        string &dataName, string &hitsName, string &resultName);
+                      string &dataName, string &hitsName, string &resultName);
 bool GetPowerFileName(ActivityDB::activityLong activity, bool &ivFound, string &ivName,
                       string &resultName);
 bool GetThresholdFileName(ActivityDB::activityLong activity, int chip, bool nominal, int backBias,
-                        string &dataName, string &resultName);
+                          string &dataName, string &resultName);
 
 bool GetITHRTuneFileName(ActivityDB::activityLong activity, int chip, int backBias,
-                        string &dataName, string &resultName);
+                         string &dataName, string &resultName);
 
 bool GetVCASNTuneFileName(ActivityDB::activityLong activity, int chip, int backBias,
-                        string &dataName, string &resultName);
+                          string &dataName, string &resultName);
 
 #endif
