@@ -312,6 +312,13 @@ void TThresholdScan::PrepareStep(int loopIndex)
       m_chips.at(ichip)->WriteRegister(Alpide::REG_VPULSEL,
                                        ((TSCurveParameters *)m_parameters)->VPULSEH - m_value[0]);
     }
+    for (unsigned int ichip = m_chips.size() - 1; ichip >= 0; ichip--) {
+      if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      uint16_t reg = 0x0;
+      m_chips.at(ichip)->ReadRegister(Alpide::REG_VPULSEL, reg);
+      ++reg; // trick the compiler
+      break;
+    }
     break;
   case 1: // 2nd loop: mask staging
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
@@ -336,6 +343,13 @@ void TtuneVCASNScan::PrepareStep(int loopIndex)
       m_chips.at(ichip)->WriteRegister(Alpide::REG_VCASN2, m_value[0] + 12);
     }
     break;
+    for (unsigned int ichip = m_chips.size() - 1; ichip >= 0; ichip--) {
+      if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      uint16_t reg = 0x0;
+      m_chips.at(ichip)->ReadRegister(Alpide::REG_VCASN2, reg);
+      ++reg; // trick the compiler
+      break;
+    }
   case 1: // 2nd loop: mask staging
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
       if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
@@ -354,6 +368,13 @@ void TtuneITHRScan::PrepareStep(int loopIndex)
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
       if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       m_chips.at(ichip)->WriteRegister(Alpide::REG_ITHR, m_value[0]);
+    }
+    for (unsigned int ichip = m_chips.size() - 1; ichip >= 0; ichip--) {
+      if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
+      uint16_t reg = 0x0;
+      m_chips.at(ichip)->ReadRegister(Alpide::REG_ITHR, reg);
+      ++reg; // trick the compiler
+      break;
     }
     break;
   case 1: // 2nd loop: mask staging
