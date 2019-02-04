@@ -197,7 +197,7 @@ void TDigitalScan::PrepareStep(int loopIndex)
       if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[0]);
     }
-    for (unsigned int ichip = m_chips.size() - 1; ichip >= 0; ichip--) {
+    for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
       if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       uint16_t reg = 0x0;
       m_chips.at(ichip)->ReadRegister(Alpide::PIXREG_SELECT, reg);
