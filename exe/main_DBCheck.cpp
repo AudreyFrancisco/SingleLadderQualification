@@ -232,7 +232,7 @@ bool checkEos(string activityType, string location, string component)
   std::cout << "Unable to find eos path " << path << std::endl;
 
   if (g_fpEos) {
-    fprintf(g_fpDB, "Component %s is missing eos data path %s\n", component.data(), path.data());
+    fprintf(g_fpEos, "Component %s is missing eos data path %s\n", component.data(), path.data());
   }
 
   return false;
