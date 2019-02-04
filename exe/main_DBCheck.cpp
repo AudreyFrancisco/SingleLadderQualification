@@ -1,13 +1,19 @@
 #include <AlpideDB.h>
 #include <AlpideDBEndPoints.h>
 #include <DBHelpers.h>
+#include <array>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <list>
+#include <memory>
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <sys/stat.h>
 #include <vector>
+
 
 static const std::list<std::string> kHicActivities = {
     "OB HIC Assembly",       "OB-HIC Impedance Test", "OB HIC Qualification Test",
@@ -62,6 +68,22 @@ FILE *g_fpDB;
 FILE *g_fpEos;
 
 std::map<string, int> g_missing;
+
+std::string getUserName()
+{
+  std::array<char, 128>                    buffer;
+  std::string                              result;
+  std::unique_ptr<FILE, decltype(&pclose)> pipe(
+      popen("klist | grep 'Default principal' | cut -d' ' -f3 | cut -d'@' -f1", "r"), pclose);
+  if (!pipe) {
+    throw std::runtime_error("popen() failed!");
+  }
+  while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+    result += buffer.data();
+  }
+  result.pop_back();
+  return result;
+}
 
 
 void printUsage()
@@ -181,21 +203,28 @@ int DbCheckHistory(AlpideDB *db, int compId, string compName, list<string> activ
 
 bool checkEos(string activityType, string location, string component)
 {
-  struct stat stat1;
-  string      retestPath, path, locDir, test;
-  string      basePath("/eos/project/a/alice-its/HicTests");
+  string retestPath, path, locDir, test;
+  string basePath("/eos/project/a/alice-its/HicTests");
   GetServiceAccount(location, locDir);
   test = GetTestDirName(GetTestType(activityType));
 
   path = basePath + "/" + test + locDir + "/" + component;
 
-  if (stat(path.data(), &stat1) == 0) {
+
+  string username = getUserName();
+  string command  = "ssh -K -o GSSAPITrustDNS=yes ";
+
+  if (std::system(string(command + username + "@lxplus.cern.ch '[ -d " + path + " ]'").data()) ==
+      0) {
     return true;
   }
 
+
   for (int retest = 1; retest < 20; retest++) {
     retestPath = path + "_Retest_" + to_string(retest);
-    if (stat(retestPath.data(), &stat1) == 0) {
+    if (std::system(
+            string(command + username + "@lxplus.cern.ch '[ -d " + retestPath + " ]'").data()) ==
+        0) {
       return true;
     }
   }
@@ -422,6 +451,18 @@ int main(int argc, char **argv)
     return -1;
   }
   stave.Name = argv[1];
+
+  if (stave.Name.find("OL") != string::npos) {
+    middleLayer = false;
+  }
+  else if (stave.Name.find("ML") != string::npos) {
+    middleLayer = true;
+  }
+  else {
+    printUsage();
+    return -1;
+  }
+
   std::cout << "Checking DB for stave " << stave.Name << std::endl;
 
   AlpideDB *db = new AlpideDB(false);
