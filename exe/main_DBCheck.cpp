@@ -144,12 +144,17 @@ void addToMissing(string missingName)
 bool DbCheckHistorySingle(AlpideDB *db, int compId, string compName, string activityType,
                           string &location)
 {
+  // exclude non-existent relations
+  if (((compName.find("L") != string::npos) && (activityType.find("Upper"))) ||
+      ((compName.find("R") != string::npos) && (activityType.find("Lowerer"))))
+    return true;
+
+
   ComponentDB *componentDB = new ComponentDB(db);
   ActivityDB * activityDB  = new ActivityDB(db);
 
   vector<ComponentDB::compActivity> history;
   int                               ID;
-
 
   componentDB->GetComponentActivities(compId, &history);
 
