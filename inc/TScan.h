@@ -173,7 +173,7 @@ public:
   void                            WriteBoardRegisters(const char *fName);
   void                            ActivateTimestampLog();
   void                            WriteTimestampLog(const char *fName);
-  bool                            HasBackBias() { return (m_parameters->backBias > 0.1); };
+  bool                            HasBackBias() { return (m_parameters->backBias > 1.1); };
   float                           GetBackBias() { return m_parameters->backBias; };
   std::vector<common::TChipIndex> GetChipList() { return m_chipList; };
 };

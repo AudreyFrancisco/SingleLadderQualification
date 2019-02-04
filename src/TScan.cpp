@@ -188,7 +188,13 @@ void TScan::SetBackBias()
       m_hics.at(ihic)->SwitchBias(true);
       pb->SetBiasVoltage((-1.) * m_parameters->backBias);
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
-      m_config->SetBackBiasActive(true);
+      // consider scans up to -1V as no back bias
+      if (m_parameters->backBias > 1.1) {
+        m_config->SetBackBiasActive(true);
+      }
+      else {
+        m_config->SetBackBiasActive(false);
+      }
     }
   }
 }
