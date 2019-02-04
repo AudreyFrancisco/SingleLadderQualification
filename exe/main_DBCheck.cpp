@@ -145,8 +145,8 @@ bool DbCheckHistorySingle(AlpideDB *db, int compId, string compName, string acti
                           string &location)
 {
   // exclude non-existent relations
-  if (((compName.find("L") != string::npos) && (activityType.find("Upper"))) ||
-      ((compName.find("R") != string::npos) && (activityType.find("Lower"))))
+  if (((compName.find("L") != string::npos) && (activityType.find("Upper") != string::npos)) ||
+      ((compName.find("R") != string::npos) && (activityType.find("Lower") != string::npos)))
     return true;
 
 
