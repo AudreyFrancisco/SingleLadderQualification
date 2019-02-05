@@ -58,6 +58,7 @@ namespace ScanConfig {
   //      introduced silver cat. in fast power test for IDDD > 300 mA
 
   const float CLASSIFICATION_VERSION = 2.3;
+  const float NUMBEROFTHEBEAST       = 1.0;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions
