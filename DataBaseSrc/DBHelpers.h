@@ -20,6 +20,7 @@ typedef struct {
 
 int DbGetMemberId(AlpideDB *db, string name);
 // int  DbGetProjectId        (AlpideDB *db, string Name);
+float            DbGetSoftwareVersion(AlpideDB *db);
 int              DbGetParameterId(AlpideDB *db, int activityTypeId, string name);
 int              DbGetResultId(AlpideDB *db, int activityTypeId, string resultName);
 int              DbGetResultId(AlpideDB *db, int activityTypeId, THicClassification classification);

@@ -40,6 +40,32 @@ int DbGetActivityTypeId(AlpideDB *db, string name)
 }
 
 
+float DbGetSoftwareVersion(AlpideDB *db)
+{
+  ActivityDB::activityLong swActivity;
+  float                    version;
+
+  int actTypeId = DbGetActivityTypeId(db, "Software Development");
+  if (actTypeId < 0) {
+    std::cout << "Warning (DbGetSoftwareVersion): unable to find software version" << std::endl;
+    return actTypeId;
+  }
+
+  if (!DbGetLatestActivity(db, actTypeId, "HIC-Test-Software", swActivity)) {
+    std::cout << "Warning (DbGetSoftwareVersion): unable to find software development activity"
+              << std::endl;
+    return -1;
+  }
+
+  if (!DbFindParamValue(swActivity.Parameters, "Version", version)) {
+    std::cout << "Warning (DbGetSoftwareVersion): unable to find Version parameter" << std::endl;
+    return -1;
+  }
+
+  return version;
+}
+
+
 // returns the ID of the previous activity
 // parameter name is the name of the current activity
 // if the previous activity acts on the children, onChildren is set true
