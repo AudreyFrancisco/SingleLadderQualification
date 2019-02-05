@@ -51,7 +51,7 @@ float DbGetSoftwareVersion(AlpideDB *db)
     return actTypeId;
   }
 
-  if (!DbGetLatestActivity(db, actTypeId, "HIC-Test-Software", swActivity)) {
+  if (!DbGetLatestActivity(db, actTypeId, "Software", swActivity)) {
     std::cout << "Warning (DbGetSoftwareVersion): unable to find software development activity"
               << std::endl;
     return -1;

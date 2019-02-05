@@ -744,6 +744,18 @@ void MainWindow::fillingOBvectors()
   AddScan(STNoise);
   AddScan(STClearMask);
 
+  // scans and tuning at -1V back bias
+  fConfig->GetScanConfig()->SetBackBias(1.0);
+  fConfig->GetScanConfig()->SetVcasnRange(40, 100);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  AddScan(STDigital);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+  AddScan(STThreshold);
+
   // threshold scans and tuning at -3V back bias
   fConfig->GetScanConfig()->SetBackBias(3.0);
   fConfig->GetScanConfig()->SetVcasnRange(75, 160);
