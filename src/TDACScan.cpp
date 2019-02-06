@@ -62,7 +62,7 @@ void TDACScan::Init()
       int previd = m_chips.at(i)->GetConfig()->GetParamValue("PREVID");
       if (previd != -1) {
         printf("setting non-default previd for disabled chip %i: %i\n", i, previd);
-        m_chips.at(i)->WriteRegister(Alpide::REG_CMUDMU_CONFIG, 0x4 | (previd & 0xf));
+        m_chips.at(i)->WriteRegister(Alpide::REG_CMUDMU_CONFIG, 0x40 | (previd & 0xf));
       }
       continue;
     }
