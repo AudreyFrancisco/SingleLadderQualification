@@ -2,12 +2,18 @@
 #define TDCTRLMEASUREMENT_H
 
 #include <mutex>
+#include <set>
 
 #include "Common.h"
 #include "THisto.h"
 #include "TScan.h"
 #include "scope_control.h"
 
+// Test types containing DCTRL scan
+static const std::set<std::string> kDCTRLTestTypes = {
+    "OB HIC Qualification Test", "IB HIC Qualification Test", "IB Stave Qualification Test",
+    "OB HIC Reception Test",     "OL HS Qualification Test",  "ML HS Qualification Test",
+    "OL Stave Reception Test",   "ML Stave Reception Test"};
 
 class TDctrlMeasurement : public TScan {
 private:
@@ -32,12 +38,17 @@ public:
                     std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoque,
                     std::mutex *aMutex);
   ~TDctrlMeasurement(){};
-  void             Init();
-  void             Execute();
-  void             Terminate();
-  void             LoopEnd(int loopIndex);
-  void             LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
-  void             PrepareStep(int loopIndex);
+  void        Init();
+  void        Execute();
+  void        Terminate();
+  void        LoopEnd(int loopIndex);
+  void        LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
+  void        PrepareStep(int loopIndex);
+  static bool isPerformedDuring(string testType)
+  {
+    return kDCTRLTestTypes.find(testType) != kDCTRLTestTypes.end();
+  };
+
   scope_control    scope;
   static const int peak_p = 0;
   static const int peak_n = 1;

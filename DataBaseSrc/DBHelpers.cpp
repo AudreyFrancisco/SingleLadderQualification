@@ -1,6 +1,8 @@
 #include "DBHelpers.h"
+#include "TDCTRLMeasurement.h"
 #include "TDigitalScan.h"
 #include "TNoiseOccupancy.h"
+#include "TPowerTest.h"
 #include "TSCurveScan.h"
 #include <algorithm>
 #include <fstream>
@@ -304,6 +306,9 @@ void DbGetAllTests(AlpideDB *db, int compId, vector<ComponentDB::compActivity> &
       continue;
     if ((scanType == STNoise) && (!TNoiseOccupancy::isPerformedDuring(history.at(i).Typename)))
       continue;
+    if ((scanType == STPower) && (!TPowerTest::isPerformedDuring(history.at(i).Typename))) continue;
+    if ((scanType == STDctrl) && (!TDctrlMeasurement::isPerformedDuring(history.at(i).Typename)))
+      continue;
     tests.push_back(history.at(i));
   }
   if (lastOnly) DbEliminateDoubles(tests);
@@ -322,7 +327,7 @@ bool DbCheckCompleteness(AlpideDB *db, int compId)
   vector<ComponentDB::compActivity> tests;
   // first fill vector with all found tests (one instance for each type only)
   // Scan type has to be one not treated in DbGetAllTests
-  DbGetAllTests(db, compId, tests, STPower, true);
+  DbGetAllTests(db, compId, tests, STFifo, true);
 
   // now find index of last test
   unsigned int last = 0;

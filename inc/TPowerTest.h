@@ -3,12 +3,20 @@
 
 #include <map>
 #include <mutex>
+#include <set>
 #include <string>
 
 #include "Common.h"
 #include "THIC.h"
 #include "THisto.h"
 #include "TScan.h"
+
+// Test types containing power test
+static const std::set<std::string> kPowerTestTypes = {
+    "OB HIC Qualification Test",   "IB HIC Qualification Test",   "IB Stave Qualification Test",
+    "OB HIC Reception Test",       "OL HS Qualification Test",    "ML HS Qualification Test",
+    "OL Stave Qualification Test", "ML Stave Qualification Test", "OL Stave Reception Test",
+    "ML Stave Reception Test"};
 
 typedef struct {
   THicType hicType;
@@ -55,6 +63,10 @@ public:
   void LoopEnd(int loopIndex) { (void)(&loopIndex); };
   void PrepareStep(int loopIndex);
   std::map<std::string, THicCurrents> GetCurrents() { return m_hicCurrents; };
+  static bool                         isPerformedDuring(string testType)
+  {
+    return kPowerTestTypes.find(testType) != kPowerTestTypes.end();
+  };
 };
 
 #endif
