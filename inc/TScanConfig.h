@@ -240,6 +240,7 @@ namespace ScanConfig {
   const int EYE_MIN_Y  = -127;
   const int EYE_MAX_Y  = 129;
   const int EYE_STEP_Y = 4;
+
 } // namespace ScanConfig
 
 class TScanConfig {
@@ -266,6 +267,7 @@ private:
   int                          m_testWithoutComp;
   int                          m_status;
   int                          m_halfstavecomp;
+  int                          m_allowOld;
   // NEW--added for additional scans
   int       m_autorepeat;
   int       m_maxrepeat;
