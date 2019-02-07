@@ -263,20 +263,10 @@ void TPowerTest::DigitalCurrentStep(float &dVDig, float &dVAna, float &dIDig, fl
   }
   // measure voltages and currents
 
-  float avddchipbefore    = 0;
-  float dvddchipbefore    = 0;
-  float ianaloguepbbefore = 0;
-  float idigitalpbbefore  = 0;
-
-  float dvddchipafter    = 0;
-  float avddchipafter    = 0;
-  float ianaloguepbafter = 0;
-  float idigitalpbafter  = 0;
-
-  avddchipbefore    = m_testHic->GetAnalogueVoltage();
-  dvddchipbefore    = m_testHic->GetDigitalVoltage();
-  ianaloguepbbefore = m_testHic->GetIdda();
-  idigitalpbbefore  = m_testHic->GetIddd();
+  float avddchipbefore    = m_testHic->GetAnalogueVoltage();
+  float dvddchipbefore    = m_testHic->GetDigitalVoltage();
+  float ianaloguepbbefore = m_testHic->GetIdda();
+  float idigitalpbbefore  = m_testHic->GetIddd();
 
   // configure chips
   for (unsigned int i = 0; i < chips.size(); i++) {
@@ -287,10 +277,10 @@ void TPowerTest::DigitalCurrentStep(float &dVDig, float &dVAna, float &dIDig, fl
   }
 
 
-  avddchipafter    = m_testHic->GetAnalogueVoltage();
-  dvddchipafter    = m_testHic->GetDigitalVoltage();
-  ianaloguepbafter = m_testHic->GetIdda();
-  idigitalpbafter  = m_testHic->GetIddd();
+  float avddchipafter    = m_testHic->GetAnalogueVoltage();
+  float dvddchipafter    = m_testHic->GetDigitalVoltage();
+  float ianaloguepbafter = m_testHic->GetIdda();
+  float idigitalpbafter  = m_testHic->GetIddd();
 
   dVDig = dvddchipafter - dvddchipbefore;
   dVAna = avddchipafter - avddchipbefore;
@@ -311,14 +301,8 @@ void TPowerTest::AnalogCurrentStep(float &dVAna, float &dIAna)
   }
   // measure voltages and currents
 
-  float avddchipbefore    = 0;
-  float ianaloguepbbefore = 0;
-
-  float avddchipafter    = 0;
-  float ianaloguepbafter = 0;
-
-  avddchipbefore    = m_testHic->GetAnalogueVoltage();
-  ianaloguepbbefore = m_testHic->GetIdda();
+  float avddchipbefore    = m_testHic->GetAnalogueVoltage();
+  float ianaloguepbbefore = m_testHic->GetIdda();
 
   // set IBIAS 0
   for (unsigned int i = 0; i < chips.size(); i++) {
@@ -327,8 +311,8 @@ void TPowerTest::AnalogCurrentStep(float &dVAna, float &dIAna)
     chips.at(i)->WriteRegister(Alpide::REG_IBIAS, 0);
   }
 
-  avddchipafter    = m_testHic->GetAnalogueVoltage();
-  ianaloguepbafter = m_testHic->GetIdda();
+  float avddchipafter    = m_testHic->GetAnalogueVoltage();
+  float ianaloguepbafter = m_testHic->GetIdda();
 
   dVAna = avddchipafter - avddchipbefore;
   dIAna = ianaloguepbbefore - ianaloguepbafter;
