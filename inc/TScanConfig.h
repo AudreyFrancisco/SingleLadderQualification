@@ -56,8 +56,9 @@ namespace ScanConfig {
   // 2.3: bug fix in the TPowerTest.cpp, correction in chip configuration
   //      (leads to higher IDDD configured)
   //      introduced silver cat. in fast power test for IDDD > 300 mA
+  // 2.4: introduced 1V back bias scan in HIC Qualification test (fail -> not working)
 
-  const float CLASSIFICATION_VERSION = 2.3;
+  const float CLASSIFICATION_VERSION = 2.4;
   const float NUMBEROFTHEBEAST       = 1.0;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
