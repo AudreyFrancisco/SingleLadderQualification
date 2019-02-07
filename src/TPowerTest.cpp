@@ -207,7 +207,7 @@ void TPowerTest::Execute()
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
   m_testHic->GetPowerBoard()->SwitchDigitalOn(m_testHic->GetPbMod());
   */
-  float dVDig, dVAna, dIDig, dIAna;
+  float dVDig, dVAna, dIDig, dIAna = 0;
 
   DigitalCurrentStep(dVDig, dVAna, dIDig, dIAna);
 
