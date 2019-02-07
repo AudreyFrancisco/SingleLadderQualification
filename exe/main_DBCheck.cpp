@@ -217,20 +217,35 @@ bool checkEos(string activityType, string location, string component)
 
 
   string username = getUserName();
-  string command  = "ssh -K -o GSSAPITrustDNS=yes ";
+  string command  = "ssh -v -K -o GSSAPITrustDNS=yes ";
 
-  if (std::system(string(command + username + "@lxplus.cern.ch '[ -d " + path + " ]'").data()) ==
-      0) {
+  int result =
+      std::system(string(command + username + "@lxplus.cern.ch '[ -d " + path + " ]'").data());
+  switch (result) {
+  case 0:
     return true;
+    break;
+  case 1:
+    break;
+  case 255:
+    std::cerr << "EOS connection failed, please check folder " << path << " by hand!" << std::endl;
+    break;
   }
-
 
   for (int retest = 1; retest < 20; retest++) {
     retestPath = path + "_Retest_" + to_string(retest);
-    if (std::system(
-            string(command + username + "@lxplus.cern.ch '[ -d " + retestPath + " ]'").data()) ==
-        0) {
+    result     = std::system(
+        string(command + username + "@lxplus.cern.ch '[ -d " + retestPath + " ]'").data());
+    switch (result) {
+    case 0:
       return true;
+      break;
+    case 1:
+      break;
+    case 255:
+      std::cerr << "EOS connection failed, please check folder " << retestPath << " by hand!"
+                << std::endl;
+      break;
     }
   }
 
