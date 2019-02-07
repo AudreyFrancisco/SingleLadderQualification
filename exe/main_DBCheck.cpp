@@ -217,7 +217,7 @@ bool checkEos(string activityType, string location, string component)
 
 
   string username = getUserName();
-  string command  = "ssh -v -K -o GSSAPITrustDNS=yes ";
+  string command  = "ssh -K -o GSSAPITrustDNS=yes ";
 
   int result =
       std::system(string(command + username + "@lxplus.cern.ch '[ -d " + path + " ]'").data());
