@@ -214,6 +214,9 @@ void TPowerTest::Execute()
   if (std::abs(dIAna) < 0.02) {
     RGND = dVAna / dIDig;
   }
+  else {
+    RGND = 0.0;
+  }
 
   // lower digital voltage
 
