@@ -125,6 +125,7 @@ void TPowerTest::Execute()
   currentIt->second.idddClocked = m_testHic->GetIddd();
   currentIt->second.iddaClocked = m_testHic->GetIdda();
 
+
   // configure chips
   for (unsigned int i = 0; i < chips.size(); i++) {
     if (!(chips.at(i)->GetConfig()->IsEnabled())) continue;
@@ -132,6 +133,8 @@ void TPowerTest::Execute()
     AlpideConfig::BaseConfig(chips.at(i));
     AlpideConfig::ConfigureCMU(chips.at(i));
   }
+
+
   for (unsigned int i = 0; i < boardIndices.size(); i++) {
     TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC *)m_boards.at(boardIndices.at(i));
     board->SendOpCode(Alpide::OPCODE_RORST);
@@ -197,10 +200,136 @@ void TPowerTest::Execute()
   if (obHic && obHic->IsPowerCombo()) {
     std::this_thread::sleep_for(std::chrono::seconds(10));
   }
+
+  std::cout << "Resistance measurement" << std::endl;
+
+  /*m_testHic->GetPowerBoard()->SwitchAnalogOn(m_testHic->GetPbMod());
+  std::this_thread::sleep_for(std::chrono::milliseconds(300));
+  m_testHic->GetPowerBoard()->SwitchDigitalOn(m_testHic->GetPbMod());
+  */
+  float dVDig, dVAna, dIDig, dIAna, RGND, RGND2, RAna, RDig = 0.0;
+
+  DigitalCurrentStep(dVDig, dVAna, dIDig, dIAna);
+
+  if (std::abs(dIAna) < 0.02) {
+    RGND = dVAna / dIDig;
+  }
+  else {
+    RGND = 0.0;
+  }
+
+  // lower digital voltage
+
+  m_testHic->GetPowerBoard()->SetDigitalVoltage(m_testHic->GetPbMod(), 1.62);
+
+
+  DigitalCurrentStep(dVDig, dVAna, dIDig, dIAna);
+
+  RGND2 = dVAna / dIDig;
+
+  RDig = (dVDig / dIDig) - RGND;
+
+  // going back to nomial voltage
+
+  m_testHic->GetPowerBoard()->SetDigitalVoltage(m_testHic->GetPbMod(), 1.82);
+
+  AnalogCurrentStep(dVAna, dIAna);
+
+  RAna = (dVAna / dIAna) - RGND;
+
+  std::cout << "RGND1: " << RGND << std::endl;
+  std::cout << "RGND2: " << RGND2 << std::endl;
+  std::cout << "RDig: " << RDig << std::endl;
+  std::cout << "RAna " << RAna << std::endl;
 }
 
 void TPowerTest::Terminate()
 {
   TScan::Terminate();
   m_running = false;
+}
+
+void TPowerTest::DigitalCurrentStep(float &dVDig, float &dVAna, float &dIDig, float &dIAna)
+{
+
+  std::vector<int>       boardIndices = m_testHic->GetBoardIndices();
+  std::vector<TAlpide *> chips        = m_testHic->GetChips();
+
+  // send GRST
+  for (unsigned int i = 0; i < boardIndices.size(); i++) {
+    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC *)m_boards.at(boardIndices.at(i));
+    board->enableControlInterfaces(true);
+    board->SendOpCode(Alpide::OPCODE_GRST);
+  }
+  // measure voltages and currents
+
+  float avddchipbefore    = 0;
+  float dvddchipbefore    = 0;
+  float ianaloguepbbefore = 0;
+  float idigitalpbbefore  = 0;
+
+  float dvddchipafter    = 0;
+  float avddchipafter    = 0;
+  float ianaloguepbafter = 0;
+  float idigitalpbafter  = 0;
+
+  avddchipbefore    = m_testHic->GetAnalogueVoltage();
+  dvddchipbefore    = m_testHic->GetDigitalVoltage();
+  ianaloguepbbefore = m_testHic->GetIdda();
+  idigitalpbbefore  = m_testHic->GetIddd();
+
+  // configure chips
+  for (unsigned int i = 0; i < chips.size(); i++) {
+    if (!(chips.at(i)->GetConfig()->IsEnabled())) continue;
+    if (m_testHic != chips.at(i)->GetHic()) continue;
+    AlpideConfig::BaseConfig(chips.at(i));
+    AlpideConfig::ConfigureCMU(chips.at(i));
+  }
+
+
+  avddchipafter    = m_testHic->GetAnalogueVoltage();
+  dvddchipafter    = m_testHic->GetDigitalVoltage();
+  ianaloguepbafter = m_testHic->GetIdda();
+  idigitalpbafter  = m_testHic->GetIddd();
+
+  dVDig = dvddchipafter - dvddchipbefore;
+  dVAna = avddchipafter - avddchipbefore;
+  dIDig = idigitalpbbefore - idigitalpbafter;
+  dIAna = ianaloguepbbefore - ianaloguepbafter;
+}
+
+void TPowerTest::AnalogCurrentStep(float &dVAna, float &dIAna)
+{
+
+  std::vector<int>       boardIndices = m_testHic->GetBoardIndices();
+  std::vector<TAlpide *> chips        = m_testHic->GetChips();
+
+  // send GRST
+  for (unsigned int i = 0; i < boardIndices.size(); i++) {
+    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC *)m_boards.at(boardIndices.at(i));
+    board->SendOpCode(Alpide::OPCODE_GRST);
+  }
+  // measure voltages and currents
+
+  float avddchipbefore    = 0;
+  float ianaloguepbbefore = 0;
+
+  float avddchipafter    = 0;
+  float ianaloguepbafter = 0;
+
+  avddchipbefore    = m_testHic->GetAnalogueVoltage();
+  ianaloguepbbefore = m_testHic->GetIdda();
+
+  // set IBIAS 0
+  for (unsigned int i = 0; i < chips.size(); i++) {
+    if (!(chips.at(i)->GetConfig()->IsEnabled())) continue;
+    if (m_testHic != chips.at(i)->GetHic()) continue;
+    chips.at(i)->WriteRegister(Alpide::REG_IBIAS, 0);
+  }
+
+  avddchipafter    = m_testHic->GetAnalogueVoltage();
+  ianaloguepbafter = m_testHic->GetIdda();
+
+  dVAna = avddchipafter - avddchipbefore;
+  dIAna = ianaloguepbbefore - ianaloguepbafter;
 }
