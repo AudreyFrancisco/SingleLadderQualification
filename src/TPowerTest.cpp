@@ -125,6 +125,7 @@ void TPowerTest::Execute()
   currentIt->second.idddClocked = m_testHic->GetIddd();
   currentIt->second.iddaClocked = m_testHic->GetIdda();
 
+
   // configure chips
   for (unsigned int i = 0; i < chips.size(); i++) {
     if (!(chips.at(i)->GetConfig()->IsEnabled())) continue;
@@ -132,6 +133,8 @@ void TPowerTest::Execute()
     AlpideConfig::BaseConfig(chips.at(i));
     AlpideConfig::ConfigureCMU(chips.at(i));
   }
+
+
   for (unsigned int i = 0; i < boardIndices.size(); i++) {
     TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC *)m_boards.at(boardIndices.at(i));
     board->SendOpCode(Alpide::OPCODE_RORST);
@@ -197,10 +200,146 @@ void TPowerTest::Execute()
   if (obHic && obHic->IsPowerCombo()) {
     std::this_thread::sleep_for(std::chrono::seconds(10));
   }
+
+  std::cout << "starting resistance measurement" << std::endl;
+
+  /*m_testHic->GetPowerBoard()->SwitchAnalogOn(m_testHic->GetPbMod());
+  std::this_thread::sleep_for(std::chrono::milliseconds(300));
+  m_testHic->GetPowerBoard()->SwitchDigitalOn(m_testHic->GetPbMod());
+  */
+  float dVDig, dVAna, dIDig, dIAna;
+
+  DigitalCurrentStep(dVDig, dVAna, dIDig, dIAna);
+
+  float RGND;
+
+  if (std::abs(dIAna) < 0.02) {
+    std::cout << "Calculating ground resistance" << std::endl;
+    RGND = dVAna / dIDig;
+  }
+  std::cout << "The ground resistance is " << RGND << std::endl;
+
+  // lower digital voltage
+
+  m_testHic->GetPowerBoard()->SetDigitalVoltage(m_testHic->GetPbMod(), 1.62);
+
+  std::cout << "the digital voltage on the chips is" << m_testHic->GetDigitalVoltage() << std::endl;
+
+  float RGND2;
+  DigitalCurrentStep(dVDig, dVAna, dIDig, dIAna);
+
+  RGND2 = dVAna / dIDig;
+
+  std::cout << "the second ground resistance is" << RGND2 << std::endl;
+
+  if (RGND != RGND2) std::cout << "There is a difference in the GND resistances" << endl;
+
+  float RDig;
+
+  RDig = (dVDig / dIDig) - RGND;
+
+  std::cout << "the digital resistance is " << RDig << std::endl;
+
+  // going back to nomial voltage
+  float RAna;
+
+  m_testHic->GetPowerBoard()->SetDigitalVoltage(m_testHic->GetPbMod(), 1.82);
+
+  AnalogCurrentStep(dVAna, dIAna);
+
+  RAna = (dVAna / dIAna) - RGND;
+
+  std::cout << "the analogue resistance is " << RAna << std::endl;
 }
 
 void TPowerTest::Terminate()
 {
   TScan::Terminate();
   m_running = false;
+}
+
+void TPowerTest::DigitalCurrentStep(float &dVDig, float &dVAna, float &dIDig, float &dIAna)
+{
+
+  std::vector<int>       boardIndices = m_testHic->GetBoardIndices();
+  std::vector<TAlpide *> chips        = m_testHic->GetChips();
+
+  // send GRST
+  for (unsigned int i = 0; i < boardIndices.size(); i++) {
+    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC *)m_boards.at(boardIndices.at(i));
+    board->enableControlInterfaces(true);
+    board->SendOpCode(Alpide::OPCODE_GRST);
+  }
+  // measure voltages and currents
+
+  float averagedvchipbefore = 0;
+  float averageavchipbefore = 0;
+  float ianaloguepbbefore   = 0;
+  float idigitalpbbefore    = 0;
+
+  float averagedvchipafter = 0;
+  float averageavchipafter = 0;
+  float ianaloguepbafter   = 0;
+  float idigitalpbafter    = 0;
+
+  averageavchipbefore = m_testHic->GetAnalogueVoltage();
+  averagedvchipbefore = m_testHic->GetDigitalVoltage();
+  ianaloguepbbefore   = m_testHic->GetIdda();
+  idigitalpbbefore    = m_testHic->GetIddd();
+
+  // configure chips
+  for (unsigned int i = 0; i < chips.size(); i++) {
+    if (!(chips.at(i)->GetConfig()->IsEnabled())) continue;
+    if (m_testHic != chips.at(i)->GetHic()) continue;
+    AlpideConfig::BaseConfig(chips.at(i));
+    AlpideConfig::ConfigureCMU(chips.at(i));
+  }
+
+
+  averageavchipafter = m_testHic->GetAnalogueVoltage();
+  averagedvchipafter = m_testHic->GetDigitalVoltage();
+  ianaloguepbafter   = m_testHic->GetIdda();
+  idigitalpbafter    = m_testHic->GetIddd();
+
+  dVDig = averagedvchipafter - averagedvchipbefore;
+  dVAna = averageavchipafter - averageavchipbefore;
+  dIDig = idigitalpbbefore - idigitalpbafter;
+  dIAna = ianaloguepbbefore - ianaloguepbafter;
+}
+
+void TPowerTest::AnalogCurrentStep(float &dVAna, float &dIAna)
+{
+
+  std::vector<int>       boardIndices = m_testHic->GetBoardIndices();
+  std::vector<TAlpide *> chips        = m_testHic->GetChips();
+
+  // send GRST
+  for (unsigned int i = 0; i < boardIndices.size(); i++) {
+    TReadoutBoardMOSAIC *board = (TReadoutBoardMOSAIC *)m_boards.at(boardIndices.at(i));
+    board->SendOpCode(Alpide::OPCODE_GRST);
+  }
+  // measure voltages and currents
+
+  float averageavchipbefore = 0;
+  float ianaloguepbbefore   = 0;
+
+  float averageavchipafter = 0;
+  float ianaloguepbafter   = 0;
+
+  averageavchipbefore = m_testHic->GetAnalogueVoltage();
+  ianaloguepbbefore   = m_testHic->GetIdda();
+
+  // set IBIAS 0
+  for (unsigned int i = 0; i < chips.size(); i++) {
+    if (!(chips.at(i)->GetConfig()->IsEnabled())) continue;
+    if (m_testHic != chips.at(i)->GetHic()) continue;
+    chips.at(i)->WriteRegister(Alpide::REG_IBIAS, 0);
+  }
+
+  averageavchipafter = m_testHic->GetAnalogueVoltage();
+  ianaloguepbafter   = m_testHic->GetIdda();
+
+  dVAna = averageavchipafter - averageavchipbefore;
+  std::cout << "the dVAna is" << dVAna << std::endl;
+  dIAna = ianaloguepbbefore - ianaloguepbafter;
 }

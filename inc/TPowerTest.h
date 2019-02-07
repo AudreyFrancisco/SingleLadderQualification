@@ -62,6 +62,8 @@ public:
   void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
   void LoopEnd(int loopIndex) { (void)(&loopIndex); };
   void PrepareStep(int loopIndex);
+  void DigitalCurrentStep(float &dVDig, float &dVAna, float &dIDig, float &dIAna);
+  void AnalogCurrentStep(float &dVAna, float &dIAna);
   std::map<std::string, THicCurrents> GetCurrents() { return m_hicCurrents; };
   static bool                         isPerformedDuring(string testType)
   {
