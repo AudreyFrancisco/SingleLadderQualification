@@ -207,11 +207,9 @@ void TPowerTest::Execute()
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
   m_testHic->GetPowerBoard()->SwitchDigitalOn(m_testHic->GetPbMod());
   */
-  float dVDig, dVAna, dIDig, dIAna = 0.0;
+  float dVDig, dVAna, dIDig, dIAna, RGND, RGND2, RAna, RDig = 0.0;
 
   DigitalCurrentStep(dVDig, dVAna, dIDig, dIAna);
-
-  float RGND, RGND2, RAna, RDig = 0.0;
 
   if (std::abs(dIAna) < 0.02) {
     RGND = dVAna / dIDig;
