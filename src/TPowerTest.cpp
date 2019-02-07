@@ -225,7 +225,12 @@ void TPowerTest::Execute()
 
   DigitalCurrentStep(dVDig, dVAna, dIDig, dIAna);
 
-  RGND2 = dVAna / dIDig;
+  if (std::abs(dIAna) < 0.02) {
+    RGND2 = dVAna / dIDig;
+  }
+  else {
+    RGND2 = RGND;
+  }
 
   RDig = (dVDig / dIDig) - RGND;
 
@@ -239,8 +244,8 @@ void TPowerTest::Execute()
 
   std::cout << "RGND1: " << RGND << std::endl;
   std::cout << "RGND2: " << RGND2 << std::endl;
-  std::cout << "RDig: " << RDig << std::endl;
-  std::cout << "RAna " << RAna << std::endl;
+  std::cout << "RDig:  " << RDig << std::endl;
+  std::cout << "RAna:  " << RAna << std::endl;
 }
 
 void TPowerTest::Terminate()
