@@ -41,12 +41,14 @@ int myMaskStages;
 int myPixPerRegion;
 int maxTrigsPerTrain;
 
-std::vector<int> fEnPerBoard; // variable to count number of enabled chips per board;
+std::vector<int>   fEnPerBoard; // variable to count number of enabled chips per board;
+std::map<int, int> map_ch_rec;
 
 TScanHisto *fScanHisto;
 
 const unsigned int kNdcol = 512;
 const unsigned int kNaddr = 1024;
+char               fNameRaw[1024];
 
 template <class T> T Sum(std::vector<T> __v, size_t __len)
 {
@@ -116,6 +118,22 @@ void FillHisto(int board, std::vector<TPixHit> *Hits)
   return;
 }
 
+void initModIdMap() // make map of the values from config and make the key for modid
+{
+  for (unsigned int iboard = 0; iboard < fBoards.size(); iboard++) {
+    for (unsigned int ich = 0; ich < fChips.size(); ich++) {
+      int chipid      = fChips.at(ich)->GetConfig()->GetChipId() & 0xf;
+      int modid       = (fChips.at(ich)->GetConfig()->GetChipId() >> 4) & 0x7;
+      int receiver    = fChips.at(ich)->GetConfig()->GetParamValue("RECEIVER");
+      int key         = (int)iboard + 2 * (chipid + 16 * receiver);
+      map_ch_rec[key] = modid;
+      //      std::cout << "Modid " << modid << " stored under the key " << key << " " <<
+      //      map_ch_rec[key]
+      //                << std::endl;
+    }
+  }
+}
+
 bool HasData(const common::TChipIndex &idx)
 {
   for (unsigned int icol = 0; icol < kNdcol; icol++) {
@@ -125,6 +143,33 @@ bool HasData(const common::TChipIndex &idx)
   }
 
   return false;
+}
+
+void WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits, TBoardHeader boardInfo,
+                  int trig)
+{
+  int dcol, address, event;
+  for (unsigned int ihit = oldHits; ihit < Hits->size(); ihit++) {
+    int modid;
+    int iboard   = Hits->at(ihit).boardIndex;
+    int receiver = Hits->at(ihit).channel;
+    int chipid   = Hits->at(ihit).chipId;
+    int key      = (int)iboard + 2 * (chipid + 16 * receiver);
+    modid        = map_ch_rec[key];
+    //      std::cout << "Reading modid from the map : " << modid << " With the key " << key <<
+    //      std::endl;
+    int chipId = chipid + 16 * modid;
+    dcol       = Hits->at(ihit).dcol + Hits->at(ihit).region * 16;
+    address    = Hits->at(ihit).address;
+
+    if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
+      event = boardInfo.eventId;
+    }
+    else {
+      event = boardInfo.eoeCount;
+    }
+    fprintf(fp, "%d %d %d %d %d\n", event, chipId, dcol, address, trig);
+  }
 }
 
 void WriteDataToFile(const char *fName, bool Recreate)
@@ -219,10 +264,13 @@ void scan()
   TBoardHeader  boardInfo;
   std::vector<TPixHit> *Hits = new std::vector<TPixHit>;
 
+  FILE *rawfile = fopen(fNameRaw, "a");
+
   int nTrigsPerTrain = (maxTrigsPerTrain > 0) ? maxTrigsPerTrain : myNTriggers;
   while ((myNTriggers % nTrigsPerTrain) != 0)
     nTrigsPerTrain--;
   int nTrains = myNTriggers / nTrigsPerTrain;
+
 
   std::cout << "Doing " << nTrains << " with " << nTrigsPerTrain << " triggers each." << std::endl;
 
@@ -308,6 +356,7 @@ void scan()
               }
               fclose(fDebug);
             }
+            WriteRawData(rawfile, Hits, Hits->size(), boardInfo, itrg);
             // std::cout << "total number of hits found: " << Hits->size() << std::endl;
             itrg += nClosedEvents;
           }
@@ -331,6 +380,7 @@ void scan()
       std::cout << "Total number of 8b10b decoder errors: " << errors8b10b << std::endl;
     }
   }
+  fclose(rawfile);
   std::cout << "Number of corrupt events:             " << nBad << std::endl;
   std::cout << "Number of skipped points:             " << nSkipped << std::endl;
   std::cout << "Priority encoder errors:              " << prioErrors << std::endl;
@@ -344,6 +394,7 @@ int main(int argc, char **argv)
 
   decodeCommandParameters(argc, argv);
   initSetup(fConfig, &fBoards, &fBoardType, &fChips, "", &fHICs);
+  initModIdMap();
 
   sleep(1);
   char Suffix[80], fName[200];
@@ -405,7 +456,7 @@ int main(int argc, char **argv)
         rBoard->SetTriggerSource(trigInt);
       }
     }
-
+    sprintf(fNameRaw, "Data/DigitalRaw_%s.dat", Suffix);
     scan();
   }
 
