@@ -349,7 +349,7 @@ void MainWindow::open()
     std::cout << std::endl
               << "Software version: " << fConfig->GetSoftwareVersion() << std::endl
               << std::endl;
-    if (fIdofactivitytype != -1) {
+    if (fIdofactivitytype > 0) {
       if (!fConfig->GetScanConfig()->GetParamValue("ALLOWOLD") &&
           (DbGetSoftwareVersion(fDB) - ScanConfig::NUMBEROFTHEBEAST > 0.001)) {
         popup("Your software version is outdated,\nplease update");
