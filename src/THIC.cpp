@@ -219,10 +219,10 @@ void THic::ScaleVoltage(float aFactor)
                           DISet * aFactor, BiasOn);
 }
 
-void THic::SwitchBias(bool on)
+void THic::SwitchBias(bool on, bool force)
 {
   if (!m_powerBoard) return;
-  if (on && m_noBB) {
+  if (on && m_noBB && !force) {
     std::cout << "Warning: HIC " << GetDbId()
               << " classified as no back bias, back bias not switched" << std::endl;
     return;

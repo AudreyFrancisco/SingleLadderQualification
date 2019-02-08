@@ -69,7 +69,7 @@ public:
   TPowerBoard *              GetPowerBoard() { return m_powerBoard; };
   int                        GetPbMod() { return m_pbMod; };
   int                        GetBbChannel() { return m_bbChannel; };
-  void                       SwitchBias(bool on);
+  void                       SwitchBias(bool on, bool force = false);
   float                      GetAnalogueVoltage(std::map<int, float> *chipValues = 0);
   float                      GetDigitalVoltage(std::map<int, float> *chipValues = 0);
   float GetSupplyVoltage(bool analogueNotDigital = true, std::map<int, float> *chipValues = 0);
