@@ -965,6 +965,32 @@ string GetTestDirName(TTestType TestType)
 }
 
 
+bool GetDctrlFileName(ActivityDB::activityLong activity, string &dataName, string &resultName)
+{
+  bool   found = false;
+  string attName;
+
+  // find the correct attachment for the given DCRTL test
+  for (unsigned int i = 0; (i < activity.Attachments.size()) && (!found); i++) {
+    attName = activity.Attachments.at(i).FileName;
+    if ((attName.find("DCtrlMeasurement") != string::npos)) {
+      found    = true;
+      dataName = attName;
+    }
+  }
+
+  if (!found) return found;
+  // find the date and time within the attachment name
+  string temp = attName.substr(attName.find("_") + 1);
+
+  string date = temp.substr(0, temp.find(".", 7));
+
+  resultName = "DctrlScanResult_" + date + ".dat";
+  // create file name for raw data files
+  return found;
+}
+
+
 bool GetDigitalFileName(ActivityDB::activityLong activity, int chip, int voltPercent, int backBias,
                         string &dataName, string &resultName)
 {
