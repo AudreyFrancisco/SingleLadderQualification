@@ -1078,7 +1078,6 @@ AlpideTable::response *ComponentDB::ReadParents(int ID, vector<int> *CompIDList)
 }
 
 
-
 /* -----------------
  *    Read := Get the activity list for a component activity
  *

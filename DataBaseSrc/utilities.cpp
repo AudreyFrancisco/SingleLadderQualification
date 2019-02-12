@@ -200,7 +200,7 @@ static logLevel_ty gLogLevel = LOG_CRITICAL;
 void dbLogSetLevel(logLevel_ty newLogLevel)
 {
   gLogLevel = newLogLevel;
-  //DEBUG("atpLogSetLevel :: Log level set to %d\n", gLogLevel);
+  // DEBUG("atpLogSetLevel :: Log level set to %d\n", gLogLevel);
   return;
 }
 
