@@ -8,6 +8,7 @@
 #include <fstream>
 #include <list>
 #include <set>
+#include <string>
 
 static const std::list<std::string> kTestTypes = {
     "OB-HIC Impedance Test",       "OB HIC Qualification Test",   "IB HIC Qualification Test",
@@ -651,6 +652,20 @@ int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children, boo
   }
   return children.size();
 }
+
+
+// searches the component childId among the children of parentId
+// return value: position if found, -1 if not found
+int DbGetPosition(AlpideDB *db, int parentId, int childId)
+{
+  std::vector<TChild> children;
+  DbGetListOfChildren(db, parentId, children);
+  for (unsigned int i = 0; i < children.size(); i++) {
+    if (children.at(i).Id == childId) return stoi(children.at(i).Position);
+  }
+  return -1;
+}
+
 
 // looks for a component of type activityTypeId in the history of component compId
 int DbGetComponentActivity(AlpideDB *db, int compId, int activityTypeId)
