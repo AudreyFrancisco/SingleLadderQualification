@@ -279,10 +279,15 @@ void TSCurveScan::Init()
 
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (!(m_chips.at(i)->GetConfig()->IsEnabled())) {
-      int previd = m_chips.at(i)->GetConfig()->GetParamValue("PREVID");
-      if (previd != -1) {
-        printf("setting non-default previd for disabled chip %i: %i\n", i, previd);
-        m_chips.at(i)->WriteRegister(Alpide::REG_CMUDMU_CONFIG, 0x40 | (previd & 0xf));
+      TChipConfig *config = m_chips.at(i)->GetConfig();
+      if ((config->GetPreviousId() != -1) || !config->GetEnableDdr()) {
+        uint16_t cmuconfig = 0;
+        cmuconfig |= (config->GetPreviousId() & 0xf);
+        cmuconfig |= (config->GetInitialToken() ? 1 : 0) << 4;
+        cmuconfig |= (config->GetDisableManchester() ? 1 : 0) << 5;
+        cmuconfig |= (config->GetEnableDdr() ? 1 : 0) << 6;
+        printf("setting non-default CMU parameters for disabled chip %i: 0x%02x\n", i, cmuconfig);
+        m_chips.at(i)->WriteRegister(Alpide::REG_CMUDMU_CONFIG, cmuconfig);
       }
       continue;
     }
