@@ -32,7 +32,7 @@
  *  Description : Alpide DB  Classes for access tables
  *
  *
- *  Ver 2.0 -
+ *  Ver 2.1 -
  *
  *  HISTORY
  *
@@ -46,6 +46,7 @@
  *  04/10/2018  - Version 2 : Recover errors + Improvements to error diagnosis
  *  13/10/2018  - Fix History Activity bug
  *  20/12/2018  - Cut the log output for Query result
+ *  12/02/2019  - Add the Method ReadParents()
  *
  */
 
@@ -128,7 +129,7 @@ bool AlpideTable::ExecuteQuery(string theUrl, string theQuery, bool isSOAPreques
       ERROR("DB connection error, %s !", "Sync Error");
     }
     else {
-      DEBUG("Obtains %d char of response :%.250s", strlen(stringresult), stringresult);
+      DEBUG("Obtains %d char of response :%.450s", strlen(stringresult), stringresult);
       errorType = DecodeResponse(stringresult, theQuery.c_str());
       switch (errorType) {
       case 2:
@@ -1023,6 +1024,59 @@ AlpideTable::response *ComponentDB::GetListByType(int ProjectID, int ComponentTy
   std::string sTypeId  = std::to_string(ComponentTypeID);
   return (readComponents(sProject, sTypeId, Result));
 }
+
+
+/* -----------------
+ *    ReadParents := Get the Parent component
+ *
+ *		In Param : the component ID of the children
+ *		Out Params : a vector of IDs of all parents
+ *
+ *		returns : a response struct that contains the error code
+ *---------------- */
+AlpideTable::response *ComponentDB::ReadParents(int ID, vector<int> *CompIDList)
+{
+  FUNCTION_TRACE;
+  std::string sID = std::to_string(ID);
+
+  CompIDList->clear();
+
+  string theUrl   = theParentDB->GetQueryDomain() + "/ComponentParentRead";
+  string theQuery = "ID=" + sID;
+
+  setResponseSession(AlpideTable::Component);
+  if (!ExecuteQuery(theUrl, theQuery)) {
+    return (&theResponse);
+  }
+  if (theRootXMLNode == NULL) {
+    return (&theResponse);
+  }
+
+  xmlNode *n1, *n2, *n3;
+  n1 = theRootXMLNode->children;
+  componentShort theComponent;
+  while (n1 != NULL) {
+    if (MATCHNODE(n1, "ComponentComposition")) {
+      n2 = n1->children;
+      while (n2 != NULL) {
+        if (MATCHNODE(n2, "Component")) {
+          n3 = n2->children;
+          while (n3 != NULL) {
+            if (MATCHNODE(n3, "ID")) {
+              CompIDList->push_back(atoi((const char *)n3->children->content));
+            }
+            n3 = n3->next;
+          }
+        }
+        n2 = n2->next;
+      }
+    }
+    n1 = n1->next;
+  }
+  SetResponse(AlpideTable::NoError);
+  return (&theResponse);
+}
+
 
 /* -----------------
  *    Read := Get the activity list for a component activity

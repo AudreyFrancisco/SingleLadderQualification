@@ -30,6 +30,7 @@
  * ====================================================
  *
  *  Description : Header file for the Alpide DB EndPoint
+ *  V.2.1
  *
  *  HISTORY
  *
@@ -388,6 +389,7 @@ public:
 
   AlpideTable::response *Read(int ID, componentLong *Result);
   AlpideTable::response *Read(string ComponentID, componentLong *Result);
+  AlpideTable::response *ReadParents(int ID, vector<int> *CompIDList);
 
   AlpideTable::response *GetComponentActivities(string ComponentID, vector<compActivity> *Result);
   AlpideTable::response *GetComponentActivities(int ID, vector<compActivity> *Result);
