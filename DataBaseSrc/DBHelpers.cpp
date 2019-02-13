@@ -656,14 +656,16 @@ int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children, boo
 
 // searches the component childId among the children of parentId
 // return value: position if found, -1 if not found
-int DbGetPosition(AlpideDB *db, int parentId, int childId)
+int DbGetPosition(AlpideDB *db, int childId)
 {
-  std::vector<TChild> children;
-  DbGetListOfChildren(db, parentId, children);
-  for (unsigned int i = 0; i < children.size(); i++) {
-    if (children.at(i).Id == childId) return stoi(children.at(i).Position);
-  }
-  return -1;
+  ComponentDB *    componentDB = new ComponentDB(db);
+  std::vector<int> parentList;
+  int              position = -1;
+
+  componentDB->ReadParents(childId, &parentList, position);
+  if (parentList.size() == 0) return -1;
+
+  return position;
 }
 
 

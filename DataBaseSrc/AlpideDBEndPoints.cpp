@@ -1034,7 +1034,7 @@ AlpideTable::response *ComponentDB::GetListByType(int ProjectID, int ComponentTy
  *
  *		returns : a response struct that contains the error code
  *---------------- */
-AlpideTable::response *ComponentDB::ReadParents(int ID, vector<int> *CompIDList)
+AlpideTable::response *ComponentDB::ReadParents(int ID, vector<int> *CompIDList, int &Position)
 {
   FUNCTION_TRACE;
   std::string sID = std::to_string(ID);
@@ -1067,6 +1067,9 @@ AlpideTable::response *ComponentDB::ReadParents(int ID, vector<int> *CompIDList)
             }
             n3 = n3->next;
           }
+        }
+        if (MATCHNODE(n2, "Position")) {
+          Position = atoi((const char *)n2->children->content);
         }
         n2 = n2->next;
       }
