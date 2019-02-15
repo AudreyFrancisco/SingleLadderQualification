@@ -1058,7 +1058,7 @@ AlpideTable::response *ComponentDB::ReadParents(int ID, vector<compComposition> 
   while (n1 != NULL) {
     if (MATCHNODE(n1, "ComponentComposition")) {
       n2 = n1->children;
-      zCOMPCOMPONENT(comp);
+      zCOMPCOMPOSITION(comp);
       while (n2 != NULL) {
         if (MATCHNODE(n2, "Component")) {
           n3 = n2->children;
