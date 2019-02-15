@@ -1034,12 +1034,12 @@ AlpideTable::response *ComponentDB::GetListByType(int ProjectID, int ComponentTy
  *
  *		returns : a response struct that contains the error code
  *---------------- */
-AlpideTable::response *ComponentDB::ReadParents(int ID, vector<int> *CompIDList, int &Position)
+AlpideTable::response *ComponentDB::ReadParents(int ID, vector<compComposition> *Parents)
 {
   FUNCTION_TRACE;
   std::string sID = std::to_string(ID);
 
-  CompIDList->clear();
+  Parents->clear();
 
   string theUrl   = theParentDB->GetQueryDomain() + "/ComponentParentRead";
   string theQuery = "ID=" + sID;
@@ -1052,27 +1052,41 @@ AlpideTable::response *ComponentDB::ReadParents(int ID, vector<int> *CompIDList,
     return (&theResponse);
   }
 
-  xmlNode *n1, *n2, *n3;
+  compComposition comp;
+  xmlNode *n1, *n2, *n3, *n4;
   n1 = theRootXMLNode->children;
-  componentShort theComponent;
   while (n1 != NULL) {
     if (MATCHNODE(n1, "ComponentComposition")) {
       n2 = n1->children;
+      zCOMPCOMPONENT(comp);
       while (n2 != NULL) {
         if (MATCHNODE(n2, "Component")) {
           n3 = n2->children;
-          while (n3 != NULL) {
-            if (MATCHNODE(n3, "ID")) {
-              CompIDList->push_back(atoi((const char *)n3->children->content));
+          while(n3 != NULL) {
+            if (MATCHNODE(n3, "ID"))
+              comp.Component.ID = atoi((const char *)n3->children->content);
+            else if (MATCHNODE(n3, "ComponentID"))
+              comp.Component.ComponentID.assign((const char *)n3->children->content);
+            else if (MATCHNODE(n3, "ComponentType")) {
+              n4 = n3->children;
+              while(n4 != NULL) {
+                if (MATCHNODE(n4, "ID"))
+                  comp.Component.ComponentType.ID = atoi((const char *)n4->children->content);
+                else if (MATCHNODE(n4, "Name"))
+                  comp.Component.ComponentType.Name.assign((const char *)n4->children->content);
+                n4 = n4->next;
+              }
             }
             n3 = n3->next;
           }
         }
-        if (MATCHNODE(n2, "Position")) {
-          Position = atoi((const char *)n2->children->content);
-        }
+        else if (MATCHNODE(n2, "ID)"))
+          comp.ID = atoi((const char *)n2->children->content);
+        else if (MATCHNODE(n2, "Position)"))
+          comp.Position.assign((const char *)n2->children->content);
         n2 = n2->next;
       }
+      Parents->push_back(comp);
     }
     n1 = n1->next;
   }
