@@ -668,7 +668,7 @@ int DbGetPosition(AlpideDB *db, int childId, std::vector<int> *positions)
   if (parentList.size() > 0)
     for(int i=0; i<parentList.size(); i++) {
       position = atoi((const char *)parentList.at(i).Position);
-      positions->push_back(position);
+      if (positions != NULL) positions->push_back(position);
     }
   return position;
 }
