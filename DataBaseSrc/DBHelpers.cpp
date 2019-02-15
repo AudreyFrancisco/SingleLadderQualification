@@ -660,13 +660,13 @@ int DbGetListOfChildren(AlpideDB *db, int Id, std::vector<TChild> &children, boo
 // return value: position of last parent if found, -1  if not found
 int DbGetPosition(AlpideDB *db, int childId, std::vector<int> *positions)
 {
-  ComponentDB *    componentDB = new ComponentDB(db);
+  ComponentDB *componentDB = new ComponentDB(db);
   // std::vector<int> parentList;
-  int              position = -1;
+  int                                       position = -1;
   std::vector<ComponentDB::compComposition> parentList;
   componentDB->ReadParents(childId, &parentList);
   if (parentList.size() > 0)
-    for(unsigned int i=0; i<parentList.size(); i++) {
+    for (unsigned int i=0; i<parentList.size(); i++) {
       position = atoi(parentList.at(i).Position.c_str());
       if (positions != NULL) positions->push_back(position);
     }

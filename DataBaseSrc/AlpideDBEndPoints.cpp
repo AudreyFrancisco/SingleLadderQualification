@@ -1053,7 +1053,7 @@ AlpideTable::response *ComponentDB::ReadParents(int ID, vector<compComposition> 
   }
 
   compComposition comp;
-  xmlNode *n1, *n2, *n3, *n4;
+  xmlNode *       n1, *n2, *n3, *n4;
   n1 = theRootXMLNode->children;
   while (n1 != NULL) {
     if (MATCHNODE(n1, "ComponentComposition")) {
@@ -1062,14 +1062,14 @@ AlpideTable::response *ComponentDB::ReadParents(int ID, vector<compComposition> 
       while (n2 != NULL) {
         if (MATCHNODE(n2, "Component")) {
           n3 = n2->children;
-          while(n3 != NULL) {
+          while (n3 != NULL) {
             if (MATCHNODE(n3, "ID"))
               comp.Component.ID = atoi((const char *)n3->children->content);
             else if (MATCHNODE(n3, "ComponentID"))
               comp.Component.ComponentID.assign((const char *)n3->children->content);
             else if (MATCHNODE(n3, "ComponentType")) {
               n4 = n3->children;
-              while(n4 != NULL) {
+              while (n4 != NULL) {
                 if (MATCHNODE(n4, "ID"))
                   comp.Component.ComponentType.ID = atoi((const char *)n4->children->content);
                 else if (MATCHNODE(n4, "Name"))
