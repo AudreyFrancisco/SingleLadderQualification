@@ -666,8 +666,8 @@ int DbGetPosition(AlpideDB *db, int childId, std::vector<int> *positions)
   std::vector<ComponentDB::compComposition> parentList;
   componentDB->ReadParents(childId, &parentList);
   if (parentList.size() > 0)
-    for(int i=0; i<parentList.size(); i++) {
-      position = atoi((const char *)parentList.at(i).Position);
+    for(unsigned int i=0; i<parentList.size(); i++) {
+      position = atoi((char *)parentList.at(i).Position);
       if (positions != NULL) positions->push_back(position);
     }
   return position;
