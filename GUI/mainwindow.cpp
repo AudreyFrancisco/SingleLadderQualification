@@ -1838,6 +1838,10 @@ void MainWindow::savesettings()
     }
     if (fNumberofscan != OBHalfStaveOLFAST && fNumberofscan != OBHalfStaveMLFAST &&
         fNumberofscan != OBStaveOLFAST && fNumberofscan != OBStaveMLFAST) {
+      if (fIdoflocationtype < 1) {
+        popup("Warning: You did not\nchoose your location\nPlease start again.");
+        return;
+      }
       for (unsigned int i = 0; i < fHICs.size(); i++) {
         if (!fHicnames.at(i).isEmpty()) {
           fstopwriting  = false;
