@@ -48,7 +48,7 @@ namespace ChipConfig { // to avoid clashes with other configs (e.g. for STROBE_D
   const int DTU_PREEMP  = 0;
 
   const int PREVIOUS_ID        = 0x0F;
-  const int INITIAL_TOKEN      = 1;
+  const int INITIAL_TOKEN      = 0;
   const int DISABLE_MANCHESTER = 0;
   const int ENABLE_DDR         = 1;
 } // namespace ChipConfig
