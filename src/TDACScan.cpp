@@ -63,7 +63,7 @@ void TDACScan::Init()
       if ((config->GetPreviousId() != -1) || !config->GetEnableDdr()) {
         uint16_t cmuconfig = 0;
         cmuconfig |= (config->GetPreviousId() & 0xf);
-        cmuconfig |= (config->GetInitialToken() ? 1 : 0) << 4;
+        cmuconfig |= 0 << 4; // no initial token
         cmuconfig |= (config->GetDisableManchester() ? 1 : 0) << 5;
         cmuconfig |= (config->GetEnableDdr() ? 1 : 0) << 6;
         printf("setting non-default CMU parameters for disabled chip %i: 0x%02x\n", i, cmuconfig);
