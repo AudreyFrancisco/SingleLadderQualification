@@ -143,6 +143,9 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
       if ((open_l == -1) && ((x_l[xbin]) < ber)) open_l = xbin;
       if ((open_r == -1) && ((x_r[xbin]) < ber)) open_r = xbin;
     }
+    // If nether below minimum BER
+    if (open_l == -1) open_l = nbin_x_half - 1;
+    if (open_r == -1) open_r = nbin_x_half - 1;
 
     int open_u = -1;
     int open_b = -1;
@@ -151,6 +154,9 @@ void TEyeAnalysis::AnalyseHisto(TScanHisto *histo)
       if ((open_b == -1) && ((y_l[ybin]) < ber)) open_b = ybin;
       if ((open_u == -1) && ((y_r[ybin]) < ber)) open_u = ybin;
     }
+    // If nether below minimum BER
+    if (open_b == -1) open_b = nbin_y_half - 1;
+    if (open_u == -1) open_u = nbin_y_half - 1;
 
 
     // // calculate cumulative function along x (within [-yband, yband])

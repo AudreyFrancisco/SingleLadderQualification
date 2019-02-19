@@ -189,12 +189,12 @@ namespace ScanConfig {
   const int MAXNOISY_CHIP_SILVER = 2100;
   const int MAXNOISY_CHIP_BRONZE = 5243;
 
-  const int EYE_MIN_VERT_CHIP_GOLD   = 150;
-  const int EYE_MIN_VERT_CHIP_SILVER = 100;
-  const int EYE_MIN_VERT_CHIP_BRONZE = 50;
-  const int EYE_MIN_HORZ_CHIP_GOLD   = 150;
-  const int EYE_MIN_HORZ_CHIP_SILVER = 100;
-  const int EYE_MIN_HORZ_CHIP_BRONZE = 50;
+  const int EYE_MIN_VERT_CHIP_GOLD   = 230;
+  const int EYE_MIN_VERT_CHIP_SILVER = 200;
+  const int EYE_MIN_VERT_CHIP_BRONZE = 170;
+  const int EYE_MIN_HORZ_CHIP_GOLD   = 80;
+  const int EYE_MIN_HORZ_CHIP_SILVER = 60;
+  const int EYE_MIN_HORZ_CHIP_BRONZE = 40;
 
   const int TEST_DCTRL = 1;
   // slope and amplitude cut values take into account losses on
