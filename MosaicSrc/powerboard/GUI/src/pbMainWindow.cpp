@@ -513,6 +513,16 @@ void pbMainWindow::refreshMonitor()
   else
     s.setNum(t, 'F', 2);
   temperatureLCD[0]->display(s);
+#ifdef PB_NEW
+  for (unsigned int i = 0; i < 2; ++i) {
+    t = pbStat.Tstaves[i];
+    if (t < -9.99 || t > 99.99)
+      s = "-----";
+    else
+      s.setNum(t, 'F', 2);
+    temperatureLCD[i + 1]->display(s);
+  }
+#endif
 
   // Channel ON
   for (int i = 0; i < NUM_CHANNELS; i++) {

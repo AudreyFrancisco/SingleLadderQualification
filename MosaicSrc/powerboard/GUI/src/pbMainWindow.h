@@ -43,7 +43,11 @@
 #include <QSignalMapper>
 #include <QTimer>
 
+#ifdef PB_NEW
+#define NUM_TSENSORS 3
+#else
 #define NUM_TSENSORS 1
+#endif
 #define NUM_MODULES 8
 #define NUM_CHANNELS 16
 
