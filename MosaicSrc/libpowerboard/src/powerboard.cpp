@@ -327,10 +327,16 @@ void powerboard::getState(pbstate_t *state, getFlags flags)
 
     for (unsigned i = 0; i < 2; ++i) {
 #ifdef PB_NEW
-      rtd               = (temperatureDetectorStave[i]->getRTD() >> 1) * (400.0 / 32768.0);
-      state->Tstaves[i] = RTD2T(rtd);
+      uint16_t temp = temperatureDetectorStave[i]->getRTD();
+      if (temp != 65535U && temp != 0U) { // something connected
+        rtd               = (temp >> 1) * (400.0 / 32768.0);
+        state->Tstaves[i] = RTD2T(rtd);
+      }
+      else { // nothing connected
+        state->Tstaves[i] = -273.15;
+      }
 #else
-      stave->Tstaves[i] = -273.15;
+      state->Tstaves[i] = -273.15;
 #endif
     }
   }

@@ -99,6 +99,19 @@ void TScan::SaveStartConditions()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     try {
+      m_conditions.m_tempPT100start[0] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(0);
+      m_conditions.m_tempPT100start[1] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(1);
+      break;
+    }
+    catch (std::exception &e) {
+      std::cout << "Init: Exception " << e.what()
+                << " when reading the additional power board temperature sensors" << std::endl;
+    }
+  }
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
+    try {
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_iddaStart =
           m_hics.at(ihic)->GetIdda();
       m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_idddStart =
@@ -257,6 +270,19 @@ std::string TScan::FindHIC(int boardIndex, int rcv)
 
 void TScan::Terminate()
 {
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
+    try {
+      m_conditions.m_tempPT100end[0] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(0);
+      m_conditions.m_tempPT100end[1] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(1);
+      break;
+    }
+    catch (std::exception &e) {
+      std::cout << "Init: Exception " << e.what()
+                << " when reading the additional power board temperature sensors" << std::endl;
+    }
+  }
+
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     if ((m_config->GetTestType() != OBEndurance) && (typeid(*this) != typeid(TPowerTest))) {
@@ -718,6 +744,15 @@ void TScan::WriteConditions(const char *fName, THic *aHic)
 
   fprintf(fp, "Firmware version: %s\n", m_conditions.m_fwVersion);
   fprintf(fp, "Software version: %s\n\n", m_conditions.m_swVersion);
+
+  fprintf(fp, "On-Stave PT100 #0 (start): %0.2f degrees Celsius\n",
+          m_conditions.m_tempPT100start[0]);
+  fprintf(fp, "On-Stave PT100 #1 (start): %0.2f degrees Celsius\n",
+          m_conditions.m_tempPT100start[1]);
+  fprintf(fp, "On-Stave PT100 #0 (end):   %0.2f degrees Celsius\n", m_conditions.m_tempPT100end[0]);
+  fprintf(fp, "On-Stave PT100 #1 (end):   %0.2f degrees Celsius\n", m_conditions.m_tempPT100end[1]);
+  fputs("# -273.15 degrees Celsius => sensor not connected\n", fp);
+
 
   fprintf(fp, "VDDD (start): %.3f V\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddStart);

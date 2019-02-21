@@ -86,6 +86,8 @@ private:
   std::vector<std::string>                    m_boardConfigStart;
   std::vector<std::string>                    m_boardConfigEnd;
   std::map<std::string, TScanConditionsHic *> m_hicConditions;
+  float                                       m_tempPT100start[2];
+  float                                       m_tempPT100end[2];
 
 public:
   TScanConditions(){};

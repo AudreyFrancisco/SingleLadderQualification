@@ -198,9 +198,11 @@ bool TPowerBoard::readMonitor()
 
   // Set the data members
   time(&fPBoard.TimeStamp); // mark the time stamp
-  fPBoard.VBmon = thePowerBoardState->Vbias;
-  fPBoard.IBmon = thePowerBoardState->Ibias;
-  fPBoard.Temp  = thePowerBoardState->T;
+  fPBoard.VBmon         = thePowerBoardState->Vbias;
+  fPBoard.IBmon         = thePowerBoardState->Ibias;
+  fPBoard.Temp          = thePowerBoardState->T;
+  fPBoard.TempStaves[0] = thePowerBoardState->Tstaves[0];
+  fPBoard.TempStaves[1] = thePowerBoardState->Tstaves[1];
 
   for (i = 0; i < MAX_MOULESPERMOSAIC; i++) { // for each module
     fPBoard.Modules[i].AVmon         = thePowerBoardState->Vmon[i * 2];

@@ -92,6 +92,7 @@ public:
     float    VBmon;
     float    IBmon;
     float    Temp;
+    float    TempStaves[2];
     time_t   TimeStamp;
   };
 
@@ -127,6 +128,16 @@ public:
     readMonitor();
     return (fPBoard.Temp);
   };
+  float GetStaveTemperature(int stave)
+  {
+    readMonitor();
+    if (stave >= 0 && stave < 2)
+      return (fPBoard.TempStaves[stave]);
+    else
+      return -273.15;
+  };
+
+
   float GetBiasVoltage()
   {
     readMonitor();
