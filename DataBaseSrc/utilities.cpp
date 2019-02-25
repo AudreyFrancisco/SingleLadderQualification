@@ -3,6 +3,10 @@
  *
  *  Created on: Mar 16, 2017
  *      Author: fap
+ *
+ *          * HISTORY *
+ *      25/02/2019	- Fix a bug in the string to date conversion !!
+ *
  */
 #include "utilities.h"
 #include <algorithm>
@@ -148,8 +152,8 @@ void str2timeDate(const char *sDate, time_t *tDate)
   int       dd, mm, yy;
   struct tm date = {0};
   sscanf(sDate, "%d.%d.%d", &dd, &mm, &yy);
-  date.tm_year = yy;
-  date.tm_mon  = mm;
+  date.tm_year = (yy < 100) ? yy + 100 : yy - 1900;
+  date.tm_mon  = mm - 1;
   date.tm_mday = dd;
   *tDate       = mktime(&date);
   return;
