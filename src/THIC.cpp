@@ -228,7 +228,7 @@ void THic::SwitchBias(bool on, bool force)
     return;
   }
   if (on) {
-    m_powerBoard->SetBiasOn(m_bbChannel);
+    m_powerBoard->SetBiasOn(m_bbChannel, force);
     std::cout << "Switched on BB channel: " << m_bbChannel << std::endl;
   }
   else {

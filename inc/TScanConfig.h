@@ -59,7 +59,9 @@ namespace ScanConfig {
   // 2.4: introduced 1V back bias scan in HIC Qualification test (fail -> not working)
 
   const float CLASSIFICATION_VERSION = 2.4;
-  const float NUMBEROFTHEBEAST       = 1.0;
+
+  // 1.1 bugfixes (local bus for disabled chips, forcing back bias at 1V)
+  const float NUMBEROFTHEBEAST = 1.1;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions
