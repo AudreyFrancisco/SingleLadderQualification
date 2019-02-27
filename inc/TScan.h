@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "AlpideDecoder.h"
+#include "BoardDecoder.h"
 #include "TAlpide.h"
 #include "THIC.h"
 #include "THisto.h"
@@ -188,9 +189,12 @@ protected:
   TErrorCounter        m_errorCount;
   virtual void         ConfigureMaskStage(TAlpide *chip, int istage);
   void                 FindTimeoutHics(int iboard, int *triggerCounts);
-  void                 ReadEventData(std::vector<TPixHit> *Hits, int iboard);
+
+  void ReadEventData(std::vector<TPixHit> *Hits, int iboard);
 
 public:
+  void WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits, TBoardHeader boardInfo,
+                    int trig);
   TMaskScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
             std::vector<TReadoutBoard *> boards, std::deque<TScanHisto> *histoQue,
             std::mutex *aMutex);

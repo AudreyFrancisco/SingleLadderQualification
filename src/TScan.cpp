@@ -6,6 +6,7 @@
 #include <typeinfo>
 
 #include "AlpideConfig.h"
+#include "BoardDecoder.h"
 #include "Common.h"
 #include "TBoardConfigMOSAIC.h"
 #include "TPowerTest.h"
@@ -587,6 +588,53 @@ void TMaskScan::ConfigureMaskStage(TAlpide *chip, int istage)
 {
   m_row = AlpideConfig::ConfigureMaskStage(chip, m_pixPerStage, istage);
 }
+/*
+std::map<int, int> map_ch_rec;
+char               fNameRaw[1024];
+
+void TMaskScan::initModIdMap() // make map of the values from config and make the key for modid
+{
+  for (unsigned int iboard = 0; iboard < fBoards.size(); iboard++) {
+    for (unsigned int ich = 0; ich < fChips.size(); ich++) {
+      int chipid      = fChips.at(ich)->GetConfig()->GetChipId() & 0xf;
+      int modid       = (fChips.at(ich)->GetConfig()->GetChipId() >> 4) & 0x7;
+      int receiver    = fChips.at(ich)->GetConfig()->GetParamValue("RECEIVER");
+      int key         = (int)iboard + 2 * (chipid + 16 * receiver);
+      map_ch_rec[key] = modid;
+      //      std::cout << "Modid " << modid << " stored under the key " << key << " " <<
+      //      map_ch_rec[key]
+      //                << std::endl;
+    }
+  }
+}
+*/
+std::vector<TReadoutBoard *> fBoards;
+void TMaskScan::WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits,
+                             TBoardHeader boardInfo, int trig)
+{
+  int dcol, address, event;
+  for (unsigned int ihit = oldHits; ihit < Hits->size(); ihit++) {
+    //    int modid;
+    int iboard   = Hits->at(ihit).boardIndex;
+    int receiver = Hits->at(ihit).channel;
+    int chipid   = Hits->at(ihit).chipId;
+    /*    int key      = (int)iboard + 2 * (chipid + 16 * receiver);
+        modid        = map_ch_rec[key];
+        //      std::cout << "Reading modid from the map : " << modid << " With the key " << key <<
+        //      std::endl;
+        int chipId = chipid + 16 * modid; */
+    dcol    = Hits->at(ihit).dcol + Hits->at(ihit).region * 16;
+    address = Hits->at(ihit).address;
+
+    if (fBoards.at(0)->GetConfig()->GetBoardType() == boardDAQ) {
+      event = boardInfo.eventId;
+    }
+    else {
+      event = boardInfo.eoeCount;
+    }
+    fprintf(fp, "%d %d %d %d %d %d %d\n", event, chipid, iboard, receiver, dcol, address, trig);
+  }
+}
 
 void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
 {
@@ -601,6 +649,7 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
     nTrigPerHic[i] = 0;
   }
 
+  FILE *rawfile = fopen("Rawfile.dat", "a");
   while (itrg < m_nTriggers * m_enabled[iboard]) {
     if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) <=
         0) { // no event available in buffer yet, wait a bit
@@ -622,6 +671,8 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
     else {
       BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer,
                                 n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+      WriteRawData(rawfile, Hits, Hits->size(), boardInfo, itrg);
+
       // decode Chip event
       if (boardInfo.decoder10b8bError) {
         m_errorCount.n8b10b++;
@@ -693,6 +744,7 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
       itrg++;
     }
   }
+  fclose(rawfile);
 }
 
 void TScan::CreateHicConditions()
