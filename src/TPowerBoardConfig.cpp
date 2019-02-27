@@ -89,7 +89,8 @@ TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName)
     fclose(fhConfigFile);
   }
 
-  m_bottom = DEF_BOTTOM;
+  m_bottom       = DEF_BOTTOM;
+  m_calibrateAll = DEF_CALIBALL;
   InitParamMap();
 }
 
@@ -194,7 +195,11 @@ void TPowerBoardConfig::readConfiguration()
   }
 }
 
-void TPowerBoardConfig::InitParamMap() { fSettings["PBBOTTOM"] = &m_bottom; }
+void TPowerBoardConfig::InitParamMap()
+{
+  fSettings["PBBOTTOM"]     = &m_bottom;
+  fSettings["CALIBRATEALL"] = &m_calibrateAll;
+}
 
 bool TPowerBoardConfig::SetParamValue(std::string Name, std::string Value)
 {

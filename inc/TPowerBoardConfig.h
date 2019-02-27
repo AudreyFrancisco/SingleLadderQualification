@@ -48,6 +48,7 @@
 // Default values table
 
 #define DEF_BOTTOM 0 // default: top power unit
+#define DEF_CALIBALL 0
 
 // a) Default values used in constructor
 #define DEF_BIASVOLTAGE 0.0
@@ -146,6 +147,7 @@ private:
   PowBoard_t                   fPBConfig;
   TBoardType                   fBoardType;
   int                          m_bottom;
+  int                          m_calibrateAll;
   std::map<std::string, int *> fSettings;
 
   // methods
