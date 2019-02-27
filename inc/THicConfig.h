@@ -7,6 +7,11 @@
 
 class TConfig;
 
+namespace HicConfig {
+  const int BBCHANNEL = 0;
+  const int PBMOD     = 0;
+} // namespace HicConfig
+
 class THicConfig {
 private:
 protected:
@@ -14,6 +19,8 @@ protected:
   TConfig *                    fConfig;
   int                          fModId;
   int                          fEnabled;
+  int                          fPbMod;
+  int                          fBbChannel;
 
 public:
   THicConfig(TConfig *config, int modId);
@@ -43,6 +50,8 @@ public:
 };
 
 class THicConfigIB : public THicConfig {
+public:
+  THicConfigIB(TConfig *config);
 };
 
 #endif

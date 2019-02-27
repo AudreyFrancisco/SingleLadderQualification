@@ -638,6 +638,7 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
 
   (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
+  THicConfigIB *      hicConfig   = (THicConfigIB *)config->GetHicConfig(0);
 
   boardConfig->SetInvertedData(false);
 
@@ -663,19 +664,24 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
 
   boards->push_back(new TReadoutBoardMOSAIC(config, boardConfig));
 
-  TPowerBoard *pb = 0;
+  TPowerBoard *pb        = 0;
+  int          bbChannel = -1;
+  int          pbMod     = 0;
+
   if (config->GetUsePowerBoard()) {
     TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
     pbConfig->SetDefaultsIB(0);
-    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0), pbConfig);
+    pb        = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0), pbConfig);
+    pbMod     = hicConfig->GetParamValue("PBMOD");
+    bbChannel = hicConfig->GetParamValue("BBCHANNEL");
   }
 
   if (hics) {
     if (hicIds) {
-      hics->push_back(new THicIB(hicIds[0], 0, pb, 0));
+      hics->push_back(new THicIB(hicIds[0], 0, pb, pbMod, bbChannel));
     }
     else {
-      hics->push_back(new THicIB("Dummy_ID", 0, pb, 0));
+      hics->push_back(new THicIB("Dummy_ID", 0, pb, pbMod, bbChannel));
     }
     ((THicIB *)(hics->at(0)))->ConfigureInterface(0, RCVMAP, 0);
   }

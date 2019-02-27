@@ -1,17 +1,23 @@
 #include "THicConfig.h"
 
+using namespace HicConfig;
+
 THicConfig::THicConfig(TConfig *config, int modId)
 {
-  fConfig  = config;
-  fModId   = (modId & 0x7);
-  fEnabled = true;
+  fConfig    = config;
+  fModId     = (modId & 0x7);
+  fEnabled   = true;
+  fPbMod     = PBMOD;
+  fBbChannel = BBCHANNEL;
   InitParamMap();
 }
 
 void THicConfig::InitParamMap()
 {
-  fSettings["MODID"] = &fModId;
-  fSettings["ENHIC"] = &fEnabled;
+  fSettings["MODID"]     = &fModId;
+  fSettings["ENHIC"]     = &fEnabled;
+  fSettings["BBCHANNEL"] = &fBbChannel;
+  fSettings["PBMOD"]     = &fPbMod;
 }
 
 bool THicConfig::SetParamValue(std::string Name, std::string Value)
@@ -61,3 +67,5 @@ void THicConfigOB::InitParamMap()
 
   THicConfig::InitParamMap();
 }
+
+THicConfigIB::THicConfigIB(TConfig *config) : THicConfig(config, 0) {}
