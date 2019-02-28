@@ -15,6 +15,8 @@
 
 typedef enum { setupSingle, setupIB, setupOB, setupSingleM } TSetupType;
 
+void readDcolMask(std::string filename, std::vector<TAlpide *> *chips);
+
 int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                        std::vector<TAlpide *> *chips, std::vector<THic *> *hics,
                        const char **hicIds);
