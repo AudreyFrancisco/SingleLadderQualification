@@ -110,6 +110,14 @@ void TFastPowerTest::Execute()
   currentIt->second.idddSwitchon = m_testHic->GetIddd();
   currentIt->second.iddaSwitchon = m_testHic->GetIdda();
 
+  // check if supply tripped
+  if (!m_testHic->IsPowered()) {
+    currentIt->second.trip = true;
+  }
+  else {
+    currentIt->second.trip = false;
+  }
+
   // switch on back bias only for module under test
   for (int i = 0; i < 8; i++) {
     if (i == m_testHic->GetBbChannel()) {
@@ -134,11 +142,11 @@ void TFastPowerTest::Execute()
   }
 
   // check if supply tripped
-  if (!m_testHic->IsPowered()) {
-    currentIt->second.trip = true;
+  if (!currentIt->second.trip && !m_testHic->IsPowered()) {
+    currentIt->second.tripBB = true;
   }
   else {
-    currentIt->second.trip = false;
+    currentIt->second.tripBB = false;
   }
 
   // check if back bias tripped
