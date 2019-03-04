@@ -12,6 +12,7 @@ typedef struct {
   int region;
   int dcol;
   int address;
+  int prev;
 } TPixHit;
 
 enum TAlpideDataType {

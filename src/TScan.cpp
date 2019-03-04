@@ -612,7 +612,14 @@ std::vector<TReadoutBoard *> fBoards;
 void TMaskScan::WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits,
                              TBoardHeader boardInfo, int trig)
 {
+
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << "IN WRITE RAW DATA" << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
   int dcol, address, event;
+  std::cout << oldHits << "  " << Hits->size() << std::endl;
   for (unsigned int ihit = oldHits; ihit < Hits->size(); ihit++) {
     //    int modid;
     int iboard   = Hits->at(ihit).boardIndex;
@@ -632,6 +639,7 @@ void TMaskScan::WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits,
     else {
       event = boardInfo.eoeCount;
     }
+    std::cout << "EVENT " << std::endl;
     fprintf(fp, "%d %d %d %d %d %d %d\n", event, chipid, iboard, receiver, dcol, address, trig);
   }
 }
@@ -644,12 +652,13 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
   int           nBad = 0;
   TBoardHeader  boardInfo;
   int           nTrigPerHic[MAX_MOSAICTRANRECV];
-
+  int           oldhits;
+  oldhits = Hits->at((Hits->size() - 1)).prev;
   for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
     nTrigPerHic[i] = 0;
   }
 
-  FILE *rawfile = fopen("Rawfile.dat", "a");
+  FILE *rawfile = fopen("Data/Rawfile.dat", "a");
   while (itrg < m_nTriggers * m_enabled[iboard]) {
     if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) <=
         0) { // no event available in buffer yet, wait a bit
@@ -669,10 +678,15 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
       continue;
     }
     else {
+      std::cout << std::endl;
+      std::cout << std::endl;
+      std::cout << "	GO HERE  :" << std::endl;
+      std::cout << std::endl;
+      std::cout << std::endl;
       BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer,
                                 n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-      WriteRawData(rawfile, Hits, Hits->size(), boardInfo, itrg);
-
+      WriteRawData(rawfile, Hits, oldhits, boardInfo, itrg);
+      oldhits = Hits->size();
       // decode Chip event
       if (boardInfo.decoder10b8bError) {
         m_errorCount.n8b10b++;

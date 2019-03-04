@@ -75,7 +75,8 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
 {
   TPixHit hit;
   int     address, hitmap_length;
-
+  int     previous_hits;
+  previous_hits = hits->size();
   if (hits->size() >= (unsigned int)hitLimit) {
     char Text[200];
     sprintf(Text, "ERROR: number of hits exceeding limit of %d, please check console output",
@@ -95,6 +96,7 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
   hit.region     = region;
   hit.dcol       = (data_field & 0x3c00) >> 10;
   address        = (data_field & 0x03ff);
+  hit.prev       = previous_hits;
 
   bool corrupt = ((hit.dcol < 0) || (hit.dcol > 511)) ? true : false;
 
