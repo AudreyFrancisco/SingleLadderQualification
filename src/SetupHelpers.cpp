@@ -17,6 +17,44 @@ int  VerboseLevel                = 0;
 char ConfigurationFileName[1024] = "Config.cfg";
 // --------------------------------------
 
+void readDcolMask(std::string filename, std::vector<TAlpide *> *chips)
+{
+  if (const char *configDir = std::getenv("ALPIDE_TEST_CONFIG"))
+    filename.insert(0, std::string(configDir) + "/");
+
+  std::ifstream infile(filename);
+
+  if (!infile.good()) {
+    std::cout << "WARNING: Config file " << filename
+              << " not found, not masking any couble columns." << std::endl;
+  }
+  else {
+    std::cout << "Masking the following double columns" << std::endl;
+    std::cout << "ChipID\tDouble Column" << std::endl;
+    std::string line;
+    while (std::getline(infile, line)) {
+      std::stringstream ss;
+      int               chipId = -1;
+      unsigned int      dCol   = -1U;
+      // remove leading tabs or blanks
+      size_t p = line.find_first_not_of(" \t");
+      line.erase(0, p);
+      if (line.size() == 0 || line.at(0) == '#') continue;
+      ss << line;
+      ss >> chipId >> dCol;
+      if (chipId > -1 && dCol < -1U) {
+        std::cout << chipId << "\t" << dCol << std::endl;
+        for (const auto &rChip : *chips) {
+          if (rChip->GetConfig()->GetChipId() == chipId) {
+            rChip->GetConfig()->SetDoubleColumnMask(dCol);
+          }
+        }
+      }
+    }
+    std::cout << std::endl;
+  }
+}
+
 void BaseConfigOBchip(TChipConfig *&chipConfig)
 {
   // --- Force the Link Speed values to 1.2 GHz in the Chip-Master
@@ -42,6 +80,7 @@ void BaseConfigOBchip(TChipConfig *&chipConfig)
 int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                 std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
 {
+  readDcolMask("dcol_mask_OBHIC.cfg", chips);
   (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
 
@@ -124,6 +163,7 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
 int initSetupPower(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                    std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
 {
+  readDcolMask("dcol_mask_fastPower.cfg", chips);
   (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
 
@@ -174,6 +214,7 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
 {
   // default mapping, the first index in receiverMap refers to the module position and not the id
   // TODO: Define power board mapping for half stave; assuming channel = position
+  readDcolMask("dcol_mask.cfg", chips);
   int mosaicMap[2]      = {0, 1};
   int receiverMap[7][2] = {{0, 1}, {1, 0}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}};
   int controlMap[2]     = {0, 0};
@@ -300,6 +341,7 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
                      std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds,
                      bool powerCombo)
 {
+  readDcolMask("dcol_mask.cfg", chips);
   // default mapping, the first index in receiverMap refers to the module position and not the id
   // TODO: Define power board mapping for half stave; assuming channel = position
   int mosaicMap[1]      = {0}; // AC: width reduced width to 1 (only one MOSAIC used in this mode)
@@ -437,6 +479,7 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
 int initSetupHalfStaveRU(TConfig *config, std::vector<TReadoutBoard *> *boards,
                          TBoardType *boardType, std::vector<TAlpide *> *chips)
 {
+  readDcolMask("dcol_mask.cfg", chips);
   (*boardType) = boardRU;
   for (unsigned int i = 0; i < config->GetNBoards(); i++) {
     TBoardConfigRU *boardConfig = (TBoardConfigRU *)config->GetBoardConfig(i);
@@ -634,6 +677,7 @@ int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
 int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                 std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
 {
+  readDcolMask("dcol_mask.cfg", chips);
   int RCVMAP[] = {3, 5, 7, 8, 6, 4, 2, 1, 0};
 
   (*boardType)                    = boardMOSAIC;
@@ -727,6 +771,7 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
 int initSetupIBRU(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                   std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
 {
+  readDcolMask("dcol_mask.cfg", chips);
   (*boardType)                = boardRU;
   TBoardConfigRU *boardConfig = (TBoardConfigRU *)config->GetBoardConfig(0);
 
@@ -772,6 +817,7 @@ int initSetupIBRU(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardT
 int initSetupSingleMosaic(TConfig *config, std::vector<TReadoutBoard *> *boards,
                           TBoardType *boardType, std::vector<TAlpide *> *chips)
 {
+  readDcolMask("dcol_mask.cfg", chips);
   TChipConfig *chipConfig         = config->GetChipConfig(0);
   (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
@@ -801,6 +847,7 @@ int initSetupSingleMosaic(TConfig *config, std::vector<TReadoutBoard *> *boards,
 int initSetupSingle(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                     std::vector<TAlpide *> *chips)
 {
+  readDcolMask("dcol_mask.cfg", chips);
   TReadoutBoardDAQ *myDAQBoard = 0;
   TChipConfig *     chipConfig = config->GetChipConfig(0);
   chipConfig->SetParamValue("LINKSPEED", "-1");
@@ -864,6 +911,7 @@ int initSetupWithNames(TConfig *&config, std::vector<TReadoutBoard *> *boards,
                        const char *configFileName /*=""*/, std::vector<THic *> *hics /*=0*/,
                        std::vector<std::string> *hicNames /*=0*/, bool powerCombo /*=false*/)
 {
+  readDcolMask("dcol_mask.cfg", chips);
   const char **hicIds = nullptr;
   if (hicNames) {
     hicIds = new const char *[hicNames->size()];
@@ -874,6 +922,10 @@ int initSetupWithNames(TConfig *&config, std::vector<TReadoutBoard *> *boards,
   delete[] hicIds;
   return ret;
 }
+
+
+// read double-column masking file
+
 /*
  * Add the InitSetUpEndurance call  - 25/5/17
  *
@@ -926,43 +978,6 @@ int initSetup(TConfig *&config, std::vector<TReadoutBoard *> *boards, TBoardType
   default:
     std::cout << "Unknown setup type, doing nothing" << std::endl;
     return -1;
-  }
-
-  // read double-column masking file
-  std::string filename = "dcol_mask.cfg";
-  if (const char *configDir = std::getenv("ALPIDE_TEST_CONFIG"))
-    filename.insert(0, std::string(configDir) + "/");
-
-  std::ifstream infile(filename);
-
-  if (!infile.good()) {
-    std::cout << "WARNING: Config file " << filename
-              << " not found, not masking any couble columns." << std::endl;
-  }
-  else {
-    std::cout << "Masking the following double columns" << std::endl;
-    std::cout << "ChipID\tDouble Column" << std::endl;
-    std::string line;
-    while (std::getline(infile, line)) {
-      std::stringstream ss;
-      int               chipId = -1;
-      unsigned int      dCol   = -1U;
-      // remove leading tabs or blanks
-      size_t p = line.find_first_not_of(" \t");
-      line.erase(0, p);
-      if (line.size() == 0 || line.at(0) == '#') continue;
-      ss << line;
-      ss >> chipId >> dCol;
-      if (chipId > -1 && dCol < -1U) {
-        std::cout << chipId << "\t" << dCol << std::endl;
-        for (const auto &rChip : *chips) {
-          if (rChip->GetConfig()->GetChipId() == chipId) {
-            rChip->GetConfig()->SetDoubleColumnMask(dCol);
-          }
-        }
-      }
-    }
-    std::cout << std::endl;
   }
 
   return 0;
