@@ -358,15 +358,18 @@ THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityT
   vector<ComponentDB::compActivity> tests;
   DbGetPreviousTests(db, compId, activityTypeId, tests, openAct, impedance);
 
-  int latestIdx = 0;
+  int latestIdx = -1;
 
-  if (tests.size() == 0) return CLASS_UNTESTED;
   for (unsigned int i = 0; i < tests.size(); i++) {
-    if (DbIsNewer(tests.at(latestIdx), tests.at(i)) == 1) {
+    if ((activityTypeId == DbGetActivityTypeId(db, "OL Stave Qualification Test")) &&
+        (tests.at(i).Typename.find("OL Stave Reception Test") != string::npos))
+      continue;
+    if (DbIsNewer(tests.at(std::max(latestIdx, 0)), tests.at(i)) == 1) {
       latestIdx = i;
     }
   }
 
+  if (latestIdx < 0) return CLASS_UNTESTED;
   string category = tests.at(latestIdx).Result.Name;
 
   // TODO: change to gold/silver/bronze
