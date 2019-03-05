@@ -1,8 +1,7 @@
 # Framework for ALPIDE testing
 
-Here, you find the general instructions for building and using the
-software. For instructions on the migration to cmake refer to
-[CMakeMigration.md](CMakeMigration.md), instead.
+You can find some instructions for basic debugging in
+[Debug.md](Debug.md).
 
 ## Build instructions
 
