@@ -306,10 +306,11 @@ void scan(int maskStepSize, int VCASN_mean, bool automated)
           BoardDecoder::DecodeEvent(fBoards.at(0)->GetConfig()->GetBoardType(), buffer,
                                     n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
           // decode Chip event
+          int prevhits          = 0;
           int n_bytes_chipevent = n_bytes_data - n_bytes_header; //-n_bytes_trailer;
           if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
           if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
-                                          boardInfo.channel, prioErrors,
+                                          boardInfo.channel, prevhits, prioErrors,
                                           fConfig->GetScanConfig()->GetParamValue("MAXHITS"))) {
             std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
             nBad++;

@@ -652,8 +652,7 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
   int           nBad = 0;
   TBoardHeader  boardInfo;
   int           nTrigPerHic[MAX_MOSAICTRANRECV];
-  int           oldhits;
-  oldhits = Hits->at((Hits->size() - 1)).prev;
+  int           prevhits = 0;
   for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
     nTrigPerHic[i] = 0;
   }
@@ -685,8 +684,7 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
       std::cout << std::endl;
       BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer,
                                 n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-      WriteRawData(rawfile, Hits, oldhits, boardInfo, itrg);
-      oldhits = Hits->size();
+      WriteRawData(rawfile, Hits, prevhits, boardInfo, itrg);
       // decode Chip event
       if (boardInfo.decoder10b8bError) {
         m_errorCount.n8b10b++;
@@ -712,7 +710,7 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
       bool         dataIntegrity = false;
       try {
         dataIntegrity = AlpideDecoder::DecodeEvent(
-            buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel,
+            buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel, prevhits,
             m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder,
             m_config->GetParamValue("MAXHITS"), &m_stuck, &chipId, &bunchCounter);
       }

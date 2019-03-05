@@ -189,8 +189,9 @@ void scan()
                                   n_bytes_header, n_bytes_trailer, boardInfo);
         // decode Chip event
         int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
+        int prevhits          = 0;
         AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
-                                   boardInfo.channel, prioErrors,
+                                   boardInfo.channel, prevhits, prioErrors,
                                    fConfig->GetScanConfig()->GetParamValue("MAXHITS"));
 
         // if (Hits->size()>0) std::cout << "Number of hits: " << Hits->size() << std::endl;

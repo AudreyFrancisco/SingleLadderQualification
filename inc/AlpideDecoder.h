@@ -12,7 +12,6 @@ typedef struct {
   int region;
   int dcol;
   int address;
-  int prev;
 } TPixHit;
 
 enum TAlpideDataType {
@@ -55,7 +54,7 @@ public:
   }
   static int  GetWordLength(TAlpideDataType dataType);
   static bool DecodeEvent(unsigned char *data, int nBytes, std::vector<TPixHit> *hits,
-                          int boardIndex, int channel, int &prioErrors, int hitLimit,
+                          int boardIndex, int channel, int prevhits, int &prioErrors, int hitLimit,
                           std::vector<TPixHit> *stuck = 0, int *chipID = 0,
                           unsigned int *bunchCounter = 0);
   static bool ExtractNextEvent(unsigned char *data, int nBytes, int &eventStart, int &eventEnd,

@@ -75,8 +75,6 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
 {
   TPixHit hit;
   int     address, hitmap_length;
-  int     previous_hits;
-  previous_hits = hits->size();
   if (hits->size() >= (unsigned int)hitLimit) {
     char Text[200];
     sprintf(Text, "ERROR: number of hits exceeding limit of %d, please check console output",
@@ -96,7 +94,6 @@ bool AlpideDecoder::DecodeDataWord(unsigned char *data, int chip, int region,
   hit.region     = region;
   hit.dcol       = (data_field & 0x3c00) >> 10;
   address        = (data_field & 0x03ff);
-  hit.prev       = previous_hits;
 
   bool corrupt = ((hit.dcol < 0) || (hit.dcol > 511)) ? true : false;
 
@@ -237,8 +234,8 @@ bool AlpideDecoder::ExtractNextEvent(unsigned char *data, int nBytes, int &event
 }
 
 bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPixHit> *hits,
-                                int boardIndex, int channel, int &prioErrors, int hitLimit,
-                                std::vector<TPixHit> *stuck, int *chipID,
+                                int boardIndex, int channel, int prevhits, int &prioErrors,
+                                int hitLimit, std::vector<TPixHit> *stuck, int *chipID,
                                 unsigned int *bunchCounter)
 {
   int             byte     = 0;
@@ -249,11 +246,10 @@ bool AlpideDecoder::DecodeEvent(unsigned char *data, int nBytes, std::vector<TPi
   bool            finished = false; // event trailer found
   bool            corrupt  = false; // corrupt data found (i.e. data without region or chip)
   TAlpideDataType type;
-
+  prevhits = hits->size();
   unsigned char last;
 
   unsigned int BunchCounterTmp;
-
   while (byte < nBytes) {
     last = data[byte];
     type = GetDataType(data[byte]);

@@ -250,9 +250,11 @@ void scan()
         int          n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
         int          chipID            = -1;
         unsigned int bunchCounter      = 0;
-        bool         Decode            = AlpideDecoder::DecodeEvent(
-            buffer + n_bytes_header, n_bytes_chipevent, Hits, 0, boardInfo.channel, prioErrors,
-            fConfig->GetScanConfig()->GetParamValue("MAXHITS"), 0x0, &chipID, &bunchCounter);
+        int          prevhits          = 0;
+        bool Decode = AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits,
+                                                 0, boardInfo.channel, prevhits, prioErrors,
+                                                 fConfig->GetScanConfig()->GetParamValue("MAXHITS"),
+                                                 0x0, &chipID, &bunchCounter);
         ;
         bool RecvMatched = false;
         try {

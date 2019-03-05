@@ -155,7 +155,7 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
   int           itrg = 0, trials = 0;
   TBoardHeader  boardInfo;
   int           nTrigPerHic[MAX_MOSAICTRANRECV];
-
+  int           prevhits = 0;
   for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
     nTrigPerHic[i] = 0;
   }
@@ -214,7 +214,7 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
       bool dataIntegrity = false;
       try {
         dataIntegrity = AlpideDecoder::DecodeEvent(
-            buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel,
+            buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel, prevhits,
             m_errorCount.nPrioEncoder, m_config->GetParamValue("MAXHITS"), &m_stuck);
       }
       catch (const std::runtime_error &e) {
