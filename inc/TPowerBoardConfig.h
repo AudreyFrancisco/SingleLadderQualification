@@ -192,7 +192,6 @@ public:
   void SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
   void EnterMeasuredLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
   void GetWirePBResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, float &BBLineR);
-  void AddPowerBusResistances(int mod, bool real = false, bool middle = false);
   void GetResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, pb_t pb);
   bool IsCalibrated(int mod);
   bool BiasEnabled(int mod) { return fPBConfig.Modul[mod].BiasEnabled; };
