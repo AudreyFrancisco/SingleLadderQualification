@@ -682,7 +682,6 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
 
   (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
-  THicConfigIB *      hicConfig   = (THicConfigIB *)config->GetHicConfig(0);
 
   boardConfig->SetInvertedData(false);
 

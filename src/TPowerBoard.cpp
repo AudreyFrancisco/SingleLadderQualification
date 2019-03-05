@@ -425,7 +425,8 @@ void TPowerBoard::CorrectVoltageDrop(TPowerBoardConfig::pb_t pb, bool reset, int
       }
     }
     for (int module = 0; module < nch; ++module) {
-      VdropGnd[module] = std::accumulate(VdropPart.begin(), VdropPart.begin() + module + 1, 0.);
+      if ((pb == TPowerBoardConfig::realML) || (pb == TPowerBoardConfig::realOL))
+        VdropGnd[module] = std::accumulate(VdropPart.begin(), VdropPart.begin() + module + 1, 0.);
       printf("VdropGnd for module %d = %g\n", module, VdropGnd[module]);
 
       fPowerBoardConfig->GetResistances(module, RAnalog, RDigital, RGround, pb);
