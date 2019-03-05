@@ -86,6 +86,8 @@ private:
   std::vector<std::string>                    m_boardConfigStart;
   std::vector<std::string>                    m_boardConfigEnd;
   std::map<std::string, TScanConditionsHic *> m_hicConditions;
+  float                                       m_tempPT100start[2];
+  float                                       m_tempPT100end[2];
 
 public:
   TScanConditions(){};
@@ -136,6 +138,9 @@ protected:
   virtual THisto CreateHisto() = 0;
   //  virtual void CreateScanParameters() = 0;
   void DumpHitInformation(std::vector<TPixHit> *Hits);
+
+  TPowerBoardConfig::pb_t GetPBtype(THic *hic) const;
+  void                    CorrectVoltageDrop(bool reset = false);
 
 public:
   TScan(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,

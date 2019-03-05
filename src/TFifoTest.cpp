@@ -114,17 +114,15 @@ void TFifoTest::Init()
     }
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  CorrectVoltageDrop();
 
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
     AlpideConfig::ConfigureCMU(m_chips.at(i));
   }
 
+  CorrectVoltageDrop();
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
     if (m_hics.at(ihic)->IsEnabled() && !m_hics.at(ihic)->IsPowered()) {
       throw std::runtime_error("FIFO scan init: HIC powered off (Retry suggested)");
     }

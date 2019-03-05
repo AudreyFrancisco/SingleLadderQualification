@@ -92,6 +92,7 @@ public:
     float    VBmon;
     float    IBmon;
     float    Temp;
+    float    TempStaves[2];
     time_t   TimeStamp;
   };
 
@@ -127,6 +128,16 @@ public:
     readMonitor();
     return (fPBoard.Temp);
   };
+  float GetStaveTemperature(int stave)
+  {
+    readMonitor();
+    if (stave >= 0 && stave < 2)
+      return (fPBoard.TempStaves[stave]);
+    else
+      return -273.15;
+  };
+
+
   float GetBiasVoltage()
   {
     readMonitor();
@@ -178,7 +189,8 @@ public:
   void CalibrateCurrent(int module);
   void CalibrateBiasCurrent();
   void CalibrateBiasVoltage();
-  void CorrectVoltageDrop(int module, bool reset = false);
+  void CorrectVoltageDrop(TPowerBoardConfig::pb_t pb, bool reset = false, int nch = 8);
+  void CorrectVoltageDrop(int module, TPowerBoardConfig::pb_t pb, bool reset = false);
   bool IsCalibrated(int module) { return GetConfigurationHandler()->IsCalibrated(module); };
 
   void GetModule(int module, float *AV, float *AI, float *DV, float *DI, bool *BiasOn, bool *AChOn,

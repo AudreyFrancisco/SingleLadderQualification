@@ -38,3 +38,4 @@ libalpide/version.h
 **/MosaicSrc/powerboard/pbctrl
 **/scripts
 **/analysis
+**/build

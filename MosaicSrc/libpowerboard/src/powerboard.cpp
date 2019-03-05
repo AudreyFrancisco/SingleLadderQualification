@@ -62,12 +62,25 @@ powerboard::powerboard(I2Cbus *busMaster, I2Cbus *busAux)
 
   spiBridge           = new SC18IS602(i2cBus, I2Caddress_spiBridge);
   temperatureDetector = new MAX31865(spiBridge, 0);
+
+#ifdef PB_NEW
+  for (unsigned int i = 0; i < 2; ++i)
+    temperatureDetectorStave[i] = new MAX31865(spiBridge, i + 1);
+#else
+  for (unsigned int i = 0; i < 2; ++i)
+    temperatureDetectorStave[i] = 0x0;
+#endif
 }
 
 powerboard::~powerboard()
 {
   // delete objects in creation reverse order
   delete temperatureDetector;
+#ifdef PB_NEW
+  for (unsigned int i = 0; i < 0; ++i) {
+    delete temperatureDetectorStave[i];
+  }
+#endif
   delete spiBridge;
 
   for (int i = 0; i < 5; i++)
@@ -240,6 +253,11 @@ void powerboard::startADC()
 {
   temperatureDetector->configure();
 
+#ifdef PB_NEW
+  for (unsigned int i = 0; i < 2; ++i)
+    temperatureDetectorStave[i]->configure();
+#endif
+
   for (int i = 0; i < 5; i++)
     adcMon[i]->setConfiguration();
 }
@@ -275,8 +293,13 @@ void powerboard::getState(pbstate_t *state, getFlags flags)
 
     for (int i = 0; i < 16; i++) {
       // Voltage
-      data           = ((*dataPtr++) >> 4) & 0xfff;
-      state->Vmon[i] = data * (2.56 / 4096.0);
+      data = ((*dataPtr++) >> 4) & 0xfff;
+#ifdef PB_NEW
+      state->Vmon[i] = data * (3.072 / 4096.0);
+#else
+      state->Vmon[i]    = data * (2.56 / 4096.0);
+#endif
+
       // Current
       data           = ((*dataPtr++) >> 4) & 0xfff;
       state->Imon[i] = ((data * (2.56 / 4096.0) - 0.25) * 1.337) + 0.013;
@@ -288,14 +311,33 @@ void powerboard::getState(pbstate_t *state, getFlags flags)
 #ifdef PB_NEW
     state->Ibias *= 4. / 40.;
 #endif
+#ifdef PB_MODIFIED
+    state->Ibias *= 4. / 39.;
+
+#endif
     dataPtr++;
     data         = ((*dataPtr++) >> 4) & 0xfff;
     state->Vbias = data * (-5.12 / 4096.0);
-#ifdef PB_NEW
+#if defined(PB_NEW) || defined(PB_MODIFIED)
     state->Ibias = state->Ibias < -state->Vbias / 100. ? 0. : state->Vbias / 100.;
 #endif
 
     float rtd = (temperatureDetector->getRTD() >> 1) * (400.0 / 32768.0);
     state->T  = RTD2T(rtd);
+
+    for (unsigned i = 0; i < 2; ++i) {
+#ifdef PB_NEW
+      uint16_t temp = temperatureDetectorStave[i]->getRTD();
+      if (temp != 65535U && temp != 0U) { // something connected
+        rtd               = (temp >> 1) * (400.0 / 32768.0);
+        state->Tstaves[i] = RTD2T(rtd);
+      }
+      else { // nothing connected
+        state->Tstaves[i] = -273.15;
+      }
+#else
+      state->Tstaves[i] = -273.15;
+#endif
+    }
   }
 }

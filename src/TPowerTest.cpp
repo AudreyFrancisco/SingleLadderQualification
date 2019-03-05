@@ -105,7 +105,7 @@ void TPowerTest::Execute()
   m_testHic->GetPowerBoard()->SwitchDigitalOn(m_testHic->GetPbMod());
 
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
-  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
+  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod(), GetPBtype(m_testHic));
 
   // measure -> switchon, no clock
   currentIt->second.idddSwitchon = m_testHic->GetIddd();
@@ -119,7 +119,7 @@ void TPowerTest::Execute()
   }
 
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
-  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
+  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod(), GetPBtype(m_testHic));
 
   // measure -> Clocked
   currentIt->second.idddClocked = m_testHic->GetIddd();
@@ -141,7 +141,7 @@ void TPowerTest::Execute()
   }
 
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
-  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod());
+  m_testHic->GetPowerBoard()->CorrectVoltageDrop(m_testHic->GetPbMod(), GetPBtype(m_testHic));
 
   // measure -> Configured
   currentIt->second.idddConfigured = m_testHic->GetIddd();

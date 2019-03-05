@@ -53,6 +53,7 @@ public:
     float    Ibias;
     uint8_t  biasOn;
     float    T;
+    float    Tstaves[2];
   } pbstate_t;
 
   enum getFlags { GetMonitor = 0x01, GetSettings = 0x02, WaitTconv = 0x04, getAll = 0x07 };
@@ -91,6 +92,7 @@ private:
   MAX5419 *   rdacVbias;
   SC18IS602 * spiBridge;
   MAX31865 *  temperatureDetector;
+  MAX31865 *  temperatureDetectorStave[2];
 
 private:
   // I2C device addresses

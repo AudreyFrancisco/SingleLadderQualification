@@ -89,10 +89,7 @@ void TDctrlMeasurement::Init()
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
-    if (pb) pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  CorrectVoltageDrop();
 
   m_disableManchesterEncoding = -1;
   for (unsigned int i = 0; i < m_chips.size(); i++) {
@@ -104,10 +101,7 @@ void TDctrlMeasurement::Init()
     AlpideConfig::ConfigureCMU(m_chips.at(i));
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
-    if (pb) pb->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  CorrectVoltageDrop();
 
   TScan::SaveStartConditions();
 }

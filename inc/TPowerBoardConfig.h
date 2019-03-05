@@ -48,7 +48,7 @@
 // Default values table
 
 #define DEF_BOTTOM 0 // default: top power unit
-#define DEF_CALIBALL 0
+#define DEF_BOARD 0  // default: PB connected to first MOSAIC
 
 // a) Default values used in constructor
 #define DEF_BIASVOLTAGE 0.0
@@ -103,9 +103,9 @@ const float RWPBGround[7]  = {0, 0, 0, 0, 0, 0, 0};
 const float RPBAnalog[7]    = {0.179, 0.383, 0.458, 0.476, 0.490, 0.512, 0.507};
 const float RPBDigital[7]   = {0.074, 0.098, 0.107, 0.113, 0.123, 0.118, 0.121};
 const float RPBGround[7]    = {0.007, 0.008, 0.010, 0.012, 0.014, 0.016, 0.018};
-const float RPBAnalogML[4]  = {0, 0, 0, 0};
-const float RPBDigitalML[4] = {0, 0, 0, 0};
-const float RPBGroundML[4]  = {0, 0, 0, 0};
+const float RPBAnalogML[4]  = {0.193, 0.291, 0.356, 0.388};
+const float RPBDigitalML[4] = {0.094, 0.087, 0.092, 0.1};
+const float RPBGroundML[4]  = {0.007, 0.008, 0.010, 0.012};
 
 // Class definition
 class TPowerBoardConfig {
@@ -141,13 +141,17 @@ public:
     float CalIBiasOffset;
   } PowBoard_t;
 
+  enum pb_t { none = 0, mockup, realML, realOL };
+
   // members
 private:
+  void GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR);
+
   FILE *                       fhConfigFile; // the file handle of the Configuration File
   PowBoard_t                   fPBConfig;
   TBoardType                   fBoardType;
   int                          m_bottom;
-  int                          m_calibrateAll;
+  int                          m_board;
   std::map<std::string, int *> fSettings;
 
   // methods
@@ -189,7 +193,7 @@ public:
   void EnterMeasuredLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
   void GetWirePBResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, float &BBLineR);
   void AddPowerBusResistances(int mod, bool real = false, bool middle = false);
-  void GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR);
+  void GetResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, pb_t pb);
   bool IsCalibrated(int mod);
   bool BiasEnabled(int mod) { return fPBConfig.Modul[mod].BiasEnabled; };
   void DisableBias(int mod) { fPBConfig.Modul[mod].BiasEnabled = false; };
@@ -213,6 +217,8 @@ public:
   bool DumpConfig() { return false; }; // TODO: not yet implemented
   bool GetIsBottom() { return (m_bottom == 1); };
   void SetIsBottom(bool bottom) { m_bottom = bottom ? 1 : 0; };
+  int  GetBoard() { return m_board; }; // which MOSAIC is the PB attached to?
+  void SetBoard(int board) { m_board = board; };
   void InitParamMap();
   bool SetParamValue(std::string Name, std::string Value);
   int  GetParamValue(std::string Name);

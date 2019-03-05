@@ -92,7 +92,7 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
   if (config->GetUsePowerBoard()) {
     TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
     pbConfig->SetDefaultsOB(0);
-    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0), pbConfig);
+    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(pbConfig->GetBoard()), pbConfig);
   }
 
   if (hics) {
@@ -173,7 +173,7 @@ int initSetupPower(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoard
   if (config->GetUsePowerBoard()) {
     TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
     pbConfig->SetDefaultsOB(0);
-    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0), pbConfig);
+    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(pbConfig->GetBoard()), pbConfig);
   }
 
   if (hics) {
@@ -238,7 +238,7 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
     for (unsigned int i = 0; i < config->GetNHics(); ++i)
       pbConfig->SetDefaultsOB(i);
-    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0), pbConfig);
+    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(pbConfig->GetBoard()), pbConfig);
   }
 
   // create HIC objects and fill positionMap
@@ -373,7 +373,7 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
     TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
     for (unsigned int i = 0; i < config->GetNHics(); ++i)
       pbConfig->SetDefaultsOB(i);
-    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0), pbConfig);
+    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(pbConfig->GetBoard()), pbConfig);
   }
 
   // create HIC objects and fill positionMap
@@ -682,7 +682,6 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
 
   (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
-  THicConfigIB *      hicConfig   = (THicConfigIB *)config->GetHicConfig(0);
 
   boardConfig->SetInvertedData(false);
 
@@ -715,9 +714,7 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
   if (config->GetUsePowerBoard()) {
     TPowerBoardConfig *pbConfig = config->GetPBConfig(0);
     pbConfig->SetDefaultsIB(0);
-    pb        = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(0), pbConfig);
-    pbMod     = hicConfig->GetParamValue("PBMOD");
-    bbChannel = hicConfig->GetParamValue("BBCHANNEL");
+    pb = new TPowerBoard((TReadoutBoardMOSAIC *)boards->at(pbConfig->GetBoard()), pbConfig);
   }
 
   if (hics) {

@@ -2049,17 +2049,6 @@ void MainWindow::setandgetcalibration()
 
     powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(fHICs.at(ihic)->GetPbMod(),
                                                                         ares, dres, gres);
-    if ((fNumberofscan == OBHalfStaveOL) || (fNumberofscan == OBHalfStaveML)) {
-      powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod());
-    }
-    if (fNumberofscan == OBStaveOL || fNumberofscan == StaveReceptionOL) {
-      powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod(),
-                                                                    true, false);
-    }
-    if (fNumberofscan == OBStaveML || fNumberofscan == StaveReceptionML) {
-      powerBoard->GetConfigurationHandler()->AddPowerBusResistances(fHICs.at(ihic)->GetPbMod(),
-                                                                    true, true);
-    }
     powerBoard->CalibrateVoltage(fHICs.at(ihic)->GetPbMod());
     powerBoard->CalibrateCurrent(fHICs.at(ihic)->GetPbMod());
   }
@@ -2490,7 +2479,7 @@ void MainWindow::fillingHSscans()
 
   // threshold scans and tuning at 0V back bias
   fConfig->GetScanConfig()->SetBackBias(0.0);
-  fConfig->GetScanConfig()->SetVcasnRange(30, 70);
+  fConfig->GetScanConfig()->SetVcasnRange(30, 90);
 
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STVCASN);

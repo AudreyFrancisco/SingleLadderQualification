@@ -294,10 +294,7 @@ void TSCurveScan::Init()
     ConfigureChip(m_chips.at(i));
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  CorrectVoltageDrop();
 
   for (const auto &rBoard : m_boards) {
     rBoard->SendOpCode(Alpide::OPCODE_RORST);

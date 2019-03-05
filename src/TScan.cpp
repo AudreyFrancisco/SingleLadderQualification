@@ -74,8 +74,9 @@ void TScan::InitBase(bool saveStartConditions)
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     m_hics.at(ihic)->PowerOn();
     if (!m_hics.at(ihic)->GetPowerBoard()) continue;
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
   }
+
+  CorrectVoltageDrop();
 
   if (saveStartConditions) {
     SaveStartConditions();
@@ -85,12 +86,29 @@ void TScan::InitBase(bool saveStartConditions)
 void TScan::SaveStartConditions()
 {
   usleep(1000); // let the system settle
+  // std::cout << "Waiting for the measurement" << std::endl;
+  // std::cout << "Waiting for the measurement" << std::endl;
+  // sleep(1000);
+
 
   TReadoutBoardMOSAIC *mosaic = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(0));
   if (mosaic) {
     strcpy(m_conditions.m_fwVersion, mosaic->GetFwIdString());
   }
   strcpy(m_conditions.m_swVersion, VERSION);
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
+    try {
+      m_conditions.m_tempPT100start[0] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(0);
+      m_conditions.m_tempPT100start[1] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(1);
+      break;
+    }
+    catch (std::exception &e) {
+      std::cout << "Init: Exception " << e.what()
+                << " when reading the additional power board temperature sensors" << std::endl;
+    }
+  }
+
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     try {
@@ -171,6 +189,7 @@ void TScan::SaveStartConditions()
       m_conditions.m_boardConfigStart.push_back(rMOSAIC->GetRegisterDump());
     }
   }
+  std::cout << "Saved the conditions" << std::endl;
 }
 
 
@@ -253,6 +272,19 @@ void TScan::Terminate()
 {
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
+    try {
+      m_conditions.m_tempPT100end[0] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(0);
+      m_conditions.m_tempPT100end[1] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(1);
+      break;
+    }
+    catch (std::exception &e) {
+      std::cout << "Init: Exception " << e.what()
+                << " when reading the additional power board temperature sensors" << std::endl;
+    }
+  }
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    if (!m_hics.at(ihic)->IsEnabled()) continue;
     if ((m_config->GetTestType() != OBEndurance) && (typeid(*this) != typeid(TPowerTest))) {
       if (!m_hics.at(ihic)->IsPowered()) {
         throw std::runtime_error("TScan terminate: HIC powered off (Retry suggested)");
@@ -315,11 +347,7 @@ void TScan::Terminate()
   snprintf(m_state, sizeof(m_state), "Done (in %3d min)", int(duration.count()));
 
   // reset voltage drop correction, reset chips, apply voltage drop correction to reset state
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (!m_hics.at(ihic)->IsEnabled()) continue;
-    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), true);
-  }
+  CorrectVoltageDrop(true);
 
   for (const auto &rChip : m_chips) {
     if (rChip->GetConfig()->IsEnabled() || (rChip->GetConfig()->GetParamValue("PREVID") != -1)) {
@@ -343,11 +371,7 @@ void TScan::Terminate()
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (!m_hics.at(ihic)->IsEnabled()) continue;
-    if (!m_hics.at(ihic)->GetPowerBoard()) continue;
-    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(), false);
-  }
+  CorrectVoltageDrop();
 
   delete m_histo;
   m_histo = nullptr;
@@ -721,6 +745,15 @@ void TScan::WriteConditions(const char *fName, THic *aHic)
   fprintf(fp, "Firmware version: %s\n", m_conditions.m_fwVersion);
   fprintf(fp, "Software version: %s\n\n", m_conditions.m_swVersion);
 
+  fprintf(fp, "On-Stave PT100 #0 (start): %0.2f degrees Celsius\n",
+          m_conditions.m_tempPT100start[0]);
+  fprintf(fp, "On-Stave PT100 #1 (start): %0.2f degrees Celsius\n",
+          m_conditions.m_tempPT100start[1]);
+  fprintf(fp, "On-Stave PT100 #0 (end):   %0.2f degrees Celsius\n", m_conditions.m_tempPT100end[0]);
+  fprintf(fp, "On-Stave PT100 #1 (end):   %0.2f degrees Celsius\n", m_conditions.m_tempPT100end[1]);
+  fputs("# -273.15 degrees Celsius => sensor not connected\n", fp);
+
+
   fprintf(fp, "VDDD (start): %.3f V\n",
           m_conditions.m_hicConditions.at(aHic->GetDbId())->m_vdddStart);
   fprintf(fp, "VDDD (end):   %.3f V\n",
@@ -846,6 +879,38 @@ void TScan::WriteBoardRegisters(const char *fName)
   fputs("==\n", fp);
 
   fclose(fp);
+}
+
+TPowerBoardConfig::pb_t TScan::GetPBtype(THic *hic) const
+{
+  TPowerBoardConfig::pb_t pb = TPowerBoardConfig::none;
+
+  const int nchips = m_chips.size();
+  if (nchips > 7) {
+    THicOB *obhic = dynamic_cast<THicOB *>(hic);
+    printf("power combo: %s\n", obhic->IsPowerCombo() ? "true" : "false");
+    if (!obhic->IsPowerCombo())
+      pb = TPowerBoardConfig::mockup;
+    else if (nchips == 56)
+      pb = TPowerBoardConfig::realML;
+    else
+      pb = TPowerBoardConfig::realOL;
+  }
+
+  printf("pb set to %d, %d modules\n", pb, nchips);
+  return pb;
+}
+
+void TScan::CorrectVoltageDrop(bool reset)
+{
+  // for (auto hic : m_hics) {
+  //  if (!hic->IsEnabled() || !hic->GetPowerBoard()) continue;
+  //  hic->GetPowerBoard()->CorrectVoltageDrop(hic->GetPbMod(), GetPBtype(hic), reset);
+  //}
+  if (TPowerBoard *pb = m_hics[0]->GetPowerBoard())
+    pb->CorrectVoltageDrop(GetPBtype(m_hics[0]), reset, m_hics.size());
+  if (TPowerBoard *pb = m_hics[0]->GetPowerBoard())
+    pb->CorrectVoltageDrop(GetPBtype(m_hics[0]), reset, m_hics.size());
 }
 
 int TScanConditions::AddHicConditions(std::string hicId, TScanConditionsHic *hicCond)
