@@ -33,6 +33,10 @@ private:
   float ibias3;
   float ibias[50];
   float maxBias;
+  float rGnd1;
+  float rGnd2;
+  float rDig;
+  float rAna;
   char  m_ivFile[200];
 
 protected:

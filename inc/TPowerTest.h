@@ -30,6 +30,10 @@ typedef struct {
   float    idddConfigured;
   float    ibias0;
   float    ibias3;
+  float    rGnd1;
+  float    rGnd2;
+  float    rDig;
+  float    rAna;
   float    maxBias;
   float    ibias[61];
 } THicCurrents;
@@ -62,6 +66,7 @@ public:
   void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
   void LoopEnd(int loopIndex) { (void)(&loopIndex); };
   void PrepareStep(int loopIndex);
+  void MeasureResistances(THic *testHic, THicCurrents &hicCurrents);
   void DigitalCurrentStep(float &dVDig, float &dVAna, float &dIDig, float &dIAna);
   void AnalogCurrentStep(float &dVAna, float &dIAna);
   std::map<std::string, THicCurrents> GetCurrents() { return m_hicCurrents; };

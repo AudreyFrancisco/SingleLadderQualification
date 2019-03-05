@@ -203,51 +203,7 @@ void TPowerTest::Execute()
 
   if ((!currentIt->second.tripBB) && (!currentIt->second.trip)) {
     try {
-      std::cout << "Resistance measurement" << std::endl;
-
-      /*m_testHic->GetPowerBoard()->SwitchAnalogOn(m_testHic->GetPbMod());
-      std::this_thread::sleep_for(std::chrono::milliseconds(300));
-      m_testHic->GetPowerBoard()->SwitchDigitalOn(m_testHic->GetPbMod());
-      */
-      float dVDig, dVAna, dIDig, dIAna, RGND, RGND2, RAna, RDig = 0.0;
-
-      DigitalCurrentStep(dVDig, dVAna, dIDig, dIAna);
-
-      if (std::abs(dIAna) < 0.02) {
-        RGND = dVAna / dIDig;
-      }
-      else {
-        RGND = 0.0;
-      }
-
-      // lower digital voltage
-
-      m_testHic->GetPowerBoard()->SetDigitalVoltage(m_testHic->GetPbMod(), 1.62);
-
-
-      DigitalCurrentStep(dVDig, dVAna, dIDig, dIAna);
-
-      if (std::abs(dIAna) < 0.02) {
-        RGND2 = dVAna / dIDig;
-      }
-      else {
-        RGND2 = RGND;
-      }
-
-      RDig = (dVDig / dIDig) - RGND;
-
-      // going back to nomial voltage
-
-      m_testHic->GetPowerBoard()->SetDigitalVoltage(m_testHic->GetPbMod(), 1.82);
-
-      AnalogCurrentStep(dVAna, dIAna);
-
-      RAna = (dVAna / dIAna) - RGND;
-
-      std::cout << "RGND1: " << RGND << std::endl;
-      std::cout << "RGND2: " << RGND2 << std::endl;
-      std::cout << "RDig:  " << RDig << std::endl;
-      std::cout << "RAna:  " << RAna << std::endl;
+      MeasureResistances(m_testHic, currentIt->second);
     }
     catch (exception &ex) {
       std::cout << ex.what() << " is the thrown exception from resistance measurement" << std::endl;
@@ -260,6 +216,54 @@ void TPowerTest::Terminate()
   TScan::Terminate();
   m_running = false;
 }
+
+
+void TPowerTest::MeasureResistances(THic *testHic, THicCurrents &hicCurrents)
+{
+  float dVDig, dVAna, dIDig, dIAna, RGND, RGND2, RAna, RDig = 0.0;
+
+  std::cout << "Resistance measurement" << std::endl;
+
+  DigitalCurrentStep(dVDig, dVAna, dIDig, dIAna);
+
+  if (std::abs(dIAna) < 0.02) {
+    RGND = dVAna / dIDig;
+  }
+  else {
+    RGND = 0.0;
+  }
+
+  // lower digital voltage to measure RDigital
+
+  testHic->GetPowerBoard()->SetDigitalVoltage(m_testHic->GetPbMod(), 1.62);
+  DigitalCurrentStep(dVDig, dVAna, dIDig, dIAna);
+
+  if (std::abs(dIAna) < 0.02) {
+    RGND2 = dVAna / dIDig;
+  }
+  else {
+    RGND2 = RGND;
+  }
+  RDig = (dVDig / dIDig) - RGND;
+
+  // go back to nominal voltage and measure RAnalogue
+
+  testHic->GetPowerBoard()->SetDigitalVoltage(m_testHic->GetPbMod(), 1.82);
+  AnalogCurrentStep(dVAna, dIAna);
+
+  RAna = (dVAna / dIAna) - RGND;
+
+  hicCurrents.rGnd1 = RGND;
+  hicCurrents.rGnd2 = RGND2;
+  hicCurrents.rDig  = RDig;
+  hicCurrents.rAna  = RAna;
+
+  std::cout << "RGND1: " << RGND << std::endl;
+  std::cout << "RGND2: " << RGND2 << std::endl;
+  std::cout << "RDig:  " << RDig << std::endl;
+  std::cout << "RAna:  " << RAna << std::endl;
+}
+
 
 void TPowerTest::DigitalCurrentStep(float &dVDig, float &dVAna, float &dIDig, float &dIAna)
 {

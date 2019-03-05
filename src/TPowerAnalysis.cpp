@@ -134,6 +134,10 @@ void TPowerAnalysis::Finalize()
     hicResult->ibias0         = hicCurrents.ibias0;
     hicResult->ibias3         = hicCurrents.ibias3;
     hicResult->maxBias        = hicCurrents.maxBias;
+    hicResult->rGnd1          = hicCurrents.rGnd1;
+    hicResult->rGnd2          = hicCurrents.rGnd2;
+    hicResult->rDig           = hicCurrents.rDig;
+    hicResult->rAna           = hicCurrents.rAna;
 
     for (int i = 0; i < m_ivPoints; i++) {
       hicResult->ibias[i] = hicCurrents.ibias[i];
@@ -329,4 +333,10 @@ void TPowerResultHic::WriteToFile(FILE *fp)
   fprintf(fp, "IBias at 3V:       %.3f\n", ibias3);
 
   fprintf(fp, "\nI-V-curve file:   %s\n", m_ivFile);
+
+  fprintf(fp, "\nResistances: \n\n");
+  fprintf(fp, "Ground 1: %.3f\n", rGnd1);
+  fprintf(fp, "Ground 2: %.3f\n", rGnd2);
+  fprintf(fp, "Digital:  %.3f\n", rDig);
+  fprintf(fp, "Analogue: %.3f\n", rAna);
 }
