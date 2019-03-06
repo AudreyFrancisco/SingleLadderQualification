@@ -1080,9 +1080,9 @@ AlpideTable::response *ComponentDB::ReadParents(int ID, vector<compComposition> 
             n3 = n3->next;
           }
         }
-        else if (MATCHNODE(n2, "ID)"))
+        else if (MATCHNODE(n2, "ID"))
           comp.ID = atoi((const char *)n2->children->content);
-        else if (MATCHNODE(n2, "Position)"))
+        else if (MATCHNODE(n2, "Position"))
           comp.Position.assign((const char *)n2->children->content);
         n2 = n2->next;
       }
