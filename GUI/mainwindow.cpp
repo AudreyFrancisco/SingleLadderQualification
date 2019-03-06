@@ -593,7 +593,6 @@ void MainWindow::scanLoop(TScan *myScan)
 
 void MainWindow::popup(QString message)
 {
-
   fWindowex = new Dialog(this);
   fWindowex->append(message);
   fWindowex->hidequit();
@@ -1566,6 +1565,7 @@ void MainWindow::attachtodatabase()
 
         DbAddMember(fDB, activ, fIdofoperator);
 
+        activ.ID = 0;
 
         std::vector<ActivityDB::actUri> uris;
 
@@ -1573,7 +1573,14 @@ void MainWindow::attachtodatabase()
 
         myactivity->Create(&activ);
 
-        std::cout << "The id of the created activity is " << activ.ID << std::endl;
+        ActivityDB::response creationsingleresponse = myactivity->GetResponse();
+
+        if (activ.ID != 0 && creationsingleresponse.ErrorCode != 0) {
+          std::cout << "The id of the created activity is " << activ.ID << std::endl;
+        }
+        else {
+          std::cout << "Problem in activity creation." << std::endl;
+        }
 
         // attempt to read activity
         if (!DbCheckActivityExists(fDB, activ.ID)) {
@@ -1753,7 +1760,6 @@ void MainWindow::fillingreceptionscans()
   AddScan(STPower);
   if (fConfig->GetScanConfig()->GetParamValue("TESTDCTRL")) AddScan(STDctrl);
   AddScan(STFifo);
-
   AddScan(STDigital);
 }
 
