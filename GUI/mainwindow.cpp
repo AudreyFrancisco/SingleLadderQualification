@@ -1575,11 +1575,12 @@ void MainWindow::attachtodatabase()
 
         ActivityDB::response creationsingleresponse = myactivity->GetResponse();
 
-        if (activ.ID != 0 && creationsingleresponse.ErrorCode != 0) {
+        if (activ.ID != 0 && creationsingleresponse.ErrorCode == 0) {
           std::cout << "The id of the created activity is " << activ.ID << std::endl;
         }
         else {
-          std::cout << "Problem in activity creation." << std::endl;
+          std::cout << "Problem in activity creation. The activity id is " << activ.ID
+                    << " and the error is " << creationsingleresponse.ErrorMessage << std::endl;
         }
 
         // attempt to read activity
