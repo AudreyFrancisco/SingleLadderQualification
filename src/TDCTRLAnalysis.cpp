@@ -211,6 +211,7 @@ void TDctrlAnalysis::AnalyseHisto(TScanHisto *histo)
     TDctrlResultChip *chipResult =
         (TDctrlResultChip *)m_result->GetChipResult(m_chipList.at(ichip));
     TDctrlResultHic *hicResult = (TDctrlResultHic *)FindHicResultForChip(m_chipList.at(ichip));
+    if (!hicResult) throw std::runtime_error("HIC result not found, unable to set filename\n");
 
     if (m_config->GetUseDataPath() && hicResult) {
       sprintf(fName, "%s/DCtrlMeasurement_%s.dat", hicResult->GetOutputPath().c_str(),
@@ -309,6 +310,8 @@ void TDctrlAnalysis::Finalize()
       if (!(m_hics.at(ihic)->ContainsChip(m_chipList.at(ichip)))) continue;
       TDctrlResultHic *hicResult =
           (TDctrlResultHic *)m_result->GetHicResults()->at(m_hics.at(ihic)->GetDbId());
+      if (!hicResult) throw std::runtime_error("HIC result not found, unable to write result");
+
       hicResult->worst_slope = Min(hicResult->worst_slope, chipResult->m_pos, chipResult->m_neg);
       hicResult->worst_maxAmp =
           Min(hicResult->worst_maxAmp, chipResult->maxAmp_pos, chipResult->maxAmp_neg);
