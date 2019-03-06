@@ -903,14 +903,18 @@ TPowerBoardConfig::pb_t TScan::GetPBtype(THic *hic) const
 
 void TScan::CorrectVoltageDrop(bool reset)
 {
-  // for (auto hic : m_hics) {
-  //  if (!hic->IsEnabled() || !hic->GetPowerBoard()) continue;
-  //  hic->GetPowerBoard()->CorrectVoltageDrop(hic->GetPbMod(), GetPBtype(hic), reset);
-  //}
-  if (TPowerBoard *pb = m_hics[0]->GetPowerBoard())
-    pb->CorrectVoltageDrop(GetPBtype(m_hics[0]), reset, m_hics.size());
-  if (TPowerBoard *pb = m_hics[0]->GetPowerBoard())
-    pb->CorrectVoltageDrop(GetPBtype(m_hics[0]), reset, m_hics.size());
+  if (m_config->GetTestType() == OBEndurance) {
+    for (auto hic : m_hics) {
+      if (!hic->IsEnabled() || !hic->GetPowerBoard()) continue;
+      hic->GetPowerBoard()->CorrectVoltageDrop(hic->GetPbMod(), GetPBtype(hic), reset);
+    }
+  }
+  else {
+    if (TPowerBoard *pb = m_hics[0]->GetPowerBoard())
+      pb->CorrectVoltageDrop(GetPBtype(m_hics[0]), reset, m_hics.size());
+    if (TPowerBoard *pb = m_hics[0]->GetPowerBoard())
+      pb->CorrectVoltageDrop(GetPBtype(m_hics[0]), reset, m_hics.size());
+  }
 }
 
 int TScanConditions::AddHicConditions(std::string hicId, TScanConditionsHic *hicCond)

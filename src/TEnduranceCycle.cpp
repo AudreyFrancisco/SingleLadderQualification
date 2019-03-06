@@ -342,7 +342,8 @@ void TEnduranceCycle::Execute()
   }
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
-    // m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
+    m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod(),
+                                                         TPowerBoardConfig::none);
     m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_idddConfigured = m_hics.at(ihic)->GetIddd();
     m_hicCounters.at(m_hics.at(ihic)->GetDbId()).m_iddaConfigured = m_hics.at(ihic)->GetIdda();
   }
