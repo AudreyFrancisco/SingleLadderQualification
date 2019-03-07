@@ -888,7 +888,7 @@ TPowerBoardConfig::pb_t TScan::GetPBtype(THic *hic) const
   const int nchips = m_chips.size();
   if (nchips > 7) {
     THicOB *obhic = dynamic_cast<THicOB *>(hic);
-    printf("power combo: %s\n", obhic->IsPowerCombo() ? "true" : "false");
+    // printf("power combo: %s\n", obhic->IsPowerCombo() ? "true" : "false");
     if (!obhic->IsPowerCombo())
       pb = TPowerBoardConfig::mockup;
     else if (nchips == 56)
@@ -897,7 +897,7 @@ TPowerBoardConfig::pb_t TScan::GetPBtype(THic *hic) const
       pb = TPowerBoardConfig::realOL;
   }
 
-  printf("pb set to %d, %d modules\n", pb, nchips);
+  // printf("pb = %d (%d chips)\n", pb, nchips);
   return pb;
 }
 

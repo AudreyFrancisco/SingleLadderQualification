@@ -460,8 +460,6 @@ void TPowerBoardConfig::GetResistances(int mod, float &ALineR, float &DLineR, fl
   ALineR   = fPBConfig.Modul[mod].CalALineR;
   GNDLineR = fPBConfig.Modul[mod].CalGNDLineR;
 
-  printf("Calculating resistances for pb %d\n", pb);
-
   if (pb == TPowerBoardConfig::realML) {
     DLineR += RPBDigitalML[mod];
     ALineR += RPBAnalogML[mod];
@@ -473,17 +471,15 @@ void TPowerBoardConfig::GetResistances(int mod, float &ALineR, float &DLineR, fl
     GNDLineR += RPBGround[mod];
   }
   else if (pb == TPowerBoardConfig::mockup) {
-    float ALineR, DLineR, GNDLineR, BBLineR;
-    GetWirePBResistances(mod, ALineR, DLineR, GNDLineR, BBLineR);
-    DLineR += DLineR;
-    ALineR += ALineR;
-    GNDLineR += GNDLineR;
+    float Ra, Rd, Rgnd, Rbb;
+    GetWirePBResistances(mod, Ra, Rd, Rgnd, Rbb);
+    DLineR += Rd;
+    ALineR += Ra;
+    GNDLineR += Rgnd;
   }
   else if (pb != TPowerBoardConfig::none) {
     std::cout << "WARNING: Unsupported power bus" << std::endl;
   }
-
-  printf("Using resistances: %g, %g, %g\n", DLineR, ALineR, GNDLineR);
 }
 
 // TODO: change filename to PBCalibTop.cfg, PBCalibBottom.cfg

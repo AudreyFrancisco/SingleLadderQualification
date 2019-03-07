@@ -389,6 +389,8 @@ void TPowerBoard::CorrectVoltageDrop(TPowerBoardConfig::pb_t pb, bool reset, int
   // Correct voltage drop for slope of voltage characteristics
   // add corrected voltage drop to channel set voltage
 
+  printf("\nPerforming voltage drop correction\n");
+
   std::vector<float> IDDA(nch);
   std::vector<float> IDDD(nch);
   std::vector<float> RGnd(nch);
@@ -408,8 +410,11 @@ void TPowerBoard::CorrectVoltageDrop(TPowerBoardConfig::pb_t pb, bool reset, int
     for (int i = 0; i < nch; i++) {
       IDDA[i] = GetAnalogCurrent(i);
       IDDD[i] = GetDigitalCurrent(i);
-      printf("currents[%d]: %g, %g A\n", i, IDDA[i], IDDD[i]);
       fPowerBoardConfig->GetResistances(i, RAnalog, RDigital, RGround, pb);
+
+      printf("channel %d: I_a = %.3f A, I_d = %.3f A\n", i, IDDA[i], IDDD[i]);
+      printf("     PB %d: R_a = %.3f \u2126, R_d = %.3f \u2126, R_gnd = %.3f \u2126\n", pb, RAnalog,
+             RDigital, RGround);
       RGnd[i]     = RGround;
       VdropGnd[i] = (IDDA[i] + IDDD[i]) * RGnd[i];
     }
@@ -421,13 +426,14 @@ void TPowerBoard::CorrectVoltageDrop(TPowerBoardConfig::pb_t pb, bool reset, int
         Itot += IDDA[ihic];
         float res       = RGnd[ihic] - (ihic > 0 ? RGnd[ihic - 1] : 0.);
         VdropPart[ihic] = res * Itot;
-        printf("VdropPart[%d] = %g * %g = %g\n", ihic, res, Itot, VdropPart[ihic]);
+        printf("channel %d: VdropPart = %.3f \u2126 * %.3f A = %.3f V\n", ihic, res, Itot,
+               VdropPart[ihic]);
       }
     }
     for (int module = 0; module < nch; ++module) {
       if ((pb == TPowerBoardConfig::realML) || (pb == TPowerBoardConfig::realOL))
         VdropGnd[module] = std::accumulate(VdropPart.begin(), VdropPart.begin() + module + 1, 0.);
-      printf("VdropGnd for module %d = %g\n", module, VdropGnd[module]);
+      // printf("channel %d: VdropGnd = %.3f V\n", module, VdropGnd[module]);
 
       fPowerBoardConfig->GetResistances(module, RAnalog, RDigital, RGround, pb);
       fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
@@ -436,10 +442,10 @@ void TPowerBoard::CorrectVoltageDrop(TPowerBoardConfig::pb_t pb, bool reset, int
       dVDigital[module] = IDDD[module] * RDigital + VdropGnd[module];
       dVAnalog[module] *= AVScale;
       dVDigital[module] *= DVScale;
-      printf("dVAnalog[%d] = (%g * %g + %g) * %g = %g\n", module, IDDA[module], RAnalog,
-             VdropGnd[module], AVScale, dVAnalog[module]);
-      printf("dVDigital[%d] = (%g * %g + %g) * %g = %g\n", module, IDDD[module], RDigital,
-             VdropGnd[module], DVScale, dVDigital[module]);
+      printf("channel %d: \u0394V_a = (%.3f A * %.3f \u2126 + %.3f V) * %.3f = %.3f,\n           "
+             "\u0394V_d = (%.3f A * %.3f \u2126 + %.3f V) * %.3f = %.3f\n",
+             module, IDDA[module], RAnalog, VdropGnd[module], AVScale, dVAnalog[module],
+             IDDD[module], RDigital, VdropGnd[module], DVScale, dVDigital[module]);
     }
   }
 
@@ -460,10 +466,9 @@ void TPowerBoard::CorrectVoltageDrop(TPowerBoardConfig::pb_t pb, bool reset, int
     }
 
     // fPBoard contains the voltages corrected with the channel calibration
-    printf("Setting analog voltage for module %i to %g + %g\n", module,
-           fPBoard.Modules[module].AVset, dVAnalog[module]);
-    printf("Setting digital voltage for module %i to %g + %g\n", module,
-           fPBoard.Modules[module].DVset, dVDigital[module]);
+    printf("channel %i: V_a = %.3f V + %.3f V, V_d = %.3f V + %.3f V\n", module,
+           fPBoard.Modules[module].AVset, dVAnalog[module], fPBoard.Modules[module].DVset,
+           dVDigital[module]);
     std::lock_guard<std::mutex> lock(mutex_pb);
     fMOSAICPowerBoard->setVout((unsigned char)(module * 2),
                                fPBoard.Modules[module].AVset + dVAnalog[module]);
@@ -479,6 +484,8 @@ void TPowerBoard::CorrectVoltageDrop(int module, TPowerBoardConfig::pb_t pb, boo
   // Calculate voltage drop
   // Correct voltage drop for slope of voltage characteristics
   // add corrected voltage drop to channel set voltage
+
+  printf("\nPerforming voltage drop correction (module-wise)\n");
 
   std::vector<float> IDDA(MAX_MOULESPERMOSAIC);
   std::vector<float> IDDD(MAX_MOULESPERMOSAIC);
