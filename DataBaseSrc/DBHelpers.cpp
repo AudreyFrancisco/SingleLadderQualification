@@ -11,11 +11,13 @@
 #include <string>
 
 static const std::list<std::string> kTestTypes = {
-    "OB-HIC Impedance Test",       "OB HIC Qualification Test",   "IB HIC Qualification Test",
-    "IB Stave Qualification Test", "OB HIC Endurance Test",       "OB HIC Fast Power Test",
-    "OB HIC Reception Test",       "OL HS Qualification Test",    "ML HS Qualification Test",
-    "OL Stave Qualification Test", "ML Stave Qualification Test", "OL Stave Reception Test",
-    "ML Stave Reception Test"};
+    "OB-HIC Impedance Test",       "OB HIC Qualification Test",
+    "IB HIC Qualification Test",   "IB Stave Qualification Test",
+    "OB HIC Endurance Test",       "OB HIC Fast Power Test",
+    "OB HIC Reception Test",       "OL HS Qualification Test",
+    "ML HS Qualification Test",    "OL Stave Qualification Test",
+    "ML Stave Qualification Test", "OL Stave Reception Test",
+    "ML Stave Reception Test",     "IB Stave Qualification Test on Layers"};
 
 bool IsTestType(std::string activity)
 {
@@ -819,6 +821,8 @@ string CreateActivityName(string compName, TScanConfig *config)
     break;
   case StaveReceptionML:
     testName = string("ML Stave Reception Test");
+  case IBStaveLayerQualification:
+    testName = string("IB Stave Qualification Test on Layers");
     break;
   default:
     testName = string("");
@@ -941,6 +945,8 @@ TTestType GetTestType(string activityTypeName)
     return IBEndurance;
   else if (activityTypeName.find("IB Stave Quali") != string::npos)
     return IBStave;
+  else if (activityTypeName.find("IB Stave Qualification Test on Layers") != string::npos)
+    return IBStaveLayerQualification;
   else if (activityTypeName.find("IB Stave End") != string::npos)
     return IBStaveEndurance;
   else if (activityTypeName.find("OL Stave Quali") != string::npos)
@@ -984,6 +990,8 @@ string GetTestDirName(TTestType TestType)
     return "StaveReceptionOL/";
   case StaveReceptionML:
     return "StaveReceptionML/";
+  case IBStaveLayerQualification:
+    return "IBStaveQualificationonLayers/";
   default:
     return "./";
   }

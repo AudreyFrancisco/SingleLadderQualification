@@ -29,6 +29,7 @@ typedef enum {
   StaveReceptionML,
   OBStaveOLFAST,
   OBStaveMLFAST,
+  IBStaveLayerQualification,
   Unknown
 } TTestType;
 

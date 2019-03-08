@@ -227,7 +227,7 @@ void MainWindow::open()
     fileName = "Config.cfg";
   }
   else if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl ||
-           fNumberofscan == IBStave) {
+           fNumberofscan == IBStave || fNumberofscan == IBStaveLayerQualification) {
     fileName = "Configib.cfg";
   }
   else if (fNumberofscan == OBPower) {
@@ -1098,7 +1098,8 @@ void MainWindow::initscanlist()
   if (fNumberofscan == OBQualification) {
     fillingOBvectors();
   }
-  if (fNumberofscan == IBQualification || fNumberofscan == IBStave) {
+  if (fNumberofscan == IBQualification || fNumberofscan == IBStave ||
+      fNumberofscan == IBStaveLayerQualification) {
     fillingibvectors();
   }
   if (fNumberofscan == OBReception) {
@@ -1805,7 +1806,7 @@ void MainWindow::locationcombo()
            fNumberofscan == IBDctrl) {
     fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Inner Barrel HIC Module");
   }
-  else if (fNumberofscan == IBStave) {
+  else if (fNumberofscan == IBStave || fNumberofscan == IBStaveLayerQualification) {
     fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "IB Stave");
   }
   else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBStaveOL ||
@@ -2529,7 +2530,7 @@ void MainWindow::attachConfigFile(ActivityDB::activity &activity)
     DbAddAttachment(fDB, activity, attachConfig, string("Config.cfg"), string("Config.cfg"));
   }
   else if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl ||
-           fNumberofscan == IBStave) {
+           fNumberofscan == IBStave || fNumberofscan == IBStaveLayerQualification) {
     DbAddAttachment(fDB, activity, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
   }
   else if (fNumberofscan == OBPower) {
