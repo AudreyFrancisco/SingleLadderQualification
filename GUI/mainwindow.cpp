@@ -117,7 +117,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(fWritedb, SIGNAL(triggered()), this, SLOT(attachtodatabase()));
   QAction *run_test =
       new QAction(QApplication::style()->standardIcon(QStyle::SP_MediaPlay), "Start test", this);
-  run_test->setShortcut(Qt::Key_F8);
+  run_test->setShortcut(Qt::Key_F9);
   connect(run_test, &QAction::triggered, this, &MainWindow::applytests);
   run_test->setEnabled(false);
   QAction *poweroff = new QAction(
