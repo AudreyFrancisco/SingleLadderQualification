@@ -1222,7 +1222,8 @@ void MainWindow::printClasses()
 {
   for (unsigned int iHic = 0; iHic < fHICs.size(); iHic++) {
     std::cout << std::endl
-              << "Classifications HIC " << fHICs.at(iHic)->GetDbId() << ":" << std::endl;
+              << "Classifications HIC " << fHICs.at(iHic)->GetDbId() << " (M"
+              << fHICs.at(iHic)->GetModId() << "):" << std::endl;
     for (unsigned int iAnalysis = 0; iAnalysis < fAnalysisVector.size(); iAnalysis++) {
       if (fScanVector.at(iAnalysis) != 0) {
         fAnalysisVector.at(iAnalysis)->WriteHicClassToFile(fHICs.at(iHic)->GetDbId());

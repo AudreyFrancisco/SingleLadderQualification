@@ -218,6 +218,7 @@ void TScanAnalysis::CreateHicResults()
     TScanResultHic *hicResult   = GetHicResult();
     hicResult->m_class          = CLASS_UNTESTED;
     hicResult->m_hicName        = m_hics.at(i)->GetDbId();
+    hicResult->m_modId          = m_hics.at(i)->GetModId();
     hicResult->m_outputPath     = m_config->GetDataPath(m_hics.at(i)->GetDbId());
     hicResult->m_scanParameters = m_scan->GetParameters();
     for (unsigned int iChip = 0; iChip < m_chipList.size(); iChip++) {
@@ -323,8 +324,9 @@ const char *TScanAnalysis::WriteHicClassification(THicClassification hicClass)
 
 void TScanAnalysis::PrintHicClassification(TScanResultHic *res)
 {
-  std::cout << "==> " << GetName() << " - Classification " << res->GetName() << ": "
-            << WriteHicClassification(res->GetClassification()) << std::endl;
+  std::cout << "==> " << GetName() << " - Classification " << res->GetName() << " (M"
+            << res->GetModId() << "): " << WriteHicClassification(res->GetClassification())
+            << std::endl;
 }
 
 void TScanAnalysis::WriteHicClassToFile(std::string hicName)

@@ -86,6 +86,7 @@ class TScanResultHic {
 protected:
   std::map<int, TScanResultChip *> m_chipResults;
   std::string                      m_hicName;
+  int                              m_modId;
   char                             m_resultFile[300];
   THicClassification               m_class;
 
@@ -121,6 +122,7 @@ public:
   string                           GetParameterFile();
   std::vector<std::string>         GetCuts() { return m_cuts; };
   std::string                      GetName() { return m_hicName; };
+  int                              GetModId() { return m_modId; }
   void                             SetHasPDF(const bool pdf) { m_hasPDF = pdf; };
   void                             SetPDFPath(const string path) { m_pdfPath = path; };
   bool                             HasPDF() { return m_hasPDF; };
