@@ -366,12 +366,15 @@ THicClassification DbGetPreviousCategory(AlpideDB *db, int compId, int activityT
     if ((activityTypeId == DbGetActivityTypeId(db, "OL Stave Qualification Test")) &&
         (tests.at(i).Typename.find("OL Stave Reception Test") != string::npos))
       continue;
-    if (DbIsNewer(tests.at(std::max(latestIdx, 0)), tests.at(i)) == 1) {
+    if (latestIdx < 0)
+      latestIdx = i;
+    else if (DbIsNewer(tests.at(latestIdx), tests.at(i)) == 1) {
       latestIdx = i;
     }
   }
 
   if (latestIdx < 0) return CLASS_UNTESTED;
+  printf("last test: %s\n", tests.at(latestIdx).Typename.c_str());
   string category = tests.at(latestIdx).Result.Name;
 
   // TODO: change to gold/silver/bronze
