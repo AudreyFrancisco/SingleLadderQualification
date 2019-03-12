@@ -886,7 +886,7 @@ TPowerBoardConfig::pb_t TScan::GetPBtype(THic *hic) const
   TPowerBoardConfig::pb_t pb = TPowerBoardConfig::none;
 
   const int nchips = m_chips.size();
-  if (nchips > 7) {
+  if (nchips > 14) {
     THicOB *obhic = dynamic_cast<THicOB *>(hic);
     // printf("power combo: %s\n", obhic->IsPowerCombo() ? "true" : "false");
     if (!obhic->IsPowerCombo())
@@ -903,17 +903,20 @@ TPowerBoardConfig::pb_t TScan::GetPBtype(THic *hic) const
 
 void TScan::CorrectVoltageDrop(bool reset)
 {
-  if (m_config->GetTestType() == OBEndurance) {
+  const auto devType = m_config->GetDeviceType();
+
+  if ((devType == TYPE_HALFSTAVE) || (devType == TYPE_HALFSTAVERU) ||
+      (devType == TYPE_MLHALFSTAVE) || (devType == TYPE_MLSTAVE)) {
+    if (TPowerBoard *pb = m_hics[0]->GetPowerBoard())
+      pb->CorrectVoltageDrop(GetPBtype(m_hics[0]), reset, m_hics.size());
+    if (TPowerBoard *pb = m_hics[0]->GetPowerBoard())
+      pb->CorrectVoltageDrop(GetPBtype(m_hics[0]), reset, m_hics.size());
+  }
+  else {
     for (auto hic : m_hics) {
       if (!hic->IsEnabled() || !hic->GetPowerBoard()) continue;
       hic->GetPowerBoard()->CorrectVoltageDrop(hic->GetPbMod(), GetPBtype(hic), reset);
     }
-  }
-  else {
-    if (TPowerBoard *pb = m_hics[0]->GetPowerBoard())
-      pb->CorrectVoltageDrop(GetPBtype(m_hics[0]), reset, m_hics.size());
-    if (TPowerBoard *pb = m_hics[0]->GetPowerBoard())
-      pb->CorrectVoltageDrop(GetPBtype(m_hics[0]), reset, m_hics.size());
   }
 }
 
