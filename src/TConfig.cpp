@@ -216,6 +216,8 @@ TDeviceType TConfig::ReadDeviceType(std::string deviceName)
 
 void TConfig::SetDeviceType(TDeviceType AType, int NChips)
 {
+  if (fScanConfig) fScanConfig->SetDeviceType(AType);
+
   std::vector<int> chipIds;
 
   fDeviceType = AType;

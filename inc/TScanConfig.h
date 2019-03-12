@@ -9,6 +9,22 @@
 #include <string.h>
 #include <string>
 
+enum TDeviceType {
+  TYPE_CHIP,
+  TYPE_TELESCOPE,
+  TYPE_OBHIC,
+  TYPE_IBHIC,
+  TYPE_CHIP_MOSAIC,
+  TYPE_HALFSTAVE,
+  TYPE_HALFSTAVERU,
+  TYPE_MLHALFSTAVE,
+  TYPE_MLSTAVE,
+  TYPE_IBHICRU,
+  TYPE_ENDURANCE,
+  TYPE_POWER,
+  TYPE_UNKNOWN
+};
+
 typedef enum {
   OBQualification,
   OBEndurance,
@@ -413,6 +429,8 @@ private:
   TTestType m_testType;
   AlpideDB *m_db;
 
+  TDeviceType m_deviceType;
+
 protected:
 public:
   TScanConfig();
@@ -470,6 +488,9 @@ public:
   TTestType GetTestType() { return m_testType; };
   void      SetDatabase(AlpideDB *db) { m_db = db; };
   AlpideDB *GetDatabase() { return m_db; };
+
+  void        SetDeviceType(TDeviceType type) { m_deviceType = type; }
+  TDeviceType GetDeviceType() { return m_deviceType; }
 };
 
 #endif
