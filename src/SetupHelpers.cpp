@@ -42,7 +42,7 @@ void readDcolMask(std::string filename, std::vector<TAlpide *> *chips)
       if (line.size() == 0 || line.at(0) == '#') continue;
       ss << line;
       ss >> chipId >> dCol;
-      if (chipId > -1 && dCol < -1U) {
+      if ((chipId > -1) && (dCol > -1U)) {
         std::cout << chipId << "\t" << dCol << std::endl;
         for (const auto &rChip : *chips) {
           if (rChip->GetConfig()->GetChipId() == chipId) {
