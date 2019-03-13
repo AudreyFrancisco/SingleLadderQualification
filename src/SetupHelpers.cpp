@@ -80,7 +80,6 @@ void BaseConfigOBchip(TChipConfig *&chipConfig)
 int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                 std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
 {
-  readDcolMask("dcol_mask_OBHIC.cfg", chips);
   (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
 
@@ -154,6 +153,8 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
     sleep(1);
   }
 
+  readDcolMask("dcol_mask_OBHIC.cfg", chips);
+
   CheckControlInterface(config, boards, boardType, chips);
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
@@ -163,7 +164,6 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
 int initSetupPower(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                    std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
 {
-  readDcolMask("dcol_mask_fastPower.cfg", chips);
   (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
 
@@ -214,7 +214,6 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
 {
   // default mapping, the first index in receiverMap refers to the module position and not the id
   // TODO: Define power board mapping for half stave; assuming channel = position
-  readDcolMask("dcol_mask.cfg", chips);
   int mosaicMap[2]      = {0, 1};
   int receiverMap[7][2] = {{0, 1}, {1, 0}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}};
   int controlMap[2]     = {0, 0};
@@ -332,6 +331,8 @@ int initSetupHalfStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
     hics->at(ihic)->PowerOn();
   }
 
+  readDcolMask("dcol_mask.cfg", chips);
+
   CheckControlInterface(config, boards, boardType, chips); // returns nWorking : int
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
@@ -341,7 +342,6 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
                      std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds,
                      bool powerCombo)
 {
-  readDcolMask("dcol_mask.cfg", chips);
   // default mapping, the first index in receiverMap refers to the module position and not the id
   // TODO: Define power board mapping for half stave; assuming channel = position
   int mosaicMap[1]      = {0}; // AC: width reduced width to 1 (only one MOSAIC used in this mode)
@@ -469,6 +469,8 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
     hics->at(ihic)->PowerOn();
   }
 
+  readDcolMask("dcol_mask.cfg", chips);
+
   CheckControlInterface(config, boards, boardType, chips); // returns nWorking : int
   MakeDaisyChain(config, boards, boardType, chips);
   return 0;
@@ -479,7 +481,6 @@ int initSetupMLStave(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoa
 int initSetupHalfStaveRU(TConfig *config, std::vector<TReadoutBoard *> *boards,
                          TBoardType *boardType, std::vector<TAlpide *> *chips)
 {
-  readDcolMask("dcol_mask.cfg", chips);
   (*boardType) = boardRU;
   for (unsigned int i = 0; i < config->GetNBoards(); i++) {
     TBoardConfigRU *boardConfig = (TBoardConfigRU *)config->GetBoardConfig(i);
@@ -537,6 +538,7 @@ int initSetupHalfStaveRU(TConfig *config, std::vector<TReadoutBoard *> *boards,
 
       int nWorking = CheckControlInterface(config, boards, boardType, chips);
       sleep(5);
+      readDcolMask("dcol_mask.cfg", chips);
       MakeDaisyChain(config, boards, boardType, chips);*/
   return 0;
 }
@@ -677,7 +679,6 @@ int CheckControlInterface(TConfig *config, std::vector<TReadoutBoard *> *boards,
 int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                 std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
 {
-  readDcolMask("dcol_mask.cfg", chips);
   int RCVMAP[] = {3, 5, 7, 8, 6, 4, 2, 1, 0};
 
   (*boardType)                    = boardMOSAIC;
@@ -757,6 +758,7 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
     hics->at(0)->PowerOn();
     sleep(1);
   }
+  readDcolMask("dcol_mask.cfg", chips);
   CheckControlInterface(config, boards, boardType, chips);
 
   return 0;
@@ -768,7 +770,6 @@ int initSetupIB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
 int initSetupIBRU(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                   std::vector<TAlpide *> *chips, std::vector<THic *> *hics, const char **hicIds)
 {
-  readDcolMask("dcol_mask.cfg", chips);
   (*boardType)                = boardRU;
   TBoardConfigRU *boardConfig = (TBoardConfigRU *)config->GetBoardConfig(0);
 
@@ -805,6 +806,8 @@ int initSetupIBRU(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardT
     boards->at(0)->AddChip(chipConfig->GetChipId(), control, receiver, chips->at(i));
   }
 
+  readDcolMask("dcol_mask.cfg", chips);
+
   // TODO: check whether CheckControlInterface works for readout unit
   CheckControlInterface(config, boards, boardType, chips);
 
@@ -814,7 +817,6 @@ int initSetupIBRU(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardT
 int initSetupSingleMosaic(TConfig *config, std::vector<TReadoutBoard *> *boards,
                           TBoardType *boardType, std::vector<TAlpide *> *chips)
 {
-  readDcolMask("dcol_mask.cfg", chips);
   TChipConfig *chipConfig         = config->GetChipConfig(0);
   (*boardType)                    = boardMOSAIC;
   TBoardConfigMOSAIC *boardConfig = (TBoardConfigMOSAIC *)config->GetBoardConfig(0);
@@ -838,13 +840,13 @@ int initSetupSingleMosaic(TConfig *config, std::vector<TReadoutBoard *> *boards,
   chips->push_back(new TAlpide(chipConfig));
   chips->at(0)->SetReadoutBoard(boards->at(0));
   boards->at(0)->AddChip(chipConfig->GetChipId(), control, receiver, chips->at(0));
+  readDcolMask("dcol_mask.cfg", chips);
   return 0;
 }
 
 int initSetupSingle(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
                     std::vector<TAlpide *> *chips)
 {
-  readDcolMask("dcol_mask.cfg", chips);
   TReadoutBoardDAQ *myDAQBoard = 0;
   TChipConfig *     chipConfig = config->GetChipConfig(0);
   chipConfig->SetParamValue("LINKSPEED", "-1");
@@ -878,6 +880,8 @@ int initSetupSingle(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoar
 
   boards->at(0)->AddChip(chipConfig->GetChipId(), 0, 0, chips->at(0));
 
+  readDcolMask("dcol_mask.cfg", chips);
+
   powerOn(myDAQBoard);
 
   return 0;
@@ -908,7 +912,6 @@ int initSetupWithNames(TConfig *&config, std::vector<TReadoutBoard *> *boards,
                        const char *configFileName /*=""*/, std::vector<THic *> *hics /*=0*/,
                        std::vector<std::string> *hicNames /*=0*/, bool powerCombo /*=false*/)
 {
-  readDcolMask("dcol_mask.cfg", chips);
   const char **hicIds = nullptr;
   if (hicNames) {
     hicIds = new const char *[hicNames->size()];
