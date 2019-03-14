@@ -824,6 +824,7 @@ string CreateActivityName(string compName, TScanConfig *config)
     break;
   case StaveReceptionML:
     testName = string("ML Stave Reception Test");
+    break;
   case IBStaveLayerQualification:
     testName = string("IB Stave Qualification Test on Layers");
     break;
