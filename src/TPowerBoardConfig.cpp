@@ -59,21 +59,22 @@ TPowerBoardConfig::TPowerBoardConfig(const char *AConfigFileName)
   fPBConfig.CalBiasScale   = DEF_BIASSCALE;
   fPBConfig.CalIBiasOffset = DEF_IBIASOFFSET;
   for (int i = 0; i < MAX_MOULESPERMOSAIC; i++) {
-    fPBConfig.Modul[i].AVset       = DEF_ANALOGVOLTAGE;
-    fPBConfig.Modul[i].AIset       = DEF_ANALOGMAXCURRENT;
-    fPBConfig.Modul[i].DVset       = DEF_DIGITALVOLTAGE;
-    fPBConfig.Modul[i].DIset       = DEF_DIGITALMAXCURRENT;
-    fPBConfig.Modul[i].BiasOn      = DEF_BIASCHANNELON;
-    fPBConfig.Modul[i].BiasEnabled = true;
-    fPBConfig.Modul[i].CalAVScale  = DEF_AVSCALE;
-    fPBConfig.Modul[i].CalDVScale  = DEF_DVSCALE;
-    fPBConfig.Modul[i].CalAVOffset = DEF_AVOFFSET;
-    fPBConfig.Modul[i].CalDVOffset = DEF_DVOFFSET;
-    fPBConfig.Modul[i].CalDIOffset = DEF_DIOFFSET;
-    fPBConfig.Modul[i].CalAIOffset = DEF_AIOFFSET;
-    fPBConfig.Modul[i].CalDLineR   = DEF_CALDLINER;
-    fPBConfig.Modul[i].CalALineR   = DEF_CALALINER;
-    fPBConfig.Modul[i].CalGNDLineR = DEF_CALGNDLINER;
+    fPBConfig.Modul[i].AVset        = DEF_ANALOGVOLTAGE;
+    fPBConfig.Modul[i].AIset        = DEF_ANALOGMAXCURRENT;
+    fPBConfig.Modul[i].DVset        = DEF_DIGITALVOLTAGE;
+    fPBConfig.Modul[i].DIset        = DEF_DIGITALMAXCURRENT;
+    fPBConfig.Modul[i].BiasOn       = DEF_BIASCHANNELON;
+    fPBConfig.Modul[i].BiasEnabled  = true;
+    fPBConfig.Modul[i].CalAVScale   = DEF_AVSCALE;
+    fPBConfig.Modul[i].CalDVScale   = DEF_DVSCALE;
+    fPBConfig.Modul[i].CalAVOffset  = DEF_AVOFFSET;
+    fPBConfig.Modul[i].CalDVOffset  = DEF_DVOFFSET;
+    fPBConfig.Modul[i].CalDIOffset  = DEF_DIOFFSET;
+    fPBConfig.Modul[i].CalAIOffset  = DEF_AIOFFSET;
+    fPBConfig.Modul[i].CalDLineR    = DEF_CALDLINER;
+    fPBConfig.Modul[i].CalALineR    = DEF_CALALINER;
+    fPBConfig.Modul[i].CalGNDLineR  = DEF_CALGNDLINER;
+    fPBConfig.Modul[i].CalAGNDLineR = DEF_CALAGNDLINER;
   }
 
   if (AConfigFileName) { // Read Configuration file
@@ -438,27 +439,30 @@ void TPowerBoardConfig::GetWirePBResistances(int mod, float &ALineR, float &DLin
 
 // sets the line resistances in the calibration part of the configuration
 // WITHOUT adding the internal resistances (used when read from file)
-void TPowerBoardConfig::SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR)
+void TPowerBoardConfig::SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR,
+                                           float AGNDLineR)
 {
-  fPBConfig.Modul[mod].CalDLineR   = DLineR;
-  fPBConfig.Modul[mod].CalALineR   = ALineR;
-  fPBConfig.Modul[mod].CalGNDLineR = GNDLineR;
+  fPBConfig.Modul[mod].CalDLineR    = DLineR;
+  fPBConfig.Modul[mod].CalALineR    = ALineR;
+  fPBConfig.Modul[mod].CalGNDLineR  = GNDLineR;
+  fPBConfig.Modul[mod].CalAGNDLineR = AGNDLineR;
 }
 
 // GetLineResistances returns the total value of the line resistance (internal + external)
-void TPowerBoardConfig::GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR)
+void TPowerBoardConfig::GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR,
+                                           float &AGNDLineR)
 {
-  DLineR   = fPBConfig.Modul[mod].CalDLineR;
-  ALineR   = fPBConfig.Modul[mod].CalALineR;
-  GNDLineR = fPBConfig.Modul[mod].CalGNDLineR;
+  DLineR    = fPBConfig.Modul[mod].CalDLineR;
+  ALineR    = fPBConfig.Modul[mod].CalALineR;
+  GNDLineR  = fPBConfig.Modul[mod].CalGNDLineR;
+  AGNDLineR = fPBConfig.Modul[mod].CalAGNDLineR;
 }
 
 void TPowerBoardConfig::GetResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR,
-                                       pb_t pb)
+                                       float &AGNDLineR, pb_t pb)
 {
-  DLineR   = fPBConfig.Modul[mod].CalDLineR;
-  ALineR   = fPBConfig.Modul[mod].CalALineR;
-  GNDLineR = fPBConfig.Modul[mod].CalGNDLineR;
+
+  GetLineResistances(mod, ALineR, DLineR, GNDLineR, AGNDLineR);
 
   if (pb == TPowerBoardConfig::realML) {
     DLineR += RPBDigitalML[mod];
@@ -486,7 +490,8 @@ void TPowerBoardConfig::GetResistances(int mod, float &ALineR, float &DLineR, fl
 // requires: correct setting of PBBOTTOM in config file
 void TPowerBoardConfig::WriteCalibrationFile()
 {
-  float ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, DVScale, AVOffset, DVOffset;
+  float ALineR, DLineR, GNDLineR, AGNDLineR, AIOffset, DIOffset, AVScale, DVScale, AVOffset,
+      DVOffset;
   float VBScale, VBOffset, IBOffset;
 
   std::string filename = m_bottom ? "PBBottomCalib.cfg" : "PBTopCalib.cfg";
@@ -495,7 +500,7 @@ void TPowerBoardConfig::WriteCalibrationFile()
   FILE *fp = fopen(filename.c_str(), "w");
 
   for (int imod = 0; imod < MAX_MOULESPERMOSAIC; imod++) {
-    GetLineResistances(imod, ALineR, DLineR, GNDLineR);
+    GetLineResistances(imod, ALineR, DLineR, GNDLineR, AGNDLineR);
     GetICalibration(imod, AIOffset, DIOffset);
     GetVCalibration(imod, AVScale, DVScale, AVOffset, DVOffset);
     fprintf(fp, "%d %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n", imod, ALineR, DLineR, GNDLineR,
@@ -548,8 +553,8 @@ void TPowerBoardConfig::ReadCalibrationFile()
 
 bool TPowerBoardConfig::IsCalibrated(int mod)
 {
-  float DLineR, ALineR, GNDLineR;
-  GetLineResistances(mod, ALineR, DLineR, GNDLineR);
+  float DLineR, ALineR, GNDLineR, AGNDLineR;
+  GetLineResistances(mod, ALineR, DLineR, GNDLineR, AGNDLineR);
   if (DLineR + ALineR + GNDLineR == 0) return false;
   return true;
 }

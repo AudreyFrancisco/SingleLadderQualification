@@ -83,6 +83,7 @@
 #define DEF_CALDLINER 0.0
 #define DEF_CALALINER 0.0
 #define DEF_CALGNDLINER 0.0
+#define DEF_CALAGNDLINER -1.0
 #define DEF_BIASOFFSET 0.0
 #define DEF_BIASSCALE 1.0
 #define DEF_IBIASOFFSET 0.0
@@ -131,6 +132,7 @@ public:
     float CalDLineR;
     float CalALineR;
     float CalGNDLineR;
+    float CalAGNDLineR;
   } Mod_t;
 
   typedef struct PowBoard {
@@ -145,7 +147,7 @@ public:
 
   // members
 private:
-  void GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR);
+  void GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, float &AGNDLineR);
 
   FILE *                       fhConfigFile; // the file handle of the Configuration File
   PowBoard_t                   fPBConfig;
@@ -189,10 +191,12 @@ public:
   void SetIBiasCalibration(float AOffset);
   void GetVBiasCalibration(float &AScale, float &AOffset);
   void GetIBiasCalibration(float &AOffset);
-  void SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
+  void SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR,
+                          float AGNDLineR = -1.);
   void EnterMeasuredLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
   void GetWirePBResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, float &BBLineR);
-  void GetResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, pb_t pb);
+  void GetResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, float &AGNDLineR,
+                      pb_t pb);
   bool IsCalibrated(int mod);
   bool BiasEnabled(int mod) { return fPBConfig.Modul[mod].BiasEnabled; };
   void DisableBias(int mod) { fPBConfig.Modul[mod].BiasEnabled = false; };

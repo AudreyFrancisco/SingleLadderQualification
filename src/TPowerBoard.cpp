@@ -396,10 +396,11 @@ void TPowerBoard::CorrectVoltageDrop(TPowerBoardConfig::pb_t pb, bool reset, int
   std::vector<float> RGnd(nch);
   std::vector<float> VdropPart(nch);
   std::vector<float> VdropGnd(nch);
+  std::vector<float> VdropAGnd(nch);
   std::vector<float> dVAnalog(nch);
   std::vector<float> dVDigital(nch);
 
-  float RAnalog, RDigital, RGround;
+  float RAnalog, RDigital, RGround, RAGround;
   float AVScale, DVScale, AVOffset, DVOffset;
   if (reset) {
     dVAnalog.assign(nch, 0);
@@ -410,7 +411,7 @@ void TPowerBoard::CorrectVoltageDrop(TPowerBoardConfig::pb_t pb, bool reset, int
     for (int i = 0; i < nch; i++) {
       IDDA[i] = GetAnalogCurrent(i);
       IDDD[i] = GetDigitalCurrent(i);
-      fPowerBoardConfig->GetResistances(i, RAnalog, RDigital, RGround, pb);
+      fPowerBoardConfig->GetResistances(i, RAnalog, RDigital, RGround, RAGround, pb);
 
       printf("channel %d: I_a = %.3f A, I_d = %.3f A\n", i, IDDA[i], IDDD[i]);
       printf("     PB %d: R_a = %.3f \u2126, R_d = %.3f \u2126, R_gnd = %.3f \u2126\n", pb, RAnalog,
@@ -435,7 +436,7 @@ void TPowerBoard::CorrectVoltageDrop(TPowerBoardConfig::pb_t pb, bool reset, int
         VdropGnd[module] = std::accumulate(VdropPart.begin(), VdropPart.begin() + module + 1, 0.);
       // printf("channel %d: VdropGnd = %.3f V\n", module, VdropGnd[module]);
 
-      fPowerBoardConfig->GetResistances(module, RAnalog, RDigital, RGround, pb);
+      fPowerBoardConfig->GetResistances(module, RAnalog, RDigital, RGround, RAGround, pb);
       fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
 
       dVAnalog[module]  = IDDA[module] * RAnalog + VdropGnd[module];
@@ -490,10 +491,11 @@ void TPowerBoard::CorrectVoltageDrop(int module, TPowerBoardConfig::pb_t pb, boo
   std::vector<float> IDDA(MAX_MOULESPERMOSAIC);
   std::vector<float> IDDD(MAX_MOULESPERMOSAIC);
   std::vector<float> RGnd(MAX_MOULESPERMOSAIC);
+  std::vector<float> RAGnd(MAX_MOULESPERMOSAIC);
   std::vector<float> VdropPart(MAX_MOULESPERMOSAIC);
 
-  float RAnalog, RDigital, RGround;
-  float dVAnalog, dVDigital;
+  float RAnalog, RDigital, RGround, RAGround;
+  float dVAnalog, dVDigital, VdropGnd, VdropAGnd;
   float AVScale, DVScale, AVOffset, DVOffset;
   if (reset) {
     dVAnalog  = 0;
@@ -506,15 +508,25 @@ void TPowerBoard::CorrectVoltageDrop(int module, TPowerBoardConfig::pb_t pb, boo
         continue;
       IDDA[i] = GetAnalogCurrent(i);
       IDDD[i] = GetDigitalCurrent(i);
-      fPowerBoardConfig->GetResistances(i, RAnalog, RDigital, RGround, pb);
+      fPowerBoardConfig->GetResistances(i, RAnalog, RDigital, RGround, RAGround, pb);
 
       printf("channel %d: I_a = %.3f A, I_d = %.3f A\n", i, IDDA[i], IDDD[i]);
-      printf("     PB %d: R_a = %.3f \u2126, R_d = %.3f \u2126, R_gnd = %.3f \u2126\n", pb, RAnalog,
-             RDigital, RGround);
-      RGnd[i] = RGround;
+      printf("     PB %d: R_a = %.3f \u2126, R_d = %.3f \u2126, R_gnd = %.3f \u2126\n, R_Agnd = "
+             "%.3f \u2126\n",
+             pb, RAnalog, RDigital, RGround, RAGround);
+      RGnd[i]  = RGround;
+      RAGnd[i] = RAGround;
+    }
+    // include possibility of split GND (for IB HICs only)
+    if (RAGnd[module] > 0) {
+      VdropGnd  = IDDD[module] * RGnd[module];
+      VdropAGnd = IDDA[module] * RAGnd[module];
+    }
+    else {
+      VdropGnd  = (IDDA[module] + IDDD[module]) * RGnd[module];
+      VdropAGnd = -1;
     }
 
-    float VdropGnd = (IDDA[module] + IDDD[module]) * RGnd[module];
     if ((pb == TPowerBoardConfig::realML) || (pb == TPowerBoardConfig::realOL)) {
       float Itot = 0.;
       for (int ihic = MAX_MOULESPERMOSAIC - 1; ihic >= 0; --ihic) {
@@ -528,18 +540,32 @@ void TPowerBoard::CorrectVoltageDrop(int module, TPowerBoardConfig::pb_t pb, boo
       VdropGnd = std::accumulate(VdropPart.begin(), VdropPart.begin() + module + 1, 0.);
     }
 
-    fPowerBoardConfig->GetResistances(module, RAnalog, RDigital, RGround, pb);
+    fPowerBoardConfig->GetResistances(module, RAnalog, RDigital, RGround, RAGround, pb);
     fPowerBoardConfig->GetVCalibration(module, AVScale, DVScale, AVOffset, DVOffset);
 
-    dVAnalog  = IDDA[module] * RAnalog + VdropGnd;
+    if (VdropAGnd > 0) {
+      dVAnalog = IDDA[module] * RAnalog + VdropAGnd;
+    }
+    else {
+      dVAnalog = IDDA[module] * RAnalog + VdropGnd;
+    }
     dVDigital = IDDD[module] * RDigital + VdropGnd;
     dVAnalog *= AVScale;
     dVDigital *= DVScale;
-    printf("channel %d: \u0394V_a = (%.3f A * %.3f \u2126 + %.3f V) * %.3f = %.3f,\n           "
-           "\u0394V_d = (%.3f A * %.3f \u2126 + %.3f V) * %.3f = %.3f\n",
-           module, IDDA[module], RAnalog, VdropGnd, AVScale, dVAnalog, IDDD[module], RDigital,
-           VdropGnd, DVScale, dVDigital);
+    if (VdropAGnd > 0) {
+      printf("channel %d: \u0394V_a = (%.3f A * %.3f \u2126 + %.3f V) * %.3f = %.3f,\n           "
+             "\u0394V_d = (%.3f A * %.3f \u2126 + %.3f V) * %.3f = %.3f\n",
+             module, IDDA[module], RAnalog, VdropAGnd, AVScale, dVAnalog, IDDD[module], RDigital,
+             VdropGnd, DVScale, dVDigital);
+    }
+    else {
+      printf("channel %d: \u0394V_a = (%.3f A * %.3f \u2126 + %.3f V) * %.3f = %.3f,\n           "
+             "\u0394V_d = (%.3f A * %.3f \u2126 + %.3f V) * %.3f = %.3f\n",
+             module, IDDA[module], RAnalog, VdropGnd, AVScale, dVAnalog, IDDD[module], RDigital,
+             VdropGnd, DVScale, dVDigital);
+    }
   }
+
 
   if (fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) {
     std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage AVDD above safe limit; using "
