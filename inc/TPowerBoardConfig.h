@@ -193,7 +193,8 @@ public:
   void GetIBiasCalibration(float &AOffset);
   void SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR,
                           float AGNDLineR = -1.);
-  void EnterMeasuredLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
+  void EnterMeasuredLineResistances(int mod, float ALineR, float DLineR, float GNDLineR,
+                                    float AGNDLineR = -1.);
   void GetWirePBResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, float &BBLineR);
   void GetResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, float &AGNDLineR,
                       pb_t pb);

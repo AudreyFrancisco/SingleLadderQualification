@@ -414,12 +414,13 @@ void TPowerBoardConfig::GetIBiasCalibration(float &AOffset) { AOffset = fPBConfi
 
 // TODO: substitute powerUnit by Top/Bottom variable
 void TPowerBoardConfig::EnterMeasuredLineResistances(int mod, float ALineR, float DLineR,
-                                                     float GNDLineR)
+                                                     float GNDLineR, float AGNDLineR)
 {
-  int powerUnit                    = ((m_bottom == 0) ? 1 : 0);
-  fPBConfig.Modul[mod].CalDLineR   = DLineR + RDigital[powerUnit][mod];
-  fPBConfig.Modul[mod].CalALineR   = ALineR + RAnalog[powerUnit][mod];
-  fPBConfig.Modul[mod].CalGNDLineR = GNDLineR;
+  int powerUnit                     = ((m_bottom == 0) ? 1 : 0);
+  fPBConfig.Modul[mod].CalDLineR    = DLineR + RDigital[powerUnit][mod];
+  fPBConfig.Modul[mod].CalALineR    = ALineR + RAnalog[powerUnit][mod];
+  fPBConfig.Modul[mod].CalGNDLineR  = GNDLineR;
+  fPBConfig.Modul[mod].CalAGNDLineR = AGNDLineR;
 }
 
 void TPowerBoardConfig::GetWirePBResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR,
