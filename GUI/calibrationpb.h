@@ -15,9 +15,10 @@ public:
   ~Calibrationpb();
 
 public slots:
-  virtual void setresistances(float &analog, float &digital, float &bb);
+  virtual void setresistances(float &analog, float &digital, float &bb, float &agnd);
   virtual void getcalibration(float savdd, float iavdd, float sdvdd, float idvdd, float offsetia,
                               float offsetid);
+  virtual void enableanaloguegnd();
 
 private:
   Ui::Calibrationpb *ui;

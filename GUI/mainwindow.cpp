@@ -2044,10 +2044,10 @@ void MainWindow::setTopBottom(int unit)
 
 void MainWindow::setandgetcalibration()
 {
-  float                      ares, gres, dres;
+  float                      ares, gresd, dres, gresa;
   std::vector<TPowerBoard *> powerBoards{fHICs.at(0)->GetPowerBoard()};
 
-  fCalwindow->setresistances(ares, dres, gres);
+  fCalwindow->setresistances(ares, dres, gresd, gresa);
 
   std::cout << ares << " input values " << dres << std::endl;
 
@@ -2055,9 +2055,15 @@ void MainWindow::setandgetcalibration()
     TPowerBoard *powerBoard = fHICs.at(ihic)->GetPowerBoard();
     if (std::find(powerBoards.begin(), powerBoards.end(), powerBoard) != powerBoards.end())
       powerBoards.push_back(powerBoard);
-
-    powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(fHICs.at(ihic)->GetPbMod(),
-                                                                        ares, dres, gres);
+    if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl || fNumberofscan == IBStave ||
+        fNumberofscan == IBStaveLayerQualification) {
+      powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(
+          fHICs.at(ihic)->GetPbMod(), ares, dres, gresd, gresa);
+    }
+    else {
+      powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(
+          fHICs.at(ihic)->GetPbMod(), ares, dres, gresd);
+    }
     powerBoard->CalibrateVoltage(fHICs.at(ihic)->GetPbMod());
     powerBoard->CalibrateCurrent(fHICs.at(ihic)->GetPbMod());
   }
@@ -2081,6 +2087,10 @@ void MainWindow::opencalibration()
 {
   fPbcfgcheck->close();
   fCalwindow = new Calibrationpb(this);
+  if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl || fNumberofscan == IBStave ||
+      fNumberofscan == IBStaveLayerQualification) {
+    fCalwindow->enableanaloguegnd();
+  }
   fCalwindow->exec();
 }
 
