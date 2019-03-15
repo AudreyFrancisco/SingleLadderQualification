@@ -202,6 +202,7 @@ public:
   void DisableBias(int mod) { fPBConfig.Modul[mod].BiasEnabled = false; };
   void WriteCalibrationFile();
   void ReadCalibrationFile();
+  int  CheckFileFormat(std::string fName);
   // Setters
   void SetBiasVoltage(float val) { fPBConfig.VBset = val; };
 

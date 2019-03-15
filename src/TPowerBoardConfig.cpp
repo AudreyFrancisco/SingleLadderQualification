@@ -35,6 +35,7 @@
  *
  *
  */
+#include <algorithm>
 #include <cstring>
 #include <exception>
 #include <iostream>
@@ -503,8 +504,14 @@ void TPowerBoardConfig::WriteCalibrationFile()
     GetLineResistances(imod, ALineR, DLineR, GNDLineR, AGNDLineR);
     GetICalibration(imod, AIOffset, DIOffset);
     GetVCalibration(imod, AVScale, DVScale, AVOffset, DVOffset);
-    fprintf(fp, "%d %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n", imod, ALineR, DLineR, GNDLineR,
-            AIOffset, DIOffset, AVScale, AVOffset, DVScale, DVOffset);
+    if (AGNDLineR > 0) {
+      fprintf(fp, "%d %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n", imod, ALineR, DLineR,
+              GNDLineR, AGNDLineR, AIOffset, DIOffset, AVScale, AVOffset, DVScale, DVOffset);
+    }
+    else {
+      fprintf(fp, "%d %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n", imod, ALineR, DLineR,
+              GNDLineR, AIOffset, DIOffset, AVScale, AVOffset, DVScale, DVOffset);
+    }
   }
   GetVBiasCalibration(VBScale, VBOffset);
   GetIBiasCalibration(IBOffset);
@@ -512,9 +519,23 @@ void TPowerBoardConfig::WriteCalibrationFile()
   fclose(fp);
 }
 
+
+int TPowerBoardConfig::CheckFileFormat(string fName)
+{
+  FILE *fp = fopen(fName.c_str(), "r");
+  char  line[100];
+  fgets(line, 100, fp);
+  string test    = string(line);
+  int    nBlanks = (int)std::count(test.begin(), test.end(), ' ');
+  fclose(fp);
+  return nBlanks;
+}
+
+
 void TPowerBoardConfig::ReadCalibrationFile()
 {
-  float ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, DVScale, AVOffset, DVOffset;
+  float ALineR, DLineR, AGNDLineR = -1, GNDLineR, AIOffset, DIOffset, AVScale, DVScale, AVOffset,
+                        DVOffset;
   float VBScale, VBOffset, IBOffset;
   int   mod;
   int   nLines = 0;
@@ -522,16 +543,21 @@ void TPowerBoardConfig::ReadCalibrationFile()
   std::string filename = m_bottom ? "PBBottomCalib.cfg" : "PBTopCalib.cfg";
   if (const char *cfgDir = std::getenv("ALPIDE_TEST_CONFIG"))
     filename.insert(0, std::string(cfgDir) + "/");
-  FILE *fp = fopen(filename.c_str(), "r");
+  int   nPars = CheckFileFormat(filename) + 1;
+  FILE *fp    = fopen(filename.c_str(), "r");
 
   if (!fp) {
     std::cout << "No calibration file found" << std::endl;
     return;
   }
   for (int imod = 0; imod < MAX_MOULESPERMOSAIC; imod++) {
-    if (fscanf(fp, "%d %f %f %f %f %f %f %f %f %f\n", &mod, &ALineR, &DLineR, &GNDLineR, &AIOffset,
-               &DIOffset, &AVScale, &AVOffset, &DVScale, &DVOffset) == 10) {
-      SetLineResistances(mod, ALineR, DLineR, GNDLineR);
+    if (((nPars == 10) &&
+         (fscanf(fp, "%d %f %f %f %f %f %f %f %f %f\n", &mod, &ALineR, &DLineR, &GNDLineR,
+                 &AIOffset, &DIOffset, &AVScale, &AVOffset, &DVScale, &DVOffset) == 10)) ||
+        ((nPars == 11) && (fscanf(fp, "%d %f %f %f %f %f %f %f %f %f %f\n", &mod, &ALineR, &DLineR,
+                                  &GNDLineR, &AGNDLineR, &AIOffset, &DIOffset, &AVScale, &AVOffset,
+                                  &DVScale, &DVOffset) == 11))) {
+      SetLineResistances(mod, ALineR, DLineR, GNDLineR, AGNDLineR);
       SetICalibration(mod, AIOffset, DIOffset);
       SetVCalibration(mod, AVScale, DVScale, AVOffset, DVOffset);
       nLines++;
