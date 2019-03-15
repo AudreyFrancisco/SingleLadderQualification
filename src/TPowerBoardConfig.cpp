@@ -524,7 +524,11 @@ int TPowerBoardConfig::CheckFileFormat(string fName)
 {
   FILE *fp = fopen(fName.c_str(), "r");
   char  line[100];
-  fgets(line, 100, fp);
+  if (fgets(line, 100, fp) == NULL) {
+    std::cout << "Warning: unable to determine calibration file format, using default" << std::endl;
+    fclose(fp);
+    return 9;
+  }
   string test    = string(line);
   int    nBlanks = (int)std::count(test.begin(), test.end(), ' ');
   fclose(fp);
