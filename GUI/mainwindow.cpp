@@ -2064,8 +2064,17 @@ void MainWindow::setandgetcalibration()
       powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(
           fHICs.at(ihic)->GetPbMod(), ares, dres, gresd);
     }
-    powerBoard->CalibrateVoltage(fHICs.at(ihic)->GetPbMod());
-    powerBoard->CalibrateCurrent(fHICs.at(ihic)->GetPbMod());
+    if (fNumberofscan == IBStaveLayerQualification) {
+      for (int g = 0; g < MAX_MOULESPERMOSAIC; g++) {
+        powerBoard->CalibrateVoltage(g);
+        powerBoard->CalibrateCurrent(g);
+      }
+    }
+
+    else {
+      powerBoard->CalibrateVoltage(fHICs.at(ihic)->GetPbMod());
+      powerBoard->CalibrateCurrent(fHICs.at(ihic)->GetPbMod());
+    }
   }
 
   for (auto powerBoard : powerBoards) {
