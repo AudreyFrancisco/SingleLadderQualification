@@ -2055,15 +2055,21 @@ void MainWindow::setandgetcalibration()
     TPowerBoard *powerBoard = fHICs.at(ihic)->GetPowerBoard();
     if (std::find(powerBoards.begin(), powerBoards.end(), powerBoard) != powerBoards.end())
       powerBoards.push_back(powerBoard);
-    if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl || fNumberofscan == IBStave ||
-        fNumberofscan == IBStaveLayerQualification) {
+    if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl || fNumberofscan == IBStave) {
       powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(
           fHICs.at(ihic)->GetPbMod(), ares, dres, gresd, gresa);
+    }
+    else if (fNumberofscan == IBStaveLayerQualification) {
+      for (int g = 0; g < MAX_MOULESPERMOSAIC; g++) {
+        powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(g, ares, dres, gresd,
+                                                                            gresa);
+      }
     }
     else {
       powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(
           fHICs.at(ihic)->GetPbMod(), ares, dres, gresd);
     }
+
     if (fNumberofscan == IBStaveLayerQualification) {
       for (int g = 0; g < MAX_MOULESPERMOSAIC; g++) {
         powerBoard->CalibrateVoltage(g);
