@@ -524,16 +524,22 @@ void TPowerBoardConfig::WriteCalibrationFile()
 int TPowerBoardConfig::CheckFileFormat(string fName)
 {
   FILE *fp = fopen(fName.c_str(), "r");
-  char  line[100];
-  if (fgets(line, 100, fp) == NULL) {
-    std::cout << "Warning: unable to determine calibration file format, using default" << std::endl;
+  if (fp) {
+    char line[100];
+    if (fgets(line, 100, fp) == NULL) {
+      std::cout << "Warning: unable to determine calibration file format, using default"
+                << std::endl;
+      fclose(fp);
+      return 9;
+    }
+    string test    = string(line);
+    int    nBlanks = (int)std::count(test.begin(), test.end(), ' ');
     fclose(fp);
+    return nBlanks;
+  }
+  else {
     return 9;
   }
-  string test    = string(line);
-  int    nBlanks = (int)std::count(test.begin(), test.end(), ' ');
-  fclose(fp);
-  return nBlanks;
 }
 
 
