@@ -24,6 +24,7 @@ public:
   QStandardItem *     NewItem(std::string CompName);
   QSplitter *         fSplitter;
   QStandardItemModel *fModel;
+  QStandardItemModel *fModelTable;
   AlpideDB *          fdb;
   QStandardItem *     fParentItem = 0;
 
@@ -34,6 +35,9 @@ private:
 
 private slots:
   void OpenWindow();
+
+public slots:
+  void onTreeClicked(const QModelIndex &index);
 };
 
 #endif // MAINWINDOW_H

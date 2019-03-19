@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   fdb       = new AlpideDB(false);
   fSplitter = new QSplitter(this);
   fModel    = new QStandardItemModel;
+
   fSplitter->setOrientation(Qt::Horizontal);
   QTreeView * leftSideWidget  = new QTreeView(this);
   QTableView *rightSideWidget = new QTableView(this);
@@ -35,8 +36,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   if (toy) fParentItem->appendRow(toy);
 
   leftSideWidget->setModel(fModel);
+  rightSideWidget->setModel(fModelTable);
 
   setCentralWidget(fSplitter);
+
+  connect(leftSideWidget, SIGNAL(clicked(const QModelIndex &)), this,
+          SLOT(onTreeClicked(const QModelIndex &)));
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -59,6 +64,7 @@ QStandardItem *MainWindow::NewItem(std::string CompName)
     QStandardItem *item        = new QStandardItem(QString::fromStdString(CompName));
     item->setData(componentid);
     std::vector<TChild> children;
+    std::cout << "the component id is " << componentid << std::endl;
     DbGetListOfChildren(fdb, componentid, children);
     for (unsigned int i = 0; i < children.size(); i++) {
       QStandardItem *newitem = NewItem(children.at(i).Name);
@@ -66,5 +72,25 @@ QStandardItem *MainWindow::NewItem(std::string CompName)
     }
 
     return item;
+  }
+}
+
+
+void MainWindow::onTreeClicked(const QModelIndex &index)
+{
+  if (index.isValid()) {
+    QStandardItem *item = fModel->itemFromIndex(index);
+    int            compId;
+    compId = item->data().toInt();
+    vector<ComponentDB::compActivity> tests;
+    DbGetAllTests(fdb, compId, tests, STDigital, true);
+    /*for (unsigned int d = 0; d < tests.size(); d++) {
+      ComponentDB::compActivity act;
+      act                     = tests.at(d);
+      QStandardItem *testitem = new QStandardItem();
+      // act.EndDate
+      fModelTable->appendRow(testitem);
+    }*/
+    std::cout << " the data number is" << compId << std::endl;
   }
 }
