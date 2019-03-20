@@ -907,10 +907,10 @@ void TScan::CorrectVoltageDrop(bool reset)
 
   if ((devType == TYPE_HALFSTAVE) || (devType == TYPE_HALFSTAVERU) ||
       (devType == TYPE_MLHALFSTAVE) || (devType == TYPE_MLSTAVE)) {
-    if (TPowerBoard *pb = m_hics[0]->GetPowerBoard())
-      pb->CorrectVoltageDrop(GetPBtype(m_hics[0]), reset, m_hics.size());
-    if (TPowerBoard *pb = m_hics[0]->GetPowerBoard())
-      pb->CorrectVoltageDrop(GetPBtype(m_hics[0]), reset, m_hics.size());
+    if (TPowerBoard *pb = !m_hics.empty() ? m_hics.front()->GetPowerBoard() : nullptr) {
+      pb->CorrectVoltageDrop(GetPBtype(m_hics.front()), reset, m_hics.size());
+      pb->CorrectVoltageDrop(GetPBtype(m_hics.front()), reset, m_hics.size());
+    }
   }
   else {
     for (auto hic : m_hics) {
