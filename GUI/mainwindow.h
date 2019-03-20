@@ -70,11 +70,7 @@ public slots:
   void findidoftheactivitytype(std::string activitytypename, int &id);
   void locationcombo();
   void savesettings();
-  void speedycheck(bool checked);
   void attachConfigFile(ActivityDB::activity &activity);
-  void loaddefaultconfig();
-
-  void loadeditedconfig();
 
   void colorsinglescan(int i);
 

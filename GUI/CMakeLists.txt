@@ -19,7 +19,6 @@ set(SRCS
   main.cpp
   mainwindow.cpp
   resultstorage.cpp
-  scanconfiguration.cpp
   scanthread.cpp
   testingprogress.cpp
   testselection.cpp

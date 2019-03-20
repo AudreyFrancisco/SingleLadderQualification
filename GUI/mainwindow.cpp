@@ -1900,82 +1900,27 @@ void MainWindow::savesettings()
       fstopwriting = false;
     }
 
-    fScanconfigwindow = new ScanConfiguration(this);
-    fScanconfigwindow->show();
-    setdefaultvalues(fScanfit, fNm);
-    fScanconfigwindow->setdefaultspeed(fScanfit);
-    fScanconfigwindow->setdeaulmaskstages(fNm);
-  }
-}
+    initscanlist();
+    if (fNumberofscan == OBEndurance && fRecovery) {
+      QString filename =
+          QFileDialog::getOpenFileName(this, tr("Select File"), "C://", "Dat files (*.dat)");
+      std::deque<std::map<std::string, THicCounter>> counterVector;
+      std::vector<std::string>                       names;
+      for (unsigned int i = 0; i < fHicnames.size(); i++) {
+        names.push_back(fHicnames.at(i).toStdString());
+      }
+      int ncycles = 0;
+      ncycles     = OpenEnduranceRecoveryFile(filename.toStdString().c_str(), names, counterVector);
 
-void MainWindow::speedycheck(bool checked)
-{
+      std::cout << ncycles << " cycles found in file." << std::endl;
 
-  if (checked) {
-    fConfig->GetScanConfig()->SetParamValue("SPEEDY", "1");
-    std::cout << "The speed is " << fConfig->GetScanConfig()->GetSpeedy() << std::endl;
-  }
-  else {
-    fConfig->GetScanConfig()->SetParamValue("SPEEDY", "0");
-    std::cout << "The speed is " << fConfig->GetScanConfig()->GetSpeedy() << std::endl;
-  }
-}
-
-void MainWindow::loadeditedconfig()
-{
-
-  fScanconfigwindow->setnumberofmaskstages(fNm);
-
-  if (fCounter == 0) {
-    return;
-  }
-
-  std::string       final;
-  std::stringstream convert;
-  convert << fNm;
-  final = convert.str();
-  fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", final.c_str());
-  std::cout << fOperatorname.toStdString() << ", " << fHicidnumber.toStdString() << ", "
-            << fIdoflocationtype << ", " << fIdofoperator << std::endl;
-  std::cout << "the speed is set to " << fConfig->GetScanConfig()->GetSpeedy() << std::endl;
-  std::cout << "the number of mask stages is " << fConfig->GetScanConfig()->GetNMaskStages()
-            << std::endl;
-  fScanconfigwindow->close();
-  initscanlist();
-
-  if (fNumberofscan == OBEndurance && fRecovery) {
-    QString filename =
-        QFileDialog::getOpenFileName(this, tr("Select File"), "C://", "Dat files (*.dat)");
-    std::deque<std::map<std::string, THicCounter>> counterVector;
-    std::vector<std::string>                       names;
-    for (unsigned int i = 0; i < fHicnames.size(); i++) {
-      names.push_back(fHicnames.at(i).toStdString());
-    }
-    int ncycles = 0;
-    ncycles     = OpenEnduranceRecoveryFile(filename.toStdString().c_str(), names, counterVector);
-
-    std::cout << ncycles << " cycles found in file." << std::endl;
-
-    for (unsigned int d = 1; d < fScanVector.size(); d++) {
-      TEnduranceCycle *scan;
-      scan = (TEnduranceCycle *)fScanVector.at(d);
-      if (counterVector.size() > 0) scan->ReadRecoveredCounters(counterVector);
+      for (unsigned int d = 1; d < fScanVector.size(); d++) {
+        TEnduranceCycle *scan;
+        scan = (TEnduranceCycle *)fScanVector.at(d);
+        if (counterVector.size() > 0) scan->ReadRecoveredCounters(counterVector);
+      }
     }
   }
-}
-
-void MainWindow::loaddefaultconfig()
-{
-
-  fConfig->GetScanConfig()->SetParamValue("SPEEDY", "0");
-  std::cout << "The speed is " << fConfig->GetScanConfig()->GetSpeedy() << std::endl;
-  if (fCounter == 0) {
-    return;
-  }
-  std::cout << fOperatorname.toStdString() << ", " << fHicidnumber.toStdString() << ", "
-            << fIdoflocationtype << ", " << fIdofoperator << std::endl;
-  fScanconfigwindow->close();
-  initscanlist();
 }
 
 void MainWindow::colorsinglescan(int i)
