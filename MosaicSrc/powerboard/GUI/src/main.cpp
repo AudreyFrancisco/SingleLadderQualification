@@ -44,6 +44,7 @@ int main(int argc, char **argv)
   a = new QApplication(argc, argv);
 
   cfgFileName[0] = '\0';
+  std::string ipAddress;
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-cfg") == 0) {
       if ((i + 1) >= argc)
@@ -51,11 +52,18 @@ int main(int argc, char **argv)
       else
         strncpy(cfgFileName, argv[++i], 2000 - 1);
     }
+    else if (strcmp(argv[i], "-ip") == 0) {
+      if ((i + 1) >= argc)
+        goto invokeError;
+      else
+        ipAddress = argv[++i];
+    }
   }
 
   theMainWindow = new pbMainWindow();
   theMainWindow->show();
   if (cfgFileName[0]) theMainWindow->fileOpen(cfgFileName);
+  if (!ipAddress.empty()) theMainWindow->setIPaddress(ipAddress.data());
   return a->exec();
 
 invokeError:

@@ -58,6 +58,8 @@ public:
   pbMainWindow(QWidget *parent = 0, Qt::WindowFlags fl = 0);
   ~pbMainWindow();
 
+  void setIPaddress(QString add);
+
 private:
   QWidget *      centralWidgetPtr;
   QString        cfgFilename;
@@ -122,7 +124,6 @@ private:
   bool        XMLreadMOSAIC(QDomElement &root);
   QDomElement XMLgetTag(QDomElement &e, QString tagName);
   void        comErrorExit(std::exception &e);
-  void        setIPaddress(QString add);
   void        setOnline(bool online);
 };
 
