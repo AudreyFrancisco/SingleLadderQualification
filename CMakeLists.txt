@@ -93,10 +93,8 @@ add_subdirectory(ScopeControlSrc)
 add_subdirectory(scripts)
 add_subdirectory(GUI)
 
-# for out-of-source builds create Data/ directory
-if(NOT BUILDINSOURCE)
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Data)
-endif()
+# create Data/ directory
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Data)
 
 # add target for format checking
 add_custom_target(format-check

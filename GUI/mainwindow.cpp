@@ -20,7 +20,6 @@
 #include "calibrationpb.h"
 #include "debugwindow.h"
 #include "dialog.h"
-#include "scanconfiguration.h"
 #include "testingprogress.h"
 #include "testselection.h"
 #include <QCoreApplication>
