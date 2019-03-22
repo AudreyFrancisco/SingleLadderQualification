@@ -26,7 +26,8 @@ public:
   QStandardItemModel *fModel;
   QStandardItemModel *fModelTable;
   AlpideDB *          fdb;
-  QStandardItem *     fParentItem = 0;
+  QStandardItem *     fParentItem      = 0;
+  QStandardItem *     fParentItemTable = 0;
 
 
 private:

@@ -1,6 +1,7 @@
 ﻿#include "mainwindow.h"
 #include "DBHelpers.h"
 #include "QFrame"
+#include "QList"
 #include "QPushButton"
 #include "QSplitter"
 #include "QStandardItemModel"
@@ -9,6 +10,8 @@
 #include "QTreeView"
 #include "QVBoxLayout"
 #include "ui_mainwindow.h"
+#include <sstream>
+#include <string>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -19,25 +22,31 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QAction *newtestaction = new QAction("&Search for component", this);
   connect(newtestaction, SIGNAL(triggered()), this, SLOT(OpenWindow()));
   menu->addAction(newtestaction);
-  fdb       = new AlpideDB(false);
-  fSplitter = new QSplitter(this);
-  fModel    = new QStandardItemModel;
+  fdb         = new AlpideDB(false);
+  fSplitter   = new QSplitter(this);
+  fModel      = new QStandardItemModel;
+  fModelTable = new QStandardItemModel;
 
   fSplitter->setOrientation(Qt::Horizontal);
   QTreeView * leftSideWidget  = new QTreeView(this);
   QTableView *rightSideWidget = new QTableView(this);
   fSplitter->addWidget(leftSideWidget);
   fSplitter->addWidget(rightSideWidget);
-  fParentItem = fModel->invisibleRootItem();
-
+  fParentItem         = fModel->invisibleRootItem();
+  QHeaderView *header = rightSideWidget->horizontalHeader();
+  header->setSectionResizeMode(QHeaderView::Stretch);
 
   QStandardItem *toy = NewItem("OBHIC-BR001583");
 
   if (toy) fParentItem->appendRow(toy);
 
+
+  fModelTable->setHorizontalHeaderItem(0, new QStandardItem("Test Type"));
+  fModelTable->setHorizontalHeaderItem(1, new QStandardItem("Data"));
+
+
   leftSideWidget->setModel(fModel);
   rightSideWidget->setModel(fModelTable);
-
   setCentralWidget(fSplitter);
 
   connect(leftSideWidget, SIGNAL(clicked(const QModelIndex &)), this,
@@ -84,13 +93,21 @@ void MainWindow::onTreeClicked(const QModelIndex &index)
     compId = item->data().toInt();
     vector<ComponentDB::compActivity> tests;
     DbGetAllTests(fdb, compId, tests, STDigital, true);
-    /*for (unsigned int d = 0; d < tests.size(); d++) {
+    fModelTable->removeRows(0, fModelTable->rowCount()); // clear the table in order to update it
+    fModelTable->removeRows(1, fModelTable->rowCount());
+    for (unsigned int d = 0; d < tests.size(); d++) {
       ComponentDB::compActivity act;
-      act                     = tests.at(d);
-      QStandardItem *testitem = new QStandardItem();
-      // act.EndDate
-      fModelTable->appendRow(testitem);
-    }*/
+      act = tests.at(d);
+      std::stringstream ss;
+      ss << act.EndDate;
+      std::string            ts           = ss.str();
+      QStandardItem *        testitemtype = new QStandardItem(QString::fromStdString(act.Typename));
+      QStandardItem *        testitemdata = new QStandardItem(QString::fromStdString(ts));
+      QList<QStandardItem *> items;
+      items.push_back(testitemtype);
+      items.push_back(testitemdata);
+      fModelTable->appendRow(items);
+    }
     std::cout << " the data number is" << compId << std::endl;
   }
 }
