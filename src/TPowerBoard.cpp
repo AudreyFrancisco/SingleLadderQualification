@@ -511,7 +511,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, TPowerBoardConfig::pb_t pb, boo
       fPowerBoardConfig->GetResistances(i, RAnalog, RDigital, RGround, RAGround, pb);
 
       printf("channel %d: I_a = %.3f A, I_d = %.3f A\n", i, IDDA[i], IDDD[i]);
-      printf("     PB %d: R_a = %.3f \u2126, R_d = %.3f \u2126, R_gnd = %.3f \u2126\n, R_Agnd = "
+      printf("     PB %d: R_a = %.3f \u2126, R_d = %.3f \u2126, R_gnd = %.3f \u2126, R_Agnd = "
              "%.3f \u2126\n",
              pb, RAnalog, RDigital, RGround, RAGround);
       RGnd[i]  = RGround;
