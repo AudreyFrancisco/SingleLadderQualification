@@ -820,23 +820,35 @@ string CreateActivityName(string compName, TScanConfig *config)
     testName = string("ML Stave Test ");
     break;
   case StaveReceptionOL:
-    testName = string("OL Stave Reception Test");
+    testName = string("OL Stave Reception Test ");
     break;
   case StaveReceptionML:
-    testName = string("ML Stave Reception Test");
+    testName = string("ML Stave Reception Test ");
     break;
   case IBStaveLayerQualification:
-    testName = string("IB Stave Qualification Test on Layers");
+    testName = string("IB Stave Qualification Test on Layers ");
     break;
   default:
     testName = string("");
     break;
   }
   result = testName + compName;
+
+  // remove stave and half-stave name from the string
+  if (compName.find(' ') != std::string::npos) {
+    compName = compName.substr(compName.find_last_of(" ") + 1);
+  }
+
+  // Get retest suffix (based on the module name)
   if (config->GetRetestNumber(compName) > 0) {
     result.append(" Retest ");
     result.append(std::to_string(config->GetRetestNumber(compName)));
   }
+
+  // append unix timestamp to the activity name
+  result.append(" [");
+  result.append(std::to_string(std::time(nullptr)));
+  result.append("]");
   return result;
 }
 
