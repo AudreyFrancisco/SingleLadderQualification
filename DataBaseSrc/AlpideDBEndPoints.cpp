@@ -919,6 +919,10 @@ AlpideTable::response *ComponentDB::Read(string ComponentID, componentLong *Resu
 AlpideTable::response *ComponentDB::readComponent(string ID, string ComponentID,
                                                   componentLong *Result)
 {
+  size_t index = ComponentID.find("&");
+  if (index != std::string::npos) {
+    ComponentID.replace(index, 1, "%26");
+  }
   FUNCTION_TRACE;
   string theUrl   = theParentDB->GetQueryDomain() + "/ComponentReadOne";
   string theQuery = "ID=" + ID + "&componentID=" + ComponentID;

@@ -36,7 +36,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QHeaderView *header = rightSideWidget->horizontalHeader();
   header->setSectionResizeMode(QHeaderView::Stretch);
 
-  QStandardItem *toy = NewItem("OBHIC-BR001583");
+  QStandardItem *toy = NewItem("D-OL-Stave-003");
+  //  QStandardItem *toy = NewItem("OBHIC-BR001583");
 
   if (toy) fParentItem->appendRow(toy);
 
@@ -73,7 +74,7 @@ QStandardItem *MainWindow::NewItem(std::string CompName)
     QStandardItem *item        = new QStandardItem(QString::fromStdString(CompName));
     item->setData(componentid);
     std::vector<TChild> children;
-    std::cout << "the component id is " << componentid << std::endl;
+    std::cout << "component " << CompName << ", the component id is " << componentid << std::endl;
     DbGetListOfChildren(fdb, componentid, children);
     for (unsigned int i = 0; i < children.size(); i++) {
       QStandardItem *newitem = NewItem(children.at(i).Name);
@@ -87,6 +88,7 @@ QStandardItem *MainWindow::NewItem(std::string CompName)
 
 void MainWindow::onTreeClicked(const QModelIndex &index)
 {
+  char Date[30];
   if (index.isValid()) {
     QStandardItem *item = fModel->itemFromIndex(index);
     int            compId;
@@ -98,9 +100,9 @@ void MainWindow::onTreeClicked(const QModelIndex &index)
     for (unsigned int d = 0; d < tests.size(); d++) {
       ComponentDB::compActivity act;
       act = tests.at(d);
-      std::stringstream ss;
-      ss << act.EndDate;
-      std::string            ts           = ss.str();
+
+      strftime(Date, 30, "%b %d, %Y", localtime(&act.EndDate));
+      std::string            ts           = string(Date);
       QStandardItem *        testitemtype = new QStandardItem(QString::fromStdString(act.Typename));
       QStandardItem *        testitemdata = new QStandardItem(QString::fromStdString(ts));
       QList<QStandardItem *> items;
