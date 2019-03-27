@@ -91,7 +91,7 @@ namespace ScanConfig {
   const int CHARGE_START   = 0;
   const int CHARGE_STOP    = 50;
   const int CHARGE_STEP    = 1;
-  const int N_MASK_STAGES  = 3;
+  const int N_MASK_STAGES  = 512;
   const int PIX_PER_REGION = 32;
   const int NOISECUT_INV   = 100000; // inverse of pixel noise cut (e.g. 100000 = 1e-5)
   const int MAXTIMEOUT     = 100;
