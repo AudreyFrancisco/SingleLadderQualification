@@ -99,8 +99,10 @@ void TScan::SaveStartConditions()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     try {
-      m_conditions.m_tempPT100start[0] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(0);
-      m_conditions.m_tempPT100start[1] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(1);
+      if (m_hics.at(ihic)->GetPowerBoard()) {
+        m_conditions.m_tempPT100start[0] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(0);
+        m_conditions.m_tempPT100start[1] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(1);
+      }
       break;
     }
     catch (std::exception &e) {
@@ -273,8 +275,10 @@ void TScan::Terminate()
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     try {
-      m_conditions.m_tempPT100end[0] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(0);
-      m_conditions.m_tempPT100end[1] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(1);
+      if (m_hics.at(ihic)->GetPowerBoard()) {
+        m_conditions.m_tempPT100end[0] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(0);
+        m_conditions.m_tempPT100end[1] = m_hics.at(ihic)->GetPowerBoard()->GetStaveTemperature(1);
+      }
       break;
     }
     catch (std::exception &e) {
