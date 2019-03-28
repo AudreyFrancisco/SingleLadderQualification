@@ -622,6 +622,7 @@ void TMaskScan::WriteRawData(FILE *fp, std::vector<TPixHit> *Hits, int oldHits,
   std::cout << oldHits << "  " << Hits->size() << std::endl;
   for (unsigned int ihit = oldHits; ihit < Hits->size(); ihit++) {
     //    int modid;
+    std::cout << " hereeeeee!" << std::endl;
     int iboard   = Hits->at(ihit).boardIndex;
     int receiver = Hits->at(ihit).channel;
     int chipid   = Hits->at(ihit).chipId;
@@ -652,7 +653,7 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
   int           nBad = 0;
   TBoardHeader  boardInfo;
   int           nTrigPerHic[MAX_MOSAICTRANRECV];
-  int           prevhits = 0;
+  int           prevhits = 1;
   for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
     nTrigPerHic[i] = 0;
   }
@@ -677,23 +678,32 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
       continue;
     }
     else {
-      std::cout << std::endl;
-      std::cout << std::endl;
-      std::cout << "	GO HERE  :" << std::endl;
-      std::cout << std::endl;
-      std::cout << std::endl;
-      BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer,
-                                n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
-      WriteRawData(rawfile, Hits, prevhits, boardInfo, itrg);
-      // decode Chip event
-      if (boardInfo.decoder10b8bError) {
+      try {
+        BoardDecoder::DecodeEvent(m_boards.at(iboard)->GetConfig()->GetBoardType(), buffer,
+                                  n_bytes_data, n_bytes_header, n_bytes_trailer, boardInfo);
+        if (boardInfo.decoder10b8bError) {
+          throw std::runtime_error("8b10b error!");
+        }
+      }
+      catch (const std::runtime_error &e) {
         m_errorCount.n8b10b++;
         if (FindHIC(iboard, boardInfo.channel).compare("None") != 0) {
-          std::cout << "WARNING: 8b10b error in board " << iboard << " channel "
+          std::cout << " WARNING: 8b10b error in board " << iboard << " channel "
                     << boardInfo.channel << std::endl;
           m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).n8b10b++;
         }
+        throw e;
       }
+      // decode Chip event
+      /*      if (boardInfo.decoder10b8bError) {
+              m_errorCount.n8b10b++;
+              if (FindHIC(iboard, boardInfo.channel).compare("None") != 0) {
+                std::cout << "WARNING: 8b10b error in board " << iboard << " channel "
+                          << boardInfo.channel << std::endl;
+                m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).n8b10b++;
+              }
+            }
+      */
       if (boardInfo.eventOverSizeError) {
         std::cout << "Found oversized event, truncated in MOSAIC" << std::endl;
         m_errorCount.nOversizeEvent++;
@@ -752,6 +762,16 @@ void TMaskScan::ReadEventData(std::vector<TPixHit> *Hits, int iboard)
         m_timestamps_ref.push_back(boardInfo.timestamp);
         m_bunchCounters_ref.push_back(bunchCounter);
       }
+      AlpideDecoder::DecodeEvent(
+          buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel, prevhits,
+          m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nPrioEncoder,
+          m_config->GetParamValue("MAXHITS"), &m_stuck, &chipId, &bunchCounter);
+      std::cout << prevhits << "   " << Hits->size() << std::endl;
+      for (unsigned int count = 0; count < Hits->size(); count++) {
+        std::cout << Hits->at(count).chipId << std::endl;
+      }
+      WriteRawData(rawfile, Hits, prevhits, boardInfo, itrg);
+
       nTrigPerHic[boardInfo.channel]++;
       itrg++;
     }
