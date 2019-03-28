@@ -17,11 +17,13 @@ set(TEST_EXE
   test_dacscan
   test_dacscan_voltage
   test_digitalscan
+  test_dumpreg
   test_fifo
   test_localbus
   test_mosaic
   test_noiseocc
   test_noiseocc_ext
+  test_pllinit
   test_poweron
   test_powerdown_analogue
   test_pulselength
