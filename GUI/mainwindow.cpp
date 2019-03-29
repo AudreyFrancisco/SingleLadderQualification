@@ -1336,8 +1336,11 @@ void MainWindow::detailscombo(int dnumber)
 void MainWindow::poweroff()
 {
   std::cout << "Powering off all HICs" << std::endl;
-  for (unsigned int i = 0; i < fHICs.size(); i++) {
-    fHICs.at(i)->PowerOff();
+  for (auto hic : fHICs) {
+    if (auto pb = hic->IsEnabled() ? hic->GetPowerBoard() : nullptr) {
+      pb->CorrectVoltageDrop(hic->GetPbMod(), TPowerBoardConfig::none, true);
+      hic->PowerOff();
+    }
   }
   std::cout << "Done." << std::endl;
 }

@@ -350,9 +350,6 @@ void TScan::Terminate()
   auto duration = std::chrono::duration_cast<std::chrono::minutes>(time_end - time_start);
   snprintf(m_state, sizeof(m_state), "Done (in %3d min)", int(duration.count()));
 
-  // reset voltage drop correction, reset chips, apply voltage drop correction to reset state
-  CorrectVoltageDrop(true);
-
   for (const auto &rChip : m_chips) {
     if (rChip->GetConfig()->IsEnabled() || (rChip->GetConfig()->GetParamValue("PREVID") != -1)) {
       try {
@@ -370,6 +367,9 @@ void TScan::Terminate()
       m_conditions.m_boardConfigEnd.push_back(rMOSAIC->GetRegisterDump());
     }
   }
+
+  // reset voltage drop correction, reset chips, apply voltage drop correction to reset state
+  CorrectVoltageDrop(true);
 
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
