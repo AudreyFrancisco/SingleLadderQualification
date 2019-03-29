@@ -41,6 +41,7 @@ class TestSelection;
 class THic;
 class DebugWindow;
 class ScanConfiguration;
+class ScanData;
 
 namespace Ui {
   class MainWindow;

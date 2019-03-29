@@ -9,10 +9,10 @@
 #include "QTextEdit"
 #include "QTreeView"
 #include "QVBoxLayout"
+#include "ScanData.h"
 #include "ui_mainwindow.h"
 #include <sstream>
 #include <string>
-
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
