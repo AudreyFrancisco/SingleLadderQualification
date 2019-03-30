@@ -236,8 +236,8 @@ namespace ScanConfig {
 
   // MAX - MIN should be divisible by STEP
   // last point should be <= 128 for y and 127 for x (upper limit is excluded)
-  const int EYE_DRIVER = 10;
-  const int EYE_PREEMP = 10;
+  const int EYE_DRIVER = 4;
+  const int EYE_PREEMP = 4;
   const int EYE_MIN_X  = -128;
   const int EYE_MAX_X  = 132;
   const int EYE_STEP_X = 4;
