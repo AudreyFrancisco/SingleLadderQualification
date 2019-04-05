@@ -316,10 +316,11 @@ void AlpideConfig::BaseConfigDACs(TAlpide *chip)
   chip->WriteRegister(Alpide::REG_IBIAS, chip->GetConfig()->GetParamValue("IBIAS"));
   chip->WriteRegister(Alpide::REG_VCASP, chip->GetConfig()->GetParamValue("VCASP"));
   // not used DACs..
-  chip->WriteRegister(Alpide::REG_VTEMP, chip->GetConfig()->GetParamValue("VTEMP"));
-  chip->WriteRegister(Alpide::REG_VRESETP, chip->GetConfig()->GetParamValue("VRESETP"));
-  chip->WriteRegister(Alpide::REG_IRESET, chip->GetConfig()->GetParamValue("IRESET"));
-  chip->WriteRegister(Alpide::REG_IAUX2, chip->GetConfig()->GetParamValue("IAUX2"));
+  // parameters not initialized in TChipConfig, do not write!
+  // chip->WriteRegister(Alpide::REG_VTEMP, chip->GetConfig()->GetParamValue("VTEMP"));
+  // chip->WriteRegister(Alpide::REG_VRESETP, chip->GetConfig()->GetParamValue("VRESETP"));
+  // chip->WriteRegister(Alpide::REG_IRESET, chip->GetConfig()->GetParamValue("IRESET"));
+  // chip->WriteRegister(Alpide::REG_IAUX2, chip->GetConfig()->GetParamValue("IAUX2"));
 }
 
 void AlpideConfig::BaseConfig(TAlpide *chip)
