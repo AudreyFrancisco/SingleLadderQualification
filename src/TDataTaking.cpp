@@ -7,6 +7,7 @@
 #include "AlpideConfig.h"
 #include "AlpideDecoder.h"
 #include "BoardDecoder.h"
+#include "SetupHelpers.h"
 #include "TDataTaking.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
@@ -95,6 +96,8 @@ void TDataTaking::Init()
   CreateScanHisto();
 
   CountEnabledChips();
+  MakeDaisyChain(nullptr, &m_boards, nullptr, &m_chips);
+
   for (unsigned int i = 0; i < m_boards.size(); i++) {
     std::cout << "Board " << i << ", found " << m_enabled[i] << " enabled chips" << std::endl;
     ConfigureBoard(m_boards.at(i));

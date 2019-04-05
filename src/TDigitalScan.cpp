@@ -1,5 +1,6 @@
 #include "TDigitalScan.h"
 #include "AlpideConfig.h"
+#include "SetupHelpers.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "TReadoutBoardRU.h"
@@ -147,6 +148,7 @@ void TDigitalScan::Init()
   SetBackBias();
   CreateScanHisto();
   CountEnabledChips();
+  MakeDaisyChain(nullptr, &m_boards, nullptr, &m_chips);
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     if (((TDigitalParameters *)m_parameters)->voltageScale != 1.) {
