@@ -25,6 +25,10 @@ TChipConfig::TChipConfig(TConfig *config, int chipId, const char *fName)
   fVRESETD = VRESETD;
   fITHR    = ITHR;
   fIBIAS   = IBIAS;
+  fVRESETP = VRESETP;
+  fVTEMP   = VTEMP;
+  fIAUX2   = IAUX2;
+  fIRESET  = IRESET;
 
   fReadoutMode         = READOUT_MODE;
   fEnableClustering    = ENABLE_CLUSTERING;

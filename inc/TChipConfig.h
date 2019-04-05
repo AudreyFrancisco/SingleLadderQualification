@@ -18,6 +18,10 @@ namespace ChipConfig { // to avoid clashes with other configs (e.g. for STROBE_D
   const int ITHR    = 51;
   const int IBIAS   = 64;
   const int VCASP   = 86;
+  const int VRESETP = 117;
+  const int VTEMP   = 0;
+  const int IAUX2   = 0;
+  const int IRESET  = 50;
 
   const int READOUT_MODE           = 0; // triggered
   const int ENABLE_CLUSTERING      = 1;
