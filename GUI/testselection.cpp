@@ -89,6 +89,16 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
     popupmessage("Info missing");
   }
   else {
+
+    if (!ui->id->toPlainText().isEmpty()) {
+      hicid     = ui->id->toPlainText();
+      halfstave = ui->id->toPlainText();
+    }
+    else {
+      hicid     = '\0';
+      halfstave = '\0';
+    }
+
     if (!ui->t2->toPlainText().isEmpty()) {
       ttwo = ui->t2->toPlainText();
     }
@@ -158,9 +168,8 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
       stave = '\0';
     }
 
-    opname    = ui->operatorstring->toPlainText();
-    hicid     = ui->id->toPlainText();
-    halfstave = ui->id->toPlainText();
+    opname = ui->operatorstring->toPlainText();
+
     fCounter = counter = 1;
     lid                = locid;
     institute          = location;
