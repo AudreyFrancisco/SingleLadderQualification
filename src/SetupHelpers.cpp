@@ -119,9 +119,6 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
     if (hics) {
       chip->SetHic(hics->at(0));
       hics->at(0)->AddChip(chip);
-      // TODO: Move this into the correct place
-      ((THicOB *)(hics->at(0)))->ConfigureMaster(0, 0, 9, 1);
-      ((THicOB *)(hics->at(0)))->ConfigureMaster(8, 0, 0, 0);
     }
     chips->push_back(chip);
 
@@ -147,6 +144,16 @@ int initSetupOB(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardTyp
       }
     }
     boards->at(0)->AddChip(chipId, control, receiver, chips->at(i));
+  }
+  if (hics) {
+    TChipConfig *cfg_b0 = config->GetChipConfig(0);
+    TChipConfig *cfg_a8 = config->GetChipConfig(7);
+    ((THicOB *)(hics->at(0)))
+        ->ConfigureMaster(0, 0, cfg_b0->GetParamValue("RECEIVER"),
+                          cfg_b0->GetParamValue("CONTROLINTERFACE"));
+    ((THicOB *)(hics->at(0)))
+        ->ConfigureMaster(8, 0, cfg_a8->GetParamValue("RECEIVER"),
+                          cfg_a8->GetParamValue("CONTROLINTERFACE"));
   }
 
   if (hics) {
@@ -550,8 +557,8 @@ int initSetupHalfStaveRU(TConfig *config, std::vector<TReadoutBoard *> *boards,
 //
 // Modify the function in order to scan a sub set of chips. The dimension is fixed to 14 !!
 //
-void MakeDaisyChain(TConfig *config, std::vector<TReadoutBoard *> *boards, TBoardType *boardType,
-                    std::vector<TAlpide *> *chips, int startPtr)
+void MakeDaisyChain(TConfig * /* config */, std::vector<TReadoutBoard *> *boards,
+                    TBoardType * /*boardType*/, std::vector<TAlpide *> *chips, int startPtr)
 {
 
   int firstLow[8], firstHigh[8], lastLow[8], lastHigh[8];
