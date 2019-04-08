@@ -23,12 +23,14 @@ void TApplyTuning::Run()
       TAlpide *          chip       = m_hics.at(ihic)->GetChipById(it->first);
       TSCurveResultChip *chipResult = (TSCurveResultChip *)it->second;
 
-      // TODO: check rounding, fix makefile (unresolved reference)
-      chip->GetConfig()->SetParamValue(GetDACName(), (int)chipResult->GetThresholdMean());
-      if (strcmp(GetDACName(), "VCASN") == 0)
-        chip->GetConfig()->SetParamValue("VCASN2", (int)chipResult->GetThresholdMean() + 12);
-      std::cout << "Setting chip with ID" << chip->GetConfig()->GetChipId()
-                << ", thr=" << chipResult->GetThresholdMean() << std::endl;
+      int val = std::round(chipResult->GetThresholdMean());
+      if (strcmp(GetDACName(), "VCASN") == 0) {
+        val = std::max(40, val);
+        chip->GetConfig()->SetParamValue("VCASN2", val + 12);
+      }
+      chip->GetConfig()->SetParamValue(GetDACName(), val);
+      std::cout << "Setting chip with ID" << chip->GetConfig()->GetChipId() << " " << GetDACName()
+                << "=" << chip->GetConfig()->GetParamValue(GetDACName()) << std::endl;
     }
   }
 }
