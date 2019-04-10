@@ -1,6 +1,7 @@
 #include <AlpideDB.h>
 #include <AlpideDBEndPoints.h>
 #include <DBHelpers.h>
+#include <algorithm>
 #include <array>
 #include <cstdio>
 #include <cstdlib>
@@ -89,7 +90,8 @@ std::string getUserName()
 void printUsage()
 {
   std::cout << std::endl << "Usage:" << std::endl;
-  std::cout << "   test_DBCheck staveName" << std::endl << std::endl;
+  std::cout << "   test_DBCheck staveName (noeos)" << std::endl;
+  std::cout << "   adding noeos deacitvates the EOS checks" << std::endl << std::endl;
 }
 
 
@@ -464,11 +466,18 @@ int main(int argc, char **argv)
   g_fpDB  = nullptr;
   g_fpEos = nullptr;
 
-  if (argc != 2) {
+  if (argc != 2 && argc != 3) {
     printUsage();
     return -1;
   }
-  stave.Name = argv[1];
+  stave.Name    = argv[1];
+  bool checkEOS = true;
+  if (argc == 3) {
+    std::string eos = argv[2];
+    std::transform(eos.begin(), eos.end(), eos.begin(), ::tolower);
+    if (eos.find("noeos") != string::npos) checkEOS = false;
+  }
+
 
   if (stave.Name.find("OL") != string::npos) {
     middleLayer = false;
@@ -520,20 +529,24 @@ int main(int argc, char **argv)
   checkBareStaveHistory(db, bareStave, middleLayer, missing);
   checkStaveHistory(db, stave, middleLayer, missing);
 
-  for (unsigned int i = 0; i < hics.size(); i++) {
-    if (!checkEos("OB HIC Qualification Test", g_hicLocation, hics.at(i).Name)) missingEos[0]++;
-    if (!checkEos("OB HIC Endurance Test", g_hicLocation, hics.at(i).Name)) missingEos[1]++;
-    if (!checkEos("OB HIC Reception Test", g_staveLocation, hics.at(i).Name)) missingEos[2]++;
-    if (!checkEos("OB HIC Fast Power Test", g_staveLocation, hics.at(i).Name)) missingEos[3]++;
-    if (middleLayer) {
-      if (!checkEos("ML HS Qualification Test", g_staveLocation, hics.at(i).Name)) missingEos[4]++;
-      if (!checkEos("ML Stave Qualification Test", g_staveLocation, hics.at(i).Name))
-        missingEos[5]++;
-    }
-    else {
-      if (!checkEos("OL HS Qualification Test", g_staveLocation, hics.at(i).Name)) missingEos[4]++;
-      if (!checkEos("OL Stave Qualification Test", g_staveLocation, hics.at(i).Name))
-        missingEos[5]++;
+  if (checkEOS) {
+    for (unsigned int i = 0; i < hics.size(); i++) {
+      if (!checkEos("OB HIC Qualification Test", g_hicLocation, hics.at(i).Name)) missingEos[0]++;
+      if (!checkEos("OB HIC Endurance Test", g_hicLocation, hics.at(i).Name)) missingEos[1]++;
+      if (!checkEos("OB HIC Reception Test", g_staveLocation, hics.at(i).Name)) missingEos[2]++;
+      if (!checkEos("OB HIC Fast Power Test", g_staveLocation, hics.at(i).Name)) missingEos[3]++;
+      if (middleLayer) {
+        if (!checkEos("ML HS Qualification Test", g_staveLocation, hics.at(i).Name))
+          missingEos[4]++;
+        if (!checkEos("ML Stave Qualification Test", g_staveLocation, hics.at(i).Name))
+          missingEos[5]++;
+      }
+      else {
+        if (!checkEos("OL HS Qualification Test", g_staveLocation, hics.at(i).Name))
+          missingEos[4]++;
+        if (!checkEos("OL Stave Qualification Test", g_staveLocation, hics.at(i).Name))
+          missingEos[5]++;
+      }
     }
   }
 
