@@ -34,6 +34,7 @@ set(TEST_EXE
   test_supply_voltage
   test_temperature
   test_threshold
+  test_vresetp
   test_DBCheck
 )
 
