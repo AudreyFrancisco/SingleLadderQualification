@@ -42,6 +42,59 @@ void TScanManager::Run()
   }
 }
 
+std::string TScanManager::GetResult(THicClassification cl)
+{
+  switch (cl) {
+  case CLASS_UNTESTED:
+    return string("UNTESTED");
+  case CLASS_GOLD:
+    return string("GOLD");
+  case CLASS_BRONZE:
+    return string("BRONZE");
+  case CLASS_SILVER:
+    return string("SILVER");
+  case CLASS_RED:
+    return string("RED");
+  case CLASS_PARTIAL:
+    return string("PARTIAL");
+  case CLASS_PARTIALB:
+    return string("PARTIAL-CATB");
+  case CLASS_NOBB:
+    return string("NOBB");
+  case CLASS_NOBBB:
+    return string("NOBB-CATB");
+  case CLASS_ABORTED:
+    return string("ABORTED");
+  default:
+    return string("UNTESTED");
+  }
+}
+
+void TScanManager::PrintClassifications()
+{
+  for (auto hic : fHICs) {
+    std::cout << std::endl
+              << "Classifications HIC " << hic->GetDbId() << " (M" << hic->GetModId()
+              << "):" << std::endl;
+    std::cout << "Old classification: " << GetResult(hic->GetOldClassification()).c_str()
+              << std::endl;
+    std::cout << "Final classification: " << GetResult(hic->GetClassification()).c_str()
+              << std::endl;
+  }
+}
+
+void TScanManager::UpdateClassifications()
+{
+  for (auto scanObj : fScanObjects) {
+    if (scanObj.result) {
+      for (auto hic : fHICs) {
+        if (TScanResultHic *hicResult = scanObj.result->GetHicResult(hic->GetDbId()))
+          hic->AddClassification(hicResult->GetClassification(), scanObj.scan->HasBackBias());
+      }
+    }
+  }
+}
+
 void TScanManager::Scan(TScan *scan)
 {
   scan->LoopStart(2);
@@ -73,4 +126,5 @@ void TScanManager::Analysis(TScanAnalysis *analysis)
 {
   analysis->Initialize();
   analysis->Run();
+  analysis->Finalize();
 }

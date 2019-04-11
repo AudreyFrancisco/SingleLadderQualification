@@ -10,6 +10,8 @@ public:
   void                       Init();
   void                       Reset();
   void                       Run();
+  void                       PrintClassifications();
+  void                       UpdateClassifications();
 
   static void Scan(TScan *scan);
   static void Analysis(TScanAnalysis *analysis);
@@ -29,4 +31,6 @@ protected:
   // std::vector<TScanType>       fScanTypes;
 
   std::vector<TScanFactory::TScanObjects> fScanObjects;
+
+  static std::string GetResult(THicClassification cl);
 };

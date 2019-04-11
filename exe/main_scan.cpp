@@ -23,5 +23,8 @@ int main(int argc, char **argv)
 
   mgr.Run();
 
+  mgr.UpdateClassifications();
+  mgr.PrintClassifications();
+
   return 0;
 }
