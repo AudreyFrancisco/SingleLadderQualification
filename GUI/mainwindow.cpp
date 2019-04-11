@@ -17,6 +17,7 @@
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
 #include "TScanFactory.h"
+#include "TScanManager.h"
 #include "calibrationpb.h"
 #include "debugwindow.h"
 #include "dialog.h"
@@ -557,30 +558,7 @@ void MainWindow::color_IB(int position, bool ok)
 void MainWindow::scanLoop(TScan *myScan)
 {
   if (!fScanAbort) try {
-      myScan->LoopStart(2);
-
-      while (myScan->Loop(2)) {
-        myScan->PrepareStep(2);
-        qApp->processEvents();
-        myScan->LoopStart(1);
-
-        while (myScan->Loop(1)) {
-          myScan->PrepareStep(1);
-          myScan->LoopStart(0);
-
-          while (myScan->Loop(0)) {
-            myScan->PrepareStep(0);
-            myScan->Execute();
-            myScan->Next(0);
-          }
-          myScan->LoopEnd(0);
-          myScan->Next(1);
-        }
-        myScan->LoopEnd(1);
-        myScan->Next(2);
-      }
-      myScan->LoopEnd(2);
-      myScan->Terminate();
+      TScanManager::Scan(myScan);
     }
     catch (exception &ex) {
       std::cout << ex.what() << " is the thrown exception from the scan" << std::endl;
@@ -2549,8 +2527,7 @@ void MainWindow::stopscans()
 void MainWindow::analysis(TScanAnalysis *myanalysis)
 {
   try {
-    myanalysis->Initialize();
-    myanalysis->Run();
+    TScanManager::Analysis(myanalysis);
   }
   catch (exception &ex) {
     std::cout << ex.what() << " is the thrown exception from the analysis" << std::endl;

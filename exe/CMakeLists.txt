@@ -1,4 +1,5 @@
 set(EXE
+  scan
   startclk
   stopclk
 )
