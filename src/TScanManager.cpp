@@ -126,5 +126,4 @@ void TScanManager::Analysis(TScanAnalysis *analysis)
 {
   analysis->Initialize();
   analysis->Run();
-  analysis->Finalize();
 }
