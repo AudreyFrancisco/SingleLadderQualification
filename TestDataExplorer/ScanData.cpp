@@ -5,17 +5,34 @@
 #include <iomanip>
 #include <iostream>
 
+struct CommonTools::TScan general;
+
+float CommonTools::add(float a, float b, int n = 1) { return a + b; }
 
 ScanData::ScanData()
 {
 
-  ScanData::TVariable numWorkingChips;
+  CommonTools::TVariable numWorkingChips;
   numWorkingChips.displayName = "Number of Working Chips";
   numWorkingChips.hicTestName = "Number of Working Chips";
-  numWorkingChips.sum         = &ScanData::add;
+  numWorkingChips.sum         = &CommonTools::add;
+
+  CreateGeneral();
 }
 
 ScanData::~ScanData() {}
 
 
-float ScanData::add(float a, float b, int n = 1) { return a + b; }
+void ScanData::CreateGeneral()
+{
+
+  general.type = STPower;
+  CreateGeneralVariables(&general);
+}
+
+void ScanData::CreateGeneralVariables(CommonTools::TScan *gen)
+{
+
+  CommonTools::TVariable myvar;
+  gen->variables.push_back(myvar);
+}
