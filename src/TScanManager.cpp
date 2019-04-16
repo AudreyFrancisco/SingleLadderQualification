@@ -7,14 +7,14 @@
 
 TScanManager::TScanManager() {}
 
-void TScanManager::Init() { initSetup(fConfig, &fBoards, &boardType, &fChips, "", &fHICs); }
+void TScanManager::Init() { initSetup(fConfig, &fBoards, &fBoardType, &fChips, "", &fHICs); }
 
 TScanFactory::TScanObjects TScanManager::AddScan(TScanType scanType, TScanResult *scanResult)
 {
   TScanConfig *config = fConfig->GetScanConfig();
 
   auto scanObjects = TScanFactory::CreateScanObjects(scanType, config, fChips, fHICs, fBoards,
-                                                     &fHistoQue, &fMutex, scanResult);
+                                                     &fHistoQueue, &fMutex, scanResult);
 
   // if (scanObjects.analysis) {
   //  fScans.push_back(scanObjects.scan);

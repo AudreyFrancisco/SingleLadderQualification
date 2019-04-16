@@ -46,7 +46,12 @@
 #include <thread>
 #include <typeinfo>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow), fConfig(fScanManager.Config()),
+      fHistoQue(fScanManager.HistoQueue()), fScanVector(fScanManager.Scans()),
+      fAnalysisVector(fScanManager.Analyses()), fScanParameters(fScanManager.Parameters()),
+      fresultVector(fScanManager.Results()), fHICs(fScanManager.HICs()),
+      fScanTypes(fScanManager.ScanTypes())
 {
   for (int i = 0; i < 7; i++) {
     fChkBtnObm[i] = false;
@@ -765,49 +770,23 @@ void MainWindow::performtests()
 {
   fAddingScans = true;
   fExtraScans  = 0;
-  qApp->processEvents();
-  fNewScans.clear();
-  fInitialScans = fScanVector.size();
 
-  for (unsigned int i = 0; i < fScanVector.size(); i++) {
-    // geting initial scan type and parameters
-    std::vector<TScanType>         scantypelist;
-    std::vector<TScanParameters *> parameterlist;
-    for (unsigned int d = 0; d < fScanTypes.size(); d++) {
-      scantypelist.push_back(fScanTypes.at(d));
-      parameterlist.push_back(fScanParameters.at(d));
-    }
-    fAbortSingleScan = false;
-
+  for (unsigned int iScan = 0; iScan < fScanManager.GetNScans(); iScan++) {
     std::chrono::milliseconds delay(200);
+
     try {
       fExceptionthrown = false;
       fTestAgain       = false;
-      if (fScanVector.at(i) == 0) {
-        auto future_analysis =
-            std::async(std::launch::async, &MainWindow::analysis, this, fAnalysisVector[i]);
-        while (future_analysis.wait_for(delay) != std::future_status::ready)
-          qApp->processEvents();
-        future_analysis.get();
+      auto future_analysis =
+          std::async(std::launch::async, &MainWindow::analysis, this, fAnalysisVector[iScan]);
 
+      if (fScanVector[iScan]) {
         try {
-          fAnalysisVector.at(i)->Finalize();
-        }
-        catch (exception &ex) {
-          std::cout << ex.what() << " is the thrown exception" << std::endl;
-          fExceptionthrown = true;
-          fScanAbort       = true;
-          fExceptiontext   = ex.what();
-        }
-        colorsinglescan(i);
-      }
-      else {
-        try {
-          // if (i ==14) throw std::invalid_argument("Invalid syntax.");
-          auto future_init = std::async(std::launch::async, &TScan::Init, fScanVector[i]);
+          auto future_init = std::async(std::launch::async, &TScan::Init, fScanVector[iScan]);
           while (future_init.wait_for(delay) != std::future_status::ready) {
-            if (fScanToRowMap.count(i) > 0)
-              ui->testTable->item(fScanToRowMap[i], 1)->setText(fScanVector.at(i)->GetState());
+            if (fScanToRowMap.count(iScan) > 0)
+              ui->testTable->item(fScanToRowMap[iScan], 1)
+                  ->setText(fScanVector.at(iScan)->GetState());
             qApp->processEvents();
           }
           future_init.get();
@@ -819,218 +798,107 @@ void MainWindow::performtests()
           fExceptiontext   = ex.what();
         }
         auto future_scan =
-            std::async(std::launch::async, &MainWindow::scanLoop, this, fScanVector[i]);
-        auto future_analysis =
-            std::async(std::launch::async, &MainWindow::analysis, this, fAnalysisVector[i]);
-
+            std::async(std::launch::async, &MainWindow::scanLoop, this, fScanVector[iScan]);
         // non-blocking wait for scan and analysis
         // use to update status in the GUI and keep it responsive
         while (future_scan.wait_for(delay) != std::future_status::ready) {
-          if (fScanToRowMap.count(i) > 0)
-            ui->testTable->item(fScanToRowMap[i], 1)->setText(fScanVector.at(i)->GetState());
+          if (fScanToRowMap.count(iScan) > 0)
+            ui->testTable->item(fScanToRowMap[iScan], 1)
+                ->setText(fScanVector.at(iScan)->GetState());
           if (fHistoQue.size() > 5)
             printf("%lu histogram(s) queued for analysis\n", fHistoQue.size());
           qApp->processEvents();
         }
         future_scan.get();
+      }
 
-        while (future_analysis.wait_for(delay) != std::future_status::ready)
-          qApp->processEvents();
-        future_analysis.get();
-
-        try {
-          fAnalysisVector.at(i)->Finalize();
-        }
-        catch (exception &ex) {
-          std::cout << ex.what() << " is the thrown exception from th finalize" << std::endl;
-          fExceptionthrown = true;
-          fScanAbort       = true;
-          fExceptiontext   = ex.what();
-        }
-
-        if (fScanToRowMap.count(i) > 0)
-          ui->testTable->item(fScanToRowMap[i], 1)->setText(fScanVector.at(i)->GetState());
+      while (future_analysis.wait_for(delay) != std::future_status::ready)
         qApp->processEvents();
+      future_analysis.get();
 
-        if (fExceptionthrown) {
-          fScanVector.at(i)->ClearHistoQue();
+      try {
+        fAnalysisVector.at(iScan)->Finalize();
+      }
+      catch (exception &ex) {
+        std::cout << ex.what() << " is the thrown exception from th finalize" << std::endl;
+        fExceptionthrown = true;
+        fScanAbort       = true;
+        fExceptiontext   = ex.what();
+      }
 
-          if (fAutoRepeat && i < fScanVector.size() - 1 && fExtraScans < fMaxRepeat) {
-            QDialog *       win   = new QDialog(this);
-            Qt::WindowFlags flags = win->windowFlags();
-            win->setWindowFlags(flags | Qt::Tool);
-            win->setFixedSize(250, 200);
-            win->move(fExtraScans * 100, 0);
-            QTextEdit *exept = new QTextEdit(win);
-            exept->append("The " + (QString)fScanVector.at(i)->GetName() +
-                          " has thrown the exception " + fExceptiontext);
-            win->show();
-            // erase next scans from vectors and elements from maps
-            fScanVector.erase(fScanVector.begin() + i + 1, fScanVector.end());
-            fAnalysisVector.erase(fAnalysisVector.begin() + i + 1, fAnalysisVector.end());
-            fresultVector.erase(fresultVector.begin() + i + 1, fresultVector.end());
-            fScanParameters.erase(fScanParameters.begin() + i + 1, fScanParameters.end());
-            fScanTypes.erase(fScanTypes.begin() + i + 1, fScanTypes.end());
-            int indexintable = 0;
-            for (unsigned int e = 0; e < fScanVector.size(); e++) {
-              if (fScanVector.at(e) != 0) {
-                indexintable++;
-              }
-            }
-            ui->testTable->setRowCount(indexintable);
+      if (fScanToRowMap.count(iScan) > 0)
+        ui->testTable->item(fScanToRowMap[iScan], 1)->setText(fScanVector.at(iScan)->GetState());
+      qApp->processEvents();
 
-            for (std::map<int, int>::iterator it = fScanToRowMap.begin(); it != fScanToRowMap.end();
-                 it++) {
-              if (it->first > (int)i) fScanToRowMap.erase(it);
-            }
-            for (std::map<int, int>::iterator it = fRowToScanMap.begin(); it != fRowToScanMap.end();
-                 it++) {
-              if (it->first > (int)i) fRowToScanMap.erase(it);
-            }
-            // Add same scan
-            if (fScanVector.at(i) == 0) {
-              if (GetScanType(i) == STClearMask) {
-                AddScan(GetScanType(i));
-              }
-              else {
-                fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
-                AddScan(GetScanType(i), fresultVector.at(i - 1));
-              }
-            }
-            else {
+      if (fExceptionthrown) {
+        fScanVector.at(iScan)->ClearHistoQue();
 
-              TScanParameters *par;
-              par = fScanVector.at(i)->GetParameters();
-              AddScan(GetScanType(i));
-              fScanVector.back()->SetParameters(par);
-            }
+        bool addAgain = false;
+        if (fAutoRepeat && iScan < fScanVector.size() - 1 && fExtraScans < fMaxRepeat) {
+          QDialog *       win   = new QDialog(this);
+          Qt::WindowFlags flags = win->windowFlags();
+          win->setWindowFlags(flags | Qt::Tool);
+          win->setFixedSize(250, 200);
+          win->move(fExtraScans * 100, 0);
+          QTextEdit *exept = new QTextEdit(win);
+          exept->append("The " + (QString)fScanVector.at(iScan)->GetName() +
+                        " has thrown the exception " + fExceptiontext);
+          win->show();
 
-            // Add rest of the scans
-            for (unsigned int k = i + 1; k < scantypelist.size(); k++) {
-              if (scantypelist.at(k) == STApplyVCASN || scantypelist.at(k) == STApplyITHR ||
-                  scantypelist.at(k) == STApplyMask || scantypelist.at(k) == STClearMask) {
-                if (scantypelist.at(k) == STClearMask) {
-                  AddScan(scantypelist.at(k));
-                }
-                else {
-                  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
-                  AddScan(scantypelist.at(k), fresultVector.back());
-                }
-              }
-              else {
-
-                AddScan(scantypelist.at(k));
-                fScanVector.back()->SetParameters(parameterlist.at(k));
-              }
-            }
-            // Change naming on table
-            std::map<int, int>::iterator iter;
-            int                          u = 0;
-            for (iter = fScanToRowMap.begin(); iter != fScanToRowMap.end(); iter++) {
-              ui->testTable->item(u, 0)->setText(fScanVector.at(iter->first)->GetName());
-              u++;
-            }
-
+          addAgain = true;
+          fExtraScans++;
+        }
+        else {
+          notifyuser(iScan);
+          if (fTestAgain) {
+            addAgain = true;
             fExtraScans++;
           }
+        }
 
-          else {
-            notifyuser(i);
-            if (fTestAgain) {
-              // erase next scans from vectors and elements from maps
-              fScanVector.erase(fScanVector.begin() + i + 1, fScanVector.end());
-              fAnalysisVector.erase(fAnalysisVector.begin() + i + 1, fAnalysisVector.end());
-              fresultVector.erase(fresultVector.begin() + i + 1, fresultVector.end());
-              fScanParameters.erase(fScanParameters.begin() + i + 1, fScanParameters.end());
-              fScanTypes.erase(fScanTypes.begin() + i + 1, fScanTypes.end());
-              int indexintable = 0;
-              for (unsigned int e = 0; e < fScanVector.size(); e++) {
-                if (fScanVector.at(e) != 0) {
-                  indexintable++;
-                }
-              }
-              ui->testTable->setRowCount(indexintable);
-              for (std::map<int, int>::iterator it = fScanToRowMap.begin();
-                   it != fScanToRowMap.end(); it++) {
-                if (it->first > (int)i) fScanToRowMap.erase(it);
-              }
-              for (std::map<int, int>::iterator it = fRowToScanMap.begin();
-                   it != fRowToScanMap.end(); it++) {
-                if (it->first > (int)i) fRowToScanMap.erase(it);
-              }
-              // Add same scan
-              if (fScanVector.at(i) == 0) {
-                if (GetScanType(i) == STClearMask) {
-                  AddScan(GetScanType(i));
-                }
-                else {
-                  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
-                  AddScan(GetScanType(i), fresultVector.at(i - 1));
-                }
-              }
-              else {
-                TScanParameters *par;
-                par = fScanVector.at(i)->GetParameters();
-                AddScan(GetScanType(i));
-                fScanVector.back()->SetParameters(par);
-              }
-
-              // Add rest of the scans
-              for (unsigned int k = i + 1; k < scantypelist.size(); k++) {
-                if (scantypelist.at(k) == STApplyVCASN || scantypelist.at(k) == STApplyITHR ||
-                    scantypelist.at(k) == STApplyMask || scantypelist.at(k) == STClearMask) {
-                  if (scantypelist.at(k) == STClearMask) {
-                    AddScan(scantypelist.at(k));
-                  }
-                  else {
-                    fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
-                    AddScan(scantypelist.at(k), fresultVector.back());
-                  }
-                }
-                else {
-                  AddScan(scantypelist.at(k));
-                  fScanVector.back()->SetParameters(parameterlist.at(k));
-                }
-              }
-
-              // Change naming on table
-              std::map<int, int>::iterator iter;
-              int                          u = 0;
-              for (iter = fScanToRowMap.begin(); iter != fScanToRowMap.end(); iter++) {
-                ui->testTable->item(u, 0)->setText(fScanVector.at(iter->first)->GetName());
-                u++;
-              }
-              fExtraScans++;
+        if (addAgain) {
+          if (fScanVector.at(iScan) == 0) {
+            if (GetScanType(iScan) == STClearMask) {
+              fScanManager.InsertScan(iScan, GetScanType(iScan));
             }
-            if (fAbortSingleScan) {
-              if (fresultVector.at(i) != 0) {
-                for (unsigned int ihic = 0; ihic < fHICs.size(); ihic++) {
-
-                  TScanResultHic *hicResult;
-                  hicResult = fresultVector.at(i)->GetHicResult(fHICs.at(ihic)->GetDbId());
-                  if (hicResult != 0) {
-                    hicResult->SetClassification(CLASS_ABORTED);
-                  }
-                }
+            else {
+              fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+              // TODO: check, probably bug!
+              fScanManager.InsertScan(iScan, GetScanType(iScan), fresultVector.at(iScan - 1));
+            }
+          }
+          else {
+            TScanParameters *par;
+            par = fScanVector.at(iScan)->GetParameters();
+            fScanManager.InsertScan(iScan, GetScanType(iScan));
+            fScanVector.back()->SetParameters(par);
+          }
+        }
+        else {
+          if (fresultVector.at(iScan)) {
+            for (unsigned int ihic = 0; ihic < fHICs.size(); ihic++) {
+              TScanResultHic *hicResult;
+              hicResult = fresultVector.at(iScan)->GetHicResult(fHICs.at(ihic)->GetDbId());
+              if (hicResult) {
+                hicResult->SetClassification(CLASS_ABORTED);
               }
             }
           }
         }
 
-        if (fScanToRowMap.count(i) > 0)
-          ui->testTable->item(fScanToRowMap[i], 1)->setText(fScanVector.at(i)->GetState());
-        colorsinglescan(i);
+        if (fScanToRowMap.count(iScan) > 0)
+          ui->testTable->item(fScanToRowMap[iScan], 1)->setText(fScanVector.at(iScan)->GetState());
+        colorsinglescan(iScan);
 
         qApp->processEvents();
       }
 
-
       if (fExecution == false) {
-        if (fresultVector.at(i) != 0) {
+        if (fresultVector.at(iScan) != 0) {
           for (unsigned int ihic = 0; ihic < fHICs.size(); ihic++) {
 
             TScanResultHic *hicResult;
-            hicResult = fresultVector.at(i)->GetHicResult(fHICs.at(ihic)->GetDbId());
+            hicResult = fresultVector.at(iScan)->GetHicResult(fHICs.at(ihic)->GetDbId());
             if (hicResult != 0) {
               hicResult->SetClassification(CLASS_ABORTED);
             }
