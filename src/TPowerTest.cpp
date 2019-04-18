@@ -36,9 +36,9 @@ void TPowerTest::CreateMeasurements()
 {
   // create map with measurement structure for each HIC
   for (unsigned int i = 0; i < m_hics.size(); i++) {
-    THicCurrents hicCurrents;
-    hicCurrents.hicType = m_hics.at(i)->GetHicType();
-    hicCurrents.maxBias = ((float)(m_config->GetParamValue("IVPOINTS")) - 1) / 10;
+    THicCurrents hicCurrents = {};
+    hicCurrents.hicType      = m_hics.at(i)->GetHicType();
+    hicCurrents.maxBias      = ((float)(m_config->GetParamValue("IVPOINTS")) - 1) / 10;
     m_hicCurrents.insert(
         std::pair<std::string, THicCurrents>(m_hics.at(i)->GetDbId(), hicCurrents));
   }
