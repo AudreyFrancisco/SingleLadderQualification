@@ -258,6 +258,10 @@ int AlpideDBManager::makeDBQuery(const string Url, const char *Payload, char **R
   curl_easy_setopt(myHandle, CURLOPT_FOLLOWLOCATION, true);
   curl_easy_setopt(myHandle, CURLOPT_COOKIEFILE, theCookieJar->getCookiePackFileName().c_str());
 
+#ifdef USE_PYTHON_SSO
+  curl_easy_setopt(myHandle, CURLOPT_SSL_VERIFYPEER, 0L);
+#endif
+
   // Perform the request, res will get the return code
   res = curl_easy_perform(myHandle);
   if (res != CURLE_OK) { // Check for errors
