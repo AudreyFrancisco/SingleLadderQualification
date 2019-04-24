@@ -215,7 +215,7 @@ bool CernSsoCookieJar::testTheCERNSSO()
 
   string tmp_filename = std::tmpnam(nullptr);
 
-  string Command = getCookieExe() + " > " + tmp_filename;
+  string Command = "type " + getCookieExe() + " > " + tmp_filename;
   if (system(Command.c_str()) != 0) {
     cout << "Failed to execute the command: " << Command << endl;
   }
