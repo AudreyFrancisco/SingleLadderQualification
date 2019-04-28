@@ -33,6 +33,7 @@ set(TEST_EXE
   test_source
   test_supply_voltage
   test_temperature
+  test_temperature_logging
   test_threshold
   test_vresetp
   test_DBCheck
