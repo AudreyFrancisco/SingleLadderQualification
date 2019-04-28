@@ -105,7 +105,7 @@ int main(int argc, char **argv)
     char   buff[20];
     time_t now = time(NULL);
     strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-    std::cout << buff << '\t' << std::endl;
+    std::cout << buff << '\t';
 
     for (unsigned int ihic = 0; ihic < fHics.size(); ihic++) {
       if (!fHics.at(ihic)->IsEnabled()) continue;
