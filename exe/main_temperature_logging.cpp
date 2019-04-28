@@ -96,9 +96,6 @@ int main(int argc, char **argv)
   std::vector<TAlpide *>       fChips;
   TConfig *                    fConfig;
 
-  std::deque<TScanHisto> fHistoQue;
-  std::mutex             fMutex;
-
   initSetup(fConfig, &fBoards, &fBoardType, &fChips, "Config_HS.cfg", &fHics);
 
   while (true) {
