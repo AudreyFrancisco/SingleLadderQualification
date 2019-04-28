@@ -23,8 +23,6 @@
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
 #include "USBHelpers.h"
-#include <deque>
-#include <mutex>
 #include <thread>
 #include <unistd.h>
 
@@ -32,41 +30,6 @@
 #include "SetupHelpers.h"
 
 #include <ctime>
-
-void scanLoop(TScan *myScan)
-{
-  std::cout << "In scan loop function" << std::endl;
-  myScan->Init();
-
-  myScan->LoopStart(2);
-  while (myScan->Loop(2)) {
-    myScan->PrepareStep(2);
-    myScan->LoopStart(1);
-    // std::cout << "Loop 1 start" << std::endl;
-    while (myScan->Loop(1)) {
-      myScan->PrepareStep(1);
-      myScan->LoopStart(0);
-      // std::cout << "Loop 0 start" << std::endl;
-      while (myScan->Loop(0)) {
-        myScan->PrepareStep(0);
-        myScan->Execute();
-        myScan->Next(0);
-        // std::cout << "0";
-      }
-      // std::cout << std::endl << "Loop 0 end";
-      myScan->LoopEnd(0);
-      // std::cout << "...and...";
-      myScan->Next(1);
-      // std::cout << "next." << std::endl;
-    }
-    myScan->LoopEnd(1);
-    myScan->Next(2);
-    // std::cout << "Loop 1 end" << std::endl;
-  }
-  myScan->LoopEnd(2);
-  std::cout << "Loop 2 end, terminating" << std::endl;
-  myScan->Terminate();
-}
 
 // TODO:: Clean this UP !!!!
 
