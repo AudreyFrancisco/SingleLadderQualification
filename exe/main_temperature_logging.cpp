@@ -31,20 +31,6 @@
 #include "BoardDecoder.h"
 #include "SetupHelpers.h"
 #include "TApplyTuning.h"
-#include "TDigitalAnalysis.h"
-#include "TDigitalScan.h"
-#include "TFifoAnalysis.h"
-#include "TFifoTest.h"
-#include "THisto.h"
-#include "TLocalBusAnalysis.h"
-#include "TLocalBusTest.h"
-#include "TReadoutAnalysis.h"
-#include "TReadoutTest.h"
-#include "TSCurveAnalysis.h"
-#include "TSCurveScan.h"
-#include "TScan.h"
-#include "TScanAnalysis.h"
-#include "TScanConfig.h"
 
 #include <ctime>
 
