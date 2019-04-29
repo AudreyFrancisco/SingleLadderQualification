@@ -52,6 +52,9 @@ int main(int argc, char **argv)
     AlpideConfig::BaseConfigPLL(fChips[ichip]);
   }
 
+  TPowerBoard *pb = fHics.at(0)->GetPowerBoard();
+  pb->CorrectVoltageDrop(TPowerBoardConfig::realOL, false, fHics.size());
+
   while (true) {
     char   buff[20];
     time_t now = time(NULL);
