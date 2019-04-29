@@ -46,6 +46,12 @@ int main(int argc, char **argv)
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips, "Config_HS.cfg", &fHics);
 
+  for (unsigned int ichip = 0; ichip < fChips.size(); ++ichip) {
+    if (!fChips.at(ichip)->GetConfig()->IsEnabled()) continue;
+    AlpideConfig::BaseConfig(fChips[ichip]);
+    AlpideConfig::BaseConfigPLL(fChips[ichip]);
+  }
+
   while (true) {
     char   buff[20];
     time_t now = time(NULL);
