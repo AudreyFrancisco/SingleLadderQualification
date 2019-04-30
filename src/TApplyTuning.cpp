@@ -27,8 +27,8 @@ void TApplyTuning::Run()
       chip->GetConfig()->SetParamValue(GetDACName(), (int)chipResult->GetThresholdMean());
       if (strcmp(GetDACName(), "VCASN") == 0)
         chip->GetConfig()->SetParamValue("VCASN2", (int)chipResult->GetThresholdMean() + 12);
-      std::cout << "Setting chip " << it->first << ", thr=" << chipResult->GetThresholdMean()
-                << std::endl;
+      std::cout << "Setting chip with ID" << chip->GetConfig()->GetChipId()
+                << ", thr=" << chipResult->GetThresholdMean() << std::endl;
     }
   }
 }

@@ -179,7 +179,7 @@ int configureChip(TAlpide *chip)
 
 void scan(const char *fName)
 {
-  unsigned char         buffer[1024 * 4000];
+  unsigned char         buffer[MAX_EVENT_SIZE];
   int                   n_bytes_data, n_bytes_header, n_bytes_trailer;
   int                   nSkipped = 0, prioErrors = 0;
   TBoardHeader          boardInfo;
@@ -199,8 +199,8 @@ void scan(const char *fName)
       int itrg   = 0;
       int trials = 0;
       while (itrg < myNTriggers) {
-        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) ==
-            -1) {       // no event available in buffer yet, wait a bit
+        if (fBoards.at(0)->ReadEventData(n_bytes_data, buffer) <=
+            0) {        // no event available in buffer yet, wait a bit
           usleep(1000); // Increment from 100us
           trials++;
           if (trials == 10) {
@@ -218,7 +218,8 @@ void scan(const char *fName)
           // decode Chip event
           int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
           AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
-                                     boardInfo.channel, prioErrors);
+                                     boardInfo.channel, prioErrors,
+                                     fConfig->GetScanConfig()->GetParamValue("MAXHITS"));
 
           itrg++;
         }
@@ -242,7 +243,7 @@ int main(int argc, char **argv)
 
   initSetup(fConfig, &fBoards, &fBoardType, &fChips);
 
-  char Suffix[20], fName[100];
+  char Suffix[80], fName[200];
 
   time_t     t   = time(0); // get time now
   struct tm *now = localtime(&t);

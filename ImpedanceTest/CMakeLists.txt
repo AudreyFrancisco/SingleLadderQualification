@@ -1,0 +1,19 @@
+if(NOT BUILDINSOURCE)
+  set(FILES_REGEX ".*\.(py)$$")
+  add_custom_target(impedance ALL
+    COMMAND ${CMAKE_COMMAND}
+    -D SRC="${CMAKE_CURRENT_SOURCE_DIR}"
+    -D DST="${CMAKE_CURRENT_BINARY_DIR}"
+    -D REGEX="${FILES_REGEX}"
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/copy_to_build.sh
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+endif()
+
+install(DIRECTORY .
+  DESTINATION ImpedanceTest
+  USE_SOURCE_PERMISSIONS
+  FILES_MATCHING
+  PATTERN *.py
+)
+

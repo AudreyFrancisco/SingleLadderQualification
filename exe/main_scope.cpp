@@ -62,7 +62,7 @@ void WriteMem(TAlpide *chip, int ARegion, int AOffset, int AValue)
   uint16_t LowVal  = AValue & 0xffff;
   uint16_t HighVal = (AValue >> 16) & 0xff;
 
-  int err           = chip->WriteRegister(LowAdd, LowVal);
+  int err = chip->WriteRegister(LowAdd, LowVal);
   if (err >= 0) err = chip->WriteRegister(HighAdd, HighVal);
 
   if (err < 0) {
@@ -82,7 +82,7 @@ void ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AValue)
 
   uint16_t LowVal, HighVal;
 
-  int err           = chip->ReadRegister(LowAdd, LowVal);
+  int err = chip->ReadRegister(LowAdd, LowVal);
   if (err >= 0) err = chip->ReadRegister(HighAdd, HighVal);
 
   if (err < 0) {

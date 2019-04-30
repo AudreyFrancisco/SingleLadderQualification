@@ -32,5 +32,6 @@
 
 PControlInterfaceError::PControlInterfaceError(const string &arg)
 {
-  msg = "Control Interface Error: " + arg;
+  msg          = "Control Interface Error: " + arg;
+  m_controlInt = -1;
 }

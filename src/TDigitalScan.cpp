@@ -12,10 +12,10 @@ TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
                            std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TMaskScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  float voltageScale = config->GetVoltageScale();
-  m_parameters       = new TDigitalParameters;
+  CreateScanParameters();
 
-  ((TDigitalParameters *)m_parameters)->voltageScale = voltageScale;
+  m_parameters->backBias                             = m_config->GetBackBias();
+  ((TDigitalParameters *)m_parameters)->voltageScale = config->GetVoltageScale();
 
   SetName();
 
@@ -32,27 +32,26 @@ TDigitalScan::TDigitalScan(TScanConfig *config, std::vector<TAlpide *> chips,
   m_stop[2]  = 1;
 
   m_nTriggers = m_config->GetParamValue("NINJ");
-
-  CreateScanHisto();
 }
 
 
 void TDigitalScan::SetName()
 {
-  std::cout << "voltageScale = " << ((TDigitalParameters *)m_parameters)->voltageScale << std::endl;
   if (IsNominal()) {
-    strcpy(m_name, "Digital Scan");
+    sprintf(m_name, "Digital Scan BB %d", (int)((TDigitalParameters *)m_parameters)->backBias);
   }
   else if (IsUpper() && (((TDigitalParameters *)m_parameters)->voltageScale < 1.2)) {
-    strcpy(m_name, "Digital Scan, V +10%");
+    sprintf(m_name, "Digital Scan BB %d, V +10%%",
+            (int)((TDigitalParameters *)m_parameters)->backBias);
   }
   else if (((TDigitalParameters *)m_parameters)->voltageScale > 0.8 && IsLower()) {
-    strcpy(m_name, "Digital Scan, V -10%");
+    sprintf(m_name, "Digital Scan BB %d, V -10%%",
+            (int)((TDigitalParameters *)m_parameters)->backBias);
   }
   else {
     std::cout << "Warning: unforeseen voltage scale, using 1" << std::endl;
     ((TDigitalParameters *)m_parameters)->voltageScale = 1.0;
-    strcpy(m_name, "Digital Scan");
+    sprintf(m_name, "Digital Scan BB %d", (int)((TDigitalParameters *)m_parameters)->backBias);
   }
 }
 
@@ -63,6 +62,7 @@ bool TDigitalScan::SetParameters(TScanParameters *pars)
   if (dPars) {
     std::cout << "TDigitalScan: Updating parameters" << std::endl;
     ((TDigitalParameters *)m_parameters)->voltageScale = dPars->voltageScale;
+    ((TDigitalParameters *)m_parameters)->backBias     = dPars->backBias;
     SetName();
     return true;
   }
@@ -144,6 +144,8 @@ void TDigitalScan::Init()
 {
   TScan::Init();
   m_running = true;
+  SetBackBias();
+  CreateScanHisto();
   CountEnabledChips();
 
   for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
@@ -160,9 +162,9 @@ void TDigitalScan::Init()
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_PRST);
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+  /*for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  }*/
 
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (!(m_chips.at(i)->GetConfig()->IsEnabled())) continue;
@@ -182,16 +184,15 @@ void TDigitalScan::Init()
     m_boards.at(i)->StartRun();
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+  /*for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  }*/
 }
 
 void TDigitalScan::PrepareStep(int loopIndex)
 {
   switch (loopIndex) {
   case 0: // innermost loop: mask staging
-    std::cout << "mask stage " << m_value[0] << std::endl;
     for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
       if (!m_chips.at(ichip)->GetConfig()->IsEnabled()) continue;
       ConfigureMaskStage(m_chips.at(ichip), m_value[0]);
@@ -228,8 +229,11 @@ void TDigitalScan::Execute()
   }
 
   for (unsigned int iboard = 0; iboard < m_boards.size(); iboard++) {
+
     Hits->clear();
+
     ReadEventData(Hits, iboard);
+
     FillHistos(Hits, iboard);
   }
   delete Hits;
@@ -258,6 +262,9 @@ void TDigitalScan::Terminate()
       // delete myDAQBoard;
     }
   }
+
+  SwitchOffBackbias();
+
   m_running = false;
 }
 
@@ -267,17 +274,21 @@ TDigitalWhiteFrame::TDigitalWhiteFrame(TScanConfig *config, std::vector<TAlpide 
                                        std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TDigitalScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  strcpy(m_name, "Digital White Frame");
+  SetName();
 }
 
 void TDigitalWhiteFrame::ConfigureMaskStage(TAlpide *chip, int istage)
 {
+
   m_row = AlpideConfig::ConfigureMaskStage(chip, m_pixPerStage, istage, false, true);
 }
 
 void TDigitalWhiteFrame::Init()
 {
   TScan::Init();
+
+  SetBackBias();
+  CreateScanHisto();
   m_running = true;
   CountEnabledChips();
 
@@ -298,8 +309,13 @@ void TDigitalWhiteFrame::Init()
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_RORST);
     m_boards.at(i)->StartRun();
   }
-
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+  /*for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
     m_hics.at(ihic)->GetPowerBoard()->CorrectVoltageDrop(m_hics.at(ihic)->GetPbMod());
-  }
+  }*/
+}
+
+
+void TDigitalWhiteFrame::SetName()
+{
+  sprintf(m_name, "Digital White Frame BB %d", (int)((TDigitalParameters *)m_parameters)->backBias);
 }

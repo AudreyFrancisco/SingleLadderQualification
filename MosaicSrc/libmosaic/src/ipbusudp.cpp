@@ -52,6 +52,7 @@ IPbusUDP::IPbusUDP(const char *IPaddr, int port, int pktSize) : IPbus(pktSize)
 void IPbusUDP::setIPaddress(const char *IPaddr, int port)
 {
   struct hostent *he;
+  m_address = string(IPaddr);
 
   if ((he = gethostbyname(IPaddr)) == NULL) // get the host address
     throw MIPBusUDPError("Can not resolve board IP address");
@@ -78,7 +79,7 @@ void IPbusUDP::testConnection()
     execute();
     rcvTimoutTime = RCV_SHORT_TIMEOUT;
   }
-  catch (MIPBusUDPError) {
+  catch (MIPBusUDPError &) {
     throw MIPBusUDPError("Board connection error in IPbusUDP::testConnection");
   }
 }
@@ -135,7 +136,7 @@ void IPbusUDP::execute()
       processAnswer();
       return;
     }
-    catch (MIPBusUDPTimeout) {
+    catch (MIPBusUDPTimeout &) {
       // shoult increase the timeout
       // cout << "Timeout from sockRead" << endl;
     }

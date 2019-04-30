@@ -138,7 +138,7 @@ void TPowerBoardConfig::readConfiguration()
         if (strcasecmp(sName, "ANALOGVOLTAGE") == 0) {
           p   = 0;
           ptr = sParam;
-          while ((tok                  = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].AVset = atof(tok);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].AVset = fPBConfig.Modul[p - 1].AVset;
@@ -148,7 +148,7 @@ void TPowerBoardConfig::readConfiguration()
         if (strcasecmp(sName, "ANALOGCURRENT") == 0) {
           p   = 0;
           ptr = sParam;
-          while ((tok                  = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].AIset = atof(tok);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].AIset = fPBConfig.Modul[p - 1].AIset;
@@ -158,7 +158,7 @@ void TPowerBoardConfig::readConfiguration()
         if (strcasecmp(sName, "DIGITALVOLTAGE") == 0) {
           p   = 0;
           ptr = sParam;
-          while ((tok                  = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].DVset = atof(tok);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].DVset = fPBConfig.Modul[p - 1].DVset;
@@ -168,7 +168,7 @@ void TPowerBoardConfig::readConfiguration()
         if (strcasecmp(sName, "DIGITALCURRENT") == 0) {
           p   = 0;
           ptr = sParam;
-          while ((tok                  = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].DIset = atof(tok);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].DIset = fPBConfig.Modul[p - 1].DIset;
@@ -178,7 +178,7 @@ void TPowerBoardConfig::readConfiguration()
         if (strcasecmp(sName, "BIASON") == 0) {
           p   = 0;
           ptr = sParam;
-          while ((tok                   = strsep(&ptr, " ,:;\t")) != NULL)
+          while ((tok = strsep(&ptr, " ,:;\t")) != NULL)
             fPBConfig.Modul[p++].BiasOn = (strcasecmp(tok, "TRUE") == 0 ? true : false);
           while (p < MAX_MOULESPERMOSAIC && p > 0) {
             fPBConfig.Modul[p].BiasOn = fPBConfig.Modul[p - 1].BiasOn;
@@ -430,12 +430,19 @@ void TPowerBoardConfig::GetWirePBResistances(int mod, float &ALineR, float &DLin
   BBLineR /= 1000.;
 }
 
-void TPowerBoardConfig::AddPowerBusResistances(int mod, bool real)
+void TPowerBoardConfig::AddPowerBusResistances(int mod, bool real, bool middle)
 {
   if (real) {
-    fPBConfig.Modul[mod].CalDLineR += RPBDigital[mod];
-    fPBConfig.Modul[mod].CalALineR += RPBAnalog[mod];
-    fPBConfig.Modul[mod].CalGNDLineR += RPBGround[mod];
+    if (middle) {
+      fPBConfig.Modul[mod].CalDLineR += RPBDigitalML[mod];
+      fPBConfig.Modul[mod].CalALineR += RPBAnalogML[mod];
+      fPBConfig.Modul[mod].CalGNDLineR += RPBGroundML[mod];
+    }
+    else {
+      fPBConfig.Modul[mod].CalDLineR += RPBDigital[mod];
+      fPBConfig.Modul[mod].CalALineR += RPBAnalog[mod];
+      fPBConfig.Modul[mod].CalGNDLineR += RPBGround[mod];
+    }
   }
   else {
     float ALineR, DLineR, GNDLineR, BBLineR;
@@ -469,13 +476,12 @@ void TPowerBoardConfig::WriteCalibrationFile()
 {
   float ALineR, DLineR, GNDLineR, AIOffset, DIOffset, AVScale, DVScale, AVOffset, DVOffset;
   float VBScale, VBOffset, IBOffset;
-  FILE *fp;
-  if (m_bottom) {
-    fp = fopen("PBBottomCalib.cfg", "w");
-  }
-  else {
-    fp = fopen("PBTopCalib.cfg", "w");
-  }
+
+  std::string filename = m_bottom ? "PBBottomCalib.cfg" : "PBTopCalib.cfg";
+  if (const char *cfgDir = std::getenv("ALPIDE_TEST_CONFIG"))
+    filename.insert(0, std::string(cfgDir) + "/");
+  FILE *fp = fopen(filename.c_str(), "w");
+
   for (int imod = 0; imod < MAX_MOULESPERMOSAIC; imod++) {
     GetLineResistances(imod, ALineR, DLineR, GNDLineR);
     GetICalibration(imod, AIOffset, DIOffset);
@@ -495,13 +501,11 @@ void TPowerBoardConfig::ReadCalibrationFile()
   float VBScale, VBOffset, IBOffset;
   int   mod;
   int   nLines = 0;
-  FILE *fp;
-  if (m_bottom) {
-    fp = fopen("PBBottomCalib.cfg", "r");
-  }
-  else {
-    fp = fopen("PBTopCalib.cfg", "r");
-  }
+
+  std::string filename = m_bottom ? "PBBottomCalib.cfg" : "PBTopCalib.cfg";
+  if (const char *cfgDir = std::getenv("ALPIDE_TEST_CONFIG"))
+    filename.insert(0, std::string(cfgDir) + "/");
+  FILE *fp = fopen(filename.c_str(), "r");
 
   if (!fp) {
     std::cout << "No calibration file found" << std::endl;

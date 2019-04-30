@@ -33,6 +33,8 @@
  *
  *  HISTORY
  *
+ * -  04/10/2018 - version 2.0
+ *
  *
  */
 #ifndef UTILITIES_H
@@ -55,13 +57,18 @@ using namespace std;
 
 // Set the verbosity level 0 or 1
 #define VERBOSITYLEVEL 0
+#define CURLVERBOSITYLEVEL 0
+#define LOGLEVEL LOG_DEBUG
 
-bool fileExists(string path);
-bool pathExists(string path);
+bool          fileExists(string path);
+bool          pathExists(string path);
+unsigned long getFileSize(const char *AFileName);
+int           fileRotate(const char *fileName);
 
-void str2timeDate(const char *sDate, time_t *tDate);
-void str2timeTime(const char *sDate, time_t *tDate);
+void        str2timeDate(const char *sDate, time_t *tDate);
+void        str2timeTime(const char *sDate, time_t *tDate);
 std::string float2str(float value);
+std::string getTimeStamp();
 
 class Uri {
 private:
@@ -69,7 +76,32 @@ public:
   std::string URI;
   std::string QueryString, Path;
   std::string Protocol, Host, Port, User;
-  static Uri Parse(const std::string &uri);
+  static Uri  Parse(const std::string &uri);
 };
+
+// ---- log ------
+#define LOG_FILENAME "/tmp/newAlpideDB.log"
+#define LOG_MAXFILEDIMENSION 50000000
+
+#define TIMESTAMP_MAX 20
+#define TIMESTAMP_FORMAT "%Y/%m/%d-%H:%M:%S"
+
+typedef enum { LOG_CRITICAL, LOG_ERROR, LOG_WARNING, LOG_INFO, LOG_DEBUG, LOG_TRACE } logLevel_ty;
+
+#define CRITICAL(a, ...) dbLog(LOG_CRITICAL, __FILE__, __LINE__, a, __VA_ARGS__)
+#define ERROR(a, ...) dbLog(LOG_ERROR, __FILE__, __LINE__, a, __VA_ARGS__)
+#define WARNING(a, ...) dbLog(LOG_WARNING, __FILE__, __LINE__, a, __VA_ARGS__)
+#define INFO(a, ...) dbLog(LOG_INFO, __FILE__, __LINE__, a, __VA_ARGS__)
+#define DEBUG(a, ...) dbLog(LOG_DEBUG, __FILE__, __LINE__, a, __VA_ARGS__)
+#define TRACE(a, ...) dbLog(LOG_TRACE, __FILE__, __LINE__, a, __VA_ARGS__)
+
+#define FUNCTION_TRACE TRACE("%s()", __FUNCTION__)
+
+// Logging Functions prototypes
+void        dbLogSetLevel(logLevel_ty newLogLevel); // Set the log level.
+logLevel_ty dbLogGetLevel(void);                    // Get the log level.
+void        dbLog(logLevel_ty logLevel, const char *file, int line, const char *fmt,
+                  ...); // Log the message
+
 
 #endif // UTILITIES_H

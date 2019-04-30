@@ -11,22 +11,22 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Communication</string>
   </property>
-  <widget class="QRadioButton" name="testdb">
+  <widget class="QRadioButton" name="localtest">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>100</x>
      <y>110</y>
      <width>121</width>
      <height>21</height>
     </rect>
    </property>
    <property name="text">
-    <string>Test Database</string>
+    <string>Local test</string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="productiondb">
+  <widget class="QRadioButton" name="constructiondb">
    <property name="geometry">
     <rect>
      <x>100</x>
@@ -36,7 +36,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Production Database</string>
+    <string>Construction Database</string>
    </property>
   </widget>
   <widget class="QLabel" name="label">
@@ -54,7 +54,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Select Type of Database</string>
+    <string>Select the saving mode</string>
    </property>
   </widget>
   <widget class="QPushButton" name="close">

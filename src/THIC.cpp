@@ -2,15 +2,24 @@
 #include "TReadoutBoardMOSAIC.h"
 
 #include <cstring>
+#include <thread>
 
-THic::THic(const char *id, int modId, TPowerBoard *pb, int pbMod)
+THic::THic(const char *id, int modId, TPowerBoard *pb, int pbMod, int bbChannel)
 {
   m_dbId.assign(id);
 
   m_powerBoard = pb;
   m_pbMod      = pbMod;
-  m_moduleId   = modId;
-  m_class      = CLASS_UNTESTED;
+  if (bbChannel == -1)
+    m_bbChannel = pbMod;
+  else
+    m_bbChannel = bbChannel;
+  m_moduleId      = modId;
+  m_class         = CLASS_UNTESTED;
+  m_oldClass      = CLASS_UNTESTED;
+  m_worstScanBB   = CLASS_UNTESTED;
+  m_worstScanNoBB = CLASS_UNTESTED;
+
   m_chips.clear();
 }
 
@@ -41,11 +50,35 @@ TAlpide *THic::GetChipById(int chipId)
 // IsEnabled: returns true if at least one chip on the HIC is enabled, false otherwise
 bool THic::IsEnabled() { return (GetNEnabledChips() > 0); }
 
-unsigned int THic::GetNEnabledChips()
+unsigned int THic::GetNEnabledChips(int boardIdx)
 {
   unsigned int n = 0;
   for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
-    if (m_chips.at(ichip)->GetConfig()->IsEnabled()) n++;
+    if ((boardIdx == -1) || IsOnBoard(boardIdx, m_chips.at(ichip)->GetConfig()->GetChipId())) {
+      if (m_chips.at(ichip)->GetConfig()->IsEnabled()) n++;
+    }
+  }
+  return n;
+}
+
+unsigned int THic::GetNEnabledChipsNoBB(int boardIdx)
+{
+  unsigned int n = 0;
+  for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
+    if ((boardIdx == -1) || IsOnBoard(boardIdx, m_chips.at(ichip)->GetConfig()->GetChipId())) {
+      if (m_chips.at(ichip)->GetConfig()->IsEnabledNoBB()) n++;
+    }
+  }
+  return n;
+}
+
+unsigned int THic::GetNEnabledChipsWithBB(int boardIdx)
+{
+  unsigned int n = 0;
+  for (unsigned int ichip = 0; ichip < m_chips.size(); ichip++) {
+    if ((boardIdx == -1) || IsOnBoard(boardIdx, m_chips.at(ichip)->GetConfig()->GetChipId())) {
+      if (m_chips.at(ichip)->GetConfig()->IsEnabledWithBB()) n++;
+    }
   }
   return n;
 }
@@ -107,6 +140,47 @@ float THic::GetIBias()
   return 0;
 }
 
+float THic::GetVddd()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetDigitalVoltage(m_pbMod);
+  }
+  return 0;
+}
+
+float THic::GetVdda()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetAnalogVoltage(m_pbMod);
+  }
+  return 0;
+}
+
+float THic::GetVddaSet()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetAnalogSetVoltage(m_pbMod);
+  }
+  return 0;
+}
+
+float THic::GetVdddSet()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetDigitalSetVoltage(m_pbMod);
+  }
+  return 0;
+}
+
+float THic::GetVbias()
+{
+  if (m_powerBoard) {
+    return m_powerBoard->GetBiasVoltage();
+  }
+  return 0;
+}
+
+
 // scales all voltages and current limits of the HIC by a given factor
 // e.g. aFactor = 1.1 -> +10%
 // method takes the value from the config and writes the scaled value to the board
@@ -132,22 +206,41 @@ void THic::SwitchBias(bool on)
 {
   if (!m_powerBoard) return;
   if (on) {
-    m_powerBoard->SetBiasOn(m_pbMod);
+    m_powerBoard->SetBiasOn(m_bbChannel);
   }
   else {
-    m_powerBoard->SetBiasOff(m_pbMod);
+    m_powerBoard->SetBiasOff(m_bbChannel);
   }
 }
 
-float THic::GetTemperature()
+
+void THic::ReadChipRegister(Alpide::TRegister reg, std::map<int, uint16_t> &values)
+{
+  uint16_t value;
+  values.clear();
+  for (unsigned int i = 0; i < m_chips.size(); i++) {
+    if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
+    m_chips.at(i)->ReadRegister(reg, value);
+    values.insert(std::pair<int, uint16_t>(m_chips.at(i)->GetConfig()->GetChipId() & 0xf, value));
+  }
+}
+
+
+float THic::GetTemperature(std::map<int, float> *chipValues)
 {
   float result = 0;
   int   nChips = 0;
 
+  if (chipValues) chipValues->clear();
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
-    result += m_chips.at(i)->ReadTemperature();
+    float temp = m_chips.at(i)->ReadTemperature();
+    result += temp;
     nChips++;
+    if (chipValues) {
+      chipValues->insert(
+          std::pair<int, float>(m_chips.at(i)->GetConfig()->GetChipId() & 0xf, temp));
+    }
   }
 
   if (nChips > 0)
@@ -156,14 +249,20 @@ float THic::GetTemperature()
     return 0.;
 }
 
-float THic::GetAnalogueVoltage()
+float THic::GetAnalogueVoltage(std::map<int, float> *chipValues)
 {
   float result = 0;
   int   nChips = 0;
 
+  if (chipValues) chipValues->clear();
   for (unsigned int i = 0; i < m_chips.size(); i++) {
     if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
-    result += m_chips.at(i)->ReadAnalogueVoltage();
+    float voltage = m_chips.at(i)->ReadAnalogueVoltage();
+    result += voltage;
+    if (chipValues) {
+      chipValues->insert(
+          std::pair<int, float>(m_chips.at(i)->GetConfig()->GetChipId() & 0xf, voltage));
+    }
     nChips++;
   }
 
@@ -173,26 +272,75 @@ float THic::GetAnalogueVoltage()
     return 0.;
 }
 
-void THic::AddClassification(THicClassification aClass)
+void THic::AddClassification(THicClassification aClass, bool backBias)
 {
-  if (aClass == CLASS_RED)
-    m_class = CLASS_RED;
-  else if (GetNEnabledChips() < m_chips.size())
-    m_class = CLASS_PARTIAL;
-  else if ((int)aClass > (int)m_class)
-    m_class = aClass;
+  // Power test results
+  if ((aClass == CLASS_GOLD_NOBB) || (aClass == CLASS_SILVER_NOBB) ||
+      (aClass == CLASS_BRONZE_NOBB)) {
+    m_worstScanBB = CLASS_RED;
+    if ((aClass == CLASS_GOLD_NOBB) && (m_worstScanNoBB < CLASS_GOLD)) m_worstScanNoBB = CLASS_GOLD;
+    if ((aClass == CLASS_SILVER_NOBB) && (m_worstScanNoBB < CLASS_SILVER))
+      m_worstScanNoBB = CLASS_SILVER;
+    if ((aClass == CLASS_BRONZE_NOBB) && (m_worstScanNoBB < CLASS_BRONZE))
+      m_worstScanNoBB = CLASS_BRONZE;
+  }
+  // Result of all other tests
+  else if (backBias && (aClass > m_worstScanBB)) {
+    m_worstScanBB = aClass;
+  }
+  else if (!backBias && (aClass > m_worstScanNoBB)) {
+    m_worstScanNoBB = aClass;
+  }
 }
 
 THicClassification THic::GetClassification()
 {
-  if (GetNEnabledChips() == 0)
-    return CLASS_RED;
-  else
-    return m_class;
+  // set ABORTED to RED
+  if (m_worstScanNoBB == CLASS_ABORTED) m_worstScanNoBB = CLASS_RED;
+  if (m_worstScanBB == CLASS_ABORTED) m_worstScanBB = CLASS_RED;
+
+  // Class RED: more than 2 non-working chips or worst no BB scan RED
+  if (m_chips.size() - GetNEnabledChips() > 2) return CLASS_RED;
+
+  if (m_worstScanNoBB == CLASS_RED) return CLASS_RED;
+
+  // Class No back bias and No back bias, cat B
+  if ((m_worstScanBB == CLASS_RED) || (GetNEnabledChipsWithBB() < GetNEnabledChipsNoBB())) {
+    if (m_chips.size() > GetNEnabledChips())
+      return Worst(m_oldClass, CLASS_NOBBB);
+    else if (m_worstScanNoBB <= CLASS_BRONZE)
+      return Worst(m_oldClass, CLASS_NOBB);
+    else {
+      std::cout << "Warning: unconsidered case 1 in HIC classification" << std::endl;
+      return CLASS_UNTESTED;
+    }
+  }
+
+  // class Partial and Partial, cat B
+  if (m_chips.size() - GetNEnabledChips() > 1) {
+    if (Worst(m_worstScanBB, m_worstScanNoBB) <= CLASS_BRONZE)
+      return Worst(m_oldClass, CLASS_PARTIALB);
+    else {
+      std::cout << "Warning: unconsidered case 2 in HIC classification" << std::endl;
+      return CLASS_UNTESTED;
+    }
+  }
+
+  if (m_chips.size() - GetNEnabledChips() == 1) {
+    if (Worst(m_worstScanBB, m_worstScanNoBB) <= CLASS_BRONZE)
+      return Worst(m_oldClass, CLASS_PARTIAL);
+    else {
+      std::cout << "Warning: unconsidered case 3 in HIC classification" << std::endl;
+      return CLASS_UNTESTED;
+    }
+  }
+
+  // "trivial" classes
+  return Worst(m_oldClass, Worst(m_worstScanBB, m_worstScanNoBB));
 }
 
-THicIB::THicIB(const char *dbId, int modId, TPowerBoard *pb, int pbMod)
-    : THic(dbId, modId, pb, pbMod)
+THicIB::THicIB(const char *dbId, int modId, TPowerBoard *pb, int pbMod, int bbChannel)
+    : THic(dbId, modId, pb, pbMod, bbChannel)
 {
   m_ctrl = -1; // FIXME: init m_ctrl to avoid not used warning/error (clang)
 }
@@ -237,6 +385,13 @@ bool THicIB::ContainsChip(common::TChipIndex idx)
   return false;
 }
 
+bool THicIB::IsOnBoard(int boardIdx, int chipId)
+{
+  if (boardIdx == m_boardidx) return true;
+  return false;
+}
+
+
 bool THicIB::ContainsReceiver(int boardIndex, int rcv)
 {
   if (boardIndex != m_boardidx) return false;
@@ -260,20 +415,23 @@ void THicIB::PowerOn()
   mosaic = (TReadoutBoardMOSAIC *)m_chips.at(0)->GetReadoutBoard();
 
   mosaic->enableClockOutput(m_ctrl, false);
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
   if (m_powerBoard) {
     m_powerBoard->SwitchAnalogOn(m_pbMod);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     m_powerBoard->SwitchDigitalOn(m_pbMod);
   }
   // if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
   mosaic->enableClockOutput(m_ctrl, true);
 }
 
-THicOB::THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod)
-    : THic(dbId, modId, pb, pbMod)
+THicOB::THicOB(const char *dbId, int modId, TPowerBoard *pb, int pbMod, int bbChannel,
+               bool useCombo)
+    : THic(dbId, modId, pb, pbMod, bbChannel)
 {
+  m_position   = 0;
+  m_powercombo = useCombo;
 }
 
 common::TChipIndex THicOB::GetChipIndex(int i)
@@ -337,6 +495,14 @@ bool THicOB::ContainsChip(common::TChipIndex idx)
   return false;
 }
 
+bool THicOB::IsOnBoard(int boardIdx, int chipId)
+{
+  if ((chipId & 0x8) && (boardIdx == m_boardidx8)) return true;
+  if (((chipId & 0x8) == 0) && (boardIdx == m_boardidx0)) return true;
+  return false;
+}
+
+
 bool THicOB::ContainsReceiver(int boardIndex, int rcv)
 {
   if ((boardIndex == m_boardidx0) && (rcv == m_rcv0)) return true;
@@ -375,14 +541,14 @@ void THicOB::PowerOn()
       mosaic->enableClockOutput(m_ctrl8, false);
   }
 
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
   if (m_powerBoard) {
     m_powerBoard->SwitchAnalogOn(m_pbMod);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     m_powerBoard->SwitchDigitalOn(m_pbMod);
   }
   // if (m_powerBoard) m_powerBoard->SwitchModule(m_pbMod, true);
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
   if (chips) {
     mosaic->enableClockOutput(m_ctrl0, true);
     if (mosaic2)

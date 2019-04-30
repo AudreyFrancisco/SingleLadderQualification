@@ -37,6 +37,8 @@
  */
 #include "TPowerBoard.h"
 #include "TReadoutBoardMOSAIC.h"
+#include <chrono>
+#include <thread>
 #include <unistd.h>
 
 /* -------------------------
@@ -91,6 +93,8 @@ void TPowerBoard::Init()
     fPBoard.Modules[i].DVset  = fPowerBoardConfig->GetDigitalVoltage(i);
     fPBoard.Modules[i].BiasOn = fPowerBoardConfig->GetBiasOn(i);
   }
+
+  std::lock_guard<std::mutex> lock(mutex_pb);
   // first of all test the presence of the power board
   try {
     fMOSAICPowerBoard->isReady();
@@ -189,6 +193,7 @@ bool TPowerBoard::readMonitor()
   }
 
   // Read the board
+  std::lock_guard<std::mutex> lock(mutex_pb);
   fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::GetMonitor);
 
   // Set the data members
@@ -198,16 +203,25 @@ bool TPowerBoard::readMonitor()
   fPBoard.Temp  = thePowerBoardState->T;
 
   for (i = 0; i < MAX_MOULESPERMOSAIC; i++) { // for each module
-    fPBoard.Modules[i].AVmon  = thePowerBoardState->Vmon[i * 2];
-    fPBoard.Modules[i].DVmon  = thePowerBoardState->Vmon[i * 2 + 1];
-    fPBoard.Modules[i].AImon  = thePowerBoardState->Imon[i * 2];
-    fPBoard.Modules[i].DImon  = thePowerBoardState->Imon[i * 2 + 1];
-    fPBoard.Modules[i].BiasOn = thePowerBoardState->biasOn & (0x01 << i);
-    fPBoard.Modules[i].AchOn  = thePowerBoardState->chOn & (0x0001 << (i * 2));
-    fPBoard.Modules[i].DchOn  = thePowerBoardState->chOn & (0x0001 << (i * 2 + 1));
+    fPBoard.Modules[i].AVmon         = thePowerBoardState->Vmon[i * 2];
+    fPBoard.Modules[i].DVmon         = thePowerBoardState->Vmon[i * 2 + 1];
+    fPBoard.Modules[i].AVsetReadback = thePowerBoardState->Vout[i * 2];
+    fPBoard.Modules[i].DVsetReadback = thePowerBoardState->Vout[i * 2 + 1];
+    fPBoard.Modules[i].AImon         = thePowerBoardState->Imon[i * 2];
+    fPBoard.Modules[i].DImon         = thePowerBoardState->Imon[i * 2 + 1];
+    fPBoard.Modules[i].BiasOn        = thePowerBoardState->biasOn & (0x01 << i);
+    fPBoard.Modules[i].AchOn         = thePowerBoardState->chOn & (0x0001 << (i * 2));
+    fPBoard.Modules[i].DchOn         = thePowerBoardState->chOn & (0x0001 << (i * 2 + 1));
   }
 
   return (true);
+}
+
+void TPowerBoard::GetPowerBoardState(powerboard::pbstate *state)
+{
+  // Read the board
+  std::lock_guard<std::mutex> lock(mutex_pb);
+  fMOSAICPowerBoard->getState(state, powerboard::getFlags::GetMonitor);
 }
 
 float TPowerBoard::GetAnalogCurrent(int module)
@@ -274,7 +288,7 @@ void TPowerBoard::CalibrateVoltage(int module)
   SetDigitalVoltage(module, set1);
   SwitchModule(module, true);
 
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   analog1  = GetAnalogVoltage(module);
   digital1 = GetDigitalVoltage(module);
@@ -283,7 +297,7 @@ void TPowerBoard::CalibrateVoltage(int module)
   SetAnalogVoltage(module, set2);
   SetDigitalVoltage(module, set2);
 
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   analog2  = GetAnalogVoltage(module);
   digital2 = GetDigitalVoltage(module);
@@ -310,7 +324,7 @@ void TPowerBoard::CalibrateCurrent(int module)
 
   SwitchModule(module, false);
 
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   aOffset = GetAnalogCurrent(module);
   dOffset = GetDigitalCurrent(module);
@@ -348,12 +362,12 @@ void TPowerBoard::CalibrateBiasVoltage()
 
   // set and measure first point
   SetBiasVoltage(set1);
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   measured1 = GetBiasVoltage();
 
   // set and measure second point
   SetBiasVoltage(set2);
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   measured2 = GetBiasVoltage();
 
   // calculate slope and intercept for calibration Vout -> Vset
@@ -381,7 +395,7 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     dVDigital = 0;
   }
   else {
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     float IDDA = GetAnalogCurrent(module);
     float IDDD = GetDigitalCurrent(module);
 
@@ -395,20 +409,25 @@ void TPowerBoard::CorrectVoltageDrop(int module, bool reset)
     dVDigital *= DVScale;
   }
 
-  if ((fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) ||
-      (fPBoard.Modules[module].DVset + dVDigital > SAFE_OUTPUT)) {
-    std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage above safe limit; using "
-                 "uncorrected values."
-              << std::endl;
-    dVAnalog  = 0;
-    dVDigital = 0;
+  if (fPBoard.Modules[module].AVset + dVAnalog > SAFE_OUTPUT) {
+    std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage AVDD above safe limit; using "
+                 "safe max value, difference = "
+              << fPBoard.Modules[module].AVset + dVAnalog - SAFE_OUTPUT << " V." << std::endl;
+    dVAnalog = SAFE_OUTPUT - fPBoard.Modules[module].AVset;
+  }
+  if (fPBoard.Modules[module].DVset + dVDigital > SAFE_OUTPUT) {
+    std::cout << "ERROR (CorrectVoltageDrop): Asking for set voltage DVDD above safe limit; using "
+                 "safe max value, difference = "
+              << fPBoard.Modules[module].DVset + dVDigital - SAFE_OUTPUT << " V." << std::endl;
+    dVDigital = SAFE_OUTPUT - fPBoard.Modules[module].DVset;
   }
 
   // fPBoard contains the voltages corrected with the channel calibration
+  std::lock_guard<std::mutex> lock(mutex_pb);
   fMOSAICPowerBoard->setVout((unsigned char)(module * 2), fPBoard.Modules[module].AVset + dVAnalog);
   fMOSAICPowerBoard->setVout((unsigned char)(module * 2 + 1),
                              fPBoard.Modules[module].DVset + dVDigital);
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 /* -------------------------
@@ -432,6 +451,7 @@ void TPowerBoard::SetModule(int module, float AV, float AI, float DV, float DI, 
   fPBoard.Modules[module].DIset  = DI;
   fPBoard.Modules[module].BiasOn = BiasOn;
 
+  std::lock_guard<std::mutex> lock(mutex_pb);
   fMOSAICPowerBoard->setVout((unsigned char)(module * 2), AV);
   fMOSAICPowerBoard->setVout((unsigned char)(module * 2 + 1), DV);
   fMOSAICPowerBoard->setIth((unsigned char)(module * 2), AI);
@@ -456,6 +476,7 @@ void TPowerBoard::SwitchModule(int module, bool value)
 {
   fPBoard.Modules[module].AchOn = value;
   fPBoard.Modules[module].DchOn = value;
+  std::lock_guard<std::mutex> lock(mutex_pb);
   if (value) {
     fMOSAICPowerBoard->onVout(module * 2);
     fMOSAICPowerBoard->onVout(module * 2 + 1);
@@ -508,6 +529,7 @@ void TPowerBoard::GetModule(int module, float *AV, float *AI, float *DV, float *
   -------------------------- */
 bool TPowerBoard::IsOK()
 {
+  std::lock_guard<std::mutex> lock(mutex_pb);
   // first of all test the presence of the power board
   try {
     fMOSAICPowerBoard->isReady();

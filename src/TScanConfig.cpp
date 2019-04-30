@@ -1,5 +1,8 @@
 #include "TScanConfig.h"
+#include "DBHelpers.h"
 #include "TChipConfig.h"
+#include <fstream>
+#include <sstream>
 #include <string>
 
 using namespace ScanConfig;
@@ -8,40 +11,53 @@ TScanConfig::TScanConfig()
 {
   m_retest.clear();
   // dummy values for first tests
-  m_nInj           = NINJ;
-  m_nTrig          = NTRIG;
-  m_chargeStart    = CHARGE_START;
-  m_chargeStop     = CHARGE_STOP;
-  m_chargeStep     = CHARGE_STEP;
-  m_nMaskStages    = N_MASK_STAGES;
-  m_pixPerRegion   = PIX_PER_REGION;
-  m_noiseCutInv    = NOISECUT_INV;
-  m_vcasnStart     = VCASN_START;
-  m_vcasnStop      = VCASN_STOP;
-  m_vcasnStep      = VCASN_STEP;
-  m_ithrStart      = ITHR_START;
-  m_ithrStop       = ITHR_STOP;
-  m_ithrStep       = ITHR_STEP;
-  m_dacStart       = DAC_START;
-  m_dacStop        = DAC_STOP;
-  m_dacStep        = DAC_STEP;
-  m_nDacSamples    = NDACSAMPLES;
-  m_scanStep       = SCAN_STEP;
-  m_tuningMaxrow   = TUNING_MAXROW;
-  m_speedy         = SPEEDY;
-  m_rawData        = RAWDATA;
-  m_ivCurve        = IVCURVE;
-  m_ivPoints       = IVPOINTS;
-  m_maxIbias       = MAXIBIAS;
-  m_localBusCutRed = LOCALBUSCUTRED;
-  m_calVpulsel     = CAL_VPULSEL;
-  m_targetThresh   = TARGET_THRESHOLD;
-  m_voltageScale   = VOLTAGE_SCALE;
-  m_backBias       = BACKBIAS;
-  m_nominal        = NOMINAL;
-  m_isMasked       = false;
-  m_mlvdsStrength  = ChipConfig::DCTRL_DRIVER;
+  m_classVersion = CLASSIFICATION_VERSION;
 
+  m_db = 0;
+
+  m_autorepeat = AUTOREPEAT;
+  m_maxrepeat  = MAXREPEAT;
+  m_recovery   = RECOVERY;
+
+  m_nInj       = NINJ;
+  m_nTrig      = NTRIG;
+  m_maxTimeout = MAXTIMEOUT;
+  m_maxHits    = MAXHITS;
+
+  m_chargeStart      = CHARGE_START;
+  m_chargeStop       = CHARGE_STOP;
+  m_chargeStep       = CHARGE_STEP;
+  m_nMaskStages      = N_MASK_STAGES;
+  m_pixPerRegion     = PIX_PER_REGION;
+  m_noiseCutInv      = NOISECUT_INV;
+  m_vcasnStart       = VCASN_START;
+  m_vcasnStop        = VCASN_STOP;
+  m_vcasnStep        = VCASN_STEP;
+  m_ithrStart        = ITHR_START;
+  m_ithrStop         = ITHR_STOP;
+  m_ithrStep         = ITHR_STEP;
+  m_dacStart         = DAC_START;
+  m_dacStop          = DAC_STOP;
+  m_dacStep          = DAC_STEP;
+  m_nDacSamples      = NDACSAMPLES;
+  m_scanStep         = SCAN_STEP;
+  m_tuningMaxrow     = TUNING_MAXROW;
+  m_speedy           = SPEEDY;
+  m_rawData          = RAWDATA;
+  m_ivCurve          = IVCURVE;
+  m_ivPoints         = IVPOINTS;
+  m_maxIbias         = MAXIBIAS;
+  m_localBusCutRed   = LOCALBUSCUTRED;
+  m_calVpulsel       = CAL_VPULSEL;
+  m_targetThresh     = TARGET_THRESHOLD;
+  m_voltageScale     = VOLTAGE_SCALE;
+  m_backBias         = BACKBIAS;
+  m_backBias_active  = false;
+  m_nominal          = NOMINAL;
+  m_isMasked         = false;
+  m_mlvdsStrength    = ChipConfig::DCTRL_DRIVER;
+  m_testWithoutComp  = TEST_WITHOUT_COMP;
+  m_status           = STATUS;
   m_readoutSpeed     = READOUTSPEED;
   m_readoutOcc       = READOUTOCC;
   m_readoutDriver    = READOUTDRIVER;
@@ -52,8 +68,7 @@ TScanConfig::TScanConfig()
   m_powerCutMinIdda_OB        = POWER_CUT_MINIDDA_OB;
   m_powerCutMinIddd_OB        = POWER_CUT_MINIDDD_OB;
   m_powerCutMaxIdda_OB        = POWER_CUT_MAXIDDA_OB;
-  m_powerCutMaxIddd_Green_OB  = POWER_CUT_MAXIDDD_GREEN_OB;
-  m_powerCutMaxIddd_Orange_OB = POWER_CUT_MAXIDDD_ORANGE_OB;
+  m_powerCutMaxIddd_OB        = POWER_CUT_MAXIDDD_OB;
   m_powerCutMinIddaClocked_OB = POWER_CUT_MINIDDA_CLOCKED_OB;
   m_powerCutMinIdddClocked_OB = POWER_CUT_MINIDDD_CLOCKED_OB;
   m_powerCutMaxIddaClocked_OB = POWER_CUT_MAXIDDA_CLOCKED_OB;
@@ -91,11 +106,17 @@ TScanConfig::TScanConfig()
   m_digitalMaxDeadPerHicGreenIB  = DIGITAL_MAXDEAD_HIC_GREEN_IB;
   m_digitalMaxDeadPerHicOrangeOB = DIGITAL_MAXDEAD_HIC_ORANGE_OB;
   m_digitalMaxDeadPerHicOrangeIB = DIGITAL_MAXDEAD_HIC_ORANGE_IB;
+  m_digitalMaxBadChipGold        = DIGITAL_MAXBAD_CHIP_GOLD;
+  m_digitalMaxBadChipSilver      = DIGITAL_MAXBAD_CHIP_SILVER;
+  m_digitalMaxBadChipBronze      = DIGITAL_MAXBAD_CHIP_BRONZE;
 
-  m_digitalMaxNoMaskHicIB      = DIGITAL_MAXNOMASK_HIC_IB;
-  m_digitalMaxNoMaskHicOB      = DIGITAL_MAXNOMASK_HIC_OB;
-  m_digitalMaxNoMaskStuckHicIB = DIGITAL_MAXNOMASKSTUCK_HIC_IB;
-  m_digitalMaxNoMaskStuckHicOB = DIGITAL_MAXNOMASKSTUCK_HIC_OB;
+  m_digitalMaxNoMaskHicIB           = DIGITAL_MAXNOMASK_HIC_IB;
+  m_digitalMaxNoMaskHicOB           = DIGITAL_MAXNOMASK_HIC_OB;
+  m_digitalMaxNoMaskStuckHicIB      = DIGITAL_MAXNOMASKSTUCK_HIC_IB;
+  m_digitalMaxNoMaskStuckHicOB      = DIGITAL_MAXNOMASKSTUCK_HIC_OB;
+  m_digitalMaxNoMaskStuckChipGold   = DIGITAL_MAXNOMASKSTUCK_CHIP_GOLD;
+  m_digitalMaxNoMaskStuckChipSilver = DIGITAL_MAXNOMASKSTUCK_CHIP_SILVER;
+  m_digitalMaxNoMaskStuckChipBronze = DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE;
 
   m_threshMaxTimeoutGreen       = THRESH_MAXTIMEOUT_GREEN;
   m_threshMaxTimeoutOrange      = THRESH_MAXTIMEOUT_ORANGE;
@@ -109,14 +130,38 @@ TScanConfig::TScanConfig()
   m_threshMaxBadPerChipIB       = THRESH_MAXBAD_CHIP_IB;
   m_threshMaxBadPerHicOB        = THRESH_MAXBAD_HIC_OB;
   m_threshMaxBadPerHicIB        = THRESH_MAXBAD_HIC_IB;
+  m_threshMaxDeadChipGold       = THRESH_MAXDEAD_CHIP_GOLD;
+  m_threshMaxDeadChipSilver     = THRESH_MAXDEAD_CHIP_SILVER;
+  m_threshMaxDeadChipBronze     = THRESH_MAXDEAD_CHIP_BRONZE;
+  m_threshMaxNoThreshChipGold   = THRESH_MAXNOTHRESH_CHIP_GOLD;
+  m_threshMaxNoThreshChipSilver = THRESH_MAXNOTHRESH_CHIP_SILVER;
+  m_threshMaxNoThreshChipBronze = THRESH_MAXNOTHRESH_CHIP_BRONZE;
   m_threshMaxNoiseOB            = THRESH_MAXNOISE_OB;
   m_threshMaxNoiseIB            = THRESH_MAXNOISE_IB;
 
-  m_testDctrl          = TEST_DCTRL;
-  m_dctrlMinAmpGreen   = DCTRL_MINAMP_GREEN;
-  m_dctrlMinSlopeGreen = DCTRL_MINSLOPE_GREEN;
-  m_dctrlMaxRiseGreen  = DCTRL_MAXRISE_GREEN;
-  m_dctrlMaxFallGreen  = DCTRL_MAXFALL_GREEN;
+  m_maxNoisyChipGold   = MAXNOISY_CHIP_GOLD;
+  m_maxNoisyChipSilver = MAXNOISY_CHIP_SILVER;
+  m_maxNoisyChipBronze = MAXNOISY_CHIP_BRONZE;
+
+  m_eyeMinVertChipGold   = EYE_MIN_VERT_CHIP_GOLD;
+  m_eyeMinVertChipSilver = EYE_MIN_VERT_CHIP_SILVER;
+  m_eyeMinVertChipBronze = EYE_MIN_VERT_CHIP_BRONZE;
+  m_eyeMinHorzChipGold   = EYE_MIN_HORZ_CHIP_GOLD;
+  m_eyeMinHorzChipSilver = EYE_MIN_HORZ_CHIP_SILVER;
+  m_eyeMinHorzChipBronze = EYE_MIN_HORZ_CHIP_BRONZE;
+
+  m_testDctrl            = TEST_DCTRL;
+  m_dctrlMinAmpOB        = DCTRL_MINAMP_OB;
+  m_dctrlMinSlopeOB      = DCTRL_MINSLOPE_OB;
+  m_dctrlMinAmpOBStave   = DCTRL_MINAMP_OBSTAVE;
+  m_dctrlMinSlopeOBStave = DCTRL_MINSLOPE_OBSTAVE;
+  m_dctrlMaxRiseGreenOB  = DCTRL_MAXRISE_GREEN_OB;
+  m_dctrlMaxFallGreenOB  = DCTRL_MAXFALL_GREEN_OB;
+  m_dctrlMinAmpIB        = DCTRL_MINAMP_IB;
+  m_dctrlMinSlopeIB      = DCTRL_MINSLOPE_IB;
+  m_dctrlMaxRiseGreenIB  = DCTRL_MAXRISE_GREEN_IB;
+  m_dctrlMaxFallGreenIB  = DCTRL_MAXFALL_GREEN_IB;
+  m_dctrlMaxChisqSilver  = DCTRL_MAXCHISQ_SILVER;
 
   m_enduranceSlices            = ENDURANCE_SLICES;
   m_enduranceCycles            = ENDURANCE_CYCLES;
@@ -128,15 +173,37 @@ TScanConfig::TScanConfig()
   m_enduranceMaxtripsOrange    = ENDURANCE_MAXTRIPS_ORANGE;
   m_enduranceMinchipsGreen     = ENDURANCE_MINCHIPS_GREEN;
   m_enduranceMaxfailuresOrange = ENDURANCE_MAXFAILURES_ORANGE;
-  m_useDataPath                = false;
 
+  m_eyeDriver = EYE_DRIVER;
+  m_eyePreemp = EYE_PREEMP;
+  m_eyeMaxX   = EYE_MAX_X;
+  m_eyeMinX   = EYE_MIN_X;
+  m_eyeStepX  = EYE_STEP_X;
+  m_eyeMaxY   = EYE_MAX_Y;
+  m_eyeMinY   = EYE_MIN_Y;
+  m_eyeStepY  = EYE_STEP_Y;
+
+  m_useDataPath   = false;
+  m_halfstavecomp = HALFSTAVE_COMPONENT;
   InitParamMap();
+
+  time_t     t   = time(0); // get time now
+  struct tm *now = localtime(&t);
+
+  sprintf(m_startTime, "%02d%02d%02d_%02d%02d%02d", now->tm_year - 100, now->tm_mon + 1,
+          now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
 }
 
 void TScanConfig::InitParamMap()
 {
+  fSettings["AUTOREPEAT"] = &m_autorepeat;
+  fSettings["MAXREPEAT"]  = &m_maxrepeat;
+  fSettings["RECOVERY"]   = &m_recovery;
+
   fSettings["NINJ"]         = &m_nInj;
   fSettings["NTRIG"]        = &m_nTrig;
+  fSettings["MAXTIMEOUT"]   = &m_maxTimeout;
+  fSettings["MAXHITS"]      = &m_maxHits;
   fSettings["CHARGESTART"]  = &m_chargeStart;
   fSettings["CHARGESTOP"]   = &m_chargeStop;
   fSettings["CHARGESTEP"]   = &m_chargeStep;
@@ -144,6 +211,8 @@ void TScanConfig::InitParamMap()
   fSettings["PIXPERREGION"] = &m_pixPerRegion;
   fSettings["NOISECUT_INV"] = &m_noiseCutInv;
 
+  fSettings["STATUS"]                 = &m_status;
+  fSettings["TESTWITHOUTCOMP"]        = &m_testWithoutComp;
   fSettings["VCASN_START"]            = &m_vcasnStart;
   fSettings["VCASN_STOP"]             = &m_vcasnStop;
   fSettings["VCASN_STEP"]             = &m_vcasnStep;
@@ -164,8 +233,7 @@ void TScanConfig::InitParamMap()
   fSettings["MINIDDA_OB"]             = &m_powerCutMinIdda_OB;
   fSettings["MINIDDD_OB"]             = &m_powerCutMinIddd_OB;
   fSettings["MAXIDDA_OB"]             = &m_powerCutMaxIdda_OB;
-  fSettings["MAXIDDD_GREEN_OB"]       = &m_powerCutMaxIddd_Green_OB;
-  fSettings["MAXIDDD_ORANGE_OB"]      = &m_powerCutMaxIddd_Orange_OB;
+  fSettings["MAXIDDD_OB"]             = &m_powerCutMaxIddd_OB;
   fSettings["MINIDDA_CLOCKED_OB"]     = &m_powerCutMinIddaClocked_OB;
   fSettings["MINIDDD_CLOCKED_OB"]     = &m_powerCutMinIdddClocked_OB;
   fSettings["MAXIDDA_CLOCKED_OB"]     = &m_powerCutMaxIddaClocked_OB;
@@ -189,50 +257,77 @@ void TScanConfig::InitParamMap()
   fSettings["FIFO_MAXFAULTYCHIPS"] = &m_fifoCutMaxFaulty;
   fSettings["FIFO_MAXEXCEPTION"]   = &m_fifoCutMaxException;
 
-  fSettings["DIGITAL_MAXTIMEOUT_GREEN"]      = &m_digitalMaxTimeoutGreen;
-  fSettings["DIGITAL_MAXTIMEOUT_ORANGE"]     = &m_digitalMaxTimeoutOrange;
-  fSettings["DIGITAL_MAXCORRUPT_GREEN"]      = &m_digitalMaxCorruptGreen;
-  fSettings["DIGITAL_MAXCORRUPT_ORANGE"]     = &m_digitalMaxCorruptOrange;
-  fSettings["DIGITAL_MAXBAD_CHIP_OB"]        = &m_digitalMaxBadPerChipOB;
-  fSettings["DIGITAL_MAXBAD_CHIP_IB"]        = &m_digitalMaxBadPerChipIB;
-  fSettings["DIGITAL_MAXBAD_HIC_OB"]         = &m_digitalMaxBadPerHicOB;
-  fSettings["DIGITAL_MAXBAD_HIC_IB"]         = &m_digitalMaxBadPerHicIB;
-  fSettings["DIGITAL_MAXDEAD_CHIP_GREEN"]    = &m_digitalMaxDeadPerChipGreen;
-  fSettings["DIGITAL_MAXDEAD_CHIP_ORANGE"]   = &m_digitalMaxDeadPerChipOrange;
-  fSettings["DIGITAL_MAXDEAD_HIC_GREEN_OB"]  = &m_digitalMaxDeadPerHicGreenOB;
-  fSettings["DIGITAL_MAXDEAD_HIC_GREEN_IB"]  = &m_digitalMaxDeadPerHicGreenIB;
-  fSettings["DIGITAL_MAXDEAD_HIC_ORANGE_OB"] = &m_digitalMaxDeadPerHicOrangeOB;
-  fSettings["DIGITAL_MAXDEAD_HIC_ORANGE_IB"] = &m_digitalMaxDeadPerHicOrangeIB;
+  fSettings["DIGITAL_MAXTIMEOUT_GREEN"]           = &m_digitalMaxTimeoutGreen;
+  fSettings["DIGITAL_MAXTIMEOUT_ORANGE"]          = &m_digitalMaxTimeoutOrange;
+  fSettings["DIGITAL_MAXCORRUPT_GREEN"]           = &m_digitalMaxCorruptGreen;
+  fSettings["DIGITAL_MAXCORRUPT_ORANGE"]          = &m_digitalMaxCorruptOrange;
+  fSettings["DIGITAL_MAXBAD_CHIP_OB"]             = &m_digitalMaxBadPerChipOB;
+  fSettings["DIGITAL_MAXBAD_CHIP_IB"]             = &m_digitalMaxBadPerChipIB;
+  fSettings["DIGITAL_MAXBAD_HIC_OB"]              = &m_digitalMaxBadPerHicOB;
+  fSettings["DIGITAL_MAXBAD_HIC_IB"]              = &m_digitalMaxBadPerHicIB;
+  fSettings["DIGITAL_MAXDEAD_CHIP_GREEN"]         = &m_digitalMaxDeadPerChipGreen;
+  fSettings["DIGITAL_MAXDEAD_CHIP_ORANGE"]        = &m_digitalMaxDeadPerChipOrange;
+  fSettings["DIGITAL_MAXDEAD_HIC_GREEN_OB"]       = &m_digitalMaxDeadPerHicGreenOB;
+  fSettings["DIGITAL_MAXDEAD_HIC_GREEN_IB"]       = &m_digitalMaxDeadPerHicGreenIB;
+  fSettings["DIGITAL_MAXDEAD_HIC_ORANGE_OB"]      = &m_digitalMaxDeadPerHicOrangeOB;
+  fSettings["DIGITAL_MAXDEAD_HIC_ORANGE_IB"]      = &m_digitalMaxDeadPerHicOrangeIB;
+  fSettings["DIGITAL_MAXBAD_CHIP_GOLD"]           = &m_digitalMaxBadChipGold;
+  fSettings["DIGITAL_MAXBAD_CHIP_SILVER"]         = &m_digitalMaxBadChipSilver;
+  fSettings["DIGITAL_MAXBAD_CHIP_BRONZE"]         = &m_digitalMaxBadChipBronze;
+  fSettings["DIGITAL_MAXNOMASK_HIC_OB"]           = &m_digitalMaxNoMaskHicOB;
+  fSettings["DIGITAL_MAXNOMASK_HIC_IB"]           = &m_digitalMaxNoMaskHicIB;
+  fSettings["DIGITAL_MAXNOMASKSTUCK_HIC_OB"]      = &m_digitalMaxNoMaskStuckHicOB;
+  fSettings["DIGITAL_MAXNOMASKSTUCK_HIC_IB"]      = &m_digitalMaxNoMaskStuckHicIB;
+  fSettings["DIGITAL_MAXNOMASKSTUCK_CHIP_GOLD"]   = &m_digitalMaxNoMaskStuckChipGold;
+  fSettings["DIGITAL_MAXNOMASKSTUCK_CHIP_SILVER"] = &m_digitalMaxNoMaskStuckChipSilver;
+  fSettings["DIGITAL_MAXNOMASKSTUCK_CHIP_BRONZE"] = &m_digitalMaxNoMaskStuckChipBronze;
 
-  fSettings["DIGITAL_MAXNOMASK_HIC_OB"]      = &m_digitalMaxNoMaskHicOB;
-  fSettings["DIGITAL_MAXNOMASK_HIC_IB"]      = &m_digitalMaxNoMaskHicIB;
-  fSettings["DIGITAL_MAXNOMASKSTUCK_HIC_OB"] = &m_digitalMaxNoMaskStuckHicOB;
-  fSettings["DIGITAL_MAXNOMASKSTUCK_HIC_IB"] = &m_digitalMaxNoMaskStuckHicIB;
+  fSettings["THRESH_MAXTIMEOUT_GREEN"]        = &m_threshMaxTimeoutGreen;
+  fSettings["THRESH_MAXTIMEOUT_ORANGE"]       = &m_threshMaxTimeoutOrange;
+  fSettings["THRESH_MAXCORRUPT_GREEN"]        = &m_threshMaxCorruptGreen;
+  fSettings["THRESH_MAXCORRUPT_ORANGE"]       = &m_threshMaxCorruptOrange;
+  fSettings["THRESH_MAXBAD_CHIP_OB"]          = &m_threshMaxBadPerChipOB;
+  fSettings["THRESH_MAXBAD_CHIP_IB"]          = &m_threshMaxBadPerChipIB;
+  fSettings["THRESH_MAXBAD_HIC_OB"]           = &m_threshMaxBadPerHicOB;
+  fSettings["THRESH_MAXBAD_HIC_IB"]           = &m_threshMaxBadPerHicIB;
+  fSettings["THRESH_MAXDEAD_HIC_GREEN_OB"]    = &m_threshMaxDeadPerHicGreenOB;
+  fSettings["THRESH_MAXDEAD_HIC_GREEN_IB"]    = &m_threshMaxDeadPerHicGreenIB;
+  fSettings["THRESH_MAXDEAD_HIC_ORANGE_OB"]   = &m_threshMaxDeadPerHicOrangeOB;
+  fSettings["THRESH_MAXDEAD_HIC_ORANGE_IB"]   = &m_threshMaxDeadPerHicOrangeIB;
+  fSettings["THRESH_MAXDEAD_CHIP_GOLD"]       = &m_threshMaxDeadChipGold;
+  fSettings["THRESH_MAXDEAD_CHIP_SILVER"]     = &m_threshMaxDeadChipSilver;
+  fSettings["THRESH_MAXDEAD_CHIP_BRONZE"]     = &m_threshMaxDeadChipBronze;
+  fSettings["THRESH_MAXNOTHRESH_CHIP_GOLD"]   = &m_threshMaxNoThreshChipGold;
+  fSettings["THRESH_MAXNOTHRESH_CHIP_SILVER"] = &m_threshMaxNoThreshChipSilver;
+  fSettings["THRESH_MAXNOTHRESH_CHIP_BRONZE"] = &m_threshMaxNoThreshChipBronze;
+  fSettings["THRESH_MAXNOISE_OB"]             = &m_threshMaxNoiseOB;
+  fSettings["THRESH_MAXNOISE_IB"]             = &m_threshMaxNoiseIB;
+  fSettings["MAXNOISY_CHIP_GOLD"]             = &m_maxNoisyChipGold;
+  fSettings["MAXNOISY_CHIP_SILVER"]           = &m_maxNoisyChipSilver;
+  fSettings["MAXNOISY_CHIP_BRONZE"]           = &m_maxNoisyChipBronze;
+  fSettings["EYE_MIN_VERT_CHIP_GOLD"]         = &m_eyeMinVertChipGold;
+  fSettings["EYE_MIN_VERT_CHIP_SILVER"]       = &m_eyeMinVertChipSilver;
+  fSettings["EYE_MIN_VERT_CHIP_BRONZE"]       = &m_eyeMinVertChipBronze;
+  fSettings["EYE_MIN_HORZ_CHIP_GOLD"]         = &m_eyeMinHorzChipGold;
+  fSettings["EYE_MIN_HORZ_CHIP_SILVER"]       = &m_eyeMinHorzChipSilver;
+  fSettings["EYE_MIN_HORZ_CHIP_BRONZE"]       = &m_eyeMinHorzChipBronze;
 
-  fSettings["THRESH_MAXTIMEOUT_GREEN"]      = &m_threshMaxTimeoutGreen;
-  fSettings["THRESH_MAXTIMEOUT_ORANGE"]     = &m_threshMaxTimeoutOrange;
-  fSettings["THRESH_MAXCORRUPT_GREEN"]      = &m_threshMaxCorruptGreen;
-  fSettings["THRESH_MAXCORRUPT_ORANGE"]     = &m_threshMaxCorruptOrange;
-  fSettings["THRESH_MAXBAD_CHIP_OB"]        = &m_threshMaxBadPerChipOB;
-  fSettings["THRESH_MAXBAD_CHIP_IB"]        = &m_threshMaxBadPerChipIB;
-  fSettings["THRESH_MAXBAD_HIC_OB"]         = &m_threshMaxBadPerHicOB;
-  fSettings["THRESH_MAXBAD_HIC_IB"]         = &m_threshMaxBadPerHicIB;
-  fSettings["THRESH_MAXDEAD_HIC_GREEN_OB"]  = &m_threshMaxDeadPerHicGreenOB;
-  fSettings["THRESH_MAXDEAD_HIC_GREEN_IB"]  = &m_threshMaxDeadPerHicGreenIB;
-  fSettings["THRESH_MAXDEAD_HIC_ORANGE_OB"] = &m_threshMaxDeadPerHicOrangeOB;
-  fSettings["THRESH_MAXDEAD_HIC_ORANGE_IB"] = &m_threshMaxDeadPerHicOrangeIB;
-  fSettings["THRESH_MAXNOISE_OB"]           = &m_threshMaxNoiseOB;
-  fSettings["THRESH_MAXNOISE_IB"]           = &m_threshMaxNoiseIB;
-
-  fSettings["TESTDCTRL"]          = &m_testDctrl;
-  fSettings["DCTRLMINAMPGREEN"]   = &m_dctrlMinAmpGreen;
-  fSettings["DCTRLMINSLOPEGREEN"] = &m_dctrlMinSlopeGreen;
-  fSettings["DCTRLMAXRISEGREEN"]  = &m_dctrlMaxRiseGreen;
-  fSettings["DCTRLMAXFALLGREEN"]  = &m_dctrlMaxFallGreen;
-
-  fSettings["CAL_VPULSEL"]  = &m_calVpulsel;
-  fSettings["TARGETTHRESH"] = &m_targetThresh;
-  fSettings["NOMINAL"]      = &m_nominal;
+  fSettings["TESTDCTRL"]            = &m_testDctrl;
+  fSettings["DCTRLMINAMPIB"]        = &m_dctrlMinAmpIB;
+  fSettings["DCTRLMINSLOPEIB"]      = &m_dctrlMinSlopeIB;
+  fSettings["DCTRLMAXRISEGREENIB"]  = &m_dctrlMaxRiseGreenIB;
+  fSettings["DCTRLMAXFALLGREENIB"]  = &m_dctrlMaxFallGreenIB;
+  fSettings["DCTRLMINAMPOB"]        = &m_dctrlMinAmpOB;
+  fSettings["DCTRLMINSLOPEOB"]      = &m_dctrlMinSlopeOB;
+  fSettings["DCTRLMINAMPOBSTAVE"]   = &m_dctrlMinAmpOBStave;
+  fSettings["DCTRLMINSLOPEOBSTAVE"] = &m_dctrlMinSlopeOBStave;
+  fSettings["DCTRLMAXRISEGREENOB"]  = &m_dctrlMaxRiseGreenOB;
+  fSettings["DCTRLMAXFALLGREENOB"]  = &m_dctrlMaxFallGreenOB;
+  fSettings["DCTRLMAXCHISQSILVER"]  = &m_dctrlMaxChisqSilver;
+  fSettings["CAL_VPULSEL"]          = &m_calVpulsel;
+  fSettings["TARGETTHRESH"]         = &m_targetThresh;
+  fSettings["NOMINAL"]              = &m_nominal;
+  fSettings["HALFSTAVECOMP"]        = &m_halfstavecomp;
 
   fSettings["ENDURANCESLICES"]    = &m_enduranceSlices;
   fSettings["ENDURANCECYCLES"]    = &m_enduranceCycles;
@@ -253,6 +348,15 @@ void TScanConfig::InitParamMap()
   fSettings["READOUTPREEMP"]    = &m_readoutPreemp;
   fSettings["READOUTROW"]       = &m_readoutRow;
   fSettings["READOUTPLLSTAGES"] = &m_readoutPllStages;
+
+  fSettings["EYEDRIVER"] = &m_eyeDriver;
+  fSettings["EYEPREEMP"] = &m_eyePreemp;
+  fSettings["EYEMINX"]   = &m_eyeMinX;
+  fSettings["EYEMAXX"]   = &m_eyeMaxX;
+  fSettings["EYESTEPX"]  = &m_eyeStepX;
+  fSettings["EYEMINY"]   = &m_eyeMinY;
+  fSettings["EYEMAXY"]   = &m_eyeMaxY;
+  fSettings["EYESTEPY"]  = &m_eyeStepY;
 }
 
 bool TScanConfig::SetParamValue(std::string Name, std::string Value)
@@ -306,7 +410,11 @@ int TScanConfig::GetRetestNumber(std::string hicName)
 
 std::string TScanConfig::GetDataPath(std::string HicName)
 {
-  std::string result = std::string("Data/") + HicName;
+  std::string result = GetTestDir() + HicName;
+  if (const char *dataDir = std::getenv("ALPIDE_TEST_DATA"))
+    result.insert(0, std::string(dataDir) + "/");
+  else
+    result.insert(0, std::string("Data/"));
   if (GetRetestNumber(HicName) > 0) {
     result.append("_Retest_");
     result.append(std::to_string(GetRetestNumber(HicName)));
@@ -324,15 +432,14 @@ std::string TScanConfig::GetRemoteHicPath(std::string HicName)
   return result;
 }
 
-/*void TScanConfig::SetVcasnArr (int hics, float *vcasn) { //copy vcasn array to m_vcasn
-  m_vcasn = new int[hics];
-  for(int i=0; i<hics; i++) {
-    m_vcasn[i] = (int)(vcasn[i]+.5); //rounding matters
-  }
+
+std::string TScanConfig::GetTestDir() { return GetTestDirName(GetTestType()); }
+
+
+bool TScanConfig::IsHalfStave()
+{
+  return ((m_testType == OBHalfStaveOL) || (m_testType == OBHalfStaveML) ||
+          (m_testType == OBHalfStaveOLFAST) || (m_testType == OBHalfStaveMLFAST) ||
+          (m_testType == OBStaveOL) || (m_testType == OBStaveML) ||
+          (m_testType == StaveReceptionOL) || (m_testType == StaveReceptionML));
 }
-void TScanConfig::SetIthrArr (int hics, float *ithr) {
-  m_ithr = new int[hics];
-  for(int i=0; i<hics; i++) {
-    m_ithr[i] = (int)(ithr[i]+.5); //rounding matters
-  }
-}*/

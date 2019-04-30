@@ -10,6 +10,14 @@ TDctrlMeasurement::TDctrlMeasurement(TScanConfig *config, std::vector<TAlpide *>
                                      std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
+  CreateScanParameters();
+
+  m_parameters->backBias = 0;
+
+  // FIFO cell that is used for readback operation
+  m_region = 13;
+  m_offset = 5;
+
   strcpy(m_name, "Dctrl Measurement"); // Display name
   m_start[2] = 0;
   m_step[2]  = 1;
@@ -24,8 +32,6 @@ TDctrlMeasurement::TDctrlMeasurement(TScanConfig *config, std::vector<TAlpide *>
   m_start[0] = 0;
   m_step[0]  = 1;
   m_stop[0]  = 16;
-
-  CreateScanHisto();
 }
 
 
@@ -72,6 +78,8 @@ void TDctrlMeasurement::InitScope()
 
 void TDctrlMeasurement::Init()
 {
+  CreateScanHisto();
+
   TScan::Init();
 
   InitScope();
@@ -87,6 +95,7 @@ void TDctrlMeasurement::Init()
   }
 
   for (unsigned int i = 0; i < m_chips.size(); i++) {
+    if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
     AlpideConfig::ConfigureCMU(m_chips.at(i));
   }
 
@@ -114,8 +123,10 @@ void TDctrlMeasurement::PrepareStep(int loopIndex)
 {
   switch (loopIndex) {
   case 0: // innermost loop
-    m_testChip->GetConfig()->SetParamValue("DCTRLDRIVER", m_value[0]);
-    AlpideConfig::ConfigureBuffers(m_testChip, m_testChip->GetConfig());
+    if (m_testChip->GetConfig()->IsEnabled()) {
+      m_testChip->GetConfig()->SetParamValue("DCTRLDRIVER", m_value[0]);
+      AlpideConfig::ConfigureBuffers(m_testChip, m_testChip->GetConfig());
+    }
     break;
   case 1: // 2nd loop
     m_testChip   = m_chips.at(m_value[1]);
@@ -141,7 +152,7 @@ void TDctrlMeasurement::WriteMem(TAlpide *chip, int ARegion, int AOffset, int AV
   uint16_t LowVal  = AValue & 0xffff;
   uint16_t HighVal = (AValue >> 16) & 0xff;
 
-  int err           = chip->WriteRegister(LowAdd, LowVal);
+  int err = chip->WriteRegister(LowAdd, LowVal);
   if (err >= 0) err = chip->WriteRegister(HighAdd, HighVal);
 
   if (err < 0) {
@@ -201,8 +212,8 @@ void TDctrlMeasurement::ReadMem(TAlpide *chip, int ARegion, int AOffset, int &AV
 bool TDctrlMeasurement::TestPattern(int pattern, bool &exception)
 {
   int readBack;
-  WriteMem(m_testChip, m_value[1], m_value[0], pattern);
-  ReadMem(m_testChip, m_value[1], m_value[0], readBack, exception);
+  WriteMem(m_testChip, m_region, m_offset, pattern);
+  ReadMem(m_testChip, m_region, m_offset, readBack, exception);
   if (exception) return false;
   if (readBack != pattern) return false;
   return true;
@@ -249,7 +260,7 @@ void TDctrlMeasurement::Execute()
     // m_histo->Set(idx, m_value[1], measured amplitude)
     // to enter the measured amplitude for the current chip and the current
     // driver setting
-    if (m_testChip->GetConfig()->GetCtrInt() == 0) {
+    if ((m_testChip->GetConfig()->GetCtrInt() == 0) && (FindBoardIndex(m_testChip) == 0)) {
       scope.en_measure_ch(3); // Set measurement to read from scope channel 3
       scope.get_meas();       // Retrieve measuremts
       m_histo->Set(idx, m_value[0], peak_p, scope.ch3.peak); // Update plots
@@ -263,7 +274,7 @@ void TDctrlMeasurement::Execute()
       m_histo->Set(idx, m_value[0], rtim_n, scope.ch4.rtim);
       m_histo->Set(idx, m_value[0], ftim_n, scope.ch4.ftim);
     }
-    else if (m_testChip->GetConfig()->GetCtrInt() == 1) {
+    else {
       scope.en_measure_ch(1);
       scope.get_meas();
       m_histo->Set(idx, m_value[0], peak_p, scope.ch1.peak);

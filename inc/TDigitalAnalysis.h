@@ -32,8 +32,9 @@ private:
   std::vector<TPixHit> m_stuck;
 
 public:
-  TDigitalResultChip() : TScanResultChip(){};
-  void WriteToFile(FILE *fp);
+  TDigitalResultChip()
+      : TScanResultChip(), m_nDead(0), m_nNoisy(0), m_nIneff(0), m_nStuck(0), m_nBadDcols(0){};
+  void  WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
 };
 
@@ -41,19 +42,27 @@ class TDigitalResultHic : public TScanResultHic {
   friend class TDigitalAnalysis;
 
 private:
+  float         m_backBias;
   int           m_nDead;
   int           m_nBad;
+  int           m_nBadWorstChip;
   int           m_nStuck;
   int           m_nBadDcols;
+  int           m_nDeadIncrease;
   char          m_stuckFile[200];
   bool          m_lower;
   bool          m_upper;
   bool          m_nominal;
   TErrorCounter m_errorCounter;
-  void GetParameterSuffix(std::string &suffix, std::string &file_suffix);
+  void          GetParameterSuffix(std::string &suffix, std::string &file_suffix);
+
+protected:
+  void Compare(TScanResultHic *aPrediction);
 
 public:
-  TDigitalResultHic() : TScanResultHic(){};
+  TDigitalResultHic()
+      : TScanResultHic(), m_nDead(0), m_nBad(0), m_nBadWorstChip(0), m_nStuck(0), m_nBadDcols(0),
+        m_nDeadIncrease(0){};
   void SetStuckFile(const char *fName) { strcpy(m_stuckFile, fName); };
   void WriteToFile(FILE *fp);
   void WriteToDB(AlpideDB *db, ActivityDB::activity &activity);
@@ -65,6 +74,7 @@ class TDigitalResult : public TScanResult {
 private:
   int m_nTimeout;
   int m_n8b10b;
+  int m_nOversize;
   int m_nCorrupt;
 
 public:
@@ -76,14 +86,15 @@ class TDigitalAnalysis : public TScanAnalysis {
 private:
   std::vector<TDigitalCounter> m_counters;
   int                          m_ninj;
-  bool HasData(TScanHisto &histo, common::TChipIndex idx, int col);
-  void InitCounters();
-  void FillVariableList();
-  void WriteHitData(TScanHisto *histo, int row);
-  void WriteResult();
-  void WriteStuckPixels(THic *hic);
-  THicClassification GetClassificationOB(TDigitalResultHic *result);
-  THicClassification GetClassificationIB(TDigitalResultHic *result);
+  bool                         HasData(TScanHisto &histo, common::TChipIndex idx, int col);
+  void                         InitCounters();
+  void                         FillVariableList();
+  void                         WriteHitData(TScanHisto *histo, int row);
+  void                         WriteResult();
+  void                         WriteStuckPixels(THic *hic);
+  void                         DrawAndSaveToPDF(int hicid);
+  THicClassification           GetClassificationOB(TDigitalResultHic *result);
+  THicClassification           GetClassificationIB(TDigitalResultHic *result);
 
 protected:
   TScanResultChip *GetChipResult()
@@ -96,10 +107,10 @@ protected:
     TDigitalResultHic *Result = new TDigitalResultHic();
     return Result;
   };
-  void CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo);
+  void   CreateResult(){};
+  void   AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType();
-  void CalculatePrediction(std::string hicName);
+  void   CalculatePrediction(std::string hicName);
 
 public:
   TDigitalAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

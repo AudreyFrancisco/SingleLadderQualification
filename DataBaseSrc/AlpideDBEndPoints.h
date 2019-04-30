@@ -36,13 +36,14 @@
  *  7/9/2017	-	Refine the XML parsing/reading
  *  9/11/2017   - Add ParameterID field to the parameter type struct
  *  21/02/2018  -   Add the Scientific Notation in the Activity Parameter rappresentation
- *
+ *  04/10/2018  - Version 2 : Recover errors + Improvements to error diagnosis
  *
  */
 #ifndef ALPIDEDBENDPOINTS_H_
 #define ALPIDEDBENDPOINTS_H_
 
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -55,12 +56,50 @@ using namespace std;
 
 #define MATCHNODE(nod, tag) (nod->children && strcmp((const char *)nod->name, tag) == 0)
 
+#define MAXNUMBEROFQUERYATTEMPTS 5
+#define DELAYINQUERYRECOVER 10
+#define MAXRESPONSESHISTORY 100
+
 class AlpideDB;
 
 // The base class
 class AlpideTable {
 public:
-  enum ErrorCode { NoError = 0, SyncQuery = 20, BadXML = 21 };
+  enum ErrorCode {
+    NoError           = 0,
+    RecordNotFound    = 10,
+    SyncQuery         = 20,
+    BadXML            = 21,
+    EmptyXMLroot      = 22,
+    BadCreation       = 23,
+    InvalidCredential = 32,
+    MSIS7042          = 33,
+    Unknown           = 99
+  };
+  enum ErrorManage { OK = 0, RETRAY = 1, ABORT = 2 };
+  enum SessionCode {
+    NoSession           = 0,
+    CreateActivity      = 1,
+    MemberAssign        = 2,
+    ParameterCreate     = 3,
+    AttachmentCreate    = 4,
+    UriCreate           = 5,
+    ChangeActivity      = 6,
+    AssignComponent     = 7,
+    ChangeParameter     = 8,
+    CreateComponent     = 9,
+    PojectGetList       = 10,
+    MemberGetList       = 11,
+    ComponentTypeList   = 12,
+    ComponentType       = 13,
+    Component           = 14,
+    ComponentList       = 15,
+    ComponentActivities = 16,
+    ActivityTypeList    = 17,
+    ActivityType        = 18,
+    Activity            = 19
+  };
+
 
   struct response {
     int    Session;
@@ -69,24 +108,62 @@ public:
     int    ID;
   };
 
+
 protected:
-  AlpideDB *theParentDB;
-  response  theResponse;
-  string    theGeneralBuffer;
-  bool      isScienNotation;
+  AlpideDB *       theParentDB;
+  response         theResponse;
+  string           theGeneralBuffer;
+  bool             isScienNotation;
+  vector<response> theResponses;
+  bool             isCreated;
+  xmlDocPtr        theXMLdoc;
+  xmlNode *        theRootXMLNode;
+  int              theActualSession;
+
+  map<int, string> errorCodesTbl;
+  map<int, string> sessionCodesTbl;
 
 public:
   explicit AlpideTable(AlpideDB *DBhandle);
   virtual ~AlpideTable();
-  response *DecodeResponse(char *returnedString, int Session = 0);
-  void SetResponse(AlpideTable::ErrorCode, int ID = 0, int Session = 0);
-  const char *DumpResponse();
+  bool ExecuteQuery(string theUrl, string theQuery, bool isSOAPrequest = false,
+                    const char *SOAPAction = NULL);
+  // response                 GetResponse() { return theResponse; }
+  AlpideTable::ErrorManage DecodeResponse(char *returnedString, const char *query, int Session = 0);
+  bool                     ParseQueryResult();
 
   bool isParameterScientificNotation() { return (isScienNotation); }
   void setParameterScientificNotation(bool isSet = true) { isScienNotation = isSet; }
 
+  void             SetResponse(AlpideTable::ErrorCode, int ID = 0, int Session = -1);
+  response         GetResponse(unsigned int Position = -1);
+  vector<response> GetResponses() { return theResponses; }
+  void             ClearResponses()
+  {
+    theResponses.clear();
+    return;
+  }
+  unsigned int GetResponsesNumber() { return (theResponses.size()); }
+  const char * DumpResponse(response *aResponse = NULL);
+  bool         GetStatus() { return isCreated; }
+  string GetErrorCodeMessage(AlpideTable::ErrorCode code) { return (errorCodesTbl[(int)code]); }
+  string GetSessionCodeMessage(AlpideTable::SessionCode code)
+  {
+    return (sessionCodesTbl[(int)code]);
+  }
+
+  AlpideTable::ErrorCode ParseTheNonXMLResponse(char *ThePage);
+
 protected:
-  bool _getTheRootElementChildren(char *stringresult, xmlDocPtr *doc, xmlNode **nod);
+  void setResponseSession(AlpideTable::SessionCode aSession)
+  {
+    theActualSession = aSession;
+    return;
+  }
+  void   dumpXMLError(const char *aDescription, const char *aQuery, const char *aResponse);
+  string formatTheParameterValue(float value);
+  void   pushResponse(response *aResponse = NULL);
+  void   createCodesDictionary(void);
 };
 
 class ProjectDB : public AlpideTable {
@@ -108,7 +185,7 @@ public:
 
 public:
   AlpideTable::response *GetList(vector<ProjectDB::project> *Result);
-  string Print(ProjectDB::project *pr)
+  string                 Print(ProjectDB::project *pr)
   {
     return ("Project : ID=" + std::to_string(pr->ID) + " Name=" + pr->Name);
   };
@@ -133,7 +210,7 @@ public:
   ~MemberDB();
 
   AlpideTable::response *GetList(int projectID, vector<member> *Result);
-  string Print(member *me)
+  string                 Print(member *me)
   {
     return ("Member : ID=" + std::to_string(me->ID) +
             " Personal ID=" + std::to_string(me->PersonalID) + " Name=" + me->FullName);
@@ -211,12 +288,12 @@ public:
 
   struct compComposition {
     int           ID;
-    int           Position;
+    string        Position;
     compComponent Component;
   };
 #define zCOMPCOMPOSITION(a)                                                                        \
   a.ID       = 0;                                                                                  \
-  a.Position = 0;                                                                                  \
+  a.Position = "";                                                                                 \
   zCOMPCOMPONENT(a.Component)
 
   struct componentLong {
@@ -289,6 +366,7 @@ public:
     compActResult Result;
     compActStatus Status;
     int           Type;
+    string        Typename;
   };
 #define zCOMPACTIVITY(a)                                                                           \
   a.ID   = 0;                                                                                      \
@@ -316,16 +394,18 @@ public:
 
   AlpideTable::response *GetListByType(int ProjectID, int ComponentTypeID,
                                        vector<componentShort> *Result);
-  string Print(componentType *co);
+  string                 Print(componentType *co);
+  string                 Dump(componentType *co);
+  string                 Dump(componentLong *co);
 
 private:
-  void extractTheComponentType(xmlNode *n1, componentType *pro);
+  void                   extractTheComponentType(xmlNode *n1, componentType *pro);
   AlpideTable::response *readComponent(string ID, string ComponentID, componentLong *Result);
   AlpideTable::response *readComponents(std::string ProjectId, std::string ComponentTypeID,
                                         vector<componentShort> *compoList);
-  void extractTheComponent(xmlNode *ns, componentLong *pro);
+  void                   extractTheComponent(xmlNode *ns, componentLong *pro);
   AlpideTable::response *readComponentActivities(int ID, vector<compActivity> *Result);
-  void extractTheActivityList(xmlNode *ns, vector<compActivity> *actList);
+  void                   extractTheActivityList(xmlNode *ns, vector<compActivity> *actList);
 };
 
 // --------------------
@@ -619,9 +699,9 @@ public:
     vector<actUri>        Uris;
   };
 #define zACTIVITYLOND(a)                                                                           \
-  a.ID   = 0;                                                                                      \
-  a.Name = "";                                                                                     \
-  a.LotID + "";                                                                                    \
+  a.ID    = 0;                                                                                     \
+  a.Name  = "";                                                                                    \
+  a.LotID = "";                                                                                    \
   zRESULTTYPE(a.Result);                                                                           \
   zACTIVITYTYPE(a.Type);                                                                           \
   zSTATUSTYPE(a.Status);                                                                           \
@@ -644,21 +724,24 @@ public:
 
   AlpideTable::response *AssignUris(int aActivityID, int aUserId, vector<actUri> *aUris);
 
-  vector<parameterType> *GetParameterTypeList(int aActivityTypeID);
-  vector<activityType> *GetActivityTypeList(int aProjectID);
-  vector<locationType> *GetLocationTypeList(int aActivityTypeID);
+  vector<parameterType> *  GetParameterTypeList(int aActivityTypeID);
+  vector<activityType> *   GetActivityTypeList(int aProjectID);
+  vector<locationType> *   GetLocationTypeList(int aActivityTypeID);
   vector<actTypeCompType> *GetComponentTypeList(int aActivityTypeID);
-  vector<resultType> *GetResultList(int aActivityTypeID);
-  vector<statusType> *GetStatusList(int aActivityTypeID);
-  vector<attachmentType> *GetAttachmentTypeList();
-  vector<activityShort> *GetActivityList(int aProjectID, int aActivityTypeID);
-  AlpideTable::response *Read(int ActivityID, activityLong *Result);
+  vector<resultType> *     GetResultList(int aActivityTypeID);
+  vector<statusType> *     GetStatusList(int aActivityTypeID);
+  vector<attachmentType> * GetAttachmentTypeList();
+  vector<activityShort> *  GetActivityList(int aProjectID, int aActivityTypeID);
+  AlpideTable::response *  ChangeParameter(int ActivityID, string parameterName, float newValue,
+                                           int userID);
+  AlpideTable::response *  Read(int ActivityID, activityLong *Result);
+  void                     DumpActivity(activityLong *Act);
 
 private:
-  unsigned long buildBase64Binary(string aLocalFileName, string *aBuffer);
-  int buildUrlEncoded(string aLocalFileName, string *Buffer);
+  unsigned long          buildBase64Binary(string aLocalFileName, string *aBuffer);
+  int                    buildUrlEncoded(string aLocalFileName, string *Buffer);
   AlpideTable::response *readActivity(string ID, activityLong *Result);
-  void extractTheActivity(xmlNode *ns, activityLong *pro);
+  void                   extractTheActivity(xmlNode *ns, activityLong *pro);
 };
 
 #endif /* ALPIDEDBENDPOINTS_H_ */

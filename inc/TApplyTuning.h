@@ -15,14 +15,14 @@
 class TApplyTuning : public TScanAnalysis {
 private:
 protected:
-  TScanResultChip *GetChipResult() { return 0; };
-  TScanResultHic * GetHicResult() { return 0; };
-  void             CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo) { (void)histo; };
-  void                          InitCounters(){};
-  virtual const char *          GetDACName() = 0;
-  string                        GetPreviousTestType() { return string(""); }; // no analysis output
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  TScanResultChip *   GetChipResult() { return 0; };
+  TScanResultHic *    GetHicResult() { return 0; };
+  void                CreateResult(){};
+  void                AnalyseHisto(TScanHisto *histo) { (void)histo; };
+  void                InitCounters(){};
+  virtual const char *GetDACName() = 0;
+  string              GetPreviousTestType() { return string(""); }; // no analysis output
+  void                CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TApplyTuning(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

@@ -49,7 +49,7 @@ int main(int argc, char **argv)
       if ((i + 1) >= argc)
         goto invokeError;
       else
-        strncpy(cfgFileName, argv[++i], 2000);
+        strncpy(cfgFileName, argv[++i], 2000 - 1);
     }
   }
 

@@ -29,6 +29,7 @@
  * 21/12/2015	Added mutex for multithread operation
  */
 #include "ipbus.h"
+#include "ipbusudp.h"
 #include "mexception.h"
 #include <iostream>
 #include <stdio.h>
@@ -38,14 +39,14 @@
 // #define TRACE_IPBUS
 
 #ifdef TRACE_IPBUS
-#define TRACE(format, args...)                                                                     \
+#define TRACE(format, ...)                                                                         \
   {                                                                                                \
     fprintf(stderr, "%s ", name().c_str());                                                        \
-    fprintf(stderr, format, ##args);                                                               \
+    fprintf(stderr, format, ##__VA_ARGS__);                                                        \
     fflush(stderr);                                                                                \
   }
 #else
-#define TRACE(format, args...)
+#define TRACE(format, ...)
 #endif
 
 IPbus::IPbus(int pktSize)
@@ -152,7 +153,7 @@ void IPbus::addIdle()
 {
   std::lock_guard<std::recursive_mutex> lock(mutex);
 
-  TRACE("IPbus::addIdle\n");
+  TRACE("IPbus::addIdle%s\n", "");
   chkBuffers(4, 4);
   addHeader(0, typeIdIdle, NULL);
   expectedRxSize += 4;
@@ -271,53 +272,59 @@ void IPbus::processAnswer()
     dumpRxData();
 #endif
     for (int i = 0; i < numTransactions; i++) {
+
+      IPbusUDP *udpbus  = dynamic_cast<IPbusUDP *>(this);
+      string    address = "";
+
+      if (udpbus) address = udpbus->getIPaddress();
       if ((rxSize - rxPtr) < 4) {
         // printf("\n\n Wrong answer size at transaction %d. size:%d\n\n", i, rxSize-rxPtr);
-        throw MIPBusError("Wrong answer size");
+        throw MIPBusError("Wrong answer size", address);
       }
 
       getHeader(&tr);
 
       // check the header
-      if (tr.version != IPBUS_PROTOCOL_VERSION) throw MIPBusError("Wrong version in answer");
+      if (tr.version != IPBUS_PROTOCOL_VERSION)
+        throw MIPBusError("Wrong version in answer", address);
 
       if (tr.transactionId != transactionList[i].transactionId)
-        throw MIPBusError("Wrong transaction ID in answer");
+        throw MIPBusError("Wrong transaction ID in answer", address);
       if (i == 0) pktId = tr.transactionId;
 
       if (tr.typeId != transactionList[i].typeId)
-        throw MIPBusError("Wrong transaction type in answer");
+        throw MIPBusError("Wrong transaction type in answer", address);
 
       if (tr.infoCode != infoCodeSuccess) {
         switch (tr.infoCode) {
         case infoCodeBadHeader:
-          throw MIPBusError("Remote bus error BAD HEADER");
+          throw MIPBusError("Remote bus error BAD HEADER", address);
         case infoCodeBusErrRead:
-          throw MIPBusError("Remote bus error in read");
+          throw MIPBusError("Remote bus error in read", address);
         case infoCodeBusErrWrite:
-          throw MIPBusErrorWrite("Remote bus error in write");
+          throw MIPBusErrorWrite("Remote bus error in write", address);
         case infoCodeBusTimeoutRead:
-          throw MIPBusErrorReadTimeout("Remote bus timeout in read");
+          throw MIPBusErrorReadTimeout("Remote bus timeout in read", address);
         case infoCodeBusTimeoutWrite:
-          throw MIPBusError("Remote bus timeout in write");
+          throw MIPBusError("Remote bus timeout in write", address);
         case infoCodeBufferOverflaw:
-          throw MIPBusError("Remote bus overflow TX buffer error");
+          throw MIPBusError("Remote bus overflow TX buffer error", address);
         case infoCodeBufferUnderflaw:
-          throw MIPBusError("Remote bus underflow RX buffer error");
+          throw MIPBusError("Remote bus underflow RX buffer error", address);
         }
       }
 
       if (tr.words != transactionList[i].words)
-        throw MIPBusError("Wrong number of words in transaction answer");
+        throw MIPBusError("Wrong number of words in transaction answer", address);
 
       // get data
       if (tr.typeId == typeIdRead || tr.typeId == typeIdNIRead || tr.typeId == typeIdRMWbits ||
           tr.typeId == typeIdRMWsum) {
 
-        if ((rxSize - rxPtr) < (tr.words * 4)) throw MIPBusError("Wrong answer size");
+        if ((rxSize - rxPtr) < (tr.words * 4)) throw MIPBusError("Wrong answer size", address);
 
         if (transactionList[i].readDataPtr != NULL)
-          for (int j                          = 0; j < tr.words; j++)
+          for (int j = 0; j < tr.words; j++)
             transactionList[i].readDataPtr[j] = getWord();
         else
           for (int j = 0; j < tr.words; j++)
@@ -354,7 +361,7 @@ void IPbus::addBadIdle(bool sendWrongVersion, bool sendWrongInfoCode)
 {
   std::lock_guard<std::recursive_mutex> lock(mutex);
 
-  TRACE("IPbus::addBadIdle\n");
+  TRACE("IPbus::addBadIdle%s\n", "");
   chkBuffers(4, 4);
 
   // modified copy of addHeader function

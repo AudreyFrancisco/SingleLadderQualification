@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 
   while (!isDataTackingEnd) { // while we don't receive a timeout
     returnCode = theBoard->ReadEventData(numberOfReadByte, theBuffer);
-    if (returnCode != 0) { // we have some thing
+    if (returnCode > 0) { // we have some thing
       std::cout << "Read an event !  Dimension :" << numberOfReadByte
                 << std::endl; // Consume the buffer ...
       usleep(20000);          // wait

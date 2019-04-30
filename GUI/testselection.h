@@ -18,14 +18,16 @@ public:
   virtual void SaveSettings(QString &institute, QString &opname, QString &hicid, int &counter,
                             int &lid, int &memberid, QString &ttwo, QString &tthree, QString &tfour,
                             QString &tfive, QString &done, QString &dtwo, QString &dthree,
-                            QString &dfour, QString &dfive, QString &halfstave);
+                            QString &dfour, QString &dfive, QString &halfstave, QString &stave,
+                            QString &address);
   virtual int  GetLocationID() { return locid; }
   virtual void ClearLocations();
+  virtual void Init();
 
 private:
   Ui::TestSelection *ui;
   Dialog *           missingsettings;
-  int                locid;
+  int                locid = 0;
   int                memid;
   bool               m_testDatabase;
   QString            location;
@@ -33,6 +35,7 @@ private:
   QString            downone, downtwo, downthree, downfour, downfive;
   MainWindow *       fmainwindow;
   int                fCounter;
+  int                cern = 1, saclay = 2, subatech = 3, ipnl = 4;
 
 public slots:
   virtual void getlocationcombo(int value);
@@ -44,6 +47,7 @@ public slots:
   virtual void getwindow();
   virtual int  getcounter();
   virtual void connectlocationcombo(std::vector<std::pair<std::string, int>> floc);
+  // virtual void adjuststave();
 
 
 private slots:

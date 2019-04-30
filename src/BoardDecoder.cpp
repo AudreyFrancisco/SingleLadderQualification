@@ -79,8 +79,8 @@ bool BoardDecoder::DecodeEventDAQ(unsigned char *data, int nBytes, int &nBytesHe
       Event_ID = (uint64_t)Header[0] & 0x00ffffff;
       // TimeStamp        = (uint64_t)Header[1] & 0x7fffffff | ((uint64_t)Header[0] & 0x7f000000) <<
       // 7; // Original
-      TimeStamp = ((uint64_t)Header[1] & 0x7fffffff) |
-                  ((uint64_t)Header[0] & 0x7f000000) << 7; // Caterina: added ()
+      TimeStamp = ((uint64_t)Header[1] & 0x7fffffff) | ((uint64_t)Header[0] & 0x7f000000)
+                                                           << 7; // Caterina: added ()
     }
     TrigCountDAQbusy = (Header[2] & 0x7fff0000) >> 8;
     StrobeCountTotal = (Header[2] & 0x00007fff);
@@ -245,9 +245,22 @@ bool BoardDecoder::DecodeEventMOSAIC(unsigned char *data, int nBytes, int &nByte
   nBytesHeader       = 64; // #define MOSAIC_HEADER_LENGTH 64
   nBytesTrailer      = 1;  // #define The MOSAIC trailer length
 
-  uint8_t MOSAICtransmissionFlag = data[nBytes - 1]; // last byte is the trailer
-  boardInfo.headerError          = MOSAICtransmissionFlag & TAlpideDataParser::flagHeaderError;
-  boardInfo.decoder10b8bError = MOSAICtransmissionFlag & TAlpideDataParser::flagDecoder10b8bError;
+  uint8_t MOSAICtransmissionFlag;
+  // GDR FIX --- 22/07/2018
+  if (nBytes > nBytesHeader + 2) {
+    // Not empty frame
+    MOSAICtransmissionFlag = data[nBytes - 1]; // last byte is the trailer
+    nBytesTrailer          = 1;
+  }
+  else {
+    // CHIP EMPTY FRAME
+    MOSAICtransmissionFlag = 0;
+    nBytesTrailer          = 0;
+  }
+
+  boardInfo.headerError        = MOSAICtransmissionFlag & TAlpideDataParser::flagHeaderError;
+  boardInfo.decoder10b8bError  = MOSAICtransmissionFlag & TAlpideDataParser::flagDecoder10b8bError;
+  boardInfo.eventOverSizeError = MOSAICtransmissionFlag & TAlpideDataParser::flagOverSizeError;
   if (MOSAICtransmissionFlag) return false;
 
   return true;

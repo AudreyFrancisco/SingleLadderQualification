@@ -14,12 +14,14 @@ TReadoutTest::TReadoutTest(TScanConfig *config, std::vector<TAlpide *> chips,
                            std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TDataTaking(config, chips, hics, boards, histoQue, aMutex)
 {
+  CreateScanParameters();
+
+  m_parameters->backBias = 0;
   // trigger frequency, number of triggers have to be set in scan config
   // before creating readout test object
   m_pulse       = true;
   m_pulseLength = chips.at(0)->GetConfig()->GetParamValue("PULSEDURATION");
 
-  m_parameters                                    = new TReadoutParameters;
   ((TReadoutParameters *)m_parameters)->nTriggers = config->GetParamValue("NTRIG");
   ;
   ((TReadoutParameters *)m_parameters)->row            = config->GetParamValue("READOUTROW");
@@ -30,6 +32,12 @@ TReadoutTest::TReadoutTest(TScanConfig *config, std::vector<TAlpide *> chips,
   ((TReadoutParameters *)m_parameters)->pllStages      = config->GetParamValue("READOUTPLLSTAGES");
   ((TReadoutParameters *)m_parameters)->voltageScale   = config->GetVoltageScale();
 
+  SetName();
+}
+
+
+void TReadoutTest::SetName()
+{
   if (((TReadoutParameters *)m_parameters)->pllStages != -1) {
     sprintf(m_name, "ReadoutTest %.1f %d", ((TReadoutParameters *)m_parameters)->voltageScale,
             ((TReadoutParameters *)m_parameters)->pllStages);
@@ -40,6 +48,33 @@ TReadoutTest::TReadoutTest(TScanConfig *config, std::vector<TAlpide *> chips,
             ((TReadoutParameters *)m_parameters)->preemp);
   }
 }
+
+
+bool TReadoutTest::SetParameters(TScanParameters *pars)
+{
+  TReadoutParameters *rPars = dynamic_cast<TReadoutParameters *>(pars);
+  if (rPars) {
+    std::cout << "TReadoutTest: Updating parameters" << std::endl;
+
+    ((TReadoutParameters *)m_parameters)->nTriggers      = rPars->nTriggers;
+    ((TReadoutParameters *)m_parameters)->row            = rPars->row;
+    ((TReadoutParameters *)m_parameters)->linkSpeed      = rPars->linkSpeed;
+    ((TReadoutParameters *)m_parameters)->occupancy      = rPars->occupancy;
+    ((TReadoutParameters *)m_parameters)->driverStrength = rPars->driverStrength;
+    ((TReadoutParameters *)m_parameters)->preemp         = rPars->preemp;
+    ((TReadoutParameters *)m_parameters)->pllStages      = rPars->pllStages;
+    ((TReadoutParameters *)m_parameters)->voltageScale   = rPars->voltageScale;
+
+    SetName();
+    return true;
+  }
+  else {
+    std::cout << "TReadoutTest::SetParameters: Error, bad parameter type, doing nothing"
+              << std::endl;
+    return false;
+  }
+}
+
 
 // TODO: save number of masked pixels (return value of ApplyMask)
 void TReadoutTest::ConfigureChip(TAlpide *chip)
@@ -60,7 +95,7 @@ void TReadoutTest::ConfigureChip(TAlpide *chip)
   AlpideConfig::BaseConfig(chip);
   ConfigureFromu(chip);
   ConfigureMask(chip, 0);
-  AlpideConfig::ApplyMask(chip, true);
+  AlpideConfig::ApplyMask(chip, false);
   AlpideConfig::ConfigureCMU(chip);
   // restore previous settings
   chip->GetConfig()->SetParamValue("DTUDRIVER", backupDriver);
@@ -107,11 +142,45 @@ void TReadoutTest::Init()
   }
 
   TDataTaking::Init();
+
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hics.at(ihic)->ReadChipRegister(
+        Alpide::REG_PLL_LOCK1,
+        m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_pllLockStart);
+  }
+
   m_running = true;
 }
 
+
+void TReadoutTest::WritePLLReg(const char *fName, THic *aHic)
+{
+  FILE *fp = fopen(fName, "a");
+
+  std::map<int, uint16_t>::iterator it;
+
+  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_pllLockStart.begin();
+       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_pllLockStart.end(); it++) {
+    fprintf(fp, "  PLL Lock Register (start) on chip %d: 0x%x\n", it->first, it->second);
+  }
+  fputs("\n", fp);
+  for (it = m_conditions.m_hicConditions.at(aHic->GetDbId())->m_pllLockEnd.begin();
+       it != m_conditions.m_hicConditions.at(aHic->GetDbId())->m_pllLockEnd.end(); it++) {
+    fprintf(fp, "  PLL Lock Register (end) on chip %d: 0x%x\n", it->first, it->second);
+  }
+  fputs("\n", fp);
+  fclose(fp);
+}
+
+
 void TReadoutTest::Terminate()
 {
+  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
+    m_hics.at(ihic)->ReadChipRegister(
+        Alpide::REG_PLL_LOCK1,
+        m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_pllLockEnd);
+  }
+
   TDataTaking::Terminate();
 
   // restore old voltage

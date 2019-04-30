@@ -24,7 +24,7 @@ namespace AlpideConfig {
   void BaseConfigDACs(TAlpide *chip);
   void BaseConfig(TAlpide *chip);
   void PrintDebugStream(TAlpide *chip);
-  int ApplyMask(TAlpide *chip, bool Clear);
-}
+  int  ApplyMask(TAlpide *chip, bool Clear);
+} // namespace AlpideConfig
 
 #endif

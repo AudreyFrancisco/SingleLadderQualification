@@ -89,7 +89,7 @@
 // internal power board resistances between regulator and breakout board
 // according to power board manual version 1.2 (14/07/2017)
 // first index is the power unit (0 = bottom, 1 = top), second is module
-const float RAnalog[2][8] = {{0.035, 0.039, 0.047, 0.054, 0.033, 0.044, 0.051, 0.052},
+const float RAnalog[2][8]  = {{0.035, 0.039, 0.047, 0.054, 0.033, 0.044, 0.051, 0.052},
                              {0.033, 0.038, 0.044, 0.056, 0.033, 0.044, 0.059, 0.052}};
 const float RDigital[2][8] = {{0.034, 0.042, 0.043, 0.050, 0.036, 0.038, 0.044, 0.052},
                               {0.033, 0.040, 0.041, 0.049, 0.034, 0.037, 0.040, 0.056}};
@@ -97,10 +97,14 @@ const float RDigital[2][8] = {{0.034, 0.042, 0.043, 0.050, 0.036, 0.038, 0.044, 
 const float RWPBAnalog[7]  = {0, 0, 0, 0, 0, 0, 0};
 const float RWPBDigital[7] = {0, 0, 0, 0, 0, 0, 0};
 const float RWPBGround[7]  = {0, 0, 0, 0, 0, 0, 0};
-// resistances of real power bus
-const float RPBAnalog[7]  = {0, 0, 0, 0, 0, 0, 0};
-const float RPBDigital[7] = {0, 0, 0, 0, 0, 0, 0};
-const float RPBGround[7]  = {0, 0, 0, 0, 0, 0, 0};
+// resistances of real power bus, outer layer and middle layer
+// OL: values measured in Torino
+const float RPBAnalog[7]    = {0.179, 0.383, 0.458, 0.476, 0.490, 0.512, 0.507};
+const float RPBDigital[7]   = {0.074, 0.098, 0.107, 0.113, 0.123, 0.118, 0.121};
+const float RPBGround[7]    = {0.007, 0.008, 0.010, 0.012, 0.014, 0.016, 0.018};
+const float RPBAnalogML[4]  = {0, 0, 0, 0};
+const float RPBDigitalML[4] = {0, 0, 0, 0};
+const float RPBGroundML[4]  = {0, 0, 0, 0};
 
 // Class definition
 class TPowerBoardConfig {
@@ -137,10 +141,10 @@ public:
 
   // members
 private:
-  FILE *     fhConfigFile; // the file handle of the Configuration File
-  PowBoard_t fPBConfig;
-  TBoardType fBoardType;
-  int        m_bottom;
+  FILE *                       fhConfigFile; // the file handle of the Configuration File
+  PowBoard_t                   fPBConfig;
+  TBoardType                   fBoardType;
+  int                          m_bottom;
   std::map<std::string, int *> fSettings;
 
   // methods
@@ -158,7 +162,7 @@ public:
   float GetAnalogCurrent(int mod) { return (fPBConfig.Modul[mod].AIset); };
   float GetDigitalVoltage(int mod);
   float GetDigitalCurrent(int mod) { return (fPBConfig.Modul[mod].DIset); };
-  bool GetBiasOn(int mod) { return (fPBConfig.Modul[mod].BiasOn); };
+  bool  GetBiasOn(int mod) { return (fPBConfig.Modul[mod].BiasOn); };
 
   float GetAVDDUncalibrated(int mod) { return (fPBConfig.Modul[mod].AVset); };
   float GetDVDDUncalibrated(int mod) { return (fPBConfig.Modul[mod].DVset); };
@@ -181,7 +185,7 @@ public:
   void SetLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
   void EnterMeasuredLineResistances(int mod, float ALineR, float DLineR, float GNDLineR);
   void GetWirePBResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR, float &BBLineR);
-  void AddPowerBusResistances(int mod, bool real = false);
+  void AddPowerBusResistances(int mod, bool real = false, bool middle = false);
   void GetLineResistances(int mod, float &ALineR, float &DLineR, float &GNDLineR);
   bool IsCalibrated(int mod);
   void WriteCalibrationFile();
@@ -204,9 +208,9 @@ public:
   bool DumpConfig() { return false; }; // TODO: not yet implemented
   bool GetIsBottom() { return (m_bottom == 1); };
   void SetIsBottom(bool bottom) { m_bottom = bottom ? 1 : 0; };
-  void                  InitParamMap();
+  void InitParamMap();
   bool SetParamValue(std::string Name, std::string Value);
-  int GetParamValue(std::string Name);
+  int  GetParamValue(std::string Name);
   bool IsParameter(std::string Name) { return (fSettings.count(Name) > 0); };
 
 private:

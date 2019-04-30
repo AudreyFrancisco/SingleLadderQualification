@@ -9,6 +9,10 @@ TFastPowerTest::TFastPowerTest(TScanConfig *config, std::vector<TAlpide *> chips
                                std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
+  CreateScanParameters();
+
+  m_parameters->backBias = 0;
+
   strcpy(m_name, "Fast Power Test");
   m_start[2] = 0;
   m_step[2]  = 1;
@@ -32,6 +36,7 @@ void TFastPowerTest::CreateMeasurements()
   for (unsigned int i = 0; i < m_hics.size(); i++) {
     THicCurrents hicCurrents;
     hicCurrents.hicType = m_hics.at(i)->GetHicType();
+    hicCurrents.maxBias = ((float)(m_config->GetParamValue("IVPOINTS")) - 1) / 10;
     m_hicCurrents.insert(
         std::pair<std::string, THicCurrents>(m_hics.at(i)->GetDbId(), hicCurrents));
   }
@@ -67,12 +72,13 @@ void TFastPowerTest::PrepareStep(int loopIndex)
 void TFastPowerTest::DoIVCurve(THicCurrents &result)
 {
   for (int i = 0; i < m_config->GetParamValue("IVPOINTS"); i++) {
-    float voltage = -i / 10;
+    float voltage = -((float)i) / 10.;
     m_testHic->GetPowerBoard()->SetBiasVoltage(voltage);
     sleep(1);
     result.ibias[i] = m_testHic->GetIBias() * 1000; // convert in mA
     // overcurrent protection; will be counted as trip
     if (result.ibias[i] > m_config->GetParamValue("MAXIBIAS")) {
+      m_hicCurrents.find(m_testHic->GetDbId())->second.maxBias = voltage - .1;
       m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
       sleep(1);
       break;
@@ -96,7 +102,7 @@ void TFastPowerTest::Execute()
 
   // switch on back bias only for module under test
   for (int i = 0; i < 8; i++) {
-    if (i == m_testHic->GetPbMod()) {
+    if (i == m_testHic->GetBbChannel()) {
       m_testHic->GetPowerBoard()->SetBiasOn(i);
     }
     else {
@@ -117,14 +123,22 @@ void TFastPowerTest::Execute()
     currentIt->second.ibias3 = m_testHic->GetIBias() * 1000;
   }
 
-  // check if tripped
-  if ((m_testHic->GetPowerBoard()->GetBiasVoltage() > -1.0) || (!(m_testHic->IsPowered()))) {
-    std::cout << "reading bias voltage of " << m_testHic->GetPowerBoard()->GetBiasVoltage()
-              << std::endl;
+  // check if supply tripped
+  if (!m_testHic->IsPowered()) {
     currentIt->second.trip = true;
   }
   else {
     currentIt->second.trip = false;
+  }
+
+  // check if back bias tripped
+  if (m_testHic->GetPowerBoard()->GetBiasVoltage() > -1.0) {
+    std::cout << "reading bias voltage of " << m_testHic->GetPowerBoard()->GetBiasVoltage()
+              << std::endl;
+    currentIt->second.tripBB = true;
+  }
+  else {
+    currentIt->second.tripBB = false;
   }
   m_testHic->GetPowerBoard()->SetBiasVoltage(0.0);
   m_testHic->PowerOff();

@@ -33,6 +33,7 @@
 TBoardType                   fBoardType;
 std::vector<TReadoutBoard *> fBoards;
 std::vector<TAlpide *>       fChips;
+std::vector<THic *>          fHICs;
 TConfig *                    fConfig;
 
 int myNTriggers;
@@ -128,7 +129,7 @@ bool HasData(const common::TChipIndex &idx)
 
 void WriteDataToFile(const char *fName, bool Recreate)
 {
-  char  fNameChip[100];
+  char  fNameChip[200];
   FILE *fp;
 
   char fNameTemp[100];
@@ -210,7 +211,7 @@ int configureChip(TAlpide *chip)
 
 void scan()
 {
-  unsigned char buffer[1024 * 4000];
+  unsigned char buffer[MAX_EVENT_SIZE];
   int           n_bytes_data, n_bytes_header, n_bytes_trailer, errors8b10b = 0, nClosedEvents = 0;
   int           nBad       = 0;
   int           nSkipped   = 0;
@@ -261,8 +262,8 @@ void scan()
 
         int fEnabled = fEnPerBoard.at(ib);
         while (itrg < nTrigsPerTrain * fEnabled) {
-          if (fBoards.at(ib)->ReadEventData(n_bytes_data, buffer) ==
-              -1) { // no event available in buffer yet, wait a bit
+          if (fBoards.at(ib)->ReadEventData(n_bytes_data, buffer) <=
+              0) { // no event available in buffer yet, wait a bit
             usleep(100);
             nTrials++;
             if (nTrials == MAXTRIALS) {
@@ -296,7 +297,8 @@ void scan()
             // decode Chip event
             int n_bytes_chipevent = n_bytes_data - n_bytes_header - n_bytes_trailer;
             if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, 0,
-                                            boardInfo.channel, prioErrors)) {
+                                            boardInfo.channel, prioErrors,
+                                            fConfig->GetScanConfig()->GetParamValue("MAXHITS"))) {
               std::cout << "Found bad event " << std::endl;
               nBad++;
               if (nBad > 10) continue;
@@ -306,7 +308,7 @@ void scan()
               }
               fclose(fDebug);
             }
-            std::cout << "total number of hits found: " << Hits->size() << std::endl;
+            // std::cout << "total number of hits found: " << Hits->size() << std::endl;
             itrg += nClosedEvents;
           }
         }
@@ -341,10 +343,10 @@ int main(int argc, char **argv)
 {
 
   decodeCommandParameters(argc, argv);
-  initSetup(fConfig, &fBoards, &fBoardType, &fChips);
+  initSetup(fConfig, &fBoards, &fBoardType, &fChips, "", &fHICs);
 
   sleep(1);
-  char Suffix[20], fName[100];
+  char Suffix[80], fName[200];
 
   InitScanParameters();
   CreateScanHisto();

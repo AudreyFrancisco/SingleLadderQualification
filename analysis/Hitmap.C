@@ -19,26 +19,6 @@ void set_plot_style()
 }
 
 
-/*
-int AddressToColumn(int ARegion, int ADoubleCol, int AAddress) {
-  int Column    = ARegion * 32 + ADoubleCol * 2;    // Double columns before ADoubleCol (all chips)
-  //int LeftRight = ((AAddress % 4) < 2 ? 1:0);       // pALPIDE-1/2: left or right column within the double column
-  int LeftRight = (((AAddress%4)==1) || ((Address%4)==2)) ? 1 : 0; // pALPIDE-3 / ALPIDE: left or right column within the double column
-  Column += LeftRight;
-
-  return Column;
-}
-
-
-int AddressToRow         (int ARegion, int ADoubleCol, int AAddress)
-{
-  int Row = AAddress / 2;                // This is OK for the top-right and the bottom-left pixel within a group of 4 (all chips)
-  //if ((AAddress % 4) == 3) Row -= 1;   // pALPIDE-1/2: adjust the top-left pixel (not needed for pALPIDE-3/ALPIDE)
-  //if ((AAddress % 4) == 0) Row += 1;   // pALPIDE-1/2: adjust the bottom-right pixel (not needed for pALPIDE-3/ALPIDE)
-  return Row;
-}
-*/
-
 int AddressToColumn(int ARegion, int ADoubleCol, int AAddress) {
     int Column    = ARegion * 32 + ADoubleCol * 2;    // Double columns before ADoubleCol
     int LeftRight = ((AAddress % 4) < 2 ? 1:0);       // Left or right column within the double column
@@ -49,8 +29,7 @@ int AddressToColumn(int ARegion, int ADoubleCol, int AAddress) {
 }
 
 
-int AddressToRow         (int ARegion, int ADoubleCol, int AAddress)
-{
+int AddressToRow(int ARegion, int ADoubleCol, int AAddress) {
     // Ok, this will get ugly
     int Row = AAddress / 2;                // This is OK for the top-right and the bottom-left pixel within a group of 4
     if ((AAddress % 4) == 3) Row -= 1;      // adjust the top-left pixel
@@ -73,14 +52,15 @@ int Hitmap(const char *fName, int nInj = -1) {
   int nLines = 0, nHot = 0, nIneff = 0;
 
   while (fscanf (fp,"%d %d %d", &col, &row, &nhits) == 3) {
-    int Column = AddressToColumn(col / 16, col % 16, row);
-    int Row    = AddressToRow   (col / 16, col % 16, row);
+    // int Column = AddressToColumn(col / 16, col % 16, row);
+    // int Row    = AddressToRow   (col / 16, col % 16, row);
     nLines ++;
     if (nInj > 0) {
       if (nhits < nInj) nIneff ++;
       if (nhits > nInj) nHot   ++;
     }
-    hHitmap->Fill(Column, Row, nhits);
+    // hHitmap->Fill(Column, Row, nhits);
+    hHitmap->Fill(col, row, nhits);
   }
 
   if (nInj > 0) {

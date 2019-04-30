@@ -1,5 +1,8 @@
+#include <chrono>
+#include <stdexcept>
 #include <string.h>
 #include <string>
+#include <thread>
 
 #include "AlpideConfig.h"
 #include "AlpideDecoder.h"
@@ -14,7 +17,6 @@ TDataTaking::TDataTaking(TScanConfig *config, std::vector<TAlpide *> chips,
                          std::deque<TScanHisto> *histoQue, std::mutex *aMutex)
     : TScan(config, chips, hics, boards, histoQue, aMutex)
 {
-  m_backBias  = m_config->GetBackBias();
   m_nTriggers = m_config->GetParamValue("NTRIG");
 
   // divide triggers in trains
@@ -29,8 +31,6 @@ TDataTaking::TDataTaking(TScanConfig *config, std::vector<TAlpide *> chips,
   m_start[2] = 0;
   m_step[2]  = 1;
   m_stop[2]  = 1;
-
-  CreateScanHisto();
 }
 
 
@@ -90,18 +90,9 @@ void TDataTaking::Init()
 {
   TScan::Init();
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
-    if (!pb) continue;
-    if (m_backBias == 0) {
-      m_hics.at(ihic)->SwitchBias(false);
-      pb->SetBiasVoltage(0);
-    }
-    else {
-      m_hics.at(ihic)->SwitchBias(true);
-      pb->SetBiasVoltage((-1.) * m_backBias);
-    }
-  }
+  SetBackBias();
+
+  CreateScanHisto();
 
   CountEnabledChips();
   for (unsigned int i = 0; i < m_boards.size(); i++) {
@@ -149,7 +140,7 @@ void TDataTaking::FindTimeoutHics(int iboard, int *triggerCounts, int nTriggers)
 
 void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTriggers)
 {
-  unsigned char buffer[1024 * 4000];
+  unsigned char buffer[MAX_EVENT_SIZE];
   int           n_bytes_data, n_bytes_header, n_bytes_trailer;
   int           itrg = 0, trials = 0;
   TBoardHeader  boardInfo;
@@ -160,16 +151,31 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
   }
 
   while (itrg < nTriggers * m_enabled[iboard]) {
-    if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) ==
-        -1) { // no event available in buffer yet, wait a bit
+    if (m_boards.at(iboard)->ReadEventData(n_bytes_data, buffer) <=
+        0) { // no event available in buffer yet, wait a bit
       usleep(100);
       trials++;
       if (trials == 3) {
         std::cout << "Board " << iboard << ": reached 3 timeouts, giving up on this event"
                   << std::endl;
+        std::cout << "  Events per receiver (receiver order): ";
+        for (unsigned int i = 0; i < MAX_MOSAICTRANRECV; i++) {
+          std::cout << nTrigPerHic[i] << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "  Trigger counters per chip (chip order): ";
+        for (unsigned int i = 0; i < m_chips.size(); i++) {
+          uint16_t value;
+          m_chips.at(i)->ReadRegister(Alpide::REG_FROMU_STATUS1, value);
+          std::cout << value << " ";
+        }
+        std::cout << std::endl;
         itrg = nTriggers * m_enabled[iboard];
         FindTimeoutHics(iboard, nTrigPerHic, nTriggers);
         m_errorCount.nTimeout++;
+        if (m_errorCount.nTimeout > m_config->GetParamValue("MAXTIMEOUT")) {
+          throw std::runtime_error("Maximum number of timouts reached. Aborting scan.");
+        }
         trials = 0;
       }
       continue;
@@ -184,16 +190,33 @@ void TDataTaking::ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTri
           m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).n8b10b++;
         }
       }
+      if (boardInfo.eventOverSizeError) {
+        std::cout << "Found oversized event, truncated in MOSAIC" << std::endl;
+        m_errorCount.nOversizeEvent++;
+      }
       int n_bytes_chipevent = n_bytes_data - n_bytes_header; //-n_bytes_trailer;
       if (boardInfo.eoeCount < 2) n_bytes_chipevent -= n_bytes_trailer;
-      if (!AlpideDecoder::DecodeEvent(buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard,
-                                      boardInfo.channel, m_errorCount.nPrioEncoder, &m_stuck)) {
+      bool dataIntegrity = false;
+      try {
+        dataIntegrity = AlpideDecoder::DecodeEvent(
+            buffer + n_bytes_header, n_bytes_chipevent, Hits, iboard, boardInfo.channel,
+            m_errorCount.nPrioEncoder, m_config->GetParamValue("MAXHITS"), &m_stuck);
+      }
+      catch (const std::runtime_error &e) {
+        std::cout << "Exception " << e.what() << " after " << itrg << " Triggers (this point)"
+                  << std::endl;
+        DumpHitInformation(Hits);
+        throw e;
+      }
+
+      if (!dataIntegrity) {
         std::cout << "Found bad event, length = " << n_bytes_chipevent << std::endl;
         m_errorCount.nCorruptEvent++;
         if (FindHIC(iboard, boardInfo.channel).compare("None") != 0) {
           m_errorCounts.at(FindHIC(iboard, boardInfo.channel)).nCorruptEvent++;
         }
       }
+      nTrigPerHic[boardInfo.channel]++;
       itrg++;
     }
   }
@@ -262,14 +285,7 @@ void TDataTaking::Terminate()
     }
   }
 
-  for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
-    if (m_backBias != 0) {
-      TPowerBoard *pb = m_hics.at(ihic)->GetPowerBoard();
-      if (!pb) continue;
-      m_hics.at(ihic)->SwitchBias(false);
-      pb->SetBiasVoltage(0);
-    }
-  }
+  SwitchOffBackbias();
 
   m_running = false;
 }

@@ -61,15 +61,15 @@ private:
   int  m_pulseDelay;
 
   std::map<uint8_t, std::vector<uint8_t>> m_readoutBuffers;
-  std::deque<std::vector<uint8_t>> m_events;
+  std::deque<std::vector<uint8_t>>        m_events;
 
   // Readout streams
   void fetchEventData();
 
 public:
   // Modules
-  std::shared_ptr<TRuDctrlModule>    dctrl;
-  std::shared_ptr<TRuWishboneModule> master;
+  std::shared_ptr<TRuDctrlModule>                          dctrl;
+  std::shared_ptr<TRuWishboneModule>                       master;
   std::map<uint8_t, std::shared_ptr<TRuTransceiverModule>> transceiver_array;
 
 public:
@@ -83,12 +83,12 @@ public:
   virtual int SendOpCode(Alpide::TOpCode OpCode, TAlpide *chipPtr);
   virtual int SendCommand(Alpide::TCommand OpCode, TAlpide *chipPtr);
 
-  virtual int SetTriggerConfig(bool enablePulse, bool enableTrigger, int triggerDelay,
-                               int pulseDelay);
+  virtual int  SetTriggerConfig(bool enablePulse, bool enableTrigger, int triggerDelay,
+                                int pulseDelay);
   virtual void SetTriggerSource(TTriggerSource triggerSource);
   virtual void StartRun();
-  virtual int Trigger(int nTriggers);
-  virtual int ReadEventData(int &NBytes, unsigned char *Buffer);
+  virtual int  Trigger(int nTriggers);
+  virtual int  ReadEventData(int &NBytes, unsigned char *Buffer);
 
   // RU specific functions
 
@@ -97,10 +97,10 @@ public:
   // Initialize Readout Unit to start readout with given configuration
   int Initialize();
 
-  void registeredWrite(uint16_t module, uint16_t address, uint16_t data);
-  void registeredRead(uint16_t module, uint16_t address);
-  bool flush();
-  void readFromPort(uint8_t port, size_t size, UsbDev::DataBuffer &buffer);
+  void                    registeredWrite(uint16_t module, uint16_t address, uint16_t data);
+  void                    registeredRead(uint16_t module, uint16_t address);
+  bool                    flush();
+  void                    readFromPort(uint8_t port, size_t size, UsbDev::DataBuffer &buffer);
   std::vector<ReadResult> readResults();
 
   void checkGitHash();

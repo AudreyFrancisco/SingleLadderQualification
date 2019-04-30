@@ -16,6 +16,8 @@ ScanConfiguration::ScanConfiguration(QWidget *parent)
   connect(ui->speedyfit, SIGNAL(clicked(bool)), this->parent(), SLOT(speedycheck(bool)));
   connect(ui->close, SIGNAL(clicked()), this->parent(), SLOT(loaddefaultconfig()));
   connect(ui->load_configuration, SIGNAL(clicked()), this->parent(), SLOT(loadeditedconfig()));
+  connect(ui->backbias0, SIGNAL(clicked(bool)), this->parent(), SLOT(SetMFTBackBias0(bool)));
+  connect(ui->backbias3, SIGNAL(clicked(bool)), this->parent(), SLOT(SetMFTBackBias3(bool)));
 }
 
 ScanConfiguration::~ScanConfiguration() { delete ui; }
@@ -47,4 +49,16 @@ void ScanConfiguration::setdeaulmaskstages(int ms)
 {
   QString s = QString::number(ms);
   ui->nmaskstages->setText(s);
+}
+
+void ScanConfiguration::setdefaultbackbias(bool backbias)
+{
+  if (backbias) {
+    ui->backbias0->setChecked(backbias);
+    ui->backbias3->setChecked(false);
+  }
+  else {
+    ui->backbias0->setChecked(backbias);
+    ui->backbias3->setChecked(true);
+  }
 }

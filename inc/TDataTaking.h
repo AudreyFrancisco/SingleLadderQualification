@@ -15,8 +15,7 @@
 const int kTrigPerTrain = 100;
 
 typedef struct __TDataTakingParameters : TScanParameters {
-  int   nTriggers;
-  float backBias;
+  int nTriggers;
 } TDataTakingParameters;
 
 class TDataTaking : public TScan {
@@ -25,11 +24,11 @@ private:
   int                  m_nLast;
   std::vector<TPixHit> m_stuck;
   TErrorCounter        m_errorCount;
-  virtual void ConfigureChip(TAlpide *chip) = 0;
-  void ConfigureBoard(TReadoutBoard *board);
-  void FillHistos(std::vector<TPixHit> *Hits, int board);
-  void ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTriggers);
-  void FindTimeoutHics(int iboard, int *triggerCounts, int nTriggers);
+  virtual void         ConfigureChip(TAlpide *chip) = 0;
+  void                 ConfigureBoard(TReadoutBoard *board);
+  void                 FillHistos(std::vector<TPixHit> *Hits, int board);
+  void                 ReadEventData(std::vector<TPixHit> *Hits, int iboard, int nTriggers);
+  void                 FindTimeoutHics(int iboard, int *triggerCounts, int nTriggers);
 
 protected:
   THisto CreateHisto();
@@ -37,8 +36,7 @@ protected:
   int    m_nTriggers;
   bool   m_pulse;
   int    m_pulseLength;
-  float  m_backBias;
-  void ConfigureFromu(TAlpide *chip);
+  void   ConfigureFromu(TAlpide *chip);
 
 public:
   TDataTaking(TScanConfig *config, std::vector<TAlpide *> chips, std::vector<THic *> hics,
@@ -50,11 +48,10 @@ public:
   {
     if (loopIndex == 0) std::cout << "sending train " << m_value[0] << std::endl;
   };
-  void LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
-  void LoopEnd(int loopIndex);
+  void         LoopStart(int loopIndex) { m_value[loopIndex] = m_start[loopIndex]; };
+  void         LoopEnd(int loopIndex);
   void         Execute();
   virtual void Terminate();
-  float        GetBackbias() { return m_backBias; };
 };
 
 #endif

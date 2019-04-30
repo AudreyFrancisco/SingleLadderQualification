@@ -48,6 +48,31 @@ bool common::HitBelongsToChip(TChipIndex aChipIndex, TPixHit aHit)
   return false;
 }
 
+
+bool common::PixelAlreadyHit(std::vector<TPixHit> *pixels, TPixHit aHit)
+{
+  for (unsigned int i = 0; i < pixels->size(); i++) {
+    if ((aHit.boardIndex == pixels->at(i).boardIndex) && (aHit.channel == pixels->at(i).channel) &&
+        (aHit.chipId == pixels->at(i).chipId) && (aHit.region == pixels->at(i).region) &&
+        (aHit.dcol == pixels->at(i).dcol) && (aHit.address == pixels->at(i).address))
+      return true;
+  }
+  return false;
+}
+
+
+bool common::DColAlreadyHit(std::vector<TPixHit> *pixels, TPixHit aHit)
+{
+  for (unsigned int i = 0; i < pixels->size(); i++) {
+    if ((aHit.boardIndex == pixels->at(i).boardIndex) && (aHit.channel == pixels->at(i).channel) &&
+        (aHit.chipId == pixels->at(i).chipId) && (aHit.region == pixels->at(i).region) &&
+        (aHit.dcol == pixels->at(i).dcol))
+      return true;
+  }
+  return false;
+}
+
+
 bool common::HitBelongsToHic(THic *aHic, TPixHit aHit)
 {
   for (unsigned int ichip = 0; ichip < aHic->GetNChips(); ichip++) {

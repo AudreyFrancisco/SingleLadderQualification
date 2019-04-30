@@ -23,7 +23,7 @@ private:
 
 public:
   TLocalBusResultChip() : TScanResultChip(){};
-  void WriteToFile(FILE *fp);
+  void  WriteToFile(FILE *fp);
   float GetVariable(TResultVariable var);
 };
 
@@ -69,10 +69,10 @@ protected:
     TLocalBusResultHic *Result = new TLocalBusResultHic();
     return Result;
   };
-  void CreateResult(){};
-  void AnalyseHisto(TScanHisto *histo);
+  void   CreateResult(){};
+  void   AnalyseHisto(TScanHisto *histo);
   string GetPreviousTestType() { return string(""); }; // done only once
-  void CalculatePrediction(std::string hicName) { (void)hicName; };
+  void   CalculatePrediction(std::string hicName) { (void)hicName; };
 
 public:
   TLocalBusAnalysis(std::deque<TScanHisto> *histoQue, TScan *aScan, TScanConfig *aScanConfig,

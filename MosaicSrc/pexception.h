@@ -39,8 +39,13 @@ using namespace std;
 
 // Control interface errors
 class PControlInterfaceError : public MException {
+private:
+  int m_controlInt;
+
 public:
   explicit PControlInterfaceError(const string &__arg);
+  void SetControlInterface(int controlInt) { m_controlInt = controlInt; };
+  int  GetControlInterface() { return m_controlInt; };
 };
 
 #endif // PEXCEPTION

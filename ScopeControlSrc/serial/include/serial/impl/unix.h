@@ -46,12 +46,12 @@
 
 namespace serial {
 
+  using std::invalid_argument;
   using std::size_t;
   using std::string;
-  using std::invalid_argument;
 
-  using serial::SerialException;
   using serial::IOException;
+  using serial::SerialException;
 
   class MillisecondTimer {
   public:
@@ -171,7 +171,7 @@ namespace serial {
     // Mutex used to lock the write functions
     pthread_mutex_t write_mutex;
   };
-}
+} // namespace serial
 
 #endif // SERIAL_IMPL_UNIX_H
 
