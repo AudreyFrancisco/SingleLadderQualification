@@ -1833,7 +1833,7 @@ void MainWindow::savesettings()
       }
 
       for (unsigned int i = 0; i < fHICs.size(); i++) {
-        if (fHicnames.at(0) != "\0") {
+        if (fHicnames.at(i) != "\0") {
           fstopwriting  = false;
           int in        = 0;
           int out       = 0;
