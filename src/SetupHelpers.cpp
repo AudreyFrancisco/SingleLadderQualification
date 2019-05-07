@@ -1153,7 +1153,7 @@ int initSetupEndurance(TConfig *config, std::vector<TReadoutBoard *> *boards, TB
             ->ConfigureMaster(0, boardIndex, DataRcvMap[mod][0], CtrIntMap[mod][0]);
         ((THicOB *)(hics->at(mod)))
             ->ConfigureMaster(8, boardIndex, DataRcvMap[mod][1], CtrIntMap[mod][1]);
-        if ((hicIds) && (hicIds[mod][0] == '\0')) {
+        if ((hicIds) && (!strcmp(hicIds[mod], "\0"))) {
           hics->at(mod)->Disable();
         }
       }

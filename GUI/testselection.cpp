@@ -95,77 +95,77 @@ void TestSelection::SaveSettings(QString &institute, QString &opname, QString &h
       halfstave = ui->id->toPlainText();
     }
     else {
-      hicid     = '\0';
-      halfstave = '\0';
+      hicid     = "\0";
+      halfstave = "\0";
     }
 
     if (!ui->t2->toPlainText().isEmpty()) {
       ttwo = ui->t2->toPlainText();
     }
     else {
-      ttwo = '\0';
+      ttwo = "\0";
     }
 
     if (!ui->t3->toPlainText().isEmpty()) {
       tthree = ui->t3->toPlainText();
     }
     else {
-      tthree = '\0';
+      tthree = "\0";
     }
 
     if (!ui->t4->toPlainText().isEmpty()) {
       tfour = ui->t4->toPlainText();
     }
     else {
-      tfour = '\0';
+      tfour = "\0";
     }
 
     if (!ui->t5->toPlainText().isEmpty()) {
       tfive = ui->t5->toPlainText();
     }
     else {
-      tfive = '\0';
+      tfive = "\0";
     }
 
     if (!ui->d1->toPlainText().isEmpty()) {
       done = ui->d1->toPlainText();
     }
     else {
-      done = '\0';
+      done = "\0";
     }
 
     if (!ui->d2->toPlainText().isEmpty()) {
       dtwo = ui->d2->toPlainText();
     }
     else {
-      dtwo = '\0';
+      dtwo = "\0";
     }
     if (!ui->d3->toPlainText().isEmpty()) {
       dthree = ui->d3->toPlainText();
     }
     else {
-      dthree = '\0';
+      dthree = "\0";
     }
 
     if (!ui->d4->toPlainText().isEmpty()) {
       dfour = ui->d4->toPlainText();
     }
     else {
-      dfour = '\0';
+      dfour = "\0";
     }
 
     if (!ui->d5->toPlainText().isEmpty()) {
       dfive = ui->d5->toPlainText();
     }
     else {
-      dfive = '\0';
+      dfive = "\0";
     }
 
     if (!ui->stavenamefield->toPlainText().isEmpty()) {
       stave = ui->stavenamefield->toPlainText();
     }
     else {
-      stave = '\0';
+      stave = "\0";
     }
 
     opname = ui->operatorstring->toPlainText();
