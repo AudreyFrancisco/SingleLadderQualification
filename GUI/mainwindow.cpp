@@ -322,6 +322,13 @@ void MainWindow::open()
 
     if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
         fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST) {
+      if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+        std::cout << "The Half Stave name is: " << fHalfstave.toStdString() << std::endl;
+      }
+      else {
+        std::cout << "The Stave name is: " << fStave.toStdString() << std::endl;
+        std::cout << "The Half Stave name is: " << fHalfstave.toStdString() << std::endl;
+      }
       fHicnames.clear();
       const int nModules =
           (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBStaveOLFAST) ? 7 : 4;
@@ -2324,7 +2331,8 @@ void MainWindow::ConnectTestCombo(int value)
     fSettingswindow->adjustendurance();
   }
   if (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
-      fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML) {
+      fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML ||
+      fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST) {
     fSettingswindow->adjuststave();
   }
   std::cout << "the numbeofscan is: " << fNumberofscan << " and the value is: " << value
