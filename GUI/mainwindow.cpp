@@ -1163,42 +1163,44 @@ void MainWindow::getresultdetails(int i)
 
   TScanResultHic *selectedhicresult =
       fresultVector.at(fScanposition)->GetHicResult(fHicnames.at(fSelectedHicIndex).toStdString());
-  ui->selectedscan_nametext->setText(fScanVector.at(fScanposition)->GetName());
-  ui->selectedhicnametext->setText(fHicnames[fSelectedHicIndex]);
+  if (selectedhicresult) {
+    ui->selectedscan_nametext->setText(fScanVector.at(fScanposition)->GetName());
+    ui->selectedhicnametext->setText(fHicnames[fSelectedHicIndex]);
 
-  if (fSelectedHic) {
-    if (selectedhicresult->HasPDF()) {
+    if (fSelectedHic) {
+      if (selectedhicresult->HasPDF()) {
 
-      fPdf = selectedhicresult->GetPDFPath();
-      ui->upload->show();
+        fPdf = selectedhicresult->GetPDFPath();
+        ui->upload->show();
+      }
     }
+
+    ui->selectedhicname->show();
+    ui->selectedhicnametext->show();
+    ui->selectedscan_name->show();
+    ui->selectedscan_nametext->show();
+
+
+    std::map<const char *, TResultVariable> myvariables;
+    myvariables = fAnalysisVector.at(fScanposition)->GetVariableList();
+
+    for (std::map<const char *, TResultVariable>::const_iterator it = myvariables.begin();
+         it != myvariables.end(); ++it) {
+
+
+      std::string d;
+      d = (std::string(it->first));
+      fMapd.push_back(std::make_pair(d, it->second));
+    }
+    for (auto const &v : fMapd) {
+
+      ui->details->addItem(v.first.c_str(), v.second);
+    }
+    ui->details->show();
+    qApp->processEvents();
+    ui->displaydetails->show();
+    qApp->processEvents();
   }
-
-  ui->selectedhicname->show();
-  ui->selectedhicnametext->show();
-  ui->selectedscan_name->show();
-  ui->selectedscan_nametext->show();
-
-
-  std::map<const char *, TResultVariable> myvariables;
-  myvariables = fAnalysisVector.at(fScanposition)->GetVariableList();
-
-  for (std::map<const char *, TResultVariable>::const_iterator it = myvariables.begin();
-       it != myvariables.end(); ++it) {
-
-
-    std::string d;
-    d = (std::string(it->first));
-    fMapd.push_back(std::make_pair(d, it->second));
-  }
-  for (auto const &v : fMapd) {
-
-    ui->details->addItem(v.first.c_str(), v.second);
-  }
-  ui->details->show();
-  qApp->processEvents();
-  ui->displaydetails->show();
-  qApp->processEvents();
 }
 
 
