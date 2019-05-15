@@ -22,6 +22,9 @@ git_status.txt
 .cproject
 .settings
 
+# VSCode local 
+.vscode
+
 # additional build files for cmake builds
 CMakeFiles
 CMakeCache.txt
