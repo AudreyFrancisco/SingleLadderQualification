@@ -359,33 +359,33 @@ int main(int argc, char **argv)
       if (!rChip->GetConfig()->IsEnabled()) continue;
       configureChip(rChip);
     }
-/*
-    // Setup mosaic board for Eyescan
-    TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(fBoards.at(0));
+    /*
+        // Setup mosaic board for Eyescan
+        TReadoutBoardMOSAIC *myMOSAIC = dynamic_cast<TReadoutBoardMOSAIC *>(fBoards.at(0));
 
-    if (!myMOSAIC) {
-      std::cout << "Eyescan only implemented for MOSAIC. Exit\n";
-      return 1;
-    }
+        if (!myMOSAIC) {
+          std::cout << "Eyescan only implemented for MOSAIC. Exit\n";
+          return 1;
+        }
 
-    myMOSAIC->StartRun();
+        myMOSAIC->StartRun();
 
-    // Eyescan
-    bool verbose = true;
-    for (const auto &rChip : fChips) {
-      if (!rChip->GetConfig()->IsEnabled()) continue;
-      std::string filename("eye_ch");
-      int         chipId = rChip->GetConfig()->GetChipId();
-      filename += std::to_string(chipId);
-      filename += ".dat";
-      eyescan::EyeScan scan(*myMOSAIC, chipId, filename, 4, 4, verbose);
-      scan.runFullScan();
-    }
-  */
+        // Eyescan
+        bool verbose = true;
+        for (const auto &rChip : fChips) {
+          if (!rChip->GetConfig()->IsEnabled()) continue;
+          std::string filename("eye_ch");
+          int         chipId = rChip->GetConfig()->GetChipId();
+          filename += std::to_string(chipId);
+          filename += ".dat";
+          eyescan::EyeScan scan(*myMOSAIC, chipId, filename, 4, 4, verbose);
+          scan.runFullScan();
+        }
+      */
   }
 
 
-  for (; ; ){
+  for (;;) {
   }
 
   return 0;
