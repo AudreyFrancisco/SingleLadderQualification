@@ -251,7 +251,7 @@ void TSCurveScan::Init()
 
   TScan::Init();
 
-  if (((TSCurveParameters *)m_parameters)->nominal) RestoreNominalSettings();
+  // if (((TSCurveParameters *)m_parameters)->nominal) RestoreNominalSettings();
 
   m_running = true;
 

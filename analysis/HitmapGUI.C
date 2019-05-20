@@ -39,22 +39,19 @@ int HitmapGUI(const char *fName, int nInj = -1, int hicid = 0, int chipid = 0, c
 
   while (fscanf (fp,"%d %d %d", &col, &row, &nhits) == 3 && irow != 512) {
     nLines ++;
-    while (icol != col || irow != row) {
+    if (icol != col || irow != row) {
       // printf("col = %d , icol = %d , row = %d , irow = %d\n", col, icol, row, irow);
-      while (irow != row) {
-        // printf("--- irow = %d , row = %d\n", irow, row);
-        for (int column = 0; column <= 1023; column ++) {
-          nDead ++;
-          hDeadMap->Fill(column, irow);
+
+        while (!(icol == col && irow == row)) {
+            //printf("col = %d ,  row = %d , icol = %d ,irow = %d\n", col, row,  icol, irow);
+            nDead ++;
+            hDeadMap->Fill(icol, irow);
+            icol ++;
+            if (icol == 1024) {
+                icol = 0;
+                irow ++;
+            }
         }
-      irow ++;
-      }
-      while (icol != col) {
-        // printf("--- icol = %d , col = %d\n", irow, row);
-        nDead ++;
-        hDeadMap->Fill(icol, row);
-        icol ++;
-      }
     }
 
     if (nInj > 0) {

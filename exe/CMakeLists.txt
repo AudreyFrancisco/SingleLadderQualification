@@ -17,6 +17,7 @@ set(TEST_EXE
   test_dacscan
   test_dacscan_voltage
   test_digitalscan
+  test_eyescan
   test_fifo
   test_localbus
   test_mosaic
@@ -24,6 +25,7 @@ set(TEST_EXE
   test_noiseocc_ext
   test_poweron
   test_powerdown_analogue
+  test_prbs
   test_pulselength
   test_readoutunit
   test_scope

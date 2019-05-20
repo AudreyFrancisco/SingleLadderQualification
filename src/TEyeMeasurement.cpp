@@ -144,7 +144,13 @@ void TEyeMeasurement::PrepareStep(int loopIndex)
     m_boardIndex = FindBoardIndex(m_testChip);
     sprintf(m_state, "Running %d", m_value[2]);
 
-    std::cout << "Testing chip : " << m_testChip->GetConfig()->GetChipId() << std::endl;
+    if (m_testChip->GetConfig()->IsEnabled()) {
+      std::cout << "Testing chip : " << m_testChip->GetConfig()->GetChipId() << std::endl;
+    }
+    else {
+      std::cout << "Skip disabled chip : " << m_testChip->GetConfig()->GetChipId() << std::endl;
+    }
+
     m_board = dynamic_cast<TReadoutBoardMOSAIC *>(m_boards.at(m_boardIndex));
     if (!m_board) {
       std::cout << "Error: Wrong board";
@@ -176,6 +182,10 @@ void TEyeMeasurement::LoopEnd(int loopIndex)
 // results are saved into m_histo as described below
 void TEyeMeasurement::Execute()
 {
+  if (!m_testChip->GetConfig()->IsEnabled()) {
+    return;
+  }
+
   int hOffset = m_value[0];
   int vOffset = m_value[1];
 
