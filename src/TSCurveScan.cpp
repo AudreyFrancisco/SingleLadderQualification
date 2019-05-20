@@ -156,7 +156,7 @@ void TSCurveScan::RestoreNominalSettings()
     for (unsigned int i = 0; i < m_chips.size(); i++) {
       m_chips.at(i)->GetConfig()->SetParamValue("ITHR", 50);
       m_chips.at(i)->GetConfig()->SetParamValue("VCASN", 50);
-      m_chips.at(i)->GetConfig()->SetParamValue("VCASN2", 57);
+      m_chips.at(i)->GetConfig()->SetParamValue("VCASN2", 62);
       m_chips.at(i)->GetConfig()->SetParamValue("VCLIP", 0);
     }
   }
