@@ -121,12 +121,12 @@ void TFifoAnalysis::WriteResult()
     if (!m_hics.at(ihic)->IsEnabled()) continue;
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     if (m_config->GetUseDataPath()) {
-      sprintf(fName, "%s/FifoScanResult_%s.dat", hicResult->GetOutputPath().c_str(),
-              m_config->GetfNameSuffix());
+      sprintf(fName, "%s/FifoScanResult_%s_BB%.0fV.dat", hicResult->GetOutputPath().c_str(),
+              m_config->GetfNameSuffix(), m_config->GetBackBias());
     }
     else {
-      sprintf(fName, "FifoScanResult_%s_%s.dat", m_hics.at(ihic)->GetDbId().c_str(),
-              m_config->GetfNameSuffix());
+      sprintf(fName, "FifoScanResult_%s_%s_BB%.0fV.dat", m_hics.at(ihic)->GetDbId().c_str(),
+              m_config->GetfNameSuffix(), m_config->GetBackBias());
     }
     // m_scan->WriteConditions(fName, m_hics.at(ihic));
 
