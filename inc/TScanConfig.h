@@ -79,7 +79,8 @@ namespace ScanConfig {
 
   // 1.1 bugfixes (local bus for disabled chips, forcing back bias at 1V)
   // 1.2 voltage drop correction for power bus
-  const float NUMBEROFTHEBEAST = 1.3;
+  // 1.4 VRESETP fix
+  const float NUMBEROFTHEBEAST = 1.4;
 
   const int AUTOREPEAT = 0; // automatically repeat scans without user prompt
   const int MAXREPEAT  = 5; // max number of automatic repetitions
