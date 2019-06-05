@@ -115,7 +115,7 @@ bool CernSsoCookieJar::fillTheJar()
       cout << "The " << theCookiePackFile << " file deleted." << endl;
     }
   }
-  string Command = "cern-get-sso-cookie ";
+  string Command = getCookieExe();
 #ifdef AUTH_X509
   Command += " --cert ";
   Command += theCliCert;
@@ -123,9 +123,16 @@ bool CernSsoCookieJar::fillTheJar()
   Command += theCliKey;
 #endif
 #ifdef AUTH_KERBEROS
+#ifdef USE_PYTHON_SSO
+  Command += " -k";
+#else
   Command += " --krb";
 #endif
-  Command += " -r -u ";
+#endif
+#ifndef USE_PYTHON_SSO
+  Command += " -r ";
+#endif
+  Command += " -u ";
   Command += theSslUrl;
   Command += " -o ";
   Command += theCookiePackFile;
@@ -208,7 +215,7 @@ bool CernSsoCookieJar::testTheCERNSSO()
 
   string tmp_filename = std::tmpnam(nullptr);
 
-  string Command = "type cern-get-sso-cookie > " + tmp_filename;
+  string Command = "type " + getCookieExe() + " > " + tmp_filename;
   if (system(Command.c_str()) != 0) {
     cout << "Failed to execute the command: " << Command << endl;
   }
@@ -225,7 +232,8 @@ bool CernSsoCookieJar::testTheCERNSSO()
   }
 
   char buffer[512];
-  if (fgets(buffer, 511, result) != NULL && strstr(buffer, "cern-get-sso-cookie is") != NULL) {
+  if (fgets(buffer, 511, result) != NULL &&
+      strstr(buffer, (getCookieExe() + " is").c_str()) != NULL) {
     if (VERBOSITYLEVEL == 1) {
       cout << "The CERN-SSO package is installed !" << endl;
     }

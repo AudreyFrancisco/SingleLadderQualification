@@ -17,6 +17,7 @@
 #include "TScanAnalysis.h"
 #include "TScanConfig.h"
 #include "TScanFactory.h"
+#include "TScanManager.h"
 #include "calibrationpb.h"
 #include "debugwindow.h"
 #include "dialog.h"
@@ -321,6 +322,13 @@ void MainWindow::open()
 
     if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST ||
         fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST) {
+      if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
+        std::cout << "The Half Stave name is: " << fHalfstave.toStdString() << std::endl;
+      }
+      else {
+        std::cout << "The Stave name is: " << fStave.toStdString() << std::endl;
+        std::cout << "The Half Stave name is: " << fHalfstave.toStdString() << std::endl;
+      }
       fHicnames.clear();
       const int nModules =
           (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBStaveOLFAST) ? 7 : 4;
@@ -557,30 +565,7 @@ void MainWindow::color_IB(int position, bool ok)
 void MainWindow::scanLoop(TScan *myScan)
 {
   if (!fScanAbort) try {
-      myScan->LoopStart(2);
-
-      while (myScan->Loop(2)) {
-        myScan->PrepareStep(2);
-        qApp->processEvents();
-        myScan->LoopStart(1);
-
-        while (myScan->Loop(1)) {
-          myScan->PrepareStep(1);
-          myScan->LoopStart(0);
-
-          while (myScan->Loop(0)) {
-            myScan->PrepareStep(0);
-            myScan->Execute();
-            myScan->Next(0);
-          }
-          myScan->LoopEnd(0);
-          myScan->Next(1);
-        }
-        myScan->LoopEnd(1);
-        myScan->Next(2);
-      }
-      myScan->LoopEnd(2);
-      myScan->Terminate();
+      TScanManager::Scan(myScan);
     }
     catch (exception &ex) {
       std::cout << ex.what() << " is the thrown exception from the scan" << std::endl;
@@ -1178,42 +1163,44 @@ void MainWindow::getresultdetails(int i)
 
   TScanResultHic *selectedhicresult =
       fresultVector.at(fScanposition)->GetHicResult(fHicnames.at(fSelectedHicIndex).toStdString());
-  ui->selectedscan_nametext->setText(fScanVector.at(fScanposition)->GetName());
-  ui->selectedhicnametext->setText(fHicnames[fSelectedHicIndex]);
+  if (selectedhicresult) {
+    ui->selectedscan_nametext->setText(fScanVector.at(fScanposition)->GetName());
+    ui->selectedhicnametext->setText(fHicnames[fSelectedHicIndex]);
 
-  if (fSelectedHic) {
-    if (selectedhicresult->HasPDF()) {
+    if (fSelectedHic) {
+      if (selectedhicresult->HasPDF()) {
 
-      fPdf = selectedhicresult->GetPDFPath();
-      ui->upload->show();
+        fPdf = selectedhicresult->GetPDFPath();
+        ui->upload->show();
+      }
     }
+
+    ui->selectedhicname->show();
+    ui->selectedhicnametext->show();
+    ui->selectedscan_name->show();
+    ui->selectedscan_nametext->show();
+
+
+    std::map<const char *, TResultVariable> myvariables;
+    myvariables = fAnalysisVector.at(fScanposition)->GetVariableList();
+
+    for (std::map<const char *, TResultVariable>::const_iterator it = myvariables.begin();
+         it != myvariables.end(); ++it) {
+
+
+      std::string d;
+      d = (std::string(it->first));
+      fMapd.push_back(std::make_pair(d, it->second));
+    }
+    for (auto const &v : fMapd) {
+
+      ui->details->addItem(v.first.c_str(), v.second);
+    }
+    ui->details->show();
+    qApp->processEvents();
+    ui->displaydetails->show();
+    qApp->processEvents();
   }
-
-  ui->selectedhicname->show();
-  ui->selectedhicnametext->show();
-  ui->selectedscan_name->show();
-  ui->selectedscan_nametext->show();
-
-
-  std::map<const char *, TResultVariable> myvariables;
-  myvariables = fAnalysisVector.at(fScanposition)->GetVariableList();
-
-  for (std::map<const char *, TResultVariable>::const_iterator it = myvariables.begin();
-       it != myvariables.end(); ++it) {
-
-
-    std::string d;
-    d = (std::string(it->first));
-    fMapd.push_back(std::make_pair(d, it->second));
-  }
-  for (auto const &v : fMapd) {
-
-    ui->details->addItem(v.first.c_str(), v.second);
-  }
-  ui->details->show();
-  qApp->processEvents();
-  ui->displaydetails->show();
-  qApp->processEvents();
 }
 
 
@@ -1413,7 +1400,7 @@ void MainWindow::attachtodatabase()
   }
 
   for (unsigned int i = 0; i < fHICs.size(); i++) {
-    if (!fHicnames.at(i).isEmpty()) {
+    if (fHicnames.at(i) != "\0") {
       if ((fHICs.at(i)->IsEnabled()) || (fNumberofscan == OBPower)) {
         QString            comment;
         QDateTime          date;
@@ -1853,8 +1840,9 @@ void MainWindow::savesettings()
         popup("Warning: You did not\nchoose your location\nPlease start again.");
         return;
       }
+
       for (unsigned int i = 0; i < fHICs.size(); i++) {
-        if (!fHicnames.at(i).isEmpty()) {
+        if (fHicnames.at(i) != "\0") {
           fstopwriting  = false;
           int in        = 0;
           int out       = 0;
@@ -2345,7 +2333,8 @@ void MainWindow::ConnectTestCombo(int value)
     fSettingswindow->adjustendurance();
   }
   if (fNumberofscan == OBStaveOL || fNumberofscan == OBStaveML ||
-      fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML) {
+      fNumberofscan == StaveReceptionOL || fNumberofscan == StaveReceptionML ||
+      fNumberofscan == OBStaveOLFAST || fNumberofscan == OBStaveMLFAST) {
     fSettingswindow->adjuststave();
   }
   std::cout << "the numbeofscan is: " << fNumberofscan << " and the value is: " << value
@@ -2549,8 +2538,7 @@ void MainWindow::stopscans()
 void MainWindow::analysis(TScanAnalysis *myanalysis)
 {
   try {
-    myanalysis->Initialize();
-    myanalysis->Run();
+    TScanManager::Analysis(myanalysis);
   }
   catch (exception &ex) {
     std::cout << ex.what() << " is the thrown exception from the analysis" << std::endl;

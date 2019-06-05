@@ -5,7 +5,7 @@ if(CMAKE_PROJECT_DIR STREQUAL CMAKE_SOURCE_DIR)
   set(BUILD_STANDALONE)
 endif()
 
-set(BASE_OBJS 
+set(BASE_OBJS
   ../DataBaseSrc/DBHelpers.cpp
   ../src/AlpideConfig.cpp
   ../src/AlpideDebug.cpp
@@ -57,6 +57,7 @@ set(BASE_OBJS
   ../src/TScanAnalysis.cpp
   ../src/TScanConfig.cpp
   ../src/TScanFactory.cpp
+  ../src/TScanManager.cpp
   ../src/TestBeamTools.cpp
   ../src/USB.cpp
   ../src/USBHelpers.cpp

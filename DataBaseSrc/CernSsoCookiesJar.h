@@ -92,6 +92,15 @@ public:
 private:
   bool testTheCERNSSO();
   int  parseTheJar(string aCookieJarFile);
+
+  static std::string getCookieExe()
+  {
+#ifdef USE_PYTHON_SSO
+    return "cern-get-sso-cookie.py";
+#else
+    return "cern-get-sso-cookie";
+#endif
+  }
 };
 
 #endif // CERNSSOCOOKIEJAR_H

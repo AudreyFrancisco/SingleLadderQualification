@@ -114,8 +114,6 @@ void TPowerBoard::Init()
     return;
   }
 
-  compareSettings(thePowerBoardState);
-
   // Switch off all channels before the setting
   fMOSAICPowerBoard->offAllVbias();
   fMOSAICPowerBoard->offAllVout();
@@ -137,6 +135,10 @@ void TPowerBoard::Init()
 
   // first read of monitor values
   fMOSAICPowerBoard->getState(thePowerBoardState, powerboard::getFlags::getAll);
+
+  // ensure correct settings
+  compareSettings(thePowerBoardState);
+
   return;
 }
 
@@ -154,13 +156,13 @@ bool TPowerBoard::compareSettings(powerboard::pbstate_t *aState)
   bool match = true;
   int  i;
   for (i = 0; i < MAX_MOULESPERMOSAIC; i++) {
-    if (aState->Vout[i * 2] != fPBoard.Modules[i].AVset) {
+    if (std::abs(aState->Vout[i * 2] - fPBoard.Modules[i].AVset) > 0.005) {
       match = false;
       std::cout << "Power board : Module =" << i
                 << " the Analog V Set is different ! Board:" << aState->Vout[i * 2]
                 << " Config:" << fPBoard.Modules[i].AVset << std::endl;
     }
-    if (aState->Vout[i * 2 + 1] != fPBoard.Modules[i].DVset) {
+    if (std::abs(aState->Vout[i * 2 + 1] - fPBoard.Modules[i].DVset) > 0.005) {
       match = false;
       std::cout << "Power board : Module =" << i
                 << " the Digital V Set is different ! Board:" << aState->Vout[i * 2 + 1]
