@@ -879,6 +879,12 @@ string GetEosPath(ActivityDB::activityLong activity, THicType hicType, bool doub
     component = activity.Name.substr(pos);
   }
 
+  // Remove the time stamp
+  size_t beginTS = component.find("[");
+  size_t endTS   = component.find("]");
+  if (beginTS != string::npos && endTS != string::npos)
+    component.erase(beginTS - 1); // Till end of string (-1 is for blank space)
+
   replace(component.begin(), component.end(), ' ', '_');
 
   path = basePath + "/" + test + location + "/" + component;
