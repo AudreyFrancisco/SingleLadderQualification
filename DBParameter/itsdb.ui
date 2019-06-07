@@ -70,9 +70,6 @@
           <height>241</height>
          </rect>
         </property>
-        <property name="tabletTracking">
-         <bool>false</bool>
-        </property>
        </widget>
        <widget class="QTextEdit" name="stave_id">
         <property name="geometry">
@@ -82,9 +79,6 @@
           <width>171</width>
           <height>31</height>
          </rect>
-        </property>
-        <property name="tabletTracking">
-         <bool>true</bool>
         </property>
         <property name="html">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -868,9 +862,6 @@ p, li { white-space: pre-wrap; }
           <height>101</height>
          </rect>
         </property>
-        <property name="tabletTracking">
-         <bool>false</bool>
-        </property>
        </widget>
        <widget class="QLabel" name="label_2">
         <property name="geometry">
@@ -965,9 +956,6 @@ p, li { white-space: pre-wrap; }
           <height>31</height>
          </rect>
         </property>
-        <property name="tabletTracking">
-         <bool>true</bool>
-        </property>
        </widget>
        <widget class="QLabel" name="label_5">
         <property name="geometry">
@@ -1018,9 +1006,6 @@ p, li { white-space: pre-wrap; }
           <width>241</width>
           <height>101</height>
          </rect>
-        </property>
-        <property name="tabletTracking">
-         <bool>false</bool>
         </property>
        </widget>
        <widget class="QPlainTextEdit" name="info_5">
