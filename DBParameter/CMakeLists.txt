@@ -32,7 +32,7 @@ add_executable(dbGUI ${SRCS})
 
 target_link_libraries(dbGUI curl xml2 Qt5::Gui Qt5::Core Qt5::Widgets alpide ${ROOT_LIBRARIES} pthread)
 
-
+target_include_directories(dbGUI PUBLIC ${ROOT_INCLUDE_DIRS})
 
 install(TARGETS dbGUI 
   RUNTIME DESTINATION bin)

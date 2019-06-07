@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef ITSDB_H
+#define ITSDB_H
 
 #include "AlpideDB.h"
 #include "AlpideDBEndPoints.h"
