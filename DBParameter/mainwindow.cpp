@@ -8,7 +8,7 @@
 #include "TMultiGraph.h"
 #include "TStyle.h"
 #include "TText.h"
-#include "ui_mainwindow.h"
+#include "ui_itsdb.h"
 #include <QDialog>
 #include <QFile>
 #include <QFileDialog>
