@@ -48,6 +48,7 @@ void TLocalBusTest::Init()
     m_boards.at(i)->SendOpCode(Alpide::OPCODE_GRST);
   }
   for (unsigned int i = 0; i < m_chips.size(); i++) {
+    if (!m_chips.at(i)->GetConfig()->IsEnabled()) continue;
     m_chips.at(i)->GetConfig()->SetInitialToken(false);
     m_chips.at(i)->GetConfig()->SetEnableDdr(false);
     AlpideConfig::ConfigureCMU(m_chips.at(i));
@@ -74,7 +75,12 @@ void TLocalBusTest::FindDaisyChains(std::vector<TAlpide *> chips)
   int                    maxChip    = -1;
   std::vector<TAlpide *> daisyChain;
 
-  while ((totalChips < (int)chips.size()) && (maxChip < (int)chips.size() - 1)) {
+  int totEnabled = 0;
+  for (auto chip : m_chips)
+    if (chip->GetConfig()->IsEnabled()) totEnabled++;
+  // cout << "Enabled chips: " << totEnabled << endl;
+
+  while ((totalChips < totEnabled) && (maxChip < (int)chips.size() - 1)) {
     // find next enabled chip and put into new daisy chain vector
     for (iChip = maxChip + 1;
          (iChip < (int)chips.size()) && (!(chips.at(iChip)->GetConfig()->IsEnabled())); iChip++) {
