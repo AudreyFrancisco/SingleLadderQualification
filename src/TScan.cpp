@@ -8,6 +8,7 @@
 #include "AlpideConfig.h"
 #include "Common.h"
 #include "TBoardConfigMOSAIC.h"
+#include "TDigitalScan.h"
 #include "TPowerTest.h"
 #include "TReadoutBoardDAQ.h"
 #include "TReadoutBoardMOSAIC.h"
@@ -132,35 +133,42 @@ void TScan::SaveStartConditions()
                 << " when reading power board voltages / currents for HIC " << ihic << std::endl;
     }
 
-    try {
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart =
-          m_hics.at(ihic)->GetTemperature(
-              &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipTempsStart));
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipStart =
-          m_hics.at(ihic)->GetAnalogueVoltage(
-              &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())
-                    ->m_chipAnalogueVoltagesStart));
-      if (m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipStart < 1.6) {
-        std::cerr << std::endl
-                  << "W A R N I N G :"
-                  << "Analogue voltage at HIC " << m_hics.at(ihic)->GetDbId()
-                  << " below 1.6V! Please check your setup" << std::endl
-                  << std::endl;
+    if (dynamic_cast<TDigitalScan *>(this) ||
+        (m_config->GetTestType() != TTestType::OBHalfStaveOLFAST &&
+         m_config->GetTestType() != TTestType::OBHalfStaveMLFAST &&
+         m_config->GetTestType() != TTestType::OBStaveOLFAST &&
+         m_config->GetTestType() != TTestType::OBStaveMLFAST)) {
+      try {
+        m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempStart =
+            m_hics.at(ihic)->GetTemperature(
+                &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipTempsStart));
+        m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipStart =
+            m_hics.at(ihic)->GetAnalogueVoltage(
+                &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())
+                      ->m_chipAnalogueVoltagesStart));
+        if (m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipStart < 1.6) {
+          std::cerr << std::endl
+                    << "W A R N I N G :"
+                    << "Analogue voltage at HIC " << m_hics.at(ihic)->GetDbId()
+                    << " below 1.6V! Please check your setup" << std::endl
+                    << std::endl;
+        }
+        m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddChipStart =
+            m_hics.at(ihic)->GetDigitalVoltage(
+                &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())
+                      ->m_chipDigitalVoltagesStart));
+        if (m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddChipStart < 1.6) {
+          std::cerr << std::endl
+                    << "W A R N I N G :"
+                    << "Digital voltage at HIC " << m_hics.at(ihic)->GetDbId()
+                    << " below 1.6V! Please check your setup" << std::endl
+                    << std::endl;
+        }
       }
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())
-          ->m_vdddChipStart = m_hics.at(ihic)->GetDigitalVoltage(&(
-          m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipDigitalVoltagesStart));
-      if (m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddChipStart < 1.6) {
-        std::cerr << std::endl
-                  << "W A R N I N G :"
-                  << "Digital voltage at HIC " << m_hics.at(ihic)->GetDbId()
-                  << " below 1.6V! Please check your setup" << std::endl
-                  << std::endl;
+      catch (std::exception &e) {
+        std::cout << "Init: Exception " << e.what() << " when reading chip temp / currents for HIC "
+                  << ihic << std::endl;
       }
-    }
-    catch (std::exception &e) {
-      std::cout << "Init: Exception " << e.what() << " when reading chip temp / currents for HIC "
-                << ihic << std::endl;
     }
 
     TErrorCounter errCount;
@@ -174,14 +182,20 @@ void TScan::SaveStartConditions()
         std::pair<std::string, TErrorCounter>(m_hics.at(ihic)->GetDbId(), errCount));
   }
 
-  for (const auto &rChip : m_chips) {
-    if (rChip->GetConfig()->IsEnabled() || (rChip->GetConfig()->GetParamValue("PREVID") != -1)) {
-      try {
-        m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
-      }
-      catch (std::exception &e) {
-        std::cout << "Init: exception " << e.what() << " when reading registers for chip "
-                  << rChip->GetConfig()->GetChipId() << std::endl;
+  if (dynamic_cast<TDigitalScan *>(this) ||
+      (m_config->GetTestType() != TTestType::OBHalfStaveOLFAST &&
+       m_config->GetTestType() != TTestType::OBHalfStaveMLFAST &&
+       m_config->GetTestType() != TTestType::OBStaveOLFAST &&
+       m_config->GetTestType() != TTestType::OBStaveMLFAST)) {
+    for (const auto &rChip : m_chips) {
+      if (rChip->GetConfig()->IsEnabled() || (rChip->GetConfig()->GetParamValue("PREVID") != -1)) {
+        try {
+          m_conditions.m_chipConfigStart.push_back(rChip->DumpRegisters());
+        }
+        catch (std::exception &e) {
+          std::cout << "Init: exception " << e.what() << " when reading registers for chip "
+                    << rChip->GetConfig()->GetChipId() << std::endl;
+        }
       }
     }
   }
@@ -316,48 +330,59 @@ void TScan::Terminate()
                 << " when reading power board voltages / currents for HIC " << ihic << std::endl;
     }
 
-    try {
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd =
-          m_hics.at(ihic)->GetTemperature(
-              &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipTempsEnd));
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())
-          ->m_vddaChipEnd = m_hics.at(ihic)->GetAnalogueVoltage(&(
-          m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipAnalogueVoltagesEnd));
-      if (m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipEnd < 1.6) {
-        std::cerr << std::endl
-                  << "W A R N I N G :"
-                  << "Analogue voltage at HIC " << m_hics.at(ihic)->GetDbId()
-                  << " below 1.6V! Please check your setup" << std::endl
-                  << std::endl;
+    if (m_config->GetTestType() != TTestType::OBHalfStaveOLFAST &&
+        m_config->GetTestType() != TTestType::OBHalfStaveMLFAST &&
+        m_config->GetTestType() != TTestType::OBStaveOLFAST &&
+        m_config->GetTestType() != TTestType::OBStaveMLFAST) {
+      try {
+        m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_tempEnd =
+            m_hics.at(ihic)->GetTemperature(
+                &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipTempsEnd));
+        m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipEnd =
+            m_hics.at(ihic)->GetAnalogueVoltage(
+                &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())
+                      ->m_chipAnalogueVoltagesEnd));
+        if (m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vddaChipEnd < 1.6) {
+          std::cerr << std::endl
+                    << "W A R N I N G :"
+                    << "Analogue voltage at HIC " << m_hics.at(ihic)->GetDbId()
+                    << " below 1.6V! Please check your setup" << std::endl
+                    << std::endl;
+        }
+        m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())
+            ->m_vdddChipEnd = m_hics.at(ihic)->GetDigitalVoltage(&(
+            m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipDigitalVoltagesEnd));
+        if (m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddChipEnd < 1.6) {
+          std::cerr << std::endl
+                    << "W A R N I N G :"
+                    << "Digital voltage at HIC " << m_hics.at(ihic)->GetDbId()
+                    << " below 1.6V! Please check your setup" << std::endl
+                    << std::endl;
+        }
       }
-      m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())
-          ->m_vdddChipEnd = m_hics.at(ihic)->GetDigitalVoltage(
-          &(m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_chipDigitalVoltagesEnd));
-      if (m_conditions.m_hicConditions.at(m_hics.at(ihic)->GetDbId())->m_vdddChipEnd < 1.6) {
-        std::cerr << std::endl
-                  << "W A R N I N G :"
-                  << "Digital voltage at HIC " << m_hics.at(ihic)->GetDbId()
-                  << " below 1.6V! Please check your setup" << std::endl
-                  << std::endl;
+      catch (std::exception &e) {
+        std::cout << "Terminate: exception " << e.what()
+                  << " when reading chip temp / currents for HIC " << ihic << std::endl;
       }
-    }
-    catch (std::exception &e) {
-      std::cout << "Terminate: exception " << e.what()
-                << " when reading chip temp / currents for HIC " << ihic << std::endl;
     }
   }
   time_end      = std::chrono::system_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::minutes>(time_end - time_start);
   snprintf(m_state, sizeof(m_state), "Done (in %3d min)", int(duration.count()));
 
-  for (const auto &rChip : m_chips) {
-    if (rChip->GetConfig()->IsEnabled() || (rChip->GetConfig()->GetParamValue("PREVID") != -1)) {
-      try {
-        m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
-      }
-      catch (std::exception &e) {
-        std::cout << "Terminate: exception " << e.what() << " when reading registers for chip "
-                  << rChip->GetConfig()->GetChipId() << std::endl;
+  if (m_config->GetTestType() != TTestType::OBHalfStaveOLFAST &&
+      m_config->GetTestType() != TTestType::OBHalfStaveMLFAST &&
+      m_config->GetTestType() != TTestType::OBStaveOLFAST &&
+      m_config->GetTestType() != TTestType::OBStaveMLFAST) {
+    for (const auto &rChip : m_chips) {
+      if (rChip->GetConfig()->IsEnabled() || (rChip->GetConfig()->GetParamValue("PREVID") != -1)) {
+        try {
+          m_conditions.m_chipConfigEnd.push_back(rChip->DumpRegisters());
+        }
+        catch (std::exception &e) {
+          std::cout << "Terminate: exception " << e.what() << " when reading registers for chip "
+                    << rChip->GetConfig()->GetChipId() << std::endl;
+        }
       }
     }
   }
