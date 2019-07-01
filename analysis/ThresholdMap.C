@@ -56,11 +56,11 @@ void ThresholdMap (const char *fName) {
     if (thresh > 0) {
       int Column = AddressToColumn(col / 16, col % 16, row);
       int Row    = AddressToRow   (col / 16, col % 16, row);
-      hThresh->Fill(Column, Row, thresh);
+      hThresh->Fill(col, row, thresh);
 
       hThresh1->Fill(thresh);
       // Fill Histogram;
-    } 
+    }
   }
 
   gStyle->SetOptStat (kFALSE);
@@ -69,11 +69,12 @@ void ThresholdMap (const char *fName) {
   hThresh->GetYaxis()->SetTitle("Row");
   hThresh->GetZaxis()->SetTitle("Noise [e]");
   hThresh->GetZaxis()->SetTitleOffset(1.1);
-  //hThresh->SetMaximum(20);
+  hThresh->SetMaximum(450);
+  new TCanvas();
   hThresh->Draw("COLZ");
   //hThresh1->Draw();
   hNoiseProf->GetXaxis()->SetTitle("Double column");
   hNoiseProf->GetYaxis()->SetTitle("<Noise> [e]");
 
   //hNoiseProf->Draw();
-} 
+}
