@@ -142,7 +142,7 @@ void TEyeMeasurement::PrepareStep(int loopIndex)
   case 2:
     m_testChip   = m_chips.at(m_value[2]);
     m_boardIndex = FindBoardIndex(m_testChip);
-    sprintf(m_state, "Running %d", m_value[2]);
+    sprintf(m_state, "Running %d", m_testChip->GetConfig()->GetChipId());
 
     if (m_testChip->GetConfig()->IsEnabled()) {
       std::cout << "Testing chip : " << m_testChip->GetConfig()->GetChipId() << std::endl;
