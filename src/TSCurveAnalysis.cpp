@@ -68,9 +68,11 @@ void TSCurveAnalysis::FillVariableList()
   }
   else if (IsVCASNTuning()) {
     m_variableList.insert(std::pair<const char *, TResultVariable>("av. VCASN", vcasn));
+    std::pair<const char *, TResultVariable>("av. VCASN", vcasn);
   }
   else {
     m_variableList.insert(std::pair<const char *, TResultVariable>("av. ITHR", ithr));
+    std::pair<const char *, TResultVariable>("av. ITHR", ithr);
   }
 }
 
@@ -150,13 +152,27 @@ void TSCurveAnalysis::PrepareFiles()
     TSCurveResultChip *chipResult = (TSCurveResultChip *)m_result->GetChipResult(m_chipList.at(i));
     if (m_writeRawData) {
       if (m_config->GetUseDataPath()) {
-        sprintf(fName, "%s/Threshold_RawData_%s_Chip%d.dat", chipResult->GetOutputPath().c_str(),
-                m_config->GetfNameSuffix(), m_chipList.at(i).chipId);
+        if (m_nominal) {
+          sprintf(fName, "%s/Threshold_RawData_%s_Chip%d.dat", chipResult->GetOutputPath().c_str(),
+                  m_config->GetfNameSuffix(), m_chipList.at(i).chipId);
+        }
+        else {
+          sprintf(fName, "%s/Threshold_RawData_Tuned_%s_Chip%d.dat",
+                  chipResult->GetOutputPath().c_str(), m_config->GetfNameSuffix(),
+                  m_chipList.at(i).chipId);
+        }
       }
       else {
-        sprintf(fName, "Threshold_RawData_%s_B%d_Rcv%d_Ch%d.dat", m_config->GetfNameSuffix(),
-                m_chipList.at(i).boardIndex, m_chipList.at(i).dataReceiver,
-                m_chipList.at(i).chipId);
+        if (m_nominal) {
+          sprintf(fName, "Threshold_RawData_%s_B%d_Rcv%d_Ch%d.dat", m_config->GetfNameSuffix(),
+                  m_chipList.at(i).boardIndex, m_chipList.at(i).dataReceiver,
+                  m_chipList.at(i).chipId);
+        }
+        else {
+          sprintf(fName, "Threshold_RawData_Tuned_%s_B%d_Rcv%d_Ch%d.dat",
+                  m_config->GetfNameSuffix(), m_chipList.at(i).boardIndex,
+                  m_chipList.at(i).dataReceiver, m_chipList.at(i).chipId);
+        }
       }
       chipResult->SetRawFile(fName);
       chipResult->m_rawFP = fopen(fName, "w");
@@ -164,14 +180,50 @@ void TSCurveAnalysis::PrepareFiles()
 
     if (m_writeFitResults) {
       if (m_config->GetUseDataPath()) {
-        sprintf(fName, "%s/Threshold_FitResults_%s_Chip%d_BB%.0fV.dat",
-                chipResult->GetOutputPath().c_str(), m_config->GetfNameSuffix(),
-                m_chipList.at(i).chipId, m_config->GetBackBias());
+        if (IsVCASNTuning()) {
+          sprintf(fName, "%s/VCASN_FitResults_%s_Chip%d_BB%.0fV.dat",
+                  chipResult->GetOutputPath().c_str(), m_config->GetfNameSuffix(),
+                  m_chipList.at(i).chipId, m_config->GetBackBias());
+        }
+        else if (IsThresholdScan()) {
+          if (m_nominal) {
+            sprintf(fName, "%s/Threshold_FitResults_%s_Chip%d_BB%.0fV.dat",
+                    chipResult->GetOutputPath().c_str(), m_config->GetfNameSuffix(),
+                    m_chipList.at(i).chipId, m_config->GetBackBias());
+          }
+          else {
+            sprintf(fName, "%s/Threshold_FitResults_Tuned_%s_Chip%d_BB%.0fV.dat",
+                    chipResult->GetOutputPath().c_str(), m_config->GetfNameSuffix(),
+                    m_chipList.at(i).chipId, m_config->GetBackBias());
+          }
+        }
+        else {
+          sprintf(fName, "%s/ITHR_FitResults_%s_Chip%d_BB%.0fV.dat",
+                  chipResult->GetOutputPath().c_str(), m_config->GetfNameSuffix(),
+                  m_chipList.at(i).chipId, m_config->GetBackBias());
+        }
       }
       else {
-        sprintf(fName, "Threshold_FitResults__%s_B%d_Rcv%d_Ch%d_BB%.0fV.dat",
-                m_config->GetfNameSuffix(), m_chipList.at(i).boardIndex,
-                m_chipList.at(i).dataReceiver, m_chipList.at(i).chipId, m_config->GetBackBias());
+        if (IsVCASNTuning()) {
+          sprintf(fName, "VCASN_FitResults__%s_B%d_Rcv%d_Ch%d_BB%.0fV.dat",
+                  m_config->GetfNameSuffix(), m_chipList.at(i).boardIndex,
+                  m_chipList.at(i).dataReceiver, m_chipList.at(i).chipId, m_config->GetBackBias());
+        }
+        else if (IsThresholdScan()) {
+          if (m_nominal) {
+            sprintf(fName, "Threshold_FitResults_%s_Chip%d_BB%.0fV.dat", m_config->GetfNameSuffix(),
+                    m_chipList.at(i).chipId, m_config->GetBackBias());
+          }
+          else {
+            sprintf(fName, "Threshold_FitResults_Tuned_%s_Chip%d_BB%.0fV.dat",
+                    m_config->GetfNameSuffix(), m_chipList.at(i).chipId, m_config->GetBackBias());
+          }
+        }
+        else {
+          sprintf(fName, "ITHR_FitResults_%s_B%d_Rcv%d_Ch%d_BB%.0fV.dat",
+                  m_config->GetfNameSuffix(), m_chipList.at(i).boardIndex,
+                  m_chipList.at(i).dataReceiver, m_chipList.at(i).chipId, m_config->GetBackBias());
+        }
       }
       chipResult->SetFitFile(fName);
       chipResult->m_fitFP = fopen(fName, "w");
@@ -223,7 +275,8 @@ void TSCurveAnalysis::CalculatePrediction(std::string hicName)
     return;
   }
 
-  prediction->SetValidity(FillPreviousActivities(hicName, &activities));
+  // prediction->SetValidity(FillPreviousActivities(hicName, &activities));
+  prediction->SetValidity(true); // Force Validity to true has we do not have DB connection
   if (!prediction->IsValid()) return;
 
   char nameDeadPixels[50], nameNoThresh[50];
@@ -340,7 +393,7 @@ void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo)
       delete gPixel;
     }
   }
-  if (IsVCASNTuning()) {
+  if (IsVCASNTuning() && vcasnTuningOutOfRange > 0) {
     std::cout << vcasnTuningOutOfRange << " pixels out-of-range in the Vcasn tuning." << std::endl;
   }
 }
@@ -349,12 +402,40 @@ void TSCurveAnalysis::DrawAndSaveToPDF(int hicid)
 {
   TString command;
   for (unsigned int ichip = 0; ichip < m_chipList.size(); ichip++) {
-    command.Form("root -b -q "
-                 "'analysis/ThresholdDistributionGUI.C+(\"Data/%d/"
-                 "Threshold_FitResults_%s_Chip%d_BB%.0fV.dat\",%d,%d,\"%s\", %f)'",
-                 hicid, m_config->GetfNameSuffix(), m_chipList.at(ichip).chipId,
-                 m_config->GetBackBias(), hicid, m_chipList.at(ichip).chipId,
-                 m_config->GetfNameSuffix(), m_config->GetBackBias());
+    if (IsThresholdScan()) {
+      if (m_nominal) {
+        command.Form("root -b -q "
+                     "'analysis/ThresholdDistributionGUI.C+(\"Data/%d/"
+                     "Threshold_FitResults_%s_Chip%d_BB%.0fV.dat\",%d,%d,\"%s\", %f)'",
+                     hicid, m_config->GetfNameSuffix(), m_chipList.at(ichip).chipId,
+                     m_config->GetBackBias(), hicid, m_chipList.at(ichip).chipId,
+                     m_config->GetfNameSuffix(), m_config->GetBackBias());
+      }
+      else {
+        command.Form("root -b -q "
+                     "'analysis/ThresholdDistributionGUI.C+(\"Data/%d/"
+                     "Threshold_FitResults_Tuned_%s_Chip%d_BB%.0fV.dat\",%d,%d,\"%s\", %f)'",
+                     hicid, m_config->GetfNameSuffix(), m_chipList.at(ichip).chipId,
+                     m_config->GetBackBias(), hicid, m_chipList.at(ichip).chipId,
+                     m_config->GetfNameSuffix(), m_config->GetBackBias());
+      }
+    }
+    else if (IsVCASNTuning()) {
+      command.Form("root -b -q "
+                   "'analysis/VCASNDistributionGUI.C+(\"Data/%d/"
+                   "VCASN_FitResults_%s_Chip%d_BB%.0fV.dat\",%d,%d,\"%s\", %f)'",
+                   hicid, m_config->GetfNameSuffix(), m_chipList.at(ichip).chipId,
+                   m_config->GetBackBias(), hicid, m_chipList.at(ichip).chipId,
+                   m_config->GetfNameSuffix(), m_config->GetBackBias());
+    }
+    else if (IsITHRTuning()) {
+      command.Form("root -b -q "
+                   "'analysis/ITHRDistributionGUI.C+(\"Data/%d/"
+                   "ITHR_FitResults_%s_Chip%d_BB%.0fV.dat\",%d,%d,\"%s\", %f)'",
+                   hicid, m_config->GetfNameSuffix(), m_chipList.at(ichip).chipId,
+                   m_config->GetBackBias(), hicid, m_chipList.at(ichip).chipId,
+                   m_config->GetfNameSuffix(), m_config->GetBackBias());
+    }
     int status = system(command.Data());
     std::cout << "Done, status code = " << status << std::endl;
   }
@@ -506,9 +587,18 @@ void TSCurveAnalysis::WriteResult()
     TScanResultHic *hicResult = m_result->GetHicResult(m_hics.at(ihic)->GetDbId());
     if (!hicResult->IsValid()) continue;
     if (m_config->GetUseDataPath()) {
-      if (IsThresholdScan())
-        sprintf(fName, "%s/ThresholdScanResult_%s_BB%.0fV.dat", hicResult->GetOutputPath().c_str(),
-                m_config->GetfNameSuffix(), m_config->GetBackBias());
+      if (IsThresholdScan()) {
+        if (m_nominal) {
+          sprintf(fName, "%s/ThresholdScanResult_%s_BB%.0fV.dat",
+                  hicResult->GetOutputPath().c_str(), m_config->GetfNameSuffix(),
+                  m_config->GetBackBias());
+        }
+        else {
+          sprintf(fName, "%s/ThresholdScanResult_Tuned_%s_BB%.0fV.dat",
+                  hicResult->GetOutputPath().c_str(), m_config->GetfNameSuffix(),
+                  m_config->GetBackBias());
+        }
+      }
       else if (IsVCASNTuning()) {
         sprintf(fName, "%s/VCASNTuneResult_%s_BB%.0fV.dat", hicResult->GetOutputPath().c_str(),
                 m_config->GetfNameSuffix(), m_config->GetBackBias());
@@ -519,9 +609,18 @@ void TSCurveAnalysis::WriteResult()
       }
     }
     else {
-      if (IsThresholdScan())
-        sprintf(fName, "ThresholdScanResult_%s_%s_BB%.0fV.dat", m_hics.at(ihic)->GetDbId().c_str(),
-                m_config->GetfNameSuffix(), m_config->GetBackBias());
+      if (IsThresholdScan()) {
+        if (m_nominal) {
+          sprintf(fName, "ThresholdScanResult_%s_%s_BB%.0fV.dat",
+                  m_hics.at(ihic)->GetDbId().c_str(), m_config->GetfNameSuffix(),
+                  m_config->GetBackBias());
+        }
+        else {
+          sprintf(fName, "ThresholdScanResult_Tuned_%s_%s_BB%.0fV.dat",
+                  m_hics.at(ihic)->GetDbId().c_str(), m_config->GetfNameSuffix(),
+                  m_config->GetBackBias());
+        }
+      }
       else if (IsVCASNTuning()) {
         sprintf(fName, "VCASNTuneResult_%s_%s_BB%.0fV.dat", m_hics.at(ihic)->GetDbId().c_str(),
                 m_config->GetfNameSuffix(), m_config->GetBackBias());
