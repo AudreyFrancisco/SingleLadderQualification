@@ -3163,8 +3163,12 @@ void MainWindow::MFTHICQualification()
 
   ConfigThresholdScan();
 
-  if (fBackBias3) {
-    printf("Setting -3V BB DAC params\n");
+  if (fBackBias0) {
+    fConfig->GetScanConfig()->SetVcasnRange(30, 70);
+    fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  }
+  else {
+    printf("Back Bias = 3V\n");
     fConfig->GetScanConfig()->SetBackBias(3.0);
     for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
       fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 60);
@@ -3172,7 +3176,16 @@ void MainWindow::MFTHICQualification()
       fConfig->GetChipConfig(i)->SetParamValue("VCASN", 105);
       fConfig->GetChipConfig(i)->SetParamValue("VCASN2", 117);
     }
+    fConfig->GetScanConfig()->SetVcasnRange(75, 160);
+    fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   }
+
+  AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
   AddScan(STThreshold);
 
   ConfigNoiseOccupancy();
