@@ -99,7 +99,7 @@ int AlpideConfig::ApplyMask(TAlpide *chip, bool Clear)
 void AlpideConfig::ApplyStandardDACSettings(TAlpide *chip, float backBias)
 {
   if (backBias == 0) {
-    chip->WriteRegister(Alpide::REG_VCASN, 60);
+    chip->WriteRegister(Alpide::REG_VCASN, 50);
     chip->WriteRegister(Alpide::REG_VCASN2, 62);
     chip->WriteRegister(Alpide::REG_VRESETD, 147);
     chip->WriteRegister(Alpide::REG_IDB, 29);
