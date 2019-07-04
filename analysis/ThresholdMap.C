@@ -1,11 +1,13 @@
 #include <iostream>
+#include <stdio.h>
 
-#include "TH1F.h"
 #include "TH2F.h"
 #include "TProfile.h"
 #include "TStyle.h"
 #include "TColor.h"
-
+#include "TCanvas.h"
+#include "TMath.h"
+#include "TLegend.h"
 
 void set_plot_style()
 {
@@ -25,56 +27,104 @@ int AddressToColumn      (int ARegion, int ADoubleCol, int AAddress)
 {
     int Column    = ARegion * 32 + ADoubleCol * 2;    // Double columns before ADoubleCol
     int LeftRight = ((((AAddress % 4) == 1) || ((AAddress % 4) == 2))? 1:0);       // Left or right column within the double column
-    
+
     Column += LeftRight;
-    
+
     return Column;
 }
 
 
 int AddressToRow         (int ARegion, int ADoubleCol, int AAddress)
 {
-    int Row = AAddress / 2;   
+    int Row = AAddress / 2;
     return Row;
 }
 
 
-void ThresholdMap (const char *fName) {
+void ThresholdMap (const char *fName, int hicid = 0, int chipid = 0, const char *datetime = "", float backbias = 0.0, bool tuned=kFALSE) {
+  int scale = 2;
   FILE *fp = fopen (fName, "r");
   set_plot_style();
-  TH2F *hThresh = new TH2F ("hThresh", "Threshold Map", 1024, -0.5, 1023.5, 512, -0.5, 511.5);
-  TProfile *hNoiseProf = new TProfile("hNoiseProf", "Noise Profile", 1024, -.5, 1023.5);
+  TH2F *hThresh = new TH2F ("hThresh", "Threshold Map", 1024/scale, -0.5, 1023.5, 512/scale, -0.5, 511.5);
+  // TProfile *hNoiseProf = new TProfile("hNoiseProf", "Noise Profile", 1024, -.5, 1023.5);
+  TH2F *hNoise = new TH2F ("hNoise", "Noise Map", 1024/scale, -0.5, 1023.5, 512/scale, -0.5, 511.5);
 
-  TH1F *hThresh1 = new TH1F ("hThresh1", "Threshold", 200, 0, 400);
   int col, row;
   float thresh, noise, chisq;
 
   while (fscanf(fp, "%d %d %f %f %f", &col, &row, &thresh, &noise, &chisq) == 5) {
     int pixel = col * 1024 + row;
-    if (!(pixel %10000)) cout << "processing pixel " << pixel << endl;
+    // if (!(pixel %10000)) cout << "processing pixel " << pixel << endl;
 
-    if (thresh > 0) {
-      int Column = AddressToColumn(col / 16, col % 16, row);
-      int Row    = AddressToRow   (col / 16, col % 16, row);
-      hThresh->Fill(col, row, thresh);
+ //   if (thresh > 0) {
+      // int Column = AddressToColumn(col / 16, col % 16, row);
+      // int Row    = AddressToRow   (col / 16, col % 16, row);
+      hThresh->Fill(col, row, thresh/scale/scale);
+      hNoise->Fill(col, row, noise/scale/scale);
 
-      hThresh1->Fill(thresh);
+      // hThresh1->Fill(thresh);
       // Fill Histogram;
-    }
+   // }
   }
+  TCanvas *cThreshDist = new TCanvas("cThreshDist", "Threshold Map", 1000, 1000);
+  cThreshDist->Divide(1,2);
+
+  cThreshDist->cd(1);
+
+  std::string title = "Threshold Map, HIC ";
+  title += std::to_string( hicid );
+  title += ", Chip ";
+  title += std::to_string( chipid );
+  const char *plotTitle = title.c_str();
 
   gStyle->SetOptStat (kFALSE);
-  gStyle->SetOptTitle(kFALSE);
+  gStyle->SetOptTitle(kTRUE);
+  hThresh->SetTitle(plotTitle);
   hThresh->GetXaxis()->SetTitle("Column");
   hThresh->GetYaxis()->SetTitle("Row");
-  hThresh->GetZaxis()->SetTitle("Noise [e]");
+  hThresh->GetZaxis()->SetTitle("Threshold [e]");
   hThresh->GetZaxis()->SetTitleOffset(1.1);
   hThresh->SetMaximum(450);
-  new TCanvas();
+  hThresh->SetMinimum(0);
+
   hThresh->Draw("COLZ");
-  //hThresh1->Draw();
-  hNoiseProf->GetXaxis()->SetTitle("Double column");
-  hNoiseProf->GetYaxis()->SetTitle("<Noise> [e]");
+
+  cThreshDist->cd(2);
+
+  std::string  title2 = "Noise Map, HIC ";
+  title2 += std::to_string( hicid );
+  title2 += ", Chip ";
+  title2 += std::to_string( chipid );
+  const char *plotTitle2 = title2.c_str();
+
+  hNoise->SetTitle(plotTitle2);
+  hNoise->GetXaxis()->SetTitle("Column");
+  hNoise->GetYaxis()->SetTitle("Row");
+  hNoise->GetZaxis()->SetTitle("Noise [e]");
+  hNoise->GetZaxis()->SetTitleOffset(1.1);
+  // hNoise->SetMaximum(450);
+  // hNoise->SetMinimum(0);
+  hNoise->Draw("COLZ");
+
+  int bbias = backbias;
+
+  std::string filename = "Data/";
+  filename += std::to_string( hicid );
+  if(tuned) filename += "/ThresholdMap_Tuned_HIC";
+  else filename += "/ThresholdMap_HIC";
+  filename += std::to_string( hicid );
+  filename += "_";
+  filename += datetime;
+  filename += "_Chip";
+  filename += std::to_string( chipid );
+  filename += "_BB";
+  filename += std::to_string( bbias );
+  filename += "V";
+  filename += ".pdf";
+  const char *finalname = filename.c_str();
+
+  cThreshDist->SaveAs(finalname);
+
 
   //hNoiseProf->Draw();
 }
