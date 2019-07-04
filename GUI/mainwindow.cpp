@@ -3124,6 +3124,7 @@ void MainWindow::MFTTunedThresholdScan()
     fConfig->GetScanConfig()->SetVcasnRange(75, 160);
     fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   }
+  fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", "64");
 
   AddScan(STThreshold);
   AddScan(STVCASN);
@@ -3131,6 +3132,12 @@ void MainWindow::MFTTunedThresholdScan()
   AddScan(STApplyVCASN, fresultVector.back());
   AddScan(STITHR);
   AddScan(STApplyITHR, fresultVector.back());
+
+  std::string       final;
+  std::stringstream convert;
+  convert << fNm;
+  final = convert.str();
+  fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", final.c_str());
   AddScan(STThreshold);
 }
 
@@ -3180,12 +3187,19 @@ void MainWindow::MFTHICQualification()
     fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   }
 
+  fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", "64");
   AddScan(STThreshold);
   AddScan(STVCASN);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
   AddScan(STApplyVCASN, fresultVector.back());
   AddScan(STITHR);
   AddScan(STApplyITHR, fresultVector.back());
+
+  std::string       final;
+  std::stringstream convert;
+  convert << fNm;
+  final = convert.str();
+  fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", final.c_str());
   AddScan(STThreshold);
 
   ConfigNoiseOccupancy();
