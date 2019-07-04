@@ -255,8 +255,13 @@ void TScan::Terminate()
   // }
   time_end      = std::chrono::system_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::minutes>(time_end - time_start);
-  snprintf(m_state, sizeof(m_state), "Done (in %3d min)", int(duration.count()));
-
+  std::chrono::minutes zeromin(0);
+  if (duration > zeromin)
+    snprintf(m_state, sizeof(m_state), "Done (in %3d min)", int(duration.count()));
+  else {
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(time_end - time_start);
+    snprintf(m_state, sizeof(m_state), "Done (in %3d sec)", int(duration.count()));
+  }
   // reset voltage drop correction, reset chips, apply voltage drop correction to reset state
   // for (unsigned int ihic = 0; ihic < m_hics.size(); ihic++) {
   //   if (!m_hics.at(ihic)->IsEnabled()) continue;
