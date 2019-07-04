@@ -413,7 +413,7 @@ void TSCurveAnalysis::DrawAndSaveToPDF(int hicid)
         system(command.Data());
         command.Form("root -b -q "
                      "'analysis/ThresholdDistributionGUI.C+(\"Data/%d/"
-                     "Threshold_FitResults_%s_Chip%d_BB%.0fV.dat\",%d,%d,\"%s\", %f,kTRUE)'",
+                     "Threshold_FitResults_%s_Chip%d_BB%.0fV.dat\",%d,%d,\"%s\", %f,kFALSE)'",
                      hicid, m_config->GetfNameSuffix(), m_chipList.at(ichip).chipId,
                      m_config->GetBackBias(), hicid, m_chipList.at(ichip).chipId,
                      m_config->GetfNameSuffix(), m_config->GetBackBias());
@@ -421,7 +421,7 @@ void TSCurveAnalysis::DrawAndSaveToPDF(int hicid)
       else {
         command.Form("root -b -q "
                      "'analysis/ThresholdMap.C+(\"Data/%d/"
-                     "Threshold_FitResults_Tuned_%s_Chip%d_BB%.0fV.dat\",%d,%d,\"%s\", %f,kFALSE)'",
+                     "Threshold_FitResults_Tuned_%s_Chip%d_BB%.0fV.dat\",%d,%d,\"%s\", %f,kTRUE)'",
                      hicid, m_config->GetfNameSuffix(), m_chipList.at(ichip).chipId,
                      m_config->GetBackBias(), hicid, m_chipList.at(ichip).chipId,
                      m_config->GetfNameSuffix(), m_config->GetBackBias());
