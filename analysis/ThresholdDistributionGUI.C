@@ -10,7 +10,7 @@
 #include "TLegend.h"
 
 
-int ThresholdDistributionGUI(const char *fName, int hicid = 0, int chipid = 0, const char *datetime = "", float backbias = 0.0) {
+int ThresholdDistributionGUI(const char *fName, int hicid = 0, int chipid = 0, const char *datetime = "", float backbias = 0.0, bool tuned=kFALSE) {
   int col, row;
   float threshold, noise, smthg;
   TH1F *hThresh = new TH1F("hThresh", "hThresh", 125, 0., 500.);
@@ -71,7 +71,8 @@ int ThresholdDistributionGUI(const char *fName, int hicid = 0, int chipid = 0, c
 
   std::string filename = "Data/";
   filename += std::to_string( hicid );
-  filename += "/ThresholdDistribution_HIC";
+  if(tuned) filename += "/ThresholdDistribution_Tuned_HIC";
+  else filename += "/ThresholdDistribution_HIC";
   filename += std::to_string( hicid );
   filename += "_";
   filename += datetime;
