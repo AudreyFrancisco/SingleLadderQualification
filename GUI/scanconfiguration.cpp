@@ -53,12 +53,6 @@ void ScanConfiguration::setdeaulmaskstages(int ms)
 
 void ScanConfiguration::setdefaultbackbias(bool backbias)
 {
-  if (backbias) {
-    ui->backbias0->setChecked(backbias);
-    ui->backbias3->setChecked(false);
-  }
-  else {
-    ui->backbias0->setChecked(backbias);
-    ui->backbias3->setChecked(true);
-  }
+  ui->backbias0->setChecked(backbias);
+  ui->backbias3->setChecked(!backbias);
 }
