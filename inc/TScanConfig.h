@@ -20,6 +20,7 @@ typedef enum {
   MFTFifo,
   MFTDigital,
   MFTThreshold,
+  MFTTunedThres,
   MFTNoise,
   MFTQualification,
   MFTEyeMeasurement,
@@ -72,13 +73,13 @@ namespace ScanConfig {
   const int MAXTIMEOUT     = 100;
   const int MAXHITS        = 40000000; // max number of hits in hit vector; 40 Mio ~ 1GB
 
-  const int ITHR_START  = 30;
+  const int ITHR_START  = 10;
   const int ITHR_STOP   = 100;
   const int ITHR_STEP   = 1;
   const int VCASN_START = 30;
   const int VCASN_STOP  = 70;
   const int VCASN_STEP  = 1;
-  const int SCAN_STEP   = 256; // Grab every Xth row (for tuneITHR/VCASN scan only).
+  const int SCAN_STEP   = 8; // Grab every Xth row (for tuneITHR/VCASN scan only).
   // Speeds up scan; changing this has little effect on result accuracy.
   const int TUNING_MAXROW  = 512;
   const int LOCALBUSCUTRED = 1;

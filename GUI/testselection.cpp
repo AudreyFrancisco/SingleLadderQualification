@@ -22,6 +22,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   ui->typetest->addItem("MFT HIC Noise Occupancy Scan", MFTNoise);
   ui->typetest->addItem("MFT Eye Measurement", MFTEyeMeasurement);
   ui->typetest->addItem("MFT HIC Qualification", MFTQualification);
+  ui->typetest->addItem("MFT HIC Threshold Tuning", MFTTunedThres);
   // ui->typetest->addItem("OB HIC Endurance Test", OBEndurance);
   // ui->typetest->addItem("IB HIC Endurance Test", IBEndurance);
   // ui->typetest->addItem("OB HIC Reception Test", OBReception);

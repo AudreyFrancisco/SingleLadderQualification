@@ -327,7 +327,7 @@ void TScanAnalysis::WriteHicClassToFile(std::string hicName)
   char            fName[300];
   TScanResultHic *hicResult = m_result->GetHicResult(hicName);
 
-  if (hicResult) {
+  if (hicResult && m_scan) {
     std::string writeLine = std::string(m_scan->GetName()) + std::string(": ") +
                             std::string(hicResult->WriteHicClassification());
     sprintf(fName, "%s/Classification.dat", hicResult->GetOutputPath().c_str());

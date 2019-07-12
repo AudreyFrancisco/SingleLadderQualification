@@ -306,7 +306,7 @@ void MainWindow::open()
   else if (fNumberofscan == MFTNoise) {
     fileName = "Config/Config_MFTLadder_NoiseOccupancy.cfg";
   }
-  else if (fNumberofscan == MFTQualification) {
+  else if (fNumberofscan == MFTQualification || fNumberofscan == MFTTunedThres) {
     fileName = "Config/Config_MFTLadder.cfg";
   }
   else if (fNumberofscan == MFTEyeMeasurement) {
@@ -1069,7 +1069,7 @@ void MainWindow::fillingOBvectors()
 
   // threshold scans and tuning at 0V back bias
   fConfig->GetScanConfig()->SetBackBias(0.0);
-  fConfig->GetScanConfig()->SetVcasnRange(30, 70);
+  fConfig->GetScanConfig()->SetVcasnRange(40, 60);
 
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STThreshold);
@@ -1449,6 +1449,9 @@ void MainWindow::initscanlist()
   if (fNumberofscan == MFTThreshold) {
     MFTThresholdScan();
   }
+  if (fNumberofscan == MFTTunedThres) {
+    MFTTunedThresholdScan();
+  }
   if (fNumberofscan == MFTNoise) {
     MFTNoiseOccupancyScan();
   }
@@ -1485,7 +1488,7 @@ void MainWindow::initscanlist()
     fillingDctrl();
   }
   qApp->processEvents();
-  std::cout << "the size of the scan vector is: " << fScanVector.size() << std::endl;
+  // std::cout << "the size of the scan vector is: " << fScanVector.size() << std::endl;
   ui->start_test->defaultAction()->setEnabled(true);
 }
 
@@ -2351,17 +2354,21 @@ void MainWindow::savesettings()
 
     fScanconfigwindow = new ScanConfiguration(this);
     if (fNumberofscan == MFTThreshold || fNumberofscan == MFTNoise ||
-        fNumberofscan == MFTQualification) {
+        fNumberofscan == MFTQualification || fNumberofscan == MFTTunedThres) {
       fScanconfigwindow->show();
       setdefaultvalues(fScanfit, fNm);
       fScanconfigwindow->setdefaultspeed(fScanfit);
       fScanconfigwindow->setdefaultbackbias(true);
+      fBackBias0 = true;
+      fBackBias3 = false;
       fScanconfigwindow->setdeaulmaskstages(fNm);
     }
     else {
       setdefaultvalues(fScanfit, fNm);
       fScanconfigwindow->setdefaultspeed(fScanfit);
       fScanconfigwindow->setdefaultbackbias(true);
+      fBackBias0 = true;
+      fBackBias3 = false;
       fScanconfigwindow->setdeaulmaskstages(fNm);
       loadeditedconfig();
     }
@@ -2946,8 +2953,7 @@ void MainWindow::fillingibvectors()
 
   // threshold scan, no tuning for the time being, 0V back bias
   fConfig->GetScanConfig()->SetBackBias(0.0);
-  fConfig->GetScanConfig()->SetVcasnRange(30, 70);
-
+  fConfig->GetScanConfig()->SetVcasnRange(40, 60);
   fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   AddScan(STThreshold);
   AddScan(STVCASN);
@@ -3101,6 +3107,44 @@ void MainWindow::MFTThresholdScan()
   AddScan(STThreshold);
 }
 
+void MainWindow::MFTTunedThresholdScan()
+{
+  // Threshold Tuning
+  ConfigThresholdScan();
+  ClearVectors();
+  if (fBackBias0) {
+    fConfig->GetScanConfig()->SetVcasnRange(30, 70);
+    fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  }
+  else {
+    printf("Back Bias = 3V\n");
+    fConfig->GetScanConfig()->SetBackBias(3.0);
+    for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
+      fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 60);
+      fConfig->GetChipConfig(i)->SetParamValue("VRESETD", 147);
+      fConfig->GetChipConfig(i)->SetParamValue("VCASN", 105);
+      fConfig->GetChipConfig(i)->SetParamValue("VCASN2", 117);
+    }
+    fConfig->GetScanConfig()->SetVcasnRange(75, 160);
+    fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  }
+  fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", "64");
+
+  AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+
+  std::string       final;
+  std::stringstream convert;
+  convert << fNm;
+  final = convert.str();
+  fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", final.c_str());
+  AddScan(STThreshold);
+}
+
 void MainWindow::MFTNoiseOccupancyScan()
 {
   ConfigNoiseOccupancy();
@@ -3130,8 +3174,12 @@ void MainWindow::MFTHICQualification()
 
   ConfigThresholdScan();
 
-  if (fBackBias3) {
-    printf("Setting -3V BB DAC params\n");
+  if (fBackBias0) {
+    fConfig->GetScanConfig()->SetVcasnRange(30, 70);
+    fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
+  }
+  else {
+    printf("Back Bias = 3V\n");
     fConfig->GetScanConfig()->SetBackBias(3.0);
     for (unsigned int i = 0; i < fConfig->GetNChips(); ++i) {
       fConfig->GetChipConfig(i)->SetParamValue("VCLIP", 60);
@@ -3139,7 +3187,23 @@ void MainWindow::MFTHICQualification()
       fConfig->GetChipConfig(i)->SetParamValue("VCASN", 105);
       fConfig->GetChipConfig(i)->SetParamValue("VCASN2", 117);
     }
+    fConfig->GetScanConfig()->SetVcasnRange(75, 160);
+    fConfig->GetScanConfig()->SetParamValue("NOMINAL", 1);
   }
+
+  fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", "64");
+  AddScan(STThreshold);
+  AddScan(STVCASN);
+  fConfig->GetScanConfig()->SetParamValue("NOMINAL", 0);
+  AddScan(STApplyVCASN, fresultVector.back());
+  AddScan(STITHR);
+  AddScan(STApplyITHR, fresultVector.back());
+
+  std::string       final;
+  std::stringstream convert;
+  convert << fNm;
+  final = convert.str();
+  fConfig->GetScanConfig()->SetParamValue("NMASKSTAGES", final.c_str());
   AddScan(STThreshold);
 
   ConfigNoiseOccupancy();

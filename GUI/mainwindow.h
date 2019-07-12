@@ -89,6 +89,7 @@ public slots:
   void MFTFifoScan();
   void MFTDigitalScan();
   void MFTThresholdScan();
+  void MFTTunedThresholdScan();
   void MFTNoiseOccupancyScan();
   void MFTHICEyeMeasurement();
   void MFTHICQualification();

@@ -26,7 +26,7 @@ TEyeMeasurement::TEyeMeasurement(TScanConfig *config, std::vector<TAlpide *> chi
 
   // outer loop: loop over all chips
   // TODO: can this be done in parallel on all chips?
-  m_start[2] = 4; // For MFT HICs never start under chipID 4
+  m_start[2] = 0;
   m_step[2]  = 1;
   m_stop[2]  = m_chips.size();
 
@@ -142,7 +142,7 @@ void TEyeMeasurement::PrepareStep(int loopIndex)
   case 2:
     m_testChip   = m_chips.at(m_value[2]);
     m_boardIndex = FindBoardIndex(m_testChip);
-    sprintf(m_state, "Running %d", m_value[2]);
+    sprintf(m_state, "Running %d", m_testChip->GetConfig()->GetChipId());
 
     if (m_testChip->GetConfig()->IsEnabled()) {
       std::cout << "Testing chip : " << m_testChip->GetConfig()->GetChipId() << std::endl;

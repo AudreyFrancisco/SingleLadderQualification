@@ -686,38 +686,28 @@ void TThresholdAnalysis::Finalize()
     itr->second.SetNoiseMean(m_noise.at(itr->first).mean);
     itr->second.SetNoiseStdDev(m_noise.at(itr->first).stdDev);
 
-    /*fprintf(itr->second.GetFileSummary(),
-      "Threshold mean: %f \n",
-      itr->second.GetThresholdMean() );
+    fprintf(itr->second.GetFileSummary(), "Threshold mean: %f \n", itr->second.GetThresholdMean());
 
-      fprintf(itr->second.GetFileSummary(),
-      "Threshold stdDev: %f \n",
-      itr->second.GetThresholdStdDev());
+    fprintf(itr->second.GetFileSummary(), "Threshold stdDev: %f \n",
+            itr->second.GetThresholdStdDev());
 
-      fprintf(itr->second.GetFileSummary(),
-      "Noise mean: %f \n",
-      itr->second.GetNoiseMean());
+    fprintf(itr->second.GetFileSummary(), "Noise mean: %f \n", itr->second.GetNoiseMean());
 
-      fprintf(itr->second.GetFileSummary(),
-      "Noise stdDev: %f \n",
-      itr->second.GetNoiseStdDev());
+    fprintf(itr->second.GetFileSummary(), "Noise stdDev: %f \n", itr->second.GetNoiseStdDev());
 
-      fprintf(itr->second.GetFileSummary(),
-            "counterPixelsNoHits: %d \n",
+    fprintf(itr->second.GetFileSummary(), "counterPixelsNoHits: %d \n",
             itr->second.GetCounterPixelsNoHits());
 
-      fprintf(itr->second.GetFileSummary(),
-            "counterPixelsNoThreshold: %d \n",
+    fprintf(itr->second.GetFileSummary(), "counterPixelsNoThreshold: %d \n",
             itr->second.GetCounterPixelsNoThreshold());
 
-      fprintf(itr->second.GetFileSummary(),
-            "counterPixelsStuck: %d \n",
-            itr->second.GetCounterPixelsStuck()); */
-    // fprintf(itr->second.GetFileSummary(), "%d %d %d %.1f %.1f %.1f %.1f\n", 0, 0, 0,
-    // itr->second.GetThresholdMean(), itr->second.GetThresholdStdDev(),
-    //      itr->second.GetNoiseMean(), itr->second.GetNoiseStdDev());
-    // fprintf(itr->second.GetFileSummary(), "%d %d\n", itr->second.GetCounterPixelsNoHits(),
-    // itr->second.GetCounterPixelsNoThreshold()); //NOT using GetPixelsStuck atm
+    fprintf(itr->second.GetFileSummary(), "counterPixelsStuck: %d \n",
+            itr->second.GetCounterPixelsStuck());
+    fprintf(itr->second.GetFileSummary(), "%d %d %d %.1f %.1f %.1f %.1f\n", 0, 0, 0,
+            itr->second.GetThresholdMean(), itr->second.GetThresholdStdDev(),
+            itr->second.GetNoiseMean(), itr->second.GetNoiseStdDev());
+    fprintf(itr->second.GetFileSummary(), "%d %d\n", itr->second.GetCounterPixelsNoHits(),
+            itr->second.GetCounterPixelsNoThreshold()); // NOT using GetPixelsStuck atm
 
     fclose(itr->second.GetFileSummary());
     if (m_writeNoHitPixels) fclose(itr->second.GetFilePixelNoHits());

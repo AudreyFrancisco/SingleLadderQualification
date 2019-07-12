@@ -24,11 +24,12 @@ void TApplyTuning::Run()
       TSCurveResultChip *chipResult = (TSCurveResultChip *)it->second;
 
       // TODO: check rounding, fix makefile (unresolved reference)
-      chip->GetConfig()->SetParamValue(GetDACName(), (int)chipResult->GetThresholdMean());
+      chip->GetConfig()->SetParamValue(GetDACName(), (int)(chipResult->GetThresholdMean() + 0.5));
+      std::string dacName(GetDACName());
       if (strcmp(GetDACName(), "VCASN") == 0)
-        chip->GetConfig()->SetParamValue("VCASN2", (int)chipResult->GetThresholdMean() + 12);
-      std::cout << "Setting chip with ID" << chip->GetConfig()->GetChipId()
-                << ", thr=" << chipResult->GetThresholdMean() << std::endl;
+        chip->GetConfig()->SetParamValue("VCASN2", (int)(chipResult->GetThresholdMean() + 12.5));
+      std::cout << "Setting chip with ID " << chip->GetConfig()->GetChipId() << ", " << dacName
+                << " = " << chipResult->GetThresholdMean() << std::endl;
     }
   }
 }
