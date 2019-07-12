@@ -2359,12 +2359,16 @@ void MainWindow::savesettings()
       setdefaultvalues(fScanfit, fNm);
       fScanconfigwindow->setdefaultspeed(fScanfit);
       fScanconfigwindow->setdefaultbackbias(true);
+      fBackBias0 = true;
+      fBackBias3 = false;
       fScanconfigwindow->setdeaulmaskstages(fNm);
     }
     else {
       setdefaultvalues(fScanfit, fNm);
       fScanconfigwindow->setdefaultspeed(fScanfit);
       fScanconfigwindow->setdefaultbackbias(true);
+      fBackBias0 = true;
+      fBackBias3 = false;
       fScanconfigwindow->setdeaulmaskstages(fNm);
       loadeditedconfig();
     }
