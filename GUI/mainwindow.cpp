@@ -1507,7 +1507,7 @@ void MainWindow::applytests()
 
   SetHicClassifications();
 
-  // printClasses();
+  printClasses();
 
   if (fNumberofscan == OBHalfStaveOLFAST || fNumberofscan == OBHalfStaveMLFAST) {
     fstopwriting = true;
