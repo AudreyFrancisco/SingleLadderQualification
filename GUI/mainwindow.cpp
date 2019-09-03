@@ -3225,6 +3225,7 @@ void MainWindow::MFTHICEyeMeasurement()
   // AddScan(STEyeScan);
   fConfig->GetScanConfig()->SetParamValue("EYEDRIVER", 4);
   fConfig->GetScanConfig()->SetParamValue("EYEPREEMP", 4);
+  fConfig->GetScanConfig()->SetParamValue("CHARGEPUMP", 10);
   AddScan(STEyeScan);
 }
 
