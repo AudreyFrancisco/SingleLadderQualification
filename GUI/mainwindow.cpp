@@ -294,22 +294,10 @@ void MainWindow::open()
   // MFTThreshold || fNumberofscan == MFTNoise || fNumberofscan == MFTQualification) {
   //   fileName = "Config/Config_MFTLadder.cfg";
   // }
-  else if (fNumberofscan == MFTFifo) {
-    fileName = "Config/Config_MFTLadder_FIFOTest.cfg";
-  }
-  else if (fNumberofscan == MFTDigital) {
-    fileName = "Config/Config_MFTLadder_DigitalScan.cfg";
-  }
-  else if (fNumberofscan == MFTThreshold) {
-    fileName = "Config/Config_MFTLadder_ThresholdScan.cfg";
-  }
-  else if (fNumberofscan == MFTNoise) {
-    fileName = "Config/Config_MFTLadder_NoiseOccupancy.cfg";
-  }
-  else if (fNumberofscan == MFTQualification || fNumberofscan == MFTTunedThres) {
-    fileName = "Config/Config_MFTLadder.cfg";
-  }
-  else if (fNumberofscan == MFTEyeMeasurement) {
+  else if (fNumberofscan == MFTFifo || fNumberofscan == MFTDigital ||
+           fNumberofscan == MFTThreshold || fNumberofscan == MFTNoise ||
+           fNumberofscan == MFTQualification || fNumberofscan == MFTTunedThres ||
+           fNumberofscan == MFTEyeMeasurement) {
     fileName = "Config/Config_MFTLadder.cfg";
   }
   else if (fNumberofscan == OBPower) {
