@@ -42,9 +42,9 @@ namespace ChipConfig { // to avoid clashes with other configs (e.g. for STROBE_D
 
   const int PLL_PHASE   = 8;
   const int PLL_STAGES  = 1;
-  const int CHARGE_PUMP = 8;
-  const int DTU_DRIVER  = 8;
-  const int DTU_PREEMP  = 0;
+  const int CHARGE_PUMP = 10;
+  const int DTU_DRIVER  = 4;
+  const int DTU_PREEMP  = 4;
 
   const int PREVIOUS_ID        = 0x10;
   const int INITIAL_TOKEN      = 1;
