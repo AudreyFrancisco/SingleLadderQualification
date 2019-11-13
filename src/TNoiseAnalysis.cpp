@@ -145,8 +145,15 @@ void TNoiseAnalysis::AnalyseHisto(TScanHisto *histo)
       for (int irow = 0; irow < 512; irow++) {
         // if entry > noise cut: add pixel to chipResult->AddNoisyPixel
         if ((*histo)(m_chipList.at(ichip), icol, irow) > 0) {
-          TPixHit pixel = {boardIndex, channel, chipId, 0, icol, irow, (int)((*histo)(m_chipList.at(ichip), icol, irow))};
-          if ((*histo)(m_chipList.at(ichip), icol, irow) > m_noiseCut) chipResult->AddNoisyPixel(pixel); // is this still needed?
+          TPixHit pixel = {boardIndex,
+                           channel,
+                           chipId,
+                           0,
+                           icol,
+                           irow,
+                           (int)((*histo)(m_chipList.at(ichip), icol, irow))};
+          if ((*histo)(m_chipList.at(ichip), icol, irow) > m_noiseCut)
+            chipResult->AddNoisyPixel(pixel); // is this still needed?
           ((TNoiseResult *)m_result)->m_noisyPixels.push_back(pixel);
         }
         occ += (*histo)(m_chipList.at(ichip), icol, irow);
