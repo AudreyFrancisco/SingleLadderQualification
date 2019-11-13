@@ -93,9 +93,9 @@ void TNoiseAnalysis::WriteNoisyPixels(THic *hic)
 
   for (unsigned int i = 0; i < result->m_noisyPixels.size(); i++) {
     if (!common::HitBelongsToHic(hic, result->m_noisyPixels.at(i))) continue;
-    fprintf(fp, "%d %d %d %d\n", result->m_noisyPixels.at(i).chipId,
+    fprintf(fp, "%d %d %d %d %d\n", result->m_noisyPixels.at(i).chipId,
             result->m_noisyPixels.at(i).region, result->m_noisyPixels.at(i).dcol,
-            result->m_noisyPixels.at(i).address);
+            result->m_noisyPixels.at(i).address, result->m_noisyPixels.at(i).nhit);
   }
   fclose(fp);
 }
@@ -144,9 +144,9 @@ void TNoiseAnalysis::AnalyseHisto(TScanHisto *histo)
     for (int icol = 0; icol < 1024; icol++) {
       for (int irow = 0; irow < 512; irow++) {
         // if entry > noise cut: add pixel to chipResult->AddNoisyPixel
-        if ((*histo)(m_chipList.at(ichip), icol, irow) > m_noiseCut) {
-          TPixHit pixel = {boardIndex, channel, chipId, 0, icol, irow};
-          chipResult->AddNoisyPixel(pixel); // is this still needed?
+        if ((*histo)(m_chipList.at(ichip), icol, irow) > 0) {
+          TPixHit pixel = {boardIndex, channel, chipId, 0, icol, irow, (int)((*histo)(m_chipList.at(ichip), icol, irow))};
+          if ((*histo)(m_chipList.at(ichip), icol, irow) > m_noiseCut) chipResult->AddNoisyPixel(pixel); // is this still needed?
           ((TNoiseResult *)m_result)->m_noisyPixels.push_back(pixel);
         }
         occ += (*histo)(m_chipList.at(ichip), icol, irow);
