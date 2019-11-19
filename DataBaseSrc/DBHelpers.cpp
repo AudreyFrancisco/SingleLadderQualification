@@ -744,6 +744,7 @@ bool FileExists(string fileName)
 void DbAddAttachment(AlpideDB *db, ActivityDB::activity &activity, TAttachmentType attType,
                      string localName, string remoteName)
 {
+  return; // Deactivating attachments
   if (!FileExists(localName)) {
     std::cout << "Warning: did not find file " << localName << ", ignored" << std::endl;
     return;
