@@ -371,18 +371,20 @@ void TSCurveAnalysis::AnalyseHisto(TScanHisto *histo)
                     << m_chipList.at(iChip).boardIndex << "." << std::endl;
         }
         else {
-          chipResult->m_thresholdAv += fitResult.threshold;
-          chipResult->m_noiseAv += fitResult.noise;
-          chipResult->m_noiseSq += pow(fitResult.noise, 2);
-          chipResult->m_threshSq += pow(fitResult.threshold, 2);
-          chipResult->m_nEntries++;
-          for (unsigned int iHic = 0; iHic < m_hics.size(); iHic++) {
-            if (!(m_hics.at(iHic)->ContainsChip(m_chipList.at(iChip)))) continue;
-            TSCurveResultHic *hicResult =
-                (TSCurveResultHic *)m_result->GetHicResults()->at(m_hics.at(iHic)->GetDbId());
-            hicResult->m_noiseAv += fitResult.noise;
-            hicResult->m_noiseSq += pow(fitResult.noise, 2);
-            hicResult->m_nEntries++;
+          if (fitResult.noise < 30 && fitResult.threshold < 500) {
+            chipResult->m_thresholdAv += fitResult.threshold;
+            chipResult->m_noiseAv += fitResult.noise;
+            chipResult->m_noiseSq += pow(fitResult.noise, 2);
+            chipResult->m_threshSq += pow(fitResult.threshold, 2);
+            chipResult->m_nEntries++;
+            for (unsigned int iHic = 0; iHic < m_hics.size(); iHic++) {
+              if (!(m_hics.at(iHic)->ContainsChip(m_chipList.at(iChip)))) continue;
+              TSCurveResultHic *hicResult =
+                  (TSCurveResultHic *)m_result->GetHicResults()->at(m_hics.at(iHic)->GetDbId());
+              hicResult->m_noiseAv += fitResult.noise;
+              hicResult->m_noiseSq += pow(fitResult.noise, 2);
+              hicResult->m_nEntries++;
+            }
           }
         }
         if (m_writeFitResults) {
