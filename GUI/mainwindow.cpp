@@ -227,7 +227,8 @@ void MainWindow::open()
     fileName = "Config.cfg";
   }
   else if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl ||
-           fNumberofscan == IBStave || fNumberofscan == IBStaveLayerQualification) {
+           fNumberofscan == IBStave || fNumberofscan == IBStaveLayerQualification ||
+           fNumberofscan == IBStaveQualificationSPHENIX) {
     fileName = "Configib.cfg";
   }
   else if (fNumberofscan == OBPower) {
@@ -1083,7 +1084,7 @@ void MainWindow::initscanlist()
     fillingOBvectors();
   }
   if (fNumberofscan == IBQualification || fNumberofscan == IBStave ||
-      fNumberofscan == IBStaveLayerQualification) {
+      fNumberofscan == IBStaveLayerQualification || fNumberofscan == IBStaveQualificationSPHENIX) {
     fillingibvectors();
   }
   if (fNumberofscan == OBReception) {
@@ -1796,7 +1797,8 @@ void MainWindow::locationcombo()
            fNumberofscan == IBDctrl) {
     fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "Inner Barrel HIC Module");
   }
-  else if (fNumberofscan == IBStave || fNumberofscan == IBStaveLayerQualification) {
+  else if (fNumberofscan == IBStave || fNumberofscan == IBStaveLayerQualification ||
+           fNumberofscan == IBStaveQualificationSPHENIX) {
     fComponentTypeID = DbGetComponentTypeId(fDB, projectid, "IB Stave");
   }
   else if (fNumberofscan == OBHalfStaveOL || fNumberofscan == OBStaveOL ||
@@ -1990,7 +1992,8 @@ void MainWindow::setandgetcalibration()
     TPowerBoard *powerBoard = fHICs.at(ihic)->GetPowerBoard();
     if (std::find(powerBoards.begin(), powerBoards.end(), powerBoard) != powerBoards.end())
       powerBoards.push_back(powerBoard);
-    if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl || fNumberofscan == IBStave) {
+    if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl || fNumberofscan == IBStave ||
+        fNumberofscan == IBStaveQualificationSPHENIX) {
       powerBoard->GetConfigurationHandler()->EnterMeasuredLineResistances(
           fHICs.at(ihic)->GetPbMod(), ares, dres, gresd, gresa);
     }
@@ -2038,7 +2041,7 @@ void MainWindow::opencalibration()
   fPbcfgcheck->close();
   fCalwindow = new Calibrationpb(this);
   if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl || fNumberofscan == IBStave ||
-      fNumberofscan == IBStaveLayerQualification) {
+      fNumberofscan == IBStaveLayerQualification || fNumberofscan == IBStaveQualificationSPHENIX) {
     fCalwindow->enableanaloguegnd();
   }
   fCalwindow->exec();
@@ -2492,7 +2495,8 @@ void MainWindow::attachConfigFile(ActivityDB::activity &activity)
     DbAddAttachment(fDB, activity, attachConfig, string("Config.cfg"), string("Config.cfg"));
   }
   else if (fNumberofscan == IBQualification || fNumberofscan == IBDctrl ||
-           fNumberofscan == IBStave || fNumberofscan == IBStaveLayerQualification) {
+           fNumberofscan == IBStave || fNumberofscan == IBStaveLayerQualification ||
+           fNumberofscan == IBStaveQualificationSPHENIX) {
     DbAddAttachment(fDB, activity, attachConfig, string("Configib.cfg"), string("Configib.cfg"));
   }
   else if (fNumberofscan == OBPower) {

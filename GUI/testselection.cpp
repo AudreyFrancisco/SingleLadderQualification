@@ -30,6 +30,7 @@ TestSelection::TestSelection(QWidget *parent, bool testDatabase)
   //  ui->typetest->addItem("IB HIC DCTRL Test", IBDctrl);
   ui->typetest->addItem("IB Stave Qualification Test on Layers", IBStaveLayerQualification);
   ui->typetest->addItem("IB Stave Qualification Test", IBStave);
+  ui->typetest->addItem("IB Stave Qualification Test SPHENIX", IBStaveQualificationSPHENIX);
   ui->typetest->addItem("OB HIC Qualification Test", OBQualification);
   ui->typetest->addItem("OB HIC Endurance Test", OBEndurance);
   ui->typetest->addItem("OB HIC Reception Test", OBReception);

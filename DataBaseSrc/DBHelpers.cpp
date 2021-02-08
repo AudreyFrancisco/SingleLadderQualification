@@ -10,14 +10,21 @@
 #include <set>
 #include <string>
 
-static const std::list<std::string> kTestTypes = {
-    "OB-HIC Impedance Test",       "OB HIC Qualification Test",
-    "IB HIC Qualification Test",   "IB Stave Qualification Test",
-    "OB HIC Endurance Test",       "OB HIC Fast Power Test",
-    "OB HIC Reception Test",       "OL HS Qualification Test",
-    "ML HS Qualification Test",    "OL Stave Qualification Test",
-    "ML Stave Qualification Test", "OL Stave Reception Test",
-    "ML Stave Reception Test",     "IB Stave Qualification Test on Layers"};
+static const std::list<std::string> kTestTypes = {"OB-HIC Impedance Test",
+                                                  "OB HIC Qualification Test",
+                                                  "IB HIC Qualification Test",
+                                                  "IB Stave Qualification Test",
+                                                  "OB HIC Endurance Test",
+                                                  "OB HIC Fast Power Test",
+                                                  "OB HIC Reception Test",
+                                                  "OL HS Qualification Test",
+                                                  "ML HS Qualification Test",
+                                                  "OL Stave Qualification Test",
+                                                  "ML Stave Qualification Test",
+                                                  "OL Stave Reception Test",
+                                                  "ML Stave Reception Test",
+                                                  "IB Stave Qualification Test on Layers",
+                                                  "IB Stave Qualification Test SPHENIX"};
 
 bool IsTestType(std::string activity)
 {
@@ -828,6 +835,9 @@ string CreateActivityName(string compName, TScanConfig *config)
   case IBStaveLayerQualification:
     testName = string("IB Stave Qualification Test on Layers ");
     break;
+  case IBStaveQualificationSPHENIX:
+    testName = string("IB Stave Qualification Test SPHENIX ");
+    break;
   default:
     testName = string("");
     break;
@@ -969,6 +979,8 @@ TTestType GetTestType(string activityTypeName)
     return IBStave;
   else if (activityTypeName.find("IB Stave Qualification Test on Layers") != string::npos)
     return IBStaveLayerQualification;
+  else if (activityTypeName.find("IB Stave Qualification Test SPHENIX") != string::npos)
+    return IBStaveQualificationSPHENIX;
   else if (activityTypeName.find("IB Stave End") != string::npos)
     return IBStaveEndurance;
   else if (activityTypeName.find("OL Stave Quali") != string::npos)
@@ -1014,6 +1026,8 @@ string GetTestDirName(TTestType TestType)
     return "StaveReceptionML/";
   case IBStaveLayerQualification:
     return "IBStaveQualificationonLayers/";
+  case IBStaveQualificationSPHENIX:
+    return "IBStaveQualificationSPHENIX/";
   default:
     return "./";
   }

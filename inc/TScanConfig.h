@@ -46,6 +46,7 @@ typedef enum {
   OBStaveOLFAST,
   OBStaveMLFAST,
   IBStaveLayerQualification,
+  IBStaveQualificationSPHENIX,
   Unknown
 } TTestType;
 
